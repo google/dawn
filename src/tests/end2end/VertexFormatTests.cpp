@@ -376,9 +376,8 @@ class VertexFormatTest : public DawnTest {
                             std::vector<VertexType> vertex,
                             std::vector<ExpectedType> expectedData) {
         dawn::RenderPipeline pipeline = MakeTestPipeline(format, expectedData);
-        dawn::Buffer vertexBuffer =
-            utils::CreateBufferFromData(device, vertex.data(), vertex.size() * sizeof(VertexType),
-                                        dawn::BufferUsageBit::Vertex);
+        dawn::Buffer vertexBuffer = utils::CreateBufferFromData(
+            device, vertex.data(), vertex.size() * sizeof(VertexType), dawn::BufferUsage::Vertex);
         uint64_t zeroOffset = 0;
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         {

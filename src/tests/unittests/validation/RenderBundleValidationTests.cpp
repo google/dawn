@@ -69,21 +69,21 @@ namespace {
 
             float data[4];
             dawn::Buffer buffer = utils::CreateBufferFromData(device, data, 4 * sizeof(float),
-                                                              dawn::BufferUsageBit::Uniform);
+                                                              dawn::BufferUsage::Uniform);
 
             constexpr static float kVertices[] = {-1.f, 1.f, 1.f, -1.f, -1.f, 1.f};
 
             vertexBuffer = utils::CreateBufferFromData(device, kVertices, sizeof(kVertices),
-                                                       dawn::BufferUsageBit::Vertex);
+                                                       dawn::BufferUsage::Vertex);
 
             // Dummy storage buffer.
             dawn::Buffer storageBuffer = utils::CreateBufferFromData(
-                device, kVertices, sizeof(kVertices), dawn::BufferUsageBit::Storage);
+                device, kVertices, sizeof(kVertices), dawn::BufferUsage::Storage);
 
             // Vertex buffer with storage usage for testing read+write error usage.
-            vertexStorageBuffer = utils::CreateBufferFromData(
-                device, kVertices, sizeof(kVertices),
-                dawn::BufferUsageBit::Vertex | dawn::BufferUsageBit::Storage);
+            vertexStorageBuffer =
+                utils::CreateBufferFromData(device, kVertices, sizeof(kVertices),
+                                            dawn::BufferUsage::Vertex | dawn::BufferUsage::Storage);
 
             bg0 = utils::MakeBindGroup(device, bgls[0], {{0, buffer, 0, 4 * sizeof(float)}});
             bg1 = utils::MakeBindGroup(
@@ -843,7 +843,7 @@ TEST_F(RenderBundleValidationTest, RenderPassColorFormatMismatch) {
     dawn::RenderBundle renderBundle = renderBundleEncoder.Finish();
 
     dawn::TextureDescriptor textureDesc = {};
-    textureDesc.usage = dawn::TextureUsageBit::OutputAttachment;
+    textureDesc.usage = dawn::TextureUsage::OutputAttachment;
     textureDesc.size = dawn::Extent3D({400, 400, 1});
 
     textureDesc.format = dawn::TextureFormat::RGBA8Unorm;
@@ -914,7 +914,7 @@ TEST_F(RenderBundleValidationTest, RenderPassDepthStencilFormatMismatch) {
     dawn::RenderBundle renderBundle = renderBundleEncoder.Finish();
 
     dawn::TextureDescriptor textureDesc = {};
-    textureDesc.usage = dawn::TextureUsageBit::OutputAttachment;
+    textureDesc.usage = dawn::TextureUsage::OutputAttachment;
     textureDesc.size = dawn::Extent3D({400, 400, 1});
 
     textureDesc.format = dawn::TextureFormat::RGBA8Unorm;
@@ -973,7 +973,7 @@ TEST_F(RenderBundleValidationTest, RenderPassSampleCountMismatch) {
     dawn::RenderBundle renderBundle = renderBundleEncoder.Finish();
 
     dawn::TextureDescriptor textureDesc = {};
-    textureDesc.usage = dawn::TextureUsageBit::OutputAttachment;
+    textureDesc.usage = dawn::TextureUsage::OutputAttachment;
     textureDesc.size = dawn::Extent3D({400, 400, 1});
 
     textureDesc.format = dawn::TextureFormat::RGBA8Unorm;

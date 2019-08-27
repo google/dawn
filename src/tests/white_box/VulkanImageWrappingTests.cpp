@@ -213,8 +213,8 @@ class VulkanImageWrappingValidationTests : public VulkanImageWrappingTestBase {
         defaultDescriptor.sampleCount = 1;
         defaultDescriptor.arrayLayerCount = 1;
         defaultDescriptor.mipLevelCount = 1;
-        defaultDescriptor.usage = dawn::TextureUsageBit::OutputAttachment |
-                                  dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::CopyDst;
+        defaultDescriptor.usage = dawn::TextureUsage::OutputAttachment |
+                                  dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst;
     }
 
     void TearDown() override {
@@ -373,8 +373,8 @@ class VulkanImageWrappingUsageTests : public VulkanImageWrappingTestBase {
         defaultDescriptor.sampleCount = 1;
         defaultDescriptor.arrayLayerCount = 1;
         defaultDescriptor.mipLevelCount = 1;
-        defaultDescriptor.usage = dawn::TextureUsageBit::OutputAttachment |
-                                  dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::CopyDst;
+        defaultDescriptor.usage = dawn::TextureUsage::OutputAttachment |
+                                  dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst;
     }
 
     void TearDown() override {
@@ -655,7 +655,7 @@ TEST_P(VulkanImageWrappingUsageTests, CopyTextureToBufferSrcSync) {
     // Create a destination buffer on |device|
     dawn::BufferDescriptor bufferDesc;
     bufferDesc.size = 4;
-    bufferDesc.usage = dawn::BufferUsageBit::CopyDst | dawn::BufferUsageBit::CopySrc;
+    bufferDesc.usage = dawn::BufferUsage::CopyDst | dawn::BufferUsage::CopySrc;
     dawn::Buffer copyDstBuffer = device.CreateBuffer(&bufferDesc);
 
     // Copy |deviceWrappedTexture| into |copyDstBuffer|
@@ -717,7 +717,7 @@ TEST_P(VulkanImageWrappingUsageTests, CopyBufferToTextureDstSync) {
 
     // Create a buffer on |secondDevice|
     dawn::Buffer copySrcBuffer =
-        utils::CreateBufferFromData(secondDevice, dawn::BufferUsageBit::CopySrc, {0x04030201});
+        utils::CreateBufferFromData(secondDevice, dawn::BufferUsage::CopySrc, {0x04030201});
 
     // Copy |copySrcBuffer| into |secondDeviceWrappedTexture|
     dawn::BufferCopyView copySrc;
@@ -925,7 +925,7 @@ TEST_P(VulkanImageWrappingUsageTests, LargerImage) {
     descriptor.sampleCount = 1;
     descriptor.format = dawn::TextureFormat::BGRA8Unorm;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = dawn::TextureUsageBit::CopyDst | dawn::TextureUsageBit::CopySrc;
+    descriptor.usage = dawn::TextureUsage::CopyDst | dawn::TextureUsage::CopySrc;
 
     // Fill memory with textures to trigger layout issues on AMD
     std::vector<dawn::Texture> textures;
@@ -969,7 +969,7 @@ TEST_P(VulkanImageWrappingUsageTests, LargerImage) {
     // Write the picture
     {
         dawn::Buffer copySrcBuffer =
-            utils::CreateBufferFromData(secondDevice, data, size, dawn::BufferUsageBit::CopySrc);
+            utils::CreateBufferFromData(secondDevice, data, size, dawn::BufferUsage::CopySrc);
         dawn::BufferCopyView copySrc = utils::CreateBufferCopyView(copySrcBuffer, 0, rowPitch, 0);
         dawn::TextureCopyView copyDst =
             utils::CreateTextureCopyView(wrappedTexture, 0, 0, {0, 0, 0});
@@ -992,7 +992,7 @@ TEST_P(VulkanImageWrappingUsageTests, LargerImage) {
     // Copy the image into a buffer for comparison
     dawn::BufferDescriptor copyDesc;
     copyDesc.size = size;
-    copyDesc.usage = dawn::BufferUsageBit::CopySrc | dawn::BufferUsageBit::CopyDst;
+    copyDesc.usage = dawn::BufferUsage::CopySrc | dawn::BufferUsage::CopyDst;
     dawn::Buffer copyDstBuffer = device.CreateBuffer(&copyDesc);
     {
         dawn::TextureCopyView copySrc =

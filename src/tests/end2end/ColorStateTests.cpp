@@ -101,7 +101,7 @@ class ColorStateTest : public DawnTest {
         uint32_t bufferSize = static_cast<uint32_t>(4 * N * sizeof(float));
 
         dawn::Buffer buffer =
-            utils::CreateBufferFromData(device, &data, bufferSize, dawn::BufferUsageBit::Uniform);
+            utils::CreateBufferFromData(device, &data, bufferSize, dawn::BufferUsage::Uniform);
         return utils::MakeBindGroup(device, bindGroupLayout, {{0, buffer, 0, bufferSize}});
     }
 
@@ -762,7 +762,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
     descriptor.sampleCount = 1;
     descriptor.format = dawn::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc;
+    descriptor.usage = dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc;
 
     for (uint32_t i = 0; i < 4; ++i) {
         renderTargets[i] = device.CreateTexture(&descriptor);

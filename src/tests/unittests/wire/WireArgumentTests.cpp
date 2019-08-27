@@ -210,8 +210,8 @@ TEST_F(WireArgumentTests, ObjectAsValueArgument) {
     DawnBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
     descriptor.size = 8;
-    descriptor.usage = static_cast<DawnBufferUsageBit>(DAWN_BUFFER_USAGE_BIT_COPY_SRC |
-                                                       DAWN_BUFFER_USAGE_BIT_COPY_DST);
+    descriptor.usage =
+        static_cast<DawnBufferUsage>(DAWN_BUFFER_USAGE_COPY_SRC | DAWN_BUFFER_USAGE_COPY_DST);
 
     DawnBuffer buffer = dawnDeviceCreateBuffer(device, &descriptor);
     DawnBuffer apiBuffer = api.GetNewBuffer();

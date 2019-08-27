@@ -33,8 +33,8 @@ namespace dawn_native {
     // information.
     class PassResourceUsageTracker {
       public:
-        void BufferUsedAs(BufferBase* buffer, dawn::BufferUsageBit usage);
-        void TextureUsedAs(TextureBase* texture, dawn::TextureUsageBit usage);
+        void BufferUsedAs(BufferBase* buffer, dawn::BufferUsage usage);
+        void TextureUsedAs(TextureBase* texture, dawn::TextureUsage usage);
 
         MaybeError ValidateComputePassUsages() const;
         MaybeError ValidateRenderPassUsages() const;
@@ -46,8 +46,8 @@ namespace dawn_native {
         // Performs the per-pass usage validation checks
         MaybeError ValidateUsages() const;
 
-        std::map<BufferBase*, dawn::BufferUsageBit> mBufferUsages;
-        std::map<TextureBase*, dawn::TextureUsageBit> mTextureUsages;
+        std::map<BufferBase*, dawn::BufferUsage> mBufferUsages;
+        std::map<TextureBase*, dawn::TextureUsage> mTextureUsages;
         bool mStorageUsedMultipleTimes = false;
     };
 

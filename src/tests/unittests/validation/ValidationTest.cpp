@@ -104,7 +104,7 @@ ValidationTest::DummyRenderPass::DummyRenderPass(const dawn::Device& device)
     descriptor.sampleCount = 1;
     descriptor.format = attachmentFormat;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
+    descriptor.usage = dawn::TextureUsage::OutputAttachment;
     attachment = device.CreateTexture(&descriptor);
 
     dawn::TextureView view = attachment.CreateDefaultView();

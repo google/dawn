@@ -35,8 +35,8 @@ void init() {
         swapchain = dawnDeviceCreateSwapChain(device, &descriptor);
     }
     swapChainFormat = static_cast<DawnTextureFormat>(GetPreferredSwapChainTextureFormat());
-    dawnSwapChainConfigure(swapchain, swapChainFormat, DAWN_TEXTURE_USAGE_BIT_OUTPUT_ATTACHMENT, 640,
-                          480);
+    dawnSwapChainConfigure(swapchain, swapChainFormat, DAWN_TEXTURE_USAGE_OUTPUT_ATTACHMENT, 640,
+                           480);
 
     const char* vs =
         "#version 450\n"

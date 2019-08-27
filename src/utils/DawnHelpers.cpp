@@ -116,10 +116,10 @@ namespace utils {
     dawn::Buffer CreateBufferFromData(const dawn::Device& device,
                                       const void* data,
                                       uint64_t size,
-                                      dawn::BufferUsageBit usage) {
+                                      dawn::BufferUsage usage) {
         dawn::BufferDescriptor descriptor;
         descriptor.size = size;
-        descriptor.usage = usage | dawn::BufferUsageBit::CopyDst;
+        descriptor.usage = usage | dawn::BufferUsage::CopyDst;
 
         dawn::Buffer buffer = device.CreateBuffer(&descriptor);
         buffer.SetSubData(0, size, data);
@@ -224,7 +224,7 @@ namespace utils {
         descriptor.sampleCount = 1;
         descriptor.format = BasicRenderPass::kDefaultColorFormat;
         descriptor.mipLevelCount = 1;
-        descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc;
+        descriptor.usage = dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc;
         dawn::Texture color = device.CreateTexture(&descriptor);
 
         return BasicRenderPass(width, height, color);

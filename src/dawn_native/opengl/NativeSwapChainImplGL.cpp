@@ -43,7 +43,7 @@ namespace dawn_native { namespace opengl {
     }
 
     DawnSwapChainError NativeSwapChainImpl::Configure(DawnTextureFormat format,
-                                                      DawnTextureUsageBit usage,
+                                                      DawnTextureUsage usage,
                                                       uint32_t width,
                                                       uint32_t height) {
         if (format != DAWN_TEXTURE_FORMAT_RGBA8_UNORM) {

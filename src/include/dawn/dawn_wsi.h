@@ -41,7 +41,7 @@ typedef struct {
     /// Configure/reconfigure the swap chain.
     DawnSwapChainError (*Configure)(void* userData,
                                     DawnTextureFormat format,
-                                    DawnTextureUsageBit allowedUsage,
+                                    DawnTextureUsage allowedUsage,
                                     uint32_t width,
                                     uint32_t height);
 
@@ -55,7 +55,7 @@ typedef struct {
     void* userData;
 
     /// For use by the D3D12 and Vulkan backends: how the swapchain will use the texture.
-    DawnTextureUsageBit textureUsage;
+    DawnTextureUsage textureUsage;
 } DawnSwapChainImplementation;
 
 #if defined(DAWN_ENABLE_BACKEND_D3D12) && defined(__cplusplus)

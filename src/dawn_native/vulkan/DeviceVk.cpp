@@ -568,7 +568,7 @@ namespace dawn_native { namespace vulkan {
         // Insert pipeline barrier to ensure correct ordering with previous memory operations on the
         // buffer.
         ToBackend(destination)
-            ->TransitionUsageNow(GetPendingRecordingContext(), dawn::BufferUsageBit::CopyDst);
+            ->TransitionUsageNow(GetPendingRecordingContext(), dawn::BufferUsage::CopyDst);
 
         VkBufferCopy copy;
         copy.srcOffset = sourceOffset;

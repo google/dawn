@@ -59,9 +59,9 @@ class RenderBundleTest : public DawnTest {
                            kColors[1].a / 255.f};
 
         dawn::Buffer buffer0 = utils::CreateBufferFromData(device, colors0, 4 * sizeof(float),
-                                                           dawn::BufferUsageBit::Uniform);
+                                                           dawn::BufferUsage::Uniform);
         dawn::Buffer buffer1 = utils::CreateBufferFromData(device, colors1, 4 * sizeof(float),
-                                                           dawn::BufferUsageBit::Uniform);
+                                                           dawn::BufferUsage::Uniform);
 
         bindGroups[0] = utils::MakeBindGroup(device, bgl, {{0, buffer0, 0, 4 * sizeof(float)}});
         bindGroups[1] = utils::MakeBindGroup(device, bgl, {{0, buffer1, 0, 4 * sizeof(float)}});
@@ -86,7 +86,7 @@ class RenderBundleTest : public DawnTest {
         pipeline = device.CreateRenderPipeline(&descriptor);
 
         vertexBuffer = utils::CreateBufferFromData<float>(
-            device, dawn::BufferUsageBit::Vertex,
+            device, dawn::BufferUsage::Vertex,
             {// The bottom left triangle
              -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f,
 

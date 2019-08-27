@@ -180,7 +180,7 @@
         "category": "structure",
         "extensible": true,
         "members": [
-            {"name": "usage", "type": "buffer usage bit"},
+            {"name": "usage", "type": "buffer usage"},
             {"name": "size", "type": "uint64_t"}
         ]
     },
@@ -199,7 +199,7 @@
             {"value": 3, "name": "context lost"}
         ]
     },
-    "buffer usage bit": {
+    "buffer usage": {
         "category": "bitmask",
         "values": [
             {"value": 0, "name": "none"},
@@ -1102,7 +1102,7 @@
                 "name": "configure",
                 "args": [
                     {"name": "format", "type": "texture format"},
-                    {"name": "allowed usage", "type": "texture usage bit"},
+                    {"name": "allowed usage", "type": "texture usage"},
                     {"name": "width", "type": "uint32_t"},
                     {"name": "height", "type": "uint32_t"}
                 ]
@@ -1175,7 +1175,7 @@
         "category": "structure",
         "extensible": true,
         "members": [
-            {"name": "usage", "type": "texture usage bit"},
+            {"name": "usage", "type": "texture usage"},
             {"name": "dimension", "type": "texture dimension", "default": "2D"},
             {"name": "size", "type": "extent 3D"},
             {"name": "array layer count", "type": "uint32_t", "default": "1"},
@@ -1256,7 +1256,7 @@
             {"value": 4294967295, "name": "none", "valid": false}
         ]
     },
-    "texture usage bit": {
+    "texture usage": {
         "category": "bitmask",
         "values": [
             {"value": 0, "name": "none"},

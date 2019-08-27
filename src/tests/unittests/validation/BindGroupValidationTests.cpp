@@ -25,13 +25,13 @@ class BindGroupValidationTest : public ValidationTest {
         {
             dawn::BufferDescriptor descriptor;
             descriptor.size = 1024;
-            descriptor.usage = dawn::BufferUsageBit::Uniform;
+            descriptor.usage = dawn::BufferUsage::Uniform;
             mUBO = device.CreateBuffer(&descriptor);
         }
         {
             dawn::BufferDescriptor descriptor;
             descriptor.size = 1024;
-            descriptor.usage = dawn::BufferUsageBit::Storage;
+            descriptor.usage = dawn::BufferUsage::Storage;
             mSSBO = device.CreateBuffer(&descriptor);
         }
         {
@@ -46,7 +46,7 @@ class BindGroupValidationTest : public ValidationTest {
             descriptor.sampleCount = 1;
             descriptor.format = dawn::TextureFormat::RGBA8Unorm;
             descriptor.mipLevelCount = 1;
-            descriptor.usage = dawn::TextureUsageBit::Sampled;
+            descriptor.usage = dawn::TextureUsage::Sampled;
             mSampledTexture = device.CreateTexture(&descriptor);
             mSampledTextureView = mSampledTexture.CreateDefaultView();
         }
@@ -272,7 +272,7 @@ TEST_F(BindGroupValidationTest, BufferBindingType) {
     {
         dawn::BufferDescriptor bufferDesc;
         bufferDesc.size = 1024;
-        bufferDesc.usage = static_cast<dawn::BufferUsageBit>(0xFFFFFFFF);
+        bufferDesc.usage = static_cast<dawn::BufferUsage>(0xFFFFFFFF);
 
         dawn::Buffer errorBuffer;
         ASSERT_DEVICE_ERROR(errorBuffer = device.CreateBuffer(&bufferDesc));
@@ -300,7 +300,7 @@ TEST_F(BindGroupValidationTest, TextureUsage) {
     descriptor.sampleCount = 1;
     descriptor.format = dawn::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
+    descriptor.usage = dawn::TextureUsage::OutputAttachment;
     dawn::Texture outputTexture = device.CreateTexture(&descriptor);
     dawn::TextureView outputTextureView = outputTexture.CreateDefaultView();
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, outputTextureView}}));
@@ -323,7 +323,7 @@ TEST_F(BindGroupValidationTest, TextureComponentType) {
     descriptor.sampleCount = 1;
     descriptor.format = dawn::TextureFormat::RGBA8Uint;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = dawn::TextureUsageBit::Sampled;
+    descriptor.usage = dawn::TextureUsage::Sampled;
     dawn::Texture uintTexture = device.CreateTexture(&descriptor);
     dawn::TextureView uintTextureView = uintTexture.CreateDefaultView();
 
@@ -382,7 +382,7 @@ TEST_F(BindGroupValidationTest, BufferBindingOOB) {
 
     dawn::BufferDescriptor descriptor;
     descriptor.size = 1024;
-    descriptor.usage = dawn::BufferUsageBit::Uniform;
+    descriptor.usage = dawn::BufferUsage::Uniform;
     dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
     // Success case, touching the start of the buffer works
@@ -602,7 +602,7 @@ class SetBindGroupValidationTest : public ValidationTest {
                       dawn::BindingType::StorageBuffer, true}});
     }
 
-    dawn::Buffer CreateBuffer(uint64_t bufferSize, dawn::BufferUsageBit usage) {
+    dawn::Buffer CreateBuffer(uint64_t bufferSize, dawn::BufferUsage usage) {
         dawn::BufferDescriptor bufferDescriptor;
         bufferDescriptor.size = bufferSize;
         bufferDescriptor.usage = usage;
@@ -717,8 +717,8 @@ class SetBindGroupValidationTest : public ValidationTest {
 // This is the test case that should work.
 TEST_F(SetBindGroupValidationTest, Basic) {
     // Set up the bind group.
-    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Uniform);
-    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Storage);
+    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsage::Uniform);
+    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsage::Storage);
     dawn::BindGroup bindGroup = utils::MakeBindGroup(
         device, mBindGroupLayout,
         {{0, uniformBuffer, 0, kBindingSize}, {1, storageBuffer, 0, kBindingSize}});
@@ -733,8 +733,8 @@ TEST_F(SetBindGroupValidationTest, Basic) {
 // Test cases that test dynamic offsets count mismatch with bind group layout.
 TEST_F(SetBindGroupValidationTest, DynamicOffsetsMismatch) {
     // Set up bind group.
-    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Uniform);
-    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Storage);
+    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsage::Uniform);
+    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsage::Storage);
     dawn::BindGroup bindGroup = utils::MakeBindGroup(
         device, mBindGroupLayout,
         {{0, uniformBuffer, 0, kBindingSize}, {1, storageBuffer, 0, kBindingSize}});
@@ -750,8 +750,8 @@ TEST_F(SetBindGroupValidationTest, DynamicOffsetsMismatch) {
 // Test cases that test dynamic offsets not aligned
 TEST_F(SetBindGroupValidationTest, DynamicOffsetsNotAligned) {
     // Set up bind group.
-    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Uniform);
-    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Storage);
+    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsage::Uniform);
+    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsage::Storage);
     dawn::BindGroup bindGroup = utils::MakeBindGroup(
         device, mBindGroupLayout,
         {{0, uniformBuffer, 0, kBindingSize}, {1, storageBuffer, 0, kBindingSize}});
@@ -767,8 +767,8 @@ TEST_F(SetBindGroupValidationTest, DynamicOffsetsNotAligned) {
 // Test cases that test dynamic uniform buffer out of bound situation.
 TEST_F(SetBindGroupValidationTest, OffsetOutOfBoundDynamicUniformBuffer) {
     // Set up bind group.
-    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Uniform);
-    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Storage);
+    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsage::Uniform);
+    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsage::Storage);
     dawn::BindGroup bindGroup = utils::MakeBindGroup(
         device, mBindGroupLayout,
         {{0, uniformBuffer, 0, kBindingSize}, {1, storageBuffer, 0, kBindingSize}});
@@ -784,8 +784,8 @@ TEST_F(SetBindGroupValidationTest, OffsetOutOfBoundDynamicUniformBuffer) {
 // Test cases that test dynamic storage buffer out of bound situation.
 TEST_F(SetBindGroupValidationTest, OffsetOutOfBoundDynamicStorageBuffer) {
     // Set up bind group.
-    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Uniform);
-    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Storage);
+    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsage::Uniform);
+    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsage::Storage);
     dawn::BindGroup bindGroup = utils::MakeBindGroup(
         device, mBindGroupLayout,
         {{0, uniformBuffer, 0, kBindingSize}, {1, storageBuffer, 0, kBindingSize}});
@@ -801,8 +801,8 @@ TEST_F(SetBindGroupValidationTest, OffsetOutOfBoundDynamicStorageBuffer) {
 // Test cases that test dynamic uniform buffer out of bound situation because of binding size.
 TEST_F(SetBindGroupValidationTest, BindingSizeOutOfBoundDynamicUniformBuffer) {
     // Set up bind group, but binding size is larger than
-    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Uniform);
-    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Storage);
+    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsage::Uniform);
+    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsage::Storage);
     dawn::BindGroup bindGroup = utils::MakeBindGroup(
         device, mBindGroupLayout,
         {{0, uniformBuffer, 0, kBindingSize}, {1, storageBuffer, 0, kBindingSize}});
@@ -818,8 +818,8 @@ TEST_F(SetBindGroupValidationTest, BindingSizeOutOfBoundDynamicUniformBuffer) {
 
 // Test cases that test dynamic storage buffer out of bound situation because of binding size.
 TEST_F(SetBindGroupValidationTest, BindingSizeOutOfBoundDynamicStorageBuffer) {
-    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Uniform);
-    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsageBit::Storage);
+    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsage::Uniform);
+    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsage::Storage);
     dawn::BindGroup bindGroup = utils::MakeBindGroup(
         device, mBindGroupLayout,
         {{0, uniformBuffer, 0, kBindingSize}, {1, storageBuffer, 0, kBindingSize}});

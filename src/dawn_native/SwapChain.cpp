@@ -81,7 +81,7 @@ namespace dawn_native {
     }
 
     void SwapChainBase::Configure(dawn::TextureFormat format,
-                                  dawn::TextureUsageBit allowedUsage,
+                                  dawn::TextureUsage allowedUsage,
                                   uint32_t width,
                                   uint32_t height) {
         if (GetDevice()->ConsumedError(ValidateConfigure(format, allowedUsage, width, height))) {
@@ -89,14 +89,14 @@ namespace dawn_native {
         }
         ASSERT(!IsError());
 
-        allowedUsage |= dawn::TextureUsageBit::Present;
+        allowedUsage |= dawn::TextureUsage::Present;
 
         mFormat = format;
         mAllowedUsage = allowedUsage;
         mWidth = width;
         mHeight = height;
         mImplementation.Configure(mImplementation.userData, static_cast<DawnTextureFormat>(format),
-                                  static_cast<DawnTextureUsageBit>(allowedUsage), width, height);
+                                  static_cast<DawnTextureUsage>(allowedUsage), width, height);
     }
 
     TextureBase* SwapChainBase::GetNextTexture() {
@@ -138,12 +138,12 @@ namespace dawn_native {
     }
 
     MaybeError SwapChainBase::ValidateConfigure(dawn::TextureFormat format,
-                                                dawn::TextureUsageBit allowedUsage,
+                                                dawn::TextureUsage allowedUsage,
                                                 uint32_t width,
                                                 uint32_t height) const {
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
-        DAWN_TRY(ValidateTextureUsageBit(allowedUsage));
+        DAWN_TRY(ValidateTextureUsage(allowedUsage));
         DAWN_TRY(ValidateTextureFormat(format));
 
         if (width == 0 || height == 0) {

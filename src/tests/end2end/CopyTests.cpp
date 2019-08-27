@@ -85,7 +85,7 @@ class CopyTests_T2B : public CopyTests {
             descriptor.sampleCount = 1;
             descriptor.format = dawn::TextureFormat::RGBA8Unorm;
             descriptor.mipLevelCount = textureSpec.level + 1;
-            descriptor.usage = dawn::TextureUsageBit::CopyDst | dawn::TextureUsageBit::CopySrc;
+            descriptor.usage = dawn::TextureUsage::CopyDst | dawn::TextureUsage::CopySrc;
             dawn::Texture texture = device.CreateTexture(&descriptor);
 
             uint32_t width = textureSpec.width >> textureSpec.level;
@@ -106,7 +106,7 @@ class CopyTests_T2B : public CopyTests {
                 dawn::Buffer uploadBuffer = utils::CreateBufferFromData(
                     device, textureArrayData[slice].data(),
                     static_cast<uint32_t>(sizeof(RGBA8) * textureArrayData[slice].size()),
-                    dawn::BufferUsageBit::CopySrc);
+                    dawn::BufferUsage::CopySrc);
                 dawn::BufferCopyView bufferCopyView =
                     utils::CreateBufferCopyView(uploadBuffer, 0, rowPitch, 0);
                 dawn::TextureCopyView textureCopyView =
@@ -120,7 +120,7 @@ class CopyTests_T2B : public CopyTests {
             // and helps ensure that the padding due to the row pitch is not modified by the copy
             dawn::BufferDescriptor bufDescriptor;
             bufDescriptor.size = bufferSpec.size * textureSpec.arraySize;
-            bufDescriptor.usage = dawn::BufferUsageBit::CopySrc | dawn::BufferUsageBit::CopyDst;
+            bufDescriptor.usage = dawn::BufferUsage::CopySrc | dawn::BufferUsage::CopyDst;
             dawn::Buffer buffer = device.CreateBuffer(&bufDescriptor);
             std::vector<RGBA8> emptyData(bufferSpec.size / kBytesPerTexel * textureSpec.arraySize);
             buffer.SetSubData(0, static_cast<uint32_t>(emptyData.size() * sizeof(RGBA8)),
@@ -182,7 +182,7 @@ protected:
         // Create a buffer of size `size` and populate it with data
         dawn::BufferDescriptor bufDescriptor;
         bufDescriptor.size = bufferSpec.size;
-        bufDescriptor.usage = dawn::BufferUsageBit::CopySrc | dawn::BufferUsageBit::CopyDst;
+        bufDescriptor.usage = dawn::BufferUsage::CopySrc | dawn::BufferUsage::CopyDst;
         dawn::Buffer buffer = device.CreateBuffer(&bufDescriptor);
 
         std::vector<RGBA8> bufferData(bufferSpec.size / kBytesPerTexel);
@@ -200,7 +200,7 @@ protected:
         descriptor.sampleCount = 1;
         descriptor.format = dawn::TextureFormat::RGBA8Unorm;
         descriptor.mipLevelCount = textureSpec.level + 1;
-        descriptor.usage = dawn::TextureUsageBit::CopyDst | dawn::TextureUsageBit::CopySrc;
+        descriptor.usage = dawn::TextureUsage::CopyDst | dawn::TextureUsage::CopySrc;
         dawn::Texture texture = device.CreateTexture(&descriptor);
 
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -218,7 +218,7 @@ protected:
             std::vector<RGBA8> emptyData(texelCount);
             dawn::Buffer uploadBuffer = utils::CreateBufferFromData(
                 device, emptyData.data(), static_cast<uint32_t>(sizeof(RGBA8) * emptyData.size()),
-                dawn::BufferUsageBit::CopySrc);
+                dawn::BufferUsage::CopySrc);
             dawn::BufferCopyView bufferCopyView =
                 utils::CreateBufferCopyView(uploadBuffer, 0, rowPitch, 0);
             dawn::TextureCopyView textureCopyView =
@@ -281,7 +281,7 @@ class CopyTests_T2T : public CopyTests {
         srcDescriptor.sampleCount = 1;
         srcDescriptor.format = dawn::TextureFormat::RGBA8Unorm;
         srcDescriptor.mipLevelCount = srcSpec.level + 1;
-        srcDescriptor.usage = dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::CopyDst;
+        srcDescriptor.usage = dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst;
         dawn::Texture srcTexture = device.CreateTexture(&srcDescriptor);
 
         dawn::TextureDescriptor dstDescriptor;
@@ -293,7 +293,7 @@ class CopyTests_T2T : public CopyTests {
         dstDescriptor.sampleCount = 1;
         dstDescriptor.format = dawn::TextureFormat::RGBA8Unorm;
         dstDescriptor.mipLevelCount = dstSpec.level + 1;
-        dstDescriptor.usage = dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::CopyDst;
+        dstDescriptor.usage = dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst;
         dawn::Texture dstTexture = device.CreateTexture(&dstDescriptor);
 
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -315,7 +315,7 @@ class CopyTests_T2T : public CopyTests {
             dawn::Buffer uploadBuffer = utils::CreateBufferFromData(
                 device, textureArrayData[slice].data(),
                 static_cast<uint32_t>(sizeof(RGBA8) * textureArrayData[slice].size()),
-                dawn::BufferUsageBit::CopySrc);
+                dawn::BufferUsage::CopySrc);
             dawn::BufferCopyView bufferCopyView =
                 utils::CreateBufferCopyView(uploadBuffer, 0, rowPitch, 0);
             dawn::TextureCopyView textureCopyView =
@@ -339,7 +339,7 @@ class CopyTests_T2T : public CopyTests {
             std::vector<RGBA8> emptyData(dstTexelCount);
             dawn::Buffer uploadBuffer = utils::CreateBufferFromData(
                 device, emptyData.data(), static_cast<uint32_t>(sizeof(RGBA8) * emptyData.size()),
-                dawn::BufferUsageBit::CopySrc);
+                dawn::BufferUsage::CopySrc);
             dawn::BufferCopyView bufferCopyView =
                 utils::CreateBufferCopyView(uploadBuffer, 0, dstRowPitch, 0);
             dawn::TextureCopyView textureCopyView =

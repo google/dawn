@@ -38,14 +38,16 @@ void initBuffers() {
     static const uint32_t indexData[3] = {
         0, 1, 2,
     };
-    indexBuffer = utils::CreateBufferFromData(device, indexData, sizeof(indexData), dawn::BufferUsageBit::Index);
+    indexBuffer =
+        utils::CreateBufferFromData(device, indexData, sizeof(indexData), dawn::BufferUsage::Index);
 
     static const float vertexData[12] = {
         0.0f, 0.5f, 0.0f, 1.0f,
         -0.5f, -0.5f, 0.0f, 1.0f,
         0.5f, -0.5f, 0.0f, 1.0f,
     };
-    vertexBuffer = utils::CreateBufferFromData(device, vertexData, sizeof(vertexData), dawn::BufferUsageBit::Vertex);
+    vertexBuffer = utils::CreateBufferFromData(device, vertexData, sizeof(vertexData),
+                                               dawn::BufferUsage::Vertex);
 }
 
 void initTextures() {
@@ -58,7 +60,7 @@ void initTextures() {
     descriptor.sampleCount = 1;
     descriptor.format = dawn::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = dawn::TextureUsageBit::CopyDst | dawn::TextureUsageBit::Sampled;
+    descriptor.usage = dawn::TextureUsage::CopyDst | dawn::TextureUsage::Sampled;
     texture = device.CreateTexture(&descriptor);
 
     dawn::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
@@ -71,7 +73,7 @@ void initTextures() {
     }
 
     dawn::Buffer stagingBuffer = utils::CreateBufferFromData(
-        device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsageBit::CopySrc);
+        device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsage::CopySrc);
     dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 0, 0);
     dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
     dawn::Extent3D copySize = {1024, 1024, 1};
@@ -88,8 +90,8 @@ void init() {
 
     queue = device.CreateQueue();
     swapchain = GetSwapChain(device);
-    swapchain.Configure(GetPreferredSwapChainTextureFormat(),
-                        dawn::TextureUsageBit::OutputAttachment, 640, 480);
+    swapchain.Configure(GetPreferredSwapChainTextureFormat(), dawn::TextureUsage::OutputAttachment,
+                        640, 480);
 
     initBuffers();
     initTextures();

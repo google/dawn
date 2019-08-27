@@ -239,7 +239,7 @@ namespace dawn_native { namespace null {
     bool Buffer::IsMapWritable() const {
         // Only return true for mappable buffers so we can test cases that need / don't need a
         // staging buffer.
-        return (GetUsage() & (dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::MapWrite)) != 0;
+        return (GetUsage() & (dawn::BufferUsage::MapRead | dawn::BufferUsage::MapWrite)) != 0;
     }
 
     MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {
@@ -345,7 +345,7 @@ namespace dawn_native { namespace null {
     }
 
     DawnSwapChainError NativeSwapChainImpl::Configure(DawnTextureFormat format,
-                                                      DawnTextureUsageBit,
+                                                      DawnTextureUsage,
                                                       uint32_t width,
                                                       uint32_t height) {
         return DAWN_SWAP_CHAIN_NO_ERROR;

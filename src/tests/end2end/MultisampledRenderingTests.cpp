@@ -95,7 +95,7 @@ class MultisampledRenderingTest : public DawnTest {
         descriptor.sampleCount = sampleCount;
         descriptor.format = format;
         descriptor.mipLevelCount = mipLevelCount;
-        descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc;
+        descriptor.usage = dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc;
         return device.CreateTexture(&descriptor);
     }
 
@@ -104,9 +104,8 @@ class MultisampledRenderingTest : public DawnTest {
                                  const dawn::RenderPipeline& pipeline,
                                  const float* uniformData,
                                  uint32_t uniformDataSize) {
-        dawn::Buffer uniformBuffer =
-            utils::CreateBufferFromData(device, uniformData, uniformDataSize,
-                                        dawn::BufferUsageBit::Uniform);
+        dawn::Buffer uniformBuffer = utils::CreateBufferFromData(
+            device, uniformData, uniformDataSize, dawn::BufferUsage::Uniform);
         dawn::BindGroup bindGroup =
             utils::MakeBindGroup(device, mBindGroupLayout,
                                  {{0, uniformBuffer, 0, uniformDataSize}});

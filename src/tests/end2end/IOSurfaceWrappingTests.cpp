@@ -118,7 +118,7 @@ class IOSurfaceValidationTests : public IOSurfaceTestBase {
         descriptor.sampleCount = 1;
         descriptor.arrayLayerCount = 1;
         descriptor.mipLevelCount = 1;
-        descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
+        descriptor.usage = dawn::TextureUsage::OutputAttachment;
     }
 
   protected:
@@ -248,7 +248,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
             textureDescriptor.sampleCount = 1;
             textureDescriptor.arrayLayerCount = 1;
             textureDescriptor.mipLevelCount = 1;
-            textureDescriptor.usage = dawn::TextureUsageBit::Sampled;
+            textureDescriptor.usage = dawn::TextureUsage::Sampled;
             dawn::Texture wrappingTexture = WrapIOSurface(&textureDescriptor, ioSurface, 0);
 
             dawn::TextureView textureView = wrappingTexture.CreateDefaultView();
@@ -341,7 +341,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
         textureDescriptor.sampleCount = 1;
         textureDescriptor.arrayLayerCount = 1;
         textureDescriptor.mipLevelCount = 1;
-        textureDescriptor.usage = dawn::TextureUsageBit::OutputAttachment;
+        textureDescriptor.usage = dawn::TextureUsage::OutputAttachment;
         dawn::Texture ioSurfaceTexture = WrapIOSurface(&textureDescriptor, ioSurface, 0);
 
         dawn::TextureView ioSurfaceView = ioSurfaceTexture.CreateDefaultView();

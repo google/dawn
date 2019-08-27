@@ -23,86 +23,86 @@ namespace dawn_native { namespace vulkan {
 
     namespace {
 
-        VkBufferUsageFlags VulkanBufferUsage(dawn::BufferUsageBit usage) {
+        VkBufferUsageFlags VulkanBufferUsage(dawn::BufferUsage usage) {
             VkBufferUsageFlags flags = 0;
 
-            if (usage & dawn::BufferUsageBit::CopySrc) {
+            if (usage & dawn::BufferUsage::CopySrc) {
                 flags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
             }
-            if (usage & dawn::BufferUsageBit::CopyDst) {
+            if (usage & dawn::BufferUsage::CopyDst) {
                 flags |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
             }
-            if (usage & dawn::BufferUsageBit::Index) {
+            if (usage & dawn::BufferUsage::Index) {
                 flags |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
             }
-            if (usage & dawn::BufferUsageBit::Vertex) {
+            if (usage & dawn::BufferUsage::Vertex) {
                 flags |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
             }
-            if (usage & dawn::BufferUsageBit::Uniform) {
+            if (usage & dawn::BufferUsage::Uniform) {
                 flags |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
             }
-            if (usage & dawn::BufferUsageBit::Storage) {
+            if (usage & dawn::BufferUsage::Storage) {
                 flags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
             }
-            if (usage & dawn::BufferUsageBit::Indirect) {
+            if (usage & dawn::BufferUsage::Indirect) {
                 flags |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
             }
 
             return flags;
         }
 
-        VkPipelineStageFlags VulkanPipelineStage(dawn::BufferUsageBit usage) {
+        VkPipelineStageFlags VulkanPipelineStage(dawn::BufferUsage usage) {
             VkPipelineStageFlags flags = 0;
 
-            if (usage & (dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::MapWrite)) {
+            if (usage & (dawn::BufferUsage::MapRead | dawn::BufferUsage::MapWrite)) {
                 flags |= VK_PIPELINE_STAGE_HOST_BIT;
             }
-            if (usage & (dawn::BufferUsageBit::CopySrc | dawn::BufferUsageBit::CopyDst)) {
+            if (usage & (dawn::BufferUsage::CopySrc | dawn::BufferUsage::CopyDst)) {
                 flags |= VK_PIPELINE_STAGE_TRANSFER_BIT;
             }
-            if (usage & (dawn::BufferUsageBit::Index | dawn::BufferUsageBit::Vertex)) {
+            if (usage & (dawn::BufferUsage::Index | dawn::BufferUsage::Vertex)) {
                 flags |= VK_PIPELINE_STAGE_VERTEX_INPUT_BIT;
             }
-            if (usage & (dawn::BufferUsageBit::Uniform | dawn::BufferUsageBit::Storage)) {
+            if (usage & (dawn::BufferUsage::Uniform | dawn::BufferUsage::Storage)) {
                 flags |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT |
                          VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT |
                          VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
             }
-            if (usage & dawn::BufferUsageBit::Indirect) {
+            if (usage & dawn::BufferUsage::Indirect) {
                 flags |= VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT;
             }
 
             return flags;
         }
 
-        VkAccessFlags VulkanAccessFlags(dawn::BufferUsageBit usage) {
+        VkAccessFlags VulkanAccessFlags(dawn::BufferUsage usage) {
             VkAccessFlags flags = 0;
 
-            if (usage & dawn::BufferUsageBit::MapRead) {
+            if (usage & dawn::BufferUsage::MapRead) {
                 flags |= VK_ACCESS_HOST_READ_BIT;
             }
-            if (usage & dawn::BufferUsageBit::MapWrite) {
+            if (usage & dawn::BufferUsage::MapWrite) {
                 flags |= VK_ACCESS_HOST_WRITE_BIT;
             }
-            if (usage & dawn::BufferUsageBit::CopySrc) {
+            if (usage & dawn::BufferUsage::CopySrc) {
                 flags |= VK_ACCESS_TRANSFER_READ_BIT;
             }
-            if (usage & dawn::BufferUsageBit::CopyDst) {
+            if (usage & dawn::BufferUsage::CopyDst) {
                 flags |= VK_ACCESS_TRANSFER_WRITE_BIT;
             }
-            if (usage & dawn::BufferUsageBit::Index) {
+            if (usage & dawn::BufferUsage::Index) {
                 flags |= VK_ACCESS_INDEX_READ_BIT;
             }
-            if (usage & dawn::BufferUsageBit::Vertex) {
+            if (usage & dawn::BufferUsage::Vertex) {
                 flags |= VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
             }
-            if (usage & dawn::BufferUsageBit::Uniform) {
+            if (usage & dawn::BufferUsage::Uniform) {
                 flags |= VK_ACCESS_UNIFORM_READ_BIT;
             }
-            if (usage & dawn::BufferUsageBit::Storage) {
+            if (usage & dawn::BufferUsage::Storage) {
                 flags |= VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
             }
-            if (usage & dawn::BufferUsageBit::Indirect) {
+            if (usage & dawn::BufferUsage::Indirect) {
                 flags |= VK_ACCESS_INDIRECT_COMMAND_READ_BIT;
             }
 
@@ -120,7 +120,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.size = GetSize();
         // Add CopyDst for non-mappable buffer initialization in CreateBufferMapped
         // and robust resource initialization.
-        createInfo.usage = VulkanBufferUsage(GetUsage() | dawn::BufferUsageBit::CopyDst);
+        createInfo.usage = VulkanBufferUsage(GetUsage() | dawn::BufferUsage::CopyDst);
         createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         createInfo.queueFamilyIndexCount = 0;
         createInfo.pQueueFamilyIndices = 0;
@@ -134,7 +134,7 @@ namespace dawn_native { namespace vulkan {
         device->fn.GetBufferMemoryRequirements(device->GetVkDevice(), mHandle, &requirements);
 
         bool requestMappable =
-            (GetUsage() & (dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::MapWrite)) != 0;
+            (GetUsage() & (dawn::BufferUsage::MapRead | dawn::BufferUsage::MapWrite)) != 0;
         if (!device->GetMemoryAllocator()->Allocate(requirements, requestMappable,
                                                     &mMemoryAllocation)) {
             ASSERT(false);
@@ -164,7 +164,7 @@ namespace dawn_native { namespace vulkan {
     }
 
     void Buffer::TransitionUsageNow(CommandRecordingContext* recordingContext,
-                                    dawn::BufferUsageBit usage) {
+                                    dawn::BufferUsage usage) {
         bool lastIncludesTarget = (mLastUsage & usage) == usage;
         bool lastReadOnly = (mLastUsage & kReadOnlyBufferUsages) == mLastUsage;
 
@@ -174,7 +174,7 @@ namespace dawn_native { namespace vulkan {
         }
 
         // Special-case for the initial transition: Vulkan doesn't allow access flags to be 0.
-        if (mLastUsage == dawn::BufferUsageBit::None) {
+        if (mLastUsage == dawn::BufferUsage::None) {
             mLastUsage = usage;
             return;
         }
@@ -214,7 +214,7 @@ namespace dawn_native { namespace vulkan {
         Device* device = ToBackend(GetDevice());
 
         CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
-        TransitionUsageNow(recordingContext, dawn::BufferUsageBit::MapRead);
+        TransitionUsageNow(recordingContext, dawn::BufferUsage::MapRead);
 
         uint8_t* memory = mMemoryAllocation.GetMappedPointer();
         ASSERT(memory != nullptr);
@@ -228,7 +228,7 @@ namespace dawn_native { namespace vulkan {
         Device* device = ToBackend(GetDevice());
 
         CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
-        TransitionUsageNow(recordingContext, dawn::BufferUsageBit::MapWrite);
+        TransitionUsageNow(recordingContext, dawn::BufferUsage::MapWrite);
 
         uint8_t* memory = mMemoryAllocation.GetMappedPointer();
         ASSERT(memory != nullptr);

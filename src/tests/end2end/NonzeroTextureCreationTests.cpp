@@ -37,7 +37,7 @@ TEST_P(NonzeroTextureCreationTests, TextureCreationClearsOneBits) {
     descriptor.sampleCount = 1;
     descriptor.format = dawn::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc;
+    descriptor.usage = dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc;
     dawn::Texture texture = device.CreateTexture(&descriptor);
 
     RGBA8 filledWithOnes(255, 255, 255, 255);
@@ -57,7 +57,7 @@ TEST_P(NonzeroTextureCreationTests, MipMapClears) {
     descriptor.sampleCount = 1;
     descriptor.format = dawn::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = mipLevels;
-    descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc;
+    descriptor.usage = dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc;
     dawn::Texture texture = device.CreateTexture(&descriptor);
 
     std::vector<RGBA8> expected;
@@ -82,7 +82,7 @@ TEST_P(NonzeroTextureCreationTests, ArrayLayerClears) {
     descriptor.sampleCount = 1;
     descriptor.format = dawn::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc;
+    descriptor.usage = dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc;
     dawn::Texture texture = device.CreateTexture(&descriptor);
 
     std::vector<RGBA8> expected;
@@ -107,14 +107,14 @@ TEST_P(NonzeroTextureCreationTests, NonrenderableTextureFormat) {
     descriptor.sampleCount = 1;
     descriptor.format = dawn::TextureFormat::RGBA8Snorm;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = dawn::TextureUsageBit::CopySrc;
+    descriptor.usage = dawn::TextureUsage::CopySrc;
     dawn::Texture texture = device.CreateTexture(&descriptor);
 
     // Set buffer with dirty data so we know it is cleared by the lazy cleared texture copy
     uint32_t bufferSize = 4 * kSize * kSize;
     std::vector<uint8_t> data(bufferSize, 100);
     dawn::Buffer bufferDst = utils::CreateBufferFromData(
-        device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsageBit::CopySrc);
+        device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsage::CopySrc);
 
     dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(bufferDst, 0, 0, 0);
     dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});

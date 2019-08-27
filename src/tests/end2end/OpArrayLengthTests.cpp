@@ -26,7 +26,7 @@ class OpArrayLengthTest : public DawnTest {
         // Create buffers of various size to check the length() implementation
         dawn::BufferDescriptor bufferDesc;
         bufferDesc.size = 4;
-        bufferDesc.usage = dawn::BufferUsageBit::Storage;
+        bufferDesc.usage = dawn::BufferUsage::Storage;
         mStorageBuffer4 = device.CreateBuffer(&bufferDesc);
 
         bufferDesc.size = 256;
@@ -95,7 +95,7 @@ TEST_P(OpArrayLengthTest, Compute) {
 
     // Create a buffer to hold the result sizes and create a bindgroup for it.
     dawn::BufferDescriptor bufferDesc;
-    bufferDesc.usage = dawn::BufferUsageBit::Storage | dawn::BufferUsageBit::CopySrc;
+    bufferDesc.usage = dawn::BufferUsage::Storage | dawn::BufferUsage::CopySrc;
     bufferDesc.size = sizeof(uint32_t) * mExpectedLengths.size();
     dawn::Buffer resultBuffer = device.CreateBuffer(&bufferDesc);
 

@@ -25,8 +25,8 @@ namespace dawn_native { namespace vulkan {
         DawnWSIContextVulkan wsiContext = {};
         im.Init(im.userData, &wsiContext);
 
-        ASSERT(im.textureUsage != DAWN_TEXTURE_USAGE_BIT_NONE);
-        mTextureUsage = static_cast<dawn::TextureUsageBit>(im.textureUsage);
+        ASSERT(im.textureUsage != DAWN_TEXTURE_USAGE_NONE);
+        mTextureUsage = static_cast<dawn::TextureUsage>(im.textureUsage);
     }
 
     SwapChain::~SwapChain() {

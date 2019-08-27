@@ -66,8 +66,8 @@ void main() {
     dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
     float data[4];
-    dawn::Buffer buffer = utils::CreateBufferFromData(device, data, 4 * sizeof(float),
-                                                        dawn::BufferUsageBit::Uniform);
+    dawn::Buffer buffer =
+        utils::CreateBufferFromData(device, data, 4 * sizeof(float), dawn::BufferUsage::Uniform);
 
     dawn::BindGroup bg1 =
         utils::MakeBindGroup(device, bgls[0], {{0, buffer, 0, 4 * sizeof(float)}});

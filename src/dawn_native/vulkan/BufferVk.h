@@ -39,8 +39,7 @@ namespace dawn_native { namespace vulkan {
         // Transitions the buffer to be used as `usage`, recording any necessary barrier in
         // `commands`.
         // TODO(cwallez@chromium.org): coalesce barriers and do them early when possible.
-        void TransitionUsageNow(CommandRecordingContext* recordingContext,
-                                dawn::BufferUsageBit usage);
+        void TransitionUsageNow(CommandRecordingContext* recordingContext, dawn::BufferUsage usage);
 
       private:
         // Dawn API
@@ -55,7 +54,7 @@ namespace dawn_native { namespace vulkan {
         VkBuffer mHandle = VK_NULL_HANDLE;
         DeviceMemoryAllocation mMemoryAllocation;
 
-        dawn::BufferUsageBit mLastUsage = dawn::BufferUsageBit::None;
+        dawn::BufferUsage mLastUsage = dawn::BufferUsage::None;
     };
 
     class MapRequestTracker {

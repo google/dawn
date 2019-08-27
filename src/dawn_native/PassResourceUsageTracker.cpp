@@ -19,26 +19,24 @@
 
 namespace dawn_native {
 
-    void PassResourceUsageTracker::BufferUsedAs(BufferBase* buffer, dawn::BufferUsageBit usage) {
+    void PassResourceUsageTracker::BufferUsedAs(BufferBase* buffer, dawn::BufferUsage usage) {
         // std::map's operator[] will create the key and return 0 if the key didn't exist
         // before.
-        dawn::BufferUsageBit& storedUsage = mBufferUsages[buffer];
+        dawn::BufferUsage& storedUsage = mBufferUsages[buffer];
 
-        if (usage == dawn::BufferUsageBit::Storage && storedUsage & dawn::BufferUsageBit::Storage) {
+        if (usage == dawn::BufferUsage::Storage && storedUsage & dawn::BufferUsage::Storage) {
             mStorageUsedMultipleTimes = true;
         }
 
         storedUsage |= usage;
     }
 
-    void PassResourceUsageTracker::TextureUsedAs(TextureBase* texture,
-                                                 dawn::TextureUsageBit usage) {
+    void PassResourceUsageTracker::TextureUsedAs(TextureBase* texture, dawn::TextureUsage usage) {
         // std::map's operator[] will create the key and return 0 if the key didn't exist
         // before.
-        dawn::TextureUsageBit& storedUsage = mTextureUsages[texture];
+        dawn::TextureUsage& storedUsage = mTextureUsages[texture];
 
-        if (usage == dawn::TextureUsageBit::Storage &&
-            storedUsage & dawn::TextureUsageBit::Storage) {
+        if (usage == dawn::TextureUsage::Storage && storedUsage & dawn::TextureUsage::Storage) {
             mStorageUsedMultipleTimes = true;
         }
 
@@ -62,7 +60,7 @@ namespace dawn_native {
         // Buffers can only be used as single-write or multiple read.
         for (auto& it : mBufferUsages) {
             BufferBase* buffer = it.first;
-            dawn::BufferUsageBit usage = it.second;
+            dawn::BufferUsage usage = it.second;
 
             if (usage & ~buffer->GetUsage()) {
                 return DAWN_VALIDATION_ERROR("Buffer missing usage for the pass");
@@ -81,7 +79,7 @@ namespace dawn_native {
         // TODO(cwallez@chromium.org): implement per-subresource tracking
         for (auto& it : mTextureUsages) {
             TextureBase* texture = it.first;
-            dawn::TextureUsageBit usage = it.second;
+            dawn::TextureUsage usage = it.second;
 
             if (usage & ~texture->GetUsage()) {
                 return DAWN_VALIDATION_ERROR("Texture missing usage for the pass");

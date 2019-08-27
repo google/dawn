@@ -21,24 +21,24 @@
 namespace dawn_native { namespace metal {
 
     namespace {
-        bool UsageNeedsTextureView(dawn::TextureUsageBit usage) {
-            constexpr dawn::TextureUsageBit kUsageNeedsTextureView =
-                dawn::TextureUsageBit::Storage | dawn::TextureUsageBit::Sampled;
+        bool UsageNeedsTextureView(dawn::TextureUsage usage) {
+            constexpr dawn::TextureUsage kUsageNeedsTextureView =
+                dawn::TextureUsage::Storage | dawn::TextureUsage::Sampled;
             return usage & kUsageNeedsTextureView;
         }
 
-        MTLTextureUsage MetalTextureUsage(dawn::TextureUsageBit usage) {
+        MTLTextureUsage MetalTextureUsage(dawn::TextureUsage usage) {
             MTLTextureUsage result = MTLTextureUsageUnknown;  // This is 0
 
-            if (usage & (dawn::TextureUsageBit::Storage)) {
+            if (usage & (dawn::TextureUsage::Storage)) {
                 result |= MTLTextureUsageShaderWrite | MTLTextureUsageShaderRead;
             }
 
-            if (usage & (dawn::TextureUsageBit::Sampled)) {
+            if (usage & (dawn::TextureUsage::Sampled)) {
                 result |= MTLTextureUsageShaderRead;
             }
 
-            if (usage & (dawn::TextureUsageBit::OutputAttachment)) {
+            if (usage & (dawn::TextureUsage::OutputAttachment)) {
                 result |= MTLTextureUsageRenderTarget;
             }
 

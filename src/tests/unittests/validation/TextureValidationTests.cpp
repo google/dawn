@@ -32,7 +32,7 @@ class TextureValidationTest : public ValidationTest {
         descriptor.sampleCount = kDefaultSampleCount;
         descriptor.dimension = dawn::TextureDimension::e2D;
         descriptor.format = kDefaultTextureFormat;
-        descriptor.usage = dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::Sampled;
+        descriptor.usage = dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::Sampled;
         return descriptor;
     }
 
@@ -239,7 +239,7 @@ TEST_F(TextureValidationTest, EncodeDestroySubmit) {
 TEST_F(TextureValidationTest, NonRenderableAndOutputAttachment) {
     dawn::TextureDescriptor descriptor;
     descriptor.size = {1, 1, 1};
-    descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
+    descriptor.usage = dawn::TextureUsage::OutputAttachment;
 
     // Succeeds because RGBA8Unorm is renderable
     descriptor.format = dawn::TextureFormat::RGBA8Unorm;
@@ -276,8 +276,8 @@ class CompressedTextureFormatsValidationTests : public TextureValidationTest {
     dawn::TextureDescriptor CreateDefaultTextureDescriptor() {
         dawn::TextureDescriptor descriptor =
             TextureValidationTest::CreateDefaultTextureDescriptor();
-        descriptor.usage = dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::CopyDst |
-                           dawn::TextureUsageBit::Sampled;
+        descriptor.usage =
+            dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst | dawn::TextureUsage::Sampled;
         return descriptor;
     }
 
@@ -347,21 +347,21 @@ TEST_F(CompressedTextureFormatsValidationTests, TextureUsage) {
         {
             dawn::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
             descriptor.format = format;
-            descriptor.usage = dawn::TextureUsageBit::OutputAttachment;
+            descriptor.usage = dawn::TextureUsage::OutputAttachment;
             ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
         }
 
         {
             dawn::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
             descriptor.format = format;
-            descriptor.usage = dawn::TextureUsageBit::Storage;
+            descriptor.usage = dawn::TextureUsage::Storage;
             ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
         }
 
         {
             dawn::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
             descriptor.format = format;
-            descriptor.usage = dawn::TextureUsageBit::Present;
+            descriptor.usage = dawn::TextureUsage::Present;
             ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
         }
     }

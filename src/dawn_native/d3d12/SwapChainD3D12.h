@@ -30,7 +30,7 @@ namespace dawn_native { namespace d3d12 {
         TextureBase* GetNextTextureImpl(const TextureDescriptor* descriptor) override;
         void OnBeforePresent(TextureBase* texture) override;
 
-        dawn::TextureUsageBit mTextureUsage;
+        dawn::TextureUsage mTextureUsage;
     };
 
 }}  // namespace dawn_native::d3d12

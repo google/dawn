@@ -55,22 +55,22 @@ namespace dawn_native { namespace vulkan {
         }
 
         // Computes which vulkan access type could be required for the given Dawn usage.
-        VkAccessFlags VulkanAccessFlags(dawn::TextureUsageBit usage, const Format& format) {
+        VkAccessFlags VulkanAccessFlags(dawn::TextureUsage usage, const Format& format) {
             VkAccessFlags flags = 0;
 
-            if (usage & dawn::TextureUsageBit::CopySrc) {
+            if (usage & dawn::TextureUsage::CopySrc) {
                 flags |= VK_ACCESS_TRANSFER_READ_BIT;
             }
-            if (usage & dawn::TextureUsageBit::CopyDst) {
+            if (usage & dawn::TextureUsage::CopyDst) {
                 flags |= VK_ACCESS_TRANSFER_WRITE_BIT;
             }
-            if (usage & dawn::TextureUsageBit::Sampled) {
+            if (usage & dawn::TextureUsage::Sampled) {
                 flags |= VK_ACCESS_SHADER_READ_BIT;
             }
-            if (usage & dawn::TextureUsageBit::Storage) {
+            if (usage & dawn::TextureUsage::Storage) {
                 flags |= VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
             }
-            if (usage & dawn::TextureUsageBit::OutputAttachment) {
+            if (usage & dawn::TextureUsage::OutputAttachment) {
                 if (format.HasDepthOrStencil()) {
                     flags |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
                              VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
@@ -79,7 +79,7 @@ namespace dawn_native { namespace vulkan {
                         VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
                 }
             }
-            if (usage & dawn::TextureUsageBit::Present) {
+            if (usage & dawn::TextureUsage::Present) {
                 // There is no access flag for present because the VK_KHR_SWAPCHAIN extension says
                 // that vkQueuePresentKHR makes the memory of the image visible to the presentation
                 // engine. There's also a note explicitly saying dstAccessMask should be 0. On the
@@ -92,8 +92,8 @@ namespace dawn_native { namespace vulkan {
         }
 
         // Chooses which Vulkan image layout should be used for the given Dawn usage
-        VkImageLayout VulkanImageLayout(dawn::TextureUsageBit usage, const Format& format) {
-            if (usage == dawn::TextureUsageBit::None) {
+        VkImageLayout VulkanImageLayout(dawn::TextureUsage usage, const Format& format) {
+            if (usage == dawn::TextureUsage::None) {
                 return VK_IMAGE_LAYOUT_UNDEFINED;
             }
 
@@ -103,27 +103,27 @@ namespace dawn_native { namespace vulkan {
 
             // Usage has a single bit so we can switch on its value directly.
             switch (usage) {
-                case dawn::TextureUsageBit::CopyDst:
+                case dawn::TextureUsage::CopyDst:
                     return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-                case dawn::TextureUsageBit::Sampled:
+                case dawn::TextureUsage::Sampled:
                     return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
                 // Vulkan texture copy functions require the image to be in _one_  known layout.
                 // Depending on whether parts of the texture have been transitioned to only
                 // CopySrc or a combination with something else, the texture could be in a
                 // combination of GENERAL and TRANSFER_SRC_OPTIMAL. This would be a problem, so we
                 // make CopySrc use GENERAL.
-                case dawn::TextureUsageBit::CopySrc:
+                case dawn::TextureUsage::CopySrc:
                 // Writable storage textures must use general. If we could know the texture is read
                 // only we could use SHADER_READ_ONLY_OPTIMAL
-                case dawn::TextureUsageBit::Storage:
+                case dawn::TextureUsage::Storage:
                     return VK_IMAGE_LAYOUT_GENERAL;
-                case dawn::TextureUsageBit::OutputAttachment:
+                case dawn::TextureUsage::OutputAttachment:
                     if (format.HasDepthOrStencil()) {
                         return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
                     } else {
                         return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
                     }
-                case dawn::TextureUsageBit::Present:
+                case dawn::TextureUsage::Present:
                     return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
                 default:
                     UNREACHABLE();
@@ -131,24 +131,23 @@ namespace dawn_native { namespace vulkan {
         }
 
         // Computes which Vulkan pipeline stage can access a texture in the given Dawn usage
-        VkPipelineStageFlags VulkanPipelineStage(dawn::TextureUsageBit usage,
-                                                 const Format& format) {
+        VkPipelineStageFlags VulkanPipelineStage(dawn::TextureUsage usage, const Format& format) {
             VkPipelineStageFlags flags = 0;
 
-            if (usage == dawn::TextureUsageBit::None) {
+            if (usage == dawn::TextureUsage::None) {
                 // This only happens when a texture is initially created (and for srcAccessMask) in
                 // which case there is no need to wait on anything to stop accessing this texture.
                 return VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
             }
-            if (usage & (dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::CopyDst)) {
+            if (usage & (dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst)) {
                 flags |= VK_PIPELINE_STAGE_TRANSFER_BIT;
             }
-            if (usage & (dawn::TextureUsageBit::Sampled | dawn::TextureUsageBit::Storage)) {
+            if (usage & (dawn::TextureUsage::Sampled | dawn::TextureUsage::Storage)) {
                 flags |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT |
                          VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT |
                          VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
             }
-            if (usage & dawn::TextureUsageBit::OutputAttachment) {
+            if (usage & dawn::TextureUsage::OutputAttachment) {
                 if (format.HasDepthOrStencil()) {
                     flags |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
                              VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
@@ -158,7 +157,7 @@ namespace dawn_native { namespace vulkan {
                     flags |= VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
                 }
             }
-            if (usage & dawn::TextureUsageBit::Present) {
+            if (usage & dawn::TextureUsage::Present) {
                 // There is no pipeline stage for present but a pipeline stage is required so we use
                 // "bottom of pipe" to block as little as possible and vkQueuePresentKHR will make
                 // the memory visible to the presentation engine. The spec explicitly mentions that
@@ -333,22 +332,22 @@ namespace dawn_native { namespace vulkan {
 
     // Converts the Dawn usage flags to Vulkan usage flags. Also needs the format to choose
     // between color and depth attachment usages.
-    VkImageUsageFlags VulkanImageUsage(dawn::TextureUsageBit usage, const Format& format) {
+    VkImageUsageFlags VulkanImageUsage(dawn::TextureUsage usage, const Format& format) {
         VkImageUsageFlags flags = 0;
 
-        if (usage & dawn::TextureUsageBit::CopySrc) {
+        if (usage & dawn::TextureUsage::CopySrc) {
             flags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
         }
-        if (usage & dawn::TextureUsageBit::CopyDst) {
+        if (usage & dawn::TextureUsage::CopyDst) {
             flags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
         }
-        if (usage & dawn::TextureUsageBit::Sampled) {
+        if (usage & dawn::TextureUsage::Sampled) {
             flags |= VK_IMAGE_USAGE_SAMPLED_BIT;
         }
-        if (usage & dawn::TextureUsageBit::Storage) {
+        if (usage & dawn::TextureUsage::Storage) {
             flags |= VK_IMAGE_USAGE_STORAGE_BIT;
         }
-        if (usage & dawn::TextureUsageBit::OutputAttachment) {
+        if (usage & dawn::TextureUsage::OutputAttachment) {
             if (format.HasDepthOrStencil()) {
                 flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
             } else {
@@ -527,7 +526,7 @@ namespace dawn_native { namespace vulkan {
 
         // Release the texture
         mExternalState = ExternalState::PendingRelease;
-        TransitionUsageNow(device->GetPendingRecordingContext(), dawn::TextureUsageBit::None);
+        TransitionUsageNow(device->GetPendingRecordingContext(), dawn::TextureUsage::None);
 
         // Queue submit to signal we are done with the texture
         device->GetPendingRecordingContext()->signalSemaphores.push_back(mSignalSemaphore);
@@ -580,7 +579,7 @@ namespace dawn_native { namespace vulkan {
     }
 
     void Texture::TransitionUsageNow(CommandRecordingContext* recordingContext,
-                                     dawn::TextureUsageBit usage) {
+                                     dawn::TextureUsage usage) {
         // Avoid encoding barriers when it isn't needed.
         bool lastReadOnly = (mLastUsage & kReadOnlyTextureUsages) == mLastUsage;
         if (lastReadOnly && mLastUsage == usage && mLastExternalState == mExternalState) {
@@ -654,7 +653,7 @@ namespace dawn_native { namespace vulkan {
         range.layerCount = layerCount;
         uint8_t clearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0 : 1;
 
-        TransitionUsageNow(recordingContext, dawn::TextureUsageBit::CopyDst);
+        TransitionUsageNow(recordingContext, dawn::TextureUsage::CopyDst);
         if (GetFormat().HasDepthOrStencil()) {
             VkClearDepthStencilValue clearDepthStencilValue[1];
             clearDepthStencilValue[0].depth = clearColor;
@@ -679,7 +678,7 @@ namespace dawn_native { namespace vulkan {
                               (GetSize().height / GetFormat().blockHeight) *
                               GetFormat().blockByteSize;
             descriptor.nextInChain = nullptr;
-            descriptor.usage = dawn::BufferUsageBit::CopySrc | dawn::BufferUsageBit::MapWrite;
+            descriptor.usage = dawn::BufferUsage::CopySrc | dawn::BufferUsage::MapWrite;
             std::unique_ptr<Buffer> srcBuffer =
                 std::make_unique<dawn_native::vulkan::Buffer>(device, &descriptor);
             uint8_t* clearBuffer = nullptr;
@@ -706,7 +705,7 @@ namespace dawn_native { namespace vulkan {
                 ComputeBufferImageCopyRegion(bufferCopy, textureCopy, copySize);
 
             // copy the clear buffer to the texture image
-            srcBuffer->TransitionUsageNow(recordingContext, dawn::BufferUsageBit::CopySrc);
+            srcBuffer->TransitionUsageNow(recordingContext, dawn::BufferUsage::CopySrc);
             ToBackend(GetDevice())
                 ->fn.CmdCopyBufferToImage(recordingContext->commandBuffer, srcBuffer->GetHandle(),
                                           GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,

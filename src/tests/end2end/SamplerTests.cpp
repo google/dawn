@@ -90,7 +90,7 @@ protected:
         descriptor.sampleCount = 1;
         descriptor.format = dawn::TextureFormat::RGBA8Unorm;
         descriptor.mipLevelCount = 1;
-        descriptor.usage = dawn::TextureUsageBit::CopyDst | dawn::TextureUsageBit::Sampled;
+        descriptor.usage = dawn::TextureUsage::CopyDst | dawn::TextureUsage::Sampled;
         dawn::Texture texture = device.CreateTexture(&descriptor);
 
         // Create a 2x2 checkerboard texture, with black in the top left and bottom right corners.
@@ -102,7 +102,7 @@ protected:
         data[1] = data[rowPixels] = white;
 
         dawn::Buffer stagingBuffer =
-            utils::CreateBufferFromData(device, data, sizeof(data), dawn::BufferUsageBit::CopySrc);
+            utils::CreateBufferFromData(device, data, sizeof(data), dawn::BufferUsage::CopySrc);
         dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 256, 0);
         dawn::TextureCopyView textureCopyView =
             utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});

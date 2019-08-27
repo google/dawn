@@ -24,7 +24,7 @@ class TextureZeroInitTest : public DawnTest {
     }
     dawn::TextureDescriptor CreateTextureDescriptor(uint32_t mipLevelCount,
                                                     uint32_t arrayLayerCount,
-                                                    dawn::TextureUsageBit usage,
+                                                    dawn::TextureUsage usage,
                                                     dawn::TextureFormat format) {
         dawn::TextureDescriptor descriptor;
         descriptor.dimension = dawn::TextureDimension::e2D;
@@ -93,8 +93,7 @@ class TextureZeroInitTest : public DawnTest {
 // This tests that the code path of CopyTextureToBuffer clears correctly to Zero after first usage
 TEST_P(TextureZeroInitTest, CopyTextureToBufferSource) {
     dawn::TextureDescriptor descriptor = CreateTextureDescriptor(
-        1, 1, dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc,
-        kColorFormat);
+        1, 1, dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc, kColorFormat);
     dawn::Texture texture = device.CreateTexture(&descriptor);
 
     // Texture's first usage is in EXPECT_PIXEL_RGBA8_EQ's call to CopyTextureToBuffer
@@ -106,8 +105,7 @@ TEST_P(TextureZeroInitTest, CopyTextureToBufferSource) {
 // This goes through the BeginRenderPass's code path
 TEST_P(TextureZeroInitTest, RenderingMipMapClearsToZero) {
     dawn::TextureDescriptor descriptor = CreateTextureDescriptor(
-        4, 1, dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc,
-        kColorFormat);
+        4, 1, dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc, kColorFormat);
     dawn::Texture texture = device.CreateTexture(&descriptor);
 
     dawn::TextureViewDescriptor viewDescriptor = CreateTextureViewDescriptor(2, 0);
@@ -135,8 +133,7 @@ TEST_P(TextureZeroInitTest, RenderingMipMapClearsToZero) {
 // This goes through the BeginRenderPass's code path
 TEST_P(TextureZeroInitTest, RenderingArrayLayerClearsToZero) {
     dawn::TextureDescriptor descriptor = CreateTextureDescriptor(
-        1, 4, dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc,
-        kColorFormat);
+        1, 4, dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc, kColorFormat);
     dawn::Texture texture = device.CreateTexture(&descriptor);
 
     dawn::TextureViewDescriptor viewDescriptor = CreateTextureViewDescriptor(0, 2);
@@ -162,16 +159,15 @@ TEST_P(TextureZeroInitTest, RenderingArrayLayerClearsToZero) {
 // TODO(natlee@microsoft.com): Add backdoor to dawn native to query the number of zero-inited
 // subresources
 TEST_P(TextureZeroInitTest, CopyBufferToTexture) {
-    dawn::TextureDescriptor descriptor =
-        CreateTextureDescriptor(4, 1,
-                                dawn::TextureUsageBit::CopyDst | dawn::TextureUsageBit::Sampled |
-                                    dawn::TextureUsageBit::CopySrc,
-                                kColorFormat);
+    dawn::TextureDescriptor descriptor = CreateTextureDescriptor(
+        4, 1,
+        dawn::TextureUsage::CopyDst | dawn::TextureUsage::Sampled | dawn::TextureUsage::CopySrc,
+        kColorFormat);
     dawn::Texture texture = device.CreateTexture(&descriptor);
 
     std::vector<uint8_t> data(4 * kSize * kSize, 100);
     dawn::Buffer stagingBuffer = utils::CreateBufferFromData(
-        device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsageBit::CopySrc);
+        device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsage::CopySrc);
 
     dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 0, 0);
     dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
@@ -190,16 +186,15 @@ TEST_P(TextureZeroInitTest, CopyBufferToTexture) {
 // Test for a copy only to a subset of the subresource, lazy init is necessary to clear the other
 // half.
 TEST_P(TextureZeroInitTest, CopyBufferToTextureHalf) {
-    dawn::TextureDescriptor descriptor =
-        CreateTextureDescriptor(4, 1,
-                                dawn::TextureUsageBit::CopyDst | dawn::TextureUsageBit::Sampled |
-                                    dawn::TextureUsageBit::CopySrc,
-                                kColorFormat);
+    dawn::TextureDescriptor descriptor = CreateTextureDescriptor(
+        4, 1,
+        dawn::TextureUsage::CopyDst | dawn::TextureUsage::Sampled | dawn::TextureUsage::CopySrc,
+        kColorFormat);
     dawn::Texture texture = device.CreateTexture(&descriptor);
 
     std::vector<uint8_t> data(4 * kSize * kSize, 100);
     dawn::Buffer stagingBuffer = utils::CreateBufferFromData(
-        device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsageBit::CopySrc);
+        device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsage::CopySrc);
 
     dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 0, 0);
     dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
@@ -221,7 +216,7 @@ TEST_P(TextureZeroInitTest, CopyBufferToTextureHalf) {
 // This tests CopyTextureToTexture fully overwrites copy so lazy init is not needed.
 TEST_P(TextureZeroInitTest, CopyTextureToTexture) {
     dawn::TextureDescriptor srcDescriptor = CreateTextureDescriptor(
-        1, 1, dawn::TextureUsageBit::Sampled | dawn::TextureUsageBit::CopySrc, kColorFormat);
+        1, 1, dawn::TextureUsage::Sampled | dawn::TextureUsage::CopySrc, kColorFormat);
     dawn::Texture srcTexture = device.CreateTexture(&srcDescriptor);
 
     dawn::TextureCopyView srcTextureCopyView =
@@ -229,8 +224,8 @@ TEST_P(TextureZeroInitTest, CopyTextureToTexture) {
 
     dawn::TextureDescriptor dstDescriptor =
         CreateTextureDescriptor(1, 1,
-                                dawn::TextureUsageBit::OutputAttachment |
-                                    dawn::TextureUsageBit::CopyDst | dawn::TextureUsageBit::CopySrc,
+                                dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopyDst |
+                                    dawn::TextureUsage::CopySrc,
                                 kColorFormat);
     dawn::Texture dstTexture = device.CreateTexture(&dstDescriptor);
 
@@ -253,18 +248,17 @@ TEST_P(TextureZeroInitTest, CopyTextureToTexture) {
 // This Tests the CopyTextureToTexture's copy only to a subset of the subresource, lazy init is
 // necessary to clear the other half.
 TEST_P(TextureZeroInitTest, CopyTextureToTextureHalf) {
-    dawn::TextureDescriptor srcDescriptor =
-        CreateTextureDescriptor(1, 1,
-                                dawn::TextureUsageBit::Sampled | dawn::TextureUsageBit::CopySrc |
-                                    dawn::TextureUsageBit::CopyDst,
-                                kColorFormat);
+    dawn::TextureDescriptor srcDescriptor = CreateTextureDescriptor(
+        1, 1,
+        dawn::TextureUsage::Sampled | dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst,
+        kColorFormat);
     dawn::Texture srcTexture = device.CreateTexture(&srcDescriptor);
 
     // fill srcTexture with 100
     {
         std::vector<uint8_t> data(4 * kSize * kSize, 100);
         dawn::Buffer stagingBuffer = utils::CreateBufferFromData(
-            device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsageBit::CopySrc);
+            device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsage::CopySrc);
         dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 0, 0);
         dawn::TextureCopyView textureCopyView =
             utils::CreateTextureCopyView(srcTexture, 0, 0, {0, 0, 0});
@@ -280,8 +274,8 @@ TEST_P(TextureZeroInitTest, CopyTextureToTextureHalf) {
 
     dawn::TextureDescriptor dstDescriptor =
         CreateTextureDescriptor(1, 1,
-                                dawn::TextureUsageBit::OutputAttachment |
-                                    dawn::TextureUsageBit::CopyDst | dawn::TextureUsageBit::CopySrc,
+                                dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopyDst |
+                                    dawn::TextureUsage::CopySrc,
                                 kColorFormat);
     dawn::Texture dstTexture = device.CreateTexture(&dstDescriptor);
 
@@ -308,13 +302,13 @@ TEST_P(TextureZeroInitTest, CopyTextureToTextureHalf) {
 TEST_P(TextureZeroInitTest, RenderingLoadingDepth) {
     dawn::TextureDescriptor srcDescriptor =
         CreateTextureDescriptor(1, 1,
-                                dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::CopyDst |
-                                    dawn::TextureUsageBit::OutputAttachment,
+                                dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst |
+                                    dawn::TextureUsage::OutputAttachment,
                                 kColorFormat);
     dawn::Texture srcTexture = device.CreateTexture(&srcDescriptor);
 
     dawn::TextureDescriptor depthStencilDescriptor = CreateTextureDescriptor(
-        1, 1, dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc,
+        1, 1, dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc,
         kDepthStencilFormat);
     dawn::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
 
@@ -343,13 +337,13 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepth) {
 TEST_P(TextureZeroInitTest, RenderingLoadingStencil) {
     dawn::TextureDescriptor srcDescriptor =
         CreateTextureDescriptor(1, 1,
-                                dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::CopyDst |
-                                    dawn::TextureUsageBit::OutputAttachment,
+                                dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst |
+                                    dawn::TextureUsage::OutputAttachment,
                                 kColorFormat);
     dawn::Texture srcTexture = device.CreateTexture(&srcDescriptor);
 
     dawn::TextureDescriptor depthStencilDescriptor = CreateTextureDescriptor(
-        1, 1, dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc,
+        1, 1, dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc,
         kDepthStencilFormat);
     dawn::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
 
@@ -378,13 +372,13 @@ TEST_P(TextureZeroInitTest, RenderingLoadingStencil) {
 TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencil) {
     dawn::TextureDescriptor srcDescriptor =
         CreateTextureDescriptor(1, 1,
-                                dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::CopyDst |
-                                    dawn::TextureUsageBit::OutputAttachment,
+                                dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst |
+                                    dawn::TextureUsage::OutputAttachment,
                                 kColorFormat);
     dawn::Texture srcTexture = device.CreateTexture(&srcDescriptor);
 
     dawn::TextureDescriptor depthStencilDescriptor = CreateTextureDescriptor(
-        1, 1, dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc,
+        1, 1, dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc,
         kDepthStencilFormat);
     dawn::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
 
@@ -410,8 +404,7 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencil) {
 // This tests the color attachments clear to 0s
 TEST_P(TextureZeroInitTest, ColorAttachmentsClear) {
     dawn::TextureDescriptor descriptor = CreateTextureDescriptor(
-        1, 1, dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc,
-        kColorFormat);
+        1, 1, dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc, kColorFormat);
     dawn::Texture texture = device.CreateTexture(&descriptor);
     utils::BasicRenderPass renderPass = utils::BasicRenderPass(kSize, kSize, texture, kColorFormat);
     renderPass.renderPassInfo.cColorAttachmentsInfoPtr[0]->loadOp = dawn::LoadOp::Load;
@@ -431,12 +424,11 @@ TEST_P(TextureZeroInitTest, ColorAttachmentsClear) {
 TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
     // Create needed resources
     dawn::TextureDescriptor descriptor =
-        CreateTextureDescriptor(1, 1, dawn::TextureUsageBit::Sampled, kColorFormat);
+        CreateTextureDescriptor(1, 1, dawn::TextureUsage::Sampled, kColorFormat);
     dawn::Texture texture = device.CreateTexture(&descriptor);
 
     dawn::TextureDescriptor renderTextureDescriptor = CreateTextureDescriptor(
-        1, 1, dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::OutputAttachment,
-        kColorFormat);
+        1, 1, dawn::TextureUsage::CopySrc | dawn::TextureUsage::OutputAttachment, kColorFormat);
     dawn::Texture renderTexture = device.CreateTexture(&renderTextureDescriptor);
 
     dawn::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
@@ -501,7 +493,7 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
 TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
     // Create needed resources
     dawn::TextureDescriptor descriptor =
-        CreateTextureDescriptor(1, 1, dawn::TextureUsageBit::Sampled, kColorFormat);
+        CreateTextureDescriptor(1, 1, dawn::TextureUsage::Sampled, kColorFormat);
     descriptor.size.width = 1;
     descriptor.size.height = 1;
     dawn::Texture texture = device.CreateTexture(&descriptor);
@@ -509,8 +501,8 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
     uint32_t bufferSize = 4 * sizeof(uint32_t);
     dawn::BufferDescriptor bufferDescriptor;
     bufferDescriptor.size = bufferSize;
-    bufferDescriptor.usage = dawn::BufferUsageBit::CopySrc | dawn::BufferUsageBit::Storage |
-                             dawn::BufferUsageBit::CopyDst;
+    bufferDescriptor.usage =
+        dawn::BufferUsage::CopySrc | dawn::BufferUsage::Storage | dawn::BufferUsage::CopyDst;
     dawn::Buffer bufferTex = device.CreateBuffer(&bufferDescriptor);
     // Add data to buffer to ensure it is initialized
     uint32_t data = 100;
@@ -571,14 +563,14 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClear) {
     DAWN_SKIP_TEST_IF(IsOpenGL() || IsD3D12());
 
     dawn::TextureDescriptor descriptor =
-        CreateTextureDescriptor(1, 1, dawn::TextureUsageBit::CopySrc, kNonrenderableColorFormat);
+        CreateTextureDescriptor(1, 1, dawn::TextureUsage::CopySrc, kNonrenderableColorFormat);
     dawn::Texture texture = device.CreateTexture(&descriptor);
 
     // Set buffer with dirty data so we know it is cleared by the lazy cleared texture copy
     uint32_t bufferSize = 4 * kSize * kSize;
     std::vector<uint8_t> data(bufferSize, 100);
     dawn::Buffer bufferDst = utils::CreateBufferFromData(
-        device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsageBit::CopySrc);
+        device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsage::CopySrc);
 
     dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(bufferDst, 0, 0, 0);
     dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});

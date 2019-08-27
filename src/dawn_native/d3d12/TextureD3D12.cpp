@@ -21,28 +21,28 @@
 namespace dawn_native { namespace d3d12 {
 
     namespace {
-        D3D12_RESOURCE_STATES D3D12TextureUsage(dawn::TextureUsageBit usage, const Format& format) {
+        D3D12_RESOURCE_STATES D3D12TextureUsage(dawn::TextureUsage usage, const Format& format) {
             D3D12_RESOURCE_STATES resourceState = D3D12_RESOURCE_STATE_COMMON;
 
             // Present is an exclusive flag.
-            if (usage & dawn::TextureUsageBit::Present) {
+            if (usage & dawn::TextureUsage::Present) {
                 return D3D12_RESOURCE_STATE_PRESENT;
             }
 
-            if (usage & dawn::TextureUsageBit::CopySrc) {
+            if (usage & dawn::TextureUsage::CopySrc) {
                 resourceState |= D3D12_RESOURCE_STATE_COPY_SOURCE;
             }
-            if (usage & dawn::TextureUsageBit::CopyDst) {
+            if (usage & dawn::TextureUsage::CopyDst) {
                 resourceState |= D3D12_RESOURCE_STATE_COPY_DEST;
             }
-            if (usage & dawn::TextureUsageBit::Sampled) {
+            if (usage & dawn::TextureUsage::Sampled) {
                 resourceState |= (D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE |
                                   D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
             }
-            if (usage & dawn::TextureUsageBit::Storage) {
+            if (usage & dawn::TextureUsage::Storage) {
                 resourceState |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
             }
-            if (usage & dawn::TextureUsageBit::OutputAttachment) {
+            if (usage & dawn::TextureUsage::OutputAttachment) {
                 if (format.HasDepthOrStencil()) {
                     resourceState |= D3D12_RESOURCE_STATE_DEPTH_WRITE;
                 } else {
@@ -53,12 +53,12 @@ namespace dawn_native { namespace d3d12 {
             return resourceState;
         }
 
-        D3D12_RESOURCE_FLAGS D3D12ResourceFlags(dawn::TextureUsageBit usage,
+        D3D12_RESOURCE_FLAGS D3D12ResourceFlags(dawn::TextureUsage usage,
                                                 const Format& format,
                                                 bool isMultisampledTexture) {
             D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE;
 
-            if (usage & dawn::TextureUsageBit::Storage) {
+            if (usage & dawn::TextureUsage::Storage) {
                 flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
             }
 
@@ -70,7 +70,7 @@ namespace dawn_native { namespace d3d12 {
             // flag is invalid.
             // TODO(natlee@microsoft.com, jiawei.shao@intel.com): do not require render target for
             // lazy clearing.
-            if ((usage & dawn::TextureUsageBit::OutputAttachment) || isMultisampledTexture ||
+            if ((usage & dawn::TextureUsage::OutputAttachment) || isMultisampledTexture ||
                 !format.isCompressed) {
                 if (format.HasDepthOrStencil()) {
                     flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
@@ -319,7 +319,7 @@ namespace dawn_native { namespace d3d12 {
     // ResourceBarrier call. Failing to do so will cause the tracked state to become invalid and can
     // cause subsequent errors.
     bool Texture::TransitionUsageAndGetResourceBarrier(D3D12_RESOURCE_BARRIER* barrier,
-                                                       dawn::TextureUsageBit newUsage) {
+                                                       dawn::TextureUsage newUsage) {
         return TransitionUsageAndGetResourceBarrier(barrier,
                                                     D3D12TextureUsage(newUsage, GetFormat()));
     }
@@ -395,7 +395,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     void Texture::TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
-                                     dawn::TextureUsageBit usage) {
+                                     dawn::TextureUsage usage) {
         TransitionUsageNow(commandList, D3D12TextureUsage(usage, GetFormat()));
     }
 

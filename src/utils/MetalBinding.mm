@@ -43,7 +43,7 @@ namespace utils {
         }
 
         DawnSwapChainError Configure(DawnTextureFormat format,
-                                     DawnTextureUsageBit usage,
+                                     DawnTextureUsage usage,
                                      uint32_t width,
                                      uint32_t height) {
             if (format != DAWN_TEXTURE_FORMAT_BGRA8_UNORM) {
@@ -65,7 +65,7 @@ namespace utils {
             [mLayer setDrawableSize:size];
 
             constexpr uint32_t kFramebufferOnlyTextureUsages =
-                DAWN_TEXTURE_USAGE_BIT_OUTPUT_ATTACHMENT | DAWN_TEXTURE_USAGE_BIT_PRESENT;
+                DAWN_TEXTURE_USAGE_OUTPUT_ATTACHMENT | DAWN_TEXTURE_USAGE_PRESENT;
             bool hasOnlyFramebufferUsages = !(usage & (~kFramebufferOnlyTextureUsages));
             if (hasOnlyFramebufferUsages) {
                 [mLayer setFramebufferOnly:YES];

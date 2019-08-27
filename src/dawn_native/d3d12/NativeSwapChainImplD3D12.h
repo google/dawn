@@ -35,7 +35,7 @@ namespace dawn_native { namespace d3d12 {
 
         void Init(DawnWSIContextD3D12* context);
         DawnSwapChainError Configure(DawnTextureFormat format,
-                                     DawnTextureUsageBit,
+                                     DawnTextureUsage,
                                      uint32_t width,
                                      uint32_t height);
         DawnSwapChainError GetNextTexture(DawnSwapChainNextTexture* nextTexture);

@@ -34,13 +34,12 @@ namespace dawn_native {
 
     bool IsValidSampleCount(uint32_t sampleCount);
 
-    static constexpr dawn::TextureUsageBit kReadOnlyTextureUsages = dawn::TextureUsageBit::CopySrc |
-                                                                    dawn::TextureUsageBit::Sampled |
-                                                                    dawn::TextureUsageBit::Present;
+    static constexpr dawn::TextureUsage kReadOnlyTextureUsages =
+        dawn::TextureUsage::CopySrc | dawn::TextureUsage::Sampled | dawn::TextureUsage::Present;
 
-    static constexpr dawn::TextureUsageBit kWritableTextureUsages =
-        dawn::TextureUsageBit::CopyDst | dawn::TextureUsageBit::Storage |
-        dawn::TextureUsageBit::OutputAttachment;
+    static constexpr dawn::TextureUsage kWritableTextureUsages =
+        dawn::TextureUsage::CopyDst | dawn::TextureUsage::Storage |
+        dawn::TextureUsage::OutputAttachment;
 
     class TextureBase : public ObjectBase {
       public:
@@ -56,7 +55,7 @@ namespace dawn_native {
         uint32_t GetArrayLayers() const;
         uint32_t GetNumMipLevels() const;
         uint32_t GetSampleCount() const;
-        dawn::TextureUsageBit GetUsage() const;
+        dawn::TextureUsage GetUsage() const;
         TextureState GetTextureState() const;
         uint32_t GetSubresourceIndex(uint32_t mipLevel, uint32_t arraySlice) const;
         bool IsSubresourceContentInitialized(uint32_t baseMipLevel,
@@ -100,7 +99,7 @@ namespace dawn_native {
         uint32_t mArrayLayerCount;
         uint32_t mMipLevelCount;
         uint32_t mSampleCount;
-        dawn::TextureUsageBit mUsage = dawn::TextureUsageBit::None;
+        dawn::TextureUsage mUsage = dawn::TextureUsage::None;
         TextureState mState;
 
         // TODO(natlee@microsoft.com): Use a more optimized data structure to save space

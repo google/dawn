@@ -32,12 +32,12 @@ static void StoreTrueMapWriteCallback(DawnBufferMapAsyncStatus status,
 TEST_F(QueueSubmitValidationTest, SubmitWithMappedBuffer) {
     // Create a map-write buffer.
     dawn::BufferDescriptor descriptor;
-    descriptor.usage = dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::CopySrc;
+    descriptor.usage = dawn::BufferUsage::MapWrite | dawn::BufferUsage::CopySrc;
     descriptor.size = 4;
     dawn::Buffer buffer = device.CreateBuffer(&descriptor);
 
     // Create a fake copy destination buffer
-    descriptor.usage = dawn::BufferUsageBit::CopyDst;
+    descriptor.usage = dawn::BufferUsage::CopyDst;
     dawn::Buffer targetBuffer = device.CreateBuffer(&descriptor);
 
     // Create a command buffer that reads from the mappable buffer.

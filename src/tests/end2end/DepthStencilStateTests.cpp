@@ -35,7 +35,7 @@ class DepthStencilStateTest : public DawnTest {
             renderTargetDescriptor.format = dawn::TextureFormat::RGBA8Unorm;
             renderTargetDescriptor.mipLevelCount = 1;
             renderTargetDescriptor.usage =
-                dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc;
+                dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc;
             renderTarget = device.CreateTexture(&renderTargetDescriptor);
 
             renderTargetView = renderTarget.CreateDefaultView();
@@ -49,7 +49,7 @@ class DepthStencilStateTest : public DawnTest {
             depthDescriptor.sampleCount = 1;
             depthDescriptor.format = dawn::TextureFormat::Depth24PlusStencil8;
             depthDescriptor.mipLevelCount = 1;
-            depthDescriptor.usage = dawn::TextureUsageBit::OutputAttachment;
+            depthDescriptor.usage = dawn::TextureUsage::OutputAttachment;
             depthTexture = device.CreateTexture(&depthDescriptor);
 
             depthTextureView = depthTexture.CreateDefaultView();
@@ -265,7 +265,8 @@ class DepthStencilStateTest : public DawnTest {
                     test.depth,
                 };
                 // Upload a buffer for each triangle's depth and color data
-                dawn::Buffer buffer = utils::CreateBufferFromData(device, &data, sizeof(TriangleData), dawn::BufferUsageBit::Uniform);
+                dawn::Buffer buffer = utils::CreateBufferFromData(
+                    device, &data, sizeof(TriangleData), dawn::BufferUsage::Uniform);
 
                 // Create a bind group for the data
                 dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bindGroupLayout, {{0, buffer, 0, sizeof(TriangleData)}});

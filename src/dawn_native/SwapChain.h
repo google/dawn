@@ -36,7 +36,7 @@ namespace dawn_native {
 
         // Dawn API
         void Configure(dawn::TextureFormat format,
-                       dawn::TextureUsageBit allowedUsage,
+                       dawn::TextureUsage allowedUsage,
                        uint32_t width,
                        uint32_t height);
         TextureBase* GetNextTexture();
@@ -51,7 +51,7 @@ namespace dawn_native {
 
       private:
         MaybeError ValidateConfigure(dawn::TextureFormat format,
-                                     dawn::TextureUsageBit allowedUsage,
+                                     dawn::TextureUsage allowedUsage,
                                      uint32_t width,
                                      uint32_t height) const;
         MaybeError ValidateGetNextTexture() const;
@@ -59,7 +59,7 @@ namespace dawn_native {
 
         DawnSwapChainImplementation mImplementation = {};
         dawn::TextureFormat mFormat = {};
-        dawn::TextureUsageBit mAllowedUsage;
+        dawn::TextureUsage mAllowedUsage;
         uint32_t mWidth = 0;
         uint32_t mHeight = 0;
         TextureBase* mLastNextTexture = nullptr;

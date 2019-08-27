@@ -73,8 +73,8 @@ class DrawIndirectValidationTest : public ValidationTest {
                             std::initializer_list<uint32_t> bufferList,
                             uint64_t indirectOffset,
                             bool indexed) {
-        dawn::Buffer indirectBuffer = utils::CreateBufferFromData<uint32_t>(
-            device, dawn::BufferUsageBit::Indirect, bufferList);
+        dawn::Buffer indirectBuffer =
+            utils::CreateBufferFromData<uint32_t>(device, dawn::BufferUsage::Indirect, bufferList);
 
         DummyRenderPass renderPass(device);
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -82,8 +82,8 @@ class DrawIndirectValidationTest : public ValidationTest {
         pass.SetPipeline(pipeline);
         if (indexed) {
             uint32_t zeros[100] = {};
-            dawn::Buffer indexBuffer = utils::CreateBufferFromData(device, zeros, sizeof(zeros),
-                                                                   dawn::BufferUsageBit::Index);
+            dawn::Buffer indexBuffer =
+                utils::CreateBufferFromData(device, zeros, sizeof(zeros), dawn::BufferUsage::Index);
             pass.SetIndexBuffer(indexBuffer, 0);
             pass.DrawIndexedIndirect(indirectBuffer, indirectOffset);
         } else {

@@ -179,7 +179,7 @@ class VertexInputTest : public DawnTest {
     dawn::Buffer MakeVertexBuffer(std::vector<T> data) {
         return utils::CreateBufferFromData(device, data.data(),
                                            static_cast<uint32_t>(data.size() * sizeof(T)),
-                                           dawn::BufferUsageBit::Vertex);
+                                           dawn::BufferUsage::Vertex);
     }
 
     struct DrawVertexBuffer {

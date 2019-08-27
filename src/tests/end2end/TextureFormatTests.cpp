@@ -245,20 +245,19 @@ class TextureFormatTest : public DawnTest {
 
         // Create the texture we will sample from
         dawn::TextureDescriptor sampleTextureDesc;
-        sampleTextureDesc.usage = dawn::TextureUsageBit::CopyDst | dawn::TextureUsageBit::Sampled;
+        sampleTextureDesc.usage = dawn::TextureUsage::CopyDst | dawn::TextureUsage::Sampled;
         sampleTextureDesc.size = {width, 1, 1};
         sampleTextureDesc.format = sampleFormatInfo.format;
         dawn::Texture sampleTexture = device.CreateTexture(&sampleTextureDesc);
 
         dawn::Buffer uploadBuffer = utils::CreateBufferFromData(device, sampleData, sampleDataSize,
-                                                                dawn::BufferUsageBit::CopySrc);
+                                                                dawn::BufferUsage::CopySrc);
 
         // Create the texture that we will render results to
         ASSERT(expectedRenderDataSize == width * renderFormatInfo.texelByteSize);
 
         dawn::TextureDescriptor renderTargetDesc;
-        renderTargetDesc.usage =
-            dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::OutputAttachment;
+        renderTargetDesc.usage = dawn::TextureUsage::CopySrc | dawn::TextureUsage::OutputAttachment;
         renderTargetDesc.size = {width, 1, 1};
         renderTargetDesc.format = renderFormatInfo.format;
 
@@ -266,7 +265,7 @@ class TextureFormatTest : public DawnTest {
 
         // Create the readback buffer for the data in renderTarget
         dawn::BufferDescriptor readbackBufferDesc;
-        readbackBufferDesc.usage = dawn::BufferUsageBit::CopyDst | dawn::BufferUsageBit::CopySrc;
+        readbackBufferDesc.usage = dawn::BufferUsage::CopyDst | dawn::BufferUsage::CopySrc;
         readbackBufferDesc.size = 4 * width * sampleFormatInfo.componentCount;
         dawn::Buffer readbackBuffer = device.CreateBuffer(&readbackBufferDesc);
 

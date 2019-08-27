@@ -173,23 +173,23 @@ namespace dawn_native {
         }
 
         MaybeError ValidateTextureUsage(const TextureDescriptor* descriptor, const Format* format) {
-            DAWN_TRY(ValidateTextureUsageBit(descriptor->usage));
+            DAWN_TRY(dawn_native::ValidateTextureUsage(descriptor->usage));
 
-            constexpr dawn::TextureUsageBit kValidCompressedUsages =
-                dawn::TextureUsageBit::Sampled | dawn::TextureUsageBit::CopySrc |
-                dawn::TextureUsageBit::CopyDst;
+            constexpr dawn::TextureUsage kValidCompressedUsages = dawn::TextureUsage::Sampled |
+                                                                  dawn::TextureUsage::CopySrc |
+                                                                  dawn::TextureUsage::CopyDst;
             if (format->isCompressed && (descriptor->usage & (~kValidCompressedUsages))) {
                 return DAWN_VALIDATION_ERROR(
                     "Compressed texture format is incompatible with the texture usage");
             }
 
             if (!format->isRenderable &&
-                (descriptor->usage & dawn::TextureUsageBit::OutputAttachment)) {
+                (descriptor->usage & dawn::TextureUsage::OutputAttachment)) {
                 return DAWN_VALIDATION_ERROR(
                     "Non-renderable format used with OutputAttachment usage");
             }
 
-            if (descriptor->usage & dawn::TextureUsageBit::Storage) {
+            if (descriptor->usage & dawn::TextureUsage::Storage) {
                 return DAWN_VALIDATION_ERROR("storage textures aren't supported (yet)");
             }
 
@@ -364,7 +364,7 @@ namespace dawn_native {
         ASSERT(!IsError());
         return mSampleCount;
     }
-    dawn::TextureUsageBit TextureBase::GetUsage() const {
+    dawn::TextureUsage TextureBase::GetUsage() const {
         ASSERT(!IsError());
         return mUsage;
     }

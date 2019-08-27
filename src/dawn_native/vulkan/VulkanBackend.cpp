@@ -42,7 +42,7 @@ namespace dawn_native { namespace vulkan {
 
         DawnSwapChainImplementation impl;
         impl = CreateSwapChainImplementation(new NativeSwapChainImpl(backendDevice, surface));
-        impl.textureUsage = DAWN_TEXTURE_USAGE_BIT_PRESENT;
+        impl.textureUsage = DAWN_TEXTURE_USAGE_PRESENT;
 
         return impl;
     }

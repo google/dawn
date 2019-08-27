@@ -64,10 +64,12 @@ void initBuffers() {
         {0.01, -0.02},
         {0.00, 0.02},
     };
-    modelBuffer = utils::CreateBufferFromData(device, model, sizeof(model), dawn::BufferUsageBit::Vertex);
+    modelBuffer =
+        utils::CreateBufferFromData(device, model, sizeof(model), dawn::BufferUsage::Vertex);
 
     SimParams params = { 0.04f, 0.1f, 0.025f, 0.025f, 0.02f, 0.05f, 0.005f, kNumParticles };
-    updateParams = utils::CreateBufferFromData(device, &params, sizeof(params), dawn::BufferUsageBit::Uniform);
+    updateParams =
+        utils::CreateBufferFromData(device, &params, sizeof(params), dawn::BufferUsage::Uniform);
 
     std::vector<Particle> initialParticles(kNumParticles);
     {
@@ -83,8 +85,8 @@ void initBuffers() {
     for (size_t i = 0; i < 2; i++) {
         dawn::BufferDescriptor descriptor;
         descriptor.size = sizeof(Particle) * kNumParticles;
-        descriptor.usage = dawn::BufferUsageBit::CopyDst | dawn::BufferUsageBit::Vertex |
-                           dawn::BufferUsageBit::Storage;
+        descriptor.usage =
+            dawn::BufferUsage::CopyDst | dawn::BufferUsage::Vertex | dawn::BufferUsage::Storage;
         particleBuffers[i] = device.CreateBuffer(&descriptor);
 
         particleBuffers[i].SetSubData(0,
@@ -293,8 +295,8 @@ void init() {
 
     queue = device.CreateQueue();
     swapchain = GetSwapChain(device);
-    swapchain.Configure(GetPreferredSwapChainTextureFormat(),
-                        dawn::TextureUsageBit::OutputAttachment, 640, 480);
+    swapchain.Configure(GetPreferredSwapChainTextureFormat(), dawn::TextureUsage::OutputAttachment,
+                        640, 480);
 
     initBuffers();
     initRender();

@@ -36,11 +36,11 @@ namespace utils {
     dawn::Buffer CreateBufferFromData(const dawn::Device& device,
                                       const void* data,
                                       uint64_t size,
-                                      dawn::BufferUsageBit usage);
+                                      dawn::BufferUsage usage);
 
     template <typename T>
     dawn::Buffer CreateBufferFromData(const dawn::Device& device,
-                                      dawn::BufferUsageBit usage,
+                                      dawn::BufferUsage usage,
                                       std::initializer_list<T> data) {
         return CreateBufferFromData(device, data.begin(), uint32_t(sizeof(T) * data.size()), usage);
     }

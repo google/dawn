@@ -587,7 +587,7 @@ DawnTest::ReadbackReservation DawnTest::ReserveReadback(uint64_t readbackSize) {
     // TODO(cwallez@chromium.org): eventually make bigger buffers and allocate linearly?
     dawn::BufferDescriptor descriptor;
     descriptor.size = readbackSize;
-    descriptor.usage = dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::CopyDst;
+    descriptor.usage = dawn::BufferUsage::MapRead | dawn::BufferUsage::CopyDst;
 
     ReadbackSlot slot;
     slot.bufferSize = readbackSize;

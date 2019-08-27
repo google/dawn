@@ -209,7 +209,7 @@ namespace dawn_native { namespace null {
         using WSIContext = struct {};
         void Init(WSIContext* context);
         DawnSwapChainError Configure(DawnTextureFormat format,
-                                     DawnTextureUsageBit,
+                                     DawnTextureUsage,
                                      uint32_t width,
                                      uint32_t height);
         DawnSwapChainError GetNextTexture(DawnSwapChainNextTexture* nextTexture);

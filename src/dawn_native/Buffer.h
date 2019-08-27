@@ -27,13 +27,12 @@ namespace dawn_native {
 
     MaybeError ValidateBufferDescriptor(DeviceBase* device, const BufferDescriptor* descriptor);
 
-    static constexpr dawn::BufferUsageBit kReadOnlyBufferUsages =
-        dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::CopySrc |
-        dawn::BufferUsageBit::Index | dawn::BufferUsageBit::Vertex | dawn::BufferUsageBit::Uniform;
+    static constexpr dawn::BufferUsage kReadOnlyBufferUsages =
+        dawn::BufferUsage::MapRead | dawn::BufferUsage::CopySrc | dawn::BufferUsage::Index |
+        dawn::BufferUsage::Vertex | dawn::BufferUsage::Uniform;
 
-    static constexpr dawn::BufferUsageBit kWritableBufferUsages = dawn::BufferUsageBit::MapWrite |
-                                                                  dawn::BufferUsageBit::CopyDst |
-                                                                  dawn::BufferUsageBit::Storage;
+    static constexpr dawn::BufferUsage kWritableBufferUsages =
+        dawn::BufferUsage::MapWrite | dawn::BufferUsage::CopyDst | dawn::BufferUsage::Storage;
 
     class BufferBase : public ObjectBase {
         enum class BufferState {
@@ -52,7 +51,7 @@ namespace dawn_native {
                                            uint8_t** mappedPointer);
 
         uint64_t GetSize() const;
-        dawn::BufferUsageBit GetUsage() const;
+        dawn::BufferUsage GetUsage() const;
 
         MaybeError MapAtCreation(uint8_t** mappedPointer);
 
@@ -91,12 +90,12 @@ namespace dawn_native {
         MaybeError CopyFromStagingBuffer();
 
         MaybeError ValidateSetSubData(uint32_t start, uint32_t count) const;
-        MaybeError ValidateMap(dawn::BufferUsageBit requiredUsage) const;
+        MaybeError ValidateMap(dawn::BufferUsage requiredUsage) const;
         MaybeError ValidateUnmap() const;
         MaybeError ValidateDestroy() const;
 
         uint64_t mSize = 0;
-        dawn::BufferUsageBit mUsage = dawn::BufferUsageBit::None;
+        dawn::BufferUsage mUsage = dawn::BufferUsage::None;
 
         DawnBufferMapReadCallback mMapReadCallback = nullptr;
         DawnBufferMapWriteCallback mMapWriteCallback = nullptr;

@@ -55,7 +55,7 @@ class DrawIndexedIndirectTest : public DawnTest {
         pipeline = device.CreateRenderPipeline(&descriptor);
 
         vertexBuffer = utils::CreateBufferFromData<float>(
-            device, dawn::BufferUsageBit::Vertex,
+            device, dawn::BufferUsage::Vertex,
             {// First quad: the first 3 vertices represent the bottom left triangle
              -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f,
              0.0f, 1.0f,
@@ -64,7 +64,7 @@ class DrawIndexedIndirectTest : public DawnTest {
              -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 1.0f,
              0.0f, 1.0f});
         indexBuffer = utils::CreateBufferFromData<uint32_t>(
-            device, dawn::BufferUsageBit::Index,
+            device, dawn::BufferUsage::Index,
             {0, 1, 2, 0, 3, 1,
              // The indices below are added to test negatve baseVertex
              0 + 4, 1 + 4, 2 + 4, 0 + 4, 3 + 4, 1 + 4});
@@ -80,8 +80,8 @@ class DrawIndexedIndirectTest : public DawnTest {
               uint64_t indirectOffset,
               RGBA8 bottomLeftExpected,
               RGBA8 topRightExpected) {
-        dawn::Buffer indirectBuffer = utils::CreateBufferFromData<uint32_t>(
-            device, dawn::BufferUsageBit::Indirect, bufferList);
+        dawn::Buffer indirectBuffer =
+            utils::CreateBufferFromData<uint32_t>(device, dawn::BufferUsage::Indirect, bufferList);
 
         uint64_t zeroOffset = 0;
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();

@@ -21,7 +21,7 @@ namespace dawn_native { namespace metal {
     Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
         : BufferBase(device, descriptor) {
         MTLResourceOptions storageMode;
-        if (GetUsage() & (dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::MapWrite)) {
+        if (GetUsage() & (dawn::BufferUsage::MapRead | dawn::BufferUsage::MapWrite)) {
             storageMode = MTLResourceStorageModeShared;
         } else {
             storageMode = MTLResourceStorageModePrivate;
@@ -49,7 +49,7 @@ namespace dawn_native { namespace metal {
 
     bool Buffer::IsMapWritable() const {
         // TODO(enga): Handle CPU-visible memory on UMA
-        return (GetUsage() & (dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::MapWrite)) != 0;
+        return (GetUsage() & (dawn::BufferUsage::MapRead | dawn::BufferUsage::MapWrite)) != 0;
     }
 
     MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {

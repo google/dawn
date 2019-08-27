@@ -55,7 +55,7 @@ class DrawTest : public DawnTest {
         pipeline = device.CreateRenderPipeline(&descriptor);
 
         vertexBuffer = utils::CreateBufferFromData<float>(
-            device, dawn::BufferUsageBit::Vertex,
+            device, dawn::BufferUsage::Vertex,
             {// The bottom left triangle
              -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f,
 

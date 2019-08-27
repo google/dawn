@@ -21,15 +21,15 @@
 namespace dawn_native { namespace d3d12 {
 
     namespace {
-        DXGI_USAGE D3D12SwapChainBufferUsage(DawnTextureUsageBit allowedUsages) {
+        DXGI_USAGE D3D12SwapChainBufferUsage(DawnTextureUsage allowedUsages) {
             DXGI_USAGE usage = DXGI_CPU_ACCESS_NONE;
-            if (allowedUsages & DAWN_TEXTURE_USAGE_BIT_SAMPLED) {
+            if (allowedUsages & DAWN_TEXTURE_USAGE_SAMPLED) {
                 usage |= DXGI_USAGE_SHADER_INPUT;
             }
-            if (allowedUsages & DAWN_TEXTURE_USAGE_BIT_STORAGE) {
+            if (allowedUsages & DAWN_TEXTURE_USAGE_STORAGE) {
                 usage |= DXGI_USAGE_UNORDERED_ACCESS;
             }
-            if (allowedUsages & DAWN_TEXTURE_USAGE_BIT_OUTPUT_ATTACHMENT) {
+            if (allowedUsages & DAWN_TEXTURE_USAGE_OUTPUT_ATTACHMENT) {
                 usage |= DXGI_USAGE_RENDER_TARGET_OUTPUT;
             }
             return usage;
@@ -49,7 +49,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     DawnSwapChainError NativeSwapChainImpl::Configure(DawnTextureFormat format,
-                                                      DawnTextureUsageBit usage,
+                                                      DawnTextureUsage usage,
                                                       uint32_t width,
                                                       uint32_t height) {
         ASSERT(width > 0);

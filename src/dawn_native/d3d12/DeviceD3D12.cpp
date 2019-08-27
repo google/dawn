@@ -317,7 +317,7 @@ namespace dawn_native { namespace d3d12 {
                                                uint64_t destinationOffset,
                                                uint64_t size) {
         ToBackend(destination)
-            ->TransitionUsageNow(GetPendingCommandList(), dawn::BufferUsageBit::CopyDst);
+            ->TransitionUsageNow(GetPendingCommandList(), dawn::BufferUsage::CopyDst);
 
         GetPendingCommandList()->CopyBufferRegion(
             ToBackend(destination)->GetD3D12Resource().Get(), destinationOffset,

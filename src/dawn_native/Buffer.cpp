@@ -89,19 +89,19 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
         }
 
-        DAWN_TRY(ValidateBufferUsageBit(descriptor->usage));
+        DAWN_TRY(ValidateBufferUsage(descriptor->usage));
 
-        dawn::BufferUsageBit usage = descriptor->usage;
+        dawn::BufferUsage usage = descriptor->usage;
 
-        const dawn::BufferUsageBit kMapWriteAllowedUsages =
-            dawn::BufferUsageBit::MapWrite | dawn::BufferUsageBit::CopySrc;
-        if (usage & dawn::BufferUsageBit::MapWrite && (usage & kMapWriteAllowedUsages) != usage) {
+        const dawn::BufferUsage kMapWriteAllowedUsages =
+            dawn::BufferUsage::MapWrite | dawn::BufferUsage::CopySrc;
+        if (usage & dawn::BufferUsage::MapWrite && (usage & kMapWriteAllowedUsages) != usage) {
             return DAWN_VALIDATION_ERROR("Only CopySrc is allowed with MapWrite");
         }
 
-        const dawn::BufferUsageBit kMapReadAllowedUsages =
-            dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::CopyDst;
-        if (usage & dawn::BufferUsageBit::MapRead && (usage & kMapReadAllowedUsages) != usage) {
+        const dawn::BufferUsage kMapReadAllowedUsages =
+            dawn::BufferUsage::MapRead | dawn::BufferUsage::CopyDst;
+        if (usage & dawn::BufferUsage::MapRead && (usage & kMapReadAllowedUsages) != usage) {
             return DAWN_VALIDATION_ERROR("Only CopyDst is allowed with MapRead");
         }
 
@@ -146,7 +146,7 @@ namespace dawn_native {
         return mSize;
     }
 
-    dawn::BufferUsageBit BufferBase::GetUsage() const {
+    dawn::BufferUsage BufferBase::GetUsage() const {
         ASSERT(!IsError());
         return mUsage;
     }
@@ -232,7 +232,7 @@ namespace dawn_native {
     }
 
     void BufferBase::MapReadAsync(DawnBufferMapReadCallback callback, void* userdata) {
-        if (GetDevice()->ConsumedError(ValidateMap(dawn::BufferUsageBit::MapRead))) {
+        if (GetDevice()->ConsumedError(ValidateMap(dawn::BufferUsage::MapRead))) {
             callback(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0, userdata);
             return;
         }
@@ -272,7 +272,7 @@ namespace dawn_native {
     }
 
     void BufferBase::MapWriteAsync(DawnBufferMapWriteCallback callback, void* userdata) {
-        if (GetDevice()->ConsumedError(ValidateMap(dawn::BufferUsageBit::MapWrite))) {
+        if (GetDevice()->ConsumedError(ValidateMap(dawn::BufferUsage::MapWrite))) {
             callback(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0, userdata);
             return;
         }
@@ -381,14 +381,14 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Buffer subdata out of range");
         }
 
-        if (!(mUsage & dawn::BufferUsageBit::CopyDst)) {
+        if (!(mUsage & dawn::BufferUsage::CopyDst)) {
             return DAWN_VALIDATION_ERROR("Buffer needs the CopyDst usage bit");
         }
 
         return {};
     }
 
-    MaybeError BufferBase::ValidateMap(dawn::BufferUsageBit requiredUsage) const {
+    MaybeError BufferBase::ValidateMap(dawn::BufferUsage requiredUsage) const {
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
         switch (mState) {
@@ -416,8 +416,7 @@ namespace dawn_native {
                 // even if it did not have a mappable usage.
                 return {};
             case BufferState::Unmapped:
-                if ((mUsage & (dawn::BufferUsageBit::MapRead | dawn::BufferUsageBit::MapWrite)) ==
-                    0) {
+                if ((mUsage & (dawn::BufferUsage::MapRead | dawn::BufferUsage::MapWrite)) == 0) {
                     return DAWN_VALIDATION_ERROR("Buffer does not have map usage");
                 }
                 return {};

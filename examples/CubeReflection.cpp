@@ -62,7 +62,8 @@ void initBuffers() {
         20, 21, 22,
         20, 22, 23
     };
-    indexBuffer = utils::CreateBufferFromData(device, indexData, sizeof(indexData), dawn::BufferUsageBit::Index);
+    indexBuffer =
+        utils::CreateBufferFromData(device, indexData, sizeof(indexData), dawn::BufferUsage::Index);
 
     static const float vertexData[6 * 4 * 6] = {
         -1.0, -1.0,  1.0,    1.0, 0.0, 0.0,
@@ -95,7 +96,8 @@ void initBuffers() {
         -1.0,  1.0,  1.0,    1.0, 1.0, 1.0,
         -1.0,  1.0, -1.0,    1.0, 1.0, 1.0
     };
-    vertexBuffer = utils::CreateBufferFromData(device, vertexData, sizeof(vertexData), dawn::BufferUsageBit::Vertex);
+    vertexBuffer = utils::CreateBufferFromData(device, vertexData, sizeof(vertexData),
+                                               dawn::BufferUsage::Vertex);
 
     static const float planeData[6 * 4] = {
         -2.0, -1.0, -2.0,    0.5, 0.5, 0.5,
@@ -103,7 +105,8 @@ void initBuffers() {
         2.0, -1.0,  2.0,    0.5, 0.5, 0.5,
         -2.0, -1.0,  2.0,    0.5, 0.5, 0.5,
     };
-    planeBuffer = utils::CreateBufferFromData(device, planeData, sizeof(planeData), dawn::BufferUsageBit::Vertex);
+    planeBuffer = utils::CreateBufferFromData(device, planeData, sizeof(planeData),
+                                              dawn::BufferUsage::Vertex);
 }
 
 struct CameraData {
@@ -116,8 +119,8 @@ void init() {
 
     queue = device.CreateQueue();
     swapchain = GetSwapChain(device);
-    swapchain.Configure(GetPreferredSwapChainTextureFormat(),
-                        dawn::TextureUsageBit::OutputAttachment, 640, 480);
+    swapchain.Configure(GetPreferredSwapChainTextureFormat(), dawn::TextureUsage::OutputAttachment,
+                        640, 480);
 
     initBuffers();
 
@@ -176,14 +179,16 @@ void init() {
 
     dawn::BufferDescriptor cameraBufDesc;
     cameraBufDesc.size = sizeof(CameraData);
-    cameraBufDesc.usage = dawn::BufferUsageBit::CopyDst | dawn::BufferUsageBit::Uniform;
+    cameraBufDesc.usage = dawn::BufferUsage::CopyDst | dawn::BufferUsage::Uniform;
     cameraBuffer = device.CreateBuffer(&cameraBufDesc);
 
     glm::mat4 transform(1.0);
-    transformBuffer[0] = utils::CreateBufferFromData(device, &transform, sizeof(glm::mat4), dawn::BufferUsageBit::Uniform);
+    transformBuffer[0] = utils::CreateBufferFromData(device, &transform, sizeof(glm::mat4),
+                                                     dawn::BufferUsage::Uniform);
 
     transform = glm::translate(transform, glm::vec3(0.f, -2.f, 0.f));
-    transformBuffer[1] = utils::CreateBufferFromData(device, &transform, sizeof(glm::mat4), dawn::BufferUsageBit::Uniform);
+    transformBuffer[1] = utils::CreateBufferFromData(device, &transform, sizeof(glm::mat4),
+                                                     dawn::BufferUsage::Uniform);
 
     bindGroup[0] = utils::MakeBindGroup(device, bgl, {
         {0, cameraBuffer, 0, sizeof(CameraData)},

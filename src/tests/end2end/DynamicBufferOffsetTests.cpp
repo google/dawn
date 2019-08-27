@@ -34,20 +34,19 @@ class DynamicBufferOffsetTests : public DawnTest {
         uniformData[1] = 2;
 
         mUniformBuffers[0] = utils::CreateBufferFromData(device, uniformData.data(), kBufferSize,
-                                                         dawn::BufferUsageBit::Uniform);
+                                                         dawn::BufferUsage::Uniform);
 
         uniformData[uniformData.size() - 2] = 5;
         uniformData[uniformData.size() - 1] = 6;
 
         // Dynamic uniform buffer
         mUniformBuffers[1] = utils::CreateBufferFromData(device, uniformData.data(), kBufferSize,
-                                                         dawn::BufferUsageBit::Uniform);
+                                                         dawn::BufferUsage::Uniform);
 
         dawn::BufferDescriptor storageBufferDescriptor;
         storageBufferDescriptor.size = kBufferSize;
-        storageBufferDescriptor.usage = dawn::BufferUsageBit::Storage |
-                                        dawn::BufferUsageBit::CopyDst |
-                                        dawn::BufferUsageBit::CopySrc;
+        storageBufferDescriptor.usage =
+            dawn::BufferUsage::Storage | dawn::BufferUsage::CopyDst | dawn::BufferUsage::CopySrc;
 
         mStorageBuffers[0] = device.CreateBuffer(&storageBufferDescriptor);
 
@@ -74,7 +73,7 @@ class DynamicBufferOffsetTests : public DawnTest {
 
         // Extra uniform buffer for inheriting test
         mUniformBuffers[2] = utils::CreateBufferFromData(device, uniformData.data(), kBufferSize,
-                                                         dawn::BufferUsageBit::Uniform);
+                                                         dawn::BufferUsage::Uniform);
 
         // Bind group layout for inheriting test
         mBindGroupLayouts[1] = utils::MakeBindGroupLayout(

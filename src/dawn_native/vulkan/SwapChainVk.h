@@ -33,7 +33,7 @@ namespace dawn_native { namespace vulkan {
         void OnBeforePresent(TextureBase* texture) override;
 
       private:
-        dawn::TextureUsageBit mTextureUsage;
+        dawn::TextureUsage mTextureUsage;
     };
 
 }}  // namespace dawn_native::vulkan

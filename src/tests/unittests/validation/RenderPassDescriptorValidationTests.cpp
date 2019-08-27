@@ -48,7 +48,7 @@ dawn::Texture CreateTexture(dawn::Device& device,
                             uint32_t arrayLayerCount,
                             uint32_t mipLevelCount,
                             uint32_t sampleCount = 1,
-                            dawn::TextureUsageBit usage = dawn::TextureUsageBit::OutputAttachment) {
+                            dawn::TextureUsage usage = dawn::TextureUsage::OutputAttachment) {
     dawn::TextureDescriptor descriptor;
     descriptor.dimension = dimension;
     descriptor.size.width = width;
@@ -488,10 +488,9 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest, ResolveTargetMipmapLevelM
 }
 
 // It is not allowed to use a resolve target which is created from a texture whose usage does not
-// include dawn::TextureUsageBit::OutputAttachment.
+// include dawn::TextureUsage::OutputAttachment.
 TEST_F(MultisampledRenderPassDescriptorValidationTest, ResolveTargetUsageNoOutputAttachment) {
-    constexpr dawn::TextureUsageBit kUsage =
-        dawn::TextureUsageBit::CopyDst | dawn::TextureUsageBit::CopySrc;
+    constexpr dawn::TextureUsage kUsage = dawn::TextureUsage::CopyDst | dawn::TextureUsage::CopySrc;
     dawn::Texture nonColorUsageResolveTexture = CreateTexture(
         device, dawn::TextureDimension::e2D, kColorFormat, kSize, kSize, kArrayLayers,
         kLevelCount, 1, kUsage);

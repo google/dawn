@@ -35,9 +35,9 @@ namespace dawn_native { namespace d3d12 {
         DXGI_FORMAT GetD3D12Format() const;
         ID3D12Resource* GetD3D12Resource() const;
         bool TransitionUsageAndGetResourceBarrier(D3D12_RESOURCE_BARRIER* barrier,
-                                                  dawn::TextureUsageBit newUsage);
+                                                  dawn::TextureUsage newUsage);
         void TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
-                                dawn::TextureUsageBit usage);
+                                dawn::TextureUsage usage);
         void TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
                                 D3D12_RESOURCE_STATES newState);
 

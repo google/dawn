@@ -38,7 +38,7 @@ namespace dawn_native {
                 const void* nextInChain = nullptr;
             {% endif %}
             {% for member in type.members %}
-                {{as_annotated_frontendType(member)}} {{render_cpp_default_value(member)}};
+            {{as_annotated_frontendType(member)}} {{render_cpp_default_value(member)}};
             {% endfor %}
         };
 

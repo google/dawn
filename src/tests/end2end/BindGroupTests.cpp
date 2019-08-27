@@ -79,7 +79,7 @@ TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
 
     dawn::BufferDescriptor bufferDesc;
     bufferDesc.size = sizeof(float);
-    bufferDesc.usage = dawn::BufferUsageBit::CopyDst | dawn::BufferUsageBit::Uniform;
+    bufferDesc.usage = dawn::BufferUsage::CopyDst | dawn::BufferUsage::Uniform;
     dawn::Buffer buffer = device.CreateBuffer(&bufferDesc);
     dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, sizeof(float)}});
 
@@ -148,7 +148,8 @@ TEST_P(BindGroupTests, ReusedUBO) {
         { 0 },
         { 0.f, 1.f, 0.f, 1.f },
     };
-    dawn::Buffer buffer = utils::CreateBufferFromData(device, &data, sizeof(data), dawn::BufferUsageBit::Uniform);
+    dawn::Buffer buffer =
+        utils::CreateBufferFromData(device, &data, sizeof(data), dawn::BufferUsage::Uniform);
     dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {
         {0, buffer, 0, sizeof(Data::transform)},
         {1, buffer, 256, sizeof(Data::color)}
@@ -222,7 +223,8 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
 
     constexpr float dummy = 0.0f;
     constexpr float transform[] = { 1.f, 0.f, dummy, dummy, 0.f, 1.f, dummy, dummy };
-    dawn::Buffer buffer = utils::CreateBufferFromData(device, &transform, sizeof(transform), dawn::BufferUsageBit::Uniform);
+    dawn::Buffer buffer = utils::CreateBufferFromData(device, &transform, sizeof(transform),
+                                                      dawn::BufferUsage::Uniform);
 
     dawn::SamplerDescriptor samplerDescriptor;
     samplerDescriptor.minFilter = dawn::FilterMode::Nearest;
@@ -246,7 +248,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     descriptor.sampleCount = 1;
     descriptor.format = dawn::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = 1;
-    descriptor.usage = dawn::TextureUsageBit::CopyDst | dawn::TextureUsageBit::Sampled;
+    descriptor.usage = dawn::TextureUsage::CopyDst | dawn::TextureUsage::Sampled;
     dawn::Texture texture = device.CreateTexture(&descriptor);
     dawn::TextureView textureView = texture.CreateDefaultView();
 
@@ -259,8 +261,8 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     for (int i = 0; i < size; i++) {
         data[i] = RGBA8(0, 255, 0, 255);
     }
-    dawn::Buffer stagingBuffer = utils::CreateBufferFromData(device, data.data(), sizeInBytes,
-                                                             dawn::BufferUsageBit::CopySrc);
+    dawn::Buffer stagingBuffer =
+        utils::CreateBufferFromData(device, data.data(), sizeInBytes, dawn::BufferUsage::CopySrc);
 
     dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {
         {0, buffer, 0, sizeof(transform)},
@@ -360,8 +362,8 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
         {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f}, {0}, {1.0f, 0.0f, 0.0f, 1.0f}});
 
     for (int i = 0; i < 2; i++) {
-        dawn::Buffer buffer = utils::CreateBufferFromData(device, &data[i], sizeof(Data),
-                                                          dawn::BufferUsageBit::Uniform);
+        dawn::Buffer buffer =
+            utils::CreateBufferFromData(device, &data[i], sizeof(Data), dawn::BufferUsage::Uniform);
         buffers.push_back(buffer);
         bindGroups.push_back(utils::MakeBindGroup(device, layout,
                                                   {{0, buffers[i], 0, sizeof(Data::transform)},
@@ -441,8 +443,8 @@ TEST_P(BindGroupTests, DrawTwiceInSamePipelineWithFourBindGroupSets)
     pass.SetPipeline(pipeline);
 
     std::array<float, 4> color = { 0.25, 0, 0, 0.25 };
-    dawn::Buffer uniformBuffer = utils::CreateBufferFromData(
-        device, &color, sizeof(color), dawn::BufferUsageBit::Uniform);
+    dawn::Buffer uniformBuffer =
+        utils::CreateBufferFromData(device, &color, sizeof(color), dawn::BufferUsage::Uniform);
     dawn::BindGroup bindGroup = utils::MakeBindGroup(
         device, layout, { { 0, uniformBuffer, 0, sizeof(color) } });
 

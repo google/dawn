@@ -130,7 +130,7 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
     baseTextureDescriptor.arrayLayerCount = 1;
     baseTextureDescriptor.mipLevelCount = 1;
     baseTextureDescriptor.dimension = dawn::TextureDimension::e2D;
-    baseTextureDescriptor.usage = dawn::TextureUsageBit::OutputAttachment;
+    baseTextureDescriptor.usage = dawn::TextureUsage::OutputAttachment;
 
     utils::ComboRenderPipelineDescriptor nonMultisampledPipelineDescriptor(device);
     nonMultisampledPipelineDescriptor.sampleCount = 1;

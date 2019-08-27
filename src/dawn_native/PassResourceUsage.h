@@ -30,10 +30,10 @@ namespace dawn_native {
     // re-compute it.
     struct PassResourceUsage {
         std::vector<BufferBase*> buffers;
-        std::vector<dawn::BufferUsageBit> bufferUsages;
+        std::vector<dawn::BufferUsage> bufferUsages;
 
         std::vector<TextureBase*> textures;
-        std::vector<dawn::TextureUsageBit> textureUsages;
+        std::vector<dawn::TextureUsage> textureUsages;
     };
 
     struct CommandBufferResourceUsage {

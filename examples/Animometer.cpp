@@ -52,8 +52,8 @@ void init() {
 
     queue = device.CreateQueue();
     swapchain = GetSwapChain(device);
-    swapchain.Configure(GetPreferredSwapChainTextureFormat(),
-                        dawn::TextureUsageBit::OutputAttachment, 640, 480);
+    swapchain.Configure(GetPreferredSwapChainTextureFormat(), dawn::TextureUsage::OutputAttachment,
+                        640, 480);
 
     dawn::ShaderModule vsModule = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
         #version 450
@@ -134,7 +134,7 @@ void init() {
 
     dawn::BufferDescriptor bufferDesc;
     bufferDesc.size = kNumTriangles * sizeof(ShaderData);
-    bufferDesc.usage = dawn::BufferUsageBit::CopyDst | dawn::BufferUsageBit::Uniform;
+    bufferDesc.usage = dawn::BufferUsage::CopyDst | dawn::BufferUsage::Uniform;
     ubo = device.CreateBuffer(&bufferDesc);
 
     bindGroup =

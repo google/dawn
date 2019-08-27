@@ -242,7 +242,7 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateCanUseAs(BufferBase* buffer, dawn::BufferUsageBit usage) {
+        MaybeError ValidateCanUseAs(BufferBase* buffer, dawn::BufferUsage usage) {
             ASSERT(HasZeroOrOneBits(usage));
             if (!(buffer->GetUsage() & usage)) {
                 return DAWN_VALIDATION_ERROR("buffer doesn't have the required usage.");
@@ -251,7 +251,7 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateCanUseAs(TextureBase* texture, dawn::TextureUsageBit usage) {
+        MaybeError ValidateCanUseAs(TextureBase* texture, dawn::TextureUsage usage) {
             ASSERT(HasZeroOrOneBits(usage));
             if (!(texture->GetUsage() & usage)) {
                 return DAWN_VALIDATION_ERROR("texture doesn't have the required usage.");
@@ -715,9 +715,8 @@ namespace dawn_native {
                     DAWN_TRY(ValidateB2BCopySizeAlignment(copy->size, copy->sourceOffset,
                                                           copy->destinationOffset));
 
-                    DAWN_TRY(ValidateCanUseAs(copy->source.Get(), dawn::BufferUsageBit::CopySrc));
-                    DAWN_TRY(
-                        ValidateCanUseAs(copy->destination.Get(), dawn::BufferUsageBit::CopyDst));
+                    DAWN_TRY(ValidateCanUseAs(copy->source.Get(), dawn::BufferUsage::CopySrc));
+                    DAWN_TRY(ValidateCanUseAs(copy->destination.Get(), dawn::BufferUsage::CopyDst));
 
                     mResourceUsages.topLevelBuffers.insert(copy->source.Get());
                     mResourceUsages.topLevelBuffers.insert(copy->destination.Get());
@@ -750,9 +749,9 @@ namespace dawn_native {
                                                        copy->destination.texture->GetFormat()));
 
                     DAWN_TRY(
-                        ValidateCanUseAs(copy->source.buffer.Get(), dawn::BufferUsageBit::CopySrc));
+                        ValidateCanUseAs(copy->source.buffer.Get(), dawn::BufferUsage::CopySrc));
                     DAWN_TRY(ValidateCanUseAs(copy->destination.texture.Get(),
-                                              dawn::TextureUsageBit::CopyDst));
+                                              dawn::TextureUsage::CopyDst));
 
                     mResourceUsages.topLevelBuffers.insert(copy->source.buffer.Get());
                     mResourceUsages.topLevelTextures.insert(copy->destination.texture.Get());
@@ -784,10 +783,10 @@ namespace dawn_native {
                     DAWN_TRY(ValidateTexelBufferOffset(copy->destination,
                                                        copy->source.texture->GetFormat()));
 
-                    DAWN_TRY(ValidateCanUseAs(copy->source.texture.Get(),
-                                              dawn::TextureUsageBit::CopySrc));
+                    DAWN_TRY(
+                        ValidateCanUseAs(copy->source.texture.Get(), dawn::TextureUsage::CopySrc));
                     DAWN_TRY(ValidateCanUseAs(copy->destination.buffer.Get(),
-                                              dawn::BufferUsageBit::CopyDst));
+                                              dawn::BufferUsage::CopyDst));
 
                     mResourceUsages.topLevelTextures.insert(copy->source.texture.Get());
                     mResourceUsages.topLevelBuffers.insert(copy->destination.buffer.Get());
@@ -812,10 +811,10 @@ namespace dawn_native {
                     DAWN_TRY(ValidateCopySizeFitsInTexture(copy->source, copy->copySize));
                     DAWN_TRY(ValidateCopySizeFitsInTexture(copy->destination, copy->copySize));
 
-                    DAWN_TRY(ValidateCanUseAs(copy->source.texture.Get(),
-                                              dawn::TextureUsageBit::CopySrc));
+                    DAWN_TRY(
+                        ValidateCanUseAs(copy->source.texture.Get(), dawn::TextureUsage::CopySrc));
                     DAWN_TRY(ValidateCanUseAs(copy->destination.texture.Get(),
-                                              dawn::TextureUsageBit::CopyDst));
+                                              dawn::TextureUsage::CopyDst));
 
                     mResourceUsages.topLevelTextures.insert(copy->source.texture.Get());
                     mResourceUsages.topLevelTextures.insert(copy->destination.texture.Get());

@@ -54,8 +54,8 @@ class ComputeIndirectValidationTest : public ValidationTest {
     void TestIndirectOffset(utils::Expectation expectation,
                             std::initializer_list<uint32_t> bufferList,
                             uint64_t indirectOffset) {
-        dawn::Buffer indirectBuffer = utils::CreateBufferFromData<uint32_t>(
-            device, dawn::BufferUsageBit::Indirect, bufferList);
+        dawn::Buffer indirectBuffer =
+            utils::CreateBufferFromData<uint32_t>(device, dawn::BufferUsage::Indirect, bufferList);
 
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         dawn::ComputePassEncoder pass = encoder.BeginComputePass();

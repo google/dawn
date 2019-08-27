@@ -67,20 +67,19 @@ void ComputeIndirectTests::BasicTest(std::initializer_list<uint32_t> bufferList,
     dawn::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
 
     // Set up dst storage buffer to contain dispatch x, y, z
-    dawn::Buffer dst = utils::CreateBufferFromData<uint32_t>(device,
-                                                             dawn::BufferUsageBit::Storage |
-                                                                 dawn::BufferUsageBit::CopySrc |
-                                                                 dawn::BufferUsageBit::CopyDst,
-                                                             {0, 0, 0});
+    dawn::Buffer dst = utils::CreateBufferFromData<uint32_t>(
+        device,
+        dawn::BufferUsage::Storage | dawn::BufferUsage::CopySrc | dawn::BufferUsage::CopyDst,
+        {0, 0, 0});
 
     std::vector<uint32_t> indirectBufferData = bufferList;
 
     dawn::Buffer indirectBuffer =
-        utils::CreateBufferFromData<uint32_t>(device, dawn::BufferUsageBit::Indirect, bufferList);
+        utils::CreateBufferFromData<uint32_t>(device, dawn::BufferUsage::Indirect, bufferList);
 
     dawn::Buffer expectedBuffer =
         utils::CreateBufferFromData(device, &indirectBufferData[indirectOffset / sizeof(uint32_t)],
-                                    3 * sizeof(uint32_t), dawn::BufferUsageBit::Uniform);
+                                    3 * sizeof(uint32_t), dawn::BufferUsage::Uniform);
 
     // Set up bind group and issue dispatch
     dawn::BindGroup bindGroup =

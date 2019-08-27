@@ -93,7 +93,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
 
         // Copy texture data from a staging buffer to the destination texture.
         dawn::Buffer stagingBuffer = utils::CreateBufferFromData(
-            device, uploadData.data(), uploadBufferSize, dawn::BufferUsageBit::CopySrc);
+            device, uploadData.data(), uploadBufferSize, dawn::BufferUsage::CopySrc);
         dawn::BufferCopyView bufferCopyView =
             utils::CreateBufferCopyView(stagingBuffer, copyConfig.bufferOffset,
                                         copyConfig.rowPitchAlignment, copyConfig.imageHeight);
@@ -449,8 +449,8 @@ class CompressedTextureBCFormatTest : public DawnTest {
     static constexpr uint32_t kBCBlockWidthInTexels = 4;
     static constexpr uint32_t kBCBlockHeightInTexels = 4;
 
-    static constexpr dawn::TextureUsageBit kDefaultBCFormatTextureUsage =
-        dawn::TextureUsageBit::Sampled | dawn::TextureUsageBit::CopyDst;
+    static constexpr dawn::TextureUsage kDefaultBCFormatTextureUsage =
+        dawn::TextureUsage::Sampled | dawn::TextureUsage::CopyDst;
 
     dawn::BindGroupLayout mBindGroupLayout;
 
@@ -633,9 +633,8 @@ TEST_P(CompressedTextureBCFormatTest, CopyWholeTextureSubResourceIntoNonZeroMipm
         config.textureDescriptor.format = format;
         // Add the usage bit for both source and destination textures so that we don't need to
         // create two copy configs.
-        config.textureDescriptor.usage = dawn::TextureUsageBit::CopySrc |
-                                         dawn::TextureUsageBit::CopyDst |
-                                         dawn::TextureUsageBit::Sampled;
+        config.textureDescriptor.usage =
+            dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst | dawn::TextureUsage::Sampled;
 
         dawn::Texture bcTextureSrc = CreateTextureWithCompressedData(config);
 
@@ -695,7 +694,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoSubresourceWithPhysicalSizeNotEqua
         // compressed data.
         srcConfig.textureDescriptor.format = format;
         srcConfig.textureDescriptor.usage =
-            dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::CopyDst;
+            dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst;
         dawn::Texture bcTextureSrc = CreateTextureWithCompressedData(srcConfig);
         dawn::TextureCopyView textureCopyViewSrc =
             utils::CreateTextureCopyView(bcTextureSrc, srcConfig.viewMipmapLevel,
@@ -755,7 +754,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyFromSubresourceWithPhysicalSizeNotEqua
     for (dawn::TextureFormat format : kBCFormats) {
         srcConfig.textureDescriptor.format = dstConfig.textureDescriptor.format = format;
         srcConfig.textureDescriptor.usage =
-            dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::CopyDst;
+            dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst;
         dstConfig.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
 
         // Create bcTextureSrc as the source texture and initialize it with pre-prepared BC
@@ -828,7 +827,7 @@ TEST_P(CompressedTextureBCFormatTest, MultipleCopiesWithPhysicalSizeNotEqualToVi
             srcConfigs[i].textureDescriptor.format = dstConfigs[i].textureDescriptor.format =
                 format;
             srcConfigs[i].textureDescriptor.usage =
-                dawn::TextureUsageBit::CopySrc | dawn::TextureUsageBit::CopyDst;
+                dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst;
             dstConfigs[i].textureDescriptor.usage = kDefaultBCFormatTextureUsage;
 
             // Create bcSrcTextures as the source textures and initialize them with pre-prepared BC

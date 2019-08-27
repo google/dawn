@@ -73,7 +73,7 @@ namespace dawn_native { namespace vulkan {
     }
 
     DawnSwapChainError NativeSwapChainImpl::Configure(DawnTextureFormat format,
-                                                      DawnTextureUsageBit usage,
+                                                      DawnTextureUsage usage,
                                                       uint32_t width,
                                                       uint32_t height) {
         UpdateSurfaceConfig();
@@ -99,7 +99,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.imageExtent.width = width;
         createInfo.imageExtent.height = height;
         createInfo.imageArrayLayers = 1;
-        createInfo.imageUsage = VulkanImageUsage(static_cast<dawn::TextureUsageBit>(usage),
+        createInfo.imageUsage = VulkanImageUsage(static_cast<dawn::TextureUsage>(usage),
                                                  mDevice->GetValidInternalFormat(mConfig.format));
         createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
         createInfo.queueFamilyIndexCount = 0;

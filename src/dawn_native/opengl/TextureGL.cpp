@@ -66,9 +66,9 @@ namespace dawn_native { namespace opengl {
             return handle;
         }
 
-        bool UsageNeedsTextureView(dawn::TextureUsageBit usage) {
-            constexpr dawn::TextureUsageBit kUsageNeedingTextureView =
-                dawn::TextureUsageBit::Storage | dawn::TextureUsageBit::Sampled;
+        bool UsageNeedsTextureView(dawn::TextureUsage usage) {
+            constexpr dawn::TextureUsage kUsageNeedingTextureView =
+                dawn::TextureUsage::Storage | dawn::TextureUsage::Sampled;
             return usage & kUsageNeedingTextureView;
         }
 

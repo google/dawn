@@ -38,7 +38,7 @@ class VertexBufferValidationTest : public ValidationTest {
             for (auto& buffer : buffers) {
                 dawn::BufferDescriptor descriptor;
                 descriptor.size = 256;
-                descriptor.usage = dawn::BufferUsageBit::Vertex;
+                descriptor.usage = dawn::BufferUsage::Vertex;
 
                 buffer = device.CreateBuffer(&descriptor);
             }

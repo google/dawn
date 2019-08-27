@@ -59,17 +59,17 @@ namespace dawn_native {
                 switch (type) {
                     case dawn::BindingType::UniformBuffer: {
                         BufferBase* buffer = group->GetBindingAsBufferBinding(i).buffer;
-                        usageTracker->BufferUsedAs(buffer, dawn::BufferUsageBit::Uniform);
+                        usageTracker->BufferUsedAs(buffer, dawn::BufferUsage::Uniform);
                     } break;
 
                     case dawn::BindingType::StorageBuffer: {
                         BufferBase* buffer = group->GetBindingAsBufferBinding(i).buffer;
-                        usageTracker->BufferUsedAs(buffer, dawn::BufferUsageBit::Storage);
+                        usageTracker->BufferUsedAs(buffer, dawn::BufferUsage::Storage);
                     } break;
 
                     case dawn::BindingType::SampledTexture: {
                         TextureBase* texture = group->GetBindingAsTextureView(i)->GetTexture();
-                        usageTracker->TextureUsedAs(texture, dawn::TextureUsageBit::Sampled);
+                        usageTracker->TextureUsedAs(texture, dawn::TextureUsage::Sampled);
                     } break;
 
                     case dawn::BindingType::Sampler:
@@ -105,14 +105,14 @@ namespace dawn_native {
                     DrawIndirectCmd* cmd = commands->NextCommand<DrawIndirectCmd>();
                     DAWN_TRY(commandBufferState->ValidateCanDraw());
                     usageTracker->BufferUsedAs(cmd->indirectBuffer.Get(),
-                                               dawn::BufferUsageBit::Indirect);
+                                               dawn::BufferUsage::Indirect);
                 } break;
 
                 case Command::DrawIndexedIndirect: {
                     DrawIndexedIndirectCmd* cmd = commands->NextCommand<DrawIndexedIndirectCmd>();
                     DAWN_TRY(commandBufferState->ValidateCanDrawIndexed());
                     usageTracker->BufferUsedAs(cmd->indirectBuffer.Get(),
-                                               dawn::BufferUsageBit::Indirect);
+                                               dawn::BufferUsage::Indirect);
                 } break;
 
                 case Command::InsertDebugMarker: {
@@ -154,7 +154,7 @@ namespace dawn_native {
                 case Command::SetIndexBuffer: {
                     SetIndexBufferCmd* cmd = commands->NextCommand<SetIndexBufferCmd>();
 
-                    usageTracker->BufferUsedAs(cmd->buffer.Get(), dawn::BufferUsageBit::Index);
+                    usageTracker->BufferUsedAs(cmd->buffer.Get(), dawn::BufferUsage::Index);
                     commandBufferState->SetIndexBuffer();
                 } break;
 
@@ -164,7 +164,7 @@ namespace dawn_native {
                     commands->NextData<uint64_t>(cmd->count);
 
                     for (uint32_t i = 0; i < cmd->count; ++i) {
-                        usageTracker->BufferUsedAs(buffers[i].Get(), dawn::BufferUsageBit::Vertex);
+                        usageTracker->BufferUsedAs(buffers[i].Get(), dawn::BufferUsage::Vertex);
                     }
                     commandBufferState->SetVertexBuffer(cmd->startSlot, cmd->count);
                 } break;
@@ -211,18 +211,18 @@ namespace dawn_native {
         for (uint32_t i : IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
             RenderPassColorAttachmentInfo* colorAttachment = &renderPass->colorAttachments[i];
             TextureBase* texture = colorAttachment->view->GetTexture();
-            usageTracker.TextureUsedAs(texture, dawn::TextureUsageBit::OutputAttachment);
+            usageTracker.TextureUsedAs(texture, dawn::TextureUsage::OutputAttachment);
 
             TextureViewBase* resolveTarget = colorAttachment->resolveTarget.Get();
             if (resolveTarget != nullptr) {
                 usageTracker.TextureUsedAs(resolveTarget->GetTexture(),
-                                           dawn::TextureUsageBit::OutputAttachment);
+                                           dawn::TextureUsage::OutputAttachment);
             }
         }
 
         if (renderPass->attachmentState->HasDepthStencilAttachment()) {
             TextureBase* texture = renderPass->depthStencilAttachment.view->GetTexture();
-            usageTracker.TextureUsedAs(texture, dawn::TextureUsageBit::OutputAttachment);
+            usageTracker.TextureUsedAs(texture, dawn::TextureUsage::OutputAttachment);
         }
 
         Command type;
@@ -324,7 +324,7 @@ namespace dawn_native {
                     DispatchIndirectCmd* cmd = commands->NextCommand<DispatchIndirectCmd>();
                     DAWN_TRY(commandBufferState.ValidateCanDispatch());
                     usageTracker.BufferUsedAs(cmd->indirectBuffer.Get(),
-                                              dawn::BufferUsageBit::Indirect);
+                                              dawn::BufferUsage::Indirect);
                 } break;
 
                 case Command::InsertDebugMarker: {

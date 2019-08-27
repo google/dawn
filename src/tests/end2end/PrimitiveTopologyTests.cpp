@@ -165,7 +165,8 @@ class PrimitiveTopologyTest : public DawnTest {
                     fragColor = vec4(0.0, 1.0, 0.0, 1.0);
                 })");
 
-            vertexBuffer = utils::CreateBufferFromData(device, kVertices, sizeof(kVertices), dawn::BufferUsageBit::Vertex);
+            vertexBuffer = utils::CreateBufferFromData(device, kVertices, sizeof(kVertices),
+                                                       dawn::BufferUsage::Vertex);
         }
 
         struct LocationSpec {

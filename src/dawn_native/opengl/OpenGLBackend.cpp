@@ -35,7 +35,7 @@ namespace dawn_native { namespace opengl {
         DawnSwapChainImplementation impl;
         impl = CreateSwapChainImplementation(
             new NativeSwapChainImpl(backendDevice, present, presentUserdata));
-        impl.textureUsage = DAWN_TEXTURE_USAGE_BIT_PRESENT;
+        impl.textureUsage = DAWN_TEXTURE_USAGE_PRESENT;
 
         return impl;
     }

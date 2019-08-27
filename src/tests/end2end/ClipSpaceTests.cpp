@@ -59,7 +59,7 @@ class ClipSpaceTest : public DawnTest {
         textureDescriptor.dimension = dawn::TextureDimension::e2D;
         textureDescriptor.format = format;
         textureDescriptor.usage =
-            dawn::TextureUsageBit::OutputAttachment | dawn::TextureUsageBit::CopySrc;
+            dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc;
         textureDescriptor.arrayLayerCount = 1;
         textureDescriptor.mipLevelCount = 1;
         textureDescriptor.sampleCount = 1;
