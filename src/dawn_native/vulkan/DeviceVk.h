@@ -117,6 +117,8 @@ namespace dawn_native { namespace vulkan {
         ResultOrError<VulkanDeviceKnobs> CreateDevice(VkPhysicalDevice physicalDevice);
         void GatherQueueFromDevice();
 
+        void InitTogglesFromDriver();
+
         // To make it easier to use fn it is a public const member. However
         // the Device is allowed to mutate them through these private methods.
         VulkanFunctions* GetMutableFunctions();

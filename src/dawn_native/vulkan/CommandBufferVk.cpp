@@ -44,6 +44,16 @@ namespace dawn_native { namespace vulkan {
             }
         }
 
+        bool HasSameTextureCopyExtent(const TextureCopy& srcCopy,
+                                      const TextureCopy& dstCopy,
+                                      const Extent3D& copySize) {
+            Extent3D imageExtentSrc = ComputeTextureCopyExtent(srcCopy, copySize);
+            Extent3D imageExtentDst = ComputeTextureCopyExtent(dstCopy, copySize);
+            return imageExtentSrc.width == imageExtentDst.width &&
+                   imageExtentSrc.height == imageExtentDst.height &&
+                   imageExtentSrc.depth == imageExtentDst.depth;
+        }
+
         VkImageCopy ComputeImageCopyRegion(const TextureCopy& srcCopy,
                                            const TextureCopy& dstCopy,
                                            const Extent3D& copySize) {
@@ -70,11 +80,8 @@ namespace dawn_native { namespace vulkan {
             region.dstOffset.y = dstCopy.origin.y;
             region.dstOffset.z = dstCopy.origin.z;
 
-            Extent3D imageExtentDst = ComputeTextureCopyExtent(dstCopy, copySize);
-            // TODO(jiawei.shao@intel.com): add workaround for the case that imageExtentSrc is not
-            // equal to imageExtentDst. For example when copySize fits in the virtual size of the
-            // source image but does not fit in the one of the destination image.
-            Extent3D imageExtent = imageExtentDst;
+            ASSERT(HasSameTextureCopyExtent(srcCopy, dstCopy, copySize));
+            Extent3D imageExtent = ComputeTextureCopyExtent(dstCopy, copySize);
             region.extent.width = imageExtent.width;
             region.extent.height = imageExtent.height;
             region.extent.depth = imageExtent.depth;
@@ -303,6 +310,64 @@ namespace dawn_native { namespace vulkan {
         FreeCommands(&mCommands);
     }
 
+    void CommandBuffer::RecordCopyImageWithTemporaryBuffer(
+        CommandRecordingContext* recordingContext,
+        const TextureCopy& srcCopy,
+        const TextureCopy& dstCopy,
+        const Extent3D& copySize) {
+        ASSERT(srcCopy.texture->GetFormat().format == dstCopy.texture->GetFormat().format);
+        dawn_native::Format format = srcCopy.texture->GetFormat();
+        ASSERT(copySize.width % format.blockWidth == 0);
+        ASSERT(copySize.height % format.blockHeight == 0);
+
+        // Create the temporary buffer. Note that We don't need to respect WebGPU's 256 alignment
+        // because it isn't a hard constraint in Vulkan.
+        uint64_t tempBufferSize =
+            (copySize.width / format.blockWidth * copySize.height / format.blockHeight) *
+            format.blockByteSize;
+        BufferDescriptor tempBufferDescriptor;
+        tempBufferDescriptor.size = tempBufferSize;
+        tempBufferDescriptor.usage = dawn::BufferUsageBit::CopySrc | dawn::BufferUsageBit::CopyDst;
+
+        Device* device = ToBackend(GetDevice());
+        Ref<Buffer> tempBuffer = ToBackend(device->CreateBuffer(&tempBufferDescriptor));
+        // After device->CreateBuffer(&tempBufferDescriptor) is called, the ref count of the buffer
+        // object is 1, and after assigning it to a Ref<Buffer>, the ref count of it will be 2. To
+        // prevent memory leak, we must reduce the ref count here to ensure the ref count of this
+        // object to be 0 after all the Ref<> objects that contain the buffer object are released.
+        tempBuffer->Release();
+
+        BufferCopy tempBufferCopy;
+        tempBufferCopy.buffer = tempBuffer.Get();
+        tempBufferCopy.imageHeight = copySize.height;
+        tempBufferCopy.offset = 0;
+        tempBufferCopy.rowPitch = copySize.width / format.blockWidth * format.blockByteSize;
+
+        VkCommandBuffer commands = recordingContext->commandBuffer;
+        VkImage srcImage = ToBackend(srcCopy.texture)->GetHandle();
+        VkImage dstImage = ToBackend(dstCopy.texture)->GetHandle();
+
+        tempBuffer->TransitionUsageNow(recordingContext, dawn::BufferUsageBit::CopyDst);
+        VkBufferImageCopy srcToTempBufferRegion =
+            ComputeBufferImageCopyRegion(tempBufferCopy, srcCopy, copySize);
+
+        // The Dawn CopySrc usage is always mapped to GENERAL
+        device->fn.CmdCopyImageToBuffer(commands, srcImage, VK_IMAGE_LAYOUT_GENERAL,
+                                        tempBuffer->GetHandle(), 1, &srcToTempBufferRegion);
+
+        tempBuffer->TransitionUsageNow(recordingContext, dawn::BufferUsageBit::CopySrc);
+        VkBufferImageCopy tempBufferToDstRegion =
+            ComputeBufferImageCopyRegion(tempBufferCopy, dstCopy, copySize);
+
+        // Dawn guarantees dstImage be in the TRANSFER_DST_OPTIMAL layout after the
+        // copy command.
+        device->fn.CmdCopyBufferToImage(commands, tempBuffer->GetHandle(), dstImage,
+                                        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
+                                        &tempBufferToDstRegion);
+
+        recordingContext->tempBuffers.emplace_back(tempBuffer);
+    }
+
     void CommandBuffer::RecordCommands(CommandRecordingContext* recordingContext) {
         Device* device = ToBackend(GetDevice());
         VkCommandBuffer commands = recordingContext->commandBuffer;
@@ -378,8 +443,8 @@ namespace dawn_native { namespace vulkan {
                     VkBuffer srcBuffer = ToBackend(src.buffer)->GetHandle();
                     VkImage dstImage = ToBackend(dst.texture)->GetHandle();
 
-                    // The image is written to so the Dawn guarantees make sure it is in the
-                    // TRANSFER_DST_OPTIMAL layout
+                    // Dawn guarantees dstImage be in the TRANSFER_DST_OPTIMAL layout after the
+                    // copy command.
                     device->fn.CmdCopyBufferToImage(commands, srcBuffer, dstImage,
                                                     VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
                                                     &region);
@@ -417,36 +482,57 @@ namespace dawn_native { namespace vulkan {
                     TextureCopy& src = copy->source;
                     TextureCopy& dst = copy->destination;
 
-                    VkImageCopy region = ComputeImageCopyRegion(src, dst, copy->copySize);
-                    VkImageSubresourceLayers dstSubresource = region.dstSubresource;
-                    VkImageSubresourceLayers srcSubresource = region.srcSubresource;
-
                     ToBackend(src.texture)
-                        ->EnsureSubresourceContentInitialized(recordingContext,
-                                                              srcSubresource.mipLevel, 1,
-                                                              srcSubresource.baseArrayLayer, 1);
+                        ->EnsureSubresourceContentInitialized(recordingContext, src.mipLevel, 1,
+                                                              src.arrayLayer, 1);
                     if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), copy->copySize,
-                                                      dstSubresource.mipLevel)) {
+                                                      dst.mipLevel)) {
                         // Since destination texture has been overwritten, it has been "initialized"
-                        dst.texture->SetIsSubresourceContentInitialized(
-                            dstSubresource.mipLevel, 1, dstSubresource.baseArrayLayer, 1);
+                        dst.texture->SetIsSubresourceContentInitialized(dst.mipLevel, 1,
+                                                                        dst.arrayLayer, 1);
                     } else {
                         ToBackend(dst.texture)
-                            ->EnsureSubresourceContentInitialized(recordingContext,
-                                                                  dstSubresource.mipLevel, 1,
-                                                                  dstSubresource.baseArrayLayer, 1);
+                            ->EnsureSubresourceContentInitialized(recordingContext, dst.mipLevel, 1,
+                                                                  dst.arrayLayer, 1);
                     }
+
                     ToBackend(src.texture)
                         ->TransitionUsageNow(recordingContext, dawn::TextureUsageBit::CopySrc);
                     ToBackend(dst.texture)
                         ->TransitionUsageNow(recordingContext, dawn::TextureUsageBit::CopyDst);
-                    VkImage srcImage = ToBackend(src.texture)->GetHandle();
-                    VkImage dstImage = ToBackend(dst.texture)->GetHandle();
 
-                    // The dstImage is written to so the Dawn guarantees make sure it is in the
-                    // TRANSFER_DST_OPTIMAL layout
-                    device->fn.CmdCopyImage(commands, srcImage, VK_IMAGE_LAYOUT_GENERAL, dstImage,
-                                            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+                    // In some situations we cannot do texture-to-texture copies with vkCmdCopyImage
+                    // because as Vulkan SPEC always validates image copies with the virtual size of
+                    // the image subresource, when the extent that fits in the copy region of one
+                    // subresource but does not fit in the one of another subresource, we will fail
+                    // to find a valid extent to satisfy the requirements on both source and
+                    // destination image subresource. For example, when the source is the first
+                    // level of a 16x16 texture in BC format, and the destination is the third level
+                    // of a 60x60 texture in the same format, neither 16x16 nor 15x15 is valid as
+                    // the extent of vkCmdCopyImage.
+                    // Our workaround for this issue is replacing the texture-to-texture copy with
+                    // one texture-to-buffer copy and one buffer-to-texture copy.
+                    bool copyUsingTemporaryBuffer =
+                        device->IsToggleEnabled(
+                            Toggle::UseTemporaryBufferInCompressedTextureToTextureCopy) &&
+                        src.texture->GetFormat().isCompressed &&
+                        !HasSameTextureCopyExtent(src, dst, copy->copySize);
+
+                    if (!copyUsingTemporaryBuffer) {
+                        VkImage srcImage = ToBackend(src.texture)->GetHandle();
+                        VkImage dstImage = ToBackend(dst.texture)->GetHandle();
+                        VkImageCopy region = ComputeImageCopyRegion(src, dst, copy->copySize);
+
+                        // Dawn guarantees dstImage be in the TRANSFER_DST_OPTIMAL layout after the
+                        // copy command.
+                        device->fn.CmdCopyImage(commands, srcImage, VK_IMAGE_LAYOUT_GENERAL,
+                                                dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
+                                                &region);
+                    } else {
+                        RecordCopyImageWithTemporaryBuffer(recordingContext, src, dst,
+                                                           copy->copySize);
+                    }
+
                 } break;
 
                 case Command::BeginRenderPass: {

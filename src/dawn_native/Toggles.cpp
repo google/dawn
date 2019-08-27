@@ -56,7 +56,16 @@ namespace dawn_native {
               {"lazy_clear_resource_on_first_use",
                "Clears resource to zero on first usage. This initializes the resource "
                "so that no dirty bits from recycled memory is present in the new resource.",
-               "https://bugs.chromium.org/p/dawn/issues/detail?id=145"}}}};
+               "https://bugs.chromium.org/p/dawn/issues/detail?id=145"}},
+             {Toggle::UseTemporaryBufferInCompressedTextureToTextureCopy,
+              {"use_temporary_buffer_in_texture_to_texture_copy",
+               "Split texture-to-texture copy into two copies: copy from source texture into a "
+               "temporary buffer, and copy from the temporary buffer into the destination texture "
+               "when copying between compressed textures that don't have block-aligned sizes. This "
+               "workaround is enabled by default on all Vulkan drivers to solve an issue in the "
+               "Vulkan SPEC about the texture-to-texture copies with compressed formats. See #1005 "
+               "(https://github.com/KhronosGroup/Vulkan-Docs/issues/1005) for more details.",
+               "https://bugs.chromium.org/p/dawn/issues/detail?id=42"}}}};
 
     }  // anonymous namespace
 
