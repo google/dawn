@@ -32,7 +32,7 @@ class RenderBundleTest : public DawnTest {
         renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
         dawn::ShaderModule vsModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
                 #version 450
                 layout(location = 0) in vec4 pos;
                 void main() {
@@ -40,7 +40,7 @@ class RenderBundleTest : public DawnTest {
                 })");
 
         dawn::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) out vec4 fragColor;
                 layout (set = 0, binding = 0) uniform fragmentUniformBuffer {
@@ -51,7 +51,7 @@ class RenderBundleTest : public DawnTest {
                 })");
 
         dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-            device, {{0, dawn::ShaderStageBit::Fragment, dawn::BindingType::UniformBuffer}});
+            device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::UniformBuffer}});
 
         float colors0[] = {kColors[0].r / 255.f, kColors[0].g / 255.f, kColors[0].b / 255.f,
                            kColors[0].a / 255.f};

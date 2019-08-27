@@ -37,8 +37,8 @@ class CompressedTextureBCFormatTest : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
         mBindGroupLayout = utils::MakeBindGroupLayout(
-            device, {{0, dawn::ShaderStageBit::Fragment, dawn::BindingType::Sampler},
-                     {1, dawn::ShaderStageBit::Fragment, dawn::BindingType::SampledTexture}});
+            device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::Sampler},
+                     {1, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture}});
     }
 
     std::vector<const char*> GetRequiredExtensions() override {
@@ -140,7 +140,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
 
         utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
         dawn::ShaderModule vsModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
             #version 450
             layout(location=0) out vec2 texCoord;
             void main() {
@@ -153,7 +153,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
                 texCoord = gl_Position.xy / 2.0f + vec2(0.5f);
             })");
         dawn::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
             #version 450
             layout(set = 0, binding = 0) uniform sampler sampler0;
             layout(set = 0, binding = 1) uniform texture2D texture0;

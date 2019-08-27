@@ -28,13 +28,13 @@ namespace utils {
 
     namespace {
 
-        shaderc_shader_kind ShadercShaderKind(ShaderStage stage) {
+        shaderc_shader_kind ShadercShaderKind(SingleShaderStage stage) {
             switch (stage) {
-                case ShaderStage::Vertex:
+                case SingleShaderStage::Vertex:
                     return shaderc_glsl_vertex_shader;
-                case ShaderStage::Fragment:
+                case SingleShaderStage::Fragment:
                     return shaderc_glsl_fragment_shader;
-                case ShaderStage::Compute:
+                case SingleShaderStage::Compute:
                     return shaderc_glsl_compute_shader;
                 default:
                     UNREACHABLE();
@@ -60,7 +60,7 @@ namespace utils {
     }  // anonymous namespace
 
     dawn::ShaderModule CreateShaderModule(const dawn::Device& device,
-                                          ShaderStage stage,
+                                          SingleShaderStage stage,
                                           const char* source) {
         shaderc_shader_kind kind = ShadercShaderKind(stage);
 
@@ -288,7 +288,7 @@ namespace utils {
     dawn::BindGroupLayout MakeBindGroupLayout(
         const dawn::Device& device,
         std::initializer_list<dawn::BindGroupLayoutBinding> bindingsInitializer) {
-        constexpr dawn::ShaderStageBit kNoStages{};
+        constexpr dawn::ShaderStage kNoStages{};
 
         std::vector<dawn::BindGroupLayoutBinding> bindings;
         for (const dawn::BindGroupLayoutBinding& binding : bindingsInitializer) {

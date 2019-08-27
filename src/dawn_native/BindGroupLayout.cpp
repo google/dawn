@@ -34,7 +34,7 @@ namespace dawn_native {
         uint32_t dynamicStorageBufferCount = 0;
         for (uint32_t i = 0; i < descriptor->bindingCount; ++i) {
             const BindGroupLayoutBinding& binding = descriptor->bindings[i];
-            DAWN_TRY(ValidateShaderStageBit(binding.visibility));
+            DAWN_TRY(ValidateShaderStage(binding.visibility));
             DAWN_TRY(ValidateBindingType(binding.type));
             DAWN_TRY(ValidateTextureComponentType(binding.textureComponentType));
 
@@ -45,7 +45,7 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("some binding index was specified more than once");
             }
 
-            if (binding.visibility == dawn::ShaderStageBit::None) {
+            if (binding.visibility == dawn::ShaderStage::None) {
                 return DAWN_VALIDATION_ERROR("Visibility of bindings can't be None");
             }
 

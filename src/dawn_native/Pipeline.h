@@ -31,20 +31,20 @@ namespace dawn_native {
     MaybeError ValidatePipelineStageDescriptor(const DeviceBase* device,
                                                const PipelineStageDescriptor* descriptor,
                                                const PipelineLayoutBase* layout,
-                                               ShaderStage stage);
+                                               SingleShaderStage stage);
 
     class PipelineBase : public ObjectBase {
       public:
-        dawn::ShaderStageBit GetStageMask() const;
+        dawn::ShaderStage GetStageMask() const;
         PipelineLayoutBase* GetLayout();
         const PipelineLayoutBase* GetLayout() const;
 
       protected:
-        PipelineBase(DeviceBase* device, PipelineLayoutBase* layout, dawn::ShaderStageBit stages);
+        PipelineBase(DeviceBase* device, PipelineLayoutBase* layout, dawn::ShaderStage stages);
         PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
       private:
-        dawn::ShaderStageBit mStageMask;
+        dawn::ShaderStage mStageMask;
         Ref<PipelineLayoutBase> mLayout;
     };
 

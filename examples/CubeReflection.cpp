@@ -124,7 +124,8 @@ void init() {
 
     initBuffers();
 
-    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
+    dawn::ShaderModule vsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
         #version 450
         layout(set = 0, binding = 0) uniform cameraData {
             mat4 view;
@@ -142,7 +143,7 @@ void init() {
         })");
 
     dawn::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
         #version 450
         layout(location = 2) in vec3 f_col;
         layout(location = 0) out vec4 fragColor;
@@ -151,7 +152,7 @@ void init() {
         })");
 
     dawn::ShaderModule fsReflectionModule =
-        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
         #version 450
         layout(location = 2) in vec3 f_col;
         layout(location = 0) out vec4 fragColor;
@@ -171,8 +172,8 @@ void init() {
 
     auto bgl = utils::MakeBindGroupLayout(
         device, {
-                    {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
-                    {1, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
+                    {0, dawn::ShaderStage::Vertex, dawn::BindingType::UniformBuffer},
+                    {1, dawn::ShaderStage::Vertex, dawn::BindingType::UniformBuffer},
                 });
 
     dawn::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);

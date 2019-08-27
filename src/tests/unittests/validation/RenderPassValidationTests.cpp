@@ -25,7 +25,8 @@ class RenderPassValidationTest : public ValidationTest {};
 
 // Test that it is invalid to draw in a render pass with missing bind groups
 TEST_F(RenderPassValidationTest, MissingBindGroup) {
-    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
+    dawn::ShaderModule vsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
 #version 450
 layout (set = 0, binding = 0) uniform vertexUniformBuffer {
     mat2 transform;
@@ -36,7 +37,7 @@ void main() {
 })");
 
     dawn::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
 #version 450
 layout (set = 1, binding = 0) uniform fragmentUniformBuffer {
     vec4 color;
@@ -48,9 +49,9 @@ void main() {
 
     dawn::BindGroupLayout bgls[] = {
         utils::MakeBindGroupLayout(
-            device, {{0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer}}),
+            device, {{0, dawn::ShaderStage::Vertex, dawn::BindingType::UniformBuffer}}),
         utils::MakeBindGroupLayout(
-            device, {{0, dawn::ShaderStageBit::Fragment, dawn::BindingType::UniformBuffer}})};
+            device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::UniformBuffer}})};
 
     dawn::PipelineLayoutDescriptor pipelineLayoutDesc;
     pipelineLayoutDesc.bindGroupLayoutCount = 2;

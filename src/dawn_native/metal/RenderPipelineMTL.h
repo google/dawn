@@ -41,7 +41,7 @@ namespace dawn_native { namespace metal {
         // vertex buffer table.
         uint32_t GetMtlVertexBufferIndex(uint32_t dawnIndex) const;
 
-        dawn::ShaderStageBit GetStagesRequiringStorageBufferLength() const;
+        dawn::ShaderStage GetStagesRequiringStorageBufferLength() const;
 
       private:
         MTLVertexDescriptor* MakeVertexDesc();
@@ -54,7 +54,7 @@ namespace dawn_native { namespace metal {
         id<MTLDepthStencilState> mMtlDepthStencilState = nil;
         std::array<uint32_t, kMaxVertexBuffers> mMtlVertexBufferIndices;
 
-        dawn::ShaderStageBit mStagesRequiringStorageBufferLength = dawn::ShaderStageBit::None;
+        dawn::ShaderStage mStagesRequiringStorageBufferLength = dawn::ShaderStage::None;
     };
 
 }}  // namespace dawn_native::metal

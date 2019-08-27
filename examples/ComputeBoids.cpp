@@ -96,7 +96,8 @@ void initBuffers() {
 }
 
 void initRender() {
-    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
+    dawn::ShaderModule vsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
         #version 450
         layout(location = 0) in vec2 a_particlePos;
         layout(location = 1) in vec2 a_particleVel;
@@ -110,7 +111,7 @@ void initRender() {
     )");
 
     dawn::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
         #version 450
         layout(location = 0) out vec4 fragColor;
         void main() {
@@ -146,7 +147,8 @@ void initRender() {
 }
 
 void initSim() {
-    dawn::ShaderModule module = utils::CreateShaderModule(device, utils::ShaderStage::Compute, R"(
+    dawn::ShaderModule module =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
         #version 450
 
         struct Particle {
@@ -237,9 +239,9 @@ void initSim() {
 
     auto bgl = utils::MakeBindGroupLayout(
         device, {
-                    {0, dawn::ShaderStageBit::Compute, dawn::BindingType::UniformBuffer},
-                    {1, dawn::ShaderStageBit::Compute, dawn::BindingType::StorageBuffer},
-                    {2, dawn::ShaderStageBit::Compute, dawn::BindingType::StorageBuffer},
+                    {0, dawn::ShaderStage::Compute, dawn::BindingType::UniformBuffer},
+                    {1, dawn::ShaderStage::Compute, dawn::BindingType::StorageBuffer},
+                    {2, dawn::ShaderStage::Compute, dawn::BindingType::StorageBuffer},
                 });
 
     dawn::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);

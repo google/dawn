@@ -102,13 +102,13 @@ namespace dawn_native {
 
         switch (compiler.get_execution_model()) {
             case spv::ExecutionModelVertex:
-                mExecutionModel = ShaderStage::Vertex;
+                mExecutionModel = SingleShaderStage::Vertex;
                 break;
             case spv::ExecutionModelFragment:
-                mExecutionModel = ShaderStage::Fragment;
+                mExecutionModel = SingleShaderStage::Fragment;
                 break;
             case spv::ExecutionModelGLCompute:
-                mExecutionModel = ShaderStage::Compute;
+                mExecutionModel = SingleShaderStage::Compute;
                 break;
             default:
                 UNREACHABLE();
@@ -153,7 +153,7 @@ namespace dawn_native {
                                 dawn::BindingType::StorageBuffer);
 
         // Extract the vertex attributes
-        if (mExecutionModel == ShaderStage::Vertex) {
+        if (mExecutionModel == SingleShaderStage::Vertex) {
             for (const auto& attrib : resources.stage_inputs) {
                 ASSERT(compiler.get_decoration_bitset(attrib.id).get(spv::DecorationLocation));
                 uint32_t location = compiler.get_decoration(attrib.id, spv::DecorationLocation);
@@ -176,7 +176,7 @@ namespace dawn_native {
             }
         }
 
-        if (mExecutionModel == ShaderStage::Fragment) {
+        if (mExecutionModel == SingleShaderStage::Fragment) {
             // Without a location qualifier on vertex inputs, spirv_cross::CompilerMSL gives them
             // all the location 0, causing a compile error.
             for (const auto& attrib : resources.stage_inputs) {
@@ -198,7 +198,7 @@ namespace dawn_native {
         return mUsedVertexAttributes;
     }
 
-    ShaderStage ShaderModuleBase::GetExecutionModel() const {
+    SingleShaderStage ShaderModuleBase::GetExecutionModel() const {
         ASSERT(!IsError());
         return mExecutionModel;
     }

@@ -26,10 +26,10 @@ namespace utils {
 
     enum Expectation { Success, Failure };
 
-    enum class ShaderStage { Vertex, Fragment, Compute };
+    enum class SingleShaderStage { Vertex, Fragment, Compute };
 
     dawn::ShaderModule CreateShaderModule(const dawn::Device& device,
-                                          ShaderStage stage,
+                                          SingleShaderStage stage,
                                           const char* source);
     dawn::ShaderModule CreateShaderModuleFromASM(const dawn::Device& device, const char* source);
 

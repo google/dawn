@@ -45,7 +45,7 @@ class ViewportTest : public DawnTest {
                 }
             })";
         pipelineDescriptor.cVertexStage.module =
-            utils::CreateShaderModule(device, utils::ShaderStage::Vertex, vs);
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vs);
 
         const char* fs =
             R"(#version 450
@@ -55,7 +55,7 @@ class ViewportTest : public DawnTest {
                fragColor = color;
             })";
         pipelineDescriptor.cFragmentStage.module =
-            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, fs);
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fs);
 
         pipelineDescriptor.cDepthStencilState.depthCompare = depthCompare;
         pipelineDescriptor.depthStencilState = &pipelineDescriptor.cDepthStencilState;

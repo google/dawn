@@ -23,13 +23,13 @@ class RenderPipelineValidationTest : public ValidationTest {
         void SetUp() override {
             ValidationTest::SetUp();
 
-            vsModule = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
+            vsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
                 #version 450
                 void main() {
                     gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
                 })");
 
-            fsModule = utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+            fsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) out vec4 fragColor;
                 void main() {

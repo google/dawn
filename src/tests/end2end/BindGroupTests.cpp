@@ -49,11 +49,9 @@ protected:
 // This test passes by not asserting or crashing.
 TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
     dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device,
-        {
-            {0, dawn::ShaderStageBit::Compute, dawn::BindingType::UniformBuffer},
-        }
-    );
+        device, {
+                    {0, dawn::ShaderStage::Compute, dawn::BindingType::UniformBuffer},
+                });
     dawn::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
     const char* shader = R"(
@@ -66,7 +64,7 @@ TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
     )";
 
     dawn::ShaderModule module =
-        utils::CreateShaderModule(device, utils::ShaderStage::Compute, shader);
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, shader);
     dawn::ComputePipelineDescriptor cpDesc;
     cpDesc.layout = pl;
 
@@ -98,7 +96,8 @@ TEST_P(BindGroupTests, ReusedUBO) {
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
+    dawn::ShaderModule vsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
         #version 450
         layout (set = 0, binding = 0) uniform vertexUniformBuffer {
             mat2 transform;
@@ -109,7 +108,7 @@ TEST_P(BindGroupTests, ReusedUBO) {
         })");
 
     dawn::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
         #version 450
         layout (set = 0, binding = 1) uniform fragmentUniformBuffer {
             vec4 color;
@@ -120,12 +119,10 @@ TEST_P(BindGroupTests, ReusedUBO) {
         })");
 
     dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device,
-        {
-            {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
-            {1, dawn::ShaderStageBit::Fragment, dawn::BindingType::UniformBuffer},
-        }
-    );
+        device, {
+                    {0, dawn::ShaderStage::Vertex, dawn::BindingType::UniformBuffer},
+                    {1, dawn::ShaderStage::Fragment, dawn::BindingType::UniformBuffer},
+                });
     dawn::PipelineLayout pipelineLayout = utils::MakeBasicPipelineLayout(device, &bgl);
 
     utils::ComboRenderPipelineDescriptor textureDescriptor(device);
@@ -183,7 +180,8 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
+    dawn::ShaderModule vsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
         #version 450
         layout (set = 0, binding = 0) uniform vertexUniformBuffer {
             mat2 transform;
@@ -194,7 +192,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
         })");
 
     dawn::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
         #version 450
         layout (set = 0, binding = 1) uniform sampler samp;
         layout (set = 0, binding = 2) uniform texture2D tex;
@@ -204,13 +202,11 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
         })");
 
     dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device,
-        {
-            {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
-            {1, dawn::ShaderStageBit::Fragment, dawn::BindingType::Sampler},
-            {2, dawn::ShaderStageBit::Fragment, dawn::BindingType::SampledTexture},
-        }
-    );
+        device, {
+                    {0, dawn::ShaderStage::Vertex, dawn::BindingType::UniformBuffer},
+                    {1, dawn::ShaderStage::Fragment, dawn::BindingType::Sampler},
+                    {2, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture},
+                });
     dawn::PipelineLayout pipelineLayout = utils::MakeBasicPipelineLayout(device, &bgl);
 
     utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
@@ -301,7 +297,8 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
+    dawn::ShaderModule vsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
         #version 450
         layout (set = 0, binding = 0) uniform vertexUniformBuffer1 {
             mat2 transform1;
@@ -315,7 +312,7 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
         })");
 
     dawn::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
         #version 450
         layout (set = 0, binding = 1) uniform fragmentUniformBuffer1 {
             vec4 color1;
@@ -330,8 +327,8 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
 
     dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
         device, {
-                    {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
-                    {1, dawn::ShaderStageBit::Fragment, dawn::BindingType::UniformBuffer},
+                    {0, dawn::ShaderStage::Vertex, dawn::BindingType::UniformBuffer},
+                    {1, dawn::ShaderStage::Fragment, dawn::BindingType::UniformBuffer},
                 });
 
     dawn::PipelineLayout pipelineLayout = MakeBasicPipelineLayout(device, {layout, layout});
@@ -396,7 +393,8 @@ TEST_P(BindGroupTests, DrawTwiceInSamePipelineWithFourBindGroupSets)
 {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
+    dawn::ShaderModule vsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
         #version 450
         void main() {
             const vec2 pos[3] = vec2[3](vec2(-1.f, -1.f), vec2(1.f, -1.f), vec2(-1.f, 1.f));
@@ -404,7 +402,7 @@ TEST_P(BindGroupTests, DrawTwiceInSamePipelineWithFourBindGroupSets)
         })");
 
     dawn::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
         #version 450
         layout (std140, set = 0, binding = 0) uniform fragmentUniformBuffer1 {
             vec4 color1;
@@ -424,9 +422,7 @@ TEST_P(BindGroupTests, DrawTwiceInSamePipelineWithFourBindGroupSets)
         })");
 
     dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
-        device, {
-            { 0, dawn::ShaderStageBit::Fragment, dawn::BindingType::UniformBuffer }
-        });
+        device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::UniformBuffer}});
     dawn::PipelineLayout pipelineLayout = MakeBasicPipelineLayout(
         device, { layout, layout, layout, layout });
 

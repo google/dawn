@@ -23,7 +23,7 @@ namespace dawn_native {
     MaybeError ValidatePipelineStageDescriptor(const DeviceBase* device,
                                                const PipelineStageDescriptor* descriptor,
                                                const PipelineLayoutBase* layout,
-                                               ShaderStage stage) {
+                                               SingleShaderStage stage) {
         DAWN_TRY(device->ValidateObject(descriptor->module));
 
         if (descriptor->entryPoint != std::string("main")) {
@@ -42,7 +42,7 @@ namespace dawn_native {
 
     PipelineBase::PipelineBase(DeviceBase* device,
                                PipelineLayoutBase* layout,
-                               dawn::ShaderStageBit stages)
+                               dawn::ShaderStage stages)
         : ObjectBase(device), mStageMask(stages), mLayout(layout) {
     }
 
@@ -50,7 +50,7 @@ namespace dawn_native {
         : ObjectBase(device, tag) {
     }
 
-    dawn::ShaderStageBit PipelineBase::GetStageMask() const {
+    dawn::ShaderStage PipelineBase::GetStageMask() const {
         ASSERT(!IsError());
         return mStageMask;
     }

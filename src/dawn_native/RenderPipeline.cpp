@@ -280,9 +280,9 @@ namespace dawn_native {
         DAWN_TRY(ValidateVertexInputDescriptor(descriptor->vertexInput, &attributesSetMask));
         DAWN_TRY(ValidatePrimitiveTopology(descriptor->primitiveTopology));
         DAWN_TRY(ValidatePipelineStageDescriptor(device, descriptor->vertexStage,
-                                                 descriptor->layout, ShaderStage::Vertex));
+                                                 descriptor->layout, SingleShaderStage::Vertex));
         DAWN_TRY(ValidatePipelineStageDescriptor(device, descriptor->fragmentStage,
-                                                 descriptor->layout, ShaderStage::Fragment));
+                                                 descriptor->layout, SingleShaderStage::Fragment));
 
         if (descriptor->rasterizationState) {
             DAWN_TRY(ValidateRasterizationStateDescriptor(descriptor->rasterizationState));
@@ -352,7 +352,7 @@ namespace dawn_native {
                                            bool blueprint)
         : PipelineBase(device,
                        descriptor->layout,
-                       dawn::ShaderStageBit::Vertex | dawn::ShaderStageBit::Fragment),
+                       dawn::ShaderStage::Vertex | dawn::ShaderStage::Fragment),
           mVertexInput(*descriptor->vertexInput),
           mAttachmentState(device->GetOrCreateAttachmentState(descriptor)),
           mPrimitiveTopology(descriptor->primitiveTopology),

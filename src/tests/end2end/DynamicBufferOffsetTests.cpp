@@ -55,13 +55,13 @@ class DynamicBufferOffsetTests : public DawnTest {
 
         // Default bind group layout
         mBindGroupLayouts[0] = utils::MakeBindGroupLayout(
-            device, {{0, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
+            device, {{0, dawn::ShaderStage::Compute | dawn::ShaderStage::Fragment,
                       dawn::BindingType::UniformBuffer},
-                     {1, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
+                     {1, dawn::ShaderStage::Compute | dawn::ShaderStage::Fragment,
                       dawn::BindingType::StorageBuffer},
-                     {3, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
+                     {3, dawn::ShaderStage::Compute | dawn::ShaderStage::Fragment,
                       dawn::BindingType::UniformBuffer, true},
-                     {4, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
+                     {4, dawn::ShaderStage::Compute | dawn::ShaderStage::Fragment,
                       dawn::BindingType::StorageBuffer, true}});
 
         // Default bind group
@@ -77,7 +77,7 @@ class DynamicBufferOffsetTests : public DawnTest {
 
         // Bind group layout for inheriting test
         mBindGroupLayouts[1] = utils::MakeBindGroupLayout(
-            device, {{0, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
+            device, {{0, dawn::ShaderStage::Compute | dawn::ShaderStage::Fragment,
                       dawn::BindingType::UniformBuffer}});
 
         // Bind group for inheriting test
@@ -94,7 +94,7 @@ class DynamicBufferOffsetTests : public DawnTest {
 
     dawn::RenderPipeline CreateRenderPipeline(bool isInheritedPipeline = false) {
         dawn::ShaderModule vsModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
                 #version 450
                 void main() {
                     const vec2 pos[3] = vec2[3](vec2(-1.0f, 0.0f), vec2(-1.0f, -1.0f), vec2(0.0f, -1.0f));
@@ -137,7 +137,7 @@ class DynamicBufferOffsetTests : public DawnTest {
         fs << " }\n";
 
         dawn::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, fs.str().c_str());
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fs.str().c_str());
 
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
         pipelineDescriptor.cVertexStage.module = vsModule;
@@ -191,7 +191,7 @@ class DynamicBufferOffsetTests : public DawnTest {
         cs << " }\n";
 
         dawn::ShaderModule csModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Compute, cs.str().c_str());
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, cs.str().c_str());
 
         dawn::ComputePipelineDescriptor csDesc;
         dawn::PipelineStageDescriptor computeStage;

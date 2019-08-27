@@ -317,19 +317,19 @@ namespace dawn_native { namespace metal {
         const ShaderModule* vertexModule = ToBackend(descriptor->vertexStage->module);
         const char* vertexEntryPoint = descriptor->vertexStage->entryPoint;
         ShaderModule::MetalFunctionData vertexData = vertexModule->GetFunction(
-            vertexEntryPoint, ShaderStage::Vertex, ToBackend(GetLayout()));
+            vertexEntryPoint, SingleShaderStage::Vertex, ToBackend(GetLayout()));
         descriptorMTL.vertexFunction = vertexData.function;
         if (vertexData.needsStorageBufferLength) {
-            mStagesRequiringStorageBufferLength |= dawn::ShaderStageBit::Vertex;
+            mStagesRequiringStorageBufferLength |= dawn::ShaderStage::Vertex;
         }
 
         const ShaderModule* fragmentModule = ToBackend(descriptor->fragmentStage->module);
         const char* fragmentEntryPoint = descriptor->fragmentStage->entryPoint;
         ShaderModule::MetalFunctionData fragmentData = fragmentModule->GetFunction(
-            fragmentEntryPoint, ShaderStage::Fragment, ToBackend(GetLayout()));
+            fragmentEntryPoint, SingleShaderStage::Fragment, ToBackend(GetLayout()));
         descriptorMTL.fragmentFunction = fragmentData.function;
         if (fragmentData.needsStorageBufferLength) {
-            mStagesRequiringStorageBufferLength |= dawn::ShaderStageBit::Fragment;
+            mStagesRequiringStorageBufferLength |= dawn::ShaderStage::Fragment;
         }
 
         if (HasDepthStencilAttachment()) {
@@ -411,7 +411,7 @@ namespace dawn_native { namespace metal {
         return mMtlVertexBufferIndices[dawnIndex];
     }
 
-    dawn::ShaderStageBit RenderPipeline::GetStagesRequiringStorageBufferLength() const {
+    dawn::ShaderStage RenderPipeline::GetStagesRequiringStorageBufferLength() const {
         return mStagesRequiringStorageBufferLength;
     }
 
@@ -420,7 +420,7 @@ namespace dawn_native { namespace metal {
 
         // Vertex buffers are packed after all the buffers for the bind groups.
         uint32_t mtlVertexBufferIndex =
-            ToBackend(GetLayout())->GetBufferBindingCount(ShaderStage::Vertex);
+            ToBackend(GetLayout())->GetBufferBindingCount(SingleShaderStage::Vertex);
 
         for (uint32_t dawnVertexBufferIndex : IterateBitSet(GetInputsSetMask())) {
             const VertexBufferInfo& info = GetInput(dawnVertexBufferIndex);

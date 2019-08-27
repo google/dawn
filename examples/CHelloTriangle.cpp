@@ -45,7 +45,8 @@ void init() {
         "   gl_Position = vec4(pos[gl_VertexIndex], 0.0, 1.0);\n"
         "}\n";
     DawnShaderModule vsModule =
-        utils::CreateShaderModule(dawn::Device(device), utils::ShaderStage::Vertex, vs).Release();
+        utils::CreateShaderModule(dawn::Device(device), utils::SingleShaderStage::Vertex, vs)
+            .Release();
 
     const char* fs =
         "#version 450\n"
@@ -54,7 +55,7 @@ void init() {
         "   fragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
         "}\n";
     DawnShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, fs).Release();
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fs).Release();
 
     {
         DawnRenderPipelineDescriptor descriptor;

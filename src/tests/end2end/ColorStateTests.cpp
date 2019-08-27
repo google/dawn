@@ -29,7 +29,7 @@ class ColorStateTest : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
 
-        vsModule = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
+        vsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
                 #version 450
                 void main() {
                     const vec2 pos[3] = vec2[3](vec2(-1.f, -1.f), vec2(3.f, -1.f), vec2(-1.f, 3.f));
@@ -39,7 +39,7 @@ class ColorStateTest : public DawnTest {
 
         bindGroupLayout = utils::MakeBindGroupLayout(
             device, {
-                        {0, dawn::ShaderStageBit::Fragment, dawn::BindingType::UniformBuffer},
+                        {0, dawn::ShaderStage::Fragment, dawn::BindingType::UniformBuffer},
                     });
 
         pipelineLayout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
@@ -56,7 +56,7 @@ class ColorStateTest : public DawnTest {
     // attachment. basePipeline has no blending
     void SetupSingleSourcePipelines(dawn::ColorStateDescriptor colorStateDescriptor) {
         dawn::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
                 #version 450
                 layout(set = 0, binding = 0) uniform myBlock {
                     vec4 color;
@@ -773,7 +773,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
                                                 renderTargetViews[2], renderTargetViews[3]});
 
     dawn::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
         #version 450
         layout(set = 0, binding = 0) uniform myBlock {
             vec4 color0;
@@ -884,7 +884,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
 // Test that the default blend color is correctly set at the beginning of every subpass
 TEST_P(ColorStateTest, DefaultBlendColor) {
     dawn::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
         #version 450
         layout(set = 0, binding = 0) uniform myBlock {
             vec4 color;
@@ -1008,7 +1008,7 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
 // attachment.
 TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
     dawn::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
         #version 450
         layout(set = 0, binding = 0) uniform myBlock {
             vec4 color;

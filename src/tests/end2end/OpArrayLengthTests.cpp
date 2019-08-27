@@ -36,9 +36,8 @@ class OpArrayLengthTest : public DawnTest {
         mStorageBuffer512 = device.CreateBuffer(&bufferDesc);
 
         // Put them all in a bind group for tests to bind them easily.
-        dawn::ShaderStageBit kAllStages = dawn::ShaderStageBit::Fragment |
-                                          dawn::ShaderStageBit::Vertex |
-                                          dawn::ShaderStageBit::Compute;
+        dawn::ShaderStage kAllStages =
+            dawn::ShaderStage::Fragment | dawn::ShaderStage::Vertex | dawn::ShaderStage::Compute;
         mBindGroupLayout =
             utils::MakeBindGroupLayout(device, {{0, kAllStages, dawn::BindingType::StorageBuffer},
                                                 {1, kAllStages, dawn::BindingType::StorageBuffer},
@@ -100,7 +99,7 @@ TEST_P(OpArrayLengthTest, Compute) {
     dawn::Buffer resultBuffer = device.CreateBuffer(&bufferDesc);
 
     dawn::BindGroupLayout resultLayout = utils::MakeBindGroupLayout(
-        device, {{0, dawn::ShaderStageBit::Compute, dawn::BindingType::StorageBuffer}});
+        device, {{0, dawn::ShaderStage::Compute, dawn::BindingType::StorageBuffer}});
 
     dawn::BindGroup resultBindGroup =
         utils::MakeBindGroup(device, resultLayout, {{0, resultBuffer, 0, dawn::kWholeSize}});
@@ -114,7 +113,7 @@ TEST_P(OpArrayLengthTest, Compute) {
 
     dawn::PipelineStageDescriptor computeStage;
     computeStage.entryPoint = "main";
-    computeStage.module = utils::CreateShaderModule(device, utils::ShaderStage::Compute,
+    computeStage.module = utils::CreateShaderModule(device, utils::SingleShaderStage::Compute,
                                                     (R"(#version 450
             layout(std430, set = 1, binding = 0) buffer ResultBuffer {
                 uint result[3];
@@ -157,15 +156,17 @@ TEST_P(OpArrayLengthTest, Fragment) {
 
     // Create the pipeline that computes the length of the buffers and writes it to the only render
     // pass pixel.
-    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
+    dawn::ShaderModule vsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
         #version 450
         void main() {
             gl_Position = vec4(0.0f, 0.0f, 0.0f, 1.0f);
             gl_PointSize = 1.0;
         })");
 
-    dawn::ShaderModule fsModule = utils::CreateShaderModule(device, utils::ShaderStage::Fragment,
-                                                            (R"(
+    dawn::ShaderModule fsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment,
+                                  (R"(
         #version 450
         )" + mShaderInterface + R"(
         layout(location = 0) out vec4 fragColor;
@@ -175,7 +176,7 @@ TEST_P(OpArrayLengthTest, Fragment) {
             fragColor.b = buffer3.data.length() / 255.0f;
             fragColor.a = 0.0f;
         })")
-                                                                .c_str());
+                                      .c_str());
 
     utils::ComboRenderPipelineDescriptor descriptor(device);
     descriptor.cVertexStage.module = vsModule;
@@ -212,8 +213,9 @@ TEST_P(OpArrayLengthTest, Vertex) {
 
     // Create the pipeline that computes the length of the buffers and writes it to the only render
     // pass pixel.
-    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, utils::ShaderStage::Vertex,
-                                                            (R"(
+    dawn::ShaderModule vsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex,
+                                  (R"(
         #version 450
         )" + mShaderInterface + R"(
         layout(location = 0) out vec4 pointColor;
@@ -226,10 +228,10 @@ TEST_P(OpArrayLengthTest, Vertex) {
             gl_Position = vec4(0.0f, 0.0f, 0.0f, 1.0f);
             gl_PointSize = 1.0;
         })")
-                                                                .c_str());
+                                      .c_str());
 
     dawn::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
         #version 450
         layout(location = 0) out vec4 fragColor;
         layout(location = 0) in vec4 pointColor;

@@ -24,14 +24,14 @@ using Microsoft::WRL::ComPtr;
 
 namespace dawn_native { namespace d3d12 {
     namespace {
-        D3D12_SHADER_VISIBILITY ShaderVisibilityType(dawn::ShaderStageBit visibility) {
-            ASSERT(visibility != dawn::ShaderStageBit::None);
+        D3D12_SHADER_VISIBILITY ShaderVisibilityType(dawn::ShaderStage visibility) {
+            ASSERT(visibility != dawn::ShaderStage::None);
 
-            if (visibility == dawn::ShaderStageBit::Vertex) {
+            if (visibility == dawn::ShaderStage::Vertex) {
                 return D3D12_SHADER_VISIBILITY_VERTEX;
             }
 
-            if (visibility == dawn::ShaderStageBit::Fragment) {
+            if (visibility == dawn::ShaderStage::Fragment) {
                 return D3D12_SHADER_VISIBILITY_PIXEL;
             }
 

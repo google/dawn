@@ -27,7 +27,7 @@ protected:
 
         // Shaders to draw a bottom-left triangle in blue.
         dawn::ShaderModule vsModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
                 #version 450
                 void main() {
                     const vec2 pos[3] = vec2[3](
@@ -36,7 +36,7 @@ protected:
                  })");
 
         dawn::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) out vec4 fragColor;
                 void main() {

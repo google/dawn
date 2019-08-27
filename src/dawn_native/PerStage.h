@@ -25,27 +25,27 @@
 
 namespace dawn_native {
 
-    enum class ShaderStage { Vertex, Fragment, Compute };
+    enum class SingleShaderStage { Vertex, Fragment, Compute };
 
-    static_assert(static_cast<uint32_t>(ShaderStage::Vertex) < kNumStages, "");
-    static_assert(static_cast<uint32_t>(ShaderStage::Fragment) < kNumStages, "");
-    static_assert(static_cast<uint32_t>(ShaderStage::Compute) < kNumStages, "");
+    static_assert(static_cast<uint32_t>(SingleShaderStage::Vertex) < kNumStages, "");
+    static_assert(static_cast<uint32_t>(SingleShaderStage::Fragment) < kNumStages, "");
+    static_assert(static_cast<uint32_t>(SingleShaderStage::Compute) < kNumStages, "");
 
-    static_assert(static_cast<uint32_t>(dawn::ShaderStageBit::Vertex) ==
-                      (1 << static_cast<uint32_t>(ShaderStage::Vertex)),
+    static_assert(static_cast<uint32_t>(dawn::ShaderStage::Vertex) ==
+                      (1 << static_cast<uint32_t>(SingleShaderStage::Vertex)),
                   "");
-    static_assert(static_cast<uint32_t>(dawn::ShaderStageBit::Fragment) ==
-                      (1 << static_cast<uint32_t>(ShaderStage::Fragment)),
+    static_assert(static_cast<uint32_t>(dawn::ShaderStage::Fragment) ==
+                      (1 << static_cast<uint32_t>(SingleShaderStage::Fragment)),
                   "");
-    static_assert(static_cast<uint32_t>(dawn::ShaderStageBit::Compute) ==
-                      (1 << static_cast<uint32_t>(ShaderStage::Compute)),
+    static_assert(static_cast<uint32_t>(dawn::ShaderStage::Compute) ==
+                      (1 << static_cast<uint32_t>(SingleShaderStage::Compute)),
                   "");
 
-    BitSetIterator<kNumStages, ShaderStage> IterateStages(dawn::ShaderStageBit stages);
-    dawn::ShaderStageBit StageBit(ShaderStage stage);
+    BitSetIterator<kNumStages, SingleShaderStage> IterateStages(dawn::ShaderStage stages);
+    dawn::ShaderStage StageBit(SingleShaderStage stage);
 
-    static constexpr dawn::ShaderStageBit kAllStages =
-        static_cast<dawn::ShaderStageBit>((1 << kNumStages) - 1);
+    static constexpr dawn::ShaderStage kAllStages =
+        static_cast<dawn::ShaderStage>((1 << kNumStages) - 1);
 
     template <typename T>
     class PerStage {
@@ -55,21 +55,21 @@ namespace dawn_native {
             mData.fill(initialValue);
         }
 
-        T& operator[](ShaderStage stage) {
+        T& operator[](SingleShaderStage stage) {
             DAWN_ASSERT(static_cast<uint32_t>(stage) < kNumStages);
             return mData[static_cast<uint32_t>(stage)];
         }
-        const T& operator[](ShaderStage stage) const {
+        const T& operator[](SingleShaderStage stage) const {
             DAWN_ASSERT(static_cast<uint32_t>(stage) < kNumStages);
             return mData[static_cast<uint32_t>(stage)];
         }
 
-        T& operator[](dawn::ShaderStageBit stageBit) {
+        T& operator[](dawn::ShaderStage stageBit) {
             uint32_t bit = static_cast<uint32_t>(stageBit);
             DAWN_ASSERT(bit != 0 && IsPowerOfTwo(bit) && bit <= (1 << kNumStages));
             return mData[Log2(bit)];
         }
-        const T& operator[](dawn::ShaderStageBit stageBit) const {
+        const T& operator[](dawn::ShaderStage stageBit) const {
             uint32_t bit = static_cast<uint32_t>(stageBit);
             DAWN_ASSERT(bit != 0 && IsPowerOfTwo(bit) && bit <= (1 << kNumStages));
             return mData[Log2(bit)];

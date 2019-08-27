@@ -26,8 +26,10 @@ class DrawQuad {
         DrawQuad() {}
         DrawQuad(dawn::Device device, const char* vsSource, const char* fsSource)
             : device(device) {
-            vsModule = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, vsSource);
-            fsModule = utils::CreateShaderModule(device, utils::ShaderStage::Fragment, fsSource);
+            vsModule =
+                utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vsSource);
+            fsModule =
+                utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fsSource);
 
             pipelineLayout = utils::MakeBasicPipelineLayout(device, nullptr);
             }

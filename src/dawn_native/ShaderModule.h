@@ -59,7 +59,7 @@ namespace dawn_native {
 
         const ModuleBindingInfo& GetBindingInfo() const;
         const std::bitset<kMaxVertexAttributes>& GetUsedVertexAttributes() const;
-        ShaderStage GetExecutionModel() const;
+        SingleShaderStage GetExecutionModel() const;
 
         bool IsCompatibleWithPipelineLayout(const PipelineLayoutBase* layout);
 
@@ -83,7 +83,7 @@ namespace dawn_native {
 
         ModuleBindingInfo mBindingInfo;
         std::bitset<kMaxVertexAttributes> mUsedVertexAttributes;
-        ShaderStage mExecutionModel;
+        SingleShaderStage mExecutionModel;
     };
 
 }  // namespace dawn_native

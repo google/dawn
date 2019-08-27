@@ -41,7 +41,7 @@ namespace dawn_native { namespace metal {
             }
         };
         MetalFunctionData GetFunction(const char* functionName,
-                                      ShaderStage functionStage,
+                                      SingleShaderStage functionStage,
                                       const PipelineLayout* layout) const;
 
       private:

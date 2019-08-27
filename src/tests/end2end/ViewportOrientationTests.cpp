@@ -23,7 +23,8 @@ class ViewportOrientationTests : public DawnTest {};
 TEST_P(ViewportOrientationTests, OriginAt0x0) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 2, 2);
 
-    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
+    dawn::ShaderModule vsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
         #version 450
         void main() {
             gl_Position = vec4(-0.5f, -0.5f, 0.0f, 1.0f);
@@ -31,7 +32,7 @@ TEST_P(ViewportOrientationTests, OriginAt0x0) {
         })");
 
     dawn::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
         #version 450
         layout(location = 0) out vec4 fragColor;
         void main() {

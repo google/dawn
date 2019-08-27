@@ -117,9 +117,9 @@ class VertexInputTest : public DawnTest {
         vs << "}\n";
 
         dawn::ShaderModule vsModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Vertex, vs.str().c_str());
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vs.str().c_str());
         dawn::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) in vec4 color;
                 layout(location = 0) out vec4 fragColor;

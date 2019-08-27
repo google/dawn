@@ -174,7 +174,7 @@ class TextureFormatTest : public DawnTest {
         utils::ComboRenderPipelineDescriptor desc(device);
 
         dawn::ShaderModule vsModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
             #version 450
             void main() {
                 const vec2 pos[3] = vec2[3](
@@ -213,8 +213,8 @@ class TextureFormatTest : public DawnTest {
                  << "sampler2D(myTexture, mySampler), ivec2(gl_FragCoord), 0);\n";
         fsSource << "}";
 
-        dawn::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, fsSource.str().c_str());
+        dawn::ShaderModule fsModule = utils::CreateShaderModule(
+            device, utils::SingleShaderStage::Fragment, fsSource.str().c_str());
 
         desc.cVertexStage.module = vsModule;
         desc.cFragmentStage.module = fsModule;
@@ -271,8 +271,8 @@ class TextureFormatTest : public DawnTest {
 
         // Create the bind group layout for sampling the texture
         dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-            device, {{0, dawn::ShaderStageBit::Fragment, dawn::BindingType::Sampler},
-                     {1, dawn::ShaderStageBit::Fragment, dawn::BindingType::SampledTexture, false,
+            device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::Sampler},
+                     {1, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture, false,
                       false, sampleFormatInfo.type}});
 
         // Prepare objects needed to sample from texture in the renderpass

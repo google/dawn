@@ -65,7 +65,7 @@ class TextureZeroInitTest : public DawnTest {
                 gl_Position = vec4(pos[gl_VertexIndex], 0.0, 1.0);
             })";
         pipelineDescriptor.cVertexStage.module =
-            utils::CreateShaderModule(device, utils::ShaderStage::Vertex, vs);
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vs);
 
         const char* fs =
             R"(#version 450
@@ -74,7 +74,7 @@ class TextureZeroInitTest : public DawnTest {
                fragColor = vec4(1.0, 0.0, 0.0, 1.0);
             })";
         pipelineDescriptor.cFragmentStage.module =
-            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, fs);
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fs);
 
         pipelineDescriptor.cDepthStencilState.depthCompare = dawn::CompareFunction::Equal;
         pipelineDescriptor.cDepthStencilState.stencilFront.compare = dawn::CompareFunction::Equal;
@@ -435,14 +435,14 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
     dawn::Sampler sampler = device.CreateSampler(&samplerDesc);
 
     dawn::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
-        device, {{0, dawn::ShaderStageBit::Fragment, dawn::BindingType::Sampler},
-                 {1, dawn::ShaderStageBit::Fragment, dawn::BindingType::SampledTexture}});
+        device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::Sampler},
+                 {1, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture}});
 
     // Create render pipeline
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
     renderPipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
     renderPipelineDescriptor.cVertexStage.module =
-        utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(#version 450
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(#version 450
         const vec2 pos[6] = vec2[6](vec2(-1.0f, -1.0f),
                                     vec2(-1.0f,  1.0f),
                                     vec2( 1.0f, -1.0f),
@@ -455,7 +455,7 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
            gl_Position = vec4(pos[gl_VertexIndex], 0.0, 1.0);
         })");
     renderPipelineDescriptor.cFragmentStage.module =
-        utils::CreateShaderModule(device, utils::ShaderStage::Fragment,
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment,
                                   R"(#version 450
         layout(set = 0, binding = 0) uniform sampler sampler0;
         layout(set = 0, binding = 1) uniform texture2D texture0;
@@ -512,9 +512,9 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
     dawn::Sampler sampler = device.CreateSampler(&samplerDesc);
 
     dawn::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
-        device, {{0, dawn::ShaderStageBit::Compute, dawn::BindingType::SampledTexture},
-                 {1, dawn::ShaderStageBit::Compute, dawn::BindingType::StorageBuffer},
-                 {2, dawn::ShaderStageBit::Compute, dawn::BindingType::Sampler}});
+        device, {{0, dawn::ShaderStage::Compute, dawn::BindingType::SampledTexture},
+                 {1, dawn::ShaderStage::Compute, dawn::BindingType::StorageBuffer},
+                 {2, dawn::ShaderStage::Compute, dawn::BindingType::Sampler}});
 
     // Create compute pipeline
     dawn::ComputePipelineDescriptor computePipelineDescriptor;
@@ -531,7 +531,7 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
            bufferTex.result =
                  texelFetch(sampler2D(sampleTex, sampler0), ivec2(0,0), 0);
         })";
-    computeStage.module = utils::CreateShaderModule(device, utils::ShaderStage::Compute, cs);
+    computeStage.module = utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, cs);
     computeStage.entryPoint = "main";
     computePipelineDescriptor.computeStage = &computeStage;
     dawn::ComputePipeline computePipeline =

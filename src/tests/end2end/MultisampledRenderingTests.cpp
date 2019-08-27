@@ -197,15 +197,15 @@ class MultisampledRenderingTest : public DawnTest {
                 gl_Position = vec4(pos[gl_VertexIndex], 0.0, 1.0);
             })";
         pipelineDescriptor.cVertexStage.module =
-            utils::CreateShaderModule(device, utils::ShaderStage::Vertex, vs);
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vs);
 
         pipelineDescriptor.cFragmentStage.module =
-            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, fs);
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fs);
 
         mBindGroupLayout = utils::MakeBindGroupLayout(
             device, {
-                {0, dawn::ShaderStageBit::Fragment, dawn::BindingType::UniformBuffer},
-            });
+                        {0, dawn::ShaderStage::Fragment, dawn::BindingType::UniformBuffer},
+                    });
         dawn::PipelineLayout pipelineLayout =
             utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
         pipelineDescriptor.layout = pipelineLayout;

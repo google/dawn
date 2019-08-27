@@ -22,10 +22,10 @@ class VertexInputTest : public ValidationTest {
     void CreatePipeline(bool success,
                         const utils::ComboVertexInputDescriptor& state,
                         std::string vertexSource) {
-        dawn::ShaderModule vsModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Vertex, vertexSource.c_str());
+        dawn::ShaderModule vsModule = utils::CreateShaderModule(
+            device, utils::SingleShaderStage::Vertex, vertexSource.c_str());
         dawn::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) out vec4 fragColor;
                 void main() {

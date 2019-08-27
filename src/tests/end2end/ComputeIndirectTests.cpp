@@ -47,13 +47,13 @@ void ComputeIndirectTests::BasicTest(std::initializer_list<uint32_t> bufferList,
                                      uint64_t indirectOffset) {
     dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
         device, {
-                    {0, dawn::ShaderStageBit::Compute, dawn::BindingType::UniformBuffer},
-                    {1, dawn::ShaderStageBit::Compute, dawn::BindingType::StorageBuffer},
+                    {0, dawn::ShaderStage::Compute, dawn::BindingType::UniformBuffer},
+                    {1, dawn::ShaderStage::Compute, dawn::BindingType::StorageBuffer},
                 });
 
     // Set up shader and pipeline
     dawn::ShaderModule module =
-        utils::CreateShaderModule(device, utils::ShaderStage::Compute, shaderSource);
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, shaderSource);
     dawn::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
     dawn::ComputePipelineDescriptor csDesc;

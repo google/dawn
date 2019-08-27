@@ -66,11 +66,11 @@ namespace dawn_native { namespace metal {
     }
 
     const PipelineLayout::BindingIndexInfo& PipelineLayout::GetBindingIndexInfo(
-        ShaderStage stage) const {
+        SingleShaderStage stage) const {
         return mIndexInfo[stage];
     }
 
-    uint32_t PipelineLayout::GetBufferBindingCount(ShaderStage stage) {
+    uint32_t PipelineLayout::GetBufferBindingCount(SingleShaderStage stage) {
         return mBufferBindingCount[stage];
     }
 

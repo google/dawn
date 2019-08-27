@@ -304,21 +304,20 @@ namespace dawn_native { namespace d3d12 {
         PerStage<ComPtr<ID3DBlob>> compiledShader;
         ComPtr<ID3DBlob> errors;
 
-        dawn::ShaderStageBit renderStages =
-            dawn::ShaderStageBit::Vertex | dawn::ShaderStageBit::Fragment;
+        dawn::ShaderStage renderStages = dawn::ShaderStage::Vertex | dawn::ShaderStage::Fragment;
         for (auto stage : IterateStages(renderStages)) {
             const ShaderModule* module = nullptr;
             const char* entryPoint = nullptr;
             const char* compileTarget = nullptr;
             D3D12_SHADER_BYTECODE* shader = nullptr;
             switch (stage) {
-                case ShaderStage::Vertex:
+                case SingleShaderStage::Vertex:
                     module = ToBackend(descriptor->vertexStage->module);
                     entryPoint = descriptor->vertexStage->entryPoint;
                     shader = &descriptorD3D12.VS;
                     compileTarget = "vs_5_1";
                     break;
-                case ShaderStage::Fragment:
+                case SingleShaderStage::Fragment:
                     module = ToBackend(descriptor->fragmentStage->module);
                     entryPoint = descriptor->fragmentStage->entryPoint;
                     shader = &descriptorD3D12.PS;

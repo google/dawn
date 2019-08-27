@@ -332,13 +332,11 @@ TEST_F(WireArgumentTests, StructureOfObjectArrayArgument) {
 TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
     static constexpr int NUM_BINDINGS = 3;
     DawnBindGroupLayoutBinding bindings[NUM_BINDINGS]{
-        {0, DAWN_SHADER_STAGE_BIT_VERTEX, DAWN_BINDING_TYPE_SAMPLER, false, false,
+        {0, DAWN_SHADER_STAGE_VERTEX, DAWN_BINDING_TYPE_SAMPLER, false, false,
          DAWN_TEXTURE_COMPONENT_TYPE_FLOAT},
-        {1, DAWN_SHADER_STAGE_BIT_VERTEX, DAWN_BINDING_TYPE_SAMPLED_TEXTURE, false, false,
+        {1, DAWN_SHADER_STAGE_VERTEX, DAWN_BINDING_TYPE_SAMPLED_TEXTURE, false, false,
          DAWN_TEXTURE_COMPONENT_TYPE_FLOAT},
-        {2,
-         static_cast<DawnShaderStageBit>(DAWN_SHADER_STAGE_BIT_VERTEX |
-                                         DAWN_SHADER_STAGE_BIT_FRAGMENT),
+        {2, static_cast<DawnShaderStage>(DAWN_SHADER_STAGE_VERTEX | DAWN_SHADER_STAGE_FRAGMENT),
          DAWN_BINDING_TYPE_UNIFORM_BUFFER, false, false, DAWN_TEXTURE_COMPONENT_TYPE_FLOAT},
     };
     DawnBindGroupLayoutDescriptor bglDescriptor;

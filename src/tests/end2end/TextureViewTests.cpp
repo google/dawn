@@ -47,7 +47,7 @@ namespace {
     }
 
     dawn::ShaderModule CreateDefaultVertexShaderModule(dawn::Device device) {
-        return utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
+        return utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
             #version 450
             layout (location = 0) out vec2 o_texCoord;
             void main() {
@@ -85,9 +85,9 @@ protected:
 
         mBindGroupLayout = utils::MakeBindGroupLayout(
             device, {
-                        {0, dawn::ShaderStageBit::Fragment, dawn::BindingType::Sampler},
-                        {1, dawn::ShaderStageBit::Fragment, dawn::BindingType::SampledTexture},
-            });
+                        {0, dawn::ShaderStage::Fragment, dawn::BindingType::Sampler},
+                        {1, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture},
+                    });
 
         dawn::FilterMode kFilterMode = dawn::FilterMode::Nearest;
         dawn::AddressMode kAddressMode = dawn::AddressMode::ClampToEdge;
@@ -164,7 +164,7 @@ protected:
         });
 
         dawn::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, fragmentShader);
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fragmentShader);
 
         utils::ComboRenderPipelineDescriptor textureDescriptor(device);
         textureDescriptor.cVertexStage.module = mVSModule;
@@ -501,8 +501,8 @@ class TextureViewRenderingTest : public DawnTest {
                 fragColor = vec4(0.0, 1.0, 0.0, 1.0);
             }
         )";
-        dawn::ShaderModule oneColorFsModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, oneColorFragmentShader);
+        dawn::ShaderModule oneColorFsModule = utils::CreateShaderModule(
+            device, utils::SingleShaderStage::Fragment, oneColorFragmentShader);
 
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
         pipelineDescriptor.cVertexStage.module = vsModule;

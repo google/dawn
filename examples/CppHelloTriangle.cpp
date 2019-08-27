@@ -96,7 +96,8 @@ void init() {
     initBuffers();
     initTextures();
 
-    dawn::ShaderModule vsModule = utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
+    dawn::ShaderModule vsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
         #version 450
         layout(location = 0) in vec4 pos;
         void main() {
@@ -104,7 +105,7 @@ void init() {
         })");
 
     dawn::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
         #version 450
         layout(set = 0, binding = 0) uniform sampler mySampler;
         layout(set = 0, binding = 1) uniform texture2D myTexture;
@@ -116,8 +117,8 @@ void init() {
 
     auto bgl = utils::MakeBindGroupLayout(
         device, {
-                    {0, dawn::ShaderStageBit::Fragment, dawn::BindingType::Sampler},
-                    {1, dawn::ShaderStageBit::Fragment, dawn::BindingType::SampledTexture},
+                    {0, dawn::ShaderStage::Fragment, dawn::BindingType::Sampler},
+                    {1, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture},
                 });
 
     dawn::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);

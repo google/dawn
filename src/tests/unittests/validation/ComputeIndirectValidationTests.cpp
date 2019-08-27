@@ -23,7 +23,7 @@ class ComputeIndirectValidationTest : public ValidationTest {
         ValidationTest::SetUp();
 
         dawn::ShaderModule computeModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Compute, R"(
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
                 #version 450
                 layout(local_size_x = 1) in;
                 void main() {

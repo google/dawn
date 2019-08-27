@@ -40,7 +40,7 @@ namespace dawn_native {
         static BindGroupLayoutBase* MakeError(DeviceBase* device);
 
         struct LayoutBindingInfo {
-            std::array<dawn::ShaderStageBit, kMaxBindingsPerGroup> visibilities;
+            std::array<dawn::ShaderStage, kMaxBindingsPerGroup> visibilities;
             std::array<dawn::BindingType, kMaxBindingsPerGroup> types;
             std::array<dawn::TextureComponentType, kMaxBindingsPerGroup> textureComponentTypes;
             std::bitset<kMaxBindingsPerGroup> dynamic;

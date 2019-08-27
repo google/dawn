@@ -258,8 +258,8 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
 
             bgl = utils::MakeBindGroupLayout(
                 device, {
-                            {0, dawn::ShaderStageBit::Fragment, dawn::BindingType::Sampler},
-                            {1, dawn::ShaderStageBit::Fragment, dawn::BindingType::SampledTexture},
+                            {0, dawn::ShaderStage::Fragment, dawn::BindingType::Sampler},
+                            {1, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture},
                         });
 
             bindGroup = utils::MakeBindGroup(device, bgl, {{0, sampler}, {1, textureView}});
@@ -269,7 +269,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
         dawn::RenderPipeline pipeline;
         {
             dawn::ShaderModule vs =
-                utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
+                utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
                 #version 450
                 layout (location = 0) out vec2 o_texCoord;
                 void main() {
@@ -290,7 +290,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
                 }
             )");
             dawn::ShaderModule fs =
-                utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+                utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
                 #version 450
                 layout(set = 0, binding = 0) uniform sampler sampler0;
                 layout(set = 0, binding = 1) uniform texture2D texture0;

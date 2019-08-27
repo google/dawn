@@ -21,16 +21,16 @@ namespace dawn_native { namespace vulkan {
 
     namespace {
 
-        VkShaderStageFlags VulkanShaderStageFlags(dawn::ShaderStageBit stages) {
+        VkShaderStageFlags VulkanShaderStageFlags(dawn::ShaderStage stages) {
             VkShaderStageFlags flags = 0;
 
-            if (stages & dawn::ShaderStageBit::Vertex) {
+            if (stages & dawn::ShaderStage::Vertex) {
                 flags |= VK_SHADER_STAGE_VERTEX_BIT;
             }
-            if (stages & dawn::ShaderStageBit::Fragment) {
+            if (stages & dawn::ShaderStage::Fragment) {
                 flags |= VK_SHADER_STAGE_FRAGMENT_BIT;
             }
-            if (stages & dawn::ShaderStageBit::Compute) {
+            if (stages & dawn::ShaderStage::Compute) {
                 flags |= VK_SHADER_STAGE_COMPUTE_BIT;
             }
 

@@ -28,11 +28,11 @@ class ComputeSharedMemoryTests : public DawnTest {
 void ComputeSharedMemoryTests::BasicTest(const char* shader) {
     auto bgl = utils::MakeBindGroupLayout(
         device, {
-                    {0, dawn::ShaderStageBit::Compute, dawn::BindingType::StorageBuffer},
+                    {0, dawn::ShaderStage::Compute, dawn::BindingType::StorageBuffer},
                 });
 
     // Set up shader and pipeline
-    auto module = utils::CreateShaderModule(device, utils::ShaderStage::Compute, shader);
+    auto module = utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, shader);
     auto pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
     dawn::ComputePipelineDescriptor csDesc;

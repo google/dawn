@@ -80,9 +80,8 @@ TEST_F(BindGroupValidationTest, NextInChainNullptr) {
 
 // Check constraints on bindingCount
 TEST_F(BindGroupValidationTest, bindingCountMismatch) {
-    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {
-        {0, dawn::ShaderStageBit::Fragment, dawn::BindingType::Sampler}
-    });
+    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::Sampler}});
 
     // Control case: check that a descriptor with one binding is ok
     utils::MakeBindGroup(device, layout, {{0, mSampler}});
@@ -93,9 +92,8 @@ TEST_F(BindGroupValidationTest, bindingCountMismatch) {
 
 // Check constraints on BindGroupBinding::binding
 TEST_F(BindGroupValidationTest, WrongBindings) {
-    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {
-        {0, dawn::ShaderStageBit::Fragment, dawn::BindingType::Sampler}
-    });
+    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::Sampler}});
 
     // Control case: check that a descriptor with a binding matching the layout's is ok
     utils::MakeBindGroup(device, layout, {{0, mSampler}});
@@ -109,10 +107,9 @@ TEST_F(BindGroupValidationTest, WrongBindings) {
 
 // Check that the same binding cannot be set twice
 TEST_F(BindGroupValidationTest, BindingSetTwice) {
-    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {
-        {0, dawn::ShaderStageBit::Fragment, dawn::BindingType::Sampler},
-        {1, dawn::ShaderStageBit::Fragment, dawn::BindingType::Sampler}
-    });
+    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::Sampler},
+                 {1, dawn::ShaderStage::Fragment, dawn::BindingType::Sampler}});
 
     // Control case: check that different bindings work
     utils::MakeBindGroup(device, layout, {
@@ -129,9 +126,8 @@ TEST_F(BindGroupValidationTest, BindingSetTwice) {
 
 // Check that a sampler binding must contain exactly one sampler
 TEST_F(BindGroupValidationTest, SamplerBindingType) {
-    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {
-        {0, dawn::ShaderStageBit::Fragment, dawn::BindingType::Sampler}
-    });
+    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::Sampler}});
 
     dawn::BindGroupBinding binding;
     binding.binding = 0;
@@ -179,9 +175,8 @@ TEST_F(BindGroupValidationTest, SamplerBindingType) {
 
 // Check that a texture binding must contain exactly a texture view
 TEST_F(BindGroupValidationTest, TextureBindingType) {
-    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {
-        {0, dawn::ShaderStageBit::Fragment, dawn::BindingType::SampledTexture}
-    });
+    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture}});
 
     dawn::BindGroupBinding binding;
     binding.binding = 0;
@@ -234,9 +229,8 @@ TEST_F(BindGroupValidationTest, TextureBindingType) {
 
 // Check that a buffer binding must contain exactly a buffer
 TEST_F(BindGroupValidationTest, BufferBindingType) {
-    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {
-        {0, dawn::ShaderStageBit::Fragment, dawn::BindingType::UniformBuffer}
-    });
+    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::UniformBuffer}});
 
     dawn::BindGroupBinding binding;
     binding.binding = 0;
@@ -285,9 +279,8 @@ TEST_F(BindGroupValidationTest, BufferBindingType) {
 
 // Check that a texture must have the correct usage
 TEST_F(BindGroupValidationTest, TextureUsage) {
-    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {
-        {0, dawn::ShaderStageBit::Fragment, dawn::BindingType::SampledTexture}
-    });
+    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture}});
 
     // Control case: setting a sampleable texture view works.
     utils::MakeBindGroup(device, layout, {{0, mSampledTextureView}});
@@ -309,8 +302,8 @@ TEST_F(BindGroupValidationTest, TextureUsage) {
 // Check that a texture must have the correct component type
 TEST_F(BindGroupValidationTest, TextureComponentType) {
     dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
-        device, {{0, dawn::ShaderStageBit::Fragment, dawn::BindingType::SampledTexture, false,
-                  false, dawn::TextureComponentType::Float}});
+        device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture, false, false,
+                  dawn::TextureComponentType::Float}});
 
     // Control case: setting a Float typed texture view works.
     utils::MakeBindGroup(device, layout, {{0, mSampledTextureView}});
@@ -332,9 +325,8 @@ TEST_F(BindGroupValidationTest, TextureComponentType) {
 
 // Check that a UBO must have the correct usage
 TEST_F(BindGroupValidationTest, BufferUsageUBO) {
-    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {
-        {0, dawn::ShaderStageBit::Fragment, dawn::BindingType::UniformBuffer}
-    });
+    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::UniformBuffer}});
 
     // Control case: using a buffer with the uniform usage works
     utils::MakeBindGroup(device, layout, {{0, mUBO, 0, 256}});
@@ -345,9 +337,8 @@ TEST_F(BindGroupValidationTest, BufferUsageUBO) {
 
 // Check that a SSBO must have the correct usage
 TEST_F(BindGroupValidationTest, BufferUsageSSBO) {
-    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {
-        {0, dawn::ShaderStageBit::Fragment, dawn::BindingType::StorageBuffer}
-    });
+    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::StorageBuffer}});
 
     // Control case: using a buffer with the storage usage works
     utils::MakeBindGroup(device, layout, {{0, mSSBO, 0, 256}});
@@ -358,9 +349,10 @@ TEST_F(BindGroupValidationTest, BufferUsageSSBO) {
 
 // Tests constraints on the buffer offset for bind groups.
 TEST_F(BindGroupValidationTest, BufferOffsetAlignment) {
-    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {
-        {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
-    });
+    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {
+                    {0, dawn::ShaderStage::Vertex, dawn::BindingType::UniformBuffer},
+                });
 
     // Check that offset 0 is valid
     utils::MakeBindGroup(device, layout, {{0, mUBO, 0, 512}});
@@ -376,9 +368,10 @@ TEST_F(BindGroupValidationTest, BufferOffsetAlignment) {
 
 // Tests constraints to be sure the buffer binding fits in the buffer
 TEST_F(BindGroupValidationTest, BufferBindingOOB) {
-    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {
-        {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
-    });
+    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {
+                    {0, dawn::ShaderStage::Vertex, dawn::BindingType::UniformBuffer},
+                });
 
     dawn::BufferDescriptor descriptor;
     descriptor.size = 1024;
@@ -412,15 +405,18 @@ TEST_F(BindGroupValidationTest, BufferBindingOOB) {
 
 // Test what happens when the layout is an error.
 TEST_F(BindGroupValidationTest, ErrorLayout) {
-    dawn::BindGroupLayout goodLayout = utils::MakeBindGroupLayout(device, {
-        {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
-    });
+    dawn::BindGroupLayout goodLayout = utils::MakeBindGroupLayout(
+        device, {
+                    {0, dawn::ShaderStage::Vertex, dawn::BindingType::UniformBuffer},
+                });
 
     dawn::BindGroupLayout errorLayout;
-    ASSERT_DEVICE_ERROR(errorLayout = utils::MakeBindGroupLayout(device, {
-        {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
-        {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
-    }));
+    ASSERT_DEVICE_ERROR(
+        errorLayout = utils::MakeBindGroupLayout(
+            device, {
+                        {0, dawn::ShaderStage::Vertex, dawn::BindingType::UniformBuffer},
+                        {0, dawn::ShaderStage::Vertex, dawn::BindingType::UniformBuffer},
+                    }));
 
     // Control case, creating with the good layout works
     utils::MakeBindGroup(device, goodLayout, {{0, mUBO, 0, 256}});
@@ -463,57 +459,56 @@ class BindGroupLayoutValidationTest : public ValidationTest {
 // Tests setting OOB checks for kMaxBindingsPerGroup in bind group layouts.
 TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutBindingOOB) {
     // Checks that kMaxBindingsPerGroup - 1 is valid.
-    utils::MakeBindGroupLayout(device, {
-        {kMaxBindingsPerGroup - 1, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer}
-    });
+    utils::MakeBindGroupLayout(device, {{kMaxBindingsPerGroup - 1, dawn::ShaderStage::Vertex,
+                                         dawn::BindingType::UniformBuffer}});
 
     // Checks that kMaxBindingsPerGroup is OOB
-    ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(device, {
-        {kMaxBindingsPerGroup, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer}
-    }));
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
+        device,
+        {{kMaxBindingsPerGroup, dawn::ShaderStage::Vertex, dawn::BindingType::UniformBuffer}}));
 }
 
 // This test verifies that the BindGroupLayout bindings are correctly validated, even if the
 // binding ids are out-of-order.
 TEST_F(BindGroupLayoutValidationTest, BindGroupBinding) {
-    utils::MakeBindGroupLayout(
-        device, {
-                    {1, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
-                    {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
-                });
+    utils::MakeBindGroupLayout(device,
+                               {
+                                   {1, dawn::ShaderStage::Vertex, dawn::BindingType::UniformBuffer},
+                                   {0, dawn::ShaderStage::Vertex, dawn::BindingType::UniformBuffer},
+                               });
 }
 
 // Check that dynamic = true is only allowed with buffer bindings.
 TEST_F(BindGroupLayoutValidationTest, DynamicAndTypeCompatibility) {
     utils::MakeBindGroupLayout(
         device, {
-                    {0, dawn::ShaderStageBit::Compute, dawn::BindingType::UniformBuffer, true},
+                    {0, dawn::ShaderStage::Compute, dawn::BindingType::UniformBuffer, true},
                 });
 
     utils::MakeBindGroupLayout(
         device, {
-                    {0, dawn::ShaderStageBit::Compute, dawn::BindingType::StorageBuffer, true},
+                    {0, dawn::ShaderStage::Compute, dawn::BindingType::StorageBuffer, true},
                 });
 
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
         device, {
-                    {0, dawn::ShaderStageBit::Compute, dawn::BindingType::SampledTexture, true},
+                    {0, dawn::ShaderStage::Compute, dawn::BindingType::SampledTexture, true},
                 }));
 
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
         device, {
-                    {0, dawn::ShaderStageBit::Compute, dawn::BindingType::Sampler, true},
+                    {0, dawn::ShaderStage::Compute, dawn::BindingType::Sampler, true},
                 }));
 }
 
 // This test verifies that visibility of bindings in BindGroupLayout can't be none
 TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutVisibilityNone) {
-    utils::MakeBindGroupLayout(
-        device, {
-                    {0, dawn::ShaderStageBit::Vertex, dawn::BindingType::UniformBuffer},
-                });
+    utils::MakeBindGroupLayout(device,
+                               {
+                                   {0, dawn::ShaderStage::Vertex, dawn::BindingType::UniformBuffer},
+                               });
 
-    dawn::BindGroupLayoutBinding binding = {0, dawn::ShaderStageBit::None,
+    dawn::BindGroupLayoutBinding binding = {0, dawn::ShaderStage::None,
                                             dawn::BindingType::UniformBuffer};
     dawn::BindGroupLayoutDescriptor descriptor;
     descriptor.bindingCount = 1;
@@ -529,12 +524,12 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
 
     for (uint32_t i = 0; i < kMaxDynamicUniformBufferCount; ++i) {
         maxUniformDB.push_back(
-            {i, dawn::ShaderStageBit::Compute, dawn::BindingType::UniformBuffer, true});
+            {i, dawn::ShaderStage::Compute, dawn::BindingType::UniformBuffer, true});
     }
 
     for (uint32_t i = 0; i < kMaxDynamicStorageBufferCount; ++i) {
         maxStorageDB.push_back(
-            {i, dawn::ShaderStageBit::Compute, dawn::BindingType::StorageBuffer, true});
+            {i, dawn::ShaderStage::Compute, dawn::BindingType::StorageBuffer, true});
     }
 
     auto MakeBindGroupLayout = [&](dawn::BindGroupLayoutBinding* binding,
@@ -557,7 +552,7 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
         bgl[0] = MakeBindGroupLayout(maxUniformDB.data(), maxUniformDB.size());
         bgl[1] = utils::MakeBindGroupLayout(
             device, {
-                        {0, dawn::ShaderStageBit::Compute, dawn::BindingType::UniformBuffer, true},
+                        {0, dawn::ShaderStage::Compute, dawn::BindingType::UniformBuffer, true},
                     });
 
         TestCreatePipelineLayout(bgl, 2, false);
@@ -568,7 +563,7 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
         bgl[0] = MakeBindGroupLayout(maxStorageDB.data(), maxStorageDB.size());
         bgl[1] = utils::MakeBindGroupLayout(
             device, {
-                        {0, dawn::ShaderStageBit::Compute, dawn::BindingType::StorageBuffer, true},
+                        {0, dawn::ShaderStage::Compute, dawn::BindingType::StorageBuffer, true},
                     });
 
         TestCreatePipelineLayout(bgl, 2, false);
@@ -576,14 +571,14 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
 
     // Check dynamic uniform buffers exceed maximum in bind group layout.
     {
-        maxUniformDB.push_back({kMaxDynamicUniformBufferCount, dawn::ShaderStageBit::Compute,
+        maxUniformDB.push_back({kMaxDynamicUniformBufferCount, dawn::ShaderStage::Compute,
                                 dawn::BindingType::UniformBuffer, true});
         TestCreateBindGroupLayout(maxUniformDB.data(), maxUniformDB.size(), false);
     }
 
     // Check dynamic storage buffers exceed maximum in bind group layout.
     {
-        maxStorageDB.push_back({kMaxDynamicStorageBufferCount, dawn::ShaderStageBit::Compute,
+        maxStorageDB.push_back({kMaxDynamicStorageBufferCount, dawn::ShaderStage::Compute,
                                 dawn::BindingType::StorageBuffer, true});
         TestCreateBindGroupLayout(maxStorageDB.data(), maxStorageDB.size(), false);
     }
@@ -596,9 +591,9 @@ class SetBindGroupValidationTest : public ValidationTest {
   public:
     void SetUp() override {
         mBindGroupLayout = utils::MakeBindGroupLayout(
-            device, {{0, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
+            device, {{0, dawn::ShaderStage::Compute | dawn::ShaderStage::Fragment,
                       dawn::BindingType::UniformBuffer, true},
-                     {1, dawn::ShaderStageBit::Compute | dawn::ShaderStageBit::Fragment,
+                     {1, dawn::ShaderStage::Compute | dawn::ShaderStage::Fragment,
                       dawn::BindingType::StorageBuffer, true}});
     }
 
@@ -616,13 +611,13 @@ class SetBindGroupValidationTest : public ValidationTest {
 
     dawn::RenderPipeline CreateRenderPipeline() {
         dawn::ShaderModule vsModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Vertex, R"(
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
                 #version 450
                 void main() {
                 })");
 
         dawn::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Fragment, R"(
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
                 #version 450
                 layout(std140, set = 0, binding = 0) uniform uBuffer {
                     vec2 value1;
@@ -645,7 +640,7 @@ class SetBindGroupValidationTest : public ValidationTest {
 
     dawn::ComputePipeline CreateComputePipeline() {
         dawn::ShaderModule csModule =
-            utils::CreateShaderModule(device, utils::ShaderStage::Compute, R"(
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
                 #version 450
                 const uint kTileSize = 4;
                 const uint kInstances = 11;
