@@ -172,6 +172,8 @@ namespace dawn_native { namespace metal {
             } else {
                 mDeviceType = DeviceType::DiscreteGPU;
             }
+
+            InitializeSupportedExtensions();
         }
 
         ~Adapter() override {
