@@ -93,6 +93,17 @@ DawnTestParam ForceWorkarounds(const DawnTestParam& originParam,
     return newTestParam;
 }
 
+std::ostream& operator<<(std::ostream& os, const DawnTestParam& param) {
+    os << ParamName(param.backendType);
+    for (const char* forceEnabledWorkaround : param.forceEnabledWorkarounds) {
+        os << "__e_" << forceEnabledWorkaround;
+    }
+    for (const char* forceDisabledWorkaround : param.forceDisabledWorkarounds) {
+        os << "__d_" << forceDisabledWorkaround;
+    }
+    return os;
+}
+
 // Implementation of DawnTestEnvironment
 
 void InitDawnEnd2EndTestEnvironment(int argc, char** argv) {
@@ -708,17 +719,6 @@ namespace detail {
             }
         }
         return backends;
-    }
-
-    std::string GetParamName(const testing::TestParamInfo<DawnTestParam>& info) {
-        std::ostringstream ostream;
-        ostream << ParamName(info.param.backendType);
-
-        for (const char* forceEnabledWorkaround : info.param.forceEnabledWorkarounds) {
-            ostream << "_" << forceEnabledWorkaround;
-        }
-
-        return ostream.str();
     }
 
     // Helper classes to set expectations

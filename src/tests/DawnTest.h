@@ -83,6 +83,8 @@ struct DawnTestParam {
     std::vector<const char*> forceDisabledWorkarounds;
 };
 
+std::ostream& operator<<(std::ostream& os, const DawnTestParam& param);
+
 // Shorthands for backend types used in the DAWN_INSTANTIATE_TEST
 extern const DawnTestParam D3D12Backend;
 extern const DawnTestParam MetalBackend;
@@ -269,7 +271,7 @@ class DawnTest : public ::testing::TestWithParam<DawnTestParam> {
         , testName,                                                              \
         testing::ValuesIn(::detail::FilterBackends(                              \
             testName##params, sizeof(testName##params) / sizeof(firstParam))),   \
-        ::detail::GetParamName)
+        testing::PrintToStringParamName())
 
 // Skip a test when the given condition is satisfied.
 #define DAWN_SKIP_TEST_IF(condition)                               \
@@ -282,7 +284,6 @@ namespace detail {
     // Helper functions used for DAWN_INSTANTIATE_TEST
     bool IsBackendAvailable(dawn_native::BackendType type);
     std::vector<DawnTestParam> FilterBackends(const DawnTestParam* params, size_t numParams);
-    std::string GetParamName(const testing::TestParamInfo<DawnTestParam>& info);
 
     // All classes used to implement the deferred expectations should inherit from this.
     class Expectation {
