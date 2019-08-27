@@ -16,13 +16,14 @@
 
 namespace dawn_wire { namespace server {
 
-    void Server::ForwardDeviceError(const char* message, void* userdata) {
+    void Server::ForwardDeviceError(DawnErrorType type, const char* message, void* userdata) {
         auto server = static_cast<Server*>(userdata);
-        server->OnDeviceError(message);
+        server->OnDeviceError(type, message);
     }
 
-    void Server::OnDeviceError(const char* message) {
+    void Server::OnDeviceError(DawnErrorType type, const char* message) {
         ReturnDeviceErrorCallbackCmd cmd;
+        cmd.type = type;
         cmd.message = message;
 
         size_t requiredSize = cmd.GetRequiredSize();

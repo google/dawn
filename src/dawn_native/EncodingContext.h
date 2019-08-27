@@ -18,6 +18,7 @@
 #include "dawn_native/CommandAllocator.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/ErrorData.h"
+#include "dawn_native/dawn_platform.h"
 
 #include <string>
 
@@ -37,10 +38,10 @@ namespace dawn_native {
         CommandIterator* GetIterator();
 
         // Functions to handle encoder errors
-        void HandleError(const char* message);
+        void HandleError(dawn::ErrorType type, const char* message);
 
         inline void ConsumeError(ErrorData* error) {
-            HandleError(error->GetMessage().c_str());
+            HandleError(error->GetType(), error->GetMessage().c_str());
             delete error;
         }
 
@@ -57,9 +58,11 @@ namespace dawn_native {
             if (DAWN_UNLIKELY(encoder != mCurrentEncoder)) {
                 if (mCurrentEncoder != mTopLevelEncoder) {
                     // The top level encoder was used when a pass encoder was current.
-                    HandleError("Command cannot be recorded inside a pass");
+                    HandleError(dawn::ErrorType::Validation,
+                                "Command cannot be recorded inside a pass");
                 } else {
-                    HandleError("Recording in an error or already ended pass encoder");
+                    HandleError(dawn::ErrorType::Validation,
+                                "Recording in an error or already ended pass encoder");
                 }
                 return false;
             }

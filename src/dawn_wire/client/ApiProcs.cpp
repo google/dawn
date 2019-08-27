@@ -275,7 +275,8 @@ namespace dawn_wire { namespace client {
                                  void* userdata) {
         Fence* fence = reinterpret_cast<Fence*>(cFence);
         if (value > fence->signaledValue) {
-            fence->device->HandleError("Value greater than fence signaled value");
+            fence->device->HandleError(DAWN_ERROR_TYPE_VALIDATION,
+                                       "Value greater than fence signaled value");
             callback(DAWN_FENCE_COMPLETION_STATUS_ERROR, userdata);
             return;
         }
@@ -384,11 +385,13 @@ namespace dawn_wire { namespace client {
         Queue* queue = reinterpret_cast<Queue*>(cQueue);
         if (fence->queue != queue) {
             fence->device->HandleError(
+                DAWN_ERROR_TYPE_VALIDATION,
                 "Fence must be signaled on the queue on which it was created.");
             return;
         }
         if (signalValue <= fence->signaledValue) {
-            fence->device->HandleError("Fence value less than or equal to signaled value");
+            fence->device->HandleError(DAWN_ERROR_TYPE_VALIDATION,
+                                       "Fence value less than or equal to signaled value");
             return;
         }
         fence->signaledValue = signalValue;
@@ -411,7 +414,7 @@ namespace dawn_wire { namespace client {
     }
 
     void ClientDeviceSetErrorCallback(DawnDevice cSelf,
-                                      DawnDeviceErrorCallback callback,
+                                      DawnErrorCallback callback,
                                       void* userdata) {
         Device* device = reinterpret_cast<Device*>(cSelf);
         device->SetErrorCallback(callback, userdata);

@@ -14,11 +14,14 @@
 
 #include "dawn_native/ErrorData.h"
 
+#include "dawn_native/Error.h"
+#include "dawn_native/dawn_platform.h"
+
 namespace dawn_native {
 
     ErrorData::ErrorData() = default;
 
-    ErrorData::ErrorData(ErrorType type, std::string message)
+    ErrorData::ErrorData(InternalErrorType type, std::string message)
         : mType(type), mMessage(std::move(message)) {
     }
 
@@ -31,8 +34,21 @@ namespace dawn_native {
         mBacktrace.push_back(std::move(record));
     }
 
-    ErrorType ErrorData::GetType() const {
+    InternalErrorType ErrorData::GetInternalType() const {
         return mType;
+    }
+
+    dawn::ErrorType ErrorData::GetType() const {
+        switch (mType) {
+            case InternalErrorType::Validation:
+                return dawn::ErrorType::Validation;
+            case InternalErrorType::OutOfMemory:
+                return dawn::ErrorType::OutOfMemory;
+            case InternalErrorType::DeviceLost:
+                return dawn::ErrorType::DeviceLost;
+            default:
+                return dawn::ErrorType::Unknown;
+        }
     }
 
     const std::string& ErrorData::GetMessage() const {

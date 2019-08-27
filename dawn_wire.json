@@ -67,6 +67,7 @@
             { "name": "status", "type": "uint32_t" }
         ],
         "device error callback": [
+            { "name": "type", "type": "error type"},
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
         ],
         "fence update completed value": [

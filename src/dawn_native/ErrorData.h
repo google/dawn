@@ -19,14 +19,18 @@
 #include <string>
 #include <vector>
 
+namespace dawn {
+    enum class ErrorType : uint32_t;
+}
+
 namespace dawn_native {
 
-    enum class ErrorType : uint32_t;
+    enum class InternalErrorType : uint32_t;
 
     class ErrorData {
       public:
         ErrorData();
-        ErrorData(ErrorType type, std::string message);
+        ErrorData(InternalErrorType type, std::string message);
 
         struct BacktraceRecord {
             const char* file;
@@ -35,12 +39,13 @@ namespace dawn_native {
         };
         void AppendBacktrace(const char* file, const char* function, int line);
 
-        ErrorType GetType() const;
+        InternalErrorType GetInternalType() const;
+        dawn::ErrorType GetType() const;
         const std::string& GetMessage() const;
         const std::vector<BacktraceRecord>& GetBacktrace() const;
 
       private:
-        ErrorType mType;
+        InternalErrorType mType;
         std::string mMessage;
         std::vector<BacktraceRecord> mBacktrace;
     };

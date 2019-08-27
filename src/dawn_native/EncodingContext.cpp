@@ -45,7 +45,7 @@ namespace dawn_native {
         return &mIterator;
     }
 
-    void EncodingContext::HandleError(const char* message) {
+    void EncodingContext::HandleError(dawn::ErrorType type, const char* message) {
         if (!IsFinished()) {
             // If the encoding context is not finished, errors are deferred until
             // Finish() is called.
@@ -54,7 +54,7 @@ namespace dawn_native {
                 mErrorMessage = message;
             }
         } else {
-            mDevice->HandleError(message);
+            mDevice->HandleError(type, message);
         }
     }
 

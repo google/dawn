@@ -15,6 +15,7 @@
 #ifndef DAWNWIRE_CLIENT_CLIENT_H_
 #define DAWNWIRE_CLIENT_CLIENT_H_
 
+#include <dawn/dawn.h>
 #include <dawn_wire/Wire.h>
 
 #include "dawn_wire/WireClient.h"

@@ -40,7 +40,7 @@ namespace dawn_native { namespace d3d12 {
         DawnSwapChainNextTexture next = {};
         DawnSwapChainError error = im.GetNextTexture(im.userData, &next);
         if (error) {
-            GetDevice()->HandleError(error);
+            GetDevice()->HandleError(dawn::ErrorType::Unknown, error);
             return nullptr;
         }
 

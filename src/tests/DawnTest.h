@@ -212,7 +212,7 @@ class DawnTest : public ::testing::TestWithParam<DawnTestParam> {
     std::unique_ptr<utils::TerribleCommandBuffer> mS2cBuf;
 
     // Tracking for validation errors
-    static void OnDeviceError(const char* message, void* userdata);
+    static void OnDeviceError(DawnErrorType type, const char* message, void* userdata);
     bool mExpectError = false;
     bool mError = false;
 

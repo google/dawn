@@ -430,6 +430,14 @@ def as_frontendType(typ):
     else:
         return as_cType(typ.name)
 
+def as_wireType(typ):
+    if typ.category == 'object':
+        return typ.name.CamelCase() + '*'
+    elif typ.category in ['bitmask', 'enum']:
+        return 'Dawn' + typ.name.CamelCase()
+    else:
+        return as_cppType(typ.name)
+
 def cpp_native_methods(types, typ):
     return typ.methods + typ.native_methods
 
@@ -522,7 +530,8 @@ class MultiGeneratorFromDawnJSON(Generator):
                 api_params,
                 c_params,
                 {
-                    'as_wireType': lambda typ: typ.name.CamelCase() + '*' if typ.category == 'object' else as_cppType(typ.name)
+                    'as_wireType': as_wireType,
+                    'as_annotated_wireType': lambda arg: annotated(as_wireType(arg.type), arg),
                 },
                 additional_params
             ]

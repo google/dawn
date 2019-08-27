@@ -18,7 +18,7 @@
 
 namespace dawn_native {
 
-    ErrorData* MakeError(ErrorType type,
+    ErrorData* MakeError(InternalErrorType type,
                          std::string message,
                          const char* file,
                          const char* function,

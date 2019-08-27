@@ -22,9 +22,9 @@
     bool Do{{command.name.CamelCase()}}(
         {%- for member in command.members -%}
             {%- if member.handle_type -%}
-                {{as_cppType(member.handle_type.name)}}* {{as_varName(member.name)}}
+                {{as_wireType(member.handle_type)}} {{as_varName(member.name)}}
             {%- else -%}
-                {{as_annotated_cppType(member)}}
+                {{as_annotated_wireType(member)}}
             {%- endif -%}
             {%- if not loop.last -%}, {% endif %}
         {%- endfor -%}

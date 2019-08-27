@@ -22,12 +22,12 @@ namespace {
     // Mock classes to add expectations on the wire calling callbacks
     class MockDeviceErrorCallback {
       public:
-        MOCK_METHOD2(Call, void(const char* message, void* userdata));
+        MOCK_METHOD3(Call, void(DawnErrorType type, const char* message, void* userdata));
     };
 
     std::unique_ptr<StrictMock<MockDeviceErrorCallback>> mockDeviceErrorCallback;
-    void ToMockDeviceErrorCallback(const char* message, void* userdata) {
-        mockDeviceErrorCallback->Call(message, userdata);
+    void ToMockDeviceErrorCallback(DawnErrorType type, const char* message, void* userdata) {
+        mockDeviceErrorCallback->Call(type, message, userdata);
     }
 
 }  // anonymous namespace
@@ -66,9 +66,9 @@ TEST_F(WireErrorCallbackTests, DeviceErrorCallback) {
 
     // Calling the callback on the server side will result in the callback being called on the
     // client side
-    api.CallDeviceErrorCallback(apiDevice, "Some error message");
+    api.CallDeviceErrorCallback(apiDevice, DAWN_ERROR_TYPE_VALIDATION, "Some error message");
 
-    EXPECT_CALL(*mockDeviceErrorCallback, Call(StrEq("Some error message"), this)).Times(1);
+    EXPECT_CALL(*mockDeviceErrorCallback, Call(DAWN_ERROR_TYPE_VALIDATION, StrEq("Some error message"), this)).Times(1);
 
     FlushServer();
 }

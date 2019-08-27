@@ -115,7 +115,8 @@ namespace dawn_native {
         }
 
         if (resources.push_constant_buffers.size() > 0) {
-            GetDevice()->HandleError("Push constants aren't supported.");
+            GetDevice()->HandleError(dawn::ErrorType::Validation,
+                                     "Push constants aren't supported.");
         }
 
         // Fill in bindingInfo with the SPIRV bindings
@@ -132,7 +133,8 @@ namespace dawn_native {
                 uint32_t set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
 
                 if (binding >= kMaxBindingsPerGroup || set >= kMaxBindGroups) {
-                    GetDevice()->HandleError("Binding over limits in the SPIRV");
+                    GetDevice()->HandleError(dawn::ErrorType::Validation,
+                                             "Binding over limits in the SPIRV");
                     continue;
                 }
 
@@ -159,7 +161,8 @@ namespace dawn_native {
                 uint32_t location = compiler.get_decoration(attrib.id, spv::DecorationLocation);
 
                 if (location >= kMaxVertexAttributes) {
-                    device->HandleError("Attribute location over limits in the SPIRV");
+                    device->HandleError(dawn::ErrorType::Validation,
+                                        "Attribute location over limits in the SPIRV");
                     return;
                 }
 
@@ -170,7 +173,8 @@ namespace dawn_native {
             // all the location 0, causing a compile error.
             for (const auto& attrib : resources.stage_outputs) {
                 if (!compiler.get_decoration_bitset(attrib.id).get(spv::DecorationLocation)) {
-                    device->HandleError("Need location qualifier on vertex output");
+                    device->HandleError(dawn::ErrorType::Validation,
+                                        "Need location qualifier on vertex output");
                     return;
                 }
             }
@@ -181,7 +185,8 @@ namespace dawn_native {
             // all the location 0, causing a compile error.
             for (const auto& attrib : resources.stage_inputs) {
                 if (!compiler.get_decoration_bitset(attrib.id).get(spv::DecorationLocation)) {
-                    device->HandleError("Need location qualifier on fragment input");
+                    device->HandleError(dawn::ErrorType::Validation,
+                                        "Need location qualifier on fragment input");
                     return;
                 }
             }

@@ -44,7 +44,7 @@ namespace dawn_native {
         DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor);
         virtual ~DeviceBase();
 
-        void HandleError(const char* message);
+        void HandleError(dawn::ErrorType type, const char* message);
 
         bool ConsumedError(MaybeError maybeError) {
             if (DAWN_UNLIKELY(maybeError.IsError())) {
@@ -148,7 +148,7 @@ namespace dawn_native {
 
         void Tick();
 
-        void SetErrorCallback(dawn::DeviceErrorCallback callback, void* userdata);
+        void SetErrorCallback(dawn::ErrorCallback callback, void* userdata);
         void Reference();
         void Release();
 
@@ -247,7 +247,7 @@ namespace dawn_native {
         std::unique_ptr<FenceSignalTracker> mFenceSignalTracker;
         std::vector<DeferredCreateBufferMappedAsync> mDeferredCreateBufferMappedAsyncResults;
 
-        dawn::DeviceErrorCallback mErrorCallback = nullptr;
+        dawn::ErrorCallback mErrorCallback = nullptr;
         void* mErrorUserdata = 0;
         uint32_t mRefCount = 1;
 

@@ -88,13 +88,13 @@ namespace dawn_native {
         ASSERT(mCaches->shaderModules.empty());
     }
 
-    void DeviceBase::HandleError(const char* message) {
+    void DeviceBase::HandleError(dawn::ErrorType type, const char* message) {
         if (mErrorCallback) {
-            mErrorCallback(message, mErrorUserdata);
+            mErrorCallback(static_cast<DawnErrorType>(type), message, mErrorUserdata);
         }
     }
 
-    void DeviceBase::SetErrorCallback(dawn::DeviceErrorCallback callback, void* userdata) {
+    void DeviceBase::SetErrorCallback(dawn::ErrorCallback callback, void* userdata) {
         mErrorCallback = callback;
         mErrorUserdata = userdata;
     }
@@ -671,7 +671,7 @@ namespace dawn_native {
 
     void DeviceBase::ConsumeError(ErrorData* error) {
         ASSERT(error != nullptr);
-        HandleError(error->GetMessage().c_str());
+        HandleError(error->GetType(), error->GetMessage().c_str());
         delete error;
     }
 

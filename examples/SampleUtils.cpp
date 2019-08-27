@@ -31,8 +31,25 @@
 #include <cstring>
 #include <iostream>
 
-void PrintDeviceError(const char* message, void*) {
-    std::cout << "Device error: " << message << std::endl;
+void PrintDeviceError(DawnErrorType errorType, const char* message, void*) {
+    switch (errorType) {
+        case DAWN_ERROR_TYPE_VALIDATION:
+            std::cout << "Validation ";
+            break;
+        case DAWN_ERROR_TYPE_OUT_OF_MEMORY:
+            std::cout << "Out of memory ";
+            break;
+        case DAWN_ERROR_TYPE_UNKNOWN:
+            std::cout << "Unknown ";
+            break;
+        case DAWN_ERROR_TYPE_DEVICE_LOST:
+            std::cout << "Device lost ";
+            break;
+        default:
+            UNREACHABLE();
+            return;
+    }
+    std::cout << "error: " << message << std::endl;
 }
 
 void PrintGLFWError(int code, const char* message) {

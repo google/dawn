@@ -50,7 +50,7 @@ const uint64_t DAWN_WHOLE_SIZE = 0xffffffffffffffffULL; // UINT64_MAX
 {% endfor %}
 
 // Custom types depending on the target language
-typedef void (*DawnDeviceErrorCallback)(const char* message, void* userdata);
+typedef void (*DawnErrorCallback)(DawnErrorType type, const char* message, void* userdata);
 typedef void (*DawnBufferCreateMappedCallback)(DawnBufferMapAsyncStatus status,
                                                DawnCreateBufferMappedResult result,
                                                void* userdata);

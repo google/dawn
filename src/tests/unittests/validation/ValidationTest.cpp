@@ -84,7 +84,8 @@ std::string ValidationTest::GetLastDeviceErrorMessage() const {
 }
 
 // static
-void ValidationTest::OnDeviceError(const char* message, void* userdata) {
+void ValidationTest::OnDeviceError(DawnErrorType type, const char* message, void* userdata) {
+    ASSERT(type != DAWN_ERROR_TYPE_NO_ERROR);
     auto self = static_cast<ValidationTest*>(userdata);
     self->mDeviceErrorMessage = message;
 

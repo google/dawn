@@ -33,7 +33,7 @@ namespace dawn_native { namespace metal {
             [mtlDevice newComputePipelineStateWithFunction:computeData.function error:&error];
         if (error != nil) {
             NSLog(@" error => %@", error);
-            GetDevice()->HandleError("Error creating pipeline state");
+            GetDevice()->HandleError(dawn::ErrorType::DeviceLost, "Error creating pipeline state");
             return;
         }
 

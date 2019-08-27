@@ -482,7 +482,8 @@ bool DawnTest::EndExpectDeviceError() {
 }
 
 // static
-void DawnTest::OnDeviceError(const char* message, void* userdata) {
+void DawnTest::OnDeviceError(DawnErrorType type, const char* message, void* userdata) {
+    ASSERT(type != DAWN_ERROR_TYPE_NO_ERROR);
     DawnTest* self = static_cast<DawnTest*>(userdata);
 
     ASSERT_TRUE(self->mExpectError) << "Got unexpected device error: " << message;

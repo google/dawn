@@ -25,13 +25,13 @@ namespace dawn_wire { namespace client {
         return mClient;
     }
 
-    void Device::HandleError(const char* message) {
+    void Device::HandleError(DawnErrorType errorType, const char* message) {
         if (mErrorCallback) {
-            mErrorCallback(message, mErrorUserdata);
+            mErrorCallback(errorType, message, mErrorUserdata);
         }
     }
 
-    void Device::SetErrorCallback(DawnDeviceErrorCallback errorCallback, void* errorUserdata) {
+    void Device::SetErrorCallback(DawnErrorCallback errorCallback, void* errorUserdata) {
         mErrorCallback = errorCallback;
         mErrorUserdata = errorUserdata;
     }

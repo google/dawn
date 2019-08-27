@@ -18,9 +18,18 @@
 
 namespace dawn_wire { namespace client {
 
-    bool Client::DoDeviceErrorCallback(const char* message) {
-        DAWN_ASSERT(message != nullptr);
-        mDevice->HandleError(message);
+    bool Client::DoDeviceErrorCallback(DawnErrorType errorType, const char* message) {
+        switch (errorType) {
+            case DAWN_ERROR_TYPE_NO_ERROR:
+            case DAWN_ERROR_TYPE_VALIDATION:
+            case DAWN_ERROR_TYPE_OUT_OF_MEMORY:
+            case DAWN_ERROR_TYPE_UNKNOWN:
+            case DAWN_ERROR_TYPE_DEVICE_LOST:
+                break;
+            default:
+                return false;
+        }
+        mDevice->HandleError(errorType, message);
         return true;
     }
 

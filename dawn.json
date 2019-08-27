@@ -524,7 +524,7 @@
             {
                 "name": "set error callback",
                 "args": [
-                    {"name": "callback", "type": "device error callback"},
+                    {"name": "callback", "type": "error callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             }
@@ -543,8 +543,18 @@
             {"name": "stencil write mask", "type": "uint32_t", "default": "0xFFFFFFFF"}
         ]
     },
-    "device error callback": {
+    "error callback": {
         "category": "natively defined"
+    },
+    "error type": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "no error"},
+            {"value": 1, "name": "validation"},
+            {"value": 2, "name": "out of memory"},
+            {"value": 3, "name": "unknown"},
+            {"value": 4, "name": "device lost"}
+        ]
     },
     "extent 3D": {
         "category": "structure",

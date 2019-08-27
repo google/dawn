@@ -51,7 +51,7 @@ void ProcTableAsClass::GetProcTableAndDevice(DawnProcTable* table, DawnDevice* d
 }
 
 void ProcTableAsClass::DeviceSetErrorCallback(DawnDevice self,
-                                              DawnDeviceErrorCallback callback,
+                                              DawnErrorCallback callback,
                                               void* userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->deviceErrorCallback = callback;
@@ -102,9 +102,9 @@ void ProcTableAsClass::FenceOnCompletion(DawnFence self,
     OnFenceOnCompletionCallback(self, value, callback, userdata);
 }
 
-void ProcTableAsClass::CallDeviceErrorCallback(DawnDevice device, const char* message) {
+void ProcTableAsClass::CallDeviceErrorCallback(DawnDevice device, DawnErrorType type, const char* message) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(device);
-    object->deviceErrorCallback(message, object->userdata1);
+    object->deviceErrorCallback(type, message, object->userdata1);
 }
 void ProcTableAsClass::CallCreateBufferMappedCallback(DawnDevice device, DawnBufferMapAsyncStatus status, DawnCreateBufferMappedResult result) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(device);

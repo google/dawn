@@ -59,7 +59,7 @@ class ValidationTest : public testing::Test {
     std::unique_ptr<dawn_native::Instance> instance;
 
   private:
-    static void OnDeviceError(const char* message, void* userdata);
+    static void OnDeviceError(DawnErrorType type, const char* message, void* userdata);
     std::string mDeviceErrorMessage;
     bool mExpectError = false;
     bool mError = false;
