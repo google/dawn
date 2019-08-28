@@ -41,31 +41,41 @@ namespace dawn_native {
         return {};
     }
 
-    ResultOrError<UploadHandle> DynamicUploader::Allocate(uint32_t size, uint32_t alignment) {
-        ASSERT(IsPowerOfTwo(alignment));
+    ResultOrError<UploadHandle> DynamicUploader::Allocate(uint32_t size) {
+        // Note: Validation ensures size is already aligned.
+        // First-fit: find next smallest buffer large enough to satisfy the allocation request.
+        RingBuffer* targetRingBuffer = GetLargestBuffer();
+        for (auto& ringBuffer : mRingBuffers) {
+            // Prevent overflow.
+            ASSERT(ringBuffer->GetSize() >= ringBuffer->GetUsedSize());
+            const size_t remainingSize = ringBuffer->GetSize() - ringBuffer->GetUsedSize();
+            if (size <= remainingSize) {
+                targetRingBuffer = ringBuffer.get();
+                break;
+            }
+        }
 
-        // Align the requested allocation size
-        const size_t alignedSize = Align(size, alignment);
-
-        RingBuffer* largestRingBuffer = GetLargestBuffer();
-        UploadHandle uploadHandle = largestRingBuffer->SubAllocate(alignedSize);
+        UploadHandle uploadHandle = UploadHandle{};
+        if (targetRingBuffer != nullptr) {
+            uploadHandle = targetRingBuffer->SubAllocate(size);
+        }
 
         // Upon failure, append a newly created (and much larger) ring buffer to fulfill the
         // request.
         if (uploadHandle.mappedBuffer == nullptr) {
             // Compute the new max size (in powers of two to preserve alignment).
-            size_t newMaxSize = largestRingBuffer->GetSize();
+            size_t newMaxSize = targetRingBuffer->GetSize() * 2;
             while (newMaxSize < size) {
                 newMaxSize *= 2;
             }
 
             // TODO(bryan.bernhart@intel.com): Fall-back to no sub-allocations should this fail.
             DAWN_TRY(CreateAndAppendBuffer(newMaxSize));
-            largestRingBuffer = GetLargestBuffer();
-            uploadHandle = largestRingBuffer->SubAllocate(alignedSize);
+            targetRingBuffer = GetLargestBuffer();
+            uploadHandle = targetRingBuffer->SubAllocate(size);
         }
 
-        uploadHandle.stagingBuffer = largestRingBuffer->GetStagingBuffer();
+        uploadHandle.stagingBuffer = targetRingBuffer->GetStagingBuffer();
 
         return uploadHandle;
     }

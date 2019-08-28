@@ -29,12 +29,12 @@ namespace dawn_native {
 
         // We add functions to Create/Release StagingBuffers to the DynamicUploader as there's
         // currently no place to track the allocated staging buffers such that they're freed after
-        // pending coommands are finished. This should be changed when better resource allocation is
+        // pending commands are finished. This should be changed when better resource allocation is
         // implemented.
         ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size);
         void ReleaseStagingBuffer(std::unique_ptr<StagingBufferBase> stagingBuffer);
 
-        ResultOrError<UploadHandle> Allocate(uint32_t requiredSize, uint32_t alignment);
+        ResultOrError<UploadHandle> Allocate(uint32_t size);
         void Tick(Serial lastCompletedSerial);
 
         RingBuffer* GetLargestBuffer();

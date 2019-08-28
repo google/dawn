@@ -255,12 +255,8 @@ namespace dawn_native {
         DynamicUploader* uploader = nullptr;
         DAWN_TRY_ASSIGN(uploader, GetDevice()->GetDynamicUploader());
 
-        // TODO(bryan.bernhart@intel.com): Remove once alignment constraint is added to validation
-        // (dawn:73). D3D12 does not specify so we assume 4-byte alignment to be safe.
-        static constexpr size_t kDefaultAlignment = 4;
-
         UploadHandle uploadHandle;
-        DAWN_TRY_ASSIGN(uploadHandle, uploader->Allocate(count, kDefaultAlignment));
+        DAWN_TRY_ASSIGN(uploadHandle, uploader->Allocate(count));
         ASSERT(uploadHandle.mappedBuffer != nullptr);
 
         memcpy(uploadHandle.mappedBuffer, data, count);
