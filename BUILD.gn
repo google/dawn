@@ -573,7 +573,16 @@ static_library("dawn_utils") {
     "src/utils/SystemUtils.h",
     "src/utils/TerribleCommandBuffer.cpp",
     "src/utils/TerribleCommandBuffer.h",
+    "src/utils/Timer.h",
   ]
+
+  if (is_win) {
+    sources += [ "src/utils/WindowsTimer.cpp" ]
+  } else if (is_mac) {
+    sources += [ "src/utils/OSXTimer.cpp" ]
+  } else {
+    sources += [ "src/utils/PosixTimer.cpp" ]
+  }
 
   public_deps = [
     "${dawn_root}/src/dawn:dawn_headers",
@@ -873,6 +882,46 @@ test("dawn_end2end_tests") {
   }
 }
 
+test("dawn_perf_tests") {
+  configs += [ "${dawn_root}/src/common:dawn_internal" ]
+
+  deps = [
+    ":dawn_utils",
+    ":libdawn_native",
+    ":libdawn_wire",
+    "${dawn_root}/src/common",
+    "${dawn_root}/src/dawn:libdawn",
+    "third_party:gmock_and_gtest",
+  ]
+
+  sources = [
+    "src/tests/DawnTest.cpp",
+    "src/tests/DawnTest.h",
+    "src/tests/ParamGenerator.h",
+    "src/tests/perf_tests/BufferUploadPerf.cpp",
+    "src/tests/perf_tests/DawnPerfTest.cpp",
+    "src/tests/perf_tests/DawnPerfTest.h",
+  ]
+
+  libs = []
+
+  # When building inside Chromium, use their gtest main function because it is
+  # needed to run in swarming correctly.
+  if (build_with_chromium) {
+    sources += [ "//gpu/dawn_perf_tests_main.cc" ]
+  } else {
+    sources += [ "src/tests/PerfTestsMain.cpp" ]
+  }
+
+  if (dawn_enable_metal) {
+    libs += [ "IOSurface.framework" ]
+  }
+
+  if (dawn_enable_opengl) {
+    deps += [ "third_party:glfw" ]
+  }
+}
+
 # Temporary groups to make a 5-way patch to fix crbug.com/913171
 group("dawn_unittests_temp_group") {
   testonly = true
@@ -885,6 +934,13 @@ group("dawn_end2end_tests_temp_group") {
   testonly = true
   deps = [
     ":dawn_end2end_tests",
+  ]
+}
+
+group("dawn_perf_tests_temp_group") {
+  testonly = true
+  deps = [
+    ":dawn_perf_tests",
   ]
 }
 
