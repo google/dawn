@@ -43,11 +43,31 @@ class RenderPipelineValidationTest : public ValidationTest {
 
 // Test cases where creation should succeed
 TEST_F(RenderPipelineValidationTest, CreationSuccess) {
-    utils::ComboRenderPipelineDescriptor descriptor(device);
-    descriptor.cVertexStage.module = vsModule;
-    descriptor.cFragmentStage.module = fsModule;
+    {
+        utils::ComboRenderPipelineDescriptor descriptor(device);
+        descriptor.cVertexStage.module = vsModule;
+        descriptor.cFragmentStage.module = fsModule;
 
-    device.CreateRenderPipeline(&descriptor);
+        device.CreateRenderPipeline(&descriptor);
+    }
+    {
+        // Vertex input should be optional
+        utils::ComboRenderPipelineDescriptor descriptor(device);
+        descriptor.cVertexStage.module = vsModule;
+        descriptor.cFragmentStage.module = fsModule;
+        descriptor.vertexInput = nullptr;
+
+        device.CreateRenderPipeline(&descriptor);
+    }
+    {
+        // Rasterization state should be optional
+        utils::ComboRenderPipelineDescriptor descriptor(device);
+        descriptor.cVertexStage.module = vsModule;
+        descriptor.cFragmentStage.module = fsModule;
+        descriptor.rasterizationState = nullptr;
+
+        device.CreateRenderPipeline(&descriptor);
+    }
 }
 
 // Tests that at least one color state is required.

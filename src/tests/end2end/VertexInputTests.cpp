@@ -518,3 +518,52 @@ DAWN_INSTANTIATE_TEST(VertexInputTest, D3D12Backend, MetalBackend, OpenGLBackend
 //  - Add checks for alignement of vertex buffers and attributes if needed
 //  - Check for attribute narrowing
 //  - Check that the input state and the pipeline vertex input types match
+
+class OptionalVertexInputTest : public DawnTest {};
+
+// Test that vertex input is not required in render pipeline descriptor.
+TEST_P(OptionalVertexInputTest, Basic) {
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 3, 3);
+
+    dawn::ShaderModule vsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
+            #version 450
+            void main() {
+                gl_Position = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+            })");
+
+    dawn::ShaderModule fsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
+            #version 450
+            layout(location = 0) out vec4 fragColor;
+            void main() {
+                fragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+            })");
+
+    utils::ComboRenderPipelineDescriptor descriptor(device);
+    descriptor.cVertexStage.module = vsModule;
+    descriptor.cFragmentStage.module = fsModule;
+    descriptor.primitiveTopology = dawn::PrimitiveTopology::PointList;
+    descriptor.vertexInput = nullptr;
+
+    dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.SetPipeline(pipeline);
+        pass.Draw(1, 1, 0, 0);
+        pass.EndPass();
+    }
+
+    dawn::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 1, 1);
+}
+
+DAWN_INSTANTIATE_TEST(OptionalVertexInputTest,
+                      D3D12Backend,
+                      MetalBackend,
+                      OpenGLBackend,
+                      VulkanBackend);
