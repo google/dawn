@@ -65,6 +65,11 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("Setting input stride out of bounds");
             }
 
+            if (buffer->stride % 4 != 0) {
+                return DAWN_VALIDATION_ERROR(
+                    "Stride of Vertex buffer needs to be multiple of 4 bytes");
+            }
+
             for (uint32_t i = 0; i < buffer->attributeCount; ++i) {
                 DAWN_TRY(ValidateVertexAttributeDescriptor(&buffer->attributes[i], buffer->stride,
                                                            attributesSetMask));

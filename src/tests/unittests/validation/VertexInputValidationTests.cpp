@@ -280,6 +280,30 @@ TEST_F(VertexInputTest, SetInputStrideOutOfBounds) {
     )");
 }
 
+// Check multiple of 4 bytes constraint on input stride
+TEST_F(VertexInputTest, SetInputStrideNotAligned) {
+    // Control case, setting input stride 4 bytes.
+    utils::ComboVertexInputDescriptor state;
+    state.bufferCount = 1;
+    state.cBuffers[0].stride = 4;
+    state.cBuffers[0].attributeCount = 1;
+    CreatePipeline(true, state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
+
+    // Test input stride not multiple of 4 bytes
+    state.cBuffers[0].stride = 2;
+    CreatePipeline(false, state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
+}
+
 // Test that we cannot set an already set attribute
 TEST_F(VertexInputTest, AlreadySetAttribute) {
     // Control case, setting attribute 0
