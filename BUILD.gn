@@ -942,6 +942,9 @@ group("dawn_perf_tests_temp_group") {
   deps = [
     ":dawn_perf_tests",
   ]
+  data_deps = [
+    ":dawn_perf_tests",
+  ]
 }
 
 ###############################################################################
