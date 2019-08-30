@@ -54,11 +54,12 @@ namespace dawn_native { namespace d3d12 {
       private:
         // Dawn API
         void DestroyImpl() override;
-        void ClearTexture(ComPtr<ID3D12GraphicsCommandList> commandList,
-                          uint32_t baseMipLevel,
-                          uint32_t levelCount,
-                          uint32_t baseArrayLayer,
-                          uint32_t layerCount);
+        MaybeError ClearTexture(ComPtr<ID3D12GraphicsCommandList> commandList,
+                                uint32_t baseMipLevel,
+                                uint32_t levelCount,
+                                uint32_t baseArrayLayer,
+                                uint32_t layerCount,
+                                TextureBase::ClearValue clearValue);
 
         UINT16 GetDepthOrArraySize();
 

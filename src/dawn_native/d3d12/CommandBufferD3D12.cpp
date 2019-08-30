@@ -31,6 +31,7 @@
 #include "dawn_native/d3d12/SamplerD3D12.h"
 #include "dawn_native/d3d12/TextureCopySplitter.h"
 #include "dawn_native/d3d12/TextureD3D12.h"
+#include "dawn_native/d3d12/UtilsD3D12.h"
 
 #include <deque>
 
@@ -46,17 +47,6 @@ namespace dawn_native { namespace d3d12 {
                 default:
                     UNREACHABLE();
             }
-        }
-
-        D3D12_TEXTURE_COPY_LOCATION CreateTextureCopyLocationForTexture(const Texture& texture,
-                                                                        uint32_t level,
-                                                                        uint32_t slice) {
-            D3D12_TEXTURE_COPY_LOCATION copyLocation;
-            copyLocation.pResource = texture.GetD3D12Resource();
-            copyLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-            copyLocation.SubresourceIndex = texture.GetSubresourceIndex(level, slice);
-
-            return copyLocation;
         }
 
         bool CanUseCopyResource(const uint32_t sourceNumMipLevels,
@@ -622,29 +612,18 @@ namespace dawn_native { namespace d3d12 {
                         copy->source.offset, copy->source.rowPitch, copy->source.imageHeight);
 
                     D3D12_TEXTURE_COPY_LOCATION textureLocation =
-                        CreateTextureCopyLocationForTexture(*texture, copy->destination.mipLevel,
-                                                            copy->destination.arrayLayer);
+                        ComputeTextureCopyLocationForTexture(texture, copy->destination.mipLevel,
+                                                             copy->destination.arrayLayer);
 
                     for (uint32_t i = 0; i < copySplit.count; ++i) {
-                        auto& info = copySplit.copies[i];
+                        TextureCopySplit::CopyInfo& info = copySplit.copies[i];
 
-                        D3D12_TEXTURE_COPY_LOCATION bufferLocation;
-                        bufferLocation.pResource = buffer->GetD3D12Resource().Get();
-                        bufferLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-                        bufferLocation.PlacedFootprint.Offset = copySplit.offset;
-                        bufferLocation.PlacedFootprint.Footprint.Format = texture->GetD3D12Format();
-                        bufferLocation.PlacedFootprint.Footprint.Width = info.bufferSize.width;
-                        bufferLocation.PlacedFootprint.Footprint.Height = info.bufferSize.height;
-                        bufferLocation.PlacedFootprint.Footprint.Depth = info.bufferSize.depth;
-                        bufferLocation.PlacedFootprint.Footprint.RowPitch = copy->source.rowPitch;
-
-                        D3D12_BOX sourceRegion;
-                        sourceRegion.left = info.bufferOffset.x;
-                        sourceRegion.top = info.bufferOffset.y;
-                        sourceRegion.front = info.bufferOffset.z;
-                        sourceRegion.right = info.bufferOffset.x + info.copySize.width;
-                        sourceRegion.bottom = info.bufferOffset.y + info.copySize.height;
-                        sourceRegion.back = info.bufferOffset.z + info.copySize.depth;
+                        D3D12_TEXTURE_COPY_LOCATION bufferLocation =
+                            ComputeBufferLocationForCopyTextureRegion(
+                                texture, buffer->GetD3D12Resource().Get(), info.bufferSize,
+                                copySplit.offset, copy->source.rowPitch);
+                        D3D12_BOX sourceRegion =
+                            ComputeD3D12BoxFromOffsetAndSize(info.bufferOffset, info.copySize);
 
                         commandList->CopyTextureRegion(&textureLocation, info.textureOffset.x,
                                                        info.textureOffset.y, info.textureOffset.z,
@@ -663,36 +642,25 @@ namespace dawn_native { namespace d3d12 {
                     texture->TransitionUsageNow(commandList, dawn::TextureUsage::CopySrc);
                     buffer->TransitionUsageNow(commandList, dawn::BufferUsage::CopyDst);
 
-                    auto copySplit = ComputeTextureCopySplit(
+                    TextureCopySplit copySplit = ComputeTextureCopySplit(
                         copy->source.origin, copy->copySize, texture->GetFormat(),
                         copy->destination.offset, copy->destination.rowPitch,
                         copy->destination.imageHeight);
 
                     D3D12_TEXTURE_COPY_LOCATION textureLocation =
-                        CreateTextureCopyLocationForTexture(*texture, copy->source.mipLevel,
-                                                            copy->source.arrayLayer);
+                        ComputeTextureCopyLocationForTexture(texture, copy->source.mipLevel,
+                                                             copy->source.arrayLayer);
 
                     for (uint32_t i = 0; i < copySplit.count; ++i) {
-                        auto& info = copySplit.copies[i];
+                        TextureCopySplit::CopyInfo& info = copySplit.copies[i];
 
-                        D3D12_TEXTURE_COPY_LOCATION bufferLocation;
-                        bufferLocation.pResource = buffer->GetD3D12Resource().Get();
-                        bufferLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-                        bufferLocation.PlacedFootprint.Offset = copySplit.offset;
-                        bufferLocation.PlacedFootprint.Footprint.Format = texture->GetD3D12Format();
-                        bufferLocation.PlacedFootprint.Footprint.Width = info.bufferSize.width;
-                        bufferLocation.PlacedFootprint.Footprint.Height = info.bufferSize.height;
-                        bufferLocation.PlacedFootprint.Footprint.Depth = info.bufferSize.depth;
-                        bufferLocation.PlacedFootprint.Footprint.RowPitch =
-                            copy->destination.rowPitch;
+                        D3D12_TEXTURE_COPY_LOCATION bufferLocation =
+                            ComputeBufferLocationForCopyTextureRegion(
+                                texture, buffer->GetD3D12Resource().Get(), info.bufferSize,
+                                copySplit.offset, copy->destination.rowPitch);
 
-                        D3D12_BOX sourceRegion;
-                        sourceRegion.left = info.textureOffset.x;
-                        sourceRegion.top = info.textureOffset.y;
-                        sourceRegion.front = info.textureOffset.z;
-                        sourceRegion.right = info.textureOffset.x + info.copySize.width;
-                        sourceRegion.bottom = info.textureOffset.y + info.copySize.height;
-                        sourceRegion.back = info.textureOffset.z + info.copySize.depth;
+                        D3D12_BOX sourceRegion =
+                            ComputeD3D12BoxFromOffsetAndSize(info.textureOffset, info.copySize);
 
                         commandList->CopyTextureRegion(&bufferLocation, info.bufferOffset.x,
                                                        info.bufferOffset.y, info.bufferOffset.z,
@@ -727,21 +695,16 @@ namespace dawn_native { namespace d3d12 {
                                                   source->GetD3D12Resource());
                     } else {
                         D3D12_TEXTURE_COPY_LOCATION srcLocation =
-                            CreateTextureCopyLocationForTexture(*source, copy->source.mipLevel,
-                                                                copy->source.arrayLayer);
+                            ComputeTextureCopyLocationForTexture(source, copy->source.mipLevel,
+                                                                 copy->source.arrayLayer);
 
                         D3D12_TEXTURE_COPY_LOCATION dstLocation =
-                            CreateTextureCopyLocationForTexture(*destination,
-                                                                copy->destination.mipLevel,
-                                                                copy->destination.arrayLayer);
+                            ComputeTextureCopyLocationForTexture(destination,
+                                                                 copy->destination.mipLevel,
+                                                                 copy->destination.arrayLayer);
 
-                        D3D12_BOX sourceRegion;
-                        sourceRegion.left = copy->source.origin.x;
-                        sourceRegion.top = copy->source.origin.y;
-                        sourceRegion.front = copy->source.origin.z;
-                        sourceRegion.right = copy->source.origin.x + copy->copySize.width;
-                        sourceRegion.bottom = copy->source.origin.y + copy->copySize.height;
-                        sourceRegion.back = copy->source.origin.z + copy->copySize.depth;
+                        D3D12_BOX sourceRegion =
+                            ComputeD3D12BoxFromOffsetAndSize(copy->source.origin, copy->copySize);
 
                         commandList->CopyTextureRegion(
                             &dstLocation, copy->destination.origin.x, copy->destination.origin.y,
