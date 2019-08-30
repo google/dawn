@@ -338,7 +338,7 @@ namespace dawn_native { namespace d3d12 {
 
     size_t Device::GetD3D12HeapTypeToIndex(D3D12_HEAP_TYPE heapType) const {
         ASSERT(heapType > 0);
-        ASSERT(heapType <= kNumHeapTypes);
+        ASSERT(static_cast<uint32_t>(heapType) <= kNumHeapTypes);
         return heapType - 1;
     }
 
