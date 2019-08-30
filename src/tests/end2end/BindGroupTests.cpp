@@ -91,9 +91,6 @@ TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
 // It contains a transformation matrix for the VS and the fragment color for the FS.
 // These must result in different register offsets in the native APIs.
 TEST_P(BindGroupTests, ReusedUBO) {
-    // TODO(jiawei.shao@intel.com): find out why this test fails on Metal
-    DAWN_SKIP_TEST_IF(IsMetal());
-
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     dawn::ShaderModule vsModule =
@@ -175,9 +172,6 @@ TEST_P(BindGroupTests, ReusedUBO) {
 // In D3D12 for example, these different types of bindings end up in different namespaces, but the register
 // offsets used must match between the shader module and descriptor range.
 TEST_P(BindGroupTests, UBOSamplerAndTexture) {
-    // TODO(jiawei.shao@intel.com): find out why this test fails on Metal
-    DAWN_SKIP_TEST_IF(IsMetal());
-
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     dawn::ShaderModule vsModule =
