@@ -810,6 +810,14 @@ source_set("dawn_end2end_tests_sources") {
     libs += [ "IOSurface.framework" ]
   }
 
+  if (dawn_enable_d3d12) {
+    sources += [ "src/tests/end2end/D3D12ResourceWrappingTests.cpp" ]
+    libs += [
+      "d3d11.lib",
+      "dxgi.lib",
+    ]
+  }
+
   if (dawn_enable_opengl) {
     deps += [ "third_party:glfw" ]
   }

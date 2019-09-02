@@ -100,7 +100,6 @@ namespace dawn_native { namespace d3d12 {
                     UNREACHABLE();
             }
         }
-
     }  // namespace
 
     DXGI_FORMAT D3D12TextureFormat(dawn::TextureFormat format) {
@@ -221,6 +220,56 @@ namespace dawn_native { namespace d3d12 {
         }
     }
 
+    MaybeError ValidateTextureDescriptorCanBeWrapped(const TextureDescriptor* descriptor) {
+        if (descriptor->dimension != dawn::TextureDimension::e2D) {
+            return DAWN_VALIDATION_ERROR("Texture must be 2D");
+        }
+
+        if (descriptor->mipLevelCount != 1) {
+            return DAWN_VALIDATION_ERROR("Mip level count must be 1");
+        }
+
+        if (descriptor->arrayLayerCount != 1) {
+            return DAWN_VALIDATION_ERROR("Array layer count must be 1");
+        }
+
+        if (descriptor->sampleCount != 1) {
+            return DAWN_VALIDATION_ERROR("Sample count must be 1");
+        }
+
+        return {};
+    }
+
+    MaybeError ValidateD3D12TextureCanBeWrapped(ID3D12Resource* d3d12Resource,
+                                                const TextureDescriptor* dawnDescriptor) {
+        const D3D12_RESOURCE_DESC d3dDescriptor = d3d12Resource->GetDesc();
+        if ((dawnDescriptor->size.width != d3dDescriptor.Width) ||
+            (dawnDescriptor->size.height != d3dDescriptor.Height) ||
+            (dawnDescriptor->size.depth != 1)) {
+            return DAWN_VALIDATION_ERROR("D3D12 texture size doesn't match descriptor");
+        }
+
+        const DXGI_FORMAT dxgiFormatFromDescriptor = D3D12TextureFormat(dawnDescriptor->format);
+        if (dxgiFormatFromDescriptor != d3dDescriptor.Format) {
+            return DAWN_VALIDATION_ERROR(
+                "D3D12 texture format must be compatible with descriptor format.");
+        }
+
+        if (d3dDescriptor.MipLevels != 1) {
+            return DAWN_VALIDATION_ERROR("D3D12 texture number of miplevels must be 1.");
+        }
+
+        if (d3dDescriptor.DepthOrArraySize != 1) {
+            return DAWN_VALIDATION_ERROR("D3D12 texture array size must be 1.");
+        }
+
+        // Shared textures cannot be multi-sample so no need to check those.
+        ASSERT(d3dDescriptor.SampleDesc.Count == 1);
+        ASSERT(d3dDescriptor.SampleDesc.Quality == 0);
+
+        return {};
+    }
+
     Texture::Texture(Device* device, const TextureDescriptor* descriptor)
         : TextureBase(device, descriptor, TextureState::OwnedInternal) {
         D3D12_RESOURCE_DESC resourceDescriptor;
@@ -258,6 +307,8 @@ namespace dawn_native { namespace d3d12 {
                      const TextureDescriptor* descriptor,
                      ID3D12Resource* nativeTexture)
         : TextureBase(device, descriptor, TextureState::OwnedExternal), mResource(nativeTexture) {
+        SetIsSubresourceContentInitialized(0, descriptor->mipLevelCount, 0,
+                                           descriptor->arrayLayerCount);
     }
 
     Texture::~Texture() {

@@ -90,6 +90,8 @@ namespace dawn_native { namespace d3d12 {
 
         void DeallocateMemory(ResourceMemoryAllocation& allocation);
 
+        TextureBase* WrapSharedHandle(const TextureDescriptor* descriptor, HANDLE sharedHandle);
+
       private:
         ResultOrError<BindGroupBase*> CreateBindGroupImpl(
             const BindGroupDescriptor* descriptor) override;

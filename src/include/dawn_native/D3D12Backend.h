@@ -19,12 +19,20 @@
 #include <dawn_native/DawnNative.h>
 
 #include <windows.h>
+#include <wrl/client.h>
+
+struct ID3D12Device;
 
 namespace dawn_native { namespace d3d12 {
+    DAWN_NATIVE_EXPORT Microsoft::WRL::ComPtr<ID3D12Device> GetD3D12Device(DawnDevice device);
     DAWN_NATIVE_EXPORT DawnSwapChainImplementation CreateNativeSwapChainImpl(DawnDevice device,
                                                                              HWND window);
     DAWN_NATIVE_EXPORT DawnTextureFormat
     GetNativeSwapChainPreferredFormat(const DawnSwapChainImplementation* swapChain);
+
+    DAWN_NATIVE_EXPORT DawnTexture WrapSharedHandle(DawnDevice device,
+                                                    const DawnTextureDescriptor* descriptor,
+                                                    HANDLE sharedHandle);
 }}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12BACKEND_H_
