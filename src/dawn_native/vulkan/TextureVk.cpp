@@ -14,12 +14,17 @@
 
 #include "dawn_native/vulkan/TextureVk.h"
 
+#include "common/Assert.h"
+#include "common/Math.h"
+#include "dawn_native/DynamicUploader.h"
+#include "dawn_native/Error.h"
 #include "dawn_native/VulkanBackend.h"
 #include "dawn_native/vulkan/AdapterVk.h"
 #include "dawn_native/vulkan/BufferVk.h"
 #include "dawn_native/vulkan/CommandRecordingContext.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
+#include "dawn_native/vulkan/StagingBufferVk.h"
 #include "dawn_native/vulkan/UtilsVulkan.h"
 
 namespace dawn_native { namespace vulkan {
@@ -442,8 +447,9 @@ namespace dawn_native { namespace vulkan {
             ASSERT(false);
         }
         if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
-            ClearTexture(ToBackend(GetDevice())->GetPendingRecordingContext(), 0, GetNumMipLevels(),
-                         0, GetArrayLayers(), TextureBase::ClearValue::NonZero);
+            device->ConsumedError(ClearTexture(ToBackend(GetDevice())->GetPendingRecordingContext(),
+                                               0, GetNumMipLevels(), 0, GetArrayLayers(),
+                                               TextureBase::ClearValue::NonZero));
         }
     }
 
@@ -639,12 +645,13 @@ namespace dawn_native { namespace vulkan {
         mLastExternalState = mExternalState;
     }
 
-    void Texture::ClearTexture(CommandRecordingContext* recordingContext,
-                               uint32_t baseMipLevel,
-                               uint32_t levelCount,
-                               uint32_t baseArrayLayer,
-                               uint32_t layerCount,
-                               TextureBase::ClearValue clearValue) {
+    MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
+                                     uint32_t baseMipLevel,
+                                     uint32_t levelCount,
+                                     uint32_t baseArrayLayer,
+                                     uint32_t layerCount,
+                                     TextureBase::ClearValue clearValue) {
+        Device* device = ToBackend(GetDevice());
         VkImageSubresourceRange range = {};
         range.aspectMask = GetVkAspectMask();
         range.baseMipLevel = baseMipLevel;
@@ -654,44 +661,45 @@ namespace dawn_native { namespace vulkan {
         uint8_t clearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0 : 1;
 
         TransitionUsageNow(recordingContext, dawn::TextureUsage::CopyDst);
-        if (GetFormat().HasDepthOrStencil()) {
-            VkClearDepthStencilValue clearDepthStencilValue[1];
-            clearDepthStencilValue[0].depth = clearColor;
-            clearDepthStencilValue[0].stencil = clearColor;
-            ToBackend(GetDevice())
-                ->fn.CmdClearDepthStencilImage(recordingContext->commandBuffer, GetHandle(),
-                                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                               clearDepthStencilValue, 1, &range);
-        } else if (GetFormat().isRenderable) {
-            VkClearColorValue clearColorValue = {{clearColor, clearColor, clearColor, clearColor}};
-            ToBackend(GetDevice())
-                ->fn.CmdClearColorImage(recordingContext->commandBuffer, GetHandle(),
-                                        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clearColorValue, 1,
-                                        &range);
+        if (GetFormat().isRenderable) {
+            if (GetFormat().HasDepthOrStencil()) {
+                VkClearDepthStencilValue clearDepthStencilValue[1];
+                clearDepthStencilValue[0].depth = clearColor;
+                clearDepthStencilValue[0].stencil = clearColor;
+                device->fn.CmdClearDepthStencilImage(recordingContext->commandBuffer, GetHandle(),
+                                                     VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                                     clearDepthStencilValue, 1, &range);
+            } else {
+                VkClearColorValue clearColorValue = {
+                    {clearColor, clearColor, clearColor, clearColor}};
+                device->fn.CmdClearColorImage(recordingContext->commandBuffer, GetHandle(),
+                                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                              &clearColorValue, 1, &range);
+            }
         } else {
             // TODO(natlee@microsoft.com): test compressed textures are cleared
             // create temp buffer with clear color to copy to the texture image
-            dawn_native::vulkan::Device* device =
-                reinterpret_cast<dawn_native::vulkan::Device*>(GetDevice());
-            dawn_native::BufferDescriptor descriptor;
-            descriptor.size = (GetSize().width / GetFormat().blockWidth) *
-                              (GetSize().height / GetFormat().blockHeight) *
-                              GetFormat().blockByteSize;
-            descriptor.nextInChain = nullptr;
-            descriptor.usage = dawn::BufferUsage::CopySrc | dawn::BufferUsage::MapWrite;
-            std::unique_ptr<Buffer> srcBuffer =
-                std::make_unique<dawn_native::vulkan::Buffer>(device, &descriptor);
-            uint8_t* clearBuffer = nullptr;
-            device->ConsumedError(srcBuffer->MapAtCreation(&clearBuffer));
-            std::fill(reinterpret_cast<uint32_t*>(clearBuffer),
-                      reinterpret_cast<uint32_t*>(clearBuffer + descriptor.size), clearColor);
+            uint32_t rowPitch =
+                Align((GetSize().width / GetFormat().blockWidth) * GetFormat().blockByteSize,
+                      kTextureRowPitchAlignment);
+            uint64_t bufferSize64 = rowPitch * (GetSize().height / GetFormat().blockHeight);
+            if (bufferSize64 > std::numeric_limits<uint32_t>::max()) {
+                return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate buffer.");
+            }
+            uint32_t bufferSize = static_cast<uint32_t>(bufferSize64);
+            DynamicUploader* uploader = nullptr;
+            DAWN_TRY_ASSIGN(uploader, device->GetDynamicUploader());
+            UploadHandle uploadHandle;
+            DAWN_TRY_ASSIGN(uploadHandle, uploader->Allocate(bufferSize));
+            std::fill(reinterpret_cast<uint32_t*>(uploadHandle.mappedBuffer),
+                      reinterpret_cast<uint32_t*>(uploadHandle.mappedBuffer + bufferSize),
+                      clearColor);
 
             // compute the buffer image copy to set the clear region of entire texture
             dawn_native::BufferCopy bufferCopy;
-            bufferCopy.buffer = srcBuffer.get();
             bufferCopy.imageHeight = 0;
-            bufferCopy.offset = 0;
-            bufferCopy.rowPitch = 0;
+            bufferCopy.offset = uploadHandle.startOffset;
+            bufferCopy.rowPitch = rowPitch;
 
             dawn_native::TextureCopy textureCopy;
             textureCopy.texture = this;
@@ -705,18 +713,17 @@ namespace dawn_native { namespace vulkan {
                 ComputeBufferImageCopyRegion(bufferCopy, textureCopy, copySize);
 
             // copy the clear buffer to the texture image
-            srcBuffer->TransitionUsageNow(recordingContext, dawn::BufferUsage::CopySrc);
-            ToBackend(GetDevice())
-                ->fn.CmdCopyBufferToImage(recordingContext->commandBuffer, srcBuffer->GetHandle(),
-                                          GetHandle(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
-                                          &region);
+            device->fn.CmdCopyBufferToImage(
+                recordingContext->commandBuffer,
+                ToBackend(uploadHandle.stagingBuffer)->GetBufferHandle(), GetHandle(),
+                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
         }
-
         if (clearValue == TextureBase::ClearValue::Zero) {
             SetIsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer,
                                                layerCount);
-            GetDevice()->IncrementLazyClearCountForTesting();
+            device->IncrementLazyClearCountForTesting();
         }
+        return {};
     }
 
     void Texture::EnsureSubresourceContentInitialized(CommandRecordingContext* recordingContext,
@@ -737,8 +744,9 @@ namespace dawn_native { namespace vulkan {
 
             // If subresource has not been initialized, clear it to black as it could contain dirty
             // bits from recycled memory
-            ClearTexture(recordingContext, baseMipLevel, levelCount, baseArrayLayer, layerCount,
-                         TextureBase::ClearValue::Zero);
+            GetDevice()->ConsumedError(ClearTexture(recordingContext, baseMipLevel, levelCount,
+                                                    baseArrayLayer, layerCount,
+                                                    TextureBase::ClearValue::Zero));
         }
     }
 

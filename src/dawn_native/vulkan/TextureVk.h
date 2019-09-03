@@ -71,12 +71,12 @@ namespace dawn_native { namespace vulkan {
 
       private:
         void DestroyImpl() override;
-        void ClearTexture(CommandRecordingContext* recordingContext,
-                          uint32_t baseMipLevel,
-                          uint32_t levelCount,
-                          uint32_t baseArrayLayer,
-                          uint32_t layerCount,
-                          TextureBase::ClearValue);
+        MaybeError ClearTexture(CommandRecordingContext* recordingContext,
+                                uint32_t baseMipLevel,
+                                uint32_t levelCount,
+                                uint32_t baseArrayLayer,
+                                uint32_t layerCount,
+                                TextureBase::ClearValue);
 
         VkImage mHandle = VK_NULL_HANDLE;
         DeviceMemoryAllocation mMemoryAllocation;
