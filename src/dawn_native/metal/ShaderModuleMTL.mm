@@ -18,7 +18,7 @@
 #include "dawn_native/metal/DeviceMTL.h"
 #include "dawn_native/metal/PipelineLayoutMTL.h"
 
-#include <spirv-cross/spirv_msl.hpp>
+#include <spirv_msl.hpp>
 
 #include <sstream>
 

@@ -17,7 +17,7 @@
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
 
-#include <spirv-cross/spirv_cross.hpp>
+#include <spirv_cross.hpp>
 
 namespace dawn_native { namespace vulkan {
 

@@ -18,7 +18,7 @@
 #include "common/Platform.h"
 #include "dawn_native/opengl/DeviceGL.h"
 
-#include <spirv-cross/spirv_glsl.hpp>
+#include <spirv_glsl.hpp>
 
 #include <sstream>
 

@@ -19,7 +19,7 @@
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/Instance.h"
 
-#include <spirv-cross/spirv_cross.hpp>
+#include <spirv_cross.hpp>
 
 namespace dawn_native { namespace null {
 

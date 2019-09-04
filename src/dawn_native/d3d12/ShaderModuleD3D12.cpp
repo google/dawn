@@ -20,7 +20,7 @@
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/PipelineLayoutD3D12.h"
 
-#include <spirv-cross/spirv_hlsl.hpp>
+#include <spirv_hlsl.hpp>
 
 namespace dawn_native { namespace d3d12 {
 

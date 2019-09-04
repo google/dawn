@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../scripts/dawn_overrides_with_defaults.gni")
-import("../scripts/dawn_features.gni")
 import("//build_overrides/build.gni")
+import("../scripts/dawn_features.gni")
+import("../scripts/dawn_overrides_with_defaults.gni")
 
 is_msvc = is_win && !is_clang
 
@@ -26,7 +26,10 @@ is_msvc = is_win && !is_clang
 spirv_cross_dir = dawn_spirv_cross_dir
 
 config("spirv_cross_public") {
-  include_dirs = [ "${spirv_cross_dir}/.." ]
+  include_dirs = [
+    "${spirv_cross_dir}",
+    "${spirv_cross_dir}/..",
+  ]
   defines = [ "SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS" ]
 }
 

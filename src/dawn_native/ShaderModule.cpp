@@ -20,8 +20,8 @@
 #include "dawn_native/Pipeline.h"
 #include "dawn_native/PipelineLayout.h"
 
-#include <spirv-cross/spirv_cross.hpp>
 #include <spirv-tools/libspirv.hpp>
+#include <spirv_cross.hpp>
 
 #include <sstream>
 
