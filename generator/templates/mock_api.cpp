@@ -60,6 +60,10 @@ void ProcTableAsClass::DeviceSetUncapturedErrorCallback(DawnDevice self,
     OnDeviceSetUncapturedErrorCallback(self, callback, userdata);
 }
 
+bool ProcTableAsClass::DevicePopErrorScope(DawnDevice self, DawnErrorCallback callback, void* userdata) {
+    return OnDevicePopErrorScopeCallback(self, callback, userdata);
+}
+
 void ProcTableAsClass::DeviceCreateBufferMappedAsync(DawnDevice self,
                                                      const DawnBufferDescriptor* descriptor,
                                                      DawnBufferCreateMappedCallback callback,

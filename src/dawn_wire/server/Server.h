@@ -32,6 +32,13 @@ namespace dawn_wire { namespace server {
         std::unique_ptr<MemoryTransferService::WriteHandle> writeHandle = nullptr;
     };
 
+    struct ErrorScopeUserdata {
+        Server* server;
+        // TODO(enga): ObjectHandle device;
+        // when the wire supports multiple devices.
+        uint32_t requestSerial;
+    };
+
     struct FenceCompletionUserdata {
         Server* server;
         ObjectHandle fence;
@@ -55,6 +62,7 @@ namespace dawn_wire { namespace server {
 
         // Forwarding callbacks
         static void ForwardUncapturedError(DawnErrorType type, const char* message, void* userdata);
+        static void ForwardPopErrorScope(DawnErrorType type, const char* message, void* userdata);
         static void ForwardBufferMapReadAsync(DawnBufferMapAsyncStatus status,
                                               const void* ptr,
                                               uint64_t dataLength,
@@ -67,6 +75,9 @@ namespace dawn_wire { namespace server {
 
         // Error callbacks
         void OnUncapturedError(DawnErrorType type, const char* message);
+        void OnDevicePopErrorScope(DawnErrorType type,
+                                   const char* message,
+                                   ErrorScopeUserdata* userdata);
         void OnBufferMapReadAsyncCallback(DawnBufferMapAsyncStatus status,
                                           const void* ptr,
                                           uint64_t dataLength,

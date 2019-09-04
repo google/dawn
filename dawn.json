@@ -527,6 +527,20 @@
                     {"name": "callback", "type": "error callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
+            },
+            {
+                "name": "push error scope",
+                "args": [
+                    {"name": "filter", "type": "error filter"}
+                ]
+            },
+            {
+                "name": "pop error scope",
+                "returns": "bool",
+                "args": [
+                    {"name": "callback", "type": "error callback"},
+                    {"name": "userdata", "type": "void", "annotation": "*"}
+                ]
             }
         ]
     },
@@ -545,6 +559,14 @@
     },
     "error callback": {
         "category": "natively defined"
+    },
+    "error filter": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "none"},
+            {"value": 1, "name": "validation"},
+            {"value": 2, "name": "out of memory"}
+        ]
     },
     "error type": {
         "category": "enum",

@@ -99,6 +99,17 @@ namespace dawn_native {
         mErrorUserdata = userdata;
     }
 
+    void DeviceBase::PushErrorScope(dawn::ErrorFilter filter) {
+        // TODO(crbug.com/dawn/153): Implement error scopes.
+        HandleError(dawn::ErrorType::Validation, "Error scopes not implemented");
+    }
+
+    bool DeviceBase::PopErrorScope(dawn::ErrorCallback callback, void* userdata) {
+        // TODO(crbug.com/dawn/153): Implement error scopes.
+        HandleError(dawn::ErrorType::Validation, "Error scopes not implemented");
+        return false;
+    }
+
     MaybeError DeviceBase::ValidateObject(const ObjectBase* object) const {
         if (DAWN_UNLIKELY(object->GetDevice() != this)) {
             return DAWN_VALIDATION_ERROR("Object from a different device.");

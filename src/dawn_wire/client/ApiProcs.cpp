@@ -264,6 +264,16 @@ namespace dawn_wire { namespace client {
         writeHandle->SerializeCreate(allocatedBuffer + commandSize);
     }
 
+    void ClientDevicePushErrorScope(DawnDevice cDevice, DawnErrorFilter filter) {
+        Device* device = reinterpret_cast<Device*>(cDevice);
+        device->PushErrorScope(filter);
+    }
+
+    bool ClientDevicePopErrorScope(DawnDevice cDevice, DawnErrorCallback callback, void* userdata) {
+        Device* device = reinterpret_cast<Device*>(cDevice);
+        return device->RequestPopErrorScope(callback, userdata);
+    }
+
     uint64_t ClientFenceGetCompletedValue(DawnFence cSelf) {
         auto fence = reinterpret_cast<Fence*>(cSelf);
         return fence->completedValue;

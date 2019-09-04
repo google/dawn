@@ -31,4 +31,33 @@ namespace dawn_wire { namespace server {
         cmd.Serialize(allocatedBuffer);
     }
 
+    bool Server::DoDevicePopErrorScope(DawnDevice cDevice, uint64_t requestSerial) {
+        ErrorScopeUserdata* userdata = new ErrorScopeUserdata;
+        userdata->server = this;
+        userdata->requestSerial = requestSerial;
+
+        return mProcs.devicePopErrorScope(cDevice, ForwardPopErrorScope, userdata);
+    }
+
+    // static
+    void Server::ForwardPopErrorScope(DawnErrorType type, const char* message, void* userdata) {
+        auto* data = reinterpret_cast<ErrorScopeUserdata*>(userdata);
+        data->server->OnDevicePopErrorScope(type, message, data);
+    }
+
+    void Server::OnDevicePopErrorScope(DawnErrorType type,
+                                       const char* message,
+                                       ErrorScopeUserdata* userdata) {
+        std::unique_ptr<ErrorScopeUserdata> data{userdata};
+
+        ReturnDevicePopErrorScopeCallbackCmd cmd;
+        cmd.requestSerial = data->requestSerial;
+        cmd.type = type;
+        cmd.message = message;
+
+        size_t requiredSize = cmd.GetRequiredSize();
+        char* allocatedBuffer = static_cast<char*>(GetCmdSpace(requiredSize));
+        cmd.Serialize(allocatedBuffer);
+    }
+
 }}  // namespace dawn_wire::server

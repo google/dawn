@@ -54,6 +54,7 @@ class ProcTableAsClass {
         void DeviceSetUncapturedErrorCallback(DawnDevice self,
                                     DawnErrorCallback callback,
                                     void* userdata);
+        bool DevicePopErrorScope(DawnDevice self, DawnErrorCallback callback, void* userdata);
         void DeviceCreateBufferMappedAsync(DawnDevice self,
                                            const DawnBufferDescriptor* descriptor,
                                            DawnBufferCreateMappedCallback callback,
@@ -71,6 +72,9 @@ class ProcTableAsClass {
 
         // Special cased mockable methods
         virtual void OnDeviceSetUncapturedErrorCallback(DawnDevice device,
+                                              DawnErrorCallback callback,
+                                              void* userdata) = 0;
+        virtual bool OnDevicePopErrorScopeCallback(DawnDevice device,
                                               DawnErrorCallback callback,
                                               void* userdata) = 0;
         virtual void OnDeviceCreateBufferMappedAsyncCallback(DawnDevice self,
@@ -134,6 +138,7 @@ class MockProcTable : public ProcTableAsClass {
         {% endfor %}
 
         MOCK_METHOD3(OnDeviceSetUncapturedErrorCallback, void(DawnDevice device, DawnErrorCallback callback, void* userdata));
+        MOCK_METHOD3(OnDevicePopErrorScopeCallback, bool(DawnDevice device, DawnErrorCallback callback, void* userdata));
         MOCK_METHOD4(OnDeviceCreateBufferMappedAsyncCallback, void(DawnDevice device, const DawnBufferDescriptor* descriptor, DawnBufferCreateMappedCallback callback, void* userdata));
         MOCK_METHOD3(OnBufferMapReadAsyncCallback, void(DawnBuffer buffer, DawnBufferMapReadCallback callback, void* userdata));
         MOCK_METHOD3(OnBufferMapWriteAsyncCallback, void(DawnBuffer buffer, DawnBufferMapWriteCallback callback, void* userdata));
