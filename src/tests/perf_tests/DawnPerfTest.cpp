@@ -39,7 +39,7 @@ DawnPerfTestEnvironment::DawnPerfTestEnvironment(int argc, char** argv)
             continue;
         }
 
-        if (strcmp("--override-steps", argv[i]) == 0) {
+        if (strstr(argv[i], "--override-steps=") == argv[i]) {
             const char* value = strchr(argv[i], '=');
             if (value != nullptr) {
                 mOverrideStepsToRun = strtoul(value + 1, nullptr, 0);
@@ -49,9 +49,10 @@ DawnPerfTestEnvironment::DawnPerfTestEnvironment(int argc, char** argv)
 
         if (strcmp("-h", argv[i]) == 0 || strcmp("--help", argv[i]) == 0) {
             std::cout << "Additional flags:"
-                      << " [--calibration]\n"
+                      << " [--calibration] [--override-steps=x]\n"
                       << "  --calibration: Only run calibration. Calibration allows the perf test"
                          " runner script to save some time.\n"
+                      << " --override-steps: Set a fixed number of steps to run for each test\n"
                       << std::endl;
             continue;
         }
