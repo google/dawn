@@ -282,10 +282,10 @@ namespace dawn_native {
             desc = *descriptor;
         }
 
-        if (desc.format == dawn::TextureFormat::None) {
+        if (desc.format == dawn::TextureFormat::Undefined) {
             desc.format = texture->GetFormat().format;
         }
-        if (desc.dimension == dawn::TextureViewDimension::None) {
+        if (desc.dimension == dawn::TextureViewDimension::Undefined) {
             desc.dimension = GetDefaultViewDimension(texture);
         }
         if (desc.arrayLayerCount == 0) {

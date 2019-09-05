@@ -60,7 +60,7 @@ namespace dawn_native {
         }
 
         if (descriptor->colorFormatsCount == 0 &&
-            descriptor->depthStencilFormat == dawn::TextureFormat::None) {
+            descriptor->depthStencilFormat == dawn::TextureFormat::Undefined) {
             return DAWN_VALIDATION_ERROR("Should have at least one attachment format");
         }
 
@@ -68,7 +68,7 @@ namespace dawn_native {
             DAWN_TRY(ValidateColorAttachmentFormat(device, descriptor->colorFormats[i]));
         }
 
-        if (descriptor->depthStencilFormat != dawn::TextureFormat::None) {
+        if (descriptor->depthStencilFormat != dawn::TextureFormat::Undefined) {
             DAWN_TRY(ValidateDepthStencilAttachmentFormat(device, descriptor->depthStencilFormat));
         }
 

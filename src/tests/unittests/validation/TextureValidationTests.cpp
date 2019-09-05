@@ -257,10 +257,10 @@ TEST_F(TextureValidationTest, NonRenderableAndOutputAttachment) {
     }
 }
 
-// Test it is an error to create a texture with format "None".
-TEST_F(TextureValidationTest, TextureFormatNone) {
+// Test it is an error to create a texture with format "Undefined".
+TEST_F(TextureValidationTest, TextureFormatUndefined) {
     dawn::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
-    descriptor.format = dawn::TextureFormat::None;
+    descriptor.format = dawn::TextureFormat::Undefined;
     ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
 }
 

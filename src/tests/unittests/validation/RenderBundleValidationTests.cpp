@@ -585,16 +585,18 @@ TEST_F(RenderBundleValidationTest, RequiresAtLeastOneTextureFormat) {
     }
 }
 
-TEST_F(RenderBundleValidationTest, ColorFormatNone) {
+// Test that render bundle color formats cannot be set to undefined.
+TEST_F(RenderBundleValidationTest, ColorFormatUndefined) {
     utils::ComboRenderBundleEncoderDescriptor desc = {};
     desc.colorFormatsCount = 1;
-    desc.cColorFormats[0] = dawn::TextureFormat::None;
+    desc.cColorFormats[0] = dawn::TextureFormat::Undefined;
     ASSERT_DEVICE_ERROR(device.CreateRenderBundleEncoder(&desc));
 }
 
-TEST_F(RenderBundleValidationTest, DepthStencilFormatNone) {
+// Test that the render bundle depth stencil format cannot be set to undefined.
+TEST_F(RenderBundleValidationTest, DepthStencilFormatUndefined) {
     utils::ComboRenderBundleEncoderDescriptor desc = {};
-    desc.depthStencilFormat = dawn::TextureFormat::None;
+    desc.depthStencilFormat = dawn::TextureFormat::Undefined;
     ASSERT_DEVICE_ERROR(device.CreateRenderBundleEncoder(&desc));
 }
 

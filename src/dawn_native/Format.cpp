@@ -64,9 +64,13 @@ namespace dawn_native {
     // Implementation details of the format table of the DeviceBase
 
     // For the enum for formats are packed but this might change when we have a broader extension
-    // mechanism for webgpu.h
+    // mechanism for webgpu.h. Formats start at 1 because 0 is the undefined format.
     size_t ComputeFormatIndex(dawn::TextureFormat format) {
-        return static_cast<size_t>(static_cast<uint32_t>(format));
+        // This takes advantage of overflows to make the index of TextureFormat::Undefined outside
+        // of the range of the FormatTable.
+        static_assert(static_cast<uint32_t>(dawn::TextureFormat::Undefined) - 1 > kKnownFormatCount,
+                      "");
+        return static_cast<size_t>(static_cast<uint32_t>(format) - 1);
     }
 
     FormatTable BuildFormatTable(const DeviceBase* device) {

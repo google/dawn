@@ -187,7 +187,7 @@ TEST_F(TextureViewValidationTest, TextureViewDescriptorDefaultsArray) {
     }
     {
         dawn::TextureViewDescriptor descriptor;
-        descriptor.format = dawn::TextureFormat::None;
+        descriptor.format = dawn::TextureFormat::Undefined;
         texture.CreateView(&descriptor);
         descriptor.format = dawn::TextureFormat::RGBA8Unorm;
         texture.CreateView(&descriptor);
@@ -196,7 +196,7 @@ TEST_F(TextureViewValidationTest, TextureViewDescriptorDefaultsArray) {
     }
     {
         dawn::TextureViewDescriptor descriptor;
-        descriptor.dimension = dawn::TextureViewDimension::None;
+        descriptor.dimension = dawn::TextureViewDimension::Undefined;
         texture.CreateView(&descriptor);
         descriptor.dimension = dawn::TextureViewDimension::e2DArray;
         texture.CreateView(&descriptor);
@@ -225,7 +225,7 @@ TEST_F(TextureViewValidationTest, TextureViewDescriptorDefaultsNonArray) {
     }
     {
         dawn::TextureViewDescriptor descriptor;
-        descriptor.format = dawn::TextureFormat::None;
+        descriptor.format = dawn::TextureFormat::Undefined;
         texture.CreateView(&descriptor);
         descriptor.format = dawn::TextureFormat::RGBA8Unorm;
         texture.CreateView(&descriptor);
@@ -234,7 +234,7 @@ TEST_F(TextureViewValidationTest, TextureViewDescriptorDefaultsNonArray) {
     }
     {
         dawn::TextureViewDescriptor descriptor;
-        descriptor.dimension = dawn::TextureViewDimension::None;
+        descriptor.dimension = dawn::TextureViewDimension::Undefined;
         texture.CreateView(&descriptor);
         descriptor.dimension = dawn::TextureViewDimension::e2D;
         texture.CreateView(&descriptor);

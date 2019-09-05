@@ -134,7 +134,7 @@ namespace dawn_native {
     }
 
     bool AttachmentState::HasDepthStencilAttachment() const {
-        return mDepthStencilFormat != dawn::TextureFormat::None;
+        return mDepthStencilFormat != dawn::TextureFormat::Undefined;
     }
 
     dawn::TextureFormat AttachmentState::GetDepthStencilFormat() const {
