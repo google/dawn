@@ -71,7 +71,7 @@ class ColorStateTest : public DawnTest {
 
         utils::ComboRenderPipelineDescriptor baseDescriptor(device);
         baseDescriptor.layout = pipelineLayout;
-        baseDescriptor.cVertexStage.module = vsModule;
+        baseDescriptor.vertexStage.module = vsModule;
         baseDescriptor.cFragmentStage.module = fsModule;
         baseDescriptor.cColorStates[0]->format = renderPass.colorFormat;
 
@@ -79,7 +79,7 @@ class ColorStateTest : public DawnTest {
 
         utils::ComboRenderPipelineDescriptor testDescriptor(device);
         testDescriptor.layout = pipelineLayout;
-        testDescriptor.cVertexStage.module = vsModule;
+        testDescriptor.vertexStage.module = vsModule;
         testDescriptor.cFragmentStage.module = fsModule;
         testDescriptor.cColorStates[0] = &colorStateDescriptor;
         testDescriptor.cColorStates[0]->format = renderPass.colorFormat;
@@ -797,7 +797,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
 
     utils::ComboRenderPipelineDescriptor baseDescriptor(device);
     baseDescriptor.layout = pipelineLayout;
-    baseDescriptor.cVertexStage.module = vsModule;
+    baseDescriptor.vertexStage.module = vsModule;
     baseDescriptor.cFragmentStage.module = fsModule;
     baseDescriptor.colorStateCount = 4;
 
@@ -805,7 +805,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
 
     utils::ComboRenderPipelineDescriptor testDescriptor(device);
     testDescriptor.layout = pipelineLayout;
-    testDescriptor.cVertexStage.module = vsModule;
+    testDescriptor.vertexStage.module = vsModule;
     testDescriptor.cFragmentStage.module = fsModule;
     testDescriptor.colorStateCount = 4;
 
@@ -899,7 +899,7 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
 
     utils::ComboRenderPipelineDescriptor baseDescriptor(device);
     baseDescriptor.layout = pipelineLayout;
-    baseDescriptor.cVertexStage.module = vsModule;
+    baseDescriptor.vertexStage.module = vsModule;
     baseDescriptor.cFragmentStage.module = fsModule;
     baseDescriptor.cColorStates[0]->format = renderPass.colorFormat;
 
@@ -907,7 +907,7 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
 
     utils::ComboRenderPipelineDescriptor testDescriptor(device);
     testDescriptor.layout = pipelineLayout;
-    testDescriptor.cVertexStage.module = vsModule;
+    testDescriptor.vertexStage.module = vsModule;
     testDescriptor.cFragmentStage.module = fsModule;
     testDescriptor.cColorStates[0]->format = renderPass.colorFormat;
 
@@ -1023,7 +1023,7 @@ TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
 
     utils::ComboRenderPipelineDescriptor baseDescriptor(device);
     baseDescriptor.layout = pipelineLayout;
-    baseDescriptor.cVertexStage.module = vsModule;
+    baseDescriptor.vertexStage.module = vsModule;
     baseDescriptor.cFragmentStage.module = fsModule;
     baseDescriptor.cColorStates[0]->format = renderPass.colorFormat;
 
@@ -1031,7 +1031,7 @@ TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
 
     utils::ComboRenderPipelineDescriptor testDescriptor(device);
     testDescriptor.layout = pipelineLayout;
-    testDescriptor.cVertexStage.module = vsModule;
+    testDescriptor.vertexStage.module = vsModule;
     testDescriptor.cFragmentStage.module = fsModule;
     testDescriptor.cColorStates[0]->format = renderPass.colorFormat;
     testDescriptor.cColorStates[0]->writeMask = dawn::ColorWriteMask::Red;

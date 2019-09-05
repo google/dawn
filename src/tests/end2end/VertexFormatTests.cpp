@@ -360,7 +360,7 @@ class VertexFormatTest : public DawnTest {
         }
 
         utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.cVertexStage.module = vsModule;
+        descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
         descriptor.cVertexInput.bufferCount = 1;
         descriptor.cVertexInput.cBuffers[0].stride = strideBytes;

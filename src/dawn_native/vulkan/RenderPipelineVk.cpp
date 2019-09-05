@@ -320,8 +320,8 @@ namespace dawn_native { namespace vulkan {
             shaderStages[0].flags = 0;
             shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
             shaderStages[0].pSpecializationInfo = nullptr;
-            shaderStages[0].module = ToBackend(descriptor->vertexStage->module)->GetHandle();
-            shaderStages[0].pName = descriptor->vertexStage->entryPoint;
+            shaderStages[0].module = ToBackend(descriptor->vertexStage.module)->GetHandle();
+            shaderStages[0].pName = descriptor->vertexStage.entryPoint;
 
             shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
             shaderStages[1].pNext = nullptr;

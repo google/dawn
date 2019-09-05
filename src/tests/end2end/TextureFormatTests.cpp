@@ -216,7 +216,7 @@ class TextureFormatTest : public DawnTest {
         dawn::ShaderModule fsModule = utils::CreateShaderModule(
             device, utils::SingleShaderStage::Fragment, fsSource.str().c_str());
 
-        desc.cVertexStage.module = vsModule;
+        desc.vertexStage.module = vsModule;
         desc.cFragmentStage.module = fsModule;
         desc.layout = utils::MakeBasicPipelineLayout(device, &bgl);
         desc.cColorStates[0]->format = renderFormatInfo.format;

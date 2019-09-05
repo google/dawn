@@ -96,7 +96,7 @@ namespace {
 
         void InitializeRenderPipelineDescriptor(utils::ComboRenderPipelineDescriptor* descriptor) {
             descriptor->layout = pipelineLayout;
-            descriptor->cVertexStage.module = vsModule;
+            descriptor->vertexStage.module = vsModule;
             descriptor->cFragmentStage.module = fsModule;
             descriptor->cVertexInput.bufferCount = 1;
             descriptor->cVertexInput.cBuffers[0].stride = 2 * sizeof(float);

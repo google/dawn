@@ -64,7 +64,7 @@ class TextureZeroInitTest : public DawnTest {
             void main() {
                 gl_Position = vec4(pos[gl_VertexIndex], 0.0, 1.0);
             })";
-        pipelineDescriptor.cVertexStage.module =
+        pipelineDescriptor.vertexStage.module =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vs);
 
         const char* fs =
@@ -441,7 +441,7 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
     // Create render pipeline
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
     renderPipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
-    renderPipelineDescriptor.cVertexStage.module =
+    renderPipelineDescriptor.vertexStage.module =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(#version 450
         const vec2 pos[6] = vec2[6](vec2(-1.0f, -1.0f),
                                     vec2(-1.0f,  1.0f),

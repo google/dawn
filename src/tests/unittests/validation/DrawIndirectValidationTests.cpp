@@ -43,7 +43,7 @@ class DrawIndirectValidationTest : public ValidationTest {
 
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.layout = pipelineLayout;
-        descriptor.cVertexStage.module = vsModule;
+        descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
 
         pipeline = device.CreateRenderPipeline(&descriptor);

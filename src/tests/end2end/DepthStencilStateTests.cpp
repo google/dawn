@@ -275,7 +275,7 @@ class DepthStencilStateTest : public DawnTest {
 
                 utils::ComboRenderPipelineDescriptor descriptor(device);
                 descriptor.layout = pipelineLayout;
-                descriptor.cVertexStage.module = vsModule;
+                descriptor.vertexStage.module = vsModule;
                 descriptor.cFragmentStage.module = fsModule;
                 descriptor.cDepthStencilState = test.depthStencilState;
                 descriptor.cDepthStencilState.format = dawn::TextureFormat::Depth24PlusStencil8;

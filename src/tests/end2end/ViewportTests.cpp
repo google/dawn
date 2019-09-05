@@ -44,7 +44,7 @@ class ViewportTest : public DawnTest {
                     color = vec4(0.0, 1.0, 0.0, 1.0);
                 }
             })";
-        pipelineDescriptor.cVertexStage.module =
+        pipelineDescriptor.vertexStage.module =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vs);
 
         const char* fs =

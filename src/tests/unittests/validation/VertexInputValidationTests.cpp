@@ -34,7 +34,7 @@ class VertexInputTest : public ValidationTest {
             )");
 
         utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.cVertexStage.module = vsModule;
+        descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
         descriptor.vertexInput = &state;
         descriptor.cColorStates[0]->format = dawn::TextureFormat::RGBA8Unorm;

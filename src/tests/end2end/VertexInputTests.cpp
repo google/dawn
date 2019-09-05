@@ -128,7 +128,7 @@ class VertexInputTest : public DawnTest {
                 })");
 
         utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.cVertexStage.module = vsModule;
+        descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
         descriptor.vertexInput = &vertexInput;
         descriptor.cColorStates[0]->format = renderPass.colorFormat;
@@ -541,7 +541,7 @@ TEST_P(OptionalVertexInputTest, Basic) {
             })");
 
     utils::ComboRenderPipelineDescriptor descriptor(device);
-    descriptor.cVertexStage.module = vsModule;
+    descriptor.vertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
     descriptor.primitiveTopology = dawn::PrimitiveTopology::PointList;
     descriptor.vertexInput = nullptr;

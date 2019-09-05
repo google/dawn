@@ -314,8 +314,8 @@ namespace dawn_native { namespace metal {
 
         MTLRenderPipelineDescriptor* descriptorMTL = [MTLRenderPipelineDescriptor new];
 
-        const ShaderModule* vertexModule = ToBackend(descriptor->vertexStage->module);
-        const char* vertexEntryPoint = descriptor->vertexStage->entryPoint;
+        const ShaderModule* vertexModule = ToBackend(descriptor->vertexStage.module);
+        const char* vertexEntryPoint = descriptor->vertexStage.entryPoint;
         ShaderModule::MetalFunctionData vertexData = vertexModule->GetFunction(
             vertexEntryPoint, SingleShaderStage::Vertex, ToBackend(GetLayout()));
         descriptorMTL.vertexFunction = vertexData.function;

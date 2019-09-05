@@ -312,8 +312,8 @@ namespace dawn_native { namespace d3d12 {
             D3D12_SHADER_BYTECODE* shader = nullptr;
             switch (stage) {
                 case SingleShaderStage::Vertex:
-                    module = ToBackend(descriptor->vertexStage->module);
-                    entryPoint = descriptor->vertexStage->entryPoint;
+                    module = ToBackend(descriptor->vertexStage.module);
+                    entryPoint = descriptor->vertexStage.entryPoint;
                     shader = &descriptorD3D12.VS;
                     compileTarget = "vs_5_1";
                     break;

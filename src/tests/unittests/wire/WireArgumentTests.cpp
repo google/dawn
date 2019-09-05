@@ -162,11 +162,9 @@ TEST_F(WireArgumentTests, CStringArgument) {
     DawnRenderPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.nextInChain = nullptr;
 
-    DawnPipelineStageDescriptor vertexStage;
-    vertexStage.nextInChain = nullptr;
-    vertexStage.module = vsModule;
-    vertexStage.entryPoint = "main";
-    pipelineDescriptor.vertexStage = &vertexStage;
+    pipelineDescriptor.vertexStage.nextInChain = nullptr;
+    pipelineDescriptor.vertexStage.module = vsModule;
+    pipelineDescriptor.vertexStage.entryPoint = "main";
 
     DawnPipelineStageDescriptor fragmentStage;
     fragmentStage.nextInChain = nullptr;
@@ -193,7 +191,7 @@ TEST_F(WireArgumentTests, CStringArgument) {
     EXPECT_CALL(api,
                 DeviceCreateRenderPipeline(
                     apiDevice, MatchesLambda([](const DawnRenderPipelineDescriptor* desc) -> bool {
-                        return desc->vertexStage->entryPoint == std::string("main");
+                        return desc->vertexStage.entryPoint == std::string("main");
                     })))
         .WillOnce(Return(apiDummyPipeline));
 

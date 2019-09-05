@@ -36,7 +36,7 @@ class ClipSpaceTest : public DawnTest {
             void main() {
                 gl_Position = vec4(pos[gl_VertexIndex], 1.0);
             })";
-        pipelineDescriptor.cVertexStage.module =
+        pipelineDescriptor.vertexStage.module =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vs);
 
         const char* fs =

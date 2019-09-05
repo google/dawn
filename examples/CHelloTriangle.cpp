@@ -61,11 +61,9 @@ void init() {
         DawnRenderPipelineDescriptor descriptor;
         descriptor.nextInChain = nullptr;
 
-        DawnPipelineStageDescriptor vertexStage;
-        vertexStage.nextInChain = nullptr;
-        vertexStage.module = vsModule;
-        vertexStage.entryPoint = "main";
-        descriptor.vertexStage = &vertexStage;
+        descriptor.vertexStage.nextInChain = nullptr;
+        descriptor.vertexStage.module = vsModule;
+        descriptor.vertexStage.entryPoint = "main";
 
         DawnPipelineStageDescriptor fragmentStage;
         fragmentStage.nextInChain = nullptr;

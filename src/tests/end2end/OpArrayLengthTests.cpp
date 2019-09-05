@@ -179,7 +179,7 @@ TEST_P(OpArrayLengthTest, Fragment) {
                                       .c_str());
 
     utils::ComboRenderPipelineDescriptor descriptor(device);
-    descriptor.cVertexStage.module = vsModule;
+    descriptor.vertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
     descriptor.primitiveTopology = dawn::PrimitiveTopology::PointList;
     descriptor.cColorStates[0]->format = renderPass.colorFormat;
@@ -240,7 +240,7 @@ TEST_P(OpArrayLengthTest, Vertex) {
         })");
 
     utils::ComboRenderPipelineDescriptor descriptor(device);
-    descriptor.cVertexStage.module = vsModule;
+    descriptor.vertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
     descriptor.primitiveTopology = dawn::PrimitiveTopology::PointList;
     descriptor.cColorStates[0]->format = renderPass.colorFormat;

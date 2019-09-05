@@ -163,7 +163,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
             void main() {
                 fragColor = texture(sampler2D(texture0, sampler0), texCoord);
             })");
-        renderPipelineDescriptor.cVertexStage.module = vsModule;
+        renderPipelineDescriptor.vertexStage.module = vsModule;
         renderPipelineDescriptor.cFragmentStage.module = fsModule;
         renderPipelineDescriptor.layout = pipelineLayout;
         renderPipelineDescriptor.cColorStates[0]->format =

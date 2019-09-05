@@ -71,7 +71,7 @@ class VertexBufferValidationTest : public ValidationTest {
         dawn::RenderPipeline MakeRenderPipeline(const dawn::ShaderModule& vsModule,
                                                 unsigned int bufferCount) {
             utils::ComboRenderPipelineDescriptor descriptor(device);
-            descriptor.cVertexStage.module = vsModule;
+            descriptor.vertexStage.module = vsModule;
             descriptor.cFragmentStage.module = fsModule;
 
             for (unsigned int i = 0; i < bufferCount; ++i) {

@@ -140,7 +140,7 @@ class DynamicBufferOffsetTests : public DawnTest {
             utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fs.str().c_str());
 
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
-        pipelineDescriptor.cVertexStage.module = vsModule;
+        pipelineDescriptor.vertexStage.module = vsModule;
         pipelineDescriptor.cFragmentStage.module = fsModule;
         pipelineDescriptor.cColorStates[0]->format = dawn::TextureFormat::RGBA8Unorm;
 

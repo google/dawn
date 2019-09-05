@@ -53,10 +53,7 @@ namespace utils {
         descriptor->sampleCount = 1;
 
         // Set defaults for the vertex stage descriptor.
-        {
-            descriptor->vertexStage = &cVertexStage;
-            cVertexStage.entryPoint = "main";
-        }
+        { vertexStage.entryPoint = "main"; }
 
         // Set defaults for the fragment stage desriptor.
         {

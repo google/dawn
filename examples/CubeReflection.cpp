@@ -205,7 +205,7 @@ void init() {
 
     utils::ComboRenderPipelineDescriptor descriptor(device);
     descriptor.layout = pl;
-    descriptor.cVertexStage.module = vsModule;
+    descriptor.vertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
     descriptor.vertexInput = &vertexInput;
     descriptor.depthStencilState = &descriptor.cDepthStencilState;
@@ -218,7 +218,7 @@ void init() {
 
     utils::ComboRenderPipelineDescriptor pDescriptor(device);
     pDescriptor.layout = pl;
-    pDescriptor.cVertexStage.module = vsModule;
+    pDescriptor.vertexStage.module = vsModule;
     pDescriptor.cFragmentStage.module = fsModule;
     pDescriptor.vertexInput = &vertexInput;
     pDescriptor.depthStencilState = &pDescriptor.cDepthStencilState;
@@ -232,7 +232,7 @@ void init() {
 
     utils::ComboRenderPipelineDescriptor rfDescriptor(device);
     rfDescriptor.layout = pl;
-    rfDescriptor.cVertexStage.module = vsModule;
+    rfDescriptor.vertexStage.module = vsModule;
     rfDescriptor.cFragmentStage.module = fsReflectionModule;
     rfDescriptor.vertexInput = &vertexInput;
     rfDescriptor.depthStencilState = &rfDescriptor.cDepthStencilState;

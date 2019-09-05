@@ -45,7 +45,7 @@ class RenderPipelineValidationTest : public ValidationTest {
 TEST_F(RenderPipelineValidationTest, CreationSuccess) {
     {
         utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.cVertexStage.module = vsModule;
+        descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
 
         device.CreateRenderPipeline(&descriptor);
@@ -53,7 +53,7 @@ TEST_F(RenderPipelineValidationTest, CreationSuccess) {
     {
         // Vertex input should be optional
         utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.cVertexStage.module = vsModule;
+        descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
         descriptor.vertexInput = nullptr;
 
@@ -62,10 +62,9 @@ TEST_F(RenderPipelineValidationTest, CreationSuccess) {
     {
         // Rasterization state should be optional
         utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.cVertexStage.module = vsModule;
+        descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
         descriptor.rasterizationState = nullptr;
-
         device.CreateRenderPipeline(&descriptor);
     }
 }
@@ -75,7 +74,7 @@ TEST_F(RenderPipelineValidationTest, ColorStateRequired) {
     {
         // This one succeeds because attachment 0 is the color attachment
         utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.cVertexStage.module = vsModule;
+        descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
         descriptor.colorStateCount = 1;
 
@@ -84,7 +83,7 @@ TEST_F(RenderPipelineValidationTest, ColorStateRequired) {
 
     {  // Fail because lack of color states (and depth/stencil state)
         utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.cVertexStage.module = vsModule;
+        descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
         descriptor.colorStateCount = 0;
 
@@ -97,7 +96,7 @@ TEST_F(RenderPipelineValidationTest, NonRenderableFormat) {
     {
         // Succeeds because RGBA8Unorm is renderable
         utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.cVertexStage.module = vsModule;
+        descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
         descriptor.cColorStates[0]->format = dawn::TextureFormat::RGBA8Unorm;
 
@@ -107,7 +106,7 @@ TEST_F(RenderPipelineValidationTest, NonRenderableFormat) {
     {
         // Fails because RG11B10Float is non-renderable
         utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.cVertexStage.module = vsModule;
+        descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
         descriptor.cColorStates[0]->format = dawn::TextureFormat::RG11B10Float;
 
@@ -119,7 +118,7 @@ TEST_F(RenderPipelineValidationTest, NonRenderableFormat) {
 TEST_F(RenderPipelineValidationTest, SampleCount) {
     {
         utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.cVertexStage.module = vsModule;
+        descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
         descriptor.sampleCount = 4;
 
@@ -128,7 +127,7 @@ TEST_F(RenderPipelineValidationTest, SampleCount) {
 
     {
         utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.cVertexStage.module = vsModule;
+        descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
         descriptor.sampleCount = 3;
 
@@ -154,7 +153,7 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
 
     utils::ComboRenderPipelineDescriptor nonMultisampledPipelineDescriptor(device);
     nonMultisampledPipelineDescriptor.sampleCount = 1;
-    nonMultisampledPipelineDescriptor.cVertexStage.module = vsModule;
+    nonMultisampledPipelineDescriptor.vertexStage.module = vsModule;
     nonMultisampledPipelineDescriptor.cFragmentStage.module = fsModule;
     dawn::RenderPipeline nonMultisampledPipeline =
         device.CreateRenderPipeline(&nonMultisampledPipelineDescriptor);
@@ -167,7 +166,7 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
 
     utils::ComboRenderPipelineDescriptor multisampledPipelineDescriptor(device);
     multisampledPipelineDescriptor.sampleCount = kMultisampledCount;
-    multisampledPipelineDescriptor.cVertexStage.module = vsModule;
+    multisampledPipelineDescriptor.vertexStage.module = vsModule;
     multisampledPipelineDescriptor.cFragmentStage.module = fsModule;
     dawn::RenderPipeline multisampledPipeline =
         device.CreateRenderPipeline(&multisampledPipelineDescriptor);

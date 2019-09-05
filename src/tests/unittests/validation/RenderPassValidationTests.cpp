@@ -61,7 +61,7 @@ void main() {
 
     utils::ComboRenderPipelineDescriptor descriptor(device);
     descriptor.layout = pipelineLayout;
-    descriptor.cVertexStage.module = vsModule;
+    descriptor.vertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
 
     dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);

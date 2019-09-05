@@ -167,7 +167,7 @@ protected:
             utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fragmentShader);
 
         utils::ComboRenderPipelineDescriptor textureDescriptor(device);
-        textureDescriptor.cVertexStage.module = mVSModule;
+        textureDescriptor.vertexStage.module = mVSModule;
         textureDescriptor.cFragmentStage.module = fsModule;
         textureDescriptor.layout = mPipelineLayout;
         textureDescriptor.cColorStates[0]->format = mRenderPass.colorFormat;
@@ -505,7 +505,7 @@ class TextureViewRenderingTest : public DawnTest {
             device, utils::SingleShaderStage::Fragment, oneColorFragmentShader);
 
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
-        pipelineDescriptor.cVertexStage.module = vsModule;
+        pipelineDescriptor.vertexStage.module = vsModule;
         pipelineDescriptor.cFragmentStage.module = oneColorFsModule;
         pipelineDescriptor.cColorStates[0]->format = kDefaultFormat;
 

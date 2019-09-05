@@ -132,11 +132,9 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     DawnRenderPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.nextInChain = nullptr;
 
-    DawnPipelineStageDescriptor vertexStage;
-    vertexStage.nextInChain = nullptr;
-    vertexStage.module = vsModule;
-    vertexStage.entryPoint = "main";
-    pipelineDescriptor.vertexStage = &vertexStage;
+    pipelineDescriptor.vertexStage.nextInChain = nullptr;
+    pipelineDescriptor.vertexStage.module = vsModule;
+    pipelineDescriptor.vertexStage.entryPoint = "main";
 
     DawnPipelineStageDescriptor fragmentStage;
     fragmentStage.nextInChain = nullptr;
