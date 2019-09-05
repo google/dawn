@@ -1,4 +1,4 @@
-// Copyright 2018 The Dawn Authors
+// Copyright 2019 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,31 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_STAGINGBUFFERVK_H_
-#define DAWNNATIVE_STAGINGBUFFERVK_H_
+#ifndef DAWNNATIVE_VULKAN_RESOURCEMEMORYVK_H_
+#define DAWNNATIVE_VULKAN_RESOURCEMEMORYVK_H_
 
 #include "common/vulkan_platform.h"
-#include "dawn_native/ResourceMemoryAllocation.h"
-#include "dawn_native/StagingBuffer.h"
+#include "dawn_native/ResourceHeap.h"
 
 namespace dawn_native { namespace vulkan {
 
-    class Device;
-
-    class StagingBuffer : public StagingBufferBase {
+    // Wrapper for physical memory used with or without a resource object.
+    class ResourceMemory : public ResourceHeapBase {
       public:
-        StagingBuffer(size_t size, Device* device);
-        ~StagingBuffer();
+        ResourceMemory(VkDeviceMemory memory);
+        ~ResourceMemory() = default;
 
-        VkBuffer GetBufferHandle() const;
-
-        MaybeError Initialize() override;
+        VkDeviceMemory GetMemory() const;
 
       private:
-        Device* mDevice;
-        VkBuffer mBuffer;
-        ResourceMemoryAllocation mAllocation;
+        VkDeviceMemory mMemory = VK_NULL_HANDLE;
     };
 }}  // namespace dawn_native::vulkan
 
-#endif  // DAWNNATIVE_STAGINGBUFFERVK_H_
+#endif  // DAWNNATIVE_VULKAN_RESOURCEMEMORYVK_H_

@@ -22,6 +22,7 @@
 #include "dawn_native/Device.h"
 #include "dawn_native/vulkan/CommandRecordingContext.h"
 #include "dawn_native/vulkan/Forward.h"
+#include "dawn_native/vulkan/MemoryResourceAllocatorVk.h"
 #include "dawn_native/vulkan/VulkanFunctions.h"
 #include "dawn_native/vulkan/VulkanInfo.h"
 
@@ -91,6 +92,11 @@ namespace dawn_native { namespace vulkan {
                                            uint64_t destinationOffset,
                                            uint64_t size) override;
 
+        ResultOrError<ResourceMemoryAllocation> AllocateMemory(VkMemoryRequirements requirements,
+                                                               bool mappable);
+
+        void DeallocateMemory(ResourceMemoryAllocation& allocation);
+
       private:
         ResultOrError<BindGroupBase*> CreateBindGroupImpl(
             const BindGroupDescriptor* descriptor) override;
@@ -127,6 +133,8 @@ namespace dawn_native { namespace vulkan {
         VkDevice mVkDevice = VK_NULL_HANDLE;
         uint32_t mQueueFamily = 0;
         VkQueue mQueue = VK_NULL_HANDLE;
+
+        std::unique_ptr<MemoryResourceAllocator> mResourceAllocator;
 
         std::unique_ptr<FencedDeleter> mDeleter;
         std::unique_ptr<MapRequestTracker> mMapRequestTracker;

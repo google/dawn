@@ -41,12 +41,14 @@ namespace dawn_native {
         ResourceMemoryAllocation();
         ResourceMemoryAllocation(uint64_t offset,
                                  ResourceHeapBase* resourceHeap,
-                                 AllocationMethod method);
+                                 AllocationMethod method,
+                                 uint8_t* mappedPointer = nullptr);
         ~ResourceMemoryAllocation() = default;
 
         ResourceHeapBase* GetResourceHeap() const;
         uint64_t GetOffset() const;
         AllocationMethod GetAllocationMethod() const;
+        uint8_t* GetMappedPointer() const;
 
         void Invalidate();
 
@@ -54,6 +56,7 @@ namespace dawn_native {
         AllocationMethod mMethod;
         uint64_t mOffset;
         ResourceHeapBase* mResourceHeap;
+        uint8_t* mMappedPointer;
     };
 }  // namespace dawn_native
 

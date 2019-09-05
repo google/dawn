@@ -19,16 +19,23 @@
 
 namespace dawn_native {
 
-    static constexpr uint64_t INVALID_OFFSET = std::numeric_limits<uint64_t>::max();
+    static constexpr uint64_t kInvalidOffset = std::numeric_limits<uint64_t>::max();
 
     ResourceMemoryAllocation::ResourceMemoryAllocation()
-        : mMethod(AllocationMethod::kInvalid), mOffset(INVALID_OFFSET), mResourceHeap(nullptr) {
+        : mMethod(AllocationMethod::kInvalid),
+          mOffset(0),
+          mResourceHeap(nullptr),
+          mMappedPointer(nullptr) {
     }
 
     ResourceMemoryAllocation::ResourceMemoryAllocation(uint64_t offset,
                                                        ResourceHeapBase* resourceHeap,
-                                                       AllocationMethod method)
-        : mMethod(method), mOffset(offset), mResourceHeap(resourceHeap) {
+                                                       AllocationMethod method,
+                                                       uint8_t* mappedPointer)
+        : mMethod(method),
+          mOffset(offset),
+          mResourceHeap(resourceHeap),
+          mMappedPointer(mappedPointer) {
     }
 
     ResourceHeapBase* ResourceMemoryAllocation::GetResourceHeap() const {
@@ -46,8 +53,13 @@ namespace dawn_native {
         return mMethod;
     }
 
+    uint8_t* ResourceMemoryAllocation::GetMappedPointer() const {
+        return mMappedPointer;
+    }
+
     void ResourceMemoryAllocation::Invalidate() {
         mResourceHeap = nullptr;
         mMethod = AllocationMethod::kInvalid;
+        mOffset = kInvalidOffset;
     }
 }  // namespace dawn_native

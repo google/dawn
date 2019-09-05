@@ -70,6 +70,7 @@ namespace dawn_native { namespace vulkan {
         mMapRequestTracker = std::make_unique<MapRequestTracker>(this);
         mMemoryAllocator = std::make_unique<MemoryAllocator>(this);
         mRenderPassCache = std::make_unique<RenderPassCache>(this);
+        mResourceAllocator = std::make_unique<MemoryResourceAllocator>(this);
 
         mExternalMemoryService = std::make_unique<external_memory::Service>(this);
         mExternalSemaphoreService = std::make_unique<external_semaphore::Service>(this);
@@ -153,7 +154,9 @@ namespace dawn_native { namespace vulkan {
         return new BindGroupLayout(this, descriptor);
     }
     ResultOrError<BufferBase*> Device::CreateBufferImpl(const BufferDescriptor* descriptor) {
-        return new Buffer(this, descriptor);
+        std::unique_ptr<Buffer> buffer = std::make_unique<Buffer>(this, descriptor);
+        DAWN_TRY(buffer->Initialize());
+        return buffer.release();
     }
     CommandBufferBase* Device::CreateCommandBuffer(CommandEncoderBase* encoder,
                                                    const CommandBufferDescriptor* descriptor) {
@@ -674,5 +677,22 @@ namespace dawn_native { namespace vulkan {
 
         return new Texture(this, descriptor, textureDescriptor, signalSemaphore, allocation,
                            waitSemaphores);
+    }
+
+    ResultOrError<ResourceMemoryAllocation> Device::AllocateMemory(
+        VkMemoryRequirements requirements,
+        bool mappable) {
+        // TODO(crbug.com/dawn/27): Support sub-allocation.
+        ResourceMemoryAllocation allocation;
+        DAWN_TRY_ASSIGN(allocation, mResourceAllocator->Allocate(requirements, mappable));
+        return allocation;
+    }
+
+    void Device::DeallocateMemory(ResourceMemoryAllocation& allocation) {
+        mResourceAllocator->Deallocate(allocation);
+
+        // Invalidate the underlying resource heap in case the client accidentally
+        // calls DeallocateMemory again using the same allocation.
+        allocation.Invalidate();
     }
 }}  // namespace dawn_native::vulkan

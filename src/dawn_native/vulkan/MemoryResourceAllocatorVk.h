@@ -1,4 +1,4 @@
-// Copyright 2018 The Dawn Authors
+// Copyright 2019 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,31 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_STAGINGBUFFERVK_H_
-#define DAWNNATIVE_STAGINGBUFFERVK_H_
+#ifndef DAWNNATIVE_VULKAN_MEMORYRESOURCEALLOCATORVK_H_
+#define DAWNNATIVE_VULKAN_MEMORYRESOURCEALLOCATORVK_H_
 
 #include "common/vulkan_platform.h"
+#include "dawn_native/Error.h"
 #include "dawn_native/ResourceMemoryAllocation.h"
-#include "dawn_native/StagingBuffer.h"
 
 namespace dawn_native { namespace vulkan {
 
     class Device;
 
-    class StagingBuffer : public StagingBufferBase {
+    class MemoryResourceAllocator {
       public:
-        StagingBuffer(size_t size, Device* device);
-        ~StagingBuffer();
+        MemoryResourceAllocator(Device* device);
+        ~MemoryResourceAllocator() = default;
 
-        VkBuffer GetBufferHandle() const;
-
-        MaybeError Initialize() override;
+        ResultOrError<ResourceMemoryAllocation> Allocate(VkMemoryRequirements requirements,
+                                                         bool mappable);
+        void Deallocate(ResourceMemoryAllocation& allocation);
 
       private:
+        int FindBestTypeIndex(VkMemoryRequirements requirements, bool mappable);
+
         Device* mDevice;
-        VkBuffer mBuffer;
-        ResourceMemoryAllocation mAllocation;
     };
+
 }}  // namespace dawn_native::vulkan
 
-#endif  // DAWNNATIVE_STAGINGBUFFERVK_H_
+#endif  // DAWNNATIVE_VULKAN_MEMORYRESOURCEALLOCATORVK_H_
