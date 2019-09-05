@@ -181,10 +181,7 @@ TEST_F(TextureViewValidationTest, TextureViewDescriptorDefaultsArray) {
     constexpr uint32_t kDefaultArrayLayers = 6;
     dawn::Texture texture = Create2DArrayTexture(device, kDefaultArrayLayers);
 
-    {
-        dawn::TextureViewDescriptor descriptor;
-        texture.CreateView(&descriptor);
-    }
+    { texture.CreateView(); }
     {
         dawn::TextureViewDescriptor descriptor;
         descriptor.format = dawn::TextureFormat::Undefined;
@@ -205,8 +202,14 @@ TEST_F(TextureViewValidationTest, TextureViewDescriptorDefaultsArray) {
     }
     {
         dawn::TextureViewDescriptor descriptor;
+
+        // Setting array layers to non-0 means the dimensionality will
+        // default to 2D so by itself it causes an error.
         descriptor.arrayLayerCount = kDefaultArrayLayers;
+        ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
+        descriptor.dimension = dawn::TextureViewDimension::e2DArray;
         texture.CreateView(&descriptor);
+
         descriptor.mipLevelCount = kDefaultMipLevels;
         texture.CreateView(&descriptor);
     }
@@ -219,10 +222,7 @@ TEST_F(TextureViewValidationTest, TextureViewDescriptorDefaultsNonArray) {
     constexpr uint32_t kDefaultArrayLayers = 1;
     dawn::Texture texture = Create2DArrayTexture(device, kDefaultArrayLayers);
 
-    {
-        dawn::TextureViewDescriptor descriptor;
-        texture.CreateView(&descriptor);
-    }
+    { texture.CreateView(); }
     {
         dawn::TextureViewDescriptor descriptor;
         descriptor.format = dawn::TextureFormat::Undefined;

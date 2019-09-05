@@ -139,22 +139,6 @@ namespace dawn_native {
             return {};
         }
 
-        dawn::TextureViewDimension GetDefaultViewDimension(const TextureBase* texture) {
-            // TODO(jiawei.shao@intel.com): support all texture dimensions.
-            switch (texture->GetDimension()) {
-                case dawn::TextureDimension::e2D:
-                    ASSERT(texture->GetArrayLayers() != 0);
-                    if (texture->GetArrayLayers() == 1u) {
-                        return dawn::TextureViewDimension::e2D;
-                    } else {
-                        return dawn::TextureViewDimension::e2DArray;
-                    }
-                default:
-                    UNREACHABLE();
-                    return dawn::TextureViewDimension::e1D;
-            }
-        }
-
         MaybeError ValidateTextureSize(const TextureDescriptor* descriptor, const Format* format) {
             ASSERT(descriptor->size.width != 0 && descriptor->size.height != 0);
 
@@ -282,11 +266,33 @@ namespace dawn_native {
             desc = *descriptor;
         }
 
+        // The default value for the view dimension depends on the texture's dimension with a
+        // special case for 2DArray being chosen automatically if arrayLayerCount is unspecified.
+        if (desc.dimension == dawn::TextureViewDimension::Undefined) {
+            switch (texture->GetDimension()) {
+                case dawn::TextureDimension::e1D:
+                    desc.dimension = dawn::TextureViewDimension::e1D;
+                    break;
+
+                case dawn::TextureDimension::e2D:
+                    if (texture->GetArrayLayers() > 1u && desc.arrayLayerCount == 0) {
+                        desc.dimension = dawn::TextureViewDimension::e2DArray;
+                    } else {
+                        desc.dimension = dawn::TextureViewDimension::e2D;
+                    }
+                    break;
+
+                case dawn::TextureDimension::e3D:
+                    desc.dimension = dawn::TextureViewDimension::e3D;
+                    break;
+
+                default:
+                    UNREACHABLE();
+            }
+        }
+
         if (desc.format == dawn::TextureFormat::Undefined) {
             desc.format = texture->GetFormat().format;
-        }
-        if (desc.dimension == dawn::TextureViewDimension::Undefined) {
-            desc.dimension = GetDefaultViewDimension(texture);
         }
         if (desc.arrayLayerCount == 0) {
             desc.arrayLayerCount = texture->GetArrayLayers() - desc.baseArrayLayer;
