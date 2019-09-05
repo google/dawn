@@ -140,20 +140,17 @@ TEST_P(ObjectCachingTest, ComputePipelineDeduplicationOnShaderModule) {
 
     dawn::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, nullptr);
 
-    dawn::PipelineStageDescriptor stageDesc;
-    stageDesc.entryPoint = "main";
-    stageDesc.module = module;
-
     dawn::ComputePipelineDescriptor desc;
-    desc.computeStage = &stageDesc;
+    desc.computeStage.entryPoint = "main";
     desc.layout = layout;
 
+    desc.computeStage.module = module;
     dawn::ComputePipeline pipeline = device.CreateComputePipeline(&desc);
 
-    stageDesc.module = sameModule;
+    desc.computeStage.module = sameModule;
     dawn::ComputePipeline samePipeline = device.CreateComputePipeline(&desc);
 
-    stageDesc.module = otherModule;
+    desc.computeStage.module = otherModule;
     dawn::ComputePipeline otherPipeline = device.CreateComputePipeline(&desc);
 
     EXPECT_NE(pipeline.Get(), otherPipeline.Get());
@@ -174,16 +171,14 @@ TEST_P(ObjectCachingTest, ComputePipelineDeduplicationOnLayout) {
     EXPECT_NE(pl.Get(), otherPl.Get());
     EXPECT_EQ(pl.Get() == samePl.Get(), !UsesWire());
 
-    dawn::PipelineStageDescriptor stageDesc;
-    stageDesc.entryPoint = "main";
-    stageDesc.module = utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
+    dawn::ComputePipelineDescriptor desc;
+    desc.computeStage.entryPoint = "main";
+    desc.computeStage.module =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
             #version 450
             void main() {
                 int i = 0;
             })");
-
-    dawn::ComputePipelineDescriptor desc;
-    desc.computeStage = &stageDesc;
 
     desc.layout = pl;
     dawn::ComputePipeline pipeline = device.CreateComputePipeline(&desc);

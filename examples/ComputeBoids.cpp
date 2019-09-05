@@ -248,12 +248,8 @@ void initSim() {
 
     dawn::ComputePipelineDescriptor csDesc;
     csDesc.layout = pl;
-
-    dawn::PipelineStageDescriptor computeStage;
-    computeStage.module = module;
-    computeStage.entryPoint = "main";
-    csDesc.computeStage = &computeStage;
-
+    csDesc.computeStage.module = module;
+    csDesc.computeStage.entryPoint = "main";
     updatePipeline = device.CreateComputePipeline(&csDesc);
 
     for (uint32_t i = 0; i < 2; ++i) {

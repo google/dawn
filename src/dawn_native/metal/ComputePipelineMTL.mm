@@ -23,8 +23,8 @@ namespace dawn_native { namespace metal {
         : ComputePipelineBase(device, descriptor) {
         auto mtlDevice = ToBackend(GetDevice())->GetMTLDevice();
 
-        const ShaderModule* computeModule = ToBackend(descriptor->computeStage->module);
-        const char* computeEntryPoint = descriptor->computeStage->entryPoint;
+        const ShaderModule* computeModule = ToBackend(descriptor->computeStage.module);
+        const char* computeEntryPoint = descriptor->computeStage.entryPoint;
         ShaderModule::MetalFunctionData computeData = computeModule->GetFunction(
             computeEntryPoint, SingleShaderStage::Compute, ToBackend(GetLayout()));
 

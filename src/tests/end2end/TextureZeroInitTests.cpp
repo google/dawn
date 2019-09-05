@@ -531,9 +531,9 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
            bufferTex.result =
                  texelFetch(sampler2D(sampleTex, sampler0), ivec2(0,0), 0);
         })";
-    computeStage.module = utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, cs);
-    computeStage.entryPoint = "main";
-    computePipelineDescriptor.computeStage = &computeStage;
+    computePipelineDescriptor.computeStage.module =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, cs);
+    computePipelineDescriptor.computeStage.entryPoint = "main";
     dawn::ComputePipeline computePipeline =
         device.CreateComputePipeline(&computePipelineDescriptor);
 

@@ -34,12 +34,8 @@ class ComputeIndirectValidationTest : public ValidationTest {
 
         dawn::ComputePipelineDescriptor csDesc;
         csDesc.layout = pl;
-
-        dawn::PipelineStageDescriptor computeStage;
-        computeStage.module = computeModule;
-        computeStage.entryPoint = "main";
-        csDesc.computeStage = &computeStage;
-
+        csDesc.computeStage.module = computeModule;
+        csDesc.computeStage.entryPoint = "main";
         pipeline = device.CreateComputePipeline(&csDesc);
     }
 

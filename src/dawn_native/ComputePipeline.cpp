@@ -26,7 +26,7 @@ namespace dawn_native {
         }
 
         DAWN_TRY(device->ValidateObject(descriptor->layout));
-        DAWN_TRY(ValidatePipelineStageDescriptor(device, descriptor->computeStage,
+        DAWN_TRY(ValidatePipelineStageDescriptor(device, &descriptor->computeStage,
                                                  descriptor->layout, SingleShaderStage::Compute));
         return {};
     }
@@ -37,8 +37,8 @@ namespace dawn_native {
                                              const ComputePipelineDescriptor* descriptor,
                                              bool blueprint)
         : PipelineBase(device, descriptor->layout, dawn::ShaderStage::Compute),
-          mModule(descriptor->computeStage->module),
-          mEntryPoint(descriptor->computeStage->entryPoint),
+          mModule(descriptor->computeStage.module),
+          mEntryPoint(descriptor->computeStage.entryPoint),
           mIsBlueprint(blueprint) {
     }
 

@@ -35,8 +35,8 @@ namespace dawn_native { namespace vulkan {
         createInfo.stage.pNext = nullptr;
         createInfo.stage.flags = 0;
         createInfo.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-        createInfo.stage.module = ToBackend(descriptor->computeStage->module)->GetHandle();
-        createInfo.stage.pName = descriptor->computeStage->entryPoint;
+        createInfo.stage.module = ToBackend(descriptor->computeStage.module)->GetHandle();
+        createInfo.stage.pName = descriptor->computeStage.entryPoint;
         createInfo.stage.pSpecializationInfo = nullptr;
 
         if (device->fn.CreateComputePipelines(device->GetVkDevice(), VK_NULL_HANDLE, 1, &createInfo,

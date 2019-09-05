@@ -58,12 +58,8 @@ void ComputeIndirectTests::BasicTest(std::initializer_list<uint32_t> bufferList,
 
     dawn::ComputePipelineDescriptor csDesc;
     csDesc.layout = pl;
-
-    dawn::PipelineStageDescriptor computeStage;
-    computeStage.module = module;
-    computeStage.entryPoint = "main";
-    csDesc.computeStage = &computeStage;
-
+    csDesc.computeStage.module = module;
+    csDesc.computeStage.entryPoint = "main";
     dawn::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
 
     // Set up dst storage buffer to contain dispatch x, y, z

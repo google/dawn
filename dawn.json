@@ -401,7 +401,7 @@
         "extensible": true,
         "members": [
             {"name": "layout", "type": "pipeline layout"},
-            {"name": "compute stage", "type": "pipeline stage descriptor", "annotation": "const*"}
+            {"name": "compute stage", "type": "pipeline stage descriptor"}
         ]
     },
     "cull mode": {

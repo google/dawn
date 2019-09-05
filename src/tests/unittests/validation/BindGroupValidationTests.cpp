@@ -656,15 +656,13 @@ class SetBindGroupValidationTest : public ValidationTest {
         void main() {
         })");
 
-        dawn::ComputePipelineDescriptor csDesc;
         dawn::PipelineLayout pipelineLayout =
             utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
-        csDesc.layout = pipelineLayout;
 
-        dawn::PipelineStageDescriptor computeStage;
-        computeStage.module = csModule;
-        computeStage.entryPoint = "main";
-        csDesc.computeStage = &computeStage;
+        dawn::ComputePipelineDescriptor csDesc;
+        csDesc.layout = pipelineLayout;
+        csDesc.computeStage.module = csModule;
+        csDesc.computeStage.entryPoint = "main";
 
         return device.CreateComputePipeline(&csDesc);
     }

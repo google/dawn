@@ -194,10 +194,8 @@ class DynamicBufferOffsetTests : public DawnTest {
             utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, cs.str().c_str());
 
         dawn::ComputePipelineDescriptor csDesc;
-        dawn::PipelineStageDescriptor computeStage;
-        computeStage.module = csModule;
-        computeStage.entryPoint = "main";
-        csDesc.computeStage = &computeStage;
+        csDesc.computeStage.module = csModule;
+        csDesc.computeStage.entryPoint = "main";
 
         dawn::PipelineLayoutDescriptor pipelineLayoutDescriptor;
         if (isInheritedPipeline) {
