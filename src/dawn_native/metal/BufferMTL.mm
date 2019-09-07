@@ -14,9 +14,13 @@
 
 #include "dawn_native/metal/BufferMTL.h"
 
+#include "common/Math.h"
 #include "dawn_native/metal/DeviceMTL.h"
 
 namespace dawn_native { namespace metal {
+    // The size of uniform buffer and storage buffer need to be aligned to 16 bytes which is the
+    // largest alignment of supported data types
+    static constexpr uint32_t kMinUniformOrStorageBufferAlignment = 16u;
 
     Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
         : BufferBase(device, descriptor) {
@@ -27,7 +31,15 @@ namespace dawn_native { namespace metal {
             storageMode = MTLResourceStorageModePrivate;
         }
 
-        mMtlBuffer = [device->GetMTLDevice() newBufferWithLength:GetSize() options:storageMode];
+        uint32_t currentSize = GetSize();
+        // Metal validation layer requires the size of uniform buffer and storage buffer to be no
+        // less than the size of the buffer block defined in shader, and the overall size of the
+        // buffer must be aligned to the largest alignment of its members.
+        if (GetUsage() & (dawn::BufferUsage::Uniform | dawn::BufferUsage::Storage)) {
+            currentSize = Align(currentSize, kMinUniformOrStorageBufferAlignment);
+        }
+
+        mMtlBuffer = [device->GetMTLDevice() newBufferWithLength:currentSize options:storageMode];
     }
 
     Buffer::~Buffer() {

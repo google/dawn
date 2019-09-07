@@ -105,21 +105,11 @@ void ComputeIndirectTests::BasicTest(std::initializer_list<uint32_t> bufferList,
 
 // Test basic indirect
 TEST_P(ComputeIndirectTests, Basic) {
-    // TODO(hao.x.li@intel.com): Test failing on Metal with validation layer on, which blocks
-    // end2end tests run with validation layer in bots. Suppress this while we're fixing.
-    // See https://bugs.chromium.org/p/dawn/issues/detail?id=139
-    DAWN_SKIP_TEST_IF(IsMetal() && IsBackendValidationEnabled());
-
     BasicTest({2, 3, 4}, 0);
 }
 
 // Test indirect with buffer offset
 TEST_P(ComputeIndirectTests, IndirectOffset) {
-    // TODO(hao.x.li@intel.com): Test failing on Metal with validation layer on, which blocks
-    // end2end tests run with validation layer in bots. Suppress this while we're fixing.
-    // See https://bugs.chromium.org/p/dawn/issues/detail?id=139
-    DAWN_SKIP_TEST_IF(IsMetal() && IsBackendValidationEnabled());
-
     BasicTest({0, 0, 0, 2, 3, 4}, 3 * sizeof(uint32_t));
 }
 
