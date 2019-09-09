@@ -161,4 +161,9 @@ class alignas(kNativeVkHandleAlignment) VkNonDispatchableHandle {
 #    include "common/xlib_with_undefs.h"
 #endif
 
+// Include Fuchsia-specific definitions that are not upstreamed yet.
+#if defined(DAWN_PLATFORM_FUCHSIA)
+#    include <vulkan/vulkan_fuchsia_extras.h>
+#endif
+
 #endif  // COMMON_VULKANPLATFORM_H_

@@ -146,6 +146,10 @@ source_set("vulkan_headers") {
     "khronos/vulkan/vulkan_core.h",
   ]
 
+  if (is_fuchsia) {
+    sources += [ "khronos/vulkan/vulkan_fuchsia_extras.h" ]
+  }
+
   public_configs = [ ":vulkan_headers_config" ]
 }
 
