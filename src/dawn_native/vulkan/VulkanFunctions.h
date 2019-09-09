@@ -106,6 +106,11 @@ namespace dawn_native { namespace vulkan {
         PFN_vkGetPhysicalDeviceSparseImageFormatProperties2KHR
             GetPhysicalDeviceSparseImageFormatProperties2KHR = nullptr;
 
+#ifdef VK_USE_PLATFORM_FUCHSIA
+        // FUCHSIA_image_pipe_surface
+        PFN_vkCreateImagePipeSurfaceFUCHSIA CreateImagePipeSurfaceFUCHSIA = nullptr;
+#endif
+
         // ---------- Device procs
 
         // Core Vulkan 1.0

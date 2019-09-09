@@ -25,6 +25,8 @@
 const char kVulkanLibName[] = "libvulkan.so.1";
 #elif DAWN_PLATFORM_WINDOWS
 const char kVulkanLibName[] = "vulkan-1.dll";
+#elif DAWN_PLATFORM_FUCHSIA
+const char kVulkanLibName[] = "libvulkan.so";
 #else
 #    error "Unimplemented Vulkan backend platform"
 #endif
@@ -136,6 +138,11 @@ namespace dawn_native { namespace vulkan {
             }
         }
 
+        if (mGlobalInfo.fuchsiaImagePipeSwapchain) {
+            layersToRequest.push_back(kLayerNameFuchsiaImagePipeSwapchain);
+            usedKnobs.fuchsiaImagePipeSwapchain = true;
+        }
+
         // Always request all extensions used to create VkSurfaceKHR objects so that they are
         // always available for embedders looking to create VkSurfaceKHR on our VkInstance.
         if (mGlobalInfo.macosSurface) {
@@ -173,6 +180,10 @@ namespace dawn_native { namespace vulkan {
         if (mGlobalInfo.xlibSurface) {
             extensionsToRequest.push_back(kExtensionNameKhrXlibSurface);
             usedKnobs.xlibSurface = true;
+        }
+        if (mGlobalInfo.fuchsiaImagePipeSurface) {
+            extensionsToRequest.push_back(kExtensionNameFuchsiaImagePipeSurface);
+            usedKnobs.fuchsiaImagePipeSurface = true;
         }
 
         VkApplicationInfo appInfo;

@@ -76,7 +76,7 @@ config("dawn_internal") {
 # This GN file is discovered by all Chromium builds, but common doesn't support
 # all of Chromium's OSes so we explicitly make the target visible only on
 # systems we know Dawn is able to compile on.
-if (is_win || is_linux || is_mac) {
+if (is_win || is_linux || is_mac || is_fuchsia) {
   static_library("common") {
     sources = [
       "Assert.cpp",

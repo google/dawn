@@ -452,6 +452,16 @@ source_set("libdawn_native_sources") {
         "src/dawn_native/vulkan/external_semaphore/SemaphoreServiceNull.cpp",
       ]
     }
+    if (build_with_chromium && is_fuchsia) {
+      # Necessary to ensure that the Vulkan libraries will be in the
+      # final Fuchsia package.
+      data_deps = [
+        # NOTE: The line below is a work around for http://crbug.com/1001081
+        "//third_party/fuchsia-sdk/sdk:trace_engine",
+        "//third_party/fuchsia-sdk:vulkan_base",
+        "//third_party/fuchsia-sdk:vulkan_validation",
+      ]
+    }
   }
 }
 
@@ -560,6 +570,47 @@ dawn_component("libdawn_wire") {
 }
 
 ###############################################################################
+# GLFW wrapping target
+###############################################################################
+
+# GLFW does not support Android or Fuchsia, so provide a small mock library
+# that can be linked into the Dawn tests on these platforms. Otherwise, use
+# the real library from third_party/.
+if (is_fuchsia) {
+  config("dawn_glfw_public_config") {
+    # Allow inclusion of <GLFW/glfw3.h>
+    configs = [ "third_party:glfw_public" ]
+
+    # The GLFW/glfw3.h header includes <GL/gl.h> by default, but the latter
+    # does not exist on Fuchsia. Defining GLFW_INCLUDE_NONE helps work around
+    # the issue, but it needs to be defined for any file that includes the
+    # header.
+    defines = [
+      "GLFW_INCLUDE_NONE",
+      "GLFW_INCLUDE_VULKAN",
+    ]
+  }
+
+  static_library("dawn_glfw") {
+    sources = [
+      # NOTE: The header below is required to pass "gn check".
+      "${dawn_glfw_dir}/include/GLFW/glfw3.h",
+      "src/utils/Glfw3Fuchsia.cpp",
+    ]
+    public_configs = [ ":dawn_glfw_public_config" ]
+    deps = [
+      "${dawn_root}/src/common",
+    ]
+  }
+} else {
+  group("dawn_glfw") {
+    public_deps = [
+      "third_party:glfw",
+    ]
+  }
+}
+
+###############################################################################
 # Utils for tests and samples
 ###############################################################################
 
@@ -613,9 +664,9 @@ static_library("dawn_bindings") {
   ]
 
   deps = [
+    ":dawn_glfw",
     ":libdawn_native",
     "${dawn_root}/src/common",
-    "third_party:glfw",
   ]
   libs = []
 
@@ -756,6 +807,7 @@ source_set("dawn_end2end_tests_sources") {
   testonly = true
 
   deps = [
+    ":dawn_glfw",
     ":dawn_utils",
     ":libdawn_native",
     ":libdawn_wire",
@@ -823,7 +875,7 @@ source_set("dawn_end2end_tests_sources") {
   }
 
   if (dawn_enable_opengl) {
-    deps += [ "third_party:glfw" ]
+    deps += [ ":dawn_glfw" ]
   }
 }
 
@@ -854,7 +906,7 @@ source_set("dawn_white_box_tests_sources") {
   }
 
   if (dawn_enable_opengl) {
-    deps += [ "third_party:glfw" ]
+    deps += [ ":dawn_glfw" ]
   }
 
   libs = []
@@ -890,7 +942,7 @@ test("dawn_end2end_tests") {
   }
 
   if (dawn_enable_opengl) {
-    deps += [ "third_party:glfw" ]
+    deps += [ ":dawn_glfw" ]
   }
 }
 
@@ -930,7 +982,7 @@ test("dawn_perf_tests") {
   }
 
   if (dawn_enable_opengl) {
-    deps += [ "third_party:glfw" ]
+    deps += [ ":dawn_glfw" ]
   }
 }
 
@@ -974,12 +1026,12 @@ if (dawn_standalone) {
     # Export all of these as public deps so that `gn check` allows includes
     public_deps = [
       ":dawn_bindings",
+      ":dawn_glfw",
       ":dawn_utils",
       ":libdawn_native",
       ":libdawn_wire",
       "${dawn_root}/src/common",
       "${dawn_root}/src/dawn:libdawn",
-      "third_party:glfw",
     ]
     public_configs = [ "${dawn_root}/src/common:dawn_internal" ]
   }
