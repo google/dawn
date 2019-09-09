@@ -36,7 +36,7 @@ namespace dawn_wire { namespace server {
         Server* server;
         // TODO(enga): ObjectHandle device;
         // when the wire supports multiple devices.
-        uint32_t requestSerial;
+        uint64_t requestSerial;
     };
 
     struct FenceCompletionUserdata {

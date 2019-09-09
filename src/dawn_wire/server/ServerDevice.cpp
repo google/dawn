@@ -36,7 +36,11 @@ namespace dawn_wire { namespace server {
         userdata->server = this;
         userdata->requestSerial = requestSerial;
 
-        return mProcs.devicePopErrorScope(cDevice, ForwardPopErrorScope, userdata);
+        bool success = mProcs.devicePopErrorScope(cDevice, ForwardPopErrorScope, userdata);
+        if (!success) {
+            delete userdata;
+        }
+        return success;
     }
 
     // static
