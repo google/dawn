@@ -14,6 +14,7 @@
 
 #include "common/Assert.h"
 #include "common/Constants.h"
+#include "common/Math.h"
 #include "tests/DawnTest.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
@@ -42,6 +43,75 @@ protected:
         descriptor.bindGroupLayouts = bindingInitializer.data();
 
         return device.CreatePipelineLayout(&descriptor);
+    }
+
+    dawn::ShaderModule MakeSimpleVSModule() const {
+        return utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
+        #version 450
+        void main() {
+            const vec2 pos[3] = vec2[3](vec2(-1.f, -1.f), vec2(1.f, -1.f), vec2(-1.f, 1.f));
+            gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
+        })");
+    }
+
+    dawn::ShaderModule MakeFSModule(std::vector<dawn::BindingType> bindingTypes) const {
+        ASSERT(bindingTypes.size() <= kMaxBindGroups);
+
+        std::ostringstream fs;
+        fs << R"(
+        #version 450
+        layout(location = 0) out vec4 fragColor;
+        )";
+
+        for (size_t i = 0; i < bindingTypes.size(); ++i) {
+            switch (bindingTypes[i]) {
+                case dawn::BindingType::UniformBuffer:
+                    fs << "layout (std140, set = " << i << ", binding = 0) uniform UniformBuffer" << i << R"( {
+                        vec4 color;
+                    } buffer)" << i << ";\n";
+                    break;
+                case dawn::BindingType::StorageBuffer:
+                    fs << "layout (std430, set = " << i << ", binding = 0) buffer StorageBuffer" << i << R"( {
+                        vec4 color;
+                    } buffer)" << i << ";\n";
+                    break;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
+        fs << R"(
+        void main() {
+            fragColor = vec4(0.0);
+        )";
+        for (size_t i = 0; i < bindingTypes.size(); ++i) {
+            fs << "fragColor += buffer" << i << ".color;\n";
+        }
+        fs << "}\n";
+
+        return utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fs.str().c_str());
+    }
+
+    dawn::RenderPipeline MakeTestPipeline(
+        const utils::BasicRenderPass& renderPass,
+        std::vector<dawn::BindingType> bindingTypes,
+        std::vector<dawn::BindGroupLayout> bindGroupLayouts) {
+
+        dawn::ShaderModule vsModule = MakeSimpleVSModule();
+        dawn::ShaderModule fsModule = MakeFSModule(bindingTypes);
+
+        dawn::PipelineLayout pipelineLayout = MakeBasicPipelineLayout(device, bindGroupLayouts);
+
+        utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
+        pipelineDescriptor.layout = pipelineLayout;
+        pipelineDescriptor.vertexStage.module = vsModule;
+        pipelineDescriptor.cFragmentStage.module = fsModule;
+        pipelineDescriptor.cColorStates[0]->format = renderPass.colorFormat;
+        pipelineDescriptor.cColorStates[0]->colorBlend.operation = dawn::BlendOperation::Add;
+        pipelineDescriptor.cColorStates[0]->colorBlend.srcFactor = dawn::BlendFactor::One;
+        pipelineDescriptor.cColorStates[0]->colorBlend.dstFactor = dawn::BlendFactor::One;
+
+        return device.CreateRenderPipeline(&pipelineDescriptor);
     }
 };
 
@@ -380,60 +450,28 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
 
 // This test reproduces an out-of-bound bug on D3D12 backends when calling draw command twice with
 // one pipeline that has 4 bind group sets in one render pass.
-TEST_P(BindGroupTests, DrawTwiceInSamePipelineWithFourBindGroupSets)
-{
+TEST_P(BindGroupTests, DrawTwiceInSamePipelineWithFourBindGroupSets) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
-
-    dawn::ShaderModule vsModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-        #version 450
-        void main() {
-            const vec2 pos[3] = vec2[3](vec2(-1.f, -1.f), vec2(1.f, -1.f), vec2(-1.f, 1.f));
-            gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
-        })");
-
-    dawn::ShaderModule fsModule =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-        #version 450
-        layout (std140, set = 0, binding = 0) uniform fragmentUniformBuffer1 {
-            vec4 color1;
-        };
-        layout (std140, set = 1, binding = 0) uniform fragmentUniformBuffer2 {
-            vec4 color2;
-        };
-        layout (std140, set = 2, binding = 0) uniform fragmentUniformBuffer3 {
-            vec4 color3;
-        };
-        layout (std140, set = 3, binding = 0) uniform fragmentUniformBuffer4 {
-            vec4 color4;
-        };
-        layout(location = 0) out vec4 fragColor;
-        void main() {
-            fragColor = color1 + color2 + color3 + color4;
-        })");
 
     dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
         device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::UniformBuffer}});
-    dawn::PipelineLayout pipelineLayout = MakeBasicPipelineLayout(
-        device, { layout, layout, layout, layout });
 
-    utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
-    pipelineDescriptor.layout = pipelineLayout;
-    pipelineDescriptor.vertexStage.module = vsModule;
-    pipelineDescriptor.cFragmentStage.module = fsModule;
-    pipelineDescriptor.cColorStates[0]->format = renderPass.colorFormat;
+    dawn::RenderPipeline pipeline =
+        MakeTestPipeline(renderPass,
+                         {dawn::BindingType::UniformBuffer, dawn::BindingType::UniformBuffer,
+                          dawn::BindingType::UniformBuffer, dawn::BindingType::UniformBuffer},
+                         {layout, layout, layout, layout});
 
-    dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
 
     pass.SetPipeline(pipeline);
 
-    std::array<float, 4> color = { 0.25, 0, 0, 0.25 };
+    std::array<float, 4> color = {0.25, 0, 0, 0.25};
     dawn::Buffer uniformBuffer =
         utils::CreateBufferFromData(device, &color, sizeof(color), dawn::BufferUsage::Uniform);
-    dawn::BindGroup bindGroup = utils::MakeBindGroup(
-        device, layout, { { 0, uniformBuffer, 0, sizeof(color) } });
+    dawn::BindGroup bindGroup =
+        utils::MakeBindGroup(device, layout, {{0, uniformBuffer, 0, sizeof(color)}});
 
     pass.SetBindGroup(0, bindGroup, 0, nullptr);
     pass.SetBindGroup(1, bindGroup, 0, nullptr);
@@ -449,6 +487,299 @@ TEST_P(BindGroupTests, DrawTwiceInSamePipelineWithFourBindGroupSets)
     queue.Submit(1, &commands);
 
     RGBA8 filled(255, 0, 0, 255);
+    RGBA8 notFilled(0, 0, 0, 0);
+    int min = 1, max = kRTSize - 3;
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, min);
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, max, min);
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, max);
+    EXPECT_PIXEL_RGBA8_EQ(notFilled, renderPass.color, max, max);
+}
+
+// Test that bind groups can be set before the pipeline.
+TEST_P(BindGroupTests, SetBindGroupBeforePipeline) {
+    // TODO(crbug.com/dawn/201): Implement on all platforms.
+    DAWN_SKIP_TEST_IF(!IsMetal());
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+
+    // Create a bind group layout which uses a single uniform buffer.
+    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::UniformBuffer}});
+
+    // Create a pipeline that uses the uniform bind group layout.
+    dawn::RenderPipeline pipeline =
+        MakeTestPipeline(renderPass, {dawn::BindingType::UniformBuffer}, {layout});
+
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+
+    // Create a bind group with a uniform buffer and fill it with RGBAunorm(1, 0, 0, 1).
+    std::array<float, 4> color = {1, 0, 0, 1};
+    dawn::Buffer uniformBuffer =
+        utils::CreateBufferFromData(device, &color, sizeof(color), dawn::BufferUsage::Uniform);
+    dawn::BindGroup bindGroup =
+        utils::MakeBindGroup(device, layout, {{0, uniformBuffer, 0, sizeof(color)}});
+
+    // Set the bind group, then the pipeline, and draw.
+    pass.SetBindGroup(0, bindGroup, 0, nullptr);
+    pass.SetPipeline(pipeline);
+    pass.Draw(3, 1, 0, 0);
+
+    pass.EndPass();
+
+    dawn::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // The result should be red.
+    RGBA8 filled(255, 0, 0, 255);
+    RGBA8 notFilled(0, 0, 0, 0);
+    int min = 1, max = kRTSize - 3;
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, min);
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, max, min);
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, max);
+    EXPECT_PIXEL_RGBA8_EQ(notFilled, renderPass.color, max, max);
+}
+
+// Test that dynamic bind groups can be set before the pipeline.
+TEST_P(BindGroupTests, SetDynamicBindGroupBeforePipeline) {
+    // TODO(crbug.com/dawn/201): Implement on all platforms.
+    DAWN_SKIP_TEST_IF(!IsMetal());
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+
+    // Create a bind group layout which uses a single dynamic uniform buffer.
+    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::UniformBuffer, true}});
+
+    // Create a pipeline that uses the dynamic uniform bind group layout for two bind groups.
+    dawn::RenderPipeline pipeline = MakeTestPipeline(
+        renderPass, {dawn::BindingType::UniformBuffer, dawn::BindingType::UniformBuffer},
+        {layout, layout});
+
+    // Prepare data RGBAunorm(1, 0, 0, 0.5) and RGBAunorm(0, 1, 0, 0.5). They will be added in the
+    // shader.
+    std::array<float, 4> color0 = {1, 0, 0, 0.5};
+    std::array<float, 4> color1 = {0, 1, 0, 0.5};
+
+    size_t color1Offset = Align(sizeof(color0), kMinDynamicBufferOffsetAlignment);
+
+    std::vector<uint8_t> data(color1Offset + sizeof(color1));
+    memcpy(data.data(), color0.data(), sizeof(color0));
+    memcpy(data.data() + color1Offset, color1.data(), sizeof(color1));
+
+    // Create a bind group and uniform buffer with the color data. It will be bound at the offset
+    // to each color.
+    dawn::Buffer uniformBuffer =
+        utils::CreateBufferFromData(device, data.data(), data.size(), dawn::BufferUsage::Uniform);
+    dawn::BindGroup bindGroup =
+        utils::MakeBindGroup(device, layout, {{0, uniformBuffer, 0, 4 * sizeof(float)}});
+
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+
+    // Set the first dynamic bind group.
+    uint64_t dynamicOffset = 0;
+    pass.SetBindGroup(0, bindGroup, 1, &dynamicOffset);
+
+    // Set the second dynamic bind group.
+    dynamicOffset = color1Offset;
+    pass.SetBindGroup(1, bindGroup, 1, &dynamicOffset);
+
+    // Set the pipeline and draw.
+    pass.SetPipeline(pipeline);
+    pass.Draw(3, 1, 0, 0);
+
+    pass.EndPass();
+
+    dawn::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // The result should be RGBAunorm(1, 0, 0, 0.5) + RGBAunorm(0, 1, 0, 0.5)
+    RGBA8 filled(255, 255, 0, 255);
+    RGBA8 notFilled(0, 0, 0, 0);
+    int min = 1, max = kRTSize - 3;
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, min);
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, max, min);
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, max);
+    EXPECT_PIXEL_RGBA8_EQ(notFilled, renderPass.color, max, max);
+}
+
+// Test that bind groups set for one pipeline are still set when the pipeline changes.
+TEST_P(BindGroupTests, BindGroupsPersistAfterPipelineChange) {
+    // TODO(crbug.com/dawn/201): Implement on all platforms.
+    DAWN_SKIP_TEST_IF(!IsMetal());
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+
+    // Create a bind group layout which uses a single dynamic uniform buffer.
+    dawn::BindGroupLayout uniformLayout = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::UniformBuffer, true}});
+
+    // Create a bind group layout which uses a single dynamic storage buffer.
+    dawn::BindGroupLayout storageLayout = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::StorageBuffer, true}});
+
+    // Create a pipeline which uses the uniform buffer and storage buffer bind groups.
+    dawn::RenderPipeline pipeline0 = MakeTestPipeline(
+        renderPass, {dawn::BindingType::UniformBuffer, dawn::BindingType::StorageBuffer},
+        {uniformLayout, storageLayout});
+
+    // Create a pipeline which uses the uniform buffer bind group twice.
+    dawn::RenderPipeline pipeline1 = MakeTestPipeline(
+        renderPass, {dawn::BindingType::UniformBuffer, dawn::BindingType::UniformBuffer},
+        {uniformLayout, uniformLayout});
+
+    // Prepare data RGBAunorm(1, 0, 0, 0.5) and RGBAunorm(0, 1, 0, 0.5). They will be added in the
+    // shader.
+    std::array<float, 4> color0 = {1, 0, 0, 0.5};
+    std::array<float, 4> color1 = {0, 1, 0, 0.5};
+
+    size_t color1Offset = Align(sizeof(color0), kMinDynamicBufferOffsetAlignment);
+
+    std::vector<uint8_t> data(color1Offset + sizeof(color1));
+    memcpy(data.data(), color0.data(), sizeof(color0));
+    memcpy(data.data() + color1Offset, color1.data(), sizeof(color1));
+
+    // Create a bind group and uniform buffer with the color data. It will be bound at the offset
+    // to each color.
+    dawn::Buffer uniformBuffer =
+        utils::CreateBufferFromData(device, data.data(), data.size(), dawn::BufferUsage::Uniform);
+    dawn::BindGroup bindGroup =
+        utils::MakeBindGroup(device, uniformLayout, {{0, uniformBuffer, 0, 4 * sizeof(float)}});
+
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+
+    // Set the first pipeline (uniform, storage).
+    pass.SetPipeline(pipeline0);
+
+    // Set the first bind group at a dynamic offset.
+    // This bind group matches the slot in the pipeline layout.
+    uint64_t dynamicOffset = 0;
+    pass.SetBindGroup(0, bindGroup, 1, &dynamicOffset);
+
+    // Set the second bind group at a dynamic offset.
+    // This bind group does not match the slot in the pipeline layout.
+    dynamicOffset = color1Offset;
+    pass.SetBindGroup(1, bindGroup, 1, &dynamicOffset);
+
+    // Set the second pipeline (uniform, uniform).
+    // Both bind groups match the pipeline.
+    // They should persist and not need to be bound again.
+    pass.SetPipeline(pipeline1);
+    pass.Draw(3, 1, 0, 0);
+
+    pass.EndPass();
+
+    dawn::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // The result should be RGBAunorm(1, 0, 0, 0.5) + RGBAunorm(0, 1, 0, 0.5)
+    RGBA8 filled(255, 255, 0, 255);
+    RGBA8 notFilled(0, 0, 0, 0);
+    int min = 1, max = kRTSize - 3;
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, min);
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, max, min);
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, max);
+    EXPECT_PIXEL_RGBA8_EQ(notFilled, renderPass.color, max, max);
+}
+
+// Do a successful draw. Then, change the pipeline and one bind group.
+// Draw to check that the all bind groups are set.
+TEST_P(BindGroupTests, DrawThenChangePipelineAndBindGroup) {
+    // TODO(crbug.com/dawn/201): Implement on all platforms.
+    DAWN_SKIP_TEST_IF(!IsMetal());
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+
+    // Create a bind group layout which uses a single dynamic uniform buffer.
+    dawn::BindGroupLayout uniformLayout = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::UniformBuffer, true}});
+
+    // Create a bind group layout which uses a single dynamic storage buffer.
+    dawn::BindGroupLayout storageLayout = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::StorageBuffer, true}});
+
+    // Create a pipeline with pipeline layout (uniform, uniform, storage).
+    dawn::RenderPipeline pipeline0 = MakeTestPipeline(
+        renderPass, {dawn::BindingType::UniformBuffer, dawn::BindingType::UniformBuffer, dawn::BindingType::StorageBuffer},
+        {uniformLayout, uniformLayout, storageLayout});
+
+    // Create a pipeline with pipeline layout (uniform, storage, storage).
+    dawn::RenderPipeline pipeline1 = MakeTestPipeline(
+        renderPass, {dawn::BindingType::UniformBuffer, dawn::BindingType::StorageBuffer, dawn::BindingType::StorageBuffer },
+        {uniformLayout, storageLayout, storageLayout});
+
+    // Prepare color data.
+    // The first draw will use { color0, color1, color2 }.
+    // The second draw will use { color0, color3, color2 }.
+    // The pipeline uses additive color blending so the result of two draws should be
+    // { 2 * color0 + color1 + color2 + color3} = RGBAunorm(1, 1, 1, 1)
+    std::array<float, 4> color0 = {0.5, 0, 0, 0};
+    std::array<float, 4> color1 = {0, 1, 0, 0};
+    std::array<float, 4> color2 = {0, 0, 0, 1};
+    std::array<float, 4> color3 = {0, 0, 1, 0};
+
+    size_t color1Offset = Align(sizeof(color0), kMinDynamicBufferOffsetAlignment);
+    size_t color2Offset = Align(color1Offset + sizeof(color1), kMinDynamicBufferOffsetAlignment);
+    size_t color3Offset = Align(color2Offset + sizeof(color2), kMinDynamicBufferOffsetAlignment);
+
+    std::vector<uint8_t> data(color3Offset + sizeof(color3), 0);
+    memcpy(data.data(), color0.data(), sizeof(color0));
+    memcpy(data.data() + color1Offset, color1.data(), sizeof(color1));
+    memcpy(data.data() + color2Offset, color2.data(), sizeof(color2));
+    memcpy(data.data() + color3Offset, color3.data(), sizeof(color3));
+
+    // Create a uniform and storage buffer bind groups to bind the color data.
+    dawn::Buffer uniformBuffer =
+        utils::CreateBufferFromData(device, data.data(), data.size(), dawn::BufferUsage::Uniform);
+
+    dawn::Buffer storageBuffer =
+        utils::CreateBufferFromData(device, data.data(), data.size(), dawn::BufferUsage::Storage);
+
+    dawn::BindGroup uniformBindGroup =
+        utils::MakeBindGroup(device, uniformLayout, {{0, uniformBuffer, 0, 4 * sizeof(float)}});
+    dawn::BindGroup storageBindGroup =
+        utils::MakeBindGroup(device, storageLayout, {{0, storageBuffer, 0, 4 * sizeof(float)}});
+
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+
+    // Set the pipeline to (uniform, uniform, storage)
+    pass.SetPipeline(pipeline0);
+
+    // Set the first bind group to color0 in the dynamic uniform buffer.
+    uint64_t dynamicOffset = 0;
+    pass.SetBindGroup(0, uniformBindGroup, 1, &dynamicOffset);
+
+    // Set the first bind group to color1 in the dynamic uniform buffer.
+    dynamicOffset = color1Offset;
+    pass.SetBindGroup(1, uniformBindGroup, 1, &dynamicOffset);
+
+    // Set the first bind group to color2 in the dynamic storage buffer.
+    dynamicOffset = color2Offset;
+    pass.SetBindGroup(2, storageBindGroup, 1, &dynamicOffset);
+
+    pass.Draw(3, 1, 0, 0);
+
+    // Set the pipeline to (uniform, storage, storage)
+    //  - The first bind group should persist (inherited on some backends)
+    //  - The second bind group needs to be set again to pass validation.
+    //    It changed from uniform to storage.
+    //  - The third bind group should persist. It should be set again by the backend internally.
+    pass.SetPipeline(pipeline1);
+
+    // Set the second bind group to color3 in the dynamic storage buffer.
+    dynamicOffset = color3Offset;
+    pass.SetBindGroup(1, storageBindGroup, 1, &dynamicOffset);
+
+    pass.Draw(3, 1, 0, 0);
+    pass.EndPass();
+
+    dawn::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    RGBA8 filled(255, 255, 255, 255);
     RGBA8 notFilled(0, 0, 0, 0);
     int min = 1, max = kRTSize - 3;
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, min);
