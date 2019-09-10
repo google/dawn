@@ -667,6 +667,40 @@ namespace dawn_native {
         });
     }
 
+    void CommandEncoderBase::InsertDebugMarker(const char* groupLabel) {
+        mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+            InsertDebugMarkerCmd* cmd =
+                allocator->Allocate<InsertDebugMarkerCmd>(Command::InsertDebugMarker);
+            cmd->length = strlen(groupLabel);
+
+            char* label = allocator->AllocateData<char>(cmd->length + 1);
+            memcpy(label, groupLabel, cmd->length + 1);
+
+            return {};
+        });
+    }
+
+    void CommandEncoderBase::PopDebugGroup() {
+        mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+            allocator->Allocate<PopDebugGroupCmd>(Command::PopDebugGroup);
+
+            return {};
+        });
+    }
+
+    void CommandEncoderBase::PushDebugGroup(const char* groupLabel) {
+        mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+            PushDebugGroupCmd* cmd =
+                allocator->Allocate<PushDebugGroupCmd>(Command::PushDebugGroup);
+            cmd->length = strlen(groupLabel);
+
+            char* label = allocator->AllocateData<char>(cmd->length + 1);
+            memcpy(label, groupLabel, cmd->length + 1);
+
+            return {};
+        });
+    }
+
     CommandBufferBase* CommandEncoderBase::Finish(const CommandBufferDescriptor* descriptor) {
         TRACE_EVENT0(GetDevice()->GetPlatform(), TRACE_DISABLED_BY_DEFAULT("gpu.dawn"),
                      "CommandEncoderBase::Finish");
@@ -688,6 +722,8 @@ namespace dawn_native {
         // Even if Finish() validation fails, calling it will mutate the internal state of the
         // encoding context. Subsequent calls to encode commands will generate errors.
         DAWN_TRY(mEncodingContext.Finish());
+
+        uint64_t debugGroupStackSize = 0;
 
         CommandIterator* commands = mEncodingContext.GetIterator();
         commands->Reset();
@@ -820,10 +856,28 @@ namespace dawn_native {
                     mResourceUsages.topLevelTextures.insert(copy->destination.texture.Get());
                 } break;
 
+                case Command::InsertDebugMarker: {
+                    InsertDebugMarkerCmd* cmd = commands->NextCommand<InsertDebugMarkerCmd>();
+                    commands->NextData<char>(cmd->length + 1);
+                } break;
+
+                case Command::PopDebugGroup: {
+                    commands->NextCommand<PopDebugGroupCmd>();
+                    DAWN_TRY(ValidateCanPopDebugGroup(debugGroupStackSize));
+                    debugGroupStackSize--;
+                } break;
+
+                case Command::PushDebugGroup: {
+                    PushDebugGroupCmd* cmd = commands->NextCommand<PushDebugGroupCmd>();
+                    commands->NextData<char>(cmd->length + 1);
+                    debugGroupStackSize++;
+                } break;
                 default:
                     return DAWN_VALIDATION_ERROR("Command disallowed outside of a pass");
             }
         }
+
+        DAWN_TRY(ValidateFinalDebugGroupStackSize(debugGroupStackSize));
 
         return {};
     }

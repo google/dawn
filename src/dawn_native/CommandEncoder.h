@@ -38,6 +38,7 @@ namespace dawn_native {
         // Dawn API
         ComputePassEncoderBase* BeginComputePass(const ComputePassDescriptor* descriptor);
         RenderPassEncoderBase* BeginRenderPass(const RenderPassDescriptor* descriptor);
+
         void CopyBufferToBuffer(BufferBase* source,
                                 uint64_t sourceOffset,
                                 BufferBase* destination,
@@ -52,6 +53,11 @@ namespace dawn_native {
         void CopyTextureToTexture(const TextureCopyView* source,
                                   const TextureCopyView* destination,
                                   const Extent3D* copySize);
+
+        void InsertDebugMarker(const char* groupLabel);
+        void PopDebugGroup();
+        void PushDebugGroup(const char* groupLabel);
+
         CommandBufferBase* Finish(const CommandBufferDescriptor* descriptor);
 
       private:
