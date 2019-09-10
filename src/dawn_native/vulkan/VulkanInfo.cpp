@@ -59,10 +59,12 @@ namespace dawn_native { namespace vulkan {
     const char kExtensionNameKhrExternalMemoryCapabilities[] =
         "VK_KHR_external_memory_capabilities";
     const char kExtensionNameKhrExternalMemoryFD[] = "VK_KHR_external_memory_fd";
+    const char kExtensionNameFuchsiaExternalMemory[] = "VK_FUCHSIA_external_memory";
     const char kExtensionNameKhrExternalSemaphore[] = "VK_KHR_external_semaphore";
     const char kExtensionNameKhrExternalSemaphoreCapabilities[] =
         "VK_KHR_external_semaphore_capabilities";
     const char kExtensionNameKhrExternalSemaphoreFD[] = "VK_KHR_external_semaphore_fd";
+    const char kExtensionNameFuchsiaExternalSemaphore[] = "VK_FUCHSIA_external_semaphore";
     const char kExtensionNameKhrGetPhysicalDeviceProperties2[] =
         "VK_KHR_get_physical_device_properties2";
     const char kExtensionNameKhrSurface[] = "VK_KHR_surface";
@@ -284,11 +286,17 @@ namespace dawn_native { namespace vulkan {
                 if (IsExtensionName(extension, kExtensionNameKhrExternalMemoryFD)) {
                     info.externalMemoryFD = true;
                 }
+                if (IsExtensionName(extension, kExtensionNameFuchsiaExternalMemory)) {
+                    info.externalMemoryZirconHandle = true;
+                }
                 if (IsExtensionName(extension, kExtensionNameKhrExternalSemaphore)) {
                     info.externalSemaphore = true;
                 }
                 if (IsExtensionName(extension, kExtensionNameKhrExternalSemaphoreFD)) {
                     info.externalSemaphoreFD = true;
+                }
+                if (IsExtensionName(extension, kExtensionNameFuchsiaExternalSemaphore)) {
+                    info.externalSemaphoreZirconHandle = true;
                 }
                 if (IsExtensionName(extension, kExtensionNameKhrSwapchain)) {
                     info.swapchain = true;

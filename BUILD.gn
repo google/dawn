@@ -446,6 +446,11 @@ source_set("libdawn_native_sources") {
         "src/dawn_native/vulkan/external_memory/MemoryServiceOpaqueFD.cpp",
         "src/dawn_native/vulkan/external_semaphore/SemaphoreServiceOpaqueFD.cpp",
       ]
+    } else if (is_fuchsia) {
+      sources += [
+        "src/dawn_native/vulkan/external_memory/MemoryServiceZirconHandle.cpp",
+        "src/dawn_native/vulkan/external_semaphore/SemaphoreServiceZirconHandle.cpp",
+      ]
     } else {
       sources += [
         "src/dawn_native/vulkan/external_memory/MemoryServiceNull.cpp",

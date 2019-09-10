@@ -36,9 +36,11 @@ namespace dawn_native { namespace vulkan {
     extern const char kExtensionNameKhrExternalMemory[];
     extern const char kExtensionNameKhrExternalMemoryCapabilities[];
     extern const char kExtensionNameKhrExternalMemoryFD[];
+    extern const char kExtensionNameFuchsiaExternalMemory[];
     extern const char kExtensionNameKhrExternalSemaphore[];
     extern const char kExtensionNameKhrExternalSemaphoreCapabilities[];
     extern const char kExtensionNameKhrExternalSemaphoreFD[];
+    extern const char kExtensionNameFuchsiaExternalSemaphore[];
     extern const char kExtensionNameKhrGetPhysicalDeviceProperties2[];
     extern const char kExtensionNameKhrSurface[];
     extern const char kExtensionNameKhrSwapchain[];
@@ -85,8 +87,10 @@ namespace dawn_native { namespace vulkan {
         bool debugMarker = false;
         bool externalMemory = false;
         bool externalMemoryFD = false;
+        bool externalMemoryZirconHandle = false;
         bool externalSemaphore = false;
         bool externalSemaphoreFD = false;
+        bool externalSemaphoreZirconHandle = false;
         bool swapchain = false;
     };
 

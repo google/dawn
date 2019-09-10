@@ -360,6 +360,10 @@ namespace dawn_native { namespace vulkan {
             extensionsToRequest.push_back(kExtensionNameKhrExternalMemoryFD);
             usedKnobs.externalMemoryFD = true;
         }
+        if (mDeviceInfo.externalMemoryZirconHandle) {
+            extensionsToRequest.push_back(kExtensionNameFuchsiaExternalMemory);
+            usedKnobs.externalMemoryZirconHandle = true;
+        }
         if (mDeviceInfo.externalSemaphore) {
             extensionsToRequest.push_back(kExtensionNameKhrExternalSemaphore);
             usedKnobs.externalSemaphore = true;
@@ -367,6 +371,10 @@ namespace dawn_native { namespace vulkan {
         if (mDeviceInfo.externalSemaphoreFD) {
             extensionsToRequest.push_back(kExtensionNameKhrExternalSemaphoreFD);
             usedKnobs.externalSemaphoreFD = true;
+        }
+        if (mDeviceInfo.externalSemaphoreZirconHandle) {
+            extensionsToRequest.push_back(kExtensionNameFuchsiaExternalSemaphore);
+            usedKnobs.externalSemaphoreZirconHandle = true;
         }
         if (mDeviceInfo.swapchain) {
             extensionsToRequest.push_back(kExtensionNameKhrSwapchain);

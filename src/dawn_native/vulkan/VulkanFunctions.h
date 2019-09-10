@@ -253,6 +253,17 @@ namespace dawn_native { namespace vulkan {
         // VK_KHR_external_semaphore_fd
         PFN_vkImportSemaphoreFdKHR ImportSemaphoreFdKHR = nullptr;
         PFN_vkGetSemaphoreFdKHR GetSemaphoreFdKHR = nullptr;
+
+#if VK_USE_PLATFORM_FUCHSIA
+        // VK_FUCHSIA_external_memory
+        PFN_vkGetMemoryZirconHandleFUCHSIA GetMemoryZirconHandleFUCHSIA = nullptr;
+        PFN_vkGetMemoryZirconHandlePropertiesFUCHSIA GetMemoryZirconHandlePropertiesFUCHSIA =
+            nullptr;
+
+        // VK_FUCHSIA_external_semaphore
+        PFN_vkImportSemaphoreZirconHandleFUCHSIA ImportSemaphoreZirconHandleFUCHSIA = nullptr;
+        PFN_vkGetSemaphoreZirconHandleFUCHSIA GetSemaphoreZirconHandleFUCHSIA = nullptr;
+#endif
     };
 
 }}  // namespace dawn_native::vulkan
