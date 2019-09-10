@@ -345,4 +345,21 @@ TEST_F(TextureViewValidationTest, DestroyCreateTextureView) {
     texture.Destroy();
     ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
 }
+
+// Test that only TextureAspect::All is supported
+TEST_F(TextureViewValidationTest, AspectMustBeAll) {
+    dawn::TextureDescriptor descriptor = {};
+    descriptor.size = {1, 1, 1};
+    descriptor.format = dawn::TextureFormat::Depth32Float;
+    descriptor.usage = dawn::TextureUsage::Sampled | dawn::TextureUsage::OutputAttachment;
+    dawn::Texture texture = device.CreateTexture(&descriptor);
+
+    dawn::TextureViewDescriptor viewDescriptor = {};
+    viewDescriptor.aspect = dawn::TextureAspect::All;
+    texture.CreateView(&viewDescriptor);
+
+    viewDescriptor.aspect = dawn::TextureAspect::DepthOnly;
+    ASSERT_DEVICE_ERROR(texture.CreateView(&viewDescriptor));
 }
+
+}  // anonymous namespace

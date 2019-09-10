@@ -1319,7 +1319,8 @@
             {"name": "base mip level", "type": "uint32_t", "default": "0"},
             {"name": "mip level count", "type": "uint32_t", "default": "0"},
             {"name": "base array layer", "type": "uint32_t", "default": "0"},
-            {"name": "array layer count", "type": "uint32_t", "default": "0"}
+            {"name": "array layer count", "type": "uint32_t", "default": "0"},
+            {"name": "aspect", "type": "texture aspect", "default": "all"}
         ],
         "TODO": [
             "jiawei.shao@intel.com: Allow choosing the aspect (depth vs. stencil)"

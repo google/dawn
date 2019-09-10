@@ -235,6 +235,11 @@ namespace dawn_native {
 
         DAWN_TRY(ValidateTextureFormat(descriptor->format));
 
+        DAWN_TRY(ValidateTextureAspect(descriptor->aspect));
+        if (descriptor->aspect != dawn::TextureAspect::All) {
+            return DAWN_VALIDATION_ERROR("Texture aspect must be 'all'");
+        }
+
         // TODO(jiawei.shao@intel.com): check stuff based on resource limits
         if (descriptor->arrayLayerCount == 0 || descriptor->mipLevelCount == 0) {
             return DAWN_VALIDATION_ERROR("Cannot create an empty texture view");
