@@ -35,6 +35,7 @@ namespace dawn_native {
     class AdapterBase;
     class AttachmentState;
     class AttachmentStateBlueprint;
+    class ErrorScope;
     class FenceSignalTracker;
     class DynamicUploader;
     class StagingBufferBase;
@@ -45,10 +46,11 @@ namespace dawn_native {
         virtual ~DeviceBase();
 
         void HandleError(dawn::ErrorType type, const char* message);
+        void HandleError(ErrorData* error);
 
         bool ConsumedError(MaybeError maybeError) {
             if (DAWN_UNLIKELY(maybeError.IsError())) {
-                ConsumeError(maybeError.AcquireError());
+                HandleError(maybeError.AcquireError());
                 return true;
             }
             return false;
@@ -230,10 +232,12 @@ namespace dawn_native {
 
         void ApplyExtensions(const DeviceDescriptor* deviceDescriptor);
 
-        void ConsumeError(ErrorData* error);
         void SetDefaultToggles();
 
         AdapterBase* mAdapter = nullptr;
+
+        Ref<ErrorScope> mRootErrorScope;
+        Ref<ErrorScope> mCurrentErrorScope;
 
         // The object caches aren't exposed in the header as they would require a lot of
         // additional includes.
@@ -250,8 +254,6 @@ namespace dawn_native {
         std::unique_ptr<FenceSignalTracker> mFenceSignalTracker;
         std::vector<DeferredCreateBufferMappedAsync> mDeferredCreateBufferMappedAsyncResults;
 
-        dawn::ErrorCallback mErrorCallback = nullptr;
-        void* mErrorUserdata = 0;
         uint32_t mRefCount = 1;
 
         FormatTable mFormatTable;

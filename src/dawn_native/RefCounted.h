@@ -120,6 +120,13 @@ namespace dawn_native {
         T* mPointee = nullptr;
     };
 
+    template <typename T>
+    Ref<T> AcquireRef(T* pointee) {
+        Ref<T> ref(pointee);
+        ref->Release();
+        return ref;
+    }
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_REFCOUNTED_H_

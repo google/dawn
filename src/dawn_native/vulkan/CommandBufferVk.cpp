@@ -330,12 +330,7 @@ namespace dawn_native { namespace vulkan {
         tempBufferDescriptor.usage = dawn::BufferUsage::CopySrc | dawn::BufferUsage::CopyDst;
 
         Device* device = ToBackend(GetDevice());
-        Ref<Buffer> tempBuffer = ToBackend(device->CreateBuffer(&tempBufferDescriptor));
-        // After device->CreateBuffer(&tempBufferDescriptor) is called, the ref count of the buffer
-        // object is 1, and after assigning it to a Ref<Buffer>, the ref count of it will be 2. To
-        // prevent memory leak, we must reduce the ref count here to ensure the ref count of this
-        // object to be 0 after all the Ref<> objects that contain the buffer object are released.
-        tempBuffer->Release();
+        Ref<Buffer> tempBuffer = AcquireRef(ToBackend(device->CreateBuffer(&tempBufferDescriptor)));
 
         BufferCopy tempBufferCopy;
         tempBufferCopy.buffer = tempBuffer.Get();

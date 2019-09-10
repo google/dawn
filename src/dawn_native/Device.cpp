@@ -24,6 +24,7 @@
 #include "dawn_native/ComputePipeline.h"
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/ErrorData.h"
+#include "dawn_native/ErrorScope.h"
 #include "dawn_native/Fence.h"
 #include "dawn_native/FenceSignalTracker.h"
 #include "dawn_native/Instance.h"
@@ -35,6 +36,7 @@
 #include "dawn_native/ShaderModule.h"
 #include "dawn_native/SwapChain.h"
 #include "dawn_native/Texture.h"
+#include "dawn_native/ValidationUtils_autogen.h"
 
 #include <unordered_set>
 
@@ -61,7 +63,9 @@ namespace dawn_native {
     // DeviceBase
 
     DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor)
-        : mAdapter(adapter) {
+        : mAdapter(adapter),
+          mRootErrorScope(AcquireRef(new ErrorScope())),
+          mCurrentErrorScope(mRootErrorScope.Get()) {
         mCaches = std::make_unique<DeviceBase::Caches>();
         mFenceSignalTracker = std::make_unique<FenceSignalTracker>(this);
         mDynamicUploader = std::make_unique<DynamicUploader>(this);
@@ -89,25 +93,32 @@ namespace dawn_native {
     }
 
     void DeviceBase::HandleError(dawn::ErrorType type, const char* message) {
-        if (mErrorCallback) {
-            mErrorCallback(static_cast<DawnErrorType>(type), message, mErrorUserdata);
-        }
+        mCurrentErrorScope->HandleError(type, message);
+    }
+
+    void DeviceBase::HandleError(ErrorData* data) {
+        mCurrentErrorScope->HandleError(data);
     }
 
     void DeviceBase::SetUncapturedErrorCallback(dawn::ErrorCallback callback, void* userdata) {
-        mErrorCallback = callback;
-        mErrorUserdata = userdata;
+        mRootErrorScope->SetCallback(callback, userdata);
     }
 
     void DeviceBase::PushErrorScope(dawn::ErrorFilter filter) {
-        // TODO(crbug.com/dawn/153): Implement error scopes.
-        HandleError(dawn::ErrorType::Validation, "Error scopes not implemented");
+        if (ConsumedError(ValidateErrorFilter(filter))) {
+            return;
+        }
+        mCurrentErrorScope = AcquireRef(new ErrorScope(filter, mCurrentErrorScope.Get()));
     }
 
     bool DeviceBase::PopErrorScope(dawn::ErrorCallback callback, void* userdata) {
-        // TODO(crbug.com/dawn/153): Implement error scopes.
-        HandleError(dawn::ErrorType::Validation, "Error scopes not implemented");
-        return false;
+        if (DAWN_UNLIKELY(mCurrentErrorScope.Get() == mRootErrorScope.Get())) {
+            return false;
+        }
+        mCurrentErrorScope->SetCallback(callback, userdata);
+        mCurrentErrorScope = Ref<ErrorScope>(mCurrentErrorScope->GetParent());
+
+        return true;
     }
 
     MaybeError DeviceBase::ValidateObject(const ObjectBase* object) const {
@@ -286,8 +297,7 @@ namespace dawn_native {
             return static_cast<AttachmentState*>(*iter);
         }
 
-        Ref<AttachmentState> attachmentState = new AttachmentState(this, *blueprint);
-        attachmentState->Release();
+        Ref<AttachmentState> attachmentState = AcquireRef(new AttachmentState(this, *blueprint));
         mCaches->attachmentStates.insert(attachmentState.Get());
         return attachmentState;
     }
@@ -679,12 +689,6 @@ namespace dawn_native {
     }
 
     // Other implementation details
-
-    void DeviceBase::ConsumeError(ErrorData* error) {
-        ASSERT(error != nullptr);
-        HandleError(error->GetType(), error->GetMessage().c_str());
-        delete error;
-    }
 
     ResultOrError<DynamicUploader*> DeviceBase::GetDynamicUploader() const {
         if (mDynamicUploader->IsEmpty()) {
