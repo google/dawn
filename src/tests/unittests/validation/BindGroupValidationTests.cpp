@@ -303,12 +303,12 @@ TEST_F(BindGroupValidationTest, TextureUsage) {
 TEST_F(BindGroupValidationTest, TextureComponentType) {
     dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
         device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture, false, false,
-                  dawn::TextureComponentType::Float}});
+                  dawn::TextureViewDimension::e2D, dawn::TextureComponentType::Float}});
 
     // Control case: setting a Float typed texture view works.
     utils::MakeBindGroup(device, layout, {{0, mSampledTextureView}});
 
-    // Make an output attachment texture and try to set it for a SampledTexture binding
+    // Make a Uint component typed texture and try to set it to a Float component binding.
     dawn::TextureDescriptor descriptor;
     descriptor.dimension = dawn::TextureDimension::e2D;
     descriptor.size = {16, 16, 1};
@@ -321,6 +321,30 @@ TEST_F(BindGroupValidationTest, TextureComponentType) {
     dawn::TextureView uintTextureView = uintTexture.CreateView();
 
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, uintTextureView}}));
+}
+
+// Check that a texture must have the correct dimension
+TEST_F(BindGroupValidationTest, TextureDimension) {
+    dawn::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture, false, false,
+                  dawn::TextureViewDimension::e2D, dawn::TextureComponentType::Float}});
+
+    // Control case: setting a 2D texture view works.
+    utils::MakeBindGroup(device, layout, {{0, mSampledTextureView}});
+
+    // Make a 2DArray texture and try to set it to a 2D binding.
+    dawn::TextureDescriptor descriptor;
+    descriptor.dimension = dawn::TextureDimension::e2D;
+    descriptor.size = {16, 16, 1};
+    descriptor.arrayLayerCount = 2;
+    descriptor.sampleCount = 1;
+    descriptor.format = dawn::TextureFormat::RGBA8Uint;
+    descriptor.mipLevelCount = 1;
+    descriptor.usage = dawn::TextureUsage::Sampled;
+    dawn::Texture arrayTexture = device.CreateTexture(&descriptor);
+    dawn::TextureView arrayTextureView = arrayTexture.CreateView();
+
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, arrayTextureView}}));
 }
 
 // Check that a UBO must have the correct usage

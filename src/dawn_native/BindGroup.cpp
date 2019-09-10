@@ -65,7 +65,8 @@ namespace dawn_native {
                                           const BindGroupBinding& binding,
                                           dawn::TextureUsage requiredUsage,
                                           bool multisampledBinding,
-                                          dawn::TextureComponentType requiredComponentType) {
+                                          dawn::TextureComponentType requiredComponentType,
+                                          dawn::TextureViewDimension requiredDimension) {
             if (binding.textureView == nullptr || binding.sampler != nullptr ||
                 binding.buffer != nullptr) {
                 return DAWN_VALIDATION_ERROR("expected texture binding");
@@ -84,6 +85,10 @@ namespace dawn_native {
 
             if (!texture->GetFormat().HasComponentType(requiredComponentType)) {
                 return DAWN_VALIDATION_ERROR("texture component type usage mismatch");
+            }
+
+            if (binding.textureView->GetDimension() != requiredDimension) {
+                return DAWN_VALIDATION_ERROR("texture view dimension mismatch");
             }
 
             return {};
@@ -145,10 +150,10 @@ namespace dawn_native {
                     DAWN_TRY(ValidateBufferBinding(device, binding, dawn::BufferUsage::Storage));
                     break;
                 case dawn::BindingType::SampledTexture:
-                    DAWN_TRY(
-                        ValidateTextureBinding(device, binding, dawn::TextureUsage::Sampled,
-                                               layoutInfo.multisampled[bindingIndex],
-                                               layoutInfo.textureComponentTypes[bindingIndex]));
+                    DAWN_TRY(ValidateTextureBinding(device, binding, dawn::TextureUsage::Sampled,
+                                                    layoutInfo.multisampled[bindingIndex],
+                                                    layoutInfo.textureComponentTypes[bindingIndex],
+                                                    layoutInfo.textureDimensions[bindingIndex]));
                     break;
                 case dawn::BindingType::Sampler:
                     DAWN_TRY(ValidateSamplerBinding(device, binding));

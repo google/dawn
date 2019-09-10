@@ -273,7 +273,7 @@ class TextureFormatTest : public DawnTest {
         dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
             device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::Sampler},
                      {1, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture, false,
-                      false, sampleFormatInfo.type}});
+                      false, dawn::TextureViewDimension::e2D, sampleFormatInfo.type}});
 
         // Prepare objects needed to sample from texture in the renderpass
         dawn::RenderPipeline pipeline =

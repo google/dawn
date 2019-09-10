@@ -50,13 +50,30 @@ TEST_P(ObjectCachingTest, BindGroupLayoutDynamic) {
 TEST_P(ObjectCachingTest, BindGroupLayoutTextureComponentType) {
     dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
         device, {{1, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture, false, false,
-                  dawn::TextureComponentType::Float}});
+                  dawn::TextureViewDimension::e2D, dawn::TextureComponentType::Float}});
     dawn::BindGroupLayout sameBgl = utils::MakeBindGroupLayout(
         device, {{1, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture, false, false,
-                  dawn::TextureComponentType::Float}});
+                  dawn::TextureViewDimension::e2D, dawn::TextureComponentType::Float}});
     dawn::BindGroupLayout otherBgl = utils::MakeBindGroupLayout(
         device, {{1, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture, false, false,
-                  dawn::TextureComponentType::Uint}});
+                  dawn::TextureViewDimension::e2D, dawn::TextureComponentType::Uint}});
+
+    EXPECT_NE(bgl.Get(), otherBgl.Get());
+    EXPECT_EQ(bgl.Get() == sameBgl.Get(), !UsesWire());
+}
+
+// Test that two similar bind group layouts won't refer to the same one if they differ by
+// textureDimension
+TEST_P(ObjectCachingTest, BindGroupLayoutTextureDimension) {
+    dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{1, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture, false, false,
+                  dawn::TextureViewDimension::e2D, dawn::TextureComponentType::Float}});
+    dawn::BindGroupLayout sameBgl = utils::MakeBindGroupLayout(
+        device, {{1, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture, false, false,
+                  dawn::TextureViewDimension::e2D, dawn::TextureComponentType::Float}});
+    dawn::BindGroupLayout otherBgl = utils::MakeBindGroupLayout(
+        device, {{1, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture, false, false,
+                  dawn::TextureViewDimension::e2DArray, dawn::TextureComponentType::Float}});
 
     EXPECT_NE(bgl.Get(), otherBgl.Get());
     EXPECT_EQ(bgl.Get() == sameBgl.Get(), !UsesWire());

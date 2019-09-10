@@ -58,6 +58,7 @@
             {"name": "type", "type": "binding type"},
             {"name": "dynamic", "type": "bool", "default": "false"},
             {"name": "multisampled", "type": "bool", "default": "false"},
+            {"name": "texture dimension", "type": "texture view dimension", "default": "undefined"},
             {"name": "texture component type", "type": "texture component type", "default": "float"}
         ]
     },
