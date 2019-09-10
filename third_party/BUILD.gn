@@ -265,21 +265,26 @@ static_library("glfw") {
     ]
   }
 
-  sources = [
-    "${glfw_dir}/include/GLFW/glfw3.h",
-    "${glfw_dir}/include/GLFW/glfw3native.h",
-    "${glfw_dir}/src/context.c",
-    "${glfw_dir}/src/egl_context.c",
-    "${glfw_dir}/src/egl_context.h",
-    "${glfw_dir}/src/init.c",
-    "${glfw_dir}/src/input.c",
-    "${glfw_dir}/src/internal.h",
-    "${glfw_dir}/src/monitor.c",
-    "${glfw_dir}/src/osmesa_context.c",
-    "${glfw_dir}/src/osmesa_context.h",
-    "${glfw_dir}/src/vulkan.c",
-    "${glfw_dir}/src/window.c",
-  ]
+  # NOTE: For some unknown reason, this library gets build when is_fuchsia
+  # is true, even if absolutely nothing references it, as checked with
+  # `gn refs out/Fuchsia third_party/dawn/third_party:glfw --all`
+  if (!is_fuchsia) {
+    sources = [
+      "${glfw_dir}/include/GLFW/glfw3.h",
+      "${glfw_dir}/include/GLFW/glfw3native.h",
+      "${glfw_dir}/src/context.c",
+      "${glfw_dir}/src/egl_context.c",
+      "${glfw_dir}/src/egl_context.h",
+      "${glfw_dir}/src/init.c",
+      "${glfw_dir}/src/input.c",
+      "${glfw_dir}/src/internal.h",
+      "${glfw_dir}/src/monitor.c",
+      "${glfw_dir}/src/osmesa_context.c",
+      "${glfw_dir}/src/osmesa_context.h",
+      "${glfw_dir}/src/vulkan.c",
+      "${glfw_dir}/src/window.c",
+    ]
+  }
   libs = []
 
   if (is_win) {
