@@ -523,6 +523,10 @@ class OptionalVertexInputTest : public DawnTest {};
 
 // Test that vertex input is not required in render pipeline descriptor.
 TEST_P(OptionalVertexInputTest, Basic) {
+    // Test failing on Vulkan with validation layer enabled
+    // See https://bugs.chromium.org/p/dawn/issues/detail?id=210
+    DAWN_SKIP_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
+
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 3, 3);
 
     dawn::ShaderModule vsModule =

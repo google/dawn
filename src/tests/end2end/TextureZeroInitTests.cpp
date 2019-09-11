@@ -300,6 +300,10 @@ TEST_P(TextureZeroInitTest, CopyTextureToTextureHalf) {
 // This tests the texture with depth attachment and load op load will init depth stencil texture to
 // 0s.
 TEST_P(TextureZeroInitTest, RenderingLoadingDepth) {
+    // Test failing on Vulkan with validation layer enabled
+    // See https://bugs.chromium.org/p/dawn/issues/detail?id=210
+    DAWN_SKIP_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
+
     dawn::TextureDescriptor srcDescriptor =
         CreateTextureDescriptor(1, 1,
                                 dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst |
@@ -335,6 +339,10 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepth) {
 // This tests the texture with stencil attachment and load op load will init depth stencil texture
 // to 0s.
 TEST_P(TextureZeroInitTest, RenderingLoadingStencil) {
+    // Test failing on Vulkan with validation layer enabled
+    // See https://bugs.chromium.org/p/dawn/issues/detail?id=210
+    DAWN_SKIP_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
+
     dawn::TextureDescriptor srcDescriptor =
         CreateTextureDescriptor(1, 1,
                                 dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst |
@@ -370,6 +378,10 @@ TEST_P(TextureZeroInitTest, RenderingLoadingStencil) {
 // This tests the texture with depth stencil attachment and load op load will init depth stencil
 // texture to 0s.
 TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencil) {
+    // Test failing on Vulkan with validation layer enabled
+    // See https://bugs.chromium.org/p/dawn/issues/detail?id=210
+    DAWN_SKIP_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
+
     dawn::TextureDescriptor srcDescriptor =
         CreateTextureDescriptor(1, 1,
                                 dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst |

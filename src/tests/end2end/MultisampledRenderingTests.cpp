@@ -255,6 +255,10 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTexture) {
 
 // Test multisampled rendering with depth test works correctly.
 TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTest) {
+    // Test failing on Vulkan with validation layer enabled
+    // See https://bugs.chromium.org/p/dawn/issues/detail?id=210
+    DAWN_SKIP_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
+
     constexpr bool kTestDepth = true;
     dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     dawn::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(kTestDepth);
