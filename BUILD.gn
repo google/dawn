@@ -580,10 +580,17 @@ dawn_component("libdawn_wire") {
 # GLFW wrapping target
 ###############################################################################
 
-# GLFW does not support Android or Fuchsia, so provide a small mock library
-# that can be linked into the Dawn tests on these platforms. Otherwise, use
-# the real library from third_party/.
-if (is_fuchsia) {
+# GLFW does not support ChromeOS, Android or Fuchsia, so provide a small mock
+# library that can be linked into the Dawn tests on these platforms. Otherwise,
+# use the real library from third_party/.
+if (is_win || is_linux || is_mac) {
+  group("dawn_glfw") {
+    public_deps = [
+      "third_party:glfw",
+    ]
+  }
+} else if (is_fuchsia) {
+  # The mock implementation of GLFW on Fuchsia
   config("dawn_glfw_public_config") {
     # Allow inclusion of <GLFW/glfw3.h>
     configs = [ "third_party:glfw_public" ]
@@ -610,10 +617,8 @@ if (is_fuchsia) {
     ]
   }
 } else {
+  # Just skip GLFW on other systems
   group("dawn_glfw") {
-    public_deps = [
-      "third_party:glfw",
-    ]
   }
 }
 
@@ -815,7 +820,6 @@ source_set("dawn_end2end_tests_sources") {
   testonly = true
 
   deps = [
-    ":dawn_glfw",
     ":dawn_utils",
     ":libdawn_native",
     ":libdawn_wire",
