@@ -960,16 +960,11 @@ namespace dawn_native { namespace d3d12 {
             if (renderPass->attachmentState->HasDepthStencilAttachment()) {
                 auto& attachmentInfo = renderPass->depthStencilAttachment;
                 Texture* texture = ToBackend(renderPass->depthStencilAttachment.view->GetTexture());
-                if ((texture->GetFormat().HasDepth() &&
-                     attachmentInfo.depthLoadOp == dawn::LoadOp::Load) ||
-                    (texture->GetFormat().HasStencil() &&
-                     attachmentInfo.stencilLoadOp == dawn::LoadOp::Load)) {
-                    texture->EnsureSubresourceContentInitialized(
-                        commandList, attachmentInfo.view->GetBaseMipLevel(),
-                        attachmentInfo.view->GetLevelCount(),
-                        attachmentInfo.view->GetBaseArrayLayer(),
-                        attachmentInfo.view->GetLayerCount());
-                }
+                TextureView* view = ToBackend(attachmentInfo.view.Get());
+                float clearDepth = attachmentInfo.clearDepth;
+                // TODO(kainino@chromium.org): investigate: should the Dawn clear
+                // stencil type be uint8_t?
+                uint8_t clearStencil = static_cast<uint8_t>(attachmentInfo.clearStencil);
 
                 // Load op - depth/stencil
                 bool doDepthClear = texture->GetFormat().HasDepth() &&
@@ -984,19 +979,35 @@ namespace dawn_native { namespace d3d12 {
                 if (doStencilClear) {
                     clearFlags |= D3D12_CLEAR_FLAG_STENCIL;
                 }
+                // If the depth stencil texture has not been initialized, we want to use loadop
+                // clear to init the contents to 0's
+                if (!texture->IsSubresourceContentInitialized(
+                        view->GetBaseMipLevel(), view->GetLevelCount(), view->GetBaseArrayLayer(),
+                        view->GetLayerCount())) {
+                    if (texture->GetFormat().HasDepth() &&
+                        attachmentInfo.depthLoadOp == dawn::LoadOp::Load) {
+                        clearDepth = 0.0f;
+                        clearFlags |= D3D12_CLEAR_FLAG_DEPTH;
+                    }
+                    if (texture->GetFormat().HasStencil() &&
+                        attachmentInfo.stencilLoadOp == dawn::LoadOp::Load) {
+                        clearStencil = 0u;
+                        clearFlags |= D3D12_CLEAR_FLAG_STENCIL;
+                    }
+                }
 
                 if (clearFlags) {
                     D3D12_CPU_DESCRIPTOR_HANDLE handle = args.dsv;
-                    // TODO(kainino@chromium.org): investigate: should the Dawn clear
-                    // stencil type be uint8_t?
-                    uint8_t clearStencil = static_cast<uint8_t>(attachmentInfo.clearStencil);
-                    commandList->ClearDepthStencilView(
-                        handle, clearFlags, attachmentInfo.clearDepth, clearStencil, 0, nullptr);
+                    commandList->ClearDepthStencilView(handle, clearFlags, clearDepth, clearStencil,
+                                                       0, nullptr);
+                }
+
+                // TODO(natlee@microsoft.com): Need to fix when storeop discard is added
+                if (attachmentInfo.depthStoreOp == dawn::StoreOp::Store &&
+                    attachmentInfo.stencilStoreOp == dawn::StoreOp::Store) {
                     texture->SetIsSubresourceContentInitialized(
-                        attachmentInfo.view->GetBaseMipLevel(),
-                        attachmentInfo.view->GetLevelCount(),
-                        attachmentInfo.view->GetBaseArrayLayer(),
-                        attachmentInfo.view->GetLayerCount());
+                        view->GetBaseMipLevel(), view->GetLevelCount(), view->GetBaseArrayLayer(),
+                        view->GetLayerCount());
                 }
             }
         }

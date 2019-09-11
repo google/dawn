@@ -197,16 +197,33 @@ namespace dawn_native { namespace vulkan {
 
                 if (renderPass->attachmentState->HasDepthStencilAttachment()) {
                     auto& attachmentInfo = renderPass->depthStencilAttachment;
-                    query.SetDepthStencil(attachmentInfo.view->GetTexture()->GetFormat().format,
+                    TextureView* view = ToBackend(attachmentInfo.view.Get());
+
+                    // If the depth stencil texture has not been initialized, we want to use loadop
+                    // clear to init the contents to 0's
+                    if (!view->GetTexture()->IsSubresourceContentInitialized(
+                            view->GetBaseMipLevel(), view->GetLevelCount(),
+                            view->GetBaseArrayLayer(), view->GetLayerCount())) {
+                        if (view->GetTexture()->GetFormat().HasDepth() &&
+                            attachmentInfo.depthLoadOp == dawn::LoadOp::Load) {
+                            attachmentInfo.clearDepth = 0.0f;
+                            attachmentInfo.depthLoadOp = dawn::LoadOp::Clear;
+                        }
+                        if (view->GetTexture()->GetFormat().HasStencil() &&
+                            attachmentInfo.stencilLoadOp == dawn::LoadOp::Load) {
+                            attachmentInfo.clearStencil = 0u;
+                            attachmentInfo.stencilLoadOp = dawn::LoadOp::Clear;
+                        }
+                    }
+                    query.SetDepthStencil(view->GetTexture()->GetFormat().format,
                                           attachmentInfo.depthLoadOp, attachmentInfo.stencilLoadOp);
-                    if (attachmentInfo.depthLoadOp == dawn::LoadOp::Load ||
-                        attachmentInfo.stencilLoadOp == dawn::LoadOp::Load) {
-                        ToBackend(attachmentInfo.view->GetTexture())
-                            ->EnsureSubresourceContentInitialized(
-                                recordingContext, attachmentInfo.view->GetBaseMipLevel(),
-                                attachmentInfo.view->GetLevelCount(),
-                                attachmentInfo.view->GetBaseArrayLayer(),
-                                attachmentInfo.view->GetLayerCount());
+
+                    // TODO(natlee@microsoft.com): Need to fix when storeop discard is added
+                    if (attachmentInfo.depthStoreOp == dawn::StoreOp::Store &&
+                        attachmentInfo.stencilStoreOp == dawn::StoreOp::Store) {
+                        view->GetTexture()->SetIsSubresourceContentInitialized(
+                            view->GetBaseMipLevel(), view->GetLevelCount(),
+                            view->GetBaseArrayLayer(), view->GetLayerCount());
                     }
                 }
 
