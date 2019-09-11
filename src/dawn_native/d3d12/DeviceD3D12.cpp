@@ -224,7 +224,7 @@ namespace dawn_native { namespace d3d12 {
         mDescriptorHeapAllocator->Tick(mCompletedSerial);
         mMapRequestTracker->Tick(mCompletedSerial);
         mUsedComObjectRefs.ClearUpTo(mCompletedSerial);
-        ExecuteCommandLists({});
+        ExecuteCommandList(nullptr);
         NextSerial();
     }
 
@@ -245,21 +245,22 @@ namespace dawn_native { namespace d3d12 {
         mUsedComObjectRefs.Enqueue(object, GetPendingCommandSerial());
     }
 
-    void Device::ExecuteCommandLists(std::initializer_list<ID3D12CommandList*> commandLists) {
+    void Device::ExecuteCommandList(ID3D12CommandList* d3d12CommandList) {
+        UINT numLists = 0;
+        std::array<ID3D12CommandList*, 2> d3d12CommandLists;
+
         // If there are pending commands, prepend them to ExecuteCommandLists
         if (mPendingCommands.open) {
-            std::vector<ID3D12CommandList*> lists(commandLists.size() + 1);
             mPendingCommands.commandList->Close();
             mPendingCommands.open = false;
-            lists[0] = mPendingCommands.commandList.Get();
-            std::copy(commandLists.begin(), commandLists.end(), lists.begin() + 1);
-            mCommandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.size() + 1),
-                                               lists.data());
-            mPendingCommands.commandList = nullptr;
-        } else {
-            std::vector<ID3D12CommandList*> lists(commandLists);
-            mCommandQueue->ExecuteCommandLists(static_cast<UINT>(commandLists.size()),
-                                               lists.data());
+            d3d12CommandLists[numLists++] = mPendingCommands.commandList.Get();
+        }
+        if (d3d12CommandList != nullptr) {
+            d3d12CommandLists[numLists++] = d3d12CommandList;
+        }
+        if (numLists > 0) {
+            mCommandQueue->ExecuteCommandLists(numLists, d3d12CommandLists.data());
+            mPendingCommands.commandList.Reset();
         }
     }
 

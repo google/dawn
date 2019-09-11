@@ -73,7 +73,7 @@ namespace dawn_native { namespace d3d12 {
 
         void ReferenceUntilUnused(ComPtr<IUnknown> object);
 
-        void ExecuteCommandLists(std::initializer_list<ID3D12CommandList*> commandLists);
+        void ExecuteCommandList(ID3D12CommandList* d3d12CommandList);
 
         ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) override;
         MaybeError CopyFromStagingToBuffer(StagingBufferBase* source,

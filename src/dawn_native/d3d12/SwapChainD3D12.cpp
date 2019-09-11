@@ -54,7 +54,7 @@ namespace dawn_native { namespace d3d12 {
         // Perform the necessary transition for the texture to be presented.
         ToBackend(texture)->TransitionUsageNow(device->GetPendingCommandList(), mTextureUsage);
 
-        device->ExecuteCommandLists({});
+        device->ExecuteCommandList(nullptr);
     }
 
 }}  // namespace dawn_native::d3d12
