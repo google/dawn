@@ -234,7 +234,7 @@ if (!build_with_chromium) {
 # Only expose GLFW targets on platforms where GLFW is supported: otherwise they
 # might get discovered by GN when another target in this file is referenced,
 # and GLFW will bbe built as part of "all" builds, causing compilation failures.
-if (is_win || is_linux || is_mac) {
+if (is_win || (is_linux && !is_chromeos) || is_mac) {
   glfw_dir = dawn_glfw_dir
 
   config("glfw_public") {

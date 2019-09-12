@@ -583,7 +583,7 @@ dawn_component("libdawn_wire") {
 # GLFW does not support ChromeOS, Android or Fuchsia, so provide a small mock
 # library that can be linked into the Dawn tests on these platforms. Otherwise,
 # use the real library from third_party/.
-if (is_win || is_linux || is_mac) {
+if (is_win || (is_linux && !is_chromeos) || is_mac) {
   group("dawn_glfw") {
     public_deps = [
       "third_party:glfw",
