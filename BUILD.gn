@@ -593,7 +593,8 @@ if (is_win || is_linux || is_mac) {
   # The mock implementation of GLFW on Fuchsia
   config("dawn_glfw_public_config") {
     # Allow inclusion of <GLFW/glfw3.h>
-    configs = [ "third_party:glfw_public" ]
+    include_dirs = [ "${dawn_glfw_dir}/include" ]
+
 
     # The GLFW/glfw3.h header includes <GL/gl.h> by default, but the latter
     # does not exist on Fuchsia. Defining GLFW_INCLUDE_NONE helps work around
