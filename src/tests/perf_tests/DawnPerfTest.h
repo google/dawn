@@ -41,19 +41,6 @@ class DawnPerfTestEnvironment : public DawnTestEnvironment {
     unsigned int mOverrideStepsToRun = 0;
 };
 
-// Dawn Perf Tests calls Step() of a derived class to measure its execution
-// time. First, a calibration step is run which determines the number of times
-// to call Step() to last approximately |kCalibrationRunTimeSeconds|. Then,
-// Step() is called for the computed number of times, or until
-// |kMaximumRunTimeSeconds| is exceeded. |kNumTrials| are performed and the
-// results and averages per iteration** are printed.
-//
-// The results are printed according to the format specified at
-// [chromium]//build/scripts/slave/performance_log_processor.py
-//
-// ** The number of iterations a test performs should be passed to the
-// constructor of DawnPerfTestBase. The reported times are the total time
-// divided by (numSteps * iterationsPerStep).
 class DawnPerfTestBase {
     static constexpr double kCalibrationRunTimeSeconds = 1.0;
     static constexpr double kMaximumRunTimeSeconds = 10.0;
