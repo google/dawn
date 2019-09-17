@@ -497,9 +497,6 @@ TEST_P(BindGroupTests, DrawTwiceInSamePipelineWithFourBindGroupSets) {
 
 // Test that bind groups can be set before the pipeline.
 TEST_P(BindGroupTests, SetBindGroupBeforePipeline) {
-    // TODO(crbug.com/dawn/201): Implement on all platforms.
-    DAWN_SKIP_TEST_IF(!IsMetal());
-
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     // Create a bind group layout which uses a single uniform buffer.
@@ -542,9 +539,6 @@ TEST_P(BindGroupTests, SetBindGroupBeforePipeline) {
 
 // Test that dynamic bind groups can be set before the pipeline.
 TEST_P(BindGroupTests, SetDynamicBindGroupBeforePipeline) {
-    // TODO(crbug.com/dawn/201): Implement on all platforms.
-    DAWN_SKIP_TEST_IF(!IsMetal());
-
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     // Create a bind group layout which uses a single dynamic uniform buffer.
@@ -558,8 +552,8 @@ TEST_P(BindGroupTests, SetDynamicBindGroupBeforePipeline) {
 
     // Prepare data RGBAunorm(1, 0, 0, 0.5) and RGBAunorm(0, 1, 0, 0.5). They will be added in the
     // shader.
-    std::array<float, 4> color0 = {1, 0, 0, 0.5};
-    std::array<float, 4> color1 = {0, 1, 0, 0.5};
+    std::array<float, 4> color0 = {1, 0, 0, 0.501};
+    std::array<float, 4> color1 = {0, 1, 0, 0.501};
 
     size_t color1Offset = Align(sizeof(color0), kMinDynamicBufferOffsetAlignment);
 
@@ -606,9 +600,6 @@ TEST_P(BindGroupTests, SetDynamicBindGroupBeforePipeline) {
 
 // Test that bind groups set for one pipeline are still set when the pipeline changes.
 TEST_P(BindGroupTests, BindGroupsPersistAfterPipelineChange) {
-    // TODO(crbug.com/dawn/201): Implement on all platforms.
-    DAWN_SKIP_TEST_IF(!IsMetal());
-
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     // Create a bind group layout which uses a single dynamic uniform buffer.
@@ -687,9 +678,6 @@ TEST_P(BindGroupTests, BindGroupsPersistAfterPipelineChange) {
 // Do a successful draw. Then, change the pipeline and one bind group.
 // Draw to check that the all bind groups are set.
 TEST_P(BindGroupTests, DrawThenChangePipelineAndBindGroup) {
-    // TODO(crbug.com/dawn/201): Implement on all platforms.
-    DAWN_SKIP_TEST_IF(!IsMetal());
-
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     // Create a bind group layout which uses a single dynamic uniform buffer.
@@ -715,7 +703,7 @@ TEST_P(BindGroupTests, DrawThenChangePipelineAndBindGroup) {
     // The second draw will use { color0, color3, color2 }.
     // The pipeline uses additive color blending so the result of two draws should be
     // { 2 * color0 + color1 + color2 + color3} = RGBAunorm(1, 1, 1, 1)
-    std::array<float, 4> color0 = {0.5, 0, 0, 0};
+    std::array<float, 4> color0 = {0.501, 0, 0, 0};
     std::array<float, 4> color1 = {0, 1, 0, 0};
     std::array<float, 4> color2 = {0, 0, 0, 1};
     std::array<float, 4> color3 = {0, 0, 1, 0};

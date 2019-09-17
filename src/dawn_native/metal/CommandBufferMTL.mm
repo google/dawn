@@ -15,6 +15,7 @@
 #include "dawn_native/metal/CommandBufferMTL.h"
 
 #include "dawn_native/BindGroup.h"
+#include "dawn_native/BindGroupTracker.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/RenderBundle.h"
@@ -391,66 +392,21 @@ namespace dawn_native { namespace metal {
 
         // Keeps track of the dirty bind groups so they can be lazily applied when we know the
         // pipeline state.
-        class BindGroupTracker {
+        // Bind groups may be inherited because bind groups are packed in the buffer /
+        // texture tables in contiguous order.
+        class BindGroupTracker : public BindGroupTrackerBase<BindGroup*, true> {
           public:
             explicit BindGroupTracker(StorageBufferLengthTracker* lengthTracker)
-                : mLengthTracker(lengthTracker) {
-            }
-
-            void OnSetBindGroup(uint32_t index,
-                                BindGroup* bindGroup,
-                                uint32_t dynamicOffsetCount,
-                                uint64_t* dynamicOffsets) {
-                ASSERT(index < kMaxBindGroups);
-
-                if (mBindGroupLayoutsMask[index]) {
-                    // It is okay to only dirty bind groups that are used by the current pipeline
-                    // layout. If the pipeline layout changes, then the bind groups it uses will
-                    // become dirty.
-                    mDirtyBindGroups.set(index);
-                }
-
-                mBindGroups[index] = bindGroup;
-                mDynamicOffsetCounts[index] = dynamicOffsetCount;
-                memcpy(mDynamicOffsets[index].data(), dynamicOffsets,
-                       sizeof(uint64_t) * dynamicOffsetCount);
-            }
-
-            void OnSetPipeline(PipelineBase* pipeline) {
-                mPipelineLayout = ToBackend(pipeline->GetLayout());
-                if (mLastAppliedPipelineLayout == mPipelineLayout) {
-                    return;
-                }
-
-                // Keep track of the bind group layout mask to avoid marking unused bind groups as
-                // dirty. This also allows us to avoid computing the intersection of the dirty bind
-                // groups and bind group layout mask in Draw or Dispatch which is very hot code.
-                mBindGroupLayoutsMask = mPipelineLayout->GetBindGroupLayoutsMask();
-
-                // Changing the pipeline layout sets bind groups as dirty. The first |k| matching
-                // bind groups may be inherited because bind groups are packed in the buffer /
-                // texture tables in contiguous order.
-                if (mLastAppliedPipelineLayout != nullptr) {
-                    // Dirty bind groups that cannot be inherited.
-                    mDirtyBindGroups |=
-                        ~mPipelineLayout->InheritedGroupsMask(mLastAppliedPipelineLayout);
-                    mDirtyBindGroups &= mBindGroupLayoutsMask;
-                } else {
-                    mDirtyBindGroups = mBindGroupLayoutsMask;
-                }
+                : BindGroupTrackerBase(), mLengthTracker(lengthTracker) {
             }
 
             template <typename Encoder>
             void Apply(Encoder encoder) {
-                for (uint32_t index : IterateBitSet(mDirtyBindGroups)) {
+                for (uint32_t index : IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
                     ApplyBindGroup(encoder, index, mBindGroups[index], mDynamicOffsetCounts[index],
-                                   mDynamicOffsets[index].data(), mPipelineLayout);
+                                   mDynamicOffsets[index].data(), ToBackend(mPipelineLayout));
                 }
-
-                // Reset all dirty bind groups. Dirty bind groups not in the bind group layout mask
-                // will be dirtied again by the next pipeline change.
-                mDirtyBindGroups.reset();
-                mLastAppliedPipelineLayout = mPipelineLayout;
+                DidApply();
             }
 
           private:
@@ -586,18 +542,6 @@ namespace dawn_native { namespace metal {
             void ApplyBindGroup(id<MTLComputeCommandEncoder> encoder, Args&&... args) {
                 ApplyBindGroupImpl(nil, encoder, std::forward<Args&&>(args)...);
             }
-
-            std::bitset<kMaxBindGroups> mDirtyBindGroups;
-            std::bitset<kMaxBindGroups> mBindGroupLayoutsMask;
-            std::array<BindGroup*, kMaxBindGroups> mBindGroups;
-            std::array<uint32_t, kMaxBindGroups> mDynamicOffsetCounts;
-            std::array<std::array<uint64_t, kMaxBindingsPerGroup>, kMaxBindGroups> mDynamicOffsets;
-
-            // |mPipelineLayout| is the current pipeline layout set on the command buffer.
-            // |mLastAppliedPipelineLayout| is the last pipeline layout for which we applied changes
-            // to the bind group bindings.
-            PipelineLayout* mPipelineLayout = nullptr;
-            PipelineLayout* mLastAppliedPipelineLayout = nullptr;
 
             StorageBufferLengthTracker* mLengthTracker;
         };
