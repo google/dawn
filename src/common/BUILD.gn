@@ -99,6 +99,7 @@ if (is_win || is_linux || is_mac || is_fuchsia) {
       "SwapChainUtils.h",
       "vulkan_platform.h",
       "windows_with_undefs.h",
+      "xlib_with_undefs.h",
     ]
 
     public_configs = [ ":dawn_internal" ]
