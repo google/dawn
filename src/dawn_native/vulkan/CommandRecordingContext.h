@@ -16,6 +16,8 @@
 
 #include "common/vulkan_platform.h"
 
+#include "dawn_native/vulkan/BufferVk.h"
+
 #include <vector>
 
 namespace dawn_native { namespace vulkan {
