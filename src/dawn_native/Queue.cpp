@@ -17,6 +17,8 @@
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ErrorScope.h"
+#include "dawn_native/ErrorScopeTracker.h"
 #include "dawn_native/Fence.h"
 #include "dawn_native/FenceSignalTracker.h"
 #include "dawn_native/Texture.h"
@@ -30,24 +32,29 @@ namespace dawn_native {
     }
 
     void QueueBase::Submit(uint32_t commandCount, CommandBufferBase* const* commands) {
-        TRACE_EVENT0(GetDevice()->GetPlatform(), TRACE_DISABLED_BY_DEFAULT("gpu.dawn"),
-                     "Queue::Submit");
-        if (GetDevice()->ConsumedError(ValidateSubmit(commandCount, commands))) {
+        DeviceBase* device = GetDevice();
+        TRACE_EVENT0(device->GetPlatform(), TRACE_DISABLED_BY_DEFAULT("gpu.dawn"), "Queue::Submit");
+        if (device->ConsumedError(ValidateSubmit(commandCount, commands))) {
             return;
         }
         ASSERT(!IsError());
 
         SubmitImpl(commandCount, commands);
+        device->GetErrorScopeTracker()->TrackUntilLastSubmitComplete(
+            device->GetCurrentErrorScope());
     }
 
     void QueueBase::Signal(FenceBase* fence, uint64_t signalValue) {
-        if (GetDevice()->ConsumedError(ValidateSignal(fence, signalValue))) {
+        DeviceBase* device = GetDevice();
+        if (device->ConsumedError(ValidateSignal(fence, signalValue))) {
             return;
         }
         ASSERT(!IsError());
 
         fence->SetSignaledValue(signalValue);
-        GetDevice()->GetFenceSignalTracker()->UpdateFenceOnComplete(fence, signalValue);
+        device->GetFenceSignalTracker()->UpdateFenceOnComplete(fence, signalValue);
+        device->GetErrorScopeTracker()->TrackUntilLastSubmitComplete(
+            device->GetCurrentErrorScope());
     }
 
     FenceBase* QueueBase::CreateFence(const FenceDescriptor* descriptor) {

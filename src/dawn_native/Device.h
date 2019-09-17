@@ -36,6 +36,7 @@ namespace dawn_native {
     class AttachmentState;
     class AttachmentStateBlueprint;
     class ErrorScope;
+    class ErrorScopeTracker;
     class FenceSignalTracker;
     class DynamicUploader;
     class StagingBufferBase;
@@ -61,6 +62,7 @@ namespace dawn_native {
         AdapterBase* GetAdapter() const;
         dawn_platform::Platform* GetPlatform() const;
 
+        ErrorScopeTracker* GetErrorScopeTracker() const;
         FenceSignalTracker* GetFenceSignalTracker() const;
 
         // Returns the Format corresponding to the dawn::TextureFormat or an error if the format
@@ -153,6 +155,7 @@ namespace dawn_native {
         void SetUncapturedErrorCallback(dawn::ErrorCallback callback, void* userdata);
         void PushErrorScope(dawn::ErrorFilter filter);
         bool PopErrorScope(dawn::ErrorCallback callback, void* userdata);
+        ErrorScope* GetCurrentErrorScope();
 
         void Reference();
         void Release();
@@ -251,6 +254,7 @@ namespace dawn_native {
             void* userdata;
         };
 
+        std::unique_ptr<ErrorScopeTracker> mErrorScopeTracker;
         std::unique_ptr<FenceSignalTracker> mFenceSignalTracker;
         std::vector<DeferredCreateBufferMappedAsync> mDeferredCreateBufferMappedAsyncResults;
 

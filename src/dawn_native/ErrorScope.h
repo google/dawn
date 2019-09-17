@@ -49,6 +49,8 @@ namespace dawn_native {
         void HandleError(dawn::ErrorType type, const char* message);
         void HandleError(ErrorData* error);
 
+        void Destroy();
+
       private:
         bool IsRoot() const;
         static void HandleErrorImpl(ErrorScope* scope, dawn::ErrorType type, const char* message);

@@ -132,3 +132,68 @@ TEST_F(ErrorScopeValidationTest, PushPopBalanced) {
         EXPECT_FALSE(device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this + 2));
     }
 }
+
+// Test that error scopes do not call their callbacks until after an enclosed Queue::Submit
+// completes
+TEST_F(ErrorScopeValidationTest, CallbackAfterQueueSubmit) {
+    dawn::Queue queue = device.CreateQueue();
+
+    device.PushErrorScope(dawn::ErrorFilter::OutOfMemory);
+    queue.Submit(0, nullptr);
+    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this);
+
+    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(DAWN_ERROR_TYPE_NO_ERROR, _, this)).Times(1);
+
+    // Side effects of Queue::Submit only are seen after Tick()
+    device.Tick();
+}
+
+// Test that parent error scopes do not call their callbacks until after an enclosed Queue::Submit
+// completes
+TEST_F(ErrorScopeValidationTest, CallbackAfterQueueSubmitNested) {
+    dawn::Queue queue = device.CreateQueue();
+
+    device.PushErrorScope(dawn::ErrorFilter::OutOfMemory);
+    device.PushErrorScope(dawn::ErrorFilter::OutOfMemory);
+    queue.Submit(0, nullptr);
+    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this);
+    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this + 1);
+
+    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(DAWN_ERROR_TYPE_NO_ERROR, _, this)).Times(1);
+    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(DAWN_ERROR_TYPE_NO_ERROR, _, this + 1))
+        .Times(1);
+
+    // Side effects of Queue::Submit only are seen after Tick()
+    device.Tick();
+}
+
+// Test a callback that returns asynchronously followed by a synchronous one
+TEST_F(ErrorScopeValidationTest, AsynchronousThenSynchronous) {
+    dawn::Queue queue = device.CreateQueue();
+
+    device.PushErrorScope(dawn::ErrorFilter::OutOfMemory);
+    queue.Submit(0, nullptr);
+    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this);
+
+    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(DAWN_ERROR_TYPE_NO_ERROR, _, this + 1))
+        .Times(1);
+    device.PushErrorScope(dawn::ErrorFilter::OutOfMemory);
+    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this + 1);
+
+    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(DAWN_ERROR_TYPE_NO_ERROR, _, this)).Times(1);
+
+    // Side effects of Queue::Submit only are seen after Tick()
+    device.Tick();
+}
+
+// Test that if the device is destroyed before the callback occurs, it is called with UNKNOWN.
+TEST_F(ErrorScopeValidationTest, DeviceDestroyedBeforeCallback) {
+    dawn::Queue queue = device.CreateQueue();
+
+    device.PushErrorScope(dawn::ErrorFilter::OutOfMemory);
+    queue.Submit(0, nullptr);
+    device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this);
+
+    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(DAWN_ERROR_TYPE_UNKNOWN, _, this)).Times(1);
+    device = nullptr;
+}

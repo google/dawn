@@ -168,6 +168,8 @@ source_set("libdawn_native_sources") {
     "src/dawn_native/ErrorData.h",
     "src/dawn_native/ErrorScope.cpp",
     "src/dawn_native/ErrorScope.h",
+    "src/dawn_native/ErrorScopeTracker.cpp",
+    "src/dawn_native/ErrorScopeTracker.h",
     "src/dawn_native/Extensions.cpp",
     "src/dawn_native/Extensions.h",
     "src/dawn_native/Fence.cpp",
@@ -594,7 +596,6 @@ if (is_win || (is_linux && !is_chromeos) || is_mac) {
   config("dawn_glfw_public_config") {
     # Allow inclusion of <GLFW/glfw3.h>
     include_dirs = [ "${dawn_glfw_dir}/include" ]
-
 
     # The GLFW/glfw3.h header includes <GL/gl.h> by default, but the latter
     # does not exist on Fuchsia. Defining GLFW_INCLUDE_NONE helps work around
