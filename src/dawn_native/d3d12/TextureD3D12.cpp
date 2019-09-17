@@ -552,22 +552,28 @@ namespace dawn_native { namespace d3d12 {
             Extent3D copySize = {GetSize().width, GetSize().height, 1};
             TextureCopySplit copySplit = ComputeTextureCopySplit(
                 {0, 0, 0}, copySize, GetFormat(), uploadHandle.startOffset, rowPitch, 0);
-            D3D12_TEXTURE_COPY_LOCATION textureLocation =
-                ComputeTextureCopyLocationForTexture(this, baseMipLevel, baseArrayLayer);
-            for (uint32_t i = 0; i < copySplit.count; ++i) {
-                TextureCopySplit::CopyInfo& info = copySplit.copies[i];
 
-                D3D12_TEXTURE_COPY_LOCATION bufferLocation =
-                    ComputeBufferLocationForCopyTextureRegion(
-                        this, ToBackend(uploadHandle.stagingBuffer)->GetResource(), info.bufferSize,
-                        copySplit.offset, rowPitch);
-                D3D12_BOX sourceRegion =
-                    ComputeD3D12BoxFromOffsetAndSize(info.bufferOffset, info.copySize);
+            for (uint32_t level = baseMipLevel; level < baseMipLevel + levelCount; ++level) {
+                for (uint32_t layer = baseArrayLayer; layer < baseArrayLayer + layerCount;
+                     ++layer) {
+                    D3D12_TEXTURE_COPY_LOCATION textureLocation =
+                        ComputeTextureCopyLocationForTexture(this, level, layer);
+                    for (uint32_t i = 0; i < copySplit.count; ++i) {
+                        TextureCopySplit::CopyInfo& info = copySplit.copies[i];
 
-                // copy the buffer filled with clear color to the texture
-                commandList->CopyTextureRegion(&textureLocation, info.textureOffset.x,
-                                               info.textureOffset.y, info.textureOffset.z,
-                                               &bufferLocation, &sourceRegion);
+                        D3D12_TEXTURE_COPY_LOCATION bufferLocation =
+                            ComputeBufferLocationForCopyTextureRegion(
+                                this, ToBackend(uploadHandle.stagingBuffer)->GetResource(),
+                                info.bufferSize, copySplit.offset, rowPitch);
+                        D3D12_BOX sourceRegion =
+                            ComputeD3D12BoxFromOffsetAndSize(info.bufferOffset, info.copySize);
+
+                        // copy the buffer filled with clear color to the texture
+                        commandList->CopyTextureRegion(&textureLocation, info.textureOffset.x,
+                                                       info.textureOffset.y, info.textureOffset.z,
+                                                       &bufferLocation, &sourceRegion);
+                    }
+                }
             }
         }
         if (clearValue == TextureBase::ClearValue::Zero) {

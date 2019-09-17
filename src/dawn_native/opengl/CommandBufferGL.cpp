@@ -457,22 +457,20 @@ namespace dawn_native { namespace opengl {
                     gl.BindTexture(target, texture->GetHandle());
 
                     const Format& formatInfo = texture->GetFormat();
-                    gl.PixelStorei(
-                        GL_UNPACK_ROW_LENGTH,
-                        src.rowPitch / texture->GetFormat().blockByteSize * formatInfo.blockWidth);
+                    gl.PixelStorei(GL_UNPACK_ROW_LENGTH,
+                                   src.rowPitch / formatInfo.blockByteSize * formatInfo.blockWidth);
                     gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, src.imageHeight);
 
-                    if (texture->GetFormat().isCompressed) {
+                    if (formatInfo.isCompressed) {
                         gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_SIZE, formatInfo.blockByteSize);
                         gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_WIDTH, formatInfo.blockWidth);
                         gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_HEIGHT, formatInfo.blockHeight);
                         gl.PixelStorei(GL_UNPACK_COMPRESSED_BLOCK_DEPTH, 1);
 
                         ASSERT(texture->GetDimension() == dawn::TextureDimension::e2D);
-                        uint64_t copyDataSize =
-                            (copySize.width / texture->GetFormat().blockWidth) *
-                            (copySize.height / texture->GetFormat().blockHeight) *
-                            texture->GetFormat().blockByteSize;
+                        uint64_t copyDataSize = (copySize.width / formatInfo.blockWidth) *
+                                                (copySize.height / formatInfo.blockHeight) *
+                                                formatInfo.blockByteSize;
                         Extent3D copyExtent = ComputeTextureCopyExtent(dst, copySize);
 
                         if (texture->GetArrayLayers() > 1) {

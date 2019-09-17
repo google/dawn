@@ -14,6 +14,7 @@
 
 #include "tests/DawnTest.h"
 
+#include "common/Math.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
 
@@ -83,6 +84,10 @@ class TextureZeroInitTest : public DawnTest {
         return device.CreateRenderPipeline(&pipelineDescriptor);
     }
     constexpr static uint32_t kSize = 128;
+    constexpr static uint32_t kUnalignedSize = 127;
+    // All three texture formats used (RGBA8Unorm, Depth24PlusStencil8, and RGBA8Snorm) have the
+    // same byte size of 4.
+    constexpr static uint32_t kFormatBlockByteSize = 4;
     constexpr static dawn::TextureFormat kColorFormat = dawn::TextureFormat::RGBA8Unorm;
     constexpr static dawn::TextureFormat kDepthStencilFormat =
         dawn::TextureFormat::Depth24PlusStencil8;
@@ -165,7 +170,7 @@ TEST_P(TextureZeroInitTest, CopyBufferToTexture) {
         kColorFormat);
     dawn::Texture texture = device.CreateTexture(&descriptor);
 
-    std::vector<uint8_t> data(4 * kSize * kSize, 100);
+    std::vector<uint8_t> data(kFormatBlockByteSize * kSize * kSize, 100);
     dawn::Buffer stagingBuffer = utils::CreateBufferFromData(
         device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsage::CopySrc);
 
@@ -192,7 +197,7 @@ TEST_P(TextureZeroInitTest, CopyBufferToTextureHalf) {
         kColorFormat);
     dawn::Texture texture = device.CreateTexture(&descriptor);
 
-    std::vector<uint8_t> data(4 * kSize * kSize, 100);
+    std::vector<uint8_t> data(kFormatBlockByteSize * kSize * kSize, 100);
     dawn::Buffer stagingBuffer = utils::CreateBufferFromData(
         device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsage::CopySrc);
 
@@ -256,7 +261,7 @@ TEST_P(TextureZeroInitTest, CopyTextureToTextureHalf) {
 
     // fill srcTexture with 100
     {
-        std::vector<uint8_t> data(4 * kSize * kSize, 100);
+        std::vector<uint8_t> data(kFormatBlockByteSize * kSize * kSize, 100);
         dawn::Buffer stagingBuffer = utils::CreateBufferFromData(
             device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsage::CopySrc);
         dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 0, 0);
@@ -504,7 +509,7 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
     descriptor.size.height = 1;
     dawn::Texture texture = device.CreateTexture(&descriptor);
 
-    uint32_t bufferSize = 4 * sizeof(uint32_t);
+    uint32_t bufferSize = kFormatBlockByteSize * sizeof(uint32_t);
     dawn::BufferDescriptor bufferDescriptor;
     bufferDescriptor.size = bufferSize;
     bufferDescriptor.usage =
@@ -560,26 +565,81 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
 
     // Expect the buffer to be zeroed out by the compute pass
     std::vector<uint32_t> expectedWithZeros(bufferSize, 0);
-    EXPECT_BUFFER_U32_RANGE_EQ(expectedWithZeros.data(), bufferTex, 0, 4);
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedWithZeros.data(), bufferTex, 0, kFormatBlockByteSize);
 }
 
 // This tests that the code path of CopyTextureToBuffer clears correctly for non-renderable textures
 TEST_P(TextureZeroInitTest, NonRenderableTextureClear) {
-    // skip test for other backends since they are not implemented yet
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-
     dawn::TextureDescriptor descriptor =
         CreateTextureDescriptor(1, 1, dawn::TextureUsage::CopySrc, kNonrenderableColorFormat);
     dawn::Texture texture = device.CreateTexture(&descriptor);
 
     // Set buffer with dirty data so we know it is cleared by the lazy cleared texture copy
-    uint32_t bufferSize = 4 * kSize * kSize;
+    uint32_t rowPitch = Align(kSize * kFormatBlockByteSize, kTextureRowPitchAlignment);
+    uint32_t bufferSize = rowPitch * kSize;
+    std::vector<uint8_t> data(bufferSize, 100);
+    dawn::Buffer bufferDst = utils::CreateBufferFromData(
+        device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsage::CopySrc);
+
+    dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(bufferDst, 0, rowPitch, 0);
+    dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
+    dawn::Extent3D copySize = {kSize, kSize, 1};
+
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copySize);
+    dawn::CommandBuffer commands = encoder.Finish();
+    EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commands));
+
+    std::vector<uint32_t> expectedWithZeros(bufferSize, 0);
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedWithZeros.data(), bufferDst, 0, kSize);
+}
+
+// This tests that the code path of CopyTextureToBuffer clears correctly for non-renderable textures
+TEST_P(TextureZeroInitTest, NonRenderableTextureClearUnalignedSize) {
+    dawn::TextureDescriptor descriptor =
+        CreateTextureDescriptor(1, 1, dawn::TextureUsage::CopySrc, kNonrenderableColorFormat);
+    descriptor.size.width = kUnalignedSize;
+    descriptor.size.height = kUnalignedSize;
+    dawn::Texture texture = device.CreateTexture(&descriptor);
+
+    // Set buffer with dirty data so we know it is cleared by the lazy cleared texture copy
+    uint32_t rowPitch = Align(kUnalignedSize * kFormatBlockByteSize, kTextureRowPitchAlignment);
+    uint32_t bufferSize = rowPitch * kUnalignedSize;
+    std::vector<uint8_t> data(bufferSize, 100);
+    dawn::Buffer bufferDst = utils::CreateBufferFromData(
+        device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsage::CopySrc);
+    dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(bufferDst, 0, rowPitch, 0);
+    dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
+    dawn::Extent3D copySize = {kUnalignedSize, kUnalignedSize, 1};
+
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copySize);
+    dawn::CommandBuffer commands = encoder.Finish();
+    EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commands));
+
+    std::vector<uint32_t> expectedWithZeros(bufferSize, 0);
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedWithZeros.data(), bufferDst, 0, kUnalignedSize);
+}
+
+// This tests that the code path of CopyTextureToBuffer clears correctly for non-renderable textures
+// with more than 1 array layers
+TEST_P(TextureZeroInitTest, NonRenderableTextureClearWithMultiArrayLayers) {
+    // TODO(natlee@microsoft.com): skip for now on opengl because TextureClear nonrenderable
+    // textures does not create large enough buffers for array layers greater than 1.
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+
+    dawn::TextureDescriptor descriptor =
+        CreateTextureDescriptor(1, 2, dawn::TextureUsage::CopySrc, kNonrenderableColorFormat);
+    dawn::Texture texture = device.CreateTexture(&descriptor);
+
+    // Set buffer with dirty data so we know it is cleared by the lazy cleared texture copy
+    uint32_t bufferSize = kFormatBlockByteSize * kSize * kSize;
     std::vector<uint8_t> data(bufferSize, 100);
     dawn::Buffer bufferDst = utils::CreateBufferFromData(
         device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsage::CopySrc);
 
     dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(bufferDst, 0, 0, 0);
-    dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
+    dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 1, {0, 0, 0});
     dawn::Extent3D copySize = {kSize, kSize, 1};
 
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();

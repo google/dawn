@@ -15,6 +15,9 @@
 #include "dawn_native/opengl/TextureGL.h"
 
 #include "common/Assert.h"
+#include "common/Constants.h"
+#include "common/Math.h"
+#include "dawn_native/opengl/BufferGL.h"
 #include "dawn_native/opengl/DeviceGL.h"
 #include "dawn_native/opengl/UtilsGL.h"
 
@@ -142,14 +145,8 @@ namespace dawn_native { namespace opengl {
         gl.TexParameteri(mTarget, GL_TEXTURE_MAX_LEVEL, levels - 1);
 
         if (GetDevice()->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
-            static constexpr uint32_t MAX_TEXEL_SIZE = 16;
-            ASSERT(GetFormat().blockByteSize <= MAX_TEXEL_SIZE);
-            GLubyte clearColor[MAX_TEXEL_SIZE];
-            std::fill(clearColor, clearColor + MAX_TEXEL_SIZE, 255);
-            // TODO(natlee@microsoft.com): clear all subresources
-            for (uint32_t i = 0; i < GetNumMipLevels(); i++) {
-                gl.ClearTexImage(mHandle, i, glFormat.format, glFormat.type, clearColor);
-            }
+            GetDevice()->ConsumedError(ClearTexture(0, GetNumMipLevels(), 0, GetArrayLayers(),
+                                                    TextureBase::ClearValue::NonZero));
         }
     }
 
@@ -182,50 +179,123 @@ namespace dawn_native { namespace opengl {
         return ToBackend(GetDevice())->GetGLFormat(GetFormat());
     }
 
-    void Texture::ClearTexture(GLint baseMipLevel,
-                               GLint levelCount,
-                               GLint baseArrayLayer,
-                               uint32_t layerCount) {
-        const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+    MaybeError Texture::ClearTexture(GLint baseMipLevel,
+                                     GLint levelCount,
+                                     GLint baseArrayLayer,
+                                     uint32_t layerCount,
+                                     TextureBase::ClearValue clearValue) {
         // TODO(jiawei.shao@intel.com): initialize the textures with compressed formats.
         if (GetFormat().isCompressed) {
-            return;
+            return {};
         }
 
-        if (GetFormat().HasDepthOrStencil()) {
-            bool doDepthClear = GetFormat().HasDepth();
-            bool doStencilClear = GetFormat().HasStencil();
-            GLfloat depth = 0.0f;
-            GLint stencil = 0u;
-            if (doDepthClear) {
-                gl.DepthMask(GL_TRUE);
-            }
-            if (doStencilClear) {
-                gl.StencilMask(GetStencilMaskFromStencilFormat(GetFormat().format));
-            }
+        Device* device = ToBackend(GetDevice());
+        const OpenGLFunctions& gl = device->gl;
+        uint8_t clearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0 : 1;
+        if (GetFormat().isRenderable) {
+            if (GetFormat().HasDepthOrStencil()) {
+                bool doDepthClear = GetFormat().HasDepth();
+                bool doStencilClear = GetFormat().HasStencil();
+                GLfloat depth = clearColor;
+                GLint stencil = clearColor;
+                if (doDepthClear) {
+                    gl.DepthMask(GL_TRUE);
+                }
+                if (doStencilClear) {
+                    gl.StencilMask(GetStencilMaskFromStencilFormat(GetFormat().format));
+                }
 
-            GLuint framebuffer = 0;
-            gl.GenFramebuffers(1, &framebuffer);
-            gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
-            gl.FramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GetGLTarget(),
-                                    GetHandle(), 0);
-            if (doDepthClear && doStencilClear) {
-                gl.ClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
-            } else if (doDepthClear) {
-                gl.ClearBufferfv(GL_DEPTH, 0, &depth);
-            } else if (doStencilClear) {
-                gl.ClearBufferiv(GL_STENCIL, 0, &stencil);
+                GLuint framebuffer = 0;
+                gl.GenFramebuffers(1, &framebuffer);
+                gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
+                // TODO(natlee@microsoft.com): clear all mip levels and array layers.
+                gl.FramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+                                        GetGLTarget(), GetHandle(), 0);
+                if (doDepthClear && doStencilClear) {
+                    gl.ClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
+                } else if (doDepthClear) {
+                    gl.ClearBufferfv(GL_DEPTH, 0, &depth);
+                } else if (doStencilClear) {
+                    gl.ClearBufferiv(GL_STENCIL, 0, &stencil);
+                }
+                gl.DeleteFramebuffers(1, &framebuffer);
+            } else {
+                static constexpr uint32_t MAX_TEXEL_SIZE = 16;
+                ASSERT(GetFormat().blockByteSize <= MAX_TEXEL_SIZE);
+                std::array<GLbyte, MAX_TEXEL_SIZE> clearColorData;
+                clearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0 : 255;
+                clearColorData.fill(clearColor);
+
+                const GLFormat& glFormat = GetGLFormat();
+                for (GLint level = baseMipLevel; level < baseMipLevel + levelCount; ++level) {
+                    Extent3D mipSize = GetMipLevelPhysicalSize(level);
+                    gl.ClearTexSubImage(mHandle, level, 0, 0, baseArrayLayer, mipSize.width,
+                                        mipSize.height, layerCount, glFormat.format, glFormat.type,
+                                        clearColorData.data());
+                }
             }
-            gl.DeleteFramebuffers(1, &framebuffer);
         } else {
-            const GLFormat& glFormat = GetGLFormat();
+            // TODO(natlee@microsoft.com): test compressed textures are cleared
+            // create temp buffer with clear color to copy to the texture image
+            ASSERT(kTextureRowPitchAlignment % GetFormat().blockByteSize == 0);
+            uint32_t rowPitch =
+                Align((GetSize().width / GetFormat().blockWidth) * GetFormat().blockByteSize,
+                      kTextureRowPitchAlignment);
+
+            // Make sure that we are not rounding
+            ASSERT(rowPitch % GetFormat().blockByteSize == 0);
+            ASSERT(GetSize().height % GetFormat().blockHeight == 0);
+
+            dawn_native::BufferDescriptor descriptor;
+            descriptor.size = rowPitch * (GetSize().height / GetFormat().blockHeight);
+            if (descriptor.size > std::numeric_limits<uint32_t>::max()) {
+                return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate buffer.");
+            }
+            descriptor.nextInChain = nullptr;
+            descriptor.usage = dawn::BufferUsage::CopySrc | dawn::BufferUsage::MapWrite;
+            // TODO(natlee@microsoft.com): use Dynamic Uplaoder here for temp buffer
+            Ref<Buffer> srcBuffer = ToBackend(device->CreateBuffer(&descriptor));
+            // Call release here to prevent memory leak since CreateBuffer will up the ref count to
+            // 1, then assigning to Ref<Buffer> ups the ref count to 2. Release will reduce the ref
+            // count and ensure it to reach 0 when out of use.
+            srcBuffer->Release();
+
+            // Fill the buffer with clear color
+            uint8_t* clearBuffer = nullptr;
+            DAWN_TRY(srcBuffer->MapAtCreation(&clearBuffer));
+            std::fill(reinterpret_cast<uint32_t*>(clearBuffer),
+                      reinterpret_cast<uint32_t*>(clearBuffer + descriptor.size), clearColor);
+            srcBuffer->Unmap();
+
+            // Bind buffer and texture, and make the buffer to texture copy
+            gl.PixelStorei(GL_UNPACK_ROW_LENGTH,
+                           (rowPitch / GetFormat().blockByteSize) * GetFormat().blockWidth);
+            gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
             for (GLint level = baseMipLevel; level < baseMipLevel + levelCount; ++level) {
-                Extent3D mipSize = GetMipLevelPhysicalSize(level);
-                gl.ClearTexSubImage(mHandle, level, 0, 0, baseArrayLayer, mipSize.width,
-                                    mipSize.height, layerCount, glFormat.format, glFormat.type,
-                                    nullptr);
+                gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER, srcBuffer->GetHandle());
+                gl.ActiveTexture(GL_TEXTURE0);
+                gl.BindTexture(GetGLTarget(), GetHandle());
+
+                Extent3D size = GetMipLevelPhysicalSize(level);
+                switch (GetDimension()) {
+                    case dawn::TextureDimension::e2D:
+                        // TODO(natlee@microsoft.com): This will break when layerCount is greater
+                        // than 1, because the buffer is only sized for one layer.
+                        ASSERT(layerCount == 1);
+                        gl.TexSubImage2D(GetGLTarget(), level, 0, 0, size.width, size.height,
+                                         GetGLFormat().format, GetGLFormat().type, 0);
+                        break;
+
+                    default:
+                        UNREACHABLE();
+                }
+                gl.PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+                gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
+
+                gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
             }
         }
+        return {};
     }
 
     void Texture::EnsureSubresourceContentInitialized(uint32_t baseMipLevel,
@@ -238,7 +308,8 @@ namespace dawn_native { namespace opengl {
         }
         if (!IsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer,
                                              layerCount)) {
-            ClearTexture(baseMipLevel, levelCount, baseArrayLayer, layerCount);
+            GetDevice()->ConsumedError(ClearTexture(baseMipLevel, levelCount, baseArrayLayer,
+                                                    layerCount, TextureBase::ClearValue::Zero));
             if (isLazyClear) {
                 GetDevice()->IncrementLazyClearCountForTesting();
             }

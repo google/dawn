@@ -701,22 +701,27 @@ namespace dawn_native { namespace vulkan {
             bufferCopy.offset = uploadHandle.startOffset;
             bufferCopy.rowPitch = rowPitch;
 
-            dawn_native::TextureCopy textureCopy;
-            textureCopy.texture = this;
-            textureCopy.origin = {0, 0, 0};
-            textureCopy.mipLevel = baseMipLevel;
-            textureCopy.arrayLayer = baseArrayLayer;
-
             Extent3D copySize = {GetSize().width, GetSize().height, 1};
 
-            VkBufferImageCopy region =
-                ComputeBufferImageCopyRegion(bufferCopy, textureCopy, copySize);
+            for (uint32_t level = baseMipLevel; level < baseMipLevel + levelCount; ++level) {
+                for (uint32_t layer = baseArrayLayer; layer < baseArrayLayer + layerCount;
+                     ++layer) {
+                    dawn_native::TextureCopy textureCopy;
+                    textureCopy.texture = this;
+                    textureCopy.origin = {0, 0, 0};
+                    textureCopy.mipLevel = level;
+                    textureCopy.arrayLayer = layer;
 
-            // copy the clear buffer to the texture image
-            device->fn.CmdCopyBufferToImage(
-                recordingContext->commandBuffer,
-                ToBackend(uploadHandle.stagingBuffer)->GetBufferHandle(), GetHandle(),
-                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+                    VkBufferImageCopy region =
+                        ComputeBufferImageCopyRegion(bufferCopy, textureCopy, copySize);
+
+                    // copy the clear buffer to the texture image
+                    device->fn.CmdCopyBufferToImage(
+                        recordingContext->commandBuffer,
+                        ToBackend(uploadHandle.stagingBuffer)->GetBufferHandle(), GetHandle(),
+                        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+                }
+            }
         }
         if (clearValue == TextureBase::ClearValue::Zero) {
             SetIsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer,
