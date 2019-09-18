@@ -98,8 +98,10 @@ namespace dawn_native {
         mCurrentErrorScope->HandleError(type, message);
     }
 
-    void DeviceBase::HandleError(ErrorData* data) {
-        mCurrentErrorScope->HandleError(data);
+    void DeviceBase::ConsumeError(ErrorData* error) {
+        ASSERT(error != nullptr);
+        HandleError(error->GetType(), error->GetMessage().c_str());
+        delete error;
     }
 
     void DeviceBase::SetUncapturedErrorCallback(dawn::ErrorCallback callback, void* userdata) {

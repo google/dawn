@@ -15,7 +15,6 @@
 #include "dawn_native/ErrorScope.h"
 
 #include "common/Assert.h"
-#include "dawn_native/ErrorData.h"
 
 namespace dawn_native {
 
@@ -48,11 +47,6 @@ namespace dawn_native {
 
     void ErrorScope::HandleError(dawn::ErrorType type, const char* message) {
         HandleErrorImpl(this, type, message);
-    }
-
-    void ErrorScope::HandleError(ErrorData* error) {
-        ASSERT(error != nullptr);
-        HandleErrorImpl(this, error->GetType(), error->GetMessage().c_str());
     }
 
     // static

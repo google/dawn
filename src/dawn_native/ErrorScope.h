@@ -23,8 +23,6 @@
 
 namespace dawn_native {
 
-    class ErrorData;
-
     // Errors can be recorded into an ErrorScope by calling |HandleError|.
     // Because an error scope should not resolve until contained
     // commands are complete, calling the callback is deferred until it is destructed.
@@ -47,7 +45,6 @@ namespace dawn_native {
         ErrorScope* GetParent();
 
         void HandleError(dawn::ErrorType type, const char* message);
-        void HandleError(ErrorData* error);
 
         void Destroy();
 

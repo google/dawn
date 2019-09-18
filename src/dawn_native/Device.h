@@ -47,11 +47,10 @@ namespace dawn_native {
         virtual ~DeviceBase();
 
         void HandleError(dawn::ErrorType type, const char* message);
-        void HandleError(ErrorData* error);
 
         bool ConsumedError(MaybeError maybeError) {
             if (DAWN_UNLIKELY(maybeError.IsError())) {
-                HandleError(maybeError.AcquireError());
+                ConsumeError(maybeError.AcquireError());
                 return true;
             }
             return false;
@@ -236,6 +235,8 @@ namespace dawn_native {
         void ApplyExtensions(const DeviceDescriptor* deviceDescriptor);
 
         void SetDefaultToggles();
+
+        void ConsumeError(ErrorData* error);
 
         AdapterBase* mAdapter = nullptr;
 
