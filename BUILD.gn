@@ -46,7 +46,11 @@ source_set("dawn_platform") {
 config("libdawn_native_internal") {
   configs = [ "${dawn_root}/src/common:dawn_internal" ]
 
-  # Suppress warnings that Metal isn't in the deployment target of Chrome
+  # Suppress warnings that Metal isn't in the deployment target of Chrome:
+  # initialization of the Metal backend is behind a IsMetalSupported check so
+  # Dawn won't call Metal functions on macOS 10.10.
+  # TODO(cwallez@chromium.org): Consider using API_AVAILABLE annotations on all
+  # metal code in dawn once crbug.com/1004024 is sorted out.
   if (is_mac) {
     cflags_objcc = [ "-Wno-unguarded-availability" ]
   }
