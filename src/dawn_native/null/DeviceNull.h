@@ -26,7 +26,7 @@
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/Queue.h"
 #include "dawn_native/RenderPipeline.h"
-#include "dawn_native/RingBuffer.h"
+#include "dawn_native/RingBufferAllocator.h"
 #include "dawn_native/Sampler.h"
 #include "dawn_native/ShaderModule.h"
 #include "dawn_native/StagingBuffer.h"

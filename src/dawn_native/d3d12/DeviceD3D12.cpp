@@ -216,8 +216,8 @@ namespace dawn_native { namespace d3d12 {
         mCompletedSerial = mFence->GetCompletedValue();
 
         // Uploader should tick before the resource allocator
-        // as it enqueues resources to be released.
-        mDynamicUploader->Tick(mCompletedSerial);
+        // as it enqueued resources to be released.
+        mDynamicUploader->Deallocate(mCompletedSerial);
 
         mResourceAllocator->Tick(mCompletedSerial);
         mCommandAllocatorManager->Tick(mCompletedSerial);
@@ -319,6 +319,7 @@ namespace dawn_native { namespace d3d12 {
     ResultOrError<std::unique_ptr<StagingBufferBase>> Device::CreateStagingBuffer(size_t size) {
         std::unique_ptr<StagingBufferBase> stagingBuffer =
             std::make_unique<StagingBuffer>(size, this);
+        DAWN_TRY(stagingBuffer->Initialize());
         return std::move(stagingBuffer);
     }
 

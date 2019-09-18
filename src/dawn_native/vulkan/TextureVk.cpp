@@ -687,10 +687,10 @@ namespace dawn_native { namespace vulkan {
                 return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate buffer.");
             }
             uint32_t bufferSize = static_cast<uint32_t>(bufferSize64);
-            DynamicUploader* uploader = nullptr;
-            DAWN_TRY_ASSIGN(uploader, device->GetDynamicUploader());
+            DynamicUploader* uploader = device->GetDynamicUploader();
             UploadHandle uploadHandle;
-            DAWN_TRY_ASSIGN(uploadHandle, uploader->Allocate(bufferSize));
+            DAWN_TRY_ASSIGN(uploadHandle,
+                            uploader->Allocate(bufferSize, device->GetPendingCommandSerial()));
             std::fill(reinterpret_cast<uint32_t*>(uploadHandle.mappedBuffer),
                       reinterpret_cast<uint32_t*>(uploadHandle.mappedBuffer + bufferSize),
                       clearColor);

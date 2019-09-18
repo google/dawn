@@ -167,7 +167,7 @@ namespace dawn_native {
                                                    uint64_t destinationOffset,
                                                    uint64_t size) = 0;
 
-        ResultOrError<DynamicUploader*> GetDynamicUploader() const;
+        DynamicUploader* GetDynamicUploader() const;
 
         std::vector<const char*> GetEnabledExtensions() const;
         std::vector<const char*> GetTogglesUsed() const;

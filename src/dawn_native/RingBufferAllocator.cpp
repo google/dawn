@@ -12,13 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn_native/RingBuffer.h"
-#include "dawn_native/Device.h"
+#include "dawn_native/RingBufferAllocator.h"
 
-#include <limits>
-
-// Note: Current RingBuffer implementation uses two indices (start and end) to implement a circular
-// queue. However, this approach defines a full queue when one element is still unused.
+// Note: Current RingBufferAllocator implementation uses two indices (start and end) to implement a
+// circular queue. However, this approach defines a full queue when one element is still unused.
 //
 // For example, [E,E,E,E] would be equivelent to [U,U,U,U].
 //                 ^                                ^
@@ -32,36 +29,10 @@
 // TODO(bryan.bernhart@intel.com): Follow-up with ringbuffer optimization.
 namespace dawn_native {
 
-    static constexpr size_t INVALID_OFFSET = std::numeric_limits<size_t>::max();
-
-    RingBuffer::RingBuffer(DeviceBase* device, size_t size) : mBufferSize(size), mDevice(device) {
+    RingBufferAllocator::RingBufferAllocator(size_t maxSize) : mMaxBlockSize(maxSize) {
     }
 
-    MaybeError RingBuffer::Initialize() {
-        DAWN_TRY_ASSIGN(mStagingBuffer, mDevice->CreateStagingBuffer(mBufferSize));
-        DAWN_TRY(mStagingBuffer->Initialize());
-        return {};
-    }
-
-    // Record allocations in a request when serial advances.
-    // This method has been split from Tick() for testing.
-    void RingBuffer::Track() {
-        if (mCurrentRequestSize == 0)
-            return;
-        const Serial currentSerial = mDevice->GetPendingCommandSerial();
-        if (mInflightRequests.Empty() || currentSerial > mInflightRequests.LastSerial()) {
-            Request request;
-            request.endOffset = mUsedEndOffset;
-            request.size = mCurrentRequestSize;
-
-            mInflightRequests.Enqueue(std::move(request), currentSerial);
-            mCurrentRequestSize = 0;  // reset
-        }
-    }
-
-    void RingBuffer::Tick(Serial lastCompletedSerial) {
-        Track();
-
+    void RingBufferAllocator::Deallocate(Serial lastCompletedSerial) {
         // Reclaim memory from previously recorded blocks.
         for (Request& request : mInflightRequests.IterateUpTo(lastCompletedSerial)) {
             mUsedStartOffset = request.endOffset;
@@ -72,21 +43,16 @@ namespace dawn_native {
         mInflightRequests.ClearUpTo(lastCompletedSerial);
     }
 
-    size_t RingBuffer::GetSize() const {
-        return mBufferSize;
+    size_t RingBufferAllocator::GetSize() const {
+        return mMaxBlockSize;
     }
 
-    size_t RingBuffer::GetUsedSize() const {
+    size_t RingBufferAllocator::GetUsedSize() const {
         return mUsedSize;
     }
 
-    bool RingBuffer::Empty() const {
+    bool RingBufferAllocator::Empty() const {
         return mInflightRequests.Empty();
-    }
-
-    StagingBufferBase* RingBuffer::GetStagingBuffer() const {
-        ASSERT(mStagingBuffer != nullptr);
-        return mStagingBuffer.get();
     }
 
     // Sub-allocate the ring-buffer by requesting a chunk of the specified size.
@@ -96,55 +62,55 @@ namespace dawn_native {
     // queue, which identifies an existing (or new) frames-worth of resources. Internally, the
     // ring-buffer maintains offsets of 3 "memory" states: Free, Reclaimed, and Used. This is done
     // in FIFO order as older frames would free resources before newer ones.
-    UploadHandle RingBuffer::SubAllocate(size_t allocSize) {
-        ASSERT(mStagingBuffer != nullptr);
-
+    size_t RingBufferAllocator::Allocate(size_t allocationSize, Serial serial) {
         // Check if the buffer is full by comparing the used size.
         // If the buffer is not split where waste occurs (e.g. cannot fit new sub-alloc in front), a
         // subsequent sub-alloc could fail where the used size was previously adjusted to include
         // the wasted.
-        if (mUsedSize >= mBufferSize)
-            return UploadHandle{};
+        if (allocationSize == 0 || mUsedSize >= mMaxBlockSize) {
+            return kInvalidOffset;
+        }
 
-        size_t startOffset = INVALID_OFFSET;
+        size_t startOffset = kInvalidOffset;
 
         // Check if the buffer is NOT split (i.e sub-alloc on ends)
         if (mUsedStartOffset <= mUsedEndOffset) {
             // Order is important (try to sub-alloc at end first).
             // This is due to FIFO order where sub-allocs are inserted from left-to-right (when not
             // wrapped).
-            if (mUsedEndOffset + allocSize <= mBufferSize) {
+            if (mUsedEndOffset + allocationSize <= mMaxBlockSize) {
                 startOffset = mUsedEndOffset;
-                mUsedEndOffset += allocSize;
-                mUsedSize += allocSize;
-                mCurrentRequestSize += allocSize;
-            } else if (allocSize <= mUsedStartOffset) {  // Try to sub-alloc at front.
-                // Count the space at front in the request size so that a subsequent
+                mUsedEndOffset += allocationSize;
+                mUsedSize += allocationSize;
+                mCurrentRequestSize += allocationSize;
+            } else if (allocationSize <= mUsedStartOffset) {  // Try to sub-alloc at front.
+                // Count the space at the end so that a subsequent
                 // sub-alloc cannot not succeed when the buffer is full.
-                const size_t requestSize = (mBufferSize - mUsedEndOffset) + allocSize;
+                const size_t requestSize = (mMaxBlockSize - mUsedEndOffset) + allocationSize;
 
                 startOffset = 0;
-                mUsedEndOffset = allocSize;
+                mUsedEndOffset = allocationSize;
                 mUsedSize += requestSize;
                 mCurrentRequestSize += requestSize;
             }
-        } else if (mUsedEndOffset + allocSize <=
+        } else if (mUsedEndOffset + allocationSize <=
                    mUsedStartOffset) {  // Otherwise, buffer is split where sub-alloc must be
                                         // in-between.
             startOffset = mUsedEndOffset;
-            mUsedEndOffset += allocSize;
-            mUsedSize += allocSize;
-            mCurrentRequestSize += allocSize;
+            mUsedEndOffset += allocationSize;
+            mUsedSize += allocationSize;
+            mCurrentRequestSize += allocationSize;
         }
 
-        if (startOffset == INVALID_OFFSET)
-            return UploadHandle{};
+        if (startOffset != kInvalidOffset) {
+            Request request;
+            request.endOffset = mUsedEndOffset;
+            request.size = mCurrentRequestSize;
 
-        UploadHandle uploadHandle;
-        uploadHandle.mappedBuffer =
-            static_cast<uint8_t*>(mStagingBuffer->GetMappedPointer()) + startOffset;
-        uploadHandle.startOffset = startOffset;
+            mInflightRequests.Enqueue(std::move(request), serial);
+            mCurrentRequestSize = 0;  // reset
+        }
 
-        return uploadHandle;
+        return startOffset;
     }
 }  // namespace dawn_native

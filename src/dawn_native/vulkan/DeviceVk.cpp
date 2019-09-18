@@ -217,7 +217,7 @@ namespace dawn_native { namespace vulkan {
 
         // Uploader should tick before the resource allocator
         // as it enqueues resources to be released.
-        mDynamicUploader->Tick(mCompletedSerial);
+        mDynamicUploader->Deallocate(mCompletedSerial);
 
         mMemoryAllocator->Tick(mCompletedSerial);
 
@@ -561,6 +561,7 @@ namespace dawn_native { namespace vulkan {
     ResultOrError<std::unique_ptr<StagingBufferBase>> Device::CreateStagingBuffer(size_t size) {
         std::unique_ptr<StagingBufferBase> stagingBuffer =
             std::make_unique<StagingBuffer>(size, this);
+        DAWN_TRY(stagingBuffer->Initialize());
         return std::move(stagingBuffer);
     }
 
