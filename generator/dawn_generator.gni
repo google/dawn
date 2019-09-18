@@ -15,6 +15,16 @@
 import("../scripts/dawn_overrides_with_defaults.gni")
 import("generator_lib.gni")
 
+dawn_allowed_gen_output_dirs = [
+  "src/dawn/",
+  "src/dawn_native/",
+  "src/dawn_native/opengl/",
+  "src/dawn_wire/client/",
+  "src/dawn_wire/server/",
+  "src/dawn_wire/",
+  "src/include/dawn/",
+]
+
 # Template to help invoking Dawn code generators based on generator_lib
 #
 #   dawn_generator("my_target_gen") {
@@ -47,6 +57,7 @@ template("dawn_generator") {
     forward_variables_from(invoker, "*")
     generator_lib_dir = "${dawn_root}/generator"
     jinja2_path = dawn_jinja2_dir
+    allowed_output_dirs = dawn_allowed_gen_output_dirs
   }
 }
 

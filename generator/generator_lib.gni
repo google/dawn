@@ -35,6 +35,11 @@
 #
 #   jinja2_path: Optional Jinja2 installation path.
 #
+#   allowed_output_dirs: Optional list of directories that are the only
+#     directories in which files of `outputs` are allowed to be (and not
+#     in children directories). Generation will fail if an output isn't
+#     in a directory in the list.
+#
 #   root_dir: Optional root source dir for Python dependencies
 #     computation. Defaults to "${generator_lib_dir}/..". Any dependency
 #     outside of this directory is considered a system file and will be
@@ -110,6 +115,19 @@ template("generator_lib_action") {
     "--expected-outputs-file",
     rebase_path(_expected_outputs_file, root_build_dir),
   ]
+
+  # Check that all of the outputs are in a directory that's allowed. This is
+  # useful to keep the list of directories in sink with other parts of the
+  # build.
+  if (defined(invoker.allowed_output_dirs)) {
+    _allowed_output_dirs_file = "${_gen_dir}/${target_name}.allowed_output_dirs"
+    write_file(_allowed_output_dirs_file, invoker.allowed_output_dirs)
+
+    _generator_args += [
+      "--allowed-output-dirs-file",
+      rebase_path(_allowed_output_dirs_file, root_build_dir),
+    ]
+  }
 
   # The code generator invocation that will write the JSON tarball, check the
   # outputs are what's expected and write a depfile for Ninja.
