@@ -80,11 +80,15 @@ class Generator:
 # NOTE: If this argument appears several times, this only uses the first
 #       value, while argparse would typically keep the last one!
 kJinja2Path = '--jinja2-path'
-jinja2_path_argv_index = sys.argv.index(kJinja2Path)
-if jinja2_path_argv_index >= 0:
+try:
+    jinja2_path_argv_index = sys.argv.index(kJinja2Path)
     # Add parent path for the import to succeed.
     path = os.path.join(sys.argv[jinja2_path_argv_index + 1], os.pardir)
     sys.path.insert(1, path)
+except ValueError:
+    # --jinja2-path isn't passed, ignore the exception and just import Jinja2
+    # assuming it already is in the Python PATH.
+    pass
 
 import jinja2
 
