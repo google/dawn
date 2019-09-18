@@ -31,13 +31,16 @@ if (build_with_chromium) {
 
 config("dawn_public_include_dirs") {
   include_dirs = [
-    "${target_gen_dir}/../..",
+    "${target_gen_dir}/../../src/include",
     "${dawn_root}/src/include",
   ]
 }
 
 config("dawn_internal") {
-  include_dirs = [ "${dawn_root}/src" ]
+  include_dirs = [
+    "${target_gen_dir}/../../src",
+    "${dawn_root}/src",
+  ]
 
   defines = []
   if (dawn_always_assert || dcheck_always_on || is_debug) {

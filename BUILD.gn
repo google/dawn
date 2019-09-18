@@ -55,11 +55,11 @@ config("libdawn_native_internal") {
 dawn_json_generator("libdawn_native_utils_gen") {
   target = "dawn_native_utils"
   outputs = [
-    "dawn_native/ProcTable.cpp",
-    "dawn_native/dawn_structs_autogen.h",
-    "dawn_native/dawn_structs_autogen.cpp",
-    "dawn_native/ValidationUtils_autogen.h",
-    "dawn_native/ValidationUtils_autogen.cpp",
+    "src/dawn_native/ProcTable.cpp",
+    "src/dawn_native/dawn_structs_autogen.h",
+    "src/dawn_native/dawn_structs_autogen.cpp",
+    "src/dawn_native/ValidationUtils_autogen.h",
+    "src/dawn_native/ValidationUtils_autogen.cpp",
   ]
 }
 
@@ -74,9 +74,9 @@ if (dawn_enable_opengl) {
                   root_build_dir),
     ]
     outputs = [
-      "dawn_native/opengl/OpenGLFunctionsBase_autogen.cpp",
-      "dawn_native/opengl/OpenGLFunctionsBase_autogen.h",
-      "dawn_native/opengl/opengl_platform_autogen.h",
+      "src/dawn_native/opengl/OpenGLFunctionsBase_autogen.cpp",
+      "src/dawn_native/opengl/OpenGLFunctionsBase_autogen.h",
+      "src/dawn_native/opengl/opengl_platform_autogen.h",
     ]
   }
 }
@@ -400,9 +400,9 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/vulkan/BufferVk.h",
       "src/dawn_native/vulkan/CommandBufferVk.cpp",
       "src/dawn_native/vulkan/CommandBufferVk.h",
+      "src/dawn_native/vulkan/CommandRecordingContext.h",
       "src/dawn_native/vulkan/ComputePipelineVk.cpp",
       "src/dawn_native/vulkan/ComputePipelineVk.h",
-      "src/dawn_native/vulkan/CommandRecordingContext.h",
       "src/dawn_native/vulkan/DeviceVk.cpp",
       "src/dawn_native/vulkan/DeviceVk.h",
       "src/dawn_native/vulkan/ExternalHandle.h",
@@ -520,18 +520,18 @@ dawn_component("libdawn_native") {
 dawn_json_generator("libdawn_wire_gen") {
   target = "dawn_wire"
   outputs = [
-    "dawn_wire/WireCmd_autogen.h",
-    "dawn_wire/WireCmd_autogen.cpp",
-    "dawn_wire/client/ApiObjects_autogen.h",
-    "dawn_wire/client/ApiProcs_autogen.cpp",
-    "dawn_wire/client/ApiProcs_autogen.h",
-    "dawn_wire/client/ClientBase_autogen.h",
-    "dawn_wire/client/ClientHandlers_autogen.cpp",
-    "dawn_wire/client/ClientPrototypes_autogen.inc",
-    "dawn_wire/server/ServerBase_autogen.h",
-    "dawn_wire/server/ServerDoers_autogen.cpp",
-    "dawn_wire/server/ServerHandlers_autogen.cpp",
-    "dawn_wire/server/ServerPrototypes_autogen.inc",
+    "src/dawn_wire/WireCmd_autogen.h",
+    "src/dawn_wire/WireCmd_autogen.cpp",
+    "src/dawn_wire/client/ApiObjects_autogen.h",
+    "src/dawn_wire/client/ApiProcs_autogen.cpp",
+    "src/dawn_wire/client/ApiProcs_autogen.h",
+    "src/dawn_wire/client/ClientBase_autogen.h",
+    "src/dawn_wire/client/ClientHandlers_autogen.cpp",
+    "src/dawn_wire/client/ClientPrototypes_autogen.inc",
+    "src/dawn_wire/server/ServerBase_autogen.h",
+    "src/dawn_wire/server/ServerDoers_autogen.cpp",
+    "src/dawn_wire/server/ServerHandlers_autogen.cpp",
+    "src/dawn_wire/server/ServerPrototypes_autogen.inc",
   ]
 }
 
@@ -723,8 +723,8 @@ static_library("dawn_bindings") {
 dawn_json_generator("mock_dawn_gen") {
   target = "mock_dawn"
   outputs = [
-    "mock/mock_dawn.h",
-    "mock/mock_dawn.cpp",
+    "src/dawn/mock_dawn.h",
+    "src/dawn/mock_dawn.cpp",
   ]
 }
 

@@ -229,9 +229,9 @@ class OpenGLLoaderGenerator(Generator):
         params = compute_params(etree.parse(args.gl_xml).getroot(), supported_extensions)
 
         return [
-            FileRender('opengl/OpenGLFunctionsBase.cpp', 'dawn_native/opengl/OpenGLFunctionsBase_autogen.cpp', [params]),
-            FileRender('opengl/OpenGLFunctionsBase.h', 'dawn_native/opengl/OpenGLFunctionsBase_autogen.h', [params]),
-            FileRender('opengl/opengl_platform.h', 'dawn_native/opengl/opengl_platform_autogen.h', [params]),
+            FileRender('opengl/OpenGLFunctionsBase.cpp', 'src/dawn_native/opengl/OpenGLFunctionsBase_autogen.cpp', [params]),
+            FileRender('opengl/OpenGLFunctionsBase.h', 'src/dawn_native/opengl/OpenGLFunctionsBase_autogen.h', [params]),
+            FileRender('opengl/opengl_platform.h', 'src/dawn_native/opengl/opengl_platform_autogen.h', [params]),
         ]
 
     def get_dependencies(self, args):
