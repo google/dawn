@@ -17,6 +17,7 @@
 
 #include "dawn_native/Texture.h"
 
+#include <IOSurface/IOSurfaceRef.h>
 #import <Metal/Metal.h>
 
 namespace dawn_native { namespace metal {

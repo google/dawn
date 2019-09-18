@@ -15,15 +15,20 @@
 #include "dawn_native/metal/BackendMTL.h"
 
 #include "common/Constants.h"
+#include "common/Platform.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/MetalBackend.h"
 #include "dawn_native/metal/DeviceMTL.h"
 
-#import <IOKit/IOKitLib.h>
+#if defined(DAWN_PLATFORM_MACOS)
+#    import <IOKit/IOKitLib.h>
+#endif
 
 namespace dawn_native { namespace metal {
 
     namespace {
+
+#if defined(DAWN_PLATFORM_MACOS)
         struct PCIIDs {
             uint32_t vendorId;
             uint32_t deviceId;
@@ -150,6 +155,18 @@ namespace dawn_native { namespace metal {
             NSOperatingSystemVersion macOS10_11 = {10, 11, 0};
             return [NSProcessInfo.processInfo isOperatingSystemAtLeastVersion:macOS10_11];
         }
+#elif defined(DAWN_PLATFORM_IOS)
+        MaybeError GetDevicePCIInfo(id<MTLDevice> device, PCIIDs* ids) {
+            DAWN_UNUSED(device);
+            *ids = PCIIDs(0, 0);
+        }
+
+        bool IsMetalSupported() {
+            return true;
+        }
+#else
+#    error "Unsupported Apple platform."
+#endif
     }  // anonymous namespace
 
     // The Metal backend's Adapter.
@@ -201,14 +218,23 @@ namespace dawn_native { namespace metal {
     }
 
     std::vector<std::unique_ptr<AdapterBase>> Backend::DiscoverDefaultAdapters() {
-        NSArray<id<MTLDevice>>* devices = MTLCopyAllDevices();
-
         std::vector<std::unique_ptr<AdapterBase>> adapters;
-        for (id<MTLDevice> device in devices) {
-            adapters.push_back(std::make_unique<Adapter>(GetInstance(), device));
-        }
 
-        [devices release];
+        if (@available(macOS 10.12, *)) {
+            NSArray<id<MTLDevice>>* devices = MTLCopyAllDevices();
+
+            for (id<MTLDevice> device in devices) {
+                adapters.push_back(std::make_unique<Adapter>(GetInstance(), device));
+            }
+
+            [devices release];
+        } else if (@available(iOS 8.0, *)) {
+            // iOS only has a single device so MTLCopyAllDevices doesn't exist there.
+            adapters.push_back(
+                std::make_unique<Adapter>(GetInstance(), MTLCreateSystemDefaultDevice()));
+        } else {
+            UNREACHABLE();
+        }
         return adapters;
     }
 

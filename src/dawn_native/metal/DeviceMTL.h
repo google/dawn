@@ -21,8 +21,9 @@
 #include "dawn_native/Device.h"
 #include "dawn_native/metal/Forward.h"
 
+#import <IOSurface/IOSurfaceRef.h>
 #import <Metal/Metal.h>
-#import <QuartzCore/CAMetalLayer.h>
+#import <QuartzCore/QuartzCore.h>
 
 #include <atomic>
 #include <memory>

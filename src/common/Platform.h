@@ -17,15 +17,27 @@
 
 #if defined(_WIN32) || defined(_WIN64)
 #    define DAWN_PLATFORM_WINDOWS 1
+
 #elif defined(__linux__)
 #    define DAWN_PLATFORM_LINUX 1
 #    define DAWN_PLATFORM_POSIX 1
+
 #elif defined(__APPLE__)
 #    define DAWN_PLATFORM_APPLE 1
 #    define DAWN_PLATFORM_POSIX 1
+#    include <TargetConditionals.h>
+#    if TARGET_OS_IPHONE
+#        define DAWN_PLATFORM_IOS
+#    elif TARGET_OS_MAC
+#        define DAWN_PLATFORM_MACOS
+#    else
+#        error "Unsupported Apple platform."
+#    endif
+
 #elif defined(__Fuchsia__)
 #    define DAWN_PLATFORM_FUCHSIA 1
 #    define DAWN_PLATFORM_POSIX 1
+
 #else
 #    error "Unsupported platform."
 #endif
