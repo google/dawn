@@ -23,10 +23,6 @@ import("${dawn_root}/scripts/dawn_component.gni")
 
 dawn_json_generator("dawn_headers_gen") {
   target = "dawn_headers"
-
-  # Generate as if we were in the main BUILD.gn because that was historically
-  # the case and we can't move generated files without clobbering the build.
-  custom_gen_dir = "${target_gen_dir}/../.."
   outputs = [
     "src/include/dawn/dawncpp.h",
     "src/include/dawn/dawn.h",

@@ -27,6 +27,7 @@ if (!defined(dawn_standalone)) {
 if (!defined(dawn_root)) {
   dawn_root = get_path_info("..", "abspath")
 }
+dawn_gen_root = get_path_info("${dawn_root}", "gen_dir")
 
 if (!defined(dawn_jinja2_dir)) {
   dawn_jinja2_dir = "//third_party/jinja2"

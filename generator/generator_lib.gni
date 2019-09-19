@@ -24,6 +24,8 @@
 #   outputs: List of expected outputs, generation will fail if there is a
 #     mistmatch.
 #
+#   deps: additional deps for the code generation targets.
+#
 #   generator_lib_dir: directory where generator_lib.py is located.
 #
 #   custom_gen_dir: Optional custom target gen dir. Defaults to $target_gen_dir
@@ -138,6 +140,9 @@ template("generator_lib_action") {
     ]
     depfile = _json_tarball_depfile
     args = _generator_args
+    if (defined(invoker.deps)) {
+      deps = invoker.deps
+    }
   }
 
   # Extract the JSON tarball into the gen_dir
