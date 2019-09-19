@@ -49,7 +49,6 @@ namespace dawn_native {
     }
 
     AllocationMethod ResourceMemoryAllocation::GetAllocationMethod() const {
-        ASSERT(mMethod != AllocationMethod::kInvalid);
         return mMethod;
     }
 

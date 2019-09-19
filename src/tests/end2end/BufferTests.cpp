@@ -627,6 +627,17 @@ TEST_P(CreateBufferMappedTests, CreateThenMapBeforeUnmapFailureAsync) {
     EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
 }
 
+// Test that creating a very large buffers fails gracefully.
+TEST_P(CreateBufferMappedTests, LargeBufferFails) {
+    // TODO(http://crbug.com/dawn/27): Missing support.
+    DAWN_SKIP_TEST_IF(IsMetal() || IsOpenGL());
+
+    dawn::BufferDescriptor descriptor;
+    descriptor.size = std::numeric_limits<uint64_t>::max();
+    descriptor.usage = dawn::BufferUsage::MapRead | dawn::BufferUsage::CopyDst;
+    ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
+}
+
 DAWN_INSTANTIATE_TEST(CreateBufferMappedTests,
                       D3D12Backend,
                       MetalBackend,
