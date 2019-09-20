@@ -45,7 +45,7 @@ namespace dawn_native {
 
     AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderPassDescriptor* descriptor) {
         for (uint32_t i = 0; i < descriptor->colorAttachmentCount; ++i) {
-            TextureViewBase* attachment = descriptor->colorAttachments[i]->attachment;
+            TextureViewBase* attachment = descriptor->colorAttachments[i].attachment;
             mColorAttachmentsSet.set(i);
             mColorFormats[i] = attachment->GetFormat().format;
             if (mSampleCount == 0) {

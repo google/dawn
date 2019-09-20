@@ -310,39 +310,40 @@ namespace dawn_native {
 
         MaybeError ValidateResolveTarget(
             const DeviceBase* device,
-            const RenderPassColorAttachmentDescriptor* colorAttachment) {
-            if (colorAttachment->resolveTarget == nullptr) {
+            const RenderPassColorAttachmentDescriptor& colorAttachment) {
+            if (colorAttachment.resolveTarget == nullptr) {
                 return {};
             }
 
-            DAWN_TRY(device->ValidateObject(colorAttachment->resolveTarget));
+            const TextureViewBase* resolveTarget = colorAttachment.resolveTarget;
+            const TextureViewBase* attachment = colorAttachment.attachment;
+            DAWN_TRY(device->ValidateObject(colorAttachment.resolveTarget));
 
-            if (!colorAttachment->attachment->GetTexture()->IsMultisampledTexture()) {
+            if (!attachment->GetTexture()->IsMultisampledTexture()) {
                 return DAWN_VALIDATION_ERROR(
                     "Cannot set resolve target when the sample count of the color attachment is 1");
             }
 
-            if (colorAttachment->resolveTarget->GetTexture()->IsMultisampledTexture()) {
+            if (resolveTarget->GetTexture()->IsMultisampledTexture()) {
                 return DAWN_VALIDATION_ERROR("Cannot use multisampled texture as resolve target");
             }
 
-            if (colorAttachment->resolveTarget->GetLayerCount() > 1) {
+            if (resolveTarget->GetLayerCount() > 1) {
                 return DAWN_VALIDATION_ERROR(
                     "The array layer count of the resolve target must be 1");
             }
 
-            if (colorAttachment->resolveTarget->GetLevelCount() > 1) {
+            if (resolveTarget->GetLevelCount() > 1) {
                 return DAWN_VALIDATION_ERROR("The mip level count of the resolve target must be 1");
             }
 
-            uint32_t colorAttachmentBaseMipLevel = colorAttachment->attachment->GetBaseMipLevel();
-            const Extent3D& colorTextureSize = colorAttachment->attachment->GetTexture()->GetSize();
+            uint32_t colorAttachmentBaseMipLevel = attachment->GetBaseMipLevel();
+            const Extent3D& colorTextureSize = attachment->GetTexture()->GetSize();
             uint32_t colorAttachmentWidth = colorTextureSize.width >> colorAttachmentBaseMipLevel;
             uint32_t colorAttachmentHeight = colorTextureSize.height >> colorAttachmentBaseMipLevel;
 
-            uint32_t resolveTargetBaseMipLevel = colorAttachment->resolveTarget->GetBaseMipLevel();
-            const Extent3D& resolveTextureSize =
-                colorAttachment->resolveTarget->GetTexture()->GetSize();
+            uint32_t resolveTargetBaseMipLevel = resolveTarget->GetBaseMipLevel();
+            const Extent3D& resolveTextureSize = resolveTarget->GetTexture()->GetSize();
             uint32_t resolveTargetWidth = resolveTextureSize.width >> resolveTargetBaseMipLevel;
             uint32_t resolveTargetHeight = resolveTextureSize.height >> resolveTargetBaseMipLevel;
             if (colorAttachmentWidth != resolveTargetWidth ||
@@ -351,9 +352,8 @@ namespace dawn_native {
                     "The size of the resolve target must be the same as the color attachment");
             }
 
-            dawn::TextureFormat resolveTargetFormat =
-                colorAttachment->resolveTarget->GetFormat().format;
-            if (resolveTargetFormat != colorAttachment->attachment->GetFormat().format) {
+            dawn::TextureFormat resolveTargetFormat = resolveTarget->GetFormat().format;
+            if (resolveTargetFormat != attachment->GetFormat().format) {
                 return DAWN_VALIDATION_ERROR(
                     "The format of the resolve target must be the same as the color attachment");
             }
@@ -363,15 +363,13 @@ namespace dawn_native {
 
         MaybeError ValidateRenderPassColorAttachment(
             const DeviceBase* device,
-            const RenderPassColorAttachmentDescriptor* colorAttachment,
+            const RenderPassColorAttachmentDescriptor& colorAttachment,
             uint32_t* width,
             uint32_t* height,
             uint32_t* sampleCount) {
-            DAWN_ASSERT(colorAttachment != nullptr);
+            DAWN_TRY(device->ValidateObject(colorAttachment.attachment));
 
-            DAWN_TRY(device->ValidateObject(colorAttachment->attachment));
-
-            const TextureViewBase* attachment = colorAttachment->attachment;
+            const TextureViewBase* attachment = colorAttachment.attachment;
             if (!attachment->GetFormat().IsColor() || !attachment->GetFormat().isRenderable) {
                 return DAWN_VALIDATION_ERROR(
                     "The format of the texture view used as color attachment is not color "
@@ -517,13 +515,13 @@ namespace dawn_native {
                 cmd->attachmentState = device->GetOrCreateAttachmentState(descriptor);
 
                 for (uint32_t i : IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
-                    cmd->colorAttachments[i].view = descriptor->colorAttachments[i]->attachment;
+                    cmd->colorAttachments[i].view = descriptor->colorAttachments[i].attachment;
                     cmd->colorAttachments[i].resolveTarget =
-                        descriptor->colorAttachments[i]->resolveTarget;
-                    cmd->colorAttachments[i].loadOp = descriptor->colorAttachments[i]->loadOp;
-                    cmd->colorAttachments[i].storeOp = descriptor->colorAttachments[i]->storeOp;
+                        descriptor->colorAttachments[i].resolveTarget;
+                    cmd->colorAttachments[i].loadOp = descriptor->colorAttachments[i].loadOp;
+                    cmd->colorAttachments[i].storeOp = descriptor->colorAttachments[i].storeOp;
                     cmd->colorAttachments[i].clearColor =
-                        descriptor->colorAttachments[i]->clearColor;
+                        descriptor->colorAttachments[i].clearColor;
                 }
 
                 if (cmd->attachmentState->HasDepthStencilAttachment()) {

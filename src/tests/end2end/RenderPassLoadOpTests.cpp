@@ -122,7 +122,7 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
     auto commandsClearZero = commandsClearZeroEncoder.Finish();
 
     utils::ComboRenderPassDescriptor renderPassClearGreen({renderTargetView});
-    renderPassClearGreen.cColorAttachmentsInfoPtr[0]->clearColor = {0.0f, 1.0f, 0.0f, 1.0f};
+    renderPassClearGreen.cColorAttachments[0].clearColor = {0.0f, 1.0f, 0.0f, 1.0f};
     auto commandsClearGreenEncoder = device.CreateCommandEncoder();
     auto clearGreenPass = commandsClearGreenEncoder.BeginRenderPass(&renderPassClearGreen);
     clearGreenPass.EndPass();
@@ -136,7 +136,7 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
 
     // Part 2: draw a blue quad into the right half of the render target, and check result
     utils::ComboRenderPassDescriptor renderPassLoad({renderTargetView});
-    renderPassLoad.cColorAttachmentsInfoPtr[0]->loadOp = dawn::LoadOp::Load;
+    renderPassLoad.cColorAttachments[0].loadOp = dawn::LoadOp::Load;
     dawn::CommandBuffer commandsLoad;
     {
         auto encoder = device.CreateCommandEncoder();

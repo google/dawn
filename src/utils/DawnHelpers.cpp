@@ -128,13 +128,11 @@ namespace utils {
 
     ComboRenderPassDescriptor::ComboRenderPassDescriptor(
         std::initializer_list<dawn::TextureView> colorAttachmentInfo,
-        dawn::TextureView depthStencil)
-        : cColorAttachmentsInfoPtr() {
+        dawn::TextureView depthStencil) {
         for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
-            mColorAttachmentsInfo[i].loadOp = dawn::LoadOp::Clear;
-            mColorAttachmentsInfo[i].storeOp = dawn::StoreOp::Store;
-            mColorAttachmentsInfo[i].clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
-            cColorAttachmentsInfoPtr[i] = nullptr;
+            cColorAttachments[i].loadOp = dawn::LoadOp::Clear;
+            cColorAttachments[i].storeOp = dawn::StoreOp::Store;
+            cColorAttachments[i].clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
         }
 
         cDepthStencilAttachmentInfo.clearDepth = 1.0f;
@@ -148,13 +146,11 @@ namespace utils {
         uint32_t colorAttachmentIndex = 0;
         for (const dawn::TextureView& colorAttachment : colorAttachmentInfo) {
             if (colorAttachment.Get() != nullptr) {
-                mColorAttachmentsInfo[colorAttachmentIndex].attachment = colorAttachment;
-                cColorAttachmentsInfoPtr[colorAttachmentIndex] =
-                    &mColorAttachmentsInfo[colorAttachmentIndex];
+                cColorAttachments[colorAttachmentIndex].attachment = colorAttachment;
             }
             ++colorAttachmentIndex;
         }
-        colorAttachments = cColorAttachmentsInfoPtr;
+        colorAttachments = cColorAttachments.data();
 
         if (depthStencil.Get() != nullptr) {
             cDepthStencilAttachmentInfo.attachment = depthStencil;
@@ -167,19 +163,10 @@ namespace utils {
     const ComboRenderPassDescriptor& ComboRenderPassDescriptor::operator=(
         const ComboRenderPassDescriptor& otherRenderPass) {
         cDepthStencilAttachmentInfo = otherRenderPass.cDepthStencilAttachmentInfo;
-        mColorAttachmentsInfo = otherRenderPass.mColorAttachmentsInfo;
-
+        cColorAttachments = otherRenderPass.cColorAttachments;
         colorAttachmentCount = otherRenderPass.colorAttachmentCount;
 
-        // Assign the pointers in colorAttachmentsInfoPtr to items in this->mColorAttachmentsInfo
-        for (uint32_t i = 0; i < colorAttachmentCount; ++i) {
-            if (otherRenderPass.cColorAttachmentsInfoPtr[i] != nullptr) {
-                cColorAttachmentsInfoPtr[i] = &mColorAttachmentsInfo[i];
-            } else {
-                cColorAttachmentsInfoPtr[i] = nullptr;
-            }
-        }
-        colorAttachments = cColorAttachmentsInfoPtr;
+        colorAttachments = cColorAttachments.data();
 
         if (otherRenderPass.depthStencilAttachment != nullptr) {
             // Assign desc.depthStencilAttachment to this->depthStencilAttachmentInfo;

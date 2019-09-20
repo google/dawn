@@ -114,9 +114,8 @@ ValidationTest::DummyRenderPass::DummyRenderPass(const dawn::Device& device)
     mColorAttachment.clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
     mColorAttachment.loadOp = dawn::LoadOp::Clear;
     mColorAttachment.storeOp = dawn::StoreOp::Store;
-    mColorAttachments[0] = &mColorAttachment;
 
     colorAttachmentCount = 1;
-    colorAttachments = mColorAttachments;
+    colorAttachments = &mColorAttachment;
     depthStencilAttachment = nullptr;
 }

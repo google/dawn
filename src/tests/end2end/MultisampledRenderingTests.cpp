@@ -131,9 +131,9 @@ class MultisampledRenderingTest : public DawnTest {
         utils::ComboRenderPassDescriptor renderPass(colorViews);
         uint32_t i = 0;
         for (const dawn::TextureView& resolveTargetView : resolveTargetViews) {
-            renderPass.cColorAttachmentsInfoPtr[i]->loadOp = colorLoadOp;
-            renderPass.cColorAttachmentsInfoPtr[i]->clearColor = kClearColor;
-            renderPass.cColorAttachmentsInfoPtr[i]->resolveTarget = resolveTargetView;
+            renderPass.cColorAttachments[i].loadOp = colorLoadOp;
+            renderPass.cColorAttachments[i].clearColor = kClearColor;
+            renderPass.cColorAttachments[i].resolveTarget = resolveTargetView;
             ++i;
         }
 

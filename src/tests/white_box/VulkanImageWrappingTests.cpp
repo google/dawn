@@ -408,7 +408,7 @@ class VulkanImageWrappingUsageTests : public VulkanImageWrappingTestBase {
 
         // Submit a clear operation
         utils::ComboRenderPassDescriptor renderPassDescriptor({wrappedView}, {});
-        renderPassDescriptor.cColorAttachmentsInfoPtr[0]->clearColor = clearColor;
+        renderPassDescriptor.cColorAttachments[0].clearColor = clearColor;
 
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDescriptor);

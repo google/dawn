@@ -61,12 +61,9 @@ namespace utils {
         const ComboRenderPassDescriptor& operator=(
             const ComboRenderPassDescriptor& otherRenderPass);
 
-        dawn::RenderPassColorAttachmentDescriptor* cColorAttachmentsInfoPtr[kMaxColorAttachments];
-        dawn::RenderPassDepthStencilAttachmentDescriptor cDepthStencilAttachmentInfo;
-
-      private:
         std::array<dawn::RenderPassColorAttachmentDescriptor, kMaxColorAttachments>
-            mColorAttachmentsInfo;
+            cColorAttachments;
+        dawn::RenderPassDepthStencilAttachmentDescriptor cDepthStencilAttachmentInfo;
     };
 
     struct BasicRenderPass {
