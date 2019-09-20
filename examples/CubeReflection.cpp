@@ -260,7 +260,7 @@ void frame() {
     cameraData.view = glm::lookAt(
         glm::vec3(8.f * std::sin(glm::radians(s.b * 360.f)), 2.f, 8.f * std::cos(glm::radians(s.b * 360.f))),
         glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, -1.0f, 0.0f)
+        glm::vec3(0.0f, 1.0f, 0.0f)
     );
 
     cameraBuffer.SetSubData(0, sizeof(CameraData), &cameraData);
