@@ -117,20 +117,20 @@ namespace dawn_native {
         }
 
         MaybeError ValidateColorStateDescriptor(const DeviceBase* device,
-                                                const ColorStateDescriptor* descriptor) {
-            if (descriptor->nextInChain != nullptr) {
+                                                const ColorStateDescriptor& descriptor) {
+            if (descriptor.nextInChain != nullptr) {
                 return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
             }
-            DAWN_TRY(ValidateBlendOperation(descriptor->alphaBlend.operation));
-            DAWN_TRY(ValidateBlendFactor(descriptor->alphaBlend.srcFactor));
-            DAWN_TRY(ValidateBlendFactor(descriptor->alphaBlend.dstFactor));
-            DAWN_TRY(ValidateBlendOperation(descriptor->colorBlend.operation));
-            DAWN_TRY(ValidateBlendFactor(descriptor->colorBlend.srcFactor));
-            DAWN_TRY(ValidateBlendFactor(descriptor->colorBlend.dstFactor));
-            DAWN_TRY(ValidateColorWriteMask(descriptor->writeMask));
+            DAWN_TRY(ValidateBlendOperation(descriptor.alphaBlend.operation));
+            DAWN_TRY(ValidateBlendFactor(descriptor.alphaBlend.srcFactor));
+            DAWN_TRY(ValidateBlendFactor(descriptor.alphaBlend.dstFactor));
+            DAWN_TRY(ValidateBlendOperation(descriptor.colorBlend.operation));
+            DAWN_TRY(ValidateBlendFactor(descriptor.colorBlend.srcFactor));
+            DAWN_TRY(ValidateBlendFactor(descriptor.colorBlend.dstFactor));
+            DAWN_TRY(ValidateColorWriteMask(descriptor.writeMask));
 
             const Format* format;
-            DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->format));
+            DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor.format));
             if (!format->IsColor() || !format->isRenderable) {
                 return DAWN_VALIDATION_ERROR("Color format must be color renderable");
             }
@@ -420,7 +420,7 @@ namespace dawn_native {
         }
 
         for (uint32_t i : IterateBitSet(mAttachmentState->GetColorAttachmentsMask())) {
-            mColorStates[i] = *descriptor->colorStates[i];
+            mColorStates[i] = descriptor->colorStates[i];
         }
 
         // TODO(cwallez@chromium.org): Check against the shader module that the correct color

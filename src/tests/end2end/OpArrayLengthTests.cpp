@@ -180,7 +180,7 @@ TEST_P(OpArrayLengthTest, Fragment) {
     descriptor.vertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
     descriptor.primitiveTopology = dawn::PrimitiveTopology::PointList;
-    descriptor.cColorStates[0]->format = renderPass.colorFormat;
+    descriptor.cColorStates[0].format = renderPass.colorFormat;
     descriptor.layout = utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
     dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
@@ -241,7 +241,7 @@ TEST_P(OpArrayLengthTest, Vertex) {
     descriptor.vertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
     descriptor.primitiveTopology = dawn::PrimitiveTopology::PointList;
-    descriptor.cColorStates[0]->format = renderPass.colorFormat;
+    descriptor.cColorStates[0].format = renderPass.colorFormat;
     descriptor.layout = utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
     dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 

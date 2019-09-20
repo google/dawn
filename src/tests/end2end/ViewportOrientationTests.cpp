@@ -43,7 +43,7 @@ TEST_P(ViewportOrientationTests, OriginAt0x0) {
     descriptor.vertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
     descriptor.primitiveTopology = dawn::PrimitiveTopology::PointList;
-    descriptor.cColorStates[0]->format = renderPass.colorFormat;
+    descriptor.cColorStates[0].format = renderPass.colorFormat;
 
     dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 

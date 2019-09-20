@@ -44,11 +44,8 @@ namespace utils {
 
         ComboVertexInputDescriptor cVertexInput;
         dawn::RasterizationStateDescriptor cRasterizationState;
-        std::array<dawn::ColorStateDescriptor*, kMaxColorAttachments> cColorStates;
+        std::array<dawn::ColorStateDescriptor, kMaxColorAttachments> cColorStates;
         dawn::DepthStencilStateDescriptor cDepthStencilState;
-
-      private:
-        dawn::ColorStateDescriptor mColorStates[kMaxColorAttachments];
     };
 
 }  // namespace utils

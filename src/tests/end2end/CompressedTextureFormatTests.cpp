@@ -166,7 +166,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
         renderPipelineDescriptor.vertexStage.module = vsModule;
         renderPipelineDescriptor.cFragmentStage.module = fsModule;
         renderPipelineDescriptor.layout = pipelineLayout;
-        renderPipelineDescriptor.cColorStates[0]->format =
+        renderPipelineDescriptor.cColorStates[0].format =
             utils::BasicRenderPass::kDefaultColorFormat;
         return device.CreateRenderPipeline(&renderPipelineDescriptor);
     }

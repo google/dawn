@@ -306,7 +306,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
             descriptor.vertexStage.module = vs;
             descriptor.cFragmentStage.module = fs;
             descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
-            descriptor.cColorStates[0]->format = dawn::TextureFormat::RGBA8Unorm;
+            descriptor.cColorStates[0].format = dawn::TextureFormat::RGBA8Unorm;
 
             pipeline = device.CreateRenderPipeline(&descriptor);
         }

@@ -219,7 +219,7 @@ class TextureFormatTest : public DawnTest {
         desc.vertexStage.module = vsModule;
         desc.cFragmentStage.module = fsModule;
         desc.layout = utils::MakeBasicPipelineLayout(device, &bgl);
-        desc.cColorStates[0]->format = renderFormatInfo.format;
+        desc.cColorStates[0].format = renderFormatInfo.format;
 
         return device.CreateRenderPipeline(&desc);
     }

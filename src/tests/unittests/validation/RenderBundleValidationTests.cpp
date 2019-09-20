@@ -707,9 +707,9 @@ TEST_F(RenderBundleValidationTest, PipelineColorFormatMismatch) {
     auto SetupRenderPipelineDescForTest = [this](utils::ComboRenderPipelineDescriptor* desc) {
         InitializeRenderPipelineDescriptor(desc);
         desc->colorStateCount = 3;
-        desc->cColorStates[0]->format = dawn::TextureFormat::RGBA8Unorm;
-        desc->cColorStates[1]->format = dawn::TextureFormat::RG16Float;
-        desc->cColorStates[2]->format = dawn::TextureFormat::R16Sint;
+        desc->cColorStates[0].format = dawn::TextureFormat::RGBA8Unorm;
+        desc->cColorStates[1].format = dawn::TextureFormat::RG16Float;
+        desc->cColorStates[2].format = dawn::TextureFormat::R16Sint;
     };
 
     // Test the success case.
@@ -728,7 +728,7 @@ TEST_F(RenderBundleValidationTest, PipelineColorFormatMismatch) {
     {
         utils::ComboRenderPipelineDescriptor desc(device);
         SetupRenderPipelineDescForTest(&desc);
-        desc.cColorStates[1]->format = dawn::TextureFormat::RGBA8Unorm;
+        desc.cColorStates[1].format = dawn::TextureFormat::RGBA8Unorm;
 
         dawn::RenderBundleEncoder renderBundleEncoder =
             device.CreateRenderBundleEncoder(&renderBundleDesc);
@@ -761,7 +761,7 @@ TEST_F(RenderBundleValidationTest, PipelineDepthStencilFormatMismatch) {
     auto SetupRenderPipelineDescForTest = [this](utils::ComboRenderPipelineDescriptor* desc) {
         InitializeRenderPipelineDescriptor(desc);
         desc->colorStateCount = 1;
-        desc->cColorStates[0]->format = dawn::TextureFormat::RGBA8Unorm;
+        desc->cColorStates[0].format = dawn::TextureFormat::RGBA8Unorm;
         desc->depthStencilState = &desc->cDepthStencilState;
         desc->cDepthStencilState.format = dawn::TextureFormat::Depth24PlusStencil8;
     };
@@ -815,7 +815,7 @@ TEST_F(RenderBundleValidationTest, PipelineSampleCountMismatch) {
     utils::ComboRenderPipelineDescriptor renderPipelineDesc(device);
     InitializeRenderPipelineDescriptor(&renderPipelineDesc);
     renderPipelineDesc.colorStateCount = 1;
-    renderPipelineDesc.cColorStates[0]->format = dawn::TextureFormat::RGBA8Unorm;
+    renderPipelineDesc.cColorStates[0].format = dawn::TextureFormat::RGBA8Unorm;
     renderPipelineDesc.sampleCount = 4;
 
     // Test the success case.

@@ -85,8 +85,7 @@ void init() {
         colorStateDescriptor.writeMask = DAWN_COLOR_WRITE_MASK_ALL;
 
         descriptor.colorStateCount = 1;
-        DawnColorStateDescriptor* colorStatesPtr[] = {&colorStateDescriptor};
-        descriptor.colorStates = colorStatesPtr;
+        descriptor.colorStates = &colorStateDescriptor;
 
         DawnPipelineLayoutDescriptor pl;
         pl.nextInChain = nullptr;

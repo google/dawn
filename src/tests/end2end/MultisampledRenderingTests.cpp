@@ -221,7 +221,7 @@ class MultisampledRenderingTest : public DawnTest {
 
         pipelineDescriptor.colorStateCount = numColorAttachments;
         for (uint32_t i = 0; i < numColorAttachments; ++i) {
-            pipelineDescriptor.cColorStates[i]->format = kColorFormat;
+            pipelineDescriptor.cColorStates[i].format = kColorFormat;
         }
 
         return device.CreateRenderPipeline(&pipelineDescriptor);

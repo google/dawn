@@ -78,7 +78,7 @@ namespace utils {
         // Set defaults for the color state descriptors.
         {
             descriptor->colorStateCount = 1;
-            descriptor->colorStates = &cColorStates[0];
+            descriptor->colorStates = cColorStates.data();
 
             dawn::BlendDescriptor blend;
             blend.operation = dawn::BlendOperation::Add;
@@ -90,8 +90,7 @@ namespace utils {
             colorStateDescriptor.colorBlend = blend;
             colorStateDescriptor.writeMask = dawn::ColorWriteMask::All;
             for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
-                mColorStates[i] = colorStateDescriptor;
-                cColorStates[i] = &mColorStates[i];
+                cColorStates[i] = colorStateDescriptor;
             }
         }
 

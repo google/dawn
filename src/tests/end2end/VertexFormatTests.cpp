@@ -366,7 +366,7 @@ class VertexFormatTest : public DawnTest {
         descriptor.cVertexInput.cBuffers[0].stride = strideBytes;
         descriptor.cVertexInput.cBuffers[0].attributeCount = 1;
         descriptor.cVertexInput.cAttributes[0].format = format;
-        descriptor.cColorStates[0]->format = renderPass.colorFormat;
+        descriptor.cColorStates[0].format = renderPass.colorFormat;
 
         return device.CreateRenderPipeline(&descriptor);
     }

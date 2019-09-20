@@ -50,7 +50,7 @@ class DrawIndexedTest : public DawnTest {
             descriptor.cVertexInput.cBuffers[0].stride = 4 * sizeof(float);
             descriptor.cVertexInput.cBuffers[0].attributeCount = 1;
             descriptor.cVertexInput.cAttributes[0].format = dawn::VertexFormat::Float4;
-            descriptor.cColorStates[0]->format = renderPass.colorFormat;
+            descriptor.cColorStates[0].format = renderPass.colorFormat;
 
             pipeline = device.CreateRenderPipeline(&descriptor);
 

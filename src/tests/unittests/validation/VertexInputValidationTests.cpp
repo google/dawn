@@ -37,7 +37,7 @@ class VertexInputTest : public ValidationTest {
         descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
         descriptor.vertexInput = &state;
-        descriptor.cColorStates[0]->format = dawn::TextureFormat::RGBA8Unorm;
+        descriptor.cColorStates[0].format = dawn::TextureFormat::RGBA8Unorm;
 
         if (!success) {
             ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));

@@ -1076,7 +1076,7 @@
             {"name": "sample count", "type": "uint32_t", "default": "1"},
             {"name": "depth stencil state", "type": "depth stencil state descriptor", "annotation": "const*", "optional": true},
             {"name": "color state count", "type": "uint32_t"},
-            {"name": "color states", "type": "color state descriptor", "annotation": "const*const*", "length": "color state count"},
+            {"name": "color states", "type": "color state descriptor", "annotation": "const*", "length": "color state count"},
             {"name": "sample mask", "type": "uint32_t", "default": "0xFFFFFFFF"},
             {"name": "alpha to coverage enabled", "type": "bool", "default": "false"}
         ]
