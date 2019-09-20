@@ -217,6 +217,9 @@ TEST_P(BufferSetSubDataTests, ManySetSubData) {
 
     // TODO (jiawei.shao@intel.com): find out why this test fails on Intel Vulkan Linux bots.
     DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsLinux());
+    // TODO(https://bugs.chromium.org/p/dawn/issues/detail?id=228): Re-enable
+    // once the issue with Metal on 10.14.6 is fixed.
+    DAWN_SKIP_TEST_IF(IsMacOS() && IsIntel() && IsMetal());
 
     constexpr uint64_t kSize = 4000 * 1000;
     constexpr uint32_t kElements = 500 * 500;
