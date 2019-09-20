@@ -220,7 +220,7 @@ namespace dawn_native { namespace metal {
     std::vector<std::unique_ptr<AdapterBase>> Backend::DiscoverDefaultAdapters() {
         std::vector<std::unique_ptr<AdapterBase>> adapters;
 
-        if (@available(macOS 10.12, *)) {
+        if (@available(macOS 10.11, *)) {
             NSArray<id<MTLDevice>>* devices = MTLCopyAllDevices();
 
             for (id<MTLDevice> device in devices) {
