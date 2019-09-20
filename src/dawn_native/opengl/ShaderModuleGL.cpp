@@ -58,6 +58,7 @@ namespace dawn_native { namespace opengl {
         // in D3D12, Metal and Vulkan, so we should normalize it in shaders in all backends.
         // See the documentation of spirv_cross::CompilerGLSL::Options::vertex::fixup_clipspace for
         // more details.
+        options.vertex.flip_vert_y = true;
         options.vertex.fixup_clipspace = true;
 
         // TODO(cwallez@chromium.org): discover the backing context version and use that.

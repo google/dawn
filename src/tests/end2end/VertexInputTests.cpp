@@ -87,7 +87,8 @@ class VertexInputTest : public DawnTest {
               "0.0f));\n";
         vs << "    vec2 offset = vec2(float(gl_VertexIndex / 3), float(gl_InstanceIndex));\n";
         vs << "    vec2 worldPos = pos[gl_VertexIndex % 3] + offset;\n";
-        vs << "    gl_Position = vec4(worldPos / 2 - vec2(1.0f), 0.0f, 1.0f);\n";
+        vs << "    vec4 position = vec4(worldPos / 2 - vec2(1.0f), 0.0f, 1.0f);\n";
+        vs << "    gl_Position = vec4(position.x, -position.y, position.z, position.w);\n";
 
         // Perform the checks by successively ANDing a boolean
         vs << "    bool success = true;\n";

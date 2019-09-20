@@ -57,12 +57,12 @@ class DrawIndexedTest : public DawnTest {
             vertexBuffer = utils::CreateBufferFromData<float>(
                 device, dawn::BufferUsage::Vertex,
                 {// First quad: the first 3 vertices represent the bottom left triangle
-                 -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-                 -1.0f, 0.0f, 1.0f,
+                 -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 1.0f,
+                 1.0f, 0.0f, 1.0f,
 
                  // Second quad: the first 3 vertices represent the top right triangle
-                 -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, -1.0f,
-                 1.0f, 0.0f, 1.0f});
+                 -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, -1.0f,
+                 -1.0f, 0.0f, 1.0f});
             indexBuffer = utils::CreateBufferFromData<uint32_t>(
                 device, dawn::BufferUsage::Index,
                 {0, 1, 2, 0, 3, 1,

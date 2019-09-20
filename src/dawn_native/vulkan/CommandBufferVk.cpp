@@ -659,9 +659,9 @@ namespace dawn_native { namespace vulkan {
             // The viewport and scissor default to cover all of the attachments
             VkViewport viewport;
             viewport.x = 0.0f;
-            viewport.y = 0.0f;
+            viewport.y = static_cast<float>(renderPassCmd->height);
             viewport.width = static_cast<float>(renderPassCmd->width);
-            viewport.height = static_cast<float>(renderPassCmd->height);
+            viewport.height = -static_cast<float>(renderPassCmd->height);
             viewport.minDepth = 0.0f;
             viewport.maxDepth = 1.0f;
             device->fn.CmdSetViewport(commands, 0, 1, &viewport);
@@ -853,9 +853,9 @@ namespace dawn_native { namespace vulkan {
                     SetViewportCmd* cmd = mCommands.NextCommand<SetViewportCmd>();
                     VkViewport viewport;
                     viewport.x = cmd->x;
-                    viewport.y = cmd->y;
+                    viewport.y = cmd->y + cmd->height;
                     viewport.width = cmd->width;
-                    viewport.height = cmd->height;
+                    viewport.height = -cmd->height;
                     viewport.minDepth = cmd->minDepth;
                     viewport.maxDepth = cmd->maxDepth;
 

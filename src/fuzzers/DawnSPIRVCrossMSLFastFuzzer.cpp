@@ -32,7 +32,6 @@ namespace {
             options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
 
             // Using the options that are used by Dawn, they appear in ShaderModuleMTL.mm
-            options.SetFlipVertY(true);
             compiler.CompileSpvToMsl(input.data(), input.size(), options);
         });
 

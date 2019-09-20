@@ -145,12 +145,12 @@ class CompressedTextureBCFormatTest : public DawnTest {
             layout(location=0) out vec2 texCoord;
             void main() {
                 const vec2 pos[3] = vec2[3](
-                    vec2(-3.0f, -1.0f),
-                    vec2( 3.0f, -1.0f),
-                    vec2( 0.0f,  2.0f)
+                    vec2(-3.0f,  1.0f),
+                    vec2( 3.0f,  1.0f),
+                    vec2( 0.0f, -2.0f)
                 );
                 gl_Position = vec4(pos[gl_VertexIndex], 0.0f, 1.0f);
-                texCoord = gl_Position.xy / 2.0f + vec2(0.5f);
+                texCoord = vec2(gl_Position.x / 2.0f, -gl_Position.y / 2.0f) + vec2(0.5f);
             })");
         dawn::ShaderModule fsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(

@@ -31,7 +31,7 @@ protected:
                 #version 450
                 void main() {
                     const vec2 pos[3] = vec2[3](
-                        vec2(-1.f, -1.f), vec2(1.f, 1.f), vec2(-1.f, 1.f));
+                        vec2(-1.f, 1.f), vec2(1.f, -1.f), vec2(-1.f, -1.f));
                     gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
                  })");
 

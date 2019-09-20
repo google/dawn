@@ -263,8 +263,8 @@ class VertexFormatTest : public DawnTest {
         vs << "void main() {\n";
 
         // Hard code the triangle in the shader so that we don't have to add a vertex input for it.
-        vs << "    const vec2 pos[3] = vec2[3](vec2(-1.0f, 0.0f), vec2(-1.0f, -1.0f), vec2(0.0f, "
-              "-1.0f));\n";
+        vs << "    const vec2 pos[3] = vec2[3](vec2(-1.0f, 0.0f), vec2(-1.0f, 1.0f), vec2(0.0f, "
+              "1.0f));\n";
         vs << "    gl_Position = vec4(pos[gl_VertexIndex], 0.0, 1.0);\n";
 
         // Declare expected values.

@@ -380,6 +380,10 @@ namespace dawn_native { namespace vulkan {
             extensionsToRequest.push_back(kExtensionNameKhrSwapchain);
             usedKnobs.swapchain = true;
         }
+        if (mDeviceInfo.maintenance1) {
+            extensionsToRequest.push_back(kExtensionNameKhrMaintenance1);
+            usedKnobs.maintenance1 = true;
+        }
 
         // Always require independentBlend because it is a core Dawn feature
         usedKnobs.features.independentBlend = VK_TRUE;
