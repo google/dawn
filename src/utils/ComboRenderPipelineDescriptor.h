@@ -35,6 +35,11 @@ namespace utils {
       public:
         ComboRenderPipelineDescriptor(const dawn::Device& device);
 
+        ComboRenderPipelineDescriptor(const ComboRenderPipelineDescriptor&) = delete;
+        ComboRenderPipelineDescriptor& operator=(const ComboRenderPipelineDescriptor&) = delete;
+        ComboRenderPipelineDescriptor(ComboRenderPipelineDescriptor&&) = delete;
+        ComboRenderPipelineDescriptor& operator=(ComboRenderPipelineDescriptor&&) = delete;
+
         dawn::PipelineStageDescriptor cFragmentStage;
 
         ComboVertexInputDescriptor cVertexInput;

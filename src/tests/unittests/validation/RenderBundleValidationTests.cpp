@@ -704,25 +704,30 @@ TEST_F(RenderBundleValidationTest, PipelineColorFormatMismatch) {
     renderBundleDesc.cColorFormats[1] = dawn::TextureFormat::RG16Float;
     renderBundleDesc.cColorFormats[2] = dawn::TextureFormat::R16Sint;
 
-    utils::ComboRenderPipelineDescriptor renderPipelineDesc(device);
-    InitializeRenderPipelineDescriptor(&renderPipelineDesc);
-    renderPipelineDesc.colorStateCount = 3;
-    renderPipelineDesc.cColorStates[0]->format = dawn::TextureFormat::RGBA8Unorm;
-    renderPipelineDesc.cColorStates[1]->format = dawn::TextureFormat::RG16Float;
-    renderPipelineDesc.cColorStates[2]->format = dawn::TextureFormat::R16Sint;
+    auto SetupRenderPipelineDescForTest = [this](utils::ComboRenderPipelineDescriptor* desc) {
+        InitializeRenderPipelineDescriptor(desc);
+        desc->colorStateCount = 3;
+        desc->cColorStates[0]->format = dawn::TextureFormat::RGBA8Unorm;
+        desc->cColorStates[1]->format = dawn::TextureFormat::RG16Float;
+        desc->cColorStates[2]->format = dawn::TextureFormat::R16Sint;
+    };
 
     // Test the success case.
     {
+        utils::ComboRenderPipelineDescriptor desc(device);
+        SetupRenderPipelineDescForTest(&desc);
+
         dawn::RenderBundleEncoder renderBundleEncoder =
             device.CreateRenderBundleEncoder(&renderBundleDesc);
-        dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&renderPipelineDesc);
+        dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
         renderBundleEncoder.SetPipeline(pipeline);
         renderBundleEncoder.Finish();
     }
 
     // Test the failure case for mismatched format types.
     {
-        utils::ComboRenderPipelineDescriptor desc = renderPipelineDesc;
+        utils::ComboRenderPipelineDescriptor desc(device);
+        SetupRenderPipelineDescForTest(&desc);
         desc.cColorStates[1]->format = dawn::TextureFormat::RGBA8Unorm;
 
         dawn::RenderBundleEncoder renderBundleEncoder =
@@ -734,7 +739,8 @@ TEST_F(RenderBundleValidationTest, PipelineColorFormatMismatch) {
 
     // Test the failure case for missing format
     {
-        utils::ComboRenderPipelineDescriptor desc = renderPipelineDesc;
+        utils::ComboRenderPipelineDescriptor desc(device);
+        SetupRenderPipelineDescForTest(&desc);
         desc.colorStateCount = 2;
 
         dawn::RenderBundleEncoder renderBundleEncoder =
@@ -752,27 +758,31 @@ TEST_F(RenderBundleValidationTest, PipelineDepthStencilFormatMismatch) {
     renderBundleDesc.cColorFormats[0] = dawn::TextureFormat::RGBA8Unorm;
     renderBundleDesc.depthStencilFormat = dawn::TextureFormat::Depth24PlusStencil8;
 
-    utils::ComboRenderPipelineDescriptor renderPipelineDesc(device);
-    InitializeRenderPipelineDescriptor(&renderPipelineDesc);
-    renderPipelineDesc.colorStateCount = 1;
-    renderPipelineDesc.cColorStates[0]->format = dawn::TextureFormat::RGBA8Unorm;
-    renderPipelineDesc.depthStencilState = &renderPipelineDesc.cDepthStencilState;
-    renderPipelineDesc.cDepthStencilState.format = dawn::TextureFormat::Depth24PlusStencil8;
+    auto SetupRenderPipelineDescForTest = [this](utils::ComboRenderPipelineDescriptor* desc) {
+        InitializeRenderPipelineDescriptor(desc);
+        desc->colorStateCount = 1;
+        desc->cColorStates[0]->format = dawn::TextureFormat::RGBA8Unorm;
+        desc->depthStencilState = &desc->cDepthStencilState;
+        desc->cDepthStencilState.format = dawn::TextureFormat::Depth24PlusStencil8;
+    };
 
     // Test the success case.
     {
+        utils::ComboRenderPipelineDescriptor desc(device);
+        SetupRenderPipelineDescForTest(&desc);
+
         dawn::RenderBundleEncoder renderBundleEncoder =
             device.CreateRenderBundleEncoder(&renderBundleDesc);
-        dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&renderPipelineDesc);
+        dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
         renderBundleEncoder.SetPipeline(pipeline);
         renderBundleEncoder.Finish();
     }
 
     // Test the failure case for mismatched format.
     {
-        utils::ComboRenderPipelineDescriptor desc = renderPipelineDesc;
+        utils::ComboRenderPipelineDescriptor desc(device);
+        SetupRenderPipelineDescForTest(&desc);
         desc.cDepthStencilState.format = dawn::TextureFormat::Depth24Plus;
-        desc.depthStencilState = &desc.cDepthStencilState;
 
         dawn::RenderBundleEncoder renderBundleEncoder =
             device.CreateRenderBundleEncoder(&renderBundleDesc);
@@ -783,7 +793,8 @@ TEST_F(RenderBundleValidationTest, PipelineDepthStencilFormatMismatch) {
 
     // Test the failure case for missing format.
     {
-        utils::ComboRenderPipelineDescriptor desc = renderPipelineDesc;
+        utils::ComboRenderPipelineDescriptor desc(device);
+        SetupRenderPipelineDescForTest(&desc);
         desc.depthStencilState = nullptr;
 
         dawn::RenderBundleEncoder renderBundleEncoder =
