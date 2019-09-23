@@ -23,7 +23,7 @@ namespace dawn_native { namespace metal {
     Queue::Queue(Device* device) : QueueBase(device) {
     }
 
-    void Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
+    MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
         Device* device = ToBackend(GetDevice());
         device->Tick();
         id<MTLCommandBuffer> commandBuffer = device->GetPendingCommandBuffer();
@@ -37,6 +37,7 @@ namespace dawn_native { namespace metal {
                          "CommandBufferMTL::FillCommands");
 
         device->SubmitPendingCommandBuffer();
+        return {};
     }
 
 }}  // namespace dawn_native::metal

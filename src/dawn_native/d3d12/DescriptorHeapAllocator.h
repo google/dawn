@@ -21,6 +21,8 @@
 #include <vector>
 #include "common/SerialQueue.h"
 
+#include "dawn_native/Error.h"
+
 namespace dawn_native { namespace d3d12 {
 
     class Device;
@@ -46,8 +48,10 @@ namespace dawn_native { namespace d3d12 {
       public:
         DescriptorHeapAllocator(Device* device);
 
-        DescriptorHeapHandle AllocateGPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count);
-        DescriptorHeapHandle AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t count);
+        ResultOrError<DescriptorHeapHandle> AllocateGPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE type,
+                                                            uint32_t count);
+        ResultOrError<DescriptorHeapHandle> AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE type,
+                                                            uint32_t count);
         void Tick(uint64_t lastCompletedSerial);
 
       private:
@@ -63,11 +67,11 @@ namespace dawn_native { namespace d3d12 {
 
         using DescriptorHeapInfo = std::pair<ComPtr<ID3D12DescriptorHeap>, AllocationInfo>;
 
-        DescriptorHeapHandle Allocate(D3D12_DESCRIPTOR_HEAP_TYPE type,
-                                      uint32_t count,
-                                      uint32_t allocationSize,
-                                      DescriptorHeapInfo* heapInfo,
-                                      D3D12_DESCRIPTOR_HEAP_FLAGS flags);
+        ResultOrError<DescriptorHeapHandle> Allocate(D3D12_DESCRIPTOR_HEAP_TYPE type,
+                                                     uint32_t count,
+                                                     uint32_t allocationSize,
+                                                     DescriptorHeapInfo* heapInfo,
+                                                     D3D12_DESCRIPTOR_HEAP_FLAGS flags);
         void Release(DescriptorHeapHandle handle);
 
         Device* mDevice;

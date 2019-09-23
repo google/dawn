@@ -39,7 +39,9 @@ namespace dawn_native {
         }
         ASSERT(!IsError());
 
-        SubmitImpl(commandCount, commands);
+        if (device->ConsumedError(SubmitImpl(commandCount, commands))) {
+            return;
+        }
         device->GetErrorScopeTracker()->TrackUntilLastSubmitComplete(
             device->GetCurrentErrorScope());
     }

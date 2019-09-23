@@ -82,7 +82,7 @@ namespace dawn_native { namespace d3d12 {
             mInCompute = inCompute_;
         }
 
-        void AllocateDescriptorHeaps(Device* device) {
+        MaybeError AllocateDescriptorHeaps(Device* device) {
             // This function should only be called once.
             ASSERT(mCbvSrvUavGPUDescriptorHeap.Get() == nullptr &&
                    mSamplerGPUDescriptorHeap.Get() == nullptr);
@@ -90,13 +90,16 @@ namespace dawn_native { namespace d3d12 {
             DescriptorHeapAllocator* descriptorHeapAllocator = device->GetDescriptorHeapAllocator();
 
             if (mCbvSrvUavDescriptorHeapSize > 0) {
-                mCbvSrvUavGPUDescriptorHeap = descriptorHeapAllocator->AllocateGPUHeap(
-                    D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, mCbvSrvUavDescriptorHeapSize);
+                DAWN_TRY_ASSIGN(
+                    mCbvSrvUavGPUDescriptorHeap,
+                    descriptorHeapAllocator->AllocateGPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+                                                             mCbvSrvUavDescriptorHeapSize));
             }
 
             if (mSamplerDescriptorHeapSize > 0) {
-                mSamplerGPUDescriptorHeap = descriptorHeapAllocator->AllocateGPUHeap(
-                    D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, mSamplerDescriptorHeapSize);
+                DAWN_TRY_ASSIGN(mSamplerGPUDescriptorHeap, descriptorHeapAllocator->AllocateGPUHeap(
+                                                               D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
+                                                               mSamplerDescriptorHeapSize));
             }
 
             uint32_t cbvSrvUavDescriptorIndex = 0;
@@ -115,6 +118,8 @@ namespace dawn_native { namespace d3d12 {
 
             ASSERT(cbvSrvUavDescriptorIndex == mCbvSrvUavDescriptorHeapSize);
             ASSERT(samplerDescriptorIndex == mSamplerDescriptorHeapSize);
+
+            return {};
         }
 
         // This function must only be called before calling AllocateDescriptorHeaps().
@@ -281,16 +286,19 @@ namespace dawn_native { namespace d3d12 {
             }
         }
 
-        void AllocateRTVAndDSVHeaps() {
+        MaybeError AllocateRTVAndDSVHeaps() {
             // This function should only be called once.
             DAWN_ASSERT(mRTVHeap.Get() == nullptr && mDSVHeap.Get() == nullptr);
             DescriptorHeapAllocator* allocator = mDevice->GetDescriptorHeapAllocator();
             if (mNumRTVs > 0) {
-                mRTVHeap = allocator->AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, mNumRTVs);
+                DAWN_TRY_ASSIGN(
+                    mRTVHeap, allocator->AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, mNumRTVs));
             }
             if (mNumDSVs > 0) {
-                mDSVHeap = allocator->AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, mNumDSVs);
+                DAWN_TRY_ASSIGN(
+                    mDSVHeap, allocator->AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, mNumDSVs));
             }
+            return {};
         }
 
         // TODO(jiawei.shao@intel.com): use hash map <RenderPass, OMSetRenderTargetArgs> as
@@ -445,11 +453,11 @@ namespace dawn_native { namespace d3d12 {
             D3D12_INDEX_BUFFER_VIEW mD3D12BufferView = {};
         };
 
-        void AllocateAndSetDescriptorHeaps(Device* device,
-                                           BindGroupStateTracker* bindingTracker,
-                                           RenderPassDescriptorHeapTracker* renderPassTracker,
-                                           CommandIterator* commands,
-                                           uint32_t indexInSubmit) {
+        MaybeError AllocateAndSetDescriptorHeaps(Device* device,
+                                                 BindGroupStateTracker* bindingTracker,
+                                                 RenderPassDescriptorHeapTracker* renderPassTracker,
+                                                 CommandIterator* commands,
+                                                 uint32_t indexInSubmit) {
             {
                 Command type;
 
@@ -495,8 +503,9 @@ namespace dawn_native { namespace d3d12 {
                 commands->Reset();
             }
 
-            renderPassTracker->AllocateRTVAndDSVHeaps();
-            bindingTracker->AllocateDescriptorHeaps(device);
+            DAWN_TRY(renderPassTracker->AllocateRTVAndDSVHeaps());
+            DAWN_TRY(bindingTracker->AllocateDescriptorHeaps(device));
+            return {};
         }
 
         void ResolveMultisampledRenderPass(ComPtr<ID3D12GraphicsCommandList> commandList,
@@ -542,8 +551,8 @@ namespace dawn_native { namespace d3d12 {
         FreeCommands(&mCommands);
     }
 
-    void CommandBuffer::RecordCommands(ComPtr<ID3D12GraphicsCommandList> commandList,
-                                       uint32_t indexInSubmit) {
+    MaybeError CommandBuffer::RecordCommands(ComPtr<ID3D12GraphicsCommandList> commandList,
+                                             uint32_t indexInSubmit) {
         Device* device = ToBackend(GetDevice());
         BindGroupStateTracker bindingTracker(device);
         RenderPassDescriptorHeapTracker renderPassTracker(device);
@@ -553,8 +562,8 @@ namespace dawn_native { namespace d3d12 {
         // should have a system where commands and descriptors are recorded in parallel then the
         // heaps set using a small CommandList inserted just before the main CommandList.
         {
-            AllocateAndSetDescriptorHeaps(device, &bindingTracker, &renderPassTracker, &mCommands,
-                                          indexInSubmit);
+            DAWN_TRY(AllocateAndSetDescriptorHeaps(device, &bindingTracker, &renderPassTracker,
+                                                   &mCommands, indexInSubmit));
             bindingTracker.Reset();
             bindingTracker.SetID3D12DescriptorHeaps(commandList);
         }
@@ -765,6 +774,7 @@ namespace dawn_native { namespace d3d12 {
         }
 
         DAWN_ASSERT(renderPassTracker.IsHeapAllocationCompleted());
+        return {};
     }
 
     void CommandBuffer::RecordComputePass(ComPtr<ID3D12GraphicsCommandList> commandList,

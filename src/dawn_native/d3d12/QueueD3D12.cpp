@@ -22,20 +22,21 @@ namespace dawn_native { namespace d3d12 {
     Queue::Queue(Device* device) : QueueBase(device) {
     }
 
-    void Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
+    MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
         Device* device = ToBackend(GetDevice());
 
         device->Tick();
 
         device->OpenCommandList(&mCommandList);
         for (uint32_t i = 0; i < commandCount; ++i) {
-            ToBackend(commands[i])->RecordCommands(mCommandList, i);
+            DAWN_TRY(ToBackend(commands[i])->RecordCommands(mCommandList, i));
         }
         ASSERT_SUCCESS(mCommandList->Close());
 
         device->ExecuteCommandList(mCommandList.Get());
 
         device->NextSerial();
+        return {};
     }
 
 }}  // namespace dawn_native::d3d12

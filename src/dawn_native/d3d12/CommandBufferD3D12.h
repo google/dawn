@@ -18,6 +18,7 @@
 #include "common/Constants.h"
 #include "dawn_native/CommandAllocator.h"
 #include "dawn_native/CommandBuffer.h"
+#include "dawn_native/Error.h"
 
 #include "dawn_native/d3d12/Forward.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
@@ -40,7 +41,8 @@ namespace dawn_native { namespace d3d12 {
         CommandBuffer(CommandEncoderBase* encoder, const CommandBufferDescriptor* descriptor);
         ~CommandBuffer();
 
-        void RecordCommands(ComPtr<ID3D12GraphicsCommandList> commandList, uint32_t indexInSubmit);
+        MaybeError RecordCommands(ComPtr<ID3D12GraphicsCommandList> commandList,
+                                  uint32_t indexInSubmit);
 
       private:
         void RecordComputePass(ComPtr<ID3D12GraphicsCommandList> commandList,

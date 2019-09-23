@@ -28,7 +28,7 @@ namespace dawn_native { namespace vulkan {
         ~Queue();
 
       private:
-        void SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
+        MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
     };
 
 }}  // namespace dawn_native::vulkan

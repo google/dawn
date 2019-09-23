@@ -29,7 +29,7 @@ namespace dawn_native { namespace d3d12 {
         Queue(Device* device);
 
       private:
-        void SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
+        MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
 
         ComPtr<ID3D12GraphicsCommandList> mCommandList;
     };

@@ -494,8 +494,9 @@ namespace dawn_native { namespace d3d12 {
         if (GetFormat().isRenderable) {
             if (GetFormat().HasDepthOrStencil()) {
                 TransitionUsageNow(commandList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-                DescriptorHeapHandle dsvHeap =
-                    descriptorHeapAllocator->AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1);
+                DescriptorHeapHandle dsvHeap;
+                DAWN_TRY_ASSIGN(dsvHeap, descriptorHeapAllocator->AllocateCPUHeap(
+                                             D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1));
                 D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvHeap.GetCPUHandle(0);
                 D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = GetDSVDescriptor(baseMipLevel);
                 device->GetD3D12Device()->CreateDepthStencilView(mResource.Get(), &dsvDesc,
@@ -513,8 +514,9 @@ namespace dawn_native { namespace d3d12 {
                                                    nullptr);
             } else {
                 TransitionUsageNow(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
-                DescriptorHeapHandle rtvHeap =
-                    descriptorHeapAllocator->AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 1);
+                DescriptorHeapHandle rtvHeap;
+                DAWN_TRY_ASSIGN(rtvHeap, descriptorHeapAllocator->AllocateCPUHeap(
+                                             D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 1));
                 D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap.GetCPUHandle(0);
                 const float clearColorRGBA[4] = {clearColor, clearColor, clearColor, clearColor};
 

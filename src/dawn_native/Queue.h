@@ -33,7 +33,8 @@ namespace dawn_native {
         FenceBase* CreateFence(const FenceDescriptor* descriptor);
 
       private:
-        virtual void SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) = 0;
+        virtual MaybeError SubmitImpl(uint32_t commandCount,
+                                      CommandBufferBase* const* commands) = 0;
 
         MaybeError ValidateSubmit(uint32_t commandCount, CommandBufferBase* const* commands);
         MaybeError ValidateSignal(const FenceBase* fence, uint64_t signalValue);

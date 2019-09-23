@@ -318,8 +318,9 @@ namespace dawn_native { namespace null {
     Queue::~Queue() {
     }
 
-    void Queue::SubmitImpl(uint32_t, CommandBufferBase* const*) {
+    MaybeError Queue::SubmitImpl(uint32_t, CommandBufferBase* const*) {
         ToBackend(GetDevice())->SubmitPendingOperations();
+        return {};
     }
 
     // SwapChain

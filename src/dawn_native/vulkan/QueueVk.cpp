@@ -26,7 +26,7 @@ namespace dawn_native { namespace vulkan {
     Queue::~Queue() {
     }
 
-    void Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
+    MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
         Device* device = ToBackend(GetDevice());
 
         device->Tick();
@@ -37,6 +37,7 @@ namespace dawn_native { namespace vulkan {
         }
 
         device->SubmitPendingCommands();
+        return {};
     }
 
 }}  // namespace dawn_native::vulkan

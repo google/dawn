@@ -27,7 +27,7 @@ namespace dawn_native { namespace opengl {
         Queue(Device* device);
 
       private:
-        void SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
+        MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
     };
 
 }}  // namespace dawn_native::opengl

@@ -191,7 +191,7 @@ namespace dawn_native { namespace null {
         ~Queue();
 
       private:
-        void SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
+        MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
     };
 
     class SwapChain : public SwapChainBase {
