@@ -56,7 +56,7 @@
             {"name": "binding", "type": "uint32_t"},
             {"name": "visibility", "type": "shader stage"},
             {"name": "type", "type": "binding type"},
-            {"name": "dynamic", "type": "bool", "default": "false"},
+            {"name": "has dynamic offset", "type": "bool", "default": "false"},
             {"name": "multisampled", "type": "bool", "default": "false"},
             {"name": "texture dimension", "type": "texture view dimension", "default": "undefined"},
             {"name": "texture component type", "type": "texture component type", "default": "float"}

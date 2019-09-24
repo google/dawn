@@ -178,7 +178,7 @@ namespace dawn_native { namespace d3d12 {
                     group->GetLayout()->GetBindingInfo();
                 uint32_t currentDynamicBufferIndex = 0;
 
-                for (uint32_t bindingIndex : IterateBitSet(layout.dynamic)) {
+                for (uint32_t bindingIndex : IterateBitSet(layout.hasDynamicOffset)) {
                     ASSERT(dynamicOffsetCount > 0);
                     uint32_t parameterIndex =
                         pipelineLayout->GetDynamicRootParameterIndex(index, bindingIndex);

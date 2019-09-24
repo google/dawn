@@ -117,7 +117,7 @@ namespace dawn_native { namespace d3d12 {
             const auto& shaderRegisters = bindGroupLayout->GetBindingOffsets();
 
             // Init root descriptors in root signatures.
-            for (uint32_t dynamicBinding : IterateBitSet(groupInfo.dynamic)) {
+            for (uint32_t dynamicBinding : IterateBitSet(groupInfo.hasDynamicOffset)) {
                 D3D12_ROOT_PARAMETER* rootParameter = &rootParameters[parameterIndex];
 
                 // Setup root descriptor.
@@ -172,7 +172,7 @@ namespace dawn_native { namespace d3d12 {
     uint32_t PipelineLayout::GetDynamicRootParameterIndex(uint32_t group, uint32_t binding) const {
         ASSERT(group < kMaxBindGroups);
         ASSERT(binding < kMaxBindingsPerGroup);
-        ASSERT(GetBindGroupLayout(group)->GetBindingInfo().dynamic[binding]);
+        ASSERT(GetBindGroupLayout(group)->GetBindingInfo().hasDynamicOffset[binding]);
         return mDynamicRootParameterIndices[group][binding];
     }
 }}  // namespace dawn_native::d3d12

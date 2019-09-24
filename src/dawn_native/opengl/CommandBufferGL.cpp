@@ -254,7 +254,7 @@ namespace dawn_native { namespace opengl {
                             GLuint uboIndex = indices[bindingIndex];
                             GLuint offset = binding.offset;
 
-                            if (layout.dynamic[bindingIndex]) {
+                            if (layout.hasDynamicOffset[bindingIndex]) {
                                 offset += dynamicOffsets[currentDynamicIndex];
                                 ++currentDynamicIndex;
                             }
@@ -298,7 +298,7 @@ namespace dawn_native { namespace opengl {
                             GLuint ssboIndex = indices[bindingIndex];
                             GLuint offset = binding.offset;
 
-                            if (layout.dynamic[bindingIndex]) {
+                            if (layout.hasDynamicOffset[bindingIndex]) {
                                 offset += dynamicOffsets[currentDynamicIndex];
                                 ++currentDynamicIndex;
                             }

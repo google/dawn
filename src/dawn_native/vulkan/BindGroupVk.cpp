@@ -78,7 +78,7 @@ namespace dawn_native { namespace vulkan {
             write.dstArrayElement = 0;
             write.descriptorCount = 1;
             write.descriptorType = VulkanDescriptorType(layoutInfo.types[bindingIndex],
-                                                        layoutInfo.dynamic[bindingIndex]);
+                                                        layoutInfo.hasDynamicOffset[bindingIndex]);
 
             switch (layoutInfo.types[bindingIndex]) {
                 case dawn::BindingType::UniformBuffer:

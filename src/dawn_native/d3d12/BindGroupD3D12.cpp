@@ -44,7 +44,7 @@ namespace dawn_native { namespace d3d12 {
         for (uint32_t bindingIndex : IterateBitSet(layout.mask)) {
             // It's not necessary to create descriptors in descriptor heap for dynamic resources.
             // So skip allocating descriptors in descriptor heaps for dynamic buffers.
-            if (layout.dynamic[bindingIndex]) {
+            if (layout.hasDynamicOffset[bindingIndex]) {
                 continue;
             }
 

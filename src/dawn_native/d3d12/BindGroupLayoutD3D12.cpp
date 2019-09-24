@@ -27,7 +27,7 @@ namespace dawn_native { namespace d3d12 {
             // For dynamic resources, Dawn uses root descriptor in D3D12 backend.
             // So there is no need to allocate the descriptor from descriptor heap. Skip counting
             // dynamic resources for calculating size of descriptor heap.
-            if (groupInfo.dynamic[binding]) {
+            if (groupInfo.hasDynamicOffset[binding]) {
                 continue;
             }
 
@@ -94,7 +94,7 @@ namespace dawn_native { namespace d3d12 {
         descriptorOffsets[Sampler] = 0;
 
         for (uint32_t binding : IterateBitSet(groupInfo.mask)) {
-            if (groupInfo.dynamic[binding]) {
+            if (groupInfo.hasDynamicOffset[binding]) {
                 // Dawn is using values in mBindingOffsets to decide register number in HLSL.
                 // Root descriptor needs to set this value to set correct register number in
                 // generated HLSL shader.

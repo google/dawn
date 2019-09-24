@@ -44,7 +44,7 @@ namespace dawn_native {
             std::array<dawn::BindingType, kMaxBindingsPerGroup> types;
             std::array<dawn::TextureComponentType, kMaxBindingsPerGroup> textureComponentTypes;
             std::array<dawn::TextureViewDimension, kMaxBindingsPerGroup> textureDimensions;
-            std::bitset<kMaxBindingsPerGroup> dynamic;
+            std::bitset<kMaxBindingsPerGroup> hasDynamicOffset;
             std::bitset<kMaxBindingsPerGroup> multisampled;
             std::bitset<kMaxBindingsPerGroup> mask;
         };

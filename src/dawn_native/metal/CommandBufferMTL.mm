@@ -460,7 +460,7 @@ namespace dawn_native { namespace metal {
 
                             // TODO(shaobo.yan@intel.com): Record bound buffer status to use
                             // setBufferOffset to achieve better performance.
-                            if (layout.dynamic[bindingIndex]) {
+                            if (layout.hasDynamicOffset[bindingIndex]) {
                                 offset += dynamicOffsets[currentDynamicBufferIndex];
                                 currentDynamicBufferIndex++;
                             }

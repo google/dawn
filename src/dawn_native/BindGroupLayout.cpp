@@ -55,18 +55,18 @@ namespace dawn_native {
 
             switch (binding.type) {
                 case dawn::BindingType::UniformBuffer:
-                    if (binding.dynamic) {
+                    if (binding.hasDynamicOffset) {
                         ++dynamicUniformBufferCount;
                     }
                     break;
                 case dawn::BindingType::StorageBuffer:
-                    if (binding.dynamic) {
+                    if (binding.hasDynamicOffset) {
                         ++dynamicStorageBufferCount;
                     }
                     break;
                 case dawn::BindingType::SampledTexture:
                 case dawn::BindingType::Sampler:
-                    if (binding.dynamic) {
+                    if (binding.hasDynamicOffset) {
                         return DAWN_VALIDATION_ERROR("Samplers and textures cannot be dynamic");
                     }
                     break;
@@ -100,7 +100,7 @@ namespace dawn_native {
     namespace {
         size_t HashBindingInfo(const BindGroupLayoutBase::LayoutBindingInfo& info) {
             size_t hash = Hash(info.mask);
-            HashCombine(&hash, info.dynamic, info.multisampled);
+            HashCombine(&hash, info.hasDynamicOffset, info.multisampled);
 
             for (uint32_t binding : IterateBitSet(info.mask)) {
                 HashCombine(&hash, info.visibilities[binding], info.types[binding],
@@ -112,7 +112,8 @@ namespace dawn_native {
 
         bool operator==(const BindGroupLayoutBase::LayoutBindingInfo& a,
                         const BindGroupLayoutBase::LayoutBindingInfo& b) {
-            if (a.mask != b.mask || a.dynamic != b.dynamic || a.multisampled != b.multisampled) {
+            if (a.mask != b.mask || a.hasDynamicOffset != b.hasDynamicOffset ||
+                a.multisampled != b.multisampled) {
                 return false;
             }
 
@@ -148,9 +149,8 @@ namespace dawn_native {
             } else {
                 mBindingInfo.textureDimensions[index] = binding.textureDimension;
             }
-
-            if (binding.dynamic) {
-                mBindingInfo.dynamic.set(index);
+            if (binding.hasDynamicOffset) {
+                mBindingInfo.hasDynamicOffset.set(index);
                 switch (binding.type) {
                     case dawn::BindingType::UniformBuffer:
                         ++mDynamicUniformBufferCount;

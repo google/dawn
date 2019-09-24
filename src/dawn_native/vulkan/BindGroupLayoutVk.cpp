@@ -73,7 +73,7 @@ namespace dawn_native { namespace vulkan {
             auto& binding = bindings[numBindings];
             binding.binding = bindingIndex;
             binding.descriptorType =
-                VulkanDescriptorType(info.types[bindingIndex], info.dynamic[bindingIndex]);
+                VulkanDescriptorType(info.types[bindingIndex], info.hasDynamicOffset[bindingIndex]);
             binding.descriptorCount = 1;
             binding.stageFlags = VulkanShaderStageFlags(info.visibilities[bindingIndex]);
             binding.pImmutableSamplers = nullptr;
@@ -146,8 +146,8 @@ namespace dawn_native { namespace vulkan {
 
             if (descriptorTypeIndex[type] == -1) {
                 descriptorTypeIndex[type] = numSizes;
-                result[numSizes].type =
-                    VulkanDescriptorType(info.types[bindingIndex], info.dynamic[bindingIndex]);
+                result[numSizes].type = VulkanDescriptorType(info.types[bindingIndex],
+                                                             info.hasDynamicOffset[bindingIndex]);
                 result[numSizes].descriptorCount = 1;
                 numSizes++;
             } else {
