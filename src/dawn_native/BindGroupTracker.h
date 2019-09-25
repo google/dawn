@@ -117,20 +117,18 @@ namespace dawn_native {
       private:
         // Vulkan backend use uint32_t as dynamic offsets type, it is not correct.
         // Vulkan should use VkDeviceSize. Dawn vulkan backend has to handle this.
-        template <typename T>
-        static void SetDynamicOffsets(T* data,
+        static void SetDynamicOffsets(uint32_t* data,
                                       uint32_t dynamicOffsetCount,
                                       uint64_t* dynamicOffsets) {
             for (uint32_t i = 0; i < dynamicOffsetCount; ++i) {
-                ASSERT(dynamicOffsets[i] <= std::numeric_limits<T>::max());
-                data[i] = static_cast<T>(dynamicOffsets[i]);
+                ASSERT(dynamicOffsets[i] <= std::numeric_limits<uint32_t>::max());
+                data[i] = static_cast<uint32_t>(dynamicOffsets[i]);
             }
         }
 
-        template <>
-        static void SetDynamicOffsets<uint64_t>(uint64_t* data,
-                                                uint32_t dynamicOffsetCount,
-                                                uint64_t* dynamicOffsets) {
+        static void SetDynamicOffsets(uint64_t* data,
+                                      uint32_t dynamicOffsetCount,
+                                      uint64_t* dynamicOffsets) {
             memcpy(data, dynamicOffsets, sizeof(uint64_t) * dynamicOffsetCount);
         }
     };

@@ -16,6 +16,8 @@
 #include "dawn_wire/client/Client.h"
 #include "dawn_wire/client/Device.h"
 
+#include <limits>
+
 namespace dawn_wire { namespace client {
 
     bool Client::DoDeviceUncapturedErrorCallback(DawnErrorType errorType, const char* message) {

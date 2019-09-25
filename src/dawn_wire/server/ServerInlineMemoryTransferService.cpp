@@ -16,6 +16,8 @@
 #include "dawn_wire/WireServer.h"
 #include "dawn_wire/server/Server.h"
 
+#include <cstring>
+
 namespace dawn_wire { namespace server {
 
     class InlineMemoryTransferService : public MemoryTransferService {

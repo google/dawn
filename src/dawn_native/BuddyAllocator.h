@@ -16,6 +16,8 @@
 #define DAWNNATIVE_BUDDYALLOCATOR_H_
 
 #include <cstddef>
+#include <cstdint>
+#include <limits>
 #include <vector>
 
 namespace dawn_native {
