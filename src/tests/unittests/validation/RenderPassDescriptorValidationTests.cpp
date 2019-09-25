@@ -189,6 +189,54 @@ TEST_F(RenderPassDescriptorValidationTest, FormatMismatch) {
     }
 }
 
+// Depth and stencil storeOps must match
+TEST_F(RenderPassDescriptorValidationTest, DepthStencilStoreOpMismatch) {
+    constexpr uint32_t kArrayLayers = 1;
+    constexpr uint32_t kLevelCount = 1;
+    constexpr uint32_t kSize = 32;
+    constexpr dawn::TextureFormat kColorFormat = dawn::TextureFormat::RGBA8Unorm;
+    constexpr dawn::TextureFormat kDepthStencilFormat = dawn::TextureFormat::Depth24PlusStencil8;
+
+    dawn::Texture colorTexture = CreateTexture(device, dawn::TextureDimension::e2D, kColorFormat,
+                                               kSize, kSize, kArrayLayers, kLevelCount);
+    dawn::Texture depthStencilTexture =
+        CreateTexture(device, dawn::TextureDimension::e2D, kDepthStencilFormat, kSize, kSize,
+                      kArrayLayers, kLevelCount);
+
+    dawn::TextureViewDescriptor descriptor;
+    descriptor.dimension = dawn::TextureViewDimension::e2D;
+    descriptor.baseArrayLayer = 0;
+    descriptor.arrayLayerCount = kArrayLayers;
+    descriptor.baseMipLevel = 0;
+    descriptor.mipLevelCount = kLevelCount;
+    dawn::TextureView colorTextureView = colorTexture.CreateView(&descriptor);
+    dawn::TextureView depthStencilView = depthStencilTexture.CreateView(&descriptor);
+
+    // StoreOps mismatch causing the render pass to error
+    {
+        utils::ComboRenderPassDescriptor renderPass({}, depthStencilView);
+        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = dawn::StoreOp::Store;
+        renderPass.cDepthStencilAttachmentInfo.depthStoreOp = dawn::StoreOp::Clear;
+        AssertBeginRenderPassError(&renderPass);
+    }
+
+    // StoreOps match so render pass is a success
+    {
+        utils::ComboRenderPassDescriptor renderPass({}, depthStencilView);
+        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = dawn::StoreOp::Store;
+        renderPass.cDepthStencilAttachmentInfo.depthStoreOp = dawn::StoreOp::Store;
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+
+    // StoreOps match so render pass is a success
+    {
+        utils::ComboRenderPassDescriptor renderPass({}, depthStencilView);
+        renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = dawn::StoreOp::Clear;
+        renderPass.cDepthStencilAttachmentInfo.depthStoreOp = dawn::StoreOp::Clear;
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+}
+
 // Currently only texture views with arrayLayerCount == 1 are allowed to be color and depth stencil
 // attachments
 TEST_F(RenderPassDescriptorValidationTest, TextureViewLayerCountForColorAndDepthStencil) {

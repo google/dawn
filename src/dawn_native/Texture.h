@@ -62,7 +62,8 @@ namespace dawn_native {
                                              uint32_t levelCount,
                                              uint32_t baseArrayLayer,
                                              uint32_t layerCount) const;
-        void SetIsSubresourceContentInitialized(uint32_t baseMipLevel,
+        void SetIsSubresourceContentInitialized(bool isInitialized,
+                                                uint32_t baseMipLevel,
                                                 uint32_t levelCount,
                                                 uint32_t baseArrayLayer,
                                                 uint32_t layerCount);

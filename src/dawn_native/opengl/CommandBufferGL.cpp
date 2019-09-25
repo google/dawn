@@ -467,8 +467,8 @@ namespace dawn_native { namespace opengl {
                     GLenum target = texture->GetGLTarget();
                     const GLFormat& format = texture->GetGLFormat();
                     if (IsCompleteSubresourceCopiedTo(texture, copySize, dst.mipLevel)) {
-                        texture->SetIsSubresourceContentInitialized(dst.mipLevel, 1, dst.arrayLayer,
-                                                                    1);
+                        texture->SetIsSubresourceContentInitialized(true, dst.mipLevel, 1,
+                                                                    dst.arrayLayer, 1);
                     } else {
                         texture->EnsureSubresourceContentInitialized(dst.mipLevel, 1,
                                                                      dst.arrayLayer, 1);
@@ -609,7 +609,7 @@ namespace dawn_native { namespace opengl {
                     srcTexture->EnsureSubresourceContentInitialized(src.mipLevel, 1, src.arrayLayer,
                                                                     1);
                     if (IsCompleteSubresourceCopiedTo(dstTexture, copySize, dst.mipLevel)) {
-                        dstTexture->SetIsSubresourceContentInitialized(dst.mipLevel, 1,
+                        dstTexture->SetIsSubresourceContentInitialized(true, dst.mipLevel, 1,
                                                                        dst.arrayLayer, 1);
                     } else {
                         dstTexture->EnsureSubresourceContentInitialized(dst.mipLevel, 1,
@@ -783,28 +783,49 @@ namespace dawn_native { namespace opengl {
         {
             for (uint32_t i :
                  IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
-                const auto& attachmentInfo = renderPass->colorAttachments[i];
+                auto* attachmentInfo = &renderPass->colorAttachments[i];
+                TextureView* view = ToBackend(attachmentInfo->view.Get());
 
                 // Load op - color
                 // TODO(cwallez@chromium.org): Choose the clear function depending on the
                 // componentType: things work for now because the clear color is always a float, but
                 // when that's fixed will lose precision on integer formats when converting to
                 // float.
-                if (attachmentInfo.loadOp == dawn::LoadOp::Clear) {
+                if (attachmentInfo->loadOp == dawn::LoadOp::Clear) {
                     gl.ColorMaski(i, true, true, true, true);
-                    gl.ClearBufferfv(GL_COLOR, i, &attachmentInfo.clearColor.r);
+                    gl.ClearBufferfv(GL_COLOR, i, &attachmentInfo->clearColor.r);
+                }
+
+                switch (attachmentInfo->storeOp) {
+                    case dawn::StoreOp::Store: {
+                        view->GetTexture()->SetIsSubresourceContentInitialized(
+                            true, view->GetBaseMipLevel(), view->GetLevelCount(),
+                            view->GetBaseArrayLayer(), view->GetLayerCount());
+                    } break;
+
+                    case dawn::StoreOp::Clear: {
+                        // TODO(natlee@microsoft.com): call glDiscard to do optimization
+                        view->GetTexture()->SetIsSubresourceContentInitialized(
+                            false, view->GetBaseMipLevel(), view->GetLevelCount(),
+                            view->GetBaseArrayLayer(), view->GetLayerCount());
+                    } break;
+
+                    default:
+                        UNREACHABLE();
+                        break;
                 }
             }
 
             if (renderPass->attachmentState->HasDepthStencilAttachment()) {
-                const auto& attachmentInfo = renderPass->depthStencilAttachment;
-                const Format& attachmentFormat = attachmentInfo.view->GetTexture()->GetFormat();
+                auto* attachmentInfo = &renderPass->depthStencilAttachment;
+                const Format& attachmentFormat = attachmentInfo->view->GetTexture()->GetFormat();
+                TextureView* view = ToBackend(attachmentInfo->view.Get());
 
                 // Load op - depth/stencil
                 bool doDepthClear = attachmentFormat.HasDepth() &&
-                                    (attachmentInfo.depthLoadOp == dawn::LoadOp::Clear);
+                                    (attachmentInfo->depthLoadOp == dawn::LoadOp::Clear);
                 bool doStencilClear = attachmentFormat.HasStencil() &&
-                                      (attachmentInfo.stencilLoadOp == dawn::LoadOp::Clear);
+                                      (attachmentInfo->stencilLoadOp == dawn::LoadOp::Clear);
 
                 if (doDepthClear) {
                     gl.DepthMask(GL_TRUE);
@@ -814,13 +835,25 @@ namespace dawn_native { namespace opengl {
                 }
 
                 if (doDepthClear && doStencilClear) {
-                    gl.ClearBufferfi(GL_DEPTH_STENCIL, 0, attachmentInfo.clearDepth,
-                                     attachmentInfo.clearStencil);
+                    gl.ClearBufferfi(GL_DEPTH_STENCIL, 0, attachmentInfo->clearDepth,
+                                     attachmentInfo->clearStencil);
                 } else if (doDepthClear) {
-                    gl.ClearBufferfv(GL_DEPTH, 0, &attachmentInfo.clearDepth);
+                    gl.ClearBufferfv(GL_DEPTH, 0, &attachmentInfo->clearDepth);
                 } else if (doStencilClear) {
-                    const GLint clearStencil = attachmentInfo.clearStencil;
+                    const GLint clearStencil = attachmentInfo->clearStencil;
                     gl.ClearBufferiv(GL_STENCIL, 0, &clearStencil);
+                }
+
+                if (attachmentInfo->depthStoreOp == dawn::StoreOp::Store &&
+                    attachmentInfo->stencilStoreOp == dawn::StoreOp::Store) {
+                    view->GetTexture()->SetIsSubresourceContentInitialized(
+                        true, view->GetBaseMipLevel(), view->GetLevelCount(),
+                        view->GetBaseArrayLayer(), view->GetLayerCount());
+                } else if (attachmentInfo->depthStoreOp == dawn::StoreOp::Clear &&
+                           attachmentInfo->stencilStoreOp == dawn::StoreOp::Clear) {
+                    view->GetTexture()->SetIsSubresourceContentInitialized(
+                        false, view->GetBaseMipLevel(), view->GetLevelCount(),
+                        view->GetBaseArrayLayer(), view->GetLayerCount());
                 }
             }
         }

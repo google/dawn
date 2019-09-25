@@ -313,7 +313,7 @@ namespace dawn_native { namespace opengl {
             if (isLazyClear) {
                 GetDevice()->IncrementLazyClearCountForTesting();
             }
-            SetIsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer,
+            SetIsSubresourceContentInitialized(true, baseMipLevel, levelCount, baseArrayLayer,
                                                layerCount);
         }
     }

@@ -412,7 +412,8 @@ namespace dawn_native {
         return true;
     }
 
-    void TextureBase::SetIsSubresourceContentInitialized(uint32_t baseMipLevel,
+    void TextureBase::SetIsSubresourceContentInitialized(bool isInitialized,
+                                                         uint32_t baseMipLevel,
                                                          uint32_t levelCount,
                                                          uint32_t baseArrayLayer,
                                                          uint32_t layerCount) {
@@ -422,7 +423,7 @@ namespace dawn_native {
                  ++arrayLayer) {
                 uint32_t subresourceIndex = GetSubresourceIndex(mipLevel, arrayLayer);
                 ASSERT(subresourceIndex < mIsSubresourceContentInitializedAtIndex.size());
-                mIsSubresourceContentInitializedAtIndex[subresourceIndex] = true;
+                mIsSubresourceContentInitializedAtIndex[subresourceIndex] = isInitialized;
             }
         }
     }

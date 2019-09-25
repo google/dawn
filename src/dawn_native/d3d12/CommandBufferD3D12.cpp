@@ -654,7 +654,7 @@ namespace dawn_native { namespace d3d12 {
                     if (IsCompleteSubresourceCopiedTo(texture, copy->copySize,
                                                       copy->destination.mipLevel)) {
                         texture->SetIsSubresourceContentInitialized(
-                            copy->destination.mipLevel, 1, copy->destination.arrayLayer, 1);
+                            true, copy->destination.mipLevel, 1, copy->destination.arrayLayer, 1);
                     } else {
                         texture->EnsureSubresourceContentInitialized(
                             commandList, copy->destination.mipLevel, 1,
@@ -737,7 +737,7 @@ namespace dawn_native { namespace d3d12 {
                     if (IsCompleteSubresourceCopiedTo(destination, copy->copySize,
                                                       copy->destination.mipLevel)) {
                         destination->SetIsSubresourceContentInitialized(
-                            copy->destination.mipLevel, 1, copy->destination.arrayLayer, 1);
+                            true, copy->destination.mipLevel, 1, copy->destination.arrayLayer, 1);
                     } else {
                         destination->EnsureSubresourceContentInitialized(
                             commandList, copy->destination.mipLevel, 1,
@@ -907,14 +907,19 @@ namespace dawn_native { namespace d3d12 {
                     // color attachment, which will be correctly initialized.
                     ToBackend(resolveView->GetTexture())
                         ->SetIsSubresourceContentInitialized(
-                            resolveView->GetBaseMipLevel(), resolveView->GetLevelCount(),
+                            true, resolveView->GetBaseMipLevel(), resolveView->GetLevelCount(),
                             resolveView->GetBaseArrayLayer(), resolveView->GetLayerCount());
                 }
 
                 switch (attachmentInfo.storeOp) {
                     case dawn::StoreOp::Store: {
                         view->GetTexture()->SetIsSubresourceContentInitialized(
-                            view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1);
+                            true, view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1);
+                    } break;
+
+                    case dawn::StoreOp::Clear: {
+                        view->GetTexture()->SetIsSubresourceContentInitialized(
+                            false, view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1);
                     } break;
 
                     default: { UNREACHABLE(); } break;
@@ -966,12 +971,16 @@ namespace dawn_native { namespace d3d12 {
                                                        0, nullptr);
                 }
 
-                // TODO(natlee@microsoft.com): Need to fix when storeop discard is added
                 if (attachmentInfo.depthStoreOp == dawn::StoreOp::Store &&
                     attachmentInfo.stencilStoreOp == dawn::StoreOp::Store) {
                     texture->SetIsSubresourceContentInitialized(
-                        view->GetBaseMipLevel(), view->GetLevelCount(), view->GetBaseArrayLayer(),
-                        view->GetLayerCount());
+                        true, view->GetBaseMipLevel(), view->GetLevelCount(),
+                        view->GetBaseArrayLayer(), view->GetLayerCount());
+                } else if (attachmentInfo.depthStoreOp == dawn::StoreOp::Clear &&
+                           attachmentInfo.stencilStoreOp == dawn::StoreOp::Clear) {
+                    texture->SetIsSubresourceContentInitialized(
+                        false, view->GetBaseMipLevel(), view->GetLevelCount(),
+                        view->GetBaseArrayLayer(), view->GetLayerCount());
                 }
             }
         }

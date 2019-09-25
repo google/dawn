@@ -137,14 +137,19 @@ namespace dawn_native { namespace vulkan {
                         TextureView* resolveView = ToBackend(attachmentInfo.resolveTarget.Get());
                         ToBackend(resolveView->GetTexture())
                             ->SetIsSubresourceContentInitialized(
-                                resolveView->GetBaseMipLevel(), resolveView->GetLevelCount(),
+                                true, resolveView->GetBaseMipLevel(), resolveView->GetLevelCount(),
                                 resolveView->GetBaseArrayLayer(), resolveView->GetLayerCount());
                     }
 
                     switch (attachmentInfo.storeOp) {
                         case dawn::StoreOp::Store: {
                             view->GetTexture()->SetIsSubresourceContentInitialized(
-                                view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1);
+                                true, view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1);
+                        } break;
+
+                        case dawn::StoreOp::Clear: {
+                            view->GetTexture()->SetIsSubresourceContentInitialized(
+                                false, view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1);
                         } break;
 
                         default: { UNREACHABLE(); } break;
@@ -177,11 +182,15 @@ namespace dawn_native { namespace vulkan {
                     query.SetDepthStencil(view->GetTexture()->GetFormat().format,
                                           attachmentInfo.depthLoadOp, attachmentInfo.stencilLoadOp);
 
-                    // TODO(natlee@microsoft.com): Need to fix when storeop discard is added
                     if (attachmentInfo.depthStoreOp == dawn::StoreOp::Store &&
                         attachmentInfo.stencilStoreOp == dawn::StoreOp::Store) {
                         view->GetTexture()->SetIsSubresourceContentInitialized(
-                            view->GetBaseMipLevel(), view->GetLevelCount(),
+                            true, view->GetBaseMipLevel(), view->GetLevelCount(),
+                            view->GetBaseArrayLayer(), view->GetLayerCount());
+                    } else if (attachmentInfo.depthStoreOp == dawn::StoreOp::Clear &&
+                               attachmentInfo.stencilStoreOp == dawn::StoreOp::Clear) {
+                        view->GetTexture()->SetIsSubresourceContentInitialized(
+                            false, view->GetBaseMipLevel(), view->GetLevelCount(),
                             view->GetBaseArrayLayer(), view->GetLayerCount());
                     }
                 }
@@ -400,7 +409,7 @@ namespace dawn_native { namespace vulkan {
                                                       subresource.mipLevel)) {
                         // Since texture has been overwritten, it has been "initialized"
                         dst.texture->SetIsSubresourceContentInitialized(
-                            subresource.mipLevel, 1, subresource.baseArrayLayer, 1);
+                            true, subresource.mipLevel, 1, subresource.baseArrayLayer, 1);
                     } else {
                         ToBackend(dst.texture)
                             ->EnsureSubresourceContentInitialized(recordingContext,
@@ -459,7 +468,7 @@ namespace dawn_native { namespace vulkan {
                     if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), copy->copySize,
                                                       dst.mipLevel)) {
                         // Since destination texture has been overwritten, it has been "initialized"
-                        dst.texture->SetIsSubresourceContentInitialized(dst.mipLevel, 1,
+                        dst.texture->SetIsSubresourceContentInitialized(true, dst.mipLevel, 1,
                                                                         dst.arrayLayer, 1);
                     } else {
                         ToBackend(dst.texture)

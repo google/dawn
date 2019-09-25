@@ -307,7 +307,7 @@ namespace dawn_native { namespace d3d12 {
                      const TextureDescriptor* descriptor,
                      ID3D12Resource* nativeTexture)
         : TextureBase(device, descriptor, TextureState::OwnedExternal), mResource(nativeTexture) {
-        SetIsSubresourceContentInitialized(0, descriptor->mipLevelCount, 0,
+        SetIsSubresourceContentInitialized(true, 0, descriptor->mipLevelCount, 0,
                                            descriptor->arrayLayerCount);
     }
 
@@ -483,7 +483,7 @@ namespace dawn_native { namespace d3d12 {
                                      TextureBase::ClearValue clearValue) {
         // TODO(jiawei.shao@intel.com): initialize the textures in compressed formats with copies.
         if (GetFormat().isCompressed) {
-            SetIsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer,
+            SetIsSubresourceContentInitialized(true, baseMipLevel, levelCount, baseArrayLayer,
                                                layerCount);
             return {};
         }
@@ -579,7 +579,7 @@ namespace dawn_native { namespace d3d12 {
             }
         }
         if (clearValue == TextureBase::ClearValue::Zero) {
-            SetIsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer,
+            SetIsSubresourceContentInitialized(true, baseMipLevel, levelCount, baseArrayLayer,
                                                layerCount);
             GetDevice()->IncrementLazyClearCountForTesting();
         }

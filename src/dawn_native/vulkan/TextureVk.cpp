@@ -512,7 +512,7 @@ namespace dawn_native { namespace vulkan {
 
         // Don't clear imported texture if already cleared
         if (descriptor->isCleared) {
-            SetIsSubresourceContentInitialized(0, 1, 0, 1);
+            SetIsSubresourceContentInitialized(true, 0, 1, 0, 1);
         }
     }
 
@@ -724,7 +724,7 @@ namespace dawn_native { namespace vulkan {
             }
         }
         if (clearValue == TextureBase::ClearValue::Zero) {
-            SetIsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer,
+            SetIsSubresourceContentInitialized(true, baseMipLevel, levelCount, baseArrayLayer,
                                                layerCount);
             device->IncrementLazyClearCountForTesting();
         }

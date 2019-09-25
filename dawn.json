@@ -708,7 +708,8 @@
     "store op": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "store"}
+            {"value": 0, "name": "store"},
+            {"value": 1, "name": "clear"}
         ]
     },
     "origin 3D": {
