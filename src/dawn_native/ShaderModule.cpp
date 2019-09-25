@@ -190,6 +190,18 @@ namespace dawn_native {
                     return;
                 }
             }
+
+            for (const auto& fragmentOutput : resources.stage_outputs) {
+                ASSERT(
+                    compiler.get_decoration_bitset(fragmentOutput.id).get(spv::DecorationLocation));
+                uint32_t location =
+                    compiler.get_decoration(fragmentOutput.id, spv::DecorationLocation);
+                if (location >= kMaxColorAttachments) {
+                    device->HandleError(dawn::ErrorType::Validation,
+                                        "Fragment output location over limits in the SPIRV");
+                    return;
+                }
+            }
         }
     }
 
