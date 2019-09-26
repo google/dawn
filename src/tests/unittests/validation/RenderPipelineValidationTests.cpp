@@ -18,6 +18,8 @@
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
 
+#include <sstream>
+
 class RenderPipelineValidationTest : public ValidationTest {
     protected:
         void SetUp() override {
@@ -111,6 +113,39 @@ TEST_F(RenderPipelineValidationTest, NonRenderableFormat) {
         descriptor.cColorStates[0].format = dawn::TextureFormat::RG11B10Float;
 
         ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+}
+
+// Tests that the format of the color state descriptor must match the output of the fragment shader.
+TEST_F(RenderPipelineValidationTest, FragmentOutputFormatCompatibility) {
+    constexpr uint32_t kNumTextureFormatBaseType = 3u;
+    std::array<const char*, kNumTextureFormatBaseType> kVecPreFix = {{"", "i", "u"}};
+    std::array<dawn::TextureFormat, kNumTextureFormatBaseType> kColorFormats = {
+        {dawn::TextureFormat::RGBA8Unorm, dawn::TextureFormat::RGBA8Sint,
+         dawn::TextureFormat::RGBA8Uint}};
+
+    for (size_t i = 0; i < kNumTextureFormatBaseType; ++i) {
+        for (size_t j = 0; j < kNumTextureFormatBaseType; ++j) {
+            utils::ComboRenderPipelineDescriptor descriptor(device);
+            descriptor.vertexStage.module = vsModule;
+            descriptor.cColorStates[0].format = kColorFormats[j];
+
+            std::ostringstream stream;
+            stream << R"(
+                #version 450
+                layout(location = 0) out )"
+                   << kVecPreFix[i] << R"(vec4 fragColor;
+                void main() {
+                })";
+            descriptor.cFragmentStage.module = utils::CreateShaderModule(
+                device, utils::SingleShaderStage::Fragment, stream.str().c_str());
+
+            if (i == j) {
+                device.CreateRenderPipeline(&descriptor);
+            } else {
+                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+            }
+        }
     }
 }
 

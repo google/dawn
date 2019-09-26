@@ -117,7 +117,8 @@ namespace dawn_native {
         }
 
         MaybeError ValidateColorStateDescriptor(const DeviceBase* device,
-                                                const ColorStateDescriptor& descriptor) {
+                                                const ColorStateDescriptor& descriptor,
+                                                Format::Type fragmentOutputBaseType) {
             if (descriptor.nextInChain != nullptr) {
                 return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
             }
@@ -133,6 +134,11 @@ namespace dawn_native {
             DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor.format));
             if (!format->IsColor() || !format->isRenderable) {
                 return DAWN_VALIDATION_ERROR("Color format must be color renderable");
+            }
+            if (fragmentOutputBaseType != Format::Type::Other &&
+                fragmentOutputBaseType != format->type) {
+                return DAWN_VALIDATION_ERROR(
+                    "Color format must match the fragment stage output type");
             }
 
             return {};
@@ -310,8 +316,12 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Should have at least one attachment");
         }
 
+        ASSERT(descriptor->fragmentStage != nullptr);
+        const ShaderModuleBase::FragmentOutputBaseTypes& fragmentOutputBaseTypes =
+            descriptor->fragmentStage->module->GetFragmentOutputBaseTypes();
         for (uint32_t i = 0; i < descriptor->colorStateCount; ++i) {
-            DAWN_TRY(ValidateColorStateDescriptor(device, descriptor->colorStates[i]));
+            DAWN_TRY(ValidateColorStateDescriptor(device, descriptor->colorStates[i],
+                                                  fragmentOutputBaseTypes[i]));
         }
 
         if (descriptor->depthStencilState) {

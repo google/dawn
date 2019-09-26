@@ -649,7 +649,7 @@ class SetBindGroupValidationTest : public ValidationTest {
                 layout(std140, set = 0, binding = 1) buffer SBuffer {
                     vec2 value2;
                 } sBuffer;
-                layout(location = 0) out uvec4 fragColor;
+                layout(location = 0) out vec4 fragColor;
                 void main() {
                 })");
 

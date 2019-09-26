@@ -27,6 +27,22 @@
 
 namespace dawn_native {
 
+    namespace {
+        Format::Type SpirvCrossBaseTypeToFormatType(spirv_cross::SPIRType::BaseType spirvBaseType) {
+            switch (spirvBaseType) {
+                case spirv_cross::SPIRType::Float:
+                    return Format::Float;
+                case spirv_cross::SPIRType::Int:
+                    return Format::Sint;
+                case spirv_cross::SPIRType::UInt:
+                    return Format::Uint;
+                default:
+                    UNREACHABLE();
+                    return Format::Other;
+            }
+        }
+    }  // anonymous namespace
+
     MaybeError ValidateShaderModuleDescriptor(DeviceBase*,
                                               const ShaderModuleDescriptor* descriptor) {
         if (descriptor->nextInChain != nullptr) {
@@ -74,6 +90,7 @@ namespace dawn_native {
         : ObjectBase(device),
           mCode(descriptor->code, descriptor->code + descriptor->codeSize),
           mIsBlueprint(blueprint) {
+        mFragmentOutputFormatBaseTypes.fill(Format::Other);
     }
 
     ShaderModuleBase::ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag)
@@ -201,6 +218,13 @@ namespace dawn_native {
                                         "Fragment output location over limits in the SPIRV");
                     return;
                 }
+
+                spirv_cross::SPIRType::BaseType shaderFragmentOutputBaseType =
+                    compiler.get_type(fragmentOutput.base_type_id).basetype;
+                Format::Type formatType =
+                    SpirvCrossBaseTypeToFormatType(shaderFragmentOutputBaseType);
+                ASSERT(formatType != Format::Type::Other);
+                mFragmentOutputFormatBaseTypes[location] = formatType;
             }
         }
     }
@@ -213,6 +237,12 @@ namespace dawn_native {
     const std::bitset<kMaxVertexAttributes>& ShaderModuleBase::GetUsedVertexAttributes() const {
         ASSERT(!IsError());
         return mUsedVertexAttributes;
+    }
+
+    const ShaderModuleBase::FragmentOutputBaseTypes& ShaderModuleBase::GetFragmentOutputBaseTypes()
+        const {
+        ASSERT(!IsError());
+        return mFragmentOutputFormatBaseTypes;
     }
 
     SingleShaderStage ShaderModuleBase::GetExecutionModel() const {

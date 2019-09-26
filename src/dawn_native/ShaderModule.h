@@ -17,6 +17,7 @@
 
 #include "common/Constants.h"
 #include "dawn_native/Error.h"
+#include "dawn_native/Format.h"
 #include "dawn_native/Forward.h"
 #include "dawn_native/ObjectBase.h"
 #include "dawn_native/PerStage.h"
@@ -61,6 +62,11 @@ namespace dawn_native {
         const std::bitset<kMaxVertexAttributes>& GetUsedVertexAttributes() const;
         SingleShaderStage GetExecutionModel() const;
 
+        // An array to record the basic types (float, int and uint) of the fragment shader outputs
+        // or Format::Type::Other means the fragment shader output is unused.
+        using FragmentOutputBaseTypes = std::array<Format::Type, kMaxColorAttachments>;
+        const FragmentOutputBaseTypes& GetFragmentOutputBaseTypes() const;
+
         bool IsCompatibleWithPipelineLayout(const PipelineLayoutBase* layout);
 
         // Functors necessary for the unordered_set<ShaderModuleBase*>-based cache.
@@ -84,6 +90,8 @@ namespace dawn_native {
         ModuleBindingInfo mBindingInfo;
         std::bitset<kMaxVertexAttributes> mUsedVertexAttributes;
         SingleShaderStage mExecutionModel;
+
+        FragmentOutputBaseTypes mFragmentOutputFormatBaseTypes;
     };
 
 }  // namespace dawn_native
