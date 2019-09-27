@@ -119,7 +119,15 @@
 
         //* Special handling of const char* that have their length embedded directly in the command
         {% for member in members if member.length == "strlen" %}
-            result += std::strlen(record.{{as_varName(member.name)}});
+            {% set memberName = as_varName(member.name) %}
+
+            {% if member.optional %}
+                bool has_{{memberName}} = record.{{memberName}} != nullptr;
+                if (has_{{memberName}})
+            {% endif %}
+            {
+            result += std::strlen(record.{{memberName}});
+            }
         {% endfor %}
 
         //* Gather how much space will be needed for pointer members.
@@ -178,10 +186,18 @@
         //* Special handling of const char* that have their length embedded directly in the command
         {% for member in members if member.length == "strlen" %}
             {% set memberName = as_varName(member.name) %}
+
+            bool has_{{memberName}} = record.{{memberName}} != nullptr;
+            transfer->has_{{memberName}} = has_{{memberName}};
+            {% if member.optional %}
+                if (has_{{memberName}})
+            {% endif %}
+            {
             transfer->{{memberName}}Strlen = std::strlen(record.{{memberName}});
 
             memcpy(*buffer, record.{{memberName}}, transfer->{{memberName}}Strlen);
             *buffer += transfer->{{memberName}}Strlen;
+            }
         {% endfor %}
 
         //* Allocate space and write the non-value arguments in it.
@@ -240,6 +256,9 @@
         //* Special handling of const char* that have their length embedded directly in the command
         {% for member in members if member.length == "strlen" %}
             {% set memberName = as_varName(member.name) %}
+
+            bool has_{{memberName}} = transfer->has_{{memberName}};
+            if (has_{{memberName}})
             {
                 size_t stringLength = transfer->{{memberName}}Strlen;
                 const char* stringInBuffer = nullptr;
@@ -250,6 +269,8 @@
                 memcpy(copiedString, stringInBuffer, stringLength);
                 copiedString[stringLength] = '\0';
                 record->{{memberName}} = copiedString;
+            } else {
+                record->{{memberName}} = nullptr;
             }
         {% endfor %}
 
