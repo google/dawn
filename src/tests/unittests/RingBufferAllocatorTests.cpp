@@ -18,6 +18,8 @@
 
 using namespace dawn_native;
 
+constexpr size_t RingBufferAllocator::kInvalidOffset;
+
 // Number of basic tests for Ringbuffer
 TEST(RingBufferAllocatorTests, BasicTest) {
     constexpr size_t sizeInBytes = 64000;
@@ -29,14 +31,14 @@ TEST(RingBufferAllocatorTests, BasicTest) {
     ASSERT_EQ(allocator.GetSize(), sizeInBytes);
 
     // Ensure failure upon sub-allocating an oversized request.
-    ASSERT_EQ(allocator.Allocate(sizeInBytes + 1, 0), kInvalidOffset);
+    ASSERT_EQ(allocator.Allocate(sizeInBytes + 1, 0), RingBufferAllocator::kInvalidOffset);
 
     // Fill the entire buffer with two requests of equal size.
     ASSERT_EQ(allocator.Allocate(sizeInBytes / 2, 1), 0u);
     ASSERT_EQ(allocator.Allocate(sizeInBytes / 2, 2), 32000u);
 
     // Ensure the buffer is full.
-    ASSERT_EQ(allocator.Allocate(1, 3), kInvalidOffset);
+    ASSERT_EQ(allocator.Allocate(1, 3), RingBufferAllocator::kInvalidOffset);
 }
 
 // Tests that several ringbuffer allocations do not fail.
@@ -104,7 +106,8 @@ TEST(RingBufferAllocatorTests, RingBufferSubAlloc) {
     //
 
     // Ensure an oversized allocation fails (only 8 bytes left)
-    ASSERT_EQ(allocator.Allocate(frameSizeInBytes * 3, serial + 1), kInvalidOffset);
+    ASSERT_EQ(allocator.Allocate(frameSizeInBytes * 3, serial + 1),
+              RingBufferAllocator::kInvalidOffset);
     ASSERT_EQ(allocator.GetUsedSize(), frameSizeInBytes * 8);
 
     // Reclaim the first 3 frames.
@@ -130,7 +133,8 @@ TEST(RingBufferAllocatorTests, RingBufferSubAlloc) {
     ASSERT_EQ(allocator.GetUsedSize(), frameSizeInBytes * maxNumOfFrames);
 
     // Ensure we are full.
-    ASSERT_EQ(allocator.Allocate(frameSizeInBytes, serial + 1), kInvalidOffset);
+    ASSERT_EQ(allocator.Allocate(frameSizeInBytes, serial + 1),
+              RingBufferAllocator::kInvalidOffset);
 
     // Reclaim the next two frames.
     allocator.Deallocate(5);
@@ -152,7 +156,8 @@ TEST(RingBufferAllocatorTests, RingBufferSubAlloc) {
     //
 
     // Ensure we are full.
-    ASSERT_EQ(allocator.Allocate(frameSizeInBytes, serial + 1), kInvalidOffset);
+    ASSERT_EQ(allocator.Allocate(frameSizeInBytes, serial + 1),
+              RingBufferAllocator::kInvalidOffset);
 
     // Reclaim all.
     allocator.Deallocate(maxNumOfFrames);

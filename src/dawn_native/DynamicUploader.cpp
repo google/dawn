@@ -44,14 +44,14 @@ namespace dawn_native {
             }
         }
 
-        size_t startOffset = kInvalidOffset;
+        size_t startOffset = RingBufferAllocator::kInvalidOffset;
         if (targetRingBuffer != nullptr) {
             startOffset = targetRingBuffer->mAllocator.Allocate(allocationSize, serial);
         }
 
         // Upon failure, append a newly created (and much larger) ring buffer to fulfill the
         // request.
-        if (startOffset == kInvalidOffset) {
+        if (startOffset == RingBufferAllocator::kInvalidOffset) {
             // Compute the new max size (in powers of two to preserve alignment).
             size_t newMaxSize = targetRingBuffer->mAllocator.GetSize() * 2;
             while (newMaxSize < allocationSize) {
@@ -66,7 +66,7 @@ namespace dawn_native {
             startOffset = targetRingBuffer->mAllocator.Allocate(allocationSize, serial);
         }
 
-        ASSERT(startOffset != kInvalidOffset);
+        ASSERT(startOffset != RingBufferAllocator::kInvalidOffset);
 
         // Allocate the staging buffer backing the ringbuffer.
         // Note: the first ringbuffer will be lazily created.

@@ -23,8 +23,6 @@
 // RingBufferAllocator is the front-end implementation used to manage a ring buffer in GPU memory.
 namespace dawn_native {
 
-    static constexpr size_t kInvalidOffset = std::numeric_limits<size_t>::max();
-
     class RingBufferAllocator {
       public:
         RingBufferAllocator(size_t maxSize);
@@ -36,6 +34,8 @@ namespace dawn_native {
         size_t GetSize() const;
         bool Empty() const;
         size_t GetUsedSize() const;
+
+        static constexpr size_t kInvalidOffset = std::numeric_limits<size_t>::max();
 
       private:
         struct Request {
