@@ -91,7 +91,7 @@ namespace dawn_native {
                 break;
             }
         }
-        return INVALID_OFFSET;  // No free block exists at any level.
+        return kInvalidOffset;  // No free block exists at any level.
     }
 
     // Inserts existing free block into the free-list.
@@ -141,7 +141,7 @@ namespace dawn_native {
 
     uint64_t BuddyAllocator::Allocate(uint64_t allocationSize, uint64_t alignment) {
         if (allocationSize == 0 || allocationSize > mMaxBlockSize) {
-            return INVALID_OFFSET;
+            return kInvalidOffset;
         }
 
         // Compute the level
@@ -152,8 +152,8 @@ namespace dawn_native {
         uint64_t currBlockLevel = GetNextFreeAlignedBlock(allocationSizeToLevel, alignment);
 
         // Error when no free blocks exist (allocator is full)
-        if (currBlockLevel == INVALID_OFFSET) {
-            return INVALID_OFFSET;
+        if (currBlockLevel == kInvalidOffset) {
+            return kInvalidOffset;
         }
 
         // Split free blocks level-by-level.

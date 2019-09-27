@@ -17,6 +17,8 @@
 
 using namespace dawn_native;
 
+constexpr uint64_t BuddyAllocator::kInvalidOffset;
+
 // Verify the buddy allocator with a basic test.
 TEST(BuddyAllocatorTests, SingleBlock) {
     // After one 32 byte allocation:
@@ -29,17 +31,17 @@ TEST(BuddyAllocatorTests, SingleBlock) {
     BuddyAllocator allocator(maxBlockSize);
 
     // Check that we cannot allocate a oversized block.
-    ASSERT_EQ(allocator.Allocate(maxBlockSize * 2), INVALID_OFFSET);
+    ASSERT_EQ(allocator.Allocate(maxBlockSize * 2), BuddyAllocator::kInvalidOffset);
 
     // Check that we cannot allocate a zero sized block.
-    ASSERT_EQ(allocator.Allocate(0u), INVALID_OFFSET);
+    ASSERT_EQ(allocator.Allocate(0u), BuddyAllocator::kInvalidOffset);
 
     // Allocate the block.
     uint64_t blockOffset = allocator.Allocate(maxBlockSize);
     ASSERT_EQ(blockOffset, 0u);
 
     // Check that we are full.
-    ASSERT_EQ(allocator.Allocate(maxBlockSize), INVALID_OFFSET);
+    ASSERT_EQ(allocator.Allocate(maxBlockSize), BuddyAllocator::kInvalidOffset);
     ASSERT_EQ(allocator.ComputeTotalNumOfFreeBlocksForTesting(), 0u);
 
     // Deallocate the block.
@@ -86,7 +88,7 @@ TEST(BuddyAllocatorTests, SingleSplitBlock) {
     ASSERT_EQ(allocator.ComputeTotalNumOfFreeBlocksForTesting(), 1u);
 
     // Check that we cannot allocate a block that is oversized.
-    ASSERT_EQ(allocator.Allocate(maxBlockSize * 2), INVALID_OFFSET);
+    ASSERT_EQ(allocator.Allocate(maxBlockSize * 2), BuddyAllocator::kInvalidOffset);
 
     // Re-allocate the largest block allowed after merging.
     blockOffset = allocator.Allocate(maxBlockSize);
@@ -188,7 +190,7 @@ TEST(BuddyAllocatorTests, MultipleSplitBlockIncreasingSize) {
     ASSERT_EQ(allocator.ComputeTotalNumOfFreeBlocksForTesting(), 0u);
 
     // Check if we're full.
-    ASSERT_EQ(allocator.Allocate(32), INVALID_OFFSET);
+    ASSERT_EQ(allocator.Allocate(32), BuddyAllocator::kInvalidOffset);
 }
 
 // Verify very small allocations using a larger allocator works correctly.
@@ -284,7 +286,7 @@ TEST(BuddyAllocatorTests, SameSizeVariousAlignment) {
     ASSERT_EQ(allocator.ComputeTotalNumOfFreeBlocksForTesting(), 2u);
 
     // Check that we cannot fit another.
-    ASSERT_EQ(allocator.Allocate(8, 16), INVALID_OFFSET);
+    ASSERT_EQ(allocator.Allocate(8, 16), BuddyAllocator::kInvalidOffset);
 
     // Allocate Ac (zero splits and Ab's buddy is now the first free block).
     ASSERT_EQ(allocator.Allocate(8, 8), 24u);
