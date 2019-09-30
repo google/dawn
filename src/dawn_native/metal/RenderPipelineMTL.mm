@@ -182,7 +182,12 @@ namespace dawn_native { namespace metal {
             }
         }
 
-        MTLColorWriteMask MetalColorWriteMask(dawn::ColorWriteMask writeMask) {
+        MTLColorWriteMask MetalColorWriteMask(dawn::ColorWriteMask writeMask,
+                                              bool isDeclaredInFragmentShader) {
+            if (!isDeclaredInFragmentShader) {
+                return MTLColorWriteMaskNone;
+            }
+
             MTLColorWriteMask mask = MTLColorWriteMaskNone;
 
             if (writeMask & dawn::ColorWriteMask::Red) {
@@ -202,7 +207,8 @@ namespace dawn_native { namespace metal {
         }
 
         void ComputeBlendDesc(MTLRenderPipelineColorAttachmentDescriptor* attachment,
-                              const ColorStateDescriptor* descriptor) {
+                              const ColorStateDescriptor* descriptor,
+                              bool isDeclaredInFragmentShader) {
             attachment.blendingEnabled = BlendEnabled(descriptor);
             attachment.sourceRGBBlendFactor =
                 MetalBlendFactor(descriptor->colorBlend.srcFactor, false);
@@ -214,7 +220,8 @@ namespace dawn_native { namespace metal {
             attachment.destinationAlphaBlendFactor =
                 MetalBlendFactor(descriptor->alphaBlend.dstFactor, true);
             attachment.alphaBlendOperation = MetalBlendOperation(descriptor->alphaBlend.operation);
-            attachment.writeMask = MetalColorWriteMask(descriptor->writeMask);
+            attachment.writeMask =
+                MetalColorWriteMask(descriptor->writeMask, isDeclaredInFragmentShader);
         }
 
         MTLStencilOperation MetalStencilOperation(dawn::StencilOperation stencilOperation) {
@@ -339,11 +346,15 @@ namespace dawn_native { namespace metal {
             descriptorMTL.stencilAttachmentPixelFormat = MetalPixelFormat(depthStencilFormat);
         }
 
+        const ShaderModuleBase::FragmentOutputBaseTypes& fragmentOutputBaseTypes =
+            descriptor->fragmentStage->module->GetFragmentOutputBaseTypes();
         for (uint32_t i : IterateBitSet(GetColorAttachmentsMask())) {
             descriptorMTL.colorAttachments[i].pixelFormat =
                 MetalPixelFormat(GetColorAttachmentFormat(i));
             const ColorStateDescriptor* descriptor = GetColorStateDescriptor(i);
-            ComputeBlendDesc(descriptorMTL.colorAttachments[i], descriptor);
+            bool isDeclaredInFragmentShader = fragmentOutputBaseTypes[i] != Format::Other;
+            ComputeBlendDesc(descriptorMTL.colorAttachments[i], descriptor,
+                             isDeclaredInFragmentShader);
         }
 
         descriptorMTL.inputPrimitiveTopology = MTLInputPrimitiveTopology(GetPrimitiveTopology());

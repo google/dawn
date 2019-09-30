@@ -26,8 +26,7 @@ protected:
         DawnTest::SetUp();
 
         // Shaders to draw a bottom-left triangle in blue.
-        dawn::ShaderModule vsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
+        mVSModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
                 #version 450
                 void main() {
                     const vec2 pos[3] = vec2[3](
@@ -44,7 +43,7 @@ protected:
                 })");
 
         utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.vertexStage.module = vsModule;
+        descriptor.vertexStage.module = mVSModule;
         descriptor.cFragmentStage.module = fsModule;
         descriptor.primitiveTopology = dawn::PrimitiveTopology::TriangleStrip;
         descriptor.cColorStates[0].format = kFormat;
@@ -66,6 +65,7 @@ protected:
         return device.CreateTexture(&descriptor);
     }
 
+    dawn::ShaderModule mVSModule;
     dawn::RenderPipeline pipeline;
 };
 
@@ -117,6 +117,58 @@ TEST_P(RenderPassTest, TwoRenderPassesInOneCommandBuffer) {
 
     EXPECT_PIXEL_RGBA8_EQ(kBlue, renderTarget2, 1, kRTSize - 1);
     EXPECT_PIXEL_RGBA8_EQ(kGreen, renderTarget2, kRTSize - 1, 1);
+}
+
+// Verify that the content in the color attachment will not be changed if there is no corresponding
+// fragment shader outputs in the render pipeline, the load operation is LoadOp::Load and the store
+// operation is StoreOp::Store.
+TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
+    dawn::Texture renderTarget = CreateDefault2DTexture();
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+
+    dawn::TextureView renderTargetView = renderTarget.CreateView();
+
+    utils::ComboRenderPassDescriptor renderPass({renderTargetView});
+    renderPass.cColorAttachments[0].clearColor = {1.0f, 0.0f, 0.0f, 1.0f};
+    renderPass.cColorAttachments[0].loadOp = dawn::LoadOp::Clear;
+    renderPass.cColorAttachments[0].storeOp = dawn::StoreOp::Store;
+    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+
+    {
+        // First we draw a blue triangle in the bottom left of renderTarget.
+        pass.SetPipeline(pipeline);
+        pass.Draw(3, 1, 0, 0);
+    }
+
+    {
+        // Next we use a pipeline whose fragment shader has no outputs.
+        dawn::ShaderModule fsModule =
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
+                #version 450
+                void main() {
+                })");
+        utils::ComboRenderPipelineDescriptor descriptor(device);
+        descriptor.vertexStage.module = mVSModule;
+        descriptor.cFragmentStage.module = fsModule;
+        descriptor.primitiveTopology = dawn::PrimitiveTopology::TriangleStrip;
+        descriptor.cColorStates[0].format = kFormat;
+
+        dawn::RenderPipeline pipelineWithNoFragmentOutput =
+            device.CreateRenderPipeline(&descriptor);
+
+        pass.SetPipeline(pipelineWithNoFragmentOutput);
+        pass.Draw(3, 1, 0, 0);
+    }
+
+    pass.EndPass();
+
+    dawn::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    constexpr RGBA8 kRed(255, 0, 0, 255);
+    constexpr RGBA8 kBlue(0, 0, 255, 255);
+    EXPECT_PIXEL_RGBA8_EQ(kBlue, renderTarget, 2, kRTSize - 1);
+    EXPECT_PIXEL_RGBA8_EQ(kRed, renderTarget, kRTSize - 1, 1);
 }
 
 DAWN_INSTANTIATE_TEST(RenderPassTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);

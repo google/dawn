@@ -207,7 +207,8 @@ namespace dawn_native { namespace vulkan {
             }
         }
 
-        VkColorComponentFlagBits VulkanColorWriteMask(dawn::ColorWriteMask mask) {
+        VkColorComponentFlags VulkanColorWriteMask(dawn::ColorWriteMask mask,
+                                                   bool isDeclaredInFragmentShader) {
             // Vulkan and Dawn color write masks match, static assert it and return the mask
             static_assert(static_cast<VkColorComponentFlagBits>(dawn::ColorWriteMask::Red) ==
                               VK_COLOR_COMPONENT_R_BIT,
@@ -222,11 +223,16 @@ namespace dawn_native { namespace vulkan {
                               VK_COLOR_COMPONENT_A_BIT,
                           "");
 
-            return static_cast<VkColorComponentFlagBits>(mask);
+            // According to Vulkan SPEC (Chapter 14.3): "The input values to blending or color
+            // attachment writes are undefined for components which do not correspond to a fragment
+            // shader outputs", we set the color write mask to 0 to prevent such undefined values
+            // being written into the color attachments.
+            return isDeclaredInFragmentShader ? static_cast<VkColorComponentFlags>(mask)
+                                              : static_cast<VkColorComponentFlags>(0);
         }
 
-        VkPipelineColorBlendAttachmentState ComputeColorDesc(
-            const ColorStateDescriptor* descriptor) {
+        VkPipelineColorBlendAttachmentState ComputeColorDesc(const ColorStateDescriptor* descriptor,
+                                                             bool isDeclaredInFragmentShader) {
             VkPipelineColorBlendAttachmentState attachment;
             attachment.blendEnable = BlendEnabled(descriptor) ? VK_TRUE : VK_FALSE;
             attachment.srcColorBlendFactor = VulkanBlendFactor(descriptor->colorBlend.srcFactor);
@@ -235,7 +241,8 @@ namespace dawn_native { namespace vulkan {
             attachment.srcAlphaBlendFactor = VulkanBlendFactor(descriptor->alphaBlend.srcFactor);
             attachment.dstAlphaBlendFactor = VulkanBlendFactor(descriptor->alphaBlend.dstFactor);
             attachment.alphaBlendOp = VulkanBlendOperation(descriptor->alphaBlend.operation);
-            attachment.colorWriteMask = VulkanColorWriteMask(descriptor->writeMask);
+            attachment.colorWriteMask =
+                VulkanColorWriteMask(descriptor->writeMask, isDeclaredInFragmentShader);
             return attachment;
         }
 
@@ -400,9 +407,13 @@ namespace dawn_native { namespace vulkan {
         // Initialize the "blend state info" that will be chained in the "create info" from the data
         // pre-computed in the ColorState
         std::array<VkPipelineColorBlendAttachmentState, kMaxColorAttachments> colorBlendAttachments;
+        const ShaderModuleBase::FragmentOutputBaseTypes& fragmentOutputBaseTypes =
+            descriptor->fragmentStage->module->GetFragmentOutputBaseTypes();
         for (uint32_t i : IterateBitSet(GetColorAttachmentsMask())) {
-            const ColorStateDescriptor* descriptor = GetColorStateDescriptor(i);
-            colorBlendAttachments[i] = ComputeColorDesc(descriptor);
+            const ColorStateDescriptor* colorStateDescriptor = GetColorStateDescriptor(i);
+            bool isDeclaredInFragmentShader = fragmentOutputBaseTypes[i] != Format::Other;
+            colorBlendAttachments[i] =
+                ComputeColorDesc(colorStateDescriptor, isDeclaredInFragmentShader);
         }
         VkPipelineColorBlendStateCreateInfo colorBlend;
         colorBlend.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
