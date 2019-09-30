@@ -149,6 +149,8 @@ namespace dawn_native {
         TextureViewBase* CreateTextureView(TextureBase* texture,
                                            const TextureViewDescriptor* descriptor);
 
+        void InjectError(dawn::ErrorType type, const char* message);
+
         void Tick();
 
         void SetUncapturedErrorCallback(dawn::ErrorCallback callback, void* userdata);

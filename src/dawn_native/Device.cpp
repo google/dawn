@@ -98,6 +98,13 @@ namespace dawn_native {
         mCurrentErrorScope->HandleError(type, message);
     }
 
+    void DeviceBase::InjectError(dawn::ErrorType type, const char* message) {
+        if (ConsumedError(ValidateErrorType(type))) {
+            return;
+        }
+        mCurrentErrorScope->HandleError(type, message);
+    }
+
     void DeviceBase::ConsumeError(ErrorData* error) {
         ASSERT(error != nullptr);
         HandleError(error->GetType(), error->GetMessage().c_str());

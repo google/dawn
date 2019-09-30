@@ -18,6 +18,8 @@
 #include <array>
 #include <cstring>
 
+using namespace testing;
+
 class MockFenceOnCompletionCallback {
   public:
     MOCK_METHOD2(Call, void(DawnFenceCompletionStatus status, void* userdata));
@@ -27,6 +29,17 @@ static std::unique_ptr<MockFenceOnCompletionCallback> mockFenceOnCompletionCallb
 static void ToMockFenceOnCompletionCallback(DawnFenceCompletionStatus status, void* userdata) {
     mockFenceOnCompletionCallback->Call(status, userdata);
 }
+
+class MockPopErrorScopeCallback {
+  public:
+    MOCK_METHOD3(Call, void(DawnErrorType type, const char* message, void* userdata));
+};
+
+static std::unique_ptr<MockPopErrorScopeCallback> mockPopErrorScopeCallback;
+static void ToMockPopErrorScopeCallback(DawnErrorType type, const char* message, void* userdata) {
+    mockPopErrorScopeCallback->Call(type, message, userdata);
+}
+
 class FenceTests : public DawnTest {
   private:
     struct CallbackInfo {
@@ -50,10 +63,12 @@ class FenceTests : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
         mockFenceOnCompletionCallback = std::make_unique<MockFenceOnCompletionCallback>();
+        mockPopErrorScopeCallback = std::make_unique<MockPopErrorScopeCallback>();
     }
 
     void TearDown() override {
         mockFenceOnCompletionCallback = nullptr;
+        mockPopErrorScopeCallback = nullptr;
         DawnTest::TearDown();
     }
 
@@ -204,6 +219,24 @@ TEST_P(FenceTests, DISABLED_DestroyBeforeOnCompletionEnd) {
     // Wait for another fence to be sure all callbacks have cleared
     queue.Signal(fence, 1);
     WaitForCompletedValue(fence, 1);
+}
+
+// Regression test that validation errors that are tracked client-side are captured
+// in error scopes.
+TEST_P(FenceTests, ClientValidationErrorInErrorScope) {
+    dawn::FenceDescriptor descriptor;
+    descriptor.initialValue = 0u;
+    dawn::Fence fence = queue.CreateFence(&descriptor);
+
+    queue.Signal(fence, 4);
+
+    device.PushErrorScope(dawn::ErrorFilter::Validation);
+    queue.Signal(fence, 2);
+
+    EXPECT_CALL(*mockPopErrorScopeCallback, Call(DAWN_ERROR_TYPE_VALIDATION, _, this)).Times(1);
+    device.PopErrorScope(ToMockPopErrorScopeCallback, this);
+
+    WaitForCompletedValue(fence, 4);
 }
 
 DAWN_INSTANTIATE_TEST(FenceTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
