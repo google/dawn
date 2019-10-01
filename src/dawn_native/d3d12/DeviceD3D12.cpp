@@ -40,10 +40,6 @@
 
 namespace dawn_native { namespace d3d12 {
 
-    void ASSERT_SUCCESS(HRESULT hr) {
-        ASSERT(SUCCEEDED(hr));
-    }
-
     Device::Device(Adapter* adapter, const DeviceDescriptor* descriptor)
         : DeviceBase(adapter, descriptor) {
         if (descriptor != nullptr) {
