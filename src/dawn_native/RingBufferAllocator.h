@@ -25,6 +25,7 @@ namespace dawn_native {
 
     class RingBufferAllocator {
       public:
+        RingBufferAllocator() = default;
         RingBufferAllocator(size_t maxSize);
         ~RingBufferAllocator() = default;
 

@@ -22,6 +22,7 @@
 #include "common/SerialQueue.h"
 
 #include "dawn_native/Error.h"
+#include "dawn_native/RingBufferAllocator.h"
 
 namespace dawn_native { namespace d3d12 {
 
@@ -52,34 +53,27 @@ namespace dawn_native { namespace d3d12 {
                                                             uint32_t count);
         ResultOrError<DescriptorHeapHandle> AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE type,
                                                             uint32_t count);
-        void Tick(uint64_t lastCompletedSerial);
+        void Deallocate(uint64_t lastCompletedSerial);
 
       private:
-        static constexpr unsigned int kMaxCbvUavSrvHeapSize = 1000000;
-        static constexpr unsigned int kMaxSamplerHeapSize = 2048;
-        static constexpr unsigned int kDescriptorHeapTypes =
-            D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES;
-
-        struct AllocationInfo {
-            uint32_t size = 0;
-            uint32_t remaining = 0;
+        struct DescriptorHeapInfo {
+            ComPtr<ID3D12DescriptorHeap> heap;
+            RingBufferAllocator allocator;
         };
-
-        using DescriptorHeapInfo = std::pair<ComPtr<ID3D12DescriptorHeap>, AllocationInfo>;
 
         ResultOrError<DescriptorHeapHandle> Allocate(D3D12_DESCRIPTOR_HEAP_TYPE type,
                                                      uint32_t count,
                                                      uint32_t allocationSize,
                                                      DescriptorHeapInfo* heapInfo,
                                                      D3D12_DESCRIPTOR_HEAP_FLAGS flags);
-        void Release(DescriptorHeapHandle handle);
 
         Device* mDevice;
 
-        std::array<uint32_t, kDescriptorHeapTypes> mSizeIncrements;
-        std::array<DescriptorHeapInfo, kDescriptorHeapTypes> mCpuDescriptorHeapInfos;
-        std::array<DescriptorHeapInfo, kDescriptorHeapTypes> mGpuDescriptorHeapInfos;
-        SerialQueue<DescriptorHeapHandle> mReleasedHandles;
+        std::array<uint32_t, D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES> mSizeIncrements;
+        std::array<DescriptorHeapInfo, D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES>
+            mCpuDescriptorHeapInfos;
+        std::array<DescriptorHeapInfo, D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES>
+            mGpuDescriptorHeapInfos;
     };
 
 }}  // namespace dawn_native::d3d12
