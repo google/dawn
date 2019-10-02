@@ -14,6 +14,7 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
+#include "common/Assert.h"
 #include "common/Constants.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/DawnHelpers.h"
@@ -859,4 +860,198 @@ TEST_F(SetBindGroupValidationTest, ErrorBindGroup) {
     TestRenderPassBindGroup(bindGroup, nullptr, 0, false);
 
     TestComputePassBindGroup(bindGroup, nullptr, 0, false);
+}
+
+class SetBindGroupPersistenceValidationTest : public ValidationTest {
+  protected:
+    void SetUp() override {
+        mVsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
+            #version 450
+            void main() {
+            })");
+    }
+
+    dawn::Buffer CreateBuffer(uint64_t bufferSize, dawn::BufferUsage usage) {
+        dawn::BufferDescriptor bufferDescriptor;
+        bufferDescriptor.size = bufferSize;
+        bufferDescriptor.usage = usage;
+
+        return device.CreateBuffer(&bufferDescriptor);
+    }
+
+    // Generates bind group layouts and a pipeline from a 2D list of binding types.
+    std::tuple<std::vector<dawn::BindGroupLayout>, dawn::RenderPipeline> SetUpLayoutsAndPipeline(
+        std::vector<std::vector<dawn::BindingType>> layouts) {
+        std::vector<dawn::BindGroupLayout> bindGroupLayouts(layouts.size());
+
+        // Iterate through the desired bind group layouts.
+        for (uint32_t l = 0; l < layouts.size(); ++l) {
+            const auto& layout = layouts[l];
+            std::vector<dawn::BindGroupLayoutBinding> bindings(layout.size());
+
+            // Iterate through binding types and populate a list of BindGroupLayoutBindings.
+            for (uint32_t b = 0; b < layout.size(); ++b) {
+                bindings[b] = {b, dawn::ShaderStage::Fragment, layout[b], false};
+            }
+
+            // Create the bind group layout.
+            dawn::BindGroupLayoutDescriptor bglDescriptor;
+            bglDescriptor.bindingCount = static_cast<uint32_t>(bindings.size());
+            bglDescriptor.bindings = bindings.data();
+            bindGroupLayouts[l] = device.CreateBindGroupLayout(&bglDescriptor);
+        }
+
+        // Create a pipeline layout from the list of bind group layouts.
+        dawn::PipelineLayoutDescriptor pipelineLayoutDescriptor;
+        pipelineLayoutDescriptor.bindGroupLayoutCount =
+            static_cast<uint32_t>(bindGroupLayouts.size());
+        pipelineLayoutDescriptor.bindGroupLayouts = bindGroupLayouts.data();
+
+        dawn::PipelineLayout pipelineLayout =
+            device.CreatePipelineLayout(&pipelineLayoutDescriptor);
+
+        std::stringstream ss;
+        ss << "#version 450\n";
+
+        // Build a shader which has bindings that match the pipeline layout.
+        for (uint32_t l = 0; l < layouts.size(); ++l) {
+            const auto& layout = layouts[l];
+
+            for (uint32_t b = 0; b < layout.size(); ++b) {
+                dawn::BindingType binding = layout[b];
+                ss << "layout(std140, set = " << l << ", binding = " << b << ") ";
+                switch (binding) {
+                    case dawn::BindingType::StorageBuffer:
+                        ss << "buffer SBuffer";
+                        break;
+                    case dawn::BindingType::UniformBuffer:
+                        ss << "uniform UBuffer";
+                        break;
+                    default:
+                        UNREACHABLE();
+                }
+                ss << l << "_" << b << " { vec2 set" << l << "_binding" << b << "; };\n";
+            }
+        }
+
+        ss << "layout(location = 0) out vec4 fragColor;\n";
+        ss << "void main() { fragColor = vec4(0.0, 1.0, 0.0, 1.0); }\n";
+
+        dawn::ShaderModule fsModule =
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, ss.str().c_str());
+
+        utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
+        pipelineDescriptor.vertexStage.module = mVsModule;
+        pipelineDescriptor.cFragmentStage.module = fsModule;
+        pipelineDescriptor.layout = pipelineLayout;
+        dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+
+        return std::make_tuple(bindGroupLayouts, pipeline);
+    }
+
+  private:
+    dawn::ShaderModule mVsModule;
+};
+
+// Test it is valid to set bind groups before setting the pipeline.
+TEST_F(SetBindGroupPersistenceValidationTest, BindGroupBeforePipeline) {
+    std::vector<dawn::BindGroupLayout> bindGroupLayouts;
+    dawn::RenderPipeline pipeline;
+    std::tie(bindGroupLayouts, pipeline) = SetUpLayoutsAndPipeline({{
+        {{
+            dawn::BindingType::UniformBuffer,
+            dawn::BindingType::UniformBuffer,
+        }},
+        {{
+            dawn::BindingType::StorageBuffer,
+            dawn::BindingType::UniformBuffer,
+        }},
+    }});
+
+    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsage::Uniform);
+    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsage::Storage);
+
+    dawn::BindGroup bindGroup0 = utils::MakeBindGroup(
+        device, bindGroupLayouts[0],
+        {{0, uniformBuffer, 0, kBindingSize}, {1, uniformBuffer, 0, kBindingSize}});
+
+    dawn::BindGroup bindGroup1 = utils::MakeBindGroup(
+        device, bindGroupLayouts[1],
+        {{0, storageBuffer, 0, kBindingSize}, {1, uniformBuffer, 0, kBindingSize}});
+
+    DummyRenderPass renderPass(device);
+    dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    dawn::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
+
+    renderPassEncoder.SetBindGroup(0, bindGroup0, 0, nullptr);
+    renderPassEncoder.SetBindGroup(1, bindGroup1, 0, nullptr);
+    renderPassEncoder.SetPipeline(pipeline);
+    renderPassEncoder.Draw(3, 1, 0, 0);
+
+    renderPassEncoder.EndPass();
+    commandEncoder.Finish();
+}
+
+// Dawn does not have a concept of bind group inheritance though the backing APIs may.
+// Test that it is valid to draw with bind groups that are not "inherited". They persist
+// after a pipeline change.
+TEST_F(SetBindGroupPersistenceValidationTest, NotVulkanInheritance) {
+    std::vector<dawn::BindGroupLayout> bindGroupLayoutsA;
+    dawn::RenderPipeline pipelineA;
+    std::tie(bindGroupLayoutsA, pipelineA) = SetUpLayoutsAndPipeline({{
+        {{
+            dawn::BindingType::UniformBuffer,
+            dawn::BindingType::StorageBuffer,
+        }},
+        {{
+            dawn::BindingType::UniformBuffer,
+            dawn::BindingType::UniformBuffer,
+        }},
+    }});
+
+    std::vector<dawn::BindGroupLayout> bindGroupLayoutsB;
+    dawn::RenderPipeline pipelineB;
+    std::tie(bindGroupLayoutsB, pipelineB) = SetUpLayoutsAndPipeline({{
+        {{
+            dawn::BindingType::StorageBuffer,
+            dawn::BindingType::UniformBuffer,
+        }},
+        {{
+            dawn::BindingType::UniformBuffer,
+            dawn::BindingType::UniformBuffer,
+        }},
+    }});
+
+    dawn::Buffer uniformBuffer = CreateBuffer(kBufferSize, dawn::BufferUsage::Uniform);
+    dawn::Buffer storageBuffer = CreateBuffer(kBufferSize, dawn::BufferUsage::Storage);
+
+    dawn::BindGroup bindGroupA0 = utils::MakeBindGroup(
+        device, bindGroupLayoutsA[0],
+        {{0, uniformBuffer, 0, kBindingSize}, {1, storageBuffer, 0, kBindingSize}});
+
+    dawn::BindGroup bindGroupA1 = utils::MakeBindGroup(
+        device, bindGroupLayoutsA[1],
+        {{0, uniformBuffer, 0, kBindingSize}, {1, uniformBuffer, 0, kBindingSize}});
+
+    dawn::BindGroup bindGroupB0 = utils::MakeBindGroup(
+        device, bindGroupLayoutsB[0],
+        {{0, storageBuffer, 0, kBindingSize}, {1, uniformBuffer, 0, kBindingSize}});
+
+    DummyRenderPass renderPass(device);
+    dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    dawn::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
+
+    renderPassEncoder.SetPipeline(pipelineA);
+    renderPassEncoder.SetBindGroup(0, bindGroupA0, 0, nullptr);
+    renderPassEncoder.SetBindGroup(1, bindGroupA1, 0, nullptr);
+    renderPassEncoder.Draw(3, 1, 0, 0);
+
+    renderPassEncoder.SetPipeline(pipelineB);
+    renderPassEncoder.SetBindGroup(0, bindGroupB0, 0, nullptr);
+    // This draw is valid.
+    // Bind group 1 persists even though it is not "inherited".
+    renderPassEncoder.Draw(3, 1, 0, 0);
+
+    renderPassEncoder.EndPass();
+    commandEncoder.Finish();
 }
