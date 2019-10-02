@@ -193,7 +193,7 @@ TEST_F(WireErrorCallbackTests, PopErrorScopeDeviceDestroyed) {
     FlushClient();
 
     // Incomplete callback called in Device destructor.
-    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(DAWN_ERROR_TYPE_UNKNOWN, _, this)).Times(1);
+    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(DAWN_ERROR_TYPE_UNKNOWN, ValidStringMessage(), this)).Times(1);
 }
 
 // Test that PopErrorScope returns false if there are no error scopes.

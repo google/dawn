@@ -107,18 +107,18 @@ TEST_F(WireFenceTests, QueueSignalSuccess) {
 // than or equal to the current signaled value
 TEST_F(WireFenceTests, QueueSignalValidationError) {
     dawnQueueSignal(queue, fence, 0u);  // Error
-    EXPECT_CALL(api, DeviceInjectError(apiDevice, DAWN_ERROR_TYPE_VALIDATION, _)).Times(1);
+    EXPECT_CALL(api, DeviceInjectError(apiDevice, DAWN_ERROR_TYPE_VALIDATION, ValidStringMessage())).Times(1);
     FlushClient();
 
     dawnQueueSignal(queue, fence, 1u);  // Error
-    EXPECT_CALL(api, DeviceInjectError(apiDevice, DAWN_ERROR_TYPE_VALIDATION, _)).Times(1);
+    EXPECT_CALL(api, DeviceInjectError(apiDevice, DAWN_ERROR_TYPE_VALIDATION, ValidStringMessage())).Times(1);
     FlushClient();
 
     DoQueueSignal(4u);  // Success
     FlushClient();
 
     dawnQueueSignal(queue, fence, 3u);  // Error
-    EXPECT_CALL(api, DeviceInjectError(apiDevice, DAWN_ERROR_TYPE_VALIDATION, _)).Times(1);
+    EXPECT_CALL(api, DeviceInjectError(apiDevice, DAWN_ERROR_TYPE_VALIDATION, ValidStringMessage())).Times(1);
     FlushClient();
 }
 
@@ -194,7 +194,7 @@ TEST_F(WireFenceTests, OnCompletionValidationError) {
 
     dawnFenceOnCompletion(fence, 2u, ToMockFenceOnCompletionCallback, this + 0);
 
-    EXPECT_CALL(api, DeviceInjectError(apiDevice, DAWN_ERROR_TYPE_VALIDATION, _)).Times(1);
+    EXPECT_CALL(api, DeviceInjectError(apiDevice, DAWN_ERROR_TYPE_VALIDATION, ValidStringMessage())).Times(1);
     FlushClient();
 }
 
@@ -235,7 +235,7 @@ TEST_F(WireFenceTests, SignalWrongQueue) {
     FlushClient();
 
     dawnQueueSignal(queue2, fence, 2u);  // error
-    EXPECT_CALL(api, DeviceInjectError(apiDevice, DAWN_ERROR_TYPE_VALIDATION, _)).Times(1);
+    EXPECT_CALL(api, DeviceInjectError(apiDevice, DAWN_ERROR_TYPE_VALIDATION, ValidStringMessage())).Times(1);
     FlushClient();
 }
 
@@ -247,7 +247,7 @@ TEST_F(WireFenceTests, SignalWrongQueueDoesNotUpdateValue) {
     FlushClient();
 
     dawnQueueSignal(queue2, fence, 2u);  // error
-    EXPECT_CALL(api, DeviceInjectError(apiDevice, DAWN_ERROR_TYPE_VALIDATION, _)).Times(1);
+    EXPECT_CALL(api, DeviceInjectError(apiDevice, DAWN_ERROR_TYPE_VALIDATION, ValidStringMessage())).Times(1);
     FlushClient();
 
     // Fence value should be unchanged.

@@ -543,7 +543,7 @@
                 "name": "inject error",
                 "args": [
                     {"name": "type", "type": "error type"},
-                    {"name": "message", "type": "char", "annotation": "const*"}
+                    {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"}
                 ],
                 "TODO": "enga@: Make this a Dawn extension"
             },

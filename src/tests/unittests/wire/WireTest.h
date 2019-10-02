@@ -66,6 +66,35 @@ inline testing::Matcher<MatcherLambdaArgument<Lambda>> MatchesLambda(Lambda lamb
     return MakeMatcher(new LambdaMatcherImpl<Lambda, MatcherLambdaArgument<Lambda>>(lambda));
 }
 
+class StringMessageMatcher : public testing::MatcherInterface<const char*> {
+  public:
+    explicit StringMessageMatcher() {}
+
+    bool MatchAndExplain(const char* message, testing::MatchResultListener* listener) const override {
+        if (message == nullptr) {
+            *listener << "missing error message";
+            return false;
+        }
+        if (std::strlen(message) <= 1) {
+            *listener << "message is truncated";
+            return false;
+        }
+        return true;
+    }
+
+    void DescribeTo(std::ostream* os) const override {
+      *os << "valid error message";
+    }
+
+    void DescribeNegationTo(std::ostream* os) const override {
+      *os << "invalid error message";
+    }
+};
+
+inline testing::Matcher<const char*> ValidStringMessage() {
+    return MakeMatcher(new StringMessageMatcher());
+}
+
 namespace dawn_wire {
     class WireClient;
     class WireServer;
