@@ -106,7 +106,7 @@
             size_t {{as_varName(member.name)}}Strlen;
         {% endfor %}
 
-        {% for member in members if member.annotation != "value" and member.type.category != "object" %}
+        {% for member in members if member.optional and member.annotation != "value" and member.type.category != "object" %}
             bool has_{{as_varName(member.name)}};
         {% endfor %}
     };
@@ -187,9 +187,9 @@
         {% for member in members if member.length == "strlen" %}
             {% set memberName = as_varName(member.name) %}
 
-            bool has_{{memberName}} = record.{{memberName}} != nullptr;
-            transfer->has_{{memberName}} = has_{{memberName}};
             {% if member.optional %}
+                bool has_{{memberName}} = record.{{memberName}} != nullptr;
+                transfer->has_{{memberName}} = has_{{memberName}};
                 if (has_{{memberName}})
             {% endif %}
             {
@@ -257,8 +257,10 @@
         {% for member in members if member.length == "strlen" %}
             {% set memberName = as_varName(member.name) %}
 
-            bool has_{{memberName}} = transfer->has_{{memberName}};
-            if (has_{{memberName}})
+            record->{{memberName}} = nullptr;
+            {% if member.optional %}
+                if (transfer->has_{{memberName}})
+            {% endif %}
             {
                 size_t stringLength = transfer->{{memberName}}Strlen;
                 const char* stringInBuffer = nullptr;
@@ -269,8 +271,6 @@
                 memcpy(copiedString, stringInBuffer, stringLength);
                 copiedString[stringLength] = '\0';
                 record->{{memberName}} = copiedString;
-            } else {
-                record->{{memberName}} = nullptr;
             }
         {% endfor %}
 
