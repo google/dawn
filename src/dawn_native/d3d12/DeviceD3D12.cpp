@@ -31,6 +31,7 @@
 #include "dawn_native/d3d12/QueueD3D12.h"
 #include "dawn_native/d3d12/RenderPipelineD3D12.h"
 #include "dawn_native/d3d12/ResourceAllocator.h"
+#include "dawn_native/d3d12/ResourceAllocatorManagerD3D12.h"
 #include "dawn_native/d3d12/ResourceHeapD3D12.h"
 #include "dawn_native/d3d12/SamplerD3D12.h"
 #include "dawn_native/d3d12/ShaderModuleD3D12.h"
@@ -68,6 +69,7 @@ namespace dawn_native { namespace d3d12 {
         mDescriptorHeapAllocator = std::make_unique<DescriptorHeapAllocator>(this);
         mMapRequestTracker = std::make_unique<MapRequestTracker>(this);
         mResourceAllocator = std::make_unique<ResourceAllocator>(this);
+        mResourceAllocatorManager = std::make_unique<ResourceAllocatorManager>(this);
 
         NextSerial();
 
@@ -334,29 +336,8 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-    size_t Device::GetD3D12HeapTypeToIndex(D3D12_HEAP_TYPE heapType) const {
-        ASSERT(heapType > 0);
-        ASSERT(static_cast<uint32_t>(heapType) <= kNumHeapTypes);
-        return heapType - 1;
-    }
-
     void Device::DeallocateMemory(ResourceMemoryAllocation& allocation) {
-        if (allocation.GetAllocationMethod() == AllocationMethod::kInvalid) {
-            return;
-        }
-        CommittedResourceAllocator* allocator = nullptr;
-        D3D12_HEAP_PROPERTIES heapProp;
-        ToBackend(allocation.GetResourceHeap())
-            ->GetD3D12Resource()
-            ->GetHeapProperties(&heapProp, nullptr);
-        const size_t heapTypeIndex = GetD3D12HeapTypeToIndex(heapProp.Type);
-        ASSERT(heapTypeIndex < kNumHeapTypes);
-        allocator = mDirectResourceAllocators[heapTypeIndex].get();
-        allocator->Deallocate(allocation);
-
-        // Invalidate the underlying resource heap in case the client accidentally
-        // calls DeallocateMemory again using the same allocation.
-        allocation.Invalidate();
+        mResourceAllocatorManager->DeallocateMemory(allocation);
     }
 
     ResultOrError<ResourceMemoryAllocation> Device::AllocateMemory(
@@ -364,22 +345,8 @@ namespace dawn_native { namespace d3d12 {
         const D3D12_RESOURCE_DESC& resourceDescriptor,
         D3D12_RESOURCE_STATES initialUsage,
         D3D12_HEAP_FLAGS heapFlags) {
-        const size_t heapTypeIndex = GetD3D12HeapTypeToIndex(heapType);
-        ASSERT(heapTypeIndex < kNumHeapTypes);
-
-        // Get the direct allocator using a tightly sized heap (aka CreateCommittedResource).
-        CommittedResourceAllocator* allocator = mDirectResourceAllocators[heapTypeIndex].get();
-        if (allocator == nullptr) {
-            mDirectResourceAllocators[heapTypeIndex] =
-                std::make_unique<CommittedResourceAllocator>(this, heapType);
-            allocator = mDirectResourceAllocators[heapTypeIndex].get();
-        }
-
-        ResourceMemoryAllocation allocation;
-        DAWN_TRY_ASSIGN(allocation,
-                        allocator->Allocate(resourceDescriptor, initialUsage, heapFlags));
-
-        return allocation;
+        return mResourceAllocatorManager->AllocateMemory(heapType, resourceDescriptor, initialUsage,
+                                                         heapFlags);
     }
 
     TextureBase* Device::WrapSharedHandle(const TextureDescriptor* descriptor,
