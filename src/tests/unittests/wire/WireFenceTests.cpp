@@ -51,8 +51,9 @@ class WireFenceTests : public WireTest {
         }
         {
             DawnFenceDescriptor descriptor;
-            descriptor.initialValue = 1;
             descriptor.nextInChain = nullptr;
+            descriptor.label = nullptr;
+            descriptor.initialValue = 1;
 
             apiFence = api.GetNewFence();
             fence = dawnQueueCreateFence(queue, &descriptor);

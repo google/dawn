@@ -41,6 +41,7 @@
         "category": "structure",
         "extensible": true,
         "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "layout", "type": "bind group layout"},
             {"name": "binding count", "type": "uint32_t"},
             {"name": "bindings", "type": "bind group binding", "annotation": "const*", "length": "binding count"}
@@ -66,6 +67,7 @@
         "category": "structure",
         "extensible": true,
         "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "binding count", "type": "uint32_t"},
             {"name": "bindings", "type": "bind group layout binding", "annotation": "const*", "length": "binding count"}
         ]
@@ -181,6 +183,7 @@
         "category": "structure",
         "extensible": true,
         "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "usage", "type": "buffer usage"},
             {"name": "size", "type": "uint64_t"}
         ]
@@ -338,7 +341,9 @@
     "command encoder descriptor": {
         "category": "structure",
         "extensible": true,
-        "members": []
+        "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true}
+        ]
     },
     "compare function": {
         "category": "enum",
@@ -421,6 +426,7 @@
         "category": "structure",
         "extensible": true,
         "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "layout", "type": "pipeline layout"},
             {"name": "compute stage", "type": "pipeline stage descriptor"}
         ]
@@ -648,6 +654,7 @@
         "category": "structure",
         "extensible": true,
         "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "initial value", "type": "uint64_t", "default": "0"}
         ]
     },
@@ -739,6 +746,7 @@
         "category": "structure",
         "extensible": true,
         "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "bind group layout count", "type": "uint32_t"},
             {"name": "bind group layouts", "type": "bind group layout", "annotation": "const*", "length": "bind group layout count"}
         ]
@@ -900,13 +908,16 @@
     "render bundle descriptor": {
         "category": "structure",
         "extensible": true,
-        "members": []
+        "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true}
+        ]
     },
 
     "render bundle encoder descriptor": {
         "category": "structure",
         "extensible": true,
         "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "color formats count", "type": "uint32_t"},
             {"name": "color formats", "type": "texture format", "annotation": "const*", "length": "color formats count"},
             {"name": "depth stencil format", "type": "texture format", "default": "undefined"},
@@ -941,6 +952,7 @@
     "render pass descriptor": {
         "category": "structure",
         "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "color attachment count", "type": "uint32_t"},
             {"name": "color attachments", "type": "render pass color attachment descriptor", "annotation": "const*", "length": "color attachment count"},
             {"name": "depth stencil attachment", "type": "render pass depth stencil attachment descriptor", "annotation": "const*", "optional": true}
@@ -1080,6 +1092,7 @@
         "category": "structure",
         "extensible": true,
         "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "layout", "type": "pipeline layout"},
             {"name": "vertex stage", "type": "pipeline stage descriptor"},
             {"name": "fragment stage", "type": "pipeline stage descriptor", "annotation": "const*", "optional": true},
@@ -1101,6 +1114,7 @@
         "category": "structure",
         "extensible": true,
         "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "address mode u", "type": "address mode", "default": "clamp to edge"},
             {"name": "address mode v", "type": "address mode", "default": "clamp to edge"},
             {"name": "address mode w", "type": "address mode", "default": "clamp to edge"},
@@ -1119,6 +1133,7 @@
         "category": "structure",
         "extensible": true,
         "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "code size", "type": "uint32_t"},
             {"name": "code", "type": "uint32_t", "annotation": "const*", "length": "code size"}
         ]
@@ -1183,6 +1198,7 @@
         "category": "structure",
         "extensible": true,
         "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "implementation", "type": "uint64_t"}
         ]
     },
@@ -1231,6 +1247,7 @@
         "category": "structure",
         "extensible": true,
         "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "usage", "type": "texture usage"},
             {"name": "dimension", "type": "texture dimension", "default": "2D"},
             {"name": "size", "type": "extent 3D"},
@@ -1328,6 +1345,7 @@
         "category": "structure",
         "extensible": true,
         "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "format", "type": "texture format", "default": "undefined"},
             {"name": "dimension", "type": "texture view dimension", "default": "undefined"},
             {"name": "base mip level", "type": "uint32_t", "default": "0"},

@@ -31,6 +31,7 @@ void init() {
     {
         DawnSwapChainDescriptor descriptor;
         descriptor.nextInChain = nullptr;
+        descriptor.label = nullptr;
         descriptor.implementation = GetSwapChainImplementation();
         swapchain = dawnDeviceCreateSwapChain(device, &descriptor);
     }
@@ -59,6 +60,7 @@ void init() {
 
     {
         DawnRenderPipelineDescriptor descriptor;
+        descriptor.label = nullptr;
         descriptor.nextInChain = nullptr;
 
         descriptor.vertexStage.nextInChain = nullptr;
@@ -89,6 +91,7 @@ void init() {
 
         DawnPipelineLayoutDescriptor pl;
         pl.nextInChain = nullptr;
+        pl.label = nullptr;
         pl.bindGroupLayoutCount = 0;
         pl.bindGroupLayouts = nullptr;
         descriptor.layout = dawnDeviceCreatePipelineLayout(device, &pl);
@@ -126,6 +129,7 @@ void frame() {
     DawnTexture backbuffer = dawnSwapChainGetNextTexture(swapchain);
     DawnTextureView backbufferView = dawnTextureCreateView(backbuffer, nullptr);
     DawnRenderPassDescriptor renderpassInfo;
+    renderpassInfo.label = nullptr;
     DawnRenderPassColorAttachmentDescriptor colorAttachment;
     {
         colorAttachment.attachment = backbufferView;

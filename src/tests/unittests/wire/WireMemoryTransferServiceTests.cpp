@@ -157,6 +157,7 @@ class WireMemoryTransferServiceTests : public WireTest {
     std::pair<DawnBuffer, DawnBuffer> CreateBuffer() {
         DawnBufferDescriptor descriptor;
         descriptor.nextInChain = nullptr;
+        descriptor.label = nullptr;
         descriptor.size = sizeof(mBufferContent);
 
         DawnBuffer apiBuffer = api.GetNewBuffer();
@@ -172,6 +173,7 @@ class WireMemoryTransferServiceTests : public WireTest {
     std::pair<DawnCreateBufferMappedResult, DawnCreateBufferMappedResult> CreateBufferMapped() {
         DawnBufferDescriptor descriptor;
         descriptor.nextInChain = nullptr;
+        descriptor.label = nullptr;
         descriptor.size = sizeof(mBufferContent);
 
         DawnBuffer apiBuffer = api.GetNewBuffer();
@@ -193,6 +195,7 @@ class WireMemoryTransferServiceTests : public WireTest {
     DawnCreateBufferMappedResult CreateBufferMappedAsync() {
         DawnBufferDescriptor descriptor;
         descriptor.nextInChain = nullptr;
+        descriptor.label = nullptr;
         descriptor.size = sizeof(mBufferContent);
 
         dawnDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback,
@@ -882,6 +885,7 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedAsyncWriteHandleCreatio
 
     DawnBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
+    descriptor.label = nullptr;
     descriptor.size = sizeof(mBufferContent);
 
     // Failed creation of a WriteHandle is a fatal failure. The client synchronously receives
@@ -1036,6 +1040,7 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedWriteHandleCreationFail
 
     DawnBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
+    descriptor.label = nullptr;
     descriptor.size = sizeof(mBufferContent);
 
     DawnCreateBufferMappedResult result = dawnDeviceCreateBufferMapped(device, &descriptor);
@@ -1081,6 +1086,7 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedHandleOpenFailure) {
 
     DawnBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
+    descriptor.label = nullptr;
     descriptor.size = sizeof(mBufferContent);
 
     DawnCreateBufferMappedResult result = dawnDeviceCreateBufferMapped(device, &descriptor);

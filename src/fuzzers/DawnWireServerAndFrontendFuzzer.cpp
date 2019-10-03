@@ -40,6 +40,7 @@ static DawnProcDeviceCreateSwapChain originalDeviceCreateSwapChain = nullptr;
 DawnSwapChain ErrorDeviceCreateSwapChain(DawnDevice device, const DawnSwapChainDescriptor*) {
     DawnSwapChainDescriptor desc;
     desc.nextInChain = nullptr;
+    desc.label = nullptr;
     // A 0 implementation will trigger a swapchain creation error.
     desc.implementation = 0;
     return originalDeviceCreateSwapChain(device, &desc);

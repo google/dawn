@@ -28,6 +28,7 @@ class WireOptionalTests : public WireTest {
 TEST_F(WireOptionalTests, OptionalObjectValue) {
     DawnBindGroupLayoutDescriptor bglDesc;
     bglDesc.nextInChain = nullptr;
+    bglDesc.label = nullptr;
     bglDesc.bindingCount = 0;
     DawnBindGroupLayout bgl = dawnDeviceCreateBindGroupLayout(device, &bglDesc);
 
@@ -44,6 +45,7 @@ TEST_F(WireOptionalTests, OptionalObjectValue) {
 
     DawnBindGroupDescriptor bgDesc;
     bgDesc.nextInChain = nullptr;
+    bgDesc.label = nullptr;
     bgDesc.layout = bgl;
     bgDesc.bindingCount = 1;
     bgDesc.bindings = &binding;
@@ -69,6 +71,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     // Create shader module
     DawnShaderModuleDescriptor vertexDescriptor;
     vertexDescriptor.nextInChain = nullptr;
+    vertexDescriptor.label = nullptr;
     vertexDescriptor.codeSize = 0;
     DawnShaderModule vsModule = dawnDeviceCreateShaderModule(device, &vertexDescriptor);
     DawnShaderModule apiVsModule = api.GetNewShaderModule();
@@ -122,6 +125,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     // Create the pipeline layout
     DawnPipelineLayoutDescriptor layoutDescriptor;
     layoutDescriptor.nextInChain = nullptr;
+    layoutDescriptor.label = nullptr;
     layoutDescriptor.bindGroupLayoutCount = 0;
     layoutDescriptor.bindGroupLayouts = nullptr;
     DawnPipelineLayout layout = dawnDeviceCreatePipelineLayout(device, &layoutDescriptor);
@@ -131,6 +135,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     // Create pipeline
     DawnRenderPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.nextInChain = nullptr;
+    pipelineDescriptor.label = nullptr;
 
     pipelineDescriptor.vertexStage.nextInChain = nullptr;
     pipelineDescriptor.vertexStage.module = vsModule;

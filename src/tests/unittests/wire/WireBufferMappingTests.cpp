@@ -99,6 +99,7 @@ class WireBufferMappingTests : public WireTest {
 
         DawnBufferDescriptor descriptor;
         descriptor.nextInChain = nullptr;
+        descriptor.label = nullptr;
         descriptor.size = kBufferSize;
 
         apiBuffer = api.GetNewBuffer();
@@ -505,6 +506,7 @@ TEST_F(WireBufferMappingTests, DestroyInsideMapWriteCallback) {
 TEST_F(WireBufferMappingTests, CreateBufferMappedSuccess) {
     DawnBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
+    descriptor.label = nullptr;
     descriptor.size = 4;
 
     DawnBuffer apiBuffer = api.GetNewBuffer();
@@ -532,6 +534,7 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedSuccess) {
 TEST_F(WireBufferMappingTests, ReleaseAfterCreateBufferMapped) {
     DawnBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
+    descriptor.label = nullptr;
     descriptor.size = 4;
 
     DawnBuffer apiBuffer = api.GetNewBuffer();
@@ -559,6 +562,7 @@ TEST_F(WireBufferMappingTests, ReleaseAfterCreateBufferMapped) {
 TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapSuccess) {
     DawnBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
+    descriptor.label = nullptr;
     descriptor.size = 4;
 
     DawnBuffer apiBuffer = api.GetNewBuffer();
@@ -603,6 +607,7 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapSuccess) {
 TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapFailure) {
     DawnBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
+    descriptor.label = nullptr;
     descriptor.size = 4;
 
     DawnBuffer apiBuffer = api.GetNewBuffer();
@@ -645,6 +650,7 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapFailure) {
 TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncSuccess) {
     DawnBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
+    descriptor.label = nullptr;
     descriptor.size = kBufferSize;
 
     DawnCreateBufferMappedResult apiResult;
@@ -688,6 +694,7 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncSuccess) {
 TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncMapError) {
     DawnBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
+    descriptor.label = nullptr;
 
     DawnCreateBufferMappedResult apiResult;
     apiResult.buffer = apiBuffer;
@@ -720,6 +727,7 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncMapError) {
 TEST_F(WireBufferMappingTests, UnmapInsideCreateBufferMappedAsyncCallback) {
     DawnBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
+    descriptor.label = nullptr;
     descriptor.size = kBufferSize;
 
     DawnCreateBufferMappedResult apiResult;
@@ -757,6 +765,7 @@ TEST_F(WireBufferMappingTests, UnmapInsideCreateBufferMappedAsyncCallback) {
 TEST_F(WireBufferMappingTests, ReleaseInsideCreateBufferMappedAsyncCallback) {
     DawnBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
+    descriptor.label = nullptr;
     descriptor.size = kBufferSize;
 
     DawnCreateBufferMappedResult apiResult;
@@ -794,6 +803,7 @@ TEST_F(WireBufferMappingTests, ReleaseInsideCreateBufferMappedAsyncCallback) {
 TEST_F(WireBufferMappingTests, DestroyInsideCreateBufferMappedAsyncCallback) {
     DawnBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
+    descriptor.label = nullptr;
     descriptor.size = kBufferSize;
 
     DawnCreateBufferMappedResult apiResult;
