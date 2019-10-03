@@ -35,25 +35,36 @@ namespace dawn_native {
         kInvalid
     };
 
+    // Metadata that describes how the allocation was allocated.
+    struct AllocationInfo {
+        // AllocationInfo contains a separate offset to not confuse block vs memory offsets.
+        // The block offset is within the entire allocator memory range and only required by the
+        // buddy sub-allocator to get the corresponding memory. Unlike the block offset, the
+        // allocation offset is always local to the memory.
+        uint64_t mBlockOffset = 0;
+
+        AllocationMethod mMethod = AllocationMethod::kInvalid;
+    };
+
     // Handle into a resource heap pool.
     class ResourceMemoryAllocation {
       public:
         ResourceMemoryAllocation();
-        ResourceMemoryAllocation(uint64_t offset,
+        ResourceMemoryAllocation(const AllocationInfo& info,
+                                 uint64_t offset,
                                  ResourceHeapBase* resourceHeap,
-                                 AllocationMethod method,
                                  uint8_t* mappedPointer = nullptr);
         ~ResourceMemoryAllocation() = default;
 
         ResourceHeapBase* GetResourceHeap() const;
         uint64_t GetOffset() const;
-        AllocationMethod GetAllocationMethod() const;
         uint8_t* GetMappedPointer() const;
+        AllocationInfo GetInfo() const;
 
         void Invalidate();
 
       private:
-        AllocationMethod mMethod;
+        AllocationInfo mInfo;
         uint64_t mOffset;
         ResourceHeapBase* mResourceHeap;
         uint8_t* mMappedPointer;

@@ -40,9 +40,12 @@ namespace dawn_native { namespace d3d12 {
             return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate resource");
         }
 
-        return ResourceMemoryAllocation(
-            /*offset*/ 0, new ResourceHeap(std::move(committedResource)),
-            AllocationMethod::kDirect);
+        AllocationInfo info;
+        info.mMethod = AllocationMethod::kDirect;
+
+        return ResourceMemoryAllocation{info,
+                                        /*offset*/ 0,
+                                        new ResourceHeap(std::move(committedResource))};
     }
 
     void CommittedResourceAllocator::Deallocate(ResourceMemoryAllocation& allocation) {

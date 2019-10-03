@@ -12,20 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_RESOURCEHEAP_H_
-#define DAWNNATIVE_RESOURCEHEAP_H_
+#ifndef DAWNNATIVE_MEMORYALLOCATOR_H_
+#define DAWNNATIVE_MEMORYALLOCATOR_H_
 
 #include "dawn_native/Error.h"
+#include "dawn_native/ResourceHeap.h"
 
 namespace dawn_native {
-
-    // Wrapper for a resource backed by a heap.
-    class ResourceHeapBase {
+    // Interface for backend allocators that create physical device memory.
+    class MemoryAllocator {
       public:
-        ResourceHeapBase() = default;
-        virtual ~ResourceHeapBase() = default;
-    };
+        virtual ~MemoryAllocator() = default;
 
+        virtual ResultOrError<std::unique_ptr<ResourceHeapBase>> Allocate(uint64_t size,
+                                                                          int memoryFlags) = 0;
+        virtual void Deallocate(std::unique_ptr<ResourceHeapBase> allocation) = 0;
+    };
 }  // namespace dawn_native
 
-#endif  // DAWNNATIVE_RESOURCEHEAP_H_
+#endif  // DAWNNATIVE_MEMORYALLOCATOR_H_

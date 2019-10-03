@@ -51,7 +51,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     void ResourceAllocatorManager::DeallocateMemory(ResourceMemoryAllocation& allocation) {
-        if (allocation.GetAllocationMethod() == AllocationMethod::kInvalid) {
+        if (allocation.GetInfo().mMethod == AllocationMethod::kInvalid) {
             return;
         }
         CommittedResourceAllocator* allocator = nullptr;

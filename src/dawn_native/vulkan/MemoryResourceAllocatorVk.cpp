@@ -105,8 +105,10 @@ namespace dawn_native { namespace vulkan {
                                     "vkMapMemory"));
         }
 
-        return ResourceMemoryAllocation(/*offset*/ 0, new ResourceMemory(allocatedMemory),
-                                        AllocationMethod::kDirect,
+        AllocationInfo info;
+        info.mMethod = AllocationMethod::kDirect;
+
+        return ResourceMemoryAllocation(info, /*offset*/ 0, new ResourceMemory(allocatedMemory),
                                         static_cast<uint8_t*>(mappedPointer));
     }
 
