@@ -102,7 +102,11 @@ namespace dawn_native {
         if (ConsumedError(ValidateErrorType(type))) {
             return;
         }
-        mCurrentErrorScope->HandleError(type, message);
+        if (DAWN_UNLIKELY(type == dawn::ErrorType::NoError)) {
+            HandleError(dawn::ErrorType::Validation, "Invalid injected error NoError");
+            return;
+        }
+        HandleError(type, message);
     }
 
     void DeviceBase::ConsumeError(ErrorData* error) {
