@@ -62,6 +62,8 @@ static_library("spirv_cross") {
     "${spirv_cross_dir}/spirv_cross_parsed_ir.hpp",
     "${spirv_cross_dir}/spirv_parser.cpp",
     "${spirv_cross_dir}/spirv_parser.hpp",
+    "${spirv_cross_dir}/spirv_reflect.cpp",
+    "${spirv_cross_dir}/spirv_reflect.hpp",
   ]
 
   need_glsl_cross = dawn_enable_opengl
@@ -112,6 +114,8 @@ static_library("spirv_cross_full_for_fuzzers") {
     "${spirv_cross_dir}/spirv_msl.hpp",
     "${spirv_cross_dir}/spirv_parser.cpp",
     "${spirv_cross_dir}/spirv_parser.hpp",
+    "${spirv_cross_dir}/spirv_reflect.cpp",
+    "${spirv_cross_dir}/spirv_reflect.hpp",
   ]
 }
 
