@@ -166,7 +166,7 @@ TEST_F(WireArgumentTests, CStringArgument) {
     pipelineDescriptor.vertexStage.module = vsModule;
     pipelineDescriptor.vertexStage.entryPoint = "main";
 
-    DawnPipelineStageDescriptor fragmentStage;
+    DawnProgrammableStageDescriptor fragmentStage;
     fragmentStage.nextInChain = nullptr;
     fragmentStage.module = vsModule;
     fragmentStage.entryPoint = "main";

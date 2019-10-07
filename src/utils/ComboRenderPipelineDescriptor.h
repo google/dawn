@@ -40,7 +40,7 @@ namespace utils {
         ComboRenderPipelineDescriptor(ComboRenderPipelineDescriptor&&) = delete;
         ComboRenderPipelineDescriptor& operator=(ComboRenderPipelineDescriptor&&) = delete;
 
-        dawn::PipelineStageDescriptor cFragmentStage;
+        dawn::ProgrammableStageDescriptor cFragmentStage;
 
         ComboVertexInputDescriptor cVertexInput;
         dawn::RasterizationStateDescriptor cRasterizationState;

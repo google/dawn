@@ -428,7 +428,7 @@
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "layout", "type": "pipeline layout"},
-            {"name": "compute stage", "type": "pipeline stage descriptor"}
+            {"name": "compute stage", "type": "programmable stage descriptor"}
         ]
     },
     "cull mode": {
@@ -751,7 +751,7 @@
             {"name": "bind group layouts", "type": "bind group layout", "annotation": "const*", "length": "bind group layout count"}
         ]
     },
-    "pipeline stage descriptor": {
+    "programmable stage descriptor": {
         "category": "structure",
         "extensible": true,
         "members": [
@@ -1094,8 +1094,8 @@
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "layout", "type": "pipeline layout"},
-            {"name": "vertex stage", "type": "pipeline stage descriptor"},
-            {"name": "fragment stage", "type": "pipeline stage descriptor", "annotation": "const*", "optional": true},
+            {"name": "vertex stage", "type": "programmable stage descriptor"},
+            {"name": "fragment stage", "type": "programmable stage descriptor", "annotation": "const*", "optional": true},
             {"name": "vertex input", "type": "vertex input descriptor", "annotation": "const*", "optional": true},
             {"name": "primitive topology", "type": "primitive topology"},
             {"name": "rasterization state", "type": "rasterization state descriptor", "annotation": "const*", "optional": true},

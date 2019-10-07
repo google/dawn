@@ -289,10 +289,10 @@ namespace dawn_native {
         }
 
         DAWN_TRY(ValidatePrimitiveTopology(descriptor->primitiveTopology));
-        DAWN_TRY(ValidatePipelineStageDescriptor(device, &descriptor->vertexStage,
-                                                 descriptor->layout, SingleShaderStage::Vertex));
-        DAWN_TRY(ValidatePipelineStageDescriptor(device, descriptor->fragmentStage,
-                                                 descriptor->layout, SingleShaderStage::Fragment));
+        DAWN_TRY(ValidateProgrammableStageDescriptor(
+            device, &descriptor->vertexStage, descriptor->layout, SingleShaderStage::Vertex));
+        DAWN_TRY(ValidateProgrammableStageDescriptor(
+            device, descriptor->fragmentStage, descriptor->layout, SingleShaderStage::Fragment));
 
         if (descriptor->rasterizationState) {
             DAWN_TRY(ValidateRasterizationStateDescriptor(descriptor->rasterizationState));

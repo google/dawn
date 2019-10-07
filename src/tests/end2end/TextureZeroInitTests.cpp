@@ -517,7 +517,7 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
     // Create compute pipeline
     dawn::ComputePipelineDescriptor computePipelineDescriptor;
     computePipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
-    dawn::PipelineStageDescriptor computeStage;
+    dawn::ProgrammableStageDescriptor computeStage;
     const char* cs =
         R"(#version 450
         layout(binding = 0) uniform texture2D sampleTex;

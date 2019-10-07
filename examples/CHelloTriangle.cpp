@@ -67,7 +67,7 @@ void init() {
         descriptor.vertexStage.module = vsModule;
         descriptor.vertexStage.entryPoint = "main";
 
-        DawnPipelineStageDescriptor fragmentStage;
+        DawnProgrammableStageDescriptor fragmentStage;
         fragmentStage.nextInChain = nullptr;
         fragmentStage.module = fsModule;
         fragmentStage.entryPoint = "main";
