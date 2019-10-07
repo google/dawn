@@ -28,7 +28,7 @@ namespace dawn_wire {
         mImpl.reset();
     }
 
-    const char* WireServer::HandleCommands(const char* commands, size_t size) {
+    const volatile char* WireServer::HandleCommands(const volatile char* commands, size_t size) {
         return mImpl->HandleCommands(commands, size);
     }
 

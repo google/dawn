@@ -25,7 +25,7 @@ namespace dawn_wire { namespace server {
         {% set Suffix = command.name.CamelCase() %}
         {% if Suffix not in client_side_commands %}
             //* The generic command handlers
-            bool Server::Handle{{Suffix}}(const char** commands, size_t* size) {
+            bool Server::Handle{{Suffix}}(const volatile char** commands, size_t* size) {
                 {{Suffix}}Cmd cmd;
                 DeserializeResult deserializeResult = cmd.Deserialize(commands, size, &mAllocator
                     {%- if command.has_dawn_object -%}
@@ -91,11 +91,11 @@ namespace dawn_wire { namespace server {
         {% endif %}
     {% endfor %}
 
-    const char* Server::HandleCommands(const char* commands, size_t size) {
+    const volatile char* Server::HandleCommands(const volatile char* commands, size_t size) {
         mProcs.deviceTick(DeviceObjects().Get(1)->handle);
 
         while (size >= sizeof(WireCmd)) {
-            WireCmd cmdId = *reinterpret_cast<const WireCmd*>(commands);
+            WireCmd cmdId = *reinterpret_cast<const volatile WireCmd*>(commands);
 
             bool success = false;
             switch (cmdId) {

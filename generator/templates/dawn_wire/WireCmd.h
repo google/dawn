@@ -24,6 +24,12 @@ namespace dawn_wire {
     struct ObjectHandle {
       ObjectId id;
       ObjectSerial serial;
+
+      ObjectHandle();
+      ObjectHandle(ObjectId id, ObjectSerial serial);
+      ObjectHandle(const volatile ObjectHandle& rhs);
+      ObjectHandle& operator=(const ObjectHandle& rhs);
+      ObjectHandle& operator=(const volatile ObjectHandle& rhs);
     };
 
     enum class DeserializeResult {
@@ -99,7 +105,7 @@ namespace dawn_wire {
         //* Deserialize returns:
         //*  - Success if everything went well (yay!)
         //*  - FatalError is something bad happened (buffer too small for example)
-        DeserializeResult Deserialize(const char** buffer, size_t* size, DeserializeAllocator* allocator
+        DeserializeResult Deserialize(const volatile char** buffer, size_t* size, DeserializeAllocator* allocator
             {%- if command.has_dawn_object -%}
                 , const ObjectIdResolver& resolver
             {%- endif -%}

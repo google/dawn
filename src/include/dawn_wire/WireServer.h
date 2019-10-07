@@ -38,7 +38,8 @@ namespace dawn_wire {
         WireServer(const WireServerDescriptor& descriptor);
         ~WireServer();
 
-        const char* HandleCommands(const char* commands, size_t size) override final;
+        const volatile char* HandleCommands(const volatile char* commands,
+                                            size_t size) override final;
 
         bool InjectTexture(DawnTexture texture, uint32_t id, uint32_t generation);
 

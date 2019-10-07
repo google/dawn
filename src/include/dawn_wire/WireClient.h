@@ -44,7 +44,8 @@ namespace dawn_wire {
 
         DawnDevice GetDevice() const;
         DawnProcTable GetProcs() const;
-        const char* HandleCommands(const char* commands, size_t size) override final;
+        const volatile char* HandleCommands(const volatile char* commands,
+                                            size_t size) override final;
 
         ReservedTexture ReserveTexture(DawnDevice device);
 

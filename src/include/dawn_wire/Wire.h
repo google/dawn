@@ -32,7 +32,7 @@ namespace dawn_wire {
     class DAWN_WIRE_EXPORT CommandHandler {
       public:
         virtual ~CommandHandler() = default;
-        virtual const char* HandleCommands(const char* commands, size_t size) = 0;
+        virtual const volatile char* HandleCommands(const volatile char* commands, size_t size) = 0;
     };
 
 }  // namespace dawn_wire

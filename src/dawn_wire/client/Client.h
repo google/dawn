@@ -33,7 +33,7 @@ namespace dawn_wire { namespace client {
         Client(CommandSerializer* serializer, MemoryTransferService* memoryTransferService);
         ~Client();
 
-        const char* HandleCommands(const char* commands, size_t size);
+        const volatile char* HandleCommands(const volatile char* commands, size_t size);
         ReservedTexture ReserveTexture(DawnDevice device);
 
         void* GetCmdSpace(size_t size) {

@@ -16,6 +16,7 @@
 
 #include "common/Assert.h"
 
+#include <algorithm>
 #include <cstring>
 #include <limits>
 
@@ -225,8 +226,8 @@
     //* Deserializes `transfer` into `record` getting more serialized data from `buffer` and `size`
     //* if needed, using `allocator` to store pointed-to values and `resolver` to translate object
     //* Ids to actual objects.
-    DAWN_DECLARE_UNUSED DeserializeResult {{Return}}{{name}}Deserialize({{Return}}{{name}}{{Cmd}}* record, const {{Return}}{{name}}Transfer* transfer,
-                                          const char** buffer, size_t* size, DeserializeAllocator* allocator
+    DAWN_DECLARE_UNUSED DeserializeResult {{Return}}{{name}}Deserialize({{Return}}{{name}}{{Cmd}}* record, const volatile {{Return}}{{name}}Transfer* transfer,
+                                          const volatile char** buffer, size_t* size, DeserializeAllocator* allocator
         {%- if record.has_dawn_object -%}
             , const ObjectIdResolver& resolver
         {%- endif -%}
@@ -257,18 +258,19 @@
         {% for member in members if member.length == "strlen" %}
             {% set memberName = as_varName(member.name) %}
 
-            record->{{memberName}} = nullptr;
             {% if member.optional %}
-                if (transfer->has_{{memberName}})
+                bool has_{{memberName}} = transfer->has_{{memberName}};
+                record->{{memberName}} = nullptr;
+                if (has_{{memberName}})
             {% endif %}
             {
                 size_t stringLength = transfer->{{memberName}}Strlen;
-                const char* stringInBuffer = nullptr;
+                const volatile char* stringInBuffer = nullptr;
                 DESERIALIZE_TRY(GetPtrFromBuffer(buffer, size, stringLength, &stringInBuffer));
 
                 char* copiedString = nullptr;
                 DESERIALIZE_TRY(GetSpace(allocator, stringLength + 1, &copiedString));
-                memcpy(copiedString, stringInBuffer, stringLength);
+                std::copy(stringInBuffer, stringInBuffer + stringLength, copiedString);
                 copiedString[stringLength] = '\0';
                 record->{{memberName}} = copiedString;
             }
@@ -285,7 +287,7 @@
             {% endif %}
             {
                 size_t memberLength = {{member_length(member, "record->")}};
-                auto memberBuffer = reinterpret_cast<const {{member_transfer_type(member)}}*>(buffer);
+                auto memberBuffer = reinterpret_cast<const volatile {{member_transfer_type(member)}}*>(buffer);
                 DESERIALIZE_TRY(GetPtrFromBuffer(buffer, size, memberLength, &memberBuffer));
 
                 {{as_cType(member.type.name)}}* copiedMembers = nullptr;
@@ -337,12 +339,12 @@
         );
     }
 
-    DeserializeResult {{Cmd}}::Deserialize(const char** buffer, size_t* size, DeserializeAllocator* allocator
+    DeserializeResult {{Cmd}}::Deserialize(const volatile char** buffer, size_t* size, DeserializeAllocator* allocator
         {%- if command.has_dawn_object -%}
             , const ObjectIdResolver& resolver
         {%- endif -%}
     ) {
-        const {{Name}}Transfer* transfer = nullptr;
+        const volatile {{Name}}Transfer* transfer = nullptr;
         DESERIALIZE_TRY(GetPtrFromBuffer(buffer, size, 1, &transfer));
 
         return {{Name}}Deserialize(this, transfer, buffer, size, allocator
@@ -364,12 +366,22 @@ namespace dawn_wire {
         } \
     }
 
+    ObjectHandle::ObjectHandle() = default;
+    ObjectHandle::ObjectHandle(ObjectId id, ObjectSerial serial) : id(id), serial(serial) {}
+    ObjectHandle::ObjectHandle(const volatile ObjectHandle& rhs) : id(rhs.id), serial(rhs.serial) {}
+    ObjectHandle& ObjectHandle::operator=(const ObjectHandle& rhs) = default;
+    ObjectHandle& ObjectHandle::operator=(const volatile ObjectHandle& rhs) {
+        id = rhs.id;
+        serial = rhs.serial;
+        return *this;
+    }
+
     namespace {
 
         // Consumes from (buffer, size) enough memory to contain T[count] and return it in data.
         // Returns FatalError if not enough memory was available
         template <typename T>
-        DeserializeResult GetPtrFromBuffer(const char** buffer, size_t* size, size_t count, const T** data) {
+        DeserializeResult GetPtrFromBuffer(const volatile char** buffer, size_t* size, size_t count, const volatile T** data) {
             constexpr size_t kMaxCountWithoutOverflows = std::numeric_limits<size_t>::max() / sizeof(T);
             if (count > kMaxCountWithoutOverflows) {
                 return DeserializeResult::FatalError;
@@ -380,7 +392,7 @@ namespace dawn_wire {
                 return DeserializeResult::FatalError;
             }
 
-            *data = reinterpret_cast<const T*>(*buffer);
+            *data = reinterpret_cast<const volatile T*>(*buffer);
             *buffer += totalSize;
             *size -= totalSize;
 

@@ -33,7 +33,7 @@ namespace dawn_wire {
         return client::GetProcs();
     }
 
-    const char* WireClient::HandleCommands(const char* commands, size_t size) {
+    const volatile char* WireClient::HandleCommands(const volatile char* commands, size_t size) {
         return mImpl->HandleCommands(commands, size);
     }
 

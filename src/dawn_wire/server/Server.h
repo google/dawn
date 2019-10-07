@@ -53,7 +53,7 @@ namespace dawn_wire { namespace server {
                MemoryTransferService* memoryTransferService);
         ~Server();
 
-        const char* HandleCommands(const char* commands, size_t size);
+        const volatile char* HandleCommands(const volatile char* commands, size_t size);
 
         bool InjectTexture(DawnTexture texture, uint32_t id, uint32_t generation);
 

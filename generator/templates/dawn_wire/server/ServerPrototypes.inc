@@ -15,7 +15,7 @@
 // Command handlers & doers
 {% for command in cmd_records["command"] if command.name.CamelCase() not in client_side_commands %}
     {% set Suffix = command.name.CamelCase() %}
-    bool Handle{{Suffix}}(const char** commands, size_t* size);
+    bool Handle{{Suffix}}(const volatile char** commands, size_t* size);
 
     bool Do{{Suffix}}(
         {%- for member in command.members -%}
