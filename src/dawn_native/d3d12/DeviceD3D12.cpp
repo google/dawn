@@ -109,7 +109,10 @@ namespace dawn_native { namespace d3d12 {
         }
         NextSerial();
         WaitForSerial(mLastSubmittedSerial);  // Wait for all in-flight commands to finish executing
-        TickImpl();                           // Call tick one last time so resources are cleaned up
+
+        // Call tick one last time so resources are cleaned up. Ignore the return value so we can
+        // continue shutting down in an orderly fashion.
+        ConsumedError(TickImpl());
 
         // Free services explicitly so that they can free D3D12 resources before destruction of the
         // device.
@@ -209,7 +212,7 @@ namespace dawn_native { namespace d3d12 {
         return mLastSubmittedSerial + 1;
     }
 
-    void Device::TickImpl() {
+    MaybeError Device::TickImpl() {
         // Perform cleanup operations to free unused objects
         mCompletedSerial = mFence->GetCompletedValue();
 
@@ -222,8 +225,10 @@ namespace dawn_native { namespace d3d12 {
         mDescriptorHeapAllocator->Deallocate(mCompletedSerial);
         mMapRequestTracker->Tick(mCompletedSerial);
         mUsedComObjectRefs.ClearUpTo(mCompletedSerial);
-        ExecuteCommandList(nullptr);
+        DAWN_TRY(ExecuteCommandList(nullptr));
         NextSerial();
+
+        return {};
     }
 
     void Device::NextSerial() {
@@ -243,13 +248,18 @@ namespace dawn_native { namespace d3d12 {
         mUsedComObjectRefs.Enqueue(object, GetPendingCommandSerial());
     }
 
-    void Device::ExecuteCommandList(ID3D12CommandList* d3d12CommandList) {
+    MaybeError Device::ExecuteCommandList(ID3D12CommandList* d3d12CommandList) {
         UINT numLists = 0;
         std::array<ID3D12CommandList*, 2> d3d12CommandLists;
 
         // If there are pending commands, prepend them to ExecuteCommandLists
         if (mPendingCommands.open) {
-            mPendingCommands.commandList->Close();
+            const HRESULT hr = mPendingCommands.commandList->Close();
+            if (FAILED(hr)) {
+                mPendingCommands.open = false;
+                mPendingCommands.commandList.Reset();
+                return DAWN_DEVICE_LOST_ERROR("Error closing pending command list.");
+            }
             mPendingCommands.open = false;
             d3d12CommandLists[numLists++] = mPendingCommands.commandList.Get();
         }
@@ -260,6 +270,8 @@ namespace dawn_native { namespace d3d12 {
             mCommandQueue->ExecuteCommandLists(numLists, d3d12CommandLists.data());
             mPendingCommands.commandList.Reset();
         }
+
+        return {};
     }
 
     ResultOrError<BindGroupBase*> Device::CreateBindGroupImpl(

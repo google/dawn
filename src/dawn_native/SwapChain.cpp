@@ -32,7 +32,7 @@ namespace dawn_native {
                 UNREACHABLE();
             }
 
-            void OnBeforePresent(TextureBase* texture) override {
+            MaybeError OnBeforePresent(TextureBase* texture) override {
                 UNREACHABLE();
             }
         };
@@ -127,7 +127,8 @@ namespace dawn_native {
         }
         ASSERT(!IsError());
 
-        OnBeforePresent(texture);
+        if (GetDevice()->ConsumedError(OnBeforePresent(texture)))
+            return;
 
         mImplementation.Present(mImplementation.userData);
     }

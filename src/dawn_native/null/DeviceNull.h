@@ -92,7 +92,7 @@ namespace dawn_native { namespace null {
         Serial GetCompletedCommandSerial() const final override;
         Serial GetLastSubmittedCommandSerial() const final override;
         Serial GetPendingCommandSerial() const override;
-        void TickImpl() override;
+        MaybeError TickImpl() override;
 
         void AddPendingOperation(std::unique_ptr<PendingOperation> operation);
         void SubmitPendingOperations();
@@ -201,7 +201,7 @@ namespace dawn_native { namespace null {
 
       protected:
         TextureBase* GetNextTextureImpl(const TextureDescriptor* descriptor) override;
-        void OnBeforePresent(TextureBase*) override;
+        MaybeError OnBeforePresent(TextureBase*) override;
     };
 
     class NativeSwapChainImpl {

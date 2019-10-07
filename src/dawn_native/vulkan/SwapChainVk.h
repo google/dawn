@@ -30,7 +30,7 @@ namespace dawn_native { namespace vulkan {
 
       protected:
         TextureBase* GetNextTextureImpl(const TextureDescriptor* descriptor) override;
-        void OnBeforePresent(TextureBase* texture) override;
+        MaybeError OnBeforePresent(TextureBase* texture) override;
 
       private:
         dawn::TextureUsage mTextureUsage;

@@ -46,7 +46,8 @@ namespace dawn_native { namespace metal {
         return new Texture(ToBackend(GetDevice()), descriptor, nativeTexture);
     }
 
-    void SwapChain::OnBeforePresent(TextureBase*) {
+    MaybeError SwapChain::OnBeforePresent(TextureBase*) {
+        return {};
     }
 
 }}  // namespace dawn_native::metal

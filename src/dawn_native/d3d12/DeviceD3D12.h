@@ -53,7 +53,7 @@ namespace dawn_native { namespace d3d12 {
 
         Serial GetCompletedCommandSerial() const final override;
         Serial GetLastSubmittedCommandSerial() const final override;
-        void TickImpl() override;
+        MaybeError TickImpl() override;
 
         ComPtr<ID3D12Device> GetD3D12Device() const;
         ComPtr<ID3D12CommandQueue> GetCommandQueue() const;
@@ -78,7 +78,7 @@ namespace dawn_native { namespace d3d12 {
 
         void ReferenceUntilUnused(ComPtr<IUnknown> object);
 
-        void ExecuteCommandList(ID3D12CommandList* d3d12CommandList);
+        MaybeError ExecuteCommandList(ID3D12CommandList* d3d12CommandList);
 
         ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) override;
         MaybeError CopyFromStagingToBuffer(StagingBufferBase* source,

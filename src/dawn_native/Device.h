@@ -81,7 +81,7 @@ namespace dawn_native {
         virtual Serial GetCompletedCommandSerial() const = 0;
         virtual Serial GetLastSubmittedCommandSerial() const = 0;
         virtual Serial GetPendingCommandSerial() const = 0;
-        virtual void TickImpl() = 0;
+        virtual MaybeError TickImpl() = 0;
 
         // Many Dawn objects are completely immutable once created which means that if two
         // creations are given the same arguments, they can return the same object. Reusing

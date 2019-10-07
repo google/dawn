@@ -28,7 +28,7 @@ namespace dawn_native { namespace metal {
 
       protected:
         TextureBase* GetNextTextureImpl(const TextureDescriptor* descriptor) override;
-        void OnBeforePresent(TextureBase* texture) override;
+        MaybeError OnBeforePresent(TextureBase* texture) override;
     };
 
 }}  // namespace dawn_native::metal

@@ -46,7 +46,7 @@ namespace dawn_native { namespace vulkan {
         return new Texture(ToBackend(GetDevice()), descriptor, nativeTexture);
     }
 
-    void SwapChain::OnBeforePresent(TextureBase* texture) {
+    MaybeError SwapChain::OnBeforePresent(TextureBase* texture) {
         Device* device = ToBackend(GetDevice());
 
         // Perform the necessary pipeline barriers for the texture to be used with the usage
@@ -55,6 +55,8 @@ namespace dawn_native { namespace vulkan {
         ToBackend(texture)->TransitionUsageNow(recordingContext, mTextureUsage);
 
         device->SubmitPendingCommands();
+
+        return {};
     }
 
 }}  // namespace dawn_native::vulkan

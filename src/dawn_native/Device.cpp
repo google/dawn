@@ -536,7 +536,9 @@ namespace dawn_native {
     // Other Device API methods
 
     void DeviceBase::Tick() {
-        TickImpl();
+        if (ConsumedError(TickImpl()))
+            return;
+
         {
             auto deferredResults = std::move(mDeferredCreateBufferMappedAsyncResults);
             for (const auto& deferred : deferredResults) {

@@ -47,7 +47,7 @@ namespace dawn_native {
 
         const DawnSwapChainImplementation& GetImplementation();
         virtual TextureBase* GetNextTextureImpl(const TextureDescriptor*) = 0;
-        virtual void OnBeforePresent(TextureBase* texture) = 0;
+        virtual MaybeError OnBeforePresent(TextureBase* texture) = 0;
 
       private:
         MaybeError ValidateConfigure(dawn::TextureFormat format,

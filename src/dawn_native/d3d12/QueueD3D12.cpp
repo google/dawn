@@ -33,7 +33,7 @@ namespace dawn_native { namespace d3d12 {
         }
         ASSERT_SUCCESS(mCommandList->Close());
 
-        device->ExecuteCommandList(mCommandList.Get());
+        DAWN_TRY(device->ExecuteCommandList(mCommandList.Get()));
 
         device->NextSerial();
         return {};

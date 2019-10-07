@@ -197,8 +197,9 @@ namespace dawn_native { namespace null {
         return mLastSubmittedSerial + 1;
     }
 
-    void Device::TickImpl() {
+    MaybeError Device::TickImpl() {
         SubmitPendingOperations();
+        return {};
     }
 
     void Device::AddPendingOperation(std::unique_ptr<PendingOperation> operation) {
@@ -338,7 +339,8 @@ namespace dawn_native { namespace null {
         return GetDevice()->CreateTexture(descriptor);
     }
 
-    void SwapChain::OnBeforePresent(TextureBase*) {
+    MaybeError SwapChain::OnBeforePresent(TextureBase*) {
+        return {};
     }
 
     // NativeSwapChainImpl

@@ -209,7 +209,7 @@ namespace dawn_native { namespace vulkan {
         return mLastSubmittedSerial + 1;
     }
 
-    void Device::TickImpl() {
+    MaybeError Device::TickImpl() {
         CheckPassedFences();
         RecycleCompletedCommands();
 
@@ -231,6 +231,8 @@ namespace dawn_native { namespace vulkan {
             mCompletedSerial++;
             mLastSubmittedSerial++;
         }
+
+        return {};
     }
 
     VkInstance Device::GetVkInstance() const {
