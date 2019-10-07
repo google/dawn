@@ -69,6 +69,7 @@ typedef struct {
 
 typedef struct {
     id<MTLDevice> device = nil;
+    id<MTLCommandQueue> queue = nil;
 } DawnWSIContextMetal;
 #endif
 

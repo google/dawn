@@ -171,6 +171,10 @@ namespace dawn_native { namespace metal {
         return mMtlDevice;
     }
 
+    id<MTLCommandQueue> Device::GetMTLQueue() {
+        return mCommandQueue;
+    }
+
     id<MTLCommandBuffer> Device::GetPendingCommandBuffer() {
         TRACE_EVENT0(GetPlatform(), TRACE_DISABLED_BY_DEFAULT("gpu.dawn"),
                      "DeviceMTL::GetPendingCommandBuffer");

@@ -26,6 +26,7 @@ namespace dawn_native { namespace metal {
         const auto& im = GetImplementation();
         DawnWSIContextMetal wsiContext = {};
         wsiContext.device = ToBackend(GetDevice())->GetMTLDevice();
+        wsiContext.queue = ToBackend(GetDevice())->GetMTLQueue();
         im.Init(im.userData, &wsiContext);
     }
 

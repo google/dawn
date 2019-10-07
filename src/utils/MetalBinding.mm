@@ -39,7 +39,7 @@ namespace utils {
 
         void Init(DawnWSIContextMetal* ctx) {
             mMtlDevice = ctx->device;
-            mCommandQueue = [mMtlDevice newCommandQueue];
+            mCommandQueue = ctx->queue;
         }
 
         DawnSwapChainError Configure(DawnTextureFormat format,
