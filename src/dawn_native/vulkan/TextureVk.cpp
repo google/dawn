@@ -670,8 +670,9 @@ namespace dawn_native { namespace vulkan {
                                                      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                                      clearDepthStencilValue, 1, &range);
             } else {
+                float fClearColor = static_cast<float>(clearColor);
                 VkClearColorValue clearColorValue = {
-                    {clearColor, clearColor, clearColor, clearColor}};
+                    {fClearColor, fClearColor, fClearColor, fClearColor}};
                 device->fn.CmdClearColorImage(recordingContext->commandBuffer, GetHandle(),
                                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                               &clearColorValue, 1, &range);
