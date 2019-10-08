@@ -14,19 +14,28 @@
 
 #include "dawn_native/vulkan/BindGroupVk.h"
 
+#include "common/BitSetIterator.h"
 #include "dawn_native/vulkan/BindGroupLayoutVk.h"
 #include "dawn_native/vulkan/BufferVk.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
 #include "dawn_native/vulkan/SamplerVk.h"
 #include "dawn_native/vulkan/TextureVk.h"
-
-#include "common/BitSetIterator.h"
+#include "dawn_native/vulkan/VulkanError.h"
 
 namespace dawn_native { namespace vulkan {
 
-    BindGroup::BindGroup(Device* device, const BindGroupDescriptor* descriptor)
-        : BindGroupBase(device, descriptor) {
+    // static
+    ResultOrError<BindGroup*> BindGroup::Create(Device* device,
+                                                const BindGroupDescriptor* descriptor) {
+        std::unique_ptr<BindGroup> group = std::make_unique<BindGroup>(device, descriptor);
+        DAWN_TRY(group->Initialize());
+        return group.release();
+    }
+
+    MaybeError BindGroup::Initialize() {
+        Device* device = ToBackend(GetDevice());
+
         // Create a pool to hold our descriptor set.
         // TODO(cwallez@chromium.org): This horribly inefficient, find a way to be better, for
         // example by having one pool per bind group layout instead.
@@ -41,10 +50,9 @@ namespace dawn_native { namespace vulkan {
         createInfo.poolSizeCount = numPoolSizes;
         createInfo.pPoolSizes = poolSizes.data();
 
-        if (device->fn.CreateDescriptorPool(device->GetVkDevice(), &createInfo, nullptr, &mPool) !=
-            VK_SUCCESS) {
-            ASSERT(false);
-        }
+        DAWN_TRY(CheckVkSuccess(
+            device->fn.CreateDescriptorPool(device->GetVkDevice(), &createInfo, nullptr, &mPool),
+            "CreateDescriptorPool"));
 
         // Now do the allocation of one descriptor set, this is very suboptimal too.
         VkDescriptorSetLayout vkLayout = ToBackend(GetLayout())->GetHandle();
@@ -56,10 +64,9 @@ namespace dawn_native { namespace vulkan {
         allocateInfo.descriptorSetCount = 1;
         allocateInfo.pSetLayouts = &vkLayout;
 
-        if (device->fn.AllocateDescriptorSets(device->GetVkDevice(), &allocateInfo, &mHandle) !=
-            VK_SUCCESS) {
-            ASSERT(false);
-        }
+        DAWN_TRY(CheckVkSuccess(
+            device->fn.AllocateDescriptorSets(device->GetVkDevice(), &allocateInfo, &mHandle),
+            "AllocateDescriptorSets"));
 
         // Now do a write of a single descriptor set with all possible chained data allocated on the
         // stack.
@@ -118,6 +125,8 @@ namespace dawn_native { namespace vulkan {
 
         device->fn.UpdateDescriptorSets(device->GetVkDevice(), numWrites, writes.data(), 0,
                                         nullptr);
+
+        return {};
     }
 
     BindGroup::~BindGroup() {

@@ -24,10 +24,12 @@ namespace dawn_native { namespace vulkan {
 
     class Queue : public QueueBase {
       public:
-        Queue(Device* device);
+        static Queue* Create(Device* device);
         ~Queue();
 
       private:
+        using QueueBase::QueueBase;
+
         MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
     };
 

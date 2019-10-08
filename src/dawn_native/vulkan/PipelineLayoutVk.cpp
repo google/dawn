@@ -14,16 +14,25 @@
 
 #include "dawn_native/vulkan/PipelineLayoutVk.h"
 
+#include "common/BitSetIterator.h"
 #include "dawn_native/vulkan/BindGroupLayoutVk.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
-
-#include "common/BitSetIterator.h"
+#include "dawn_native/vulkan/VulkanError.h"
 
 namespace dawn_native { namespace vulkan {
 
-    PipelineLayout::PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor)
-        : PipelineLayoutBase(device, descriptor) {
+    // static
+    ResultOrError<PipelineLayout*> PipelineLayout::Create(
+        Device* device,
+        const PipelineLayoutDescriptor* descriptor) {
+        std::unique_ptr<PipelineLayout> layout =
+            std::make_unique<PipelineLayout>(device, descriptor);
+        DAWN_TRY(layout->Initialize());
+        return layout.release();
+    }
+
+    MaybeError PipelineLayout::Initialize() {
         // Compute the array of VkDescriptorSetLayouts that will be chained in the create info.
         // TODO(cwallez@chromium.org) Vulkan doesn't allow holes in this array, should we expose
         // this constraints at the Dawn level?
@@ -43,10 +52,10 @@ namespace dawn_native { namespace vulkan {
         createInfo.pushConstantRangeCount = 0;
         createInfo.pPushConstantRanges = nullptr;
 
-        if (device->fn.CreatePipelineLayout(device->GetVkDevice(), &createInfo, nullptr,
-                                            &mHandle) != VK_SUCCESS) {
-            ASSERT(false);
-        }
+        Device* device = ToBackend(GetDevice());
+        return CheckVkSuccess(
+            device->fn.CreatePipelineLayout(device->GetVkDevice(), &createInfo, nullptr, &mHandle),
+            "CreatePipelineLayout");
     }
 
     PipelineLayout::~PipelineLayout() {

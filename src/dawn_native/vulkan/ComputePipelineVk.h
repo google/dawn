@@ -18,6 +18,7 @@
 #include "dawn_native/ComputePipeline.h"
 
 #include "common/vulkan_platform.h"
+#include "dawn_native/Error.h"
 
 namespace dawn_native { namespace vulkan {
 
@@ -25,12 +26,16 @@ namespace dawn_native { namespace vulkan {
 
     class ComputePipeline : public ComputePipelineBase {
       public:
-        ComputePipeline(Device* device, const ComputePipelineDescriptor* descriptor);
+        static ResultOrError<ComputePipeline*> Create(Device* device,
+                                                      const ComputePipelineDescriptor* descriptor);
         ~ComputePipeline();
 
         VkPipeline GetHandle() const;
 
       private:
+        using ComputePipelineBase::ComputePipelineBase;
+        MaybeError Initialize(const ComputePipelineDescriptor* descriptor);
+
         VkPipeline mHandle = VK_NULL_HANDLE;
     };
 

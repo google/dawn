@@ -18,6 +18,7 @@
 #include "dawn_native/ShaderModule.h"
 
 #include "common/vulkan_platform.h"
+#include "dawn_native/Error.h"
 
 namespace dawn_native { namespace vulkan {
 
@@ -25,12 +26,16 @@ namespace dawn_native { namespace vulkan {
 
     class ShaderModule : public ShaderModuleBase {
       public:
-        ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
+        static ResultOrError<ShaderModule*> Create(Device* device,
+                                                   const ShaderModuleDescriptor* descriptor);
         ~ShaderModule();
 
         VkShaderModule GetHandle() const;
 
       private:
+        using ShaderModuleBase::ShaderModuleBase;
+        MaybeError Initialize(const ShaderModuleDescriptor* descriptor);
+
         VkShaderModule mHandle = VK_NULL_HANDLE;
     };
 

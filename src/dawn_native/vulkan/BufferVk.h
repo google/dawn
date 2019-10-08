@@ -29,10 +29,8 @@ namespace dawn_native { namespace vulkan {
 
     class Buffer : public BufferBase {
       public:
-        Buffer(Device* device, const BufferDescriptor* descriptor);
+        static ResultOrError<Buffer*> Create(Device* device, const BufferDescriptor* descriptor);
         ~Buffer();
-
-        MaybeError Initialize();
 
         void OnMapReadCommandSerialFinished(uint32_t mapSerial, const void* data);
         void OnMapWriteCommandSerialFinished(uint32_t mapSerial, void* data);
@@ -45,6 +43,9 @@ namespace dawn_native { namespace vulkan {
         void TransitionUsageNow(CommandRecordingContext* recordingContext, dawn::BufferUsage usage);
 
       private:
+        using BufferBase::BufferBase;
+        MaybeError Initialize();
+
         // Dawn API
         MaybeError MapReadAsyncImpl(uint32_t serial) override;
         MaybeError MapWriteAsyncImpl(uint32_t serial) override;

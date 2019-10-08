@@ -17,6 +17,7 @@
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
 #include "dawn_native/vulkan/UtilsVulkan.h"
+#include "dawn_native/vulkan/VulkanError.h"
 
 namespace dawn_native { namespace vulkan {
 
@@ -57,8 +58,14 @@ namespace dawn_native { namespace vulkan {
         }
     }  // anonymous namespace
 
-    Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
-        : SamplerBase(device, descriptor), mDevice(device) {
+    // static
+    ResultOrError<Sampler*> Sampler::Create(Device* device, const SamplerDescriptor* descriptor) {
+        std::unique_ptr<Sampler> sampler = std::make_unique<Sampler>(device, descriptor);
+        DAWN_TRY(sampler->Initialize(descriptor));
+        return sampler.release();
+    }
+
+    MaybeError Sampler::Initialize(const SamplerDescriptor* descriptor) {
         VkSamplerCreateInfo createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
         createInfo.pNext = nullptr;
@@ -78,15 +85,15 @@ namespace dawn_native { namespace vulkan {
         createInfo.maxLod = descriptor->lodMaxClamp;
         createInfo.unnormalizedCoordinates = VK_FALSE;
 
-        if (device->fn.CreateSampler(device->GetVkDevice(), &createInfo, nullptr, &mHandle) !=
-            VK_SUCCESS) {
-            ASSERT(false);
-        }
+        Device* device = ToBackend(GetDevice());
+        return CheckVkSuccess(
+            device->fn.CreateSampler(device->GetVkDevice(), &createInfo, nullptr, &mHandle),
+            "CreateSampler");
     }
 
     Sampler::~Sampler() {
         if (mHandle != VK_NULL_HANDLE) {
-            mDevice->GetFencedDeleter()->DeleteWhenUnused(mHandle);
+            ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mHandle);
             mHandle = VK_NULL_HANDLE;
         }
     }

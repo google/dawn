@@ -19,6 +19,11 @@
 
 namespace dawn_native { namespace vulkan {
 
+    // static
+    SwapChain* SwapChain::Create(Device* device, const SwapChainDescriptor* descriptor) {
+        return new SwapChain(device, descriptor);
+    }
+
     SwapChain::SwapChain(Device* device, const SwapChainDescriptor* descriptor)
         : SwapChainBase(device, descriptor) {
         const auto& im = GetImplementation();

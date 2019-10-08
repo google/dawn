@@ -27,7 +27,8 @@ namespace dawn_native { namespace vulkan {
 
     class BindGroupLayout : public BindGroupLayoutBase {
       public:
-        BindGroupLayout(Device* device, const BindGroupLayoutDescriptor* descriptor);
+        static ResultOrError<BindGroupLayout*> Create(Device* device,
+                                                      const BindGroupLayoutDescriptor* descriptor);
         ~BindGroupLayout();
 
         VkDescriptorSetLayout GetHandle() const;
@@ -37,6 +38,9 @@ namespace dawn_native { namespace vulkan {
         PoolSizeSpec ComputePoolSizes(uint32_t* numPoolSizes) const;
 
       private:
+        using BindGroupLayoutBase::BindGroupLayoutBase;
+        MaybeError Initialize();
+
         VkDescriptorSetLayout mHandle = VK_NULL_HANDLE;
     };
 

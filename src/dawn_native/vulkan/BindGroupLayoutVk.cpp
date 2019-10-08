@@ -16,6 +16,7 @@
 
 #include "common/BitSetIterator.h"
 #include "dawn_native/vulkan/DeviceVk.h"
+#include "dawn_native/vulkan/VulkanError.h"
 
 namespace dawn_native { namespace vulkan {
 
@@ -60,8 +61,17 @@ namespace dawn_native { namespace vulkan {
         }
     }
 
-    BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor* descriptor)
-        : BindGroupLayoutBase(device, descriptor) {
+    // static
+    ResultOrError<BindGroupLayout*> BindGroupLayout::Create(
+        Device* device,
+        const BindGroupLayoutDescriptor* descriptor) {
+        std::unique_ptr<BindGroupLayout> bgl =
+            std::make_unique<BindGroupLayout>(device, descriptor);
+        DAWN_TRY(bgl->Initialize());
+        return bgl.release();
+    }
+
+    MaybeError BindGroupLayout::Initialize() {
         const auto& info = GetBindingInfo();
 
         // Compute the bindings that will be chained in the DescriptorSetLayout create info. We add
@@ -88,10 +98,10 @@ namespace dawn_native { namespace vulkan {
         createInfo.bindingCount = numBindings;
         createInfo.pBindings = bindings.data();
 
-        if (device->fn.CreateDescriptorSetLayout(device->GetVkDevice(), &createInfo, nullptr,
-                                                 &mHandle) != VK_SUCCESS) {
-            ASSERT(false);
-        }
+        Device* device = ToBackend(GetDevice());
+        return CheckVkSuccess(device->fn.CreateDescriptorSetLayout(device->GetVkDevice(),
+                                                                   &createInfo, nullptr, &mHandle),
+                              "CreateDescriptorSetLayout");
     }
 
     BindGroupLayout::~BindGroupLayout() {

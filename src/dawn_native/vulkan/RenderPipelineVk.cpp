@@ -21,6 +21,7 @@
 #include "dawn_native/vulkan/ShaderModuleVk.h"
 #include "dawn_native/vulkan/TextureVk.h"
 #include "dawn_native/vulkan/UtilsVulkan.h"
+#include "dawn_native/vulkan/VulkanError.h"
 
 namespace dawn_native { namespace vulkan {
 
@@ -318,8 +319,19 @@ namespace dawn_native { namespace vulkan {
 
     }  // anonymous namespace
 
-    RenderPipeline::RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor)
-        : RenderPipelineBase(device, descriptor) {
+    // static
+    ResultOrError<RenderPipeline*> RenderPipeline::Create(
+        Device* device,
+        const RenderPipelineDescriptor* descriptor) {
+        std::unique_ptr<RenderPipeline> pipeline =
+            std::make_unique<RenderPipeline>(device, descriptor);
+        DAWN_TRY(pipeline->Initialize(descriptor));
+        return pipeline.release();
+    }
+
+    MaybeError RenderPipeline::Initialize(const RenderPipelineDescriptor* descriptor) {
+        Device* device = ToBackend(GetDevice());
+
         VkPipelineShaderStageCreateInfo shaderStages[2];
         {
             shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -488,10 +500,10 @@ namespace dawn_native { namespace vulkan {
         createInfo.basePipelineHandle = VK_NULL_HANDLE;
         createInfo.basePipelineIndex = -1;
 
-        if (device->fn.CreateGraphicsPipelines(device->GetVkDevice(), VK_NULL_HANDLE, 1,
-                                               &createInfo, nullptr, &mHandle) != VK_SUCCESS) {
-            ASSERT(false);
-        }
+        return CheckVkSuccess(
+            device->fn.CreateGraphicsPipelines(device->GetVkDevice(), VK_NULL_HANDLE, 1,
+                                               &createInfo, nullptr, &mHandle),
+            "CreateGraphicsPipeline");
     }
 
     VkPipelineVertexInputStateCreateInfo RenderPipeline::ComputeVertexInputDesc(

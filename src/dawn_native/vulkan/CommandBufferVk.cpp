@@ -286,6 +286,12 @@ namespace dawn_native { namespace vulkan {
         }
     }  // anonymous namespace
 
+    // static
+    CommandBuffer* CommandBuffer::Create(CommandEncoderBase* encoder,
+                                         const CommandBufferDescriptor* descriptor) {
+        return new CommandBuffer(encoder, descriptor);
+    }
+
     CommandBuffer::CommandBuffer(CommandEncoderBase* encoder,
                                  const CommandBufferDescriptor* descriptor)
         : CommandBufferBase(encoder, descriptor), mCommands(encoder->AcquireCommands()) {

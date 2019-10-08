@@ -18,11 +18,21 @@
 #include "dawn_native/vulkan/FencedDeleter.h"
 #include "dawn_native/vulkan/PipelineLayoutVk.h"
 #include "dawn_native/vulkan/ShaderModuleVk.h"
+#include "dawn_native/vulkan/VulkanError.h"
 
 namespace dawn_native { namespace vulkan {
 
-    ComputePipeline::ComputePipeline(Device* device, const ComputePipelineDescriptor* descriptor)
-        : ComputePipelineBase(device, descriptor) {
+    // static
+    ResultOrError<ComputePipeline*> ComputePipeline::Create(
+        Device* device,
+        const ComputePipelineDescriptor* descriptor) {
+        std::unique_ptr<ComputePipeline> pipeline =
+            std::make_unique<ComputePipeline>(device, descriptor);
+        DAWN_TRY(pipeline->Initialize(descriptor));
+        return pipeline.release();
+    }
+
+    MaybeError ComputePipeline::Initialize(const ComputePipelineDescriptor* descriptor) {
         VkComputePipelineCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
         createInfo.pNext = nullptr;
@@ -39,10 +49,11 @@ namespace dawn_native { namespace vulkan {
         createInfo.stage.pName = descriptor->computeStage.entryPoint;
         createInfo.stage.pSpecializationInfo = nullptr;
 
-        if (device->fn.CreateComputePipelines(device->GetVkDevice(), VK_NULL_HANDLE, 1, &createInfo,
-                                              nullptr, &mHandle) != VK_SUCCESS) {
-            ASSERT(false);
-        }
+        Device* device = ToBackend(GetDevice());
+        return CheckVkSuccess(
+            device->fn.CreateComputePipelines(device->GetVkDevice(), VK_NULL_HANDLE, 1, &createInfo,
+                                              nullptr, &mHandle),
+            "CreateComputePipeline");
     }
 
     ComputePipeline::~ComputePipeline() {

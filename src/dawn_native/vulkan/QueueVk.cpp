@@ -20,7 +20,9 @@
 
 namespace dawn_native { namespace vulkan {
 
-    Queue::Queue(Device* device) : QueueBase(device) {
+    // static
+    Queue* Queue::Create(Device* device) {
+        return new Queue(device);
     }
 
     Queue::~Queue() {

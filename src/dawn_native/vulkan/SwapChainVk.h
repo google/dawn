@@ -25,10 +25,12 @@ namespace dawn_native { namespace vulkan {
 
     class SwapChain : public SwapChainBase {
       public:
-        SwapChain(Device* device, const SwapChainDescriptor* descriptor);
+        static SwapChain* Create(Device* device, const SwapChainDescriptor* descriptor);
         ~SwapChain();
 
       protected:
+        SwapChain(Device* device, const SwapChainDescriptor* descriptor);
+
         TextureBase* GetNextTextureImpl(const TextureDescriptor* descriptor) override;
         MaybeError OnBeforePresent(TextureBase* texture) override;
 
