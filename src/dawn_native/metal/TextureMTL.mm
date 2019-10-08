@@ -214,6 +214,7 @@ namespace dawn_native { namespace metal {
             case dawn::TextureFormat::Depth24PlusStencil8:
                 return MTLPixelFormatDepth32Float_Stencil8;
 
+#if defined(DAWN_PLATFORM_MACOS)
             case dawn::TextureFormat::BC1RGBAUnorm:
                 return MTLPixelFormatBC1_RGBA;
             case dawn::TextureFormat::BC1RGBAUnormSrgb:
@@ -242,6 +243,7 @@ namespace dawn_native { namespace metal {
                 return MTLPixelFormatBC7_RGBAUnorm;
             case dawn::TextureFormat::BC7RGBAUnormSrgb:
                 return MTLPixelFormatBC7_RGBAUnorm_sRGB;
+#endif
 
             default:
                 UNREACHABLE();

@@ -76,11 +76,13 @@ namespace dawn_native { namespace metal {
     }
 
     void Device::InitTogglesFromDriver() {
+#if defined(DAWN_PLATFORM_MACOS)
         if (@available(macOS 10.12, *)) {
             bool emulateStoreAndMSAAResolve =
                 ![mMtlDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v2];
             SetToggle(Toggle::EmulateStoreAndMSAAResolve, emulateStoreAndMSAAResolve);
         }
+#endif
 
         // TODO(jiawei.shao@intel.com): check iOS feature sets
 
