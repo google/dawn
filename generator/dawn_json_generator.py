@@ -195,6 +195,7 @@ def link_object(obj, types):
 
     methods = [make_method(m) for m in obj.json_data.get('methods', [])]
     obj.methods = [method for method in methods if not is_native_method(method)]
+    obj.methods.sort(key=lambda method: method.name.canonical_case())
     obj.native_methods = [method for method in methods if is_native_method(method)]
 
 def link_structure(struct, types):
@@ -439,7 +440,7 @@ def as_wireType(typ):
         return as_cppType(typ.name)
 
 def cpp_native_methods(types, typ):
-    return typ.methods + typ.native_methods
+    return sorted(typ.methods + typ.native_methods, key=lambda method: method.name.canonical_case())
 
 def c_native_methods(types, typ):
     return cpp_native_methods(types, typ) + [

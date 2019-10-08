@@ -28,7 +28,7 @@ const uint64_t DAWN_WHOLE_SIZE = 0xffffffffffffffffULL; // UINT64_MAX
 {% endfor %}
 
 {% for type in by_category["enum"] + by_category["bitmask"] %}
-    typedef enum {
+    typedef enum {{as_cType(type.name)}} {
         {% for value in type.values %}
             {{as_cEnum(type.name, value.name)}} = 0x{{format(value.value, "08X")}},
         {% endfor %}
@@ -40,7 +40,7 @@ const uint64_t DAWN_WHOLE_SIZE = 0xffffffffffffffffULL; // UINT64_MAX
 {% for type in by_category["structure"] %}
     typedef struct {{as_cType(type.name)}} {
         {% if type.extensible %}
-            const void* nextInChain;
+            void const * nextInChain;
         {% endif %}
         {% for member in type.members %}
             {{as_annotated_cType(member)}};
@@ -48,6 +48,10 @@ const uint64_t DAWN_WHOLE_SIZE = 0xffffffffffffffffULL; // UINT64_MAX
     } {{as_cType(type.name)}};
 
 {% endfor %}
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // Custom types depending on the target language
 typedef void (*DawnErrorCallback)(DawnErrorType type, const char* message, void* userdata);
@@ -64,9 +68,7 @@ typedef void (*DawnBufferMapWriteCallback)(DawnBufferMapAsyncStatus status,
                                            void* userdata);
 typedef void (*DawnFenceOnCompletionCallback)(DawnFenceCompletionStatus status, void* userdata);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#if !defined(DAWN_SKIP_PROCS)
 
 {% for type in by_category["object"] %}
     // Procs of {{type.name.CamelCase()}}
@@ -80,6 +82,7 @@ extern "C" {
     {% endfor %}
 
 {% endfor %}
+#endif  // !defined(DAWN_SKIP_PROCS)
 
 struct DawnProcTable_s {
     {% for type in by_category["object"] %}
@@ -92,6 +95,8 @@ struct DawnProcTable_s {
 typedef struct DawnProcTable_s DawnProcTable;
 
 // Stuff below is for convenience and will forward calls to a static DawnProcTable.
+
+#if !defined(DAWN_SKIP_DECLARATIONS)
 
 // Set which DawnProcTable will be used
 DAWN_EXPORT void dawnSetProcs(const DawnProcTable* procs);
@@ -108,6 +113,7 @@ DAWN_EXPORT void dawnSetProcs(const DawnProcTable* procs);
     {% endfor %}
 
 {% endfor %}
+#endif  // !defined(DAWN_SKIP_DECLARATIONS)
 
 #ifdef __cplusplus
 } // extern "C"

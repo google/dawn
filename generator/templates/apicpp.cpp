@@ -29,7 +29,6 @@ namespace dawn {
 
     {% endfor %}
 
-
     {% for type in by_category["structure"] %}
         {% set CppType = as_cppType(type.name) %}
         {% set CType = as_cType(type.name) %}
