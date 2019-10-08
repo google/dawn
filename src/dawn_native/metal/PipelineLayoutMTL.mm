@@ -24,8 +24,7 @@ namespace dawn_native { namespace metal {
         : PipelineLayoutBase(device, descriptor) {
         // Each stage has its own numbering namespace in CompilerMSL.
         for (auto stage : IterateStages(kAllStages)) {
-            // Buffer number 0 is reserved for push constants
-            uint32_t bufferIndex = 1;
+            uint32_t bufferIndex = 0;
             uint32_t samplerIndex = 0;
             uint32_t textureIndex = 0;
 

@@ -365,8 +365,6 @@ namespace dawn_native { namespace metal {
 
         descriptorMTL.sampleCount = GetSampleCount();
 
-        // TODO(kainino@chromium.org): push constants, textures, samplers
-
         {
             NSError* error = nil;
             mMtlRenderPipelineState = [mtlDevice newRenderPipelineStateWithDescriptor:descriptorMTL

@@ -69,28 +69,6 @@ namespace dawn_native { namespace opengl {
 #endif
         compiler.set_common_options(options);
 
-        // Rename the push constant block to be prefixed with the shader stage type so that uniform
-        // names don't match between the FS and the VS.
-        const auto& resources = compiler.get_shader_resources();
-        if (resources.push_constant_buffers.size() > 0) {
-            const char* prefix = nullptr;
-            switch (compiler.get_execution_model()) {
-                case spv::ExecutionModelVertex:
-                    prefix = "vs_";
-                    break;
-                case spv::ExecutionModelFragment:
-                    prefix = "fs_";
-                    break;
-                case spv::ExecutionModelGLCompute:
-                    prefix = "cs_";
-                    break;
-                default:
-                    UNREACHABLE();
-            }
-            auto interfaceBlock = resources.push_constant_buffers[0];
-            compiler.set_name(interfaceBlock.id, prefix + interfaceBlock.name);
-        }
-
         ExtractSpirvInfo(compiler);
 
         const auto& bindingInfo = GetBindingInfo();

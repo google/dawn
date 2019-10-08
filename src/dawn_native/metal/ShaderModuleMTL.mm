@@ -73,17 +73,6 @@ namespace dawn_native { namespace metal {
         // To make the MSL indices match the indices chosen in the PipelineLayout, we build
         // a table of MSLResourceBinding to give to SPIRV-Cross.
 
-        // Reserve index 0 for buffers for the push constants buffer.
-        for (auto stage : IterateStages(kAllStages)) {
-            spirv_cross::MSLResourceBinding binding;
-            binding.stage = SpirvExecutionModelForStage(stage);
-            binding.desc_set = spirv_cross::kPushConstDescSet;
-            binding.binding = spirv_cross::kPushConstBinding;
-            binding.msl_buffer = 0;
-
-            compiler.add_msl_resource_binding(binding);
-        }
-
         // Create one resource binding entry per stage per binding.
         for (uint32_t group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
             const auto& bgInfo = layout->GetBindGroupLayout(group)->GetBindingInfo();
