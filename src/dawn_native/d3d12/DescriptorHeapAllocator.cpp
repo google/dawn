@@ -72,7 +72,8 @@ namespace dawn_native { namespace d3d12 {
                                  ? RingBufferAllocator::kInvalidOffset
                                  : heapInfo->allocator.Allocate(count, pendingSerial);
         if (startOffset != RingBufferAllocator::kInvalidOffset) {
-            return DescriptorHeapHandle{heapInfo->heap, mSizeIncrements[type], startOffset};
+            return DescriptorHeapHandle{heapInfo->heap, mSizeIncrements[type],
+                                        static_cast<uint32_t>(startOffset)};
         }
 
         // If the pool has no more space, replace the pool with a new one of the specified size
