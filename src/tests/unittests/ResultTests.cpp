@@ -139,6 +139,31 @@ TEST(ResultBothPointer, ReturningSuccess) {
     TestSuccess(&result, &dummySuccess);
 }
 
+// Tests converting from a Result<TChild*, E*>
+TEST(ResultBothPointer, ConversionFromChildClass) {
+    struct T {
+        int a;
+    };
+    struct TChild : T {};
+
+    TChild child;
+    T* childAsT = &child;
+    {
+        Result<T*, int*> result(&child);
+        TestSuccess(&result, childAsT);
+    }
+    {
+        Result<TChild*, int*> resultChild(&child);
+        Result<T*, int*> result(std::move(resultChild));
+        TestSuccess(&result, childAsT);
+    }
+    {
+        Result<TChild*, int*> resultChild(&child);
+        Result<T*, int*> result = std::move(resultChild);
+        TestSuccess(&result, childAsT);
+    }
+}
+
 // Result<const T*, E*>
 
 // Test constructing an error Result<const T*, E*>

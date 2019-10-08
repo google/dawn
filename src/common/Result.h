@@ -20,6 +20,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <type_traits>
 #include <utility>
 
 // Result<T, E> is the following sum type (Haskell notation):
@@ -117,8 +118,11 @@ class DAWN_NO_DISCARD Result<T*, E*> {
     Result(T* success);
     Result(E* error);
 
-    Result(Result<T*, E*>&& other);
-    Result<T*, E*>& operator=(Result<T*, E>&& other);
+    // Support returning a Result<T*, E*> from a Result<TChild*, E*>
+    template <typename TChild>
+    Result(Result<TChild*, E*>&& other);
+    template <typename TChild>
+    Result<T*, E*>& operator=(Result<TChild*, E>&& other);
 
     ~Result();
 
@@ -129,6 +133,9 @@ class DAWN_NO_DISCARD Result<T*, E*> {
     E* AcquireError();
 
   private:
+    template <typename T2, typename E2>
+    friend class Result;
+
     intptr_t mPayload = detail::kEmptyPayload;
 };
 
@@ -265,13 +272,17 @@ Result<T*, E*>::Result(E* error) : mPayload(detail::MakePayload(error, detail::E
 }
 
 template <typename T, typename E>
-Result<T*, E*>::Result(Result<T*, E*>&& other) : mPayload(other.mPayload) {
+template <typename TChild>
+Result<T*, E*>::Result(Result<TChild*, E*>&& other) : mPayload(other.mPayload) {
     other.mPayload = detail::kEmptyPayload;
+    static_assert(std::is_same<T, TChild>::value || std::is_base_of<T, TChild>::value, "");
 }
 
 template <typename T, typename E>
-Result<T*, E*>& Result<T*, E*>::operator=(Result<T*, E>&& other) {
+template <typename TChild>
+Result<T*, E*>& Result<T*, E*>::operator=(Result<TChild*, E>&& other) {
     ASSERT(mPayload == detail::kEmptyPayload);
+    static_assert(std::is_same<T, TChild>::value || std::is_base_of<T, TChild>::value, "");
     mPayload = other.mPayload;
     other.mPayload = detail::kEmptyPayload;
     return *this;
