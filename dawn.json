@@ -951,6 +951,7 @@
 
     "render pass descriptor": {
         "category": "structure",
+        "extensible": true,
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "color attachment count", "type": "uint32_t"},
