@@ -29,13 +29,13 @@ namespace dawn_native { namespace d3d12 {
       public:
         ResourceAllocatorManager(Device* device);
 
-        ResultOrError<ResourceMemoryAllocation> AllocateMemory(
+        ResultOrError<ResourceHeapAllocation> AllocateMemory(
             D3D12_HEAP_TYPE heapType,
             const D3D12_RESOURCE_DESC& resourceDescriptor,
             D3D12_RESOURCE_STATES initialUsage,
             D3D12_HEAP_FLAGS heapFlags);
 
-        void DeallocateMemory(ResourceMemoryAllocation& allocation);
+        void DeallocateMemory(ResourceHeapAllocation& allocation);
 
       private:
         size_t GetD3D12HeapTypeToIndex(D3D12_HEAP_TYPE heapType) const;

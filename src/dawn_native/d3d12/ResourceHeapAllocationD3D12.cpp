@@ -12,19 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn_native/d3d12/ResourceHeapD3D12.h"
-#include "dawn_native/d3d12/DeviceD3D12.h"
+#include "dawn_native/d3d12/ResourceHeapAllocationD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
-
-    ResourceHeap::ResourceHeap(ComPtr<ID3D12Resource> resource) : mResource(resource) {
+    ResourceHeapAllocation::ResourceHeapAllocation(const AllocationInfo& info,
+                                                   uint64_t offset,
+                                                   ComPtr<ID3D12Resource> resource)
+        : ResourceMemoryAllocation(info, offset, nullptr), mResource(std::move(resource)) {
     }
 
-    ComPtr<ID3D12Resource> ResourceHeap::GetD3D12Resource() const {
+    ComPtr<ID3D12Resource> ResourceHeapAllocation::GetD3D12Resource() const {
         return mResource;
     }
 
-    D3D12_GPU_VIRTUAL_ADDRESS ResourceHeap::GetGPUPointer() const {
+    D3D12_GPU_VIRTUAL_ADDRESS ResourceHeapAllocation::GetGPUPointer() const {
         return mResource->GetGPUVirtualAddress();
     }
 }}  // namespace dawn_native::d3d12

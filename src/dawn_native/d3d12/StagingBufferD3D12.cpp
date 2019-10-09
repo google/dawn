@@ -14,7 +14,6 @@
 
 #include "dawn_native/d3d12/StagingBufferD3D12.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
-#include "dawn_native/d3d12/ResourceHeapD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
 
@@ -56,7 +55,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     ID3D12Resource* StagingBuffer::GetResource() const {
-        return ToBackend(mUploadHeap.GetResourceHeap())->GetD3D12Resource().Get();
+        return mUploadHeap.GetD3D12Resource().Get();
     }
 
 }}  // namespace dawn_native::d3d12

@@ -14,14 +14,13 @@
 
 #include "dawn_native/d3d12/ResourceAllocatorManagerD3D12.h"
 #include "dawn_native/d3d12/Forward.h"
-#include "dawn_native/d3d12/ResourceHeapD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
 
     ResourceAllocatorManager::ResourceAllocatorManager(Device* device) : mDevice(device) {
     }
 
-    ResultOrError<ResourceMemoryAllocation> ResourceAllocatorManager::AllocateMemory(
+    ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::AllocateMemory(
         D3D12_HEAP_TYPE heapType,
         const D3D12_RESOURCE_DESC& resourceDescriptor,
         D3D12_RESOURCE_STATES initialUsage,
@@ -37,7 +36,7 @@ namespace dawn_native { namespace d3d12 {
             allocator = mDirectResourceAllocators[heapTypeIndex].get();
         }
 
-        ResourceMemoryAllocation allocation;
+        ResourceHeapAllocation allocation;
         DAWN_TRY_ASSIGN(allocation,
                         allocator->Allocate(resourceDescriptor, initialUsage, heapFlags));
 
@@ -50,15 +49,13 @@ namespace dawn_native { namespace d3d12 {
         return heapType - 1;
     }
 
-    void ResourceAllocatorManager::DeallocateMemory(ResourceMemoryAllocation& allocation) {
+    void ResourceAllocatorManager::DeallocateMemory(ResourceHeapAllocation& allocation) {
         if (allocation.GetInfo().mMethod == AllocationMethod::kInvalid) {
             return;
         }
         CommittedResourceAllocator* allocator = nullptr;
         D3D12_HEAP_PROPERTIES heapProp;
-        ToBackend(allocation.GetResourceHeap())
-            ->GetD3D12Resource()
-            ->GetHeapProperties(&heapProp, nullptr);
+        allocation.GetD3D12Resource()->GetHeapProperties(&heapProp, nullptr);
         const size_t heapTypeIndex = GetD3D12HeapTypeToIndex(heapProp.Type);
         ASSERT(heapTypeIndex < kNumHeapTypes);
         allocator = mDirectResourceAllocators[heapTypeIndex].get();

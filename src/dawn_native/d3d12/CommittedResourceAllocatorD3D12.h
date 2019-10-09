@@ -17,7 +17,7 @@
 
 #include "common/SerialQueue.h"
 #include "dawn_native/Error.h"
-#include "dawn_native/ResourceMemoryAllocation.h"
+#include "dawn_native/d3d12/ResourceHeapAllocationD3D12.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 namespace dawn_native { namespace d3d12 {
@@ -31,11 +31,11 @@ namespace dawn_native { namespace d3d12 {
         CommittedResourceAllocator(Device* device, D3D12_HEAP_TYPE heapType);
         ~CommittedResourceAllocator() = default;
 
-        ResultOrError<ResourceMemoryAllocation> Allocate(
+        ResultOrError<ResourceHeapAllocation> Allocate(
             const D3D12_RESOURCE_DESC& resourceDescriptor,
             D3D12_RESOURCE_STATES initialUsage,
             D3D12_HEAP_FLAGS heapFlags);
-        void Deallocate(ResourceMemoryAllocation& allocation);
+        void Deallocate(ResourceHeapAllocation& allocation);
 
       private:
         Device* mDevice;

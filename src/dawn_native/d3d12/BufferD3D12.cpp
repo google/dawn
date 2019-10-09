@@ -18,7 +18,6 @@
 #include "common/Constants.h"
 #include "common/Math.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
-#include "dawn_native/d3d12/ResourceHeapD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
 
@@ -125,7 +124,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     ComPtr<ID3D12Resource> Buffer::GetD3D12Resource() const {
-        return ToBackend(mResourceAllocation.GetResourceHeap())->GetD3D12Resource();
+        return mResourceAllocation.GetD3D12Resource();
     }
 
     // When true is returned, a D3D12_RESOURCE_BARRIER has been created and must be used in a
@@ -198,7 +197,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     D3D12_GPU_VIRTUAL_ADDRESS Buffer::GetVA() const {
-        return ToBackend(mResourceAllocation.GetResourceHeap())->GetGPUPointer();
+        return mResourceAllocation.GetGPUPointer();
     }
 
     void Buffer::OnMapCommandSerialFinished(uint32_t mapSerial, void* data, bool isWrite) {

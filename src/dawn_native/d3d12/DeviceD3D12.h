@@ -19,8 +19,8 @@
 
 #include "common/SerialQueue.h"
 #include "dawn_native/Device.h"
-#include "dawn_native/ResourceMemoryAllocation.h"
 #include "dawn_native/d3d12/Forward.h"
+#include "dawn_native/d3d12/ResourceHeapAllocationD3D12.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 #include <memory>
@@ -87,13 +87,13 @@ namespace dawn_native { namespace d3d12 {
                                            uint64_t destinationOffset,
                                            uint64_t size) override;
 
-        ResultOrError<ResourceMemoryAllocation> AllocateMemory(
+        ResultOrError<ResourceHeapAllocation> AllocateMemory(
             D3D12_HEAP_TYPE heapType,
             const D3D12_RESOURCE_DESC& resourceDescriptor,
             D3D12_RESOURCE_STATES initialUsage,
             D3D12_HEAP_FLAGS heapFlags);
 
-        void DeallocateMemory(ResourceMemoryAllocation& allocation);
+        void DeallocateMemory(ResourceHeapAllocation& allocation);
 
         TextureBase* WrapSharedHandle(const TextureDescriptor* descriptor, HANDLE sharedHandle);
 

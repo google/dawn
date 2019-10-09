@@ -18,7 +18,7 @@
 #include "common/SerialQueue.h"
 #include "dawn_native/Buffer.h"
 
-#include "dawn_native/ResourceMemoryAllocation.h"
+#include "dawn_native/d3d12/ResourceHeapAllocationD3D12.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 namespace dawn_native { namespace d3d12 {
@@ -51,7 +51,7 @@ namespace dawn_native { namespace d3d12 {
         bool IsMapWritable() const override;
         virtual MaybeError MapAtCreationImpl(uint8_t** mappedPointer) override;
 
-        ResourceMemoryAllocation mResourceAllocation;
+        ResourceHeapAllocation mResourceAllocation;
         bool mFixedResourceState = false;
         dawn::BufferUsage mLastUsage = dawn::BufferUsage::None;
         Serial mLastUsedSerial = UINT64_MAX;

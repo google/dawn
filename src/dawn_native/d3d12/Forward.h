@@ -29,7 +29,6 @@ namespace dawn_native { namespace d3d12 {
     class PipelineLayout;
     class Queue;
     class RenderPipeline;
-    class ResourceHeap;
     class Sampler;
     class ShaderModule;
     class StagingBuffer;
@@ -48,7 +47,6 @@ namespace dawn_native { namespace d3d12 {
         using PipelineLayoutType = PipelineLayout;
         using QueueType = Queue;
         using RenderPipelineType = RenderPipeline;
-        using ResourceHeapType = ResourceHeap;
         using SamplerType = Sampler;
         using ShaderModuleType = ShaderModule;
         using StagingBufferType = StagingBuffer;
