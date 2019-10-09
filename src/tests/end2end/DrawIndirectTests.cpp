@@ -21,8 +21,8 @@ constexpr uint32_t kRTSize = 4;
 
 class DrawIndirectTest : public DawnTest {
   protected:
-    void SetUp() override {
-        DawnTest::SetUp();
+    void TestSetUp() override {
+        DawnTest::TestSetUp();
 
         renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 

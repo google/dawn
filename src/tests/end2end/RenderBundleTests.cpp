@@ -26,8 +26,8 @@ constexpr RGBA8 kColors[2] = {RGBA8(0, 255, 0, 255), RGBA8(0, 0, 255, 255)};
 // tested in all other rendering tests.
 class RenderBundleTest : public DawnTest {
   protected:
-    void SetUp() override {
-        DawnTest::SetUp();
+    void TestSetUp() override {
+        DawnTest::TestSetUp();
 
         renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 

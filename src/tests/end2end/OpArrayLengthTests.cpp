@@ -20,8 +20,8 @@
 
 class OpArrayLengthTest : public DawnTest {
   protected:
-    void SetUp() {
-        DawnTest::SetUp();
+    void TestSetUp() {
+        DawnTest::TestSetUp();
 
         // Create buffers of various size to check the length() implementation
         dawn::BufferDescriptor bufferDesc;

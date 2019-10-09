@@ -20,8 +20,8 @@
 
 class MultisampledRenderingTest : public DawnTest {
   protected:
-    void SetUp() override {
-        DawnTest::SetUp();
+    void TestSetUp() override {
+        DawnTest::TestSetUp();
 
         InitTexturesForTest();
     }

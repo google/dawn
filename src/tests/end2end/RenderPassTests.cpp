@@ -22,8 +22,8 @@ constexpr dawn::TextureFormat kFormat = dawn::TextureFormat::RGBA8Unorm;
 
 class RenderPassTest : public DawnTest {
 protected:
-    void SetUp() override {
-        DawnTest::SetUp();
+    void TestSetUp() override {
+        DawnTest::TestSetUp();
 
         // Shaders to draw a bottom-left triangle in blue.
         mVSModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(

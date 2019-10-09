@@ -22,8 +22,8 @@ constexpr uint32_t kRTSize = 400;
 
 class IndexFormatTest : public DawnTest {
     protected:
-        void SetUp() override {
-            DawnTest::SetUp();
+        void TestSetUp() override {
+            DawnTest::TestSetUp();
 
             renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
         }

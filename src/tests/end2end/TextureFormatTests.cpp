@@ -111,8 +111,8 @@ class ExpectFloat16 : public detail::Expectation {
 
 class TextureFormatTest : public DawnTest {
   protected:
-    void SetUp() {
-        DawnTest::SetUp();
+    void TestSetUp() {
+        DawnTest::TestSetUp();
     }
 
     // Structure containing all the information that tests need to know about the format.

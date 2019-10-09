@@ -58,7 +58,7 @@ class BufferUploadPerf : public DawnPerfTestWithParams<BufferUploadParams> {
     }
     ~BufferUploadPerf() override = default;
 
-    void SetUp() override;
+    void TestSetUp() override;
 
   private:
     void Step() override;
@@ -67,8 +67,8 @@ class BufferUploadPerf : public DawnPerfTestWithParams<BufferUploadParams> {
     std::vector<uint8_t> data;
 };
 
-void BufferUploadPerf::SetUp() {
-    DawnPerfTestWithParams<BufferUploadParams>::SetUp();
+void BufferUploadPerf::TestSetUp() {
+    DawnPerfTestWithParams<BufferUploadParams>::TestSetUp();
 
     dawn::BufferDescriptor desc = {};
     desc.size = kBufferSize;

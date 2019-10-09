@@ -34,8 +34,8 @@ struct CopyConfig {
 
 class CompressedTextureBCFormatTest : public DawnTest {
   protected:
-    void SetUp() override {
-        DawnTest::SetUp();
+    void TestSetUp() override {
+        DawnTest::TestSetUp();
         mBindGroupLayout = utils::MakeBindGroupLayout(
             device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::Sampler},
                      {1, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture}});

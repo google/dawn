@@ -20,8 +20,8 @@
 
 class TextureZeroInitTest : public DawnTest {
   protected:
-    void SetUp() override {
-        DawnTest::SetUp();
+    void TestSetUp() override {
+        DawnTest::TestSetUp();
     }
     dawn::TextureDescriptor CreateTextureDescriptor(uint32_t mipLevelCount,
                                                     uint32_t arrayLayerCount,

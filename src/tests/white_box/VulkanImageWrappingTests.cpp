@@ -31,8 +31,7 @@ namespace {
 
     class VulkanImageWrappingTestBase : public DawnTest {
       public:
-        void SetUp() override {
-            DawnTest::SetUp();
+        void TestSetUp() override {
             if (UsesWire() || IsIntel()) {
                 return;
             }
@@ -198,8 +197,8 @@ namespace {
 
 class VulkanImageWrappingValidationTests : public VulkanImageWrappingTestBase {
   public:
-    void SetUp() override {
-        VulkanImageWrappingTestBase::SetUp();
+    void TestSetUp() override {
+        VulkanImageWrappingTestBase::TestSetUp();
         if (UsesWire() || IsIntel()) {
             return;
         }
@@ -349,8 +348,8 @@ TEST_P(VulkanImageWrappingValidationTests, DestroyedTextureSignalSemaphoreExport
 // These tests are skipped if the harness is using the wire.
 class VulkanImageWrappingUsageTests : public VulkanImageWrappingTestBase {
   public:
-    void SetUp() override {
-        VulkanImageWrappingTestBase::SetUp();
+    void TestSetUp() override {
+        VulkanImageWrappingTestBase::TestSetUp();
         if (UsesWire() || IsIntel()) {
             return;
         }

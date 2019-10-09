@@ -56,8 +56,8 @@ class DrawQuad {
 
 class RenderPassLoadOpTests : public DawnTest {
     protected:
-        void SetUp() override {
-            DawnTest::SetUp();
+        void TestSetUp() override {
+            DawnTest::TestSetUp();
 
             dawn::TextureDescriptor descriptor;
             descriptor.dimension = dawn::TextureDimension::e2D;

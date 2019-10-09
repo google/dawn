@@ -200,6 +200,7 @@ class DawnTestBase {
                                               uint32_t pixelSize,
                                               detail::Expectation* expectation);
 
+    bool HasAdapter() const;
     void WaitABit();
     void FlushWire();
 
@@ -272,14 +273,31 @@ class DawnTestBase {
     dawn_native::Adapter mBackendAdapter;
 };
 
+// Skip a test when the given condition is satisfied.
+#define DAWN_SKIP_TEST_IF(condition)                               \
+    if (condition) {                                               \
+        std::cout << "Test skipped: " #condition "." << std::endl; \
+        GTEST_SKIP();                                              \
+        return;                                                    \
+    }
+
 template <typename Params = DawnTestParam>
 class DawnTestWithParams : public DawnTestBase, public ::testing::TestWithParam<Params> {
+  private:
+    void SetUp() override final {
+        // DawnTestBase::SetUp() gets the adapter, and creates the device and wire.
+        // It's separate from TestSetUp() so we can skip tests completely if no adapter
+        // is available.
+        DawnTestBase::SetUp();
+        DAWN_SKIP_TEST_IF(!HasAdapter());
+        TestSetUp();
+    }
+
   protected:
     DawnTestWithParams();
     ~DawnTestWithParams() override = default;
 
-    void SetUp() override {
-        DawnTestBase::SetUp();
+    virtual void TestSetUp() {
     }
 
     void TearDown() override {
@@ -303,12 +321,6 @@ using DawnTest = DawnTestWithParams<>;
             testName##params, sizeof(testName##params) / sizeof(firstParam))),   \
         testing::PrintToStringParamName())
 
-// Skip a test when the given condition is satisfied.
-#define DAWN_SKIP_TEST_IF(condition)                               \
-    if (condition) {                                               \
-        std::cout << "Test skipped: " #condition "." << std::endl; \
-        return;                                                    \
-    }
 
 namespace detail {
     // Helper functions used for DAWN_INSTANTIATE_TEST

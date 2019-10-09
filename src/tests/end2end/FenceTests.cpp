@@ -60,8 +60,8 @@ class FenceTests : public DawnTest {
     FenceTests() : mCallIndex(0) {
     }
 
-    void SetUp() override {
-        DawnTest::SetUp();
+    void TestSetUp() override {
+        DawnTest::TestSetUp();
         mockFenceOnCompletionCallback = std::make_unique<MockFenceOnCompletionCallback>();
         mockPopErrorScopeCallback = std::make_unique<MockPopErrorScopeCallback>();
     }

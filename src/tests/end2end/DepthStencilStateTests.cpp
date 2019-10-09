@@ -22,8 +22,8 @@ constexpr static unsigned int kRTSize = 64;
 
 class DepthStencilStateTest : public DawnTest {
     protected:
-        void SetUp() override {
-            DawnTest::SetUp();
+        void TestSetUp() override {
+            DawnTest::TestSetUp();
 
             dawn::TextureDescriptor renderTargetDescriptor;
             renderTargetDescriptor.dimension = dawn::TextureDimension::e2D;

@@ -164,20 +164,8 @@ void DawnTestEnvironment::SetUp() {
     mInstance->EnableBackendValidation(mEnableBackendValidation);
     mInstance->EnableBeginCaptureOnStartup(mBeginCaptureOnStartup);
 
-    static constexpr dawn_native::BackendType kWindowlessBackends[] = {
-        dawn_native::BackendType::D3D12,
-        dawn_native::BackendType::Metal,
-        dawn_native::BackendType::Vulkan,
-    };
-    for (dawn_native::BackendType backend : kWindowlessBackends) {
-        if (detail::IsBackendAvailable(backend)) {
-            mInstance.get()->DiscoverDefaultAdapters();
-        }
-    }
-
-    if (detail::IsBackendAvailable(dawn_native::BackendType::OpenGL)) {
-        DiscoverOpenGLAdapter();
-    }
+    mInstance.get()->DiscoverDefaultAdapters();
+    DiscoverOpenGLAdapter();
 
     std::cout << "Testing configuration\n"
                  "---------------------\n"
@@ -238,7 +226,9 @@ uint32_t DawnTestEnvironment::GetVendorIdFilter() const {
 
 void DawnTestEnvironment::DiscoverOpenGLAdapter() {
 #ifdef DAWN_ENABLE_BACKEND_OPENGL
-    ASSERT_TRUE(glfwInit());
+    if (!glfwInit()) {
+        return;
+    }
     glfwDefaultWindowHints();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
@@ -407,7 +397,9 @@ void DawnTestBase::SetUp() {
             }
         }
 
-        ASSERT(mBackendAdapter);
+        if (!mBackendAdapter) {
+            return;
+        }
     }
 
     mPCIInfo = mBackendAdapter.GetPCIInfo();
@@ -476,6 +468,10 @@ void DawnTestBase::TearDown() {
     for (size_t i = 0; i < mReadbackSlots.size(); ++i) {
         mReadbackSlots[i].buffer.Unmap();
     }
+}
+
+bool DawnTestBase::HasAdapter() const {
+    return !!mBackendAdapter;
 }
 
 void DawnTestBase::StartExpectDeviceError() {

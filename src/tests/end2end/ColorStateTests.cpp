@@ -26,8 +26,8 @@ constexpr static unsigned int kRTSize = 64;
 
 class ColorStateTest : public DawnTest {
   protected:
-    void SetUp() override {
-        DawnTest::SetUp();
+    void TestSetUp() override {
+        DawnTest::TestSetUp();
 
         vsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
                 #version 450

@@ -35,8 +35,8 @@ constexpr static unsigned int kRTCellSize = 100;
 
 class VertexInputTest : public DawnTest {
   protected:
-    void SetUp() override {
-        DawnTest::SetUp();
+    void TestSetUp() override {
+        DawnTest::TestSetUp();
 
         renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
     }

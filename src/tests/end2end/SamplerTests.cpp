@@ -38,8 +38,8 @@ namespace {
 
 class SamplerTest : public DawnTest {
 protected:
-    void SetUp() override {
-        DawnTest::SetUp();
+    void TestSetUp() override {
+        DawnTest::TestSetUp();
         mRenderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
         mBindGroupLayout = utils::MakeBindGroupLayout(

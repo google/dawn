@@ -29,8 +29,8 @@ namespace {
 
     class D3D12ResourceTestBase : public DawnTest {
       public:
-        void SetUp() override {
-            DawnTest::SetUp();
+        void TestSetUp() override {
+            DawnTest::TestSetUp();
             if (UsesWire()) {
                 return;
             }
@@ -101,8 +101,8 @@ namespace {
 // These tests are skipped if the harness is using the wire.
 class D3D12SharedHandleValidation : public D3D12ResourceTestBase {
   public:
-    void SetUp() override {
-        D3D12ResourceTestBase::SetUp();
+    void TestSetUp() override {
+        D3D12ResourceTestBase::TestSetUp();
 
         dawnDescriptor.dimension = dawn::TextureDimension::e2D;
         dawnDescriptor.format = dawn::TextureFormat::BGRA8Unorm;
