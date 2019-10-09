@@ -418,6 +418,30 @@ TEST_F(VertexInputTest, SetAttributeOffsetOutOfBounds) {
     )");
 }
 
+// Check multiple of 4 bytes constraint on offset
+TEST_F(VertexInputTest, SetOffsetNotAligned) {
+    // Control case, setting offset 4 bytes.
+    utils::ComboVertexInputDescriptor state;
+    state.bufferCount = 1;
+    state.cBuffers[0].attributeCount = 1;
+    state.cAttributes[0].offset = 4;
+    CreatePipeline(true, state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
+
+    // Test offset not multiple of 4 bytes
+    state.cAttributes[0].offset = 2;
+    CreatePipeline(false, state, R"(
+        #version 450
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )");
+}
+
 // Check attribute offset overflow
 TEST_F(VertexInputTest, SetAttributeOffsetOverflow) {
     utils::ComboVertexInputDescriptor state;

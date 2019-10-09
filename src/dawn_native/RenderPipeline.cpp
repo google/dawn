@@ -49,6 +49,10 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("Setting attribute offset out of bounds");
             }
 
+            if (attribute->offset % 4 != 0) {
+                return DAWN_VALIDATION_ERROR("Attribute offset needs to be a multiple of 4 bytes");
+            }
+
             if ((*attributesSetMask)[attribute->shaderLocation]) {
                 return DAWN_VALIDATION_ERROR("Setting already set attribute");
             }
@@ -67,7 +71,7 @@ namespace dawn_native {
 
             if (buffer->stride % 4 != 0) {
                 return DAWN_VALIDATION_ERROR(
-                    "Stride of Vertex buffer needs to be multiple of 4 bytes");
+                    "Stride of Vertex buffer needs to be a multiple of 4 bytes");
             }
 
             for (uint32_t i = 0; i < buffer->attributeCount; ++i) {
