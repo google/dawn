@@ -56,6 +56,16 @@ namespace dawn_native {
             return false;
         }
 
+        template <typename T>
+        bool ConsumedError(ResultOrError<T> resultOrError, T* result) {
+            if (DAWN_UNLIKELY(resultOrError.IsError())) {
+                ConsumeError(resultOrError.AcquireError());
+                return true;
+            }
+            *result = resultOrError.AcquireSuccess();
+            return false;
+        }
+
         MaybeError ValidateObject(const ObjectBase* object) const;
 
         AdapterBase* GetAdapter() const;

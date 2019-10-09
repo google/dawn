@@ -672,9 +672,14 @@ namespace dawn_native { namespace vulkan {
         std::vector<VkSemaphore> waitSemaphores;
         waitSemaphores.reserve(waitHandles.size());
 
-        // If failed, cleanup
+        // Cleanup in case of a failure, the image creation doesn't acquire the external objects
+        // if a failure happems.
+        Texture* result = nullptr;
         if (ConsumedError(ImportExternalImage(descriptor, memoryHandle, waitHandles,
-                                              &signalSemaphore, &allocation, &waitSemaphores))) {
+                                              &signalSemaphore, &allocation, &waitSemaphores)) ||
+            ConsumedError(Texture::CreateFromExternal(this, descriptor, textureDescriptor,
+                                                      signalSemaphore, allocation, waitSemaphores),
+                          &result)) {
             // Clear the signal semaphore
             fn.DestroySemaphore(GetVkDevice(), signalSemaphore, nullptr);
 
@@ -688,8 +693,7 @@ namespace dawn_native { namespace vulkan {
             return nullptr;
         }
 
-        return new Texture(this, descriptor, textureDescriptor, signalSemaphore, allocation,
-                           waitSemaphores);
+        return result;
     }
 
     ResultOrError<ResourceMemoryAllocation> Device::AllocateMemory(

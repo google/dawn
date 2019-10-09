@@ -35,14 +35,21 @@ namespace dawn_native { namespace vulkan {
 
     class Texture : public TextureBase {
       public:
+        // Used to create a regular texture from a descriptor.
         static ResultOrError<Texture*> Create(Device* device, const TextureDescriptor* descriptor);
+
+        // Used to create a texture from Vulkan external memory objects.
+        // Ownership of semaphores and the memory allocation is taken only if the creation is
+        // a success.
+        static ResultOrError<Texture*> CreateFromExternal(
+            Device* device,
+            const ExternalImageDescriptor* descriptor,
+            const TextureDescriptor* textureDescriptor,
+            VkSemaphore signalSemaphore,
+            VkDeviceMemory externalMemoryAllocation,
+            std::vector<VkSemaphore> waitSemaphores);
+
         Texture(Device* device, const TextureDescriptor* descriptor, VkImage nativeImage);
-        Texture(Device* device,
-                const ExternalImageDescriptor* descriptor,
-                const TextureDescriptor* textureDescriptor,
-                VkSemaphore signalSemaphore,
-                VkDeviceMemory externalMemoryAllocation,
-                std::vector<VkSemaphore> waitSemaphores);
         ~Texture();
 
         VkImage GetHandle() const;
@@ -64,6 +71,10 @@ namespace dawn_native { namespace vulkan {
       private:
         using TextureBase::TextureBase;
         MaybeError InitializeAsInternalTexture();
+        MaybeError InitializeFromExternal(const ExternalImageDescriptor* descriptor,
+                                          VkSemaphore signalSemaphore,
+                                          VkDeviceMemory externalMemoryAllocation,
+                                          std::vector<VkSemaphore> waitSemaphores);
 
         void DestroyImpl() override;
         MaybeError ClearTexture(CommandRecordingContext* recordingContext,
