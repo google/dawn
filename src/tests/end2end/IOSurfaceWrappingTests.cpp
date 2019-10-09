@@ -317,7 +317,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
         {
             dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
             pass.SetPipeline(pipeline);
-            pass.SetBindGroup(0, bindGroup, 0, nullptr);
+            pass.SetBindGroup(0, bindGroup);
             pass.Draw(6, 1, 0, 0);
             pass.EndPass();
         }

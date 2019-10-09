@@ -111,7 +111,7 @@ TEST_P(RenderBundleTest, Basic) {
     uint64_t zeroOffset = 0;
     renderBundleEncoder.SetPipeline(pipeline);
     renderBundleEncoder.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
-    renderBundleEncoder.SetBindGroup(0, bindGroups[0], 0, nullptr);
+    renderBundleEncoder.SetBindGroup(0, bindGroups[0]);
     renderBundleEncoder.Draw(6, 1, 0, 0);
 
     dawn::RenderBundle renderBundle = renderBundleEncoder.Finish();
@@ -142,7 +142,7 @@ TEST_P(RenderBundleTest, MultipleBundles) {
 
         renderBundleEncoder.SetPipeline(pipeline);
         renderBundleEncoder.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
-        renderBundleEncoder.SetBindGroup(0, bindGroups[0], 0, nullptr);
+        renderBundleEncoder.SetBindGroup(0, bindGroups[0]);
         renderBundleEncoder.Draw(3, 1, 0, 0);
 
         renderBundles[0] = renderBundleEncoder.Finish();
@@ -152,7 +152,7 @@ TEST_P(RenderBundleTest, MultipleBundles) {
 
         renderBundleEncoder.SetPipeline(pipeline);
         renderBundleEncoder.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
-        renderBundleEncoder.SetBindGroup(0, bindGroups[1], 0, nullptr);
+        renderBundleEncoder.SetBindGroup(0, bindGroups[1]);
         renderBundleEncoder.Draw(3, 1, 3, 0);
 
         renderBundles[1] = renderBundleEncoder.Finish();
@@ -182,7 +182,7 @@ TEST_P(RenderBundleTest, BundleAndRenderPassCommands) {
     uint64_t zeroOffset = 0;
     renderBundleEncoder.SetPipeline(pipeline);
     renderBundleEncoder.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
-    renderBundleEncoder.SetBindGroup(0, bindGroups[0], 0, nullptr);
+    renderBundleEncoder.SetBindGroup(0, bindGroups[0]);
     renderBundleEncoder.Draw(3, 1, 0, 0);
 
     dawn::RenderBundle renderBundle = renderBundleEncoder.Finish();
@@ -194,7 +194,7 @@ TEST_P(RenderBundleTest, BundleAndRenderPassCommands) {
 
     pass.SetPipeline(pipeline);
     pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
-    pass.SetBindGroup(0, bindGroups[1], 0, nullptr);
+    pass.SetBindGroup(0, bindGroups[1]);
     pass.Draw(3, 1, 3, 0);
 
     pass.ExecuteBundles(1, &renderBundle);

@@ -219,7 +219,7 @@ TEST_F(CommandBufferValidationTest, BufferWithReadAndWriteUsage) {
     DummyRenderPass dummyRenderPass(device);
     dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
     pass.SetIndexBuffer(buffer, 0);
-    pass.SetBindGroup(0, bg, 0, nullptr);
+    pass.SetBindGroup(0, bg);
     pass.EndPass();
     ASSERT_DEVICE_ERROR(encoder.Finish());
 }
@@ -249,7 +249,7 @@ TEST_F(CommandBufferValidationTest, TextureWithReadAndWriteUsage) {
     // Use the texture as both sampeld and output attachment in the same pass
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
-    pass.SetBindGroup(0, bg, 0, nullptr);
+    pass.SetBindGroup(0, bg);
     pass.EndPass();
     ASSERT_DEVICE_ERROR(encoder.Finish());
 }

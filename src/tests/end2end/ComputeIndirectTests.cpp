@@ -90,7 +90,7 @@ void ComputeIndirectTests::BasicTest(std::initializer_list<uint32_t> bufferList,
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         dawn::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(pipeline);
-        pass.SetBindGroup(0, bindGroup, 0, nullptr);
+        pass.SetBindGroup(0, bindGroup);
         pass.DispatchIndirect(indirectBuffer, indirectOffset);
         pass.EndPass();
 

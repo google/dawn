@@ -133,8 +133,8 @@ TEST_P(OpArrayLengthTest, Compute) {
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     dawn::ComputePassEncoder pass = encoder.BeginComputePass();
     pass.SetPipeline(pipeline);
-    pass.SetBindGroup(0, mBindGroup, 0, nullptr);
-    pass.SetBindGroup(1, resultBindGroup, 0, nullptr);
+    pass.SetBindGroup(0, mBindGroup);
+    pass.SetBindGroup(1, resultBindGroup);
     pass.Dispatch(1, 1, 1);
     pass.EndPass();
 
@@ -189,7 +189,7 @@ TEST_P(OpArrayLengthTest, Fragment) {
     {
         dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
-        pass.SetBindGroup(0, mBindGroup, 0, nullptr);
+        pass.SetBindGroup(0, mBindGroup);
         pass.Draw(1, 1, 0, 0);
         pass.EndPass();
     }
@@ -250,7 +250,7 @@ TEST_P(OpArrayLengthTest, Vertex) {
     {
         dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
-        pass.SetBindGroup(0, mBindGroup, 0, nullptr);
+        pass.SetBindGroup(0, mBindGroup);
         pass.Draw(1, 1, 0, 0);
         pass.EndPass();
     }

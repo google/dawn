@@ -311,7 +311,7 @@ TEST_P(DynamicBufferOffsetTests, InheritDynamicOffestsRenderPipeline) {
     renderPassEncoder.SetBindGroup(0, mBindGroups[0], offsets.size(), offsets.data());
     renderPassEncoder.Draw(3, 1, 0, 0);
     renderPassEncoder.SetPipeline(testPipeline);
-    renderPassEncoder.SetBindGroup(1, mBindGroups[1], 0, nullptr);
+    renderPassEncoder.SetBindGroup(1, mBindGroups[1]);
     renderPassEncoder.Draw(3, 1, 0, 0);
     renderPassEncoder.EndPass();
     dawn::CommandBuffer commands = commandEncoder.Finish();
@@ -341,7 +341,7 @@ TEST_P(DynamicBufferOffsetTests, InheritDynamicOffestsComputePipeline) {
     computePassEncoder.SetBindGroup(0, mBindGroups[0], offsets.size(), offsets.data());
     computePassEncoder.Dispatch(1, 1, 1);
     computePassEncoder.SetPipeline(testPipeline);
-    computePassEncoder.SetBindGroup(1, mBindGroups[1], 0, nullptr);
+    computePassEncoder.SetBindGroup(1, mBindGroups[1]);
     computePassEncoder.Dispatch(1, 1, 1);
     computePassEncoder.EndPass();
     dawn::CommandBuffer commands = commandEncoder.Finish();

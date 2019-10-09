@@ -112,7 +112,7 @@ class MultisampledRenderingTest : public DawnTest {
 
         dawn::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
         renderPassEncoder.SetPipeline(pipeline);
-        renderPassEncoder.SetBindGroup(0, bindGroup, 0, nullptr);
+        renderPassEncoder.SetBindGroup(0, bindGroup);
         renderPassEncoder.Draw(3, 1, 0, 0);
         renderPassEncoder.EndPass();
     }

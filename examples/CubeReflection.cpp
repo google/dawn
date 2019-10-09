@@ -272,20 +272,20 @@ void frame() {
     {
         dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
-        pass.SetBindGroup(0, bindGroup[0], 0, nullptr);
+        pass.SetBindGroup(0, bindGroup[0]);
         pass.SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets);
         pass.SetIndexBuffer(indexBuffer, 0);
         pass.DrawIndexed(36, 1, 0, 0, 0);
 
         pass.SetStencilReference(0x1);
         pass.SetPipeline(planePipeline);
-        pass.SetBindGroup(0, bindGroup[0], 0, nullptr);
+        pass.SetBindGroup(0, bindGroup[0]);
         pass.SetVertexBuffers(0, 1, &planeBuffer, vertexBufferOffsets);
         pass.DrawIndexed(6, 1, 0, 0, 0);
 
         pass.SetPipeline(reflectionPipeline);
         pass.SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets);
-        pass.SetBindGroup(0, bindGroup[1], 0, nullptr);
+        pass.SetBindGroup(0, bindGroup[1]);
         pass.DrawIndexed(36, 1, 0, 0, 0);
 
         pass.EndPass();

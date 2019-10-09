@@ -80,8 +80,8 @@ void main() {
         dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         dawn::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
-        pass.SetBindGroup(0, bg1, 0, nullptr);
-        pass.SetBindGroup(1, bg2, 0, nullptr);
+        pass.SetBindGroup(0, bg1);
+        pass.SetBindGroup(1, bg2);
         pass.Draw(3, 0, 0, 0);
         pass.EndPass();
         commandEncoder.Finish();
@@ -98,7 +98,7 @@ void main() {
         dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         dawn::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
-        pass.SetBindGroup(1, bg2, 0, nullptr);
+        pass.SetBindGroup(1, bg2);
         pass.Draw(3, 0, 0, 0);
         pass.EndPass();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
@@ -107,7 +107,7 @@ void main() {
         dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         dawn::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
-        pass.SetBindGroup(0, bg1, 0, nullptr);
+        pass.SetBindGroup(0, bg1);
         pass.Draw(3, 0, 0, 0);
         pass.EndPass();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());

@@ -395,8 +395,8 @@
                 "args": [
                     {"name": "group index", "type": "uint32_t"},
                     {"name": "group", "type": "bind group"},
-                    {"name": "dynamic offset count", "type": "uint32_t"},
-                    {"name": "dynamic offsets", "type": "uint64_t", "annotation": "const*", "length": "dynamic offset count"}
+                    {"name": "dynamic offset count", "type": "uint32_t", "default": "0"},
+                    {"name": "dynamic offsets", "type": "uint64_t", "annotation": "const*", "length": "dynamic offset count", "optional": true}
                 ]
             },
             {
@@ -826,8 +826,8 @@
                 "args": [
                     {"name": "group index", "type": "uint32_t"},
                     {"name": "group", "type": "bind group"},
-                    {"name": "dynamic offset count", "type": "uint32_t"},
-                    {"name": "dynamic offsets", "type": "uint64_t", "annotation": "const*", "length": "dynamic offset count"}
+                    {"name": "dynamic offset count", "type": "uint32_t", "default": "0"},
+                    {"name": "dynamic offsets", "type": "uint64_t", "annotation": "const*", "length": "dynamic offset count", "optional": true}
                 ]
             },
             {
@@ -973,8 +973,8 @@
                 "args": [
                     {"name": "group index", "type": "uint32_t"},
                     {"name": "group", "type": "bind group"},
-                    {"name": "dynamic offset count", "type": "uint32_t"},
-                    {"name": "dynamic offsets", "type": "uint64_t", "annotation": "const*", "length": "dynamic offset count"}
+                    {"name": "dynamic offset count", "type": "uint32_t", "default": "0"},
+                    {"name": "dynamic offsets", "type": "uint64_t", "annotation": "const*", "length": "dynamic offset count", "optional": true}
                 ]
             },
             {

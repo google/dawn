@@ -983,8 +983,8 @@ TEST_F(SetBindGroupPersistenceValidationTest, BindGroupBeforePipeline) {
     dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     dawn::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
 
-    renderPassEncoder.SetBindGroup(0, bindGroup0, 0, nullptr);
-    renderPassEncoder.SetBindGroup(1, bindGroup1, 0, nullptr);
+    renderPassEncoder.SetBindGroup(0, bindGroup0);
+    renderPassEncoder.SetBindGroup(1, bindGroup1);
     renderPassEncoder.SetPipeline(pipeline);
     renderPassEncoder.Draw(3, 1, 0, 0);
 
@@ -1042,12 +1042,12 @@ TEST_F(SetBindGroupPersistenceValidationTest, NotVulkanInheritance) {
     dawn::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
 
     renderPassEncoder.SetPipeline(pipelineA);
-    renderPassEncoder.SetBindGroup(0, bindGroupA0, 0, nullptr);
-    renderPassEncoder.SetBindGroup(1, bindGroupA1, 0, nullptr);
+    renderPassEncoder.SetBindGroup(0, bindGroupA0);
+    renderPassEncoder.SetBindGroup(1, bindGroupA1);
     renderPassEncoder.Draw(3, 1, 0, 0);
 
     renderPassEncoder.SetPipeline(pipelineB);
-    renderPassEncoder.SetBindGroup(0, bindGroupB0, 0, nullptr);
+    renderPassEncoder.SetBindGroup(0, bindGroupB0);
     // This draw is valid.
     // Bind group 1 persists even though it is not "inherited".
     renderPassEncoder.Draw(3, 1, 0, 0);

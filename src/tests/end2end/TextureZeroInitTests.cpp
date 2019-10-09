@@ -475,7 +475,7 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
     renderPassDesc.cColorAttachments[0].loadOp = dawn::LoadOp::Clear;
     dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
     pass.SetPipeline(renderPipeline);
-    pass.SetBindGroup(0, bindGroup, 0, nullptr);
+    pass.SetBindGroup(0, bindGroup);
     pass.Draw(6, 1, 0, 0);
     pass.EndPass();
     dawn::CommandBuffer commands = encoder.Finish();
@@ -544,7 +544,7 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     dawn::ComputePassEncoder pass = encoder.BeginComputePass();
     pass.SetPipeline(computePipeline);
-    pass.SetBindGroup(0, bindGroup, 0, nullptr);
+    pass.SetBindGroup(0, bindGroup);
     pass.Dispatch(1, 1, 1);
     pass.EndPass();
     dawn::CommandBuffer commands = encoder.Finish();
@@ -692,7 +692,7 @@ TEST_P(TextureZeroInitTest, RenderPassStoreOpClear) {
     renderPassDesc.cColorAttachments[0].storeOp = dawn::StoreOp::Clear;
     dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
     pass.SetPipeline(renderPipeline);
-    pass.SetBindGroup(0, bindGroup, 0, nullptr);
+    pass.SetBindGroup(0, bindGroup);
     pass.Draw(6, 1, 0, 0);
     pass.EndPass();
     commands = encoder.Finish();

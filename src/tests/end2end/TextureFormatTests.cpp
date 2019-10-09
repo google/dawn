@@ -298,7 +298,7 @@ class TextureFormatTest : public DawnTest {
         utils::ComboRenderPassDescriptor renderPassDesc({renderTarget.CreateView()});
         dawn::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDesc);
         renderPass.SetPipeline(pipeline);
-        renderPass.SetBindGroup(0, bindGroup, 0, nullptr);
+        renderPass.SetBindGroup(0, bindGroup);
         renderPass.Draw(3, 1, 0, 0);
         renderPass.EndPass();
 

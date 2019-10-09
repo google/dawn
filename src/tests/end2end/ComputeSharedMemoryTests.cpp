@@ -61,7 +61,7 @@ void ComputeSharedMemoryTests::BasicTest(const char* shader) {
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         dawn::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(pipeline);
-        pass.SetBindGroup(0, bindGroup, 0, nullptr);
+        pass.SetBindGroup(0, bindGroup);
         pass.Dispatch(1, 1, 1);
         pass.EndPass();
 
