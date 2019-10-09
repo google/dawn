@@ -50,7 +50,7 @@ deps = {
 
   # SPIRV-Cross
   'third_party/spirv-cross': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Cross@5431e1da2dc11123750f39a5ba4e5a8c117a0773',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Cross@e5d3a6655e13870a6f38f40bd88cc662b14e3cdf',
     'condition': 'dawn_standalone',
   },
 
@@ -68,7 +68,7 @@ deps = {
     'condition': 'dawn_standalone',
   },
   'third_party/shaderc': {
-    'url': '{chromium_git}/external/github.com/google/shaderc@e849e6783d9f99fd7727d12f0cf2321269beca17',
+    'url': '{chromium_git}/external/github.com/google/shaderc@621605ce2644d55ab74cb27a8afef97dc40f1b0f',
     'condition': 'dawn_standalone',
   },
 

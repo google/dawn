@@ -15,3 +15,6 @@
 shaderc_glslang_dir = "//third_party/glslang"
 shaderc_spirv_tools_dir = "//third_party/SPIRV-Tools"
 shaderc_spirv_cross_dir = "//third_party"
+shaderc_spirv_headers_dir = "//third_party/spirv-headers"
+
+shaderc_enable_spvc_parser = false
