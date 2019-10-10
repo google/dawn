@@ -891,7 +891,7 @@
                 "name": "set index buffer",
                 "args": [
                     {"name": "buffer", "type": "buffer"},
-                    {"name": "offset", "type": "uint64_t"}
+                    {"name": "offset", "type": "uint64_t", "default": "0"}
                 ]
             },
             {
@@ -1076,7 +1076,7 @@
                 "name": "set index buffer",
                 "args": [
                     {"name": "buffer", "type": "buffer"},
-                    {"name": "offset", "type": "uint64_t"}
+                    {"name": "offset", "type": "uint64_t", "default": "0"}
                 ]
             },
             {

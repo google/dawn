@@ -84,7 +84,7 @@ class DrawIndirectValidationTest : public ValidationTest {
             uint32_t zeros[100] = {};
             dawn::Buffer indexBuffer =
                 utils::CreateBufferFromData(device, zeros, sizeof(zeros), dawn::BufferUsage::Index);
-            pass.SetIndexBuffer(indexBuffer, 0);
+            pass.SetIndexBuffer(indexBuffer);
             pass.DrawIndexedIndirect(indirectBuffer, indirectOffset);
         } else {
             pass.DrawIndirect(indirectBuffer, indirectOffset);

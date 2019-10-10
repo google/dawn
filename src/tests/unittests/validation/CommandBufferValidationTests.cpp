@@ -194,7 +194,7 @@ TEST_F(CommandBufferValidationTest, BufferWithMultipleReadUsage) {
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     DummyRenderPass dummyRenderPass(device);
     dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
-    pass.SetIndexBuffer(buffer, 0);
+    pass.SetIndexBuffer(buffer);
     pass.SetVertexBuffer(0, buffer);
     pass.EndPass();
     encoder.Finish();
@@ -217,7 +217,7 @@ TEST_F(CommandBufferValidationTest, BufferWithReadAndWriteUsage) {
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     DummyRenderPass dummyRenderPass(device);
     dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
-    pass.SetIndexBuffer(buffer, 0);
+    pass.SetIndexBuffer(buffer);
     pass.SetBindGroup(0, bg);
     pass.EndPass();
     ASSERT_DEVICE_ERROR(encoder.Finish());

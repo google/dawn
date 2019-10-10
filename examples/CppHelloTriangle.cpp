@@ -162,7 +162,7 @@ void frame() {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
         pass.SetVertexBuffer(0, vertexBuffer);
-        pass.SetIndexBuffer(indexBuffer, 0);
+        pass.SetIndexBuffer(indexBuffer);
         pass.DrawIndexed(3, 1, 0, 0, 0);
         pass.EndPass();
     }

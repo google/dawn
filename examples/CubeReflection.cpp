@@ -273,7 +273,7 @@ void frame() {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup[0]);
         pass.SetVertexBuffer(0, vertexBuffer);
-        pass.SetIndexBuffer(indexBuffer, 0);
+        pass.SetIndexBuffer(indexBuffer);
         pass.DrawIndexed(36, 1, 0, 0, 0);
 
         pass.SetStencilReference(0x1);
