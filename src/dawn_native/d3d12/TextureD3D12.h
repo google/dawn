@@ -22,6 +22,7 @@
 
 namespace dawn_native { namespace d3d12 {
 
+    class CommandRecordingContext;
     class Device;
 
     DXGI_FORMAT D3D12TextureFormat(dawn::TextureFormat format);
@@ -31,33 +32,39 @@ namespace dawn_native { namespace d3d12 {
 
     class Texture : public TextureBase {
       public:
-        Texture(Device* device, const TextureDescriptor* descriptor);
-        Texture(Device* device, const TextureDescriptor* descriptor, ID3D12Resource* nativeTexture);
+        static ResultOrError<TextureBase*> Create(Device* device,
+                                                  const TextureDescriptor* descriptor);
+        Texture(Device* device,
+                const TextureDescriptor* descriptor,
+                ComPtr<ID3D12Resource> nativeTexture);
         ~Texture();
 
         DXGI_FORMAT GetD3D12Format() const;
         ID3D12Resource* GetD3D12Resource() const;
-        bool TransitionUsageAndGetResourceBarrier(D3D12_RESOURCE_BARRIER* barrier,
+        bool TransitionUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
+                                                  D3D12_RESOURCE_BARRIER* barrier,
                                                   dawn::TextureUsage newUsage);
-        void TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
-                                dawn::TextureUsage usage);
-        void TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
+        void TransitionUsageNow(CommandRecordingContext* commandContext, dawn::TextureUsage usage);
+        void TransitionUsageNow(CommandRecordingContext* commandContext,
                                 D3D12_RESOURCE_STATES newState);
 
         D3D12_RENDER_TARGET_VIEW_DESC GetRTVDescriptor(uint32_t baseMipLevel,
                                                        uint32_t baseArrayLayer,
                                                        uint32_t layerCount) const;
         D3D12_DEPTH_STENCIL_VIEW_DESC GetDSVDescriptor(uint32_t baseMipLevel) const;
-        void EnsureSubresourceContentInitialized(ComPtr<ID3D12GraphicsCommandList> commandList,
+        void EnsureSubresourceContentInitialized(CommandRecordingContext* commandContext,
                                                  uint32_t baseMipLevel,
                                                  uint32_t levelCount,
                                                  uint32_t baseArrayLayer,
                                                  uint32_t layerCount);
 
       private:
+        Texture(Device* device, const TextureDescriptor* descriptor);
+        MaybeError InitializeAsInternalTexture();
+
         // Dawn API
         void DestroyImpl() override;
-        MaybeError ClearTexture(ComPtr<ID3D12GraphicsCommandList> commandList,
+        MaybeError ClearTexture(CommandRecordingContext* commandContext,
                                 uint32_t baseMipLevel,
                                 uint32_t levelCount,
                                 uint32_t baseArrayLayer,
@@ -66,7 +73,8 @@ namespace dawn_native { namespace d3d12 {
 
         UINT16 GetDepthOrArraySize();
 
-        bool TransitionUsageAndGetResourceBarrier(D3D12_RESOURCE_BARRIER* barrier,
+        bool TransitionUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
+                                                  D3D12_RESOURCE_BARRIER* barrier,
                                                   D3D12_RESOURCE_STATES newState);
 
         ComPtr<ID3D12Resource> mResource;

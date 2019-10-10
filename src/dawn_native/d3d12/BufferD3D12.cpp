@@ -17,6 +17,7 @@
 #include "common/Assert.h"
 #include "common/Constants.h"
 #include "common/Math.h"
+#include "dawn_native/d3d12/CommandRecordingContext.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
@@ -130,7 +131,8 @@ namespace dawn_native { namespace d3d12 {
     // When true is returned, a D3D12_RESOURCE_BARRIER has been created and must be used in a
     // ResourceBarrier call. Failing to do so will cause the tracked state to become invalid and can
     // cause subsequent errors.
-    bool Buffer::TransitionUsageAndGetResourceBarrier(D3D12_RESOURCE_BARRIER* barrier,
+    bool Buffer::TransitionUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
+                                                      D3D12_RESOURCE_BARRIER* barrier,
                                                       dawn::BufferUsage newUsage) {
         // Resources in upload and readback heaps must be kept in the COPY_SOURCE/DEST state
         if (mFixedResourceState) {
@@ -187,12 +189,12 @@ namespace dawn_native { namespace d3d12 {
         return true;
     }
 
-    void Buffer::TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
+    void Buffer::TransitionUsageNow(CommandRecordingContext* commandContext,
                                     dawn::BufferUsage usage) {
         D3D12_RESOURCE_BARRIER barrier;
 
-        if (TransitionUsageAndGetResourceBarrier(&barrier, usage)) {
-            commandList->ResourceBarrier(1, &barrier);
+        if (TransitionUsageAndGetResourceBarrier(commandContext, &barrier, usage)) {
+            commandContext->GetCommandList()->ResourceBarrier(1, &barrier);
         }
     }
 

@@ -104,6 +104,12 @@ namespace dawn_native {
             return mPointee;
         }
 
+        T* Detach() {
+            T* pointee = mPointee;
+            mPointee = nullptr;
+            return pointee;
+        }
+
       private:
         void Reference() const {
             if (mPointee != nullptr) {

@@ -27,13 +27,13 @@ namespace dawn_native { namespace d3d12 {
 
         device->Tick();
 
-        device->OpenCommandList(&mCommandList);
+        DAWN_TRY(mCommandContext.Open(device->GetD3D12Device().Get(),
+                                      device->GetCommandAllocatorManager()));
         for (uint32_t i = 0; i < commandCount; ++i) {
-            DAWN_TRY(ToBackend(commands[i])->RecordCommands(mCommandList, i));
+            DAWN_TRY(ToBackend(commands[i])->RecordCommands(&mCommandContext, i));
         }
-        ASSERT_SUCCESS(mCommandList->Close());
 
-        DAWN_TRY(device->ExecuteCommandList(mCommandList.Get()));
+        DAWN_TRY(device->ExecuteCommandContext(&mCommandContext));
 
         device->NextSerial();
         return {};

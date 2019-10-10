@@ -19,9 +19,9 @@
 
 #include "common/SerialQueue.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/d3d12/CommandRecordingContext.h"
 #include "dawn_native/d3d12/Forward.h"
 #include "dawn_native/d3d12/ResourceHeapAllocationD3D12.h"
-#include "dawn_native/d3d12/d3d12_platform.h"
 
 #include <memory>
 
@@ -65,12 +65,12 @@ namespace dawn_native { namespace d3d12 {
         DescriptorHeapAllocator* GetDescriptorHeapAllocator() const;
         MapRequestTracker* GetMapRequestTracker() const;
         ResourceAllocator* GetResourceAllocator() const;
+        CommandAllocatorManager* GetCommandAllocatorManager() const;
 
         const PlatformFunctions* GetFunctions() const;
         ComPtr<IDXGIFactory4> GetFactory() const;
 
-        void OpenCommandList(ComPtr<ID3D12GraphicsCommandList>* commandList);
-        ComPtr<ID3D12GraphicsCommandList> GetPendingCommandList();
+        ResultOrError<CommandRecordingContext*> GetPendingCommandContext();
         Serial GetPendingCommandSerial() const override;
 
         void NextSerial();
@@ -78,7 +78,7 @@ namespace dawn_native { namespace d3d12 {
 
         void ReferenceUntilUnused(ComPtr<IUnknown> object);
 
-        MaybeError ExecuteCommandList(ID3D12CommandList* d3d12CommandList);
+        MaybeError ExecuteCommandContext(CommandRecordingContext* commandContext);
 
         ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) override;
         MaybeError CopyFromStagingToBuffer(StagingBufferBase* source,
@@ -132,10 +132,7 @@ namespace dawn_native { namespace d3d12 {
         ComPtr<ID3D12CommandSignature> mDrawIndirectSignature;
         ComPtr<ID3D12CommandSignature> mDrawIndexedIndirectSignature;
 
-        struct PendingCommandList {
-            ComPtr<ID3D12GraphicsCommandList> commandList;
-            bool open = false;
-        } mPendingCommands;
+        CommandRecordingContext mPendingCommands;
 
         SerialQueue<ComPtr<IUnknown>> mUsedComObjectRefs;
 

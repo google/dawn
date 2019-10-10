@@ -32,6 +32,7 @@ namespace dawn_native {
 namespace dawn_native { namespace d3d12 {
 
     class BindGroupStateTracker;
+    class CommandRecordingContext;
     class Device;
     class RenderPassDescriptorHeapTracker;
     class RenderPipeline;
@@ -41,13 +42,12 @@ namespace dawn_native { namespace d3d12 {
         CommandBuffer(CommandEncoderBase* encoder, const CommandBufferDescriptor* descriptor);
         ~CommandBuffer();
 
-        MaybeError RecordCommands(ComPtr<ID3D12GraphicsCommandList> commandList,
-                                  uint32_t indexInSubmit);
+        MaybeError RecordCommands(CommandRecordingContext* commandContext, uint32_t indexInSubmit);
 
       private:
-        void RecordComputePass(ComPtr<ID3D12GraphicsCommandList> commandList,
+        void RecordComputePass(ID3D12GraphicsCommandList* commandList,
                                BindGroupStateTracker* bindingTracker);
-        void RecordRenderPass(ComPtr<ID3D12GraphicsCommandList> commandList,
+        void RecordRenderPass(CommandRecordingContext* commandContext,
                               BindGroupStateTracker* bindingTracker,
                               RenderPassDescriptorHeapTracker* renderPassTracker,
                               BeginRenderPassCmd* renderPass);

@@ -23,6 +23,7 @@
 
 namespace dawn_native { namespace d3d12 {
 
+    class CommandRecordingContext;
     class Device;
 
     class Buffer : public BufferBase {
@@ -36,10 +37,10 @@ namespace dawn_native { namespace d3d12 {
         ComPtr<ID3D12Resource> GetD3D12Resource() const;
         D3D12_GPU_VIRTUAL_ADDRESS GetVA() const;
         void OnMapCommandSerialFinished(uint32_t mapSerial, void* data, bool isWrite);
-        bool TransitionUsageAndGetResourceBarrier(D3D12_RESOURCE_BARRIER* barrier,
+        bool TransitionUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
+                                                  D3D12_RESOURCE_BARRIER* barrier,
                                                   dawn::BufferUsage newUsage);
-        void TransitionUsageNow(ComPtr<ID3D12GraphicsCommandList> commandList,
-                                dawn::BufferUsage usage);
+        void TransitionUsageNow(CommandRecordingContext* commandContext, dawn::BufferUsage usage);
 
       private:
         // Dawn API

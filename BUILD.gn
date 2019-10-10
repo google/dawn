@@ -254,6 +254,8 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/d3d12/CommandAllocatorManager.h",
       "src/dawn_native/d3d12/CommandBufferD3D12.cpp",
       "src/dawn_native/d3d12/CommandBufferD3D12.h",
+      "src/dawn_native/d3d12/CommandRecordingContext.cpp",
+      "src/dawn_native/d3d12/CommandRecordingContext.h",
       "src/dawn_native/d3d12/CommittedResourceAllocatorD3D12.cpp",
       "src/dawn_native/d3d12/CommittedResourceAllocatorD3D12.h",
       "src/dawn_native/d3d12/ComputePipelineD3D12.cpp",

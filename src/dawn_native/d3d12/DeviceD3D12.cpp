@@ -101,11 +101,8 @@ namespace dawn_native { namespace d3d12 {
 
     Device::~Device() {
         // Immediately forget about all pending commands
-        if (mPendingCommands.open) {
-            mPendingCommands.commandList->Close();
-            mPendingCommands.open = false;
-            mPendingCommands.commandList = nullptr;
-        }
+        mPendingCommands.Release();
+
         NextSerial();
         WaitForSerial(mLastSubmittedSerial);  // Wait for all in-flight commands to finish executing
 
@@ -133,7 +130,7 @@ namespace dawn_native { namespace d3d12 {
         mUsedComObjectRefs.ClearUpTo(mCompletedSerial);
 
         ASSERT(mUsedComObjectRefs.Empty());
-        ASSERT(mPendingCommands.commandList == nullptr);
+        ASSERT(!mPendingCommands.IsOpen());
     }
 
     ComPtr<ID3D12Device> Device::GetD3D12Device() const {
@@ -176,27 +173,17 @@ namespace dawn_native { namespace d3d12 {
         return mResourceAllocator.get();
     }
 
-    void Device::OpenCommandList(ComPtr<ID3D12GraphicsCommandList>* commandList) {
-        ComPtr<ID3D12GraphicsCommandList>& cmdList = *commandList;
-        if (!cmdList) {
-            ASSERT_SUCCESS(mD3d12Device->CreateCommandList(
-                0, D3D12_COMMAND_LIST_TYPE_DIRECT,
-                mCommandAllocatorManager->ReserveCommandAllocator().Get(), nullptr,
-                IID_PPV_ARGS(&cmdList)));
-        } else {
-            ASSERT_SUCCESS(
-                cmdList->Reset(mCommandAllocatorManager->ReserveCommandAllocator().Get(), nullptr));
-        }
+    CommandAllocatorManager* Device::GetCommandAllocatorManager() const {
+        return mCommandAllocatorManager.get();
     }
 
-    ComPtr<ID3D12GraphicsCommandList> Device::GetPendingCommandList() {
+    ResultOrError<CommandRecordingContext*> Device::GetPendingCommandContext() {
         // Callers of GetPendingCommandList do so to record commands. Only reserve a command
         // allocator when it is needed so we don't submit empty command lists
-        if (!mPendingCommands.open) {
-            OpenCommandList(&mPendingCommands.commandList);
-            mPendingCommands.open = true;
+        if (!mPendingCommands.IsOpen()) {
+            DAWN_TRY(mPendingCommands.Open(mD3d12Device.Get(), mCommandAllocatorManager.get()));
         }
-        return mPendingCommands.commandList;
+        return &mPendingCommands;
     }
 
     Serial Device::GetCompletedCommandSerial() const {
@@ -224,7 +211,7 @@ namespace dawn_native { namespace d3d12 {
         mDescriptorHeapAllocator->Deallocate(mCompletedSerial);
         mMapRequestTracker->Tick(mCompletedSerial);
         mUsedComObjectRefs.ClearUpTo(mCompletedSerial);
-        DAWN_TRY(ExecuteCommandList(nullptr));
+        DAWN_TRY(ExecuteCommandContext(nullptr));
         NextSerial();
 
         return {};
@@ -247,27 +234,23 @@ namespace dawn_native { namespace d3d12 {
         mUsedComObjectRefs.Enqueue(object, GetPendingCommandSerial());
     }
 
-    MaybeError Device::ExecuteCommandList(ID3D12CommandList* d3d12CommandList) {
+    MaybeError Device::ExecuteCommandContext(CommandRecordingContext* commandContext) {
         UINT numLists = 0;
         std::array<ID3D12CommandList*, 2> d3d12CommandLists;
 
         // If there are pending commands, prepend them to ExecuteCommandLists
-        if (mPendingCommands.open) {
-            const HRESULT hr = mPendingCommands.commandList->Close();
-            if (FAILED(hr)) {
-                mPendingCommands.open = false;
-                mPendingCommands.commandList.Reset();
-                return DAWN_DEVICE_LOST_ERROR("Error closing pending command list.");
-            }
-            mPendingCommands.open = false;
-            d3d12CommandLists[numLists++] = mPendingCommands.commandList.Get();
+        if (mPendingCommands.IsOpen()) {
+            ID3D12GraphicsCommandList* d3d12CommandList;
+            DAWN_TRY_ASSIGN(d3d12CommandList, mPendingCommands.Close());
+            d3d12CommandLists[numLists++] = d3d12CommandList;
         }
-        if (d3d12CommandList != nullptr) {
+        if (commandContext != nullptr) {
+            ID3D12GraphicsCommandList* d3d12CommandList;
+            DAWN_TRY_ASSIGN(d3d12CommandList, commandContext->Close());
             d3d12CommandLists[numLists++] = d3d12CommandList;
         }
         if (numLists > 0) {
             mCommandQueue->ExecuteCommandLists(numLists, d3d12CommandLists.data());
-            mPendingCommands.commandList.Reset();
         }
 
         return {};
@@ -317,7 +300,7 @@ namespace dawn_native { namespace d3d12 {
         return new SwapChain(this, descriptor);
     }
     ResultOrError<TextureBase*> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {
-        return new Texture(this, descriptor);
+        return Texture::Create(this, descriptor);
     }
     ResultOrError<TextureViewBase*> Device::CreateTextureViewImpl(
         TextureBase* texture,
@@ -337,10 +320,13 @@ namespace dawn_native { namespace d3d12 {
                                                BufferBase* destination,
                                                uint64_t destinationOffset,
                                                uint64_t size) {
-        ToBackend(destination)
-            ->TransitionUsageNow(GetPendingCommandList(), dawn::BufferUsage::CopyDst);
+        CommandRecordingContext* commandRecordingContext;
+        DAWN_TRY_ASSIGN(commandRecordingContext, GetPendingCommandContext());
 
-        GetPendingCommandList()->CopyBufferRegion(
+        ToBackend(destination)
+            ->TransitionUsageNow(commandRecordingContext, dawn::BufferUsage::CopyDst);
+
+        commandRecordingContext->GetCommandList()->CopyBufferRegion(
             ToBackend(destination)->GetD3D12Resource().Get(), destinationOffset,
             ToBackend(source)->GetResource(), sourceOffset, size);
 
@@ -381,6 +367,6 @@ namespace dawn_native { namespace d3d12 {
             return nullptr;
         }
 
-        return new Texture(this, descriptor, d3d12Resource.Get());
+        return new Texture(this, descriptor, std::move(d3d12Resource));
     }
 }}  // namespace dawn_native::d3d12
