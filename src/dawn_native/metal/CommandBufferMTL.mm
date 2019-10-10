@@ -550,19 +550,13 @@ namespace dawn_native { namespace metal {
         // all the relevant state.
         class VertexInputBufferTracker {
           public:
-            void OnSetVertexBuffers(uint32_t startSlot,
-                                    uint32_t count,
-                                    const Ref<BufferBase>* buffers,
-                                    const uint64_t* offsets) {
-                for (uint32_t i = 0; i < count; ++i) {
-                    uint32_t slot = startSlot + i;
-                    mVertexBuffers[slot] = ToBackend(buffers[i].Get())->GetMTLBuffer();
-                    mVertexBufferOffsets[slot] = offsets[i];
-                }
+            void OnSetVertexBuffer(uint32_t slot, Buffer* buffer, uint64_t offset) {
+                mVertexBuffers[slot] = buffer->GetMTLBuffer();
+                mVertexBufferOffsets[slot] = offset;
 
                 // Use 64 bit masks and make sure there are no shift UB
                 static_assert(kMaxVertexBuffers <= 8 * sizeof(unsigned long long) - 1, "");
-                mDirtyVertexBuffers |= ((1ull << count) - 1ull) << startSlot;
+                mDirtyVertexBuffers |= 1ull << slot;
             }
 
             void OnSetPipeline(RenderPipeline* lastPipeline, RenderPipeline* pipeline) {
@@ -1047,13 +1041,11 @@ namespace dawn_native { namespace metal {
                     indexBufferBaseOffset = cmd->offset;
                 } break;
 
-                case Command::SetVertexBuffers: {
-                    SetVertexBuffersCmd* cmd = iter->NextCommand<SetVertexBuffersCmd>();
-                    const Ref<BufferBase>* buffers = iter->NextData<Ref<BufferBase>>(cmd->count);
-                    const uint64_t* offsets = iter->NextData<uint64_t>(cmd->count);
+                case Command::SetVertexBuffer: {
+                    SetVertexBufferCmd* cmd = iter->NextCommand<SetVertexBufferCmd>();
 
-                    vertexInputBuffers.OnSetVertexBuffers(cmd->startSlot, cmd->count, buffers,
-                                                          offsets);
+                    vertexInputBuffers.OnSetVertexBuffer(cmd->slot, ToBackend(cmd->buffer.Get()),
+                                                         cmd->offset);
                 } break;
 
                 default:

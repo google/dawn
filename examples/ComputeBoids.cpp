@@ -262,7 +262,6 @@ void initSim() {
 }
 
 dawn::CommandBuffer createCommandBuffer(const dawn::Texture backbuffer, size_t i) {
-    static const uint64_t zeroOffsets[1] = {0};
     auto& bufferDst = particleBuffers[(i + 1) % 2];
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
 
@@ -278,8 +277,8 @@ dawn::CommandBuffer createCommandBuffer(const dawn::Texture backbuffer, size_t i
         utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateView()}, depthStencilView);
         dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(renderPipeline);
-        pass.SetVertexBuffers(0, 1, &bufferDst, zeroOffsets);
-        pass.SetVertexBuffers(1, 1, &modelBuffer, zeroOffsets);
+        pass.SetVertexBuffer(0, bufferDst);
+        pass.SetVertexBuffer(1, modelBuffer);
         pass.Draw(3, kNumParticles, 0, 0);
         pass.EndPass();
     }

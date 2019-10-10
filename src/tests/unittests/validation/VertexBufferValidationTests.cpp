@@ -32,17 +32,12 @@ class VertexBufferValidationTest : public ValidationTest {
                 })");
         }
 
-        template <unsigned int N>
-        std::array<dawn::Buffer, N> MakeVertexBuffers() {
-            std::array<dawn::Buffer, N> buffers;
-            for (auto& buffer : buffers) {
-                dawn::BufferDescriptor descriptor;
-                descriptor.size = 256;
-                descriptor.usage = dawn::BufferUsage::Vertex;
+        dawn::Buffer MakeVertexBuffer() {
+            dawn::BufferDescriptor descriptor;
+            descriptor.size = 256;
+            descriptor.usage = dawn::BufferUsage::Vertex;
 
-                buffer = device.CreateBuffer(&descriptor);
-            }
-            return buffers;
+            return device.CreateBuffer(&descriptor);
         }
 
         dawn::ShaderModule MakeVertexShader(unsigned int bufferCount) {
@@ -97,8 +92,8 @@ TEST_F(VertexBufferValidationTest, VertexBuffersInheritedBetweenPipelines) {
     auto pipeline2 = MakeRenderPipeline(vsModule2, 2);
     auto pipeline1 = MakeRenderPipeline(vsModule1, 1);
 
-    auto vertexBuffers = MakeVertexBuffers<2>();
-    uint64_t offsets[] = { 0, 0 };
+    auto vertexBuffer1 = MakeVertexBuffer();
+    auto vertexBuffer2 = MakeVertexBuffer();
 
     // Check failure when vertex buffer is not set
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -115,7 +110,8 @@ TEST_F(VertexBufferValidationTest, VertexBuffersInheritedBetweenPipelines) {
     {
         dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline2);
-        pass.SetVertexBuffers(0, 2, vertexBuffers.data(), offsets);
+        pass.SetVertexBuffer(0, vertexBuffer1);
+        pass.SetVertexBuffer(1, vertexBuffer2);
         pass.Draw(3, 1, 0, 0);
         pass.SetPipeline(pipeline1);
         pass.Draw(3, 1, 0, 0);
@@ -132,22 +128,23 @@ TEST_F(VertexBufferValidationTest, VertexBuffersNotInheritedBetweenRendePasses) 
     auto pipeline2 = MakeRenderPipeline(vsModule2, 2);
     auto pipeline1 = MakeRenderPipeline(vsModule1, 1);
 
-    auto vertexBuffers = MakeVertexBuffers<2>();
-    uint64_t offsets[] = { 0, 0 };
+    auto vertexBuffer1 = MakeVertexBuffer();
+    auto vertexBuffer2 = MakeVertexBuffer();
 
     // Check success when vertex buffer is set for each render pass
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     {
         dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline2);
-        pass.SetVertexBuffers(0, 2, vertexBuffers.data(), offsets);
+        pass.SetVertexBuffer(0, vertexBuffer1);
+        pass.SetVertexBuffer(1, vertexBuffer2);
         pass.Draw(3, 1, 0, 0);
         pass.EndPass();
     }
     {
         dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline1);
-        pass.SetVertexBuffers(0, 1, vertexBuffers.data(), offsets);
+        pass.SetVertexBuffer(0, vertexBuffer1);
         pass.Draw(3, 1, 0, 0);
         pass.EndPass();
     }
@@ -158,7 +155,8 @@ TEST_F(VertexBufferValidationTest, VertexBuffersNotInheritedBetweenRendePasses) 
     {
         dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline2);
-        pass.SetVertexBuffers(0, 2, vertexBuffers.data(), offsets);
+        pass.SetVertexBuffer(0, vertexBuffer1);
+        pass.SetVertexBuffer(1, vertexBuffer2);
         pass.Draw(3, 1, 0, 0);
         pass.EndPass();
     }

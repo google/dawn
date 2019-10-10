@@ -73,12 +73,11 @@ class DrawTest : public DawnTest {
               uint32_t firstInstance,
               RGBA8 bottomLeftExpected,
               RGBA8 topRightExpected) {
-        uint64_t zeroOffset = 0;
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         {
             dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
             pass.SetPipeline(pipeline);
-            pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+            pass.SetVertexBuffer(0, vertexBuffer);
             pass.Draw(vertexCount, instanceCount, firstIndex, firstInstance);
             pass.EndPass();
         }

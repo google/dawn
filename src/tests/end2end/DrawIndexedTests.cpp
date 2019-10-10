@@ -83,13 +83,12 @@ class DrawIndexedTest : public DawnTest {
                   uint64_t bufferOffset,
                   RGBA8 bottomLeftExpected,
                   RGBA8 topRightExpected) {
-            uint64_t zeroOffset = 0;
             dawn::CommandEncoder encoder = device.CreateCommandEncoder();
             {
                 dawn::RenderPassEncoder pass = encoder.BeginRenderPass(
                     &renderPass.renderPassInfo);
                 pass.SetPipeline(pipeline);
-                pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+                pass.SetVertexBuffer(0, vertexBuffer);
                 pass.SetIndexBuffer(indexBuffer, bufferOffset);
                 pass.DrawIndexed(indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
                 pass.EndPass();

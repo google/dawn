@@ -136,15 +136,11 @@ namespace dawn_native {
                     commandBufferState->SetIndexBuffer();
                 } break;
 
-                case Command::SetVertexBuffers: {
-                    SetVertexBuffersCmd* cmd = commands->NextCommand<SetVertexBuffersCmd>();
-                    auto buffers = commands->NextData<Ref<BufferBase>>(cmd->count);
-                    commands->NextData<uint64_t>(cmd->count);
+                case Command::SetVertexBuffer: {
+                    SetVertexBufferCmd* cmd = commands->NextCommand<SetVertexBufferCmd>();
 
-                    for (uint32_t i = 0; i < cmd->count; ++i) {
-                        usageTracker->BufferUsedAs(buffers[i].Get(), dawn::BufferUsage::Vertex);
-                    }
-                    commandBufferState->SetVertexBuffer(cmd->startSlot, cmd->count);
+                    usageTracker->BufferUsedAs(cmd->buffer.Get(), dawn::BufferUsage::Vertex);
+                    commandBufferState->SetVertexBuffer(cmd->slot);
                 } break;
 
                 default:

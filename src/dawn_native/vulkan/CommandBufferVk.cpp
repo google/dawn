@@ -814,22 +814,12 @@ namespace dawn_native { namespace vulkan {
                     descriptorSets.OnSetPipeline(pipeline);
                 } break;
 
-                case Command::SetVertexBuffers: {
-                    SetVertexBuffersCmd* cmd = iter->NextCommand<SetVertexBuffersCmd>();
-                    auto buffers = iter->NextData<Ref<BufferBase>>(cmd->count);
-                    auto offsets = iter->NextData<uint64_t>(cmd->count);
+                case Command::SetVertexBuffer: {
+                    SetVertexBufferCmd* cmd = iter->NextCommand<SetVertexBufferCmd>();
+                    VkBuffer buffer = ToBackend(cmd->buffer)->GetHandle();
+                    VkDeviceSize offset = static_cast<VkDeviceSize>(cmd->offset);
 
-                    std::array<VkBuffer, kMaxVertexBuffers> vkBuffers;
-                    std::array<VkDeviceSize, kMaxVertexBuffers> vkOffsets;
-
-                    for (uint32_t i = 0; i < cmd->count; ++i) {
-                        Buffer* buffer = ToBackend(buffers[i].Get());
-                        vkBuffers[i] = buffer->GetHandle();
-                        vkOffsets[i] = static_cast<VkDeviceSize>(offsets[i]);
-                    }
-
-                    device->fn.CmdBindVertexBuffers(commands, cmd->startSlot, cmd->count,
-                                                    vkBuffers.data(), vkOffsets.data());
+                    device->fn.CmdBindVertexBuffers(commands, cmd->slot, 1, &buffer, &offset);
                 } break;
 
                 default:

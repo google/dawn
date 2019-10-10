@@ -74,12 +74,11 @@ class DrawIndirectTest : public DawnTest {
         dawn::Buffer indirectBuffer =
             utils::CreateBufferFromData<uint32_t>(device, dawn::BufferUsage::Indirect, bufferList);
 
-        uint64_t zeroOffset = 0;
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         {
             dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
             pass.SetPipeline(pipeline);
-            pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+            pass.SetVertexBuffer(0, vertexBuffer);
             pass.DrawIndirect(indirectBuffer, indirectOffset);
             pass.EndPass();
         }

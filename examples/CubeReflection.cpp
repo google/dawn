@@ -255,7 +255,6 @@ void frame() {
     s.a = (s.a + 1) % 256;
     s.b += 0.01f;
     if (s.b >= 1.0f) {s.b = 0.0f;}
-    static const uint64_t vertexBufferOffsets[1] = {0};
 
     cameraData.view = glm::lookAt(
         glm::vec3(8.f * std::sin(glm::radians(s.b * 360.f)), 2.f, 8.f * std::cos(glm::radians(s.b * 360.f))),
@@ -273,18 +272,18 @@ void frame() {
         dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup[0]);
-        pass.SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets);
+        pass.SetVertexBuffer(0, vertexBuffer);
         pass.SetIndexBuffer(indexBuffer, 0);
         pass.DrawIndexed(36, 1, 0, 0, 0);
 
         pass.SetStencilReference(0x1);
         pass.SetPipeline(planePipeline);
         pass.SetBindGroup(0, bindGroup[0]);
-        pass.SetVertexBuffers(0, 1, &planeBuffer, vertexBufferOffsets);
+        pass.SetVertexBuffer(0, planeBuffer);
         pass.DrawIndexed(6, 1, 0, 0, 0);
 
         pass.SetPipeline(reflectionPipeline);
-        pass.SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets);
+        pass.SetVertexBuffer(0, vertexBuffer);
         pass.SetBindGroup(0, bindGroup[1]);
         pass.DrawIndexed(36, 1, 0, 0, 0);
 

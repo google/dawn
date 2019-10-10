@@ -142,19 +142,13 @@ namespace dawn_native { namespace opengl {
                 mIndexBuffer = ToBackend(buffer);
             }
 
-            void OnSetVertexBuffers(uint32_t startSlot,
-                                    uint32_t count,
-                                    Ref<BufferBase>* buffers,
-                                    uint64_t* offsets) {
-                for (uint32_t i = 0; i < count; ++i) {
-                    uint32_t slot = startSlot + i;
-                    mVertexBuffers[slot] = ToBackend(buffers[i].Get());
-                    mVertexBufferOffsets[slot] = offsets[i];
-                }
+            void OnSetVertexBuffer(uint32_t slot, BufferBase* buffer, uint64_t offset) {
+                mVertexBuffers[slot] = ToBackend(buffer);
+                mVertexBufferOffsets[slot] = offset;
 
                 // Use 64 bit masks and make sure there are no shift UB
                 static_assert(kMaxVertexBuffers <= 8 * sizeof(unsigned long long) - 1, "");
-                mDirtyVertexBuffers |= ((1ull << count) - 1ull) << startSlot;
+                mDirtyVertexBuffers |= 1ull << slot;
             }
 
             void OnSetPipeline(RenderPipelineBase* pipeline) {
@@ -974,11 +968,9 @@ namespace dawn_native { namespace opengl {
                     inputBuffers.OnSetIndexBuffer(cmd->buffer.Get());
                 } break;
 
-                case Command::SetVertexBuffers: {
-                    SetVertexBuffersCmd* cmd = iter->NextCommand<SetVertexBuffersCmd>();
-                    auto buffers = iter->NextData<Ref<BufferBase>>(cmd->count);
-                    auto offsets = iter->NextData<uint64_t>(cmd->count);
-                    inputBuffers.OnSetVertexBuffers(cmd->startSlot, cmd->count, buffers, offsets);
+                case Command::SetVertexBuffer: {
+                    SetVertexBufferCmd* cmd = iter->NextCommand<SetVertexBufferCmd>();
+                    inputBuffers.OnSetVertexBuffer(cmd->slot, cmd->buffer.Get(), cmd->offset);
                 } break;
 
                 default:

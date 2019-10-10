@@ -108,9 +108,8 @@ TEST_P(RenderBundleTest, Basic) {
 
     dawn::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
 
-    uint64_t zeroOffset = 0;
     renderBundleEncoder.SetPipeline(pipeline);
-    renderBundleEncoder.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+    renderBundleEncoder.SetVertexBuffer(0, vertexBuffer);
     renderBundleEncoder.SetBindGroup(0, bindGroups[0]);
     renderBundleEncoder.Draw(6, 1, 0, 0);
 
@@ -136,12 +135,11 @@ TEST_P(RenderBundleTest, MultipleBundles) {
     desc.cColorFormats[0] = renderPass.colorFormat;
 
     dawn::RenderBundle renderBundles[2];
-    uint64_t zeroOffset = 0;
     {
         dawn::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
 
         renderBundleEncoder.SetPipeline(pipeline);
-        renderBundleEncoder.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        renderBundleEncoder.SetVertexBuffer(0, vertexBuffer);
         renderBundleEncoder.SetBindGroup(0, bindGroups[0]);
         renderBundleEncoder.Draw(3, 1, 0, 0);
 
@@ -151,7 +149,7 @@ TEST_P(RenderBundleTest, MultipleBundles) {
         dawn::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
 
         renderBundleEncoder.SetPipeline(pipeline);
-        renderBundleEncoder.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        renderBundleEncoder.SetVertexBuffer(0, vertexBuffer);
         renderBundleEncoder.SetBindGroup(0, bindGroups[1]);
         renderBundleEncoder.Draw(3, 1, 3, 0);
 
@@ -179,9 +177,8 @@ TEST_P(RenderBundleTest, BundleAndRenderPassCommands) {
 
     dawn::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
 
-    uint64_t zeroOffset = 0;
     renderBundleEncoder.SetPipeline(pipeline);
-    renderBundleEncoder.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+    renderBundleEncoder.SetVertexBuffer(0, vertexBuffer);
     renderBundleEncoder.SetBindGroup(0, bindGroups[0]);
     renderBundleEncoder.Draw(3, 1, 0, 0);
 
@@ -193,7 +190,7 @@ TEST_P(RenderBundleTest, BundleAndRenderPassCommands) {
     pass.ExecuteBundles(1, &renderBundle);
 
     pass.SetPipeline(pipeline);
-    pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+    pass.SetVertexBuffer(0, vertexBuffer);
     pass.SetBindGroup(0, bindGroups[1]);
     pass.Draw(3, 1, 3, 0);
 

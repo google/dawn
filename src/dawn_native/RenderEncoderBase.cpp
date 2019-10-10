@@ -129,27 +129,15 @@ namespace dawn_native {
         });
     }
 
-    void RenderEncoderBase::SetVertexBuffers(uint32_t startSlot,
-                                             uint32_t count,
-                                             BufferBase* const* buffers,
-                                             uint64_t const* offsets) {
+    void RenderEncoderBase::SetVertexBuffer(uint32_t slot, BufferBase* buffer, uint64_t offset) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            for (size_t i = 0; i < count; ++i) {
-                DAWN_TRY(GetDevice()->ValidateObject(buffers[i]));
-            }
+            DAWN_TRY(GetDevice()->ValidateObject(buffer));
 
-            SetVertexBuffersCmd* cmd =
-                allocator->Allocate<SetVertexBuffersCmd>(Command::SetVertexBuffers);
-            cmd->startSlot = startSlot;
-            cmd->count = count;
-
-            Ref<BufferBase>* cmdBuffers = allocator->AllocateData<Ref<BufferBase>>(count);
-            for (size_t i = 0; i < count; ++i) {
-                cmdBuffers[i] = buffers[i];
-            }
-
-            uint64_t* cmdOffsets = allocator->AllocateData<uint64_t>(count);
-            memcpy(cmdOffsets, offsets, count * sizeof(uint64_t));
+            SetVertexBufferCmd* cmd =
+                allocator->Allocate<SetVertexBufferCmd>(Command::SetVertexBuffer);
+            cmd->slot = slot;
+            cmd->buffer = buffer;
+            cmd->offset = offset;
 
             return {};
         });

@@ -144,14 +144,9 @@ namespace dawn_native {
                     SetIndexBufferCmd* cmd = commands->NextCommand<SetIndexBufferCmd>();
                     cmd->~SetIndexBufferCmd();
                 } break;
-                case Command::SetVertexBuffers: {
-                    SetVertexBuffersCmd* cmd = commands->NextCommand<SetVertexBuffersCmd>();
-                    auto buffers = commands->NextData<Ref<BufferBase>>(cmd->count);
-                    for (size_t i = 0; i < cmd->count; ++i) {
-                        (&buffers[i])->~Ref<BufferBase>();
-                    }
-                    commands->NextData<uint64_t>(cmd->count);
-                    cmd->~SetVertexBuffersCmd();
+                case Command::SetVertexBuffer: {
+                    SetVertexBufferCmd* cmd = commands->NextCommand<SetVertexBufferCmd>();
+                    cmd->~SetVertexBufferCmd();
                 } break;
             }
         }
@@ -267,10 +262,8 @@ namespace dawn_native {
                 commands->NextCommand<SetIndexBufferCmd>();
                 break;
 
-            case Command::SetVertexBuffers: {
-                auto* cmd = commands->NextCommand<SetVertexBuffersCmd>();
-                commands->NextData<Ref<BufferBase>>(cmd->count);
-                commands->NextData<uint64_t>(cmd->count);
+            case Command::SetVertexBuffer: {
+                commands->NextCommand<SetVertexBufferCmd>();
             } break;
         }
     }

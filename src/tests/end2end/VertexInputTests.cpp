@@ -199,9 +199,8 @@ class VertexInputTest : public DawnTest {
         dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
 
-        uint64_t zeroOffset = 0;
-        for (const auto& buffer : vertexBuffers) {
-            pass.SetVertexBuffers(buffer.location, 1, buffer.buffer, &zeroOffset);
+        for (const DrawVertexBuffer& buffer : vertexBuffers) {
+            pass.SetVertexBuffer(buffer.location, *buffer.buffer);
         }
 
         pass.Draw(triangles * 3, instances, 0, 0);
@@ -426,9 +425,8 @@ TEST_P(VertexInputTest, UnusedVertexSlot) {
 
     dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
 
-    uint64_t zeroOffset = 0;
-    pass.SetVertexBuffers(0, 1, &buffer, &zeroOffset);
-    pass.SetVertexBuffers(1, 1, &buffer, &zeroOffset);
+    pass.SetVertexBuffer(0, buffer);
+    pass.SetVertexBuffer(1, buffer);
 
     pass.SetPipeline(instancePipeline);
     pass.Draw(1 * 3, 4, 0, 0);
@@ -442,9 +440,9 @@ TEST_P(VertexInputTest, UnusedVertexSlot) {
 }
 
 // Test setting a different pipeline with a different input state.
-// This was a problem with the D3D12 backend where SetVertexBuffers
+// This was a problem with the D3D12 backend where SetVertexBuffer
 // was getting the input from the last set pipeline, not the current.
-// SetVertexBuffers should be reapplied when the input state changes.
+// SetVertexBuffer should be reapplied when the input state changes.
 TEST_P(VertexInputTest, MultiplePipelinesMixedVertexInput) {
     // Basic input state, using slot 0
     utils::ComboVertexInputDescriptor vertexVertexInput = MakeVertexInput(
@@ -470,9 +468,8 @@ TEST_P(VertexInputTest, MultiplePipelinesMixedVertexInput) {
 
     dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
 
-    uint64_t zeroOffset = 0;
-    pass.SetVertexBuffers(0, 1, &buffer, &zeroOffset);
-    pass.SetVertexBuffers(1, 1, &buffer, &zeroOffset);
+    pass.SetVertexBuffer(0, buffer);
+    pass.SetVertexBuffer(1, buffer);
 
     pass.SetPipeline(vertexPipeline);
     pass.Draw(1 * 3, 1, 0, 0);

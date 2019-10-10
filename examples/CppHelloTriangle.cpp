@@ -156,13 +156,12 @@ void frame() {
     dawn::Texture backbuffer = swapchain.GetNextTexture();
     utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateView()}, depthStencilView);
 
-    static const uint64_t vertexBufferOffsets[1] = {0};
     dawn::CommandEncoder encoder = device.CreateCommandEncoder();
     {
         dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
-        pass.SetVertexBuffers(0, 1, &vertexBuffer, vertexBufferOffsets);
+        pass.SetVertexBuffer(0, vertexBuffer);
         pass.SetIndexBuffer(indexBuffer, 0);
         pass.DrawIndexed(3, 1, 0, 0, 0);
         pass.EndPass();

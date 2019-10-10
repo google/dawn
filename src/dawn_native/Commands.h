@@ -58,7 +58,7 @@ namespace dawn_native {
         SetBlendColor,
         SetBindGroup,
         SetIndexBuffer,
-        SetVertexBuffers,
+        SetVertexBuffer,
     };
 
     struct BeginComputePassCmd {};
@@ -220,9 +220,10 @@ namespace dawn_native {
         uint64_t offset;
     };
 
-    struct SetVertexBuffersCmd {
-        uint32_t startSlot;
-        uint32_t count;
+    struct SetVertexBufferCmd {
+        uint32_t slot;
+        Ref<BufferBase> buffer;
+        uint64_t offset;
     };
 
     // This needs to be called before the CommandIterator is freed so that the Ref<> present in

@@ -358,20 +358,14 @@ namespace dawn_native { namespace d3d12 {
 
         class VertexBufferTracker {
           public:
-            void OnSetVertexBuffers(uint32_t startSlot,
-                                    uint32_t count,
-                                    Ref<BufferBase>* buffers,
-                                    uint64_t* offsets) {
-                mStartSlot = std::min(mStartSlot, startSlot);
-                mEndSlot = std::max(mEndSlot, startSlot + count);
+            void OnSetVertexBuffer(uint32_t slot, Buffer* buffer, uint64_t offset) {
+                mStartSlot = std::min(mStartSlot, slot);
+                mEndSlot = std::max(mEndSlot, slot + 1);
 
-                for (uint32_t i = 0; i < count; ++i) {
-                    Buffer* buffer = ToBackend(buffers[i].Get());
-                    auto* d3d12BufferView = &mD3D12BufferViews[startSlot + i];
-                    d3d12BufferView->BufferLocation = buffer->GetVA() + offsets[i];
-                    d3d12BufferView->SizeInBytes = buffer->GetSize() - offsets[i];
-                    // The bufferView stride is set based on the input state before a draw.
-                }
+                auto* d3d12BufferView = &mD3D12BufferViews[slot];
+                d3d12BufferView->BufferLocation = buffer->GetVA() + offset;
+                d3d12BufferView->SizeInBytes = buffer->GetSize() - offset;
+                // The bufferView stride is set based on the input state before a draw.
             }
 
             void Apply(ID3D12GraphicsCommandList* commandList,
@@ -402,7 +396,7 @@ namespace dawn_native { namespace d3d12 {
                 }
 
                 // mD3D12BufferViews is kept up to date with the most recent data passed
-                // to SetVertexBuffers. This makes it correct to only track the start
+                // to SetVertexBuffer. This makes it correct to only track the start
                 // and end of the dirty range. When Apply is called,
                 // we will at worst set non-dirty vertex buffers in duplicate.
                 uint32_t count = endSlot - startSlot;
@@ -414,7 +408,7 @@ namespace dawn_native { namespace d3d12 {
 
           private:
             // startSlot and endSlot indicate the range of dirty vertex buffers.
-            // If there are multiple calls to SetVertexBuffers, the start and end
+            // If there are multiple calls to SetVertexBuffer, the start and end
             // represent the union of the dirty ranges (the union may have non-dirty
             // data in the middle of the range).
             const RenderPipeline* mLastAppliedRenderPipeline = nullptr;
@@ -1133,13 +1127,11 @@ namespace dawn_native { namespace d3d12 {
                     indexBufferTracker.OnSetIndexBuffer(ToBackend(cmd->buffer.Get()), cmd->offset);
                 } break;
 
-                case Command::SetVertexBuffers: {
-                    SetVertexBuffersCmd* cmd = iter->NextCommand<SetVertexBuffersCmd>();
-                    Ref<BufferBase>* buffers = iter->NextData<Ref<BufferBase>>(cmd->count);
-                    uint64_t* offsets = iter->NextData<uint64_t>(cmd->count);
+                case Command::SetVertexBuffer: {
+                    SetVertexBufferCmd* cmd = iter->NextCommand<SetVertexBufferCmd>();
 
-                    vertexBufferTracker.OnSetVertexBuffers(cmd->startSlot, cmd->count, buffers,
-                                                           offsets);
+                    vertexBufferTracker.OnSetVertexBuffer(cmd->slot, ToBackend(cmd->buffer.Get()),
+                                                          cmd->offset);
                 } break;
 
                 default:

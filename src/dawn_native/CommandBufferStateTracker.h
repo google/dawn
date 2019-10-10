@@ -38,7 +38,7 @@ namespace dawn_native {
         void SetRenderPipeline(RenderPipelineBase* pipeline);
         void SetBindGroup(uint32_t index, BindGroupBase* bindgroup);
         void SetIndexBuffer();
-        void SetVertexBuffer(uint32_t start, uint32_t count);
+        void SetVertexBuffer(uint32_t slot);
 
         static constexpr size_t kNumAspects = 4;
         using ValidationAspects = std::bitset<kNumAspects>;

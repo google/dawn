@@ -378,12 +378,11 @@ class VertexFormatTest : public DawnTest {
         dawn::RenderPipeline pipeline = MakeTestPipeline(format, expectedData);
         dawn::Buffer vertexBuffer = utils::CreateBufferFromData(
             device, vertex.data(), vertex.size() * sizeof(VertexType), dawn::BufferUsage::Vertex);
-        uint64_t zeroOffset = 0;
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         {
             dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
             pass.SetPipeline(pipeline);
-            pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+            pass.SetVertexBuffer(0, vertexBuffer);
             pass.Draw(3, 1, 0, 0);
             pass.EndPass();
         }

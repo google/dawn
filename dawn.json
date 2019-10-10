@@ -880,12 +880,11 @@
                 ]
             },
             {
-                "name": "set vertex buffers",
+                "name": "set vertex buffer",
                 "args": [
-                    {"name": "start slot", "type": "uint32_t"},
-                    {"name": "count", "type": "uint32_t"},
-                    {"name": "buffers", "type": "buffer", "annotation": "const*", "length": "count"},
-                    {"name": "offsets", "type": "uint64_t", "annotation": "const*", "length": "count"}
+                    {"name": "slot", "type": "uint32_t"},
+                    {"name": "buffer", "type": "buffer"},
+                    {"name": "offset", "type": "uint64_t", "default": "0"}
                 ]
             },
             {
@@ -1066,12 +1065,11 @@
                 ]
             },
             {
-                "name": "set vertex buffers",
+                "name": "set vertex buffer",
                 "args": [
-                    {"name": "start slot", "type": "uint32_t"},
-                    {"name": "count", "type": "uint32_t"},
-                    {"name": "buffers", "type": "buffer", "annotation": "const*", "length": "count"},
-                    {"name": "offsets", "type": "uint64_t", "annotation": "const*", "length": "count"}
+                    {"name": "slot", "type": "uint32_t"},
+                    {"name": "buffer", "type": "buffer"},
+                    {"name": "offset", "type": "uint64_t", "default": "0"}
                 ]
             },
             {

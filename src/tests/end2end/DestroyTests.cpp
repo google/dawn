@@ -70,12 +70,11 @@ class DestroyTest : public DawnTest {
     dawn::Buffer vertexBuffer;
 
     dawn::CommandBuffer CreateTriangleCommandBuffer() {
-        uint64_t zeroOffset = 0;
         dawn::CommandEncoder encoder = device.CreateCommandEncoder();
         {
             dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
             pass.SetPipeline(pipeline);
-            pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+            pass.SetVertexBuffer(0, vertexBuffer);
             pass.Draw(3, 1, 0, 0);
             pass.EndPass();
         }

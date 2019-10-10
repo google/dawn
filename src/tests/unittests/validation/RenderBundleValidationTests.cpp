@@ -111,7 +111,6 @@ namespace {
         dawn::RenderPipeline pipeline;
         dawn::Buffer vertexBuffer;
         dawn::Buffer vertexStorageBuffer;
-        const uint64_t zeroOffset = 0;
         dawn::BindGroup bg0;
         dawn::BindGroup bg1;
         dawn::BindGroup bg1Vertex;
@@ -160,7 +159,7 @@ TEST_F(RenderBundleValidationTest, SimpleSuccess) {
     renderBundleEncoder.SetPipeline(pipeline);
     renderBundleEncoder.SetBindGroup(0, bg0);
     renderBundleEncoder.SetBindGroup(1, bg1);
-    renderBundleEncoder.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+    renderBundleEncoder.SetVertexBuffer(0, vertexBuffer);
     renderBundleEncoder.Draw(3, 0, 0, 0);
     dawn::RenderBundle renderBundle = renderBundleEncoder.Finish();
 
@@ -248,7 +247,7 @@ TEST_F(RenderBundleValidationTest, StateInheritance) {
 
         renderBundleEncoder.SetBindGroup(0, bg0);
         renderBundleEncoder.SetBindGroup(1, bg1);
-        renderBundleEncoder.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        renderBundleEncoder.SetVertexBuffer(0, vertexBuffer);
         renderBundleEncoder.Draw(3, 0, 0, 0);
         ASSERT_DEVICE_ERROR(dawn::RenderBundle renderBundle = renderBundleEncoder.Finish());
 
@@ -267,7 +266,7 @@ TEST_F(RenderBundleValidationTest, StateInheritance) {
         pass.SetBindGroup(1, bg1);
 
         renderBundleEncoder.SetPipeline(pipeline);
-        renderBundleEncoder.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        renderBundleEncoder.SetVertexBuffer(0, vertexBuffer);
         renderBundleEncoder.Draw(3, 0, 0, 0);
         ASSERT_DEVICE_ERROR(dawn::RenderBundle renderBundle = renderBundleEncoder.Finish());
 
@@ -286,7 +285,7 @@ TEST_F(RenderBundleValidationTest, StateInheritance) {
         pass.SetBindGroup(0, bg0);
         pass.SetBindGroup(1, bg1);
 
-        renderBundleEncoder.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        renderBundleEncoder.SetVertexBuffer(0, vertexBuffer);
         renderBundleEncoder.Draw(3, 0, 0, 0);
         ASSERT_DEVICE_ERROR(dawn::RenderBundle renderBundle = renderBundleEncoder.Finish());
 
@@ -301,7 +300,7 @@ TEST_F(RenderBundleValidationTest, StateInheritance) {
         dawn::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
         dawn::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
 
-        pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        pass.SetVertexBuffer(0, vertexBuffer);
 
         renderBundleEncoder.SetPipeline(pipeline);
         renderBundleEncoder.SetBindGroup(0, bg0);
@@ -335,7 +334,7 @@ TEST_F(RenderBundleValidationTest, StatePersistence) {
         pass.ExecuteBundles(1, &renderBundle);
         pass.SetBindGroup(0, bg0);
         pass.SetBindGroup(1, bg1);
-        pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        pass.SetVertexBuffer(0, vertexBuffer);
         pass.Draw(3, 0, 0, 0);
         pass.EndPass();
 
@@ -354,7 +353,7 @@ TEST_F(RenderBundleValidationTest, StatePersistence) {
 
         pass.ExecuteBundles(1, &renderBundle);
         pass.SetPipeline(pipeline);
-        pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        pass.SetVertexBuffer(0, vertexBuffer);
         pass.Draw(3, 0, 0, 0);
         pass.EndPass();
 
@@ -373,7 +372,7 @@ TEST_F(RenderBundleValidationTest, StatePersistence) {
         dawn::RenderBundle renderBundle = renderBundleEncoder.Finish();
 
         pass.ExecuteBundles(1, &renderBundle);
-        pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        pass.SetVertexBuffer(0, vertexBuffer);
         pass.Draw(3, 0, 0, 0);
         pass.EndPass();
 
@@ -386,7 +385,7 @@ TEST_F(RenderBundleValidationTest, StatePersistence) {
         dawn::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
 
         dawn::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
-        renderBundleEncoder.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        renderBundleEncoder.SetVertexBuffer(0, vertexBuffer);
         dawn::RenderBundle renderBundle = renderBundleEncoder.Finish();
 
         pass.ExecuteBundles(1, &renderBundle);
@@ -420,7 +419,7 @@ TEST_F(RenderBundleValidationTest, ClearsState) {
         pass.ExecuteBundles(1, &renderBundle);
         pass.SetBindGroup(0, bg0);
         pass.SetBindGroup(1, bg1);
-        pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        pass.SetVertexBuffer(0, vertexBuffer);
         pass.Draw(3, 0, 0, 0);
         pass.EndPass();
 
@@ -436,7 +435,7 @@ TEST_F(RenderBundleValidationTest, ClearsState) {
         pass.SetBindGroup(1, bg1);
         pass.ExecuteBundles(1, &renderBundle);
         pass.SetPipeline(pipeline);
-        pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        pass.SetVertexBuffer(0, vertexBuffer);
         pass.Draw(3, 0, 0, 0);
         pass.EndPass();
 
@@ -452,7 +451,7 @@ TEST_F(RenderBundleValidationTest, ClearsState) {
         pass.SetBindGroup(0, bg0);
         pass.SetBindGroup(1, bg1);
         pass.ExecuteBundles(1, &renderBundle);
-        pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        pass.SetVertexBuffer(0, vertexBuffer);
         pass.Draw(3, 0, 0, 0);
         pass.EndPass();
 
@@ -464,7 +463,7 @@ TEST_F(RenderBundleValidationTest, ClearsState) {
         dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         dawn::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
 
-        pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        pass.SetVertexBuffer(0, vertexBuffer);
         pass.ExecuteBundles(1, &renderBundle);
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bg0);
@@ -483,7 +482,7 @@ TEST_F(RenderBundleValidationTest, ClearsState) {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bg0);
         pass.SetBindGroup(1, bg1);
-        pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        pass.SetVertexBuffer(0, vertexBuffer);
         pass.ExecuteBundles(0, nullptr);
         pass.Draw(3, 0, 0, 0);
 
@@ -506,7 +505,7 @@ TEST_F(RenderBundleValidationTest, MultipleBundles) {
     renderBundleEncoder0.SetPipeline(pipeline);
     renderBundleEncoder0.SetBindGroup(0, bg0);
     renderBundleEncoder0.SetBindGroup(1, bg1);
-    renderBundleEncoder0.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+    renderBundleEncoder0.SetVertexBuffer(0, vertexBuffer);
     renderBundleEncoder0.Draw(3, 1, 0, 0);
     renderBundles[0] = renderBundleEncoder0.Finish();
 
@@ -514,7 +513,7 @@ TEST_F(RenderBundleValidationTest, MultipleBundles) {
     renderBundleEncoder1.SetPipeline(pipeline);
     renderBundleEncoder1.SetBindGroup(0, bg0);
     renderBundleEncoder1.SetBindGroup(1, bg1);
-    renderBundleEncoder1.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+    renderBundleEncoder1.SetVertexBuffer(0, vertexBuffer);
     renderBundleEncoder1.Draw(3, 1, 0, 0);
     renderBundles[1] = renderBundleEncoder1.Finish();
 
@@ -537,7 +536,7 @@ TEST_F(RenderBundleValidationTest, ExecuteMultipleTimes) {
     renderBundleEncoder.SetPipeline(pipeline);
     renderBundleEncoder.SetBindGroup(0, bg0);
     renderBundleEncoder.SetBindGroup(1, bg1);
-    renderBundleEncoder.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+    renderBundleEncoder.SetVertexBuffer(0, vertexBuffer);
     renderBundleEncoder.Draw(3, 1, 0, 0);
     dawn::RenderBundle renderBundle = renderBundleEncoder.Finish();
 
@@ -617,7 +616,7 @@ TEST_F(RenderBundleValidationTest, UsageTracking) {
         renderBundleEncoder.SetPipeline(pipeline);
         renderBundleEncoder.SetBindGroup(0, bg0);
         renderBundleEncoder.SetBindGroup(1, bg1Vertex);
-        renderBundleEncoder.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        renderBundleEncoder.SetVertexBuffer(0, vertexBuffer);
         renderBundleEncoder.Draw(3, 0, 0, 0);
         renderBundle0 = renderBundleEncoder.Finish();
     }
@@ -628,7 +627,7 @@ TEST_F(RenderBundleValidationTest, UsageTracking) {
         renderBundleEncoder.SetPipeline(pipeline);
         renderBundleEncoder.SetBindGroup(0, bg0);
         renderBundleEncoder.SetBindGroup(1, bg1);
-        renderBundleEncoder.SetVertexBuffers(0, 1, &vertexStorageBuffer, &zeroOffset);
+        renderBundleEncoder.SetVertexBuffer(0, vertexStorageBuffer);
         renderBundleEncoder.Draw(3, 0, 0, 0);
         renderBundle1 = renderBundleEncoder.Finish();
     }
@@ -640,7 +639,7 @@ TEST_F(RenderBundleValidationTest, UsageTracking) {
         renderBundleEncoder.SetPipeline(pipeline);
         renderBundleEncoder.SetBindGroup(0, bg0);
         renderBundleEncoder.SetBindGroup(1, bg1Vertex);
-        renderBundleEncoder.SetVertexBuffers(0, 1, &vertexStorageBuffer, &zeroOffset);
+        renderBundleEncoder.SetVertexBuffer(0, vertexStorageBuffer);
         renderBundleEncoder.Draw(3, 0, 0, 0);
         ASSERT_DEVICE_ERROR(renderBundleEncoder.Finish());
     }
@@ -668,7 +667,7 @@ TEST_F(RenderBundleValidationTest, UsageTracking) {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bg0);
         pass.SetBindGroup(1, bg1Vertex);
-        pass.SetVertexBuffers(0, 1, &vertexBuffer, &zeroOffset);
+        pass.SetVertexBuffer(0, vertexBuffer);
         pass.Draw(3, 0, 0, 0);
 
         pass.ExecuteBundles(1, &renderBundle1);
@@ -688,7 +687,7 @@ TEST_F(RenderBundleValidationTest, UsageTracking) {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bg0);
         pass.SetBindGroup(1, bg1);
-        pass.SetVertexBuffers(0, 1, &vertexStorageBuffer, &zeroOffset);
+        pass.SetVertexBuffer(0, vertexStorageBuffer);
         pass.Draw(3, 0, 0, 0);
 
         pass.EndPass();

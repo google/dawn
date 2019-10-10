@@ -152,10 +152,8 @@ namespace dawn_native {
         mAspects.set(VALIDATION_ASPECT_INDEX_BUFFER);
     }
 
-    void CommandBufferStateTracker::SetVertexBuffer(uint32_t start, uint32_t count) {
-        for (uint32_t i = 0; i < count; ++i) {
-            mInputsSet.set(start + i);
-        }
+    void CommandBufferStateTracker::SetVertexBuffer(uint32_t slot) {
+        mInputsSet.set(slot);
     }
 
     void CommandBufferStateTracker::SetPipelineCommon(PipelineBase* pipeline) {
