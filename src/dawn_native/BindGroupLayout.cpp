@@ -49,10 +49,6 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("some binding index was specified more than once");
             }
 
-            if (binding.visibility == dawn::ShaderStage::None) {
-                return DAWN_VALIDATION_ERROR("Visibility of bindings can't be None");
-            }
-
             switch (binding.type) {
                 case dawn::BindingType::UniformBuffer:
                     if (binding.hasDynamicOffset) {

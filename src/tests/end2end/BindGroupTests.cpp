@@ -776,4 +776,35 @@ TEST_P(BindGroupTests, DrawThenChangePipelineAndBindGroup) {
     EXPECT_PIXEL_RGBA8_EQ(notFilled, renderPass.color, max, max);
 }
 
+// Test that visibility of bindings in BindGroupLayout can be none
+// This test passes by not asserting or crashing.
+TEST_P(BindGroupTests, BindGroupLayoutVisibilityCanBeNone) {
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+
+    dawn::BindGroupLayoutBinding binding = {0, dawn::ShaderStage::None,
+                                            dawn::BindingType::UniformBuffer};
+    dawn::BindGroupLayoutDescriptor descriptor;
+    descriptor.bindingCount = 1;
+    descriptor.bindings = &binding;
+    dawn::BindGroupLayout layout = device.CreateBindGroupLayout(&descriptor);
+
+    dawn::RenderPipeline pipeline = MakeTestPipeline(renderPass, {}, {layout});
+
+    std::array<float, 4> color = {1, 0, 0, 1};
+    dawn::Buffer uniformBuffer =
+        utils::CreateBufferFromData(device, &color, sizeof(color), dawn::BufferUsage::Uniform);
+    dawn::BindGroup bindGroup =
+        utils::MakeBindGroup(device, layout, {{0, uniformBuffer, 0, sizeof(color)}});
+
+    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bindGroup);
+    pass.Draw(3, 1, 0, 0);
+    pass.EndPass();
+
+    dawn::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+}
+
 DAWN_INSTANTIATE_TEST(BindGroupTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);

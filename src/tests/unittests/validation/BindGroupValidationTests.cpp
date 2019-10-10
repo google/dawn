@@ -526,7 +526,7 @@ TEST_F(BindGroupLayoutValidationTest, DynamicAndTypeCompatibility) {
                 }));
 }
 
-// This test verifies that visibility of bindings in BindGroupLayout can't be none
+// This test verifies that visibility of bindings in BindGroupLayout can be none
 TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutVisibilityNone) {
     utils::MakeBindGroupLayout(device,
                                {
@@ -538,7 +538,7 @@ TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutVisibilityNone) {
     dawn::BindGroupLayoutDescriptor descriptor;
     descriptor.bindingCount = 1;
     descriptor.bindings = &binding;
-    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor));
+    device.CreateBindGroupLayout(&descriptor);
 }
 
 // Check that dynamic buffer numbers exceed maximum value in one bind group layout.
