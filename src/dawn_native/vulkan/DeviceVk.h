@@ -67,7 +67,7 @@ namespace dawn_native { namespace vulkan {
         VkCommandBuffer GetPendingCommandBuffer();
         CommandRecordingContext* GetPendingRecordingContext();
         Serial GetPendingCommandSerial() const override;
-        void SubmitPendingCommands();
+        MaybeError SubmitPendingCommands();
 
         TextureBase* CreateTextureWrappingVulkanImage(
             const ExternalImageDescriptor* descriptor,

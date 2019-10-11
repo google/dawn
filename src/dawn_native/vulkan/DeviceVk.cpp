@@ -222,7 +222,7 @@ namespace dawn_native { namespace vulkan {
         mDeleter->Tick(mCompletedSerial);
 
         if (mPendingCommands.pool != VK_NULL_HANDLE) {
-            SubmitPendingCommands();
+            DAWN_TRY(SubmitPendingCommands());
         } else if (mCompletedSerial == mLastSubmittedSerial) {
             // If there's no GPU work in flight we still need to artificially increment the serial
             // so that CPU operations waiting on GPU completion can know they don't have to wait.
@@ -294,14 +294,13 @@ namespace dawn_native { namespace vulkan {
         return &mRecordingContext;
     }
 
-    void Device::SubmitPendingCommands() {
+    MaybeError Device::SubmitPendingCommands() {
         if (mPendingCommands.pool == VK_NULL_HANDLE) {
-            return;
+            return {};
         }
 
-        if (fn.EndCommandBuffer(mPendingCommands.commandBuffer) != VK_SUCCESS) {
-            ASSERT(false);
-        }
+        DAWN_TRY(CheckVkSuccess(fn.EndCommandBuffer(mPendingCommands.commandBuffer),
+                                "vkEndCommandBuffer"));
 
         std::vector<VkPipelineStageFlags> dstStageMasks(mRecordingContext.waitSemaphores.size(),
                                                         VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
@@ -320,9 +319,7 @@ namespace dawn_native { namespace vulkan {
         submitInfo.pSignalSemaphores = mRecordingContext.signalSemaphores.data();
 
         VkFence fence = GetUnusedFence();
-        if (fn.QueueSubmit(mQueue, 1, &submitInfo, fence) != VK_SUCCESS) {
-            ASSERT(false);
-        }
+        DAWN_TRY(CheckVkSuccess(fn.QueueSubmit(mQueue, 1, &submitInfo, fence), "vkQueueSubmit"));
 
         mLastSubmittedSerial++;
         mCommandsInFlight.Enqueue(mPendingCommands, mLastSubmittedSerial);
@@ -338,6 +335,8 @@ namespace dawn_native { namespace vulkan {
         }
 
         mRecordingContext = CommandRecordingContext();
+
+        return {};
     }
 
     ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice physicalDevice) {

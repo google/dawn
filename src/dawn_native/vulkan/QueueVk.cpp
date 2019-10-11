@@ -38,7 +38,8 @@ namespace dawn_native { namespace vulkan {
             DAWN_TRY(ToBackend(commands[i])->RecordCommands(recordingContext));
         }
 
-        device->SubmitPendingCommands();
+        DAWN_TRY(device->SubmitPendingCommands());
+
         return {};
     }
 

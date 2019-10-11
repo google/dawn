@@ -562,7 +562,7 @@ namespace dawn_native { namespace vulkan {
 
         // Queue submit to signal we are done with the texture
         device->GetPendingRecordingContext()->signalSemaphores.push_back(mSignalSemaphore);
-        device->SubmitPendingCommands();
+        DAWN_TRY(device->SubmitPendingCommands());
 
         // Write out the signal semaphore
         *outSignalSemaphore = mSignalSemaphore;

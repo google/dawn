@@ -59,7 +59,7 @@ namespace dawn_native { namespace vulkan {
         CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
         ToBackend(texture)->TransitionUsageNow(recordingContext, mTextureUsage);
 
-        device->SubmitPendingCommands();
+        DAWN_TRY(device->SubmitPendingCommands());
 
         return {};
     }
