@@ -75,12 +75,15 @@ namespace dawn_native { namespace vulkan {
         mExternalMemoryService = std::make_unique<external_memory::Service>(this);
         mExternalSemaphoreService = std::make_unique<external_semaphore::Service>(this);
 
+        DAWN_TRY(PrepareRecordingContext());
+
         return {};
     }
 
     Device::~Device() {
-        // Immediately forget about all pending commands so we don't try to submit them in Tick
-        FreeCommands(&mPendingCommands);
+        // Immediately tag the recording context as unused so we don't try to submit it in Tick.
+        mRecordingContext.used = false;
+        fn.DestroyCommandPool(mVkDevice, mRecordingContext.commandPool, nullptr);
 
         if (fn.QueueWaitIdle(mQueue) != VK_SUCCESS) {
             ASSERT(false);
@@ -110,8 +113,8 @@ namespace dawn_native { namespace vulkan {
         Tick();
 
         ASSERT(mCommandsInFlight.Empty());
-        for (auto& commands : mUnusedCommands) {
-            FreeCommands(&commands);
+        for (const CommandPoolAndBuffer& commands : mUnusedCommands) {
+            fn.DestroyCommandPool(mVkDevice, commands.pool, nullptr);
         }
         mUnusedCommands.clear();
 
@@ -221,7 +224,7 @@ namespace dawn_native { namespace vulkan {
 
         mDeleter->Tick(mCompletedSerial);
 
-        if (mPendingCommands.pool != VK_NULL_HANDLE) {
+        if (mRecordingContext.used) {
             DAWN_TRY(SubmitPendingCommands());
         } else if (mCompletedSerial == mLastSubmittedSerial) {
             // If there's no GPU work in flight we still need to artificially increment the serial
@@ -268,38 +271,18 @@ namespace dawn_native { namespace vulkan {
         return mRenderPassCache.get();
     }
 
-    VkCommandBuffer Device::GetPendingCommandBuffer() {
-        if (mPendingCommands.pool == VK_NULL_HANDLE) {
-            mPendingCommands = GetUnusedCommands();
-
-            VkCommandBufferBeginInfo beginInfo;
-            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-            beginInfo.pNext = nullptr;
-            beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-            beginInfo.pInheritanceInfo = nullptr;
-
-            if (fn.BeginCommandBuffer(mPendingCommands.commandBuffer, &beginInfo) != VK_SUCCESS) {
-                ASSERT(false);
-            }
-        }
-
-        return mPendingCommands.commandBuffer;
-    }
-
     CommandRecordingContext* Device::GetPendingRecordingContext() {
-        if (mRecordingContext.commandBuffer == VK_NULL_HANDLE) {
-            mRecordingContext.commandBuffer = GetPendingCommandBuffer();
-        }
-
+        ASSERT(mRecordingContext.commandBuffer != VK_NULL_HANDLE);
+        mRecordingContext.used = true;
         return &mRecordingContext;
     }
 
     MaybeError Device::SubmitPendingCommands() {
-        if (mPendingCommands.pool == VK_NULL_HANDLE) {
+        if (!mRecordingContext.used) {
             return {};
         }
 
-        DAWN_TRY(CheckVkSuccess(fn.EndCommandBuffer(mPendingCommands.commandBuffer),
+        DAWN_TRY(CheckVkSuccess(fn.EndCommandBuffer(mRecordingContext.commandBuffer),
                                 "vkEndCommandBuffer"));
 
         std::vector<VkPipelineStageFlags> dstStageMasks(mRecordingContext.waitSemaphores.size(),
@@ -313,18 +296,23 @@ namespace dawn_native { namespace vulkan {
         submitInfo.pWaitSemaphores = mRecordingContext.waitSemaphores.data();
         submitInfo.pWaitDstStageMask = dstStageMasks.data();
         submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &mPendingCommands.commandBuffer;
+        submitInfo.pCommandBuffers = &mRecordingContext.commandBuffer;
         submitInfo.signalSemaphoreCount =
             static_cast<uint32_t>(mRecordingContext.signalSemaphores.size());
         submitInfo.pSignalSemaphores = mRecordingContext.signalSemaphores.data();
 
-        VkFence fence = GetUnusedFence();
+        VkFence fence = VK_NULL_HANDLE;
+        DAWN_TRY_ASSIGN(fence, GetUnusedFence());
         DAWN_TRY(CheckVkSuccess(fn.QueueSubmit(mQueue, 1, &submitInfo, fence), "vkQueueSubmit"));
 
         mLastSubmittedSerial++;
-        mCommandsInFlight.Enqueue(mPendingCommands, mLastSubmittedSerial);
-        mPendingCommands = CommandPoolAndBuffer();
         mFencesInFlight.emplace(fence, mLastSubmittedSerial);
+
+        CommandPoolAndBuffer submittedCommands = {mRecordingContext.commandPool,
+                                                  mRecordingContext.commandBuffer};
+        mCommandsInFlight.Enqueue(submittedCommands, mLastSubmittedSerial);
+        mRecordingContext = CommandRecordingContext();
+        DAWN_TRY(PrepareRecordingContext());
 
         for (VkSemaphore semaphore : mRecordingContext.waitSemaphores) {
             mDeleter->DeleteWhenUnused(semaphore);
@@ -333,8 +321,6 @@ namespace dawn_native { namespace vulkan {
         for (VkSemaphore semaphore : mRecordingContext.signalSemaphores) {
             mDeleter->DeleteWhenUnused(semaphore);
         }
-
-        mRecordingContext = CommandRecordingContext();
 
         return {};
     }
@@ -461,9 +447,11 @@ namespace dawn_native { namespace vulkan {
         return const_cast<VulkanFunctions*>(&fn);
     }
 
-    VkFence Device::GetUnusedFence() {
+    ResultOrError<VkFence> Device::GetUnusedFence() {
         if (!mUnusedFences.empty()) {
             VkFence fence = mUnusedFences.back();
+            DAWN_TRY(CheckVkSuccess(fn.ResetFences(mVkDevice, 1, &fence), "vkResetFences"));
+
             mUnusedFences.pop_back();
             return fence;
         }
@@ -474,9 +462,8 @@ namespace dawn_native { namespace vulkan {
         createInfo.flags = 0;
 
         VkFence fence = VK_NULL_HANDLE;
-        if (fn.CreateFence(mVkDevice, &createInfo, nullptr, &fence) != VK_SUCCESS) {
-            ASSERT(false);
-        }
+        DAWN_TRY(CheckVkSuccess(fn.CreateFence(mVkDevice, &createInfo, nullptr, &fence),
+                                "vkCreateFence"));
 
         return fence;
     }
@@ -495,11 +482,7 @@ namespace dawn_native { namespace vulkan {
                 return;
             }
 
-            if (fn.ResetFences(mVkDevice, 1, &fence) != VK_SUCCESS) {
-                ASSERT(false);
-            }
             mUnusedFences.push_back(fence);
-
             mFencesInFlight.pop();
 
             ASSERT(fenceSerial > mCompletedSerial);
@@ -507,58 +490,60 @@ namespace dawn_native { namespace vulkan {
         }
     }
 
-    Device::CommandPoolAndBuffer Device::GetUnusedCommands() {
+    MaybeError Device::PrepareRecordingContext() {
+        ASSERT(!mRecordingContext.used);
+        ASSERT(mRecordingContext.commandBuffer == VK_NULL_HANDLE);
+        ASSERT(mRecordingContext.commandPool == VK_NULL_HANDLE);
+
+        // First try to recycle unused command pools.
         if (!mUnusedCommands.empty()) {
             CommandPoolAndBuffer commands = mUnusedCommands.back();
             mUnusedCommands.pop_back();
-            return commands;
+            DAWN_TRY(CheckVkSuccess(fn.ResetCommandPool(mVkDevice, commands.pool, 0),
+                                    "vkResetCommandPool"));
+
+            mRecordingContext.commandBuffer = commands.commandBuffer;
+            mRecordingContext.commandPool = commands.pool;
+        } else {
+            // Create a new command pool for our commands and allocate the command buffer.
+            VkCommandPoolCreateInfo createInfo;
+            createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+            createInfo.pNext = nullptr;
+            createInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+            createInfo.queueFamilyIndex = mQueueFamily;
+
+            DAWN_TRY(CheckVkSuccess(fn.CreateCommandPool(mVkDevice, &createInfo, nullptr,
+                                                         &mRecordingContext.commandPool),
+                                    "vkCreateCommandPool"));
+
+            VkCommandBufferAllocateInfo allocateInfo;
+            allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+            allocateInfo.pNext = nullptr;
+            allocateInfo.commandPool = mRecordingContext.commandPool;
+            allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+            allocateInfo.commandBufferCount = 1;
+
+            DAWN_TRY(CheckVkSuccess(fn.AllocateCommandBuffers(mVkDevice, &allocateInfo,
+                                                              &mRecordingContext.commandBuffer),
+                                    "vkAllocateCommandBuffers"));
         }
 
-        CommandPoolAndBuffer commands;
+        // Start the recording of commands in the command buffer.
+        VkCommandBufferBeginInfo beginInfo;
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.pNext = nullptr;
+        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        beginInfo.pInheritanceInfo = nullptr;
 
-        VkCommandPoolCreateInfo createInfo;
-        createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        createInfo.pNext = nullptr;
-        createInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
-        createInfo.queueFamilyIndex = mQueueFamily;
-
-        if (fn.CreateCommandPool(mVkDevice, &createInfo, nullptr, &commands.pool) != VK_SUCCESS) {
-            ASSERT(false);
-        }
-
-        VkCommandBufferAllocateInfo allocateInfo;
-        allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocateInfo.pNext = nullptr;
-        allocateInfo.commandPool = commands.pool;
-        allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocateInfo.commandBufferCount = 1;
-
-        if (fn.AllocateCommandBuffers(mVkDevice, &allocateInfo, &commands.commandBuffer) !=
-            VK_SUCCESS) {
-            ASSERT(false);
-        }
-
-        return commands;
+        return CheckVkSuccess(fn.BeginCommandBuffer(mRecordingContext.commandBuffer, &beginInfo),
+                              "vkBeginCommandBuffer");
     }
 
     void Device::RecycleCompletedCommands() {
         for (auto& commands : mCommandsInFlight.IterateUpTo(mCompletedSerial)) {
-            if (fn.ResetCommandPool(mVkDevice, commands.pool, 0) != VK_SUCCESS) {
-                ASSERT(false);
-            }
             mUnusedCommands.push_back(commands);
         }
         mCommandsInFlight.ClearUpTo(mCompletedSerial);
-    }
-
-    void Device::FreeCommands(CommandPoolAndBuffer* commands) {
-        if (commands->pool != VK_NULL_HANDLE) {
-            fn.DestroyCommandPool(mVkDevice, commands->pool, nullptr);
-            commands->pool = VK_NULL_HANDLE;
-        }
-
-        // Command buffers are implicitly destroyed when the command pool is.
-        commands->commandBuffer = VK_NULL_HANDLE;
     }
 
     ResultOrError<std::unique_ptr<StagingBufferBase>> Device::CreateStagingBuffer(size_t size) {
@@ -573,6 +558,8 @@ namespace dawn_native { namespace vulkan {
                                                BufferBase* destination,
                                                uint64_t destinationOffset,
                                                uint64_t size) {
+        CommandRecordingContext* recordingContext = GetPendingRecordingContext();
+
         // Insert memory barrier to ensure host write operations are made visible before
         // copying from the staging buffer. However, this barrier can be removed (see note below).
         //
@@ -582,15 +569,15 @@ namespace dawn_native { namespace vulkan {
 
         // Insert pipeline barrier to ensure correct ordering with previous memory operations on the
         // buffer.
-        ToBackend(destination)
-            ->TransitionUsageNow(GetPendingRecordingContext(), dawn::BufferUsage::CopyDst);
+        ToBackend(destination)->TransitionUsageNow(recordingContext, dawn::BufferUsage::CopyDst);
 
         VkBufferCopy copy;
         copy.srcOffset = sourceOffset;
         copy.dstOffset = destinationOffset;
         copy.size = size;
 
-        this->fn.CmdCopyBuffer(GetPendingCommandBuffer(), ToBackend(source)->GetBufferHandle(),
+        this->fn.CmdCopyBuffer(recordingContext->commandBuffer,
+                               ToBackend(source)->GetBufferHandle(),
                                ToBackend(destination)->GetHandle(), 1, &copy);
 
         return {};

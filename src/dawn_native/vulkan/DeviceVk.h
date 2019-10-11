@@ -64,7 +64,6 @@ namespace dawn_native { namespace vulkan {
         MemoryAllocator* GetMemoryAllocator() const;
         RenderPassCache* GetRenderPassCache() const;
 
-        VkCommandBuffer GetPendingCommandBuffer();
         CommandRecordingContext* GetPendingRecordingContext();
         Serial GetPendingCommandSerial() const override;
         MaybeError SubmitPendingCommands();
@@ -144,7 +143,7 @@ namespace dawn_native { namespace vulkan {
         std::unique_ptr<external_memory::Service> mExternalMemoryService;
         std::unique_ptr<external_semaphore::Service> mExternalSemaphoreService;
 
-        VkFence GetUnusedFence();
+        ResultOrError<VkFence> GetUnusedFence();
         void CheckPassedFences();
 
         // We track which operations are in flight on the GPU with an increasing serial.
@@ -152,22 +151,22 @@ namespace dawn_native { namespace vulkan {
         // to a serial and a fence, such that when the fence is "ready" we know the operations
         // have finished.
         std::queue<std::pair<VkFence, Serial>> mFencesInFlight;
+        // Fences in the unused list aren't reset yet.
         std::vector<VkFence> mUnusedFences;
         Serial mCompletedSerial = 0;
         Serial mLastSubmittedSerial = 0;
+
+        MaybeError PrepareRecordingContext();
+        void RecycleCompletedCommands();
 
         struct CommandPoolAndBuffer {
             VkCommandPool pool = VK_NULL_HANDLE;
             VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
         };
-
-        CommandPoolAndBuffer GetUnusedCommands();
-        void RecycleCompletedCommands();
-        void FreeCommands(CommandPoolAndBuffer* commands);
-
         SerialQueue<CommandPoolAndBuffer> mCommandsInFlight;
+        // Command pools in the unused list haven't been reset yet.
         std::vector<CommandPoolAndBuffer> mUnusedCommands;
-        CommandPoolAndBuffer mPendingCommands;
+        // There is always a valid recording context stored in mRecordingContext
         CommandRecordingContext mRecordingContext;
 
         MaybeError ImportExternalImage(const ExternalImageDescriptor* descriptor,
