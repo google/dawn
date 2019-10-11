@@ -35,7 +35,7 @@ namespace dawn_native { namespace vulkan {
 
         CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
         for (uint32_t i = 0; i < commandCount; ++i) {
-            ToBackend(commands[i])->RecordCommands(recordingContext);
+            DAWN_TRY(ToBackend(commands[i])->RecordCommands(recordingContext));
         }
 
         device->SubmitPendingCommands();

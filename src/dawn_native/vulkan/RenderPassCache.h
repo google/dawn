@@ -15,9 +15,9 @@
 #ifndef DAWNNATIVE_VULKAN_RENDERPASSCACHE_H_
 #define DAWNNATIVE_VULKAN_RENDERPASSCACHE_H_
 
-#include "common/vulkan_platform.h"
-
 #include "common/Constants.h"
+#include "common/vulkan_platform.h"
+#include "dawn_native/Error.h"
 #include "dawn_native/dawn_platform.h"
 
 #include <array>
@@ -66,11 +66,12 @@ namespace dawn_native { namespace vulkan {
         RenderPassCache(Device* device);
         ~RenderPassCache();
 
-        VkRenderPass GetRenderPass(const RenderPassCacheQuery& query);
+        ResultOrError<VkRenderPass> GetRenderPass(const RenderPassCacheQuery& query);
 
       private:
         // Does the actual VkRenderPass creation on a cache miss.
-        VkRenderPass CreateRenderPassForQuery(const RenderPassCacheQuery& query) const;
+        ResultOrError<VkRenderPass> CreateRenderPassForQuery(
+            const RenderPassCacheQuery& query) const;
 
         // Implements the functors necessary for to use RenderPassCacheQueries as unordered_map
         // keys.

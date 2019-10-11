@@ -29,6 +29,7 @@
 #include "dawn_native/vulkan/RenderPipelineVk.h"
 #include "dawn_native/vulkan/TextureVk.h"
 #include "dawn_native/vulkan/UtilsVulkan.h"
+#include "dawn_native/vulkan/VulkanError.h"
 
 namespace dawn_native { namespace vulkan {
 
@@ -105,9 +106,9 @@ namespace dawn_native { namespace vulkan {
             }
         };
 
-        void RecordBeginRenderPass(CommandRecordingContext* recordingContext,
-                                   Device* device,
-                                   BeginRenderPassCmd* renderPass) {
+        MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
+                                         Device* device,
+                                         BeginRenderPassCmd* renderPass) {
             VkCommandBuffer commands = recordingContext->commandBuffer;
 
             // Query a VkRenderPass from the cache
@@ -197,7 +198,7 @@ namespace dawn_native { namespace vulkan {
 
                 query.SetSampleCount(renderPass->attachmentState->GetSampleCount());
 
-                renderPassVK = device->GetRenderPassCache()->GetRenderPass(query);
+                DAWN_TRY_ASSIGN(renderPassVK, device->GetRenderPassCache()->GetRenderPass(query));
             }
 
             // Create a framebuffer that will be used once for the render pass and gather the clear
@@ -260,10 +261,10 @@ namespace dawn_native { namespace vulkan {
                 createInfo.height = renderPass->height;
                 createInfo.layers = 1;
 
-                if (device->fn.CreateFramebuffer(device->GetVkDevice(), &createInfo, nullptr,
-                                                 &framebuffer) != VK_SUCCESS) {
-                    ASSERT(false);
-                }
+                DAWN_TRY(
+                    CheckVkSuccess(device->fn.CreateFramebuffer(device->GetVkDevice(), &createInfo,
+                                                                nullptr, &framebuffer),
+                                   "CreateFramebuffer"));
 
                 // We don't reuse VkFramebuffers so mark the framebuffer for deletion as soon as the
                 // commands currently being recorded are finished.
@@ -283,6 +284,8 @@ namespace dawn_native { namespace vulkan {
             beginInfo.pClearValues = clearValues.data();
 
             device->fn.CmdBeginRenderPass(commands, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+            return {};
         }
     }  // anonymous namespace
 
@@ -354,7 +357,7 @@ namespace dawn_native { namespace vulkan {
         recordingContext->tempBuffers.emplace_back(tempBuffer);
     }
 
-    void CommandBuffer::RecordCommands(CommandRecordingContext* recordingContext) {
+    MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingContext) {
         Device* device = ToBackend(GetDevice());
         VkCommandBuffer commands = recordingContext->commandBuffer;
 
@@ -525,7 +528,7 @@ namespace dawn_native { namespace vulkan {
                     BeginRenderPassCmd* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
 
                     TransitionForPass(recordingContext, passResourceUsages[nextPassNumber]);
-                    RecordRenderPass(recordingContext, cmd);
+                    DAWN_TRY(RecordRenderPass(recordingContext, cmd));
 
                     nextPassNumber++;
                 } break;
@@ -542,6 +545,8 @@ namespace dawn_native { namespace vulkan {
                 default: { UNREACHABLE(); } break;
             }
         }
+
+        return {};
     }
 
     void CommandBuffer::RecordComputePass(CommandRecordingContext* recordingContext) {
@@ -649,12 +654,13 @@ namespace dawn_native { namespace vulkan {
         // EndComputePass should have been called
         UNREACHABLE();
     }
-    void CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingContext,
-                                         BeginRenderPassCmd* renderPassCmd) {
+
+    MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingContext,
+                                               BeginRenderPassCmd* renderPassCmd) {
         Device* device = ToBackend(GetDevice());
         VkCommandBuffer commands = recordingContext->commandBuffer;
 
-        RecordBeginRenderPass(recordingContext, device, renderPassCmd);
+        DAWN_TRY(RecordBeginRenderPass(recordingContext, device, renderPassCmd));
 
         // Set the default value for the dynamic state
         {
@@ -834,7 +840,7 @@ namespace dawn_native { namespace vulkan {
                 case Command::EndRenderPass: {
                     mCommands.NextCommand<EndRenderPassCmd>();
                     device->fn.CmdEndRenderPass(commands);
-                    return;
+                    return {};
                 } break;
 
                 case Command::SetBlendColor: {

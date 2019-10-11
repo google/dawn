@@ -37,14 +37,14 @@ namespace dawn_native { namespace vulkan {
                                      const CommandBufferDescriptor* descriptor);
         ~CommandBuffer();
 
-        void RecordCommands(CommandRecordingContext* recordingContext);
+        MaybeError RecordCommands(CommandRecordingContext* recordingContext);
 
       private:
         CommandBuffer(CommandEncoderBase* encoder, const CommandBufferDescriptor* descriptor);
 
         void RecordComputePass(CommandRecordingContext* recordingContext);
-        void RecordRenderPass(CommandRecordingContext* recordingContext,
-                              BeginRenderPassCmd* renderPass);
+        MaybeError RecordRenderPass(CommandRecordingContext* recordingContext,
+                                    BeginRenderPassCmd* renderPass);
         void RecordCopyImageWithTemporaryBuffer(CommandRecordingContext* recordingContext,
                                                 const TextureCopy& srcCopy,
                                                 const TextureCopy& dstCopy,

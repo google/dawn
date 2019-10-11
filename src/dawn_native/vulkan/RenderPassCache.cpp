@@ -18,6 +18,7 @@
 #include "common/HashUtils.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/TextureVk.h"
+#include "dawn_native/vulkan/VulkanError.h"
 
 namespace dawn_native { namespace vulkan {
 
@@ -71,18 +72,19 @@ namespace dawn_native { namespace vulkan {
         mCache.clear();
     }
 
-    VkRenderPass RenderPassCache::GetRenderPass(const RenderPassCacheQuery& query) {
+    ResultOrError<VkRenderPass> RenderPassCache::GetRenderPass(const RenderPassCacheQuery& query) {
         auto it = mCache.find(query);
         if (it != mCache.end()) {
-            return it->second;
+            return VkRenderPass(it->second);
         }
 
-        VkRenderPass renderPass = CreateRenderPassForQuery(query);
+        VkRenderPass renderPass;
+        DAWN_TRY_ASSIGN(renderPass, CreateRenderPassForQuery(query));
         mCache.emplace(query, renderPass);
         return renderPass;
     }
 
-    VkRenderPass RenderPassCache::CreateRenderPassForQuery(
+    ResultOrError<VkRenderPass> RenderPassCache::CreateRenderPassForQuery(
         const RenderPassCacheQuery& query) const {
         // The Vulkan subpasses want to know the layout of the attachments with VkAttachmentRef.
         // Precompute them as they must be pointer-chained in VkSubpassDescription
@@ -189,11 +191,9 @@ namespace dawn_native { namespace vulkan {
 
         // Create the render pass from the zillion parameters
         VkRenderPass renderPass;
-        if (mDevice->fn.CreateRenderPass(mDevice->GetVkDevice(), &createInfo, nullptr,
-                                         &renderPass) != VK_SUCCESS) {
-            ASSERT(false);
-        }
-
+        DAWN_TRY(CheckVkSuccess(
+            mDevice->fn.CreateRenderPass(mDevice->GetVkDevice(), &createInfo, nullptr, &renderPass),
+            "CreateRenderPass"));
         return renderPass;
     }
 

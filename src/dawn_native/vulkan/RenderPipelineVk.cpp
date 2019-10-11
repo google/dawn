@@ -474,7 +474,7 @@ namespace dawn_native { namespace vulkan {
 
             query.SetSampleCount(GetSampleCount());
 
-            renderPass = device->GetRenderPassCache()->GetRenderPass(query);
+            DAWN_TRY_ASSIGN(renderPass, device->GetRenderPassCache()->GetRenderPass(query));
         }
 
         // The create info chains in a bunch of things created on the stack here or inside state
