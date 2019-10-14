@@ -14,6 +14,8 @@
 
 #include "dawn_native/d3d12/ResourceHeapAllocationD3D12.h"
 
+#include <utility>
+
 namespace dawn_native { namespace d3d12 {
     ResourceHeapAllocation::ResourceHeapAllocation(const AllocationInfo& info,
                                                    uint64_t offset,
