@@ -112,4 +112,8 @@ namespace dawn {
 
     {% endfor %}
 
+    Proc GetProcAddress(Device const& device, const char* procName) {
+        return reinterpret_cast<Proc>(DawnGetProcAddress(device.Get(), procName));
+    }
+
 }

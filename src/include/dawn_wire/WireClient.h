@@ -120,8 +120,10 @@ namespace dawn_wire {
                 virtual ~WriteHandle();
             };
         };
-    }  // namespace client
 
+        // Backdoor to get the order of the ProcMap for testing
+        DAWN_WIRE_EXPORT std::vector<const char*> GetProcMapNamesForTesting();
+    }  // namespace client
 }  // namespace dawn_wire
 
 #endif  // DAWNWIRE_WIRECLIENT_H_

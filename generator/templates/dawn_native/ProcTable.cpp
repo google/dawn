@@ -12,12 +12,10 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#include "common/Assert.h"
-
 #include "dawn_native/dawn_platform.h"
 #include "dawn_native/DawnNative.h"
-#include "dawn_native/ErrorData.h"
-#include "dawn_native/ValidationUtils_autogen.h"
+
+#include <vector>
 
 {% for type in by_category["object"] %}
     {% if type.name.canonical_case() not in ["texture view"] %}
@@ -28,11 +26,12 @@
 namespace dawn_native {
 
     namespace {
+
         {% for type in by_category["object"] %}
             {% for method in native_methods(type) %}
                 {% set suffix = as_MethodSuffix(type.name, method.name) %}
 
-                {{as_cType(method.return_type.name)}} CToCpp{{suffix}}(
+                {{as_cType(method.return_type.name)}} Native{{suffix}}(
                     {{-as_cType(type.name)}} cSelf
                     {%- for arg in method.arguments -%}
                         , {{as_annotated_cType(arg)}}
@@ -71,13 +70,56 @@ namespace dawn_native {
                 }
             {% endfor %}
         {% endfor %}
+
+        struct ProcEntry {
+            DawnProc proc;
+            const char* name;
+        };
+        static const ProcEntry sProcMap[] = {
+            {% for (type, method) in methods_sorted_by_name %}
+                { reinterpret_cast<DawnProc>(Native{{as_MethodSuffix(type.name, method.name)}}), "{{as_cMethod(type.name, method.name)}}" },
+            {% endfor %}
+        };
+        static constexpr size_t sProcMapSize = sizeof(sProcMap) / sizeof(sProcMap[0]);
+    }
+
+    DawnProc NativeGetProcAddress(DawnDevice, const char* procName) {
+        if (procName == nullptr) {
+            return nullptr;
+        }
+
+        const ProcEntry* entry = std::lower_bound(&sProcMap[0], &sProcMap[sProcMapSize], procName,
+            [](const ProcEntry &a, const char *b) -> bool {
+                return strcmp(a.name, b) < 0;
+            }
+        );
+
+        if (entry != &sProcMap[sProcMapSize] && strcmp(entry->name, procName) == 0) {
+            return entry->proc;
+        }
+
+        if (strcmp(procName, "dawnGetProcAddress") == 0) {
+            return reinterpret_cast<DawnProc>(NativeGetProcAddress);
+        }
+
+        return nullptr;
+    }
+
+    std::vector<const char*> GetProcMapNamesForTesting() {
+        std::vector<const char*> result;
+        result.reserve(sProcMapSize);
+        for (const ProcEntry& entry : sProcMap) {
+            result.push_back(entry.name);
+        }
+        return result;
     }
 
     DawnProcTable GetProcsAutogen() {
         DawnProcTable table;
+        table.getProcAddress = NativeGetProcAddress;
         {% for type in by_category["object"] %}
             {% for method in native_methods(type) %}
-                table.{{as_varName(type.name, method.name)}} = CToCpp{{as_MethodSuffix(type.name, method.name)}};
+                table.{{as_varName(type.name, method.name)}} = Native{{as_MethodSuffix(type.name, method.name)}};
             {% endfor %}
         {% endfor %}
         return table;

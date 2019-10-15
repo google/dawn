@@ -26,6 +26,10 @@ void dawnProcSetProcs(const DawnProcTable* procs_) {
     }
 }
 
+DawnProc DawnGetProcAddress(DawnDevice device, const char* procName) {
+    return procs.getProcAddress(device, procName);
+}
+
 {% for type in by_category["object"] %}
     {% for method in native_methods(type) %}
         {{as_cType(method.return_type.name)}} {{as_cMethod(type.name, method.name)}}(

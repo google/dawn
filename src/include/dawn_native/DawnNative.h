@@ -160,6 +160,9 @@ namespace dawn_native {
 
     // Backdoor to get the number of lazy clears for testing
     DAWN_NATIVE_EXPORT size_t GetLazyClearCountForTesting(DawnDevice device);
+
+    // Backdoor to get the order of the ProcMap for testing
+    DAWN_NATIVE_EXPORT std::vector<const char*> GetProcMapNamesForTesting();
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_DAWNNATIVE_H_

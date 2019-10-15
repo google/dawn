@@ -18,6 +18,8 @@
 #include "dawn/dawn.h"
 
 typedef struct DawnProcTable {
+    DawnProcGetProcAddress getProcAddress;
+
     {% for type in by_category["object"] %}
         {% for method in native_methods(type) %}
             {{as_cProc(type.name, method.name)}} {{as_varName(type.name, method.name)}};

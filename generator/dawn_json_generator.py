@@ -448,6 +448,12 @@ def c_native_methods(types, typ):
         Method(Name('release'), types['void'], []),
     ]
 
+def get_methods_sorted_by_name(api_params):
+    unsorted = [(as_MethodSuffix(typ.name, method.name), typ, method) \
+            for typ in api_params['by_category']['object'] \
+            for method in c_native_methods(api_params['types'], typ) ]
+    return [(typ, method) for (_, typ, method) in sorted(unsorted)]
+
 class MultiGeneratorFromDawnJSON(Generator):
     def get_description(self):
         return 'Generates code for various target from Dawn.json.'
@@ -486,6 +492,7 @@ class MultiGeneratorFromDawnJSON(Generator):
             'convert_cType_to_cppType': convert_cType_to_cppType,
             'as_varName': as_varName,
             'decorate': decorate,
+            'methods_sorted_by_name': get_methods_sorted_by_name(api_params),
         }
 
         renders = []
