@@ -142,6 +142,7 @@ namespace dawn_native {
     }
 
     MaybeError DeviceBase::ValidateObject(const ObjectBase* object) const {
+        ASSERT(object != nullptr);
         if (DAWN_UNLIKELY(object->GetDevice() != this)) {
             return DAWN_VALIDATION_ERROR("Object from a different device.");
         }
