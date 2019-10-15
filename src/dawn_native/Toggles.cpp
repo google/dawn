@@ -57,6 +57,11 @@ namespace dawn_native {
                "Clears resource to zero on first usage. This initializes the resource "
                "so that no dirty bits from recycled memory is present in the new resource.",
                "https://bugs.chromium.org/p/dawn/issues/detail?id=145"}},
+             {Toggle::TurnOffVsync,
+              {"turn_off_vsync",
+               "Turn off vsync when rendering. In order to do performance test or run perf tests, "
+               "turn off vsync so that the fps can exeed 60.",
+               "https://bugs.chromium.org/p/dawn/issues/detail?id=237"}},
              {Toggle::UseTemporaryBufferInCompressedTextureToTextureCopy,
               {"use_temporary_buffer_in_texture_to_texture_copy",
                "Split texture-to-texture copy into two copies: copy from source texture into a "

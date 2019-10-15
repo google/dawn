@@ -28,6 +28,7 @@ namespace dawn_native {
         NonzeroClearResourcesOnCreationForTesting,
         AlwaysResolveIntoZeroLevelAndLayer,
         LazyClearResourceOnFirstUse,
+        TurnOffVsync,
         UseTemporaryBufferInCompressedTextureToTextureCopy,
 
         EnumCount,
