@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "common/Assert.h"
+#include "dawn/dawn_proc.h"
 #include "dawn/dawncpp.h"
 #include "dawn_native/DawnNative.h"
 #include "dawn_wire/WireServer.h"
@@ -56,7 +57,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     originalDeviceCreateSwapChain = procs.deviceCreateSwapChain;
     procs.deviceCreateSwapChain = ErrorDeviceCreateSwapChain;
 
-    dawnSetProcs(&procs);
+    dawnProcSetProcs(&procs);
 
     // Create an instance and find the null adapter to create a device with.
     std::unique_ptr<dawn_native::Instance> instance = std::make_unique<dawn_native::Instance>();

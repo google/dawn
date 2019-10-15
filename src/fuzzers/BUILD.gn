@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../scripts/dawn_overrides_with_defaults.gni")
 import("//build_overrides/build.gni")
+import("../../scripts/dawn_overrides_with_defaults.gni")
 
 # We only have libfuzzer in Chromium builds but if we build fuzzer targets only
 # there, we would risk breaking fuzzer targets all the time when making changes
@@ -127,7 +127,8 @@ dawn_fuzzer_test("dawn_wire_server_and_frontend_fuzzer") {
     "${dawn_root}/:libdawn_native_static",
     "${dawn_root}/:libdawn_wire_static",
     "${dawn_root}/src/common",
-    "${dawn_root}/src/dawn:libdawn_static",
+    "${dawn_root}/src/dawn:dawncpp",
+    "${dawn_root}/src/dawn:libdawn_proc",
   ]
 
   additional_configs = [ "${dawn_root}/src/common:dawn_internal" ]

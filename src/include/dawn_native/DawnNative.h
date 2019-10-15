@@ -16,6 +16,7 @@
 #define DAWNNATIVE_DAWNNATIVE_H_
 
 #include <dawn/dawn.h>
+#include <dawn/dawn_proc_table.h>
 #include <dawn_native/dawn_native_export.h>
 
 #include <string>

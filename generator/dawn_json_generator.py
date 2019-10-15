@@ -453,7 +453,7 @@ class MultiGeneratorFromDawnJSON(Generator):
         return 'Generates code for various target from Dawn.json.'
 
     def add_commandline_arguments(self, parser):
-        allowed_targets = ['dawn_headers', 'libdawn', 'mock_dawn', 'dawn_wire', "dawn_native_utils"]
+        allowed_targets = ['dawn_headers', 'dawncpp', 'dawn_proc', 'mock_dawn', 'dawn_wire', "dawn_native_utils"]
 
         parser.add_argument('--dawn-json', required=True, type=str, help ='The DAWN JSON definition to use.')
         parser.add_argument('--wire-json', default=None, type=str, help='The DAWN WIRE JSON definition to use.')
@@ -495,11 +495,13 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if 'dawn_headers' in targets:
             renders.append(FileRender('api.h', 'src/include/dawn/dawn.h', [base_params, api_params, c_params]))
-            renders.append(FileRender('apicpp.h', 'src/include/dawn/dawncpp.h', [base_params, api_params, cpp_params]))
+            renders.append(FileRender('api_proc_table.h', 'src/include/dawn/dawn_proc_table.h', [base_params, api_params, c_params]))
 
-        if 'libdawn' in targets:
-            additional_params = {'native_methods': lambda typ: cpp_native_methods(api_params['types'], typ)}
-            renders.append(FileRender('api.c', 'src/dawn/dawn.c', [base_params, api_params, c_params]))
+        if 'dawn_proc' in targets:
+            renders.append(FileRender('api_proc.c', 'src/dawn/dawn_proc.c', [base_params, api_params, c_params]))
+
+        if 'dawncpp' in targets:
+            renders.append(FileRender('apicpp.h', 'src/include/dawn/dawncpp.h', [base_params, api_params, cpp_params]))
             renders.append(FileRender('apicpp.cpp', 'src/dawn/dawncpp.cpp', [base_params, api_params, cpp_params]))
 
         if 'mock_dawn' in targets:

@@ -16,7 +16,6 @@
 #define DAWN_DAWNCPP_H_
 
 #include "dawn/dawn.h"
-#include "dawn/dawn_export.h"
 #include "dawn/EnumClassBitmasks.h"
 
 namespace dawn {
@@ -143,7 +142,7 @@ namespace dawn {
 
 {% macro render_cpp_method_declaration(type, method) %}
     {% set CppType = as_cppType(type.name) %}
-    DAWN_EXPORT {{as_cppType(method.return_type.name)}} {{method.name.CamelCase()}}(
+    {{as_cppType(method.return_type.name)}} {{method.name.CamelCase()}}(
         {%- for arg in method.arguments -%}
             {%- if not loop.first %}, {% endif -%}
             {%- if arg.type.category == "object" and arg.annotation == "value" -%}
@@ -170,8 +169,8 @@ namespace dawn {
 
           private:
             friend ObjectBase<{{CppType}}, {{CType}}>;
-            static DAWN_EXPORT void DawnReference({{CType}} handle);
-            static DAWN_EXPORT void DawnRelease({{CType}} handle);
+            static void DawnReference({{CType}} handle);
+            static void DawnRelease({{CType}} handle);
         };
 
     {% endfor %}

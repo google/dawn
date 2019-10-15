@@ -12,13 +12,13 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#include "dawn/dawn.h"
+#include "dawn/dawn_proc.h"
 
 static DawnProcTable procs;
 
 static DawnProcTable nullProcs;
 
-void dawnSetProcs(const DawnProcTable* procs_) {
+void dawnProcSetProcs(const DawnProcTable* procs_) {
     if (procs_) {
         procs = *procs_;
     } else {

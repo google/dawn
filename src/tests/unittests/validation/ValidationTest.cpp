@@ -16,6 +16,7 @@
 
 #include "common/Assert.h"
 #include "dawn/dawn.h"
+#include "dawn/dawn_proc.h"
 #include "dawn_native/NullBackend.h"
 
 ValidationTest::ValidationTest() {
@@ -37,7 +38,7 @@ ValidationTest::ValidationTest() {
     ASSERT(foundNullAdapter);
 
     DawnProcTable procs = dawn_native::GetProcs();
-    dawnSetProcs(&procs);
+    dawnProcSetProcs(&procs);
 
     device = CreateDeviceFromAdapter(adapter, std::vector<const char*>());
 }
@@ -64,7 +65,7 @@ ValidationTest::~ValidationTest() {
     // We need to destroy Dawn objects before setting the procs to null otherwise the dawn*Release
     // will call a nullptr
     device = dawn::Device();
-    dawnSetProcs(nullptr);
+    dawnProcSetProcs(nullptr);
 }
 
 void ValidationTest::TearDown() {

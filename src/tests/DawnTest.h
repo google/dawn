@@ -15,6 +15,7 @@
 #ifndef TESTS_DAWNTEST_H_
 #define TESTS_DAWNTEST_H_
 
+#include "dawn/dawn_proc_table.h"
 #include "dawn/dawncpp.h"
 #include "dawn_native/DawnNative.h"
 

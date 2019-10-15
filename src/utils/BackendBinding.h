@@ -15,7 +15,7 @@
 #ifndef UTILS_BACKENDBINDING_H_
 #define UTILS_BACKENDBINDING_H_
 
-#include "dawn/dawncpp.h"
+#include "dawn/dawn.h"
 #include "dawn_native/DawnNative.h"
 
 struct GLFWwindow;

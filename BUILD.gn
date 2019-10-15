@@ -749,7 +749,8 @@ test("dawn_unittests") {
     ":libdawn_wire",
     ":mock_dawn_gen",
     "${dawn_root}/src/common",
-    "${dawn_root}/src/dawn:libdawn",
+    "${dawn_root}/src/dawn:dawncpp",
+    "${dawn_root}/src/dawn:libdawn_proc",
     "third_party:gmock_and_gtest",
   ]
 
@@ -840,7 +841,8 @@ source_set("dawn_end2end_tests_sources") {
     ":libdawn_native",
     ":libdawn_wire",
     "${dawn_root}/src/common",
-    "${dawn_root}/src/dawn:libdawn",
+    "${dawn_root}/src/dawn:dawncpp",
+    "${dawn_root}/src/dawn:libdawn_proc",
     "third_party:gmock_and_gtest",
   ]
 
@@ -917,7 +919,8 @@ source_set("dawn_white_box_tests_sources") {
     ":libdawn_native_sources",
     ":libdawn_wire",
     "${dawn_root}/src/common",
-    "${dawn_root}/src/dawn:libdawn",
+    "${dawn_root}/src/dawn:dawncpp",
+    "${dawn_root}/src/dawn:libdawn_proc",
     "third_party:gmock_and_gtest",
   ]
 
@@ -950,7 +953,8 @@ test("dawn_end2end_tests") {
     ":libdawn_native",
     ":libdawn_wire",
     "${dawn_root}/src/common",
-    "${dawn_root}/src/dawn:libdawn",
+    "${dawn_root}/src/dawn:dawncpp",
+    "${dawn_root}/src/dawn:libdawn_proc",
     "third_party:gmock_and_gtest",
   ]
 
@@ -982,7 +986,8 @@ test("dawn_perf_tests") {
     ":libdawn_native",
     ":libdawn_wire",
     "${dawn_root}/src/common",
-    "${dawn_root}/src/dawn:libdawn",
+    "${dawn_root}/src/dawn:dawncpp",
+    "${dawn_root}/src/dawn:libdawn_proc",
     "third_party:gmock_and_gtest",
   ]
 
@@ -1059,7 +1064,8 @@ if (dawn_standalone) {
       ":libdawn_native",
       ":libdawn_wire",
       "${dawn_root}/src/common",
-      "${dawn_root}/src/dawn:libdawn",
+      "${dawn_root}/src/dawn:dawncpp",
+      "${dawn_root}/src/dawn:libdawn_proc",
     ]
     public_configs = [ "${dawn_root}/src/common:dawn_internal" ]
   }

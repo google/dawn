@@ -15,9 +15,10 @@
 #ifndef DAWNWIRE_WIRECLIENT_H_
 #define DAWNWIRE_WIRECLIENT_H_
 
-#include <memory>
-
+#include "dawn/dawn_proc_table.h"
 #include "dawn_wire/Wire.h"
+
+#include <memory>
 
 namespace dawn_wire {
 

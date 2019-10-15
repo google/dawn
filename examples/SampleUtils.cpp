@@ -20,6 +20,7 @@
 #include "utils/TerribleCommandBuffer.h"
 
 #include <dawn/dawn.h>
+#include <dawn/dawn_proc.h>
 #include <dawn/dawn_wsi.h>
 #include <dawn/dawncpp.h>
 #include <dawn_native/DawnNative.h>
@@ -160,7 +161,7 @@ dawn::Device CreateCppDawnDevice() {
             break;
     }
 
-    dawnSetProcs(&procs);
+    dawnProcSetProcs(&procs);
     procs.deviceSetUncapturedErrorCallback(cDevice, PrintDeviceError, nullptr);
     return dawn::Device::Acquire(cDevice);
 }

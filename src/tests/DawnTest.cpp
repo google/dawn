@@ -18,6 +18,7 @@
 #include "common/Constants.h"
 #include "common/Math.h"
 #include "common/Platform.h"
+#include "dawn/dawn_proc.h"
 #include "dawn_native/DawnNative.h"
 #include "dawn_wire/WireClient.h"
 #include "dawn_wire/WireServer.h"
@@ -262,7 +263,7 @@ DawnTestBase::~DawnTestBase() {
         backendProcs.deviceRelease(backendDevice);
     }
 
-    dawnSetProcs(nullptr);
+    dawnProcSetProcs(nullptr);
 }
 
 bool DawnTestBase::IsD3D12() const {
@@ -452,7 +453,7 @@ void DawnTestBase::SetUp() {
 
     // Set up the device and queue because all tests need them, and DawnTestBase needs them too for
     // the deferred expectations.
-    dawnSetProcs(&procs);
+    dawnProcSetProcs(&procs);
     device = dawn::Device::Acquire(cDevice);
     queue = device.CreateQueue();
 

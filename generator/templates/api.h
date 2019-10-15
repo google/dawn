@@ -84,22 +84,7 @@ typedef void (*DawnFenceOnCompletionCallback)(DawnFenceCompletionStatus status, 
 {% endfor %}
 #endif  // !defined(DAWN_SKIP_PROCS)
 
-struct DawnProcTable_s {
-    {% for type in by_category["object"] %}
-        {% for method in native_methods(type) %}
-            {{as_cProc(type.name, method.name)}} {{as_varName(type.name, method.name)}};
-        {% endfor %}
-
-    {% endfor %}
-};
-typedef struct DawnProcTable_s DawnProcTable;
-
-// Stuff below is for convenience and will forward calls to a static DawnProcTable.
-
 #if !defined(DAWN_SKIP_DECLARATIONS)
-
-// Set which DawnProcTable will be used
-DAWN_EXPORT void dawnSetProcs(const DawnProcTable* procs);
 
 {% for type in by_category["object"] %}
     // Methods of {{type.name.CamelCase()}}

@@ -14,6 +14,7 @@
 
 #include "tests/unittests/wire/WireTest.h"
 
+#include "dawn/dawn_proc.h"
 #include "dawn_wire/WireClient.h"
 #include "dawn_wire/WireServer.h"
 #include "utils/TerribleCommandBuffer.h"
@@ -65,13 +66,13 @@ void WireTest::SetUp() {
 
     device = mWireClient->GetDevice();
     DawnProcTable clientProcs = mWireClient->GetProcs();
-    dawnSetProcs(&clientProcs);
+    dawnProcSetProcs(&clientProcs);
 
     apiDevice = mockDevice;
 }
 
 void WireTest::TearDown() {
-    dawnSetProcs(nullptr);
+    dawnProcSetProcs(nullptr);
 
     // Derived classes should call the base TearDown() first. The client must
     // be reset before any mocks are deleted.

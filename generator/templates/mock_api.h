@@ -15,8 +15,9 @@
 #ifndef MOCK_DAWN_H
 #define MOCK_DAWN_H
 
-#include <gmock/gmock.h>
 #include <dawn/dawn.h>
+#include <dawn/dawn_proc_table.h>
+#include <gmock/gmock.h>
 
 #include <memory>
 

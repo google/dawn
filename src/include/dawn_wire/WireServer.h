@@ -19,6 +19,8 @@
 
 #include "dawn_wire/Wire.h"
 
+struct DawnProcTable;
+
 namespace dawn_wire {
 
     namespace server {
