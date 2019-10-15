@@ -539,7 +539,9 @@ namespace dawn_native { namespace d3d12 {
                 DAWN_TRY_ASSIGN(rtvHeap, descriptorHeapAllocator->AllocateCPUHeap(
                                              D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 1));
                 D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap.GetCPUHandle(0);
-                const float clearColorRGBA[4] = {clearColor, clearColor, clearColor, clearColor};
+                const float fClearColor = static_cast<float>(clearColor);
+                const float clearColorRGBA[4] = {fClearColor, fClearColor, fClearColor,
+                                                 fClearColor};
 
                 // TODO(natlee@microsoft.com): clear all array layers for 2D array textures
                 for (uint32_t i = baseMipLevel; i < baseMipLevel + levelCount; i++) {
