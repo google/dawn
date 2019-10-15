@@ -85,9 +85,12 @@ namespace dawn_native { namespace vulkan {
         mRecordingContext.used = false;
         fn.DestroyCommandPool(mVkDevice, mRecordingContext.commandPool, nullptr);
 
-        if (fn.QueueWaitIdle(mQueue) != VK_SUCCESS) {
-            ASSERT(false);
-        }
+        VkResult waitIdleResult = fn.QueueWaitIdle(mQueue);
+        // Ignore the result of QueueWaitIdle: it can return OOM which we can't really do anything
+        // about, Device lost, which means workloads running on the GPU are no longer accessible
+        // (so they are as good as waited on) or success.
+        DAWN_UNUSED(waitIdleResult);
+
         CheckPassedFences();
 
         // Make sure all fences are complete by explicitly waiting on them all

@@ -98,12 +98,7 @@ namespace dawn_native { namespace vulkan {
                                    bool mappable,
                                    DeviceMemoryAllocation* allocation) {
         int bestType = FindBestTypeIndex(requirements, mappable);
-
-        // TODO(cwallez@chromium.org): I think the Vulkan spec guarantees this should never happen
-        if (bestType == -1) {
-            ASSERT(false);
-            return false;
-        }
+        ASSERT(bestType >= 0);
 
         VkMemoryAllocateInfo allocateInfo;
         allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
