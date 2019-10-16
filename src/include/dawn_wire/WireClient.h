@@ -19,6 +19,7 @@
 #include "dawn_wire/Wire.h"
 
 #include <memory>
+#include <vector>
 
 namespace dawn_wire {
 
