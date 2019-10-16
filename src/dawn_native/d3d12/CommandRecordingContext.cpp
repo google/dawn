@@ -13,28 +13,28 @@
 // limitations under the License.
 #include "dawn_native/d3d12/CommandRecordingContext.h"
 #include "dawn_native/d3d12/CommandAllocatorManager.h"
+#include "dawn_native/d3d12/D3D12Error.h"
 
 namespace dawn_native { namespace d3d12 {
 
     MaybeError CommandRecordingContext::Open(ID3D12Device* d3d12Device,
                                              CommandAllocatorManager* commandAllocationManager) {
         ASSERT(!IsOpen());
+        ID3D12CommandAllocator* commandAllocator;
+        DAWN_TRY_ASSIGN(commandAllocator, commandAllocationManager->ReserveCommandAllocator());
         if (mD3d12CommandList != nullptr) {
-            const HRESULT hr = mD3d12CommandList->Reset(
-                commandAllocationManager->ReserveCommandAllocator().Get(), nullptr);
-            if (FAILED(hr)) {
+            MaybeError error = CheckHRESULT(mD3d12CommandList->Reset(commandAllocator, nullptr),
+                                            "D3D12 resetting command list");
+            if (error.IsError()) {
                 mD3d12CommandList.Reset();
-                return DAWN_DEVICE_LOST_ERROR("Error resetting command list.");
+                DAWN_TRY(std::move(error));
             }
         } else {
             ComPtr<ID3D12GraphicsCommandList> d3d12GraphicsCommandList;
-            const HRESULT hr = d3d12Device->CreateCommandList(
-                0, D3D12_COMMAND_LIST_TYPE_DIRECT,
-                commandAllocationManager->ReserveCommandAllocator().Get(), nullptr,
-                IID_PPV_ARGS(&d3d12GraphicsCommandList));
-            if (FAILED(hr)) {
-                return DAWN_DEVICE_LOST_ERROR("Error creating a direct command list.");
-            }
+            DAWN_TRY(CheckHRESULT(
+                d3d12Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator,
+                                               nullptr, IID_PPV_ARGS(&d3d12GraphicsCommandList)),
+                "D3D12 creating direct command list"));
             mD3d12CommandList = std::move(d3d12GraphicsCommandList);
         }
 
@@ -46,10 +46,11 @@ namespace dawn_native { namespace d3d12 {
     ResultOrError<ID3D12GraphicsCommandList*> CommandRecordingContext::Close() {
         ASSERT(IsOpen());
         mIsOpen = false;
-        const HRESULT hr = mD3d12CommandList->Close();
-        if (FAILED(hr)) {
+        MaybeError error =
+            CheckHRESULT(mD3d12CommandList->Close(), "D3D12 closing pending command list");
+        if (error.IsError()) {
             mD3d12CommandList.Reset();
-            return DAWN_DEVICE_LOST_ERROR("Error closing pending command list.");
+            DAWN_TRY(std::move(error));
         }
         return mD3d12CommandList.Get();
     }

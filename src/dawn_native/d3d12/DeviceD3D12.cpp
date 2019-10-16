@@ -25,6 +25,7 @@
 #include "dawn_native/d3d12/CommandAllocatorManager.h"
 #include "dawn_native/d3d12/CommandBufferD3D12.h"
 #include "dawn_native/d3d12/ComputePipelineD3D12.h"
+#include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DescriptorHeapAllocator.h"
 #include "dawn_native/d3d12/PipelineLayoutD3D12.h"
 #include "dawn_native/d3d12/PlatformFunctions.h"
@@ -56,10 +57,14 @@ namespace dawn_native { namespace d3d12 {
         D3D12_COMMAND_QUEUE_DESC queueDesc = {};
         queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
         queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-        ASSERT_SUCCESS(mD3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&mCommandQueue)));
+        DAWN_TRY(
+            CheckHRESULT(mD3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&mCommandQueue)),
+                         "D3D12 create command queue"));
 
-        ASSERT_SUCCESS(mD3d12Device->CreateFence(mLastSubmittedSerial, D3D12_FENCE_FLAG_NONE,
-                                                 IID_PPV_ARGS(&mFence)));
+        DAWN_TRY(CheckHRESULT(mD3d12Device->CreateFence(mLastSubmittedSerial, D3D12_FENCE_FLAG_NONE,
+                                                        IID_PPV_ARGS(&mFence)),
+                              "D3D12 create fence"));
+
         mFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
         ASSERT(mFenceEvent != nullptr);
 
@@ -70,7 +75,7 @@ namespace dawn_native { namespace d3d12 {
         mResourceAllocator = std::make_unique<ResourceAllocator>(this);
         mResourceAllocatorManager = std::make_unique<ResourceAllocatorManager>(this);
 
-        NextSerial();
+        DAWN_TRY(NextSerial());
 
         // Initialize indirect commands
         D3D12_INDIRECT_ARGUMENT_DESC argumentDesc = {};
@@ -103,8 +108,9 @@ namespace dawn_native { namespace d3d12 {
         // Immediately forget about all pending commands
         mPendingCommands.Release();
 
-        NextSerial();
-        WaitForSerial(mLastSubmittedSerial);  // Wait for all in-flight commands to finish executing
+        ConsumedError(NextSerial());
+        // Wait for all in-flight commands to finish executing
+        ConsumedError(WaitForSerial(mLastSubmittedSerial));
 
         // Call tick one last time so resources are cleaned up. Ignore the return value so we can
         // continue shutting down in an orderly fashion.
@@ -207,27 +213,29 @@ namespace dawn_native { namespace d3d12 {
         mDynamicUploader->Deallocate(mCompletedSerial);
 
         mResourceAllocator->Tick(mCompletedSerial);
-        mCommandAllocatorManager->Tick(mCompletedSerial);
+        DAWN_TRY(mCommandAllocatorManager->Tick(mCompletedSerial));
         mDescriptorHeapAllocator->Deallocate(mCompletedSerial);
         mMapRequestTracker->Tick(mCompletedSerial);
         mUsedComObjectRefs.ClearUpTo(mCompletedSerial);
         DAWN_TRY(ExecuteCommandContext(nullptr));
-        NextSerial();
-
+        DAWN_TRY(NextSerial());
         return {};
     }
 
-    void Device::NextSerial() {
+    MaybeError Device::NextSerial() {
         mLastSubmittedSerial++;
-        ASSERT_SUCCESS(mCommandQueue->Signal(mFence.Get(), mLastSubmittedSerial));
+        return CheckHRESULT(mCommandQueue->Signal(mFence.Get(), mLastSubmittedSerial),
+                            "D3D12 command queue signal fence");
     }
 
-    void Device::WaitForSerial(uint64_t serial) {
+    MaybeError Device::WaitForSerial(uint64_t serial) {
         mCompletedSerial = mFence->GetCompletedValue();
         if (mCompletedSerial < serial) {
-            ASSERT_SUCCESS(mFence->SetEventOnCompletion(serial, mFenceEvent));
+            DAWN_TRY(CheckHRESULT(mFence->SetEventOnCompletion(serial, mFenceEvent),
+                                  "D3D12 set event on completion"));
             WaitForSingleObject(mFenceEvent, INFINITE);
         }
+        return {};
     }
 
     void Device::ReferenceUntilUnused(ComPtr<IUnknown> object) {
@@ -279,14 +287,14 @@ namespace dawn_native { namespace d3d12 {
     }
     ResultOrError<PipelineLayoutBase*> Device::CreatePipelineLayoutImpl(
         const PipelineLayoutDescriptor* descriptor) {
-        return new PipelineLayout(this, descriptor);
+        return PipelineLayout::Create(this, descriptor);
     }
     ResultOrError<QueueBase*> Device::CreateQueueImpl() {
         return new Queue(this);
     }
     ResultOrError<RenderPipelineBase*> Device::CreateRenderPipelineImpl(
         const RenderPipelineDescriptor* descriptor) {
-        return new RenderPipeline(this, descriptor);
+        return RenderPipeline::Create(this, descriptor);
     }
     ResultOrError<SamplerBase*> Device::CreateSamplerImpl(const SamplerDescriptor* descriptor) {
         return new Sampler(this, descriptor);

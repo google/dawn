@@ -15,6 +15,7 @@
 #include "dawn_native/d3d12/QueueD3D12.h"
 
 #include "dawn_native/d3d12/CommandBufferD3D12.h"
+#include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
@@ -35,7 +36,7 @@ namespace dawn_native { namespace d3d12 {
 
         DAWN_TRY(device->ExecuteCommandContext(&mCommandContext));
 
-        device->NextSerial();
+        DAWN_TRY(device->NextSerial());
         return {};
     }
 

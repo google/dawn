@@ -95,7 +95,7 @@ namespace dawn_native { namespace d3d12 {
 
         // TODO(cwallez@chromium.org) Currently we force the CPU to wait for the GPU to be finished
         // with the buffer. Ideally the synchronization should be all done on the GPU.
-        mDevice->WaitForSerial(mBufferSerials[mCurrentBuffer]);
+        ASSERT(mDevice->WaitForSerial(mBufferSerials[mCurrentBuffer]).IsSuccess());
 
         return DAWN_SWAP_CHAIN_NO_ERROR;
     }
@@ -105,7 +105,7 @@ namespace dawn_native { namespace d3d12 {
 
         ASSERT_SUCCESS(mSwapChain->Present(1, 0));
         // TODO(cwallez@chromium.org): Make the serial ticking implicit.
-        mDevice->NextSerial();
+        ASSERT(mDevice->NextSerial().IsSuccess());
 
         mBufferSerials[mCurrentBuffer] = mDevice->GetPendingCommandSerial();
         return DAWN_SWAP_CHAIN_NO_ERROR;

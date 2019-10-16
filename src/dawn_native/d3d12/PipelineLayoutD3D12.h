@@ -25,7 +25,8 @@ namespace dawn_native { namespace d3d12 {
 
     class PipelineLayout : public PipelineLayoutBase {
       public:
-        PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor);
+        static ResultOrError<PipelineLayout*> Create(Device* device,
+                                                     const PipelineLayoutDescriptor* descriptor);
 
         uint32_t GetCbvUavSrvRootParameterIndex(uint32_t group) const;
         uint32_t GetSamplerRootParameterIndex(uint32_t group) const;
@@ -36,6 +37,8 @@ namespace dawn_native { namespace d3d12 {
         ComPtr<ID3D12RootSignature> GetRootSignature() const;
 
       private:
+        using PipelineLayoutBase::PipelineLayoutBase;
+        MaybeError Initialize();
         std::array<uint32_t, kMaxBindGroups> mCbvUavSrvRootParameterInfo;
         std::array<uint32_t, kMaxBindGroups> mSamplerRootParameterInfo;
         std::array<std::array<uint32_t, kMaxBindingsPerGroup>, kMaxBindGroups>
