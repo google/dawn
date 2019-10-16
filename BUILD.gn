@@ -89,7 +89,7 @@ if (dawn_enable_opengl) {
 # dependencies of libdawn_native
 source_set("libdawn_native_headers") {
   public_deps = [
-    "${dawn_root}/src/dawn:dawn_headers",
+    "${dawn_root}/src/dawn:dawncpp_headers",
   ]
   all_dependent_configs = [ "${dawn_root}/src/common:dawn_public_include_dirs" ]
   sources = [
@@ -669,7 +669,7 @@ static_library("dawn_utils") {
   }
 
   public_deps = [
-    "${dawn_root}/src/dawn:dawn_headers",
+    "${dawn_root}/src/dawn:dawncpp_headers",
   ]
 
   deps = [

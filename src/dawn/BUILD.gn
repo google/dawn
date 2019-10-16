@@ -51,6 +51,27 @@ source_set("dawn_headers") {
 }
 
 ###############################################################################
+# Dawn C++ headers
+###############################################################################
+
+dawn_json_generator("dawncpp_headers_gen") {
+  target = "dawncpp_headers"
+  outputs = [
+    "src/include/dawn/dawncpp.h",
+  ]
+}
+
+source_set("dawncpp_headers") {
+  public_deps = [
+    ":dawn_headers",
+    ":dawncpp_headers_gen",
+  ]
+
+  sources = get_target_outputs(":dawncpp_headers_gen")
+  sources += [ "${dawn_root}/src/include/dawn/EnumClassBitmasks.h" ]
+}
+
+###############################################################################
 # Dawn C++ wrapper
 ###############################################################################
 
@@ -58,17 +79,15 @@ dawn_json_generator("dawncpp_gen") {
   target = "dawncpp"
   outputs = [
     "src/dawn/dawncpp.cpp",
-    "src/include/dawn/dawncpp.h",
   ]
 }
 
 source_set("dawncpp") {
   deps = [
-    ":dawn_headers",
     ":dawncpp_gen",
+    ":dawncpp_headers",
   ]
   sources = get_target_outputs(":dawncpp_gen")
-  sources += [ "${dawn_root}/src/include/dawn/EnumClassBitmasks.h" ]
 }
 
 ###############################################################################
