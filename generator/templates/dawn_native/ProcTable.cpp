@@ -15,6 +15,7 @@
 #include "dawn_native/dawn_platform.h"
 #include "dawn_native/DawnNative.h"
 
+#include <algorithm>
 #include <vector>
 
 {% for type in by_category["object"] %}

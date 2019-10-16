@@ -16,6 +16,7 @@
 #include "dawn_wire/client/ApiProcs_autogen.h"
 #include "dawn_wire/client/Client.h"
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
