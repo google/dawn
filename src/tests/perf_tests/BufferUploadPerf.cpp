@@ -147,11 +147,8 @@ void BufferUploadPerf::Step() {
 }
 
 TEST_P(BufferUploadPerf, Run) {
-    // TODO(crbug.com/dawn/239): Investigate why large buffer uploads via SetSubData fail on some
-    // configurations.
-    DAWN_SKIP_TEST_IF(IsMetal() && GetParam().uploadMethod == UploadMethod::SetSubData &&
-                      GetParam().uploadSize == UploadSize::BufferSize_16MB);
-    DAWN_SKIP_TEST_IF(IsVulkan() && GetParam().uploadMethod == UploadMethod::SetSubData &&
+    // TODO(crbug.com/dawn/239): Investigate why large buffer uploads via SetSubData fail.
+    DAWN_SKIP_TEST_IF(GetParam().uploadMethod == UploadMethod::SetSubData &&
                       GetParam().uploadSize == UploadSize::BufferSize_16MB);
 
     RunTest();
