@@ -105,7 +105,7 @@ namespace dawn_native {
         return nullptr;
     }
 
-    std::vector<const char*> GetProcMapNamesForTesting() {
+    std::vector<const char*> GetProcMapNamesForTestingInternal() {
         std::vector<const char*> result;
         result.reserve(sProcMapSize);
         for (const ProcEntry& entry : sProcMap) {

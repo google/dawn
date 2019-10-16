@@ -134,4 +134,10 @@ namespace dawn_native {
         return deviceBase->GetLazyClearCountForTesting();
     }
 
+    std::vector<const char*> GetProcMapNamesForTestingInternal();
+
+    std::vector<const char*> GetProcMapNamesForTesting() {
+        return GetProcMapNamesForTestingInternal();
+    }
+
 }  // namespace dawn_native
