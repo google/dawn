@@ -13,56 +13,218 @@
 // limitations under the License.
 
 #include "dawn_native/d3d12/ResourceAllocatorManagerD3D12.h"
-#include "dawn_native/d3d12/Forward.h"
+
+#include "dawn_native/d3d12/DeviceD3D12.h"
+#include "dawn_native/d3d12/HeapAllocatorD3D12.h"
+#include "dawn_native/d3d12/HeapD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
+    namespace {
+        D3D12_HEAP_TYPE GetD3D12HeapType(ResourceHeapKind resourceHeapKind) {
+            switch (resourceHeapKind) {
+                case Readback_OnlyBuffers:
+                    return D3D12_HEAP_TYPE_READBACK;
+                case Default_OnlyBuffers:
+                case Default_OnlyNonRenderableOrDepthTextures:
+                case Default_OnlyRenderableOrDepthTextures:
+                    return D3D12_HEAP_TYPE_DEFAULT;
+                case Upload_OnlyBuffers:
+                    return D3D12_HEAP_TYPE_UPLOAD;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
+        D3D12_HEAP_FLAGS GetD3D12HeapFlags(ResourceHeapKind resourceHeapKind) {
+            switch (resourceHeapKind) {
+                case Default_OnlyBuffers:
+                case Readback_OnlyBuffers:
+                case Upload_OnlyBuffers:
+                    return D3D12_HEAP_FLAG_ALLOW_ONLY_BUFFERS;
+                case Default_OnlyNonRenderableOrDepthTextures:
+                    return D3D12_HEAP_FLAG_ALLOW_ONLY_NON_RT_DS_TEXTURES;
+                case Default_OnlyRenderableOrDepthTextures:
+                    return D3D12_HEAP_FLAG_ALLOW_ONLY_RT_DS_TEXTURES;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
+        ResourceHeapKind GetResourceHeapKind(D3D12_RESOURCE_DIMENSION dimension,
+                                             D3D12_HEAP_TYPE heapType,
+                                             D3D12_RESOURCE_FLAGS flags) {
+            switch (dimension) {
+                case D3D12_RESOURCE_DIMENSION_BUFFER: {
+                    switch (heapType) {
+                        case D3D12_HEAP_TYPE_UPLOAD:
+                            return Upload_OnlyBuffers;
+                        case D3D12_HEAP_TYPE_DEFAULT:
+                            return Default_OnlyBuffers;
+                        case D3D12_HEAP_TYPE_READBACK:
+                            return Readback_OnlyBuffers;
+                        default:
+                            UNREACHABLE();
+                    }
+                } break;
+                case D3D12_RESOURCE_DIMENSION_TEXTURE1D:
+                case D3D12_RESOURCE_DIMENSION_TEXTURE2D:
+                case D3D12_RESOURCE_DIMENSION_TEXTURE3D: {
+                    switch (heapType) {
+                        case D3D12_HEAP_TYPE_DEFAULT: {
+                            if ((flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) ||
+                                (flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET)) {
+                                return Default_OnlyRenderableOrDepthTextures;
+                            } else {
+                                return Default_OnlyNonRenderableOrDepthTextures;
+                            }
+                        } break;
+                        default:
+                            UNREACHABLE();
+                    }
+                } break;
+                default:
+                    UNREACHABLE();
+            }
+        }
+    }  // namespace
 
     ResourceAllocatorManager::ResourceAllocatorManager(Device* device) : mDevice(device) {
+        for (uint32_t i = 0; i < ResourceHeapKind::EnumCount; i++) {
+            const ResourceHeapKind resourceHeapKind = static_cast<ResourceHeapKind>(i);
+            mSubAllocatedResourceAllocators[i] = std::make_unique<BuddyMemoryAllocator>(
+                kMaxHeapSize, kMinHeapSize,
+                std::make_unique<HeapAllocator>(mDevice, GetD3D12HeapType(resourceHeapKind),
+                                                GetD3D12HeapFlags(resourceHeapKind)));
+        }
     }
 
     ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::AllocateMemory(
         D3D12_HEAP_TYPE heapType,
         const D3D12_RESOURCE_DESC& resourceDescriptor,
-        D3D12_RESOURCE_STATES initialUsage,
-        D3D12_HEAP_FLAGS heapFlags) {
-        const size_t heapTypeIndex = GetD3D12HeapTypeToIndex(heapType);
-        ASSERT(heapTypeIndex < kNumHeapTypes);
-
-        // Get the direct allocator using a tightly sized heap (aka CreateCommittedResource).
-        CommittedResourceAllocator* allocator = mDirectResourceAllocators[heapTypeIndex].get();
-        if (allocator == nullptr) {
-            mDirectResourceAllocators[heapTypeIndex] =
-                std::make_unique<CommittedResourceAllocator>(mDevice, heapType);
-            allocator = mDirectResourceAllocators[heapTypeIndex].get();
+        D3D12_RESOURCE_STATES initialUsage) {
+        // TODO(bryan.bernhart@intel.com): Conditionally disable sub-allocation.
+        // For very large resources, there is no benefit to suballocate.
+        // For very small resources, it is inefficent to suballocate given the min. heap
+        // size could be much larger then the resource allocation.
+        // Attempt to satisfy the request using sub-allocation (placed resource in a heap).
+        ResourceHeapAllocation subAllocation;
+        DAWN_TRY_ASSIGN(subAllocation,
+                        CreatePlacedResource(heapType, resourceDescriptor, initialUsage));
+        if (subAllocation.GetInfo().mMethod != AllocationMethod::kInvalid) {
+            return subAllocation;
         }
 
-        ResourceHeapAllocation allocation;
-        DAWN_TRY_ASSIGN(allocation,
-                        allocator->Allocate(resourceDescriptor, initialUsage, heapFlags));
+        // If sub-allocation fails, fall-back to direct allocation (committed resource).
+        ResourceHeapAllocation directAllocation;
+        DAWN_TRY_ASSIGN(directAllocation,
+                        CreateCommittedResource(heapType, resourceDescriptor, initialUsage));
 
-        return allocation;
+        return directAllocation;
     }
 
-    size_t ResourceAllocatorManager::GetD3D12HeapTypeToIndex(D3D12_HEAP_TYPE heapType) const {
-        ASSERT(heapType > 0);
-        ASSERT(static_cast<uint32_t>(heapType) <= kNumHeapTypes);
-        return heapType - 1;
+    void ResourceAllocatorManager::Tick(Serial completedSerial) {
+        for (ResourceHeapAllocation& allocation :
+             mAllocationsToDelete.IterateUpTo(completedSerial)) {
+            if (allocation.GetInfo().mMethod == AllocationMethod::kSubAllocated) {
+                FreeMemory(allocation);
+            }
+        }
+        mAllocationsToDelete.ClearUpTo(completedSerial);
     }
 
     void ResourceAllocatorManager::DeallocateMemory(ResourceHeapAllocation& allocation) {
         if (allocation.GetInfo().mMethod == AllocationMethod::kInvalid) {
             return;
         }
-        CommittedResourceAllocator* allocator = nullptr;
-        D3D12_HEAP_PROPERTIES heapProp;
-        allocation.GetD3D12Resource()->GetHeapProperties(&heapProp, nullptr);
-        const size_t heapTypeIndex = GetD3D12HeapTypeToIndex(heapProp.Type);
-        ASSERT(heapTypeIndex < kNumHeapTypes);
-        allocator = mDirectResourceAllocators[heapTypeIndex].get();
-        allocator->Deallocate(allocation);
 
-        // Invalidate the underlying resource heap in case the client accidentally
+        mAllocationsToDelete.Enqueue(allocation, mDevice->GetPendingCommandSerial());
+
+        // Invalidate the allocation immediately in case one accidentally
         // calls DeallocateMemory again using the same allocation.
         allocation.Invalidate();
     }
+
+    void ResourceAllocatorManager::FreeMemory(ResourceHeapAllocation& allocation) {
+        ASSERT(allocation.GetInfo().mMethod == AllocationMethod::kSubAllocated);
+
+        D3D12_HEAP_PROPERTIES heapProp;
+        allocation.GetD3D12Resource()->GetHeapProperties(&heapProp, nullptr);
+
+        const D3D12_RESOURCE_DESC resourceDescriptor = allocation.GetD3D12Resource()->GetDesc();
+
+        const size_t resourceHeapKindIndex = GetResourceHeapKind(
+            resourceDescriptor.Dimension, heapProp.Type, resourceDescriptor.Flags);
+
+        mSubAllocatedResourceAllocators[resourceHeapKindIndex]->Deallocate(allocation);
+    }
+
+    ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::CreatePlacedResource(
+        D3D12_HEAP_TYPE heapType,
+        const D3D12_RESOURCE_DESC& resourceDescriptor,
+        D3D12_RESOURCE_STATES initialUsage) {
+        const size_t resourceHeapKindIndex =
+            GetResourceHeapKind(resourceDescriptor.Dimension, heapType, resourceDescriptor.Flags);
+
+        BuddyMemoryAllocator* allocator =
+            mSubAllocatedResourceAllocators[resourceHeapKindIndex].get();
+
+        const D3D12_RESOURCE_ALLOCATION_INFO resourceInfo =
+            mDevice->GetD3D12Device()->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
+
+        ResourceMemoryAllocation allocation;
+        DAWN_TRY_ASSIGN(allocation,
+                        allocator->Allocate(resourceInfo.SizeInBytes, resourceInfo.Alignment));
+        if (allocation.GetInfo().mMethod == AllocationMethod::kInvalid) {
+            return ResourceHeapAllocation{};  // invalid
+        }
+
+        ID3D12Heap* heap = static_cast<Heap*>(allocation.GetResourceHeap())->GetD3D12Heap().Get();
+
+        // With placed resources, a single heap can be reused.
+        // The resource placed at an offset is only reclaimed
+        // upon Tick or after the last command list using the resource has completed
+        // on the GPU. This means the same physical memory is not reused
+        // within the same command-list and does not require additional synchronization (aliasing
+        // barrier).
+        // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12device-createplacedresource
+        ComPtr<ID3D12Resource> placedResource;
+        if (FAILED(mDevice->GetD3D12Device()->CreatePlacedResource(
+                heap, allocation.GetOffset(), &resourceDescriptor, initialUsage, nullptr,
+                IID_PPV_ARGS(&placedResource)))) {
+            // Note: Heap must already exist before the resource is created. If CreatePlacedResource
+            // fails, it's unlikely to be OOM.
+            return DAWN_DEVICE_LOST_ERROR("Unable to allocate resource");
+        }
+
+        return ResourceHeapAllocation{allocation.GetInfo(), allocation.GetOffset(),
+                                      std::move(placedResource)};
+    }
+
+    ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::CreateCommittedResource(
+        D3D12_HEAP_TYPE heapType,
+        const D3D12_RESOURCE_DESC& resourceDescriptor,
+        D3D12_RESOURCE_STATES initialUsage) {
+        D3D12_HEAP_PROPERTIES heapProperties;
+        heapProperties.Type = heapType;
+        heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+        heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+        heapProperties.CreationNodeMask = 0;
+        heapProperties.VisibleNodeMask = 0;
+
+        // Note: Heap flags are inferred by the resource descriptor and do not need to be explicitly
+        // provided to CreateCommittedResource.
+        ComPtr<ID3D12Resource> committedResource;
+        if (FAILED(mDevice->GetD3D12Device()->CreateCommittedResource(
+                &heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDescriptor, initialUsage, nullptr,
+                IID_PPV_ARGS(&committedResource)))) {
+            return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate resource");
+        }
+
+        AllocationInfo info;
+        info.mMethod = AllocationMethod::kDirect;
+
+        return ResourceHeapAllocation{info,
+                                      /*offset*/ 0, std::move(committedResource)};
+    }
+
 }}  // namespace dawn_native::d3d12

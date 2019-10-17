@@ -12,21 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_MEMORYALLOCATOR_H_
-#define DAWNNATIVE_MEMORYALLOCATOR_H_
+#include "dawn_native/d3d12/HeapD3D12.h"
 
-#include "dawn_native/Error.h"
-#include "dawn_native/ResourceHeap.h"
+namespace dawn_native { namespace d3d12 {
 
-namespace dawn_native {
-    // Interface for backend allocators that create physical device memory.
-    class MemoryAllocator {
-      public:
-        virtual ~MemoryAllocator() = default;
+    Heap::Heap(ComPtr<ID3D12Heap> heap) : mHeap(std::move(heap)) {
+    }
 
-        virtual ResultOrError<std::unique_ptr<ResourceHeapBase>> Allocate(uint64_t size) = 0;
-        virtual void Deallocate(std::unique_ptr<ResourceHeapBase> allocation) = 0;
-    };
-}  // namespace dawn_native
-
-#endif  // DAWNNATIVE_MEMORYALLOCATOR_H_
+    ComPtr<ID3D12Heap> Heap::GetD3D12Heap() const {
+        return mHeap;
+    }
+}}  // namespace dawn_native::d3d12

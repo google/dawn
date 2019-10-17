@@ -15,7 +15,10 @@
 #ifndef DAWNNATIVE_D3D12_RESOURCEALLOCATORMANAGERD3D12_H_
 #define DAWNNATIVE_D3D12_RESOURCEALLOCATORMANAGERD3D12_H_
 
-#include "dawn_native/d3d12/CommittedResourceAllocatorD3D12.h"
+#include "common/SerialQueue.h"
+
+#include "dawn_native/BuddyMemoryAllocator.h"
+#include "dawn_native/d3d12/ResourceHeapAllocationD3D12.h"
 
 #include <array>
 
@@ -23,8 +26,23 @@ namespace dawn_native { namespace d3d12 {
 
     class Device;
 
-    // Manages a list of resource allocators used by the device to create resources using multiple
-    // allocation methods.
+    // Heap types + flags combinations are named after the D3D constants.
+    // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_heap_flags
+    // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_heap_type
+    enum ResourceHeapKind {
+        Readback_OnlyBuffers,
+        Upload_OnlyBuffers,
+        Default_OnlyBuffers,
+
+        Default_OnlyNonRenderableOrDepthTextures,
+        Default_OnlyRenderableOrDepthTextures,
+
+        EnumCount,
+        InvalidEnum = EnumCount,
+    };
+
+    // Manages a list of resource allocators used by the device to create resources using
+    // multiple allocation methods.
     class ResourceAllocatorManager {
       public:
         ResourceAllocatorManager(Device* device);
@@ -32,29 +50,34 @@ namespace dawn_native { namespace d3d12 {
         ResultOrError<ResourceHeapAllocation> AllocateMemory(
             D3D12_HEAP_TYPE heapType,
             const D3D12_RESOURCE_DESC& resourceDescriptor,
-            D3D12_RESOURCE_STATES initialUsage,
-            D3D12_HEAP_FLAGS heapFlags);
+            D3D12_RESOURCE_STATES initialUsage);
 
         void DeallocateMemory(ResourceHeapAllocation& allocation);
 
+        void Tick(Serial lastCompletedSerial);
+
       private:
-        size_t GetD3D12HeapTypeToIndex(D3D12_HEAP_TYPE heapType) const;
+        void FreeMemory(ResourceHeapAllocation& allocation);
+
+        ResultOrError<ResourceHeapAllocation> CreatePlacedResource(
+            D3D12_HEAP_TYPE heapType,
+            const D3D12_RESOURCE_DESC& resourceDescriptor,
+            D3D12_RESOURCE_STATES initialUsage);
+
+        ResultOrError<ResourceHeapAllocation> CreateCommittedResource(
+            D3D12_HEAP_TYPE heapType,
+            const D3D12_RESOURCE_DESC& resourceDescriptor,
+            D3D12_RESOURCE_STATES initialUsage);
 
         Device* mDevice;
 
-        static constexpr uint32_t kNumHeapTypes = 4u;  // Number of D3D12_HEAP_TYPE
+        static constexpr uint64_t kMaxHeapSize = 32ll * 1024ll * 1024ll * 1024ll;  // 32GB
+        static constexpr uint64_t kMinHeapSize = 4ll * 1024ll * 1024ll;            // 4MB
 
-        static_assert(D3D12_HEAP_TYPE_READBACK <= kNumHeapTypes,
-                      "Readback heap type enum exceeds max heap types");
-        static_assert(D3D12_HEAP_TYPE_UPLOAD <= kNumHeapTypes,
-                      "Upload heap type enum exceeds max heap types");
-        static_assert(D3D12_HEAP_TYPE_DEFAULT <= kNumHeapTypes,
-                      "Default heap type enum exceeds max heap types");
-        static_assert(D3D12_HEAP_TYPE_CUSTOM <= kNumHeapTypes,
-                      "Custom heap type enum exceeds max heap types");
+        std::array<std::unique_ptr<BuddyMemoryAllocator>, ResourceHeapKind::EnumCount>
+            mSubAllocatedResourceAllocators;
 
-        std::array<std::unique_ptr<CommittedResourceAllocator>, kNumHeapTypes>
-            mDirectResourceAllocators;
+        SerialQueue<ResourceHeapAllocation> mAllocationsToDelete;
     };
 
 }}  // namespace dawn_native::d3d12

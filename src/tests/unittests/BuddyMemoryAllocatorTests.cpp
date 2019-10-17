@@ -20,8 +20,7 @@ using namespace dawn_native;
 
 class DummyMemoryAllocator : public MemoryAllocator {
   public:
-    ResultOrError<std::unique_ptr<ResourceHeapBase>> Allocate(uint64_t size,
-                                                              int memoryFlags = 0) override {
+    ResultOrError<std::unique_ptr<ResourceHeapBase>> Allocate(uint64_t size) override {
         return std::make_unique<ResourceHeapBase>();
     }
     void Deallocate(std::unique_ptr<ResourceHeapBase> allocation) override {

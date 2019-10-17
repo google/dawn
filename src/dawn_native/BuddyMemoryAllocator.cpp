@@ -34,12 +34,18 @@ namespace dawn_native {
     }
 
     ResultOrError<ResourceMemoryAllocation> BuddyMemoryAllocator::Allocate(uint64_t allocationSize,
-                                                                           uint64_t alignment,
-                                                                           int memoryFlags) {
+                                                                           uint64_t alignment) {
         ResourceMemoryAllocation invalidAllocation = ResourceMemoryAllocation{};
 
+        if (allocationSize == 0) {
+            return invalidAllocation;
+        }
+
+        // Round allocation size to nearest power-of-two.
+        allocationSize = NextPowerOfTwo(allocationSize);
+
         // Allocation cannot exceed the memory size.
-        if (allocationSize == 0 || allocationSize > mMemorySize) {
+        if (allocationSize > mMemorySize) {
             return invalidAllocation;
         }
 
@@ -53,7 +59,7 @@ namespace dawn_native {
         if (mTrackedSubAllocations[memoryIndex].refcount == 0) {
             // Transfer ownership to this allocator
             std::unique_ptr<ResourceHeapBase> memory;
-            DAWN_TRY_ASSIGN(memory, mClient->Allocate(mMemorySize, memoryFlags));
+            DAWN_TRY_ASSIGN(memory, mClient->Allocate(mMemorySize));
             mTrackedSubAllocations[memoryIndex] = {/*refcount*/ 0, std::move(memory)};
         }
 

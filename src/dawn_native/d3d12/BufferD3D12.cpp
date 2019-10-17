@@ -111,8 +111,7 @@ namespace dawn_native { namespace d3d12 {
 
         DAWN_TRY_ASSIGN(
             mResourceAllocation,
-            ToBackend(GetDevice())
-                ->AllocateMemory(heapType, resourceDescriptor, bufferUsage, D3D12_HEAP_FLAG_NONE));
+            ToBackend(GetDevice())->AllocateMemory(heapType, resourceDescriptor, bufferUsage));
         return {};
     }
 

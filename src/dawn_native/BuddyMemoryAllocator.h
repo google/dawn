@@ -44,8 +44,7 @@ namespace dawn_native {
         ~BuddyMemoryAllocator() = default;
 
         ResultOrError<ResourceMemoryAllocation> Allocate(uint64_t allocationSize,
-                                                         uint64_t alignment,
-                                                         int memoryFlags = 0);
+                                                         uint64_t alignment);
         void Deallocate(const ResourceMemoryAllocation& allocation);
 
         uint64_t GetMemorySize() const;
