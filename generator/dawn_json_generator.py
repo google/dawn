@@ -354,6 +354,11 @@ def as_cType(name):
     else:
         return 'Dawn' + name.CamelCase()
 
+def as_cTypeEnumSpecialCase(typ):
+    if typ.category == 'bitmask':
+        return as_cType(typ.name) + 'Flags'
+    return as_cType(typ.name)
+
 def as_cppType(name):
     if name.native:
         return name.concatcase()
@@ -480,7 +485,7 @@ class MultiGeneratorFromDawnJSON(Generator):
         base_params = {
             'Name': lambda name: Name(name),
 
-            'as_annotated_cType': lambda arg: annotated(as_cType(arg.type.name), arg),
+            'as_annotated_cType': lambda arg: annotated(as_cTypeEnumSpecialCase(arg.type), arg),
             'as_annotated_cppType': lambda arg: annotated(as_cppType(arg.type.name), arg),
             'as_cEnum': as_cEnum,
             'as_cppEnum': as_cppEnum,

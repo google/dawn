@@ -37,6 +37,8 @@
         ObjectId
     {%- elif member.type.category == "structure" -%}
         {{as_cType(member.type.name)}}Transfer
+    {%- elif member.type.category == "bitmask" -%}
+        {{as_cType(member.type.name)}}Flags
     {%- else -%}
         {{as_cType(member.type.name)}}
     {%- endif -%}

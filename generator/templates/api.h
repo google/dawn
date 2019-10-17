@@ -23,6 +23,8 @@
 
 const uint64_t DAWN_WHOLE_SIZE = 0xffffffffffffffffULL; // UINT64_MAX
 
+typedef uint32_t WGPUFlags;
+
 {% for type in by_category["object"] %}
     typedef struct {{as_cType(type.name)}}Impl* {{as_cType(type.name)}};
 {% endfor %}
@@ -34,6 +36,9 @@ const uint64_t DAWN_WHOLE_SIZE = 0xffffffffffffffffULL; // UINT64_MAX
         {% endfor %}
         {{as_cEnum(type.name, Name("force32"))}} = 0x7FFFFFFF
     } {{as_cType(type.name)}};
+    {% if type.category == "bitmask" %}
+        typedef WGPUFlags {{as_cType(type.name)}}Flags;
+    {% endif %}
 
 {% endfor %}
 
