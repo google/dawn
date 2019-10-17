@@ -95,13 +95,6 @@ template("dawn_component") {
       defines = []
     }
     defines += [ "${invoker.DEFINE_PREFIX}_IMPLEMENTATION" ]
-
-    # TODO(cwallez@chromium.org): Remove this when we are sure the bots have
-    # been clobbered. This is necessary because when moving generated files
-    # around we ended up with bad generated files in cached build
-    # directories that get picked up because of the default inclusion of
-    # target_gen_dir as an include directory.
-    configs -= [ "//build/config/compiler:default_include_dirs" ]
   }
 
   static_library("${libname}_static") {
@@ -114,13 +107,6 @@ template("dawn_component") {
     if (defined(invoker.configs)) {
       configs += invoker.configs
     }
-
-    # TODO(cwallez@chromium.org): Remove this when we are sure the bots have
-    # been clobbered. This is necessary because when moving generated files
-    # around we ended up with bad generated files in cached build
-    # directories that get picked up because of the default inclusion of
-    # target_gen_dir as an include directory.
-    configs -= [ "//build/config/compiler:default_include_dirs" ]
   }
 
   group(libname) {
