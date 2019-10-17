@@ -26,6 +26,8 @@ namespace dawn_platform {
         using TraceEventHandle = uint64_t;
 
         const unsigned char* GetTraceCategoryEnabledFlag(Platform* platform, const char* name);
+
+        // TODO(enga): Simplify this API.
         TraceEventHandle AddTraceEvent(Platform* platform,
                                        char phase,
                                        const unsigned char* categoryGroupEnabled,

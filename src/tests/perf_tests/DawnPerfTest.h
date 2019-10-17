@@ -21,6 +21,8 @@ namespace utils {
     class Timer;
 }
 
+class DawnPerfTestPlatform;
+
 void InitDawnPerfTestEnvironment(int argc, char** argv);
 
 class DawnPerfTestEnvironment : public DawnTestEnvironment {
@@ -29,16 +31,26 @@ class DawnPerfTestEnvironment : public DawnTestEnvironment {
     ~DawnPerfTestEnvironment();
 
     void SetUp() override;
+    void TearDown() override;
 
     bool IsCalibrating() const;
     unsigned int OverrideStepsToRun() const;
 
+    // Returns whether tracing is enabled.
+    bool IsTracingEnabled() const;
+
   private:
+    void DumpTraceEventsToJSONFile() const;
+
     // Only run calibration which allows the perf test runner to save time.
     bool mIsCalibrating = false;
 
     // If non-zero, overrides the number of steps.
     unsigned int mOverrideStepsToRun = 0;
+
+    const char* mTraceFile = nullptr;
+
+    std::unique_ptr<DawnPerfTestPlatform> mPlatform;
 };
 
 class DawnPerfTestBase {

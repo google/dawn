@@ -15,6 +15,7 @@ third_party/glm/
 third_party/glslang/
 third_party/googletest/
 third_party/jinja2/
+third_party/jsoncpp/
 third_party/llvm-build
 third_party/markupsafe/
 third_party/shaderc/

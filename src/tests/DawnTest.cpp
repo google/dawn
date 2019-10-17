@@ -129,10 +129,11 @@ DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
             continue;
         }
 
-        if (strstr(argv[i], "--adapter-vendor-id") != nullptr) {
-            const char* value = strchr(argv[i], '=');
-            if (value != nullptr) {
-                mVendorIdFilter = strtoul(value + 1, nullptr, 16);
+        constexpr const char kVendorIdFilterArg[] = "--adapter-vendor-id=";
+        if (strstr(argv[i], kVendorIdFilterArg) == argv[i]) {
+            const char* vendorIdFilter = argv[i] + strlen(kVendorIdFilterArg);
+            if (vendorIdFilter[0] != '\0') {
+                mVendorIdFilter = strtoul(vendorIdFilter, nullptr, 16);
                 // Set filter flag if vendor id is non-zero.
                 mHasVendorIdFilter = mVendorIdFilter != 0;
             }

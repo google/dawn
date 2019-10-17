@@ -987,9 +987,11 @@ test("dawn_perf_tests") {
   configs += [ "${dawn_root}/src/common:dawn_internal" ]
 
   deps = [
+    ":dawn_platform",
     ":dawn_utils",
     ":libdawn_native",
     ":libdawn_wire",
+    "${dawn_jsoncpp_dir}:jsoncpp",
     "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawncpp",
     "${dawn_root}/src/dawn:libdawn_proc",
@@ -1003,6 +1005,8 @@ test("dawn_perf_tests") {
     "src/tests/perf_tests/BufferUploadPerf.cpp",
     "src/tests/perf_tests/DawnPerfTest.cpp",
     "src/tests/perf_tests/DawnPerfTest.h",
+    "src/tests/perf_tests/DawnPerfTestPlatform.cpp",
+    "src/tests/perf_tests/DawnPerfTestPlatform.h",
   ]
 
   libs = []
