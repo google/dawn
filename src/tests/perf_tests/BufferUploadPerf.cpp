@@ -87,7 +87,8 @@ namespace {
 class BufferUploadPerf : public DawnPerfTestWithParams<BufferUploadParams> {
   public:
     BufferUploadPerf()
-        : DawnPerfTestWithParams(kNumIterations), data(static_cast<size_t>(GetParam().uploadSize)) {
+        : DawnPerfTestWithParams(kNumIterations, 1),
+          data(static_cast<size_t>(GetParam().uploadSize)) {
     }
     ~BufferUploadPerf() override = default;
 
@@ -138,12 +139,6 @@ void BufferUploadPerf::Step() {
             queue.Submit(1, &commands);
         } break;
     }
-
-    // Wait for the GPU in this batch of iterations.
-    // If we don't wait, we can't properly compute the number of steps to run during
-    // calibration.
-    // The wait time gets amortized over the kNumIterations.
-    WaitForGPU();
 }
 
 TEST_P(BufferUploadPerf, Run) {

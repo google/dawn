@@ -47,14 +47,19 @@ class DawnPerfTestBase {
     static constexpr unsigned int kNumTrials = 3;
 
   public:
-    DawnPerfTestBase(DawnTestBase* test, unsigned int iterationsPerStep);
+    // Perf test results are reported as the amortized time of |mStepsToRun| * |mIterationsPerStep|.
+    // A test deriving from |DawnPerfTestBase| must call the base contructor with
+    // |iterationsPerStep| appropriately to reflect the amount of work performed.
+    // |maxStepsInFlight| may be used to mimic having multiple frames or workloads in flight which
+    // is common with double or triple buffered applications.
+    DawnPerfTestBase(DawnTestBase* test,
+                     unsigned int iterationsPerStep,
+                     unsigned int maxStepsInFlight);
     virtual ~DawnPerfTestBase();
 
   protected:
     // Call if the test step was aborted and the test should stop running.
     void AbortTest();
-
-    void WaitForGPU();
 
     void RunTest();
     void PrintResult(const std::string& trace,
@@ -74,7 +79,8 @@ class DawnPerfTestBase {
 
     DawnTestBase* mTest;
     bool mRunning = false;
-    unsigned int mIterationsPerStep;
+    const unsigned int mIterationsPerStep;
+    const unsigned int mMaxStepsInFlight;
     unsigned int mStepsToRun = 0;
     unsigned int mNumStepsPerformed = 0;
     uint64_t mGPUTimeNs = 0;  // TODO(enga): Measure GPU time with timing queries.
@@ -84,8 +90,9 @@ class DawnPerfTestBase {
 template <typename Params = DawnTestParam>
 class DawnPerfTestWithParams : public DawnTestWithParams<Params>, public DawnPerfTestBase {
   protected:
-    DawnPerfTestWithParams(unsigned int iterationsPerStep)
-        : DawnTestWithParams<Params>(), DawnPerfTestBase(this, iterationsPerStep) {
+    DawnPerfTestWithParams(unsigned int iterationsPerStep, unsigned int maxStepsInFlight)
+        : DawnTestWithParams<Params>(),
+          DawnPerfTestBase(this, iterationsPerStep, maxStepsInFlight) {
     }
     ~DawnPerfTestWithParams() override = default;
 };

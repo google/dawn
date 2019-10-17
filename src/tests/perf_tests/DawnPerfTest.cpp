@@ -73,34 +73,19 @@ unsigned int DawnPerfTestEnvironment::OverrideStepsToRun() const {
     return mOverrideStepsToRun;
 }
 
-DawnPerfTestBase::DawnPerfTestBase(DawnTestBase* test, unsigned int iterationsPerStep)
-    : mTest(test), mIterationsPerStep(iterationsPerStep), mTimer(utils::CreateTimer()) {
+DawnPerfTestBase::DawnPerfTestBase(DawnTestBase* test,
+                                   unsigned int iterationsPerStep,
+                                   unsigned int maxStepsInFlight)
+    : mTest(test),
+      mIterationsPerStep(iterationsPerStep),
+      mMaxStepsInFlight(maxStepsInFlight),
+      mTimer(utils::CreateTimer()) {
 }
 
 DawnPerfTestBase::~DawnPerfTestBase() = default;
 
 void DawnPerfTestBase::AbortTest() {
     mRunning = false;
-}
-
-void DawnPerfTestBase::WaitForGPU() {
-    dawn::FenceDescriptor desc = {};
-    desc.initialValue = 0;
-
-    dawn::Fence fence = mTest->queue.CreateFence(&desc);
-    mTest->queue.Signal(fence, 1);
-
-    bool done = false;
-    fence.OnCompletion(1,
-                       [](DawnFenceCompletionStatus status, void* userdata) {
-                           ASSERT_EQ(status, DAWN_FENCE_COMPLETION_STATUS_SUCCESS);
-                           *reinterpret_cast<bool*>(userdata) = true;
-                       },
-                       &done);
-
-    while (!done) {
-        mTest->WaitABit();
-    }
 }
 
 void DawnPerfTestBase::RunTest() {
@@ -137,11 +122,22 @@ void DawnPerfTestBase::RunTest() {
 void DawnPerfTestBase::DoRunLoop(double maxRunTime) {
     mNumStepsPerformed = 0;
     mRunning = true;
+
+    dawn::FenceDescriptor desc = {};
+    uint64_t signaledFenceValue = 0;
+    dawn::Fence fence = mTest->queue.CreateFence(&desc);
+
     mTimer->Start();
 
     // This loop can be canceled by calling AbortTest().
     while (mRunning) {
+        // Wait if there are too many steps in flight on the GPU.
+        while (signaledFenceValue - fence.GetCompletedValue() >= mMaxStepsInFlight) {
+            mTest->WaitABit();
+        }
         Step();
+        mTest->queue.Signal(fence, ++signaledFenceValue);
+
         if (mRunning) {
             ++mNumStepsPerformed;
             if (mTimer->GetElapsedTime() > maxRunTime) {
@@ -150,6 +146,11 @@ void DawnPerfTestBase::DoRunLoop(double maxRunTime) {
                 mRunning = false;
             }
         }
+    }
+
+    // Wait for all GPU commands to complete.
+    while (signaledFenceValue != fence.GetCompletedValue()) {
+        mTest->WaitABit();
     }
 
     mTimer->Stop();
