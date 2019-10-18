@@ -46,6 +46,7 @@ namespace dawn_native { namespace d3d12 {
       private:
         HWND mWindow = nullptr;
         Device* mDevice = nullptr;
+        UINT mInterval;
 
         ComPtr<IDXGISwapChain3> mSwapChain = nullptr;
         std::vector<ComPtr<ID3D12Resource>> mBuffers;

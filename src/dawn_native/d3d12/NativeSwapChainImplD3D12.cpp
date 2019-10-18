@@ -39,7 +39,7 @@ namespace dawn_native { namespace d3d12 {
     }  // anonymous namespace
 
     NativeSwapChainImpl::NativeSwapChainImpl(Device* device, HWND window)
-        : mWindow(window), mDevice(device) {
+        : mWindow(window), mDevice(device), mInterval(1) {
     }
 
     NativeSwapChainImpl::~NativeSwapChainImpl() {
@@ -58,6 +58,8 @@ namespace dawn_native { namespace d3d12 {
 
         ComPtr<IDXGIFactory4> factory = mDevice->GetFactory();
         ComPtr<ID3D12CommandQueue> queue = mDevice->GetCommandQueue();
+
+        mInterval = mDevice->IsToggleEnabled(Toggle::TurnOffVsync) == true ? 0 : 1;
 
         // Create the D3D12 swapchain, assuming only two buffers for now
         DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
@@ -103,7 +105,7 @@ namespace dawn_native { namespace d3d12 {
     DawnSwapChainError NativeSwapChainImpl::Present() {
         // This assumes the texture has already been transition to the PRESENT state.
 
-        ASSERT_SUCCESS(mSwapChain->Present(1, 0));
+        ASSERT_SUCCESS(mSwapChain->Present(mInterval, 0));
         // TODO(cwallez@chromium.org): Make the serial ticking implicit.
         ASSERT(mDevice->NextSerial().IsSuccess());
 
