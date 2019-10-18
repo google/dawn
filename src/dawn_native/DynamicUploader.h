@@ -25,13 +25,13 @@ namespace dawn_native {
 
     struct UploadHandle {
         uint8_t* mappedBuffer = nullptr;
-        size_t startOffset = 0;
+        uint64_t startOffset = 0;
         StagingBufferBase* stagingBuffer = nullptr;
     };
 
     class DynamicUploader {
       public:
-        DynamicUploader(DeviceBase* device, size_t size = kBaseUploadBufferSize);
+        DynamicUploader(DeviceBase* device, uint64_t size = kBaseUploadBufferSize);
         ~DynamicUploader() = default;
 
         // We add functions to Release StagingBuffers to the DynamicUploader as there's
@@ -40,12 +40,12 @@ namespace dawn_native {
         // implemented.
         void ReleaseStagingBuffer(std::unique_ptr<StagingBufferBase> stagingBuffer);
 
-        ResultOrError<UploadHandle> Allocate(size_t allocationSize, Serial serial);
+        ResultOrError<UploadHandle> Allocate(uint64_t allocationSize, Serial serial);
         void Deallocate(Serial lastCompletedSerial);
 
       private:
         // TODO(bryan.bernhart@intel.com): Figure out this value.
-        static constexpr size_t kBaseUploadBufferSize = 64000;
+        static constexpr uint64_t kBaseUploadBufferSize = 64000;
 
         struct RingBuffer {
             std::unique_ptr<StagingBufferBase> mStagingBuffer;

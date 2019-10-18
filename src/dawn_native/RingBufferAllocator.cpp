@@ -29,7 +29,7 @@
 // TODO(bryan.bernhart@intel.com): Follow-up with ringbuffer optimization.
 namespace dawn_native {
 
-    RingBufferAllocator::RingBufferAllocator(size_t maxSize) : mMaxBlockSize(maxSize) {
+    RingBufferAllocator::RingBufferAllocator(uint64_t maxSize) : mMaxBlockSize(maxSize) {
     }
 
     void RingBufferAllocator::Deallocate(Serial lastCompletedSerial) {
@@ -43,11 +43,11 @@ namespace dawn_native {
         mInflightRequests.ClearUpTo(lastCompletedSerial);
     }
 
-    size_t RingBufferAllocator::GetSize() const {
+    uint64_t RingBufferAllocator::GetSize() const {
         return mMaxBlockSize;
     }
 
-    size_t RingBufferAllocator::GetUsedSize() const {
+    uint64_t RingBufferAllocator::GetUsedSize() const {
         return mUsedSize;
     }
 
@@ -62,7 +62,7 @@ namespace dawn_native {
     // queue, which identifies an existing (or new) frames-worth of resources. Internally, the
     // ring-buffer maintains offsets of 3 "memory" states: Free, Reclaimed, and Used. This is done
     // in FIFO order as older frames would free resources before newer ones.
-    size_t RingBufferAllocator::Allocate(size_t allocationSize, Serial serial) {
+    uint64_t RingBufferAllocator::Allocate(uint64_t allocationSize, Serial serial) {
         // Check if the buffer is full by comparing the used size.
         // If the buffer is not split where waste occurs (e.g. cannot fit new sub-alloc in front), a
         // subsequent sub-alloc could fail where the used size was previously adjusted to include
@@ -71,7 +71,13 @@ namespace dawn_native {
             return kInvalidOffset;
         }
 
-        size_t startOffset = kInvalidOffset;
+        // Ensure adding allocationSize does not overflow.
+        const uint64_t remainingSize = (mMaxBlockSize - mUsedSize);
+        if (allocationSize > remainingSize) {
+            return kInvalidOffset;
+        }
+
+        uint64_t startOffset = kInvalidOffset;
 
         // Check if the buffer is NOT split (i.e sub-alloc on ends)
         if (mUsedStartOffset <= mUsedEndOffset) {
@@ -86,7 +92,7 @@ namespace dawn_native {
             } else if (allocationSize <= mUsedStartOffset) {  // Try to sub-alloc at front.
                 // Count the space at the end so that a subsequent
                 // sub-alloc cannot not succeed when the buffer is full.
-                const size_t requestSize = (mMaxBlockSize - mUsedEndOffset) + allocationSize;
+                const uint64_t requestSize = (mMaxBlockSize - mUsedEndOffset) + allocationSize;
 
                 startOffset = 0;
                 mUsedEndOffset = allocationSize;

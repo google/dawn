@@ -33,7 +33,7 @@ namespace dawn_native { namespace d3d12 {
         DescriptorHeapHandle();
         DescriptorHeapHandle(ComPtr<ID3D12DescriptorHeap> descriptorHeap,
                              uint32_t sizeIncrement,
-                             uint32_t offset);
+                             uint64_t offset);
 
         ID3D12DescriptorHeap* Get() const;
         D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandle(uint32_t index) const;
@@ -42,7 +42,7 @@ namespace dawn_native { namespace d3d12 {
       private:
         ComPtr<ID3D12DescriptorHeap> mDescriptorHeap;
         uint32_t mSizeIncrement;
-        uint32_t mOffset;
+        uint64_t mOffset;
     };
 
     class DescriptorHeapAllocator {

@@ -26,32 +26,32 @@ namespace dawn_native {
     class RingBufferAllocator {
       public:
         RingBufferAllocator() = default;
-        RingBufferAllocator(size_t maxSize);
+        RingBufferAllocator(uint64_t maxSize);
         ~RingBufferAllocator() = default;
 
-        size_t Allocate(size_t allocationSize, Serial serial);
+        uint64_t Allocate(uint64_t allocationSize, Serial serial);
         void Deallocate(Serial lastCompletedSerial);
 
-        size_t GetSize() const;
+        uint64_t GetSize() const;
         bool Empty() const;
-        size_t GetUsedSize() const;
+        uint64_t GetUsedSize() const;
 
-        static constexpr size_t kInvalidOffset = std::numeric_limits<size_t>::max();
+        static constexpr uint64_t kInvalidOffset = std::numeric_limits<uint64_t>::max();
 
       private:
         struct Request {
-            size_t endOffset;
-            size_t size;
+            uint64_t endOffset;
+            uint64_t size;
         };
 
         SerialQueue<Request> mInflightRequests;  // Queue of the recorded sub-alloc requests (e.g.
                                                  // frame of resources).
 
-        size_t mUsedEndOffset = 0;    // Tail of used sub-alloc requests (in bytes).
-        size_t mUsedStartOffset = 0;  // Head of used sub-alloc requests (in bytes).
-        size_t mMaxBlockSize = 0;     // Max size of the ring buffer (in bytes).
-        size_t mUsedSize = 0;  // Size of the sub-alloc requests (in bytes) of the ring buffer.
-        size_t mCurrentRequestSize =
+        uint64_t mUsedEndOffset = 0;    // Tail of used sub-alloc requests (in bytes).
+        uint64_t mUsedStartOffset = 0;  // Head of used sub-alloc requests (in bytes).
+        uint64_t mMaxBlockSize = 0;     // Max size of the ring buffer (in bytes).
+        uint64_t mUsedSize = 0;  // Size of the sub-alloc requests (in bytes) of the ring buffer.
+        uint64_t mCurrentRequestSize =
             0;  // Size of the sub-alloc requests (in bytes) of the current serial.
     };
 }  // namespace dawn_native

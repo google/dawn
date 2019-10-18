@@ -18,7 +18,7 @@
 
 namespace dawn_native {
 
-    DynamicUploader::DynamicUploader(DeviceBase* device, size_t size) : mDevice(device) {
+    DynamicUploader::DynamicUploader(DeviceBase* device, uint64_t size) : mDevice(device) {
         mRingBuffers.emplace_back(
             std::unique_ptr<RingBuffer>(new RingBuffer{nullptr, RingBufferAllocator(size)}));
     }
@@ -28,7 +28,7 @@ namespace dawn_native {
                                         mDevice->GetPendingCommandSerial());
     }
 
-    ResultOrError<UploadHandle> DynamicUploader::Allocate(size_t allocationSize, Serial serial) {
+    ResultOrError<UploadHandle> DynamicUploader::Allocate(uint64_t allocationSize, Serial serial) {
         // Note: Validation ensures size is already aligned.
         // First-fit: find next smallest buffer large enough to satisfy the allocation request.
         RingBuffer* targetRingBuffer = mRingBuffers.back().get();
@@ -36,7 +36,7 @@ namespace dawn_native {
             const RingBufferAllocator& ringBufferAllocator = ringBuffer->mAllocator;
             // Prevent overflow.
             ASSERT(ringBufferAllocator.GetSize() >= ringBufferAllocator.GetUsedSize());
-            const size_t remainingSize =
+            const uint64_t remainingSize =
                 ringBufferAllocator.GetSize() - ringBufferAllocator.GetUsedSize();
             if (allocationSize <= remainingSize) {
                 targetRingBuffer = ringBuffer.get();
@@ -44,7 +44,7 @@ namespace dawn_native {
             }
         }
 
-        size_t startOffset = RingBufferAllocator::kInvalidOffset;
+        uint64_t startOffset = RingBufferAllocator::kInvalidOffset;
         if (targetRingBuffer != nullptr) {
             startOffset = targetRingBuffer->mAllocator.Allocate(allocationSize, serial);
         }

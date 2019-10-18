@@ -18,11 +18,11 @@
 
 using namespace dawn_native;
 
-constexpr size_t RingBufferAllocator::kInvalidOffset;
+constexpr uint64_t RingBufferAllocator::kInvalidOffset;
 
 // Number of basic tests for Ringbuffer
 TEST(RingBufferAllocatorTests, BasicTest) {
-    constexpr size_t sizeInBytes = 64000;
+    constexpr uint64_t sizeInBytes = 64000;
     RingBufferAllocator allocator(sizeInBytes);
 
     // Ensure no requests exist on empty buffer.
@@ -43,8 +43,8 @@ TEST(RingBufferAllocatorTests, BasicTest) {
 
 // Tests that several ringbuffer allocations do not fail.
 TEST(RingBufferAllocatorTests, RingBufferManyAlloc) {
-    constexpr size_t maxNumOfFrames = 64000;
-    constexpr size_t frameSizeInBytes = 4;
+    constexpr uint64_t maxNumOfFrames = 64000;
+    constexpr uint64_t frameSizeInBytes = 4;
 
     RingBufferAllocator allocator(maxNumOfFrames * frameSizeInBytes);
 
@@ -57,8 +57,8 @@ TEST(RingBufferAllocatorTests, RingBufferManyAlloc) {
 
 // Tests ringbuffer sub-allocations of the same serial are correctly tracked.
 TEST(RingBufferAllocatorTests, AllocInSameFrame) {
-    constexpr size_t maxNumOfFrames = 3;
-    constexpr size_t frameSizeInBytes = 4;
+    constexpr uint64_t maxNumOfFrames = 3;
+    constexpr uint64_t frameSizeInBytes = 4;
 
     RingBufferAllocator allocator(maxNumOfFrames * frameSizeInBytes);
 
@@ -87,8 +87,8 @@ TEST(RingBufferAllocatorTests, AllocInSameFrame) {
 
 // Tests ringbuffer sub-allocation at various offsets.
 TEST(RingBufferAllocatorTests, RingBufferSubAlloc) {
-    constexpr size_t maxNumOfFrames = 10;
-    constexpr size_t frameSizeInBytes = 4;
+    constexpr uint64_t maxNumOfFrames = 10;
+    constexpr uint64_t frameSizeInBytes = 4;
 
     RingBufferAllocator allocator(maxNumOfFrames * frameSizeInBytes);
 
@@ -163,4 +163,15 @@ TEST(RingBufferAllocatorTests, RingBufferSubAlloc) {
     allocator.Deallocate(maxNumOfFrames);
 
     EXPECT_TRUE(allocator.Empty());
+}
+
+// Checks if ringbuffer sub-allocation does not overflow.
+TEST(RingBufferAllocatorTests, RingBufferOverflow) {
+    Serial serial = 1;
+
+    RingBufferAllocator allocator(std::numeric_limits<uint64_t>::max());
+
+    ASSERT_EQ(allocator.Allocate(1, serial), 0u);
+    ASSERT_EQ(allocator.Allocate(std::numeric_limits<uint64_t>::max(), serial + 1),
+              RingBufferAllocator::kInvalidOffset);
 }

@@ -25,7 +25,7 @@ namespace dawn_native { namespace d3d12 {
 
     DescriptorHeapHandle::DescriptorHeapHandle(ComPtr<ID3D12DescriptorHeap> descriptorHeap,
                                                uint32_t sizeIncrement,
-                                               uint32_t offset)
+                                               uint64_t offset)
         : mDescriptorHeap(descriptorHeap), mSizeIncrement(sizeIncrement), mOffset(offset) {
     }
 
@@ -68,12 +68,11 @@ namespace dawn_native { namespace d3d12 {
         DescriptorHeapInfo* heapInfo,
         D3D12_DESCRIPTOR_HEAP_FLAGS flags) {
         const Serial pendingSerial = mDevice->GetPendingCommandSerial();
-        size_t startOffset = (heapInfo->heap == nullptr)
-                                 ? RingBufferAllocator::kInvalidOffset
-                                 : heapInfo->allocator.Allocate(count, pendingSerial);
+        uint64_t startOffset = (heapInfo->heap == nullptr)
+                                   ? RingBufferAllocator::kInvalidOffset
+                                   : heapInfo->allocator.Allocate(count, pendingSerial);
         if (startOffset != RingBufferAllocator::kInvalidOffset) {
-            return DescriptorHeapHandle{heapInfo->heap, mSizeIncrements[type],
-                                        static_cast<uint32_t>(startOffset)};
+            return DescriptorHeapHandle{heapInfo->heap, mSizeIncrements[type], startOffset};
         }
 
         // If the pool has no more space, replace the pool with a new one of the specified size
