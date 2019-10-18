@@ -163,8 +163,10 @@ namespace dawn_native { namespace opengl {
     }
 
     void Texture::DestroyImpl() {
-        ToBackend(GetDevice())->gl.DeleteTextures(1, &mHandle);
-        mHandle = 0;
+        if (GetTextureState() == TextureState::OwnedInternal) {
+            ToBackend(GetDevice())->gl.DeleteTextures(1, &mHandle);
+            mHandle = 0;
+        }
     }
 
     GLuint Texture::GetHandle() const {

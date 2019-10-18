@@ -19,6 +19,7 @@
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/d3d12/BufferD3D12.h"
+#include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DescriptorHeapAllocator.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/ResourceAllocator.h"
@@ -272,13 +273,52 @@ namespace dawn_native { namespace d3d12 {
 
     ResultOrError<TextureBase*> Texture::Create(Device* device,
                                                 const TextureDescriptor* descriptor) {
-        Ref<Texture> dawnTexture = AcquireRef(new Texture(device, descriptor));
+        Ref<Texture> dawnTexture =
+            AcquireRef(new Texture(device, descriptor, TextureState::OwnedInternal));
         DAWN_TRY(dawnTexture->InitializeAsInternalTexture());
         return dawnTexture.Detach();
     }
 
-    Texture::Texture(Device* device, const TextureDescriptor* descriptor)
-        : TextureBase(device, descriptor, TextureState::OwnedInternal) {
+    ResultOrError<TextureBase*> Texture::Create(Device* device,
+                                                const TextureDescriptor* descriptor,
+                                                HANDLE sharedHandle,
+                                                uint64_t acquireMutexKey) {
+        Ref<Texture> dawnTexture =
+            AcquireRef(new Texture(device, descriptor, TextureState::OwnedExternal));
+        DAWN_TRY(
+            dawnTexture->InitializeAsExternalTexture(descriptor, sharedHandle, acquireMutexKey));
+        return dawnTexture.Detach();
+    }
+
+    MaybeError Texture::InitializeAsExternalTexture(const TextureDescriptor* descriptor,
+                                                    HANDLE sharedHandle,
+                                                    uint64_t acquireMutexKey) {
+        Device* dawnDevice = ToBackend(GetDevice());
+        DAWN_TRY(ValidateTextureDescriptor(dawnDevice, descriptor));
+        DAWN_TRY(ValidateTextureDescriptorCanBeWrapped(descriptor));
+
+        ComPtr<ID3D12Resource> d3d12Resource;
+        DAWN_TRY(CheckHRESULT(dawnDevice->GetD3D12Device()->OpenSharedHandle(
+                                  sharedHandle, IID_PPV_ARGS(&d3d12Resource)),
+                              "D3D12 opening shared handle"));
+
+        DAWN_TRY(ValidateD3D12TextureCanBeWrapped(d3d12Resource.Get(), descriptor));
+
+        ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex;
+        DAWN_TRY_ASSIGN(dxgiKeyedMutex,
+                        dawnDevice->CreateKeyedMutexForTexture(d3d12Resource.Get()));
+
+        DAWN_TRY(CheckHRESULT(dxgiKeyedMutex->AcquireSync(acquireMutexKey, INFINITE),
+                              "D3D12 acquiring shared mutex"));
+
+        mAcquireMutexKey = acquireMutexKey;
+        mDxgiKeyedMutex = std::move(dxgiKeyedMutex);
+        mResource = std::move(d3d12Resource);
+
+        SetIsSubresourceContentInitialized(true, 0, descriptor->mipLevelCount, 0,
+                                           descriptor->arrayLayerCount);
+
+        return {};
     }
 
     MaybeError Texture::InitializeAsInternalTexture() {
@@ -318,7 +358,6 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-    // With this constructor, the lifetime of the ID3D12Resource is externally managed.
     Texture::Texture(Device* device,
                      const TextureDescriptor* descriptor,
                      ComPtr<ID3D12Resource> nativeTexture)
@@ -333,9 +372,13 @@ namespace dawn_native { namespace d3d12 {
     }
 
     void Texture::DestroyImpl() {
-        // If we own the resource, release it.
-        ToBackend(GetDevice())->GetResourceAllocator()->Release(mResource);
-        mResource = nullptr;
+        Device* device = ToBackend(GetDevice());
+        device->GetResourceAllocator()->Release(std::move(mResource));
+
+        if (mDxgiKeyedMutex != nullptr) {
+            mDxgiKeyedMutex->ReleaseSync(mAcquireMutexKey + 1);
+            device->ReleaseKeyedMutexForTexture(std::move(mDxgiKeyedMutex));
+        }
     }
 
     DXGI_FORMAT Texture::GetD3D12Format() const {
@@ -371,6 +414,13 @@ namespace dawn_native { namespace d3d12 {
     bool Texture::TransitionUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
                                                        D3D12_RESOURCE_BARRIER* barrier,
                                                        D3D12_RESOURCE_STATES newState) {
+        // Textures with keyed mutexes can be written from other graphics queues. Hence, they
+        // must be acquired before command list submission to ensure work from the other queues
+        // has finished. See Device::ExecuteCommandContext.
+        if (mDxgiKeyedMutex != nullptr) {
+            commandContext->AddToSharedTextureList(this);
+        }
+
         // Avoid transitioning the texture when it isn't needed.
         // TODO(cwallez@chromium.org): Need some form of UAV barriers at some point.
         if (mLastState == newState) {

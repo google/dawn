@@ -78,7 +78,7 @@ namespace dawn_native { namespace d3d12 {
 
         void ReferenceUntilUnused(ComPtr<IUnknown> object);
 
-        MaybeError ExecuteCommandContext(CommandRecordingContext* commandContext);
+        MaybeError ExecutePendingCommandContext();
 
         ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) override;
         MaybeError CopyFromStagingToBuffer(StagingBufferBase* source,
@@ -94,7 +94,12 @@ namespace dawn_native { namespace d3d12 {
 
         void DeallocateMemory(ResourceHeapAllocation& allocation);
 
-        TextureBase* WrapSharedHandle(const TextureDescriptor* descriptor, HANDLE sharedHandle);
+        TextureBase* WrapSharedHandle(const TextureDescriptor* descriptor,
+                                      HANDLE sharedHandle,
+                                      uint64_t acquireMutexKey);
+        ResultOrError<ComPtr<IDXGIKeyedMutex>> CreateKeyedMutexForTexture(
+            ID3D12Resource* d3d12Resource);
+        void ReleaseKeyedMutexForTexture(ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex);
 
       private:
         ResultOrError<BindGroupBase*> CreateBindGroupImpl(
@@ -126,6 +131,7 @@ namespace dawn_native { namespace d3d12 {
 
         ComPtr<ID3D12Device> mD3d12Device;  // Device is owned by adapter and will not be outlived.
         ComPtr<ID3D12CommandQueue> mCommandQueue;
+        ComPtr<ID3D11On12Device> mD3d11On12Device;  // 11on12 device corresponding to mCommandQueue
 
         ComPtr<ID3D12CommandSignature> mDispatchIndirectSignature;
         ComPtr<ID3D12CommandSignature> mDrawIndirectSignature;

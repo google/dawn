@@ -77,13 +77,18 @@ namespace dawn_native { namespace d3d12 {
 
         PFN_SET_MARKER_ON_COMMAND_LIST pixSetMarkerOnCommandList = nullptr;
 
+        // Functions from D3D11.dll
+        PFN_D3D11ON12_CREATE_DEVICE d3d11on12CreateDevice = nullptr;
+
       private:
         MaybeError LoadD3D12();
+        MaybeError LoadD3D11();
         MaybeError LoadDXGI();
         MaybeError LoadD3DCompiler();
         void LoadPIXRuntime();
 
         DynamicLib mD3D12Lib;
+        DynamicLib mD3D11Lib;
         DynamicLib mDXGILib;
         DynamicLib mD3DCompilerLib;
         DynamicLib mPIXEventRuntimeLib;

@@ -481,9 +481,7 @@ namespace dawn_native {
     }
 
     void TextureBase::DestroyInternal() {
-        if (mState == TextureState::OwnedInternal) {
-            DestroyImpl();
-        }
+        DestroyImpl();
         mState = TextureState::Destroyed;
     }
 

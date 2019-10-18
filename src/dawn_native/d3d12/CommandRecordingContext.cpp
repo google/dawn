@@ -17,6 +17,11 @@
 
 namespace dawn_native { namespace d3d12 {
 
+    void CommandRecordingContext::AddToSharedTextureList(Texture* texture) {
+        ASSERT(IsOpen());
+        mSharedTextures.insert(texture);
+    }
+
     MaybeError CommandRecordingContext::Open(ID3D12Device* d3d12Device,
                                              CommandAllocatorManager* commandAllocationManager) {
         ASSERT(!IsOpen());
@@ -43,16 +48,30 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-    ResultOrError<ID3D12GraphicsCommandList*> CommandRecordingContext::Close() {
-        ASSERT(IsOpen());
-        mIsOpen = false;
-        MaybeError error =
-            CheckHRESULT(mD3d12CommandList->Close(), "D3D12 closing pending command list");
-        if (error.IsError()) {
-            mD3d12CommandList.Reset();
-            DAWN_TRY(std::move(error));
+    MaybeError CommandRecordingContext::ExecuteCommandList(ID3D12CommandQueue* d3d12CommandQueue) {
+        if (IsOpen()) {
+            // Shared textures must be transitioned to common state after the last usage in order
+            // for them to be used by other APIs like D3D11. We ensure this by transitioning to the
+            // common state right before command list submission. TransitionUsageNow itself ensures
+            // no unnecessary transitions happen if the resources is already in the common state.
+            for (Texture* texture : mSharedTextures) {
+                texture->TransitionUsageNow(this, D3D12_RESOURCE_STATE_COMMON);
+            }
+
+            MaybeError error =
+                CheckHRESULT(mD3d12CommandList->Close(), "D3D12 closing pending command list");
+            if (error.IsError()) {
+                Release();
+                DAWN_TRY(std::move(error));
+            }
+
+            ID3D12CommandList* d3d12CommandList = GetCommandList();
+            d3d12CommandQueue->ExecuteCommandLists(1, &d3d12CommandList);
+
+            mIsOpen = false;
+            mSharedTextures.clear();
         }
-        return mD3d12CommandList.Get();
+        return {};
     }
 
     ID3D12GraphicsCommandList* CommandRecordingContext::GetCommandList() const {
@@ -64,6 +83,7 @@ namespace dawn_native { namespace d3d12 {
     void CommandRecordingContext::Release() {
         mD3d12CommandList.Reset();
         mIsOpen = false;
+        mSharedTextures.clear();
     }
 
     bool CommandRecordingContext::IsOpen() const {

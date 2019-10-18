@@ -31,8 +31,6 @@ namespace dawn_native { namespace d3d12 {
 
       private:
         MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
-
-        CommandRecordingContext mCommandContext;
     };
 
 }}  // namespace dawn_native::d3d12

@@ -15,23 +15,31 @@
 #define DAWNNATIVE_D3D12_COMMANDRECORDINGCONTEXT_H_
 
 #include "dawn_native/Error.h"
+#include "dawn_native/d3d12/TextureD3D12.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
+
+#include <set>
 
 namespace dawn_native { namespace d3d12 {
     class CommandAllocatorManager;
+    class Texture;
 
     class CommandRecordingContext {
       public:
+        void AddToSharedTextureList(Texture* texture);
         MaybeError Open(ID3D12Device* d3d12Device,
                         CommandAllocatorManager* commandAllocationManager);
-        ResultOrError<ID3D12GraphicsCommandList*> Close();
+
         ID3D12GraphicsCommandList* GetCommandList() const;
         void Release();
         bool IsOpen() const;
 
+        MaybeError ExecuteCommandList(ID3D12CommandQueue* d3d12CommandQueue);
+
       private:
         ComPtr<ID3D12GraphicsCommandList> mD3d12CommandList;
         bool mIsOpen = false;
+        std::set<Texture*> mSharedTextures;
     };
 }}  // namespace dawn_native::d3d12
 

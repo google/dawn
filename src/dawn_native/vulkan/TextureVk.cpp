@@ -578,28 +578,30 @@ namespace dawn_native { namespace vulkan {
     }
 
     void Texture::DestroyImpl() {
-        Device* device = ToBackend(GetDevice());
+        if (GetTextureState() == TextureState::OwnedInternal) {
+            Device* device = ToBackend(GetDevice());
 
-        // If we own the resource, release it.
-        if (mMemoryAllocation.GetMemory() != VK_NULL_HANDLE) {
-            // We need to free both the memory allocation and the container. Memory should be
-            // freed after the VkImage is destroyed and this is taken care of by the
-            // FencedDeleter.
-            device->GetMemoryAllocator()->Free(&mMemoryAllocation);
+            // If we own the resource, release it.
+            if (mMemoryAllocation.GetMemory() != VK_NULL_HANDLE) {
+                // We need to free both the memory allocation and the container. Memory should be
+                // freed after the VkImage is destroyed and this is taken care of by the
+                // FencedDeleter.
+                device->GetMemoryAllocator()->Free(&mMemoryAllocation);
+            }
+
+            if (mHandle != VK_NULL_HANDLE) {
+                device->GetFencedDeleter()->DeleteWhenUnused(mHandle);
+            }
+
+            if (mExternalAllocation != VK_NULL_HANDLE) {
+                device->GetFencedDeleter()->DeleteWhenUnused(mExternalAllocation);
+            }
+
+            mHandle = VK_NULL_HANDLE;
+            mExternalAllocation = VK_NULL_HANDLE;
+            // If a signal semaphore exists it should be requested before we delete the texture
+            ASSERT(mSignalSemaphore == VK_NULL_HANDLE);
         }
-
-        if (mHandle != VK_NULL_HANDLE) {
-            device->GetFencedDeleter()->DeleteWhenUnused(mHandle);
-        }
-
-        if (mExternalAllocation != VK_NULL_HANDLE) {
-            device->GetFencedDeleter()->DeleteWhenUnused(mExternalAllocation);
-        }
-
-        mHandle = VK_NULL_HANDLE;
-        mExternalAllocation = VK_NULL_HANDLE;
-        // If a signal semaphore exists it should be requested before we delete the texture
-        ASSERT(mSignalSemaphore == VK_NULL_HANDLE);
     }
 
     VkImage Texture::GetHandle() const {

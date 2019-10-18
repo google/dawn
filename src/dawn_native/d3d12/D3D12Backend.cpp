@@ -20,6 +20,7 @@
 #include "common/SwapChainUtils.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/NativeSwapChainImplD3D12.h"
+#include "dawn_native/d3d12/TextureD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
 
@@ -47,11 +48,13 @@ namespace dawn_native { namespace d3d12 {
 
     DawnTexture WrapSharedHandle(DawnDevice device,
                                  const DawnTextureDescriptor* descriptor,
-                                 HANDLE sharedHandle) {
+                                 HANDLE sharedHandle,
+                                 uint64_t acquireMutexKey) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
         const TextureDescriptor* backendDescriptor =
             reinterpret_cast<const TextureDescriptor*>(descriptor);
-        TextureBase* texture = backendDevice->WrapSharedHandle(backendDescriptor, sharedHandle);
+        TextureBase* texture =
+            backendDevice->WrapSharedHandle(backendDescriptor, sharedHandle, acquireMutexKey);
         return reinterpret_cast<DawnTexture>(texture);
     }
 }}  // namespace dawn_native::d3d12

@@ -58,12 +58,36 @@ namespace {
 
             mD3d11Device = std::move(d3d11Device);
             mD3d11DeviceContext = std::move(d3d11DeviceContext);
+
+            dawnDescriptor.dimension = dawn::TextureDimension::e2D;
+            dawnDescriptor.format = dawn::TextureFormat::RGBA8Unorm;
+            dawnDescriptor.size = {kTestWidth, kTestHeight, 1};
+            dawnDescriptor.sampleCount = 1;
+            dawnDescriptor.arrayLayerCount = 1;
+            dawnDescriptor.mipLevelCount = 1;
+            dawnDescriptor.usage = dawn::TextureUsage::Sampled | dawn::TextureUsage::CopySrc |
+                                   dawn::TextureUsage::OutputAttachment |
+                                   dawn::TextureUsage::CopyDst;
+
+            d3dDescriptor.Width = kTestWidth;
+            d3dDescriptor.Height = kTestHeight;
+            d3dDescriptor.MipLevels = 1;
+            d3dDescriptor.ArraySize = 1;
+            d3dDescriptor.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+            d3dDescriptor.SampleDesc.Count = 1;
+            d3dDescriptor.SampleDesc.Quality = 0;
+            d3dDescriptor.Usage = D3D11_USAGE_DEFAULT;
+            d3dDescriptor.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+            d3dDescriptor.CPUAccessFlags = 0;
+            d3dDescriptor.MiscFlags =
+                D3D11_RESOURCE_MISC_SHARED_NTHANDLE | D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX;
         }
 
       protected:
         void WrapSharedHandle(const dawn::TextureDescriptor* dawnDescriptor,
                               const D3D11_TEXTURE2D_DESC* d3dDescriptor,
-                              dawn::Texture* dawnTexture) const {
+                              dawn::Texture* dawnTexture,
+                              ID3D11Texture2D** d3d11TextureOut) const {
             ComPtr<ID3D11Texture2D> d3d11Texture;
             HRESULT hr = mD3d11Device->CreateTexture2D(d3dDescriptor, nullptr, &d3d11Texture);
             ASSERT_EQ(hr, S_OK);
@@ -80,12 +104,13 @@ namespace {
 
             DawnTexture texture = dawn_native::d3d12::WrapSharedHandle(
                 device.Get(), reinterpret_cast<const DawnTextureDescriptor*>(dawnDescriptor),
-                sharedHandle);
+                sharedHandle, 0);
             // Now that we've created all of our resources, we can close the handle
             // since we no longer need it.
             ::CloseHandle(sharedHandle);
 
             *dawnTexture = dawn::Texture::Acquire(texture);
+            *d3d11TextureOut = d3d11Texture.Detach();
         }
 
         static constexpr size_t kTestWidth = 10;
@@ -93,6 +118,9 @@ namespace {
 
         ComPtr<ID3D11Device> mD3d11Device;
         ComPtr<ID3D11DeviceContext> mD3d11DeviceContext;
+
+        D3D11_TEXTURE2D_DESC d3dDescriptor;
+        dawn::TextureDescriptor dawnDescriptor;
     };
 
 }  // anonymous namespace
@@ -100,35 +128,6 @@ namespace {
 // A small fixture used to initialize default data for the D3D12Resource validation tests.
 // These tests are skipped if the harness is using the wire.
 class D3D12SharedHandleValidation : public D3D12ResourceTestBase {
-  public:
-    void TestSetUp() override {
-        D3D12ResourceTestBase::TestSetUp();
-
-        dawnDescriptor.dimension = dawn::TextureDimension::e2D;
-        dawnDescriptor.format = dawn::TextureFormat::BGRA8Unorm;
-        dawnDescriptor.size = {kTestWidth, kTestHeight, 1};
-        dawnDescriptor.sampleCount = 1;
-        dawnDescriptor.arrayLayerCount = 1;
-        dawnDescriptor.mipLevelCount = 1;
-        dawnDescriptor.usage = dawn::TextureUsage::OutputAttachment;
-
-        d3dDescriptor.Width = kTestWidth;
-        d3dDescriptor.Height = kTestHeight;
-        d3dDescriptor.MipLevels = 1;
-        d3dDescriptor.ArraySize = 1;
-        d3dDescriptor.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-        d3dDescriptor.SampleDesc.Count = 1;
-        d3dDescriptor.SampleDesc.Quality = 0;
-        d3dDescriptor.Usage = D3D11_USAGE_DEFAULT;
-        d3dDescriptor.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
-        d3dDescriptor.CPUAccessFlags = 0;
-        d3dDescriptor.MiscFlags =
-            D3D11_RESOURCE_MISC_SHARED_NTHANDLE | D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX;
-    }
-
-  protected:
-    D3D11_TEXTURE2D_DESC d3dDescriptor;
-    dawn::TextureDescriptor dawnDescriptor;
 };
 
 // Test a successful wrapping of an D3D12Resource in a texture
@@ -136,7 +135,8 @@ TEST_P(D3D12SharedHandleValidation, Success) {
     DAWN_SKIP_TEST_IF(UsesWire());
 
     dawn::Texture texture;
-    WrapSharedHandle(&dawnDescriptor, &d3dDescriptor, &texture);
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    WrapSharedHandle(&dawnDescriptor, &d3dDescriptor, &texture, &d3d11Texture);
 
     ASSERT_NE(texture.Get(), nullptr);
 }
@@ -147,7 +147,8 @@ TEST_P(D3D12SharedHandleValidation, InvalidTextureDescriptor) {
     dawnDescriptor.nextInChain = this;
 
     dawn::Texture texture;
-    ASSERT_DEVICE_ERROR(WrapSharedHandle(&dawnDescriptor, &d3dDescriptor, &texture));
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    ASSERT_DEVICE_ERROR(WrapSharedHandle(&dawnDescriptor, &d3dDescriptor, &texture, &d3d11Texture));
 
     ASSERT_EQ(texture.Get(), nullptr);
 }
@@ -158,7 +159,8 @@ TEST_P(D3D12SharedHandleValidation, InvalidMipLevelCount) {
     dawnDescriptor.mipLevelCount = 2;
 
     dawn::Texture texture;
-    ASSERT_DEVICE_ERROR(WrapSharedHandle(&dawnDescriptor, &d3dDescriptor, &texture));
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    ASSERT_DEVICE_ERROR(WrapSharedHandle(&dawnDescriptor, &d3dDescriptor, &texture, &d3d11Texture));
 
     ASSERT_EQ(texture.Get(), nullptr);
 }
@@ -169,7 +171,8 @@ TEST_P(D3D12SharedHandleValidation, InvalidArrayLayerCount) {
     dawnDescriptor.arrayLayerCount = 2;
 
     dawn::Texture texture;
-    ASSERT_DEVICE_ERROR(WrapSharedHandle(&dawnDescriptor, &d3dDescriptor, &texture));
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    ASSERT_DEVICE_ERROR(WrapSharedHandle(&dawnDescriptor, &d3dDescriptor, &texture, &d3d11Texture));
 
     ASSERT_EQ(texture.Get(), nullptr);
 }
@@ -180,7 +183,8 @@ TEST_P(D3D12SharedHandleValidation, InvalidSampleCount) {
     dawnDescriptor.sampleCount = 4;
 
     dawn::Texture texture;
-    ASSERT_DEVICE_ERROR(WrapSharedHandle(&dawnDescriptor, &d3dDescriptor, &texture));
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    ASSERT_DEVICE_ERROR(WrapSharedHandle(&dawnDescriptor, &d3dDescriptor, &texture, &d3d11Texture));
 
     ASSERT_EQ(texture.Get(), nullptr);
 }
@@ -191,7 +195,8 @@ TEST_P(D3D12SharedHandleValidation, InvalidWidth) {
     dawnDescriptor.size.width = kTestWidth + 1;
 
     dawn::Texture texture;
-    ASSERT_DEVICE_ERROR(WrapSharedHandle(&dawnDescriptor, &d3dDescriptor, &texture));
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    ASSERT_DEVICE_ERROR(WrapSharedHandle(&dawnDescriptor, &d3dDescriptor, &texture, &d3d11Texture));
 
     ASSERT_EQ(texture.Get(), nullptr);
 }
@@ -202,7 +207,8 @@ TEST_P(D3D12SharedHandleValidation, InvalidHeight) {
     dawnDescriptor.size.height = kTestHeight + 1;
 
     dawn::Texture texture;
-    ASSERT_DEVICE_ERROR(WrapSharedHandle(&dawnDescriptor, &d3dDescriptor, &texture));
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    ASSERT_DEVICE_ERROR(WrapSharedHandle(&dawnDescriptor, &d3dDescriptor, &texture, &d3d11Texture));
 
     ASSERT_EQ(texture.Get(), nullptr);
 }
@@ -213,7 +219,8 @@ TEST_P(D3D12SharedHandleValidation, InvalidFormat) {
     dawnDescriptor.format = dawn::TextureFormat::R8Unorm;
 
     dawn::Texture texture;
-    ASSERT_DEVICE_ERROR(WrapSharedHandle(&dawnDescriptor, &d3dDescriptor, &texture));
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    ASSERT_DEVICE_ERROR(WrapSharedHandle(&dawnDescriptor, &d3dDescriptor, &texture, &d3d11Texture));
 
     ASSERT_EQ(texture.Get(), nullptr);
 }
@@ -224,7 +231,8 @@ TEST_P(D3D12SharedHandleValidation, InvalidNumD3DMipLevels) {
     d3dDescriptor.MipLevels = 2;
 
     dawn::Texture texture;
-    ASSERT_DEVICE_ERROR(WrapSharedHandle(&dawnDescriptor, &d3dDescriptor, &texture));
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    ASSERT_DEVICE_ERROR(WrapSharedHandle(&dawnDescriptor, &d3dDescriptor, &texture, &d3d11Texture));
 
     ASSERT_EQ(texture.Get(), nullptr);
 }
@@ -235,9 +243,252 @@ TEST_P(D3D12SharedHandleValidation, InvalidD3DArraySize) {
     d3dDescriptor.ArraySize = 2;
 
     dawn::Texture texture;
-    ASSERT_DEVICE_ERROR(WrapSharedHandle(&dawnDescriptor, &d3dDescriptor, &texture));
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    ASSERT_DEVICE_ERROR(WrapSharedHandle(&dawnDescriptor, &d3dDescriptor, &texture, &d3d11Texture));
 
     ASSERT_EQ(texture.Get(), nullptr);
 }
 
+class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
+  protected:
+    // Submits a 1x1x1 copy from source to destination
+    void SimpleCopyTextureToTexture(dawn::Texture source, dawn::Texture destination) {
+        dawn::TextureCopyView copySrc;
+        copySrc.texture = source;
+        copySrc.mipLevel = 0;
+        copySrc.arrayLayer = 0;
+        copySrc.origin = {0, 0, 0};
+
+        dawn::TextureCopyView copyDst;
+        copyDst.texture = destination;
+        copyDst.mipLevel = 0;
+        copyDst.arrayLayer = 0;
+        copyDst.origin = {0, 0, 0};
+
+        dawn::Extent3D copySize = {1, 1, 1};
+
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyTextureToTexture(&copySrc, &copyDst, &copySize);
+        dawn::CommandBuffer commands = encoder.Finish();
+
+        queue.Submit(1, &commands);
+    }
+
+    // Clear a texture on a given device
+    void ClearImage(dawn::Texture wrappedTexture, const dawn::Color& clearColor) {
+        dawn::TextureView wrappedView = wrappedTexture.CreateView();
+
+        // Submit a clear operation
+        utils::ComboRenderPassDescriptor renderPassDescriptor({wrappedView}, {});
+        renderPassDescriptor.cColorAttachments[0].clearColor = clearColor;
+
+        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDescriptor);
+        pass.EndPass();
+
+        dawn::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+    }
+
+    void WrapAndClearD3D11Texture(const dawn::TextureDescriptor* dawnDescriptor,
+                                  const D3D11_TEXTURE2D_DESC* d3dDescriptor,
+                                  dawn::Texture* dawnTextureOut,
+                                  const dawn::Color& clearColor,
+                                  ID3D11Texture2D** d3d11TextureOut,
+                                  IDXGIKeyedMutex** dxgiKeyedMutexOut) const {
+        ComPtr<ID3D11Texture2D> d3d11Texture;
+        HRESULT hr = mD3d11Device->CreateTexture2D(d3dDescriptor, nullptr, &d3d11Texture);
+        ASSERT_EQ(hr, S_OK);
+
+        ComPtr<IDXGIResource1> dxgiResource;
+        hr = d3d11Texture.As(&dxgiResource);
+        ASSERT_EQ(hr, S_OK);
+
+        HANDLE sharedHandle;
+        hr = dxgiResource->CreateSharedHandle(
+            nullptr, DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE, nullptr,
+            &sharedHandle);
+        ASSERT_EQ(hr, S_OK);
+
+        ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex;
+        hr = d3d11Texture.As(&dxgiKeyedMutex);
+        ASSERT_EQ(hr, S_OK);
+
+        ComPtr<ID3D11RenderTargetView> d3d11RTV;
+        hr = mD3d11Device->CreateRenderTargetView(d3d11Texture.Get(), nullptr, &d3d11RTV);
+        ASSERT_EQ(hr, S_OK);
+
+        hr = dxgiKeyedMutex->AcquireSync(0, INFINITE);
+        ASSERT_EQ(hr, S_OK);
+
+        const float colorRGBA[] = {clearColor.r, clearColor.g, clearColor.b, clearColor.a};
+        mD3d11DeviceContext->ClearRenderTargetView(d3d11RTV.Get(), colorRGBA);
+
+        hr = dxgiKeyedMutex->ReleaseSync(1);
+        ASSERT_EQ(hr, S_OK);
+
+        DawnTexture dawnTexture = dawn_native::d3d12::WrapSharedHandle(
+            device.Get(), reinterpret_cast<const DawnTextureDescriptor*>(dawnDescriptor),
+            sharedHandle, 1);
+
+        *dawnTextureOut = dawn::Texture::Acquire(dawnTexture);
+        *d3d11TextureOut = d3d11Texture.Detach();
+        *dxgiKeyedMutexOut = dxgiKeyedMutex.Detach();
+    }
+
+    void ExpectPixelRGBA8EQ(UINT64 acquireKey,
+                            ID3D11Texture2D* d3d11Texture,
+                            IDXGIKeyedMutex* dxgiKeyedMutex,
+                            const dawn::Color& color) {
+        HRESULT hr = dxgiKeyedMutex->AcquireSync(acquireKey, INFINITE);
+        ASSERT_EQ(hr, S_OK);
+
+        D3D11_TEXTURE2D_DESC texture2DDesc;
+        d3d11Texture->GetDesc(&texture2DDesc);
+
+        const CD3D11_TEXTURE2D_DESC texture2DStagingDesc(
+            texture2DDesc.Format,                             // Format
+            texture2DDesc.Width,                              // Width
+            texture2DDesc.Height,                             // Height
+            1,                                                // ArraySize
+            1,                                                // MipLevels
+            0,                                                // BindFlags
+            D3D11_USAGE_STAGING,                              // Usage
+            D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE);  // CPUAccessFlags
+
+        ComPtr<ID3D11Texture2D> spD3DTextureStaging;
+        hr = mD3d11Device->CreateTexture2D(&texture2DStagingDesc, nullptr, &spD3DTextureStaging);
+        ASSERT_EQ(hr, S_OK);
+
+        D3D11_BOX d3dRc;
+        d3dRc.back = 1;
+        d3dRc.front = 0;
+        d3dRc.top = 0;
+        d3dRc.left = 0;
+        d3dRc.bottom = texture2DDesc.Height;
+        d3dRc.right = texture2DDesc.Width;
+
+        mD3d11DeviceContext->CopySubresourceRegion(spD3DTextureStaging.Get(),  // pDstResource
+                                                   0,                          // DstSubresource
+                                                   0,                          // DstX
+                                                   0,                          // DstY
+                                                   0,                          // DstZ
+                                                   d3d11Texture,               // pSrcResource
+                                                   0,                          // SrcSubresource
+                                                   &d3dRc);                    // pSrcBox
+
+        D3D11_MAPPED_SUBRESOURCE mappedResource;
+        hr = mD3d11DeviceContext->Map(spD3DTextureStaging.Get(), 0, D3D11_MAP_READ_WRITE, 0,
+                                      &mappedResource);
+        ASSERT_EQ(hr, S_OK);
+
+        const uint8_t* colorData = static_cast<uint8_t*>(mappedResource.pData);
+        EXPECT_EQ(colorData[0], color.r * 255u);
+        EXPECT_EQ(colorData[1], color.g * 255u);
+        EXPECT_EQ(colorData[2], color.b * 255u);
+        EXPECT_EQ(colorData[3], color.a * 255u);
+
+        mD3d11DeviceContext->Unmap(spD3DTextureStaging.Get(), 0);
+
+        hr = dxgiKeyedMutex->ReleaseSync(acquireKey + 1);
+        ASSERT_EQ(hr, S_OK);
+    }
+};
+
+// 1. Create and clear a D3D11 texture
+// 2. Copy the wrapped texture to another dawn texture
+// 3. Readback the copied texture and ensure the color matches the original clear color.
+TEST_P(D3D12SharedHandleUsageTests, ClearInD3D11CopyAndReadbackInD3D12) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+
+    const dawn::Color clearColor{1.0f, 1.0f, 0.0f, 1.0f};
+    dawn::Texture dawnSrcTexture;
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex;
+    WrapAndClearD3D11Texture(&dawnDescriptor, &d3dDescriptor, &dawnSrcTexture, clearColor,
+                             &d3d11Texture, &dxgiKeyedMutex);
+
+    // Create a texture on the device and copy the source texture to it.
+    dawn::Texture dawnCopyDestTexture = device.CreateTexture(&dawnDescriptor);
+    SimpleCopyTextureToTexture(dawnSrcTexture, dawnCopyDestTexture);
+
+    // Readback the destination texture and ensure it contains the colors we used
+    // to clear the source texture on the D3D device.
+    EXPECT_PIXEL_RGBA8_EQ(
+        RGBA8(clearColor.r * 255u, clearColor.g * 255u, clearColor.b * 255u, clearColor.a * 255u),
+        dawnCopyDestTexture, 0, 0);
+}
+
+// 1. Create and clear a D3D11 texture
+// 2. Readback the wrapped texture and ensure the color matches the original clear color.
+TEST_P(D3D12SharedHandleUsageTests, ClearInD3D11ReadbackInD3D12) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+
+    const dawn::Color clearColor{1.0f, 1.0f, 0.0f, 1.0f};
+    dawn::Texture dawnTexture;
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex;
+    WrapAndClearD3D11Texture(&dawnDescriptor, &d3dDescriptor, &dawnTexture, clearColor,
+                             &d3d11Texture, &dxgiKeyedMutex);
+
+    // Readback the destination texture and ensure it contains the colors we used
+    // to clear the source texture on the D3D device.
+    EXPECT_PIXEL_RGBA8_EQ(
+        RGBA8(clearColor.r * 255, clearColor.g * 255, clearColor.b * 255, clearColor.a * 255),
+        dawnTexture, 0, 0);
+}
+
+// 1. Create and clear a D3D11 texture
+// 2. Wrap it in a Dawn texture and clear it to a different color
+// 3. Readback the texture with D3D11 and ensure we receive the color we cleared with Dawn.
+TEST_P(D3D12SharedHandleUsageTests, ClearInD3D12ReadbackInD3D11) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+
+    const dawn::Color d3d11ClearColor{1.0f, 1.0f, 0.0f, 1.0f};
+    dawn::Texture dawnTexture;
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex;
+    WrapAndClearD3D11Texture(&dawnDescriptor, &d3dDescriptor, &dawnTexture, d3d11ClearColor,
+                             &d3d11Texture, &dxgiKeyedMutex);
+
+    const dawn::Color d3d12ClearColor{0.0f, 0.0f, 1.0f, 1.0f};
+    ClearImage(dawnTexture, d3d12ClearColor);
+
+    dawnTexture.Destroy();
+
+    // Now that Dawn (via D3D12) has finished writing to the texture, we should be
+    // able to read it back by copying it to a staging texture and verifying the
+    // color matches the D3D12 clear color.
+    ExpectPixelRGBA8EQ(2, d3d11Texture.Get(), dxgiKeyedMutex.Get(), d3d12ClearColor);
+}
+
+// 1. Create and clear a D3D11 texture
+// 2. Wrap it in a Dawn texture and clear the texture to two different colors.
+// 3. Readback the texture with D3D11.
+// 4. Verify the readback color was the final color cleared.
+TEST_P(D3D12SharedHandleUsageTests, ClearTwiceInD3D12ReadbackInD3D11) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+
+    const dawn::Color d3d11ClearColor{1.0f, 1.0f, 0.0f, 1.0f};
+    dawn::Texture dawnTexture;
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex;
+    WrapAndClearD3D11Texture(&dawnDescriptor, &d3dDescriptor, &dawnTexture, d3d11ClearColor,
+                             &d3d11Texture, &dxgiKeyedMutex);
+
+    const dawn::Color d3d12ClearColor1{0.0f, 0.0f, 1.0f, 1.0f};
+    ClearImage(dawnTexture, d3d12ClearColor1);
+
+    const dawn::Color d3d12ClearColor2{0.0f, 1.0f, 1.0f, 1.0f};
+    ClearImage(dawnTexture, d3d12ClearColor2);
+
+    dawnTexture.Destroy();
+
+    // Now that Dawn (via D3D12) has finished writing to the texture, we should be
+    // able to read it back by copying it to a staging texture and verifying the
+    // color matches the last D3D12 clear color.
+    ExpectPixelRGBA8EQ(2, d3d11Texture.Get(), dxgiKeyedMutex.Get(), d3d12ClearColor2);
+}
+
 DAWN_INSTANTIATE_TEST(D3D12SharedHandleValidation, D3D12Backend);
+DAWN_INSTANTIATE_TEST(D3D12SharedHandleUsageTests, D3D12Backend);
