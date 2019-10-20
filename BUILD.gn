@@ -815,6 +815,7 @@ test("dawn_unittests") {
     "src/tests/unittests/wire/WireArgumentTests.cpp",
     "src/tests/unittests/wire/WireBasicTests.cpp",
     "src/tests/unittests/wire/WireBufferMappingTests.cpp",
+    "src/tests/unittests/wire/WireDawnDevicePropertiesTests.cpp",
     "src/tests/unittests/wire/WireErrorCallbackTests.cpp",
     "src/tests/unittests/wire/WireFenceTests.cpp",
     "src/tests/unittests/wire/WireInjectTextureTests.cpp",

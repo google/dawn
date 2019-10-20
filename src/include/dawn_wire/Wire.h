@@ -35,6 +35,15 @@ namespace dawn_wire {
         virtual const volatile char* HandleCommands(const volatile char* commands, size_t size) = 0;
     };
 
+    DAWN_WIRE_EXPORT size_t
+    SerializedDawnDevicePropertiesSize(const DawnDeviceProperties* deviceProperties);
+
+    DAWN_WIRE_EXPORT void SerializeDawnDeviceProperties(
+        const DawnDeviceProperties* deviceProperties,
+        char* serializeBuffer);
+    DAWN_WIRE_EXPORT bool DeserializeDawnDeviceProperties(DawnDeviceProperties* deviceProperties,
+                                                          const volatile char* deserializeBuffer);
+
 }  // namespace dawn_wire
 
 #endif  // DAWNWIRE_WIRE_H_

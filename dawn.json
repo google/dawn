@@ -579,6 +579,13 @@
             }
         ]
     },
+    "device properties": {
+        "category": "structure",
+        "extensible": false,
+        "members": [
+            {"name": "texture compression BC", "type": "bool", "default": "false"}
+        ]
+    },
     "depth stencil state descriptor": {
         "category": "structure",
         "extensible": true,
