@@ -362,8 +362,18 @@ namespace dawn_native { namespace d3d12 {
                                       mD3d12Device.Get(), 0, nullptr, 0, &iUnknownQueue, 1, 1,
                                       &d3d11Device, &d3d11DeviceContext, &d3dFeatureLevel),
                                   "D3D12 11on12 device create"));
-            DAWN_TRY(CheckHRESULT(d3d11Device.As(&mD3d11On12Device),
+
+            ComPtr<ID3D11On12Device> d3d11on12Device;
+            DAWN_TRY(CheckHRESULT(d3d11Device.As(&d3d11on12Device),
                                   "D3D12 QueryInterface ID3D11Device to ID3D11On12Device"));
+
+            ComPtr<ID3D11DeviceContext2> d3d11DeviceContext2;
+            DAWN_TRY(
+                CheckHRESULT(d3d11DeviceContext.As(&d3d11DeviceContext2),
+                             "D3D12 QueryInterface ID3D11DeviceContext to ID3D11DeviceContext2"));
+
+            mD3d11On12DeviceContext = std::move(d3d11DeviceContext2);
+            mD3d11On12Device = std::move(d3d11on12Device);
         }
 
         ComPtr<ID3D11Texture2D> d3d11Texture;
@@ -393,6 +403,18 @@ namespace dawn_native { namespace d3d12 {
 
         ID3D11Resource* d3d11ResourceRaw = d3d11Resource.Get();
         mD3d11On12Device->ReleaseWrappedResources(&d3d11ResourceRaw, 1);
+
+        d3d11Resource.Reset();
+        dxgiKeyedMutex.Reset();
+
+        // 11on12 has a bug where D3D12 resources used only for keyed shared mutexes
+        // are not released until work is submitted to the device context and flushed.
+        // The most minimal work we can get away with is issuing a TiledResourceBarrier.
+
+        // ID3D11DeviceContext2 is available in Win8.1 and above. This suffices for a
+        // D3D12 backend since both D3D12 and 11on12 first appeared in Windows 10.
+        mD3d11On12DeviceContext->TiledResourceBarrier(nullptr, nullptr);
+        mD3d11On12DeviceContext->Flush();
     }
 
 }}  // namespace dawn_native::d3d12
