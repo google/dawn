@@ -12,9 +12,9 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#include "dawn/dawncpp.h"
+#include "dawn/webgpu_cpp.h"
 
-namespace dawn {
+namespace wgpu {
 
     {% for type in by_category["enum"] %}
         {% set CppType = as_cppType(type.name) %}
@@ -112,12 +112,12 @@ namespace dawn {
                 {% endif %}
             }
         {% endfor %}
-        void {{CppType}}::DawnReference({{CType}} handle) {
+        void {{CppType}}::WGPUReference({{CType}} handle) {
             if (handle != nullptr) {
                 {{as_cMethod(type.name, Name("reference"))}}(handle);
             }
         }
-        void {{CppType}}::DawnRelease({{CType}} handle) {
+        void {{CppType}}::WGPURelease({{CType}} handle) {
             if (handle != nullptr) {
                 {{as_cMethod(type.name, Name("release"))}}(handle);
             }
@@ -126,7 +126,7 @@ namespace dawn {
     {% endfor %}
 
     Proc GetProcAddress(Device const& device, const char* procName) {
-        return reinterpret_cast<Proc>(DawnGetProcAddress(device.Get(), procName));
+        return reinterpret_cast<Proc>(WGPUGetProcAddress(device.Get(), procName));
     }
 
 }

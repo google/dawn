@@ -352,6 +352,12 @@ def as_cType(name):
     if name.native:
         return name.concatcase()
     else:
+        return 'WGPU' + name.CamelCase()
+
+def as_cTypeDawn(name):
+    if name.native:
+        return name.concatcase()
+    else:
         return 'Dawn' + name.CamelCase()
 
 def as_cTypeEnumSpecialCase(typ):
@@ -406,6 +412,10 @@ def annotated(typ, arg):
 
 def as_cEnum(type_name, value_name):
     assert(not type_name.native and not value_name.native)
+    return 'WGPU' + type_name.CamelCase() + '_' + value_name.CamelCase()
+
+def as_cEnumDawn(type_name, value_name):
+    assert(not type_name.native and not value_name.native)
     return 'DAWN' + '_' + type_name.SNAKE_CASE() + '_' + value_name.SNAKE_CASE()
 
 def as_cppEnum(value_name):
@@ -416,6 +426,10 @@ def as_cppEnum(value_name):
 
 def as_cMethod(type_name, method_name):
     assert(not type_name.native and not method_name.native)
+    return 'wgpu' + type_name.CamelCase() + method_name.CamelCase()
+
+def as_cMethodDawn(type_name, method_name):
+    assert(not type_name.native and not method_name.native)
     return 'dawn' + type_name.CamelCase() + method_name.CamelCase()
 
 def as_MethodSuffix(type_name, method_name):
@@ -423,6 +437,10 @@ def as_MethodSuffix(type_name, method_name):
     return type_name.CamelCase() + method_name.CamelCase()
 
 def as_cProc(type_name, method_name):
+    assert(not type_name.native and not method_name.native)
+    return 'WGPU' + 'Proc' + type_name.CamelCase() + method_name.CamelCase()
+
+def as_cProcDawn(type_name, method_name):
     assert(not type_name.native and not method_name.native)
     return 'Dawn' + 'Proc' + type_name.CamelCase() + method_name.CamelCase()
 
@@ -488,11 +506,15 @@ class MultiGeneratorFromDawnJSON(Generator):
             'as_annotated_cType': lambda arg: annotated(as_cTypeEnumSpecialCase(arg.type), arg),
             'as_annotated_cppType': lambda arg: annotated(as_cppType(arg.type.name), arg),
             'as_cEnum': as_cEnum,
+            'as_cEnumDawn': as_cEnumDawn,
             'as_cppEnum': as_cppEnum,
             'as_cMethod': as_cMethod,
+            'as_cMethodDawn': as_cMethodDawn,
             'as_MethodSuffix': as_MethodSuffix,
             'as_cProc': as_cProc,
+            'as_cProcDawn': as_cProcDawn,
             'as_cType': as_cType,
+            'as_cTypeDawn': as_cTypeDawn,
             'as_cppType': as_cppType,
             'convert_cType_to_cppType': convert_cType_to_cppType,
             'as_varName': as_varName,
@@ -506,17 +528,19 @@ class MultiGeneratorFromDawnJSON(Generator):
         cpp_params = {'native_methods': lambda typ: cpp_native_methods(api_params['types'], typ)}
 
         if 'dawn_headers' in targets:
-            renders.append(FileRender('api.h', 'src/include/dawn/dawn.h', [base_params, api_params, c_params]))
-            renders.append(FileRender('api_proc_table.h', 'src/include/dawn/dawn_proc_table.h', [base_params, api_params, c_params]))
+            renders.append(FileRender('webgpu.h', 'src/include/dawn/webgpu.h', [base_params, api_params, c_params]))
+            renders.append(FileRender('dawn.h', 'src/include/dawn/dawn.h', [base_params, api_params, c_params]))
+            renders.append(FileRender('dawn_proc_table.h', 'src/include/dawn/dawn_proc_table.h', [base_params, api_params, c_params]))
 
         if 'dawncpp_headers' in targets:
-            renders.append(FileRender('apicpp.h', 'src/include/dawn/dawncpp.h', [base_params, api_params, cpp_params]))
+            renders.append(FileRender('webgpu_cpp.h', 'src/include/dawn/webgpu_cpp.h', [base_params, api_params, cpp_params]))
+            renders.append(FileRender('dawncpp.h', 'src/include/dawn/dawncpp.h', [base_params, api_params, cpp_params]))
 
         if 'dawn_proc' in targets:
-            renders.append(FileRender('api_proc.c', 'src/dawn/dawn_proc.c', [base_params, api_params, c_params]))
+            renders.append(FileRender('dawn_proc.c', 'src/dawn/dawn_proc.c', [base_params, api_params, c_params]))
 
         if 'dawncpp' in targets:
-            renders.append(FileRender('apicpp.cpp', 'src/dawn/dawncpp.cpp', [base_params, api_params, cpp_params]))
+            renders.append(FileRender('webgpu_cpp.cpp', 'src/dawn/webgpu_cpp.cpp', [base_params, api_params, cpp_params]))
 
         if 'mock_dawn' in targets:
             renders.append(FileRender('mock_api.h', 'src/dawn/mock_dawn.h', [base_params, api_params, c_params]))

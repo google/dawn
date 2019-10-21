@@ -12,15 +12,15 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#ifndef DAWN_DAWNCPP_H_
-#define DAWN_DAWNCPP_H_
+#ifndef WEBGPU_CPP_H_
+#define WEBGPU_CPP_H_
 
-#include "dawn/dawn.h"
+#include "dawn/webgpu.h"
 #include "dawn/EnumClassBitmasks.h"
 
-namespace dawn {
+namespace wgpu {
 
-    static constexpr uint64_t kWholeSize = DAWN_WHOLE_SIZE;
+    static constexpr uint64_t kWholeSize = WGPU_WHOLE_SIZE;
 
     {% for type in by_category["enum"] %}
         enum class {{as_cppType(type.name)}} : uint32_t {
@@ -48,7 +48,7 @@ namespace dawn {
 
     {% endfor %}
 
-    using Proc = DawnProc;
+    using Proc = WGPUProc;
     {% for type in by_category["natively defined"] %}
         using {{as_cppType(type.name)}} = {{as_cType(type.name)}};
     {% endfor %}
@@ -66,10 +66,10 @@ namespace dawn {
       public:
         ObjectBase() = default;
         ObjectBase(CType handle): mHandle(handle) {
-            if (mHandle) Derived::DawnReference(mHandle);
+            if (mHandle) Derived::WGPUReference(mHandle);
         }
         ~ObjectBase() {
-            if (mHandle) Derived::DawnRelease(mHandle);
+            if (mHandle) Derived::WGPURelease(mHandle);
         }
 
         ObjectBase(ObjectBase const& other)
@@ -77,9 +77,9 @@ namespace dawn {
         }
         Derived& operator=(ObjectBase const& other) {
             if (&other != this) {
-                if (mHandle) Derived::DawnRelease(mHandle);
+                if (mHandle) Derived::WGPURelease(mHandle);
                 mHandle = other.mHandle;
-                if (mHandle) Derived::DawnReference(mHandle);
+                if (mHandle) Derived::WGPUReference(mHandle);
             }
 
             return static_cast<Derived&>(*this);
@@ -91,7 +91,7 @@ namespace dawn {
         }
         Derived& operator=(ObjectBase&& other) {
             if (&other != this) {
-                if (mHandle) Derived::DawnRelease(mHandle);
+                if (mHandle) Derived::WGPURelease(mHandle);
                 mHandle = other.mHandle;
                 other.mHandle = 0;
             }
@@ -102,7 +102,7 @@ namespace dawn {
         ObjectBase(std::nullptr_t) {}
         Derived& operator=(std::nullptr_t) {
             if (mHandle != nullptr) {
-                Derived::DawnRelease(mHandle);
+                Derived::WGPURelease(mHandle);
                 mHandle = nullptr;
             }
             return static_cast<Derived&>(*this);
@@ -170,13 +170,13 @@ namespace dawn {
 
           private:
             friend ObjectBase<{{CppType}}, {{CType}}>;
-            static void DawnReference({{CType}} handle);
-            static void DawnRelease({{CType}} handle);
+            static void WGPUReference({{CType}} handle);
+            static void WGPURelease({{CType}} handle);
         };
 
     {% endfor %}
 
-    DAWN_EXPORT Proc GetProcAddress(Device const& device, const char* procName);
+    Proc GetProcAddress(Device const& device, const char* procName);
 
     {% for type in by_category["structure"] %}
         struct {{as_cppType(type.name)}} {
@@ -190,6 +190,6 @@ namespace dawn {
 
     {% endfor %}
 
-} // namespace dawn
+}  // namespace wgpu
 
-#endif // DAWN_DAWNCPP_H_
+#endif // WEBGPU_CPP_H_

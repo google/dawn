@@ -457,31 +457,31 @@ namespace dawn_wire {
     {% endfor %}
 
         // Implementations of serialization/deserialization of DawnDeviceProperties.
-        size_t SerializedDawnDevicePropertiesSize(const DawnDeviceProperties* deviceProperties) {
+        size_t SerializedWGPUDevicePropertiesSize(const DawnDeviceProperties* deviceProperties) {
             return sizeof(DawnDeviceProperties) +
-                   DawnDevicePropertiesGetExtraRequiredSize(*deviceProperties);
+                   WGPUDevicePropertiesGetExtraRequiredSize(*deviceProperties);
         }
 
-        void SerializeDawnDeviceProperties(const DawnDeviceProperties* deviceProperties,
+        void SerializeWGPUDeviceProperties(const DawnDeviceProperties* deviceProperties,
                                            char* serializeBuffer) {
-            size_t devicePropertiesSize = SerializedDawnDevicePropertiesSize(deviceProperties);
-            DawnDevicePropertiesTransfer* transfer =
-                reinterpret_cast<DawnDevicePropertiesTransfer*>(serializeBuffer);
+            size_t devicePropertiesSize = SerializedWGPUDevicePropertiesSize(deviceProperties);
+            WGPUDevicePropertiesTransfer* transfer =
+                reinterpret_cast<WGPUDevicePropertiesTransfer*>(serializeBuffer);
             serializeBuffer += devicePropertiesSize;
 
-            DawnDevicePropertiesSerialize(*deviceProperties, transfer, &serializeBuffer);
+            WGPUDevicePropertiesSerialize(*deviceProperties, transfer, &serializeBuffer);
         }
 
-        bool DeserializeDawnDeviceProperties(DawnDeviceProperties* deviceProperties,
+        bool DeserializeWGPUDeviceProperties(DawnDeviceProperties* deviceProperties,
                                              const volatile char* deserializeBuffer) {
-            size_t devicePropertiesSize = SerializedDawnDevicePropertiesSize(deviceProperties);
-            const volatile DawnDevicePropertiesTransfer* transfer = nullptr;
+            size_t devicePropertiesSize = SerializedWGPUDevicePropertiesSize(deviceProperties);
+            const volatile WGPUDevicePropertiesTransfer* transfer = nullptr;
             if (GetPtrFromBuffer(&deserializeBuffer, &devicePropertiesSize, 1, &transfer) !=
                 DeserializeResult::Success) {
                 return false;
             }
 
-            return DawnDevicePropertiesDeserialize(deviceProperties, transfer, &deserializeBuffer,
+            return WGPUDevicePropertiesDeserialize(deviceProperties, transfer, &deserializeBuffer,
                                                    &devicePropertiesSize,
                                                    nullptr) == DeserializeResult::Success;
         }

@@ -16,7 +16,7 @@
 
 #include "dawn/EnumClassBitmasks.h"
 
-namespace dawn {
+namespace wgpu {
 
     enum class Color : uint32_t {
         R = 1,
@@ -80,14 +80,14 @@ namespace dawn {
 
     TEST(BitmaskTests, ZeroOrOneBits) {
         Color zero = static_cast<Color>(0);
-        ASSERT_TRUE(HasZeroOrOneBits(zero));
-        ASSERT_TRUE(HasZeroOrOneBits(Color::R));
-        ASSERT_TRUE(HasZeroOrOneBits(Color::G));
-        ASSERT_TRUE(HasZeroOrOneBits(Color::B));
-        ASSERT_TRUE(HasZeroOrOneBits(Color::A));
-        ASSERT_FALSE(HasZeroOrOneBits(static_cast<Color>(Color::R | Color::G)));
-        ASSERT_FALSE(HasZeroOrOneBits(static_cast<Color>(Color::G | Color::B)));
-        ASSERT_FALSE(HasZeroOrOneBits(static_cast<Color>(Color::B | Color::A)));
+        ASSERT_TRUE(dawn::HasZeroOrOneBits(zero));
+        ASSERT_TRUE(dawn::HasZeroOrOneBits(Color::R));
+        ASSERT_TRUE(dawn::HasZeroOrOneBits(Color::G));
+        ASSERT_TRUE(dawn::HasZeroOrOneBits(Color::B));
+        ASSERT_TRUE(dawn::HasZeroOrOneBits(Color::A));
+        ASSERT_FALSE(dawn::HasZeroOrOneBits(static_cast<Color>(Color::R | Color::G)));
+        ASSERT_FALSE(dawn::HasZeroOrOneBits(static_cast<Color>(Color::G | Color::B)));
+        ASSERT_FALSE(dawn::HasZeroOrOneBits(static_cast<Color>(Color::B | Color::A)));
     }
 
-}  // namespace dawn
+}  // namespace wgpu

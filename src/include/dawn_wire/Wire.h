@@ -36,12 +36,13 @@ namespace dawn_wire {
     };
 
     DAWN_WIRE_EXPORT size_t
-    SerializedDawnDevicePropertiesSize(const DawnDeviceProperties* deviceProperties);
+    SerializedWGPUDevicePropertiesSize(const DawnDeviceProperties* deviceProperties);
 
-    DAWN_WIRE_EXPORT void SerializeDawnDeviceProperties(
+    DAWN_WIRE_EXPORT void SerializeWGPUDeviceProperties(
         const DawnDeviceProperties* deviceProperties,
         char* serializeBuffer);
-    DAWN_WIRE_EXPORT bool DeserializeDawnDeviceProperties(DawnDeviceProperties* deviceProperties,
+
+    DAWN_WIRE_EXPORT bool DeserializeWGPUDeviceProperties(DawnDeviceProperties* deviceProperties,
                                                           const volatile char* deserializeBuffer);
 
 }  // namespace dawn_wire

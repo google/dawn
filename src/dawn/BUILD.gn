@@ -34,6 +34,7 @@ dawn_json_generator("dawn_headers_gen") {
   outputs = [
     "src/include/dawn/dawn.h",
     "src/include/dawn/dawn_proc_table.h",
+    "src/include/dawn/webgpu.h",
   ]
 }
 
@@ -44,10 +45,7 @@ source_set("dawn_headers") {
   ]
 
   sources = get_target_outputs(":dawn_headers_gen")
-  sources += [
-    "${dawn_root}/src/include/dawn/dawn_export.h",
-    "${dawn_root}/src/include/dawn/dawn_wsi.h",
-  ]
+  sources += [ "${dawn_root}/src/include/dawn/dawn_wsi.h" ]
 }
 
 ###############################################################################
@@ -58,6 +56,7 @@ dawn_json_generator("dawncpp_headers_gen") {
   target = "dawncpp_headers"
   outputs = [
     "src/include/dawn/dawncpp.h",
+    "src/include/dawn/webgpu_cpp.h",
   ]
 }
 
@@ -78,7 +77,7 @@ source_set("dawncpp_headers") {
 dawn_json_generator("dawncpp_gen") {
   target = "dawncpp"
   outputs = [
-    "src/dawn/dawncpp.cpp",
+    "src/dawn/webgpu_cpp.cpp",
   ]
 }
 
@@ -102,7 +101,7 @@ dawn_json_generator("libdawn_proc_gen") {
 }
 
 dawn_component("libdawn_proc") {
-  DEFINE_PREFIX = "DAWN"
+  DEFINE_PREFIX = "WGPU"
 
   public_deps = [
     ":dawn_headers",

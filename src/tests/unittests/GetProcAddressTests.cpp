@@ -102,13 +102,13 @@ namespace {
 
     // Test GetProcAddress with and without devices on some valid examples
     TEST_P(GetProcAddressTests, ValidExamples) {
-        ASSERT_EQ(mProcs.getProcAddress(nullptr, "dawnDeviceCreateBuffer"),
+        ASSERT_EQ(mProcs.getProcAddress(nullptr, "wgpuDeviceCreateBuffer"),
                   reinterpret_cast<DawnProc>(mProcs.deviceCreateBuffer));
-        ASSERT_EQ(mProcs.getProcAddress(mDevice.Get(), "dawnDeviceCreateBuffer"),
+        ASSERT_EQ(mProcs.getProcAddress(mDevice.Get(), "wgpuDeviceCreateBuffer"),
                   reinterpret_cast<DawnProc>(mProcs.deviceCreateBuffer));
-        ASSERT_EQ(mProcs.getProcAddress(nullptr, "dawnQueueSubmit"),
+        ASSERT_EQ(mProcs.getProcAddress(nullptr, "wgpuQueueSubmit"),
                   reinterpret_cast<DawnProc>(mProcs.queueSubmit));
-        ASSERT_EQ(mProcs.getProcAddress(mDevice.Get(), "dawnQueueSubmit"),
+        ASSERT_EQ(mProcs.getProcAddress(mDevice.Get(), "wgpuQueueSubmit"),
                   reinterpret_cast<DawnProc>(mProcs.queueSubmit));
     }
 
@@ -120,8 +120,8 @@ namespace {
 
     // Test GetProcAddress with and without devices on some invalid
     TEST_P(GetProcAddressTests, InvalidExamples) {
-        ASSERT_EQ(mProcs.getProcAddress(nullptr, "dawnDeviceDoSomething"), nullptr);
-        ASSERT_EQ(mProcs.getProcAddress(mDevice.Get(), "dawnDeviceDoSomething"), nullptr);
+        ASSERT_EQ(mProcs.getProcAddress(nullptr, "wgpuDeviceDoSomething"), nullptr);
+        ASSERT_EQ(mProcs.getProcAddress(mDevice.Get(), "wgpuDeviceDoSomething"), nullptr);
 
         // Trigger the condition where lower_bound will return the end of the procMap.
         ASSERT_EQ(mProcs.getProcAddress(nullptr, "zzzzzzz"), nullptr);
@@ -139,9 +139,9 @@ namespace {
     // Test that GetProcAddress supports itself: it is handled specially because it is a
     // freestanding function and not a method on an object.
     TEST_P(GetProcAddressTests, GetProcAddressItself) {
-        ASSERT_EQ(mProcs.getProcAddress(nullptr, "dawnGetProcAddress"),
+        ASSERT_EQ(mProcs.getProcAddress(nullptr, "wgpuGetProcAddress"),
                   reinterpret_cast<DawnProc>(mProcs.getProcAddress));
-        ASSERT_EQ(mProcs.getProcAddress(mDevice.Get(), "dawnGetProcAddress"),
+        ASSERT_EQ(mProcs.getProcAddress(mDevice.Get(), "wgpuGetProcAddress"),
                   reinterpret_cast<DawnProc>(mProcs.getProcAddress));
     }
 

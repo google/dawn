@@ -121,7 +121,7 @@ namespace dawn_wire { namespace client {
             return entry->proc;
         }
 
-        if (strcmp(procName, "dawnGetProcAddress") == 0) {
+        if (strcmp(procName, "wgpuGetProcAddress") == 0) {
             return reinterpret_cast<DawnProc>(ClientGetProcAddress);
         }
 

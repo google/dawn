@@ -15,10 +15,10 @@
 #ifndef DAWN_DAWN_PROC_TABLE_H_
 #define DAWN_DAWN_PROC_TABLE_H_
 
-#include "dawn/dawn.h"
+#include "dawn/webgpu.h"
 
 typedef struct DawnProcTable {
-    DawnProcGetProcAddress getProcAddress;
+    WGPUProcGetProcAddress getProcAddress;
 
     {% for type in by_category["object"] %}
         {% for method in native_methods(type) %}

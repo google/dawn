@@ -25,12 +25,12 @@ TEST_F(WireDawnDevicePropertiesTests, SerializeDawnDeviceProperties) {
     sentDawnDeviceProperties.textureCompressionBC = true;
 
     size_t sentDawnDevicePropertiesSize =
-        dawn_wire::SerializedDawnDevicePropertiesSize(&sentDawnDeviceProperties);
+        dawn_wire::SerializedWGPUDevicePropertiesSize(&sentDawnDeviceProperties);
     std::vector<char> buffer;
     buffer.resize(sentDawnDevicePropertiesSize);
-    dawn_wire::SerializeDawnDeviceProperties(&sentDawnDeviceProperties, buffer.data());
+    dawn_wire::SerializeWGPUDeviceProperties(&sentDawnDeviceProperties, buffer.data());
 
     DawnDeviceProperties receivedDawnDeviceProperties;
-    dawn_wire::DeserializeDawnDeviceProperties(&receivedDawnDeviceProperties, buffer.data());
+    dawn_wire::DeserializeWGPUDeviceProperties(&receivedDawnDeviceProperties, buffer.data());
     ASSERT_TRUE(receivedDawnDeviceProperties.textureCompressionBC);
 }

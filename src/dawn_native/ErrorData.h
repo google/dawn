@@ -19,8 +19,12 @@
 #include <string>
 #include <vector>
 
-namespace dawn {
+namespace wgpu {
     enum class ErrorType : uint32_t;
+}
+
+namespace dawn {
+    using ErrorType = wgpu::ErrorType;
 }
 
 namespace dawn_native {
