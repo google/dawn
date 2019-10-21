@@ -74,7 +74,7 @@ uint64_t NextPowerOfTwo(uint64_t n) {
 #endif
 }
 
-bool IsPowerOfTwo(size_t n) {
+bool IsPowerOfTwo(uint64_t n) {
     ASSERT(n != 0);
     return (n & (n - 1)) == 0;
 }
