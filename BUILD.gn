@@ -56,6 +56,15 @@ config("libdawn_native_internal") {
   }
 }
 
+config("libdawn_native_weak_framework") {
+  if (is_mac && dawn_enable_metal) {
+    ldflags = [
+      "-weak_framework",
+      "Metal",
+    ]
+  }
+}
+
 dawn_json_generator("libdawn_native_utils_gen") {
   target = "dawn_native_utils"
   outputs = [
@@ -119,6 +128,7 @@ source_set("libdawn_native_sources") {
   ]
 
   configs += [ ":libdawn_native_internal" ]
+  all_dependent_configs = [ ":libdawn_native_weak_framework" ]
   libs = []
 
   # Dependencies that are needed to compile libdawn_native entry points in
@@ -307,7 +317,6 @@ source_set("libdawn_native_sources") {
 
   if (dawn_enable_metal) {
     libs += [
-      "Metal.framework",
       "Cocoa.framework",
       "IOKit.framework",
       "IOSurface.framework",
