@@ -22,7 +22,7 @@
 #include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DescriptorHeapAllocator.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
-#include "dawn_native/d3d12/ResourceAllocator.h"
+#include "dawn_native/d3d12/ResourceAllocatorManagerD3D12.h"
 #include "dawn_native/d3d12/StagingBufferD3D12.h"
 #include "dawn_native/d3d12/TextureCopySplitter.h"
 #include "dawn_native/d3d12/UtilsD3D12.h"
@@ -313,7 +313,10 @@ namespace dawn_native { namespace d3d12 {
 
         mAcquireMutexKey = acquireMutexKey;
         mDxgiKeyedMutex = std::move(dxgiKeyedMutex);
-        mResource = std::move(d3d12Resource);
+
+        AllocationInfo info;
+        info.mMethod = AllocationMethod::kDirect;
+        mResourceAllocation = {info, 0, std::move(d3d12Resource)};
 
         SetIsSubresourceContentInitialized(true, 0, descriptor->mipLevelCount, 0,
                                            descriptor->arrayLayerCount);
@@ -340,10 +343,10 @@ namespace dawn_native { namespace d3d12 {
         resourceDescriptor.Flags =
             D3D12ResourceFlags(GetUsage(), GetFormat(), IsMultisampledTexture());
 
-        mResource = ToBackend(GetDevice())
-                        ->GetResourceAllocator()
-                        ->Allocate(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor,
-                                   D3D12_RESOURCE_STATE_COMMON);
+        DAWN_TRY_ASSIGN(mResourceAllocation,
+                        ToBackend(GetDevice())
+                            ->AllocateMemory(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor,
+                                             D3D12_RESOURCE_STATE_COMMON));
 
         Device* device = ToBackend(GetDevice());
 
@@ -361,8 +364,11 @@ namespace dawn_native { namespace d3d12 {
     Texture::Texture(Device* device,
                      const TextureDescriptor* descriptor,
                      ComPtr<ID3D12Resource> nativeTexture)
-        : TextureBase(device, descriptor, TextureState::OwnedExternal),
-          mResource(std::move(nativeTexture)) {
+        : TextureBase(device, descriptor, TextureState::OwnedExternal) {
+        AllocationInfo info;
+        info.mMethod = AllocationMethod::kDirect;
+        mResourceAllocation = {info, 0, std::move(nativeTexture)};
+
         SetIsSubresourceContentInitialized(true, 0, descriptor->mipLevelCount, 0,
                                            descriptor->arrayLayerCount);
     }
@@ -373,7 +379,7 @@ namespace dawn_native { namespace d3d12 {
 
     void Texture::DestroyImpl() {
         Device* device = ToBackend(GetDevice());
-        device->GetResourceAllocator()->Release(std::move(mResource));
+        device->DeallocateMemory(mResourceAllocation);
 
         if (mDxgiKeyedMutex != nullptr) {
             mDxgiKeyedMutex->ReleaseSync(mAcquireMutexKey + 1);
@@ -386,7 +392,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     ID3D12Resource* Texture::GetD3D12Resource() const {
-        return mResource.Get();
+        return mResourceAllocation.GetD3D12Resource().Get();
     }
 
     UINT16 Texture::GetDepthOrArraySize() {
@@ -476,7 +482,7 @@ namespace dawn_native { namespace d3d12 {
 
         barrier->Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
         barrier->Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        barrier->Transition.pResource = mResource.Get();
+        barrier->Transition.pResource = GetD3D12Resource();
         barrier->Transition.StateBefore = lastState;
         barrier->Transition.StateAfter = newState;
         barrier->Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
@@ -570,7 +576,7 @@ namespace dawn_native { namespace d3d12 {
                                              D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1));
                 D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvHeap.GetCPUHandle(0);
                 D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = GetDSVDescriptor(baseMipLevel);
-                device->GetD3D12Device()->CreateDepthStencilView(mResource.Get(), &dsvDesc,
+                device->GetD3D12Device()->CreateDepthStencilView(GetD3D12Resource(), &dsvDesc,
                                                                  dsvHandle);
 
                 D3D12_CLEAR_FLAGS clearFlags = {};
@@ -597,7 +603,7 @@ namespace dawn_native { namespace d3d12 {
                 for (uint32_t i = baseMipLevel; i < baseMipLevel + levelCount; i++) {
                     D3D12_RENDER_TARGET_VIEW_DESC rtvDesc =
                         GetRTVDescriptor(i, baseArrayLayer, layerCount);
-                    device->GetD3D12Device()->CreateRenderTargetView(mResource.Get(), &rtvDesc,
+                    device->GetD3D12Device()->CreateRenderTargetView(GetD3D12Resource(), &rtvDesc,
                                                                      rtvHandle);
                     commandList->ClearRenderTargetView(rtvHandle, clearColorRGBA, 0, nullptr);
                 }

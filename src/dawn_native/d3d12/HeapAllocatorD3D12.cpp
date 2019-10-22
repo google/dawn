@@ -32,9 +32,11 @@ namespace dawn_native { namespace d3d12 {
         heapDesc.Properties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
         heapDesc.Properties.CreationNodeMask = 0;
         heapDesc.Properties.VisibleNodeMask = 0;
-        // MSAA vs non-MSAA resources have separate heap alignments.
-        // TODO(bryan.bernhart@intel.com): Support heap creation containing MSAA resources.
-        heapDesc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+        // It is preferred to use a size that is a multiple of the alignment.
+        // However, MSAA heaps are always aligned to 4MB instead of 64KB. This means
+        // if the heap size is too small, the VMM would fragment.
+        // TODO(bryan.bernhart@intel.com): Consider having MSAA vs non-MSAA heaps.
+        heapDesc.Alignment = D3D12_DEFAULT_MSAA_RESOURCE_PLACEMENT_ALIGNMENT;
         heapDesc.Flags = mHeapFlags;
 
         ComPtr<ID3D12Heap> heap;

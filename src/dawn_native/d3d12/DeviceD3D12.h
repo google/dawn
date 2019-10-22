@@ -31,7 +31,6 @@ namespace dawn_native { namespace d3d12 {
     class DescriptorHeapAllocator;
     class MapRequestTracker;
     class PlatformFunctions;
-    class ResourceAllocator;
     class ResourceAllocatorManager;
 
 #define ASSERT_SUCCESS(hr)            \
@@ -64,7 +63,6 @@ namespace dawn_native { namespace d3d12 {
 
         DescriptorHeapAllocator* GetDescriptorHeapAllocator() const;
         MapRequestTracker* GetMapRequestTracker() const;
-        ResourceAllocator* GetResourceAllocator() const;
         CommandAllocatorManager* GetCommandAllocatorManager() const;
 
         const PlatformFunctions* GetFunctions() const;
@@ -147,7 +145,6 @@ namespace dawn_native { namespace d3d12 {
         std::unique_ptr<CommandAllocatorManager> mCommandAllocatorManager;
         std::unique_ptr<DescriptorHeapAllocator> mDescriptorHeapAllocator;
         std::unique_ptr<MapRequestTracker> mMapRequestTracker;
-        std::unique_ptr<ResourceAllocator> mResourceAllocator;
         std::unique_ptr<ResourceAllocatorManager> mResourceAllocatorManager;
 
         dawn_native::PCIInfo mPCIInfo;

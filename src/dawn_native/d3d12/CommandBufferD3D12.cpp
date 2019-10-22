@@ -29,7 +29,6 @@
 #include "dawn_native/d3d12/PipelineLayoutD3D12.h"
 #include "dawn_native/d3d12/PlatformFunctions.h"
 #include "dawn_native/d3d12/RenderPipelineD3D12.h"
-#include "dawn_native/d3d12/ResourceAllocator.h"
 #include "dawn_native/d3d12/SamplerD3D12.h"
 #include "dawn_native/d3d12/TextureCopySplitter.h"
 #include "dawn_native/d3d12/TextureD3D12.h"

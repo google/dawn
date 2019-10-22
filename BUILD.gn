@@ -291,8 +291,6 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/d3d12/QueueD3D12.h",
       "src/dawn_native/d3d12/RenderPipelineD3D12.cpp",
       "src/dawn_native/d3d12/RenderPipelineD3D12.h",
-      "src/dawn_native/d3d12/ResourceAllocator.cpp",
-      "src/dawn_native/d3d12/ResourceAllocator.h",
       "src/dawn_native/d3d12/ResourceAllocatorManagerD3D12.cpp",
       "src/dawn_native/d3d12/ResourceAllocatorManagerD3D12.h",
       "src/dawn_native/d3d12/ResourceHeapAllocationD3D12.cpp",

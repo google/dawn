@@ -31,7 +31,6 @@
 #include "dawn_native/d3d12/PlatformFunctions.h"
 #include "dawn_native/d3d12/QueueD3D12.h"
 #include "dawn_native/d3d12/RenderPipelineD3D12.h"
-#include "dawn_native/d3d12/ResourceAllocator.h"
 #include "dawn_native/d3d12/ResourceAllocatorManagerD3D12.h"
 #include "dawn_native/d3d12/SamplerD3D12.h"
 #include "dawn_native/d3d12/ShaderModuleD3D12.h"
@@ -72,7 +71,6 @@ namespace dawn_native { namespace d3d12 {
         mCommandAllocatorManager = std::make_unique<CommandAllocatorManager>(this);
         mDescriptorHeapAllocator = std::make_unique<DescriptorHeapAllocator>(this);
         mMapRequestTracker = std::make_unique<MapRequestTracker>(this);
-        mResourceAllocator = std::make_unique<ResourceAllocator>(this);
         mResourceAllocatorManager = std::make_unique<ResourceAllocatorManager>(this);
 
         DAWN_TRY(NextSerial());
@@ -125,10 +123,6 @@ namespace dawn_native { namespace d3d12 {
         // MAX.
         mCompletedSerial = std::numeric_limits<Serial>::max();
 
-        // Releasing the uploader enqueues buffers to be released.
-        // Call Tick() again to clear them before releasing the allocator.
-        mResourceAllocator->Tick(mCompletedSerial);
-
         if (mFenceEvent != nullptr) {
             ::CloseHandle(mFenceEvent);
         }
@@ -175,10 +169,6 @@ namespace dawn_native { namespace d3d12 {
         return mMapRequestTracker.get();
     }
 
-    ResourceAllocator* Device::GetResourceAllocator() const {
-        return mResourceAllocator.get();
-    }
-
     CommandAllocatorManager* Device::GetCommandAllocatorManager() const {
         return mCommandAllocatorManager.get();
     }
@@ -212,7 +202,6 @@ namespace dawn_native { namespace d3d12 {
         // as it enqueued resources to be released.
         mDynamicUploader->Deallocate(mCompletedSerial);
 
-        mResourceAllocator->Tick(mCompletedSerial);
         mResourceAllocatorManager->Tick(mCompletedSerial);
         DAWN_TRY(mCommandAllocatorManager->Tick(mCompletedSerial));
         mDescriptorHeapAllocator->Deallocate(mCompletedSerial);

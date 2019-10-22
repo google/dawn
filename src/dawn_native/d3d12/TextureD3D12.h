@@ -18,6 +18,7 @@
 #include "common/Serial.h"
 #include "dawn_native/Texture.h"
 
+#include "dawn_native/d3d12/ResourceHeapAllocationD3D12.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 namespace dawn_native { namespace d3d12 {
@@ -86,7 +87,7 @@ namespace dawn_native { namespace d3d12 {
                                                   D3D12_RESOURCE_BARRIER* barrier,
                                                   D3D12_RESOURCE_STATES newState);
 
-        ComPtr<ID3D12Resource> mResource;
+        ResourceHeapAllocation mResourceAllocation;
         D3D12_RESOURCE_STATES mLastState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
 
         Serial mLastUsedSerial = UINT64_MAX;
