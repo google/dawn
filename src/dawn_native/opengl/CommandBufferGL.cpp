@@ -210,7 +210,7 @@ namespace dawn_native { namespace opengl {
             RenderPipelineBase* mLastPipeline = nullptr;
         };
 
-        class BindGroupTracker : public BindGroupTrackerBase<BindGroupBase*, false> {
+        class BindGroupTracker : public BindGroupTrackerBase<false> {
           public:
             void OnSetPipeline(RenderPipeline* pipeline) {
                 BindGroupTrackerBase::OnSetPipeline(pipeline);

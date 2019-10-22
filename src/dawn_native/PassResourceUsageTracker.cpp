@@ -22,32 +22,16 @@ namespace dawn_native {
     void PassResourceUsageTracker::BufferUsedAs(BufferBase* buffer, dawn::BufferUsage usage) {
         // std::map's operator[] will create the key and return 0 if the key didn't exist
         // before.
-        dawn::BufferUsage& storedUsage = mBufferUsages[buffer];
-
-        if (usage == dawn::BufferUsage::Storage && storedUsage & dawn::BufferUsage::Storage) {
-            mStorageUsedMultipleTimes = true;
-        }
-
-        storedUsage |= usage;
+        mBufferUsages[buffer] |= usage;
     }
 
     void PassResourceUsageTracker::TextureUsedAs(TextureBase* texture, dawn::TextureUsage usage) {
         // std::map's operator[] will create the key and return 0 if the key didn't exist
         // before.
-        dawn::TextureUsage& storedUsage = mTextureUsages[texture];
-
-        if (usage == dawn::TextureUsage::Storage && storedUsage & dawn::TextureUsage::Storage) {
-            mStorageUsedMultipleTimes = true;
-        }
-
-        storedUsage |= usage;
+        mTextureUsages[texture] |= usage;
     }
 
     MaybeError PassResourceUsageTracker::ValidateComputePassUsages() const {
-        // Storage resources cannot be used twice in the same compute pass
-        if (mStorageUsedMultipleTimes) {
-            return DAWN_VALIDATION_ERROR("Storage resource used multiple times in compute pass");
-        }
         return ValidateUsages();
     }
 

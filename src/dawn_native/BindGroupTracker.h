@@ -27,15 +27,13 @@ namespace dawn_native {
 
     // Keeps track of the dirty bind groups so they can be lazily applied when we know the
     // pipeline state or it changes.
-    // |BindGroup| is a template parameter so a backend may provide its backend-specific
-    // type or native handle.
     // |DynamicOffset| is a template parameter because offsets in Vulkan are uint32_t but uint64_t
     // in other backends.
-    template <typename BindGroup, bool CanInheritBindGroups, typename DynamicOffset = uint64_t>
+    template <bool CanInheritBindGroups, typename DynamicOffset = uint64_t>
     class BindGroupTrackerBase {
       public:
         void OnSetBindGroup(uint32_t index,
-                            BindGroup bindGroup,
+                            BindGroupBase* bindGroup,
                             uint32_t dynamicOffsetCount,
                             uint64_t* dynamicOffsets) {
             ASSERT(index < kMaxBindGroups);
@@ -103,7 +101,7 @@ namespace dawn_native {
         std::bitset<kMaxBindGroups> mDirtyBindGroups = 0;
         std::bitset<kMaxBindGroups> mDirtyBindGroupsObjectChangedOrIsDynamic = 0;
         std::bitset<kMaxBindGroups> mBindGroupLayoutsMask = 0;
-        std::array<BindGroup, kMaxBindGroups> mBindGroups = {};
+        std::array<BindGroupBase*, kMaxBindGroups> mBindGroups = {};
         std::array<uint32_t, kMaxBindGroups> mDynamicOffsetCounts = {};
         std::array<std::array<DynamicOffset, kMaxBindingsPerGroup>, kMaxBindGroups>
             mDynamicOffsets = {};

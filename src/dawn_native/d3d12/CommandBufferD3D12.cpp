@@ -15,7 +15,7 @@
 #include "dawn_native/d3d12/CommandBufferD3D12.h"
 
 #include "common/Assert.h"
-#include "dawn_native/BindGroupTracker.h"
+#include "dawn_native/BindGroupAndStorageBarrierTracker.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/RenderBundle.h"
@@ -74,9 +74,10 @@ namespace dawn_native { namespace d3d12 {
 
     }  // anonymous namespace
 
-    class BindGroupStateTracker : public BindGroupTrackerBase<BindGroup*, false> {
+    class BindGroupStateTracker : public BindGroupAndStorageBarrierTrackerBase<false> {
       public:
-        BindGroupStateTracker(Device* device) : BindGroupTrackerBase(), mDevice(device) {
+        BindGroupStateTracker(Device* device)
+            : BindGroupAndStorageBarrierTrackerBase(), mDevice(device) {
         }
 
         void SetInComputePass(bool inCompute_) {
@@ -137,10 +138,41 @@ namespace dawn_native { namespace d3d12 {
             }
         }
 
-        void Apply(ID3D12GraphicsCommandList* commandList) {
+        void Apply(CommandRecordingContext* commandContext) {
+            ID3D12GraphicsCommandList* commandList = commandContext->GetCommandList();
+
             for (uint32_t index : IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
-                ApplyBindGroup(commandList, ToBackend(mPipelineLayout), index, mBindGroups[index],
-                               mDynamicOffsetCounts[index], mDynamicOffsets[index].data());
+                ApplyBindGroup(commandList, ToBackend(mPipelineLayout), index,
+                               ToBackend(mBindGroups[index]), mDynamicOffsetCounts[index],
+                               mDynamicOffsets[index].data());
+            }
+
+            if (mInCompute) {
+                for (uint32_t index : IterateBitSet(mBindGroupLayoutsMask)) {
+                    for (uint32_t binding : IterateBitSet(mBuffersNeedingBarrier[index])) {
+                        dawn::BindingType bindingType = mBindingTypes[index][binding];
+                        switch (bindingType) {
+                            case dawn::BindingType::StorageBuffer:
+                                ToBackend(mBuffers[index][binding])
+                                    ->TransitionUsageNow(commandContext,
+                                                         dawn::BufferUsage::Storage);
+                                break;
+
+                            case dawn::BindingType::StorageTexture:
+                                // Not implemented.
+
+                            case dawn::BindingType::UniformBuffer:
+                            case dawn::BindingType::ReadonlyStorageBuffer:
+                            case dawn::BindingType::Sampler:
+                            case dawn::BindingType::SampledTexture:
+                                // Don't require barriers.
+
+                            default:
+                                UNREACHABLE();
+                                break;
+                        }
+                    }
+                }
             }
             DidApply();
         }
@@ -620,7 +652,7 @@ namespace dawn_native { namespace d3d12 {
 
                     TransitionForPass(commandContext, passResourceUsages[nextPassNumber]);
                     bindingTracker.SetInComputePass(true);
-                    RecordComputePass(commandList, &bindingTracker);
+                    RecordComputePass(commandContext, &bindingTracker);
 
                     nextPassNumber++;
                 } break;
@@ -781,9 +813,10 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-    void CommandBuffer::RecordComputePass(ID3D12GraphicsCommandList* commandList,
+    void CommandBuffer::RecordComputePass(CommandRecordingContext* commandContext,
                                           BindGroupStateTracker* bindingTracker) {
         PipelineLayout* lastLayout = nullptr;
+        ID3D12GraphicsCommandList* commandList = commandContext->GetCommandList();
 
         Command type;
         while (mCommands.NextCommandId(&type)) {
@@ -791,14 +824,14 @@ namespace dawn_native { namespace d3d12 {
                 case Command::Dispatch: {
                     DispatchCmd* dispatch = mCommands.NextCommand<DispatchCmd>();
 
-                    bindingTracker->Apply(commandList);
+                    bindingTracker->Apply(commandContext);
                     commandList->Dispatch(dispatch->x, dispatch->y, dispatch->z);
                 } break;
 
                 case Command::DispatchIndirect: {
                     DispatchIndirectCmd* dispatch = mCommands.NextCommand<DispatchIndirectCmd>();
 
-                    bindingTracker->Apply(commandList);
+                    bindingTracker->Apply(commandContext);
                     Buffer* buffer = ToBackend(dispatch->indirectBuffer.Get());
                     ComPtr<ID3D12CommandSignature> signature =
                         ToBackend(GetDevice())->GetDispatchIndirectSignature();
@@ -1023,7 +1056,7 @@ namespace dawn_native { namespace d3d12 {
                 case Command::Draw: {
                     DrawCmd* draw = iter->NextCommand<DrawCmd>();
 
-                    bindingTracker->Apply(commandList);
+                    bindingTracker->Apply(commandContext);
                     vertexBufferTracker.Apply(commandList, lastPipeline);
                     commandList->DrawInstanced(draw->vertexCount, draw->instanceCount,
                                                draw->firstVertex, draw->firstInstance);
@@ -1032,7 +1065,7 @@ namespace dawn_native { namespace d3d12 {
                 case Command::DrawIndexed: {
                     DrawIndexedCmd* draw = iter->NextCommand<DrawIndexedCmd>();
 
-                    bindingTracker->Apply(commandList);
+                    bindingTracker->Apply(commandContext);
                     indexBufferTracker.Apply(commandList);
                     vertexBufferTracker.Apply(commandList, lastPipeline);
                     commandList->DrawIndexedInstanced(draw->indexCount, draw->instanceCount,
@@ -1043,7 +1076,7 @@ namespace dawn_native { namespace d3d12 {
                 case Command::DrawIndirect: {
                     DrawIndirectCmd* draw = iter->NextCommand<DrawIndirectCmd>();
 
-                    bindingTracker->Apply(commandList);
+                    bindingTracker->Apply(commandContext);
                     vertexBufferTracker.Apply(commandList, lastPipeline);
                     Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
                     ComPtr<ID3D12CommandSignature> signature =
@@ -1056,7 +1089,7 @@ namespace dawn_native { namespace d3d12 {
                 case Command::DrawIndexedIndirect: {
                     DrawIndexedIndirectCmd* draw = iter->NextCommand<DrawIndexedIndirectCmd>();
 
-                    bindingTracker->Apply(commandList);
+                    bindingTracker->Apply(commandContext);
                     indexBufferTracker.Apply(commandList);
                     vertexBufferTracker.Apply(commandList, lastPipeline);
                     Buffer* buffer = ToBackend(draw->indirectBuffer.Get());

@@ -394,7 +394,7 @@ namespace dawn_native { namespace metal {
         // pipeline state.
         // Bind groups may be inherited because bind groups are packed in the buffer /
         // texture tables in contiguous order.
-        class BindGroupTracker : public BindGroupTrackerBase<BindGroup*, true> {
+        class BindGroupTracker : public BindGroupTrackerBase<true> {
           public:
             explicit BindGroupTracker(StorageBufferLengthTracker* lengthTracker)
                 : BindGroupTrackerBase(), mLengthTracker(lengthTracker) {
@@ -403,8 +403,9 @@ namespace dawn_native { namespace metal {
             template <typename Encoder>
             void Apply(Encoder encoder) {
                 for (uint32_t index : IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
-                    ApplyBindGroup(encoder, index, mBindGroups[index], mDynamicOffsetCounts[index],
-                                   mDynamicOffsets[index].data(), ToBackend(mPipelineLayout));
+                    ApplyBindGroup(encoder, index, ToBackend(mBindGroups[index]),
+                                   mDynamicOffsetCounts[index], mDynamicOffsets[index].data(),
+                                   ToBackend(mPipelineLayout));
                 }
                 DidApply();
             }

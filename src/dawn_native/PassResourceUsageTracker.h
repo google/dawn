@@ -48,7 +48,6 @@ namespace dawn_native {
 
         std::map<BufferBase*, dawn::BufferUsage> mBufferUsages;
         std::map<TextureBase*, dawn::TextureUsage> mTextureUsages;
-        bool mStorageUsedMultipleTimes = false;
     };
 
 }  // namespace dawn_native

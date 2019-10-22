@@ -45,7 +45,7 @@ namespace dawn_native { namespace d3d12 {
         MaybeError RecordCommands(CommandRecordingContext* commandContext, uint32_t indexInSubmit);
 
       private:
-        void RecordComputePass(ID3D12GraphicsCommandList* commandList,
+        void RecordComputePass(CommandRecordingContext* commandContext,
                                BindGroupStateTracker* bindingTracker);
         void RecordRenderPass(CommandRecordingContext* commandContext,
                               BindGroupStateTracker* bindingTracker,
