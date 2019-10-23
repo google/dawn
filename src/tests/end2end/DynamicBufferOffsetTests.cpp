@@ -381,8 +381,7 @@ TEST_P(DynamicBufferOffsetTests, UpdateDynamicOffestsMultipleTimesRenderPipeline
 }
 
 // Setting multiple dynamic offsets for the same bindgroup in one compute pass.
-// TODO(shaobo.yan@intel.com) : enable this test after resolving dawn issue 198.
-TEST_P(DynamicBufferOffsetTests, DISABLED_UpdateDynamicOffestsMultipleTimesComputePipeline) {
+TEST_P(DynamicBufferOffsetTests, UpdateDynamicOffsetsMultipleTimesComputePipeline) {
     dawn::ComputePipeline pipeline = CreateComputePipeline();
 
     std::array<uint64_t, 2> offsets = {kMinDynamicBufferOffsetAlignment,
