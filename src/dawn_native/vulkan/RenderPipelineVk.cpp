@@ -27,200 +27,200 @@ namespace dawn_native { namespace vulkan {
 
     namespace {
 
-        VkVertexInputRate VulkanInputRate(dawn::InputStepMode stepMode) {
+        VkVertexInputRate VulkanInputRate(wgpu::InputStepMode stepMode) {
             switch (stepMode) {
-                case dawn::InputStepMode::Vertex:
+                case wgpu::InputStepMode::Vertex:
                     return VK_VERTEX_INPUT_RATE_VERTEX;
-                case dawn::InputStepMode::Instance:
+                case wgpu::InputStepMode::Instance:
                     return VK_VERTEX_INPUT_RATE_INSTANCE;
                 default:
                     UNREACHABLE();
             }
         }
 
-        VkFormat VulkanVertexFormat(dawn::VertexFormat format) {
+        VkFormat VulkanVertexFormat(wgpu::VertexFormat format) {
             switch (format) {
-                case dawn::VertexFormat::UChar2:
+                case wgpu::VertexFormat::UChar2:
                     return VK_FORMAT_R8G8_UINT;
-                case dawn::VertexFormat::UChar4:
+                case wgpu::VertexFormat::UChar4:
                     return VK_FORMAT_R8G8B8A8_UINT;
-                case dawn::VertexFormat::Char2:
+                case wgpu::VertexFormat::Char2:
                     return VK_FORMAT_R8G8_SINT;
-                case dawn::VertexFormat::Char4:
+                case wgpu::VertexFormat::Char4:
                     return VK_FORMAT_R8G8B8A8_SINT;
-                case dawn::VertexFormat::UChar2Norm:
+                case wgpu::VertexFormat::UChar2Norm:
                     return VK_FORMAT_R8G8_UNORM;
-                case dawn::VertexFormat::UChar4Norm:
+                case wgpu::VertexFormat::UChar4Norm:
                     return VK_FORMAT_R8G8B8A8_UNORM;
-                case dawn::VertexFormat::Char2Norm:
+                case wgpu::VertexFormat::Char2Norm:
                     return VK_FORMAT_R8G8_SNORM;
-                case dawn::VertexFormat::Char4Norm:
+                case wgpu::VertexFormat::Char4Norm:
                     return VK_FORMAT_R8G8B8A8_SNORM;
-                case dawn::VertexFormat::UShort2:
+                case wgpu::VertexFormat::UShort2:
                     return VK_FORMAT_R16G16_UINT;
-                case dawn::VertexFormat::UShort4:
+                case wgpu::VertexFormat::UShort4:
                     return VK_FORMAT_R16G16B16A16_UINT;
-                case dawn::VertexFormat::Short2:
+                case wgpu::VertexFormat::Short2:
                     return VK_FORMAT_R16G16_SINT;
-                case dawn::VertexFormat::Short4:
+                case wgpu::VertexFormat::Short4:
                     return VK_FORMAT_R16G16B16A16_SINT;
-                case dawn::VertexFormat::UShort2Norm:
+                case wgpu::VertexFormat::UShort2Norm:
                     return VK_FORMAT_R16G16_UNORM;
-                case dawn::VertexFormat::UShort4Norm:
+                case wgpu::VertexFormat::UShort4Norm:
                     return VK_FORMAT_R16G16B16A16_UNORM;
-                case dawn::VertexFormat::Short2Norm:
+                case wgpu::VertexFormat::Short2Norm:
                     return VK_FORMAT_R16G16_SNORM;
-                case dawn::VertexFormat::Short4Norm:
+                case wgpu::VertexFormat::Short4Norm:
                     return VK_FORMAT_R16G16B16A16_SNORM;
-                case dawn::VertexFormat::Half2:
+                case wgpu::VertexFormat::Half2:
                     return VK_FORMAT_R16G16_SFLOAT;
-                case dawn::VertexFormat::Half4:
+                case wgpu::VertexFormat::Half4:
                     return VK_FORMAT_R16G16B16A16_SFLOAT;
-                case dawn::VertexFormat::Float:
+                case wgpu::VertexFormat::Float:
                     return VK_FORMAT_R32_SFLOAT;
-                case dawn::VertexFormat::Float2:
+                case wgpu::VertexFormat::Float2:
                     return VK_FORMAT_R32G32_SFLOAT;
-                case dawn::VertexFormat::Float3:
+                case wgpu::VertexFormat::Float3:
                     return VK_FORMAT_R32G32B32_SFLOAT;
-                case dawn::VertexFormat::Float4:
+                case wgpu::VertexFormat::Float4:
                     return VK_FORMAT_R32G32B32A32_SFLOAT;
-                case dawn::VertexFormat::UInt:
+                case wgpu::VertexFormat::UInt:
                     return VK_FORMAT_R32_UINT;
-                case dawn::VertexFormat::UInt2:
+                case wgpu::VertexFormat::UInt2:
                     return VK_FORMAT_R32G32_UINT;
-                case dawn::VertexFormat::UInt3:
+                case wgpu::VertexFormat::UInt3:
                     return VK_FORMAT_R32G32B32_UINT;
-                case dawn::VertexFormat::UInt4:
+                case wgpu::VertexFormat::UInt4:
                     return VK_FORMAT_R32G32B32A32_UINT;
-                case dawn::VertexFormat::Int:
+                case wgpu::VertexFormat::Int:
                     return VK_FORMAT_R32_SINT;
-                case dawn::VertexFormat::Int2:
+                case wgpu::VertexFormat::Int2:
                     return VK_FORMAT_R32G32_SINT;
-                case dawn::VertexFormat::Int3:
+                case wgpu::VertexFormat::Int3:
                     return VK_FORMAT_R32G32B32_SINT;
-                case dawn::VertexFormat::Int4:
+                case wgpu::VertexFormat::Int4:
                     return VK_FORMAT_R32G32B32A32_SINT;
                 default:
                     UNREACHABLE();
             }
         }
 
-        VkPrimitiveTopology VulkanPrimitiveTopology(dawn::PrimitiveTopology topology) {
+        VkPrimitiveTopology VulkanPrimitiveTopology(wgpu::PrimitiveTopology topology) {
             switch (topology) {
-                case dawn::PrimitiveTopology::PointList:
+                case wgpu::PrimitiveTopology::PointList:
                     return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
-                case dawn::PrimitiveTopology::LineList:
+                case wgpu::PrimitiveTopology::LineList:
                     return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
-                case dawn::PrimitiveTopology::LineStrip:
+                case wgpu::PrimitiveTopology::LineStrip:
                     return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
-                case dawn::PrimitiveTopology::TriangleList:
+                case wgpu::PrimitiveTopology::TriangleList:
                     return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-                case dawn::PrimitiveTopology::TriangleStrip:
+                case wgpu::PrimitiveTopology::TriangleStrip:
                     return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
                 default:
                     UNREACHABLE();
             }
         }
 
-        bool ShouldEnablePrimitiveRestart(dawn::PrimitiveTopology topology) {
+        bool ShouldEnablePrimitiveRestart(wgpu::PrimitiveTopology topology) {
             // Primitive restart is always enabled in WebGPU but Vulkan validation rules ask that
             // primitive restart be only enabled on primitive topologies that support restarting.
             switch (topology) {
-                case dawn::PrimitiveTopology::PointList:
-                case dawn::PrimitiveTopology::LineList:
-                case dawn::PrimitiveTopology::TriangleList:
+                case wgpu::PrimitiveTopology::PointList:
+                case wgpu::PrimitiveTopology::LineList:
+                case wgpu::PrimitiveTopology::TriangleList:
                     return false;
-                case dawn::PrimitiveTopology::LineStrip:
-                case dawn::PrimitiveTopology::TriangleStrip:
+                case wgpu::PrimitiveTopology::LineStrip:
+                case wgpu::PrimitiveTopology::TriangleStrip:
                     return true;
                 default:
                     UNREACHABLE();
             }
         }
 
-        VkFrontFace VulkanFrontFace(dawn::FrontFace face) {
+        VkFrontFace VulkanFrontFace(wgpu::FrontFace face) {
             switch (face) {
-                case dawn::FrontFace::CCW:
+                case wgpu::FrontFace::CCW:
                     return VK_FRONT_FACE_COUNTER_CLOCKWISE;
-                case dawn::FrontFace::CW:
+                case wgpu::FrontFace::CW:
                     return VK_FRONT_FACE_CLOCKWISE;
             }
         }
 
-        VkCullModeFlagBits VulkanCullMode(dawn::CullMode mode) {
+        VkCullModeFlagBits VulkanCullMode(wgpu::CullMode mode) {
             switch (mode) {
-                case dawn::CullMode::None:
+                case wgpu::CullMode::None:
                     return VK_CULL_MODE_NONE;
-                case dawn::CullMode::Front:
+                case wgpu::CullMode::Front:
                     return VK_CULL_MODE_FRONT_BIT;
-                case dawn::CullMode::Back:
+                case wgpu::CullMode::Back:
                     return VK_CULL_MODE_BACK_BIT;
             }
         }
 
-        VkBlendFactor VulkanBlendFactor(dawn::BlendFactor factor) {
+        VkBlendFactor VulkanBlendFactor(wgpu::BlendFactor factor) {
             switch (factor) {
-                case dawn::BlendFactor::Zero:
+                case wgpu::BlendFactor::Zero:
                     return VK_BLEND_FACTOR_ZERO;
-                case dawn::BlendFactor::One:
+                case wgpu::BlendFactor::One:
                     return VK_BLEND_FACTOR_ONE;
-                case dawn::BlendFactor::SrcColor:
+                case wgpu::BlendFactor::SrcColor:
                     return VK_BLEND_FACTOR_SRC_COLOR;
-                case dawn::BlendFactor::OneMinusSrcColor:
+                case wgpu::BlendFactor::OneMinusSrcColor:
                     return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
-                case dawn::BlendFactor::SrcAlpha:
+                case wgpu::BlendFactor::SrcAlpha:
                     return VK_BLEND_FACTOR_SRC_ALPHA;
-                case dawn::BlendFactor::OneMinusSrcAlpha:
+                case wgpu::BlendFactor::OneMinusSrcAlpha:
                     return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-                case dawn::BlendFactor::DstColor:
+                case wgpu::BlendFactor::DstColor:
                     return VK_BLEND_FACTOR_DST_COLOR;
-                case dawn::BlendFactor::OneMinusDstColor:
+                case wgpu::BlendFactor::OneMinusDstColor:
                     return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
-                case dawn::BlendFactor::DstAlpha:
+                case wgpu::BlendFactor::DstAlpha:
                     return VK_BLEND_FACTOR_DST_ALPHA;
-                case dawn::BlendFactor::OneMinusDstAlpha:
+                case wgpu::BlendFactor::OneMinusDstAlpha:
                     return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
-                case dawn::BlendFactor::SrcAlphaSaturated:
+                case wgpu::BlendFactor::SrcAlphaSaturated:
                     return VK_BLEND_FACTOR_SRC_ALPHA_SATURATE;
-                case dawn::BlendFactor::BlendColor:
+                case wgpu::BlendFactor::BlendColor:
                     return VK_BLEND_FACTOR_CONSTANT_COLOR;
-                case dawn::BlendFactor::OneMinusBlendColor:
+                case wgpu::BlendFactor::OneMinusBlendColor:
                     return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
                 default:
                     UNREACHABLE();
             }
         }
 
-        VkBlendOp VulkanBlendOperation(dawn::BlendOperation operation) {
+        VkBlendOp VulkanBlendOperation(wgpu::BlendOperation operation) {
             switch (operation) {
-                case dawn::BlendOperation::Add:
+                case wgpu::BlendOperation::Add:
                     return VK_BLEND_OP_ADD;
-                case dawn::BlendOperation::Subtract:
+                case wgpu::BlendOperation::Subtract:
                     return VK_BLEND_OP_SUBTRACT;
-                case dawn::BlendOperation::ReverseSubtract:
+                case wgpu::BlendOperation::ReverseSubtract:
                     return VK_BLEND_OP_REVERSE_SUBTRACT;
-                case dawn::BlendOperation::Min:
+                case wgpu::BlendOperation::Min:
                     return VK_BLEND_OP_MIN;
-                case dawn::BlendOperation::Max:
+                case wgpu::BlendOperation::Max:
                     return VK_BLEND_OP_MAX;
                 default:
                     UNREACHABLE();
             }
         }
 
-        VkColorComponentFlags VulkanColorWriteMask(dawn::ColorWriteMask mask,
+        VkColorComponentFlags VulkanColorWriteMask(wgpu::ColorWriteMask mask,
                                                    bool isDeclaredInFragmentShader) {
             // Vulkan and Dawn color write masks match, static assert it and return the mask
-            static_assert(static_cast<VkColorComponentFlagBits>(dawn::ColorWriteMask::Red) ==
+            static_assert(static_cast<VkColorComponentFlagBits>(wgpu::ColorWriteMask::Red) ==
                               VK_COLOR_COMPONENT_R_BIT,
                           "");
-            static_assert(static_cast<VkColorComponentFlagBits>(dawn::ColorWriteMask::Green) ==
+            static_assert(static_cast<VkColorComponentFlagBits>(wgpu::ColorWriteMask::Green) ==
                               VK_COLOR_COMPONENT_G_BIT,
                           "");
-            static_assert(static_cast<VkColorComponentFlagBits>(dawn::ColorWriteMask::Blue) ==
+            static_assert(static_cast<VkColorComponentFlagBits>(wgpu::ColorWriteMask::Blue) ==
                               VK_COLOR_COMPONENT_B_BIT,
                           "");
-            static_assert(static_cast<VkColorComponentFlagBits>(dawn::ColorWriteMask::Alpha) ==
+            static_assert(static_cast<VkColorComponentFlagBits>(wgpu::ColorWriteMask::Alpha) ==
                               VK_COLOR_COMPONENT_A_BIT,
                           "");
 
@@ -247,23 +247,23 @@ namespace dawn_native { namespace vulkan {
             return attachment;
         }
 
-        VkStencilOp VulkanStencilOp(dawn::StencilOperation op) {
+        VkStencilOp VulkanStencilOp(wgpu::StencilOperation op) {
             switch (op) {
-                case dawn::StencilOperation::Keep:
+                case wgpu::StencilOperation::Keep:
                     return VK_STENCIL_OP_KEEP;
-                case dawn::StencilOperation::Zero:
+                case wgpu::StencilOperation::Zero:
                     return VK_STENCIL_OP_ZERO;
-                case dawn::StencilOperation::Replace:
+                case wgpu::StencilOperation::Replace:
                     return VK_STENCIL_OP_REPLACE;
-                case dawn::StencilOperation::IncrementClamp:
+                case wgpu::StencilOperation::IncrementClamp:
                     return VK_STENCIL_OP_INCREMENT_AND_CLAMP;
-                case dawn::StencilOperation::DecrementClamp:
+                case wgpu::StencilOperation::DecrementClamp:
                     return VK_STENCIL_OP_DECREMENT_AND_CLAMP;
-                case dawn::StencilOperation::Invert:
+                case wgpu::StencilOperation::Invert:
                     return VK_STENCIL_OP_INVERT;
-                case dawn::StencilOperation::IncrementWrap:
+                case wgpu::StencilOperation::IncrementWrap:
                     return VK_STENCIL_OP_INCREMENT_AND_WRAP;
-                case dawn::StencilOperation::DecrementWrap:
+                case wgpu::StencilOperation::DecrementWrap:
                     return VK_STENCIL_OP_DECREMENT_AND_WRAP;
                 default:
                     UNREACHABLE();
@@ -279,7 +279,7 @@ namespace dawn_native { namespace vulkan {
 
             // Depth writes only occur if depth is enabled
             depthStencilState.depthTestEnable =
-                (descriptor->depthCompare == dawn::CompareFunction::Always &&
+                (descriptor->depthCompare == wgpu::CompareFunction::Always &&
                  !descriptor->depthWriteEnabled)
                     ? VK_FALSE
                     : VK_TRUE;
@@ -464,12 +464,12 @@ namespace dawn_native { namespace vulkan {
             RenderPassCacheQuery query;
 
             for (uint32_t i : IterateBitSet(GetColorAttachmentsMask())) {
-                query.SetColor(i, GetColorAttachmentFormat(i), dawn::LoadOp::Load, false);
+                query.SetColor(i, GetColorAttachmentFormat(i), wgpu::LoadOp::Load, false);
             }
 
             if (HasDepthStencilAttachment()) {
-                query.SetDepthStencil(GetDepthStencilFormat(), dawn::LoadOp::Load,
-                                      dawn::LoadOp::Load);
+                query.SetDepthStencil(GetDepthStencilFormat(), wgpu::LoadOp::Load,
+                                      wgpu::LoadOp::Load);
             }
 
             query.SetSampleCount(GetSampleCount());

@@ -42,26 +42,26 @@ namespace dawn_native {
                 const auto& info = layout->GetBindingInfo();
 
                 for (uint32_t binding : IterateBitSet(info.mask)) {
-                    if ((info.visibilities[binding] & dawn::ShaderStage::Compute) == 0) {
+                    if ((info.visibilities[binding] & wgpu::ShaderStage::Compute) == 0) {
                         continue;
                     }
 
                     mBindingTypes[index][binding] = info.types[binding];
                     switch (info.types[binding]) {
-                        case dawn::BindingType::UniformBuffer:
-                        case dawn::BindingType::ReadonlyStorageBuffer:
-                        case dawn::BindingType::Sampler:
-                        case dawn::BindingType::SampledTexture:
+                        case wgpu::BindingType::UniformBuffer:
+                        case wgpu::BindingType::ReadonlyStorageBuffer:
+                        case wgpu::BindingType::Sampler:
+                        case wgpu::BindingType::SampledTexture:
                             // Don't require barriers.
                             break;
 
-                        case dawn::BindingType::StorageBuffer:
+                        case wgpu::BindingType::StorageBuffer:
                             mBuffersNeedingBarrier[index].set(binding);
                             mBuffers[index][binding] =
                                 bindGroup->GetBindingAsBufferBinding(binding).buffer;
                             break;
 
-                        case dawn::BindingType::StorageTexture:
+                        case wgpu::BindingType::StorageTexture:
                             // Not implemented.
 
                         default:
@@ -76,7 +76,7 @@ namespace dawn_native {
 
       protected:
         std::array<std::bitset<kMaxBindingsPerGroup>, kMaxBindGroups> mBuffersNeedingBarrier = {};
-        std::array<std::array<dawn::BindingType, kMaxBindingsPerGroup>, kMaxBindGroups>
+        std::array<std::array<wgpu::BindingType, kMaxBindingsPerGroup>, kMaxBindGroups>
             mBindingTypes = {};
         std::array<std::array<BufferBase*, kMaxBindingsPerGroup>, kMaxBindGroups> mBuffers = {};
     };

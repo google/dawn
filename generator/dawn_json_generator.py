@@ -448,7 +448,7 @@ def as_frontendType(typ):
     if typ.category == 'object':
         return typ.name.CamelCase() + 'Base*'
     elif typ.category in ['bitmask', 'enum']:
-        return 'dawn::' + typ.name.CamelCase()
+        return 'wgpu::' + typ.name.CamelCase()
     elif typ.category == 'structure':
         return as_cppType(typ.name)
     else:
@@ -559,8 +559,8 @@ class MultiGeneratorFromDawnJSON(Generator):
 
             renders.append(FileRender('dawn_native/ValidationUtils.h', 'src/dawn_native/ValidationUtils_autogen.h', frontend_params))
             renders.append(FileRender('dawn_native/ValidationUtils.cpp', 'src/dawn_native/ValidationUtils_autogen.cpp', frontend_params))
-            renders.append(FileRender('dawn_native/api_structs.h', 'src/dawn_native/dawn_structs_autogen.h', frontend_params))
-            renders.append(FileRender('dawn_native/api_structs.cpp', 'src/dawn_native/dawn_structs_autogen.cpp', frontend_params))
+            renders.append(FileRender('dawn_native/wgpu_structs.h', 'src/dawn_native/wgpu_structs_autogen.h', frontend_params))
+            renders.append(FileRender('dawn_native/wgpu_structs.cpp', 'src/dawn_native/wgpu_structs_autogen.cpp', frontend_params))
             renders.append(FileRender('dawn_native/ProcTable.cpp', 'src/dawn_native/ProcTable.cpp', frontend_params))
 
         if 'dawn_wire' in targets:

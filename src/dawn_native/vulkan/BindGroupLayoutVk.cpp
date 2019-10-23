@@ -22,16 +22,16 @@ namespace dawn_native { namespace vulkan {
 
     namespace {
 
-        VkShaderStageFlags VulkanShaderStageFlags(dawn::ShaderStage stages) {
+        VkShaderStageFlags VulkanShaderStageFlags(wgpu::ShaderStage stages) {
             VkShaderStageFlags flags = 0;
 
-            if (stages & dawn::ShaderStage::Vertex) {
+            if (stages & wgpu::ShaderStage::Vertex) {
                 flags |= VK_SHADER_STAGE_VERTEX_BIT;
             }
-            if (stages & dawn::ShaderStage::Fragment) {
+            if (stages & wgpu::ShaderStage::Fragment) {
                 flags |= VK_SHADER_STAGE_FRAGMENT_BIT;
             }
-            if (stages & dawn::ShaderStage::Compute) {
+            if (stages & wgpu::ShaderStage::Compute) {
                 flags |= VK_SHADER_STAGE_COMPUTE_BIT;
             }
 
@@ -40,18 +40,18 @@ namespace dawn_native { namespace vulkan {
 
     }  // anonymous namespace
 
-    VkDescriptorType VulkanDescriptorType(dawn::BindingType type, bool isDynamic) {
+    VkDescriptorType VulkanDescriptorType(wgpu::BindingType type, bool isDynamic) {
         switch (type) {
-            case dawn::BindingType::UniformBuffer:
+            case wgpu::BindingType::UniformBuffer:
                 if (isDynamic) {
                     return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
                 }
                 return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            case dawn::BindingType::Sampler:
+            case wgpu::BindingType::Sampler:
                 return VK_DESCRIPTOR_TYPE_SAMPLER;
-            case dawn::BindingType::SampledTexture:
+            case wgpu::BindingType::SampledTexture:
                 return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-            case dawn::BindingType::StorageBuffer:
+            case wgpu::BindingType::StorageBuffer:
                 if (isDynamic) {
                     return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
                 }
@@ -132,15 +132,15 @@ namespace dawn_native { namespace vulkan {
             MAX_TYPE,
         };
         static_assert(MAX_TYPE == kMaxPoolSizesNeeded, "");
-        auto ToDescriptorType = [](dawn::BindingType type) -> DescriptorType {
+        auto ToDescriptorType = [](wgpu::BindingType type) -> DescriptorType {
             switch (type) {
-                case dawn::BindingType::UniformBuffer:
+                case wgpu::BindingType::UniformBuffer:
                     return UNIFORM_BUFFER;
-                case dawn::BindingType::Sampler:
+                case wgpu::BindingType::Sampler:
                     return SAMPLER;
-                case dawn::BindingType::SampledTexture:
+                case wgpu::BindingType::SampledTexture:
                     return SAMPLED_IMAGE;
-                case dawn::BindingType::StorageBuffer:
+                case wgpu::BindingType::StorageBuffer:
                     return STORAGE_BUFFER;
                 default:
                     UNREACHABLE();

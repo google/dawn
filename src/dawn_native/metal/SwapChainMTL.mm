@@ -38,7 +38,7 @@ namespace dawn_native { namespace metal {
         DawnSwapChainNextTexture next = {};
         DawnSwapChainError error = im.GetNextTexture(im.userData, &next);
         if (error) {
-            GetDevice()->HandleError(dawn::ErrorType::Unknown, error);
+            GetDevice()->HandleError(wgpu::ErrorType::Unknown, error);
             return nullptr;
         }
 

@@ -50,9 +50,9 @@ namespace dawn_native {
 
       protected:
         std::bitset<kMaxColorAttachments> mColorAttachmentsSet;
-        std::array<dawn::TextureFormat, kMaxColorAttachments> mColorFormats;
+        std::array<wgpu::TextureFormat, kMaxColorAttachments> mColorFormats;
         // Default (texture format Undefined) indicates there is no depth stencil attachment.
-        dawn::TextureFormat mDepthStencilFormat = dawn::TextureFormat::Undefined;
+        wgpu::TextureFormat mDepthStencilFormat = wgpu::TextureFormat::Undefined;
         uint32_t mSampleCount = 0;
     };
 
@@ -62,9 +62,9 @@ namespace dawn_native {
         ~AttachmentState() override;
 
         std::bitset<kMaxColorAttachments> GetColorAttachmentsMask() const;
-        dawn::TextureFormat GetColorAttachmentFormat(uint32_t index) const;
+        wgpu::TextureFormat GetColorAttachmentFormat(uint32_t index) const;
         bool HasDepthStencilAttachment() const;
-        dawn::TextureFormat GetDepthStencilFormat() const;
+        wgpu::TextureFormat GetDepthStencilFormat() const;
         uint32_t GetSampleCount() const;
 
       private:

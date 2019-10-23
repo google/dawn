@@ -16,14 +16,14 @@
 
 namespace dawn_native {
 
-    BitSetIterator<kNumStages, SingleShaderStage> IterateStages(dawn::ShaderStage stages) {
+    BitSetIterator<kNumStages, SingleShaderStage> IterateStages(wgpu::ShaderStage stages) {
         std::bitset<kNumStages> bits(static_cast<uint32_t>(stages));
         return BitSetIterator<kNumStages, SingleShaderStage>(bits);
     }
 
-    dawn::ShaderStage StageBit(SingleShaderStage stage) {
+    wgpu::ShaderStage StageBit(SingleShaderStage stage) {
         ASSERT(static_cast<uint32_t>(stage) < kNumStages);
-        return static_cast<dawn::ShaderStage>(1 << static_cast<uint32_t>(stage));
+        return static_cast<wgpu::ShaderStage>(1 << static_cast<uint32_t>(stage));
     }
 
 }  // namespace dawn_native

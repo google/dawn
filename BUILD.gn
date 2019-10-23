@@ -69,8 +69,8 @@ dawn_json_generator("libdawn_native_utils_gen") {
   target = "dawn_native_utils"
   outputs = [
     "src/dawn_native/ProcTable.cpp",
-    "src/dawn_native/dawn_structs_autogen.h",
-    "src/dawn_native/dawn_structs_autogen.cpp",
+    "src/dawn_native/wgpu_structs_autogen.h",
+    "src/dawn_native/wgpu_structs_autogen.cpp",
     "src/dawn_native/ValidationUtils_autogen.h",
     "src/dawn_native/ValidationUtils_autogen.cpp",
   ]

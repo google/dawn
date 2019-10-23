@@ -38,16 +38,16 @@ namespace dawn_native {
         return mType;
     }
 
-    dawn::ErrorType ErrorData::GetType() const {
+    wgpu::ErrorType ErrorData::GetType() const {
         switch (mType) {
             case InternalErrorType::Validation:
-                return dawn::ErrorType::Validation;
+                return wgpu::ErrorType::Validation;
             case InternalErrorType::OutOfMemory:
-                return dawn::ErrorType::OutOfMemory;
+                return wgpu::ErrorType::OutOfMemory;
             case InternalErrorType::DeviceLost:
-                return dawn::ErrorType::DeviceLost;
+                return wgpu::ErrorType::DeviceLost;
             default:
-                return dawn::ErrorType::Unknown;
+                return wgpu::ErrorType::Unknown;
         }
     }
 

@@ -80,8 +80,8 @@ namespace dawn_native {
         return new ErrorSwapChain(device);
     }
 
-    void SwapChainBase::Configure(dawn::TextureFormat format,
-                                  dawn::TextureUsage allowedUsage,
+    void SwapChainBase::Configure(wgpu::TextureFormat format,
+                                  wgpu::TextureUsage allowedUsage,
                                   uint32_t width,
                                   uint32_t height) {
         if (GetDevice()->ConsumedError(ValidateConfigure(format, allowedUsage, width, height))) {
@@ -89,7 +89,7 @@ namespace dawn_native {
         }
         ASSERT(!IsError());
 
-        allowedUsage |= dawn::TextureUsage::Present;
+        allowedUsage |= wgpu::TextureUsage::Present;
 
         mFormat = format;
         mAllowedUsage = allowedUsage;
@@ -106,7 +106,7 @@ namespace dawn_native {
         ASSERT(!IsError());
 
         TextureDescriptor descriptor;
-        descriptor.dimension = dawn::TextureDimension::e2D;
+        descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size.width = mWidth;
         descriptor.size.height = mHeight;
         descriptor.size.depth = 1;
@@ -138,8 +138,8 @@ namespace dawn_native {
         return mImplementation;
     }
 
-    MaybeError SwapChainBase::ValidateConfigure(dawn::TextureFormat format,
-                                                dawn::TextureUsage allowedUsage,
+    MaybeError SwapChainBase::ValidateConfigure(wgpu::TextureFormat format,
+                                                wgpu::TextureUsage allowedUsage,
                                                 uint32_t width,
                                                 uint32_t height) const {
         DAWN_TRY(GetDevice()->ValidateObject(this));

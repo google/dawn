@@ -26,7 +26,7 @@ namespace dawn_native { namespace d3d12 {
     class CommandRecordingContext;
     class Device;
 
-    DXGI_FORMAT D3D12TextureFormat(dawn::TextureFormat format);
+    DXGI_FORMAT D3D12TextureFormat(wgpu::TextureFormat format);
     MaybeError ValidateD3D12TextureCanBeWrapped(ID3D12Resource* d3d12Resource,
                                                 const TextureDescriptor* descriptor);
     MaybeError ValidateTextureDescriptorCanBeWrapped(const TextureDescriptor* descriptor);
@@ -49,8 +49,8 @@ namespace dawn_native { namespace d3d12 {
         ID3D12Resource* GetD3D12Resource() const;
         bool TransitionUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
                                                   D3D12_RESOURCE_BARRIER* barrier,
-                                                  dawn::TextureUsage newUsage);
-        void TransitionUsageNow(CommandRecordingContext* commandContext, dawn::TextureUsage usage);
+                                                  wgpu::TextureUsage newUsage);
+        void TransitionUsageNow(CommandRecordingContext* commandContext, wgpu::TextureUsage usage);
         void TransitionUsageNow(CommandRecordingContext* commandContext,
                                 D3D12_RESOURCE_STATES newState);
 

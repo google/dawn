@@ -113,8 +113,8 @@ namespace dawn_native { namespace d3d12 {
         return DAWN_SWAP_CHAIN_NO_ERROR;
     }
 
-    dawn::TextureFormat NativeSwapChainImpl::GetPreferredFormat() const {
-        return dawn::TextureFormat::RGBA8Unorm;
+    wgpu::TextureFormat NativeSwapChainImpl::GetPreferredFormat() const {
+        return wgpu::TextureFormat::RGBA8Unorm;
     }
 
 }}  // namespace dawn_native::d3d12

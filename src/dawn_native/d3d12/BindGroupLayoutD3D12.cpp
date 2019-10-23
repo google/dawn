@@ -32,21 +32,21 @@ namespace dawn_native { namespace d3d12 {
             }
 
             switch (groupInfo.types[binding]) {
-                case dawn::BindingType::UniformBuffer:
+                case wgpu::BindingType::UniformBuffer:
                     mBindingOffsets[binding] = mDescriptorCounts[CBV]++;
                     break;
-                case dawn::BindingType::StorageBuffer:
+                case wgpu::BindingType::StorageBuffer:
                     mBindingOffsets[binding] = mDescriptorCounts[UAV]++;
                     break;
-                case dawn::BindingType::SampledTexture:
+                case wgpu::BindingType::SampledTexture:
                     mBindingOffsets[binding] = mDescriptorCounts[SRV]++;
                     break;
-                case dawn::BindingType::Sampler:
+                case wgpu::BindingType::Sampler:
                     mBindingOffsets[binding] = mDescriptorCounts[Sampler]++;
                     break;
 
-                case dawn::BindingType::StorageTexture:
-                case dawn::BindingType::ReadonlyStorageBuffer:
+                case wgpu::BindingType::StorageTexture:
+                case wgpu::BindingType::ReadonlyStorageBuffer:
                     UNREACHABLE();
                     break;
             }
@@ -99,14 +99,14 @@ namespace dawn_native { namespace d3d12 {
                 // Root descriptor needs to set this value to set correct register number in
                 // generated HLSL shader.
                 switch (groupInfo.types[binding]) {
-                    case dawn::BindingType::UniformBuffer:
-                    case dawn::BindingType::StorageBuffer:
+                    case wgpu::BindingType::UniformBuffer:
+                    case wgpu::BindingType::StorageBuffer:
                         mBindingOffsets[binding] = baseRegister++;
                         break;
-                    case dawn::BindingType::SampledTexture:
-                    case dawn::BindingType::Sampler:
-                    case dawn::BindingType::StorageTexture:
-                    case dawn::BindingType::ReadonlyStorageBuffer:
+                    case wgpu::BindingType::SampledTexture:
+                    case wgpu::BindingType::Sampler:
+                    case wgpu::BindingType::StorageTexture:
+                    case wgpu::BindingType::ReadonlyStorageBuffer:
                         UNREACHABLE();
                         break;
                 }
@@ -114,21 +114,21 @@ namespace dawn_native { namespace d3d12 {
             }
 
             switch (groupInfo.types[binding]) {
-                case dawn::BindingType::UniformBuffer:
+                case wgpu::BindingType::UniformBuffer:
                     mBindingOffsets[binding] += descriptorOffsets[CBV];
                     break;
-                case dawn::BindingType::StorageBuffer:
+                case wgpu::BindingType::StorageBuffer:
                     mBindingOffsets[binding] += descriptorOffsets[UAV];
                     break;
-                case dawn::BindingType::SampledTexture:
+                case wgpu::BindingType::SampledTexture:
                     mBindingOffsets[binding] += descriptorOffsets[SRV];
                     break;
-                case dawn::BindingType::Sampler:
+                case wgpu::BindingType::Sampler:
                     mBindingOffsets[binding] += descriptorOffsets[Sampler];
                     break;
 
-                case dawn::BindingType::StorageTexture:
-                case dawn::BindingType::ReadonlyStorageBuffer:
+                case wgpu::BindingType::StorageTexture:
+                case wgpu::BindingType::ReadonlyStorageBuffer:
                     UNREACHABLE();
                     break;
 

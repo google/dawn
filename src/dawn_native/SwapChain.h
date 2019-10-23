@@ -35,8 +35,8 @@ namespace dawn_native {
         static SwapChainBase* MakeError(DeviceBase* device);
 
         // Dawn API
-        void Configure(dawn::TextureFormat format,
-                       dawn::TextureUsage allowedUsage,
+        void Configure(wgpu::TextureFormat format,
+                       wgpu::TextureUsage allowedUsage,
                        uint32_t width,
                        uint32_t height);
         TextureBase* GetNextTexture();
@@ -50,16 +50,16 @@ namespace dawn_native {
         virtual MaybeError OnBeforePresent(TextureBase* texture) = 0;
 
       private:
-        MaybeError ValidateConfigure(dawn::TextureFormat format,
-                                     dawn::TextureUsage allowedUsage,
+        MaybeError ValidateConfigure(wgpu::TextureFormat format,
+                                     wgpu::TextureUsage allowedUsage,
                                      uint32_t width,
                                      uint32_t height) const;
         MaybeError ValidateGetNextTexture() const;
         MaybeError ValidatePresent(TextureBase* texture) const;
 
         DawnSwapChainImplementation mImplementation = {};
-        dawn::TextureFormat mFormat = {};
-        dawn::TextureUsage mAllowedUsage;
+        wgpu::TextureFormat mFormat = {};
+        wgpu::TextureUsage mAllowedUsage;
         uint32_t mWidth = 0;
         uint32_t mHeight = 0;
         TextureBase* mLastNextTexture = nullptr;

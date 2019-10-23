@@ -30,28 +30,28 @@
 namespace dawn_native { namespace d3d12 {
 
     namespace {
-        D3D12_RESOURCE_STATES D3D12TextureUsage(dawn::TextureUsage usage, const Format& format) {
+        D3D12_RESOURCE_STATES D3D12TextureUsage(wgpu::TextureUsage usage, const Format& format) {
             D3D12_RESOURCE_STATES resourceState = D3D12_RESOURCE_STATE_COMMON;
 
             // Present is an exclusive flag.
-            if (usage & dawn::TextureUsage::Present) {
+            if (usage & wgpu::TextureUsage::Present) {
                 return D3D12_RESOURCE_STATE_PRESENT;
             }
 
-            if (usage & dawn::TextureUsage::CopySrc) {
+            if (usage & wgpu::TextureUsage::CopySrc) {
                 resourceState |= D3D12_RESOURCE_STATE_COPY_SOURCE;
             }
-            if (usage & dawn::TextureUsage::CopyDst) {
+            if (usage & wgpu::TextureUsage::CopyDst) {
                 resourceState |= D3D12_RESOURCE_STATE_COPY_DEST;
             }
-            if (usage & dawn::TextureUsage::Sampled) {
+            if (usage & wgpu::TextureUsage::Sampled) {
                 resourceState |= (D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE |
                                   D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
             }
-            if (usage & dawn::TextureUsage::Storage) {
+            if (usage & wgpu::TextureUsage::Storage) {
                 resourceState |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
             }
-            if (usage & dawn::TextureUsage::OutputAttachment) {
+            if (usage & wgpu::TextureUsage::OutputAttachment) {
                 if (format.HasDepthOrStencil()) {
                     resourceState |= D3D12_RESOURCE_STATE_DEPTH_WRITE;
                 } else {
@@ -62,12 +62,12 @@ namespace dawn_native { namespace d3d12 {
             return resourceState;
         }
 
-        D3D12_RESOURCE_FLAGS D3D12ResourceFlags(dawn::TextureUsage usage,
+        D3D12_RESOURCE_FLAGS D3D12ResourceFlags(wgpu::TextureUsage usage,
                                                 const Format& format,
                                                 bool isMultisampledTexture) {
             D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE;
 
-            if (usage & dawn::TextureUsage::Storage) {
+            if (usage & wgpu::TextureUsage::Storage) {
                 flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
             }
 
@@ -79,7 +79,7 @@ namespace dawn_native { namespace d3d12 {
             // flag is invalid.
             // TODO(natlee@microsoft.com, jiawei.shao@intel.com): do not require render target for
             // lazy clearing.
-            if ((usage & dawn::TextureUsage::OutputAttachment) || isMultisampledTexture ||
+            if ((usage & wgpu::TextureUsage::OutputAttachment) || isMultisampledTexture ||
                 !format.isCompressed) {
                 if (format.HasDepthOrStencil()) {
                     flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
@@ -93,9 +93,9 @@ namespace dawn_native { namespace d3d12 {
             return flags;
         }
 
-        D3D12_RESOURCE_DIMENSION D3D12TextureDimension(dawn::TextureDimension dimension) {
+        D3D12_RESOURCE_DIMENSION D3D12TextureDimension(wgpu::TextureDimension dimension) {
             switch (dimension) {
-                case dawn::TextureDimension::e2D:
+                case wgpu::TextureDimension::e2D:
                     return D3D12_RESOURCE_DIMENSION_TEXTURE2D;
                 default:
                     UNREACHABLE();
@@ -103,117 +103,117 @@ namespace dawn_native { namespace d3d12 {
         }
     }  // namespace
 
-    DXGI_FORMAT D3D12TextureFormat(dawn::TextureFormat format) {
+    DXGI_FORMAT D3D12TextureFormat(wgpu::TextureFormat format) {
         switch (format) {
-            case dawn::TextureFormat::R8Unorm:
+            case wgpu::TextureFormat::R8Unorm:
                 return DXGI_FORMAT_R8_UNORM;
-            case dawn::TextureFormat::R8Snorm:
+            case wgpu::TextureFormat::R8Snorm:
                 return DXGI_FORMAT_R8_SNORM;
-            case dawn::TextureFormat::R8Uint:
+            case wgpu::TextureFormat::R8Uint:
                 return DXGI_FORMAT_R8_UINT;
-            case dawn::TextureFormat::R8Sint:
+            case wgpu::TextureFormat::R8Sint:
                 return DXGI_FORMAT_R8_SINT;
 
-            case dawn::TextureFormat::R16Uint:
+            case wgpu::TextureFormat::R16Uint:
                 return DXGI_FORMAT_R16_UINT;
-            case dawn::TextureFormat::R16Sint:
+            case wgpu::TextureFormat::R16Sint:
                 return DXGI_FORMAT_R16_SINT;
-            case dawn::TextureFormat::R16Float:
+            case wgpu::TextureFormat::R16Float:
                 return DXGI_FORMAT_R16_FLOAT;
-            case dawn::TextureFormat::RG8Unorm:
+            case wgpu::TextureFormat::RG8Unorm:
                 return DXGI_FORMAT_R8G8_UNORM;
-            case dawn::TextureFormat::RG8Snorm:
+            case wgpu::TextureFormat::RG8Snorm:
                 return DXGI_FORMAT_R8G8_SNORM;
-            case dawn::TextureFormat::RG8Uint:
+            case wgpu::TextureFormat::RG8Uint:
                 return DXGI_FORMAT_R8G8_UINT;
-            case dawn::TextureFormat::RG8Sint:
+            case wgpu::TextureFormat::RG8Sint:
                 return DXGI_FORMAT_R8G8_SINT;
 
-            case dawn::TextureFormat::R32Uint:
+            case wgpu::TextureFormat::R32Uint:
                 return DXGI_FORMAT_R32_UINT;
-            case dawn::TextureFormat::R32Sint:
+            case wgpu::TextureFormat::R32Sint:
                 return DXGI_FORMAT_R32_SINT;
-            case dawn::TextureFormat::R32Float:
+            case wgpu::TextureFormat::R32Float:
                 return DXGI_FORMAT_R32_FLOAT;
-            case dawn::TextureFormat::RG16Uint:
+            case wgpu::TextureFormat::RG16Uint:
                 return DXGI_FORMAT_R16G16_UINT;
-            case dawn::TextureFormat::RG16Sint:
+            case wgpu::TextureFormat::RG16Sint:
                 return DXGI_FORMAT_R16G16_SINT;
-            case dawn::TextureFormat::RG16Float:
+            case wgpu::TextureFormat::RG16Float:
                 return DXGI_FORMAT_R16G16_FLOAT;
-            case dawn::TextureFormat::RGBA8Unorm:
+            case wgpu::TextureFormat::RGBA8Unorm:
                 return DXGI_FORMAT_R8G8B8A8_UNORM;
-            case dawn::TextureFormat::RGBA8UnormSrgb:
+            case wgpu::TextureFormat::RGBA8UnormSrgb:
                 return DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-            case dawn::TextureFormat::RGBA8Snorm:
+            case wgpu::TextureFormat::RGBA8Snorm:
                 return DXGI_FORMAT_R8G8B8A8_SNORM;
-            case dawn::TextureFormat::RGBA8Uint:
+            case wgpu::TextureFormat::RGBA8Uint:
                 return DXGI_FORMAT_R8G8B8A8_UINT;
-            case dawn::TextureFormat::RGBA8Sint:
+            case wgpu::TextureFormat::RGBA8Sint:
                 return DXGI_FORMAT_R8G8B8A8_SINT;
-            case dawn::TextureFormat::BGRA8Unorm:
+            case wgpu::TextureFormat::BGRA8Unorm:
                 return DXGI_FORMAT_B8G8R8A8_UNORM;
-            case dawn::TextureFormat::BGRA8UnormSrgb:
+            case wgpu::TextureFormat::BGRA8UnormSrgb:
                 return DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
-            case dawn::TextureFormat::RGB10A2Unorm:
+            case wgpu::TextureFormat::RGB10A2Unorm:
                 return DXGI_FORMAT_R10G10B10A2_UNORM;
-            case dawn::TextureFormat::RG11B10Float:
+            case wgpu::TextureFormat::RG11B10Float:
                 return DXGI_FORMAT_R11G11B10_FLOAT;
 
-            case dawn::TextureFormat::RG32Uint:
+            case wgpu::TextureFormat::RG32Uint:
                 return DXGI_FORMAT_R32G32_UINT;
-            case dawn::TextureFormat::RG32Sint:
+            case wgpu::TextureFormat::RG32Sint:
                 return DXGI_FORMAT_R32G32_SINT;
-            case dawn::TextureFormat::RG32Float:
+            case wgpu::TextureFormat::RG32Float:
                 return DXGI_FORMAT_R32G32_FLOAT;
-            case dawn::TextureFormat::RGBA16Uint:
+            case wgpu::TextureFormat::RGBA16Uint:
                 return DXGI_FORMAT_R16G16B16A16_UINT;
-            case dawn::TextureFormat::RGBA16Sint:
+            case wgpu::TextureFormat::RGBA16Sint:
                 return DXGI_FORMAT_R16G16B16A16_SINT;
-            case dawn::TextureFormat::RGBA16Float:
+            case wgpu::TextureFormat::RGBA16Float:
                 return DXGI_FORMAT_R16G16B16A16_FLOAT;
 
-            case dawn::TextureFormat::RGBA32Uint:
+            case wgpu::TextureFormat::RGBA32Uint:
                 return DXGI_FORMAT_R32G32B32A32_UINT;
-            case dawn::TextureFormat::RGBA32Sint:
+            case wgpu::TextureFormat::RGBA32Sint:
                 return DXGI_FORMAT_R32G32B32A32_SINT;
-            case dawn::TextureFormat::RGBA32Float:
+            case wgpu::TextureFormat::RGBA32Float:
                 return DXGI_FORMAT_R32G32B32A32_FLOAT;
 
-            case dawn::TextureFormat::Depth32Float:
+            case wgpu::TextureFormat::Depth32Float:
                 return DXGI_FORMAT_D32_FLOAT;
-            case dawn::TextureFormat::Depth24Plus:
+            case wgpu::TextureFormat::Depth24Plus:
                 return DXGI_FORMAT_D32_FLOAT;
-            case dawn::TextureFormat::Depth24PlusStencil8:
+            case wgpu::TextureFormat::Depth24PlusStencil8:
                 return DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
 
-            case dawn::TextureFormat::BC1RGBAUnorm:
+            case wgpu::TextureFormat::BC1RGBAUnorm:
                 return DXGI_FORMAT_BC1_UNORM;
-            case dawn::TextureFormat::BC1RGBAUnormSrgb:
+            case wgpu::TextureFormat::BC1RGBAUnormSrgb:
                 return DXGI_FORMAT_BC1_UNORM_SRGB;
-            case dawn::TextureFormat::BC2RGBAUnorm:
+            case wgpu::TextureFormat::BC2RGBAUnorm:
                 return DXGI_FORMAT_BC2_UNORM;
-            case dawn::TextureFormat::BC2RGBAUnormSrgb:
+            case wgpu::TextureFormat::BC2RGBAUnormSrgb:
                 return DXGI_FORMAT_BC2_UNORM_SRGB;
-            case dawn::TextureFormat::BC3RGBAUnorm:
+            case wgpu::TextureFormat::BC3RGBAUnorm:
                 return DXGI_FORMAT_BC3_UNORM;
-            case dawn::TextureFormat::BC3RGBAUnormSrgb:
+            case wgpu::TextureFormat::BC3RGBAUnormSrgb:
                 return DXGI_FORMAT_BC3_UNORM_SRGB;
-            case dawn::TextureFormat::BC4RSnorm:
+            case wgpu::TextureFormat::BC4RSnorm:
                 return DXGI_FORMAT_BC4_SNORM;
-            case dawn::TextureFormat::BC4RUnorm:
+            case wgpu::TextureFormat::BC4RUnorm:
                 return DXGI_FORMAT_BC4_UNORM;
-            case dawn::TextureFormat::BC5RGSnorm:
+            case wgpu::TextureFormat::BC5RGSnorm:
                 return DXGI_FORMAT_BC5_SNORM;
-            case dawn::TextureFormat::BC5RGUnorm:
+            case wgpu::TextureFormat::BC5RGUnorm:
                 return DXGI_FORMAT_BC5_UNORM;
-            case dawn::TextureFormat::BC6HRGBSfloat:
+            case wgpu::TextureFormat::BC6HRGBSfloat:
                 return DXGI_FORMAT_BC6H_SF16;
-            case dawn::TextureFormat::BC6HRGBUfloat:
+            case wgpu::TextureFormat::BC6HRGBUfloat:
                 return DXGI_FORMAT_BC6H_UF16;
-            case dawn::TextureFormat::BC7RGBAUnorm:
+            case wgpu::TextureFormat::BC7RGBAUnorm:
                 return DXGI_FORMAT_BC7_UNORM;
-            case dawn::TextureFormat::BC7RGBAUnormSrgb:
+            case wgpu::TextureFormat::BC7RGBAUnormSrgb:
                 return DXGI_FORMAT_BC7_UNORM_SRGB;
 
             default:
@@ -222,7 +222,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     MaybeError ValidateTextureDescriptorCanBeWrapped(const TextureDescriptor* descriptor) {
-        if (descriptor->dimension != dawn::TextureDimension::e2D) {
+        if (descriptor->dimension != wgpu::TextureDimension::e2D) {
             return DAWN_VALIDATION_ERROR("Texture must be 2D");
         }
 
@@ -397,7 +397,7 @@ namespace dawn_native { namespace d3d12 {
 
     UINT16 Texture::GetDepthOrArraySize() {
         switch (GetDimension()) {
-            case dawn::TextureDimension::e2D:
+            case wgpu::TextureDimension::e2D:
                 return static_cast<UINT16>(GetArrayLayers());
             default:
                 UNREACHABLE();
@@ -409,7 +409,7 @@ namespace dawn_native { namespace d3d12 {
     // cause subsequent errors.
     bool Texture::TransitionUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
                                                        D3D12_RESOURCE_BARRIER* barrier,
-                                                       dawn::TextureUsage newUsage) {
+                                                       wgpu::TextureUsage newUsage) {
         return TransitionUsageAndGetResourceBarrier(commandContext, barrier,
                                                     D3D12TextureUsage(newUsage, GetFormat()));
     }
@@ -493,7 +493,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     void Texture::TransitionUsageNow(CommandRecordingContext* commandContext,
-                                     dawn::TextureUsage usage) {
+                                     wgpu::TextureUsage usage) {
         TransitionUsageNow(commandContext, D3D12TextureUsage(usage, GetFormat()));
     }
 
@@ -509,7 +509,7 @@ namespace dawn_native { namespace d3d12 {
     D3D12_RENDER_TARGET_VIEW_DESC Texture::GetRTVDescriptor(uint32_t baseMipLevel,
                                                             uint32_t baseArrayLayer,
                                                             uint32_t layerCount) const {
-        ASSERT(GetDimension() == dawn::TextureDimension::e2D);
+        ASSERT(GetDimension() == wgpu::TextureDimension::e2D);
         D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
         rtvDesc.Format = GetD3D12Format();
         if (IsMultisampledTexture()) {
@@ -696,9 +696,9 @@ namespace dawn_native { namespace d3d12 {
         // TODO(jiawei.shao@intel.com): support more texture view dimensions.
         // TODO(jiawei.shao@intel.com): support creating SRV on multisampled textures.
         switch (descriptor->dimension) {
-            case dawn::TextureViewDimension::e2D:
-            case dawn::TextureViewDimension::e2DArray:
-                ASSERT(texture->GetDimension() == dawn::TextureDimension::e2D);
+            case wgpu::TextureViewDimension::e2D:
+            case wgpu::TextureViewDimension::e2DArray:
+                ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
                 mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
                 mSrvDesc.Texture2DArray.ArraySize = descriptor->arrayLayerCount;
                 mSrvDesc.Texture2DArray.FirstArraySlice = descriptor->baseArrayLayer;
@@ -707,9 +707,9 @@ namespace dawn_native { namespace d3d12 {
                 mSrvDesc.Texture2DArray.PlaneSlice = 0;
                 mSrvDesc.Texture2DArray.ResourceMinLODClamp = 0;
                 break;
-            case dawn::TextureViewDimension::Cube:
-            case dawn::TextureViewDimension::CubeArray:
-                ASSERT(texture->GetDimension() == dawn::TextureDimension::e2D);
+            case wgpu::TextureViewDimension::Cube:
+            case wgpu::TextureViewDimension::CubeArray:
+                ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
                 ASSERT(descriptor->arrayLayerCount % 6 == 0);
                 mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBEARRAY;
                 mSrvDesc.TextureCubeArray.First2DArrayFace = descriptor->baseArrayLayer;

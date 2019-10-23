@@ -41,7 +41,7 @@ namespace dawn_native { namespace d3d12 {
         DawnSwapChainError GetNextTexture(DawnSwapChainNextTexture* nextTexture);
         DawnSwapChainError Present();
 
-        dawn::TextureFormat GetPreferredFormat() const;
+        wgpu::TextureFormat GetPreferredFormat() const;
 
       private:
         HWND mWindow = nullptr;

@@ -20,24 +20,24 @@ using namespace dawn_native;
 
 // Tests for StageBit
 TEST(PerStage, StageBit) {
-    ASSERT_EQ(StageBit(SingleShaderStage::Vertex), dawn::ShaderStage::Vertex);
-    ASSERT_EQ(StageBit(SingleShaderStage::Fragment), dawn::ShaderStage::Fragment);
-    ASSERT_EQ(StageBit(SingleShaderStage::Compute), dawn::ShaderStage::Compute);
+    ASSERT_EQ(StageBit(SingleShaderStage::Vertex), wgpu::ShaderStage::Vertex);
+    ASSERT_EQ(StageBit(SingleShaderStage::Fragment), wgpu::ShaderStage::Fragment);
+    ASSERT_EQ(StageBit(SingleShaderStage::Compute), wgpu::ShaderStage::Compute);
 }
 
 // Basic test for the PerStage container
 TEST(PerStage, PerStage) {
     PerStage<int> data;
 
-    // Store data using dawn::ShaderStage
+    // Store data using wgpu::ShaderStage
     data[SingleShaderStage::Vertex] = 42;
     data[SingleShaderStage::Fragment] = 3;
     data[SingleShaderStage::Compute] = -1;
 
-    // Load it using dawn::ShaderStage
-    ASSERT_EQ(data[dawn::ShaderStage::Vertex], 42);
-    ASSERT_EQ(data[dawn::ShaderStage::Fragment], 3);
-    ASSERT_EQ(data[dawn::ShaderStage::Compute], -1);
+    // Load it using wgpu::ShaderStage
+    ASSERT_EQ(data[wgpu::ShaderStage::Vertex], 42);
+    ASSERT_EQ(data[wgpu::ShaderStage::Fragment], 3);
+    ASSERT_EQ(data[wgpu::ShaderStage::Compute], -1);
 }
 
 // Test IterateStages with kAllStages
@@ -51,9 +51,9 @@ TEST(PerStage, IterateAllStages) {
         counts[stage] ++;
     }
 
-    ASSERT_EQ(counts[dawn::ShaderStage::Vertex], 1);
-    ASSERT_EQ(counts[dawn::ShaderStage::Fragment], 1);
-    ASSERT_EQ(counts[dawn::ShaderStage::Compute], 1);
+    ASSERT_EQ(counts[wgpu::ShaderStage::Vertex], 1);
+    ASSERT_EQ(counts[wgpu::ShaderStage::Fragment], 1);
+    ASSERT_EQ(counts[wgpu::ShaderStage::Compute], 1);
 }
 
 // Test IterateStages with one stage
@@ -63,13 +63,13 @@ TEST(PerStage, IterateOneStage) {
     counts[SingleShaderStage::Fragment] = 0;
     counts[SingleShaderStage::Compute] = 0;
 
-    for (auto stage : IterateStages(dawn::ShaderStage::Fragment)) {
+    for (auto stage : IterateStages(wgpu::ShaderStage::Fragment)) {
         counts[stage] ++;
     }
 
-    ASSERT_EQ(counts[dawn::ShaderStage::Vertex], 0);
-    ASSERT_EQ(counts[dawn::ShaderStage::Fragment], 1);
-    ASSERT_EQ(counts[dawn::ShaderStage::Compute], 0);
+    ASSERT_EQ(counts[wgpu::ShaderStage::Vertex], 0);
+    ASSERT_EQ(counts[wgpu::ShaderStage::Fragment], 1);
+    ASSERT_EQ(counts[wgpu::ShaderStage::Compute], 0);
 }
 
 // Test IterateStages with no stage
@@ -79,11 +79,11 @@ TEST(PerStage, IterateNoStages) {
     counts[SingleShaderStage::Fragment] = 0;
     counts[SingleShaderStage::Compute] = 0;
 
-    for (auto stage : IterateStages(dawn::ShaderStage::Fragment & dawn::ShaderStage::Vertex)) {
+    for (auto stage : IterateStages(wgpu::ShaderStage::Fragment & wgpu::ShaderStage::Vertex)) {
         counts[stage] ++;
     }
 
-    ASSERT_EQ(counts[dawn::ShaderStage::Vertex], 0);
-    ASSERT_EQ(counts[dawn::ShaderStage::Fragment], 0);
-    ASSERT_EQ(counts[dawn::ShaderStage::Compute], 0);
+    ASSERT_EQ(counts[wgpu::ShaderStage::Vertex], 0);
+    ASSERT_EQ(counts[wgpu::ShaderStage::Fragment], 0);
+    ASSERT_EQ(counts[wgpu::ShaderStage::Compute], 0);
 }

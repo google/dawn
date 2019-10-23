@@ -94,16 +94,16 @@ namespace dawn_native {
         ASSERT(mCaches->shaderModules.empty());
     }
 
-    void DeviceBase::HandleError(dawn::ErrorType type, const char* message) {
+    void DeviceBase::HandleError(wgpu::ErrorType type, const char* message) {
         mCurrentErrorScope->HandleError(type, message);
     }
 
-    void DeviceBase::InjectError(dawn::ErrorType type, const char* message) {
+    void DeviceBase::InjectError(wgpu::ErrorType type, const char* message) {
         if (ConsumedError(ValidateErrorType(type))) {
             return;
         }
-        if (DAWN_UNLIKELY(type == dawn::ErrorType::NoError)) {
-            HandleError(dawn::ErrorType::Validation, "Invalid injected error NoError");
+        if (DAWN_UNLIKELY(type == wgpu::ErrorType::NoError)) {
+            HandleError(wgpu::ErrorType::Validation, "Invalid injected error NoError");
             return;
         }
         HandleError(type, message);
@@ -115,18 +115,18 @@ namespace dawn_native {
         delete error;
     }
 
-    void DeviceBase::SetUncapturedErrorCallback(dawn::ErrorCallback callback, void* userdata) {
+    void DeviceBase::SetUncapturedErrorCallback(wgpu::ErrorCallback callback, void* userdata) {
         mRootErrorScope->SetCallback(callback, userdata);
     }
 
-    void DeviceBase::PushErrorScope(dawn::ErrorFilter filter) {
+    void DeviceBase::PushErrorScope(wgpu::ErrorFilter filter) {
         if (ConsumedError(ValidateErrorFilter(filter))) {
             return;
         }
         mCurrentErrorScope = AcquireRef(new ErrorScope(filter, mCurrentErrorScope.Get()));
     }
 
-    bool DeviceBase::PopErrorScope(dawn::ErrorCallback callback, void* userdata) {
+    bool DeviceBase::PopErrorScope(wgpu::ErrorCallback callback, void* userdata) {
         if (DAWN_UNLIKELY(mCurrentErrorScope.Get() == mRootErrorScope.Get())) {
             return false;
         }
@@ -168,7 +168,7 @@ namespace dawn_native {
         return mFenceSignalTracker.get();
     }
 
-    ResultOrError<const Format*> DeviceBase::GetInternalFormat(dawn::TextureFormat format) const {
+    ResultOrError<const Format*> DeviceBase::GetInternalFormat(wgpu::TextureFormat format) const {
         size_t index = ComputeFormatIndex(format);
         if (index >= mFormatTable.size()) {
             return DAWN_VALIDATION_ERROR("Unknown texture format");
@@ -182,7 +182,7 @@ namespace dawn_native {
         return internalFormat;
     }
 
-    const Format& DeviceBase::GetValidInternalFormat(dawn::TextureFormat format) const {
+    const Format& DeviceBase::GetValidInternalFormat(wgpu::TextureFormat format) const {
         size_t index = ComputeFormatIndex(format);
         ASSERT(index < mFormatTable.size());
         ASSERT(mFormatTable[index].isSupported);
@@ -413,7 +413,7 @@ namespace dawn_native {
         return result;
     }
     void DeviceBase::CreateBufferMappedAsync(const BufferDescriptor* descriptor,
-                                             dawn::BufferCreateMappedCallback callback,
+                                             wgpu::BufferCreateMappedCallback callback,
                                              void* userdata) {
         DawnCreateBufferMappedResult result = CreateBufferMapped(descriptor);
 

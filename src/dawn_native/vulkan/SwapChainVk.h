@@ -35,7 +35,7 @@ namespace dawn_native { namespace vulkan {
         MaybeError OnBeforePresent(TextureBase* texture) override;
 
       private:
-        dawn::TextureUsage mTextureUsage;
+        wgpu::TextureUsage mTextureUsage;
     };
 
 }}  // namespace dawn_native::vulkan

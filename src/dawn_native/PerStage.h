@@ -31,21 +31,21 @@ namespace dawn_native {
     static_assert(static_cast<uint32_t>(SingleShaderStage::Fragment) < kNumStages, "");
     static_assert(static_cast<uint32_t>(SingleShaderStage::Compute) < kNumStages, "");
 
-    static_assert(static_cast<uint32_t>(dawn::ShaderStage::Vertex) ==
+    static_assert(static_cast<uint32_t>(wgpu::ShaderStage::Vertex) ==
                       (1 << static_cast<uint32_t>(SingleShaderStage::Vertex)),
                   "");
-    static_assert(static_cast<uint32_t>(dawn::ShaderStage::Fragment) ==
+    static_assert(static_cast<uint32_t>(wgpu::ShaderStage::Fragment) ==
                       (1 << static_cast<uint32_t>(SingleShaderStage::Fragment)),
                   "");
-    static_assert(static_cast<uint32_t>(dawn::ShaderStage::Compute) ==
+    static_assert(static_cast<uint32_t>(wgpu::ShaderStage::Compute) ==
                       (1 << static_cast<uint32_t>(SingleShaderStage::Compute)),
                   "");
 
-    BitSetIterator<kNumStages, SingleShaderStage> IterateStages(dawn::ShaderStage stages);
-    dawn::ShaderStage StageBit(SingleShaderStage stage);
+    BitSetIterator<kNumStages, SingleShaderStage> IterateStages(wgpu::ShaderStage stages);
+    wgpu::ShaderStage StageBit(SingleShaderStage stage);
 
-    static constexpr dawn::ShaderStage kAllStages =
-        static_cast<dawn::ShaderStage>((1 << kNumStages) - 1);
+    static constexpr wgpu::ShaderStage kAllStages =
+        static_cast<wgpu::ShaderStage>((1 << kNumStages) - 1);
 
     template <typename T>
     class PerStage {
@@ -64,12 +64,12 @@ namespace dawn_native {
             return mData[static_cast<uint32_t>(stage)];
         }
 
-        T& operator[](dawn::ShaderStage stageBit) {
+        T& operator[](wgpu::ShaderStage stageBit) {
             uint32_t bit = static_cast<uint32_t>(stageBit);
             DAWN_ASSERT(bit != 0 && IsPowerOfTwo(bit) && bit <= (1 << kNumStages));
             return mData[Log2(bit)];
         }
-        const T& operator[](dawn::ShaderStage stageBit) const {
+        const T& operator[](wgpu::ShaderStage stageBit) const {
             uint32_t bit = static_cast<uint32_t>(stageBit);
             DAWN_ASSERT(bit != 0 && IsPowerOfTwo(bit) && bit <= (1 << kNumStages));
             return mData[Log2(bit)];

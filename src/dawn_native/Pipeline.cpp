@@ -42,7 +42,7 @@ namespace dawn_native {
 
     PipelineBase::PipelineBase(DeviceBase* device,
                                PipelineLayoutBase* layout,
-                               dawn::ShaderStage stages)
+                               wgpu::ShaderStage stages)
         : ObjectBase(device), mStageMask(stages), mLayout(layout) {
     }
 
@@ -50,7 +50,7 @@ namespace dawn_native {
         : ObjectBase(device, tag) {
     }
 
-    dawn::ShaderStage PipelineBase::GetStageMask() const {
+    wgpu::ShaderStage PipelineBase::GetStageMask() const {
         ASSERT(!IsError());
         return mStageMask;
     }

@@ -36,7 +36,7 @@ namespace dawn_native {
     ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
                                              const ComputePipelineDescriptor* descriptor,
                                              bool blueprint)
-        : PipelineBase(device, descriptor->layout, dawn::ShaderStage::Compute),
+        : PipelineBase(device, descriptor->layout, wgpu::ShaderStage::Compute),
           mModule(descriptor->computeStage.module),
           mEntryPoint(descriptor->computeStage.entryPoint),
           mIsBlueprint(blueprint) {

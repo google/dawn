@@ -20,24 +20,24 @@
 namespace dawn_native { namespace metal {
 
     namespace {
-        bool UsageNeedsTextureView(dawn::TextureUsage usage) {
-            constexpr dawn::TextureUsage kUsageNeedsTextureView =
-                dawn::TextureUsage::Storage | dawn::TextureUsage::Sampled;
+        bool UsageNeedsTextureView(wgpu::TextureUsage usage) {
+            constexpr wgpu::TextureUsage kUsageNeedsTextureView =
+                wgpu::TextureUsage::Storage | wgpu::TextureUsage::Sampled;
             return usage & kUsageNeedsTextureView;
         }
 
-        MTLTextureUsage MetalTextureUsage(dawn::TextureUsage usage) {
+        MTLTextureUsage MetalTextureUsage(wgpu::TextureUsage usage) {
             MTLTextureUsage result = MTLTextureUsageUnknown;  // This is 0
 
-            if (usage & (dawn::TextureUsage::Storage)) {
+            if (usage & (wgpu::TextureUsage::Storage)) {
                 result |= MTLTextureUsageShaderWrite | MTLTextureUsageShaderRead;
             }
 
-            if (usage & (dawn::TextureUsage::Sampled)) {
+            if (usage & (wgpu::TextureUsage::Sampled)) {
                 result |= MTLTextureUsageShaderRead;
             }
 
-            if (usage & (dawn::TextureUsage::OutputAttachment)) {
+            if (usage & (wgpu::TextureUsage::OutputAttachment)) {
                 result |= MTLTextureUsageRenderTarget;
             }
 
@@ -48,11 +48,11 @@ namespace dawn_native { namespace metal {
             return result;
         }
 
-        MTLTextureType MetalTextureType(dawn::TextureDimension dimension,
+        MTLTextureType MetalTextureType(wgpu::TextureDimension dimension,
                                         unsigned int arrayLayers,
                                         unsigned int sampleCount) {
             switch (dimension) {
-                case dawn::TextureDimension::e2D:
+                case wgpu::TextureDimension::e2D:
                     if (sampleCount > 1) {
                         ASSERT(arrayLayers == 1);
                         return MTLTextureType2DMultisample;
@@ -64,16 +64,16 @@ namespace dawn_native { namespace metal {
             }
         }
 
-        MTLTextureType MetalTextureViewType(dawn::TextureViewDimension dimension,
+        MTLTextureType MetalTextureViewType(wgpu::TextureViewDimension dimension,
                                             unsigned int sampleCount) {
             switch (dimension) {
-                case dawn::TextureViewDimension::e2D:
+                case wgpu::TextureViewDimension::e2D:
                     return (sampleCount > 1) ? MTLTextureType2DMultisample : MTLTextureType2D;
-                case dawn::TextureViewDimension::e2DArray:
+                case wgpu::TextureViewDimension::e2DArray:
                     return MTLTextureType2DArray;
-                case dawn::TextureViewDimension::Cube:
+                case wgpu::TextureViewDimension::Cube:
                     return MTLTextureTypeCube;
-                case dawn::TextureViewDimension::CubeArray:
+                case wgpu::TextureViewDimension::CubeArray:
                     return MTLTextureTypeCubeArray;
                 default:
                     UNREACHABLE();
@@ -96,8 +96,8 @@ namespace dawn_native { namespace metal {
             }
 
             switch (textureViewDescriptor->dimension) {
-                case dawn::TextureViewDimension::Cube:
-                case dawn::TextureViewDimension::CubeArray:
+                case wgpu::TextureViewDimension::Cube:
+                case wgpu::TextureViewDimension::CubeArray:
                     return true;
                 default:
                     break;
@@ -106,16 +106,16 @@ namespace dawn_native { namespace metal {
             return false;
         }
 
-        ResultOrError<dawn::TextureFormat> GetFormatEquivalentToIOSurfaceFormat(uint32_t format) {
+        ResultOrError<wgpu::TextureFormat> GetFormatEquivalentToIOSurfaceFormat(uint32_t format) {
             switch (format) {
                 case 'RGBA':
-                    return dawn::TextureFormat::RGBA8Unorm;
+                    return wgpu::TextureFormat::RGBA8Unorm;
                 case 'BGRA':
-                    return dawn::TextureFormat::BGRA8Unorm;
+                    return wgpu::TextureFormat::BGRA8Unorm;
                 case '2C08':
-                    return dawn::TextureFormat::RG8Unorm;
+                    return wgpu::TextureFormat::RG8Unorm;
                 case 'L008':
-                    return dawn::TextureFormat::R8Unorm;
+                    return wgpu::TextureFormat::R8Unorm;
                 default:
                     return DAWN_VALIDATION_ERROR("Unsupported IOSurface format");
             }
@@ -130,118 +130,118 @@ namespace dawn_native { namespace metal {
 #endif
     }
 
-    MTLPixelFormat MetalPixelFormat(dawn::TextureFormat format) {
+    MTLPixelFormat MetalPixelFormat(wgpu::TextureFormat format) {
         switch (format) {
-            case dawn::TextureFormat::R8Unorm:
+            case wgpu::TextureFormat::R8Unorm:
                 return MTLPixelFormatR8Unorm;
-            case dawn::TextureFormat::R8Snorm:
+            case wgpu::TextureFormat::R8Snorm:
                 return MTLPixelFormatR8Snorm;
-            case dawn::TextureFormat::R8Uint:
+            case wgpu::TextureFormat::R8Uint:
                 return MTLPixelFormatR8Uint;
-            case dawn::TextureFormat::R8Sint:
+            case wgpu::TextureFormat::R8Sint:
                 return MTLPixelFormatR8Sint;
 
-            case dawn::TextureFormat::R16Uint:
+            case wgpu::TextureFormat::R16Uint:
                 return MTLPixelFormatR16Uint;
-            case dawn::TextureFormat::R16Sint:
+            case wgpu::TextureFormat::R16Sint:
                 return MTLPixelFormatR16Sint;
-            case dawn::TextureFormat::R16Float:
+            case wgpu::TextureFormat::R16Float:
                 return MTLPixelFormatR16Float;
-            case dawn::TextureFormat::RG8Unorm:
+            case wgpu::TextureFormat::RG8Unorm:
                 return MTLPixelFormatRG8Unorm;
-            case dawn::TextureFormat::RG8Snorm:
+            case wgpu::TextureFormat::RG8Snorm:
                 return MTLPixelFormatRG8Snorm;
-            case dawn::TextureFormat::RG8Uint:
+            case wgpu::TextureFormat::RG8Uint:
                 return MTLPixelFormatRG8Uint;
-            case dawn::TextureFormat::RG8Sint:
+            case wgpu::TextureFormat::RG8Sint:
                 return MTLPixelFormatRG8Sint;
 
-            case dawn::TextureFormat::R32Uint:
+            case wgpu::TextureFormat::R32Uint:
                 return MTLPixelFormatR32Uint;
-            case dawn::TextureFormat::R32Sint:
+            case wgpu::TextureFormat::R32Sint:
                 return MTLPixelFormatR32Sint;
-            case dawn::TextureFormat::R32Float:
+            case wgpu::TextureFormat::R32Float:
                 return MTLPixelFormatR32Float;
-            case dawn::TextureFormat::RG16Uint:
+            case wgpu::TextureFormat::RG16Uint:
                 return MTLPixelFormatRG16Uint;
-            case dawn::TextureFormat::RG16Sint:
+            case wgpu::TextureFormat::RG16Sint:
                 return MTLPixelFormatRG16Sint;
-            case dawn::TextureFormat::RG16Float:
+            case wgpu::TextureFormat::RG16Float:
                 return MTLPixelFormatRG16Float;
-            case dawn::TextureFormat::RGBA8Unorm:
+            case wgpu::TextureFormat::RGBA8Unorm:
                 return MTLPixelFormatRGBA8Unorm;
-            case dawn::TextureFormat::RGBA8UnormSrgb:
+            case wgpu::TextureFormat::RGBA8UnormSrgb:
                 return MTLPixelFormatRGBA8Unorm_sRGB;
-            case dawn::TextureFormat::RGBA8Snorm:
+            case wgpu::TextureFormat::RGBA8Snorm:
                 return MTLPixelFormatRGBA8Snorm;
-            case dawn::TextureFormat::RGBA8Uint:
+            case wgpu::TextureFormat::RGBA8Uint:
                 return MTLPixelFormatRGBA8Uint;
-            case dawn::TextureFormat::RGBA8Sint:
+            case wgpu::TextureFormat::RGBA8Sint:
                 return MTLPixelFormatRGBA8Sint;
-            case dawn::TextureFormat::BGRA8Unorm:
+            case wgpu::TextureFormat::BGRA8Unorm:
                 return MTLPixelFormatBGRA8Unorm;
-            case dawn::TextureFormat::BGRA8UnormSrgb:
+            case wgpu::TextureFormat::BGRA8UnormSrgb:
                 return MTLPixelFormatBGRA8Unorm_sRGB;
-            case dawn::TextureFormat::RGB10A2Unorm:
+            case wgpu::TextureFormat::RGB10A2Unorm:
                 return MTLPixelFormatRGB10A2Unorm;
-            case dawn::TextureFormat::RG11B10Float:
+            case wgpu::TextureFormat::RG11B10Float:
                 return MTLPixelFormatRG11B10Float;
 
-            case dawn::TextureFormat::RG32Uint:
+            case wgpu::TextureFormat::RG32Uint:
                 return MTLPixelFormatRG32Uint;
-            case dawn::TextureFormat::RG32Sint:
+            case wgpu::TextureFormat::RG32Sint:
                 return MTLPixelFormatRG32Sint;
-            case dawn::TextureFormat::RG32Float:
+            case wgpu::TextureFormat::RG32Float:
                 return MTLPixelFormatRG32Float;
-            case dawn::TextureFormat::RGBA16Uint:
+            case wgpu::TextureFormat::RGBA16Uint:
                 return MTLPixelFormatRGBA16Uint;
-            case dawn::TextureFormat::RGBA16Sint:
+            case wgpu::TextureFormat::RGBA16Sint:
                 return MTLPixelFormatRGBA16Sint;
-            case dawn::TextureFormat::RGBA16Float:
+            case wgpu::TextureFormat::RGBA16Float:
                 return MTLPixelFormatRGBA16Float;
 
-            case dawn::TextureFormat::RGBA32Uint:
+            case wgpu::TextureFormat::RGBA32Uint:
                 return MTLPixelFormatRGBA32Uint;
-            case dawn::TextureFormat::RGBA32Sint:
+            case wgpu::TextureFormat::RGBA32Sint:
                 return MTLPixelFormatRGBA32Sint;
-            case dawn::TextureFormat::RGBA32Float:
+            case wgpu::TextureFormat::RGBA32Float:
                 return MTLPixelFormatRGBA32Float;
 
-            case dawn::TextureFormat::Depth32Float:
+            case wgpu::TextureFormat::Depth32Float:
                 return MTLPixelFormatDepth32Float;
-            case dawn::TextureFormat::Depth24Plus:
+            case wgpu::TextureFormat::Depth24Plus:
                 return MTLPixelFormatDepth32Float;
-            case dawn::TextureFormat::Depth24PlusStencil8:
+            case wgpu::TextureFormat::Depth24PlusStencil8:
                 return MTLPixelFormatDepth32Float_Stencil8;
 
 #if defined(DAWN_PLATFORM_MACOS)
-            case dawn::TextureFormat::BC1RGBAUnorm:
+            case wgpu::TextureFormat::BC1RGBAUnorm:
                 return MTLPixelFormatBC1_RGBA;
-            case dawn::TextureFormat::BC1RGBAUnormSrgb:
+            case wgpu::TextureFormat::BC1RGBAUnormSrgb:
                 return MTLPixelFormatBC1_RGBA_sRGB;
-            case dawn::TextureFormat::BC2RGBAUnorm:
+            case wgpu::TextureFormat::BC2RGBAUnorm:
                 return MTLPixelFormatBC2_RGBA;
-            case dawn::TextureFormat::BC2RGBAUnormSrgb:
+            case wgpu::TextureFormat::BC2RGBAUnormSrgb:
                 return MTLPixelFormatBC2_RGBA_sRGB;
-            case dawn::TextureFormat::BC3RGBAUnorm:
+            case wgpu::TextureFormat::BC3RGBAUnorm:
                 return MTLPixelFormatBC3_RGBA;
-            case dawn::TextureFormat::BC3RGBAUnormSrgb:
+            case wgpu::TextureFormat::BC3RGBAUnormSrgb:
                 return MTLPixelFormatBC3_RGBA_sRGB;
-            case dawn::TextureFormat::BC4RSnorm:
+            case wgpu::TextureFormat::BC4RSnorm:
                 return MTLPixelFormatBC4_RSnorm;
-            case dawn::TextureFormat::BC4RUnorm:
+            case wgpu::TextureFormat::BC4RUnorm:
                 return MTLPixelFormatBC4_RUnorm;
-            case dawn::TextureFormat::BC5RGSnorm:
+            case wgpu::TextureFormat::BC5RGSnorm:
                 return MTLPixelFormatBC5_RGSnorm;
-            case dawn::TextureFormat::BC5RGUnorm:
+            case wgpu::TextureFormat::BC5RGUnorm:
                 return MTLPixelFormatBC5_RGUnorm;
-            case dawn::TextureFormat::BC6HRGBSfloat:
+            case wgpu::TextureFormat::BC6HRGBSfloat:
                 return MTLPixelFormatBC6H_RGBFloat;
-            case dawn::TextureFormat::BC6HRGBUfloat:
+            case wgpu::TextureFormat::BC6HRGBUfloat:
                 return MTLPixelFormatBC6H_RGBUfloat;
-            case dawn::TextureFormat::BC7RGBAUnorm:
+            case wgpu::TextureFormat::BC7RGBAUnorm:
                 return MTLPixelFormatBC7_RGBAUnorm;
-            case dawn::TextureFormat::BC7RGBAUnormSrgb:
+            case wgpu::TextureFormat::BC7RGBAUnormSrgb:
                 return MTLPixelFormatBC7_RGBAUnorm_sRGB;
 #endif
 
@@ -261,7 +261,7 @@ namespace dawn_native { namespace metal {
             return DAWN_VALIDATION_ERROR("IOSurface plane doesn't exist");
         }
 
-        if (descriptor->dimension != dawn::TextureDimension::e2D) {
+        if (descriptor->dimension != wgpu::TextureDimension::e2D) {
             return DAWN_VALIDATION_ERROR("IOSurface texture must be 2D");
         }
 
@@ -283,7 +283,7 @@ namespace dawn_native { namespace metal {
             return DAWN_VALIDATION_ERROR("IOSurface size doesn't match descriptor");
         }
 
-        dawn::TextureFormat ioSurfaceFormat;
+        wgpu::TextureFormat ioSurfaceFormat;
         DAWN_TRY_ASSIGN(ioSurfaceFormat,
                         GetFormatEquivalentToIOSurfaceFormat(IOSurfaceGetPixelFormat(ioSurface)));
         if (descriptor->format != ioSurfaceFormat) {

@@ -127,16 +127,16 @@ namespace dawn_native {
         return mColorAttachmentsSet;
     }
 
-    dawn::TextureFormat AttachmentState::GetColorAttachmentFormat(uint32_t index) const {
+    wgpu::TextureFormat AttachmentState::GetColorAttachmentFormat(uint32_t index) const {
         ASSERT(mColorAttachmentsSet[index]);
         return mColorFormats[index];
     }
 
     bool AttachmentState::HasDepthStencilAttachment() const {
-        return mDepthStencilFormat != dawn::TextureFormat::Undefined;
+        return mDepthStencilFormat != wgpu::TextureFormat::Undefined;
     }
 
-    dawn::TextureFormat AttachmentState::GetDepthStencilFormat() const {
+    wgpu::TextureFormat AttachmentState::GetDepthStencilFormat() const {
         ASSERT(HasDepthStencilAttachment());
         return mDepthStencilFormat;
     }

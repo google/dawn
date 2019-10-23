@@ -22,35 +22,35 @@
 namespace dawn_native { namespace vulkan {
 
     namespace {
-        VkSamplerAddressMode VulkanSamplerAddressMode(dawn::AddressMode mode) {
+        VkSamplerAddressMode VulkanSamplerAddressMode(wgpu::AddressMode mode) {
             switch (mode) {
-                case dawn::AddressMode::Repeat:
+                case wgpu::AddressMode::Repeat:
                     return VK_SAMPLER_ADDRESS_MODE_REPEAT;
-                case dawn::AddressMode::MirrorRepeat:
+                case wgpu::AddressMode::MirrorRepeat:
                     return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
-                case dawn::AddressMode::ClampToEdge:
+                case wgpu::AddressMode::ClampToEdge:
                     return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
                 default:
                     UNREACHABLE();
             }
         }
 
-        VkFilter VulkanSamplerFilter(dawn::FilterMode filter) {
+        VkFilter VulkanSamplerFilter(wgpu::FilterMode filter) {
             switch (filter) {
-                case dawn::FilterMode::Linear:
+                case wgpu::FilterMode::Linear:
                     return VK_FILTER_LINEAR;
-                case dawn::FilterMode::Nearest:
+                case wgpu::FilterMode::Nearest:
                     return VK_FILTER_NEAREST;
                 default:
                     UNREACHABLE();
             }
         }
 
-        VkSamplerMipmapMode VulkanMipMapMode(dawn::FilterMode filter) {
+        VkSamplerMipmapMode VulkanMipMapMode(wgpu::FilterMode filter) {
             switch (filter) {
-                case dawn::FilterMode::Linear:
+                case wgpu::FilterMode::Linear:
                     return VK_SAMPLER_MIPMAP_MODE_LINEAR;
-                case dawn::FilterMode::Nearest:
+                case wgpu::FilterMode::Nearest:
                     return VK_SAMPLER_MIPMAP_MODE_NEAREST;
                 default:
                     UNREACHABLE();

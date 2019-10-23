@@ -66,17 +66,17 @@ namespace dawn_native {
     struct RenderPassColorAttachmentInfo {
         Ref<TextureViewBase> view;
         Ref<TextureViewBase> resolveTarget;
-        dawn::LoadOp loadOp;
-        dawn::StoreOp storeOp;
+        wgpu::LoadOp loadOp;
+        wgpu::StoreOp storeOp;
         dawn_native::Color clearColor;
     };
 
     struct RenderPassDepthStencilAttachmentInfo {
         Ref<TextureViewBase> view;
-        dawn::LoadOp depthLoadOp;
-        dawn::StoreOp depthStoreOp;
-        dawn::LoadOp stencilLoadOp;
-        dawn::StoreOp stencilStoreOp;
+        wgpu::LoadOp depthLoadOp;
+        wgpu::StoreOp depthStoreOp;
+        wgpu::LoadOp stencilLoadOp;
+        wgpu::StoreOp stencilStoreOp;
         float clearDepth;
         uint32_t clearStencil;
     };

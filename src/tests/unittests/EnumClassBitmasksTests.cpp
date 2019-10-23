@@ -80,14 +80,14 @@ namespace wgpu {
 
     TEST(BitmaskTests, ZeroOrOneBits) {
         Color zero = static_cast<Color>(0);
-        ASSERT_TRUE(dawn::HasZeroOrOneBits(zero));
-        ASSERT_TRUE(dawn::HasZeroOrOneBits(Color::R));
-        ASSERT_TRUE(dawn::HasZeroOrOneBits(Color::G));
-        ASSERT_TRUE(dawn::HasZeroOrOneBits(Color::B));
-        ASSERT_TRUE(dawn::HasZeroOrOneBits(Color::A));
-        ASSERT_FALSE(dawn::HasZeroOrOneBits(static_cast<Color>(Color::R | Color::G)));
-        ASSERT_FALSE(dawn::HasZeroOrOneBits(static_cast<Color>(Color::G | Color::B)));
-        ASSERT_FALSE(dawn::HasZeroOrOneBits(static_cast<Color>(Color::B | Color::A)));
+        ASSERT_TRUE(wgpu::HasZeroOrOneBits(zero));
+        ASSERT_TRUE(wgpu::HasZeroOrOneBits(Color::R));
+        ASSERT_TRUE(wgpu::HasZeroOrOneBits(Color::G));
+        ASSERT_TRUE(wgpu::HasZeroOrOneBits(Color::B));
+        ASSERT_TRUE(wgpu::HasZeroOrOneBits(Color::A));
+        ASSERT_FALSE(wgpu::HasZeroOrOneBits(static_cast<Color>(Color::R | Color::G)));
+        ASSERT_FALSE(wgpu::HasZeroOrOneBits(static_cast<Color>(Color::G | Color::B)));
+        ASSERT_FALSE(wgpu::HasZeroOrOneBits(static_cast<Color>(Color::B | Color::A)));
     }
 
 }  // namespace wgpu

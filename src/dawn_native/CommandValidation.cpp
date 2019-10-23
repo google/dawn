@@ -31,29 +31,29 @@ namespace dawn_native {
             const auto& layoutInfo = group->GetLayout()->GetBindingInfo();
 
             for (uint32_t i : IterateBitSet(layoutInfo.mask)) {
-                dawn::BindingType type = layoutInfo.types[i];
+                wgpu::BindingType type = layoutInfo.types[i];
 
                 switch (type) {
-                    case dawn::BindingType::UniformBuffer: {
+                    case wgpu::BindingType::UniformBuffer: {
                         BufferBase* buffer = group->GetBindingAsBufferBinding(i).buffer;
-                        usageTracker->BufferUsedAs(buffer, dawn::BufferUsage::Uniform);
+                        usageTracker->BufferUsedAs(buffer, wgpu::BufferUsage::Uniform);
                     } break;
 
-                    case dawn::BindingType::StorageBuffer: {
+                    case wgpu::BindingType::StorageBuffer: {
                         BufferBase* buffer = group->GetBindingAsBufferBinding(i).buffer;
-                        usageTracker->BufferUsedAs(buffer, dawn::BufferUsage::Storage);
+                        usageTracker->BufferUsedAs(buffer, wgpu::BufferUsage::Storage);
                     } break;
 
-                    case dawn::BindingType::SampledTexture: {
+                    case wgpu::BindingType::SampledTexture: {
                         TextureBase* texture = group->GetBindingAsTextureView(i)->GetTexture();
-                        usageTracker->TextureUsedAs(texture, dawn::TextureUsage::Sampled);
+                        usageTracker->TextureUsedAs(texture, wgpu::TextureUsage::Sampled);
                     } break;
 
-                    case dawn::BindingType::Sampler:
+                    case wgpu::BindingType::Sampler:
                         break;
 
-                    case dawn::BindingType::StorageTexture:
-                    case dawn::BindingType::ReadonlyStorageBuffer:
+                    case wgpu::BindingType::StorageTexture:
+                    case wgpu::BindingType::ReadonlyStorageBuffer:
                         UNREACHABLE();
                         break;
                 }
@@ -82,14 +82,14 @@ namespace dawn_native {
                     DrawIndirectCmd* cmd = commands->NextCommand<DrawIndirectCmd>();
                     DAWN_TRY(commandBufferState->ValidateCanDraw());
                     usageTracker->BufferUsedAs(cmd->indirectBuffer.Get(),
-                                               dawn::BufferUsage::Indirect);
+                                               wgpu::BufferUsage::Indirect);
                 } break;
 
                 case Command::DrawIndexedIndirect: {
                     DrawIndexedIndirectCmd* cmd = commands->NextCommand<DrawIndexedIndirectCmd>();
                     DAWN_TRY(commandBufferState->ValidateCanDrawIndexed());
                     usageTracker->BufferUsedAs(cmd->indirectBuffer.Get(),
-                                               dawn::BufferUsage::Indirect);
+                                               wgpu::BufferUsage::Indirect);
                 } break;
 
                 case Command::InsertDebugMarker: {
@@ -132,14 +132,14 @@ namespace dawn_native {
                 case Command::SetIndexBuffer: {
                     SetIndexBufferCmd* cmd = commands->NextCommand<SetIndexBufferCmd>();
 
-                    usageTracker->BufferUsedAs(cmd->buffer.Get(), dawn::BufferUsage::Index);
+                    usageTracker->BufferUsedAs(cmd->buffer.Get(), wgpu::BufferUsage::Index);
                     commandBufferState->SetIndexBuffer();
                 } break;
 
                 case Command::SetVertexBuffer: {
                     SetVertexBufferCmd* cmd = commands->NextCommand<SetVertexBufferCmd>();
 
-                    usageTracker->BufferUsedAs(cmd->buffer.Get(), dawn::BufferUsage::Vertex);
+                    usageTracker->BufferUsedAs(cmd->buffer.Get(), wgpu::BufferUsage::Vertex);
                     commandBufferState->SetVertexBuffer(cmd->slot);
                 } break;
 
@@ -199,18 +199,18 @@ namespace dawn_native {
         for (uint32_t i : IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
             RenderPassColorAttachmentInfo* colorAttachment = &renderPass->colorAttachments[i];
             TextureBase* texture = colorAttachment->view->GetTexture();
-            usageTracker.TextureUsedAs(texture, dawn::TextureUsage::OutputAttachment);
+            usageTracker.TextureUsedAs(texture, wgpu::TextureUsage::OutputAttachment);
 
             TextureViewBase* resolveTarget = colorAttachment->resolveTarget.Get();
             if (resolveTarget != nullptr) {
                 usageTracker.TextureUsedAs(resolveTarget->GetTexture(),
-                                           dawn::TextureUsage::OutputAttachment);
+                                           wgpu::TextureUsage::OutputAttachment);
             }
         }
 
         if (renderPass->attachmentState->HasDepthStencilAttachment()) {
             TextureBase* texture = renderPass->depthStencilAttachment.view->GetTexture();
-            usageTracker.TextureUsedAs(texture, dawn::TextureUsage::OutputAttachment);
+            usageTracker.TextureUsedAs(texture, wgpu::TextureUsage::OutputAttachment);
         }
 
         Command type;
@@ -310,7 +310,7 @@ namespace dawn_native {
                     DispatchIndirectCmd* cmd = commands->NextCommand<DispatchIndirectCmd>();
                     DAWN_TRY(commandBufferState.ValidateCanDispatch());
                     usageTracker.BufferUsedAs(cmd->indirectBuffer.Get(),
-                                              dawn::BufferUsage::Indirect);
+                                              wgpu::BufferUsage::Indirect);
                 } break;
 
                 case Command::InsertDebugMarker: {

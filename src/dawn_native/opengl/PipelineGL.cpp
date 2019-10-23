@@ -74,7 +74,7 @@ namespace dawn_native { namespace opengl {
 
         mProgram = gl.CreateProgram();
 
-        dawn::ShaderStage activeStages = dawn::ShaderStage::None;
+        wgpu::ShaderStage activeStages = wgpu::ShaderStage::None;
         for (SingleShaderStage stage : IterateStages(kAllStages)) {
             if (modules[stage] != nullptr) {
                 activeStages |= StageBit(stage);
@@ -118,14 +118,14 @@ namespace dawn_native { namespace opengl {
 
                 std::string name = GetBindingName(group, binding);
                 switch (groupInfo.types[binding]) {
-                    case dawn::BindingType::UniformBuffer: {
+                    case wgpu::BindingType::UniformBuffer: {
                         GLint location = gl.GetUniformBlockIndex(mProgram, name.c_str());
                         if (location != -1) {
                             gl.UniformBlockBinding(mProgram, location, indices[group][binding]);
                         }
                     } break;
 
-                    case dawn::BindingType::StorageBuffer: {
+                    case wgpu::BindingType::StorageBuffer: {
                         GLuint location = gl.GetProgramResourceIndex(
                             mProgram, GL_SHADER_STORAGE_BLOCK, name.c_str());
                         if (location != GL_INVALID_INDEX) {
@@ -134,14 +134,14 @@ namespace dawn_native { namespace opengl {
                         }
                     } break;
 
-                    case dawn::BindingType::Sampler:
-                    case dawn::BindingType::SampledTexture:
+                    case wgpu::BindingType::Sampler:
+                    case wgpu::BindingType::SampledTexture:
                         // These binding types are handled in the separate sampler and texture
                         // emulation
                         break;
 
-                    case dawn::BindingType::StorageTexture:
-                    case dawn::BindingType::ReadonlyStorageBuffer:
+                    case wgpu::BindingType::StorageTexture:
+                    case wgpu::BindingType::ReadonlyStorageBuffer:
                         UNREACHABLE();
                         break;
 
@@ -177,11 +177,11 @@ namespace dawn_native { namespace opengl {
                     indices[combined.textureLocation.group][combined.textureLocation.binding];
                 mUnitsForTextures[textureIndex].push_back(textureUnit);
 
-                dawn::TextureComponentType componentType =
+                wgpu::TextureComponentType componentType =
                     layout->GetBindGroupLayout(combined.textureLocation.group)
                         ->GetBindingInfo()
                         .textureComponentTypes[combined.textureLocation.binding];
-                bool shouldUseFiltering = componentType == dawn::TextureComponentType::Float;
+                bool shouldUseFiltering = componentType == wgpu::TextureComponentType::Float;
 
                 GLuint samplerIndex =
                     indices[combined.samplerLocation.group][combined.samplerLocation.binding];

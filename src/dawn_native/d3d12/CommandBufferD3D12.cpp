@@ -40,11 +40,11 @@ namespace dawn_native { namespace d3d12 {
 
     namespace {
 
-        DXGI_FORMAT DXGIIndexFormat(dawn::IndexFormat format) {
+        DXGI_FORMAT DXGIIndexFormat(wgpu::IndexFormat format) {
             switch (format) {
-                case dawn::IndexFormat::Uint16:
+                case wgpu::IndexFormat::Uint16:
                     return DXGI_FORMAT_R16_UINT;
-                case dawn::IndexFormat::Uint32:
+                case wgpu::IndexFormat::Uint32:
                     return DXGI_FORMAT_R32_UINT;
                 default:
                     UNREACHABLE();
@@ -149,21 +149,21 @@ namespace dawn_native { namespace d3d12 {
             if (mInCompute) {
                 for (uint32_t index : IterateBitSet(mBindGroupLayoutsMask)) {
                     for (uint32_t binding : IterateBitSet(mBuffersNeedingBarrier[index])) {
-                        dawn::BindingType bindingType = mBindingTypes[index][binding];
+                        wgpu::BindingType bindingType = mBindingTypes[index][binding];
                         switch (bindingType) {
-                            case dawn::BindingType::StorageBuffer:
+                            case wgpu::BindingType::StorageBuffer:
                                 ToBackend(mBuffers[index][binding])
                                     ->TransitionUsageNow(commandContext,
-                                                         dawn::BufferUsage::Storage);
+                                                         wgpu::BufferUsage::Storage);
                                 break;
 
-                            case dawn::BindingType::StorageTexture:
+                            case wgpu::BindingType::StorageTexture:
                                 // Not implemented.
 
-                            case dawn::BindingType::UniformBuffer:
-                            case dawn::BindingType::ReadonlyStorageBuffer:
-                            case dawn::BindingType::Sampler:
-                            case dawn::BindingType::SampledTexture:
+                            case wgpu::BindingType::UniformBuffer:
+                            case wgpu::BindingType::ReadonlyStorageBuffer:
+                            case wgpu::BindingType::Sampler:
+                            case wgpu::BindingType::SampledTexture:
                                 // Don't require barriers.
 
                             default:
@@ -224,7 +224,7 @@ namespace dawn_native { namespace d3d12 {
                         ToBackend(binding.buffer)->GetVA() + offset;
 
                     switch (layout.types[bindingIndex]) {
-                        case dawn::BindingType::UniformBuffer:
+                        case wgpu::BindingType::UniformBuffer:
                             if (mInCompute) {
                                 commandList->SetComputeRootConstantBufferView(parameterIndex,
                                                                               bufferLocation);
@@ -233,7 +233,7 @@ namespace dawn_native { namespace d3d12 {
                                                                                bufferLocation);
                             }
                             break;
-                        case dawn::BindingType::StorageBuffer:
+                        case wgpu::BindingType::StorageBuffer:
                             if (mInCompute) {
                                 commandList->SetComputeRootUnorderedAccessView(parameterIndex,
                                                                                bufferLocation);
@@ -242,10 +242,10 @@ namespace dawn_native { namespace d3d12 {
                                                                                 bufferLocation);
                             }
                             break;
-                        case dawn::BindingType::SampledTexture:
-                        case dawn::BindingType::Sampler:
-                        case dawn::BindingType::StorageTexture:
-                        case dawn::BindingType::ReadonlyStorageBuffer:
+                        case wgpu::BindingType::SampledTexture:
+                        case wgpu::BindingType::Sampler:
+                        case wgpu::BindingType::StorageTexture:
+                        case wgpu::BindingType::ReadonlyStorageBuffer:
                             UNREACHABLE();
                             break;
                     }
@@ -619,7 +619,7 @@ namespace dawn_native { namespace d3d12 {
                 // Clear textures that are not output attachments. Output attachments will be
                 // cleared during record render pass if the texture subresource has not been
                 // initialized before the render pass.
-                if (!(usages.textureUsages[i] & dawn::TextureUsage::OutputAttachment)) {
+                if (!(usages.textureUsages[i] & wgpu::TextureUsage::OutputAttachment)) {
                     texture->EnsureSubresourceContentInitialized(commandContext, 0,
                                                                  texture->GetNumMipLevels(), 0,
                                                                  texture->GetArrayLayers());
@@ -673,8 +673,8 @@ namespace dawn_native { namespace d3d12 {
                     Buffer* srcBuffer = ToBackend(copy->source.Get());
                     Buffer* dstBuffer = ToBackend(copy->destination.Get());
 
-                    srcBuffer->TransitionUsageNow(commandContext, dawn::BufferUsage::CopySrc);
-                    dstBuffer->TransitionUsageNow(commandContext, dawn::BufferUsage::CopyDst);
+                    srcBuffer->TransitionUsageNow(commandContext, wgpu::BufferUsage::CopySrc);
+                    dstBuffer->TransitionUsageNow(commandContext, wgpu::BufferUsage::CopyDst);
 
                     commandList->CopyBufferRegion(
                         dstBuffer->GetD3D12Resource().Get(), copy->destinationOffset,
@@ -696,8 +696,8 @@ namespace dawn_native { namespace d3d12 {
                             copy->destination.arrayLayer, 1);
                     }
 
-                    buffer->TransitionUsageNow(commandContext, dawn::BufferUsage::CopySrc);
-                    texture->TransitionUsageNow(commandContext, dawn::TextureUsage::CopyDst);
+                    buffer->TransitionUsageNow(commandContext, wgpu::BufferUsage::CopySrc);
+                    texture->TransitionUsageNow(commandContext, wgpu::TextureUsage::CopyDst);
 
                     auto copySplit = ComputeTextureCopySplit(
                         copy->destination.origin, copy->copySize, texture->GetFormat(),
@@ -731,8 +731,8 @@ namespace dawn_native { namespace d3d12 {
                     texture->EnsureSubresourceContentInitialized(
                         commandContext, copy->source.mipLevel, 1, copy->source.arrayLayer, 1);
 
-                    texture->TransitionUsageNow(commandContext, dawn::TextureUsage::CopySrc);
-                    buffer->TransitionUsageNow(commandContext, dawn::BufferUsage::CopyDst);
+                    texture->TransitionUsageNow(commandContext, wgpu::TextureUsage::CopySrc);
+                    buffer->TransitionUsageNow(commandContext, wgpu::BufferUsage::CopyDst);
 
                     TextureCopySplit copySplit = ComputeTextureCopySplit(
                         copy->source.origin, copy->copySize, texture->GetFormat(),
@@ -778,8 +778,8 @@ namespace dawn_native { namespace d3d12 {
                             commandContext, copy->destination.mipLevel, 1,
                             copy->destination.arrayLayer, 1);
                     }
-                    source->TransitionUsageNow(commandContext, dawn::TextureUsage::CopySrc);
-                    destination->TransitionUsageNow(commandContext, dawn::TextureUsage::CopyDst);
+                    source->TransitionUsageNow(commandContext, wgpu::TextureUsage::CopySrc);
+                    destination->TransitionUsageNow(commandContext, wgpu::TextureUsage::CopyDst);
 
                     if (CanUseCopyResource(source->GetNumMipLevels(), source->GetSize(),
                                            destination->GetSize(), copy->copySize)) {
@@ -928,8 +928,8 @@ namespace dawn_native { namespace d3d12 {
                 // Load op - color
                 ASSERT(view->GetLevelCount() == 1);
                 ASSERT(view->GetLayerCount() == 1);
-                if (attachmentInfo.loadOp == dawn::LoadOp::Clear ||
-                    (attachmentInfo.loadOp == dawn::LoadOp::Load &&
+                if (attachmentInfo.loadOp == wgpu::LoadOp::Clear ||
+                    (attachmentInfo.loadOp == wgpu::LoadOp::Load &&
                      !view->GetTexture()->IsSubresourceContentInitialized(
                          view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1))) {
                     D3D12_CPU_DESCRIPTOR_HANDLE handle = args.RTVs[i];
@@ -949,12 +949,12 @@ namespace dawn_native { namespace d3d12 {
                 }
 
                 switch (attachmentInfo.storeOp) {
-                    case dawn::StoreOp::Store: {
+                    case wgpu::StoreOp::Store: {
                         view->GetTexture()->SetIsSubresourceContentInitialized(
                             true, view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1);
                     } break;
 
-                    case dawn::StoreOp::Clear: {
+                    case wgpu::StoreOp::Clear: {
                         view->GetTexture()->SetIsSubresourceContentInitialized(
                             false, view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1);
                     } break;
@@ -974,9 +974,9 @@ namespace dawn_native { namespace d3d12 {
 
                 // Load op - depth/stencil
                 bool doDepthClear = texture->GetFormat().HasDepth() &&
-                                    (attachmentInfo.depthLoadOp == dawn::LoadOp::Clear);
+                                    (attachmentInfo.depthLoadOp == wgpu::LoadOp::Clear);
                 bool doStencilClear = texture->GetFormat().HasStencil() &&
-                                      (attachmentInfo.stencilLoadOp == dawn::LoadOp::Clear);
+                                      (attachmentInfo.stencilLoadOp == wgpu::LoadOp::Clear);
 
                 D3D12_CLEAR_FLAGS clearFlags = {};
                 if (doDepthClear) {
@@ -991,12 +991,12 @@ namespace dawn_native { namespace d3d12 {
                         view->GetBaseMipLevel(), view->GetLevelCount(), view->GetBaseArrayLayer(),
                         view->GetLayerCount())) {
                     if (texture->GetFormat().HasDepth() &&
-                        attachmentInfo.depthLoadOp == dawn::LoadOp::Load) {
+                        attachmentInfo.depthLoadOp == wgpu::LoadOp::Load) {
                         clearDepth = 0.0f;
                         clearFlags |= D3D12_CLEAR_FLAG_DEPTH;
                     }
                     if (texture->GetFormat().HasStencil() &&
-                        attachmentInfo.stencilLoadOp == dawn::LoadOp::Load) {
+                        attachmentInfo.stencilLoadOp == wgpu::LoadOp::Load) {
                         clearStencil = 0u;
                         clearFlags |= D3D12_CLEAR_FLAG_STENCIL;
                     }
@@ -1008,13 +1008,13 @@ namespace dawn_native { namespace d3d12 {
                                                        0, nullptr);
                 }
 
-                if (attachmentInfo.depthStoreOp == dawn::StoreOp::Store &&
-                    attachmentInfo.stencilStoreOp == dawn::StoreOp::Store) {
+                if (attachmentInfo.depthStoreOp == wgpu::StoreOp::Store &&
+                    attachmentInfo.stencilStoreOp == wgpu::StoreOp::Store) {
                     texture->SetIsSubresourceContentInitialized(
                         true, view->GetBaseMipLevel(), view->GetLevelCount(),
                         view->GetBaseArrayLayer(), view->GetLayerCount());
-                } else if (attachmentInfo.depthStoreOp == dawn::StoreOp::Clear &&
-                           attachmentInfo.stencilStoreOp == dawn::StoreOp::Clear) {
+                } else if (attachmentInfo.depthStoreOp == wgpu::StoreOp::Clear &&
+                           attachmentInfo.stencilStoreOp == wgpu::StoreOp::Clear) {
                     texture->SetIsSubresourceContentInitialized(
                         false, view->GetBaseMipLevel(), view->GetLevelCount(),
                         view->GetBaseArrayLayer(), view->GetLayerCount());

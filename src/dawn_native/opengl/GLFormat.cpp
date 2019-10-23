@@ -21,7 +21,7 @@ namespace dawn_native { namespace opengl {
 
         using Type = GLFormat::ComponentType;
 
-        auto AddFormat = [&table](dawn::TextureFormat dawnFormat, GLenum internalFormat,
+        auto AddFormat = [&table](wgpu::TextureFormat dawnFormat, GLenum internalFormat,
                                   GLenum format, GLenum type, Type componentType) {
             size_t index = ComputeFormatIndex(dawnFormat);
             ASSERT(index < table.size());
@@ -44,71 +44,71 @@ namespace dawn_native { namespace opengl {
         // clang-format off
 
         // 1 byte color formats
-        AddFormat(dawn::TextureFormat::R8Unorm, GL_R8, GL_RED, GL_UNSIGNED_BYTE, Type::Float);
-        AddFormat(dawn::TextureFormat::R8Snorm, GL_R8_SNORM, GL_RED, GL_BYTE, Type::Float);
-        AddFormat(dawn::TextureFormat::R8Uint, GL_R8UI, GL_RED_INTEGER, GL_UNSIGNED_BYTE, Type::Uint);
-        AddFormat(dawn::TextureFormat::R8Sint, GL_R8I, GL_RED_INTEGER, GL_BYTE, Type::Int);
+        AddFormat(wgpu::TextureFormat::R8Unorm, GL_R8, GL_RED, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::R8Snorm, GL_R8_SNORM, GL_RED, GL_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::R8Uint, GL_R8UI, GL_RED_INTEGER, GL_UNSIGNED_BYTE, Type::Uint);
+        AddFormat(wgpu::TextureFormat::R8Sint, GL_R8I, GL_RED_INTEGER, GL_BYTE, Type::Int);
 
         // 2 bytes color formats
-        AddFormat(dawn::TextureFormat::R16Uint, GL_R16UI, GL_RED_INTEGER, GL_UNSIGNED_SHORT, Type::Uint);
-        AddFormat(dawn::TextureFormat::R16Sint, GL_R16I, GL_RED_INTEGER, GL_SHORT, Type::Int);
-        AddFormat(dawn::TextureFormat::R16Float, GL_R16F, GL_RED, GL_HALF_FLOAT, Type::Float);
-        AddFormat(dawn::TextureFormat::RG8Unorm, GL_RG8, GL_RG, GL_UNSIGNED_BYTE, Type::Float);
-        AddFormat(dawn::TextureFormat::RG8Snorm, GL_RG8_SNORM, GL_RG, GL_BYTE, Type::Float);
-        AddFormat(dawn::TextureFormat::RG8Uint, GL_RG8UI, GL_RG_INTEGER, GL_UNSIGNED_BYTE, Type::Uint);
-        AddFormat(dawn::TextureFormat::RG8Sint, GL_RG8I, GL_RG_INTEGER, GL_BYTE, Type::Int);
+        AddFormat(wgpu::TextureFormat::R16Uint, GL_R16UI, GL_RED_INTEGER, GL_UNSIGNED_SHORT, Type::Uint);
+        AddFormat(wgpu::TextureFormat::R16Sint, GL_R16I, GL_RED_INTEGER, GL_SHORT, Type::Int);
+        AddFormat(wgpu::TextureFormat::R16Float, GL_R16F, GL_RED, GL_HALF_FLOAT, Type::Float);
+        AddFormat(wgpu::TextureFormat::RG8Unorm, GL_RG8, GL_RG, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::RG8Snorm, GL_RG8_SNORM, GL_RG, GL_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::RG8Uint, GL_RG8UI, GL_RG_INTEGER, GL_UNSIGNED_BYTE, Type::Uint);
+        AddFormat(wgpu::TextureFormat::RG8Sint, GL_RG8I, GL_RG_INTEGER, GL_BYTE, Type::Int);
 
         // 4 bytes color formats
-        AddFormat(dawn::TextureFormat::R32Uint, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, Type::Uint);
-        AddFormat(dawn::TextureFormat::R32Sint, GL_R32I, GL_RED_INTEGER, GL_INT, Type::Int);
-        AddFormat(dawn::TextureFormat::R32Float, GL_R32F, GL_RED, GL_FLOAT, Type::Float);
-        AddFormat(dawn::TextureFormat::RG16Uint, GL_RG16UI, GL_RG_INTEGER, GL_UNSIGNED_SHORT, Type::Uint);
-        AddFormat(dawn::TextureFormat::RG16Sint, GL_RG16I, GL_RG_INTEGER, GL_SHORT, Type::Int);
-        AddFormat(dawn::TextureFormat::RG16Float, GL_RG16F, GL_RG, GL_HALF_FLOAT, Type::Float);
-        AddFormat(dawn::TextureFormat::RGBA8Unorm, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
-        AddFormat(dawn::TextureFormat::RGBA8UnormSrgb, GL_SRGB8_ALPHA8, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
-        AddFormat(dawn::TextureFormat::RGBA8Snorm, GL_RGBA8_SNORM, GL_RGBA, GL_BYTE, Type::Float);
-        AddFormat(dawn::TextureFormat::RGBA8Uint, GL_RGBA8UI, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, Type::Uint);
-        AddFormat(dawn::TextureFormat::RGBA8Sint, GL_RGBA8I, GL_RGBA_INTEGER, GL_BYTE, Type::Int);
+        AddFormat(wgpu::TextureFormat::R32Uint, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, Type::Uint);
+        AddFormat(wgpu::TextureFormat::R32Sint, GL_R32I, GL_RED_INTEGER, GL_INT, Type::Int);
+        AddFormat(wgpu::TextureFormat::R32Float, GL_R32F, GL_RED, GL_FLOAT, Type::Float);
+        AddFormat(wgpu::TextureFormat::RG16Uint, GL_RG16UI, GL_RG_INTEGER, GL_UNSIGNED_SHORT, Type::Uint);
+        AddFormat(wgpu::TextureFormat::RG16Sint, GL_RG16I, GL_RG_INTEGER, GL_SHORT, Type::Int);
+        AddFormat(wgpu::TextureFormat::RG16Float, GL_RG16F, GL_RG, GL_HALF_FLOAT, Type::Float);
+        AddFormat(wgpu::TextureFormat::RGBA8Unorm, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::RGBA8UnormSrgb, GL_SRGB8_ALPHA8, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::RGBA8Snorm, GL_RGBA8_SNORM, GL_RGBA, GL_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::RGBA8Uint, GL_RGBA8UI, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, Type::Uint);
+        AddFormat(wgpu::TextureFormat::RGBA8Sint, GL_RGBA8I, GL_RGBA_INTEGER, GL_BYTE, Type::Int);
 
         // This doesn't have an enum for the internal format in OpenGL, so use RGBA8.
-        AddFormat(dawn::TextureFormat::BGRA8Unorm, GL_RGBA8, GL_BGRA, GL_UNSIGNED_BYTE, Type::Float);
-        AddFormat(dawn::TextureFormat::RGB10A2Unorm, GL_RGB10_A2, GL_RGBA, GL_UNSIGNED_INT_2_10_10_10_REV, Type::Float);
-        AddFormat(dawn::TextureFormat::RG11B10Float, GL_R11F_G11F_B10F, GL_RGB, GL_UNSIGNED_INT_10F_11F_11F_REV, Type::Float);
+        AddFormat(wgpu::TextureFormat::BGRA8Unorm, GL_RGBA8, GL_BGRA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::RGB10A2Unorm, GL_RGB10_A2, GL_RGBA, GL_UNSIGNED_INT_2_10_10_10_REV, Type::Float);
+        AddFormat(wgpu::TextureFormat::RG11B10Float, GL_R11F_G11F_B10F, GL_RGB, GL_UNSIGNED_INT_10F_11F_11F_REV, Type::Float);
 
         // 8 bytes color formats
-        AddFormat(dawn::TextureFormat::RG32Uint, GL_RG32UI, GL_RG_INTEGER, GL_UNSIGNED_INT, Type::Uint);
-        AddFormat(dawn::TextureFormat::RG32Sint, GL_RG32I, GL_RG_INTEGER, GL_INT, Type::Int);
-        AddFormat(dawn::TextureFormat::RG32Float, GL_RG32F, GL_RG, GL_FLOAT, Type::Float);
-        AddFormat(dawn::TextureFormat::RGBA16Uint, GL_RGBA16UI, GL_RGBA_INTEGER, GL_UNSIGNED_SHORT, Type::Uint);
-        AddFormat(dawn::TextureFormat::RGBA16Sint, GL_RGBA16I, GL_RGBA_INTEGER, GL_SHORT, Type::Int);
-        AddFormat(dawn::TextureFormat::RGBA16Float, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT, Type::Float);
+        AddFormat(wgpu::TextureFormat::RG32Uint, GL_RG32UI, GL_RG_INTEGER, GL_UNSIGNED_INT, Type::Uint);
+        AddFormat(wgpu::TextureFormat::RG32Sint, GL_RG32I, GL_RG_INTEGER, GL_INT, Type::Int);
+        AddFormat(wgpu::TextureFormat::RG32Float, GL_RG32F, GL_RG, GL_FLOAT, Type::Float);
+        AddFormat(wgpu::TextureFormat::RGBA16Uint, GL_RGBA16UI, GL_RGBA_INTEGER, GL_UNSIGNED_SHORT, Type::Uint);
+        AddFormat(wgpu::TextureFormat::RGBA16Sint, GL_RGBA16I, GL_RGBA_INTEGER, GL_SHORT, Type::Int);
+        AddFormat(wgpu::TextureFormat::RGBA16Float, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT, Type::Float);
 
         // 16 bytes color formats
-        AddFormat(dawn::TextureFormat::RGBA32Uint, GL_RGBA32UI, GL_RGBA_INTEGER, GL_UNSIGNED_INT, Type::Uint);
-        AddFormat(dawn::TextureFormat::RGBA32Sint, GL_RGBA32I, GL_RGBA_INTEGER, GL_INT, Type::Int);
-        AddFormat(dawn::TextureFormat::RGBA32Float, GL_RGBA32F, GL_RGBA, GL_FLOAT, Type::Float);
+        AddFormat(wgpu::TextureFormat::RGBA32Uint, GL_RGBA32UI, GL_RGBA_INTEGER, GL_UNSIGNED_INT, Type::Uint);
+        AddFormat(wgpu::TextureFormat::RGBA32Sint, GL_RGBA32I, GL_RGBA_INTEGER, GL_INT, Type::Int);
+        AddFormat(wgpu::TextureFormat::RGBA32Float, GL_RGBA32F, GL_RGBA, GL_FLOAT, Type::Float);
 
         // Depth stencil formats
-        AddFormat(dawn::TextureFormat::Depth32Float, GL_DEPTH_COMPONENT32F, GL_DEPTH, GL_FLOAT, Type::DepthStencil);
-        AddFormat(dawn::TextureFormat::Depth24Plus, GL_DEPTH_COMPONENT32F, GL_DEPTH, GL_FLOAT, Type::DepthStencil);
-        AddFormat(dawn::TextureFormat::Depth24PlusStencil8, GL_DEPTH32F_STENCIL8, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, Type::DepthStencil);
+        AddFormat(wgpu::TextureFormat::Depth32Float, GL_DEPTH_COMPONENT32F, GL_DEPTH, GL_FLOAT, Type::DepthStencil);
+        AddFormat(wgpu::TextureFormat::Depth24Plus, GL_DEPTH_COMPONENT32F, GL_DEPTH, GL_FLOAT, Type::DepthStencil);
+        AddFormat(wgpu::TextureFormat::Depth24PlusStencil8, GL_DEPTH32F_STENCIL8, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, Type::DepthStencil);
 
         // Block compressed formats
-        AddFormat(dawn::TextureFormat::BC1RGBAUnorm, GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
-        AddFormat(dawn::TextureFormat::BC1RGBAUnormSrgb, GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
-        AddFormat(dawn::TextureFormat::BC2RGBAUnorm, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
-        AddFormat(dawn::TextureFormat::BC2RGBAUnormSrgb, GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
-        AddFormat(dawn::TextureFormat::BC3RGBAUnorm, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
-        AddFormat(dawn::TextureFormat::BC3RGBAUnormSrgb, GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
-        AddFormat(dawn::TextureFormat::BC4RSnorm, GL_COMPRESSED_SIGNED_RED_RGTC1, GL_RED, GL_BYTE, Type::Float);
-        AddFormat(dawn::TextureFormat::BC4RUnorm, GL_COMPRESSED_RED_RGTC1, GL_RED, GL_UNSIGNED_BYTE, Type::Float);
-        AddFormat(dawn::TextureFormat::BC5RGSnorm, GL_COMPRESSED_SIGNED_RG_RGTC2, GL_RG, GL_BYTE, Type::Float);
-        AddFormat(dawn::TextureFormat::BC5RGUnorm, GL_COMPRESSED_RG_RGTC2, GL_RG, GL_UNSIGNED_BYTE, Type::Float);
-        AddFormat(dawn::TextureFormat::BC6HRGBSfloat, GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT, GL_RGB, GL_HALF_FLOAT, Type::Float);
-        AddFormat(dawn::TextureFormat::BC6HRGBUfloat, GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT, GL_RGB, GL_HALF_FLOAT, Type::Float);
-        AddFormat(dawn::TextureFormat::BC7RGBAUnorm, GL_COMPRESSED_RGBA_BPTC_UNORM, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
-        AddFormat(dawn::TextureFormat::BC7RGBAUnormSrgb, GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::BC1RGBAUnorm, GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::BC1RGBAUnormSrgb, GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::BC2RGBAUnorm, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::BC2RGBAUnormSrgb, GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::BC3RGBAUnorm, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::BC3RGBAUnormSrgb, GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::BC4RSnorm, GL_COMPRESSED_SIGNED_RED_RGTC1, GL_RED, GL_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::BC4RUnorm, GL_COMPRESSED_RED_RGTC1, GL_RED, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::BC5RGSnorm, GL_COMPRESSED_SIGNED_RG_RGTC2, GL_RG, GL_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::BC5RGUnorm, GL_COMPRESSED_RG_RGTC2, GL_RG, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::BC6HRGBSfloat, GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT, GL_RGB, GL_HALF_FLOAT, Type::Float);
+        AddFormat(wgpu::TextureFormat::BC6HRGBUfloat, GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT, GL_RGB, GL_HALF_FLOAT, Type::Float);
+        AddFormat(wgpu::TextureFormat::BC7RGBAUnorm, GL_COMPRESSED_RGBA_BPTC_UNORM, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::BC7RGBAUnormSrgb, GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
 
         // clang-format on
 

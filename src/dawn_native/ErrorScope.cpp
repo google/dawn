@@ -20,7 +20,7 @@ namespace dawn_native {
 
     ErrorScope::ErrorScope() = default;
 
-    ErrorScope::ErrorScope(dawn::ErrorFilter errorFilter, ErrorScope* parent)
+    ErrorScope::ErrorScope(wgpu::ErrorFilter errorFilter, ErrorScope* parent)
         : RefCounted(), mErrorFilter(errorFilter), mParent(parent) {
         ASSERT(mParent.Get() != nullptr);
     }
@@ -29,10 +29,10 @@ namespace dawn_native {
         if (mCallback == nullptr || IsRoot()) {
             return;
         }
-        mCallback(static_cast<DawnErrorType>(mErrorType), mErrorMessage.c_str(), mUserdata);
+        mCallback(static_cast<WGPUErrorType>(mErrorType), mErrorMessage.c_str(), mUserdata);
     }
 
-    void ErrorScope::SetCallback(dawn::ErrorCallback callback, void* userdata) {
+    void ErrorScope::SetCallback(wgpu::ErrorCallback callback, void* userdata) {
         mCallback = callback;
         mUserdata = userdata;
     }
@@ -45,28 +45,28 @@ namespace dawn_native {
         return mParent.Get() == nullptr;
     }
 
-    void ErrorScope::HandleError(dawn::ErrorType type, const char* message) {
+    void ErrorScope::HandleError(wgpu::ErrorType type, const char* message) {
         HandleErrorImpl(this, type, message);
     }
 
     // static
-    void ErrorScope::HandleErrorImpl(ErrorScope* scope, dawn::ErrorType type, const char* message) {
+    void ErrorScope::HandleErrorImpl(ErrorScope* scope, wgpu::ErrorType type, const char* message) {
         ErrorScope* currentScope = scope;
         for (; !currentScope->IsRoot(); currentScope = currentScope->GetParent()) {
             ASSERT(currentScope != nullptr);
 
             bool consumed = false;
             switch (type) {
-                case dawn::ErrorType::Validation:
-                    if (currentScope->mErrorFilter != dawn::ErrorFilter::Validation) {
+                case wgpu::ErrorType::Validation:
+                    if (currentScope->mErrorFilter != wgpu::ErrorFilter::Validation) {
                         // Error filter does not match. Move on to the next scope.
                         continue;
                     }
                     consumed = true;
                     break;
 
-                case dawn::ErrorType::OutOfMemory:
-                    if (currentScope->mErrorFilter != dawn::ErrorFilter::OutOfMemory) {
+                case wgpu::ErrorType::OutOfMemory:
+                    if (currentScope->mErrorFilter != wgpu::ErrorFilter::OutOfMemory) {
                         // Error filter does not match. Move on to the next scope.
                         continue;
                     }
@@ -75,19 +75,19 @@ namespace dawn_native {
 
                 // Unknown and DeviceLost are fatal. All error scopes capture them.
                 // |consumed| is false because these should bubble to all scopes.
-                case dawn::ErrorType::Unknown:
-                case dawn::ErrorType::DeviceLost:
+                case wgpu::ErrorType::Unknown:
+                case wgpu::ErrorType::DeviceLost:
                     consumed = false;
                     break;
 
-                case dawn::ErrorType::NoError:
+                case wgpu::ErrorType::NoError:
                 default:
                     UNREACHABLE();
                     return;
             }
 
             // Record the error if the scope doesn't have one yet.
-            if (currentScope->mErrorType == dawn::ErrorType::NoError) {
+            if (currentScope->mErrorType == wgpu::ErrorType::NoError) {
                 currentScope->mErrorType = type;
                 currentScope->mErrorMessage = message;
             }
@@ -100,14 +100,14 @@ namespace dawn_native {
         // The root error scope captures all uncaptured errors.
         ASSERT(currentScope->IsRoot());
         if (currentScope->mCallback) {
-            currentScope->mCallback(static_cast<DawnErrorType>(type), message,
+            currentScope->mCallback(static_cast<WGPUErrorType>(type), message,
                                     currentScope->mUserdata);
         }
     }
 
     void ErrorScope::Destroy() {
         if (!IsRoot()) {
-            mErrorType = dawn::ErrorType::Unknown;
+            mErrorType = wgpu::ErrorType::Unknown;
             mErrorMessage = "Error scope destroyed";
         }
     }

@@ -27,7 +27,7 @@ namespace dawn_native { namespace opengl {
 
         GLenum TargetForTexture(const TextureDescriptor* descriptor) {
             switch (descriptor->dimension) {
-                case dawn::TextureDimension::e2D:
+                case wgpu::TextureDimension::e2D:
                     if (descriptor->arrayLayerCount > 1) {
                         ASSERT(descriptor->sampleCount == 1);
                         return GL_TEXTURE_2D_ARRAY;
@@ -45,17 +45,17 @@ namespace dawn_native { namespace opengl {
             }
         }
 
-        GLenum TargetForTextureViewDimension(dawn::TextureViewDimension dimension,
+        GLenum TargetForTextureViewDimension(wgpu::TextureViewDimension dimension,
                                              uint32_t sampleCount) {
             switch (dimension) {
-                case dawn::TextureViewDimension::e2D:
+                case wgpu::TextureViewDimension::e2D:
                     return (sampleCount > 1) ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
-                case dawn::TextureViewDimension::e2DArray:
+                case wgpu::TextureViewDimension::e2DArray:
                     ASSERT(sampleCount == 1);
                     return GL_TEXTURE_2D_ARRAY;
-                case dawn::TextureViewDimension::Cube:
+                case wgpu::TextureViewDimension::Cube:
                     return GL_TEXTURE_CUBE_MAP;
-                case dawn::TextureViewDimension::CubeArray:
+                case wgpu::TextureViewDimension::CubeArray:
                     return GL_TEXTURE_CUBE_MAP_ARRAY;
                 default:
                     UNREACHABLE();
@@ -69,9 +69,9 @@ namespace dawn_native { namespace opengl {
             return handle;
         }
 
-        bool UsageNeedsTextureView(dawn::TextureUsage usage) {
-            constexpr dawn::TextureUsage kUsageNeedingTextureView =
-                dawn::TextureUsage::Storage | dawn::TextureUsage::Sampled;
+        bool UsageNeedsTextureView(wgpu::TextureUsage usage) {
+            constexpr wgpu::TextureUsage kUsageNeedingTextureView =
+                wgpu::TextureUsage::Storage | wgpu::TextureUsage::Sampled;
             return usage & kUsageNeedingTextureView;
         }
 
@@ -90,8 +90,8 @@ namespace dawn_native { namespace opengl {
             }
 
             switch (textureViewDescriptor->dimension) {
-                case dawn::TextureViewDimension::Cube:
-                case dawn::TextureViewDimension::CubeArray:
+                case wgpu::TextureViewDimension::Cube:
+                case wgpu::TextureViewDimension::CubeArray:
                     return true;
                 default:
                     break;
@@ -122,7 +122,7 @@ namespace dawn_native { namespace opengl {
         // GL_TRUE, so the storage of the texture must be allocated with glTexStorage*D.
         // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTextureView.xhtml
         switch (GetDimension()) {
-            case dawn::TextureDimension::e2D:
+            case wgpu::TextureDimension::e2D:
                 if (arrayLayers > 1) {
                     ASSERT(!IsMultisampledTexture());
                     gl.TexStorage3D(mTarget, levels, glFormat.internalFormat, width, height,
@@ -254,7 +254,7 @@ namespace dawn_native { namespace opengl {
                 return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate buffer.");
             }
             descriptor.nextInChain = nullptr;
-            descriptor.usage = dawn::BufferUsage::CopySrc | dawn::BufferUsage::MapWrite;
+            descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
             // TODO(natlee@microsoft.com): use Dynamic Uplaoder here for temp buffer
             Ref<Buffer> srcBuffer = ToBackend(device->CreateBuffer(&descriptor));
             // Call release here to prevent memory leak since CreateBuffer will up the ref count to
@@ -280,7 +280,7 @@ namespace dawn_native { namespace opengl {
 
                 Extent3D size = GetMipLevelPhysicalSize(level);
                 switch (GetDimension()) {
-                    case dawn::TextureDimension::e2D:
+                    case wgpu::TextureDimension::e2D:
                         // TODO(natlee@microsoft.com): This will break when layerCount is greater
                         // than 1, because the buffer is only sized for one layer.
                         ASSERT(layerCount == 1);

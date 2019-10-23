@@ -32,10 +32,10 @@ namespace dawn_native {
 
     MaybeError ValidateRenderPipelineDescriptor(const DeviceBase* device,
                                                 const RenderPipelineDescriptor* descriptor);
-    size_t IndexFormatSize(dawn::IndexFormat format);
-    uint32_t VertexFormatNumComponents(dawn::VertexFormat format);
-    size_t VertexFormatComponentSize(dawn::VertexFormat format);
-    size_t VertexFormatSize(dawn::VertexFormat format);
+    size_t IndexFormatSize(wgpu::IndexFormat format);
+    uint32_t VertexFormatNumComponents(wgpu::VertexFormat format);
+    size_t VertexFormatComponentSize(wgpu::VertexFormat format);
+    size_t VertexFormatSize(wgpu::VertexFormat format);
 
     bool StencilTestEnabled(const DepthStencilStateDescriptor* mDepthStencilState);
     bool BlendEnabled(const ColorStateDescriptor* mColorState);
@@ -44,12 +44,12 @@ namespace dawn_native {
         uint32_t shaderLocation;
         uint32_t inputSlot;
         uint64_t offset;
-        dawn::VertexFormat format;
+        wgpu::VertexFormat format;
     };
 
     struct VertexBufferInfo {
         uint64_t stride;
-        dawn::InputStepMode stepMode;
+        wgpu::InputStepMode stepMode;
     };
 
     class RenderPipelineBase : public PipelineBase {
@@ -69,14 +69,14 @@ namespace dawn_native {
 
         const ColorStateDescriptor* GetColorStateDescriptor(uint32_t attachmentSlot) const;
         const DepthStencilStateDescriptor* GetDepthStencilStateDescriptor() const;
-        dawn::PrimitiveTopology GetPrimitiveTopology() const;
-        dawn::CullMode GetCullMode() const;
-        dawn::FrontFace GetFrontFace() const;
+        wgpu::PrimitiveTopology GetPrimitiveTopology() const;
+        wgpu::CullMode GetCullMode() const;
+        wgpu::FrontFace GetFrontFace() const;
 
         std::bitset<kMaxColorAttachments> GetColorAttachmentsMask() const;
         bool HasDepthStencilAttachment() const;
-        dawn::TextureFormat GetColorAttachmentFormat(uint32_t attachment) const;
-        dawn::TextureFormat GetDepthStencilFormat() const;
+        wgpu::TextureFormat GetColorAttachmentFormat(uint32_t attachment) const;
+        wgpu::TextureFormat GetDepthStencilFormat() const;
         uint32_t GetSampleCount() const;
 
         const AttachmentState* GetAttachmentState() const;
@@ -108,7 +108,7 @@ namespace dawn_native {
         std::array<ColorStateDescriptor, kMaxColorAttachments> mColorStates;
 
         // Other state
-        dawn::PrimitiveTopology mPrimitiveTopology;
+        wgpu::PrimitiveTopology mPrimitiveTopology;
         RasterizationStateDescriptor mRasterizationState;
         uint32_t mSampleMask;
         bool mAlphaToCoverageEnabled;

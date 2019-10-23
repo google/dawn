@@ -38,7 +38,7 @@ namespace dawn_native {
             DAWN_TRY(ValidateBindingType(binding.type));
             DAWN_TRY(ValidateTextureComponentType(binding.textureComponentType));
 
-            if (binding.textureDimension != dawn::TextureViewDimension::Undefined) {
+            if (binding.textureDimension != wgpu::TextureViewDimension::Undefined) {
                 DAWN_TRY(ValidateTextureViewDimension(binding.textureDimension));
             }
 
@@ -50,25 +50,25 @@ namespace dawn_native {
             }
 
             switch (binding.type) {
-                case dawn::BindingType::UniformBuffer:
+                case wgpu::BindingType::UniformBuffer:
                     if (binding.hasDynamicOffset) {
                         ++dynamicUniformBufferCount;
                     }
                     break;
-                case dawn::BindingType::StorageBuffer:
+                case wgpu::BindingType::StorageBuffer:
                     if (binding.hasDynamicOffset) {
                         ++dynamicStorageBufferCount;
                     }
                     break;
-                case dawn::BindingType::SampledTexture:
-                case dawn::BindingType::Sampler:
+                case wgpu::BindingType::SampledTexture:
+                case wgpu::BindingType::Sampler:
                     if (binding.hasDynamicOffset) {
                         return DAWN_VALIDATION_ERROR("Samplers and textures cannot be dynamic");
                     }
                     break;
-                case dawn::BindingType::ReadonlyStorageBuffer:
+                case wgpu::BindingType::ReadonlyStorageBuffer:
                     return DAWN_VALIDATION_ERROR("readonly storage buffers aren't supported (yet)");
-                case dawn::BindingType::StorageTexture:
+                case wgpu::BindingType::StorageTexture:
                     return DAWN_VALIDATION_ERROR("storage textures aren't supported (yet)");
             }
 
@@ -140,24 +140,24 @@ namespace dawn_native {
             mBindingInfo.types[index] = binding.type;
             mBindingInfo.textureComponentTypes[index] = binding.textureComponentType;
 
-            if (binding.textureDimension == dawn::TextureViewDimension::Undefined) {
-                mBindingInfo.textureDimensions[index] = dawn::TextureViewDimension::e2D;
+            if (binding.textureDimension == wgpu::TextureViewDimension::Undefined) {
+                mBindingInfo.textureDimensions[index] = wgpu::TextureViewDimension::e2D;
             } else {
                 mBindingInfo.textureDimensions[index] = binding.textureDimension;
             }
             if (binding.hasDynamicOffset) {
                 mBindingInfo.hasDynamicOffset.set(index);
                 switch (binding.type) {
-                    case dawn::BindingType::UniformBuffer:
+                    case wgpu::BindingType::UniformBuffer:
                         ++mDynamicUniformBufferCount;
                         break;
-                    case dawn::BindingType::StorageBuffer:
+                    case wgpu::BindingType::StorageBuffer:
                         ++mDynamicStorageBufferCount;
                         break;
-                    case dawn::BindingType::SampledTexture:
-                    case dawn::BindingType::Sampler:
-                    case dawn::BindingType::ReadonlyStorageBuffer:
-                    case dawn::BindingType::StorageTexture:
+                    case wgpu::BindingType::SampledTexture:
+                    case wgpu::BindingType::Sampler:
+                    case wgpu::BindingType::ReadonlyStorageBuffer:
+                    case wgpu::BindingType::StorageTexture:
                         UNREACHABLE();
                         break;
                 }

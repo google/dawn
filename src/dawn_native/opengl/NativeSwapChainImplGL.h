@@ -39,7 +39,7 @@ namespace dawn_native { namespace opengl {
         DawnSwapChainError GetNextTexture(DawnSwapChainNextTexture* nextTexture);
         DawnSwapChainError Present();
 
-        dawn::TextureFormat GetPreferredFormat() const;
+        wgpu::TextureFormat GetPreferredFormat() const;
 
       private:
         PresentCallback mPresentCallback;

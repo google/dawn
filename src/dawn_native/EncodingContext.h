@@ -38,7 +38,7 @@ namespace dawn_native {
         CommandIterator* GetIterator();
 
         // Functions to handle encoder errors
-        void HandleError(dawn::ErrorType type, const char* message);
+        void HandleError(wgpu::ErrorType type, const char* message);
 
         inline void ConsumeError(ErrorData* error) {
             HandleError(error->GetType(), error->GetMessage().c_str());
@@ -58,10 +58,10 @@ namespace dawn_native {
             if (DAWN_UNLIKELY(encoder != mCurrentEncoder)) {
                 if (mCurrentEncoder != mTopLevelEncoder) {
                     // The top level encoder was used when a pass encoder was current.
-                    HandleError(dawn::ErrorType::Validation,
+                    HandleError(wgpu::ErrorType::Validation,
                                 "Command cannot be recorded inside a pass");
                 } else {
-                    HandleError(dawn::ErrorType::Validation,
+                    HandleError(wgpu::ErrorType::Validation,
                                 "Recording in an error or already ended pass encoder");
                 }
                 return false;

@@ -23,11 +23,11 @@
 namespace dawn_native { namespace vulkan {
 
     namespace {
-        VkAttachmentLoadOp VulkanAttachmentLoadOp(dawn::LoadOp op) {
+        VkAttachmentLoadOp VulkanAttachmentLoadOp(wgpu::LoadOp op) {
             switch (op) {
-                case dawn::LoadOp::Load:
+                case wgpu::LoadOp::Load:
                     return VK_ATTACHMENT_LOAD_OP_LOAD;
-                case dawn::LoadOp::Clear:
+                case wgpu::LoadOp::Clear:
                     return VK_ATTACHMENT_LOAD_OP_CLEAR;
                 default:
                     UNREACHABLE();
@@ -38,8 +38,8 @@ namespace dawn_native { namespace vulkan {
     // RenderPassCacheQuery
 
     void RenderPassCacheQuery::SetColor(uint32_t index,
-                                        dawn::TextureFormat format,
-                                        dawn::LoadOp loadOp,
+                                        wgpu::TextureFormat format,
+                                        wgpu::LoadOp loadOp,
                                         bool hasResolveTarget) {
         colorMask.set(index);
         colorFormats[index] = format;
@@ -47,9 +47,9 @@ namespace dawn_native { namespace vulkan {
         resolveTargetMask[index] = hasResolveTarget;
     }
 
-    void RenderPassCacheQuery::SetDepthStencil(dawn::TextureFormat format,
-                                               dawn::LoadOp depthLoadOp,
-                                               dawn::LoadOp stencilLoadOp) {
+    void RenderPassCacheQuery::SetDepthStencil(wgpu::TextureFormat format,
+                                               wgpu::LoadOp depthLoadOp,
+                                               wgpu::LoadOp stencilLoadOp) {
         hasDepthStencil = true;
         depthStencilFormat = format;
         this->depthLoadOp = depthLoadOp;

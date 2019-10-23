@@ -35,16 +35,16 @@ namespace dawn_native {
 
     class PipelineBase : public ObjectBase {
       public:
-        dawn::ShaderStage GetStageMask() const;
+        wgpu::ShaderStage GetStageMask() const;
         PipelineLayoutBase* GetLayout();
         const PipelineLayoutBase* GetLayout() const;
 
       protected:
-        PipelineBase(DeviceBase* device, PipelineLayoutBase* layout, dawn::ShaderStage stages);
+        PipelineBase(DeviceBase* device, PipelineLayoutBase* layout, wgpu::ShaderStage stages);
         PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
       private:
-        dawn::ShaderStage mStageMask;
+        wgpu::ShaderStage mStageMask;
         Ref<PipelineLayoutBase> mLayout;
     };
 

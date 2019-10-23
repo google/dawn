@@ -39,11 +39,11 @@ namespace dawn_native { namespace vulkan {
         DawnSwapChainError GetNextTexture(DawnSwapChainNextTexture* nextTexture);
         DawnSwapChainError Present();
 
-        dawn::TextureFormat GetPreferredFormat() const;
+        wgpu::TextureFormat GetPreferredFormat() const;
 
         struct ChosenConfig {
             VkFormat nativeFormat;
-            dawn::TextureFormat format;
+            wgpu::TextureFormat format;
             VkColorSpaceKHR colorSpace;
             VkSurfaceTransformFlagBitsKHR preTransform;
             uint32_t minImageCount;

@@ -23,7 +23,7 @@ namespace dawn_native { namespace vulkan {
 
     class Device;
 
-    VkDescriptorType VulkanDescriptorType(dawn::BindingType type, bool isDynamic);
+    VkDescriptorType VulkanDescriptorType(wgpu::BindingType type, bool isDynamic);
 
     class BindGroupLayout : public BindGroupLayoutBase {
       public:

@@ -58,8 +58,8 @@ namespace {
         void SetUp() override {
             switch (GetParam()) {
                 case DawnFlavor::Native: {
-                    mDevice = dawn::Device::Acquire(
-                        reinterpret_cast<DawnDevice>(mNativeAdapter.CreateDevice(nullptr)));
+                    mDevice = wgpu::Device::Acquire(
+                        reinterpret_cast<WGPUDevice>(mNativeAdapter.CreateDevice(nullptr)));
                     mProcs = dawn_native::GetProcs();
                     break;
                 }
@@ -71,7 +71,7 @@ namespace {
                     clientDesc.serializer = mC2sBuf.get();
                     mWireClient = std::make_unique<dawn_wire::WireClient>(clientDesc);
 
-                    mDevice = dawn::Device::Acquire(mWireClient->GetDevice());
+                    mDevice = wgpu::Device::Acquire(mWireClient->GetDevice());
                     mProcs = mWireClient->GetProcs();
                     break;
                 }
@@ -86,7 +86,7 @@ namespace {
 
         void TearDown() override {
             // Destroy the device before freeing the instance or the wire client in the destructor
-            mDevice = dawn::Device();
+            mDevice = wgpu::Device();
         }
 
       protected:
@@ -96,20 +96,20 @@ namespace {
         std::unique_ptr<utils::TerribleCommandBuffer> mC2sBuf;
         std::unique_ptr<dawn_wire::WireClient> mWireClient;
 
-        dawn::Device mDevice;
+        wgpu::Device mDevice;
         DawnProcTable mProcs;
     };
 
     // Test GetProcAddress with and without devices on some valid examples
     TEST_P(GetProcAddressTests, ValidExamples) {
         ASSERT_EQ(mProcs.getProcAddress(nullptr, "wgpuDeviceCreateBuffer"),
-                  reinterpret_cast<DawnProc>(mProcs.deviceCreateBuffer));
+                  reinterpret_cast<WGPUProc>(mProcs.deviceCreateBuffer));
         ASSERT_EQ(mProcs.getProcAddress(mDevice.Get(), "wgpuDeviceCreateBuffer"),
-                  reinterpret_cast<DawnProc>(mProcs.deviceCreateBuffer));
+                  reinterpret_cast<WGPUProc>(mProcs.deviceCreateBuffer));
         ASSERT_EQ(mProcs.getProcAddress(nullptr, "wgpuQueueSubmit"),
-                  reinterpret_cast<DawnProc>(mProcs.queueSubmit));
+                  reinterpret_cast<WGPUProc>(mProcs.queueSubmit));
         ASSERT_EQ(mProcs.getProcAddress(mDevice.Get(), "wgpuQueueSubmit"),
-                  reinterpret_cast<DawnProc>(mProcs.queueSubmit));
+                  reinterpret_cast<WGPUProc>(mProcs.queueSubmit));
     }
 
     // Test GetProcAddress with and without devices on nullptr procName
@@ -140,9 +140,9 @@ namespace {
     // freestanding function and not a method on an object.
     TEST_P(GetProcAddressTests, GetProcAddressItself) {
         ASSERT_EQ(mProcs.getProcAddress(nullptr, "wgpuGetProcAddress"),
-                  reinterpret_cast<DawnProc>(mProcs.getProcAddress));
+                  reinterpret_cast<WGPUProc>(mProcs.getProcAddress));
         ASSERT_EQ(mProcs.getProcAddress(mDevice.Get(), "wgpuGetProcAddress"),
-                  reinterpret_cast<DawnProc>(mProcs.getProcAddress));
+                  reinterpret_cast<WGPUProc>(mProcs.getProcAddress));
     }
 
     INSTANTIATE_TEST_SUITE_P(,

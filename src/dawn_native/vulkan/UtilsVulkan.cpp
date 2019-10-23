@@ -21,23 +21,23 @@
 
 namespace dawn_native { namespace vulkan {
 
-    VkCompareOp ToVulkanCompareOp(dawn::CompareFunction op) {
+    VkCompareOp ToVulkanCompareOp(wgpu::CompareFunction op) {
         switch (op) {
-            case dawn::CompareFunction::Always:
+            case wgpu::CompareFunction::Always:
                 return VK_COMPARE_OP_ALWAYS;
-            case dawn::CompareFunction::Equal:
+            case wgpu::CompareFunction::Equal:
                 return VK_COMPARE_OP_EQUAL;
-            case dawn::CompareFunction::Greater:
+            case wgpu::CompareFunction::Greater:
                 return VK_COMPARE_OP_GREATER;
-            case dawn::CompareFunction::GreaterEqual:
+            case wgpu::CompareFunction::GreaterEqual:
                 return VK_COMPARE_OP_GREATER_OR_EQUAL;
-            case dawn::CompareFunction::Less:
+            case wgpu::CompareFunction::Less:
                 return VK_COMPARE_OP_LESS;
-            case dawn::CompareFunction::LessEqual:
+            case wgpu::CompareFunction::LessEqual:
                 return VK_COMPARE_OP_LESS_OR_EQUAL;
-            case dawn::CompareFunction::Never:
+            case wgpu::CompareFunction::Never:
                 return VK_COMPARE_OP_NEVER;
-            case dawn::CompareFunction::NotEqual:
+            case wgpu::CompareFunction::NotEqual:
                 return VK_COMPARE_OP_NOT_EQUAL;
             default:
                 UNREACHABLE();

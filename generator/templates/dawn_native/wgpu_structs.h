@@ -12,10 +12,10 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#ifndef DAWNNATIVE_DAWN_STRUCTS_H_
-#define DAWNNATIVE_DAWN_STRUCTS_H_
+#ifndef DAWNNATIVE_WGPU_STRUCTS_H_
+#define DAWNNATIVE_WGPU_STRUCTS_H_
 
-#include "dawn/dawncpp.h"
+#include "dawn/webgpu_cpp.h"
 #include "dawn_native/Forward.h"
 
 namespace dawn_native {
@@ -24,7 +24,7 @@ namespace dawn_native {
     {%- if member.annotation in ["*", "const*", "const*const*"] and member.optional -%}
         {{" "}}= nullptr
     {%- elif member.type.category in ["enum", "bitmask"] and member.default_value != None -%}
-        {{" "}}= dawn::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
+        {{" "}}= wgpu::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
     {%- elif member.type.category == "native" and member.default_value != None -%}
         {{" "}}= {{member.default_value}}
     {%- else -%}
@@ -46,4 +46,4 @@ namespace dawn_native {
 
 } // namespace dawn_native
 
-#endif  // DAWNNATIVE_DAWN_STRUCTS_H_
+#endif  // DAWNNATIVE_WGPU_STRUCTS_H_

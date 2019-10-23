@@ -17,16 +17,6 @@
 
 #include <type_traits>
 
-namespace dawn {
-
-    template <typename T>
-    constexpr bool HasZeroOrOneBits(T value) {
-        using Integral = typename std::underlying_type<T>::type;
-        return (static_cast<Integral>(value) & (static_cast<Integral>(value) - 1)) == 0;
-    }
-
-}  // namespace dawn
-
 namespace wgpu {
 
     template <typename T>
@@ -142,6 +132,13 @@ namespace wgpu {
         l = l ^ r;
         return l;
     }
+
+    template <typename T>
+    constexpr bool HasZeroOrOneBits(T value) {
+        using Integral = typename std::underlying_type<T>::type;
+        return (static_cast<Integral>(value) & (static_cast<Integral>(value) - 1)) == 0;
+    }
+
 }  // namespace wgpu
 
 #endif  // DAWN_ENUM_CLASS_BITMASKS_H_

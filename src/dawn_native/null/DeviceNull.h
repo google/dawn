@@ -214,7 +214,7 @@ namespace dawn_native { namespace null {
                                      uint32_t height);
         DawnSwapChainError GetNextTexture(DawnSwapChainNextTexture* nextTexture);
         DawnSwapChainError Present();
-        dawn::TextureFormat GetPreferredFormat() const;
+        wgpu::TextureFormat GetPreferredFormat() const;
     };
 
     class StagingBuffer : public StagingBufferBase {

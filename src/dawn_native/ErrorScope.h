@@ -38,27 +38,27 @@ namespace dawn_native {
     class ErrorScope : public RefCounted {
       public:
         ErrorScope();  // Constructor for the root error scope.
-        ErrorScope(dawn::ErrorFilter errorFilter, ErrorScope* parent);
+        ErrorScope(wgpu::ErrorFilter errorFilter, ErrorScope* parent);
         ~ErrorScope();
 
-        void SetCallback(dawn::ErrorCallback callback, void* userdata);
+        void SetCallback(wgpu::ErrorCallback callback, void* userdata);
         ErrorScope* GetParent();
 
-        void HandleError(dawn::ErrorType type, const char* message);
+        void HandleError(wgpu::ErrorType type, const char* message);
 
         void Destroy();
 
       private:
         bool IsRoot() const;
-        static void HandleErrorImpl(ErrorScope* scope, dawn::ErrorType type, const char* message);
+        static void HandleErrorImpl(ErrorScope* scope, wgpu::ErrorType type, const char* message);
 
-        dawn::ErrorFilter mErrorFilter = dawn::ErrorFilter::None;
+        wgpu::ErrorFilter mErrorFilter = wgpu::ErrorFilter::None;
         Ref<ErrorScope> mParent = nullptr;
 
-        dawn::ErrorCallback mCallback = nullptr;
+        wgpu::ErrorCallback mCallback = nullptr;
         void* mUserdata = nullptr;
 
-        dawn::ErrorType mErrorType = dawn::ErrorType::NoError;
+        wgpu::ErrorType mErrorType = wgpu::ErrorType::NoError;
         std::string mErrorMessage = "";
     };
 

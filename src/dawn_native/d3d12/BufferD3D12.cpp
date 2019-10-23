@@ -24,45 +24,45 @@
 namespace dawn_native { namespace d3d12 {
 
     namespace {
-        D3D12_RESOURCE_FLAGS D3D12ResourceFlags(dawn::BufferUsage usage) {
+        D3D12_RESOURCE_FLAGS D3D12ResourceFlags(wgpu::BufferUsage usage) {
             D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE;
 
-            if (usage & dawn::BufferUsage::Storage) {
+            if (usage & wgpu::BufferUsage::Storage) {
                 flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
             }
 
             return flags;
         }
 
-        D3D12_RESOURCE_STATES D3D12BufferUsage(dawn::BufferUsage usage) {
+        D3D12_RESOURCE_STATES D3D12BufferUsage(wgpu::BufferUsage usage) {
             D3D12_RESOURCE_STATES resourceState = D3D12_RESOURCE_STATE_COMMON;
 
-            if (usage & dawn::BufferUsage::CopySrc) {
+            if (usage & wgpu::BufferUsage::CopySrc) {
                 resourceState |= D3D12_RESOURCE_STATE_COPY_SOURCE;
             }
-            if (usage & dawn::BufferUsage::CopyDst) {
+            if (usage & wgpu::BufferUsage::CopyDst) {
                 resourceState |= D3D12_RESOURCE_STATE_COPY_DEST;
             }
-            if (usage & (dawn::BufferUsage::Vertex | dawn::BufferUsage::Uniform)) {
+            if (usage & (wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Uniform)) {
                 resourceState |= D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
             }
-            if (usage & dawn::BufferUsage::Index) {
+            if (usage & wgpu::BufferUsage::Index) {
                 resourceState |= D3D12_RESOURCE_STATE_INDEX_BUFFER;
             }
-            if (usage & dawn::BufferUsage::Storage) {
+            if (usage & wgpu::BufferUsage::Storage) {
                 resourceState |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
             }
-            if (usage & dawn::BufferUsage::Indirect) {
+            if (usage & wgpu::BufferUsage::Indirect) {
                 resourceState |= D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;
             }
 
             return resourceState;
         }
 
-        D3D12_HEAP_TYPE D3D12HeapType(dawn::BufferUsage allowedUsage) {
-            if (allowedUsage & dawn::BufferUsage::MapRead) {
+        D3D12_HEAP_TYPE D3D12HeapType(wgpu::BufferUsage allowedUsage) {
+            if (allowedUsage & wgpu::BufferUsage::MapRead) {
                 return D3D12_HEAP_TYPE_READBACK;
-            } else if (allowedUsage & dawn::BufferUsage::MapWrite) {
+            } else if (allowedUsage & wgpu::BufferUsage::MapWrite) {
                 return D3D12_HEAP_TYPE_UPLOAD;
             } else {
                 return D3D12_HEAP_TYPE_DEFAULT;
@@ -88,7 +88,7 @@ namespace dawn_native { namespace d3d12 {
         resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
         // Add CopyDst for non-mappable buffer initialization in CreateBufferMapped
         // and robust resource initialization.
-        resourceDescriptor.Flags = D3D12ResourceFlags(GetUsage() | dawn::BufferUsage::CopyDst);
+        resourceDescriptor.Flags = D3D12ResourceFlags(GetUsage() | wgpu::BufferUsage::CopyDst);
 
         auto heapType = D3D12HeapType(GetUsage());
         auto bufferUsage = D3D12_RESOURCE_STATE_COMMON;
@@ -98,7 +98,7 @@ namespace dawn_native { namespace d3d12 {
         if (heapType == D3D12_HEAP_TYPE_READBACK) {
             bufferUsage |= D3D12_RESOURCE_STATE_COPY_DEST;
             mFixedResourceState = true;
-            mLastUsage = dawn::BufferUsage::CopyDst;
+            mLastUsage = wgpu::BufferUsage::CopyDst;
         }
 
         // D3D12 requires buffers on the UPLOAD heap to have the D3D12_RESOURCE_STATE_GENERIC_READ
@@ -106,7 +106,7 @@ namespace dawn_native { namespace d3d12 {
         if (heapType == D3D12_HEAP_TYPE_UPLOAD) {
             bufferUsage |= D3D12_RESOURCE_STATE_GENERIC_READ;
             mFixedResourceState = true;
-            mLastUsage = dawn::BufferUsage::CopySrc;
+            mLastUsage = wgpu::BufferUsage::CopySrc;
         }
 
         DAWN_TRY_ASSIGN(
@@ -133,7 +133,7 @@ namespace dawn_native { namespace d3d12 {
     // cause subsequent errors.
     bool Buffer::TransitionUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
                                                       D3D12_RESOURCE_BARRIER* barrier,
-                                                      dawn::BufferUsage newUsage) {
+                                                      wgpu::BufferUsage newUsage) {
         // Resources in upload and readback heaps must be kept in the COPY_SOURCE/DEST state
         if (mFixedResourceState) {
             ASSERT(mLastUsage == newUsage);
@@ -204,7 +204,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     void Buffer::TransitionUsageNow(CommandRecordingContext* commandContext,
-                                    dawn::BufferUsage usage) {
+                                    wgpu::BufferUsage usage) {
         D3D12_RESOURCE_BARRIER barrier;
 
         if (TransitionUsageAndGetResourceBarrier(commandContext, &barrier, usage)) {
@@ -226,7 +226,7 @@ namespace dawn_native { namespace d3d12 {
 
     bool Buffer::IsMapWritable() const {
         // TODO(enga): Handle CPU-visible memory on UMA
-        return (GetUsage() & (dawn::BufferUsage::MapRead | dawn::BufferUsage::MapWrite)) != 0;
+        return (GetUsage() & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) != 0;
     }
 
     MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {

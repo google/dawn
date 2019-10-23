@@ -16,23 +16,23 @@
 
 namespace dawn_native { namespace metal {
 
-    MTLCompareFunction ToMetalCompareFunction(dawn::CompareFunction compareFunction) {
+    MTLCompareFunction ToMetalCompareFunction(wgpu::CompareFunction compareFunction) {
         switch (compareFunction) {
-            case dawn::CompareFunction::Never:
+            case wgpu::CompareFunction::Never:
                 return MTLCompareFunctionNever;
-            case dawn::CompareFunction::Less:
+            case wgpu::CompareFunction::Less:
                 return MTLCompareFunctionLess;
-            case dawn::CompareFunction::LessEqual:
+            case wgpu::CompareFunction::LessEqual:
                 return MTLCompareFunctionLessEqual;
-            case dawn::CompareFunction::Greater:
+            case wgpu::CompareFunction::Greater:
                 return MTLCompareFunctionGreater;
-            case dawn::CompareFunction::GreaterEqual:
+            case wgpu::CompareFunction::GreaterEqual:
                 return MTLCompareFunctionGreaterEqual;
-            case dawn::CompareFunction::NotEqual:
+            case wgpu::CompareFunction::NotEqual:
                 return MTLCompareFunctionNotEqual;
-            case dawn::CompareFunction::Equal:
+            case wgpu::CompareFunction::Equal:
                 return MTLCompareFunctionEqual;
-            case dawn::CompareFunction::Always:
+            case wgpu::CompareFunction::Always:
                 return MTLCompareFunctionAlways;
         }
     }

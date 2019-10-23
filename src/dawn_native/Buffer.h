@@ -27,12 +27,12 @@ namespace dawn_native {
 
     MaybeError ValidateBufferDescriptor(DeviceBase* device, const BufferDescriptor* descriptor);
 
-    static constexpr dawn::BufferUsage kReadOnlyBufferUsages =
-        dawn::BufferUsage::MapRead | dawn::BufferUsage::CopySrc | dawn::BufferUsage::Index |
-        dawn::BufferUsage::Vertex | dawn::BufferUsage::Uniform;
+    static constexpr wgpu::BufferUsage kReadOnlyBufferUsages =
+        wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Index |
+        wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Uniform;
 
-    static constexpr dawn::BufferUsage kWritableBufferUsages =
-        dawn::BufferUsage::MapWrite | dawn::BufferUsage::CopyDst | dawn::BufferUsage::Storage;
+    static constexpr wgpu::BufferUsage kWritableBufferUsages =
+        wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Storage;
 
     class BufferBase : public ObjectBase {
         enum class BufferState {
@@ -51,7 +51,7 @@ namespace dawn_native {
                                            uint8_t** mappedPointer);
 
         uint64_t GetSize() const;
-        dawn::BufferUsage GetUsage() const;
+        wgpu::BufferUsage GetUsage() const;
 
         MaybeError MapAtCreation(uint8_t** mappedPointer);
 
@@ -59,8 +59,8 @@ namespace dawn_native {
 
         // Dawn API
         void SetSubData(uint32_t start, uint32_t count, const void* data);
-        void MapReadAsync(DawnBufferMapReadCallback callback, void* userdata);
-        void MapWriteAsync(DawnBufferMapWriteCallback callback, void* userdata);
+        void MapReadAsync(WGPUBufferMapReadCallback callback, void* userdata);
+        void MapWriteAsync(WGPUBufferMapWriteCallback callback, void* userdata);
         void Unmap();
         void Destroy();
 
@@ -68,11 +68,11 @@ namespace dawn_native {
         BufferBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
         void CallMapReadCallback(uint32_t serial,
-                                 DawnBufferMapAsyncStatus status,
+                                 WGPUBufferMapAsyncStatus status,
                                  const void* pointer,
                                  uint32_t dataLength);
         void CallMapWriteCallback(uint32_t serial,
-                                  DawnBufferMapAsyncStatus status,
+                                  WGPUBufferMapAsyncStatus status,
                                   void* pointer,
                                   uint32_t dataLength);
 
@@ -90,15 +90,15 @@ namespace dawn_native {
         MaybeError CopyFromStagingBuffer();
 
         MaybeError ValidateSetSubData(uint32_t start, uint32_t count) const;
-        MaybeError ValidateMap(dawn::BufferUsage requiredUsage) const;
+        MaybeError ValidateMap(wgpu::BufferUsage requiredUsage) const;
         MaybeError ValidateUnmap() const;
         MaybeError ValidateDestroy() const;
 
         uint64_t mSize = 0;
-        dawn::BufferUsage mUsage = dawn::BufferUsage::None;
+        wgpu::BufferUsage mUsage = wgpu::BufferUsage::None;
 
-        DawnBufferMapReadCallback mMapReadCallback = nullptr;
-        DawnBufferMapWriteCallback mMapWriteCallback = nullptr;
+        WGPUBufferMapReadCallback mMapReadCallback = nullptr;
+        WGPUBufferMapWriteCallback mMapWriteCallback = nullptr;
         void* mMapUserdata = 0;
         uint32_t mMapSerial = 0;
 

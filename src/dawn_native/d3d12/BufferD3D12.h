@@ -39,8 +39,8 @@ namespace dawn_native { namespace d3d12 {
         void OnMapCommandSerialFinished(uint32_t mapSerial, void* data, bool isWrite);
         bool TransitionUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
                                                   D3D12_RESOURCE_BARRIER* barrier,
-                                                  dawn::BufferUsage newUsage);
-        void TransitionUsageNow(CommandRecordingContext* commandContext, dawn::BufferUsage usage);
+                                                  wgpu::BufferUsage newUsage);
+        void TransitionUsageNow(CommandRecordingContext* commandContext, wgpu::BufferUsage usage);
 
       private:
         // Dawn API
@@ -54,7 +54,7 @@ namespace dawn_native { namespace d3d12 {
 
         ResourceHeapAllocation mResourceAllocation;
         bool mFixedResourceState = false;
-        dawn::BufferUsage mLastUsage = dawn::BufferUsage::None;
+        wgpu::BufferUsage mLastUsage = wgpu::BufferUsage::None;
         Serial mLastUsedSerial = UINT64_MAX;
         D3D12_RANGE mWrittenMappedRange;
     };

@@ -21,7 +21,7 @@
 
 namespace dawn_native { namespace metal {
 
-    MTLCompareFunction ToMetalCompareFunction(dawn::CompareFunction compareFunction);
+    MTLCompareFunction ToMetalCompareFunction(wgpu::CompareFunction compareFunction);
 
 }}  // namespace dawn_native::metal
 

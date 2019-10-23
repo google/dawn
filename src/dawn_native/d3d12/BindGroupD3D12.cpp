@@ -49,7 +49,7 @@ namespace dawn_native { namespace d3d12 {
             }
 
             switch (layout.types[bindingIndex]) {
-                case dawn::BindingType::UniformBuffer: {
+                case wgpu::BindingType::UniformBuffer: {
                     BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
 
                     D3D12_CONSTANT_BUFFER_VIEW_DESC desc;
@@ -62,7 +62,7 @@ namespace dawn_native { namespace d3d12 {
                         &desc, cbvUavSrvHeapStart.GetCPUHandle(*cbvUavSrvHeapOffset +
                                                                bindingOffsets[bindingIndex]));
                 } break;
-                case dawn::BindingType::StorageBuffer: {
+                case wgpu::BindingType::StorageBuffer: {
                     BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
 
                     // Since SPIRV-Cross outputs HLSL shaders with RWByteAddressBuffer,
@@ -86,7 +86,7 @@ namespace dawn_native { namespace d3d12 {
                         cbvUavSrvHeapStart.GetCPUHandle(*cbvUavSrvHeapOffset +
                                                         bindingOffsets[bindingIndex]));
                 } break;
-                case dawn::BindingType::SampledTexture: {
+                case wgpu::BindingType::SampledTexture: {
                     auto* view = ToBackend(GetBindingAsTextureView(bindingIndex));
                     auto& srv = view->GetSRVDescriptor();
                     d3d12Device->CreateShaderResourceView(
@@ -94,7 +94,7 @@ namespace dawn_native { namespace d3d12 {
                         cbvUavSrvHeapStart.GetCPUHandle(*cbvUavSrvHeapOffset +
                                                         bindingOffsets[bindingIndex]));
                 } break;
-                case dawn::BindingType::Sampler: {
+                case wgpu::BindingType::Sampler: {
                     auto* sampler = ToBackend(GetBindingAsSampler(bindingIndex));
                     auto& samplerDesc = sampler->GetSamplerDescriptor();
                     d3d12Device->CreateSampler(
@@ -102,8 +102,8 @@ namespace dawn_native { namespace d3d12 {
                                                                     bindingOffsets[bindingIndex]));
                 } break;
 
-                case dawn::BindingType::StorageTexture:
-                case dawn::BindingType::ReadonlyStorageBuffer:
+                case wgpu::BindingType::StorageTexture:
+                case wgpu::BindingType::ReadonlyStorageBuffer:
                     UNREACHABLE();
                     break;
 

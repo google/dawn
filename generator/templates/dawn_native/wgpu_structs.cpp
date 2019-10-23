@@ -12,7 +12,7 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#include "dawn_native/dawn_structs_autogen.h"
+#include "dawn_native/wgpu_structs_autogen.h"
 
 namespace dawn_native {
 

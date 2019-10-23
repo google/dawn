@@ -26,8 +26,8 @@ namespace dawn_native { namespace vulkan {
     struct CommandRecordingContext;
     struct ExternalImageDescriptor;
 
-    VkFormat VulkanImageFormat(dawn::TextureFormat format);
-    VkImageUsageFlags VulkanImageUsage(dawn::TextureUsage usage, const Format& format);
+    VkFormat VulkanImageFormat(wgpu::TextureFormat format);
+    VkImageUsageFlags VulkanImageUsage(wgpu::TextureUsage usage, const Format& format);
     VkSampleCountFlagBits VulkanSampleCount(uint32_t sampleCount);
 
     MaybeError ValidateVulkanImageCanBeWrapped(const DeviceBase* device,
@@ -59,7 +59,7 @@ namespace dawn_native { namespace vulkan {
         // `commands`.
         // TODO(cwallez@chromium.org): coalesce barriers and do them early when possible.
         void TransitionUsageNow(CommandRecordingContext* recordingContext,
-                                dawn::TextureUsage usage);
+                                wgpu::TextureUsage usage);
         void EnsureSubresourceContentInitialized(CommandRecordingContext* recordingContext,
                                                  uint32_t baseMipLevel,
                                                  uint32_t levelCount,
@@ -103,7 +103,7 @@ namespace dawn_native { namespace vulkan {
 
         // A usage of none will make sure the texture is transitioned before its first use as
         // required by the Vulkan spec.
-        dawn::TextureUsage mLastUsage = dawn::TextureUsage::None;
+        wgpu::TextureUsage mLastUsage = wgpu::TextureUsage::None;
     };
 
     class TextureView : public TextureViewBase {

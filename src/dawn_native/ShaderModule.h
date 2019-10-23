@@ -52,7 +52,7 @@ namespace dawn_native {
             // The SPIRV ID of the resource.
             uint32_t id;
             uint32_t base_type_id;
-            dawn::BindingType type;
+            wgpu::BindingType type;
             bool used = false;
         };
         using ModuleBindingInfo =

@@ -177,100 +177,100 @@ namespace dawn_native {
     }  // anonymous namespace
 
     // Helper functions
-    size_t IndexFormatSize(dawn::IndexFormat format) {
+    size_t IndexFormatSize(wgpu::IndexFormat format) {
         switch (format) {
-            case dawn::IndexFormat::Uint16:
+            case wgpu::IndexFormat::Uint16:
                 return sizeof(uint16_t);
-            case dawn::IndexFormat::Uint32:
+            case wgpu::IndexFormat::Uint32:
                 return sizeof(uint32_t);
             default:
                 UNREACHABLE();
         }
     }
 
-    uint32_t VertexFormatNumComponents(dawn::VertexFormat format) {
+    uint32_t VertexFormatNumComponents(wgpu::VertexFormat format) {
         switch (format) {
-            case dawn::VertexFormat::UChar4:
-            case dawn::VertexFormat::Char4:
-            case dawn::VertexFormat::UChar4Norm:
-            case dawn::VertexFormat::Char4Norm:
-            case dawn::VertexFormat::UShort4:
-            case dawn::VertexFormat::Short4:
-            case dawn::VertexFormat::UShort4Norm:
-            case dawn::VertexFormat::Short4Norm:
-            case dawn::VertexFormat::Half4:
-            case dawn::VertexFormat::Float4:
-            case dawn::VertexFormat::UInt4:
-            case dawn::VertexFormat::Int4:
+            case wgpu::VertexFormat::UChar4:
+            case wgpu::VertexFormat::Char4:
+            case wgpu::VertexFormat::UChar4Norm:
+            case wgpu::VertexFormat::Char4Norm:
+            case wgpu::VertexFormat::UShort4:
+            case wgpu::VertexFormat::Short4:
+            case wgpu::VertexFormat::UShort4Norm:
+            case wgpu::VertexFormat::Short4Norm:
+            case wgpu::VertexFormat::Half4:
+            case wgpu::VertexFormat::Float4:
+            case wgpu::VertexFormat::UInt4:
+            case wgpu::VertexFormat::Int4:
                 return 4;
-            case dawn::VertexFormat::Float3:
-            case dawn::VertexFormat::UInt3:
-            case dawn::VertexFormat::Int3:
+            case wgpu::VertexFormat::Float3:
+            case wgpu::VertexFormat::UInt3:
+            case wgpu::VertexFormat::Int3:
                 return 3;
-            case dawn::VertexFormat::UChar2:
-            case dawn::VertexFormat::Char2:
-            case dawn::VertexFormat::UChar2Norm:
-            case dawn::VertexFormat::Char2Norm:
-            case dawn::VertexFormat::UShort2:
-            case dawn::VertexFormat::Short2:
-            case dawn::VertexFormat::UShort2Norm:
-            case dawn::VertexFormat::Short2Norm:
-            case dawn::VertexFormat::Half2:
-            case dawn::VertexFormat::Float2:
-            case dawn::VertexFormat::UInt2:
-            case dawn::VertexFormat::Int2:
+            case wgpu::VertexFormat::UChar2:
+            case wgpu::VertexFormat::Char2:
+            case wgpu::VertexFormat::UChar2Norm:
+            case wgpu::VertexFormat::Char2Norm:
+            case wgpu::VertexFormat::UShort2:
+            case wgpu::VertexFormat::Short2:
+            case wgpu::VertexFormat::UShort2Norm:
+            case wgpu::VertexFormat::Short2Norm:
+            case wgpu::VertexFormat::Half2:
+            case wgpu::VertexFormat::Float2:
+            case wgpu::VertexFormat::UInt2:
+            case wgpu::VertexFormat::Int2:
                 return 2;
-            case dawn::VertexFormat::Float:
-            case dawn::VertexFormat::UInt:
-            case dawn::VertexFormat::Int:
+            case wgpu::VertexFormat::Float:
+            case wgpu::VertexFormat::UInt:
+            case wgpu::VertexFormat::Int:
                 return 1;
             default:
                 UNREACHABLE();
         }
     }
 
-    size_t VertexFormatComponentSize(dawn::VertexFormat format) {
+    size_t VertexFormatComponentSize(wgpu::VertexFormat format) {
         switch (format) {
-            case dawn::VertexFormat::UChar2:
-            case dawn::VertexFormat::UChar4:
-            case dawn::VertexFormat::Char2:
-            case dawn::VertexFormat::Char4:
-            case dawn::VertexFormat::UChar2Norm:
-            case dawn::VertexFormat::UChar4Norm:
-            case dawn::VertexFormat::Char2Norm:
-            case dawn::VertexFormat::Char4Norm:
+            case wgpu::VertexFormat::UChar2:
+            case wgpu::VertexFormat::UChar4:
+            case wgpu::VertexFormat::Char2:
+            case wgpu::VertexFormat::Char4:
+            case wgpu::VertexFormat::UChar2Norm:
+            case wgpu::VertexFormat::UChar4Norm:
+            case wgpu::VertexFormat::Char2Norm:
+            case wgpu::VertexFormat::Char4Norm:
                 return sizeof(char);
-            case dawn::VertexFormat::UShort2:
-            case dawn::VertexFormat::UShort4:
-            case dawn::VertexFormat::UShort2Norm:
-            case dawn::VertexFormat::UShort4Norm:
-            case dawn::VertexFormat::Short2:
-            case dawn::VertexFormat::Short4:
-            case dawn::VertexFormat::Short2Norm:
-            case dawn::VertexFormat::Short4Norm:
-            case dawn::VertexFormat::Half2:
-            case dawn::VertexFormat::Half4:
+            case wgpu::VertexFormat::UShort2:
+            case wgpu::VertexFormat::UShort4:
+            case wgpu::VertexFormat::UShort2Norm:
+            case wgpu::VertexFormat::UShort4Norm:
+            case wgpu::VertexFormat::Short2:
+            case wgpu::VertexFormat::Short4:
+            case wgpu::VertexFormat::Short2Norm:
+            case wgpu::VertexFormat::Short4Norm:
+            case wgpu::VertexFormat::Half2:
+            case wgpu::VertexFormat::Half4:
                 return sizeof(uint16_t);
-            case dawn::VertexFormat::Float:
-            case dawn::VertexFormat::Float2:
-            case dawn::VertexFormat::Float3:
-            case dawn::VertexFormat::Float4:
+            case wgpu::VertexFormat::Float:
+            case wgpu::VertexFormat::Float2:
+            case wgpu::VertexFormat::Float3:
+            case wgpu::VertexFormat::Float4:
                 return sizeof(float);
-            case dawn::VertexFormat::UInt:
-            case dawn::VertexFormat::UInt2:
-            case dawn::VertexFormat::UInt3:
-            case dawn::VertexFormat::UInt4:
-            case dawn::VertexFormat::Int:
-            case dawn::VertexFormat::Int2:
-            case dawn::VertexFormat::Int3:
-            case dawn::VertexFormat::Int4:
+            case wgpu::VertexFormat::UInt:
+            case wgpu::VertexFormat::UInt2:
+            case wgpu::VertexFormat::UInt3:
+            case wgpu::VertexFormat::UInt4:
+            case wgpu::VertexFormat::Int:
+            case wgpu::VertexFormat::Int2:
+            case wgpu::VertexFormat::Int3:
+            case wgpu::VertexFormat::Int4:
                 return sizeof(int32_t);
             default:
                 UNREACHABLE();
         }
     }
 
-    size_t VertexFormatSize(dawn::VertexFormat format) {
+    size_t VertexFormatSize(wgpu::VertexFormat format) {
         return VertexFormatNumComponents(format) * VertexFormatComponentSize(format);
     }
 
@@ -344,23 +344,23 @@ namespace dawn_native {
     }
 
     bool StencilTestEnabled(const DepthStencilStateDescriptor* mDepthStencilState) {
-        return mDepthStencilState->stencilBack.compare != dawn::CompareFunction::Always ||
-               mDepthStencilState->stencilBack.failOp != dawn::StencilOperation::Keep ||
-               mDepthStencilState->stencilBack.depthFailOp != dawn::StencilOperation::Keep ||
-               mDepthStencilState->stencilBack.passOp != dawn::StencilOperation::Keep ||
-               mDepthStencilState->stencilFront.compare != dawn::CompareFunction::Always ||
-               mDepthStencilState->stencilFront.failOp != dawn::StencilOperation::Keep ||
-               mDepthStencilState->stencilFront.depthFailOp != dawn::StencilOperation::Keep ||
-               mDepthStencilState->stencilFront.passOp != dawn::StencilOperation::Keep;
+        return mDepthStencilState->stencilBack.compare != wgpu::CompareFunction::Always ||
+               mDepthStencilState->stencilBack.failOp != wgpu::StencilOperation::Keep ||
+               mDepthStencilState->stencilBack.depthFailOp != wgpu::StencilOperation::Keep ||
+               mDepthStencilState->stencilBack.passOp != wgpu::StencilOperation::Keep ||
+               mDepthStencilState->stencilFront.compare != wgpu::CompareFunction::Always ||
+               mDepthStencilState->stencilFront.failOp != wgpu::StencilOperation::Keep ||
+               mDepthStencilState->stencilFront.depthFailOp != wgpu::StencilOperation::Keep ||
+               mDepthStencilState->stencilFront.passOp != wgpu::StencilOperation::Keep;
     }
 
     bool BlendEnabled(const ColorStateDescriptor* mColorState) {
-        return mColorState->alphaBlend.operation != dawn::BlendOperation::Add ||
-               mColorState->alphaBlend.srcFactor != dawn::BlendFactor::One ||
-               mColorState->alphaBlend.dstFactor != dawn::BlendFactor::Zero ||
-               mColorState->colorBlend.operation != dawn::BlendOperation::Add ||
-               mColorState->colorBlend.srcFactor != dawn::BlendFactor::One ||
-               mColorState->colorBlend.dstFactor != dawn::BlendFactor::Zero;
+        return mColorState->alphaBlend.operation != wgpu::BlendOperation::Add ||
+               mColorState->alphaBlend.srcFactor != wgpu::BlendFactor::One ||
+               mColorState->alphaBlend.dstFactor != wgpu::BlendFactor::Zero ||
+               mColorState->colorBlend.operation != wgpu::BlendOperation::Add ||
+               mColorState->colorBlend.srcFactor != wgpu::BlendFactor::One ||
+               mColorState->colorBlend.dstFactor != wgpu::BlendFactor::Zero;
     }
 
     // RenderPipelineBase
@@ -370,7 +370,7 @@ namespace dawn_native {
                                            bool blueprint)
         : PipelineBase(device,
                        descriptor->layout,
-                       dawn::ShaderStage::Vertex | dawn::ShaderStage::Fragment),
+                       wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment),
           mAttachmentState(device->GetOrCreateAttachmentState(descriptor)),
           mPrimitiveTopology(descriptor->primitiveTopology),
           mSampleMask(descriptor->sampleMask),
@@ -419,16 +419,16 @@ namespace dawn_native {
             // The values indicate that depth and stencil test are disabled when backends
             // set their own depth stencil states/descriptors according to the values in
             // mDepthStencilState.
-            mDepthStencilState.depthCompare = dawn::CompareFunction::Always;
+            mDepthStencilState.depthCompare = wgpu::CompareFunction::Always;
             mDepthStencilState.depthWriteEnabled = false;
-            mDepthStencilState.stencilBack.compare = dawn::CompareFunction::Always;
-            mDepthStencilState.stencilBack.failOp = dawn::StencilOperation::Keep;
-            mDepthStencilState.stencilBack.depthFailOp = dawn::StencilOperation::Keep;
-            mDepthStencilState.stencilBack.passOp = dawn::StencilOperation::Keep;
-            mDepthStencilState.stencilFront.compare = dawn::CompareFunction::Always;
-            mDepthStencilState.stencilFront.failOp = dawn::StencilOperation::Keep;
-            mDepthStencilState.stencilFront.depthFailOp = dawn::StencilOperation::Keep;
-            mDepthStencilState.stencilFront.passOp = dawn::StencilOperation::Keep;
+            mDepthStencilState.stencilBack.compare = wgpu::CompareFunction::Always;
+            mDepthStencilState.stencilBack.failOp = wgpu::StencilOperation::Keep;
+            mDepthStencilState.stencilBack.depthFailOp = wgpu::StencilOperation::Keep;
+            mDepthStencilState.stencilBack.passOp = wgpu::StencilOperation::Keep;
+            mDepthStencilState.stencilFront.compare = wgpu::CompareFunction::Always;
+            mDepthStencilState.stencilFront.failOp = wgpu::StencilOperation::Keep;
+            mDepthStencilState.stencilFront.depthFailOp = wgpu::StencilOperation::Keep;
+            mDepthStencilState.stencilFront.passOp = wgpu::StencilOperation::Keep;
             mDepthStencilState.stencilReadMask = 0xff;
             mDepthStencilState.stencilWriteMask = 0xff;
         }
@@ -496,17 +496,17 @@ namespace dawn_native {
         return &mDepthStencilState;
     }
 
-    dawn::PrimitiveTopology RenderPipelineBase::GetPrimitiveTopology() const {
+    wgpu::PrimitiveTopology RenderPipelineBase::GetPrimitiveTopology() const {
         ASSERT(!IsError());
         return mPrimitiveTopology;
     }
 
-    dawn::CullMode RenderPipelineBase::GetCullMode() const {
+    wgpu::CullMode RenderPipelineBase::GetCullMode() const {
         ASSERT(!IsError());
         return mRasterizationState.cullMode;
     }
 
-    dawn::FrontFace RenderPipelineBase::GetFrontFace() const {
+    wgpu::FrontFace RenderPipelineBase::GetFrontFace() const {
         ASSERT(!IsError());
         return mRasterizationState.frontFace;
     }
@@ -521,12 +521,12 @@ namespace dawn_native {
         return mAttachmentState->HasDepthStencilAttachment();
     }
 
-    dawn::TextureFormat RenderPipelineBase::GetColorAttachmentFormat(uint32_t attachment) const {
+    wgpu::TextureFormat RenderPipelineBase::GetColorAttachmentFormat(uint32_t attachment) const {
         ASSERT(!IsError());
         return mColorStates[attachment].format;
     }
 
-    dawn::TextureFormat RenderPipelineBase::GetDepthStencilFormat() const {
+    wgpu::TextureFormat RenderPipelineBase::GetDepthStencilFormat() const {
         ASSERT(!IsError());
         ASSERT(mAttachmentState->HasDepthStencilAttachment());
         return mDepthStencilState.format;

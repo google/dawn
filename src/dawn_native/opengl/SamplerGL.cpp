@@ -21,33 +21,33 @@
 namespace dawn_native { namespace opengl {
 
     namespace {
-        GLenum MagFilterMode(dawn::FilterMode filter) {
+        GLenum MagFilterMode(wgpu::FilterMode filter) {
             switch (filter) {
-                case dawn::FilterMode::Nearest:
+                case wgpu::FilterMode::Nearest:
                     return GL_NEAREST;
-                case dawn::FilterMode::Linear:
+                case wgpu::FilterMode::Linear:
                     return GL_LINEAR;
                 default:
                     UNREACHABLE();
             }
         }
 
-        GLenum MinFilterMode(dawn::FilterMode minFilter, dawn::FilterMode mipMapFilter) {
+        GLenum MinFilterMode(wgpu::FilterMode minFilter, wgpu::FilterMode mipMapFilter) {
             switch (minFilter) {
-                case dawn::FilterMode::Nearest:
+                case wgpu::FilterMode::Nearest:
                     switch (mipMapFilter) {
-                        case dawn::FilterMode::Nearest:
+                        case wgpu::FilterMode::Nearest:
                             return GL_NEAREST_MIPMAP_NEAREST;
-                        case dawn::FilterMode::Linear:
+                        case wgpu::FilterMode::Linear:
                             return GL_NEAREST_MIPMAP_LINEAR;
                         default:
                             UNREACHABLE();
                     }
-                case dawn::FilterMode::Linear:
+                case wgpu::FilterMode::Linear:
                     switch (mipMapFilter) {
-                        case dawn::FilterMode::Nearest:
+                        case wgpu::FilterMode::Nearest:
                             return GL_LINEAR_MIPMAP_NEAREST;
-                        case dawn::FilterMode::Linear:
+                        case wgpu::FilterMode::Linear:
                             return GL_LINEAR_MIPMAP_LINEAR;
                         default:
                             UNREACHABLE();
@@ -57,13 +57,13 @@ namespace dawn_native { namespace opengl {
             }
         }
 
-        GLenum WrapMode(dawn::AddressMode mode) {
+        GLenum WrapMode(wgpu::AddressMode mode) {
             switch (mode) {
-                case dawn::AddressMode::Repeat:
+                case wgpu::AddressMode::Repeat:
                     return GL_REPEAT;
-                case dawn::AddressMode::MirrorRepeat:
+                case wgpu::AddressMode::MirrorRepeat:
                     return GL_MIRRORED_REPEAT;
-                case dawn::AddressMode::ClampToEdge:
+                case wgpu::AddressMode::ClampToEdge:
                     return GL_CLAMP_TO_EDGE;
                 default:
                     UNREACHABLE();

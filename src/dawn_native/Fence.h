@@ -40,7 +40,7 @@ namespace dawn_native {
 
         // Dawn API
         uint64_t GetCompletedValue() const;
-        void OnCompletion(uint64_t value, dawn::FenceOnCompletionCallback callback, void* userdata);
+        void OnCompletion(uint64_t value, wgpu::FenceOnCompletionCallback callback, void* userdata);
 
       protected:
         friend class QueueBase;
@@ -54,7 +54,7 @@ namespace dawn_native {
         MaybeError ValidateOnCompletion(uint64_t value) const;
 
         struct OnCompletionData {
-            dawn::FenceOnCompletionCallback completionCallback = nullptr;
+            wgpu::FenceOnCompletionCallback completionCallback = nullptr;
             void* userdata = nullptr;
         };
 

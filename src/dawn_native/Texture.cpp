@@ -37,14 +37,14 @@ namespace dawn_native {
 
         // TODO(jiawei.shao@intel.com): support validation on all texture view dimensions
         bool IsTextureViewDimensionCompatibleWithTextureDimension(
-            dawn::TextureViewDimension textureViewDimension,
-            dawn::TextureDimension textureDimension) {
+            wgpu::TextureViewDimension textureViewDimension,
+            wgpu::TextureDimension textureDimension) {
             switch (textureViewDimension) {
-                case dawn::TextureViewDimension::e2D:
-                case dawn::TextureViewDimension::e2DArray:
-                case dawn::TextureViewDimension::Cube:
-                case dawn::TextureViewDimension::CubeArray:
-                    return textureDimension == dawn::TextureDimension::e2D;
+                case wgpu::TextureViewDimension::e2D:
+                case wgpu::TextureViewDimension::e2DArray:
+                case wgpu::TextureViewDimension::Cube:
+                case wgpu::TextureViewDimension::CubeArray:
+                    return textureDimension == wgpu::TextureDimension::e2D;
                 default:
                     UNREACHABLE();
                     return false;
@@ -53,16 +53,16 @@ namespace dawn_native {
 
         // TODO(jiawei.shao@intel.com): support validation on all texture view dimensions
         bool IsArrayLayerValidForTextureViewDimension(
-            dawn::TextureViewDimension textureViewDimension,
+            wgpu::TextureViewDimension textureViewDimension,
             uint32_t textureViewArrayLayer) {
             switch (textureViewDimension) {
-                case dawn::TextureViewDimension::e2D:
+                case wgpu::TextureViewDimension::e2D:
                     return textureViewArrayLayer == 1u;
-                case dawn::TextureViewDimension::e2DArray:
+                case wgpu::TextureViewDimension::e2DArray:
                     return true;
-                case dawn::TextureViewDimension::Cube:
+                case wgpu::TextureViewDimension::Cube:
                     return textureViewArrayLayer == 6u;
-                case dawn::TextureViewDimension::CubeArray:
+                case wgpu::TextureViewDimension::CubeArray:
                     return textureViewArrayLayer % 6 == 0;
                 default:
                     UNREACHABLE();
@@ -71,14 +71,14 @@ namespace dawn_native {
         }
 
         bool IsTextureSizeValidForTextureViewDimension(
-            dawn::TextureViewDimension textureViewDimension,
+            wgpu::TextureViewDimension textureViewDimension,
             const Extent3D& textureSize) {
             switch (textureViewDimension) {
-                case dawn::TextureViewDimension::Cube:
-                case dawn::TextureViewDimension::CubeArray:
+                case wgpu::TextureViewDimension::Cube:
+                case wgpu::TextureViewDimension::CubeArray:
                     return textureSize.width == textureSize.height;
-                case dawn::TextureViewDimension::e2D:
-                case dawn::TextureViewDimension::e2DArray:
+                case wgpu::TextureViewDimension::e2D:
+                case wgpu::TextureViewDimension::e2DArray:
                     return true;
                 default:
                     UNREACHABLE();
@@ -159,21 +159,21 @@ namespace dawn_native {
         MaybeError ValidateTextureUsage(const TextureDescriptor* descriptor, const Format* format) {
             DAWN_TRY(dawn_native::ValidateTextureUsage(descriptor->usage));
 
-            constexpr dawn::TextureUsage kValidCompressedUsages = dawn::TextureUsage::Sampled |
-                                                                  dawn::TextureUsage::CopySrc |
-                                                                  dawn::TextureUsage::CopyDst;
+            constexpr wgpu::TextureUsage kValidCompressedUsages = wgpu::TextureUsage::Sampled |
+                                                                  wgpu::TextureUsage::CopySrc |
+                                                                  wgpu::TextureUsage::CopyDst;
             if (format->isCompressed && (descriptor->usage & (~kValidCompressedUsages))) {
                 return DAWN_VALIDATION_ERROR(
                     "Compressed texture format is incompatible with the texture usage");
             }
 
             if (!format->isRenderable &&
-                (descriptor->usage & dawn::TextureUsage::OutputAttachment)) {
+                (descriptor->usage & wgpu::TextureUsage::OutputAttachment)) {
                 return DAWN_VALIDATION_ERROR(
                     "Non-renderable format used with OutputAttachment usage");
             }
 
-            if (descriptor->usage & dawn::TextureUsage::Storage) {
+            if (descriptor->usage & wgpu::TextureUsage::Storage) {
                 return DAWN_VALIDATION_ERROR("storage textures aren't supported (yet)");
             }
 
@@ -205,7 +205,7 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Cannot create an empty texture");
         }
 
-        if (descriptor->dimension != dawn::TextureDimension::e2D) {
+        if (descriptor->dimension != wgpu::TextureDimension::e2D) {
             return DAWN_VALIDATION_ERROR("Texture dimension must be 2D (for now)");
         }
 
@@ -228,15 +228,15 @@ namespace dawn_native {
         }
 
         DAWN_TRY(ValidateTextureViewDimension(descriptor->dimension));
-        if (descriptor->dimension == dawn::TextureViewDimension::e1D ||
-            descriptor->dimension == dawn::TextureViewDimension::e3D) {
+        if (descriptor->dimension == wgpu::TextureViewDimension::e1D ||
+            descriptor->dimension == wgpu::TextureViewDimension::e3D) {
             return DAWN_VALIDATION_ERROR("Texture view dimension must be 2D compatible.");
         }
 
         DAWN_TRY(ValidateTextureFormat(descriptor->format));
 
         DAWN_TRY(ValidateTextureAspect(descriptor->aspect));
-        if (descriptor->aspect != dawn::TextureAspect::All) {
+        if (descriptor->aspect != wgpu::TextureAspect::All) {
             return DAWN_VALIDATION_ERROR("Texture aspect must be 'all'");
         }
 
@@ -273,22 +273,22 @@ namespace dawn_native {
 
         // The default value for the view dimension depends on the texture's dimension with a
         // special case for 2DArray being chosen automatically if arrayLayerCount is unspecified.
-        if (desc.dimension == dawn::TextureViewDimension::Undefined) {
+        if (desc.dimension == wgpu::TextureViewDimension::Undefined) {
             switch (texture->GetDimension()) {
-                case dawn::TextureDimension::e1D:
-                    desc.dimension = dawn::TextureViewDimension::e1D;
+                case wgpu::TextureDimension::e1D:
+                    desc.dimension = wgpu::TextureViewDimension::e1D;
                     break;
 
-                case dawn::TextureDimension::e2D:
+                case wgpu::TextureDimension::e2D:
                     if (texture->GetArrayLayers() > 1u && desc.arrayLayerCount == 0) {
-                        desc.dimension = dawn::TextureViewDimension::e2DArray;
+                        desc.dimension = wgpu::TextureViewDimension::e2DArray;
                     } else {
-                        desc.dimension = dawn::TextureViewDimension::e2D;
+                        desc.dimension = wgpu::TextureViewDimension::e2D;
                     }
                     break;
 
-                case dawn::TextureDimension::e3D:
-                    desc.dimension = dawn::TextureViewDimension::e3D;
+                case wgpu::TextureDimension::e3D:
+                    desc.dimension = wgpu::TextureViewDimension::e3D;
                     break;
 
                 default:
@@ -296,7 +296,7 @@ namespace dawn_native {
             }
         }
 
-        if (desc.format == dawn::TextureFormat::Undefined) {
+        if (desc.format == wgpu::TextureFormat::Undefined) {
             desc.format = texture->GetFormat().format;
         }
         if (desc.arrayLayerCount == 0) {
@@ -349,7 +349,7 @@ namespace dawn_native {
         return new TextureBase(device, ObjectBase::kError);
     }
 
-    dawn::TextureDimension TextureBase::GetDimension() const {
+    wgpu::TextureDimension TextureBase::GetDimension() const {
         ASSERT(!IsError());
         return mDimension;
     }
@@ -375,7 +375,7 @@ namespace dawn_native {
         ASSERT(!IsError());
         return mSampleCount;
     }
-    dawn::TextureUsage TextureBase::GetUsage() const {
+    wgpu::TextureUsage TextureBase::GetUsage() const {
         ASSERT(!IsError());
         return mUsage;
     }
@@ -527,7 +527,7 @@ namespace dawn_native {
         return mFormat;
     }
 
-    dawn::TextureViewDimension TextureViewBase::GetDimension() const {
+    wgpu::TextureViewDimension TextureViewBase::GetDimension() const {
         ASSERT(!IsError());
         return mDimension;
     }

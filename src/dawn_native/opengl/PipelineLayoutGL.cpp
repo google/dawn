@@ -36,26 +36,26 @@ namespace dawn_native { namespace opengl {
                 }
 
                 switch (groupInfo.types[binding]) {
-                    case dawn::BindingType::UniformBuffer:
+                    case wgpu::BindingType::UniformBuffer:
                         mIndexInfo[group][binding] = uboIndex;
                         uboIndex++;
                         break;
-                    case dawn::BindingType::Sampler:
+                    case wgpu::BindingType::Sampler:
                         mIndexInfo[group][binding] = samplerIndex;
                         samplerIndex++;
                         break;
-                    case dawn::BindingType::SampledTexture:
+                    case wgpu::BindingType::SampledTexture:
                         mIndexInfo[group][binding] = sampledTextureIndex;
                         sampledTextureIndex++;
                         break;
 
-                    case dawn::BindingType::StorageBuffer:
+                    case wgpu::BindingType::StorageBuffer:
                         mIndexInfo[group][binding] = ssboIndex;
                         ssboIndex++;
                         break;
 
-                    case dawn::BindingType::StorageTexture:
-                    case dawn::BindingType::ReadonlyStorageBuffer:
+                    case wgpu::BindingType::StorageTexture:
+                    case wgpu::BindingType::ReadonlyStorageBuffer:
                         UNREACHABLE();
                         break;
 

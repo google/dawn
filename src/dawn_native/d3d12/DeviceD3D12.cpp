@@ -304,7 +304,7 @@ namespace dawn_native { namespace d3d12 {
         DAWN_TRY_ASSIGN(commandRecordingContext, GetPendingCommandContext());
 
         ToBackend(destination)
-            ->TransitionUsageNow(commandRecordingContext, dawn::BufferUsage::CopyDst);
+            ->TransitionUsageNow(commandRecordingContext, wgpu::BufferUsage::CopyDst);
 
         commandRecordingContext->GetCommandList()->CopyBufferRegion(
             ToBackend(destination)->GetD3D12Resource().Get(), destinationOffset,

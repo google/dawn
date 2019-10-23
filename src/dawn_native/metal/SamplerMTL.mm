@@ -20,31 +20,31 @@
 namespace dawn_native { namespace metal {
 
     namespace {
-        MTLSamplerMinMagFilter FilterModeToMinMagFilter(dawn::FilterMode mode) {
+        MTLSamplerMinMagFilter FilterModeToMinMagFilter(wgpu::FilterMode mode) {
             switch (mode) {
-                case dawn::FilterMode::Nearest:
+                case wgpu::FilterMode::Nearest:
                     return MTLSamplerMinMagFilterNearest;
-                case dawn::FilterMode::Linear:
+                case wgpu::FilterMode::Linear:
                     return MTLSamplerMinMagFilterLinear;
             }
         }
 
-        MTLSamplerMipFilter FilterModeToMipFilter(dawn::FilterMode mode) {
+        MTLSamplerMipFilter FilterModeToMipFilter(wgpu::FilterMode mode) {
             switch (mode) {
-                case dawn::FilterMode::Nearest:
+                case wgpu::FilterMode::Nearest:
                     return MTLSamplerMipFilterNearest;
-                case dawn::FilterMode::Linear:
+                case wgpu::FilterMode::Linear:
                     return MTLSamplerMipFilterLinear;
             }
         }
 
-        MTLSamplerAddressMode AddressMode(dawn::AddressMode mode) {
+        MTLSamplerAddressMode AddressMode(wgpu::AddressMode mode) {
             switch (mode) {
-                case dawn::AddressMode::Repeat:
+                case wgpu::AddressMode::Repeat:
                     return MTLSamplerAddressModeRepeat;
-                case dawn::AddressMode::MirrorRepeat:
+                case wgpu::AddressMode::MirrorRepeat:
                     return MTLSamplerAddressModeMirrorRepeat;
-                case dawn::AddressMode::ClampToEdge:
+                case wgpu::AddressMode::ClampToEdge:
                     return MTLSamplerAddressModeClampToEdge;
             }
         }

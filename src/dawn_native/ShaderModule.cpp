@@ -132,7 +132,7 @@ namespace dawn_native {
         }
 
         if (resources.push_constant_buffers.size() > 0) {
-            GetDevice()->HandleError(dawn::ErrorType::Validation,
+            GetDevice()->HandleError(wgpu::ErrorType::Validation,
                                      "Push constants aren't supported.");
         }
 
@@ -140,7 +140,7 @@ namespace dawn_native {
         auto ExtractResourcesBinding = [this](const spirv_cross::SmallVector<spirv_cross::Resource>&
                                                   resources,
                                               const spirv_cross::Compiler& compiler,
-                                              dawn::BindingType bindingType) {
+                                              wgpu::BindingType bindingType) {
             for (const auto& resource : resources) {
                 ASSERT(compiler.get_decoration_bitset(resource.id).get(spv::DecorationBinding));
                 ASSERT(
@@ -150,7 +150,7 @@ namespace dawn_native {
                 uint32_t set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
 
                 if (binding >= kMaxBindingsPerGroup || set >= kMaxBindGroups) {
-                    GetDevice()->HandleError(dawn::ErrorType::Validation,
+                    GetDevice()->HandleError(wgpu::ErrorType::Validation,
                                              "Binding over limits in the SPIRV");
                     continue;
                 }
@@ -164,12 +164,12 @@ namespace dawn_native {
         };
 
         ExtractResourcesBinding(resources.uniform_buffers, compiler,
-                                dawn::BindingType::UniformBuffer);
+                                wgpu::BindingType::UniformBuffer);
         ExtractResourcesBinding(resources.separate_images, compiler,
-                                dawn::BindingType::SampledTexture);
-        ExtractResourcesBinding(resources.separate_samplers, compiler, dawn::BindingType::Sampler);
+                                wgpu::BindingType::SampledTexture);
+        ExtractResourcesBinding(resources.separate_samplers, compiler, wgpu::BindingType::Sampler);
         ExtractResourcesBinding(resources.storage_buffers, compiler,
-                                dawn::BindingType::StorageBuffer);
+                                wgpu::BindingType::StorageBuffer);
 
         // Extract the vertex attributes
         if (mExecutionModel == SingleShaderStage::Vertex) {
@@ -178,7 +178,7 @@ namespace dawn_native {
                 uint32_t location = compiler.get_decoration(attrib.id, spv::DecorationLocation);
 
                 if (location >= kMaxVertexAttributes) {
-                    device->HandleError(dawn::ErrorType::Validation,
+                    device->HandleError(wgpu::ErrorType::Validation,
                                         "Attribute location over limits in the SPIRV");
                     return;
                 }
@@ -190,7 +190,7 @@ namespace dawn_native {
             // all the location 0, causing a compile error.
             for (const auto& attrib : resources.stage_outputs) {
                 if (!compiler.get_decoration_bitset(attrib.id).get(spv::DecorationLocation)) {
-                    device->HandleError(dawn::ErrorType::Validation,
+                    device->HandleError(wgpu::ErrorType::Validation,
                                         "Need location qualifier on vertex output");
                     return;
                 }
@@ -202,7 +202,7 @@ namespace dawn_native {
             // all the location 0, causing a compile error.
             for (const auto& attrib : resources.stage_inputs) {
                 if (!compiler.get_decoration_bitset(attrib.id).get(spv::DecorationLocation)) {
-                    device->HandleError(dawn::ErrorType::Validation,
+                    device->HandleError(wgpu::ErrorType::Validation,
                                         "Need location qualifier on fragment input");
                     return;
                 }
@@ -214,7 +214,7 @@ namespace dawn_native {
                 uint32_t location =
                     compiler.get_decoration(fragmentOutput.id, spv::DecorationLocation);
                 if (location >= kMaxColorAttachments) {
-                    device->HandleError(dawn::ErrorType::Validation,
+                    device->HandleError(wgpu::ErrorType::Validation,
                                         "Fragment output location over limits in the SPIRV");
                     return;
                 }

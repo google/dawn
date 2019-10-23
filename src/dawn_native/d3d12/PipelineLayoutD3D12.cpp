@@ -25,14 +25,14 @@ using Microsoft::WRL::ComPtr;
 
 namespace dawn_native { namespace d3d12 {
     namespace {
-        D3D12_SHADER_VISIBILITY ShaderVisibilityType(dawn::ShaderStage visibility) {
-            ASSERT(visibility != dawn::ShaderStage::None);
+        D3D12_SHADER_VISIBILITY ShaderVisibilityType(wgpu::ShaderStage visibility) {
+            ASSERT(visibility != wgpu::ShaderStage::None);
 
-            if (visibility == dawn::ShaderStage::Vertex) {
+            if (visibility == wgpu::ShaderStage::Vertex) {
                 return D3D12_SHADER_VISIBILITY_VERTEX;
             }
 
-            if (visibility == dawn::ShaderStage::Fragment) {
+            if (visibility == wgpu::ShaderStage::Fragment) {
                 return D3D12_SHADER_VISIBILITY_PIXEL;
             }
 
@@ -40,16 +40,16 @@ namespace dawn_native { namespace d3d12 {
             return D3D12_SHADER_VISIBILITY_ALL;
         }
 
-        D3D12_ROOT_PARAMETER_TYPE RootParameterType(dawn::BindingType type) {
+        D3D12_ROOT_PARAMETER_TYPE RootParameterType(wgpu::BindingType type) {
             switch (type) {
-                case dawn::BindingType::UniformBuffer:
+                case wgpu::BindingType::UniformBuffer:
                     return D3D12_ROOT_PARAMETER_TYPE_CBV;
-                case dawn::BindingType::StorageBuffer:
+                case wgpu::BindingType::StorageBuffer:
                     return D3D12_ROOT_PARAMETER_TYPE_UAV;
-                case dawn::BindingType::SampledTexture:
-                case dawn::BindingType::Sampler:
-                case dawn::BindingType::StorageTexture:
-                case dawn::BindingType::ReadonlyStorageBuffer:
+                case wgpu::BindingType::SampledTexture:
+                case wgpu::BindingType::Sampler:
+                case wgpu::BindingType::StorageTexture:
+                case wgpu::BindingType::ReadonlyStorageBuffer:
                     UNREACHABLE();
             }
         }

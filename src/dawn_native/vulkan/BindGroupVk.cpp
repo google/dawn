@@ -88,8 +88,8 @@ namespace dawn_native { namespace vulkan {
                                                         layoutInfo.hasDynamicOffset[bindingIndex]);
 
             switch (layoutInfo.types[bindingIndex]) {
-                case dawn::BindingType::UniformBuffer:
-                case dawn::BindingType::StorageBuffer: {
+                case wgpu::BindingType::UniformBuffer:
+                case wgpu::BindingType::StorageBuffer: {
                     BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
 
                     writeBufferInfo[numWrites].buffer = ToBackend(binding.buffer)->GetHandle();
@@ -98,13 +98,13 @@ namespace dawn_native { namespace vulkan {
                     write.pBufferInfo = &writeBufferInfo[numWrites];
                 } break;
 
-                case dawn::BindingType::Sampler: {
+                case wgpu::BindingType::Sampler: {
                     Sampler* sampler = ToBackend(GetBindingAsSampler(bindingIndex));
                     writeImageInfo[numWrites].sampler = sampler->GetHandle();
                     write.pImageInfo = &writeImageInfo[numWrites];
                 } break;
 
-                case dawn::BindingType::SampledTexture: {
+                case wgpu::BindingType::SampledTexture: {
                     TextureView* view = ToBackend(GetBindingAsTextureView(bindingIndex));
 
                     writeImageInfo[numWrites].imageView = view->GetHandle();

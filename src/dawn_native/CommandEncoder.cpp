@@ -242,8 +242,8 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateCanUseAs(BufferBase* buffer, dawn::BufferUsage usage) {
-            ASSERT(dawn::HasZeroOrOneBits(usage));
+        MaybeError ValidateCanUseAs(BufferBase* buffer, wgpu::BufferUsage usage) {
+            ASSERT(wgpu::HasZeroOrOneBits(usage));
             if (!(buffer->GetUsage() & usage)) {
                 return DAWN_VALIDATION_ERROR("buffer doesn't have the required usage.");
             }
@@ -251,8 +251,8 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateCanUseAs(TextureBase* texture, dawn::TextureUsage usage) {
-            ASSERT(dawn::HasZeroOrOneBits(usage));
+        MaybeError ValidateCanUseAs(TextureBase* texture, wgpu::TextureUsage usage) {
+            ASSERT(wgpu::HasZeroOrOneBits(usage));
             if (!(texture->GetUsage() & usage)) {
                 return DAWN_VALIDATION_ERROR("texture doesn't have the required usage.");
             }
@@ -352,7 +352,7 @@ namespace dawn_native {
                     "The size of the resolve target must be the same as the color attachment");
             }
 
-            dawn::TextureFormat resolveTargetFormat = resolveTarget->GetFormat().format;
+            wgpu::TextureFormat resolveTargetFormat = resolveTarget->GetFormat().format;
             if (resolveTargetFormat != attachment->GetFormat().format) {
                 return DAWN_VALIDATION_ERROR(
                     "The format of the resolve target must be the same as the color attachment");
@@ -755,8 +755,8 @@ namespace dawn_native {
                     DAWN_TRY(ValidateB2BCopySizeAlignment(copy->size, copy->sourceOffset,
                                                           copy->destinationOffset));
 
-                    DAWN_TRY(ValidateCanUseAs(copy->source.Get(), dawn::BufferUsage::CopySrc));
-                    DAWN_TRY(ValidateCanUseAs(copy->destination.Get(), dawn::BufferUsage::CopyDst));
+                    DAWN_TRY(ValidateCanUseAs(copy->source.Get(), wgpu::BufferUsage::CopySrc));
+                    DAWN_TRY(ValidateCanUseAs(copy->destination.Get(), wgpu::BufferUsage::CopyDst));
 
                     mResourceUsages.topLevelBuffers.insert(copy->source.Get());
                     mResourceUsages.topLevelBuffers.insert(copy->destination.Get());
@@ -789,9 +789,9 @@ namespace dawn_native {
                                                        copy->destination.texture->GetFormat()));
 
                     DAWN_TRY(
-                        ValidateCanUseAs(copy->source.buffer.Get(), dawn::BufferUsage::CopySrc));
+                        ValidateCanUseAs(copy->source.buffer.Get(), wgpu::BufferUsage::CopySrc));
                     DAWN_TRY(ValidateCanUseAs(copy->destination.texture.Get(),
-                                              dawn::TextureUsage::CopyDst));
+                                              wgpu::TextureUsage::CopyDst));
 
                     mResourceUsages.topLevelBuffers.insert(copy->source.buffer.Get());
                     mResourceUsages.topLevelTextures.insert(copy->destination.texture.Get());
@@ -824,9 +824,9 @@ namespace dawn_native {
                                                        copy->source.texture->GetFormat()));
 
                     DAWN_TRY(
-                        ValidateCanUseAs(copy->source.texture.Get(), dawn::TextureUsage::CopySrc));
+                        ValidateCanUseAs(copy->source.texture.Get(), wgpu::TextureUsage::CopySrc));
                     DAWN_TRY(ValidateCanUseAs(copy->destination.buffer.Get(),
-                                              dawn::BufferUsage::CopyDst));
+                                              wgpu::BufferUsage::CopyDst));
 
                     mResourceUsages.topLevelTextures.insert(copy->source.texture.Get());
                     mResourceUsages.topLevelBuffers.insert(copy->destination.buffer.Get());
@@ -852,9 +852,9 @@ namespace dawn_native {
                     DAWN_TRY(ValidateCopySizeFitsInTexture(copy->destination, copy->copySize));
 
                     DAWN_TRY(
-                        ValidateCanUseAs(copy->source.texture.Get(), dawn::TextureUsage::CopySrc));
+                        ValidateCanUseAs(copy->source.texture.Get(), wgpu::TextureUsage::CopySrc));
                     DAWN_TRY(ValidateCanUseAs(copy->destination.texture.Get(),
-                                              dawn::TextureUsage::CopyDst));
+                                              wgpu::TextureUsage::CopyDst));
 
                     mResourceUsages.topLevelTextures.insert(copy->source.texture.Get());
                     mResourceUsages.topLevelTextures.insert(copy->destination.texture.Get());

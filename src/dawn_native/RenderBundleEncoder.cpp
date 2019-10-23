@@ -24,7 +24,7 @@
 namespace dawn_native {
 
     MaybeError ValidateColorAttachmentFormat(const DeviceBase* device,
-                                             dawn::TextureFormat textureFormat) {
+                                             wgpu::TextureFormat textureFormat) {
         DAWN_TRY(ValidateTextureFormat(textureFormat));
         const Format* format = nullptr;
         DAWN_TRY_ASSIGN(format, device->GetInternalFormat(textureFormat));
@@ -36,7 +36,7 @@ namespace dawn_native {
     }
 
     MaybeError ValidateDepthStencilAttachmentFormat(const DeviceBase* device,
-                                                    dawn::TextureFormat textureFormat) {
+                                                    wgpu::TextureFormat textureFormat) {
         DAWN_TRY(ValidateTextureFormat(textureFormat));
         const Format* format = nullptr;
         DAWN_TRY_ASSIGN(format, device->GetInternalFormat(textureFormat));
@@ -60,7 +60,7 @@ namespace dawn_native {
         }
 
         if (descriptor->colorFormatsCount == 0 &&
-            descriptor->depthStencilFormat == dawn::TextureFormat::Undefined) {
+            descriptor->depthStencilFormat == wgpu::TextureFormat::Undefined) {
             return DAWN_VALIDATION_ERROR("Should have at least one attachment format");
         }
 
@@ -68,7 +68,7 @@ namespace dawn_native {
             DAWN_TRY(ValidateColorAttachmentFormat(device, descriptor->colorFormats[i]));
         }
 
-        if (descriptor->depthStencilFormat != dawn::TextureFormat::Undefined) {
+        if (descriptor->depthStencilFormat != wgpu::TextureFormat::Undefined) {
             DAWN_TRY(ValidateDepthStencilAttachmentFormat(device, descriptor->depthStencilFormat));
         }
 

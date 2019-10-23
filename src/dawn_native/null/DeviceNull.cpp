@@ -241,7 +241,7 @@ namespace dawn_native { namespace null {
     bool Buffer::IsMapWritable() const {
         // Only return true for mappable buffers so we can test cases that need / don't need a
         // staging buffer.
-        return (GetUsage() & (dawn::BufferUsage::MapRead | dawn::BufferUsage::MapWrite)) != 0;
+        return (GetUsage() & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) != 0;
     }
 
     MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {
@@ -363,8 +363,8 @@ namespace dawn_native { namespace null {
         return DAWN_SWAP_CHAIN_NO_ERROR;
     }
 
-    dawn::TextureFormat NativeSwapChainImpl::GetPreferredFormat() const {
-        return dawn::TextureFormat::RGBA8Unorm;
+    wgpu::TextureFormat NativeSwapChainImpl::GetPreferredFormat() const {
+        return wgpu::TextureFormat::RGBA8Unorm;
     }
 
     // StagingBuffer
