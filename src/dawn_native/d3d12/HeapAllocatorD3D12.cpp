@@ -24,7 +24,8 @@ namespace dawn_native { namespace d3d12 {
         : mDevice(device), mHeapType(heapType), mHeapFlags(heapFlags) {
     }
 
-    ResultOrError<std::unique_ptr<ResourceHeapBase>> HeapAllocator::Allocate(uint64_t size) {
+    ResultOrError<std::unique_ptr<ResourceHeapBase>> HeapAllocator::AllocateResourceHeap(
+        uint64_t size) {
         D3D12_HEAP_DESC heapDesc;
         heapDesc.SizeInBytes = size;
         heapDesc.Properties.Type = mHeapType;
@@ -47,7 +48,7 @@ namespace dawn_native { namespace d3d12 {
         return {std::make_unique<Heap>(std::move(heap))};
     }
 
-    void HeapAllocator::Deallocate(std::unique_ptr<ResourceHeapBase> heap) {
+    void HeapAllocator::DeallocateResourceHeap(std::unique_ptr<ResourceHeapBase> heap) {
         mDevice->ReferenceUntilUnused(static_cast<Heap*>(heap.get())->GetD3D12Heap());
     }
 

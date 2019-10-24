@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_D3D12_HEAPALLOCATORD3D12_H_
 #define DAWNNATIVE_D3D12_HEAPALLOCATORD3D12_H_
 
-#include "dawn_native/MemoryAllocator.h"
+#include "dawn_native/ResourceHeapAllocator.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 namespace dawn_native { namespace d3d12 {
@@ -23,13 +23,14 @@ namespace dawn_native { namespace d3d12 {
     class Device;
 
     // Wrapper to allocate a D3D12 heap.
-    class HeapAllocator : public MemoryAllocator {
+    class HeapAllocator : public ResourceHeapAllocator {
       public:
         HeapAllocator(Device* device, D3D12_HEAP_TYPE heapType, D3D12_HEAP_FLAGS heapFlags);
         ~HeapAllocator() override = default;
 
-        ResultOrError<std::unique_ptr<ResourceHeapBase>> Allocate(uint64_t size) override;
-        void Deallocate(std::unique_ptr<ResourceHeapBase> allocation) override;
+        ResultOrError<std::unique_ptr<ResourceHeapBase>> AllocateResourceHeap(
+            uint64_t size) override;
+        void DeallocateResourceHeap(std::unique_ptr<ResourceHeapBase> allocation) override;
 
       private:
         Device* mDevice;

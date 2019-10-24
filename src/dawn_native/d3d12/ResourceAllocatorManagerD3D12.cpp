@@ -91,10 +91,10 @@ namespace dawn_native { namespace d3d12 {
     ResourceAllocatorManager::ResourceAllocatorManager(Device* device) : mDevice(device) {
         for (uint32_t i = 0; i < ResourceHeapKind::EnumCount; i++) {
             const ResourceHeapKind resourceHeapKind = static_cast<ResourceHeapKind>(i);
+            mHeapAllocators[i] = std::make_unique<HeapAllocator>(
+                mDevice, GetD3D12HeapType(resourceHeapKind), GetD3D12HeapFlags(resourceHeapKind));
             mSubAllocatedResourceAllocators[i] = std::make_unique<BuddyMemoryAllocator>(
-                kMaxHeapSize, kMinHeapSize,
-                std::make_unique<HeapAllocator>(mDevice, GetD3D12HeapType(resourceHeapKind),
-                                                GetD3D12HeapFlags(resourceHeapKind)));
+                kMaxHeapSize, kMinHeapSize, mHeapAllocators[i].get());
         }
     }
 

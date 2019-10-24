@@ -16,8 +16,8 @@
 #define DAWNNATIVE_D3D12_RESOURCEALLOCATORMANAGERD3D12_H_
 
 #include "common/SerialQueue.h"
-
 #include "dawn_native/BuddyMemoryAllocator.h"
+#include "dawn_native/d3d12/HeapAllocatorD3D12.h"
 #include "dawn_native/d3d12/ResourceHeapAllocationD3D12.h"
 
 #include <array>
@@ -76,6 +76,7 @@ namespace dawn_native { namespace d3d12 {
 
         std::array<std::unique_ptr<BuddyMemoryAllocator>, ResourceHeapKind::EnumCount>
             mSubAllocatedResourceAllocators;
+        std::array<std::unique_ptr<HeapAllocator>, ResourceHeapKind::EnumCount> mHeapAllocators;
 
         SerialQueue<ResourceHeapAllocation> mAllocationsToDelete;
     };

@@ -34,6 +34,7 @@ namespace dawn_native { namespace d3d12 {
       private:
         ComPtr<ID3D12Resource> mResource;
     };
+
 }}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_RESOURCEHEAPALLOCATIOND3D12_H_

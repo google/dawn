@@ -11,26 +11,30 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 #include "dawn_native/BuddyMemoryAllocator.h"
 
 #include "common/Math.h"
+#include "dawn_native/ResourceHeapAllocator.h"
 
 namespace dawn_native {
 
-    BuddyMemoryAllocator::BuddyMemoryAllocator(uint64_t maxBlockSize,
-                                               uint64_t memorySize,
-                                               std::unique_ptr<MemoryAllocator> client)
-        : mMemorySize(memorySize), mBuddyBlockAllocator(maxBlockSize), mClient(std::move(client)) {
-        ASSERT(memorySize <= maxBlockSize);
-        ASSERT(IsPowerOfTwo(mMemorySize));
-        ASSERT(maxBlockSize % mMemorySize == 0);
+    BuddyMemoryAllocator::BuddyMemoryAllocator(uint64_t maxSystemSize,
+                                               uint64_t memoryBlockSize,
+                                               ResourceHeapAllocator* heapAllocator)
+        : mMemoryBlockSize(memoryBlockSize),
+          mBuddyBlockAllocator(maxSystemSize),
+          mHeapAllocator(heapAllocator) {
+        ASSERT(memoryBlockSize <= maxSystemSize);
+        ASSERT(IsPowerOfTwo(mMemoryBlockSize));
+        ASSERT(maxSystemSize % mMemoryBlockSize == 0);
 
-        mTrackedSubAllocations.resize(maxBlockSize / mMemorySize);
+        mTrackedSubAllocations.resize(maxSystemSize / mMemoryBlockSize);
     }
 
     uint64_t BuddyMemoryAllocator::GetMemoryIndex(uint64_t offset) const {
         ASSERT(offset != BuddyAllocator::kInvalidOffset);
-        return offset / mMemorySize;
+        return offset / mMemoryBlockSize;
     }
 
     ResultOrError<ResourceMemoryAllocation> BuddyMemoryAllocator::Allocate(uint64_t allocationSize,
@@ -45,7 +49,7 @@ namespace dawn_native {
         allocationSize = NextPowerOfTwo(allocationSize);
 
         // Allocation cannot exceed the memory size.
-        if (allocationSize > mMemorySize) {
+        if (allocationSize > mMemoryBlockSize) {
             return invalidAllocation;
         }
 
@@ -59,7 +63,7 @@ namespace dawn_native {
         if (mTrackedSubAllocations[memoryIndex].refcount == 0) {
             // Transfer ownership to this allocator
             std::unique_ptr<ResourceHeapBase> memory;
-            DAWN_TRY_ASSIGN(memory, mClient->Allocate(mMemorySize));
+            DAWN_TRY_ASSIGN(memory, mHeapAllocator->AllocateResourceHeap(mMemoryBlockSize));
             mTrackedSubAllocations[memoryIndex] = {/*refcount*/ 0, std::move(memory)};
         }
 
@@ -70,11 +74,11 @@ namespace dawn_native {
         info.mMethod = AllocationMethod::kSubAllocated;
 
         // Allocation offset is always local to the memory.
-        const uint64_t memoryOffset = blockOffset % mMemorySize;
+        const uint64_t memoryOffset = blockOffset % mMemoryBlockSize;
 
         return ResourceMemoryAllocation{
             info, memoryOffset, mTrackedSubAllocations[memoryIndex].mMemoryAllocation.get()};
-    }  // namespace dawn_native
+    }
 
     void BuddyMemoryAllocator::Deallocate(const ResourceMemoryAllocation& allocation) {
         const AllocationInfo info = allocation.GetInfo();
@@ -84,18 +88,18 @@ namespace dawn_native {
         const uint64_t memoryIndex = GetMemoryIndex(info.mBlockOffset);
 
         ASSERT(mTrackedSubAllocations[memoryIndex].refcount > 0);
-
         mTrackedSubAllocations[memoryIndex].refcount--;
 
         if (mTrackedSubAllocations[memoryIndex].refcount == 0) {
-            mClient->Deallocate(std::move(mTrackedSubAllocations[memoryIndex].mMemoryAllocation));
+            mHeapAllocator->DeallocateResourceHeap(
+                std::move(mTrackedSubAllocations[memoryIndex].mMemoryAllocation));
         }
 
         mBuddyBlockAllocator.Deallocate(info.mBlockOffset);
     }
 
-    uint64_t BuddyMemoryAllocator::GetMemorySize() const {
-        return mMemorySize;
+    uint64_t BuddyMemoryAllocator::GetMemoryBlockSize() const {
+        return mMemoryBlockSize;
     }
 
     uint64_t BuddyMemoryAllocator::ComputeTotalNumOfHeapsForTesting() const {
@@ -107,4 +111,5 @@ namespace dawn_native {
         }
         return count;
     }
+
 }  // namespace dawn_native
