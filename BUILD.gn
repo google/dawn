@@ -128,7 +128,6 @@ source_set("libdawn_native_sources") {
   ]
 
   configs += [ ":libdawn_native_internal" ]
-  all_dependent_configs = [ ":libdawn_native_weak_framework" ]
   libs = []
 
   # Dependencies that are needed to compile libdawn_native entry points in
@@ -517,6 +516,7 @@ dawn_component("libdawn_native") {
     "src/dawn_native/DawnNative.cpp",
   ]
   configs = [ ":libdawn_native_internal" ]
+  public_configs = [ ":libdawn_native_weak_framework" ]
 
   if (dawn_enable_d3d12) {
     sources += [ "src/dawn_native/d3d12/D3D12Backend.cpp" ]
