@@ -20,14 +20,14 @@ namespace dawn_wire { namespace client {
         // Callbacks need to be fired in all cases, as they can handle freeing resources
         // so we call them with "Unknown" status.
         for (auto& request : requests.IterateAll()) {
-            request.completionCallback(DAWN_FENCE_COMPLETION_STATUS_UNKNOWN, request.userdata);
+            request.completionCallback(WGPUFenceCompletionStatus_Unknown, request.userdata);
         }
         requests.Clear();
     }
 
     void Fence::CheckPassedFences() {
         for (auto& request : requests.IterateUpTo(completedValue)) {
-            request.completionCallback(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, request.userdata);
+            request.completionCallback(WGPUFenceCompletionStatus_Success, request.userdata);
         }
         requests.ClearUpTo(completedValue);
     }

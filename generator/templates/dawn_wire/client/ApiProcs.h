@@ -15,7 +15,7 @@
 #ifndef DAWNWIRE_CLIENT_APIPROCS_AUTOGEN_H_
 #define DAWNWIRE_CLIENT_APIPROCS_AUTOGEN_H_
 
-#include <dawn/dawn.h>
+#include <dawn/webgpu.h>
 
 namespace dawn_wire { namespace client {
 

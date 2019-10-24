@@ -15,7 +15,7 @@
 #ifndef DAWNWIRE_CLIENT_FENCE_H_
 #define DAWNWIRE_CLIENT_FENCE_H_
 
-#include <dawn/dawn.h>
+#include <dawn/webgpu.h>
 
 #include "common/SerialMap.h"
 #include "dawn_wire/client/ObjectBase.h"
@@ -30,7 +30,7 @@ namespace dawn_wire { namespace client {
         void CheckPassedFences();
 
         struct OnCompletionData {
-            DawnFenceOnCompletionCallback completionCallback = nullptr;
+            WGPUFenceOnCompletionCallback completionCallback = nullptr;
             void* userdata = nullptr;
         };
         Queue* queue = nullptr;

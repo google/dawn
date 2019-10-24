@@ -25,7 +25,7 @@ namespace dawn_wire {
         mImpl.reset();
     }
 
-    DawnDevice WireClient::GetDevice() const {
+    WGPUDevice WireClient::GetDevice() const {
         return mImpl->GetDevice();
     }
 
@@ -37,7 +37,7 @@ namespace dawn_wire {
         return mImpl->HandleCommands(commands, size);
     }
 
-    ReservedTexture WireClient::ReserveTexture(DawnDevice device) {
+    ReservedTexture WireClient::ReserveTexture(WGPUDevice device) {
         return mImpl->ReserveTexture(device);
     }
 
@@ -45,12 +45,12 @@ namespace dawn_wire {
         MemoryTransferService::~MemoryTransferService() = default;
 
         MemoryTransferService::ReadHandle*
-        MemoryTransferService::CreateReadHandle(DawnBuffer buffer, uint64_t offset, size_t size) {
+        MemoryTransferService::CreateReadHandle(WGPUBuffer buffer, uint64_t offset, size_t size) {
             return CreateReadHandle(size);
         }
 
         MemoryTransferService::WriteHandle*
-        MemoryTransferService::CreateWriteHandle(DawnBuffer buffer, uint64_t offset, size_t size) {
+        MemoryTransferService::CreateWriteHandle(WGPUBuffer buffer, uint64_t offset, size_t size) {
             return CreateWriteHandle(size);
         }
 

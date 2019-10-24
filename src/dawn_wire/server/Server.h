@@ -47,7 +47,7 @@ namespace dawn_wire { namespace server {
 
     class Server : public ServerBase {
       public:
-        Server(DawnDevice device,
+        Server(WGPUDevice device,
                const DawnProcTable& procs,
                CommandSerializer* serializer,
                MemoryTransferService* memoryTransferService);
@@ -55,38 +55,38 @@ namespace dawn_wire { namespace server {
 
         const volatile char* HandleCommands(const volatile char* commands, size_t size);
 
-        bool InjectTexture(DawnTexture texture, uint32_t id, uint32_t generation);
+        bool InjectTexture(WGPUTexture texture, uint32_t id, uint32_t generation);
 
       private:
         void* GetCmdSpace(size_t size);
 
         // Forwarding callbacks
-        static void ForwardUncapturedError(DawnErrorType type, const char* message, void* userdata);
-        static void ForwardPopErrorScope(DawnErrorType type, const char* message, void* userdata);
-        static void ForwardBufferMapReadAsync(DawnBufferMapAsyncStatus status,
+        static void ForwardUncapturedError(WGPUErrorType type, const char* message, void* userdata);
+        static void ForwardPopErrorScope(WGPUErrorType type, const char* message, void* userdata);
+        static void ForwardBufferMapReadAsync(WGPUBufferMapAsyncStatus status,
                                               const void* ptr,
                                               uint64_t dataLength,
                                               void* userdata);
-        static void ForwardBufferMapWriteAsync(DawnBufferMapAsyncStatus status,
+        static void ForwardBufferMapWriteAsync(WGPUBufferMapAsyncStatus status,
                                                void* ptr,
                                                uint64_t dataLength,
                                                void* userdata);
-        static void ForwardFenceCompletedValue(DawnFenceCompletionStatus status, void* userdata);
+        static void ForwardFenceCompletedValue(WGPUFenceCompletionStatus status, void* userdata);
 
         // Error callbacks
-        void OnUncapturedError(DawnErrorType type, const char* message);
-        void OnDevicePopErrorScope(DawnErrorType type,
+        void OnUncapturedError(WGPUErrorType type, const char* message);
+        void OnDevicePopErrorScope(WGPUErrorType type,
                                    const char* message,
                                    ErrorScopeUserdata* userdata);
-        void OnBufferMapReadAsyncCallback(DawnBufferMapAsyncStatus status,
+        void OnBufferMapReadAsyncCallback(WGPUBufferMapAsyncStatus status,
                                           const void* ptr,
                                           uint64_t dataLength,
                                           MapUserdata* userdata);
-        void OnBufferMapWriteAsyncCallback(DawnBufferMapAsyncStatus status,
+        void OnBufferMapWriteAsyncCallback(WGPUBufferMapAsyncStatus status,
                                            void* ptr,
                                            uint64_t dataLength,
                                            MapUserdata* userdata);
-        void OnFenceCompletedValueUpdated(DawnFenceCompletionStatus status,
+        void OnFenceCompletedValueUpdated(WGPUFenceCompletionStatus status,
                                           FenceCompletionUserdata* userdata);
 
 #include "dawn_wire/server/ServerPrototypes_autogen.inc"

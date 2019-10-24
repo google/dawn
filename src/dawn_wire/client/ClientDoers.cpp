@@ -20,13 +20,13 @@
 
 namespace dawn_wire { namespace client {
 
-    bool Client::DoDeviceUncapturedErrorCallback(DawnErrorType errorType, const char* message) {
+    bool Client::DoDeviceUncapturedErrorCallback(WGPUErrorType errorType, const char* message) {
         switch (errorType) {
-            case DAWN_ERROR_TYPE_NO_ERROR:
-            case DAWN_ERROR_TYPE_VALIDATION:
-            case DAWN_ERROR_TYPE_OUT_OF_MEMORY:
-            case DAWN_ERROR_TYPE_UNKNOWN:
-            case DAWN_ERROR_TYPE_DEVICE_LOST:
+            case WGPUErrorType_NoError:
+            case WGPUErrorType_Validation:
+            case WGPUErrorType_OutOfMemory:
+            case WGPUErrorType_Unknown:
+            case WGPUErrorType_DeviceLost:
                 break;
             default:
                 return false;
@@ -36,7 +36,7 @@ namespace dawn_wire { namespace client {
     }
 
     bool Client::DoDevicePopErrorScopeCallback(uint64_t requestSerial,
-                                               DawnErrorType errorType,
+                                               WGPUErrorType errorType,
                                                const char* message) {
         return mDevice->PopErrorScope(requestSerial, errorType, message);
     }
@@ -71,7 +71,7 @@ namespace dawn_wire { namespace client {
                 return false;
             }
 
-            if (status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
+            if (status == WGPUBufferMapAsyncStatus_Success) {
                 if (buffer->readHandle || buffer->writeHandle) {
                     // Buffer is already mapped.
                     return false;
@@ -105,11 +105,10 @@ namespace dawn_wire { namespace client {
         if (!GetMappedData()) {
             // Dawn promises that all callbacks are called in finite time. Even if a fatal error
             // occurs, the callback is called.
-            request.readCallback(DAWN_BUFFER_MAP_ASYNC_STATUS_DEVICE_LOST, nullptr, 0,
-                                 request.userdata);
+            request.readCallback(WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0, request.userdata);
             return false;
         } else {
-            request.readCallback(static_cast<DawnBufferMapAsyncStatus>(status), mappedData,
+            request.readCallback(static_cast<WGPUBufferMapAsyncStatus>(status), mappedData,
                                  static_cast<uint64_t>(mappedDataLength), request.userdata);
             return true;
         }
@@ -143,7 +142,7 @@ namespace dawn_wire { namespace client {
                 return false;
             }
 
-            if (status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
+            if (status == WGPUBufferMapAsyncStatus_Success) {
                 if (buffer->readHandle || buffer->writeHandle) {
                     // Buffer is already mapped.
                     return false;
@@ -169,11 +168,11 @@ namespace dawn_wire { namespace client {
         if (!GetMappedData()) {
             // Dawn promises that all callbacks are called in finite time. Even if a fatal error
             // occurs, the callback is called.
-            request.writeCallback(DAWN_BUFFER_MAP_ASYNC_STATUS_DEVICE_LOST, nullptr, 0,
+            request.writeCallback(WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0,
                                   request.userdata);
             return false;
         } else {
-            request.writeCallback(static_cast<DawnBufferMapAsyncStatus>(status), mappedData,
+            request.writeCallback(static_cast<WGPUBufferMapAsyncStatus>(status), mappedData,
                                   static_cast<uint64_t>(mappedDataLength), request.userdata);
             return true;
         }

@@ -29,7 +29,7 @@ namespace dawn_wire {
     }
 
     struct ReservedTexture {
-        DawnTexture texture;
+        WGPUTexture texture;
         uint32_t id;
         uint32_t generation;
     };
@@ -44,12 +44,12 @@ namespace dawn_wire {
         WireClient(const WireClientDescriptor& descriptor);
         ~WireClient();
 
-        DawnDevice GetDevice() const;
+        WGPUDevice GetDevice() const;
         DawnProcTable GetProcs() const;
         const volatile char* HandleCommands(const volatile char* commands,
                                             size_t size) override final;
 
-        ReservedTexture ReserveTexture(DawnDevice device);
+        ReservedTexture ReserveTexture(WGPUDevice device);
 
       private:
         std::unique_ptr<client::Client> mImpl;
@@ -74,8 +74,8 @@ namespace dawn_wire {
             // Imported memory implementation needs to override these to create Read/Write
             // handles associated with a particular buffer. The client should receive a file
             // descriptor for the buffer out-of-band.
-            virtual ReadHandle* CreateReadHandle(DawnBuffer, uint64_t offset, size_t size);
-            virtual WriteHandle* CreateWriteHandle(DawnBuffer, uint64_t offset, size_t size);
+            virtual ReadHandle* CreateReadHandle(WGPUBuffer, uint64_t offset, size_t size);
+            virtual WriteHandle* CreateWriteHandle(WGPUBuffer, uint64_t offset, size_t size);
 
             class DAWN_WIRE_EXPORT ReadHandle {
               public:

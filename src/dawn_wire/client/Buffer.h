@@ -15,7 +15,7 @@
 #ifndef DAWNWIRE_CLIENT_BUFFER_H_
 #define DAWNWIRE_CLIENT_BUFFER_H_
 
-#include <dawn/dawn.h>
+#include <dawn/webgpu.h>
 
 #include "dawn_wire/WireClient.h"
 #include "dawn_wire/client/ObjectBase.h"
@@ -28,15 +28,15 @@ namespace dawn_wire { namespace client {
         using ObjectBase::ObjectBase;
 
         ~Buffer();
-        void ClearMapRequests(DawnBufferMapAsyncStatus status);
+        void ClearMapRequests(WGPUBufferMapAsyncStatus status);
 
         // We want to defer all the validation to the server, which means we could have multiple
         // map request in flight at a single time and need to track them separately.
         // On well-behaved applications, only one request should exist at a single time.
         struct MapRequestData {
             // TODO(enga): Use a tagged pointer to save space.
-            DawnBufferMapReadCallback readCallback = nullptr;
-            DawnBufferMapWriteCallback writeCallback = nullptr;
+            WGPUBufferMapReadCallback readCallback = nullptr;
+            WGPUBufferMapWriteCallback writeCallback = nullptr;
             void* userdata = nullptr;
             // TODO(enga): Use a tagged pointer to save space.
             std::unique_ptr<MemoryTransferService::ReadHandle> readHandle = nullptr;

@@ -456,13 +456,13 @@ namespace dawn_wire {
         {{ write_command_serialization_methods(command, True) }}
     {% endfor %}
 
-        // Implementations of serialization/deserialization of DawnDeviceProperties.
-        size_t SerializedWGPUDevicePropertiesSize(const DawnDeviceProperties* deviceProperties) {
-            return sizeof(DawnDeviceProperties) +
+        // Implementations of serialization/deserialization of WPGUDeviceProperties.
+        size_t SerializedWGPUDevicePropertiesSize(const WGPUDeviceProperties* deviceProperties) {
+            return sizeof(WGPUDeviceProperties) +
                    WGPUDevicePropertiesGetExtraRequiredSize(*deviceProperties);
         }
 
-        void SerializeWGPUDeviceProperties(const DawnDeviceProperties* deviceProperties,
+        void SerializeWGPUDeviceProperties(const WGPUDeviceProperties* deviceProperties,
                                            char* serializeBuffer) {
             size_t devicePropertiesSize = SerializedWGPUDevicePropertiesSize(deviceProperties);
             WGPUDevicePropertiesTransfer* transfer =
@@ -472,7 +472,7 @@ namespace dawn_wire {
             WGPUDevicePropertiesSerialize(*deviceProperties, transfer, &serializeBuffer);
         }
 
-        bool DeserializeWGPUDeviceProperties(DawnDeviceProperties* deviceProperties,
+        bool DeserializeWGPUDeviceProperties(WGPUDeviceProperties* deviceProperties,
                                              const volatile char* deserializeBuffer) {
             size_t devicePropertiesSize = SerializedWGPUDevicePropertiesSize(deviceProperties);
             const volatile WGPUDevicePropertiesTransfer* transfer = nullptr;

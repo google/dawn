@@ -16,12 +16,12 @@
 
 namespace dawn_wire { namespace server {
 
-    void Server::ForwardUncapturedError(DawnErrorType type, const char* message, void* userdata) {
+    void Server::ForwardUncapturedError(WGPUErrorType type, const char* message, void* userdata) {
         auto server = static_cast<Server*>(userdata);
         server->OnUncapturedError(type, message);
     }
 
-    void Server::OnUncapturedError(DawnErrorType type, const char* message) {
+    void Server::OnUncapturedError(WGPUErrorType type, const char* message) {
         ReturnDeviceUncapturedErrorCallbackCmd cmd;
         cmd.type = type;
         cmd.message = message;
@@ -31,7 +31,7 @@ namespace dawn_wire { namespace server {
         cmd.Serialize(allocatedBuffer);
     }
 
-    bool Server::DoDevicePopErrorScope(DawnDevice cDevice, uint64_t requestSerial) {
+    bool Server::DoDevicePopErrorScope(WGPUDevice cDevice, uint64_t requestSerial) {
         ErrorScopeUserdata* userdata = new ErrorScopeUserdata;
         userdata->server = this;
         userdata->requestSerial = requestSerial;
@@ -44,12 +44,12 @@ namespace dawn_wire { namespace server {
     }
 
     // static
-    void Server::ForwardPopErrorScope(DawnErrorType type, const char* message, void* userdata) {
+    void Server::ForwardPopErrorScope(WGPUErrorType type, const char* message, void* userdata) {
         auto* data = reinterpret_cast<ErrorScopeUserdata*>(userdata);
         data->server->OnDevicePopErrorScope(type, message, data);
     }
 
-    void Server::OnDevicePopErrorScope(DawnErrorType type,
+    void Server::OnDevicePopErrorScope(WGPUErrorType type,
                                        const char* message,
                                        ErrorScopeUserdata* userdata) {
         std::unique_ptr<ErrorScopeUserdata> data{userdata};

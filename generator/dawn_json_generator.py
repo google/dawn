@@ -458,7 +458,7 @@ def as_wireType(typ):
     if typ.category == 'object':
         return typ.name.CamelCase() + '*'
     elif typ.category in ['bitmask', 'enum']:
-        return 'Dawn' + typ.name.CamelCase()
+        return 'WGPU' + typ.name.CamelCase()
     else:
         return as_cppType(typ.name)
 

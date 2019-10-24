@@ -92,8 +92,8 @@ namespace dawn_wire { namespace server {
         return true;
     }
 
-    bool Server::DoDeviceCreateBufferMapped(DawnDevice device,
-                                            const DawnBufferDescriptor* descriptor,
+    bool Server::DoDeviceCreateBufferMapped(WGPUDevice device,
+                                            const WGPUBufferDescriptor* descriptor,
                                             ObjectHandle bufferResult,
                                             uint64_t handleCreateInfoLength,
                                             const uint8_t* handleCreateInfo) {
@@ -109,7 +109,7 @@ namespace dawn_wire { namespace server {
         }
         resultData->serial = bufferResult.serial;
 
-        DawnCreateBufferMappedResult result = mProcs.deviceCreateBufferMapped(device, descriptor);
+        WGPUCreateBufferMappedResult result = mProcs.deviceCreateBufferMapped(device, descriptor);
         ASSERT(result.buffer != nullptr);
         if (result.data == nullptr && result.dataLength != 0) {
             // Non-zero dataLength but null data is used to indicate an allocation error.
@@ -140,8 +140,8 @@ namespace dawn_wire { namespace server {
         return true;
     }
 
-    bool Server::DoDeviceCreateBufferMappedAsync(DawnDevice device,
-                                                 const DawnBufferDescriptor* descriptor,
+    bool Server::DoDeviceCreateBufferMappedAsync(WGPUDevice device,
+                                                 const WGPUBufferDescriptor* descriptor,
                                                  uint32_t requestSerial,
                                                  ObjectHandle bufferResult,
                                                  uint64_t handleCreateInfoLength,
@@ -158,8 +158,8 @@ namespace dawn_wire { namespace server {
         cmd.buffer = ObjectHandle{bufferResult.id, bufferResult.serial};
         cmd.requestSerial = requestSerial;
         cmd.status = bufferData->mapWriteState == BufferMapWriteState::Mapped
-                         ? DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS
-                         : DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR;
+                         ? WGPUBufferMapAsyncStatus_Success
+                         : WGPUBufferMapAsyncStatus_Error;
 
         size_t requiredSize = cmd.GetRequiredSize();
         char* allocatedBuffer = static_cast<char*>(GetCmdSpace(requiredSize));
@@ -223,7 +223,7 @@ namespace dawn_wire { namespace server {
                                                      static_cast<size_t>(writeFlushInfoLength));
     }
 
-    void Server::ForwardBufferMapReadAsync(DawnBufferMapAsyncStatus status,
+    void Server::ForwardBufferMapReadAsync(WGPUBufferMapAsyncStatus status,
                                            const void* ptr,
                                            uint64_t dataLength,
                                            void* userdata) {
@@ -231,7 +231,7 @@ namespace dawn_wire { namespace server {
         data->server->OnBufferMapReadAsyncCallback(status, ptr, dataLength, data);
     }
 
-    void Server::ForwardBufferMapWriteAsync(DawnBufferMapAsyncStatus status,
+    void Server::ForwardBufferMapWriteAsync(WGPUBufferMapAsyncStatus status,
                                             void* ptr,
                                             uint64_t dataLength,
                                             void* userdata) {
@@ -239,7 +239,7 @@ namespace dawn_wire { namespace server {
         data->server->OnBufferMapWriteAsyncCallback(status, ptr, dataLength, data);
     }
 
-    void Server::OnBufferMapReadAsyncCallback(DawnBufferMapAsyncStatus status,
+    void Server::OnBufferMapReadAsyncCallback(WGPUBufferMapAsyncStatus status,
                                               const void* ptr,
                                               uint64_t dataLength,
                                               MapUserdata* userdata) {
@@ -252,7 +252,7 @@ namespace dawn_wire { namespace server {
         }
 
         size_t initialDataInfoLength = 0;
-        if (status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
+        if (status == WGPUBufferMapAsyncStatus_Success) {
             // Get the serialization size of the message to initialize ReadHandle data.
             initialDataInfoLength = data->readHandle->SerializeInitialDataSize(ptr, dataLength);
         } else {
@@ -271,7 +271,7 @@ namespace dawn_wire { namespace server {
         char* allocatedBuffer = static_cast<char*>(GetCmdSpace(requiredSize));
         cmd.Serialize(allocatedBuffer);
 
-        if (status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
+        if (status == WGPUBufferMapAsyncStatus_Success) {
             // Serialize the initialization message into the space after the command.
             data->readHandle->SerializeInitialData(ptr, dataLength, allocatedBuffer + commandSize);
 
@@ -281,7 +281,7 @@ namespace dawn_wire { namespace server {
         }
     }
 
-    void Server::OnBufferMapWriteAsyncCallback(DawnBufferMapAsyncStatus status,
+    void Server::OnBufferMapWriteAsyncCallback(WGPUBufferMapAsyncStatus status,
                                                void* ptr,
                                                uint64_t dataLength,
                                                MapUserdata* userdata) {
@@ -302,7 +302,7 @@ namespace dawn_wire { namespace server {
         char* allocatedBuffer = static_cast<char*>(GetCmdSpace(requiredSize));
         cmd.Serialize(allocatedBuffer);
 
-        if (status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS) {
+        if (status == WGPUBufferMapAsyncStatus_Success) {
             // The in-flight map request returned successfully.
             // Move the WriteHandle so it is owned by the buffer.
             bufferData->writeHandle = std::move(data->writeHandle);

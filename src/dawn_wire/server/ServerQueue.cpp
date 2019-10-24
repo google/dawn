@@ -17,7 +17,7 @@
 
 namespace dawn_wire { namespace server {
 
-    bool Server::DoQueueSignal(DawnQueue cSelf, DawnFence cFence, uint64_t signalValue) {
+    bool Server::DoQueueSignal(WGPUQueue cSelf, WGPUFence cFence, uint64_t signalValue) {
         if (cFence == nullptr) {
             return false;
         }

@@ -28,7 +28,7 @@ namespace dawn_wire { namespace client {
     Device::~Device() {
         auto errorScopes = std::move(mErrorScopes);
         for (const auto& it : errorScopes) {
-            it.second.callback(DAWN_ERROR_TYPE_UNKNOWN, "Device destroyed", it.second.userdata);
+            it.second.callback(WGPUErrorType_Unknown, "Device destroyed", it.second.userdata);
         }
     }
 
@@ -36,22 +36,22 @@ namespace dawn_wire { namespace client {
         return mClient;
     }
 
-    void Device::HandleError(DawnErrorType errorType, const char* message) {
+    void Device::HandleError(WGPUErrorType errorType, const char* message) {
         if (mErrorCallback) {
             mErrorCallback(errorType, message, mErrorUserdata);
         }
     }
 
-    void Device::SetUncapturedErrorCallback(DawnErrorCallback errorCallback, void* errorUserdata) {
+    void Device::SetUncapturedErrorCallback(WGPUErrorCallback errorCallback, void* errorUserdata) {
         mErrorCallback = errorCallback;
         mErrorUserdata = errorUserdata;
     }
 
-    void Device::PushErrorScope(DawnErrorFilter filter) {
+    void Device::PushErrorScope(WGPUErrorFilter filter) {
         mErrorScopeStackSize++;
 
         DevicePushErrorScopeCmd cmd;
-        cmd.self = reinterpret_cast<DawnDevice>(this);
+        cmd.self = reinterpret_cast<WGPUDevice>(this);
         cmd.filter = filter;
 
         Client* wireClient = GetClient();
@@ -60,7 +60,7 @@ namespace dawn_wire { namespace client {
         cmd.Serialize(allocatedBuffer, *wireClient);
     }
 
-    bool Device::RequestPopErrorScope(DawnErrorCallback callback, void* userdata) {
+    bool Device::RequestPopErrorScope(WGPUErrorCallback callback, void* userdata) {
         if (mErrorScopeStackSize == 0) {
             return false;
         }
@@ -72,7 +72,7 @@ namespace dawn_wire { namespace client {
         mErrorScopes[serial] = {callback, userdata};
 
         DevicePopErrorScopeCmd cmd;
-        cmd.device = reinterpret_cast<DawnDevice>(this);
+        cmd.device = reinterpret_cast<WGPUDevice>(this);
         cmd.requestSerial = serial;
 
         Client* wireClient = GetClient();
@@ -83,13 +83,13 @@ namespace dawn_wire { namespace client {
         return true;
     }
 
-    bool Device::PopErrorScope(uint64_t requestSerial, DawnErrorType type, const char* message) {
+    bool Device::PopErrorScope(uint64_t requestSerial, WGPUErrorType type, const char* message) {
         switch (type) {
-            case DAWN_ERROR_TYPE_NO_ERROR:
-            case DAWN_ERROR_TYPE_VALIDATION:
-            case DAWN_ERROR_TYPE_OUT_OF_MEMORY:
-            case DAWN_ERROR_TYPE_UNKNOWN:
-            case DAWN_ERROR_TYPE_DEVICE_LOST:
+            case WGPUErrorType_NoError:
+            case WGPUErrorType_Validation:
+            case WGPUErrorType_OutOfMemory:
+            case WGPUErrorType_Unknown:
+            case WGPUErrorType_DeviceLost:
                 break;
             default:
                 return false;

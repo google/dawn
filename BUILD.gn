@@ -821,7 +821,6 @@ test("dawn_unittests") {
     "src/tests/unittests/wire/WireArgumentTests.cpp",
     "src/tests/unittests/wire/WireBasicTests.cpp",
     "src/tests/unittests/wire/WireBufferMappingTests.cpp",
-    "src/tests/unittests/wire/WireDawnDevicePropertiesTests.cpp",
     "src/tests/unittests/wire/WireErrorCallbackTests.cpp",
     "src/tests/unittests/wire/WireFenceTests.cpp",
     "src/tests/unittests/wire/WireInjectTextureTests.cpp",
@@ -829,6 +828,7 @@ test("dawn_unittests") {
     "src/tests/unittests/wire/WireOptionalTests.cpp",
     "src/tests/unittests/wire/WireTest.cpp",
     "src/tests/unittests/wire/WireTest.h",
+    "src/tests/unittests/wire/WireWGPUDevicePropertiesTests.cpp",
   ]
 
   if (dawn_enable_d3d12) {

@@ -15,7 +15,7 @@
 #ifndef DAWNWIRE_CLIENT_CLIENT_H_
 #define DAWNWIRE_CLIENT_CLIENT_H_
 
-#include <dawn/dawn.h>
+#include <dawn/webgpu.h>
 #include <dawn_wire/Wire.h>
 
 #include "dawn_wire/WireClient.h"
@@ -34,14 +34,14 @@ namespace dawn_wire { namespace client {
         ~Client();
 
         const volatile char* HandleCommands(const volatile char* commands, size_t size);
-        ReservedTexture ReserveTexture(DawnDevice device);
+        ReservedTexture ReserveTexture(WGPUDevice device);
 
         void* GetCmdSpace(size_t size) {
             return mSerializer->GetCmdSpace(size);
         }
 
-        DawnDevice GetDevice() const {
-            return reinterpret_cast<DawnDeviceImpl*>(mDevice);
+        WGPUDevice GetDevice() const {
+            return reinterpret_cast<WGPUDeviceImpl*>(mDevice);
         }
 
         MemoryTransferService* GetMemoryTransferService() const {
