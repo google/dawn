@@ -18,12 +18,13 @@
 #include "dawn_native/Texture.h"
 
 #include "common/vulkan_platform.h"
+#include "dawn_native/ResourceMemoryAllocation.h"
 #include "dawn_native/vulkan/ExternalHandle.h"
-#include "dawn_native/vulkan/MemoryAllocator.h"
 
 namespace dawn_native { namespace vulkan {
 
     struct CommandRecordingContext;
+    class Device;
     struct ExternalImageDescriptor;
 
     VkFormat VulkanImageFormat(wgpu::TextureFormat format);
@@ -85,7 +86,7 @@ namespace dawn_native { namespace vulkan {
                                 TextureBase::ClearValue);
 
         VkImage mHandle = VK_NULL_HANDLE;
-        DeviceMemoryAllocation mMemoryAllocation;
+        ResourceMemoryAllocation mMemoryAllocation;
         VkDeviceMemory mExternalAllocation = VK_NULL_HANDLE;
 
         enum class ExternalState {

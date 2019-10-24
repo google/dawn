@@ -15,7 +15,7 @@
 #include "dawn_native/vulkan/StagingBufferVk.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
-#include "dawn_native/vulkan/ResourceMemoryVk.h"
+#include "dawn_native/vulkan/ResourceHeapVk.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
 namespace dawn_native { namespace vulkan {

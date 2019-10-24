@@ -19,9 +19,10 @@
 
 #include "common/vulkan_platform.h"
 #include "dawn_native/Error.h"
-#include "dawn_native/vulkan/MemoryAllocator.h"
 
 namespace dawn_native { namespace vulkan {
+
+    class Device;
 
     class Sampler : public SamplerBase {
       public:

@@ -12,17 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "dawn_native/vulkan/ResourceMemoryAllocatorVk.h"
+
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
-#include "dawn_native/vulkan/ResourceMemoryVk.h"
+#include "dawn_native/vulkan/ResourceHeapVk.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
 namespace dawn_native { namespace vulkan {
 
-    MemoryResourceAllocator::MemoryResourceAllocator(Device* device) : mDevice(device) {
+    ResourceMemoryAllocator::ResourceMemoryAllocator(Device* device) : mDevice(device) {
     }
 
-    int MemoryResourceAllocator::FindBestTypeIndex(VkMemoryRequirements requirements,
+    int ResourceMemoryAllocator::FindBestTypeIndex(VkMemoryRequirements requirements,
                                                    bool mappable) {
         const VulkanDeviceInfo& info = mDevice->GetDeviceInfo();
 
@@ -76,7 +78,7 @@ namespace dawn_native { namespace vulkan {
         return bestType;
     }
 
-    ResultOrError<ResourceMemoryAllocation> MemoryResourceAllocator::Allocate(
+    ResultOrError<ResourceMemoryAllocation> ResourceMemoryAllocator::Allocate(
         VkMemoryRequirements requirements,
         bool mappable) {
         int bestType = FindBestTypeIndex(requirements, mappable);
@@ -108,11 +110,11 @@ namespace dawn_native { namespace vulkan {
         AllocationInfo info;
         info.mMethod = AllocationMethod::kDirect;
 
-        return ResourceMemoryAllocation(info, /*offset*/ 0, new ResourceMemory(allocatedMemory),
+        return ResourceMemoryAllocation(info, /*offset*/ 0, new ResourceHeap(allocatedMemory),
                                         static_cast<uint8_t*>(mappedPointer));
     }
 
-    void MemoryResourceAllocator::Deallocate(ResourceMemoryAllocation& allocation) {
+    void ResourceMemoryAllocator::Deallocate(ResourceMemoryAllocation& allocation) {
         mDevice->GetFencedDeleter()->DeleteWhenUnused(
             ToBackend(allocation.GetResourceHeap())->GetMemory());
     }

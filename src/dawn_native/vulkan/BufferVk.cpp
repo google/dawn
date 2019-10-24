@@ -16,8 +16,8 @@
 
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
-#include "dawn_native/vulkan/MemoryResourceAllocatorVk.h"
-#include "dawn_native/vulkan/ResourceMemoryVk.h"
+#include "dawn_native/vulkan/ResourceHeapVk.h"
+#include "dawn_native/vulkan/ResourceMemoryAllocatorVk.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
 #include <cstring>

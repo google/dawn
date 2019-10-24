@@ -33,6 +33,7 @@
 #include "dawn_native/vulkan/QueueVk.h"
 #include "dawn_native/vulkan/RenderPassCache.h"
 #include "dawn_native/vulkan/RenderPipelineVk.h"
+#include "dawn_native/vulkan/ResourceMemoryAllocatorVk.h"
 #include "dawn_native/vulkan/SamplerVk.h"
 #include "dawn_native/vulkan/ShaderModuleVk.h"
 #include "dawn_native/vulkan/StagingBufferVk.h"
@@ -68,9 +69,8 @@ namespace dawn_native { namespace vulkan {
         GatherQueueFromDevice();
         mDeleter = std::make_unique<FencedDeleter>(this);
         mMapRequestTracker = std::make_unique<MapRequestTracker>(this);
-        mMemoryAllocator = std::make_unique<MemoryAllocator>(this);
         mRenderPassCache = std::make_unique<RenderPassCache>(this);
-        mResourceAllocator = std::make_unique<MemoryResourceAllocator>(this);
+        mResourceMemoryAllocator = std::make_unique<ResourceMemoryAllocator>(this);
 
         mExternalMemoryService = std::make_unique<external_memory::Service>(this);
         mExternalSemaphoreService = std::make_unique<external_semaphore::Service>(this);
@@ -138,7 +138,6 @@ namespace dawn_native { namespace vulkan {
 
         mDeleter = nullptr;
         mMapRequestTracker = nullptr;
-        mMemoryAllocator = nullptr;
 
         // The VkRenderPasses in the cache can be destroyed immediately since all commands referring
         // to them are guaranteed to be finished executing.
@@ -223,8 +222,6 @@ namespace dawn_native { namespace vulkan {
         // as it enqueues resources to be released.
         mDynamicUploader->Deallocate(mCompletedSerial);
 
-        mMemoryAllocator->Tick(mCompletedSerial);
-
         mDeleter->Tick(mCompletedSerial);
 
         if (mRecordingContext.used) {
@@ -260,10 +257,6 @@ namespace dawn_native { namespace vulkan {
 
     MapRequestTracker* Device::GetMapRequestTracker() const {
         return mMapRequestTracker.get();
-    }
-
-    MemoryAllocator* Device::GetMemoryAllocator() const {
-        return mMemoryAllocator.get();
     }
 
     FencedDeleter* Device::GetFencedDeleter() const {
@@ -689,19 +682,22 @@ namespace dawn_native { namespace vulkan {
         VkMemoryRequirements requirements,
         bool mappable) {
         // TODO(crbug.com/dawn/27): Support sub-allocation.
-        ResourceMemoryAllocation allocation;
-        DAWN_TRY_ASSIGN(allocation, mResourceAllocator->Allocate(requirements, mappable));
-        return allocation;
+        return mResourceMemoryAllocator->Allocate(requirements, mappable);
     }
 
     void Device::DeallocateMemory(ResourceMemoryAllocation& allocation) {
         if (allocation.GetInfo().mMethod == AllocationMethod::kInvalid) {
             return;
         }
-        mResourceAllocator->Deallocate(allocation);
+        mResourceMemoryAllocator->Deallocate(allocation);
 
         // Invalidate the underlying resource heap in case the client accidentally
         // calls DeallocateMemory again using the same allocation.
         allocation.Invalidate();
     }
+
+    ResourceMemoryAllocator* Device::GetResourceMemoryAllocatorForTesting() const {
+        return mResourceMemoryAllocator.get();
+    }
+
 }}  // namespace dawn_native::vulkan

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_VULKAN_MEMORYRESOURCEALLOCATORVK_H_
-#define DAWNNATIVE_VULKAN_MEMORYRESOURCEALLOCATORVK_H_
+#ifndef DAWNNATIVE_VULKAN_RESOURCEMEMORYALLOCATORVK_H_
+#define DAWNNATIVE_VULKAN_RESOURCEMEMORYALLOCATORVK_H_
 
 #include "common/vulkan_platform.h"
 #include "dawn_native/Error.h"
@@ -23,21 +23,21 @@ namespace dawn_native { namespace vulkan {
 
     class Device;
 
-    class MemoryResourceAllocator {
+    class ResourceMemoryAllocator {
       public:
-        MemoryResourceAllocator(Device* device);
-        ~MemoryResourceAllocator() = default;
+        ResourceMemoryAllocator(Device* device);
+        ~ResourceMemoryAllocator() = default;
 
         ResultOrError<ResourceMemoryAllocation> Allocate(VkMemoryRequirements requirements,
                                                          bool mappable);
         void Deallocate(ResourceMemoryAllocation& allocation);
 
-      private:
         int FindBestTypeIndex(VkMemoryRequirements requirements, bool mappable);
 
+      private:
         Device* mDevice;
     };
 
 }}  // namespace dawn_native::vulkan
 
-#endif  // DAWNNATIVE_VULKAN_MEMORYRESOURCEALLOCATORVK_H_
+#endif  // DAWNNATIVE_VULKAN_RESOURCEMEMORYALLOCATORVK_H_

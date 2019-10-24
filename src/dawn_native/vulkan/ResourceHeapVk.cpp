@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn_native/vulkan/ResourceMemoryVk.h"
+#include "dawn_native/vulkan/ResourceHeapVk.h"
 
 namespace dawn_native { namespace vulkan {
 
-    ResourceMemory::ResourceMemory(VkDeviceMemory memory) : mMemory(memory) {
+    ResourceHeap::ResourceHeap(VkDeviceMemory memory) : mMemory(memory) {
     }
 
-    VkDeviceMemory ResourceMemory::GetMemory() const {
+    VkDeviceMemory ResourceHeap::GetMemory() const {
         return mMemory;
     }
 

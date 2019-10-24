@@ -20,7 +20,7 @@
 #include "dawn_native/vulkan/AdapterVk.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
-#include "dawn_native/vulkan/MemoryAllocator.h"
+#include "dawn_native/vulkan/ResourceMemoryAllocatorVk.h"
 #include "dawn_native/vulkan/TextureVk.h"
 #include "utils/DawnHelpers.h"
 #include "utils/SystemUtils.h"
@@ -89,7 +89,8 @@ namespace {
             externalInfo.pNext = nullptr;
             externalInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
 
-            int bestType = deviceVk->GetMemoryAllocator()->FindBestTypeIndex(requirements, false);
+            int bestType = deviceVk->GetResourceMemoryAllocatorForTesting()->FindBestTypeIndex(
+                requirements, false);
             VkMemoryAllocateInfo allocateInfo;
             allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
             allocateInfo.pNext = &externalInfo;

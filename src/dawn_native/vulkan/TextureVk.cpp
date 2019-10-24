@@ -24,6 +24,7 @@
 #include "dawn_native/vulkan/CommandRecordingContext.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
+#include "dawn_native/vulkan/ResourceHeapVk.h"
 #include "dawn_native/vulkan/StagingBufferVk.h"
 #include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
@@ -460,14 +461,13 @@ namespace dawn_native { namespace vulkan {
         VkMemoryRequirements requirements;
         device->fn.GetImageMemoryRequirements(device->GetVkDevice(), mHandle, &requirements);
 
-        if (!device->GetMemoryAllocator()->Allocate(requirements, false, &mMemoryAllocation)) {
-            return DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate texture");
-        }
+        DAWN_TRY_ASSIGN(mMemoryAllocation, device->AllocateMemory(requirements, false));
 
-        DAWN_TRY(CheckVkSuccess(device->fn.BindImageMemory(device->GetVkDevice(), mHandle,
-                                                           mMemoryAllocation.GetMemory(),
-                                                           mMemoryAllocation.GetMemoryOffset()),
-                                "BindImageMemory"));
+        DAWN_TRY(CheckVkSuccess(
+            device->fn.BindImageMemory(device->GetVkDevice(), mHandle,
+                                       ToBackend(mMemoryAllocation.GetResourceHeap())->GetMemory(),
+                                       mMemoryAllocation.GetOffset()),
+            "BindImageMemory"));
 
         if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
             DAWN_TRY(ClearTexture(ToBackend(GetDevice())->GetPendingRecordingContext(), 0,
@@ -581,13 +581,9 @@ namespace dawn_native { namespace vulkan {
         if (GetTextureState() == TextureState::OwnedInternal) {
             Device* device = ToBackend(GetDevice());
 
-            // If we own the resource, release it.
-            if (mMemoryAllocation.GetMemory() != VK_NULL_HANDLE) {
-                // We need to free both the memory allocation and the container. Memory should be
-                // freed after the VkImage is destroyed and this is taken care of by the
-                // FencedDeleter.
-                device->GetMemoryAllocator()->Free(&mMemoryAllocation);
-            }
+            // For textures created from a VkImage, the allocation if kInvalid so the Device knows
+            // to skip the deallocation of the (absence of) VkDeviceMemory.
+            device->DeallocateMemory(mMemoryAllocation);
 
             if (mHandle != VK_NULL_HANDLE) {
                 device->GetFencedDeleter()->DeleteWhenUnused(mHandle);
