@@ -23,13 +23,15 @@ namespace dawn_native { namespace vulkan {
     // Wrapper for physical memory used with or without a resource object.
     class ResourceHeap : public ResourceHeapBase {
       public:
-        ResourceHeap(VkDeviceMemory memory);
+        ResourceHeap(VkDeviceMemory memory, size_t memoryType);
         ~ResourceHeap() = default;
 
         VkDeviceMemory GetMemory() const;
+        size_t GetMemoryType() const;
 
       private:
         VkDeviceMemory mMemory = VK_NULL_HANDLE;
+        size_t mMemoryType = 0;
     };
 
 }}  // namespace dawn_native::vulkan

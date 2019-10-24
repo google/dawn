@@ -16,11 +16,16 @@
 
 namespace dawn_native { namespace vulkan {
 
-    ResourceHeap::ResourceHeap(VkDeviceMemory memory) : mMemory(memory) {
+    ResourceHeap::ResourceHeap(VkDeviceMemory memory, size_t memoryType)
+        : mMemory(memory), mMemoryType(memoryType) {
     }
 
     VkDeviceMemory ResourceHeap::GetMemory() const {
         return mMemory;
+    }
+
+    size_t ResourceHeap::GetMemoryType() const {
+        return mMemoryType;
     }
 
 }}  // namespace dawn_native::vulkan

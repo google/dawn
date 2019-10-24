@@ -91,7 +91,7 @@ namespace dawn_native { namespace vulkan {
 
         ResultOrError<ResourceMemoryAllocation> AllocateMemory(VkMemoryRequirements requirements,
                                                                bool mappable);
-        void DeallocateMemory(ResourceMemoryAllocation& allocation);
+        void DeallocateMemory(ResourceMemoryAllocation* allocation);
 
         ResourceMemoryAllocator* GetResourceMemoryAllocatorForTesting() const;
 

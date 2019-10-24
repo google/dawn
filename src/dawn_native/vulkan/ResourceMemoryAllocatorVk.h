@@ -15,9 +15,12 @@
 #ifndef DAWNNATIVE_VULKAN_RESOURCEMEMORYALLOCATORVK_H_
 #define DAWNNATIVE_VULKAN_RESOURCEMEMORYALLOCATORVK_H_
 
+#include "common/SerialQueue.h"
 #include "common/vulkan_platform.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/ResourceMemoryAllocation.h"
+
+#include <vector>
 
 namespace dawn_native { namespace vulkan {
 
@@ -26,16 +29,23 @@ namespace dawn_native { namespace vulkan {
     class ResourceMemoryAllocator {
       public:
         ResourceMemoryAllocator(Device* device);
-        ~ResourceMemoryAllocator() = default;
+        ~ResourceMemoryAllocator();
 
-        ResultOrError<ResourceMemoryAllocation> Allocate(VkMemoryRequirements requirements,
+        ResultOrError<ResourceMemoryAllocation> Allocate(const VkMemoryRequirements& requirements,
                                                          bool mappable);
-        void Deallocate(ResourceMemoryAllocation& allocation);
+        void Deallocate(ResourceMemoryAllocation* allocation);
+
+        void Tick(Serial completedSerial);
 
         int FindBestTypeIndex(VkMemoryRequirements requirements, bool mappable);
 
       private:
         Device* mDevice;
+
+        class SingleTypeAllocator;
+        std::vector<std::unique_ptr<SingleTypeAllocator>> mAllocatorsPerType;
+
+        SerialQueue<ResourceMemoryAllocation> mSubAllocationsToDelete;
     };
 
 }}  // namespace dawn_native::vulkan

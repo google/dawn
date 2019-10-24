@@ -583,7 +583,7 @@ namespace dawn_native { namespace vulkan {
 
             // For textures created from a VkImage, the allocation if kInvalid so the Device knows
             // to skip the deallocation of the (absence of) VkDeviceMemory.
-            device->DeallocateMemory(mMemoryAllocation);
+            device->DeallocateMemory(&mMemoryAllocation);
 
             if (mHandle != VK_NULL_HANDLE) {
                 device->GetFencedDeleter()->DeleteWhenUnused(mHandle);

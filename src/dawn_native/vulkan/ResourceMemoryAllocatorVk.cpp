@@ -14,6 +14,8 @@
 
 #include "dawn_native/vulkan/ResourceMemoryAllocatorVk.h"
 
+#include "dawn_native/BuddyMemoryAllocator.h"
+#include "dawn_native/ResourceHeapAllocator.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
 #include "dawn_native/vulkan/ResourceHeapVk.h"
@@ -21,7 +23,167 @@
 
 namespace dawn_native { namespace vulkan {
 
+    namespace {
+
+        // TODO(cwallez@chromium.org): This is a hardcoded heurstic to choose when to
+        // suballocate but it should ideally depend on the size of the memory heaps and other
+        // factors.
+        constexpr uint64_t kMaxBuddySystemSize = 32ull * 1024ull * 1024ull * 1024ull;  // 32GB
+        constexpr uint64_t kMaxSizeForSubAllocation = 4ull * 1024ull * 1024ull;        // 4MB
+
+        // Have each bucket of the buddy system allocate at least some resource of the maximum
+        // size
+        constexpr uint64_t kBuddyHeapsSize = 2 * kMaxSizeForSubAllocation;
+
+    }  // anonymous namespace
+
+    // SingleTypeAllocator is a combination of a BuddyMemoryAllocator and its client and can
+    // service suballocation requests, but for a single Vulkan memory type.
+
+    class ResourceMemoryAllocator::SingleTypeAllocator : public ResourceHeapAllocator {
+      public:
+        SingleTypeAllocator(Device* device, size_t memoryTypeIndex)
+            : mDevice(device),
+              mMemoryTypeIndex(memoryTypeIndex),
+              mBuddySystem(kMaxBuddySystemSize, kBuddyHeapsSize, this) {
+        }
+        ~SingleTypeAllocator() override = default;
+
+        ResultOrError<ResourceMemoryAllocation> AllocateMemory(
+            const VkMemoryRequirements& requirements) {
+            return mBuddySystem.Allocate(requirements.size, requirements.alignment);
+        }
+
+        void DeallocateMemory(const ResourceMemoryAllocation& allocation) {
+            mBuddySystem.Deallocate(allocation);
+        }
+
+        // Implementation of the MemoryAllocator interface to be a client of BuddyMemoryAllocator
+
+        ResultOrError<std::unique_ptr<ResourceHeapBase>> AllocateResourceHeap(
+            uint64_t size) override {
+            VkMemoryAllocateInfo allocateInfo;
+            allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+            allocateInfo.pNext = nullptr;
+            allocateInfo.allocationSize = size;
+            allocateInfo.memoryTypeIndex = mMemoryTypeIndex;
+
+            VkDeviceMemory allocatedMemory = VK_NULL_HANDLE;
+            VkResult allocationResult = mDevice->fn.AllocateMemory(
+                mDevice->GetVkDevice(), &allocateInfo, nullptr, &allocatedMemory);
+
+            // Handle vkAllocateMemory error but differentiate OOM that we want to surface to
+            // the application.
+            if (allocationResult == VK_ERROR_OUT_OF_DEVICE_MEMORY) {
+                return DAWN_OUT_OF_MEMORY_ERROR("OOM while creating the Vkmemory");
+            }
+            DAWN_TRY(CheckVkSuccess(allocationResult, "vkAllocateMemory"));
+
+            ASSERT(allocatedMemory != VK_NULL_HANDLE);
+            return {std::make_unique<ResourceHeap>(allocatedMemory, mMemoryTypeIndex)};
+        }
+
+        void DeallocateResourceHeap(std::unique_ptr<ResourceHeapBase> allocation) override {
+            mDevice->GetFencedDeleter()->DeleteWhenUnused(ToBackend(allocation.get())->GetMemory());
+        }
+
+      private:
+        Device* mDevice;
+        size_t mMemoryTypeIndex;
+        BuddyMemoryAllocator mBuddySystem;
+    };
+
+    // Implementation of ResourceMemoryAllocator
+
     ResourceMemoryAllocator::ResourceMemoryAllocator(Device* device) : mDevice(device) {
+        const VulkanDeviceInfo& info = mDevice->GetDeviceInfo();
+        mAllocatorsPerType.reserve(info.memoryTypes.size());
+
+        for (size_t i = 0; i < info.memoryTypes.size(); i++) {
+            mAllocatorsPerType.emplace_back(std::make_unique<SingleTypeAllocator>(mDevice, i));
+        }
+    }
+
+    ResourceMemoryAllocator::~ResourceMemoryAllocator() = default;
+
+    ResultOrError<ResourceMemoryAllocation> ResourceMemoryAllocator::Allocate(
+        const VkMemoryRequirements& requirements,
+        bool mappable) {
+        // The Vulkan spec guarantees at least on memory type is valid.
+        int memoryType = FindBestTypeIndex(requirements, mappable);
+        ASSERT(memoryType >= 0);
+
+        VkDeviceSize size = requirements.size;
+
+        // If the resource is too big, allocate memory just for it.
+        // Also allocate mappable resources separately because at the moment the mapped pointer
+        // is part of the resource and not the heap, which doesn't match the Vulkan model.
+        // TODO(cwallez@chromium.org): allow sub-allocating mappable resources, maybe.
+        if (requirements.size >= kMaxSizeForSubAllocation || mappable) {
+            std::unique_ptr<ResourceHeapBase> resourceHeap;
+            DAWN_TRY_ASSIGN(resourceHeap,
+                            mAllocatorsPerType[memoryType]->AllocateResourceHeap(size));
+
+            void* mappedPointer = nullptr;
+            if (mappable) {
+                DAWN_TRY(
+                    CheckVkSuccess(mDevice->fn.MapMemory(mDevice->GetVkDevice(),
+                                                         ToBackend(resourceHeap.get())->GetMemory(),
+                                                         0, size, 0, &mappedPointer),
+                                   "vkMapMemory"));
+            }
+
+            AllocationInfo info;
+            info.mMethod = AllocationMethod::kDirect;
+            return ResourceMemoryAllocation(info, /*offset*/ 0, resourceHeap.release(),
+                                            static_cast<uint8_t*>(mappedPointer));
+        } else {
+            return mAllocatorsPerType[memoryType]->AllocateMemory(requirements);
+        }
+    }
+
+    void ResourceMemoryAllocator::Deallocate(ResourceMemoryAllocation* allocation) {
+        switch (allocation->GetInfo().mMethod) {
+            // Some memory allocation can never be initialized, for example when wrapping
+            // swapchain VkImages with a Texture.
+            case AllocationMethod::kInvalid:
+                break;
+
+            // For direct allocation we can put the memory for deletion immediately and the fence
+            // deleter will make sure the resources are freed before the memory.
+            case AllocationMethod::kDirect:
+                mDevice->GetFencedDeleter()->DeleteWhenUnused(
+                    ToBackend(allocation->GetResourceHeap())->GetMemory());
+                break;
+
+            // Suballocations aren't freed immediately, otherwise another resource allocation could
+            // happen just after that aliases the old one and would require a barrier.
+            // TODO(cwallez@chromium.org): Maybe we can produce the correct barriers to reduce the
+            // latency to reclaim memory.
+            case AllocationMethod::kSubAllocated:
+                mSubAllocationsToDelete.Enqueue(*allocation, mDevice->GetPendingCommandSerial());
+                break;
+
+            default:
+                UNREACHABLE();
+                break;
+        }
+
+        // Invalidate the underlying resource heap in case the client accidentally
+        // calls DeallocateMemory again using the same allocation.
+        allocation->Invalidate();
+    }
+
+    void ResourceMemoryAllocator::Tick(Serial completedSerial) {
+        for (const ResourceMemoryAllocation& allocation :
+             mSubAllocationsToDelete.IterateUpTo(completedSerial)) {
+            ASSERT(allocation.GetInfo().mMethod == AllocationMethod::kSubAllocated);
+            size_t memoryType = ToBackend(allocation.GetResourceHeap())->GetMemoryType();
+
+            mAllocatorsPerType[memoryType]->DeallocateMemory(allocation);
+        }
+
+        mSubAllocationsToDelete.ClearUpTo(completedSerial);
     }
 
     int ResourceMemoryAllocator::FindBestTypeIndex(VkMemoryRequirements requirements,
@@ -78,44 +240,4 @@ namespace dawn_native { namespace vulkan {
         return bestType;
     }
 
-    ResultOrError<ResourceMemoryAllocation> ResourceMemoryAllocator::Allocate(
-        VkMemoryRequirements requirements,
-        bool mappable) {
-        int bestType = FindBestTypeIndex(requirements, mappable);
-
-        // TODO(cwallez@chromium.org): I think the Vulkan spec guarantees this should never
-        // happen
-        if (bestType == -1) {
-            return DAWN_DEVICE_LOST_ERROR("Unable to find memory for requirements.");
-        }
-
-        VkMemoryAllocateInfo allocateInfo;
-        allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocateInfo.pNext = nullptr;
-        allocateInfo.allocationSize = requirements.size;
-        allocateInfo.memoryTypeIndex = static_cast<uint32_t>(bestType);
-
-        VkDeviceMemory allocatedMemory = VK_NULL_HANDLE;
-        DAWN_TRY(CheckVkSuccess(mDevice->fn.AllocateMemory(mDevice->GetVkDevice(), &allocateInfo,
-                                                           nullptr, &allocatedMemory),
-                                "vkAllocateMemory"));
-
-        void* mappedPointer = nullptr;
-        if (mappable) {
-            DAWN_TRY(CheckVkSuccess(mDevice->fn.MapMemory(mDevice->GetVkDevice(), allocatedMemory,
-                                                          0, requirements.size, 0, &mappedPointer),
-                                    "vkMapMemory"));
-        }
-
-        AllocationInfo info;
-        info.mMethod = AllocationMethod::kDirect;
-
-        return ResourceMemoryAllocation(info, /*offset*/ 0, new ResourceHeap(allocatedMemory),
-                                        static_cast<uint8_t*>(mappedPointer));
-    }
-
-    void ResourceMemoryAllocator::Deallocate(ResourceMemoryAllocation& allocation) {
-        mDevice->GetFencedDeleter()->DeleteWhenUnused(
-            ToBackend(allocation.GetResourceHeap())->GetMemory());
-    }
 }}  // namespace dawn_native::vulkan

@@ -251,7 +251,7 @@ namespace dawn_native { namespace vulkan {
     }
 
     void Buffer::DestroyImpl() {
-        ToBackend(GetDevice())->DeallocateMemory(mMemoryAllocation);
+        ToBackend(GetDevice())->DeallocateMemory(&mMemoryAllocation);
 
         if (mHandle != VK_NULL_HANDLE) {
             ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mHandle);
