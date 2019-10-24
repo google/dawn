@@ -30,7 +30,7 @@ namespace dawn_native { namespace vulkan {
         DawnWSIContextVulkan wsiContext = {};
         im.Init(im.userData, &wsiContext);
 
-        ASSERT(im.textureUsage != DAWN_TEXTURE_USAGE_NONE);
+        ASSERT(im.textureUsage != WGPUTextureUsage_None);
         mTextureUsage = static_cast<wgpu::TextureUsage>(im.textureUsage);
     }
 

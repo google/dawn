@@ -94,8 +94,8 @@ namespace dawn_native { namespace vulkan {
         UpdateSurfaceConfig();
     }
 
-    DawnSwapChainError NativeSwapChainImpl::Configure(DawnTextureFormat format,
-                                                      DawnTextureUsage usage,
+    DawnSwapChainError NativeSwapChainImpl::Configure(WGPUTextureFormat format,
+                                                      WGPUTextureUsage usage,
                                                       uint32_t width,
                                                       uint32_t height) {
         UpdateSurfaceConfig();
@@ -105,7 +105,7 @@ namespace dawn_native { namespace vulkan {
         ASSERT(mInfo.capabilities.minImageExtent.height <= height);
         ASSERT(mInfo.capabilities.maxImageExtent.height >= height);
 
-        ASSERT(format == static_cast<DawnTextureFormat>(GetPreferredFormat()));
+        ASSERT(format == static_cast<WGPUTextureFormat>(GetPreferredFormat()));
         // TODO(cwallez@chromium.org): need to check usage works too
 
         // Create the swapchain with the configuration we chose

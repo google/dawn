@@ -25,10 +25,10 @@ namespace dawn_native { namespace d3d12 {
         : SwapChainBase(device, descriptor) {
         const auto& im = GetImplementation();
         DawnWSIContextD3D12 wsiContext = {};
-        wsiContext.device = reinterpret_cast<DawnDevice>(GetDevice());
+        wsiContext.device = reinterpret_cast<WGPUDevice>(GetDevice());
         im.Init(im.userData, &wsiContext);
 
-        ASSERT(im.textureUsage != DAWN_TEXTURE_USAGE_NONE);
+        ASSERT(im.textureUsage != WGPUTextureUsage_None);
         mTextureUsage = static_cast<wgpu::TextureUsage>(im.textureUsage);
     }
 

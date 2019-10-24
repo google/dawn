@@ -28,8 +28,8 @@ namespace dawn_native { namespace opengl {
 
     using PresentCallback = void (*)(void*);
     DAWN_NATIVE_EXPORT DawnSwapChainImplementation
-    CreateNativeSwapChainImpl(DawnDevice device, PresentCallback present, void* presentUserdata);
-    DAWN_NATIVE_EXPORT DawnTextureFormat
+    CreateNativeSwapChainImpl(WGPUDevice device, PresentCallback present, void* presentUserdata);
+    DAWN_NATIVE_EXPORT WGPUTextureFormat
     GetNativeSwapChainPreferredFormat(const DawnSwapChainImplementation* swapChain);
 
 }}  // namespace dawn_native::opengl

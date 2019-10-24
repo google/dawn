@@ -380,7 +380,7 @@ namespace dawn_native {
 
         return result;
     }
-    DawnCreateBufferMappedResult DeviceBase::CreateBufferMapped(
+    WGPUCreateBufferMappedResult DeviceBase::CreateBufferMapped(
         const BufferDescriptor* descriptor) {
         BufferBase* buffer = nullptr;
         uint8_t* data = nullptr;
@@ -405,8 +405,8 @@ namespace dawn_native {
             memset(data, 0, size);
         }
 
-        DawnCreateBufferMappedResult result = {};
-        result.buffer = reinterpret_cast<DawnBuffer>(buffer);
+        WGPUCreateBufferMappedResult result = {};
+        result.buffer = reinterpret_cast<WGPUBuffer>(buffer);
         result.data = data;
         result.dataLength = size;
 
@@ -415,11 +415,11 @@ namespace dawn_native {
     void DeviceBase::CreateBufferMappedAsync(const BufferDescriptor* descriptor,
                                              wgpu::BufferCreateMappedCallback callback,
                                              void* userdata) {
-        DawnCreateBufferMappedResult result = CreateBufferMapped(descriptor);
+        WGPUCreateBufferMappedResult result = CreateBufferMapped(descriptor);
 
-        DawnBufferMapAsyncStatus status = DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS;
+        WGPUBufferMapAsyncStatus status = WGPUBufferMapAsyncStatus_Success;
         if (result.data == nullptr || result.dataLength != descriptor->size) {
-            status = DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR;
+            status = WGPUBufferMapAsyncStatus_Error;
         }
 
         DeferredCreateBufferMappedAsync deferred_info;

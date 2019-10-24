@@ -28,7 +28,7 @@
 
 namespace dawn_native { namespace vulkan {
 
-    VkInstance GetInstance(DawnDevice device) {
+    VkInstance GetInstance(WGPUDevice device) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
         return backendDevice->GetVkInstance();
     }
@@ -36,35 +36,35 @@ namespace dawn_native { namespace vulkan {
     // Explicitly export this function because it uses the "native" type for surfaces while the
     // header as seen in this file uses the wrapped type.
     DAWN_NATIVE_EXPORT DawnSwapChainImplementation
-    CreateNativeSwapChainImpl(DawnDevice device, VkSurfaceKHRNative surfaceNative) {
+    CreateNativeSwapChainImpl(WGPUDevice device, VkSurfaceKHRNative surfaceNative) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
         VkSurfaceKHR surface = VkSurfaceKHR::CreateFromHandle(surfaceNative);
 
         DawnSwapChainImplementation impl;
         impl = CreateSwapChainImplementation(new NativeSwapChainImpl(backendDevice, surface));
-        impl.textureUsage = DAWN_TEXTURE_USAGE_PRESENT;
+        impl.textureUsage = WGPUTextureUsage_Present;
 
         return impl;
     }
 
-    DawnTextureFormat GetNativeSwapChainPreferredFormat(
+    WGPUTextureFormat GetNativeSwapChainPreferredFormat(
         const DawnSwapChainImplementation* swapChain) {
         NativeSwapChainImpl* impl = reinterpret_cast<NativeSwapChainImpl*>(swapChain->userData);
-        return static_cast<DawnTextureFormat>(impl->GetPreferredFormat());
+        return static_cast<WGPUTextureFormat>(impl->GetPreferredFormat());
     }
 
 #ifdef DAWN_PLATFORM_LINUX
-    DawnTexture WrapVulkanImageOpaqueFD(DawnDevice cDevice,
+    WGPUTexture WrapVulkanImageOpaqueFD(WGPUDevice cDevice,
                                         const ExternalImageDescriptorOpaqueFD* descriptor) {
         Device* device = reinterpret_cast<Device*>(cDevice);
 
         TextureBase* texture = device->CreateTextureWrappingVulkanImage(
             descriptor, descriptor->memoryFD, descriptor->waitFDs);
 
-        return reinterpret_cast<DawnTexture>(texture);
+        return reinterpret_cast<WGPUTexture>(texture);
     }
 
-    int ExportSignalSemaphoreOpaqueFD(DawnDevice cDevice, DawnTexture cTexture) {
+    int ExportSignalSemaphoreOpaqueFD(WGPUDevice cDevice, WGPUTexture cTexture) {
         Device* device = reinterpret_cast<Device*>(cDevice);
         Texture* texture = reinterpret_cast<Texture*>(cTexture);
 

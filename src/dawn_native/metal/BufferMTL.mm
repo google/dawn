@@ -53,9 +53,9 @@ namespace dawn_native { namespace metal {
     void Buffer::OnMapCommandSerialFinished(uint32_t mapSerial, bool isWrite) {
         char* data = reinterpret_cast<char*>([mMtlBuffer contents]);
         if (isWrite) {
-            CallMapWriteCallback(mapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data, GetSize());
+            CallMapWriteCallback(mapSerial, WGPUBufferMapAsyncStatus_Success, data, GetSize());
         } else {
-            CallMapReadCallback(mapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data, GetSize());
+            CallMapReadCallback(mapSerial, WGPUBufferMapAsyncStatus_Success, data, GetSize());
         }
     }
 

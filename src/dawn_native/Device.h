@@ -141,7 +141,7 @@ namespace dawn_native {
         BindGroupBase* CreateBindGroup(const BindGroupDescriptor* descriptor);
         BindGroupLayoutBase* CreateBindGroupLayout(const BindGroupLayoutDescriptor* descriptor);
         BufferBase* CreateBuffer(const BufferDescriptor* descriptor);
-        DawnCreateBufferMappedResult CreateBufferMapped(const BufferDescriptor* descriptor);
+        WGPUCreateBufferMappedResult CreateBufferMapped(const BufferDescriptor* descriptor);
         void CreateBufferMappedAsync(const BufferDescriptor* descriptor,
                                      wgpu::BufferCreateMappedCallback callback,
                                      void* userdata);
@@ -262,8 +262,8 @@ namespace dawn_native {
 
         struct DeferredCreateBufferMappedAsync {
             wgpu::BufferCreateMappedCallback callback;
-            DawnBufferMapAsyncStatus status;
-            DawnCreateBufferMappedResult result;
+            WGPUBufferMapAsyncStatus status;
+            WGPUCreateBufferMappedResult result;
             void* userdata;
         };
 

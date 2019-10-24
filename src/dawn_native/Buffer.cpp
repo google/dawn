@@ -124,8 +124,8 @@ namespace dawn_native {
     BufferBase::~BufferBase() {
         if (mState == BufferState::Mapped) {
             ASSERT(!IsError());
-            CallMapReadCallback(mMapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u);
-            CallMapWriteCallback(mMapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u);
+            CallMapReadCallback(mMapSerial, WGPUBufferMapAsyncStatus_Unknown, nullptr, 0u);
+            CallMapWriteCallback(mMapSerial, WGPUBufferMapAsyncStatus_Unknown, nullptr, 0u);
         }
     }
 
@@ -231,7 +231,7 @@ namespace dawn_native {
 
     void BufferBase::MapReadAsync(WGPUBufferMapReadCallback callback, void* userdata) {
         if (GetDevice()->ConsumedError(ValidateMap(wgpu::BufferUsage::MapRead))) {
-            callback(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0, userdata);
+            callback(WGPUBufferMapAsyncStatus_Error, nullptr, 0, userdata);
             return;
         }
         ASSERT(!IsError());
@@ -267,7 +267,7 @@ namespace dawn_native {
 
     void BufferBase::MapWriteAsync(WGPUBufferMapWriteCallback callback, void* userdata) {
         if (GetDevice()->ConsumedError(ValidateMap(wgpu::BufferUsage::MapWrite))) {
-            callback(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0, userdata);
+            callback(WGPUBufferMapAsyncStatus_Error, nullptr, 0, userdata);
             return;
         }
         ASSERT(!IsError());
@@ -333,8 +333,8 @@ namespace dawn_native {
             // completed before the Unmap.
             // Callbacks are not fired if there is no callback registered, so this is correct for
             // CreateBufferMapped.
-            CallMapReadCallback(mMapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u);
-            CallMapWriteCallback(mMapSerial, DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u);
+            CallMapReadCallback(mMapSerial, WGPUBufferMapAsyncStatus_Unknown, nullptr, 0u);
+            CallMapWriteCallback(mMapSerial, WGPUBufferMapAsyncStatus_Unknown, nullptr, 0u);
             UnmapImpl();
         }
         mState = BufferState::Unmapped;

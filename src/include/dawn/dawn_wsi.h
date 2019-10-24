@@ -15,7 +15,7 @@
 #ifndef DAWN_DAWN_WSI_H_
 #define DAWN_DAWN_WSI_H_
 
-#include <dawn/dawn.h>
+#include <dawn/webgpu.h>
 
 // Error message (or nullptr if there was no error)
 typedef const char* DawnSwapChainError;
@@ -40,8 +40,8 @@ typedef struct {
 
     /// Configure/reconfigure the swap chain.
     DawnSwapChainError (*Configure)(void* userData,
-                                    DawnTextureFormat format,
-                                    DawnTextureUsage allowedUsage,
+                                    WGPUTextureFormat format,
+                                    WGPUTextureUsage allowedUsage,
                                     uint32_t width,
                                     uint32_t height);
 
@@ -55,12 +55,12 @@ typedef struct {
     void* userData;
 
     /// For use by the D3D12 and Vulkan backends: how the swapchain will use the texture.
-    DawnTextureUsage textureUsage;
+    WGPUTextureUsage textureUsage;
 } DawnSwapChainImplementation;
 
 #if defined(DAWN_ENABLE_BACKEND_D3D12) && defined(__cplusplus)
 typedef struct {
-    DawnDevice device = nullptr;
+    WGPUDevice device = nullptr;
 } DawnWSIContextD3D12;
 #endif
 

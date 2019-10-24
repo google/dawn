@@ -15,8 +15,8 @@
 #ifndef DAWNNATIVE_DAWNNATIVE_H_
 #define DAWNNATIVE_DAWNNATIVE_H_
 
-#include <dawn/dawn.h>
 #include <dawn/dawn_proc_table.h>
+#include <dawn/webgpu.h>
 #include <dawn_native/dawn_native_export.h>
 
 #include <string>
@@ -96,7 +96,7 @@ namespace dawn_native {
         // Create a device on this adapter, note that the interface will change to include at least
         // a device descriptor and a pointer to backend specific options.
         // On an error, nullptr is returned.
-        DawnDevice CreateDevice(const DeviceDescriptor* deviceDescriptor = nullptr);
+        WGPUDevice CreateDevice(const DeviceDescriptor* deviceDescriptor = nullptr);
 
       private:
         AdapterBase* mImpl = nullptr;
@@ -156,10 +156,10 @@ namespace dawn_native {
     DAWN_NATIVE_EXPORT DawnProcTable GetProcs();
 
     // Query the names of all the toggles that are enabled in device
-    DAWN_NATIVE_EXPORT std::vector<const char*> GetTogglesUsed(DawnDevice device);
+    DAWN_NATIVE_EXPORT std::vector<const char*> GetTogglesUsed(WGPUDevice device);
 
     // Backdoor to get the number of lazy clears for testing
-    DAWN_NATIVE_EXPORT size_t GetLazyClearCountForTesting(DawnDevice device);
+    DAWN_NATIVE_EXPORT size_t GetLazyClearCountForTesting(WGPUDevice device);
 
     // Backdoor to get the order of the ProcMap for testing
     DAWN_NATIVE_EXPORT std::vector<const char*> GetProcMapNamesForTesting();

@@ -55,7 +55,7 @@ TEST_F(ExtensionTests, AdapterWithRequiredExtensionDisabled) {
         dawn_native::DeviceDescriptor deviceDescriptor;
         const char* extensionName = ExtensionEnumToName(notSupportedExtension);
         deviceDescriptor.requiredExtensions = std::vector<const char*>(1, extensionName);
-        DawnDevice deviceWithExtension = adapterWithoutExtension.CreateDevice(&deviceDescriptor);
+        WGPUDevice deviceWithExtension = adapterWithoutExtension.CreateDevice(&deviceDescriptor);
         ASSERT_EQ(nullptr, deviceWithExtension);
     }
 }

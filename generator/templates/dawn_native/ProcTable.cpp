@@ -73,18 +73,18 @@ namespace dawn_native {
         {% endfor %}
 
         struct ProcEntry {
-            DawnProc proc;
+            WGPUProc proc;
             const char* name;
         };
         static const ProcEntry sProcMap[] = {
             {% for (type, method) in methods_sorted_by_name %}
-                { reinterpret_cast<DawnProc>(Native{{as_MethodSuffix(type.name, method.name)}}), "{{as_cMethod(type.name, method.name)}}" },
+                { reinterpret_cast<WGPUProc>(Native{{as_MethodSuffix(type.name, method.name)}}), "{{as_cMethod(type.name, method.name)}}" },
             {% endfor %}
         };
         static constexpr size_t sProcMapSize = sizeof(sProcMap) / sizeof(sProcMap[0]);
     }
 
-    DawnProc NativeGetProcAddress(DawnDevice, const char* procName) {
+    WGPUProc NativeGetProcAddress(WGPUDevice, const char* procName) {
         if (procName == nullptr) {
             return nullptr;
         }
@@ -100,7 +100,7 @@ namespace dawn_native {
         }
 
         if (strcmp(procName, "wgpuGetProcAddress") == 0) {
-            return reinterpret_cast<DawnProc>(NativeGetProcAddress);
+            return reinterpret_cast<WGPUProc>(NativeGetProcAddress);
         }
 
         return nullptr;

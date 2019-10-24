@@ -27,7 +27,7 @@ namespace dawn_native {
         return GetProcsAutogen();
     }
 
-    std::vector<const char*> GetTogglesUsed(DawnDevice device) {
+    std::vector<const char*> GetTogglesUsed(WGPUDevice device) {
         const dawn_native::DeviceBase* deviceBase =
             reinterpret_cast<const dawn_native::DeviceBase*>(device);
         return deviceBase->GetTogglesUsed();
@@ -65,8 +65,8 @@ namespace dawn_native {
         return mImpl != nullptr;
     }
 
-    DawnDevice Adapter::CreateDevice(const DeviceDescriptor* deviceDescriptor) {
-        return reinterpret_cast<DawnDevice>(mImpl->CreateDevice(deviceDescriptor));
+    WGPUDevice Adapter::CreateDevice(const DeviceDescriptor* deviceDescriptor) {
+        return reinterpret_cast<WGPUDevice>(mImpl->CreateDevice(deviceDescriptor));
     }
 
     // AdapterDiscoverOptionsBase
@@ -129,7 +129,7 @@ namespace dawn_native {
         return mImpl->GetPlatform();
     }
 
-    size_t GetLazyClearCountForTesting(DawnDevice device) {
+    size_t GetLazyClearCountForTesting(WGPUDevice device) {
         dawn_native::DeviceBase* deviceBase = reinterpret_cast<dawn_native::DeviceBase*>(device);
         return deviceBase->GetLazyClearCountForTesting();
     }

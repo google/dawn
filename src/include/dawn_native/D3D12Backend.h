@@ -24,15 +24,15 @@
 struct ID3D12Device;
 
 namespace dawn_native { namespace d3d12 {
-    DAWN_NATIVE_EXPORT Microsoft::WRL::ComPtr<ID3D12Device> GetD3D12Device(DawnDevice device);
-    DAWN_NATIVE_EXPORT DawnSwapChainImplementation CreateNativeSwapChainImpl(DawnDevice device,
+    DAWN_NATIVE_EXPORT Microsoft::WRL::ComPtr<ID3D12Device> GetD3D12Device(WGPUDevice device);
+    DAWN_NATIVE_EXPORT DawnSwapChainImplementation CreateNativeSwapChainImpl(WGPUDevice device,
                                                                              HWND window);
-    DAWN_NATIVE_EXPORT DawnTextureFormat
+    DAWN_NATIVE_EXPORT WGPUTextureFormat
     GetNativeSwapChainPreferredFormat(const DawnSwapChainImplementation* swapChain);
 
     // Note: SharedHandle must be a handle to a texture object.
-    DAWN_NATIVE_EXPORT DawnTexture WrapSharedHandle(DawnDevice device,
-                                                    const DawnTextureDescriptor* descriptor,
+    DAWN_NATIVE_EXPORT WGPUTexture WrapSharedHandle(WGPUDevice device,
+                                                    const WGPUTextureDescriptor* descriptor,
                                                     HANDLE sharedHandle,
                                                     uint64_t acquireMutexKey);
 }}  // namespace dawn_native::d3d12

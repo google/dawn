@@ -251,9 +251,9 @@ namespace dawn_native { namespace null {
 
     void Buffer::MapOperationCompleted(uint32_t serial, void* ptr, bool isWrite) {
         if (isWrite) {
-            CallMapWriteCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, ptr, GetSize());
+            CallMapWriteCallback(serial, WGPUBufferMapAsyncStatus_Success, ptr, GetSize());
         } else {
-            CallMapReadCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, ptr, GetSize());
+            CallMapReadCallback(serial, WGPUBufferMapAsyncStatus_Success, ptr, GetSize());
         }
     }
 
@@ -348,8 +348,8 @@ namespace dawn_native { namespace null {
     void NativeSwapChainImpl::Init(WSIContext* context) {
     }
 
-    DawnSwapChainError NativeSwapChainImpl::Configure(DawnTextureFormat format,
-                                                      DawnTextureUsage,
+    DawnSwapChainError NativeSwapChainImpl::Configure(WGPUTextureFormat format,
+                                                      WGPUTextureUsage,
                                                       uint32_t width,
                                                       uint32_t height) {
         return DAWN_SWAP_CHAIN_NO_ERROR;

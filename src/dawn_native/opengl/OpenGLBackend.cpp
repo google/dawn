@@ -27,7 +27,7 @@ namespace dawn_native { namespace opengl {
         : AdapterDiscoveryOptionsBase(BackendType::OpenGL) {
     }
 
-    DawnSwapChainImplementation CreateNativeSwapChainImpl(DawnDevice device,
+    DawnSwapChainImplementation CreateNativeSwapChainImpl(WGPUDevice device,
                                                           PresentCallback present,
                                                           void* presentUserdata) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
@@ -35,15 +35,15 @@ namespace dawn_native { namespace opengl {
         DawnSwapChainImplementation impl;
         impl = CreateSwapChainImplementation(
             new NativeSwapChainImpl(backendDevice, present, presentUserdata));
-        impl.textureUsage = DAWN_TEXTURE_USAGE_PRESENT;
+        impl.textureUsage = WGPUTextureUsage_Present;
 
         return impl;
     }
 
-    DawnTextureFormat GetNativeSwapChainPreferredFormat(
+    WGPUTextureFormat GetNativeSwapChainPreferredFormat(
         const DawnSwapChainImplementation* swapChain) {
         NativeSwapChainImpl* impl = reinterpret_cast<NativeSwapChainImpl*>(swapChain->userData);
-        return static_cast<DawnTextureFormat>(impl->GetPreferredFormat());
+        return static_cast<WGPUTextureFormat>(impl->GetPreferredFormat());
     }
 
 }}  // namespace dawn_native::opengl

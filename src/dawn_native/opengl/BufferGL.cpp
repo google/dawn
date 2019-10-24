@@ -65,7 +65,7 @@ namespace dawn_native { namespace opengl {
         // version of OpenGL that would let us map the buffer unsynchronized.
         gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
         void* data = gl.MapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
-        CallMapReadCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data, GetSize());
+        CallMapReadCallback(serial, WGPUBufferMapAsyncStatus_Success, data, GetSize());
         return {};
     }
 
@@ -76,7 +76,7 @@ namespace dawn_native { namespace opengl {
         // version of OpenGL that would let us map the buffer unsynchronized.
         gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
         void* data = gl.MapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-        CallMapWriteCallback(serial, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, data, GetSize());
+        CallMapWriteCallback(serial, WGPUBufferMapAsyncStatus_Success, data, GetSize());
         return {};
     }
 

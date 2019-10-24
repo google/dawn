@@ -32,8 +32,8 @@ namespace dawn_native { namespace vulkan {
         ~NativeSwapChainImpl();
 
         void Init(DawnWSIContextVulkan* context);
-        DawnSwapChainError Configure(DawnTextureFormat format,
-                                     DawnTextureUsage,
+        DawnSwapChainError Configure(WGPUTextureFormat format,
+                                     WGPUTextureUsage,
                                      uint32_t width,
                                      uint32_t height);
         DawnSwapChainError GetNextTexture(DawnSwapChainNextTexture* nextTexture);

@@ -46,7 +46,7 @@ namespace dawn_native {
     FenceBase::~FenceBase() {
         for (auto& request : mRequests.IterateAll()) {
             ASSERT(!IsError());
-            request.completionCallback(DAWN_FENCE_COMPLETION_STATUS_UNKNOWN, request.userdata);
+            request.completionCallback(WGPUFenceCompletionStatus_Unknown, request.userdata);
         }
         mRequests.Clear();
     }
@@ -67,13 +67,13 @@ namespace dawn_native {
                                  wgpu::FenceOnCompletionCallback callback,
                                  void* userdata) {
         if (GetDevice()->ConsumedError(ValidateOnCompletion(value))) {
-            callback(DAWN_FENCE_COMPLETION_STATUS_ERROR, userdata);
+            callback(WGPUFenceCompletionStatus_Error, userdata);
             return;
         }
         ASSERT(!IsError());
 
         if (value <= mCompletedValue) {
-            callback(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, userdata);
+            callback(WGPUFenceCompletionStatus_Success, userdata);
             return;
         }
 
@@ -106,7 +106,7 @@ namespace dawn_native {
         mCompletedValue = completedValue;
 
         for (auto& request : mRequests.IterateUpTo(mCompletedValue)) {
-            request.completionCallback(DAWN_FENCE_COMPLETION_STATUS_SUCCESS, request.userdata);
+            request.completionCallback(WGPUFenceCompletionStatus_Success, request.userdata);
         }
         mRequests.ClearUpTo(mCompletedValue);
     }

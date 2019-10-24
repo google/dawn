@@ -42,11 +42,11 @@ namespace dawn_native { namespace opengl {
                                 mBackTexture, 0);
     }
 
-    DawnSwapChainError NativeSwapChainImpl::Configure(DawnTextureFormat format,
-                                                      DawnTextureUsage usage,
+    DawnSwapChainError NativeSwapChainImpl::Configure(WGPUTextureFormat format,
+                                                      WGPUTextureUsage usage,
                                                       uint32_t width,
                                                       uint32_t height) {
-        if (format != DAWN_TEXTURE_FORMAT_RGBA8_UNORM) {
+        if (format != WGPUTextureFormat_RGBA8Unorm) {
             return "unsupported format";
         }
         ASSERT(width > 0);

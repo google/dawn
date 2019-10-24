@@ -22,23 +22,23 @@
 
 namespace dawn_native { namespace metal {
 
-    id<MTLDevice> GetMetalDevice(DawnDevice cDevice) {
+    id<MTLDevice> GetMetalDevice(WGPUDevice cDevice) {
         Device* device = reinterpret_cast<Device*>(cDevice);
         return device->GetMTLDevice();
     }
 
-    DawnTexture WrapIOSurface(DawnDevice cDevice,
-                              const DawnTextureDescriptor* cDescriptor,
+    WGPUTexture WrapIOSurface(WGPUDevice cDevice,
+                              const WGPUTextureDescriptor* cDescriptor,
                               IOSurfaceRef ioSurface,
                               uint32_t plane) {
         Device* device = reinterpret_cast<Device*>(cDevice);
         const TextureDescriptor* descriptor =
             reinterpret_cast<const TextureDescriptor*>(cDescriptor);
         TextureBase* texture = device->CreateTextureWrappingIOSurface(descriptor, ioSurface, plane);
-        return reinterpret_cast<DawnTexture>(texture);
+        return reinterpret_cast<WGPUTexture>(texture);
     }
 
-    void WaitForCommandsToBeScheduled(DawnDevice cDevice) {
+    void WaitForCommandsToBeScheduled(WGPUDevice cDevice) {
         Device* device = reinterpret_cast<Device*>(cDevice);
         device->WaitForCommandsToBeScheduled();
     }

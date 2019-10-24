@@ -26,17 +26,17 @@ namespace dawn_native { namespace vulkan {
 
     // Common properties of external images
     struct ExternalImageDescriptor {
-        const DawnTextureDescriptor* cTextureDescriptor;  // Must match image creation params
+        const WGPUTextureDescriptor* cTextureDescriptor;  // Must match image creation params
         bool isCleared;               // Sets whether the texture will be cleared before use
         VkDeviceSize allocationSize;  // Must match VkMemoryAllocateInfo from image creation
         uint32_t memoryTypeIndex;     // Must match VkMemoryAllocateInfo from image creation
     };
 
-    DAWN_NATIVE_EXPORT VkInstance GetInstance(DawnDevice device);
+    DAWN_NATIVE_EXPORT VkInstance GetInstance(WGPUDevice device);
 
-    DAWN_NATIVE_EXPORT DawnSwapChainImplementation CreateNativeSwapChainImpl(DawnDevice device,
+    DAWN_NATIVE_EXPORT DawnSwapChainImplementation CreateNativeSwapChainImpl(WGPUDevice device,
                                                                              VkSurfaceKHR surface);
-    DAWN_NATIVE_EXPORT DawnTextureFormat
+    DAWN_NATIVE_EXPORT WGPUTextureFormat
     GetNativeSwapChainPreferredFormat(const DawnSwapChainImplementation* swapChain);
 
 // Can't use DAWN_PLATFORM_LINUX since header included in both dawn and chrome
@@ -52,14 +52,14 @@ namespace dawn_native { namespace vulkan {
         // |descriptor->waitFDs| before the texture can be used. Finally, a signal semaphore
         // can be exported, transferring control back to the caller.
         // On failure, returns a nullptr
-        DAWN_NATIVE_EXPORT DawnTexture
-        WrapVulkanImageOpaqueFD(DawnDevice cDevice,
+        DAWN_NATIVE_EXPORT WGPUTexture
+        WrapVulkanImageOpaqueFD(WGPUDevice cDevice,
                                 const ExternalImageDescriptorOpaqueFD* descriptor);
 
         // Exports a signal semaphore from a wrapped texture. This must be called on wrapped
         // textures before they are destroyed. On failure, returns -1
-        DAWN_NATIVE_EXPORT int ExportSignalSemaphoreOpaqueFD(DawnDevice cDevice,
-                                                             DawnTexture cTexture);
+        DAWN_NATIVE_EXPORT int ExportSignalSemaphoreOpaqueFD(WGPUDevice cDevice,
+                                                             WGPUTexture cTexture);
 #endif  // __linux__
 }}  // namespace dawn_native::vulkan
 

@@ -95,8 +95,8 @@ namespace dawn_native {
         mAllowedUsage = allowedUsage;
         mWidth = width;
         mHeight = height;
-        mImplementation.Configure(mImplementation.userData, static_cast<DawnTextureFormat>(format),
-                                  static_cast<DawnTextureUsage>(allowedUsage), width, height);
+        mImplementation.Configure(mImplementation.userData, static_cast<WGPUTextureFormat>(format),
+                                  static_cast<WGPUTextureUsage>(allowedUsage), width, height);
     }
 
     TextureBase* SwapChainBase::GetNextTexture() {
