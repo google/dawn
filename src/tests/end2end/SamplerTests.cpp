@@ -19,7 +19,7 @@
 #include "common/Assert.h"
 #include "common/Constants.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/DawnHelpers.h"
+#include "utils/WGPUHelpers.h"
 
 constexpr static unsigned int kRTSize = 64;
 

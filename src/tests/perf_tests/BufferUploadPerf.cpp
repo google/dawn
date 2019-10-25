@@ -15,7 +15,7 @@
 #include "tests/perf_tests/DawnPerfTest.h"
 
 #include "tests/ParamGenerator.h"
-#include "utils/DawnHelpers.h"
+#include "utils/WGPUHelpers.h"
 
 namespace {
 

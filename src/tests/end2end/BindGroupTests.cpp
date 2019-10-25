@@ -17,7 +17,7 @@
 #include "common/Math.h"
 #include "tests/DawnTest.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/DawnHelpers.h"
+#include "utils/WGPUHelpers.h"
 
 constexpr static unsigned int kRTSize = 8;
 

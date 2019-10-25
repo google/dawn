@@ -15,19 +15,19 @@
 #include "SampleUtils.h"
 
 #include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/DawnHelpers.h"
 #include "utils/SystemUtils.h"
+#include "utils/WGPUHelpers.h"
 
 #include <cstdlib>
 #include <cstdio>
 #include <vector>
 
-dawn::Device device;
-dawn::Queue queue;
-dawn::SwapChain swapchain;
-dawn::RenderPipeline pipeline;
-dawn::BindGroup bindGroup;
-dawn::Buffer ubo;
+wgpu::Device device;
+wgpu::Queue queue;
+wgpu::SwapChain swapchain;
+wgpu::RenderPipeline pipeline;
+wgpu::BindGroup bindGroup;
+wgpu::Buffer ubo;
 
 float RandomFloat(float min, float max) {
     float zeroOne = rand() / float(RAND_MAX);
@@ -52,10 +52,10 @@ void init() {
 
     queue = device.CreateQueue();
     swapchain = GetSwapChain(device);
-    swapchain.Configure(GetPreferredSwapChainTextureFormat(), dawn::TextureUsage::OutputAttachment,
+    swapchain.Configure(GetPreferredSwapChainTextureFormat(), wgpu::TextureUsage::OutputAttachment,
                         640, 480);
 
-    dawn::ShaderModule vsModule =
+    wgpu::ShaderModule vsModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
         #version 450
 
@@ -103,7 +103,7 @@ void init() {
             gl_Position = vec4(xpos, ypos, 0.0, 1.0);
         })");
 
-    dawn::ShaderModule fsModule =
+    wgpu::ShaderModule fsModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
         #version 450
         layout(location = 0) out vec4 fragColor;
@@ -112,8 +112,8 @@ void init() {
             fragColor = v_color;
         })");
 
-    dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {{0, dawn::ShaderStage::Vertex, dawn::BindingType::UniformBuffer, true}});
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Vertex, wgpu::BindingType::UniformBuffer, true}});
 
     utils::ComboRenderPipelineDescriptor descriptor(device);
     descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
@@ -133,9 +133,9 @@ void init() {
         data.scalarOffset = RandomFloat(0.0f, 10.0f);
     }
 
-    dawn::BufferDescriptor bufferDesc;
+    wgpu::BufferDescriptor bufferDesc;
     bufferDesc.size = kNumTriangles * sizeof(ShaderData);
-    bufferDesc.usage = dawn::BufferUsage::CopyDst | dawn::BufferUsage::Uniform;
+    bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform;
     ubo = device.CreateBuffer(&bufferDesc);
 
     bindGroup =
@@ -143,7 +143,7 @@ void init() {
 }
 
 void frame() {
-    dawn::Texture backbuffer = swapchain.GetNextTexture();
+    wgpu::Texture backbuffer = swapchain.GetNextTexture();
 
     static int f = 0;
     f++;
@@ -153,9 +153,9 @@ void frame() {
     ubo.SetSubData(0, kNumTriangles * sizeof(ShaderData), shaderData.data());
 
     utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateView()});
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
 
         for (size_t i = 0; i < kNumTriangles; i++) {
@@ -167,7 +167,7 @@ void frame() {
         pass.EndPass();
     }
 
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
     swapchain.Present(backbuffer);
     DoFlush();

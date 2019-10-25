@@ -15,7 +15,7 @@
 #ifndef UTILS_COMBORENDERBUNDLEENCODERDESCRIPTOR_H_
 #define UTILS_COMBORENDERBUNDLEENCODERDESCRIPTOR_H_
 
-#include <dawn/dawncpp.h>
+#include <dawn/webgpu_cpp.h>
 
 #include "common/Constants.h"
 
@@ -23,11 +23,11 @@
 
 namespace utils {
 
-    class ComboRenderBundleEncoderDescriptor : public dawn::RenderBundleEncoderDescriptor {
+    class ComboRenderBundleEncoderDescriptor : public wgpu::RenderBundleEncoderDescriptor {
       public:
         ComboRenderBundleEncoderDescriptor();
 
-        std::array<dawn::TextureFormat, kMaxColorAttachments> cColorFormats;
+        std::array<wgpu::TextureFormat, kMaxColorAttachments> cColorFormats;
     };
 
 }  // namespace utils

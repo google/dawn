@@ -658,13 +658,13 @@ static_library("dawn_utils") {
     "src/utils/ComboRenderBundleEncoderDescriptor.h",
     "src/utils/ComboRenderPipelineDescriptor.cpp",
     "src/utils/ComboRenderPipelineDescriptor.h",
-    "src/utils/DawnHelpers.cpp",
-    "src/utils/DawnHelpers.h",
     "src/utils/SystemUtils.cpp",
     "src/utils/SystemUtils.h",
     "src/utils/TerribleCommandBuffer.cpp",
     "src/utils/TerribleCommandBuffer.h",
     "src/utils/Timer.h",
+    "src/utils/WGPUHelpers.cpp",
+    "src/utils/WGPUHelpers.h",
   ]
 
   if (is_win) {

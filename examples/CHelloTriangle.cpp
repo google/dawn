@@ -14,30 +14,29 @@
 
 #include "SampleUtils.h"
 
-#include "utils/DawnHelpers.h"
 #include "utils/SystemUtils.h"
+#include "utils/WGPUHelpers.h"
 
-DawnDevice device;
-DawnQueue queue;
-DawnSwapChain swapchain;
-DawnRenderPipeline pipeline;
+WGPUDevice device;
+WGPUQueue queue;
+WGPUSwapChain swapchain;
+WGPURenderPipeline pipeline;
 
-DawnTextureFormat swapChainFormat;
+WGPUTextureFormat swapChainFormat;
 
 void init() {
     device = CreateCppDawnDevice().Release();
-    queue = dawnDeviceCreateQueue(device);
+    queue = wgpuDeviceCreateQueue(device);
 
     {
-        DawnSwapChainDescriptor descriptor;
+        WGPUSwapChainDescriptor descriptor;
         descriptor.nextInChain = nullptr;
         descriptor.label = nullptr;
         descriptor.implementation = GetSwapChainImplementation();
-        swapchain = dawnDeviceCreateSwapChain(device, &descriptor);
+        swapchain = wgpuDeviceCreateSwapChain(device, &descriptor);
     }
-    swapChainFormat = static_cast<DawnTextureFormat>(GetPreferredSwapChainTextureFormat());
-    dawnSwapChainConfigure(swapchain, swapChainFormat, DAWN_TEXTURE_USAGE_OUTPUT_ATTACHMENT, 640,
-                           480);
+    swapChainFormat = static_cast<WGPUTextureFormat>(GetPreferredSwapChainTextureFormat());
+    wgpuSwapChainConfigure(swapchain, swapChainFormat, WGPUTextureUsage_OutputAttachment, 640, 480);
 
     const char* vs =
         "#version 450\n"
@@ -45,8 +44,8 @@ void init() {
         "void main() {\n"
         "   gl_Position = vec4(pos[gl_VertexIndex], 0.0, 1.0);\n"
         "}\n";
-    DawnShaderModule vsModule =
-        utils::CreateShaderModule(dawn::Device(device), utils::SingleShaderStage::Vertex, vs)
+    WGPUShaderModule vsModule =
+        utils::CreateShaderModule(wgpu::Device(device), utils::SingleShaderStage::Vertex, vs)
             .Release();
 
     const char* fs =
@@ -55,11 +54,11 @@ void init() {
         "void main() {\n"
         "   fragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
         "}\n";
-    DawnShaderModule fsModule =
+    WGPUShaderModule fsModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fs).Release();
 
     {
-        DawnRenderPipelineDescriptor descriptor;
+        WGPURenderPipelineDescriptor descriptor;
         descriptor.label = nullptr;
         descriptor.nextInChain = nullptr;
 
@@ -67,7 +66,7 @@ void init() {
         descriptor.vertexStage.module = vsModule;
         descriptor.vertexStage.entryPoint = "main";
 
-        DawnProgrammableStageDescriptor fragmentStage;
+        WGPUProgrammableStageDescriptor fragmentStage;
         fragmentStage.nextInChain = nullptr;
         fragmentStage.module = fsModule;
         fragmentStage.entryPoint = "main";
@@ -75,91 +74,91 @@ void init() {
 
         descriptor.sampleCount = 1;
 
-        DawnBlendDescriptor blendDescriptor;
-        blendDescriptor.operation = DAWN_BLEND_OPERATION_ADD;
-        blendDescriptor.srcFactor = DAWN_BLEND_FACTOR_ONE;
-        blendDescriptor.dstFactor = DAWN_BLEND_FACTOR_ONE;
-        DawnColorStateDescriptor colorStateDescriptor;
+        WGPUBlendDescriptor blendDescriptor;
+        blendDescriptor.operation = WGPUBlendOperation_Add;
+        blendDescriptor.srcFactor = WGPUBlendFactor_One;
+        blendDescriptor.dstFactor = WGPUBlendFactor_One;
+        WGPUColorStateDescriptor colorStateDescriptor;
         colorStateDescriptor.nextInChain = nullptr;
         colorStateDescriptor.format = swapChainFormat;
         colorStateDescriptor.alphaBlend = blendDescriptor;
         colorStateDescriptor.colorBlend = blendDescriptor;
-        colorStateDescriptor.writeMask = DAWN_COLOR_WRITE_MASK_ALL;
+        colorStateDescriptor.writeMask = WGPUColorWriteMask_All;
 
         descriptor.colorStateCount = 1;
         descriptor.colorStates = &colorStateDescriptor;
 
-        DawnPipelineLayoutDescriptor pl;
+        WGPUPipelineLayoutDescriptor pl;
         pl.nextInChain = nullptr;
         pl.label = nullptr;
         pl.bindGroupLayoutCount = 0;
         pl.bindGroupLayouts = nullptr;
-        descriptor.layout = dawnDeviceCreatePipelineLayout(device, &pl);
+        descriptor.layout = wgpuDeviceCreatePipelineLayout(device, &pl);
 
-        DawnVertexInputDescriptor vertexInput;
+        WGPUVertexInputDescriptor vertexInput;
         vertexInput.nextInChain = nullptr;
-        vertexInput.indexFormat = DAWN_INDEX_FORMAT_UINT32;
+        vertexInput.indexFormat = WGPUIndexFormat_Uint32;
         vertexInput.bufferCount = 0;
         vertexInput.buffers = nullptr;
         descriptor.vertexInput = &vertexInput;
 
-        DawnRasterizationStateDescriptor rasterizationState;
+        WGPURasterizationStateDescriptor rasterizationState;
         rasterizationState.nextInChain = nullptr;
-        rasterizationState.frontFace = DAWN_FRONT_FACE_CCW;
-        rasterizationState.cullMode = DAWN_CULL_MODE_NONE;
+        rasterizationState.frontFace = WGPUFrontFace_CCW;
+        rasterizationState.cullMode = WGPUCullMode_None;
         rasterizationState.depthBias = 0;
         rasterizationState.depthBiasSlopeScale = 0.0;
         rasterizationState.depthBiasClamp = 0.0;
         descriptor.rasterizationState = &rasterizationState;
 
-        descriptor.primitiveTopology = DAWN_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        descriptor.primitiveTopology = WGPUPrimitiveTopology_TriangleList;
         descriptor.sampleMask = 0xFFFFFFFF;
         descriptor.alphaToCoverageEnabled = false;
 
         descriptor.depthStencilState = nullptr;
 
-        pipeline = dawnDeviceCreateRenderPipeline(device, &descriptor);
+        pipeline = wgpuDeviceCreateRenderPipeline(device, &descriptor);
     }
 
-    dawnShaderModuleRelease(vsModule);
-    dawnShaderModuleRelease(fsModule);
+    wgpuShaderModuleRelease(vsModule);
+    wgpuShaderModuleRelease(fsModule);
 }
 
 void frame() {
-    DawnTexture backbuffer = dawnSwapChainGetNextTexture(swapchain);
-    DawnTextureView backbufferView = dawnTextureCreateView(backbuffer, nullptr);
-    DawnRenderPassDescriptor renderpassInfo;
+    WGPUTexture backbuffer = wgpuSwapChainGetNextTexture(swapchain);
+    WGPUTextureView backbufferView = wgpuTextureCreateView(backbuffer, nullptr);
+    WGPURenderPassDescriptor renderpassInfo;
     renderpassInfo.nextInChain = nullptr;
     renderpassInfo.label = nullptr;
-    DawnRenderPassColorAttachmentDescriptor colorAttachment;
+    WGPURenderPassColorAttachmentDescriptor colorAttachment;
     {
         colorAttachment.attachment = backbufferView;
         colorAttachment.resolveTarget = nullptr;
         colorAttachment.clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
-        colorAttachment.loadOp = DAWN_LOAD_OP_CLEAR;
-        colorAttachment.storeOp = DAWN_STORE_OP_STORE;
+        colorAttachment.loadOp = WGPULoadOp_Clear;
+        colorAttachment.storeOp = WGPUStoreOp_Store;
         renderpassInfo.colorAttachmentCount = 1;
         renderpassInfo.colorAttachments = &colorAttachment;
         renderpassInfo.depthStencilAttachment = nullptr;
     }
-    DawnCommandBuffer commands;
+    WGPUCommandBuffer commands;
     {
-        DawnCommandEncoder encoder = dawnDeviceCreateCommandEncoder(device, nullptr);
+        WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
 
-        DawnRenderPassEncoder pass = dawnCommandEncoderBeginRenderPass(encoder, &renderpassInfo);
-        dawnRenderPassEncoderSetPipeline(pass, pipeline);
-        dawnRenderPassEncoderDraw(pass, 3, 1, 0, 0);
-        dawnRenderPassEncoderEndPass(pass);
-        dawnRenderPassEncoderRelease(pass);
+        WGPURenderPassEncoder pass = wgpuCommandEncoderBeginRenderPass(encoder, &renderpassInfo);
+        wgpuRenderPassEncoderSetPipeline(pass, pipeline);
+        wgpuRenderPassEncoderDraw(pass, 3, 1, 0, 0);
+        wgpuRenderPassEncoderEndPass(pass);
+        wgpuRenderPassEncoderRelease(pass);
 
-        commands = dawnCommandEncoderFinish(encoder, nullptr);
-        dawnCommandEncoderRelease(encoder);
+        commands = wgpuCommandEncoderFinish(encoder, nullptr);
+        wgpuCommandEncoderRelease(encoder);
     }
 
-    dawnQueueSubmit(queue, 1, &commands);
-    dawnCommandBufferRelease(commands);
-    dawnSwapChainPresent(swapchain, backbuffer);
-    dawnTextureViewRelease(backbufferView);
+    wgpuQueueSubmit(queue, 1, &commands);
+    wgpuCommandBufferRelease(commands);
+    wgpuSwapChainPresent(swapchain, backbuffer);
+    wgpuTextureViewRelease(backbufferView);
 
     DoFlush();
 }

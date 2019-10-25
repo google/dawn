@@ -18,7 +18,7 @@
 #include "common/Constants.h"
 #include "common/Math.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/DawnHelpers.h"
+#include "utils/WGPUHelpers.h"
 
 // The helper struct to configure the copies between buffers and textures.
 struct CopyConfig {

@@ -22,8 +22,8 @@
 #include "dawn_native/vulkan/FencedDeleter.h"
 #include "dawn_native/vulkan/ResourceMemoryAllocatorVk.h"
 #include "dawn_native/vulkan/TextureVk.h"
-#include "utils/DawnHelpers.h"
 #include "utils/SystemUtils.h"
+#include "utils/WGPUHelpers.h"
 
 // TODO(crbug.com/966500): Intel is disabled until upgrade is finished
 

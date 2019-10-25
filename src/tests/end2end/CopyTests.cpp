@@ -17,7 +17,7 @@
 #include <array>
 #include "common/Constants.h"
 #include "common/Math.h"
-#include "utils/DawnHelpers.h"
+#include "utils/WGPUHelpers.h"
 
 class CopyTests : public DawnTest {
     protected:

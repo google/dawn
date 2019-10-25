@@ -21,7 +21,7 @@
 
 #include "dawn_native/D3D12Backend.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/DawnHelpers.h"
+#include "utils/WGPUHelpers.h"
 
 using Microsoft::WRL::ComPtr;
 

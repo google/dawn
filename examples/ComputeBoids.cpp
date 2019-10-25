@@ -15,8 +15,8 @@
 #include "SampleUtils.h"
 
 #include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/DawnHelpers.h"
 #include "utils/SystemUtils.h"
+#include "utils/WGPUHelpers.h"
 
 #include <array>
 #include <cstring>
@@ -24,19 +24,19 @@
 
 #include <glm/glm.hpp>
 
-dawn::Device device;
-dawn::Queue queue;
-dawn::SwapChain swapchain;
-dawn::TextureView depthStencilView;
+wgpu::Device device;
+wgpu::Queue queue;
+wgpu::SwapChain swapchain;
+wgpu::TextureView depthStencilView;
 
-dawn::Buffer modelBuffer;
-std::array<dawn::Buffer, 2> particleBuffers;
+wgpu::Buffer modelBuffer;
+std::array<wgpu::Buffer, 2> particleBuffers;
 
-dawn::RenderPipeline renderPipeline;
+wgpu::RenderPipeline renderPipeline;
 
-dawn::Buffer updateParams;
-dawn::ComputePipeline updatePipeline;
-std::array<dawn::BindGroup, 2> updateBGs;
+wgpu::Buffer updateParams;
+wgpu::ComputePipeline updatePipeline;
+std::array<wgpu::BindGroup, 2> updateBGs;
 
 size_t pingpong = 0;
 
@@ -65,11 +65,11 @@ void initBuffers() {
         {0.00, 0.02},
     };
     modelBuffer =
-        utils::CreateBufferFromData(device, model, sizeof(model), dawn::BufferUsage::Vertex);
+        utils::CreateBufferFromData(device, model, sizeof(model), wgpu::BufferUsage::Vertex);
 
     SimParams params = { 0.04f, 0.1f, 0.025f, 0.025f, 0.02f, 0.05f, 0.005f, kNumParticles };
     updateParams =
-        utils::CreateBufferFromData(device, &params, sizeof(params), dawn::BufferUsage::Uniform);
+        utils::CreateBufferFromData(device, &params, sizeof(params), wgpu::BufferUsage::Uniform);
 
     std::vector<Particle> initialParticles(kNumParticles);
     {
@@ -83,10 +83,10 @@ void initBuffers() {
     }
 
     for (size_t i = 0; i < 2; i++) {
-        dawn::BufferDescriptor descriptor;
+        wgpu::BufferDescriptor descriptor;
         descriptor.size = sizeof(Particle) * kNumParticles;
         descriptor.usage =
-            dawn::BufferUsage::CopyDst | dawn::BufferUsage::Vertex | dawn::BufferUsage::Storage;
+            wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Storage;
         particleBuffers[i] = device.CreateBuffer(&descriptor);
 
         particleBuffers[i].SetSubData(0,
@@ -96,7 +96,7 @@ void initBuffers() {
 }
 
 void initRender() {
-    dawn::ShaderModule vsModule =
+    wgpu::ShaderModule vsModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
         #version 450
         layout(location = 0) in vec2 a_particlePos;
@@ -110,7 +110,7 @@ void initRender() {
         }
     )");
 
-    dawn::ShaderModule fsModule =
+    wgpu::ShaderModule fsModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
         #version 450
         layout(location = 0) out vec4 fragColor;
@@ -127,27 +127,27 @@ void initRender() {
 
     descriptor.cVertexInput.bufferCount = 2;
     descriptor.cVertexInput.cBuffers[0].stride = sizeof(Particle);
-    descriptor.cVertexInput.cBuffers[0].stepMode = dawn::InputStepMode::Instance;
+    descriptor.cVertexInput.cBuffers[0].stepMode = wgpu::InputStepMode::Instance;
     descriptor.cVertexInput.cBuffers[0].attributeCount = 2;
     descriptor.cVertexInput.cAttributes[0].offset = offsetof(Particle, pos);
-    descriptor.cVertexInput.cAttributes[0].format = dawn::VertexFormat::Float2;
+    descriptor.cVertexInput.cAttributes[0].format = wgpu::VertexFormat::Float2;
     descriptor.cVertexInput.cAttributes[1].shaderLocation = 1;
     descriptor.cVertexInput.cAttributes[1].offset = offsetof(Particle, vel);
-    descriptor.cVertexInput.cAttributes[1].format = dawn::VertexFormat::Float2;
+    descriptor.cVertexInput.cAttributes[1].format = wgpu::VertexFormat::Float2;
     descriptor.cVertexInput.cBuffers[1].stride = sizeof(glm::vec2);
     descriptor.cVertexInput.cBuffers[1].attributeCount = 1;
     descriptor.cVertexInput.cBuffers[1].attributes = &descriptor.cVertexInput.cAttributes[2];
     descriptor.cVertexInput.cAttributes[2].shaderLocation = 2;
-    descriptor.cVertexInput.cAttributes[2].format = dawn::VertexFormat::Float2;
+    descriptor.cVertexInput.cAttributes[2].format = wgpu::VertexFormat::Float2;
     descriptor.depthStencilState = &descriptor.cDepthStencilState;
-    descriptor.cDepthStencilState.format = dawn::TextureFormat::Depth24PlusStencil8;
+    descriptor.cDepthStencilState.format = wgpu::TextureFormat::Depth24PlusStencil8;
     descriptor.cColorStates[0].format = GetPreferredSwapChainTextureFormat();
 
     renderPipeline = device.CreateRenderPipeline(&descriptor);
 }
 
 void initSim() {
-    dawn::ShaderModule module =
+    wgpu::ShaderModule module =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
         #version 450
 
@@ -239,14 +239,14 @@ void initSim() {
 
     auto bgl = utils::MakeBindGroupLayout(
         device, {
-                    {0, dawn::ShaderStage::Compute, dawn::BindingType::UniformBuffer},
-                    {1, dawn::ShaderStage::Compute, dawn::BindingType::StorageBuffer},
-                    {2, dawn::ShaderStage::Compute, dawn::BindingType::StorageBuffer},
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::UniformBuffer},
+                    {1, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
+                    {2, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
                 });
 
-    dawn::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
+    wgpu::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
-    dawn::ComputePipelineDescriptor csDesc;
+    wgpu::ComputePipelineDescriptor csDesc;
     csDesc.layout = pl;
     csDesc.computeStage.module = module;
     csDesc.computeStage.entryPoint = "main";
@@ -261,12 +261,12 @@ void initSim() {
     }
 }
 
-dawn::CommandBuffer createCommandBuffer(const dawn::Texture backbuffer, size_t i) {
+wgpu::CommandBuffer createCommandBuffer(const wgpu::Texture backbuffer, size_t i) {
     auto& bufferDst = particleBuffers[(i + 1) % 2];
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
     {
-        dawn::ComputePassEncoder pass = encoder.BeginComputePass();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(updatePipeline);
         pass.SetBindGroup(0, updateBGs[i]);
         pass.Dispatch(kNumParticles, 1, 1);
@@ -275,7 +275,7 @@ dawn::CommandBuffer createCommandBuffer(const dawn::Texture backbuffer, size_t i
 
     {
         utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateView()}, depthStencilView);
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(renderPipeline);
         pass.SetVertexBuffer(0, bufferDst);
         pass.SetVertexBuffer(1, modelBuffer);
@@ -291,7 +291,7 @@ void init() {
 
     queue = device.CreateQueue();
     swapchain = GetSwapChain(device);
-    swapchain.Configure(GetPreferredSwapChainTextureFormat(), dawn::TextureUsage::OutputAttachment,
+    swapchain.Configure(GetPreferredSwapChainTextureFormat(), wgpu::TextureUsage::OutputAttachment,
                         640, 480);
 
     initBuffers();
@@ -300,9 +300,9 @@ void init() {
 }
 
 void frame() {
-    dawn::Texture backbuffer = swapchain.GetNextTexture();
+    wgpu::Texture backbuffer = swapchain.GetNextTexture();
 
-    dawn::CommandBuffer commandBuffer = createCommandBuffer(backbuffer, pingpong);
+    wgpu::CommandBuffer commandBuffer = createCommandBuffer(backbuffer, pingpong);
     queue.Submit(1, &commandBuffer);
     swapchain.Present(backbuffer);
     DoFlush();

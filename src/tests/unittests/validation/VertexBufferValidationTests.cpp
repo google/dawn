@@ -17,7 +17,7 @@
 #include "tests/unittests/validation/ValidationTest.h"
 
 #include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/DawnHelpers.h"
+#include "utils/WGPUHelpers.h"
 
 class VertexBufferValidationTest : public ValidationTest {
     protected:

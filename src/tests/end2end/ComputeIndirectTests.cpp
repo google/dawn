@@ -15,7 +15,7 @@
 #include "dawn/dawncpp.h"
 #include "tests/DawnTest.h"
 
-#include "utils/DawnHelpers.h"
+#include "utils/WGPUHelpers.h"
 
 #include <array>
 #include <initializer_list>

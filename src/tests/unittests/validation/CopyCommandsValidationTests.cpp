@@ -16,7 +16,7 @@
 #include "common/Constants.h"
 #include "common/Math.h"
 #include "tests/unittests/validation/ValidationTest.h"
-#include "utils/DawnHelpers.h"
+#include "utils/WGPUHelpers.h"
 
 class CopyCommandTest : public ValidationTest {
   protected:

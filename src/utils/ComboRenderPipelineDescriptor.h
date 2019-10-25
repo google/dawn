@@ -15,7 +15,7 @@
 #ifndef UTILS_COMBORENDERPIPELINEDESCRIPTOR_H_
 #define UTILS_COMBORENDERPIPELINEDESCRIPTOR_H_
 
-#include <dawn/dawncpp.h>
+#include <dawn/webgpu_cpp.h>
 
 #include "common/Constants.h"
 
@@ -23,29 +23,29 @@
 
 namespace utils {
 
-    class ComboVertexInputDescriptor : public dawn::VertexInputDescriptor {
+    class ComboVertexInputDescriptor : public wgpu::VertexInputDescriptor {
       public:
         ComboVertexInputDescriptor();
 
-        std::array<dawn::VertexBufferDescriptor, kMaxVertexBuffers> cBuffers;
-        std::array<dawn::VertexAttributeDescriptor, kMaxVertexAttributes> cAttributes;
+        std::array<wgpu::VertexBufferDescriptor, kMaxVertexBuffers> cBuffers;
+        std::array<wgpu::VertexAttributeDescriptor, kMaxVertexAttributes> cAttributes;
     };
 
-    class ComboRenderPipelineDescriptor : public dawn::RenderPipelineDescriptor {
+    class ComboRenderPipelineDescriptor : public wgpu::RenderPipelineDescriptor {
       public:
-        ComboRenderPipelineDescriptor(const dawn::Device& device);
+        ComboRenderPipelineDescriptor(const wgpu::Device& device);
 
         ComboRenderPipelineDescriptor(const ComboRenderPipelineDescriptor&) = delete;
         ComboRenderPipelineDescriptor& operator=(const ComboRenderPipelineDescriptor&) = delete;
         ComboRenderPipelineDescriptor(ComboRenderPipelineDescriptor&&) = delete;
         ComboRenderPipelineDescriptor& operator=(ComboRenderPipelineDescriptor&&) = delete;
 
-        dawn::ProgrammableStageDescriptor cFragmentStage;
+        wgpu::ProgrammableStageDescriptor cFragmentStage;
 
         ComboVertexInputDescriptor cVertexInput;
-        dawn::RasterizationStateDescriptor cRasterizationState;
-        std::array<dawn::ColorStateDescriptor, kMaxColorAttachments> cColorStates;
-        dawn::DepthStencilStateDescriptor cDepthStencilState;
+        wgpu::RasterizationStateDescriptor cRasterizationState;
+        std::array<wgpu::ColorStateDescriptor, kMaxColorAttachments> cColorStates;
+        wgpu::DepthStencilStateDescriptor cDepthStencilState;
     };
 
 }  // namespace utils

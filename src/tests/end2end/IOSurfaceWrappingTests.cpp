@@ -16,7 +16,7 @@
 
 #include "dawn_native/MetalBackend.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/DawnHelpers.h"
+#include "utils/WGPUHelpers.h"
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOSurface/IOSurface.h>

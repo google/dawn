@@ -16,7 +16,7 @@
 
 #include "common/Constants.h"
 
-#include "utils/DawnHelpers.h"
+#include "utils/WGPUHelpers.h"
 
 namespace {
 

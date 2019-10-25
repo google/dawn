@@ -16,7 +16,7 @@
 
 #include "common/Math.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
-#include "utils/DawnHelpers.h"
+#include "utils/WGPUHelpers.h"
 
 class TextureZeroInitTest : public DawnTest {
   protected:

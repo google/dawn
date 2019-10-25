@@ -14,12 +14,12 @@
 
 #include "utils/ComboRenderBundleEncoderDescriptor.h"
 
-#include "utils/DawnHelpers.h"
+#include "utils/WGPUHelpers.h"
 
 namespace utils {
 
     ComboRenderBundleEncoderDescriptor::ComboRenderBundleEncoderDescriptor() {
-        dawn::RenderBundleEncoderDescriptor* descriptor = this;
+        wgpu::RenderBundleEncoderDescriptor* descriptor = this;
 
         descriptor->colorFormatsCount = 0;
         descriptor->colorFormats = &cColorFormats[0];

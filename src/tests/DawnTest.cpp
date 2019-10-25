@@ -22,9 +22,9 @@
 #include "dawn_native/DawnNative.h"
 #include "dawn_wire/WireClient.h"
 #include "dawn_wire/WireServer.h"
-#include "utils/DawnHelpers.h"
 #include "utils/SystemUtils.h"
 #include "utils/TerribleCommandBuffer.h"
+#include "utils/WGPUHelpers.h"
 
 #include <algorithm>
 #include <iomanip>

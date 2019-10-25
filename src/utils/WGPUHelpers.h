@@ -15,7 +15,7 @@
 #ifndef UTILS_DAWNHELPERS_H_
 #define UTILS_DAWNHELPERS_H_
 
-#include <dawn/dawncpp.h>
+#include <dawn/webgpu_cpp.h>
 
 #include <array>
 #include <initializer_list>
@@ -28,42 +28,42 @@ namespace utils {
 
     enum class SingleShaderStage { Vertex, Fragment, Compute };
 
-    dawn::ShaderModule CreateShaderModule(const dawn::Device& device,
+    wgpu::ShaderModule CreateShaderModule(const wgpu::Device& device,
                                           SingleShaderStage stage,
                                           const char* source);
-    dawn::ShaderModule CreateShaderModuleFromASM(const dawn::Device& device, const char* source);
+    wgpu::ShaderModule CreateShaderModuleFromASM(const wgpu::Device& device, const char* source);
 
-    dawn::Buffer CreateBufferFromData(const dawn::Device& device,
+    wgpu::Buffer CreateBufferFromData(const wgpu::Device& device,
                                       const void* data,
                                       uint64_t size,
-                                      dawn::BufferUsage usage);
+                                      wgpu::BufferUsage usage);
 
     template <typename T>
-    dawn::Buffer CreateBufferFromData(const dawn::Device& device,
-                                      dawn::BufferUsage usage,
+    wgpu::Buffer CreateBufferFromData(const wgpu::Device& device,
+                                      wgpu::BufferUsage usage,
                                       std::initializer_list<T> data) {
         return CreateBufferFromData(device, data.begin(), uint32_t(sizeof(T) * data.size()), usage);
     }
 
-    dawn::BufferCopyView CreateBufferCopyView(dawn::Buffer buffer,
+    wgpu::BufferCopyView CreateBufferCopyView(wgpu::Buffer buffer,
                                               uint64_t offset,
                                               uint32_t rowPitch,
                                               uint32_t imageHeight);
-    dawn::TextureCopyView CreateTextureCopyView(dawn::Texture texture,
+    wgpu::TextureCopyView CreateTextureCopyView(wgpu::Texture texture,
                                                 uint32_t level,
                                                 uint32_t slice,
-                                                dawn::Origin3D origin);
+                                                wgpu::Origin3D origin);
 
-    struct ComboRenderPassDescriptor : public dawn::RenderPassDescriptor {
+    struct ComboRenderPassDescriptor : public wgpu::RenderPassDescriptor {
       public:
-        ComboRenderPassDescriptor(std::initializer_list<dawn::TextureView> colorAttachmentInfo,
-                                  dawn::TextureView depthStencil = dawn::TextureView());
+        ComboRenderPassDescriptor(std::initializer_list<wgpu::TextureView> colorAttachmentInfo,
+                                  wgpu::TextureView depthStencil = wgpu::TextureView());
         const ComboRenderPassDescriptor& operator=(
             const ComboRenderPassDescriptor& otherRenderPass);
 
-        std::array<dawn::RenderPassColorAttachmentDescriptor, kMaxColorAttachments>
+        std::array<wgpu::RenderPassColorAttachmentDescriptor, kMaxColorAttachments>
             cColorAttachments;
-        dawn::RenderPassDepthStencilAttachmentDescriptor cDepthStencilAttachmentInfo;
+        wgpu::RenderPassDepthStencilAttachmentDescriptor cDepthStencilAttachmentInfo;
     };
 
     struct BasicRenderPass {
@@ -71,27 +71,27 @@ namespace utils {
         BasicRenderPass();
         BasicRenderPass(uint32_t width,
                         uint32_t height,
-                        dawn::Texture color,
-                        dawn::TextureFormat texture = kDefaultColorFormat);
+                        wgpu::Texture color,
+                        wgpu::TextureFormat texture = kDefaultColorFormat);
 
-        static constexpr dawn::TextureFormat kDefaultColorFormat = dawn::TextureFormat::RGBA8Unorm;
+        static constexpr wgpu::TextureFormat kDefaultColorFormat = wgpu::TextureFormat::RGBA8Unorm;
 
         uint32_t width;
         uint32_t height;
-        dawn::Texture color;
-        dawn::TextureFormat colorFormat;
+        wgpu::Texture color;
+        wgpu::TextureFormat colorFormat;
         utils::ComboRenderPassDescriptor renderPassInfo;
     };
-    BasicRenderPass CreateBasicRenderPass(const dawn::Device& device,
+    BasicRenderPass CreateBasicRenderPass(const wgpu::Device& device,
                                           uint32_t width,
                                           uint32_t height);
 
-    dawn::SamplerDescriptor GetDefaultSamplerDescriptor();
-    dawn::PipelineLayout MakeBasicPipelineLayout(const dawn::Device& device,
-                                                 const dawn::BindGroupLayout* bindGroupLayout);
-    dawn::BindGroupLayout MakeBindGroupLayout(
-        const dawn::Device& device,
-        std::initializer_list<dawn::BindGroupLayoutBinding> bindingsInitializer);
+    wgpu::SamplerDescriptor GetDefaultSamplerDescriptor();
+    wgpu::PipelineLayout MakeBasicPipelineLayout(const wgpu::Device& device,
+                                                 const wgpu::BindGroupLayout* bindGroupLayout);
+    wgpu::BindGroupLayout MakeBindGroupLayout(
+        const wgpu::Device& device,
+        std::initializer_list<wgpu::BindGroupLayoutBinding> bindingsInitializer);
 
     // Helpers to make creating bind groups look nicer:
     //
@@ -104,26 +104,26 @@ namespace utils {
     // Structure with one constructor per-type of bindings, so that the initializer_list accepts
     // bindings with the right type and no extra information.
     struct BindingInitializationHelper {
-        BindingInitializationHelper(uint32_t binding, const dawn::Sampler& sampler);
-        BindingInitializationHelper(uint32_t binding, const dawn::TextureView& textureView);
+        BindingInitializationHelper(uint32_t binding, const wgpu::Sampler& sampler);
+        BindingInitializationHelper(uint32_t binding, const wgpu::TextureView& textureView);
         BindingInitializationHelper(uint32_t binding,
-                                    const dawn::Buffer& buffer,
+                                    const wgpu::Buffer& buffer,
                                     uint64_t offset,
                                     uint64_t size);
 
-        dawn::BindGroupBinding GetAsBinding() const;
+        wgpu::BindGroupBinding GetAsBinding() const;
 
         uint32_t binding;
-        dawn::Sampler sampler;
-        dawn::TextureView textureView;
-        dawn::Buffer buffer;
+        wgpu::Sampler sampler;
+        wgpu::TextureView textureView;
+        wgpu::Buffer buffer;
         uint64_t offset = 0;
         uint64_t size = 0;
     };
 
-    dawn::BindGroup MakeBindGroup(
-        const dawn::Device& device,
-        const dawn::BindGroupLayout& layout,
+    wgpu::BindGroup MakeBindGroup(
+        const wgpu::Device& device,
+        const wgpu::BindGroupLayout& layout,
         std::initializer_list<BindingInitializationHelper> bindingsInitializer);
 
 }  // namespace utils

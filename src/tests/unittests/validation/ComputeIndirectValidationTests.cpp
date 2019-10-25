@@ -15,7 +15,7 @@
 #include <initializer_list>
 #include <limits>
 #include "tests/unittests/validation/ValidationTest.h"
-#include "utils/DawnHelpers.h"
+#include "utils/WGPUHelpers.h"
 
 class ComputeIndirectValidationTest : public ValidationTest {
   protected:

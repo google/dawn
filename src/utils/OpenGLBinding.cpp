@@ -27,7 +27,7 @@ namespace utils {
 
     class OpenGLBinding : public BackendBinding {
       public:
-        OpenGLBinding(GLFWwindow* window, DawnDevice device) : BackendBinding(window, device) {
+        OpenGLBinding(GLFWwindow* window, WGPUDevice device) : BackendBinding(window, device) {
         }
 
         uint64_t GetSwapChainImplementation() override {
@@ -40,7 +40,7 @@ namespace utils {
             return reinterpret_cast<uint64_t>(&mSwapchainImpl);
         }
 
-        DawnTextureFormat GetPreferredSwapChainTextureFormat() override {
+        WGPUTextureFormat GetPreferredSwapChainTextureFormat() override {
             return dawn_native::opengl::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
         }
 
@@ -48,7 +48,7 @@ namespace utils {
         DawnSwapChainImplementation mSwapchainImpl = {};
     };
 
-    BackendBinding* CreateOpenGLBinding(GLFWwindow* window, DawnDevice device) {
+    BackendBinding* CreateOpenGLBinding(GLFWwindow* window, WGPUDevice device) {
         return new OpenGLBinding(window, device);
     }
 

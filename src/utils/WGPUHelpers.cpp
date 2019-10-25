@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "utils/DawnHelpers.h"
+#include "utils/WGPUHelpers.h"
 
 #include "common/Assert.h"
 #include "common/Constants.h"
@@ -41,8 +41,8 @@ namespace utils {
             }
         }
 
-        dawn::ShaderModule CreateShaderModuleFromResult(
-            const dawn::Device& device,
+        wgpu::ShaderModule CreateShaderModuleFromResult(
+            const wgpu::Device& device,
             const shaderc::SpvCompilationResult& result) {
             // result.cend and result.cbegin return pointers to uint32_t.
             const uint32_t* resultBegin = result.cbegin();
@@ -51,7 +51,7 @@ namespace utils {
             ptrdiff_t resultSize = resultEnd - resultBegin;
             // SetSource takes data as uint32_t*.
 
-            dawn::ShaderModuleDescriptor descriptor;
+            wgpu::ShaderModuleDescriptor descriptor;
             descriptor.codeSize = static_cast<uint32_t>(resultSize);
             descriptor.code = result.cbegin();
             return device.CreateShaderModule(&descriptor);
@@ -59,7 +59,7 @@ namespace utils {
 
     }  // anonymous namespace
 
-    dawn::ShaderModule CreateShaderModule(const dawn::Device& device,
+    wgpu::ShaderModule CreateShaderModule(const wgpu::Device& device,
                                           SingleShaderStage stage,
                                           const char* source) {
         shaderc_shader_kind kind = ShadercShaderKind(stage);
@@ -102,7 +102,7 @@ namespace utils {
         return CreateShaderModuleFromResult(device, result);
     }
 
-    dawn::ShaderModule CreateShaderModuleFromASM(const dawn::Device& device, const char* source) {
+    wgpu::ShaderModule CreateShaderModuleFromASM(const wgpu::Device& device, const char* source) {
         shaderc::Compiler compiler;
         shaderc::SpvCompilationResult result = compiler.AssembleToSpv(source, strlen(source));
         if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
@@ -113,38 +113,38 @@ namespace utils {
         return CreateShaderModuleFromResult(device, result);
     }
 
-    dawn::Buffer CreateBufferFromData(const dawn::Device& device,
+    wgpu::Buffer CreateBufferFromData(const wgpu::Device& device,
                                       const void* data,
                                       uint64_t size,
-                                      dawn::BufferUsage usage) {
-        dawn::BufferDescriptor descriptor;
+                                      wgpu::BufferUsage usage) {
+        wgpu::BufferDescriptor descriptor;
         descriptor.size = size;
-        descriptor.usage = usage | dawn::BufferUsage::CopyDst;
+        descriptor.usage = usage | wgpu::BufferUsage::CopyDst;
 
-        dawn::Buffer buffer = device.CreateBuffer(&descriptor);
+        wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
         buffer.SetSubData(0, size, data);
         return buffer;
     }
 
     ComboRenderPassDescriptor::ComboRenderPassDescriptor(
-        std::initializer_list<dawn::TextureView> colorAttachmentInfo,
-        dawn::TextureView depthStencil) {
+        std::initializer_list<wgpu::TextureView> colorAttachmentInfo,
+        wgpu::TextureView depthStencil) {
         for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
-            cColorAttachments[i].loadOp = dawn::LoadOp::Clear;
-            cColorAttachments[i].storeOp = dawn::StoreOp::Store;
+            cColorAttachments[i].loadOp = wgpu::LoadOp::Clear;
+            cColorAttachments[i].storeOp = wgpu::StoreOp::Store;
             cColorAttachments[i].clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
         }
 
         cDepthStencilAttachmentInfo.clearDepth = 1.0f;
         cDepthStencilAttachmentInfo.clearStencil = 0;
-        cDepthStencilAttachmentInfo.depthLoadOp = dawn::LoadOp::Clear;
-        cDepthStencilAttachmentInfo.depthStoreOp = dawn::StoreOp::Store;
-        cDepthStencilAttachmentInfo.stencilLoadOp = dawn::LoadOp::Clear;
-        cDepthStencilAttachmentInfo.stencilStoreOp = dawn::StoreOp::Store;
+        cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Clear;
+        cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
+        cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Clear;
+        cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
 
         colorAttachmentCount = static_cast<uint32_t>(colorAttachmentInfo.size());
         uint32_t colorAttachmentIndex = 0;
-        for (const dawn::TextureView& colorAttachment : colorAttachmentInfo) {
+        for (const wgpu::TextureView& colorAttachment : colorAttachmentInfo) {
             if (colorAttachment.Get() != nullptr) {
                 cColorAttachments[colorAttachmentIndex].attachment = colorAttachment;
             }
@@ -182,14 +182,14 @@ namespace utils {
         : width(0),
           height(0),
           color(nullptr),
-          colorFormat(dawn::TextureFormat::RGBA8Unorm),
+          colorFormat(wgpu::TextureFormat::RGBA8Unorm),
           renderPassInfo({}) {
     }
 
     BasicRenderPass::BasicRenderPass(uint32_t texWidth,
                                      uint32_t texHeight,
-                                     dawn::Texture colorAttachment,
-                                     dawn::TextureFormat textureFormat)
+                                     wgpu::Texture colorAttachment,
+                                     wgpu::TextureFormat textureFormat)
         : width(texWidth),
           height(texHeight),
           color(colorAttachment),
@@ -197,13 +197,13 @@ namespace utils {
           renderPassInfo({colorAttachment.CreateView()}) {
     }
 
-    BasicRenderPass CreateBasicRenderPass(const dawn::Device& device,
+    BasicRenderPass CreateBasicRenderPass(const wgpu::Device& device,
                                           uint32_t width,
                                           uint32_t height) {
         DAWN_ASSERT(width > 0 && height > 0);
 
-        dawn::TextureDescriptor descriptor;
-        descriptor.dimension = dawn::TextureDimension::e2D;
+        wgpu::TextureDescriptor descriptor;
+        descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size.width = width;
         descriptor.size.height = height;
         descriptor.size.depth = 1;
@@ -211,17 +211,17 @@ namespace utils {
         descriptor.sampleCount = 1;
         descriptor.format = BasicRenderPass::kDefaultColorFormat;
         descriptor.mipLevelCount = 1;
-        descriptor.usage = dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc;
-        dawn::Texture color = device.CreateTexture(&descriptor);
+        descriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+        wgpu::Texture color = device.CreateTexture(&descriptor);
 
         return BasicRenderPass(width, height, color);
     }
 
-    dawn::BufferCopyView CreateBufferCopyView(dawn::Buffer buffer,
+    wgpu::BufferCopyView CreateBufferCopyView(wgpu::Buffer buffer,
                                               uint64_t offset,
                                               uint32_t rowPitch,
                                               uint32_t imageHeight) {
-        dawn::BufferCopyView bufferCopyView;
+        wgpu::BufferCopyView bufferCopyView;
         bufferCopyView.buffer = buffer;
         bufferCopyView.offset = offset;
         bufferCopyView.rowPitch = rowPitch;
@@ -230,11 +230,11 @@ namespace utils {
         return bufferCopyView;
     }
 
-    dawn::TextureCopyView CreateTextureCopyView(dawn::Texture texture,
+    wgpu::TextureCopyView CreateTextureCopyView(wgpu::Texture texture,
                                                 uint32_t mipLevel,
                                                 uint32_t arrayLayer,
-                                                dawn::Origin3D origin) {
-        dawn::TextureCopyView textureCopyView;
+                                                wgpu::Origin3D origin) {
+        wgpu::TextureCopyView textureCopyView;
         textureCopyView.texture = texture;
         textureCopyView.mipLevel = mipLevel;
         textureCopyView.arrayLayer = arrayLayer;
@@ -243,25 +243,25 @@ namespace utils {
         return textureCopyView;
     }
 
-    dawn::SamplerDescriptor GetDefaultSamplerDescriptor() {
-        dawn::SamplerDescriptor desc;
+    wgpu::SamplerDescriptor GetDefaultSamplerDescriptor() {
+        wgpu::SamplerDescriptor desc;
 
-        desc.minFilter = dawn::FilterMode::Linear;
-        desc.magFilter = dawn::FilterMode::Linear;
-        desc.mipmapFilter = dawn::FilterMode::Linear;
-        desc.addressModeU = dawn::AddressMode::Repeat;
-        desc.addressModeV = dawn::AddressMode::Repeat;
-        desc.addressModeW = dawn::AddressMode::Repeat;
+        desc.minFilter = wgpu::FilterMode::Linear;
+        desc.magFilter = wgpu::FilterMode::Linear;
+        desc.mipmapFilter = wgpu::FilterMode::Linear;
+        desc.addressModeU = wgpu::AddressMode::Repeat;
+        desc.addressModeV = wgpu::AddressMode::Repeat;
+        desc.addressModeW = wgpu::AddressMode::Repeat;
         desc.lodMinClamp = kLodMin;
         desc.lodMaxClamp = kLodMax;
-        desc.compare = dawn::CompareFunction::Never;
+        desc.compare = wgpu::CompareFunction::Never;
 
         return desc;
     }
 
-    dawn::PipelineLayout MakeBasicPipelineLayout(const dawn::Device& device,
-                                                 const dawn::BindGroupLayout* bindGroupLayout) {
-        dawn::PipelineLayoutDescriptor descriptor;
+    wgpu::PipelineLayout MakeBasicPipelineLayout(const wgpu::Device& device,
+                                                 const wgpu::BindGroupLayout* bindGroupLayout) {
+        wgpu::PipelineLayoutDescriptor descriptor;
         if (bindGroupLayout != nullptr) {
             descriptor.bindGroupLayoutCount = 1;
             descriptor.bindGroupLayouts = bindGroupLayout;
@@ -272,43 +272,43 @@ namespace utils {
         return device.CreatePipelineLayout(&descriptor);
     }
 
-    dawn::BindGroupLayout MakeBindGroupLayout(
-        const dawn::Device& device,
-        std::initializer_list<dawn::BindGroupLayoutBinding> bindingsInitializer) {
-        constexpr dawn::ShaderStage kNoStages{};
+    wgpu::BindGroupLayout MakeBindGroupLayout(
+        const wgpu::Device& device,
+        std::initializer_list<wgpu::BindGroupLayoutBinding> bindingsInitializer) {
+        constexpr wgpu::ShaderStage kNoStages{};
 
-        std::vector<dawn::BindGroupLayoutBinding> bindings;
-        for (const dawn::BindGroupLayoutBinding& binding : bindingsInitializer) {
+        std::vector<wgpu::BindGroupLayoutBinding> bindings;
+        for (const wgpu::BindGroupLayoutBinding& binding : bindingsInitializer) {
             if (binding.visibility != kNoStages) {
                 bindings.push_back(binding);
             }
         }
 
-        dawn::BindGroupLayoutDescriptor descriptor;
+        wgpu::BindGroupLayoutDescriptor descriptor;
         descriptor.bindingCount = static_cast<uint32_t>(bindings.size());
         descriptor.bindings = bindings.data();
         return device.CreateBindGroupLayout(&descriptor);
     }
 
     BindingInitializationHelper::BindingInitializationHelper(uint32_t binding,
-                                                             const dawn::Sampler& sampler)
+                                                             const wgpu::Sampler& sampler)
         : binding(binding), sampler(sampler) {
     }
 
     BindingInitializationHelper::BindingInitializationHelper(uint32_t binding,
-                                                             const dawn::TextureView& textureView)
+                                                             const wgpu::TextureView& textureView)
         : binding(binding), textureView(textureView) {
     }
 
     BindingInitializationHelper::BindingInitializationHelper(uint32_t binding,
-                                                             const dawn::Buffer& buffer,
+                                                             const wgpu::Buffer& buffer,
                                                              uint64_t offset,
                                                              uint64_t size)
         : binding(binding), buffer(buffer), offset(offset), size(size) {
     }
 
-    dawn::BindGroupBinding BindingInitializationHelper::GetAsBinding() const {
-        dawn::BindGroupBinding result;
+    wgpu::BindGroupBinding BindingInitializationHelper::GetAsBinding() const {
+        wgpu::BindGroupBinding result;
 
         result.binding = binding;
         result.sampler = sampler;
@@ -320,16 +320,16 @@ namespace utils {
         return result;
     }
 
-    dawn::BindGroup MakeBindGroup(
-        const dawn::Device& device,
-        const dawn::BindGroupLayout& layout,
+    wgpu::BindGroup MakeBindGroup(
+        const wgpu::Device& device,
+        const wgpu::BindGroupLayout& layout,
         std::initializer_list<BindingInitializationHelper> bindingsInitializer) {
-        std::vector<dawn::BindGroupBinding> bindings;
+        std::vector<wgpu::BindGroupBinding> bindings;
         for (const BindingInitializationHelper& helper : bindingsInitializer) {
             bindings.push_back(helper.GetAsBinding());
         }
 
-        dawn::BindGroupDescriptor descriptor;
+        wgpu::BindGroupDescriptor descriptor;
         descriptor.layout = layout;
         descriptor.bindingCount = bindings.size();
         descriptor.bindings = bindings.data();

@@ -14,7 +14,7 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
-#include "utils/DawnHelpers.h"
+#include "utils/WGPUHelpers.h"
 
 class CommandBufferValidationTest : public ValidationTest {
 };
