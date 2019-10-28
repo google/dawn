@@ -15,6 +15,7 @@
 #include "dawn_native/d3d12/DescriptorHeapAllocator.h"
 
 #include "common/Assert.h"
+#include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
@@ -83,10 +84,9 @@ namespace dawn_native { namespace d3d12 {
         heapDescriptor.Flags = flags;
         heapDescriptor.NodeMask = 0;
         ComPtr<ID3D12DescriptorHeap> heap;
-        if (FAILED(mDevice->GetD3D12Device()->CreateDescriptorHeap(&heapDescriptor,
-                                                                   IID_PPV_ARGS(&heap)))) {
-            return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate heap");
-        }
+        DAWN_TRY(CheckHRESULT(
+            mDevice->GetD3D12Device()->CreateDescriptorHeap(&heapDescriptor, IID_PPV_ARGS(&heap)),
+            "ID3D12Device::CreateDescriptorHeap"));
 
         mDevice->ReferenceUntilUnused(heap);
 

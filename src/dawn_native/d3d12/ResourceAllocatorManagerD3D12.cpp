@@ -14,6 +14,7 @@
 
 #include "dawn_native/d3d12/ResourceAllocatorManagerD3D12.h"
 
+#include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/HeapAllocatorD3D12.h"
 #include "dawn_native/d3d12/HeapD3D12.h"
@@ -188,13 +189,10 @@ namespace dawn_native { namespace d3d12 {
         // barrier).
         // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12device-createplacedresource
         ComPtr<ID3D12Resource> placedResource;
-        if (FAILED(mDevice->GetD3D12Device()->CreatePlacedResource(
-                heap, allocation.GetOffset(), &resourceDescriptor, initialUsage, nullptr,
-                IID_PPV_ARGS(&placedResource)))) {
-            // Note: Heap must already exist before the resource is created. If CreatePlacedResource
-            // fails, it's unlikely to be OOM.
-            return DAWN_DEVICE_LOST_ERROR("Unable to allocate resource");
-        }
+        DAWN_TRY(CheckOutOfMemoryHRESULT(mDevice->GetD3D12Device()->CreatePlacedResource(
+                                             heap, allocation.GetOffset(), &resourceDescriptor,
+                                             initialUsage, nullptr, IID_PPV_ARGS(&placedResource)),
+                                         "ID3D12Device::CreatePlacedResource"));
 
         return ResourceHeapAllocation{allocation.GetInfo(), allocation.GetOffset(),
                                       std::move(placedResource)};
@@ -214,11 +212,11 @@ namespace dawn_native { namespace d3d12 {
         // Note: Heap flags are inferred by the resource descriptor and do not need to be explicitly
         // provided to CreateCommittedResource.
         ComPtr<ID3D12Resource> committedResource;
-        if (FAILED(mDevice->GetD3D12Device()->CreateCommittedResource(
-                &heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDescriptor, initialUsage, nullptr,
-                IID_PPV_ARGS(&committedResource)))) {
-            return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate resource");
-        }
+        DAWN_TRY(
+            CheckOutOfMemoryHRESULT(mDevice->GetD3D12Device()->CreateCommittedResource(
+                                        &heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDescriptor,
+                                        initialUsage, nullptr, IID_PPV_ARGS(&committedResource)),
+                                    "ID3D12Device::CreateCommittedResource"));
 
         AllocationInfo info;
         info.mMethod = AllocationMethod::kDirect;

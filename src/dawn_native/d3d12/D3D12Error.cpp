@@ -26,4 +26,11 @@ namespace dawn_native { namespace d3d12 {
         return DAWN_DEVICE_LOST_ERROR(message);
     }
 
+    MaybeError CheckOutOfMemoryHRESULT(HRESULT result, const char* context) {
+        if (result == E_OUTOFMEMORY) {
+            return DAWN_OUT_OF_MEMORY_ERROR(context);
+        }
+        return CheckHRESULT(result, context);
+    }
+
 }}  // namespace dawn_native::d3d12

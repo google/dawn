@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "dawn_native/d3d12/HeapAllocatorD3D12.h"
+#include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/HeapD3D12.h"
 
@@ -41,9 +42,9 @@ namespace dawn_native { namespace d3d12 {
         heapDesc.Flags = mHeapFlags;
 
         ComPtr<ID3D12Heap> heap;
-        if (FAILED(mDevice->GetD3D12Device()->CreateHeap(&heapDesc, IID_PPV_ARGS(&heap)))) {
-            return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate heap");
-        }
+        DAWN_TRY(CheckOutOfMemoryHRESULT(
+            mDevice->GetD3D12Device()->CreateHeap(&heapDesc, IID_PPV_ARGS(&heap)),
+            "ID3D12Device::CreateHeap"));
 
         return {std::make_unique<Heap>(std::move(heap))};
     }

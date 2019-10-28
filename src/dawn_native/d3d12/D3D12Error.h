@@ -23,6 +23,9 @@ namespace dawn_native { namespace d3d12 {
     // Returns a success only if result of HResult is success
     MaybeError CheckHRESULT(HRESULT result, const char* context);
 
+    // Uses CheckRESULT but returns OOM specific error when recoverable.
+    MaybeError CheckOutOfMemoryHRESULT(HRESULT result, const char* context);
+
 }}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_D3D12ERROR_H_

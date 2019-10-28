@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "dawn_native/d3d12/StagingBufferD3D12.h"
+#include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
@@ -39,11 +40,7 @@ namespace dawn_native { namespace d3d12 {
                         mDevice->AllocateMemory(D3D12_HEAP_TYPE_UPLOAD, resourceDescriptor,
                                                 D3D12_RESOURCE_STATE_GENERIC_READ));
 
-        if (FAILED(GetResource()->Map(0, nullptr, &mMappedPointer))) {
-            return DAWN_DEVICE_LOST_ERROR("Unable to map staging buffer.");
-        }
-
-        return {};
+        return CheckHRESULT(GetResource()->Map(0, nullptr, &mMappedPointer), "ID3D12Resource::Map");
     }
 
     StagingBuffer::~StagingBuffer() {
