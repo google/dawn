@@ -28,10 +28,10 @@ TEST_P(ComputeStorageBufferBarrierTests, AddIncrement) {
     std::vector<uint32_t> expected(kNumValues, 0x1234 * kIterations);
 
     uint64_t bufferSize = static_cast<uint64_t>(data.size() * sizeof(uint32_t));
-    dawn::Buffer buffer = utils::CreateBufferFromData(
-        device, data.data(), bufferSize, dawn::BufferUsage::Storage | dawn::BufferUsage::CopySrc);
+    wgpu::Buffer buffer = utils::CreateBufferFromData(
+        device, data.data(), bufferSize, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
 
-    dawn::ShaderModule module =
+    wgpu::ShaderModule module =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
         #version 450
         #define kNumValues 100
@@ -41,28 +41,28 @@ TEST_P(ComputeStorageBufferBarrierTests, AddIncrement) {
         }
     )");
 
-    dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {{0, dawn::ShaderStage::Compute, dawn::BindingType::StorageBuffer}});
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer}});
 
-    dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, bufferSize}});
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, bufferSize}});
 
-    dawn::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, &bgl);
+    wgpu::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, &bgl);
 
-    dawn::ComputePipelineDescriptor pipelineDesc = {};
+    wgpu::ComputePipelineDescriptor pipelineDesc = {};
     pipelineDesc.layout = layout;
     pipelineDesc.computeStage.module = module;
     pipelineDesc.computeStage.entryPoint = "main";
-    dawn::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-    dawn::ComputePassEncoder pass = encoder.BeginComputePass();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);
     for (uint32_t i = 0; i < kIterations; ++i) {
         pass.Dispatch(kNumValues, 1, 1);
     }
     pass.EndPass();
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), buffer, 0, kNumValues);
@@ -77,13 +77,13 @@ TEST_P(ComputeStorageBufferBarrierTests, AddPingPong) {
 
     uint64_t bufferSize = static_cast<uint64_t>(data.size() * sizeof(uint32_t));
 
-    dawn::Buffer bufferA = utils::CreateBufferFromData(
-        device, data.data(), bufferSize, dawn::BufferUsage::Storage | dawn::BufferUsage::CopySrc);
+    wgpu::Buffer bufferA = utils::CreateBufferFromData(
+        device, data.data(), bufferSize, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
 
-    dawn::Buffer bufferB = utils::CreateBufferFromData(
-        device, data.data(), bufferSize, dawn::BufferUsage::Storage | dawn::BufferUsage::CopySrc);
+    wgpu::Buffer bufferB = utils::CreateBufferFromData(
+        device, data.data(), bufferSize, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
 
-    dawn::ShaderModule module =
+    wgpu::ShaderModule module =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
         #version 450
         #define kNumValues 100
@@ -95,34 +95,34 @@ TEST_P(ComputeStorageBufferBarrierTests, AddPingPong) {
         }
     )");
 
-    dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {{0, dawn::ShaderStage::Compute, dawn::BindingType::StorageBuffer},
-                 {1, dawn::ShaderStage::Compute, dawn::BindingType::StorageBuffer}});
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
+                 {1, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer}});
 
-    dawn::BindGroup bindGroupA = utils::MakeBindGroup(device, bgl,
+    wgpu::BindGroup bindGroupA = utils::MakeBindGroup(device, bgl,
                                                       {
                                                           {0, bufferA, 0, bufferSize},
                                                           {1, bufferB, 0, bufferSize},
                                                       });
 
-    dawn::BindGroup bindGroupB = utils::MakeBindGroup(device, bgl,
+    wgpu::BindGroup bindGroupB = utils::MakeBindGroup(device, bgl,
                                                       {
                                                           {0, bufferB, 0, bufferSize},
                                                           {1, bufferA, 0, bufferSize},
                                                       });
 
-    dawn::BindGroup bindGroups[2] = {bindGroupA, bindGroupB};
+    wgpu::BindGroup bindGroups[2] = {bindGroupA, bindGroupB};
 
-    dawn::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, &bgl);
+    wgpu::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, &bgl);
 
-    dawn::ComputePipelineDescriptor pipelineDesc = {};
+    wgpu::ComputePipelineDescriptor pipelineDesc = {};
     pipelineDesc.layout = layout;
     pipelineDesc.computeStage.module = module;
     pipelineDesc.computeStage.entryPoint = "main";
-    dawn::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-    dawn::ComputePassEncoder pass = encoder.BeginComputePass();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
     pass.SetPipeline(pipeline);
 
     for (uint32_t i = 0; i < kIterations / 2; ++i) {
@@ -132,7 +132,7 @@ TEST_P(ComputeStorageBufferBarrierTests, AddPingPong) {
         pass.Dispatch(kNumValues, 1, 1);
     }
     pass.EndPass();
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     EXPECT_BUFFER_U32_RANGE_EQ(expectedA.data(), bufferA, 0, kNumValues);
@@ -148,13 +148,15 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
 
     uint64_t bufferSize = static_cast<uint64_t>(data.size() * sizeof(uint32_t));
 
-    dawn::Buffer bufferA = utils::CreateBufferFromData(
-        device, data.data(), bufferSize, dawn::BufferUsage::Storage | dawn::BufferUsage::Uniform | dawn::BufferUsage::CopySrc);
+    wgpu::Buffer bufferA = utils::CreateBufferFromData(
+        device, data.data(), bufferSize,
+        wgpu::BufferUsage::Storage | wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopySrc);
 
-    dawn::Buffer bufferB = utils::CreateBufferFromData(
-        device, data.data(), bufferSize, dawn::BufferUsage::Storage | dawn::BufferUsage::Uniform | dawn::BufferUsage::CopySrc);
+    wgpu::Buffer bufferB = utils::CreateBufferFromData(
+        device, data.data(), bufferSize,
+        wgpu::BufferUsage::Storage | wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopySrc);
 
-    dawn::ShaderModule module =
+    wgpu::ShaderModule module =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
         #version 450
         #define kNumValues 100
@@ -166,43 +168,43 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
         }
     )");
 
-    dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {{0, dawn::ShaderStage::Compute, dawn::BindingType::UniformBuffer},
-                 {1, dawn::ShaderStage::Compute, dawn::BindingType::StorageBuffer}});
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::UniformBuffer},
+                 {1, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer}});
 
-    dawn::BindGroup bindGroupA = utils::MakeBindGroup(device, bgl,
+    wgpu::BindGroup bindGroupA = utils::MakeBindGroup(device, bgl,
                                                       {
                                                           {0, bufferA, 0, bufferSize},
                                                           {1, bufferB, 0, bufferSize},
                                                       });
 
-    dawn::BindGroup bindGroupB = utils::MakeBindGroup(device, bgl,
+    wgpu::BindGroup bindGroupB = utils::MakeBindGroup(device, bgl,
                                                       {
                                                           {0, bufferB, 0, bufferSize},
                                                           {1, bufferA, 0, bufferSize},
                                                       });
 
-    dawn::BindGroup bindGroups[2] = {bindGroupA, bindGroupB};
+    wgpu::BindGroup bindGroups[2] = {bindGroupA, bindGroupB};
 
-    dawn::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, &bgl);
+    wgpu::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, &bgl);
 
-    dawn::ComputePipelineDescriptor pipelineDesc = {};
+    wgpu::ComputePipelineDescriptor pipelineDesc = {};
     pipelineDesc.layout = layout;
     pipelineDesc.computeStage.module = module;
     pipelineDesc.computeStage.entryPoint = "main";
-    dawn::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
     for (uint32_t i = 0, b = 0; i < kIterations; ++i, b = 1 - b) {
-        dawn::ComputePassEncoder pass = encoder.BeginComputePass();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroups[b]);
         pass.Dispatch(kNumValues, 1, 1);
         pass.EndPass();
     }
 
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     EXPECT_BUFFER_U32_RANGE_EQ(expectedA.data(), bufferA, 0, kNumValues);

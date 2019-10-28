@@ -166,7 +166,7 @@ class PrimitiveTopologyTest : public DawnTest {
                 })");
 
             vertexBuffer = utils::CreateBufferFromData(device, kVertices, sizeof(kVertices),
-                                                       dawn::BufferUsage::Vertex);
+                                                       wgpu::BufferUsage::Vertex);
         }
 
         struct LocationSpec {
@@ -181,7 +181,8 @@ class PrimitiveTopologyTest : public DawnTest {
         }
 
         // Draw the vertices with the given primitive topology and check the pixel values of the test locations
-        void DoTest(dawn::PrimitiveTopology primitiveTopology, const std::vector<LocationSpec> &locationSpecs) {
+        void DoTest(wgpu::PrimitiveTopology primitiveTopology,
+                    const std::vector<LocationSpec>& locationSpecs) {
             utils::ComboRenderPipelineDescriptor descriptor(device);
             descriptor.vertexStage.module = vsModule;
             descriptor.cFragmentStage.module = fsModule;
@@ -189,22 +190,21 @@ class PrimitiveTopologyTest : public DawnTest {
             descriptor.cVertexInput.bufferCount = 1;
             descriptor.cVertexInput.cBuffers[0].stride = 4 * sizeof(float);
             descriptor.cVertexInput.cBuffers[0].attributeCount = 1;
-            descriptor.cVertexInput.cAttributes[0].format = dawn::VertexFormat::Float4;
+            descriptor.cVertexInput.cAttributes[0].format = wgpu::VertexFormat::Float4;
             descriptor.cColorStates[0].format = renderPass.colorFormat;
 
-            dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+            wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
-            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             {
-                dawn::RenderPassEncoder pass = encoder.BeginRenderPass(
-                    &renderPass.renderPassInfo);
+                wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
                 pass.SetPipeline(pipeline);
                 pass.SetVertexBuffer(0, vertexBuffer);
                 pass.Draw(6, 1, 0, 0);
                 pass.EndPass();
             }
 
-            dawn::CommandBuffer commands = encoder.Finish();
+            wgpu::CommandBuffer commands = encoder.Finish();
             queue.Submit(1, &commands);
 
             for (auto& locationSpec : locationSpecs) {
@@ -218,68 +218,72 @@ class PrimitiveTopologyTest : public DawnTest {
         }
 
         utils::BasicRenderPass renderPass;
-        dawn::ShaderModule vsModule;
-        dawn::ShaderModule fsModule;
-        dawn::Buffer vertexBuffer;
+        wgpu::ShaderModule vsModule;
+        wgpu::ShaderModule fsModule;
+        wgpu::Buffer vertexBuffer;
 };
 
 // Test Point primitive topology
 TEST_P(PrimitiveTopologyTest, PointList) {
-    DoTest(dawn::PrimitiveTopology::PointList, {
-        // Check that the points are drawn
-        TestPoints(kPointTestLocations, true),
+    DoTest(wgpu::PrimitiveTopology::PointList,
+           {
+               // Check that the points are drawn
+               TestPoints(kPointTestLocations, true),
 
-        // Check that line and triangle locations are untouched
-        TestPoints(kLineTestLocations, false),
-        TestPoints(kLineStripTestLocations, false),
-        TestPoints(kTriangleTestLocations, false),
-        TestPoints(kTriangleStripTestLocations, false),
-    });
+               // Check that line and triangle locations are untouched
+               TestPoints(kLineTestLocations, false),
+               TestPoints(kLineStripTestLocations, false),
+               TestPoints(kTriangleTestLocations, false),
+               TestPoints(kTriangleStripTestLocations, false),
+           });
 }
 
 // Test Line primitive topology
 TEST_P(PrimitiveTopologyTest, LineList) {
-    DoTest(dawn::PrimitiveTopology::LineList, {
-        // Check that lines are drawn
-        TestPoints(kLineTestLocations, true),
+    DoTest(wgpu::PrimitiveTopology::LineList,
+           {
+               // Check that lines are drawn
+               TestPoints(kLineTestLocations, true),
 
-        // Check that line strip and triangle locations are untouched
-        TestPoints(kLineStripTestLocations, false),
-        TestPoints(kTriangleTestLocations, false),
-        TestPoints(kTriangleStripTestLocations, false),
-    });
+               // Check that line strip and triangle locations are untouched
+               TestPoints(kLineStripTestLocations, false),
+               TestPoints(kTriangleTestLocations, false),
+               TestPoints(kTriangleStripTestLocations, false),
+           });
 }
 
 // Test LineStrip primitive topology
 TEST_P(PrimitiveTopologyTest, LineStrip) {
-    DoTest(dawn::PrimitiveTopology::LineStrip, {
-        // Check that lines are drawn
-        TestPoints(kLineTestLocations, true),
-        TestPoints(kLineStripTestLocations, true),
+    DoTest(wgpu::PrimitiveTopology::LineStrip, {
+                                                   // Check that lines are drawn
+                                                   TestPoints(kLineTestLocations, true),
+                                                   TestPoints(kLineStripTestLocations, true),
 
-        // Check that triangle locations are untouched
-        TestPoints(kTriangleTestLocations, false),
-        TestPoints(kTriangleStripTestLocations, false),
-    });
+                                                   // Check that triangle locations are untouched
+                                                   TestPoints(kTriangleTestLocations, false),
+                                                   TestPoints(kTriangleStripTestLocations, false),
+                                               });
 }
 
 // Test Triangle primitive topology
 TEST_P(PrimitiveTopologyTest, TriangleList) {
-    DoTest(dawn::PrimitiveTopology::TriangleList, {
-        // Check that triangles are drawn
-        TestPoints(kTriangleTestLocations, true),
+    DoTest(wgpu::PrimitiveTopology::TriangleList,
+           {
+               // Check that triangles are drawn
+               TestPoints(kTriangleTestLocations, true),
 
-        // Check that triangle strip locations are untouched
-        TestPoints(kTriangleStripTestLocations, false),
-    });
+               // Check that triangle strip locations are untouched
+               TestPoints(kTriangleStripTestLocations, false),
+           });
 }
 
 // Test TriangleStrip primitive topology
 TEST_P(PrimitiveTopologyTest, TriangleStrip) {
-    DoTest(dawn::PrimitiveTopology::TriangleStrip, {
-        TestPoints(kTriangleTestLocations, true),
-        TestPoints(kTriangleStripTestLocations, true),
-    });
+    DoTest(wgpu::PrimitiveTopology::TriangleStrip,
+           {
+               TestPoints(kTriangleTestLocations, true),
+               TestPoints(kTriangleStripTestLocations, true),
+           });
 }
 
 DAWN_INSTANTIATE_TEST(PrimitiveTopologyTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);

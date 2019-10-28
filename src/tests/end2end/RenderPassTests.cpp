@@ -18,7 +18,7 @@
 #include "utils/WGPUHelpers.h"
 
 constexpr uint32_t kRTSize = 16;
-constexpr dawn::TextureFormat kFormat = dawn::TextureFormat::RGBA8Unorm;
+constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
 
 class RenderPassTest : public DawnTest {
 protected:
@@ -34,7 +34,7 @@ protected:
                     gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
                  })");
 
-        dawn::ShaderModule fsModule =
+        wgpu::ShaderModule fsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) out vec4 fragColor;
@@ -45,15 +45,15 @@ protected:
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.vertexStage.module = mVSModule;
         descriptor.cFragmentStage.module = fsModule;
-        descriptor.primitiveTopology = dawn::PrimitiveTopology::TriangleStrip;
+        descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
         descriptor.cColorStates[0].format = kFormat;
 
         pipeline = device.CreateRenderPipeline(&descriptor);
     }
 
-    dawn::Texture CreateDefault2DTexture() {
-        dawn::TextureDescriptor descriptor;
-        descriptor.dimension = dawn::TextureDimension::e2D;
+    wgpu::Texture CreateDefault2DTexture() {
+        wgpu::TextureDescriptor descriptor;
+        descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size.width = kRTSize;
         descriptor.size.height = kRTSize;
         descriptor.size.depth = 1;
@@ -61,12 +61,12 @@ protected:
         descriptor.sampleCount = 1;
         descriptor.format = kFormat;
         descriptor.mipLevelCount = 1;
-        descriptor.usage = dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc;
+        descriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
         return device.CreateTexture(&descriptor);
     }
 
-    dawn::ShaderModule mVSModule;
-    dawn::RenderPipeline pipeline;
+    wgpu::ShaderModule mVSModule;
+    wgpu::RenderPipeline pipeline;
 };
 
 // Test using two different render passes in one commandBuffer works correctly.
@@ -81,9 +81,9 @@ TEST_P(RenderPassTest, TwoRenderPassesInOneCommandBuffer) {
 
     constexpr RGBA8 kBlue(0, 0, 255, 255);
 
-    dawn::Texture renderTarget1 = CreateDefault2DTexture();
-    dawn::Texture renderTarget2 = CreateDefault2DTexture();
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::Texture renderTarget1 = CreateDefault2DTexture();
+    wgpu::Texture renderTarget2 = CreateDefault2DTexture();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
     {
         // In the first render pass we clear renderTarget1 to red and draw a blue triangle in the
@@ -91,7 +91,7 @@ TEST_P(RenderPassTest, TwoRenderPassesInOneCommandBuffer) {
         utils::ComboRenderPassDescriptor renderPass({renderTarget1.CreateView()});
         renderPass.cColorAttachments[0].clearColor = {1.0f, 0.0f, 0.0f, 1.0f};
 
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
         pass.Draw(3, 1, 0, 0);
         pass.EndPass();
@@ -103,13 +103,13 @@ TEST_P(RenderPassTest, TwoRenderPassesInOneCommandBuffer) {
         utils::ComboRenderPassDescriptor renderPass({renderTarget2.CreateView()});
         renderPass.cColorAttachments[0].clearColor = {0.0f, 1.0f, 0.0f, 1.0f};
 
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
         pass.Draw(3, 1, 0, 0);
         pass.EndPass();
     }
 
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(kBlue, renderTarget1, 1, kRTSize - 1);
@@ -123,16 +123,16 @@ TEST_P(RenderPassTest, TwoRenderPassesInOneCommandBuffer) {
 // fragment shader outputs in the render pipeline, the load operation is LoadOp::Load and the store
 // operation is StoreOp::Store.
 TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
-    dawn::Texture renderTarget = CreateDefault2DTexture();
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::Texture renderTarget = CreateDefault2DTexture();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
-    dawn::TextureView renderTargetView = renderTarget.CreateView();
+    wgpu::TextureView renderTargetView = renderTarget.CreateView();
 
     utils::ComboRenderPassDescriptor renderPass({renderTargetView});
     renderPass.cColorAttachments[0].clearColor = {1.0f, 0.0f, 0.0f, 1.0f};
-    renderPass.cColorAttachments[0].loadOp = dawn::LoadOp::Clear;
-    renderPass.cColorAttachments[0].storeOp = dawn::StoreOp::Store;
-    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+    renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+    renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Store;
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
 
     {
         // First we draw a blue triangle in the bottom left of renderTarget.
@@ -142,7 +142,7 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
 
     {
         // Next we use a pipeline whose fragment shader has no outputs.
-        dawn::ShaderModule fsModule =
+        wgpu::ShaderModule fsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
                 #version 450
                 void main() {
@@ -150,10 +150,10 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.vertexStage.module = mVSModule;
         descriptor.cFragmentStage.module = fsModule;
-        descriptor.primitiveTopology = dawn::PrimitiveTopology::TriangleStrip;
+        descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
         descriptor.cColorStates[0].format = kFormat;
 
-        dawn::RenderPipeline pipelineWithNoFragmentOutput =
+        wgpu::RenderPipeline pipelineWithNoFragmentOutput =
             device.CreateRenderPipeline(&descriptor);
 
         pass.SetPipeline(pipelineWithNoFragmentOutput);
@@ -162,7 +162,7 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
 
     pass.EndPass();
 
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     constexpr RGBA8 kRed(255, 0, 0, 255);

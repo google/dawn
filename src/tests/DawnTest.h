@@ -16,7 +16,7 @@
 #define TESTS_DAWNTEST_H_
 
 #include "dawn/dawn_proc_table.h"
-#include "dawn/dawncpp.h"
+#include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
 
 #include <gtest/gtest.h>
@@ -180,22 +180,22 @@ class DawnTestBase {
     dawn_native::PCIInfo GetPCIInfo() const;
 
   protected:
-    dawn::Device device;
-    dawn::Queue queue;
+    wgpu::Device device;
+    wgpu::Queue queue;
 
     DawnProcTable backendProcs = {};
-    DawnDevice backendDevice = nullptr;
+    WGPUDevice backendDevice = nullptr;
 
     // Helper methods to implement the EXPECT_ macros
     std::ostringstream& AddBufferExpectation(const char* file,
                                              int line,
-                                             const dawn::Buffer& buffer,
+                                             const wgpu::Buffer& buffer,
                                              uint64_t offset,
                                              uint64_t size,
                                              detail::Expectation* expectation);
     std::ostringstream& AddTextureExpectation(const char* file,
                                               int line,
-                                              const dawn::Texture& texture,
+                                              const wgpu::Texture& texture,
                                               uint32_t x,
                                               uint32_t y,
                                               uint32_t width,
@@ -227,13 +227,13 @@ class DawnTestBase {
     std::unique_ptr<utils::TerribleCommandBuffer> mS2cBuf;
 
     // Tracking for validation errors
-    static void OnDeviceError(DawnErrorType type, const char* message, void* userdata);
+    static void OnDeviceError(WGPUErrorType type, const char* message, void* userdata);
     bool mExpectError = false;
     bool mError = false;
 
     // MapRead buffers used to get data for the expectations
     struct ReadbackSlot {
-        dawn::Buffer buffer;
+        wgpu::Buffer buffer;
         uint64_t bufferSize;
         const void* mappedData = nullptr;
     };
@@ -241,7 +241,7 @@ class DawnTestBase {
 
     // Maps all the buffers and fill ReadbackSlot::mappedData
     void MapSlotsSynchronously();
-    static void SlotMapReadCallback(DawnBufferMapAsyncStatus status,
+    static void SlotMapReadCallback(WGPUBufferMapAsyncStatus status,
                                     const void* data,
                                     uint64_t dataLength,
                                     void* userdata);
@@ -249,7 +249,7 @@ class DawnTestBase {
 
     // Reserve space where the data for an expectation can be copied
     struct ReadbackReservation {
-        dawn::Buffer buffer;
+        wgpu::Buffer buffer;
         size_t slot;
         uint64_t offset;
     };

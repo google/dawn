@@ -26,7 +26,7 @@ class DestroyTest : public DawnTest {
 
         renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-        dawn::ShaderModule vsModule =
+        wgpu::ShaderModule vsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
               #version 450
               layout(location = 0) in vec4 pos;
@@ -34,7 +34,7 @@ class DestroyTest : public DawnTest {
                   gl_Position = pos;
               })");
 
-        dawn::ShaderModule fsModule =
+        wgpu::ShaderModule fsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
               #version 450
               layout(location = 0) out vec4 fragColor;
@@ -45,40 +45,40 @@ class DestroyTest : public DawnTest {
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
-        descriptor.primitiveTopology = dawn::PrimitiveTopology::TriangleStrip;
+        descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
         descriptor.cVertexInput.bufferCount = 1;
         descriptor.cVertexInput.cBuffers[0].stride = 4 * sizeof(float);
         descriptor.cVertexInput.cBuffers[0].attributeCount = 1;
-        descriptor.cVertexInput.cAttributes[0].format = dawn::VertexFormat::Float4;
+        descriptor.cVertexInput.cAttributes[0].format = wgpu::VertexFormat::Float4;
         descriptor.cColorStates[0].format = renderPass.colorFormat;
 
         pipeline = device.CreateRenderPipeline(&descriptor);
 
         vertexBuffer = utils::CreateBufferFromData<float>(
-            device, dawn::BufferUsage::Vertex,
+            device, wgpu::BufferUsage::Vertex,
             {// The bottom left triangle
              -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 1.0f});
 
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.BeginRenderPass(&renderPass.renderPassInfo).EndPass();
-        dawn::CommandBuffer commands = encoder.Finish();
+        wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
     }
 
     utils::BasicRenderPass renderPass;
-    dawn::RenderPipeline pipeline;
-    dawn::Buffer vertexBuffer;
+    wgpu::RenderPipeline pipeline;
+    wgpu::Buffer vertexBuffer;
 
-    dawn::CommandBuffer CreateTriangleCommandBuffer() {
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandBuffer CreateTriangleCommandBuffer() {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         {
-            dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
             pass.SetPipeline(pipeline);
             pass.SetVertexBuffer(0, vertexBuffer);
             pass.Draw(3, 1, 0, 0);
             pass.EndPass();
         }
-        dawn::CommandBuffer commands = encoder.Finish();
+        wgpu::CommandBuffer commands = encoder.Finish();
         return commands;
     }
 };
@@ -87,7 +87,7 @@ class DestroyTest : public DawnTest {
 TEST_P(DestroyTest, BufferDestroyBeforeSubmit) {
     RGBA8 notFilled(0, 0, 0, 0);
 
-    dawn::CommandBuffer commands = CreateTriangleCommandBuffer();
+    wgpu::CommandBuffer commands = CreateTriangleCommandBuffer();
     vertexBuffer.Destroy();
     ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
 
@@ -98,7 +98,7 @@ TEST_P(DestroyTest, BufferDestroyBeforeSubmit) {
 TEST_P(DestroyTest, BufferDestroyAfterSubmit) {
     RGBA8 filled(0, 255, 0, 255);
 
-    dawn::CommandBuffer commands = CreateTriangleCommandBuffer();
+    wgpu::CommandBuffer commands = CreateTriangleCommandBuffer();
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, 1, 3);
@@ -110,7 +110,7 @@ TEST_P(DestroyTest, BufferDestroyAfterSubmit) {
 TEST_P(DestroyTest, BufferSubmitDestroySubmit) {
     RGBA8 filled(0, 255, 0, 255);
 
-    dawn::CommandBuffer commands = CreateTriangleCommandBuffer();
+    wgpu::CommandBuffer commands = CreateTriangleCommandBuffer();
     queue.Submit(1, &commands);
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, 1, 3);
 
@@ -125,7 +125,7 @@ TEST_P(DestroyTest, BufferSubmitDestroySubmit) {
 
 // Destroy texture before submit should fail submit
 TEST_P(DestroyTest, TextureDestroyBeforeSubmit) {
-    dawn::CommandBuffer commands = CreateTriangleCommandBuffer();
+    wgpu::CommandBuffer commands = CreateTriangleCommandBuffer();
     renderPass.color.Destroy();
     ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
 }
@@ -134,7 +134,7 @@ TEST_P(DestroyTest, TextureDestroyBeforeSubmit) {
 TEST_P(DestroyTest, TextureDestroyAfterSubmit) {
     RGBA8 filled(0, 255, 0, 255);
 
-    dawn::CommandBuffer commands = CreateTriangleCommandBuffer();
+    wgpu::CommandBuffer commands = CreateTriangleCommandBuffer();
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, 1, 3);
@@ -146,7 +146,7 @@ TEST_P(DestroyTest, TextureDestroyAfterSubmit) {
 TEST_P(DestroyTest, TextureSubmitDestroySubmit) {
     RGBA8 filled(0, 255, 0, 255);
 
-    dawn::CommandBuffer commands = CreateTriangleCommandBuffer();
+    wgpu::CommandBuffer commands = CreateTriangleCommandBuffer();
     queue.Submit(1, &commands);
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, 1, 3);
 

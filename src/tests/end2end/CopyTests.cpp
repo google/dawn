@@ -76,17 +76,17 @@ class CopyTests_T2B : public CopyTests {
 
         void DoTest(const TextureSpec& textureSpec, const BufferSpec& bufferSpec) {
             // Create a texture that is `width` x `height` with (`level` + 1) mip levels.
-            dawn::TextureDescriptor descriptor;
-            descriptor.dimension = dawn::TextureDimension::e2D;
+            wgpu::TextureDescriptor descriptor;
+            descriptor.dimension = wgpu::TextureDimension::e2D;
             descriptor.size.width = textureSpec.width;
             descriptor.size.height = textureSpec.height;
             descriptor.size.depth = 1;
             descriptor.arrayLayerCount = textureSpec.arraySize;
             descriptor.sampleCount = 1;
-            descriptor.format = dawn::TextureFormat::RGBA8Unorm;
+            descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
             descriptor.mipLevelCount = textureSpec.level + 1;
-            descriptor.usage = dawn::TextureUsage::CopyDst | dawn::TextureUsage::CopySrc;
-            dawn::Texture texture = device.CreateTexture(&descriptor);
+            descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
+            wgpu::Texture texture = device.CreateTexture(&descriptor);
 
             uint32_t width = textureSpec.width >> textureSpec.level;
             uint32_t height = textureSpec.height >> textureSpec.level;
@@ -94,7 +94,7 @@ class CopyTests_T2B : public CopyTests {
             uint32_t texelsPerRow = rowPitch / kBytesPerTexel;
             uint32_t texelCountPerLayer = texelsPerRow * (height - 1) + width;
 
-            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
             std::vector<std::vector<RGBA8>> textureArrayData(textureSpec.arraySize);
             for (uint32_t slice = 0; slice < textureSpec.arraySize; ++slice) {
@@ -103,25 +103,25 @@ class CopyTests_T2B : public CopyTests {
                                 textureArrayData[slice].data());
 
                 // Create an upload buffer and use it to populate the current slice of the texture in `level` mip level
-                dawn::Buffer uploadBuffer = utils::CreateBufferFromData(
+                wgpu::Buffer uploadBuffer = utils::CreateBufferFromData(
                     device, textureArrayData[slice].data(),
                     static_cast<uint32_t>(sizeof(RGBA8) * textureArrayData[slice].size()),
-                    dawn::BufferUsage::CopySrc);
-                dawn::BufferCopyView bufferCopyView =
+                    wgpu::BufferUsage::CopySrc);
+                wgpu::BufferCopyView bufferCopyView =
                     utils::CreateBufferCopyView(uploadBuffer, 0, rowPitch, 0);
-                dawn::TextureCopyView textureCopyView =
+                wgpu::TextureCopyView textureCopyView =
                     utils::CreateTextureCopyView(texture, textureSpec.level, slice, {0, 0, 0});
-                dawn::Extent3D copySize = {width, height, 1};
+                wgpu::Extent3D copySize = {width, height, 1};
                 encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
             }
 
             // Create a buffer of size `size * textureSpec.arrayLayer` and populate it with empty data (0,0,0,0)
             // Note: Prepopulating the buffer with empty data ensures that there is not random data in the expectation
             // and helps ensure that the padding due to the row pitch is not modified by the copy
-            dawn::BufferDescriptor bufDescriptor;
+            wgpu::BufferDescriptor bufDescriptor;
             bufDescriptor.size = bufferSpec.size * textureSpec.arraySize;
-            bufDescriptor.usage = dawn::BufferUsage::CopySrc | dawn::BufferUsage::CopyDst;
-            dawn::Buffer buffer = device.CreateBuffer(&bufDescriptor);
+            bufDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+            wgpu::Buffer buffer = device.CreateBuffer(&bufDescriptor);
             std::vector<RGBA8> emptyData(bufferSpec.size / kBytesPerTexel * textureSpec.arraySize);
             buffer.SetSubData(0, static_cast<uint32_t>(emptyData.size() * sizeof(RGBA8)),
                               emptyData.data());
@@ -129,16 +129,16 @@ class CopyTests_T2B : public CopyTests {
             uint64_t bufferOffset = bufferSpec.offset;
             for (uint32_t slice = 0; slice < textureSpec.arraySize; ++slice) {
                 // Copy the region [(`x`, `y`), (`x + copyWidth, `y + copyWidth`)] from the `level` mip into the buffer at `offset + bufferSpec.size * slice` and `rowPitch`
-                dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
+                wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
                     texture, textureSpec.level, slice, {textureSpec.x, textureSpec.y, 0});
-                dawn::BufferCopyView bufferCopyView =
+                wgpu::BufferCopyView bufferCopyView =
                     utils::CreateBufferCopyView(buffer, bufferOffset, bufferSpec.rowPitch, 0);
-                dawn::Extent3D copySize = {textureSpec.copyWidth, textureSpec.copyHeight, 1};
+                wgpu::Extent3D copySize = {textureSpec.copyWidth, textureSpec.copyHeight, 1};
                 encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copySize);
                 bufferOffset += bufferSpec.size;
             }
 
-            dawn::CommandBuffer commands = encoder.Finish();
+            wgpu::CommandBuffer commands = encoder.Finish();
             queue.Submit(1, &commands);
 
             bufferOffset = bufferSpec.offset;
@@ -180,10 +180,10 @@ protected:
 
     void DoTest(const TextureSpec& textureSpec, const BufferSpec& bufferSpec) {
         // Create a buffer of size `size` and populate it with data
-        dawn::BufferDescriptor bufDescriptor;
+        wgpu::BufferDescriptor bufDescriptor;
         bufDescriptor.size = bufferSpec.size;
-        bufDescriptor.usage = dawn::BufferUsage::CopySrc | dawn::BufferUsage::CopyDst;
-        dawn::Buffer buffer = device.CreateBuffer(&bufDescriptor);
+        bufDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+        wgpu::Buffer buffer = device.CreateBuffer(&bufDescriptor);
 
         std::vector<RGBA8> bufferData(bufferSpec.size / kBytesPerTexel);
         FillBufferData(bufferData.data(), bufferData.size());
@@ -191,19 +191,19 @@ protected:
                           bufferData.data());
 
         // Create a texture that is `width` x `height` with (`level` + 1) mip levels.
-        dawn::TextureDescriptor descriptor;
-        descriptor.dimension = dawn::TextureDimension::e2D;
+        wgpu::TextureDescriptor descriptor;
+        descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size.width = textureSpec.width;
         descriptor.size.height = textureSpec.height;
         descriptor.size.depth = 1;
         descriptor.arrayLayerCount = 1;
         descriptor.sampleCount = 1;
-        descriptor.format = dawn::TextureFormat::RGBA8Unorm;
+        descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
         descriptor.mipLevelCount = textureSpec.level + 1;
-        descriptor.usage = dawn::TextureUsage::CopyDst | dawn::TextureUsage::CopySrc;
-        dawn::Texture texture = device.CreateTexture(&descriptor);
+        descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
+        wgpu::Texture texture = device.CreateTexture(&descriptor);
 
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
         // Create an upload buffer filled with empty data and use it to populate the `level` mip of the texture
         // Note: Prepopulating the texture with empty data ensures that there is not random data in the expectation
@@ -216,28 +216,28 @@ protected:
             uint32_t texelCount = texelsPerRow * (height - 1) + width;
 
             std::vector<RGBA8> emptyData(texelCount);
-            dawn::Buffer uploadBuffer = utils::CreateBufferFromData(
+            wgpu::Buffer uploadBuffer = utils::CreateBufferFromData(
                 device, emptyData.data(), static_cast<uint32_t>(sizeof(RGBA8) * emptyData.size()),
-                dawn::BufferUsage::CopySrc);
-            dawn::BufferCopyView bufferCopyView =
+                wgpu::BufferUsage::CopySrc);
+            wgpu::BufferCopyView bufferCopyView =
                 utils::CreateBufferCopyView(uploadBuffer, 0, rowPitch, 0);
-            dawn::TextureCopyView textureCopyView =
+            wgpu::TextureCopyView textureCopyView =
                 utils::CreateTextureCopyView(texture, textureSpec.level, 0, {0, 0, 0});
-            dawn::Extent3D copySize = {width, height, 1};
+            wgpu::Extent3D copySize = {width, height, 1};
             encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
         }
 
         // Copy to the region [(`x`, `y`), (`x + copyWidth, `y + copyWidth`)] at the `level` mip from the buffer at the specified `offset` and `rowPitch`
         {
-            dawn::BufferCopyView bufferCopyView =
+            wgpu::BufferCopyView bufferCopyView =
                 utils::CreateBufferCopyView(buffer, bufferSpec.offset, bufferSpec.rowPitch, 0);
-            dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
+            wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
                 texture, textureSpec.level, 0, {textureSpec.x, textureSpec.y, 0});
-            dawn::Extent3D copySize = {textureSpec.copyWidth, textureSpec.copyHeight, 1};
+            wgpu::Extent3D copySize = {textureSpec.copyWidth, textureSpec.copyHeight, 1};
             encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
         }
 
-        dawn::CommandBuffer commands = encoder.Finish();
+        wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
         // Pack the data used to create the buffer in the specified copy region to have the same format as the expected texture data.
@@ -272,31 +272,31 @@ class CopyTests_T2T : public CopyTests {
 
   protected:
     void DoTest(const TextureSpec& srcSpec, const TextureSpec& dstSpec, const CopySize& copy) {
-        dawn::TextureDescriptor srcDescriptor;
-        srcDescriptor.dimension = dawn::TextureDimension::e2D;
+        wgpu::TextureDescriptor srcDescriptor;
+        srcDescriptor.dimension = wgpu::TextureDimension::e2D;
         srcDescriptor.size.width = srcSpec.width;
         srcDescriptor.size.height = srcSpec.height;
         srcDescriptor.size.depth = 1;
         srcDescriptor.arrayLayerCount = srcSpec.arraySize;
         srcDescriptor.sampleCount = 1;
-        srcDescriptor.format = dawn::TextureFormat::RGBA8Unorm;
+        srcDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
         srcDescriptor.mipLevelCount = srcSpec.level + 1;
-        srcDescriptor.usage = dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst;
-        dawn::Texture srcTexture = device.CreateTexture(&srcDescriptor);
+        srcDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+        wgpu::Texture srcTexture = device.CreateTexture(&srcDescriptor);
 
-        dawn::TextureDescriptor dstDescriptor;
-        dstDescriptor.dimension = dawn::TextureDimension::e2D;
+        wgpu::TextureDescriptor dstDescriptor;
+        dstDescriptor.dimension = wgpu::TextureDimension::e2D;
         dstDescriptor.size.width = dstSpec.width;
         dstDescriptor.size.height = dstSpec.height;
         dstDescriptor.size.depth = 1;
         dstDescriptor.arrayLayerCount = dstSpec.arraySize;
         dstDescriptor.sampleCount = 1;
-        dstDescriptor.format = dawn::TextureFormat::RGBA8Unorm;
+        dstDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
         dstDescriptor.mipLevelCount = dstSpec.level + 1;
-        dstDescriptor.usage = dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst;
-        dawn::Texture dstTexture = device.CreateTexture(&dstDescriptor);
+        dstDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+        wgpu::Texture dstTexture = device.CreateTexture(&dstDescriptor);
 
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
         // Create an upload buffer and use it to populate the current slice of the texture in
         // `level` mip level
@@ -312,15 +312,15 @@ class CopyTests_T2T : public CopyTests {
             FillTextureData(width, height, rowPitch / kBytesPerTexel, slice,
                             textureArrayData[slice].data());
 
-            dawn::Buffer uploadBuffer = utils::CreateBufferFromData(
+            wgpu::Buffer uploadBuffer = utils::CreateBufferFromData(
                 device, textureArrayData[slice].data(),
                 static_cast<uint32_t>(sizeof(RGBA8) * textureArrayData[slice].size()),
-                dawn::BufferUsage::CopySrc);
-            dawn::BufferCopyView bufferCopyView =
+                wgpu::BufferUsage::CopySrc);
+            wgpu::BufferCopyView bufferCopyView =
                 utils::CreateBufferCopyView(uploadBuffer, 0, rowPitch, 0);
-            dawn::TextureCopyView textureCopyView =
+            wgpu::TextureCopyView textureCopyView =
                 utils::CreateTextureCopyView(srcTexture, srcSpec.level, slice, {0, 0, 0});
-            dawn::Extent3D bufferCopySize = {width, height, 1};
+            wgpu::Extent3D bufferCopySize = {width, height, 1};
 
             encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &bufferCopySize);
         }
@@ -337,28 +337,28 @@ class CopyTests_T2T : public CopyTests {
             uint32_t dstTexelCount = dstTexelsPerRow * (dstHeight - 1) + dstWidth;
 
             std::vector<RGBA8> emptyData(dstTexelCount);
-            dawn::Buffer uploadBuffer = utils::CreateBufferFromData(
+            wgpu::Buffer uploadBuffer = utils::CreateBufferFromData(
                 device, emptyData.data(), static_cast<uint32_t>(sizeof(RGBA8) * emptyData.size()),
-                dawn::BufferUsage::CopySrc);
-            dawn::BufferCopyView bufferCopyView =
+                wgpu::BufferUsage::CopySrc);
+            wgpu::BufferCopyView bufferCopyView =
                 utils::CreateBufferCopyView(uploadBuffer, 0, dstRowPitch, 0);
-            dawn::TextureCopyView textureCopyView =
+            wgpu::TextureCopyView textureCopyView =
                 utils::CreateTextureCopyView(dstTexture, dstSpec.level, 0, {0, 0, 0});
-            dawn::Extent3D dstCopySize = {dstWidth, dstHeight, 1};
+            wgpu::Extent3D dstCopySize = {dstWidth, dstHeight, 1};
             encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &dstCopySize);
         }
 
         // Perform the texture to texture copy
         for (uint32_t slice = 0; slice < srcSpec.arraySize; ++slice) {
-            dawn::TextureCopyView srcTextureCopyView = utils::CreateTextureCopyView(
+            wgpu::TextureCopyView srcTextureCopyView = utils::CreateTextureCopyView(
                 srcTexture, srcSpec.level, slice, {srcSpec.x, srcSpec.y, 0});
-            dawn::TextureCopyView dstTextureCopyView = utils::CreateTextureCopyView(
+            wgpu::TextureCopyView dstTextureCopyView = utils::CreateTextureCopyView(
                 dstTexture, dstSpec.level, slice, {dstSpec.x, dstSpec.y, 0});
-            dawn::Extent3D copySize = {copy.width, copy.height, 1};
+            wgpu::Extent3D copySize = {copy.width, copy.height, 1};
             encoder.CopyTextureToTexture(&srcTextureCopyView, &dstTextureCopyView, &copySize);
         }
 
-        dawn::CommandBuffer commands = encoder.Finish();
+        wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
         std::vector<RGBA8> expected(rowPitch / kBytesPerTexel * (copy.height - 1) + copy.width);

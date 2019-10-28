@@ -29,10 +29,10 @@ TEST_P(BasicTests, VendorIdFilter) {
 // Test Buffer::SetSubData changes the content of the buffer, but really this is the most
 // basic test possible, and tests the test harness
 TEST_P(BasicTests, BufferSetSubData) {
-    dawn::BufferDescriptor descriptor;
+    wgpu::BufferDescriptor descriptor;
     descriptor.size = 4;
-    descriptor.usage = dawn::BufferUsage::CopySrc | dawn::BufferUsage::CopyDst;
-    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
+    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
     uint32_t value = 0x01020304;
     buffer.SetSubData(0, sizeof(value), &value);
@@ -43,10 +43,10 @@ TEST_P(BasicTests, BufferSetSubData) {
 // Test a validation error for buffer setSubData, but really this is the most basic test possible
 // for ASSERT_DEVICE_ERROR
 TEST_P(BasicTests, BufferSetSubDataError) {
-    dawn::BufferDescriptor descriptor;
+    wgpu::BufferDescriptor descriptor;
     descriptor.size = 4;
-    descriptor.usage = dawn::BufferUsage::CopySrc | dawn::BufferUsage::CopyDst;
-    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
+    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
     uint8_t value = 187;
     ASSERT_DEVICE_ERROR(buffer.SetSubData(1000, sizeof(value), &value));

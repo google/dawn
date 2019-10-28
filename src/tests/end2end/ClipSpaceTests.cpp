@@ -19,7 +19,7 @@
 
 class ClipSpaceTest : public DawnTest {
   protected:
-    dawn::RenderPipeline CreatePipelineForTest() {
+    wgpu::RenderPipeline CreatePipelineForTest() {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
 
         // Draw two triangles:
@@ -48,18 +48,18 @@ class ClipSpaceTest : public DawnTest {
         pipelineDescriptor.cFragmentStage.module =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fs);
 
-        pipelineDescriptor.cDepthStencilState.depthCompare = dawn::CompareFunction::LessEqual;
+        pipelineDescriptor.cDepthStencilState.depthCompare = wgpu::CompareFunction::LessEqual;
         pipelineDescriptor.depthStencilState = &pipelineDescriptor.cDepthStencilState;
 
         return device.CreateRenderPipeline(&pipelineDescriptor);
     }
 
-    dawn::Texture Create2DTextureForTest(dawn::TextureFormat format) {
-        dawn::TextureDescriptor textureDescriptor;
-        textureDescriptor.dimension = dawn::TextureDimension::e2D;
+    wgpu::Texture Create2DTextureForTest(wgpu::TextureFormat format) {
+        wgpu::TextureDescriptor textureDescriptor;
+        textureDescriptor.dimension = wgpu::TextureDimension::e2D;
         textureDescriptor.format = format;
         textureDescriptor.usage =
-            dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc;
+            wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
         textureDescriptor.arrayLayerCount = 1;
         textureDescriptor.mipLevelCount = 1;
         textureDescriptor.sampleCount = 1;
@@ -72,27 +72,27 @@ class ClipSpaceTest : public DawnTest {
 
 // Test that the clip space is correctly configured.
 TEST_P(ClipSpaceTest, ClipSpace) {
-    dawn::Texture colorTexture = Create2DTextureForTest(dawn::TextureFormat::RGBA8Unorm);
-    dawn::Texture depthStencilTexture =
-        Create2DTextureForTest(dawn::TextureFormat::Depth24PlusStencil8);
+    wgpu::Texture colorTexture = Create2DTextureForTest(wgpu::TextureFormat::RGBA8Unorm);
+    wgpu::Texture depthStencilTexture =
+        Create2DTextureForTest(wgpu::TextureFormat::Depth24PlusStencil8);
 
     utils::ComboRenderPassDescriptor renderPassDescriptor({colorTexture.CreateView()},
                                                           depthStencilTexture.CreateView());
     renderPassDescriptor.cColorAttachments[0].clearColor = {0.0, 1.0, 0.0, 1.0};
-    renderPassDescriptor.cColorAttachments[0].loadOp = dawn::LoadOp::Clear;
+    renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
 
     // Clear the depth stencil attachment to 0.5f, so only the bottom-right triangle should be
     // drawn.
     renderPassDescriptor.cDepthStencilAttachmentInfo.clearDepth = 0.5f;
-    renderPassDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = dawn::LoadOp::Clear;
+    renderPassDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Clear;
 
-    dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-    dawn::RenderPassEncoder renderPass = commandEncoder.BeginRenderPass(&renderPassDescriptor);
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder renderPass = commandEncoder.BeginRenderPass(&renderPassDescriptor);
     renderPass.SetPipeline(CreatePipelineForTest());
     renderPass.Draw(6, 1, 0, 0);
     renderPass.EndPass();
-    dawn::CommandBuffer commandBuffer = commandEncoder.Finish();
-    dawn::Queue queue = device.CreateQueue();
+    wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
+    wgpu::Queue queue = device.CreateQueue();
     queue.Submit(1, &commandBuffer);
 
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(255, 0, 0, 255), colorTexture, kSize - 1, kSize - 1);

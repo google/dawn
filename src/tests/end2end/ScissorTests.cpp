@@ -19,8 +19,8 @@
 
 class ScissorTest: public DawnTest {
   protected:
-    dawn::RenderPipeline CreateQuadPipeline(dawn::TextureFormat format) {
-        dawn::ShaderModule vsModule =
+    wgpu::RenderPipeline CreateQuadPipeline(wgpu::TextureFormat format) {
+        wgpu::ShaderModule vsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
             #version 450
             const vec2 pos[6] = vec2[6](
@@ -31,7 +31,7 @@ class ScissorTest: public DawnTest {
                 gl_Position = vec4(pos[gl_VertexIndex], 0.5, 1.0);
             })");
 
-        dawn::ShaderModule fsModule =
+        wgpu::ShaderModule fsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
             #version 450
             layout(location = 0) out vec4 fragColor;
@@ -51,17 +51,17 @@ class ScissorTest: public DawnTest {
 // Test that by default the scissor test is disabled and the whole attachment can be drawn to.
 TEST_P(ScissorTest, DefaultsToWholeRenderTarget) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 100, 100);
-    dawn::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
+    wgpu::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.Draw(6, 1, 0, 0);
         pass.EndPass();
     }
 
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 0, 0);
@@ -73,18 +73,18 @@ TEST_P(ScissorTest, DefaultsToWholeRenderTarget) {
 // Test setting the scissor to something larger than the attachments.
 TEST_P(ScissorTest, LargerThanAttachment) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 100, 100);
-    dawn::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
+    wgpu::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.SetScissorRect(0, 0, 200, 200);
         pass.Draw(6, 1, 0, 0);
         pass.EndPass();
     }
 
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 0, 0);
@@ -96,23 +96,23 @@ TEST_P(ScissorTest, LargerThanAttachment) {
 // Test setting a partial scissor (not empty, not full attachment)
 TEST_P(ScissorTest, PartialRect) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 100, 100);
-    dawn::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
+    wgpu::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
 
     constexpr uint32_t kX = 3;
     constexpr uint32_t kY = 7;
     constexpr uint32_t kW = 5;
     constexpr uint32_t kH = 13;
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.SetScissorRect(kX, kY, kW, kH);
         pass.Draw(6, 1, 0, 0);
         pass.EndPass();
     }
 
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     // Test the two opposite corners of the scissor box. With one pixel inside and on outside
@@ -126,24 +126,24 @@ TEST_P(ScissorTest, PartialRect) {
 // Test that the scissor setting doesn't get inherited between renderpasses
 TEST_P(ScissorTest, NoInheritanceBetweenRenderPass) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 100, 100);
-    dawn::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
+    wgpu::RenderPipeline pipeline = CreateQuadPipeline(renderPass.colorFormat);
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     // RenderPass 1 set the scissor
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetScissorRect(1, 1, 1, 1);
         pass.EndPass();
     }
     // RenderPass 2 draw a full quad, it shouldn't be scissored
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.Draw(6, 1, 0, 0);
         pass.EndPass();
     }
 
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 0, 0);

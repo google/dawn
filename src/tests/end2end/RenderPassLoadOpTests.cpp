@@ -24,18 +24,16 @@ constexpr static unsigned int kRTSize = 16;
 class DrawQuad {
     public:
         DrawQuad() {}
-        DrawQuad(dawn::Device device, const char* vsSource, const char* fsSource)
-            : device(device) {
+        DrawQuad(wgpu::Device device, const char* vsSource, const char* fsSource) : device(device) {
             vsModule =
                 utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vsSource);
             fsModule =
                 utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fsSource);
 
             pipelineLayout = utils::MakeBasicPipelineLayout(device, nullptr);
-            }
+        }
 
-        void Draw(dawn::RenderPassEncoder* pass) {
-
+        void Draw(wgpu::RenderPassEncoder* pass) {
             utils::ComboRenderPipelineDescriptor descriptor(device);
             descriptor.layout = pipelineLayout;
             descriptor.vertexStage.module = vsModule;
@@ -48,10 +46,10 @@ class DrawQuad {
         }
 
     private:
-        dawn::Device device;
-        dawn::ShaderModule vsModule = {};
-        dawn::ShaderModule fsModule = {};
-        dawn::PipelineLayout pipelineLayout = {};
+      wgpu::Device device;
+      wgpu::ShaderModule vsModule = {};
+      wgpu::ShaderModule fsModule = {};
+      wgpu::PipelineLayout pipelineLayout = {};
 };
 
 class RenderPassLoadOpTests : public DawnTest {
@@ -59,16 +57,16 @@ class RenderPassLoadOpTests : public DawnTest {
         void TestSetUp() override {
             DawnTest::TestSetUp();
 
-            dawn::TextureDescriptor descriptor;
-            descriptor.dimension = dawn::TextureDimension::e2D;
+            wgpu::TextureDescriptor descriptor;
+            descriptor.dimension = wgpu::TextureDimension::e2D;
             descriptor.size.width = kRTSize;
             descriptor.size.height = kRTSize;
             descriptor.size.depth = 1;
             descriptor.arrayLayerCount = 1;
             descriptor.sampleCount = 1;
-            descriptor.format = dawn::TextureFormat::RGBA8Unorm;
+            descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
             descriptor.mipLevelCount = 1;
-            descriptor.usage = dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc;
+            descriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
             renderTarget = device.CreateTexture(&descriptor);
 
             renderTargetView = renderTarget.CreateView();
@@ -102,8 +100,8 @@ class RenderPassLoadOpTests : public DawnTest {
             blueQuad = DrawQuad(device, vsSource, fsSource);
         }
 
-        dawn::Texture renderTarget;
-        dawn::TextureView renderTargetView;
+        wgpu::Texture renderTarget;
+        wgpu::TextureView renderTargetView;
 
         std::array<RGBA8, kRTSize * kRTSize> expectZero;
         std::array<RGBA8, kRTSize * kRTSize> expectGreen;
@@ -136,8 +134,8 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
 
     // Part 2: draw a blue quad into the right half of the render target, and check result
     utils::ComboRenderPassDescriptor renderPassLoad({renderTargetView});
-    renderPassLoad.cColorAttachments[0].loadOp = dawn::LoadOp::Load;
-    dawn::CommandBuffer commandsLoad;
+    renderPassLoad.cColorAttachments[0].loadOp = wgpu::LoadOp::Load;
+    wgpu::CommandBuffer commandsLoad;
     {
         auto encoder = device.CreateCommandEncoder();
         auto pass = encoder.BeginRenderPass(&renderPassLoad);

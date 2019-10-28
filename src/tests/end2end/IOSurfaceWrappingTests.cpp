@@ -93,13 +93,13 @@ namespace {
 
     class IOSurfaceTestBase : public DawnTest {
       public:
-        dawn::Texture WrapIOSurface(const dawn::TextureDescriptor* descriptor,
+        wgpu::Texture WrapIOSurface(const wgpu::TextureDescriptor* descriptor,
                                     IOSurfaceRef ioSurface,
                                     uint32_t plane) {
-            DawnTexture texture = dawn_native::metal::WrapIOSurface(
-                device.Get(), reinterpret_cast<const DawnTextureDescriptor*>(descriptor), ioSurface,
+            WGPUTexture texture = dawn_native::metal::WrapIOSurface(
+                device.Get(), reinterpret_cast<const WGPUTextureDescriptor*>(descriptor), ioSurface,
                 plane);
-            return dawn::Texture::Acquire(texture);
+            return wgpu::Texture::Acquire(texture);
         }
     };
 
@@ -112,24 +112,24 @@ class IOSurfaceValidationTests : public IOSurfaceTestBase {
     IOSurfaceValidationTests() {
         defaultIOSurface = CreateSinglePlaneIOSurface(10, 10, 'BGRA', 4);
 
-        descriptor.dimension = dawn::TextureDimension::e2D;
-        descriptor.format = dawn::TextureFormat::BGRA8Unorm;
+        descriptor.dimension = wgpu::TextureDimension::e2D;
+        descriptor.format = wgpu::TextureFormat::BGRA8Unorm;
         descriptor.size = {10, 10, 1};
         descriptor.sampleCount = 1;
         descriptor.arrayLayerCount = 1;
         descriptor.mipLevelCount = 1;
-        descriptor.usage = dawn::TextureUsage::OutputAttachment;
+        descriptor.usage = wgpu::TextureUsage::OutputAttachment;
     }
 
   protected:
-    dawn::TextureDescriptor descriptor;
+    wgpu::TextureDescriptor descriptor;
     ScopedIOSurfaceRef defaultIOSurface;
 };
 
 // Test a successful wrapping of an IOSurface in a texture
 TEST_P(IOSurfaceValidationTests, Success) {
     DAWN_SKIP_TEST_IF(UsesWire());
-    dawn::Texture texture = WrapIOSurface(&descriptor, defaultIOSurface.get(), 0);
+    wgpu::Texture texture = WrapIOSurface(&descriptor, defaultIOSurface.get(), 0);
     ASSERT_NE(texture.Get(), nullptr);
 }
 
@@ -138,7 +138,7 @@ TEST_P(IOSurfaceValidationTests, InvalidTextureDescriptor) {
     DAWN_SKIP_TEST_IF(UsesWire());
     descriptor.nextInChain = this;
 
-    ASSERT_DEVICE_ERROR(dawn::Texture texture =
+    ASSERT_DEVICE_ERROR(wgpu::Texture texture =
                             WrapIOSurface(&descriptor, defaultIOSurface.get(), 0));
     ASSERT_EQ(texture.Get(), nullptr);
 }
@@ -146,7 +146,7 @@ TEST_P(IOSurfaceValidationTests, InvalidTextureDescriptor) {
 // Test an error occurs if the plane is too large
 TEST_P(IOSurfaceValidationTests, PlaneTooLarge) {
     DAWN_SKIP_TEST_IF(UsesWire());
-    ASSERT_DEVICE_ERROR(dawn::Texture texture =
+    ASSERT_DEVICE_ERROR(wgpu::Texture texture =
                             WrapIOSurface(&descriptor, defaultIOSurface.get(), 1));
     ASSERT_EQ(texture.Get(), nullptr);
 }
@@ -155,9 +155,9 @@ TEST_P(IOSurfaceValidationTests, PlaneTooLarge) {
 // TODO(cwallez@chromium.org): Reenable when 1D or 3D textures are implemented
 TEST_P(IOSurfaceValidationTests, DISABLED_InvalidTextureDimension) {
     DAWN_SKIP_TEST_IF(UsesWire());
-    descriptor.dimension = dawn::TextureDimension::e2D;
+    descriptor.dimension = wgpu::TextureDimension::e2D;
 
-    ASSERT_DEVICE_ERROR(dawn::Texture texture =
+    ASSERT_DEVICE_ERROR(wgpu::Texture texture =
                             WrapIOSurface(&descriptor, defaultIOSurface.get(), 0));
     ASSERT_EQ(texture.Get(), nullptr);
 }
@@ -167,7 +167,7 @@ TEST_P(IOSurfaceValidationTests, InvalidMipLevelCount) {
     DAWN_SKIP_TEST_IF(UsesWire());
     descriptor.mipLevelCount = 2;
 
-    ASSERT_DEVICE_ERROR(dawn::Texture texture =
+    ASSERT_DEVICE_ERROR(wgpu::Texture texture =
                             WrapIOSurface(&descriptor, defaultIOSurface.get(), 0));
     ASSERT_EQ(texture.Get(), nullptr);
 }
@@ -177,7 +177,7 @@ TEST_P(IOSurfaceValidationTests, InvalidArrayLayerCount) {
     DAWN_SKIP_TEST_IF(UsesWire());
     descriptor.arrayLayerCount = 2;
 
-    ASSERT_DEVICE_ERROR(dawn::Texture texture =
+    ASSERT_DEVICE_ERROR(wgpu::Texture texture =
                             WrapIOSurface(&descriptor, defaultIOSurface.get(), 0));
     ASSERT_EQ(texture.Get(), nullptr);
 }
@@ -187,7 +187,7 @@ TEST_P(IOSurfaceValidationTests, InvalidSampleCount) {
     DAWN_SKIP_TEST_IF(UsesWire());
     descriptor.sampleCount = 4;
 
-    ASSERT_DEVICE_ERROR(dawn::Texture texture =
+    ASSERT_DEVICE_ERROR(wgpu::Texture texture =
                             WrapIOSurface(&descriptor, defaultIOSurface.get(), 0));
     ASSERT_EQ(texture.Get(), nullptr);
 }
@@ -197,7 +197,7 @@ TEST_P(IOSurfaceValidationTests, InvalidWidth) {
     DAWN_SKIP_TEST_IF(UsesWire());
     descriptor.size.width = 11;
 
-    ASSERT_DEVICE_ERROR(dawn::Texture texture =
+    ASSERT_DEVICE_ERROR(wgpu::Texture texture =
                             WrapIOSurface(&descriptor, defaultIOSurface.get(), 0));
     ASSERT_EQ(texture.Get(), nullptr);
 }
@@ -207,7 +207,7 @@ TEST_P(IOSurfaceValidationTests, InvalidHeight) {
     DAWN_SKIP_TEST_IF(UsesWire());
     descriptor.size.height = 11;
 
-    ASSERT_DEVICE_ERROR(dawn::Texture texture =
+    ASSERT_DEVICE_ERROR(wgpu::Texture texture =
                             WrapIOSurface(&descriptor, defaultIOSurface.get(), 0));
     ASSERT_EQ(texture.Get(), nullptr);
 }
@@ -215,9 +215,9 @@ TEST_P(IOSurfaceValidationTests, InvalidHeight) {
 // Test an error occurs if the descriptor format isn't compatible with the IOSurface's
 TEST_P(IOSurfaceValidationTests, InvalidFormat) {
     DAWN_SKIP_TEST_IF(UsesWire());
-    descriptor.format = dawn::TextureFormat::R8Unorm;
+    descriptor.format = wgpu::TextureFormat::R8Unorm;
 
-    ASSERT_DEVICE_ERROR(dawn::Texture texture =
+    ASSERT_DEVICE_ERROR(wgpu::Texture texture =
                             WrapIOSurface(&descriptor, defaultIOSurface.get(), 0));
     ASSERT_EQ(texture.Get(), nullptr);
 }
@@ -228,7 +228,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
   public:
     // Test that sampling a 1x1 works.
     void DoSampleTest(IOSurfaceRef ioSurface,
-                      dawn::TextureFormat format,
+                      wgpu::TextureFormat format,
                       void* data,
                       size_t dataSize,
                       RGBA8 expectedColor) {
@@ -238,37 +238,37 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
         IOSurfaceUnlock(ioSurface, 0, nullptr);
 
         // The bindgroup containing the texture view for the ioSurface as well as the sampler.
-        dawn::BindGroupLayout bgl;
-        dawn::BindGroup bindGroup;
+        wgpu::BindGroupLayout bgl;
+        wgpu::BindGroup bindGroup;
         {
-            dawn::TextureDescriptor textureDescriptor;
-            textureDescriptor.dimension = dawn::TextureDimension::e2D;
+            wgpu::TextureDescriptor textureDescriptor;
+            textureDescriptor.dimension = wgpu::TextureDimension::e2D;
             textureDescriptor.format = format;
             textureDescriptor.size = {1, 1, 1};
             textureDescriptor.sampleCount = 1;
             textureDescriptor.arrayLayerCount = 1;
             textureDescriptor.mipLevelCount = 1;
-            textureDescriptor.usage = dawn::TextureUsage::Sampled;
-            dawn::Texture wrappingTexture = WrapIOSurface(&textureDescriptor, ioSurface, 0);
+            textureDescriptor.usage = wgpu::TextureUsage::Sampled;
+            wgpu::Texture wrappingTexture = WrapIOSurface(&textureDescriptor, ioSurface, 0);
 
-            dawn::TextureView textureView = wrappingTexture.CreateView();
+            wgpu::TextureView textureView = wrappingTexture.CreateView();
 
-            dawn::SamplerDescriptor samplerDescriptor = utils::GetDefaultSamplerDescriptor();
-            dawn::Sampler sampler = device.CreateSampler(&samplerDescriptor);
+            wgpu::SamplerDescriptor samplerDescriptor = utils::GetDefaultSamplerDescriptor();
+            wgpu::Sampler sampler = device.CreateSampler(&samplerDescriptor);
 
             bgl = utils::MakeBindGroupLayout(
                 device, {
-                            {0, dawn::ShaderStage::Fragment, dawn::BindingType::Sampler},
-                            {1, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture},
+                            {0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler},
+                            {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture},
                         });
 
             bindGroup = utils::MakeBindGroup(device, bgl, {{0, sampler}, {1, textureView}});
         }
 
         // The simplest texture sampling pipeline.
-        dawn::RenderPipeline pipeline;
+        wgpu::RenderPipeline pipeline;
         {
-            dawn::ShaderModule vs =
+            wgpu::ShaderModule vs =
                 utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
                 #version 450
                 layout (location = 0) out vec2 o_texCoord;
@@ -289,7 +289,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
                     o_texCoord = texCoord[gl_VertexIndex];
                 }
             )");
-            dawn::ShaderModule fs =
+            wgpu::ShaderModule fs =
                 utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
                 #version 450
                 layout(set = 0, binding = 0) uniform sampler sampler0;
@@ -306,23 +306,23 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
             descriptor.vertexStage.module = vs;
             descriptor.cFragmentStage.module = fs;
             descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
-            descriptor.cColorStates[0].format = dawn::TextureFormat::RGBA8Unorm;
+            descriptor.cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
 
             pipeline = device.CreateRenderPipeline(&descriptor);
         }
 
         // Submit commands samping from the ioSurface and writing the result to renderPass.color
         utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         {
-            dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
             pass.SetPipeline(pipeline);
             pass.SetBindGroup(0, bindGroup);
             pass.Draw(6, 1, 0, 0);
             pass.EndPass();
         }
 
-        dawn::CommandBuffer commands = encoder.Finish();
+        wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
         EXPECT_PIXEL_RGBA8_EQ(expectedColor, renderPass.color, 0, 0);
@@ -330,32 +330,32 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
 
     // Test that clearing using BeginRenderPass writes correct data in the ioSurface.
     void DoClearTest(IOSurfaceRef ioSurface,
-                     dawn::TextureFormat format,
+                     wgpu::TextureFormat format,
                      void* data,
                      size_t dataSize) {
         // Get a texture view for the ioSurface
-        dawn::TextureDescriptor textureDescriptor;
-        textureDescriptor.dimension = dawn::TextureDimension::e2D;
+        wgpu::TextureDescriptor textureDescriptor;
+        textureDescriptor.dimension = wgpu::TextureDimension::e2D;
         textureDescriptor.format = format;
         textureDescriptor.size = {1, 1, 1};
         textureDescriptor.sampleCount = 1;
         textureDescriptor.arrayLayerCount = 1;
         textureDescriptor.mipLevelCount = 1;
-        textureDescriptor.usage = dawn::TextureUsage::OutputAttachment;
-        dawn::Texture ioSurfaceTexture = WrapIOSurface(&textureDescriptor, ioSurface, 0);
+        textureDescriptor.usage = wgpu::TextureUsage::OutputAttachment;
+        wgpu::Texture ioSurfaceTexture = WrapIOSurface(&textureDescriptor, ioSurface, 0);
 
-        dawn::TextureView ioSurfaceView = ioSurfaceTexture.CreateView();
+        wgpu::TextureView ioSurfaceView = ioSurfaceTexture.CreateView();
 
         utils::ComboRenderPassDescriptor renderPassDescriptor({ioSurfaceView}, {});
         renderPassDescriptor.cColorAttachments[0].clearColor = {1 / 255.0f, 2 / 255.0f, 3 / 255.0f,
                                                                 4 / 255.0f};
 
         // Execute commands to clear the ioSurface
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDescriptor);
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDescriptor);
         pass.EndPass();
 
-        dawn::CommandBuffer commands = encoder.Finish();
+        wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
         // Wait for the commands touching the IOSurface to be scheduled
@@ -374,7 +374,7 @@ TEST_P(IOSurfaceUsageTests, SampleFromR8IOSurface) {
     ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, 'L008', 1);
 
     uint8_t data = 0x01;
-    DoSampleTest(ioSurface.get(), dawn::TextureFormat::R8Unorm, &data, sizeof(data),
+    DoSampleTest(ioSurface.get(), wgpu::TextureFormat::R8Unorm, &data, sizeof(data),
                  RGBA8(1, 0, 0, 255));
 }
 
@@ -384,7 +384,7 @@ TEST_P(IOSurfaceUsageTests, ClearR8IOSurface) {
     ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, 'L008', 1);
 
     uint8_t data = 0x01;
-    DoClearTest(ioSurface.get(), dawn::TextureFormat::R8Unorm, &data, sizeof(data));
+    DoClearTest(ioSurface.get(), wgpu::TextureFormat::R8Unorm, &data, sizeof(data));
 }
 
 // Test sampling from a RG8 IOSurface
@@ -393,7 +393,7 @@ TEST_P(IOSurfaceUsageTests, SampleFromRG8IOSurface) {
     ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, '2C08', 2);
 
     uint16_t data = 0x0102;  // Stored as (G, R)
-    DoSampleTest(ioSurface.get(), dawn::TextureFormat::RG8Unorm, &data, sizeof(data),
+    DoSampleTest(ioSurface.get(), wgpu::TextureFormat::RG8Unorm, &data, sizeof(data),
                  RGBA8(2, 1, 0, 255));
 }
 
@@ -403,7 +403,7 @@ TEST_P(IOSurfaceUsageTests, ClearRG8IOSurface) {
     ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, '2C08', 2);
 
     uint16_t data = 0x0201;
-    DoClearTest(ioSurface.get(), dawn::TextureFormat::RG8Unorm, &data, sizeof(data));
+    DoClearTest(ioSurface.get(), wgpu::TextureFormat::RG8Unorm, &data, sizeof(data));
 }
 
 // Test sampling from a BGRA8 IOSurface
@@ -412,7 +412,7 @@ TEST_P(IOSurfaceUsageTests, SampleFromBGRA8IOSurface) {
     ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, 'BGRA', 4);
 
     uint32_t data = 0x01020304;  // Stored as (A, R, G, B)
-    DoSampleTest(ioSurface.get(), dawn::TextureFormat::BGRA8Unorm, &data, sizeof(data),
+    DoSampleTest(ioSurface.get(), wgpu::TextureFormat::BGRA8Unorm, &data, sizeof(data),
                  RGBA8(2, 3, 4, 1));
 }
 
@@ -422,7 +422,7 @@ TEST_P(IOSurfaceUsageTests, ClearBGRA8IOSurface) {
     ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, 'BGRA', 4);
 
     uint32_t data = 0x04010203;
-    DoClearTest(ioSurface.get(), dawn::TextureFormat::BGRA8Unorm, &data, sizeof(data));
+    DoClearTest(ioSurface.get(), wgpu::TextureFormat::BGRA8Unorm, &data, sizeof(data));
 }
 
 // Test sampling from an RGBA8 IOSurface
@@ -431,7 +431,7 @@ TEST_P(IOSurfaceUsageTests, SampleFromRGBA8IOSurface) {
     ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, 'RGBA', 4);
 
     uint32_t data = 0x01020304;  // Stored as (A, B, G, R)
-    DoSampleTest(ioSurface.get(), dawn::TextureFormat::RGBA8Unorm, &data, sizeof(data),
+    DoSampleTest(ioSurface.get(), wgpu::TextureFormat::RGBA8Unorm, &data, sizeof(data),
                  RGBA8(4, 3, 2, 1));
 }
 
@@ -441,7 +441,7 @@ TEST_P(IOSurfaceUsageTests, ClearRGBA8IOSurface) {
     ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, 'RGBA', 4);
 
     uint32_t data = 0x04030201;
-    DoClearTest(ioSurface.get(), dawn::TextureFormat::RGBA8Unorm, &data, sizeof(data));
+    DoClearTest(ioSurface.get(), wgpu::TextureFormat::RGBA8Unorm, &data, sizeof(data));
 }
 
 DAWN_INSTANTIATE_TEST(IOSurfaceValidationTests, MetalBackend);

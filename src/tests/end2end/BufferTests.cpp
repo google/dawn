@@ -18,17 +18,17 @@
 
 class BufferMapReadTests : public DawnTest {
     protected:
-      static void MapReadCallback(DawnBufferMapAsyncStatus status,
+      static void MapReadCallback(WGPUBufferMapAsyncStatus status,
                                   const void* data,
                                   uint64_t,
                                   void* userdata) {
-          ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, status);
+          ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
           ASSERT_NE(nullptr, data);
 
           static_cast<BufferMapReadTests*>(userdata)->mappedData = data;
       }
 
-      const void* MapReadAsyncAndWait(const dawn::Buffer& buffer) {
+      const void* MapReadAsyncAndWait(const wgpu::Buffer& buffer) {
           buffer.MapReadAsync(MapReadCallback, this);
 
           while (mappedData == nullptr) {
@@ -44,10 +44,10 @@ class BufferMapReadTests : public DawnTest {
 
 // Test that the simplest map read works.
 TEST_P(BufferMapReadTests, SmallReadAtZero) {
-    dawn::BufferDescriptor descriptor;
+    wgpu::BufferDescriptor descriptor;
     descriptor.size = 4;
-    descriptor.usage = dawn::BufferUsage::MapRead | dawn::BufferUsage::CopyDst;
-    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
+    descriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
     uint32_t myData = 0x01020304;
     buffer.SetSubData(0, sizeof(myData), &myData);
@@ -66,10 +66,10 @@ TEST_P(BufferMapReadTests, LargeRead) {
         myData.push_back(i);
     }
 
-    dawn::BufferDescriptor descriptor;
+    wgpu::BufferDescriptor descriptor;
     descriptor.size = static_cast<uint32_t>(kDataSize * sizeof(uint32_t));
-    descriptor.usage = dawn::BufferUsage::MapRead | dawn::BufferUsage::CopyDst;
-    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
+    descriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
     buffer.SetSubData(0, kDataSize * sizeof(uint32_t), myData.data());
 
@@ -83,17 +83,17 @@ DAWN_INSTANTIATE_TEST(BufferMapReadTests, D3D12Backend, MetalBackend, OpenGLBack
 
 class BufferMapWriteTests : public DawnTest {
     protected:
-      static void MapWriteCallback(DawnBufferMapAsyncStatus status,
+      static void MapWriteCallback(WGPUBufferMapAsyncStatus status,
                                    void* data,
                                    uint64_t,
                                    void* userdata) {
-          ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, status);
+          ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
           ASSERT_NE(nullptr, data);
 
           static_cast<BufferMapWriteTests*>(userdata)->mappedData = data;
       }
 
-      void* MapWriteAsyncAndWait(const dawn::Buffer& buffer) {
+      void* MapWriteAsyncAndWait(const wgpu::Buffer& buffer) {
           buffer.MapWriteAsync(MapWriteCallback, this);
 
           while (mappedData == nullptr) {
@@ -113,10 +113,10 @@ class BufferMapWriteTests : public DawnTest {
 
 // Test that the simplest map write works.
 TEST_P(BufferMapWriteTests, SmallWriteAtZero) {
-    dawn::BufferDescriptor descriptor;
+    wgpu::BufferDescriptor descriptor;
     descriptor.size = 4;
-    descriptor.usage = dawn::BufferUsage::MapWrite | dawn::BufferUsage::CopySrc;
-    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
+    descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
     uint32_t myData = 2934875;
     void* mappedData = MapWriteAsyncAndWait(buffer);
@@ -134,10 +134,10 @@ TEST_P(BufferMapWriteTests, LargeWrite) {
         myData.push_back(i);
     }
 
-    dawn::BufferDescriptor descriptor;
+    wgpu::BufferDescriptor descriptor;
     descriptor.size = static_cast<uint32_t>(kDataSize * sizeof(uint32_t));
-    descriptor.usage = dawn::BufferUsage::MapWrite | dawn::BufferUsage::CopySrc;
-    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
+    descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
     void* mappedData = MapWriteAsyncAndWait(buffer);
     memcpy(mappedData, myData.data(), kDataSize * sizeof(uint32_t));
@@ -154,14 +154,14 @@ TEST_P(BufferMapWriteTests, ManyWrites) {
         myData.push_back(i);
     }
 
-    std::vector<dawn::Buffer> buffers;
+    std::vector<wgpu::Buffer> buffers;
 
     constexpr uint32_t kBuffers = 100;
     for (uint32_t i = 0; i < kBuffers; ++i) {
-        dawn::BufferDescriptor descriptor;
+        wgpu::BufferDescriptor descriptor;
         descriptor.size = static_cast<uint32_t>(kDataSize * sizeof(uint32_t));
-        descriptor.usage = dawn::BufferUsage::MapWrite | dawn::BufferUsage::CopySrc;
-        dawn::Buffer buffer = device.CreateBuffer(&descriptor);
+        descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+        wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
         void* mappedData = MapWriteAsyncAndWait(buffer);
         memcpy(mappedData, myData.data(), kDataSize * sizeof(uint32_t));
@@ -182,10 +182,10 @@ class BufferSetSubDataTests : public DawnTest {
 
 // Test the simplest set sub data: setting one u32 at offset 0.
 TEST_P(BufferSetSubDataTests, SmallDataAtZero) {
-    dawn::BufferDescriptor descriptor;
+    wgpu::BufferDescriptor descriptor;
     descriptor.size = 4;
-    descriptor.usage = dawn::BufferUsage::CopySrc | dawn::BufferUsage::CopyDst;
-    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
+    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
     uint32_t value = 0x01020304;
     buffer.SetSubData(0, sizeof(value), &value);
@@ -195,10 +195,10 @@ TEST_P(BufferSetSubDataTests, SmallDataAtZero) {
 
 // Test that SetSubData offset works.
 TEST_P(BufferSetSubDataTests, SmallDataAtOffset) {
-    dawn::BufferDescriptor descriptor;
+    wgpu::BufferDescriptor descriptor;
     descriptor.size = 4000;
-    descriptor.usage = dawn::BufferUsage::CopySrc | dawn::BufferUsage::CopyDst;
-    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
+    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
     constexpr uint64_t kOffset = 2000;
     uint32_t value = 0x01020304;
@@ -223,10 +223,10 @@ TEST_P(BufferSetSubDataTests, ManySetSubData) {
 
     constexpr uint64_t kSize = 4000 * 1000;
     constexpr uint32_t kElements = 500 * 500;
-    dawn::BufferDescriptor descriptor;
+    wgpu::BufferDescriptor descriptor;
     descriptor.size = kSize;
-    descriptor.usage = dawn::BufferUsage::CopySrc | dawn::BufferUsage::CopyDst;
-    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
+    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
     std::vector<uint32_t> expectedData;
     for (uint32_t i = 0; i < kElements; ++i) {
@@ -241,10 +241,10 @@ TEST_P(BufferSetSubDataTests, ManySetSubData) {
 TEST_P(BufferSetSubDataTests, LargeSetSubData) {
     constexpr uint64_t kSize = 4000 * 1000;
     constexpr uint32_t kElements = 1000 * 1000;
-    dawn::BufferDescriptor descriptor;
+    wgpu::BufferDescriptor descriptor;
     descriptor.size = kSize;
-    descriptor.usage = dawn::BufferUsage::CopySrc | dawn::BufferUsage::CopyDst;
-    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
+    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
     std::vector<uint32_t> expectedData;
     for (uint32_t i = 0; i < kElements; ++i) {
@@ -265,17 +265,17 @@ DAWN_INSTANTIATE_TEST(BufferSetSubDataTests,
 // TODO(enga): These tests should use the testing toggle to initialize resources to 1.
 class CreateBufferMappedTests : public DawnTest {
     protected:
-      static void MapReadCallback(DawnBufferMapAsyncStatus status,
+      static void MapReadCallback(WGPUBufferMapAsyncStatus status,
                                   const void* data,
                                   uint64_t,
                                   void* userdata) {
-          ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, status);
+          ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
           ASSERT_NE(nullptr, data);
 
           static_cast<CreateBufferMappedTests*>(userdata)->mappedData = data;
       }
 
-      const void* MapReadAsyncAndWait(const dawn::Buffer& buffer) {
+      const void* MapReadAsyncAndWait(const wgpu::Buffer& buffer) {
           buffer.MapReadAsync(MapReadCallback, this);
 
           while (mappedData == nullptr) {
@@ -285,7 +285,7 @@ class CreateBufferMappedTests : public DawnTest {
           return mappedData;
       }
 
-      void CheckResultStartsZeroed(const dawn::CreateBufferMappedResult& result, uint64_t size) {
+      void CheckResultStartsZeroed(const wgpu::CreateBufferMappedResult& result, uint64_t size) {
           ASSERT_EQ(result.dataLength, size);
           for (uint64_t i = 0; i < result.dataLength; ++i) {
               uint8_t value = *(reinterpret_cast<uint8_t*>(result.data) + i);
@@ -293,46 +293,46 @@ class CreateBufferMappedTests : public DawnTest {
           }
       }
 
-      dawn::CreateBufferMappedResult CreateBufferMapped(dawn::BufferUsage usage, uint64_t size) {
-          dawn::BufferDescriptor descriptor;
+      wgpu::CreateBufferMappedResult CreateBufferMapped(wgpu::BufferUsage usage, uint64_t size) {
+          wgpu::BufferDescriptor descriptor;
           descriptor.nextInChain = nullptr;
           descriptor.size = size;
           descriptor.usage = usage;
 
-          dawn::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
+          wgpu::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
           CheckResultStartsZeroed(result, size);
           return result;
       }
 
-      dawn::CreateBufferMappedResult CreateBufferMappedWithData(dawn::BufferUsage usage,
+      wgpu::CreateBufferMappedResult CreateBufferMappedWithData(wgpu::BufferUsage usage,
                                                                 const std::vector<uint32_t>& data) {
           size_t byteLength = data.size() * sizeof(uint32_t);
-          dawn::CreateBufferMappedResult result = CreateBufferMapped(usage, byteLength);
+          wgpu::CreateBufferMappedResult result = CreateBufferMapped(usage, byteLength);
           memcpy(result.data, data.data(), byteLength);
 
           return result;
       }
 
-      template <DawnBufferMapAsyncStatus expectedStatus = DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS>
-      dawn::CreateBufferMappedResult CreateBufferMappedAsyncAndWait(dawn::BufferUsage usage,
+      template <WGPUBufferMapAsyncStatus expectedStatus = WGPUBufferMapAsyncStatus_Success>
+      wgpu::CreateBufferMappedResult CreateBufferMappedAsyncAndWait(wgpu::BufferUsage usage,
                                                                     uint64_t size) {
-          dawn::BufferDescriptor descriptor;
+          wgpu::BufferDescriptor descriptor;
           descriptor.nextInChain = nullptr;
           descriptor.size = size;
           descriptor.usage = usage;
 
           struct ResultInfo {
-              dawn::CreateBufferMappedResult result;
+              wgpu::CreateBufferMappedResult result;
               bool done = false;
           } resultInfo;
 
           device.CreateBufferMappedAsync(
               &descriptor,
-              [](DawnBufferMapAsyncStatus status, DawnCreateBufferMappedResult result,
+              [](WGPUBufferMapAsyncStatus status, WGPUCreateBufferMappedResult result,
                  void* userdata) {
                   ASSERT_EQ(status, expectedStatus);
                   auto* resultInfo = reinterpret_cast<ResultInfo*>(userdata);
-                  resultInfo->result.buffer = dawn::Buffer::Acquire(result.buffer);
+                  resultInfo->result.buffer = wgpu::Buffer::Acquire(result.buffer);
                   resultInfo->result.data = result.data;
                   resultInfo->result.dataLength = result.dataLength;
                   resultInfo->done = true;
@@ -348,11 +348,11 @@ class CreateBufferMappedTests : public DawnTest {
           return resultInfo.result;
       }
 
-      dawn::CreateBufferMappedResult CreateBufferMappedAsyncWithDataAndWait(
-          dawn::BufferUsage usage,
+      wgpu::CreateBufferMappedResult CreateBufferMappedAsyncWithDataAndWait(
+          wgpu::BufferUsage usage,
           const std::vector<uint32_t>& data) {
           size_t byteLength = data.size() * sizeof(uint32_t);
-          dawn::CreateBufferMappedResult result = CreateBufferMappedAsyncAndWait(usage, byteLength);
+          wgpu::CreateBufferMappedResult result = CreateBufferMappedAsyncAndWait(usage, byteLength);
           memcpy(result.data, data.data(), byteLength);
 
           return result;
@@ -365,8 +365,8 @@ class CreateBufferMappedTests : public DawnTest {
 // Test that the simplest CreateBufferMapped works for MapWrite buffers.
 TEST_P(CreateBufferMappedTests, MapWriteUsageSmall) {
     uint32_t myData = 230502;
-    dawn::CreateBufferMappedResult result = CreateBufferMappedWithData(
-        dawn::BufferUsage::MapWrite | dawn::BufferUsage::CopySrc, {myData});
+    wgpu::CreateBufferMappedResult result = CreateBufferMappedWithData(
+        wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc, {myData});
     result.buffer.Unmap();
     EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
 }
@@ -374,8 +374,8 @@ TEST_P(CreateBufferMappedTests, MapWriteUsageSmall) {
 // Test that the simplest CreateBufferMapped works for MapRead buffers.
 TEST_P(CreateBufferMappedTests, MapReadUsageSmall) {
     uint32_t myData = 230502;
-    dawn::CreateBufferMappedResult result =
-        CreateBufferMappedWithData(dawn::BufferUsage::MapRead, {myData});
+    wgpu::CreateBufferMappedResult result =
+        CreateBufferMappedWithData(wgpu::BufferUsage::MapRead, {myData});
     result.buffer.Unmap();
 
     const void* mappedData = MapReadAsyncAndWait(result.buffer);
@@ -386,8 +386,8 @@ TEST_P(CreateBufferMappedTests, MapReadUsageSmall) {
 // Test that the simplest CreateBufferMapped works for non-mappable buffers.
 TEST_P(CreateBufferMappedTests, NonMappableUsageSmall) {
     uint32_t myData = 4239;
-    dawn::CreateBufferMappedResult result =
-        CreateBufferMappedWithData(dawn::BufferUsage::CopySrc, {myData});
+    wgpu::CreateBufferMappedResult result =
+        CreateBufferMappedWithData(wgpu::BufferUsage::CopySrc, {myData});
     result.buffer.Unmap();
 
     EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
@@ -401,8 +401,8 @@ TEST_P(CreateBufferMappedTests, MapWriteUsageLarge) {
         myData.push_back(i);
     }
 
-    dawn::CreateBufferMappedResult result = CreateBufferMappedWithData(
-        dawn::BufferUsage::MapWrite | dawn::BufferUsage::CopySrc, {myData});
+    wgpu::CreateBufferMappedResult result = CreateBufferMappedWithData(
+        wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc, {myData});
     result.buffer.Unmap();
 
     EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), result.buffer, 0, kDataSize);
@@ -416,8 +416,8 @@ TEST_P(CreateBufferMappedTests, MapReadUsageLarge) {
         myData.push_back(i);
     }
 
-    dawn::CreateBufferMappedResult result =
-        CreateBufferMappedWithData(dawn::BufferUsage::MapRead, myData);
+    wgpu::CreateBufferMappedResult result =
+        CreateBufferMappedWithData(wgpu::BufferUsage::MapRead, myData);
     result.buffer.Unmap();
 
     const void* mappedData = MapReadAsyncAndWait(result.buffer);
@@ -433,8 +433,8 @@ TEST_P(CreateBufferMappedTests, NonMappableUsageLarge) {
         myData.push_back(i);
     }
 
-    dawn::CreateBufferMappedResult result =
-        CreateBufferMappedWithData(dawn::BufferUsage::CopySrc, {myData});
+    wgpu::CreateBufferMappedResult result =
+        CreateBufferMappedWithData(wgpu::BufferUsage::CopySrc, {myData});
     result.buffer.Unmap();
 
     EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), result.buffer, 0, kDataSize);
@@ -444,16 +444,16 @@ TEST_P(CreateBufferMappedTests, NonMappableUsageLarge) {
 TEST_P(CreateBufferMappedTests, CreateThenMapSuccess) {
     static uint32_t myData = 230502;
     static uint32_t myData2 = 1337;
-    dawn::CreateBufferMappedResult result = CreateBufferMappedWithData(
-        dawn::BufferUsage::MapWrite | dawn::BufferUsage::CopySrc, {myData});
+    wgpu::CreateBufferMappedResult result = CreateBufferMappedWithData(
+        wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc, {myData});
     result.buffer.Unmap();
 
     EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
 
     bool done = false;
     result.buffer.MapWriteAsync(
-        [](DawnBufferMapAsyncStatus status, void* data, uint64_t, void* userdata) {
-            ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, status);
+        [](WGPUBufferMapAsyncStatus status, void* data, uint64_t, void* userdata) {
+            ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
             ASSERT_NE(nullptr, data);
 
             *static_cast<uint32_t*>(data) = myData2;
@@ -472,14 +472,14 @@ TEST_P(CreateBufferMappedTests, CreateThenMapSuccess) {
 // Test that is is invalid to map a buffer twice when using CreateBufferMapped
 TEST_P(CreateBufferMappedTests, CreateThenMapBeforeUnmapFailure) {
     uint32_t myData = 230502;
-    dawn::CreateBufferMappedResult result = CreateBufferMappedWithData(
-        dawn::BufferUsage::MapWrite | dawn::BufferUsage::CopySrc, {myData});
+    wgpu::CreateBufferMappedResult result = CreateBufferMappedWithData(
+        wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc, {myData});
 
     ASSERT_DEVICE_ERROR([&]() {
         bool done = false;
         result.buffer.MapWriteAsync(
-            [](DawnBufferMapAsyncStatus status, void* data, uint64_t, void* userdata) {
-                ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, status);
+            [](WGPUBufferMapAsyncStatus status, void* data, uint64_t, void* userdata) {
+                ASSERT_EQ(WGPUBufferMapAsyncStatus_Error, status);
                 ASSERT_EQ(nullptr, data);
 
                 *static_cast<bool*>(userdata) = true;
@@ -499,8 +499,8 @@ TEST_P(CreateBufferMappedTests, CreateThenMapBeforeUnmapFailure) {
 // Test that the simplest CreateBufferMappedAsync works for MapWrite buffers.
 TEST_P(CreateBufferMappedTests, MapWriteUsageSmallAsync) {
     uint32_t myData = 230502;
-    dawn::CreateBufferMappedResult result = CreateBufferMappedAsyncWithDataAndWait(
-        dawn::BufferUsage::MapWrite | dawn::BufferUsage::CopySrc, {myData});
+    wgpu::CreateBufferMappedResult result = CreateBufferMappedAsyncWithDataAndWait(
+        wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc, {myData});
     result.buffer.Unmap();
     EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
 }
@@ -508,8 +508,8 @@ TEST_P(CreateBufferMappedTests, MapWriteUsageSmallAsync) {
 // Test that the simplest CreateBufferMappedAsync works for MapRead buffers.
 TEST_P(CreateBufferMappedTests, MapReadUsageSmallAsync) {
     uint32_t myData = 230502;
-    dawn::CreateBufferMappedResult result =
-        CreateBufferMappedAsyncWithDataAndWait(dawn::BufferUsage::MapRead, {myData});
+    wgpu::CreateBufferMappedResult result =
+        CreateBufferMappedAsyncWithDataAndWait(wgpu::BufferUsage::MapRead, {myData});
     result.buffer.Unmap();
 
     const void* mappedData = MapReadAsyncAndWait(result.buffer);
@@ -520,8 +520,8 @@ TEST_P(CreateBufferMappedTests, MapReadUsageSmallAsync) {
 // Test that the simplest CreateBufferMappedAsync works for non-mappable buffers.
 TEST_P(CreateBufferMappedTests, NonMappableUsageSmallAsync) {
     uint32_t myData = 4239;
-    dawn::CreateBufferMappedResult result =
-        CreateBufferMappedAsyncWithDataAndWait(dawn::BufferUsage::CopySrc, {myData});
+    wgpu::CreateBufferMappedResult result =
+        CreateBufferMappedAsyncWithDataAndWait(wgpu::BufferUsage::CopySrc, {myData});
     result.buffer.Unmap();
 
     EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
@@ -535,8 +535,8 @@ TEST_P(CreateBufferMappedTests, MapWriteUsageLargeAsync) {
         myData.push_back(i);
     }
 
-    dawn::CreateBufferMappedResult result = CreateBufferMappedAsyncWithDataAndWait(
-        dawn::BufferUsage::MapWrite | dawn::BufferUsage::CopySrc, {myData});
+    wgpu::CreateBufferMappedResult result = CreateBufferMappedAsyncWithDataAndWait(
+        wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc, {myData});
     result.buffer.Unmap();
 
     EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), result.buffer, 0, kDataSize);
@@ -550,8 +550,8 @@ TEST_P(CreateBufferMappedTests, MapReadUsageLargeAsync) {
         myData.push_back(i);
     }
 
-    dawn::CreateBufferMappedResult result =
-        CreateBufferMappedAsyncWithDataAndWait(dawn::BufferUsage::MapRead, {myData});
+    wgpu::CreateBufferMappedResult result =
+        CreateBufferMappedAsyncWithDataAndWait(wgpu::BufferUsage::MapRead, {myData});
     result.buffer.Unmap();
 
     const void* mappedData = MapReadAsyncAndWait(result.buffer);
@@ -567,8 +567,8 @@ TEST_P(CreateBufferMappedTests, NonMappableUsageLargeAsync) {
         myData.push_back(i);
     }
 
-    dawn::CreateBufferMappedResult result =
-        CreateBufferMappedAsyncWithDataAndWait(dawn::BufferUsage::CopySrc, {myData});
+    wgpu::CreateBufferMappedResult result =
+        CreateBufferMappedAsyncWithDataAndWait(wgpu::BufferUsage::CopySrc, {myData});
     result.buffer.Unmap();
 
     EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), result.buffer, 0, kDataSize);
@@ -578,16 +578,16 @@ TEST_P(CreateBufferMappedTests, NonMappableUsageLargeAsync) {
 TEST_P(CreateBufferMappedTests, CreateThenMapSuccessAsync) {
     static uint32_t myData = 230502;
     static uint32_t myData2 = 1337;
-    dawn::CreateBufferMappedResult result = CreateBufferMappedAsyncWithDataAndWait(
-        dawn::BufferUsage::MapWrite | dawn::BufferUsage::CopySrc, {myData});
+    wgpu::CreateBufferMappedResult result = CreateBufferMappedAsyncWithDataAndWait(
+        wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc, {myData});
     result.buffer.Unmap();
 
     EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
 
     bool done = false;
     result.buffer.MapWriteAsync(
-        [](DawnBufferMapAsyncStatus status, void* data, uint64_t, void* userdata) {
-            ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, status);
+        [](WGPUBufferMapAsyncStatus status, void* data, uint64_t, void* userdata) {
+            ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
             ASSERT_NE(nullptr, data);
 
             *static_cast<uint32_t*>(data) = myData2;
@@ -606,14 +606,14 @@ TEST_P(CreateBufferMappedTests, CreateThenMapSuccessAsync) {
 // Test that is is invalid to map a buffer twice when using CreateBufferMappedAsync
 TEST_P(CreateBufferMappedTests, CreateThenMapBeforeUnmapFailureAsync) {
     uint32_t myData = 230502;
-    dawn::CreateBufferMappedResult result = CreateBufferMappedAsyncWithDataAndWait(
-        dawn::BufferUsage::MapWrite | dawn::BufferUsage::CopySrc, {myData});
+    wgpu::CreateBufferMappedResult result = CreateBufferMappedAsyncWithDataAndWait(
+        wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc, {myData});
 
     ASSERT_DEVICE_ERROR([&]() {
         bool done = false;
         result.buffer.MapWriteAsync(
-            [](DawnBufferMapAsyncStatus status, void* data, uint64_t, void* userdata) {
-                ASSERT_EQ(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, status);
+            [](WGPUBufferMapAsyncStatus status, void* data, uint64_t, void* userdata) {
+                ASSERT_EQ(WGPUBufferMapAsyncStatus_Error, status);
                 ASSERT_EQ(nullptr, data);
 
                 *static_cast<bool*>(userdata) = true;
@@ -640,9 +640,9 @@ TEST_P(CreateBufferMappedTests, LargeBufferFails) {
     // 4G on some platforms.
     DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia() && IsBackendValidationEnabled());
 
-    dawn::BufferDescriptor descriptor;
+    wgpu::BufferDescriptor descriptor;
     descriptor.size = std::numeric_limits<uint64_t>::max();
-    descriptor.usage = dawn::BufferUsage::MapRead | dawn::BufferUsage::CopyDst;
+    descriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
     ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
 }
 

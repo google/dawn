@@ -26,7 +26,7 @@ class DrawIndexedIndirectTest : public DawnTest {
 
         renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-        dawn::ShaderModule vsModule =
+        wgpu::ShaderModule vsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
                 #version 450
                 layout(location = 0) in vec4 pos;
@@ -34,7 +34,7 @@ class DrawIndexedIndirectTest : public DawnTest {
                     gl_Position = pos;
                 })");
 
-        dawn::ShaderModule fsModule =
+        wgpu::ShaderModule fsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) out vec4 fragColor;
@@ -45,17 +45,17 @@ class DrawIndexedIndirectTest : public DawnTest {
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
-        descriptor.primitiveTopology = dawn::PrimitiveTopology::TriangleStrip;
+        descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
         descriptor.cVertexInput.bufferCount = 1;
         descriptor.cVertexInput.cBuffers[0].stride = 4 * sizeof(float);
         descriptor.cVertexInput.cBuffers[0].attributeCount = 1;
-        descriptor.cVertexInput.cAttributes[0].format = dawn::VertexFormat::Float4;
+        descriptor.cVertexInput.cAttributes[0].format = wgpu::VertexFormat::Float4;
         descriptor.cColorStates[0].format = renderPass.colorFormat;
 
         pipeline = device.CreateRenderPipeline(&descriptor);
 
         vertexBuffer = utils::CreateBufferFromData<float>(
-            device, dawn::BufferUsage::Vertex,
+            device, wgpu::BufferUsage::Vertex,
             {// First quad: the first 3 vertices represent the bottom left triangle
              -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
              0.0f, 1.0f,
@@ -64,28 +64,28 @@ class DrawIndexedIndirectTest : public DawnTest {
              -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f,
              0.0f, 1.0f});
         indexBuffer = utils::CreateBufferFromData<uint32_t>(
-            device, dawn::BufferUsage::Index,
+            device, wgpu::BufferUsage::Index,
             {0, 1, 2, 0, 3, 1,
              // The indices below are added to test negatve baseVertex
              0 + 4, 1 + 4, 2 + 4, 0 + 4, 3 + 4, 1 + 4});
     }
 
     utils::BasicRenderPass renderPass;
-    dawn::RenderPipeline pipeline;
-    dawn::Buffer vertexBuffer;
-    dawn::Buffer indexBuffer;
+    wgpu::RenderPipeline pipeline;
+    wgpu::Buffer vertexBuffer;
+    wgpu::Buffer indexBuffer;
 
     void Test(std::initializer_list<uint32_t> bufferList,
               uint64_t indexOffset,
               uint64_t indirectOffset,
               RGBA8 bottomLeftExpected,
               RGBA8 topRightExpected) {
-        dawn::Buffer indirectBuffer =
-            utils::CreateBufferFromData<uint32_t>(device, dawn::BufferUsage::Indirect, bufferList);
+        wgpu::Buffer indirectBuffer =
+            utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Indirect, bufferList);
 
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         {
-            dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
             pass.SetPipeline(pipeline);
             pass.SetVertexBuffer(0, vertexBuffer);
             pass.SetIndexBuffer(indexBuffer, indexOffset);
@@ -93,7 +93,7 @@ class DrawIndexedIndirectTest : public DawnTest {
             pass.EndPass();
         }
 
-        dawn::CommandBuffer commands = encoder.Finish();
+        wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
         EXPECT_PIXEL_RGBA8_EQ(bottomLeftExpected, renderPass.color, 1, 3);

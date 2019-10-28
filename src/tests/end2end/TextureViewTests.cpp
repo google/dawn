@@ -23,18 +23,18 @@
 #include <array>
 
 constexpr static unsigned int kRTSize = 64;
-constexpr dawn::TextureFormat kDefaultFormat = dawn::TextureFormat::RGBA8Unorm;
+constexpr wgpu::TextureFormat kDefaultFormat = wgpu::TextureFormat::RGBA8Unorm;
 constexpr uint32_t kBytesPerTexel = 4;
 
 namespace {
-    dawn::Texture Create2DTexture(dawn::Device device,
+    wgpu::Texture Create2DTexture(wgpu::Device device,
                                   uint32_t width,
                                   uint32_t height,
                                   uint32_t arrayLayerCount,
                                   uint32_t mipLevelCount,
-                                  dawn::TextureUsage usage) {
-        dawn::TextureDescriptor descriptor;
-        descriptor.dimension = dawn::TextureDimension::e2D;
+                                  wgpu::TextureUsage usage) {
+        wgpu::TextureDescriptor descriptor;
+        descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size.width = width;
         descriptor.size.height = height;
         descriptor.size.depth = 1;
@@ -46,7 +46,7 @@ namespace {
         return device.CreateTexture(&descriptor);
     }
 
-    dawn::ShaderModule CreateDefaultVertexShaderModule(dawn::Device device) {
+    wgpu::ShaderModule CreateDefaultVertexShaderModule(wgpu::Device device) {
         return utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
             #version 450
             layout (location = 0) out vec2 o_texCoord;
@@ -83,10 +83,10 @@ protected:
 
         mRenderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-        dawn::FilterMode kFilterMode = dawn::FilterMode::Nearest;
-        dawn::AddressMode kAddressMode = dawn::AddressMode::ClampToEdge;
+        wgpu::FilterMode kFilterMode = wgpu::FilterMode::Nearest;
+        wgpu::AddressMode kAddressMode = wgpu::AddressMode::ClampToEdge;
 
-        dawn::SamplerDescriptor samplerDescriptor;
+        wgpu::SamplerDescriptor samplerDescriptor;
         samplerDescriptor.minFilter = kFilterMode;
         samplerDescriptor.magFilter = kFilterMode;
         samplerDescriptor.mipmapFilter = kFilterMode;
@@ -95,7 +95,7 @@ protected:
         samplerDescriptor.addressModeW = kAddressMode;
         samplerDescriptor.lodMinClamp = kLodMin;
         samplerDescriptor.lodMaxClamp = kLodMax;
-        samplerDescriptor.compare = dawn::CompareFunction::Never;
+        samplerDescriptor.compare = wgpu::CompareFunction::Never;
         mSampler = device.CreateSampler(&samplerDescriptor);
 
         mVSModule = CreateDefaultVertexShaderModule(device);
@@ -106,12 +106,12 @@ protected:
 
         const uint32_t textureWidthLevel0 = 1 << mipLevelCount;
         const uint32_t textureHeightLevel0 = 1 << mipLevelCount;
-        constexpr dawn::TextureUsage kUsage =
-            dawn::TextureUsage::CopyDst | dawn::TextureUsage::Sampled;
+        constexpr wgpu::TextureUsage kUsage =
+            wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled;
         mTexture = Create2DTexture(
             device, textureWidthLevel0, textureHeightLevel0, arrayLayerCount, mipLevelCount, kUsage);
 
-        mDefaultTextureViewDescriptor.dimension = dawn::TextureViewDimension::e2DArray;
+        mDefaultTextureViewDescriptor.dimension = wgpu::TextureViewDimension::e2DArray;
         mDefaultTextureViewDescriptor.format = kDefaultFormat;
         mDefaultTextureViewDescriptor.baseMipLevel = 0;
         mDefaultTextureViewDescriptor.mipLevelCount = mipLevelCount;
@@ -125,7 +125,7 @@ protected:
         constexpr uint32_t kPixelsPerRowPitch = kTextureRowPitchAlignment / sizeof(RGBA8);
         ASSERT_LE(textureWidthLevel0, kPixelsPerRowPitch);
 
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         for (uint32_t layer = 0; layer < arrayLayerCount; ++layer) {
             for (uint32_t level = 0; level < mipLevelCount; ++level) {
                 const uint32_t texWidth = textureWidthLevel0 >> level;
@@ -135,35 +135,35 @@ protected:
 
                 constexpr uint32_t kPaddedTexWidth = kPixelsPerRowPitch;
                 std::vector<RGBA8> data(kPaddedTexWidth * texHeight, RGBA8(0, 0, 0, pixelValue));
-                dawn::Buffer stagingBuffer = utils::CreateBufferFromData(
-                    device, data.data(), data.size() * sizeof(RGBA8), dawn::BufferUsage::CopySrc);
-                dawn::BufferCopyView bufferCopyView =
+                wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(
+                    device, data.data(), data.size() * sizeof(RGBA8), wgpu::BufferUsage::CopySrc);
+                wgpu::BufferCopyView bufferCopyView =
                     utils::CreateBufferCopyView(stagingBuffer, 0, kTextureRowPitchAlignment, 0);
-                dawn::TextureCopyView textureCopyView =
+                wgpu::TextureCopyView textureCopyView =
                     utils::CreateTextureCopyView(mTexture, level, layer, {0, 0, 0});
-                dawn::Extent3D copySize = {texWidth, texHeight, 1};
+                wgpu::Extent3D copySize = {texWidth, texHeight, 1};
                 encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
             }
         }
-        dawn::CommandBuffer copy = encoder.Finish();
+        wgpu::CommandBuffer copy = encoder.Finish();
         queue.Submit(1, &copy);
     }
 
-    void Verify(const dawn::TextureView& textureView,
-                dawn::TextureViewDimension dimension,
+    void Verify(const wgpu::TextureView& textureView,
+                wgpu::TextureViewDimension dimension,
                 const char* fragmentShader,
                 int expected) {
-        dawn::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device, {
-                        {0, dawn::ShaderStage::Fragment, dawn::BindingType::Sampler},
-                        {1, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture, false,
-                         false, dimension, dawn::TextureComponentType::Float},
+                        {0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler},
+                        {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false,
+                         false, dimension, wgpu::TextureComponentType::Float},
                     });
 
-        dawn::BindGroup bindGroup =
+        wgpu::BindGroup bindGroup =
             utils::MakeBindGroup(device, bindGroupLayout, {{0, mSampler}, {1, textureView}});
 
-        dawn::ShaderModule fsModule =
+        wgpu::ShaderModule fsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fragmentShader);
 
         utils::ComboRenderPipelineDescriptor textureDescriptor(device);
@@ -172,18 +172,18 @@ protected:
         textureDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
         textureDescriptor.cColorStates[0].format = mRenderPass.colorFormat;
 
-        dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&textureDescriptor);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&textureDescriptor);
 
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         {
-            dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&mRenderPass.renderPassInfo);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&mRenderPass.renderPassInfo);
             pass.SetPipeline(pipeline);
             pass.SetBindGroup(0, bindGroup);
             pass.Draw(6, 1, 0, 0);
             pass.EndPass();
         }
 
-        dawn::CommandBuffer commands = encoder.Finish();
+        wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
         RGBA8 expectedPixel(0, 0, 0, expected);
@@ -202,13 +202,13 @@ protected:
 
         initTexture(textureArrayLayers, textureMipLevels);
 
-        dawn::TextureViewDescriptor descriptor = mDefaultTextureViewDescriptor;
-        descriptor.dimension = dawn::TextureViewDimension::e2D;
+        wgpu::TextureViewDescriptor descriptor = mDefaultTextureViewDescriptor;
+        descriptor.dimension = wgpu::TextureViewDimension::e2D;
         descriptor.baseArrayLayer = textureViewBaseLayer;
         descriptor.arrayLayerCount = 1;
         descriptor.baseMipLevel = textureViewBaseMipLevel;
         descriptor.mipLevelCount = 1;
-        dawn::TextureView textureView = mTexture.CreateView(&descriptor);
+        wgpu::TextureView textureView = mTexture.CreateView(&descriptor);
 
         const char* fragmentShader = R"(
             #version 450
@@ -224,7 +224,7 @@ protected:
         )";
 
         const int expected = GenerateTestPixelValue(textureViewBaseLayer, textureViewBaseMipLevel);
-        Verify(textureView, dawn::TextureViewDimension::e2D, fragmentShader, expected);
+        Verify(textureView, wgpu::TextureViewDimension::e2D, fragmentShader, expected);
     }
 
     void Texture2DArrayViewTest(uint32_t textureArrayLayers,
@@ -241,13 +241,13 @@ protected:
 
         initTexture(textureArrayLayers, textureMipLevels);
 
-        dawn::TextureViewDescriptor descriptor = mDefaultTextureViewDescriptor;
-        descriptor.dimension = dawn::TextureViewDimension::e2DArray;
+        wgpu::TextureViewDescriptor descriptor = mDefaultTextureViewDescriptor;
+        descriptor.dimension = wgpu::TextureViewDimension::e2DArray;
         descriptor.baseArrayLayer = textureViewBaseLayer;
         descriptor.arrayLayerCount = kTextureViewLayerCount;
         descriptor.baseMipLevel = textureViewBaseMipLevel;
         descriptor.mipLevelCount = 1;
-        dawn::TextureView textureView = mTexture.CreateView(&descriptor);
+        wgpu::TextureView textureView = mTexture.CreateView(&descriptor);
 
         const char* fragmentShader = R"(
             #version 450
@@ -268,7 +268,7 @@ protected:
         for (int i = 0; i < static_cast<int>(kTextureViewLayerCount); ++i) {
             expected += GenerateTestPixelValue(textureViewBaseLayer + i, textureViewBaseMipLevel);
         }
-        Verify(textureView, dawn::TextureViewDimension::e2DArray, fragmentShader, expected);
+        Verify(textureView, wgpu::TextureViewDimension::e2DArray, fragmentShader, expected);
     }
 
     std::string CreateFragmentShaderForCubeMapFace(uint32_t layer, bool isCubeMapArray) {
@@ -320,16 +320,16 @@ protected:
 
         ASSERT_TRUE((textureViewLayerCount == 6) ||
                     (isCubeMapArray && textureViewLayerCount % 6 == 0));
-        dawn::TextureViewDimension dimension = (isCubeMapArray)
-                                                   ? dawn::TextureViewDimension::CubeArray
-                                                   : dawn::TextureViewDimension::Cube;
+        wgpu::TextureViewDimension dimension = (isCubeMapArray)
+                                                   ? wgpu::TextureViewDimension::CubeArray
+                                                   : wgpu::TextureViewDimension::Cube;
 
-        dawn::TextureViewDescriptor descriptor = mDefaultTextureViewDescriptor;
+        wgpu::TextureViewDescriptor descriptor = mDefaultTextureViewDescriptor;
         descriptor.dimension = dimension;
         descriptor.baseArrayLayer = textureViewBaseLayer;
         descriptor.arrayLayerCount = textureViewLayerCount;
 
-        dawn::TextureView cubeMapTextureView = mTexture.CreateView(&descriptor);
+        wgpu::TextureView cubeMapTextureView = mTexture.CreateView(&descriptor);
 
         // Check the data in the every face of the cube map (array) texture view.
         for (uint32_t layer = 0; layer < textureViewLayerCount; ++layer) {
@@ -341,10 +341,10 @@ protected:
         }
     }
 
-    dawn::Sampler mSampler;
-    dawn::Texture mTexture;
-    dawn::TextureViewDescriptor mDefaultTextureViewDescriptor;
-    dawn::ShaderModule mVSModule;
+    wgpu::Sampler mSampler;
+    wgpu::Texture mTexture;
+    wgpu::TextureViewDescriptor mDefaultTextureViewDescriptor;
+    wgpu::ShaderModule mVSModule;
     utils::BasicRenderPass mRenderPass;
 };
 
@@ -357,7 +357,7 @@ TEST_P(TextureViewSamplingTest, Default2DArrayTexture) {
     constexpr uint32_t kMipLevels = 1;
     initTexture(kLayers, kMipLevels);
 
-    dawn::TextureView textureView = mTexture.CreateView();
+    wgpu::TextureView textureView = mTexture.CreateView();
 
     const char* fragmentShader = R"(
             #version 450
@@ -376,7 +376,7 @@ TEST_P(TextureViewSamplingTest, Default2DArrayTexture) {
 
     const int expected = GenerateTestPixelValue(0, 0) + GenerateTestPixelValue(1, 0) +
                          GenerateTestPixelValue(2, 0);
-    Verify(textureView, dawn::TextureViewDimension::e2DArray, fragmentShader, expected);
+    Verify(textureView, wgpu::TextureViewDimension::e2DArray, fragmentShader, expected);
 }
 
 // Test sampling from a 2D texture view created on a 2D array texture.
@@ -461,33 +461,33 @@ TEST_P(TextureViewSamplingTest, TextureCubeMapArrayViewSingleCubeMap) {
 
 class TextureViewRenderingTest : public DawnTest {
   protected:
-    void TextureLayerAsColorAttachmentTest(dawn::TextureViewDimension dimension,
+    void TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension dimension,
                                            uint32_t layerCount,
                                            uint32_t levelCount,
                                            uint32_t textureViewBaseLayer,
                                            uint32_t textureViewBaseLevel) {
-        ASSERT(dimension == dawn::TextureViewDimension::e2D ||
-            dimension == dawn::TextureViewDimension::e2DArray);
+        ASSERT(dimension == wgpu::TextureViewDimension::e2D ||
+               dimension == wgpu::TextureViewDimension::e2DArray);
         ASSERT_LT(textureViewBaseLayer, layerCount);
         ASSERT_LT(textureViewBaseLevel, levelCount);
 
         const uint32_t textureWidthLevel0 = 1 << levelCount;
         const uint32_t textureHeightLevel0 = 1 << levelCount;
-        constexpr dawn::TextureUsage kUsage =
-            dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc;
-        dawn::Texture texture = Create2DTexture(
-            device, textureWidthLevel0, textureHeightLevel0, layerCount, levelCount, kUsage);
+        constexpr wgpu::TextureUsage kUsage =
+            wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+        wgpu::Texture texture = Create2DTexture(device, textureWidthLevel0, textureHeightLevel0,
+                                                layerCount, levelCount, kUsage);
 
-        dawn::TextureViewDescriptor descriptor;
+        wgpu::TextureViewDescriptor descriptor;
         descriptor.format = kDefaultFormat;
         descriptor.dimension = dimension;
         descriptor.baseArrayLayer = textureViewBaseLayer;
         descriptor.arrayLayerCount = 1;
         descriptor.baseMipLevel = textureViewBaseLevel;
         descriptor.mipLevelCount = 1;
-        dawn::TextureView textureView = texture.CreateView(&descriptor);
+        wgpu::TextureView textureView = texture.CreateView(&descriptor);
 
-        dawn::ShaderModule vsModule = CreateDefaultVertexShaderModule(device);
+        wgpu::ShaderModule vsModule = CreateDefaultVertexShaderModule(device);
 
         // Clear textureView with Red(255, 0, 0, 255) and render Green(0, 255, 0, 255) into it
         utils::ComboRenderPassDescriptor renderPassInfo({textureView});
@@ -501,7 +501,7 @@ class TextureViewRenderingTest : public DawnTest {
                 fragColor = vec4(0.0, 1.0, 0.0, 1.0);
             }
         )";
-        dawn::ShaderModule oneColorFsModule = utils::CreateShaderModule(
+        wgpu::ShaderModule oneColorFsModule = utils::CreateShaderModule(
             device, utils::SingleShaderStage::Fragment, oneColorFragmentShader);
 
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
@@ -509,17 +509,17 @@ class TextureViewRenderingTest : public DawnTest {
         pipelineDescriptor.cFragmentStage.module = oneColorFsModule;
         pipelineDescriptor.cColorStates[0].format = kDefaultFormat;
 
-        dawn::RenderPipeline oneColorPipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+        wgpu::RenderPipeline oneColorPipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         {
-            dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassInfo);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassInfo);
             pass.SetPipeline(oneColorPipeline);
             pass.Draw(6, 1, 0, 0);
             pass.EndPass();
         }
 
-        dawn::CommandBuffer commands = encoder.Finish();
+        wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
         // Check if the right pixels (Green) have been written into the right part of the texture.
@@ -545,15 +545,15 @@ TEST_P(TextureViewRenderingTest, Texture2DViewOnALevelOf2DTextureAsColorAttachme
     // Rendering into the first level
     {
         constexpr uint32_t kBaseLevel = 0;
-        TextureLayerAsColorAttachmentTest(
-            dawn::TextureViewDimension::e2D, kLayers, kMipLevels, kBaseLayer, kBaseLevel);
+        TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension::e2D, kLayers, kMipLevels,
+                                          kBaseLayer, kBaseLevel);
     }
 
     // Rendering into the last level
     {
         constexpr uint32_t kBaseLevel = kMipLevels - 1;
-        TextureLayerAsColorAttachmentTest(
-            dawn::TextureViewDimension::e2D, kLayers, kMipLevels, kBaseLayer, kBaseLevel);
+        TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension::e2D, kLayers, kMipLevels,
+                                          kBaseLayer, kBaseLevel);
     }
 }
 
@@ -566,15 +566,15 @@ TEST_P(TextureViewRenderingTest, Texture2DViewOnALayerOf2DArrayTextureAsColorAtt
     // Rendering into the first layer
     {
         constexpr uint32_t kBaseLayer = 0;
-        TextureLayerAsColorAttachmentTest(
-            dawn::TextureViewDimension::e2D, kLayers, kMipLevels, kBaseLayer, kBaseLevel);
+        TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension::e2D, kLayers, kMipLevels,
+                                          kBaseLayer, kBaseLevel);
     }
 
     // Rendering into the last layer
     {
         constexpr uint32_t kBaseLayer = kLayers - 1;
-        TextureLayerAsColorAttachmentTest(
-            dawn::TextureViewDimension::e2D, kLayers, kMipLevels, kBaseLayer, kBaseLevel);
+        TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension::e2D, kLayers, kMipLevels,
+                                          kBaseLayer, kBaseLevel);
     }
 
 }
@@ -588,15 +588,15 @@ TEST_P(TextureViewRenderingTest, Texture2DArrayViewOnALevelOf2DTextureAsColorAtt
     // Rendering into the first level
     {
         constexpr uint32_t kBaseLevel = 0;
-        TextureLayerAsColorAttachmentTest(
-            dawn::TextureViewDimension::e2DArray, kLayers, kMipLevels, kBaseLayer, kBaseLevel);
+        TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension::e2DArray, kLayers, kMipLevels,
+                                          kBaseLayer, kBaseLevel);
     }
 
     // Rendering into the last level
     {
         constexpr uint32_t kBaseLevel = kMipLevels - 1;
-        TextureLayerAsColorAttachmentTest(
-            dawn::TextureViewDimension::e2DArray, kLayers, kMipLevels, kBaseLayer, kBaseLevel);
+        TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension::e2DArray, kLayers, kMipLevels,
+                                          kBaseLayer, kBaseLevel);
     }
 }
 
@@ -609,15 +609,15 @@ TEST_P(TextureViewRenderingTest, Texture2DArrayViewOnALayerOf2DArrayTextureAsCol
     // Rendering into the first layer
     {
         constexpr uint32_t kBaseLayer = 0;
-        TextureLayerAsColorAttachmentTest(
-            dawn::TextureViewDimension::e2DArray, kLayers, kMipLevels, kBaseLayer, kBaseLevel);
+        TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension::e2DArray, kLayers, kMipLevels,
+                                          kBaseLayer, kBaseLevel);
     }
 
     // Rendering into the last layer
     {
         constexpr uint32_t kBaseLayer = kLayers - 1;
-        TextureLayerAsColorAttachmentTest(
-            dawn::TextureViewDimension::e2DArray, kLayers, kMipLevels, kBaseLayer, kBaseLevel);
+        TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension::e2DArray, kLayers, kMipLevels,
+                                          kBaseLayer, kBaseLevel);
     }
 }
 

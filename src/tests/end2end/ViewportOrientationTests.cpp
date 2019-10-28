@@ -23,7 +23,7 @@ class ViewportOrientationTests : public DawnTest {};
 TEST_P(ViewportOrientationTests, OriginAt0x0) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 2, 2);
 
-    dawn::ShaderModule vsModule =
+    wgpu::ShaderModule vsModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
         #version 450
         void main() {
@@ -31,7 +31,7 @@ TEST_P(ViewportOrientationTests, OriginAt0x0) {
             gl_PointSize = 1.0;
         })");
 
-    dawn::ShaderModule fsModule =
+    wgpu::ShaderModule fsModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
         #version 450
         layout(location = 0) out vec4 fragColor;
@@ -42,20 +42,20 @@ TEST_P(ViewportOrientationTests, OriginAt0x0) {
     utils::ComboRenderPipelineDescriptor descriptor(device);
     descriptor.vertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
-    descriptor.primitiveTopology = dawn::PrimitiveTopology::PointList;
+    descriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
     descriptor.cColorStates[0].format = renderPass.colorFormat;
 
-    dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.Draw(1, 1, 0, 0);
         pass.EndPass();
     }
 
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 0, 0);

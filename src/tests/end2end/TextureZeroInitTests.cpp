@@ -23,12 +23,12 @@ class TextureZeroInitTest : public DawnTest {
     void TestSetUp() override {
         DawnTest::TestSetUp();
     }
-    dawn::TextureDescriptor CreateTextureDescriptor(uint32_t mipLevelCount,
+    wgpu::TextureDescriptor CreateTextureDescriptor(uint32_t mipLevelCount,
                                                     uint32_t arrayLayerCount,
-                                                    dawn::TextureUsage usage,
-                                                    dawn::TextureFormat format) {
-        dawn::TextureDescriptor descriptor;
-        descriptor.dimension = dawn::TextureDimension::e2D;
+                                                    wgpu::TextureUsage usage,
+                                                    wgpu::TextureFormat format) {
+        wgpu::TextureDescriptor descriptor;
+        descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size.width = kSize;
         descriptor.size.height = kSize;
         descriptor.size.depth = 1;
@@ -39,18 +39,18 @@ class TextureZeroInitTest : public DawnTest {
         descriptor.usage = usage;
         return descriptor;
     }
-    dawn::TextureViewDescriptor CreateTextureViewDescriptor(uint32_t baseMipLevel,
+    wgpu::TextureViewDescriptor CreateTextureViewDescriptor(uint32_t baseMipLevel,
                                                             uint32_t baseArrayLayer) {
-        dawn::TextureViewDescriptor descriptor;
+        wgpu::TextureViewDescriptor descriptor;
         descriptor.format = kColorFormat;
         descriptor.baseArrayLayer = baseArrayLayer;
         descriptor.arrayLayerCount = 1;
         descriptor.baseMipLevel = baseMipLevel;
         descriptor.mipLevelCount = 1;
-        descriptor.dimension = dawn::TextureViewDimension::e2D;
+        descriptor.dimension = wgpu::TextureViewDimension::e2D;
         return descriptor;
     }
-    dawn::RenderPipeline CreatePipelineForTest() {
+    wgpu::RenderPipeline CreatePipelineForTest() {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
         pipelineDescriptor.vertexStage.module = CreateBasicVertexShaderForTest();
         const char* fs =
@@ -62,13 +62,13 @@ class TextureZeroInitTest : public DawnTest {
         pipelineDescriptor.cFragmentStage.module =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fs);
 
-        pipelineDescriptor.cDepthStencilState.depthCompare = dawn::CompareFunction::Equal;
-        pipelineDescriptor.cDepthStencilState.stencilFront.compare = dawn::CompareFunction::Equal;
+        pipelineDescriptor.cDepthStencilState.depthCompare = wgpu::CompareFunction::Equal;
+        pipelineDescriptor.cDepthStencilState.stencilFront.compare = wgpu::CompareFunction::Equal;
         pipelineDescriptor.depthStencilState = &pipelineDescriptor.cDepthStencilState;
 
         return device.CreateRenderPipeline(&pipelineDescriptor);
     }
-    dawn::ShaderModule CreateBasicVertexShaderForTest() {
+    wgpu::ShaderModule CreateBasicVertexShaderForTest() {
         return utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(#version 450
             const vec2 pos[6] = vec2[6](vec2(-1.0f, -1.0f),
                                     vec2(-1.0f,  1.0f),
@@ -82,7 +82,7 @@ class TextureZeroInitTest : public DawnTest {
                 gl_Position = vec4(pos[gl_VertexIndex], 0.0, 1.0);
             })");
     }
-    dawn::ShaderModule CreateSampledTextureFragmentShaderForTest() {
+    wgpu::ShaderModule CreateSampledTextureFragmentShaderForTest() {
         return utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment,
                                          R"(#version 450
             layout(set = 0, binding = 0) uniform sampler sampler0;
@@ -97,18 +97,18 @@ class TextureZeroInitTest : public DawnTest {
     // All three texture formats used (RGBA8Unorm, Depth24PlusStencil8, and RGBA8Snorm) have the
     // same byte size of 4.
     constexpr static uint32_t kFormatBlockByteSize = 4;
-    constexpr static dawn::TextureFormat kColorFormat = dawn::TextureFormat::RGBA8Unorm;
-    constexpr static dawn::TextureFormat kDepthStencilFormat =
-        dawn::TextureFormat::Depth24PlusStencil8;
-    constexpr static dawn::TextureFormat kNonrenderableColorFormat =
-        dawn::TextureFormat::RGBA8Snorm;
+    constexpr static wgpu::TextureFormat kColorFormat = wgpu::TextureFormat::RGBA8Unorm;
+    constexpr static wgpu::TextureFormat kDepthStencilFormat =
+        wgpu::TextureFormat::Depth24PlusStencil8;
+    constexpr static wgpu::TextureFormat kNonrenderableColorFormat =
+        wgpu::TextureFormat::RGBA8Snorm;
 };
 
 // This tests that the code path of CopyTextureToBuffer clears correctly to Zero after first usage
 TEST_P(TextureZeroInitTest, CopyTextureToBufferSource) {
-    dawn::TextureDescriptor descriptor = CreateTextureDescriptor(
-        1, 1, dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc, kColorFormat);
-    dawn::Texture texture = device.CreateTexture(&descriptor);
+    wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
+        1, 1, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc, kColorFormat);
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
 
     // Texture's first usage is in EXPECT_PIXEL_RGBA8_EQ's call to CopyTextureToBuffer
     RGBA8 filledWithZeros(0, 0, 0, 0);
@@ -118,23 +118,23 @@ TEST_P(TextureZeroInitTest, CopyTextureToBufferSource) {
 // Test that non-zero mip level clears subresource to Zero after first use
 // This goes through the BeginRenderPass's code path
 TEST_P(TextureZeroInitTest, RenderingMipMapClearsToZero) {
-    dawn::TextureDescriptor descriptor = CreateTextureDescriptor(
-        4, 1, dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc, kColorFormat);
-    dawn::Texture texture = device.CreateTexture(&descriptor);
+    wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
+        4, 1, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc, kColorFormat);
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
 
-    dawn::TextureViewDescriptor viewDescriptor = CreateTextureViewDescriptor(2, 0);
-    dawn::TextureView view = texture.CreateView(&viewDescriptor);
+    wgpu::TextureViewDescriptor viewDescriptor = CreateTextureViewDescriptor(2, 0);
+    wgpu::TextureView view = texture.CreateView(&viewDescriptor);
 
     utils::BasicRenderPass renderPass = utils::BasicRenderPass(kSize, kSize, texture, kColorFormat);
 
     renderPass.renderPassInfo.cColorAttachments[0].attachment = view;
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
         // Texture's first usage is in BeginRenderPass's call to RecordRenderPass
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.EndPass();
     }
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commands));
 
     uint32_t mipSize = kSize >> 2;
@@ -146,22 +146,22 @@ TEST_P(TextureZeroInitTest, RenderingMipMapClearsToZero) {
 // Test that non-zero array layers clears subresource to Zero after first use.
 // This goes through the BeginRenderPass's code path
 TEST_P(TextureZeroInitTest, RenderingArrayLayerClearsToZero) {
-    dawn::TextureDescriptor descriptor = CreateTextureDescriptor(
-        1, 4, dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc, kColorFormat);
-    dawn::Texture texture = device.CreateTexture(&descriptor);
+    wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
+        1, 4, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc, kColorFormat);
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
 
-    dawn::TextureViewDescriptor viewDescriptor = CreateTextureViewDescriptor(0, 2);
-    dawn::TextureView view = texture.CreateView(&viewDescriptor);
+    wgpu::TextureViewDescriptor viewDescriptor = CreateTextureViewDescriptor(0, 2);
+    wgpu::TextureView view = texture.CreateView(&viewDescriptor);
 
     utils::BasicRenderPass renderPass = utils::BasicRenderPass(kSize, kSize, texture, kColorFormat);
 
     renderPass.renderPassInfo.cColorAttachments[0].attachment = view;
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.EndPass();
     }
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commands));
 
     std::vector<RGBA8> expected(kSize * kSize, {0, 0, 0, 0});
@@ -171,23 +171,23 @@ TEST_P(TextureZeroInitTest, RenderingArrayLayerClearsToZero) {
 
 // This tests CopyBufferToTexture fully overwrites copy so lazy init is not needed.
 TEST_P(TextureZeroInitTest, CopyBufferToTexture) {
-    dawn::TextureDescriptor descriptor = CreateTextureDescriptor(
+    wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
         4, 1,
-        dawn::TextureUsage::CopyDst | dawn::TextureUsage::Sampled | dawn::TextureUsage::CopySrc,
+        wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled | wgpu::TextureUsage::CopySrc,
         kColorFormat);
-    dawn::Texture texture = device.CreateTexture(&descriptor);
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
 
     std::vector<uint8_t> data(kFormatBlockByteSize * kSize * kSize, 100);
-    dawn::Buffer stagingBuffer = utils::CreateBufferFromData(
-        device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsage::CopySrc);
+    wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(
+        device, data.data(), static_cast<uint32_t>(data.size()), wgpu::BufferUsage::CopySrc);
 
-    dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 0, 0);
-    dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
-    dawn::Extent3D copySize = {kSize, kSize, 1};
+    wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 0, 0);
+    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
+    wgpu::Extent3D copySize = {kSize, kSize, 1};
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commands));
 
     std::vector<RGBA8> expected(kSize * kSize, {100, 100, 100, 100});
@@ -198,23 +198,23 @@ TEST_P(TextureZeroInitTest, CopyBufferToTexture) {
 // Test for a copy only to a subset of the subresource, lazy init is necessary to clear the other
 // half.
 TEST_P(TextureZeroInitTest, CopyBufferToTextureHalf) {
-    dawn::TextureDescriptor descriptor = CreateTextureDescriptor(
+    wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
         4, 1,
-        dawn::TextureUsage::CopyDst | dawn::TextureUsage::Sampled | dawn::TextureUsage::CopySrc,
+        wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled | wgpu::TextureUsage::CopySrc,
         kColorFormat);
-    dawn::Texture texture = device.CreateTexture(&descriptor);
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
 
     std::vector<uint8_t> data(kFormatBlockByteSize * kSize * kSize, 100);
-    dawn::Buffer stagingBuffer = utils::CreateBufferFromData(
-        device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsage::CopySrc);
+    wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(
+        device, data.data(), static_cast<uint32_t>(data.size()), wgpu::BufferUsage::CopySrc);
 
-    dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 0, 0);
-    dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
-    dawn::Extent3D copySize = {kSize / 2, kSize, 1};
+    wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 0, 0);
+    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
+    wgpu::Extent3D copySize = {kSize / 2, kSize, 1};
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commands));
 
     std::vector<RGBA8> expected100((kSize / 2) * kSize, {100, 100, 100, 100});
@@ -227,28 +227,28 @@ TEST_P(TextureZeroInitTest, CopyBufferToTextureHalf) {
 
 // This tests CopyTextureToTexture fully overwrites copy so lazy init is not needed.
 TEST_P(TextureZeroInitTest, CopyTextureToTexture) {
-    dawn::TextureDescriptor srcDescriptor = CreateTextureDescriptor(
-        1, 1, dawn::TextureUsage::Sampled | dawn::TextureUsage::CopySrc, kColorFormat);
-    dawn::Texture srcTexture = device.CreateTexture(&srcDescriptor);
+    wgpu::TextureDescriptor srcDescriptor = CreateTextureDescriptor(
+        1, 1, wgpu::TextureUsage::Sampled | wgpu::TextureUsage::CopySrc, kColorFormat);
+    wgpu::Texture srcTexture = device.CreateTexture(&srcDescriptor);
 
-    dawn::TextureCopyView srcTextureCopyView =
+    wgpu::TextureCopyView srcTextureCopyView =
         utils::CreateTextureCopyView(srcTexture, 0, 0, {0, 0, 0});
 
-    dawn::TextureDescriptor dstDescriptor =
+    wgpu::TextureDescriptor dstDescriptor =
         CreateTextureDescriptor(1, 1,
-                                dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopyDst |
-                                    dawn::TextureUsage::CopySrc,
+                                wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopyDst |
+                                    wgpu::TextureUsage::CopySrc,
                                 kColorFormat);
-    dawn::Texture dstTexture = device.CreateTexture(&dstDescriptor);
+    wgpu::Texture dstTexture = device.CreateTexture(&dstDescriptor);
 
-    dawn::TextureCopyView dstTextureCopyView =
+    wgpu::TextureCopyView dstTextureCopyView =
         utils::CreateTextureCopyView(dstTexture, 0, 0, {0, 0, 0});
 
-    dawn::Extent3D copySize = {kSize, kSize, 1};
+    wgpu::Extent3D copySize = {kSize, kSize, 1};
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyTextureToTexture(&srcTextureCopyView, &dstTextureCopyView, &copySize);
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commands));
 
     std::vector<RGBA8> expected(kSize * kSize, {0, 0, 0, 0});
@@ -260,44 +260,44 @@ TEST_P(TextureZeroInitTest, CopyTextureToTexture) {
 // This Tests the CopyTextureToTexture's copy only to a subset of the subresource, lazy init is
 // necessary to clear the other half.
 TEST_P(TextureZeroInitTest, CopyTextureToTextureHalf) {
-    dawn::TextureDescriptor srcDescriptor = CreateTextureDescriptor(
+    wgpu::TextureDescriptor srcDescriptor = CreateTextureDescriptor(
         1, 1,
-        dawn::TextureUsage::Sampled | dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst,
+        wgpu::TextureUsage::Sampled | wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst,
         kColorFormat);
-    dawn::Texture srcTexture = device.CreateTexture(&srcDescriptor);
+    wgpu::Texture srcTexture = device.CreateTexture(&srcDescriptor);
 
     // fill srcTexture with 100
     {
         std::vector<uint8_t> data(kFormatBlockByteSize * kSize * kSize, 100);
-        dawn::Buffer stagingBuffer = utils::CreateBufferFromData(
-            device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsage::CopySrc);
-        dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 0, 0);
-        dawn::TextureCopyView textureCopyView =
+        wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(
+            device, data.data(), static_cast<uint32_t>(data.size()), wgpu::BufferUsage::CopySrc);
+        wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 0, 0);
+        wgpu::TextureCopyView textureCopyView =
             utils::CreateTextureCopyView(srcTexture, 0, 0, {0, 0, 0});
-        dawn::Extent3D copySize = {kSize, kSize, 1};
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::Extent3D copySize = {kSize, kSize, 1};
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
-        dawn::CommandBuffer commands = encoder.Finish();
+        wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
     }
 
-    dawn::TextureCopyView srcTextureCopyView =
+    wgpu::TextureCopyView srcTextureCopyView =
         utils::CreateTextureCopyView(srcTexture, 0, 0, {0, 0, 0});
 
-    dawn::TextureDescriptor dstDescriptor =
+    wgpu::TextureDescriptor dstDescriptor =
         CreateTextureDescriptor(1, 1,
-                                dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopyDst |
-                                    dawn::TextureUsage::CopySrc,
+                                wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopyDst |
+                                    wgpu::TextureUsage::CopySrc,
                                 kColorFormat);
-    dawn::Texture dstTexture = device.CreateTexture(&dstDescriptor);
+    wgpu::Texture dstTexture = device.CreateTexture(&dstDescriptor);
 
-    dawn::TextureCopyView dstTextureCopyView =
+    wgpu::TextureCopyView dstTextureCopyView =
         utils::CreateTextureCopyView(dstTexture, 0, 0, {0, 0, 0});
-    dawn::Extent3D copySize = {kSize / 2, kSize, 1};
+    wgpu::Extent3D copySize = {kSize / 2, kSize, 1};
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyTextureToTexture(&srcTextureCopyView, &dstTextureCopyView, &copySize);
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commands));
 
     std::vector<RGBA8> expectedWithZeros((kSize / 2) * kSize, {0, 0, 0, 0});
@@ -312,32 +312,32 @@ TEST_P(TextureZeroInitTest, CopyTextureToTextureHalf) {
 // This tests the texture with depth attachment and load op load will init depth stencil texture to
 // 0s.
 TEST_P(TextureZeroInitTest, RenderingLoadingDepth) {
-    dawn::TextureDescriptor srcDescriptor =
+    wgpu::TextureDescriptor srcDescriptor =
         CreateTextureDescriptor(1, 1,
-                                dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst |
-                                    dawn::TextureUsage::OutputAttachment,
+                                wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
+                                    wgpu::TextureUsage::OutputAttachment,
                                 kColorFormat);
-    dawn::Texture srcTexture = device.CreateTexture(&srcDescriptor);
+    wgpu::Texture srcTexture = device.CreateTexture(&srcDescriptor);
 
-    dawn::TextureDescriptor depthStencilDescriptor = CreateTextureDescriptor(
-        1, 1, dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc,
+    wgpu::TextureDescriptor depthStencilDescriptor = CreateTextureDescriptor(
+        1, 1, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc,
         kDepthStencilFormat);
-    dawn::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
+    wgpu::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
 
     utils::ComboRenderPassDescriptor renderPassDescriptor({srcTexture.CreateView()},
                                                           depthStencilTexture.CreateView());
-    renderPassDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = dawn::LoadOp::Load;
-    renderPassDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = dawn::LoadOp::Clear;
+    renderPassDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
+    renderPassDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Clear;
     renderPassDescriptor.cDepthStencilAttachmentInfo.clearStencil = 0;
-    renderPassDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = dawn::StoreOp::Store;
-    renderPassDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = dawn::StoreOp::Store;
+    renderPassDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
+    renderPassDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     auto pass = encoder.BeginRenderPass(&renderPassDescriptor);
     pass.SetPipeline(CreatePipelineForTest());
     pass.Draw(6, 1, 0, 0);
     pass.EndPass();
-    dawn::CommandBuffer commandBuffer = encoder.Finish();
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
     // Expect 0 lazy clears, depth stencil texture will clear using loadop
     EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commandBuffer));
 
@@ -349,32 +349,32 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepth) {
 // This tests the texture with stencil attachment and load op load will init depth stencil texture
 // to 0s.
 TEST_P(TextureZeroInitTest, RenderingLoadingStencil) {
-    dawn::TextureDescriptor srcDescriptor =
+    wgpu::TextureDescriptor srcDescriptor =
         CreateTextureDescriptor(1, 1,
-                                dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst |
-                                    dawn::TextureUsage::OutputAttachment,
+                                wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
+                                    wgpu::TextureUsage::OutputAttachment,
                                 kColorFormat);
-    dawn::Texture srcTexture = device.CreateTexture(&srcDescriptor);
+    wgpu::Texture srcTexture = device.CreateTexture(&srcDescriptor);
 
-    dawn::TextureDescriptor depthStencilDescriptor = CreateTextureDescriptor(
-        1, 1, dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc,
+    wgpu::TextureDescriptor depthStencilDescriptor = CreateTextureDescriptor(
+        1, 1, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc,
         kDepthStencilFormat);
-    dawn::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
+    wgpu::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
 
     utils::ComboRenderPassDescriptor renderPassDescriptor({srcTexture.CreateView()},
                                                           depthStencilTexture.CreateView());
-    renderPassDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = dawn::LoadOp::Clear;
+    renderPassDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Clear;
     renderPassDescriptor.cDepthStencilAttachmentInfo.clearDepth = 0.0f;
-    renderPassDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = dawn::LoadOp::Load;
-    renderPassDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = dawn::StoreOp::Store;
-    renderPassDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = dawn::StoreOp::Store;
+    renderPassDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
+    renderPassDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
+    renderPassDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     auto pass = encoder.BeginRenderPass(&renderPassDescriptor);
     pass.SetPipeline(CreatePipelineForTest());
     pass.Draw(6, 1, 0, 0);
     pass.EndPass();
-    dawn::CommandBuffer commandBuffer = encoder.Finish();
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
     // Expect 0 lazy clears, depth stencil texture will clear using loadop
     EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commandBuffer));
 
@@ -386,31 +386,31 @@ TEST_P(TextureZeroInitTest, RenderingLoadingStencil) {
 // This tests the texture with depth stencil attachment and load op load will init depth stencil
 // texture to 0s.
 TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencil) {
-    dawn::TextureDescriptor srcDescriptor =
+    wgpu::TextureDescriptor srcDescriptor =
         CreateTextureDescriptor(1, 1,
-                                dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst |
-                                    dawn::TextureUsage::OutputAttachment,
+                                wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
+                                    wgpu::TextureUsage::OutputAttachment,
                                 kColorFormat);
-    dawn::Texture srcTexture = device.CreateTexture(&srcDescriptor);
+    wgpu::Texture srcTexture = device.CreateTexture(&srcDescriptor);
 
-    dawn::TextureDescriptor depthStencilDescriptor = CreateTextureDescriptor(
-        1, 1, dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc,
+    wgpu::TextureDescriptor depthStencilDescriptor = CreateTextureDescriptor(
+        1, 1, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc,
         kDepthStencilFormat);
-    dawn::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
+    wgpu::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
 
     utils::ComboRenderPassDescriptor renderPassDescriptor({srcTexture.CreateView()},
                                                           depthStencilTexture.CreateView());
-    renderPassDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = dawn::LoadOp::Load;
-    renderPassDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = dawn::LoadOp::Load;
-    renderPassDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = dawn::StoreOp::Store;
-    renderPassDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = dawn::StoreOp::Store;
+    renderPassDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
+    renderPassDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
+    renderPassDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
+    renderPassDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     auto pass = encoder.BeginRenderPass(&renderPassDescriptor);
     pass.SetPipeline(CreatePipelineForTest());
     pass.Draw(6, 1, 0, 0);
     pass.EndPass();
-    dawn::CommandBuffer commandBuffer = encoder.Finish();
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
     // Expect 0 lazy clears, depth stencil texture will clear using loadop
     EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commandBuffer));
 
@@ -421,17 +421,17 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencil) {
 
 // This tests the color attachments clear to 0s
 TEST_P(TextureZeroInitTest, ColorAttachmentsClear) {
-    dawn::TextureDescriptor descriptor = CreateTextureDescriptor(
-        1, 1, dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc, kColorFormat);
-    dawn::Texture texture = device.CreateTexture(&descriptor);
+    wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
+        1, 1, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc, kColorFormat);
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
     utils::BasicRenderPass renderPass = utils::BasicRenderPass(kSize, kSize, texture, kColorFormat);
-    renderPass.renderPassInfo.cColorAttachments[0].loadOp = dawn::LoadOp::Load;
+    renderPass.renderPassInfo.cColorAttachments[0].loadOp = wgpu::LoadOp::Load;
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
     pass.EndPass();
 
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commands));
 
     std::vector<RGBA8> expected(kSize * kSize, {0, 0, 0, 0});
@@ -441,20 +441,20 @@ TEST_P(TextureZeroInitTest, ColorAttachmentsClear) {
 // This tests the clearing of sampled textures in render pass
 TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
     // Create needed resources
-    dawn::TextureDescriptor descriptor =
-        CreateTextureDescriptor(1, 1, dawn::TextureUsage::Sampled, kColorFormat);
-    dawn::Texture texture = device.CreateTexture(&descriptor);
+    wgpu::TextureDescriptor descriptor =
+        CreateTextureDescriptor(1, 1, wgpu::TextureUsage::Sampled, kColorFormat);
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
 
-    dawn::TextureDescriptor renderTextureDescriptor = CreateTextureDescriptor(
-        1, 1, dawn::TextureUsage::CopySrc | dawn::TextureUsage::OutputAttachment, kColorFormat);
-    dawn::Texture renderTexture = device.CreateTexture(&renderTextureDescriptor);
+    wgpu::TextureDescriptor renderTextureDescriptor = CreateTextureDescriptor(
+        1, 1, wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::OutputAttachment, kColorFormat);
+    wgpu::Texture renderTexture = device.CreateTexture(&renderTextureDescriptor);
 
-    dawn::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
-    dawn::Sampler sampler = device.CreateSampler(&samplerDesc);
+    wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
+    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
 
-    dawn::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
-        device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::Sampler},
-                 {1, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture}});
+    wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler},
+                 {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture}});
 
     // Create render pipeline
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
@@ -462,23 +462,23 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
     renderPipelineDescriptor.cColorStates[0].format = kColorFormat;
     renderPipelineDescriptor.vertexStage.module = CreateBasicVertexShaderForTest();
     renderPipelineDescriptor.cFragmentStage.module = CreateSampledTextureFragmentShaderForTest();
-    dawn::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
 
     // Create bindgroup
-    dawn::BindGroup bindGroup =
+    wgpu::BindGroup bindGroup =
         utils::MakeBindGroup(device, bindGroupLayout, {{0, sampler}, {1, texture.CreateView()}});
 
     // Encode pass and submit
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     utils::ComboRenderPassDescriptor renderPassDesc({renderTexture.CreateView()});
     renderPassDesc.cColorAttachments[0].clearColor = {1.0, 1.0, 1.0, 1.0};
-    renderPassDesc.cColorAttachments[0].loadOp = dawn::LoadOp::Clear;
-    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
+    renderPassDesc.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
     pass.SetPipeline(renderPipeline);
     pass.SetBindGroup(0, bindGroup);
     pass.Draw(6, 1, 0, 0);
     pass.EndPass();
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     // Expect 1 lazy clear for sampled texture
     EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commands));
 
@@ -490,34 +490,34 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
 // This tests the clearing of sampled textures during compute pass
 TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
     // Create needed resources
-    dawn::TextureDescriptor descriptor =
-        CreateTextureDescriptor(1, 1, dawn::TextureUsage::Sampled, kColorFormat);
+    wgpu::TextureDescriptor descriptor =
+        CreateTextureDescriptor(1, 1, wgpu::TextureUsage::Sampled, kColorFormat);
     descriptor.size.width = 1;
     descriptor.size.height = 1;
-    dawn::Texture texture = device.CreateTexture(&descriptor);
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
 
     uint32_t bufferSize = kFormatBlockByteSize * sizeof(uint32_t);
-    dawn::BufferDescriptor bufferDescriptor;
+    wgpu::BufferDescriptor bufferDescriptor;
     bufferDescriptor.size = bufferSize;
     bufferDescriptor.usage =
-        dawn::BufferUsage::CopySrc | dawn::BufferUsage::Storage | dawn::BufferUsage::CopyDst;
-    dawn::Buffer bufferTex = device.CreateBuffer(&bufferDescriptor);
+        wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer bufferTex = device.CreateBuffer(&bufferDescriptor);
     // Add data to buffer to ensure it is initialized
     uint32_t data = 100;
     bufferTex.SetSubData(0, sizeof(data), &data);
 
-    dawn::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
-    dawn::Sampler sampler = device.CreateSampler(&samplerDesc);
+    wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
+    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
 
-    dawn::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
-        device, {{0, dawn::ShaderStage::Compute, dawn::BindingType::SampledTexture},
-                 {1, dawn::ShaderStage::Compute, dawn::BindingType::StorageBuffer},
-                 {2, dawn::ShaderStage::Compute, dawn::BindingType::Sampler}});
+    wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture},
+                 {1, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
+                 {2, wgpu::ShaderStage::Compute, wgpu::BindingType::Sampler}});
 
     // Create compute pipeline
-    dawn::ComputePipelineDescriptor computePipelineDescriptor;
+    wgpu::ComputePipelineDescriptor computePipelineDescriptor;
     computePipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
-    dawn::ProgrammableStageDescriptor computeStage;
+    wgpu::ProgrammableStageDescriptor computeStage;
     const char* cs =
         R"(#version 450
         layout(binding = 0) uniform texture2D sampleTex;
@@ -532,22 +532,22 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
     computePipelineDescriptor.computeStage.module =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, cs);
     computePipelineDescriptor.computeStage.entryPoint = "main";
-    dawn::ComputePipeline computePipeline =
+    wgpu::ComputePipeline computePipeline =
         device.CreateComputePipeline(&computePipelineDescriptor);
 
     // Create bindgroup
-    dawn::BindGroup bindGroup = utils::MakeBindGroup(
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(
         device, bindGroupLayout,
         {{0, texture.CreateView()}, {1, bufferTex, 0, bufferSize}, {2, sampler}});
 
     // Encode the pass and submit
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-    dawn::ComputePassEncoder pass = encoder.BeginComputePass();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
     pass.SetPipeline(computePipeline);
     pass.SetBindGroup(0, bindGroup);
     pass.Dispatch(1, 1, 1);
     pass.EndPass();
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commands));
 
     // Expect the buffer to be zeroed out by the compute pass
@@ -557,24 +557,24 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
 
 // This tests that the code path of CopyTextureToBuffer clears correctly for non-renderable textures
 TEST_P(TextureZeroInitTest, NonRenderableTextureClear) {
-    dawn::TextureDescriptor descriptor =
-        CreateTextureDescriptor(1, 1, dawn::TextureUsage::CopySrc, kNonrenderableColorFormat);
-    dawn::Texture texture = device.CreateTexture(&descriptor);
+    wgpu::TextureDescriptor descriptor =
+        CreateTextureDescriptor(1, 1, wgpu::TextureUsage::CopySrc, kNonrenderableColorFormat);
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
 
     // Set buffer with dirty data so we know it is cleared by the lazy cleared texture copy
     uint32_t rowPitch = Align(kSize * kFormatBlockByteSize, kTextureRowPitchAlignment);
     uint32_t bufferSize = rowPitch * kSize;
     std::vector<uint8_t> data(bufferSize, 100);
-    dawn::Buffer bufferDst = utils::CreateBufferFromData(
-        device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsage::CopySrc);
+    wgpu::Buffer bufferDst = utils::CreateBufferFromData(
+        device, data.data(), static_cast<uint32_t>(data.size()), wgpu::BufferUsage::CopySrc);
 
-    dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(bufferDst, 0, rowPitch, 0);
-    dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
-    dawn::Extent3D copySize = {kSize, kSize, 1};
+    wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(bufferDst, 0, rowPitch, 0);
+    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
+    wgpu::Extent3D copySize = {kSize, kSize, 1};
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copySize);
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commands));
 
     std::vector<uint32_t> expectedWithZeros(bufferSize, 0);
@@ -583,25 +583,25 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClear) {
 
 // This tests that the code path of CopyTextureToBuffer clears correctly for non-renderable textures
 TEST_P(TextureZeroInitTest, NonRenderableTextureClearUnalignedSize) {
-    dawn::TextureDescriptor descriptor =
-        CreateTextureDescriptor(1, 1, dawn::TextureUsage::CopySrc, kNonrenderableColorFormat);
+    wgpu::TextureDescriptor descriptor =
+        CreateTextureDescriptor(1, 1, wgpu::TextureUsage::CopySrc, kNonrenderableColorFormat);
     descriptor.size.width = kUnalignedSize;
     descriptor.size.height = kUnalignedSize;
-    dawn::Texture texture = device.CreateTexture(&descriptor);
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
 
     // Set buffer with dirty data so we know it is cleared by the lazy cleared texture copy
     uint32_t rowPitch = Align(kUnalignedSize * kFormatBlockByteSize, kTextureRowPitchAlignment);
     uint32_t bufferSize = rowPitch * kUnalignedSize;
     std::vector<uint8_t> data(bufferSize, 100);
-    dawn::Buffer bufferDst = utils::CreateBufferFromData(
-        device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsage::CopySrc);
-    dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(bufferDst, 0, rowPitch, 0);
-    dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
-    dawn::Extent3D copySize = {kUnalignedSize, kUnalignedSize, 1};
+    wgpu::Buffer bufferDst = utils::CreateBufferFromData(
+        device, data.data(), static_cast<uint32_t>(data.size()), wgpu::BufferUsage::CopySrc);
+    wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(bufferDst, 0, rowPitch, 0);
+    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
+    wgpu::Extent3D copySize = {kUnalignedSize, kUnalignedSize, 1};
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copySize);
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commands));
 
     std::vector<uint32_t> expectedWithZeros(bufferSize, 0);
@@ -615,23 +615,23 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClearWithMultiArrayLayers) {
     // textures does not create large enough buffers for array layers greater than 1.
     DAWN_SKIP_TEST_IF(IsOpenGL());
 
-    dawn::TextureDescriptor descriptor =
-        CreateTextureDescriptor(1, 2, dawn::TextureUsage::CopySrc, kNonrenderableColorFormat);
-    dawn::Texture texture = device.CreateTexture(&descriptor);
+    wgpu::TextureDescriptor descriptor =
+        CreateTextureDescriptor(1, 2, wgpu::TextureUsage::CopySrc, kNonrenderableColorFormat);
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
 
     // Set buffer with dirty data so we know it is cleared by the lazy cleared texture copy
     uint32_t bufferSize = kFormatBlockByteSize * kSize * kSize;
     std::vector<uint8_t> data(bufferSize, 100);
-    dawn::Buffer bufferDst = utils::CreateBufferFromData(
-        device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsage::CopySrc);
+    wgpu::Buffer bufferDst = utils::CreateBufferFromData(
+        device, data.data(), static_cast<uint32_t>(data.size()), wgpu::BufferUsage::CopySrc);
 
-    dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(bufferDst, 0, 0, 0);
-    dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 1, {0, 0, 0});
-    dawn::Extent3D copySize = {kSize, kSize, 1};
+    wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(bufferDst, 0, 0, 0);
+    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 1, {0, 0, 0});
+    wgpu::Extent3D copySize = {kSize, kSize, 1};
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copySize);
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commands));
 
     std::vector<uint32_t> expectedWithZeros(bufferSize, 0);
@@ -644,31 +644,31 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClearWithMultiArrayLayers) {
 // because it will be lazy cleared by the EXPECT_TEXTURE_RGBA8_EQ call.
 TEST_P(TextureZeroInitTest, RenderPassStoreOpClear) {
     // Create needed resources
-    dawn::TextureDescriptor descriptor = CreateTextureDescriptor(
-        1, 1, dawn::TextureUsage::Sampled | dawn::TextureUsage::CopyDst, kColorFormat);
-    dawn::Texture texture = device.CreateTexture(&descriptor);
+    wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
+        1, 1, wgpu::TextureUsage::Sampled | wgpu::TextureUsage::CopyDst, kColorFormat);
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
 
-    dawn::TextureDescriptor renderTextureDescriptor = CreateTextureDescriptor(
-        1, 1, dawn::TextureUsage::CopySrc | dawn::TextureUsage::OutputAttachment, kColorFormat);
-    dawn::Texture renderTexture = device.CreateTexture(&renderTextureDescriptor);
+    wgpu::TextureDescriptor renderTextureDescriptor = CreateTextureDescriptor(
+        1, 1, wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::OutputAttachment, kColorFormat);
+    wgpu::Texture renderTexture = device.CreateTexture(&renderTextureDescriptor);
 
-    dawn::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
-    dawn::Sampler sampler = device.CreateSampler(&samplerDesc);
+    wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
+    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
 
-    dawn::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
-        device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::Sampler},
-                 {1, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture}});
+    wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler},
+                 {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture}});
 
     // Fill the sample texture with data
     std::vector<uint8_t> data(kFormatBlockByteSize * kSize * kSize, 1);
-    dawn::Buffer stagingBuffer = utils::CreateBufferFromData(
-        device, data.data(), static_cast<uint32_t>(data.size()), dawn::BufferUsage::CopySrc);
-    dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 0, 0);
-    dawn::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
-    dawn::Extent3D copySize = {kSize, kSize, 1};
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(
+        device, data.data(), static_cast<uint32_t>(data.size()), wgpu::BufferUsage::CopySrc);
+    wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 0, 0);
+    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
+    wgpu::Extent3D copySize = {kSize, kSize, 1};
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     // Expect 0 lazy clears because the texture will be completely copied to
     EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commands));
 
@@ -678,19 +678,19 @@ TEST_P(TextureZeroInitTest, RenderPassStoreOpClear) {
     renderPipelineDescriptor.vertexStage.module = CreateBasicVertexShaderForTest();
     renderPipelineDescriptor.cFragmentStage.module = CreateSampledTextureFragmentShaderForTest();
     renderPipelineDescriptor.cColorStates[0].format = kColorFormat;
-    dawn::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
 
     // Create bindgroup
-    dawn::BindGroup bindGroup =
+    wgpu::BindGroup bindGroup =
         utils::MakeBindGroup(device, bindGroupLayout, {{0, sampler}, {1, texture.CreateView()}});
 
     // Encode pass and submit
     encoder = device.CreateCommandEncoder();
     utils::ComboRenderPassDescriptor renderPassDesc({renderTexture.CreateView()});
     renderPassDesc.cColorAttachments[0].clearColor = {0.0, 0.0, 0.0, 0.0};
-    renderPassDesc.cColorAttachments[0].loadOp = dawn::LoadOp::Clear;
-    renderPassDesc.cColorAttachments[0].storeOp = dawn::StoreOp::Clear;
-    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
+    renderPassDesc.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+    renderPassDesc.cColorAttachments[0].storeOp = wgpu::StoreOp::Clear;
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
     pass.SetPipeline(renderPipeline);
     pass.SetBindGroup(0, bindGroup);
     pass.Draw(6, 1, 0, 0);
@@ -714,38 +714,38 @@ TEST_P(TextureZeroInitTest, RenderPassStoreOpClear) {
 //      Because LoadOp is Load and the subresource is uninitialized, the texture will be cleared to
 //      0's This means the depth and stencil test will pass and the red square is drawn.
 TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencilStoreOpClear) {
-    dawn::TextureDescriptor srcDescriptor =
+    wgpu::TextureDescriptor srcDescriptor =
         CreateTextureDescriptor(1, 1,
-                                dawn::TextureUsage::CopySrc | dawn::TextureUsage::CopyDst |
-                                    dawn::TextureUsage::OutputAttachment,
+                                wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
+                                    wgpu::TextureUsage::OutputAttachment,
                                 kColorFormat);
-    dawn::Texture srcTexture = device.CreateTexture(&srcDescriptor);
+    wgpu::Texture srcTexture = device.CreateTexture(&srcDescriptor);
 
-    dawn::TextureDescriptor depthStencilDescriptor =
+    wgpu::TextureDescriptor depthStencilDescriptor =
         CreateTextureDescriptor(1, 1,
-                                dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc |
-                                    dawn::TextureUsage::CopyDst,
+                                wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc |
+                                    wgpu::TextureUsage::CopyDst,
                                 kDepthStencilFormat);
-    dawn::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
+    wgpu::Texture depthStencilTexture = device.CreateTexture(&depthStencilDescriptor);
 
     // Setup the renderPass for the first pass.
     // We want to fail the depth and stencil test here so that nothing gets drawn and we can
     // see that the subresource correctly gets set as unintialized in the second pass
     utils::ComboRenderPassDescriptor renderPassDescriptor({srcTexture.CreateView()},
                                                           depthStencilTexture.CreateView());
-    renderPassDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = dawn::LoadOp::Clear;
-    renderPassDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = dawn::LoadOp::Clear;
+    renderPassDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Clear;
+    renderPassDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Clear;
     renderPassDescriptor.cDepthStencilAttachmentInfo.clearDepth = 1.0f;
     renderPassDescriptor.cDepthStencilAttachmentInfo.clearStencil = 1u;
-    renderPassDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = dawn::StoreOp::Clear;
-    renderPassDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = dawn::StoreOp::Clear;
+    renderPassDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Clear;
+    renderPassDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Clear;
     {
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDescriptor);
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDescriptor);
         pass.SetPipeline(CreatePipelineForTest());
         pass.Draw(6, 1, 0, 0);
         pass.EndPass();
-        dawn::CommandBuffer commandBuffer = encoder.Finish();
+        wgpu::CommandBuffer commandBuffer = encoder.Finish();
         // Expect 0 lazy clears, depth stencil texture will clear using loadop
         EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commandBuffer));
 
@@ -758,14 +758,14 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencilStoreOpClear) {
     // Now we put the depth stencil texture back into renderpass, it should be cleared by loadop
     // because storeOp clear sets the subresource as uninitialized
     {
-        renderPassDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = dawn::LoadOp::Load;
-        renderPassDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = dawn::LoadOp::Load;
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPassDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
+        renderPassDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDescriptor);
         pass.SetPipeline(CreatePipelineForTest());
         pass.Draw(6, 1, 0, 0);
         pass.EndPass();
-        dawn::CommandBuffer commandBuffer = encoder.Finish();
+        wgpu::CommandBuffer commandBuffer = encoder.Finish();
         // Expect 0 lazy clears, depth stencil texture will clear using loadop
         EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commandBuffer));
 

@@ -19,7 +19,7 @@
 
 class ViewportTest : public DawnTest {
   protected:
-    dawn::RenderPipeline CreatePipelineForTest(dawn::CompareFunction depthCompare) {
+    wgpu::RenderPipeline CreatePipelineForTest(wgpu::CompareFunction depthCompare) {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
 
         // Draw two triangles:
@@ -63,12 +63,12 @@ class ViewportTest : public DawnTest {
         return device.CreateRenderPipeline(&pipelineDescriptor);
     }
 
-    dawn::Texture Create2DTextureForTest(dawn::TextureFormat format) {
-        dawn::TextureDescriptor textureDescriptor;
-        textureDescriptor.dimension = dawn::TextureDimension::e2D;
+    wgpu::Texture Create2DTextureForTest(wgpu::TextureFormat format) {
+        wgpu::TextureDescriptor textureDescriptor;
+        textureDescriptor.dimension = wgpu::TextureDimension::e2D;
         textureDescriptor.format = format;
         textureDescriptor.usage =
-            dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc;
+            wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
         textureDescriptor.arrayLayerCount = 1;
         textureDescriptor.mipLevelCount = 1;
         textureDescriptor.sampleCount = 1;
@@ -97,16 +97,16 @@ class ViewportTest : public DawnTest {
     };
 
     void DoTest(const TestInfo& info) {
-        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
 
         // Create render targets for 2 render passes.
-        dawn::Texture colorTexture1 = Create2DTextureForTest(dawn::TextureFormat::RGBA8Unorm);
-        dawn::Texture depthStencilTexture1 =
-            Create2DTextureForTest(dawn::TextureFormat::Depth24PlusStencil8);
+        wgpu::Texture colorTexture1 = Create2DTextureForTest(wgpu::TextureFormat::RGBA8Unorm);
+        wgpu::Texture depthStencilTexture1 =
+            Create2DTextureForTest(wgpu::TextureFormat::Depth24PlusStencil8);
 
-        dawn::Texture colorTexture2 = Create2DTextureForTest(dawn::TextureFormat::RGBA8Unorm);
-        dawn::Texture depthStencilTexture2 =
-            Create2DTextureForTest(dawn::TextureFormat::Depth24PlusStencil8);
+        wgpu::Texture colorTexture2 = Create2DTextureForTest(wgpu::TextureFormat::RGBA8Unorm);
+        wgpu::Texture depthStencilTexture2 =
+            Create2DTextureForTest(wgpu::TextureFormat::Depth24PlusStencil8);
 
         // Create render pass 1
         // Note that we may explicitly call SetViewport() in this pass
@@ -114,14 +114,14 @@ class ViewportTest : public DawnTest {
             utils::ComboRenderPassDescriptor renderPassDescriptor1(
                 {colorTexture1.CreateView()}, depthStencilTexture1.CreateView());
             renderPassDescriptor1.cColorAttachments[0].clearColor = {0.0, 0.0, 1.0, 1.0};
-            renderPassDescriptor1.cColorAttachments[0].loadOp = dawn::LoadOp::Clear;
+            renderPassDescriptor1.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
 
             renderPassDescriptor1.cDepthStencilAttachmentInfo.clearDepth = info.clearDepth;
-            renderPassDescriptor1.cDepthStencilAttachmentInfo.depthLoadOp = dawn::LoadOp::Clear;
+            renderPassDescriptor1.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Clear;
 
-            dawn::RenderPassEncoder renderPass1 =
+            wgpu::RenderPassEncoder renderPass1 =
                 commandEncoder.BeginRenderPass(&renderPassDescriptor1);
-            renderPass1.SetPipeline(CreatePipelineForTest(dawn::CompareFunction::Less));
+            renderPass1.SetPipeline(CreatePipelineForTest(wgpu::CompareFunction::Less));
             if (info.setViewport) {
                 ViewportParams viewport = info.viewport;
                 renderPass1.SetViewport(viewport.x, viewport.y, viewport.width, viewport.height,
@@ -139,20 +139,20 @@ class ViewportTest : public DawnTest {
             utils::ComboRenderPassDescriptor renderPassDescriptor2(
                 {colorTexture2.CreateView()}, depthStencilTexture2.CreateView());
             renderPassDescriptor2.cColorAttachments[0].clearColor = {0.0, 0.0, 1.0, 1.0};
-            renderPassDescriptor2.cColorAttachments[0].loadOp = dawn::LoadOp::Clear;
+            renderPassDescriptor2.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
 
             renderPassDescriptor2.cDepthStencilAttachmentInfo.clearDepth = 0.5;
-            renderPassDescriptor2.cDepthStencilAttachmentInfo.depthLoadOp = dawn::LoadOp::Clear;
+            renderPassDescriptor2.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Clear;
 
-            dawn::RenderPassEncoder renderPass2 =
+            wgpu::RenderPassEncoder renderPass2 =
                 commandEncoder.BeginRenderPass(&renderPassDescriptor2);
-            renderPass2.SetPipeline(CreatePipelineForTest(dawn::CompareFunction::Greater));
+            renderPass2.SetPipeline(CreatePipelineForTest(wgpu::CompareFunction::Greater));
             renderPass2.Draw(6, 1, 0, 0);
             renderPass2.EndPass();
         }
 
-        dawn::CommandBuffer commandBuffer = commandEncoder.Finish();
-        dawn::Queue queue = device.CreateQueue();
+        wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
+        wgpu::Queue queue = device.CreateQueue();
         queue.Submit(1, &commandBuffer);
 
         constexpr RGBA8 kColor[ColorTypeCount] = {

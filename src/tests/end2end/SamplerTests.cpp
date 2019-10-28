@@ -25,14 +25,26 @@ constexpr static unsigned int kRTSize = 64;
 
 namespace {
     struct AddressModeTestCase {
-        dawn::AddressMode mMode;
+        wgpu::AddressMode mMode;
         uint8_t mExpected2;
         uint8_t mExpected3;
     };
     AddressModeTestCase addressModes[] = {
-        { dawn::AddressMode::Repeat,           0, 255, },
-        { dawn::AddressMode::MirrorRepeat, 255,   0, },
-        { dawn::AddressMode::ClampToEdge,    255, 255, },
+        {
+            wgpu::AddressMode::Repeat,
+            0,
+            255,
+        },
+        {
+            wgpu::AddressMode::MirrorRepeat,
+            255,
+            0,
+        },
+        {
+            wgpu::AddressMode::ClampToEdge,
+            255,
+            255,
+        },
     };
 }
 
@@ -44,8 +56,8 @@ protected:
 
         mBindGroupLayout = utils::MakeBindGroupLayout(
             device, {
-                        {0, dawn::ShaderStage::Fragment, dawn::BindingType::Sampler},
-                        {1, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture},
+                        {0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler},
+                        {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture},
                     });
 
         auto pipelineLayout = utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
@@ -81,17 +93,17 @@ protected:
 
         mPipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 
-        dawn::TextureDescriptor descriptor;
-        descriptor.dimension = dawn::TextureDimension::e2D;
+        wgpu::TextureDescriptor descriptor;
+        descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size.width = 2;
         descriptor.size.height = 2;
         descriptor.size.depth = 1;
         descriptor.arrayLayerCount = 1;
         descriptor.sampleCount = 1;
-        descriptor.format = dawn::TextureFormat::RGBA8Unorm;
+        descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
         descriptor.mipLevelCount = 1;
-        descriptor.usage = dawn::TextureUsage::CopyDst | dawn::TextureUsage::Sampled;
-        dawn::Texture texture = device.CreateTexture(&descriptor);
+        descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled;
+        wgpu::Texture texture = device.CreateTexture(&descriptor);
 
         // Create a 2x2 checkerboard texture, with black in the top left and bottom right corners.
         const uint32_t rowPixels = kTextureRowPitchAlignment / sizeof(RGBA8);
@@ -101,53 +113,51 @@ protected:
         data[0] = data[rowPixels + 1] = black;
         data[1] = data[rowPixels] = white;
 
-        dawn::Buffer stagingBuffer =
-            utils::CreateBufferFromData(device, data, sizeof(data), dawn::BufferUsage::CopySrc);
-        dawn::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 256, 0);
-        dawn::TextureCopyView textureCopyView =
+        wgpu::Buffer stagingBuffer =
+            utils::CreateBufferFromData(device, data, sizeof(data), wgpu::BufferUsage::CopySrc);
+        wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 256, 0);
+        wgpu::TextureCopyView textureCopyView =
             utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
-        dawn::Extent3D copySize = {2, 2, 1};
+        wgpu::Extent3D copySize = {2, 2, 1};
 
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
 
-        dawn::CommandBuffer copy = encoder.Finish();
+        wgpu::CommandBuffer copy = encoder.Finish();
         queue.Submit(1, &copy);
 
         mTextureView = texture.CreateView();
     }
 
     void TestAddressModes(AddressModeTestCase u, AddressModeTestCase v, AddressModeTestCase w) {
-        dawn::Sampler sampler;
+        wgpu::Sampler sampler;
         {
-            dawn::SamplerDescriptor descriptor;
-            descriptor.minFilter = dawn::FilterMode::Nearest;
-            descriptor.magFilter = dawn::FilterMode::Nearest;
-            descriptor.mipmapFilter = dawn::FilterMode::Nearest;
+            wgpu::SamplerDescriptor descriptor;
+            descriptor.minFilter = wgpu::FilterMode::Nearest;
+            descriptor.magFilter = wgpu::FilterMode::Nearest;
+            descriptor.mipmapFilter = wgpu::FilterMode::Nearest;
             descriptor.addressModeU = u.mMode;
             descriptor.addressModeV = v.mMode;
             descriptor.addressModeW = w.mMode;
             descriptor.lodMinClamp = kLodMin;
             descriptor.lodMaxClamp = kLodMax;
-            descriptor.compare = dawn::CompareFunction::Never;
+            descriptor.compare = wgpu::CompareFunction::Never;
             sampler = device.CreateSampler(&descriptor);
         }
 
-        dawn::BindGroup bindGroup = utils::MakeBindGroup(device, mBindGroupLayout, {
-            {0, sampler},
-            {1, mTextureView}
-        });
+        wgpu::BindGroup bindGroup =
+            utils::MakeBindGroup(device, mBindGroupLayout, {{0, sampler}, {1, mTextureView}});
 
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         {
-            dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&mRenderPass.renderPassInfo);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&mRenderPass.renderPassInfo);
             pass.SetPipeline(mPipeline);
             pass.SetBindGroup(0, bindGroup);
             pass.Draw(6, 1, 0, 0);
             pass.EndPass();
         }
 
-        dawn::CommandBuffer commands = encoder.Finish();
+        wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
         RGBA8 expectedU2(u.mExpected2, u.mExpected2, u.mExpected2, 255);
@@ -168,9 +178,9 @@ protected:
     }
 
     utils::BasicRenderPass mRenderPass;
-    dawn::BindGroupLayout mBindGroupLayout;
-    dawn::RenderPipeline mPipeline;
-    dawn::TextureView mTextureView;
+    wgpu::BindGroupLayout mBindGroupLayout;
+    wgpu::RenderPipeline mPipeline;
+    wgpu::TextureView mTextureView;
 };
 
 // Test drawing a rect with a checkerboard texture with different address modes.

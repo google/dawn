@@ -34,19 +34,19 @@ class DynamicBufferOffsetTests : public DawnTest {
         uniformData[1] = 2;
 
         mUniformBuffers[0] = utils::CreateBufferFromData(device, uniformData.data(), kBufferSize,
-                                                         dawn::BufferUsage::Uniform);
+                                                         wgpu::BufferUsage::Uniform);
 
         uniformData[uniformData.size() - 2] = 5;
         uniformData[uniformData.size() - 1] = 6;
 
         // Dynamic uniform buffer
         mUniformBuffers[1] = utils::CreateBufferFromData(device, uniformData.data(), kBufferSize,
-                                                         dawn::BufferUsage::Uniform);
+                                                         wgpu::BufferUsage::Uniform);
 
-        dawn::BufferDescriptor storageBufferDescriptor;
+        wgpu::BufferDescriptor storageBufferDescriptor;
         storageBufferDescriptor.size = kBufferSize;
         storageBufferDescriptor.usage =
-            dawn::BufferUsage::Storage | dawn::BufferUsage::CopyDst | dawn::BufferUsage::CopySrc;
+            wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
 
         mStorageBuffers[0] = device.CreateBuffer(&storageBufferDescriptor);
 
@@ -55,14 +55,14 @@ class DynamicBufferOffsetTests : public DawnTest {
 
         // Default bind group layout
         mBindGroupLayouts[0] = utils::MakeBindGroupLayout(
-            device, {{0, dawn::ShaderStage::Compute | dawn::ShaderStage::Fragment,
-                      dawn::BindingType::UniformBuffer},
-                     {1, dawn::ShaderStage::Compute | dawn::ShaderStage::Fragment,
-                      dawn::BindingType::StorageBuffer},
-                     {3, dawn::ShaderStage::Compute | dawn::ShaderStage::Fragment,
-                      dawn::BindingType::UniformBuffer, true},
-                     {4, dawn::ShaderStage::Compute | dawn::ShaderStage::Fragment,
-                      dawn::BindingType::StorageBuffer, true}});
+            device, {{0, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
+                      wgpu::BindingType::UniformBuffer},
+                     {1, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
+                      wgpu::BindingType::StorageBuffer},
+                     {3, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
+                      wgpu::BindingType::UniformBuffer, true},
+                     {4, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
+                      wgpu::BindingType::StorageBuffer, true}});
 
         // Default bind group
         mBindGroups[0] = utils::MakeBindGroup(device, mBindGroupLayouts[0],
@@ -73,12 +73,12 @@ class DynamicBufferOffsetTests : public DawnTest {
 
         // Extra uniform buffer for inheriting test
         mUniformBuffers[2] = utils::CreateBufferFromData(device, uniformData.data(), kBufferSize,
-                                                         dawn::BufferUsage::Uniform);
+                                                         wgpu::BufferUsage::Uniform);
 
         // Bind group layout for inheriting test
         mBindGroupLayouts[1] = utils::MakeBindGroupLayout(
-            device, {{0, dawn::ShaderStage::Compute | dawn::ShaderStage::Fragment,
-                      dawn::BindingType::UniformBuffer}});
+            device, {{0, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
+                      wgpu::BindingType::UniformBuffer}});
 
         // Bind group for inheriting test
         mBindGroups[1] = utils::MakeBindGroup(device, mBindGroupLayouts[1],
@@ -86,14 +86,14 @@ class DynamicBufferOffsetTests : public DawnTest {
     }
     // Create objects to use as resources inside test bind groups.
 
-    dawn::BindGroup mBindGroups[2];
-    dawn::BindGroupLayout mBindGroupLayouts[2];
-    dawn::Buffer mUniformBuffers[3];
-    dawn::Buffer mStorageBuffers[2];
-    dawn::Texture mColorAttachment;
+    wgpu::BindGroup mBindGroups[2];
+    wgpu::BindGroupLayout mBindGroupLayouts[2];
+    wgpu::Buffer mUniformBuffers[3];
+    wgpu::Buffer mStorageBuffers[2];
+    wgpu::Texture mColorAttachment;
 
-    dawn::RenderPipeline CreateRenderPipeline(bool isInheritedPipeline = false) {
-        dawn::ShaderModule vsModule =
+    wgpu::RenderPipeline CreateRenderPipeline(bool isInheritedPipeline = false) {
+        wgpu::ShaderModule vsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
                 #version 450
                 void main() {
@@ -136,15 +136,15 @@ class DynamicBufferOffsetTests : public DawnTest {
         fs << "     fragColor = vec4(value.x / 255.0f, value.y / 255.0f, 1.0f, 1.0f);\n";
         fs << " }\n";
 
-        dawn::ShaderModule fsModule =
+        wgpu::ShaderModule fsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fs.str().c_str());
 
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
         pipelineDescriptor.vertexStage.module = vsModule;
         pipelineDescriptor.cFragmentStage.module = fsModule;
-        pipelineDescriptor.cColorStates[0].format = dawn::TextureFormat::RGBA8Unorm;
+        pipelineDescriptor.cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
 
-        dawn::PipelineLayoutDescriptor pipelineLayoutDescriptor;
+        wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor;
         if (isInheritedPipeline) {
             pipelineLayoutDescriptor.bindGroupLayoutCount = 2;
         } else {
@@ -156,7 +156,7 @@ class DynamicBufferOffsetTests : public DawnTest {
         return device.CreateRenderPipeline(&pipelineDescriptor);
     }
 
-    dawn::ComputePipeline CreateComputePipeline(bool isInheritedPipeline = false) {
+    wgpu::ComputePipeline CreateComputePipeline(bool isInheritedPipeline = false) {
         // Construct compute shader source
         std::ostringstream cs;
         std::string multipleNumber = isInheritedPipeline ? "2" : "1";
@@ -190,14 +190,14 @@ class DynamicBufferOffsetTests : public DawnTest {
            << " * (value.xy + mid.notDynamicResult.xy);\n";
         cs << " }\n";
 
-        dawn::ShaderModule csModule =
+        wgpu::ShaderModule csModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, cs.str().c_str());
 
-        dawn::ComputePipelineDescriptor csDesc;
+        wgpu::ComputePipelineDescriptor csDesc;
         csDesc.computeStage.module = csModule;
         csDesc.computeStage.entryPoint = "main";
 
-        dawn::PipelineLayoutDescriptor pipelineLayoutDescriptor;
+        wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor;
         if (isInheritedPipeline) {
             pipelineLayoutDescriptor.bindGroupLayoutCount = 2;
         } else {
@@ -212,18 +212,18 @@ class DynamicBufferOffsetTests : public DawnTest {
 
 // Dynamic offsets are all zero and no effect to result.
 TEST_P(DynamicBufferOffsetTests, BasicRenderPipeline) {
-    dawn::RenderPipeline pipeline = CreateRenderPipeline();
+    wgpu::RenderPipeline pipeline = CreateRenderPipeline();
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-    dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     std::array<uint64_t, 2> offsets = {0, 0};
-    dawn::RenderPassEncoder renderPassEncoder =
+    wgpu::RenderPassEncoder renderPassEncoder =
         commandEncoder.BeginRenderPass(&renderPass.renderPassInfo);
     renderPassEncoder.SetPipeline(pipeline);
     renderPassEncoder.SetBindGroup(0, mBindGroups[0], offsets.size(), offsets.data());
     renderPassEncoder.Draw(3, 1, 0, 0);
     renderPassEncoder.EndPass();
-    dawn::CommandBuffer commands = commandEncoder.Finish();
+    wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
     std::vector<uint32_t> expectedData = {2, 4};
@@ -233,19 +233,19 @@ TEST_P(DynamicBufferOffsetTests, BasicRenderPipeline) {
 
 // Have non-zero dynamic offsets.
 TEST_P(DynamicBufferOffsetTests, SetDynamicOffestsRenderPipeline) {
-    dawn::RenderPipeline pipeline = CreateRenderPipeline();
+    wgpu::RenderPipeline pipeline = CreateRenderPipeline();
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-    dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     std::array<uint64_t, 2> offsets = {kMinDynamicBufferOffsetAlignment,
                                        kMinDynamicBufferOffsetAlignment};
-    dawn::RenderPassEncoder renderPassEncoder =
+    wgpu::RenderPassEncoder renderPassEncoder =
         commandEncoder.BeginRenderPass(&renderPass.renderPassInfo);
     renderPassEncoder.SetPipeline(pipeline);
     renderPassEncoder.SetBindGroup(0, mBindGroups[0], offsets.size(), offsets.data());
     renderPassEncoder.Draw(3, 1, 0, 0);
     renderPassEncoder.EndPass();
-    dawn::CommandBuffer commands = commandEncoder.Finish();
+    wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
     std::vector<uint32_t> expectedData = {6, 8};
@@ -256,17 +256,17 @@ TEST_P(DynamicBufferOffsetTests, SetDynamicOffestsRenderPipeline) {
 
 // Dynamic offsets are all zero and no effect to result.
 TEST_P(DynamicBufferOffsetTests, BasicComputePipeline) {
-    dawn::ComputePipeline pipeline = CreateComputePipeline();
+    wgpu::ComputePipeline pipeline = CreateComputePipeline();
 
     std::array<uint64_t, 2> offsets = {0, 0};
 
-    dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-    dawn::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
     computePassEncoder.SetPipeline(pipeline);
     computePassEncoder.SetBindGroup(0, mBindGroups[0], offsets.size(), offsets.data());
     computePassEncoder.Dispatch(1, 1, 1);
     computePassEncoder.EndPass();
-    dawn::CommandBuffer commands = commandEncoder.Finish();
+    wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
     std::vector<uint32_t> expectedData = {2, 4};
@@ -275,18 +275,18 @@ TEST_P(DynamicBufferOffsetTests, BasicComputePipeline) {
 
 // Have non-zero dynamic offsets.
 TEST_P(DynamicBufferOffsetTests, SetDynamicOffestsComputePipeline) {
-    dawn::ComputePipeline pipeline = CreateComputePipeline();
+    wgpu::ComputePipeline pipeline = CreateComputePipeline();
 
     std::array<uint64_t, 2> offsets = {kMinDynamicBufferOffsetAlignment,
                                        kMinDynamicBufferOffsetAlignment};
 
-    dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-    dawn::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
     computePassEncoder.SetPipeline(pipeline);
     computePassEncoder.SetBindGroup(0, mBindGroups[0], offsets.size(), offsets.data());
     computePassEncoder.Dispatch(1, 1, 1);
     computePassEncoder.EndPass();
-    dawn::CommandBuffer commands = commandEncoder.Finish();
+    wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
     std::vector<uint32_t> expectedData = {6, 8};
@@ -297,15 +297,15 @@ TEST_P(DynamicBufferOffsetTests, SetDynamicOffestsComputePipeline) {
 // Test inherit dynamic offsets on render pipeline
 TEST_P(DynamicBufferOffsetTests, InheritDynamicOffestsRenderPipeline) {
     // Using default pipeline and setting dynamic offsets
-    dawn::RenderPipeline pipeline = CreateRenderPipeline();
-    dawn::RenderPipeline testPipeline = CreateRenderPipeline(true);
+    wgpu::RenderPipeline pipeline = CreateRenderPipeline();
+    wgpu::RenderPipeline testPipeline = CreateRenderPipeline(true);
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-    dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     std::array<uint64_t, 2> offsets = {kMinDynamicBufferOffsetAlignment,
                                        kMinDynamicBufferOffsetAlignment};
-    dawn::RenderPassEncoder renderPassEncoder =
+    wgpu::RenderPassEncoder renderPassEncoder =
         commandEncoder.BeginRenderPass(&renderPass.renderPassInfo);
     renderPassEncoder.SetPipeline(pipeline);
     renderPassEncoder.SetBindGroup(0, mBindGroups[0], offsets.size(), offsets.data());
@@ -314,7 +314,7 @@ TEST_P(DynamicBufferOffsetTests, InheritDynamicOffestsRenderPipeline) {
     renderPassEncoder.SetBindGroup(1, mBindGroups[1]);
     renderPassEncoder.Draw(3, 1, 0, 0);
     renderPassEncoder.EndPass();
-    dawn::CommandBuffer commands = commandEncoder.Finish();
+    wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
     std::vector<uint32_t> expectedData = {12, 16};
@@ -329,14 +329,14 @@ TEST_P(DynamicBufferOffsetTests, InheritDynamicOffestsRenderPipeline) {
 // Will double check root cause after got GTX1660.
 TEST_P(DynamicBufferOffsetTests, InheritDynamicOffestsComputePipeline) {
     DAWN_SKIP_TEST_IF(IsWindows());
-    dawn::ComputePipeline pipeline = CreateComputePipeline();
-    dawn::ComputePipeline testPipeline = CreateComputePipeline(true);
+    wgpu::ComputePipeline pipeline = CreateComputePipeline();
+    wgpu::ComputePipeline testPipeline = CreateComputePipeline(true);
 
     std::array<uint64_t, 2> offsets = {kMinDynamicBufferOffsetAlignment,
                                        kMinDynamicBufferOffsetAlignment};
 
-    dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-    dawn::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
     computePassEncoder.SetPipeline(pipeline);
     computePassEncoder.SetBindGroup(0, mBindGroups[0], offsets.size(), offsets.data());
     computePassEncoder.Dispatch(1, 1, 1);
@@ -344,7 +344,7 @@ TEST_P(DynamicBufferOffsetTests, InheritDynamicOffestsComputePipeline) {
     computePassEncoder.SetBindGroup(1, mBindGroups[1]);
     computePassEncoder.Dispatch(1, 1, 1);
     computePassEncoder.EndPass();
-    dawn::CommandBuffer commands = commandEncoder.Finish();
+    wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
     std::vector<uint32_t> expectedData = {12, 16};
@@ -355,16 +355,16 @@ TEST_P(DynamicBufferOffsetTests, InheritDynamicOffestsComputePipeline) {
 // Setting multiple dynamic offsets for the same bindgroup in one render pass.
 TEST_P(DynamicBufferOffsetTests, UpdateDynamicOffestsMultipleTimesRenderPipeline) {
     // Using default pipeline and setting dynamic offsets
-    dawn::RenderPipeline pipeline = CreateRenderPipeline();
+    wgpu::RenderPipeline pipeline = CreateRenderPipeline();
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-    dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     std::array<uint64_t, 2> offsets = {kMinDynamicBufferOffsetAlignment,
                                        kMinDynamicBufferOffsetAlignment};
     std::array<uint64_t, 2> testOffsets = {0, 0};
 
-    dawn::RenderPassEncoder renderPassEncoder =
+    wgpu::RenderPassEncoder renderPassEncoder =
         commandEncoder.BeginRenderPass(&renderPass.renderPassInfo);
     renderPassEncoder.SetPipeline(pipeline);
     renderPassEncoder.SetBindGroup(0, mBindGroups[0], offsets.size(), offsets.data());
@@ -372,7 +372,7 @@ TEST_P(DynamicBufferOffsetTests, UpdateDynamicOffestsMultipleTimesRenderPipeline
     renderPassEncoder.SetBindGroup(0, mBindGroups[0], testOffsets.size(), testOffsets.data());
     renderPassEncoder.Draw(3, 1, 0, 0);
     renderPassEncoder.EndPass();
-    dawn::CommandBuffer commands = commandEncoder.Finish();
+    wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
     std::vector<uint32_t> expectedData = {2, 4};
@@ -382,21 +382,21 @@ TEST_P(DynamicBufferOffsetTests, UpdateDynamicOffestsMultipleTimesRenderPipeline
 
 // Setting multiple dynamic offsets for the same bindgroup in one compute pass.
 TEST_P(DynamicBufferOffsetTests, UpdateDynamicOffsetsMultipleTimesComputePipeline) {
-    dawn::ComputePipeline pipeline = CreateComputePipeline();
+    wgpu::ComputePipeline pipeline = CreateComputePipeline();
 
     std::array<uint64_t, 2> offsets = {kMinDynamicBufferOffsetAlignment,
                                        kMinDynamicBufferOffsetAlignment};
     std::array<uint64_t, 2> testOffsets = {0, 0};
 
-    dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-    dawn::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
     computePassEncoder.SetPipeline(pipeline);
     computePassEncoder.SetBindGroup(0, mBindGroups[0], offsets.size(), offsets.data());
     computePassEncoder.Dispatch(1, 1, 1);
     computePassEncoder.SetBindGroup(0, mBindGroups[0], testOffsets.size(), testOffsets.data());
     computePassEncoder.Dispatch(1, 1, 1);
     computePassEncoder.EndPass();
-    dawn::CommandBuffer commands = commandEncoder.Finish();
+    wgpu::CommandBuffer commands = commandEncoder.Finish();
     queue.Submit(1, &commands);
 
     std::vector<uint32_t> expectedData = {2, 4};

@@ -19,7 +19,7 @@
 
 class CullingTest : public DawnTest {
   protected:
-    dawn::RenderPipeline CreatePipelineForTest(dawn::FrontFace frontFace, dawn::CullMode cullMode) {
+    wgpu::RenderPipeline CreatePipelineForTest(wgpu::FrontFace frontFace, wgpu::CullMode cullMode) {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
 
         // Draw two triangles with different winding orders:
@@ -58,12 +58,12 @@ class CullingTest : public DawnTest {
         return device.CreateRenderPipeline(&pipelineDescriptor);
     }
 
-    dawn::Texture Create2DTextureForTest(dawn::TextureFormat format) {
-        dawn::TextureDescriptor textureDescriptor;
-        textureDescriptor.dimension = dawn::TextureDimension::e2D;
+    wgpu::Texture Create2DTextureForTest(wgpu::TextureFormat format) {
+        wgpu::TextureDescriptor textureDescriptor;
+        textureDescriptor.dimension = wgpu::TextureDimension::e2D;
         textureDescriptor.format = format;
         textureDescriptor.usage =
-            dawn::TextureUsage::OutputAttachment | dawn::TextureUsage::CopySrc;
+            wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
         textureDescriptor.arrayLayerCount = 1;
         textureDescriptor.mipLevelCount = 1;
         textureDescriptor.sampleCount = 1;
@@ -71,23 +71,23 @@ class CullingTest : public DawnTest {
         return device.CreateTexture(&textureDescriptor);
     }
 
-    void DoTest(dawn::FrontFace frontFace,
-                dawn::CullMode cullMode,
+    void DoTest(wgpu::FrontFace frontFace,
+                wgpu::CullMode cullMode,
                 bool isCCWTriangleCulled,
                 bool isCWTriangleCulled) {
-        dawn::Texture colorTexture = Create2DTextureForTest(dawn::TextureFormat::RGBA8Unorm);
+        wgpu::Texture colorTexture = Create2DTextureForTest(wgpu::TextureFormat::RGBA8Unorm);
 
         utils::ComboRenderPassDescriptor renderPassDescriptor({colorTexture.CreateView()});
         renderPassDescriptor.cColorAttachments[0].clearColor = {0.0, 0.0, 1.0, 1.0};
-        renderPassDescriptor.cColorAttachments[0].loadOp = dawn::LoadOp::Clear;
+        renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
 
-        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-        dawn::RenderPassEncoder renderPass = commandEncoder.BeginRenderPass(&renderPassDescriptor);
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder renderPass = commandEncoder.BeginRenderPass(&renderPassDescriptor);
         renderPass.SetPipeline(CreatePipelineForTest(frontFace, cullMode));
         renderPass.Draw(6, 1, 0, 0);
         renderPass.EndPass();
-        dawn::CommandBuffer commandBuffer = commandEncoder.Finish();
-        dawn::Queue queue = device.CreateQueue();
+        wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
+        wgpu::Queue queue = device.CreateQueue();
         queue.Submit(1, &commandBuffer);
 
         constexpr RGBA8 kTopLeftColor = RGBA8(0, 0, 0, 255);
@@ -106,27 +106,27 @@ class CullingTest : public DawnTest {
 };
 
 TEST_P(CullingTest, CullNoneWhenCCWIsFrontFace) {
-    DoTest(dawn::FrontFace::CCW, dawn::CullMode::None, false, false);
+    DoTest(wgpu::FrontFace::CCW, wgpu::CullMode::None, false, false);
 }
 
 TEST_P(CullingTest, CullFrontFaceWhenCCWIsFrontFace) {
-    DoTest(dawn::FrontFace::CCW, dawn::CullMode::Front, true, false);
+    DoTest(wgpu::FrontFace::CCW, wgpu::CullMode::Front, true, false);
 }
 
 TEST_P(CullingTest, CullBackFaceWhenCCWIsFrontFace) {
-    DoTest(dawn::FrontFace::CCW, dawn::CullMode::Back, false, true);
+    DoTest(wgpu::FrontFace::CCW, wgpu::CullMode::Back, false, true);
 }
 
 TEST_P(CullingTest, CullNoneWhenCWIsFrontFace) {
-    DoTest(dawn::FrontFace::CW, dawn::CullMode::None, false, false);
+    DoTest(wgpu::FrontFace::CW, wgpu::CullMode::None, false, false);
 }
 
 TEST_P(CullingTest, CullFrontFaceWhenCWIsFrontFace) {
-    DoTest(dawn::FrontFace::CW, dawn::CullMode::Front, false, true);
+    DoTest(wgpu::FrontFace::CW, wgpu::CullMode::Front, false, true);
 }
 
 TEST_P(CullingTest, CullBackFaceWhenCWIsFrontFace) {
-    DoTest(dawn::FrontFace::CW, dawn::CullMode::Back, true, false);
+    DoTest(wgpu::FrontFace::CW, wgpu::CullMode::Back, true, false);
 }
 
 DAWN_INSTANTIATE_TEST(CullingTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);

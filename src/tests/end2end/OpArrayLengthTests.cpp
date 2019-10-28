@@ -24,9 +24,9 @@ class OpArrayLengthTest : public DawnTest {
         DawnTest::TestSetUp();
 
         // Create buffers of various size to check the length() implementation
-        dawn::BufferDescriptor bufferDesc;
+        wgpu::BufferDescriptor bufferDesc;
         bufferDesc.size = 4;
-        bufferDesc.usage = dawn::BufferUsage::Storage;
+        bufferDesc.usage = wgpu::BufferUsage::Storage;
         mStorageBuffer4 = device.CreateBuffer(&bufferDesc);
 
         bufferDesc.size = 256;
@@ -36,17 +36,17 @@ class OpArrayLengthTest : public DawnTest {
         mStorageBuffer512 = device.CreateBuffer(&bufferDesc);
 
         // Put them all in a bind group for tests to bind them easily.
-        dawn::ShaderStage kAllStages =
-            dawn::ShaderStage::Fragment | dawn::ShaderStage::Vertex | dawn::ShaderStage::Compute;
+        wgpu::ShaderStage kAllStages =
+            wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Compute;
         mBindGroupLayout =
-            utils::MakeBindGroupLayout(device, {{0, kAllStages, dawn::BindingType::StorageBuffer},
-                                                {1, kAllStages, dawn::BindingType::StorageBuffer},
-                                                {2, kAllStages, dawn::BindingType::StorageBuffer}});
+            utils::MakeBindGroupLayout(device, {{0, kAllStages, wgpu::BindingType::StorageBuffer},
+                                                {1, kAllStages, wgpu::BindingType::StorageBuffer},
+                                                {2, kAllStages, wgpu::BindingType::StorageBuffer}});
 
         mBindGroup = utils::MakeBindGroup(device, mBindGroupLayout,
                                           {
                                               {0, mStorageBuffer4, 0, 4},
-                                              {1, mStorageBuffer256, 0, dawn::kWholeSize},
+                                              {1, mStorageBuffer256, 0, wgpu::kWholeSize},
                                               {2, mStorageBuffer512, 0, 512},
                                           });
 
@@ -76,12 +76,12 @@ class OpArrayLengthTest : public DawnTest {
         mExpectedLengths = {1, 64, 56};
     }
 
-    dawn::Buffer mStorageBuffer4;
-    dawn::Buffer mStorageBuffer256;
-    dawn::Buffer mStorageBuffer512;
+    wgpu::Buffer mStorageBuffer4;
+    wgpu::Buffer mStorageBuffer256;
+    wgpu::Buffer mStorageBuffer512;
 
-    dawn::BindGroupLayout mBindGroupLayout;
-    dawn::BindGroup mBindGroup;
+    wgpu::BindGroupLayout mBindGroupLayout;
+    wgpu::BindGroup mBindGroup;
     std::string mShaderInterface;
     std::array<uint32_t, 3> mExpectedLengths;
 };
@@ -93,25 +93,25 @@ TEST_P(OpArrayLengthTest, Compute) {
     DAWN_SKIP_TEST_IF(IsNvidia() && IsOpenGL());
 
     // Create a buffer to hold the result sizes and create a bindgroup for it.
-    dawn::BufferDescriptor bufferDesc;
-    bufferDesc.usage = dawn::BufferUsage::Storage | dawn::BufferUsage::CopySrc;
+    wgpu::BufferDescriptor bufferDesc;
+    bufferDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
     bufferDesc.size = sizeof(uint32_t) * mExpectedLengths.size();
-    dawn::Buffer resultBuffer = device.CreateBuffer(&bufferDesc);
+    wgpu::Buffer resultBuffer = device.CreateBuffer(&bufferDesc);
 
-    dawn::BindGroupLayout resultLayout = utils::MakeBindGroupLayout(
-        device, {{0, dawn::ShaderStage::Compute, dawn::BindingType::StorageBuffer}});
+    wgpu::BindGroupLayout resultLayout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer}});
 
-    dawn::BindGroup resultBindGroup =
-        utils::MakeBindGroup(device, resultLayout, {{0, resultBuffer, 0, dawn::kWholeSize}});
+    wgpu::BindGroup resultBindGroup =
+        utils::MakeBindGroup(device, resultLayout, {{0, resultBuffer, 0, wgpu::kWholeSize}});
 
     // Create the compute pipeline that stores the length()s in the result buffer.
-    dawn::BindGroupLayout bgls[] = {mBindGroupLayout, resultLayout};
-    dawn::PipelineLayoutDescriptor plDesc;
+    wgpu::BindGroupLayout bgls[] = {mBindGroupLayout, resultLayout};
+    wgpu::PipelineLayoutDescriptor plDesc;
     plDesc.bindGroupLayoutCount = 2;
     plDesc.bindGroupLayouts = bgls;
-    dawn::PipelineLayout pl = device.CreatePipelineLayout(&plDesc);
+    wgpu::PipelineLayout pl = device.CreatePipelineLayout(&plDesc);
 
-    dawn::ComputePipelineDescriptor pipelineDesc;
+    wgpu::ComputePipelineDescriptor pipelineDesc;
     pipelineDesc.layout = pl;
     pipelineDesc.computeStage.entryPoint = "main";
     pipelineDesc.computeStage.module =
@@ -127,18 +127,18 @@ TEST_P(OpArrayLengthTest, Compute) {
                 result[2] = buffer3.data.length();
             })")
                                       .c_str());
-    dawn::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
     // Run a single instance of the compute shader
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-    dawn::ComputePassEncoder pass = encoder.BeginComputePass();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, mBindGroup);
     pass.SetBindGroup(1, resultBindGroup);
     pass.Dispatch(1, 1, 1);
     pass.EndPass();
 
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     EXPECT_BUFFER_U32_RANGE_EQ(mExpectedLengths.data(), resultBuffer, 0, 3);
@@ -154,7 +154,7 @@ TEST_P(OpArrayLengthTest, Fragment) {
 
     // Create the pipeline that computes the length of the buffers and writes it to the only render
     // pass pixel.
-    dawn::ShaderModule vsModule =
+    wgpu::ShaderModule vsModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
         #version 450
         void main() {
@@ -162,7 +162,7 @@ TEST_P(OpArrayLengthTest, Fragment) {
             gl_PointSize = 1.0;
         })");
 
-    dawn::ShaderModule fsModule =
+    wgpu::ShaderModule fsModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment,
                                   (R"(
         #version 450
@@ -179,22 +179,22 @@ TEST_P(OpArrayLengthTest, Fragment) {
     utils::ComboRenderPipelineDescriptor descriptor(device);
     descriptor.vertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
-    descriptor.primitiveTopology = dawn::PrimitiveTopology::PointList;
+    descriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
     descriptor.cColorStates[0].format = renderPass.colorFormat;
     descriptor.layout = utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
-    dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
     // "Draw" the lengths to the texture.
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, mBindGroup);
         pass.Draw(1, 1, 0, 0);
         pass.EndPass();
     }
 
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     RGBA8 expectedColor = RGBA8(mExpectedLengths[0], mExpectedLengths[1], mExpectedLengths[2], 0);
@@ -211,7 +211,7 @@ TEST_P(OpArrayLengthTest, Vertex) {
 
     // Create the pipeline that computes the length of the buffers and writes it to the only render
     // pass pixel.
-    dawn::ShaderModule vsModule =
+    wgpu::ShaderModule vsModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex,
                                   (R"(
         #version 450
@@ -228,7 +228,7 @@ TEST_P(OpArrayLengthTest, Vertex) {
         })")
                                       .c_str());
 
-    dawn::ShaderModule fsModule =
+    wgpu::ShaderModule fsModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
         #version 450
         layout(location = 0) out vec4 fragColor;
@@ -240,22 +240,22 @@ TEST_P(OpArrayLengthTest, Vertex) {
     utils::ComboRenderPipelineDescriptor descriptor(device);
     descriptor.vertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
-    descriptor.primitiveTopology = dawn::PrimitiveTopology::PointList;
+    descriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
     descriptor.cColorStates[0].format = renderPass.colorFormat;
     descriptor.layout = utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
-    dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
     // "Draw" the lengths to the texture.
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, mBindGroup);
         pass.Draw(1, 1, 0, 0);
         pass.EndPass();
     }
 
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     RGBA8 expectedColor = RGBA8(mExpectedLengths[0], mExpectedLengths[1], mExpectedLengths[2], 0);

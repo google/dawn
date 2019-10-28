@@ -255,8 +255,8 @@ DawnTestBase::DawnTestBase(const DawnTestParam& param) : mParam(param) {
 DawnTestBase::~DawnTestBase() {
     // We need to destroy child objects before the Device
     mReadbackSlots.clear();
-    queue = dawn::Queue();
-    device = dawn::Device();
+    queue = wgpu::Queue();
+    device = wgpu::Device();
 
     mWireClient = nullptr;
     mWireServer = nullptr;
@@ -423,7 +423,7 @@ void DawnTestBase::SetUp() {
     backendProcs = dawn_native::GetProcs();
 
     // Choose whether to use the backend procs and devices directly, or set up the wire.
-    DawnDevice cDevice = nullptr;
+    WGPUDevice cDevice = nullptr;
     DawnProcTable procs;
 
     if (gTestEnv->UsesWire()) {
@@ -442,7 +442,7 @@ void DawnTestBase::SetUp() {
         clientDesc.serializer = mC2sBuf.get();
 
         mWireClient.reset(new dawn_wire::WireClient(clientDesc));
-        DawnDevice clientDevice = mWireClient->GetDevice();
+        WGPUDevice clientDevice = mWireClient->GetDevice();
         DawnProcTable clientProcs = mWireClient->GetProcs();
         mS2cBuf->SetHandler(mWireClient.get());
 
@@ -456,7 +456,7 @@ void DawnTestBase::SetUp() {
     // Set up the device and queue because all tests need them, and DawnTestBase needs them too for
     // the deferred expectations.
     dawnProcSetProcs(&procs);
-    device = dawn::Device::Acquire(cDevice);
+    device = wgpu::Device::Acquire(cDevice);
     queue = device.CreateQueue();
 
     device.SetUncapturedErrorCallback(OnDeviceError, this);
@@ -491,8 +491,8 @@ dawn_native::PCIInfo DawnTestBase::GetPCIInfo() const {
 }
 
 // static
-void DawnTestBase::OnDeviceError(DawnErrorType type, const char* message, void* userdata) {
-    ASSERT(type != DAWN_ERROR_TYPE_NO_ERROR);
+void DawnTestBase::OnDeviceError(WGPUErrorType type, const char* message, void* userdata) {
+    ASSERT(type != WGPUErrorType_NoError);
     DawnTestBase* self = static_cast<DawnTestBase*>(userdata);
 
     ASSERT_TRUE(self->mExpectError) << "Got unexpected device error: " << message;
@@ -502,7 +502,7 @@ void DawnTestBase::OnDeviceError(DawnErrorType type, const char* message, void* 
 
 std::ostringstream& DawnTestBase::AddBufferExpectation(const char* file,
                                                        int line,
-                                                       const dawn::Buffer& buffer,
+                                                       const wgpu::Buffer& buffer,
                                                        uint64_t offset,
                                                        uint64_t size,
                                                        detail::Expectation* expectation) {
@@ -510,10 +510,10 @@ std::ostringstream& DawnTestBase::AddBufferExpectation(const char* file,
 
     // We need to enqueue the copy immediately because by the time we resolve the expectation,
     // the buffer might have been modified.
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyBufferToBuffer(buffer, offset, readback.buffer, readback.offset, size);
 
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     DeferredExpectation deferred;
@@ -533,7 +533,7 @@ std::ostringstream& DawnTestBase::AddBufferExpectation(const char* file,
 
 std::ostringstream& DawnTestBase::AddTextureExpectation(const char* file,
                                                         int line,
-                                                        const dawn::Texture& texture,
+                                                        const wgpu::Texture& texture,
                                                         uint32_t x,
                                                         uint32_t y,
                                                         uint32_t width,
@@ -549,16 +549,16 @@ std::ostringstream& DawnTestBase::AddTextureExpectation(const char* file,
 
     // We need to enqueue the copy immediately because by the time we resolve the expectation,
     // the texture might have been modified.
-    dawn::TextureCopyView textureCopyView =
+    wgpu::TextureCopyView textureCopyView =
         utils::CreateTextureCopyView(texture, level, slice, {x, y, 0});
-    dawn::BufferCopyView bufferCopyView =
+    wgpu::BufferCopyView bufferCopyView =
         utils::CreateBufferCopyView(readback.buffer, readback.offset, rowPitch, 0);
-    dawn::Extent3D copySize = {width, height, 1};
+    wgpu::Extent3D copySize = {width, height, 1};
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copySize);
 
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     DeferredExpectation deferred;
@@ -595,9 +595,9 @@ void DawnTestBase::FlushWire() {
 DawnTestBase::ReadbackReservation DawnTestBase::ReserveReadback(uint64_t readbackSize) {
     // For now create a new MapRead buffer for each readback
     // TODO(cwallez@chromium.org): eventually make bigger buffers and allocate linearly?
-    dawn::BufferDescriptor descriptor;
+    wgpu::BufferDescriptor descriptor;
     descriptor.size = readbackSize;
-    descriptor.usage = dawn::BufferUsage::MapRead | dawn::BufferUsage::CopyDst;
+    descriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
 
     ReadbackSlot slot;
     slot.bufferSize = readbackSize;
@@ -632,11 +632,11 @@ void DawnTestBase::MapSlotsSynchronously() {
 }
 
 // static
-void DawnTestBase::SlotMapReadCallback(DawnBufferMapAsyncStatus status,
+void DawnTestBase::SlotMapReadCallback(WGPUBufferMapAsyncStatus status,
                                        const void* data,
                                        uint64_t,
                                        void* userdata_) {
-    DAWN_ASSERT(status == DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS);
+    DAWN_ASSERT(status == WGPUBufferMapAsyncStatus_Success);
 
     auto userdata = static_cast<MapReadUserdata*>(userdata_);
     userdata->test->mReadbackSlots[userdata->slot].mappedData = data;

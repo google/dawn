@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/dawncpp.h"
 #include "tests/DawnTest.h"
 
 #include "utils/WGPUHelpers.h"
@@ -45,50 +44,50 @@ class ComputeIndirectTests : public DawnTest {
 
 void ComputeIndirectTests::BasicTest(std::initializer_list<uint32_t> bufferList,
                                      uint64_t indirectOffset) {
-    dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
         device, {
-                    {0, dawn::ShaderStage::Compute, dawn::BindingType::UniformBuffer},
-                    {1, dawn::ShaderStage::Compute, dawn::BindingType::StorageBuffer},
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::UniformBuffer},
+                    {1, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
                 });
 
     // Set up shader and pipeline
-    dawn::ShaderModule module =
+    wgpu::ShaderModule module =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, shaderSource);
-    dawn::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
+    wgpu::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
-    dawn::ComputePipelineDescriptor csDesc;
+    wgpu::ComputePipelineDescriptor csDesc;
     csDesc.layout = pl;
     csDesc.computeStage.module = module;
     csDesc.computeStage.entryPoint = "main";
-    dawn::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
 
     // Set up dst storage buffer to contain dispatch x, y, z
-    dawn::Buffer dst = utils::CreateBufferFromData<uint32_t>(
+    wgpu::Buffer dst = utils::CreateBufferFromData<uint32_t>(
         device,
-        dawn::BufferUsage::Storage | dawn::BufferUsage::CopySrc | dawn::BufferUsage::CopyDst,
+        wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst,
         {0, 0, 0});
 
     std::vector<uint32_t> indirectBufferData = bufferList;
 
-    dawn::Buffer indirectBuffer =
-        utils::CreateBufferFromData<uint32_t>(device, dawn::BufferUsage::Indirect, bufferList);
+    wgpu::Buffer indirectBuffer =
+        utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Indirect, bufferList);
 
-    dawn::Buffer expectedBuffer =
+    wgpu::Buffer expectedBuffer =
         utils::CreateBufferFromData(device, &indirectBufferData[indirectOffset / sizeof(uint32_t)],
-                                    3 * sizeof(uint32_t), dawn::BufferUsage::Uniform);
+                                    3 * sizeof(uint32_t), wgpu::BufferUsage::Uniform);
 
     // Set up bind group and issue dispatch
-    dawn::BindGroup bindGroup =
+    wgpu::BindGroup bindGroup =
         utils::MakeBindGroup(device, bgl,
                              {
                                  {0, expectedBuffer, 0, 3 * sizeof(uint32_t)},
                                  {1, dst, 0, 3 * sizeof(uint32_t)},
                              });
 
-    dawn::CommandBuffer commands;
+    wgpu::CommandBuffer commands;
     {
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-        dawn::ComputePassEncoder pass = encoder.BeginComputePass();
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
         pass.DispatchIndirect(indirectBuffer, indirectOffset);

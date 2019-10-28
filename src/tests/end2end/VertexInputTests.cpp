@@ -18,8 +18,8 @@
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
-using dawn::InputStepMode;
-using dawn::VertexFormat;
+using wgpu::InputStepMode;
+using wgpu::VertexFormat;
 
 // Input state tests all work the same way: the test will render triangles in a grid up to 4x4. Each triangle
 // is position in the grid such that X will correspond to the "triangle number" and the Y to the instance number.
@@ -64,7 +64,7 @@ class VertexInputTest : public DawnTest {
         VertexFormat format;
         InputStepMode step;
     };
-    dawn::RenderPipeline MakeTestPipeline(const dawn::VertexInputDescriptor& vertexInput,
+    wgpu::RenderPipeline MakeTestPipeline(const wgpu::VertexInputDescriptor& vertexInput,
                                           int multiplier,
                                           const std::vector<ShaderTestSpec>& testSpec) {
         std::ostringstream vs;
@@ -117,9 +117,9 @@ class VertexInputTest : public DawnTest {
         vs << "    }\n;";
         vs << "}\n";
 
-        dawn::ShaderModule vsModule =
+        wgpu::ShaderModule vsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vs.str().c_str());
-        dawn::ShaderModule fsModule =
+        wgpu::ShaderModule fsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) in vec4 color;
@@ -177,26 +177,26 @@ class VertexInputTest : public DawnTest {
     }
 
     template <typename T>
-    dawn::Buffer MakeVertexBuffer(std::vector<T> data) {
+    wgpu::Buffer MakeVertexBuffer(std::vector<T> data) {
         return utils::CreateBufferFromData(device, data.data(),
                                            static_cast<uint32_t>(data.size() * sizeof(T)),
-                                           dawn::BufferUsage::Vertex);
+                                           wgpu::BufferUsage::Vertex);
     }
 
     struct DrawVertexBuffer {
         uint32_t location;
-        dawn::Buffer* buffer;
+        wgpu::Buffer* buffer;
     };
-    void DoTestDraw(const dawn::RenderPipeline& pipeline,
+    void DoTestDraw(const wgpu::RenderPipeline& pipeline,
                     unsigned int triangles,
                     unsigned int instances,
                     std::vector<DrawVertexBuffer> vertexBuffers) {
         EXPECT_LE(triangles, 4u);
         EXPECT_LE(instances, 4u);
 
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
 
         for (const DrawVertexBuffer& buffer : vertexBuffers) {
@@ -206,7 +206,7 @@ class VertexInputTest : public DawnTest {
         pass.Draw(triangles * 3, instances, 0, 0);
         pass.EndPass();
 
-        dawn::CommandBuffer commands = encoder.Finish();
+        wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
         CheckResult(triangles, instances);
@@ -235,14 +235,16 @@ class VertexInputTest : public DawnTest {
 TEST_P(VertexInputTest, Basic) {
     utils::ComboVertexInputDescriptor vertexInput = MakeVertexInput(
         {{4 * sizeof(float), InputStepMode::Vertex, {{0, 0, VertexFormat::Float4}}}});
-    dawn::RenderPipeline pipeline =
+    wgpu::RenderPipeline pipeline =
         MakeTestPipeline(vertexInput, 1, {{0, VertexFormat::Float4, InputStepMode::Vertex}});
 
-    dawn::Buffer buffer0 = MakeVertexBuffer<float>({
+    // clang-format off
+    wgpu::Buffer buffer0 = MakeVertexBuffer<float>({
         0, 1, 2, 3,
         1, 2, 3, 4,
         2, 3, 4, 5
     });
+    // clang-format on
     DoTestDraw(pipeline, 1, 1, {DrawVertexBuffer{0, &buffer0}});
 }
 
@@ -253,11 +255,14 @@ TEST_P(VertexInputTest, ZeroStride) {
 
     utils::ComboVertexInputDescriptor vertexInput =
         MakeVertexInput({{0, InputStepMode::Vertex, {{0, 0, VertexFormat::Float4}}}});
-    dawn::RenderPipeline pipeline =
+    wgpu::RenderPipeline pipeline =
         MakeTestPipeline(vertexInput, 0, {{0, VertexFormat::Float4, InputStepMode::Vertex}});
 
-    dawn::Buffer buffer0 = MakeVertexBuffer<float>({
-        0, 1, 2, 3,
+    wgpu::Buffer buffer0 = MakeVertexBuffer<float>({
+        0,
+        1,
+        2,
+        3,
     });
     DoTestDraw(pipeline, 1, 1, {DrawVertexBuffer{0, &buffer0}});
 }
@@ -271,36 +276,30 @@ TEST_P(VertexInputTest, AttributeExpanding) {
     {
         utils::ComboVertexInputDescriptor vertexInput =
             MakeVertexInput({{0, InputStepMode::Vertex, {{0, 0, VertexFormat::Float}}}});
-        dawn::RenderPipeline pipeline =
+        wgpu::RenderPipeline pipeline =
             MakeTestPipeline(vertexInput, 0, {{0, VertexFormat::Float, InputStepMode::Vertex}});
 
-        dawn::Buffer buffer0 = MakeVertexBuffer<float>({
-            0, 1, 2, 3
-        });
+        wgpu::Buffer buffer0 = MakeVertexBuffer<float>({0, 1, 2, 3});
         DoTestDraw(pipeline, 1, 1, {DrawVertexBuffer{0, &buffer0}});
     }
     // RG32F case
     {
         utils::ComboVertexInputDescriptor vertexInput =
             MakeVertexInput({{0, InputStepMode::Vertex, {{0, 0, VertexFormat::Float2}}}});
-        dawn::RenderPipeline pipeline =
+        wgpu::RenderPipeline pipeline =
             MakeTestPipeline(vertexInput, 0, {{0, VertexFormat::Float2, InputStepMode::Vertex}});
 
-        dawn::Buffer buffer0 = MakeVertexBuffer<float>({
-            0, 1, 2, 3
-        });
+        wgpu::Buffer buffer0 = MakeVertexBuffer<float>({0, 1, 2, 3});
         DoTestDraw(pipeline, 1, 1, {DrawVertexBuffer{0, &buffer0}});
     }
     // RGB32F case
     {
         utils::ComboVertexInputDescriptor vertexInput =
             MakeVertexInput({{0, InputStepMode::Vertex, {{0, 0, VertexFormat::Float3}}}});
-        dawn::RenderPipeline pipeline =
+        wgpu::RenderPipeline pipeline =
             MakeTestPipeline(vertexInput, 0, {{0, VertexFormat::Float3, InputStepMode::Vertex}});
 
-        dawn::Buffer buffer0 = MakeVertexBuffer<float>({
-            0, 1, 2, 3
-        });
+        wgpu::Buffer buffer0 = MakeVertexBuffer<float>({0, 1, 2, 3});
         DoTestDraw(pipeline, 1, 1, {DrawVertexBuffer{0, &buffer0}});
     }
 }
@@ -312,14 +311,16 @@ TEST_P(VertexInputTest, StrideLargerThanAttributes) {
 
     utils::ComboVertexInputDescriptor vertexInput = MakeVertexInput(
         {{8 * sizeof(float), InputStepMode::Vertex, {{0, 0, VertexFormat::Float4}}}});
-    dawn::RenderPipeline pipeline =
+    wgpu::RenderPipeline pipeline =
         MakeTestPipeline(vertexInput, 1, {{0, VertexFormat::Float4, InputStepMode::Vertex}});
 
-    dawn::Buffer buffer0 = MakeVertexBuffer<float>({
+    // clang-format off
+    wgpu::Buffer buffer0 = MakeVertexBuffer<float>({
         0, 1, 2, 3, 0, 0, 0, 0,
         1, 2, 3, 4, 0, 0, 0, 0,
         2, 3, 4, 5, 0, 0, 0, 0,
     });
+    // clang-format on
     DoTestDraw(pipeline, 1, 1, {DrawVertexBuffer{0, &buffer0}});
 }
 
@@ -329,14 +330,16 @@ TEST_P(VertexInputTest, TwoAttributesAtAnOffsetVertex) {
         {{8 * sizeof(float),
           InputStepMode::Vertex,
           {{0, 0, VertexFormat::Float4}, {1, 4 * sizeof(float), VertexFormat::Float4}}}});
-    dawn::RenderPipeline pipeline =
+    wgpu::RenderPipeline pipeline =
         MakeTestPipeline(vertexInput, 1, {{0, VertexFormat::Float4, InputStepMode::Vertex}});
 
-    dawn::Buffer buffer0 = MakeVertexBuffer<float>({
+    // clang-format off
+    wgpu::Buffer buffer0 = MakeVertexBuffer<float>({
         0, 1, 2, 3, 0, 1, 2, 3,
         1, 2, 3, 4, 1, 2, 3, 4,
         2, 3, 4, 5, 2, 3, 4, 5,
     });
+    // clang-format on
     DoTestDraw(pipeline, 1, 1, {DrawVertexBuffer{0, &buffer0}});
 }
 
@@ -346,14 +349,16 @@ TEST_P(VertexInputTest, TwoAttributesAtAnOffsetInstance) {
         {{8 * sizeof(float),
           InputStepMode::Instance,
           {{0, 0, VertexFormat::Float4}, {1, 4 * sizeof(float), VertexFormat::Float4}}}});
-    dawn::RenderPipeline pipeline =
+    wgpu::RenderPipeline pipeline =
         MakeTestPipeline(vertexInput, 1, {{0, VertexFormat::Float4, InputStepMode::Instance}});
 
-    dawn::Buffer buffer0 = MakeVertexBuffer<float>({
+    // clang-format off
+    wgpu::Buffer buffer0 = MakeVertexBuffer<float>({
         0, 1, 2, 3, 0, 1, 2, 3,
         1, 2, 3, 4, 1, 2, 3, 4,
         2, 3, 4, 5, 2, 3, 4, 5,
     });
+    // clang-format on
     DoTestDraw(pipeline, 1, 1, {DrawVertexBuffer{0, &buffer0}});
 }
 
@@ -361,15 +366,17 @@ TEST_P(VertexInputTest, TwoAttributesAtAnOffsetInstance) {
 TEST_P(VertexInputTest, PureInstance) {
     utils::ComboVertexInputDescriptor vertexInput = MakeVertexInput(
         {{4 * sizeof(float), InputStepMode::Instance, {{0, 0, VertexFormat::Float4}}}});
-    dawn::RenderPipeline pipeline =
+    wgpu::RenderPipeline pipeline =
         MakeTestPipeline(vertexInput, 1, {{0, VertexFormat::Float4, InputStepMode::Instance}});
 
-    dawn::Buffer buffer0 = MakeVertexBuffer<float>({
+    // clang-format off
+    wgpu::Buffer buffer0 = MakeVertexBuffer<float>({
         0, 1, 2, 3,
         1, 2, 3, 4,
         2, 3, 4, 5,
         3, 4, 5, 6,
     });
+    // clang-format on
     DoTestDraw(pipeline, 1, 4, {DrawVertexBuffer{0, &buffer0}});
 }
 
@@ -383,25 +390,27 @@ TEST_P(VertexInputTest, MixedEverything) {
          {10 * sizeof(float),
           InputStepMode::Instance,
           {{2, 0, VertexFormat::Float3}, {3, 5 * sizeof(float), VertexFormat::Float4}}}});
-    dawn::RenderPipeline pipeline =
+    wgpu::RenderPipeline pipeline =
         MakeTestPipeline(vertexInput, 1,
                          {{0, VertexFormat::Float, InputStepMode::Vertex},
                           {1, VertexFormat::Float2, InputStepMode::Vertex},
                           {2, VertexFormat::Float3, InputStepMode::Instance},
                           {3, VertexFormat::Float4, InputStepMode::Instance}});
 
-    dawn::Buffer buffer0 = MakeVertexBuffer<float>({
+    // clang-format off
+    wgpu::Buffer buffer0 = MakeVertexBuffer<float>({
         0, 1, 2, 3, 0, 0, 0, 1, 2, 3, 0, 0,
         1, 2, 3, 4, 0, 0, 1, 2, 3, 4, 0, 0,
         2, 3, 4, 5, 0, 0, 2, 3, 4, 5, 0, 0,
         3, 4, 5, 6, 0, 0, 3, 4, 5, 6, 0, 0,
     });
-    dawn::Buffer buffer1 = MakeVertexBuffer<float>({
+    wgpu::Buffer buffer1 = MakeVertexBuffer<float>({
         0, 1, 2, 3, 0, 0, 1, 2, 3, 0,
         1, 2, 3, 4, 0, 1, 2, 3, 4, 0,
         2, 3, 4, 5, 0, 2, 3, 4, 5, 0,
         3, 4, 5, 6, 0, 3, 4, 5, 6, 0,
     });
+    // clang-format on
     DoTestDraw(pipeline, 1, 1, {{0, &buffer0}, {1, &buffer1}});
 }
 
@@ -411,19 +420,21 @@ TEST_P(VertexInputTest, UnusedVertexSlot) {
     utils::ComboVertexInputDescriptor instanceVertexInput = MakeVertexInput(
         {{0, InputStepMode::Vertex, {}},
          {4 * sizeof(float), InputStepMode::Instance, {{0, 0, VertexFormat::Float4}}}});
-    dawn::RenderPipeline instancePipeline = MakeTestPipeline(
+    wgpu::RenderPipeline instancePipeline = MakeTestPipeline(
         instanceVertexInput, 1, {{0, VertexFormat::Float4, InputStepMode::Instance}});
 
-    dawn::Buffer buffer = MakeVertexBuffer<float>({
+    // clang-format off
+    wgpu::Buffer buffer = MakeVertexBuffer<float>({
         0, 1, 2, 3,
         1, 2, 3, 4,
         2, 3, 4, 5,
         3, 4, 5, 6,
     });
+    // clang-format on
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
-    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
 
     pass.SetVertexBuffer(0, buffer);
     pass.SetVertexBuffer(1, buffer);
@@ -433,7 +444,7 @@ TEST_P(VertexInputTest, UnusedVertexSlot) {
 
     pass.EndPass();
 
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     CheckResult(1, 4);
@@ -447,26 +458,28 @@ TEST_P(VertexInputTest, MultiplePipelinesMixedVertexInput) {
     // Basic input state, using slot 0
     utils::ComboVertexInputDescriptor vertexVertexInput = MakeVertexInput(
         {{4 * sizeof(float), InputStepMode::Vertex, {{0, 0, VertexFormat::Float4}}}});
-    dawn::RenderPipeline vertexPipeline =
+    wgpu::RenderPipeline vertexPipeline =
         MakeTestPipeline(vertexVertexInput, 1, {{0, VertexFormat::Float4, InputStepMode::Vertex}});
 
     // Instance input state, using slot 1
     utils::ComboVertexInputDescriptor instanceVertexInput = MakeVertexInput(
         {{0, InputStepMode::Instance, {}},
          {4 * sizeof(float), InputStepMode::Instance, {{0, 0, VertexFormat::Float4}}}});
-    dawn::RenderPipeline instancePipeline = MakeTestPipeline(
+    wgpu::RenderPipeline instancePipeline = MakeTestPipeline(
         instanceVertexInput, 1, {{0, VertexFormat::Float4, InputStepMode::Instance}});
 
-    dawn::Buffer buffer = MakeVertexBuffer<float>({
+    // clang-format off
+    wgpu::Buffer buffer = MakeVertexBuffer<float>({
         0, 1, 2, 3,
         1, 2, 3, 4,
         2, 3, 4, 5,
         3, 4, 5, 6,
     });
+    // clang-format on
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
-    dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
 
     pass.SetVertexBuffer(0, buffer);
     pass.SetVertexBuffer(1, buffer);
@@ -479,7 +492,7 @@ TEST_P(VertexInputTest, MultiplePipelinesMixedVertexInput) {
 
     pass.EndPass();
 
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     CheckResult(1, 4);
@@ -500,10 +513,10 @@ TEST_P(VertexInputTest, LastAllowedVertexBuffer) {
     vertexInput.cAttributes[0].offset = 0;
     vertexInput.cAttributes[0].format = VertexFormat::Float4;
 
-    dawn::RenderPipeline pipeline =
+    wgpu::RenderPipeline pipeline =
         MakeTestPipeline(vertexInput, 1, {{0, VertexFormat::Float4, InputStepMode::Vertex}});
 
-    dawn::Buffer buffer0 = MakeVertexBuffer<float>({0, 1, 2, 3, 1, 2, 3, 4, 2, 3, 4, 5});
+    wgpu::Buffer buffer0 = MakeVertexBuffer<float>({0, 1, 2, 3, 1, 2, 3, 4, 2, 3, 4, 5});
     DoTestDraw(pipeline, 1, 1, {DrawVertexBuffer{kMaxVertexBuffers - 1, &buffer0}});
 }
 
@@ -523,7 +536,7 @@ class OptionalVertexInputTest : public DawnTest {};
 TEST_P(OptionalVertexInputTest, Basic) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 3, 3);
 
-    dawn::ShaderModule vsModule =
+    wgpu::ShaderModule vsModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
             #version 450
             void main() {
@@ -531,7 +544,7 @@ TEST_P(OptionalVertexInputTest, Basic) {
                 gl_PointSize = 1.0;
             })");
 
-    dawn::ShaderModule fsModule =
+    wgpu::ShaderModule fsModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
             #version 450
             layout(location = 0) out vec4 fragColor;
@@ -542,20 +555,20 @@ TEST_P(OptionalVertexInputTest, Basic) {
     utils::ComboRenderPipelineDescriptor descriptor(device);
     descriptor.vertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
-    descriptor.primitiveTopology = dawn::PrimitiveTopology::PointList;
+    descriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
     descriptor.vertexInput = nullptr;
 
-    dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.Draw(1, 1, 0, 0);
         pass.EndPass();
     }
 
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 1, 1);

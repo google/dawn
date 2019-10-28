@@ -97,16 +97,16 @@ class BufferUploadPerf : public DawnPerfTestWithParams<BufferUploadParams> {
   private:
     void Step() override;
 
-    dawn::Buffer dst;
+    wgpu::Buffer dst;
     std::vector<uint8_t> data;
 };
 
 void BufferUploadPerf::TestSetUp() {
     DawnPerfTestWithParams<BufferUploadParams>::TestSetUp();
 
-    dawn::BufferDescriptor desc = {};
+    wgpu::BufferDescriptor desc = {};
     desc.size = data.size();
-    desc.usage = dawn::BufferUsage::CopyDst;
+    desc.usage = wgpu::BufferUsage::CopyDst;
 
     dst = device.CreateBuffer(&desc);
 }
@@ -122,11 +122,11 @@ void BufferUploadPerf::Step() {
         } break;
 
         case UploadMethod::CreateBufferMapped: {
-            dawn::BufferDescriptor desc = {};
+            wgpu::BufferDescriptor desc = {};
             desc.size = data.size();
-            desc.usage = dawn::BufferUsage::CopySrc | dawn::BufferUsage::MapWrite;
+            desc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
 
-            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
             for (unsigned int i = 0; i < kNumIterations; ++i) {
                 auto result = device.CreateBufferMapped(&desc);
@@ -135,7 +135,7 @@ void BufferUploadPerf::Step() {
                 encoder.CopyBufferToBuffer(result.buffer, 0, dst, 0, data.size());
             }
 
-            dawn::CommandBuffer commands = encoder.Finish();
+            wgpu::CommandBuffer commands = encoder.Finish();
             queue.Submit(1, &commands);
         } break;
     }

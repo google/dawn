@@ -208,9 +208,9 @@ void DawnPerfTestBase::DoRunLoop(double maxRunTime) {
     mNumStepsPerformed = 0;
     mRunning = true;
 
-    dawn::FenceDescriptor desc = {};
+    wgpu::FenceDescriptor desc = {};
     uint64_t signaledFenceValue = 0;
-    dawn::Fence fence = mTest->queue.CreateFence(&desc);
+    wgpu::Fence fence = mTest->queue.CreateFence(&desc);
 
     mTimer->Start();
 

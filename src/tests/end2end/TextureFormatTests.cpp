@@ -117,45 +117,45 @@ class TextureFormatTest : public DawnTest {
 
     // Structure containing all the information that tests need to know about the format.
     struct FormatTestInfo {
-        dawn::TextureFormat format;
+        wgpu::TextureFormat format;
         uint32_t texelByteSize;
-        dawn::TextureComponentType type;
+        wgpu::TextureComponentType type;
         uint32_t componentCount;
     };
 
     // Returns a reprensentation of a format that can be used to contain the "uncompressed" values
     // of the format. That the equivalent format with all channels 32bit-sized.
     FormatTestInfo GetUncompressedFormatInfo(FormatTestInfo formatInfo) {
-        std::array<dawn::TextureFormat, 4> floatFormats = {
-            dawn::TextureFormat::R32Float,
-            dawn::TextureFormat::RG32Float,
-            dawn::TextureFormat::RGBA32Float,
-            dawn::TextureFormat::RGBA32Float,
+        std::array<wgpu::TextureFormat, 4> floatFormats = {
+            wgpu::TextureFormat::R32Float,
+            wgpu::TextureFormat::RG32Float,
+            wgpu::TextureFormat::RGBA32Float,
+            wgpu::TextureFormat::RGBA32Float,
         };
-        std::array<dawn::TextureFormat, 4> sintFormats = {
-            dawn::TextureFormat::R32Sint,
-            dawn::TextureFormat::RG32Sint,
-            dawn::TextureFormat::RGBA32Sint,
-            dawn::TextureFormat::RGBA32Sint,
+        std::array<wgpu::TextureFormat, 4> sintFormats = {
+            wgpu::TextureFormat::R32Sint,
+            wgpu::TextureFormat::RG32Sint,
+            wgpu::TextureFormat::RGBA32Sint,
+            wgpu::TextureFormat::RGBA32Sint,
         };
-        std::array<dawn::TextureFormat, 4> uintFormats = {
-            dawn::TextureFormat::R32Uint,
-            dawn::TextureFormat::RG32Uint,
-            dawn::TextureFormat::RGBA32Uint,
-            dawn::TextureFormat::RGBA32Uint,
+        std::array<wgpu::TextureFormat, 4> uintFormats = {
+            wgpu::TextureFormat::R32Uint,
+            wgpu::TextureFormat::RG32Uint,
+            wgpu::TextureFormat::RGBA32Uint,
+            wgpu::TextureFormat::RGBA32Uint,
         };
         std::array<uint32_t, 4> componentCounts = {1, 2, 4, 4};
 
         ASSERT(formatInfo.componentCount > 0 && formatInfo.componentCount <= 4);
-        dawn::TextureFormat format;
+        wgpu::TextureFormat format;
         switch (formatInfo.type) {
-            case dawn::TextureComponentType::Float:
+            case wgpu::TextureComponentType::Float:
                 format = floatFormats[formatInfo.componentCount - 1];
                 break;
-            case dawn::TextureComponentType::Sint:
+            case wgpu::TextureComponentType::Sint:
                 format = sintFormats[formatInfo.componentCount - 1];
                 break;
-            case dawn::TextureComponentType::Uint:
+            case wgpu::TextureComponentType::Uint:
                 format = uintFormats[formatInfo.componentCount - 1];
                 break;
             default:
@@ -168,12 +168,12 @@ class TextureFormatTest : public DawnTest {
 
     // Return a pipeline that can be used in a full-texture draw to sample from the texture in the
     // bindgroup and output its decompressed values to the render target.
-    dawn::RenderPipeline CreateSamplePipeline(FormatTestInfo sampleFormatInfo,
+    wgpu::RenderPipeline CreateSamplePipeline(FormatTestInfo sampleFormatInfo,
                                               FormatTestInfo renderFormatInfo,
-                                              dawn::BindGroupLayout bgl) {
+                                              wgpu::BindGroupLayout bgl) {
         utils::ComboRenderPipelineDescriptor desc(device);
 
-        dawn::ShaderModule vsModule =
+        wgpu::ShaderModule vsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
             #version 450
             void main() {
@@ -188,13 +188,13 @@ class TextureFormatTest : public DawnTest {
         // Compute the prefix needed for GLSL types that handle our texture's data.
         const char* prefix = nullptr;
         switch (sampleFormatInfo.type) {
-            case dawn::TextureComponentType::Float:
+            case wgpu::TextureComponentType::Float:
                 prefix = "";
                 break;
-            case dawn::TextureComponentType::Sint:
+            case wgpu::TextureComponentType::Sint:
                 prefix = "i";
                 break;
-            case dawn::TextureComponentType::Uint:
+            case wgpu::TextureComponentType::Uint:
                 prefix = "u";
                 break;
             default:
@@ -213,7 +213,7 @@ class TextureFormatTest : public DawnTest {
                  << "sampler2D(myTexture, mySampler), ivec2(gl_FragCoord), 0);\n";
         fsSource << "}";
 
-        dawn::ShaderModule fsModule = utils::CreateShaderModule(
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(
             device, utils::SingleShaderStage::Fragment, fsSource.str().c_str());
 
         desc.vertexStage.module = vsModule;
@@ -244,74 +244,74 @@ class TextureFormatTest : public DawnTest {
         ASSERT(expectedRenderDataSize % 4 == 0);
 
         // Create the texture we will sample from
-        dawn::TextureDescriptor sampleTextureDesc;
-        sampleTextureDesc.usage = dawn::TextureUsage::CopyDst | dawn::TextureUsage::Sampled;
+        wgpu::TextureDescriptor sampleTextureDesc;
+        sampleTextureDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled;
         sampleTextureDesc.size = {width, 1, 1};
         sampleTextureDesc.format = sampleFormatInfo.format;
-        dawn::Texture sampleTexture = device.CreateTexture(&sampleTextureDesc);
+        wgpu::Texture sampleTexture = device.CreateTexture(&sampleTextureDesc);
 
-        dawn::Buffer uploadBuffer = utils::CreateBufferFromData(device, sampleData, sampleDataSize,
-                                                                dawn::BufferUsage::CopySrc);
+        wgpu::Buffer uploadBuffer = utils::CreateBufferFromData(device, sampleData, sampleDataSize,
+                                                                wgpu::BufferUsage::CopySrc);
 
         // Create the texture that we will render results to
         ASSERT(expectedRenderDataSize == width * renderFormatInfo.texelByteSize);
 
-        dawn::TextureDescriptor renderTargetDesc;
-        renderTargetDesc.usage = dawn::TextureUsage::CopySrc | dawn::TextureUsage::OutputAttachment;
+        wgpu::TextureDescriptor renderTargetDesc;
+        renderTargetDesc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::OutputAttachment;
         renderTargetDesc.size = {width, 1, 1};
         renderTargetDesc.format = renderFormatInfo.format;
 
-        dawn::Texture renderTarget = device.CreateTexture(&renderTargetDesc);
+        wgpu::Texture renderTarget = device.CreateTexture(&renderTargetDesc);
 
         // Create the readback buffer for the data in renderTarget
-        dawn::BufferDescriptor readbackBufferDesc;
-        readbackBufferDesc.usage = dawn::BufferUsage::CopyDst | dawn::BufferUsage::CopySrc;
+        wgpu::BufferDescriptor readbackBufferDesc;
+        readbackBufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
         readbackBufferDesc.size = 4 * width * sampleFormatInfo.componentCount;
-        dawn::Buffer readbackBuffer = device.CreateBuffer(&readbackBufferDesc);
+        wgpu::Buffer readbackBuffer = device.CreateBuffer(&readbackBufferDesc);
 
         // Create the bind group layout for sampling the texture
-        dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-            device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::Sampler},
-                     {1, dawn::ShaderStage::Fragment, dawn::BindingType::SampledTexture, false,
-                      false, dawn::TextureViewDimension::e2D, sampleFormatInfo.type}});
+        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler},
+                     {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false,
+                      false, wgpu::TextureViewDimension::e2D, sampleFormatInfo.type}});
 
         // Prepare objects needed to sample from texture in the renderpass
-        dawn::RenderPipeline pipeline =
+        wgpu::RenderPipeline pipeline =
             CreateSamplePipeline(sampleFormatInfo, renderFormatInfo, bgl);
-        dawn::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
-        dawn::Sampler sampler = device.CreateSampler(&samplerDesc);
-        dawn::BindGroup bindGroup =
+        wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
+        wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
+        wgpu::BindGroup bindGroup =
             utils::MakeBindGroup(device, bgl, {{0, sampler}, {1, sampleTexture.CreateView()}});
 
         // Encode commands for the test that fill texture, sample it to render to renderTarget then
         // copy renderTarget in a buffer so we can read it easily.
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
         {
-            dawn::BufferCopyView bufferView = utils::CreateBufferCopyView(uploadBuffer, 0, 256, 0);
-            dawn::TextureCopyView textureView =
+            wgpu::BufferCopyView bufferView = utils::CreateBufferCopyView(uploadBuffer, 0, 256, 0);
+            wgpu::TextureCopyView textureView =
                 utils::CreateTextureCopyView(sampleTexture, 0, 0, {0, 0, 0});
-            dawn::Extent3D extent{width, 1, 1};
+            wgpu::Extent3D extent{width, 1, 1};
             encoder.CopyBufferToTexture(&bufferView, &textureView, &extent);
         }
 
         utils::ComboRenderPassDescriptor renderPassDesc({renderTarget.CreateView()});
-        dawn::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDesc);
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDesc);
         renderPass.SetPipeline(pipeline);
         renderPass.SetBindGroup(0, bindGroup);
         renderPass.Draw(3, 1, 0, 0);
         renderPass.EndPass();
 
         {
-            dawn::BufferCopyView bufferView =
+            wgpu::BufferCopyView bufferView =
                 utils::CreateBufferCopyView(readbackBuffer, 0, 256, 0);
-            dawn::TextureCopyView textureView =
+            wgpu::TextureCopyView textureView =
                 utils::CreateTextureCopyView(renderTarget, 0, 0, {0, 0, 0});
-            dawn::Extent3D extent{width, 1, 1};
+            wgpu::Extent3D extent{width, 1, 1};
             encoder.CopyTextureToBuffer(&textureView, &bufferView, &extent);
         }
 
-        dawn::CommandBuffer commands = encoder.Finish();
+        wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
         // For floats use a special expectation that understands how to compare NaNs and support a
@@ -367,7 +367,7 @@ class TextureFormatTest : public DawnTest {
     void DoUnormTest(FormatTestInfo formatInfo) {
         static_assert(!std::is_signed<T>::value && std::is_integral<T>::value, "");
         ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
-        ASSERT(formatInfo.type == dawn::TextureComponentType::Float);
+        ASSERT(formatInfo.type == wgpu::TextureComponentType::Float);
 
         T maxValue = std::numeric_limits<T>::max();
         std::vector<T> textureData = {0, 1, maxValue, maxValue};
@@ -381,7 +381,7 @@ class TextureFormatTest : public DawnTest {
     void DoSnormTest(FormatTestInfo formatInfo) {
         static_assert(std::is_signed<T>::value && std::is_integral<T>::value, "");
         ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
-        ASSERT(formatInfo.type == dawn::TextureComponentType::Float);
+        ASSERT(formatInfo.type == wgpu::TextureComponentType::Float);
 
         T maxValue = std::numeric_limits<T>::max();
         T minValue = std::numeric_limits<T>::min();
@@ -396,7 +396,7 @@ class TextureFormatTest : public DawnTest {
     void DoUintTest(FormatTestInfo formatInfo) {
         static_assert(!std::is_signed<T>::value && std::is_integral<T>::value, "");
         ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
-        ASSERT(formatInfo.type == dawn::TextureComponentType::Uint);
+        ASSERT(formatInfo.type == wgpu::TextureComponentType::Uint);
 
         T maxValue = std::numeric_limits<T>::max();
         std::vector<T> textureData = {0, 1, maxValue, maxValue};
@@ -410,7 +410,7 @@ class TextureFormatTest : public DawnTest {
     void DoSintTest(FormatTestInfo formatInfo) {
         static_assert(std::is_signed<T>::value && std::is_integral<T>::value, "");
         ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
-        ASSERT(formatInfo.type == dawn::TextureComponentType::Sint);
+        ASSERT(formatInfo.type == wgpu::TextureComponentType::Sint);
 
         T maxValue = std::numeric_limits<T>::max();
         T minValue = std::numeric_limits<T>::min();
@@ -423,7 +423,7 @@ class TextureFormatTest : public DawnTest {
 
     void DoFloat32Test(FormatTestInfo formatInfo) {
         ASSERT(sizeof(float) * formatInfo.componentCount == formatInfo.texelByteSize);
-        ASSERT(formatInfo.type == dawn::TextureComponentType::Float);
+        ASSERT(formatInfo.type == wgpu::TextureComponentType::Float);
 
         std::vector<float> textureData = {+0.0f,  -0.0f, 1.0f,     1.0e-29f,
                                           1.0e29f, NAN,   INFINITY, -INFINITY};
@@ -435,7 +435,7 @@ class TextureFormatTest : public DawnTest {
 
     void DoFloat16Test(FormatTestInfo formatInfo) {
         ASSERT(sizeof(int16_t) * formatInfo.componentCount == formatInfo.texelByteSize);
-        ASSERT(formatInfo.type == dawn::TextureComponentType::Float);
+        ASSERT(formatInfo.type == wgpu::TextureComponentType::Float);
 
         std::vector<float> uncompressedData = {+0.0f,  -0.0f, 1.0f,     1.01e-4f,
                                                1.0e4f, NAN,   INFINITY, -INFINITY};
@@ -454,18 +454,18 @@ class TextureFormatTest : public DawnTest {
 
 // Test the R8Unorm format
 TEST_P(TextureFormatTest, R8Unorm) {
-    DoUnormTest<uint8_t>({dawn::TextureFormat::R8Unorm, 1, dawn::TextureComponentType::Float, 1});
+    DoUnormTest<uint8_t>({wgpu::TextureFormat::R8Unorm, 1, wgpu::TextureComponentType::Float, 1});
 }
 
 // Test the RG8Unorm format
 TEST_P(TextureFormatTest, RG8Unorm) {
-    DoUnormTest<uint8_t>({dawn::TextureFormat::RG8Unorm, 2, dawn::TextureComponentType::Float, 2});
+    DoUnormTest<uint8_t>({wgpu::TextureFormat::RG8Unorm, 2, wgpu::TextureComponentType::Float, 2});
 }
 
 // Test the RGBA8Unorm format
 TEST_P(TextureFormatTest, RGBA8Unorm) {
     DoUnormTest<uint8_t>(
-        {dawn::TextureFormat::RGBA8Unorm, 4, dawn::TextureComponentType::Float, 4});
+        {wgpu::TextureFormat::RGBA8Unorm, 4, wgpu::TextureComponentType::Float, 4});
 }
 
 // Test the BGRA8Unorm format
@@ -473,147 +473,147 @@ TEST_P(TextureFormatTest, BGRA8Unorm) {
     uint8_t maxValue = std::numeric_limits<uint8_t>::max();
     std::vector<uint8_t> textureData = {maxValue, 1, 0, maxValue};
     std::vector<float> uncompressedData = {0.0f, 1.0f / maxValue, 1.0f, 1.0f};
-    DoFormatSamplingTest({dawn::TextureFormat::BGRA8Unorm, 4, dawn::TextureComponentType::Float, 4},
+    DoFormatSamplingTest({wgpu::TextureFormat::BGRA8Unorm, 4, wgpu::TextureComponentType::Float, 4},
                          textureData, uncompressedData);
     DoFormatRenderingTest(
-        {dawn::TextureFormat::BGRA8Unorm, 4, dawn::TextureComponentType::Float, 4},
+        {wgpu::TextureFormat::BGRA8Unorm, 4, wgpu::TextureComponentType::Float, 4},
         uncompressedData, textureData);
 }
 
 // Test the R8Snorm format
 TEST_P(TextureFormatTest, R8Snorm) {
-    DoSnormTest<int8_t>({dawn::TextureFormat::R8Snorm, 1, dawn::TextureComponentType::Float, 1});
+    DoSnormTest<int8_t>({wgpu::TextureFormat::R8Snorm, 1, wgpu::TextureComponentType::Float, 1});
 }
 
 // Test the RG8Snorm format
 TEST_P(TextureFormatTest, RG8Snorm) {
-    DoSnormTest<int8_t>({dawn::TextureFormat::RG8Snorm, 2, dawn::TextureComponentType::Float, 2});
+    DoSnormTest<int8_t>({wgpu::TextureFormat::RG8Snorm, 2, wgpu::TextureComponentType::Float, 2});
 }
 
 // Test the RGBA8Snorm format
 TEST_P(TextureFormatTest, RGBA8Snorm) {
-    DoSnormTest<int8_t>({dawn::TextureFormat::RGBA8Snorm, 4, dawn::TextureComponentType::Float, 4});
+    DoSnormTest<int8_t>({wgpu::TextureFormat::RGBA8Snorm, 4, wgpu::TextureComponentType::Float, 4});
 }
 
 // Test the R8Uint format
 TEST_P(TextureFormatTest, R8Uint) {
-    DoUintTest<uint8_t>({dawn::TextureFormat::R8Uint, 1, dawn::TextureComponentType::Uint, 1});
+    DoUintTest<uint8_t>({wgpu::TextureFormat::R8Uint, 1, wgpu::TextureComponentType::Uint, 1});
 }
 
 // Test the RG8Uint format
 TEST_P(TextureFormatTest, RG8Uint) {
-    DoUintTest<uint8_t>({dawn::TextureFormat::RG8Uint, 2, dawn::TextureComponentType::Uint, 2});
+    DoUintTest<uint8_t>({wgpu::TextureFormat::RG8Uint, 2, wgpu::TextureComponentType::Uint, 2});
 }
 
 // Test the RGBA8Uint format
 TEST_P(TextureFormatTest, RGBA8Uint) {
-    DoUintTest<uint8_t>({dawn::TextureFormat::RGBA8Uint, 4, dawn::TextureComponentType::Uint, 4});
+    DoUintTest<uint8_t>({wgpu::TextureFormat::RGBA8Uint, 4, wgpu::TextureComponentType::Uint, 4});
 }
 
 // Test the R16Uint format
 TEST_P(TextureFormatTest, R16Uint) {
-    DoUintTest<uint16_t>({dawn::TextureFormat::R16Uint, 2, dawn::TextureComponentType::Uint, 1});
+    DoUintTest<uint16_t>({wgpu::TextureFormat::R16Uint, 2, wgpu::TextureComponentType::Uint, 1});
 }
 
 // Test the RG16Uint format
 TEST_P(TextureFormatTest, RG16Uint) {
-    DoUintTest<uint16_t>({dawn::TextureFormat::RG16Uint, 4, dawn::TextureComponentType::Uint, 2});
+    DoUintTest<uint16_t>({wgpu::TextureFormat::RG16Uint, 4, wgpu::TextureComponentType::Uint, 2});
 }
 
 // Test the RGBA16Uint format
 TEST_P(TextureFormatTest, RGBA16Uint) {
-    DoUintTest<uint16_t>({dawn::TextureFormat::RGBA16Uint, 8, dawn::TextureComponentType::Uint, 4});
+    DoUintTest<uint16_t>({wgpu::TextureFormat::RGBA16Uint, 8, wgpu::TextureComponentType::Uint, 4});
 }
 
 // Test the R32Uint format
 TEST_P(TextureFormatTest, R32Uint) {
-    DoUintTest<uint32_t>({dawn::TextureFormat::R32Uint, 4, dawn::TextureComponentType::Uint, 1});
+    DoUintTest<uint32_t>({wgpu::TextureFormat::R32Uint, 4, wgpu::TextureComponentType::Uint, 1});
 }
 
 // Test the RG32Uint format
 TEST_P(TextureFormatTest, RG32Uint) {
-    DoUintTest<uint32_t>({dawn::TextureFormat::RG32Uint, 8, dawn::TextureComponentType::Uint, 2});
+    DoUintTest<uint32_t>({wgpu::TextureFormat::RG32Uint, 8, wgpu::TextureComponentType::Uint, 2});
 }
 
 // Test the RGBA32Uint format
 TEST_P(TextureFormatTest, RGBA32Uint) {
     DoUintTest<uint32_t>(
-        {dawn::TextureFormat::RGBA32Uint, 16, dawn::TextureComponentType::Uint, 4});
+        {wgpu::TextureFormat::RGBA32Uint, 16, wgpu::TextureComponentType::Uint, 4});
 }
 
 // Test the R8Sint format
 TEST_P(TextureFormatTest, R8Sint) {
-    DoSintTest<int8_t>({dawn::TextureFormat::R8Sint, 1, dawn::TextureComponentType::Sint, 1});
+    DoSintTest<int8_t>({wgpu::TextureFormat::R8Sint, 1, wgpu::TextureComponentType::Sint, 1});
 }
 
 // Test the RG8Sint format
 TEST_P(TextureFormatTest, RG8Sint) {
-    DoSintTest<int8_t>({dawn::TextureFormat::RG8Sint, 2, dawn::TextureComponentType::Sint, 2});
+    DoSintTest<int8_t>({wgpu::TextureFormat::RG8Sint, 2, wgpu::TextureComponentType::Sint, 2});
 }
 
 // Test the RGBA8Sint format
 TEST_P(TextureFormatTest, RGBA8Sint) {
-    DoSintTest<int8_t>({dawn::TextureFormat::RGBA8Sint, 4, dawn::TextureComponentType::Sint, 4});
+    DoSintTest<int8_t>({wgpu::TextureFormat::RGBA8Sint, 4, wgpu::TextureComponentType::Sint, 4});
 }
 
 // Test the R16Sint format
 TEST_P(TextureFormatTest, R16Sint) {
-    DoSintTest<int16_t>({dawn::TextureFormat::R16Sint, 2, dawn::TextureComponentType::Sint, 1});
+    DoSintTest<int16_t>({wgpu::TextureFormat::R16Sint, 2, wgpu::TextureComponentType::Sint, 1});
 }
 
 // Test the RG16Sint format
 TEST_P(TextureFormatTest, RG16Sint) {
-    DoSintTest<int16_t>({dawn::TextureFormat::RG16Sint, 4, dawn::TextureComponentType::Sint, 2});
+    DoSintTest<int16_t>({wgpu::TextureFormat::RG16Sint, 4, wgpu::TextureComponentType::Sint, 2});
 }
 
 // Test the RGBA16Sint format
 TEST_P(TextureFormatTest, RGBA16Sint) {
-    DoSintTest<int16_t>({dawn::TextureFormat::RGBA16Sint, 8, dawn::TextureComponentType::Sint, 4});
+    DoSintTest<int16_t>({wgpu::TextureFormat::RGBA16Sint, 8, wgpu::TextureComponentType::Sint, 4});
 }
 
 // Test the R32Sint format
 TEST_P(TextureFormatTest, R32Sint) {
-    DoSintTest<int32_t>({dawn::TextureFormat::R32Sint, 4, dawn::TextureComponentType::Sint, 1});
+    DoSintTest<int32_t>({wgpu::TextureFormat::R32Sint, 4, wgpu::TextureComponentType::Sint, 1});
 }
 
 // Test the RG32Sint format
 TEST_P(TextureFormatTest, RG32Sint) {
-    DoSintTest<int32_t>({dawn::TextureFormat::RG32Sint, 8, dawn::TextureComponentType::Sint, 2});
+    DoSintTest<int32_t>({wgpu::TextureFormat::RG32Sint, 8, wgpu::TextureComponentType::Sint, 2});
 }
 
 // Test the RGBA32Sint format
 TEST_P(TextureFormatTest, RGBA32Sint) {
-    DoSintTest<int32_t>({dawn::TextureFormat::RGBA32Sint, 16, dawn::TextureComponentType::Sint, 4});
+    DoSintTest<int32_t>({wgpu::TextureFormat::RGBA32Sint, 16, wgpu::TextureComponentType::Sint, 4});
 }
 
 // Test the R32Float format
 TEST_P(TextureFormatTest, R32Float) {
-    DoFloat32Test({dawn::TextureFormat::R32Float, 4, dawn::TextureComponentType::Float, 1});
+    DoFloat32Test({wgpu::TextureFormat::R32Float, 4, wgpu::TextureComponentType::Float, 1});
 }
 
 // Test the RG32Float format
 TEST_P(TextureFormatTest, RG32Float) {
-    DoFloat32Test({dawn::TextureFormat::RG32Float, 8, dawn::TextureComponentType::Float, 2});
+    DoFloat32Test({wgpu::TextureFormat::RG32Float, 8, wgpu::TextureComponentType::Float, 2});
 }
 
 // Test the RGBA32Float format
 TEST_P(TextureFormatTest, RGBA32Float) {
-    DoFloat32Test({dawn::TextureFormat::RGBA32Float, 16, dawn::TextureComponentType::Float, 4});
+    DoFloat32Test({wgpu::TextureFormat::RGBA32Float, 16, wgpu::TextureComponentType::Float, 4});
 }
 
 // Test the R16Float format
 TEST_P(TextureFormatTest, R16Float) {
-    DoFloat16Test({dawn::TextureFormat::R16Float, 2, dawn::TextureComponentType::Float, 1});
+    DoFloat16Test({wgpu::TextureFormat::R16Float, 2, wgpu::TextureComponentType::Float, 1});
 }
 
 // Test the RG16Float format
 TEST_P(TextureFormatTest, RG16Float) {
-    DoFloat16Test({dawn::TextureFormat::RG16Float, 4, dawn::TextureComponentType::Float, 2});
+    DoFloat16Test({wgpu::TextureFormat::RG16Float, 4, wgpu::TextureComponentType::Float, 2});
 }
 
 // Test the RGBA16Float format
 TEST_P(TextureFormatTest, RGBA16Float) {
-    DoFloat16Test({dawn::TextureFormat::RGBA16Float, 8, dawn::TextureComponentType::Float, 4});
+    DoFloat16Test({wgpu::TextureFormat::RGBA16Float, 8, wgpu::TextureComponentType::Float, 4});
 }
 
 // Test the RGBA8Unorm format
@@ -631,10 +631,10 @@ TEST_P(TextureFormatTest, RGBA8UnormSrgb) {
     }
 
     DoFloatFormatSamplingTest(
-        {dawn::TextureFormat::RGBA8UnormSrgb, 4, dawn::TextureComponentType::Float, 4}, textureData,
+        {wgpu::TextureFormat::RGBA8UnormSrgb, 4, wgpu::TextureComponentType::Float, 4}, textureData,
         uncompressedData, 1.0e-3);
     DoFormatRenderingTest(
-        {dawn::TextureFormat::RGBA8UnormSrgb, 4, dawn::TextureComponentType::Float, 4},
+        {wgpu::TextureFormat::RGBA8UnormSrgb, 4, wgpu::TextureComponentType::Float, 4},
         uncompressedData, textureData);
 }
 
@@ -658,10 +658,10 @@ TEST_P(TextureFormatTest, BGRA8UnormSrgb) {
     }
 
     DoFloatFormatSamplingTest(
-        {dawn::TextureFormat::BGRA8UnormSrgb, 4, dawn::TextureComponentType::Float, 4}, textureData,
+        {wgpu::TextureFormat::BGRA8UnormSrgb, 4, wgpu::TextureComponentType::Float, 4}, textureData,
         uncompressedData, 1.0e-3);
     DoFormatRenderingTest(
-        {dawn::TextureFormat::BGRA8UnormSrgb, 4, dawn::TextureComponentType::Float, 4},
+        {wgpu::TextureFormat::BGRA8UnormSrgb, 4, wgpu::TextureComponentType::Float, 4},
         uncompressedData, textureData);
 }
 
@@ -687,10 +687,10 @@ TEST_P(TextureFormatTest, RGB10A2Unorm) {
     // clang-format on
 
     DoFloatFormatSamplingTest(
-        {dawn::TextureFormat::RGB10A2Unorm, 4, dawn::TextureComponentType::Float, 4}, textureData,
+        {wgpu::TextureFormat::RGB10A2Unorm, 4, wgpu::TextureComponentType::Float, 4}, textureData,
         uncompressedData, 1.0e-5);
     DoFormatRenderingTest(
-        {dawn::TextureFormat::RGB10A2Unorm, 4, dawn::TextureComponentType::Float, 4},
+        {wgpu::TextureFormat::RGB10A2Unorm, 4, wgpu::TextureComponentType::Float, 4},
         uncompressedData, textureData);
 }
 
@@ -734,7 +734,7 @@ TEST_P(TextureFormatTest, RG11B10Float) {
     // clang-format on
 
     DoFloatFormatSamplingTest(
-        {dawn::TextureFormat::RG11B10Float, 4, dawn::TextureComponentType::Float, 4}, textureData,
+        {wgpu::TextureFormat::RG11B10Float, 4, wgpu::TextureComponentType::Float, 4}, textureData,
         uncompressedData);
     // This format is not renderable.
 }
