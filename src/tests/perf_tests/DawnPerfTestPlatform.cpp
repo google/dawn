@@ -80,7 +80,7 @@ uint64_t DawnPerfTestPlatform::AddTraceEvent(char phase,
                   "|enabled| must be the first field of the TraceCategory class.");
     const TraceCategory* category = reinterpret_cast<const TraceCategory*>(categoryGroupEnabled);
 
-    mTraceEventBuffer.emplace_back(phase, category->name, name, timestamp);
+    mTraceEventBuffer.emplace_back(phase, category->name, name, id, timestamp);
     return static_cast<uint64_t>(mTraceEventBuffer.size());
 }
 

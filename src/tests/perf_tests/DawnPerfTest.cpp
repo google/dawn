@@ -125,6 +125,7 @@ void DawnPerfTestEnvironment::DumpTraceEventsToJSONFile() const {
         value["name"] = traceEvent.name;
         value["cat"] = traceEvent.categoryName;
         value["ph"] = &phase[0];
+        value["id"] = traceEvent.id;
         value["ts"] = microseconds;
         value["pid"] = "Dawn";
 
