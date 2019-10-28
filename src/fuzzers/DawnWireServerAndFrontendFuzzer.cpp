@@ -14,7 +14,7 @@
 
 #include "common/Assert.h"
 #include "dawn/dawn_proc.h"
-#include "dawn/dawncpp.h"
+#include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
 #include "dawn_wire/WireServer.h"
 
@@ -36,10 +36,10 @@ class DevNull : public dawn_wire::CommandSerializer {
     std::vector<char> buf;
 };
 
-static DawnProcDeviceCreateSwapChain originalDeviceCreateSwapChain = nullptr;
+static WGPUProcDeviceCreateSwapChain originalDeviceCreateSwapChain = nullptr;
 
-DawnSwapChain ErrorDeviceCreateSwapChain(DawnDevice device, const DawnSwapChainDescriptor*) {
-    DawnSwapChainDescriptor desc;
+WGPUSwapChain ErrorDeviceCreateSwapChain(WGPUDevice device, const WGPUSwapChainDescriptor*) {
+    WGPUSwapChainDescriptor desc;
     desc.nextInChain = nullptr;
     desc.label = nullptr;
     // A 0 implementation will trigger a swapchain creation error.
@@ -65,10 +65,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
     std::vector<dawn_native::Adapter> adapters = instance->GetAdapters();
 
-    dawn::Device nullDevice;
+    wgpu::Device nullDevice;
     for (dawn_native::Adapter adapter : adapters) {
         if (adapter.GetBackendType() == dawn_native::BackendType::Null) {
-            nullDevice = dawn::Device::Acquire(adapter.CreateDevice());
+            nullDevice = wgpu::Device::Acquire(adapter.CreateDevice());
             break;
         }
     }

@@ -26,14 +26,14 @@ namespace {
     class MockBufferMapReadCallback {
       public:
         MOCK_METHOD4(Call,
-                     void(DawnBufferMapAsyncStatus status,
+                     void(WGPUBufferMapAsyncStatus status,
                           const uint32_t* ptr,
                           uint64_t dataLength,
                           void* userdata));
     };
 
     std::unique_ptr<StrictMock<MockBufferMapReadCallback>> mockBufferMapReadCallback;
-    void ToMockBufferMapReadCallback(DawnBufferMapAsyncStatus status,
+    void ToMockBufferMapReadCallback(WGPUBufferMapAsyncStatus status,
                                      const void* ptr,
                                      uint64_t dataLength,
                                      void* userdata) {
@@ -45,14 +45,14 @@ namespace {
     class MockBufferMapWriteCallback {
       public:
         MOCK_METHOD4(Call,
-                     void(DawnBufferMapAsyncStatus status,
+                     void(WGPUBufferMapAsyncStatus status,
                           uint32_t* ptr,
                           uint64_t dataLength,
                           void* userdata));
     };
 
     std::unique_ptr<StrictMock<MockBufferMapWriteCallback>> mockBufferMapWriteCallback;
-    void ToMockBufferMapWriteCallback(DawnBufferMapAsyncStatus status,
+    void ToMockBufferMapWriteCallback(WGPUBufferMapAsyncStatus status,
                                       void* ptr,
                                       uint64_t dataLength,
                                       void* userdata) {
@@ -63,16 +63,16 @@ namespace {
     class MockBufferCreateMappedCallback {
       public:
         MOCK_METHOD5(Call,
-                     void(DawnBufferMapAsyncStatus status,
-                          DawnBuffer buffer,
+                     void(WGPUBufferMapAsyncStatus status,
+                          WGPUBuffer buffer,
                           uint32_t* ptr,
                           uint64_t dataLength,
                           void* userdata));
     };
 
     std::unique_ptr<StrictMock<MockBufferCreateMappedCallback>> mockCreateBufferMappedCallback;
-    void ToMockCreateBufferMappedCallback(DawnBufferMapAsyncStatus status,
-                                          DawnCreateBufferMappedResult result,
+    void ToMockCreateBufferMappedCallback(WGPUBufferMapAsyncStatus status,
+                                          WGPUCreateBufferMappedResult result,
                                           void* userdata) {
         // Assume the data is uint32_t to make writing matchers easier
         mockCreateBufferMappedCallback->Call(status, result.buffer,
@@ -154,14 +154,14 @@ class WireMemoryTransferServiceTests : public WireTest {
     using ClientWriteHandle = client::MockMemoryTransferService::MockWriteHandle;
     using ServerWriteHandle = server::MockMemoryTransferService::MockWriteHandle;
 
-    std::pair<DawnBuffer, DawnBuffer> CreateBuffer() {
-        DawnBufferDescriptor descriptor;
+    std::pair<WGPUBuffer, WGPUBuffer> CreateBuffer() {
+        WGPUBufferDescriptor descriptor;
         descriptor.nextInChain = nullptr;
         descriptor.label = nullptr;
         descriptor.size = sizeof(mBufferContent);
 
-        DawnBuffer apiBuffer = api.GetNewBuffer();
-        DawnBuffer buffer = dawnDeviceCreateBuffer(device, &descriptor);
+        WGPUBuffer apiBuffer = api.GetNewBuffer();
+        WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
 
         EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _))
             .WillOnce(Return(apiBuffer))
@@ -170,20 +170,20 @@ class WireMemoryTransferServiceTests : public WireTest {
         return std::make_pair(apiBuffer, buffer);
     }
 
-    std::pair<DawnCreateBufferMappedResult, DawnCreateBufferMappedResult> CreateBufferMapped() {
-        DawnBufferDescriptor descriptor;
+    std::pair<WGPUCreateBufferMappedResult, WGPUCreateBufferMappedResult> CreateBufferMapped() {
+        WGPUBufferDescriptor descriptor;
         descriptor.nextInChain = nullptr;
         descriptor.label = nullptr;
         descriptor.size = sizeof(mBufferContent);
 
-        DawnBuffer apiBuffer = api.GetNewBuffer();
+        WGPUBuffer apiBuffer = api.GetNewBuffer();
 
-        DawnCreateBufferMappedResult apiResult;
+        WGPUCreateBufferMappedResult apiResult;
         apiResult.buffer = apiBuffer;
         apiResult.data = reinterpret_cast<uint8_t*>(&mMappedBufferContent);
         apiResult.dataLength = sizeof(mMappedBufferContent);
 
-        DawnCreateBufferMappedResult result = dawnDeviceCreateBufferMapped(device, &descriptor);
+        WGPUCreateBufferMappedResult result = wgpuDeviceCreateBufferMapped(device, &descriptor);
 
         EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
             .WillOnce(Return(apiResult))
@@ -192,18 +192,18 @@ class WireMemoryTransferServiceTests : public WireTest {
         return std::make_pair(apiResult, result);
     }
 
-    DawnCreateBufferMappedResult CreateBufferMappedAsync() {
-        DawnBufferDescriptor descriptor;
+    WGPUCreateBufferMappedResult CreateBufferMappedAsync() {
+        WGPUBufferDescriptor descriptor;
         descriptor.nextInChain = nullptr;
         descriptor.label = nullptr;
         descriptor.size = sizeof(mBufferContent);
 
-        dawnDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback,
+        wgpuDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback,
                                           nullptr);
 
-        DawnBuffer apiBuffer = api.GetNewBuffer();
+        WGPUBuffer apiBuffer = api.GetNewBuffer();
 
-        DawnCreateBufferMappedResult apiResult;
+        WGPUCreateBufferMappedResult apiResult;
         apiResult.buffer = apiBuffer;
         apiResult.data = reinterpret_cast<uint8_t*>(&mMappedBufferContent);
         apiResult.dataLength = sizeof(mMappedBufferContent);
@@ -416,8 +416,8 @@ uint32_t WireMemoryTransferServiceTests::mSerializeFlushInfo = 1235;
 
 // Test successful MapRead.
 TEST_F(WireMemoryTransferServiceTests, BufferMapReadSuccess) {
-    DawnBuffer buffer;
-    DawnBuffer apiBuffer;
+    WGPUBuffer buffer;
+    WGPUBuffer apiBuffer;
     std::tie(apiBuffer, buffer) = CreateBuffer();
     FlushClient();
 
@@ -425,7 +425,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadSuccess) {
     ClientReadHandle* clientHandle = ExpectReadHandleCreation();
     ExpectReadHandleSerialization(clientHandle);
 
-    dawnBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
+    wgpuBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
 
     // The server should deserialize the MapRead handle from the client and then serialize
     // an initialization message.
@@ -435,7 +435,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadSuccess) {
     // Mock a successful callback
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapReadCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, &mBufferContent,
+            api.CallMapReadCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success, &mBufferContent,
                                     sizeof(mBufferContent));
         }));
 
@@ -443,8 +443,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadSuccess) {
 
     // The client receives a successful callback.
     EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, &mBufferContent,
-                     sizeof(mBufferContent), _))
+                Call(WGPUBufferMapAsyncStatus_Success, &mBufferContent, sizeof(mBufferContent), _))
         .Times(1);
 
     // The client should receive the handle initialization message from the server.
@@ -454,7 +453,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadSuccess) {
 
     // The handle is destroyed once the buffer is unmapped.
     EXPECT_CALL(clientMemoryTransferService, OnReadHandleDestroy(clientHandle)).Times(1);
-    dawnBufferUnmap(buffer);
+    wgpuBufferUnmap(buffer);
 
     EXPECT_CALL(serverMemoryTransferService, OnReadHandleDestroy(serverHandle)).Times(1);
     EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
@@ -464,8 +463,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadSuccess) {
 
 // Test unsuccessful MapRead.
 TEST_F(WireMemoryTransferServiceTests, BufferMapReadError) {
-    DawnBuffer buffer;
-    DawnBuffer apiBuffer;
+    WGPUBuffer buffer;
+    WGPUBuffer apiBuffer;
     std::tie(apiBuffer, buffer) = CreateBuffer();
     FlushClient();
 
@@ -473,7 +472,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadError) {
     ClientReadHandle* clientHandle = ExpectReadHandleCreation();
     ExpectReadHandleSerialization(clientHandle);
 
-    dawnBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
+    wgpuBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
 
     // The server should deserialize the ReadHandle from the client.
     ServerReadHandle* serverHandle = ExpectServerReadHandleDeserialize();
@@ -481,7 +480,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadError) {
     // Mock a failed callback.
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapReadCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0);
+            api.CallMapReadCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error, nullptr, 0);
         }));
 
     // Since the mapping failed, the handle is immediately destroyed.
@@ -490,7 +489,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadError) {
     FlushClient();
 
     // The client receives an error callback.
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0, _))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(WGPUBufferMapAsyncStatus_Error, nullptr, 0, _))
         .Times(1);
 
     // The client receives the map failure and destroys the handle.
@@ -498,7 +497,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadError) {
 
     FlushServer();
 
-    dawnBufferUnmap(buffer);
+    wgpuBufferUnmap(buffer);
 
     EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
 
@@ -507,8 +506,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadError) {
 
 // Test MapRead ReadHandle creation failure.
 TEST_F(WireMemoryTransferServiceTests, BufferMapReadHandleCreationFailure) {
-    DawnBuffer buffer;
-    DawnBuffer apiBuffer;
+    WGPUBuffer buffer;
+    WGPUBuffer apiBuffer;
     std::tie(apiBuffer, buffer) = CreateBuffer();
     FlushClient();
 
@@ -518,16 +517,16 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadHandleCreationFailure) {
     // Failed creation of a ReadHandle is a fatal failure and the client synchronously receives a
     // DEVICE_LOST callback.
     EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_DEVICE_LOST, nullptr, 0, _))
+                Call(WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0, _))
         .Times(1);
 
-    dawnBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
+    wgpuBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
 }
 
 // Test MapRead DeserializeReadHandle failure.
 TEST_F(WireMemoryTransferServiceTests, BufferMapReadDeserializeReadHandleFailure) {
-    DawnBuffer buffer;
-    DawnBuffer apiBuffer;
+    WGPUBuffer buffer;
+    WGPUBuffer apiBuffer;
     std::tie(apiBuffer, buffer) = CreateBuffer();
     FlushClient();
 
@@ -535,7 +534,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDeserializeReadHandleFailure
     ClientReadHandle* clientHandle = ExpectReadHandleCreation();
     ExpectReadHandleSerialization(clientHandle);
 
-    dawnBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
+    wgpuBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
 
     // Mock a Deserialization failure.
     MockServerReadHandleDeserializeFailure();
@@ -544,8 +543,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDeserializeReadHandleFailure
 
     // The server received a fatal failure and the client callback was never returned.
     // It is called when the wire is destructed.
-    EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0, _))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(WGPUBufferMapAsyncStatus_Unknown, nullptr, 0, _))
         .Times(1);
 
     EXPECT_CALL(clientMemoryTransferService, OnReadHandleDestroy(clientHandle)).Times(1);
@@ -553,8 +551,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDeserializeReadHandleFailure
 
 // Test MapRead DeserializeInitialData failure.
 TEST_F(WireMemoryTransferServiceTests, BufferMapReadDeserializeInitialDataFailure) {
-    DawnBuffer buffer;
-    DawnBuffer apiBuffer;
+    WGPUBuffer buffer;
+    WGPUBuffer apiBuffer;
     std::tie(apiBuffer, buffer) = CreateBuffer();
     FlushClient();
 
@@ -562,7 +560,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDeserializeInitialDataFailur
     ClientReadHandle* clientHandle = ExpectReadHandleCreation();
     ExpectReadHandleSerialization(clientHandle);
 
-    dawnBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
+    wgpuBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
 
     // The server should deserialize the MapRead handle from the client and then serialize
     // an initialization message.
@@ -572,7 +570,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDeserializeInitialDataFailur
     // Mock a successful callback
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapReadCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, &mBufferContent,
+            api.CallMapReadCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success, &mBufferContent,
                                     sizeof(mBufferContent));
         }));
 
@@ -585,7 +583,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDeserializeInitialDataFailur
     // Failed deserialization is a fatal failure and the client synchronously receives a
     // DEVICE_LOST callback.
     EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_DEVICE_LOST, nullptr, 0, _))
+                Call(WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0, _))
         .Times(1);
 
     // The handle will be destroyed since deserializing failed.
@@ -598,15 +596,15 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDeserializeInitialDataFailur
 
 // Test successful MapWrite.
 TEST_F(WireMemoryTransferServiceTests, BufferMapWriteSuccess) {
-    DawnBuffer buffer;
-    DawnBuffer apiBuffer;
+    WGPUBuffer buffer;
+    WGPUBuffer apiBuffer;
     std::tie(apiBuffer, buffer) = CreateBuffer();
     FlushClient();
 
     ClientWriteHandle* clientHandle = ExpectWriteHandleCreation();
     ExpectWriteHandleSerialization(clientHandle);
 
-    dawnBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
+    wgpuBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
 
     // The server should then deserialize the WriteHandle from the client.
     ServerWriteHandle* serverHandle = ExpectServerWriteHandleDeserialization();
@@ -614,7 +612,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteSuccess) {
     // Mock a successful callback.
     EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
+            api.CallMapWriteCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success,
                                      &mMappedBufferContent, sizeof(mMappedBufferContent));
         }));
 
@@ -622,7 +620,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteSuccess) {
 
     // The client receives a successful callback.
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, &mMappedBufferContent,
+                Call(WGPUBufferMapAsyncStatus_Success, &mMappedBufferContent,
                      sizeof(mMappedBufferContent), _))
         .Times(1);
 
@@ -638,7 +636,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteSuccess) {
     ExpectClientWriteHandleSerializeFlush(clientHandle);
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
 
-    dawnBufferUnmap(buffer);
+    wgpuBufferUnmap(buffer);
 
     // The server deserializes the Flush message.
     ExpectServerWriteHandleDeserializeFlush(serverHandle, mUpdatedBufferContent);
@@ -652,8 +650,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteSuccess) {
 
 // Test unsuccessful MapWrite.
 TEST_F(WireMemoryTransferServiceTests, BufferMapWriteError) {
-    DawnBuffer buffer;
-    DawnBuffer apiBuffer;
+    WGPUBuffer buffer;
+    WGPUBuffer apiBuffer;
     std::tie(apiBuffer, buffer) = CreateBuffer();
     FlushClient();
 
@@ -661,7 +659,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteError) {
     ClientWriteHandle* clientHandle = ExpectWriteHandleCreation();
     ExpectWriteHandleSerialization(clientHandle);
 
-    dawnBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
+    wgpuBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
 
     // The server should then deserialize the WriteHandle from the client.
     ServerWriteHandle* serverHandle = ExpectServerWriteHandleDeserialization();
@@ -669,7 +667,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteError) {
     // Mock an error callback.
     EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0);
+            api.CallMapWriteCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error, nullptr, 0);
         }));
 
     // Since the mapping fails, the handle is immediately destroyed because it won't be written.
@@ -678,8 +676,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteError) {
     FlushClient();
 
     // The client receives an error callback.
-    EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0, _))
+    EXPECT_CALL(*mockBufferMapWriteCallback, Call(WGPUBufferMapAsyncStatus_Error, nullptr, 0, _))
         .Times(1);
 
     // Client receives the map failure and destroys the handle.
@@ -687,7 +684,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteError) {
 
     FlushServer();
 
-    dawnBufferUnmap(buffer);
+    wgpuBufferUnmap(buffer);
 
     EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
 
@@ -696,8 +693,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteError) {
 
 // Test MapRead WriteHandle creation failure.
 TEST_F(WireMemoryTransferServiceTests, BufferMapWriteHandleCreationFailure) {
-    DawnBuffer buffer;
-    DawnBuffer apiBuffer;
+    WGPUBuffer buffer;
+    WGPUBuffer apiBuffer;
     std::tie(apiBuffer, buffer) = CreateBuffer();
     FlushClient();
 
@@ -707,16 +704,16 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteHandleCreationFailure) {
     // Failed creation of a WriteHandle is a fatal failure and the client synchronously receives a
     // DEVICE_LOST callback.
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_DEVICE_LOST, nullptr, 0, _))
+                Call(WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0, _))
         .Times(1);
 
-    dawnBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
+    wgpuBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
 }
 
 // Test MapWrite DeserializeWriteHandle failure.
 TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDeserializeWriteHandleFailure) {
-    DawnBuffer buffer;
-    DawnBuffer apiBuffer;
+    WGPUBuffer buffer;
+    WGPUBuffer apiBuffer;
     std::tie(apiBuffer, buffer) = CreateBuffer();
     FlushClient();
 
@@ -724,7 +721,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDeserializeWriteHandleFailu
     ClientWriteHandle* clientHandle = ExpectWriteHandleCreation();
     ExpectWriteHandleSerialization(clientHandle);
 
-    dawnBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
+    wgpuBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
 
     // Mock a deserialization failure.
     MockServerWriteHandleDeserializeFailure();
@@ -733,8 +730,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDeserializeWriteHandleFailu
 
     // The server hit a fatal failure and never returned the callback. The client callback is
     // called when the wire is destructed.
-    EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0, _))
+    EXPECT_CALL(*mockBufferMapWriteCallback, Call(WGPUBufferMapAsyncStatus_Unknown, nullptr, 0, _))
         .Times(1);
 
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
@@ -742,15 +738,15 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDeserializeWriteHandleFailu
 
 // Test MapWrite handle Open failure.
 TEST_F(WireMemoryTransferServiceTests, BufferMapWriteHandleOpenFailure) {
-    DawnBuffer buffer;
-    DawnBuffer apiBuffer;
+    WGPUBuffer buffer;
+    WGPUBuffer apiBuffer;
     std::tie(apiBuffer, buffer) = CreateBuffer();
     FlushClient();
 
     ClientWriteHandle* clientHandle = ExpectWriteHandleCreation();
     ExpectWriteHandleSerialization(clientHandle);
 
-    dawnBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
+    wgpuBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
 
     // The server should then deserialize the WriteHandle from the client.
     ServerWriteHandle* serverHandle = ExpectServerWriteHandleDeserialization();
@@ -758,7 +754,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteHandleOpenFailure) {
     // Mock a successful callback.
     EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
+            api.CallMapWriteCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success,
                                      &mMappedBufferContent, sizeof(mMappedBufferContent));
         }));
 
@@ -770,7 +766,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteHandleOpenFailure) {
 
     // Failing to open a handle is a fatal failure and the client receives a DEVICE_LOST callback.
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_DEVICE_LOST, nullptr, 0, _))
+                Call(WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0, _))
         .Times(1);
 
     // Since opening the handle fails, it gets destroyed immediately.
@@ -783,15 +779,15 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteHandleOpenFailure) {
 
 // Test MapWrite DeserializeFlush failure.
 TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDeserializeFlushFailure) {
-    DawnBuffer buffer;
-    DawnBuffer apiBuffer;
+    WGPUBuffer buffer;
+    WGPUBuffer apiBuffer;
     std::tie(apiBuffer, buffer) = CreateBuffer();
     FlushClient();
 
     ClientWriteHandle* clientHandle = ExpectWriteHandleCreation();
     ExpectWriteHandleSerialization(clientHandle);
 
-    dawnBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
+    wgpuBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
 
     // The server should then deserialize the WriteHandle from the client.
     ServerWriteHandle* serverHandle = ExpectServerWriteHandleDeserialization();
@@ -799,7 +795,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDeserializeFlushFailure) {
     // Mock a successful callback.
     EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
+            api.CallMapWriteCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success,
                                      &mMappedBufferContent, sizeof(mMappedBufferContent));
         }));
 
@@ -807,7 +803,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDeserializeFlushFailure) {
 
     // The client receives a success callback.
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, &mMappedBufferContent,
+                Call(WGPUBufferMapAsyncStatus_Success, &mMappedBufferContent,
                      sizeof(mMappedBufferContent), _))
         .Times(1);
 
@@ -823,7 +819,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDeserializeFlushFailure) {
     ExpectClientWriteHandleSerializeFlush(clientHandle);
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
 
-    dawnBufferUnmap(buffer);
+    wgpuBufferUnmap(buffer);
 
     // The server deserializes the Flush message. Mock a deserialization failure.
     MockServerWriteHandleDeserializeFlushFailure(serverHandle);
@@ -839,7 +835,7 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedAsyncSuccess) {
     ClientWriteHandle* clientHandle = ExpectWriteHandleCreation();
     ExpectWriteHandleSerialization(clientHandle);
 
-    DawnCreateBufferMappedResult apiResult = CreateBufferMappedAsync();
+    WGPUCreateBufferMappedResult apiResult = CreateBufferMappedAsync();
 
     // The server should then deserialize the WriteHandle from the client.
     ServerWriteHandle* serverHandle = ExpectServerWriteHandleDeserialization();
@@ -847,9 +843,9 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedAsyncSuccess) {
     FlushClient();
 
     // The client receives a success callback. Save the buffer argument so we can call Unmap.
-    DawnBuffer buffer;
+    WGPUBuffer buffer;
     EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, _, &mMappedBufferContent,
+                Call(WGPUBufferMapAsyncStatus_Success, _, &mMappedBufferContent,
                      sizeof(mMappedBufferContent), _))
 
         .WillOnce(SaveArg<1>(&buffer));
@@ -866,7 +862,7 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedAsyncSuccess) {
     ExpectClientWriteHandleSerializeFlush(clientHandle);
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
 
-    dawnBufferUnmap(buffer);
+    wgpuBufferUnmap(buffer);
 
     // The server deserializes the Flush message.
     ExpectServerWriteHandleDeserializeFlush(serverHandle, mUpdatedBufferContent);
@@ -883,7 +879,7 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedAsyncWriteHandleCreatio
     // Mock a WriteHandle creation failure
     MockWriteHandleCreationFailure();
 
-    DawnBufferDescriptor descriptor;
+    WGPUBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
     descriptor.label = nullptr;
     descriptor.size = sizeof(mBufferContent);
@@ -891,10 +887,11 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedAsyncWriteHandleCreatio
     // Failed creation of a WriteHandle is a fatal failure. The client synchronously receives
     // a DEVICE_LOST callback.
     EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_DEVICE_LOST, _, nullptr, 0, _))
+                Call(WGPUBufferMapAsyncStatus_DeviceLost, _, nullptr, 0, _))
         .Times(1);
 
-    dawnDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback, nullptr);
+    wgpuDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback,
+                                      nullptr);
 }
 
 // Test CreateBufferMappedAsync DeserializeWriteHandle failure.
@@ -903,7 +900,7 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedAsyncDeserializeWriteHa
     ClientWriteHandle* clientHandle = ExpectWriteHandleCreation();
     ExpectWriteHandleSerialization(clientHandle);
 
-    DawnCreateBufferMappedResult apiResult = CreateBufferMappedAsync();
+    WGPUCreateBufferMappedResult apiResult = CreateBufferMappedAsync();
     DAWN_UNUSED(apiResult);
 
     // The server should then deserialize the WriteHandle from the client.
@@ -915,7 +912,7 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedAsyncDeserializeWriteHa
     // The server hit a fatal failure and never returned the callback. It is called when the
     // wire is destructed.
     EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, _, nullptr, 0, _))
+                Call(WGPUBufferMapAsyncStatus_Unknown, _, nullptr, 0, _))
         .Times(1);
 
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
@@ -927,7 +924,7 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedAsyncHandleOpenFailure)
     ClientWriteHandle* clientHandle = ExpectWriteHandleCreation();
     ExpectWriteHandleSerialization(clientHandle);
 
-    DawnCreateBufferMappedResult apiResult = CreateBufferMappedAsync();
+    WGPUCreateBufferMappedResult apiResult = CreateBufferMappedAsync();
     DAWN_UNUSED(apiResult);
 
     // The server should then deserialize the WriteHandle from the client.
@@ -940,7 +937,7 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedAsyncHandleOpenFailure)
 
     // Failing to open a handle is a fatal failure. The client receives a DEVICE_LOST callback.
     EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_DEVICE_LOST, _, nullptr, 0, _))
+                Call(WGPUBufferMapAsyncStatus_DeviceLost, _, nullptr, 0, _))
         .Times(1);
 
     // Since opening the handle fails, it is destroyed immediately.
@@ -957,7 +954,7 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedAsyncDeserializeFlushFa
     ClientWriteHandle* clientHandle = ExpectWriteHandleCreation();
     ExpectWriteHandleSerialization(clientHandle);
 
-    DawnCreateBufferMappedResult apiResult = CreateBufferMappedAsync();
+    WGPUCreateBufferMappedResult apiResult = CreateBufferMappedAsync();
     DAWN_UNUSED(apiResult);
 
     // The server should then deserialize the WriteHandle from the client.
@@ -966,9 +963,9 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedAsyncDeserializeFlushFa
     FlushClient();
 
     // The client receives a success callback. Save the buffer argument so we can call Unmap.
-    DawnBuffer buffer;
+    WGPUBuffer buffer;
     EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, _, &mMappedBufferContent,
+                Call(WGPUBufferMapAsyncStatus_Success, _, &mMappedBufferContent,
                      sizeof(mMappedBufferContent), _))
 
         .WillOnce(SaveArg<1>(&buffer));
@@ -985,7 +982,7 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedAsyncDeserializeFlushFa
     ExpectClientWriteHandleSerializeFlush(clientHandle);
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
 
-    dawnBufferUnmap(buffer);
+    wgpuBufferUnmap(buffer);
 
     // The server deserializes the Flush message.
     // Mock a deserialization failure.
@@ -1009,8 +1006,8 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedSuccess) {
     // The server should then deserialize the WriteHandle from the client.
     ServerWriteHandle* serverHandle = ExpectServerWriteHandleDeserialization();
 
-    DawnCreateBufferMappedResult result;
-    DawnCreateBufferMappedResult apiResult;
+    WGPUCreateBufferMappedResult result;
+    WGPUCreateBufferMappedResult apiResult;
     std::tie(apiResult, result) = CreateBufferMapped();
     FlushClient();
 
@@ -1021,7 +1018,7 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedSuccess) {
     ExpectClientWriteHandleSerializeFlush(clientHandle);
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
 
-    dawnBufferUnmap(result.buffer);
+    wgpuBufferUnmap(result.buffer);
 
     // The server deserializes the Flush message.
     ExpectServerWriteHandleDeserializeFlush(serverHandle, mUpdatedBufferContent);
@@ -1038,12 +1035,12 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedWriteHandleCreationFail
     // Mock a WriteHandle creation failure
     MockWriteHandleCreationFailure();
 
-    DawnBufferDescriptor descriptor;
+    WGPUBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
     descriptor.label = nullptr;
     descriptor.size = sizeof(mBufferContent);
 
-    DawnCreateBufferMappedResult result = dawnDeviceCreateBufferMapped(device, &descriptor);
+    WGPUCreateBufferMappedResult result = wgpuDeviceCreateBufferMapped(device, &descriptor);
 
     // TODO(enga): Check that the client generated a context lost.
     EXPECT_EQ(result.data, nullptr);
@@ -1063,8 +1060,8 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedDeserializeWriteHandleF
     // The server should then deserialize the WriteHandle from the client.
     MockServerWriteHandleDeserializeFailure();
 
-    DawnCreateBufferMappedResult result;
-    DawnCreateBufferMappedResult apiResult;
+    WGPUCreateBufferMappedResult result;
+    WGPUCreateBufferMappedResult apiResult;
     std::tie(apiResult, result) = CreateBufferMapped();
     FlushClient(false);
 
@@ -1084,12 +1081,12 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedHandleOpenFailure) {
     // Note: The handle is not serialized because sychronously opening it failed.
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
 
-    DawnBufferDescriptor descriptor;
+    WGPUBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
     descriptor.label = nullptr;
     descriptor.size = sizeof(mBufferContent);
 
-    DawnCreateBufferMappedResult result = dawnDeviceCreateBufferMapped(device, &descriptor);
+    WGPUCreateBufferMappedResult result = wgpuDeviceCreateBufferMapped(device, &descriptor);
 
     // TODO(enga): Check that the client generated a context lost.
     EXPECT_EQ(result.data, nullptr);
@@ -1109,8 +1106,8 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedDeserializeFlushFailure
     // The server should then deserialize the WriteHandle from the client.
     ServerWriteHandle* serverHandle = ExpectServerWriteHandleDeserialization();
 
-    DawnCreateBufferMappedResult result;
-    DawnCreateBufferMappedResult apiResult;
+    WGPUCreateBufferMappedResult result;
+    WGPUCreateBufferMappedResult apiResult;
     std::tie(apiResult, result) = CreateBufferMapped();
     FlushClient();
 
@@ -1121,7 +1118,7 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedDeserializeFlushFailure
     ExpectClientWriteHandleSerializeFlush(clientHandle);
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
 
-    dawnBufferUnmap(result.buffer);
+    wgpuBufferUnmap(result.buffer);
 
     // The server deserializes the Flush message. Mock a deserialization failure.
     MockServerWriteHandleDeserializeFlushFailure(serverHandle);

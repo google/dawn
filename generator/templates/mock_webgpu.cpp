@@ -12,7 +12,7 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#include "mock_dawn.h"
+#include "mock_webgpu.h"
 
 using namespace testing;
 
@@ -40,7 +40,7 @@ namespace {
 ProcTableAsClass::~ProcTableAsClass() {
 }
 
-void ProcTableAsClass::GetProcTableAndDevice(DawnProcTable* table, DawnDevice* device) {
+void ProcTableAsClass::GetProcTableAndDevice(DawnProcTable* table, WGPUDevice* device) {
     *device = GetNewDevice();
 
     {% for type in by_category["object"] %}
@@ -50,9 +50,9 @@ void ProcTableAsClass::GetProcTableAndDevice(DawnProcTable* table, DawnDevice* d
     {% endfor %}
 }
 
-void ProcTableAsClass::DeviceSetUncapturedErrorCallback(DawnDevice self,
-                                              DawnErrorCallback callback,
-                                              void* userdata) {
+void ProcTableAsClass::DeviceSetUncapturedErrorCallback(WGPUDevice self,
+                                                        WGPUErrorCallback callback,
+                                                        void* userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->deviceErrorCallback = callback;
     object->userdata1 = userdata;
@@ -60,13 +60,15 @@ void ProcTableAsClass::DeviceSetUncapturedErrorCallback(DawnDevice self,
     OnDeviceSetUncapturedErrorCallback(self, callback, userdata);
 }
 
-bool ProcTableAsClass::DevicePopErrorScope(DawnDevice self, DawnErrorCallback callback, void* userdata) {
+bool ProcTableAsClass::DevicePopErrorScope(WGPUDevice self,
+                                           WGPUErrorCallback callback,
+                                           void* userdata) {
     return OnDevicePopErrorScopeCallback(self, callback, userdata);
 }
 
-void ProcTableAsClass::DeviceCreateBufferMappedAsync(DawnDevice self,
-                                                     const DawnBufferDescriptor* descriptor,
-                                                     DawnBufferCreateMappedCallback callback,
+void ProcTableAsClass::DeviceCreateBufferMappedAsync(WGPUDevice self,
+                                                     const WGPUBufferDescriptor* descriptor,
+                                                     WGPUBufferCreateMappedCallback callback,
                                                      void* userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->createBufferMappedCallback = callback;
@@ -75,8 +77,8 @@ void ProcTableAsClass::DeviceCreateBufferMappedAsync(DawnDevice self,
     OnDeviceCreateBufferMappedAsyncCallback(self, descriptor, callback, userdata);
 }
 
-void ProcTableAsClass::BufferMapReadAsync(DawnBuffer self,
-                                          DawnBufferMapReadCallback callback,
+void ProcTableAsClass::BufferMapReadAsync(WGPUBuffer self,
+                                          WGPUBufferMapReadCallback callback,
                                           void* userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->mapReadCallback = callback;
@@ -85,8 +87,8 @@ void ProcTableAsClass::BufferMapReadAsync(DawnBuffer self,
     OnBufferMapReadAsyncCallback(self, callback, userdata);
 }
 
-void ProcTableAsClass::BufferMapWriteAsync(DawnBuffer self,
-                                           DawnBufferMapWriteCallback callback,
+void ProcTableAsClass::BufferMapWriteAsync(WGPUBuffer self,
+                                           WGPUBufferMapWriteCallback callback,
                                            void* userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->mapWriteCallback = callback;
@@ -95,9 +97,9 @@ void ProcTableAsClass::BufferMapWriteAsync(DawnBuffer self,
     OnBufferMapWriteAsyncCallback(self, callback, userdata);
 }
 
-void ProcTableAsClass::FenceOnCompletion(DawnFence self,
+void ProcTableAsClass::FenceOnCompletion(WGPUFence self,
                                          uint64_t value,
-                                         DawnFenceOnCompletionCallback callback,
+                                         WGPUFenceOnCompletionCallback callback,
                                          void* userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->fenceOnCompletionCallback = callback;
@@ -106,26 +108,36 @@ void ProcTableAsClass::FenceOnCompletion(DawnFence self,
     OnFenceOnCompletionCallback(self, value, callback, userdata);
 }
 
-void ProcTableAsClass::CallDeviceErrorCallback(DawnDevice device, DawnErrorType type, const char* message) {
+void ProcTableAsClass::CallDeviceErrorCallback(WGPUDevice device,
+                                               WGPUErrorType type,
+                                               const char* message) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(device);
     object->deviceErrorCallback(type, message, object->userdata1);
 }
-void ProcTableAsClass::CallCreateBufferMappedCallback(DawnDevice device, DawnBufferMapAsyncStatus status, DawnCreateBufferMappedResult result) {
+void ProcTableAsClass::CallCreateBufferMappedCallback(WGPUDevice device,
+                                                      WGPUBufferMapAsyncStatus status,
+                                                      WGPUCreateBufferMappedResult result) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(device);
     object->createBufferMappedCallback(status, result, object->userdata1);
 }
-void ProcTableAsClass::CallMapReadCallback(DawnBuffer buffer, DawnBufferMapAsyncStatus status, const void* data, uint64_t dataLength) {
+void ProcTableAsClass::CallMapReadCallback(WGPUBuffer buffer,
+                                           WGPUBufferMapAsyncStatus status,
+                                           const void* data,
+                                           uint64_t dataLength) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(buffer);
     object->mapReadCallback(status, data, dataLength, object->userdata1);
 }
 
-void ProcTableAsClass::CallMapWriteCallback(DawnBuffer buffer, DawnBufferMapAsyncStatus status, void* data, uint64_t dataLength) {
+void ProcTableAsClass::CallMapWriteCallback(WGPUBuffer buffer,
+                                            WGPUBufferMapAsyncStatus status,
+                                            void* data,
+                                            uint64_t dataLength) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(buffer);
     object->mapWriteCallback(status, data, dataLength, object->userdata1);
 }
 
-void ProcTableAsClass::CallFenceOnCompletionCallback(DawnFence fence,
-                                                     DawnFenceCompletionStatus status) {
+void ProcTableAsClass::CallFenceOnCompletionCallback(WGPUFence fence,
+                                                     WGPUFenceCompletionStatus status) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(fence);
     object->fenceOnCompletionCallback(status, object->userdata1);
 }

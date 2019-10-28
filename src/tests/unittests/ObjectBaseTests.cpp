@@ -14,7 +14,7 @@
 
 #include <gtest/gtest.h>
 
-#include "dawn/dawncpp.h"
+#include "dawn/webgpu_cpp.h"
 
 class Object : public wgpu::ObjectBase<Object, int*> {
   public:

@@ -23,14 +23,14 @@ namespace {
     class MockBufferMapReadCallback {
       public:
         MOCK_METHOD4(Call,
-                     void(DawnBufferMapAsyncStatus status,
+                     void(WGPUBufferMapAsyncStatus status,
                           const uint32_t* ptr,
                           uint64_t dataLength,
                           void* userdata));
     };
 
     std::unique_ptr<StrictMock<MockBufferMapReadCallback>> mockBufferMapReadCallback;
-    void ToMockBufferMapReadCallback(DawnBufferMapAsyncStatus status,
+    void ToMockBufferMapReadCallback(WGPUBufferMapAsyncStatus status,
                                      const void* ptr,
                                      uint64_t dataLength,
                                      void* userdata) {
@@ -42,7 +42,7 @@ namespace {
     class MockBufferMapWriteCallback {
       public:
         MOCK_METHOD4(Call,
-                     void(DawnBufferMapAsyncStatus status,
+                     void(WGPUBufferMapAsyncStatus status,
                           uint32_t* ptr,
                           uint64_t dataLength,
                           void* userdata));
@@ -50,7 +50,7 @@ namespace {
 
     std::unique_ptr<StrictMock<MockBufferMapWriteCallback>> mockBufferMapWriteCallback;
     uint32_t* lastMapWritePointer = nullptr;
-    void ToMockBufferMapWriteCallback(DawnBufferMapAsyncStatus status,
+    void ToMockBufferMapWriteCallback(WGPUBufferMapAsyncStatus status,
                                       void* ptr,
                                       uint64_t dataLength,
                                       void* userdata) {
@@ -62,8 +62,8 @@ namespace {
     class MockBufferCreateMappedCallback {
       public:
         MOCK_METHOD5(Call,
-                     void(DawnBufferMapAsyncStatus status,
-                          DawnBuffer buffer,
+                     void(WGPUBufferMapAsyncStatus status,
+                          WGPUBuffer buffer,
                           uint32_t* ptr,
                           uint64_t dataLength,
                           void* userdata));
@@ -71,12 +71,12 @@ namespace {
 
     std::unique_ptr<StrictMock<MockBufferCreateMappedCallback>> mockCreateBufferMappedCallback;
     uint32_t* lastCreateMappedPointer = nullptr;
-    void ToMockCreateBufferMappedCallback(DawnBufferMapAsyncStatus status,
-                                          DawnCreateBufferMappedResult result,
+    void ToMockCreateBufferMappedCallback(WGPUBufferMapAsyncStatus status,
+                                          WGPUCreateBufferMappedResult result,
                                           void* userdata) {
         // Assume the data is uint32_t to make writing matchers easier
         lastCreateMappedPointer = static_cast<uint32_t*>(result.data);
-        // Unpack DawnCreateBufferMappedResult to make writing matchers easier
+        // Unpack WGPUCreateBufferMappedResult to make writing matchers easier
         mockCreateBufferMappedCallback->Call(status, result.buffer, lastCreateMappedPointer,
                                              result.dataLength, userdata);
     }
@@ -97,13 +97,13 @@ class WireBufferMappingTests : public WireTest {
         mockCreateBufferMappedCallback =
             std::make_unique<StrictMock<MockBufferCreateMappedCallback>>();
 
-        DawnBufferDescriptor descriptor;
+        WGPUBufferDescriptor descriptor;
         descriptor.nextInChain = nullptr;
         descriptor.label = nullptr;
         descriptor.size = kBufferSize;
 
         apiBuffer = api.GetNewBuffer();
-        buffer = dawnDeviceCreateBuffer(device, &descriptor);
+        buffer = wgpuDeviceCreateBuffer(device, &descriptor);
 
         EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _))
             .WillOnce(Return(apiBuffer))
@@ -131,32 +131,32 @@ class WireBufferMappingTests : public WireTest {
   protected:
     static constexpr uint64_t kBufferSize = sizeof(uint32_t);
     // A successfully created buffer
-    DawnBuffer buffer;
-    DawnBuffer apiBuffer;
+    WGPUBuffer buffer;
+    WGPUBuffer apiBuffer;
 };
 
 // MapRead-specific tests
 
 // Check mapping for reading a succesfully created buffer
 TEST_F(WireBufferMappingTests, MappingForReadSuccessBuffer) {
-    dawnBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
+    wgpuBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
 
     uint32_t bufferContent = 31337;
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapReadCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, &bufferContent,
+            api.CallMapReadCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success, &bufferContent,
                                     kBufferSize);
         }));
 
     FlushClient();
 
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
-                                                 Pointee(Eq(bufferContent)), kBufferSize, _))
+    EXPECT_CALL(*mockBufferMapReadCallback,
+                Call(WGPUBufferMapAsyncStatus_Success, Pointee(Eq(bufferContent)), kBufferSize, _))
         .Times(1);
 
     FlushServer();
 
-    dawnBufferUnmap(buffer);
+    wgpuBufferUnmap(buffer);
     EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
 
     FlushClient();
@@ -165,16 +165,16 @@ TEST_F(WireBufferMappingTests, MappingForReadSuccessBuffer) {
 // Check that things work correctly when a validation error happens when mapping the buffer for
 // reading
 TEST_F(WireBufferMappingTests, ErrorWhileMappingForRead) {
-    dawnBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
+    wgpuBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
 
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapReadCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0);
+            api.CallMapReadCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error, nullptr, 0);
         }));
 
     FlushClient();
 
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0, _))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(WGPUBufferMapAsyncStatus_Error, nullptr, 0, _))
         .Times(1);
 
     FlushServer();
@@ -183,19 +183,18 @@ TEST_F(WireBufferMappingTests, ErrorWhileMappingForRead) {
 // Check that the map read callback is called with UNKNOWN when the buffer is destroyed before the
 // request is finished
 TEST_F(WireBufferMappingTests, DestroyBeforeReadRequestEnd) {
-    dawnBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
+    wgpuBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
 
     // Return success
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapReadCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, nullptr, 0);
+            api.CallMapReadCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success, nullptr, 0);
         }));
 
     // Destroy before the client gets the success, so the callback is called with unknown.
-    EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0, _))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(WGPUBufferMapAsyncStatus_Unknown, nullptr, 0, _))
         .Times(1);
-    dawnBufferRelease(buffer);
+    wgpuBufferRelease(buffer);
     EXPECT_CALL(api, BufferRelease(apiBuffer));
 
     FlushClient();
@@ -205,22 +204,21 @@ TEST_F(WireBufferMappingTests, DestroyBeforeReadRequestEnd) {
 // Check the map read callback is called with UNKNOWN when the map request would have worked, but
 // Unmap was called
 TEST_F(WireBufferMappingTests, UnmapCalledTooEarlyForRead) {
-    dawnBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
+    wgpuBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
 
     uint32_t bufferContent = 31337;
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapReadCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, &bufferContent,
+            api.CallMapReadCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success, &bufferContent,
                                     kBufferSize);
         }));
 
     FlushClient();
 
     // Oh no! We are calling Unmap too early!
-    EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0, _))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(WGPUBufferMapAsyncStatus_Unknown, nullptr, 0, _))
         .Times(1);
-    dawnBufferUnmap(buffer);
+    wgpuBufferUnmap(buffer);
 
     // The callback shouldn't get called, even when the request succeeded on the server side
     FlushServer();
@@ -229,34 +227,34 @@ TEST_F(WireBufferMappingTests, UnmapCalledTooEarlyForRead) {
 // Check that an error map read callback gets nullptr while a buffer is already mapped
 TEST_F(WireBufferMappingTests, MappingForReadingErrorWhileAlreadyMappedGetsNullptr) {
     // Successful map
-    dawnBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
+    wgpuBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
 
     uint32_t bufferContent = 31337;
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapReadCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, &bufferContent,
+            api.CallMapReadCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success, &bufferContent,
                                     kBufferSize);
         }))
         .RetiresOnSaturation();
 
     FlushClient();
 
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
-                                                 Pointee(Eq(bufferContent)), kBufferSize, _))
+    EXPECT_CALL(*mockBufferMapReadCallback,
+                Call(WGPUBufferMapAsyncStatus_Success, Pointee(Eq(bufferContent)), kBufferSize, _))
         .Times(1);
 
     FlushServer();
 
     // Map failure while the buffer is already mapped
-    dawnBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
+    wgpuBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapReadCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0);
+            api.CallMapReadCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error, nullptr, 0);
         }));
 
     FlushClient();
 
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0, _))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(WGPUBufferMapAsyncStatus_Error, nullptr, 0, _))
         .Times(1);
 
     FlushServer();
@@ -264,20 +262,20 @@ TEST_F(WireBufferMappingTests, MappingForReadingErrorWhileAlreadyMappedGetsNullp
 
 // Test that the MapReadCallback isn't fired twice when unmap() is called inside the callback
 TEST_F(WireBufferMappingTests, UnmapInsideMapReadCallback) {
-    dawnBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
+    wgpuBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
 
     uint32_t bufferContent = 31337;
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapReadCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, &bufferContent,
+            api.CallMapReadCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success, &bufferContent,
                                     kBufferSize);
         }));
 
     FlushClient();
 
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
-                                                 Pointee(Eq(bufferContent)), kBufferSize, _))
-        .WillOnce(InvokeWithoutArgs([&]() { dawnBufferUnmap(buffer); }));
+    EXPECT_CALL(*mockBufferMapReadCallback,
+                Call(WGPUBufferMapAsyncStatus_Success, Pointee(Eq(bufferContent)), kBufferSize, _))
+        .WillOnce(InvokeWithoutArgs([&]() { wgpuBufferUnmap(buffer); }));
 
     FlushServer();
 
@@ -289,20 +287,20 @@ TEST_F(WireBufferMappingTests, UnmapInsideMapReadCallback) {
 // Test that the MapReadCallback isn't fired twice the buffer external refcount reaches 0 in the
 // callback
 TEST_F(WireBufferMappingTests, DestroyInsideMapReadCallback) {
-    dawnBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
+    wgpuBufferMapReadAsync(buffer, ToMockBufferMapReadCallback, nullptr);
 
     uint32_t bufferContent = 31337;
     EXPECT_CALL(api, OnBufferMapReadAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapReadCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, &bufferContent,
+            api.CallMapReadCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success, &bufferContent,
                                     kBufferSize);
         }));
 
     FlushClient();
 
-    EXPECT_CALL(*mockBufferMapReadCallback, Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
-                                                 Pointee(Eq(bufferContent)), kBufferSize, _))
-        .WillOnce(InvokeWithoutArgs([&]() { dawnBufferRelease(buffer); }));
+    EXPECT_CALL(*mockBufferMapReadCallback,
+                Call(WGPUBufferMapAsyncStatus_Success, Pointee(Eq(bufferContent)), kBufferSize, _))
+        .WillOnce(InvokeWithoutArgs([&]() { wgpuBufferRelease(buffer); }));
 
     FlushServer();
 
@@ -315,7 +313,7 @@ TEST_F(WireBufferMappingTests, DestroyInsideMapReadCallback) {
 
 // Check mapping for writing a succesfully created buffer
 TEST_F(WireBufferMappingTests, MappingForWriteSuccessBuffer) {
-    dawnBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
+    wgpuBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
 
     uint32_t serverBufferContent = 31337;
     uint32_t updatedContent = 4242;
@@ -323,7 +321,7 @@ TEST_F(WireBufferMappingTests, MappingForWriteSuccessBuffer) {
 
     EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
+            api.CallMapWriteCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success,
                                      &serverBufferContent, kBufferSize);
         }));
 
@@ -331,7 +329,7 @@ TEST_F(WireBufferMappingTests, MappingForWriteSuccessBuffer) {
 
     // The map write callback always gets a buffer full of zeroes.
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Pointee(Eq(zero)), kBufferSize, _))
+                Call(WGPUBufferMapAsyncStatus_Success, Pointee(Eq(zero)), kBufferSize, _))
         .Times(1);
 
     FlushServer();
@@ -339,7 +337,7 @@ TEST_F(WireBufferMappingTests, MappingForWriteSuccessBuffer) {
     // Write something to the mapped pointer
     *lastMapWritePointer = updatedContent;
 
-    dawnBufferUnmap(buffer);
+    wgpuBufferUnmap(buffer);
     EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
 
     FlushClient();
@@ -351,17 +349,16 @@ TEST_F(WireBufferMappingTests, MappingForWriteSuccessBuffer) {
 // Check that things work correctly when a validation error happens when mapping the buffer for
 // writing
 TEST_F(WireBufferMappingTests, ErrorWhileMappingForWrite) {
-    dawnBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
+    wgpuBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
 
     EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0);
+            api.CallMapWriteCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error, nullptr, 0);
         }));
 
     FlushClient();
 
-    EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0, _))
+    EXPECT_CALL(*mockBufferMapWriteCallback, Call(WGPUBufferMapAsyncStatus_Error, nullptr, 0, _))
         .Times(1);
 
     FlushServer();
@@ -370,19 +367,18 @@ TEST_F(WireBufferMappingTests, ErrorWhileMappingForWrite) {
 // Check that the map write callback is called with UNKNOWN when the buffer is destroyed before the
 // request is finished
 TEST_F(WireBufferMappingTests, DestroyBeforeWriteRequestEnd) {
-    dawnBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
+    wgpuBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
 
     // Return success
     EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, nullptr, 0);
+            api.CallMapWriteCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success, nullptr, 0);
         }));
 
     // Destroy before the client gets the success, so the callback is called with unknown.
-    EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0, _))
+    EXPECT_CALL(*mockBufferMapWriteCallback, Call(WGPUBufferMapAsyncStatus_Unknown, nullptr, 0, _))
         .Times(1);
-    dawnBufferRelease(buffer);
+    wgpuBufferRelease(buffer);
     EXPECT_CALL(api, BufferRelease(apiBuffer));
 
     FlushClient();
@@ -392,22 +388,21 @@ TEST_F(WireBufferMappingTests, DestroyBeforeWriteRequestEnd) {
 // Check the map read callback is called with UNKNOWN when the map request would have worked, but
 // Unmap was called
 TEST_F(WireBufferMappingTests, UnmapCalledTooEarlyForWrite) {
-    dawnBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
+    wgpuBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
 
     uint32_t bufferContent = 31337;
     EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
-                                     &bufferContent, kBufferSize);
+            api.CallMapWriteCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success, &bufferContent,
+                                     kBufferSize);
         }));
 
     FlushClient();
 
     // Oh no! We are calling Unmap too early!
-    EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0, _))
+    EXPECT_CALL(*mockBufferMapWriteCallback, Call(WGPUBufferMapAsyncStatus_Unknown, nullptr, 0, _))
         .Times(1);
-    dawnBufferUnmap(buffer);
+    wgpuBufferUnmap(buffer);
 
     // The callback shouldn't get called, even when the request succeeded on the server side
     FlushServer();
@@ -416,36 +411,35 @@ TEST_F(WireBufferMappingTests, UnmapCalledTooEarlyForWrite) {
 // Check that an error map read callback gets nullptr while a buffer is already mapped
 TEST_F(WireBufferMappingTests, MappingForWritingErrorWhileAlreadyMappedGetsNullptr) {
     // Successful map
-    dawnBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
+    wgpuBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
 
     uint32_t bufferContent = 31337;
     uint32_t zero = 0;
     EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
-                                     &bufferContent, kBufferSize);
+            api.CallMapWriteCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success, &bufferContent,
+                                     kBufferSize);
         }))
         .RetiresOnSaturation();
 
     FlushClient();
 
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Pointee(Eq(zero)), kBufferSize, _))
+                Call(WGPUBufferMapAsyncStatus_Success, Pointee(Eq(zero)), kBufferSize, _))
         .Times(1);
 
     FlushServer();
 
     // Map failure while the buffer is already mapped
-    dawnBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
+    wgpuBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
     EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0);
+            api.CallMapWriteCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error, nullptr, 0);
         }));
 
     FlushClient();
 
-    EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0, _))
+    EXPECT_CALL(*mockBufferMapWriteCallback, Call(WGPUBufferMapAsyncStatus_Error, nullptr, 0, _))
         .Times(1);
 
     FlushServer();
@@ -453,21 +447,21 @@ TEST_F(WireBufferMappingTests, MappingForWritingErrorWhileAlreadyMappedGetsNullp
 
 // Test that the MapWriteCallback isn't fired twice when unmap() is called inside the callback
 TEST_F(WireBufferMappingTests, UnmapInsideMapWriteCallback) {
-    dawnBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
+    wgpuBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
 
     uint32_t bufferContent = 31337;
     uint32_t zero = 0;
     EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
-                                     &bufferContent, kBufferSize);
+            api.CallMapWriteCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success, &bufferContent,
+                                     kBufferSize);
         }));
 
     FlushClient();
 
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Pointee(Eq(zero)), kBufferSize, _))
-        .WillOnce(InvokeWithoutArgs([&]() { dawnBufferUnmap(buffer); }));
+                Call(WGPUBufferMapAsyncStatus_Success, Pointee(Eq(zero)), kBufferSize, _))
+        .WillOnce(InvokeWithoutArgs([&]() { wgpuBufferUnmap(buffer); }));
 
     FlushServer();
 
@@ -479,21 +473,21 @@ TEST_F(WireBufferMappingTests, UnmapInsideMapWriteCallback) {
 // Test that the MapWriteCallback isn't fired twice the buffer external refcount reaches 0 in the
 // callback
 TEST_F(WireBufferMappingTests, DestroyInsideMapWriteCallback) {
-    dawnBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
+    wgpuBufferMapWriteAsync(buffer, ToMockBufferMapWriteCallback, nullptr);
 
     uint32_t bufferContent = 31337;
     uint32_t zero = 0;
     EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
-                                     &bufferContent, kBufferSize);
+            api.CallMapWriteCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success, &bufferContent,
+                                     kBufferSize);
         }));
 
     FlushClient();
 
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Pointee(Eq(zero)), kBufferSize, _))
-        .WillOnce(InvokeWithoutArgs([&]() { dawnBufferRelease(buffer); }));
+                Call(WGPUBufferMapAsyncStatus_Success, Pointee(Eq(zero)), kBufferSize, _))
+        .WillOnce(InvokeWithoutArgs([&]() { wgpuBufferRelease(buffer); }));
 
     FlushServer();
 
@@ -504,19 +498,19 @@ TEST_F(WireBufferMappingTests, DestroyInsideMapWriteCallback) {
 
 // Test successful CreateBufferMapped
 TEST_F(WireBufferMappingTests, CreateBufferMappedSuccess) {
-    DawnBufferDescriptor descriptor;
+    WGPUBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
     descriptor.label = nullptr;
     descriptor.size = 4;
 
-    DawnBuffer apiBuffer = api.GetNewBuffer();
-    DawnCreateBufferMappedResult apiResult;
+    WGPUBuffer apiBuffer = api.GetNewBuffer();
+    WGPUCreateBufferMappedResult apiResult;
     uint32_t apiBufferData = 1234;
     apiResult.buffer = apiBuffer;
     apiResult.data = reinterpret_cast<uint8_t*>(&apiBufferData);
     apiResult.dataLength = 4;
 
-    DawnCreateBufferMappedResult result = dawnDeviceCreateBufferMapped(device, &descriptor);
+    WGPUCreateBufferMappedResult result = wgpuDeviceCreateBufferMapped(device, &descriptor);
 
     EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
         .WillOnce(Return(apiResult))
@@ -524,7 +518,7 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedSuccess) {
 
     FlushClient();
 
-    dawnBufferUnmap(result.buffer);
+    wgpuBufferUnmap(result.buffer);
     EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
 
     FlushClient();
@@ -532,19 +526,19 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedSuccess) {
 
 // Test that releasing after CreateBufferMapped does not call Unmap
 TEST_F(WireBufferMappingTests, ReleaseAfterCreateBufferMapped) {
-    DawnBufferDescriptor descriptor;
+    WGPUBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
     descriptor.label = nullptr;
     descriptor.size = 4;
 
-    DawnBuffer apiBuffer = api.GetNewBuffer();
-    DawnCreateBufferMappedResult apiResult;
+    WGPUBuffer apiBuffer = api.GetNewBuffer();
+    WGPUCreateBufferMappedResult apiResult;
     uint32_t apiBufferData = 1234;
     apiResult.buffer = apiBuffer;
     apiResult.data = reinterpret_cast<uint8_t*>(&apiBufferData);
     apiResult.dataLength = 4;
 
-    DawnCreateBufferMappedResult result = dawnDeviceCreateBufferMapped(device, &descriptor);
+    WGPUCreateBufferMappedResult result = wgpuDeviceCreateBufferMapped(device, &descriptor);
 
     EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
         .WillOnce(Return(apiResult))
@@ -552,7 +546,7 @@ TEST_F(WireBufferMappingTests, ReleaseAfterCreateBufferMapped) {
 
     FlushClient();
 
-    dawnBufferRelease(result.buffer);
+    wgpuBufferRelease(result.buffer);
     EXPECT_CALL(api, BufferRelease(apiBuffer)).Times(1);
 
     FlushClient();
@@ -560,19 +554,19 @@ TEST_F(WireBufferMappingTests, ReleaseAfterCreateBufferMapped) {
 
 // Test that it is valid to map a buffer after CreateBufferMapped and Unmap
 TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapSuccess) {
-    DawnBufferDescriptor descriptor;
+    WGPUBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
     descriptor.label = nullptr;
     descriptor.size = 4;
 
-    DawnBuffer apiBuffer = api.GetNewBuffer();
-    DawnCreateBufferMappedResult apiResult;
+    WGPUBuffer apiBuffer = api.GetNewBuffer();
+    WGPUCreateBufferMappedResult apiResult;
     uint32_t apiBufferData = 9863;
     apiResult.buffer = apiBuffer;
     apiResult.data = reinterpret_cast<uint8_t*>(&apiBufferData);
     apiResult.dataLength = 4;
 
-    DawnCreateBufferMappedResult result = dawnDeviceCreateBufferMapped(device, &descriptor);
+    WGPUCreateBufferMappedResult result = wgpuDeviceCreateBufferMapped(device, &descriptor);
 
     EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
         .WillOnce(Return(apiResult))
@@ -580,24 +574,24 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapSuccess) {
 
     FlushClient();
 
-    dawnBufferUnmap(result.buffer);
+    wgpuBufferUnmap(result.buffer);
     EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
 
     FlushClient();
 
-    dawnBufferMapWriteAsync(result.buffer, ToMockBufferMapWriteCallback, nullptr);
+    wgpuBufferMapWriteAsync(result.buffer, ToMockBufferMapWriteCallback, nullptr);
 
     uint32_t zero = 0;
     EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS,
-                                     &apiBufferData, kBufferSize);
+            api.CallMapWriteCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success, &apiBufferData,
+                                     kBufferSize);
         }));
 
     FlushClient();
 
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Pointee(Eq(zero)), kBufferSize, _))
+                Call(WGPUBufferMapAsyncStatus_Success, Pointee(Eq(zero)), kBufferSize, _))
         .Times(1);
 
     FlushServer();
@@ -605,19 +599,19 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapSuccess) {
 
 // Test that it is invalid to map a buffer after CreateBufferMapped before Unmap
 TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapFailure) {
-    DawnBufferDescriptor descriptor;
+    WGPUBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
     descriptor.label = nullptr;
     descriptor.size = 4;
 
-    DawnBuffer apiBuffer = api.GetNewBuffer();
-    DawnCreateBufferMappedResult apiResult;
+    WGPUBuffer apiBuffer = api.GetNewBuffer();
+    WGPUCreateBufferMappedResult apiResult;
     uint32_t apiBufferData = 9863;
     apiResult.buffer = apiBuffer;
     apiResult.data = reinterpret_cast<uint8_t*>(&apiBufferData);
     apiResult.dataLength = 4;
 
-    DawnCreateBufferMappedResult result = dawnDeviceCreateBufferMapped(device, &descriptor);
+    WGPUCreateBufferMappedResult result = wgpuDeviceCreateBufferMapped(device, &descriptor);
 
     EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
         .WillOnce(Return(apiResult))
@@ -625,22 +619,21 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapFailure) {
 
     FlushClient();
 
-    dawnBufferMapWriteAsync(result.buffer, ToMockBufferMapWriteCallback, nullptr);
+    wgpuBufferMapWriteAsync(result.buffer, ToMockBufferMapWriteCallback, nullptr);
 
     EXPECT_CALL(api, OnBufferMapWriteAsyncCallback(apiBuffer, _, _))
         .WillOnce(InvokeWithoutArgs([&]() {
-            api.CallMapWriteCallback(apiBuffer, DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0);
+            api.CallMapWriteCallback(apiBuffer, WGPUBufferMapAsyncStatus_Error, nullptr, 0);
         }));
 
     FlushClient();
 
-    EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0, _))
+    EXPECT_CALL(*mockBufferMapWriteCallback, Call(WGPUBufferMapAsyncStatus_Error, nullptr, 0, _))
         .Times(1);
 
     FlushServer();
 
-    dawnBufferUnmap(result.buffer);
+    wgpuBufferUnmap(result.buffer);
     EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
 
     FlushClient();
@@ -648,12 +641,12 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapFailure) {
 
 // Test successful CreateBufferMappedAsync
 TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncSuccess) {
-    DawnBufferDescriptor descriptor;
+    WGPUBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
     descriptor.label = nullptr;
     descriptor.size = kBufferSize;
 
-    DawnCreateBufferMappedResult apiResult;
+    WGPUCreateBufferMappedResult apiResult;
     uint32_t serverBufferContent = 31337;
     apiResult.buffer = apiBuffer;
     apiResult.data = reinterpret_cast<uint8_t*>(&serverBufferContent);
@@ -662,7 +655,8 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncSuccess) {
     uint32_t updatedContent = 4242;
     uint32_t zero = 0;
 
-    dawnDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback, nullptr);
+    wgpuDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback,
+                                      nullptr);
 
     EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
         .WillOnce(Return(apiResult))
@@ -670,10 +664,10 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncSuccess) {
 
     FlushClient();
 
-    DawnBuffer buffer;
+    WGPUBuffer buffer;
     // The callback always gets a buffer full of zeroes.
     EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, _, Pointee(Eq(zero)), kBufferSize, _))
+                Call(WGPUBufferMapAsyncStatus_Success, _, Pointee(Eq(zero)), kBufferSize, _))
         .WillOnce(::testing::SaveArg<1>(&buffer));
 
     FlushServer();
@@ -681,7 +675,7 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncSuccess) {
     // Write something to the mapped pointer
     *lastCreateMappedPointer = updatedContent;
 
-    dawnBufferUnmap(buffer);
+    wgpuBufferUnmap(buffer);
     EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
 
     FlushClient();
@@ -692,16 +686,17 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncSuccess) {
 
 // Test CreateBufferMappedAsync with map error
 TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncMapError) {
-    DawnBufferDescriptor descriptor;
+    WGPUBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
     descriptor.label = nullptr;
 
-    DawnCreateBufferMappedResult apiResult;
+    WGPUCreateBufferMappedResult apiResult;
     apiResult.buffer = apiBuffer;
     apiResult.data = nullptr;  // error mapping
     apiResult.dataLength = kBufferSize;
 
-    dawnDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback, nullptr);
+    wgpuDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback,
+                                      nullptr);
 
     EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
         .WillOnce(Return(apiResult))
@@ -709,14 +704,14 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncMapError) {
 
     FlushClient();
 
-    DawnBuffer buffer;
+    WGPUBuffer buffer;
     EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, _, nullptr, 0, _))
+                Call(WGPUBufferMapAsyncStatus_Error, _, nullptr, 0, _))
         .WillOnce(::testing::SaveArg<1>(&buffer));
 
     FlushServer();
 
-    dawnBufferUnmap(buffer);
+    wgpuBufferUnmap(buffer);
     EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
 
     FlushClient();
@@ -725,12 +720,12 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncMapError) {
 // Test that the CreateBufferMappedCallback isn't fired twice when unmap() is called inside the
 // callback
 TEST_F(WireBufferMappingTests, UnmapInsideCreateBufferMappedAsyncCallback) {
-    DawnBufferDescriptor descriptor;
+    WGPUBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
     descriptor.label = nullptr;
     descriptor.size = kBufferSize;
 
-    DawnCreateBufferMappedResult apiResult;
+    WGPUCreateBufferMappedResult apiResult;
     uint32_t serverBufferContent = 31337;
     apiResult.buffer = apiBuffer;
     apiResult.data = reinterpret_cast<uint8_t*>(&serverBufferContent);
@@ -738,7 +733,8 @@ TEST_F(WireBufferMappingTests, UnmapInsideCreateBufferMappedAsyncCallback) {
 
     uint32_t zero = 0;
 
-    dawnDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback, nullptr);
+    wgpuDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback,
+                                      nullptr);
 
     EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
         .WillOnce(Return(apiResult))
@@ -746,12 +742,12 @@ TEST_F(WireBufferMappingTests, UnmapInsideCreateBufferMappedAsyncCallback) {
 
     FlushClient();
 
-    DawnBuffer buffer;
+    WGPUBuffer buffer;
     // The callback always gets a buffer full of zeroes.
     EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, _, Pointee(Eq(zero)), kBufferSize, _))
+                Call(WGPUBufferMapAsyncStatus_Success, _, Pointee(Eq(zero)), kBufferSize, _))
         .WillOnce(DoAll(::testing::SaveArg<1>(&buffer),
-                        InvokeWithoutArgs([&]() { dawnBufferUnmap(buffer); })));
+                        InvokeWithoutArgs([&]() { wgpuBufferUnmap(buffer); })));
 
     FlushServer();
 
@@ -763,12 +759,12 @@ TEST_F(WireBufferMappingTests, UnmapInsideCreateBufferMappedAsyncCallback) {
 // Test that the CreateBufferMappedCallback isn't fired twice when the buffer is deleted inside
 // the callback
 TEST_F(WireBufferMappingTests, ReleaseInsideCreateBufferMappedAsyncCallback) {
-    DawnBufferDescriptor descriptor;
+    WGPUBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
     descriptor.label = nullptr;
     descriptor.size = kBufferSize;
 
-    DawnCreateBufferMappedResult apiResult;
+    WGPUCreateBufferMappedResult apiResult;
     uint32_t serverBufferContent = 31337;
     apiResult.buffer = apiBuffer;
     apiResult.data = reinterpret_cast<uint8_t*>(&serverBufferContent);
@@ -776,7 +772,8 @@ TEST_F(WireBufferMappingTests, ReleaseInsideCreateBufferMappedAsyncCallback) {
 
     uint32_t zero = 0;
 
-    dawnDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback, nullptr);
+    wgpuDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback,
+                                      nullptr);
 
     EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
         .WillOnce(Return(apiResult))
@@ -784,12 +781,12 @@ TEST_F(WireBufferMappingTests, ReleaseInsideCreateBufferMappedAsyncCallback) {
 
     FlushClient();
 
-    DawnBuffer buffer;
+    WGPUBuffer buffer;
     // The callback always gets a buffer full of zeroes.
     EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, _, Pointee(Eq(zero)), kBufferSize, _))
+                Call(WGPUBufferMapAsyncStatus_Success, _, Pointee(Eq(zero)), kBufferSize, _))
         .WillOnce(DoAll(::testing::SaveArg<1>(&buffer),
-                        InvokeWithoutArgs([&]() { dawnBufferRelease(buffer); })));
+                        InvokeWithoutArgs([&]() { wgpuBufferRelease(buffer); })));
 
     FlushServer();
 
@@ -801,12 +798,12 @@ TEST_F(WireBufferMappingTests, ReleaseInsideCreateBufferMappedAsyncCallback) {
 // Test that the CreateBufferMappedCallback isn't fired twice when the buffer is destroyed inside
 // the callback
 TEST_F(WireBufferMappingTests, DestroyInsideCreateBufferMappedAsyncCallback) {
-    DawnBufferDescriptor descriptor;
+    WGPUBufferDescriptor descriptor;
     descriptor.nextInChain = nullptr;
     descriptor.label = nullptr;
     descriptor.size = kBufferSize;
 
-    DawnCreateBufferMappedResult apiResult;
+    WGPUCreateBufferMappedResult apiResult;
     uint32_t serverBufferContent = 31337;
     apiResult.buffer = apiBuffer;
     apiResult.data = reinterpret_cast<uint8_t*>(&serverBufferContent);
@@ -814,7 +811,8 @@ TEST_F(WireBufferMappingTests, DestroyInsideCreateBufferMappedAsyncCallback) {
 
     uint32_t zero = 0;
 
-    dawnDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback, nullptr);
+    wgpuDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback,
+                                      nullptr);
 
     EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
         .WillOnce(Return(apiResult))
@@ -822,12 +820,12 @@ TEST_F(WireBufferMappingTests, DestroyInsideCreateBufferMappedAsyncCallback) {
 
     FlushClient();
 
-    DawnBuffer buffer;
+    WGPUBuffer buffer;
     // The callback always gets a buffer full of zeroes.
     EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, _, Pointee(Eq(zero)), kBufferSize, _))
+                Call(WGPUBufferMapAsyncStatus_Success, _, Pointee(Eq(zero)), kBufferSize, _))
         .WillOnce(DoAll(::testing::SaveArg<1>(&buffer),
-                        InvokeWithoutArgs([&]() { dawnBufferDestroy(buffer); })));
+                        InvokeWithoutArgs([&]() { wgpuBufferDestroy(buffer); })));
 
     FlushServer();
 

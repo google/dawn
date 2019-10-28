@@ -21,7 +21,7 @@ namespace {
 class QueueSubmitValidationTest : public ValidationTest {
 };
 
-static void StoreTrueMapWriteCallback(DawnBufferMapAsyncStatus status,
+static void StoreTrueMapWriteCallback(WGPUBufferMapAsyncStatus status,
                                       void*,
                                       uint64_t,
                                       void* userdata) {
@@ -31,24 +31,24 @@ static void StoreTrueMapWriteCallback(DawnBufferMapAsyncStatus status,
 // Test submitting with a mapped buffer is disallowed
 TEST_F(QueueSubmitValidationTest, SubmitWithMappedBuffer) {
     // Create a map-write buffer.
-    dawn::BufferDescriptor descriptor;
-    descriptor.usage = dawn::BufferUsage::MapWrite | dawn::BufferUsage::CopySrc;
+    wgpu::BufferDescriptor descriptor;
+    descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
     descriptor.size = 4;
-    dawn::Buffer buffer = device.CreateBuffer(&descriptor);
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
     // Create a fake copy destination buffer
-    descriptor.usage = dawn::BufferUsage::CopyDst;
-    dawn::Buffer targetBuffer = device.CreateBuffer(&descriptor);
+    descriptor.usage = wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer targetBuffer = device.CreateBuffer(&descriptor);
 
     // Create a command buffer that reads from the mappable buffer.
-    dawn::CommandBuffer commands;
+    wgpu::CommandBuffer commands;
     {
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyBufferToBuffer(buffer, 0, targetBuffer, 0, 4);
         commands = encoder.Finish();
     }
 
-    dawn::Queue queue = device.CreateQueue();
+    wgpu::Queue queue = device.CreateQueue();
 
     // Submitting when the buffer has never been mapped should succeed
     queue.Submit(1, &commands);

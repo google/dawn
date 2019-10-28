@@ -22,9 +22,9 @@ class DebugMarkerValidationTest : public ValidationTest {};
 TEST_F(DebugMarkerValidationTest, RenderSuccess) {
     DummyRenderPass renderPass(device);
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.PushDebugGroup("Event Start");
         pass.PushDebugGroup("Event Start");
         pass.InsertDebugMarker("Marker");
@@ -40,9 +40,9 @@ TEST_F(DebugMarkerValidationTest, RenderSuccess) {
 TEST_F(DebugMarkerValidationTest, RenderUnbalancedPush) {
     DummyRenderPass renderPass(device);
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.PushDebugGroup("Event Start");
         pass.PushDebugGroup("Event Start");
         pass.InsertDebugMarker("Marker");
@@ -57,9 +57,9 @@ TEST_F(DebugMarkerValidationTest, RenderUnbalancedPush) {
 TEST_F(DebugMarkerValidationTest, RenderUnbalancedPop) {
     DummyRenderPass renderPass(device);
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.PushDebugGroup("Event Start");
         pass.InsertDebugMarker("Marker");
         pass.PopDebugGroup();
@@ -72,9 +72,9 @@ TEST_F(DebugMarkerValidationTest, RenderUnbalancedPop) {
 
 // Correct usage of debug markers should succeed in compute pass.
 TEST_F(DebugMarkerValidationTest, ComputeSuccess) {
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::ComputePassEncoder pass = encoder.BeginComputePass();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.PushDebugGroup("Event Start");
         pass.PushDebugGroup("Event Start");
         pass.InsertDebugMarker("Marker");
@@ -88,9 +88,9 @@ TEST_F(DebugMarkerValidationTest, ComputeSuccess) {
 
 // A PushDebugGroup call without a following PopDebugGroup produces an error in compute pass.
 TEST_F(DebugMarkerValidationTest, ComputeUnbalancedPush) {
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::ComputePassEncoder pass = encoder.BeginComputePass();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.PushDebugGroup("Event Start");
         pass.PushDebugGroup("Event Start");
         pass.InsertDebugMarker("Marker");
@@ -103,9 +103,9 @@ TEST_F(DebugMarkerValidationTest, ComputeUnbalancedPush) {
 
 // A PopDebugGroup call without a preceding PushDebugGroup produces an error in compute pass.
 TEST_F(DebugMarkerValidationTest, ComputeUnbalancedPop) {
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::ComputePassEncoder pass = encoder.BeginComputePass();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.PushDebugGroup("Event Start");
         pass.InsertDebugMarker("Marker");
         pass.PopDebugGroup();
@@ -118,7 +118,7 @@ TEST_F(DebugMarkerValidationTest, ComputeUnbalancedPop) {
 
 // Correct usage of debug markers should succeed in command encoder.
 TEST_F(DebugMarkerValidationTest, CommandEncoderSuccess) {
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.PushDebugGroup("Event Start");
     encoder.PushDebugGroup("Event Start");
     encoder.InsertDebugMarker("Marker");
@@ -129,7 +129,7 @@ TEST_F(DebugMarkerValidationTest, CommandEncoderSuccess) {
 
 // A PushDebugGroup call without a following PopDebugGroup produces an error in command encoder.
 TEST_F(DebugMarkerValidationTest, CommandEncoderUnbalancedPush) {
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.PushDebugGroup("Event Start");
     encoder.PushDebugGroup("Event Start");
     encoder.InsertDebugMarker("Marker");
@@ -139,7 +139,7 @@ TEST_F(DebugMarkerValidationTest, CommandEncoderUnbalancedPush) {
 
 // A PopDebugGroup call without a preceding PushDebugGroup produces an error in command encoder.
 TEST_F(DebugMarkerValidationTest, CommandEncoderUnbalancedPop) {
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.PushDebugGroup("Event Start");
     encoder.InsertDebugMarker("Marker");
     encoder.PopDebugGroup();
@@ -149,10 +149,10 @@ TEST_F(DebugMarkerValidationTest, CommandEncoderUnbalancedPop) {
 
 // It is possible to nested pushes in a compute pass in a command encoder.
 TEST_F(DebugMarkerValidationTest, NestedComputeInCommandEncoder) {
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.PushDebugGroup("Event Start");
     {
-        dawn::ComputePassEncoder pass = encoder.BeginComputePass();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.PushDebugGroup("Event Start");
         pass.InsertDebugMarker("Marker");
         pass.PopDebugGroup();
@@ -164,10 +164,10 @@ TEST_F(DebugMarkerValidationTest, NestedComputeInCommandEncoder) {
 
 // Command encoder and compute pass pushes must be balanced independently.
 TEST_F(DebugMarkerValidationTest, NestedComputeInCommandEncoderIndependent) {
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.PushDebugGroup("Event Start");
     {
-        dawn::ComputePassEncoder pass = encoder.BeginComputePass();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.InsertDebugMarker("Marker");
         pass.PopDebugGroup();
         pass.EndPass();
@@ -179,10 +179,10 @@ TEST_F(DebugMarkerValidationTest, NestedComputeInCommandEncoderIndependent) {
 TEST_F(DebugMarkerValidationTest, NestedRenderInCommandEncoder) {
     DummyRenderPass renderPass(device);
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.PushDebugGroup("Event Start");
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.PushDebugGroup("Event Start");
         pass.InsertDebugMarker("Marker");
         pass.PopDebugGroup();
@@ -196,10 +196,10 @@ TEST_F(DebugMarkerValidationTest, NestedRenderInCommandEncoder) {
 TEST_F(DebugMarkerValidationTest, NestedRenderInCommandEncoderIndependent) {
     DummyRenderPass renderPass(device);
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.PushDebugGroup("Event Start");
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.InsertDebugMarker("Marker");
         pass.PopDebugGroup();
         pass.EndPass();

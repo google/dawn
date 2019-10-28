@@ -15,9 +15,9 @@
 #ifndef TESTS_UNITTESTS_VALIDATIONTEST_H_
 #define TESTS_UNITTESTS_VALIDATIONTEST_H_
 
-#include "gtest/gtest.h"
-#include "dawn/dawncpp.h"
+#include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
+#include "gtest/gtest.h"
 
 #define ASSERT_DEVICE_ERROR(statement) \
     StartExpectDeviceError(); \
@@ -29,7 +29,7 @@ class ValidationTest : public testing::Test {
     ValidationTest();
     ~ValidationTest();
 
-    dawn::Device CreateDeviceFromAdapter(dawn_native::Adapter adapter,
+    wgpu::Device CreateDeviceFromAdapter(dawn_native::Adapter adapter,
                                          const std::vector<const char*>& requiredExtensions);
 
     void TearDown() override;
@@ -40,25 +40,25 @@ class ValidationTest : public testing::Test {
 
     // Helper functions to create objects to test validation.
 
-    struct DummyRenderPass : public dawn::RenderPassDescriptor {
+    struct DummyRenderPass : public wgpu::RenderPassDescriptor {
       public:
-        DummyRenderPass(const dawn::Device& device);
-        dawn::Texture attachment;
-        dawn::TextureFormat attachmentFormat;
+        DummyRenderPass(const wgpu::Device& device);
+        wgpu::Texture attachment;
+        wgpu::TextureFormat attachmentFormat;
         uint32_t width;
         uint32_t height;
 
       private:
-        dawn::RenderPassColorAttachmentDescriptor mColorAttachment;
+        wgpu::RenderPassColorAttachmentDescriptor mColorAttachment;
     };
 
   protected:
-    dawn::Device device;
+    wgpu::Device device;
     dawn_native::Adapter adapter;
     std::unique_ptr<dawn_native::Instance> instance;
 
   private:
-    static void OnDeviceError(DawnErrorType type, const char* message, void* userdata);
+    static void OnDeviceError(WGPUErrorType type, const char* message, void* userdata);
     std::string mDeviceErrorMessage;
     bool mExpectError = false;
     bool mError = false;

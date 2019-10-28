@@ -23,14 +23,14 @@ using namespace testing;
 class MockBufferMapReadCallback {
     public:
       MOCK_METHOD4(Call,
-                   void(DawnBufferMapAsyncStatus status,
+                   void(WGPUBufferMapAsyncStatus status,
                         const uint32_t* ptr,
                         uint64_t dataLength,
                         void* userdata));
 };
 
 static std::unique_ptr<MockBufferMapReadCallback> mockBufferMapReadCallback;
-static void ToMockBufferMapReadCallback(DawnBufferMapAsyncStatus status,
+static void ToMockBufferMapReadCallback(WGPUBufferMapAsyncStatus status,
                                         const void* ptr,
                                         uint64_t dataLength,
                                         void* userdata) {
@@ -42,14 +42,14 @@ static void ToMockBufferMapReadCallback(DawnBufferMapAsyncStatus status,
 class MockBufferMapWriteCallback {
     public:
       MOCK_METHOD4(Call,
-                   void(DawnBufferMapAsyncStatus status,
+                   void(WGPUBufferMapAsyncStatus status,
                         uint32_t* ptr,
                         uint64_t dataLength,
                         void* userdata));
 };
 
 static std::unique_ptr<MockBufferMapWriteCallback> mockBufferMapWriteCallback;
-static void ToMockBufferMapWriteCallback(DawnBufferMapAsyncStatus status,
+static void ToMockBufferMapWriteCallback(WGPUBufferMapAsyncStatus status,
                                          void* ptr,
                                          uint64_t dataLength,
                                          void* userdata) {
@@ -60,37 +60,37 @@ static void ToMockBufferMapWriteCallback(DawnBufferMapAsyncStatus status,
 
 class BufferValidationTest : public ValidationTest {
     protected:
-        dawn::Buffer CreateMapReadBuffer(uint64_t size) {
-            dawn::BufferDescriptor descriptor;
-            descriptor.size = size;
-            descriptor.usage = dawn::BufferUsage::MapRead;
+      wgpu::Buffer CreateMapReadBuffer(uint64_t size) {
+          wgpu::BufferDescriptor descriptor;
+          descriptor.size = size;
+          descriptor.usage = wgpu::BufferUsage::MapRead;
 
-            return device.CreateBuffer(&descriptor);
-        }
-        dawn::Buffer CreateMapWriteBuffer(uint64_t size) {
-            dawn::BufferDescriptor descriptor;
-            descriptor.size = size;
-            descriptor.usage = dawn::BufferUsage::MapWrite;
+          return device.CreateBuffer(&descriptor);
+      }
+      wgpu::Buffer CreateMapWriteBuffer(uint64_t size) {
+          wgpu::BufferDescriptor descriptor;
+          descriptor.size = size;
+          descriptor.usage = wgpu::BufferUsage::MapWrite;
 
-            return device.CreateBuffer(&descriptor);
-        }
-        dawn::Buffer CreateSetSubDataBuffer(uint64_t size) {
-            dawn::BufferDescriptor descriptor;
-            descriptor.size = size;
-            descriptor.usage = dawn::BufferUsage::CopyDst;
+          return device.CreateBuffer(&descriptor);
+      }
+      wgpu::Buffer CreateSetSubDataBuffer(uint64_t size) {
+          wgpu::BufferDescriptor descriptor;
+          descriptor.size = size;
+          descriptor.usage = wgpu::BufferUsage::CopyDst;
 
-            return device.CreateBuffer(&descriptor);
-        }
+          return device.CreateBuffer(&descriptor);
+      }
 
-        dawn::CreateBufferMappedResult CreateBufferMapped(uint64_t size, dawn::BufferUsage usage) {
-            dawn::BufferDescriptor descriptor;
-            descriptor.size = size;
-            descriptor.usage = usage;
+      wgpu::CreateBufferMappedResult CreateBufferMapped(uint64_t size, wgpu::BufferUsage usage) {
+          wgpu::BufferDescriptor descriptor;
+          descriptor.size = size;
+          descriptor.usage = usage;
 
-            return device.CreateBufferMapped(&descriptor);
-        }
+          return device.CreateBufferMapped(&descriptor);
+      }
 
-        dawn::Queue queue;
+      wgpu::Queue queue;
 
     private:
         void SetUp() override {
@@ -114,9 +114,9 @@ class BufferValidationTest : public ValidationTest {
 TEST_F(BufferValidationTest, CreationSuccess) {
     // Success
     {
-        dawn::BufferDescriptor descriptor;
+        wgpu::BufferDescriptor descriptor;
         descriptor.size = 4;
-        descriptor.usage = dawn::BufferUsage::Uniform;
+        descriptor.usage = wgpu::BufferUsage::Uniform;
 
         device.CreateBuffer(&descriptor);
     }
@@ -126,36 +126,36 @@ TEST_F(BufferValidationTest, CreationSuccess) {
 TEST_F(BufferValidationTest, CreationMapUsageRestrictions) {
     // MapRead with CopyDst is ok
     {
-        dawn::BufferDescriptor descriptor;
+        wgpu::BufferDescriptor descriptor;
         descriptor.size = 4;
-        descriptor.usage = dawn::BufferUsage::MapRead | dawn::BufferUsage::CopyDst;
+        descriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
 
         device.CreateBuffer(&descriptor);
     }
 
     // MapRead with something else is an error
     {
-        dawn::BufferDescriptor descriptor;
+        wgpu::BufferDescriptor descriptor;
         descriptor.size = 4;
-        descriptor.usage = dawn::BufferUsage::MapRead | dawn::BufferUsage::Uniform;
+        descriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::Uniform;
 
         ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
     }
 
     // MapWrite with CopySrc is ok
     {
-        dawn::BufferDescriptor descriptor;
+        wgpu::BufferDescriptor descriptor;
         descriptor.size = 4;
-        descriptor.usage = dawn::BufferUsage::MapWrite | dawn::BufferUsage::CopySrc;
+        descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
 
         device.CreateBuffer(&descriptor);
     }
 
     // MapWrite with something else is an error
     {
-        dawn::BufferDescriptor descriptor;
+        wgpu::BufferDescriptor descriptor;
         descriptor.size = 4;
-        descriptor.usage = dawn::BufferUsage::MapWrite | dawn::BufferUsage::Uniform;
+        descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::Uniform;
 
         ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
     }
@@ -163,12 +163,12 @@ TEST_F(BufferValidationTest, CreationMapUsageRestrictions) {
 
 // Test the success case for mapping buffer for reading
 TEST_F(BufferValidationTest, MapReadSuccess) {
-    dawn::Buffer buf = CreateMapReadBuffer(4);
+    wgpu::Buffer buf = CreateMapReadBuffer(4);
 
     buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
 
     EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, _))
+                Call(WGPUBufferMapAsyncStatus_Success, Ne(nullptr), 4u, _))
         .Times(1);
     queue.Submit(0, nullptr);
 
@@ -177,12 +177,12 @@ TEST_F(BufferValidationTest, MapReadSuccess) {
 
 // Test the success case for mapping buffer for writing
 TEST_F(BufferValidationTest, MapWriteSuccess) {
-    dawn::Buffer buf = CreateMapWriteBuffer(4);
+    wgpu::Buffer buf = CreateMapWriteBuffer(4);
 
     buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
 
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, _))
+                Call(WGPUBufferMapAsyncStatus_Success, Ne(nullptr), 4u, _))
         .Times(1);
     queue.Submit(0, nullptr);
 
@@ -191,7 +191,7 @@ TEST_F(BufferValidationTest, MapWriteSuccess) {
 
 // Test the success case for CreateBufferMapped
 TEST_F(BufferValidationTest, CreateBufferMappedSuccess) {
-    dawn::CreateBufferMappedResult result = CreateBufferMapped(4, dawn::BufferUsage::MapWrite);
+    wgpu::CreateBufferMappedResult result = CreateBufferMapped(4, wgpu::BufferUsage::MapWrite);
     ASSERT_NE(result.data, nullptr);
     ASSERT_EQ(result.dataLength, 4u);
     result.buffer.Unmap();
@@ -199,7 +199,7 @@ TEST_F(BufferValidationTest, CreateBufferMappedSuccess) {
 
 // Test the success case for non-mappable CreateBufferMapped
 TEST_F(BufferValidationTest, NonMappableCreateBufferMappedSuccess) {
-    dawn::CreateBufferMappedResult result = CreateBufferMapped(4, dawn::BufferUsage::CopySrc);
+    wgpu::CreateBufferMappedResult result = CreateBufferMapped(4, wgpu::BufferUsage::CopySrc);
     ASSERT_NE(result.data, nullptr);
     ASSERT_EQ(result.dataLength, 4u);
     result.buffer.Unmap();
@@ -207,14 +207,13 @@ TEST_F(BufferValidationTest, NonMappableCreateBufferMappedSuccess) {
 
 // Test map reading a buffer with wrong current usage
 TEST_F(BufferValidationTest, MapReadWrongUsage) {
-    dawn::BufferDescriptor descriptor;
+    wgpu::BufferDescriptor descriptor;
     descriptor.size = 4;
-    descriptor.usage = dawn::BufferUsage::CopyDst;
+    descriptor.usage = wgpu::BufferUsage::CopyDst;
 
-    dawn::Buffer buf = device.CreateBuffer(&descriptor);
+    wgpu::Buffer buf = device.CreateBuffer(&descriptor);
 
-    EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0u, _))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(WGPUBufferMapAsyncStatus_Error, nullptr, 0u, _))
         .Times(1);
 
     ASSERT_DEVICE_ERROR(buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr));
@@ -222,14 +221,13 @@ TEST_F(BufferValidationTest, MapReadWrongUsage) {
 
 // Test map writing a buffer with wrong current usage
 TEST_F(BufferValidationTest, MapWriteWrongUsage) {
-    dawn::BufferDescriptor descriptor;
+    wgpu::BufferDescriptor descriptor;
     descriptor.size = 4;
-    descriptor.usage = dawn::BufferUsage::CopySrc;
+    descriptor.usage = wgpu::BufferUsage::CopySrc;
 
-    dawn::Buffer buf = device.CreateBuffer(&descriptor);
+    wgpu::Buffer buf = device.CreateBuffer(&descriptor);
 
-    EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0u, _))
+    EXPECT_CALL(*mockBufferMapWriteCallback, Call(WGPUBufferMapAsyncStatus_Error, nullptr, 0u, _))
         .Times(1);
 
     ASSERT_DEVICE_ERROR(buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr));
@@ -237,15 +235,15 @@ TEST_F(BufferValidationTest, MapWriteWrongUsage) {
 
 // Test map reading a buffer that is already mapped
 TEST_F(BufferValidationTest, MapReadAlreadyMapped) {
-    dawn::Buffer buf = CreateMapReadBuffer(4);
+    wgpu::Buffer buf = CreateMapReadBuffer(4);
 
     buf.MapReadAsync(ToMockBufferMapReadCallback, this + 0);
     EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, this + 0))
+                Call(WGPUBufferMapAsyncStatus_Success, Ne(nullptr), 4u, this + 0))
         .Times(1);
 
     EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0u, this + 1))
+                Call(WGPUBufferMapAsyncStatus_Error, nullptr, 0u, this + 1))
         .Times(1);
     ASSERT_DEVICE_ERROR(buf.MapReadAsync(ToMockBufferMapReadCallback, this + 1));
 
@@ -254,15 +252,15 @@ TEST_F(BufferValidationTest, MapReadAlreadyMapped) {
 
 // Test map writing a buffer that is already mapped
 TEST_F(BufferValidationTest, MapWriteAlreadyMapped) {
-    dawn::Buffer buf = CreateMapWriteBuffer(4);
+    wgpu::Buffer buf = CreateMapWriteBuffer(4);
 
     buf.MapWriteAsync(ToMockBufferMapWriteCallback, this + 0);
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, this + 0))
+                Call(WGPUBufferMapAsyncStatus_Success, Ne(nullptr), 4u, this + 0))
         .Times(1);
 
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_ERROR, nullptr, 0u, this + 1))
+                Call(WGPUBufferMapAsyncStatus_Error, nullptr, 0u, this + 1))
         .Times(1);
     ASSERT_DEVICE_ERROR(buf.MapWriteAsync(ToMockBufferMapWriteCallback, this + 1));
 
@@ -272,12 +270,11 @@ TEST_F(BufferValidationTest, MapWriteAlreadyMapped) {
 
 // Test unmapping before having the result gives UNKNOWN - for reading
 TEST_F(BufferValidationTest, MapReadUnmapBeforeResult) {
-    dawn::Buffer buf = CreateMapReadBuffer(4);
+    wgpu::Buffer buf = CreateMapReadBuffer(4);
 
     buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
 
-    EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u, _))
+    EXPECT_CALL(*mockBufferMapReadCallback, Call(WGPUBufferMapAsyncStatus_Unknown, nullptr, 0u, _))
         .Times(1);
     buf.Unmap();
 
@@ -288,12 +285,11 @@ TEST_F(BufferValidationTest, MapReadUnmapBeforeResult) {
 
 // Test unmapping before having the result gives UNKNOWN - for writing
 TEST_F(BufferValidationTest, MapWriteUnmapBeforeResult) {
-    dawn::Buffer buf = CreateMapWriteBuffer(4);
+    wgpu::Buffer buf = CreateMapWriteBuffer(4);
 
     buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
 
-    EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u, _))
+    EXPECT_CALL(*mockBufferMapWriteCallback, Call(WGPUBufferMapAsyncStatus_Unknown, nullptr, 0u, _))
         .Times(1);
     buf.Unmap();
 
@@ -307,12 +303,12 @@ TEST_F(BufferValidationTest, MapWriteUnmapBeforeResult) {
 // when its external ref count reaches 0.
 TEST_F(BufferValidationTest, DISABLED_MapReadDestroyBeforeResult) {
     {
-        dawn::Buffer buf = CreateMapReadBuffer(4);
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
 
         buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
 
         EXPECT_CALL(*mockBufferMapReadCallback,
-                    Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u, _))
+                    Call(WGPUBufferMapAsyncStatus_Unknown, nullptr, 0u, _))
             .Times(1);
     }
 
@@ -326,12 +322,12 @@ TEST_F(BufferValidationTest, DISABLED_MapReadDestroyBeforeResult) {
 // when its external ref count reaches 0.
 TEST_F(BufferValidationTest, DISABLED_MapWriteDestroyBeforeResult) {
     {
-        dawn::Buffer buf = CreateMapWriteBuffer(4);
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
 
         buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
 
         EXPECT_CALL(*mockBufferMapWriteCallback,
-                    Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u, _))
+                    Call(WGPUBufferMapAsyncStatus_Unknown, nullptr, 0u, _))
             .Times(1);
     }
 
@@ -343,19 +339,19 @@ TEST_F(BufferValidationTest, DISABLED_MapWriteDestroyBeforeResult) {
 // When a MapRead is cancelled with Unmap it might still be in flight, test doing a new request
 // works as expected and we don't get the cancelled request's data.
 TEST_F(BufferValidationTest, MapReadUnmapBeforeResultThenMapAgain) {
-    dawn::Buffer buf = CreateMapReadBuffer(4);
+    wgpu::Buffer buf = CreateMapReadBuffer(4);
 
     buf.MapReadAsync(ToMockBufferMapReadCallback, this + 0);
 
     EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u, this + 0))
+                Call(WGPUBufferMapAsyncStatus_Unknown, nullptr, 0u, this + 0))
         .Times(1);
     buf.Unmap();
 
     buf.MapReadAsync(ToMockBufferMapReadCallback, this + 1);
 
     EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, this + 1))
+                Call(WGPUBufferMapAsyncStatus_Success, Ne(nullptr), 4u, this + 1))
         .Times(1);
     queue.Submit(0, nullptr);
 }
@@ -364,31 +360,31 @@ TEST_F(BufferValidationTest, MapReadUnmapBeforeResultThenMapAgain) {
 // When a MapWrite is cancelled with Unmap it might still be in flight, test doing a new request
 // works as expected and we don't get the cancelled request's data.
 TEST_F(BufferValidationTest, MapWriteUnmapBeforeResultThenMapAgain) {
-    dawn::Buffer buf = CreateMapWriteBuffer(4);
+    wgpu::Buffer buf = CreateMapWriteBuffer(4);
 
     buf.MapWriteAsync(ToMockBufferMapWriteCallback, this + 0);
 
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0u, this + 0))
+                Call(WGPUBufferMapAsyncStatus_Unknown, nullptr, 0u, this + 0))
         .Times(1);
     buf.Unmap();
 
     buf.MapWriteAsync(ToMockBufferMapWriteCallback, this + 1);
 
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, this + 1))
+                Call(WGPUBufferMapAsyncStatus_Success, Ne(nullptr), 4u, this + 1))
         .Times(1);
     queue.Submit(0, nullptr);
 }
 
 // Test that the MapReadCallback isn't fired twice when unmap() is called inside the callback
 TEST_F(BufferValidationTest, UnmapInsideMapReadCallback) {
-    dawn::Buffer buf = CreateMapReadBuffer(4);
+    wgpu::Buffer buf = CreateMapReadBuffer(4);
 
     buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
 
     EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, _))
+                Call(WGPUBufferMapAsyncStatus_Success, Ne(nullptr), 4u, _))
         .WillOnce(InvokeWithoutArgs([&]() { buf.Unmap(); }));
 
     queue.Submit(0, nullptr);
@@ -396,12 +392,12 @@ TEST_F(BufferValidationTest, UnmapInsideMapReadCallback) {
 
 // Test that the MapWriteCallback isn't fired twice when unmap() is called inside the callback
 TEST_F(BufferValidationTest, UnmapInsideMapWriteCallback) {
-    dawn::Buffer buf = CreateMapWriteBuffer(4);
+    wgpu::Buffer buf = CreateMapWriteBuffer(4);
 
     buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
 
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, _))
+                Call(WGPUBufferMapAsyncStatus_Success, Ne(nullptr), 4u, _))
         .WillOnce(InvokeWithoutArgs([&]() { buf.Unmap(); }));
 
     queue.Submit(0, nullptr);
@@ -409,33 +405,33 @@ TEST_F(BufferValidationTest, UnmapInsideMapWriteCallback) {
 
 // Test that the MapReadCallback isn't fired twice the buffer external refcount reaches 0 in the callback
 TEST_F(BufferValidationTest, DestroyInsideMapReadCallback) {
-    dawn::Buffer buf = CreateMapReadBuffer(4);
+    wgpu::Buffer buf = CreateMapReadBuffer(4);
 
     buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
 
     EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, _))
-        .WillOnce(InvokeWithoutArgs([&]() { buf = dawn::Buffer(); }));
+                Call(WGPUBufferMapAsyncStatus_Success, Ne(nullptr), 4u, _))
+        .WillOnce(InvokeWithoutArgs([&]() { buf = wgpu::Buffer(); }));
 
     queue.Submit(0, nullptr);
 }
 
 // Test that the MapWriteCallback isn't fired twice the buffer external refcount reaches 0 in the callback
 TEST_F(BufferValidationTest, DestroyInsideMapWriteCallback) {
-    dawn::Buffer buf = CreateMapWriteBuffer(4);
+    wgpu::Buffer buf = CreateMapWriteBuffer(4);
 
     buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
 
     EXPECT_CALL(*mockBufferMapWriteCallback,
-                Call(DAWN_BUFFER_MAP_ASYNC_STATUS_SUCCESS, Ne(nullptr), 4u, _))
-        .WillOnce(InvokeWithoutArgs([&]() { buf = dawn::Buffer(); }));
+                Call(WGPUBufferMapAsyncStatus_Success, Ne(nullptr), 4u, _))
+        .WillOnce(InvokeWithoutArgs([&]() { buf = wgpu::Buffer(); }));
 
     queue.Submit(0, nullptr);
 }
 
 // Test the success case for Buffer::SetSubData
 TEST_F(BufferValidationTest, SetSubDataSuccess) {
-    dawn::Buffer buf = CreateSetSubDataBuffer(4);
+    wgpu::Buffer buf = CreateSetSubDataBuffer(4);
 
     uint32_t foo = 0x01020304;
     buf.SetSubData(0, sizeof(foo), &foo);
@@ -443,7 +439,7 @@ TEST_F(BufferValidationTest, SetSubDataSuccess) {
 
 // Test error case for SetSubData out of bounds
 TEST_F(BufferValidationTest, SetSubDataOutOfBounds) {
-    dawn::Buffer buf = CreateSetSubDataBuffer(1);
+    wgpu::Buffer buf = CreateSetSubDataBuffer(1);
 
     uint8_t foo[2] = {0, 0};
     ASSERT_DEVICE_ERROR(buf.SetSubData(0, 2, foo));
@@ -451,7 +447,7 @@ TEST_F(BufferValidationTest, SetSubDataOutOfBounds) {
 
 // Test error case for SetSubData out of bounds with an overflow
 TEST_F(BufferValidationTest, SetSubDataOutOfBoundsOverflow) {
-    dawn::Buffer buf = CreateSetSubDataBuffer(1000);
+    wgpu::Buffer buf = CreateSetSubDataBuffer(1000);
 
     uint8_t foo[2] = {0, 0};
 
@@ -464,11 +460,11 @@ TEST_F(BufferValidationTest, SetSubDataOutOfBoundsOverflow) {
 
 // Test error case for SetSubData with the wrong usage
 TEST_F(BufferValidationTest, SetSubDataWrongUsage) {
-    dawn::BufferDescriptor descriptor;
+    wgpu::BufferDescriptor descriptor;
     descriptor.size = 4;
-    descriptor.usage = dawn::BufferUsage::Vertex;
+    descriptor.usage = wgpu::BufferUsage::Vertex;
 
-    dawn::Buffer buf = device.CreateBuffer(&descriptor);
+    wgpu::Buffer buf = device.CreateBuffer(&descriptor);
 
     uint8_t foo = 0;
     ASSERT_DEVICE_ERROR(buf.SetSubData(0, sizeof(foo), &foo));
@@ -476,11 +472,11 @@ TEST_F(BufferValidationTest, SetSubDataWrongUsage) {
 
 // Test SetSubData with unaligned size
 TEST_F(BufferValidationTest, SetSubDataWithUnalignedSize) {
-    dawn::BufferDescriptor descriptor;
+    wgpu::BufferDescriptor descriptor;
     descriptor.size = 4;
-    descriptor.usage = dawn::BufferUsage::CopySrc | dawn::BufferUsage::CopyDst;
+    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
 
-    dawn::Buffer buf = device.CreateBuffer(&descriptor);
+    wgpu::Buffer buf = device.CreateBuffer(&descriptor);
 
     uint8_t value = 123;
     ASSERT_DEVICE_ERROR(buf.SetSubData(0, sizeof(value), &value));
@@ -488,11 +484,11 @@ TEST_F(BufferValidationTest, SetSubDataWithUnalignedSize) {
 
 // Test SetSubData with unaligned offset
 TEST_F(BufferValidationTest, SetSubDataWithUnalignedOffset) {
-    dawn::BufferDescriptor descriptor;
+    wgpu::BufferDescriptor descriptor;
     descriptor.size = 4000;
-    descriptor.usage = dawn::BufferUsage::CopySrc | dawn::BufferUsage::CopyDst;
+    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
 
-    dawn::Buffer buf = device.CreateBuffer(&descriptor);
+    wgpu::Buffer buf = device.CreateBuffer(&descriptor);
 
     uint64_t kOffset = 2999;
     uint32_t value = 0x01020304;
@@ -502,11 +498,11 @@ TEST_F(BufferValidationTest, SetSubDataWithUnalignedOffset) {
 // Test that it is valid to destroy an unmapped buffer
 TEST_F(BufferValidationTest, DestroyUnmappedBuffer) {
     {
-        dawn::Buffer buf = CreateMapReadBuffer(4);
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
         buf.Destroy();
     }
     {
-        dawn::Buffer buf = CreateMapWriteBuffer(4);
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
         buf.Destroy();
     }
 }
@@ -514,12 +510,12 @@ TEST_F(BufferValidationTest, DestroyUnmappedBuffer) {
 // Test that it is valid to destroy a mapped buffer
 TEST_F(BufferValidationTest, DestroyMappedBuffer) {
     {
-        dawn::Buffer buf = CreateMapReadBuffer(4);
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
         buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
         buf.Destroy();
     }
     {
-        dawn::Buffer buf = CreateMapWriteBuffer(4);
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
         buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
         buf.Destroy();
     }
@@ -528,21 +524,21 @@ TEST_F(BufferValidationTest, DestroyMappedBuffer) {
 // Test that destroying a buffer implicitly unmaps it
 TEST_F(BufferValidationTest, DestroyMappedBufferCausesImplicitUnmap) {
     {
-        dawn::Buffer buf = CreateMapReadBuffer(4);
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
         buf.MapReadAsync(ToMockBufferMapReadCallback, this + 0);
         // Buffer is destroyed. Callback should be called with UNKNOWN status
         EXPECT_CALL(*mockBufferMapReadCallback,
-                    Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0, this + 0))
+                    Call(WGPUBufferMapAsyncStatus_Unknown, nullptr, 0, this + 0))
             .Times(1);
         buf.Destroy();
         queue.Submit(0, nullptr);
     }
     {
-        dawn::Buffer buf = CreateMapWriteBuffer(4);
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
         buf.MapWriteAsync(ToMockBufferMapWriteCallback, this + 1);
         // Buffer is destroyed. Callback should be called with UNKNOWN status
         EXPECT_CALL(*mockBufferMapWriteCallback,
-                    Call(DAWN_BUFFER_MAP_ASYNC_STATUS_UNKNOWN, nullptr, 0, this + 1))
+                    Call(WGPUBufferMapAsyncStatus_Unknown, nullptr, 0, this + 1))
             .Times(1);
         buf.Destroy();
         queue.Submit(0, nullptr);
@@ -551,7 +547,7 @@ TEST_F(BufferValidationTest, DestroyMappedBufferCausesImplicitUnmap) {
 
 // Test that it is valid to Destroy a destroyed buffer
 TEST_F(BufferValidationTest, DestroyDestroyedBuffer) {
-    dawn::Buffer buf = CreateSetSubDataBuffer(4);
+    wgpu::Buffer buf = CreateSetSubDataBuffer(4);
     buf.Destroy();
     buf.Destroy();
 }
@@ -559,12 +555,12 @@ TEST_F(BufferValidationTest, DestroyDestroyedBuffer) {
 // Test that it is invalid to Unmap a destroyed buffer
 TEST_F(BufferValidationTest, UnmapDestroyedBuffer) {
     {
-        dawn::Buffer buf = CreateMapReadBuffer(4);
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
         buf.Destroy();
         ASSERT_DEVICE_ERROR(buf.Unmap());
     }
     {
-        dawn::Buffer buf = CreateMapWriteBuffer(4);
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
         buf.Destroy();
         ASSERT_DEVICE_ERROR(buf.Unmap());
     }
@@ -573,12 +569,12 @@ TEST_F(BufferValidationTest, UnmapDestroyedBuffer) {
 // Test that it is invalid to map a destroyed buffer
 TEST_F(BufferValidationTest, MapDestroyedBuffer) {
     {
-        dawn::Buffer buf = CreateMapReadBuffer(4);
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
         buf.Destroy();
         ASSERT_DEVICE_ERROR(buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr));
     }
     {
-        dawn::Buffer buf = CreateMapWriteBuffer(4);
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
         buf.Destroy();
         ASSERT_DEVICE_ERROR(buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr));
     }
@@ -586,7 +582,7 @@ TEST_F(BufferValidationTest, MapDestroyedBuffer) {
 
 // Test that it is invalid to call SetSubData on a destroyed buffer
 TEST_F(BufferValidationTest, SetSubDataDestroyedBuffer) {
-    dawn::Buffer buf = CreateSetSubDataBuffer(4);
+    wgpu::Buffer buf = CreateSetSubDataBuffer(4);
     buf.Destroy();
     uint8_t foo = 0;
     ASSERT_DEVICE_ERROR(buf.SetSubData(0, sizeof(foo), &foo));
@@ -595,13 +591,13 @@ TEST_F(BufferValidationTest, SetSubDataDestroyedBuffer) {
 // Test that is is invalid to Map a mapped buffer
 TEST_F(BufferValidationTest, MapMappedBuffer) {
     {
-        dawn::Buffer buf = CreateMapReadBuffer(4);
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
         buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
         ASSERT_DEVICE_ERROR(buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr));
         queue.Submit(0, nullptr);
     }
     {
-        dawn::Buffer buf = CreateMapWriteBuffer(4);
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
         buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
         ASSERT_DEVICE_ERROR(buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr));
         queue.Submit(0, nullptr);
@@ -611,12 +607,12 @@ TEST_F(BufferValidationTest, MapMappedBuffer) {
 // Test that is is invalid to Map a CreateBufferMapped buffer
 TEST_F(BufferValidationTest, MapCreateBufferMappedBuffer) {
     {
-        dawn::Buffer buf = CreateBufferMapped(4, dawn::BufferUsage::MapRead).buffer;
+        wgpu::Buffer buf = CreateBufferMapped(4, wgpu::BufferUsage::MapRead).buffer;
         ASSERT_DEVICE_ERROR(buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr));
         queue.Submit(0, nullptr);
     }
     {
-        dawn::Buffer buf = CreateBufferMapped(4, dawn::BufferUsage::MapWrite).buffer;
+        wgpu::Buffer buf = CreateBufferMapped(4, wgpu::BufferUsage::MapWrite).buffer;
         ASSERT_DEVICE_ERROR(buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr));
         queue.Submit(0, nullptr);
     }
@@ -625,14 +621,14 @@ TEST_F(BufferValidationTest, MapCreateBufferMappedBuffer) {
 // Test that it is invalid to call SetSubData on a mapped buffer
 TEST_F(BufferValidationTest, SetSubDataMappedBuffer) {
     {
-        dawn::Buffer buf = CreateMapReadBuffer(4);
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
         buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
         uint8_t foo = 0;
         ASSERT_DEVICE_ERROR(buf.SetSubData(0, sizeof(foo), &foo));
         queue.Submit(0, nullptr);
     }
     {
-        dawn::Buffer buf = CreateMapWriteBuffer(4);
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
         buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
         uint8_t foo = 0;
         ASSERT_DEVICE_ERROR(buf.SetSubData(0, sizeof(foo), &foo));
@@ -642,73 +638,73 @@ TEST_F(BufferValidationTest, SetSubDataMappedBuffer) {
 
 // Test that it is valid to submit a buffer in a queue with a map usage if it is unmapped
 TEST_F(BufferValidationTest, SubmitBufferWithMapUsage) {
-    dawn::BufferDescriptor descriptorA;
+    wgpu::BufferDescriptor descriptorA;
     descriptorA.size = 4;
-    descriptorA.usage = dawn::BufferUsage::CopySrc | dawn::BufferUsage::MapWrite;
+    descriptorA.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
 
-    dawn::BufferDescriptor descriptorB;
+    wgpu::BufferDescriptor descriptorB;
     descriptorB.size = 4;
-    descriptorB.usage = dawn::BufferUsage::CopyDst | dawn::BufferUsage::MapRead;
+    descriptorB.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::MapRead;
 
-    dawn::Buffer bufA = device.CreateBuffer(&descriptorA);
-    dawn::Buffer bufB = device.CreateBuffer(&descriptorB);
+    wgpu::Buffer bufA = device.CreateBuffer(&descriptorA);
+    wgpu::Buffer bufB = device.CreateBuffer(&descriptorB);
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyBufferToBuffer(bufA, 0, bufB, 0, 4);
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 }
 
 // Test that it is invalid to submit a mapped buffer in a queue
 TEST_F(BufferValidationTest, SubmitMappedBuffer) {
-    dawn::BufferDescriptor descriptorA;
+    wgpu::BufferDescriptor descriptorA;
     descriptorA.size = 4;
-    descriptorA.usage = dawn::BufferUsage::CopySrc | dawn::BufferUsage::MapWrite;
+    descriptorA.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
 
-    dawn::BufferDescriptor descriptorB;
+    wgpu::BufferDescriptor descriptorB;
     descriptorB.size = 4;
-    descriptorB.usage = dawn::BufferUsage::CopyDst | dawn::BufferUsage::MapRead;
+    descriptorB.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::MapRead;
     {
-        dawn::Buffer bufA = device.CreateBuffer(&descriptorA);
-        dawn::Buffer bufB = device.CreateBuffer(&descriptorB);
+        wgpu::Buffer bufA = device.CreateBuffer(&descriptorA);
+        wgpu::Buffer bufB = device.CreateBuffer(&descriptorB);
 
         bufA.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
 
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyBufferToBuffer(bufA, 0, bufB, 0, 4);
-        dawn::CommandBuffer commands = encoder.Finish();
+        wgpu::CommandBuffer commands = encoder.Finish();
         ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
         queue.Submit(0, nullptr);
     }
     {
-        dawn::Buffer bufA = device.CreateBuffer(&descriptorA);
-        dawn::Buffer bufB = device.CreateBuffer(&descriptorB);
+        wgpu::Buffer bufA = device.CreateBuffer(&descriptorA);
+        wgpu::Buffer bufB = device.CreateBuffer(&descriptorB);
 
         bufB.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
 
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyBufferToBuffer(bufA, 0, bufB, 0, 4);
-        dawn::CommandBuffer commands = encoder.Finish();
+        wgpu::CommandBuffer commands = encoder.Finish();
         ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
         queue.Submit(0, nullptr);
     }
     {
-        dawn::Buffer bufA = device.CreateBufferMapped(&descriptorA).buffer;
-        dawn::Buffer bufB = device.CreateBuffer(&descriptorB);
+        wgpu::Buffer bufA = device.CreateBufferMapped(&descriptorA).buffer;
+        wgpu::Buffer bufB = device.CreateBuffer(&descriptorB);
 
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyBufferToBuffer(bufA, 0, bufB, 0, 4);
-        dawn::CommandBuffer commands = encoder.Finish();
+        wgpu::CommandBuffer commands = encoder.Finish();
         ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
         queue.Submit(0, nullptr);
     }
     {
-        dawn::Buffer bufA = device.CreateBuffer(&descriptorA);
-        dawn::Buffer bufB = device.CreateBufferMapped(&descriptorB).buffer;
+        wgpu::Buffer bufA = device.CreateBuffer(&descriptorA);
+        wgpu::Buffer bufB = device.CreateBufferMapped(&descriptorB).buffer;
 
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyBufferToBuffer(bufA, 0, bufB, 0, 4);
-        dawn::CommandBuffer commands = encoder.Finish();
+        wgpu::CommandBuffer commands = encoder.Finish();
         ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
         queue.Submit(0, nullptr);
     }
@@ -716,34 +712,34 @@ TEST_F(BufferValidationTest, SubmitMappedBuffer) {
 
 // Test that it is invalid to submit a destroyed buffer in a queue
 TEST_F(BufferValidationTest, SubmitDestroyedBuffer) {
-    dawn::BufferDescriptor descriptorA;
+    wgpu::BufferDescriptor descriptorA;
     descriptorA.size = 4;
-    descriptorA.usage = dawn::BufferUsage::CopySrc;
+    descriptorA.usage = wgpu::BufferUsage::CopySrc;
 
-    dawn::BufferDescriptor descriptorB;
+    wgpu::BufferDescriptor descriptorB;
     descriptorB.size = 4;
-    descriptorB.usage = dawn::BufferUsage::CopyDst;
+    descriptorB.usage = wgpu::BufferUsage::CopyDst;
 
-    dawn::Buffer bufA = device.CreateBuffer(&descriptorA);
-    dawn::Buffer bufB = device.CreateBuffer(&descriptorB);
+    wgpu::Buffer bufA = device.CreateBuffer(&descriptorA);
+    wgpu::Buffer bufB = device.CreateBuffer(&descriptorB);
 
     bufA.Destroy();
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyBufferToBuffer(bufA, 0, bufB, 0, 4);
-    dawn::CommandBuffer commands = encoder.Finish();
+    wgpu::CommandBuffer commands = encoder.Finish();
     ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
 }
 
 // Test that a map usage is required to call Unmap
 TEST_F(BufferValidationTest, UnmapWithoutMapUsage) {
-    dawn::Buffer buf = CreateSetSubDataBuffer(4);
+    wgpu::Buffer buf = CreateSetSubDataBuffer(4);
     ASSERT_DEVICE_ERROR(buf.Unmap());
 }
 
 // Test that it is valid to call Unmap on a buffer that is not mapped
 TEST_F(BufferValidationTest, UnmapUnmappedBuffer) {
     {
-        dawn::Buffer buf = CreateMapReadBuffer(4);
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
         // Buffer starts unmapped. Unmap should succeed.
         buf.Unmap();
         buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
@@ -752,7 +748,7 @@ TEST_F(BufferValidationTest, UnmapUnmappedBuffer) {
         buf.Unmap();
     }
     {
-        dawn::Buffer buf = CreateMapWriteBuffer(4);
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
         // Buffer starts unmapped. Unmap should succeed.
         buf.Unmap();
         buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);

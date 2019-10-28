@@ -32,15 +32,15 @@ class VertexBufferValidationTest : public ValidationTest {
                 })");
         }
 
-        dawn::Buffer MakeVertexBuffer() {
-            dawn::BufferDescriptor descriptor;
+        wgpu::Buffer MakeVertexBuffer() {
+            wgpu::BufferDescriptor descriptor;
             descriptor.size = 256;
-            descriptor.usage = dawn::BufferUsage::Vertex;
+            descriptor.usage = wgpu::BufferUsage::Vertex;
 
             return device.CreateBuffer(&descriptor);
         }
 
-        dawn::ShaderModule MakeVertexShader(unsigned int bufferCount) {
+        wgpu::ShaderModule MakeVertexShader(unsigned int bufferCount) {
             std::ostringstream vs;
             vs << "#version 450\n";
             for (unsigned int i = 0; i < bufferCount; ++i) {
@@ -63,7 +63,7 @@ class VertexBufferValidationTest : public ValidationTest {
                                              vs.str().c_str());
         }
 
-        dawn::RenderPipeline MakeRenderPipeline(const dawn::ShaderModule& vsModule,
+        wgpu::RenderPipeline MakeRenderPipeline(const wgpu::ShaderModule& vsModule,
                                                 unsigned int bufferCount) {
             utils::ComboRenderPipelineDescriptor descriptor(device);
             descriptor.vertexStage.module = vsModule;
@@ -74,14 +74,14 @@ class VertexBufferValidationTest : public ValidationTest {
                 descriptor.cVertexInput.cBuffers[i].attributes =
                     &descriptor.cVertexInput.cAttributes[i];
                 descriptor.cVertexInput.cAttributes[i].shaderLocation = i;
-                descriptor.cVertexInput.cAttributes[i].format = dawn::VertexFormat::Float3;
+                descriptor.cVertexInput.cAttributes[i].format = wgpu::VertexFormat::Float3;
             }
             descriptor.cVertexInput.bufferCount = bufferCount;
 
             return device.CreateRenderPipeline(&descriptor);
         }
 
-        dawn::ShaderModule fsModule;
+        wgpu::ShaderModule fsModule;
 };
 
 TEST_F(VertexBufferValidationTest, VertexBuffersInheritedBetweenPipelines) {
@@ -96,9 +96,9 @@ TEST_F(VertexBufferValidationTest, VertexBuffersInheritedBetweenPipelines) {
     auto vertexBuffer2 = MakeVertexBuffer();
 
     // Check failure when vertex buffer is not set
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline1);
         pass.Draw(3, 1, 0, 0);
         pass.EndPass();
@@ -108,7 +108,7 @@ TEST_F(VertexBufferValidationTest, VertexBuffersInheritedBetweenPipelines) {
     // Check success when vertex buffer is inherited from previous pipeline
     encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline2);
         pass.SetVertexBuffer(0, vertexBuffer1);
         pass.SetVertexBuffer(1, vertexBuffer2);
@@ -132,9 +132,9 @@ TEST_F(VertexBufferValidationTest, VertexBuffersNotInheritedBetweenRendePasses) 
     auto vertexBuffer2 = MakeVertexBuffer();
 
     // Check success when vertex buffer is set for each render pass
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline2);
         pass.SetVertexBuffer(0, vertexBuffer1);
         pass.SetVertexBuffer(1, vertexBuffer2);
@@ -142,7 +142,7 @@ TEST_F(VertexBufferValidationTest, VertexBuffersNotInheritedBetweenRendePasses) 
         pass.EndPass();
     }
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline1);
         pass.SetVertexBuffer(0, vertexBuffer1);
         pass.Draw(3, 1, 0, 0);
@@ -153,7 +153,7 @@ TEST_F(VertexBufferValidationTest, VertexBuffersNotInheritedBetweenRendePasses) 
     // Check failure because vertex buffer is not inherited in second subpass
     encoder = device.CreateCommandEncoder();
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline2);
         pass.SetVertexBuffer(0, vertexBuffer1);
         pass.SetVertexBuffer(1, vertexBuffer2);
@@ -161,7 +161,7 @@ TEST_F(VertexBufferValidationTest, VertexBuffersNotInheritedBetweenRendePasses) 
         pass.EndPass();
     }
     {
-        dawn::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline1);
         pass.Draw(3, 1, 0, 0);
         pass.EndPass();

@@ -22,9 +22,9 @@ class VertexInputTest : public ValidationTest {
     void CreatePipeline(bool success,
                         const utils::ComboVertexInputDescriptor& state,
                         std::string vertexSource) {
-        dawn::ShaderModule vsModule = utils::CreateShaderModule(
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(
             device, utils::SingleShaderStage::Vertex, vertexSource.c_str());
-        dawn::ShaderModule fsModule =
+        wgpu::ShaderModule fsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) out vec4 fragColor;
@@ -37,7 +37,7 @@ class VertexInputTest : public ValidationTest {
         descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
         descriptor.vertexInput = &state;
-        descriptor.cColorStates[0].format = dawn::TextureFormat::RGBA8Unorm;
+        descriptor.cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
 
         if (!success) {
             ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
@@ -400,7 +400,7 @@ TEST_F(VertexInputTest, SetAttributeOffsetOutOfBounds) {
     utils::ComboVertexInputDescriptor state;
     state.bufferCount = 1;
     state.cBuffers[0].attributeCount = 1;
-    state.cAttributes[0].offset = kMaxVertexAttributeEnd - sizeof(dawn::VertexFormat::Float);
+    state.cAttributes[0].offset = kMaxVertexAttributeEnd - sizeof(wgpu::VertexFormat::Float);
     CreatePipeline(true, state, R"(
         #version 450
         void main() {
@@ -462,7 +462,7 @@ TEST_F(VertexInputTest, VertexFormatLargerThanNonZeroStride) {
     state.bufferCount = 1;
     state.cBuffers[0].stride = 4;
     state.cBuffers[0].attributeCount = 1;
-    state.cAttributes[0].format = dawn::VertexFormat::Float4;
+    state.cAttributes[0].format = wgpu::VertexFormat::Float4;
     CreatePipeline(false, state, R"(
         #version 450
         void main() {

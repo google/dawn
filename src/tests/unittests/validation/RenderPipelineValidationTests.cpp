@@ -39,8 +39,8 @@ class RenderPipelineValidationTest : public ValidationTest {
                 })");
         }
 
-        dawn::ShaderModule vsModule;
-        dawn::ShaderModule fsModule;
+        wgpu::ShaderModule vsModule;
+        wgpu::ShaderModule fsModule;
 };
 
 // Test cases where creation should succeed
@@ -100,7 +100,7 @@ TEST_F(RenderPipelineValidationTest, NonRenderableFormat) {
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
-        descriptor.cColorStates[0].format = dawn::TextureFormat::RGBA8Unorm;
+        descriptor.cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
 
         device.CreateRenderPipeline(&descriptor);
     }
@@ -110,7 +110,7 @@ TEST_F(RenderPipelineValidationTest, NonRenderableFormat) {
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
-        descriptor.cColorStates[0].format = dawn::TextureFormat::RG11B10Float;
+        descriptor.cColorStates[0].format = wgpu::TextureFormat::RG11B10Float;
 
         ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
     }
@@ -120,9 +120,9 @@ TEST_F(RenderPipelineValidationTest, NonRenderableFormat) {
 TEST_F(RenderPipelineValidationTest, FragmentOutputFormatCompatibility) {
     constexpr uint32_t kNumTextureFormatBaseType = 3u;
     std::array<const char*, kNumTextureFormatBaseType> kVecPreFix = {{"", "i", "u"}};
-    std::array<dawn::TextureFormat, kNumTextureFormatBaseType> kColorFormats = {
-        {dawn::TextureFormat::RGBA8Unorm, dawn::TextureFormat::RGBA8Sint,
-         dawn::TextureFormat::RGBA8Uint}};
+    std::array<wgpu::TextureFormat, kNumTextureFormatBaseType> kColorFormats = {
+        {wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureFormat::RGBA8Sint,
+         wgpu::TextureFormat::RGBA8Uint}};
 
     for (size_t i = 0; i < kNumTextureFormatBaseType; ++i) {
         for (size_t j = 0; j < kNumTextureFormatBaseType; ++j) {
@@ -174,56 +174,56 @@ TEST_F(RenderPipelineValidationTest, SampleCount) {
 // in the render pass.
 TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
     constexpr uint32_t kMultisampledCount = 4;
-    constexpr dawn::TextureFormat kColorFormat = dawn::TextureFormat::RGBA8Unorm;
-    constexpr dawn::TextureFormat kDepthStencilFormat = dawn::TextureFormat::Depth24PlusStencil8;
+    constexpr wgpu::TextureFormat kColorFormat = wgpu::TextureFormat::RGBA8Unorm;
+    constexpr wgpu::TextureFormat kDepthStencilFormat = wgpu::TextureFormat::Depth24PlusStencil8;
 
-    dawn::TextureDescriptor baseTextureDescriptor;
+    wgpu::TextureDescriptor baseTextureDescriptor;
     baseTextureDescriptor.size.width = 4;
     baseTextureDescriptor.size.height = 4;
     baseTextureDescriptor.size.depth = 1;
     baseTextureDescriptor.arrayLayerCount = 1;
     baseTextureDescriptor.mipLevelCount = 1;
-    baseTextureDescriptor.dimension = dawn::TextureDimension::e2D;
-    baseTextureDescriptor.usage = dawn::TextureUsage::OutputAttachment;
+    baseTextureDescriptor.dimension = wgpu::TextureDimension::e2D;
+    baseTextureDescriptor.usage = wgpu::TextureUsage::OutputAttachment;
 
     utils::ComboRenderPipelineDescriptor nonMultisampledPipelineDescriptor(device);
     nonMultisampledPipelineDescriptor.sampleCount = 1;
     nonMultisampledPipelineDescriptor.vertexStage.module = vsModule;
     nonMultisampledPipelineDescriptor.cFragmentStage.module = fsModule;
-    dawn::RenderPipeline nonMultisampledPipeline =
+    wgpu::RenderPipeline nonMultisampledPipeline =
         device.CreateRenderPipeline(&nonMultisampledPipelineDescriptor);
 
     nonMultisampledPipelineDescriptor.colorStateCount = 0;
     nonMultisampledPipelineDescriptor.depthStencilState =
         &nonMultisampledPipelineDescriptor.cDepthStencilState;
-    dawn::RenderPipeline nonMultisampledPipelineWithDepthStencilOnly =
+    wgpu::RenderPipeline nonMultisampledPipelineWithDepthStencilOnly =
         device.CreateRenderPipeline(&nonMultisampledPipelineDescriptor);
 
     utils::ComboRenderPipelineDescriptor multisampledPipelineDescriptor(device);
     multisampledPipelineDescriptor.sampleCount = kMultisampledCount;
     multisampledPipelineDescriptor.vertexStage.module = vsModule;
     multisampledPipelineDescriptor.cFragmentStage.module = fsModule;
-    dawn::RenderPipeline multisampledPipeline =
+    wgpu::RenderPipeline multisampledPipeline =
         device.CreateRenderPipeline(&multisampledPipelineDescriptor);
 
     multisampledPipelineDescriptor.colorStateCount = 0;
     multisampledPipelineDescriptor.depthStencilState =
         &multisampledPipelineDescriptor.cDepthStencilState;
-    dawn::RenderPipeline multisampledPipelineWithDepthStencilOnly =
+    wgpu::RenderPipeline multisampledPipelineWithDepthStencilOnly =
         device.CreateRenderPipeline(&multisampledPipelineDescriptor);
 
     // It is not allowed to use multisampled render pass and non-multisampled render pipeline.
     {
         {
-            dawn::TextureDescriptor textureDescriptor = baseTextureDescriptor;
+            wgpu::TextureDescriptor textureDescriptor = baseTextureDescriptor;
             textureDescriptor.format = kColorFormat;
             textureDescriptor.sampleCount = kMultisampledCount;
-            dawn::Texture multisampledColorTexture = device.CreateTexture(&textureDescriptor);
+            wgpu::Texture multisampledColorTexture = device.CreateTexture(&textureDescriptor);
             utils::ComboRenderPassDescriptor renderPassDescriptor(
                 {multisampledColorTexture.CreateView()});
 
-            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-            dawn::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
             renderPass.SetPipeline(nonMultisampledPipeline);
             renderPass.EndPass();
 
@@ -231,16 +231,16 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
         }
 
         {
-            dawn::TextureDescriptor textureDescriptor = baseTextureDescriptor;
+            wgpu::TextureDescriptor textureDescriptor = baseTextureDescriptor;
             textureDescriptor.sampleCount = kMultisampledCount;
             textureDescriptor.format = kDepthStencilFormat;
-            dawn::Texture multisampledDepthStencilTexture =
+            wgpu::Texture multisampledDepthStencilTexture =
                 device.CreateTexture(&textureDescriptor);
             utils::ComboRenderPassDescriptor renderPassDescriptor(
                 {}, multisampledDepthStencilTexture.CreateView());
 
-            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-            dawn::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
             renderPass.SetPipeline(nonMultisampledPipelineWithDepthStencilOnly);
             renderPass.EndPass();
 
@@ -251,15 +251,15 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
     // It is allowed to use multisampled render pass and multisampled render pipeline.
     {
         {
-            dawn::TextureDescriptor textureDescriptor = baseTextureDescriptor;
+            wgpu::TextureDescriptor textureDescriptor = baseTextureDescriptor;
             textureDescriptor.format = kColorFormat;
             textureDescriptor.sampleCount = kMultisampledCount;
-            dawn::Texture multisampledColorTexture = device.CreateTexture(&textureDescriptor);
+            wgpu::Texture multisampledColorTexture = device.CreateTexture(&textureDescriptor);
             utils::ComboRenderPassDescriptor renderPassDescriptor(
                 {multisampledColorTexture.CreateView()});
 
-            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-            dawn::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
             renderPass.SetPipeline(multisampledPipeline);
             renderPass.EndPass();
 
@@ -267,16 +267,16 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
         }
 
         {
-            dawn::TextureDescriptor textureDescriptor = baseTextureDescriptor;
+            wgpu::TextureDescriptor textureDescriptor = baseTextureDescriptor;
             textureDescriptor.sampleCount = kMultisampledCount;
             textureDescriptor.format = kDepthStencilFormat;
-            dawn::Texture multisampledDepthStencilTexture =
+            wgpu::Texture multisampledDepthStencilTexture =
                 device.CreateTexture(&textureDescriptor);
             utils::ComboRenderPassDescriptor renderPassDescriptor(
                 {}, multisampledDepthStencilTexture.CreateView());
 
-            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-            dawn::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
             renderPass.SetPipeline(multisampledPipelineWithDepthStencilOnly);
             renderPass.EndPass();
 
@@ -287,15 +287,15 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
     // It is not allowed to use non-multisampled render pass and multisampled render pipeline.
     {
         {
-            dawn::TextureDescriptor textureDescriptor = baseTextureDescriptor;
+            wgpu::TextureDescriptor textureDescriptor = baseTextureDescriptor;
             textureDescriptor.format = kColorFormat;
             textureDescriptor.sampleCount = 1;
-            dawn::Texture nonMultisampledColorTexture = device.CreateTexture(&textureDescriptor);
+            wgpu::Texture nonMultisampledColorTexture = device.CreateTexture(&textureDescriptor);
             utils::ComboRenderPassDescriptor nonMultisampledRenderPassDescriptor(
                 {nonMultisampledColorTexture.CreateView()});
 
-            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-            dawn::RenderPassEncoder renderPass =
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder renderPass =
                 encoder.BeginRenderPass(&nonMultisampledRenderPassDescriptor);
             renderPass.SetPipeline(multisampledPipeline);
             renderPass.EndPass();
@@ -304,16 +304,16 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
         }
 
         {
-            dawn::TextureDescriptor textureDescriptor = baseTextureDescriptor;
+            wgpu::TextureDescriptor textureDescriptor = baseTextureDescriptor;
             textureDescriptor.sampleCount = 1;
             textureDescriptor.format = kDepthStencilFormat;
-            dawn::Texture multisampledDepthStencilTexture =
+            wgpu::Texture multisampledDepthStencilTexture =
                 device.CreateTexture(&textureDescriptor);
             utils::ComboRenderPassDescriptor renderPassDescriptor(
                 {}, multisampledDepthStencilTexture.CreateView());
 
-            dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-            dawn::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
             renderPass.SetPipeline(multisampledPipelineWithDepthStencilOnly);
             renderPass.EndPass();
 

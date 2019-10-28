@@ -25,22 +25,22 @@ namespace {
     // Test NaN and INFINITY values are not allowed
     TEST_F(SamplerValidationTest, InvalidLOD) {
         {
-            dawn::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
+            wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
             samplerDesc.lodMinClamp = NAN;
             ASSERT_DEVICE_ERROR(device.CreateSampler(&samplerDesc));
         }
         {
-            dawn::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
+            wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
             samplerDesc.lodMaxClamp = NAN;
             ASSERT_DEVICE_ERROR(device.CreateSampler(&samplerDesc));
         }
         {
-            dawn::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
+            wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
             samplerDesc.lodMinClamp = INFINITY;
             ASSERT_DEVICE_ERROR(device.CreateSampler(&samplerDesc));
         }
         {
-            dawn::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
+            wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
             samplerDesc.lodMaxClamp = INFINITY;
             ASSERT_DEVICE_ERROR(device.CreateSampler(&samplerDesc));
         }

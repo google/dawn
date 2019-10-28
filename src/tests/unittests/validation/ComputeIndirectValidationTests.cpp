@@ -22,7 +22,7 @@ class ComputeIndirectValidationTest : public ValidationTest {
     void SetUp() override {
         ValidationTest::SetUp();
 
-        dawn::ShaderModule computeModule =
+        wgpu::ShaderModule computeModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
                 #version 450
                 layout(local_size_x = 1) in;
@@ -30,16 +30,16 @@ class ComputeIndirectValidationTest : public ValidationTest {
                 })");
 
         // Set up compute pipeline
-        dawn::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, nullptr);
+        wgpu::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, nullptr);
 
-        dawn::ComputePipelineDescriptor csDesc;
+        wgpu::ComputePipelineDescriptor csDesc;
         csDesc.layout = pl;
         csDesc.computeStage.module = computeModule;
         csDesc.computeStage.entryPoint = "main";
         pipeline = device.CreateComputePipeline(&csDesc);
     }
 
-    void ValidateExpectation(dawn::CommandEncoder encoder, utils::Expectation expectation) {
+    void ValidateExpectation(wgpu::CommandEncoder encoder, utils::Expectation expectation) {
         if (expectation == utils::Expectation::Success) {
             encoder.Finish();
         } else {
@@ -50,11 +50,11 @@ class ComputeIndirectValidationTest : public ValidationTest {
     void TestIndirectOffset(utils::Expectation expectation,
                             std::initializer_list<uint32_t> bufferList,
                             uint64_t indirectOffset) {
-        dawn::Buffer indirectBuffer =
-            utils::CreateBufferFromData<uint32_t>(device, dawn::BufferUsage::Indirect, bufferList);
+        wgpu::Buffer indirectBuffer =
+            utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Indirect, bufferList);
 
-        dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-        dawn::ComputePassEncoder pass = encoder.BeginComputePass();
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(pipeline);
         pass.DispatchIndirect(indirectBuffer, indirectOffset);
         pass.EndPass();
@@ -62,7 +62,7 @@ class ComputeIndirectValidationTest : public ValidationTest {
         ValidateExpectation(encoder, expectation);
     }
 
-    dawn::ComputePipeline pipeline;
+    wgpu::ComputePipeline pipeline;
 };
 
 // Verify out of bounds indirect dispatch calls are caught early

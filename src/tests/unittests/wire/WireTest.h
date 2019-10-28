@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "dawn/mock_webgpu.h"
 #include "gtest/gtest.h"
-#include "dawn/mock_dawn.h"
 
 #include <memory>
 
@@ -122,8 +122,8 @@ class WireTest : public testing::Test {
     void FlushServer(bool success = true);
 
     testing::StrictMock<MockProcTable> api;
-    DawnDevice apiDevice;
-    DawnDevice device;
+    WGPUDevice apiDevice;
+    WGPUDevice device;
 
     dawn_wire::WireServer* GetWireServer();
     dawn_wire::WireClient* GetWireClient();

@@ -38,7 +38,7 @@ server::MemoryTransferService* WireTest::GetServerMemoryTransferService() {
 
 void WireTest::SetUp() {
     DawnProcTable mockProcs;
-    DawnDevice mockDevice;
+    WGPUDevice mockDevice;
     api.GetProcTableAndDevice(&mockProcs, &mockDevice);
 
     // This SetCallback call cannot be ignored because it is done as soon as we start the server

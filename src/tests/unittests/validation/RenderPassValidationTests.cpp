@@ -25,7 +25,7 @@ class RenderPassValidationTest : public ValidationTest {};
 
 // Test that it is invalid to draw in a render pass with missing bind groups
 TEST_F(RenderPassValidationTest, MissingBindGroup) {
-    dawn::ShaderModule vsModule =
+    wgpu::ShaderModule vsModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
 #version 450
 layout (set = 0, binding = 0) uniform vertexUniformBuffer {
@@ -36,7 +36,7 @@ void main() {
     gl_Position = vec4(transform * pos[gl_VertexIndex], 0.f, 1.f);
 })");
 
-    dawn::ShaderModule fsModule =
+    wgpu::ShaderModule fsModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
 #version 450
 layout (set = 1, binding = 0) uniform fragmentUniformBuffer {
@@ -47,38 +47,38 @@ void main() {
     fragColor = color;
 })");
 
-    dawn::BindGroupLayout bgls[] = {
+    wgpu::BindGroupLayout bgls[] = {
         utils::MakeBindGroupLayout(
-            device, {{0, dawn::ShaderStage::Vertex, dawn::BindingType::UniformBuffer}}),
+            device, {{0, wgpu::ShaderStage::Vertex, wgpu::BindingType::UniformBuffer}}),
         utils::MakeBindGroupLayout(
-            device, {{0, dawn::ShaderStage::Fragment, dawn::BindingType::UniformBuffer}})};
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer}})};
 
-    dawn::PipelineLayoutDescriptor pipelineLayoutDesc;
+    wgpu::PipelineLayoutDescriptor pipelineLayoutDesc;
     pipelineLayoutDesc.bindGroupLayoutCount = 2;
     pipelineLayoutDesc.bindGroupLayouts = bgls;
 
-    dawn::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&pipelineLayoutDesc);
+    wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&pipelineLayoutDesc);
 
     utils::ComboRenderPipelineDescriptor descriptor(device);
     descriptor.layout = pipelineLayout;
     descriptor.vertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
 
-    dawn::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
     float data[4];
-    dawn::Buffer buffer =
-        utils::CreateBufferFromData(device, data, 4 * sizeof(float), dawn::BufferUsage::Uniform);
+    wgpu::Buffer buffer =
+        utils::CreateBufferFromData(device, data, 4 * sizeof(float), wgpu::BufferUsage::Uniform);
 
-    dawn::BindGroup bg1 =
+    wgpu::BindGroup bg1 =
         utils::MakeBindGroup(device, bgls[0], {{0, buffer, 0, 4 * sizeof(float)}});
-    dawn::BindGroup bg2 =
+    wgpu::BindGroup bg2 =
         utils::MakeBindGroup(device, bgls[1], {{0, buffer, 0, 4 * sizeof(float)}});
 
     DummyRenderPass renderPass(device);
     {
-        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-        dawn::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bg1);
         pass.SetBindGroup(1, bg2);
@@ -87,16 +87,16 @@ void main() {
         commandEncoder.Finish();
     }
     {
-        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-        dawn::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
         pass.Draw(3, 0, 0, 0);
         pass.EndPass();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
     {
-        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-        dawn::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(1, bg2);
         pass.Draw(3, 0, 0, 0);
@@ -104,8 +104,8 @@ void main() {
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
     {
-        dawn::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-        dawn::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bg1);
         pass.Draw(3, 0, 0, 0);

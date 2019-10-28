@@ -740,11 +740,11 @@ static_library("dawn_bindings") {
 # Dawn test targets
 ###############################################################################
 
-dawn_json_generator("mock_dawn_gen") {
-  target = "mock_dawn"
+dawn_json_generator("mock_webgpu_gen") {
+  target = "mock_webgpu"
   outputs = [
-    "src/dawn/mock_dawn.h",
-    "src/dawn/mock_dawn.cpp",
+    "src/dawn/mock_webgpu.h",
+    "src/dawn/mock_webgpu.cpp",
   ]
 }
 
@@ -756,7 +756,7 @@ test("dawn_unittests") {
     ":libdawn_native",
     ":libdawn_native_sources",
     ":libdawn_wire",
-    ":mock_dawn_gen",
+    ":mock_webgpu_gen",
     "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawncpp",
     "${dawn_root}/src/dawn:libdawn_proc",
@@ -767,7 +767,7 @@ test("dawn_unittests") {
   deps += [ ":libdawn_native_headers" ]
   configs += [ ":libdawn_native_internal" ]
 
-  sources = get_target_outputs(":mock_dawn_gen")
+  sources = get_target_outputs(":mock_webgpu_gen")
   sources += [
     "src/dawn_wire/client/ClientMemoryTransferService_mock.cpp",
     "src/dawn_wire/client/ClientMemoryTransferService_mock.h",

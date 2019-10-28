@@ -26,35 +26,35 @@ class WireOptionalTests : public WireTest {
 
 // Test passing nullptr instead of objects - object as value version
 TEST_F(WireOptionalTests, OptionalObjectValue) {
-    DawnBindGroupLayoutDescriptor bglDesc;
+    WGPUBindGroupLayoutDescriptor bglDesc;
     bglDesc.nextInChain = nullptr;
     bglDesc.label = nullptr;
     bglDesc.bindingCount = 0;
-    DawnBindGroupLayout bgl = dawnDeviceCreateBindGroupLayout(device, &bglDesc);
+    WGPUBindGroupLayout bgl = wgpuDeviceCreateBindGroupLayout(device, &bglDesc);
 
-    DawnBindGroupLayout apiBindGroupLayout = api.GetNewBindGroupLayout();
+    WGPUBindGroupLayout apiBindGroupLayout = api.GetNewBindGroupLayout();
     EXPECT_CALL(api, DeviceCreateBindGroupLayout(apiDevice, _))
         .WillOnce(Return(apiBindGroupLayout));
 
     // The `sampler`, `textureView` and `buffer` members of a binding are optional.
-    DawnBindGroupBinding binding;
+    WGPUBindGroupBinding binding;
     binding.binding = 0;
     binding.sampler = nullptr;
     binding.textureView = nullptr;
     binding.buffer = nullptr;
 
-    DawnBindGroupDescriptor bgDesc;
+    WGPUBindGroupDescriptor bgDesc;
     bgDesc.nextInChain = nullptr;
     bgDesc.label = nullptr;
     bgDesc.layout = bgl;
     bgDesc.bindingCount = 1;
     bgDesc.bindings = &binding;
 
-    dawnDeviceCreateBindGroup(device, &bgDesc);
+    wgpuDeviceCreateBindGroup(device, &bgDesc);
 
-    DawnBindGroup apiDummyBindGroup = api.GetNewBindGroup();
+    WGPUBindGroup apiDummyBindGroup = api.GetNewBindGroup();
     EXPECT_CALL(api, DeviceCreateBindGroup(
-                         apiDevice, MatchesLambda([](const DawnBindGroupDescriptor* desc) -> bool {
+                         apiDevice, MatchesLambda([](const WGPUBindGroupDescriptor* desc) -> bool {
                              return desc->nextInChain == nullptr && desc->bindingCount == 1 &&
                                     desc->bindings[0].binding == 0 &&
                                     desc->bindings[0].sampler == nullptr &&
@@ -69,71 +69,71 @@ TEST_F(WireOptionalTests, OptionalObjectValue) {
 // Test that the wire is able to send optional pointers to structures
 TEST_F(WireOptionalTests, OptionalStructPointer) {
     // Create shader module
-    DawnShaderModuleDescriptor vertexDescriptor;
+    WGPUShaderModuleDescriptor vertexDescriptor;
     vertexDescriptor.nextInChain = nullptr;
     vertexDescriptor.label = nullptr;
     vertexDescriptor.codeSize = 0;
-    DawnShaderModule vsModule = dawnDeviceCreateShaderModule(device, &vertexDescriptor);
-    DawnShaderModule apiVsModule = api.GetNewShaderModule();
+    WGPUShaderModule vsModule = wgpuDeviceCreateShaderModule(device, &vertexDescriptor);
+    WGPUShaderModule apiVsModule = api.GetNewShaderModule();
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiVsModule));
 
     // Create the color state descriptor
-    DawnBlendDescriptor blendDescriptor;
-    blendDescriptor.operation = DAWN_BLEND_OPERATION_ADD;
-    blendDescriptor.srcFactor = DAWN_BLEND_FACTOR_ONE;
-    blendDescriptor.dstFactor = DAWN_BLEND_FACTOR_ONE;
-    DawnColorStateDescriptor colorStateDescriptor;
+    WGPUBlendDescriptor blendDescriptor;
+    blendDescriptor.operation = WGPUBlendOperation_Add;
+    blendDescriptor.srcFactor = WGPUBlendFactor_One;
+    blendDescriptor.dstFactor = WGPUBlendFactor_One;
+    WGPUColorStateDescriptor colorStateDescriptor;
     colorStateDescriptor.nextInChain = nullptr;
-    colorStateDescriptor.format = DAWN_TEXTURE_FORMAT_RGBA8_UNORM;
+    colorStateDescriptor.format = WGPUTextureFormat_RGBA8Unorm;
     colorStateDescriptor.alphaBlend = blendDescriptor;
     colorStateDescriptor.colorBlend = blendDescriptor;
-    colorStateDescriptor.writeMask = DAWN_COLOR_WRITE_MASK_ALL;
+    colorStateDescriptor.writeMask = WGPUColorWriteMask_All;
 
     // Create the input state
-    DawnVertexInputDescriptor vertexInput;
+    WGPUVertexInputDescriptor vertexInput;
     vertexInput.nextInChain = nullptr;
-    vertexInput.indexFormat = DAWN_INDEX_FORMAT_UINT32;
+    vertexInput.indexFormat = WGPUIndexFormat_Uint32;
     vertexInput.bufferCount = 0;
     vertexInput.buffers = nullptr;
 
     // Create the rasterization state
-    DawnRasterizationStateDescriptor rasterizationState;
+    WGPURasterizationStateDescriptor rasterizationState;
     rasterizationState.nextInChain = nullptr;
-    rasterizationState.frontFace = DAWN_FRONT_FACE_CCW;
-    rasterizationState.cullMode = DAWN_CULL_MODE_NONE;
+    rasterizationState.frontFace = WGPUFrontFace_CCW;
+    rasterizationState.cullMode = WGPUCullMode_None;
     rasterizationState.depthBias = 0;
     rasterizationState.depthBiasSlopeScale = 0.0;
     rasterizationState.depthBiasClamp = 0.0;
 
     // Create the depth-stencil state
-    DawnStencilStateFaceDescriptor stencilFace;
-    stencilFace.compare = DAWN_COMPARE_FUNCTION_ALWAYS;
-    stencilFace.failOp = DAWN_STENCIL_OPERATION_KEEP;
-    stencilFace.depthFailOp = DAWN_STENCIL_OPERATION_KEEP;
-    stencilFace.passOp = DAWN_STENCIL_OPERATION_KEEP;
+    WGPUStencilStateFaceDescriptor stencilFace;
+    stencilFace.compare = WGPUCompareFunction_Always;
+    stencilFace.failOp = WGPUStencilOperation_Keep;
+    stencilFace.depthFailOp = WGPUStencilOperation_Keep;
+    stencilFace.passOp = WGPUStencilOperation_Keep;
 
-    DawnDepthStencilStateDescriptor depthStencilState;
+    WGPUDepthStencilStateDescriptor depthStencilState;
     depthStencilState.nextInChain = nullptr;
-    depthStencilState.format = DAWN_TEXTURE_FORMAT_DEPTH24_PLUS_STENCIL8;
+    depthStencilState.format = WGPUTextureFormat_Depth24PlusStencil8;
     depthStencilState.depthWriteEnabled = false;
-    depthStencilState.depthCompare = DAWN_COMPARE_FUNCTION_ALWAYS;
+    depthStencilState.depthCompare = WGPUCompareFunction_Always;
     depthStencilState.stencilBack = stencilFace;
     depthStencilState.stencilFront = stencilFace;
     depthStencilState.stencilReadMask = 0xff;
     depthStencilState.stencilWriteMask = 0xff;
 
     // Create the pipeline layout
-    DawnPipelineLayoutDescriptor layoutDescriptor;
+    WGPUPipelineLayoutDescriptor layoutDescriptor;
     layoutDescriptor.nextInChain = nullptr;
     layoutDescriptor.label = nullptr;
     layoutDescriptor.bindGroupLayoutCount = 0;
     layoutDescriptor.bindGroupLayouts = nullptr;
-    DawnPipelineLayout layout = dawnDeviceCreatePipelineLayout(device, &layoutDescriptor);
-    DawnPipelineLayout apiLayout = api.GetNewPipelineLayout();
+    WGPUPipelineLayout layout = wgpuDeviceCreatePipelineLayout(device, &layoutDescriptor);
+    WGPUPipelineLayout apiLayout = api.GetNewPipelineLayout();
     EXPECT_CALL(api, DeviceCreatePipelineLayout(apiDevice, _)).WillOnce(Return(apiLayout));
 
     // Create pipeline
-    DawnRenderPipelineDescriptor pipelineDescriptor;
+    WGPURenderPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.nextInChain = nullptr;
     pipelineDescriptor.label = nullptr;
 
@@ -141,7 +141,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     pipelineDescriptor.vertexStage.module = vsModule;
     pipelineDescriptor.vertexStage.entryPoint = "main";
 
-    DawnProgrammableStageDescriptor fragmentStage;
+    WGPUProgrammableStageDescriptor fragmentStage;
     fragmentStage.nextInChain = nullptr;
     fragmentStage.module = vsModule;
     fragmentStage.entryPoint = "main";
@@ -155,36 +155,33 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     pipelineDescriptor.alphaToCoverageEnabled = false;
     pipelineDescriptor.layout = layout;
     pipelineDescriptor.vertexInput = &vertexInput;
-    pipelineDescriptor.primitiveTopology = DAWN_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    pipelineDescriptor.primitiveTopology = WGPUPrimitiveTopology_TriangleList;
     pipelineDescriptor.rasterizationState = &rasterizationState;
 
     // First case: depthStencilState is not null.
     pipelineDescriptor.depthStencilState = &depthStencilState;
-    dawnDeviceCreateRenderPipeline(device, &pipelineDescriptor);
+    wgpuDeviceCreateRenderPipeline(device, &pipelineDescriptor);
 
-    DawnRenderPipeline apiDummyPipeline = api.GetNewRenderPipeline();
+    WGPURenderPipeline apiDummyPipeline = api.GetNewRenderPipeline();
     EXPECT_CALL(
         api,
         DeviceCreateRenderPipeline(
-            apiDevice, MatchesLambda([](const DawnRenderPipelineDescriptor* desc) -> bool {
+            apiDevice, MatchesLambda([](const WGPURenderPipelineDescriptor* desc) -> bool {
                 return desc->depthStencilState != nullptr &&
                        desc->depthStencilState->nextInChain == nullptr &&
                        desc->depthStencilState->depthWriteEnabled == false &&
-                       desc->depthStencilState->depthCompare == DAWN_COMPARE_FUNCTION_ALWAYS &&
-                       desc->depthStencilState->stencilBack.compare ==
-                           DAWN_COMPARE_FUNCTION_ALWAYS &&
-                       desc->depthStencilState->stencilBack.failOp == DAWN_STENCIL_OPERATION_KEEP &&
+                       desc->depthStencilState->depthCompare == WGPUCompareFunction_Always &&
+                       desc->depthStencilState->stencilBack.compare == WGPUCompareFunction_Always &&
+                       desc->depthStencilState->stencilBack.failOp == WGPUStencilOperation_Keep &&
                        desc->depthStencilState->stencilBack.depthFailOp ==
-                           DAWN_STENCIL_OPERATION_KEEP &&
-                       desc->depthStencilState->stencilBack.passOp == DAWN_STENCIL_OPERATION_KEEP &&
+                           WGPUStencilOperation_Keep &&
+                       desc->depthStencilState->stencilBack.passOp == WGPUStencilOperation_Keep &&
                        desc->depthStencilState->stencilFront.compare ==
-                           DAWN_COMPARE_FUNCTION_ALWAYS &&
-                       desc->depthStencilState->stencilFront.failOp ==
-                           DAWN_STENCIL_OPERATION_KEEP &&
+                           WGPUCompareFunction_Always &&
+                       desc->depthStencilState->stencilFront.failOp == WGPUStencilOperation_Keep &&
                        desc->depthStencilState->stencilFront.depthFailOp ==
-                           DAWN_STENCIL_OPERATION_KEEP &&
-                       desc->depthStencilState->stencilFront.passOp ==
-                           DAWN_STENCIL_OPERATION_KEEP &&
+                           WGPUStencilOperation_Keep &&
+                       desc->depthStencilState->stencilFront.passOp == WGPUStencilOperation_Keep &&
                        desc->depthStencilState->stencilReadMask == 0xff &&
                        desc->depthStencilState->stencilWriteMask == 0xff;
             })))
@@ -194,10 +191,10 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
 
     // Second case: depthStencilState is null.
     pipelineDescriptor.depthStencilState = nullptr;
-    dawnDeviceCreateRenderPipeline(device, &pipelineDescriptor);
+    wgpuDeviceCreateRenderPipeline(device, &pipelineDescriptor);
     EXPECT_CALL(api,
                 DeviceCreateRenderPipeline(
-                    apiDevice, MatchesLambda([](const DawnRenderPipelineDescriptor* desc) -> bool {
+                    apiDevice, MatchesLambda([](const WGPURenderPipelineDescriptor* desc) -> bool {
                         return desc->depthStencilState == nullptr;
                     })))
         .WillOnce(Return(apiDummyPipeline));

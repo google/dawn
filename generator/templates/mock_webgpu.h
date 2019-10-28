@@ -12,11 +12,11 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#ifndef MOCK_DAWN_H
-#define MOCK_DAWN_H
+#ifndef MOCK_WEBGPU_H
+#define MOCK_WEBGPU_H
 
-#include <dawn/dawn.h>
 #include <dawn/dawn_proc_table.h>
+#include <dawn/webgpu.h>
 #include <gmock/gmock.h>
 
 #include <memory>
@@ -28,7 +28,7 @@ class ProcTableAsClass {
     public:
         virtual ~ProcTableAsClass();
 
-        void GetProcTableAndDevice(DawnProcTable* table, DawnDevice* device);
+        void GetProcTableAndDevice(DawnProcTable* table, WGPUDevice* device);
 
         // Creates an object that can be returned by a mocked call as in WillOnce(Return(foo)).
         // It returns an object of the write type that isn't equal to any previously returned object.
@@ -52,61 +52,61 @@ class ProcTableAsClass {
         {% endfor %}
 
         // Stores callback and userdata and calls the On* methods
-        void DeviceSetUncapturedErrorCallback(DawnDevice self,
-                                    DawnErrorCallback callback,
+        void DeviceSetUncapturedErrorCallback(WGPUDevice self,
+                                    WGPUErrorCallback callback,
                                     void* userdata);
-        bool DevicePopErrorScope(DawnDevice self, DawnErrorCallback callback, void* userdata);
-        void DeviceCreateBufferMappedAsync(DawnDevice self,
-                                           const DawnBufferDescriptor* descriptor,
-                                           DawnBufferCreateMappedCallback callback,
+        bool DevicePopErrorScope(WGPUDevice self, WGPUErrorCallback callback, void* userdata);
+        void DeviceCreateBufferMappedAsync(WGPUDevice self,
+                                           const WGPUBufferDescriptor* descriptor,
+                                           WGPUBufferCreateMappedCallback callback,
                                            void* userdata);
-        void BufferMapReadAsync(DawnBuffer self,
-                                DawnBufferMapReadCallback callback,
+        void BufferMapReadAsync(WGPUBuffer self,
+                                WGPUBufferMapReadCallback callback,
                                 void* userdata);
-        void BufferMapWriteAsync(DawnBuffer self,
-                                 DawnBufferMapWriteCallback callback,
+        void BufferMapWriteAsync(WGPUBuffer self,
+                                 WGPUBufferMapWriteCallback callback,
                                  void* userdata);
-        void FenceOnCompletion(DawnFence self,
+        void FenceOnCompletion(WGPUFence self,
                                uint64_t value,
-                               DawnFenceOnCompletionCallback callback,
+                               WGPUFenceOnCompletionCallback callback,
                                void* userdata);
 
         // Special cased mockable methods
-        virtual void OnDeviceSetUncapturedErrorCallback(DawnDevice device,
-                                              DawnErrorCallback callback,
+        virtual void OnDeviceSetUncapturedErrorCallback(WGPUDevice device,
+                                              WGPUErrorCallback callback,
                                               void* userdata) = 0;
-        virtual bool OnDevicePopErrorScopeCallback(DawnDevice device,
-                                              DawnErrorCallback callback,
+        virtual bool OnDevicePopErrorScopeCallback(WGPUDevice device,
+                                              WGPUErrorCallback callback,
                                               void* userdata) = 0;
-        virtual void OnDeviceCreateBufferMappedAsyncCallback(DawnDevice self,
-                                                             const DawnBufferDescriptor* descriptor,
-                                                             DawnBufferCreateMappedCallback callback,
+        virtual void OnDeviceCreateBufferMappedAsyncCallback(WGPUDevice self,
+                                                             const WGPUBufferDescriptor* descriptor,
+                                                             WGPUBufferCreateMappedCallback callback,
                                                              void* userdata) = 0;
-        virtual void OnBufferMapReadAsyncCallback(DawnBuffer buffer,
-                                                  DawnBufferMapReadCallback callback,
+        virtual void OnBufferMapReadAsyncCallback(WGPUBuffer buffer,
+                                                  WGPUBufferMapReadCallback callback,
                                                   void* userdata) = 0;
-        virtual void OnBufferMapWriteAsyncCallback(DawnBuffer buffer,
-                                                   DawnBufferMapWriteCallback callback,
+        virtual void OnBufferMapWriteAsyncCallback(WGPUBuffer buffer,
+                                                   WGPUBufferMapWriteCallback callback,
                                                    void* userdata) = 0;
-        virtual void OnFenceOnCompletionCallback(DawnFence fence,
+        virtual void OnFenceOnCompletionCallback(WGPUFence fence,
                                                  uint64_t value,
-                                                 DawnFenceOnCompletionCallback callback,
+                                                 WGPUFenceOnCompletionCallback callback,
                                                  void* userdata) = 0;
 
         // Calls the stored callbacks
-        void CallDeviceErrorCallback(DawnDevice device, DawnErrorType type, const char* message);
-        void CallCreateBufferMappedCallback(DawnDevice device, DawnBufferMapAsyncStatus status, DawnCreateBufferMappedResult result);
-        void CallMapReadCallback(DawnBuffer buffer, DawnBufferMapAsyncStatus status, const void* data, uint64_t dataLength);
-        void CallMapWriteCallback(DawnBuffer buffer, DawnBufferMapAsyncStatus status, void* data, uint64_t dataLength);
-        void CallFenceOnCompletionCallback(DawnFence fence, DawnFenceCompletionStatus status);
+        void CallDeviceErrorCallback(WGPUDevice device, WGPUErrorType type, const char* message);
+        void CallCreateBufferMappedCallback(WGPUDevice device, WGPUBufferMapAsyncStatus status, WGPUCreateBufferMappedResult result);
+        void CallMapReadCallback(WGPUBuffer buffer, WGPUBufferMapAsyncStatus status, const void* data, uint64_t dataLength);
+        void CallMapWriteCallback(WGPUBuffer buffer, WGPUBufferMapAsyncStatus status, void* data, uint64_t dataLength);
+        void CallFenceOnCompletionCallback(WGPUFence fence, WGPUFenceCompletionStatus status);
 
         struct Object {
             ProcTableAsClass* procs = nullptr;
-            DawnErrorCallback deviceErrorCallback = nullptr;
-            DawnBufferCreateMappedCallback createBufferMappedCallback = nullptr;
-            DawnBufferMapReadCallback mapReadCallback = nullptr;
-            DawnBufferMapWriteCallback mapWriteCallback = nullptr;
-            DawnFenceOnCompletionCallback fenceOnCompletionCallback = nullptr;
+            WGPUErrorCallback deviceErrorCallback = nullptr;
+            WGPUBufferCreateMappedCallback createBufferMappedCallback = nullptr;
+            WGPUBufferMapReadCallback mapReadCallback = nullptr;
+            WGPUBufferMapWriteCallback mapWriteCallback = nullptr;
+            WGPUFenceOnCompletionCallback fenceOnCompletionCallback = nullptr;
             void* userdata1 = 0;
             void* userdata2 = 0;
         };
@@ -138,16 +138,16 @@ class MockProcTable : public ProcTableAsClass {
             MOCK_METHOD1({{as_MethodSuffix(type.name, Name("release"))}}, void({{as_cType(type.name)}} self));
         {% endfor %}
 
-        MOCK_METHOD3(OnDeviceSetUncapturedErrorCallback, void(DawnDevice device, DawnErrorCallback callback, void* userdata));
-        MOCK_METHOD3(OnDevicePopErrorScopeCallback, bool(DawnDevice device, DawnErrorCallback callback, void* userdata));
-        MOCK_METHOD4(OnDeviceCreateBufferMappedAsyncCallback, void(DawnDevice device, const DawnBufferDescriptor* descriptor, DawnBufferCreateMappedCallback callback, void* userdata));
-        MOCK_METHOD3(OnBufferMapReadAsyncCallback, void(DawnBuffer buffer, DawnBufferMapReadCallback callback, void* userdata));
-        MOCK_METHOD3(OnBufferMapWriteAsyncCallback, void(DawnBuffer buffer, DawnBufferMapWriteCallback callback, void* userdata));
+        MOCK_METHOD3(OnDeviceSetUncapturedErrorCallback, void(WGPUDevice device, WGPUErrorCallback callback, void* userdata));
+        MOCK_METHOD3(OnDevicePopErrorScopeCallback, bool(WGPUDevice device, WGPUErrorCallback callback, void* userdata));
+        MOCK_METHOD4(OnDeviceCreateBufferMappedAsyncCallback, void(WGPUDevice device, const WGPUBufferDescriptor* descriptor, WGPUBufferCreateMappedCallback callback, void* userdata));
+        MOCK_METHOD3(OnBufferMapReadAsyncCallback, void(WGPUBuffer buffer, WGPUBufferMapReadCallback callback, void* userdata));
+        MOCK_METHOD3(OnBufferMapWriteAsyncCallback, void(WGPUBuffer buffer, WGPUBufferMapWriteCallback callback, void* userdata));
         MOCK_METHOD4(OnFenceOnCompletionCallback,
-                     void(DawnFence fence,
+                     void(WGPUFence fence,
                           uint64_t value,
-                          DawnFenceOnCompletionCallback callback,
+                          WGPUFenceOnCompletionCallback callback,
                           void* userdata));
 };
 
-#endif // MOCK_DAWN_H
+#endif  // MOCK_WEBGPU_H

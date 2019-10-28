@@ -482,7 +482,7 @@ class MultiGeneratorFromDawnJSON(Generator):
         return 'Generates code for various target from Dawn.json.'
 
     def add_commandline_arguments(self, parser):
-        allowed_targets = ['dawn_headers', 'dawncpp_headers', 'dawncpp', 'dawn_proc', 'mock_dawn', 'dawn_wire', "dawn_native_utils"]
+        allowed_targets = ['dawn_headers', 'dawncpp_headers', 'dawncpp', 'dawn_proc', 'mock_webgpu', 'dawn_wire', "dawn_native_utils"]
 
         parser.add_argument('--dawn-json', required=True, type=str, help ='The DAWN JSON definition to use.')
         parser.add_argument('--wire-json', default=None, type=str, help='The DAWN WIRE JSON definition to use.')
@@ -542,9 +542,9 @@ class MultiGeneratorFromDawnJSON(Generator):
         if 'dawncpp' in targets:
             renders.append(FileRender('webgpu_cpp.cpp', 'src/dawn/webgpu_cpp.cpp', [base_params, api_params, cpp_params]))
 
-        if 'mock_dawn' in targets:
-            renders.append(FileRender('mock_api.h', 'src/dawn/mock_dawn.h', [base_params, api_params, c_params]))
-            renders.append(FileRender('mock_api.cpp', 'src/dawn/mock_dawn.cpp', [base_params, api_params, c_params]))
+        if 'mock_webgpu' in targets:
+            renders.append(FileRender('mock_webgpu.h', 'src/dawn/mock_webgpu.h', [base_params, api_params, c_params]))
+            renders.append(FileRender('mock_webgpu.cpp', 'src/dawn/mock_webgpu.cpp', [base_params, api_params, c_params]))
 
         if 'dawn_native_utils' in targets:
             frontend_params = [

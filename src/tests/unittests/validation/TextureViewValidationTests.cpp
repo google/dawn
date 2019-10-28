@@ -23,16 +23,16 @@ constexpr uint32_t kWidth = 32u;
 constexpr uint32_t kHeight = 32u;
 constexpr uint32_t kDefaultMipLevels = 6u;
 
-constexpr dawn::TextureFormat kDefaultTextureFormat = dawn::TextureFormat::RGBA8Unorm;
+constexpr wgpu::TextureFormat kDefaultTextureFormat = wgpu::TextureFormat::RGBA8Unorm;
 
-dawn::Texture Create2DArrayTexture(dawn::Device& device,
+wgpu::Texture Create2DArrayTexture(wgpu::Device& device,
                                    uint32_t arrayLayerCount,
                                    uint32_t width = kWidth,
                                    uint32_t height = kHeight,
                                    uint32_t mipLevelCount = kDefaultMipLevels,
                                    uint32_t sampleCount = 1) {
-    dawn::TextureDescriptor descriptor;
-    descriptor.dimension = dawn::TextureDimension::e2D;
+    wgpu::TextureDescriptor descriptor;
+    descriptor.dimension = wgpu::TextureDimension::e2D;
     descriptor.size.width = width;
     descriptor.size.height = height;
     descriptor.size.depth = 1;
@@ -40,12 +40,12 @@ dawn::Texture Create2DArrayTexture(dawn::Device& device,
     descriptor.sampleCount = sampleCount;
     descriptor.format = kDefaultTextureFormat;
     descriptor.mipLevelCount = mipLevelCount;
-    descriptor.usage = dawn::TextureUsage::Sampled;
+    descriptor.usage = wgpu::TextureUsage::Sampled;
     return device.CreateTexture(&descriptor);
 }
 
-dawn::TextureViewDescriptor CreateDefaultViewDescriptor(dawn::TextureViewDimension dimension) {
-    dawn::TextureViewDescriptor descriptor;
+wgpu::TextureViewDescriptor CreateDefaultViewDescriptor(wgpu::TextureViewDimension dimension) {
+    wgpu::TextureViewDescriptor descriptor;
     descriptor.format = kDefaultTextureFormat;
     descriptor.dimension = dimension;
     descriptor.baseMipLevel = 0;
@@ -57,36 +57,36 @@ dawn::TextureViewDescriptor CreateDefaultViewDescriptor(dawn::TextureViewDimensi
 
 // Test creating texture view on a 2D non-array texture
 TEST_F(TextureViewValidationTest, CreateTextureViewOnTexture2D) {
-    dawn::Texture texture = Create2DArrayTexture(device, 1);
+    wgpu::Texture texture = Create2DArrayTexture(device, 1);
 
-    dawn::TextureViewDescriptor base2DTextureViewDescriptor =
-        CreateDefaultViewDescriptor(dawn::TextureViewDimension::e2D);
+    wgpu::TextureViewDescriptor base2DTextureViewDescriptor =
+        CreateDefaultViewDescriptor(wgpu::TextureViewDimension::e2D);
 
     // It is OK to create a 2D texture view on a 2D texture.
     {
-        dawn::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
+        wgpu::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
         descriptor.arrayLayerCount = 1;
         texture.CreateView(&descriptor);
     }
 
     // It is an error to view a layer past the end of the texture.
     {
-        dawn::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
+        wgpu::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
         descriptor.arrayLayerCount = 2;
         ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
     }
 
     // It is OK to create a 1-layer 2D array texture view on a 2D texture.
     {
-        dawn::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
-        descriptor.dimension = dawn::TextureViewDimension::e2DArray;
+        wgpu::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
+        descriptor.dimension = wgpu::TextureViewDimension::e2DArray;
         descriptor.arrayLayerCount = 1;
         texture.CreateView(&descriptor);
     }
 
     // baseMipLevel == k && mipLevelCount == 0 means to use levels k..end.
     {
-        dawn::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
+        wgpu::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
         descriptor.mipLevelCount = 0;
 
         descriptor.baseMipLevel = 0;
@@ -101,7 +101,7 @@ TEST_F(TextureViewValidationTest, CreateTextureViewOnTexture2D) {
 
     // It is an error to make the mip level out of range.
     {
-        dawn::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
+        wgpu::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
         descriptor.baseMipLevel = 0;
         descriptor.mipLevelCount = kDefaultMipLevels + 1;
         ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
@@ -121,29 +121,29 @@ TEST_F(TextureViewValidationTest, CreateTextureViewOnTexture2D) {
 TEST_F(TextureViewValidationTest, CreateTextureViewOnTexture2DArray) {
     constexpr uint32_t kDefaultArrayLayers = 6;
 
-    dawn::Texture texture = Create2DArrayTexture(device, kDefaultArrayLayers);
+    wgpu::Texture texture = Create2DArrayTexture(device, kDefaultArrayLayers);
 
-    dawn::TextureViewDescriptor base2DArrayTextureViewDescriptor =
-        CreateDefaultViewDescriptor(dawn::TextureViewDimension::e2DArray);
+    wgpu::TextureViewDescriptor base2DArrayTextureViewDescriptor =
+        CreateDefaultViewDescriptor(wgpu::TextureViewDimension::e2DArray);
 
     // It is OK to create a 2D texture view on a 2D array texture.
     {
-        dawn::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
-        descriptor.dimension = dawn::TextureViewDimension::e2D;
+        wgpu::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
+        descriptor.dimension = wgpu::TextureViewDimension::e2D;
         descriptor.arrayLayerCount = 1;
         texture.CreateView(&descriptor);
     }
 
     // It is OK to create a 2D array texture view on a 2D array texture.
     {
-        dawn::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
+        wgpu::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
         descriptor.arrayLayerCount = kDefaultArrayLayers;
         texture.CreateView(&descriptor);
     }
 
     // baseArrayLayer == k && arrayLayerCount == 0 means to use layers k..end.
     {
-        dawn::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
+        wgpu::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
         descriptor.arrayLayerCount = 0;
 
         descriptor.baseArrayLayer = 0;
@@ -158,7 +158,7 @@ TEST_F(TextureViewValidationTest, CreateTextureViewOnTexture2DArray) {
 
     // It is an error for the array layer range of the view to exceed that of the texture.
     {
-        dawn::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
+        wgpu::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
         descriptor.baseArrayLayer = 0;
         descriptor.arrayLayerCount = kDefaultArrayLayers + 1;
         ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
@@ -179,35 +179,35 @@ TEST_F(TextureViewValidationTest, CreateTextureViewOnTexture2DArray) {
 // Variant for a texture with more than 1 array layer.
 TEST_F(TextureViewValidationTest, TextureViewDescriptorDefaultsArray) {
     constexpr uint32_t kDefaultArrayLayers = 6;
-    dawn::Texture texture = Create2DArrayTexture(device, kDefaultArrayLayers);
+    wgpu::Texture texture = Create2DArrayTexture(device, kDefaultArrayLayers);
 
     { texture.CreateView(); }
     {
-        dawn::TextureViewDescriptor descriptor;
-        descriptor.format = dawn::TextureFormat::Undefined;
+        wgpu::TextureViewDescriptor descriptor;
+        descriptor.format = wgpu::TextureFormat::Undefined;
         texture.CreateView(&descriptor);
-        descriptor.format = dawn::TextureFormat::RGBA8Unorm;
+        descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
         texture.CreateView(&descriptor);
-        descriptor.format = dawn::TextureFormat::R8Unorm;
+        descriptor.format = wgpu::TextureFormat::R8Unorm;
         ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
     }
     {
-        dawn::TextureViewDescriptor descriptor;
-        descriptor.dimension = dawn::TextureViewDimension::Undefined;
+        wgpu::TextureViewDescriptor descriptor;
+        descriptor.dimension = wgpu::TextureViewDimension::Undefined;
         texture.CreateView(&descriptor);
-        descriptor.dimension = dawn::TextureViewDimension::e2DArray;
+        descriptor.dimension = wgpu::TextureViewDimension::e2DArray;
         texture.CreateView(&descriptor);
-        descriptor.dimension = dawn::TextureViewDimension::e2D;
+        descriptor.dimension = wgpu::TextureViewDimension::e2D;
         ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
     }
     {
-        dawn::TextureViewDescriptor descriptor;
+        wgpu::TextureViewDescriptor descriptor;
 
         // Setting array layers to non-0 means the dimensionality will
         // default to 2D so by itself it causes an error.
         descriptor.arrayLayerCount = kDefaultArrayLayers;
         ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
-        descriptor.dimension = dawn::TextureViewDimension::e2DArray;
+        descriptor.dimension = wgpu::TextureViewDimension::e2DArray;
         texture.CreateView(&descriptor);
 
         descriptor.mipLevelCount = kDefaultMipLevels;
@@ -220,29 +220,29 @@ TEST_F(TextureViewValidationTest, TextureViewDescriptorDefaultsArray) {
 // Variant for a texture with only 1 array layer.
 TEST_F(TextureViewValidationTest, TextureViewDescriptorDefaultsNonArray) {
     constexpr uint32_t kDefaultArrayLayers = 1;
-    dawn::Texture texture = Create2DArrayTexture(device, kDefaultArrayLayers);
+    wgpu::Texture texture = Create2DArrayTexture(device, kDefaultArrayLayers);
 
     { texture.CreateView(); }
     {
-        dawn::TextureViewDescriptor descriptor;
-        descriptor.format = dawn::TextureFormat::Undefined;
+        wgpu::TextureViewDescriptor descriptor;
+        descriptor.format = wgpu::TextureFormat::Undefined;
         texture.CreateView(&descriptor);
-        descriptor.format = dawn::TextureFormat::RGBA8Unorm;
+        descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
         texture.CreateView(&descriptor);
-        descriptor.format = dawn::TextureFormat::R8Unorm;
+        descriptor.format = wgpu::TextureFormat::R8Unorm;
         ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
     }
     {
-        dawn::TextureViewDescriptor descriptor;
-        descriptor.dimension = dawn::TextureViewDimension::Undefined;
+        wgpu::TextureViewDescriptor descriptor;
+        descriptor.dimension = wgpu::TextureViewDimension::Undefined;
         texture.CreateView(&descriptor);
-        descriptor.dimension = dawn::TextureViewDimension::e2D;
+        descriptor.dimension = wgpu::TextureViewDimension::e2D;
         texture.CreateView(&descriptor);
-        descriptor.dimension = dawn::TextureViewDimension::e2DArray;
+        descriptor.dimension = wgpu::TextureViewDimension::e2DArray;
         texture.CreateView(&descriptor);
     }
     {
-        dawn::TextureViewDescriptor descriptor;
+        wgpu::TextureViewDescriptor descriptor;
         descriptor.arrayLayerCount = 0;
         texture.CreateView(&descriptor);
         descriptor.arrayLayerCount = 1;
@@ -251,7 +251,7 @@ TEST_F(TextureViewValidationTest, TextureViewDescriptorDefaultsNonArray) {
         ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
     }
     {
-        dawn::TextureViewDescriptor descriptor;
+        wgpu::TextureViewDescriptor descriptor;
         descriptor.mipLevelCount = kDefaultMipLevels;
         texture.CreateView(&descriptor);
         descriptor.arrayLayerCount = kDefaultArrayLayers;
@@ -263,59 +263,59 @@ TEST_F(TextureViewValidationTest, TextureViewDescriptorDefaultsNonArray) {
 TEST_F(TextureViewValidationTest, CreateCubeMapTextureView) {
     constexpr uint32_t kDefaultArrayLayers = 16;
 
-    dawn::Texture texture = Create2DArrayTexture(device, kDefaultArrayLayers);
+    wgpu::Texture texture = Create2DArrayTexture(device, kDefaultArrayLayers);
 
-    dawn::TextureViewDescriptor base2DArrayTextureViewDescriptor =
-        CreateDefaultViewDescriptor(dawn::TextureViewDimension::e2DArray);
+    wgpu::TextureViewDescriptor base2DArrayTextureViewDescriptor =
+        CreateDefaultViewDescriptor(wgpu::TextureViewDimension::e2DArray);
 
     // It is OK to create a cube map texture view with arrayLayerCount == 6.
     {
-        dawn::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
-        descriptor.dimension = dawn::TextureViewDimension::Cube;
+        wgpu::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
+        descriptor.dimension = wgpu::TextureViewDimension::Cube;
         descriptor.arrayLayerCount = 6;
         texture.CreateView(&descriptor);
     }
 
     // It is an error to create a cube map texture view with arrayLayerCount != 6.
     {
-        dawn::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
-        descriptor.dimension = dawn::TextureViewDimension::Cube;
+        wgpu::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
+        descriptor.dimension = wgpu::TextureViewDimension::Cube;
         descriptor.arrayLayerCount = 3;
         ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
     }
 
     // It is OK to create a cube map array texture view with arrayLayerCount % 6 == 0.
     {
-        dawn::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
-        descriptor.dimension = dawn::TextureViewDimension::CubeArray;
+        wgpu::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
+        descriptor.dimension = wgpu::TextureViewDimension::CubeArray;
         descriptor.arrayLayerCount = 12;
         texture.CreateView(&descriptor);
     }
 
     // It is an error to create a cube map array texture view with arrayLayerCount % 6 != 0.
     {
-        dawn::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
-        descriptor.dimension = dawn::TextureViewDimension::CubeArray;
+        wgpu::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
+        descriptor.dimension = wgpu::TextureViewDimension::CubeArray;
         descriptor.arrayLayerCount = 11;
         ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
     }
 
     // It is an error to create a cube map texture view with width != height.
     {
-        dawn::Texture nonSquareTexture = Create2DArrayTexture(device, 18, 32, 16, 5);
+        wgpu::Texture nonSquareTexture = Create2DArrayTexture(device, 18, 32, 16, 5);
 
-        dawn::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
-        descriptor.dimension = dawn::TextureViewDimension::Cube;
+        wgpu::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
+        descriptor.dimension = wgpu::TextureViewDimension::Cube;
         descriptor.arrayLayerCount = 6;
         ASSERT_DEVICE_ERROR(nonSquareTexture.CreateView(&descriptor));
     }
 
     // It is an error to create a cube map array texture view with width != height.
     {
-        dawn::Texture nonSquareTexture = Create2DArrayTexture(device, 18, 32, 16, 5);
+        wgpu::Texture nonSquareTexture = Create2DArrayTexture(device, 18, 32, 16, 5);
 
-        dawn::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
-        descriptor.dimension = dawn::TextureViewDimension::CubeArray;
+        wgpu::TextureViewDescriptor descriptor = base2DArrayTextureViewDescriptor;
+        descriptor.dimension = wgpu::TextureViewDimension::CubeArray;
         descriptor.arrayLayerCount = 12;
         ASSERT_DEVICE_ERROR(nonSquareTexture.CreateView(&descriptor));
     }
@@ -324,41 +324,41 @@ TEST_F(TextureViewValidationTest, CreateCubeMapTextureView) {
 // Test the format compatibility rules when creating a texture view.
 // TODO(jiawei.shao@intel.com): add more tests when the rules are fully implemented.
 TEST_F(TextureViewValidationTest, TextureViewFormatCompatibility) {
-    dawn::Texture texture = Create2DArrayTexture(device, 1);
+    wgpu::Texture texture = Create2DArrayTexture(device, 1);
 
-    dawn::TextureViewDescriptor base2DTextureViewDescriptor =
-        CreateDefaultViewDescriptor(dawn::TextureViewDimension::e2D);
+    wgpu::TextureViewDescriptor base2DTextureViewDescriptor =
+        CreateDefaultViewDescriptor(wgpu::TextureViewDimension::e2D);
 
     // It is an error to create a texture view in depth-stencil format on a RGBA texture.
     {
-        dawn::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
-        descriptor.format = dawn::TextureFormat::Depth24PlusStencil8;
+        wgpu::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
+        descriptor.format = wgpu::TextureFormat::Depth24PlusStencil8;
         ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
     }
 }
 
 // Test that it's invalid to create a texture view from a destroyed texture
 TEST_F(TextureViewValidationTest, DestroyCreateTextureView) {
-    dawn::Texture texture = Create2DArrayTexture(device, 1);
-    dawn::TextureViewDescriptor descriptor =
-        CreateDefaultViewDescriptor(dawn::TextureViewDimension::e2D);
+    wgpu::Texture texture = Create2DArrayTexture(device, 1);
+    wgpu::TextureViewDescriptor descriptor =
+        CreateDefaultViewDescriptor(wgpu::TextureViewDimension::e2D);
     texture.Destroy();
     ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
 }
 
 // Test that only TextureAspect::All is supported
 TEST_F(TextureViewValidationTest, AspectMustBeAll) {
-    dawn::TextureDescriptor descriptor = {};
+    wgpu::TextureDescriptor descriptor = {};
     descriptor.size = {1, 1, 1};
-    descriptor.format = dawn::TextureFormat::Depth32Float;
-    descriptor.usage = dawn::TextureUsage::Sampled | dawn::TextureUsage::OutputAttachment;
-    dawn::Texture texture = device.CreateTexture(&descriptor);
+    descriptor.format = wgpu::TextureFormat::Depth32Float;
+    descriptor.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment;
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
 
-    dawn::TextureViewDescriptor viewDescriptor = {};
-    viewDescriptor.aspect = dawn::TextureAspect::All;
+    wgpu::TextureViewDescriptor viewDescriptor = {};
+    viewDescriptor.aspect = wgpu::TextureAspect::All;
     texture.CreateView(&viewDescriptor);
 
-    viewDescriptor.aspect = dawn::TextureAspect::DepthOnly;
+    viewDescriptor.aspect = wgpu::TextureAspect::DepthOnly;
     ASSERT_DEVICE_ERROR(texture.CreateView(&viewDescriptor));
 }
 

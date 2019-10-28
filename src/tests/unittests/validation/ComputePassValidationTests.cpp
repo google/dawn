@@ -20,12 +20,12 @@ class ComputePassValidationTest : public ValidationTest {};
 
 // Test that it is invalid to use a buffer with both read and write usages in a compute pass.
 TEST_F(ComputePassValidationTest, ReadWriteUsage) {
-    dawn::BufferDescriptor bufferDesc = {};
-    bufferDesc.usage = dawn::BufferUsage::Storage | dawn::BufferUsage::Uniform;
+    wgpu::BufferDescriptor bufferDesc = {};
+    bufferDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::Uniform;
     bufferDesc.size = 4;
-    dawn::Buffer buffer = device.CreateBuffer(&bufferDesc);
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
 
-    dawn::ShaderModule module =
+    wgpu::ShaderModule module =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
         #version 450
         layout(std430, set = 0, binding = 0) buffer BufA { uint bufA; };
@@ -33,26 +33,26 @@ TEST_F(ComputePassValidationTest, ReadWriteUsage) {
         void main() {}
     )");
 
-    dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {{0, dawn::ShaderStage::Compute, dawn::BindingType::StorageBuffer},
-                 {1, dawn::ShaderStage::Compute, dawn::BindingType::UniformBuffer}});
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
+                 {1, wgpu::ShaderStage::Compute, wgpu::BindingType::UniformBuffer}});
 
-    dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bgl,
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, bgl,
                                                      {
                                                          {0, buffer, 0, 4},
                                                          {1, buffer, 0, 4},
                                                      });
 
-    dawn::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, &bgl);
+    wgpu::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, &bgl);
 
-    dawn::ComputePipelineDescriptor pipelineDesc = {};
+    wgpu::ComputePipelineDescriptor pipelineDesc = {};
     pipelineDesc.layout = layout;
     pipelineDesc.computeStage.module = module;
     pipelineDesc.computeStage.entryPoint = "main";
-    dawn::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-    dawn::ComputePassEncoder pass = encoder.BeginComputePass();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);
 
@@ -65,33 +65,33 @@ TEST_F(ComputePassValidationTest, ReadWriteUsage) {
 
 // Test that it is valid to use a buffer with a single write usage multiple times in a compute pass.
 TEST_F(ComputePassValidationTest, MultipleWrites) {
-    dawn::BufferDescriptor bufferDesc = {};
-    bufferDesc.usage = dawn::BufferUsage::Storage;
+    wgpu::BufferDescriptor bufferDesc = {};
+    bufferDesc.usage = wgpu::BufferUsage::Storage;
     bufferDesc.size = 4;
-    dawn::Buffer buffer = device.CreateBuffer(&bufferDesc);
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
 
-    dawn::ShaderModule module =
+    wgpu::ShaderModule module =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
         #version 450
         layout(std430, set = 0, binding = 0) buffer Buf { uint buf; };
         void main() {}
     )");
 
-    dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {{0, dawn::ShaderStage::Compute, dawn::BindingType::StorageBuffer}});
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer}});
 
-    dawn::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, 4}});
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, 4}});
 
-    dawn::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, &bgl);
+    wgpu::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, &bgl);
 
-    dawn::ComputePipelineDescriptor pipelineDesc = {};
+    wgpu::ComputePipelineDescriptor pipelineDesc = {};
     pipelineDesc.layout = layout;
     pipelineDesc.computeStage.module = module;
     pipelineDesc.computeStage.entryPoint = "main";
-    dawn::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-    dawn::ComputePassEncoder pass = encoder.BeginComputePass();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);
 
@@ -105,12 +105,12 @@ TEST_F(ComputePassValidationTest, MultipleWrites) {
 // Test that it is valid to use a buffer with a single write usage multiple times in a compute pass,
 // even if the buffer is referenced in separate bind groups.
 TEST_F(ComputePassValidationTest, MultipleWritesSeparateBindGroups) {
-    dawn::BufferDescriptor bufferDesc = {};
-    bufferDesc.usage = dawn::BufferUsage::Storage;
+    wgpu::BufferDescriptor bufferDesc = {};
+    bufferDesc.usage = wgpu::BufferUsage::Storage;
     bufferDesc.size = 4;
-    dawn::Buffer buffer = device.CreateBuffer(&bufferDesc);
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
 
-    dawn::ShaderModule module =
+    wgpu::ShaderModule module =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
         #version 450
         #define kNumValues 100
@@ -118,22 +118,22 @@ TEST_F(ComputePassValidationTest, MultipleWritesSeparateBindGroups) {
         void main() {}
     )");
 
-    dawn::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {{0, dawn::ShaderStage::Compute, dawn::BindingType::StorageBuffer}});
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer}});
 
-    dawn::BindGroup bindGroupA = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, 4}});
-    dawn::BindGroup bindGroupB = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, 4}});
+    wgpu::BindGroup bindGroupA = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, 4}});
+    wgpu::BindGroup bindGroupB = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, 4}});
 
-    dawn::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, &bgl);
+    wgpu::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, &bgl);
 
-    dawn::ComputePipelineDescriptor pipelineDesc = {};
+    wgpu::ComputePipelineDescriptor pipelineDesc = {};
     pipelineDesc.layout = layout;
     pipelineDesc.computeStage.module = module;
     pipelineDesc.computeStage.entryPoint = "main";
-    dawn::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
-    dawn::CommandEncoder encoder = device.CreateCommandEncoder();
-    dawn::ComputePassEncoder pass = encoder.BeginComputePass();
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
     pass.SetPipeline(pipeline);
 
     pass.SetBindGroup(0, bindGroupA);
