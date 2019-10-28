@@ -33,19 +33,15 @@ class DawnPerfTestPlatform : public dawn_platform::Platform {
         TraceEvent() {
         }
         TraceEvent(char phaseIn,
-                   const char* categoryNameIn,
+                   dawn_platform::TraceCategory categoryIn,
                    const char* nameIn,
                    uint64_t idIn,
                    double timestampIn)
-            : phase(phaseIn),
-              categoryName(categoryNameIn),
-              name(nameIn),
-              id(idIn),
-              timestamp(timestampIn) {
+            : phase(phaseIn), category(categoryIn), name(nameIn), id(idIn), timestamp(timestampIn) {
         }
 
         char phase = 0;
-        const char* categoryName = nullptr;
+        dawn_platform::TraceCategory category;
         const char* name = nullptr;
         uint64_t id = 0;
         double timestamp = 0;
@@ -58,7 +54,8 @@ class DawnPerfTestPlatform : public dawn_platform::Platform {
     std::vector<TraceEvent> AcquireTraceEventBuffer();
 
   private:
-    const unsigned char* GetTraceCategoryEnabledFlag(const char* name) override;
+    const unsigned char* GetTraceCategoryEnabledFlag(
+        dawn_platform::TraceCategory category) override;
 
     double MonotonicallyIncreasingTime() override;
 

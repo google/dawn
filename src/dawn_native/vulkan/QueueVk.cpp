@@ -17,6 +17,8 @@
 #include "dawn_native/vulkan/CommandBufferVk.h"
 #include "dawn_native/vulkan/CommandRecordingContext.h"
 #include "dawn_native/vulkan/DeviceVk.h"
+#include "dawn_platform/DawnPlatform.h"
+#include "dawn_platform/tracing/TraceEvent.h"
 
 namespace dawn_native { namespace vulkan {
 
@@ -33,10 +35,13 @@ namespace dawn_native { namespace vulkan {
 
         device->Tick();
 
+        TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording,
+                           "CommandBufferVk::RecordCommands");
         CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
         for (uint32_t i = 0; i < commandCount; ++i) {
             DAWN_TRY(ToBackend(commands[i])->RecordCommands(recordingContext));
         }
+        TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferVk::RecordCommands");
 
         DAWN_TRY(device->SubmitPendingCommands());
 

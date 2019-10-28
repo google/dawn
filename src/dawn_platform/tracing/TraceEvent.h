@@ -156,12 +156,6 @@
 
 #include "dawn_platform/tracing/EventTracer.h"
 
-#define TRACE_DISABLED_BY_DEFAULT(name) "disabled-by-default-" name
-
-// By default, const char* argument values are assumed to have long-lived scope
-// and will not be copied. Use this macro to force a const char* to be copied.
-#define TRACE_STR_COPY(str) WebCore::TraceEvent::TraceStringWithCopy(str)
-
 // Records a pair of begin and end events called "name" for the current
 // scope, with 0, 1 or 2 associated arguments. If the category is not
 // enabled, then this does nothing.
@@ -679,35 +673,37 @@
 
 // Implementation detail: internal macro to create static category and add
 // event if the category is enabled.
-#define INTERNAL_TRACE_EVENT_ADD(platform, phase, category, name, flags, ...) \
-    do {                                                                      \
-        INTERNAL_TRACE_EVENT_GET_CATEGORY_INFO(platform, category);           \
-        if (*INTERNALTRACEEVENTUID(catstatic)) {                              \
-            dawn_platform::TraceEvent::addTraceEvent(                         \
-                platform, phase, INTERNALTRACEEVENTUID(catstatic), name,      \
-                dawn_platform::TraceEvent::noEventId, flags, ##__VA_ARGS__);  \
-        }                                                                     \
+#define INTERNAL_TRACE_EVENT_ADD(platform, phase, category, name, flags, ...)             \
+    do {                                                                                  \
+        INTERNAL_TRACE_EVENT_GET_CATEGORY_INFO(platform,                                  \
+                                               ::dawn_platform::TraceCategory::category); \
+        if (*INTERNALTRACEEVENTUID(catstatic)) {                                          \
+            dawn_platform::TraceEvent::addTraceEvent(                                     \
+                platform, phase, INTERNALTRACEEVENTUID(catstatic), name,                  \
+                dawn_platform::TraceEvent::noEventId, flags, ##__VA_ARGS__);              \
+        }                                                                                 \
     } while (0)
 
 // Implementation detail: internal macro to create static category and add begin
 // event if the category is enabled. Also adds the end event when the scope
 // ends.
-#define INTERNAL_TRACE_EVENT_ADD_SCOPED(platform, category, name, ...)                   \
-    INTERNAL_TRACE_EVENT_GET_CATEGORY_INFO(platform, category);                          \
-    dawn_platform::TraceEvent::TraceEndOnScopeClose INTERNALTRACEEVENTUID(profileScope); \
-    if (*INTERNALTRACEEVENTUID(catstatic)) {                                             \
-        dawn_platform::TraceEvent::addTraceEvent(                                        \
-            platform, TRACE_EVENT_PHASE_BEGIN, INTERNALTRACEEVENTUID(catstatic), name,   \
-            dawn_platform::TraceEvent::noEventId, TRACE_EVENT_FLAG_NONE, ##__VA_ARGS__); \
-        INTERNALTRACEEVENTUID(profileScope)                                              \
-            .initialize(platform, INTERNALTRACEEVENTUID(catstatic), name);               \
+#define INTERNAL_TRACE_EVENT_ADD_SCOPED(platform, category, name, ...)                          \
+    INTERNAL_TRACE_EVENT_GET_CATEGORY_INFO(platform, ::dawn_platform::TraceCategory::category); \
+    dawn_platform::TraceEvent::TraceEndOnScopeClose INTERNALTRACEEVENTUID(profileScope);        \
+    if (*INTERNALTRACEEVENTUID(catstatic)) {                                                    \
+        dawn_platform::TraceEvent::addTraceEvent(                                               \
+            platform, TRACE_EVENT_PHASE_BEGIN, INTERNALTRACEEVENTUID(catstatic), name,          \
+            dawn_platform::TraceEvent::noEventId, TRACE_EVENT_FLAG_NONE, ##__VA_ARGS__);        \
+        INTERNALTRACEEVENTUID(profileScope)                                                     \
+            .initialize(platform, INTERNALTRACEEVENTUID(catstatic), name);                      \
     }
 
 // Implementation detail: internal macro to create static category and add
 // event if the category is enabled.
 #define INTERNAL_TRACE_EVENT_ADD_WITH_ID(platform, phase, category, name, id, flags, ...)          \
     do {                                                                                           \
-        INTERNAL_TRACE_EVENT_GET_CATEGORY_INFO(platform, category);                                \
+        INTERNAL_TRACE_EVENT_GET_CATEGORY_INFO(platform,                                           \
+                                               ::dawn_platform::TraceCategory::category);          \
         if (*INTERNALTRACEEVENTUID(catstatic)) {                                                   \
             unsigned char traceEventFlags = flags | TRACE_EVENT_FLAG_HAS_ID;                       \
             dawn_platform::TraceEvent::TraceID traceEventTraceID(id, &traceEventFlags);            \

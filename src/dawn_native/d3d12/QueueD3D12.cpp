@@ -17,6 +17,8 @@
 #include "dawn_native/d3d12/CommandBufferD3D12.h"
 #include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
+#include "dawn_platform/DawnPlatform.h"
+#include "dawn_platform/tracing/TraceEvent.h"
 
 namespace dawn_native { namespace d3d12 {
 
@@ -31,9 +33,13 @@ namespace dawn_native { namespace d3d12 {
         CommandRecordingContext* commandContext;
         DAWN_TRY_ASSIGN(commandContext, device->GetPendingCommandContext());
 
+        TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording,
+                           "CommandBufferD3D12::RecordCommands");
         for (uint32_t i = 0; i < commandCount; ++i) {
             DAWN_TRY(ToBackend(commands[i])->RecordCommands(commandContext, i));
         }
+        TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording,
+                         "CommandBufferD3D12::RecordCommands");
 
         DAWN_TRY(device->ExecutePendingCommandContext());
 

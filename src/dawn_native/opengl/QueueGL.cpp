@@ -16,6 +16,8 @@
 
 #include "dawn_native/opengl/CommandBufferGL.h"
 #include "dawn_native/opengl/DeviceGL.h"
+#include "dawn_platform/DawnPlatform.h"
+#include "dawn_platform/tracing/TraceEvent.h"
 
 namespace dawn_native { namespace opengl {
 
@@ -25,9 +27,11 @@ namespace dawn_native { namespace opengl {
     MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
         Device* device = ToBackend(GetDevice());
 
+        TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording, "CommandBufferGL::Execute");
         for (uint32_t i = 0; i < commandCount; ++i) {
             ToBackend(commands[i])->Execute();
         }
+        TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferGL::Execute");
 
         device->SubmitFenceSync();
         return {};

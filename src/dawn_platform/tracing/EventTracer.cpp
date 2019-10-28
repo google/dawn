@@ -18,13 +18,13 @@
 
 namespace dawn_platform { namespace tracing {
 
-    const unsigned char* GetTraceCategoryEnabledFlag(Platform* platform, const char* name) {
+    const unsigned char* GetTraceCategoryEnabledFlag(Platform* platform, TraceCategory category) {
         static unsigned char disabled = 0;
         if (platform == nullptr) {
             return &disabled;
         }
 
-        const unsigned char* categoryEnabledFlag = platform->GetTraceCategoryEnabledFlag(name);
+        const unsigned char* categoryEnabledFlag = platform->GetTraceCategoryEnabledFlag(category);
         if (categoryEnabledFlag != nullptr) {
             return categoryEnabledFlag;
         }

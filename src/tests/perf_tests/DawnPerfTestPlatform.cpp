@@ -14,22 +14,29 @@
 
 #include "tests/perf_tests/DawnPerfTestPlatform.h"
 
+#include "common/Assert.h"
 #include "dawn_platform/tracing/TraceEvent.h"
 #include "tests/perf_tests/DawnPerfTest.h"
 #include "utils/Timer.h"
 
 namespace {
 
-    struct TraceCategory {
+    struct TraceCategoryInfo {
         unsigned char enabled;
-        const char* name;
+        dawn_platform::TraceCategory category;
     };
 
-    constexpr TraceCategory gTraceCategories[2] = {
-        // TODO(enga): Remove the use of this macro, but keep it disabled by default in Chromium.
-        {1, TRACE_DISABLED_BY_DEFAULT("gpu.dawn")},
-        {1, "dawn.perf_test"},
+    constexpr TraceCategoryInfo gTraceCategories[4] = {
+        {1, dawn_platform::TraceCategory::General},
+        {1, dawn_platform::TraceCategory::Validation},
+        {1, dawn_platform::TraceCategory::Recording},
+        {1, dawn_platform::TraceCategory::GPUWork},
     };
+
+    static_assert(static_cast<uint32_t>(dawn_platform::TraceCategory::General) == 0, "");
+    static_assert(static_cast<uint32_t>(dawn_platform::TraceCategory::Validation) == 1, "");
+    static_assert(static_cast<uint32_t>(dawn_platform::TraceCategory::Recording) == 2, "");
+    static_assert(static_cast<uint32_t>(dawn_platform::TraceCategory::GPUWork) == 3, "");
 
 }  // anonymous namespace
 
@@ -39,15 +46,18 @@ DawnPerfTestPlatform::DawnPerfTestPlatform()
 
 DawnPerfTestPlatform::~DawnPerfTestPlatform() = default;
 
-const unsigned char* DawnPerfTestPlatform::GetTraceCategoryEnabledFlag(const char* name) {
-    for (const TraceCategory& category : gTraceCategories) {
-        if (strcmp(category.name, name) == 0) {
-            return &category.enabled;
-        }
+const unsigned char* DawnPerfTestPlatform::GetTraceCategoryEnabledFlag(
+    dawn_platform::TraceCategory category) {
+    switch (category) {
+        case dawn_platform::TraceCategory::General:
+        case dawn_platform::TraceCategory::Validation:
+        case dawn_platform::TraceCategory::Recording:
+        case dawn_platform::TraceCategory::GPUWork:
+            break;
+        default:
+            UNREACHABLE();
     }
-
-    constexpr static unsigned char kZero = 0;
-    return &kZero;
+    return &gTraceCategories[static_cast<uint32_t>(category)].enabled;
 }
 
 double DawnPerfTestPlatform::MonotonicallyIncreasingTime() {
@@ -74,11 +84,13 @@ uint64_t DawnPerfTestPlatform::AddTraceEvent(char phase,
 
     // Discover the category name based on categoryGroupEnabled.  This flag comes from the first
     // parameter of TraceCategory, and corresponds to one of the entries in gTraceCategories.
-    static_assert(offsetof(TraceCategory, enabled) == 0,
-                  "|enabled| must be the first field of the TraceCategory class.");
-    const TraceCategory* category = reinterpret_cast<const TraceCategory*>(categoryGroupEnabled);
+    static_assert(offsetof(TraceCategoryInfo, enabled) == 0,
+                  "|enabled| must be the first field of the TraceCategoryInfo class.");
 
-    mTraceEventBuffer.emplace_back(phase, category->name, name, id, timestamp);
+    const TraceCategoryInfo* info =
+        reinterpret_cast<const TraceCategoryInfo*>(categoryGroupEnabled);
+
+    mTraceEventBuffer.emplace_back(phase, info->category, name, id, timestamp);
     return static_cast<uint64_t>(mTraceEventBuffer.size());
 }
 

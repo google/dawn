@@ -20,6 +20,8 @@
 #include "dawn_native/Format.h"
 #include "dawn_native/RenderPipeline.h"
 #include "dawn_native/ValidationUtils_autogen.h"
+#include "dawn_platform/DawnPlatform.h"
+#include "dawn_platform/tracing/TraceEvent.h"
 
 namespace dawn_native {
 
@@ -111,6 +113,8 @@ namespace dawn_native {
     }
 
     MaybeError RenderBundleEncoderBase::ValidateFinish(const RenderBundleDescriptor* descriptor) {
+        TRACE_EVENT0(GetDevice()->GetPlatform(), Validation,
+                     "RenderBundleEncoderBase::ValidateFinish");
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
         // Even if Finish() validation fails, calling it will mutate the internal state of the

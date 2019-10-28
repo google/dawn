@@ -21,11 +21,18 @@
 
 namespace dawn_platform {
 
+    enum class TraceCategory {
+        General,     // General trace events
+        Validation,  // Dawn validation
+        Recording,   // Native command recording
+        GPUWork,     // Actual GPU work
+    };
+
     class DAWN_NATIVE_EXPORT Platform {
       public:
         virtual ~Platform() {
         }
-        virtual const unsigned char* GetTraceCategoryEnabledFlag(const char* name) = 0;
+        virtual const unsigned char* GetTraceCategoryEnabledFlag(TraceCategory category) = 0;
 
         virtual double MonotonicallyIncreasingTime() = 0;
 

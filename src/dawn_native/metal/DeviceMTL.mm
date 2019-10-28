@@ -29,6 +29,7 @@
 #include "dawn_native/metal/StagingBufferMTL.h"
 #include "dawn_native/metal/SwapChainMTL.h"
 #include "dawn_native/metal/TextureMTL.h"
+#include "dawn_platform/DawnPlatform.h"
 #include "dawn_platform/tracing/TraceEvent.h"
 
 #include <type_traits>
@@ -180,8 +181,7 @@ namespace dawn_native { namespace metal {
     }
 
     id<MTLCommandBuffer> Device::GetPendingCommandBuffer() {
-        TRACE_EVENT0(GetPlatform(), TRACE_DISABLED_BY_DEFAULT("gpu.dawn"),
-                     "DeviceMTL::GetPendingCommandBuffer");
+        TRACE_EVENT0(GetPlatform(), General, "DeviceMTL::GetPendingCommandBuffer");
         if (mPendingCommands == nil) {
             mPendingCommands = [mCommandQueue commandBuffer];
             [mPendingCommands retain];
@@ -228,14 +228,14 @@ namespace dawn_native { namespace metal {
         // mLastSubmittedSerial so it is captured by value.
         Serial pendingSerial = mLastSubmittedSerial;
         [mPendingCommands addCompletedHandler:^(id<MTLCommandBuffer>) {
-            TRACE_EVENT_ASYNC_END0(GetPlatform(), TRACE_DISABLED_BY_DEFAULT("gpu.dawn"),
-                                   "DeviceMTL::SubmitPendingCommandBuffer", pendingSerial);
+            TRACE_EVENT_ASYNC_END0(GetPlatform(), GPUWork, "DeviceMTL::SubmitPendingCommandBuffer",
+                                   pendingSerial);
             ASSERT(pendingSerial > mCompletedSerial.load());
             this->mCompletedSerial = pendingSerial;
         }];
 
-        TRACE_EVENT_ASYNC_BEGIN0(GetPlatform(), TRACE_DISABLED_BY_DEFAULT("gpu.dawn"),
-                                 "DeviceMTL::SubmitPendingCommandBuffer", pendingSerial);
+        TRACE_EVENT_ASYNC_BEGIN0(GetPlatform(), GPUWork, "DeviceMTL::SubmitPendingCommandBuffer",
+                                 pendingSerial);
         [mPendingCommands commit];
         mPendingCommands = nil;
     }
