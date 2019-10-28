@@ -36,12 +36,11 @@ class DawnPerfTestEnvironment : public DawnTestEnvironment {
     bool IsCalibrating() const;
     unsigned int OverrideStepsToRun() const;
 
-    // Returns whether tracing is enabled.
-    bool IsTracingEnabled() const;
+    // Returns the path to the trace file, or nullptr if traces should
+    // not be written to a json file.
+    const char* GetTraceFile() const;
 
   private:
-    void DumpTraceEventsToJSONFile() const;
-
     // Only run calibration which allows the perf test runner to save time.
     bool mIsCalibrating = false;
 
@@ -85,7 +84,7 @@ class DawnPerfTestBase {
 
   private:
     void DoRunLoop(double maxRunTime);
-    void PrintResults();
+    void OutputResults();
 
     virtual void Step() = 0;
 

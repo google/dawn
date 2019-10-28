@@ -33,18 +33,16 @@ namespace {
 
 }  // anonymous namespace
 
-DawnPerfTestPlatform::DawnPerfTestPlatform(bool enableTracing)
-    : dawn_platform::Platform(), mEnableTracing(enableTracing), mTimer(utils::CreateTimer()) {
+DawnPerfTestPlatform::DawnPerfTestPlatform()
+    : dawn_platform::Platform(), mTimer(utils::CreateTimer()) {
 }
 
 DawnPerfTestPlatform::~DawnPerfTestPlatform() = default;
 
 const unsigned char* DawnPerfTestPlatform::GetTraceCategoryEnabledFlag(const char* name) {
-    if (mEnableTracing) {
-        for (const TraceCategory& category : gTraceCategories) {
-            if (strcmp(category.name, name) == 0) {
-                return &category.enabled;
-            }
+    for (const TraceCategory& category : gTraceCategories) {
+        if (strcmp(category.name, name) == 0) {
+            return &category.enabled;
         }
     }
 
@@ -70,7 +68,7 @@ uint64_t DawnPerfTestPlatform::AddTraceEvent(char phase,
                                              const unsigned char* argTypes,
                                              const uint64_t* argValues,
                                              unsigned char flags) {
-    if (!mEnableTracing || !mRecordTraceEvents) {
+    if (!mRecordTraceEvents) {
         return 0;
     }
 
@@ -88,7 +86,8 @@ void DawnPerfTestPlatform::EnableTraceEventRecording(bool enable) {
     mRecordTraceEvents = enable;
 }
 
-const std::vector<DawnPerfTestPlatform::TraceEvent>& DawnPerfTestPlatform::GetTraceEventBuffer()
-    const {
-    return mTraceEventBuffer;
+std::vector<DawnPerfTestPlatform::TraceEvent> DawnPerfTestPlatform::AcquireTraceEventBuffer() {
+    std::vector<DawnPerfTestPlatform::TraceEvent> buffer = mTraceEventBuffer;
+    mTraceEventBuffer.clear();
+    return buffer;
 }

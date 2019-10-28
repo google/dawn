@@ -29,6 +29,38 @@ namespace {
     constexpr double kMicroSecondsPerSecond = 1e6;
     constexpr double kNanoSecondsPerSecond = 1e9;
 
+    void DumpTraceEventsToJSONFile(
+        const std::vector<DawnPerfTestPlatform::TraceEvent>& traceEventBuffer,
+        const char* traceFile) {
+        std::ofstream outFile;
+        outFile.open(traceFile, std::ios_base::app);
+
+        Json::StreamWriterBuilder builder;
+        std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
+
+        for (const DawnPerfTestPlatform::TraceEvent& traceEvent : traceEventBuffer) {
+            Json::Value value(Json::objectValue);
+
+            const Json::LargestInt microseconds =
+                static_cast<Json::LargestInt>(traceEvent.timestamp * 1000.0 * 1000.0);
+
+            char phase[2] = {traceEvent.phase, '\0'};
+
+            value["name"] = traceEvent.name;
+            value["cat"] = traceEvent.categoryName;
+            value["ph"] = &phase[0];
+            value["id"] = traceEvent.id;
+            value["ts"] = microseconds;
+            value["pid"] = "Dawn";
+
+            outFile << ", ";
+            writer->write(value, &outFile);
+            outFile.flush();
+        }
+
+        outFile.close();
+    }
+
 }  // namespace
 
 void InitDawnPerfTestEnvironment(int argc, char** argv) {
@@ -83,12 +115,36 @@ DawnPerfTestEnvironment::~DawnPerfTestEnvironment() = default;
 void DawnPerfTestEnvironment::SetUp() {
     DawnTestEnvironment::SetUp();
 
-    mPlatform = std::make_unique<DawnPerfTestPlatform>(IsTracingEnabled());
+    mPlatform = std::make_unique<DawnPerfTestPlatform>();
     mInstance->SetPlatform(mPlatform.get());
+
+    // Begin writing the trace event array.
+    if (mTraceFile != nullptr) {
+        std::ofstream outFile;
+        outFile.open(mTraceFile);
+        outFile << "{ \"traceEvents\": [";
+        outFile << "{}";  // Dummy object so trace events can always prepend a comma
+        outFile.flush();
+        outFile.close();
+    }
 }
 
 void DawnPerfTestEnvironment::TearDown() {
-    DumpTraceEventsToJSONFile();
+    // End writing the trace event array.
+    if (mTraceFile != nullptr) {
+        std::vector<DawnPerfTestPlatform::TraceEvent> traceEventBuffer =
+            mPlatform->AcquireTraceEventBuffer();
+
+        // Write remaining trace events.
+        DumpTraceEventsToJSONFile(traceEventBuffer, mTraceFile);
+
+        std::ofstream outFile;
+        outFile.open(mTraceFile, std::ios_base::app);
+        outFile << "]}";
+        outFile << std::endl;
+        outFile.close();
+    }
+
     DawnTestEnvironment::TearDown();
 }
 
@@ -100,48 +156,8 @@ unsigned int DawnPerfTestEnvironment::OverrideStepsToRun() const {
     return mOverrideStepsToRun;
 }
 
-bool DawnPerfTestEnvironment::IsTracingEnabled() const {
-    return mTraceFile != nullptr;
-}
-
-void DawnPerfTestEnvironment::DumpTraceEventsToJSONFile() const {
-    if (!IsTracingEnabled()) {
-        return;
-    }
-
-    Json::Value eventsValue(Json::arrayValue);
-
-    const std::vector<DawnPerfTestPlatform::TraceEvent>& traceEventBuffer =
-        mPlatform->GetTraceEventBuffer();
-
-    for (const DawnPerfTestPlatform::TraceEvent& traceEvent : traceEventBuffer) {
-        Json::Value value(Json::objectValue);
-
-        const Json::LargestInt microseconds =
-            static_cast<Json::LargestInt>(traceEvent.timestamp * 1000.0 * 1000.0);
-
-        char phase[2] = {traceEvent.phase, '\0'};
-
-        value["name"] = traceEvent.name;
-        value["cat"] = traceEvent.categoryName;
-        value["ph"] = &phase[0];
-        value["id"] = traceEvent.id;
-        value["ts"] = microseconds;
-        value["pid"] = "Dawn";
-
-        eventsValue.append(value);
-    }
-
-    Json::Value root(Json::objectValue);
-    root["traceEvents"] = eventsValue;
-
-    std::ofstream outFile;
-    outFile.open(mTraceFile);
-
-    Json::StyledStreamWriter styledWrite;
-    styledWrite.write(outFile, root);
-
-    outFile.close();
+const char* DawnPerfTestEnvironment::GetTraceFile() const {
+    return mTraceFile;
 }
 
 DawnPerfTestBase::DawnPerfTestBase(DawnTestBase* test,
@@ -196,7 +212,7 @@ void DawnPerfTestBase::RunTest() {
         for (unsigned int trial = 0; trial < kNumTrials; ++trial) {
             TRACE_EVENT0(platform, "dawn.perf_test", "Trial");
             DoRunLoop(kMaximumRunTimeSeconds);
-            PrintResults();
+            OutputResults();
         }
     }
     platform->EnableTraceEventRecording(false);
@@ -242,7 +258,7 @@ void DawnPerfTestBase::DoRunLoop(double maxRunTime) {
     mTimer->Stop();
 }
 
-void DawnPerfTestBase::PrintResults() {
+void DawnPerfTestBase::OutputResults() {
     double elapsedTimeSeconds[2] = {
         mTimer->GetElapsedTime(),
         mGPUTimeNs * 1e-9,
@@ -268,6 +284,19 @@ void DawnPerfTestBase::PrintResults() {
             double nanoSecPerIteration = secondsPerIteration * kNanoSecondsPerSecond;
             PrintResult(clockNames[i], nanoSecPerIteration, "ns", true);
         }
+    }
+
+    DawnPerfTestPlatform* platform =
+        reinterpret_cast<DawnPerfTestPlatform*>(gTestEnv->GetInstance()->GetPlatform());
+
+    std::vector<DawnPerfTestPlatform::TraceEvent> traceEventBuffer =
+        platform->AcquireTraceEventBuffer();
+
+    // TODO(enga): Process traces to extract time of command recording, validation, etc.
+
+    const char* traceFile = gTestEnv->GetTraceFile();
+    if (traceFile != nullptr) {
+        DumpTraceEventsToJSONFile(traceEventBuffer, traceFile);
     }
 }
 
