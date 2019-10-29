@@ -20,6 +20,7 @@
 #include "dawn_native/Error.h"
 #include "dawn_native/ResourceMemoryAllocation.h"
 
+#include <memory>
 #include <vector>
 
 namespace dawn_native { namespace vulkan {
