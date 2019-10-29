@@ -142,10 +142,6 @@ void BufferUploadPerf::Step() {
 }
 
 TEST_P(BufferUploadPerf, Run) {
-    // TODO(crbug.com/dawn/239): Investigate why large buffer uploads via SetSubData fail.
-    DAWN_SKIP_TEST_IF(GetParam().uploadMethod == UploadMethod::SetSubData &&
-                      GetParam().uploadSize == UploadSize::BufferSize_16MB);
-
     RunTest();
 }
 

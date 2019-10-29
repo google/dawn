@@ -18,9 +18,9 @@
 
 namespace dawn_native {
 
-    DynamicUploader::DynamicUploader(DeviceBase* device, uint64_t size) : mDevice(device) {
-        mRingBuffers.emplace_back(
-            std::unique_ptr<RingBuffer>(new RingBuffer{nullptr, RingBufferAllocator(size)}));
+    DynamicUploader::DynamicUploader(DeviceBase* device) : mDevice(device) {
+        mRingBuffers.emplace_back(std::unique_ptr<RingBuffer>(
+            new RingBuffer{nullptr, RingBufferAllocator(kRingBufferSize)}));
     }
 
     void DynamicUploader::ReleaseStagingBuffer(std::unique_ptr<StagingBufferBase> stagingBuffer) {
@@ -29,6 +29,19 @@ namespace dawn_native {
     }
 
     ResultOrError<UploadHandle> DynamicUploader::Allocate(uint64_t allocationSize, Serial serial) {
+        // Disable further sub-allocation should the request be too large.
+        if (allocationSize > kRingBufferSize) {
+            std::unique_ptr<StagingBufferBase> stagingBuffer;
+            DAWN_TRY_ASSIGN(stagingBuffer, mDevice->CreateStagingBuffer(allocationSize));
+
+            UploadHandle uploadHandle;
+            uploadHandle.mappedBuffer = static_cast<uint8_t*>(stagingBuffer->GetMappedPointer());
+            uploadHandle.stagingBuffer = stagingBuffer.get();
+
+            ReleaseStagingBuffer(std::move(stagingBuffer));
+            return uploadHandle;
+        }
+
         // Note: Validation ensures size is already aligned.
         // First-fit: find next smallest buffer large enough to satisfy the allocation request.
         RingBuffer* targetRingBuffer = mRingBuffers.back().get();
@@ -49,18 +62,11 @@ namespace dawn_native {
             startOffset = targetRingBuffer->mAllocator.Allocate(allocationSize, serial);
         }
 
-        // Upon failure, append a newly created (and much larger) ring buffer to fulfill the
+        // Upon failure, append a newly created ring buffer to fulfill the
         // request.
         if (startOffset == RingBufferAllocator::kInvalidOffset) {
-            // Compute the new max size (in powers of two to preserve alignment).
-            size_t newMaxSize = targetRingBuffer->mAllocator.GetSize() * 2;
-            while (newMaxSize < allocationSize) {
-                newMaxSize *= 2;
-            }
-
-            // TODO(bryan.bernhart@intel.com): Fall-back to no sub-allocations should this fail.
             mRingBuffers.emplace_back(std::unique_ptr<RingBuffer>(
-                new RingBuffer{nullptr, RingBufferAllocator(newMaxSize)}));
+                new RingBuffer{nullptr, RingBufferAllocator(kRingBufferSize)}));
 
             targetRingBuffer = mRingBuffers.back().get();
             startOffset = targetRingBuffer->mAllocator.Allocate(allocationSize, serial);

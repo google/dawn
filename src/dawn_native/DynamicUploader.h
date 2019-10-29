@@ -31,7 +31,7 @@ namespace dawn_native {
 
     class DynamicUploader {
       public:
-        DynamicUploader(DeviceBase* device, uint64_t size = kBaseUploadBufferSize);
+        DynamicUploader(DeviceBase* device);
         ~DynamicUploader() = default;
 
         // We add functions to Release StagingBuffers to the DynamicUploader as there's
@@ -44,8 +44,7 @@ namespace dawn_native {
         void Deallocate(Serial lastCompletedSerial);
 
       private:
-        // TODO(bryan.bernhart@intel.com): Figure out this value.
-        static constexpr uint64_t kBaseUploadBufferSize = 64000;
+        static constexpr uint64_t kRingBufferSize = 4 * 1024 * 1024;
 
         struct RingBuffer {
             std::unique_ptr<StagingBufferBase> mStagingBuffer;
