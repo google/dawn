@@ -16,7 +16,7 @@
 #define DAWNNATIVE_ATTACHMENTSTATE_H_
 
 #include "common/Constants.h"
-#include "dawn_native/RefCounted.h"
+#include "dawn_native/CachedObject.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -56,7 +56,7 @@ namespace dawn_native {
         uint32_t mSampleCount = 0;
     };
 
-    class AttachmentState : public AttachmentStateBlueprint, public RefCounted {
+    class AttachmentState : public AttachmentStateBlueprint, public CachedObject {
       public:
         AttachmentState(DeviceBase* device, const AttachmentStateBlueprint& blueprint);
         ~AttachmentState() override;
@@ -66,9 +66,6 @@ namespace dawn_native {
         bool HasDepthStencilAttachment() const;
         wgpu::TextureFormat GetDepthStencilFormat() const;
         uint32_t GetSampleCount() const;
-
-      private:
-        DeviceBase* mDevice;
     };
 
 }  // namespace dawn_native

@@ -34,12 +34,10 @@ namespace dawn_native {
     // ComputePipelineBase
 
     ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
-                                             const ComputePipelineDescriptor* descriptor,
-                                             bool blueprint)
+                                             const ComputePipelineDescriptor* descriptor)
         : PipelineBase(device, descriptor->layout, wgpu::ShaderStage::Compute),
           mModule(descriptor->computeStage.module),
-          mEntryPoint(descriptor->computeStage.entryPoint),
-          mIsBlueprint(blueprint) {
+          mEntryPoint(descriptor->computeStage.entryPoint) {
     }
 
     ComputePipelineBase::ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)
@@ -48,7 +46,7 @@ namespace dawn_native {
 
     ComputePipelineBase::~ComputePipelineBase() {
         // Do not uncache the actual cached object if we are a blueprint
-        if (!mIsBlueprint && !IsError()) {
+        if (IsCachedReference()) {
             GetDevice()->UncacheComputePipeline(this);
         }
     }

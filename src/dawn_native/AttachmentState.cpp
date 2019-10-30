@@ -116,11 +116,11 @@ namespace dawn_native {
     }
 
     AttachmentState::AttachmentState(DeviceBase* device, const AttachmentStateBlueprint& blueprint)
-        : AttachmentStateBlueprint(blueprint), RefCounted(), mDevice(device) {
+        : AttachmentStateBlueprint(blueprint), CachedObject(device) {
     }
 
     AttachmentState::~AttachmentState() {
-        mDevice->UncacheAttachmentState(this);
+        GetDevice()->UncacheAttachmentState(this);
     }
 
     std::bitset<kMaxColorAttachments> AttachmentState::GetColorAttachmentsMask() const {

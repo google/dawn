@@ -15,8 +15,8 @@
 #ifndef DAWNNATIVE_PIPELINE_H_
 #define DAWNNATIVE_PIPELINE_H_
 
+#include "dawn_native/CachedObject.h"
 #include "dawn_native/Forward.h"
-#include "dawn_native/ObjectBase.h"
 #include "dawn_native/PerStage.h"
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/ShaderModule.h"
@@ -33,7 +33,7 @@ namespace dawn_native {
                                                    const PipelineLayoutBase* layout,
                                                    SingleShaderStage stage);
 
-    class PipelineBase : public ObjectBase {
+    class PipelineBase : public CachedObject {
       public:
         wgpu::ShaderStage GetStageMask() const;
         PipelineLayoutBase* GetLayout();

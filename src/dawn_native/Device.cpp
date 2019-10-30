@@ -191,7 +191,7 @@ namespace dawn_native {
 
     ResultOrError<BindGroupLayoutBase*> DeviceBase::GetOrCreateBindGroupLayout(
         const BindGroupLayoutDescriptor* descriptor) {
-        BindGroupLayoutBase blueprint(this, descriptor, true);
+        BindGroupLayoutBase blueprint(this, descriptor);
 
         auto iter = mCaches->bindGroupLayouts.find(&blueprint);
         if (iter != mCaches->bindGroupLayouts.end()) {
@@ -201,18 +201,20 @@ namespace dawn_native {
 
         BindGroupLayoutBase* backendObj;
         DAWN_TRY_ASSIGN(backendObj, CreateBindGroupLayoutImpl(descriptor));
+        backendObj->SetIsCachedReference();
         mCaches->bindGroupLayouts.insert(backendObj);
         return backendObj;
     }
 
     void DeviceBase::UncacheBindGroupLayout(BindGroupLayoutBase* obj) {
+        ASSERT(obj->IsCachedReference());
         size_t removedCount = mCaches->bindGroupLayouts.erase(obj);
         ASSERT(removedCount == 1);
     }
 
     ResultOrError<ComputePipelineBase*> DeviceBase::GetOrCreateComputePipeline(
         const ComputePipelineDescriptor* descriptor) {
-        ComputePipelineBase blueprint(this, descriptor, true);
+        ComputePipelineBase blueprint(this, descriptor);
 
         auto iter = mCaches->computePipelines.find(&blueprint);
         if (iter != mCaches->computePipelines.end()) {
@@ -222,18 +224,20 @@ namespace dawn_native {
 
         ComputePipelineBase* backendObj;
         DAWN_TRY_ASSIGN(backendObj, CreateComputePipelineImpl(descriptor));
+        backendObj->SetIsCachedReference();
         mCaches->computePipelines.insert(backendObj);
         return backendObj;
     }
 
     void DeviceBase::UncacheComputePipeline(ComputePipelineBase* obj) {
+        ASSERT(obj->IsCachedReference());
         size_t removedCount = mCaches->computePipelines.erase(obj);
         ASSERT(removedCount == 1);
     }
 
     ResultOrError<PipelineLayoutBase*> DeviceBase::GetOrCreatePipelineLayout(
         const PipelineLayoutDescriptor* descriptor) {
-        PipelineLayoutBase blueprint(this, descriptor, true);
+        PipelineLayoutBase blueprint(this, descriptor);
 
         auto iter = mCaches->pipelineLayouts.find(&blueprint);
         if (iter != mCaches->pipelineLayouts.end()) {
@@ -243,18 +247,20 @@ namespace dawn_native {
 
         PipelineLayoutBase* backendObj;
         DAWN_TRY_ASSIGN(backendObj, CreatePipelineLayoutImpl(descriptor));
+        backendObj->SetIsCachedReference();
         mCaches->pipelineLayouts.insert(backendObj);
         return backendObj;
     }
 
     void DeviceBase::UncachePipelineLayout(PipelineLayoutBase* obj) {
+        ASSERT(obj->IsCachedReference());
         size_t removedCount = mCaches->pipelineLayouts.erase(obj);
         ASSERT(removedCount == 1);
     }
 
     ResultOrError<RenderPipelineBase*> DeviceBase::GetOrCreateRenderPipeline(
         const RenderPipelineDescriptor* descriptor) {
-        RenderPipelineBase blueprint(this, descriptor, true);
+        RenderPipelineBase blueprint(this, descriptor);
 
         auto iter = mCaches->renderPipelines.find(&blueprint);
         if (iter != mCaches->renderPipelines.end()) {
@@ -264,18 +270,20 @@ namespace dawn_native {
 
         RenderPipelineBase* backendObj;
         DAWN_TRY_ASSIGN(backendObj, CreateRenderPipelineImpl(descriptor));
+        backendObj->SetIsCachedReference();
         mCaches->renderPipelines.insert(backendObj);
         return backendObj;
     }
 
     void DeviceBase::UncacheRenderPipeline(RenderPipelineBase* obj) {
+        ASSERT(obj->IsCachedReference());
         size_t removedCount = mCaches->renderPipelines.erase(obj);
         ASSERT(removedCount == 1);
     }
 
     ResultOrError<SamplerBase*> DeviceBase::GetOrCreateSampler(
         const SamplerDescriptor* descriptor) {
-        SamplerBase blueprint(this, descriptor, true);
+        SamplerBase blueprint(this, descriptor);
 
         auto iter = mCaches->samplers.find(&blueprint);
         if (iter != mCaches->samplers.end()) {
@@ -285,18 +293,20 @@ namespace dawn_native {
 
         SamplerBase* backendObj;
         DAWN_TRY_ASSIGN(backendObj, CreateSamplerImpl(descriptor));
+        backendObj->SetIsCachedReference();
         mCaches->samplers.insert(backendObj);
         return backendObj;
     }
 
     void DeviceBase::UncacheSampler(SamplerBase* obj) {
+        ASSERT(obj->IsCachedReference());
         size_t removedCount = mCaches->samplers.erase(obj);
         ASSERT(removedCount == 1);
     }
 
     ResultOrError<ShaderModuleBase*> DeviceBase::GetOrCreateShaderModule(
         const ShaderModuleDescriptor* descriptor) {
-        ShaderModuleBase blueprint(this, descriptor, true);
+        ShaderModuleBase blueprint(this, descriptor);
 
         auto iter = mCaches->shaderModules.find(&blueprint);
         if (iter != mCaches->shaderModules.end()) {
@@ -306,11 +316,13 @@ namespace dawn_native {
 
         ShaderModuleBase* backendObj;
         DAWN_TRY_ASSIGN(backendObj, CreateShaderModuleImpl(descriptor));
+        backendObj->SetIsCachedReference();
         mCaches->shaderModules.insert(backendObj);
         return backendObj;
     }
 
     void DeviceBase::UncacheShaderModule(ShaderModuleBase* obj) {
+        ASSERT(obj->IsCachedReference());
         size_t removedCount = mCaches->shaderModules.erase(obj);
         ASSERT(removedCount == 1);
     }
@@ -323,6 +335,7 @@ namespace dawn_native {
         }
 
         Ref<AttachmentState> attachmentState = AcquireRef(new AttachmentState(this, *blueprint));
+        attachmentState->SetIsCachedReference();
         mCaches->attachmentStates.insert(attachmentState.Get());
         return attachmentState;
     }
@@ -346,6 +359,7 @@ namespace dawn_native {
     }
 
     void DeviceBase::UncacheAttachmentState(AttachmentState* obj) {
+        ASSERT(obj->IsCachedReference());
         size_t removedCount = mCaches->attachmentStates.erase(obj);
         ASSERT(removedCount == 1);
     }

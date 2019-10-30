@@ -129,9 +129,8 @@ namespace dawn_native {
     // BindGroupLayoutBase
 
     BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
-                                             const BindGroupLayoutDescriptor* descriptor,
-                                             bool blueprint)
-        : ObjectBase(device), mIsBlueprint(blueprint) {
+                                             const BindGroupLayoutDescriptor* descriptor)
+        : CachedObject(device) {
         for (uint32_t i = 0; i < descriptor->bindingCount; ++i) {
             auto& binding = descriptor->bindings[i];
 
@@ -171,12 +170,12 @@ namespace dawn_native {
     }
 
     BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-        : ObjectBase(device, tag), mIsBlueprint(true) {
+        : CachedObject(device, tag) {
     }
 
     BindGroupLayoutBase::~BindGroupLayoutBase() {
         // Do not uncache the actual cached object if we are a blueprint
-        if (!mIsBlueprint && !IsError()) {
+        if (IsCachedReference()) {
             GetDevice()->UncacheBindGroupLayout(this);
         }
     }

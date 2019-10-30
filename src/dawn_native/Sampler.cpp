@@ -52,10 +52,8 @@ namespace dawn_native {
 
     // SamplerBase
 
-    SamplerBase::SamplerBase(DeviceBase* device,
-                             const SamplerDescriptor* descriptor,
-                             bool blueprint)
-        : ObjectBase(device),
+    SamplerBase::SamplerBase(DeviceBase* device, const SamplerDescriptor* descriptor)
+        : CachedObject(device),
           mAddressModeU(descriptor->addressModeU),
           mAddressModeV(descriptor->addressModeV),
           mAddressModeW(descriptor->addressModeW),
@@ -64,17 +62,15 @@ namespace dawn_native {
           mMipmapFilter(descriptor->mipmapFilter),
           mLodMinClamp(descriptor->lodMinClamp),
           mLodMaxClamp(descriptor->lodMaxClamp),
-          mCompareFunction(descriptor->compare),
-          mIsBlueprint(blueprint) {
+          mCompareFunction(descriptor->compare) {
     }
 
     SamplerBase::SamplerBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-        : ObjectBase(device, tag) {
+        : CachedObject(device, tag) {
     }
 
     SamplerBase::~SamplerBase() {
-        // Do not uncache the actual cached object if we are a blueprint
-        if (!mIsBlueprint && !IsError()) {
+        if (IsCachedReference()) {
             GetDevice()->UncacheSampler(this);
         }
     }

@@ -16,9 +16,9 @@
 #define DAWNNATIVE_PIPELINELAYOUT_H_
 
 #include "common/Constants.h"
+#include "dawn_native/CachedObject.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
-#include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -32,11 +32,9 @@ namespace dawn_native {
 
     using BindGroupLayoutArray = std::array<Ref<BindGroupLayoutBase>, kMaxBindGroups>;
 
-    class PipelineLayoutBase : public ObjectBase {
+    class PipelineLayoutBase : public CachedObject {
       public:
-        PipelineLayoutBase(DeviceBase* device,
-                           const PipelineLayoutDescriptor* descriptor,
-                           bool blueprint = false);
+        PipelineLayoutBase(DeviceBase* device, const PipelineLayoutDescriptor* descriptor);
         ~PipelineLayoutBase() override;
 
         static PipelineLayoutBase* MakeError(DeviceBase* device);
@@ -65,7 +63,6 @@ namespace dawn_native {
 
         BindGroupLayoutArray mBindGroupLayouts;
         std::bitset<kMaxBindGroups> mMask;
-        bool mIsBlueprint = false;
     };
 
 }  // namespace dawn_native

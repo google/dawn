@@ -54,9 +54,7 @@ namespace dawn_native {
 
     class RenderPipelineBase : public PipelineBase {
       public:
-        RenderPipelineBase(DeviceBase* device,
-                           const RenderPipelineDescriptor* descriptor,
-                           bool blueprint = false);
+        RenderPipelineBase(DeviceBase* device, const RenderPipelineDescriptor* descriptor);
         ~RenderPipelineBase() override;
 
         static RenderPipelineBase* MakeError(DeviceBase* device);
@@ -119,8 +117,6 @@ namespace dawn_native {
         std::string mVertexEntryPoint;
         Ref<ShaderModuleBase> mFragmentModule;
         std::string mFragmentEntryPoint;
-
-        bool mIsBlueprint = false;
     };
 
 }  // namespace dawn_native

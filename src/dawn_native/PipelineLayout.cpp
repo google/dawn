@@ -56,9 +56,8 @@ namespace dawn_native {
     // PipelineLayoutBase
 
     PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
-                                           const PipelineLayoutDescriptor* descriptor,
-                                           bool blueprint)
-        : ObjectBase(device), mIsBlueprint(blueprint) {
+                                           const PipelineLayoutDescriptor* descriptor)
+        : CachedObject(device) {
         ASSERT(descriptor->bindGroupLayoutCount <= kMaxBindGroups);
         for (uint32_t group = 0; group < descriptor->bindGroupLayoutCount; ++group) {
             mBindGroupLayouts[group] = descriptor->bindGroupLayouts[group];
@@ -67,12 +66,12 @@ namespace dawn_native {
     }
 
     PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-        : ObjectBase(device, tag) {
+        : CachedObject(device, tag) {
     }
 
     PipelineLayoutBase::~PipelineLayoutBase() {
         // Do not uncache the actual cached object if we are a blueprint
-        if (!mIsBlueprint && !IsError()) {
+        if (IsCachedReference()) {
             GetDevice()->UncachePipelineLayout(this);
         }
     }

@@ -16,10 +16,10 @@
 #define DAWNNATIVE_SHADERMODULE_H_
 
 #include "common/Constants.h"
+#include "dawn_native/CachedObject.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Format.h"
 #include "dawn_native/Forward.h"
-#include "dawn_native/ObjectBase.h"
 #include "dawn_native/PerStage.h"
 
 #include "dawn_native/dawn_platform.h"
@@ -37,11 +37,9 @@ namespace dawn_native {
     MaybeError ValidateShaderModuleDescriptor(DeviceBase* device,
                                               const ShaderModuleDescriptor* descriptor);
 
-    class ShaderModuleBase : public ObjectBase {
+    class ShaderModuleBase : public CachedObject {
       public:
-        ShaderModuleBase(DeviceBase* device,
-                         const ShaderModuleDescriptor* descriptor,
-                         bool blueprint = false);
+        ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModuleBase() override;
 
         static ShaderModuleBase* MakeError(DeviceBase* device);
@@ -85,7 +83,6 @@ namespace dawn_native {
         // TODO(cwallez@chromium.org): The code is only stored for deduplication. We could maybe
         // store a cryptographic hash of the code instead?
         std::vector<uint32_t> mCode;
-        bool mIsBlueprint = false;
 
         ModuleBindingInfo mBindingInfo;
         std::bitset<kMaxVertexAttributes> mUsedVertexAttributes;

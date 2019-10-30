@@ -15,8 +15,8 @@
 #ifndef DAWNNATIVE_SAMPLER_H_
 #define DAWNNATIVE_SAMPLER_H_
 
+#include "dawn_native/CachedObject.h"
 #include "dawn_native/Error.h"
-#include "dawn_native/ObjectBase.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -26,11 +26,9 @@ namespace dawn_native {
 
     MaybeError ValidateSamplerDescriptor(DeviceBase* device, const SamplerDescriptor* descriptor);
 
-    class SamplerBase : public ObjectBase {
+    class SamplerBase : public CachedObject {
       public:
-        SamplerBase(DeviceBase* device,
-                    const SamplerDescriptor* descriptor,
-                    bool blueprint = false);
+        SamplerBase(DeviceBase* device, const SamplerDescriptor* descriptor);
         ~SamplerBase() override;
 
         static SamplerBase* MakeError(DeviceBase* device);
@@ -56,7 +54,6 @@ namespace dawn_native {
         float mLodMinClamp;
         float mLodMaxClamp;
         wgpu::CompareFunction mCompareFunction;
-        bool mIsBlueprint = false;
     };
 
 }  // namespace dawn_native
