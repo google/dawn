@@ -18,6 +18,8 @@
 #include "dawn_native/Error.h"
 #include "dawn_native/ResourceHeap.h"
 
+#include <memory>
+
 namespace dawn_native {
 
     // Interface for backend allocators that create memory heaps resoruces can be suballocated in.
