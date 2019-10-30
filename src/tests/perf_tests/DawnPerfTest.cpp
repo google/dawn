@@ -21,14 +21,13 @@
 
 #include <json/value.h>
 #include <json/writer.h>
+
 #include <fstream>
+#include <limits>
 
 namespace {
 
     DawnPerfTestEnvironment* gTestEnv = nullptr;
-
-    constexpr double kMicroSecondsPerSecond = 1e6;
-    constexpr double kNanoSecondsPerSecond = 1e9;
 
     void DumpTraceEventsToJSONFile(
         const std::vector<DawnPerfTestPlatform::TraceEvent>& traceEventBuffer,
@@ -274,44 +273,91 @@ void DawnPerfTestBase::DoRunLoop(double maxRunTime) {
 }
 
 void DawnPerfTestBase::OutputResults() {
-    double elapsedTimeSeconds[2] = {
-        mTimer->GetElapsedTime(),
-        mGPUTimeNs * 1e-9,
-    };
-
-    const char* clockNames[2] = {
-        "wall_time",
-        "gpu_time",
-    };
-
-    // If measured gpu time is non-zero, print that too.
-    unsigned int clocksToOutput = mGPUTimeNs > 0 ? 2 : 1;
-
-    for (unsigned int i = 0; i < clocksToOutput; ++i) {
-        double secondsPerStep = elapsedTimeSeconds[i] / static_cast<double>(mNumStepsPerformed);
-        double secondsPerIteration = secondsPerStep / static_cast<double>(mIterationsPerStep);
-
-        // Give the result a different name to ensure separate graphs if we transition.
-        if (secondsPerIteration > 1e-3) {
-            double microSecondsPerIteration = secondsPerIteration * kMicroSecondsPerSecond;
-            PrintResult(clockNames[i], microSecondsPerIteration, "us", true);
-        } else {
-            double nanoSecPerIteration = secondsPerIteration * kNanoSecondsPerSecond;
-            PrintResult(clockNames[i], nanoSecPerIteration, "ns", true);
-        }
-    }
-
     DawnPerfTestPlatform* platform =
         reinterpret_cast<DawnPerfTestPlatform*>(gTestEnv->GetInstance()->GetPlatform());
 
     std::vector<DawnPerfTestPlatform::TraceEvent> traceEventBuffer =
         platform->AcquireTraceEventBuffer();
 
-    // TODO(enga): Process traces to extract time of command recording, validation, etc.
+    struct EventTracker {
+        double start = std::numeric_limits<double>::max();
+        double end = 0;
+        uint32_t count = 0;
+    };
+
+    EventTracker validationTracker = {};
+    EventTracker recordingTracker = {};
+
+    double totalValidationTime = 0;
+    double totalRecordingTime = 0;
+
+    // Note: We assume END timestamps always come after their corresponding BEGIN timestamps.
+    // TODO(enga): When Dawn has multiple threads, stratify by thread id.
+    for (const DawnPerfTestPlatform::TraceEvent& traceEvent : traceEventBuffer) {
+        EventTracker* tracker = nullptr;
+        double* totalTime = nullptr;
+
+        switch (traceEvent.category) {
+            case dawn_platform::TraceCategory::Validation:
+                tracker = &validationTracker;
+                totalTime = &totalValidationTime;
+                break;
+            case dawn_platform::TraceCategory::Recording:
+                tracker = &recordingTracker;
+                totalTime = &totalRecordingTime;
+                break;
+            default:
+                break;
+        }
+
+        if (tracker == nullptr) {
+            continue;
+        }
+
+        if (traceEvent.phase == TRACE_EVENT_PHASE_BEGIN) {
+            tracker->start = std::min(tracker->start, traceEvent.timestamp);
+            tracker->count++;
+        }
+
+        if (traceEvent.phase == TRACE_EVENT_PHASE_END) {
+            tracker->end = std::max(tracker->end, traceEvent.timestamp);
+            ASSERT(tracker->count > 0);
+            tracker->count--;
+
+            if (tracker->count == 0) {
+                *totalTime += (tracker->end - tracker->start);
+                *tracker = {};
+            }
+        }
+    }
+
+    PrintPerIterationResultFromMilliseconds("wall_time", mTimer->GetElapsedTime() * 1e3, true);
+    PrintPerIterationResultFromMilliseconds("validation_time", totalValidationTime, true);
+    PrintPerIterationResultFromMilliseconds("recording_time", totalRecordingTime, true);
 
     const char* traceFile = gTestEnv->GetTraceFile();
     if (traceFile != nullptr) {
         DumpTraceEventsToJSONFile(traceEventBuffer, traceFile);
+    }
+}
+
+void DawnPerfTestBase::PrintPerIterationResultFromMilliseconds(const std::string& trace,
+                                                               double valueInMilliseconds,
+                                                               bool important) const {
+    if (valueInMilliseconds == 0) {
+        return;
+    }
+
+    double millisecondsPerIteration =
+        valueInMilliseconds / static_cast<double>(mNumStepsPerformed * mIterationsPerStep);
+
+    // Give the result a different name to ensure separate graphs if we transition.
+    if (millisecondsPerIteration > 1e3) {
+        PrintResult(trace, millisecondsPerIteration, "ms", important);
+    } else if (millisecondsPerIteration > 1) {
+        PrintResult(trace, millisecondsPerIteration * 1e3, "us", important);
+    } else {
+        PrintResult(trace, millisecondsPerIteration * 1e6, "ns", important);
     }
 }
 

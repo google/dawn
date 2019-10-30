@@ -73,6 +73,9 @@ class DawnPerfTestBase {
     void AbortTest();
 
     void RunTest();
+    void PrintPerIterationResultFromMilliseconds(const std::string& trace,
+                                                 double valueInMilliseconds,
+                                                 bool important) const;
     void PrintResult(const std::string& trace,
                      double value,
                      const std::string& units,
@@ -94,7 +97,6 @@ class DawnPerfTestBase {
     const unsigned int mMaxStepsInFlight;
     unsigned int mStepsToRun = 0;
     unsigned int mNumStepsPerformed = 0;
-    uint64_t mGPUTimeNs = 0;  // TODO(enga): Measure GPU time with timing queries.
     std::unique_ptr<utils::Timer> mTimer;
 };
 
