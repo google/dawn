@@ -22,6 +22,15 @@ namespace dawn_native {
 
     // Format
 
+    Format::Type Format::TextureComponentTypeToFormatType(
+        wgpu::TextureComponentType componentType) {
+        // Check that Type correctly mirrors TextureComponentType except for "Other".
+        static_assert(static_cast<Type>(wgpu::TextureComponentType::Float) == Type::Float, "");
+        static_assert(static_cast<Type>(wgpu::TextureComponentType::Sint) == Type::Sint, "");
+        static_assert(static_cast<Type>(wgpu::TextureComponentType::Uint) == Type::Uint, "");
+        return static_cast<Type>(componentType);
+    }
+
     bool Format::IsColor() const {
         return aspect == Aspect::Color;
     }
@@ -44,17 +53,7 @@ namespace dawn_native {
             return false;
         }
 
-        // Check that Type is correctly mirrors TextureComponentType except for "Other".
-        static_assert(static_cast<wgpu::TextureComponentType>(Type::Float) ==
-                          wgpu::TextureComponentType::Float,
-                      "");
-        static_assert(
-            static_cast<wgpu::TextureComponentType>(Type::Sint) == wgpu::TextureComponentType::Sint,
-            "");
-        static_assert(
-            static_cast<wgpu::TextureComponentType>(Type::Uint) == wgpu::TextureComponentType::Uint,
-            "");
-        return static_cast<wgpu::TextureComponentType>(type) == componentType;
+        return TextureComponentTypeToFormatType(componentType) == type;
     }
 
     size_t Format::GetIndex() const {

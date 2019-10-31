@@ -51,6 +51,7 @@ namespace dawn_native {
             uint32_t id;
             uint32_t base_type_id;
             wgpu::BindingType type;
+            Format::Type textureComponentType;
             bool used = false;
         };
         using ModuleBindingInfo =

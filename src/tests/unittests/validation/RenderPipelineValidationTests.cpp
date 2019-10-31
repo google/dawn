@@ -321,3 +321,42 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
         }
     }
 }
+
+// Tests that the texture component type in shader must match the bind group layout.
+TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
+    constexpr uint32_t kNumTextureComponentType = 3u;
+    std::array<const char*, kNumTextureComponentType> kTexturePrefix = {{"", "i", "u"}};
+    std::array<wgpu::TextureComponentType, kNumTextureComponentType> kTextureComponentTypes = {{
+        wgpu::TextureComponentType::Float,
+        wgpu::TextureComponentType::Sint,
+        wgpu::TextureComponentType::Uint,
+    }};
+
+    for (size_t i = 0; i < kNumTextureComponentType; ++i) {
+        for (size_t j = 0; j < kNumTextureComponentType; ++j) {
+            utils::ComboRenderPipelineDescriptor descriptor(device);
+            descriptor.vertexStage.module = vsModule;
+
+            std::ostringstream stream;
+            stream << R"(
+                #version 450
+                layout(set = 0, binding = 0) uniform )"
+                   << kTexturePrefix[i] << R"(texture2D tex;
+                void main() {
+                })";
+            descriptor.cFragmentStage.module = utils::CreateShaderModule(
+                device, utils::SingleShaderStage::Fragment, stream.str().c_str());
+
+            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false,
+                          false, wgpu::TextureViewDimension::e2D, kTextureComponentTypes[j]}});
+            descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
+
+            if (i == j) {
+                device.CreateRenderPipeline(&descriptor);
+            } else {
+                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+            }
+        }
+    }
+}
