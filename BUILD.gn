@@ -1017,6 +1017,7 @@ test("dawn_perf_tests") {
     "src/tests/perf_tests/DawnPerfTest.h",
     "src/tests/perf_tests/DawnPerfTestPlatform.cpp",
     "src/tests/perf_tests/DawnPerfTestPlatform.h",
+    "src/tests/perf_tests/DrawCallPerf.cpp",
   ]
 
   libs = []
