@@ -372,6 +372,18 @@ TEST_F(BindGroupValidationTest, BufferUsageSSBO) {
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, mUBO, 0, 256}}));
 }
 
+// Check that a readonly SSBO must have the correct usage
+TEST_F(BindGroupValidationTest, BufferUsageReadonlySSBO) {
+    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageBuffer}});
+
+    // Control case: using a buffer with the storage usage works
+    utils::MakeBindGroup(device, layout, {{0, mSSBO, 0, 256}});
+
+    // Using a buffer without the storage usage fails
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, mUBO, 0, 256}}));
+}
+
 // Tests constraints on the buffer offset for bind groups.
 TEST_F(BindGroupValidationTest, BufferOffsetAlignment) {
     wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
@@ -515,6 +527,11 @@ TEST_F(BindGroupLayoutValidationTest, DynamicAndTypeCompatibility) {
                     {0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer, true},
                 });
 
+    utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageBuffer, true},
+                });
+
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
         device, {
                     {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, true},
@@ -546,6 +563,7 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
     wgpu::BindGroupLayout bgl[2];
     std::vector<wgpu::BindGroupLayoutBinding> maxUniformDB;
     std::vector<wgpu::BindGroupLayoutBinding> maxStorageDB;
+    std::vector<wgpu::BindGroupLayoutBinding> maxReadonlyStorageDB;
 
     for (uint32_t i = 0; i < kMaxDynamicUniformBufferCount; ++i) {
         maxUniformDB.push_back(
@@ -555,6 +573,11 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
     for (uint32_t i = 0; i < kMaxDynamicStorageBufferCount; ++i) {
         maxStorageDB.push_back(
             {i, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer, true});
+    }
+
+    for (uint32_t i = 0; i < kMaxDynamicStorageBufferCount; ++i) {
+        maxReadonlyStorageDB.push_back(
+            {i, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageBuffer, true});
     }
 
     auto MakeBindGroupLayout = [&](wgpu::BindGroupLayoutBinding* binding,
@@ -572,7 +595,14 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
         TestCreatePipelineLayout(bgl, 2, true);
     }
 
-    // Check dynamic uniform buffers excedd maximum in pipeline layout.
+    {
+        bgl[0] = MakeBindGroupLayout(maxUniformDB.data(), maxUniformDB.size());
+        bgl[1] = MakeBindGroupLayout(maxReadonlyStorageDB.data(), maxReadonlyStorageDB.size());
+
+        TestCreatePipelineLayout(bgl, 2, true);
+    }
+
+    // Check dynamic uniform buffers exceed maximum in pipeline layout.
     {
         bgl[0] = MakeBindGroupLayout(maxUniformDB.data(), maxUniformDB.size());
         bgl[1] = utils::MakeBindGroupLayout(
@@ -594,6 +624,31 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
         TestCreatePipelineLayout(bgl, 2, false);
     }
 
+    // Check dynamic readonly storage buffers exceed maximum in pipeline layout
+    {
+        bgl[0] = MakeBindGroupLayout(maxReadonlyStorageDB.data(), maxReadonlyStorageDB.size());
+        bgl[1] = utils::MakeBindGroupLayout(
+            device,
+            {
+                {0, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageBuffer, true},
+            });
+
+        TestCreatePipelineLayout(bgl, 2, false);
+    }
+
+    // Check dynamic storage buffers + dynamic readonly storage buffers exceed maximum storage
+    // buffers in pipeline layout
+    {
+        bgl[0] = MakeBindGroupLayout(maxStorageDB.data(), maxStorageDB.size());
+        bgl[1] = utils::MakeBindGroupLayout(
+            device,
+            {
+                {0, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageBuffer, true},
+            });
+
+        TestCreatePipelineLayout(bgl, 2, false);
+    }
+
     // Check dynamic uniform buffers exceed maximum in bind group layout.
     {
         maxUniformDB.push_back({kMaxDynamicUniformBufferCount, wgpu::ShaderStage::Compute,
@@ -606,6 +661,13 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
         maxStorageDB.push_back({kMaxDynamicStorageBufferCount, wgpu::ShaderStage::Compute,
                                 wgpu::BindingType::StorageBuffer, true});
         TestCreateBindGroupLayout(maxStorageDB.data(), maxStorageDB.size(), false);
+    }
+
+    // Check dynamic readonly storage buffers exceed maximum in bind group layout.
+    {
+        maxReadonlyStorageDB.push_back({kMaxDynamicStorageBufferCount, wgpu::ShaderStage::Compute,
+                                        wgpu::BindingType::ReadonlyStorageBuffer, true});
+        TestCreateBindGroupLayout(maxReadonlyStorageDB.data(), maxReadonlyStorageDB.size(), false);
     }
 }
 

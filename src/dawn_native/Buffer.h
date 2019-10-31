@@ -27,9 +27,13 @@ namespace dawn_native {
 
     MaybeError ValidateBufferDescriptor(DeviceBase* device, const BufferDescriptor* descriptor);
 
+    // Add an extra buffer usage (readonly storage buffer usage) for render pass resource tracking
+    static constexpr wgpu::BufferUsage kReadOnlyStorage =
+        static_cast<wgpu::BufferUsage>(0x80000000);
+
     static constexpr wgpu::BufferUsage kReadOnlyBufferUsages =
         wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Index |
-        wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Uniform;
+        wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Uniform | kReadOnlyStorage;
 
     static constexpr wgpu::BufferUsage kWritableBufferUsages =
         wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Storage;

@@ -16,6 +16,7 @@
 
 #include "common/BitSetIterator.h"
 #include "dawn_native/BindGroup.h"
+#include "dawn_native/Buffer.h"
 #include "dawn_native/CommandBufferStateTracker.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/PassResourceUsageTracker.h"
@@ -49,11 +50,15 @@ namespace dawn_native {
                         usageTracker->TextureUsedAs(texture, wgpu::TextureUsage::Sampled);
                     } break;
 
+                    case wgpu::BindingType::ReadonlyStorageBuffer: {
+                        BufferBase* buffer = group->GetBindingAsBufferBinding(i).buffer;
+                        usageTracker->BufferUsedAs(buffer, kReadOnlyStorage);
+                    } break;
+
                     case wgpu::BindingType::Sampler:
                         break;
 
                     case wgpu::BindingType::StorageTexture:
-                    case wgpu::BindingType::ReadonlyStorageBuffer:
                         UNREACHABLE();
                         break;
                 }
