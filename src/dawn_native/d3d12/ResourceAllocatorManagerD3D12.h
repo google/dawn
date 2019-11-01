@@ -26,10 +26,21 @@ namespace dawn_native { namespace d3d12 {
 
     class Device;
 
-    // Heap types + flags combinations are named after the D3D constants.
+    // Resource heap types + flags combinations are named after the D3D constants.
     // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_heap_flags
     // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_heap_type
     enum ResourceHeapKind {
+
+        // Resource heap tier 2
+        // Allows resource heaps to contain all buffer and textures types.
+        // This enables better heap re-use by avoiding the need for separate heaps and
+        // also reduces fragmentation.
+        Readback_AllBuffersAndTextures,
+        Upload_AllBuffersAndTextures,
+        Default_AllBuffersAndTextures,
+
+        // Resource heap tier 1
+        // Resource heaps only support types from a single resource category.
         Readback_OnlyBuffers,
         Upload_OnlyBuffers,
         Default_OnlyBuffers,
@@ -70,6 +81,7 @@ namespace dawn_native { namespace d3d12 {
             D3D12_RESOURCE_STATES initialUsage);
 
         Device* mDevice;
+        uint32_t mResourceHeapTier;
 
         static constexpr uint64_t kMaxHeapSize = 32ll * 1024ll * 1024ll * 1024ll;  // 32GB
         static constexpr uint64_t kMinHeapSize = 4ll * 1024ll * 1024ll;            // 4MB

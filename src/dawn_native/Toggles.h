@@ -30,6 +30,7 @@ namespace dawn_native {
         LazyClearResourceOnFirstUse,
         TurnOffVsync,
         UseTemporaryBufferInCompressedTextureToTextureCopy,
+        UseD3D12ResourceHeapTier2,
 
         EnumCount,
         InvalidEnum = EnumCount,

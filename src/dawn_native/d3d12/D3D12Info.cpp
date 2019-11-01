@@ -16,7 +16,7 @@
 
 #include "dawn_native/d3d12/AdapterD3D12.h"
 #include "dawn_native/d3d12/BackendD3D12.h"
-
+#include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/PlatformFunctions.h"
 
 namespace dawn_native { namespace d3d12 {
@@ -31,12 +31,18 @@ namespace dawn_native { namespace d3d12 {
             // for backwards compat.
             // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ne-d3d12-d3d12_feature
             D3D12_FEATURE_DATA_ARCHITECTURE arch = {};
-            if (FAILED(adapter.GetDevice()->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE, &arch,
-                                                                sizeof(arch)))) {
-                return DAWN_DEVICE_LOST_ERROR("CheckFeatureSupport failed");
-            }
+            DAWN_TRY(CheckHRESULT(adapter.GetDevice()->CheckFeatureSupport(
+                                      D3D12_FEATURE_ARCHITECTURE, &arch, sizeof(arch)),
+                                  "ID3D12Device::CheckFeatureSupport"));
 
             info.isUMA = arch.UMA;
+
+            D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
+            DAWN_TRY(CheckHRESULT(adapter.GetDevice()->CheckFeatureSupport(
+                                      D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options)),
+                                  "ID3D12Device::CheckFeatureSupport"));
+
+            info.resourceHeapTier = options.ResourceHeapTier;
         }
 
         return info;

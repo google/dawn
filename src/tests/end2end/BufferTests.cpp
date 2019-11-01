@@ -648,6 +648,7 @@ TEST_P(CreateBufferMappedTests, LargeBufferFails) {
 
 DAWN_INSTANTIATE_TEST(CreateBufferMappedTests,
                       D3D12Backend,
+                      ForceWorkarounds(D3D12Backend, {}, {"use_d3d12_resource_heap_tier2"}),
                       MetalBackend,
                       OpenGLBackend,
                       VulkanBackend);

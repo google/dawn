@@ -42,6 +42,7 @@ namespace dawn_native { namespace d3d12 {
 
     Device::Device(Adapter* adapter, const DeviceDescriptor* descriptor)
         : DeviceBase(adapter, descriptor) {
+        InitTogglesFromDriver();
         if (descriptor != nullptr) {
             ApplyToggleOverrides(descriptor);
         }
@@ -404,6 +405,15 @@ namespace dawn_native { namespace d3d12 {
         // D3D12 backend since both D3D12 and 11on12 first appeared in Windows 10.
         mD3d11On12DeviceContext->TiledResourceBarrier(nullptr, nullptr);
         mD3d11On12DeviceContext->Flush();
+    }
+
+    const D3D12DeviceInfo& Device::GetDeviceInfo() const {
+        return ToBackend(GetAdapter())->GetDeviceInfo();
+    }
+
+    void Device::InitTogglesFromDriver() {
+        const bool useResourceHeapTier2 = (GetDeviceInfo().resourceHeapTier >= 2);
+        SetToggle(Toggle::UseD3D12ResourceHeapTier2, useResourceHeapTier2);
     }
 
 }}  // namespace dawn_native::d3d12

@@ -505,6 +505,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DArrayTexture) {
 
 DAWN_INSTANTIATE_TEST(MultisampledRenderingTest,
                       D3D12Backend,
+                      ForceWorkarounds(D3D12Backend, {}, {"use_d3d12_resource_heap_tier2"}),
                       MetalBackend,
                       OpenGLBackend,
                       VulkanBackend,

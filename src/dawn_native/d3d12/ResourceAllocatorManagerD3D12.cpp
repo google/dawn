@@ -24,12 +24,15 @@ namespace dawn_native { namespace d3d12 {
         D3D12_HEAP_TYPE GetD3D12HeapType(ResourceHeapKind resourceHeapKind) {
             switch (resourceHeapKind) {
                 case Readback_OnlyBuffers:
+                case Readback_AllBuffersAndTextures:
                     return D3D12_HEAP_TYPE_READBACK;
+                case Default_AllBuffersAndTextures:
                 case Default_OnlyBuffers:
                 case Default_OnlyNonRenderableOrDepthTextures:
                 case Default_OnlyRenderableOrDepthTextures:
                     return D3D12_HEAP_TYPE_DEFAULT;
                 case Upload_OnlyBuffers:
+                case Upload_AllBuffersAndTextures:
                     return D3D12_HEAP_TYPE_UPLOAD;
                 default:
                     UNREACHABLE();
@@ -38,6 +41,10 @@ namespace dawn_native { namespace d3d12 {
 
         D3D12_HEAP_FLAGS GetD3D12HeapFlags(ResourceHeapKind resourceHeapKind) {
             switch (resourceHeapKind) {
+                case Default_AllBuffersAndTextures:
+                case Readback_AllBuffersAndTextures:
+                case Upload_AllBuffersAndTextures:
+                    return D3D12_HEAP_FLAG_ALLOW_ALL_BUFFERS_AND_TEXTURES;
                 case Default_OnlyBuffers:
                 case Readback_OnlyBuffers:
                 case Upload_OnlyBuffers:
@@ -53,7 +60,21 @@ namespace dawn_native { namespace d3d12 {
 
         ResourceHeapKind GetResourceHeapKind(D3D12_RESOURCE_DIMENSION dimension,
                                              D3D12_HEAP_TYPE heapType,
-                                             D3D12_RESOURCE_FLAGS flags) {
+                                             D3D12_RESOURCE_FLAGS flags,
+                                             uint32_t resourceHeapTier) {
+            if (resourceHeapTier >= 2) {
+                switch (heapType) {
+                    case D3D12_HEAP_TYPE_UPLOAD:
+                        return Upload_AllBuffersAndTextures;
+                    case D3D12_HEAP_TYPE_DEFAULT:
+                        return Default_AllBuffersAndTextures;
+                    case D3D12_HEAP_TYPE_READBACK:
+                        return Readback_AllBuffersAndTextures;
+                    default:
+                        UNREACHABLE();
+                }
+            }
+
             switch (dimension) {
                 case D3D12_RESOURCE_DIMENSION_BUFFER: {
                     switch (heapType) {
@@ -90,6 +111,10 @@ namespace dawn_native { namespace d3d12 {
     }  // namespace
 
     ResourceAllocatorManager::ResourceAllocatorManager(Device* device) : mDevice(device) {
+        mResourceHeapTier = (mDevice->IsToggleEnabled(Toggle::UseD3D12ResourceHeapTier2))
+                                ? mDevice->GetDeviceInfo().resourceHeapTier
+                                : 1;
+
         for (uint32_t i = 0; i < ResourceHeapKind::EnumCount; i++) {
             const ResourceHeapKind resourceHeapKind = static_cast<ResourceHeapKind>(i);
             mHeapAllocators[i] = std::make_unique<HeapAllocator>(
@@ -153,8 +178,9 @@ namespace dawn_native { namespace d3d12 {
 
         const D3D12_RESOURCE_DESC resourceDescriptor = allocation.GetD3D12Resource()->GetDesc();
 
-        const size_t resourceHeapKindIndex = GetResourceHeapKind(
-            resourceDescriptor.Dimension, heapProp.Type, resourceDescriptor.Flags);
+        const size_t resourceHeapKindIndex =
+            GetResourceHeapKind(resourceDescriptor.Dimension, heapProp.Type,
+                                resourceDescriptor.Flags, mResourceHeapTier);
 
         mSubAllocatedResourceAllocators[resourceHeapKindIndex]->Deallocate(allocation);
     }
@@ -163,8 +189,8 @@ namespace dawn_native { namespace d3d12 {
         D3D12_HEAP_TYPE heapType,
         const D3D12_RESOURCE_DESC& resourceDescriptor,
         D3D12_RESOURCE_STATES initialUsage) {
-        const size_t resourceHeapKindIndex =
-            GetResourceHeapKind(resourceDescriptor.Dimension, heapType, resourceDescriptor.Flags);
+        const size_t resourceHeapKindIndex = GetResourceHeapKind(
+            resourceDescriptor.Dimension, heapType, resourceDescriptor.Flags, mResourceHeapTier);
 
         BuddyMemoryAllocator* allocator =
             mSubAllocatedResourceAllocators[resourceHeapKindIndex].get();

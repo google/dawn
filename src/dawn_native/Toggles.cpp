@@ -70,7 +70,12 @@ namespace dawn_native {
                "workaround is enabled by default on all Vulkan drivers to solve an issue in the "
                "Vulkan SPEC about the texture-to-texture copies with compressed formats. See #1005 "
                "(https://github.com/KhronosGroup/Vulkan-Docs/issues/1005) for more details.",
-               "https://bugs.chromium.org/p/dawn/issues/detail?id=42"}}}};
+               "https://bugs.chromium.org/p/dawn/issues/detail?id=42"}},
+             {Toggle::UseD3D12ResourceHeapTier2,
+              {"use_d3d12_resource_heap_tier2",
+               "Enable support for resource heap tier 2. Resource heap tier 2 allows mixing of "
+               "texture and buffers in the same heap. This allows better heap re-use and reduces "
+               "fragmentation."}}}};
 
     }  // anonymous namespace
 

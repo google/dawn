@@ -20,6 +20,7 @@
 #include "common/SerialQueue.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/d3d12/CommandRecordingContext.h"
+#include "dawn_native/d3d12/D3D12Info.h"
 #include "dawn_native/d3d12/Forward.h"
 #include "dawn_native/d3d12/ResourceHeapAllocationD3D12.h"
 
@@ -71,6 +72,8 @@ namespace dawn_native { namespace d3d12 {
         ResultOrError<CommandRecordingContext*> GetPendingCommandContext();
         Serial GetPendingCommandSerial() const override;
 
+        const D3D12DeviceInfo& GetDeviceInfo() const;
+
         MaybeError NextSerial();
         MaybeError WaitForSerial(Serial serial);
 
@@ -98,6 +101,8 @@ namespace dawn_native { namespace d3d12 {
         ResultOrError<ComPtr<IDXGIKeyedMutex>> CreateKeyedMutexForTexture(
             ID3D12Resource* d3d12Resource);
         void ReleaseKeyedMutexForTexture(ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex);
+
+        void InitTogglesFromDriver();
 
       private:
         ResultOrError<BindGroupBase*> CreateBindGroupImpl(
