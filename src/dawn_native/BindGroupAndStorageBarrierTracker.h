@@ -22,7 +22,7 @@
 namespace dawn_native {
 
     // Extends BindGroupTrackerBase to also keep track of resources that need a usage transition.
-    template <bool CanInheritBindGroups, typename DynamicOffset = uint64_t>
+    template <bool CanInheritBindGroups, typename DynamicOffset>
     class BindGroupAndStorageBarrierTrackerBase
         : public BindGroupTrackerBase<CanInheritBindGroups, DynamicOffset> {
         using Base = BindGroupTrackerBase<CanInheritBindGroups, DynamicOffset>;
@@ -33,7 +33,7 @@ namespace dawn_native {
         void OnSetBindGroup(uint32_t index,
                             BindGroupBase* bindGroup,
                             uint32_t dynamicOffsetCount,
-                            uint64_t* dynamicOffsets) {
+                            uint32_t* dynamicOffsets) {
             if (this->mBindGroups[index] != bindGroup) {
                 mBuffers[index] = {};
                 mBuffersNeedingBarrier[index] = {};

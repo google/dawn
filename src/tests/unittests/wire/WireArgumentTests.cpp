@@ -71,7 +71,7 @@ TEST_F(WireArgumentTests, ValueArrayArgument) {
     WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
     WGPUComputePassEncoder pass = wgpuCommandEncoderBeginComputePass(encoder, nullptr);
 
-    std::array<uint64_t, 4> testOffsets = {0, 42, 0xDEAD'BEEF'DEAD'BEEFu, 0xFFFF'FFFF'FFFF'FFFFu};
+    std::array<uint32_t, 4> testOffsets = {0, 42, 0xDEAD'BEEFu, 0xFFFF'FFFFu};
     wgpuComputePassEncoderSetBindGroup(pass, 0, bindGroup, testOffsets.size(), testOffsets.data());
 
     WGPUCommandEncoder apiEncoder = api.GetNewCommandEncoder();
@@ -82,7 +82,7 @@ TEST_F(WireArgumentTests, ValueArrayArgument) {
 
     EXPECT_CALL(api, ComputePassEncoderSetBindGroup(
                          apiPass, 0, apiBindGroup, testOffsets.size(),
-                         MatchesLambda([testOffsets](const uint64_t* offsets) -> bool {
+                         MatchesLambda([testOffsets](const uint32_t* offsets) -> bool {
                              for (size_t i = 0; i < testOffsets.size(); i++) {
                                  if (offsets[i] != testOffsets[i]) {
                                      return false;

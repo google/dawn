@@ -29,13 +29,13 @@ namespace dawn_native {
     // pipeline state or it changes.
     // |DynamicOffset| is a template parameter because offsets in Vulkan are uint32_t but uint64_t
     // in other backends.
-    template <bool CanInheritBindGroups, typename DynamicOffset = uint64_t>
+    template <bool CanInheritBindGroups, typename DynamicOffset>
     class BindGroupTrackerBase {
       public:
         void OnSetBindGroup(uint32_t index,
                             BindGroupBase* bindGroup,
                             uint32_t dynamicOffsetCount,
-                            uint64_t* dynamicOffsets) {
+                            uint32_t* dynamicOffsets) {
             ASSERT(index < kMaxBindGroups);
 
             if (mBindGroupLayoutsMask[index]) {
@@ -113,21 +113,20 @@ namespace dawn_native {
         PipelineLayoutBase* mLastAppliedPipelineLayout = nullptr;
 
       private:
-        // Vulkan backend use uint32_t as dynamic offsets type, it is not correct.
-        // Vulkan should use VkDeviceSize. Dawn vulkan backend has to handle this.
-        static void SetDynamicOffsets(uint32_t* data,
+        // We have two overloads here because offsets in Vulkan are uint32_t but uint64_t
+        // in other backends.
+        static void SetDynamicOffsets(uint64_t* data,
                                       uint32_t dynamicOffsetCount,
-                                      uint64_t* dynamicOffsets) {
+                                      uint32_t* dynamicOffsets) {
             for (uint32_t i = 0; i < dynamicOffsetCount; ++i) {
-                ASSERT(dynamicOffsets[i] <= std::numeric_limits<uint32_t>::max());
-                data[i] = static_cast<uint32_t>(dynamicOffsets[i]);
+                data[i] = static_cast<uint64_t>(dynamicOffsets[i]);
             }
         }
 
-        static void SetDynamicOffsets(uint64_t* data,
+        static void SetDynamicOffsets(uint32_t* data,
                                       uint32_t dynamicOffsetCount,
-                                      uint64_t* dynamicOffsets) {
-            memcpy(data, dynamicOffsets, sizeof(uint64_t) * dynamicOffsetCount);
+                                      uint32_t* dynamicOffsets) {
+            memcpy(data, dynamicOffsets, sizeof(uint32_t) * dynamicOffsetCount);
         }
     };
 

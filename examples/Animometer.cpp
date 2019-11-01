@@ -159,7 +159,7 @@ void frame() {
         pass.SetPipeline(pipeline);
 
         for (size_t i = 0; i < kNumTriangles; i++) {
-            uint64_t offset = i * sizeof(ShaderData);
+            uint32_t offset = i * sizeof(ShaderData);
             pass.SetBindGroup(0, bindGroup, 1, &offset);
             pass.Draw(3, 1, 0, 0);
         }

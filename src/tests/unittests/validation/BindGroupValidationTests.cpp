@@ -693,7 +693,7 @@ class SetBindGroupValidationTest : public ValidationTest {
     }
 
     void TestRenderPassBindGroup(wgpu::BindGroup bindGroup,
-                                 uint64_t* offsets,
+                                 uint32_t* offsets,
                                  uint32_t count,
                                  bool expectation) {
         wgpu::RenderPipeline renderPipeline = CreateRenderPipeline();
@@ -713,7 +713,7 @@ class SetBindGroupValidationTest : public ValidationTest {
     }
 
     void TestComputePassBindGroup(wgpu::BindGroup bindGroup,
-                                  uint64_t* offsets,
+                                  uint32_t* offsets,
                                   uint32_t count,
                                   bool expectation) {
         wgpu::ComputePipeline computePipeline = CreateComputePipeline();
@@ -741,7 +741,7 @@ TEST_F(SetBindGroupValidationTest, Basic) {
         device, mBindGroupLayout,
         {{0, uniformBuffer, 0, kBindingSize}, {1, storageBuffer, 0, kBindingSize}});
 
-    std::array<uint64_t, 2> offsets = {256, 0};
+    std::array<uint32_t, 2> offsets = {256, 0};
 
     TestRenderPassBindGroup(bindGroup, offsets.data(), 2, true);
 
@@ -758,7 +758,7 @@ TEST_F(SetBindGroupValidationTest, DynamicOffsetsMismatch) {
         {{0, uniformBuffer, 0, kBindingSize}, {1, storageBuffer, 0, kBindingSize}});
 
     // Number of offsets mismatch.
-    std::array<uint64_t, 1> mismatchOffsets = {0};
+    std::array<uint32_t, 1> mismatchOffsets = {0};
 
     TestRenderPassBindGroup(bindGroup, mismatchOffsets.data(), 1, false);
 
@@ -775,7 +775,7 @@ TEST_F(SetBindGroupValidationTest, DynamicOffsetsNotAligned) {
         {{0, uniformBuffer, 0, kBindingSize}, {1, storageBuffer, 0, kBindingSize}});
 
     // Dynamic offsets are not aligned.
-    std::array<uint64_t, 2> notAlignedOffsets = {1, 2};
+    std::array<uint32_t, 2> notAlignedOffsets = {1, 2};
 
     TestRenderPassBindGroup(bindGroup, notAlignedOffsets.data(), 2, false);
 
@@ -792,7 +792,7 @@ TEST_F(SetBindGroupValidationTest, OffsetOutOfBoundDynamicUniformBuffer) {
         {{0, uniformBuffer, 0, kBindingSize}, {1, storageBuffer, 0, kBindingSize}});
 
     // Dynamic offset + offset is larger than buffer size.
-    std::array<uint64_t, 2> overFlowOffsets = {1024, 0};
+    std::array<uint32_t, 2> overFlowOffsets = {1024, 0};
 
     TestRenderPassBindGroup(bindGroup, overFlowOffsets.data(), 2, false);
 
@@ -809,7 +809,7 @@ TEST_F(SetBindGroupValidationTest, OffsetOutOfBoundDynamicStorageBuffer) {
         {{0, uniformBuffer, 0, kBindingSize}, {1, storageBuffer, 0, kBindingSize}});
 
     // Dynamic offset + offset is larger than buffer size.
-    std::array<uint64_t, 2> overFlowOffsets = {0, 1024};
+    std::array<uint32_t, 2> overFlowOffsets = {0, 1024};
 
     TestRenderPassBindGroup(bindGroup, overFlowOffsets.data(), 2, false);
 
@@ -827,7 +827,7 @@ TEST_F(SetBindGroupValidationTest, BindingSizeOutOfBoundDynamicUniformBuffer) {
 
     // Dynamic offset + offset isn't larger than buffer size.
     // But with binding size, it will trigger OOB error.
-    std::array<uint64_t, 2> offsets = {512, 0};
+    std::array<uint32_t, 2> offsets = {512, 0};
 
     TestRenderPassBindGroup(bindGroup, offsets.data(), 2, false);
 
@@ -843,7 +843,7 @@ TEST_F(SetBindGroupValidationTest, BindingSizeOutOfBoundDynamicStorageBuffer) {
         {{0, uniformBuffer, 0, kBindingSize}, {1, storageBuffer, 0, kBindingSize}});
     // Dynamic offset + offset isn't larger than buffer size.
     // But with binding size, it will trigger OOB error.
-    std::array<uint64_t, 2> offsets = {0, 512};
+    std::array<uint32_t, 2> offsets = {0, 512};
 
     TestRenderPassBindGroup(bindGroup, offsets.data(), 2, false);
 

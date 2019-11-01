@@ -210,7 +210,7 @@ namespace dawn_native { namespace opengl {
             RenderPipelineBase* mLastPipeline = nullptr;
         };
 
-        class BindGroupTracker : public BindGroupTrackerBase<false> {
+        class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
           public:
             void OnSetPipeline(RenderPipeline* pipeline) {
                 BindGroupTrackerBase::OnSetPipeline(pipeline);
@@ -666,9 +666,9 @@ namespace dawn_native { namespace opengl {
 
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
-                    uint64_t* dynamicOffsets = nullptr;
+                    uint32_t* dynamicOffsets = nullptr;
                     if (cmd->dynamicOffsetCount > 0) {
-                        dynamicOffsets = mCommands.NextData<uint64_t>(cmd->dynamicOffsetCount);
+                        dynamicOffsets = mCommands.NextData<uint32_t>(cmd->dynamicOffsetCount);
                     }
                     bindGroupTracker.OnSetBindGroup(cmd->index, cmd->group.Get(),
                                                     cmd->dynamicOffsetCount, dynamicOffsets);
@@ -954,9 +954,9 @@ namespace dawn_native { namespace opengl {
 
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = iter->NextCommand<SetBindGroupCmd>();
-                    uint64_t* dynamicOffsets = nullptr;
+                    uint32_t* dynamicOffsets = nullptr;
                     if (cmd->dynamicOffsetCount > 0) {
-                        dynamicOffsets = iter->NextData<uint64_t>(cmd->dynamicOffsetCount);
+                        dynamicOffsets = iter->NextData<uint32_t>(cmd->dynamicOffsetCount);
                     }
                     bindGroupTracker.OnSetBindGroup(cmd->index, cmd->group.Get(),
                                                     cmd->dynamicOffsetCount, dynamicOffsets);

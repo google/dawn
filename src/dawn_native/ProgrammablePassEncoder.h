@@ -38,7 +38,7 @@ namespace dawn_native {
         void SetBindGroup(uint32_t groupIndex,
                           BindGroupBase* group,
                           uint32_t dynamicOffsetCount,
-                          const uint64_t* dynamicOffsets);
+                          const uint32_t* dynamicOffsets);
 
       protected:
         // Construct an "error" programmable pass encoder.

@@ -541,7 +541,7 @@ void DrawCallPerf::RecordRenderCommands(Encoder pass) {
                 break;
 
             case BindGroup::Dynamic: {
-                uint64_t dynamicOffset = static_cast<uint64_t>(i * mAlignedUniformSize);
+                uint32_t dynamicOffset = static_cast<uint32_t>(i * mAlignedUniformSize);
                 pass.SetBindGroup(uniformBindGroupIndex, mUniformBindGroups[0], 1, &dynamicOffset);
             } break;
 

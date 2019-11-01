@@ -571,7 +571,7 @@ TEST_P(BindGroupTests, SetDynamicBindGroupBeforePipeline) {
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
 
     // Set the first dynamic bind group.
-    uint64_t dynamicOffset = 0;
+    uint32_t dynamicOffset = 0;
     pass.SetBindGroup(0, bindGroup, 1, &dynamicOffset);
 
     // Set the second dynamic bind group.
@@ -645,7 +645,7 @@ TEST_P(BindGroupTests, BindGroupsPersistAfterPipelineChange) {
 
     // Set the first bind group at a dynamic offset.
     // This bind group matches the slot in the pipeline layout.
-    uint64_t dynamicOffset = 0;
+    uint32_t dynamicOffset = 0;
     pass.SetBindGroup(0, bindGroup, 1, &dynamicOffset);
 
     // Set the second bind group at a dynamic offset.
@@ -740,7 +740,7 @@ TEST_P(BindGroupTests, DrawThenChangePipelineAndBindGroup) {
     pass.SetPipeline(pipeline0);
 
     // Set the first bind group to color0 in the dynamic uniform buffer.
-    uint64_t dynamicOffset = 0;
+    uint32_t dynamicOffset = 0;
     pass.SetBindGroup(0, uniformBindGroup, 1, &dynamicOffset);
 
     // Set the first bind group to color1 in the dynamic uniform buffer.

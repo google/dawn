@@ -73,7 +73,7 @@ namespace dawn_native { namespace d3d12 {
 
     }  // anonymous namespace
 
-    class BindGroupStateTracker : public BindGroupAndStorageBarrierTrackerBase<false> {
+    class BindGroupStateTracker : public BindGroupAndStorageBarrierTrackerBase<false, uint64_t> {
       public:
         BindGroupStateTracker(Device* device)
             : BindGroupAndStorageBarrierTrackerBase(), mDevice(device) {
@@ -493,7 +493,7 @@ namespace dawn_native { namespace d3d12 {
                             SetBindGroupCmd* cmd = commands->NextCommand<SetBindGroupCmd>();
                             BindGroup* group = ToBackend(cmd->group.Get());
                             if (cmd->dynamicOffsetCount) {
-                                commands->NextData<uint64_t>(cmd->dynamicOffsetCount);
+                                commands->NextData<uint32_t>(cmd->dynamicOffsetCount);
                             }
                             bindingTracker->TrackSetBindGroup(group, cmd->index, indexInSubmit);
                         } break;
@@ -860,10 +860,10 @@ namespace dawn_native { namespace d3d12 {
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
                     BindGroup* group = ToBackend(cmd->group.Get());
-                    uint64_t* dynamicOffsets = nullptr;
+                    uint32_t* dynamicOffsets = nullptr;
 
                     if (cmd->dynamicOffsetCount > 0) {
-                        dynamicOffsets = mCommands.NextData<uint64_t>(cmd->dynamicOffsetCount);
+                        dynamicOffsets = mCommands.NextData<uint32_t>(cmd->dynamicOffsetCount);
                     }
 
                     bindingTracker->OnSetBindGroup(cmd->index, group, cmd->dynamicOffsetCount,
@@ -1154,10 +1154,10 @@ namespace dawn_native { namespace d3d12 {
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = iter->NextCommand<SetBindGroupCmd>();
                     BindGroup* group = ToBackend(cmd->group.Get());
-                    uint64_t* dynamicOffsets = nullptr;
+                    uint32_t* dynamicOffsets = nullptr;
 
                     if (cmd->dynamicOffsetCount > 0) {
-                        dynamicOffsets = iter->NextData<uint64_t>(cmd->dynamicOffsetCount);
+                        dynamicOffsets = iter->NextData<uint32_t>(cmd->dynamicOffsetCount);
                     }
 
                     bindingTracker->OnSetBindGroup(cmd->index, group, cmd->dynamicOffsetCount,

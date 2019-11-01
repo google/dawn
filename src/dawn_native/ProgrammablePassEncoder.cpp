@@ -73,7 +73,7 @@ namespace dawn_native {
     void ProgrammablePassEncoder::SetBindGroup(uint32_t groupIndex,
                                                BindGroupBase* group,
                                                uint32_t dynamicOffsetCount,
-                                               const uint64_t* dynamicOffsets) {
+                                               const uint32_t* dynamicOffsets) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             DAWN_TRY(GetDevice()->ValidateObject(group));
 
@@ -111,8 +111,8 @@ namespace dawn_native {
             cmd->group = group;
             cmd->dynamicOffsetCount = dynamicOffsetCount;
             if (dynamicOffsetCount > 0) {
-                uint64_t* offsets = allocator->AllocateData<uint64_t>(cmd->dynamicOffsetCount);
-                memcpy(offsets, dynamicOffsets, dynamicOffsetCount * sizeof(uint64_t));
+                uint32_t* offsets = allocator->AllocateData<uint32_t>(cmd->dynamicOffsetCount);
+                memcpy(offsets, dynamicOffsets, dynamicOffsetCount * sizeof(uint32_t));
             }
 
             return {};

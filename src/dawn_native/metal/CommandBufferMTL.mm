@@ -394,7 +394,7 @@ namespace dawn_native { namespace metal {
         // pipeline state.
         // Bind groups may be inherited because bind groups are packed in the buffer /
         // texture tables in contiguous order.
-        class BindGroupTracker : public BindGroupTrackerBase<true> {
+        class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
           public:
             explicit BindGroupTracker(StorageBufferLengthTracker* lengthTracker)
                 : BindGroupTrackerBase(), mLengthTracker(lengthTracker) {
@@ -764,9 +764,9 @@ namespace dawn_native { namespace metal {
 
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
-                    uint64_t* dynamicOffsets = nullptr;
+                    uint32_t* dynamicOffsets = nullptr;
                     if (cmd->dynamicOffsetCount > 0) {
-                        dynamicOffsets = mCommands.NextData<uint64_t>(cmd->dynamicOffsetCount);
+                        dynamicOffsets = mCommands.NextData<uint32_t>(cmd->dynamicOffsetCount);
                     }
 
                     bindGroups.OnSetBindGroup(cmd->index, ToBackend(cmd->group.Get()),
@@ -1026,9 +1026,9 @@ namespace dawn_native { namespace metal {
 
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = iter->NextCommand<SetBindGroupCmd>();
-                    uint64_t* dynamicOffsets = nullptr;
+                    uint32_t* dynamicOffsets = nullptr;
                     if (cmd->dynamicOffsetCount > 0) {
-                        dynamicOffsets = iter->NextData<uint64_t>(cmd->dynamicOffsetCount);
+                        dynamicOffsets = iter->NextData<uint32_t>(cmd->dynamicOffsetCount);
                     }
 
                     bindGroups.OnSetBindGroup(cmd->index, ToBackend(cmd->group.Get()),

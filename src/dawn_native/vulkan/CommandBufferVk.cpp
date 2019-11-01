@@ -645,9 +645,9 @@ namespace dawn_native { namespace vulkan {
                     SetBindGroupCmd* cmd = mCommands.NextCommand<SetBindGroupCmd>();
 
                     BindGroup* bindGroup = ToBackend(cmd->group.Get());
-                    uint64_t* dynamicOffsets = nullptr;
+                    uint32_t* dynamicOffsets = nullptr;
                     if (cmd->dynamicOffsetCount > 0) {
-                        dynamicOffsets = mCommands.NextData<uint64_t>(cmd->dynamicOffsetCount);
+                        dynamicOffsets = mCommands.NextData<uint32_t>(cmd->dynamicOffsetCount);
                     }
 
                     descriptorSets.OnSetBindGroup(cmd->index, bindGroup, cmd->dynamicOffsetCount,
@@ -850,9 +850,9 @@ namespace dawn_native { namespace vulkan {
                 case Command::SetBindGroup: {
                     SetBindGroupCmd* cmd = iter->NextCommand<SetBindGroupCmd>();
                     BindGroup* bindGroup = ToBackend(cmd->group.Get());
-                    uint64_t* dynamicOffsets = nullptr;
+                    uint32_t* dynamicOffsets = nullptr;
                     if (cmd->dynamicOffsetCount > 0) {
-                        dynamicOffsets = iter->NextData<uint64_t>(cmd->dynamicOffsetCount);
+                        dynamicOffsets = iter->NextData<uint32_t>(cmd->dynamicOffsetCount);
                     }
 
                     descriptorSets.OnSetBindGroup(cmd->index, bindGroup, cmd->dynamicOffsetCount,
