@@ -115,12 +115,6 @@ namespace dawn_native {
           mSize(descriptor->size),
           mUsage(descriptor->usage),
           mState(BufferState::Unmapped) {
-        // Add readonly storage usage if the buffer has a storage usage. The validation rules in
-        // PassResourceUsageTracker::ValidateUsages will make sure we don't use both at the same
-        // time.
-        if (mUsage & wgpu::BufferUsage::Storage) {
-            mUsage |= kReadOnlyStorage;
-        }
     }
 
     BufferBase::BufferBase(DeviceBase* device, ObjectBase::ErrorTag tag)

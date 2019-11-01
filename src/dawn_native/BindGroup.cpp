@@ -147,7 +147,6 @@ namespace dawn_native {
                     DAWN_TRY(ValidateBufferBinding(device, binding, wgpu::BufferUsage::Uniform));
                     break;
                 case wgpu::BindingType::StorageBuffer:
-                case wgpu::BindingType::ReadonlyStorageBuffer:
                     DAWN_TRY(ValidateBufferBinding(device, binding, wgpu::BufferUsage::Storage));
                     break;
                 case wgpu::BindingType::SampledTexture:
@@ -160,6 +159,7 @@ namespace dawn_native {
                     DAWN_TRY(ValidateSamplerBinding(device, binding));
                     break;
                 case wgpu::BindingType::StorageTexture:
+                case wgpu::BindingType::ReadonlyStorageBuffer:
                     UNREACHABLE();
                     break;
             }
@@ -231,9 +231,7 @@ namespace dawn_native {
         ASSERT(binding < kMaxBindingsPerGroup);
         ASSERT(mLayout->GetBindingInfo().mask[binding]);
         ASSERT(mLayout->GetBindingInfo().types[binding] == wgpu::BindingType::UniformBuffer ||
-               mLayout->GetBindingInfo().types[binding] == wgpu::BindingType::StorageBuffer ||
-               mLayout->GetBindingInfo().types[binding] ==
-                   wgpu::BindingType::ReadonlyStorageBuffer);
+               mLayout->GetBindingInfo().types[binding] == wgpu::BindingType::StorageBuffer);
         BufferBase* buffer = static_cast<BufferBase*>(mBindings[binding].Get());
         return {buffer, mOffsets[binding], mSizes[binding]};
     }
