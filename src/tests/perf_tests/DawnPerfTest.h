@@ -73,9 +73,9 @@ class DawnPerfTestBase {
     void AbortTest();
 
     void RunTest();
-    void PrintPerIterationResultFromMilliseconds(const std::string& trace,
-                                                 double valueInMilliseconds,
-                                                 bool important) const;
+    void PrintPerIterationResultFromSeconds(const std::string& trace,
+                                            double valueInSeconds,
+                                            bool important) const;
     void PrintResult(const std::string& trace,
                      double value,
                      const std::string& units,

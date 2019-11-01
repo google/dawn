@@ -331,9 +331,9 @@ void DawnPerfTestBase::OutputResults() {
         }
     }
 
-    PrintPerIterationResultFromMilliseconds("wall_time", mTimer->GetElapsedTime() * 1e3, true);
-    PrintPerIterationResultFromMilliseconds("validation_time", totalValidationTime, true);
-    PrintPerIterationResultFromMilliseconds("recording_time", totalRecordingTime, true);
+    PrintPerIterationResultFromSeconds("wall_time", mTimer->GetElapsedTime(), true);
+    PrintPerIterationResultFromSeconds("validation_time", totalValidationTime, true);
+    PrintPerIterationResultFromSeconds("recording_time", totalRecordingTime, true);
 
     const char* traceFile = gTestEnv->GetTraceFile();
     if (traceFile != nullptr) {
@@ -341,23 +341,23 @@ void DawnPerfTestBase::OutputResults() {
     }
 }
 
-void DawnPerfTestBase::PrintPerIterationResultFromMilliseconds(const std::string& trace,
-                                                               double valueInMilliseconds,
-                                                               bool important) const {
-    if (valueInMilliseconds == 0) {
+void DawnPerfTestBase::PrintPerIterationResultFromSeconds(const std::string& trace,
+                                                          double valueInSeconds,
+                                                          bool important) const {
+    if (valueInSeconds == 0) {
         return;
     }
 
-    double millisecondsPerIteration =
-        valueInMilliseconds / static_cast<double>(mNumStepsPerformed * mIterationsPerStep);
+    double secondsPerIteration =
+        valueInSeconds / static_cast<double>(mNumStepsPerformed * mIterationsPerStep);
 
     // Give the result a different name to ensure separate graphs if we transition.
-    if (millisecondsPerIteration > 1e3) {
-        PrintResult(trace, millisecondsPerIteration, "ms", important);
-    } else if (millisecondsPerIteration > 1) {
-        PrintResult(trace, millisecondsPerIteration * 1e3, "us", important);
+    if (secondsPerIteration > 1) {
+        PrintResult(trace, secondsPerIteration * 1e3, "ms", important);
+    } else if (secondsPerIteration > 1e-3) {
+        PrintResult(trace, secondsPerIteration * 1e6, "us", important);
     } else {
-        PrintResult(trace, millisecondsPerIteration * 1e6, "ns", important);
+        PrintResult(trace, secondsPerIteration * 1e9, "ns", important);
     }
 }
 
