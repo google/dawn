@@ -34,6 +34,8 @@ namespace dawn_native { namespace vulkan {
 
     DAWN_NATIVE_EXPORT VkInstance GetInstance(WGPUDevice device);
 
+    DAWN_NATIVE_EXPORT PFN_vkVoidFunction GetInstanceProcAddr(WGPUDevice device, const char* pName);
+
     DAWN_NATIVE_EXPORT DawnSwapChainImplementation CreateNativeSwapChainImpl(WGPUDevice device,
                                                                              VkSurfaceKHR surface);
     DAWN_NATIVE_EXPORT WGPUTextureFormat
