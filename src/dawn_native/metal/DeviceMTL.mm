@@ -77,15 +77,18 @@ namespace dawn_native { namespace metal {
     }
 
     void Device::InitTogglesFromDriver() {
+        {
+            bool haveStoreAndMSAAResolve = false;
 #if defined(DAWN_PLATFORM_MACOS)
-        if (@available(macOS 10.12, *)) {
-            bool emulateStoreAndMSAAResolve =
-                ![mMtlDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v2];
-            SetToggle(Toggle::EmulateStoreAndMSAAResolve, emulateStoreAndMSAAResolve);
-        }
+            haveStoreAndMSAAResolve =
+                [mMtlDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v2];
+#elif defined(DAWN_PLATFORM_IOS)
+            haveStoreAndMSAAResolve =
+                [mMtlDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v2];
 #endif
-
-        // TODO(jiawei.shao@intel.com): check iOS feature sets
+            // On tvOS, we would need MTLFeatureSet_tvOS_GPUFamily2_v1.
+            SetToggle(Toggle::EmulateStoreAndMSAAResolve, !haveStoreAndMSAAResolve);
+        }
 
         // TODO(jiawei.shao@intel.com): tighten this workaround when the driver bug is fixed.
         SetToggle(Toggle::AlwaysResolveIntoZeroLevelAndLayer, true);
