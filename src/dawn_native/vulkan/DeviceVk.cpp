@@ -28,6 +28,7 @@
 #include "dawn_native/vulkan/BufferVk.h"
 #include "dawn_native/vulkan/CommandBufferVk.h"
 #include "dawn_native/vulkan/ComputePipelineVk.h"
+#include "dawn_native/vulkan/DescriptorSetService.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
 #include "dawn_native/vulkan/PipelineLayoutVk.h"
 #include "dawn_native/vulkan/QueueVk.h"
@@ -67,6 +68,7 @@ namespace dawn_native { namespace vulkan {
         DAWN_TRY(functions->LoadDeviceProcs(mVkDevice, mDeviceInfo));
 
         GatherQueueFromDevice();
+        mDescriptorSetService = std::make_unique<DescriptorSetService>(this);
         mDeleter = std::make_unique<FencedDeleter>(this);
         mMapRequestTracker = std::make_unique<MapRequestTracker>(this);
         mRenderPassCache = std::make_unique<RenderPassCache>(this);
@@ -131,6 +133,7 @@ namespace dawn_native { namespace vulkan {
 
         // Free services explicitly so that they can free Vulkan objects before vkDestroyDevice
         mDynamicUploader = nullptr;
+        mDescriptorSetService = nullptr;
 
         // Releasing the uploader enqueues buffers to be released.
         // Call Tick() again to clear them before releasing the deleter.
@@ -216,6 +219,7 @@ namespace dawn_native { namespace vulkan {
         CheckPassedFences();
         RecycleCompletedCommands();
 
+        mDescriptorSetService->Tick(mCompletedSerial);
         mMapRequestTracker->Tick(mCompletedSerial);
 
         // Uploader should tick before the resource allocator
@@ -259,6 +263,10 @@ namespace dawn_native { namespace vulkan {
 
     MapRequestTracker* Device::GetMapRequestTracker() const {
         return mMapRequestTracker.get();
+    }
+
+    DescriptorSetService* Device::GetDescriptorSetService() const {
+        return mDescriptorSetService.get();
     }
 
     FencedDeleter* Device::GetFencedDeleter() const {

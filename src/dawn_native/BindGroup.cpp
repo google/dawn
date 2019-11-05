@@ -221,7 +221,7 @@ namespace dawn_native {
         return new BindGroupBase(device, ObjectBase::kError);
     }
 
-    const BindGroupLayoutBase* BindGroupBase::GetLayout() const {
+    BindGroupLayoutBase* BindGroupBase::GetLayout() {
         ASSERT(!IsError());
         return mLayout.Get();
     }

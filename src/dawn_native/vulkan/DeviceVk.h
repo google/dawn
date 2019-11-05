@@ -35,6 +35,7 @@ namespace dawn_native { namespace vulkan {
 
     class Adapter;
     class BufferUploader;
+    class DescriptorSetService;
     struct ExternalImageDescriptor;
     class FencedDeleter;
     class MapRequestTracker;
@@ -58,6 +59,7 @@ namespace dawn_native { namespace vulkan {
         VkQueue GetQueue() const;
 
         BufferUploader* GetBufferUploader() const;
+        DescriptorSetService* GetDescriptorSetService() const;
         FencedDeleter* GetFencedDeleter() const;
         MapRequestTracker* GetMapRequestTracker() const;
         RenderPassCache* GetRenderPassCache() const;
@@ -132,6 +134,7 @@ namespace dawn_native { namespace vulkan {
         uint32_t mQueueFamily = 0;
         VkQueue mQueue = VK_NULL_HANDLE;
 
+        std::unique_ptr<DescriptorSetService> mDescriptorSetService;
         std::unique_ptr<FencedDeleter> mDeleter;
         std::unique_ptr<MapRequestTracker> mMapRequestTracker;
         std::unique_ptr<ResourceMemoryAllocator> mResourceMemoryAllocator;

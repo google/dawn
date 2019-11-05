@@ -17,7 +17,7 @@
 
 #include "dawn_native/BindGroup.h"
 
-#include "common/vulkan_platform.h"
+#include "dawn_native/vulkan/BindGroupLayoutVk.h"
 
 namespace dawn_native { namespace vulkan {
 
@@ -35,8 +35,9 @@ namespace dawn_native { namespace vulkan {
         using BindGroupBase::BindGroupBase;
         MaybeError Initialize();
 
-        VkDescriptorPool mPool = VK_NULL_HANDLE;
-        VkDescriptorSet mHandle = VK_NULL_HANDLE;
+        // The descriptor set in this allocation outlives the BindGroup because it is owned by
+        // the BindGroupLayout which is referenced by the BindGroup.
+        DescriptorSetAllocation mAllocation;
     };
 
 }}  // namespace dawn_native::vulkan

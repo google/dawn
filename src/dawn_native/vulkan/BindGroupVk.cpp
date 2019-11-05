@@ -36,37 +36,7 @@ namespace dawn_native { namespace vulkan {
     MaybeError BindGroup::Initialize() {
         Device* device = ToBackend(GetDevice());
 
-        // Create a pool to hold our descriptor set.
-        // TODO(cwallez@chromium.org): This horribly inefficient, find a way to be better, for
-        // example by having one pool per bind group layout instead.
-        uint32_t numPoolSizes = 0;
-        auto poolSizes = ToBackend(GetLayout())->ComputePoolSizes(&numPoolSizes);
-
-        VkDescriptorPoolCreateInfo createInfo;
-        createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        createInfo.pNext = nullptr;
-        createInfo.flags = 0;
-        createInfo.maxSets = 1;
-        createInfo.poolSizeCount = numPoolSizes;
-        createInfo.pPoolSizes = poolSizes.data();
-
-        DAWN_TRY(CheckVkSuccess(
-            device->fn.CreateDescriptorPool(device->GetVkDevice(), &createInfo, nullptr, &mPool),
-            "CreateDescriptorPool"));
-
-        // Now do the allocation of one descriptor set, this is very suboptimal too.
-        VkDescriptorSetLayout vkLayout = ToBackend(GetLayout())->GetHandle();
-
-        VkDescriptorSetAllocateInfo allocateInfo;
-        allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        allocateInfo.pNext = nullptr;
-        allocateInfo.descriptorPool = mPool;
-        allocateInfo.descriptorSetCount = 1;
-        allocateInfo.pSetLayouts = &vkLayout;
-
-        DAWN_TRY(CheckVkSuccess(
-            device->fn.AllocateDescriptorSets(device->GetVkDevice(), &allocateInfo, &mHandle),
-            "AllocateDescriptorSets"));
+        DAWN_TRY_ASSIGN(mAllocation, ToBackend(GetLayout())->AllocateOneSet());
 
         // Now do a write of a single descriptor set with all possible chained data allocated on the
         // stack.
@@ -80,7 +50,7 @@ namespace dawn_native { namespace vulkan {
             auto& write = writes[numWrites];
             write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             write.pNext = nullptr;
-            write.dstSet = mHandle;
+            write.dstSet = mAllocation.set;
             write.dstBinding = bindingIndex;
             write.dstArrayElement = 0;
             write.descriptorCount = 1;
@@ -108,7 +78,7 @@ namespace dawn_native { namespace vulkan {
                     TextureView* view = ToBackend(GetBindingAsTextureView(bindingIndex));
 
                     writeImageInfo[numWrites].imageView = view->GetHandle();
-                    // TODO(cwallez@chromium.org): This isn't true in general: if the image can has
+                    // TODO(cwallez@chromium.org): This isn't true in general: if the image has
                     // two read-only usages one of which is Sampled. Works for now though :)
                     writeImageInfo[numWrites].imageLayout =
                         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -123,6 +93,7 @@ namespace dawn_native { namespace vulkan {
             numWrites++;
         }
 
+        // TODO(cwallez@chromium.org): Batch these updates
         device->fn.UpdateDescriptorSets(device->GetVkDevice(), numWrites, writes.data(), 0,
                                         nullptr);
 
@@ -130,18 +101,11 @@ namespace dawn_native { namespace vulkan {
     }
 
     BindGroup::~BindGroup() {
-        // The descriptor set doesn't need to be delete because it's done implicitly when the
-        // descriptor pool is destroyed.
-        mHandle = VK_NULL_HANDLE;
-
-        if (mPool != VK_NULL_HANDLE) {
-            ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mPool);
-            mPool = VK_NULL_HANDLE;
-        }
+        ToBackend(GetLayout())->Deallocate(&mAllocation);
     }
 
     VkDescriptorSet BindGroup::GetHandle() const {
-        return mHandle;
+        return mAllocation.set;
     }
 
 }}  // namespace dawn_native::vulkan

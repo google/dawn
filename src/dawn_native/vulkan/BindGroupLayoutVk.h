@@ -19,12 +19,32 @@
 
 #include "common/vulkan_platform.h"
 
+#include <vector>
+
 namespace dawn_native { namespace vulkan {
 
     class Device;
 
     VkDescriptorType VulkanDescriptorType(wgpu::BindingType type, bool isDynamic);
 
+    // Contains a descriptor set along with data necessary to track its allocation.
+    struct DescriptorSetAllocation {
+        size_t index = 0;
+        VkDescriptorSet set = VK_NULL_HANDLE;
+    };
+
+    // In Vulkan descriptor pools have to be sized to an exact number of descriptors. This means
+    // it's hard to have something where we can mix different types of descriptor sets because
+    // we don't know if their vector of number of descriptors will be similar.
+    //
+    // That's why that in addition to containing the VkDescriptorSetLayout to create
+    // VkDescriptorSets for its bindgroups, the layout also acts as an allocator for the descriptor
+    // sets.
+    //
+    // The allocations is done with one pool per descriptor set, which is inefficient, but at least
+    // the pools are reused when no longer used. Minimizing the number of descriptor pool allocation
+    // is important because creating them can incur GPU memory allocation which is usually an
+    // expensive syscall.
     class BindGroupLayout : public BindGroupLayoutBase {
       public:
         static ResultOrError<BindGroupLayout*> Create(Device* device,
@@ -33,13 +53,25 @@ namespace dawn_native { namespace vulkan {
 
         VkDescriptorSetLayout GetHandle() const;
 
-        static constexpr size_t kMaxPoolSizesNeeded = 4;
-        using PoolSizeSpec = std::array<VkDescriptorPoolSize, kMaxPoolSizesNeeded>;
-        PoolSizeSpec ComputePoolSizes(uint32_t* numPoolSizes) const;
+        ResultOrError<DescriptorSetAllocation> AllocateOneSet();
+        void Deallocate(DescriptorSetAllocation* allocation);
+
+        // Interaction with the DescriptorSetService.
+        void FinishDeallocation(size_t index);
 
       private:
         using BindGroupLayoutBase::BindGroupLayoutBase;
         MaybeError Initialize();
+
+        std::vector<VkDescriptorPoolSize> mPoolSizes;
+
+        struct SingleDescriptorSetAllocation {
+            VkDescriptorPool pool = VK_NULL_HANDLE;
+            // Descriptor sets are freed when the pool is destroyed.
+            VkDescriptorSet set = VK_NULL_HANDLE;
+        };
+        std::vector<SingleDescriptorSetAllocation> mAllocations;
+        std::vector<size_t> mAvailableAllocations;
 
         VkDescriptorSetLayout mHandle = VK_NULL_HANDLE;
     };
