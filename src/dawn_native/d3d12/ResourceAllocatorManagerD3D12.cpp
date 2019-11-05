@@ -187,16 +187,40 @@ namespace dawn_native { namespace d3d12 {
 
     ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::CreatePlacedResource(
         D3D12_HEAP_TYPE heapType,
-        const D3D12_RESOURCE_DESC& resourceDescriptor,
+        const D3D12_RESOURCE_DESC& requestedResourceDescriptor,
         D3D12_RESOURCE_STATES initialUsage) {
-        const size_t resourceHeapKindIndex = GetResourceHeapKind(
-            resourceDescriptor.Dimension, heapType, resourceDescriptor.Flags, mResourceHeapTier);
+        const size_t resourceHeapKindIndex =
+            GetResourceHeapKind(requestedResourceDescriptor.Dimension, heapType,
+                                requestedResourceDescriptor.Flags, mResourceHeapTier);
+
+        // Small resources can take advantage of smaller alignments. For example,
+        // if the most detailed mip can fit under 64KB, 4KB alignments can be used.
+        // Must be non-depth or without render-target to use small resource alignment.
+        //
+        // Note: Only known to be used for small textures; however, MSDN suggests
+        // it could be extended for more cases. If so, this could default to always attempt small
+        // resource placement.
+        // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_resource_desc
+        D3D12_RESOURCE_DESC resourceDescriptor = requestedResourceDescriptor;
+        resourceDescriptor.Alignment =
+            (resourceHeapKindIndex == Default_OnlyNonRenderableOrDepthTextures)
+                ? D3D12_SMALL_RESOURCE_PLACEMENT_ALIGNMENT
+                : requestedResourceDescriptor.Alignment;
+
+        D3D12_RESOURCE_ALLOCATION_INFO resourceInfo =
+            mDevice->GetD3D12Device()->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
+
+        // If the request for small resource alignment was rejected, let D3D tell us what the
+        // required alignment is for this resource.
+        if (resourceHeapKindIndex == Default_OnlyNonRenderableOrDepthTextures &&
+            resourceInfo.Alignment != D3D12_SMALL_RESOURCE_PLACEMENT_ALIGNMENT) {
+            resourceDescriptor.Alignment = 0;
+            resourceInfo =
+                mDevice->GetD3D12Device()->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
+        }
 
         BuddyMemoryAllocator* allocator =
             mSubAllocatedResourceAllocators[resourceHeapKindIndex].get();
-
-        const D3D12_RESOURCE_ALLOCATION_INFO resourceInfo =
-            mDevice->GetD3D12Device()->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
 
         ResourceMemoryAllocation allocation;
         DAWN_TRY_ASSIGN(allocation,

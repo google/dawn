@@ -953,6 +953,10 @@ source_set("dawn_white_box_tests_sources") {
     }
   }
 
+  if (dawn_enable_d3d12) {
+    sources += [ "src/tests/white_box/D3D12SmallTextureTests.cpp" ]
+  }
+
   if (dawn_enable_opengl) {
     deps += [ ":dawn_glfw" ]
   }
