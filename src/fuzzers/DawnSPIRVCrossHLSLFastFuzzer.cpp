@@ -21,12 +21,12 @@
 namespace {
 
     int FuzzTask(const std::vector<uint32_t>& input) {
-        shaderc_spvc::Compiler compiler;
-        if (!compiler.IsValid()) {
+        shaderc_spvc::Context context;
+        if (!context.IsValid()) {
             return 0;
         }
 
-        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&compiler, &input]() {
+        DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&context, &input]() {
             shaderc_spvc::CompileOptions options;
             options.SetSourceEnvironment(shaderc_target_env_webgpu, shaderc_env_version_webgpu);
             options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
@@ -39,7 +39,7 @@ namespace {
             // See https://github.com/gpuweb/gpuweb/issues/332
             options.SetHLSLPointCoordCompat(true);
             options.SetHLSLPointSizeCompat(true);
-            compiler.CompileSpvToHlsl(input.data(), input.size(), options);
+            context.CompileSpvToHlsl(input.data(), input.size(), options);
         });
 
         return 0;
