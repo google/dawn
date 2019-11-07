@@ -223,6 +223,55 @@ TEST_F(CommandBufferValidationTest, BufferWithReadAndWriteUsage) {
     ASSERT_DEVICE_ERROR(encoder.Finish());
 }
 
+// Test that using a single buffer in multiple read usages which include readonly storage usage in
+// the same pass is allowed.
+TEST_F(CommandBufferValidationTest, BufferWithMultipleReadAndReadOnlyStorageUsage) {
+    // Create a buffer that will be used as an index buffer and as a storage buffer
+    wgpu::BufferDescriptor bufferDescriptor;
+    bufferDescriptor.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::Index;
+    bufferDescriptor.size = 4;
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
+
+    // Create the bind group to use the buffer as storage
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Vertex, wgpu::BindingType::ReadonlyStorageBuffer}});
+    wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, 4}});
+
+    // Use the buffer as both index and storage in the same pass
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    DummyRenderPass dummyRenderPass(device);
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+    pass.SetIndexBuffer(buffer);
+    pass.SetBindGroup(0, bg);
+    pass.EndPass();
+    encoder.Finish();
+}
+
+// Test that using the same storage buffer as both readable and writable in the same pass is
+// disallowed
+TEST_F(CommandBufferValidationTest, BufferWithReadAndWriteStorageBufferUsage) {
+    // Create a buffer that will be used as an storage buffer and as a readonly storage buffer
+    wgpu::BufferDescriptor bufferDescriptor;
+    bufferDescriptor.usage = wgpu::BufferUsage::Storage;
+    bufferDescriptor.size = 512;
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
+
+    // Create the bind group to use the buffer as storage
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Vertex, wgpu::BindingType::StorageBuffer},
+                 {1, wgpu::ShaderStage::Vertex, wgpu::BindingType::ReadonlyStorageBuffer}});
+    wgpu::BindGroup bg =
+        utils::MakeBindGroup(device, bgl, {{0, buffer, 0, 4}, {1, buffer, 256, 4}});
+
+    // Use the buffer as both index and storage in the same pass
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    DummyRenderPass dummyRenderPass(device);
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+    pass.SetBindGroup(0, bg);
+    pass.EndPass();
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
 // Test that using the same texture as both readable and writable in the same pass is disallowed
 TEST_F(CommandBufferValidationTest, TextureWithReadAndWriteUsage) {
     // Create a texture that will be used both as a sampled texture and a render target
