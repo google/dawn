@@ -100,6 +100,8 @@ if (is_win || is_linux || is_mac || is_fuchsia) {
       "SerialQueue.h",
       "SerialStorage.h",
       "SwapChainUtils.h",
+      "SystemUtils.cpp",
+      "SystemUtils.h",
       "vulkan_platform.h",
       "windows_with_undefs.h",
       "xlib_with_undefs.h",

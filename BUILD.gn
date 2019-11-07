@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import("//build_overrides/build.gni")
+import("//build_overrides/vulkan_validation_layers.gni")
 import("generator/dawn_generator.gni")
 import("scripts/dawn_component.gni")
 import("scripts/dawn_features.gni")
@@ -496,6 +497,12 @@ source_set("libdawn_native_sources") {
         "//third_party/fuchsia-sdk:vulkan_validation",
       ]
     }
+    if (dawn_enable_vulkan_validation_layers) {
+      defines = [
+        "DAWN_ENABLE_VULKAN_VALIDATION_LAYERS",
+        "DAWN_VK_DATA_DIR=\"$vulkan_data_subdir\"",
+      ]
+    }
   }
 }
 
@@ -534,6 +541,16 @@ dawn_component("libdawn_native") {
   }
   if (dawn_enable_vulkan) {
     sources += [ "src/dawn_native/vulkan/VulkanBackend.cpp" ]
+
+    if (dawn_enable_vulkan_validation_layers) {
+      data_deps = [
+        "${dawn_vulkan_validation_layers_dir}:vulkan_validation_layers",
+      ]
+      if (!is_android) {
+        data_deps +=
+            [ "${dawn_vulkan_validation_layers_dir}:vulkan_gen_json_files" ]
+      }
+    }
   }
 }
 
@@ -795,6 +812,7 @@ test("dawn_unittests") {
     "src/tests/unittests/RingBufferAllocatorTests.cpp",
     "src/tests/unittests/SerialMapTests.cpp",
     "src/tests/unittests/SerialQueueTests.cpp",
+    "src/tests/unittests/SystemUtilsTests.cpp",
     "src/tests/unittests/ToBackendTests.cpp",
     "src/tests/unittests/validation/BindGroupValidationTests.cpp",
     "src/tests/unittests/validation/BufferValidationTests.cpp",

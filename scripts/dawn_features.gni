@@ -45,3 +45,11 @@ declare_args() {
   # compiler, since it is a sub-class of if.
   dawn_enable_cross_reflection = false
 }
+
+# GN does not allow reading a variable defined in the same declare_args().
+# Put them in two separate declare_args() when setting the value of one
+# argument based on another.
+declare_args() {
+  # Uses our built version of Vulkan validation layers
+  dawn_enable_vulkan_validation_layers = dawn_enable_vulkan && is_win
+}

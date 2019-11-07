@@ -56,3 +56,7 @@ if (!defined(dawn_spirv_cross_dir)) {
 if (!defined(dawn_spirv_tools_dir)) {
   dawn_spirv_tools_dir = "//third_party/SPIRV-Tools"
 }
+
+if (!defined(dawn_vulkan_validaion_layers_dir)) {
+  dawn_vulkan_validaion_layers_dir = "//third_party/vulkan-validation-layers"
+}
