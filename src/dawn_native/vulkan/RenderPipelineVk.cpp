@@ -351,11 +351,9 @@ namespace dawn_native { namespace vulkan {
             shaderStages[1].pName = descriptor->fragmentStage->entryPoint;
         }
 
-        std::array<VkVertexInputBindingDescription, kMaxVertexBuffers> mBindings;
-        std::array<VkVertexInputAttributeDescription, kMaxVertexAttributes> mAttributes;
-        const VertexInputDescriptor* vertexInput = GetVertexInputDescriptor();
+        PipelineVertexInputStateCreateInfoTemporaryAllocations tempAllocations;
         VkPipelineVertexInputStateCreateInfo vertexInputCreateInfo =
-            ComputeVertexInputDesc(vertexInput, &mBindings, &mAttributes);
+            ComputeVertexInputDesc(&tempAllocations);
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly;
         inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -507,32 +505,31 @@ namespace dawn_native { namespace vulkan {
     }
 
     VkPipelineVertexInputStateCreateInfo RenderPipeline::ComputeVertexInputDesc(
-        const VertexInputDescriptor* vertexInput,
-        std::array<VkVertexInputBindingDescription, kMaxVertexBuffers>* mBindings,
-        std::array<VkVertexInputAttributeDescription, kMaxVertexAttributes>* mAttributes) {
+        PipelineVertexInputStateCreateInfoTemporaryAllocations* tempAllocations) {
         // Fill in the "binding info" that will be chained in the create info
         uint32_t bindingCount = 0;
-        for (uint32_t i : IterateBitSet(GetInputsSetMask())) {
-            const auto& bindingInfo = GetInput(i);
+        for (uint32_t i : IterateBitSet(GetVertexBufferSlotsUsed())) {
+            const VertexBufferInfo& bindingInfo = GetVertexBuffer(i);
 
-            auto& bindingDesc = (*mBindings)[bindingCount];
-            bindingDesc.binding = i;
-            bindingDesc.stride = bindingInfo.stride;
-            bindingDesc.inputRate = VulkanInputRate(bindingInfo.stepMode);
+            VkVertexInputBindingDescription* bindingDesc = &tempAllocations->bindings[bindingCount];
+            bindingDesc->binding = i;
+            bindingDesc->stride = bindingInfo.arrayStride;
+            bindingDesc->inputRate = VulkanInputRate(bindingInfo.stepMode);
 
             bindingCount++;
         }
 
         // Fill in the "attribute info" that will be chained in the create info
         uint32_t attributeCount = 0;
-        for (uint32_t i : IterateBitSet(GetAttributesSetMask())) {
-            const auto& attributeInfo = GetAttribute(i);
+        for (uint32_t i : IterateBitSet(GetAttributeLocationsUsed())) {
+            const VertexAttributeInfo& attributeInfo = GetAttribute(i);
 
-            auto& attributeDesc = (*mAttributes)[attributeCount];
-            attributeDesc.location = i;
-            attributeDesc.binding = attributeInfo.inputSlot;
-            attributeDesc.format = VulkanVertexFormat(attributeInfo.format);
-            attributeDesc.offset = attributeInfo.offset;
+            VkVertexInputAttributeDescription* attributeDesc =
+                &tempAllocations->attributes[attributeCount];
+            attributeDesc->location = i;
+            attributeDesc->binding = attributeInfo.vertexBufferSlot;
+            attributeDesc->format = VulkanVertexFormat(attributeInfo.format);
+            attributeDesc->offset = attributeInfo.offset;
 
             attributeCount++;
         }
@@ -543,9 +540,9 @@ namespace dawn_native { namespace vulkan {
         mCreateInfo.pNext = nullptr;
         mCreateInfo.flags = 0;
         mCreateInfo.vertexBindingDescriptionCount = bindingCount;
-        mCreateInfo.pVertexBindingDescriptions = &(*mBindings)[0];
+        mCreateInfo.pVertexBindingDescriptions = tempAllocations->bindings.data();
         mCreateInfo.vertexAttributeDescriptionCount = attributeCount;
-        mCreateInfo.pVertexAttributeDescriptions = &(*mAttributes)[0];
+        mCreateInfo.pVertexAttributeDescriptions = tempAllocations->attributes.data();
         return mCreateInfo;
     }
 

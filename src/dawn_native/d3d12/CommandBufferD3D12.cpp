@@ -397,29 +397,30 @@ namespace dawn_native { namespace d3d12 {
                 auto* d3d12BufferView = &mD3D12BufferViews[slot];
                 d3d12BufferView->BufferLocation = buffer->GetVA() + offset;
                 d3d12BufferView->SizeInBytes = buffer->GetSize() - offset;
-                // The bufferView stride is set based on the input state before a draw.
+                // The bufferView stride is set based on the vertex state before a draw.
             }
 
             void Apply(ID3D12GraphicsCommandList* commandList,
                        const RenderPipeline* renderPipeline) {
                 ASSERT(renderPipeline != nullptr);
 
-                std::bitset<kMaxVertexBuffers> inputsMask = renderPipeline->GetInputsSetMask();
+                std::bitset<kMaxVertexBuffers> vertexBufferSlotsUsed =
+                    renderPipeline->GetVertexBufferSlotsUsed();
 
                 uint32_t startSlot = mStartSlot;
                 uint32_t endSlot = mEndSlot;
 
-                // If the input state has changed, we need to update the StrideInBytes
+                // If the vertex state has changed, we need to update the StrideInBytes
                 // for the D3D12 buffer views. We also need to extend the dirty range to
                 // touch all these slots because the stride may have changed.
                 if (mLastAppliedRenderPipeline != renderPipeline) {
                     mLastAppliedRenderPipeline = renderPipeline;
 
-                    for (uint32_t slot : IterateBitSet(inputsMask)) {
+                    for (uint32_t slot : IterateBitSet(vertexBufferSlotsUsed)) {
                         startSlot = std::min(startSlot, slot);
                         endSlot = std::max(endSlot, slot + 1);
                         mD3D12BufferViews[slot].StrideInBytes =
-                            renderPipeline->GetInput(slot).stride;
+                            renderPipeline->GetVertexBuffer(slot).arrayStride;
                     }
                 }
 
@@ -462,7 +463,7 @@ namespace dawn_native { namespace d3d12 {
 
             void OnSetPipeline(const RenderPipelineBase* pipeline) {
                 mD3D12BufferView.Format =
-                    DXGIIndexFormat(pipeline->GetVertexInputDescriptor()->indexFormat);
+                    DXGIIndexFormat(pipeline->GetVertexStateDescriptor()->indexFormat);
             }
 
             void Apply(ID3D12GraphicsCommandList* commandList) {

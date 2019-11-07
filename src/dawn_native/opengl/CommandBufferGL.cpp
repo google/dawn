@@ -133,9 +133,9 @@ namespace dawn_native { namespace opengl {
         }
 
         // Vertex buffers and index buffers are implemented as part of an OpenGL VAO that
-        // corresponds to an VertexInput. On the contrary in Dawn they are part of the global state.
-        // This means that we have to re-apply these buffers on an VertexInput change.
-        class InputBufferTracker {
+        // corresponds to a VertexState. On the contrary in Dawn they are part of the global state.
+        // This means that we have to re-apply these buffers on a VertexState change.
+        class VertexStateBufferBindingTracker {
           public:
             void OnSetIndexBuffer(BufferBase* buffer) {
                 mIndexBufferDirty = true;
@@ -157,7 +157,7 @@ namespace dawn_native { namespace opengl {
                 }
 
                 mIndexBufferDirty = true;
-                mDirtyVertexBuffers |= pipeline->GetInputsSetMask();
+                mDirtyVertexBuffers |= pipeline->GetVertexBufferSlotsUsed();
 
                 mLastPipeline = pipeline;
             }
@@ -168,30 +168,32 @@ namespace dawn_native { namespace opengl {
                     mIndexBufferDirty = false;
                 }
 
-                for (uint32_t slot :
-                     IterateBitSet(mDirtyVertexBuffers & mLastPipeline->GetInputsSetMask())) {
+                for (uint32_t slot : IterateBitSet(mDirtyVertexBuffers &
+                                                   mLastPipeline->GetVertexBufferSlotsUsed())) {
                     for (uint32_t location :
-                         IterateBitSet(mLastPipeline->GetAttributesUsingInput(slot))) {
-                        auto attribute = mLastPipeline->GetAttribute(location);
+                         IterateBitSet(mLastPipeline->GetAttributesUsingVertexBuffer(slot))) {
+                        const VertexAttributeInfo& attribute =
+                            mLastPipeline->GetAttribute(location);
 
                         GLuint buffer = mVertexBuffers[slot]->GetHandle();
                         uint64_t offset = mVertexBufferOffsets[slot];
 
-                        auto input = mLastPipeline->GetInput(slot);
-                        auto components = VertexFormatNumComponents(attribute.format);
-                        auto formatType = VertexFormatType(attribute.format);
+                        const VertexBufferInfo& vertexBuffer = mLastPipeline->GetVertexBuffer(slot);
+                        uint32_t components = VertexFormatNumComponents(attribute.format);
+                        GLenum formatType = VertexFormatType(attribute.format);
 
                         GLboolean normalized = VertexFormatIsNormalized(attribute.format);
                         gl.BindBuffer(GL_ARRAY_BUFFER, buffer);
                         if (VertexFormatIsInt(attribute.format)) {
-                            gl.VertexAttribIPointer(location, components, formatType, input.stride,
-                                                    reinterpret_cast<void*>(static_cast<intptr_t>(
-                                                        offset + attribute.offset)));
-                        } else {
-                            gl.VertexAttribPointer(
-                                location, components, formatType, normalized, input.stride,
+                            gl.VertexAttribIPointer(
+                                location, components, formatType, vertexBuffer.arrayStride,
                                 reinterpret_cast<void*>(
                                     static_cast<intptr_t>(offset + attribute.offset)));
+                        } else {
+                            gl.VertexAttribPointer(location, components, formatType, normalized,
+                                                   vertexBuffer.arrayStride,
+                                                   reinterpret_cast<void*>(static_cast<intptr_t>(
+                                                       offset + attribute.offset)));
                         }
                     }
                 }
@@ -855,14 +857,14 @@ namespace dawn_native { namespace opengl {
         RenderPipeline* lastPipeline = nullptr;
         uint64_t indexBufferBaseOffset = 0;
 
-        InputBufferTracker inputBuffers;
+        VertexStateBufferBindingTracker vertexStateBufferBindingTracker;
         BindGroupTracker bindGroupTracker = {};
 
         auto DoRenderBundleCommand = [&](CommandIterator* iter, Command type) {
             switch (type) {
                 case Command::Draw: {
                     DrawCmd* draw = iter->NextCommand<DrawCmd>();
-                    inputBuffers.Apply(gl);
+                    vertexStateBufferBindingTracker.Apply(gl);
                     bindGroupTracker.Apply(gl);
 
                     if (draw->firstInstance > 0) {
@@ -879,11 +881,11 @@ namespace dawn_native { namespace opengl {
 
                 case Command::DrawIndexed: {
                     DrawIndexedCmd* draw = iter->NextCommand<DrawIndexedCmd>();
-                    inputBuffers.Apply(gl);
+                    vertexStateBufferBindingTracker.Apply(gl);
                     bindGroupTracker.Apply(gl);
 
                     wgpu::IndexFormat indexFormat =
-                        lastPipeline->GetVertexInputDescriptor()->indexFormat;
+                        lastPipeline->GetVertexStateDescriptor()->indexFormat;
                     size_t formatSize = IndexFormatSize(indexFormat);
                     GLenum formatType = IndexFormatType(indexFormat);
 
@@ -905,7 +907,7 @@ namespace dawn_native { namespace opengl {
 
                 case Command::DrawIndirect: {
                     DrawIndirectCmd* draw = iter->NextCommand<DrawIndirectCmd>();
-                    inputBuffers.Apply(gl);
+                    vertexStateBufferBindingTracker.Apply(gl);
                     bindGroupTracker.Apply(gl);
 
                     uint64_t indirectBufferOffset = draw->indirectOffset;
@@ -919,11 +921,11 @@ namespace dawn_native { namespace opengl {
 
                 case Command::DrawIndexedIndirect: {
                     DrawIndexedIndirectCmd* draw = iter->NextCommand<DrawIndexedIndirectCmd>();
-                    inputBuffers.Apply(gl);
+                    vertexStateBufferBindingTracker.Apply(gl);
                     bindGroupTracker.Apply(gl);
 
                     wgpu::IndexFormat indexFormat =
-                        lastPipeline->GetVertexInputDescriptor()->indexFormat;
+                        lastPipeline->GetVertexStateDescriptor()->indexFormat;
                     GLenum formatType = IndexFormatType(indexFormat);
 
                     uint64_t indirectBufferOffset = draw->indirectOffset;
@@ -948,7 +950,7 @@ namespace dawn_native { namespace opengl {
                     lastPipeline = ToBackend(cmd->pipeline).Get();
                     lastPipeline->ApplyNow(persistentPipelineState);
 
-                    inputBuffers.OnSetPipeline(lastPipeline);
+                    vertexStateBufferBindingTracker.OnSetPipeline(lastPipeline);
                     bindGroupTracker.OnSetPipeline(lastPipeline);
                 } break;
 
@@ -965,12 +967,13 @@ namespace dawn_native { namespace opengl {
                 case Command::SetIndexBuffer: {
                     SetIndexBufferCmd* cmd = iter->NextCommand<SetIndexBufferCmd>();
                     indexBufferBaseOffset = cmd->offset;
-                    inputBuffers.OnSetIndexBuffer(cmd->buffer.Get());
+                    vertexStateBufferBindingTracker.OnSetIndexBuffer(cmd->buffer.Get());
                 } break;
 
                 case Command::SetVertexBuffer: {
                     SetVertexBufferCmd* cmd = iter->NextCommand<SetVertexBufferCmd>();
-                    inputBuffers.OnSetVertexBuffer(cmd->slot, cmd->buffer.Get(), cmd->offset);
+                    vertexStateBufferBindingTracker.OnSetVertexBuffer(cmd->slot, cmd->buffer.Get(),
+                                                                      cmd->offset);
                 } break;
 
                 default:

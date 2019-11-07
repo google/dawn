@@ -51,11 +51,11 @@ class IndexFormatTest : public DawnTest {
             descriptor.vertexStage.module = vsModule;
             descriptor.cFragmentStage.module = fsModule;
             descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
-            descriptor.cVertexInput.indexFormat = format;
-            descriptor.cVertexInput.bufferCount = 1;
-            descriptor.cVertexInput.cBuffers[0].stride = 4 * sizeof(float);
-            descriptor.cVertexInput.cBuffers[0].attributeCount = 1;
-            descriptor.cVertexInput.cAttributes[0].format = wgpu::VertexFormat::Float4;
+            descriptor.cVertexState.indexFormat = format;
+            descriptor.cVertexState.vertexBufferCount = 1;
+            descriptor.cVertexState.cVertexBuffers[0].arrayStride = 4 * sizeof(float);
+            descriptor.cVertexState.cVertexBuffers[0].attributeCount = 1;
+            descriptor.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float4;
             descriptor.cColorStates[0].format = renderPass.colorFormat;
 
             return device.CreateRenderPipeline(&descriptor);

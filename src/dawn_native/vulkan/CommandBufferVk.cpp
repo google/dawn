@@ -867,7 +867,7 @@ namespace dawn_native { namespace vulkan {
                     // and rebind if needed on pipeline change
                     ASSERT(lastPipeline != nullptr);
                     VkIndexType indexType =
-                        VulkanIndexType(lastPipeline->GetVertexInputDescriptor()->indexFormat);
+                        VulkanIndexType(lastPipeline->GetVertexStateDescriptor()->indexFormat);
                     device->fn.CmdBindIndexBuffer(
                         commands, indexBuffer, static_cast<VkDeviceSize>(cmd->offset), indexType);
                 } break;

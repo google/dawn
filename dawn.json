@@ -693,28 +693,28 @@
         "category": "structure",
         "extensible": false,
         "members": [
-            {"name": "shader location", "type": "uint32_t"},
-            {"name": "offset", "type": "uint64_t", "default": "0"},
-            {"name": "format", "type": "vertex format"}
+            {"name": "format", "type": "vertex format"},
+            {"name": "offset", "type": "uint64_t"},
+            {"name": "shader location", "type": "uint32_t"}
         ]
     },
-    "vertex buffer descriptor": {
+    "vertex buffer layout descriptor": {
         "category": "structure",
         "extensible": false,
         "members": [
-            {"name": "stride", "type": "uint64_t"},
+            {"name": "array stride", "type": "uint64_t"},
             {"name": "step mode", "type": "input step mode", "default": "vertex"},
             {"name": "attribute count", "type": "uint32_t"},
             {"name": "attributes", "type": "vertex attribute descriptor", "annotation": "const*", "length": "attribute count"}
         ]
     },
-    "vertex input descriptor": {
+    "vertex state descriptor": {
         "category": "structure",
         "extensible": true,
         "members": [
             {"name": "index format", "type": "index format", "default": "uint32"},
-            {"name": "buffer count", "type": "uint32_t", "default": 0},
-            {"name": "buffers", "type": "vertex buffer descriptor", "annotation": "const*", "length": "buffer count"}
+            {"name": "vertex buffer count", "type": "uint32_t", "default": 0},
+            {"name": "vertex buffers", "type": "vertex buffer layout descriptor", "annotation": "const*", "length": "vertex buffer count"}
         ]
     },
     "input step mode": {
@@ -1102,7 +1102,7 @@
             {"name": "layout", "type": "pipeline layout"},
             {"name": "vertex stage", "type": "programmable stage descriptor"},
             {"name": "fragment stage", "type": "programmable stage descriptor", "annotation": "const*", "optional": true},
-            {"name": "vertex input", "type": "vertex input descriptor", "annotation": "const*", "optional": true},
+            {"name": "vertex state", "type": "vertex state descriptor", "annotation": "const*", "optional": true},
             {"name": "primitive topology", "type": "primitive topology"},
             {"name": "rasterization state", "type": "rasterization state descriptor", "annotation": "const*", "optional": true},
             {"name": "sample count", "type": "uint32_t", "default": "1"},

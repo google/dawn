@@ -160,15 +160,15 @@ void init() {
             fragColor = vec4(mix(f_col, vec3(0.5, 0.5, 0.5), 0.5), 1.0);
         })");
 
-    utils::ComboVertexInputDescriptor vertexInput;
-    vertexInput.cBuffers[0].attributeCount = 2;
-    vertexInput.cAttributes[0].format = wgpu::VertexFormat::Float3;
-    vertexInput.cAttributes[1].shaderLocation = 1;
-    vertexInput.cAttributes[1].offset = 3 * sizeof(float);
-    vertexInput.cAttributes[1].format = wgpu::VertexFormat::Float3;
+    utils::ComboVertexStateDescriptor vertexState;
+    vertexState.cVertexBuffers[0].attributeCount = 2;
+    vertexState.cAttributes[0].format = wgpu::VertexFormat::Float3;
+    vertexState.cAttributes[1].shaderLocation = 1;
+    vertexState.cAttributes[1].offset = 3 * sizeof(float);
+    vertexState.cAttributes[1].format = wgpu::VertexFormat::Float3;
 
-    vertexInput.bufferCount = 1;
-    vertexInput.cBuffers[0].stride = 6 * sizeof(float);
+    vertexState.vertexBufferCount = 1;
+    vertexState.cVertexBuffers[0].arrayStride = 6 * sizeof(float);
 
     auto bgl = utils::MakeBindGroupLayout(
         device, {
@@ -207,7 +207,7 @@ void init() {
     descriptor.layout = pl;
     descriptor.vertexStage.module = vsModule;
     descriptor.cFragmentStage.module = fsModule;
-    descriptor.vertexInput = &vertexInput;
+    descriptor.vertexState = &vertexState;
     descriptor.depthStencilState = &descriptor.cDepthStencilState;
     descriptor.cDepthStencilState.format = wgpu::TextureFormat::Depth24PlusStencil8;
     descriptor.cColorStates[0].format = GetPreferredSwapChainTextureFormat();
@@ -220,7 +220,7 @@ void init() {
     pDescriptor.layout = pl;
     pDescriptor.vertexStage.module = vsModule;
     pDescriptor.cFragmentStage.module = fsModule;
-    pDescriptor.vertexInput = &vertexInput;
+    pDescriptor.vertexState = &vertexState;
     pDescriptor.depthStencilState = &pDescriptor.cDepthStencilState;
     pDescriptor.cDepthStencilState.format = wgpu::TextureFormat::Depth24PlusStencil8;
     pDescriptor.cColorStates[0].format = GetPreferredSwapChainTextureFormat();
@@ -234,7 +234,7 @@ void init() {
     rfDescriptor.layout = pl;
     rfDescriptor.vertexStage.module = vsModule;
     rfDescriptor.cFragmentStage.module = fsReflectionModule;
-    rfDescriptor.vertexInput = &vertexInput;
+    rfDescriptor.vertexState = &vertexState;
     rfDescriptor.depthStencilState = &rfDescriptor.cDepthStencilState;
     rfDescriptor.cDepthStencilState.format = wgpu::TextureFormat::Depth24PlusStencil8;
     rfDescriptor.cColorStates[0].format = GetPreferredSwapChainTextureFormat();

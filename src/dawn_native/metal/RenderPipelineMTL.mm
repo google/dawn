@@ -313,7 +313,7 @@ namespace dawn_native { namespace metal {
 
     RenderPipeline::RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor)
         : RenderPipelineBase(device, descriptor),
-          mMtlIndexType(MTLIndexFormat(GetVertexInputDescriptor()->indexFormat)),
+          mMtlIndexType(MTLIndexFormat(GetVertexStateDescriptor()->indexFormat)),
           mMtlPrimitiveTopology(MTLPrimitiveTopology(GetPrimitiveTopology())),
           mMtlFrontFace(MTLFrontFace(GetFrontFace())),
           mMtlCullMode(ToMTLCullMode(GetCullMode())) {
@@ -432,49 +432,49 @@ namespace dawn_native { namespace metal {
         uint32_t mtlVertexBufferIndex =
             ToBackend(GetLayout())->GetBufferBindingCount(SingleShaderStage::Vertex);
 
-        for (uint32_t dawnVertexBufferIndex : IterateBitSet(GetInputsSetMask())) {
-            const VertexBufferInfo& info = GetInput(dawnVertexBufferIndex);
+        for (uint32_t dawnVertexBufferSlot : IterateBitSet(GetVertexBufferSlotsUsed())) {
+            const VertexBufferInfo& info = GetVertexBuffer(dawnVertexBufferSlot);
 
             MTLVertexBufferLayoutDescriptor* layoutDesc = [MTLVertexBufferLayoutDescriptor new];
-            if (info.stride == 0) {
+            if (info.arrayStride == 0) {
                 // For MTLVertexStepFunctionConstant, the stepRate must be 0,
-                // but the stride must NOT be 0, so we made up it with
+                // but the arrayStride must NOT be 0, so we made up it with
                 // max(attrib.offset + sizeof(attrib) for each attrib)
-                size_t max_stride = 0;
-                for (uint32_t attribIndex : IterateBitSet(GetAttributesSetMask())) {
+                size_t maxArrayStride = 0;
+                for (uint32_t attribIndex : IterateBitSet(GetAttributeLocationsUsed())) {
                     const VertexAttributeInfo& attrib = GetAttribute(attribIndex);
                     // Only use the attributes that use the current input
-                    if (attrib.inputSlot != dawnVertexBufferIndex) {
+                    if (attrib.vertexBufferSlot != dawnVertexBufferSlot) {
                         continue;
                     }
-                    max_stride = std::max(max_stride,
-                                          VertexFormatSize(attrib.format) + size_t(attrib.offset));
+                    maxArrayStride = std::max(
+                        maxArrayStride, VertexFormatSize(attrib.format) + size_t(attrib.offset));
                 }
                 layoutDesc.stepFunction = MTLVertexStepFunctionConstant;
                 layoutDesc.stepRate = 0;
                 // Metal requires the stride must be a multiple of 4 bytes, align it with next
                 // multiple of 4 if it's not.
-                layoutDesc.stride = Align(max_stride, 4);
+                layoutDesc.stride = Align(maxArrayStride, 4);
             } else {
                 layoutDesc.stepFunction = InputStepModeFunction(info.stepMode);
                 layoutDesc.stepRate = 1;
-                layoutDesc.stride = info.stride;
+                layoutDesc.stride = info.arrayStride;
             }
 
             mtlVertexDescriptor.layouts[mtlVertexBufferIndex] = layoutDesc;
             [layoutDesc release];
 
-            mMtlVertexBufferIndices[dawnVertexBufferIndex] = mtlVertexBufferIndex;
+            mMtlVertexBufferIndices[dawnVertexBufferSlot] = mtlVertexBufferIndex;
             mtlVertexBufferIndex++;
         }
 
-        for (uint32_t i : IterateBitSet(GetAttributesSetMask())) {
+        for (uint32_t i : IterateBitSet(GetAttributeLocationsUsed())) {
             const VertexAttributeInfo& info = GetAttribute(i);
 
             auto attribDesc = [MTLVertexAttributeDescriptor new];
             attribDesc.format = VertexFormatType(info.format);
             attribDesc.offset = info.offset;
-            attribDesc.bufferIndex = mMtlVertexBufferIndices[info.inputSlot];
+            attribDesc.bufferIndex = mMtlVertexBufferIndices[info.vertexBufferSlot];
             mtlVertexDescriptor.attributes[i] = attribDesc;
             [attribDesc release];
         }

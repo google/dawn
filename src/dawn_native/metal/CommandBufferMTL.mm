@@ -549,7 +549,7 @@ namespace dawn_native { namespace metal {
 
         // Keeps track of the dirty vertex buffer values so they can be lazily applied when we know
         // all the relevant state.
-        class VertexInputBufferTracker {
+        class VertexBufferTracker {
           public:
             void OnSetVertexBuffer(uint32_t slot, Buffer* buffer, uint64_t offset) {
                 mVertexBuffers[slot] = buffer->GetMTLBuffer();
@@ -564,12 +564,12 @@ namespace dawn_native { namespace metal {
                 // When a new pipeline is bound we must set all the vertex buffers again because
                 // they might have been offset by the pipeline layout, and they might be packed
                 // differently from the previous pipeline.
-                mDirtyVertexBuffers |= pipeline->GetInputsSetMask();
+                mDirtyVertexBuffers |= pipeline->GetVertexBufferSlotsUsed();
             }
 
             void Apply(id<MTLRenderCommandEncoder> encoder, RenderPipeline* pipeline) {
                 std::bitset<kMaxVertexBuffers> vertexBuffersToApply =
-                    mDirtyVertexBuffers & pipeline->GetInputsSetMask();
+                    mDirtyVertexBuffers & pipeline->GetVertexBufferSlotsUsed();
 
                 for (uint32_t dawnIndex : IterateBitSet(vertexBuffersToApply)) {
                     uint32_t metalIndex = pipeline->GetMtlVertexBufferIndex(dawnIndex);
@@ -904,7 +904,7 @@ namespace dawn_native { namespace metal {
         RenderPipeline* lastPipeline = nullptr;
         id<MTLBuffer> indexBuffer = nil;
         uint32_t indexBufferBaseOffset = 0;
-        VertexInputBufferTracker vertexInputBuffers;
+        VertexBufferTracker vertexBuffers;
         StorageBufferLengthTracker storageBufferLengths = {};
         BindGroupTracker bindGroups(&storageBufferLengths);
 
@@ -917,7 +917,7 @@ namespace dawn_native { namespace metal {
                 case Command::Draw: {
                     DrawCmd* draw = iter->NextCommand<DrawCmd>();
 
-                    vertexInputBuffers.Apply(encoder, lastPipeline);
+                    vertexBuffers.Apply(encoder, lastPipeline);
                     bindGroups.Apply(encoder);
                     storageBufferLengths.Apply(encoder, lastPipeline);
 
@@ -934,9 +934,9 @@ namespace dawn_native { namespace metal {
                 case Command::DrawIndexed: {
                     DrawIndexedCmd* draw = iter->NextCommand<DrawIndexedCmd>();
                     size_t formatSize =
-                        IndexFormatSize(lastPipeline->GetVertexInputDescriptor()->indexFormat);
+                        IndexFormatSize(lastPipeline->GetVertexStateDescriptor()->indexFormat);
 
-                    vertexInputBuffers.Apply(encoder, lastPipeline);
+                    vertexBuffers.Apply(encoder, lastPipeline);
                     bindGroups.Apply(encoder);
                     storageBufferLengths.Apply(encoder, lastPipeline);
 
@@ -957,7 +957,7 @@ namespace dawn_native { namespace metal {
                 case Command::DrawIndirect: {
                     DrawIndirectCmd* draw = iter->NextCommand<DrawIndirectCmd>();
 
-                    vertexInputBuffers.Apply(encoder, lastPipeline);
+                    vertexBuffers.Apply(encoder, lastPipeline);
                     bindGroups.Apply(encoder);
                     storageBufferLengths.Apply(encoder, lastPipeline);
 
@@ -971,7 +971,7 @@ namespace dawn_native { namespace metal {
                 case Command::DrawIndexedIndirect: {
                     DrawIndirectCmd* draw = iter->NextCommand<DrawIndirectCmd>();
 
-                    vertexInputBuffers.Apply(encoder, lastPipeline);
+                    vertexBuffers.Apply(encoder, lastPipeline);
                     bindGroups.Apply(encoder);
                     storageBufferLengths.Apply(encoder, lastPipeline);
 
@@ -1013,7 +1013,7 @@ namespace dawn_native { namespace metal {
                     SetRenderPipelineCmd* cmd = iter->NextCommand<SetRenderPipelineCmd>();
                     RenderPipeline* newPipeline = ToBackend(cmd->pipeline).Get();
 
-                    vertexInputBuffers.OnSetPipeline(lastPipeline, newPipeline);
+                    vertexBuffers.OnSetPipeline(lastPipeline, newPipeline);
                     bindGroups.OnSetPipeline(newPipeline);
 
                     [encoder setDepthStencilState:newPipeline->GetMTLDepthStencilState()];
@@ -1045,8 +1045,8 @@ namespace dawn_native { namespace metal {
                 case Command::SetVertexBuffer: {
                     SetVertexBufferCmd* cmd = iter->NextCommand<SetVertexBufferCmd>();
 
-                    vertexInputBuffers.OnSetVertexBuffer(cmd->slot, ToBackend(cmd->buffer.Get()),
-                                                         cmd->offset);
+                    vertexBuffers.OnSetVertexBuffer(cmd->slot, ToBackend(cmd->buffer.Get()),
+                                                    cmd->offset);
                 } break;
 
                 default:

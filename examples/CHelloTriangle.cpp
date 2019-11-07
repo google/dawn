@@ -95,12 +95,12 @@ void init() {
         pl.bindGroupLayouts = nullptr;
         descriptor.layout = wgpuDeviceCreatePipelineLayout(device, &pl);
 
-        WGPUVertexInputDescriptor vertexInput;
-        vertexInput.nextInChain = nullptr;
-        vertexInput.indexFormat = WGPUIndexFormat_Uint32;
-        vertexInput.bufferCount = 0;
-        vertexInput.buffers = nullptr;
-        descriptor.vertexInput = &vertexInput;
+        WGPUVertexStateDescriptor vertexState;
+        vertexState.nextInChain = nullptr;
+        vertexState.indexFormat = WGPUIndexFormat_Uint32;
+        vertexState.vertexBufferCount = 0;
+        vertexState.vertexBuffers = nullptr;
+        descriptor.vertexState = &vertexState;
 
         WGPURasterizationStateDescriptor rasterizationState;
         rasterizationState.nextInChain = nullptr;

@@ -23,11 +23,11 @@
 
 namespace utils {
 
-    class ComboVertexInputDescriptor : public wgpu::VertexInputDescriptor {
+    class ComboVertexStateDescriptor : public wgpu::VertexStateDescriptor {
       public:
-        ComboVertexInputDescriptor();
+        ComboVertexStateDescriptor();
 
-        std::array<wgpu::VertexBufferDescriptor, kMaxVertexBuffers> cBuffers;
+        std::array<wgpu::VertexBufferLayoutDescriptor, kMaxVertexBuffers> cVertexBuffers;
         std::array<wgpu::VertexAttributeDescriptor, kMaxVertexAttributes> cAttributes;
     };
 
@@ -42,7 +42,7 @@ namespace utils {
 
         wgpu::ProgrammableStageDescriptor cFragmentStage;
 
-        ComboVertexInputDescriptor cVertexInput;
+        ComboVertexStateDescriptor cVertexState;
         wgpu::RasterizationStateDescriptor cRasterizationState;
         std::array<wgpu::ColorStateDescriptor, kMaxColorAttachments> cColorStates;
         wgpu::DepthStencilStateDescriptor cDepthStencilState;

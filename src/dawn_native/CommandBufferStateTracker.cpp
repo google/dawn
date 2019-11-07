@@ -106,8 +106,9 @@ namespace dawn_native {
         if (aspects[VALIDATION_ASPECT_VERTEX_BUFFERS]) {
             ASSERT(mLastRenderPipeline != nullptr);
 
-            auto requiredInputs = mLastRenderPipeline->GetInputsSetMask();
-            if ((mInputsSet & requiredInputs) == requiredInputs) {
+            const std::bitset<kMaxVertexBuffers>& requiredVertexBuffers =
+                mLastRenderPipeline->GetVertexBufferSlotsUsed();
+            if ((mVertexBufferSlotsUsed & requiredVertexBuffers) == requiredVertexBuffers) {
                 mAspects.set(VALIDATION_ASPECT_VERTEX_BUFFERS);
             }
         }
@@ -153,7 +154,7 @@ namespace dawn_native {
     }
 
     void CommandBufferStateTracker::SetVertexBuffer(uint32_t slot) {
-        mInputsSet.set(slot);
+        mVertexBufferSlotsUsed.set(slot);
     }
 
     void CommandBufferStateTracker::SetPipelineCommon(PipelineBase* pipeline) {

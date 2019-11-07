@@ -36,10 +36,12 @@ namespace dawn_native { namespace vulkan {
         using RenderPipelineBase::RenderPipelineBase;
         MaybeError Initialize(const RenderPipelineDescriptor* descriptor);
 
+        struct PipelineVertexInputStateCreateInfoTemporaryAllocations {
+            std::array<VkVertexInputBindingDescription, kMaxVertexBuffers> bindings;
+            std::array<VkVertexInputAttributeDescription, kMaxVertexAttributes> attributes;
+        };
         VkPipelineVertexInputStateCreateInfo ComputeVertexInputDesc(
-            const VertexInputDescriptor* vertexInput,
-            std::array<VkVertexInputBindingDescription, kMaxVertexBuffers>* mBindings,
-            std::array<VkVertexInputAttributeDescription, kMaxVertexAttributes>* mAttributes);
+            PipelineVertexInputStateCreateInfoTemporaryAllocations* temporaryAllocations);
 
         VkPipeline mHandle = VK_NULL_HANDLE;
     };

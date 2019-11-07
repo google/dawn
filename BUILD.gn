@@ -839,7 +839,7 @@ test("dawn_unittests") {
     "src/tests/unittests/validation/ValidationTest.cpp",
     "src/tests/unittests/validation/ValidationTest.h",
     "src/tests/unittests/validation/VertexBufferValidationTests.cpp",
-    "src/tests/unittests/validation/VertexInputValidationTests.cpp",
+    "src/tests/unittests/validation/VertexStateValidationTests.cpp",
     "src/tests/unittests/wire/WireArgumentTests.cpp",
     "src/tests/unittests/wire/WireBasicTests.cpp",
     "src/tests/unittests/wire/WireBufferMappingTests.cpp",
@@ -918,7 +918,7 @@ source_set("dawn_end2end_tests_sources") {
     "src/tests/end2end/TextureViewTests.cpp",
     "src/tests/end2end/TextureZeroInitTests.cpp",
     "src/tests/end2end/VertexFormatTests.cpp",
-    "src/tests/end2end/VertexInputTests.cpp",
+    "src/tests/end2end/VertexStateTests.cpp",
     "src/tests/end2end/ViewportOrientationTests.cpp",
     "src/tests/end2end/ViewportTests.cpp",
   ]

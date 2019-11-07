@@ -18,11 +18,11 @@
 
 namespace utils {
 
-    ComboVertexInputDescriptor::ComboVertexInputDescriptor() {
-        wgpu::VertexInputDescriptor* descriptor = this;
+    ComboVertexStateDescriptor::ComboVertexStateDescriptor() {
+        wgpu::VertexStateDescriptor* descriptor = this;
 
         descriptor->indexFormat = wgpu::IndexFormat::Uint32;
-        descriptor->bufferCount = 0;
+        descriptor->vertexBufferCount = 0;
 
         // Fill the default values for vertexBuffers and vertexAttributes in buffers.
         wgpu::VertexAttributeDescriptor vertexAttribute;
@@ -33,17 +33,18 @@ namespace utils {
             cAttributes[i] = vertexAttribute;
         }
         for (uint32_t i = 0; i < kMaxVertexBuffers; ++i) {
-            cBuffers[i].stride = 0;
-            cBuffers[i].stepMode = wgpu::InputStepMode::Vertex;
-            cBuffers[i].attributeCount = 0;
-            cBuffers[i].attributes = nullptr;
+            cVertexBuffers[i].arrayStride = 0;
+            cVertexBuffers[i].stepMode = wgpu::InputStepMode::Vertex;
+            cVertexBuffers[i].attributeCount = 0;
+            cVertexBuffers[i].attributes = nullptr;
         }
-        // cBuffers[i].attributes points to somewhere in cAttributes. cBuffers[0].attributes
-        // points to &cAttributes[0] by default. Assuming cBuffers[0] has two attributes, then
-        // cBuffers[1].attributes should point to &cAttributes[2]. Likewise, if cBuffers[1]
-        // has 3 attributes, then cBuffers[2].attributes should point to &cAttributes[5].
-        cBuffers[0].attributes = &cAttributes[0];
-        descriptor->buffers = &cBuffers[0];
+        // cVertexBuffers[i].attributes points to somewhere in cAttributes.
+        // cVertexBuffers[0].attributes points to &cAttributes[0] by default. Assuming
+        // cVertexBuffers[0] has two attributes, then cVertexBuffers[1].attributes should point to
+        // &cAttributes[2]. Likewise, if cVertexBuffers[1] has 3 attributes, then
+        // cVertexBuffers[2].attributes should point to &cAttributes[5].
+        cVertexBuffers[0].attributes = &cAttributes[0];
+        descriptor->vertexBuffers = &cVertexBuffers[0];
     }
 
     ComboRenderPipelineDescriptor::ComboRenderPipelineDescriptor(const wgpu::Device& device) {
@@ -62,7 +63,7 @@ namespace utils {
         }
 
         // Set defaults for the input state descriptors.
-        descriptor->vertexInput = &cVertexInput;
+        descriptor->vertexState = &cVertexState;
 
         // Set defaults for the rasterization state descriptor.
         {

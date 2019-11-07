@@ -359,7 +359,7 @@ namespace dawn_native { namespace d3d12 {
 
         // D3D12 logs warnings if any empty input state is used
         std::array<D3D12_INPUT_ELEMENT_DESC, kMaxVertexAttributes> inputElementDescriptors;
-        if (GetAttributesSetMask().any()) {
+        if (GetAttributeLocationsUsed().any()) {
             descriptorD3D12.InputLayout = ComputeInputLayout(&inputElementDescriptors);
         }
 
@@ -423,7 +423,7 @@ namespace dawn_native { namespace d3d12 {
     D3D12_INPUT_LAYOUT_DESC RenderPipeline::ComputeInputLayout(
         std::array<D3D12_INPUT_ELEMENT_DESC, kMaxVertexAttributes>* inputElementDescriptors) {
         unsigned int count = 0;
-        for (auto i : IterateBitSet(GetAttributesSetMask())) {
+        for (auto i : IterateBitSet(GetAttributeLocationsUsed())) {
             D3D12_INPUT_ELEMENT_DESC& inputElementDescriptor = (*inputElementDescriptors)[count++];
 
             const VertexAttributeInfo& attribute = GetAttribute(i);
@@ -433,9 +433,9 @@ namespace dawn_native { namespace d3d12 {
             inputElementDescriptor.SemanticName = "TEXCOORD";
             inputElementDescriptor.SemanticIndex = static_cast<uint32_t>(i);
             inputElementDescriptor.Format = VertexFormatType(attribute.format);
-            inputElementDescriptor.InputSlot = attribute.inputSlot;
+            inputElementDescriptor.InputSlot = attribute.vertexBufferSlot;
 
-            const VertexBufferInfo& input = GetInput(attribute.inputSlot);
+            const VertexBufferInfo& input = GetVertexBuffer(attribute.vertexBufferSlot);
 
             inputElementDescriptor.AlignedByteOffset = attribute.offset;
             inputElementDescriptor.InputSlotClass = InputStepModeFunction(input.stepMode);

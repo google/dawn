@@ -41,14 +41,14 @@ namespace dawn_native {
     bool BlendEnabled(const ColorStateDescriptor* mColorState);
 
     struct VertexAttributeInfo {
-        uint32_t shaderLocation;
-        uint32_t inputSlot;
-        uint64_t offset;
         wgpu::VertexFormat format;
+        uint64_t offset;
+        uint32_t shaderLocation;
+        uint32_t vertexBufferSlot;
     };
 
     struct VertexBufferInfo {
-        uint64_t stride;
+        uint64_t arrayStride;
         wgpu::InputStepMode stepMode;
     };
 
@@ -59,11 +59,11 @@ namespace dawn_native {
 
         static RenderPipelineBase* MakeError(DeviceBase* device);
 
-        const VertexInputDescriptor* GetVertexInputDescriptor() const;
-        const std::bitset<kMaxVertexAttributes>& GetAttributesSetMask() const;
+        const VertexStateDescriptor* GetVertexStateDescriptor() const;
+        const std::bitset<kMaxVertexAttributes>& GetAttributeLocationsUsed() const;
         const VertexAttributeInfo& GetAttribute(uint32_t location) const;
-        const std::bitset<kMaxVertexBuffers>& GetInputsSetMask() const;
-        const VertexBufferInfo& GetInput(uint32_t slot) const;
+        const std::bitset<kMaxVertexBuffers>& GetVertexBufferSlotsUsed() const;
+        const VertexBufferInfo& GetVertexBuffer(uint32_t slot) const;
 
         const ColorStateDescriptor* GetColorStateDescriptor(uint32_t attachmentSlot) const;
         const DepthStencilStateDescriptor* GetDepthStencilStateDescriptor() const;
@@ -79,8 +79,9 @@ namespace dawn_native {
 
         const AttachmentState* GetAttachmentState() const;
 
-        std::bitset<kMaxVertexAttributes> GetAttributesUsingInput(uint32_t slot) const;
-        std::array<std::bitset<kMaxVertexAttributes>, kMaxVertexBuffers> attributesUsingInput;
+        std::bitset<kMaxVertexAttributes> GetAttributesUsingVertexBuffer(uint32_t slot) const;
+        std::array<std::bitset<kMaxVertexAttributes>, kMaxVertexBuffers>
+            attributesUsingVertexBuffer;
 
         // Functors necessary for the unordered_set<RenderPipelineBase*>-based cache.
         struct HashFunc {
@@ -93,12 +94,12 @@ namespace dawn_native {
       private:
         RenderPipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
-        // Vertex input
-        VertexInputDescriptor mVertexInput;
-        std::bitset<kMaxVertexAttributes> mAttributesSetMask;
+        // Vertex state
+        VertexStateDescriptor mVertexState;
+        std::bitset<kMaxVertexAttributes> mAttributeLocationsUsed;
         std::array<VertexAttributeInfo, kMaxVertexAttributes> mAttributeInfos;
-        std::bitset<kMaxVertexBuffers> mInputsSetMask;
-        std::array<VertexBufferInfo, kMaxVertexBuffers> mInputInfos;
+        std::bitset<kMaxVertexBuffers> mVertexBufferSlotsUsed;
+        std::array<VertexBufferInfo, kMaxVertexBuffers> mVertexBufferInfos;
 
         // Attachments
         Ref<AttachmentState> mAttachmentState;

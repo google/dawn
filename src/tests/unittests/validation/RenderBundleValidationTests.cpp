@@ -98,11 +98,11 @@ namespace {
             descriptor->layout = pipelineLayout;
             descriptor->vertexStage.module = vsModule;
             descriptor->cFragmentStage.module = fsModule;
-            descriptor->cVertexInput.bufferCount = 1;
-            descriptor->cVertexInput.cBuffers[0].stride = 2 * sizeof(float);
-            descriptor->cVertexInput.cBuffers[0].attributeCount = 1;
-            descriptor->cVertexInput.cAttributes[0].format = wgpu::VertexFormat::Float2;
-            descriptor->cVertexInput.cAttributes[0].shaderLocation = 0;
+            descriptor->cVertexState.vertexBufferCount = 1;
+            descriptor->cVertexState.cVertexBuffers[0].arrayStride = 2 * sizeof(float);
+            descriptor->cVertexState.cVertexBuffers[0].attributeCount = 1;
+            descriptor->cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float2;
+            descriptor->cVertexState.cAttributes[0].shaderLocation = 0;
         }
 
         wgpu::ShaderModule vsModule;

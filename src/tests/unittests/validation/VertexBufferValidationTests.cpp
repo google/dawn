@@ -70,13 +70,13 @@ class VertexBufferValidationTest : public ValidationTest {
             descriptor.cFragmentStage.module = fsModule;
 
             for (unsigned int i = 0; i < bufferCount; ++i) {
-                descriptor.cVertexInput.cBuffers[i].attributeCount = 1;
-                descriptor.cVertexInput.cBuffers[i].attributes =
-                    &descriptor.cVertexInput.cAttributes[i];
-                descriptor.cVertexInput.cAttributes[i].shaderLocation = i;
-                descriptor.cVertexInput.cAttributes[i].format = wgpu::VertexFormat::Float3;
+                descriptor.cVertexState.cVertexBuffers[i].attributeCount = 1;
+                descriptor.cVertexState.cVertexBuffers[i].attributes =
+                    &descriptor.cVertexState.cAttributes[i];
+                descriptor.cVertexState.cAttributes[i].shaderLocation = i;
+                descriptor.cVertexState.cAttributes[i].format = wgpu::VertexFormat::Float3;
             }
-            descriptor.cVertexInput.bufferCount = bufferCount;
+            descriptor.cVertexState.vertexBufferCount = bufferCount;
 
             return device.CreateRenderPipeline(&descriptor);
         }

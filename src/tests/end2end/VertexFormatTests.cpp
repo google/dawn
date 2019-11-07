@@ -362,10 +362,10 @@ class VertexFormatTest : public DawnTest {
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
-        descriptor.cVertexInput.bufferCount = 1;
-        descriptor.cVertexInput.cBuffers[0].stride = strideBytes;
-        descriptor.cVertexInput.cBuffers[0].attributeCount = 1;
-        descriptor.cVertexInput.cAttributes[0].format = format;
+        descriptor.cVertexState.vertexBufferCount = 1;
+        descriptor.cVertexState.cVertexBuffers[0].arrayStride = strideBytes;
+        descriptor.cVertexState.cVertexBuffers[0].attributeCount = 1;
+        descriptor.cVertexState.cAttributes[0].format = format;
         descriptor.cColorStates[0].format = renderPass.colorFormat;
 
         return device.CreateRenderPipeline(&descriptor);

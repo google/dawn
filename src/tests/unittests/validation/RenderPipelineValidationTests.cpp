@@ -57,7 +57,7 @@ TEST_F(RenderPipelineValidationTest, CreationSuccess) {
         utils::ComboRenderPipelineDescriptor descriptor(device);
         descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
-        descriptor.vertexInput = nullptr;
+        descriptor.vertexState = nullptr;
 
         device.CreateRenderPipeline(&descriptor);
     }

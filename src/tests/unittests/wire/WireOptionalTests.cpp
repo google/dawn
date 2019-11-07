@@ -90,11 +90,11 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     colorStateDescriptor.writeMask = WGPUColorWriteMask_All;
 
     // Create the input state
-    WGPUVertexInputDescriptor vertexInput;
-    vertexInput.nextInChain = nullptr;
-    vertexInput.indexFormat = WGPUIndexFormat_Uint32;
-    vertexInput.bufferCount = 0;
-    vertexInput.buffers = nullptr;
+    WGPUVertexStateDescriptor vertexState;
+    vertexState.nextInChain = nullptr;
+    vertexState.indexFormat = WGPUIndexFormat_Uint32;
+    vertexState.vertexBufferCount = 0;
+    vertexState.vertexBuffers = nullptr;
 
     // Create the rasterization state
     WGPURasterizationStateDescriptor rasterizationState;
@@ -154,7 +154,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     pipelineDescriptor.sampleMask = 0xFFFFFFFF;
     pipelineDescriptor.alphaToCoverageEnabled = false;
     pipelineDescriptor.layout = layout;
-    pipelineDescriptor.vertexInput = &vertexInput;
+    pipelineDescriptor.vertexState = &vertexState;
     pipelineDescriptor.primitiveTopology = WGPUPrimitiveTopology_TriangleList;
     pipelineDescriptor.rasterizationState = &rasterizationState;
 
