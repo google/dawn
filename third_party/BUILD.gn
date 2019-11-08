@@ -369,6 +369,7 @@ if (is_win || (is_linux && !is_chromeos) || is_mac) {
       cflags_objc = [
         "-Wno-sign-compare",
         "-Wno-unguarded-availability",
+        "-Wno-objc-multiple-method-names",
       ]
     }
   }
