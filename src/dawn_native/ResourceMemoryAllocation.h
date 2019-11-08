@@ -54,14 +54,14 @@ namespace dawn_native {
                                  uint64_t offset,
                                  ResourceHeapBase* resourceHeap,
                                  uint8_t* mappedPointer = nullptr);
-        ~ResourceMemoryAllocation() = default;
+        virtual ~ResourceMemoryAllocation() = default;
 
         ResourceHeapBase* GetResourceHeap() const;
         uint64_t GetOffset() const;
         uint8_t* GetMappedPointer() const;
         AllocationInfo GetInfo() const;
 
-        void Invalidate();
+        virtual void Invalidate();
 
       private:
         AllocationInfo mInfo;

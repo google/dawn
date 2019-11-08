@@ -168,6 +168,8 @@ namespace dawn_native { namespace d3d12 {
         // Invalidate the allocation immediately in case one accidentally
         // calls DeallocateMemory again using the same allocation.
         allocation.Invalidate();
+
+        ASSERT(allocation.GetD3D12Resource().Get() == nullptr);
     }
 
     void ResourceAllocatorManager::FreeMemory(ResourceHeapAllocation& allocation) {

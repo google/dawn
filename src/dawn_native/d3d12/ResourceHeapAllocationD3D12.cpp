@@ -23,6 +23,11 @@ namespace dawn_native { namespace d3d12 {
         : ResourceMemoryAllocation(info, offset, nullptr), mResource(std::move(resource)) {
     }
 
+    void ResourceHeapAllocation::Invalidate() {
+        ResourceMemoryAllocation::Invalidate();
+        mResource.Reset();
+    }
+
     ComPtr<ID3D12Resource> ResourceHeapAllocation::GetD3D12Resource() const {
         return mResource;
     }
