@@ -27,12 +27,13 @@ namespace {
         }
 
         DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&context, &input]() {
+            shaderc_spvc::CompilationResult result;
             shaderc_spvc::CompileOptions options;
             options.SetSourceEnvironment(shaderc_target_env_webgpu, shaderc_env_version_webgpu);
             options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
 
             // Using the options that are used by Dawn, they appear in ShaderModuleMTL.mm
-            context.CompileSpvToMsl(input.data(), input.size(), options);
+            context.CompileSpvToMsl(input.data(), input.size(), options, &result);
         });
 
         return 0;

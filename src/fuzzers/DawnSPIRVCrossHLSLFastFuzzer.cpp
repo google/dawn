@@ -27,6 +27,7 @@ namespace {
         }
 
         DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&context, &input]() {
+            shaderc_spvc::CompilationResult result;
             shaderc_spvc::CompileOptions options;
             options.SetSourceEnvironment(shaderc_target_env_webgpu, shaderc_env_version_webgpu);
             options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
@@ -39,7 +40,7 @@ namespace {
             // See https://github.com/gpuweb/gpuweb/issues/332
             options.SetHLSLPointCoordCompat(true);
             options.SetHLSLPointSizeCompat(true);
-            context.CompileSpvToHlsl(input.data(), input.size(), options);
+            context.CompileSpvToHlsl(input.data(), input.size(), options, &result);
         });
 
         return 0;

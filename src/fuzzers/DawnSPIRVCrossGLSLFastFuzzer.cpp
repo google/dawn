@@ -26,6 +26,7 @@ namespace {
         }
 
         DawnSPIRVCrossFuzzer::ExecuteWithSignalTrap([&context, &input]() {
+            shaderc_spvc::CompilationResult result;
             shaderc_spvc::CompileOptions options;
             options.SetSourceEnvironment(shaderc_target_env_webgpu, shaderc_env_version_webgpu);
             options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
@@ -33,7 +34,7 @@ namespace {
             // Using the options that are used by Dawn, they appear in ShaderModuleGL.cpp
             options.SetGLSLLanguageVersion(440);
             options.SetFixupClipspace(true);
-            context.CompileSpvToGlsl(input.data(), input.size(), options);
+            context.CompileSpvToGlsl(input.data(), input.size(), options, &result);
         });
 
         return 0;
