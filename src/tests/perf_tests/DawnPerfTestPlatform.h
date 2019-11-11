@@ -18,6 +18,9 @@
 #include <dawn_platform/DawnPlatform.h>
 
 #include <memory>
+#include <mutex>
+#include <thread>
+#include <unordered_map>
 #include <vector>
 
 namespace utils {
@@ -44,6 +47,7 @@ class DawnPerfTestPlatform : public dawn_platform::Platform {
         dawn_platform::TraceCategory category;
         const char* name = nullptr;
         uint64_t id = 0;
+        std::string threadId;
         double timestamp = 0;
     };
 
@@ -58,6 +62,8 @@ class DawnPerfTestPlatform : public dawn_platform::Platform {
         dawn_platform::TraceCategory category) override;
 
     double MonotonicallyIncreasingTime() override;
+
+    std::vector<TraceEvent>* GetLocalTraceEventBuffer();
 
     uint64_t AddTraceEvent(char phase,
                            const unsigned char* categoryGroupEnabled,
@@ -74,7 +80,12 @@ class DawnPerfTestPlatform : public dawn_platform::Platform {
     std::unique_ptr<utils::Timer> mTimer;
 
     // Trace event record.
-    std::vector<TraceEvent> mTraceEventBuffer;
+    // Each uses their own trace event buffer, but the PerfTestPlatform owns all of them in
+    // this map. The map stores all of them so we can iterate through them and flush when
+    // AcquireTraceEventBuffer is called.
+    std::unordered_map<std::thread::id, std::unique_ptr<std::vector<TraceEvent>>>
+        mTraceEventBuffers;
+    std::mutex mTraceEventBufferMapMutex;
 };
 
 #endif  // TESTS_PERFTESTS_DAWNPERFTESTPLATFORM_H_

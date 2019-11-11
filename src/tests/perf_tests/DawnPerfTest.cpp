@@ -65,6 +65,7 @@ namespace {
             }
             value["ph"] = &phase[0];
             value["id"] = traceEvent.id;
+            value["tid"] = traceEvent.threadId;
             value["ts"] = microseconds;
             value["pid"] = "Dawn";
 
@@ -265,6 +266,9 @@ void DawnPerfTestBase::DoRunLoop(double maxRunTime) {
     }
 
     // Wait for all GPU commands to complete.
+    // TODO(enga): When Dawn has multiple backgrounds threads, add a Device::WaitForIdleForTesting()
+    // which waits for all threads to stop doing work. When we output results, there should
+    // be no additional incoming trace events.
     while (signaledFenceValue != fence.GetCompletedValue()) {
         mTest->WaitABit();
     }
@@ -273,6 +277,9 @@ void DawnPerfTestBase::DoRunLoop(double maxRunTime) {
 }
 
 void DawnPerfTestBase::OutputResults() {
+    // TODO(enga): When Dawn has multiple backgrounds threads, add a Device::WaitForIdleForTesting()
+    // which waits for all threads to stop doing work. When we output results, there should
+    // be no additional incoming trace events.
     DawnPerfTestPlatform* platform =
         reinterpret_cast<DawnPerfTestPlatform*>(gTestEnv->GetInstance()->GetPlatform());
 
