@@ -154,12 +154,27 @@ namespace dawn_native {
                 info.used = true;
                 info.id = resource.id;
                 info.base_type_id = resource.base_type_id;
-                info.type = bindingType;
-                if (info.type == wgpu::BindingType::SampledTexture) {
-                    spirv_cross::SPIRType::BaseType textureComponentType =
-                        compiler.get_type(compiler.get_type(info.base_type_id).image.type).basetype;
-                    info.textureComponentType =
-                        SpirvCrossBaseTypeToFormatType(textureComponentType);
+                switch (bindingType) {
+                    case wgpu::BindingType::SampledTexture: {
+                        spirv_cross::SPIRType::BaseType textureComponentType =
+                            compiler.get_type(compiler.get_type(info.base_type_id).image.type)
+                                .basetype;
+                        info.textureComponentType =
+                            SpirvCrossBaseTypeToFormatType(textureComponentType);
+                        info.type = bindingType;
+                    } break;
+                    case wgpu::BindingType::StorageBuffer: {
+                        // Differentiate between readonly storage bindings and writable ones based
+                        // on the NonWritable decoration
+                        spirv_cross::Bitset flags = compiler.get_buffer_block_flags(resource.id);
+                        if (flags.get(spv::DecorationNonWritable)) {
+                            info.type = wgpu::BindingType::ReadonlyStorageBuffer;
+                        } else {
+                            info.type = wgpu::BindingType::StorageBuffer;
+                        }
+                    } break;
+                    default:
+                        info.type = bindingType;
                 }
             }
         };
@@ -285,7 +300,16 @@ namespace dawn_native {
             }
 
             if (layoutBindingType != moduleInfo.type) {
-                return false;
+                // Binding mismatch between shader and bind group is invalid. For example, a
+                // writable binding in the shader with a readonly storage buffer in the bind group
+                // layout is invalid. However, a readonly binding in the shader with a writable
+                // storage buffer in the bind group layout is valid.
+                bool validBindingConversion =
+                    layoutBindingType == wgpu::BindingType::StorageBuffer &&
+                    moduleInfo.type == wgpu::BindingType::ReadonlyStorageBuffer;
+                if (!validBindingConversion) {
+                    return false;
+                }
             }
 
             if ((layoutInfo.visibilities[i] & StageBit(mExecutionModel)) == 0) {
