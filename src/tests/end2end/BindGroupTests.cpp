@@ -113,6 +113,9 @@ protected:
       pipelineDescriptor.cColorStates[0].colorBlend.operation = wgpu::BlendOperation::Add;
       pipelineDescriptor.cColorStates[0].colorBlend.srcFactor = wgpu::BlendFactor::One;
       pipelineDescriptor.cColorStates[0].colorBlend.dstFactor = wgpu::BlendFactor::One;
+      pipelineDescriptor.cColorStates[0].alphaBlend.operation = wgpu::BlendOperation::Add;
+      pipelineDescriptor.cColorStates[0].alphaBlend.srcFactor = wgpu::BlendFactor::One;
+      pipelineDescriptor.cColorStates[0].alphaBlend.dstFactor = wgpu::BlendFactor::One;
 
       return device.CreateRenderPipeline(&pipelineDescriptor);
   }
@@ -466,7 +469,9 @@ TEST_P(BindGroupTests, DrawTwiceInSamePipelineWithFourBindGroupSets) {
 
     pass.SetPipeline(pipeline);
 
-    std::array<float, 4> color = {0.25, 0, 0, 0.25};
+    // The color will be added 8 times, so the value should be 0.125. But we choose 0.126
+    // because of precision issues on some devices (for example NVIDIA bots).
+    std::array<float, 4> color = {0.126, 0, 0, 0.126};
     wgpu::Buffer uniformBuffer =
         utils::CreateBufferFromData(device, &color, sizeof(color), wgpu::BufferUsage::Uniform);
     wgpu::BindGroup bindGroup =
@@ -704,11 +709,11 @@ TEST_P(BindGroupTests, DrawThenChangePipelineAndBindGroup) {
     // Prepare color data.
     // The first draw will use { color0, color1, color2 }.
     // The second draw will use { color0, color3, color2 }.
-    // The pipeline uses additive color blending so the result of two draws should be
-    // { 2 * color0 + color1 + color2 + color3} = RGBAunorm(1, 1, 1, 1)
+    // The pipeline uses additive color and alpha blending so the result of two draws should be
+    // { 2 * color0 + color1 + 2 * color2 + color3} = RGBAunorm(1, 1, 1, 1)
     std::array<float, 4> color0 = {0.501, 0, 0, 0};
     std::array<float, 4> color1 = {0, 1, 0, 0};
-    std::array<float, 4> color2 = {0, 0, 0, 1};
+    std::array<float, 4> color2 = {0, 0, 0, 0.501};
     std::array<float, 4> color3 = {0, 0, 1, 0};
 
     size_t color1Offset = Align(sizeof(color0), kMinDynamicBufferOffsetAlignment);

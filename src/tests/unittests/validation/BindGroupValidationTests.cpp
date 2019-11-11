@@ -693,8 +693,6 @@ class SetBindGroupValidationTest : public ValidationTest {
     }
 
     wgpu::BindGroupLayout mBindGroupLayout;
-    wgpu::Buffer mUniformBuffer;
-    wgpu::Buffer mStorageBuffer;
 
     wgpu::RenderPipeline CreateRenderPipeline() {
         wgpu::ShaderModule vsModule =
