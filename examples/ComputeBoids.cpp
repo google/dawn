@@ -261,7 +261,7 @@ void initSim() {
     }
 }
 
-wgpu::CommandBuffer createCommandBuffer(const wgpu::Texture backbuffer, size_t i) {
+wgpu::CommandBuffer createCommandBuffer(const wgpu::TextureView backbufferView, size_t i) {
     auto& bufferDst = particleBuffers[(i + 1) % 2];
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
@@ -274,7 +274,7 @@ wgpu::CommandBuffer createCommandBuffer(const wgpu::Texture backbuffer, size_t i
     }
 
     {
-        utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateView()}, depthStencilView);
+        utils::ComboRenderPassDescriptor renderPass({backbufferView}, depthStencilView);
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(renderPipeline);
         pass.SetVertexBuffer(0, bufferDst);
@@ -300,11 +300,11 @@ void init() {
 }
 
 void frame() {
-    wgpu::Texture backbuffer = swapchain.GetNextTexture();
+    wgpu::TextureView backbufferView = swapchain.GetCurrentTextureView();
 
-    wgpu::CommandBuffer commandBuffer = createCommandBuffer(backbuffer, pingpong);
+    wgpu::CommandBuffer commandBuffer = createCommandBuffer(backbufferView, pingpong);
     queue.Submit(1, &commandBuffer);
-    swapchain.Present(backbuffer);
+    swapchain.Present();
     DoFlush();
 
     pingpong = (pingpong + 1) % 2;

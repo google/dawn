@@ -1188,16 +1188,8 @@
                     {"name": "height", "type": "uint32_t"}
                 ]
             },
-            {
-                "name": "get next texture",
-                "returns": "texture"
-            },
-            {
-                "name": "present",
-                "args": [
-                    {"name": "texture", "type": "texture"}
-                ]
-            }
+            {"name": "get current texture view", "returns": "texture view"},
+            {"name": "present"}
         ]
     },
     "swap chain descriptor": {

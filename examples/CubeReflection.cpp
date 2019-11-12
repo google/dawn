@@ -264,8 +264,8 @@ void frame() {
 
     cameraBuffer.SetSubData(0, sizeof(CameraData), &cameraData);
 
-    wgpu::Texture backbuffer = swapchain.GetNextTexture();
-    utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateView()}, depthStencilView);
+    wgpu::TextureView backbufferView = swapchain.GetCurrentTextureView();
+    utils::ComboRenderPassDescriptor renderPass({backbufferView}, depthStencilView);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
@@ -292,7 +292,7 @@ void frame() {
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
-    swapchain.Present(backbuffer);
+    swapchain.Present();
     DoFlush();
 }
 

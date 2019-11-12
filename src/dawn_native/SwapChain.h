@@ -39,8 +39,8 @@ namespace dawn_native {
                        wgpu::TextureUsage allowedUsage,
                        uint32_t width,
                        uint32_t height);
-        TextureBase* GetNextTexture();
-        void Present(TextureBase* texture);
+        TextureViewBase* GetCurrentTextureView();
+        void Present();
 
       protected:
         SwapChainBase(DeviceBase* device, ObjectBase::ErrorTag tag);
@@ -54,15 +54,16 @@ namespace dawn_native {
                                      wgpu::TextureUsage allowedUsage,
                                      uint32_t width,
                                      uint32_t height) const;
-        MaybeError ValidateGetNextTexture() const;
-        MaybeError ValidatePresent(TextureBase* texture) const;
+        MaybeError ValidateGetCurrentTextureView() const;
+        MaybeError ValidatePresent() const;
 
         DawnSwapChainImplementation mImplementation = {};
         wgpu::TextureFormat mFormat = {};
         wgpu::TextureUsage mAllowedUsage;
         uint32_t mWidth = 0;
         uint32_t mHeight = 0;
-        TextureBase* mLastNextTexture = nullptr;
+        Ref<TextureBase> mCurrentTexture;
+        Ref<TextureViewBase> mCurrentTextureView;
     };
 
 }  // namespace dawn_native

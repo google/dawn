@@ -125,8 +125,7 @@ void init() {
 }
 
 void frame() {
-    WGPUTexture backbuffer = wgpuSwapChainGetNextTexture(swapchain);
-    WGPUTextureView backbufferView = wgpuTextureCreateView(backbuffer, nullptr);
+    WGPUTextureView backbufferView = wgpuSwapChainGetCurrentTextureView(swapchain);
     WGPURenderPassDescriptor renderpassInfo;
     renderpassInfo.nextInChain = nullptr;
     renderpassInfo.label = nullptr;
@@ -157,7 +156,7 @@ void frame() {
 
     wgpuQueueSubmit(queue, 1, &commands);
     wgpuCommandBufferRelease(commands);
-    wgpuSwapChainPresent(swapchain, backbuffer);
+    wgpuSwapChainPresent(swapchain);
     wgpuTextureViewRelease(backbufferView);
 
     DoFlush();

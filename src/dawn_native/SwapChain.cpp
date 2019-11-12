@@ -99,12 +99,21 @@ namespace dawn_native {
                                   static_cast<WGPUTextureUsage>(allowedUsage), width, height);
     }
 
-    TextureBase* SwapChainBase::GetNextTexture() {
-        if (GetDevice()->ConsumedError(ValidateGetNextTexture())) {
-            return TextureBase::MakeError(GetDevice());
+    TextureViewBase* SwapChainBase::GetCurrentTextureView() {
+        if (GetDevice()->ConsumedError(ValidateGetCurrentTextureView())) {
+            return TextureViewBase::MakeError(GetDevice());
         }
         ASSERT(!IsError());
 
+        // Return the same current texture view until Present is called.
+        if (mCurrentTextureView.Get() != nullptr) {
+            // Calling GetCurrentTextureView always returns a new reference so add it even when
+            // reuse the existing texture view.
+            mCurrentTextureView->Reference();
+            return mCurrentTextureView.Get();
+        }
+
+        // Create the backing texture and the view.
         TextureDescriptor descriptor;
         descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size.width = mWidth;
@@ -116,21 +125,28 @@ namespace dawn_native {
         descriptor.mipLevelCount = 1;
         descriptor.usage = mAllowedUsage;
 
-        auto* texture = GetNextTextureImpl(&descriptor);
-        mLastNextTexture = texture;
-        return texture;
+        // Get the texture but remove the external refcount because it is never passed outside
+        // of dawn_native
+        mCurrentTexture = AcquireRef(GetNextTextureImpl(&descriptor));
+
+        mCurrentTextureView = mCurrentTexture->CreateView(nullptr);
+        return mCurrentTextureView.Get();
     }
 
-    void SwapChainBase::Present(TextureBase* texture) {
-        if (GetDevice()->ConsumedError(ValidatePresent(texture))) {
+    void SwapChainBase::Present() {
+        if (GetDevice()->ConsumedError(ValidatePresent())) {
             return;
         }
         ASSERT(!IsError());
 
-        if (GetDevice()->ConsumedError(OnBeforePresent(texture)))
+        if (GetDevice()->ConsumedError(OnBeforePresent(mCurrentTexture.Get()))) {
             return;
+        }
 
         mImplementation.Present(mImplementation.userData);
+
+        mCurrentTexture = nullptr;
+        mCurrentTextureView = nullptr;
     }
 
     const DawnSwapChainImplementation& SwapChainBase::GetImplementation() {
@@ -154,7 +170,7 @@ namespace dawn_native {
         return {};
     }
 
-    MaybeError SwapChainBase::ValidateGetNextTexture() const {
+    MaybeError SwapChainBase::ValidateGetCurrentTextureView() const {
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
         if (mWidth == 0) {
@@ -165,14 +181,12 @@ namespace dawn_native {
         return {};
     }
 
-    MaybeError SwapChainBase::ValidatePresent(TextureBase* texture) const {
+    MaybeError SwapChainBase::ValidatePresent() const {
         DAWN_TRY(GetDevice()->ValidateObject(this));
-        DAWN_TRY(GetDevice()->ValidateObject(texture));
 
-        // This also checks that the texture is valid since mLastNextTexture is always valid.
-        if (texture != mLastNextTexture) {
+        if (mCurrentTextureView.Get() == nullptr) {
             return DAWN_VALIDATION_ERROR(
-                "Tried to present something other than the last NextTexture");
+                "Cannot call present without a GetCurrentTextureView call for this frame");
         }
 
         return {};

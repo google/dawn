@@ -143,7 +143,7 @@ void init() {
 }
 
 void frame() {
-    wgpu::Texture backbuffer = swapchain.GetNextTexture();
+    wgpu::TextureView backbufferView = swapchain.GetCurrentTextureView();
 
     static int f = 0;
     f++;
@@ -152,7 +152,7 @@ void frame() {
     }
     ubo.SetSubData(0, kNumTriangles * sizeof(ShaderData), shaderData.data());
 
-    utils::ComboRenderPassDescriptor renderPass({backbuffer.CreateView()});
+    utils::ComboRenderPassDescriptor renderPass({backbufferView});
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
@@ -169,7 +169,7 @@ void frame() {
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
-    swapchain.Present(backbuffer);
+    swapchain.Present();
     DoFlush();
     fprintf(stderr, "frame %i\n", f);
 }
