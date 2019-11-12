@@ -75,8 +75,12 @@ namespace dawn_native {
               {"use_d3d12_resource_heap_tier2",
                "Enable support for resource heap tier 2. Resource heap tier 2 allows mixing of "
                "texture and buffers in the same heap. This allows better heap re-use and reduces "
-               "fragmentation."}}}};
-
+               "fragmentation."}},
+             {Toggle::UseD3D12RenderPass,
+              {"use_d3d12_render_pass",
+               "Use the D3D12 render pass API introduced in Windows build 1809 by default. On "
+               "versions of Windows prior to build 1809, or when this toggle is turned off, Dawn "
+               "will emulate a render pass."}}}};
     }  // anonymous namespace
 
     void TogglesSet::SetToggle(Toggle toggle, bool enabled) {

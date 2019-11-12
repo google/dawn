@@ -25,6 +25,7 @@ namespace dawn_native { namespace d3d12 {
     struct D3D12DeviceInfo {
         bool isUMA;
         uint32_t resourceHeapTier;
+        bool supportsRenderPass;
     };
 
     ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const Adapter& adapter);

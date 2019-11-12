@@ -779,5 +779,8 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencilStoreOpClear) {
 DAWN_INSTANTIATE_TEST(
     TextureZeroInitTest,
     ForceWorkarounds(D3D12Backend, {"nonzero_clear_resources_on_creation_for_testing"}),
+    ForceWorkarounds(D3D12Backend,
+                     {"nonzero_clear_resources_on_creation_for_testing"},
+                     {"use_d3d12_render_pass"}),
     ForceWorkarounds(OpenGLBackend, {"nonzero_clear_resources_on_creation_for_testing"}),
     ForceWorkarounds(VulkanBackend, {"nonzero_clear_resources_on_creation_for_testing"}));

@@ -41,6 +41,9 @@ namespace dawn_native { namespace d3d12 {
                                                nullptr, IID_PPV_ARGS(&d3d12GraphicsCommandList)),
                 "D3D12 creating direct command list"));
             mD3d12CommandList = std::move(d3d12GraphicsCommandList);
+            // Store a cast to ID3D12GraphicsCommandList4. This is required to use the D3D12 render
+            // pass APIs introduced in Windows build 1809.
+            mD3d12CommandList.As(&mD3d12CommandList4);
         }
 
         mIsOpen = true;
@@ -80,8 +83,17 @@ namespace dawn_native { namespace d3d12 {
         return mD3d12CommandList.Get();
     }
 
+    // This function will fail on Windows versions prior to 1809. Support must be queried through
+    // the device before calling.
+    ID3D12GraphicsCommandList4* CommandRecordingContext::GetCommandList4() const {
+        ASSERT(IsOpen());
+        ASSERT(mD3d12CommandList.Get() != nullptr);
+        return mD3d12CommandList4.Get();
+    }
+
     void CommandRecordingContext::Release() {
         mD3d12CommandList.Reset();
+        mD3d12CommandList4.Reset();
         mIsOpen = false;
         mSharedTextures.clear();
     }

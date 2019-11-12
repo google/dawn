@@ -24,25 +24,33 @@ namespace dawn_native { namespace d3d12 {
     ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const Adapter& adapter) {
         D3D12DeviceInfo info = {};
 
-        // Gather info about device memory
-        {
-            // Newer builds replace D3D_FEATURE_DATA_ARCHITECTURE with
-            // D3D_FEATURE_DATA_ARCHITECTURE1. However, D3D_FEATURE_DATA_ARCHITECTURE can be used
-            // for backwards compat.
-            // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ne-d3d12-d3d12_feature
-            D3D12_FEATURE_DATA_ARCHITECTURE arch = {};
-            DAWN_TRY(CheckHRESULT(adapter.GetDevice()->CheckFeatureSupport(
-                                      D3D12_FEATURE_ARCHITECTURE, &arch, sizeof(arch)),
-                                  "ID3D12Device::CheckFeatureSupport"));
+        // Newer builds replace D3D_FEATURE_DATA_ARCHITECTURE with
+        // D3D_FEATURE_DATA_ARCHITECTURE1. However, D3D_FEATURE_DATA_ARCHITECTURE can be used
+        // for backwards compat.
+        // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ne-d3d12-d3d12_feature
+        D3D12_FEATURE_DATA_ARCHITECTURE arch = {};
+        DAWN_TRY(CheckHRESULT(adapter.GetDevice()->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE,
+                                                                       &arch, sizeof(arch)),
+                              "ID3D12Device::CheckFeatureSupport"));
 
-            info.isUMA = arch.UMA;
+        info.isUMA = arch.UMA;
 
-            D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
-            DAWN_TRY(CheckHRESULT(adapter.GetDevice()->CheckFeatureSupport(
-                                      D3D12_FEATURE_D3D12_OPTIONS, &options, sizeof(options)),
-                                  "ID3D12Device::CheckFeatureSupport"));
+        D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
+        DAWN_TRY(CheckHRESULT(adapter.GetDevice()->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS,
+                                                                       &options, sizeof(options)),
+                              "ID3D12Device::CheckFeatureSupport"));
 
-            info.resourceHeapTier = options.ResourceHeapTier;
+        info.resourceHeapTier = options.ResourceHeapTier;
+
+        // Windows builds 1809 and above can use the D3D12 render pass API. If we query
+        // CheckFeatureSupport for D3D12_FEATURE_D3D12_OPTIONS5 successfully, then we can use
+        // the render pass API.
+        D3D12_FEATURE_DATA_D3D12_OPTIONS5 featureOptions5 = {};
+        if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
+                D3D12_FEATURE_D3D12_OPTIONS5, &featureOptions5, sizeof(featureOptions5)))) {
+            info.supportsRenderPass = true;
+        } else {
+            info.supportsRenderPass = false;
         }
 
         return info;

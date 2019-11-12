@@ -171,4 +171,9 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
     EXPECT_PIXEL_RGBA8_EQ(kRed, renderTarget, kRTSize - 1, 1);
 }
 
-DAWN_INSTANTIATE_TEST(RenderPassTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
+DAWN_INSTANTIATE_TEST(RenderPassTest,
+                      D3D12Backend,
+                      ForceWorkarounds(D3D12Backend, {}, {"use_d3d12_render_pass"}),
+                      MetalBackend,
+                      OpenGLBackend,
+                      VulkanBackend);

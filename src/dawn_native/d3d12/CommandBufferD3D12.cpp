@@ -28,6 +28,7 @@
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/PipelineLayoutD3D12.h"
 #include "dawn_native/d3d12/PlatformFunctions.h"
+#include "dawn_native/d3d12/RenderPassBuilderD3D12.h"
 #include "dawn_native/d3d12/RenderPipelineD3D12.h"
 #include "dawn_native/d3d12/SamplerD3D12.h"
 #include "dawn_native/d3d12/TextureCopySplitter.h"
@@ -64,12 +65,6 @@ namespace dawn_native { namespace d3d12 {
 
             return false;
         }
-
-        struct OMSetRenderTargetArgs {
-            unsigned int numRTVs = 0;
-            std::array<D3D12_CPU_DESCRIPTOR_HANDLE, kMaxColorAttachments> RTVs = {};
-            D3D12_CPU_DESCRIPTOR_HANDLE dsv = {};
-        };
 
     }  // anonymous namespace
 
@@ -601,10 +596,12 @@ namespace dawn_native { namespace d3d12 {
 
         // Records the necessary barriers for the resource usage pre-computed by the frontend
         auto TransitionForPass = [](CommandRecordingContext* commandContext,
-                                    const PassResourceUsage& usages) {
+                                    const PassResourceUsage& usages) -> bool {
             std::vector<D3D12_RESOURCE_BARRIER> barriers;
 
             ID3D12GraphicsCommandList* commandList = commandContext->GetCommandList();
+
+            wgpu::BufferUsage bufferUsages = wgpu::BufferUsage::None;
 
             for (size_t i = 0; i < usages.buffers.size(); ++i) {
                 D3D12_RESOURCE_BARRIER barrier;
@@ -613,6 +610,7 @@ namespace dawn_native { namespace d3d12 {
                                                                usages.bufferUsages[i])) {
                     barriers.push_back(barrier);
                 }
+                bufferUsages |= usages.bufferUsages[i];
             }
 
             for (size_t i = 0; i < usages.textures.size(); ++i) {
@@ -627,6 +625,8 @@ namespace dawn_native { namespace d3d12 {
                 }
             }
 
+            wgpu::TextureUsage textureUsages = wgpu::TextureUsage::None;
+
             for (size_t i = 0; i < usages.textures.size(); ++i) {
                 D3D12_RESOURCE_BARRIER barrier;
                 if (ToBackend(usages.textures[i])
@@ -634,11 +634,15 @@ namespace dawn_native { namespace d3d12 {
                                                                usages.textureUsages[i])) {
                     barriers.push_back(barrier);
                 }
+                textureUsages |= usages.textureUsages[i];
             }
 
             if (barriers.size()) {
                 commandList->ResourceBarrier(barriers.size(), barriers.data());
             }
+
+            return (bufferUsages & wgpu::BufferUsage::Storage ||
+                    textureUsages & wgpu::TextureUsage::Storage);
         };
 
         const std::vector<PassResourceUsage>& passResourceUsages = GetResourceUsages().perPass;
@@ -661,10 +665,11 @@ namespace dawn_native { namespace d3d12 {
                     BeginRenderPassCmd* beginRenderPassCmd =
                         mCommands.NextCommand<BeginRenderPassCmd>();
 
-                    TransitionForPass(commandContext, passResourceUsages[nextPassNumber]);
+                    const bool passHasUAV =
+                        TransitionForPass(commandContext, passResourceUsages[nextPassNumber]);
                     bindingTracker.SetInComputePass(false);
                     RecordRenderPass(commandContext, &bindingTracker, &renderPassTracker,
-                                     beginRenderPassCmd);
+                                     beginRenderPassCmd, passHasUAV);
 
                     nextPassNumber++;
                 } break;
@@ -912,125 +917,193 @@ namespace dawn_native { namespace d3d12 {
         }
     }
 
-    void CommandBuffer::RecordRenderPass(CommandRecordingContext* commandContext,
-                                         BindGroupStateTracker* bindingTracker,
-                                         RenderPassDescriptorHeapTracker* renderPassTracker,
-                                         BeginRenderPassCmd* renderPass) {
-        OMSetRenderTargetArgs args = renderPassTracker->GetSubpassOMSetRenderTargetArgs(renderPass);
+    void CommandBuffer::SetupRenderPass(CommandRecordingContext* commandContext,
+                                        BeginRenderPassCmd* renderPass,
+                                        RenderPassBuilder* renderPassBuilder) {
+        for (uint32_t i : IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
+            RenderPassColorAttachmentInfo& attachmentInfo = renderPass->colorAttachments[i];
+            TextureView* view = ToBackend(attachmentInfo.view.Get());
+            Texture* texture = ToBackend(view->GetTexture());
+
+            // Load operation is changed to clear when the texture is uninitialized.
+            if (!texture->IsSubresourceContentInitialized(view->GetBaseMipLevel(), 1,
+                                                          view->GetBaseArrayLayer(), 1) &&
+                attachmentInfo.loadOp == wgpu::LoadOp::Load) {
+                attachmentInfo.loadOp = wgpu::LoadOp::Clear;
+                attachmentInfo.clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
+            }
+
+            // Set color load operation.
+            renderPassBuilder->SetRenderTargetBeginningAccess(
+                i, attachmentInfo.loadOp, attachmentInfo.clearColor, view->GetD3D12Format());
+
+            // Set color store operation.
+            if (attachmentInfo.resolveTarget.Get() != nullptr) {
+                TextureView* resolveDestinationView = ToBackend(attachmentInfo.resolveTarget.Get());
+                Texture* resolveDestinationTexture =
+                    ToBackend(resolveDestinationView->GetTexture());
+
+                resolveDestinationTexture->TransitionUsageNow(commandContext,
+                                                              D3D12_RESOURCE_STATE_RESOLVE_DEST);
+
+                // Mark resolve target as initialized to prevent clearing later.
+                resolveDestinationTexture->SetIsSubresourceContentInitialized(
+                    true, resolveDestinationView->GetBaseMipLevel(), 1,
+                    resolveDestinationView->GetBaseArrayLayer(), 1);
+
+                renderPassBuilder->SetRenderTargetEndingAccessResolve(i, attachmentInfo.storeOp,
+                                                                      view, resolveDestinationView);
+            } else {
+                renderPassBuilder->SetRenderTargetEndingAccess(i, attachmentInfo.storeOp);
+            }
+
+            // Set whether or not the texture requires initialization after the pass.
+            bool isInitialized = attachmentInfo.storeOp == wgpu::StoreOp::Store;
+            texture->SetIsSubresourceContentInitialized(isInitialized, view->GetBaseMipLevel(), 1,
+                                                        view->GetBaseArrayLayer(), 1);
+        }
+
+        if (renderPass->attachmentState->HasDepthStencilAttachment()) {
+            RenderPassDepthStencilAttachmentInfo& attachmentInfo =
+                renderPass->depthStencilAttachment;
+            TextureView* view = ToBackend(renderPass->depthStencilAttachment.view.Get());
+            Texture* texture = ToBackend(view->GetTexture());
+
+            const bool hasDepth = view->GetTexture()->GetFormat().HasDepth();
+            const bool hasStencil = view->GetTexture()->GetFormat().HasStencil();
+
+            // Load operations are changed to clear when the texture is uninitialized.
+            if (!view->GetTexture()->IsSubresourceContentInitialized(
+                    view->GetBaseMipLevel(), view->GetLevelCount(), view->GetBaseArrayLayer(),
+                    view->GetLayerCount())) {
+                if (hasDepth && attachmentInfo.depthLoadOp == wgpu::LoadOp::Load) {
+                    attachmentInfo.clearDepth = 0.0f;
+                    attachmentInfo.depthLoadOp = wgpu::LoadOp::Clear;
+                }
+                if (hasStencil && attachmentInfo.stencilLoadOp == wgpu::LoadOp::Load) {
+                    attachmentInfo.clearStencil = 0u;
+                    attachmentInfo.stencilLoadOp = wgpu::LoadOp::Clear;
+                }
+            }
+
+            // Set depth/stencil load operations.
+            if (hasDepth) {
+                renderPassBuilder->SetDepthAccess(
+                    attachmentInfo.depthLoadOp, attachmentInfo.depthStoreOp,
+                    attachmentInfo.clearDepth, view->GetD3D12Format());
+            } else {
+                renderPassBuilder->SetDepthNoAccess();
+            }
+
+            if (hasStencil) {
+                renderPassBuilder->SetStencilAccess(
+                    attachmentInfo.stencilLoadOp, attachmentInfo.stencilStoreOp,
+                    attachmentInfo.clearStencil, view->GetD3D12Format());
+            } else {
+                renderPassBuilder->SetStencilNoAccess();
+            }
+
+            // Set whether or not the texture requires initialization.
+            ASSERT(!hasDepth || !hasStencil ||
+                   attachmentInfo.depthStoreOp == attachmentInfo.stencilStoreOp);
+            bool isInitialized = attachmentInfo.depthStoreOp == wgpu::StoreOp::Store;
+            texture->SetIsSubresourceContentInitialized(isInitialized, view->GetBaseMipLevel(), 1,
+                                                        view->GetBaseArrayLayer(), 1);
+        } else {
+            renderPassBuilder->SetDepthStencilNoAccess();
+        }
+    }
+
+    void CommandBuffer::EmulateBeginRenderPass(CommandRecordingContext* commandContext,
+                                               const RenderPassBuilder* renderPassBuilder) const {
         ID3D12GraphicsCommandList* commandList = commandContext->GetCommandList();
 
-        // Clear framebuffer attachments as needed and transition to render target
+        // Clear framebuffer attachments as needed.
         {
-            for (uint32_t i :
-                 IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
-                auto& attachmentInfo = renderPass->colorAttachments[i];
-                TextureView* view = ToBackend(attachmentInfo.view.Get());
-
+            for (uint32_t i = 0; i < renderPassBuilder->GetColorAttachmentCount(); i++) {
                 // Load op - color
-                ASSERT(view->GetLevelCount() == 1);
-                ASSERT(view->GetLayerCount() == 1);
-                if (attachmentInfo.loadOp == wgpu::LoadOp::Clear ||
-                    (attachmentInfo.loadOp == wgpu::LoadOp::Load &&
-                     !view->GetTexture()->IsSubresourceContentInitialized(
-                         view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1))) {
-                    D3D12_CPU_DESCRIPTOR_HANDLE handle = args.RTVs[i];
-                    commandList->ClearRenderTargetView(handle, &attachmentInfo.clearColor.r, 0,
-                                                       nullptr);
-                }
-
-                TextureView* resolveView = ToBackend(attachmentInfo.resolveTarget.Get());
-                if (resolveView != nullptr) {
-                    // We need to set the resolve target to initialized so that it does not get
-                    // cleared later in the pipeline. The texture will be resolved from the source
-                    // color attachment, which will be correctly initialized.
-                    ToBackend(resolveView->GetTexture())
-                        ->SetIsSubresourceContentInitialized(
-                            true, resolveView->GetBaseMipLevel(), resolveView->GetLevelCount(),
-                            resolveView->GetBaseArrayLayer(), resolveView->GetLayerCount());
-                }
-
-                switch (attachmentInfo.storeOp) {
-                    case wgpu::StoreOp::Store: {
-                        view->GetTexture()->SetIsSubresourceContentInitialized(
-                            true, view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1);
-                    } break;
-
-                    case wgpu::StoreOp::Clear: {
-                        view->GetTexture()->SetIsSubresourceContentInitialized(
-                            false, view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1);
-                    } break;
-
-                    default: { UNREACHABLE(); } break;
+                if (renderPassBuilder->GetRenderPassRenderTargetDescriptors()[i]
+                        .BeginningAccess.Type == D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_CLEAR) {
+                    commandList->ClearRenderTargetView(
+                        renderPassBuilder->GetRenderPassRenderTargetDescriptors()[i].cpuDescriptor,
+                        renderPassBuilder->GetRenderPassRenderTargetDescriptors()[i]
+                            .BeginningAccess.Clear.ClearValue.Color,
+                        0, nullptr);
                 }
             }
 
-            if (renderPass->attachmentState->HasDepthStencilAttachment()) {
-                auto& attachmentInfo = renderPass->depthStencilAttachment;
-                Texture* texture = ToBackend(renderPass->depthStencilAttachment.view->GetTexture());
-                TextureView* view = ToBackend(attachmentInfo.view.Get());
-                float clearDepth = attachmentInfo.clearDepth;
+            if (renderPassBuilder->HasDepth()) {
+                D3D12_CLEAR_FLAGS clearFlags = {};
+                float depthClear = 0.0f;
+                uint8_t stencilClear = 0u;
+
+                if (renderPassBuilder->GetRenderPassDepthStencilDescriptor()
+                        ->DepthBeginningAccess.Type ==
+                    D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_CLEAR) {
+                    clearFlags |= D3D12_CLEAR_FLAG_DEPTH;
+                    depthClear = renderPassBuilder->GetRenderPassDepthStencilDescriptor()
+                                     ->DepthBeginningAccess.Clear.ClearValue.DepthStencil.Depth;
+                }
+                if (renderPassBuilder->GetRenderPassDepthStencilDescriptor()
+                        ->StencilBeginningAccess.Type ==
+                    D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_CLEAR) {
+                    clearFlags |= D3D12_CLEAR_FLAG_STENCIL;
+                    stencilClear =
+                        renderPassBuilder->GetRenderPassDepthStencilDescriptor()
+                            ->StencilBeginningAccess.Clear.ClearValue.DepthStencil.Stencil;
+                }
+
                 // TODO(kainino@chromium.org): investigate: should the Dawn clear
                 // stencil type be uint8_t?
-                uint8_t clearStencil = static_cast<uint8_t>(attachmentInfo.clearStencil);
-
-                // Load op - depth/stencil
-                bool doDepthClear = texture->GetFormat().HasDepth() &&
-                                    (attachmentInfo.depthLoadOp == wgpu::LoadOp::Clear);
-                bool doStencilClear = texture->GetFormat().HasStencil() &&
-                                      (attachmentInfo.stencilLoadOp == wgpu::LoadOp::Clear);
-
-                D3D12_CLEAR_FLAGS clearFlags = {};
-                if (doDepthClear) {
-                    clearFlags |= D3D12_CLEAR_FLAG_DEPTH;
-                }
-                if (doStencilClear) {
-                    clearFlags |= D3D12_CLEAR_FLAG_STENCIL;
-                }
-                // If the depth stencil texture has not been initialized, we want to use loadop
-                // clear to init the contents to 0's
-                if (!texture->IsSubresourceContentInitialized(
-                        view->GetBaseMipLevel(), view->GetLevelCount(), view->GetBaseArrayLayer(),
-                        view->GetLayerCount())) {
-                    if (texture->GetFormat().HasDepth() &&
-                        attachmentInfo.depthLoadOp == wgpu::LoadOp::Load) {
-                        clearDepth = 0.0f;
-                        clearFlags |= D3D12_CLEAR_FLAG_DEPTH;
-                    }
-                    if (texture->GetFormat().HasStencil() &&
-                        attachmentInfo.stencilLoadOp == wgpu::LoadOp::Load) {
-                        clearStencil = 0u;
-                        clearFlags |= D3D12_CLEAR_FLAG_STENCIL;
-                    }
-                }
-
                 if (clearFlags) {
-                    D3D12_CPU_DESCRIPTOR_HANDLE handle = args.dsv;
-                    commandList->ClearDepthStencilView(handle, clearFlags, clearDepth, clearStencil,
-                                                       0, nullptr);
-                }
-
-                if (attachmentInfo.depthStoreOp == wgpu::StoreOp::Store &&
-                    attachmentInfo.stencilStoreOp == wgpu::StoreOp::Store) {
-                    texture->SetIsSubresourceContentInitialized(
-                        true, view->GetBaseMipLevel(), view->GetLevelCount(),
-                        view->GetBaseArrayLayer(), view->GetLayerCount());
-                } else if (attachmentInfo.depthStoreOp == wgpu::StoreOp::Clear &&
-                           attachmentInfo.stencilStoreOp == wgpu::StoreOp::Clear) {
-                    texture->SetIsSubresourceContentInitialized(
-                        false, view->GetBaseMipLevel(), view->GetLevelCount(),
-                        view->GetBaseArrayLayer(), view->GetLayerCount());
+                    commandList->ClearDepthStencilView(
+                        renderPassBuilder->GetRenderPassDepthStencilDescriptor()->cpuDescriptor,
+                        clearFlags, depthClear, stencilClear, 0, nullptr);
                 }
             }
         }
 
-        // Set up render targets
-        {
-            if (args.dsv.ptr) {
-                commandList->OMSetRenderTargets(args.numRTVs, args.RTVs.data(), FALSE, &args.dsv);
-            } else {
-                commandList->OMSetRenderTargets(args.numRTVs, args.RTVs.data(), FALSE, nullptr);
-            }
+        commandList->OMSetRenderTargets(
+            renderPassBuilder->GetColorAttachmentCount(), renderPassBuilder->GetRenderTargetViews(),
+            FALSE,
+            renderPassBuilder->HasDepth()
+                ? &renderPassBuilder->GetRenderPassDepthStencilDescriptor()->cpuDescriptor
+                : nullptr);
+    }
+
+    void CommandBuffer::RecordRenderPass(
+        CommandRecordingContext* commandContext,
+        BindGroupStateTracker* bindingTracker,
+        RenderPassDescriptorHeapTracker* renderPassDescriptorHeapTracker,
+        BeginRenderPassCmd* renderPass,
+        const bool passHasUAV) {
+        OMSetRenderTargetArgs args =
+            renderPassDescriptorHeapTracker->GetSubpassOMSetRenderTargetArgs(renderPass);
+
+        const bool useRenderPass = GetDevice()->IsToggleEnabled(Toggle::UseD3D12RenderPass);
+
+        // renderPassBuilder must be scoped to RecordRenderPass because any underlying
+        // D3D12_RENDER_PASS_ENDING_ACCESS_RESOLVE_SUBRESOURCE_PARAMETERS structs must remain
+        // valid until after EndRenderPass() has been called.
+        RenderPassBuilder renderPassBuilder(args, passHasUAV);
+
+        SetupRenderPass(commandContext, renderPass, &renderPassBuilder);
+
+        // Use D3D12's native render pass API if it's available, otherwise emulate the
+        // beginning and ending access operations.
+        if (useRenderPass) {
+            commandContext->GetCommandList4()->BeginRenderPass(
+                renderPassBuilder.GetColorAttachmentCount(),
+                renderPassBuilder.GetRenderPassRenderTargetDescriptors(),
+                renderPassBuilder.HasDepth()
+                    ? renderPassBuilder.GetRenderPassDepthStencilDescriptor()
+                    : nullptr,
+                renderPassBuilder.GetRenderPassFlags());
+        } else {
+            EmulateBeginRenderPass(commandContext, &renderPassBuilder);
         }
+
+        ID3D12GraphicsCommandList* commandList = commandContext->GetCommandList();
 
         // Set up default dynamic state
         {
@@ -1189,10 +1262,9 @@ namespace dawn_native { namespace d3d12 {
             switch (type) {
                 case Command::EndRenderPass: {
                     mCommands.NextCommand<EndRenderPassCmd>();
-
-                    // TODO(brandon1.jones@intel.com): avoid calling this function and enable MSAA
-                    // resolve in D3D12 render pass on the platforms that support this feature.
-                    if (renderPass->attachmentState->GetSampleCount() > 1) {
+                    if (useRenderPass) {
+                        commandContext->GetCommandList4()->EndRenderPass();
+                    } else if (renderPass->attachmentState->GetSampleCount() > 1) {
                         ResolveMultisampledRenderPass(commandContext, renderPass);
                     }
                     return;

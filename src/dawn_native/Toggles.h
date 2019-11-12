@@ -31,6 +31,7 @@ namespace dawn_native {
         TurnOffVsync,
         UseTemporaryBufferInCompressedTextureToTextureCopy,
         UseD3D12ResourceHeapTier2,
+        UseD3D12RenderPass,
 
         EnumCount,
         InvalidEnum = EnumCount,
