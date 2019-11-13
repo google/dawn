@@ -68,7 +68,7 @@ deps = {
     'condition': 'dawn_standalone',
   },
   'third_party/shaderc': {
-    'url': '{chromium_git}/external/github.com/google/shaderc@c9d5be6b01708bf7d8a8401a7edb98bf3ab82f17',
+    'url': '{chromium_git}/external/github.com/google/shaderc@0865050e54e93bb1b0f122780246892a1164bb26',
     'condition': 'dawn_standalone',
   },
 

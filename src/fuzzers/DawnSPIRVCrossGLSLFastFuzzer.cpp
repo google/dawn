@@ -34,7 +34,10 @@ namespace {
             // Using the options that are used by Dawn, they appear in ShaderModuleGL.cpp
             options.SetGLSLLanguageVersion(440);
             options.SetFixupClipspace(true);
-            context.CompileSpvToGlsl(input.data(), input.size(), options, &result);
+            if (context.InitializeForGlsl(input.data(), input.size(), options) ==
+                shaderc_compilation_status_success) {
+                context.CompileShader(&result);
+            }
         });
 
         return 0;

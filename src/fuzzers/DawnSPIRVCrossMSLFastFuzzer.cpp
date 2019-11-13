@@ -33,7 +33,10 @@ namespace {
             options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
 
             // Using the options that are used by Dawn, they appear in ShaderModuleMTL.mm
-            context.CompileSpvToMsl(input.data(), input.size(), options, &result);
+            if (context.InitializeForMsl(input.data(), input.size(), options) ==
+                shaderc_compilation_status_success) {
+                context.CompileShader(&result);
+            }
         });
 
         return 0;

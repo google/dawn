@@ -40,7 +40,10 @@ namespace {
             // See https://github.com/gpuweb/gpuweb/issues/332
             options.SetHLSLPointCoordCompat(true);
             options.SetHLSLPointSizeCompat(true);
-            context.CompileSpvToHlsl(input.data(), input.size(), options, &result);
+            if (context.InitializeForHlsl(input.data(), input.size(), options) ==
+                shaderc_compilation_status_success) {
+                context.CompileShader(&result);
+            }
         });
 
         return 0;
