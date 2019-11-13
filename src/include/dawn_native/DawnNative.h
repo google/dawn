@@ -90,6 +90,7 @@ namespace dawn_native {
         DeviceType GetDeviceType() const;
         const PCIInfo& GetPCIInfo() const;
         std::vector<const char*> GetSupportedExtensions() const;
+        WGPUDeviceProperties GetAdapterProperties() const;
 
         explicit operator bool() const;
 

@@ -39,6 +39,7 @@ namespace dawn_native {
         ExtensionsSet GetSupportedExtensions() const;
         bool SupportsAllRequestedExtensions(
             const std::vector<const char*>& requestedExtensions) const;
+        WGPUDeviceProperties GetAdapterProperties() const;
 
       protected:
         PCIInfo mPCIInfo = {};

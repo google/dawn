@@ -56,6 +56,13 @@ namespace dawn_native {
         return true;
     }
 
+    WGPUDeviceProperties AdapterBase::GetAdapterProperties() const {
+        WGPUDeviceProperties adapterProperties = {};
+
+        mSupportedExtensions.InitializeDeviceProperties(&adapterProperties);
+        return adapterProperties;
+    }
+
     DeviceBase* AdapterBase::CreateDevice(const DeviceDescriptor* descriptor) {
         DeviceBase* result = nullptr;
 

@@ -24,6 +24,7 @@ namespace dawn_native {
         struct ExtensionEnumAndInfo {
             Extension extension;
             ExtensionInfo info;
+            bool WGPUDeviceProperties::*memberInWGPUDeviceProperties;
         };
 
         using ExtensionEnumAndInfoList =
@@ -32,7 +33,8 @@ namespace dawn_native {
         static constexpr ExtensionEnumAndInfoList kExtensionNameAndInfoList = {
             {{Extension::TextureCompressionBC,
               {"texture_compression_bc", "Support Block Compressed (BC) texture formats",
-               "https://bugs.chromium.org/p/dawn/issues/detail?id=42"}}}};
+               "https://bugs.chromium.org/p/dawn/issues/detail?id=42"},
+              &WGPUDeviceProperties::textureCompressionBC}}};
 
     }  // anonymous namespace
 
@@ -58,6 +60,14 @@ namespace dawn_native {
             ++index;
         }
         return enabledExtensionNames;
+    }
+
+    void ExtensionsSet::InitializeDeviceProperties(WGPUDeviceProperties* properties) const {
+        ASSERT(properties != nullptr);
+
+        for (uint32_t i : IterateBitSet(extensionsBitSet)) {
+            properties->*(kExtensionNameAndInfoList[i].memberInWGPUDeviceProperties) = true;
+        }
     }
 
     const char* ExtensionEnumToName(Extension extension) {

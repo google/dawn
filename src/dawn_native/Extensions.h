@@ -39,6 +39,7 @@ namespace dawn_native {
         void EnableExtension(Extension extension);
         bool IsEnabled(Extension extension) const;
         std::vector<const char*> GetEnabledExtensionNames() const;
+        void InitializeDeviceProperties(WGPUDeviceProperties* properties) const;
     };
 
     const char* ExtensionEnumToName(Extension extension);
