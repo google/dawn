@@ -75,7 +75,7 @@ namespace dawn_native { namespace opengl {
     ResultOrError<BufferBase*> Device::CreateBufferImpl(const BufferDescriptor* descriptor) {
         return new Buffer(this, descriptor);
     }
-    CommandBufferBase* Device::CreateCommandBuffer(CommandEncoderBase* encoder,
+    CommandBufferBase* Device::CreateCommandBuffer(CommandEncoder* encoder,
                                                    const CommandBufferDescriptor* descriptor) {
         return new CommandBuffer(encoder, descriptor);
     }

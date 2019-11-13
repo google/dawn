@@ -30,11 +30,11 @@ namespace dawn_native {
 
     struct BeginRenderPassCmd;
     struct RenderBundleDescriptor;
-    class RenderBundleEncoderBase;
+    class RenderBundleEncoder;
 
     class RenderBundleBase : public ObjectBase {
       public:
-        RenderBundleBase(RenderBundleEncoderBase* encoder,
+        RenderBundleBase(RenderBundleEncoder* encoder,
                          const RenderBundleDescriptor* descriptor,
                          AttachmentState* attachmentState,
                          PassResourceUsage resourceUsage);

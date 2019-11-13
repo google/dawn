@@ -394,8 +394,7 @@ namespace dawn_native { namespace opengl {
 
     }  // namespace
 
-    CommandBuffer::CommandBuffer(CommandEncoderBase* encoder,
-                                 const CommandBufferDescriptor* descriptor)
+    CommandBuffer::CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor)
         : CommandBufferBase(encoder, descriptor), mCommands(encoder->AcquireCommands()) {
     }
 

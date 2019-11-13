@@ -21,7 +21,7 @@
 
 namespace dawn_native {
 
-    RenderBundleBase::RenderBundleBase(RenderBundleEncoderBase* encoder,
+    RenderBundleBase::RenderBundleBase(RenderBundleEncoder* encoder,
                                        const RenderBundleDescriptor* descriptor,
                                        AttachmentState* attachmentState,
                                        PassResourceUsage resourceUsage)

@@ -48,7 +48,7 @@ namespace dawn_native { namespace d3d12 {
 
         MaybeError Initialize();
 
-        CommandBufferBase* CreateCommandBuffer(CommandEncoderBase* encoder,
+        CommandBufferBase* CreateCommandBuffer(CommandEncoder* encoder,
                                                const CommandBufferDescriptor* descriptor) override;
 
         Serial GetCompletedCommandSerial() const final override;

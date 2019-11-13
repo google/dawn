@@ -33,17 +33,17 @@ namespace dawn_native {
 
     // Fence
 
-    FenceBase::FenceBase(QueueBase* queue, const FenceDescriptor* descriptor)
+    Fence::Fence(QueueBase* queue, const FenceDescriptor* descriptor)
         : ObjectBase(queue->GetDevice()),
           mSignalValue(descriptor->initialValue),
           mCompletedValue(descriptor->initialValue),
           mQueue(queue) {
     }
 
-    FenceBase::FenceBase(DeviceBase* device, ObjectBase::ErrorTag tag) : ObjectBase(device, tag) {
+    Fence::Fence(DeviceBase* device, ObjectBase::ErrorTag tag) : ObjectBase(device, tag) {
     }
 
-    FenceBase::~FenceBase() {
+    Fence::~Fence() {
         for (auto& request : mRequests.IterateAll()) {
             ASSERT(!IsError());
             request.completionCallback(WGPUFenceCompletionStatus_Unknown, request.userdata);
@@ -52,20 +52,20 @@ namespace dawn_native {
     }
 
     // static
-    FenceBase* FenceBase::MakeError(DeviceBase* device) {
-        return new FenceBase(device, ObjectBase::kError);
+    Fence* Fence::MakeError(DeviceBase* device) {
+        return new Fence(device, ObjectBase::kError);
     }
 
-    uint64_t FenceBase::GetCompletedValue() const {
+    uint64_t Fence::GetCompletedValue() const {
         if (IsError()) {
             return 0;
         }
         return mCompletedValue;
     }
 
-    void FenceBase::OnCompletion(uint64_t value,
-                                 wgpu::FenceOnCompletionCallback callback,
-                                 void* userdata) {
+    void Fence::OnCompletion(uint64_t value,
+                             wgpu::FenceOnCompletionCallback callback,
+                             void* userdata) {
         if (GetDevice()->ConsumedError(ValidateOnCompletion(value))) {
             callback(WGPUFenceCompletionStatus_Error, userdata);
             return;
@@ -83,23 +83,23 @@ namespace dawn_native {
         mRequests.Enqueue(std::move(request), value);
     }
 
-    uint64_t FenceBase::GetSignaledValue() const {
+    uint64_t Fence::GetSignaledValue() const {
         ASSERT(!IsError());
         return mSignalValue;
     }
 
-    const QueueBase* FenceBase::GetQueue() const {
+    const QueueBase* Fence::GetQueue() const {
         ASSERT(!IsError());
         return mQueue.Get();
     }
 
-    void FenceBase::SetSignaledValue(uint64_t signalValue) {
+    void Fence::SetSignaledValue(uint64_t signalValue) {
         ASSERT(!IsError());
         ASSERT(signalValue > mSignalValue);
         mSignalValue = signalValue;
     }
 
-    void FenceBase::SetCompletedValue(uint64_t completedValue) {
+    void Fence::SetCompletedValue(uint64_t completedValue) {
         ASSERT(!IsError());
         ASSERT(completedValue <= mSignalValue);
         ASSERT(completedValue > mCompletedValue);
@@ -111,7 +111,7 @@ namespace dawn_native {
         mRequests.ClearUpTo(mCompletedValue);
     }
 
-    MaybeError FenceBase::ValidateOnCompletion(uint64_t value) const {
+    MaybeError Fence::ValidateOnCompletion(uint64_t value) const {
         DAWN_TRY(GetDevice()->ValidateObject(this));
         if (value > mSignalValue) {
             return DAWN_VALIDATION_ERROR("Value greater than fence signaled value");

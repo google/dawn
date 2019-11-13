@@ -77,7 +77,7 @@ namespace dawn_native { namespace vulkan {
                                                   ExternalSemaphoreHandle* outHandle);
 
         // Dawn API
-        CommandBufferBase* CreateCommandBuffer(CommandEncoderBase* encoder,
+        CommandBufferBase* CreateCommandBuffer(CommandEncoder* encoder,
                                                const CommandBufferDescriptor* descriptor) override;
 
         Serial GetCompletedCommandSerial() const final override;

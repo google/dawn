@@ -27,27 +27,26 @@
 
 namespace dawn_native {
 
-    RenderPassEncoderBase::RenderPassEncoderBase(DeviceBase* device,
-                                                 CommandEncoderBase* commandEncoder,
-                                                 EncodingContext* encodingContext)
+    RenderPassEncoder::RenderPassEncoder(DeviceBase* device,
+                                         CommandEncoder* commandEncoder,
+                                         EncodingContext* encodingContext)
         : RenderEncoderBase(device, encodingContext), mCommandEncoder(commandEncoder) {
     }
 
-    RenderPassEncoderBase::RenderPassEncoderBase(DeviceBase* device,
-                                                 CommandEncoderBase* commandEncoder,
-                                                 EncodingContext* encodingContext,
-                                                 ErrorTag errorTag)
+    RenderPassEncoder::RenderPassEncoder(DeviceBase* device,
+                                         CommandEncoder* commandEncoder,
+                                         EncodingContext* encodingContext,
+                                         ErrorTag errorTag)
         : RenderEncoderBase(device, encodingContext, errorTag), mCommandEncoder(commandEncoder) {
     }
 
-    RenderPassEncoderBase* RenderPassEncoderBase::MakeError(DeviceBase* device,
-                                                            CommandEncoderBase* commandEncoder,
-                                                            EncodingContext* encodingContext) {
-        return new RenderPassEncoderBase(device, commandEncoder, encodingContext,
-                                         ObjectBase::kError);
+    RenderPassEncoder* RenderPassEncoder::MakeError(DeviceBase* device,
+                                                    CommandEncoder* commandEncoder,
+                                                    EncodingContext* encodingContext) {
+        return new RenderPassEncoder(device, commandEncoder, encodingContext, ObjectBase::kError);
     }
 
-    void RenderPassEncoderBase::EndPass() {
+    void RenderPassEncoder::EndPass() {
         if (mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
                 allocator->Allocate<EndRenderPassCmd>(Command::EndRenderPass);
 
@@ -57,7 +56,7 @@ namespace dawn_native {
         }
     }
 
-    void RenderPassEncoderBase::SetStencilReference(uint32_t reference) {
+    void RenderPassEncoder::SetStencilReference(uint32_t reference) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             SetStencilReferenceCmd* cmd =
                 allocator->Allocate<SetStencilReferenceCmd>(Command::SetStencilReference);
@@ -67,7 +66,7 @@ namespace dawn_native {
         });
     }
 
-    void RenderPassEncoderBase::SetBlendColor(const Color* color) {
+    void RenderPassEncoder::SetBlendColor(const Color* color) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             SetBlendColorCmd* cmd = allocator->Allocate<SetBlendColorCmd>(Command::SetBlendColor);
             cmd->color = *color;
@@ -76,12 +75,12 @@ namespace dawn_native {
         });
     }
 
-    void RenderPassEncoderBase::SetViewport(float x,
-                                            float y,
-                                            float width,
-                                            float height,
-                                            float minDepth,
-                                            float maxDepth) {
+    void RenderPassEncoder::SetViewport(float x,
+                                        float y,
+                                        float width,
+                                        float height,
+                                        float minDepth,
+                                        float maxDepth) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if ((isnan(x) || isnan(y) || isnan(width) || isnan(height) || isnan(minDepth) ||
                  isnan(maxDepth))) {
@@ -111,10 +110,10 @@ namespace dawn_native {
         });
     }
 
-    void RenderPassEncoderBase::SetScissorRect(uint32_t x,
-                                               uint32_t y,
-                                               uint32_t width,
-                                               uint32_t height) {
+    void RenderPassEncoder::SetScissorRect(uint32_t x,
+                                           uint32_t y,
+                                           uint32_t width,
+                                           uint32_t height) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (width == 0 || height == 0) {
                 return DAWN_VALIDATION_ERROR("Width and height must be greater than 0.");
@@ -131,8 +130,7 @@ namespace dawn_native {
         });
     }
 
-    void RenderPassEncoderBase::ExecuteBundles(uint32_t count,
-                                               RenderBundleBase* const* renderBundles) {
+    void RenderPassEncoder::ExecuteBundles(uint32_t count, RenderBundleBase* const* renderBundles) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             for (uint32_t i = 0; i < count; ++i) {
                 DAWN_TRY(GetDevice()->ValidateObject(renderBundles[i]));

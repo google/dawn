@@ -462,24 +462,23 @@ namespace dawn_native {
 
     }  // namespace
 
-    CommandEncoderBase::CommandEncoderBase(DeviceBase* device, const CommandEncoderDescriptor*)
+    CommandEncoder::CommandEncoder(DeviceBase* device, const CommandEncoderDescriptor*)
         : ObjectBase(device), mEncodingContext(device, this) {
     }
 
-    CommandBufferResourceUsage CommandEncoderBase::AcquireResourceUsages() {
+    CommandBufferResourceUsage CommandEncoder::AcquireResourceUsages() {
         ASSERT(!mWereResourceUsagesAcquired);
         mWereResourceUsagesAcquired = true;
         return std::move(mResourceUsages);
     }
 
-    CommandIterator CommandEncoderBase::AcquireCommands() {
+    CommandIterator CommandEncoder::AcquireCommands() {
         return mEncodingContext.AcquireCommands();
     }
 
     // Implementation of the API's command recording methods
 
-    ComputePassEncoderBase* CommandEncoderBase::BeginComputePass(
-        const ComputePassDescriptor* descriptor) {
+    ComputePassEncoder* CommandEncoder::BeginComputePass(const ComputePassDescriptor* descriptor) {
         DeviceBase* device = GetDevice();
 
         bool success =
@@ -492,17 +491,16 @@ namespace dawn_native {
             });
 
         if (success) {
-            ComputePassEncoderBase* passEncoder =
-                new ComputePassEncoderBase(device, this, &mEncodingContext);
+            ComputePassEncoder* passEncoder =
+                new ComputePassEncoder(device, this, &mEncodingContext);
             mEncodingContext.EnterPass(passEncoder);
             return passEncoder;
         }
 
-        return ComputePassEncoderBase::MakeError(device, this, &mEncodingContext);
+        return ComputePassEncoder::MakeError(device, this, &mEncodingContext);
     }
 
-    RenderPassEncoderBase* CommandEncoderBase::BeginRenderPass(
-        const RenderPassDescriptor* descriptor) {
+    RenderPassEncoder* CommandEncoder::BeginRenderPass(const RenderPassDescriptor* descriptor) {
         DeviceBase* device = GetDevice();
 
         bool success =
@@ -555,20 +553,19 @@ namespace dawn_native {
             });
 
         if (success) {
-            RenderPassEncoderBase* passEncoder =
-                new RenderPassEncoderBase(device, this, &mEncodingContext);
+            RenderPassEncoder* passEncoder = new RenderPassEncoder(device, this, &mEncodingContext);
             mEncodingContext.EnterPass(passEncoder);
             return passEncoder;
         }
 
-        return RenderPassEncoderBase::MakeError(device, this, &mEncodingContext);
+        return RenderPassEncoder::MakeError(device, this, &mEncodingContext);
     }
 
-    void CommandEncoderBase::CopyBufferToBuffer(BufferBase* source,
-                                                uint64_t sourceOffset,
-                                                BufferBase* destination,
-                                                uint64_t destinationOffset,
-                                                uint64_t size) {
+    void CommandEncoder::CopyBufferToBuffer(BufferBase* source,
+                                            uint64_t sourceOffset,
+                                            BufferBase* destination,
+                                            uint64_t destinationOffset,
+                                            uint64_t size) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             DAWN_TRY(GetDevice()->ValidateObject(source));
             DAWN_TRY(GetDevice()->ValidateObject(destination));
@@ -585,9 +582,9 @@ namespace dawn_native {
         });
     }
 
-    void CommandEncoderBase::CopyBufferToTexture(const BufferCopyView* source,
-                                                 const TextureCopyView* destination,
-                                                 const Extent3D* copySize) {
+    void CommandEncoder::CopyBufferToTexture(const BufferCopyView* source,
+                                             const TextureCopyView* destination,
+                                             const Extent3D* copySize) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             DAWN_TRY(GetDevice()->ValidateObject(source->buffer));
             DAWN_TRY(GetDevice()->ValidateObject(destination->texture));
@@ -617,9 +614,9 @@ namespace dawn_native {
         });
     }
 
-    void CommandEncoderBase::CopyTextureToBuffer(const TextureCopyView* source,
-                                                 const BufferCopyView* destination,
-                                                 const Extent3D* copySize) {
+    void CommandEncoder::CopyTextureToBuffer(const TextureCopyView* source,
+                                             const BufferCopyView* destination,
+                                             const Extent3D* copySize) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             DAWN_TRY(GetDevice()->ValidateObject(source->texture));
             DAWN_TRY(GetDevice()->ValidateObject(destination->buffer));
@@ -649,9 +646,9 @@ namespace dawn_native {
         });
     }
 
-    void CommandEncoderBase::CopyTextureToTexture(const TextureCopyView* source,
-                                                  const TextureCopyView* destination,
-                                                  const Extent3D* copySize) {
+    void CommandEncoder::CopyTextureToTexture(const TextureCopyView* source,
+                                              const TextureCopyView* destination,
+                                              const Extent3D* copySize) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             DAWN_TRY(GetDevice()->ValidateObject(source->texture));
             DAWN_TRY(GetDevice()->ValidateObject(destination->texture));
@@ -672,7 +669,7 @@ namespace dawn_native {
         });
     }
 
-    void CommandEncoderBase::InsertDebugMarker(const char* groupLabel) {
+    void CommandEncoder::InsertDebugMarker(const char* groupLabel) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             InsertDebugMarkerCmd* cmd =
                 allocator->Allocate<InsertDebugMarkerCmd>(Command::InsertDebugMarker);
@@ -685,7 +682,7 @@ namespace dawn_native {
         });
     }
 
-    void CommandEncoderBase::PopDebugGroup() {
+    void CommandEncoder::PopDebugGroup() {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             allocator->Allocate<PopDebugGroupCmd>(Command::PopDebugGroup);
 
@@ -693,7 +690,7 @@ namespace dawn_native {
         });
     }
 
-    void CommandEncoderBase::PushDebugGroup(const char* groupLabel) {
+    void CommandEncoder::PushDebugGroup(const char* groupLabel) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             PushDebugGroupCmd* cmd =
                 allocator->Allocate<PushDebugGroupCmd>(Command::PushDebugGroup);
@@ -706,7 +703,7 @@ namespace dawn_native {
         });
     }
 
-    CommandBufferBase* CommandEncoderBase::Finish(const CommandBufferDescriptor* descriptor) {
+    CommandBufferBase* CommandEncoder::Finish(const CommandBufferDescriptor* descriptor) {
         if (GetDevice()->ConsumedError(ValidateFinish(descriptor))) {
             // Even if finish validation fails, it is now invalid to call any encoding commands on
             // this object, so we set its state to finished.
@@ -719,8 +716,8 @@ namespace dawn_native {
 
     // Implementation of the command buffer validation that can be precomputed before submit
 
-    MaybeError CommandEncoderBase::ValidateFinish(const CommandBufferDescriptor*) {
-        TRACE_EVENT0(GetDevice()->GetPlatform(), Validation, "CommandEncoderBase::ValidateFinish");
+    MaybeError CommandEncoder::ValidateFinish(const CommandBufferDescriptor*) {
+        TRACE_EVENT0(GetDevice()->GetPlatform(), Validation, "CommandEncoder::ValidateFinish");
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
         // Even if Finish() validation fails, calling it will mutate the internal state of the

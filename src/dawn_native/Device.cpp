@@ -445,9 +445,8 @@ namespace dawn_native {
         // The callback is deferred so it matches the async behavior of WebGPU.
         mDeferredCreateBufferMappedAsyncResults.push_back(deferred_info);
     }
-    CommandEncoderBase* DeviceBase::CreateCommandEncoder(
-        const CommandEncoderDescriptor* descriptor) {
-        return new CommandEncoderBase(this, descriptor);
+    CommandEncoder* DeviceBase::CreateCommandEncoder(const CommandEncoderDescriptor* descriptor) {
+        return new CommandEncoder(this, descriptor);
     }
     ComputePipelineBase* DeviceBase::CreateComputePipeline(
         const ComputePipelineDescriptor* descriptor) {
@@ -490,12 +489,12 @@ namespace dawn_native {
 
         return result;
     }
-    RenderBundleEncoderBase* DeviceBase::CreateRenderBundleEncoder(
+    RenderBundleEncoder* DeviceBase::CreateRenderBundleEncoder(
         const RenderBundleEncoderDescriptor* descriptor) {
-        RenderBundleEncoderBase* result = nullptr;
+        RenderBundleEncoder* result = nullptr;
 
         if (ConsumedError(CreateRenderBundleEncoderInternal(&result, descriptor))) {
-            return RenderBundleEncoderBase::MakeError(this);
+            return RenderBundleEncoder::MakeError(this);
         }
 
         return result;
@@ -677,10 +676,10 @@ namespace dawn_native {
     }
 
     MaybeError DeviceBase::CreateRenderBundleEncoderInternal(
-        RenderBundleEncoderBase** result,
+        RenderBundleEncoder** result,
         const RenderBundleEncoderDescriptor* descriptor) {
         DAWN_TRY(ValidateRenderBundleEncoderDescriptor(this, descriptor));
-        *result = new RenderBundleEncoderBase(this, descriptor);
+        *result = new RenderBundleEncoder(this, descriptor);
         return {};
     }
 

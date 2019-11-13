@@ -77,32 +77,31 @@ namespace dawn_native {
         return {};
     }
 
-    RenderBundleEncoderBase::RenderBundleEncoderBase(
-        DeviceBase* device,
-        const RenderBundleEncoderDescriptor* descriptor)
+    RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device,
+                                             const RenderBundleEncoderDescriptor* descriptor)
         : RenderEncoderBase(device, &mEncodingContext),
           mEncodingContext(device, this),
           mAttachmentState(device->GetOrCreateAttachmentState(descriptor)) {
     }
 
-    RenderBundleEncoderBase::RenderBundleEncoderBase(DeviceBase* device, ErrorTag errorTag)
+    RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device, ErrorTag errorTag)
         : RenderEncoderBase(device, &mEncodingContext, errorTag), mEncodingContext(device, this) {
     }
 
     // static
-    RenderBundleEncoderBase* RenderBundleEncoderBase::MakeError(DeviceBase* device) {
-        return new RenderBundleEncoderBase(device, ObjectBase::kError);
+    RenderBundleEncoder* RenderBundleEncoder::MakeError(DeviceBase* device) {
+        return new RenderBundleEncoder(device, ObjectBase::kError);
     }
 
-    const AttachmentState* RenderBundleEncoderBase::GetAttachmentState() const {
+    const AttachmentState* RenderBundleEncoder::GetAttachmentState() const {
         return mAttachmentState.Get();
     }
 
-    CommandIterator RenderBundleEncoderBase::AcquireCommands() {
+    CommandIterator RenderBundleEncoder::AcquireCommands() {
         return mEncodingContext.AcquireCommands();
     }
 
-    RenderBundleBase* RenderBundleEncoderBase::Finish(const RenderBundleDescriptor* descriptor) {
+    RenderBundleBase* RenderBundleEncoder::Finish(const RenderBundleDescriptor* descriptor) {
         if (GetDevice()->ConsumedError(ValidateFinish(descriptor))) {
             return RenderBundleBase::MakeError(GetDevice());
         }
@@ -112,9 +111,8 @@ namespace dawn_native {
                                     std::move(mResourceUsage));
     }
 
-    MaybeError RenderBundleEncoderBase::ValidateFinish(const RenderBundleDescriptor* descriptor) {
-        TRACE_EVENT0(GetDevice()->GetPlatform(), Validation,
-                     "RenderBundleEncoderBase::ValidateFinish");
+    MaybeError RenderBundleEncoder::ValidateFinish(const RenderBundleDescriptor* descriptor) {
+        TRACE_EVENT0(GetDevice()->GetPlatform(), Validation, "RenderBundleEncoder::ValidateFinish");
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
         // Even if Finish() validation fails, calling it will mutate the internal state of the

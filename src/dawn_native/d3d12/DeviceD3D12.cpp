@@ -250,7 +250,7 @@ namespace dawn_native { namespace d3d12 {
         DAWN_TRY(buffer->Initialize());
         return buffer.release();
     }
-    CommandBufferBase* Device::CreateCommandBuffer(CommandEncoderBase* encoder,
+    CommandBufferBase* Device::CreateCommandBuffer(CommandEncoder* encoder,
                                                    const CommandBufferDescriptor* descriptor) {
         return new CommandBuffer(encoder, descriptor);
     }

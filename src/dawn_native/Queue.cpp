@@ -47,7 +47,7 @@ namespace dawn_native {
             device->GetCurrentErrorScope());
     }
 
-    void QueueBase::Signal(FenceBase* fence, uint64_t signalValue) {
+    void QueueBase::Signal(Fence* fence, uint64_t signalValue) {
         DeviceBase* device = GetDevice();
         if (device->ConsumedError(ValidateSignal(fence, signalValue))) {
             return;
@@ -60,12 +60,12 @@ namespace dawn_native {
             device->GetCurrentErrorScope());
     }
 
-    FenceBase* QueueBase::CreateFence(const FenceDescriptor* descriptor) {
+    Fence* QueueBase::CreateFence(const FenceDescriptor* descriptor) {
         if (GetDevice()->ConsumedError(ValidateCreateFence(descriptor))) {
-            return FenceBase::MakeError(GetDevice());
+            return Fence::MakeError(GetDevice());
         }
 
-        return new FenceBase(this, descriptor);
+        return new Fence(this, descriptor);
     }
 
     MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
@@ -98,7 +98,7 @@ namespace dawn_native {
         return {};
     }
 
-    MaybeError QueueBase::ValidateSignal(const FenceBase* fence, uint64_t signalValue) {
+    MaybeError QueueBase::ValidateSignal(const Fence* fence, uint64_t signalValue) {
         DAWN_TRY(GetDevice()->ValidateObject(this));
         DAWN_TRY(GetDevice()->ValidateObject(fence));
 

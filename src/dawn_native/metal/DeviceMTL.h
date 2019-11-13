@@ -38,7 +38,7 @@ namespace dawn_native { namespace metal {
         Device(AdapterBase* adapter, id<MTLDevice> mtlDevice, const DeviceDescriptor* descriptor);
         ~Device();
 
-        CommandBufferBase* CreateCommandBuffer(CommandEncoderBase* encoder,
+        CommandBufferBase* CreateCommandBuffer(CommandEncoder* encoder,
                                                const CommandBufferDescriptor* descriptor) override;
 
         Serial GetCompletedCommandSerial() const final override;

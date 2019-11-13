@@ -85,7 +85,7 @@ namespace dawn_native {
         const Format& GetValidInternalFormat(wgpu::TextureFormat format) const;
 
         virtual CommandBufferBase* CreateCommandBuffer(
-            CommandEncoderBase* encoder,
+            CommandEncoder* encoder,
             const CommandBufferDescriptor* descriptor) = 0;
 
         virtual Serial GetCompletedCommandSerial() const = 0;
@@ -145,11 +145,11 @@ namespace dawn_native {
         void CreateBufferMappedAsync(const BufferDescriptor* descriptor,
                                      wgpu::BufferCreateMappedCallback callback,
                                      void* userdata);
-        CommandEncoderBase* CreateCommandEncoder(const CommandEncoderDescriptor* descriptor);
+        CommandEncoder* CreateCommandEncoder(const CommandEncoderDescriptor* descriptor);
         ComputePipelineBase* CreateComputePipeline(const ComputePipelineDescriptor* descriptor);
         PipelineLayoutBase* CreatePipelineLayout(const PipelineLayoutDescriptor* descriptor);
         QueueBase* CreateQueue();
-        RenderBundleEncoderBase* CreateRenderBundleEncoder(
+        RenderBundleEncoder* CreateRenderBundleEncoder(
             const RenderBundleEncoderDescriptor* descriptor);
         RenderPipelineBase* CreateRenderPipeline(const RenderPipelineDescriptor* descriptor);
         SamplerBase* CreateSampler(const SamplerDescriptor* descriptor);
@@ -230,7 +230,7 @@ namespace dawn_native {
                                                 const PipelineLayoutDescriptor* descriptor);
         MaybeError CreateQueueInternal(QueueBase** result);
         MaybeError CreateRenderBundleEncoderInternal(
-            RenderBundleEncoderBase** result,
+            RenderBundleEncoder** result,
             const RenderBundleEncoderDescriptor* descriptor);
         MaybeError CreateRenderPipelineInternal(RenderPipelineBase** result,
                                                 const RenderPipelineDescriptor* descriptor);

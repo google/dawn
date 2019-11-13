@@ -28,16 +28,16 @@ namespace dawn_native {
 
     struct BeginRenderPassCmd;
 
-    class CommandEncoderBase : public ObjectBase {
+    class CommandEncoder final : public ObjectBase {
       public:
-        CommandEncoderBase(DeviceBase* device, const CommandEncoderDescriptor* descriptor);
+        CommandEncoder(DeviceBase* device, const CommandEncoderDescriptor* descriptor);
 
         CommandIterator AcquireCommands();
         CommandBufferResourceUsage AcquireResourceUsages();
 
         // Dawn API
-        ComputePassEncoderBase* BeginComputePass(const ComputePassDescriptor* descriptor);
-        RenderPassEncoderBase* BeginRenderPass(const RenderPassDescriptor* descriptor);
+        ComputePassEncoder* BeginComputePass(const ComputePassDescriptor* descriptor);
+        RenderPassEncoder* BeginRenderPass(const RenderPassDescriptor* descriptor);
 
         void CopyBufferToBuffer(BufferBase* source,
                                 uint64_t sourceOffset,

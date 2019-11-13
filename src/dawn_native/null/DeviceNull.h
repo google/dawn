@@ -86,7 +86,7 @@ namespace dawn_native { namespace null {
         Device(Adapter* adapter, const DeviceDescriptor* descriptor);
         ~Device();
 
-        CommandBufferBase* CreateCommandBuffer(CommandEncoderBase* encoder,
+        CommandBufferBase* CreateCommandBuffer(CommandEncoder* encoder,
                                                const CommandBufferDescriptor* descriptor) override;
 
         Serial GetCompletedCommandSerial() const final override;
@@ -178,7 +178,7 @@ namespace dawn_native { namespace null {
 
     class CommandBuffer : public CommandBufferBase {
       public:
-        CommandBuffer(CommandEncoderBase* encoder, const CommandBufferDescriptor* descriptor);
+        CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
         ~CommandBuffer();
 
       private:

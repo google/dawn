@@ -21,7 +21,7 @@
 #import <Metal/Metal.h>
 
 namespace dawn_native {
-    class CommandEncoderBase;
+    class CommandEncoder;
 }
 
 namespace dawn_native { namespace metal {
@@ -31,7 +31,7 @@ namespace dawn_native { namespace metal {
 
     class CommandBuffer : public CommandBufferBase {
       public:
-        CommandBuffer(CommandEncoderBase* encoder, const CommandBufferDescriptor* descriptor);
+        CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
         ~CommandBuffer();
 
         void FillCommands(id<MTLCommandBuffer> commandBuffer);

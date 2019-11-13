@@ -103,7 +103,7 @@ namespace dawn_native { namespace null {
         DAWN_TRY(IncrementMemoryUsage(descriptor->size));
         return new Buffer(this, descriptor);
     }
-    CommandBufferBase* Device::CreateCommandBuffer(CommandEncoderBase* encoder,
+    CommandBufferBase* Device::CreateCommandBuffer(CommandEncoder* encoder,
                                                    const CommandBufferDescriptor* descriptor) {
         return new CommandBuffer(encoder, descriptor);
     }
@@ -302,8 +302,7 @@ namespace dawn_native { namespace null {
 
     // CommandBuffer
 
-    CommandBuffer::CommandBuffer(CommandEncoderBase* encoder,
-                                 const CommandBufferDescriptor* descriptor)
+    CommandBuffer::CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor)
         : CommandBufferBase(encoder, descriptor), mCommands(encoder->AcquireCommands()) {
     }
 

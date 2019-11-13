@@ -29,15 +29,15 @@ namespace dawn_native {
 
         // Dawn API
         void Submit(uint32_t commandCount, CommandBufferBase* const* commands);
-        void Signal(FenceBase* fence, uint64_t signalValue);
-        FenceBase* CreateFence(const FenceDescriptor* descriptor);
+        void Signal(Fence* fence, uint64_t signalValue);
+        Fence* CreateFence(const FenceDescriptor* descriptor);
 
       private:
         virtual MaybeError SubmitImpl(uint32_t commandCount,
                                       CommandBufferBase* const* commands) = 0;
 
         MaybeError ValidateSubmit(uint32_t commandCount, CommandBufferBase* const* commands);
-        MaybeError ValidateSignal(const FenceBase* fence, uint64_t signalValue);
+        MaybeError ValidateSignal(const Fence* fence, uint64_t signalValue);
         MaybeError ValidateCreateFence(const FenceDescriptor* descriptor);
     };
 

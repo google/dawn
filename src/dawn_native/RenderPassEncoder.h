@@ -22,19 +22,15 @@ namespace dawn_native {
 
     class RenderBundleBase;
 
-    // This is called RenderPassEncoderBase to match the code generator expectations. Note that it
-    // is a pure frontend type to record in its parent CommandEncoder and never has a backend
-    // implementation.
-    // TODO(cwallez@chromium.org): Remove that generator limitation and rename to RenderPassEncoder
-    class RenderPassEncoderBase : public RenderEncoderBase {
+    class RenderPassEncoder final : public RenderEncoderBase {
       public:
-        RenderPassEncoderBase(DeviceBase* device,
-                              CommandEncoderBase* commandEncoder,
-                              EncodingContext* encodingContext);
+        RenderPassEncoder(DeviceBase* device,
+                          CommandEncoder* commandEncoder,
+                          EncodingContext* encodingContext);
 
-        static RenderPassEncoderBase* MakeError(DeviceBase* device,
-                                                CommandEncoderBase* commandEncoder,
-                                                EncodingContext* encodingContext);
+        static RenderPassEncoder* MakeError(DeviceBase* device,
+                                            CommandEncoder* commandEncoder,
+                                            EncodingContext* encodingContext);
 
         void EndPass();
 
@@ -50,15 +46,15 @@ namespace dawn_native {
         void ExecuteBundles(uint32_t count, RenderBundleBase* const* renderBundles);
 
       protected:
-        RenderPassEncoderBase(DeviceBase* device,
-                              CommandEncoderBase* commandEncoder,
-                              EncodingContext* encodingContext,
-                              ErrorTag errorTag);
+        RenderPassEncoder(DeviceBase* device,
+                          CommandEncoder* commandEncoder,
+                          EncodingContext* encodingContext,
+                          ErrorTag errorTag);
 
       private:
         // For render and compute passes, the encoding context is borrowed from the command encoder.
         // Keep a reference to the encoder to make sure the context isn't freed.
-        Ref<CommandEncoderBase> mCommandEncoder;
+        Ref<CommandEncoder> mCommandEncoder;
     };
 
 }  // namespace dawn_native
