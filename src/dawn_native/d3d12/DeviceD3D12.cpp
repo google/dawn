@@ -274,7 +274,7 @@ namespace dawn_native { namespace d3d12 {
     }
     ResultOrError<ShaderModuleBase*> Device::CreateShaderModuleImpl(
         const ShaderModuleDescriptor* descriptor) {
-        return new ShaderModule(this, descriptor);
+        return ShaderModule::Create(this, descriptor);
     }
     ResultOrError<SwapChainBase*> Device::CreateSwapChainImpl(
         const SwapChainDescriptor* descriptor) {

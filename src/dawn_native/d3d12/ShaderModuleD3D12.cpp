@@ -24,11 +24,25 @@
 
 namespace dawn_native { namespace d3d12 {
 
+    // static
+    ResultOrError<ShaderModule*> ShaderModule::Create(Device* device,
+                                                      const ShaderModuleDescriptor* descriptor) {
+        std::unique_ptr<ShaderModule> module(new ShaderModule(device, descriptor));
+        if (!module)
+            return DAWN_VALIDATION_ERROR("Unable to create ShaderModule");
+        DAWN_TRY(module->Initialize(descriptor));
+        return module.release();
+    }
+
     ShaderModule::ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor)
         : ShaderModuleBase(device, descriptor) {
+    }
+
+    MaybeError ShaderModule::Initialize(const ShaderModuleDescriptor* descriptor) {
         mSpirv.assign(descriptor->code, descriptor->code + descriptor->codeSize);
         spirv_cross::CompilerHLSL compiler(mSpirv);
         ExtractSpirvInfo(compiler);
+        return {};
     }
 
     const std::string ShaderModule::GetHLSLSource(PipelineLayout* layout) const {

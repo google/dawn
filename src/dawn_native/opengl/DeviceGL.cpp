@@ -99,7 +99,7 @@ namespace dawn_native { namespace opengl {
     }
     ResultOrError<ShaderModuleBase*> Device::CreateShaderModuleImpl(
         const ShaderModuleDescriptor* descriptor) {
-        return new ShaderModule(this, descriptor);
+        return ShaderModule::Create(this, descriptor);
     }
     ResultOrError<SwapChainBase*> Device::CreateSwapChainImpl(
         const SwapChainDescriptor* descriptor) {

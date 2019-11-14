@@ -24,11 +24,15 @@ namespace dawn_native { namespace d3d12 {
 
     class ShaderModule : public ShaderModuleBase {
       public:
-        ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
+        static ResultOrError<ShaderModule*> Create(Device* device,
+                                                   const ShaderModuleDescriptor* descriptor);
 
         const std::string GetHLSLSource(PipelineLayout* layout) const;
 
       private:
+        ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
+        MaybeError Initialize(const ShaderModuleDescriptor* descriptor);
+
         std::vector<uint32_t> mSpirv;
     };
 

@@ -47,8 +47,29 @@ namespace dawn_native { namespace opengl {
         return o.str();
     }
 
+    // static
+    ResultOrError<ShaderModule*> ShaderModule::Create(Device* device,
+                                                      const ShaderModuleDescriptor* descriptor) {
+        std::unique_ptr<ShaderModule> module(new ShaderModule(device, descriptor));
+        if (!module)
+            return DAWN_VALIDATION_ERROR("Unable to create ShaderModule");
+        DAWN_TRY(module->Initialize(descriptor));
+        return module.release();
+    }
+
+    const char* ShaderModule::GetSource() const {
+        return mGlslSource.c_str();
+    }
+
+    const ShaderModule::CombinedSamplerInfo& ShaderModule::GetCombinedSamplerInfo() const {
+        return mCombinedInfo;
+    }
+
     ShaderModule::ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor)
         : ShaderModuleBase(device, descriptor) {
+    }
+
+    MaybeError ShaderModule::Initialize(const ShaderModuleDescriptor* descriptor) {
         spirv_cross::CompilerGLSL compiler(descriptor->code, descriptor->codeSize);
         // If these options are changed, the values in DawnSPIRVCrossGLSLFastFuzzer.cpp need to be
         // updated.
@@ -108,14 +129,7 @@ namespace dawn_native { namespace opengl {
         }
 
         mGlslSource = compiler.compile();
-    }
-
-    const char* ShaderModule::GetSource() const {
-        return mGlslSource.c_str();
-    }
-
-    const ShaderModule::CombinedSamplerInfo& ShaderModule::GetCombinedSamplerInfo() const {
-        return mCombinedInfo;
+        return {};
     }
 
 }}  // namespace dawn_native::opengl
