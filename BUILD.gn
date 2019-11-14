@@ -21,6 +21,13 @@ import("scripts/dawn_overrides_with_defaults.gni")
 
 import("//testing/test.gni")
 
+if (build_with_chromium) {
+  # Chromium build targets may not depend on dawn unless use_dawn is set. This
+  # assertion helps avoid accidental dependencies creeping into chromium.
+  import("//ui/gl/features.gni")
+  assert(use_dawn)
+}
+
 ###############################################################################
 # dawn_platform
 ###############################################################################
