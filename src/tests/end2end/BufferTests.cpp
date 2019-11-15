@@ -256,6 +256,25 @@ TEST_P(BufferSetSubDataTests, LargeSetSubData) {
     EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), buffer, 0, kElements);
 }
 
+// Test using SetSubData for super large data block
+TEST_P(BufferSetSubDataTests, SuperLargeSetSubData) {
+    constexpr uint64_t kSize = 12000 * 1000;
+    constexpr uint64_t kElements = 3000 * 1000;
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = kSize;
+    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    std::vector<uint32_t> expectedData;
+    for (uint32_t i = 0; i < kElements; ++i) {
+        expectedData.push_back(i);
+    }
+
+    buffer.SetSubData(0, kElements * sizeof(uint32_t), expectedData.data());
+
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), buffer, 0, kElements);
+}
+
 DAWN_INSTANTIATE_TEST(BufferSetSubDataTests,
                      D3D12Backend,
                      MetalBackend,
