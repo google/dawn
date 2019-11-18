@@ -912,6 +912,7 @@ source_set("dawn_end2end_tests_sources") {
     "src/tests/end2end/DrawTests.cpp",
     "src/tests/end2end/DynamicBufferOffsetTests.cpp",
     "src/tests/end2end/FenceTests.cpp",
+    "src/tests/end2end/GpuMemorySynchronizationTests.cpp",
     "src/tests/end2end/IndexFormatTests.cpp",
     "src/tests/end2end/MultisampledRenderingTests.cpp",
     "src/tests/end2end/NonzeroTextureCreationTests.cpp",
