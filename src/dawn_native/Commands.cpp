@@ -254,9 +254,12 @@ namespace dawn_native {
                 commands->NextCommand<SetBlendColorCmd>();
                 break;
 
-            case Command::SetBindGroup:
-                commands->NextCommand<SetBindGroupCmd>();
-                break;
+            case Command::SetBindGroup: {
+                SetBindGroupCmd* cmd = commands->NextCommand<SetBindGroupCmd>();
+                if (cmd->dynamicOffsetCount > 0) {
+                    commands->NextData<uint32_t>(cmd->dynamicOffsetCount);
+                }
+            } break;
 
             case Command::SetIndexBuffer:
                 commands->NextCommand<SetIndexBufferCmd>();
