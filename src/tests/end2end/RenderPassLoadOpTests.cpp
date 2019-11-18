@@ -71,14 +71,11 @@ class RenderPassLoadOpTests : public DawnTest {
 
             renderTargetView = renderTarget.CreateView();
 
-            RGBA8 zero(0, 0, 0, 0);
-            std::fill(expectZero.begin(), expectZero.end(), zero);
+            std::fill(expectZero.begin(), expectZero.end(), kZero);
 
-            RGBA8 green(0, 255, 0, 255);
-            std::fill(expectGreen.begin(), expectGreen.end(), green);
+            std::fill(expectGreen.begin(), expectGreen.end(), kGreen);
 
-            RGBA8 blue(0, 0, 255, 255);
-            std::fill(expectBlue.begin(), expectBlue.end(), blue);
+            std::fill(expectBlue.begin(), expectBlue.end(), kBlue);
 
             // draws a blue quad on the right half of the screen
             const char* vsSource = R"(

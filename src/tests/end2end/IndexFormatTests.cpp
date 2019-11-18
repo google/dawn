@@ -87,7 +87,7 @@ TEST_P(IndexFormatTest, Uint32) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);
+    EXPECT_PIXEL_RGBA8_EQ(kGreen, renderPass.color, 100, 300);
 }
 
 // Test that the Uint16 index format is correctly interpreted
@@ -114,7 +114,7 @@ TEST_P(IndexFormatTest, Uint16) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);
+    EXPECT_PIXEL_RGBA8_EQ(kGreen, renderPass.color, 100, 300);
 }
 
 // Test for primitive restart use vertices like in the drawing and draw the following
@@ -164,9 +164,9 @@ TEST_P(IndexFormatTest, Uint32PrimitiveRestart) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 190, 190);  // A
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 210, 210);  // B
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, 210, 190);      // C
+    EXPECT_PIXEL_RGBA8_EQ(kGreen, renderPass.color, 190, 190);  // A
+    EXPECT_PIXEL_RGBA8_EQ(kGreen, renderPass.color, 210, 210);  // B
+    EXPECT_PIXEL_RGBA8_EQ(kZero, renderPass.color, 210, 190);   // C
 }
 
 // Test use of primitive restart with an Uint16 index format
@@ -206,9 +206,9 @@ TEST_P(IndexFormatTest, Uint16PrimitiveRestart) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 190, 190);  // A
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 210, 210);  // B
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, 210, 190);      // C
+    EXPECT_PIXEL_RGBA8_EQ(kGreen, renderPass.color, 190, 190);  // A
+    EXPECT_PIXEL_RGBA8_EQ(kGreen, renderPass.color, 210, 210);  // B
+    EXPECT_PIXEL_RGBA8_EQ(kZero, renderPass.color, 210, 190);   // C
 }
 
 // Test that the index format used is the format of the last set pipeline. This is to
@@ -242,7 +242,7 @@ TEST_P(IndexFormatTest, ChangePipelineAfterSetIndexBuffer) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);
+    EXPECT_PIXEL_RGBA8_EQ(kGreen, renderPass.color, 100, 300);
 }
 
 // Test that setting the index buffer before the pipeline works, this is important

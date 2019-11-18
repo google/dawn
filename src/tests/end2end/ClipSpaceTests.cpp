@@ -95,8 +95,8 @@ TEST_P(ClipSpaceTest, ClipSpace) {
     wgpu::Queue queue = device.CreateQueue();
     queue.Submit(1, &commandBuffer);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(255, 0, 0, 255), colorTexture, kSize - 1, kSize - 1);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), colorTexture, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(kRed, colorTexture, kSize - 1, kSize - 1);
+    EXPECT_PIXEL_RGBA8_EQ(kGreen, colorTexture, 0, 0);
 }
 
 DAWN_INSTANTIATE_TEST(ClipSpaceTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);

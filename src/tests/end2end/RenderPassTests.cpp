@@ -76,10 +76,6 @@ TEST_P(RenderPassTest, TwoRenderPassesInOneCommandBuffer) {
       // This test is consistently failing on OpenGL and flaky on Metal.
       return;
     }
-    constexpr RGBA8 kRed(255, 0, 0, 255);
-    constexpr RGBA8 kGreen(0, 255, 0, 255);
-
-    constexpr RGBA8 kBlue(0, 0, 255, 255);
 
     wgpu::Texture renderTarget1 = CreateDefault2DTexture();
     wgpu::Texture renderTarget2 = CreateDefault2DTexture();
@@ -165,8 +161,6 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    constexpr RGBA8 kRed(255, 0, 0, 255);
-    constexpr RGBA8 kBlue(0, 0, 255, 255);
     EXPECT_PIXEL_RGBA8_EQ(kBlue, renderTarget, 2, kRTSize - 1);
     EXPECT_PIXEL_RGBA8_EQ(kRed, renderTarget, kRTSize - 1, 1);
 }

@@ -90,9 +90,9 @@ class CullingTest : public DawnTest {
         wgpu::Queue queue = device.CreateQueue();
         queue.Submit(1, &commandBuffer);
 
-        constexpr RGBA8 kTopLeftColor = RGBA8(0, 0, 0, 255);
+        constexpr RGBA8 kTopLeftColor = kBlack;
         constexpr RGBA8 kBottomRightColor = RGBA8(3, 3, 0, 255);
-        constexpr RGBA8 kBackgroundColor = RGBA8(0, 0, 255, 255);
+        constexpr RGBA8 kBackgroundColor = kBlue;
 
         RGBA8 kCCWTriangleTopLeftColor = isCCWTriangleCulled ? kBackgroundColor : kTopLeftColor;
         EXPECT_PIXEL_RGBA8_EQ(kCCWTriangleTopLeftColor, colorTexture, 0, 0);

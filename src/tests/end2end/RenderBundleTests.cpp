@@ -19,7 +19,7 @@
 #include "utils/WGPUHelpers.h"
 
 constexpr uint32_t kRTSize = 4;
-constexpr RGBA8 kColors[2] = {RGBA8(0, 255, 0, 255), RGBA8(0, 0, 255, 255)};
+constexpr RGBA8 kColors[2] = {kGreen, kBlue};
 
 // RenderBundleTest tests simple usage of RenderBundles to draw. The implementaiton
 // of RenderBundle is shared significantly with render pass execution which is

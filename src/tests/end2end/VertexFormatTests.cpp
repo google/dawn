@@ -390,7 +390,7 @@ class VertexFormatTest : public DawnTest {
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
-        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 0, 0);
+        EXPECT_PIXEL_RGBA8_EQ(kGreen, renderPass.color, 0, 0);
     }
 };
 

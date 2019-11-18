@@ -210,7 +210,7 @@ class PrimitiveTopologyTest : public DawnTest {
             for (auto& locationSpec : locationSpecs) {
                 for (size_t i = 0; i < locationSpec.count; ++i) {
                     // If this pixel is included, check that it is green. Otherwise, check that it is black
-                    RGBA8 color = locationSpec.include ? RGBA8(0, 255, 0, 255) : RGBA8(0, 0, 0, 0);
+                    RGBA8 color = locationSpec.include ? kGreen : kZero;
                     EXPECT_PIXEL_RGBA8_EQ(color, renderPass.color, locationSpec.locations[i].x, locationSpec.locations[i].y)
                         << "Expected (" << locationSpec.locations[i].x << ", " << locationSpec.locations[i].y << ") to be " << color;
                 }

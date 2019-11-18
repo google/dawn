@@ -221,9 +221,9 @@ class VertexStateTest : public DawnTest {
                 unsigned int x = kRTCellOffset + kRTCellSize * triangle;
                 unsigned int y = kRTCellOffset + kRTCellSize * instance;
                 if (triangle < triangles && instance < instances) {
-                    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, x, y);
+                    EXPECT_PIXEL_RGBA8_EQ(kGreen, renderPass.color, x, y);
                 } else {
-                    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), renderPass.color, x, y);
+                    EXPECT_PIXEL_RGBA8_EQ(kZero, renderPass.color, x, y);
                 }
             }
         }
@@ -572,7 +572,7 @@ TEST_P(OptionalVertexStateTest, Basic) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 1, 1);
+    EXPECT_PIXEL_RGBA8_EQ(kGreen, renderPass.color, 1, 1);
 }
 
 DAWN_INSTANTIATE_TEST(OptionalVertexStateTest,

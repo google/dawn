@@ -156,9 +156,9 @@ class ViewportTest : public DawnTest {
         queue.Submit(1, &commandBuffer);
 
         constexpr RGBA8 kColor[ColorTypeCount] = {
-            RGBA8(255, 0, 0, 255),  // top-left triangle is red
-            RGBA8(0, 255, 0, 255),  // bottom-right triangle is green
-            RGBA8(0, 0, 255, 255),  // background is blue
+            kRed,  // top-left triangle is red
+            kGreen,  // bottom-right triangle is green
+            kBlue,  // background is blue
         };
 
         EXPECT_PIXEL_RGBA8_EQ(kColor[info.topLeftPoint], colorTexture1, 0, 0);

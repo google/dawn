@@ -356,9 +356,6 @@ class CompressedTextureBCFormatTest : public DawnTest {
     // RGBA8 formats.
     static std::vector<RGBA8> GetExpectedData(wgpu::TextureFormat bcFormat,
                                               const wgpu::Extent3D& testRegion) {
-        constexpr RGBA8 kRed(255, 0, 0, 255);
-        constexpr RGBA8 kGreen(0, 255, 0, 255);
-        constexpr RGBA8 kBlack(0, 0, 0, 255);
         constexpr RGBA8 kDarkRed(198, 0, 0, 255);
         constexpr RGBA8 kDarkGreen(0, 207, 0, 255);
         constexpr RGBA8 kDarkRedSRGB(144, 0, 0, 255);
