@@ -123,6 +123,9 @@ namespace dawn_native { namespace vulkan {
         }
         mUnusedCommands.clear();
 
+        // TODO(jiajie.hu@intel.com): In rare cases, a DAWN_TRY() failure may leave semaphores
+        // untagged for deletion. But for most of the time when everything goes well, these
+        // assertions can be helpful in catching bugs.
         ASSERT(mRecordingContext.waitSemaphores.empty());
         ASSERT(mRecordingContext.signalSemaphores.empty());
 
@@ -311,6 +314,15 @@ namespace dawn_native { namespace vulkan {
         DAWN_TRY_ASSIGN(fence, GetUnusedFence());
         DAWN_TRY(CheckVkSuccess(fn.QueueSubmit(mQueue, 1, &submitInfo, fence), "vkQueueSubmit"));
 
+        // Enqueue the semaphores before incrementing the serial, so that they can be deleted as
+        // soon as the current submission is finished.
+        for (VkSemaphore semaphore : mRecordingContext.waitSemaphores) {
+            mDeleter->DeleteWhenUnused(semaphore);
+        }
+        for (VkSemaphore semaphore : mRecordingContext.signalSemaphores) {
+            mDeleter->DeleteWhenUnused(semaphore);
+        }
+
         mLastSubmittedSerial++;
         mFencesInFlight.emplace(fence, mLastSubmittedSerial);
 
@@ -319,14 +331,6 @@ namespace dawn_native { namespace vulkan {
         mCommandsInFlight.Enqueue(submittedCommands, mLastSubmittedSerial);
         mRecordingContext = CommandRecordingContext();
         DAWN_TRY(PrepareRecordingContext());
-
-        for (VkSemaphore semaphore : mRecordingContext.waitSemaphores) {
-            mDeleter->DeleteWhenUnused(semaphore);
-        }
-
-        for (VkSemaphore semaphore : mRecordingContext.signalSemaphores) {
-            mDeleter->DeleteWhenUnused(semaphore);
-        }
 
         return {};
     }
