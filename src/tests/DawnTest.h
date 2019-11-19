@@ -74,15 +74,16 @@ struct RGBA8 {
     bool operator!=(const RGBA8& other) const;
 
     uint8_t r, g, b, a;
+
+    static const RGBA8 kZero;
+    static const RGBA8 kBlack;
+    static const RGBA8 kRed;
+    static const RGBA8 kGreen;
+    static const RGBA8 kBlue;
+    static const RGBA8 kYellow;
+    static const RGBA8 kWhite;
 };
 std::ostream& operator<<(std::ostream& stream, const RGBA8& color);
-
-constexpr RGBA8 kZero(0, 0, 0, 0);
-constexpr RGBA8 kBlack(0, 0, 0, 255);
-constexpr RGBA8 kRed(255, 0, 0, 255);
-constexpr RGBA8 kGreen(0, 255, 0, 255);
-constexpr RGBA8 kBlue(0, 0, 255, 255);
-constexpr RGBA8 kWhite(255, 255, 255, 255);
 
 struct DawnTestParam {
     explicit DawnTestParam(dawn_native::BackendType backendType) : backendType(backendType) {

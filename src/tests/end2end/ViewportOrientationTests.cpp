@@ -58,10 +58,10 @@ TEST_P(ViewportOrientationTests, OriginAt0x0) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(kGreen, renderPass.color, 0, 0);
-    EXPECT_PIXEL_RGBA8_EQ(kZero, renderPass.color, 0, 1);
-    EXPECT_PIXEL_RGBA8_EQ(kZero, renderPass.color, 1, 0);
-    EXPECT_PIXEL_RGBA8_EQ(kZero, renderPass.color, 1, 1);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kZero, renderPass.color, 0, 1);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kZero, renderPass.color, 1, 0);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kZero, renderPass.color, 1, 1);
 }
 
 DAWN_INSTANTIATE_TEST(ViewportOrientationTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);

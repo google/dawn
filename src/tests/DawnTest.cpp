@@ -80,6 +80,14 @@ namespace {
 
 }  // namespace
 
+const RGBA8 RGBA8::kZero = RGBA8(0, 0, 0, 0);
+const RGBA8 RGBA8::kBlack = RGBA8(0, 0, 0, 255);
+const RGBA8 RGBA8::kRed = RGBA8(255, 0, 0, 255);
+const RGBA8 RGBA8::kGreen = RGBA8(0, 255, 0, 255);
+const RGBA8 RGBA8::kBlue = RGBA8(0, 0, 255, 255);
+const RGBA8 RGBA8::kYellow = RGBA8(255, 255, 0, 255);
+const RGBA8 RGBA8::kWhite = RGBA8(255, 255, 255, 255);
+
 const DawnTestParam D3D12Backend(dawn_native::BackendType::D3D12);
 const DawnTestParam MetalBackend(dawn_native::BackendType::Metal);
 const DawnTestParam OpenGLBackend(dawn_native::BackendType::OpenGL);

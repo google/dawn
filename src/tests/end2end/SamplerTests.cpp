@@ -108,8 +108,8 @@ protected:
         // Create a 2x2 checkerboard texture, with black in the top left and bottom right corners.
         const uint32_t rowPixels = kTextureRowPitchAlignment / sizeof(RGBA8);
         RGBA8 data[rowPixels * 2];
-        data[0] = data[rowPixels + 1] = kBlack;
-        data[1] = data[rowPixels] = kWhite;
+        data[0] = data[rowPixels + 1] = RGBA8::kBlack;
+        data[1] = data[rowPixels] = RGBA8::kWhite;
 
         wgpu::Buffer stagingBuffer =
             utils::CreateBufferFromData(device, data, sizeof(data), wgpu::BufferUsage::CopySrc);
@@ -162,10 +162,10 @@ protected:
         RGBA8 expectedU3(u.mExpected3, u.mExpected3, u.mExpected3, 255);
         RGBA8 expectedV2(v.mExpected2, v.mExpected2, v.mExpected2, 255);
         RGBA8 expectedV3(v.mExpected3, v.mExpected3, v.mExpected3, 255);
-        EXPECT_PIXEL_RGBA8_EQ(kBlack, mRenderPass.color, 0, 0);
-        EXPECT_PIXEL_RGBA8_EQ(kWhite, mRenderPass.color, 0, 1);
-        EXPECT_PIXEL_RGBA8_EQ(kWhite, mRenderPass.color, 1, 0);
-        EXPECT_PIXEL_RGBA8_EQ(kBlack, mRenderPass.color, 1, 1);
+        EXPECT_PIXEL_RGBA8_EQ(RGBA8::kBlack, mRenderPass.color, 0, 0);
+        EXPECT_PIXEL_RGBA8_EQ(RGBA8::kWhite, mRenderPass.color, 0, 1);
+        EXPECT_PIXEL_RGBA8_EQ(RGBA8::kWhite, mRenderPass.color, 1, 0);
+        EXPECT_PIXEL_RGBA8_EQ(RGBA8::kBlack, mRenderPass.color, 1, 1);
         EXPECT_PIXEL_RGBA8_EQ(expectedU2, mRenderPass.color, 2, 0);
         EXPECT_PIXEL_RGBA8_EQ(expectedU3, mRenderPass.color, 3, 0);
         EXPECT_PIXEL_RGBA8_EQ(expectedV2, mRenderPass.color, 0, 2);

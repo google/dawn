@@ -132,7 +132,7 @@ TEST_P(StorageToUniformSyncTests, ReadAfterWriteWithSameCommandBuffer) {
     queue.Submit(1, &commands);
 
     // Verify the rendering result.
-    EXPECT_PIXEL_RGBA8_EQ(kRed, renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kRed, renderPass.color, 0, 0);
 }
 
 // Write into a storage buffer in compute pass in a command buffer. Then read that data in a render
@@ -171,7 +171,7 @@ TEST_P(StorageToUniformSyncTests, ReadAfterWriteWithDifferentCommandBuffers) {
     queue.Submit(2, cb);
 
     // Verify the rendering result.
-    EXPECT_PIXEL_RGBA8_EQ(kRed, renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kRed, renderPass.color, 0, 0);
 }
 
 // Write into a storage buffer in compute pass in a command buffer. Then read that data in a render
@@ -211,7 +211,7 @@ TEST_P(StorageToUniformSyncTests, ReadAfterWriteWithDifferentQueueSubmits) {
     queue.Submit(1, &cb[1]);
 
     // Verify the rendering result.
-    EXPECT_PIXEL_RGBA8_EQ(kRed, renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kRed, renderPass.color, 0, 0);
 }
 
 DAWN_INSTANTIATE_TEST(StorageToUniformSyncTests,

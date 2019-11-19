@@ -155,10 +155,10 @@ class ViewportTest : public DawnTest {
         wgpu::Queue queue = device.CreateQueue();
         queue.Submit(1, &commandBuffer);
 
-        constexpr RGBA8 kColor[ColorTypeCount] = {
-            kRed,  // top-left triangle is red
-            kGreen,  // bottom-right triangle is green
-            kBlue,  // background is blue
+        const RGBA8 kColor[ColorTypeCount] = {
+            RGBA8::kRed,    // top-left triangle is red
+            RGBA8::kGreen,  // bottom-right triangle is green
+            RGBA8::kBlue,   // background is blue
         };
 
         EXPECT_PIXEL_RGBA8_EQ(kColor[info.topLeftPoint], colorTexture1, 0, 0);

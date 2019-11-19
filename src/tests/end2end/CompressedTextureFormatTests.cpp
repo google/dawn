@@ -389,13 +389,13 @@ class CompressedTextureBCFormatTest : public DawnTest {
 
             case wgpu::TextureFormat::BC4RSnorm:
             case wgpu::TextureFormat::BC4RUnorm:
-                return FillExpectedData(testRegion, kRed, kBlack);
+                return FillExpectedData(testRegion, RGBA8::kRed, RGBA8::kBlack);
 
             case wgpu::TextureFormat::BC5RGSnorm:
             case wgpu::TextureFormat::BC5RGUnorm:
             case wgpu::TextureFormat::BC6HRGBSfloat:
             case wgpu::TextureFormat::BC6HRGBUfloat:
-                return FillExpectedData(testRegion, kRed, kGreen);
+                return FillExpectedData(testRegion, RGBA8::kRed, RGBA8::kGreen);
 
             default:
                 UNREACHABLE();
