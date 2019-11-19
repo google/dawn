@@ -58,6 +58,35 @@ TEST_P(BufferMapReadTests, SmallReadAtZero) {
     buffer.Unmap();
 }
 
+// Map, read and unmap twice. Test that both of these two iterations work.
+TEST_P(BufferMapReadTests, MapTwice) {
+    // TODO(http://crbug.com/dawn/278): the second read doesn't get updated data
+    // on D3D12, Metal and Vulkan.
+    // TODO(http://crbug.com/dawn/280): the second read doesn't get updated data
+    // on OpenGL wire.
+    DAWN_SKIP_TEST_IF(IsD3D12() || IsMetal() || IsVulkan() || UsesWire());
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    uint32_t myData = 0x01020304;
+    buffer.SetSubData(0, sizeof(myData), &myData);
+
+    const void* mappedData = MapReadAsyncAndWait(buffer);
+    EXPECT_EQ(myData, *reinterpret_cast<const uint32_t*>(mappedData));
+
+    buffer.Unmap();
+
+    myData = 0x05060708;
+    buffer.SetSubData(0, sizeof(myData), &myData);
+
+    const void* mappedData1 = MapReadAsyncAndWait(buffer);
+    EXPECT_EQ(myData, *reinterpret_cast<const uint32_t*>(mappedData1));
+
+    buffer.Unmap();
+}
+
 // Test mapping a large buffer.
 TEST_P(BufferMapReadTests, LargeRead) {
     constexpr uint32_t kDataSize = 1000 * 1000;
@@ -126,6 +155,28 @@ TEST_P(BufferMapWriteTests, SmallWriteAtZero) {
     EXPECT_BUFFER_U32_EQ(myData, buffer, 0);
 }
 
+// Map, write and unmap twice. Test that both of these two iterations work.
+TEST_P(BufferMapWriteTests, MapTwice) {
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    uint32_t myData = 2934875;
+    void* mappedData = MapWriteAsyncAndWait(buffer);
+    memcpy(mappedData, &myData, sizeof(myData));
+    buffer.Unmap();
+
+    EXPECT_BUFFER_U32_EQ(myData, buffer, 0);
+
+    myData = 9999999;
+    void* mappedData1 = MapWriteAsyncAndWait(buffer);
+    memcpy(mappedData1, &myData, sizeof(myData));
+    buffer.Unmap();
+
+    EXPECT_BUFFER_U32_EQ(myData, buffer, 0);
+}
+
 // Test mapping a large buffer.
 TEST_P(BufferMapWriteTests, LargeWrite) {
     constexpr uint32_t kDataSize = 1000 * 1000;
@@ -188,6 +239,24 @@ TEST_P(BufferSetSubDataTests, SmallDataAtZero) {
     wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
     uint32_t value = 0x01020304;
+    buffer.SetSubData(0, sizeof(value), &value);
+
+    EXPECT_BUFFER_U32_EQ(value, buffer, 0);
+}
+
+// Call SetSubData at offset 0 via a u32 twice. Test that data is updated accoordingly.
+TEST_P(BufferSetSubDataTests, SetTwice) {
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    uint32_t value = 0x01020304;
+    buffer.SetSubData(0, sizeof(value), &value);
+
+    EXPECT_BUFFER_U32_EQ(value, buffer, 0);
+
+    value = 0x05060708;
     buffer.SetSubData(0, sizeof(value), &value);
 
     EXPECT_BUFFER_U32_EQ(value, buffer, 0);
