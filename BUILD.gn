@@ -21,13 +21,6 @@ import("scripts/dawn_overrides_with_defaults.gni")
 
 import("//testing/test.gni")
 
-if (build_with_chromium) {
-  # Chromium build targets may not depend on dawn unless use_dawn is set. This
-  # assertion helps avoid accidental dependencies creeping into chromium.
-  import("//ui/gl/features.gni")
-  assert(use_dawn)
-}
-
 ###############################################################################
 # dawn_platform
 ###############################################################################
@@ -717,55 +710,6 @@ static_library("dawn_utils") {
   ]
 }
 
-static_library("dawn_bindings") {
-  configs += [ "${dawn_root}/src/common:dawn_internal" ]
-
-  sources = [
-    "src/utils/BackendBinding.cpp",
-    "src/utils/BackendBinding.h",
-  ]
-
-  public_deps = [
-    "${dawn_root}/src/dawn:dawn_headers",
-  ]
-
-  deps = [
-    ":dawn_glfw",
-    ":libdawn_native",
-    "${dawn_root}/src/common",
-  ]
-  libs = []
-
-  if (dawn_enable_d3d12) {
-    sources += [ "src/utils/D3D12Binding.cpp" ]
-  }
-
-  if (dawn_enable_metal) {
-    sources += [ "src/utils/MetalBinding.mm" ]
-    libs += [
-      "Metal.framework",
-      "QuartzCore.framework",
-    ]
-
-    # Suppress warnings that Metal isn't in the deployment target of Chrome
-    if (is_mac) {
-      cflags_objcc = [ "-Wno-unguarded-availability" ]
-    }
-  }
-
-  if (dawn_enable_null) {
-    sources += [ "src/utils/NullBinding.cpp" ]
-  }
-
-  if (dawn_enable_opengl) {
-    sources += [ "src/utils/OpenGLBinding.cpp" ]
-  }
-
-  if (dawn_enable_vulkan) {
-    sources += [ "src/utils/VulkanBinding.cpp" ]
-  }
-}
-
 ###############################################################################
 # Dawn test targets
 ###############################################################################
@@ -1103,6 +1047,56 @@ group("dawn_perf_tests_temp_group") {
 ###############################################################################
 
 if (dawn_standalone) {
+  # Library to handle the interaction of Dawn with GLFW windows in samples
+  static_library("dawn_bindings") {
+    configs += [ "${dawn_root}/src/common:dawn_internal" ]
+
+    sources = [
+      "src/utils/BackendBinding.cpp",
+      "src/utils/BackendBinding.h",
+    ]
+
+    public_deps = [
+      "${dawn_root}/src/dawn:dawn_headers",
+    ]
+
+    deps = [
+      ":dawn_glfw",
+      ":libdawn_native",
+      "${dawn_root}/src/common",
+    ]
+    libs = []
+
+    if (dawn_enable_d3d12) {
+      sources += [ "src/utils/D3D12Binding.cpp" ]
+    }
+
+    if (dawn_enable_metal) {
+      sources += [ "src/utils/MetalBinding.mm" ]
+      libs += [
+        "Metal.framework",
+        "QuartzCore.framework",
+      ]
+
+      # Suppress warnings that Metal isn't in the deployment target of Chrome
+      if (is_mac) {
+        cflags_objcc = [ "-Wno-unguarded-availability" ]
+      }
+    }
+
+    if (dawn_enable_null) {
+      sources += [ "src/utils/NullBinding.cpp" ]
+    }
+
+    if (dawn_enable_opengl) {
+      sources += [ "src/utils/OpenGLBinding.cpp" ]
+    }
+
+    if (dawn_enable_vulkan) {
+      sources += [ "src/utils/VulkanBinding.cpp" ]
+    }
+  }
+
   # Static library to contain code and dependencies common to all samples
   static_library("dawn_sample_utils") {
     sources = [
