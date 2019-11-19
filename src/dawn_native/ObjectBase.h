@@ -35,10 +35,6 @@ namespace dawn_native {
 
       private:
         DeviceBase* mDevice;
-        // TODO(cwallez@chromium.org): This most likely adds 4 bytes to most Dawn objects, see if
-        // that bit can be hidden in the refcount once it is a single 64bit refcount.
-        // See https://bugs.chromium.org/p/dawn/issues/detail?id=105
-        bool mIsError;
     };
 
 }  // namespace dawn_native

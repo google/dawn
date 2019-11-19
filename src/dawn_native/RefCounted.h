@@ -22,17 +22,18 @@ namespace dawn_native {
 
     class RefCounted {
       public:
-        RefCounted();
+        RefCounted(uint64_t payload = 0);
         virtual ~RefCounted();
 
-        uint64_t GetRefCount() const;
+        uint64_t GetRefCountForTesting() const;
+        uint64_t GetRefCountPayload() const;
 
         // Dawn API
         void Reference();
         void Release();
 
       protected:
-        std::atomic_uint64_t mRefCount = {1};
+        std::atomic_uint64_t mRefCount;
     };
 
     template <typename T>

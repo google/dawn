@@ -20,8 +20,7 @@
 using namespace dawn_native;
 
 struct RCTest : public RefCounted {
-    RCTest() {
-    }
+    using RefCounted::RefCounted;
 
     RCTest(bool* deleted): deleted(deleted) {
     }
@@ -76,7 +75,7 @@ TEST(RefCounted, RaceOnReferenceRelease) {
 
     t1.join();
     t2.join();
-    ASSERT_EQ(test->GetRefCount(), 200001u);
+    ASSERT_EQ(test->GetRefCountForTesting(), 200001u);
 
     auto releaseManyTimes = [test]() {
         for (uint32_t i = 0; i < 100000; ++i) {
@@ -88,7 +87,7 @@ TEST(RefCounted, RaceOnReferenceRelease) {
     std::thread t4(releaseManyTimes);
     t3.join();
     t4.join();
-    ASSERT_EQ(test->GetRefCount(), 1u);
+    ASSERT_EQ(test->GetRefCountForTesting(), 1u);
 }
 
 // Test Ref remove reference when going out of scope
@@ -206,4 +205,32 @@ TEST(Ref, MoveAssignment) {
 
     destination = nullptr;
     ASSERT_TRUE(deleted);
+}
+
+// Test the payload initial value is set correctly
+TEST(Ref, InitialPayloadValue) {
+    RCTest* testDefaultConstructor = new RCTest();
+    ASSERT_EQ(testDefaultConstructor->GetRefCountPayload(), 0u);
+    testDefaultConstructor->Release();
+
+    RCTest* testZero = new RCTest(0);
+    ASSERT_EQ(testZero->GetRefCountPayload(), 0u);
+    testZero->Release();
+
+    RCTest* testOne = new RCTest(1);
+    ASSERT_EQ(testOne->GetRefCountPayload(), 1u);
+    testOne->Release();
+}
+
+// Test that the payload survives ref and release operations
+TEST(Ref, PayloadUnchangedByRefCounting) {
+    RCTest* test = new RCTest(1);
+    ASSERT_EQ(test->GetRefCountPayload(), 1u);
+
+    test->Reference();
+    ASSERT_EQ(test->GetRefCountPayload(), 1u);
+    test->Release();
+    ASSERT_EQ(test->GetRefCountPayload(), 1u);
+
+    test->Release();
 }
