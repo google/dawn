@@ -16,6 +16,7 @@
 #include "dawn_native/vulkan/AdapterVk.h"
 #include "dawn_native/vulkan/BackendVk.h"
 #include "dawn_native/vulkan/DeviceVk.h"
+#include "dawn_native/vulkan/TextureVk.h"
 #include "dawn_native/vulkan/VulkanError.h"
 #include "dawn_native/vulkan/external_memory/MemoryService.h"
 
@@ -33,11 +34,11 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
 
     Service::~Service() = default;
 
-    bool Service::Supported(VkFormat format,
-                            VkImageType type,
-                            VkImageTiling tiling,
-                            VkImageUsageFlags usage,
-                            VkImageCreateFlags flags) {
+    bool Service::SupportsImportMemory(VkFormat format,
+                                       VkImageType type,
+                                       VkImageTiling tiling,
+                                       VkImageUsageFlags usage,
+                                       VkImageCreateFlags flags) {
         // Early out before we try using extension functions
         if (!mSupported) {
             return false;
@@ -80,6 +81,10 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
                !(memoryFlags & VK_EXTERNAL_MEMORY_FEATURE_DEDICATED_ONLY_BIT_KHR);
     }
 
+    bool Service::SupportsCreateImage(const ExternalImageDescriptor* descriptor, VkFormat format) {
+        return mSupported;
+    }
+
     ResultOrError<MemoryImportParams> Service::GetMemoryImportParams(
         const ExternalImageDescriptor* descriptor,
         VkImage image) {
@@ -113,6 +118,22 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
                                                            nullptr, &allocatedMemory),
                                 "vkAllocateMemory"));
         return allocatedMemory;
+    }
+
+    ResultOrError<VkImage> Service::CreateImage(const ExternalImageDescriptor* descriptor,
+                                                const VkImageCreateInfo& baseCreateInfo) {
+        VkImageCreateInfo createInfo = baseCreateInfo;
+        createInfo.flags = VK_IMAGE_CREATE_ALIAS_BIT_KHR;
+        createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+        createInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+        ASSERT(IsSampleCountSupported(mDevice, createInfo));
+
+        VkImage image;
+        DAWN_TRY(CheckVkSuccess(
+            mDevice->fn.CreateImage(mDevice->GetVkDevice(), &createInfo, nullptr, &image),
+            "CreateImage"));
+        return image;
     }
 
 }}}  // namespace dawn_native::vulkan::external_memory

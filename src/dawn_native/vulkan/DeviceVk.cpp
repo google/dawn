@@ -615,7 +615,7 @@ namespace dawn_native { namespace vulkan {
         if (!mExternalSemaphoreService->Supported()) {
             return DAWN_VALIDATION_ERROR("External semaphore usage not supported");
         }
-        if (!mExternalMemoryService->Supported(
+        if (!mExternalMemoryService->SupportsImportMemory(
                 VulkanImageFormat(textureDescriptor->format), VK_IMAGE_TYPE_2D,
                 VK_IMAGE_TILING_OPTIMAL,
                 VulkanImageUsage(textureDescriptor->usage,
@@ -683,7 +683,8 @@ namespace dawn_native { namespace vulkan {
         // if a failure happems.
         Texture* result = nullptr;
         // TODO(crbug.com/1026480): Consolidate this into a single CreateFromExternal call.
-        if (ConsumedError(Texture::CreateFromExternal(this, descriptor, textureDescriptor),
+        if (ConsumedError(Texture::CreateFromExternal(this, descriptor, textureDescriptor,
+                                                      mExternalMemoryService.get()),
                           &result) ||
             ConsumedError(ImportExternalImage(descriptor, memoryHandle, result->GetHandle(),
                                               waitHandles, &signalSemaphore, &allocation,

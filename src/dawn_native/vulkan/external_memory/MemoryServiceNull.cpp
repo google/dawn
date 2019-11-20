@@ -24,11 +24,15 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
 
     Service::~Service() = default;
 
-    bool Service::Supported(VkFormat format,
-                            VkImageType type,
-                            VkImageTiling tiling,
-                            VkImageUsageFlags usage,
-                            VkImageCreateFlags flags) {
+    bool Service::SupportsImportMemory(VkFormat format,
+                                       VkImageType type,
+                                       VkImageTiling tiling,
+                                       VkImageUsageFlags usage,
+                                       VkImageCreateFlags flags) {
+        return false;
+    }
+
+    bool Service::SupportsCreateImage(const ExternalImageDescriptor* descriptor, VkFormat format) {
         return false;
     }
 
@@ -41,6 +45,11 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
     ResultOrError<VkDeviceMemory> Service::ImportMemory(ExternalMemoryHandle handle,
                                                         const MemoryImportParams& importParams,
                                                         VkImage image) {
+        return DAWN_UNIMPLEMENTED_ERROR("Using null memory service to interop inside Vulkan");
+    }
+
+    ResultOrError<VkImage> Service::CreateImage(const ExternalImageDescriptor* descriptor,
+                                                const VkImageCreateInfo& baseCreateInfo) {
         return DAWN_UNIMPLEMENTED_ERROR("Using null memory service to interop inside Vulkan");
     }
 

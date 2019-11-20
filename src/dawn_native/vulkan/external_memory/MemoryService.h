@@ -36,12 +36,15 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
         explicit Service(Device* device);
         ~Service();
 
-        // True if the device reports it supports this feature
-        bool Supported(VkFormat format,
-                       VkImageType type,
-                       VkImageTiling tiling,
-                       VkImageUsageFlags usage,
-                       VkImageCreateFlags flags);
+        // True if the device reports it supports importing external memory.
+        bool SupportsImportMemory(VkFormat format,
+                                  VkImageType type,
+                                  VkImageTiling tiling,
+                                  VkImageUsageFlags usage,
+                                  VkImageCreateFlags flags);
+
+        // True if the device reports it supports creating VkImages from external memory.
+        bool SupportsCreateImage(const ExternalImageDescriptor* descriptor, VkFormat format);
 
         // Returns the parameters required for importing memory
         ResultOrError<MemoryImportParams> GetMemoryImportParams(
@@ -52,6 +55,10 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
         ResultOrError<VkDeviceMemory> ImportMemory(ExternalMemoryHandle handle,
                                                    const MemoryImportParams& importParams,
                                                    VkImage image);
+
+        // Create a VkImage for the given handle type
+        ResultOrError<VkImage> CreateImage(const ExternalImageDescriptor* descriptor,
+                                           const VkImageCreateInfo& baseCreateInfo);
 
       private:
         Device* mDevice = nullptr;
