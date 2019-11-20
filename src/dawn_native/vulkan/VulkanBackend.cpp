@@ -60,6 +60,23 @@ namespace dawn_native { namespace vulkan {
     }
 
 #ifdef DAWN_PLATFORM_LINUX
+    ExternalImageDescriptor::ExternalImageDescriptor(ExternalImageDescriptorType type)
+        : type(type) {
+    }
+
+    ExternalImageDescriptorFD::ExternalImageDescriptorFD(ExternalImageDescriptorType type)
+        : ExternalImageDescriptor(type) {
+    }
+
+    ExternalImageDescriptorOpaqueFD::ExternalImageDescriptorOpaqueFD()
+        : ExternalImageDescriptorFD(ExternalImageDescriptorType::OpaqueFD) {
+    }
+
+    ExternalImageDescriptorDmaBuf::ExternalImageDescriptorDmaBuf()
+        : ExternalImageDescriptorFD(ExternalImageDescriptorType::DmaBuf) {
+    }
+
+    // TODO(hob): Remove this once we switch over to WrapVulkanImage in Chromium.
     WGPUTexture WrapVulkanImageOpaqueFD(WGPUDevice cDevice,
                                         const ExternalImageDescriptorOpaqueFD* descriptor) {
         Device* device = reinterpret_cast<Device*>(cDevice);
@@ -84,6 +101,23 @@ namespace dawn_native { namespace vulkan {
         }
 
         return outHandle;
+    }
+
+    WGPUTexture WrapVulkanImage(WGPUDevice cDevice, const ExternalImageDescriptor* descriptor) {
+        Device* device = reinterpret_cast<Device*>(cDevice);
+
+        switch (descriptor->type) {
+            case ExternalImageDescriptorType::OpaqueFD:
+            case ExternalImageDescriptorType::DmaBuf: {
+                const ExternalImageDescriptorFD* fdDescriptor =
+                    static_cast<const ExternalImageDescriptorFD*>(descriptor);
+                TextureBase* texture = device->CreateTextureWrappingVulkanImage(
+                    descriptor, fdDescriptor->memoryFD, fdDescriptor->waitFDs);
+                return reinterpret_cast<WGPUTexture>(texture);
+            }
+            default:
+                return nullptr;
+        }
     }
 #endif
 

@@ -518,11 +518,6 @@ namespace dawn_native { namespace vulkan {
                                            VkDeviceMemory externalMemoryAllocation,
                                            std::vector<VkSemaphore> waitSemaphores) {
         Device* device = ToBackend(GetDevice());
-        VkMemoryRequirements requirements;
-        device->fn.GetImageMemoryRequirements(device->GetVkDevice(), mHandle, &requirements);
-
-        ASSERT(requirements.size <= descriptor->allocationSize);
-
         DAWN_TRY(CheckVkSuccess(
             device->fn.BindImageMemory(device->GetVkDevice(), mHandle, externalMemoryAllocation, 0),
             "BindImageMemory (external)"));
