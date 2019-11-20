@@ -66,8 +66,9 @@ static_library("spirv_cross") {
     "${spirv_cross_dir}/spirv_parser.hpp",
   ]
 
-  need_glsl_cross = dawn_enable_opengl || dawn_enable_cross_reflection
-  need_reflection_cross = dawn_enable_cross_reflection
+  need_glsl_cross =
+      dawn_enable_opengl || dawn_enable_cross_reflection || dawn_use_spvc
+  need_reflection_cross = dawn_enable_cross_reflection || dawn_use_spvc
 
   if (dawn_enable_d3d12) {
     sources += [

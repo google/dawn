@@ -127,6 +127,11 @@ source_set("libdawn_native_sources") {
     "${dawn_spirv_tools_dir}:spvtools_val",
     "third_party:spirv_cross",
   ]
+  defines = []
+  if (dawn_use_spvc) {
+    deps += [ "${dawn_shaderc_dir}:libshaderc_spvc" ]
+    defines += [ "DAWN_USE_SPVC" ]
+  }
 
   configs += [ ":libdawn_native_internal" ]
   libs = []
@@ -500,7 +505,7 @@ source_set("libdawn_native_sources") {
       ]
     }
     if (dawn_enable_vulkan_validation_layers) {
-      defines = [
+      defines += [
         "DAWN_ENABLE_VULKAN_VALIDATION_LAYERS",
         "DAWN_VK_DATA_DIR=\"$vulkan_data_subdir\"",
       ]
