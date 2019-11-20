@@ -56,6 +56,6 @@ declare_args() {
 if (dawn_enable_vulkan) {
   declare_args() {
     # Uses our built version of Vulkan validation layers
-    dawn_enable_vulkan_validation_layers = is_linux || is_win
+    dawn_enable_vulkan_validation_layers = (is_linux && !is_chromeos) || is_win
   }
 }
