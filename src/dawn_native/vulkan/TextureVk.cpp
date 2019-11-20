@@ -406,16 +406,13 @@ namespace dawn_native { namespace vulkan {
     }
 
     // static
-    ResultOrError<Texture*> Texture::CreateFromExternal(Device* device,
-                                                        const ExternalImageDescriptor* descriptor,
-                                                        const TextureDescriptor* textureDescriptor,
-                                                        VkSemaphore signalSemaphore,
-                                                        VkDeviceMemory externalMemoryAllocation,
-                                                        std::vector<VkSemaphore> waitSemaphores) {
+    ResultOrError<Texture*> Texture::CreateFromExternal(
+        Device* device,
+        const ExternalImageDescriptor* descriptor,
+        const TextureDescriptor* textureDescriptor) {
         std::unique_ptr<Texture> texture =
             std::make_unique<Texture>(device, textureDescriptor, TextureState::OwnedInternal);
-        DAWN_TRY(texture->InitializeFromExternal(
-            descriptor, signalSemaphore, externalMemoryAllocation, std::move((waitSemaphores))));
+        DAWN_TRY(texture->InitializeFromExternal(descriptor));
         return texture.release();
     }
 
@@ -484,10 +481,7 @@ namespace dawn_native { namespace vulkan {
     }
 
     // Internally managed, but imported from external handle
-    MaybeError Texture::InitializeFromExternal(const ExternalImageDescriptor* descriptor,
-                                               VkSemaphore signalSemaphore,
-                                               VkDeviceMemory externalMemoryAllocation,
-                                               std::vector<VkSemaphore> waitSemaphores) {
+    MaybeError Texture::InitializeFromExternal(const ExternalImageDescriptor* descriptor) {
         mExternalState = ExternalState::PendingAcquire;
         Device* device = ToBackend(GetDevice());
 
@@ -519,7 +513,14 @@ namespace dawn_native { namespace vulkan {
             device->fn.CreateImage(device->GetVkDevice(), &createInfo, nullptr, &mHandle),
             "CreateImage"));
 
-        // Create the image memory and associate it with the container
+        return {};
+    }
+
+    MaybeError Texture::BindExternalMemory(const ExternalImageDescriptor* descriptor,
+                                           VkSemaphore signalSemaphore,
+                                           VkDeviceMemory externalMemoryAllocation,
+                                           std::vector<VkSemaphore> waitSemaphores) {
+        Device* device = ToBackend(GetDevice());
         VkMemoryRequirements requirements;
         device->fn.GetImageMemoryRequirements(device->GetVkDevice(), mHandle, &requirements);
 
@@ -538,7 +539,6 @@ namespace dawn_native { namespace vulkan {
         mExternalAllocation = externalMemoryAllocation;
         mSignalSemaphore = signalSemaphore;
         mWaitRequirements = std::move(waitSemaphores);
-
         return {};
     }
 

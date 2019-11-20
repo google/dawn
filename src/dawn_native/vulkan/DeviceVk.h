@@ -171,6 +171,7 @@ namespace dawn_native { namespace vulkan {
 
         MaybeError ImportExternalImage(const ExternalImageDescriptor* descriptor,
                                        ExternalMemoryHandle memoryHandle,
+                                       VkImage image,
                                        const std::vector<ExternalSemaphoreHandle>& waitHandles,
                                        VkSemaphore* outSignalSemaphore,
                                        VkDeviceMemory* outAllocation,

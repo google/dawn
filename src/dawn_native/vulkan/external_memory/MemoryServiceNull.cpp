@@ -32,10 +32,16 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
         return false;
     }
 
+    ResultOrError<MemoryImportParams> Service::GetMemoryImportParams(
+        const ExternalImageDescriptor* descriptor,
+        VkImage image) {
+        return DAWN_UNIMPLEMENTED_ERROR("Using null memory service to interop inside Vulkan");
+    }
+
     ResultOrError<VkDeviceMemory> Service::ImportMemory(ExternalMemoryHandle handle,
-                                                        VkDeviceSize allocationSize,
-                                                        uint32_t memoryTypeIndex) {
-        return DAWN_UNIMPLEMENTED_ERROR("Using null semaphore service to interop inside Vulkan");
+                                                        const MemoryImportParams& importParams,
+                                                        VkImage image) {
+        return DAWN_UNIMPLEMENTED_ERROR("Using null memory service to interop inside Vulkan");
     }
 
 }}}  // namespace dawn_native::vulkan::external_memory

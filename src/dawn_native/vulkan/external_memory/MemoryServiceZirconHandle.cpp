@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "common/Assert.h"
 #include "dawn_native/vulkan/AdapterVk.h"
 #include "dawn_native/vulkan/BackendVk.h"
 #include "dawn_native/vulkan/DeviceVk.h"
@@ -79,9 +80,16 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
                !(memoryFlags & VK_EXTERNAL_MEMORY_FEATURE_DEDICATED_ONLY_BIT_KHR);
     }
 
+    ResultOrError<MemoryImportParams> Service::GetMemoryImportParams(
+        const ExternalImageDescriptor* descriptor,
+        VkImage image) {
+        MemoryImportParams params = {descriptor->allocationSize, descriptor->memoryTypeIndex};
+        return params;
+    }
+
     ResultOrError<VkDeviceMemory> Service::ImportMemory(ExternalMemoryHandle handle,
-                                                        VkDeviceSize allocationSize,
-                                                        uint32_t memoryTypeIndex) {
+                                                        const MemoryImportParams& importParams,
+                                                        VkImage image) {
         if (handle == ZX_HANDLE_INVALID) {
             return DAWN_VALIDATION_ERROR("Trying to import memory with invalid handle");
         }
@@ -97,8 +105,8 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
         VkMemoryAllocateInfo allocateInfo;
         allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocateInfo.pNext = &importMemoryHandleInfo;
-        allocateInfo.allocationSize = allocationSize;
-        allocateInfo.memoryTypeIndex = memoryTypeIndex;
+        allocateInfo.allocationSize = importParams.allocationSize;
+        allocateInfo.memoryTypeIndex = importParams.memoryTypeIndex;
 
         VkDeviceMemory allocatedMemory = VK_NULL_HANDLE;
         DAWN_TRY(CheckVkSuccess(mDevice->fn.AllocateMemory(mDevice->GetVkDevice(), &allocateInfo,

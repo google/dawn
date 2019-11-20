@@ -39,16 +39,13 @@ namespace dawn_native { namespace vulkan {
         // Used to create a regular texture from a descriptor.
         static ResultOrError<Texture*> Create(Device* device, const TextureDescriptor* descriptor);
 
-        // Used to create a texture from Vulkan external memory objects.
-        // Ownership of semaphores and the memory allocation is taken only if the creation is
-        // a success.
+        // Creates a texture and initializes it with a VkImage that references an external memory
+        // object. Before the texture can be used, the VkDeviceMemory associated with the external
+        // image must be bound via Texture::BindExternalMemory.
         static ResultOrError<Texture*> CreateFromExternal(
             Device* device,
             const ExternalImageDescriptor* descriptor,
-            const TextureDescriptor* textureDescriptor,
-            VkSemaphore signalSemaphore,
-            VkDeviceMemory externalMemoryAllocation,
-            std::vector<VkSemaphore> waitSemaphores);
+            const TextureDescriptor* textureDescriptor);
 
         Texture(Device* device, const TextureDescriptor* descriptor, VkImage nativeImage);
         ~Texture();
@@ -68,14 +65,18 @@ namespace dawn_native { namespace vulkan {
                                                  uint32_t layerCount);
 
         MaybeError SignalAndDestroy(VkSemaphore* outSignalSemaphore);
+        // Binds externally allocated memory to the VkImage and on success, takes ownership of
+        // semaphores.
+        MaybeError BindExternalMemory(const ExternalImageDescriptor* descriptor,
+                                      VkSemaphore signalSemaphore,
+                                      VkDeviceMemory externalMemoryAllocation,
+                                      std::vector<VkSemaphore> waitSemaphores);
 
       private:
         using TextureBase::TextureBase;
         MaybeError InitializeAsInternalTexture();
-        MaybeError InitializeFromExternal(const ExternalImageDescriptor* descriptor,
-                                          VkSemaphore signalSemaphore,
-                                          VkDeviceMemory externalMemoryAllocation,
-                                          std::vector<VkSemaphore> waitSemaphores);
+
+        MaybeError InitializeFromExternal(const ExternalImageDescriptor* descriptor);
 
         void DestroyImpl() override;
         MaybeError ClearTexture(CommandRecordingContext* recordingContext,
