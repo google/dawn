@@ -49,7 +49,9 @@ declare_args() {
 # GN does not allow reading a variable defined in the same declare_args().
 # Put them in two separate declare_args() when setting the value of one
 # argument based on another.
-declare_args() {
-  # Uses our built version of Vulkan validation layers
-  dawn_enable_vulkan_validation_layers = dawn_enable_vulkan && is_win
+if (dawn_enable_vulkan) {
+  declare_args() {
+    # Uses our built version of Vulkan validation layers
+    dawn_enable_vulkan_validation_layers = is_linux || is_win
+  }
 }

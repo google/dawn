@@ -214,6 +214,12 @@ void DawnTestEnvironment::SetUp() {
     std::cout << std::endl;
 }
 
+void DawnTestEnvironment::TearDown() {
+    // When Vulkan validation layers are enabled, it's unsafe to call Vulkan APIs in the destructor
+    // of a static/global variable, so the instance must be manually released beforehand.
+    mInstance.reset();
+}
+
 bool DawnTestEnvironment::UsesWire() const {
     return mUseWire;
 }
