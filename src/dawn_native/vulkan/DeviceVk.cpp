@@ -355,6 +355,14 @@ namespace dawn_native { namespace vulkan {
             extensionsToRequest.push_back(kExtensionNameKhrExternalMemoryFD);
             usedKnobs.externalMemoryFD = true;
         }
+        if (mDeviceInfo.externalMemoryDmaBuf) {
+            extensionsToRequest.push_back(kExtensionNameExtExternalMemoryDmaBuf);
+            usedKnobs.externalMemoryDmaBuf = true;
+        }
+        if (mDeviceInfo.imageDrmFormatModifier) {
+            extensionsToRequest.push_back(kExtensionNameExtImageDrmFormatModifier);
+            usedKnobs.imageDrmFormatModifier = true;
+        }
         if (mDeviceInfo.externalMemoryZirconHandle) {
             extensionsToRequest.push_back(kExtensionNameFuchsiaExternalMemory);
             usedKnobs.externalMemoryZirconHandle = true;

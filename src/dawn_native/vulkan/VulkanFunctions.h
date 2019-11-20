@@ -24,14 +24,14 @@ class DynamicLib;
 namespace dawn_native { namespace vulkan {
 
     struct VulkanGlobalInfo;
-    struct VulkanDeviceKnobs;
+    struct VulkanDeviceInfo;
 
     // Stores the Vulkan entry points. Also loads them from the dynamic library
     // and the vkGet*ProcAddress entry points.
     struct VulkanFunctions {
         MaybeError LoadGlobalProcs(const DynamicLib& vulkanLib);
         MaybeError LoadInstanceProcs(VkInstance instance, const VulkanGlobalInfo& globalInfo);
-        MaybeError LoadDeviceProcs(VkDevice device, const VulkanDeviceKnobs& usedKnobs);
+        MaybeError LoadDeviceProcs(VkDevice device, const VulkanDeviceInfo& deviceInfo);
 
         // ---------- Global procs
 

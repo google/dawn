@@ -59,6 +59,8 @@ namespace dawn_native { namespace vulkan {
     const char kExtensionNameKhrExternalMemoryCapabilities[] =
         "VK_KHR_external_memory_capabilities";
     const char kExtensionNameKhrExternalMemoryFD[] = "VK_KHR_external_memory_fd";
+    const char kExtensionNameExtExternalMemoryDmaBuf[] = "VK_EXT_external_memory_dma_buf";
+    const char kExtensionNameExtImageDrmFormatModifier[] = "VK_EXT_image_drm_format_modifier";
     const char kExtensionNameFuchsiaExternalMemory[] = "VK_FUCHSIA_external_memory";
     const char kExtensionNameKhrExternalSemaphore[] = "VK_KHR_external_semaphore";
     const char kExtensionNameKhrExternalSemaphoreCapabilities[] =
@@ -286,6 +288,12 @@ namespace dawn_native { namespace vulkan {
                 }
                 if (IsExtensionName(extension, kExtensionNameKhrExternalMemoryFD)) {
                     info.externalMemoryFD = true;
+                }
+                if (IsExtensionName(extension, kExtensionNameExtExternalMemoryDmaBuf)) {
+                    info.externalMemoryDmaBuf = true;
+                }
+                if (IsExtensionName(extension, kExtensionNameExtImageDrmFormatModifier)) {
+                    info.imageDrmFormatModifier = true;
                 }
                 if (IsExtensionName(extension, kExtensionNameFuchsiaExternalMemory)) {
                     info.externalMemoryZirconHandle = true;
