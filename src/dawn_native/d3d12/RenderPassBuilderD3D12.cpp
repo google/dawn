@@ -92,8 +92,11 @@ namespace dawn_native { namespace d3d12 {
             subresourceParameters.SrcSubresource = 0;
             subresourceParameters.DstSubresource = resolveDestinationTexture->GetSubresourceIndex(
                 resolveDestination->GetBaseMipLevel(), resolveDestination->GetBaseArrayLayer());
-            subresourceParameters.SrcRect = {0, 0, resolveDestinationTexture->GetSize().width,
-                                             resolveDestinationTexture->GetSize().height};
+            // Resolving a specified sub-rect is only valid on hardware that supports sample
+            // positions. This means even {0, 0, width, height} would be invalid if unsupported. To
+            // avoid this, we assume sub-rect resolves never work by setting them to all zeros or
+            // "empty" to resolve the entire region.
+            subresourceParameters.SrcRect = {0, 0, 0, 0};
 
             return subresourceParameters;
         }
