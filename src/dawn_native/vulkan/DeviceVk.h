@@ -95,6 +95,8 @@ namespace dawn_native { namespace vulkan {
                                                                bool mappable);
         void DeallocateMemory(ResourceMemoryAllocation* allocation);
 
+        int FindBestMemoryTypeIndex(VkMemoryRequirements requirements, bool mappable);
+
         ResourceMemoryAllocator* GetResourceMemoryAllocatorForTesting() const;
 
       private:

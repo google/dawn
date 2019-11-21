@@ -81,7 +81,9 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
                !(memoryFlags & VK_EXTERNAL_MEMORY_FEATURE_DEDICATED_ONLY_BIT_KHR);
     }
 
-    bool Service::SupportsCreateImage(const ExternalImageDescriptor* descriptor, VkFormat format) {
+    bool Service::SupportsCreateImage(const ExternalImageDescriptor* descriptor,
+                                      VkFormat format,
+                                      VkImageUsageFlags usage) {
         return mSupported;
     }
 

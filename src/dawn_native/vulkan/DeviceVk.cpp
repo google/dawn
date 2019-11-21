@@ -722,6 +722,10 @@ namespace dawn_native { namespace vulkan {
         mResourceMemoryAllocator->Deallocate(allocation);
     }
 
+    int Device::FindBestMemoryTypeIndex(VkMemoryRequirements requirements, bool mappable) {
+        return mResourceMemoryAllocator->FindBestTypeIndex(requirements, mappable);
+    }
+
     ResourceMemoryAllocator* Device::GetResourceMemoryAllocatorForTesting() const {
         return mResourceMemoryAllocator.get();
     }

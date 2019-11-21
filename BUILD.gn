@@ -478,7 +478,12 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/vulkan/external_semaphore/SemaphoreService.h",
     ]
 
-    if (is_linux) {
+    if (is_chromeos) {
+      sources += [
+        "src/dawn_native/vulkan/external_memory/MemoryServiceDmaBuf.cpp",
+        "src/dawn_native/vulkan/external_semaphore/SemaphoreServiceOpaqueFD.cpp",
+      ]
+    } else if (is_linux) {
       sources += [
         "src/dawn_native/vulkan/external_memory/MemoryServiceOpaqueFD.cpp",
         "src/dawn_native/vulkan/external_semaphore/SemaphoreServiceOpaqueFD.cpp",

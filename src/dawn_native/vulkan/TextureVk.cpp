@@ -485,7 +485,8 @@ namespace dawn_native { namespace vulkan {
     MaybeError Texture::InitializeFromExternal(const ExternalImageDescriptor* descriptor,
                                                external_memory::Service* externalMemoryService) {
         VkFormat format = VulkanImageFormat(GetFormat().format);
-        if (!externalMemoryService->SupportsCreateImage(descriptor, format)) {
+        VkImageUsageFlags usage = VulkanImageUsage(GetUsage(), GetFormat());
+        if (!externalMemoryService->SupportsCreateImage(descriptor, format, usage)) {
             return DAWN_VALIDATION_ERROR("Creating an image from external memory is not supported");
         }
 
@@ -499,7 +500,7 @@ namespace dawn_native { namespace vulkan {
         baseCreateInfo.mipLevels = GetNumMipLevels();
         baseCreateInfo.arrayLayers = GetArrayLayers();
         baseCreateInfo.samples = VulkanSampleCount(GetSampleCount());
-        baseCreateInfo.usage = VulkanImageUsage(GetUsage(), GetFormat());
+        baseCreateInfo.usage = usage;
         baseCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         baseCreateInfo.queueFamilyIndexCount = 0;
         baseCreateInfo.pQueueFamilyIndices = nullptr;

@@ -32,7 +32,9 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
         return false;
     }
 
-    bool Service::SupportsCreateImage(const ExternalImageDescriptor* descriptor, VkFormat format) {
+    bool Service::SupportsCreateImage(const ExternalImageDescriptor* descriptor,
+                                      VkFormat format,
+                                      VkImageUsageFlags usage) {
         return false;
     }
 
