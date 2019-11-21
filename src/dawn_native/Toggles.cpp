@@ -80,7 +80,9 @@ namespace dawn_native {
               {"use_d3d12_render_pass",
                "Use the D3D12 render pass API introduced in Windows build 1809 by default. On "
                "versions of Windows prior to build 1809, or when this toggle is turned off, Dawn "
-               "will emulate a render pass."}}}};
+               "will emulate a render pass."}},
+             {Toggle::SkipValidation,
+              {"skip_validation", "Skip expensive validation of Dawn commands."}}}};
     }  // anonymous namespace
 
     void TogglesSet::SetToggle(Toggle toggle, bool enabled) {

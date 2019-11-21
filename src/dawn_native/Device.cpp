@@ -617,6 +617,10 @@ namespace dawn_native {
         return mTogglesSet.IsEnabled(toggle);
     }
 
+    bool DeviceBase::IsValidationEnabled() const {
+        return !IsToggleEnabled(Toggle::SkipValidation);
+    }
+
     size_t DeviceBase::GetLazyClearCountForTesting() {
         return mLazyClearCountForTesting;
     }
@@ -634,7 +638,9 @@ namespace dawn_native {
 
     MaybeError DeviceBase::CreateBindGroupInternal(BindGroupBase** result,
                                                    const BindGroupDescriptor* descriptor) {
-        DAWN_TRY(ValidateBindGroupDescriptor(this, descriptor));
+        if (IsValidationEnabled()) {
+            DAWN_TRY(ValidateBindGroupDescriptor(this, descriptor));
+        }
         DAWN_TRY_ASSIGN(*result, CreateBindGroupImpl(descriptor));
         return {};
     }
@@ -642,14 +648,18 @@ namespace dawn_native {
     MaybeError DeviceBase::CreateBindGroupLayoutInternal(
         BindGroupLayoutBase** result,
         const BindGroupLayoutDescriptor* descriptor) {
-        DAWN_TRY(ValidateBindGroupLayoutDescriptor(this, descriptor));
+        if (IsValidationEnabled()) {
+            DAWN_TRY(ValidateBindGroupLayoutDescriptor(this, descriptor));
+        }
         DAWN_TRY_ASSIGN(*result, GetOrCreateBindGroupLayout(descriptor));
         return {};
     }
 
     MaybeError DeviceBase::CreateBufferInternal(BufferBase** result,
                                                 const BufferDescriptor* descriptor) {
-        DAWN_TRY(ValidateBufferDescriptor(this, descriptor));
+        if (IsValidationEnabled()) {
+            DAWN_TRY(ValidateBufferDescriptor(this, descriptor));
+        }
         DAWN_TRY_ASSIGN(*result, CreateBufferImpl(descriptor));
         return {};
     }
@@ -657,7 +667,9 @@ namespace dawn_native {
     MaybeError DeviceBase::CreateComputePipelineInternal(
         ComputePipelineBase** result,
         const ComputePipelineDescriptor* descriptor) {
-        DAWN_TRY(ValidateComputePipelineDescriptor(this, descriptor));
+        if (IsValidationEnabled()) {
+            DAWN_TRY(ValidateComputePipelineDescriptor(this, descriptor));
+        }
         DAWN_TRY_ASSIGN(*result, GetOrCreateComputePipeline(descriptor));
         return {};
     }
@@ -665,7 +677,9 @@ namespace dawn_native {
     MaybeError DeviceBase::CreatePipelineLayoutInternal(
         PipelineLayoutBase** result,
         const PipelineLayoutDescriptor* descriptor) {
-        DAWN_TRY(ValidatePipelineLayoutDescriptor(this, descriptor));
+        if (IsValidationEnabled()) {
+            DAWN_TRY(ValidatePipelineLayoutDescriptor(this, descriptor));
+        }
         DAWN_TRY_ASSIGN(*result, GetOrCreatePipelineLayout(descriptor));
         return {};
     }
@@ -678,7 +692,9 @@ namespace dawn_native {
     MaybeError DeviceBase::CreateRenderBundleEncoderInternal(
         RenderBundleEncoder** result,
         const RenderBundleEncoderDescriptor* descriptor) {
-        DAWN_TRY(ValidateRenderBundleEncoderDescriptor(this, descriptor));
+        if (IsValidationEnabled()) {
+            DAWN_TRY(ValidateRenderBundleEncoderDescriptor(this, descriptor));
+        }
         *result = new RenderBundleEncoder(this, descriptor);
         return {};
     }
@@ -686,35 +702,45 @@ namespace dawn_native {
     MaybeError DeviceBase::CreateRenderPipelineInternal(
         RenderPipelineBase** result,
         const RenderPipelineDescriptor* descriptor) {
-        DAWN_TRY(ValidateRenderPipelineDescriptor(this, descriptor));
+        if (IsValidationEnabled()) {
+            DAWN_TRY(ValidateRenderPipelineDescriptor(this, descriptor));
+        }
         DAWN_TRY_ASSIGN(*result, GetOrCreateRenderPipeline(descriptor));
         return {};
     }
 
     MaybeError DeviceBase::CreateSamplerInternal(SamplerBase** result,
                                                  const SamplerDescriptor* descriptor) {
-        DAWN_TRY(ValidateSamplerDescriptor(this, descriptor));
+        if (IsValidationEnabled()) {
+            DAWN_TRY(ValidateSamplerDescriptor(this, descriptor));
+        }
         DAWN_TRY_ASSIGN(*result, GetOrCreateSampler(descriptor));
         return {};
     }
 
     MaybeError DeviceBase::CreateShaderModuleInternal(ShaderModuleBase** result,
                                                       const ShaderModuleDescriptor* descriptor) {
-        DAWN_TRY(ValidateShaderModuleDescriptor(this, descriptor));
+        if (IsValidationEnabled()) {
+            DAWN_TRY(ValidateShaderModuleDescriptor(this, descriptor));
+        }
         DAWN_TRY_ASSIGN(*result, GetOrCreateShaderModule(descriptor));
         return {};
     }
 
     MaybeError DeviceBase::CreateSwapChainInternal(SwapChainBase** result,
                                                    const SwapChainDescriptor* descriptor) {
-        DAWN_TRY(ValidateSwapChainDescriptor(this, descriptor));
+        if (IsValidationEnabled()) {
+            DAWN_TRY(ValidateSwapChainDescriptor(this, descriptor));
+        }
         DAWN_TRY_ASSIGN(*result, CreateSwapChainImpl(descriptor));
         return {};
     }
 
     MaybeError DeviceBase::CreateTextureInternal(TextureBase** result,
                                                  const TextureDescriptor* descriptor) {
-        DAWN_TRY(ValidateTextureDescriptor(this, descriptor));
+        if (IsValidationEnabled()) {
+            DAWN_TRY(ValidateTextureDescriptor(this, descriptor));
+        }
         DAWN_TRY_ASSIGN(*result, CreateTextureImpl(descriptor));
         return {};
     }
@@ -724,7 +750,9 @@ namespace dawn_native {
                                                      const TextureViewDescriptor* descriptor) {
         DAWN_TRY(ValidateObject(texture));
         TextureViewDescriptor desc = GetTextureViewDescriptorWithDefaults(texture, descriptor);
-        DAWN_TRY(ValidateTextureViewDescriptor(texture, &desc));
+        if (IsValidationEnabled()) {
+            DAWN_TRY(ValidateTextureViewDescriptor(texture, &desc));
+        }
         DAWN_TRY_ASSIGN(*result, CreateTextureViewImpl(texture, &desc));
         return {};
     }

@@ -81,6 +81,8 @@ TEST_P(ObjectCachingTest, BindGroupLayoutTextureDimension) {
 
 // Test that an error object doesn't try to uncache itself
 TEST_P(ObjectCachingTest, ErrorObjectDoesntUncache) {
+    DAWN_SKIP_TEST_IF(IsDawnValidationSkipped());
+
     ASSERT_DEVICE_ERROR(
         wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer},

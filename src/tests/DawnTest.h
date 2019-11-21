@@ -134,6 +134,7 @@ class DawnTestEnvironment : public testing::Environment {
 
     bool UsesWire() const;
     bool IsBackendValidationEnabled() const;
+    bool IsDawnValidationSkipped() const;
     dawn_native::Instance* GetInstance() const;
     bool HasVendorIdFilter() const;
     uint32_t GetVendorIdFilter() const;
@@ -146,6 +147,7 @@ class DawnTestEnvironment : public testing::Environment {
 
     bool mUseWire = false;
     bool mEnableBackendValidation = false;
+    bool mSkipDawnValidation = false;
     bool mBeginCaptureOnStartup = false;
     bool mHasVendorIdFilter = false;
     uint32_t mVendorIdFilter = 0;
@@ -179,6 +181,7 @@ class DawnTestBase {
 
     bool UsesWire() const;
     bool IsBackendValidationEnabled() const;
+    bool IsDawnValidationSkipped() const;
 
     void StartExpectDeviceError();
     bool EndExpectDeviceError();

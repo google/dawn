@@ -185,6 +185,7 @@ namespace dawn_native {
         std::vector<const char*> GetTogglesUsed() const;
         bool IsExtensionEnabled(Extension extension) const;
         bool IsToggleEnabled(Toggle toggle) const;
+        bool IsValidationEnabled() const;
         size_t GetLazyClearCountForTesting();
         void IncrementLazyClearCountForTesting();
 
