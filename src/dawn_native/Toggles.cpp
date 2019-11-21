@@ -82,11 +82,7 @@ namespace dawn_native {
                "versions of Windows prior to build 1809, or when this toggle is turned off, Dawn "
                "will emulate a render pass."}},
              {Toggle::SkipValidation,
-              {"skip_validation", "Skip expensive validation of Dawn commands."}},
-             {Toggle::UseSpvc,
-              {"use_spvc",
-               "Enable use of spvc for shader compilation, instead of accessing spirv_cross "
-               "directly."}}}};
+              {"skip_validation", "Skip expensive validation of Dawn commands."}}}};
     }  // anonymous namespace
 
     void TogglesSet::SetToggle(Toggle toggle, bool enabled) {
