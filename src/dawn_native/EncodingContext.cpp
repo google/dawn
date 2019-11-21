@@ -15,9 +15,11 @@
 #include "dawn_native/EncodingContext.h"
 
 #include "common/Assert.h"
+#include "dawn_native/CommandEncoder.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/ErrorData.h"
+#include "dawn_native/RenderBundleEncoder.h"
 
 namespace dawn_native {
 
@@ -32,17 +34,23 @@ namespace dawn_native {
     }
 
     CommandIterator EncodingContext::AcquireCommands() {
+        MoveToIterator();
         ASSERT(!mWereCommandsAcquired);
         mWereCommandsAcquired = true;
         return std::move(mIterator);
     }
 
     CommandIterator* EncodingContext::GetIterator() {
+        MoveToIterator();
+        ASSERT(!mWereCommandsAcquired);
+        return &mIterator;
+    }
+
+    void EncodingContext::MoveToIterator() {
         if (!mWasMovedToIterator) {
             mIterator = std::move(mAllocator);
             mWasMovedToIterator = true;
         }
-        return &mIterator;
     }
 
     void EncodingContext::HandleError(wgpu::ErrorType type, const char* message) {
@@ -66,13 +74,25 @@ namespace dawn_native {
         mCurrentEncoder = passEncoder;
     }
 
-    void EncodingContext::ExitPass(const ObjectBase* passEncoder) {
+    void EncodingContext::ExitPass(const ObjectBase* passEncoder, PassResourceUsage passUsage) {
         // Assert we're not at the top level.
         ASSERT(mCurrentEncoder != mTopLevelEncoder);
         // Assert the pass encoder is current.
         ASSERT(mCurrentEncoder == passEncoder);
 
         mCurrentEncoder = mTopLevelEncoder;
+        mPassUsages.push_back(std::move(passUsage));
+    }
+
+    const PerPassUsages& EncodingContext::GetPassUsages() const {
+        ASSERT(!mWerePassUsagesAcquired);
+        return mPassUsages;
+    }
+
+    PerPassUsages EncodingContext::AcquirePassUsages() {
+        ASSERT(!mWerePassUsagesAcquired);
+        mWerePassUsagesAcquired = true;
+        return std::move(mPassUsages);
     }
 
     MaybeError EncodingContext::Finish() {

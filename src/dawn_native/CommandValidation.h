@@ -30,13 +30,11 @@ namespace dawn_native {
     MaybeError ValidateFinalDebugGroupStackSize(uint64_t debugGroupStackSize);
 
     MaybeError ValidateRenderBundle(CommandIterator* commands,
-                                    const AttachmentState* attachmentState,
-                                    PassResourceUsage* resourceUsage);
-    MaybeError ValidateRenderPass(CommandIterator* commands,
-                                  BeginRenderPassCmd* renderPass,
-                                  std::vector<PassResourceUsage>* perPassResourceUsages);
-    MaybeError ValidateComputePass(CommandIterator* commands,
-                                   std::vector<PassResourceUsage>* perPassResourceUsages);
+                                    const AttachmentState* attachmentState);
+    MaybeError ValidateRenderPass(CommandIterator* commands, const BeginRenderPassCmd* renderPass);
+    MaybeError ValidateComputePass(CommandIterator* commands);
+
+    MaybeError ValidatePassResourceUsage(const PassResourceUsage& usage);
 
 }  // namespace dawn_native
 

@@ -61,12 +61,12 @@ namespace dawn_native {
         CommandBufferBase* Finish(const CommandBufferDescriptor* descriptor);
 
       private:
-        MaybeError ValidateFinish(const CommandBufferDescriptor* descriptor);
+        MaybeError ValidateFinish(CommandIterator* commands,
+                                  const PerPassUsages& perPassUsages) const;
 
         EncodingContext mEncodingContext;
-
-        bool mWereResourceUsagesAcquired = false;
-        CommandBufferResourceUsage mResourceUsages;
+        std::set<BufferBase*> mTopLevelBuffers;
+        std::set<TextureBase*> mTopLevelTextures;
     };
 
 }  // namespace dawn_native

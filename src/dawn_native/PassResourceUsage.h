@@ -36,8 +36,10 @@ namespace dawn_native {
         std::vector<wgpu::TextureUsage> textureUsages;
     };
 
+    using PerPassUsages = std::vector<PassResourceUsage>;
+
     struct CommandBufferResourceUsage {
-        std::vector<PassResourceUsage> perPass;
+        PerPassUsages perPass;
         std::set<BufferBase*> topLevelBuffers;
         std::set<TextureBase*> topLevelTextures;
     };

@@ -42,11 +42,10 @@ namespace dawn_native {
       private:
         RenderBundleEncoder(DeviceBase* device, ErrorTag errorTag);
 
-        MaybeError ValidateFinish(const RenderBundleDescriptor* descriptor);
+        MaybeError ValidateFinish(CommandIterator* commands, const PassResourceUsage& usages) const;
 
         EncodingContext mEncodingContext;
         Ref<AttachmentState> mAttachmentState;
-        PassResourceUsage mResourceUsage;
     };
 }  // namespace dawn_native
 

@@ -15,7 +15,6 @@
 #ifndef DAWNNATIVE_PASSRESOURCEUSAGETRACKER_H_
 #define DAWNNATIVE_PASSRESOURCEUSAGETRACKER_H_
 
-#include "dawn_native/Error.h"
 #include "dawn_native/PassResourceUsage.h"
 
 #include "dawn_native/dawn_platform.h"
@@ -36,16 +35,10 @@ namespace dawn_native {
         void BufferUsedAs(BufferBase* buffer, wgpu::BufferUsage usage);
         void TextureUsedAs(TextureBase* texture, wgpu::TextureUsage usage);
 
-        MaybeError ValidateComputePassUsages() const;
-        MaybeError ValidateRenderPassUsages() const;
-
         // Returns the per-pass usage for use by backends for APIs with explicit barriers.
         PassResourceUsage AcquireResourceUsage();
 
       private:
-        // Performs the per-pass usage validation checks
-        MaybeError ValidateUsages() const;
-
         std::map<BufferBase*, wgpu::BufferUsage> mBufferUsages;
         std::map<TextureBase*, wgpu::TextureUsage> mTextureUsages;
     };

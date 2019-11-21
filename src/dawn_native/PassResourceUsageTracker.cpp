@@ -31,54 +31,6 @@ namespace dawn_native {
         mTextureUsages[texture] |= usage;
     }
 
-    MaybeError PassResourceUsageTracker::ValidateComputePassUsages() const {
-        return ValidateUsages();
-    }
-
-    MaybeError PassResourceUsageTracker::ValidateRenderPassUsages() const {
-        return ValidateUsages();
-    }
-
-    // Performs the per-pass usage validation checks
-    MaybeError PassResourceUsageTracker::ValidateUsages() const {
-        // Buffers can only be used as single-write or multiple read.
-        for (auto& it : mBufferUsages) {
-            BufferBase* buffer = it.first;
-            wgpu::BufferUsage usage = it.second;
-
-            if (usage & ~buffer->GetUsage()) {
-                return DAWN_VALIDATION_ERROR("Buffer missing usage for the pass");
-            }
-
-            bool readOnly = (usage & kReadOnlyBufferUsages) == usage;
-            bool singleUse = wgpu::HasZeroOrOneBits(usage);
-
-            if (!readOnly && !singleUse) {
-                return DAWN_VALIDATION_ERROR(
-                    "Buffer used as writable usage and another usage in pass");
-            }
-        }
-
-        // Textures can only be used as single-write or multiple read.
-        // TODO(cwallez@chromium.org): implement per-subresource tracking
-        for (auto& it : mTextureUsages) {
-            TextureBase* texture = it.first;
-            wgpu::TextureUsage usage = it.second;
-
-            if (usage & ~texture->GetUsage()) {
-                return DAWN_VALIDATION_ERROR("Texture missing usage for the pass");
-            }
-
-            // For textures the only read-only usage in a pass is Sampled, so checking the
-            // usage constraint simplifies to checking a single usage bit is set.
-            if (!wgpu::HasZeroOrOneBits(it.second)) {
-                return DAWN_VALIDATION_ERROR("Texture used with more than one usage in pass");
-            }
-        }
-
-        return {};
-    }
-
     // Returns the per-pass usage for use by backends for APIs with explicit barriers.
     PassResourceUsage PassResourceUsageTracker::AcquireResourceUsage() {
         PassResourceUsage result;
@@ -96,6 +48,9 @@ namespace dawn_native {
             result.textures.push_back(it.first);
             result.textureUsages.push_back(it.second);
         }
+
+        mBufferUsages.clear();
+        mTextureUsages.clear();
 
         return result;
     }

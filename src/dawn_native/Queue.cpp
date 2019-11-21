@@ -35,7 +35,8 @@ namespace dawn_native {
     void QueueBase::Submit(uint32_t commandCount, CommandBufferBase* const* commands) {
         DeviceBase* device = GetDevice();
         TRACE_EVENT0(device->GetPlatform(), General, "Queue::Submit");
-        if (device->ConsumedError(ValidateSubmit(commandCount, commands))) {
+        if (device->IsValidationEnabled() &&
+            device->ConsumedError(ValidateSubmit(commandCount, commands))) {
             return;
         }
         ASSERT(!IsError());

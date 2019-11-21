@@ -26,7 +26,8 @@ namespace dawn_native {
       public:
         RenderPassEncoder(DeviceBase* device,
                           CommandEncoder* commandEncoder,
-                          EncodingContext* encodingContext);
+                          EncodingContext* encodingContext,
+                          PassResourceUsageTracker usageTracker);
 
         static RenderPassEncoder* MakeError(DeviceBase* device,
                                             CommandEncoder* commandEncoder,

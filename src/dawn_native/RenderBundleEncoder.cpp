@@ -102,26 +102,27 @@ namespace dawn_native {
     }
 
     RenderBundleBase* RenderBundleEncoder::Finish(const RenderBundleDescriptor* descriptor) {
-        if (GetDevice()->ConsumedError(ValidateFinish(descriptor))) {
-            return RenderBundleBase::MakeError(GetDevice());
-        }
-        ASSERT(!IsError());
+        PassResourceUsage usages = mUsageTracker.AcquireResourceUsage();
 
-        return new RenderBundleBase(this, descriptor, mAttachmentState.Get(),
-                                    std::move(mResourceUsage));
+        DeviceBase* device = GetDevice();
+        // Even if mEncodingContext.Finish() validation fails, calling it will mutate the internal
+        // state of the encoding context. Subsequent calls to encode commands will generate errors.
+        if (device->ConsumedError(mEncodingContext.Finish()) ||
+            (device->IsValidationEnabled() &&
+             device->ConsumedError(ValidateFinish(mEncodingContext.GetIterator(), usages)))) {
+            return RenderBundleBase::MakeError(device);
+        }
+
+        ASSERT(!IsError());
+        return new RenderBundleBase(this, descriptor, mAttachmentState.Get(), std::move(usages));
     }
 
-    MaybeError RenderBundleEncoder::ValidateFinish(const RenderBundleDescriptor* descriptor) {
+    MaybeError RenderBundleEncoder::ValidateFinish(CommandIterator* commands,
+                                                   const PassResourceUsage& usages) const {
         TRACE_EVENT0(GetDevice()->GetPlatform(), Validation, "RenderBundleEncoder::ValidateFinish");
         DAWN_TRY(GetDevice()->ValidateObject(this));
-
-        // Even if Finish() validation fails, calling it will mutate the internal state of the
-        // encoding context. Subsequent calls to encode commands will generate errors.
-        DAWN_TRY(mEncodingContext.Finish());
-
-        CommandIterator* commands = mEncodingContext.GetIterator();
-
-        DAWN_TRY(ValidateRenderBundle(commands, mAttachmentState.Get(), &mResourceUsage));
+        DAWN_TRY(ValidatePassResourceUsage(usages));
+        DAWN_TRY(ValidateRenderBundle(commands, mAttachmentState.Get()));
         return {};
     }
 

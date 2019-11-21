@@ -27,10 +27,15 @@
 
 namespace dawn_native {
 
+    // The usage tracker is passed in here, because it is prepopulated with usages from the
+    // BeginRenderPassCmd. If we had RenderPassEncoder responsible for recording the
+    // command, then this wouldn't be necessary.
     RenderPassEncoder::RenderPassEncoder(DeviceBase* device,
                                          CommandEncoder* commandEncoder,
-                                         EncodingContext* encodingContext)
+                                         EncodingContext* encodingContext,
+                                         PassResourceUsageTracker usageTracker)
         : RenderEncoderBase(device, encodingContext), mCommandEncoder(commandEncoder) {
+        mUsageTracker = std::move(usageTracker);
     }
 
     RenderPassEncoder::RenderPassEncoder(DeviceBase* device,
@@ -52,7 +57,7 @@ namespace dawn_native {
 
                 return {};
             })) {
-            mEncodingContext->ExitPass(this);
+            mEncodingContext->ExitPass(this, mUsageTracker.AcquireResourceUsage());
         }
     }
 
@@ -143,6 +148,14 @@ namespace dawn_native {
             Ref<RenderBundleBase>* bundles = allocator->AllocateData<Ref<RenderBundleBase>>(count);
             for (uint32_t i = 0; i < count; ++i) {
                 bundles[i] = renderBundles[i];
+
+                const PassResourceUsage& usages = bundles[i]->GetResourceUsage();
+                for (uint32_t i = 0; i < usages.buffers.size(); ++i) {
+                    mUsageTracker.BufferUsedAs(usages.buffers[i], usages.bufferUsages[i]);
+                }
+                for (uint32_t i = 0; i < usages.textures.size(); ++i) {
+                    mUsageTracker.TextureUsedAs(usages.textures[i], usages.textureUsages[i]);
+                }
             }
 
             return {};
