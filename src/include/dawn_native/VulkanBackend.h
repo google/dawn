@@ -33,7 +33,7 @@ namespace dawn_native { namespace vulkan {
     };
 
     // Common properties of external images
-    struct ExternalImageDescriptor {
+    struct DAWN_NATIVE_EXPORT ExternalImageDescriptor {
       public:
         const ExternalImageDescriptorType type;           // Must match the subclass
         const WGPUTextureDescriptor* cTextureDescriptor;  // Must match image creation params
@@ -55,7 +55,7 @@ namespace dawn_native { namespace vulkan {
 // Can't use DAWN_PLATFORM_LINUX since header included in both dawn and chrome
 #ifdef __linux__
         // Common properties of external images represented by FDs
-        struct ExternalImageDescriptorFD : ExternalImageDescriptor {
+        struct DAWN_NATIVE_EXPORT ExternalImageDescriptorFD : ExternalImageDescriptor {
           public:
             int memoryFD;  // A file descriptor from an export of the memory of the image
             std::vector<int> waitFDs;  // File descriptors of semaphores which will be waited on
@@ -65,7 +65,7 @@ namespace dawn_native { namespace vulkan {
         };
 
         // Descriptor for opaque file descriptor image import
-        struct ExternalImageDescriptorOpaqueFD : ExternalImageDescriptorFD {
+        struct DAWN_NATIVE_EXPORT ExternalImageDescriptorOpaqueFD : ExternalImageDescriptorFD {
             ExternalImageDescriptorOpaqueFD();
 
             VkDeviceSize allocationSize;  // Must match VkMemoryAllocateInfo from image creation
@@ -73,7 +73,7 @@ namespace dawn_native { namespace vulkan {
         };
 
         // Descriptor for dma-buf file descriptor image import
-        struct ExternalImageDescriptorDmaBuf : ExternalImageDescriptorFD {
+        struct DAWN_NATIVE_EXPORT ExternalImageDescriptorDmaBuf : ExternalImageDescriptorFD {
             ExternalImageDescriptorDmaBuf();
 
             uint32_t stride;       // Stride of the buffer in bytes
