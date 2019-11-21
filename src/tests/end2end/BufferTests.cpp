@@ -38,6 +38,11 @@ class BufferMapReadTests : public DawnTest {
           return mappedData;
       }
 
+      void UnmapBuffer(const wgpu::Buffer& buffer) {
+          buffer.Unmap();
+          mappedData = nullptr;
+      }
+
     private:
         const void* mappedData = nullptr;
 };
@@ -55,16 +60,11 @@ TEST_P(BufferMapReadTests, SmallReadAtZero) {
     const void* mappedData = MapReadAsyncAndWait(buffer);
     ASSERT_EQ(myData, *reinterpret_cast<const uint32_t*>(mappedData));
 
-    buffer.Unmap();
+    UnmapBuffer(buffer);
 }
 
 // Map, read and unmap twice. Test that both of these two iterations work.
 TEST_P(BufferMapReadTests, MapTwice) {
-    // TODO(http://crbug.com/dawn/278): the second read doesn't get updated data
-    // on D3D12, Metal and Vulkan.
-    // TODO(http://crbug.com/dawn/280): the second read doesn't get updated data
-    // on OpenGL wire.
-    DAWN_SKIP_TEST_IF(IsD3D12() || IsMetal() || IsVulkan() || UsesWire());
     wgpu::BufferDescriptor descriptor;
     descriptor.size = 4;
     descriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
@@ -76,7 +76,7 @@ TEST_P(BufferMapReadTests, MapTwice) {
     const void* mappedData = MapReadAsyncAndWait(buffer);
     EXPECT_EQ(myData, *reinterpret_cast<const uint32_t*>(mappedData));
 
-    buffer.Unmap();
+    UnmapBuffer(buffer);
 
     myData = 0x05060708;
     buffer.SetSubData(0, sizeof(myData), &myData);
@@ -84,7 +84,7 @@ TEST_P(BufferMapReadTests, MapTwice) {
     const void* mappedData1 = MapReadAsyncAndWait(buffer);
     EXPECT_EQ(myData, *reinterpret_cast<const uint32_t*>(mappedData1));
 
-    buffer.Unmap();
+    UnmapBuffer(buffer);
 }
 
 // Test mapping a large buffer.
@@ -105,7 +105,7 @@ TEST_P(BufferMapReadTests, LargeRead) {
     const void* mappedData = MapReadAsyncAndWait(buffer);
     ASSERT_EQ(0, memcmp(mappedData, myData.data(), kDataSize * sizeof(uint32_t)));
 
-    buffer.Unmap();
+    UnmapBuffer(buffer);
 }
 
 DAWN_INSTANTIATE_TEST(BufferMapReadTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
@@ -136,6 +136,11 @@ class BufferMapWriteTests : public DawnTest {
           return resultPointer;
       }
 
+      void UnmapBuffer(const wgpu::Buffer& buffer) {
+          buffer.Unmap();
+          mappedData = nullptr;
+      }
+
     private:
         void* mappedData = nullptr;
 };
@@ -150,7 +155,7 @@ TEST_P(BufferMapWriteTests, SmallWriteAtZero) {
     uint32_t myData = 2934875;
     void* mappedData = MapWriteAsyncAndWait(buffer);
     memcpy(mappedData, &myData, sizeof(myData));
-    buffer.Unmap();
+    UnmapBuffer(buffer);
 
     EXPECT_BUFFER_U32_EQ(myData, buffer, 0);
 }
@@ -165,14 +170,14 @@ TEST_P(BufferMapWriteTests, MapTwice) {
     uint32_t myData = 2934875;
     void* mappedData = MapWriteAsyncAndWait(buffer);
     memcpy(mappedData, &myData, sizeof(myData));
-    buffer.Unmap();
+    UnmapBuffer(buffer);
 
     EXPECT_BUFFER_U32_EQ(myData, buffer, 0);
 
     myData = 9999999;
     void* mappedData1 = MapWriteAsyncAndWait(buffer);
     memcpy(mappedData1, &myData, sizeof(myData));
-    buffer.Unmap();
+    UnmapBuffer(buffer);
 
     EXPECT_BUFFER_U32_EQ(myData, buffer, 0);
 }
@@ -192,7 +197,7 @@ TEST_P(BufferMapWriteTests, LargeWrite) {
 
     void* mappedData = MapWriteAsyncAndWait(buffer);
     memcpy(mappedData, myData.data(), kDataSize * sizeof(uint32_t));
-    buffer.Unmap();
+    UnmapBuffer(buffer);
 
     EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), buffer, 0, kDataSize);
 }
@@ -216,7 +221,7 @@ TEST_P(BufferMapWriteTests, ManyWrites) {
 
         void* mappedData = MapWriteAsyncAndWait(buffer);
         memcpy(mappedData, myData.data(), kDataSize * sizeof(uint32_t));
-        buffer.Unmap();
+        UnmapBuffer(buffer);
 
         buffers.push_back(buffer);  // Destroy buffers upon return.
     }
@@ -373,6 +378,11 @@ class CreateBufferMappedTests : public DawnTest {
           return mappedData;
       }
 
+      void UnmapBuffer(const wgpu::Buffer& buffer) {
+          buffer.Unmap();
+          mappedData = nullptr;
+      }
+
       void CheckResultStartsZeroed(const wgpu::CreateBufferMappedResult& result, uint64_t size) {
           ASSERT_EQ(result.dataLength, size);
           for (uint64_t i = 0; i < result.dataLength; ++i) {
@@ -455,7 +465,7 @@ TEST_P(CreateBufferMappedTests, MapWriteUsageSmall) {
     uint32_t myData = 230502;
     wgpu::CreateBufferMappedResult result = CreateBufferMappedWithData(
         wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc, {myData});
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
     EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
 }
 
@@ -464,11 +474,11 @@ TEST_P(CreateBufferMappedTests, MapReadUsageSmall) {
     uint32_t myData = 230502;
     wgpu::CreateBufferMappedResult result =
         CreateBufferMappedWithData(wgpu::BufferUsage::MapRead, {myData});
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
 
     const void* mappedData = MapReadAsyncAndWait(result.buffer);
     ASSERT_EQ(myData, *reinterpret_cast<const uint32_t*>(mappedData));
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
 }
 
 // Test that the simplest CreateBufferMapped works for non-mappable buffers.
@@ -476,7 +486,7 @@ TEST_P(CreateBufferMappedTests, NonMappableUsageSmall) {
     uint32_t myData = 4239;
     wgpu::CreateBufferMappedResult result =
         CreateBufferMappedWithData(wgpu::BufferUsage::CopySrc, {myData});
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
 
     EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
 }
@@ -491,7 +501,7 @@ TEST_P(CreateBufferMappedTests, MapWriteUsageLarge) {
 
     wgpu::CreateBufferMappedResult result = CreateBufferMappedWithData(
         wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc, {myData});
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
 
     EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), result.buffer, 0, kDataSize);
 }
@@ -506,11 +516,11 @@ TEST_P(CreateBufferMappedTests, MapReadUsageLarge) {
 
     wgpu::CreateBufferMappedResult result =
         CreateBufferMappedWithData(wgpu::BufferUsage::MapRead, myData);
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
 
     const void* mappedData = MapReadAsyncAndWait(result.buffer);
     ASSERT_EQ(0, memcmp(mappedData, myData.data(), kDataSize * sizeof(uint32_t)));
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
 }
 
 // Test CreateBufferMapped for a large non-mappable buffer
@@ -523,7 +533,7 @@ TEST_P(CreateBufferMappedTests, NonMappableUsageLarge) {
 
     wgpu::CreateBufferMappedResult result =
         CreateBufferMappedWithData(wgpu::BufferUsage::CopySrc, {myData});
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
 
     EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), result.buffer, 0, kDataSize);
 }
@@ -534,7 +544,7 @@ TEST_P(CreateBufferMappedTests, CreateThenMapSuccess) {
     static uint32_t myData2 = 1337;
     wgpu::CreateBufferMappedResult result = CreateBufferMappedWithData(
         wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc, {myData});
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
 
     EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
 
@@ -553,7 +563,7 @@ TEST_P(CreateBufferMappedTests, CreateThenMapSuccess) {
         WaitABit();
     }
 
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
     EXPECT_BUFFER_U32_EQ(myData2, result.buffer, 0);
 }
 
@@ -580,7 +590,7 @@ TEST_P(CreateBufferMappedTests, CreateThenMapBeforeUnmapFailure) {
     }());
 
     // CreateBufferMapped is unaffected by the MapWrite error.
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
     EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
 }
 
@@ -589,7 +599,7 @@ TEST_P(CreateBufferMappedTests, MapWriteUsageSmallAsync) {
     uint32_t myData = 230502;
     wgpu::CreateBufferMappedResult result = CreateBufferMappedAsyncWithDataAndWait(
         wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc, {myData});
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
     EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
 }
 
@@ -598,11 +608,11 @@ TEST_P(CreateBufferMappedTests, MapReadUsageSmallAsync) {
     uint32_t myData = 230502;
     wgpu::CreateBufferMappedResult result =
         CreateBufferMappedAsyncWithDataAndWait(wgpu::BufferUsage::MapRead, {myData});
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
 
     const void* mappedData = MapReadAsyncAndWait(result.buffer);
     ASSERT_EQ(myData, *reinterpret_cast<const uint32_t*>(mappedData));
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
 }
 
 // Test that the simplest CreateBufferMappedAsync works for non-mappable buffers.
@@ -610,7 +620,7 @@ TEST_P(CreateBufferMappedTests, NonMappableUsageSmallAsync) {
     uint32_t myData = 4239;
     wgpu::CreateBufferMappedResult result =
         CreateBufferMappedAsyncWithDataAndWait(wgpu::BufferUsage::CopySrc, {myData});
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
 
     EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
 }
@@ -625,7 +635,7 @@ TEST_P(CreateBufferMappedTests, MapWriteUsageLargeAsync) {
 
     wgpu::CreateBufferMappedResult result = CreateBufferMappedAsyncWithDataAndWait(
         wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc, {myData});
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
 
     EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), result.buffer, 0, kDataSize);
 }
@@ -640,11 +650,11 @@ TEST_P(CreateBufferMappedTests, MapReadUsageLargeAsync) {
 
     wgpu::CreateBufferMappedResult result =
         CreateBufferMappedAsyncWithDataAndWait(wgpu::BufferUsage::MapRead, {myData});
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
 
     const void* mappedData = MapReadAsyncAndWait(result.buffer);
     ASSERT_EQ(0, memcmp(mappedData, myData.data(), kDataSize * sizeof(uint32_t)));
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
 }
 
 // Test CreateBufferMappedAsync for a large non-mappable buffer
@@ -657,7 +667,7 @@ TEST_P(CreateBufferMappedTests, NonMappableUsageLargeAsync) {
 
     wgpu::CreateBufferMappedResult result =
         CreateBufferMappedAsyncWithDataAndWait(wgpu::BufferUsage::CopySrc, {myData});
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
 
     EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), result.buffer, 0, kDataSize);
 }
@@ -668,7 +678,7 @@ TEST_P(CreateBufferMappedTests, CreateThenMapSuccessAsync) {
     static uint32_t myData2 = 1337;
     wgpu::CreateBufferMappedResult result = CreateBufferMappedAsyncWithDataAndWait(
         wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc, {myData});
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
 
     EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
 
@@ -687,7 +697,7 @@ TEST_P(CreateBufferMappedTests, CreateThenMapSuccessAsync) {
         WaitABit();
     }
 
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
     EXPECT_BUFFER_U32_EQ(myData2, result.buffer, 0);
 }
 
@@ -714,7 +724,7 @@ TEST_P(CreateBufferMappedTests, CreateThenMapBeforeUnmapFailureAsync) {
     }());
 
     // CreateBufferMappedAsync is unaffected by the MapWrite error.
-    result.buffer.Unmap();
+    UnmapBuffer(result.buffer);
     EXPECT_BUFFER_U32_EQ(myData, result.buffer, 0);
 }
 
