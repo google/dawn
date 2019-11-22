@@ -25,7 +25,7 @@
 {% for type in by_category["object"] %}
     typedef {{as_cType(type.name)}} {{as_cTypeDawn(type.name)}};
     typedef {{as_cType(type.name)}}Impl {{as_cTypeDawn(type.name)}}Impl;
-    {% for method in native_methods(type) %}
+    {% for method in c_methods(type) %}
         typedef {{as_cProc(type.name, method.name)}} {{as_cProcDawn(type.name, method.name)}};
         #define {{as_cMethodDawn(type.name, method.name)}} {{as_cMethod(type.name, method.name)}}
     {% endfor %}

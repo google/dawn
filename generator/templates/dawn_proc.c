@@ -31,7 +31,7 @@ WGPUProc WGPUGetProcAddress(WGPUDevice device, const char* procName) {
 }
 
 {% for type in by_category["object"] %}
-    {% for method in native_methods(type) %}
+    {% for method in c_methods(type) %}
         {{as_cType(method.return_type.name)}} {{as_cMethod(type.name, method.name)}}(
             {{-as_cType(type.name)}} {{as_varName(type.name)}}
             {%- for arg in method.arguments -%}

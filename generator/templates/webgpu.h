@@ -103,9 +103,9 @@ typedef void (*WGPUProc)();
 
 typedef WGPUProc (*WGPUProcGetProcAddress)(WGPUDevice device, const char* procName);
 
-{% for type in by_category["object"] if len(native_methods(type)) > 0 %}
+{% for type in by_category["object"] if len(c_methods(type)) > 0 %}
     // Procs of {{type.name.CamelCase()}}
-    {% for method in native_methods(type) %}
+    {% for method in c_methods(type) %}
         typedef {{as_cType(method.return_type.name)}} (*{{as_cProc(type.name, method.name)}})(
             {{-as_cType(type.name)}} {{as_varName(type.name)}}
             {%- for arg in method.arguments -%}
@@ -121,9 +121,9 @@ typedef WGPUProc (*WGPUProcGetProcAddress)(WGPUDevice device, const char* procNa
 
 WGPU_EXPORT WGPUProc WGPUGetProcAddress(WGPUDevice device, const char* procName);
 
-{% for type in by_category["object"] if len(native_methods(type)) > 0 %}
+{% for type in by_category["object"] if len(c_methods(type)) > 0 %}
     // Methods of {{type.name.CamelCase()}}
-    {% for method in native_methods(type) %}
+    {% for method in c_methods(type) %}
         WGPU_EXPORT {{as_cType(method.return_type.name)}} {{as_cMethod(type.name, method.name)}}(
             {{-as_cType(type.name)}} {{as_varName(type.name)}}
             {%- for arg in method.arguments -%}

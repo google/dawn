@@ -102,7 +102,7 @@ namespace wgpu {
             )
         {%- endmacro %}
 
-        {% for method in native_methods(type) %}
+        {% for method in type.methods %}
             {{render_cpp_method_declaration(type, method)}} {
                 {% if method.return_type.name.concatcase() == "void" %}
                     {{render_cpp_to_c_method_call(type, method)}};

@@ -37,7 +37,7 @@ namespace dawn_native {
     namespace {
 
         {% for type in by_category["object"] %}
-            {% for method in native_methods(type) %}
+            {% for method in c_methods(type) %}
                 {% set suffix = as_MethodSuffix(type.name, method.name) %}
 
                 {{as_cType(method.return_type.name)}} Native{{suffix}}(
@@ -85,7 +85,7 @@ namespace dawn_native {
             const char* name;
         };
         static const ProcEntry sProcMap[] = {
-            {% for (type, method) in methods_sorted_by_name %}
+            {% for (type, method) in c_methods_sorted_by_name %}
                 { reinterpret_cast<WGPUProc>(Native{{as_MethodSuffix(type.name, method.name)}}), "{{as_cMethod(type.name, method.name)}}" },
             {% endfor %}
         };
@@ -127,7 +127,7 @@ namespace dawn_native {
         DawnProcTable table;
         table.getProcAddress = NativeGetProcAddress;
         {% for type in by_category["object"] %}
-            {% for method in native_methods(type) %}
+            {% for method in c_methods(type) %}
                 table.{{as_varName(type.name, method.name)}} = Native{{as_MethodSuffix(type.name, method.name)}};
             {% endfor %}
         {% endfor %}

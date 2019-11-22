@@ -117,7 +117,6 @@ class ObjectType(Type):
     def __init__(self, name, json_data):
         Type.__init__(self, name, json_data)
         self.methods = []
-        self.native_methods = []
         self.built_type = None
 
 class Record:
@@ -185,19 +184,13 @@ def linked_record_members(json_data, types):
 # PARSE
 ############################################################
 
-def is_native_method(method):
-    return method.return_type.category == "natively defined" or \
-        any([arg.type.category == "natively defined" for arg in method.arguments])
-
 def link_object(obj, types):
     def make_method(json_data):
         arguments = linked_record_members(json_data.get('args', []), types)
         return Method(Name(json_data['name']), types[json_data.get('returns', 'void')], arguments)
 
-    methods = [make_method(m) for m in obj.json_data.get('methods', [])]
-    obj.methods = [method for method in methods if not is_native_method(method)]
+    obj.methods = [make_method(m) for m in obj.json_data.get('methods', [])]
     obj.methods.sort(key=lambda method: method.name.canonical_case())
-    obj.native_methods = [method for method in methods if is_native_method(method)]
 
 def link_structure(struct, types):
     struct.members = linked_record_members(struct.json_data['members'], types)
@@ -471,19 +464,16 @@ def as_wireType(typ):
     else:
         return as_cppType(typ.name)
 
-def cpp_native_methods(types, typ):
-    return sorted(typ.methods + typ.native_methods, key=lambda method: method.name.canonical_case())
-
-def c_native_methods(types, typ):
-    return cpp_native_methods(types, typ) + [
+def c_methods(types, typ):
+    return typ.methods + [
         Method(Name('reference'), types['void'], []),
         Method(Name('release'), types['void'], []),
     ]
 
-def get_methods_sorted_by_name(api_params):
+def get_c_methods_sorted_by_name(api_params):
     unsorted = [(as_MethodSuffix(typ.name, method.name), typ, method) \
             for typ in api_params['by_category']['object'] \
-            for method in c_native_methods(api_params['types'], typ) ]
+            for method in c_methods(api_params['types'], typ) ]
     return [(typ, method) for (_, typ, method) in sorted(unsorted)]
 
 def has_callback_arguments(method):
@@ -531,34 +521,31 @@ class MultiGeneratorFromDawnJSON(Generator):
             'convert_cType_to_cppType': convert_cType_to_cppType,
             'as_varName': as_varName,
             'decorate': decorate,
-            'methods_sorted_by_name': get_methods_sorted_by_name(api_params),
+            'c_methods': lambda typ: c_methods(api_params['types'], typ),
+            'c_methods_sorted_by_name': get_c_methods_sorted_by_name(api_params),
         }
 
         renders = []
 
-        c_params = {'native_methods': lambda typ: c_native_methods(api_params['types'], typ)}
-        cpp_params = {'native_methods': lambda typ: cpp_native_methods(api_params['types'], typ)}
-
         if 'dawn_headers' in targets:
-            renders.append(FileRender('webgpu.h', 'src/include/dawn/webgpu.h', [base_params, api_params, c_params]))
-            renders.append(FileRender('dawn.h', 'src/include/dawn/dawn.h', [base_params, api_params, c_params]))
-            renders.append(FileRender('dawn_proc_table.h', 'src/include/dawn/dawn_proc_table.h', [base_params, api_params, c_params]))
+            renders.append(FileRender('webgpu.h', 'src/include/dawn/webgpu.h', [base_params, api_params]))
+            renders.append(FileRender('dawn.h', 'src/include/dawn/dawn.h', [base_params, api_params]))
+            renders.append(FileRender('dawn_proc_table.h', 'src/include/dawn/dawn_proc_table.h', [base_params, api_params]))
 
         if 'dawncpp_headers' in targets:
-            renders.append(FileRender('webgpu_cpp.h', 'src/include/dawn/webgpu_cpp.h', [base_params, api_params, cpp_params]))
-            renders.append(FileRender('dawncpp.h', 'src/include/dawn/dawncpp.h', [base_params, api_params, cpp_params]))
+            renders.append(FileRender('webgpu_cpp.h', 'src/include/dawn/webgpu_cpp.h', [base_params, api_params]))
+            renders.append(FileRender('dawncpp.h', 'src/include/dawn/dawncpp.h', [base_params, api_params]))
 
         if 'dawn_proc' in targets:
-            renders.append(FileRender('dawn_proc.c', 'src/dawn/dawn_proc.c', [base_params, api_params, c_params]))
+            renders.append(FileRender('dawn_proc.c', 'src/dawn/dawn_proc.c', [base_params, api_params]))
 
         if 'dawncpp' in targets:
-            renders.append(FileRender('webgpu_cpp.cpp', 'src/dawn/webgpu_cpp.cpp', [base_params, api_params, cpp_params]))
+            renders.append(FileRender('webgpu_cpp.cpp', 'src/dawn/webgpu_cpp.cpp', [base_params, api_params]))
 
         if 'mock_webgpu' in targets:
             mock_params = [
                 base_params,
                 api_params,
-                c_params,
                 {
                     'has_callback_arguments': has_callback_arguments
                 }
@@ -570,7 +557,6 @@ class MultiGeneratorFromDawnJSON(Generator):
             frontend_params = [
                 base_params,
                 api_params,
-                c_params,
                 {
                     'as_frontendType': lambda typ: as_frontendType(typ), # TODO as_frontendType and friends take a Type and not a Name :(
                     'as_annotated_frontendType': lambda arg: annotated(as_frontendType(arg.type), arg)
@@ -589,7 +575,6 @@ class MultiGeneratorFromDawnJSON(Generator):
             wire_params = [
                 base_params,
                 api_params,
-                c_params,
                 {
                     'as_wireType': as_wireType,
                     'as_annotated_wireType': lambda arg: annotated(as_wireType(arg.type), arg),

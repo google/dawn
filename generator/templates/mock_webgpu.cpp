@@ -18,7 +18,7 @@ using namespace testing;
 
 namespace {
     {% for type in by_category["object"] %}
-        {% for method in native_methods(type) if len(method.arguments) < 10 %}
+        {% for method in c_methods(type) if len(method.arguments) < 10 %}
             {{as_cType(method.return_type.name)}} Forward{{as_MethodSuffix(type.name, method.name)}}(
                 {{-as_cType(type.name)}} self
                 {%- for arg in method.arguments -%}
@@ -44,7 +44,7 @@ void ProcTableAsClass::GetProcTableAndDevice(DawnProcTable* table, WGPUDevice* d
     *device = GetNewDevice();
 
     {% for type in by_category["object"] %}
-        {% for method in native_methods(type) if len(method.arguments) < 10 %}
+        {% for method in c_methods(type) if len(method.arguments) < 10 %}
             table->{{as_varName(type.name, method.name)}} = reinterpret_cast<{{as_cProc(type.name, method.name)}}>(Forward{{as_MethodSuffix(type.name, method.name)}});
         {% endfor %}
     {% endfor %}

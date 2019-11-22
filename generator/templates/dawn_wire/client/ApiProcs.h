@@ -22,7 +22,7 @@ namespace dawn_wire { namespace client {
     //* Dawn API
     {% for type in by_category["object"] %}
         {% set cType = as_cType(type.name) %}
-        {% for method in native_methods(type) %}
+        {% for method in c_methods(type) %}
             {% set Suffix = as_MethodSuffix(type.name, method.name) %}
             {{as_cType(method.return_type.name)}} Client{{Suffix}}(
               {{-cType}} cSelf

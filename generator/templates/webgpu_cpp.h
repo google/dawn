@@ -164,7 +164,7 @@ namespace wgpu {
             using ObjectBase::ObjectBase;
             using ObjectBase::operator=;
 
-            {% for method in native_methods(type) %}
+            {% for method in type.methods %}
                 {{render_cpp_method_declaration(type, method)}};
             {% endfor %}
 
