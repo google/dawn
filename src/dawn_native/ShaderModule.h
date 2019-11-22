@@ -51,7 +51,10 @@ namespace dawn_native {
             uint32_t id;
             uint32_t base_type_id;
             wgpu::BindingType type;
-            Format::Type textureComponentType;
+            // Match the defaults in BindGroupLayoutDescriptor
+            wgpu::TextureViewDimension textureDimension = wgpu::TextureViewDimension::Undefined;
+            Format::Type textureComponentType = Format::Type::Float;
+            bool multisampled = false;
             bool used = false;
         };
         using ModuleBindingInfo =

@@ -360,3 +360,53 @@ TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
         }
     }
 }
+
+// Tests that the texture view dimension in shader must match the bind group layout.
+TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
+    constexpr uint32_t kNumTextureViewDimensions = 6u;
+    std::array<const char*, kNumTextureViewDimensions> kTextureKeywords = {{
+        "texture1D",
+        "texture2D",
+        "texture2DArray",
+        "textureCube",
+        "textureCubeArray",
+        "texture3D",
+    }};
+
+    std::array<wgpu::TextureViewDimension, kNumTextureViewDimensions> kTextureViewDimensions = {{
+        wgpu::TextureViewDimension::e1D,
+        wgpu::TextureViewDimension::e2D,
+        wgpu::TextureViewDimension::e2DArray,
+        wgpu::TextureViewDimension::Cube,
+        wgpu::TextureViewDimension::CubeArray,
+        wgpu::TextureViewDimension::e3D,
+    }};
+
+    for (size_t i = 0; i < kNumTextureViewDimensions; ++i) {
+        for (size_t j = 0; j < kNumTextureViewDimensions; ++j) {
+            utils::ComboRenderPipelineDescriptor descriptor(device);
+            descriptor.vertexStage.module = vsModule;
+
+            std::ostringstream stream;
+            stream << R"(
+                #version 450
+                layout(set = 0, binding = 0) uniform )"
+                   << kTextureKeywords[i] << R"( tex;
+                void main() {
+                })";
+            descriptor.cFragmentStage.module = utils::CreateShaderModule(
+                device, utils::SingleShaderStage::Fragment, stream.str().c_str());
+
+            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false,
+                          false, kTextureViewDimensions[j], wgpu::TextureComponentType::Float}});
+            descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
+
+            if (i == j) {
+                device.CreateRenderPipeline(&descriptor);
+            } else {
+                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+            }
+        }
+    }
+}
