@@ -167,7 +167,12 @@
         ]
     },
     "buffer create mapped callback": {
-        "category": "natively defined"
+        "category": "callback",
+        "args": [
+            {"name": "status", "type": "buffer map async status"},
+            {"name": "result", "type": "create buffer mapped result"},
+            {"name": "userdata", "type": "void", "annotation": "*"}
+        ]
     },
     "buffer copy view": {
         "category": "structure",
@@ -189,10 +194,22 @@
         ]
     },
     "buffer map read callback": {
-        "category": "natively defined"
+        "category": "callback",
+        "args": [
+            {"name": "status", "type": "buffer map async status"},
+            {"name": "data", "type": "void", "annotation": "const*"},
+            {"name": "data length", "type": "uint64_t"},
+            {"name": "userdata", "type": "void", "annotation": "*"}
+        ]
     },
     "buffer map write callback": {
-        "category": "natively defined"
+        "category": "callback",
+        "args": [
+            {"name": "status", "type": "buffer map async status"},
+            {"name": "data", "type": "void", "annotation": "*"},
+            {"name": "data length", "type": "uint64_t"},
+            {"name": "userdata", "type": "void", "annotation": "*"}
+        ]
     },
     "buffer map async status": {
         "category": "enum",
@@ -600,7 +617,12 @@
         ]
     },
     "error callback": {
-        "category": "natively defined"
+        "category": "callback",
+        "args": [
+            {"name": "type", "type": "error type"},
+            {"name": "message", "type": "char", "annotation": "const*"},
+            {"name": "userdata", "type": "void", "annotation": "*"}
+        ]
     },
     "error filter": {
         "category": "enum",
@@ -646,7 +668,11 @@
         ]
     },
     "fence on completion callback": {
-        "category": "natively defined"
+        "category": "callback",
+        "args": [
+            {"name": "status", "type": "fence completion status"},
+            {"name": "userdata", "type": "void", "annotation": "*"}
+        ]
     },
     "fence completion status": {
         "category": "enum",

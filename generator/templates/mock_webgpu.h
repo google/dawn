@@ -39,7 +39,7 @@ class ProcTableAsClass {
         {% endfor %}
 
         {% for type in by_category["object"] %}
-            {% for method in type.methods if len(method.arguments) < 10 %}
+            {% for method in type.methods if len(method.arguments) < 10 and not has_callback_arguments(method) %}
                 virtual {{as_cType(method.return_type.name)}} {{as_MethodSuffix(type.name, method.name)}}(
                     {{-as_cType(type.name)}} {{as_varName(type.name)}}
                     {%- for arg in method.arguments -%}
@@ -123,7 +123,7 @@ class MockProcTable : public ProcTableAsClass {
         void IgnoreAllReleaseCalls();
 
         {% for type in by_category["object"] %}
-            {% for method in type.methods if len(method.arguments) < 10 %}
+            {% for method in type.methods if len(method.arguments) < 10 and not has_callback_arguments(method) %}
                 MOCK_METHOD{{len(method.arguments) + 1}}(
                     {{-as_MethodSuffix(type.name, method.name)}},
                     {{as_cType(method.return_type.name)}}(

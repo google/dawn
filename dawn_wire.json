@@ -89,19 +89,21 @@
             "CreateBufferMappedResult"
         ],
         "client_side_commands": [
+            "BufferMapReadAsync",
+            "BufferMapWriteAsync",
             "BufferSetSubData",
-            "FenceGetCompletedValue"
+            "DeviceCreateBufferMappedAsync",
+            "DevicePopErrorScope",
+            "DeviceSetUncapturedErrorCallback",
+            "FenceGetCompletedValue",
+            "FenceOnCompletion"
         ],
         "client_handwritten_commands": [
-            "BufferSetSubData",
             "BufferUnmap",
             "DeviceCreateBuffer",
             "DeviceCreateBufferMapped",
-            "DeviceCreateBufferMappedAsync",
             "DevicePushErrorScope",
-            "DevicePopErrorScope",
             "QueueCreateFence",
-            "FenceGetCompletedValue",
             "QueueSignal"
         ],
         "client_special_objects": [

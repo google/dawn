@@ -89,19 +89,13 @@ typedef uint32_t WGPUFlags;
 extern "C" {
 #endif
 
-typedef void (*WGPUBufferCreateMappedCallback)(WGPUBufferMapAsyncStatus status,
-                                               WGPUCreateBufferMappedResult result,
-                                               void* userdata);
-typedef void (*WGPUBufferMapReadCallback)(WGPUBufferMapAsyncStatus status,
-                                          const void* data,
-                                          uint64_t dataLength,
-                                          void* userdata);
-typedef void (*WGPUBufferMapWriteCallback)(WGPUBufferMapAsyncStatus status,
-                                           void* data,
-                                           uint64_t dataLength,
-                                           void* userdata);
-typedef void (*WGPUFenceOnCompletionCallback)(WGPUFenceCompletionStatus status, void* userdata);
-typedef void (*WGPUErrorCallback)(WGPUErrorType type, const char* message, void* userdata);
+{% for type in by_category["callback"] %}
+    typedef void (*{{as_cType(type.name)}})(
+        {%- for arg in type.arguments -%}
+            {% if not loop.first %}, {% endif %}{{as_annotated_cType(arg)}}
+        {%- endfor -%}
+    );
+{% endfor %}
 
 typedef void (*WGPUProc)();
 

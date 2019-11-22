@@ -49,7 +49,7 @@ namespace wgpu {
     {% endfor %}
 
     using Proc = WGPUProc;
-    {% for type in by_category["natively defined"] %}
+    {% for type in by_category["callback"] %}
         using {{as_cppType(type.name)}} = {{as_cType(type.name)}};
     {% endfor %}
 

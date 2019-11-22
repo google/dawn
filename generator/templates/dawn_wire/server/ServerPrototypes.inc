@@ -13,7 +13,7 @@
 //* limitations under the License.
 
 // Command handlers & doers
-{% for command in cmd_records["command"] if command.name.CamelCase() not in client_side_commands %}
+{% for command in cmd_records["command"] %}
     {% set Suffix = command.name.CamelCase() %}
     bool Handle{{Suffix}}(const volatile char** commands, size_t* size);
 
