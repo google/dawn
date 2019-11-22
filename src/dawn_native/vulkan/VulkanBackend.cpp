@@ -76,17 +76,6 @@ namespace dawn_native { namespace vulkan {
         : ExternalImageDescriptorFD(ExternalImageDescriptorType::DmaBuf) {
     }
 
-    // TODO(hob): Remove this once we switch over to WrapVulkanImage in Chromium.
-    WGPUTexture WrapVulkanImageOpaqueFD(WGPUDevice cDevice,
-                                        const ExternalImageDescriptorOpaqueFD* descriptor) {
-        Device* device = reinterpret_cast<Device*>(cDevice);
-
-        TextureBase* texture = device->CreateTextureWrappingVulkanImage(
-            descriptor, descriptor->memoryFD, descriptor->waitFDs);
-
-        return reinterpret_cast<WGPUTexture>(texture);
-    }
-
     int ExportSignalSemaphoreOpaqueFD(WGPUDevice cDevice, WGPUTexture cTexture) {
         Device* device = reinterpret_cast<Device*>(cDevice);
         Texture* texture = reinterpret_cast<Texture*>(cTexture);

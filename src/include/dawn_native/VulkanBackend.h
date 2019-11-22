@@ -80,17 +80,6 @@ namespace dawn_native { namespace vulkan {
             uint64_t drmModifier;  // DRM modifier of the buffer
         };
 
-        // Imports an external vulkan image from an opaque file descriptor. Internally, this uses
-        // external memory / semaphore extensions to import the image. Then, waits on the provided
-        // |descriptor->waitFDs| before the texture can be used. Finally, a signal semaphore
-        // can be exported, transferring control back to the caller.
-        // On failure, returns a nullptr
-        // NOTE: This is deprecated. Use WrapVulkanImage instead.
-        // TODO(hob): Remove this once Chromium has switched over to WrapVulkanImage.
-        DAWN_NATIVE_EXPORT WGPUTexture
-        WrapVulkanImageOpaqueFD(WGPUDevice cDevice,
-                                const ExternalImageDescriptorOpaqueFD* descriptor);
-
         // Exports a signal semaphore from a wrapped texture. This must be called on wrapped
         // textures before they are destroyed. On failure, returns -1
         DAWN_NATIVE_EXPORT int ExportSignalSemaphoreOpaqueFD(WGPUDevice cDevice,
