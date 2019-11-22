@@ -25,7 +25,10 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
         }
 
-        DAWN_TRY(device->ValidateObject(descriptor->layout));
+        if (descriptor->layout != nullptr) {
+            DAWN_TRY(device->ValidateObject(descriptor->layout));
+        }
+
         DAWN_TRY(ValidateProgrammableStageDescriptor(
             device, &descriptor->computeStage, descriptor->layout, SingleShaderStage::Compute));
         return {};

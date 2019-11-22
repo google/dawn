@@ -58,6 +58,7 @@ namespace dawn_native {
         uint32_t blockHeight;
 
         static Type TextureComponentTypeToFormatType(wgpu::TextureComponentType componentType);
+        static wgpu::TextureComponentType FormatTypeToTextureComponentType(Type type);
 
         bool IsColor() const;
         bool HasDepth() const;

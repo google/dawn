@@ -38,8 +38,11 @@ namespace dawn_native {
         ~PipelineLayoutBase() override;
 
         static PipelineLayoutBase* MakeError(DeviceBase* device);
+        static ResultOrError<PipelineLayoutBase*>
+        CreateDefault(DeviceBase* device, const ShaderModuleBase* const* modules, uint32_t count);
 
-        const BindGroupLayoutBase* GetBindGroupLayout(size_t group) const;
+        const BindGroupLayoutBase* GetBindGroupLayout(uint32_t group) const;
+        BindGroupLayoutBase* GetBindGroupLayout(uint32_t group);
         const std::bitset<kMaxBindGroups> GetBindGroupLayoutsMask() const;
 
         // Utility functions to compute inherited bind groups.

@@ -69,7 +69,7 @@ namespace dawn_native {
         using FragmentOutputBaseTypes = std::array<Format::Type, kMaxColorAttachments>;
         const FragmentOutputBaseTypes& GetFragmentOutputBaseTypes() const;
 
-        bool IsCompatibleWithPipelineLayout(const PipelineLayoutBase* layout);
+        bool IsCompatibleWithPipelineLayout(const PipelineLayoutBase* layout) const;
 
         // Functors necessary for the unordered_set<ShaderModuleBase*>-based cache.
         struct HashFunc {
@@ -82,7 +82,7 @@ namespace dawn_native {
       private:
         ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
-        bool IsCompatibleWithBindGroupLayout(size_t group, const BindGroupLayoutBase* layout);
+        bool IsCompatibleWithBindGroupLayout(size_t group, const BindGroupLayoutBase* layout) const;
 
         // TODO(cwallez@chromium.org): The code is only stored for deduplication. We could maybe
         // store a cryptographic hash of the code instead?

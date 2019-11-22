@@ -38,12 +38,15 @@ namespace dawn_native {
         wgpu::ShaderStage GetStageMask() const;
         PipelineLayoutBase* GetLayout();
         const PipelineLayoutBase* GetLayout() const;
+        BindGroupLayoutBase* GetBindGroupLayout(uint32_t group);
 
       protected:
         PipelineBase(DeviceBase* device, PipelineLayoutBase* layout, wgpu::ShaderStage stages);
         PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
       private:
+        MaybeError ValidateGetBindGroupLayout(uint32_t group);
+
         wgpu::ShaderStage mStageMask;
         Ref<PipelineLayoutBase> mLayout;
     };

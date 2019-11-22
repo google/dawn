@@ -22,13 +22,39 @@ namespace dawn_native {
 
     // Format
 
+    // static
     Format::Type Format::TextureComponentTypeToFormatType(
         wgpu::TextureComponentType componentType) {
+        switch (componentType) {
+            case wgpu::TextureComponentType::Float:
+            case wgpu::TextureComponentType::Sint:
+            case wgpu::TextureComponentType::Uint:
+                break;
+            default:
+                UNREACHABLE();
+        }
         // Check that Type correctly mirrors TextureComponentType except for "Other".
         static_assert(static_cast<Type>(wgpu::TextureComponentType::Float) == Type::Float, "");
         static_assert(static_cast<Type>(wgpu::TextureComponentType::Sint) == Type::Sint, "");
         static_assert(static_cast<Type>(wgpu::TextureComponentType::Uint) == Type::Uint, "");
         return static_cast<Type>(componentType);
+    }
+
+    // static
+    wgpu::TextureComponentType Format::FormatTypeToTextureComponentType(Type type) {
+        switch (type) {
+            case Type::Float:
+            case Type::Sint:
+            case Type::Uint:
+                break;
+            default:
+                UNREACHABLE();
+        }
+        // Check that Type correctly mirrors TextureComponentType except for "Other".
+        static_assert(static_cast<Type>(wgpu::TextureComponentType::Float) == Type::Float, "");
+        static_assert(static_cast<Type>(wgpu::TextureComponentType::Sint) == Type::Sint, "");
+        static_assert(static_cast<Type>(wgpu::TextureComponentType::Uint) == Type::Uint, "");
+        return static_cast<wgpu::TextureComponentType>(type);
     }
 
     bool Format::IsColor() const {

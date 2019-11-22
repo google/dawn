@@ -108,6 +108,13 @@ namespace wgpu {
             return static_cast<Derived&>(*this);
         }
 
+        bool operator==(std::nullptr_t) const {
+            return mHandle == nullptr;
+        }
+        bool operator!=(std::nullptr_t) const {
+            return mHandle != nullptr;
+        }
+
         explicit operator bool() const {
             return mHandle != nullptr;
         }

@@ -175,36 +175,37 @@ namespace dawn_native {
                     continue;
                 }
 
-                auto& info = mBindingInfo[set][binding];
-                info.used = true;
-                info.id = resource.id;
-                info.base_type_id = resource.base_type_id;
+                BindingInfo* info = &mBindingInfo[set][binding];
+                *info = {};
+                info->used = true;
+                info->id = resource.id;
+                info->base_type_id = resource.base_type_id;
                 switch (bindingType) {
                     case wgpu::BindingType::SampledTexture: {
                         spirv_cross::SPIRType::ImageType imageType =
-                            compiler.get_type(info.base_type_id).image;
+                            compiler.get_type(info->base_type_id).image;
                         spirv_cross::SPIRType::BaseType textureComponentType =
                             compiler.get_type(imageType.type).basetype;
 
-                        info.multisampled = imageType.ms;
-                        info.textureDimension =
+                        info->multisampled = imageType.ms;
+                        info->textureDimension =
                             SpirvDimToTextureViewDimension(imageType.dim, imageType.arrayed);
-                        info.textureComponentType =
+                        info->textureComponentType =
                             SpirvCrossBaseTypeToFormatType(textureComponentType);
-                        info.type = bindingType;
+                        info->type = bindingType;
                     } break;
                     case wgpu::BindingType::StorageBuffer: {
                         // Differentiate between readonly storage bindings and writable ones based
                         // on the NonWritable decoration
                         spirv_cross::Bitset flags = compiler.get_buffer_block_flags(resource.id);
                         if (flags.get(spv::DecorationNonWritable)) {
-                            info.type = wgpu::BindingType::ReadonlyStorageBuffer;
+                            info->type = wgpu::BindingType::ReadonlyStorageBuffer;
                         } else {
-                            info.type = wgpu::BindingType::StorageBuffer;
+                            info->type = wgpu::BindingType::StorageBuffer;
                         }
                     } break;
                     default:
-                        info.type = bindingType;
+                        info->type = bindingType;
                 }
             }
         };
@@ -296,7 +297,7 @@ namespace dawn_native {
         return mExecutionModel;
     }
 
-    bool ShaderModuleBase::IsCompatibleWithPipelineLayout(const PipelineLayoutBase* layout) {
+    bool ShaderModuleBase::IsCompatibleWithPipelineLayout(const PipelineLayoutBase* layout) const {
         ASSERT(!IsError());
 
         for (uint32_t group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
@@ -316,8 +317,9 @@ namespace dawn_native {
         return true;
     }
 
-    bool ShaderModuleBase::IsCompatibleWithBindGroupLayout(size_t group,
-                                                           const BindGroupLayoutBase* layout) {
+    bool ShaderModuleBase::IsCompatibleWithBindGroupLayout(
+        size_t group,
+        const BindGroupLayoutBase* layout) const {
         ASSERT(!IsError());
 
         const auto& layoutInfo = layout->GetBindingInfo();

@@ -670,7 +670,21 @@ namespace dawn_native {
         if (IsValidationEnabled()) {
             DAWN_TRY(ValidateComputePipelineDescriptor(this, descriptor));
         }
-        DAWN_TRY_ASSIGN(*result, GetOrCreateComputePipeline(descriptor));
+
+        if (descriptor->layout == nullptr) {
+            ComputePipelineDescriptor descriptorWithDefaultLayout = *descriptor;
+
+            DAWN_TRY_ASSIGN(
+                descriptorWithDefaultLayout.layout,
+                PipelineLayoutBase::CreateDefault(this, &descriptor->computeStage.module, 1));
+            // Ref will keep the pipeline layout alive until the end of the function where
+            // the pipeline will take another reference.
+            Ref<PipelineLayoutBase> layoutRef = AcquireRef(descriptorWithDefaultLayout.layout);
+
+            DAWN_TRY_ASSIGN(*result, GetOrCreateComputePipeline(&descriptorWithDefaultLayout));
+        } else {
+            DAWN_TRY_ASSIGN(*result, GetOrCreateComputePipeline(descriptor));
+        }
         return {};
     }
 
@@ -705,7 +719,30 @@ namespace dawn_native {
         if (IsValidationEnabled()) {
             DAWN_TRY(ValidateRenderPipelineDescriptor(this, descriptor));
         }
-        DAWN_TRY_ASSIGN(*result, GetOrCreateRenderPipeline(descriptor));
+
+        if (descriptor->layout == nullptr) {
+            RenderPipelineDescriptor descriptorWithDefaultLayout = *descriptor;
+
+            const ShaderModuleBase* modules[2];
+            modules[0] = descriptor->vertexStage.module;
+            uint32_t count;
+            if (descriptor->fragmentStage == nullptr) {
+                count = 1;
+            } else {
+                modules[1] = descriptor->fragmentStage->module;
+                count = 2;
+            }
+
+            DAWN_TRY_ASSIGN(descriptorWithDefaultLayout.layout,
+                            PipelineLayoutBase::CreateDefault(this, modules, count));
+            // Ref will keep the pipeline layout alive until the end of the function where
+            // the pipeline will take another reference.
+            Ref<PipelineLayoutBase> layoutRef = AcquireRef(descriptorWithDefaultLayout.layout);
+
+            DAWN_TRY_ASSIGN(*result, GetOrCreateRenderPipeline(&descriptorWithDefaultLayout));
+        } else {
+            DAWN_TRY_ASSIGN(*result, GetOrCreateRenderPipeline(descriptor));
+        }
         return {};
     }
 

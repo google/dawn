@@ -789,6 +789,7 @@ test("dawn_unittests") {
     "src/tests/unittests/validation/DynamicStateCommandValidationTests.cpp",
     "src/tests/unittests/validation/ErrorScopeValidationTests.cpp",
     "src/tests/unittests/validation/FenceValidationTests.cpp",
+    "src/tests/unittests/validation/GetBindGroupLayoutValidationTests.cpp",
     "src/tests/unittests/validation/QueueSubmitValidationTests.cpp",
     "src/tests/unittests/validation/RenderBundleValidationTests.cpp",
     "src/tests/unittests/validation/RenderPassDescriptorValidationTests.cpp",
