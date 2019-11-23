@@ -20,9 +20,13 @@
 using namespace dawn_native;
 
 struct RCTest : public RefCounted {
-    using RefCounted::RefCounted;
+    RCTest() : RefCounted() {
+    }
 
-    RCTest(bool* deleted): deleted(deleted) {
+    RCTest(uint64_t payload) : RefCounted(payload) {
+    }
+
+    RCTest(bool* deleted) : deleted(deleted) {
     }
 
     ~RCTest() override {
@@ -213,18 +217,18 @@ TEST(Ref, InitialPayloadValue) {
     ASSERT_EQ(testDefaultConstructor->GetRefCountPayload(), 0u);
     testDefaultConstructor->Release();
 
-    RCTest* testZero = new RCTest(0);
+    RCTest* testZero = new RCTest(uint64_t(0ull));
     ASSERT_EQ(testZero->GetRefCountPayload(), 0u);
     testZero->Release();
 
-    RCTest* testOne = new RCTest(1);
+    RCTest* testOne = new RCTest(1ull);
     ASSERT_EQ(testOne->GetRefCountPayload(), 1u);
     testOne->Release();
 }
 
 // Test that the payload survives ref and release operations
 TEST(Ref, PayloadUnchangedByRefCounting) {
-    RCTest* test = new RCTest(1);
+    RCTest* test = new RCTest(1ull);
     ASSERT_EQ(test->GetRefCountPayload(), 1u);
 
     test->Reference();

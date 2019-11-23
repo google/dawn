@@ -124,6 +124,7 @@ namespace {
                                       UniformData::Static, RenderBundle::No};
 
         unsigned int unused[] = {
+            0,  // Avoid making a 0-sized array.
             AssignParam(std::get<Ts>(paramTuple), args)...,
         };
         DAWN_UNUSED(unused);
