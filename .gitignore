@@ -19,6 +19,7 @@ third_party/jsoncpp/
 third_party/llvm-build
 third_party/markupsafe/
 third_party/shaderc/
+third_party/swiftshader/
 third_party/spirv-cross/
 third_party/spirv-headers/
 third_party/vulkan-headers/

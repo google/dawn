@@ -21,6 +21,16 @@ import("scripts/dawn_overrides_with_defaults.gni")
 
 import("//testing/test.gni")
 
+# Swiftshader is an optional dependency of Dawn so we only use it if the path
+# to it has been set.
+use_swiftshader = dawn_use_swiftshader && dawn_swiftshader_dir != ""
+
+if (use_swiftshader) {
+  assert(dawn_enable_vulkan,
+         "dawn_use_swiftshader requires dawn_enable_vulkan=true")
+  import("${dawn_swiftshader_dir}/src/Vulkan/vulkan.gni")
+}
+
 ###############################################################################
 # dawn_platform
 ###############################################################################
@@ -128,9 +138,10 @@ source_set("libdawn_native_sources") {
     "third_party:spirv_cross",
   ]
   defines = []
+  libs = []
+  data_deps = []
 
   configs += [ ":libdawn_native_internal" ]
-  libs = []
 
   # Dependencies that are needed to compile libdawn_native entry points in
   # FooBackend.cpp need to be public deps so they are propagated to the
@@ -510,6 +521,12 @@ source_set("libdawn_native_sources") {
         "DAWN_ENABLE_VULKAN_VALIDATION_LAYERS",
         "DAWN_VK_DATA_DIR=\"$vulkan_data_subdir\"",
       ]
+    }
+
+    if (use_swiftshader) {
+      data_deps += [ "${dawn_swiftshader_dir}/src/Vulkan:icd_file" ]
+      defines +=
+          [ "DAWN_SWIFTSHADER_VK_ICD_JSON=\"${swiftshader_icd_file_name}\"" ]
     }
   }
 }
