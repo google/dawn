@@ -26,7 +26,7 @@ void dawnProcSetProcs(const DawnProcTable* procs_) {
     }
 }
 
-WGPUProc WGPUGetProcAddress(WGPUDevice device, const char* procName) {
+WGPUProc wgpuGetProcAddress(WGPUDevice device, const char* procName) {
     return procs.getProcAddress(device, procName);
 }
 

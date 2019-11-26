@@ -101,7 +101,7 @@ typedef void (*WGPUProc)();
 
 #if !defined(WGPU_SKIP_PROCS)
 
-typedef WGPUProc (*WGPUProcGetProcAddress)(WGPUDevice device, const char* procName);
+typedef WGPUProc (*WGPUProcGetProcAddress)(WGPUDevice device, char const * procName);
 
 {% for type in by_category["object"] if len(c_methods(type)) > 0 %}
     // Procs of {{type.name.CamelCase()}}
@@ -119,7 +119,7 @@ typedef WGPUProc (*WGPUProcGetProcAddress)(WGPUDevice device, const char* procNa
 
 #if !defined(WGPU_SKIP_DECLARATIONS)
 
-WGPU_EXPORT WGPUProc WGPUGetProcAddress(WGPUDevice device, const char* procName);
+WGPU_EXPORT WGPUProc wgpuGetProcAddress(WGPUDevice device, char const * procName);
 
 {% for type in by_category["object"] if len(c_methods(type)) > 0 %}
     // Methods of {{type.name.CamelCase()}}

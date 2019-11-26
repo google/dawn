@@ -126,7 +126,7 @@ namespace wgpu {
     {% endfor %}
 
     Proc GetProcAddress(Device const& device, const char* procName) {
-        return reinterpret_cast<Proc>(WGPUGetProcAddress(device.Get(), procName));
+        return reinterpret_cast<Proc>(wgpuGetProcAddress(device.Get(), procName));
     }
 
 }
