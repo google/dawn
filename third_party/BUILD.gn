@@ -100,35 +100,6 @@ static_library("spirv_cross") {
   }
 }
 
-static_library("spirv_cross_full_for_fuzzers") {
-  public_configs = [ ":spirv_cross_public" ]
-  configs += [ ":spirv_cross_internal" ]
-
-  sources = [
-    "${spirv_cross_dir}/GLSL.std.450.h",
-    "${spirv_cross_dir}/spirv.hpp",
-    "${spirv_cross_dir}/spirv_cfg.cpp",
-    "${spirv_cross_dir}/spirv_cfg.hpp",
-    "${spirv_cross_dir}/spirv_common.hpp",
-    "${spirv_cross_dir}/spirv_cross.cpp",
-    "${spirv_cross_dir}/spirv_cross.hpp",
-    "${spirv_cross_dir}/spirv_cross_containers.hpp",
-    "${spirv_cross_dir}/spirv_cross_error_handling.hpp",
-    "${spirv_cross_dir}/spirv_cross_parsed_ir.cpp",
-    "${spirv_cross_dir}/spirv_cross_parsed_ir.hpp",
-    "${spirv_cross_dir}/spirv_glsl.cpp",
-    "${spirv_cross_dir}/spirv_glsl.hpp",
-    "${spirv_cross_dir}/spirv_hlsl.cpp",
-    "${spirv_cross_dir}/spirv_hlsl.hpp",
-    "${spirv_cross_dir}/spirv_msl.cpp",
-    "${spirv_cross_dir}/spirv_msl.hpp",
-    "${spirv_cross_dir}/spirv_parser.cpp",
-    "${spirv_cross_dir}/spirv_parser.hpp",
-    "${spirv_cross_dir}/spirv_reflect.cpp",
-    "${spirv_cross_dir}/spirv_reflect.hpp",
-  ]
-}
-
 # Empty targets to add the include dirs and list the sources of Khronos headers for header inclusion check.
 config("khronos_headers_public") {
   include_dirs = [ "khronos" ]
