@@ -21,6 +21,9 @@
 #elif defined(__linux__)
 #    define DAWN_PLATFORM_LINUX 1
 #    define DAWN_PLATFORM_POSIX 1
+#    if defined(__ANDROID__)
+#        define DAWN_PLATFORM_ANDROID 1
+#    endif
 
 #elif defined(__APPLE__)
 #    define DAWN_PLATFORM_APPLE 1

@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("dawn_overrides_with_defaults.gni")
+import("//build_overrides/build.gni")
 import("dawn_features.gni")
+import("dawn_overrides_with_defaults.gni")
 
 ###############################################################################
 # Template to produce a component for one of Dawn's libraries.
@@ -95,6 +96,14 @@ template("dawn_component") {
       defines = []
     }
     defines += [ "${invoker.DEFINE_PREFIX}_IMPLEMENTATION" ]
+
+    # Chromium adds a config that uses a special linker script that removes
+    # all symbols except JNI ones. Remove this config so that our
+    # shared_library symbols are visible. This matches what Chromium's
+    # component template does.
+    if (build_with_chromium && is_android) {
+      configs -= [ "//build/config/android:hide_all_but_jni_onload" ]
+    }
   }
 
   static_library("${libname}_static") {
