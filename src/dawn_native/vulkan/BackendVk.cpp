@@ -22,11 +22,15 @@
 
 #include <iostream>
 
-#if DAWN_PLATFORM_LINUX
+#if defined(DAWN_PLATFORM_LINUX)
+#    if defined(DAWN_PLATFORM_ANDROID)
+const char kVulkanLibName[] = "libvulkan.so";
+#    else
 const char kVulkanLibName[] = "libvulkan.so.1";
-#elif DAWN_PLATFORM_WINDOWS
+#    endif
+#elif defined(DAWN_PLATFORM_WINDOWS)
 const char kVulkanLibName[] = "vulkan-1.dll";
-#elif DAWN_PLATFORM_FUCHSIA
+#elif defined(DAWN_PLATFORM_FUCHSIA)
 const char kVulkanLibName[] = "libvulkan.so";
 #else
 #    error "Unimplemented Vulkan backend platform"
