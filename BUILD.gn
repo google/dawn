@@ -134,8 +134,8 @@ source_set("libdawn_native_sources") {
     ":libdawn_native_headers",
     ":libdawn_native_utils_gen",
     "${dawn_root}/src/common",
+    "${dawn_shaderc_dir}:spirv_cross",
     "${dawn_spirv_tools_dir}:spvtools_val",
-    "third_party:spirv_cross",
   ]
   defines = []
   libs = []
