@@ -245,6 +245,8 @@ TEST_P(GpuMemorySyncTests, ComputePassToRenderPass) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(2, 0, 0, 255), renderPass.color, 0, 0);
 }
 
+DAWN_INSTANTIATE_TEST(GpuMemorySyncTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
+
 class StorageToUniformSyncTests : public DawnTest {
   protected:
     void CreateBuffer() {
@@ -440,9 +442,313 @@ TEST_P(StorageToUniformSyncTests, ReadAfterWriteWithDifferentQueueSubmits) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8::kRed, renderPass.color, 0, 0);
 }
 
-DAWN_INSTANTIATE_TEST(GpuMemorySyncTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
-
 DAWN_INSTANTIATE_TEST(StorageToUniformSyncTests,
+                      D3D12Backend,
+                      MetalBackend,
+                      OpenGLBackend,
+                      VulkanBackend);
+
+constexpr int kRTSize = 8;
+constexpr int kVertexBufferStride = 4 * sizeof(float);
+
+class MultipleWriteThenMultipleReadTests : public DawnTest {
+  protected:
+    wgpu::Buffer CreateZeroedBuffer(uint64_t size, wgpu::BufferUsage usage) {
+        wgpu::BufferDescriptor srcDesc;
+        srcDesc.size = size;
+        srcDesc.usage = usage;
+        wgpu::Buffer buffer = device.CreateBuffer(&srcDesc);
+
+        std::vector<uint8_t> zeros(size, 0);
+        buffer.SetSubData(0, size, zeros.data());
+
+        return buffer;
+    }
+};
+
+// Write into a few storage buffers in compute pass. Then read that data in a render pass. The
+// readonly buffers in render pass include vertex buffer, index buffer, and uniform buffer. Data to
+// be read in all of these buffers in render pass depend on the write operation in compute pass.
+TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
+    // Create pipeline, bind group, and different buffers for compute pass.
+    wgpu::ShaderModule csModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
+        #version 450
+        layout(std140, set = 0, binding = 0) buffer VBContents {
+            vec4 pos[4];
+        };
+
+        layout(std140, set = 0, binding = 1) buffer IBContents {
+            ivec4 indices[2];
+        };
+
+        layout(std140, set = 0, binding = 2) buffer UniformContents0 {
+            float color0;
+        };
+
+        layout(std140, set = 0, binding = 3) buffer UniformContents1 {
+            float color1;
+        };
+
+        void main() {
+            pos[0] = vec4(-1.f, 1.f, 0.f, 1.f);
+            pos[1] = vec4(1.f, 1.f, 0.f, 1.f);
+            pos[2] = vec4(1.f, -1.f, 0.f, 1.f);
+            pos[3] = vec4(-1.f, -1.f, 0.f, 1.f);
+            int dummy = 0;
+            indices[0] = ivec4(0, 1, 2, 0);
+            indices[1] = ivec4(2, 3, dummy, dummy);
+            color0 = 1.0;
+            color1 = 1.0;
+        })");
+
+    wgpu::BindGroupLayout bgl0 = utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
+                    {1, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
+                    {2, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
+                    {3, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
+                });
+    wgpu::PipelineLayout pipelineLayout0 = utils::MakeBasicPipelineLayout(device, &bgl0);
+
+    wgpu::ComputePipelineDescriptor cpDesc;
+    cpDesc.layout = pipelineLayout0;
+    cpDesc.computeStage.module = csModule;
+    cpDesc.computeStage.entryPoint = "main";
+    wgpu::ComputePipeline cp = device.CreateComputePipeline(&cpDesc);
+    wgpu::Buffer vertexBuffer = CreateZeroedBuffer(
+        kVertexBufferStride * 4,
+        wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst);
+    wgpu::Buffer indexBuffer = CreateZeroedBuffer(
+        sizeof(int) * 4 * 2,
+        wgpu::BufferUsage::Index | wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst);
+    wgpu::Buffer uniformBuffer0 =
+        CreateZeroedBuffer(sizeof(float), wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage |
+                                              wgpu::BufferUsage::CopyDst);
+    wgpu::Buffer uniformBuffer1 =
+        CreateZeroedBuffer(sizeof(float), wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage |
+                                              wgpu::BufferUsage::CopyDst);
+    wgpu::BindGroup bindGroup0 = utils::MakeBindGroup(
+        device, bgl0,
+        {{0, vertexBuffer}, {1, indexBuffer}, {2, uniformBuffer0}, {3, uniformBuffer1}});
+
+    // Write data into storage buffers in compute pass.
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass0 = encoder.BeginComputePass();
+    pass0.SetPipeline(cp);
+    pass0.SetBindGroup(0, bindGroup0);
+    pass0.Dispatch(1, 1, 1);
+    pass0.EndPass();
+
+    // Create pipeline, bind group, and reuse buffers in render pass.
+    wgpu::ShaderModule vsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
+        #version 450
+        layout(location = 0) in vec4 pos;
+        void main() {
+            gl_Position = pos;
+        })");
+
+    wgpu::ShaderModule fsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
+        #version 450
+        layout (set = 0, binding = 0) uniform uniformBuffer0 {
+            float color0;
+        };
+
+        layout (set = 0, binding = 1) uniform uniformBuffer1 {
+            float color1;
+        };
+
+        layout(location = 0) out vec4 fragColor;
+        void main() {
+            fragColor = vec4(color0, color1, 0.f, 1.f);
+        })");
+
+    wgpu::BindGroupLayout bgl1 = utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer},
+                    {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer},
+                });
+    wgpu::PipelineLayout pipelineLayout = utils::MakeBasicPipelineLayout(device, &bgl1);
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+
+    utils::ComboRenderPipelineDescriptor rpDesc(device);
+    rpDesc.layout = pipelineLayout;
+    rpDesc.vertexStage.module = vsModule;
+    rpDesc.cFragmentStage.module = fsModule;
+    rpDesc.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
+    rpDesc.cVertexState.vertexBufferCount = 1;
+    rpDesc.cVertexState.cVertexBuffers[0].arrayStride = kVertexBufferStride;
+    rpDesc.cVertexState.cVertexBuffers[0].attributeCount = 1;
+    rpDesc.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float4;
+    rpDesc.cColorStates[0].format = renderPass.colorFormat;
+
+    wgpu::RenderPipeline rp = device.CreateRenderPipeline(&rpDesc);
+
+    wgpu::BindGroup bindGroup1 =
+        utils::MakeBindGroup(device, bgl1, {{0, uniformBuffer0}, {1, uniformBuffer1}});
+
+    // Read data in buffers in render pass.
+    wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass1.SetPipeline(rp);
+    pass1.SetVertexBuffer(0, vertexBuffer);
+    pass1.SetIndexBuffer(indexBuffer, 0);
+    pass1.SetBindGroup(0, bindGroup1);
+    pass1.DrawIndexed(6, 1, 0, 0, 0);
+    pass1.EndPass();
+
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    // Verify the rendering result.
+    int min = 1, max = kRTSize - 3;
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kYellow, renderPass.color, min, min);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kYellow, renderPass.color, max, min);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kYellow, renderPass.color, min, max);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kYellow, renderPass.color, max, max);
+}
+
+// Write into a storage buffer in compute pass. Then read that data in buffer in a render pass. The
+// buffer is composed of vertices, indices, and uniforms. Data to be read in the buffer in render
+// pass depend on the write operation in compute pass.
+TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
+    // Create pipeline, bind group, and a complex buffer for compute pass.
+    wgpu::ShaderModule csModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
+        #version 450
+        layout(std140, set = 0, binding = 0) buffer Contents {
+            // Every single float (and every float in an array, and every single vec2, vec3, and
+            // every column in mat2/mat3, etc) uses the same amount of memory as vec4 (float4).
+            vec4 pos[4];
+            vec4 padding0[12];
+            ivec4 indices[2];
+            ivec4 padding1[14];
+            float color0;
+            float padding2[15];
+            float color1;
+        };
+
+        void main() {
+            pos[0] = vec4(-1.f, 1.f, 0.f, 1.f);
+            pos[1] = vec4(1.f, 1.f, 0.f, 1.f);
+            pos[2] = vec4(1.f, -1.f, 0.f, 1.f);
+            pos[3] = vec4(-1.f, -1.f, 0.f, 1.f);
+            int dummy = 0;
+            indices[0] = ivec4(0, 1, 2, 0);
+            indices[1] = ivec4(2, 3, dummy, dummy);
+            color0 = 1.0;
+            color1 = 1.0;
+        })");
+
+    wgpu::BindGroupLayout bgl0 = utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
+                });
+    wgpu::PipelineLayout pipelineLayout0 = utils::MakeBasicPipelineLayout(device, &bgl0);
+
+    wgpu::ComputePipelineDescriptor cpDesc;
+    cpDesc.layout = pipelineLayout0;
+    cpDesc.computeStage.module = csModule;
+    cpDesc.computeStage.entryPoint = "main";
+    wgpu::ComputePipeline cp = device.CreateComputePipeline(&cpDesc);
+    struct Data {
+        float pos[4][4];
+        char padding0[256 - sizeof(float) * 16];
+        int indices[2][4];
+        char padding1[256 - sizeof(int) * 8];
+        float color0[4];
+        char padding2[256 - sizeof(float) * 4];
+        float color1[4];
+    };
+    wgpu::Buffer buffer = CreateZeroedBuffer(
+        sizeof(Data), wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Index |
+                          wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage |
+                          wgpu::BufferUsage::CopyDst);
+    wgpu::BindGroup bindGroup0 = utils::MakeBindGroup(device, bgl0, {{0, buffer, 0, sizeof(Data)}});
+
+    // Write various data (vertices, indices, and uniforms) into the buffer in compute pass.
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass0 = encoder.BeginComputePass();
+    pass0.SetPipeline(cp);
+    pass0.SetBindGroup(0, bindGroup0);
+    pass0.Dispatch(1, 1, 1);
+    pass0.EndPass();
+
+    // Create pipeline, bind group, and reuse the buffer in render pass.
+    wgpu::ShaderModule vsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
+        #version 450
+        layout(location = 0) in vec4 pos;
+        void main() {
+            gl_Position = pos;
+        })");
+
+    wgpu::ShaderModule fsModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
+        #version 450
+        layout (set = 0, binding = 0) uniform uniformBuffer0 {
+            float color0;
+        };
+
+        layout (set = 0, binding = 1) uniform uniformBuffer1 {
+            float color1;
+        };
+
+        layout(location = 0) out vec4 fragColor;
+        void main() {
+            fragColor = vec4(color0, color1, 0.f, 1.f);
+        })");
+
+    wgpu::BindGroupLayout bgl1 = utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer},
+                    {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer},
+                });
+    wgpu::PipelineLayout pipelineLayout = utils::MakeBasicPipelineLayout(device, &bgl1);
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+
+    utils::ComboRenderPipelineDescriptor rpDesc(device);
+    rpDesc.layout = pipelineLayout;
+    rpDesc.vertexStage.module = vsModule;
+    rpDesc.cFragmentStage.module = fsModule;
+    rpDesc.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
+    rpDesc.cVertexState.vertexBufferCount = 1;
+    rpDesc.cVertexState.cVertexBuffers[0].arrayStride = kVertexBufferStride;
+    rpDesc.cVertexState.cVertexBuffers[0].attributeCount = 1;
+    rpDesc.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float4;
+    rpDesc.cColorStates[0].format = renderPass.colorFormat;
+
+    wgpu::RenderPipeline rp = device.CreateRenderPipeline(&rpDesc);
+
+    wgpu::BindGroup bindGroup1 =
+        utils::MakeBindGroup(device, bgl1,
+                             {{0, buffer, offsetof(Data, color0), sizeof(float)},
+                              {1, buffer, offsetof(Data, color1), sizeof(float)}});
+
+    // Read various data in the buffer in render pass.
+    wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass1.SetPipeline(rp);
+    pass1.SetVertexBuffer(0, buffer);
+    pass1.SetIndexBuffer(buffer, offsetof(Data, indices));
+    pass1.SetBindGroup(0, bindGroup1);
+    pass1.DrawIndexed(6, 1, 0, 0, 0);
+    pass1.EndPass();
+
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    // Verify the rendering result.
+    int min = 1, max = kRTSize - 3;
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kYellow, renderPass.color, min, min);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kYellow, renderPass.color, max, min);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kYellow, renderPass.color, min, max);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kYellow, renderPass.color, max, max);
+}
+
+DAWN_INSTANTIATE_TEST(MultipleWriteThenMultipleReadTests,
                       D3D12Backend,
                       MetalBackend,
                       OpenGLBackend,

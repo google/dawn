@@ -108,8 +108,8 @@ namespace utils {
         BindingInitializationHelper(uint32_t binding, const wgpu::TextureView& textureView);
         BindingInitializationHelper(uint32_t binding,
                                     const wgpu::Buffer& buffer,
-                                    uint64_t offset,
-                                    uint64_t size);
+                                    uint64_t offset = 0,
+                                    uint64_t size = wgpu::kWholeSize);
 
         wgpu::BindGroupBinding GetAsBinding() const;
 
