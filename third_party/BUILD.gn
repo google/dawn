@@ -16,8 +16,6 @@ import("//build_overrides/build.gni")
 import("../scripts/dawn_features.gni")
 import("../scripts/dawn_overrides_with_defaults.gni")
 
-is_msvc = is_win && !is_clang
-
 ###############################################################################
 # Third-party dependencies needed by libdawn_native
 ###############################################################################
@@ -166,7 +164,7 @@ if (is_win || (is_linux && !is_chromeos) || is_mac) {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
 
-    if (is_msvc) {
+    if (is_win && !is_clang) {
       # nonstandard extension, function/data pointer conversion in expression
       cflags_c = [ "/wd4152" ]
     } else {
