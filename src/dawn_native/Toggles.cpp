@@ -86,7 +86,12 @@ namespace dawn_native {
              {Toggle::UseSpvc,
               {"use_spvc",
                "Enable use of spvc for shader compilation, instead of accessing spirv_cross "
-               "directly."}}}};
+               "directly."}},
+             {Toggle::UseSpvcIRGen,
+              {"use_spvc_ir_gen",
+               "Enable usage of spvc's internal parsing and IR generation code, instead of "
+               "spirv_cross's."}}}};
+
     }  // anonymous namespace
 
     void TogglesSet::SetToggle(Toggle toggle, bool enabled) {

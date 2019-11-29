@@ -34,6 +34,7 @@ namespace dawn_native {
         UseD3D12RenderPass,
         SkipValidation,
         UseSpvc,
+        UseSpvcIRGen,
 
         EnumCount,
         InvalidEnum = EnumCount,
