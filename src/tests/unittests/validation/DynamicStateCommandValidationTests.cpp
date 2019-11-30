@@ -203,7 +203,7 @@ TEST_F(SetViewportTest, MaxDepthOutOfRange) {
 }
 
 // Test to check that minDepth equal or greater than maxDepth is allowed
-TEST_F(SetViewportTest, MinDepthEqualOrLessThanMaxDepth) {
+TEST_F(SetViewportTest, MinDepthEqualOrGreaterThanMaxDepth) {
     DummyRenderPass renderPass(device);
 
     {
