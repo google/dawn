@@ -28,18 +28,10 @@ class ComputeCopyStorageBufferTests : public DawnTest {
 };
 
 void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
-    auto bgl = utils::MakeBindGroupLayout(
-        device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
-                    {1, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
-                });
-
     // Set up shader and pipeline
     auto module = utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, shader);
-    auto pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
     wgpu::ComputePipelineDescriptor csDesc;
-    csDesc.layout = pl;
     csDesc.computeStage.module = module;
     csDesc.computeStage.entryPoint = "main";
 
@@ -70,7 +62,7 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
     dst.SetSubData(0, sizeof(zero), zero.data());
 
     // Set up bind group and issue dispatch
-    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, bgl,
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
                                                      {
                                                          {0, src, 0, kNumUints * sizeof(uint32_t)},
                                                          {1, dst, 0, kNumUints * sizeof(uint32_t)},
