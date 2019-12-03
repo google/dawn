@@ -150,18 +150,8 @@ protected:
     }
 
     void Verify(const wgpu::TextureView& textureView,
-                wgpu::TextureViewDimension dimension,
                 const char* fragmentShader,
                 int expected) {
-        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
-            device, {
-                        {0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler},
-                        {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false,
-                         false, dimension, wgpu::TextureComponentType::Float},
-                    });
-
-        wgpu::BindGroup bindGroup =
-            utils::MakeBindGroup(device, bindGroupLayout, {{0, mSampler}, {1, textureView}});
 
         wgpu::ShaderModule fsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fragmentShader);
@@ -169,10 +159,12 @@ protected:
         utils::ComboRenderPipelineDescriptor textureDescriptor(device);
         textureDescriptor.vertexStage.module = mVSModule;
         textureDescriptor.cFragmentStage.module = fsModule;
-        textureDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
         textureDescriptor.cColorStates[0].format = mRenderPass.colorFormat;
 
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&textureDescriptor);
+
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                         {{0, mSampler}, {1, textureView}});
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         {
@@ -224,7 +216,7 @@ protected:
         )";
 
         const int expected = GenerateTestPixelValue(textureViewBaseLayer, textureViewBaseMipLevel);
-        Verify(textureView, wgpu::TextureViewDimension::e2D, fragmentShader, expected);
+        Verify(textureView, fragmentShader, expected);
     }
 
     void Texture2DArrayViewTest(uint32_t textureArrayLayers,
@@ -268,7 +260,7 @@ protected:
         for (int i = 0; i < static_cast<int>(kTextureViewLayerCount); ++i) {
             expected += GenerateTestPixelValue(textureViewBaseLayer + i, textureViewBaseMipLevel);
         }
-        Verify(textureView, wgpu::TextureViewDimension::e2DArray, fragmentShader, expected);
+        Verify(textureView, fragmentShader, expected);
     }
 
     std::string CreateFragmentShaderForCubeMapFace(uint32_t layer, bool isCubeMapArray) {
@@ -337,7 +329,7 @@ protected:
                 CreateFragmentShaderForCubeMapFace(layer, isCubeMapArray);
 
             int expected = GenerateTestPixelValue(textureViewBaseLayer + layer, 0);
-            Verify(cubeMapTextureView, dimension, fragmentShader.c_str(), expected);
+            Verify(cubeMapTextureView, fragmentShader.c_str(), expected);
         }
     }
 
@@ -376,7 +368,7 @@ TEST_P(TextureViewSamplingTest, Default2DArrayTexture) {
 
     const int expected = GenerateTestPixelValue(0, 0) + GenerateTestPixelValue(1, 0) +
                          GenerateTestPixelValue(2, 0);
-    Verify(textureView, wgpu::TextureViewDimension::e2DArray, fragmentShader, expected);
+    Verify(textureView, fragmentShader, expected);
 }
 
 // Test sampling from a 2D texture view created on a 2D array texture.
