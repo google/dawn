@@ -50,8 +50,17 @@ class RenderBundleTest : public DawnTest {
                     fragColor = color;
                 })");
 
-        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer}});
+        utils::ComboRenderPipelineDescriptor descriptor(device);
+        descriptor.vertexStage.module = vsModule;
+        descriptor.cFragmentStage.module = fsModule;
+        descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
+        descriptor.cVertexState.vertexBufferCount = 1;
+        descriptor.cVertexState.cVertexBuffers[0].arrayStride = 4 * sizeof(float);
+        descriptor.cVertexState.cVertexBuffers[0].attributeCount = 1;
+        descriptor.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float4;
+        descriptor.cColorStates[0].format = renderPass.colorFormat;
+
+        pipeline = device.CreateRenderPipeline(&descriptor);
 
         float colors0[] = {kColors[0].r / 255.f, kColors[0].g / 255.f, kColors[0].b / 255.f,
                            kColors[0].a / 255.f};
@@ -63,27 +72,10 @@ class RenderBundleTest : public DawnTest {
         wgpu::Buffer buffer1 = utils::CreateBufferFromData(device, colors1, 4 * sizeof(float),
                                                            wgpu::BufferUsage::Uniform);
 
-        bindGroups[0] = utils::MakeBindGroup(device, bgl, {{0, buffer0, 0, 4 * sizeof(float)}});
-        bindGroups[1] = utils::MakeBindGroup(device, bgl, {{0, buffer1, 0, 4 * sizeof(float)}});
-
-        wgpu::PipelineLayoutDescriptor pipelineLayoutDesc;
-        pipelineLayoutDesc.bindGroupLayoutCount = 1;
-        pipelineLayoutDesc.bindGroupLayouts = &bgl;
-
-        wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&pipelineLayoutDesc);
-
-        utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.layout = pipelineLayout;
-        descriptor.vertexStage.module = vsModule;
-        descriptor.cFragmentStage.module = fsModule;
-        descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
-        descriptor.cVertexState.vertexBufferCount = 1;
-        descriptor.cVertexState.cVertexBuffers[0].arrayStride = 4 * sizeof(float);
-        descriptor.cVertexState.cVertexBuffers[0].attributeCount = 1;
-        descriptor.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float4;
-        descriptor.cColorStates[0].format = renderPass.colorFormat;
-
-        pipeline = device.CreateRenderPipeline(&descriptor);
+        bindGroups[0] = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                             {{0, buffer0, 0, 4 * sizeof(float)}});
+        bindGroups[1] = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                             {{0, buffer1, 0, 4 * sizeof(float)}});
 
         vertexBuffer = utils::CreateBufferFromData<float>(
             device, wgpu::BufferUsage::Vertex,
