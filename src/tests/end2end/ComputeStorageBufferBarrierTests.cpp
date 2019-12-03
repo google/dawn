@@ -41,18 +41,13 @@ TEST_P(ComputeStorageBufferBarrierTests, AddIncrement) {
         }
     )");
 
-    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer}});
-
-    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, bufferSize}});
-
-    wgpu::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, &bgl);
-
     wgpu::ComputePipelineDescriptor pipelineDesc = {};
-    pipelineDesc.layout = layout;
     pipelineDesc.computeStage.module = module;
     pipelineDesc.computeStage.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buffer, 0, bufferSize}});
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
@@ -95,31 +90,24 @@ TEST_P(ComputeStorageBufferBarrierTests, AddPingPong) {
         }
     )");
 
-    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
-                 {1, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer}});
+    wgpu::ComputePipelineDescriptor pipelineDesc = {};
+    pipelineDesc.computeStage.module = module;
+    pipelineDesc.computeStage.entryPoint = "main";
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
-    wgpu::BindGroup bindGroupA = utils::MakeBindGroup(device, bgl,
+    wgpu::BindGroup bindGroupA = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
                                                       {
                                                           {0, bufferA, 0, bufferSize},
                                                           {1, bufferB, 0, bufferSize},
                                                       });
 
-    wgpu::BindGroup bindGroupB = utils::MakeBindGroup(device, bgl,
+    wgpu::BindGroup bindGroupB = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
                                                       {
                                                           {0, bufferB, 0, bufferSize},
                                                           {1, bufferA, 0, bufferSize},
                                                       });
 
     wgpu::BindGroup bindGroups[2] = {bindGroupA, bindGroupB};
-
-    wgpu::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, &bgl);
-
-    wgpu::ComputePipelineDescriptor pipelineDesc = {};
-    pipelineDesc.layout = layout;
-    pipelineDesc.computeStage.module = module;
-    pipelineDesc.computeStage.entryPoint = "main";
-    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
@@ -168,31 +156,24 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
         }
     )");
 
-    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::UniformBuffer},
-                 {1, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer}});
+    wgpu::ComputePipelineDescriptor pipelineDesc = {};
+    pipelineDesc.computeStage.module = module;
+    pipelineDesc.computeStage.entryPoint = "main";
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
-    wgpu::BindGroup bindGroupA = utils::MakeBindGroup(device, bgl,
+    wgpu::BindGroup bindGroupA = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
                                                       {
                                                           {0, bufferA, 0, bufferSize},
                                                           {1, bufferB, 0, bufferSize},
                                                       });
 
-    wgpu::BindGroup bindGroupB = utils::MakeBindGroup(device, bgl,
+    wgpu::BindGroup bindGroupB = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
                                                       {
                                                           {0, bufferB, 0, bufferSize},
                                                           {1, bufferA, 0, bufferSize},
                                                       });
 
     wgpu::BindGroup bindGroups[2] = {bindGroupA, bindGroupB};
-
-    wgpu::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, &bgl);
-
-    wgpu::ComputePipelineDescriptor pipelineDesc = {};
-    pipelineDesc.layout = layout;
-    pipelineDesc.computeStage.module = module;
-    pipelineDesc.computeStage.entryPoint = "main";
-    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
