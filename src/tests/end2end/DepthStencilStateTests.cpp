@@ -80,14 +80,6 @@ class DepthStencilStateTest : public DawnTest {
                     fragColor = vec4(myUbo.color, 1.f);
                 }
             )");
-
-            bindGroupLayout = utils::MakeBindGroupLayout(
-                device, {
-                            {0, wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment,
-                             wgpu::BindingType::UniformBuffer},
-                        });
-
-            pipelineLayout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
         }
 
         struct TestSpec {
@@ -277,14 +269,9 @@ class DepthStencilStateTest : public DawnTest {
                 wgpu::Buffer buffer = utils::CreateBufferFromData(
                     device, &data, sizeof(TriangleData), wgpu::BufferUsage::Uniform);
 
-                // Create a bind group for the data
-                wgpu::BindGroup bindGroup = utils::MakeBindGroup(
-                    device, bindGroupLayout, {{0, buffer, 0, sizeof(TriangleData)}});
-
                 // Create a pipeline for the triangles with the test spec's depth stencil state
 
                 utils::ComboRenderPipelineDescriptor descriptor(device);
-                descriptor.layout = pipelineLayout;
                 descriptor.vertexStage.module = vsModule;
                 descriptor.cFragmentStage.module = fsModule;
                 descriptor.cDepthStencilState = test.depthStencilState;
@@ -292,6 +279,10 @@ class DepthStencilStateTest : public DawnTest {
                 descriptor.depthStencilState = &descriptor.cDepthStencilState;
 
                 wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+                // Create a bind group for the data
+                wgpu::BindGroup bindGroup = utils::MakeBindGroup(
+                    device, pipeline.GetBindGroupLayout(0), {{0, buffer, 0, sizeof(TriangleData)}});
 
                 pass.SetPipeline(pipeline);
                 pass.SetStencilReference(test.stencil);  // Set the stencil reference
@@ -318,8 +309,6 @@ class DepthStencilStateTest : public DawnTest {
         wgpu::TextureView depthTextureView;
         wgpu::ShaderModule vsModule;
         wgpu::ShaderModule fsModule;
-        wgpu::BindGroupLayout bindGroupLayout;
-        wgpu::PipelineLayout pipelineLayout;
 };
 
 // Test compilation and usage of the fixture
