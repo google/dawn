@@ -315,7 +315,7 @@ namespace dawn_native { namespace d3d12 {
 
         wgpu::ShaderStage renderStages = wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment;
         for (auto stage : IterateStages(renderStages)) {
-            const ShaderModule* module = nullptr;
+            ShaderModule* module = nullptr;
             const char* entryPoint = nullptr;
             const char* compileTarget = nullptr;
             D3D12_SHADER_BYTECODE* shader = nullptr;

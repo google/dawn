@@ -32,8 +32,8 @@ namespace dawn_native { namespace d3d12 {
         // SPRIV-cross does matrix multiplication expecting row major matrices
         compileFlags |= D3DCOMPILE_PACK_MATRIX_ROW_MAJOR;
 
-        const ShaderModule* module = ToBackend(descriptor->computeStage.module);
-        const std::string& hlslSource = module->GetHLSLSource(ToBackend(GetLayout()));
+        ShaderModule* module = ToBackend(descriptor->computeStage.module);
+        const std::string hlslSource = module->GetHLSLSource(ToBackend(GetLayout()));
 
         ComPtr<ID3DBlob> compiledShader;
         ComPtr<ID3DBlob> errors;

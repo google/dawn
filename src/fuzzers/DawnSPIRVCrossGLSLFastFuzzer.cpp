@@ -35,7 +35,7 @@ namespace {
             options.SetGLSLLanguageVersion(440);
             options.SetFixupClipspace(true);
             if (context.InitializeForGlsl(input.data(), input.size(), options) ==
-                shaderc_compilation_status_success) {
+                shaderc_spvc_status_success) {
                 context.CompileShader(&result);
             }
         });

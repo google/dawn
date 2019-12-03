@@ -39,8 +39,21 @@ namespace dawn_native { namespace vulkan {
     MaybeError ShaderModule::Initialize(const ShaderModuleDescriptor* descriptor) {
         // Use SPIRV-Cross to extract info from the SPIRV even if Vulkan consumes SPIRV. We want to
         // have a translation step eventually anyway.
-        spirv_cross::Compiler compiler(descriptor->code, descriptor->codeSize);
-        ExtractSpirvInfo(compiler);
+        if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
+            shaderc_spvc::CompileOptions options;
+            shaderc_spvc_status status =
+                mSpvcContext.InitializeForGlsl(descriptor->code, descriptor->codeSize, options);
+            if (status != shaderc_spvc_status_success) {
+                return DAWN_VALIDATION_ERROR("Unable to initialize instance of spvc");
+            }
+
+            spirv_cross::Compiler* compiler =
+                reinterpret_cast<spirv_cross::Compiler*>(mSpvcContext.GetCompiler());
+            ExtractSpirvInfo(*compiler);
+        } else {
+            spirv_cross::Compiler compiler(descriptor->code, descriptor->codeSize);
+            ExtractSpirvInfo(compiler);
+        }
 
         VkShaderModuleCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;

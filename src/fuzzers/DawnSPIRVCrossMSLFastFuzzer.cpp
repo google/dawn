@@ -34,7 +34,7 @@ namespace {
 
             // Using the options that are used by Dawn, they appear in ShaderModuleMTL.mm
             if (context.InitializeForMsl(input.data(), input.size(), options) ==
-                shaderc_compilation_status_success) {
+                shaderc_spvc_status_success) {
                 context.CompileShader(&result);
             }
         });

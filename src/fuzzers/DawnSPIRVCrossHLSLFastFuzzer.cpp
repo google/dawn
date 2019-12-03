@@ -41,7 +41,7 @@ namespace {
             options.SetHLSLPointCoordCompat(true);
             options.SetHLSLPointSizeCompat(true);
             if (context.InitializeForHlsl(input.data(), input.size(), options) ==
-                shaderc_compilation_status_success) {
+                shaderc_spvc_status_success) {
                 context.CompileShader(&result);
             }
         });

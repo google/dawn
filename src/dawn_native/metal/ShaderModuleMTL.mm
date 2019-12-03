@@ -56,32 +56,68 @@ namespace dawn_native { namespace metal {
 
     MaybeError ShaderModule::Initialize(const ShaderModuleDescriptor* descriptor) {
         mSpirv.assign(descriptor->code, descriptor->code + descriptor->codeSize);
-        spirv_cross::CompilerMSL compiler(mSpirv);
-        ExtractSpirvInfo(compiler);
+        if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
+            shaderc_spvc::CompileOptions options;
+            shaderc_spvc_status status =
+                mSpvcContext.InitializeForGlsl(descriptor->code, descriptor->codeSize, options);
+            if (status != shaderc_spvc_status_success) {
+                return DAWN_VALIDATION_ERROR("Unable to initialize instance of spvc");
+            }
+
+            spirv_cross::CompilerMSL* compiler =
+                reinterpret_cast<spirv_cross::CompilerMSL*>(mSpvcContext.GetCompiler());
+            ExtractSpirvInfo(*compiler);
+        } else {
+            spirv_cross::CompilerMSL compiler(mSpirv);
+            ExtractSpirvInfo(compiler);
+        }
         return {};
     }
 
     ShaderModule::MetalFunctionData ShaderModule::GetFunction(const char* functionName,
                                                               SingleShaderStage functionStage,
                                                               const PipelineLayout* layout) const {
-        spirv_cross::CompilerMSL compiler(mSpirv);
+        std::unique_ptr<spirv_cross::CompilerMSL> compiler_impl;
+        spirv_cross::CompilerMSL* compiler;
+        if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
+            // If these options are changed, the values in DawnSPIRVCrossGLSLFastFuzzer.cpp need to
+            // be updated.
+            shaderc_spvc::CompileOptions options;
 
-        // If these options are changed, the values in DawnSPIRVCrossMSLFastFuzzer.cpp need to be
-        // updated.
-        spirv_cross::CompilerMSL::Options options_msl;
+            // Disable PointSize builtin for https://bugs.chromium.org/p/dawn/issues/detail?id=146
+            // Because Metal will reject PointSize builtin if the shader is compiled into a render
+            // pipeline that uses a non-point topology.
+            // TODO (hao.x.li@intel.com): Remove this once WebGPU requires there is no
+            // gl_PointSize builtin (https://github.com/gpuweb/gpuweb/issues/332).
+            options.SetMSLEnablePointSizeBuiltIn(false);
 
-        // Disable PointSize builtin for https://bugs.chromium.org/p/dawn/issues/detail?id=146
-        // Because Metal will reject PointSize builtin if the shader is compiled into a render
-        // pipeline that uses a non-point topology.
-        // TODO (hao.x.li@intel.com): Remove this once WebGPU requires there is no
-        // gl_PointSize builtin (https://github.com/gpuweb/gpuweb/issues/332).
-        options_msl.enable_point_size_builtin = false;
+            // Always use vertex buffer 30 (the last one in the vertex buffer table) to contain
+            // the shader storage buffer lengths.
+            options.SetMSLBufferSizeBufferIndex(kBufferLengthBufferSlot);
+            mSpvcContext.InitializeForMsl(mSpirv.data(), mSpirv.size(), options);
+            // TODO(rharrison): Handle initialize failing
 
-        // Always use vertex buffer 30 (the last one in the vertex buffer table) to contain
-        // the shader storage buffer lengths.
-        options_msl.buffer_size_buffer_index = kBufferLengthBufferSlot;
+            compiler = reinterpret_cast<spirv_cross::CompilerMSL*>(mSpvcContext.GetCompiler());
+        } else {
+            // If these options are changed, the values in DawnSPIRVCrossMSLFastFuzzer.cpp need to
+            // be updated.
+            spirv_cross::CompilerMSL::Options options_msl;
 
-        compiler.set_msl_options(options_msl);
+            // Disable PointSize builtin for https://bugs.chromium.org/p/dawn/issues/detail?id=146
+            // Because Metal will reject PointSize builtin if the shader is compiled into a render
+            // pipeline that uses a non-point topology.
+            // TODO (hao.x.li@intel.com): Remove this once WebGPU requires there is no
+            // gl_PointSize builtin (https://github.com/gpuweb/gpuweb/issues/332).
+            options_msl.enable_point_size_builtin = false;
+
+            // Always use vertex buffer 30 (the last one in the vertex buffer table) to contain
+            // the shader storage buffer lengths.
+            options_msl.buffer_size_buffer_index = kBufferLengthBufferSlot;
+
+            compiler_impl = std::make_unique<spirv_cross::CompilerMSL>(mSpirv);
+            compiler = compiler_impl.get();
+            compiler->set_msl_options(options_msl);
+        }
 
         // By default SPIRV-Cross will give MSL resources indices in increasing order.
         // To make the MSL indices match the indices chosen in the PipelineLayout, we build
@@ -100,7 +136,7 @@ namespace dawn_native { namespace metal {
                     mslBinding.binding = binding;
                     mslBinding.msl_buffer = mslBinding.msl_texture = mslBinding.msl_sampler = index;
 
-                    compiler.add_msl_resource_binding(mslBinding);
+                    compiler->add_msl_resource_binding(mslBinding);
                 }
             }
         }
@@ -109,14 +145,14 @@ namespace dawn_native { namespace metal {
 
         {
             spv::ExecutionModel executionModel = SpirvExecutionModelForStage(functionStage);
-            auto size = compiler.get_entry_point(functionName, executionModel).workgroup_size;
+            auto size = compiler->get_entry_point(functionName, executionModel).workgroup_size;
             result.localWorkgroupSize = MTLSizeMake(size.x, size.y, size.z);
         }
 
         {
             // SPIRV-Cross also supports re-ordering attributes but it seems to do the correct thing
             // by default.
-            std::string msl = compiler.compile();
+            std::string msl = compiler->compile();
             NSString* mslSource = [NSString stringWithFormat:@"%s", msl.c_str()];
 
             auto mtlDevice = ToBackend(GetDevice())->GetMTLDevice();
@@ -140,7 +176,7 @@ namespace dawn_native { namespace metal {
             [library release];
         }
 
-        result.needsStorageBufferLength = compiler.needs_buffer_size_buffer();
+        result.needsStorageBufferLength = compiler->needs_buffer_size_buffer();
 
         return result;
     }
