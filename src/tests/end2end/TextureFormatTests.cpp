@@ -169,8 +169,7 @@ class TextureFormatTest : public DawnTest {
     // Return a pipeline that can be used in a full-texture draw to sample from the texture in the
     // bindgroup and output its decompressed values to the render target.
     wgpu::RenderPipeline CreateSamplePipeline(FormatTestInfo sampleFormatInfo,
-                                              FormatTestInfo renderFormatInfo,
-                                              wgpu::BindGroupLayout bgl) {
+                                              FormatTestInfo renderFormatInfo) {
         utils::ComboRenderPipelineDescriptor desc(device);
 
         wgpu::ShaderModule vsModule =
@@ -218,7 +217,6 @@ class TextureFormatTest : public DawnTest {
 
         desc.vertexStage.module = vsModule;
         desc.cFragmentStage.module = fsModule;
-        desc.layout = utils::MakeBasicPipelineLayout(device, &bgl);
         desc.cColorStates[0].format = renderFormatInfo.format;
 
         return device.CreateRenderPipeline(&desc);
@@ -269,19 +267,13 @@ class TextureFormatTest : public DawnTest {
         readbackBufferDesc.size = 4 * width * sampleFormatInfo.componentCount;
         wgpu::Buffer readbackBuffer = device.CreateBuffer(&readbackBufferDesc);
 
-        // Create the bind group layout for sampling the texture
-        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler},
-                     {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false,
-                      false, wgpu::TextureViewDimension::e2D, sampleFormatInfo.type}});
-
         // Prepare objects needed to sample from texture in the renderpass
-        wgpu::RenderPipeline pipeline =
-            CreateSamplePipeline(sampleFormatInfo, renderFormatInfo, bgl);
+        wgpu::RenderPipeline pipeline = CreateSamplePipeline(sampleFormatInfo, renderFormatInfo);
         wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
         wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
         wgpu::BindGroup bindGroup =
-            utils::MakeBindGroup(device, bgl, {{0, sampler}, {1, sampleTexture.CreateView()}});
+            utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                 {{0, sampler}, {1, sampleTexture.CreateView()}});
 
         // Encode commands for the test that fill texture, sample it to render to renderTarget then
         // copy renderTarget in a buffer so we can read it easily.
