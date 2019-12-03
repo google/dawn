@@ -44,19 +44,11 @@ class ComputeIndirectTests : public DawnTest {
 
 void ComputeIndirectTests::BasicTest(std::initializer_list<uint32_t> bufferList,
                                      uint64_t indirectOffset) {
-    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::UniformBuffer},
-                    {1, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
-                });
-
     // Set up shader and pipeline
     wgpu::ShaderModule module =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, shaderSource);
-    wgpu::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
     wgpu::ComputePipelineDescriptor csDesc;
-    csDesc.layout = pl;
     csDesc.computeStage.module = module;
     csDesc.computeStage.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
@@ -78,7 +70,7 @@ void ComputeIndirectTests::BasicTest(std::initializer_list<uint32_t> bufferList,
 
     // Set up bind group and issue dispatch
     wgpu::BindGroup bindGroup =
-        utils::MakeBindGroup(device, bgl,
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
                              {
                                  {0, expectedBuffer, 0, 3 * sizeof(uint32_t)},
                                  {1, dst, 0, 3 * sizeof(uint32_t)},
