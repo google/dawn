@@ -237,34 +237,6 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
         memcpy(IOSurfaceGetBaseAddress(ioSurface), data, dataSize);
         IOSurfaceUnlock(ioSurface, 0, nullptr);
 
-        // The bindgroup containing the texture view for the ioSurface as well as the sampler.
-        wgpu::BindGroupLayout bgl;
-        wgpu::BindGroup bindGroup;
-        {
-            wgpu::TextureDescriptor textureDescriptor;
-            textureDescriptor.dimension = wgpu::TextureDimension::e2D;
-            textureDescriptor.format = format;
-            textureDescriptor.size = {1, 1, 1};
-            textureDescriptor.sampleCount = 1;
-            textureDescriptor.arrayLayerCount = 1;
-            textureDescriptor.mipLevelCount = 1;
-            textureDescriptor.usage = wgpu::TextureUsage::Sampled;
-            wgpu::Texture wrappingTexture = WrapIOSurface(&textureDescriptor, ioSurface, 0);
-
-            wgpu::TextureView textureView = wrappingTexture.CreateView();
-
-            wgpu::SamplerDescriptor samplerDescriptor = utils::GetDefaultSamplerDescriptor();
-            wgpu::Sampler sampler = device.CreateSampler(&samplerDescriptor);
-
-            bgl = utils::MakeBindGroupLayout(
-                device, {
-                            {0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler},
-                            {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture},
-                        });
-
-            bindGroup = utils::MakeBindGroup(device, bgl, {{0, sampler}, {1, textureView}});
-        }
-
         // The simplest texture sampling pipeline.
         wgpu::RenderPipeline pipeline;
         {
@@ -305,10 +277,31 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
             utils::ComboRenderPipelineDescriptor descriptor(device);
             descriptor.vertexStage.module = vs;
             descriptor.cFragmentStage.module = fs;
-            descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
             descriptor.cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
 
             pipeline = device.CreateRenderPipeline(&descriptor);
+        }
+
+        // The bindgroup containing the texture view for the ioSurface as well as the sampler.
+        wgpu::BindGroup bindGroup;
+        {
+            wgpu::TextureDescriptor textureDescriptor;
+            textureDescriptor.dimension = wgpu::TextureDimension::e2D;
+            textureDescriptor.format = format;
+            textureDescriptor.size = {1, 1, 1};
+            textureDescriptor.sampleCount = 1;
+            textureDescriptor.arrayLayerCount = 1;
+            textureDescriptor.mipLevelCount = 1;
+            textureDescriptor.usage = wgpu::TextureUsage::Sampled;
+            wgpu::Texture wrappingTexture = WrapIOSurface(&textureDescriptor, ioSurface, 0);
+
+            wgpu::TextureView textureView = wrappingTexture.CreateView();
+
+            wgpu::SamplerDescriptor samplerDescriptor = utils::GetDefaultSamplerDescriptor();
+            wgpu::Sampler sampler = device.CreateSampler(&samplerDescriptor);
+
+            bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                             {{0, sampler}, {1, textureView}});
         }
 
         // Submit commands samping from the ioSurface and writing the result to renderPass.color
