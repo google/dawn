@@ -54,14 +54,6 @@ protected:
         DawnTest::TestSetUp();
         mRenderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-        mBindGroupLayout = utils::MakeBindGroupLayout(
-            device, {
-                        {0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler},
-                        {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture},
-                    });
-
-        auto pipelineLayout = utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
-
         auto vsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
             #version 450
             void main() {
@@ -86,12 +78,12 @@ protected:
         )");
 
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
-        pipelineDescriptor.layout = pipelineLayout;
         pipelineDescriptor.vertexStage.module = vsModule;
         pipelineDescriptor.cFragmentStage.module = fsModule;
         pipelineDescriptor.cColorStates[0].format = mRenderPass.colorFormat;
 
         mPipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+        mBindGroupLayout = mPipeline.GetBindGroupLayout(0);
 
         wgpu::TextureDescriptor descriptor;
         descriptor.dimension = wgpu::TextureDimension::e2D;
