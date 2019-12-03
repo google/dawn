@@ -452,21 +452,16 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
     wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
     wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
 
-    wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler},
-                 {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture}});
-
     // Create render pipeline
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
-    renderPipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
     renderPipelineDescriptor.cColorStates[0].format = kColorFormat;
     renderPipelineDescriptor.vertexStage.module = CreateBasicVertexShaderForTest();
     renderPipelineDescriptor.cFragmentStage.module = CreateSampledTextureFragmentShaderForTest();
     wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
 
     // Create bindgroup
-    wgpu::BindGroup bindGroup =
-        utils::MakeBindGroup(device, bindGroupLayout, {{0, sampler}, {1, texture.CreateView()}});
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
+                                                     {{0, sampler}, {1, texture.CreateView()}});
 
     // Encode pass and submit
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -509,14 +504,8 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
     wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
     wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
 
-    wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture},
-                 {1, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
-                 {2, wgpu::ShaderStage::Compute, wgpu::BindingType::Sampler}});
-
     // Create compute pipeline
     wgpu::ComputePipelineDescriptor computePipelineDescriptor;
-    computePipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
     wgpu::ProgrammableStageDescriptor computeStage;
     const char* cs =
         R"(#version 450
@@ -537,7 +526,7 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
 
     // Create bindgroup
     wgpu::BindGroup bindGroup = utils::MakeBindGroup(
-        device, bindGroupLayout,
+        device, computePipeline.GetBindGroupLayout(0),
         {{0, texture.CreateView()}, {1, bufferTex, 0, bufferSize}, {2, sampler}});
 
     // Encode the pass and submit
@@ -655,10 +644,6 @@ TEST_P(TextureZeroInitTest, RenderPassStoreOpClear) {
     wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
     wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
 
-    wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler},
-                 {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture}});
-
     // Fill the sample texture with data
     std::vector<uint8_t> data(kFormatBlockByteSize * kSize * kSize, 1);
     wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(
@@ -674,15 +659,14 @@ TEST_P(TextureZeroInitTest, RenderPassStoreOpClear) {
 
     // Create render pipeline
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
-    renderPipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
     renderPipelineDescriptor.vertexStage.module = CreateBasicVertexShaderForTest();
     renderPipelineDescriptor.cFragmentStage.module = CreateSampledTextureFragmentShaderForTest();
     renderPipelineDescriptor.cColorStates[0].format = kColorFormat;
     wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
 
     // Create bindgroup
-    wgpu::BindGroup bindGroup =
-        utils::MakeBindGroup(device, bindGroupLayout, {{0, sampler}, {1, texture.CreateView()}});
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
+                                                     {{0, sampler}, {1, texture.CreateView()}});
 
     // Encode pass and submit
     encoder = device.CreateCommandEncoder();
