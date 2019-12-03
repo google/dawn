@@ -37,13 +37,6 @@ class ColorStateTest : public DawnTest {
                 }
             )");
 
-        bindGroupLayout = utils::MakeBindGroupLayout(
-            device, {
-                        {0, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer},
-                    });
-
-        pipelineLayout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
-
         renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
     }
 
@@ -70,7 +63,6 @@ class ColorStateTest : public DawnTest {
             )");
 
         utils::ComboRenderPipelineDescriptor baseDescriptor(device);
-        baseDescriptor.layout = pipelineLayout;
         baseDescriptor.vertexStage.module = vsModule;
         baseDescriptor.cFragmentStage.module = fsModule;
         baseDescriptor.cColorStates[0].format = renderPass.colorFormat;
@@ -78,7 +70,6 @@ class ColorStateTest : public DawnTest {
         basePipeline = device.CreateRenderPipeline(&baseDescriptor);
 
         utils::ComboRenderPipelineDescriptor testDescriptor(device);
-        testDescriptor.layout = pipelineLayout;
         testDescriptor.vertexStage.module = vsModule;
         testDescriptor.cFragmentStage.module = fsModule;
         testDescriptor.cColorStates[0] = colorStateDescriptor;
@@ -102,7 +93,8 @@ class ColorStateTest : public DawnTest {
 
         wgpu::Buffer buffer =
             utils::CreateBufferFromData(device, &data, bufferSize, wgpu::BufferUsage::Uniform);
-        return utils::MakeBindGroup(device, bindGroupLayout, {{0, buffer, 0, bufferSize}});
+        return utils::MakeBindGroup(device, testPipeline.GetBindGroupLayout(0),
+                                    {{0, buffer, 0, bufferSize}});
     }
 
     // Test that after drawing a triangle with the base color, and then the given triangle spec, the
@@ -205,8 +197,6 @@ class ColorStateTest : public DawnTest {
     wgpu::RenderPipeline basePipeline;
     wgpu::RenderPipeline testPipeline;
     wgpu::ShaderModule vsModule;
-    wgpu::BindGroupLayout bindGroupLayout;
-    wgpu::PipelineLayout pipelineLayout;
 };
 
 namespace {
@@ -796,7 +786,6 @@ TEST_P(ColorStateTest, IndependentColorState) {
     )");
 
     utils::ComboRenderPipelineDescriptor baseDescriptor(device);
-    baseDescriptor.layout = pipelineLayout;
     baseDescriptor.vertexStage.module = vsModule;
     baseDescriptor.cFragmentStage.module = fsModule;
     baseDescriptor.colorStateCount = 4;
@@ -804,7 +793,6 @@ TEST_P(ColorStateTest, IndependentColorState) {
     basePipeline = device.CreateRenderPipeline(&baseDescriptor);
 
     utils::ComboRenderPipelineDescriptor testDescriptor(device);
-    testDescriptor.layout = pipelineLayout;
     testDescriptor.vertexStage.module = vsModule;
     testDescriptor.cFragmentStage.module = fsModule;
     testDescriptor.colorStateCount = 4;
@@ -898,7 +886,6 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
     )");
 
     utils::ComboRenderPipelineDescriptor baseDescriptor(device);
-    baseDescriptor.layout = pipelineLayout;
     baseDescriptor.vertexStage.module = vsModule;
     baseDescriptor.cFragmentStage.module = fsModule;
     baseDescriptor.cColorStates[0].format = renderPass.colorFormat;
@@ -906,7 +893,6 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
     basePipeline = device.CreateRenderPipeline(&baseDescriptor);
 
     utils::ComboRenderPipelineDescriptor testDescriptor(device);
-    testDescriptor.layout = pipelineLayout;
     testDescriptor.vertexStage.module = vsModule;
     testDescriptor.cFragmentStage.module = fsModule;
     testDescriptor.cColorStates[0].format = renderPass.colorFormat;
@@ -1022,7 +1008,6 @@ TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
     )");
 
     utils::ComboRenderPipelineDescriptor baseDescriptor(device);
-    baseDescriptor.layout = pipelineLayout;
     baseDescriptor.vertexStage.module = vsModule;
     baseDescriptor.cFragmentStage.module = fsModule;
     baseDescriptor.cColorStates[0].format = renderPass.colorFormat;
@@ -1030,7 +1015,6 @@ TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
     basePipeline = device.CreateRenderPipeline(&baseDescriptor);
 
     utils::ComboRenderPipelineDescriptor testDescriptor(device);
-    testDescriptor.layout = pipelineLayout;
     testDescriptor.vertexStage.module = vsModule;
     testDescriptor.cFragmentStage.module = fsModule;
     testDescriptor.cColorStates[0].format = renderPass.colorFormat;

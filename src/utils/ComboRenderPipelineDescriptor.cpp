@@ -112,8 +112,6 @@ namespace utils {
             cDepthStencilState.stencilWriteMask = 0xff;
             descriptor->depthStencilState = nullptr;
         }
-
-        descriptor->layout = utils::MakeBasicPipelineLayout(device, nullptr);
     }
 
 }  // namespace utils
