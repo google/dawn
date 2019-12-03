@@ -106,7 +106,7 @@ class MultisampledRenderingTest : public DawnTest {
                                  uint32_t uniformDataSize) {
         wgpu::Buffer uniformBuffer = utils::CreateBufferFromData(
             device, uniformData, uniformDataSize, wgpu::BufferUsage::Uniform);
-        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, mBindGroupLayout,
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
                                                          {{0, uniformBuffer, 0, uniformDataSize}});
 
         wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
@@ -179,7 +179,6 @@ class MultisampledRenderingTest : public DawnTest {
     wgpu::TextureView mResolveView;
     wgpu::Texture mDepthStencilTexture;
     wgpu::TextureView mDepthStencilView;
-    wgpu::BindGroupLayout mBindGroupLayout;
 
   private:
     wgpu::RenderPipeline CreateRenderPipelineForTest(const char* fs,
@@ -201,14 +200,6 @@ class MultisampledRenderingTest : public DawnTest {
         pipelineDescriptor.cFragmentStage.module =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fs);
 
-        mBindGroupLayout = utils::MakeBindGroupLayout(
-            device, {
-                        {0, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer},
-                    });
-        wgpu::PipelineLayout pipelineLayout =
-            utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
-        pipelineDescriptor.layout = pipelineLayout;
-
         if (hasDepthStencilAttachment) {
             pipelineDescriptor.cDepthStencilState.format = kDepthStencilFormat;
             pipelineDescriptor.cDepthStencilState.depthWriteEnabled = true;
@@ -223,7 +214,8 @@ class MultisampledRenderingTest : public DawnTest {
             pipelineDescriptor.cColorStates[i].format = kColorFormat;
         }
 
-        return device.CreateRenderPipeline(&pipelineDescriptor);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+        return pipeline;
     }
 };
 
