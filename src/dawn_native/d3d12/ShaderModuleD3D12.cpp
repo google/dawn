@@ -42,6 +42,16 @@ namespace dawn_native { namespace d3d12 {
         mSpirv.assign(descriptor->code, descriptor->code + descriptor->codeSize);
         if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
             shaderc_spvc::CompileOptions options;
+
+            options.SetHLSLShaderModel(51);
+            // PointCoord and PointSize are not supported in HLSL
+            // TODO (hao.x.li@intel.com): The point_coord_compat and point_size_compat are
+            // required temporarily for https://bugs.chromium.org/p/dawn/issues/detail?id=146,
+            // but should be removed once WebGPU requires there is no gl_PointSize builtin.
+            // See https://github.com/gpuweb/gpuweb/issues/332
+            options.SetHLSLPointCoordCompat(true);
+            options.SetHLSLPointSizeCompat(true);
+
             shaderc_spvc_status status =
                 mSpvcContext.InitializeForHlsl(descriptor->code, descriptor->codeSize, options);
             if (status != shaderc_spvc_status_success) {
@@ -62,18 +72,6 @@ namespace dawn_native { namespace d3d12 {
         std::unique_ptr<spirv_cross::CompilerHLSL> compiler_impl;
         spirv_cross::CompilerHLSL* compiler;
         if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
-            shaderc_spvc::CompileOptions options;
-
-            options.SetHLSLShaderModel(51);
-            // PointCoord and PointSize are not supported in HLSL
-            // TODO (hao.x.li@intel.com): The point_coord_compat and point_size_compat are
-            // required temporarily for https://bugs.chromium.org/p/dawn/issues/detail?id=146,
-            // but should be removed once WebGPU requires there is no gl_PointSize builtin.
-            // See https://github.com/gpuweb/gpuweb/issues/332
-            options.SetHLSLPointCoordCompat(true);
-            options.SetHLSLPointSizeCompat(true);
-
-            mSpvcContext.InitializeForHlsl(mSpirv.data(), mSpirv.size(), options);
             compiler = reinterpret_cast<spirv_cross::CompilerHLSL*>(mSpvcContext.GetCompiler());
             // TODO(rharrison): Check status & have some sort of meaningful error path
         } else {
