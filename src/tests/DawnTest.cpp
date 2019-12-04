@@ -142,6 +142,11 @@ DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
             continue;
         }
 
+        if (strcmp("--use-spvc", argv[i]) == 0) {
+            mUseSpvc = true;
+            continue;
+        }
+
         constexpr const char kVendorIdFilterArg[] = "--adapter-vendor-id=";
         if (strstr(argv[i], kVendorIdFilterArg) == argv[i]) {
             const char* vendorIdFilter = argv[i] + strlen(kVendorIdFilterArg);
@@ -194,6 +199,9 @@ void DawnTestEnvironment::SetUp() {
                  "SkipDawnValidation: "
               << (mSkipDawnValidation ? "true" : "false")
               << "\n"
+                 "UseSpvc: "
+              << (mUseSpvc ? "true" : "false")
+              << "\n"
                  "BeginCaptureOnStartup: "
               << (mBeginCaptureOnStartup ? "true" : "false")
               << "\n"
@@ -239,6 +247,10 @@ bool DawnTestEnvironment::IsBackendValidationEnabled() const {
 
 bool DawnTestEnvironment::IsDawnValidationSkipped() const {
     return mSkipDawnValidation;
+}
+
+bool DawnTestEnvironment::IsSpvcBeingUsed() const {
+    return mUseSpvc;
 }
 
 dawn_native::Instance* DawnTestEnvironment::GetInstance() const {
@@ -370,6 +382,10 @@ bool DawnTestBase::IsDawnValidationSkipped() const {
     return gTestEnv->IsDawnValidationSkipped();
 }
 
+bool DawnTestBase::IsSpvcBeingUsed() const {
+    return gTestEnv->IsSpvcBeingUsed();
+}
+
 bool DawnTestBase::HasVendorIdFilter() const {
     return gTestEnv->HasVendorIdFilter();
 }
@@ -453,6 +469,12 @@ void DawnTestBase::SetUp() {
     if (gTestEnv->IsDawnValidationSkipped()) {
         ASSERT(gTestEnv->GetInstance()->GetToggleInfo(kSkipValidationToggle) != nullptr);
         deviceDescriptor.forceEnabledToggles.push_back(kSkipValidationToggle);
+    }
+
+    static constexpr char kUseSpvcToggle[] = "use_spvc";
+    if (gTestEnv->IsSpvcBeingUsed()) {
+        ASSERT(gTestEnv->GetInstance()->GetToggleInfo(kUseSpvcToggle) != nullptr);
+        deviceDescriptor.forceEnabledToggles.push_back(kUseSpvcToggle);
     }
 
     backendDevice = mBackendAdapter.CreateDevice(&deviceDescriptor);
