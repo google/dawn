@@ -166,12 +166,12 @@ TEST_P(NonzeroTextureCreationTests, NonRenderableTextureClearWithMultiArrayLayer
 }
 
 DAWN_INSTANTIATE_TEST(NonzeroTextureCreationTests,
-                      ForceWorkarounds(D3D12Backend,
-                                       {"nonzero_clear_resources_on_creation_for_testing"},
-                                       {"lazy_clear_resource_on_first_use"}),
-                      ForceWorkarounds(OpenGLBackend,
-                                       {"nonzero_clear_resources_on_creation_for_testing"},
-                                       {"lazy_clear_resource_on_first_use"}),
-                      ForceWorkarounds(VulkanBackend,
-                                       {"nonzero_clear_resources_on_creation_for_testing"},
-                                       {"lazy_clear_resource_on_first_use"}));
+                      ForceToggles(D3D12Backend,
+                                   {"nonzero_clear_resources_on_creation_for_testing"},
+                                   {"lazy_clear_resource_on_first_use"}),
+                      ForceToggles(OpenGLBackend,
+                                   {"nonzero_clear_resources_on_creation_for_testing"},
+                                   {"lazy_clear_resource_on_first_use"}),
+                      ForceToggles(VulkanBackend,
+                                   {"nonzero_clear_resources_on_creation_for_testing"},
+                                   {"lazy_clear_resource_on_first_use"}));

@@ -203,7 +203,7 @@ namespace dawn_native { namespace vulkan {
     }  // namespace
 
     // Converts Dawn texture format to Vulkan formats.
-    VkFormat VulkanImageFormat(wgpu::TextureFormat format) {
+    VkFormat VulkanImageFormat(const Device* device, wgpu::TextureFormat format) {
         switch (format) {
             case wgpu::TextureFormat::R8Unorm:
                 return VK_FORMAT_R8_UNORM;
@@ -285,7 +285,15 @@ namespace dawn_native { namespace vulkan {
             case wgpu::TextureFormat::Depth24Plus:
                 return VK_FORMAT_D32_SFLOAT;
             case wgpu::TextureFormat::Depth24PlusStencil8:
-                return VK_FORMAT_D32_SFLOAT_S8_UINT;
+                // Depth24PlusStencil8 maps to either of these two formats because only requires
+                // that one of the two be present. The VulkanUseD32S8 toggle combines the wish of
+                // the environment, default to using D32S8, and availability information so we know
+                // that the format is available.
+                if (device->IsToggleEnabled(Toggle::VulkanUseD32S8)) {
+                    return VK_FORMAT_D32_SFLOAT_S8_UINT;
+                } else {
+                    return VK_FORMAT_D24_UNORM_S8_UINT;
+                }
 
             case wgpu::TextureFormat::BC1RGBAUnorm:
                 return VK_FORMAT_BC1_RGBA_UNORM_BLOCK;
@@ -428,7 +436,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
         createInfo.imageType = VulkanImageType(GetDimension());
-        createInfo.format = VulkanImageFormat(GetFormat().format);
+        createInfo.format = VulkanImageFormat(device, GetFormat().format);
         createInfo.extent = VulkanExtent3D(GetSize());
         createInfo.mipLevels = GetNumMipLevels();
         createInfo.arrayLayers = GetArrayLayers();
@@ -484,7 +492,7 @@ namespace dawn_native { namespace vulkan {
     // Internally managed, but imported from external handle
     MaybeError Texture::InitializeFromExternal(const ExternalImageDescriptor* descriptor,
                                                external_memory::Service* externalMemoryService) {
-        VkFormat format = VulkanImageFormat(GetFormat().format);
+        VkFormat format = VulkanImageFormat(ToBackend(GetDevice()), GetFormat().format);
         VkImageUsageFlags usage = VulkanImageUsage(GetUsage(), GetFormat());
         if (!externalMemoryService->SupportsCreateImage(descriptor, format, usage)) {
             return DAWN_VALIDATION_ERROR("Creating an image from external memory is not supported");
@@ -790,7 +798,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.flags = 0;
         createInfo.image = ToBackend(GetTexture())->GetHandle();
         createInfo.viewType = VulkanImageViewType(descriptor->dimension);
-        createInfo.format = VulkanImageFormat(descriptor->format);
+        createInfo.format = VulkanImageFormat(device, descriptor->format);
         createInfo.components = VkComponentMapping{VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G,
                                                    VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A};
         createInfo.subresourceRange.aspectMask = VulkanAspectMask(GetFormat());

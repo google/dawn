@@ -1054,5 +1054,5 @@ DAWN_INSTANTIATE_TEST(CompressedTextureBCFormatTest,
                       MetalBackend,
                       OpenGLBackend,
                       VulkanBackend,
-                      ForceWorkarounds(VulkanBackend,
-                                       {"use_temporary_buffer_in_texture_to_texture_copy"}));
+                      ForceToggles(VulkanBackend,
+                                   {"use_temporary_buffer_in_texture_to_texture_copy"}));

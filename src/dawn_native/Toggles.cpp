@@ -96,6 +96,12 @@ namespace dawn_native {
               "Enable usage of spvc's internal parsing and IR generation code, instead of "
               "spirv_cross's.",
               "https://crbug.com/dawn/288"}},
+            {Toggle::VulkanUseD32S8,
+             {"vulkan_use_d32s8",
+              "Vulkan mandates support of either D32_FLOAT_S8 or D24_UNORM_S8. When available the "
+              "backend will use D32S8 (toggle to on) but setting the toggle to off will make it"
+              "use the D24S8 format when possible.",
+              "https://crbug.com/dawn/286"}},
         }};
 
     }  // anonymous namespace

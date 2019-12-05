@@ -68,6 +68,8 @@ namespace dawn_native { namespace vulkan {
         Serial GetPendingCommandSerial() const override;
         MaybeError SubmitPendingCommands();
 
+        // Dawn Native API
+
         TextureBase* CreateTextureWrappingVulkanImage(
             const ExternalImageDescriptor* descriptor,
             ExternalMemoryHandle memoryHandle,
@@ -126,6 +128,7 @@ namespace dawn_native { namespace vulkan {
         void GatherQueueFromDevice();
 
         void InitTogglesFromDriver();
+        void ApplyDepth24PlusS8Toggle();
 
         // To make it easier to use fn it is a public const member. However
         // the Device is allowed to mutate them through these private methods.

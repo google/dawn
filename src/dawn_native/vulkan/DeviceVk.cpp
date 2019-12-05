@@ -79,6 +79,10 @@ namespace dawn_native { namespace vulkan {
 
         DAWN_TRY(PrepareRecordingContext());
 
+        // The environment can request to use D32S8 or D24S8 when it's not available. Override
+        // the decision if it is not applicable.
+        ApplyDepth24PlusS8Toggle();
+
         return {};
     }
 
@@ -459,6 +463,40 @@ namespace dawn_native { namespace vulkan {
         // TODO(jiawei.shao@intel.com): tighten this workaround when this issue is fixed in both
         // Vulkan SPEC and drivers.
         SetToggle(Toggle::UseTemporaryBufferInCompressedTextureToTextureCopy, true);
+
+        // By default try to use D32S8 for Depth24PlusStencil8
+        SetToggle(Toggle::VulkanUseD32S8, true);
+    }
+
+    void Device::ApplyDepth24PlusS8Toggle() {
+        VkPhysicalDevice physicalDevice = ToBackend(GetAdapter())->GetPhysicalDevice();
+
+        bool supportsD32s8 = false;
+        {
+            VkFormatProperties properties;
+            fn.GetPhysicalDeviceFormatProperties(physicalDevice, VK_FORMAT_D32_SFLOAT_S8_UINT,
+                                                 &properties);
+            supportsD32s8 =
+                properties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        }
+
+        bool supportsD24s8 = false;
+        {
+            VkFormatProperties properties;
+            fn.GetPhysicalDeviceFormatProperties(physicalDevice, VK_FORMAT_D24_UNORM_S8_UINT,
+                                                 &properties);
+            supportsD24s8 =
+                properties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        }
+
+        ASSERT(supportsD32s8 || supportsD24s8);
+
+        if (!supportsD24s8) {
+            SetToggle(Toggle::VulkanUseD32S8, true);
+        }
+        if (!supportsD32s8) {
+            SetToggle(Toggle::VulkanUseD32S8, false);
+        }
     }
 
     VulkanFunctions* Device::GetMutableFunctions() {
@@ -616,7 +654,7 @@ namespace dawn_native { namespace vulkan {
             return DAWN_VALIDATION_ERROR("External semaphore usage not supported");
         }
         if (!mExternalMemoryService->SupportsImportMemory(
-                VulkanImageFormat(textureDescriptor->format), VK_IMAGE_TYPE_2D,
+                VulkanImageFormat(this, textureDescriptor->format), VK_IMAGE_TYPE_2D,
                 VK_IMAGE_TILING_OPTIMAL,
                 VulkanImageUsage(textureDescriptor->usage,
                                  GetValidInternalFormat(textureDescriptor->format)),

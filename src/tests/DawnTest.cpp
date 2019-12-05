@@ -93,9 +93,9 @@ const DawnTestParam MetalBackend(dawn_native::BackendType::Metal);
 const DawnTestParam OpenGLBackend(dawn_native::BackendType::OpenGL);
 const DawnTestParam VulkanBackend(dawn_native::BackendType::Vulkan);
 
-DawnTestParam ForceWorkarounds(const DawnTestParam& originParam,
-                               std::initializer_list<const char*> forceEnabledWorkarounds,
-                               std::initializer_list<const char*> forceDisabledWorkarounds) {
+DawnTestParam ForceToggles(const DawnTestParam& originParam,
+                           std::initializer_list<const char*> forceEnabledWorkarounds,
+                           std::initializer_list<const char*> forceDisabledWorkarounds) {
     DawnTestParam newTestParam = originParam;
     newTestParam.forceEnabledWorkarounds = forceEnabledWorkarounds;
     newTestParam.forceDisabledWorkarounds = forceDisabledWorkarounds;

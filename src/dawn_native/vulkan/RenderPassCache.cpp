@@ -108,7 +108,7 @@ namespace dawn_native { namespace vulkan {
             attachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
             attachmentDesc.flags = 0;
-            attachmentDesc.format = VulkanImageFormat(query.colorFormats[i]);
+            attachmentDesc.format = VulkanImageFormat(mDevice, query.colorFormats[i]);
             attachmentDesc.samples = vkSampleCount;
             attachmentDesc.loadOp = VulkanAttachmentLoadOp(query.colorLoadOp[i]);
             attachmentDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -129,7 +129,7 @@ namespace dawn_native { namespace vulkan {
             depthStencilAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
             attachmentDesc.flags = 0;
-            attachmentDesc.format = VulkanImageFormat(query.depthStencilFormat);
+            attachmentDesc.format = VulkanImageFormat(mDevice, query.depthStencilFormat);
             attachmentDesc.samples = vkSampleCount;
             attachmentDesc.loadOp = VulkanAttachmentLoadOp(query.depthLoadOp);
             attachmentDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -150,7 +150,7 @@ namespace dawn_native { namespace vulkan {
             attachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
             attachmentDesc.flags = 0;
-            attachmentDesc.format = VulkanImageFormat(query.colorFormats[i]);
+            attachmentDesc.format = VulkanImageFormat(mDevice, query.colorFormats[i]);
             attachmentDesc.samples = VK_SAMPLE_COUNT_1_BIT;
             attachmentDesc.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
             attachmentDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;

@@ -35,6 +35,7 @@ namespace dawn_native {
         SkipValidation,
         UseSpvc,
         UseSpvcIRGen,
+        VulkanUseD32S8,
 
         EnumCount,
         InvalidEnum = EnumCount,

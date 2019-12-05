@@ -104,9 +104,9 @@ extern const DawnTestParam MetalBackend;
 extern const DawnTestParam OpenGLBackend;
 extern const DawnTestParam VulkanBackend;
 
-DawnTestParam ForceWorkarounds(const DawnTestParam& originParam,
-                               std::initializer_list<const char*> forceEnabledWorkarounds,
-                               std::initializer_list<const char*> forceDisabledWorkarounds = {});
+DawnTestParam ForceToggles(const DawnTestParam& originParam,
+                           std::initializer_list<const char*> forceEnabledWorkarounds,
+                           std::initializer_list<const char*> forceDisabledWorkarounds = {});
 
 namespace utils {
     class TerribleCommandBuffer;
