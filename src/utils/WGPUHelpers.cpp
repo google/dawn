@@ -16,12 +16,12 @@
 
 #include "common/Assert.h"
 #include "common/Constants.h"
+#include "common/Log.h"
 
 #include <shaderc/shaderc.hpp>
 
 #include <cstring>
 #include <iomanip>
-#include <iostream>
 #include <sstream>
 
 namespace utils {
@@ -67,7 +67,7 @@ namespace utils {
         shaderc::Compiler compiler;
         auto result = compiler.CompileGlslToSpv(source, strlen(source), kind, "myshader?");
         if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
-            std::cerr << result.GetErrorMessage();
+            ErrorLog() << result.GetErrorMessage();
             return {};
         }
 #ifdef DUMP_SPIRV_ASSEMBLY
@@ -106,7 +106,7 @@ namespace utils {
         shaderc::Compiler compiler;
         shaderc::SpvCompilationResult result = compiler.AssembleToSpv(source, strlen(source));
         if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
-            std::cerr << result.GetErrorMessage();
+            ErrorLog() << result.GetErrorMessage();
             return {};
         }
 

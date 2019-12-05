@@ -90,6 +90,8 @@ if (is_win || is_linux || is_mac || is_fuchsia || is_android) {
       "DynamicLib.cpp",
       "DynamicLib.h",
       "HashUtils.h",
+      "Log.cpp",
+      "Log.h",
       "Math.cpp",
       "Math.h",
       "Platform.h",
@@ -115,6 +117,9 @@ if (is_win || is_linux || is_mac || is_fuchsia || is_android) {
       public_deps = [
         "../../third_party:vulkan_headers",
       ]
+    }
+    if (is_android) {
+      libs = [ "log" ]
     }
   }
 }

@@ -15,6 +15,7 @@
 #include "tests/perf_tests/DawnPerfTest.h"
 
 #include "common/Assert.h"
+#include "common/Log.h"
 #include "dawn_platform/tracing/TraceEvent.h"
 #include "tests/perf_tests/DawnPerfTestPlatform.h"
 #include "utils/Timer.h"
@@ -112,14 +113,13 @@ DawnPerfTestEnvironment::DawnPerfTestEnvironment(int argc, char** argv)
         }
 
         if (strcmp("-h", argv[i]) == 0 || strcmp("--help", argv[i]) == 0) {
-            std::cout
+            InfoLog()
                 << "Additional flags:"
                 << " [--calibration] [--override-steps=x] [--enable-tracing] [--trace-file=file]\n"
                 << "  --calibration: Only run calibration. Calibration allows the perf test"
                    " runner script to save some time.\n"
                 << " --override-steps: Set a fixed number of steps to run for each test\n"
-                << " --trace-file: The file to dump trace results.\n"
-                << std::endl;
+                << " --trace-file: The file to dump trace results.\n";
             continue;
         }
     }

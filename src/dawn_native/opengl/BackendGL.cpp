@@ -15,12 +15,12 @@
 #include "dawn_native/opengl/BackendGL.h"
 
 #include "common/Constants.h"
+#include "common/Log.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/OpenGLBackend.h"
 #include "dawn_native/opengl/DeviceGL.h"
 
 #include <cstring>
-#include <iostream>
 
 namespace dawn_native { namespace opengl {
 
@@ -102,11 +102,11 @@ namespace dawn_native { namespace opengl {
             }
 
             if (type == GL_DEBUG_TYPE_ERROR) {
-                std::cout << "OpenGL error:" << std::endl;
-                std::cout << "    Source: " << sourceText << std::endl;
-                std::cout << "    ID: " << id << std::endl;
-                std::cout << "    Severity: " << severityText << std::endl;
-                std::cout << "    Message: " << message << std::endl;
+                WarningLog() << "OpenGL error:"
+                             << "\n    Source: " << sourceText      //
+                             << "\n    ID: " << id                  //
+                             << "\n    Severity: " << severityText  //
+                             << "\n    Message: " << message;
 
                 // Abort on an error when in Debug mode.
                 UNREACHABLE();

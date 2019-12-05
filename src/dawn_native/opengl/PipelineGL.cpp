@@ -15,13 +15,13 @@
 #include "dawn_native/opengl/PipelineGL.h"
 
 #include "common/BitSetIterator.h"
+#include "common/Log.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/opengl/Forward.h"
 #include "dawn_native/opengl/OpenGLFunctions.h"
 #include "dawn_native/opengl/PipelineLayoutGL.h"
 #include "dawn_native/opengl/ShaderModuleGL.h"
 
-#include <iostream>
 #include <set>
 
 namespace dawn_native { namespace opengl {
@@ -64,9 +64,7 @@ namespace dawn_native { namespace opengl {
                 if (infoLogLength > 1) {
                     std::vector<char> buffer(infoLogLength);
                     gl.GetShaderInfoLog(shader, infoLogLength, nullptr, &buffer[0]);
-                    std::cout << source << std::endl;
-                    std::cout << "Program compilation failed:\n";
-                    std::cout << buffer.data() << std::endl;
+                    ErrorLog() << source << "\nProgram compilation failed:\n" << buffer.data();
                 }
             }
             return shader;
@@ -97,8 +95,7 @@ namespace dawn_native { namespace opengl {
             if (infoLogLength > 1) {
                 std::vector<char> buffer(infoLogLength);
                 gl.GetProgramInfoLog(mProgram, infoLogLength, nullptr, &buffer[0]);
-                std::cout << "Program link failed:\n";
-                std::cout << buffer.data() << std::endl;
+                ErrorLog() << "Program link failed:\n" << buffer.data();
             }
         }
 

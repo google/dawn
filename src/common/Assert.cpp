@@ -13,14 +13,13 @@
 // limitations under the License.
 
 #include "common/Assert.h"
-
-#include <iostream>
+#include "common/Log.h"
 
 void HandleAssertionFailure(const char* file,
                             const char* function,
                             int line,
                             const char* condition) {
-    std::cerr << "Assertion failure at " << file << ":" << line << " (" << function
-              << "): " << condition << std::endl;
+    ErrorLog() << "Assertion failure at " << file << ":" << line << " (" << function
+               << "): " << condition;
     DAWN_BREAKPOINT();
 }

@@ -14,13 +14,12 @@
 
 #include "dawn_native/vulkan/BackendVk.h"
 
+#include "common/Log.h"
 #include "common/SystemUtils.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/VulkanBackend.h"
 #include "dawn_native/vulkan/AdapterVk.h"
 #include "dawn_native/vulkan/VulkanError.h"
-
-#include <iostream>
 
 #if defined(DAWN_PLATFORM_LINUX)
 #    if defined(DAWN_PLATFORM_ANDROID)
@@ -254,7 +253,7 @@ namespace dawn_native { namespace vulkan {
                                    const char* /*pLayerPrefix*/,
                                    const char* pMessage,
                                    void* /*pUserdata*/) {
-        std::cout << pMessage << std::endl;
+        WarningLog() << pMessage;
         ASSERT((flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) == 0);
 
         return VK_FALSE;

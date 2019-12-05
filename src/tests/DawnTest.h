@@ -15,6 +15,7 @@
 #ifndef TESTS_DAWNTEST_H_
 #define TESTS_DAWNTEST_H_
 
+#include "common/Log.h"
 #include "dawn/dawn_proc_table.h"
 #include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
@@ -294,11 +295,11 @@ class DawnTestBase {
 };
 
 // Skip a test when the given condition is satisfied.
-#define DAWN_SKIP_TEST_IF(condition)                               \
-    if (condition) {                                               \
-        std::cout << "Test skipped: " #condition "." << std::endl; \
-        GTEST_SKIP();                                              \
-        return;                                                    \
+#define DAWN_SKIP_TEST_IF(condition)                  \
+    if (condition) {                                  \
+        InfoLog() << "Test skipped: " #condition "."; \
+        GTEST_SKIP();                                 \
+        return;                                       \
     }
 
 template <typename Params = DawnTestParam>

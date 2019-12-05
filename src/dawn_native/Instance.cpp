@@ -15,9 +15,8 @@
 #include "dawn_native/Instance.h"
 
 #include "common/Assert.h"
+#include "common/Log.h"
 #include "dawn_native/ErrorData.h"
-
-#include <iostream>
 
 namespace dawn_native {
 
@@ -168,7 +167,7 @@ namespace dawn_native {
             ErrorData* error = maybeError.AcquireError();
 
             ASSERT(error != nullptr);
-            std::cout << error->GetMessage() << std::endl;
+            InfoLog() << error->GetMessage();
             delete error;
 
             return true;

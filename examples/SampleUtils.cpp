@@ -15,6 +15,7 @@
 #include "SampleUtils.h"
 
 #include "common/Assert.h"
+#include "common/Log.h"
 #include "common/Platform.h"
 #include "utils/BackendBinding.h"
 #include "utils/TerribleCommandBuffer.h"
@@ -28,31 +29,31 @@
 
 #include <algorithm>
 #include <cstring>
-#include <iostream>
 
 void PrintDeviceError(WGPUErrorType errorType, const char* message, void*) {
+    const char* errorTypeName = "";
     switch (errorType) {
         case WGPUErrorType_Validation:
-            std::cout << "Validation ";
+            errorTypeName = "Validation";
             break;
         case WGPUErrorType_OutOfMemory:
-            std::cout << "Out of memory ";
+            errorTypeName = "Out of memory";
             break;
         case WGPUErrorType_Unknown:
-            std::cout << "Unknown ";
+            errorTypeName = "Unknown";
             break;
         case WGPUErrorType_DeviceLost:
-            std::cout << "Device lost ";
+            errorTypeName = "Device lost";
             break;
         default:
             UNREACHABLE();
             return;
     }
-    std::cout << "error: " << message << std::endl;
+    ErrorLog() << errorTypeName << " error: " << message;
 }
 
 void PrintGLFWError(int code, const char* message) {
-    std::cout << "GLFW error: " << code << " - " << message << std::endl;
+    ErrorLog() << "GLFW error: " << code << " - " << message;
 }
 
 enum class CmdBufType {
