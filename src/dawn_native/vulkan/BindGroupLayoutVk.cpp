@@ -56,6 +56,7 @@ namespace dawn_native { namespace vulkan {
             case wgpu::BindingType::SampledTexture:
                 return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
             case wgpu::BindingType::StorageBuffer:
+            case wgpu::BindingType::ReadonlyStorageBuffer:
                 if (isDynamic) {
                     return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
                 }

@@ -59,7 +59,8 @@ namespace dawn_native { namespace vulkan {
 
             switch (layoutInfo.types[bindingIndex]) {
                 case wgpu::BindingType::UniformBuffer:
-                case wgpu::BindingType::StorageBuffer: {
+                case wgpu::BindingType::StorageBuffer:
+                case wgpu::BindingType::ReadonlyStorageBuffer: {
                     BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
 
                     writeBufferInfo[numWrites].buffer = ToBackend(binding.buffer)->GetHandle();

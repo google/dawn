@@ -467,8 +467,9 @@ class MultipleWriteThenMultipleReadTests : public DawnTest {
 };
 
 // Write into a few storage buffers in compute pass. Then read that data in a render pass. The
-// readonly buffers in render pass include vertex buffer, index buffer, and uniform buffer. Data to
-// be read in all of these buffers in render pass depend on the write operation in compute pass.
+// readonly buffers in render pass include vertex buffer, index buffer, uniform buffer, and readonly
+// storage buffer. Data to be read in all of these buffers in render pass depend on the write
+// operation in compute pass.
 TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
     // Create pipeline, bind group, and different buffers for compute pass.
     wgpu::ShaderModule csModule =
@@ -482,11 +483,11 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
             ivec4 indices[2];
         };
 
-        layout(std140, set = 0, binding = 2) buffer UniformContents0 {
+        layout(std140, set = 0, binding = 2) buffer UniformContents {
             float color0;
         };
 
-        layout(std140, set = 0, binding = 3) buffer UniformContents1 {
+        layout(std140, set = 0, binding = 3) buffer ReadonlyStorageContents {
             float color1;
         };
 
@@ -522,15 +523,14 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
     wgpu::Buffer indexBuffer = CreateZeroedBuffer(
         sizeof(int) * 4 * 2,
         wgpu::BufferUsage::Index | wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst);
-    wgpu::Buffer uniformBuffer0 =
+    wgpu::Buffer uniformBuffer =
         CreateZeroedBuffer(sizeof(float), wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage |
                                               wgpu::BufferUsage::CopyDst);
-    wgpu::Buffer uniformBuffer1 =
-        CreateZeroedBuffer(sizeof(float), wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage |
-                                              wgpu::BufferUsage::CopyDst);
+    wgpu::Buffer readonlyStorageBuffer =
+        CreateZeroedBuffer(sizeof(float), wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst);
     wgpu::BindGroup bindGroup0 = utils::MakeBindGroup(
         device, bgl0,
-        {{0, vertexBuffer}, {1, indexBuffer}, {2, uniformBuffer0}, {3, uniformBuffer1}});
+        {{0, vertexBuffer}, {1, indexBuffer}, {2, uniformBuffer}, {3, readonlyStorageBuffer}});
 
     // Write data into storage buffers in compute pass.
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -552,11 +552,11 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
     wgpu::ShaderModule fsModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
         #version 450
-        layout (set = 0, binding = 0) uniform uniformBuffer0 {
+        layout (set = 0, binding = 0) uniform UniformBuffer {
             float color0;
         };
 
-        layout (set = 0, binding = 1) uniform uniformBuffer1 {
+        layout (set = 0, binding = 1) readonly buffer ReadonlyStorageBuffer {
             float color1;
         };
 
@@ -568,7 +568,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
     wgpu::BindGroupLayout bgl1 = utils::MakeBindGroupLayout(
         device, {
                     {0, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer},
-                    {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer},
+                    {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageBuffer},
                 });
     wgpu::PipelineLayout pipelineLayout = utils::MakeBasicPipelineLayout(device, &bgl1);
 
@@ -588,7 +588,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
     wgpu::RenderPipeline rp = device.CreateRenderPipeline(&rpDesc);
 
     wgpu::BindGroup bindGroup1 =
-        utils::MakeBindGroup(device, bgl1, {{0, uniformBuffer0}, {1, uniformBuffer1}});
+        utils::MakeBindGroup(device, bgl1, {{0, uniformBuffer}, {1, readonlyStorageBuffer}});
 
     // Read data in buffers in render pass.
     wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&renderPass.renderPassInfo);
@@ -611,8 +611,8 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
 }
 
 // Write into a storage buffer in compute pass. Then read that data in buffer in a render pass. The
-// buffer is composed of vertices, indices, and uniforms. Data to be read in the buffer in render
-// pass depend on the write operation in compute pass.
+// buffer is composed of vertices, indices, uniforms and readonly storage. Data to be read in the
+// buffer in render pass depend on the write operation in compute pass.
 TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
     // Create pipeline, bind group, and a complex buffer for compute pass.
     wgpu::ShaderModule csModule =
@@ -688,11 +688,11 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
     wgpu::ShaderModule fsModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
         #version 450
-        layout (set = 0, binding = 0) uniform uniformBuffer0 {
+        layout (set = 0, binding = 0) uniform UniformBuffer {
             float color0;
         };
 
-        layout (set = 0, binding = 1) uniform uniformBuffer1 {
+        layout (set = 0, binding = 1) readonly buffer ReadonlyStorageBuffer {
             float color1;
         };
 
@@ -704,7 +704,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
     wgpu::BindGroupLayout bgl1 = utils::MakeBindGroupLayout(
         device, {
                     {0, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer},
-                    {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer},
+                    {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageBuffer},
                 });
     wgpu::PipelineLayout pipelineLayout = utils::MakeBasicPipelineLayout(device, &bgl1);
 
@@ -749,7 +749,4 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
 }
 
 DAWN_INSTANTIATE_TEST(MultipleWriteThenMultipleReadTests,
-                      D3D12Backend,
-                      MetalBackend,
-                      OpenGLBackend,
                       VulkanBackend);
