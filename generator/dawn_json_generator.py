@@ -529,12 +529,10 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if 'dawn_headers' in targets:
             renders.append(FileRender('webgpu.h', 'src/include/dawn/webgpu.h', [base_params, api_params]))
-            renders.append(FileRender('dawn.h', 'src/include/dawn/dawn.h', [base_params, api_params]))
             renders.append(FileRender('dawn_proc_table.h', 'src/include/dawn/dawn_proc_table.h', [base_params, api_params]))
 
         if 'dawncpp_headers' in targets:
             renders.append(FileRender('webgpu_cpp.h', 'src/include/dawn/webgpu_cpp.h', [base_params, api_params]))
-            renders.append(FileRender('dawncpp.h', 'src/include/dawn/dawncpp.h', [base_params, api_params]))
 
         if 'dawn_proc' in targets:
             renders.append(FileRender('dawn_proc.c', 'src/dawn/dawn_proc.c', [base_params, api_params]))
