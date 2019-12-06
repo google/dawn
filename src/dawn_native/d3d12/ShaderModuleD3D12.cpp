@@ -71,10 +71,7 @@ namespace dawn_native { namespace d3d12 {
     const std::string ShaderModule::GetHLSLSource(PipelineLayout* layout) {
         std::unique_ptr<spirv_cross::CompilerHLSL> compiler_impl;
         spirv_cross::CompilerHLSL* compiler;
-        if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
-            compiler = reinterpret_cast<spirv_cross::CompilerHLSL*>(mSpvcContext.GetCompiler());
-            // TODO(rharrison): Check status & have some sort of meaningful error path
-        } else {
+        if (!GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
             // If these options are changed, the values in DawnSPIRVCrossHLSLFastFuzzer.cpp need to
             // be updated.
             spirv_cross::CompilerGLSL::Options options_glsl;
@@ -104,14 +101,21 @@ namespace dawn_native { namespace d3d12 {
                 const BindingInfo& bindingInfo = groupBindingInfo[binding];
                 if (bindingInfo.used) {
                     uint32_t bindingOffset = bindingOffsets[binding];
-                    compiler->set_decoration(bindingInfo.id, spv::DecorationBinding, bindingOffset);
+                    if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
+                        mSpvcContext.SetDecoration(bindingInfo.id, SHADERC_SPVC_DECORATION_BINDING,
+                                                   bindingOffset);
+                        // TODO(dawn:301): Check status & have some sort of meaningful error path
+                    } else {
+                        compiler->set_decoration(bindingInfo.id, spv::DecorationBinding,
+                                                 bindingOffset);
+                    }
                 }
             }
         }
         if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
             shaderc_spvc::CompilationResult result;
             mSpvcContext.CompileShader(&result);
-            // TODO(rharrison): Check status & have some sort of meaningful error path
+            // TODO(dawn:301): Check status & have some sort of meaningful error path
             return result.GetStringOutput();
         } else {
             return compiler->compile();
