@@ -102,11 +102,11 @@ namespace dawn_native { namespace opengl {
             }
 
             if (type == GL_DEBUG_TYPE_ERROR) {
-                WarningLog() << "OpenGL error:"
-                             << "\n    Source: " << sourceText      //
-                             << "\n    ID: " << id                  //
-                             << "\n    Severity: " << severityText  //
-                             << "\n    Message: " << message;
+                dawn::WarningLog() << "OpenGL error:"
+                                   << "\n    Source: " << sourceText      //
+                                   << "\n    ID: " << id                  //
+                                   << "\n    Severity: " << severityText  //
+                                   << "\n    Message: " << message;
 
                 // Abort on an error when in Debug mode.
                 UNREACHABLE();

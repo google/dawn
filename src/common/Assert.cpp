@@ -19,7 +19,7 @@ void HandleAssertionFailure(const char* file,
                             const char* function,
                             int line,
                             const char* condition) {
-    ErrorLog() << "Assertion failure at " << file << ":" << line << " (" << function
-               << "): " << condition;
+    dawn::ErrorLog() << "Assertion failure at " << file << ":" << line << " (" << function
+                     << "): " << condition;
     DAWN_BREAKPOINT();
 }

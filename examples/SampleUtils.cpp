@@ -49,11 +49,11 @@ void PrintDeviceError(WGPUErrorType errorType, const char* message, void*) {
             UNREACHABLE();
             return;
     }
-    ErrorLog() << errorTypeName << " error: " << message;
+    dawn::ErrorLog() << errorTypeName << " error: " << message;
 }
 
 void PrintGLFWError(int code, const char* message) {
-    ErrorLog() << "GLFW error: " << code << " - " << message;
+    dawn::ErrorLog() << "GLFW error: " << code << " - " << message;
 }
 
 enum class CmdBufType {

@@ -113,7 +113,7 @@ DawnPerfTestEnvironment::DawnPerfTestEnvironment(int argc, char** argv)
         }
 
         if (strcmp("-h", argv[i]) == 0 || strcmp("--help", argv[i]) == 0) {
-            InfoLog()
+            dawn::InfoLog()
                 << "Additional flags:"
                 << " [--calibration] [--override-steps=x] [--enable-tracing] [--trace-file=file]\n"
                 << "  --calibration: Only run calibration. Calibration allows the perf test"

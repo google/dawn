@@ -67,7 +67,7 @@ namespace utils {
         shaderc::Compiler compiler;
         auto result = compiler.CompileGlslToSpv(source, strlen(source), kind, "myshader?");
         if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
-            ErrorLog() << result.GetErrorMessage();
+            dawn::ErrorLog() << result.GetErrorMessage();
             return {};
         }
 #ifdef DUMP_SPIRV_ASSEMBLY
@@ -106,7 +106,7 @@ namespace utils {
         shaderc::Compiler compiler;
         shaderc::SpvCompilationResult result = compiler.AssembleToSpv(source, strlen(source));
         if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
-            ErrorLog() << result.GetErrorMessage();
+            dawn::ErrorLog() << result.GetErrorMessage();
             return {};
         }
 

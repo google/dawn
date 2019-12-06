@@ -167,7 +167,7 @@ namespace dawn_native {
             ErrorData* error = maybeError.AcquireError();
 
             ASSERT(error != nullptr);
-            InfoLog() << error->GetMessage();
+            dawn::InfoLog() << error->GetMessage();
             delete error;
 
             return true;

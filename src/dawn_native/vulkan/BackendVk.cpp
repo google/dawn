@@ -253,7 +253,7 @@ namespace dawn_native { namespace vulkan {
                                    const char* /*pLayerPrefix*/,
                                    const char* pMessage,
                                    void* /*pUserdata*/) {
-        WarningLog() << pMessage;
+        dawn::WarningLog() << pMessage;
         ASSERT((flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) == 0);
 
         return VK_FALSE;

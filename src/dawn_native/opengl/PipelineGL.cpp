@@ -64,7 +64,8 @@ namespace dawn_native { namespace opengl {
                 if (infoLogLength > 1) {
                     std::vector<char> buffer(infoLogLength);
                     gl.GetShaderInfoLog(shader, infoLogLength, nullptr, &buffer[0]);
-                    ErrorLog() << source << "\nProgram compilation failed:\n" << buffer.data();
+                    dawn::ErrorLog() << source << "\nProgram compilation failed:\n"
+                                     << buffer.data();
                 }
             }
             return shader;
@@ -95,7 +96,7 @@ namespace dawn_native { namespace opengl {
             if (infoLogLength > 1) {
                 std::vector<char> buffer(infoLogLength);
                 gl.GetProgramInfoLog(mProgram, infoLogLength, nullptr, &buffer[0]);
-                ErrorLog() << "Program link failed:\n" << buffer.data();
+                dawn::ErrorLog() << "Program link failed:\n" << buffer.data();
             }
         }
 

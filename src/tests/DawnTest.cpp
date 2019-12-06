@@ -159,16 +159,17 @@ DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
         }
 
         if (strcmp("-h", argv[i]) == 0 || strcmp("--help", argv[i]) == 0) {
-            InfoLog() << "\n\nUsage: " << argv[0]
-                      << " [GTEST_FLAGS...] [-w] [-d] [-c] [--adapter-vendor-id=x]\n"
-                         "  -w, --use-wire: Run the tests through the wire (defaults to no wire)\n"
-                         "  -d, --enable-backend-validation: Enable backend validation (defaults"
-                         " to disabled)\n"
-                         "  -c, --begin-capture-on-startup: Begin debug capture on startup "
-                         "(defaults to no capture)\n"
-                         "  --skip-validation: Skip Dawn validation\n"
-                         "  --adapter-vendor-id: Select adapter by vendor id to run end2end tests"
-                         "on multi-GPU systems \n";
+            dawn::InfoLog()
+                << "\n\nUsage: " << argv[0]
+                << " [GTEST_FLAGS...] [-w] [-d] [-c] [--adapter-vendor-id=x]\n"
+                   "  -w, --use-wire: Run the tests through the wire (defaults to no wire)\n"
+                   "  -d, --enable-backend-validation: Enable backend validation (defaults"
+                   " to disabled)\n"
+                   "  -c, --begin-capture-on-startup: Begin debug capture on startup "
+                   "(defaults to no capture)\n"
+                   "  --skip-validation: Skip Dawn validation\n"
+                   "  --adapter-vendor-id: Select adapter by vendor id to run end2end tests"
+                   "on multi-GPU systems \n";
             continue;
         }
     }
@@ -187,25 +188,25 @@ void DawnTestEnvironment::SetUp() {
     mInstance.get()->DiscoverDefaultAdapters();
     DiscoverOpenGLAdapter();
 
-    InfoLog() << "Testing configuration\n"
-                 "---------------------\n"
-                 "UseWire: "
-              << (mUseWire ? "true" : "false")
-              << "\n"
-                 "EnableBackendValidation: "
-              << (mEnableBackendValidation ? "true" : "false")
-              << "\n"
-                 "SkipDawnValidation: "
-              << (mSkipDawnValidation ? "true" : "false")
-              << "\n"
-                 "UseSpvc: "
-              << (mUseSpvc ? "true" : "false")
-              << "\n"
-                 "BeginCaptureOnStartup: "
-              << (mBeginCaptureOnStartup ? "true" : "false")
-              << "\n"
-                 "\n"
-              << "System adapters: \n";
+    dawn::InfoLog() << "Testing configuration\n"
+                       "---------------------\n"
+                       "UseWire: "
+                    << (mUseWire ? "true" : "false")
+                    << "\n"
+                       "EnableBackendValidation: "
+                    << (mEnableBackendValidation ? "true" : "false")
+                    << "\n"
+                       "SkipDawnValidation: "
+                    << (mSkipDawnValidation ? "true" : "false")
+                    << "\n"
+                       "UseSpvc: "
+                    << (mUseSpvc ? "true" : "false")
+                    << "\n"
+                       "BeginCaptureOnStartup: "
+                    << (mBeginCaptureOnStartup ? "true" : "false")
+                    << "\n"
+                       "\n"
+                    << "System adapters: \n";
     for (const dawn_native::Adapter& adapter : mInstance->GetAdapters()) {
         const dawn_native::PCIInfo& pci = adapter.GetPCIInfo();
 
@@ -217,14 +218,15 @@ void DawnTestEnvironment::SetUp() {
                  << pci.deviceId;
 
         // Preparing for outputting hex numbers
-        InfoLog() << std::showbase << std::hex << std::setfill('0') << std::setw(4)
+        dawn::InfoLog() << std::showbase << std::hex << std::setfill('0') << std::setw(4)
 
-                  << " - \"" << pci.name << "\"\n"
-                  << "   type: " << DeviceTypeName(adapter.GetDeviceType())
-                  << ", backend: " << ParamName(adapter.GetBackendType()) << "\n"
-                  << "   vendorId: 0x" << vendorId.str() << ", deviceId: 0x" << deviceId.str()
-                  << (mHasVendorIdFilter && mVendorIdFilter == pci.vendorId ? " [Selected]" : "")
-                  << "\n";
+                        << " - \"" << pci.name << "\"\n"
+                        << "   type: " << DeviceTypeName(adapter.GetDeviceType())
+                        << ", backend: " << ParamName(adapter.GetBackendType()) << "\n"
+                        << "   vendorId: 0x" << vendorId.str() << ", deviceId: 0x" << deviceId.str()
+                        << (mHasVendorIdFilter && mVendorIdFilter == pci.vendorId ? " [Selected]"
+                                                                                  : "")
+                        << "\n";
     }
 }
 
