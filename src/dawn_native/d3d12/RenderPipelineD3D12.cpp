@@ -337,7 +337,8 @@ namespace dawn_native { namespace d3d12 {
                     break;
             }
 
-            const std::string hlslSource = module->GetHLSLSource(ToBackend(GetLayout()));
+            std::string hlslSource;
+            DAWN_TRY_ASSIGN(hlslSource, module->GetHLSLSource(ToBackend(GetLayout())));
 
             const PlatformFunctions* functions = device->GetFunctions();
             if (FAILED(functions->d3dCompile(hlslSource.c_str(), hlslSource.length(), nullptr,

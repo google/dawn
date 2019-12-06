@@ -27,6 +27,7 @@ namespace dawn_native { namespace d3d12 {
       public:
         static ResultOrError<RenderPipeline*> Create(Device* device,
                                                      const RenderPipelineDescriptor* descriptor);
+        RenderPipeline() = delete;
         ~RenderPipeline();
 
         D3D12_PRIMITIVE_TOPOLOGY GetD3D12PrimitiveTopology() const;

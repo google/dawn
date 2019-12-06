@@ -25,12 +25,16 @@ namespace dawn_native { namespace d3d12 {
 
     class ComputePipeline : public ComputePipelineBase {
       public:
-        ComputePipeline(Device* device, const ComputePipelineDescriptor* descriptor);
+        static ResultOrError<ComputePipeline*> Create(Device* device,
+                                                      const ComputePipelineDescriptor* descriptor);
+        ComputePipeline() = delete;
         ~ComputePipeline();
 
         ComPtr<ID3D12PipelineState> GetPipelineState();
 
       private:
+        using ComputePipelineBase::ComputePipelineBase;
+        MaybeError Initialize(const ComputePipelineDescriptor* descriptor);
         ComPtr<ID3D12PipelineState> mPipelineState;
     };
 
