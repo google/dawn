@@ -172,6 +172,76 @@ TEST_F(TextureValidationTest, MipLevelCount) {
 
         device.CreateTexture(&descriptor);
     }
+
+    // Mip level exceeding kMaxTexture2DMipLevels not allowed
+    {
+        wgpu::TextureDescriptor descriptor = defaultDescriptor;
+        descriptor.size.width = 1 >> kMaxTexture2DMipLevels;
+        descriptor.size.height = 1 >> kMaxTexture2DMipLevels;
+        descriptor.mipLevelCount = kMaxTexture2DMipLevels + 1u;
+
+        ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+    }
+}
+// Test the validation of array layer count
+TEST_F(TextureValidationTest, ArrayLayerCount) {
+    wgpu::TextureDescriptor defaultDescriptor = CreateDefaultTextureDescriptor();
+
+    // Array layer count exceeding kMaxTexture2DArrayLayers is not allowed
+    {
+        wgpu::TextureDescriptor descriptor = defaultDescriptor;
+        descriptor.arrayLayerCount = kMaxTexture2DArrayLayers + 1u;
+
+        ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+    }
+
+    // Array layer count less than kMaxTexture2DArrayLayers is allowed;
+    {
+        wgpu::TextureDescriptor descriptor = defaultDescriptor;
+        descriptor.arrayLayerCount = kMaxTexture2DArrayLayers >> 1;
+
+        device.CreateTexture(&descriptor);
+    }
+
+    // Array layer count equal to kMaxTexture2DArrayLayers is allowed;
+    {
+        wgpu::TextureDescriptor descriptor = defaultDescriptor;
+        descriptor.arrayLayerCount = kMaxTexture2DArrayLayers;
+
+        device.CreateTexture(&descriptor);
+    }
+}
+
+// Test the validation of texture size
+TEST_F(TextureValidationTest, TextureSize) {
+    wgpu::TextureDescriptor defaultDescriptor = CreateDefaultTextureDescriptor();
+
+    // Texture size exceeding kMaxTextureSize is not allowed
+    {
+        wgpu::TextureDescriptor descriptor = defaultDescriptor;
+        descriptor.size.width = kMaxTextureSize + 1u;
+        descriptor.size.height = kMaxTextureSize + 1u;
+
+        ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+    }
+
+    // Texture size less than kMaxTextureSize is allowed
+    {
+        wgpu::TextureDescriptor descriptor = defaultDescriptor;
+        descriptor.size.width = kMaxTextureSize >> 1;
+        descriptor.size.height = kMaxTextureSize >> 1;
+
+        device.CreateTexture(&descriptor);
+    }
+
+    // Texture equal to kMaxTextureSize is allowed
+    {
+        wgpu::TextureDescriptor descriptor = defaultDescriptor;
+        descriptor.size.width = kMaxTextureSize;
+        descriptor.size.height = kMaxTextureSize;
+
+        device.CreateTexture(&descriptor);
+    }
 }
 
 // Test that it is valid to destroy a texture

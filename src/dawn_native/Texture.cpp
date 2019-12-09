@@ -141,6 +141,10 @@ namespace dawn_native {
 
         MaybeError ValidateTextureSize(const TextureDescriptor* descriptor, const Format* format) {
             ASSERT(descriptor->size.width != 0 && descriptor->size.height != 0);
+            if (descriptor->size.width > kMaxTextureSize ||
+                descriptor->size.height > kMaxTextureSize) {
+                return DAWN_VALIDATION_ERROR("Texture max size exceeded");
+            }
 
             if (Log2(std::max(descriptor->size.width, descriptor->size.height)) + 1 <
                 descriptor->mipLevelCount) {
@@ -151,6 +155,13 @@ namespace dawn_native {
                                          descriptor->size.height % format->blockHeight != 0)) {
                 return DAWN_VALIDATION_ERROR(
                     "The size of the texture is incompatible with the texture format");
+            }
+
+            if (descriptor->arrayLayerCount > kMaxTexture2DArrayLayers) {
+                return DAWN_VALIDATION_ERROR("Texture 2D array layer count exceeded");
+            }
+            if (descriptor->mipLevelCount > kMaxTexture2DMipLevels) {
+                return DAWN_VALIDATION_ERROR("Max texture 2D mip level exceeded");
             }
 
             return {};
