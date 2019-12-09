@@ -41,6 +41,7 @@ namespace dawn_native { namespace metal {
                     switch (groupInfo.types[binding]) {
                         case wgpu::BindingType::UniformBuffer:
                         case wgpu::BindingType::StorageBuffer:
+                        case wgpu::BindingType::ReadonlyStorageBuffer:
                             mIndexInfo[stage][group][binding] = bufferIndex;
                             bufferIndex++;
                             break;
@@ -53,7 +54,6 @@ namespace dawn_native { namespace metal {
                             textureIndex++;
                             break;
                         case wgpu::BindingType::StorageTexture:
-                        case wgpu::BindingType::ReadonlyStorageBuffer:
                             UNREACHABLE();
                             break;
                     }

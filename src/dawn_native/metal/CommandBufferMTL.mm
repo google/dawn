@@ -453,7 +453,8 @@ namespace dawn_native { namespace metal {
 
                     switch (layout.types[bindingIndex]) {
                         case wgpu::BindingType::UniformBuffer:
-                        case wgpu::BindingType::StorageBuffer: {
+                        case wgpu::BindingType::StorageBuffer:
+                        case wgpu::BindingType::ReadonlyStorageBuffer: {
                             const BufferBinding& binding =
                                 group->GetBindingAsBufferBinding(bindingIndex);
                             const id<MTLBuffer> buffer = ToBackend(binding.buffer)->GetMTLBuffer();
@@ -527,7 +528,6 @@ namespace dawn_native { namespace metal {
                         } break;
 
                         case wgpu::BindingType::StorageTexture:
-                        case wgpu::BindingType::ReadonlyStorageBuffer:
                             UNREACHABLE();
                             break;
                     }
