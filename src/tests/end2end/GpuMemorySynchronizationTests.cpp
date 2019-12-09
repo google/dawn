@@ -45,20 +45,13 @@ class GpuMemorySyncTests : public DawnTest {
             data.a += 1;
         })");
 
-        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-            device, {
-                        {0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
-                    });
-        wgpu::PipelineLayout pipelineLayout0 = utils::MakeBasicPipelineLayout(device, &bgl);
-
         wgpu::ComputePipelineDescriptor cpDesc;
-        cpDesc.layout = pipelineLayout0;
         cpDesc.computeStage.module = csModule;
         cpDesc.computeStage.entryPoint = "main";
         wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&cpDesc);
 
         wgpu::BindGroup bindGroup =
-            utils::MakeBindGroup(device, bgl, {{0, buffer, 0, sizeof(int)}});
+            utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buffer}});
         return std::make_tuple(pipeline, bindGroup);
     }
 
@@ -85,14 +78,7 @@ class GpuMemorySyncTests : public DawnTest {
             fragColor = vec4(data.i / 255.f, 0.f, 0.f, 1.f);
         })");
 
-        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-            device, {
-                        {0, wgpu::ShaderStage::Fragment, wgpu::BindingType::StorageBuffer},
-                    });
-        wgpu::PipelineLayout pipelineLayout = utils::MakeBasicPipelineLayout(device, &bgl);
-
         utils::ComboRenderPipelineDescriptor rpDesc(device);
-        rpDesc.layout = pipelineLayout;
         rpDesc.vertexStage.module = vsModule;
         rpDesc.cFragmentStage.module = fsModule;
         rpDesc.primitiveTopology = wgpu::PrimitiveTopology::PointList;
@@ -101,7 +87,7 @@ class GpuMemorySyncTests : public DawnTest {
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
 
         wgpu::BindGroup bindGroup =
-            utils::MakeBindGroup(device, bgl, {{0, buffer, 0, sizeof(int)}});
+            utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buffer}});
         return std::make_tuple(pipeline, bindGroup);
     }
 };
@@ -267,20 +253,13 @@ class StorageToUniformSyncTests : public DawnTest {
             data.a = 1.0;
         })");
 
-        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-            device, {
-                        {0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
-                    });
-        wgpu::PipelineLayout pipelineLayout0 = utils::MakeBasicPipelineLayout(device, &bgl);
-
         wgpu::ComputePipelineDescriptor cpDesc;
-        cpDesc.layout = pipelineLayout0;
         cpDesc.computeStage.module = csModule;
         cpDesc.computeStage.entryPoint = "main";
         wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&cpDesc);
 
         wgpu::BindGroup bindGroup =
-            utils::MakeBindGroup(device, bgl, {{0, mBuffer, 0, sizeof(float)}});
+            utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, mBuffer}});
         return std::make_tuple(pipeline, bindGroup);
     }
 
@@ -305,14 +284,7 @@ class StorageToUniformSyncTests : public DawnTest {
             fragColor = vec4(color, 0.f, 0.f, 1.f);
         })");
 
-        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-            device, {
-                        {0, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer},
-                    });
-        wgpu::PipelineLayout pipelineLayout = utils::MakeBasicPipelineLayout(device, &bgl);
-
         utils::ComboRenderPipelineDescriptor rpDesc(device);
-        rpDesc.layout = pipelineLayout;
         rpDesc.vertexStage.module = vsModule;
         rpDesc.cFragmentStage.module = fsModule;
         rpDesc.primitiveTopology = wgpu::PrimitiveTopology::PointList;
@@ -321,7 +293,7 @@ class StorageToUniformSyncTests : public DawnTest {
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
 
         wgpu::BindGroup bindGroup =
-            utils::MakeBindGroup(device, bgl, {{0, mBuffer, 0, sizeof(float)}});
+            utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, mBuffer}});
         return std::make_tuple(pipeline, bindGroup);
     }
 
@@ -503,17 +475,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
             color1 = 1.0;
         })");
 
-    wgpu::BindGroupLayout bgl0 = utils::MakeBindGroupLayout(
-        device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
-                    {1, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
-                    {2, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
-                    {3, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
-                });
-    wgpu::PipelineLayout pipelineLayout0 = utils::MakeBasicPipelineLayout(device, &bgl0);
-
     wgpu::ComputePipelineDescriptor cpDesc;
-    cpDesc.layout = pipelineLayout0;
     cpDesc.computeStage.module = csModule;
     cpDesc.computeStage.entryPoint = "main";
     wgpu::ComputePipeline cp = device.CreateComputePipeline(&cpDesc);
@@ -528,10 +490,10 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
                                               wgpu::BufferUsage::CopyDst);
     wgpu::Buffer readonlyStorageBuffer =
         CreateZeroedBuffer(sizeof(float), wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst);
-    wgpu::BindGroup bindGroup0 = utils::MakeBindGroup(
-        device, bgl0,
-        {{0, vertexBuffer}, {1, indexBuffer}, {2, uniformBuffer}, {3, readonlyStorageBuffer}});
 
+    wgpu::BindGroup bindGroup0 = utils::MakeBindGroup(
+        device, cp.GetBindGroupLayout(0),
+        {{0, vertexBuffer}, {1, indexBuffer}, {2, uniformBuffer}, {3, readonlyStorageBuffer}});
     // Write data into storage buffers in compute pass.
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::ComputePassEncoder pass0 = encoder.BeginComputePass();
@@ -565,17 +527,9 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
             fragColor = vec4(color0, color1, 0.f, 1.f);
         })");
 
-    wgpu::BindGroupLayout bgl1 = utils::MakeBindGroupLayout(
-        device, {
-                    {0, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer},
-                    {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageBuffer},
-                });
-    wgpu::PipelineLayout pipelineLayout = utils::MakeBasicPipelineLayout(device, &bgl1);
-
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     utils::ComboRenderPipelineDescriptor rpDesc(device);
-    rpDesc.layout = pipelineLayout;
     rpDesc.vertexStage.module = vsModule;
     rpDesc.cFragmentStage.module = fsModule;
     rpDesc.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
@@ -587,8 +541,8 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
 
     wgpu::RenderPipeline rp = device.CreateRenderPipeline(&rpDesc);
 
-    wgpu::BindGroup bindGroup1 =
-        utils::MakeBindGroup(device, bgl1, {{0, uniformBuffer}, {1, readonlyStorageBuffer}});
+    wgpu::BindGroup bindGroup1 = utils::MakeBindGroup(
+        device, rp.GetBindGroupLayout(0), {{0, uniformBuffer}, {1, readonlyStorageBuffer}});
 
     // Read data in buffers in render pass.
     wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&renderPass.renderPassInfo);
@@ -642,14 +596,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
             color1 = 1.0;
         })");
 
-    wgpu::BindGroupLayout bgl0 = utils::MakeBindGroupLayout(
-        device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
-                });
-    wgpu::PipelineLayout pipelineLayout0 = utils::MakeBasicPipelineLayout(device, &bgl0);
-
     wgpu::ComputePipelineDescriptor cpDesc;
-    cpDesc.layout = pipelineLayout0;
     cpDesc.computeStage.module = csModule;
     cpDesc.computeStage.entryPoint = "main";
     wgpu::ComputePipeline cp = device.CreateComputePipeline(&cpDesc);
@@ -666,7 +613,8 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
         sizeof(Data), wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Index |
                           wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage |
                           wgpu::BufferUsage::CopyDst);
-    wgpu::BindGroup bindGroup0 = utils::MakeBindGroup(device, bgl0, {{0, buffer, 0, sizeof(Data)}});
+    wgpu::BindGroup bindGroup0 =
+        utils::MakeBindGroup(device, cp.GetBindGroupLayout(0), {{0, buffer}});
 
     // Write various data (vertices, indices, and uniforms) into the buffer in compute pass.
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -701,17 +649,9 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
             fragColor = vec4(color0, color1, 0.f, 1.f);
         })");
 
-    wgpu::BindGroupLayout bgl1 = utils::MakeBindGroupLayout(
-        device, {
-                    {0, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer},
-                    {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageBuffer},
-                });
-    wgpu::PipelineLayout pipelineLayout = utils::MakeBasicPipelineLayout(device, &bgl1);
-
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     utils::ComboRenderPipelineDescriptor rpDesc(device);
-    rpDesc.layout = pipelineLayout;
     rpDesc.vertexStage.module = vsModule;
     rpDesc.cFragmentStage.module = fsModule;
     rpDesc.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
@@ -724,7 +664,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
     wgpu::RenderPipeline rp = device.CreateRenderPipeline(&rpDesc);
 
     wgpu::BindGroup bindGroup1 =
-        utils::MakeBindGroup(device, bgl1,
+        utils::MakeBindGroup(device, rp.GetBindGroupLayout(0),
                              {{0, buffer, offsetof(Data, color0), sizeof(float)},
                               {1, buffer, offsetof(Data, color1), sizeof(float)}});
 
