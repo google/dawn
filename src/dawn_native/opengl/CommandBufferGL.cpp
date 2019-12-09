@@ -288,7 +288,8 @@ namespace dawn_native { namespace opengl {
                             }
                         } break;
 
-                        case wgpu::BindingType::StorageBuffer: {
+                        case wgpu::BindingType::StorageBuffer:
+                        case wgpu::BindingType::ReadonlyStorageBuffer: {
                             BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
                             GLuint buffer = ToBackend(binding.buffer)->GetHandle();
                             GLuint ssboIndex = indices[bindingIndex];
@@ -304,7 +305,6 @@ namespace dawn_native { namespace opengl {
                         } break;
 
                         case wgpu::BindingType::StorageTexture:
-                        case wgpu::BindingType::ReadonlyStorageBuffer:
                             UNREACHABLE();
                             break;
 

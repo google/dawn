@@ -50,12 +50,12 @@ namespace dawn_native { namespace opengl {
                         break;
 
                     case wgpu::BindingType::StorageBuffer:
+                    case wgpu::BindingType::ReadonlyStorageBuffer:
                         mIndexInfo[group][binding] = ssboIndex;
                         ssboIndex++;
                         break;
 
                     case wgpu::BindingType::StorageTexture:
-                    case wgpu::BindingType::ReadonlyStorageBuffer:
                         UNREACHABLE();
                         break;
 

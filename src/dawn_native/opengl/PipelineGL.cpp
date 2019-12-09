@@ -123,7 +123,8 @@ namespace dawn_native { namespace opengl {
                         }
                     } break;
 
-                    case wgpu::BindingType::StorageBuffer: {
+                    case wgpu::BindingType::StorageBuffer:
+                    case wgpu::BindingType::ReadonlyStorageBuffer: {
                         GLuint location = gl.GetProgramResourceIndex(
                             mProgram, GL_SHADER_STORAGE_BLOCK, name.c_str());
                         if (location != GL_INVALID_INDEX) {
@@ -139,7 +140,6 @@ namespace dawn_native { namespace opengl {
                         break;
 
                     case wgpu::BindingType::StorageTexture:
-                    case wgpu::BindingType::ReadonlyStorageBuffer:
                         UNREACHABLE();
                         break;
 

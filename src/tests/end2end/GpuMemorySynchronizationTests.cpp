@@ -691,4 +691,5 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
 DAWN_INSTANTIATE_TEST(MultipleWriteThenMultipleReadTests,
                       D3D12Backend,
                       MetalBackend,
+                      OpenGLBackend,
                       VulkanBackend);
