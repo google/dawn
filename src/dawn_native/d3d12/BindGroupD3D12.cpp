@@ -86,6 +86,26 @@ namespace dawn_native { namespace d3d12 {
                         cbvUavSrvHeapStart.GetCPUHandle(*cbvUavSrvHeapOffset +
                                                         bindingOffsets[bindingIndex]));
                 } break;
+                case wgpu::BindingType::ReadonlyStorageBuffer: {
+                    BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
+
+                    // Like StorageBuffer, SPIRV-Cross outputs HLSL shaders for readonly storage
+                    // buffer with ByteAddressBuffer. So we must use D3D12_BUFFER_SRV_FLAG_RAW
+                    // when making the SRV descriptor. And it has similar requirement for format,
+                    // element size, etc.
+                    D3D12_SHADER_RESOURCE_VIEW_DESC desc;
+                    desc.Format = DXGI_FORMAT_R32_TYPELESS;
+                    desc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+                    desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+                    desc.Buffer.FirstElement = binding.offset / 4;
+                    desc.Buffer.NumElements = binding.size / 4;
+                    desc.Buffer.StructureByteStride = 0;
+                    desc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_RAW;
+                    d3d12Device->CreateShaderResourceView(
+                        ToBackend(binding.buffer)->GetD3D12Resource().Get(), &desc,
+                        cbvUavSrvHeapStart.GetCPUHandle(*cbvUavSrvHeapOffset +
+                                                        bindingOffsets[bindingIndex]));
+                } break;
                 case wgpu::BindingType::SampledTexture: {
                     auto* view = ToBackend(GetBindingAsTextureView(bindingIndex));
                     auto& srv = view->GetSRVDescriptor();
@@ -103,7 +123,6 @@ namespace dawn_native { namespace d3d12 {
                 } break;
 
                 case wgpu::BindingType::StorageTexture:
-                case wgpu::BindingType::ReadonlyStorageBuffer:
                     UNREACHABLE();
                     break;
 

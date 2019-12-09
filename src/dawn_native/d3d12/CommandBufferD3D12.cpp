@@ -237,10 +237,18 @@ namespace dawn_native { namespace d3d12 {
                                                                                 bufferLocation);
                             }
                             break;
+                        case wgpu::BindingType::ReadonlyStorageBuffer:
+                            if (mInCompute) {
+                                commandList->SetComputeRootShaderResourceView(parameterIndex,
+                                                                              bufferLocation);
+                            } else {
+                                commandList->SetGraphicsRootShaderResourceView(parameterIndex,
+                                                                               bufferLocation);
+                            }
+                            break;
                         case wgpu::BindingType::SampledTexture:
                         case wgpu::BindingType::Sampler:
                         case wgpu::BindingType::StorageTexture:
-                        case wgpu::BindingType::ReadonlyStorageBuffer:
                             UNREACHABLE();
                             break;
                     }

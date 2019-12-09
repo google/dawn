@@ -688,5 +688,4 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8::kYellow, renderPass.color, max, max);
 }
 
-DAWN_INSTANTIATE_TEST(MultipleWriteThenMultipleReadTests,
-                      VulkanBackend);
+DAWN_INSTANTIATE_TEST(MultipleWriteThenMultipleReadTests, D3D12Backend, VulkanBackend);
