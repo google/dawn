@@ -117,6 +117,7 @@ namespace detail {
 }  // namespace detail
 
 namespace dawn_wire {
+    class CommandHandler;
     class WireClient;
     class WireServer;
 }  // namespace dawn_wire
@@ -140,6 +141,7 @@ class DawnTestEnvironment : public testing::Environment {
     dawn_native::Instance* GetInstance() const;
     bool HasVendorIdFilter() const;
     uint32_t GetVendorIdFilter() const;
+    const char* GetWireTraceDir() const;
 
   protected:
     std::unique_ptr<dawn_native::Instance> mInstance;
@@ -154,6 +156,7 @@ class DawnTestEnvironment : public testing::Environment {
     bool mBeginCaptureOnStartup = false;
     bool mHasVendorIdFilter = false;
     uint32_t mVendorIdFilter = 0;
+    std::string mWireTraceDir;
 };
 
 class DawnTestBase {
@@ -241,6 +244,8 @@ class DawnTestBase {
     std::unique_ptr<dawn_wire::WireClient> mWireClient;
     std::unique_ptr<utils::TerribleCommandBuffer> mC2sBuf;
     std::unique_ptr<utils::TerribleCommandBuffer> mS2cBuf;
+
+    std::unique_ptr<dawn_wire::CommandHandler> mWireServerTraceLayer;
 
     // Tracking for validation errors
     static void OnDeviceError(WGPUErrorType type, const char* message, void* userdata);
