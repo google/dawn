@@ -15,6 +15,8 @@
 #ifndef COMMON_MATH_H_
 #define COMMON_MATH_H_
 
+#include "common/Assert.h"
+
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -35,13 +37,19 @@ bool IsAligned(uint32_t value, size_t alignment);
 uint32_t Align(uint32_t value, size_t alignment);
 
 template <typename T>
-T* AlignPtr(T* ptr, size_t alignment) {
-    return static_cast<T*>(AlignVoidPtr(ptr, alignment));
+DAWN_FORCE_INLINE T* AlignPtr(T* ptr, size_t alignment) {
+    ASSERT(IsPowerOfTwo(alignment));
+    ASSERT(alignment != 0);
+    return reinterpret_cast<T*>((reinterpret_cast<size_t>(ptr) + (alignment - 1)) &
+                                ~(alignment - 1));
 }
 
 template <typename T>
-const T* AlignPtr(const T* ptr, size_t alignment) {
-    return static_cast<const T*>(AlignVoidPtr(const_cast<T*>(ptr), alignment));
+DAWN_FORCE_INLINE const T* AlignPtr(const T* ptr, size_t alignment) {
+    ASSERT(IsPowerOfTwo(alignment));
+    ASSERT(alignment != 0);
+    return reinterpret_cast<const T*>((reinterpret_cast<size_t>(ptr) + (alignment - 1)) &
+                                      ~(alignment - 1));
 }
 
 template <typename destType, typename sourceType>

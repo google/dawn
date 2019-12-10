@@ -61,6 +61,9 @@
 #    endif
 
 #    define DAWN_DECLARE_UNUSED __attribute__((unused))
+#    if defined(NDEBUG)
+#        define DAWN_FORCE_INLINE inline __attribute__((always_inline))
+#    endif
 
 // MSVC
 #elif defined(_MSC_VER)
@@ -77,6 +80,9 @@ extern void __cdecl __debugbreak(void);
 #    endif
 
 #    define DAWN_DECLARE_UNUSED
+#    if defined(NDEBUG)
+#        define DAWN_FORCE_INLINE __forceinline
+#    endif
 
 #else
 #    error "Unsupported compiler"
@@ -96,6 +102,9 @@ extern void __cdecl __debugbreak(void);
 #endif
 #if !defined(DAWN_NO_DISCARD)
 #    define DAWN_NO_DISCARD
+#endif
+#if !defined(DAWN_FORCE_INLINE)
+#    define DAWN_FORCE_INLINE inline
 #endif
 
 #endif  // COMMON_COMPILER_H_

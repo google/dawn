@@ -85,13 +85,6 @@ bool IsPtrAligned(const void* ptr, size_t alignment) {
     return (reinterpret_cast<size_t>(ptr) & (alignment - 1)) == 0;
 }
 
-void* AlignVoidPtr(void* ptr, size_t alignment) {
-    ASSERT(IsPowerOfTwo(alignment));
-    ASSERT(alignment != 0);
-    return reinterpret_cast<void*>((reinterpret_cast<size_t>(ptr) + (alignment - 1)) &
-                                   ~(alignment - 1));
-}
-
 bool IsAligned(uint32_t value, size_t alignment) {
     ASSERT(alignment <= UINT32_MAX);
     ASSERT(IsPowerOfTwo(alignment));
