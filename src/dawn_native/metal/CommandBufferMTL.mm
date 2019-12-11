@@ -48,6 +48,15 @@ namespace dawn_native { namespace metal {
 
     namespace {
 
+        // Allows this file to use MTLStoreActionStoreAndMultismapleResolve because the logic is
+        // first to compute what the "best" Metal render pass descriptor is, then fix it up if we
+        // are not on macOS 10.12 (i.e. the EmulateStoreAndMSAAResolve toggle is on).
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability"
+        constexpr MTLStoreAction kMTLStoreActionStoreAndMultisampleResolve =
+            MTLStoreActionStoreAndMultisampleResolve;
+#pragma clang diagnostic pop
+
         // Creates an autoreleased MTLRenderPassDescriptor matching desc
         MTLRenderPassDescriptor* CreateMTLRenderPassDescriptor(BeginRenderPassCmd* renderPass) {
             MTLRenderPassDescriptor* descriptor = [MTLRenderPassDescriptor renderPassDescriptor];
@@ -79,7 +88,7 @@ namespace dawn_native { namespace metal {
                         descriptor.colorAttachments[i].resolveSlice =
                             attachmentInfo.resolveTarget->GetBaseArrayLayer();
                         descriptor.colorAttachments[i].storeAction =
-                            MTLStoreActionStoreAndMultisampleResolve;
+                            kMTLStoreActionStoreAndMultisampleResolve;
                     } else {
                         descriptor.colorAttachments[i].storeAction = MTLStoreActionStore;
                     }
@@ -876,7 +885,7 @@ namespace dawn_native { namespace metal {
             std::array<id<MTLTexture>, kMaxColorAttachments> resolveTextures = {};
             for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
                 if (mtlRenderPass.colorAttachments[i].storeAction ==
-                    MTLStoreActionStoreAndMultisampleResolve) {
+                    kMTLStoreActionStoreAndMultisampleResolve) {
                     hasStoreAndMSAAResolve = true;
                     resolveTextures[i] = mtlRenderPass.colorAttachments[i].resolveTexture;
 

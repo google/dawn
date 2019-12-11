@@ -31,6 +31,11 @@ if (use_swiftshader) {
   import("${dawn_swiftshader_dir}/src/Vulkan/vulkan.gni")
 }
 
+# Import mac_min_system_version
+if (is_mac) {
+  import("//build/config/mac/mac_sdk.gni")
+}
+
 ###############################################################################
 # dawn_platform
 ###############################################################################
@@ -60,9 +65,14 @@ config("libdawn_native_internal") {
   # Suppress warnings that Metal isn't in the deployment target of Chrome:
   # initialization of the Metal backend is behind a IsMetalSupported check so
   # Dawn won't call Metal functions on macOS 10.10.
+  # At the time this is written Chromium supports 10.10.0 and above, so if we
+  # aren't on 10.11 it means we are on 10.11 and above, and Metal is available.
+  # Skipping this check on 10.11 and above is important as it allows getting
+  # proper compilation warning when using 10.12 and above feature for example.
   # TODO(cwallez@chromium.org): Consider using API_AVAILABLE annotations on all
-  # metal code in dawn once crbug.com/1004024 is sorted out.
-  if (is_mac) {
+  # metal code in dawn once crbug.com/1004024 is sorted out if Chromium still
+  # supports 10.10 then.
+  if (is_mac && mac_min_system_version == "10.10.0") {
     cflags_objcc = [ "-Wno-unguarded-availability" ]
   }
 }

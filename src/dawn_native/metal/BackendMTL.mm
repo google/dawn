@@ -103,7 +103,8 @@ namespace dawn_native { namespace metal {
         //
         // [device registryID] is the ID for one of the IOGraphicsAccelerator2 and we can see that
         // their parent always is an IOPCIDevice that has properties for the device and vendor IDs.
-        MaybeError GetDeviceIORegistryPCIInfo(id<MTLDevice> device, PCIIDs* ids) {
+        MaybeError API_AVAILABLE(macos(10.13))
+            GetDeviceIORegistryPCIInfo(id<MTLDevice> device, PCIIDs* ids) {
             // Get a matching dictionary for the IOGraphicsAccelerator2
             CFMutableDictionaryRef matchingDict = IORegistryEntryIDMatching([device registryID]);
             if (matchingDict == nullptr) {
@@ -143,7 +144,7 @@ namespace dawn_native { namespace metal {
         MaybeError GetDevicePCIInfo(id<MTLDevice> device, PCIIDs* ids) {
             // [device registryID] is introduced on macOS 10.13+, otherwise workaround to get vendor
             // id by vendor name on old macOS
-            if ([NSProcessInfo.processInfo isOperatingSystemAtLeastVersion:{10, 13, 0}]) {
+            if (@available(macos 10.13, *)) {
                 return GetDeviceIORegistryPCIInfo(device, ids);
             } else {
                 return GetVendorIdFromVendors(device, ids);
