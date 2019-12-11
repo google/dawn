@@ -82,7 +82,7 @@ namespace dawn_native { namespace d3d12 {
         D3D12_RESOURCE_DESC resourceDescriptor;
         resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
         resourceDescriptor.Alignment = 0;
-        resourceDescriptor.Width = GetD3D12Size();
+        resourceDescriptor.Width = GetSize();
         resourceDescriptor.Height = 1;
         resourceDescriptor.DepthOrArraySize = 1;
         resourceDescriptor.MipLevels = 1;
@@ -121,11 +121,6 @@ namespace dawn_native { namespace d3d12 {
 
     Buffer::~Buffer() {
         DestroyInternal();
-    }
-
-    uint32_t Buffer::GetD3D12Size() const {
-        // TODO(enga@google.com): TODO investigate if this needs to be a constraint at the API level
-        return Align(GetSize(), 256);
     }
 
     ComPtr<ID3D12Resource> Buffer::GetD3D12Resource() const {
