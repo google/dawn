@@ -1224,6 +1224,9 @@ group("dawn_fuzzers") {
     "src/fuzzers:dawn_spirv_cross_glsl_fast_fuzzer",
     "src/fuzzers:dawn_spirv_cross_hlsl_fast_fuzzer",
     "src/fuzzers:dawn_spirv_cross_msl_fast_fuzzer",
+    "src/fuzzers:dawn_spvc_glsl_fast_fuzzer",
+    "src/fuzzers:dawn_spvc_hlsl_fast_fuzzer",
+    "src/fuzzers:dawn_spvc_msl_fast_fuzzer",
     "src/fuzzers:dawn_wire_server_and_frontend_fuzzer",
   ]
 }

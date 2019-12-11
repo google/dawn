@@ -118,6 +118,33 @@ dawn_fuzzer_test("dawn_spirv_cross_msl_fast_fuzzer") {
   asan_options = [ "allow_user_segv_handler=1" ]
 }
 
+dawn_fuzzer_test("dawn_spvc_glsl_fast_fuzzer") {
+  sources = [
+    "DawnSPVCglslFastFuzzer.cpp",
+  ]
+  deps = [
+     "${dawn_shaderc_dir}:libshaderc_spvc",
+  ]
+}
+
+dawn_fuzzer_test("dawn_spvc_hlsl_fast_fuzzer") {
+  sources = [
+    "DawnSPVChlslFastFuzzer.cpp",
+  ]
+  deps = [
+     "${dawn_shaderc_dir}:libshaderc_spvc",
+  ]
+}
+
+dawn_fuzzer_test("dawn_spvc_msl_fast_fuzzer") {
+  sources = [
+    "DawnSPVCmslFastFuzzer.cpp",
+  ]
+  deps = [
+     "${dawn_shaderc_dir}:libshaderc_spvc",
+  ]
+}
+
 dawn_fuzzer_test("dawn_wire_server_and_frontend_fuzzer") {
   sources = [
     "DawnWireServerAndFrontendFuzzer.cpp",
