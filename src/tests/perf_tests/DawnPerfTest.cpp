@@ -385,10 +385,8 @@ void DawnPerfTestBase::PrintResult(const std::string& trace,
 
     // The results are printed according to the format specified at
     // [chromium]//build/scripts/slave/performance_log_processor.py
-    fflush(stdout);
-    printf("%sRESULT %s%s: %s= %s%f%s %s\n", important ? "*" : "", testSuite, testName,
-           trace.c_str(), "", value, "", units.c_str());
-    fflush(stdout);
+    dawn::InfoLog() << (important ? "*" : "") << "RESULT " << testSuite << testName << ": " << trace
+                    << "= " << value << " " << units;
 }
 
 void DawnPerfTestBase::PrintResult(const std::string& trace,
@@ -403,8 +401,6 @@ void DawnPerfTestBase::PrintResult(const std::string& trace,
 
     // The results are printed according to the format specified at
     // [chromium]//build/scripts/slave/performance_log_processor.py
-    fflush(stdout);
-    printf("%sRESULT %s%s: %s= %s%u%s %s\n", important ? "*" : "", testName, testSuite,
-           trace.c_str(), "", value, "", units.c_str());
-    fflush(stdout);
+    dawn::InfoLog() << (important ? "*" : "") << "RESULT " << testSuite << testName << ": " << trace
+                    << "= " << value << " " << units;
 }
