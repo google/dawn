@@ -26,6 +26,7 @@
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/RenderPassEncoder.h"
 #include "dawn_native/RenderPipeline.h"
+#include "dawn_native/ValidationUtils_autogen.h"
 #include "dawn_platform/DawnPlatform.h"
 #include "dawn_platform/tracing/TraceEvent.h"
 
@@ -376,6 +377,18 @@ namespace dawn_native {
                     "renderable");
             }
 
+            DAWN_TRY(ValidateLoadOp(colorAttachment.loadOp));
+            DAWN_TRY(ValidateStoreOp(colorAttachment.storeOp));
+
+            if (colorAttachment.loadOp == wgpu::LoadOp::Clear) {
+                if (std::isnan(colorAttachment.clearColor.r) ||
+                    std::isnan(colorAttachment.clearColor.g) ||
+                    std::isnan(colorAttachment.clearColor.b) ||
+                    std::isnan(colorAttachment.clearColor.a)) {
+                    return DAWN_VALIDATION_ERROR("Color clear value cannot contain NaN");
+                }
+            }
+
             DAWN_TRY(ValidateOrSetColorAttachmentSampleCount(attachment, sampleCount));
 
             DAWN_TRY(ValidateResolveTarget(device, colorAttachment));
@@ -402,6 +415,16 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR(
                     "The format of the texture view used as depth stencil attachment is not a "
                     "depth stencil format");
+            }
+
+            DAWN_TRY(ValidateLoadOp(depthStencilAttachment->depthLoadOp));
+            DAWN_TRY(ValidateLoadOp(depthStencilAttachment->stencilLoadOp));
+            DAWN_TRY(ValidateStoreOp(depthStencilAttachment->depthStoreOp));
+            DAWN_TRY(ValidateStoreOp(depthStencilAttachment->stencilStoreOp));
+
+            if (depthStencilAttachment->depthLoadOp == wgpu::LoadOp::Clear &&
+                std::isnan(depthStencilAttachment->clearDepth)) {
+                return DAWN_VALIDATION_ERROR("Depth clear value cannot be NaN");
             }
 
             // This validates that the depth storeOp and stencil storeOps are the same
