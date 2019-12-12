@@ -124,12 +124,6 @@ protected:
 // Test a bindgroup reused in two command buffers in the same call to queue.Submit().
 // This test passes by not asserting or crashing.
 TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
-    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::UniformBuffer},
-                });
-    wgpu::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
-
     const char* shader = R"(
         #version 450
         layout(std140, set = 0, binding = 0) uniform Contents {
@@ -143,7 +137,6 @@ TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
         utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, shader);
 
     wgpu::ComputePipelineDescriptor cpDesc;
-    cpDesc.layout = pl;
     cpDesc.computeStage.module = module;
     cpDesc.computeStage.entryPoint = "main";
     wgpu::ComputePipeline cp = device.CreateComputePipeline(&cpDesc);
@@ -152,7 +145,8 @@ TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
     bufferDesc.size = sizeof(float);
     bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform;
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
-    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, sizeof(float)}});
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, cp.GetBindGroupLayout(0), {{0, buffer}});
 
     wgpu::CommandBuffer cb[2];
     cb[0] = CreateSimpleComputeCommandBuffer(cp, bindGroup);
@@ -188,15 +182,7 @@ TEST_P(BindGroupTests, ReusedUBO) {
             fragColor = color;
         })");
 
-    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {
-                    {0, wgpu::ShaderStage::Vertex, wgpu::BindingType::UniformBuffer},
-                    {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer},
-                });
-    wgpu::PipelineLayout pipelineLayout = utils::MakeBasicPipelineLayout(device, &bgl);
-
     utils::ComboRenderPipelineDescriptor textureDescriptor(device);
-    textureDescriptor.layout = pipelineLayout;
     textureDescriptor.vertexStage.module = vsModule;
     textureDescriptor.cFragmentStage.module = fsModule;
     textureDescriptor.cColorStates[0].format = renderPass.colorFormat;
@@ -218,7 +204,7 @@ TEST_P(BindGroupTests, ReusedUBO) {
     wgpu::Buffer buffer =
         utils::CreateBufferFromData(device, &data, sizeof(data), wgpu::BufferUsage::Uniform);
     wgpu::BindGroup bindGroup = utils::MakeBindGroup(
-        device, bgl,
+        device, pipeline.GetBindGroupLayout(0),
         {{0, buffer, 0, sizeof(Data::transform)}, {1, buffer, 256, sizeof(Data::color)}});
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -267,16 +253,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
             fragColor = texture(sampler2D(tex, samp), gl_FragCoord.xy);
         })");
 
-    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {
-                    {0, wgpu::ShaderStage::Vertex, wgpu::BindingType::UniformBuffer},
-                    {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler},
-                    {2, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture},
-                });
-    wgpu::PipelineLayout pipelineLayout = utils::MakeBasicPipelineLayout(device, &bgl);
-
     utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
-    pipelineDescriptor.layout = pipelineLayout;
     pipelineDescriptor.vertexStage.module = vsModule;
     pipelineDescriptor.cFragmentStage.module = fsModule;
     pipelineDescriptor.cColorStates[0].format = renderPass.colorFormat;
@@ -326,8 +303,9 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     wgpu::Buffer stagingBuffer =
         utils::CreateBufferFromData(device, data.data(), sizeInBytes, wgpu::BufferUsage::CopySrc);
 
-    wgpu::BindGroup bindGroup = utils::MakeBindGroup(
-        device, bgl, {{0, buffer, 0, sizeof(transform)}, {1, sampler}, {2, textureView}});
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                             {{0, buffer, 0, sizeof(transform)}, {1, sampler}, {2, textureView}});
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::BufferCopyView bufferCopyView =
@@ -388,16 +366,7 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
             fragColor = color1 + color2;
         })");
 
-    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
-        device, {
-                    {0, wgpu::ShaderStage::Vertex, wgpu::BindingType::UniformBuffer},
-                    {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::UniformBuffer},
-                });
-
-    wgpu::PipelineLayout pipelineLayout = MakeBasicPipelineLayout(device, {layout, layout});
-
     utils::ComboRenderPipelineDescriptor textureDescriptor(device);
-    textureDescriptor.layout = pipelineLayout;
     textureDescriptor.vertexStage.module = vsModule;
     textureDescriptor.cFragmentStage.module = fsModule;
     textureDescriptor.cColorStates[0].format = renderPass.colorFormat;
@@ -425,7 +394,7 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
         wgpu::Buffer buffer =
             utils::CreateBufferFromData(device, &data[i], sizeof(Data), wgpu::BufferUsage::Uniform);
         buffers.push_back(buffer);
-        bindGroups.push_back(utils::MakeBindGroup(device, layout,
+        bindGroups.push_back(utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
                                                   {{0, buffers[i], 0, sizeof(Data::transform)},
                                                    {1, buffers[i], 256, sizeof(Data::color)}}));
     }
