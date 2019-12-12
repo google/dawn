@@ -111,7 +111,7 @@ namespace dawn_native { namespace metal {
     }
     ResultOrError<ComputePipelineBase*> Device::CreateComputePipelineImpl(
         const ComputePipelineDescriptor* descriptor) {
-        return new ComputePipeline(this, descriptor);
+        return ComputePipeline::Create(this, descriptor);
     }
     ResultOrError<PipelineLayoutBase*> Device::CreatePipelineLayoutImpl(
         const PipelineLayoutDescriptor* descriptor) {
@@ -122,7 +122,7 @@ namespace dawn_native { namespace metal {
     }
     ResultOrError<RenderPipelineBase*> Device::CreateRenderPipelineImpl(
         const RenderPipelineDescriptor* descriptor) {
-        return new RenderPipeline(this, descriptor);
+        return RenderPipeline::Create(this, descriptor);
     }
     ResultOrError<SamplerBase*> Device::CreateSamplerImpl(const SamplerDescriptor* descriptor) {
         return new Sampler(this, descriptor);

@@ -92,17 +92,22 @@ namespace dawn_native { namespace metal {
         return {};
     }
 
-    ShaderModule::MetalFunctionData ShaderModule::GetFunction(const char* functionName,
-                                                              SingleShaderStage functionStage,
-                                                              const PipelineLayout* layout) const {
+    MaybeError ShaderModule::GetFunction(const char* functionName,
+                                         SingleShaderStage functionStage,
+                                         const PipelineLayout* layout,
+                                         ShaderModule::MetalFunctionData* out) const {
+        ASSERT(!IsError());
+        ASSERT(out);
         std::unique_ptr<spirv_cross::CompilerMSL> compiler_impl;
         spirv_cross::CompilerMSL* compiler;
         if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
             // Initializing the compiler is needed every call, because this method uses reflection
             // to mutate the compiler's IR.
-            mSpvcContext.InitializeForMsl(mSpirv.data(), mSpirv.size(), GetMSLCompileOptions());
-            // TODO(rharrison): Handle initialize failing
-
+            if (mSpvcContext.InitializeForMsl(mSpirv.data(), mSpirv.size(),
+                                              GetMSLCompileOptions()) !=
+                shaderc_spvc_status_success) {
+                return DAWN_DEVICE_LOST_ERROR("Unable to initialize instance of spvc");
+            }
             compiler = reinterpret_cast<spirv_cross::CompilerMSL*>(mSpvcContext.GetCompiler());
         } else {
             // If these options are changed, the values in DawnSPIRVCrossMSLFastFuzzer.cpp need to
@@ -147,12 +152,10 @@ namespace dawn_native { namespace metal {
             }
         }
 
-        MetalFunctionData result;
-
         {
             spv::ExecutionModel executionModel = SpirvExecutionModelForStage(functionStage);
             auto size = compiler->get_entry_point(functionName, executionModel).workgroup_size;
-            result.localWorkgroupSize = MTLSizeMake(size.x, size.y, size.z);
+            out->localWorkgroupSize = MTLSizeMake(size.x, size.y, size.z);
         }
 
         {
@@ -167,9 +170,14 @@ namespace dawn_native { namespace metal {
                                                              options:nil
                                                                error:&error];
             if (error != nil) {
-                // TODO(cwallez@chromium.org): forward errors to caller
+                // TODO(cwallez@chromium.org): Switch that NSLog to use dawn::InfoLog or even be
+                // folded in the DAWN_VALIDATION_ERROR
                 NSLog(@"MTLDevice newLibraryWithSource => %@", error);
+                if (error.code != MTLLibraryErrorCompileWarning) {
+                    return DAWN_VALIDATION_ERROR("Unable to create library object");
+                }
             }
+
             // TODO(kainino@chromium.org): make this somehow more robust; it needs to behave like
             // clean_func_name:
             // https://github.com/KhronosGroup/SPIRV-Cross/blob/4e915e8c483e319d0dd7a1fa22318bef28f8cca3/spirv_msl.cpp#L1213
@@ -178,13 +186,13 @@ namespace dawn_native { namespace metal {
             }
 
             NSString* name = [NSString stringWithFormat:@"%s", functionName];
-            result.function = [library newFunctionWithName:name];
+            out->function = [library newFunctionWithName:name];
             [library release];
         }
 
-        result.needsStorageBufferLength = compiler->needs_buffer_size_buffer();
+        out->needsStorageBufferLength = compiler->needs_buffer_size_buffer();
 
-        return result;
+        return {};
     }
 
 }}  // namespace dawn_native::metal

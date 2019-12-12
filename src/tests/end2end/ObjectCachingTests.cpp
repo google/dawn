@@ -139,14 +139,16 @@ TEST_P(ObjectCachingTest, ComputePipelineDeduplicationOnShaderModule) {
     wgpu::ShaderModule module =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
             #version 450
+            shared uint i;
             void main() {
-                int i = 0;
+                i = 0;
             })");
     wgpu::ShaderModule sameModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
             #version 450
+            shared uint i;
             void main() {
-                int i = 0;
+                i = 0;
             })");
     wgpu::ShaderModule otherModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
@@ -195,8 +197,9 @@ TEST_P(ObjectCachingTest, ComputePipelineDeduplicationOnLayout) {
     desc.computeStage.module =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
             #version 450
+            shared uint i;
             void main() {
-                int i = 0;
+                i = 0;
             })");
 
     desc.layout = pl;
@@ -311,8 +314,9 @@ TEST_P(ObjectCachingTest, RenderPipelineDeduplicationOnFragmentModule) {
     wgpu::ShaderModule otherModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
             #version 450
+            layout (location = 0) out vec4 color;
             void main() {
-                int i = 0;
+                color = vec4(0.0);
             })");
 
     EXPECT_NE(module.Get(), otherModule.Get());
