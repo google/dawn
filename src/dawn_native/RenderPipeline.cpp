@@ -115,8 +115,15 @@ namespace dawn_native {
             if (descriptor->nextInChain != nullptr) {
                 return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
             }
+
             DAWN_TRY(ValidateFrontFace(descriptor->frontFace));
             DAWN_TRY(ValidateCullMode(descriptor->cullMode));
+
+            if (std::isnan(descriptor->depthBiasSlopeScale) ||
+                std::isnan(descriptor->depthBiasClamp)) {
+                return DAWN_VALIDATION_ERROR("Depth bias parameters must not be NaN.");
+            }
+
             return {};
         }
 
@@ -709,6 +716,12 @@ namespace dawn_native {
             if (descA.frontFace != descB.frontFace || descA.cullMode != descB.cullMode) {
                 return false;
             }
+
+            ASSERT(!std::isnan(descA.depthBiasSlopeScale));
+            ASSERT(!std::isnan(descB.depthBiasSlopeScale));
+            ASSERT(!std::isnan(descA.depthBiasClamp));
+            ASSERT(!std::isnan(descB.depthBiasClamp));
+
             if (descA.depthBias != descB.depthBias ||
                 descA.depthBiasSlopeScale != descB.depthBiasSlopeScale ||
                 descA.depthBiasClamp != descB.depthBiasClamp) {

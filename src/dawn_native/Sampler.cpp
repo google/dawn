@@ -27,12 +27,12 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
         }
 
-        if (!std::isfinite(descriptor->lodMinClamp) || !std::isfinite(descriptor->lodMaxClamp)) {
-            return DAWN_VALIDATION_ERROR("LOD must be finite");
+        if (std::isnan(descriptor->lodMinClamp) || std::isnan(descriptor->lodMaxClamp)) {
+            return DAWN_VALIDATION_ERROR("LOD clamp bounds must not be NaN");
         }
 
         if (descriptor->lodMinClamp < 0 || descriptor->lodMaxClamp < 0) {
-            return DAWN_VALIDATION_ERROR("LOD must be positive");
+            return DAWN_VALIDATION_ERROR("LOD clamp bounds must be positive");
         }
 
         if (descriptor->lodMinClamp > descriptor->lodMaxClamp) {
@@ -101,10 +101,10 @@ namespace dawn_native {
             return true;
         }
 
-        ASSERT(std::isfinite(a->mLodMinClamp));
-        ASSERT(std::isfinite(b->mLodMinClamp));
-        ASSERT(std::isfinite(a->mLodMaxClamp));
-        ASSERT(std::isfinite(b->mLodMaxClamp));
+        ASSERT(!std::isnan(a->mLodMinClamp));
+        ASSERT(!std::isnan(b->mLodMinClamp));
+        ASSERT(!std::isnan(a->mLodMaxClamp));
+        ASSERT(!std::isnan(b->mLodMaxClamp));
 
         return a->mAddressModeU == b->mAddressModeU && a->mAddressModeV == b->mAddressModeV &&
                a->mAddressModeW == b->mAddressModeW && a->mMagFilter == b->mMagFilter &&
