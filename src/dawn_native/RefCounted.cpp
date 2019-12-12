@@ -43,14 +43,36 @@ namespace dawn_native {
 
     void RefCounted::Reference() {
         ASSERT((mRefCount & ~kPayloadMask) != 0);
-        mRefCount += kRefCountIncrement;
+
+        // The relaxed ordering guarantees only the atomicity of the update, which is enough here
+        // because the reference we are copying from still exists and makes sure other threads
+        // don't delete `this`.
+        // See the explanation in the Boost documentation:
+        //     https://www.boost.org/doc/libs/1_55_0/doc/html/atomic/usage_examples.html
+        mRefCount.fetch_add(kRefCountIncrement, std::memory_order_relaxed);
     }
 
     void RefCounted::Release() {
         ASSERT((mRefCount & ~kPayloadMask) != 0);
 
-        mRefCount -= kRefCountIncrement;
-        if (mRefCount < kRefCountIncrement) {
+        // The release fence here is to make sure all accesses to the object on a thread A
+        // happen-before the object is deleted on a thread B. The release memory order ensures that
+        // all accesses on thread A happen-before the refcount is decreased and the atomic variable
+        // makes sure the refcount decrease in A happens-before the refcount decrease in B. Finally
+        // the acquire fence in the destruction case makes sure the refcount decrease in B
+        // happens-before the `delete this`.
+        //
+        // See the explanation in the Boost documentation:
+        //     https://www.boost.org/doc/libs/1_55_0/doc/html/atomic/usage_examples.html
+        uint64_t previousRefCount =
+            mRefCount.fetch_sub(kRefCountIncrement, std::memory_order_release);
+
+        // Check that the previous reference count was strictly less than 2, ignoring payload bits.
+        if (previousRefCount < 2 * kRefCountIncrement) {
+            // Note that on ARM64 this will generate a `dmb ish` instruction which is a global
+            // memory barrier, when an acquire load on mRefCount (using the `ldar` instruction)
+            // should be enough and could end up being faster.
+            std::atomic_thread_fence(std::memory_order_acquire);
             delete this;
         }
     }
