@@ -175,6 +175,10 @@ const char* DawnPerfTestEnvironment::GetTraceFile() const {
     return mTraceFile;
 }
 
+DawnPerfTestPlatform* DawnPerfTestEnvironment::GetPlatform() const {
+    return mPlatform.get();
+}
+
 DawnPerfTestBase::DawnPerfTestBase(DawnTestBase* test,
                                    unsigned int iterationsPerStep,
                                    unsigned int maxStepsInFlight)
@@ -216,7 +220,7 @@ void DawnPerfTestBase::RunTest() {
     DoRunLoop(kMaximumRunTimeSeconds);
 
     DawnPerfTestPlatform* platform =
-        reinterpret_cast<DawnPerfTestPlatform*>(gTestEnv->GetInstance()->GetPlatform());
+        reinterpret_cast<DawnPerfTestPlatform*>(gTestEnv->GetPlatform());
     const char* testName = ::testing::UnitTest::GetInstance()->current_test_info()->name();
 
     // Only enable trace event recording in this section.
@@ -234,7 +238,7 @@ void DawnPerfTestBase::RunTest() {
 }
 
 void DawnPerfTestBase::DoRunLoop(double maxRunTime) {
-    dawn_platform::Platform* platform = gTestEnv->GetInstance()->GetPlatform();
+    dawn_platform::Platform* platform = gTestEnv->GetPlatform();
 
     mNumStepsPerformed = 0;
     cpuTime = 0;
@@ -285,7 +289,7 @@ void DawnPerfTestBase::OutputResults() {
     // which waits for all threads to stop doing work. When we output results, there should
     // be no additional incoming trace events.
     DawnPerfTestPlatform* platform =
-        reinterpret_cast<DawnPerfTestPlatform*>(gTestEnv->GetInstance()->GetPlatform());
+        reinterpret_cast<DawnPerfTestPlatform*>(gTestEnv->GetPlatform());
 
     std::vector<DawnPerfTestPlatform::TraceEvent> traceEventBuffer =
         platform->AcquireTraceEventBuffer();

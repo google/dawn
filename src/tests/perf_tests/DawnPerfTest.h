@@ -40,6 +40,8 @@ class DawnPerfTestEnvironment : public DawnTestEnvironment {
     // not be written to a json file.
     const char* GetTraceFile() const;
 
+    DawnPerfTestPlatform* GetPlatform() const;
+
   private:
     // Only run calibration which allows the perf test runner to save time.
     bool mIsCalibrating = false;

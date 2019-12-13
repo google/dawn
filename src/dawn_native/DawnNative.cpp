@@ -113,24 +113,12 @@ namespace dawn_native {
         mImpl->EnableBackendValidation(enableBackendValidation);
     }
 
-    bool Instance::IsBackendValidationEnabled() const {
-        return mImpl->IsBackendValidationEnabled();
-    }
-
     void Instance::EnableBeginCaptureOnStartup(bool beginCaptureOnStartup) {
         mImpl->EnableBeginCaptureOnStartup(beginCaptureOnStartup);
     }
 
-    bool Instance::IsBeginCaptureOnStartupEnabled() const {
-        return mImpl->IsBeginCaptureOnStartupEnabled();
-    }
-
     void Instance::SetPlatform(dawn_platform::Platform* platform) {
         mImpl->SetPlatform(platform);
-    }
-
-    dawn_platform::Platform* Instance::GetPlatform() const {
-        return mImpl->GetPlatform();
     }
 
     size_t GetLazyClearCountForTesting(WGPUDevice device) {
