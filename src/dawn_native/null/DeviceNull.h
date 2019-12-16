@@ -130,6 +130,9 @@ namespace dawn_native { namespace null {
             TextureBase* texture,
             const TextureViewDescriptor* descriptor) override;
 
+        void Destroy() override;
+        MaybeError WaitForIdleForDestruction() override;
+
         Serial mCompletedSerial = 0;
         Serial mLastSubmittedSerial = 0;
         std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;

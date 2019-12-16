@@ -17,6 +17,7 @@
 #include "common/Assert.h"
 #include "dawn_native/BackendConnection.h"
 #include "dawn_native/DynamicUploader.h"
+#include "dawn_native/ErrorData.h"
 #include "dawn_native/d3d12/AdapterD3D12.h"
 #include "dawn_native/d3d12/BackendD3D12.h"
 #include "dawn_native/d3d12/BindGroupD3D12.h"
@@ -104,34 +105,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     Device::~Device() {
-        // Immediately forget about all pending commands
-        mPendingCommands.Release();
-
-        ConsumedError(NextSerial());
-        // Wait for all in-flight commands to finish executing
-        ConsumedError(WaitForSerial(mLastSubmittedSerial));
-
-        // Call tick one last time so resources are cleaned up. Ignore the return value so we can
-        // continue shutting down in an orderly fashion.
-        ConsumedError(TickImpl());
-
-        // Free services explicitly so that they can free D3D12 resources before destruction of the
-        // device.
-        mDynamicUploader = nullptr;
-
-        // GPU is no longer executing commands. Existing objects do not get freed until the device
-        // is destroyed. To ensure objects are always released, force the completed serial to be
-        // MAX.
-        mCompletedSerial = std::numeric_limits<Serial>::max();
-
-        if (mFenceEvent != nullptr) {
-            ::CloseHandle(mFenceEvent);
-        }
-
-        mUsedComObjectRefs.ClearUpTo(mCompletedSerial);
-
-        ASSERT(mUsedComObjectRefs.Empty());
-        ASSERT(!mPendingCommands.IsOpen());
+        BaseDestructor();
     }
 
     ComPtr<ID3D12Device> Device::GetD3D12Device() const {
@@ -415,6 +389,40 @@ namespace dawn_native { namespace d3d12 {
         const bool useResourceHeapTier2 = (GetDeviceInfo().resourceHeapTier >= 2);
         SetToggle(Toggle::UseD3D12ResourceHeapTier2, useResourceHeapTier2);
         SetToggle(Toggle::UseD3D12RenderPass, GetDeviceInfo().supportsRenderPass);
+    }
+
+    MaybeError Device::WaitForIdleForDestruction() {
+        DAWN_TRY(NextSerial());
+        // Wait for all in-flight commands to finish executing
+        DAWN_TRY(WaitForSerial(mLastSubmittedSerial));
+
+        // Call tick one last time so resources are cleaned up.
+        DAWN_TRY(TickImpl());
+
+        return {};
+    }
+
+    void Device::Destroy() {
+        // Immediately forget about all pending commands
+        mPendingCommands.Release();
+
+        // Free services explicitly so that they can free D3D12 resources before destruction of the
+        // device.
+        mDynamicUploader = nullptr;
+
+        // GPU is no longer executing commands. Existing objects do not get freed until the device
+        // is destroyed. To ensure objects are always released, force the completed serial to be
+        // MAX.
+        mCompletedSerial = std::numeric_limits<Serial>::max();
+
+        if (mFenceEvent != nullptr) {
+            ::CloseHandle(mFenceEvent);
+        }
+
+        mUsedComObjectRefs.ClearUpTo(mCompletedSerial);
+
+        ASSERT(mUsedComObjectRefs.Empty());
+        ASSERT(!mPendingCommands.IsOpen());
     }
 
 }}  // namespace dawn_native::d3d12

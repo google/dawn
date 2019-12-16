@@ -94,6 +94,15 @@ namespace dawn_native {
         ASSERT(mCaches->shaderModules.empty());
     }
 
+    void DeviceBase::BaseDestructor() {
+        MaybeError err = WaitForIdleForDestruction();
+        if (err.IsError()) {
+            // Assert that errors are device loss so that we can continue with destruction
+            ASSERT(err.AcquireError()->GetType() == wgpu::ErrorType::DeviceLost);
+        }
+        Destroy();
+    }
+
     void DeviceBase::HandleError(wgpu::ErrorType type, const char* message) {
         mCurrentErrorScope->HandleError(type, message);
     }

@@ -87,77 +87,7 @@ namespace dawn_native { namespace vulkan {
     }
 
     Device::~Device() {
-        // Immediately tag the recording context as unused so we don't try to submit it in Tick.
-        mRecordingContext.used = false;
-        fn.DestroyCommandPool(mVkDevice, mRecordingContext.commandPool, nullptr);
-
-        VkResult waitIdleResult = fn.QueueWaitIdle(mQueue);
-        // Ignore the result of QueueWaitIdle: it can return OOM which we can't really do anything
-        // about, Device lost, which means workloads running on the GPU are no longer accessible
-        // (so they are as good as waited on) or success.
-        DAWN_UNUSED(waitIdleResult);
-
-        CheckPassedFences();
-
-        // Make sure all fences are complete by explicitly waiting on them all
-        while (!mFencesInFlight.empty()) {
-            VkFence fence = mFencesInFlight.front().first;
-            Serial fenceSerial = mFencesInFlight.front().second;
-            ASSERT(fenceSerial > mCompletedSerial);
-
-            VkResult result = VK_TIMEOUT;
-            do {
-                result = fn.WaitForFences(mVkDevice, 1, &fence, true, UINT64_MAX);
-            } while (result == VK_TIMEOUT);
-            fn.DestroyFence(mVkDevice, fence, nullptr);
-
-            mFencesInFlight.pop();
-            mCompletedSerial = fenceSerial;
-        }
-
-        // Some operations might have been started since the last submit and waiting
-        // on a serial that doesn't have a corresponding fence enqueued. Force all
-        // operations to look as if they were completed (because they were).
-        mCompletedSerial = mLastSubmittedSerial + 1;
-        Tick();
-
-        ASSERT(mCommandsInFlight.Empty());
-        for (const CommandPoolAndBuffer& commands : mUnusedCommands) {
-            fn.DestroyCommandPool(mVkDevice, commands.pool, nullptr);
-        }
-        mUnusedCommands.clear();
-
-        // TODO(jiajie.hu@intel.com): In rare cases, a DAWN_TRY() failure may leave semaphores
-        // untagged for deletion. But for most of the time when everything goes well, these
-        // assertions can be helpful in catching bugs.
-        ASSERT(mRecordingContext.waitSemaphores.empty());
-        ASSERT(mRecordingContext.signalSemaphores.empty());
-
-        for (VkFence fence : mUnusedFences) {
-            fn.DestroyFence(mVkDevice, fence, nullptr);
-        }
-        mUnusedFences.clear();
-
-        // Free services explicitly so that they can free Vulkan objects before vkDestroyDevice
-        mDynamicUploader = nullptr;
-        mDescriptorSetService = nullptr;
-
-        // Releasing the uploader enqueues buffers to be released.
-        // Call Tick() again to clear them before releasing the deleter.
-        mDeleter->Tick(mCompletedSerial);
-
-        mDeleter = nullptr;
-        mMapRequestTracker = nullptr;
-
-        // The VkRenderPasses in the cache can be destroyed immediately since all commands referring
-        // to them are guaranteed to be finished executing.
-        mRenderPassCache = nullptr;
-
-        // VkQueues are destroyed when the VkDevice is destroyed
-        if (mVkDevice != VK_NULL_HANDLE) {
-            fn.DestroyDevice(mVkDevice, nullptr);
-            mVkDevice = VK_NULL_HANDLE;
-        }
+        BaseDestructor();
     }
 
     ResultOrError<BindGroupBase*> Device::CreateBindGroupImpl(
@@ -766,6 +696,83 @@ namespace dawn_native { namespace vulkan {
 
     ResourceMemoryAllocator* Device::GetResourceMemoryAllocatorForTesting() const {
         return mResourceMemoryAllocator.get();
+    }
+
+    MaybeError Device::WaitForIdleForDestruction() {
+        VkResult waitIdleResult = fn.QueueWaitIdle(mQueue);
+        // Ignore the result of QueueWaitIdle: it can return OOM which we can't really do anything
+        // about, Device lost, which means workloads running on the GPU are no longer accessible
+        // (so they are as good as waited on) or success.
+        DAWN_UNUSED(waitIdleResult);
+
+        CheckPassedFences();
+
+        // Make sure all fences are complete by explicitly waiting on them all
+        while (!mFencesInFlight.empty()) {
+            VkFence fence = mFencesInFlight.front().first;
+            Serial fenceSerial = mFencesInFlight.front().second;
+            ASSERT(fenceSerial > mCompletedSerial);
+
+            VkResult result = VK_TIMEOUT;
+            do {
+                result = fn.WaitForFences(mVkDevice, 1, &fence, true, UINT64_MAX);
+            } while (result == VK_TIMEOUT);
+            fn.DestroyFence(mVkDevice, fence, nullptr);
+
+            mFencesInFlight.pop();
+            mCompletedSerial = fenceSerial;
+        }
+        return {};
+    }
+
+    void Device::Destroy() {
+        // Immediately tag the recording context as unused so we don't try to submit it in Tick.
+        mRecordingContext.used = false;
+        fn.DestroyCommandPool(mVkDevice, mRecordingContext.commandPool, nullptr);
+
+        // Some operations might have been started since the last submit and waiting
+        // on a serial that doesn't have a corresponding fence enqueued. Force all
+        // operations to look as if they were completed (because they were).
+        mCompletedSerial = mLastSubmittedSerial + 1;
+        Tick();
+
+        ASSERT(mCommandsInFlight.Empty());
+        for (const CommandPoolAndBuffer& commands : mUnusedCommands) {
+            fn.DestroyCommandPool(mVkDevice, commands.pool, nullptr);
+        }
+        mUnusedCommands.clear();
+
+        // TODO(jiajie.hu@intel.com): In rare cases, a DAWN_TRY() failure may leave semaphores
+        // untagged for deletion. But for most of the time when everything goes well, these
+        // assertions can be helpful in catching bugs.
+        ASSERT(mRecordingContext.waitSemaphores.empty());
+        ASSERT(mRecordingContext.signalSemaphores.empty());
+
+        for (VkFence fence : mUnusedFences) {
+            fn.DestroyFence(mVkDevice, fence, nullptr);
+        }
+        mUnusedFences.clear();
+
+        // Free services explicitly so that they can free Vulkan objects before vkDestroyDevice
+        mDynamicUploader = nullptr;
+        mDescriptorSetService = nullptr;
+
+        // Releasing the uploader enqueues buffers to be released.
+        // Call Tick() again to clear them before releasing the deleter.
+        mDeleter->Tick(mCompletedSerial);
+
+        mDeleter = nullptr;
+        mMapRequestTracker = nullptr;
+
+        // The VkRenderPasses in the cache can be destroyed immediately since all commands referring
+        // to them are guaranteed to be finished executing.
+        mRenderPassCache = nullptr;
+
+        // VkQueues are destroyed when the VkDevice is destroyed
+        if (mVkDevice != VK_NULL_HANDLE) {
+            fn.DestroyDevice(mVkDevice, nullptr);
+            mVkDevice = VK_NULL_HANDLE;
+        }
     }
 
 }}  // namespace dawn_native::vulkan

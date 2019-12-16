@@ -17,6 +17,7 @@
 #include "dawn_native/BackendConnection.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/DynamicUploader.h"
+#include "dawn_native/ErrorData.h"
 #include "dawn_native/Instance.h"
 
 #include <spirv_cross.hpp>
@@ -85,10 +86,7 @@ namespace dawn_native { namespace null {
     }
 
     Device::~Device() {
-        mDynamicUploader = nullptr;
-
-        mPendingOperations.clear();
-        ASSERT(mMemoryUsage == 0);
+        BaseDestructor();
     }
 
     ResultOrError<BindGroupBase*> Device::CreateBindGroupImpl(
@@ -165,6 +163,17 @@ namespace dawn_native { namespace null {
             std::make_unique<StagingBuffer>(size, this);
         DAWN_TRY(stagingBuffer->Initialize());
         return std::move(stagingBuffer);
+    }
+
+    void Device::Destroy() {
+        mDynamicUploader = nullptr;
+
+        mPendingOperations.clear();
+        ASSERT(mMemoryUsage == 0);
+    }
+
+    MaybeError Device::WaitForIdleForDestruction() {
+        return {};
     }
 
     MaybeError Device::CopyFromStagingToBuffer(StagingBufferBase* source,

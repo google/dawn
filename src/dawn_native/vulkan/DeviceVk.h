@@ -130,6 +130,9 @@ namespace dawn_native { namespace vulkan {
         void InitTogglesFromDriver();
         void ApplyDepth24PlusS8Toggle();
 
+        void Destroy() override;
+        MaybeError WaitForIdleForDestruction() override;
+
         // To make it easier to use fn it is a public const member. However
         // the Device is allowed to mutate them through these private methods.
         VulkanFunctions* GetMutableFunctions();
