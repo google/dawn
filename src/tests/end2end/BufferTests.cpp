@@ -733,11 +733,6 @@ TEST_P(CreateBufferMappedTests, LargeBufferFails) {
     // TODO(http://crbug.com/dawn/27): Missing support.
     DAWN_SKIP_TEST_IF(IsMetal() || IsOpenGL());
 
-    // TODO(http://crbug.com/dawn/241): Fails on NVIDIA cards when Vulkan validation layers are
-    // enabled becuase the maximum size of a single allocation cannot be larger than or equal to
-    // 4G on some platforms.
-    DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia() && IsBackendValidationEnabled());
-
     wgpu::BufferDescriptor descriptor;
     descriptor.size = std::numeric_limits<uint64_t>::max();
     descriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;

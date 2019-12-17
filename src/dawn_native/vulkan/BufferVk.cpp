@@ -123,6 +123,16 @@ namespace dawn_native { namespace vulkan {
     }
 
     MaybeError Buffer::Initialize() {
+        // Avoid passing ludicrously large sizes to drivers because it causes issues: drivers add
+        // some constants to the size passed and align it, but for values close to the maximum
+        // VkDeviceSize this can cause overflows and makes drivers crash or return bad sizes in the
+        // VkmemoryRequirements. See https://gitlab.khronos.org/vulkan/vulkan/issues/1904
+        // Any size with one of two top bits of VkDeviceSize set is a HUGE allocation and we can
+        // safely return an OOM error.
+        if (GetSize() & (uint64_t(3) << uint64_t(62))) {
+            return DAWN_OUT_OF_MEMORY_ERROR("Buffer size is HUGE and could cause overflows");
+        }
+
         VkBufferCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         createInfo.pNext = nullptr;
