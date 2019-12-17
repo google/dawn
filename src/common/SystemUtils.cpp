@@ -21,7 +21,7 @@
 #    include <limits.h>
 #    include <unistd.h>
 #    include <cstdlib>
-#elif defined(DAWN_PLATFORM_MACOS)
+#elif defined(DAWN_PLATFORM_MACOS) || defined(DAWN_PLATFORM_IOS)
 #    include <mach-o/dyld.h>
 #    include <vector>
 #endif
@@ -88,7 +88,7 @@ std::string GetExecutablePath() {
     path[result] = '\0';
     return path.data();
 }
-#elif defined(DAWN_PLATFORM_MACOS)
+#elif defined(DAWN_PLATFORM_MACOS) || defined(DAWN_PLATFORM_IOS)
 std::string GetExecutablePath() {
     uint32_t size = 0;
     _NSGetExecutablePath(nullptr, &size);
