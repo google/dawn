@@ -18,8 +18,12 @@
 
 namespace dawn_native { namespace vulkan {
 
-    const char* VkResultAsString(VkResult result) {
-        switch (result) {
+    const char* VkResultAsString(::VkResult result) {
+        // Convert to a uint32_t to silence and MSVC warning that the fake errors don't appear in
+        // the original VkResult enum.
+        uint32_t code = static_cast<uint32_t>(result);
+
+        switch (code) {
             case VK_SUCCESS:
                 return "VK_SUCCESS";
             case VK_NOT_READY:
