@@ -78,18 +78,18 @@ class alignas(kNativeVkHandleAlignment) VkNonDispatchableHandle {
     VkNonDispatchableHandle& operator=(const VkNonDispatchableHandle<Tag, HandleType>&) = default;
 
     // Comparisons between handles
-    bool operator==(VkNonDispatchableHandle<Tag, HandleType> other) {
+    bool operator==(VkNonDispatchableHandle<Tag, HandleType> other) const {
         return mHandle == other.mHandle;
     }
-    bool operator!=(VkNonDispatchableHandle<Tag, HandleType> other) {
+    bool operator!=(VkNonDispatchableHandle<Tag, HandleType> other) const {
         return mHandle != other.mHandle;
     }
 
     // Comparisons between handles and VK_NULL_HANDLE
-    bool operator==(std::nullptr_t) {
+    bool operator==(std::nullptr_t) const {
         return mHandle == 0;
     }
-    bool operator!=(std::nullptr_t) {
+    bool operator!=(std::nullptr_t) const {
         return mHandle != 0;
     }
 

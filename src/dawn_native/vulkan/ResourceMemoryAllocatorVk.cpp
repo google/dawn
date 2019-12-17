@@ -69,15 +69,12 @@ namespace dawn_native { namespace vulkan {
             allocateInfo.memoryTypeIndex = mMemoryTypeIndex;
 
             VkDeviceMemory allocatedMemory = VK_NULL_HANDLE;
-            VkResult allocationResult = mDevice->fn.AllocateMemory(
-                mDevice->GetVkDevice(), &allocateInfo, nullptr, &allocatedMemory);
 
-            // Handle vkAllocateMemory error but differentiate OOM that we want to surface to
-            // the application.
-            if (allocationResult == VK_ERROR_OUT_OF_DEVICE_MEMORY) {
-                return DAWN_OUT_OF_MEMORY_ERROR("OOM while creating the Vkmemory");
-            }
-            DAWN_TRY(CheckVkSuccess(allocationResult, "vkAllocateMemory"));
+            // First check OOM that we want to surface to the application.
+            DAWN_TRY(CheckVkOOMThenSuccess(
+                mDevice->fn.AllocateMemory(mDevice->GetVkDevice(), &allocateInfo, nullptr,
+                                           &allocatedMemory),
+                "vkAllocateMemory"));
 
             ASSERT(allocatedMemory != VK_NULL_HANDLE);
             return {std::make_unique<ResourceHeap>(allocatedMemory, mMemoryTypeIndex)};

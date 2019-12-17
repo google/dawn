@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build_overrides/build.gni")
+
+if (build_with_chromium) {
+  import("//build/config/sanitizers/sanitizers.gni")
+}
+
 declare_args() {
   # Enable Dawn's ASSERTs even in release builds
   dawn_always_assert = false
@@ -51,6 +57,10 @@ declare_args() {
   # Because of how the Vulkan loader works, setting this make Dawn only able
   # to find the Swiftshader ICD and not the others.
   dawn_use_swiftshader = false
+
+  # Enables error injection for faking failures to native API calls
+  dawn_enable_error_injection =
+      is_debug || (build_with_chromium && use_fuzzing_engine)
 }
 
 # GN does not allow reading a variable defined in the same declare_args().

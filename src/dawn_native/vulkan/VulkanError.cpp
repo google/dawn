@@ -56,17 +56,32 @@ namespace dawn_native { namespace vulkan {
                 return "VK_ERROR_FORMAT_NOT_SUPPORTED";
             case VK_ERROR_FRAGMENTED_POOL:
                 return "VK_ERROR_FRAGMENTED_POOL";
+            case VK_FAKE_DEVICE_OOM_FOR_TESTING:
+                return "VK_FAKE_DEVICE_OOM_FOR_TESTING";
+            case VK_FAKE_ERROR_FOR_TESTING:
+                return "VK_FAKE_ERROR_FOR_TESTING";
             default:
                 return "<Unknown VkResult>";
         }
     }
 
-    MaybeError CheckVkSuccess(VkResult result, const char* context) {
+    MaybeError CheckVkSuccessImpl(VkResult result, const char* context) {
+        if (DAWN_LIKELY(result == VK_SUCCESS)) {
+            return {};
+        }
+        std::string message = std::string(context) + " failed with " + VkResultAsString(result);
+        return DAWN_DEVICE_LOST_ERROR(message);
+    }
+
+    MaybeError CheckVkOOMThenSuccessImpl(VkResult result, const char* context) {
         if (DAWN_LIKELY(result == VK_SUCCESS)) {
             return {};
         }
 
         std::string message = std::string(context) + " failed with " + VkResultAsString(result);
+        if (result == VK_ERROR_OUT_OF_DEVICE_MEMORY || result == VK_FAKE_DEVICE_OOM_FOR_TESTING) {
+            return DAWN_OUT_OF_MEMORY_ERROR(message);
+        }
         return DAWN_DEVICE_LOST_ERROR(message);
     }
 

@@ -459,7 +459,9 @@ namespace dawn_native { namespace vulkan {
             VkFence fence = mFencesInFlight.front().first;
             Serial fenceSerial = mFencesInFlight.front().second;
 
-            VkResult result = fn.GetFenceStatus(mVkDevice, fence);
+            VkResult result = VkResult::WrapUnsafe(
+                INJECT_ERROR_OR_RUN(fn.GetFenceStatus(mVkDevice, fence), VK_ERROR_DEVICE_LOST));
+            // TODO: Handle DeviceLost error.
             ASSERT(result == VK_SUCCESS || result == VK_NOT_READY);
 
             // Fence are added in order, so we can stop searching as soon
@@ -699,7 +701,7 @@ namespace dawn_native { namespace vulkan {
     }
 
     MaybeError Device::WaitForIdleForDestruction() {
-        VkResult waitIdleResult = fn.QueueWaitIdle(mQueue);
+        VkResult waitIdleResult = VkResult::WrapUnsafe(fn.QueueWaitIdle(mQueue));
         // Ignore the result of QueueWaitIdle: it can return OOM which we can't really do anything
         // about, Device lost, which means workloads running on the GPU are no longer accessible
         // (so they are as good as waited on) or success.
@@ -713,10 +715,15 @@ namespace dawn_native { namespace vulkan {
             Serial fenceSerial = mFencesInFlight.front().second;
             ASSERT(fenceSerial > mCompletedSerial);
 
-            VkResult result = VK_TIMEOUT;
+            VkResult result = VkResult::WrapUnsafe(VK_TIMEOUT);
             do {
-                result = fn.WaitForFences(mVkDevice, 1, &fence, true, UINT64_MAX);
+                result = VkResult::WrapUnsafe(
+                    INJECT_ERROR_OR_RUN(fn.WaitForFences(mVkDevice, 1, &fence, true, UINT64_MAX),
+                                        VK_ERROR_DEVICE_LOST));
             } while (result == VK_TIMEOUT);
+
+            // TODO: Handle errors
+            ASSERT(result == VK_SUCCESS);
             fn.DestroyFence(mVkDevice, fence, nullptr);
 
             mFencesInFlight.pop();

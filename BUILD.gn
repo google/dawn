@@ -208,6 +208,8 @@ source_set("libdawn_native_sources") {
     "src/dawn_native/Error.h",
     "src/dawn_native/ErrorData.cpp",
     "src/dawn_native/ErrorData.h",
+    "src/dawn_native/ErrorInjector.cpp",
+    "src/dawn_native/ErrorInjector.h",
     "src/dawn_native/ErrorScope.cpp",
     "src/dawn_native/ErrorScope.h",
     "src/dawn_native/ErrorScopeTracker.cpp",
@@ -957,6 +959,10 @@ source_set("dawn_white_box_tests_sources") {
 
     if (is_linux) {
       sources += [ "src/tests/white_box/VulkanImageWrappingTests.cpp" ]
+    }
+
+    if (dawn_enable_error_injection) {
+      sources += [ "src/tests/white_box/VulkanErrorInjectorTests.cpp" ]
     }
   }
 

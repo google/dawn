@@ -67,6 +67,10 @@ config("dawn_internal") {
     defines += [ "DAWN_USE_X11" ]
   }
 
+  if (dawn_enable_error_injection) {
+    defines += [ "DAWN_ENABLE_ERROR_INJECTION" ]
+  }
+
   # Only internal Dawn targets can use this config, this means only targets in
   # this BUILD.gn file.
   visibility = [ ":*" ]

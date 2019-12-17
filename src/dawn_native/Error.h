@@ -61,7 +61,7 @@ namespace dawn_native {
     {                                                                            \
         auto DAWN_LOCAL_VAR = EXPR;                                              \
         if (DAWN_UNLIKELY(DAWN_LOCAL_VAR.IsError())) {                           \
-            ErrorData* error = DAWN_LOCAL_VAR.AcquireError();                    \
+            ::dawn_native::ErrorData* error = DAWN_LOCAL_VAR.AcquireError();     \
             ::dawn_native::AppendBacktrace(error, __FILE__, __func__, __LINE__); \
             return {std::move(error)};                                           \
         }                                                                        \
