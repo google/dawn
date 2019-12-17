@@ -183,6 +183,7 @@ DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
                    "  -c, --begin-capture-on-startup: Begin debug capture on startup "
                    "(defaults to no capture)\n"
                    "  --skip-validation: Skip Dawn validation\n"
+                   "  --use-spvc: Use spvc for accessing spirv-cross\n"
                    "  --adapter-vendor-id: Select adapter by vendor id to run end2end tests"
                    "on multi-GPU systems \n";
             continue;

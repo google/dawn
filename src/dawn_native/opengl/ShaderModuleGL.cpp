@@ -93,9 +93,9 @@ namespace dawn_native { namespace opengl {
 #endif
             shaderc_spvc_status status =
                 mSpvcContext.InitializeForGlsl(descriptor->code, descriptor->codeSize, options);
-            if (status != shaderc_spvc_status_success)
+            if (status != shaderc_spvc_status_success) {
                 return DAWN_VALIDATION_ERROR("Unable to initialize instance of spvc");
-
+            }
             compiler = reinterpret_cast<spirv_cross::CompilerGLSL*>(mSpvcContext.GetCompiler());
         } else {
             // If these options are changed, the values in DawnSPIRVCrossGLSLFastFuzzer.cpp need to
@@ -129,21 +129,45 @@ namespace dawn_native { namespace opengl {
         // Extract bindings names so that it can be used to get its location in program.
         // Now translate the separate sampler / textures into combined ones and store their info.
         // We need to do this before removing the set and binding decorations.
-        compiler->build_combined_image_samplers();
+        if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
+            mSpvcContext.BuildCombinedImageSamplers();
+        } else {
+            compiler->build_combined_image_samplers();
+        }
 
-        for (const auto& combined : compiler->get_combined_image_samplers()) {
-            mCombinedInfo.emplace_back();
+        if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
+            std::vector<shaderc_spvc_combined_image_sampler> samplers;
+            mSpvcContext.GetCombinedImageSamplers(&samplers);
+            for (auto sampler : samplers) {
+                mCombinedInfo.emplace_back();
+                auto& info = mCombinedInfo.back();
 
-            auto& info = mCombinedInfo.back();
-            info.samplerLocation.group =
-                compiler->get_decoration(combined.sampler_id, spv::DecorationDescriptorSet);
-            info.samplerLocation.binding =
-                compiler->get_decoration(combined.sampler_id, spv::DecorationBinding);
-            info.textureLocation.group =
-                compiler->get_decoration(combined.image_id, spv::DecorationDescriptorSet);
-            info.textureLocation.binding =
-                compiler->get_decoration(combined.image_id, spv::DecorationBinding);
-            compiler->set_name(combined.combined_id, info.GetName());
+                mSpvcContext.GetDecoration(sampler.sampler_id,
+                                           shaderc_spvc_decoration_descriptorset,
+                                           &info.samplerLocation.group);
+                mSpvcContext.GetDecoration(sampler.sampler_id, shaderc_spvc_decoration_binding,
+                                           &info.samplerLocation.binding);
+                mSpvcContext.GetDecoration(sampler.image_id, shaderc_spvc_decoration_descriptorset,
+                                           &info.textureLocation.group);
+                mSpvcContext.GetDecoration(sampler.image_id, shaderc_spvc_decoration_binding,
+                                           &info.textureLocation.binding);
+                mSpvcContext.SetName(sampler.combined_id, info.GetName());
+            }
+        } else {
+            for (const auto& combined : compiler->get_combined_image_samplers()) {
+                mCombinedInfo.emplace_back();
+
+                auto& info = mCombinedInfo.back();
+                info.samplerLocation.group =
+                    compiler->get_decoration(combined.sampler_id, spv::DecorationDescriptorSet);
+                info.samplerLocation.binding =
+                    compiler->get_decoration(combined.sampler_id, spv::DecorationBinding);
+                info.textureLocation.group =
+                    compiler->get_decoration(combined.image_id, spv::DecorationDescriptorSet);
+                info.textureLocation.binding =
+                    compiler->get_decoration(combined.image_id, spv::DecorationBinding);
+                compiler->set_name(combined.combined_id, info.GetName());
+            }
         }
 
         // Change binding names to be "dawn_binding_<group>_<binding>".
@@ -153,9 +177,16 @@ namespace dawn_native { namespace opengl {
             for (uint32_t binding = 0; binding < kMaxBindingsPerGroup; ++binding) {
                 const auto& info = bindingInfo[group][binding];
                 if (info.used) {
-                    compiler->set_name(info.base_type_id, GetBindingName(group, binding));
-                    compiler->unset_decoration(info.id, spv::DecorationBinding);
-                    compiler->unset_decoration(info.id, spv::DecorationDescriptorSet);
+                    if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
+                        mSpvcContext.SetName(info.base_type_id, GetBindingName(group, binding));
+                        mSpvcContext.UnsetDecoration(info.id, shaderc_spvc_decoration_binding);
+                        mSpvcContext.UnsetDecoration(info.id,
+                                                     shaderc_spvc_decoration_descriptorset);
+                    } else {
+                        compiler->set_name(info.base_type_id, GetBindingName(group, binding));
+                        compiler->unset_decoration(info.id, spv::DecorationBinding);
+                        compiler->unset_decoration(info.id, spv::DecorationDescriptorSet);
+                    }
                 }
             }
         }
