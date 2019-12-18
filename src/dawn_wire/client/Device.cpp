@@ -42,9 +42,20 @@ namespace dawn_wire { namespace client {
         }
     }
 
+    void Device::HandleDeviceLost(const char* message) {
+        if (mDeviceLostCallback) {
+            mDeviceLostCallback(message, mDeviceLostUserdata);
+        }
+    }
+
     void Device::SetUncapturedErrorCallback(WGPUErrorCallback errorCallback, void* errorUserdata) {
         mErrorCallback = errorCallback;
         mErrorUserdata = errorUserdata;
+    }
+
+    void Device::SetDeviceLostCallback(WGPUDeviceLostCallback callback, void* userdata) {
+        mDeviceLostCallback = callback;
+        mDeviceLostUserdata = userdata;
     }
 
     void Device::PushErrorScope(WGPUErrorFilter filter) {

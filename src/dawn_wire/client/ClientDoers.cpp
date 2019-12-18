@@ -35,6 +35,11 @@ namespace dawn_wire { namespace client {
         return true;
     }
 
+    bool Client::DoDeviceLostCallback(char const* message) {
+        mDevice->HandleDeviceLost(message);
+        return true;
+    }
+
     bool Client::DoDevicePopErrorScopeCallback(uint64_t requestSerial,
                                                WGPUErrorType errorType,
                                                const char* message) {

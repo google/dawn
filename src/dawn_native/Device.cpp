@@ -128,6 +128,11 @@ namespace dawn_native {
         mRootErrorScope->SetCallback(callback, userdata);
     }
 
+    void DeviceBase::SetDeviceLostCallback(wgpu::DeviceLostCallback callback, void* userdata) {
+        mDeviceLostCallback = callback;
+        mDeviceLostUserdata = userdata;
+    }
+
     void DeviceBase::PushErrorScope(wgpu::ErrorFilter filter) {
         if (ConsumedError(ValidateErrorFilter(filter))) {
             return;

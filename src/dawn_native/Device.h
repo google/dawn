@@ -163,6 +163,7 @@ namespace dawn_native {
 
         void Tick();
 
+        void SetDeviceLostCallback(wgpu::DeviceLostCallback callback, void* userdata);
         void SetUncapturedErrorCallback(wgpu::ErrorCallback callback, void* userdata);
         void PushErrorScope(wgpu::ErrorFilter filter);
         bool PopErrorScope(wgpu::ErrorCallback callback, void* userdata);
@@ -261,6 +262,9 @@ namespace dawn_native {
         // device loss, this function doesn't need to be called since the driver already closed all
         // resources.
         virtual MaybeError WaitForIdleForDestruction() = 0;
+
+        wgpu::DeviceLostCallback mDeviceLostCallback = nullptr;
+        void* mDeviceLostUserdata;
 
         AdapterBase* mAdapter = nullptr;
 

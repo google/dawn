@@ -42,6 +42,16 @@ namespace {
         mockDevicePopErrorScopeCallback->Call(type, message, userdata);
     }
 
+    class MockDeviceLostCallback {
+      public:
+        MOCK_METHOD2(Call, void(const char* message, void* userdata));
+    };
+
+    std::unique_ptr<StrictMock<MockDeviceLostCallback>> mockDeviceLostCallback;
+    void ToMockDeviceLostCallback(const char* message, void* userdata) {
+        mockDeviceLostCallback->Call(message, userdata);
+    }
+
 }  // anonymous namespace
 
 class WireErrorCallbackTests : public WireTest {
@@ -55,6 +65,7 @@ class WireErrorCallbackTests : public WireTest {
 
         mockDeviceErrorCallback = std::make_unique<StrictMock<MockDeviceErrorCallback>>();
         mockDevicePopErrorScopeCallback = std::make_unique<StrictMock<MockDevicePopErrorScopeCallback>>();
+        mockDeviceLostCallback = std::make_unique<StrictMock<MockDeviceLostCallback>>();
     }
 
     void TearDown() override {
@@ -62,6 +73,7 @@ class WireErrorCallbackTests : public WireTest {
 
         mockDeviceErrorCallback = nullptr;
         mockDevicePopErrorScopeCallback = nullptr;
+        mockDeviceLostCallback = nullptr;
     }
 
     void FlushServer() {
@@ -231,4 +243,20 @@ TEST_F(WireErrorCallbackTests, PopErrorScopeEmptyStack) {
 
         FlushServer();
     }
+}
+
+// Test the return wire for device lost callback
+TEST_F(WireErrorCallbackTests, DeviceLostCallback) {
+    wgpuDeviceSetDeviceLostCallback(device, ToMockDeviceLostCallback, this);
+
+    // Setting the error callback should stay on the client side and do nothing
+    FlushClient();
+
+    // Calling the callback on the server side will result in the callback being called on the
+    // client side
+    api.CallDeviceLostCallback(apiDevice, "Some error message");
+
+    EXPECT_CALL(*mockDeviceLostCallback, Call(StrEq("Some error message"), this)).Times(1);
+
+    FlushServer();
 }

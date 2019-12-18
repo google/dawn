@@ -431,5 +431,11 @@ namespace dawn_wire { namespace client {
         Device* device = reinterpret_cast<Device*>(cSelf);
         device->SetUncapturedErrorCallback(callback, userdata);
     }
+    void ClientDeviceSetDeviceLostCallback(WGPUDevice cSelf,
+                                           WGPUDeviceLostCallback callback,
+                                           void* userdata) {
+        Device* device = reinterpret_cast<Device*>(cSelf);
+        device->SetDeviceLostCallback(callback, userdata);
+    }
 
 }}  // namespace dawn_wire::client

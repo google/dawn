@@ -62,6 +62,7 @@ namespace dawn_wire { namespace server {
 
         // Forwarding callbacks
         static void ForwardUncapturedError(WGPUErrorType type, const char* message, void* userdata);
+        static void ForwardDeviceLost(const char* message, void* userdata);
         static void ForwardPopErrorScope(WGPUErrorType type, const char* message, void* userdata);
         static void ForwardBufferMapReadAsync(WGPUBufferMapAsyncStatus status,
                                               const void* ptr,
@@ -75,6 +76,7 @@ namespace dawn_wire { namespace server {
 
         // Error callbacks
         void OnUncapturedError(WGPUErrorType type, const char* message);
+        void OnDeviceLost(const char* message);
         void OnDevicePopErrorScope(WGPUErrorType type,
                                    const char* message,
                                    ErrorScopeUserdata* userdata);

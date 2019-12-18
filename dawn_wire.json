@@ -74,6 +74,9 @@
             { "name": "type", "type": "error type"},
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
         ],
+        "device lost callback" : [
+            { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
+        ],
         "device pop error scope callback": [
             { "name": "request serial", "type": "uint64_t" },
             { "name": "type", "type": "error type" },
@@ -94,6 +97,7 @@
             "BufferSetSubData",
             "DeviceCreateBufferMappedAsync",
             "DevicePopErrorScope",
+            "DeviceSetDeviceLostCallback",
             "DeviceSetUncapturedErrorCallback",
             "FenceGetCompletedValue",
             "FenceOnCompletion"

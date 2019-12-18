@@ -43,6 +43,7 @@ void WireTest::SetUp() {
 
     // This SetCallback call cannot be ignored because it is done as soon as we start the server
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(_, _, _)).Times(Exactly(1));
+    EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(_, _, _)).Times(Exactly(1));
     SetupIgnoredCallExpectations();
 
     mS2cBuf = std::make_unique<utils::TerribleCommandBuffer>();

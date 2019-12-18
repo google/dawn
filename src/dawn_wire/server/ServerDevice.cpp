@@ -21,9 +21,23 @@ namespace dawn_wire { namespace server {
         server->OnUncapturedError(type, message);
     }
 
+    void Server::ForwardDeviceLost(const char* message, void* userdata) {
+        auto server = static_cast<Server*>(userdata);
+        server->OnDeviceLost(message);
+    }
+
     void Server::OnUncapturedError(WGPUErrorType type, const char* message) {
         ReturnDeviceUncapturedErrorCallbackCmd cmd;
         cmd.type = type;
+        cmd.message = message;
+
+        size_t requiredSize = cmd.GetRequiredSize();
+        char* allocatedBuffer = static_cast<char*>(GetCmdSpace(requiredSize));
+        cmd.Serialize(allocatedBuffer);
+    }
+
+    void Server::OnDeviceLost(const char* message) {
+        ReturnDeviceLostCallbackCmd cmd;
         cmd.message = message;
 
         size_t requiredSize = cmd.GetRequiredSize();

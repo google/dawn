@@ -55,9 +55,19 @@ void ProcTableAsClass::DeviceSetUncapturedErrorCallback(WGPUDevice self,
                                                         void* userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->deviceErrorCallback = callback;
-    object->userdata1 = userdata;
+    object->userdata = userdata;
 
     OnDeviceSetUncapturedErrorCallback(self, callback, userdata);
+}
+
+void ProcTableAsClass::DeviceSetDeviceLostCallback(WGPUDevice self,
+                                                   WGPUDeviceLostCallback callback,
+                                                   void* userdata) {
+    auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
+    object->deviceLostCallback = callback;
+    object->userdata = userdata;
+
+    OnDeviceSetDeviceLostCallback(self, callback, userdata);
 }
 
 bool ProcTableAsClass::DevicePopErrorScope(WGPUDevice self,
@@ -72,7 +82,7 @@ void ProcTableAsClass::DeviceCreateBufferMappedAsync(WGPUDevice self,
                                                      void* userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->createBufferMappedCallback = callback;
-    object->userdata1 = userdata;
+    object->userdata = userdata;
 
     OnDeviceCreateBufferMappedAsyncCallback(self, descriptor, callback, userdata);
 }
@@ -82,7 +92,7 @@ void ProcTableAsClass::BufferMapReadAsync(WGPUBuffer self,
                                           void* userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->mapReadCallback = callback;
-    object->userdata1 = userdata;
+    object->userdata = userdata;
 
     OnBufferMapReadAsyncCallback(self, callback, userdata);
 }
@@ -92,7 +102,7 @@ void ProcTableAsClass::BufferMapWriteAsync(WGPUBuffer self,
                                            void* userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->mapWriteCallback = callback;
-    object->userdata1 = userdata;
+    object->userdata = userdata;
 
     OnBufferMapWriteAsyncCallback(self, callback, userdata);
 }
@@ -103,7 +113,7 @@ void ProcTableAsClass::FenceOnCompletion(WGPUFence self,
                                          void* userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->fenceOnCompletionCallback = callback;
-    object->userdata1 = userdata;
+    object->userdata = userdata;
 
     OnFenceOnCompletionCallback(self, value, callback, userdata);
 }
@@ -112,20 +122,26 @@ void ProcTableAsClass::CallDeviceErrorCallback(WGPUDevice device,
                                                WGPUErrorType type,
                                                const char* message) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(device);
-    object->deviceErrorCallback(type, message, object->userdata1);
+    object->deviceErrorCallback(type, message, object->userdata);
 }
+
+void ProcTableAsClass::CallDeviceLostCallback(WGPUDevice device, const char* message) {
+    auto object = reinterpret_cast<ProcTableAsClass::Object*>(device);
+    object->deviceLostCallback(message, object->userdata);
+}
+
 void ProcTableAsClass::CallCreateBufferMappedCallback(WGPUDevice device,
                                                       WGPUBufferMapAsyncStatus status,
                                                       WGPUCreateBufferMappedResult result) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(device);
-    object->createBufferMappedCallback(status, result, object->userdata1);
+    object->createBufferMappedCallback(status, result, object->userdata);
 }
 void ProcTableAsClass::CallMapReadCallback(WGPUBuffer buffer,
                                            WGPUBufferMapAsyncStatus status,
                                            const void* data,
                                            uint64_t dataLength) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(buffer);
-    object->mapReadCallback(status, data, dataLength, object->userdata1);
+    object->mapReadCallback(status, data, dataLength, object->userdata);
 }
 
 void ProcTableAsClass::CallMapWriteCallback(WGPUBuffer buffer,
@@ -133,13 +149,13 @@ void ProcTableAsClass::CallMapWriteCallback(WGPUBuffer buffer,
                                             void* data,
                                             uint64_t dataLength) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(buffer);
-    object->mapWriteCallback(status, data, dataLength, object->userdata1);
+    object->mapWriteCallback(status, data, dataLength, object->userdata);
 }
 
 void ProcTableAsClass::CallFenceOnCompletionCallback(WGPUFence fence,
                                                      WGPUFenceCompletionStatus status) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(fence);
-    object->fenceOnCompletionCallback(status, object->userdata1);
+    object->fenceOnCompletionCallback(status, object->userdata);
 }
 
 {% for type in by_category["object"] %}

@@ -32,6 +32,7 @@ namespace dawn_wire { namespace server {
         deviceData->handle = device;
 
         mProcs.deviceSetUncapturedErrorCallback(device, ForwardUncapturedError, this);
+        mProcs.deviceSetDeviceLostCallback(device, ForwardDeviceLost, this);
     }
 
     Server::~Server() {
