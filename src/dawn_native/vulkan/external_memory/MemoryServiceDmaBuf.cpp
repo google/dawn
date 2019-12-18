@@ -142,7 +142,7 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
         imageFormatProps.pNext = &externalImageFormatProps;
 
         VkResult result =
-            WkResult::WrapUnsafe(mDevice->fn.GetPhysicalDeviceImageFormatProperties2KHR(
+            VkResult::WrapUnsafe(mDevice->fn.GetPhysicalDeviceImageFormatProperties2KHR(
                 physicalDevice, &imageFormatInfo, &imageFormatProps));
         if (result != VK_SUCCESS) {
             return false;
