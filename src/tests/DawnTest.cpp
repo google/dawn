@@ -310,18 +310,18 @@ void DawnTestEnvironment::DiscoverOpenGLAdapter() {
 
 class WireServerTraceLayer : public dawn_wire::CommandHandler {
   public:
-    WireServerTraceLayer(const char* file, dawn_wire::WireServer* server)
-        : dawn_wire::CommandHandler(), mServer(server) {
-        mFile.open(file, std::ios_base::app | std::ios_base::binary | std::ios_base::trunc);
+    WireServerTraceLayer(const char* file, dawn_wire::CommandHandler* handler)
+        : dawn_wire::CommandHandler(), mHandler(handler) {
+        mFile.open(file, std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
     }
 
     const volatile char* HandleCommands(const volatile char* commands, size_t size) override {
         mFile.write(const_cast<const char*>(commands), size);
-        return mServer->HandleCommands(commands, size);
+        return mHandler->HandleCommands(commands, size);
     }
 
   private:
-    dawn_wire::WireServer* mServer;
+    dawn_wire::CommandHandler* mHandler;
     std::ofstream mFile;
 };
 
