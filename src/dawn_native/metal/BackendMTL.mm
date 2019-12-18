@@ -229,9 +229,10 @@ namespace dawn_native { namespace metal {
 
     std::vector<std::unique_ptr<AdapterBase>> Backend::DiscoverDefaultAdapters() {
         std::vector<std::unique_ptr<AdapterBase>> adapters;
-
-        if (@available(macOS 10.11, *)) {
+        BOOL supportedVersion = NO;
 #if defined(DAWN_PLATFORM_MACOS)
+        if (@available(macOS 10.11, *)) {
+            supportedVersion = YES;
             NSArray<id<MTLDevice>>* devices = MTLCopyAllDevices();
 
             for (id<MTLDevice> device in devices) {
@@ -239,14 +240,18 @@ namespace dawn_native { namespace metal {
             }
 
             [devices release];
+        }
 #endif
-        } else if (@available(iOS 8.0, *)) {
+
 #if defined(DAWN_PLATFORM_IOS)
+        if (@available(iOS 8.0, *)) {
+            supportedVersion = YES;
             // iOS only has a single device so MTLCopyAllDevices doesn't exist there.
             adapters.push_back(
                 std::make_unique<Adapter>(GetInstance(), MTLCreateSystemDefaultDevice()));
+        }
 #endif
-        } else {
+        if (!supportedVersion) {
             UNREACHABLE();
         }
         return adapters;
