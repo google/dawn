@@ -47,9 +47,6 @@ mkdir -p "$testcase_dir"
 rm -rf "$minimized_testcase_dir"
 mkdir -p "$minimized_testcase_dir"
 
-# Download the existing corpus. First argument is src, second is dst.
-gsutil -m rsync gs://clusterfuzz-corpus/libfuzzer/${fuzzer_name}/ "$testcase_dir"
-
 # Build the fuzzer and test
 autoninja -C $out_dir $fuzzer_name $test_name
 
@@ -81,7 +78,5 @@ Please test the corpus in $minimized_testcase_dir with $fuzzer_name and confirm 
 Then, run the following command to upload new testcases to the seed corpus:
 
     gsutil -m rsync $minimized_testcase_dir gs://clusterfuzz-corpus/libfuzzer/${fuzzer_name}/
-
-    WARNING: Add [-d] argument to delete all GCS files that are not also in $minimized_testcase_dir
 
 EOF
