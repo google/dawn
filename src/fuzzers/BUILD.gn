@@ -170,3 +170,15 @@ dawn_fuzzer_test("dawn_wire_server_and_frontend_fuzzer") {
 
   additional_configs = [ "${dawn_root}/src/common:dawn_internal" ]
 }
+
+dawn_fuzzer_test("dawn_wire_server_and_vulkan_backend_fuzzer") {
+  sources = [
+    "DawnWireServerAndVulkanBackendFuzzer.cpp",
+  ]
+
+  deps = [
+    ":dawn_wire_server_fuzzer_common",
+  ]
+
+  additional_configs = [ "${dawn_root}/src/common:dawn_internal" ]
+}
