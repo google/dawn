@@ -79,6 +79,20 @@ static_library("dawn_spirv_cross_fuzzer_common") {
   ]
 }
 
+static_library("dawn_wire_server_fuzzer_common") {
+  sources = [
+    "DawnWireServerFuzzer.cpp",
+    "DawnWireServerFuzzer.h",
+  ]
+  public_deps = [
+    "${dawn_root}/:libdawn_native_static",
+    "${dawn_root}/:libdawn_wire_static",
+    "${dawn_root}/src/common",
+    "${dawn_root}/src/dawn:dawncpp",
+    "${dawn_root}/src/dawn:libdawn_proc",
+  ]
+}
+
 # TODO(rharrison): Remove asan_options once signal trap is no longer
 #                  needed.
 # Uses Dawn specific options and varies input data
@@ -123,7 +137,7 @@ dawn_fuzzer_test("dawn_spvc_glsl_fast_fuzzer") {
     "DawnSPVCglslFastFuzzer.cpp",
   ]
   deps = [
-     "${dawn_shaderc_dir}:libshaderc_spvc",
+    "${dawn_shaderc_dir}:libshaderc_spvc",
   ]
 }
 
@@ -132,7 +146,7 @@ dawn_fuzzer_test("dawn_spvc_hlsl_fast_fuzzer") {
     "DawnSPVChlslFastFuzzer.cpp",
   ]
   deps = [
-     "${dawn_shaderc_dir}:libshaderc_spvc",
+    "${dawn_shaderc_dir}:libshaderc_spvc",
   ]
 }
 
@@ -141,7 +155,7 @@ dawn_fuzzer_test("dawn_spvc_msl_fast_fuzzer") {
     "DawnSPVCmslFastFuzzer.cpp",
   ]
   deps = [
-     "${dawn_shaderc_dir}:libshaderc_spvc",
+    "${dawn_shaderc_dir}:libshaderc_spvc",
   ]
 }
 
@@ -151,11 +165,7 @@ dawn_fuzzer_test("dawn_wire_server_and_frontend_fuzzer") {
   ]
 
   deps = [
-    "${dawn_root}/:libdawn_native_static",
-    "${dawn_root}/:libdawn_wire_static",
-    "${dawn_root}/src/common",
-    "${dawn_root}/src/dawn:dawncpp",
-    "${dawn_root}/src/dawn:libdawn_proc",
+    ":dawn_wire_server_fuzzer_common",
   ]
 
   additional_configs = [ "${dawn_root}/src/common:dawn_internal" ]

@@ -21,7 +21,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size);
 
 int main(int argc, char** argv) {
     if (argc != 2) {
-        std::cout << "Usage: <standalone reproducer> [FILE]" << std::endl;
+        std::cout << "Usage: <standalone reproducer> FILE" << std::endl;
         return 1;
     }
 

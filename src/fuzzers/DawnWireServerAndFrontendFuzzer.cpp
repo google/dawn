@@ -12,85 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "DawnWireServerFuzzer.h"
+
 #include "common/Assert.h"
-#include "dawn/dawn_proc.h"
-#include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
-#include "dawn_wire/WireServer.h"
-
-#include <vector>
-
-class DevNull : public dawn_wire::CommandSerializer {
-  public:
-    void* GetCmdSpace(size_t size) override {
-        if (size > buf.size()) {
-            buf.resize(size);
-        }
-        return buf.data();
-    }
-    bool Flush() override {
-        return true;
-    }
-
-  private:
-    std::vector<char> buf;
-};
-
-static WGPUProcDeviceCreateSwapChain originalDeviceCreateSwapChain = nullptr;
-
-WGPUSwapChain ErrorDeviceCreateSwapChain(WGPUDevice device, const WGPUSwapChainDescriptor*) {
-    WGPUSwapChainDescriptor desc;
-    desc.nextInChain = nullptr;
-    desc.label = nullptr;
-    // A 0 implementation will trigger a swapchain creation error.
-    desc.implementation = 0;
-    return originalDeviceCreateSwapChain(device, &desc);
-}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
-    DawnProcTable procs = dawn_native::GetProcs();
+    return DawnWireServerFuzzer::Run(data, size, [](dawn_native::Instance* instance) {
+        instance->DiscoverDefaultAdapters();
 
-    // Swapchains receive a pointer to an implementation. The fuzzer will pass garbage in so we
-    // intercept calls to create swapchains and make sure they always return error swapchains.
-    // This is ok for fuzzing because embedders of dawn_wire would always define their own
-    // swapchain handling.
-    originalDeviceCreateSwapChain = procs.deviceCreateSwapChain;
-    procs.deviceCreateSwapChain = ErrorDeviceCreateSwapChain;
+        std::vector<dawn_native::Adapter> adapters = instance->GetAdapters();
 
-    dawnProcSetProcs(&procs);
-
-    // Create an instance and find the null adapter to create a device with.
-    std::unique_ptr<dawn_native::Instance> instance = std::make_unique<dawn_native::Instance>();
-    instance->DiscoverDefaultAdapters();
-
-    std::vector<dawn_native::Adapter> adapters = instance->GetAdapters();
-
-    wgpu::Device nullDevice;
-    for (dawn_native::Adapter adapter : adapters) {
-        if (adapter.GetBackendType() == dawn_native::BackendType::Null) {
-            nullDevice = wgpu::Device::Acquire(adapter.CreateDevice());
-            break;
+        wgpu::Device nullDevice;
+        for (dawn_native::Adapter adapter : adapters) {
+            if (adapter.GetBackendType() == dawn_native::BackendType::Null) {
+                nullDevice = wgpu::Device::Acquire(adapter.CreateDevice());
+                break;
+            }
         }
-    }
-    ASSERT(nullDevice.Get() != nullptr);
 
-    DevNull devNull;
-    dawn_wire::WireServerDescriptor serverDesc = {};
-    serverDesc.device = nullDevice.Get();
-    serverDesc.procs = &procs;
-    serverDesc.serializer = &devNull;
-
-    std::unique_ptr<dawn_wire::WireServer> wireServer(new dawn_wire::WireServer(serverDesc));
-
-    wireServer->HandleCommands(reinterpret_cast<const char*>(data), size);
-
-    // Fake waiting for all previous commands before destroying the server.
-    nullDevice.Tick();
-
-    // Destroy the server before the device because it needs to free all objects.
-    wireServer = nullptr;
-    nullDevice = nullptr;
-    instance = nullptr;
-
-    return 0;
+        ASSERT(nullDevice.Get() != nullptr);
+        return nullDevice;
+    });
 }
