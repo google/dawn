@@ -15,11 +15,17 @@
 #include "common/Assert.h"
 #include "common/Log.h"
 
+#include <cstdlib>
+
 void HandleAssertionFailure(const char* file,
                             const char* function,
                             int line,
                             const char* condition) {
     dawn::ErrorLog() << "Assertion failure at " << file << ":" << line << " (" << function
                      << "): " << condition;
+#if defined(DAWN_ABORT_ON_ASSERT)
+    abort();
+#else
     DAWN_BREAKPOINT();
+#endif
 }

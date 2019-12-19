@@ -25,6 +25,12 @@ if (build_with_chromium) {
   dcheck_always_on = false
 }
 
+if (build_with_chromium) {
+  import("//build/config/sanitizers/sanitizers.gni")
+} else {
+  use_fuzzing_engine = false
+}
+
 ###############################################################################
 # Common dawn configs
 ###############################################################################
@@ -43,8 +49,14 @@ config("dawn_internal") {
   ]
 
   defines = []
-  if (dawn_always_assert || dcheck_always_on || is_debug) {
+  if (dawn_always_assert || dcheck_always_on || is_debug ||
+      use_fuzzing_engine) {
     defines += [ "DAWN_ENABLE_ASSERTS" ]
+  }
+
+  if (use_fuzzing_engine) {
+    # Does a hard abort when an assertion fails so that fuzzers catch and parse the failure.
+    defines += [ "DAWN_ABORT_ON_ASSERT" ]
   }
 
   if (dawn_enable_d3d12) {
