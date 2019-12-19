@@ -493,6 +493,22 @@ class BindGroupLayoutValidationTest : public ValidationTest {
     }
 };
 
+// Tests setting storage buffer and readonly storage buffer bindings in vertex and fragment shader.
+TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutStorageBindingsInVertexShader) {
+    // Checks that storage buffer binding is not supported in vertex shader.
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Vertex, wgpu::BindingType::StorageBuffer}}));
+
+    utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Vertex, wgpu::BindingType::ReadonlyStorageBuffer}});
+
+    utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::StorageBuffer}});
+
+    utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageBuffer}});
+}
+
 // Tests setting OOB checks for kMaxBindingsPerGroup in bind group layouts.
 TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutBindingOOB) {
     // Checks that kMaxBindingsPerGroup - 1 is valid.

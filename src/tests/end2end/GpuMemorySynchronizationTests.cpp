@@ -179,7 +179,7 @@ TEST_P(GpuMemorySyncTests, RenderPassToComputePass) {
     pass0.Draw(1, 1, 0, 0);
     pass0.EndPass();
 
-    // Read that data in render pass.
+    // Read that data in compute pass.
     wgpu::ComputePassEncoder pass1 = encoder.BeginComputePass();
     pass1.SetPipeline(compute);
     pass1.SetBindGroup(0, bindGroup1);
@@ -210,7 +210,7 @@ TEST_P(GpuMemorySyncTests, ComputePassToRenderPass) {
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
-    // Write data into a storage buffer in render pass.
+    // Write data into a storage buffer in compute pass.
     wgpu::ComputePassEncoder pass0 = encoder.BeginComputePass();
     pass0.SetPipeline(compute);
     pass0.SetBindGroup(0, bindGroup1);

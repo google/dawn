@@ -132,9 +132,14 @@ namespace dawn_native {
 
                     BindGroupLayoutBinding bindingSlot;
                     bindingSlot.binding = binding;
-                    bindingSlot.visibility = wgpu::ShaderStage::Vertex |
-                                             wgpu::ShaderStage::Fragment |
-                                             wgpu::ShaderStage::Compute;
+                    if (bindingInfo.type == wgpu::BindingType::StorageBuffer) {
+                        bindingSlot.visibility =
+                            wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute;
+                    } else {
+                        bindingSlot.visibility = wgpu::ShaderStage::Vertex |
+                                                 wgpu::ShaderStage::Fragment |
+                                                 wgpu::ShaderStage::Compute;
+                    }
                     bindingSlot.type = bindingInfo.type;
                     bindingSlot.hasDynamicOffset = false;
                     bindingSlot.multisampled = bindingInfo.multisampled;

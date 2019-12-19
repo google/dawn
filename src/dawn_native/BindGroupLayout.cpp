@@ -49,6 +49,12 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("some binding index was specified more than once");
             }
 
+            if (binding.type == wgpu::BindingType::StorageBuffer &&
+                (binding.visibility & wgpu::ShaderStage::Vertex) != 0) {
+                return DAWN_VALIDATION_ERROR(
+                    "storage buffer binding is not supported in vertex shader");
+            }
+
             switch (binding.type) {
                 case wgpu::BindingType::UniformBuffer:
                     if (binding.hasDynamicOffset) {

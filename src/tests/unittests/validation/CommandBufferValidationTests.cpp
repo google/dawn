@@ -210,7 +210,7 @@ TEST_F(CommandBufferValidationTest, BufferWithReadAndWriteUsage) {
 
     // Create the bind group to use the buffer as storage
     wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Vertex, wgpu::BindingType::StorageBuffer}});
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::StorageBuffer}});
     wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, 4}});
 
     // Use the buffer as both index and storage in the same pass
@@ -258,8 +258,8 @@ TEST_F(CommandBufferValidationTest, BufferWithReadAndWriteStorageBufferUsage) {
 
     // Create the bind group to use the buffer as storage
     wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Vertex, wgpu::BindingType::StorageBuffer},
-                 {1, wgpu::ShaderStage::Vertex, wgpu::BindingType::ReadonlyStorageBuffer}});
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::StorageBuffer},
+                 {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageBuffer}});
     wgpu::BindGroup bg =
         utils::MakeBindGroup(device, bgl, {{0, buffer, 0, 4}, {1, buffer, 256, 4}});
 
