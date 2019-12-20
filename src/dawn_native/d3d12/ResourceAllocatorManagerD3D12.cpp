@@ -108,6 +108,28 @@ namespace dawn_native { namespace d3d12 {
                     UNREACHABLE();
             }
         }
+
+        uint64_t GetResourcePlacementAlignment(ResourceHeapKind resourceHeapKind,
+                                               uint32_t sampleCount,
+                                               uint64_t requestedAlignment) {
+            switch (resourceHeapKind) {
+                // Small resources can take advantage of smaller alignments. For example,
+                // if the most detailed mip can fit under 64KB, 4KB alignments can be used.
+                // Must be non-depth or without render-target to use small resource alignment.
+                // This also applies to MSAA textures (4MB => 64KB).
+                //
+                // Note: Only known to be used for small textures; however, MSDN suggests
+                // it could be extended for more cases. If so, this could default to always
+                // attempt small resource placement.
+                // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_resource_desc
+                case Default_OnlyNonRenderableOrDepthTextures:
+                    return (sampleCount > 1) ? D3D12_SMALL_MSAA_RESOURCE_PLACEMENT_ALIGNMENT
+                                             : D3D12_SMALL_RESOURCE_PLACEMENT_ALIGNMENT;
+                default:
+                    return requestedAlignment;
+            }
+        }
+
     }  // namespace
 
     ResourceAllocatorManager::ResourceAllocatorManager(Device* device) : mDevice(device) {
@@ -191,31 +213,21 @@ namespace dawn_native { namespace d3d12 {
         D3D12_HEAP_TYPE heapType,
         const D3D12_RESOURCE_DESC& requestedResourceDescriptor,
         D3D12_RESOURCE_STATES initialUsage) {
-        const size_t resourceHeapKindIndex =
+        const ResourceHeapKind resourceHeapKind =
             GetResourceHeapKind(requestedResourceDescriptor.Dimension, heapType,
                                 requestedResourceDescriptor.Flags, mResourceHeapTier);
 
-        // Small resources can take advantage of smaller alignments. For example,
-        // if the most detailed mip can fit under 64KB, 4KB alignments can be used.
-        // Must be non-depth or without render-target to use small resource alignment.
-        //
-        // Note: Only known to be used for small textures; however, MSDN suggests
-        // it could be extended for more cases. If so, this could default to always attempt small
-        // resource placement.
-        // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_resource_desc
         D3D12_RESOURCE_DESC resourceDescriptor = requestedResourceDescriptor;
-        resourceDescriptor.Alignment =
-            (resourceHeapKindIndex == Default_OnlyNonRenderableOrDepthTextures)
-                ? D3D12_SMALL_RESOURCE_PLACEMENT_ALIGNMENT
-                : requestedResourceDescriptor.Alignment;
+        resourceDescriptor.Alignment = GetResourcePlacementAlignment(
+            resourceHeapKind, requestedResourceDescriptor.SampleDesc.Count,
+            requestedResourceDescriptor.Alignment);
 
         D3D12_RESOURCE_ALLOCATION_INFO resourceInfo =
             mDevice->GetD3D12Device()->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
 
-        // If the request for small resource alignment was rejected, let D3D tell us what the
+        // If the requested resource alignment was rejected, let D3D tell us what the
         // required alignment is for this resource.
-        if (resourceHeapKindIndex == Default_OnlyNonRenderableOrDepthTextures &&
-            resourceInfo.Alignment != D3D12_SMALL_RESOURCE_PLACEMENT_ALIGNMENT) {
+        if (resourceDescriptor.Alignment != resourceInfo.Alignment) {
             resourceDescriptor.Alignment = 0;
             resourceInfo =
                 mDevice->GetD3D12Device()->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
@@ -225,7 +237,7 @@ namespace dawn_native { namespace d3d12 {
         }
 
         BuddyMemoryAllocator* allocator =
-            mSubAllocatedResourceAllocators[resourceHeapKindIndex].get();
+            mSubAllocatedResourceAllocators[static_cast<size_t>(resourceHeapKind)].get();
 
         ResourceMemoryAllocation allocation;
         DAWN_TRY_ASSIGN(allocation,
