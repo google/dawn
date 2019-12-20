@@ -91,6 +91,11 @@ class DawnPerfTestBase {
     void DoRunLoop(double maxRunTime);
     void OutputResults();
 
+    void PrintResultImpl(const std::string& trace,
+                         const std::string& value,
+                         const std::string& units,
+                         bool important) const;
+
     virtual void Step() = 0;
 
     DawnTestBase* mTest;
