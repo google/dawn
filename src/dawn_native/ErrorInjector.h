@@ -26,12 +26,7 @@ namespace dawn_native {
         bool injected;
     };
 
-    void EnableErrorInjector();
-    void DisableErrorInjector();
-    void ClearErrorInjector();
-
     bool ErrorInjectorEnabled();
-    uint64_t AcquireErrorInjectorCallCount();
 
     bool ShouldInjectError();
 
@@ -47,8 +42,6 @@ namespace dawn_native {
         }
         return MaybeInjectError(errorTypes...);
     }
-
-    void InjectErrorAt(uint64_t index);
 
 }  // namespace dawn_native
 
