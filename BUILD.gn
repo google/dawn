@@ -1020,7 +1020,6 @@ test("dawn_perf_tests") {
     ":dawn_utils",
     ":libdawn_native",
     ":libdawn_wire",
-    "${dawn_jsoncpp_dir}:jsoncpp",
     "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawncpp",
     "${dawn_root}/src/dawn:libdawn_proc",

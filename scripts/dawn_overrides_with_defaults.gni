@@ -41,10 +41,6 @@ if (!defined(dawn_googletest_dir)) {
   dawn_googletest_dir = "//third_party/googletest"
 }
 
-if (!defined(dawn_jsoncpp_dir)) {
-  dawn_jsoncpp_dir = "//third_party/jsoncpp"
-}
-
 if (!defined(dawn_shaderc_dir)) {
   dawn_shaderc_dir = "//third_party/shaderc"
 }

@@ -73,17 +73,6 @@ deps = {
     'condition': 'dawn_standalone',
   },
 
-  # jsoncpp for perf tests trace events
-  'third_party/jsoncpp': {
-    'url': '{chromium_git}/chromium/src/third_party/jsoncpp@571788934b5ee8643d53e5d054534abbe6006168',
-    'condition': 'dawn_standalone',
-  },
-
-  'third_party/jsoncpp/source': {
-    'url' : '{chromium_git}/external/github.com/open-source-parsers/jsoncpp@645250b6690785be60ab6780ce4b58698d884d11',
-    'condition': 'dawn_standalone',
-  },
-
   # GLFW for tests and samples
   'third_party/glfw': {
     'url': '{chromium_git}/external/github.com/glfw/glfw@2de2589f910b1a85905f425be4d32f33cec092df',
