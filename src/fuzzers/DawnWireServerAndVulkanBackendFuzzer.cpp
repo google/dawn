@@ -14,29 +14,25 @@
 
 #include "DawnWireServerFuzzer.h"
 
+#include "common/Assert.h"
 #include "dawn_native/DawnNative.h"
 
-extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
-    return DawnWireServerFuzzer::Initialize(argc, argv);
-}
-
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
-    return DawnWireServerFuzzer::Run(
-        data, size,
-        [](dawn_native::Instance* instance) {
-            instance->DiscoverDefaultAdapters();
+    return DawnWireServerFuzzer::Run(data, size, [](dawn_native::Instance* instance) {
+        instance->DiscoverDefaultAdapters();
 
-            std::vector<dawn_native::Adapter> adapters = instance->GetAdapters();
+        std::vector<dawn_native::Adapter> adapters = instance->GetAdapters();
 
-            wgpu::Device device;
-            for (dawn_native::Adapter adapter : adapters) {
-                if (adapter.GetBackendType() == dawn_native::BackendType::Vulkan &&
-                    adapter.GetDeviceType() == dawn_native::DeviceType::CPU) {
-                    device = wgpu::Device::Acquire(adapter.CreateDevice());
-                    break;
-                }
+        wgpu::Device device;
+        for (dawn_native::Adapter adapter : adapters) {
+            if (adapter.GetBackendType() == dawn_native::BackendType::Vulkan &&
+                adapter.GetDeviceType() == dawn_native::DeviceType::CPU) {
+                device = wgpu::Device::Acquire(adapter.CreateDevice());
+                break;
             }
-            return device;
-        },
-        true /* supportsErrorInjection */);
+        }
+
+        ASSERT(device.Get() != nullptr);
+        return device;
+    });
 }
