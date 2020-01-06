@@ -458,7 +458,7 @@ TEST_F(BindGroupValidationTest, ErrorLayout) {
     // Control case, creating with the good layout works
     utils::MakeBindGroup(device, goodLayout, {{0, mUBO, 0, 256}});
 
-    // Control case, creating with the good layout works
+    // Creating with an error layout fails
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, errorLayout, {{0, mUBO, 0, 256}}));
 }
 
