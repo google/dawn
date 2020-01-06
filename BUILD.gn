@@ -941,8 +941,9 @@ source_set("dawn_white_box_tests_sources") {
 
   deps = [
     ":dawn_utils",
-    ":libdawn_native",
     ":libdawn_native_sources",
+    ":libdawn_native_static",  # Static because the tests both link against and have libdawn_native
+                               # sources. MSVC errors when both importing and exporting symbols.
     ":libdawn_wire",
     "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawncpp",

@@ -18,6 +18,10 @@
 
 #include "spvc/spvc.hpp"
 
+extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
+    return 0;
+}
+
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     shaderc_spvc::Context context;
     if (!context.IsValid()) {

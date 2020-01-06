@@ -27,6 +27,8 @@ namespace DawnWireServerFuzzer {
 
     using MakeDeviceFn = std::function<wgpu::Device(dawn_native::Instance*)>;
 
-    int Run(const uint8_t* data, size_t size, MakeDeviceFn MakeDevice);
+    int Initialize(int* argc, char*** argv);
+
+    int Run(const uint8_t* data, size_t size, MakeDeviceFn MakeDevice, bool supportsErrorInjection);
 
 }  // namespace DawnWireServerFuzzer

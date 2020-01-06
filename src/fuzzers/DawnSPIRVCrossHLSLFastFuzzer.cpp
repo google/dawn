@@ -51,6 +51,10 @@ namespace {
 
 }  // namespace
 
+extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
+    return 0;
+}
+
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     return DawnSPIRVCrossFuzzer::Run(data, size, FuzzTask);
 }

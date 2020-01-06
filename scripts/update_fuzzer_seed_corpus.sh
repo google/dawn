@@ -20,28 +20,38 @@
 # Exit if anything fails
 set -e
 
-if [ "$#" -ne 3 ]; then
+if [ "$#" -lt 3 ]; then
 cat << EOF
 
 Usage:
-  $0 <out_dir> <fuzzer_name> <test_name>
+  $0 <out_dir> <fuzzer_name> <test_name> [additional_test_args...]
 
 Example:
-  $0 out/fuzz dawn_wire_server_and_frontend_fuzzer dawn_end2end_tests
+  $0 out/fuzz dawn_wire_server_and_vulkan_backend_fuzzer dawn_end2end_tests --gtest_filter=*Vulkan
 
 EOF
     exit 1
 fi
 
+all_args=("$@")
 out_dir=$1
 fuzzer_name=$2
 test_name=$3
+additional_test_args=("${all_args[@]:3}")
 
 testcase_dir="/tmp/testcases/${fuzzer_name}/"
+injected_error_testcase_dir="/tmp/testcases/${fuzzer_name}_injected/"
 minimized_testcase_dir="/tmp/testcases/${fuzzer_name}_minimized/"
+
+# Print commands so it's clear what is being executed
+set -x
 
 # Make a directory for temporarily storing testcases
 mkdir -p "$testcase_dir"
+
+# Make an empty directory for temporarily storing testcases with injected errors
+rm -rf "$injected_error_testcase_dir"
+mkdir -p "$injected_error_testcase_dir"
 
 # Make an empty directory for temporarily storing minimized testcases
 rm -rf "$minimized_testcase_dir"
@@ -54,10 +64,16 @@ fuzzer_binary="${out_dir}/${fuzzer_name}"
 test_binary="${out_dir}/${test_name}"
 
 # Run the test binary
-$test_binary --use-wire --wire-trace-dir="$testcase_dir"
+$test_binary --use-wire --wire-trace-dir="$testcase_dir" $additional_test_args
 
-# Run the fuzzer to minimize the corpus
-$fuzzer_binary -merge=1 "$minimized_testcase_dir" "$testcase_dir"
+# Run the fuzzer over the testcases to inject errors
+$fuzzer_binary --injected-error-testcase-dir="$injected_error_testcase_dir" -runs=0 "$testcase_dir"
+
+# Run the fuzzer to minimize the testcases + injected errors
+$fuzzer_binary -merge=1 "$minimized_testcase_dir" "$injected_error_testcase_dir" "$testcase_dir"
+
+# Turn off command printing
+set +x
 
 if [ -z "$(ls -A $minimized_testcase_dir)" ]; then
 cat << EOF

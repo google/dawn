@@ -15,6 +15,7 @@
 #include "dawn_native/ErrorInjector.h"
 
 #include "common/Assert.h"
+#include "dawn_native/DawnNative.h"
 
 namespace dawn_native {
 
