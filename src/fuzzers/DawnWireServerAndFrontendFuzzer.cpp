@@ -25,8 +25,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     return DawnWireServerFuzzer::Run(
         data, size,
         [](dawn_native::Instance* instance) {
-            instance->DiscoverDefaultAdapters();
-
             std::vector<dawn_native::Adapter> adapters = instance->GetAdapters();
 
             wgpu::Device nullDevice;

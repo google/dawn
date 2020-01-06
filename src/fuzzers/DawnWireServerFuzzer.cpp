@@ -43,6 +43,7 @@ namespace {
         std::vector<char> buf;
     };
 
+    std::unique_ptr<dawn_native::Instance> sInstance;
     WGPUProcDeviceCreateSwapChain sOriginalDeviceCreateSwapChain = nullptr;
 
     std::string sInjectedErrorTestcaseOutDir;
@@ -86,6 +87,12 @@ int DawnWireServerFuzzer::Initialize(int* argc, char*** argv) {
     // Write the argument count
     *argc = argcOut;
 
+    // TODO(crbug.com/1038952): The Instance must be static because destructing the vkInstance with
+    // Swiftshader crashes libFuzzer. When this is fixed, move this into Run so that error injection
+    // for adapter discovery can be fuzzed.
+    sInstance = std::make_unique<dawn_native::Instance>();
+    sInstance->DiscoverDefaultAdapters();
+
     return 0;
 }
 
@@ -125,8 +132,7 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
 
     dawnProcSetProcs(&procs);
 
-    std::unique_ptr<dawn_native::Instance> instance = std::make_unique<dawn_native::Instance>();
-    wgpu::Device device = MakeDevice(instance.get());
+    wgpu::Device device = MakeDevice(sInstance.get());
     if (!device) {
         // We should only ever fail device creation if an error was injected.
         ASSERT(didInjectError);
@@ -149,7 +155,6 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
     // Destroy the server before the device because it needs to free all objects.
     wireServer = nullptr;
     device = nullptr;
-    instance = nullptr;
 
     // If we support error injection, and an output directory was provided, output copies of the
     // original testcase data, prepended with the injected error index.
