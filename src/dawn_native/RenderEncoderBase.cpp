@@ -139,6 +139,10 @@ namespace dawn_native {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             DAWN_TRY(GetDevice()->ValidateObject(buffer));
 
+            if (slot >= kMaxVertexBuffers) {
+                return DAWN_VALIDATION_ERROR("Vertex buffer slot out of bounds");
+            }
+
             SetVertexBufferCmd* cmd =
                 allocator->Allocate<SetVertexBufferCmd>(Command::SetVertexBuffer);
             cmd->slot = slot;

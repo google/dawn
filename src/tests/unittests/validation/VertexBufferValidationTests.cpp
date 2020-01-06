@@ -16,6 +16,7 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
+#include "utils/ComboRenderBundleEncoderDescriptor.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
@@ -86,14 +87,14 @@ class VertexBufferValidationTest : public ValidationTest {
 
 TEST_F(VertexBufferValidationTest, VertexBuffersInheritedBetweenPipelines) {
     DummyRenderPass renderPass(device);
-    auto vsModule2 = MakeVertexShader(2);
-    auto vsModule1 = MakeVertexShader(1);
+    wgpu::ShaderModule vsModule2 = MakeVertexShader(2);
+    wgpu::ShaderModule vsModule1 = MakeVertexShader(1);
 
-    auto pipeline2 = MakeRenderPipeline(vsModule2, 2);
-    auto pipeline1 = MakeRenderPipeline(vsModule1, 1);
+    wgpu::RenderPipeline pipeline2 = MakeRenderPipeline(vsModule2, 2);
+    wgpu::RenderPipeline pipeline1 = MakeRenderPipeline(vsModule1, 1);
 
-    auto vertexBuffer1 = MakeVertexBuffer();
-    auto vertexBuffer2 = MakeVertexBuffer();
+    wgpu::Buffer vertexBuffer1 = MakeVertexBuffer();
+    wgpu::Buffer vertexBuffer2 = MakeVertexBuffer();
 
     // Check failure when vertex buffer is not set
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -122,14 +123,14 @@ TEST_F(VertexBufferValidationTest, VertexBuffersInheritedBetweenPipelines) {
 
 TEST_F(VertexBufferValidationTest, VertexBuffersNotInheritedBetweenRendePasses) {
     DummyRenderPass renderPass(device);
-    auto vsModule2 = MakeVertexShader(2);
-    auto vsModule1 = MakeVertexShader(1);
+    wgpu::ShaderModule vsModule2 = MakeVertexShader(2);
+    wgpu::ShaderModule vsModule1 = MakeVertexShader(1);
 
-    auto pipeline2 = MakeRenderPipeline(vsModule2, 2);
-    auto pipeline1 = MakeRenderPipeline(vsModule1, 1);
+    wgpu::RenderPipeline pipeline2 = MakeRenderPipeline(vsModule2, 2);
+    wgpu::RenderPipeline pipeline1 = MakeRenderPipeline(vsModule1, 1);
 
-    auto vertexBuffer1 = MakeVertexBuffer();
-    auto vertexBuffer2 = MakeVertexBuffer();
+    wgpu::Buffer vertexBuffer1 = MakeVertexBuffer();
+    wgpu::Buffer vertexBuffer2 = MakeVertexBuffer();
 
     // Check success when vertex buffer is set for each render pass
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -167,4 +168,46 @@ TEST_F(VertexBufferValidationTest, VertexBuffersNotInheritedBetweenRendePasses) 
         pass.EndPass();
     }
     ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
+TEST_F(VertexBufferValidationTest, VertexBufferSlotValidation) {
+    wgpu::Buffer buffer = MakeVertexBuffer();
+
+    DummyRenderPass renderPass(device);
+
+    // Control case: using the last vertex buffer slot in render passes is ok.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetVertexBuffer(kMaxVertexBuffers - 1, buffer, 0);
+        pass.EndPass();
+        encoder.Finish();
+    }
+
+    // Error case: using past the last vertex buffer slot in render pass fails.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetVertexBuffer(kMaxVertexBuffers, buffer, 0);
+        pass.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    utils::ComboRenderBundleEncoderDescriptor renderBundleDesc = {};
+    renderBundleDesc.colorFormatsCount = 1;
+    renderBundleDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
+
+    // Control case: using the last vertex buffer slot in render bundles is ok.
+    {
+        wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
+        encoder.SetVertexBuffer(kMaxVertexBuffers - 1, buffer, 0);
+        encoder.Finish();
+    }
+
+    // Error case: using past the last vertex buffer slot in render bundle fails.
+    {
+        wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
+        encoder.SetVertexBuffer(kMaxVertexBuffers, buffer, 0);
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
 }
