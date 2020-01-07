@@ -15,7 +15,7 @@
 #include "tests/DawnTest.h"
 
 #include "common/Assert.h"
-#include "common/Constants.h"
+#include "common/GPUInfo.h"
 #include "common/Log.h"
 #include "common/Math.h"
 #include "common/Platform.h"
@@ -362,27 +362,27 @@ bool DawnTestBase::IsVulkan() const {
 }
 
 bool DawnTestBase::IsAMD() const {
-    return mPCIInfo.vendorId == kVendorID_AMD;
+    return gpu_info::IsAMD(mPCIInfo.vendorId);
 }
 
 bool DawnTestBase::IsARM() const {
-    return mPCIInfo.vendorId == kVendorID_ARM;
+    return gpu_info::IsARM(mPCIInfo.vendorId);
 }
 
 bool DawnTestBase::IsImgTec() const {
-    return mPCIInfo.vendorId == kVendorID_ImgTec;
+    return gpu_info::IsImgTec(mPCIInfo.vendorId);
 }
 
 bool DawnTestBase::IsIntel() const {
-    return mPCIInfo.vendorId == kVendorID_Intel;
+    return gpu_info::IsIntel(mPCIInfo.vendorId);
 }
 
 bool DawnTestBase::IsNvidia() const {
-    return mPCIInfo.vendorId == kVendorID_Nvidia;
+    return gpu_info::IsNvidia(mPCIInfo.vendorId);
 }
 
 bool DawnTestBase::IsQualcomm() const {
-    return mPCIInfo.vendorId == kVendorID_Qualcomm;
+    return gpu_info::IsQualcomm(mPCIInfo.vendorId);
 }
 
 bool DawnTestBase::IsWindows() const {

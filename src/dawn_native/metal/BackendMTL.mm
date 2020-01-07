@@ -14,7 +14,7 @@
 
 #include "dawn_native/metal/BackendMTL.h"
 
-#include "common/Constants.h"
+#include "common/GPUInfo.h"
 #include "common/Platform.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/MetalBackend.h"
@@ -39,11 +39,11 @@ namespace dawn_native { namespace metal {
         };
 
 #if defined(DAWN_PLATFORM_MACOS)
-        const Vendor kVendors[] = {{"AMD", kVendorID_AMD},
-                                   {"Radeon", kVendorID_AMD},
-                                   {"Intel", kVendorID_Intel},
-                                   {"Geforce", kVendorID_Nvidia},
-                                   {"Quadro", kVendorID_Nvidia}};
+        const Vendor kVendors[] = {{"AMD", gpu_info::kVendorID_AMD},
+                                   {"Radeon", gpu_info::kVendorID_AMD},
+                                   {"Intel", gpu_info::kVendorID_Intel},
+                                   {"Geforce", gpu_info::kVendorID_Nvidia},
+                                   {"Quadro", gpu_info::kVendorID_Nvidia}};
 
         // Find vendor ID from MTLDevice name.
         MaybeError GetVendorIdFromVendors(id<MTLDevice> device, PCIIDs* ids) {

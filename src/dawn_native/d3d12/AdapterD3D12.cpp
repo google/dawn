@@ -66,13 +66,13 @@ namespace dawn_native { namespace d3d12 {
             return DAWN_DEVICE_LOST_ERROR("D3D12CreateDevice failed");
         }
 
-        DAWN_TRY_ASSIGN(mDeviceInfo, GatherDeviceInfo(*this));
-
         DXGI_ADAPTER_DESC1 adapterDesc;
         mHardwareAdapter->GetDesc1(&adapterDesc);
 
         mPCIInfo.deviceId = adapterDesc.DeviceId;
         mPCIInfo.vendorId = adapterDesc.VendorId;
+
+        DAWN_TRY_ASSIGN(mDeviceInfo, GatherDeviceInfo(*this));
 
         if (adapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) {
             mDeviceType = DeviceType::CPU;
