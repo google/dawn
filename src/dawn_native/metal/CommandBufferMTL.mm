@@ -29,23 +29,6 @@
 
 namespace dawn_native { namespace metal {
 
-    struct GlobalEncoders {
-        id<MTLBlitCommandEncoder> blit = nil;
-
-        void Finish() {
-            if (blit != nil) {
-                [blit endEncoding];
-                blit = nil;  // This will be autoreleased.
-            }
-        }
-
-        void EnsureBlit(id<MTLCommandBuffer> commandBuffer) {
-            if (blit == nil) {
-                blit = [commandBuffer blitCommandEncoder];
-            }
-        }
-    };
-
     namespace {
 
         // Allows this file to use MTLStoreActionStoreAndMultismapleResolve because the logic is
@@ -133,7 +116,7 @@ namespace dawn_native { namespace metal {
 
         // Helper function for Toggle EmulateStoreAndMSAAResolve
         void ResolveInAnotherRenderPass(
-            id<MTLCommandBuffer> commandBuffer,
+            CommandRecordingContext* commandContext,
             const MTLRenderPassDescriptor* mtlRenderPass,
             const std::array<id<MTLTexture>, kMaxColorAttachments>& resolveTextures) {
             MTLRenderPassDescriptor* mtlRenderPassForResolve =
@@ -155,9 +138,8 @@ namespace dawn_native { namespace metal {
                     mtlRenderPass.colorAttachments[i].resolveSlice;
             }
 
-            id<MTLRenderCommandEncoder> encoder =
-                [commandBuffer renderCommandEncoderWithDescriptor:mtlRenderPassForResolve];
-            [encoder endEncoding];
+            commandContext->BeginRender(mtlRenderPassForResolve);
+            commandContext->EndRender();
         }
 
         // Helper functions for Toggle AlwaysResolveIntoZeroLevelAndLayer
@@ -182,24 +164,22 @@ namespace dawn_native { namespace metal {
             return resolveTexture;
         }
 
-        void CopyIntoTrueResolveTarget(id<MTLCommandBuffer> commandBuffer,
+        void CopyIntoTrueResolveTarget(CommandRecordingContext* commandContext,
                                        id<MTLTexture> mtlTrueResolveTexture,
                                        uint32_t trueResolveLevel,
                                        uint32_t trueResolveSlice,
                                        id<MTLTexture> temporaryResolveTexture,
                                        uint32_t width,
-                                       uint32_t height,
-                                       GlobalEncoders* encoders) {
-            encoders->EnsureBlit(commandBuffer);
-            [encoders->blit copyFromTexture:temporaryResolveTexture
-                                sourceSlice:0
-                                sourceLevel:0
-                               sourceOrigin:MTLOriginMake(0, 0, 0)
-                                 sourceSize:MTLSizeMake(width, height, 1)
-                                  toTexture:mtlTrueResolveTexture
-                           destinationSlice:trueResolveSlice
-                           destinationLevel:trueResolveLevel
-                          destinationOrigin:MTLOriginMake(0, 0, 0)];
+                                       uint32_t height) {
+            [commandContext->EnsureBlit() copyFromTexture:temporaryResolveTexture
+                                              sourceSlice:0
+                                              sourceLevel:0
+                                             sourceOrigin:MTLOriginMake(0, 0, 0)
+                                               sourceSize:MTLSizeMake(width, height, 1)
+                                                toTexture:mtlTrueResolveTexture
+                                         destinationSlice:trueResolveSlice
+                                         destinationLevel:trueResolveLevel
+                                        destinationOrigin:MTLOriginMake(0, 0, 0)];
         }
 
         // Metal uses a physical addressing mode which means buffers in the shading language are
@@ -608,34 +588,33 @@ namespace dawn_native { namespace metal {
         FreeCommands(&mCommands);
     }
 
-    void CommandBuffer::FillCommands(id<MTLCommandBuffer> commandBuffer) {
-        GlobalEncoders encoders;
-
+    void CommandBuffer::FillCommands(CommandRecordingContext* commandContext) {
         Command type;
         while (mCommands.NextCommandId(&type)) {
             switch (type) {
                 case Command::BeginComputePass: {
                     mCommands.NextCommand<BeginComputePassCmd>();
-                    encoders.Finish();
-                    EncodeComputePass(commandBuffer);
+
+                    commandContext->EndBlit();
+                    EncodeComputePass(commandContext);
                 } break;
 
                 case Command::BeginRenderPass: {
                     BeginRenderPassCmd* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
-                    encoders.Finish();
+                    commandContext->EndBlit();
                     MTLRenderPassDescriptor* descriptor = CreateMTLRenderPassDescriptor(cmd);
-                    EncodeRenderPass(commandBuffer, descriptor, &encoders, cmd->width, cmd->height);
+                    EncodeRenderPass(commandContext, descriptor, cmd->width, cmd->height);
                 } break;
 
                 case Command::CopyBufferToBuffer: {
                     CopyBufferToBufferCmd* copy = mCommands.NextCommand<CopyBufferToBufferCmd>();
 
-                    encoders.EnsureBlit(commandBuffer);
-                    [encoders.blit copyFromBuffer:ToBackend(copy->source)->GetMTLBuffer()
-                                     sourceOffset:copy->sourceOffset
-                                         toBuffer:ToBackend(copy->destination)->GetMTLBuffer()
-                                destinationOffset:copy->destinationOffset
-                                             size:copy->size];
+                    [commandContext->EnsureBlit()
+                           copyFromBuffer:ToBackend(copy->source)->GetMTLBuffer()
+                             sourceOffset:copy->sourceOffset
+                                 toBuffer:ToBackend(copy->destination)->GetMTLBuffer()
+                        destinationOffset:copy->destinationOffset
+                                     size:copy->size];
                 } break;
 
                 case Command::CopyBufferToTexture: {
@@ -651,18 +630,17 @@ namespace dawn_native { namespace metal {
                         dst.origin, copySize, texture->GetFormat(), virtualSizeAtLevel,
                         buffer->GetSize(), src.offset, src.rowPitch, src.imageHeight);
 
-                    encoders.EnsureBlit(commandBuffer);
                     for (uint32_t i = 0; i < splittedCopies.count; ++i) {
                         const TextureBufferCopySplit::CopyInfo& copyInfo = splittedCopies.copies[i];
-                        [encoders.blit copyFromBuffer:buffer->GetMTLBuffer()
-                                         sourceOffset:copyInfo.bufferOffset
-                                    sourceBytesPerRow:copyInfo.bytesPerRow
-                                  sourceBytesPerImage:copyInfo.bytesPerImage
-                                           sourceSize:copyInfo.copyExtent
-                                            toTexture:texture->GetMTLTexture()
-                                     destinationSlice:dst.arrayLayer
-                                     destinationLevel:dst.mipLevel
-                                    destinationOrigin:copyInfo.textureOrigin];
+                        [commandContext->EnsureBlit() copyFromBuffer:buffer->GetMTLBuffer()
+                                                        sourceOffset:copyInfo.bufferOffset
+                                                   sourceBytesPerRow:copyInfo.bytesPerRow
+                                                 sourceBytesPerImage:copyInfo.bytesPerImage
+                                                          sourceSize:copyInfo.copyExtent
+                                                           toTexture:texture->GetMTLTexture()
+                                                    destinationSlice:dst.arrayLayer
+                                                    destinationLevel:dst.mipLevel
+                                                   destinationOrigin:copyInfo.textureOrigin];
                     }
                 } break;
 
@@ -679,18 +657,17 @@ namespace dawn_native { namespace metal {
                         src.origin, copySize, texture->GetFormat(), virtualSizeAtLevel,
                         buffer->GetSize(), dst.offset, dst.rowPitch, dst.imageHeight);
 
-                    encoders.EnsureBlit(commandBuffer);
                     for (uint32_t i = 0; i < splittedCopies.count; ++i) {
                         const TextureBufferCopySplit::CopyInfo& copyInfo = splittedCopies.copies[i];
-                        [encoders.blit copyFromTexture:texture->GetMTLTexture()
-                                           sourceSlice:src.arrayLayer
-                                           sourceLevel:src.mipLevel
-                                          sourceOrigin:copyInfo.textureOrigin
-                                            sourceSize:copyInfo.copyExtent
-                                              toBuffer:buffer->GetMTLBuffer()
-                                     destinationOffset:copyInfo.bufferOffset
-                                destinationBytesPerRow:copyInfo.bytesPerRow
-                              destinationBytesPerImage:copyInfo.bytesPerImage];
+                        [commandContext->EnsureBlit() copyFromTexture:texture->GetMTLTexture()
+                                                          sourceSlice:src.arrayLayer
+                                                          sourceLevel:src.mipLevel
+                                                         sourceOrigin:copyInfo.textureOrigin
+                                                           sourceSize:copyInfo.copyExtent
+                                                             toBuffer:buffer->GetMTLBuffer()
+                                                    destinationOffset:copyInfo.bufferOffset
+                                               destinationBytesPerRow:copyInfo.bytesPerRow
+                                             destinationBytesPerImage:copyInfo.bytesPerImage];
                     }
                 } break;
 
@@ -700,40 +677,38 @@ namespace dawn_native { namespace metal {
                     Texture* srcTexture = ToBackend(copy->source.texture.Get());
                     Texture* dstTexture = ToBackend(copy->destination.texture.Get());
 
-                    encoders.EnsureBlit(commandBuffer);
-
-                    [encoders.blit copyFromTexture:srcTexture->GetMTLTexture()
-                                       sourceSlice:copy->source.arrayLayer
-                                       sourceLevel:copy->source.mipLevel
-                                      sourceOrigin:MakeMTLOrigin(copy->source.origin)
-                                        sourceSize:MakeMTLSize(copy->copySize)
-                                         toTexture:dstTexture->GetMTLTexture()
-                                  destinationSlice:copy->destination.arrayLayer
-                                  destinationLevel:copy->destination.mipLevel
-                                 destinationOrigin:MakeMTLOrigin(copy->destination.origin)];
+                    [commandContext->EnsureBlit()
+                          copyFromTexture:srcTexture->GetMTLTexture()
+                              sourceSlice:copy->source.arrayLayer
+                              sourceLevel:copy->source.mipLevel
+                             sourceOrigin:MakeMTLOrigin(copy->source.origin)
+                               sourceSize:MakeMTLSize(copy->copySize)
+                                toTexture:dstTexture->GetMTLTexture()
+                         destinationSlice:copy->destination.arrayLayer
+                         destinationLevel:copy->destination.mipLevel
+                        destinationOrigin:MakeMTLOrigin(copy->destination.origin)];
                 } break;
 
                 default: { UNREACHABLE(); } break;
             }
         }
 
-        encoders.Finish();
+        commandContext->EndBlit();
     }
 
-    void CommandBuffer::EncodeComputePass(id<MTLCommandBuffer> commandBuffer) {
+    void CommandBuffer::EncodeComputePass(CommandRecordingContext* commandContext) {
         ComputePipeline* lastPipeline = nullptr;
         StorageBufferLengthTracker storageBufferLengths = {};
         BindGroupTracker bindGroups(&storageBufferLengths);
 
-        // Will be autoreleased
-        id<MTLComputeCommandEncoder> encoder = [commandBuffer computeCommandEncoder];
+        id<MTLComputeCommandEncoder> encoder = commandContext->BeginCompute();
 
         Command type;
         while (mCommands.NextCommandId(&type)) {
             switch (type) {
                 case Command::EndComputePass: {
                     mCommands.NextCommand<EndComputePassCmd>();
-                    [encoder endEncoding];
+                    commandContext->EndCompute();
                     return;
                 } break;
 
@@ -813,12 +788,11 @@ namespace dawn_native { namespace metal {
         UNREACHABLE();
     }
 
-    void CommandBuffer::EncodeRenderPass(id<MTLCommandBuffer> commandBuffer,
+    void CommandBuffer::EncodeRenderPass(CommandRecordingContext* commandContext,
                                          MTLRenderPassDescriptor* mtlRenderPass,
-                                         GlobalEncoders* globalEncoders,
                                          uint32_t width,
                                          uint32_t height) {
-        ASSERT(mtlRenderPass && globalEncoders);
+        ASSERT(mtlRenderPass);
 
         Device* device = ToBackend(GetDevice());
 
@@ -861,17 +835,16 @@ namespace dawn_native { namespace metal {
             // If we need to use a temporary resolve texture we need to copy the result of MSAA
             // resolve back to the true resolve targets.
             if (useTemporaryResolveTexture) {
-                EncodeRenderPass(commandBuffer, mtlRenderPass, globalEncoders, width, height);
+                EncodeRenderPass(commandContext, mtlRenderPass, width, height);
                 for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
                     if (trueResolveTextures[i] == nil) {
                         continue;
                     }
 
                     ASSERT(temporaryResolveTextures[i] != nil);
-                    CopyIntoTrueResolveTarget(commandBuffer, trueResolveTextures[i],
+                    CopyIntoTrueResolveTarget(commandContext, trueResolveTextures[i],
                                               trueResolveLevels[i], trueResolveSlices[i],
-                                              temporaryResolveTextures[i], width, height,
-                                              globalEncoders);
+                                              temporaryResolveTextures[i], width, height);
                 }
                 return;
             }
@@ -896,16 +869,16 @@ namespace dawn_native { namespace metal {
 
             // If we found a store + MSAA resolve we need to resolve in a different render pass.
             if (hasStoreAndMSAAResolve) {
-                EncodeRenderPass(commandBuffer, mtlRenderPass, globalEncoders, width, height);
-                ResolveInAnotherRenderPass(commandBuffer, mtlRenderPass, resolveTextures);
+                EncodeRenderPass(commandContext, mtlRenderPass, width, height);
+                ResolveInAnotherRenderPass(commandContext, mtlRenderPass, resolveTextures);
                 return;
             }
         }
 
-        EncodeRenderPassInternal(commandBuffer, mtlRenderPass, width, height);
+        EncodeRenderPassInternal(commandContext, mtlRenderPass, width, height);
     }
 
-    void CommandBuffer::EncodeRenderPassInternal(id<MTLCommandBuffer> commandBuffer,
+    void CommandBuffer::EncodeRenderPassInternal(CommandRecordingContext* commandContext,
                                                  MTLRenderPassDescriptor* mtlRenderPass,
                                                  uint32_t width,
                                                  uint32_t height) {
@@ -916,9 +889,7 @@ namespace dawn_native { namespace metal {
         StorageBufferLengthTracker storageBufferLengths = {};
         BindGroupTracker bindGroups(&storageBufferLengths);
 
-        // This will be autoreleased
-        id<MTLRenderCommandEncoder> encoder =
-            [commandBuffer renderCommandEncoderWithDescriptor:mtlRenderPass];
+        id<MTLRenderCommandEncoder> encoder = commandContext->BeginRender(mtlRenderPass);
 
         auto EncodeRenderBundleCommand = [&](CommandIterator* iter, Command type) {
             switch (type) {
@@ -1068,7 +1039,7 @@ namespace dawn_native { namespace metal {
             switch (type) {
                 case Command::EndRenderPass: {
                     mCommands.NextCommand<EndRenderPassCmd>();
-                    [encoder endEncoding];
+                    commandContext->EndRender();
                     return;
                 } break;
 

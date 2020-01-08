@@ -355,6 +355,8 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/metal/BufferMTL.mm",
       "src/dawn_native/metal/CommandBufferMTL.h",
       "src/dawn_native/metal/CommandBufferMTL.mm",
+      "src/dawn_native/metal/CommandRecordingContext.h",
+      "src/dawn_native/metal/CommandRecordingContext.mm",
       "src/dawn_native/metal/ComputePipelineMTL.h",
       "src/dawn_native/metal/ComputePipelineMTL.mm",
       "src/dawn_native/metal/DeviceMTL.h",
