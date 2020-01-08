@@ -51,13 +51,6 @@ declare_args() {
   # compiler, since it is a sub-class of if.
   dawn_enable_cross_reflection = false
 
-  # Enables usage of swiftshader on the Vulkan backend.
-  # Note that this will only work in standalone and in projects that set the
-  # dawn_swiftshader_dir variable in build_overrides/dawn.gni
-  # Because of how the Vulkan loader works, setting this make Dawn only able
-  # to find the Swiftshader ICD and not the others.
-  dawn_use_swiftshader = false
-
   # Enables error injection for faking failures to native API calls
   dawn_enable_error_injection =
       is_debug || (build_with_chromium && use_fuzzing_engine)
@@ -67,6 +60,15 @@ declare_args() {
 # Put them in two separate declare_args() when setting the value of one
 # argument based on another.
 declare_args() {
+  # Enables usage of swiftshader on the Vulkan backend.
+  # Note that this will only work in standalone and in projects that set the
+  # dawn_swiftshader_dir variable in build_overrides/dawn.gni
+  # Because of how the Vulkan loader works, setting this make Dawn only able
+  # to find the Swiftshader ICD and not the others.
+  # Enabled by default when fuzzing.
+  dawn_use_swiftshader =
+      dawn_enable_vulkan && build_with_chromium && use_fuzzing_engine
+
   # Uses our built version of Vulkan validation layers
   dawn_enable_vulkan_validation_layers =
       dawn_enable_vulkan && ((is_linux && !is_chromeos) || is_win)
