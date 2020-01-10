@@ -18,16 +18,16 @@
 
 namespace dawn_native {
 
-    AdapterBase::AdapterBase(InstanceBase* instance, BackendType backend)
+    AdapterBase::AdapterBase(InstanceBase* instance, wgpu::BackendType backend)
         : mInstance(instance), mBackend(backend) {
     }
 
-    BackendType AdapterBase::GetBackendType() const {
+    wgpu::BackendType AdapterBase::GetBackendType() const {
         return mBackend;
     }
 
-    DeviceType AdapterBase::GetDeviceType() const {
-        return mDeviceType;
+    wgpu::AdapterType AdapterBase::GetAdapterType() const {
+        return mAdapterType;
     }
 
     const PCIInfo& AdapterBase::GetPCIInfo() const {

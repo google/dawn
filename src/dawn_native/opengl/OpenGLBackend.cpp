@@ -24,7 +24,7 @@
 namespace dawn_native { namespace opengl {
 
     AdapterDiscoveryOptions::AdapterDiscoveryOptions()
-        : AdapterDiscoveryOptionsBase(BackendType::OpenGL) {
+        : AdapterDiscoveryOptionsBase(WGPUBackendType_OpenGL) {
     }
 
     DawnSwapChainImplementation CreateNativeSwapChainImpl(WGPUDevice device,

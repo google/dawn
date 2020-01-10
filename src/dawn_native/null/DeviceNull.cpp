@@ -26,9 +26,9 @@ namespace dawn_native { namespace null {
 
     // Implementation of pre-Device objects: the null adapter, null backend connection and Connect()
 
-    Adapter::Adapter(InstanceBase* instance) : AdapterBase(instance, BackendType::Null) {
+    Adapter::Adapter(InstanceBase* instance) : AdapterBase(instance, wgpu::BackendType::Null) {
         mPCIInfo.name = "Null backend";
-        mDeviceType = DeviceType::CPU;
+        mAdapterType = wgpu::AdapterType::CPU;
 
         // Enable all extensions by default for the convenience of tests.
         mSupportedExtensions.extensionsBitSet.flip();
@@ -47,7 +47,7 @@ namespace dawn_native { namespace null {
 
     class Backend : public BackendConnection {
       public:
-        Backend(InstanceBase* instance) : BackendConnection(instance, BackendType::Null) {
+        Backend(InstanceBase* instance) : BackendConnection(instance, wgpu::BackendType::Null) {
         }
 
         std::vector<std::unique_ptr<AdapterBase>> DiscoverDefaultAdapters() override {

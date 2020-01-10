@@ -35,7 +35,7 @@ namespace dawn_native { namespace d3d12 {
     };
 
     Adapter::Adapter(Backend* backend, ComPtr<IDXGIAdapter1> hardwareAdapter)
-        : AdapterBase(backend->GetInstance(), BackendType::D3D12),
+        : AdapterBase(backend->GetInstance(), wgpu::BackendType::D3D12),
           mHardwareAdapter(hardwareAdapter),
           mBackend(backend) {
     }
@@ -75,9 +75,10 @@ namespace dawn_native { namespace d3d12 {
         DAWN_TRY_ASSIGN(mDeviceInfo, GatherDeviceInfo(*this));
 
         if (adapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) {
-            mDeviceType = DeviceType::CPU;
+            mAdapterType = wgpu::AdapterType::CPU;
         } else {
-            mDeviceType = (mDeviceInfo.isUMA) ? DeviceType::IntegratedGPU : DeviceType::DiscreteGPU;
+            mAdapterType = (mDeviceInfo.isUMA) ? wgpu::AdapterType::IntegratedGPU
+                                               : wgpu::AdapterType::DiscreteGPU;
         }
 
         std::wstring_convert<DeletableFacet<std::codecvt<wchar_t, char, std::mbstate_t>>> converter(

@@ -20,7 +20,7 @@
 namespace dawn_native { namespace vulkan {
 
     Adapter::Adapter(Backend* backend, VkPhysicalDevice physicalDevice)
-        : AdapterBase(backend->GetInstance(), BackendType::Vulkan),
+        : AdapterBase(backend->GetInstance(), wgpu::BackendType::Vulkan),
           mPhysicalDevice(physicalDevice),
           mBackend(backend) {
     }
@@ -54,16 +54,16 @@ namespace dawn_native { namespace vulkan {
 
         switch (mDeviceInfo.properties.deviceType) {
             case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
-                mDeviceType = DeviceType::IntegratedGPU;
+                mAdapterType = wgpu::AdapterType::IntegratedGPU;
                 break;
             case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
-                mDeviceType = DeviceType::DiscreteGPU;
+                mAdapterType = wgpu::AdapterType::DiscreteGPU;
                 break;
             case VK_PHYSICAL_DEVICE_TYPE_CPU:
-                mDeviceType = DeviceType::CPU;
+                mAdapterType = wgpu::AdapterType::CPU;
                 break;
             default:
-                mDeviceType = DeviceType::Unknown;
+                mAdapterType = wgpu::AdapterType::Unknown;
                 break;
         }
 

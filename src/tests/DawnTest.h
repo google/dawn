@@ -87,10 +87,10 @@ struct RGBA8 {
 std::ostream& operator<<(std::ostream& stream, const RGBA8& color);
 
 struct DawnTestParam {
-    explicit DawnTestParam(dawn_native::BackendType backendType) : backendType(backendType) {
+    explicit DawnTestParam(wgpu::BackendType backendType) : backendType(backendType) {
     }
 
-    dawn_native::BackendType backendType;
+    wgpu::BackendType backendType;
 
     std::vector<const char*> forceEnabledWorkarounds;
     std::vector<const char*> forceDisabledWorkarounds;
@@ -196,8 +196,6 @@ class DawnTestBase {
     bool HasVendorIdFilter() const;
     uint32_t GetVendorIdFilter() const;
 
-    dawn_native::PCIInfo GetPCIInfo() const;
-
   protected:
     wgpu::Device device;
     wgpu::Queue queue;
@@ -235,6 +233,8 @@ class DawnTestBase {
     // the returned extensions are all supported by the adapter. The tests may provide different
     // code path to handle the situation when not all extensions are supported.
     virtual std::vector<const char*> GetRequiredExtensions();
+
+    const wgpu::AdapterProperties& GetAdapterProperties() const;
 
   private:
     DawnTestParam mParam;
@@ -294,9 +294,8 @@ class DawnTestBase {
     // Assuming the data is mapped, checks all expectations
     void ResolveExpectations();
 
-    dawn_native::PCIInfo mPCIInfo;
-
     dawn_native::Adapter mBackendAdapter;
+    wgpu::AdapterProperties mAdapterProperties;
 };
 
 // Skip a test when the given condition is satisfied.
@@ -350,7 +349,7 @@ using DawnTest = DawnTestWithParams<>;
 
 namespace detail {
     // Helper functions used for DAWN_INSTANTIATE_TEST
-    bool IsBackendAvailable(dawn_native::BackendType type);
+    bool IsBackendAvailable(wgpu::BackendType type);
     std::vector<DawnTestParam> FilterBackends(const DawnTestParam* params, size_t numParams);
 
     // All classes used to implement the deferred expectations should inherit from this.

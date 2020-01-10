@@ -28,7 +28,10 @@ ValidationTest::ValidationTest() {
     // Validation tests run against the null backend, find the corresponding adapter
     bool foundNullAdapter = false;
     for (auto &currentAdapter : adapters) {
-        if (currentAdapter.GetBackendType() == dawn_native::BackendType::Null) {
+        wgpu::AdapterProperties adapterProperties;
+        currentAdapter.GetProperties(&adapterProperties);
+
+        if (adapterProperties.backendType == wgpu::BackendType::Null) {
             adapter = currentAdapter;
             foundNullAdapter = true;
             break;

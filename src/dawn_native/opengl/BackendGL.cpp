@@ -119,7 +119,7 @@ namespace dawn_native { namespace opengl {
 
     class Adapter : public AdapterBase {
       public:
-        Adapter(InstanceBase* instance) : AdapterBase(instance, BackendType::OpenGL) {
+        Adapter(InstanceBase* instance) : AdapterBase(instance, wgpu::BackendType::OpenGL) {
         }
 
         MaybeError Initialize(const AdapterDiscoveryOptions* options) {
@@ -225,7 +225,8 @@ namespace dawn_native { namespace opengl {
 
     // Implementation of the OpenGL backend's BackendConnection
 
-    Backend::Backend(InstanceBase* instance) : BackendConnection(instance, BackendType::OpenGL) {
+    Backend::Backend(InstanceBase* instance)
+        : BackendConnection(instance, wgpu::BackendType::OpenGL) {
     }
 
     std::vector<std::unique_ptr<AdapterBase>> Backend::DiscoverDefaultAdapters() {
@@ -241,7 +242,7 @@ namespace dawn_native { namespace opengl {
             return DAWN_VALIDATION_ERROR("The OpenGL backend can only create a single adapter");
         }
 
-        ASSERT(optionsBase->backendType == BackendType::OpenGL);
+        ASSERT(optionsBase->backendType == WGPUBackendType_OpenGL);
         const AdapterDiscoveryOptions* options =
             static_cast<const AdapterDiscoveryOptions*>(optionsBase);
 

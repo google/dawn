@@ -41,32 +41,32 @@
 
 namespace {
 
-    std::string ParamName(dawn_native::BackendType type) {
+    std::string ParamName(wgpu::BackendType type) {
         switch (type) {
-            case dawn_native::BackendType::D3D12:
+            case wgpu::BackendType::D3D12:
                 return "D3D12";
-            case dawn_native::BackendType::Metal:
+            case wgpu::BackendType::Metal:
                 return "Metal";
-            case dawn_native::BackendType::Null:
+            case wgpu::BackendType::Null:
                 return "Null";
-            case dawn_native::BackendType::OpenGL:
+            case wgpu::BackendType::OpenGL:
                 return "OpenGL";
-            case dawn_native::BackendType::Vulkan:
+            case wgpu::BackendType::Vulkan:
                 return "Vulkan";
             default:
                 UNREACHABLE();
         }
     }
 
-    const char* DeviceTypeName(dawn_native::DeviceType type) {
+    const char* AdapterTypeName(wgpu::AdapterType type) {
         switch (type) {
-            case dawn_native::DeviceType::DiscreteGPU:
+            case wgpu::AdapterType::DiscreteGPU:
                 return "Discrete GPU";
-            case dawn_native::DeviceType::IntegratedGPU:
+            case wgpu::AdapterType::IntegratedGPU:
                 return "Integrated GPU";
-            case dawn_native::DeviceType::CPU:
+            case wgpu::AdapterType::CPU:
                 return "CPU";
-            case dawn_native::DeviceType::Unknown:
+            case wgpu::AdapterType::Unknown:
                 return "Unknown";
             default:
                 UNREACHABLE();
@@ -90,10 +90,10 @@ const RGBA8 RGBA8::kBlue = RGBA8(0, 0, 255, 255);
 const RGBA8 RGBA8::kYellow = RGBA8(255, 255, 0, 255);
 const RGBA8 RGBA8::kWhite = RGBA8(255, 255, 255, 255);
 
-const DawnTestParam D3D12Backend(dawn_native::BackendType::D3D12);
-const DawnTestParam MetalBackend(dawn_native::BackendType::Metal);
-const DawnTestParam OpenGLBackend(dawn_native::BackendType::OpenGL);
-const DawnTestParam VulkanBackend(dawn_native::BackendType::Vulkan);
+const DawnTestParam D3D12Backend(wgpu::BackendType::D3D12);
+const DawnTestParam MetalBackend(wgpu::BackendType::Metal);
+const DawnTestParam OpenGLBackend(wgpu::BackendType::OpenGL);
+const DawnTestParam VulkanBackend(wgpu::BackendType::Vulkan);
 
 DawnTestParam ForceToggles(const DawnTestParam& originParam,
                            std::initializer_list<const char*> forceEnabledWorkarounds,
@@ -224,24 +224,26 @@ void DawnTestEnvironment::SetUp() {
                        "\n"
                     << "System adapters: \n";
     for (const dawn_native::Adapter& adapter : mInstance->GetAdapters()) {
-        const dawn_native::PCIInfo& pci = adapter.GetPCIInfo();
+        wgpu::AdapterProperties properties;
+        adapter.GetProperties(&properties);
 
         std::ostringstream vendorId;
         std::ostringstream deviceId;
         vendorId << std::setfill('0') << std::uppercase << std::internal << std::hex << std::setw(4)
-                 << pci.vendorId;
+                 << properties.vendorID;
         deviceId << std::setfill('0') << std::uppercase << std::internal << std::hex << std::setw(4)
-                 << pci.deviceId;
+                 << properties.deviceID;
 
         // Preparing for outputting hex numbers
         dawn::InfoLog() << std::showbase << std::hex << std::setfill('0') << std::setw(4)
 
-                        << " - \"" << pci.name << "\"\n"
-                        << "   type: " << DeviceTypeName(adapter.GetDeviceType())
-                        << ", backend: " << ParamName(adapter.GetBackendType()) << "\n"
+                        << " - \"" << properties.name << "\"\n"
+                        << "   type: " << AdapterTypeName(properties.adapterType)
+                        << ", backend: " << ParamName(properties.backendType) << "\n"
                         << "   vendorId: 0x" << vendorId.str() << ", deviceId: 0x" << deviceId.str()
-                        << (mHasVendorIdFilter && mVendorIdFilter == pci.vendorId ? " [Selected]"
-                                                                                  : "")
+                        << (mHasVendorIdFilter && mVendorIdFilter == properties.vendorID
+                                ? " [Selected]"
+                                : "")
                         << "\n";
     }
 }
@@ -346,43 +348,43 @@ DawnTestBase::~DawnTestBase() {
 }
 
 bool DawnTestBase::IsD3D12() const {
-    return mParam.backendType == dawn_native::BackendType::D3D12;
+    return mParam.backendType == wgpu::BackendType::D3D12;
 }
 
 bool DawnTestBase::IsMetal() const {
-    return mParam.backendType == dawn_native::BackendType::Metal;
+    return mParam.backendType == wgpu::BackendType::Metal;
 }
 
 bool DawnTestBase::IsOpenGL() const {
-    return mParam.backendType == dawn_native::BackendType::OpenGL;
+    return mParam.backendType == wgpu::BackendType::OpenGL;
 }
 
 bool DawnTestBase::IsVulkan() const {
-    return mParam.backendType == dawn_native::BackendType::Vulkan;
+    return mParam.backendType == wgpu::BackendType::Vulkan;
 }
 
 bool DawnTestBase::IsAMD() const {
-    return gpu_info::IsAMD(mPCIInfo.vendorId);
+    return gpu_info::IsAMD(mAdapterProperties.vendorID);
 }
 
 bool DawnTestBase::IsARM() const {
-    return gpu_info::IsARM(mPCIInfo.vendorId);
+    return gpu_info::IsARM(mAdapterProperties.vendorID);
 }
 
 bool DawnTestBase::IsImgTec() const {
-    return gpu_info::IsImgTec(mPCIInfo.vendorId);
+    return gpu_info::IsImgTec(mAdapterProperties.vendorID);
 }
 
 bool DawnTestBase::IsIntel() const {
-    return gpu_info::IsIntel(mPCIInfo.vendorId);
+    return gpu_info::IsIntel(mAdapterProperties.vendorID);
 }
 
 bool DawnTestBase::IsNvidia() const {
-    return gpu_info::IsNvidia(mPCIInfo.vendorId);
+    return gpu_info::IsNvidia(mAdapterProperties.vendorID);
 }
 
 bool DawnTestBase::IsQualcomm() const {
-    return gpu_info::IsQualcomm(mPCIInfo.vendorId);
+    return gpu_info::IsQualcomm(mAdapterProperties.vendorID);
 }
 
 bool DawnTestBase::IsWindows() const {
@@ -437,6 +439,10 @@ std::vector<const char*> DawnTestBase::GetRequiredExtensions() {
     return {};
 }
 
+const wgpu::AdapterProperties& DawnTestBase::GetAdapterProperties() const {
+    return mAdapterProperties;
+}
+
 // This function can only be called after SetUp() because it requires mBackendAdapter to be
 // initialized.
 bool DawnTestBase::SupportsExtensions(const std::vector<const char*>& extensions) {
@@ -458,20 +464,23 @@ bool DawnTestBase::SupportsExtensions(const std::vector<const char*>& extensions
 
 void DawnTestBase::SetUp() {
     // Initialize mBackendAdapter, and create the device.
-    const dawn_native::BackendType backendType = mParam.backendType;
+    const wgpu::BackendType backendType = mParam.backendType;
     {
         dawn_native::Instance* instance = gTestEnv->GetInstance();
         std::vector<dawn_native::Adapter> adapters = instance->GetAdapters();
 
         for (const dawn_native::Adapter& adapter : adapters) {
-            if (adapter.GetBackendType() == backendType) {
-                if (adapter.GetDeviceType() == dawn_native::DeviceType::CPU) {
+            wgpu::AdapterProperties properties;
+            adapter.GetProperties(&properties);
+
+            if (properties.backendType == backendType) {
+                if (properties.adapterType == wgpu::AdapterType::CPU) {
                     continue;
                 }
 
                 // Filter adapter by vendor id
                 if (HasVendorIdFilter()) {
-                    if (adapter.GetPCIInfo().vendorId == GetVendorIdFilter()) {
+                    if (properties.vendorID == GetVendorIdFilter()) {
                         mBackendAdapter = adapter;
                         break;
                     }
@@ -480,7 +489,8 @@ void DawnTestBase::SetUp() {
 
                 // Prefer discrete GPU on multi-GPU systems, otherwise get integrated GPU.
                 mBackendAdapter = adapter;
-                if (mBackendAdapter.GetDeviceType() == dawn_native::DeviceType::DiscreteGPU) {
+                mAdapterProperties = properties;
+                if (properties.adapterType == wgpu::AdapterType::DiscreteGPU) {
                     break;
                 }
             }
@@ -490,8 +500,6 @@ void DawnTestBase::SetUp() {
             return;
         }
     }
-
-    mPCIInfo = mBackendAdapter.GetPCIInfo();
 
     for (const char* forceEnabledWorkaround : mParam.forceEnabledWorkarounds) {
         ASSERT(gTestEnv->GetInstance()->GetToggleInfo(forceEnabledWorkaround) != nullptr);
@@ -598,10 +606,6 @@ void DawnTestBase::StartExpectDeviceError() {
 bool DawnTestBase::EndExpectDeviceError() {
     mExpectError = false;
     return mError;
-}
-
-dawn_native::PCIInfo DawnTestBase::GetPCIInfo() const {
-    return mPCIInfo;
 }
 
 // static
@@ -813,19 +817,19 @@ std::ostream& operator<<(std::ostream& stream, const RGBA8& color) {
 }
 
 namespace detail {
-    bool IsBackendAvailable(dawn_native::BackendType type) {
+    bool IsBackendAvailable(wgpu::BackendType type) {
         switch (type) {
 #if defined(DAWN_ENABLE_BACKEND_D3D12)
-            case dawn_native::BackendType::D3D12:
+            case wgpu::BackendType::D3D12:
 #endif
 #if defined(DAWN_ENABLE_BACKEND_METAL)
-            case dawn_native::BackendType::Metal:
+            case wgpu::BackendType::Metal:
 #endif
 #if defined(DAWN_ENABLE_BACKEND_OPENGL)
-            case dawn_native::BackendType::OpenGL:
+            case wgpu::BackendType::OpenGL:
 #endif
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)
-            case dawn_native::BackendType::Vulkan:
+            case wgpu::BackendType::Vulkan:
 #endif
                 return true;
 

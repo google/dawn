@@ -37,7 +37,8 @@ const char kVulkanLibName[] = "libvulkan.so";
 
 namespace dawn_native { namespace vulkan {
 
-    Backend::Backend(InstanceBase* instance) : BackendConnection(instance, BackendType::Vulkan) {
+    Backend::Backend(InstanceBase* instance)
+        : BackendConnection(instance, wgpu::BackendType::Vulkan) {
     }
 
     Backend::~Backend() {

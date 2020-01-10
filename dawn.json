@@ -14,12 +14,44 @@
         "See the License for the specific language governing permissions and",
         "limitations under the License."
     ],
+    "adapter properties": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "device ID", "type": "uint32_t"},
+            {"name": "vendor ID", "type": "uint32_t"},
+            {"name": "name", "type": "char", "annotation": "const*"},
+            {"name": "adapter type", "type": "adapter type"},
+            {"name": "backend type", "type": "backend type"}
+        ]
+    },
+    "adapter type": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "discrete GPU"},
+            {"value": 1, "name": "integrated GPU"},
+            {"value": 2, "name": "CPU"},
+            {"value": 3, "name": "Unknown"}
+        ]
+    },
     "address mode": {
         "category": "enum",
         "values": [
             {"value": 0, "name": "repeat"},
             {"value": 1, "name": "mirror repeat"},
             {"value": 2, "name": "clamp to edge"}
+        ]
+    },
+    "backend type": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "D3D11"},
+            {"value": 1, "name": "D3D12"},
+            {"value": 2, "name": "metal"},
+            {"value": 3, "name": "vulkan"},
+            {"value": 4, "name": "openGL"},
+            {"value": 5, "name": "openGLES"},
+            {"value": 6, "name": "null"}
         ]
     },
     "bind group": {

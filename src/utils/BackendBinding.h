@@ -15,7 +15,7 @@
 #ifndef UTILS_BACKENDBINDING_H_
 #define UTILS_BACKENDBINDING_H_
 
-#include "dawn/webgpu.h"
+#include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
 
 struct GLFWwindow;
@@ -36,13 +36,11 @@ namespace utils {
         WGPUDevice mDevice = nullptr;
     };
 
-    void SetupGLFWWindowHintsForBackend(dawn_native::BackendType type);
+    void SetupGLFWWindowHintsForBackend(wgpu::BackendType type);
     void DiscoverAdapter(dawn_native::Instance* instance,
                          GLFWwindow* window,
-                         dawn_native::BackendType type);
-    BackendBinding* CreateBinding(dawn_native::BackendType type,
-                                  GLFWwindow* window,
-                                  WGPUDevice device);
+                         wgpu::BackendType type);
+    BackendBinding* CreateBinding(wgpu::BackendType type, GLFWwindow* window, WGPUDevice device);
 
 }  // namespace utils
 

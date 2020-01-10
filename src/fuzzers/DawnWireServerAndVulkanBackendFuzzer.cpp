@@ -28,8 +28,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
             wgpu::Device device;
             for (dawn_native::Adapter adapter : adapters) {
-                if (adapter.GetBackendType() == dawn_native::BackendType::Vulkan &&
-                    adapter.GetDeviceType() == dawn_native::DeviceType::CPU) {
+                wgpu::AdapterProperties properties;
+                adapter.GetProperties(&properties);
+
+                if (properties.backendType == wgpu::BackendType::Vulkan &&
+                    properties.adapterType == wgpu::AdapterType::CPU) {
                     device = wgpu::Device::Acquire(adapter.CreateDevice());
                     break;
                 }

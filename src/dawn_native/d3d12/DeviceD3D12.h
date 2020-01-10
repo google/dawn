@@ -154,8 +154,6 @@ namespace dawn_native { namespace d3d12 {
         std::unique_ptr<DescriptorHeapAllocator> mDescriptorHeapAllocator;
         std::unique_ptr<MapRequestTracker> mMapRequestTracker;
         std::unique_ptr<ResourceAllocatorManager> mResourceAllocatorManager;
-
-        dawn_native::PCIInfo mPCIInfo;
     };
 
 }}  // namespace dawn_native::d3d12

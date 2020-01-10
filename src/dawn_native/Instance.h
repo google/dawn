@@ -77,7 +77,7 @@ namespace dawn_native {
         void EnsureBackendConnections();
 
         // Finds the BackendConnection for `type` or returns an error.
-        ResultOrError<BackendConnection*> FindBackend(BackendType type);
+        ResultOrError<BackendConnection*> FindBackend(wgpu::BackendType type);
 
         MaybeError DiscoverAdaptersInternal(const AdapterDiscoveryOptionsBase* options);
 

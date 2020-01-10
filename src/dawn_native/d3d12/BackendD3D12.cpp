@@ -70,7 +70,8 @@ namespace dawn_native { namespace d3d12 {
 
     }  // anonymous namespace
 
-    Backend::Backend(InstanceBase* instance) : BackendConnection(instance, BackendType::D3D12) {
+    Backend::Backend(InstanceBase* instance)
+        : BackendConnection(instance, wgpu::BackendType::D3D12) {
     }
 
     MaybeError Backend::Initialize() {

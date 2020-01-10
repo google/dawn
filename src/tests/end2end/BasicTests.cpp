@@ -23,7 +23,7 @@ class BasicTests : public DawnTest {
 TEST_P(BasicTests, VendorIdFilter) {
     DAWN_SKIP_TEST_IF(!HasVendorIdFilter());
 
-    ASSERT_EQ(GetPCIInfo().vendorId, GetVendorIdFilter());
+    ASSERT_EQ(GetAdapterProperties().vendorID, GetVendorIdFilter());
 }
 
 // Test Buffer::SetSubData changes the content of the buffer, but really this is the most
