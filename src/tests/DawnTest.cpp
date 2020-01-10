@@ -557,7 +557,7 @@ void DawnTestBase::SetUp() {
 
         mWireClient.reset(new dawn_wire::WireClient(clientDesc));
         WGPUDevice clientDevice = mWireClient->GetDevice();
-        DawnProcTable clientProcs = mWireClient->GetProcs();
+        DawnProcTable clientProcs = dawn_wire::WireClient::GetProcs();
         mS2cBuf->SetHandler(mWireClient.get());
 
         procs = clientProcs;

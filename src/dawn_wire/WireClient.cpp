@@ -25,12 +25,13 @@ namespace dawn_wire {
         mImpl.reset();
     }
 
-    WGPUDevice WireClient::GetDevice() const {
-        return mImpl->GetDevice();
+    // static
+    DawnProcTable WireClient::GetProcs() {
+        return client::GetProcs();
     }
 
-    DawnProcTable WireClient::GetProcs() const {
-        return client::GetProcs();
+    WGPUDevice WireClient::GetDevice() const {
+        return mImpl->GetDevice();
     }
 
     const volatile char* WireClient::HandleCommands(const volatile char* commands, size_t size) {

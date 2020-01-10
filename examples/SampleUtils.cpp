@@ -151,7 +151,7 @@ wgpu::Device CreateCppDawnDevice() {
 
                 wireClient = new dawn_wire::WireClient(clientDesc);
                 WGPUDevice clientDevice = wireClient->GetDevice();
-                DawnProcTable clientProcs = wireClient->GetProcs();
+                DawnProcTable clientProcs = dawn_wire::WireClient::GetProcs();
                 s2cBuf->SetHandler(wireClient);
 
                 procs = clientProcs;

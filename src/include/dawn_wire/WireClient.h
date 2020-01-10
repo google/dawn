@@ -44,8 +44,9 @@ namespace dawn_wire {
         WireClient(const WireClientDescriptor& descriptor);
         ~WireClient();
 
+        static DawnProcTable GetProcs();
+
         WGPUDevice GetDevice() const;
-        DawnProcTable GetProcs() const;
         const volatile char* HandleCommands(const volatile char* commands,
                                             size_t size) override final;
 
