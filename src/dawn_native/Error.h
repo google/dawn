@@ -16,23 +16,20 @@
 #define DAWNNATIVE_ERROR_H_
 
 #include "common/Result.h"
+#include "dawn_native/ErrorData.h"
 
 #include <string>
 
 namespace dawn_native {
 
-    // This is the content of an error value for MaybeError or ResultOrError, split off to its own
-    // file to avoid having all files including headers like <string> and <vector>
-    class ErrorData;
-
     enum class InternalErrorType : uint32_t { Validation, DeviceLost, Unimplemented, OutOfMemory };
 
     // MaybeError and ResultOrError are meant to be used as return value for function that are not
     // expected to, but might fail. The handling of error is potentially much slower than successes.
-    using MaybeError = Result<void, ErrorData*>;
+    using MaybeError = Result<void, ErrorData>;
 
     template <typename T>
-    using ResultOrError = Result<T, ErrorData*>;
+    using ResultOrError = Result<T, ErrorData>;
 
     // Returning a success is done like so:
     //   return {}; // for Error
@@ -44,7 +41,7 @@ namespace dawn_native {
     // but shorthand version for specific error types are preferred:
     //   return DAWN_VALIDATION_ERROR("My error message");
 #define DAWN_MAKE_ERROR(TYPE, MESSAGE) \
-    ::dawn_native::MakeError(TYPE, MESSAGE, __FILE__, __func__, __LINE__)
+    ::dawn_native::ErrorData::Create(TYPE, MESSAGE, __FILE__, __func__, __LINE__)
 #define DAWN_VALIDATION_ERROR(MESSAGE) DAWN_MAKE_ERROR(InternalErrorType::Validation, MESSAGE)
 #define DAWN_DEVICE_LOST_ERROR(MESSAGE) DAWN_MAKE_ERROR(InternalErrorType::DeviceLost, MESSAGE)
 #define DAWN_UNIMPLEMENTED_ERROR(MESSAGE) DAWN_MAKE_ERROR(InternalErrorType::Unimplemented, MESSAGE)
@@ -57,42 +54,32 @@ namespace dawn_native {
     // When Errors aren't handled explicitly, calls to functions returning errors should be
     // wrapped in an DAWN_TRY. It will return the error if any, otherwise keep executing
     // the current function.
-#define DAWN_TRY(EXPR)                                                           \
-    {                                                                            \
-        auto DAWN_LOCAL_VAR = EXPR;                                              \
-        if (DAWN_UNLIKELY(DAWN_LOCAL_VAR.IsError())) {                           \
-            ::dawn_native::ErrorData* error = DAWN_LOCAL_VAR.AcquireError();     \
-            ::dawn_native::AppendBacktrace(error, __FILE__, __func__, __LINE__); \
-            return {std::move(error)};                                           \
-        }                                                                        \
-    }                                                                            \
-    for (;;)                                                                     \
+#define DAWN_TRY(EXPR)                                                                       \
+    {                                                                                        \
+        auto DAWN_LOCAL_VAR = EXPR;                                                          \
+        if (DAWN_UNLIKELY(DAWN_LOCAL_VAR.IsError())) {                                       \
+            std::unique_ptr<::dawn_native::ErrorData> error = DAWN_LOCAL_VAR.AcquireError(); \
+            error->AppendBacktrace(__FILE__, __func__, __LINE__);                            \
+            return {std::move(error)};                                                       \
+        }                                                                                    \
+    }                                                                                        \
+    for (;;)                                                                                 \
     break
 
     // DAWN_TRY_ASSIGN is the same as DAWN_TRY for ResultOrError and assigns the success value, if
     // any, to VAR.
-#define DAWN_TRY_ASSIGN(VAR, EXPR)                                               \
-    {                                                                            \
-        auto DAWN_LOCAL_VAR = EXPR;                                              \
-        if (DAWN_UNLIKELY(DAWN_LOCAL_VAR.IsError())) {                           \
-            ErrorData* error = DAWN_LOCAL_VAR.AcquireError();                    \
-            ::dawn_native::AppendBacktrace(error, __FILE__, __func__, __LINE__); \
-            return {std::move(error)};                                           \
-        }                                                                        \
-        VAR = DAWN_LOCAL_VAR.AcquireSuccess();                                   \
-    }                                                                            \
-    for (;;)                                                                     \
+#define DAWN_TRY_ASSIGN(VAR, EXPR)                                            \
+    {                                                                         \
+        auto DAWN_LOCAL_VAR = EXPR;                                           \
+        if (DAWN_UNLIKELY(DAWN_LOCAL_VAR.IsError())) {                        \
+            std::unique_ptr<ErrorData> error = DAWN_LOCAL_VAR.AcquireError(); \
+            error->AppendBacktrace(__FILE__, __func__, __LINE__);             \
+            return {std::move(error)};                                        \
+        }                                                                     \
+        VAR = DAWN_LOCAL_VAR.AcquireSuccess();                                \
+    }                                                                         \
+    for (;;)                                                                  \
     break
-
-    // Implementation detail of DAWN_TRY and DAWN_TRY_ASSIGN's adding to the Error's backtrace.
-    void AppendBacktrace(ErrorData* error, const char* file, const char* function, int line);
-
-    // Implementation detail of DAWN_MAKE_ERROR
-    ErrorData* MakeError(InternalErrorType type,
-                         std::string message,
-                         const char* file,
-                         const char* function,
-                         int line);
 
 }  // namespace dawn_native
 

@@ -251,7 +251,7 @@ namespace dawn_native {
 
         void SetDefaultToggles();
 
-        void ConsumeError(ErrorData* error);
+        void ConsumeError(std::unique_ptr<ErrorData> error);
 
         // Destroy is used to clean up and release resources used by device, does not wait for GPU
         // or check errors.

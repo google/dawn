@@ -41,9 +41,8 @@ namespace dawn_native {
         // Functions to handle encoder errors
         void HandleError(wgpu::ErrorType type, const char* message);
 
-        inline void ConsumeError(ErrorData* error) {
+        inline void ConsumeError(std::unique_ptr<ErrorData> error) {
             HandleError(error->GetType(), error->GetMessage().c_str());
-            delete error;
         }
 
         inline bool ConsumedError(MaybeError maybeError) {

@@ -118,10 +118,9 @@ namespace dawn_native {
         HandleError(type, message);
     }
 
-    void DeviceBase::ConsumeError(ErrorData* error) {
+    void DeviceBase::ConsumeError(std::unique_ptr<ErrorData> error) {
         ASSERT(error != nullptr);
         HandleError(error->GetType(), error->GetMessage().c_str());
-        delete error;
     }
 
     void DeviceBase::SetUncapturedErrorCallback(wgpu::ErrorCallback callback, void* userdata) {

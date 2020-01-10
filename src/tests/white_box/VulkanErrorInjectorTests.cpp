@@ -61,7 +61,7 @@ TEST_P(VulkanErrorInjectorTests, InjectErrorOnCreateBuffer) {
         if (err.IsError()) {
             // The handle should never be written to, even for mock failures.
             EXPECT_EQ(buffer, VK_NULL_HANDLE);
-            delete err.AcquireError();
+            err.AcquireError();
             return false;
         }
         EXPECT_NE(buffer, VK_NULL_HANDLE);

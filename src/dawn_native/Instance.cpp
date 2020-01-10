@@ -177,11 +177,10 @@ namespace dawn_native {
 
     bool InstanceBase::ConsumedError(MaybeError maybeError) {
         if (maybeError.IsError()) {
-            ErrorData* error = maybeError.AcquireError();
+            std::unique_ptr<ErrorData> error = maybeError.AcquireError();
 
             ASSERT(error != nullptr);
             dawn::InfoLog() << error->GetMessage();
-            delete error;
 
             return true;
         }
