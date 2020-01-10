@@ -51,8 +51,8 @@ namespace {
       public:
         GetProcAddressTests()
             : testing::TestWithParam<DawnFlavor>(),
-              mNativeInstance(),
-              mNativeAdapter(&mNativeInstance) {
+              mNativeInstance(dawn_native::InstanceBase::Create()),
+              mNativeAdapter(mNativeInstance.Get()) {
         }
 
         void SetUp() override {
@@ -90,7 +90,7 @@ namespace {
         }
 
       protected:
-        dawn_native::InstanceBase mNativeInstance;
+        dawn_native::Ref<dawn_native::InstanceBase> mNativeInstance;
         dawn_native::null::Adapter mNativeAdapter;
 
         std::unique_ptr<utils::TerribleCommandBuffer> mC2sBuf;
@@ -136,13 +136,17 @@ namespace {
         ASSERT_EQ(mProcs.getProcAddress(mDevice.Get(), "0"), nullptr);
     }
 
-    // Test that GetProcAddress supports itself: it is handled specially because it is a
-    // freestanding function and not a method on an object.
-    TEST_P(GetProcAddressTests, GetProcAddressItself) {
+    // Test that GetProcAddress supports freestanding function that are handled specially
+    TEST_P(GetProcAddressTests, FreeStandingFunctions) {
         ASSERT_EQ(mProcs.getProcAddress(nullptr, "wgpuGetProcAddress"),
                   reinterpret_cast<WGPUProc>(mProcs.getProcAddress));
         ASSERT_EQ(mProcs.getProcAddress(mDevice.Get(), "wgpuGetProcAddress"),
                   reinterpret_cast<WGPUProc>(mProcs.getProcAddress));
+
+        ASSERT_EQ(mProcs.getProcAddress(nullptr, "wgpuCreateInstance"),
+                  reinterpret_cast<WGPUProc>(mProcs.createInstance));
+        ASSERT_EQ(mProcs.getProcAddress(mDevice.Get(), "wgpuCreateInstance"),
+                  reinterpret_cast<WGPUProc>(mProcs.createInstance));
     }
 
     INSTANTIATE_TEST_SUITE_P(,

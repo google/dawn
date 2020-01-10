@@ -183,6 +183,7 @@ namespace wgpu {
 
     {% endfor %}
 
+    Instance CreateInstance(InstanceDescriptor const * descriptor = nullptr);
     Proc GetProcAddress(Device const& device, const char* procName);
 
     {% for type in by_category["structure"] %}

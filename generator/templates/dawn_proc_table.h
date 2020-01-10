@@ -19,6 +19,7 @@
 
 typedef struct DawnProcTable {
     WGPUProcGetProcAddress getProcAddress;
+    WGPUProcCreateInstance createInstance;
 
     {% for type in by_category["object"] %}
         {% for method in c_methods(type) %}

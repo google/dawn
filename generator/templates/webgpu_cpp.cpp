@@ -125,6 +125,12 @@ namespace wgpu {
 
     {% endfor %}
 
+    Instance CreateInstance(const InstanceDescriptor* descriptor) {
+        const WGPUInstanceDescriptor* cDescriptor =
+            reinterpret_cast<const WGPUInstanceDescriptor*>(descriptor);
+        return Instance::Acquire(wgpuCreateInstance(cDescriptor));
+    }
+
     Proc GetProcAddress(Device const& device, const char* procName) {
         return reinterpret_cast<Proc>(wgpuGetProcAddress(device.Get(), procName));
     }

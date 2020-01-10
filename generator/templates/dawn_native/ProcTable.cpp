@@ -92,6 +92,12 @@ namespace dawn_native {
         static constexpr size_t sProcMapSize = sizeof(sProcMap) / sizeof(sProcMap[0]);
     }
 
+    WGPUInstance NativeCreateInstance(WGPUInstanceDescriptor const* cDescriptor) {
+        const dawn_native::InstanceDescriptor* descriptor =
+            reinterpret_cast<const dawn_native::InstanceDescriptor*>(cDescriptor);
+        return reinterpret_cast<WGPUInstance>(InstanceBase::Create(descriptor));
+    }
+
     WGPUProc NativeGetProcAddress(WGPUDevice, const char* procName) {
         if (procName == nullptr) {
             return nullptr;
@@ -107,8 +113,13 @@ namespace dawn_native {
             return entry->proc;
         }
 
+        // Special case the two free-standing functions of the API.
         if (strcmp(procName, "wgpuGetProcAddress") == 0) {
             return reinterpret_cast<WGPUProc>(NativeGetProcAddress);
+        }
+
+        if (strcmp(procName, "wgpuCreateInstance") == 0) {
+            return reinterpret_cast<WGPUProc>(NativeCreateInstance);
         }
 
         return nullptr;
@@ -126,6 +137,7 @@ namespace dawn_native {
     DawnProcTable GetProcsAutogen() {
         DawnProcTable table;
         table.getProcAddress = NativeGetProcAddress;
+        table.createInstance = NativeCreateInstance;
         {% for type in by_category["object"] %}
             {% for method in c_methods(type) %}
                 table.{{as_varName(type.name, method.name)}} = Native{{as_MethodSuffix(type.name, method.name)}};

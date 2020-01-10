@@ -50,6 +50,19 @@ namespace dawn_native {
 
     // InstanceBase
 
+    // static
+    InstanceBase* InstanceBase::Create(const InstanceDescriptor* descriptor) {
+        Ref<InstanceBase> instance = AcquireRef(new InstanceBase);
+        if (!instance->Initialize(descriptor)) {
+            return nullptr;
+        }
+        return instance.Detach();
+    }
+
+    bool InstanceBase::Initialize(const InstanceDescriptor*) {
+        return true;
+    }
+
     void InstanceBase::DiscoverDefaultAdapters() {
         EnsureBackendConnections();
 

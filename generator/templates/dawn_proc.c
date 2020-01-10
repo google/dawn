@@ -26,6 +26,10 @@ void dawnProcSetProcs(const DawnProcTable* procs_) {
     }
 }
 
+WGPUInstance wgpuCreateInstance(WGPUInstanceDescriptor const * descriptor) {
+    return procs.createInstance(descriptor);
+}
+
 WGPUProc wgpuGetProcAddress(WGPUDevice device, const char* procName) {
     return procs.getProcAddress(device, procName);
 }

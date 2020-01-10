@@ -738,6 +738,14 @@
             {"value": 1, "name": "uint32"}
         ]
     },
+    "instance": {
+        "category": "object"
+    },
+    "instance descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": []
+    },
     "vertex attribute descriptor": {
         "category": "structure",
         "extensible": false,
