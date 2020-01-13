@@ -101,10 +101,6 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfBasic) {
 
 // Test that a slightly-less-trivial compute-shader memcpy implementation works.
 TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfStruct) {
-    // TODO(kainino@chromium.org): Fails on D3D12 due to SPIRV-Cross not supporting
-    // reading structs from ByteAddressBuffer.
-    DAWN_SKIP_TEST_IF(IsD3D12());
-
     BasicTest(R"(
         #version 450
         #define kInstances 4
