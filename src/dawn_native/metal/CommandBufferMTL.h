@@ -26,24 +26,25 @@ namespace dawn_native {
 
 namespace dawn_native { namespace metal {
 
-    class CommandRecordingContext;
     class Device;
+    struct GlobalEncoders;
 
     class CommandBuffer : public CommandBufferBase {
       public:
         CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
         ~CommandBuffer();
 
-        void FillCommands(CommandRecordingContext* commandContext);
+        void FillCommands(id<MTLCommandBuffer> commandBuffer);
 
       private:
-        void EncodeComputePass(CommandRecordingContext* commandContext);
-        void EncodeRenderPass(CommandRecordingContext* commandContext,
+        void EncodeComputePass(id<MTLCommandBuffer> commandBuffer);
+        void EncodeRenderPass(id<MTLCommandBuffer> commandBuffer,
                               MTLRenderPassDescriptor* mtlRenderPass,
+                              GlobalEncoders* globalEncoders,
                               uint32_t width,
                               uint32_t height);
 
-        void EncodeRenderPassInternal(CommandRecordingContext* commandContext,
+        void EncodeRenderPassInternal(id<MTLCommandBuffer> commandBuffer,
                                       MTLRenderPassDescriptor* mtlRenderPass,
                                       uint32_t width,
                                       uint32_t height);

@@ -19,7 +19,6 @@
 
 #include "common/Serial.h"
 #include "dawn_native/Device.h"
-#include "dawn_native/metal/CommandRecordingContext.h"
 #include "dawn_native/metal/Forward.h"
 
 #import <IOSurface/IOSurfaceRef.h>
@@ -49,7 +48,7 @@ namespace dawn_native { namespace metal {
         id<MTLDevice> GetMTLDevice();
         id<MTLCommandQueue> GetMTLQueue();
 
-        CommandRecordingContext* GetPendingCommandContext();
+        id<MTLCommandBuffer> GetPendingCommandBuffer();
         Serial GetPendingCommandSerial() const override;
         void SubmitPendingCommandBuffer();
 
@@ -99,7 +98,7 @@ namespace dawn_native { namespace metal {
         std::unique_ptr<MapRequestTracker> mMapTracker;
 
         Serial mLastSubmittedSerial = 0;
-        CommandRecordingContext mCommandContext;
+        id<MTLCommandBuffer> mPendingCommands = nil;
 
         // The completed serial is updated in a Metal completion handler that can be fired on a
         // different thread, so it needs to be atomic.
