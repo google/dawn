@@ -122,7 +122,7 @@ namespace dawn_native { namespace opengl {
         compiler->set_common_options(options);
         }
 
-        ExtractSpirvInfo(*compiler);
+        DAWN_TRY(ExtractSpirvInfo(*compiler));
 
         const auto& bindingInfo = GetBindingInfo();
 

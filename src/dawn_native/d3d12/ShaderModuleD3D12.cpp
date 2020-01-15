@@ -60,10 +60,10 @@ namespace dawn_native { namespace d3d12 {
 
             spirv_cross::Compiler* compiler =
                 reinterpret_cast<spirv_cross::Compiler*>(mSpvcContext.GetCompiler());
-            ExtractSpirvInfo(*compiler);
+            DAWN_TRY(ExtractSpirvInfo(*compiler));
         } else {
             spirv_cross::CompilerHLSL compiler(descriptor->code, descriptor->codeSize);
-            ExtractSpirvInfo(compiler);
+            DAWN_TRY(ExtractSpirvInfo(compiler));
         }
         return {};
     }

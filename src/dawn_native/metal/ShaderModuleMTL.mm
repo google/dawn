@@ -84,10 +84,10 @@ namespace dawn_native { namespace metal {
 
             spirv_cross::CompilerMSL* compiler =
                 reinterpret_cast<spirv_cross::CompilerMSL*>(mSpvcContext.GetCompiler());
-            ExtractSpirvInfo(*compiler);
+            DAWN_TRY(ExtractSpirvInfo(*compiler));
         } else {
             spirv_cross::CompilerMSL compiler(mSpirv);
-            ExtractSpirvInfo(compiler);
+            DAWN_TRY(ExtractSpirvInfo(compiler));
         }
         return {};
     }

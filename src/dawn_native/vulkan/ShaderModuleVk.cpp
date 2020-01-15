@@ -49,10 +49,10 @@ namespace dawn_native { namespace vulkan {
 
             spirv_cross::Compiler* compiler =
                 reinterpret_cast<spirv_cross::Compiler*>(mSpvcContext.GetCompiler());
-            ExtractSpirvInfo(*compiler);
+            DAWN_TRY(ExtractSpirvInfo(*compiler));
         } else {
             spirv_cross::Compiler compiler(descriptor->code, descriptor->codeSize);
-            ExtractSpirvInfo(compiler);
+            DAWN_TRY(ExtractSpirvInfo(compiler));
         }
 
         VkShaderModuleCreateInfo createInfo;

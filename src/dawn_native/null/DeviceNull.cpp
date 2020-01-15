@@ -138,10 +138,10 @@ namespace dawn_native { namespace null {
 
             spirv_cross::Compiler* compiler =
                 reinterpret_cast<spirv_cross::Compiler*>(context.GetCompiler());
-            module->ExtractSpirvInfo(*compiler);
+            DAWN_TRY(module->ExtractSpirvInfo(*compiler));
         } else {
             spirv_cross::Compiler compiler(descriptor->code, descriptor->codeSize);
-            module->ExtractSpirvInfo(compiler);
+            DAWN_TRY(module->ExtractSpirvInfo(compiler));
         }
         return module;
     }

@@ -119,20 +119,19 @@ namespace dawn_native {
             UNREACHABLE();
         }
 
-        // TODO(rharrison): Convert this to ResultOrError once ExtractSPIRVInfo turns an error
-        SingleShaderStage ToSingleShaderStage(shaderc_spvc_execution_model execution_model) {
+        ResultOrError<SingleShaderStage> ToSingleShaderStage(
+            shaderc_spvc_execution_model execution_model) {
             switch (execution_model) {
                 case shaderc_spvc_execution_model_vertex:
-                    return SingleShaderStage::Vertex;
+                    return {SingleShaderStage::Vertex};
                 case shaderc_spvc_execution_model_fragment:
-                    return SingleShaderStage::Fragment;
+                    return {SingleShaderStage::Fragment};
                 case shaderc_spvc_execution_model_glcompute:
-                    return SingleShaderStage::Compute;
+                    return {SingleShaderStage::Compute};
                 default:
-                    // This will be converted to an error return when the whole
-                    // calling stack is changed to passing errors.
                     UNREACHABLE();
-                    return SingleShaderStage::Vertex;
+                    return DAWN_VALIDATION_ERROR(
+                        "Attempted to convert invalid spvc execution model to SingleShaderStage");
             }
         }
     }  // anonymous namespace
@@ -198,45 +197,40 @@ namespace dawn_native {
         return new ShaderModuleBase(device, ObjectBase::kError);
     }
 
-    void ShaderModuleBase::ExtractSpirvInfo(const spirv_cross::Compiler& compiler) {
+    MaybeError ShaderModuleBase::ExtractSpirvInfo(const spirv_cross::Compiler& compiler) {
         ASSERT(!IsError());
         if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
-            ExtractSpirvInfoWithSpvc(compiler);
+            DAWN_TRY(ExtractSpirvInfoWithSpvc());
         } else {
-            ExtractSpirvInfoWithSpirvCross(compiler);
+            DAWN_TRY(ExtractSpirvInfoWithSpirvCross(compiler));
         }
+        return {};
     }
 
-    void ShaderModuleBase::ExtractSpirvInfoWithSpvc(const spirv_cross::Compiler& compiler) {
+    MaybeError ShaderModuleBase::ExtractSpirvInfoWithSpvc() {
         shaderc_spvc_execution_model execution_model;
-        if (!CheckSpvcSuccess(mSpvcContext.GetExecutionModel(&execution_model),
-                              "Unable to get execution model for shader.")) {
-            return;
-        }
+        DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetExecutionModel(&execution_model),
+                                  "Unable to get execution model for shader."));
 
-        mExecutionModel = ToSingleShaderStage(execution_model);
+        DAWN_TRY_ASSIGN(mExecutionModel, ToSingleShaderStage(execution_model));
 
         size_t push_constant_buffers_count;
-        if (!CheckSpvcSuccess(mSpvcContext.GetPushConstantBufferCount(&push_constant_buffers_count),
-                              "Unable to get push constant buffer count for shader.")) {
-            return;
-        }
+        DAWN_TRY(
+            CheckSpvcSuccess(mSpvcContext.GetPushConstantBufferCount(&push_constant_buffers_count),
+                             "Unable to get push constant buffer count for shader."));
 
         // TODO(rharrison): This should be handled by spirv-val pass in spvc,
         // but need to confirm.
         if (push_constant_buffers_count > 0) {
-            GetDevice()->HandleError(wgpu::ErrorType::Validation,
-                                     "Push constants aren't supported.");
-            return;
+            return DAWN_VALIDATION_ERROR("Push constants aren't supported.");
         }
 
         // Fill in bindingInfo with the SPIRV bindings
-        auto ExtractResourcesBinding = [this](std::vector<shaderc_spvc_binding_info> bindings) {
+        auto ExtractResourcesBinding =
+            [this](std::vector<shaderc_spvc_binding_info> bindings) -> MaybeError {
             for (const auto& binding : bindings) {
                 if (binding.binding >= kMaxBindingsPerGroup || binding.set >= kMaxBindGroups) {
-                    GetDevice()->HandleError(wgpu::ErrorType::Validation,
-                                             "Binding over limits in the SPIRV");
-                    continue;
+                    return DAWN_VALIDATION_ERROR("Binding over limits in the SPIRV");
                 }
 
                 BindingInfo* info = &mBindingInfo[binding.set][binding.binding];
@@ -251,108 +245,90 @@ namespace dawn_native {
                 }
                 info->type = ToWGPUBindingType(binding.binding_type);
             }
+            return {};
         };
 
         std::vector<shaderc_spvc_binding_info> resource_bindings;
-        if (!CheckSpvcSuccess(mSpvcContext.GetBindingInfo(
-                                  shaderc_spvc_shader_resource_uniform_buffers,
-                                  shaderc_spvc_binding_type_uniform_buffer, &resource_bindings),
-                              "Unable to get binding info for uniform buffers from shader")) {
-            return;
-        }
-        ExtractResourcesBinding(resource_bindings);
+        DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetBindingInfo(
+                                      shaderc_spvc_shader_resource_uniform_buffers,
+                                      shaderc_spvc_binding_type_uniform_buffer, &resource_bindings),
+                                  "Unable to get binding info for uniform buffers from shader"));
+        DAWN_TRY(ExtractResourcesBinding(resource_bindings));
 
-        if (!CheckSpvcSuccess(mSpvcContext.GetBindingInfo(
-                                  shaderc_spvc_shader_resource_separate_images,
-                                  shaderc_spvc_binding_type_sampled_texture, &resource_bindings),
-                              "Unable to get binding info for sampled textures from shader")) {
-            return;
-        }
-        ExtractResourcesBinding(resource_bindings);
+        DAWN_TRY(CheckSpvcSuccess(
+            mSpvcContext.GetBindingInfo(shaderc_spvc_shader_resource_separate_images,
+                                        shaderc_spvc_binding_type_sampled_texture,
+                                        &resource_bindings),
+            "Unable to get binding info for sampled textures from shader"));
+        DAWN_TRY(ExtractResourcesBinding(resource_bindings));
 
-        if (!CheckSpvcSuccess(
-                mSpvcContext.GetBindingInfo(shaderc_spvc_shader_resource_separate_samplers,
-                                            shaderc_spvc_binding_type_sampler, &resource_bindings),
-                "Unable to get binding info for samples from shader")) {
-            return;
-        }
-        ExtractResourcesBinding(resource_bindings);
+        DAWN_TRY(CheckSpvcSuccess(
+            mSpvcContext.GetBindingInfo(shaderc_spvc_shader_resource_separate_samplers,
+                                        shaderc_spvc_binding_type_sampler, &resource_bindings),
+            "Unable to get binding info for samples from shader"));
+        DAWN_TRY(ExtractResourcesBinding(resource_bindings));
 
-        if (!CheckSpvcSuccess(mSpvcContext.GetBindingInfo(
-                                  shaderc_spvc_shader_resource_storage_buffers,
-                                  shaderc_spvc_binding_type_storage_buffer, &resource_bindings),
-                              "Unable to get binding info for storage buffers from shader")) {
-            return;
-        }
-        ExtractResourcesBinding(resource_bindings);
+        DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetBindingInfo(
+                                      shaderc_spvc_shader_resource_storage_buffers,
+                                      shaderc_spvc_binding_type_storage_buffer, &resource_bindings),
+                                  "Unable to get binding info for storage buffers from shader"));
+        DAWN_TRY(ExtractResourcesBinding(resource_bindings));
 
         std::vector<shaderc_spvc_resource_location_info> input_stage_locations;
-        if (!CheckSpvcSuccess(mSpvcContext.GetInputStageLocationInfo(&input_stage_locations),
-                              "Unable to get input stage location information from shader")) {
-            input_stage_locations.clear();
-            return;
-        }
+        DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetInputStageLocationInfo(&input_stage_locations),
+                                  "Unable to get input stage location information from shader"));
 
         for (const auto& input : input_stage_locations) {
             if (mExecutionModel == SingleShaderStage::Vertex) {
                 if (input.location >= kMaxVertexAttributes) {
-                    GetDevice()->HandleError(wgpu::ErrorType::Validation,
-                                             "Attribute location over limits in the SPIRV");
-                    return;
+                    return DAWN_VALIDATION_ERROR("Attribute location over limits in the SPIRV");
                 }
                 mUsedVertexAttributes.set(input.location);
             } else if (mExecutionModel == SingleShaderStage::Fragment) {
                 // Without a location qualifier on vertex inputs, spirv_cross::CompilerMSL gives
                 // them all the location 0, causing a compile error.
                 if (!input.has_location) {
-                    GetDevice()->HandleError(wgpu::ErrorType::Validation,
-                                             "Need location qualifier on fragment input");
-                    return;
+                    return DAWN_VALIDATION_ERROR("Need location qualifier on fragment input");
                 }
             }
         }
 
         std::vector<shaderc_spvc_resource_location_info> output_stage_locations;
-        if (!CheckSpvcSuccess(mSpvcContext.GetOutputStageLocationInfo(&output_stage_locations),
-                              "Unable to get output stage location information from shader")) {
-            output_stage_locations.clear();
-            return;
-        }
+        DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetOutputStageLocationInfo(&output_stage_locations),
+                                  "Unable to get output stage location information from shader"));
 
         for (const auto& output : output_stage_locations) {
             if (mExecutionModel == SingleShaderStage::Vertex) {
                 // Without a location qualifier on vertex outputs, spirv_cross::CompilerMSL
                 // gives them all the location 0, causing a compile error.
                 if (!output.has_location) {
-                    GetDevice()->HandleError(wgpu::ErrorType::Validation,
-                                             "Need location qualifier on vertex output");
-                    return;
+                    return DAWN_VALIDATION_ERROR("Need location qualifier on vertex output");
                 }
             } else if (mExecutionModel == SingleShaderStage::Fragment) {
                 if (output.location >= kMaxColorAttachments) {
-                    GetDevice()->HandleError(wgpu::ErrorType::Validation,
-                                             "Fragment output location over limits in the SPIRV");
-                    return;
+                    return DAWN_VALIDATION_ERROR(
+                        "Fragment output location over limits in the SPIRV");
                 }
             }
         }
 
         if (mExecutionModel == SingleShaderStage::Fragment) {
             std::vector<shaderc_spvc_resource_type_info> output_types;
-            if (!CheckSpvcSuccess(mSpvcContext.GetOutputStageTypeInfo(&output_types),
-                                  "Unable to get output stage type information from shader")) {
-                output_stage_locations.clear();
-                return;
-            }
+            DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetOutputStageTypeInfo(&output_types),
+                                      "Unable to get output stage type information from shader"));
 
             for (const auto& output : output_types) {
-                ASSERT(output.type != shaderc_spvc_texture_format_type_other);
+                if (output.type == shaderc_spvc_texture_format_type_other) {
+                    return DAWN_VALIDATION_ERROR("Unexpected Fragment output type");
+                }
                 mFragmentOutputFormatBaseTypes[output.location] = ToDawnFormatType(output.type);
             }
         }
+        return {};
     }
 
-    void ShaderModuleBase::ExtractSpirvInfoWithSpirvCross(const spirv_cross::Compiler& compiler) {
+    MaybeError ShaderModuleBase::ExtractSpirvInfoWithSpirvCross(
+        const spirv_cross::Compiler& compiler) {
         // TODO(cwallez@chromium.org): make errors here creation errors
         // currently errors here do not prevent the shadermodule from being used
         const auto& resources = compiler.get_shader_resources();
@@ -369,86 +345,91 @@ namespace dawn_native {
                 break;
             default:
                 UNREACHABLE();
+                return DAWN_VALIDATION_ERROR("Unexpected shader execution model");
         }
 
         if (resources.push_constant_buffers.size() > 0) {
-            GetDevice()->HandleError(wgpu::ErrorType::Validation,
-                                     "Push constants aren't supported.");
+            return DAWN_VALIDATION_ERROR("Push constants aren't supported.");
         }
 
         // Fill in bindingInfo with the SPIRV bindings
         auto ExtractResourcesBinding =
             [this](const spirv_cross::SmallVector<spirv_cross::Resource>& resources,
-                   const spirv_cross::Compiler& compiler, wgpu::BindingType bindingType) {
-                for (const auto& resource : resources) {
-                    ASSERT(compiler.get_decoration_bitset(resource.id).get(spv::DecorationBinding));
-                    ASSERT(compiler.get_decoration_bitset(resource.id)
-                               .get(spv::DecorationDescriptorSet));
-
-                    uint32_t binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
-                    uint32_t set =
-                        compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
-
-                    if (binding >= kMaxBindingsPerGroup || set >= kMaxBindGroups) {
-                        GetDevice()->HandleError(wgpu::ErrorType::Validation,
-                                                 "Binding over limits in the SPIRV");
-                        continue;
-                    }
-
-                    BindingInfo* info = &mBindingInfo[set][binding];
-                    *info = {};
-                    info->used = true;
-                    info->id = resource.id;
-                    info->base_type_id = resource.base_type_id;
-                    switch (bindingType) {
-                        case wgpu::BindingType::SampledTexture: {
-                            spirv_cross::SPIRType::ImageType imageType =
-                                compiler.get_type(info->base_type_id).image;
-                            spirv_cross::SPIRType::BaseType textureComponentType =
-                                compiler.get_type(imageType.type).basetype;
-
-                            info->multisampled = imageType.ms;
-                            info->textureDimension =
-                                SpirvDimToTextureViewDimension(imageType.dim, imageType.arrayed);
-                            info->textureComponentType =
-                                SpirvCrossBaseTypeToFormatType(textureComponentType);
-                            info->type = bindingType;
-                        } break;
-                        case wgpu::BindingType::StorageBuffer: {
-                            // Differentiate between readonly storage bindings and writable ones
-                            // based on the NonWritable decoration
-                            spirv_cross::Bitset flags =
-                                compiler.get_buffer_block_flags(resource.id);
-                            if (flags.get(spv::DecorationNonWritable)) {
-                                info->type = wgpu::BindingType::ReadonlyStorageBuffer;
-                            } else {
-                                info->type = wgpu::BindingType::StorageBuffer;
-                            }
-                        } break;
-                        default:
-                            info->type = bindingType;
-                    }
+                   const spirv_cross::Compiler& compiler,
+                   wgpu::BindingType bindingType) -> MaybeError {
+            for (const auto& resource : resources) {
+                if (!compiler.get_decoration_bitset(resource.id).get(spv::DecorationBinding)) {
+                    return DAWN_VALIDATION_ERROR("No Binding decoration set for resource");
                 }
-            };
 
-        ExtractResourcesBinding(resources.uniform_buffers, compiler,
-                                wgpu::BindingType::UniformBuffer);
-        ExtractResourcesBinding(resources.separate_images, compiler,
-                                wgpu::BindingType::SampledTexture);
-        ExtractResourcesBinding(resources.separate_samplers, compiler, wgpu::BindingType::Sampler);
-        ExtractResourcesBinding(resources.storage_buffers, compiler,
-                                wgpu::BindingType::StorageBuffer);
+                if (!compiler.get_decoration_bitset(resource.id)
+                         .get(spv::DecorationDescriptorSet)) {
+                    return DAWN_VALIDATION_ERROR("No Descriptor Decoration set for resource");
+                }
+
+                uint32_t binding = compiler.get_decoration(resource.id, spv::DecorationBinding);
+                uint32_t set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
+
+                if (binding >= kMaxBindingsPerGroup || set >= kMaxBindGroups) {
+                    return DAWN_VALIDATION_ERROR("Binding over limits in the SPIRV");
+                }
+
+                BindingInfo* info = &mBindingInfo[set][binding];
+                *info = {};
+                info->used = true;
+                info->id = resource.id;
+                info->base_type_id = resource.base_type_id;
+                switch (bindingType) {
+                    case wgpu::BindingType::SampledTexture: {
+                        spirv_cross::SPIRType::ImageType imageType =
+                            compiler.get_type(info->base_type_id).image;
+                        spirv_cross::SPIRType::BaseType textureComponentType =
+                            compiler.get_type(imageType.type).basetype;
+
+                        info->multisampled = imageType.ms;
+                        info->textureDimension =
+                            SpirvDimToTextureViewDimension(imageType.dim, imageType.arrayed);
+                        info->textureComponentType =
+                            SpirvCrossBaseTypeToFormatType(textureComponentType);
+                        info->type = bindingType;
+                    } break;
+                    case wgpu::BindingType::StorageBuffer: {
+                        // Differentiate between readonly storage bindings and writable ones
+                        // based on the NonWritable decoration
+                        spirv_cross::Bitset flags = compiler.get_buffer_block_flags(resource.id);
+                        if (flags.get(spv::DecorationNonWritable)) {
+                            info->type = wgpu::BindingType::ReadonlyStorageBuffer;
+                        } else {
+                            info->type = wgpu::BindingType::StorageBuffer;
+                        }
+                    } break;
+                    default:
+                        info->type = bindingType;
+                }
+            }
+            return {};
+        };
+
+        DAWN_TRY(ExtractResourcesBinding(resources.uniform_buffers, compiler,
+                                         wgpu::BindingType::UniformBuffer));
+        DAWN_TRY(ExtractResourcesBinding(resources.separate_images, compiler,
+                                         wgpu::BindingType::SampledTexture));
+        DAWN_TRY(ExtractResourcesBinding(resources.separate_samplers, compiler,
+                                         wgpu::BindingType::Sampler));
+        DAWN_TRY(ExtractResourcesBinding(resources.storage_buffers, compiler,
+                                         wgpu::BindingType::StorageBuffer));
 
         // Extract the vertex attributes
         if (mExecutionModel == SingleShaderStage::Vertex) {
             for (const auto& attrib : resources.stage_inputs) {
-                ASSERT(compiler.get_decoration_bitset(attrib.id).get(spv::DecorationLocation));
+                if (!(compiler.get_decoration_bitset(attrib.id).get(spv::DecorationLocation))) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Unable to find Location decoration for Vertex input");
+                }
                 uint32_t location = compiler.get_decoration(attrib.id, spv::DecorationLocation);
 
                 if (location >= kMaxVertexAttributes) {
-                    GetDevice()->HandleError(wgpu::ErrorType::Validation,
-                                             "Attribute location over limits in the SPIRV");
-                    return;
+                    return DAWN_VALIDATION_ERROR("Attribute location over limits in the SPIRV");
                 }
 
                 mUsedVertexAttributes.set(location);
@@ -458,9 +439,7 @@ namespace dawn_native {
             // them all the location 0, causing a compile error.
             for (const auto& attrib : resources.stage_outputs) {
                 if (!compiler.get_decoration_bitset(attrib.id).get(spv::DecorationLocation)) {
-                    GetDevice()->HandleError(wgpu::ErrorType::Validation,
-                                             "Need location qualifier on vertex output");
-                    return;
+                    return DAWN_VALIDATION_ERROR("Need location qualifier on vertex output");
                 }
             }
         }
@@ -470,31 +449,34 @@ namespace dawn_native {
             // them all the location 0, causing a compile error.
             for (const auto& attrib : resources.stage_inputs) {
                 if (!compiler.get_decoration_bitset(attrib.id).get(spv::DecorationLocation)) {
-                    GetDevice()->HandleError(wgpu::ErrorType::Validation,
-                                             "Need location qualifier on fragment input");
-                    return;
+                    return DAWN_VALIDATION_ERROR("Need location qualifier on fragment input");
                 }
             }
 
             for (const auto& fragmentOutput : resources.stage_outputs) {
-                ASSERT(
-                    compiler.get_decoration_bitset(fragmentOutput.id).get(spv::DecorationLocation));
+                if (!compiler.get_decoration_bitset(fragmentOutput.id)
+                         .get(spv::DecorationLocation)) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Unable to find Location decoration for Fragment output");
+                }
                 uint32_t location =
                     compiler.get_decoration(fragmentOutput.id, spv::DecorationLocation);
                 if (location >= kMaxColorAttachments) {
-                    GetDevice()->HandleError(wgpu::ErrorType::Validation,
-                                             "Fragment output location over limits in the SPIRV");
-                    return;
+                    return DAWN_VALIDATION_ERROR(
+                        "Fragment output location over limits in the SPIRV");
                 }
 
                 spirv_cross::SPIRType::BaseType shaderFragmentOutputBaseType =
                     compiler.get_type(fragmentOutput.base_type_id).basetype;
                 Format::Type formatType =
                     SpirvCrossBaseTypeToFormatType(shaderFragmentOutputBaseType);
-                ASSERT(formatType != Format::Type::Other);
+                if (formatType == Format::Type::Other) {
+                    return DAWN_VALIDATION_ERROR("Unexpected Fragment output type");
+                };
                 mFragmentOutputFormatBaseTypes[location] = formatType;
             }
         }
+        return {};
     }
 
     const ShaderModuleBase::ModuleBindingInfo& ShaderModuleBase::GetBindingInfo() const {
@@ -600,12 +582,12 @@ namespace dawn_native {
         return a->mCode == b->mCode;
     }
 
-    bool ShaderModuleBase::CheckSpvcSuccess(shaderc_spvc_status status, const char* error_msg) {
+    MaybeError ShaderModuleBase::CheckSpvcSuccess(shaderc_spvc_status status,
+                                                  const char* error_msg) {
         if (status != shaderc_spvc_status_success) {
-            GetDevice()->HandleError(wgpu::ErrorType::Validation, error_msg);
-            return false;
+            DAWN_VALIDATION_ERROR(error_msg);
         }
-        return true;
+        return {};
     }
 
 }  // namespace dawn_native
