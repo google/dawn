@@ -582,6 +582,7 @@ void DawnTestBase::SetUp() {
     queue = device.CreateQueue();
 
     device.SetUncapturedErrorCallback(OnDeviceError, this);
+    device.SetDeviceLostCallback(OnDeviceLost, this);
 }
 
 void DawnTestBase::TearDown() {
@@ -616,6 +617,10 @@ void DawnTestBase::OnDeviceError(WGPUErrorType type, const char* message, void* 
     ASSERT_TRUE(self->mExpectError) << "Got unexpected device error: " << message;
     ASSERT_FALSE(self->mError) << "Got two errors in expect block";
     self->mError = true;
+}
+
+void DawnTestBase::OnDeviceLost(const char* message, void* userdata) {
+    FAIL() << "Device Lost during test: " << message;
 }
 
 std::ostringstream& DawnTestBase::AddBufferExpectation(const char* file,

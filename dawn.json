@@ -612,6 +612,9 @@
                 "TODO": "enga@: Make this a Dawn extension"
             },
             {
+                "name": "lose for testing"
+            },
+            {
                 "name": "tick"
             },
             {

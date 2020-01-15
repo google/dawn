@@ -403,6 +403,8 @@ namespace dawn_native { namespace d3d12 {
     }
 
     void Device::Destroy() {
+        ASSERT(mLossStatus != LossStatus::AlreadyLost);
+
         // Immediately forget about all pending commands
         mPendingCommands.Release();
 

@@ -503,6 +503,7 @@ namespace dawn_native {
     }
 
     MaybeError TextureBase::ValidateDestroy() const {
+        DAWN_TRY(GetDevice()->ValidateIsAlive());
         DAWN_TRY(GetDevice()->ValidateObject(this));
         return {};
     }

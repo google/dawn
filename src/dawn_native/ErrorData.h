@@ -28,7 +28,6 @@ namespace dawn {
 }
 
 namespace dawn_native {
-
     enum class InternalErrorType : uint32_t;
 
     class ErrorData {

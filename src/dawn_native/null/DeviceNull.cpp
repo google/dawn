@@ -166,6 +166,8 @@ namespace dawn_native { namespace null {
     }
 
     void Device::Destroy() {
+        ASSERT(mLossStatus != LossStatus::AlreadyLost);
+
         mDynamicUploader = nullptr;
 
         mPendingOperations.clear();

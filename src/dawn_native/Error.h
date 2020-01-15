@@ -81,6 +81,9 @@ namespace dawn_native {
     for (;;)                                                                  \
     break
 
+    // Assert that errors are device loss so that we can continue with destruction
+    void AssertAndIgnoreDeviceLossError(MaybeError maybeError);
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_ERROR_H_

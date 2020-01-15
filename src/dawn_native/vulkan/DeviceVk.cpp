@@ -733,6 +733,8 @@ namespace dawn_native { namespace vulkan {
     }
 
     void Device::Destroy() {
+        ASSERT(mLossStatus != LossStatus::AlreadyLost);
+
         // Immediately tag the recording context as unused so we don't try to submit it in Tick.
         mRecordingContext.used = false;
         fn.DestroyCommandPool(mVkDevice, mRecordingContext.commandPool, nullptr);
@@ -741,7 +743,9 @@ namespace dawn_native { namespace vulkan {
         // on a serial that doesn't have a corresponding fence enqueued. Force all
         // operations to look as if they were completed (because they were).
         mCompletedSerial = mLastSubmittedSerial + 1;
-        Tick();
+
+        // Assert that errors are device loss so that we can continue with destruction
+        AssertAndIgnoreDeviceLossError(TickImpl());
 
         ASSERT(mCommandsInFlight.Empty());
         for (const CommandPoolAndBuffer& commands : mUnusedCommands) {
