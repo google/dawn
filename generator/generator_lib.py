@@ -117,6 +117,11 @@ class _PreprocessingLoader(jinja2.BaseLoader):
         result = []
         indentation_level = 0
 
+        # Filter lines that are pure comments. line_comment_prefix is not enough because it removes
+        # the comment but doesn't completely remove the line, resulting in more verbose output.
+        lines = filter(lambda line: not line.strip().startswith('//*'), lines)
+
+        # Remove indentation templates have for the Jinja control flow.
         for line in lines:
             # The capture in the regex adds one element per block start or end so we divide by two
             # there is also an extra line chunk corresponding to the line end, so we substract it.
