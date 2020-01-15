@@ -108,6 +108,11 @@ namespace dawn_native {
                     return DAWN_VALIDATION_ERROR(
                         "The sample counts of the textures in BC formats must be 1.");
                 }
+
+                if (descriptor->usage & wgpu::TextureUsage::Storage) {
+                    return DAWN_VALIDATION_ERROR(
+                        "The sample counts of the storage textures must be 1.");
+                }
             }
 
             return {};
@@ -184,8 +189,9 @@ namespace dawn_native {
                     "Non-renderable format used with OutputAttachment usage");
             }
 
-            if (descriptor->usage & wgpu::TextureUsage::Storage) {
-                return DAWN_VALIDATION_ERROR("storage textures aren't supported (yet)");
+            if (!format->supportsStorageUsage &&
+                (descriptor->usage & wgpu::TextureUsage::Storage)) {
+                return DAWN_VALIDATION_ERROR("Format cannot be used in storage textures");
             }
 
             return {};

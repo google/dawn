@@ -50,6 +50,7 @@ namespace dawn_native {
         bool isCompressed;
         // A format can be known but not supported because it is part of a disabled extension.
         bool isSupported;
+        bool supportsStorageUsage;
         Aspect aspect;
         Type type;
 
