@@ -17,6 +17,7 @@
 #include "common/Assert.h"
 #include "common/Log.h"
 #include "dawn_native/ErrorData.h"
+#include "dawn_native/Surface.h"
 
 namespace dawn_native {
 
@@ -209,6 +210,14 @@ namespace dawn_native {
 
     dawn_platform::Platform* InstanceBase::GetPlatform() const {
         return mPlatform;
+    }
+
+    Surface* InstanceBase::CreateSurface(const SurfaceDescriptor* descriptor) {
+        if (ConsumedError(ValidateSurfaceDescriptor(this, descriptor))) {
+            return nullptr;
+        }
+
+        return new Surface(this, descriptor);
     }
 
 }  // namespace dawn_native

@@ -30,4 +30,6 @@
 #undef None
 #undef Always
 
+using XErrorHandler = int (*)(Display*, XErrorEvent*);
+
 #endif  // COMMON_XLIB_WITH_UNDEFS_H_

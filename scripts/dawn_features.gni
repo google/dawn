@@ -54,6 +54,9 @@ declare_args() {
   # Enables error injection for faking failures to native API calls
   dawn_enable_error_injection =
       is_debug || (build_with_chromium && use_fuzzing_engine)
+
+  # Whether Dawn should enable X11 support.
+  dawn_use_x11 = is_linux && !is_chromeos
 }
 
 # GN does not allow reading a variable defined in the same declare_args().

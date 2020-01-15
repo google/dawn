@@ -263,6 +263,8 @@ source_set("libdawn_native_sources") {
     "src/dawn_native/ShaderModule.h",
     "src/dawn_native/StagingBuffer.cpp",
     "src/dawn_native/StagingBuffer.h",
+    "src/dawn_native/Surface.cpp",
+    "src/dawn_native/Surface.h",
     "src/dawn_native/SwapChain.cpp",
     "src/dawn_native/SwapChain.h",
     "src/dawn_native/Texture.cpp",
@@ -346,8 +348,10 @@ source_set("libdawn_native_sources") {
       "Cocoa.framework",
       "IOKit.framework",
       "IOSurface.framework",
+      "QuartzCore.framework",
     ]
     sources += [
+      "src/dawn_native/Surface_metal.mm",
       "src/dawn_native/metal/BackendMTL.h",
       "src/dawn_native/metal/BackendMTL.mm",
       "src/dawn_native/metal/BufferMTL.h",
@@ -541,6 +545,10 @@ source_set("libdawn_native_sources") {
           [ "DAWN_SWIFTSHADER_VK_ICD_JSON=\"${swiftshader_icd_file_name}\"" ]
     }
   }
+
+  if (dawn_use_x11) {
+    libs += [ "X11" ]
+  }
 }
 
 # The static and shared libraries for libdawn_native. Most of the files are
@@ -662,10 +670,12 @@ dawn_component("libdawn_wire") {
 # GLFW wrapping target
 ###############################################################################
 
+supports_glfw_for_windowing = is_win || (is_linux && !is_chromeos) || is_mac
+
 # GLFW does not support ChromeOS, Android or Fuchsia, so provide a small mock
 # library that can be linked into the Dawn tests on these platforms. Otherwise,
 # use the real library from third_party/.
-if (is_win || (is_linux && !is_chromeos) || is_mac) {
+if (supports_glfw_for_windowing) {
   group("dawn_glfw") {
     public_deps = [
       "third_party:glfw",
@@ -724,24 +734,42 @@ static_library("dawn_utils") {
     "src/utils/WGPUHelpers.cpp",
     "src/utils/WGPUHelpers.h",
   ]
-
-  if (is_win) {
-    sources += [ "src/utils/WindowsTimer.cpp" ]
-  } else if (is_mac) {
-    sources += [ "src/utils/OSXTimer.cpp" ]
-  } else {
-    sources += [ "src/utils/PosixTimer.cpp" ]
-  }
-
-  public_deps = [
-    "${dawn_root}/src/dawn:dawncpp_headers",
-  ]
-
   deps = [
     ":libdawn_native",
     ":libdawn_wire",
     "${dawn_root}/src/common",
     "${dawn_shaderc_dir}:libshaderc",
+  ]
+  libs = []
+
+  if (is_win) {
+    sources += [ "src/utils/WindowsTimer.cpp" ]
+  } else if (is_mac) {
+    sources += [
+      "src/utils/OSXTimer.cpp",
+      "src/utils/ObjCUtils.h",
+      "src/utils/ObjCUtils.mm",
+    ]
+    libs += [ "QuartzCore.framework" ]
+  } else {
+    sources += [ "src/utils/PosixTimer.cpp" ]
+  }
+
+  if (supports_glfw_for_windowing) {
+    sources += [
+      "src/utils/GLFWUtils.cpp",
+      "src/utils/GLFWUtils.h",
+    ]
+    deps += [ ":dawn_glfw" ]
+
+    if (dawn_enable_metal) {
+      sources += [ "src/utils/GLFWUtils_metal.mm" ]
+      libs += [ "Metal.framework" ]
+    }
+  }
+
+  public_deps = [
+    "${dawn_root}/src/dawn:dawncpp_headers",
   ]
 }
 
@@ -915,12 +943,6 @@ source_set("dawn_end2end_tests_sources") {
 
   libs = []
 
-  if (dawn_enable_metal) {
-    sources += [ "src/tests/end2end/IOSurfaceWrappingTests.cpp" ]
-
-    libs += [ "IOSurface.framework" ]
-  }
-
   if (dawn_enable_d3d12) {
     sources += [ "src/tests/end2end/D3D12ResourceWrappingTests.cpp" ]
     libs += [
@@ -929,7 +951,17 @@ source_set("dawn_end2end_tests_sources") {
     ]
   }
 
+  if (dawn_enable_metal) {
+    sources += [ "src/tests/end2end/IOSurfaceWrappingTests.cpp" ]
+    libs += [ "IOSurface.framework" ]
+  }
+
   if (dawn_enable_opengl) {
+    assert(supports_glfw_for_windowing)
+  }
+
+  if (supports_glfw_for_windowing) {
+    sources += [ "src/tests/end2end/WindowSurfaceTests.cpp" ]
     deps += [ ":dawn_glfw" ]
   }
 }

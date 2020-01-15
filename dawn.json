@@ -771,7 +771,16 @@
         ]
     },
     "instance": {
-        "category": "object"
+        "category": "object",
+        "methods": [
+            {
+                "name": "create surface",
+                "returns": "surface",
+                "args": [
+                    {"name": "descriptor", "type": "surface descriptor", "annotation": "const*"}
+                ]
+            }
+        ]
     },
     "instance descriptor": {
         "category": "structure",
@@ -1274,6 +1283,39 @@
             {"name": "pass op", "type": "stencil operation", "default": "keep"}
         ]
     },
+    "surface": {
+        "category": "object"
+    },
+    "surface descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true}
+        ]
+    },
+    "surface descriptor from metal layer": {
+        "category": "structure",
+        "chained": true,
+        "members": [
+            {"name": "layer", "type": "void", "annotation": "*"}
+        ]
+    },
+    "surface descriptor from windows HWND": {
+        "category": "structure",
+        "chained": true,
+        "members": [
+            {"name": "hinstance", "type": "void", "annotation": "*"},
+            {"name": "hwnd", "type": "void", "annotation": "*"}
+        ]
+    },
+    "surface descriptor from xlib": {
+        "category": "structure",
+        "chained": true,
+        "members": [
+            {"name": "display", "type": "void", "annotation": "*"},
+            {"name": "window", "type": "uint32_t"}
+        ]
+    },
     "swap chain": {
         "category": "object",
         "methods": [
@@ -1301,7 +1343,10 @@
     "s type": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "invalid"}
+            {"value": 0, "name": "invalid"},
+            {"value": 1, "name": "surface descriptor from metal layer"},
+            {"value": 2, "name": "surface descriptor from windows HWND"},
+            {"value": 3, "name": "surface descriptor from xlib"}
         ]
     },
     "texture": {

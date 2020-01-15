@@ -89,7 +89,10 @@
     },
     "special items": {
         "client_side_structures": [
-            "CreateBufferMappedResult"
+            "CreateBufferMappedResult",
+            "SurfaceDescriptorFromMetalLayer",
+            "SurfaceDescriptorFromWindowsHWND",
+            "SurfaceDescriptorFromXlib"
         ],
         "client_side_commands": [
             "BufferMapReadAsync",

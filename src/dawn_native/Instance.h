@@ -29,6 +29,8 @@
 
 namespace dawn_native {
 
+    class Surface;
+
     // This is called InstanceBase for consistency across the frontend, even if the backends don't
     // specialize this class.
     class InstanceBase final : public RefCounted {
@@ -63,6 +65,9 @@ namespace dawn_native {
 
         void SetPlatform(dawn_platform::Platform* platform);
         dawn_platform::Platform* GetPlatform() const;
+
+        // Dawn API
+        Surface* CreateSurface(const SurfaceDescriptor* descriptor);
 
       private:
         InstanceBase() = default;

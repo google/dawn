@@ -18,6 +18,7 @@
 #include "common/Log.h"
 #include "common/Platform.h"
 #include "utils/BackendBinding.h"
+#include "utils/GLFWUtils.h"
 #include "utils/TerribleCommandBuffer.h"
 
 #include <dawn/dawn_proc.h>

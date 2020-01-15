@@ -33,6 +33,7 @@ namespace dawn_native {
     using FenceBase = Fence;
     using RenderPassEncoderBase = RenderPassEncoder;
     using RenderBundleEncoderBase = RenderBundleEncoder;
+    using SurfaceBase = Surface;
 
     namespace {
 

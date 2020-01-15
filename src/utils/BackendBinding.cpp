@@ -44,17 +44,6 @@ namespace utils {
         : mWindow(window), mDevice(device) {
     }
 
-    void SetupGLFWWindowHintsForBackend(wgpu::BackendType type) {
-        if (type == wgpu::BackendType::OpenGL) {
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
-            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        } else {
-            glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        }
-    }
-
     void DiscoverAdapter(dawn_native::Instance* instance,
                          GLFWwindow* window,
                          wgpu::BackendType type) {

@@ -75,7 +75,7 @@ config("dawn_internal") {
     defines += [ "DAWN_ENABLE_BACKEND_VULKAN" ]
   }
 
-  if (is_linux && !is_chromeos) {
+  if (dawn_use_x11) {
     defines += [ "DAWN_USE_X11" ]
   }
 
