@@ -73,10 +73,19 @@ typedef uint32_t WGPUFlags;
 
 {% endfor %}
 
+typedef struct WGPUChainedStruct {
+    struct WGPUChainedStruct const * nextInChain;
+    WGPUSType sType;
+} WGPUChainedStruct;
+
 {% for type in by_category["structure"] %}
     typedef struct {{as_cType(type.name)}} {
         {% if type.extensible %}
-            void const * nextInChain;
+            WGPUChainedStruct const * nextInChain;
+        {% endif %}
+        {% if type.chained %}
+            WGPUChainedStruct const * nextInChain;
+            WGPUSType sType;
         {% endif %}
         {% for member in type.members %}
             {{as_annotated_cType(member)}};

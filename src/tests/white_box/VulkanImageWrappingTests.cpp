@@ -256,7 +256,8 @@ TEST_P(VulkanImageWrappingValidationTests, MissingTextureDescriptor) {
 // Test an error occurs if the texture descriptor is invalid
 TEST_P(VulkanImageWrappingValidationTests, InvalidTextureDescriptor) {
     DAWN_SKIP_TEST_IF(UsesWire());
-    defaultDescriptor.nextInChain = this;
+    wgpu::ChainedStruct chainedDescriptor;
+    defaultDescriptor.nextInChain = &chainedDescriptor;
 
     ASSERT_DEVICE_ERROR(wgpu::Texture texture = WrapVulkanImage(
                             device, &defaultDescriptor, defaultFd, defaultAllocationSize,

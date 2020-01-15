@@ -1298,6 +1298,12 @@
             {"name": "implementation", "type": "uint64_t"}
         ]
     },
+    "s type": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "invalid"}
+        ]
+    },
     "texture": {
         "category": "object",
         "methods": [

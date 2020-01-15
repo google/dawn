@@ -186,10 +186,22 @@ namespace wgpu {
     Instance CreateInstance(InstanceDescriptor const * descriptor = nullptr);
     Proc GetProcAddress(Device const& device, const char* procName);
 
+    struct ChainedStruct {
+        ChainedStruct const * nextInChain = nullptr;
+        SType sType = SType::Invalid;
+    };
+
     {% for type in by_category["structure"] %}
-        struct {{as_cppType(type.name)}} {
+        {% if type.chained %}
+            struct {{as_cppType(type.name)}} : ChainedStruct {
+                {{as_cppType(type.name)}}() {
+                    sType = SType::{{type.name.CamelCase()}};
+                }
+        {% else %}
+            struct {{as_cppType(type.name)}} {
+        {% endif %}
             {% if type.extensible %}
-                const void* nextInChain = nullptr;
+                ChainedStruct const * nextInChain = nullptr;
             {% endif %}
             {% for member in type.members %}
                 {{as_annotated_cppType(member)}}{{render_cpp_default_value(member)}};

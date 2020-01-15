@@ -136,7 +136,9 @@ TEST_P(IOSurfaceValidationTests, Success) {
 // Test an error occurs if the texture descriptor is invalid
 TEST_P(IOSurfaceValidationTests, InvalidTextureDescriptor) {
     DAWN_SKIP_TEST_IF(UsesWire());
-    descriptor.nextInChain = this;
+
+    wgpu::ChainedStruct chainedDescriptor;
+    descriptor.nextInChain = &chainedDescriptor;
 
     ASSERT_DEVICE_ERROR(wgpu::Texture texture =
                             WrapIOSurface(&descriptor, defaultIOSurface.get(), 0));

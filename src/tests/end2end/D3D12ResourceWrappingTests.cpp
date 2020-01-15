@@ -144,7 +144,9 @@ TEST_P(D3D12SharedHandleValidation, Success) {
 // Test an error occurs if the texture descriptor is invalid
 TEST_P(D3D12SharedHandleValidation, InvalidTextureDescriptor) {
     DAWN_SKIP_TEST_IF(UsesWire());
-    dawnDescriptor.nextInChain = this;
+
+    wgpu::ChainedStruct chainedDescriptor;
+    dawnDescriptor.nextInChain = &chainedDescriptor;
 
     wgpu::Texture texture;
     ComPtr<ID3D11Texture2D> d3d11Texture;

@@ -32,13 +32,25 @@ namespace dawn_native {
     {%- endif -%}
 {%- endmacro %}
 
+    struct ChainedStruct {
+        ChainedStruct const * nextInChain = nullptr;
+        wgpu::SType sType = wgpu::SType::Invalid;
+    };
+
     {% for type in by_category["structure"] %}
-        struct {{as_cppType(type.name)}} {
+        {% if type.chained %}
+            struct {{as_cppType(type.name)}} : ChainedStruct {
+                {{as_cppType(type.name)}}() {
+                    sType = wgpu::SType::{{type.name.CamelCase()}};
+                }
+        {% else %}
+            struct {{as_cppType(type.name)}} {
+        {% endif %}
             {% if type.extensible %}
-                const void* nextInChain = nullptr;
+                ChainedStruct const * nextInChain = nullptr;
             {% endif %}
             {% for member in type.members %}
-            {{as_annotated_frontendType(member)}} {{render_cpp_default_value(member)}};
+                {{as_annotated_frontendType(member)}} {{render_cpp_default_value(member)}};
             {% endfor %}
         };
 

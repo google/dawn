@@ -140,7 +140,11 @@ class StructureType(Record, Type):
     def __init__(self, name, json_data):
         Record.__init__(self, name)
         Type.__init__(self, name, json_data)
+        self.chained = json_data.get("chained", False)
         self.extensible = json_data.get("extensible", False)
+        # Chained structs inherit from wgpu::ChainedStruct which has nextInChain so setting
+        # both extensible and chained would result in two nextInChain members.
+        assert(not (self.extensible and self.chained))
 
 class Command(Record):
     def __init__(self, name, members=None):

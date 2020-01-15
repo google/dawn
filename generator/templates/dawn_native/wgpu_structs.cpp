@@ -16,6 +16,15 @@
 
 namespace dawn_native {
 
+    static_assert(sizeof(ChainedStruct) == sizeof(WGPUChainedStruct),
+            "sizeof mismatch for ChainedStruct");
+    static_assert(alignof(ChainedStruct) == alignof(WGPUChainedStruct),
+            "alignof mismatch for ChainedStruct");
+    static_assert(offsetof(ChainedStruct, nextInChain) == offsetof(WGPUChainedStruct, nextInChain),
+            "offsetof mismatch for ChainedStruct::nextInChain");
+    static_assert(offsetof(ChainedStruct, sType) == offsetof(WGPUChainedStruct, sType),
+            "offsetof mismatch for ChainedStruct::sType");
+
     {% for type in by_category["structure"] %}
         {% set CppType = as_cppType(type.name) %}
         {% set CType = as_cType(type.name) %}
