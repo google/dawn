@@ -358,6 +358,8 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/metal/BufferMTL.mm",
       "src/dawn_native/metal/CommandBufferMTL.h",
       "src/dawn_native/metal/CommandBufferMTL.mm",
+      "src/dawn_native/metal/CommandRecordingContext.h",
+      "src/dawn_native/metal/CommandRecordingContext.mm",
       "src/dawn_native/metal/ComputePipelineMTL.h",
       "src/dawn_native/metal/ComputePipelineMTL.mm",
       "src/dawn_native/metal/DeviceMTL.h",
@@ -967,7 +969,7 @@ source_set("dawn_end2end_tests_sources") {
 }
 
 source_set("dawn_white_box_tests_sources") {
-  configs += [ "${dawn_root}/src/common:dawn_internal" ]
+  configs += [ ":libdawn_native_internal" ]
   testonly = true
 
   deps = [
@@ -1000,6 +1002,10 @@ source_set("dawn_white_box_tests_sources") {
 
   if (dawn_enable_d3d12) {
     sources += [ "src/tests/white_box/D3D12SmallTextureTests.cpp" ]
+  }
+
+  if (dawn_enable_metal) {
+    sources += [ "src/tests/white_box/MetalAutoreleasePoolTests.mm" ]
   }
 
   if (dawn_enable_opengl) {
