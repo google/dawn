@@ -82,6 +82,8 @@ namespace dawn_native {
         };
 
       protected:
+        static MaybeError CheckSpvcSuccess(shaderc_spvc_status status, const char* error_msg);
+
         shaderc_spvc::Context mSpvcContext;
 
       private:
@@ -93,8 +95,6 @@ namespace dawn_native {
         // whether using spvc, or directly accessing spirv-cross.
         MaybeError ExtractSpirvInfoWithSpvc();
         MaybeError ExtractSpirvInfoWithSpirvCross(const spirv_cross::Compiler& compiler);
-
-        MaybeError CheckSpvcSuccess(shaderc_spvc_status status, const char* error_msg);
 
         // TODO(cwallez@chromium.org): The code is only stored for deduplication. We could maybe
         // store a cryptographic hash of the code instead?

@@ -76,11 +76,10 @@ namespace dawn_native { namespace metal {
     MaybeError ShaderModule::Initialize(const ShaderModuleDescriptor* descriptor) {
         mSpirv.assign(descriptor->code, descriptor->code + descriptor->codeSize);
         if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
-            shaderc_spvc_status status = mSpvcContext.InitializeForMsl(
-                descriptor->code, descriptor->codeSize, GetMSLCompileOptions());
-            if (status != shaderc_spvc_status_success) {
-                return DAWN_VALIDATION_ERROR("Unable to initialize instance of spvc");
-            }
+            DAWN_TRY(CheckSpvcSuccess(
+                mSpvcContext.InitializeForMsl(descriptor->code, descriptor->codeSize,
+                                              GetMSLCompileOptions()),
+                "Unable to initialize instance of spvc"));
 
             spirv_cross::CompilerMSL* compiler =
                 reinterpret_cast<spirv_cross::CompilerMSL*>(mSpvcContext.GetCompiler());
@@ -103,11 +102,9 @@ namespace dawn_native { namespace metal {
         if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
             // Initializing the compiler is needed every call, because this method uses reflection
             // to mutate the compiler's IR.
-            if (mSpvcContext.InitializeForMsl(mSpirv.data(), mSpirv.size(),
-                                              GetMSLCompileOptions()) !=
-                shaderc_spvc_status_success) {
-                return DAWN_DEVICE_LOST_ERROR("Unable to initialize instance of spvc");
-            }
+            DAWN_TRY(CheckSpvcSuccess(
+                mSpvcContext.InitializeForMsl(mSpirv.data(), mSpirv.size(), GetMSLCompileOptions()),
+                "Unable to initialize instance of spvc"));
             compiler = reinterpret_cast<spirv_cross::CompilerMSL*>(mSpvcContext.GetCompiler());
         } else {
             // If these options are changed, the values in DawnSPIRVCrossMSLFastFuzzer.cpp need to

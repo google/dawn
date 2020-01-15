@@ -52,11 +52,9 @@ namespace dawn_native { namespace d3d12 {
             options.SetHLSLPointCoordCompat(true);
             options.SetHLSLPointSizeCompat(true);
 
-            shaderc_spvc_status status =
-                mSpvcContext.InitializeForHlsl(descriptor->code, descriptor->codeSize, options);
-            if (status != shaderc_spvc_status_success) {
-                return DAWN_VALIDATION_ERROR("Unable to initialize instance of spvc");
-            }
+            DAWN_TRY(CheckSpvcSuccess(
+                mSpvcContext.InitializeForHlsl(descriptor->code, descriptor->codeSize, options),
+                "Unable to initialize instance of spvc"));
 
             spirv_cross::Compiler* compiler =
                 reinterpret_cast<spirv_cross::Compiler*>(mSpvcContext.GetCompiler());
@@ -102,13 +100,11 @@ namespace dawn_native { namespace d3d12 {
                 if (bindingInfo.used) {
                     uint32_t bindingOffset = bindingOffsets[binding];
                     if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
-                        if (mSpvcContext.SetDecoration(
-                                bindingInfo.id, SHADERC_SPVC_DECORATION_BINDING, bindingOffset) !=
-                            shaderc_spvc_status_success) {
-                            return DAWN_VALIDATION_ERROR(
-                                "Unable to set decorating binding before generating HLSL shader w/ "
-                                "spvc");
-                        }
+                        DAWN_TRY(CheckSpvcSuccess(
+                            mSpvcContext.SetDecoration(
+                                bindingInfo.id, SHADERC_SPVC_DECORATION_BINDING, bindingOffset),
+                            "Unable to set decorating binding before generating HLSL shader w/ "
+                            "spvc"));
                     } else {
                         compiler->set_decoration(bindingInfo.id, spv::DecorationBinding,
                                                  bindingOffset);
@@ -118,9 +114,8 @@ namespace dawn_native { namespace d3d12 {
         }
         if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
             shaderc_spvc::CompilationResult result;
-            if (mSpvcContext.CompileShader(&result) != shaderc_spvc_status_success) {
-                return DAWN_VALIDATION_ERROR("Unable to generate HLSL shader w/ spvc");
-            }
+            DAWN_TRY(CheckSpvcSuccess(mSpvcContext.CompileShader(&result),
+                                      "Unable to generate HLSL shader w/ spvc"));
             std::string result_string =
                 result.GetStringOutput();  // Stripping const for ResultOrError
             return result_string;
