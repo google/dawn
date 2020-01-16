@@ -190,6 +190,7 @@ namespace dawn_native { namespace vulkan {
                         !view->GetTexture()->IsSubresourceContentInitialized(
                             view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1)) {
                         loadOp = wgpu::LoadOp::Clear;
+                        attachmentInfo.clearColor = {0.f, 0.f, 0.f, 0.f};
                     }
 
                     if (hasResolveTarget) {

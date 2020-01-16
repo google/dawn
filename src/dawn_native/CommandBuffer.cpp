@@ -14,7 +14,10 @@
 
 #include "dawn_native/CommandBuffer.h"
 
+#include "common/BitSetIterator.h"
 #include "dawn_native/CommandEncoder.h"
+#include "dawn_native/Commands.h"
+#include "dawn_native/Format.h"
 #include "dawn_native/Texture.h"
 
 namespace dawn_native {
@@ -47,4 +50,92 @@ namespace dawn_native {
         }
         return false;
     }
+
+    void LazyClearRenderPassAttachments(BeginRenderPassCmd* renderPass) {
+        for (uint32_t i : IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
+            auto& attachmentInfo = renderPass->colorAttachments[i];
+            TextureViewBase* view = attachmentInfo.view.Get();
+            bool hasResolveTarget = attachmentInfo.resolveTarget.Get() != nullptr;
+
+            ASSERT(view->GetLayerCount() == 1);
+            ASSERT(view->GetLevelCount() == 1);
+
+            // If the loadOp is Load, but the subresource is not initialized, use Clear instead.
+            if (attachmentInfo.loadOp == wgpu::LoadOp::Load &&
+                !view->GetTexture()->IsSubresourceContentInitialized(
+                    view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1)) {
+                attachmentInfo.loadOp = wgpu::LoadOp::Clear;
+                attachmentInfo.clearColor = {0.f, 0.f, 0.f, 0.f};
+            }
+
+            if (hasResolveTarget) {
+                // We need to set the resolve target to initialized so that it does not get
+                // cleared later in the pipeline. The texture will be resolved from the
+                // source color attachment, which will be correctly initialized.
+                TextureViewBase* resolveView = attachmentInfo.resolveTarget.Get();
+                resolveView->GetTexture()->SetIsSubresourceContentInitialized(
+                    true, resolveView->GetBaseMipLevel(), resolveView->GetLevelCount(),
+                    resolveView->GetBaseArrayLayer(), resolveView->GetLayerCount());
+            }
+
+            switch (attachmentInfo.storeOp) {
+                case wgpu::StoreOp::Store:
+                    view->GetTexture()->SetIsSubresourceContentInitialized(
+                        true, view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1);
+                    break;
+
+                case wgpu::StoreOp::Clear:
+                    view->GetTexture()->SetIsSubresourceContentInitialized(
+                        false, view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1);
+                    break;
+
+                default:
+                    UNREACHABLE();
+                    break;
+            }
+        }
+
+        if (renderPass->attachmentState->HasDepthStencilAttachment()) {
+            auto& attachmentInfo = renderPass->depthStencilAttachment;
+            TextureViewBase* view = attachmentInfo.view.Get();
+
+            // If the depth stencil texture has not been initialized, we want to use loadop
+            // clear to init the contents to 0's
+            if (!view->GetTexture()->IsSubresourceContentInitialized(
+                    view->GetBaseMipLevel(), view->GetLevelCount(), view->GetBaseArrayLayer(),
+                    view->GetLayerCount())) {
+                if (view->GetTexture()->GetFormat().HasDepth() &&
+                    attachmentInfo.depthLoadOp == wgpu::LoadOp::Load) {
+                    attachmentInfo.clearDepth = 0.0f;
+                    attachmentInfo.depthLoadOp = wgpu::LoadOp::Clear;
+                }
+                if (view->GetTexture()->GetFormat().HasStencil() &&
+                    attachmentInfo.stencilLoadOp == wgpu::LoadOp::Load) {
+                    attachmentInfo.clearStencil = 0u;
+                    attachmentInfo.stencilLoadOp = wgpu::LoadOp::Clear;
+                }
+            }
+
+            // If these have different store ops, make them both Store because we can't track
+            // initialized state separately yet. TODO(crbug.com/dawn/145)
+            if (attachmentInfo.depthStoreOp != attachmentInfo.stencilStoreOp) {
+                attachmentInfo.depthStoreOp = wgpu::StoreOp::Store;
+                attachmentInfo.stencilStoreOp = wgpu::StoreOp::Store;
+            }
+
+            if (attachmentInfo.depthStoreOp == wgpu::StoreOp::Store &&
+                attachmentInfo.stencilStoreOp == wgpu::StoreOp::Store) {
+                view->GetTexture()->SetIsSubresourceContentInitialized(
+                    true, view->GetBaseMipLevel(), view->GetLevelCount(), view->GetBaseArrayLayer(),
+                    view->GetLayerCount());
+            } else {
+                ASSERT(attachmentInfo.depthStoreOp == wgpu::StoreOp::Clear &&
+                       attachmentInfo.stencilStoreOp == wgpu::StoreOp::Clear);
+                view->GetTexture()->SetIsSubresourceContentInitialized(
+                    false, view->GetBaseMipLevel(), view->GetLevelCount(),
+                    view->GetBaseArrayLayer(), view->GetLayerCount());
+            }
+        }
+    }
+
 }  // namespace dawn_native

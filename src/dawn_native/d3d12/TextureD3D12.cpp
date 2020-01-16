@@ -567,7 +567,10 @@ namespace dawn_native { namespace d3d12 {
 
         Device* device = ToBackend(GetDevice());
         DescriptorHeapAllocator* descriptorHeapAllocator = device->GetDescriptorHeapAllocator();
+
         uint8_t clearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0 : 1;
+        float fClearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0.f : 1.f;
+
         if (GetFormat().isRenderable) {
             if (GetFormat().HasDepthOrStencil()) {
                 TransitionUsageNow(commandContext, D3D12_RESOURCE_STATE_DEPTH_WRITE);
@@ -587,15 +590,14 @@ namespace dawn_native { namespace d3d12 {
                     clearFlags |= D3D12_CLEAR_FLAG_STENCIL;
                 }
 
-                commandList->ClearDepthStencilView(dsvHandle, clearFlags, clearColor, clearColor, 0,
-                                                   nullptr);
+                commandList->ClearDepthStencilView(dsvHandle, clearFlags, fClearColor, clearColor,
+                                                   0, nullptr);
             } else {
                 TransitionUsageNow(commandContext, D3D12_RESOURCE_STATE_RENDER_TARGET);
                 DescriptorHeapHandle rtvHeap;
                 DAWN_TRY_ASSIGN(rtvHeap, descriptorHeapAllocator->AllocateCPUHeap(
                                              D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 1));
                 D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap.GetCPUHandle(0);
-                const float fClearColor = static_cast<float>(clearColor);
                 const float clearColorRGBA[4] = {fClearColor, fClearColor, fClearColor,
                                                  fClearColor};
 
@@ -623,9 +625,7 @@ namespace dawn_native { namespace d3d12 {
             UploadHandle uploadHandle;
             DAWN_TRY_ASSIGN(uploadHandle,
                             uploader->Allocate(bufferSize, device->GetPendingCommandSerial()));
-            std::fill(reinterpret_cast<uint32_t*>(uploadHandle.mappedBuffer),
-                      reinterpret_cast<uint32_t*>(uploadHandle.mappedBuffer + bufferSize),
-                      clearColor);
+            memset(uploadHandle.mappedBuffer, clearColor, bufferSize);
 
             TransitionUsageNow(commandContext, D3D12_RESOURCE_STATE_COPY_DEST);
 

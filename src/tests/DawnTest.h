@@ -48,6 +48,15 @@
                           sizeof(RGBA8),                                                  \
                           new detail::ExpectEq<RGBA8>(expected, (width) * (height)))
 
+#define EXPECT_PIXEL_FLOAT_EQ(expected, texture, x, y)                                  \
+    AddTextureExpectation(__FILE__, __LINE__, texture, x, y, 1, 1, 0, 0, sizeof(float), \
+                          new detail::ExpectEq<float>(expected))
+
+#define EXPECT_TEXTURE_FLOAT_EQ(expected, texture, x, y, width, height, level, slice)     \
+    AddTextureExpectation(__FILE__, __LINE__, texture, x, y, width, height, level, slice, \
+                          sizeof(float),                                                  \
+                          new detail::ExpectEq<float>(expected, (width) * (height)))
+
 #define EXPECT_LAZY_CLEAR(N, statement)                                                   \
     if (UsesWire()) {                                                                     \
         statement;                                                                        \
@@ -377,6 +386,7 @@ namespace detail {
     extern template class ExpectEq<uint8_t>;
     extern template class ExpectEq<uint32_t>;
     extern template class ExpectEq<RGBA8>;
+    extern template class ExpectEq<float>;
 }  // namespace detail
 
 #endif  // TESTS_DAWNTEST_H_

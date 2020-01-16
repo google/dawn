@@ -23,6 +23,8 @@
 
 namespace dawn_native {
 
+    struct BeginRenderPassCmd;
+
     class CommandBufferBase : public ObjectBase {
       public:
         CommandBufferBase(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
@@ -38,6 +40,8 @@ namespace dawn_native {
     bool IsCompleteSubresourceCopiedTo(const TextureBase* texture,
                                        const Extent3D copySize,
                                        const uint32_t mipLevel);
+
+    void LazyClearRenderPassAttachments(BeginRenderPassCmd* renderPass);
 
 }  // namespace dawn_native
 

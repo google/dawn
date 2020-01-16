@@ -684,18 +684,18 @@ namespace dawn_native { namespace vulkan {
         range.baseArrayLayer = baseArrayLayer;
         range.layerCount = layerCount;
         uint8_t clearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0 : 1;
+        float fClearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0.f : 1.f;
 
         TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst);
         if (GetFormat().isRenderable) {
             if (GetFormat().HasDepthOrStencil()) {
                 VkClearDepthStencilValue clearDepthStencilValue[1];
-                clearDepthStencilValue[0].depth = clearColor;
+                clearDepthStencilValue[0].depth = fClearColor;
                 clearDepthStencilValue[0].stencil = clearColor;
                 device->fn.CmdClearDepthStencilImage(recordingContext->commandBuffer, GetHandle(),
                                                      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                                      clearDepthStencilValue, 1, &range);
             } else {
-                float fClearColor = static_cast<float>(clearColor);
                 VkClearColorValue clearColorValue = {
                     {fClearColor, fClearColor, fClearColor, fClearColor}};
                 device->fn.CmdClearColorImage(recordingContext->commandBuffer, GetHandle(),
@@ -717,9 +717,7 @@ namespace dawn_native { namespace vulkan {
             UploadHandle uploadHandle;
             DAWN_TRY_ASSIGN(uploadHandle,
                             uploader->Allocate(bufferSize, device->GetPendingCommandSerial()));
-            std::fill(reinterpret_cast<uint32_t*>(uploadHandle.mappedBuffer),
-                      reinterpret_cast<uint32_t*>(uploadHandle.mappedBuffer + bufferSize),
-                      clearColor);
+            memset(uploadHandle.mappedBuffer, clearColor, bufferSize);
 
             // compute the buffer image copy to set the clear region of entire texture
             dawn_native::BufferCopy bufferCopy;
