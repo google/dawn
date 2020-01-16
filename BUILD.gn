@@ -543,9 +543,14 @@ source_set("libdawn_native_sources") {
     }
 
     if (use_swiftshader) {
-      data_deps += [ "${dawn_swiftshader_dir}/src/Vulkan:icd_file" ]
-      defines +=
-          [ "DAWN_SWIFTSHADER_VK_ICD_JSON=\"${swiftshader_icd_file_name}\"" ]
+      data_deps += [
+        "${dawn_swiftshader_dir}/src/Vulkan:icd_file",
+        "${dawn_swiftshader_dir}/src/Vulkan:swiftshader_libvulkan",
+      ]
+      defines += [
+        "DAWN_ENABLE_SWIFTSHADER",
+        "DAWN_SWIFTSHADER_VK_ICD_JSON=\"${swiftshader_icd_file_name}\"",
+      ]
     }
   }
 

@@ -37,6 +37,7 @@ namespace dawn_native { namespace vulkan {
         std::vector<std::unique_ptr<AdapterBase>> DiscoverDefaultAdapters() override;
 
       private:
+        MaybeError LoadVulkan();
         ResultOrError<VulkanGlobalKnobs> CreateInstance();
 
         MaybeError RegisterDebugReport();

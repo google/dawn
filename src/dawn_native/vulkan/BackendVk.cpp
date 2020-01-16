@@ -21,16 +21,31 @@
 #include "dawn_native/vulkan/AdapterVk.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
+// TODO(crbug.com/dawn/283): Link against the Vulkan Loader and remove this.
+#if defined(DAWN_ENABLE_SWIFTSHADER)
+#    if defined(DAWN_PLATFORM_LINUX) || defined(DAWN_PLATFORM_FUSCHIA)
+constexpr char kSwiftshaderLibName[] = "libvk_swiftshader.so";
+#    elif defined(DAWN_PLATFORM_WINDOWS)
+constexpr char kSwiftshaderLibName[] = "vk_swiftshader.dll";
+#    elif defined(DAWN_PLATFORM_MAC)
+constexpr char kSwiftshaderLibName[] = "libvk_swiftshader.dylib";
+#    else
+#        error "Unimplemented Swiftshader Vulkan backend platform"
+#    endif
+#endif
+
 #if defined(DAWN_PLATFORM_LINUX)
 #    if defined(DAWN_PLATFORM_ANDROID)
-const char kVulkanLibName[] = "libvulkan.so";
+constexpr char kVulkanLibName[] = "libvulkan.so";
 #    else
-const char kVulkanLibName[] = "libvulkan.so.1";
+constexpr char kVulkanLibName[] = "libvulkan.so.1";
 #    endif
 #elif defined(DAWN_PLATFORM_WINDOWS)
-const char kVulkanLibName[] = "vulkan-1.dll";
+constexpr char kVulkanLibName[] = "vulkan-1.dll";
 #elif defined(DAWN_PLATFORM_FUCHSIA)
-const char kVulkanLibName[] = "libvulkan.so";
+constexpr char kVulkanLibName[] = "libvulkan.so";
+#elif defined(DAWN_ENABLE_SWIFTSHADER)
+const char* kVulkanLibName = kSwiftshaderLibName;
 #else
 #    error "Unimplemented Vulkan backend platform"
 #endif
@@ -66,7 +81,7 @@ namespace dawn_native { namespace vulkan {
         return mGlobalInfo;
     }
 
-    MaybeError Backend::Initialize() {
+    MaybeError Backend::LoadVulkan() {
 #if defined(DAWN_ENABLE_VULKAN_VALIDATION_LAYERS)
         if (GetInstance()->IsBackendValidationEnabled()) {
             std::string vkDataDir = GetExecutableDirectory() + DAWN_VK_DATA_DIR;
@@ -83,9 +98,25 @@ namespace dawn_native { namespace vulkan {
         }
 #endif
 
-        if (!mVulkanLib.Open(kVulkanLibName)) {
-            return DAWN_DEVICE_LOST_ERROR(std::string("Couldn't open ") + kVulkanLibName);
+        if (mVulkanLib.Open(kVulkanLibName)) {
+            return {};
         }
+        dawn::WarningLog() << std::string("Couldn't open ") + kVulkanLibName;
+
+#if defined(DAWN_ENABLE_SWIFTSHADER)
+        if (strcmp(kVulkanLibName, kSwiftshaderLibName) != 0) {
+            if (mVulkanLib.Open(kSwiftshaderLibName)) {
+                return {};
+            }
+            dawn::WarningLog() << std::string("Couldn't open ") + kSwiftshaderLibName;
+        }
+#endif
+
+        return DAWN_DEVICE_LOST_ERROR("Couldn't load Vulkan");
+    }
+
+    MaybeError Backend::Initialize() {
+        DAWN_TRY(LoadVulkan());
 
         DAWN_TRY(mFunctions.LoadGlobalProcs(mVulkanLib));
 
