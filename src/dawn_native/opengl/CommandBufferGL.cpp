@@ -408,12 +408,13 @@ namespace dawn_native { namespace opengl {
         auto TransitionForPass = [](const PassResourceUsage& usages) {
             for (size_t i = 0; i < usages.textures.size(); i++) {
                 Texture* texture = ToBackend(usages.textures[i]);
-                // We count the lazy clears for non output attachment textures in order to match the
-                // backdoor lazy clear counts in Vulkan and D3D12.
-                bool isLazyClear =
-                    !(usages.textureUsages[i] & wgpu::TextureUsage::OutputAttachment);
-                texture->EnsureSubresourceContentInitialized(
-                    0, texture->GetNumMipLevels(), 0, texture->GetArrayLayers(), isLazyClear);
+                // Clear textures that are not output attachments. Output attachments will be
+                // cleared in BeginRenderPass by setting the loadop to clear when the
+                // texture subresource has not been initialized before the render pass.
+                if (!(usages.textureUsages[i] & wgpu::TextureUsage::OutputAttachment)) {
+                    texture->EnsureSubresourceContentInitialized(0, texture->GetNumMipLevels(), 0,
+                                                                 texture->GetArrayLayers());
+                }
             }
         };
 
@@ -434,6 +435,8 @@ namespace dawn_native { namespace opengl {
                 case Command::BeginRenderPass: {
                     auto* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
                     TransitionForPass(passResourceUsages[nextPassNumber]);
+
+                    LazyClearRenderPassAttachments(cmd);
                     ExecuteRenderPass(cmd);
 
                     nextPassNumber++;
@@ -779,7 +782,6 @@ namespace dawn_native { namespace opengl {
             for (uint32_t i :
                  IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
                 auto* attachmentInfo = &renderPass->colorAttachments[i];
-                TextureView* view = ToBackend(attachmentInfo->view.Get());
 
                 // Load op - color
                 // TODO(cwallez@chromium.org): Choose the clear function depending on the
@@ -791,30 +793,14 @@ namespace dawn_native { namespace opengl {
                     gl.ClearBufferfv(GL_COLOR, i, &attachmentInfo->clearColor.r);
                 }
 
-                switch (attachmentInfo->storeOp) {
-                    case wgpu::StoreOp::Store: {
-                        view->GetTexture()->SetIsSubresourceContentInitialized(
-                            true, view->GetBaseMipLevel(), view->GetLevelCount(),
-                            view->GetBaseArrayLayer(), view->GetLayerCount());
-                    } break;
-
-                    case wgpu::StoreOp::Clear: {
-                        // TODO(natlee@microsoft.com): call glDiscard to do optimization
-                        view->GetTexture()->SetIsSubresourceContentInitialized(
-                            false, view->GetBaseMipLevel(), view->GetLevelCount(),
-                            view->GetBaseArrayLayer(), view->GetLayerCount());
-                    } break;
-
-                    default:
-                        UNREACHABLE();
-                        break;
+                if (attachmentInfo->storeOp == wgpu::StoreOp::Clear) {
+                    // TODO(natlee@microsoft.com): call glDiscard to do optimization
                 }
             }
 
             if (renderPass->attachmentState->HasDepthStencilAttachment()) {
                 auto* attachmentInfo = &renderPass->depthStencilAttachment;
                 const Format& attachmentFormat = attachmentInfo->view->GetTexture()->GetFormat();
-                TextureView* view = ToBackend(attachmentInfo->view.Get());
 
                 // Load op - depth/stencil
                 bool doDepthClear = attachmentFormat.HasDepth() &&
@@ -837,18 +823,6 @@ namespace dawn_native { namespace opengl {
                 } else if (doStencilClear) {
                     const GLint clearStencil = attachmentInfo->clearStencil;
                     gl.ClearBufferiv(GL_STENCIL, 0, &clearStencil);
-                }
-
-                if (attachmentInfo->depthStoreOp == wgpu::StoreOp::Store &&
-                    attachmentInfo->stencilStoreOp == wgpu::StoreOp::Store) {
-                    view->GetTexture()->SetIsSubresourceContentInitialized(
-                        true, view->GetBaseMipLevel(), view->GetLevelCount(),
-                        view->GetBaseArrayLayer(), view->GetLayerCount());
-                } else if (attachmentInfo->depthStoreOp == wgpu::StoreOp::Clear &&
-                           attachmentInfo->stencilStoreOp == wgpu::StoreOp::Clear) {
-                    view->GetTexture()->SetIsSubresourceContentInitialized(
-                        false, view->GetBaseMipLevel(), view->GetLevelCount(),
-                        view->GetBaseArrayLayer(), view->GetLayerCount());
                 }
             }
         }
