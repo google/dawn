@@ -50,6 +50,9 @@ TEST_P(NonzeroTextureCreationTests, Depth32TextureCreationDepthClears) {
     // Copies from depth textures not supported on the OpenGL backend right now.
     DAWN_SKIP_TEST_IF(IsOpenGL());
 
+    // Closing the pending command list crashes flakily on D3D12 NVIDIA only.
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsNvidia());
+
     wgpu::TextureDescriptor descriptor;
     descriptor.dimension = wgpu::TextureDimension::e2D;
     descriptor.size.width = kSize;
