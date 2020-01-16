@@ -179,83 +179,20 @@ namespace dawn_native { namespace vulkan {
 
                 for (uint32_t i :
                      IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
-                    auto& attachmentInfo = renderPass->colorAttachments[i];
-                    TextureView* view = ToBackend(attachmentInfo.view.Get());
+                    const auto& attachmentInfo = renderPass->colorAttachments[i];
+
                     bool hasResolveTarget = attachmentInfo.resolveTarget.Get() != nullptr;
-
                     wgpu::LoadOp loadOp = attachmentInfo.loadOp;
-                    ASSERT(view->GetLayerCount() == 1);
-                    ASSERT(view->GetLevelCount() == 1);
-                    if (loadOp == wgpu::LoadOp::Load &&
-                        !view->GetTexture()->IsSubresourceContentInitialized(
-                            view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1)) {
-                        loadOp = wgpu::LoadOp::Clear;
-                        attachmentInfo.clearColor = {0.f, 0.f, 0.f, 0.f};
-                    }
-
-                    if (hasResolveTarget) {
-                        // We need to set the resolve target to initialized so that it does not get
-                        // cleared later in the pipeline. The texture will be resolved from the
-                        // source color attachment, which will be correctly initialized.
-                        TextureView* resolveView = ToBackend(attachmentInfo.resolveTarget.Get());
-                        ToBackend(resolveView->GetTexture())
-                            ->SetIsSubresourceContentInitialized(
-                                true, resolveView->GetBaseMipLevel(), resolveView->GetLevelCount(),
-                                resolveView->GetBaseArrayLayer(), resolveView->GetLayerCount());
-                    }
-
-                    switch (attachmentInfo.storeOp) {
-                        case wgpu::StoreOp::Store: {
-                            view->GetTexture()->SetIsSubresourceContentInitialized(
-                                true, view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1);
-                        } break;
-
-                        case wgpu::StoreOp::Clear: {
-                            view->GetTexture()->SetIsSubresourceContentInitialized(
-                                false, view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1);
-                        } break;
-
-                        default: { UNREACHABLE(); } break;
-                    }
 
                     query.SetColor(i, attachmentInfo.view->GetFormat().format, loadOp,
                                    hasResolveTarget);
                 }
 
                 if (renderPass->attachmentState->HasDepthStencilAttachment()) {
-                    auto& attachmentInfo = renderPass->depthStencilAttachment;
-                    TextureView* view = ToBackend(attachmentInfo.view.Get());
+                    const auto& attachmentInfo = renderPass->depthStencilAttachment;
 
-                    // If the depth stencil texture has not been initialized, we want to use loadop
-                    // clear to init the contents to 0's
-                    if (!view->GetTexture()->IsSubresourceContentInitialized(
-                            view->GetBaseMipLevel(), view->GetLevelCount(),
-                            view->GetBaseArrayLayer(), view->GetLayerCount())) {
-                        if (view->GetTexture()->GetFormat().HasDepth() &&
-                            attachmentInfo.depthLoadOp == wgpu::LoadOp::Load) {
-                            attachmentInfo.clearDepth = 0.0f;
-                            attachmentInfo.depthLoadOp = wgpu::LoadOp::Clear;
-                        }
-                        if (view->GetTexture()->GetFormat().HasStencil() &&
-                            attachmentInfo.stencilLoadOp == wgpu::LoadOp::Load) {
-                            attachmentInfo.clearStencil = 0u;
-                            attachmentInfo.stencilLoadOp = wgpu::LoadOp::Clear;
-                        }
-                    }
-                    query.SetDepthStencil(view->GetTexture()->GetFormat().format,
+                    query.SetDepthStencil(attachmentInfo.view->GetTexture()->GetFormat().format,
                                           attachmentInfo.depthLoadOp, attachmentInfo.stencilLoadOp);
-
-                    if (attachmentInfo.depthStoreOp == wgpu::StoreOp::Store &&
-                        attachmentInfo.stencilStoreOp == wgpu::StoreOp::Store) {
-                        view->GetTexture()->SetIsSubresourceContentInitialized(
-                            true, view->GetBaseMipLevel(), view->GetLevelCount(),
-                            view->GetBaseArrayLayer(), view->GetLayerCount());
-                    } else if (attachmentInfo.depthStoreOp == wgpu::StoreOp::Clear &&
-                               attachmentInfo.stencilStoreOp == wgpu::StoreOp::Clear) {
-                        view->GetTexture()->SetIsSubresourceContentInitialized(
-                            false, view->GetBaseMipLevel(), view->GetLevelCount(),
-                            view->GetBaseArrayLayer(), view->GetLayerCount());
-                    }
                 }
 
                 query.SetSampleCount(renderPass->attachmentState->GetSampleCount());
@@ -589,6 +526,8 @@ namespace dawn_native { namespace vulkan {
                     BeginRenderPassCmd* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
 
                     TransitionForPass(recordingContext, passResourceUsages[nextPassNumber]);
+
+                    LazyClearRenderPassAttachments(cmd);
                     DAWN_TRY(RecordRenderPass(recordingContext, cmd));
 
                     nextPassNumber++;
