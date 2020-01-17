@@ -32,7 +32,7 @@ namespace dawn_native { namespace metal {
     MaybeError ComputePipeline::Initialize(const ComputePipelineDescriptor* descriptor) {
         auto mtlDevice = ToBackend(GetDevice())->GetMTLDevice();
 
-        const ShaderModule* computeModule = ToBackend(descriptor->computeStage.module);
+        ShaderModule* computeModule = ToBackend(descriptor->computeStage.module);
         const char* computeEntryPoint = descriptor->computeStage.entryPoint;
         ShaderModule::MetalFunctionData computeData;
         DAWN_TRY(computeModule->GetFunction(computeEntryPoint, SingleShaderStage::Compute,

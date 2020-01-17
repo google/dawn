@@ -330,7 +330,7 @@ namespace dawn_native { namespace metal {
 
         MTLRenderPipelineDescriptor* descriptorMTL = [MTLRenderPipelineDescriptor new];
 
-        const ShaderModule* vertexModule = ToBackend(descriptor->vertexStage.module);
+        ShaderModule* vertexModule = ToBackend(descriptor->vertexStage.module);
         const char* vertexEntryPoint = descriptor->vertexStage.entryPoint;
         ShaderModule::MetalFunctionData vertexData;
         DAWN_TRY(vertexModule->GetFunction(vertexEntryPoint, SingleShaderStage::Vertex,
@@ -341,7 +341,7 @@ namespace dawn_native { namespace metal {
             mStagesRequiringStorageBufferLength |= wgpu::ShaderStage::Vertex;
         }
 
-        const ShaderModule* fragmentModule = ToBackend(descriptor->fragmentStage->module);
+        ShaderModule* fragmentModule = ToBackend(descriptor->fragmentStage->module);
         const char* fragmentEntryPoint = descriptor->fragmentStage->entryPoint;
         ShaderModule::MetalFunctionData fragmentData;
         DAWN_TRY(fragmentModule->GetFunction(fragmentEntryPoint, SingleShaderStage::Fragment,

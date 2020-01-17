@@ -39,6 +39,20 @@ namespace dawn_native { namespace metal {
             }
         }
 
+        shaderc_spvc_execution_model ToSpvcExecutionModel(SingleShaderStage stage) {
+            switch (stage) {
+                case SingleShaderStage::Vertex:
+                    return shaderc_spvc_execution_model_vertex;
+                case SingleShaderStage::Fragment:
+                    return shaderc_spvc_execution_model_fragment;
+                case SingleShaderStage::Compute:
+                    return shaderc_spvc_execution_model_glcompute;
+                default:
+                    UNREACHABLE();
+                    return shaderc_spvc_execution_model_invalid;
+            }
+        }
+
         shaderc_spvc::CompileOptions GetMSLCompileOptions() {
             // If these options are changed, the values in DawnSPIRVCrossGLSLFastFuzzer.cpp need to
             // be updated.
@@ -94,7 +108,7 @@ namespace dawn_native { namespace metal {
     MaybeError ShaderModule::GetFunction(const char* functionName,
                                          SingleShaderStage functionStage,
                                          const PipelineLayout* layout,
-                                         ShaderModule::MetalFunctionData* out) const {
+                                         ShaderModule::MetalFunctionData* out) {
         ASSERT(!IsError());
         ASSERT(out);
         std::unique_ptr<spirv_cross::CompilerMSL> compiler_impl;
@@ -137,30 +151,58 @@ namespace dawn_native { namespace metal {
             for (uint32_t binding : IterateBitSet(bgInfo.mask)) {
                 for (auto stage : IterateStages(bgInfo.visibilities[binding])) {
                     uint32_t index = layout->GetBindingIndexInfo(stage)[group][binding];
+                    if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
+                        shaderc_spvc_msl_resource_binding mslBinding;
+                        mslBinding.stage = ToSpvcExecutionModel(stage);
+                        mslBinding.desc_set = group;
+                        mslBinding.binding = binding;
+                        mslBinding.msl_buffer = mslBinding.msl_texture = mslBinding.msl_sampler =
+                            index;
+                        DAWN_TRY(CheckSpvcSuccess(mSpvcContext.AddMSLResourceBinding(mslBinding),
+                                                  "Unable to add MSL Resource Binding"));
+                    } else {
+                        spirv_cross::MSLResourceBinding mslBinding;
+                        mslBinding.stage = SpirvExecutionModelForStage(stage);
+                        mslBinding.desc_set = group;
+                        mslBinding.binding = binding;
+                        mslBinding.msl_buffer = mslBinding.msl_texture = mslBinding.msl_sampler =
+                            index;
 
-                    spirv_cross::MSLResourceBinding mslBinding;
-                    mslBinding.stage = SpirvExecutionModelForStage(stage);
-                    mslBinding.desc_set = group;
-                    mslBinding.binding = binding;
-                    mslBinding.msl_buffer = mslBinding.msl_texture = mslBinding.msl_sampler = index;
-
-                    compiler->add_msl_resource_binding(mslBinding);
+                        compiler->add_msl_resource_binding(mslBinding);
+                    }
                 }
             }
         }
 
         {
-            spv::ExecutionModel executionModel = SpirvExecutionModelForStage(functionStage);
-            auto size = compiler->get_entry_point(functionName, executionModel).workgroup_size;
-            out->localWorkgroupSize = MTLSizeMake(size.x, size.y, size.z);
+            if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
+                shaderc_spvc_execution_model executionModel = ToSpvcExecutionModel(functionStage);
+                shaderc_spvc_workgroup_size size;
+                DAWN_TRY(CheckSpvcSuccess(
+                    mSpvcContext.GetWorkgroupSize(functionName, executionModel, &size),
+                    "Unable to get workgroup size for shader"));
+                out->localWorkgroupSize = MTLSizeMake(size.x, size.y, size.z);
+            } else {
+                spv::ExecutionModel executionModel = SpirvExecutionModelForStage(functionStage);
+                auto size = compiler->get_entry_point(functionName, executionModel).workgroup_size;
+                out->localWorkgroupSize = MTLSizeMake(size.x, size.y, size.z);
+            }
         }
 
         {
             // SPIRV-Cross also supports re-ordering attributes but it seems to do the correct thing
             // by default.
-            std::string msl = compiler->compile();
-            NSString* mslSource = [NSString stringWithFormat:@"%s", msl.c_str()];
+            NSString* mslSource;
+            if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
+                shaderc_spvc::CompilationResult result;
+                DAWN_TRY(CheckSpvcSuccess(mSpvcContext.CompileShader(&result),
+                                          "Unable to compile shader"));
 
+                mslSource = [NSString stringWithFormat:@"%s", result.GetStringOutput().c_str()];
+            } else {
+                std::string msl = compiler->compile();
+                mslSource = [NSString stringWithFormat:@"%s", msl.c_str()];
+            }
             auto mtlDevice = ToBackend(GetDevice())->GetMTLDevice();
             NSError* error = nil;
             id<MTLLibrary> library = [mtlDevice newLibraryWithSource:mslSource
@@ -187,7 +229,13 @@ namespace dawn_native { namespace metal {
             [library release];
         }
 
-        out->needsStorageBufferLength = compiler->needs_buffer_size_buffer();
+        if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
+            DAWN_TRY(
+                CheckSpvcSuccess(mSpvcContext.NeedsBufferSizeBuffer(&out->needsStorageBufferLength),
+                                 "Unable to determine if shader needs buffer size buffer"));
+        } else {
+            out->needsStorageBufferLength = compiler->needs_buffer_size_buffer();
+        }
 
         return {};
     }
