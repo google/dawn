@@ -517,10 +517,7 @@ namespace dawn_native {
         QueueBase* result = nullptr;
 
         if (ConsumedError(CreateQueueInternal(&result))) {
-            // If queue creation failure ever becomes possible, we should implement MakeError and
-            // friends for them.
-            UNREACHABLE();
-            return nullptr;
+            return QueueBase::MakeError(this);
         }
 
         return result;

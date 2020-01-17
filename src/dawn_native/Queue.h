@@ -27,14 +27,17 @@ namespace dawn_native {
       public:
         QueueBase(DeviceBase* device);
 
+        static QueueBase* MakeError(DeviceBase* device);
+
         // Dawn API
         void Submit(uint32_t commandCount, CommandBufferBase* const* commands);
         void Signal(Fence* fence, uint64_t signalValue);
         Fence* CreateFence(const FenceDescriptor* descriptor);
 
       private:
-        virtual MaybeError SubmitImpl(uint32_t commandCount,
-                                      CommandBufferBase* const* commands) = 0;
+        QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+
+        virtual MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands);
 
         MaybeError ValidateSubmit(uint32_t commandCount, CommandBufferBase* const* commands);
         MaybeError ValidateSignal(const Fence* fence, uint64_t signalValue);

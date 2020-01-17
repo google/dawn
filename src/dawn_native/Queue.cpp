@@ -32,6 +32,19 @@ namespace dawn_native {
     QueueBase::QueueBase(DeviceBase* device) : ObjectBase(device) {
     }
 
+    QueueBase::QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag) : ObjectBase(device, tag) {
+    }
+
+    // static
+    QueueBase* QueueBase::MakeError(DeviceBase* device) {
+        return new QueueBase(device, ObjectBase::kError);
+    }
+
+    MaybeError QueueBase::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
+        UNREACHABLE();
+        return {};
+    }
+
     void QueueBase::Submit(uint32_t commandCount, CommandBufferBase* const* commands) {
         DeviceBase* device = GetDevice();
         if (device->ConsumedError(device->ValidateIsAlive())) {
