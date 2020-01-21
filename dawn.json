@@ -45,13 +45,13 @@
     "backend type": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "D3D11"},
-            {"value": 1, "name": "D3D12"},
-            {"value": 2, "name": "metal"},
-            {"value": 3, "name": "vulkan"},
-            {"value": 4, "name": "openGL"},
-            {"value": 5, "name": "openGLES"},
-            {"value": 6, "name": "null"}
+            {"value": 0, "name": "null"},
+            {"value": 1, "name": "D3D11"},
+            {"value": 2, "name": "D3D12"},
+            {"value": 3, "name": "metal"},
+            {"value": 4, "name": "vulkan"},
+            {"value": 5, "name": "openGL"},
+            {"value": 6, "name": "openGLES"}
         ]
     },
     "bind group": {
