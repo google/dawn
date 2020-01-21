@@ -67,6 +67,7 @@ namespace dawn_native {
     }
 
     MaybeError PipelineBase::ValidateGetBindGroupLayout(uint32_t group) {
+        DAWN_TRY(GetDevice()->ValidateIsAlive());
         DAWN_TRY(GetDevice()->ValidateObject(this));
         DAWN_TRY(GetDevice()->ValidateObject(mLayout.Get()));
         if (group >= kMaxBindGroups) {

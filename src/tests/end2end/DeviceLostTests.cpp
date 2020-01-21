@@ -81,6 +81,28 @@ TEST_P(DeviceLostTest, CreateBindGroupLayoutFails) {
     ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor));
 }
 
+// Test that GetBindGroupLayout fails when device is lost
+TEST_P(DeviceLostTest, GetBindGroupLayoutFails) {
+    wgpu::ShaderModule csModule =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
+    #version 450
+    layout(set = 0, binding = 0) uniform UniformBuffer {
+        vec4 pos;
+    };
+    void main() {
+    })");
+
+    wgpu::ComputePipelineDescriptor descriptor;
+    descriptor.layout = nullptr;
+    descriptor.computeStage.module = csModule;
+    descriptor.computeStage.entryPoint = "main";
+
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&descriptor);
+
+    SetCallbackAndLoseForTesting();
+    ASSERT_DEVICE_ERROR(pipeline.GetBindGroupLayout(0).Get());
+}
+
 // Test that CreateBindGroup fails when device is lost
 TEST_P(DeviceLostTest, CreateBindGroupFails) {
     SetCallbackAndLoseForTesting();
@@ -189,4 +211,5 @@ TEST_P(DeviceLostTest, TickFails) {
     SetCallbackAndLoseForTesting();
     ASSERT_DEVICE_ERROR(device.Tick());
 }
+
 DAWN_INSTANTIATE_TEST(DeviceLostTest, D3D12Backend, VulkanBackend);
