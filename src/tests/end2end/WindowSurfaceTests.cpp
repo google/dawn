@@ -19,13 +19,15 @@
 #include "utils/GLFWUtils.h"
 
 #include <gtest/gtest.h>
-#include "GLFW/glfw3.h"
 
 #include <cstdlib>
 
+// Include windows.h before GLFW so GLFW's APIENTRY macro doesn't conflict with windows.h's.
 #if defined(DAWN_PLATFORM_WINDOWS)
 #    include "common/windows_with_undefs.h"
 #endif  // defined(DAWN_PLATFORM_WINDOWS)
+
+#include "GLFW/glfw3.h"
 
 #if defined(DAWN_USE_X11)
 #    include "common/xlib_with_undefs.h"

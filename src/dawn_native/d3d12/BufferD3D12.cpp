@@ -229,7 +229,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {
-        mWrittenMappedRange = {0, GetSize()};
+        mWrittenMappedRange = {0, static_cast<size_t>(GetSize())};
         DAWN_TRY(CheckHRESULT(GetD3D12Resource()->Map(0, &mWrittenMappedRange,
                                                       reinterpret_cast<void**>(mappedPointer)),
                               "D3D12 map at creation"));
@@ -238,7 +238,7 @@ namespace dawn_native { namespace d3d12 {
 
     MaybeError Buffer::MapReadAsyncImpl(uint32_t serial) {
         mWrittenMappedRange = {};
-        D3D12_RANGE readRange = {0, GetSize()};
+        D3D12_RANGE readRange = {0, static_cast<size_t>(GetSize())};
         char* data = nullptr;
         DAWN_TRY(
             CheckHRESULT(GetD3D12Resource()->Map(0, &readRange, reinterpret_cast<void**>(&data)),
@@ -251,7 +251,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     MaybeError Buffer::MapWriteAsyncImpl(uint32_t serial) {
-        mWrittenMappedRange = {0, GetSize()};
+        mWrittenMappedRange = {0, static_cast<size_t>(GetSize())};
         char* data = nullptr;
         DAWN_TRY(CheckHRESULT(
             GetD3D12Resource()->Map(0, &mWrittenMappedRange, reinterpret_cast<void**>(&data)),
