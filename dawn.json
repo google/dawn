@@ -1296,6 +1296,13 @@
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true}
         ]
     },
+    "surface descriptor from HTML canvas id": {
+        "category": "structure",
+        "chained": true,
+        "members": [
+            {"name": "id", "type": "char", "annotation": "const*", "length": "strlen"}
+        ]
+    },
     "surface descriptor from metal layer": {
         "category": "structure",
         "chained": true,
@@ -1349,7 +1356,8 @@
             {"value": 0, "name": "invalid"},
             {"value": 1, "name": "surface descriptor from metal layer"},
             {"value": 2, "name": "surface descriptor from windows HWND"},
-            {"value": 3, "name": "surface descriptor from xlib"}
+            {"value": 3, "name": "surface descriptor from xlib"},
+            {"value": 4, "name": "surface descriptor from HTML canvas id"}
         ]
     },
     "texture": {

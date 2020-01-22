@@ -110,6 +110,17 @@ TEST_F(WindowSurfaceInstanceTests, BadChainedDescriptors) {
     AssertSurfaceCreation(&descriptor, false);
 }
 
+// Test that a chained descriptor with HTMLCanvas produces an error.
+TEST_F(WindowSurfaceInstanceTests, HTMLCanvasDescriptor) {
+    wgpu::SurfaceDescriptorFromHTMLCanvasId chainedDescriptor;
+    chainedDescriptor.id = "myCanvas";
+
+    wgpu::SurfaceDescriptor descriptor;
+    descriptor.nextInChain = &chainedDescriptor;
+
+    AssertSurfaceCreation(&descriptor, false);
+}
+
 // Test that it is invalid to give two valid chained descriptors
 TEST_F(WindowSurfaceInstanceTests, TwoChainedDescriptors) {
     GLFWwindow* window = CreateWindow();
