@@ -57,16 +57,6 @@
                           sizeof(float),                                                  \
                           new detail::ExpectEq<float>(expected, (width) * (height)))
 
-#define EXPECT_LAZY_CLEAR(N, statement)                                                   \
-    if (UsesWire()) {                                                                     \
-        statement;                                                                        \
-    } else {                                                                              \
-        size_t lazyClearsBefore = dawn_native::GetLazyClearCountForTesting(device.Get()); \
-        statement;                                                                        \
-        size_t lazyClearsAfter = dawn_native::GetLazyClearCountForTesting(device.Get());  \
-        EXPECT_EQ(N, lazyClearsAfter - lazyClearsBefore);                                 \
-    }
-
 // Should only be used to test validation of function that can't be tested by regular validation
 // tests;
 #define ASSERT_DEVICE_ERROR(statement) \
