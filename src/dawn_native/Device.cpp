@@ -560,10 +560,11 @@ namespace dawn_native {
 
         return result;
     }
-    SwapChainBase* DeviceBase::CreateSwapChain(const SwapChainDescriptor* descriptor) {
+    SwapChainBase* DeviceBase::CreateSwapChain(Surface* surface,
+                                               const SwapChainDescriptor* descriptor) {
         SwapChainBase* result = nullptr;
 
-        if (ConsumedError(CreateSwapChainInternal(&result, descriptor))) {
+        if (ConsumedError(CreateSwapChainInternal(&result, surface, descriptor))) {
             return SwapChainBase::MakeError(this);
         }
 
@@ -821,12 +822,19 @@ namespace dawn_native {
     }
 
     MaybeError DeviceBase::CreateSwapChainInternal(SwapChainBase** result,
+                                                   Surface* surface,
                                                    const SwapChainDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
         if (IsValidationEnabled()) {
-            DAWN_TRY(ValidateSwapChainDescriptor(this, descriptor));
+            DAWN_TRY(ValidateSwapChainDescriptor(this, surface, descriptor));
         }
-        DAWN_TRY_ASSIGN(*result, CreateSwapChainImpl(descriptor));
+
+        if (surface == nullptr) {
+            DAWN_TRY_ASSIGN(*result, CreateSwapChainImpl(descriptor));
+        } else {
+            ASSERT(descriptor->implementation == 0);
+            DAWN_TRY_ASSIGN(*result, CreateSwapChainImpl(surface, descriptor));
+        }
         return {};
     }
 

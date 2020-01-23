@@ -21,7 +21,7 @@ namespace dawn_native { namespace d3d12 {
 
     class Device;
 
-    class SwapChain : public SwapChainBase {
+    class SwapChain : public OldSwapChainBase {
       public:
         SwapChain(Device* device, const SwapChainDescriptor* descriptor);
         ~SwapChain();

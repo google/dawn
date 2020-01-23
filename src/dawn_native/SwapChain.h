@@ -25,12 +25,33 @@
 namespace dawn_native {
 
     MaybeError ValidateSwapChainDescriptor(const DeviceBase* device,
+                                           const Surface* surface,
                                            const SwapChainDescriptor* descriptor);
 
     class SwapChainBase : public ObjectBase {
       public:
-        SwapChainBase(DeviceBase* device, const SwapChainDescriptor* descriptor);
-        ~SwapChainBase();
+        SwapChainBase(DeviceBase* device);
+        virtual ~SwapChainBase();
+
+        static SwapChainBase* MakeError(DeviceBase* device);
+
+        // Dawn API
+        virtual void Configure(wgpu::TextureFormat format,
+                               wgpu::TextureUsage allowedUsage,
+                               uint32_t width,
+                               uint32_t height) = 0;
+        virtual TextureViewBase* GetCurrentTextureView() = 0;
+        virtual void Present() = 0;
+
+      protected:
+        SwapChainBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+    };
+
+    // The base class for implementation-based SwapChains that are deprecated.
+    class OldSwapChainBase : public SwapChainBase {
+      public:
+        OldSwapChainBase(DeviceBase* device, const SwapChainDescriptor* descriptor);
+        ~OldSwapChainBase();
 
         static SwapChainBase* MakeError(DeviceBase* device);
 
@@ -38,13 +59,11 @@ namespace dawn_native {
         void Configure(wgpu::TextureFormat format,
                        wgpu::TextureUsage allowedUsage,
                        uint32_t width,
-                       uint32_t height);
-        TextureViewBase* GetCurrentTextureView();
-        void Present();
+                       uint32_t height) override;
+        TextureViewBase* GetCurrentTextureView() override;
+        void Present() override;
 
       protected:
-        SwapChainBase(DeviceBase* device, ObjectBase::ErrorTag tag);
-
         const DawnSwapChainImplementation& GetImplementation();
         virtual TextureBase* GetNextTextureImpl(const TextureDescriptor*) = 0;
         virtual MaybeError OnBeforePresent(TextureBase* texture) = 0;
@@ -64,6 +83,35 @@ namespace dawn_native {
         uint32_t mHeight = 0;
         Ref<TextureBase> mCurrentTexture;
         Ref<TextureViewBase> mCurrentTextureView;
+    };
+
+    // The base class for surface-based SwapChains that aren't ready yet.
+    class NewSwapChainBase : public SwapChainBase {
+      public:
+        NewSwapChainBase(DeviceBase* device,
+                         Surface* surface,
+                         const SwapChainDescriptor* descriptor);
+
+        void Configure(wgpu::TextureFormat format,
+                       wgpu::TextureUsage allowedUsage,
+                       uint32_t width,
+                       uint32_t height) override;
+        TextureViewBase* GetCurrentTextureView() override;
+        void Present() override;
+
+        uint32_t GetWidth() const;
+        uint32_t GetHeight() const;
+        wgpu::TextureFormat GetFormat() const;
+        wgpu::TextureUsage GetUsage() const;
+        Surface* GetSurface();
+
+      private:
+        uint32_t mWidth;
+        uint32_t mHeight;
+        wgpu::TextureFormat mFormat;
+        wgpu::TextureUsage mUsage;
+
+        Ref<Surface> mSurface;
     };
 
 }  // namespace dawn_native

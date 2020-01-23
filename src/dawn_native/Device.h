@@ -151,7 +151,7 @@ namespace dawn_native {
         RenderPipelineBase* CreateRenderPipeline(const RenderPipelineDescriptor* descriptor);
         SamplerBase* CreateSampler(const SamplerDescriptor* descriptor);
         ShaderModuleBase* CreateShaderModule(const ShaderModuleDescriptor* descriptor);
-        SwapChainBase* CreateSwapChain(const SwapChainDescriptor* descriptor);
+        SwapChainBase* CreateSwapChain(Surface* surface, const SwapChainDescriptor* descriptor);
         TextureBase* CreateTexture(const TextureDescriptor* descriptor);
         TextureViewBase* CreateTextureView(TextureBase* texture,
                                            const TextureViewDescriptor* descriptor);
@@ -224,6 +224,9 @@ namespace dawn_native {
             const ShaderModuleDescriptor* descriptor) = 0;
         virtual ResultOrError<SwapChainBase*> CreateSwapChainImpl(
             const SwapChainDescriptor* descriptor) = 0;
+        virtual ResultOrError<SwapChainBase*> CreateSwapChainImpl(
+            Surface* surface,
+            const SwapChainDescriptor* descriptor) = 0;
         virtual ResultOrError<TextureBase*> CreateTextureImpl(
             const TextureDescriptor* descriptor) = 0;
         virtual ResultOrError<TextureViewBase*> CreateTextureViewImpl(
@@ -249,6 +252,7 @@ namespace dawn_native {
         MaybeError CreateShaderModuleInternal(ShaderModuleBase** result,
                                               const ShaderModuleDescriptor* descriptor);
         MaybeError CreateSwapChainInternal(SwapChainBase** result,
+                                           Surface* surface,
                                            const SwapChainDescriptor* descriptor);
         MaybeError CreateTextureInternal(TextureBase** result, const TextureDescriptor* descriptor);
         MaybeError CreateTextureViewInternal(TextureViewBase** result,

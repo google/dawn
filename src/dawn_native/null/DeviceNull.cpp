@@ -19,6 +19,7 @@
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/Instance.h"
+#include "dawn_native/Surface.h"
 
 #include <spirv_cross.hpp>
 
@@ -147,7 +148,12 @@ namespace dawn_native { namespace null {
     }
     ResultOrError<SwapChainBase*> Device::CreateSwapChainImpl(
         const SwapChainDescriptor* descriptor) {
-        return new SwapChain(this, descriptor);
+        return new OldSwapChain(this, descriptor);
+    }
+    ResultOrError<SwapChainBase*> Device::CreateSwapChainImpl(
+        Surface* surface,
+        const SwapChainDescriptor* descriptor) {
+        return new SwapChain(this, surface, descriptor);
     }
     ResultOrError<TextureBase*> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {
         return new Texture(this, descriptor, TextureBase::TextureState::OwnedInternal);
@@ -349,20 +355,29 @@ namespace dawn_native { namespace null {
 
     // SwapChain
 
-    SwapChain::SwapChain(Device* device, const SwapChainDescriptor* descriptor)
-        : SwapChainBase(device, descriptor) {
-        const auto& im = GetImplementation();
-        im.Init(im.userData, nullptr);
+    SwapChain::SwapChain(Device* device, Surface* surface, const SwapChainDescriptor* descriptor)
+        : NewSwapChainBase(device, surface, descriptor) {
     }
 
     SwapChain::~SwapChain() {
     }
 
-    TextureBase* SwapChain::GetNextTextureImpl(const TextureDescriptor* descriptor) {
+    // OldSwapChain
+
+    OldSwapChain::OldSwapChain(Device* device, const SwapChainDescriptor* descriptor)
+        : OldSwapChainBase(device, descriptor) {
+        const auto& im = GetImplementation();
+        im.Init(im.userData, nullptr);
+    }
+
+    OldSwapChain::~OldSwapChain() {
+    }
+
+    TextureBase* OldSwapChain::GetNextTextureImpl(const TextureDescriptor* descriptor) {
         return GetDevice()->CreateTexture(descriptor);
     }
 
-    MaybeError SwapChain::OnBeforePresent(TextureBase*) {
+    MaybeError OldSwapChain::OnBeforePresent(TextureBase*) {
         return {};
     }
 

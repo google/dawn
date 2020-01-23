@@ -39,6 +39,8 @@
 
 #include "GLFW/glfw3native.h"
 
+// Test for wgpu::Surface creation that only need an instance (no devices) and don't need all the
+// complexity of DawnTest.
 class WindowSurfaceInstanceTests : public testing::Test {
   public:
     void SetUp() override {

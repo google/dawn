@@ -23,7 +23,7 @@ namespace dawn_native { namespace vulkan {
 
     class Device;
 
-    class SwapChain : public SwapChainBase {
+    class SwapChain : public OldSwapChainBase {
       public:
         static SwapChain* Create(Device* device, const SwapChainDescriptor* descriptor);
         ~SwapChain();

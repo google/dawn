@@ -188,7 +188,7 @@ TEST_P(DeviceLostTest, CreateSwapChainFails) {
 
     wgpu::SwapChainDescriptor descriptor;
     descriptor.nextInChain = nullptr;
-    ASSERT_DEVICE_ERROR(device.CreateSwapChain(&descriptor));
+    ASSERT_DEVICE_ERROR(device.CreateSwapChain(nullptr, &descriptor));
 }
 
 // Tests that CreateTexture fails when device is lost

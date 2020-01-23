@@ -23,7 +23,7 @@ namespace dawn_native { namespace opengl {
 
     class Device;
 
-    class SwapChain : public SwapChainBase {
+    class SwapChain : public OldSwapChainBase {
       public:
         SwapChain(Device* device, const SwapChainDescriptor* descriptor);
         ~SwapChain();

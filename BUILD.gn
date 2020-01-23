@@ -818,8 +818,6 @@ test("dawn_unittests") {
     "src/dawn_wire/client/ClientMemoryTransferService_mock.h",
     "src/dawn_wire/server/ServerMemoryTransferService_mock.cpp",
     "src/dawn_wire/server/ServerMemoryTransferService_mock.h",
-  ]
-  sources += [
     "src/tests/unittests/BitSetIteratorTests.cpp",
     "src/tests/unittests/BuddyAllocatorTests.cpp",
     "src/tests/unittests/BuddyMemoryAllocatorTests.cpp",
@@ -950,6 +948,12 @@ source_set("dawn_end2end_tests_sources") {
     "src/tests/end2end/ViewportTests.cpp",
   ]
 
+  # Validation tests that need OS windows live in end2end tests.
+  sources += [
+    "src/tests/unittests/validation/ValidationTest.cpp",
+    "src/tests/unittests/validation/ValidationTest.h",
+  ]
+
   libs = []
 
   if (dawn_enable_d3d12) {
@@ -970,7 +974,10 @@ source_set("dawn_end2end_tests_sources") {
   }
 
   if (supports_glfw_for_windowing) {
-    sources += [ "src/tests/end2end/WindowSurfaceTests.cpp" ]
+    sources += [
+      "src/tests/end2end/SwapChainValidationTests.cpp",
+      "src/tests/end2end/WindowSurfaceTests.cpp",
+    ]
     deps += [ ":dawn_glfw" ]
   }
 }

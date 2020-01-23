@@ -180,7 +180,7 @@ wgpu::TextureFormat GetPreferredSwapChainTextureFormat() {
 wgpu::SwapChain GetSwapChain(const wgpu::Device& device) {
     wgpu::SwapChainDescriptor swapChainDesc;
     swapChainDesc.implementation = GetSwapChainImplementation();
-    return device.CreateSwapChain(&swapChainDesc);
+    return device.CreateSwapChain(nullptr, &swapChainDesc);
 }
 
 wgpu::TextureView CreateDefaultDepthStencilView(const wgpu::Device& device) {

@@ -49,13 +49,15 @@ namespace {
     std::string sInjectedErrorTestcaseOutDir;
     uint64_t sOutputFileNumber = 0;
 
-    WGPUSwapChain ErrorDeviceCreateSwapChain(WGPUDevice device, const WGPUSwapChainDescriptor*) {
+    WGPUSwapChain ErrorDeviceCreateSwapChain(WGPUDevice device,
+                                             WGPUSurface surface,
+                                             const WGPUSwapChainDescriptor*) {
         WGPUSwapChainDescriptor desc;
         desc.nextInChain = nullptr;
         desc.label = nullptr;
         // A 0 implementation will trigger a swapchain creation error.
         desc.implementation = 0;
-        return sOriginalDeviceCreateSwapChain(device, &desc);
+        return sOriginalDeviceCreateSwapChain(device, surface, &desc);
     }
 
 }  // namespace

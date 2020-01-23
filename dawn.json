@@ -593,6 +593,7 @@
                 "name": "create swap chain",
                 "returns": "swap chain",
                 "args": [
+                    {"name": "surface", "type": "surface"},
                     {"name": "descriptor", "type": "swap chain descriptor", "annotation": "const*"}
                 ]
             },
@@ -857,6 +858,13 @@
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "bind group layout count", "type": "uint32_t"},
             {"name": "bind group layouts", "type": "bind group layout", "annotation": "const*", "length": "bind group layout count"}
+        ]
+    },
+    "present mode": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "no v sync"},
+            {"value": 1, "name": "v sync"}
         ]
     },
     "programmable stage descriptor": {
@@ -1347,7 +1355,12 @@
         "extensible": true,
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
-            {"name": "implementation", "type": "uint64_t"}
+            {"name": "usage", "type": "texture usage"},
+            {"name": "format", "type": "texture format"},
+            {"name": "width", "type": "uint32_t"},
+            {"name": "height", "type": "uint32_t"},
+            {"name": "present mode", "type": "present mode"},
+            {"name": "implementation", "type": "uint64_t", "default": 0}
         ]
     },
     "s type": {

@@ -22,7 +22,7 @@
 namespace dawn_native { namespace d3d12 {
 
     SwapChain::SwapChain(Device* device, const SwapChainDescriptor* descriptor)
-        : SwapChainBase(device, descriptor) {
+        : OldSwapChainBase(device, descriptor) {
         const auto& im = GetImplementation();
         DawnWSIContextD3D12 wsiContext = {};
         wsiContext.device = reinterpret_cast<WGPUDevice>(GetDevice());
