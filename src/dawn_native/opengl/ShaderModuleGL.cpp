@@ -94,7 +94,8 @@ namespace dawn_native { namespace opengl {
             DAWN_TRY(CheckSpvcSuccess(
                 mSpvcContext.InitializeForGlsl(descriptor->code, descriptor->codeSize, options),
                 "Unable to initialize instance of spvc"));
-            compiler = reinterpret_cast<spirv_cross::CompilerGLSL*>(mSpvcContext.GetCompiler());
+            DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetCompiler(reinterpret_cast<void**>(&compiler)),
+                                      "Unable to get cross compiler"));
         } else {
             // If these options are changed, the values in DawnSPIRVCrossGLSLFastFuzzer.cpp need to
             // be updated.
@@ -192,8 +193,9 @@ namespace dawn_native { namespace opengl {
         if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
             shaderc_spvc::CompilationResult result;
             DAWN_TRY(CheckSpvcSuccess(mSpvcContext.CompileShader(&result),
-                                      "Unable to compile shader using spvc"));
-            mGlslSource = result.GetStringOutput();
+                                      "Unable to compile GLSL shader using spvc"));
+            DAWN_TRY(CheckSpvcSuccess(result.GetStringOutput(&mGlslSource),
+                                      "Unable to get GLSL shader text"));
         } else {
             mGlslSource = compiler->compile();
         }

@@ -95,8 +95,9 @@ namespace dawn_native { namespace metal {
                                               GetMSLCompileOptions()),
                 "Unable to initialize instance of spvc"));
 
-            spirv_cross::CompilerMSL* compiler =
-                reinterpret_cast<spirv_cross::CompilerMSL*>(mSpvcContext.GetCompiler());
+            spirv_cross::CompilerMSL* compiler;
+            DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetCompiler(reinterpret_cast<void**>(&compiler)),
+                                      "Unable to get cross compiler"));
             DAWN_TRY(ExtractSpirvInfo(*compiler));
         } else {
             spirv_cross::CompilerMSL compiler(mSpirv);
@@ -119,7 +120,8 @@ namespace dawn_native { namespace metal {
             DAWN_TRY(CheckSpvcSuccess(
                 mSpvcContext.InitializeForMsl(mSpirv.data(), mSpirv.size(), GetMSLCompileOptions()),
                 "Unable to initialize instance of spvc"));
-            compiler = reinterpret_cast<spirv_cross::CompilerMSL*>(mSpvcContext.GetCompiler());
+            DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetCompiler(reinterpret_cast<void**>(&compiler)),
+                                      "Unable to get cross compiler"));
         } else {
             // If these options are changed, the values in DawnSPIRVCrossMSLFastFuzzer.cpp need to
             // be updated.
@@ -196,9 +198,11 @@ namespace dawn_native { namespace metal {
             if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
                 shaderc_spvc::CompilationResult result;
                 DAWN_TRY(CheckSpvcSuccess(mSpvcContext.CompileShader(&result),
-                                          "Unable to compile shader"));
-
-                mslSource = [NSString stringWithFormat:@"%s", result.GetStringOutput().c_str()];
+                                          "Unable to compile MSL shader"));
+                std::string result_str;
+                DAWN_TRY(CheckSpvcSuccess(result.GetStringOutput(&result_str),
+                                          "Unable to get MSL shader text"));
+                mslSource = [NSString stringWithFormat:@"%s", result_str.c_str()];
             } else {
                 std::string msl = compiler->compile();
                 mslSource = [NSString stringWithFormat:@"%s", msl.c_str()];

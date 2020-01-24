@@ -56,8 +56,9 @@ namespace dawn_native { namespace d3d12 {
                 mSpvcContext.InitializeForHlsl(descriptor->code, descriptor->codeSize, options),
                 "Unable to initialize instance of spvc"));
 
-            spirv_cross::Compiler* compiler =
-                reinterpret_cast<spirv_cross::Compiler*>(mSpvcContext.GetCompiler());
+            spirv_cross::Compiler* compiler;
+            DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetCompiler(reinterpret_cast<void**>(&compiler)),
+                                      "Unable to get cross compiler"));
             DAWN_TRY(ExtractSpirvInfo(*compiler));
         } else {
             spirv_cross::CompilerHLSL compiler(descriptor->code, descriptor->codeSize);
@@ -116,8 +117,9 @@ namespace dawn_native { namespace d3d12 {
             shaderc_spvc::CompilationResult result;
             DAWN_TRY(CheckSpvcSuccess(mSpvcContext.CompileShader(&result),
                                       "Unable to generate HLSL shader w/ spvc"));
-            std::string result_string =
-                result.GetStringOutput();  // Stripping const for ResultOrError
+            std::string result_string;
+            DAWN_TRY(CheckSpvcSuccess(result.GetStringOutput(&result_string),
+                                      "Unable to get HLSL shader text"));
             return result_string;
         } else {
             return compiler->compile();

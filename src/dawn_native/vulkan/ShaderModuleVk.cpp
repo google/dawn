@@ -45,8 +45,9 @@ namespace dawn_native { namespace vulkan {
                 mSpvcContext.InitializeForGlsl(descriptor->code, descriptor->codeSize, options),
                 "Unable to initialize instance of spvc"));
 
-            spirv_cross::Compiler* compiler =
-                reinterpret_cast<spirv_cross::Compiler*>(mSpvcContext.GetCompiler());
+            spirv_cross::Compiler* compiler;
+            DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetCompiler(reinterpret_cast<void**>(&compiler)),
+                                      "Unable to get cross compiler"));
             DAWN_TRY(ExtractSpirvInfo(*compiler));
         } else {
             spirv_cross::Compiler compiler(descriptor->code, descriptor->codeSize);
