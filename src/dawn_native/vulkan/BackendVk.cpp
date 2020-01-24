@@ -27,7 +27,7 @@
 constexpr char kSwiftshaderLibName[] = "libvk_swiftshader.so";
 #    elif defined(DAWN_PLATFORM_WINDOWS)
 constexpr char kSwiftshaderLibName[] = "vk_swiftshader.dll";
-#    elif defined(DAWN_PLATFORM_MAC)
+#    elif defined(DAWN_PLATFORM_MACOS)
 constexpr char kSwiftshaderLibName[] = "libvk_swiftshader.dylib";
 #    else
 #        error "Unimplemented Swiftshader Vulkan backend platform"
