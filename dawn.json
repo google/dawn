@@ -650,7 +650,7 @@
     },
     "device lost callback": {
         "category": "callback",
-        "args" : [
+        "args": [
             {"name": "message", "type": "char", "annotation": "const*"},
             {"name": "userdata", "type": "void", "annotation": "*"}
         ]

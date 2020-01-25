@@ -46,7 +46,7 @@ namespace wgpu {
             "sizeof mismatch for ChainedStruct");
     static_assert(alignof(ChainedStruct) == alignof(WGPUChainedStruct),
             "alignof mismatch for ChainedStruct");
-    static_assert(offsetof(ChainedStruct, nextInChain) == offsetof(WGPUChainedStruct, nextInChain),
+    static_assert(offsetof(ChainedStruct, nextInChain) == offsetof(WGPUChainedStruct, next),
             "offsetof mismatch for ChainedStruct::nextInChain");
     static_assert(offsetof(ChainedStruct, sType) == offsetof(WGPUChainedStruct, sType),
             "offsetof mismatch for ChainedStruct::sType");
