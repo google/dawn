@@ -153,10 +153,11 @@ namespace dawn_native { namespace null {
         const SwapChainDescriptor* descriptor) {
         return new OldSwapChain(this, descriptor);
     }
-    ResultOrError<SwapChainBase*> Device::CreateSwapChainImpl(
+    ResultOrError<NewSwapChainBase*> Device::CreateSwapChainImpl(
         Surface* surface,
+        NewSwapChainBase* previousSwapChain,
         const SwapChainDescriptor* descriptor) {
-        return new SwapChain(this, surface, descriptor);
+        return new SwapChain(this, surface, previousSwapChain, descriptor);
     }
     ResultOrError<TextureBase*> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {
         return new Texture(this, descriptor, TextureBase::TextureState::OwnedInternal);
@@ -358,11 +359,42 @@ namespace dawn_native { namespace null {
 
     // SwapChain
 
-    SwapChain::SwapChain(Device* device, Surface* surface, const SwapChainDescriptor* descriptor)
+    SwapChain::SwapChain(Device* device,
+                         Surface* surface,
+                         NewSwapChainBase* previousSwapChain,
+                         const SwapChainDescriptor* descriptor)
         : NewSwapChainBase(device, surface, descriptor) {
+        if (previousSwapChain != nullptr) {
+            // TODO(cwallez@chromium.org): figure out what should happen when surfaces are used by
+            // multiple backends one after the other. It probably needs to block until the backend
+            // and GPU are completely finished with the previous swapchain.
+            ASSERT(previousSwapChain->GetBackendType() == wgpu::BackendType::Null);
+            previousSwapChain->DetachFromSurface();
+        }
     }
 
     SwapChain::~SwapChain() {
+        DetachFromSurface();
+    }
+
+    MaybeError SwapChain::PresentImpl() {
+        mTexture->Destroy();
+        mTexture = nullptr;
+        return {};
+    }
+
+    ResultOrError<TextureViewBase*> SwapChain::GetCurrentTextureViewImpl() {
+        TextureDescriptor textureDesc = GetSwapChainBaseTextureDescriptor(this);
+        mTexture = AcquireRef(
+            new Texture(GetDevice(), &textureDesc, TextureBase::TextureState::OwnedInternal));
+        return mTexture->CreateView(nullptr);
+    }
+
+    void SwapChain::DetachFromSurfaceImpl() {
+        if (mTexture.Get() != nullptr) {
+            mTexture->Destroy();
+            mTexture = nullptr;
+        }
     }
 
     // OldSwapChain

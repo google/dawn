@@ -29,10 +29,15 @@ namespace dawn_native {
     // A surface is a sum types of all the kind of windows Dawn supports. The OS-specific types
     // aren't used because they would cause compilation errors on other OSes (or require
     // ObjectiveC).
+    // The surface is also used to store the current swapchain so that we can detach it when it is
+    // replaced.
     class Surface final : public RefCounted {
       public:
         Surface(InstanceBase* instance, const SurfaceDescriptor* descriptor);
         ~Surface();
+
+        void SetAttachedSwapChain(NewSwapChainBase* swapChain);
+        NewSwapChainBase* GetAttachedSwapChain() const;
 
         // These are valid to call on all Surfaces.
         enum class Type { MetalLayer, WindowsHWND, Xlib };
@@ -53,6 +58,9 @@ namespace dawn_native {
       private:
         Ref<InstanceBase> mInstance;
         Type mType;
+
+        // The swapchain will set this to null when it is destroyed.
+        NewSwapChainBase* mSwapChain = nullptr;
 
         // MetalLayer
         void* mMetalLayer = nullptr;

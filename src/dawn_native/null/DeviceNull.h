@@ -125,8 +125,9 @@ namespace dawn_native { namespace null {
             const ShaderModuleDescriptor* descriptor) override;
         ResultOrError<SwapChainBase*> CreateSwapChainImpl(
             const SwapChainDescriptor* descriptor) override;
-        ResultOrError<SwapChainBase*> CreateSwapChainImpl(
+        ResultOrError<NewSwapChainBase*> CreateSwapChainImpl(
             Surface* surface,
+            NewSwapChainBase* previousSwapChain,
             const SwapChainDescriptor* descriptor) override;
         ResultOrError<TextureBase*> CreateTextureImpl(const TextureDescriptor* descriptor) override;
         ResultOrError<TextureViewBase*> CreateTextureViewImpl(
@@ -202,8 +203,18 @@ namespace dawn_native { namespace null {
 
     class SwapChain : public NewSwapChainBase {
       public:
-        SwapChain(Device* device, Surface* surface, const SwapChainDescriptor* descriptor);
-        ~SwapChain();
+        SwapChain(Device* device,
+                  Surface* surface,
+                  NewSwapChainBase* previousSwapChain,
+                  const SwapChainDescriptor* descriptor);
+        ~SwapChain() override;
+
+      private:
+        Ref<Texture> mTexture;
+
+        MaybeError PresentImpl() override;
+        ResultOrError<TextureViewBase*> GetCurrentTextureViewImpl() override;
+        void DetachFromSurfaceImpl() override;
     };
 
     class OldSwapChain : public OldSwapChainBase {

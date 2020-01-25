@@ -16,6 +16,7 @@
 
 #include "common/Constants.h"
 #include "common/Log.h"
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/GLFWUtils.h"
 #include "utils/WGPUHelpers.h"
 
@@ -69,11 +70,26 @@ class SwapChainValidationTests : public ValidationTest {
         pass.EndPass();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
+
+    // Checks that an OutputAttachment view is an error by trying to create a render pass on it.
+    void CheckTextureViewIsDestroyed(wgpu::TextureView view) {
+        utils::ComboRenderPassDescriptor renderPassDesc({view});
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
+        pass.EndPass();
+        wgpu::CommandBuffer commands = encoder.Finish();
+
+        wgpu::Queue queue = device.CreateQueue();
+        ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+    }
 };
 
-// Control case for a successful swapchain creation.
+// Control case for a successful swapchain creation and presenting.
 TEST_F(SwapChainValidationTests, CreationSuccess) {
-    device.CreateSwapChain(surface, &goodDescriptor);
+    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
+    wgpu::TextureView view = swapchain.GetCurrentTextureView();
+    swapchain.Present();
 }
 
 // Checks that the creation size must be a valid 2D texture size.
@@ -143,4 +159,134 @@ TEST_F(SwapChainValidationTests, OperationsOnErrorSwapChain) {
     CheckTextureViewIsError(view);
 
     ASSERT_DEVICE_ERROR(swapchain.Present());
+}
+
+// Check it is invalid to call present without getting a current view.
+TEST_F(SwapChainValidationTests, PresentWithoutCurrentView) {
+    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
+
+    // Check it is invalid if we never called GetCurrentTextureView
+    ASSERT_DEVICE_ERROR(swapchain.Present());
+
+    // Check it is invalid if we never called since the last present.
+    swapchain.GetCurrentTextureView();
+    swapchain.Present();
+    ASSERT_DEVICE_ERROR(swapchain.Present());
+}
+
+// Check that the current view is in the destroyed state after the swapchain is destroyed.
+TEST_F(SwapChainValidationTests, ViewDestroyedAfterSwapChainDestruction) {
+    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
+    wgpu::TextureView view = swapchain.GetCurrentTextureView();
+    swapchain = nullptr;
+
+    CheckTextureViewIsDestroyed(view);
+}
+
+// Check that the current view is the destroyed state after present.
+TEST_F(SwapChainValidationTests, ViewDestroyedAfterPresent) {
+    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
+    wgpu::TextureView view = swapchain.GetCurrentTextureView();
+    swapchain.Present();
+
+    CheckTextureViewIsDestroyed(view);
+}
+
+// Check that returned view is of the current format / usage / dimension / size / sample count
+TEST_F(SwapChainValidationTests, ReturnedViewCharacteristics) {
+    utils::ComboRenderPipelineDescriptor pipelineDesc(device);
+    pipelineDesc.vertexStage.module =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
+                #version 450
+                void main() {
+                    gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+                })");
+    pipelineDesc.cFragmentStage.module =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
+                #version 450
+                layout(location = 0) out vec4 fragColor;
+                void main() {
+                    fragColor = vec4(0.0, 1.0, 0.0, 1.0);
+                })");
+    // Validation will check that the sample count of the view matches this format.
+    pipelineDesc.sampleCount = 1;
+    pipelineDesc.colorStateCount = 2;
+    // Validation will check that the format of the view matches this format.
+    pipelineDesc.cColorStates[0].format = wgpu::TextureFormat::BGRA8Unorm;
+    pipelineDesc.cColorStates[1].format = wgpu::TextureFormat::R8Unorm;
+    device.CreateRenderPipeline(&pipelineDesc);
+
+    // Create a second texture to be used as render pass attachment. Validation will check that the
+    // size of the view matches the size of this texture.
+    wgpu::TextureDescriptor textureDesc;
+    textureDesc.usage = wgpu::TextureUsage::OutputAttachment;
+    textureDesc.dimension = wgpu::TextureDimension::e2D;
+    textureDesc.size = {1, 1, 1};
+    textureDesc.format = wgpu::TextureFormat::R8Unorm;
+    textureDesc.sampleCount = 1;
+    wgpu::Texture secondTexture = device.CreateTexture(&textureDesc);
+
+    // Get the swapchain view and try to use it in the render pass to trigger all the validation.
+    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
+    wgpu::TextureView view = swapchain.GetCurrentTextureView();
+
+    // Validation will also check the dimension of the view is 2D, and it's usage contains
+    // OutputAttachment
+    utils::ComboRenderPassDescriptor renderPassDesc({view, secondTexture.CreateView()});
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
+    pass.EndPass();
+    wgpu::CommandBuffer commands = encoder.Finish();
+
+    wgpu::Queue queue = device.CreateQueue();
+    queue.Submit(1, &commands);
+
+    // Check that view doesn't have extra formats like Sampled.
+    // TODO(cwallez@chromium.org): also check for [Readonly]Storage once that's implemented.
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture}});
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, bgl, {{0, view}}));
+}
+
+// Check that failing to create a new swapchain doesn't replace the previous one.
+TEST_F(SwapChainValidationTests, ErrorSwapChainDoesntReplacePreviousOne) {
+    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
+    ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &badDescriptor));
+
+    wgpu::TextureView view = swapchain.GetCurrentTextureView();
+    swapchain.Present();
+}
+
+// Check that after replacement, all swapchain operations are errors and the view is destroyed.
+TEST_F(SwapChainValidationTests, ReplacedSwapChainIsInvalid) {
+    {
+        wgpu::SwapChain replacedSwapChain = device.CreateSwapChain(surface, &goodDescriptor);
+        device.CreateSwapChain(surface, &goodDescriptor);
+        ASSERT_DEVICE_ERROR(replacedSwapChain.GetCurrentTextureView());
+    }
+
+    {
+        wgpu::SwapChain replacedSwapChain = device.CreateSwapChain(surface, &goodDescriptor);
+        wgpu::TextureView view = replacedSwapChain.GetCurrentTextureView();
+        device.CreateSwapChain(surface, &goodDescriptor);
+
+        CheckTextureViewIsDestroyed(view);
+        ASSERT_DEVICE_ERROR(replacedSwapChain.Present());
+    }
+}
+
+// Check that after surface destruction, all swapchain operations are errors and the view is
+// destroyed. The test is split in two to reset the wgpu::Surface in the middle.
+TEST_F(SwapChainValidationTests, SwapChainIsInvalidAfterSurfaceDestruction_GetView) {
+    wgpu::SwapChain replacedSwapChain = device.CreateSwapChain(surface, &goodDescriptor);
+    surface = nullptr;
+    ASSERT_DEVICE_ERROR(replacedSwapChain.GetCurrentTextureView());
+}
+TEST_F(SwapChainValidationTests, SwapChainIsInvalidAfterSurfaceDestruction_AfterGetView) {
+    wgpu::SwapChain replacedSwapChain = device.CreateSwapChain(surface, &goodDescriptor);
+    wgpu::TextureView view = replacedSwapChain.GetCurrentTextureView();
+    surface = nullptr;
+
+    CheckTextureViewIsDestroyed(view);
+    ASSERT_DEVICE_ERROR(replacedSwapChain.Present());
 }

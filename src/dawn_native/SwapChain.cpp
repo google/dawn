@@ -15,6 +15,7 @@
 #include "dawn_native/SwapChain.h"
 
 #include "common/Constants.h"
+#include "dawn_native/Adapter.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/Surface.h"
 #include "dawn_native/Texture.h"
@@ -94,6 +95,19 @@ namespace dawn_native {
         }
 
         return {};
+    }
+
+    TextureDescriptor GetSwapChainBaseTextureDescriptor(NewSwapChainBase* swapChain) {
+        TextureDescriptor desc;
+        desc.usage = swapChain->GetUsage();
+        desc.dimension = wgpu::TextureDimension::e2D;
+        desc.size = {swapChain->GetWidth(), swapChain->GetHeight(), 1};
+        desc.arrayLayerCount = 1;
+        desc.format = swapChain->GetFormat();
+        desc.mipLevelCount = 1;
+        desc.sampleCount = 1;
+
+        return desc;
     }
 
     // SwapChainBase
@@ -246,11 +260,31 @@ namespace dawn_native {
                                        Surface* surface,
                                        const SwapChainDescriptor* descriptor)
         : SwapChainBase(device),
+          mAttached(true),
           mWidth(descriptor->width),
           mHeight(descriptor->height),
           mFormat(descriptor->format),
           mUsage(descriptor->usage),
           mSurface(surface) {
+    }
+
+    NewSwapChainBase::~NewSwapChainBase() {
+        if (mCurrentTextureView.Get() != nullptr) {
+            ASSERT(mCurrentTextureView->GetTexture()->GetTextureState() ==
+                   TextureBase::TextureState::Destroyed);
+        }
+
+        ASSERT(!mAttached);
+        ASSERT(mSurface == nullptr);
+    }
+
+    void NewSwapChainBase::DetachFromSurface() {
+        if (mAttached) {
+            DetachFromSurfaceImpl();
+            GetSurface()->SetAttachedSwapChain(nullptr);
+            mSurface = nullptr;
+            mAttached = false;
+        }
     }
 
     void NewSwapChainBase::Configure(wgpu::TextureFormat format,
@@ -262,14 +296,48 @@ namespace dawn_native {
     }
 
     TextureViewBase* NewSwapChainBase::GetCurrentTextureView() {
-        GetDevice()->ConsumedError(DAWN_VALIDATION_ERROR(
-            "GetCurrentTextureView not implemented yet for surface-based swapchains"));
-        return TextureViewBase::MakeError(GetDevice());
+        if (GetDevice()->ConsumedError(ValidateGetCurrentTextureView())) {
+            return TextureViewBase::MakeError(GetDevice());
+        }
+
+        if (mCurrentTextureView.Get() != nullptr) {
+            // Calling GetCurrentTextureView always returns a new reference so add it even when
+            // reusing the existing texture view.
+            mCurrentTextureView->Reference();
+            return mCurrentTextureView.Get();
+        }
+
+        TextureViewBase* view = nullptr;
+        if (GetDevice()->ConsumedError(GetCurrentTextureViewImpl(), &view)) {
+            return TextureViewBase::MakeError(GetDevice());
+        }
+
+        // Check that the return texture view matches exactly what was given for this descriptor.
+        ASSERT(view->GetTexture()->GetFormat().format == mFormat);
+        ASSERT((view->GetTexture()->GetUsage() & mUsage) == mUsage);
+        ASSERT(view->GetLevelCount() == 1);
+        ASSERT(view->GetLayerCount() == 1);
+        ASSERT(view->GetDimension() == wgpu::TextureViewDimension::e2D);
+        ASSERT(view->GetTexture()->GetMipLevelVirtualSize(view->GetBaseMipLevel()).width == mWidth);
+        ASSERT(view->GetTexture()->GetMipLevelVirtualSize(view->GetBaseMipLevel()).height ==
+               mHeight);
+
+        mCurrentTextureView = view;
+        return view;
     }
 
     void NewSwapChainBase::Present() {
-        GetDevice()->ConsumedError(
-            DAWN_VALIDATION_ERROR("Present not implemented yet for surface-based swapchains"));
+        if (GetDevice()->ConsumedError(ValidatePresent())) {
+            return;
+        }
+
+        if (GetDevice()->ConsumedError(PresentImpl())) {
+            return;
+        }
+
+        ASSERT(mCurrentTextureView->GetTexture()->GetTextureState() ==
+               TextureBase::TextureState::Destroyed);
+        mCurrentTextureView = nullptr;
     }
 
     uint32_t NewSwapChainBase::GetWidth() const {
@@ -289,7 +357,41 @@ namespace dawn_native {
     }
 
     Surface* NewSwapChainBase::GetSurface() {
-        return mSurface.Get();
+        return mSurface;
+    }
+
+    bool NewSwapChainBase::IsAttached() const {
+        return mAttached;
+    }
+
+    wgpu::BackendType NewSwapChainBase::GetBackendType() const {
+        return GetDevice()->GetAdapter()->GetBackendType();
+    }
+
+    MaybeError NewSwapChainBase::ValidatePresent() const {
+        DAWN_TRY(GetDevice()->ValidateIsAlive());
+        DAWN_TRY(GetDevice()->ValidateObject(this));
+
+        if (!mAttached) {
+            return DAWN_VALIDATION_ERROR("Presenting on detached swapchain");
+        }
+
+        if (mCurrentTextureView.Get() == nullptr) {
+            return DAWN_VALIDATION_ERROR("Presenting without prior GetCurrentTextureView");
+        }
+
+        return {};
+    }
+
+    MaybeError NewSwapChainBase::ValidateGetCurrentTextureView() const {
+        DAWN_TRY(GetDevice()->ValidateIsAlive());
+        DAWN_TRY(GetDevice()->ValidateObject(this));
+
+        if (!mAttached) {
+            return DAWN_VALIDATION_ERROR("Getting view on detached swapchain");
+        }
+
+        return {};
     }
 
 }  // namespace dawn_native

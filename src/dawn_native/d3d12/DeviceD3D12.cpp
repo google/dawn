@@ -254,8 +254,9 @@ namespace dawn_native { namespace d3d12 {
         const SwapChainDescriptor* descriptor) {
         return new SwapChain(this, descriptor);
     }
-    ResultOrError<SwapChainBase*> Device::CreateSwapChainImpl(
+    ResultOrError<NewSwapChainBase*> Device::CreateSwapChainImpl(
         Surface* surface,
+        NewSwapChainBase* previousSwapChain,
         const SwapChainDescriptor* descriptor) {
         return DAWN_VALIDATION_ERROR("New swapchains not implemented.");
     }

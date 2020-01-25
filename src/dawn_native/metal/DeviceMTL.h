@@ -85,8 +85,9 @@ namespace dawn_native { namespace metal {
             const ShaderModuleDescriptor* descriptor) override;
         ResultOrError<SwapChainBase*> CreateSwapChainImpl(
             const SwapChainDescriptor* descriptor) override;
-        ResultOrError<SwapChainBase*> CreateSwapChainImpl(
+        ResultOrError<NewSwapChainBase*> CreateSwapChainImpl(
             Surface* surface,
+            NewSwapChainBase* previousSwapChain,
             const SwapChainDescriptor* descriptor) override;
         ResultOrError<TextureBase*> CreateTextureImpl(const TextureDescriptor* descriptor) override;
         ResultOrError<TextureViewBase*> CreateTextureViewImpl(

@@ -35,6 +35,7 @@
 #include "dawn_native/RenderPipeline.h"
 #include "dawn_native/Sampler.h"
 #include "dawn_native/ShaderModule.h"
+#include "dawn_native/Surface.h"
 #include "dawn_native/SwapChain.h"
 #include "dawn_native/Texture.h"
 #include "dawn_native/ValidationUtils_autogen.h"
@@ -833,7 +834,19 @@ namespace dawn_native {
             DAWN_TRY_ASSIGN(*result, CreateSwapChainImpl(descriptor));
         } else {
             ASSERT(descriptor->implementation == 0);
-            DAWN_TRY_ASSIGN(*result, CreateSwapChainImpl(surface, descriptor));
+
+            NewSwapChainBase* previousSwapChain = surface->GetAttachedSwapChain();
+            NewSwapChainBase* newSwapChain;
+            DAWN_TRY_ASSIGN(newSwapChain,
+                            CreateSwapChainImpl(surface, previousSwapChain, descriptor));
+
+            if (previousSwapChain != nullptr) {
+                ASSERT(!previousSwapChain->IsAttached());
+            }
+            ASSERT(newSwapChain->IsAttached());
+
+            surface->SetAttachedSwapChain(newSwapChain);
+            *result = newSwapChain;
         }
         return {};
     }

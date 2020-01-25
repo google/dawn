@@ -224,8 +224,10 @@ namespace dawn_native {
             const ShaderModuleDescriptor* descriptor) = 0;
         virtual ResultOrError<SwapChainBase*> CreateSwapChainImpl(
             const SwapChainDescriptor* descriptor) = 0;
-        virtual ResultOrError<SwapChainBase*> CreateSwapChainImpl(
+        // Note that previousSwapChain may be nullptr, or come from a different backend.
+        virtual ResultOrError<NewSwapChainBase*> CreateSwapChainImpl(
             Surface* surface,
+            NewSwapChainBase* previousSwapChain,
             const SwapChainDescriptor* descriptor) = 0;
         virtual ResultOrError<TextureBase*> CreateTextureImpl(
             const TextureDescriptor* descriptor) = 0;
