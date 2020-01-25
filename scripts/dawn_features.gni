@@ -19,6 +19,16 @@ if (build_with_chromium) {
 }
 
 declare_args() {
+  # Enables usage of swiftshader on the Vulkan backend.
+  # Note that this will only work in standalone and in projects that set the
+  # dawn_swiftshader_dir variable in build_overrides/dawn.gni
+  # Because of how the Vulkan loader works, setting this makes Dawn only able
+  # to find the Swiftshader ICD and not the others.
+  # Enabled by default when fuzzing.
+  dawn_use_swiftshader = build_with_chromium && use_fuzzing_engine
+}
+
+declare_args() {
   # Enable Dawn's ASSERTs even in release builds
   dawn_always_assert = false
 
@@ -42,7 +52,8 @@ declare_args() {
   dawn_enable_opengl = is_linux && !is_chromeos
 
   # Enables the compilation of Dawn's Vulkan backend
-  dawn_enable_vulkan = is_linux || is_win || is_fuchsia || is_android
+  dawn_enable_vulkan =
+      is_linux || is_win || is_fuchsia || is_android || dawn_use_swiftshader
 
   # Enable use of reflection compiler in spirv-cross. This is needed
   # if performing reflection on systems that the platform language
@@ -63,15 +74,6 @@ declare_args() {
 # Put them in two separate declare_args() when setting the value of one
 # argument based on another.
 declare_args() {
-  # Enables usage of swiftshader on the Vulkan backend.
-  # Note that this will only work in standalone and in projects that set the
-  # dawn_swiftshader_dir variable in build_overrides/dawn.gni
-  # Because of how the Vulkan loader works, setting this make Dawn only able
-  # to find the Swiftshader ICD and not the others.
-  # Enabled by default when fuzzing.
-  dawn_use_swiftshader =
-      dawn_enable_vulkan && build_with_chromium && use_fuzzing_engine
-
   # Uses our built version of Vulkan validation layers
   dawn_enable_vulkan_validation_layers =
       dawn_enable_vulkan && ((is_linux && !is_chromeos) || is_win)
