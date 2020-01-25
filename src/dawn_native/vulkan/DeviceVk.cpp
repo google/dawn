@@ -50,6 +50,9 @@ namespace dawn_native { namespace vulkan {
         if (descriptor != nullptr) {
             ApplyToggleOverrides(descriptor);
         }
+
+        // Set the device as lost until successfully created.
+        mLossStatus = LossStatus::AlreadyLost;
     }
 
     MaybeError Device::Initialize() {
@@ -91,14 +94,22 @@ namespace dawn_native { namespace vulkan {
 
         mDescriptorSetService = nullptr;
 
+        // The frontend asserts DynamicUploader is destructed by the backend.
+        // It is usually destructed in Destroy(), but Destroy isn't always called if device
+        // initialization failed.
+        mDynamicUploader = nullptr;
+
         // We still need to properly handle Vulkan object deletion even if the device has been lost,
         // so the Deleter and vkDevice cannot be destroyed in Device::Destroy().
         // We need handle deleting all child objects by calling Tick() again with a large serial to
         // force all operations to look as if they were completed, and delete all objects before
         // destroying the Deleter and vkDevice.
-        mCompletedSerial = std::numeric_limits<Serial>::max();
-        mDeleter->Tick(mCompletedSerial);
-        mDeleter = nullptr;
+        // The Deleter may be null if initialization failed.
+        if (mDeleter != nullptr) {
+            mCompletedSerial = std::numeric_limits<Serial>::max();
+            mDeleter->Tick(mCompletedSerial);
+            mDeleter = nullptr;
+        }
 
         // VkQueues are destroyed when the VkDevice is destroyed
         // The VkDevice is needed to destroy child objects, so it must be destroyed last after all
@@ -406,6 +417,8 @@ namespace dawn_native { namespace vulkan {
         DAWN_TRY(CheckVkSuccess(fn.CreateDevice(physicalDevice, &createInfo, nullptr, &mVkDevice),
                                 "vkCreateDevice"));
 
+        // Device created. Mark it as alive.
+        mLossStatus = LossStatus::Alive;
         return usedKnobs;
     }
 
