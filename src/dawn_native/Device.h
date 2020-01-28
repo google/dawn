@@ -190,6 +190,7 @@ namespace dawn_native {
         size_t GetLazyClearCountForTesting();
         void IncrementLazyClearCountForTesting();
         void LoseForTesting();
+        bool IsLost() const;
 
       protected:
         void SetToggle(Toggle toggle, bool isEnabled);

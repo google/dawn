@@ -88,6 +88,9 @@ namespace dawn_native { namespace null {
 
     Device::~Device() {
         BaseDestructor();
+        // This assert is in the destructor rather than Device::Destroy() because it needs to make
+        // sure buffers have been destroyed before the device.
+        ASSERT(mMemoryUsage == 0);
     }
 
     ResultOrError<BindGroupBase*> Device::CreateBindGroupImpl(
@@ -181,7 +184,6 @@ namespace dawn_native { namespace null {
         mDynamicUploader = nullptr;
 
         mPendingOperations.clear();
-        ASSERT(mMemoryUsage == 0);
     }
 
     MaybeError Device::WaitForIdleForDestruction() {
