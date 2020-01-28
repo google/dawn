@@ -37,6 +37,14 @@ dawn_json_generator("dawn_headers_gen") {
   ]
 }
 
+dawn_json_generator("emscripten_bits_gen") {
+  target = "emscripten_bits"
+  outputs = [
+    "src/dawn/webgpu_struct_info.json",
+    "src/dawn/library_webgpu_enum_tables.js",
+  ]
+}
+
 source_set("dawn_headers") {
   all_dependent_configs = [ "${dawn_root}/src/common:dawn_public_include_dirs" ]
   public_deps = [

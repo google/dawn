@@ -27,6 +27,7 @@
     },
     "adapter type": {
         "category": "enum",
+        "javascript": false,
         "values": [
             {"value": 0, "name": "discrete GPU"},
             {"value": 1, "name": "integrated GPU"},
@@ -44,6 +45,7 @@
     },
     "backend type": {
         "category": "enum",
+        "javascript": false,
         "values": [
             {"value": 0, "name": "null"},
             {"value": 1, "name": "D3D11"},
@@ -1314,6 +1316,7 @@
     "surface descriptor from metal layer": {
         "category": "structure",
         "chained": true,
+        "javascript": false,
         "members": [
             {"name": "layer", "type": "void", "annotation": "*"}
         ]
@@ -1321,6 +1324,7 @@
     "surface descriptor from windows HWND": {
         "category": "structure",
         "chained": true,
+        "javascript": false,
         "members": [
             {"name": "hinstance", "type": "void", "annotation": "*"},
             {"name": "hwnd", "type": "void", "annotation": "*"}
@@ -1329,6 +1333,7 @@
     "surface descriptor from xlib": {
         "category": "structure",
         "chained": true,
+        "javascript": false,
         "members": [
             {"name": "display", "type": "void", "annotation": "*"},
             {"name": "window", "type": "uint32_t"}
@@ -1365,6 +1370,7 @@
     },
     "s type": {
         "category": "enum",
+        "javascript": false,
         "values": [
             {"value": 0, "name": "invalid"},
             {"value": 1, "name": "surface descriptor from metal layer"},
@@ -1439,7 +1445,7 @@
     "texture format": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "undefined", "valid": false},
+            {"value": 0, "name": "undefined", "valid": false, "jsrepr": "undefined"},
             {"value": 1, "name": "R8 unorm"},
             {"value": 2, "name": "R8 snorm"},
             {"value": 3, "name": "R8 uint"},
@@ -1535,7 +1541,7 @@
     "texture view dimension": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "undefined", "valid": false},
+            {"value": 0, "name": "undefined", "valid": false, "jsrepr": "undefined"},
             {"value": 1, "name": "1D"},
             {"value": 2, "name": "2D"},
             {"value": 3, "name": "2D array"},
