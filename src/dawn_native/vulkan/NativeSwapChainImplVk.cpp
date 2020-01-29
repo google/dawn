@@ -66,6 +66,9 @@ namespace dawn_native { namespace vulkan {
 
     NativeSwapChainImpl::NativeSwapChainImpl(Device* device, VkSurfaceKHR surface)
         : mSurface(surface), mDevice(device) {
+        // Call this immediately, so that BackendBinding::GetPreferredSwapChainTextureFormat
+        // will return a correct result before a SwapChain is created.
+        UpdateSurfaceConfig();
     }
 
     NativeSwapChainImpl::~NativeSwapChainImpl() {
