@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     output_dir = sys.argv[2]
 
-    for (name, content) in files.iteritems():
+    for (name, content) in files.items():
         output_file = output_dir + os.path.sep + name
 
         directory = os.path.dirname(output_file)
