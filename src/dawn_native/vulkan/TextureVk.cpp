@@ -460,7 +460,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
         DAWN_TRY(CheckVkSuccess(
-            device->fn.CreateImage(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
+            device->fn.CreateImage(device->GetVkDevice(), &createInfo, nullptr, &mHandle),
             "CreateImage"));
 
         // Create the image memory and associate it with the container
@@ -806,7 +806,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.subresourceRange.layerCount = descriptor->arrayLayerCount;
 
         return CheckVkSuccess(
-            device->fn.CreateImageView(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
+            device->fn.CreateImageView(device->GetVkDevice(), &createInfo, nullptr, &mHandle),
             "CreateImageView");
     }
 

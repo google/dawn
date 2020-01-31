@@ -147,7 +147,7 @@ namespace dawn_native { namespace vulkan {
 
         Device* device = ToBackend(GetDevice());
         DAWN_TRY(CheckVkSuccess(
-            device->fn.CreateBuffer(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
+            device->fn.CreateBuffer(device->GetVkDevice(), &createInfo, nullptr, &mHandle),
             "vkCreateBuffer"));
 
         VkMemoryRequirements requirements;

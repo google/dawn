@@ -87,7 +87,7 @@ namespace dawn_native { namespace vulkan {
 
         Device* device = ToBackend(GetDevice());
         return CheckVkSuccess(
-            device->fn.CreateSampler(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
+            device->fn.CreateSampler(device->GetVkDevice(), &createInfo, nullptr, &mHandle),
             "CreateSampler");
     }
 

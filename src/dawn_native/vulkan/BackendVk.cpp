@@ -272,7 +272,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.pUserData = this;
 
         return CheckVkSuccess(mFunctions.CreateDebugReportCallbackEXT(
-                                  mInstance, &createInfo, nullptr, &*mDebugReportCallback),
+                                  mInstance, &createInfo, nullptr, &mDebugReportCallback),
                               "vkCreateDebugReportcallback");
     }
 

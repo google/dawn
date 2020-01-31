@@ -48,13 +48,13 @@ namespace dawn_native { namespace vulkan {
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
         createInfo.setLayoutCount = numSetLayouts;
-        createInfo.pSetLayouts = AsVkArray(setLayouts.data());
+        createInfo.pSetLayouts = setLayouts.data();
         createInfo.pushConstantRangeCount = 0;
         createInfo.pPushConstantRanges = nullptr;
 
         Device* device = ToBackend(GetDevice());
         return CheckVkSuccess(
-            device->fn.CreatePipelineLayout(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
+            device->fn.CreatePipelineLayout(device->GetVkDevice(), &createInfo, nullptr, &mHandle),
             "CreatePipelineLayout");
     }
 

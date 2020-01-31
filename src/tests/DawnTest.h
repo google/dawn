@@ -32,30 +32,30 @@
 // them.
 #define EXPECT_BUFFER_U32_EQ(expected, buffer, offset)                         \
     AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t), \
-                         new ::detail::ExpectEq<uint32_t>(expected))
+                         new detail::ExpectEq<uint32_t>(expected))
 
 #define EXPECT_BUFFER_U32_RANGE_EQ(expected, buffer, offset, count)                    \
     AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t) * count, \
-                         new ::detail::ExpectEq<uint32_t>(expected, count))
+                         new detail::ExpectEq<uint32_t>(expected, count))
 
 // Test a pixel of the mip level 0 of a 2D texture.
 #define EXPECT_PIXEL_RGBA8_EQ(expected, texture, x, y)                                  \
     AddTextureExpectation(__FILE__, __LINE__, texture, x, y, 1, 1, 0, 0, sizeof(RGBA8), \
-                          new ::detail::ExpectEq<RGBA8>(expected))
+                          new detail::ExpectEq<RGBA8>(expected))
 
 #define EXPECT_TEXTURE_RGBA8_EQ(expected, texture, x, y, width, height, level, slice)     \
     AddTextureExpectation(__FILE__, __LINE__, texture, x, y, width, height, level, slice, \
                           sizeof(RGBA8),                                                  \
-                          new ::detail::ExpectEq<RGBA8>(expected, (width) * (height)))
+                          new detail::ExpectEq<RGBA8>(expected, (width) * (height)))
 
 #define EXPECT_PIXEL_FLOAT_EQ(expected, texture, x, y)                                  \
     AddTextureExpectation(__FILE__, __LINE__, texture, x, y, 1, 1, 0, 0, sizeof(float), \
-                          new ::detail::ExpectEq<float>(expected))
+                          new detail::ExpectEq<float>(expected))
 
 #define EXPECT_TEXTURE_FLOAT_EQ(expected, texture, x, y, width, height, level, slice)     \
     AddTextureExpectation(__FILE__, __LINE__, texture, x, y, width, height, level, slice, \
                           sizeof(float),                                                  \
-                          new ::detail::ExpectEq<float>(expected, (width) * (height)))
+                          new detail::ExpectEq<float>(expected, (width) * (height)))
 
 // Should only be used to test validation of function that can't be tested by regular validation
 // tests;

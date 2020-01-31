@@ -38,7 +38,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
         createInfo.layout = ToBackend(descriptor->layout)->GetHandle();
-        createInfo.basePipelineHandle = ::VK_NULL_HANDLE;
+        createInfo.basePipelineHandle = VK_NULL_HANDLE;
         createInfo.basePipelineIndex = -1;
 
         createInfo.stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -51,8 +51,8 @@ namespace dawn_native { namespace vulkan {
 
         Device* device = ToBackend(GetDevice());
         return CheckVkSuccess(
-            device->fn.CreateComputePipelines(device->GetVkDevice(), ::VK_NULL_HANDLE, 1,
-                                              &createInfo, nullptr, &*mHandle),
+            device->fn.CreateComputePipelines(device->GetVkDevice(), VK_NULL_HANDLE, 1, &createInfo,
+                                              nullptr, &mHandle),
             "CreateComputePipeline");
     }
 
