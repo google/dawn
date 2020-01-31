@@ -495,12 +495,12 @@ namespace dawn_native { namespace vulkan {
         createInfo.layout = ToBackend(GetLayout())->GetHandle();
         createInfo.renderPass = renderPass;
         createInfo.subpass = 0;
-        createInfo.basePipelineHandle = VK_NULL_HANDLE;
+        createInfo.basePipelineHandle = VkPipeline{};
         createInfo.basePipelineIndex = -1;
 
         return CheckVkSuccess(
-            device->fn.CreateGraphicsPipelines(device->GetVkDevice(), VK_NULL_HANDLE, 1,
-                                               &createInfo, nullptr, &mHandle),
+            device->fn.CreateGraphicsPipelines(device->GetVkDevice(), VkPipelineCache{}, 1,
+                                               &createInfo, nullptr, &*mHandle),
             "CreateGraphicsPipeline");
     }
 

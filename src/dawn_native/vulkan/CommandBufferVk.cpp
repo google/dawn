@@ -106,7 +106,7 @@ namespace dawn_native { namespace vulkan {
                                                     ? dynamicOffsets[dirtyIndex].data()
                                                     : nullptr;
                 device->fn.CmdBindDescriptorSets(commands, bindPoint, pipelineLayout, dirtyIndex, 1,
-                                                 &set, dynamicOffsetCounts[dirtyIndex],
+                                                 &*set, dynamicOffsetCounts[dirtyIndex],
                                                  dynamicOffset);
             }
         }
@@ -255,14 +255,14 @@ namespace dawn_native { namespace vulkan {
                 createInfo.flags = 0;
                 createInfo.renderPass = renderPassVK;
                 createInfo.attachmentCount = attachmentCount;
-                createInfo.pAttachments = attachments.data();
+                createInfo.pAttachments = AsVkArray(attachments.data());
                 createInfo.width = renderPass->width;
                 createInfo.height = renderPass->height;
                 createInfo.layers = 1;
 
                 DAWN_TRY(
                     CheckVkSuccess(device->fn.CreateFramebuffer(device->GetVkDevice(), &createInfo,
-                                                                nullptr, &framebuffer),
+                                                                nullptr, &*framebuffer),
                                    "CreateFramebuffer"));
 
                 // We don't reuse VkFramebuffers so mark the framebuffer for deletion as soon as the
@@ -827,7 +827,7 @@ namespace dawn_native { namespace vulkan {
                     VkBuffer buffer = ToBackend(cmd->buffer)->GetHandle();
                     VkDeviceSize offset = static_cast<VkDeviceSize>(cmd->offset);
 
-                    device->fn.CmdBindVertexBuffers(commands, cmd->slot, 1, &buffer, &offset);
+                    device->fn.CmdBindVertexBuffers(commands, cmd->slot, 1, &*buffer, &offset);
                 } break;
 
                 default:

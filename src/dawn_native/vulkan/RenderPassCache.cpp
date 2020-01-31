@@ -191,9 +191,9 @@ namespace dawn_native { namespace vulkan {
 
         // Create the render pass from the zillion parameters
         VkRenderPass renderPass;
-        DAWN_TRY(CheckVkSuccess(
-            mDevice->fn.CreateRenderPass(mDevice->GetVkDevice(), &createInfo, nullptr, &renderPass),
-            "CreateRenderPass"));
+        DAWN_TRY(CheckVkSuccess(mDevice->fn.CreateRenderPass(mDevice->GetVkDevice(), &createInfo,
+                                                             nullptr, &*renderPass),
+                                "CreateRenderPass"));
         return renderPass;
     }
 

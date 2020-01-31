@@ -136,7 +136,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.oldSwapchain = oldSwapchain;
 
         if (mDevice->fn.CreateSwapchainKHR(mDevice->GetVkDevice(), &createInfo, nullptr,
-                                           &mSwapChain) != VK_SUCCESS) {
+                                           &*mSwapChain) != VK_SUCCESS) {
             ASSERT(false);
         }
 
@@ -151,7 +151,7 @@ namespace dawn_native { namespace vulkan {
         ASSERT(count >= mConfig.minImageCount);
         mSwapChainImages.resize(count);
         if (mDevice->fn.GetSwapchainImagesKHR(mDevice->GetVkDevice(), mSwapChain, &count,
-                                              mSwapChainImages.data()) != VK_SUCCESS) {
+                                              AsVkArray(mSwapChainImages.data())) != VK_SUCCESS) {
             ASSERT(false);
         }
 
@@ -168,7 +168,7 @@ namespace dawn_native { namespace vulkan {
             barrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
             barrier.srcQueueFamilyIndex = 0;
             barrier.dstQueueFamilyIndex = 0;
-            barrier.image = image;
+            barrier.image = *image;
             barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
             barrier.subresourceRange.baseMipLevel = 0;
             barrier.subresourceRange.levelCount = 1;
@@ -197,18 +197,22 @@ namespace dawn_native { namespace vulkan {
             createInfo.pNext = nullptr;
             createInfo.flags = 0;
             if (mDevice->fn.CreateSemaphore(mDevice->GetVkDevice(), &createInfo, nullptr,
-                                            &semaphore) != VK_SUCCESS) {
+                                            &*semaphore) != VK_SUCCESS) {
                 ASSERT(false);
             }
         }
 
         if (mDevice->fn.AcquireNextImageKHR(mDevice->GetVkDevice(), mSwapChain,
                                             std::numeric_limits<uint64_t>::max(), semaphore,
-                                            VK_NULL_HANDLE, &mLastImageIndex) != VK_SUCCESS) {
+                                            VkFence{}, &mLastImageIndex) != VK_SUCCESS) {
             ASSERT(false);
         }
 
-        nextTexture->texture.u64 = mSwapChainImages[mLastImageIndex].GetU64();
+        nextTexture->texture.u64 =
+#if defined(DAWN_PLATFORM_64_BIT)
+            reinterpret_cast<uint64_t>
+#endif
+            (*mSwapChainImages[mLastImageIndex]);
         mDevice->GetPendingRecordingContext()->waitSemaphores.push_back(semaphore);
 
         return DAWN_SWAP_CHAIN_NO_ERROR;
@@ -227,7 +231,7 @@ namespace dawn_native { namespace vulkan {
         presentInfo.waitSemaphoreCount = 0;
         presentInfo.pWaitSemaphores = nullptr;
         presentInfo.swapchainCount = 1;
-        presentInfo.pSwapchains = &mSwapChain;
+        presentInfo.pSwapchains = &*mSwapChain;
         presentInfo.pImageIndices = &mLastImageIndex;
         presentInfo.pResults = nullptr;
 

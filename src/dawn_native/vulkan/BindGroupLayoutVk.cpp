@@ -105,7 +105,7 @@ namespace dawn_native { namespace vulkan {
 
         Device* device = ToBackend(GetDevice());
         DAWN_TRY(CheckVkSuccess(device->fn.CreateDescriptorSetLayout(
-                                    device->GetVkDevice(), &createInfo, nullptr, &mHandle),
+                                    device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
                                 "CreateDescriptorSetLayout"));
 
         // Compute the size of descriptor pools used for this layout.
@@ -171,7 +171,7 @@ namespace dawn_native { namespace vulkan {
 
         VkDescriptorPool descriptorPool;
         DAWN_TRY(CheckVkSuccess(device->fn.CreateDescriptorPool(device->GetVkDevice(), &createInfo,
-                                                                nullptr, &descriptorPool),
+                                                                nullptr, &*descriptorPool),
                                 "CreateDescriptorPool"));
 
         // Allocate our single set.
@@ -180,12 +180,13 @@ namespace dawn_native { namespace vulkan {
         allocateInfo.pNext = nullptr;
         allocateInfo.descriptorPool = descriptorPool;
         allocateInfo.descriptorSetCount = 1;
-        allocateInfo.pSetLayouts = &mHandle;
+        allocateInfo.pSetLayouts = &*mHandle;
 
         VkDescriptorSet descriptorSet;
-        MaybeError result = CheckVkSuccess(
-            device->fn.AllocateDescriptorSets(device->GetVkDevice(), &allocateInfo, &descriptorSet),
-            "AllocateDescriptorSets");
+        MaybeError result =
+            CheckVkSuccess(device->fn.AllocateDescriptorSets(device->GetVkDevice(), &allocateInfo,
+                                                             &*descriptorSet),
+                           "AllocateDescriptorSets");
 
         if (result.IsError()) {
             // On an error we can destroy the pool immediately because no command references it.
