@@ -73,7 +73,7 @@ namespace dawn_native { namespace vulkan {
             // First check OOM that we want to surface to the application.
             DAWN_TRY(CheckVkOOMThenSuccess(
                 mDevice->fn.AllocateMemory(mDevice->GetVkDevice(), &allocateInfo, nullptr,
-                                           &allocatedMemory),
+                                           &*allocatedMemory),
                 "vkAllocateMemory"));
 
             ASSERT(allocatedMemory != VK_NULL_HANDLE);

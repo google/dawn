@@ -36,7 +36,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.pQueueFamilyIndices = 0;
 
         DAWN_TRY(CheckVkSuccess(
-            mDevice->fn.CreateBuffer(mDevice->GetVkDevice(), &createInfo, nullptr, &mBuffer),
+            mDevice->fn.CreateBuffer(mDevice->GetVkDevice(), &createInfo, nullptr, &*mBuffer),
             "vkCreateBuffer"));
 
         VkMemoryRequirements requirements;

@@ -196,7 +196,7 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
         memoryDedicatedAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO;
         memoryDedicatedAllocateInfo.pNext = nullptr;
         memoryDedicatedAllocateInfo.image = image;
-        memoryDedicatedAllocateInfo.buffer = VK_NULL_HANDLE;
+        memoryDedicatedAllocateInfo.buffer = VkBuffer{};
 
         VkImportMemoryFdInfoKHR importMemoryFdInfo;
         importMemoryFdInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR;
@@ -213,7 +213,7 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
         VkDeviceMemory allocatedMemory = VK_NULL_HANDLE;
         DAWN_TRY(
             CheckVkSuccess(mDevice->fn.AllocateMemory(mDevice->GetVkDevice(), &memoryAllocateInfo,
-                                                      nullptr, &allocatedMemory),
+                                                      nullptr, &*allocatedMemory),
                            "vkAllocateMemory"));
         return allocatedMemory;
     }
@@ -264,7 +264,7 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
 
         // Create a new VkImage with tiling equal to the DRM format modifier.
         VkImage image;
-        DAWN_TRY(CheckVkSuccess(mDevice->fn.CreateImage(device, &createInfo, nullptr, &image),
+        DAWN_TRY(CheckVkSuccess(mDevice->fn.CreateImage(device, &createInfo, nullptr, &*image),
                                 "CreateImage"));
         return image;
     }

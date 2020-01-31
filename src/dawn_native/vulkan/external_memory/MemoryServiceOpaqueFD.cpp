@@ -130,7 +130,7 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
 
         VkDeviceMemory allocatedMemory = VK_NULL_HANDLE;
         DAWN_TRY(CheckVkSuccess(mDevice->fn.AllocateMemory(mDevice->GetVkDevice(), &allocateInfo,
-                                                           nullptr, &allocatedMemory),
+                                                           nullptr, &*allocatedMemory),
                                 "vkAllocateMemory"));
         return allocatedMemory;
     }
@@ -146,7 +146,7 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
 
         VkImage image;
         DAWN_TRY(CheckVkSuccess(
-            mDevice->fn.CreateImage(mDevice->GetVkDevice(), &createInfo, nullptr, &image),
+            mDevice->fn.CreateImage(mDevice->GetVkDevice(), &createInfo, nullptr, &*image),
             "CreateImage"));
         return image;
     }
