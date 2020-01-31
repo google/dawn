@@ -357,4 +357,13 @@ TEST_P(DeviceLostTest, SetSubDataFails) {
     ASSERT_DEVICE_ERROR(buffer.SetSubData(0, sizeof(float), data.data()));
 }
 
+// Test that Command Encoder Finish fails when device lost
+TEST_P(DeviceLostTest, CommandEncoderFinishFails) {
+    wgpu::CommandBuffer commands;
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+    SetCallbackAndLoseForTesting();
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
 DAWN_INSTANTIATE_TEST(DeviceLostTest, D3D12Backend, VulkanBackend);

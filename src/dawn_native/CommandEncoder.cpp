@@ -763,6 +763,7 @@ namespace dawn_native {
         // state of the encoding context. The internal state is set to finished, and subsequent
         // calls to encode commands will generate errors.
         if (device->ConsumedError(mEncodingContext.Finish()) ||
+            device->ConsumedError(device->ValidateIsAlive()) ||
             (device->IsValidationEnabled() &&
              device->ConsumedError(ValidateFinish(mEncodingContext.GetIterator(),
                                                   mEncodingContext.GetPassUsages())))) {
