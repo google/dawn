@@ -112,31 +112,35 @@ namespace dawn_native { namespace vulkan {
 
         VkDeviceSize size = requirements.size;
 
-        // If the resource is too big, allocate memory just for it.
-        // Also allocate mappable resources separately because at the moment the mapped pointer
+        // Sub-allocate non-mappable resources because at the moment the mapped pointer
         // is part of the resource and not the heap, which doesn't match the Vulkan model.
         // TODO(cwallez@chromium.org): allow sub-allocating mappable resources, maybe.
-        if (requirements.size >= kMaxSizeForSubAllocation || mappable) {
-            std::unique_ptr<ResourceHeapBase> resourceHeap;
-            DAWN_TRY_ASSIGN(resourceHeap,
-                            mAllocatorsPerType[memoryType]->AllocateResourceHeap(size));
-
-            void* mappedPointer = nullptr;
-            if (mappable) {
-                DAWN_TRY(
-                    CheckVkSuccess(mDevice->fn.MapMemory(mDevice->GetVkDevice(),
-                                                         ToBackend(resourceHeap.get())->GetMemory(),
-                                                         0, size, 0, &mappedPointer),
-                                   "vkMapMemory"));
+        if (requirements.size < kMaxSizeForSubAllocation && !mappable) {
+            ResourceMemoryAllocation subAllocation;
+            DAWN_TRY_ASSIGN(subAllocation,
+                            mAllocatorsPerType[memoryType]->AllocateMemory(requirements));
+            if (subAllocation.GetInfo().mMethod != AllocationMethod::kInvalid) {
+                return subAllocation;
             }
-
-            AllocationInfo info;
-            info.mMethod = AllocationMethod::kDirect;
-            return ResourceMemoryAllocation(info, /*offset*/ 0, resourceHeap.release(),
-                                            static_cast<uint8_t*>(mappedPointer));
-        } else {
-            return mAllocatorsPerType[memoryType]->AllocateMemory(requirements);
         }
+
+        // If sub-allocation failed, allocate memory just for it.
+        std::unique_ptr<ResourceHeapBase> resourceHeap;
+        DAWN_TRY_ASSIGN(resourceHeap, mAllocatorsPerType[memoryType]->AllocateResourceHeap(size));
+
+        void* mappedPointer = nullptr;
+        if (mappable) {
+            DAWN_TRY(
+                CheckVkSuccess(mDevice->fn.MapMemory(mDevice->GetVkDevice(),
+                                                     ToBackend(resourceHeap.get())->GetMemory(), 0,
+                                                     size, 0, &mappedPointer),
+                               "vkMapMemory"));
+        }
+
+        AllocationInfo info;
+        info.mMethod = AllocationMethod::kDirect;
+        return ResourceMemoryAllocation(info, /*offset*/ 0, resourceHeap.release(),
+                                        static_cast<uint8_t*>(mappedPointer));
     }
 
     void ResourceMemoryAllocator::Deallocate(ResourceMemoryAllocation* allocation) {
