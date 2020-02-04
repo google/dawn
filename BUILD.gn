@@ -158,7 +158,7 @@ source_set("libdawn_native_sources") {
   # libdawn_native target
   public_deps = [
     ":dawn_platform",
-    "${dawn_shaderc_dir}:libshaderc_spvc_sources",
+    "${dawn_shaderc_dir}:libshaderc_spvc",
   ]
 
   sources = get_target_outputs(":libdawn_native_utils_gen")
