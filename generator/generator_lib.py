@@ -206,21 +206,38 @@ def _compute_python_dependencies(root_dir = None):
 def run_generator(generator):
     parser = argparse.ArgumentParser(
         description = generator.get_description(),
-        formatter_class = argparse.ArgumentDefaultsHelpFormatter
+        formatter_class = argparse.ArgumentDefaultsHelpFormatter,
     )
 
     generator.add_commandline_arguments(parser);
-    parser.add_argument('-t', '--template-dir', default='templates', type=str, help='Directory with template files.')
+    parser.add_argument('--template-dir', default='templates', type=str, help='Directory with template files.')
     parser.add_argument(kJinja2Path, default=None, type=str, help='Additional python path to set before loading Jinja2')
     parser.add_argument('--output-json-tarball', default=None, type=str, help='Name of the "JSON tarball" to create (tar is too annoying to use in python).')
     parser.add_argument('--depfile', default=None, type=str, help='Name of the Ninja depfile to create for the JSON tarball')
     parser.add_argument('--expected-outputs-file', default=None, type=str, help="File to compare outputs with and fail if it doesn't match")
     parser.add_argument('--root-dir', default=None, type=str, help='Optional source root directory for Python dependency computations')
     parser.add_argument('--allowed-output-dirs-file', default=None, type=str, help="File containing a list of allowed directories where files can be output.")
+    parser.add_argument('--print-cmake-dependencies', default=False, action="store_true", help="Prints a semi-colon separated list of dependencies to stdout and exits.")
+    parser.add_argument('--print-cmake-outputs', default=False, action="store_true", help="Prints a semi-colon separated list of outputs to stdout and exits.")
+    parser.add_argument('--output-dir', default=None, type=str, help='Directory where to output generate files.')
 
     args = parser.parse_args()
 
     renders = generator.get_file_renders(args);
+
+    # Output a list of all dependencies for CMake or the tarball for GN/Ninja.
+    if args.depfile != None or args.print_cmake_dependencies:
+        dependencies = generator.get_dependencies(args)
+        dependencies += [args.template_dir + os.path.sep + render.template for render in renders]
+        dependencies += _compute_python_dependencies(args.root_dir)
+
+        if args.depfile != None:
+            with open(args.depfile, 'w') as f:
+                f.write(args.output_json_tarball + ": " + " ".join(dependencies))
+
+        if args.print_cmake_dependencies:
+            sys.stdout.write(";".join(dependencies))
+            return 0
 
     # The caller wants to assert that the outputs are what it expects.
     # Load the file and compare with our renders.
@@ -234,6 +251,11 @@ def run_generator(generator):
             print("Wrong expected outputs, caller expected:\n    " + repr(sorted(expected)))
             print("Actual output:\n    " + repr(sorted(actual)))
             return 1
+
+    # Print the list of all the outputs for cmake.
+    if args.print_cmake_outputs:
+        sys.stdout.write(";".join([os.path.join(args.output_dir, render.output) for render in renders]))
+        return 0
 
     outputs = _do_renders(renders, args.template_dir)
 
@@ -257,7 +279,7 @@ def run_generator(generator):
                     print('    "{}"'.format(directory))
                 return 1
 
-    # Output the tarball and its depfile
+    # Output the JSON tarball
     if args.output_json_tarball != None:
         json_root = {}
         for output in outputs:
@@ -266,11 +288,14 @@ def run_generator(generator):
         with open(args.output_json_tarball, 'w') as f:
             f.write(json.dumps(json_root))
 
-    # Output a list of all dependencies for the tarball for Ninja.
-    if args.depfile != None:
-        dependencies = generator.get_dependencies(args)
-        dependencies += [args.template_dir + os.path.sep + render.template for render in renders]
-        dependencies += _compute_python_dependencies(args.root_dir)
+    # Output the files directly.
+    if args.output_dir != None:
+        for output in outputs:
+            output_path = os.path.join(args.output_dir, output.name)
 
-        with open(args.depfile, 'w') as f:
-            f.write(args.output_json_tarball + ": " + " ".join(dependencies))
+            directory = os.path.dirname(output_path)
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+
+            with open(output_path, 'w') as outfile:
+                outfile.write(output.content)
