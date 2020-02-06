@@ -52,6 +52,8 @@ namespace dawn_native { namespace metal {
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
         MaybeError Initialize(const ShaderModuleDescriptor* descriptor);
 
+        shaderc_spvc::CompileOptions GetMSLCompileOptions();
+
         // Calling compile on CompilerMSL somehow changes internal state that makes subsequent
         // compiles return invalid MSL. We keep the spirv around and recreate the compiler everytime
         // we need to use it.

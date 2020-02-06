@@ -590,4 +590,10 @@ namespace dawn_native {
         return {};
     }
 
+    shaderc_spvc::CompileOptions ShaderModuleBase::GetCompileOptions() {
+        shaderc_spvc::CompileOptions options;
+        options.SetValidate(GetDevice()->IsValidationEnabled());
+        return options;
+    }
+
 }  // namespace dawn_native

@@ -81,8 +81,13 @@ namespace dawn_native {
             bool operator()(const ShaderModuleBase* a, const ShaderModuleBase* b) const;
         };
 
+        shaderc_spvc::Context* GetContext() {
+            return &mSpvcContext;
+        }
+
       protected:
         static MaybeError CheckSpvcSuccess(shaderc_spvc_status status, const char* error_msg);
+        shaderc_spvc::CompileOptions GetCompileOptions();
 
         shaderc_spvc::Context mSpvcContext;
 

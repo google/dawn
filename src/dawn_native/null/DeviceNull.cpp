@@ -133,15 +133,16 @@ namespace dawn_native { namespace null {
 
         if (IsToggleEnabled(Toggle::UseSpvc)) {
             shaderc_spvc::CompileOptions options;
-            shaderc_spvc::Context context;
+            options.SetValidate(IsValidationEnabled());
+            shaderc_spvc::Context* context = module->GetContext();
             shaderc_spvc_status status =
-                context.InitializeForGlsl(descriptor->code, descriptor->codeSize, options);
+                context->InitializeForGlsl(descriptor->code, descriptor->codeSize, options);
             if (status != shaderc_spvc_status_success) {
                 return DAWN_VALIDATION_ERROR("Unable to initialize instance of spvc");
             }
 
             spirv_cross::Compiler* compiler;
-            status = context.GetCompiler(reinterpret_cast<void**>(&compiler));
+            status = context->GetCompiler(reinterpret_cast<void**>(&compiler));
             if (status != shaderc_spvc_status_success) {
                 return DAWN_VALIDATION_ERROR("Unable to get cross compiler");
             }

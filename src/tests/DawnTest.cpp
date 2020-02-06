@@ -522,6 +522,9 @@ void DawnTestBase::SetUp() {
     if (gTestEnv->IsSpvcBeingUsed()) {
         ASSERT(gTestEnv->GetInstance()->GetToggleInfo(kUseSpvcToggle) != nullptr);
         deviceDescriptor.forceEnabledToggles.push_back(kUseSpvcToggle);
+    } else {
+        ASSERT(gTestEnv->GetInstance()->GetToggleInfo(kUseSpvcToggle) != nullptr);
+        deviceDescriptor.forceDisabledToggles.push_back(kUseSpvcToggle);
     }
 
     backendDevice = mBackendAdapter.CreateDevice(&deviceDescriptor);
