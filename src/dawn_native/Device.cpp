@@ -97,6 +97,10 @@ namespace dawn_native {
 
     void DeviceBase::BaseDestructor() {
         if (mLossStatus != LossStatus::Alive) {
+            // if device is already lost, we may still have fences and error scopes to clear since
+            // the time the device was lost, clear them now before we destruct the device.
+            mErrorScopeTracker->Tick(GetCompletedCommandSerial());
+            mFenceSignalTracker->Tick(GetCompletedCommandSerial());
             return;
         }
         // Assert that errors are device loss so that we can continue with destruction

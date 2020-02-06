@@ -34,6 +34,24 @@ static void ToMockDeviceLostCallback(const char* message, void* userdata) {
     self->StartExpectDeviceError();
 }
 
+class MockFenceOnCompletionCallback {
+  public:
+    MOCK_METHOD2(Call, void(WGPUFenceCompletionStatus status, void* userdata));
+};
+
+static std::unique_ptr<MockFenceOnCompletionCallback> mockFenceOnCompletionCallback;
+static void ToMockFenceOnCompletionCallbackFails(WGPUFenceCompletionStatus status, void* userdata) {
+    EXPECT_EQ(WGPUFenceCompletionStatus_DeviceLost, status);
+    mockFenceOnCompletionCallback->Call(status, userdata);
+    mockFenceOnCompletionCallback = nullptr;
+}
+static void ToMockFenceOnCompletionCallbackSucceeds(WGPUFenceCompletionStatus status,
+                                                    void* userdata) {
+    EXPECT_EQ(WGPUFenceCompletionStatus_Success, status);
+    mockFenceOnCompletionCallback->Call(status, userdata);
+    mockFenceOnCompletionCallback = nullptr;
+}
+
 static const int fakeUserData = 0;
 
 class DeviceLostTest : public DawnTest {
@@ -42,6 +60,7 @@ class DeviceLostTest : public DawnTest {
         DAWN_SKIP_TEST_IF(UsesWire());
         DawnTest::TestSetUp();
         mockDeviceLostCallback = std::make_unique<MockDeviceLostCallback>();
+        mockFenceOnCompletionCallback = std::make_unique<MockFenceOnCompletionCallback>();
     }
 
     void TearDown() override {
@@ -55,20 +74,11 @@ class DeviceLostTest : public DawnTest {
         device.LoseForTesting();
     }
 
-    static void CheckMapWriteFail(WGPUBufferMapAsyncStatus status,
-                                  void* data,
-                                  uint64_t datalength,
-                                  void* userdata) {
-        EXPECT_EQ(WGPUBufferMapAsyncStatus_DeviceLost, status);
-        EXPECT_EQ(nullptr, data);
-        EXPECT_EQ(0u, datalength);
-        EXPECT_EQ(&fakeUserData, userdata);
-    }
-
-    static void CheckMapReadFail(WGPUBufferMapAsyncStatus status,
-                                 const void* data,
-                                 uint64_t datalength,
-                                 void* userdata) {
+    template <typename T>
+    static void MapFailCallback(WGPUBufferMapAsyncStatus status,
+                                T* data,
+                                uint64_t datalength,
+                                void* userdata) {
         EXPECT_EQ(WGPUBufferMapAsyncStatus_DeviceLost, status);
         EXPECT_EQ(nullptr, data);
         EXPECT_EQ(0u, datalength);
@@ -252,7 +262,7 @@ TEST_P(DeviceLostTest, BufferMapWriteAsyncFails) {
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
     SetCallbackAndLoseForTesting();
-    ASSERT_DEVICE_ERROR(buffer.MapWriteAsync(CheckMapWriteFail, const_cast<int*>(&fakeUserData)));
+    ASSERT_DEVICE_ERROR(buffer.MapWriteAsync(MapFailCallback, const_cast<int*>(&fakeUserData)));
 }
 
 // Test that buffer.MapWriteAsync calls back with device loss status
@@ -262,7 +272,7 @@ TEST_P(DeviceLostTest, BufferMapWriteAsyncBeforeLossFails) {
     bufferDescriptor.usage = wgpu::BufferUsage::MapWrite;
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
-    buffer.MapWriteAsync(CheckMapWriteFail, const_cast<int*>(&fakeUserData));
+    buffer.MapWriteAsync(MapFailCallback, const_cast<int*>(&fakeUserData));
     SetCallbackAndLoseForTesting();
 }
 
@@ -329,7 +339,7 @@ TEST_P(DeviceLostTest, BufferMapReadAsyncFails) {
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
     SetCallbackAndLoseForTesting();
-    ASSERT_DEVICE_ERROR(buffer.MapReadAsync(CheckMapReadFail, const_cast<int*>(&fakeUserData)));
+    ASSERT_DEVICE_ERROR(buffer.MapReadAsync(MapFailCallback, const_cast<int*>(&fakeUserData)));
 }
 
 // Test that BufferMapReadAsync calls back with device lost status when device lost after map read
@@ -340,7 +350,7 @@ TEST_P(DeviceLostTest, BufferMapReadAsyncBeforeLossFails) {
 
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
-    buffer.MapReadAsync(CheckMapReadFail, const_cast<int*>(&fakeUserData));
+    buffer.MapReadAsync(MapFailCallback, const_cast<int*>(&fakeUserData));
     SetCallbackAndLoseForTesting();
 }
 
@@ -364,6 +374,91 @@ TEST_P(DeviceLostTest, CommandEncoderFinishFails) {
 
     SetCallbackAndLoseForTesting();
     ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
+// Test that CreateFenceFails when device is lost
+TEST_P(DeviceLostTest, CreateFenceFails) {
+    SetCallbackAndLoseForTesting();
+
+    wgpu::FenceDescriptor descriptor;
+    descriptor.initialValue = 0;
+
+    ASSERT_DEVICE_ERROR(queue.CreateFence(&descriptor));
+}
+
+// Test that queue signal fails when device is lost
+TEST_P(DeviceLostTest, QueueSignalFenceFails) {
+    wgpu::FenceDescriptor descriptor;
+    descriptor.initialValue = 0;
+    wgpu::Fence fence = queue.CreateFence(&descriptor);
+
+    SetCallbackAndLoseForTesting();
+
+    ASSERT_DEVICE_ERROR(queue.Signal(fence, 3));
+
+    // callback should have device lost status
+    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_DeviceLost, nullptr))
+        .Times(1);
+    ASSERT_DEVICE_ERROR(fence.OnCompletion(2u, ToMockFenceOnCompletionCallbackFails, nullptr));
+
+    // completed value should not have changed from initial value
+    EXPECT_EQ(fence.GetCompletedValue(), descriptor.initialValue);
+}
+
+// Test that Fence On Completion fails after device is lost
+TEST_P(DeviceLostTest, FenceOnCompletionFails) {
+    wgpu::FenceDescriptor descriptor;
+    descriptor.initialValue = 0;
+    wgpu::Fence fence = queue.CreateFence(&descriptor);
+
+    queue.Signal(fence, 2);
+
+    SetCallbackAndLoseForTesting();
+    // callback should have device lost status
+    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_DeviceLost, nullptr))
+        .Times(1);
+    ASSERT_DEVICE_ERROR(fence.OnCompletion(2u, ToMockFenceOnCompletionCallbackFails, nullptr));
+    ASSERT_DEVICE_ERROR(device.Tick());
+
+    // completed value should not have changed from initial value
+    EXPECT_EQ(fence.GetCompletedValue(), 0u);
+}
+
+// Test that Fence::OnCompletion callbacks with device lost status when device is lost after calling
+// OnCompletion
+TEST_P(DeviceLostTest, FenceOnCompletionBeforeLossFails) {
+    wgpu::FenceDescriptor descriptor;
+    descriptor.initialValue = 0;
+    wgpu::Fence fence = queue.CreateFence(&descriptor);
+
+    queue.Signal(fence, 2);
+
+    // callback should have device lost status
+    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_DeviceLost, nullptr))
+        .Times(1);
+    fence.OnCompletion(2u, ToMockFenceOnCompletionCallbackFails, nullptr);
+    SetCallbackAndLoseForTesting();
+    ASSERT_DEVICE_ERROR(device.Tick());
+
+    EXPECT_EQ(fence.GetCompletedValue(), 0u);
+}
+
+// Test that when you Signal, then Tick, then device lost, the fence completed value would be 2
+TEST_P(DeviceLostTest, FenceSignalTickOnCompletion) {
+    wgpu::FenceDescriptor descriptor;
+    descriptor.initialValue = 0;
+    wgpu::Fence fence = queue.CreateFence(&descriptor);
+
+    queue.Signal(fence, 2);
+    device.Tick();
+
+    // callback should have device lost status
+    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_Success, nullptr))
+        .Times(1);
+    fence.OnCompletion(2u, ToMockFenceOnCompletionCallbackSucceeds, nullptr);
+    SetCallbackAndLoseForTesting();
+
+    EXPECT_EQ(fence.GetCompletedValue(), 2u);
 }
 
 DAWN_INSTANTIATE_TEST(DeviceLostTest, D3D12Backend, VulkanBackend);

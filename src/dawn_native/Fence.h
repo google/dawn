@@ -51,7 +51,7 @@ namespace dawn_native {
       private:
         Fence(DeviceBase* device, ObjectBase::ErrorTag tag);
 
-        MaybeError ValidateOnCompletion(uint64_t value) const;
+        MaybeError ValidateOnCompletion(uint64_t value, WGPUFenceCompletionStatus* status) const;
 
         struct OnCompletionData {
             wgpu::FenceOnCompletionCallback completionCallback = nullptr;

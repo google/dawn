@@ -118,6 +118,7 @@ namespace dawn_native {
     }
 
     MaybeError QueueBase::ValidateSignal(const Fence* fence, uint64_t signalValue) {
+        DAWN_TRY(GetDevice()->ValidateIsAlive());
         DAWN_TRY(GetDevice()->ValidateObject(this));
         DAWN_TRY(GetDevice()->ValidateObject(fence));
 
@@ -132,6 +133,7 @@ namespace dawn_native {
     }
 
     MaybeError QueueBase::ValidateCreateFence(const FenceDescriptor* descriptor) {
+        DAWN_TRY(GetDevice()->ValidateIsAlive());
         DAWN_TRY(GetDevice()->ValidateObject(this));
         DAWN_TRY(ValidateFenceDescriptor(descriptor));
 
