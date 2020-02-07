@@ -137,6 +137,7 @@ class DawnTestEnvironment : public testing::Environment {
     bool IsBackendValidationEnabled() const;
     bool IsDawnValidationSkipped() const;
     bool IsSpvcBeingUsed() const;
+    bool IsSpvcParserBeingUsed() const;
     dawn_native::Instance* GetInstance() const;
     bool HasVendorIdFilter() const;
     uint32_t GetVendorIdFilter() const;
@@ -152,6 +153,7 @@ class DawnTestEnvironment : public testing::Environment {
     bool mEnableBackendValidation = false;
     bool mSkipDawnValidation = false;
     bool mUseSpvc = false;
+    bool mUseSpvcParser = false;
     bool mBeginCaptureOnStartup = false;
     bool mHasVendorIdFilter = false;
     uint32_t mVendorIdFilter = 0;

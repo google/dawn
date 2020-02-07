@@ -149,6 +149,13 @@ DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
             continue;
         }
 
+        if (strcmp("--use-spvc-parser", argv[i]) == 0) {
+            mUseSpvc = true;  // It's impossible to use the spvc parser without using spvc, so
+                              // turning on mUseSpvc implicitly.
+            mUseSpvcParser = true;
+            continue;
+        }
+
         constexpr const char kVendorIdFilterArg[] = "--adapter-vendor-id=";
         if (strstr(argv[i], kVendorIdFilterArg) == argv[i]) {
             const char* vendorIdFilter = argv[i] + strlen(kVendorIdFilterArg);
@@ -218,6 +225,9 @@ void DawnTestEnvironment::SetUp() {
                        "UseSpvc: "
                     << (mUseSpvc ? "true" : "false")
                     << "\n"
+                       "UseSpvcParser: "
+                    << (mUseSpvcParser ? "true" : "false")
+                    << "\n"
                        "BeginCaptureOnStartup: "
                     << (mBeginCaptureOnStartup ? "true" : "false")
                     << "\n"
@@ -268,6 +278,10 @@ bool DawnTestEnvironment::IsDawnValidationSkipped() const {
 
 bool DawnTestEnvironment::IsSpvcBeingUsed() const {
     return mUseSpvc;
+}
+
+bool DawnTestEnvironment::IsSpvcParserBeingUsed() const {
+    return mUseSpvcParser;
 }
 
 dawn_native::Instance* DawnTestEnvironment::GetInstance() const {
@@ -519,10 +533,19 @@ void DawnTestBase::SetUp() {
     }
 
     static constexpr char kUseSpvcToggle[] = "use_spvc";
+    static constexpr char kUseSpvcParserToggle[] = "use_spvc_parser";
     if (gTestEnv->IsSpvcBeingUsed()) {
         ASSERT(gTestEnv->GetInstance()->GetToggleInfo(kUseSpvcToggle) != nullptr);
         deviceDescriptor.forceEnabledToggles.push_back(kUseSpvcToggle);
+
+        if (gTestEnv->IsSpvcParserBeingUsed()) {
+            ASSERT(gTestEnv->GetInstance()->GetToggleInfo(kUseSpvcParserToggle) != nullptr);
+            deviceDescriptor.forceEnabledToggles.push_back(kUseSpvcParserToggle);
+        }
+
     } else {
+        // Turning on spvc parser should always turn on spvc.
+        ASSERT(!gTestEnv->IsSpvcParserBeingUsed());
         ASSERT(gTestEnv->GetInstance()->GetToggleInfo(kUseSpvcToggle) != nullptr);
         deviceDescriptor.forceDisabledToggles.push_back(kUseSpvcToggle);
     }

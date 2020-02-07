@@ -180,6 +180,9 @@ namespace dawn_native {
     ShaderModuleBase::ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor)
         : CachedObject(device), mCode(descriptor->code, descriptor->code + descriptor->codeSize) {
         mFragmentOutputFormatBaseTypes.fill(Format::Other);
+        if (GetDevice()->IsToggleEnabled(Toggle::UseSpvcParser)) {
+            mSpvcContext.SetUseSpvcParser(true);
+        }
     }
 
     ShaderModuleBase::ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag)

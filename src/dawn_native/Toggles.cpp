@@ -91,8 +91,8 @@ namespace dawn_native {
               "Enable use of spvc for shader compilation, instead of accessing spirv_cross "
               "directly.",
               "https://crbug.com/dawn/288"}},
-            {Toggle::UseSpvcIRGen,
-             {"use_spvc_ir_gen",
+            {Toggle::UseSpvcParser,
+             {"use_spvc_parser",
               "Enable usage of spvc's internal parsing and IR generation code, instead of "
               "spirv_cross's.",
               "https://crbug.com/dawn/288"}},
