@@ -73,7 +73,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-const uint64_t WGPU_WHOLE_SIZE = 0xffffffffffffffffULL; // UINT64_MAX
+#define WGPU_WHOLE_SIZE (0xffffffffffffffffULL)
 
 typedef uint32_t WGPUFlags;
 
