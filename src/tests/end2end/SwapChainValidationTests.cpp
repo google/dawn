@@ -290,3 +290,36 @@ TEST_F(SwapChainValidationTests, SwapChainIsInvalidAfterSurfaceDestruction_After
     CheckTextureViewIsDestroyed(view);
     ASSERT_DEVICE_ERROR(replacedSwapChain.Present());
 }
+
+// Test that after Device is Lost, all swap chain operations fail
+static void ToMockDeviceLostCallback(const char* message, void* userdata) {
+    ValidationTest* self = static_cast<ValidationTest*>(userdata);
+    self->StartExpectDeviceError();
+}
+
+// Test that new swap chain present fails after device is lost
+TEST_F(SwapChainValidationTests, NewSwapChainPresentFailsAfterDeviceLost) {
+    device.SetDeviceLostCallback(ToMockDeviceLostCallback, this);
+    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
+    wgpu::TextureView view = swapchain.GetCurrentTextureView();
+
+    device.LoseForTesting();
+    ASSERT_DEVICE_ERROR(swapchain.Present());
+}
+
+// Test that new swap chain get current texture view fails after device is lost
+TEST_F(SwapChainValidationTests, NewSwapChainGetCurrentTextureViewFailsAfterDevLost) {
+    device.SetDeviceLostCallback(ToMockDeviceLostCallback, this);
+    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
+
+    device.LoseForTesting();
+    ASSERT_DEVICE_ERROR(swapchain.GetCurrentTextureView());
+}
+
+// Test that creation of a new swapchain fails
+TEST_F(SwapChainValidationTests, CreateNewSwapChainFailsAfterDevLost) {
+    device.SetDeviceLostCallback(ToMockDeviceLostCallback, this);
+    device.LoseForTesting();
+
+    ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &goodDescriptor));
+}

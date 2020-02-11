@@ -220,6 +220,7 @@ namespace dawn_native {
                                                    wgpu::TextureUsage allowedUsage,
                                                    uint32_t width,
                                                    uint32_t height) const {
+        DAWN_TRY(GetDevice()->ValidateIsAlive());
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
         DAWN_TRY(ValidateTextureUsage(allowedUsage));
@@ -233,6 +234,7 @@ namespace dawn_native {
     }
 
     MaybeError OldSwapChainBase::ValidateGetCurrentTextureView() const {
+        DAWN_TRY(GetDevice()->ValidateIsAlive());
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
         if (mWidth == 0) {
@@ -244,6 +246,7 @@ namespace dawn_native {
     }
 
     MaybeError OldSwapChainBase::ValidatePresent() const {
+        DAWN_TRY(GetDevice()->ValidateIsAlive());
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
         if (mCurrentTextureView.Get() == nullptr) {
