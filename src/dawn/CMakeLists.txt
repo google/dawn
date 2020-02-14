@@ -22,8 +22,16 @@ DawnJSONGenerator(
     RESULT_VARIABLE "DAWN_HEADERS_GEN_SOURCES"
 )
 
-add_library(dawn_headers INTERFACE)
-target_sources(dawn_headers INTERFACE
+# Headers only INTERFACE library with generated headers don't work in CMake
+# because the GENERATED property is local to a directory. Instead we make a
+# STATIC library with a Dummy cpp file.
+#
+# INTERFACE libraries can only have INTERFACE sources so the sources get added
+# to the dependant's list of sources. If these dependents are in another
+# directory, they don't see the GENERATED property and fail to configure
+# because the file doesn't exist on disk.
+add_library(dawn_headers STATIC ${DAWN_DUMMY_FILE})
+target_sources(dawn_headers PRIVATE
     "${DAWN_INCLUDE_DIR}/dawn/dawn_wsi.h"
     ${DAWN_HEADERS_GEN_SOURCES}
 )
@@ -39,8 +47,10 @@ DawnJSONGenerator(
     RESULT_VARIABLE "DAWNCPP_HEADERS_GEN_SOURCES"
 )
 
-add_library(dawncpp_headers INTERFACE)
-target_sources(dawncpp_headers INTERFACE
+# This headers only library needs to be a STATIC library, see comment for
+# dawn_headers above.
+add_library(dawncpp_headers STATIC ${DAWN_DUMMY_FILE})
+target_sources(dawncpp_headers PRIVATE
     "${DAWN_INCLUDE_DIR}/dawn/EnumClassBitmasks.h"
     ${DAWNCPP_HEADERS_GEN_SOURCES}
 )
