@@ -211,7 +211,50 @@ if (DAWN_ENABLE_OPENGL)
         RESULT_VARIABLE "DAWN_NATIVE_OPENGL_AUTOGEN_SOURCES"
     )
 
-    # TODO
+    target_sources(dawn_native PRIVATE
+        "${DAWN_INCLUDE_DIR}/dawn_native/OpenGLBackend.h"
+        ${DAWN_NATIVE_OPENGL_AUTOGEN_SOURCES}
+        "opengl/BackendGL.cpp"
+        "opengl/BackendGL.h"
+        "opengl/BufferGL.cpp"
+        "opengl/BufferGL.h"
+        "opengl/CommandBufferGL.cpp"
+        "opengl/CommandBufferGL.h"
+        "opengl/ComputePipelineGL.cpp"
+        "opengl/ComputePipelineGL.h"
+        "opengl/DeviceGL.cpp"
+        "opengl/DeviceGL.h"
+        "opengl/Forward.h"
+        "opengl/GLFormat.cpp"
+        "opengl/GLFormat.h"
+        "opengl/NativeSwapChainImplGL.cpp"
+        "opengl/NativeSwapChainImplGL.h"
+        "opengl/OpenGLFunctions.cpp"
+        "opengl/OpenGLFunctions.h"
+        "opengl/PersistentPipelineStateGL.cpp"
+        "opengl/PersistentPipelineStateGL.h"
+        "opengl/PipelineGL.cpp"
+        "opengl/PipelineGL.h"
+        "opengl/PipelineLayoutGL.cpp"
+        "opengl/PipelineLayoutGL.h"
+        "opengl/QueueGL.cpp"
+        "opengl/QueueGL.h"
+        "opengl/RenderPipelineGL.cpp"
+        "opengl/RenderPipelineGL.h"
+        "opengl/SamplerGL.cpp"
+        "opengl/SamplerGL.h"
+        "opengl/ShaderModuleGL.cpp"
+        "opengl/ShaderModuleGL.h"
+        "opengl/SwapChainGL.cpp"
+        "opengl/SwapChainGL.h"
+        "opengl/TextureGL.cpp"
+        "opengl/TextureGL.h"
+        "opengl/UtilsGL.cpp"
+        "opengl/UtilsGL.h"
+        "opengl/opengl_platform.h"
+    )
+
+    target_link_libraries(dawn_native PRIVATE dawn_khronos_platform)
 endif()
 
 if (DAWN_ENABLE_VULKAN)

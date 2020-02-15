@@ -72,3 +72,8 @@ if (DAWN_BUILD_EXAMPLES)
         add_subdirectory(${DAWN_GLM_DIR})
     endif()
 endif()
+
+# Header-only library for khrplatform.h
+add_library(dawn_khronos_platform INTERFACE)
+target_sources(dawn_khronos_platform INTERFACE "${DAWN_THIRD_PARTY_DIR}/khronos/KHR/khrplatform.h")
+target_include_directories(dawn_khronos_platform INTERFACE "${DAWN_THIRD_PARTY_DIR}/khronos")
