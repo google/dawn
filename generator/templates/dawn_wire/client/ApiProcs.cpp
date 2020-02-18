@@ -17,6 +17,7 @@
 #include "dawn_wire/client/Client.h"
 
 #include <algorithm>
+#include <cstring>
 #include <string>
 #include <vector>
 

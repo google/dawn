@@ -16,6 +16,7 @@
 #define DAWNNATIVE_ERRORDATA_H_
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 

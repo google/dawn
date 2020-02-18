@@ -192,6 +192,8 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("Buffer used in a submit while mapped");
             case BufferState::Unmapped:
                 return {};
+            default:
+                UNREACHABLE();
         }
     }
 
@@ -444,6 +446,8 @@ namespace dawn_native {
                 return {};
             case BufferState::Destroyed:
                 return DAWN_VALIDATION_ERROR("Buffer is destroyed");
+            default:
+                UNREACHABLE();
         }
     }
 

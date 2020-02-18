@@ -144,6 +144,8 @@ namespace dawn_native { namespace vulkan {
                     return VK_FRONT_FACE_COUNTER_CLOCKWISE;
                 case wgpu::FrontFace::CW:
                     return VK_FRONT_FACE_CLOCKWISE;
+                default:
+                    UNREACHABLE();
             }
         }
 
@@ -155,6 +157,8 @@ namespace dawn_native { namespace vulkan {
                     return VK_CULL_MODE_FRONT_BIT;
                 case wgpu::CullMode::Back:
                     return VK_CULL_MODE_BACK_BIT;
+                default:
+                    UNREACHABLE();
             }
         }
 

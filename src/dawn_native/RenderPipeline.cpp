@@ -20,6 +20,8 @@
 #include "dawn_native/Device.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
+#include <cmath>
+
 namespace dawn_native {
     // Helper functions
     namespace {

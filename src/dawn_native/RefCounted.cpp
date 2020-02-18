@@ -16,6 +16,8 @@
 
 #include "common/Assert.h"
 
+#include <cstddef>
+
 namespace dawn_native {
 
     static constexpr size_t kPayloadBits = 1;

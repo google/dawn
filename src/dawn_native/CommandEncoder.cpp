@@ -30,6 +30,7 @@
 #include "dawn_platform/DawnPlatform.h"
 #include "dawn_platform/tracing/TraceEvent.h"
 
+#include <cmath>
 #include <map>
 
 namespace dawn_native {
