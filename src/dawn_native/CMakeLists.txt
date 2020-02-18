@@ -144,6 +144,11 @@ target_link_libraries(dawn_native
             spirv-cross-core
 )
 
+if (DAWN_USE_X11)
+    find_package(X11 REQUIRED)
+    target_link_libraries(dawn_native PRIVATE ${X11_LIBRARIES})
+endif()
+
 if (DAWN_ENABLE_D3D12)
     #TODO
 endif()
@@ -258,7 +263,80 @@ if (DAWN_ENABLE_OPENGL)
 endif()
 
 if (DAWN_ENABLE_VULKAN)
-    # TODO
+    target_sources(dawn_native PRIVATE
+        "${DAWN_INCLUDE_DIR}/dawn_native/VulkanBackend.h"
+        "vulkan/AdapterVk.cpp"
+        "vulkan/AdapterVk.h"
+        "vulkan/BackendVk.cpp"
+        "vulkan/BackendVk.h"
+        "vulkan/BindGroupLayoutVk.cpp"
+        "vulkan/BindGroupLayoutVk.h"
+        "vulkan/BindGroupVk.cpp"
+        "vulkan/BindGroupVk.h"
+        "vulkan/BufferVk.cpp"
+        "vulkan/BufferVk.h"
+        "vulkan/CommandBufferVk.cpp"
+        "vulkan/CommandBufferVk.h"
+        "vulkan/CommandRecordingContext.h"
+        "vulkan/ComputePipelineVk.cpp"
+        "vulkan/ComputePipelineVk.h"
+        "vulkan/DescriptorSetService.cpp"
+        "vulkan/DescriptorSetService.h"
+        "vulkan/DeviceVk.cpp"
+        "vulkan/DeviceVk.h"
+        "vulkan/ExternalHandle.h"
+        "vulkan/FencedDeleter.cpp"
+        "vulkan/FencedDeleter.h"
+        "vulkan/Forward.h"
+        "vulkan/NativeSwapChainImplVk.cpp"
+        "vulkan/NativeSwapChainImplVk.h"
+        "vulkan/PipelineLayoutVk.cpp"
+        "vulkan/PipelineLayoutVk.h"
+        "vulkan/QueueVk.cpp"
+        "vulkan/QueueVk.h"
+        "vulkan/RenderPassCache.cpp"
+        "vulkan/RenderPassCache.h"
+        "vulkan/RenderPipelineVk.cpp"
+        "vulkan/RenderPipelineVk.h"
+        "vulkan/ResourceHeapVk.cpp"
+        "vulkan/ResourceHeapVk.h"
+        "vulkan/ResourceMemoryAllocatorVk.cpp"
+        "vulkan/ResourceMemoryAllocatorVk.h"
+        "vulkan/SamplerVk.cpp"
+        "vulkan/SamplerVk.h"
+        "vulkan/ShaderModuleVk.cpp"
+        "vulkan/ShaderModuleVk.h"
+        "vulkan/StagingBufferVk.cpp"
+        "vulkan/StagingBufferVk.h"
+        "vulkan/SwapChainVk.cpp"
+        "vulkan/SwapChainVk.h"
+        "vulkan/TextureVk.cpp"
+        "vulkan/TextureVk.h"
+        "vulkan/UtilsVulkan.cpp"
+        "vulkan/UtilsVulkan.h"
+        "vulkan/VulkanError.cpp"
+        "vulkan/VulkanError.h"
+        "vulkan/VulkanFunctions.cpp"
+        "vulkan/VulkanFunctions.h"
+        "vulkan/VulkanInfo.cpp"
+        "vulkan/VulkanInfo.h"
+        "vulkan/external_memory/MemoryService.h"
+        "vulkan/external_semaphore/SemaphoreService.h"
+    )
+
+    target_link_libraries(dawn_native PUBLIC dawn_vulkan_headers)
+
+    if (UNIX AND NOT APPLE)
+        target_sources(dawn_native PRIVATE
+            "vulkan/external_memory/MemoryServiceOpaqueFD.cpp"
+            "vulkan/external_semaphore/SemaphoreServiceOpaqueFD.cpp"
+        )
+    else()
+        target_sources(dawn_native PRIVATE
+            "vulkan/external_memory/MemoryServiceNull.cpp"
+            "vulkan/external_semaphore/SemaphoreServiceNull.cpp"
+        )
+    endif()
 endif()
 
 # TODO how to do the component build in CMake?
