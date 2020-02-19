@@ -1005,10 +1005,8 @@ source_set("dawn_white_box_tests_sources") {
   if (dawn_enable_vulkan) {
     deps += [ "third_party:vulkan_headers" ]
 
-    if (is_chromeos) {
-      sources += [ "src/tests/white_box/VulkanImageWrappingTestsDmaBuf.cpp" ]
-    } else if (is_linux) {
-      sources += [ "src/tests/white_box/VulkanImageWrappingTestsOpaqueFD.cpp" ]
+    if (is_linux) {
+      sources += [ "src/tests/white_box/VulkanImageWrappingTests.cpp" ]
     }
 
     if (dawn_enable_error_injection) {
@@ -1063,10 +1061,6 @@ test("dawn_end2end_tests") {
 
   if (dawn_enable_opengl) {
     deps += [ ":dawn_glfw" ]
-  }
-
-  if (is_chromeos) {
-    libs += [ "gbm" ]
   }
 }
 
