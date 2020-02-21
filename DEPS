@@ -93,13 +93,13 @@ deps = {
 
   # Khronos Vulkan-Headers
   'third_party/vulkan-headers': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Headers@5b44df19e040fca0048ab30c553a8c2d2cb9623e',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Headers@d287523f48dba1b669866c5d6625b29931948e39',
     'condition': 'dawn_standalone',
   },
 
   # Khronos Vulkan-ValidationLayers
   'third_party/vulkan-validation-layers': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-ValidationLayers@9fba37afae13a11bd49ae942bf82e5bf1098e381',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-ValidationLayers@237d818e81fbffa073d29d94f53a2cbac4f25b9f',
     'condition': 'dawn_standalone',
   },
 
