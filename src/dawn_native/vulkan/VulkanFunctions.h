@@ -84,27 +84,28 @@ namespace dawn_native { namespace vulkan {
         PFN_vkGetPhysicalDeviceSurfacePresentModesKHR GetPhysicalDeviceSurfacePresentModesKHR =
             nullptr;
 
-        // Core Vulkan 1.1 promoted extensions
+        // Core Vulkan 1.1 promoted extensions, set if either the core version or the extension is
+        // present.
 
         // VK_KHR_external_memory_capabilities
-        PFN_vkGetPhysicalDeviceExternalBufferPropertiesKHR
-            GetPhysicalDeviceExternalBufferPropertiesKHR = nullptr;
+        PFN_vkGetPhysicalDeviceExternalBufferProperties GetPhysicalDeviceExternalBufferProperties =
+            nullptr;
 
         // VK_KHR_external_semaphore_capabilities
-        PFN_vkGetPhysicalDeviceExternalSemaphorePropertiesKHR
-            GetPhysicalDeviceExternalSemaphorePropertiesKHR = nullptr;
+        PFN_vkGetPhysicalDeviceExternalSemaphoreProperties
+            GetPhysicalDeviceExternalSemaphoreProperties = nullptr;
 
         // VK_KHR_get_physical_device_properties2
-        PFN_vkGetPhysicalDeviceFeatures2KHR GetPhysicalDeviceFeatures2KHR = nullptr;
-        PFN_vkGetPhysicalDeviceProperties2KHR GetPhysicalDeviceProperties2KHR = nullptr;
-        PFN_vkGetPhysicalDeviceFormatProperties2KHR GetPhysicalDeviceFormatProperties2KHR = nullptr;
-        PFN_vkGetPhysicalDeviceImageFormatProperties2KHR
-            GetPhysicalDeviceImageFormatProperties2KHR = nullptr;
-        PFN_vkGetPhysicalDeviceQueueFamilyProperties2KHR
-            GetPhysicalDeviceQueueFamilyProperties2KHR = nullptr;
-        PFN_vkGetPhysicalDeviceMemoryProperties2KHR GetPhysicalDeviceMemoryProperties2KHR = nullptr;
-        PFN_vkGetPhysicalDeviceSparseImageFormatProperties2KHR
-            GetPhysicalDeviceSparseImageFormatProperties2KHR = nullptr;
+        PFN_vkGetPhysicalDeviceFeatures2 GetPhysicalDeviceFeatures2 = nullptr;
+        PFN_vkGetPhysicalDeviceProperties2 GetPhysicalDeviceProperties2 = nullptr;
+        PFN_vkGetPhysicalDeviceFormatProperties2 GetPhysicalDeviceFormatProperties2 = nullptr;
+        PFN_vkGetPhysicalDeviceImageFormatProperties2 GetPhysicalDeviceImageFormatProperties2 =
+            nullptr;
+        PFN_vkGetPhysicalDeviceQueueFamilyProperties2 GetPhysicalDeviceQueueFamilyProperties2 =
+            nullptr;
+        PFN_vkGetPhysicalDeviceMemoryProperties2 GetPhysicalDeviceMemoryProperties2 = nullptr;
+        PFN_vkGetPhysicalDeviceSparseImageFormatProperties2
+            GetPhysicalDeviceSparseImageFormatProperties2 = nullptr;
 
 #ifdef VK_USE_PLATFORM_FUCHSIA
         // FUCHSIA_image_pipe_surface

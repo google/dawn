@@ -190,28 +190,15 @@ namespace dawn_native { namespace vulkan {
             }
         }
 
+        // Always request all extensions used to create VkSurfaceKHR objects so that they are
+        // always available for embedders looking to create VkSurfaceKHR on our VkInstance.
         if (mGlobalInfo.fuchsiaImagePipeSwapchain) {
             layersToRequest.push_back(kLayerNameFuchsiaImagePipeSwapchain);
             usedKnobs.fuchsiaImagePipeSwapchain = true;
         }
-
-        // Always request all extensions used to create VkSurfaceKHR objects so that they are
-        // always available for embedders looking to create VkSurfaceKHR on our VkInstance.
         if (mGlobalInfo.macosSurface) {
             extensionsToRequest.push_back(kExtensionNameMvkMacosSurface);
             usedKnobs.macosSurface = true;
-        }
-        if (mGlobalInfo.externalMemoryCapabilities) {
-            extensionsToRequest.push_back(kExtensionNameKhrExternalMemoryCapabilities);
-            usedKnobs.externalMemoryCapabilities = true;
-        }
-        if (mGlobalInfo.externalSemaphoreCapabilities) {
-            extensionsToRequest.push_back(kExtensionNameKhrExternalSemaphoreCapabilities);
-            usedKnobs.externalSemaphoreCapabilities = true;
-        }
-        if (mGlobalInfo.getPhysicalDeviceProperties2) {
-            extensionsToRequest.push_back(kExtensionNameKhrGetPhysicalDeviceProperties2);
-            usedKnobs.getPhysicalDeviceProperties2 = true;
         }
         if (mGlobalInfo.surface) {
             extensionsToRequest.push_back(kExtensionNameKhrSurface);
@@ -236,6 +223,28 @@ namespace dawn_native { namespace vulkan {
         if (mGlobalInfo.fuchsiaImagePipeSurface) {
             extensionsToRequest.push_back(kExtensionNameFuchsiaImagePipeSurface);
             usedKnobs.fuchsiaImagePipeSurface = true;
+        }
+
+        // Mark the promoted extensions as present if the core version in which they were promoted
+        // is used. This allows having a single boolean that checks if the functionality from that
+        // extension is available (instead of checking extension || coreVersion).
+        if (mGlobalInfo.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
+            usedKnobs.getPhysicalDeviceProperties2 = true;
+            usedKnobs.externalMemoryCapabilities = true;
+            usedKnobs.externalSemaphoreCapabilities = true;
+        } else {
+            if (mGlobalInfo.externalMemoryCapabilities) {
+                extensionsToRequest.push_back(kExtensionNameKhrExternalMemoryCapabilities);
+                usedKnobs.externalMemoryCapabilities = true;
+            }
+            if (mGlobalInfo.externalSemaphoreCapabilities) {
+                extensionsToRequest.push_back(kExtensionNameKhrExternalSemaphoreCapabilities);
+                usedKnobs.externalSemaphoreCapabilities = true;
+            }
+            if (mGlobalInfo.getPhysicalDeviceProperties2) {
+                extensionsToRequest.push_back(kExtensionNameKhrGetPhysicalDeviceProperties2);
+                usedKnobs.getPhysicalDeviceProperties2 = true;
+            }
         }
 
         VkApplicationInfo appInfo;

@@ -43,7 +43,7 @@ namespace dawn_native { namespace vulkan { namespace external_semaphore {
         semaphoreProperties.sType = VK_STRUCTURE_TYPE_EXTERNAL_SEMAPHORE_PROPERTIES_KHR;
         semaphoreProperties.pNext = nullptr;
 
-        mDevice->fn.GetPhysicalDeviceExternalSemaphorePropertiesKHR(
+        mDevice->fn.GetPhysicalDeviceExternalSemaphoreProperties(
             ToBackend(mDevice->GetAdapter())->GetPhysicalDevice(), &semaphoreInfo,
             &semaphoreProperties);
 

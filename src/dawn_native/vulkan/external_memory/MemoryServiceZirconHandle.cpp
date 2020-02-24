@@ -66,7 +66,7 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
         formatProperties.sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2_KHR;
         formatProperties.pNext = &externalFormatProperties;
 
-        VkResult result = mDevice->fn.GetPhysicalDeviceImageFormatProperties2KHR(
+        VkResult result = mDevice->fn.GetPhysicalDeviceImageFormatProperties2(
             ToBackend(mDevice->GetAdapter())->GetPhysicalDevice(), &formatInfo, &formatProperties);
 
         // If handle not supported, result == VK_ERROR_FORMAT_NOT_SUPPORTED

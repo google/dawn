@@ -41,13 +41,13 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
             formatProps.sType = VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_2;
             formatProps.pNext = &formatModifierPropsList;
 
-            fn.GetPhysicalDeviceFormatProperties2KHR(physicalDevice, format, &formatProps);
+            fn.GetPhysicalDeviceFormatProperties2(physicalDevice, format, &formatProps);
 
             uint32_t modifierCount = formatModifierPropsList.drmFormatModifierCount;
             std::vector<VkDrmFormatModifierPropertiesEXT> formatModifierProps(modifierCount);
             formatModifierPropsList.pDrmFormatModifierProperties = formatModifierProps.data();
 
-            fn.GetPhysicalDeviceFormatProperties2KHR(physicalDevice, format, &formatProps);
+            fn.GetPhysicalDeviceFormatProperties2(physicalDevice, format, &formatProps);
             for (const auto& props : formatModifierProps) {
                 if (props.drmFormatModifier == modifier) {
                     uint32_t count = props.drmFormatModifierPlaneCount;
@@ -141,9 +141,8 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
         imageFormatProps.sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2;
         imageFormatProps.pNext = &externalImageFormatProps;
 
-        VkResult result =
-            VkResult::WrapUnsafe(mDevice->fn.GetPhysicalDeviceImageFormatProperties2KHR(
-                physicalDevice, &imageFormatInfo, &imageFormatProps));
+        VkResult result = VkResult::WrapUnsafe(mDevice->fn.GetPhysicalDeviceImageFormatProperties2(
+            physicalDevice, &imageFormatInfo, &imageFormatProps));
         if (result != VK_SUCCESS) {
             return false;
         }

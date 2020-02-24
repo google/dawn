@@ -86,7 +86,7 @@ namespace dawn_native { namespace vulkan {
     struct VulkanDeviceKnobs {
         VkPhysicalDeviceFeatures features;
 
-        // Extensions
+        // Extensions, promoted extensions are set to true if their core version is supported.
         bool debugMarker = false;
         bool externalMemory = false;
         bool externalMemoryFD = false;
