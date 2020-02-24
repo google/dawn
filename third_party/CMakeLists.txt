@@ -48,6 +48,12 @@ else()
     set(SHADERC_SKIP_INSTALL ON)
     set(SHADERC_ENABLE_SPVC ON)
 
+    # Change the default value of SHADERC_ENABLE_SHARED_CRT to ON as that's what matches the
+    # CMake defaults better.
+    if(MSVC)
+        option(SHADERC_ENABLE_SHARED_CRT "Use the shared CRT instead of the static CRT" ON)
+    endif()
+
     # Let SPVC's CMakeLists.txt deal with configuring SPIRV-Cross
     set(SPIRV_CROSS_ENABLE_TESTS OFF)
     set(SHADERC_SPIRV_CROSS_DIR "${DAWN_SPIRV_CROSS_DIR}")

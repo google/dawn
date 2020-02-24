@@ -124,6 +124,10 @@ endif()
 if (DAWN_USE_X11)
     target_compile_definitions(dawn_internal_config INTERFACE "DAWN_USE_X11")
 endif()
+if (WIN32)
+    target_compile_definitions(dawn_internal_config INTERFACE "NOMINMAX" "WIN32_LEAN_AND_MEAN")
+endif()
+
 
 set(CMAKE_CXX_STANDARD "14")
 
