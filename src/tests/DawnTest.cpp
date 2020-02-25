@@ -163,14 +163,68 @@ DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
         }
 
         if (strcmp("--use-spvc", argv[i]) == 0) {
+            if (mSpvcFlagSeen) {
+                dawn::WarningLog() << "Multiple flags passed in that force whether or not to use "
+                                      "the spvc. This may lead to unexpected behaviour.";
+            }
+            ASSERT(!mSpvcFlagSeen);
+
             mUseSpvc = true;
+            mSpvcFlagSeen = true;
+            continue;
+        }
+
+        if (strcmp("--no-use-spvc", argv[i]) == 0) {
+            if (mSpvcFlagSeen) {
+                dawn::WarningLog() << "Multiple flags passed in that force whether or not to use "
+                                      "the spvc. This may lead to unexpected behaviour.";
+            }
+            ASSERT(!mSpvcFlagSeen);
+
+            mUseSpvc = false;
+            mSpvcFlagSeen = true;
             continue;
         }
 
         if (strcmp("--use-spvc-parser", argv[i]) == 0) {
+            if (mSpvcParserFlagSeen) {
+                dawn::WarningLog() << "Multiple flags passed in that force whether or not to use "
+                                      "the spvc parser. This may cause unexpected behaviour.";
+            }
+            ASSERT(!mSpvcParserFlagSeen);
+
+            if (!mUseSpvc) {
+                if (mSpvcFlagSeen) {
+                    dawn::ErrorLog()
+                        << "Overriding force disabling of spvc since it is required for using the "
+                           "spvc parser. This indicates a likely misconfiguration.";
+                } else {
+                    dawn::InfoLog()
+                        << "Enabling spvc since it is required for using the spvc parser.";
+                }
+                ASSERT(!mSpvcFlagSeen);
+            }
+
             mUseSpvc = true;  // It's impossible to use the spvc parser without using spvc, so
                               // turning on mUseSpvc implicitly.
             mUseSpvcParser = true;
+            mSpvcParserFlagSeen = true;
+            continue;
+        }
+
+        if (strcmp("--no-use-spvc-parser", argv[i]) == 0) {
+            if (mSpvcParserFlagSeen) {
+                dawn::WarningLog() << "Multiple flags passed in that force whether or not to use "
+                                      "the spvc parser. This may cause unexpected behaviour.";
+            }
+            ASSERT(!mSpvcParserFlagSeen);
+
+            // Intentionally not changing mUseSpvc, since the dependency is one-way. This will
+            // not correctly handle the case where spvc is off by default, then there is a spvc
+            // parser on flag followed by a off flag, but that is already being indicated as a
+            // misuse.
+            mUseSpvcParser = false;
+            mSpvcParserFlagSeen = true;
             continue;
         }
 
@@ -209,6 +263,11 @@ DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
                    "(defaults to no capture)\n"
                    "  --skip-validation: Skip Dawn validation\n"
                    "  --use-spvc: Use spvc for accessing spirv-cross\n"
+                   "  --no-use-spvc: Do not use spvc for accessing spirv-cross\n"
+                   "  --use-spvc-parser: Use spvc's spir-v parsing insteads of spirv-cross's, "
+                   "implies --use-spvc\n"
+                   "  --no-use-spvc-parser: Do no use spvc's spir-v parsing insteads of "
+                   "spirv-cross's\n"
                    "  --adapter-vendor-id: Select adapter by vendor id to run end2end tests"
                    "on multi-GPU systems \n";
             continue;

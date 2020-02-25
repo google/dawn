@@ -156,7 +156,9 @@ class DawnTestEnvironment : public testing::Environment {
     bool mEnableBackendValidation = false;
     bool mSkipDawnValidation = false;
     bool mUseSpvc = false;
+    bool mSpvcFlagSeen = false;
     bool mUseSpvcParser = false;
+    bool mSpvcParserFlagSeen = false;
     bool mBeginCaptureOnStartup = false;
     bool mHasVendorIdFilter = false;
     uint32_t mVendorIdFilter = 0;
