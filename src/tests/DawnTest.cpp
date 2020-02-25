@@ -90,18 +90,36 @@ const RGBA8 RGBA8::kBlue = RGBA8(0, 0, 255, 255);
 const RGBA8 RGBA8::kYellow = RGBA8(255, 255, 0, 255);
 const RGBA8 RGBA8::kWhite = RGBA8(255, 255, 255, 255);
 
-const DawnTestParam D3D12Backend(wgpu::BackendType::D3D12);
-const DawnTestParam MetalBackend(wgpu::BackendType::Metal);
-const DawnTestParam OpenGLBackend(wgpu::BackendType::OpenGL);
-const DawnTestParam VulkanBackend(wgpu::BackendType::Vulkan);
+DawnTestParam::DawnTestParam(wgpu::BackendType backendType,
+                             std::initializer_list<const char*> forceEnabledWorkarounds,
+                             std::initializer_list<const char*> forceDisabledWorkarounds)
+    : backendType(backendType),
+      forceEnabledWorkarounds(forceEnabledWorkarounds),
+      forceDisabledWorkarounds(forceDisabledWorkarounds) {
+}
 
-DawnTestParam ForceToggles(const DawnTestParam& originParam,
-                           std::initializer_list<const char*> forceEnabledWorkarounds,
+DawnTestParam D3D12Backend(std::initializer_list<const char*> forceEnabledWorkarounds,
                            std::initializer_list<const char*> forceDisabledWorkarounds) {
-    DawnTestParam newTestParam = originParam;
-    newTestParam.forceEnabledWorkarounds = forceEnabledWorkarounds;
-    newTestParam.forceDisabledWorkarounds = forceDisabledWorkarounds;
-    return newTestParam;
+    return DawnTestParam(wgpu::BackendType::D3D12, forceEnabledWorkarounds,
+                         forceDisabledWorkarounds);
+}
+
+DawnTestParam MetalBackend(std::initializer_list<const char*> forceEnabledWorkarounds,
+                           std::initializer_list<const char*> forceDisabledWorkarounds) {
+    return DawnTestParam(wgpu::BackendType::Metal, forceEnabledWorkarounds,
+                         forceDisabledWorkarounds);
+}
+
+DawnTestParam OpenGLBackend(std::initializer_list<const char*> forceEnabledWorkarounds,
+                            std::initializer_list<const char*> forceDisabledWorkarounds) {
+    return DawnTestParam(wgpu::BackendType::OpenGL, forceEnabledWorkarounds,
+                         forceDisabledWorkarounds);
+}
+
+DawnTestParam VulkanBackend(std::initializer_list<const char*> forceEnabledWorkarounds,
+                            std::initializer_list<const char*> forceDisabledWorkarounds) {
+    return DawnTestParam(wgpu::BackendType::Vulkan, forceEnabledWorkarounds,
+                         forceDisabledWorkarounds);
 }
 
 std::ostream& operator<<(std::ostream& os, const DawnTestParam& param) {

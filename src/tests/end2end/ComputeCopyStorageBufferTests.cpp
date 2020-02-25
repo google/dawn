@@ -173,7 +173,7 @@ TEST_P(ComputeCopyStorageBufferTests, DISABLED_UnsizedDescriptorArray) {
 }
 
 DAWN_INSTANTIATE_TEST(ComputeCopyStorageBufferTests,
-                     D3D12Backend,
-                     MetalBackend,
-                     OpenGLBackend,
-                     VulkanBackend);
+                     D3D12Backend(),
+                     MetalBackend(),
+                     OpenGLBackend(),
+                     VulkanBackend());

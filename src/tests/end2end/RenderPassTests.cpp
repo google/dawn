@@ -166,8 +166,8 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
 }
 
 DAWN_INSTANTIATE_TEST(RenderPassTest,
-                      D3D12Backend,
-                      ForceToggles(D3D12Backend, {}, {"use_d3d12_render_pass"}),
-                      MetalBackend,
-                      OpenGLBackend,
-                      VulkanBackend);
+                      D3D12Backend(),
+                      D3D12Backend({}, {"use_d3d12_render_pass"}),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());

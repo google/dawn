@@ -496,14 +496,13 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DArrayTexture) {
 }
 
 DAWN_INSTANTIATE_TEST(MultisampledRenderingTest,
-                      D3D12Backend,
-                      ForceToggles(D3D12Backend, {}, {"use_d3d12_resource_heap_tier2"}),
-                      ForceToggles(D3D12Backend, {}, {"use_d3d12_render_pass"}),
-                      MetalBackend,
-                      OpenGLBackend,
-                      VulkanBackend,
-                      ForceToggles(MetalBackend, {"emulate_store_and_msaa_resolve"}),
-                      ForceToggles(MetalBackend, {"always_resolve_into_zero_level_and_layer"}),
-                      ForceToggles(MetalBackend,
-                                   {"always_resolve_into_zero_level_and_layer",
+                      D3D12Backend(),
+                      D3D12Backend({}, {"use_d3d12_resource_heap_tier2"}),
+                      D3D12Backend({}, {"use_d3d12_render_pass"}),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend(),
+                      MetalBackend({"emulate_store_and_msaa_resolve"}),
+                      MetalBackend({"always_resolve_into_zero_level_and_layer"}),
+                      MetalBackend({"always_resolve_into_zero_level_and_layer",
                                     "emulate_store_and_msaa_resolve"}));

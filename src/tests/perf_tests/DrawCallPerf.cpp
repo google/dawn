@@ -606,8 +606,8 @@ TEST_P(DrawCallPerf, Run) {
 
 DAWN_INSTANTIATE_PERF_TEST_SUITE_P(
     DrawCallPerf,
-    {D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend,
-     ForceToggles(VulkanBackend, {"skip_validation"})},
+    {D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend(),
+     VulkanBackend({"skip_validation"})},
     {
         // Baseline
         MakeParam(),

@@ -401,4 +401,4 @@ TEST_P(ViewportTest, DoNotTruncateWidthAndHeight2) {
     DoTest(info);
 }
 
-DAWN_INSTANTIATE_TEST(ViewportTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
+DAWN_INSTANTIATE_TEST(ViewportTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());

@@ -492,5 +492,5 @@ TEST_P(D3D12SharedHandleUsageTests, ClearTwiceInD3D12ReadbackInD3D11) {
     ExpectPixelRGBA8EQ(2, d3d11Texture.Get(), dxgiKeyedMutex.Get(), d3d12ClearColor2);
 }
 
-DAWN_INSTANTIATE_TEST(D3D12SharedHandleValidation, D3D12Backend);
-DAWN_INSTANTIATE_TEST(D3D12SharedHandleUsageTests, D3D12Backend);
+DAWN_INSTANTIATE_TEST(D3D12SharedHandleValidation, D3D12Backend());
+DAWN_INSTANTIATE_TEST(D3D12SharedHandleUsageTests, D3D12Backend());

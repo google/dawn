@@ -1050,9 +1050,8 @@ TEST_P(CompressedTextureBCFormatTest, LargeImageHeightAndClampedCopyExtent) {
 
 // TODO(jiawei.shao@intel.com): support BC formats on OpenGL backend
 DAWN_INSTANTIATE_TEST(CompressedTextureBCFormatTest,
-                      D3D12Backend,
-                      MetalBackend,
-                      OpenGLBackend,
-                      VulkanBackend,
-                      ForceToggles(VulkanBackend,
-                                   {"use_temporary_buffer_in_texture_to_texture_copy"}));
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend(),
+                      VulkanBackend({"use_temporary_buffer_in_texture_to_texture_copy"}));

@@ -231,7 +231,7 @@ TEST_P(GpuMemorySyncTests, ComputePassToRenderPass) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(2, 0, 0, 255), renderPass.color, 0, 0);
 }
 
-DAWN_INSTANTIATE_TEST(GpuMemorySyncTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
+DAWN_INSTANTIATE_TEST(GpuMemorySyncTests, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
 
 class StorageToUniformSyncTests : public DawnTest {
   protected:
@@ -415,10 +415,10 @@ TEST_P(StorageToUniformSyncTests, ReadAfterWriteWithDifferentQueueSubmits) {
 }
 
 DAWN_INSTANTIATE_TEST(StorageToUniformSyncTests,
-                      D3D12Backend,
-                      MetalBackend,
-                      OpenGLBackend,
-                      VulkanBackend);
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());
 
 constexpr int kRTSize = 8;
 constexpr int kVertexBufferStride = 4 * sizeof(float);
@@ -689,7 +689,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
 }
 
 DAWN_INSTANTIATE_TEST(MultipleWriteThenMultipleReadTests,
-                      D3D12Backend,
-                      MetalBackend,
-                      OpenGLBackend,
-                      VulkanBackend);
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());

@@ -850,7 +850,7 @@ namespace dawn_native { namespace vulkan {
         IgnoreSignalSemaphore(device, nextWrappedTexture);
     }
 
-    DAWN_INSTANTIATE_TEST(VulkanImageWrappingValidationTests, VulkanBackend);
-    DAWN_INSTANTIATE_TEST(VulkanImageWrappingUsageTests, VulkanBackend);
+    DAWN_INSTANTIATE_TEST(VulkanImageWrappingValidationTests, VulkanBackend());
+    DAWN_INSTANTIATE_TEST(VulkanImageWrappingUsageTests, VulkanBackend());
 
 }}  // namespace dawn_native::vulkan

@@ -58,4 +58,4 @@ TEST_P(MetalAutoreleasePoolTests, EncoderOutlivesAutorelease) {
     mMtlDevice->SubmitPendingCommandBuffer();
 }
 
-DAWN_INSTANTIATE_TEST(MetalAutoreleasePoolTests, MetalBackend);
+DAWN_INSTANTIATE_TEST(MetalAutoreleasePoolTests, MetalBackend());

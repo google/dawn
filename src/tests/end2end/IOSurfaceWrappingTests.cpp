@@ -439,5 +439,5 @@ TEST_P(IOSurfaceUsageTests, ClearRGBA8IOSurface) {
     DoClearTest(ioSurface.get(), wgpu::TextureFormat::RGBA8Unorm, &data, sizeof(data));
 }
 
-DAWN_INSTANTIATE_TEST(IOSurfaceValidationTests, MetalBackend);
-DAWN_INSTANTIATE_TEST(IOSurfaceUsageTests, MetalBackend);
+DAWN_INSTANTIATE_TEST(IOSurfaceValidationTests, MetalBackend());
+DAWN_INSTANTIATE_TEST(IOSurfaceUsageTests, MetalBackend());

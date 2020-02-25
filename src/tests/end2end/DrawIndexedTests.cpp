@@ -134,4 +134,4 @@ TEST_P(DrawIndexedTest, BaseVertex) {
     Test(3, 1, 3, -4, 0, 6 * sizeof(uint32_t), notFilled, filled);
 }
 
-DAWN_INSTANTIATE_TEST(DrawIndexedTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
+DAWN_INSTANTIATE_TEST(DrawIndexedTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());

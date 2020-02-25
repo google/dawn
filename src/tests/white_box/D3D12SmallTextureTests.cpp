@@ -74,4 +74,4 @@ TEST_P(D3D12SmallTextureTests, AlignSmallCompressedTexture) {
               static_cast<uint64_t>(D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT));
 }
 
-DAWN_INSTANTIATE_TEST(D3D12SmallTextureTests, D3D12Backend);
+DAWN_INSTANTIATE_TEST(D3D12SmallTextureTests, D3D12Backend());

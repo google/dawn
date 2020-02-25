@@ -404,7 +404,7 @@ TEST_P(DynamicBufferOffsetTests, UpdateDynamicOffsetsMultipleTimesComputePipelin
 }
 
 DAWN_INSTANTIATE_TEST(DynamicBufferOffsetTests,
-                      D3D12Backend,
-                      MetalBackend,
-                      OpenGLBackend,
-                      VulkanBackend);
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());

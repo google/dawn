@@ -120,4 +120,4 @@ TEST_P(VulkanErrorInjectorTests, InjectErrorOnCreateBuffer) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(VulkanErrorInjectorTests, VulkanBackend);
+DAWN_INSTANTIATE_TEST(VulkanErrorInjectorTests, VulkanBackend());

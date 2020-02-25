@@ -1026,7 +1026,7 @@ namespace dawn_native { namespace vulkan {
         secondDeviceVk->GetFencedDeleter()->DeleteWhenUnused(allocationA);
     }
 
-    DAWN_INSTANTIATE_TEST(VulkanImageWrappingValidationTests, VulkanBackend);
-    DAWN_INSTANTIATE_TEST(VulkanImageWrappingUsageTests, VulkanBackend);
+    DAWN_INSTANTIATE_TEST(VulkanImageWrappingValidationTests, VulkanBackend());
+    DAWN_INSTANTIATE_TEST(VulkanImageWrappingUsageTests, VulkanBackend());
 
 }}  // namespace dawn_native::vulkan

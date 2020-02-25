@@ -275,4 +275,4 @@ TEST_P(IndexFormatTest, DISABLED_SetIndexBufferBeforeSetPipeline) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);
 }
 
-DAWN_INSTANTIATE_TEST(IndexFormatTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
+DAWN_INSTANTIATE_TEST(IndexFormatTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());

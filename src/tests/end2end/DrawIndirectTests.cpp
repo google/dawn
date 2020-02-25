@@ -124,4 +124,4 @@ TEST_P(DrawIndirectTest, IndirectOffset) {
     Test({3, 1, 0, 0, 3, 1, 3, 0}, 4 * sizeof(uint32_t), notFilled, filled);
 }
 
-DAWN_INSTANTIATE_TEST(DrawIndirectTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
+DAWN_INSTANTIATE_TEST(DrawIndirectTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());

@@ -461,4 +461,4 @@ TEST_P(DeviceLostTest, FenceSignalTickOnCompletion) {
     EXPECT_EQ(fence.GetCompletedValue(), 2u);
 }
 
-DAWN_INSTANTIATE_TEST(DeviceLostTest, D3D12Backend, VulkanBackend);
+DAWN_INSTANTIATE_TEST(DeviceLostTest, D3D12Backend(), VulkanBackend());

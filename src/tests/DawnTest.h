@@ -86,8 +86,9 @@ struct RGBA8 {
 std::ostream& operator<<(std::ostream& stream, const RGBA8& color);
 
 struct DawnTestParam {
-    explicit DawnTestParam(wgpu::BackendType backendType) : backendType(backendType) {
-    }
+    DawnTestParam(wgpu::BackendType backendType,
+                  std::initializer_list<const char*> forceEnabledWorkarounds = {},
+                  std::initializer_list<const char*> forceDisabledWorkarounds = {});
 
     wgpu::BackendType backendType;
 
@@ -97,15 +98,17 @@ struct DawnTestParam {
 
 std::ostream& operator<<(std::ostream& os, const DawnTestParam& param);
 
-// Shorthands for backend types used in the DAWN_INSTANTIATE_TEST
-extern const DawnTestParam D3D12Backend;
-extern const DawnTestParam MetalBackend;
-extern const DawnTestParam OpenGLBackend;
-extern const DawnTestParam VulkanBackend;
-
-DawnTestParam ForceToggles(const DawnTestParam& originParam,
-                           std::initializer_list<const char*> forceEnabledWorkarounds,
+DawnTestParam D3D12Backend(std::initializer_list<const char*> forceEnabledWorkarounds = {},
                            std::initializer_list<const char*> forceDisabledWorkarounds = {});
+
+DawnTestParam MetalBackend(std::initializer_list<const char*> forceEnabledWorkarounds = {},
+                           std::initializer_list<const char*> forceDisabledWorkarounds = {});
+
+DawnTestParam OpenGLBackend(std::initializer_list<const char*> forceEnabledWorkarounds = {},
+                            std::initializer_list<const char*> forceDisabledWorkarounds = {});
+
+DawnTestParam VulkanBackend(std::initializer_list<const char*> forceEnabledWorkarounds = {},
+                            std::initializer_list<const char*> forceDisabledWorkarounds = {});
 
 namespace utils {
     class TerribleCommandBuffer;

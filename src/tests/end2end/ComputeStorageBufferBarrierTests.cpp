@@ -193,7 +193,7 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
 }
 
 DAWN_INSTANTIATE_TEST(ComputeStorageBufferBarrierTests,
-                      D3D12Backend,
-                      MetalBackend,
-                      OpenGLBackend,
-                      VulkanBackend);
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());

@@ -946,10 +946,9 @@ TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
 
 DAWN_INSTANTIATE_TEST(
     TextureZeroInitTest,
-    ForceToggles(D3D12Backend, {"nonzero_clear_resources_on_creation_for_testing"}),
-    ForceToggles(D3D12Backend,
-                 {"nonzero_clear_resources_on_creation_for_testing"},
+    D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}),
+    D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
                  {"use_d3d12_render_pass"}),
-    ForceToggles(OpenGLBackend, {"nonzero_clear_resources_on_creation_for_testing"}),
-    ForceToggles(MetalBackend, {"nonzero_clear_resources_on_creation_for_testing"}),
-    ForceToggles(VulkanBackend, {"nonzero_clear_resources_on_creation_for_testing"}));
+    OpenGLBackend({"nonzero_clear_resources_on_creation_for_testing"}),
+    MetalBackend({"nonzero_clear_resources_on_creation_for_testing"}),
+    VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"}));

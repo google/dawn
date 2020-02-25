@@ -734,4 +734,4 @@ TEST_P(TextureFormatTest, RG11B10Float) {
 // TODO(cwallez@chromium.org): Add tests for depth-stencil formats when we know if they are copyable
 // in WebGPU.
 
-DAWN_INSTANTIATE_TEST(TextureFormatTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
+DAWN_INSTANTIATE_TEST(TextureFormatTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());

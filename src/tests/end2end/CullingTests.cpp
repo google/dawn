@@ -129,4 +129,4 @@ TEST_P(CullingTest, CullBackFaceWhenCWIsFrontFace) {
     DoTest(wgpu::FrontFace::CW, wgpu::CullMode::Back, true, false);
 }
 
-DAWN_INSTANTIATE_TEST(CullingTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
+DAWN_INSTANTIATE_TEST(CullingTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());

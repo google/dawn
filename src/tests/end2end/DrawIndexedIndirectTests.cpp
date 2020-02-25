@@ -162,7 +162,7 @@ TEST_P(DrawIndexedIndirectTest, IndirectOffset) {
 }
 
 DAWN_INSTANTIATE_TEST(DrawIndexedIndirectTest,
-                      D3D12Backend,
-                      MetalBackend,
-                      OpenGLBackend,
-                      VulkanBackend);
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());

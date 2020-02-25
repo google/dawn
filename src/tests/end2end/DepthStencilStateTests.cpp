@@ -682,8 +682,8 @@ TEST_P(DepthStencilStateTest, StencilDepthPass) {
 }
 
 DAWN_INSTANTIATE_TEST(DepthStencilStateTest,
-                      D3D12Backend,
-                      MetalBackend,
-                      OpenGLBackend,
-                      ForceToggles(VulkanBackend, {"vulkan_use_d32s8"}, {}),
-                      ForceToggles(VulkanBackend, {}, {"vulkan_use_d32s8"}));
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend({"vulkan_use_d32s8"}, {}),
+                      VulkanBackend({}, {"vulkan_use_d32s8"}));

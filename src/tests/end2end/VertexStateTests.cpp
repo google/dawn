@@ -521,7 +521,7 @@ TEST_P(VertexStateTest, LastAllowedVertexBuffer) {
     DoTestDraw(pipeline, 1, 1, {DrawVertexBuffer{kMaxVertexBuffers - 1, &buffer0}});
 }
 
-DAWN_INSTANTIATE_TEST(VertexStateTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
+DAWN_INSTANTIATE_TEST(VertexStateTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
 
 // TODO for the input state:
 //  - Add more vertex formats
@@ -576,7 +576,7 @@ TEST_P(OptionalVertexStateTest, Basic) {
 }
 
 DAWN_INSTANTIATE_TEST(OptionalVertexStateTest,
-                      D3D12Backend,
-                      MetalBackend,
-                      OpenGLBackend,
-                      VulkanBackend);
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());

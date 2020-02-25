@@ -98,7 +98,7 @@ TEST_P(ComputeSharedMemoryTests, Basic) {
 }
 
 DAWN_INSTANTIATE_TEST(ComputeSharedMemoryTests,
-                     D3D12Backend,
-                     MetalBackend,
-                     OpenGLBackend,
-                     VulkanBackend);
+                     D3D12Backend(),
+                     MetalBackend(),
+                     OpenGLBackend(),
+                     VulkanBackend());

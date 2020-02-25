@@ -780,4 +780,4 @@ TEST_P(BindGroupTests, BindGroupLayoutVisibilityCanBeNone) {
     queue.Submit(1, &commands);
 }
 
-DAWN_INSTANTIATE_TEST(BindGroupTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
+DAWN_INSTANTIATE_TEST(BindGroupTests, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());

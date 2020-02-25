@@ -148,4 +148,4 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
     EXPECT_TEXTURE_RGBA8_EQ(expectBlue.data(), renderTarget, kRTSize / 2, 0, kRTSize / 2, kRTSize, 0, 0);
 }
 
-DAWN_INSTANTIATE_TEST(RenderPassLoadOpTests, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
+DAWN_INSTANTIATE_TEST(RenderPassLoadOpTests, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());

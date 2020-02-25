@@ -400,4 +400,4 @@ TEST_P(ObjectCachingTest, SamplerDeduplication) {
     EXPECT_EQ(sampler.Get() == sameSampler.Get(), !UsesWire());
 }
 
-DAWN_INSTANTIATE_TEST(ObjectCachingTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
+DAWN_INSTANTIATE_TEST(ObjectCachingTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());

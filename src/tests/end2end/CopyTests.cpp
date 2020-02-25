@@ -540,7 +540,7 @@ TEST_P(CopyTests_T2B, Texture2DArrayMip) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(CopyTests_T2B, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
+DAWN_INSTANTIATE_TEST(CopyTests_T2B, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
 
 // Test that copying an entire texture with 256-byte aligned dimensions works
 TEST_P(CopyTests_B2T, FullTextureAligned) {
@@ -683,7 +683,7 @@ TEST_P(CopyTests_B2T, RowPitchUnaligned) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(CopyTests_B2T, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
+DAWN_INSTANTIATE_TEST(CopyTests_B2T, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
 
 TEST_P(CopyTests_T2T, Texture) {
     constexpr uint32_t kWidth = 256;
@@ -731,4 +731,4 @@ TEST_P(CopyTests_T2T, TextureMip) {
 
 // TODO(brandon1.jones@intel.com) Add test for ensuring blitCommandEncoder on Metal.
 
-DAWN_INSTANTIATE_TEST(CopyTests_T2T, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
+DAWN_INSTANTIATE_TEST(CopyTests_T2T, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());

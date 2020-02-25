@@ -1048,4 +1048,4 @@ TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
     EXPECT_PIXEL_RGBA8_EQ(expected, renderPass.color, kRTSize / 2, kRTSize / 2);
 }
 
-DAWN_INSTANTIATE_TEST(ColorStateTest, D3D12Backend, MetalBackend, OpenGLBackend, VulkanBackend);
+DAWN_INSTANTIATE_TEST(ColorStateTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
