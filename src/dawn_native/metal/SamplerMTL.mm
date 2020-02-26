@@ -52,15 +52,11 @@ namespace dawn_native { namespace metal {
 
     // static
     ResultOrError<Sampler*> Sampler::Create(Device* device, const SamplerDescriptor* descriptor) {
-#if defined(DAWN_PLATFORM_IOS)
         if (descriptor->compare != wgpu::CompareFunction::Never &&
-            ![device->GetMTLDevice() supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v1]) {
-            // Unsupported before A9.
-            // TODO(b/149025333): Investigate emulation -- possibly expensive.
-            return DAWN_VALIDATION_ERROR(
-                "Sampler compare function requires at least iOS GPU family 3, version 1");
+            device->IsToggleEnabled(Toggle::MetalDisableSamplerCompare)) {
+            return DAWN_VALIDATION_ERROR("Sampler compare function not supported.");
         }
-#endif
+
         return new Sampler(device, descriptor);
     }
 

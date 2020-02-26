@@ -69,6 +69,13 @@ namespace dawn_native { namespace metal {
 #endif
             // On tvOS, we would need MTLFeatureSet_tvOS_GPUFamily2_v1.
             SetToggle(Toggle::EmulateStoreAndMSAAResolve, !haveStoreAndMSAAResolve);
+
+            bool haveSamplerCompare = true;
+#if defined(DAWN_PLATFORM_IOS)
+            haveSamplerCompare = [mMtlDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v1];
+#endif
+            // TODO(crbug.com/dawn/342): Investigate emulation -- possibly expensive.
+            SetToggle(Toggle::MetalDisableSamplerCompare, !haveSamplerCompare);
         }
 
         // TODO(jiawei.shao@intel.com): tighten this workaround when the driver bug is fixed.
