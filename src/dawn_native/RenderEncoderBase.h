@@ -45,6 +45,10 @@ namespace dawn_native {
       protected:
         // Construct an "error" render encoder base.
         RenderEncoderBase(DeviceBase* device, EncodingContext* encodingContext, ErrorTag errorTag);
+
+      private:
+        const bool mDisableBaseVertex;
+        const bool mDisableBaseInstance;
     };
 
 }  // namespace dawn_native

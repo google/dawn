@@ -37,6 +37,8 @@ namespace dawn_native {
         UseSpvcParser,
         VulkanUseD32S8,
         MetalDisableSamplerCompare,
+        DisableBaseVertex,
+        DisableBaseInstance,
 
         EnumCount,
         InvalidEnum = EnumCount,

@@ -25,8 +25,8 @@ namespace dawn_native { namespace opengl {
       public:
         MaybeError Initialize(GetProcAddress getProc);
 
-        bool IsAtLeastGL(uint32_t majorVersion, uint32_t minorVersion);
-        bool IsAtLeastGLES(uint32_t majorVersion, uint32_t minorVersion);
+        bool IsAtLeastGL(uint32_t majorVersion, uint32_t minorVersion) const;
+        bool IsAtLeastGLES(uint32_t majorVersion, uint32_t minorVersion) const;
 
         bool IsGLExtensionSupported(const char* extension) const;
 

@@ -1018,11 +1018,19 @@ namespace dawn_native { namespace metal {
 
                     // The instance count must be non-zero, otherwise no-op
                     if (draw->instanceCount != 0) {
-                        [encoder drawPrimitives:lastPipeline->GetMTLPrimitiveTopology()
-                                    vertexStart:draw->firstVertex
-                                    vertexCount:draw->vertexCount
-                                  instanceCount:draw->instanceCount
-                                   baseInstance:draw->firstInstance];
+                        // MTLFeatureSet_iOS_GPUFamily3_v1 does not support baseInstance
+                        if (draw->firstInstance == 0) {
+                            [encoder drawPrimitives:lastPipeline->GetMTLPrimitiveTopology()
+                                        vertexStart:draw->firstVertex
+                                        vertexCount:draw->vertexCount
+                                      instanceCount:draw->instanceCount];
+                        } else {
+                            [encoder drawPrimitives:lastPipeline->GetMTLPrimitiveTopology()
+                                        vertexStart:draw->firstVertex
+                                        vertexCount:draw->vertexCount
+                                      instanceCount:draw->instanceCount
+                                       baseInstance:draw->firstInstance];
+                        }
                     }
                 } break;
 
@@ -1037,15 +1045,27 @@ namespace dawn_native { namespace metal {
 
                     // The index and instance count must be non-zero, otherwise no-op
                     if (draw->indexCount != 0 && draw->instanceCount != 0) {
-                        [encoder drawIndexedPrimitives:lastPipeline->GetMTLPrimitiveTopology()
-                                            indexCount:draw->indexCount
-                                             indexType:lastPipeline->GetMTLIndexType()
-                                           indexBuffer:indexBuffer
-                                     indexBufferOffset:indexBufferBaseOffset +
-                                                       draw->firstIndex * formatSize
-                                         instanceCount:draw->instanceCount
-                                            baseVertex:draw->baseVertex
-                                          baseInstance:draw->firstInstance];
+                        // MTLFeatureSet_iOS_GPUFamily3_v1 does not support baseInstance and
+                        // baseVertex.
+                        if (draw->baseVertex == 0 && draw->firstInstance == 0) {
+                            [encoder drawIndexedPrimitives:lastPipeline->GetMTLPrimitiveTopology()
+                                                indexCount:draw->indexCount
+                                                 indexType:lastPipeline->GetMTLIndexType()
+                                               indexBuffer:indexBuffer
+                                         indexBufferOffset:indexBufferBaseOffset +
+                                                           draw->firstIndex * formatSize
+                                             instanceCount:draw->instanceCount];
+                        } else {
+                            [encoder drawIndexedPrimitives:lastPipeline->GetMTLPrimitiveTopology()
+                                                indexCount:draw->indexCount
+                                                 indexType:lastPipeline->GetMTLIndexType()
+                                               indexBuffer:indexBuffer
+                                         indexBufferOffset:indexBufferBaseOffset +
+                                                           draw->firstIndex * formatSize
+                                             instanceCount:draw->instanceCount
+                                                baseVertex:draw->baseVertex
+                                              baseInstance:draw->firstInstance];
+                        }
                     }
                 } break;
 

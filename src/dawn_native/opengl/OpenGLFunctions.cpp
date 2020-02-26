@@ -74,12 +74,12 @@ namespace dawn_native { namespace opengl {
         return mSupportedGLExtensionsSet.count(extension) != 0;
     }
 
-    bool OpenGLFunctions::IsAtLeastGL(uint32_t majorVersion, uint32_t minorVersion) {
+    bool OpenGLFunctions::IsAtLeastGL(uint32_t majorVersion, uint32_t minorVersion) const {
         return mStandard == Standard::Desktop &&
                std::tie(mMajorVersion, mMinorVersion) >= std::tie(majorVersion, minorVersion);
     }
 
-    bool OpenGLFunctions::IsAtLeastGLES(uint32_t majorVersion, uint32_t minorVersion) {
+    bool OpenGLFunctions::IsAtLeastGLES(uint32_t majorVersion, uint32_t minorVersion) const {
         return mStandard == Standard::ES &&
                std::tie(mMajorVersion, mMinorVersion) >= std::tie(majorVersion, minorVersion);
     }

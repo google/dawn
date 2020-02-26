@@ -27,13 +27,17 @@
 namespace dawn_native {
 
     RenderEncoderBase::RenderEncoderBase(DeviceBase* device, EncodingContext* encodingContext)
-        : ProgrammablePassEncoder(device, encodingContext) {
+        : ProgrammablePassEncoder(device, encodingContext),
+          mDisableBaseVertex(device->IsToggleEnabled(Toggle::DisableBaseVertex)),
+          mDisableBaseInstance(device->IsToggleEnabled(Toggle::DisableBaseInstance)) {
     }
 
     RenderEncoderBase::RenderEncoderBase(DeviceBase* device,
                                          EncodingContext* encodingContext,
                                          ErrorTag errorTag)
-        : ProgrammablePassEncoder(device, encodingContext, errorTag) {
+        : ProgrammablePassEncoder(device, encodingContext, errorTag),
+          mDisableBaseVertex(device->IsToggleEnabled(Toggle::DisableBaseVertex)),
+          mDisableBaseInstance(device->IsToggleEnabled(Toggle::DisableBaseInstance)) {
     }
 
     void RenderEncoderBase::Draw(uint32_t vertexCount,
@@ -41,6 +45,10 @@ namespace dawn_native {
                                  uint32_t firstVertex,
                                  uint32_t firstInstance) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+            if (mDisableBaseInstance && firstInstance != 0) {
+                return DAWN_VALIDATION_ERROR("Non-zero first instance not supported");
+            }
+
             DrawCmd* draw = allocator->Allocate<DrawCmd>(Command::Draw);
             draw->vertexCount = vertexCount;
             draw->instanceCount = instanceCount;
@@ -57,6 +65,13 @@ namespace dawn_native {
                                         int32_t baseVertex,
                                         uint32_t firstInstance) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+            if (mDisableBaseInstance && firstInstance != 0) {
+                return DAWN_VALIDATION_ERROR("Non-zero first instance not supported");
+            }
+            if (mDisableBaseInstance && baseVertex != 0) {
+                return DAWN_VALIDATION_ERROR("Non-zero base vertex not supported");
+            }
+
             DrawIndexedCmd* draw = allocator->Allocate<DrawIndexedCmd>(Command::DrawIndexed);
             draw->indexCount = indexCount;
             draw->instanceCount = instanceCount;

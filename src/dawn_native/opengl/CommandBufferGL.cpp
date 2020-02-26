@@ -869,12 +869,23 @@ namespace dawn_native { namespace opengl {
                                                     indexBufferBaseOffset),
                             draw->instanceCount, draw->baseVertex, draw->firstInstance);
                     } else {
-                        // This branch is only needed on OpenGL < 4.2
-                        gl.DrawElementsInstancedBaseVertex(
-                            lastPipeline->GetGLPrimitiveTopology(), draw->indexCount, formatType,
-                            reinterpret_cast<void*>(draw->firstIndex * formatSize +
-                                                    indexBufferBaseOffset),
-                            draw->instanceCount, draw->baseVertex);
+                        // This branch is only needed on OpenGL < 4.2; ES < 3.2
+                        if (draw->baseVertex != 0) {
+                            gl.DrawElementsInstancedBaseVertex(
+                                lastPipeline->GetGLPrimitiveTopology(), draw->indexCount,
+                                formatType,
+                                reinterpret_cast<void*>(draw->firstIndex * formatSize +
+                                                        indexBufferBaseOffset),
+                                draw->instanceCount, draw->baseVertex);
+                        } else {
+                            // This branch is only needed on OpenGL < 3.2; ES < 3.2
+                            gl.DrawElementsInstanced(
+                                lastPipeline->GetGLPrimitiveTopology(), draw->indexCount,
+                                formatType,
+                                reinterpret_cast<void*>(draw->firstIndex * formatSize +
+                                                        indexBufferBaseOffset),
+                                draw->instanceCount);
+                        }
                     }
                 } break;
 
