@@ -560,36 +560,61 @@ void DawnTestBase::SetUp() {
         dawn_native::Instance* instance = gTestEnv->GetInstance();
         std::vector<dawn_native::Adapter> adapters = instance->GetAdapters();
 
-        for (const dawn_native::Adapter& adapter : adapters) {
+        static constexpr size_t kInvalidIndex = std::numeric_limits<size_t>::max();
+        size_t discreteAdapterIndex = kInvalidIndex;
+        size_t integratedAdapterIndex = kInvalidIndex;
+        size_t cpuAdapterIndex = kInvalidIndex;
+        size_t unknownAdapterIndex = kInvalidIndex;
+
+        for (size_t i = 0; i < adapters.size(); ++i) {
+            const dawn_native::Adapter& adapter = adapters[i];
+
             wgpu::AdapterProperties properties;
             adapter.GetProperties(&properties);
 
             if (properties.backendType == backendType) {
-                if (properties.adapterType == wgpu::AdapterType::CPU) {
+                // If the vendor id doesn't match, skip this adapter.
+                if (HasVendorIdFilter() && properties.vendorID != GetVendorIdFilter()) {
                     continue;
                 }
 
-                // Filter adapter by vendor id
-                if (HasVendorIdFilter()) {
-                    if (properties.vendorID == GetVendorIdFilter()) {
-                        mBackendAdapter = adapter;
+                // Find the index of each type of adapter.
+                switch (adapter.GetDeviceType()) {
+                    case dawn_native::DeviceType::DiscreteGPU:
+                        discreteAdapterIndex = i;
                         break;
-                    }
-                    continue;
-                }
-
-                // Prefer discrete GPU on multi-GPU systems, otherwise get integrated GPU.
-                mBackendAdapter = adapter;
-                mAdapterProperties = properties;
-                if (properties.adapterType == wgpu::AdapterType::DiscreteGPU) {
-                    break;
+                    case dawn_native::DeviceType::IntegratedGPU:
+                        integratedAdapterIndex = i;
+                        break;
+                    case dawn_native::DeviceType::CPU:
+                        cpuAdapterIndex = i;
+                        break;
+                    case dawn_native::DeviceType::Unknown:
+                        unknownAdapterIndex = i;
+                        break;
+                    default:
+                        UNREACHABLE();
+                        break;
                 }
             }
+        }
+
+        // Prefer, discrete, then integrated, then CPU, then unknown adapters.
+        if (discreteAdapterIndex != kInvalidIndex) {
+            mBackendAdapter = adapters[discreteAdapterIndex];
+        } else if (integratedAdapterIndex != kInvalidIndex) {
+            mBackendAdapter = adapters[integratedAdapterIndex];
+        } else if (cpuAdapterIndex != kInvalidIndex) {
+            mBackendAdapter = adapters[cpuAdapterIndex];
+        } else if (unknownAdapterIndex != kInvalidIndex) {
+            mBackendAdapter = adapters[unknownAdapterIndex];
         }
 
         if (!mBackendAdapter) {
             return;
         }
+
+        mBackendAdapter.GetProperties(&mAdapterProperties);
     }
 
     for (const char* forceEnabledWorkaround : mParam.forceEnabledWorkarounds) {
