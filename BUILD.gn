@@ -301,6 +301,8 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/d3d12/D3D12Error.h",
       "src/dawn_native/d3d12/D3D12Info.cpp",
       "src/dawn_native/d3d12/D3D12Info.h",
+      "src/dawn_native/d3d12/DescriptorHeapAllocationD3D12.cpp",
+      "src/dawn_native/d3d12/DescriptorHeapAllocationD3D12.h",
       "src/dawn_native/d3d12/DescriptorHeapAllocator.cpp",
       "src/dawn_native/d3d12/DescriptorHeapAllocator.h",
       "src/dawn_native/d3d12/DeviceD3D12.cpp",
@@ -330,6 +332,8 @@ source_set("libdawn_native_sources") {
       "src/dawn_native/d3d12/SamplerD3D12.h",
       "src/dawn_native/d3d12/ShaderModuleD3D12.cpp",
       "src/dawn_native/d3d12/ShaderModuleD3D12.h",
+      "src/dawn_native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.cpp",
+      "src/dawn_native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.h",
       "src/dawn_native/d3d12/StagingBufferD3D12.cpp",
       "src/dawn_native/d3d12/StagingBufferD3D12.h",
       "src/dawn_native/d3d12/SwapChainD3D12.cpp",
@@ -1017,7 +1021,10 @@ source_set("dawn_white_box_tests_sources") {
   }
 
   if (dawn_enable_d3d12) {
-    sources += [ "src/tests/white_box/D3D12SmallTextureTests.cpp" ]
+    sources += [
+      "src/tests/white_box/D3D12DescriptorHeapTests.cpp",
+      "src/tests/white_box/D3D12SmallTextureTests.cpp",
+    ]
   }
 
   if (dawn_enable_metal) {

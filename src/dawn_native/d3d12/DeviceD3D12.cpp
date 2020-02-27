@@ -35,6 +35,7 @@
 #include "dawn_native/d3d12/ResourceAllocatorManagerD3D12.h"
 #include "dawn_native/d3d12/SamplerD3D12.h"
 #include "dawn_native/d3d12/ShaderModuleD3D12.h"
+#include "dawn_native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.h"
 #include "dawn_native/d3d12/StagingBufferD3D12.h"
 #include "dawn_native/d3d12/SwapChainD3D12.h"
 #include "dawn_native/d3d12/TextureD3D12.h"
@@ -72,6 +73,11 @@ namespace dawn_native { namespace d3d12 {
         // Initialize backend services
         mCommandAllocatorManager = std::make_unique<CommandAllocatorManager>(this);
         mDescriptorHeapAllocator = std::make_unique<DescriptorHeapAllocator>(this);
+
+        mShaderVisibleDescriptorAllocator =
+            std::make_unique<ShaderVisibleDescriptorAllocator>(this);
+        DAWN_TRY(mShaderVisibleDescriptorAllocator->Initialize());
+
         mMapRequestTracker = std::make_unique<MapRequestTracker>(this);
         mResourceAllocatorManager = std::make_unique<ResourceAllocatorManager>(this);
 
@@ -179,7 +185,7 @@ namespace dawn_native { namespace d3d12 {
 
         mResourceAllocatorManager->Tick(mCompletedSerial);
         DAWN_TRY(mCommandAllocatorManager->Tick(mCompletedSerial));
-        mDescriptorHeapAllocator->Deallocate(mCompletedSerial);
+        mShaderVisibleDescriptorAllocator->Tick(mCompletedSerial);
         mMapRequestTracker->Tick(mCompletedSerial);
         mUsedComObjectRefs.ClearUpTo(mCompletedSerial);
         DAWN_TRY(ExecutePendingCommandContext());
@@ -433,4 +439,7 @@ namespace dawn_native { namespace d3d12 {
         ASSERT(!mPendingCommands.IsOpen());
     }
 
+    ShaderVisibleDescriptorAllocator* Device::GetShaderVisibleDescriptorAllocator() const {
+        return mShaderVisibleDescriptorAllocator.get();
+    }
 }}  // namespace dawn_native::d3d12

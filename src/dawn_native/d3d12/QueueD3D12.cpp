@@ -36,7 +36,7 @@ namespace dawn_native { namespace d3d12 {
         TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording,
                            "CommandBufferD3D12::RecordCommands");
         for (uint32_t i = 0; i < commandCount; ++i) {
-            DAWN_TRY(ToBackend(commands[i])->RecordCommands(commandContext, i));
+            DAWN_TRY(ToBackend(commands[i])->RecordCommands(commandContext));
         }
         TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording,
                          "CommandBufferD3D12::RecordCommands");
