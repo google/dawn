@@ -97,9 +97,7 @@ class WireBufferMappingTests : public WireTest {
         mockCreateBufferMappedCallback =
             std::make_unique<StrictMock<MockBufferCreateMappedCallback>>();
 
-        WGPUBufferDescriptor descriptor;
-        descriptor.nextInChain = nullptr;
-        descriptor.label = nullptr;
+        WGPUBufferDescriptor descriptor = {};
         descriptor.size = kBufferSize;
 
         apiBuffer = api.GetNewBuffer();
@@ -498,9 +496,7 @@ TEST_F(WireBufferMappingTests, DestroyInsideMapWriteCallback) {
 
 // Test successful CreateBufferMapped
 TEST_F(WireBufferMappingTests, CreateBufferMappedSuccess) {
-    WGPUBufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.label = nullptr;
+    WGPUBufferDescriptor descriptor = {};
     descriptor.size = 4;
 
     WGPUBuffer apiBuffer = api.GetNewBuffer();
@@ -526,9 +522,7 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedSuccess) {
 
 // Test that releasing after CreateBufferMapped does not call Unmap
 TEST_F(WireBufferMappingTests, ReleaseAfterCreateBufferMapped) {
-    WGPUBufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.label = nullptr;
+    WGPUBufferDescriptor descriptor = {};
     descriptor.size = 4;
 
     WGPUBuffer apiBuffer = api.GetNewBuffer();
@@ -554,9 +548,7 @@ TEST_F(WireBufferMappingTests, ReleaseAfterCreateBufferMapped) {
 
 // Test that it is valid to map a buffer after CreateBufferMapped and Unmap
 TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapSuccess) {
-    WGPUBufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.label = nullptr;
+    WGPUBufferDescriptor descriptor = {};
     descriptor.size = 4;
 
     WGPUBuffer apiBuffer = api.GetNewBuffer();
@@ -599,9 +591,7 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapSuccess) {
 
 // Test that it is invalid to map a buffer after CreateBufferMapped before Unmap
 TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapFailure) {
-    WGPUBufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.label = nullptr;
+    WGPUBufferDescriptor descriptor = {};
     descriptor.size = 4;
 
     WGPUBuffer apiBuffer = api.GetNewBuffer();
@@ -641,9 +631,7 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapFailure) {
 
 // Test successful CreateBufferMappedAsync
 TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncSuccess) {
-    WGPUBufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.label = nullptr;
+    WGPUBufferDescriptor descriptor = {};
     descriptor.size = kBufferSize;
 
     WGPUCreateBufferMappedResult apiResult;
@@ -686,9 +674,7 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncSuccess) {
 
 // Test CreateBufferMappedAsync with map error
 TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncMapError) {
-    WGPUBufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.label = nullptr;
+    WGPUBufferDescriptor descriptor = {};
 
     WGPUCreateBufferMappedResult apiResult;
     apiResult.buffer = apiBuffer;
@@ -720,9 +706,7 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncMapError) {
 // Test that the CreateBufferMappedCallback isn't fired twice when unmap() is called inside the
 // callback
 TEST_F(WireBufferMappingTests, UnmapInsideCreateBufferMappedAsyncCallback) {
-    WGPUBufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.label = nullptr;
+    WGPUBufferDescriptor descriptor = {};
     descriptor.size = kBufferSize;
 
     WGPUCreateBufferMappedResult apiResult;
@@ -759,9 +743,7 @@ TEST_F(WireBufferMappingTests, UnmapInsideCreateBufferMappedAsyncCallback) {
 // Test that the CreateBufferMappedCallback isn't fired twice when the buffer is deleted inside
 // the callback
 TEST_F(WireBufferMappingTests, ReleaseInsideCreateBufferMappedAsyncCallback) {
-    WGPUBufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.label = nullptr;
+    WGPUBufferDescriptor descriptor = {};
     descriptor.size = kBufferSize;
 
     WGPUCreateBufferMappedResult apiResult;
@@ -798,9 +780,7 @@ TEST_F(WireBufferMappingTests, ReleaseInsideCreateBufferMappedAsyncCallback) {
 // Test that the CreateBufferMappedCallback isn't fired twice when the buffer is destroyed inside
 // the callback
 TEST_F(WireBufferMappingTests, DestroyInsideCreateBufferMappedAsyncCallback) {
-    WGPUBufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.label = nullptr;
+    WGPUBufferDescriptor descriptor = {};
     descriptor.size = kBufferSize;
 
     WGPUCreateBufferMappedResult apiResult;

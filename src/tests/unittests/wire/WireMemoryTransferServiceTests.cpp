@@ -155,9 +155,7 @@ class WireMemoryTransferServiceTests : public WireTest {
     using ServerWriteHandle = server::MockMemoryTransferService::MockWriteHandle;
 
     std::pair<WGPUBuffer, WGPUBuffer> CreateBuffer() {
-        WGPUBufferDescriptor descriptor;
-        descriptor.nextInChain = nullptr;
-        descriptor.label = nullptr;
+        WGPUBufferDescriptor descriptor = {};
         descriptor.size = sizeof(mBufferContent);
 
         WGPUBuffer apiBuffer = api.GetNewBuffer();
@@ -171,9 +169,7 @@ class WireMemoryTransferServiceTests : public WireTest {
     }
 
     std::pair<WGPUCreateBufferMappedResult, WGPUCreateBufferMappedResult> CreateBufferMapped() {
-        WGPUBufferDescriptor descriptor;
-        descriptor.nextInChain = nullptr;
-        descriptor.label = nullptr;
+        WGPUBufferDescriptor descriptor = {};
         descriptor.size = sizeof(mBufferContent);
 
         WGPUBuffer apiBuffer = api.GetNewBuffer();
@@ -193,9 +189,7 @@ class WireMemoryTransferServiceTests : public WireTest {
     }
 
     WGPUCreateBufferMappedResult CreateBufferMappedAsync() {
-        WGPUBufferDescriptor descriptor;
-        descriptor.nextInChain = nullptr;
-        descriptor.label = nullptr;
+        WGPUBufferDescriptor descriptor = {};
         descriptor.size = sizeof(mBufferContent);
 
         wgpuDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback,
@@ -879,9 +873,7 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedAsyncWriteHandleCreatio
     // Mock a WriteHandle creation failure
     MockWriteHandleCreationFailure();
 
-    WGPUBufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.label = nullptr;
+    WGPUBufferDescriptor descriptor = {};
     descriptor.size = sizeof(mBufferContent);
 
     // Failed creation of a WriteHandle is a fatal failure. The client synchronously receives
@@ -1035,9 +1027,7 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedWriteHandleCreationFail
     // Mock a WriteHandle creation failure
     MockWriteHandleCreationFailure();
 
-    WGPUBufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.label = nullptr;
+    WGPUBufferDescriptor descriptor = {};
     descriptor.size = sizeof(mBufferContent);
 
     WGPUCreateBufferMappedResult result = wgpuDeviceCreateBufferMapped(device, &descriptor);
@@ -1081,9 +1071,7 @@ TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedHandleOpenFailure) {
     // Note: The handle is not serialized because sychronously opening it failed.
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
 
-    WGPUBufferDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
-    descriptor.label = nullptr;
+    WGPUBufferDescriptor descriptor = {};
     descriptor.size = sizeof(mBufferContent);
 
     WGPUCreateBufferMappedResult result = wgpuDeviceCreateBufferMapped(device, &descriptor);

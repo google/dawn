@@ -26,9 +26,7 @@ class WireOptionalTests : public WireTest {
 
 // Test passing nullptr instead of objects - object as value version
 TEST_F(WireOptionalTests, OptionalObjectValue) {
-    WGPUBindGroupLayoutDescriptor bglDesc;
-    bglDesc.nextInChain = nullptr;
-    bglDesc.label = nullptr;
+    WGPUBindGroupLayoutDescriptor bglDesc = {};
     bglDesc.bindingCount = 0;
     WGPUBindGroupLayout bgl = wgpuDeviceCreateBindGroupLayout(device, &bglDesc);
 
@@ -43,9 +41,7 @@ TEST_F(WireOptionalTests, OptionalObjectValue) {
     binding.textureView = nullptr;
     binding.buffer = nullptr;
 
-    WGPUBindGroupDescriptor bgDesc;
-    bgDesc.nextInChain = nullptr;
-    bgDesc.label = nullptr;
+    WGPUBindGroupDescriptor bgDesc = {};
     bgDesc.layout = bgl;
     bgDesc.bindingCount = 1;
     bgDesc.bindings = &binding;
@@ -69,36 +65,31 @@ TEST_F(WireOptionalTests, OptionalObjectValue) {
 // Test that the wire is able to send optional pointers to structures
 TEST_F(WireOptionalTests, OptionalStructPointer) {
     // Create shader module
-    WGPUShaderModuleDescriptor vertexDescriptor;
-    vertexDescriptor.nextInChain = nullptr;
-    vertexDescriptor.label = nullptr;
+    WGPUShaderModuleDescriptor vertexDescriptor = {};
     vertexDescriptor.codeSize = 0;
     WGPUShaderModule vsModule = wgpuDeviceCreateShaderModule(device, &vertexDescriptor);
     WGPUShaderModule apiVsModule = api.GetNewShaderModule();
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiVsModule));
 
     // Create the color state descriptor
-    WGPUBlendDescriptor blendDescriptor;
+    WGPUBlendDescriptor blendDescriptor = {};
     blendDescriptor.operation = WGPUBlendOperation_Add;
     blendDescriptor.srcFactor = WGPUBlendFactor_One;
     blendDescriptor.dstFactor = WGPUBlendFactor_One;
-    WGPUColorStateDescriptor colorStateDescriptor;
-    colorStateDescriptor.nextInChain = nullptr;
+    WGPUColorStateDescriptor colorStateDescriptor = {};
     colorStateDescriptor.format = WGPUTextureFormat_RGBA8Unorm;
     colorStateDescriptor.alphaBlend = blendDescriptor;
     colorStateDescriptor.colorBlend = blendDescriptor;
     colorStateDescriptor.writeMask = WGPUColorWriteMask_All;
 
     // Create the input state
-    WGPUVertexStateDescriptor vertexState;
-    vertexState.nextInChain = nullptr;
+    WGPUVertexStateDescriptor vertexState = {};
     vertexState.indexFormat = WGPUIndexFormat_Uint32;
     vertexState.vertexBufferCount = 0;
     vertexState.vertexBuffers = nullptr;
 
     // Create the rasterization state
-    WGPURasterizationStateDescriptor rasterizationState;
-    rasterizationState.nextInChain = nullptr;
+    WGPURasterizationStateDescriptor rasterizationState = {};
     rasterizationState.frontFace = WGPUFrontFace_CCW;
     rasterizationState.cullMode = WGPUCullMode_None;
     rasterizationState.depthBias = 0;
@@ -106,14 +97,13 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     rasterizationState.depthBiasClamp = 0.0;
 
     // Create the depth-stencil state
-    WGPUStencilStateFaceDescriptor stencilFace;
+    WGPUStencilStateFaceDescriptor stencilFace = {};
     stencilFace.compare = WGPUCompareFunction_Always;
     stencilFace.failOp = WGPUStencilOperation_Keep;
     stencilFace.depthFailOp = WGPUStencilOperation_Keep;
     stencilFace.passOp = WGPUStencilOperation_Keep;
 
-    WGPUDepthStencilStateDescriptor depthStencilState;
-    depthStencilState.nextInChain = nullptr;
+    WGPUDepthStencilStateDescriptor depthStencilState = {};
     depthStencilState.format = WGPUTextureFormat_Depth24PlusStencil8;
     depthStencilState.depthWriteEnabled = false;
     depthStencilState.depthCompare = WGPUCompareFunction_Always;
@@ -123,9 +113,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     depthStencilState.stencilWriteMask = 0xff;
 
     // Create the pipeline layout
-    WGPUPipelineLayoutDescriptor layoutDescriptor;
-    layoutDescriptor.nextInChain = nullptr;
-    layoutDescriptor.label = nullptr;
+    WGPUPipelineLayoutDescriptor layoutDescriptor = {};
     layoutDescriptor.bindGroupLayoutCount = 0;
     layoutDescriptor.bindGroupLayouts = nullptr;
     WGPUPipelineLayout layout = wgpuDeviceCreatePipelineLayout(device, &layoutDescriptor);
@@ -133,16 +121,12 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     EXPECT_CALL(api, DeviceCreatePipelineLayout(apiDevice, _)).WillOnce(Return(apiLayout));
 
     // Create pipeline
-    WGPURenderPipelineDescriptor pipelineDescriptor;
-    pipelineDescriptor.nextInChain = nullptr;
-    pipelineDescriptor.label = nullptr;
+    WGPURenderPipelineDescriptor pipelineDescriptor = {};
 
-    pipelineDescriptor.vertexStage.nextInChain = nullptr;
     pipelineDescriptor.vertexStage.module = vsModule;
     pipelineDescriptor.vertexStage.entryPoint = "main";
 
-    WGPUProgrammableStageDescriptor fragmentStage;
-    fragmentStage.nextInChain = nullptr;
+    WGPUProgrammableStageDescriptor fragmentStage = {};
     fragmentStage.module = vsModule;
     fragmentStage.entryPoint = "main";
     pipelineDescriptor.fragmentStage = &fragmentStage;

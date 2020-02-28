@@ -178,10 +178,9 @@ TEST_P(DeviceLostTest, CreateRenderBundleEncoderFails) {
 TEST_P(DeviceLostTest, CreateComputePipelineFails) {
     SetCallbackAndLoseForTesting();
 
-    wgpu::ComputePipelineDescriptor descriptor;
+    wgpu::ComputePipelineDescriptor descriptor = {};
     descriptor.layout = nullptr;
     descriptor.computeStage.module = nullptr;
-    descriptor.nextInChain = nullptr;
     ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&descriptor));
 }
 
@@ -218,8 +217,7 @@ TEST_P(DeviceLostTest, CreateShaderModuleFails) {
 TEST_P(DeviceLostTest, CreateSwapChainFails) {
     SetCallbackAndLoseForTesting();
 
-    wgpu::SwapChainDescriptor descriptor;
-    descriptor.nextInChain = nullptr;
+    wgpu::SwapChainDescriptor descriptor = {};
     ASSERT_DEVICE_ERROR(device.CreateSwapChain(nullptr, &descriptor));
 }
 

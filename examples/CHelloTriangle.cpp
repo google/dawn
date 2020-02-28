@@ -29,9 +29,7 @@ void init() {
     queue = wgpuDeviceCreateQueue(device);
 
     {
-        WGPUSwapChainDescriptor descriptor;
-        descriptor.nextInChain = nullptr;
-        descriptor.label = nullptr;
+        WGPUSwapChainDescriptor descriptor = {};
         descriptor.implementation = GetSwapChainImplementation();
         swapchain = wgpuDeviceCreateSwapChain(device, nullptr, &descriptor);
     }
@@ -58,28 +56,23 @@ void init() {
         utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fs).Release();
 
     {
-        WGPURenderPipelineDescriptor descriptor;
-        descriptor.label = nullptr;
-        descriptor.nextInChain = nullptr;
+        WGPURenderPipelineDescriptor descriptor = {};
 
-        descriptor.vertexStage.nextInChain = nullptr;
         descriptor.vertexStage.module = vsModule;
         descriptor.vertexStage.entryPoint = "main";
 
-        WGPUProgrammableStageDescriptor fragmentStage;
-        fragmentStage.nextInChain = nullptr;
+        WGPUProgrammableStageDescriptor fragmentStage = {};
         fragmentStage.module = fsModule;
         fragmentStage.entryPoint = "main";
         descriptor.fragmentStage = &fragmentStage;
 
         descriptor.sampleCount = 1;
 
-        WGPUBlendDescriptor blendDescriptor;
+        WGPUBlendDescriptor blendDescriptor = {};
         blendDescriptor.operation = WGPUBlendOperation_Add;
         blendDescriptor.srcFactor = WGPUBlendFactor_One;
         blendDescriptor.dstFactor = WGPUBlendFactor_One;
-        WGPUColorStateDescriptor colorStateDescriptor;
-        colorStateDescriptor.nextInChain = nullptr;
+        WGPUColorStateDescriptor colorStateDescriptor = {};
         colorStateDescriptor.format = swapChainFormat;
         colorStateDescriptor.alphaBlend = blendDescriptor;
         colorStateDescriptor.colorBlend = blendDescriptor;
@@ -88,22 +81,18 @@ void init() {
         descriptor.colorStateCount = 1;
         descriptor.colorStates = &colorStateDescriptor;
 
-        WGPUPipelineLayoutDescriptor pl;
-        pl.nextInChain = nullptr;
-        pl.label = nullptr;
+        WGPUPipelineLayoutDescriptor pl = {};
         pl.bindGroupLayoutCount = 0;
         pl.bindGroupLayouts = nullptr;
         descriptor.layout = wgpuDeviceCreatePipelineLayout(device, &pl);
 
-        WGPUVertexStateDescriptor vertexState;
-        vertexState.nextInChain = nullptr;
+        WGPUVertexStateDescriptor vertexState = {};
         vertexState.indexFormat = WGPUIndexFormat_Uint32;
         vertexState.vertexBufferCount = 0;
         vertexState.vertexBuffers = nullptr;
         descriptor.vertexState = &vertexState;
 
-        WGPURasterizationStateDescriptor rasterizationState;
-        rasterizationState.nextInChain = nullptr;
+        WGPURasterizationStateDescriptor rasterizationState = {};
         rasterizationState.frontFace = WGPUFrontFace_CCW;
         rasterizationState.cullMode = WGPUCullMode_None;
         rasterizationState.depthBias = 0;
@@ -126,10 +115,8 @@ void init() {
 
 void frame() {
     WGPUTextureView backbufferView = wgpuSwapChainGetCurrentTextureView(swapchain);
-    WGPURenderPassDescriptor renderpassInfo;
-    renderpassInfo.nextInChain = nullptr;
-    renderpassInfo.label = nullptr;
-    WGPURenderPassColorAttachmentDescriptor colorAttachment;
+    WGPURenderPassDescriptor renderpassInfo = {};
+    WGPURenderPassColorAttachmentDescriptor colorAttachment = {};
     {
         colorAttachment.attachment = backbufferView;
         colorAttachment.resolveTarget = nullptr;
