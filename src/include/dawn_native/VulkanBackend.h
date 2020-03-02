@@ -23,26 +23,6 @@
 #include <vector>
 
 namespace dawn_native { namespace vulkan {
-
-    // The different types of ExternalImageDescriptors
-    enum ExternalImageDescriptorType {
-#ifdef __linux__
-        OpaqueFD,
-        DmaBuf,
-#endif  // __linux__
-    };
-
-    // Common properties of external images
-    struct DAWN_NATIVE_EXPORT ExternalImageDescriptor {
-      public:
-        const ExternalImageDescriptorType type;           // Must match the subclass
-        const WGPUTextureDescriptor* cTextureDescriptor;  // Must match image creation params
-        bool isCleared;  // Sets whether the texture will be cleared before use
-
-      protected:
-        ExternalImageDescriptor(ExternalImageDescriptorType type);
-    };
-
     DAWN_NATIVE_EXPORT VkInstance GetInstance(WGPUDevice device);
 
     DAWN_NATIVE_EXPORT PFN_vkVoidFunction GetInstanceProcAddr(WGPUDevice device, const char* pName);

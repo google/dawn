@@ -312,7 +312,7 @@ namespace dawn_native { namespace d3d12 {
                                                          initialUsage);
     }
 
-    TextureBase* Device::WrapSharedHandle(const TextureDescriptor* descriptor,
+    TextureBase* Device::WrapSharedHandle(const ExternalImageDescriptor* descriptor,
                                           HANDLE sharedHandle,
                                           uint64_t acquireMutexKey) {
         TextureBase* dawnTexture;

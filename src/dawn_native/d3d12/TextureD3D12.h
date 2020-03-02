@@ -18,6 +18,7 @@
 #include "common/Serial.h"
 #include "dawn_native/Texture.h"
 
+#include "dawn_native/DawnNative.h"
 #include "dawn_native/d3d12/ResourceHeapAllocationD3D12.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
@@ -36,7 +37,7 @@ namespace dawn_native { namespace d3d12 {
         static ResultOrError<TextureBase*> Create(Device* device,
                                                   const TextureDescriptor* descriptor);
         static ResultOrError<TextureBase*> Create(Device* device,
-                                                  const TextureDescriptor* descriptor,
+                                                  const ExternalImageDescriptor* descriptor,
                                                   HANDLE sharedHandle,
                                                   uint64_t acquireMutexKey);
         Texture(Device* device,

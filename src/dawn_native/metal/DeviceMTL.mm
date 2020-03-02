@@ -269,13 +269,16 @@ namespace dawn_native { namespace metal {
         return {};
     }
 
-    TextureBase* Device::CreateTextureWrappingIOSurface(const TextureDescriptor* descriptor,
+    TextureBase* Device::CreateTextureWrappingIOSurface(const ExternalImageDescriptor* descriptor,
                                                         IOSurfaceRef ioSurface,
                                                         uint32_t plane) {
-        if (ConsumedError(ValidateTextureDescriptor(this, descriptor))) {
+        const TextureDescriptor* textureDescriptor =
+            reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor);
+        if (ConsumedError(ValidateTextureDescriptor(this, textureDescriptor))) {
             return nullptr;
         }
-        if (ConsumedError(ValidateIOSurfaceCanBeWrapped(this, descriptor, ioSurface, plane))) {
+        if (ConsumedError(
+                ValidateIOSurfaceCanBeWrapped(this, textureDescriptor, ioSurface, plane))) {
             return nullptr;
         }
 

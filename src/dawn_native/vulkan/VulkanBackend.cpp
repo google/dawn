@@ -60,10 +60,6 @@ namespace dawn_native { namespace vulkan {
     }
 
 #ifdef DAWN_PLATFORM_LINUX
-    ExternalImageDescriptor::ExternalImageDescriptor(ExternalImageDescriptorType type)
-        : type(type) {
-    }
-
     ExternalImageDescriptorFD::ExternalImageDescriptorFD(ExternalImageDescriptorType type)
         : ExternalImageDescriptor(type) {
     }

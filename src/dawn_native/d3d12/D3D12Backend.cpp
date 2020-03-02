@@ -46,15 +46,27 @@ namespace dawn_native { namespace d3d12 {
         return static_cast<WGPUTextureFormat>(impl->GetPreferredFormat());
     }
 
+    ExternalImageDescriptorDXGISharedHandle::ExternalImageDescriptorDXGISharedHandle()
+        : ExternalImageDescriptor(ExternalImageDescriptorType::DXGISharedHandle) {
+    }
+
+    WGPUTexture WrapSharedHandle(WGPUDevice device,
+                                 const ExternalImageDescriptorDXGISharedHandle* descriptor) {
+        Device* backendDevice = reinterpret_cast<Device*>(device);
+        TextureBase* texture = backendDevice->WrapSharedHandle(descriptor, descriptor->sharedHandle,
+                                                               descriptor->acquireMutexKey);
+        return reinterpret_cast<WGPUTexture>(texture);
+    }
+
     WGPUTexture WrapSharedHandle(WGPUDevice device,
                                  const WGPUTextureDescriptor* descriptor,
                                  HANDLE sharedHandle,
                                  uint64_t acquireMutexKey) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
-        const TextureDescriptor* backendDescriptor =
-            reinterpret_cast<const TextureDescriptor*>(descriptor);
+        ExternalImageDescriptorDXGISharedHandle externalDescriptor = {};
+        externalDescriptor.cTextureDescriptor = descriptor;
         TextureBase* texture =
-            backendDevice->WrapSharedHandle(backendDescriptor, sharedHandle, acquireMutexKey);
+            backendDevice->WrapSharedHandle(&externalDescriptor, sharedHandle, acquireMutexKey);
         return reinterpret_cast<WGPUTexture>(texture);
     }
 }}  // namespace dawn_native::d3d12

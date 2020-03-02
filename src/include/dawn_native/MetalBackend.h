@@ -33,6 +33,17 @@ typedef __IOSurface* IOSurfaceRef;
 #endif  //__OBJC__
 
 namespace dawn_native { namespace metal {
+    struct DAWN_NATIVE_EXPORT ExternalImageDescriptorIOSurface : ExternalImageDescriptor {
+      public:
+        ExternalImageDescriptorIOSurface();
+
+        IOSurfaceRef ioSurface;
+        uint32_t plane;
+    };
+
+    DAWN_NATIVE_EXPORT WGPUTexture
+    WrapIOSurface(WGPUDevice device, const ExternalImageDescriptorIOSurface* descriptor);
+
     DAWN_NATIVE_EXPORT WGPUTexture WrapIOSurface(WGPUDevice device,
                                                  const WGPUTextureDescriptor* descriptor,
                                                  IOSurfaceRef ioSurface,

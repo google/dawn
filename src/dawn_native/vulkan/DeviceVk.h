@@ -36,7 +36,6 @@ namespace dawn_native { namespace vulkan {
     class Adapter;
     class BufferUploader;
     class DescriptorSetService;
-    struct ExternalImageDescriptor;
     class FencedDeleter;
     class MapRequestTracker;
     class RenderPassCache;

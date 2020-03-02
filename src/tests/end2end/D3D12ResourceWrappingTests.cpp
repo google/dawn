@@ -102,9 +102,13 @@ namespace {
                 &sharedHandle);
             ASSERT_EQ(hr, S_OK);
 
-            WGPUTexture texture = dawn_native::d3d12::WrapSharedHandle(
-                device.Get(), reinterpret_cast<const WGPUTextureDescriptor*>(dawnDescriptor),
-                sharedHandle, 0);
+            dawn_native::d3d12::ExternalImageDescriptorDXGISharedHandle externDesc;
+            externDesc.cTextureDescriptor =
+                reinterpret_cast<const WGPUTextureDescriptor*>(dawnDescriptor);
+            externDesc.sharedHandle = sharedHandle;
+            externDesc.acquireMutexKey = 0;
+            WGPUTexture texture = dawn_native::d3d12::WrapSharedHandle(device.Get(), &externDesc);
+
             // Now that we've created all of our resources, we can close the handle
             // since we no longer need it.
             ::CloseHandle(sharedHandle);
@@ -329,9 +333,12 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
         hr = dxgiKeyedMutex->ReleaseSync(1);
         ASSERT_EQ(hr, S_OK);
 
-        WGPUTexture dawnTexture = dawn_native::d3d12::WrapSharedHandle(
-            device.Get(), reinterpret_cast<const WGPUTextureDescriptor*>(dawnDescriptor),
-            sharedHandle, 1);
+        dawn_native::d3d12::ExternalImageDescriptorDXGISharedHandle externDesc;
+        externDesc.cTextureDescriptor =
+            reinterpret_cast<const WGPUTextureDescriptor*>(dawnDescriptor);
+        externDesc.sharedHandle = sharedHandle;
+        externDesc.acquireMutexKey = 1;
+        WGPUTexture dawnTexture = dawn_native::d3d12::WrapSharedHandle(device.Get(), &externDesc);
 
         *dawnTextureOut = wgpu::Texture::Acquire(dawnTexture);
         *d3d11TextureOut = d3d11Texture.Detach();

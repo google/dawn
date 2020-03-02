@@ -335,11 +335,14 @@ namespace dawn_native { namespace metal {
     }
 
     Texture::Texture(Device* device,
-                     const TextureDescriptor* descriptor,
+                     const ExternalImageDescriptor* descriptor,
                      IOSurfaceRef ioSurface,
                      uint32_t plane)
-        : TextureBase(device, descriptor, TextureState::OwnedInternal) {
-        MTLTextureDescriptor* mtlDesc = CreateMetalTextureDescriptor(descriptor);
+        : TextureBase(device,
+                      reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor),
+                      TextureState::OwnedInternal) {
+        MTLTextureDescriptor* mtlDesc = CreateMetalTextureDescriptor(
+            reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor));
         mtlDesc.storageMode = kIOSurfaceStorageMode;
         mMtlTexture = [device->GetMTLDevice() newTextureWithDescriptor:mtlDesc
                                                              iosurface:ioSurface

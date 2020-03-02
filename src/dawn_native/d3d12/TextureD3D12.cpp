@@ -280,13 +280,16 @@ namespace dawn_native { namespace d3d12 {
     }
 
     ResultOrError<TextureBase*> Texture::Create(Device* device,
-                                                const TextureDescriptor* descriptor,
+                                                const ExternalImageDescriptor* descriptor,
                                                 HANDLE sharedHandle,
                                                 uint64_t acquireMutexKey) {
+        const TextureDescriptor* textureDescriptor =
+            reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor);
+
         Ref<Texture> dawnTexture =
-            AcquireRef(new Texture(device, descriptor, TextureState::OwnedExternal));
-        DAWN_TRY(
-            dawnTexture->InitializeAsExternalTexture(descriptor, sharedHandle, acquireMutexKey));
+            AcquireRef(new Texture(device, textureDescriptor, TextureState::OwnedExternal));
+        DAWN_TRY(dawnTexture->InitializeAsExternalTexture(textureDescriptor, sharedHandle,
+                                                          acquireMutexKey));
         return dawnTexture.Detach();
     }
 

@@ -55,7 +55,7 @@ namespace dawn_native { namespace metal {
 
         MapRequestTracker* GetMapTracker() const;
 
-        TextureBase* CreateTextureWrappingIOSurface(const TextureDescriptor* descriptor,
+        TextureBase* CreateTextureWrappingIOSurface(const ExternalImageDescriptor* descriptor,
                                                     IOSurfaceRef ioSurface,
                                                     uint32_t plane);
         void WaitForCommandsToBeScheduled();
