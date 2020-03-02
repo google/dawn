@@ -1,0 +1,310 @@
+# Copyright 2020 The Tint Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set(TINT_LIB_SRCS
+  ast/array_accessor_expression.cc
+  ast/array_accessor_expression.h
+  ast/as_expression.cc
+  ast/as_expression.h
+  ast/assignment_statement.cc
+  ast/assignment_statement.h
+  ast/binding_decoration.cc
+  ast/binding_decoration.h
+  ast/bool_literal.h
+  ast/bool_literal.cc
+  ast/break_statement.cc
+  ast/break_statement.h
+  ast/builtin.cc
+  ast/builtin.h
+  ast/builtin_decoration.cc
+  ast/builtin_decoration.h
+  ast/call_expression.cc
+  ast/call_expression.h
+  ast/case_statement.cc
+  ast/case_statement.h
+  ast/cast_expression.cc
+  ast/cast_expression.h
+  ast/const_initializer_expression.cc
+  ast/const_initializer_expression.h
+  ast/continue_statement.cc
+  ast/continue_statement.h
+  ast/decorated_variable.cc
+  ast/decorated_variable.h
+  ast/derivative_modifier.cc
+  ast/derivative_modifier.h
+  ast/else_statement.cc
+  ast/else_statement.h
+  ast/entry_point.cc
+  ast/entry_point.h
+  ast/expression.cc
+  ast/expression.h
+  ast/fallthrough_statement.cc
+  ast/fallthrough_statement.h
+  ast/float_literal.cc
+  ast/float_literal.h
+  ast/function.cc
+  ast/function.h
+  ast/identifier_expression.cc
+  ast/identifier_expression.h
+  ast/if_statement.cc
+  ast/if_statement.h
+  ast/import.cc
+  ast/import.h
+  ast/initializer_expression.cc
+  ast/initializer_expression.h
+  ast/int_literal.cc
+  ast/int_literal.h
+  ast/kill_statement.cc
+  ast/kill_statement.h
+  ast/literal.h
+  ast/literal.cc
+  ast/location_decoration.cc
+  ast/location_decoration.h
+  ast/loop_statement.cc
+  ast/loop_statement.h
+  ast/member_accessor_expression.cc
+  ast/member_accessor_expression.h
+  ast/module.cc
+  ast/module.h
+  ast/node.cc
+  ast/node.h
+  ast/nop_statement.cc
+  ast/nop_statement.h
+  ast/pipeline_stage.cc
+  ast/pipeline_stage.h
+  ast/regardless_statement.cc
+  ast/regardless_statement.h
+  ast/relational_expression.cc
+  ast/relational_expression.h
+  ast/return_statement.cc
+  ast/return_statement.h
+  ast/set_decoration.cc
+  ast/set_decoration.h
+  ast/statement.cc
+  ast/statement.h
+  ast/statement_condition.cc
+  ast/statement_condition.h
+  ast/storage_class.cc
+  ast/storage_class.h
+  ast/struct_decoration.cc
+  ast/struct_decoration.h
+  ast/struct.cc
+  ast/struct.h
+  ast/struct_member.cc
+  ast/struct_member.h
+  ast/struct_member_decoration.cc
+  ast/struct_member_decoration.h
+  ast/struct_member_offset_decoration.cc
+  ast/struct_member_offset_decoration.h
+  ast/switch_statement.cc
+  ast/switch_statement.h
+  ast/type_initializer_expression.h
+  ast/type_initializer_expression.cc
+  ast/type/alias_type.cc
+  ast/type/alias_type.h
+  ast/type/array_type.cc
+  ast/type/array_type.h
+  ast/type/bool_type.cc
+  ast/type/bool_type.h
+  ast/type/f32_type.cc
+  ast/type/f32_type.h
+  ast/type/i32_type.cc
+  ast/type/i32_type.h
+  ast/type/matrix_type.cc
+  ast/type/matrix_type.h
+  ast/type/pointer_type.cc
+  ast/type/pointer_type.h
+  ast/type/struct_type.cc
+  ast/type/struct_type.h
+  ast/type/type.cc
+  ast/type/type.h
+  ast/type/u32_type.cc
+  ast/type/u32_type.h
+  ast/type/vector_type.cc
+  ast/type/vector_type.h
+  ast/type/void_type.cc
+  ast/type/void_type.h
+  ast/uint_literal.cc
+  ast/uint_literal.h
+  ast/unary_derivative.cc
+  ast/unary_derivative.h
+  ast/unary_derivative_expression.cc
+  ast/unary_derivative_expression.h
+  ast/unary_method.cc
+  ast/unary_method.h
+  ast/unary_method_expression.cc
+  ast/unary_method_expression.h
+  ast/unary_op.cc
+  ast/unary_op.h
+  ast/unary_op_expression.cc
+  ast/unary_op_expression.h
+  ast/unless_statement.cc
+  ast/unless_statement.h
+  ast/variable.cc
+  ast/variable.h
+  ast/variable_decoration.cc
+  ast/variable_decoration.h
+  ast/variable_statement.cc
+  ast/variable_statement.h
+  reader/reader.cc
+  reader/reader.h
+  reader/wgsl/lexer.cc
+  reader/wgsl/lexer.h
+  reader/wgsl/parser.cc
+  reader/wgsl/parser.h
+  reader/wgsl/parser_impl.cc
+  reader/wgsl/parser_impl.h
+  reader/wgsl/token.cc
+  reader/wgsl/token.h
+  source.h
+  type_determiner.cc
+  type_determiner.h
+  type_manager.cc
+  type_manager.h
+  validator.cc
+  validator.h
+  # TODO(dsinclair): The writers should all be optional
+  writer/spv/generator.cc
+  writer/spv/generator.h
+  writer/wgsl/generator.cc
+  writer/wgsl/generator.h
+  writer/writer.cc
+  writer/writer.h
+)
+
+if(TINT_BUILD_SPV_PARSER)
+  list(APPEND TINT_LIB_SRCS
+    reader/spv/parser.cc
+    reader/spv/parser.h
+  )
+endif()
+
+set(TINT_TEST_SRCS
+  ast/binding_decoration_test.cc
+  ast/bool_literal_test.cc
+  ast/builtin_decoration_test.cc
+  ast/entry_point_test.cc
+  ast/import_test.cc
+  ast/int_literal_test.cc
+  ast/location_decoration_test.cc
+  ast/module_test.cc
+  ast/set_decoration_test.cc
+  ast/struct_member_test.cc
+  ast/struct_member_offset_decoration_test.cc
+  ast/struct_test.cc
+  ast/type/alias_type_test.cc
+  ast/type/array_type_test.cc
+  ast/type/bool_type_test.cc
+  ast/type/f32_type_test.cc
+  ast/type/i32_type_test.cc
+  ast/type/matrix_type_test.cc
+  ast/type/pointer_type_test.cc
+  ast/type/struct_type_test.cc
+  ast/type/u32_type_test.cc
+  ast/type/vector_type_test.cc
+  ast/uint_literal_test.cc
+  ast/variable_test.cc
+  reader/wgsl/lexer_test.cc
+  reader/wgsl/parser_test.cc
+  reader/wgsl/parser_impl_additive_expression_test.cc
+  reader/wgsl/parser_impl_and_expression_test.cc
+  reader/wgsl/parser_impl_argument_expression_list_test.cc
+  reader/wgsl/parser_impl_assignment_stmt_test.cc
+  reader/wgsl/parser_impl_body_stmt_test.cc
+  reader/wgsl/parser_impl_break_stmt_test.cc
+  reader/wgsl/parser_impl_builtin_decoration_test.cc
+  reader/wgsl/parser_impl_case_body_test.cc
+  reader/wgsl/parser_impl_const_expr_test.cc
+  reader/wgsl/parser_impl_const_literal_test.cc
+  reader/wgsl/parser_impl_continue_stmt_test.cc
+  reader/wgsl/parser_impl_continuing_stmt_test.cc
+  reader/wgsl/parser_impl_derivative_modifier_test.cc
+  reader/wgsl/parser_impl_else_stmt_test.cc
+  reader/wgsl/parser_impl_elseif_stmt_test.cc
+  reader/wgsl/parser_impl_entry_point_decl_test.cc
+  reader/wgsl/parser_impl_equality_expression_test.cc
+  reader/wgsl/parser_impl_exclusive_or_expression_test.cc
+  reader/wgsl/parser_impl_function_decl_test.cc
+  reader/wgsl/parser_impl_function_header_test.cc
+  reader/wgsl/parser_impl_function_type_decl_test.cc
+  reader/wgsl/parser_impl_global_constant_decl_test.cc
+  reader/wgsl/parser_impl_global_decl_test.cc
+  reader/wgsl/parser_impl_global_variable_decl_test.cc
+  reader/wgsl/parser_impl_if_stmt_test.cc
+  reader/wgsl/parser_impl_import_decl_test.cc
+  reader/wgsl/parser_impl_inclusive_or_expression_test.cc
+  reader/wgsl/parser_impl_logical_and_expression_test.cc
+  reader/wgsl/parser_impl_logical_or_expression_test.cc
+  reader/wgsl/parser_impl_loop_stmt_test.cc
+  reader/wgsl/parser_impl_multiplicative_expression_test.cc
+  reader/wgsl/parser_impl_param_list_test.cc
+  reader/wgsl/parser_impl_paren_rhs_stmt_test.cc
+  reader/wgsl/parser_impl_pipeline_stage_test.cc
+  reader/wgsl/parser_impl_postfix_expression_test.cc
+  reader/wgsl/parser_impl_premerge_stmt_test.cc
+  reader/wgsl/parser_impl_primary_expression_test.cc
+  reader/wgsl/parser_impl_regardless_stmt_test.cc
+  reader/wgsl/parser_impl_relational_expression_test.cc
+  reader/wgsl/parser_impl_shift_expression_test.cc
+  reader/wgsl/parser_impl_statement_test.cc
+  reader/wgsl/parser_impl_statements_test.cc
+  reader/wgsl/parser_impl_storage_class_test.cc
+  reader/wgsl/parser_impl_struct_body_decl_test.cc
+  reader/wgsl/parser_impl_struct_decl_test.cc
+  reader/wgsl/parser_impl_struct_decoration_decl_test.cc
+  reader/wgsl/parser_impl_struct_decoration_test.cc
+  reader/wgsl/parser_impl_struct_member_decoration_decl_test.cc
+  reader/wgsl/parser_impl_struct_member_decoration_test.cc
+  reader/wgsl/parser_impl_struct_member_test.cc
+  reader/wgsl/parser_impl_switch_body_test.cc
+  reader/wgsl/parser_impl_switch_stmt_test.cc
+  reader/wgsl/parser_impl_test.cc
+  reader/wgsl/parser_impl_type_alias_test.cc
+  reader/wgsl/parser_impl_type_decl_test.cc
+  reader/wgsl/parser_impl_unary_expression_test.cc
+  reader/wgsl/parser_impl_unless_stmt_test.cc
+  reader/wgsl/parser_impl_variable_decl_test.cc
+  reader/wgsl/parser_impl_variable_decoration_list_test.cc
+  reader/wgsl/parser_impl_variable_decoration_test.cc
+  reader/wgsl/parser_impl_variable_ident_decl_test.cc
+  reader/wgsl/parser_impl_variable_stmt_test.cc
+  reader/wgsl/parser_impl_variable_storage_decoration_test.cc
+  reader/wgsl/token_test.cc
+  type_manager_test.cc
+)
+
+## Tint library
+add_library(libtint ${TINT_LIB_SRCS})
+tint_default_compile_options(libtint)
+set_target_properties(libtint PROPERTIES OUTPUT_NAME "tint")
+
+if(${TINT_ENABLE_SPV_PARSER})
+  target_link_libraries(libtint SPIRV-Tools)
+endif()
+
+add_executable(tint_unittests ${TINT_TEST_SRCS})
+if (NOT MSVC)
+  target_compile_options(tint_unittests PRIVATE
+    -Wno-global-constructors
+    -Wno-weak-vtables
+  )
+endif()
+
+## Test executable
+target_include_directories(
+    tint_unittests PRIVATE ${gmock_SOURCE_DIR}/include)
+target_link_libraries(tint_unittests libtint gmock_main)
+tint_default_compile_options(tint_unittests)
+
+add_test(NAME tint_unittests COMMAND tint_unittests)

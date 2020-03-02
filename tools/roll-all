@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+# Copyright 2020 The Tint Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Parse a DEPS file and rolls all of the dependencies.
+"""
+
+import os
+import re
+import subprocess
+import sys
+
+
+DEFAULT_DEPS_PATH = os.path.normpath(
+  os.path.join(os.path.dirname(__file__), os.pardir, 'DEPS'))
+
+
+def parse_file_to_dict(path):
+  dictionary = {}
+  contents = open(path).read()
+  # Need to convert Var() to vars[], so that the DEPS is actually Python. Var()
+  # comes from Autoroller using gclient which has a slightly different DEPS
+  # format.
+  contents = re.sub(r"Var\((.*?)\)", r"vars[\1]", contents)
+  exec(contents, dictionary)
+  return dictionary
+
+
+def roll_all_deps(deps_file_path):
+  deps_file_directory = os.path.dirname(deps_file_path)
+  deps_file = parse_file_to_dict(deps_file_path)
+
+  dependencies = deps_file['deps'].copy()
+
+  list_of_deps = ['roll-dep', '--ignore-dirty-tree']
+  for directory in sorted(deps_file['deps']):
+    # cpplint uses gh-pages as the main branch, not master which doesn't work
+    # with roll-dep
+    if directory == "third_party/cpplint":
+      continue
+
+    relative_directory = os.path.join(deps_file_directory, directory)
+    list_of_deps.append(relative_directory)
+
+  subprocess.check_call(list_of_deps)
+
+
+def main(argv):
+  deps_file_path = DEFAULT_DEPS_PATH
+
+  roll_all_deps(deps_file_path)
+
+
+if __name__ == '__main__':
+  exit(main(sys.argv[1:]))

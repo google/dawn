@@ -1,0 +1,140 @@
+# Copyright 2020 The Tint Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cmake_minimum_required(VERSION 3.10.2)
+
+project(tint)
+enable_testing()
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_DEBUG_POSTFIX "")
+
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
+  message(STATUS "No build type selected, default to Debug")
+  set(CMAKE_BUILD_TYPE "Debug")
+endif()
+
+option(TINT_BUILD_DOCS "Build documentation" ON)
+option(TINT_BUILD_SPV_PARSER "Build the SPIR-V input parser" OFF)
+option(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
+
+option(TINT_ENABLE_MSAN "Enable memory sanitizer" OFF)
+option(TINT_ENABLE_ASAN "Enable address sanitizer" OFF)
+option(TINT_ENABLE_UBSAN "Enable undefined behaviour sanitizer" OFF)
+
+message(STATUS "Tint build docs: ${TINT_BUILD_DOCS}")
+message(STATUS "Tint build SPIR-V parser: ${TINT_BUILD_SPV_PARSER}")
+message(STATUS "Tint build fuzzers: ${TINT_BUILD_FUZZERS}")
+message(STATUS "Tint build with ASAN: ${TINT_ENABLE_ASAN}")
+message(STATUS "Tint build with MSAN: ${TINT_ENABLE_MSAN}")
+message(STATUS "Tint build with UBSAN: ${TINT_ENABLE_UBSAN}")
+
+message(STATUS "Using python3")
+find_package(PythonInterp 3 REQUIRED)
+
+if (${TINT_BUILD_SPV_PARSER})
+  include_directories("${PROJECT_SOURCE_DIR}/third_party/spirv-tools/include")
+endif()
+
+if(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") OR
+    ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang") OR
+    (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") AND
+     (NOT CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")))
+  set(COMPILER_IS_LIKE_GNU TRUE)
+endif()
+
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+  add_custom_target(tint_docs ALL
+      COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+      COMMENT "Generating API documentation"
+      VERBATIM)
+else()
+  message("Doxygen not found. Skipping documentation")
+endif()
+
+function(tint_default_compile_options TARGET)
+  include_directories("${PROJECT_SOURCE_DIR}")
+
+  if (${COMPILER_IS_LIKE_GNU})
+    target_compile_options(${TARGET} PRIVATE
+      -std=c++14
+      -fno-exceptions
+      -fno-rtti
+      -fvisibility=hidden
+      -Wall
+      -Werror
+      -Wextra
+      -Wno-documentation-unknown-command
+      -Wno-padded
+      -Wno-switch-enum
+      -Wno-unknown-pragmas
+      -pedantic-errors
+    )
+
+    if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
+        ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
+      target_compile_options(${TARGET} PRIVATE
+        -Wno-c++98-compat
+        -Wno-c++98-compat-pedantic
+        -Wno-format-pedantic
+        -Wno-return-std-move-in-c++11
+        -Wno-unknown-warning-option
+        -Weverything
+      )
+    endif()
+
+    if (${TINT_ENABLE_MSAN})
+      target_compile_options(${TARGET} PRIVATE -fsanitize=memory)
+      target_link_options(${TARGET} PRIVATE -fsanitize=memory)
+    elseif (${TINT_ENABLE_ASAN})
+      target_compile_options(${TARGET} PRIVATE -fsanitize=address)
+      target_link_options(${TARGET} PRIVATE -fsanitize=address)
+    elseif (${TINT_ENABLE_UBSAN})
+      target_compile_options(${TARGET} PRIVATE -fsanitize=undefined)
+      target_link_options(${TARGET} PRIVATE -fsanitize=undefined)
+    endif()
+  endif()
+
+  if (MSVC)
+    # Specify /EHs for exception handling.
+    target_compile_options(${TARGET} PRIVATE
+      /bigobj
+      /EHsc
+      /W3
+      /WX
+      /wd4068
+      /wd4514
+      /wd4571
+      /wd4625
+      /wd4626
+      /wd4710
+      /wd4774
+      /wd4820
+      /wd5026
+      /wd5027
+    )
+  endif()
+endfunction()
+
+add_subdirectory(third_party)
+add_subdirectory(src)
+add_subdirectory(samples)
+
+if (${TINT_BUILD_FUZZERS})
+  add_subdirectory(fuzz)
+endif()
+

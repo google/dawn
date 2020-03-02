@@ -1,0 +1,110 @@
+// Copyright 2020 The Tint Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include "gtest/gtest.h"
+#include "src/ast/case_statement.h"
+#include "src/ast/switch_statement.h"
+#include "src/reader/wgsl/parser_impl.h"
+
+namespace tint {
+namespace reader {
+namespace wgsl {
+
+using ParserImplTest = testing::Test;
+
+TEST_F(ParserImplTest, SwitchStmt_WithoutDefault) {
+  ParserImpl p{R"(switch(a) {
+  case 1: {}
+  case 2: {}
+})"};
+  auto e = p.switch_stmt();
+  ASSERT_FALSE(p.has_error()) << p.error();
+  ASSERT_NE(e, nullptr);
+  ASSERT_TRUE(e->IsSwitch());
+  ASSERT_EQ(e->body().size(), 2);
+  EXPECT_FALSE(e->body()[0]->IsDefault());
+  EXPECT_FALSE(e->body()[1]->IsDefault());
+}
+
+TEST_F(ParserImplTest, SwitchStmt_Empty) {
+  ParserImpl p{"switch(a) { }"};
+  auto e = p.switch_stmt();
+  ASSERT_FALSE(p.has_error()) << p.error();
+  ASSERT_NE(e, nullptr);
+  ASSERT_TRUE(e->IsSwitch());
+  ASSERT_EQ(e->body().size(), 0);
+}
+
+TEST_F(ParserImplTest, SwitchStmt_DefaultInMiddle) {
+  ParserImpl p{R"(switch(a) {
+  case 1: {}
+  default: {}
+  case 2: {}
+})"};
+  auto e = p.switch_stmt();
+  ASSERT_FALSE(p.has_error()) << p.error();
+  ASSERT_NE(e, nullptr);
+  ASSERT_TRUE(e->IsSwitch());
+
+  ASSERT_EQ(e->body().size(), 3);
+  ASSERT_FALSE(e->body()[0]->IsDefault());
+  ASSERT_TRUE(e->body()[1]->IsDefault());
+  ASSERT_FALSE(e->body()[2]->IsDefault());
+}
+
+TEST_F(ParserImplTest, SwitchStmt_InvalidExpression) {
+  ParserImpl p{"switch(a=b) {}"};
+  auto e = p.switch_stmt();
+  ASSERT_TRUE(p.has_error());
+  ASSERT_EQ(e, nullptr);
+  EXPECT_EQ(p.error(), "1:9: expected )");
+}
+
+TEST_F(ParserImplTest, SwitchStmt_MissingExpression) {
+  ParserImpl p{"switch {}"};
+  auto e = p.switch_stmt();
+  ASSERT_TRUE(p.has_error());
+  ASSERT_EQ(e, nullptr);
+  EXPECT_EQ(p.error(), "1:8: expected (");
+}
+
+TEST_F(ParserImplTest, SwitchStmt_MissingBracketLeft) {
+  ParserImpl p{"switch(a) }"};
+  auto e = p.switch_stmt();
+  ASSERT_TRUE(p.has_error());
+  ASSERT_EQ(e, nullptr);
+  EXPECT_EQ(p.error(), "1:11: missing { for switch statement");
+}
+
+TEST_F(ParserImplTest, SwitchStmt_MissingBracketRight) {
+  ParserImpl p{"switch(a) {"};
+  auto e = p.switch_stmt();
+  ASSERT_TRUE(p.has_error());
+  ASSERT_EQ(e, nullptr);
+  EXPECT_EQ(p.error(), "1:12: missing } for switch statement");
+}
+
+TEST_F(ParserImplTest, SwitchStmt_InvalidBody) {
+  ParserImpl p{R"(switch(a) {
+  case: {}
+})"};
+  auto e = p.switch_stmt();
+  ASSERT_TRUE(p.has_error());
+  ASSERT_EQ(e, nullptr);
+  EXPECT_EQ(p.error(), "2:7: unable to parse case conditional");
+}
+
+}  // namespace wgsl
+}  // namespace reader
+}  // namespace tint

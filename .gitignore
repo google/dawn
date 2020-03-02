@@ -1,0 +1,8 @@
+.vscode
+.DS_Store
+build
+out
+third_party/cpplint
+third_party/googletest
+third_party/spirv-headers
+third_party/spirv-tools
