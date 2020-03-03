@@ -5,9 +5,9 @@ vars = {
   'khronos_git': 'https://github.com/KhronosGroup',
 
   'cpplint_revision': '26470f9ccb354ff2f6d098f831271a1833701b28',
-  'googletest_revision': '41b5f149ab306e96b5b2faf523505d75acffd98a',
-  'spirv_headers_revision': '5dbc1c32182e17b8ab8e8158a802ecabaf35aad3',
-  'spirv_tools_revision': 'fe10239f92f4539e9050da375dab095328fec196',
+  'googletest_revision': 'e588eb1ff9ff6598666279b737b27f983156ad85',
+  'spirv_headers_revision': '0a7fc45259910f07f00c5a3fa10be5678bee1f83',
+  'spirv_tools_revision': 'e1688b60caf77e7efd9e440e57cca429ca7c5a1e',
 }
 
 deps = {
