@@ -270,91 +270,53 @@ namespace dawn_native { namespace d3d12 {
         ShaderVisibleDescriptorAllocator* mAllocator;
     };
 
-    class RenderPassDescriptorHeapTracker {
-      public:
-        RenderPassDescriptorHeapTracker(Device* device) : mDevice(device) {
-        }
-
-        // This function must only be called before calling AllocateRTVAndDSVHeaps().
-        void TrackRenderPass(const BeginRenderPassCmd* renderPass) {
-            DAWN_ASSERT(mRTVHeap.Get() == nullptr && mDSVHeap.Get() == nullptr);
-
-            mNumRTVs += static_cast<uint32_t>(
-                renderPass->attachmentState->GetColorAttachmentsMask().count());
-            if (renderPass->attachmentState->HasDepthStencilAttachment()) {
-                ++mNumDSVs;
-            }
-        }
-
-        MaybeError AllocateRTVAndDSVHeaps() {
-            // This function should only be called once.
-            DAWN_ASSERT(mRTVHeap.Get() == nullptr && mDSVHeap.Get() == nullptr);
-            DescriptorHeapAllocator* allocator = mDevice->GetDescriptorHeapAllocator();
-            if (mNumRTVs > 0) {
-                DAWN_TRY_ASSIGN(
-                    mRTVHeap, allocator->AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, mNumRTVs));
-            }
-            if (mNumDSVs > 0) {
-                DAWN_TRY_ASSIGN(
-                    mDSVHeap, allocator->AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, mNumDSVs));
-            }
-            return {};
-        }
+    namespace {
 
         // TODO(jiawei.shao@intel.com): use hash map <RenderPass, OMSetRenderTargetArgs> as
         // cache to avoid redundant RTV and DSV memory allocations.
-        OMSetRenderTargetArgs GetSubpassOMSetRenderTargetArgs(BeginRenderPassCmd* renderPass) {
+        ResultOrError<OMSetRenderTargetArgs> GetSubpassOMSetRenderTargetArgs(
+            BeginRenderPassCmd* renderPass,
+            Device* device) {
             OMSetRenderTargetArgs args = {};
 
-            unsigned int rtvIndex = 0;
             uint32_t rtvCount = static_cast<uint32_t>(
                 renderPass->attachmentState->GetColorAttachmentsMask().count());
-            DAWN_ASSERT(mAllocatedRTVs + rtvCount <= mNumRTVs);
+            DescriptorHeapAllocator* allocator = device->GetDescriptorHeapAllocator();
+            DescriptorHeapHandle rtvHeap;
+            DAWN_TRY_ASSIGN(rtvHeap,
+                            allocator->AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, rtvCount));
+            ASSERT(rtvHeap.Get() != nullptr);
+            ID3D12Device* d3dDevice = device->GetD3D12Device().Get();
+            unsigned int rtvIndex = 0;
             for (uint32_t i :
                  IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
+                ASSERT(rtvIndex < rtvCount);
                 TextureView* view = ToBackend(renderPass->colorAttachments[i].view).Get();
-                D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = mRTVHeap.GetCPUHandle(mAllocatedRTVs);
+                D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap.GetCPUHandle(rtvIndex);
                 D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = view->GetRTVDescriptor();
-                mDevice->GetD3D12Device()->CreateRenderTargetView(
-                    ToBackend(view->GetTexture())->GetD3D12Resource(), &rtvDesc, rtvHandle);
-                args.RTVs[i] = rtvHandle;
+                d3dDevice->CreateRenderTargetView(ToBackend(view->GetTexture())->GetD3D12Resource(),
+                                                  &rtvDesc, rtvHandle);
+                args.RTVs[rtvIndex] = rtvHandle;
 
                 ++rtvIndex;
-                ++mAllocatedRTVs;
             }
-            args.numRTVs = rtvIndex;
+            args.numRTVs = rtvCount;
 
             if (renderPass->attachmentState->HasDepthStencilAttachment()) {
-                DAWN_ASSERT(mAllocatedDSVs < mNumDSVs);
+                DescriptorHeapHandle dsvHeap;
+                DAWN_TRY_ASSIGN(dsvHeap,
+                                allocator->AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1));
+                ASSERT(dsvHeap.Get() != nullptr);
                 TextureView* view = ToBackend(renderPass->depthStencilAttachment.view).Get();
-                D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = mDSVHeap.GetCPUHandle(mAllocatedDSVs);
+                D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvHeap.GetCPUHandle(0);
                 D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = view->GetDSVDescriptor();
-                mDevice->GetD3D12Device()->CreateDepthStencilView(
-                    ToBackend(view->GetTexture())->GetD3D12Resource(), &dsvDesc, dsvHandle);
+                d3dDevice->CreateDepthStencilView(ToBackend(view->GetTexture())->GetD3D12Resource(),
+                                                  &dsvDesc, dsvHandle);
                 args.dsv = dsvHandle;
-
-                ++mAllocatedDSVs;
             }
 
             return args;
         }
-
-        bool IsHeapAllocationCompleted() const {
-            return mNumRTVs == mAllocatedRTVs && mNumDSVs == mAllocatedDSVs;
-        }
-
-      private:
-        Device* mDevice;
-        DescriptorHeapHandle mRTVHeap = {};
-        DescriptorHeapHandle mDSVHeap = {};
-        uint32_t mNumRTVs = 0;
-        uint32_t mNumDSVs = 0;
-
-        uint32_t mAllocatedRTVs = 0;
-        uint32_t mAllocatedDSVs = 0;
-    };
-
-    namespace {
 
         class VertexBufferTracker {
           public:
@@ -448,51 +410,6 @@ namespace dawn_native { namespace d3d12 {
             D3D12_INDEX_BUFFER_VIEW mD3D12BufferView = {};
         };
 
-        MaybeError AllocateAndSetDescriptorHeaps(Device* device,
-                                                 BindGroupStateTracker* bindingTracker,
-                                                 RenderPassDescriptorHeapTracker* renderPassTracker,
-                                                 CommandIterator* commands) {
-            {
-                Command type;
-
-                auto HandleCommand = [&](CommandIterator* commands, Command type) {
-                    switch (type) {
-                        case Command::BeginRenderPass: {
-                            BeginRenderPassCmd* cmd = commands->NextCommand<BeginRenderPassCmd>();
-                            renderPassTracker->TrackRenderPass(cmd);
-                        } break;
-                        default:
-                            SkipCommand(commands, type);
-                    }
-                };
-
-                while (commands->NextCommandId(&type)) {
-                    switch (type) {
-                        case Command::ExecuteBundles: {
-                            ExecuteBundlesCmd* cmd = commands->NextCommand<ExecuteBundlesCmd>();
-                            auto bundles = commands->NextData<Ref<RenderBundleBase>>(cmd->count);
-
-                            for (uint32_t i = 0; i < cmd->count; ++i) {
-                                CommandIterator* commands = bundles[i]->GetCommands();
-                                commands->Reset();
-                                while (commands->NextCommandId(&type)) {
-                                    HandleCommand(commands, type);
-                                }
-                            }
-                        } break;
-                        default:
-                            HandleCommand(commands, type);
-                            break;
-                    }
-                }
-
-                commands->Reset();
-            }
-
-            DAWN_TRY(renderPassTracker->AllocateRTVAndDSVHeaps());
-            return {};
-        }
-
         void ResolveMultisampledRenderPass(CommandRecordingContext* commandContext,
                                            BeginRenderPassCmd* renderPass) {
             ASSERT(renderPass != nullptr);
@@ -540,18 +457,8 @@ namespace dawn_native { namespace d3d12 {
     MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext) {
         Device* device = ToBackend(GetDevice());
         BindGroupStateTracker bindingTracker(device);
-        RenderPassDescriptorHeapTracker renderPassTracker(device);
 
         ID3D12GraphicsCommandList* commandList = commandContext->GetCommandList();
-
-        // Precompute the allocation of bindgroups in descriptor heaps
-        // TODO(cwallez@chromium.org): Iterating over all the commands here is inefficient. We
-        // should have a system where commands and descriptors are recorded in parallel then the
-        // heaps set using a small CommandList inserted just before the main CommandList.
-        {
-            DAWN_TRY(AllocateAndSetDescriptorHeaps(device, &bindingTracker, &renderPassTracker,
-                                                   &mCommands));
-        }
 
         // Make sure we use the correct descriptors for this command list. Could be done once per
         // actual command list but here is ok because there should be few command buffers.
@@ -633,8 +540,8 @@ namespace dawn_native { namespace d3d12 {
                     bindingTracker.SetInComputePass(false);
 
                     LazyClearRenderPassAttachments(beginRenderPassCmd);
-                    DAWN_TRY(RecordRenderPass(commandContext, &bindingTracker, &renderPassTracker,
-                                              beginRenderPassCmd, passHasUAV));
+                    DAWN_TRY(RecordRenderPass(commandContext, &bindingTracker, beginRenderPassCmd,
+                                              passHasUAV));
 
                     nextPassNumber++;
                 } break;
@@ -779,7 +686,6 @@ namespace dawn_native { namespace d3d12 {
             }
         }
 
-        DAWN_ASSERT(renderPassTracker.IsHeapAllocationCompleted());
         return {};
     }
 
@@ -998,16 +904,15 @@ namespace dawn_native { namespace d3d12 {
                 : nullptr);
     }
 
-    MaybeError CommandBuffer::RecordRenderPass(
-        CommandRecordingContext* commandContext,
-        BindGroupStateTracker* bindingTracker,
-        RenderPassDescriptorHeapTracker* renderPassDescriptorHeapTracker,
-        BeginRenderPassCmd* renderPass,
-        const bool passHasUAV) {
-        OMSetRenderTargetArgs args =
-            renderPassDescriptorHeapTracker->GetSubpassOMSetRenderTargetArgs(renderPass);
+    MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandContext,
+                                               BindGroupStateTracker* bindingTracker,
+                                               BeginRenderPassCmd* renderPass,
+                                               const bool passHasUAV) {
+        Device* device = ToBackend(GetDevice());
+        OMSetRenderTargetArgs args;
+        DAWN_TRY_ASSIGN(args, GetSubpassOMSetRenderTargetArgs(renderPass, device));
 
-        const bool useRenderPass = GetDevice()->IsToggleEnabled(Toggle::UseD3D12RenderPass);
+        const bool useRenderPass = device->IsToggleEnabled(Toggle::UseD3D12RenderPass);
 
         // renderPassBuilder must be scoped to RecordRenderPass because any underlying
         // D3D12_RENDER_PASS_ENDING_ACCESS_RESOLVE_SUBRESOURCE_PARAMETERS structs must remain

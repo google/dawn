@@ -54,12 +54,10 @@ namespace dawn_native { namespace d3d12 {
       private:
         MaybeError RecordComputePass(CommandRecordingContext* commandContext,
                                      BindGroupStateTracker* bindingTracker);
-        MaybeError RecordRenderPass(
-            CommandRecordingContext* commandContext,
-            BindGroupStateTracker* bindingTracker,
-            RenderPassDescriptorHeapTracker* renderPassDescriptorHeapTracker,
-            BeginRenderPassCmd* renderPass,
-            bool passHasUAV);
+        MaybeError RecordRenderPass(CommandRecordingContext* commandContext,
+                                    BindGroupStateTracker* bindingTracker,
+                                    BeginRenderPassCmd* renderPass,
+                                    bool passHasUAV);
         void SetupRenderPass(CommandRecordingContext* commandContext,
                              BeginRenderPassCmd* renderPass,
                              RenderPassBuilder* renderPassBuilder);
