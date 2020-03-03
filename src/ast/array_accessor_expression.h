@@ -28,6 +28,8 @@ namespace ast {
 class ArrayAccessorExpression : public Expression {
  public:
   /// Constructor
+  ArrayAccessorExpression();
+  /// Constructor
   /// @param array the array
   /// @param idx_expr the index expression
   ArrayAccessorExpression(std::unique_ptr<Expression> array,

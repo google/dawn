@@ -17,6 +17,8 @@
 namespace tint {
 namespace ast {
 
+ArrayAccessorExpression::ArrayAccessorExpression() : Expression() {}
+
 ArrayAccessorExpression::ArrayAccessorExpression(
     std::unique_ptr<Expression> array,
     std::unique_ptr<Expression> idx_expr)
