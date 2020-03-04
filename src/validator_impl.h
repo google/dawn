@@ -12,25 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_VALIDATOR_H_
-#define SRC_VALIDATOR_H_
+#ifndef SRC_VALIDATOR_IMPL_H_
+#define SRC_VALIDATOR_IMPL_H_
 
-#include <memory>
 #include <string>
 
 #include "src/ast/module.h"
-#include "src/validator_impl.h"
 
 namespace tint {
 
-class ValidatorImpl;
-
 /// Determines if the module is complete and valid
-class Validator {
+class ValidatorImpl {
  public:
   /// Constructor
-  Validator();
-  ~Validator();
+  ValidatorImpl();
+  ~ValidatorImpl();
 
   /// Runs the validator
   /// @param module the module to validate
@@ -39,17 +35,24 @@ class Validator {
 
   /// @returns error messages from the validator
   const std::string& error() { return error_; }
+
   /// @returns true if an error was encountered
   bool has_error() const { return error_.size() > 0; }
+
   /// Sets the error string
+  /// @param src the source causing the error
   /// @param msg the error message
-  void set_error(const std::string& msg) { error_ = msg; }
+  void set_error(const Source& src, const std::string& msg);
+
+  /// Validates v-0001: Only allowed import is "GLSL.std.450"
+  /// @param module the modele to check imports
+  /// @returns ture if input complies with v-0001 rule
+  bool CheckImports(const ast::Module& module);
 
  private:
-  std::unique_ptr<ValidatorImpl> impl_;
   std::string error_;
 };
 
 }  // namespace tint
 
-#endif  // SRC_VALIDATOR_H_
+#endif  // SRC_VALIDATOR_IMPL_H_

@@ -12,23 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/validator.h"
-
 #include "src/validator_impl.h"
 
 namespace tint {
 
-Validator::Validator() : impl_(std::make_unique<tint::ValidatorImpl>()) {}
+ValidatorImpl::ValidatorImpl() = default;
 
-Validator::~Validator() = default;
+ValidatorImpl::~ValidatorImpl() = default;
 
-bool Validator::Validate(const ast::Module& module) {
-  bool ret = impl_->Validate(module);
+void ValidatorImpl::set_error(const Source& src, const std::string& msg) {
+  error_ =
+      std::to_string(src.line) + ":" + std::to_string(src.column) + ": " + msg;
+}
 
-  if (impl_->has_error())
-    set_error(impl_->error());
+bool ValidatorImpl::Validate(const ast::Module& module) {
+  if (!CheckImports(module))
+    return false;
+  return true;
+}
 
-  return ret;
+bool ValidatorImpl::CheckImports(const ast::Module& module) {
+  for (const auto& import : module.imports()) {
+    if (import->path() != "GLSL.std.450") {
+      set_error(import->source(), "v-0001: unknown import: " + import->path());
+      return false;
+    }
+  }
+  return true;
 }
 
 }  // namespace tint

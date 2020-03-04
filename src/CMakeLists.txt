@@ -174,6 +174,8 @@ set(TINT_LIB_SRCS
   type_manager.h
   validator.cc
   validator.h
+  validator_impl.cc
+  validator_impl.h
   # TODO(dsinclair): The writers should all be optional
   writer/spv/generator.cc
   writer/spv/generator.h
@@ -283,6 +285,7 @@ set(TINT_TEST_SRCS
   reader/wgsl/parser_impl_variable_storage_decoration_test.cc
   reader/wgsl/token_test.cc
   type_manager_test.cc
+  validator_impl_import_test.cc
 )
 
 ## Tint library

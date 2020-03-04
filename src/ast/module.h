@@ -43,7 +43,9 @@ class Module {
     imports_.push_back(std::move(import));
   }
   /// @returns the imports for this module
-  const std::vector<std::unique_ptr<Import>>& imports() { return imports_; }
+  const std::vector<std::unique_ptr<Import>>& imports() const {
+    return imports_;
+  }
   /// Find the import of the given name
   /// @param name The import name to search for
   /// @returns the import with the given name if found, nullptr otherwise.
