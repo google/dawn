@@ -29,6 +29,8 @@ namespace ast {
 class AssignmentStatement : public Statement {
  public:
   /// Constructor
+  AssignmentStatement();
+  /// Constructor
   /// @param lhs the left side of the expression
   /// @param rhs the right side of the expression
   AssignmentStatement(std::unique_ptr<Expression> lhs,

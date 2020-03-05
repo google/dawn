@@ -17,6 +17,8 @@
 namespace tint {
 namespace ast {
 
+AssignmentStatement::AssignmentStatement() : Statement() {}
+
 AssignmentStatement::AssignmentStatement(std::unique_ptr<Expression> lhs,
                                          std::unique_ptr<Expression> rhs)
     : Statement(), lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
@@ -29,16 +31,19 @@ AssignmentStatement::AssignmentStatement(const Source& source,
 AssignmentStatement::~AssignmentStatement() = default;
 
 bool AssignmentStatement::IsValid() const {
-  return lhs_ != nullptr && rhs_ != nullptr;
+  if (lhs_ == nullptr || !lhs_->IsValid())
+    return false;
+  if (rhs_ == nullptr || !rhs_->IsValid())
+    return false;
+
+  return true;
 }
 
 void AssignmentStatement::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
   out << "Assignment{" << std::endl;
   lhs_->to_str(out, indent + 2);
-  out << std::endl;
   rhs_->to_str(out, indent + 2);
-  out << std::endl;
   make_indent(out, indent);
   out << "}" << std::endl;
 }
