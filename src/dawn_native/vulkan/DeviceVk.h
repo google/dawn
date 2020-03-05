@@ -100,6 +100,12 @@ namespace dawn_native { namespace vulkan {
 
         ResourceMemoryAllocator* GetResourceMemoryAllocatorForTesting() const;
 
+        // Return the fixed subgroup size to use for compute shaders on this device,
+        // or 0 if none needs to be set.
+        uint32_t GetComputeSubgroupSize() const {
+            return mComputeSubgroupSize;
+        }
+
       private:
         ResultOrError<BindGroupBase*> CreateBindGroupImpl(
             const BindGroupDescriptor* descriptor) override;
@@ -130,6 +136,7 @@ namespace dawn_native { namespace vulkan {
         ResultOrError<VulkanDeviceKnobs> CreateDevice(VkPhysicalDevice physicalDevice);
         void GatherQueueFromDevice();
 
+        uint32_t FindComputeSubgroupSize() const;
         void InitTogglesFromDriver();
         void ApplyDepth24PlusS8Toggle();
 
@@ -144,6 +151,7 @@ namespace dawn_native { namespace vulkan {
         VkDevice mVkDevice = VK_NULL_HANDLE;
         uint32_t mQueueFamily = 0;
         VkQueue mQueue = VK_NULL_HANDLE;
+        uint32_t mComputeSubgroupSize = 0;
 
         std::unique_ptr<DescriptorSetService> mDescriptorSetService;
         std::unique_ptr<FencedDeleter> mDeleter;
