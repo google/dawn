@@ -40,6 +40,7 @@
 #include "dawn_native/vulkan/StagingBufferVk.h"
 #include "dawn_native/vulkan/SwapChainVk.h"
 #include "dawn_native/vulkan/TextureVk.h"
+#include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
 namespace dawn_native { namespace vulkan {
@@ -308,6 +309,22 @@ namespace dawn_native { namespace vulkan {
     ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice physicalDevice) {
         VulkanDeviceKnobs usedKnobs = {};
 
+        // Some device features can only be enabled using a VkPhysicalDeviceFeatures2
+        // struct, which is supported by the VK_EXT_get_physical_properties2 instance
+        // extension, which was promoted as a core API in Vulkan 1.1.
+        //
+        // Prepare a VkPhysicalDeviceFeatures2 struct for this use case, it will
+        // only be populated if |hasPhysicalDeviceFeatures2| is true.
+        //
+        bool hasPhysicalDeviceFeatures2 =
+            ToBackend(GetAdapter())->GetBackend()->GetGlobalInfo().getPhysicalDeviceProperties2;
+
+        VkPhysicalDeviceFeatures2 features2 = {
+            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+            .pNext = nullptr,
+        };
+        PNextChainBuilder featuresChain(&features2);
+
         float zero = 0.0f;
         std::vector<const char*> layersToRequest;
         std::vector<const char*> extensionsToRequest;
@@ -356,6 +373,21 @@ namespace dawn_native { namespace vulkan {
         if (mDeviceInfo.maintenance1) {
             extensionsToRequest.push_back(kExtensionNameKhrMaintenance1);
             usedKnobs.maintenance1 = true;
+        }
+        if (mDeviceInfo.subgroupSizeControl) {
+            // This extension is part of Vulkan 1.1 which always provides support
+            // for VkPhysicalDeviceFeatures2.
+            ASSERT(hasPhysicalDeviceFeatures2);
+
+            // Always require subgroup size control if available.
+            extensionsToRequest.push_back(kExtensionNameExtSubgroupSizeControl);
+            usedKnobs.subgroupSizeControl = true;
+
+            VkPhysicalDeviceSubgroupSizeControlFeaturesEXT* dst =
+                &usedKnobs.featuresExtensions.subgroupSizeControl;
+
+            *dst = mDeviceInfo.featuresExtensions.subgroupSizeControl;
+            featuresChain.Add(dst);
         }
 
         // Always require independentBlend because it is a core Dawn feature
@@ -414,6 +446,15 @@ namespace dawn_native { namespace vulkan {
         createInfo.enabledExtensionCount = static_cast<uint32_t>(extensionsToRequest.size());
         createInfo.ppEnabledExtensionNames = extensionsToRequest.data();
         createInfo.pEnabledFeatures = &usedKnobs.features;
+
+        if (hasPhysicalDeviceFeatures2 && features2.pNext != nullptr) {
+            // IMPORTANT: To enable features that are not covered by VkPhysicalDeviceFeatures,
+            // one should include a VkPhysicalDeviceFeatures2 struct in the
+            // VkDeviceCreateInfo.pNext chain, and set VkDeviceCreateInfo.pEnabledFeatures to null.
+            features2.features = usedKnobs.features;
+            createInfo.pNext = &features2;
+            createInfo.pEnabledFeatures = nullptr;
+        }
 
         DAWN_TRY(CheckVkSuccess(fn.CreateDevice(physicalDevice, &createInfo, nullptr, &mVkDevice),
                                 "vkCreateDevice"));
