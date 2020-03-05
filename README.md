@@ -23,6 +23,10 @@ cmake -GNinja ../..
 ninja
 ```
 
+## Issues
+Please file any issues or feature requests at
+https://bugs.chromium.org/p/tint/issues/entry
+
 ## Contributing
 Please see the CONTRIBUTING and CODE_OF_CONDUCT files on how to contribute to
 Tint.
