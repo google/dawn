@@ -1,5 +1,7 @@
-.vscode
 .DS_Store
+.gclient
+.gclient_entries
+.vscode
 build
 out
 third_party/cpplint
