@@ -17,6 +17,8 @@
 namespace tint {
 namespace ast {
 
+CallExpression::CallExpression() : Expression() {}
+
 CallExpression::CallExpression(std::unique_ptr<Expression> func,
                                std::vector<std::unique_ptr<Expression>> params)
     : Expression(), func_(std::move(func)), params_(std::move(params)) {}
@@ -29,11 +31,22 @@ CallExpression::CallExpression(const Source& source,
 CallExpression::~CallExpression() = default;
 
 bool CallExpression::IsValid() const {
-  return func_ != nullptr;
+  if (func_ == nullptr || !func_->IsValid())
+    return false;
+
+  // All params must be valid
+  for (const auto& param : params_) {
+    if (param == nullptr || !param->IsValid())
+      return false;
+  }
+  return true;
 }
 
 void CallExpression::to_str(std::ostream& out, size_t indent) const {
-  func_->to_str(out, indent);
+  make_indent(out, indent);
+  out << "Call{" << std::endl;
+  func_->to_str(out, indent + 2);
+
   make_indent(out, indent + 2);
   out << "(" << std::endl;
   for (const auto& param : params_)
@@ -41,6 +54,9 @@ void CallExpression::to_str(std::ostream& out, size_t indent) const {
 
   make_indent(out, indent + 2);
   out << ")" << std::endl;
+
+  make_indent(out, indent);
+  out << "}" << std::endl;
 }
 
 }  // namespace ast

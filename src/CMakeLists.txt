@@ -200,6 +200,7 @@ set(TINT_TEST_SRCS
   ast/bool_literal_test.cc
   ast/break_statement_test.cc
   ast/builtin_decoration_test.cc
+  ast/call_expression_test.cc
   ast/entry_point_test.cc
   ast/import_test.cc
   ast/int_literal_test.cc

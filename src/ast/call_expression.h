@@ -29,6 +29,8 @@ namespace ast {
 class CallExpression : public Expression {
  public:
   /// Constructor
+  CallExpression();
+  /// Constructor
   /// @param func the function
   /// @param params the parameters
   CallExpression(std::unique_ptr<Expression> func,
