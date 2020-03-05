@@ -48,7 +48,6 @@ TEST_F(ArrayAccessorExpressionTest, IsArrayAccessor) {
   EXPECT_TRUE(exp.IsArrayAccessor());
 }
 
-
 TEST_F(ArrayAccessorExpressionTest, IsValid) {
   auto ary = std::make_unique<IdentifierExpression>("ary");
   auto idx = std::make_unique<IdentifierExpression>("idx");
@@ -79,12 +78,12 @@ TEST_F(ArrayAccessorExpressionTest, ToStr) {
 
   ArrayAccessorExpression exp(std::move(ary), std::move(idx));
   std::ostringstream out;
-  exp.to_str(out, 0);
+  exp.to_str(out, 2);
 
-  EXPECT_EQ(out.str(), R"(ArrayAccessor{
-  Identifier{ary}
-  Identifier{idx}
-}
+  EXPECT_EQ(out.str(), R"(  ArrayAccessor{
+    Identifier{ary}
+    Identifier{idx}
+  }
 )");
 }
 

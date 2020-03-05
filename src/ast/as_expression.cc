@@ -17,6 +17,8 @@
 namespace tint {
 namespace ast {
 
+AsExpression::AsExpression() : Expression() {}
+
 AsExpression::AsExpression(type::Type* type, std::unique_ptr<Expression> expr)
     : Expression(), type_(type), expr_(std::move(expr)) {}
 
@@ -28,13 +30,17 @@ AsExpression::AsExpression(const Source& source,
 AsExpression::~AsExpression() = default;
 
 bool AsExpression::IsValid() const {
-  return type_ != nullptr && expr_ != nullptr;
+  if (expr_ == nullptr || !expr_->IsValid())
+    return false;
+  return type_ != nullptr;
 }
 
 void AsExpression::to_str(std::ostream& out, size_t indent) const {
-  out << "as<" << type_->type_name() << ">(";
-  expr_->to_str(out, indent);
-  out << ")";
+  make_indent(out, indent);
+  out << "As<" << type_->type_name() << ">{" << std::endl;
+  expr_->to_str(out, indent + 2);
+  make_indent(out, indent);
+  out << "}" << std::endl;
 }
 
 }  // namespace ast

@@ -194,6 +194,7 @@ endif()
 
 set(TINT_TEST_SRCS
   ast/array_accessor_expression_test.cc
+  ast/as_expression_test.cc
   ast/binding_decoration_test.cc
   ast/bool_literal_test.cc
   ast/builtin_decoration_test.cc

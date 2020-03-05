@@ -34,7 +34,7 @@ IdentifierExpression::IdentifierExpression(const Source& source,
 IdentifierExpression::~IdentifierExpression() = default;
 
 bool IdentifierExpression::IsValid() const {
-  return name_.size() > 0 && name_[1].size() > 0;
+  return name_.size() > 0 && name_[0].size() > 0;
 }
 
 void IdentifierExpression::to_str(std::ostream& out, size_t indent) const {

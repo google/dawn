@@ -30,6 +30,8 @@ namespace ast {
 class AsExpression : public Expression {
  public:
   /// Constructor
+  AsExpression();
+  /// Constructor
   /// @param type the type
   /// @param expr the expr
   AsExpression(type::Type* type, std::unique_ptr<Expression> expr);
@@ -70,7 +72,7 @@ class AsExpression : public Expression {
  private:
   AsExpression(const AsExpression&) = delete;
 
-  type::Type* type_;
+  type::Type* type_ = nullptr;
   std::unique_ptr<Expression> expr_;
 };
 
