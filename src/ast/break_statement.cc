@@ -17,6 +17,10 @@
 namespace tint {
 namespace ast {
 
+BreakStatement::BreakStatement() : Statement() {}
+
+BreakStatement::BreakStatement(const Source& source) : Statement(source) {}
+
 BreakStatement::BreakStatement(StatementCondition condition,
                                std::unique_ptr<Expression> conditional)
     : Statement(),
@@ -33,25 +37,26 @@ BreakStatement::BreakStatement(const Source& source,
 BreakStatement::~BreakStatement() = default;
 
 bool BreakStatement::IsValid() const {
-  return condition_ == StatementCondition::kNone || conditional_ != nullptr;
+  if (condition_ == StatementCondition::kNone)
+    return conditional_ == nullptr;
+
+  return conditional_ != nullptr && conditional_->IsValid();
 }
 
 void BreakStatement::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "Break";
+  out << "Break{";
 
   if (condition_ != StatementCondition::kNone) {
-    out << "{" << std::endl;
+    out << std::endl;
 
     make_indent(out, indent + 2);
     out << condition_ << std::endl;
     conditional_->to_str(out, indent + 2);
 
     make_indent(out, indent);
-    out << "}";
   }
-
-  out << std::endl;
+  out << "}" << std::endl;
 }
 
 }  // namespace ast

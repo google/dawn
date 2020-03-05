@@ -31,6 +31,9 @@ class BreakStatement : public Statement {
   /// Constructor
   BreakStatement();
   /// Constructor
+  /// @param source the initializer source
+  explicit BreakStatement(const Source& source);
+  /// Constructor
   /// @param condition the condition type
   /// @param conditional the condition expression
   BreakStatement(StatementCondition condition,
