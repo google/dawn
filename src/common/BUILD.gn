@@ -108,6 +108,7 @@ if (is_win || is_linux || is_mac || is_fuchsia || is_android) {
       "GPUInfo.cpp",
       "GPUInfo.h",
       "HashUtils.h",
+      "LinkedList.h",
       "Log.cpp",
       "Log.h",
       "Math.cpp",

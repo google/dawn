@@ -830,6 +830,7 @@ test("dawn_unittests") {
     "src/tests/unittests/ErrorTests.cpp",
     "src/tests/unittests/ExtensionTests.cpp",
     "src/tests/unittests/GetProcAddressTests.cpp",
+    "src/tests/unittests/LinkedListTests.cpp",
     "src/tests/unittests/MathTests.cpp",
     "src/tests/unittests/ObjectBaseTests.cpp",
     "src/tests/unittests/PerStageTests.cpp",

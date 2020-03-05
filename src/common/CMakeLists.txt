@@ -24,6 +24,7 @@ target_sources(dawn_common PRIVATE
     "GPUInfo.cpp"
     "GPUInfo.h"
     "HashUtils.h"
+    "LinkedList.h"
     "Log.cpp"
     "Log.h"
     "Math.cpp"
