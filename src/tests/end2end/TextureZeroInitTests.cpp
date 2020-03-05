@@ -31,6 +31,7 @@
 class TextureZeroInitTest : public DawnTest {
   protected:
     void TestSetUp() override {
+        DAWN_SKIP_TEST_IF(UsesWire());
         DawnTest::TestSetUp();
     }
     wgpu::TextureDescriptor CreateTextureDescriptor(uint32_t mipLevelCount,
@@ -123,16 +124,26 @@ TEST_P(TextureZeroInitTest, CopyTextureToBufferSource) {
     // Texture's first usage is in EXPECT_PIXEL_RGBA8_EQ's call to CopyTextureToBuffer
     RGBA8 filledWithZeros(0, 0, 0, 0);
     EXPECT_LAZY_CLEAR(1u, EXPECT_PIXEL_RGBA8_EQ(filledWithZeros, texture, 0, 0));
+
+    // Expect texture subresource initialized to be true
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(texture.Get(), 0, 1, 0, 1));
 }
 
 // Test that non-zero mip level clears subresource to Zero after first use
 // This goes through the BeginRenderPass's code path
 TEST_P(TextureZeroInitTest, RenderingMipMapClearsToZero) {
+    uint32_t baseMipLevel = 2;
+    uint32_t levelCount = 4;
+    uint32_t baseArrayLayer = 0;
+    uint32_t layerCount = 1;
+
     wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
-        4, 1, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc, kColorFormat);
+        levelCount, layerCount, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc,
+        kColorFormat);
     wgpu::Texture texture = device.CreateTexture(&descriptor);
 
-    wgpu::TextureViewDescriptor viewDescriptor = CreateTextureViewDescriptor(2, 0);
+    wgpu::TextureViewDescriptor viewDescriptor =
+        CreateTextureViewDescriptor(baseMipLevel, baseArrayLayer);
     wgpu::TextureView view = texture.CreateView(&viewDescriptor);
 
     utils::BasicRenderPass renderPass = utils::BasicRenderPass(kSize, kSize, texture, kColorFormat);
@@ -155,17 +166,29 @@ TEST_P(TextureZeroInitTest, RenderingMipMapClearsToZero) {
     uint32_t mipSize = kSize >> 2;
     std::vector<RGBA8> expected(mipSize * mipSize, {0, 0, 0, 0});
 
-    EXPECT_TEXTURE_RGBA8_EQ(expected.data(), renderPass.color, 0, 0, mipSize, mipSize, 2, 0);
+    EXPECT_TEXTURE_RGBA8_EQ(expected.data(), renderPass.color, 0, 0, mipSize, mipSize, baseMipLevel,
+                            baseArrayLayer);
+
+    // Expect texture subresource initialized to be true
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(
+                        renderPass.color.Get(), baseMipLevel, 1, baseArrayLayer, 1));
 }
 
 // Test that non-zero array layers clears subresource to Zero after first use.
 // This goes through the BeginRenderPass's code path
 TEST_P(TextureZeroInitTest, RenderingArrayLayerClearsToZero) {
+    uint32_t baseMipLevel = 0;
+    uint32_t levelCount = 1;
+    uint32_t baseArrayLayer = 2;
+    uint32_t layerCount = 4;
+
     wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
-        1, 4, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc, kColorFormat);
+        levelCount, layerCount, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc,
+        kColorFormat);
     wgpu::Texture texture = device.CreateTexture(&descriptor);
 
-    wgpu::TextureViewDescriptor viewDescriptor = CreateTextureViewDescriptor(0, 2);
+    wgpu::TextureViewDescriptor viewDescriptor =
+        CreateTextureViewDescriptor(baseMipLevel, baseArrayLayer);
     wgpu::TextureView view = texture.CreateView(&viewDescriptor);
 
     utils::BasicRenderPass renderPass = utils::BasicRenderPass(kSize, kSize, texture, kColorFormat);
@@ -186,7 +209,12 @@ TEST_P(TextureZeroInitTest, RenderingArrayLayerClearsToZero) {
 
     std::vector<RGBA8> expected(kSize * kSize, {0, 0, 0, 0});
 
-    EXPECT_TEXTURE_RGBA8_EQ(expected.data(), renderPass.color, 0, 0, kSize, kSize, 0, 2);
+    EXPECT_TEXTURE_RGBA8_EQ(expected.data(), renderPass.color, 0, 0, kSize, kSize, baseMipLevel,
+                            baseArrayLayer);
+
+    // Expect texture subresource initialized to be true
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(
+                        renderPass.color.Get(), baseMipLevel, 1, baseArrayLayer, 1));
 }
 
 // This tests CopyBufferToTexture fully overwrites copy so lazy init is not needed.
@@ -213,6 +241,9 @@ TEST_P(TextureZeroInitTest, CopyBufferToTexture) {
     std::vector<RGBA8> expected(kSize * kSize, {100, 100, 100, 100});
 
     EXPECT_TEXTURE_RGBA8_EQ(expected.data(), texture, 0, 0, kSize, kSize, 0, 0);
+
+    // Expect texture subresource initialized to be true
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(texture.Get(), 0, 1, 0, 1));
 }
 
 // Test for a copy only to a subset of the subresource, lazy init is necessary to clear the other
@@ -243,6 +274,9 @@ TEST_P(TextureZeroInitTest, CopyBufferToTextureHalf) {
     EXPECT_TEXTURE_RGBA8_EQ(expected100.data(), texture, 0, 0, kSize / 2, kSize, 0, 0);
     // second half should be cleared
     EXPECT_TEXTURE_RGBA8_EQ(expectedZeros.data(), texture, kSize / 2, 0, kSize / 2, kSize, 0, 0);
+
+    // Expect texture subresource initialized to be true
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(texture.Get(), 0, 1, 0, 1));
 }
 
 // This tests CopyTextureToTexture fully overwrites copy so lazy init is not needed.
@@ -275,6 +309,10 @@ TEST_P(TextureZeroInitTest, CopyTextureToTexture) {
 
     EXPECT_TEXTURE_RGBA8_EQ(expected.data(), srcTexture, 0, 0, kSize, kSize, 0, 0);
     EXPECT_TEXTURE_RGBA8_EQ(expected.data(), dstTexture, 0, 0, kSize, kSize, 0, 0);
+
+    // Expect texture subresource initialized to be true
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(srcTexture.Get(), 0, 1, 0, 1));
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(dstTexture.Get(), 0, 1, 0, 1));
 }
 
 // This Tests the CopyTextureToTexture's copy only to a subset of the subresource, lazy init is
@@ -327,6 +365,10 @@ TEST_P(TextureZeroInitTest, CopyTextureToTextureHalf) {
     EXPECT_TEXTURE_RGBA8_EQ(expectedWith100.data(), dstTexture, 0, 0, kSize / 2, kSize, 0, 0);
     EXPECT_TEXTURE_RGBA8_EQ(expectedWithZeros.data(), dstTexture, kSize / 2, 0, kSize / 2, kSize, 0,
                             0);
+
+    // Expect texture subresource initialized to be true
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(srcTexture.Get(), 0, 1, 0, 1));
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(dstTexture.Get(), 0, 1, 0, 1));
 }
 
 // This tests the texture with depth attachment and load op load will init depth stencil texture to
@@ -366,6 +408,9 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepth) {
     // Expect the texture to be red because depth test passed.
     std::vector<RGBA8> expected(kSize * kSize, {255, 0, 0, 255});
     EXPECT_TEXTURE_RGBA8_EQ(expected.data(), srcTexture, 0, 0, kSize, kSize, 0, 0);
+
+    // Expect texture subresource initialized to be true
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(srcTexture.Get(), 0, 1, 0, 1));
 }
 
 // This tests the texture with stencil attachment and load op load will init depth stencil texture
@@ -405,6 +450,9 @@ TEST_P(TextureZeroInitTest, RenderingLoadingStencil) {
     // Expect the texture to be red because stencil test passed.
     std::vector<RGBA8> expected(kSize * kSize, {255, 0, 0, 255});
     EXPECT_TEXTURE_RGBA8_EQ(expected.data(), srcTexture, 0, 0, kSize, kSize, 0, 0);
+
+    // Expect texture subresource initialized to be true
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(srcTexture.Get(), 0, 1, 0, 1));
 }
 
 // This tests the texture with depth stencil attachment and load op load will init depth stencil
@@ -441,6 +489,9 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencil) {
     // Expect the texture to be red because both depth and stencil tests passed.
     std::vector<RGBA8> expected(kSize * kSize, {255, 0, 0, 255});
     EXPECT_TEXTURE_RGBA8_EQ(expected.data(), srcTexture, 0, 0, kSize, kSize, 0, 0);
+
+    // Expect texture subresource initialized to be true
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(srcTexture.Get(), 0, 1, 0, 1));
 }
 
 // This tests the color attachments clear to 0s
@@ -460,6 +511,10 @@ TEST_P(TextureZeroInitTest, ColorAttachmentsClear) {
 
     std::vector<RGBA8> expected(kSize * kSize, {0, 0, 0, 0});
     EXPECT_TEXTURE_RGBA8_EQ(expected.data(), renderPass.color, 0, 0, kSize, kSize, 0, 0);
+
+    // Expect texture subresource initialized to be true
+    EXPECT_EQ(true,
+              dawn_native::IsTextureSubresourceInitialized(renderPass.color.Get(), 0, 1, 0, 1));
 }
 
 // This tests the clearing of sampled textures in render pass
@@ -504,6 +559,9 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
     // Expect the rendered texture to be cleared
     std::vector<RGBA8> expectedWithZeros(kSize * kSize, {0, 0, 0, 0});
     EXPECT_TEXTURE_RGBA8_EQ(expectedWithZeros.data(), renderTexture, 0, 0, kSize, kSize, 0, 0);
+
+    // Expect texture subresource initialized to be true
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(renderTexture.Get(), 0, 1, 0, 1));
 }
 
 // This tests the clearing of sampled textures during compute pass
@@ -566,6 +624,9 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
     // Expect the buffer to be zeroed out by the compute pass
     std::vector<uint32_t> expectedWithZeros(bufferSize, 0);
     EXPECT_BUFFER_U32_RANGE_EQ(expectedWithZeros.data(), bufferTex, 0, kFormatBlockByteSize);
+
+    // Expect texture subresource initialized to be true
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(texture.Get(), 0, 1, 0, 1));
 }
 
 // This tests that the code path of CopyTextureToBuffer clears correctly for non-renderable textures
@@ -592,6 +653,9 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClear) {
 
     std::vector<uint32_t> expectedWithZeros(bufferSize, 0);
     EXPECT_BUFFER_U32_RANGE_EQ(expectedWithZeros.data(), bufferDst, 0, kSize);
+
+    // Expect texture subresource initialized to be true
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(texture.Get(), 0, 1, 0, 1));
 }
 
 // This tests that the code path of CopyTextureToBuffer clears correctly for non-renderable textures
@@ -619,6 +683,9 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClearUnalignedSize) {
 
     std::vector<uint32_t> expectedWithZeros(bufferSize, 0);
     EXPECT_BUFFER_U32_RANGE_EQ(expectedWithZeros.data(), bufferDst, 0, kUnalignedSize);
+
+    // Expect texture subresource initialized to be true
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(texture.Get(), 0, 1, 0, 1));
 }
 
 // This tests that the code path of CopyTextureToBuffer clears correctly for non-renderable textures
@@ -649,6 +716,9 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClearWithMultiArrayLayers) {
 
     std::vector<uint32_t> expectedWithZeros(bufferSize, 0);
     EXPECT_BUFFER_U32_RANGE_EQ(expectedWithZeros.data(), bufferDst, 0, 8);
+
+    // Expect texture subresource initialized to be true
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(texture.Get(), 0, 1, 1, 1));
 }
 
 // This tests that storeOp clear resets resource state to uninitialized.
@@ -712,6 +782,10 @@ TEST_P(TextureZeroInitTest, RenderPassStoreOpClear) {
     std::vector<RGBA8> expectedWithZeros(kSize * kSize, {0, 0, 0, 0});
     EXPECT_LAZY_CLEAR(1u, EXPECT_TEXTURE_RGBA8_EQ(expectedWithZeros.data(), renderTexture, 0, 0,
                                                   kSize, kSize, 0, 0));
+
+    // Expect texture subresource initialized to be true
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(texture.Get(), 0, 1, 0, 1));
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(renderTexture.Get(), 0, 1, 0, 1));
 }
 
 // This tests storeOp Clear on depth and stencil textures.
@@ -761,6 +835,11 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencilStoreOpClear) {
         // cleared to 1's by using loadOp clear and set values from descriptor.
         std::vector<RGBA8> expectedBlack(kSize * kSize, {0, 0, 0, 0});
         EXPECT_TEXTURE_RGBA8_EQ(expectedBlack.data(), srcTexture, 0, 0, kSize, kSize, 0, 0);
+
+        // Expect texture subresource initialized to be false since storeop is clear, sets
+        // subresource as uninitialized
+        EXPECT_EQ(false, dawn_native::IsTextureSubresourceInitialized(depthStencilTexture.Get(), 0,
+                                                                      1, 0, 1));
     }
 
     // Now we put the depth stencil texture back into renderpass, it should be cleared by loadop
@@ -781,6 +860,11 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencilStoreOpClear) {
         // loadop load and uninitialized subresource, so we should have a red square
         std::vector<RGBA8> expectedRed(kSize * kSize, {255, 0, 0, 255});
         EXPECT_TEXTURE_RGBA8_EQ(expectedRed.data(), srcTexture, 0, 0, kSize, kSize, 0, 0);
+
+        // Expect texture subresource initialized to be false since storeop is clear, sets
+        // subresource as uninitialized
+        EXPECT_EQ(false, dawn_native::IsTextureSubresourceInitialized(depthStencilTexture.Get(), 0,
+                                                                      1, 0, 1));
     }
 }
 
@@ -860,6 +944,9 @@ TEST_P(TextureZeroInitTest, PreservesInitializedMip) {
     std::vector<RGBA8> expectedWithTwos(mipSize * mipSize, {2, 2, 2, 2});
     EXPECT_LAZY_CLEAR(0u, EXPECT_TEXTURE_RGBA8_EQ(expectedWithTwos.data(), sampleTexture, 0, 0,
                                                   mipSize, mipSize, 1, 0));
+
+    // Expect the whole texture to be initialized
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(sampleTexture.Get(), 0, 2, 0, 1));
 }
 
 // Test that if one layer of a texture is initialized and another is uninitialized, lazy clearing
@@ -942,6 +1029,9 @@ TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
     std::vector<RGBA8> expectedWithTwos(kSize * kSize, {2, 2, 2, 2});
     EXPECT_LAZY_CLEAR(0u, EXPECT_TEXTURE_RGBA8_EQ(expectedWithTwos.data(), sampleTexture, 0, 0,
                                                   kSize, kSize, 0, 1));
+
+    // Expect the whole texture to be initialized
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(sampleTexture.Get(), 0, 1, 0, 2));
 }
 
 DAWN_INSTANTIATE_TEST(

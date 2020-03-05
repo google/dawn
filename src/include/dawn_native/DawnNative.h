@@ -175,6 +175,13 @@ namespace dawn_native {
     // Backdoor to get the number of lazy clears for testing
     DAWN_NATIVE_EXPORT size_t GetLazyClearCountForTesting(WGPUDevice device);
 
+    //  Query if texture has been initialized
+    DAWN_NATIVE_EXPORT bool IsTextureSubresourceInitialized(WGPUTexture texture,
+                                                            uint32_t baseMipLevel,
+                                                            uint32_t levelCount,
+                                                            uint32_t baseArrayLayer,
+                                                            uint32_t layerCount);
+
     // Backdoor to get the order of the ProcMap for testing
     DAWN_NATIVE_EXPORT std::vector<const char*> GetProcMapNamesForTesting();
 

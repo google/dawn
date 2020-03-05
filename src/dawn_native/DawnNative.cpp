@@ -15,6 +15,7 @@
 #include "dawn_native/DawnNative.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/Instance.h"
+#include "dawn_native/Texture.h"
 #include "dawn_platform/DawnPlatform.h"
 
 // Contains the entry-points into dawn_native
@@ -163,6 +164,17 @@ namespace dawn_native {
     size_t GetLazyClearCountForTesting(WGPUDevice device) {
         dawn_native::DeviceBase* deviceBase = reinterpret_cast<dawn_native::DeviceBase*>(device);
         return deviceBase->GetLazyClearCountForTesting();
+    }
+
+    bool IsTextureSubresourceInitialized(WGPUTexture texture,
+                                         uint32_t baseMipLevel,
+                                         uint32_t levelCount,
+                                         uint32_t baseArrayLayer,
+                                         uint32_t layerCount) {
+        dawn_native::TextureBase* textureBase =
+            reinterpret_cast<dawn_native::TextureBase*>(texture);
+        return textureBase->IsSubresourceContentInitialized(baseMipLevel, levelCount,
+                                                            baseArrayLayer, layerCount);
     }
 
     std::vector<const char*> GetProcMapNamesForTestingInternal();
