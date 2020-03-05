@@ -12,14 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <assert.h>
+
 #include <iostream>
+
 #include "gtest/gtest.h"
 #include "src/reader/wgsl/parser.h"
 #include "src/validator_impl.h"
 
 namespace tint {
-
-using ValidatorImplTest = testing::Test;
+namespace {
 
 ast::Module build_module(std::string data) {
   auto reader = std::make_unique<tint::reader::wgsl::Parser>(
@@ -27,6 +29,10 @@ ast::Module build_module(std::string data) {
   assert(reader->Parse());
   return reader->module();
 }
+
+}  // namespace
+
+using ValidatorImplTest = testing::Test;
 
 TEST_F(ValidatorImplTest, Import) {
   std::string input = "import \"GLSL.std.450\" as glsl;";
