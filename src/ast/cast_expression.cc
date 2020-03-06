@@ -17,6 +17,8 @@
 namespace tint {
 namespace ast {
 
+CastExpression::CastExpression() : Expression() {}
+
 CastExpression::CastExpression(type::Type* type,
                                std::unique_ptr<Expression> expr)
     : Expression(), type_(type), expr_(std::move(expr)) {}
@@ -29,13 +31,17 @@ CastExpression::CastExpression(const Source& source,
 CastExpression::~CastExpression() = default;
 
 bool CastExpression::IsValid() const {
-  return type_ != nullptr && expr_ != nullptr;
+  if (expr_ == nullptr || !expr_->IsValid())
+    return false;
+  return type_ != nullptr;
 }
 
 void CastExpression::to_str(std::ostream& out, size_t indent) const {
-  out << "cast<" << type_->type_name() << ">(";
-  expr_->to_str(out, indent);
-  out << ")";
+  make_indent(out, indent);
+  out << "Cast<" << type_->type_name() << ">(" << std::endl;
+  expr_->to_str(out, indent + 2);
+  make_indent(out, indent);
+  out << ")" << std::endl;
 }
 
 }  // namespace ast

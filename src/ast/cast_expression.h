@@ -30,6 +30,8 @@ namespace ast {
 class CastExpression : public Expression {
  public:
   /// Constructor
+  CastExpression();
+  /// Constructor
   /// @param type the type
   /// @param expr the expr
   CastExpression(type::Type* type, std::unique_ptr<Expression> expr);
@@ -70,7 +72,7 @@ class CastExpression : public Expression {
  private:
   CastExpression(const CastExpression&) = delete;
 
-  type::Type* type_;
+  type::Type* type_ = nullptr;
   std::unique_ptr<Expression> expr_;
 };
 

@@ -202,6 +202,7 @@ set(TINT_TEST_SRCS
   ast/builtin_decoration_test.cc
   ast/call_expression_test.cc
   ast/case_statement_test.cc
+  ast/cast_expression_test.cc
   ast/entry_point_test.cc
   ast/import_test.cc
   ast/int_literal_test.cc
