@@ -17,6 +17,9 @@
 namespace tint {
 namespace ast {
 
+ConstInitializerExpression::ConstInitializerExpression()
+    : InitializerExpression() {}
+
 ConstInitializerExpression::ConstInitializerExpression(
     std::unique_ptr<Literal> literal)
     : InitializerExpression(), literal_(std::move(literal)) {}

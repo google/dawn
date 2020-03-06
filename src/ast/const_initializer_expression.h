@@ -28,6 +28,8 @@ namespace ast {
 class ConstInitializerExpression : public InitializerExpression {
  public:
   /// Constructor
+  ConstInitializerExpression();
+  /// Constructor
   /// @param literal the const literal
   explicit ConstInitializerExpression(std::unique_ptr<Literal> literal);
   /// Constructor
