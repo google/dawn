@@ -33,6 +33,10 @@ CaseStatement::CaseStatement(const Source& source,
 CaseStatement::~CaseStatement() = default;
 
 bool CaseStatement::IsValid() const {
+  for (const auto& stmt : body_) {
+    if (stmt == nullptr || !stmt->IsValid())
+      return false;
+  }
   return true;
 }
 
@@ -40,7 +44,7 @@ void CaseStatement::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
 
   if (IsDefault()) {
-    out << "default{" << std::endl;
+    out << "Default{" << std::endl;
   } else {
     out << "Case " << condition_->to_str() << "{" << std::endl;
   }
