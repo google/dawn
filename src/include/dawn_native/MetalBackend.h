@@ -44,11 +44,6 @@ namespace dawn_native { namespace metal {
     DAWN_NATIVE_EXPORT WGPUTexture
     WrapIOSurface(WGPUDevice device, const ExternalImageDescriptorIOSurface* descriptor);
 
-    DAWN_NATIVE_EXPORT WGPUTexture WrapIOSurface(WGPUDevice device,
-                                                 const WGPUTextureDescriptor* descriptor,
-                                                 IOSurfaceRef ioSurface,
-                                                 uint32_t plane);
-
     // When making Metal interop with other APIs, we need to be careful that QueueSubmit doesn't
     // mean that the operations will be visible to other APIs/Metal devices right away. macOS
     // does have a global queue of graphics operations, but the command buffers are inserted there

@@ -349,8 +349,7 @@ namespace dawn_native { namespace metal {
                                                                  plane:plane];
         [mtlDesc release];
 
-        // TODO(enga): Set as uninitialized if IOSurface isn't initialized.
-        SetIsSubresourceContentInitialized(true, 0, 1, 0, 1);
+        SetIsSubresourceContentInitialized(descriptor->isCleared, 0, 1, 0, 1);
     }
 
     Texture::~Texture() {

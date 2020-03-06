@@ -39,18 +39,6 @@ namespace dawn_native { namespace metal {
         return reinterpret_cast<WGPUTexture>(texture);
     }
 
-    WGPUTexture WrapIOSurface(WGPUDevice cDevice,
-                              const WGPUTextureDescriptor* cDescriptor,
-                              IOSurfaceRef ioSurface,
-                              uint32_t plane) {
-        Device* device = reinterpret_cast<Device*>(cDevice);
-        ExternalImageDescriptorIOSurface descriptor = {};
-        descriptor.cTextureDescriptor = cDescriptor;
-        TextureBase* texture =
-            device->CreateTextureWrappingIOSurface(&descriptor, ioSurface, plane);
-        return reinterpret_cast<WGPUTexture>(texture);
-    }
-
     void WaitForCommandsToBeScheduled(WGPUDevice cDevice) {
         Device* device = reinterpret_cast<Device*>(cDevice);
         device->WaitForCommandsToBeScheduled();

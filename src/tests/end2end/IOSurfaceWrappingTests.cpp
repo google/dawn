@@ -95,12 +95,14 @@ namespace {
       public:
         wgpu::Texture WrapIOSurface(const wgpu::TextureDescriptor* descriptor,
                                     IOSurfaceRef ioSurface,
-                                    uint32_t plane) {
+                                    uint32_t plane,
+                                    bool isCleared = true) {
             dawn_native::metal::ExternalImageDescriptorIOSurface externDesc;
             externDesc.cTextureDescriptor =
                 reinterpret_cast<const WGPUTextureDescriptor*>(descriptor);
             externDesc.ioSurface = ioSurface;
             externDesc.plane = plane;
+            externDesc.isCleared = isCleared;
             WGPUTexture texture = dawn_native::metal::WrapIOSurface(device.Get(), &externDesc);
             return wgpu::Texture::Acquire(texture);
         }
@@ -440,6 +442,31 @@ TEST_P(IOSurfaceUsageTests, ClearRGBA8IOSurface) {
 
     uint32_t data = 0x04030201;
     DoClearTest(ioSurface.get(), wgpu::TextureFormat::RGBA8Unorm, &data, sizeof(data));
+}
+
+// Test that texture with color is cleared when isCleared = false
+TEST_P(IOSurfaceUsageTests, UnclearedTextureIsCleared) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+
+    ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, 'RGBA', 4);
+    uint32_t data = 0x04030201;
+
+    IOSurfaceLock(ioSurface.get(), 0, nullptr);
+    memcpy(IOSurfaceGetBaseAddress(ioSurface.get()), &data, sizeof(data));
+    IOSurfaceUnlock(ioSurface.get(), 0, nullptr);
+
+    wgpu::TextureDescriptor textureDescriptor;
+    textureDescriptor.dimension = wgpu::TextureDimension::e2D;
+    textureDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+    textureDescriptor.size = {1, 1, 1};
+    textureDescriptor.sampleCount = 1;
+    textureDescriptor.arrayLayerCount = 1;
+    textureDescriptor.mipLevelCount = 1;
+    textureDescriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+
+    // wrap ioSurface and ensure color is not visible when isCleared set to false
+    wgpu::Texture ioSurfaceTexture = WrapIOSurface(&textureDescriptor, ioSurface.get(), 0, false);
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), ioSurfaceTexture, 0, 0);
 }
 
 DAWN_INSTANTIATE_TEST(IOSurfaceValidationTests, MetalBackend());

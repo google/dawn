@@ -290,6 +290,10 @@ namespace dawn_native { namespace d3d12 {
             AcquireRef(new Texture(device, textureDescriptor, TextureState::OwnedExternal));
         DAWN_TRY(dawnTexture->InitializeAsExternalTexture(textureDescriptor, sharedHandle,
                                                           acquireMutexKey));
+
+        dawnTexture->SetIsSubresourceContentInitialized(descriptor->isCleared, 0,
+                                                        textureDescriptor->mipLevelCount, 0,
+                                                        textureDescriptor->arrayLayerCount);
         return dawnTexture.Detach();
     }
 
@@ -320,9 +324,6 @@ namespace dawn_native { namespace d3d12 {
         AllocationInfo info;
         info.mMethod = AllocationMethod::kDirect;
         mResourceAllocation = {info, 0, std::move(d3d12Resource)};
-
-        SetIsSubresourceContentInitialized(true, 0, descriptor->mipLevelCount, 0,
-                                           descriptor->arrayLayerCount);
 
         return {};
     }
