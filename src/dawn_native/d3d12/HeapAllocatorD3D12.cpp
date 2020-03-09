@@ -46,7 +46,7 @@ namespace dawn_native { namespace d3d12 {
             mDevice->GetD3D12Device()->CreateHeap(&heapDesc, IID_PPV_ARGS(&heap)),
             "ID3D12Device::CreateHeap"));
 
-        return {std::make_unique<Heap>(std::move(heap))};
+        return {std::make_unique<Heap>(std::move(heap), size)};
     }
 
     void HeapAllocator::DeallocateResourceHeap(std::unique_ptr<ResourceHeapBase> heap) {

@@ -20,12 +20,15 @@
 
 namespace dawn_native { namespace d3d12 {
 
+    class Heap;
+
     class ResourceHeapAllocation : public ResourceMemoryAllocation {
       public:
         ResourceHeapAllocation() = default;
         ResourceHeapAllocation(const AllocationInfo& info,
                                uint64_t offset,
-                               ComPtr<ID3D12Resource> resource);
+                               ComPtr<ID3D12Resource> resource,
+                               Heap* heap);
         ~ResourceHeapAllocation() override = default;
 
         void Invalidate() override;

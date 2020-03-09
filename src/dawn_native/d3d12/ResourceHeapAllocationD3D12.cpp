@@ -14,13 +14,17 @@
 
 #include "dawn_native/d3d12/ResourceHeapAllocationD3D12.h"
 
+#include "dawn_native/d3d12/HeapD3D12.h"
+
 #include <utility>
 
 namespace dawn_native { namespace d3d12 {
     ResourceHeapAllocation::ResourceHeapAllocation(const AllocationInfo& info,
                                                    uint64_t offset,
-                                                   ComPtr<ID3D12Resource> resource)
-        : ResourceMemoryAllocation(info, offset, nullptr), mResource(std::move(resource)) {
+                                                   ComPtr<ID3D12Resource> resource,
+                                                   Heap* heap)
+        : ResourceMemoryAllocation(info, offset, heap), mResource(std::move(resource)) {
+        ASSERT((info.mMethod == AllocationMethod::kExternal) == (heap == nullptr));
     }
 
     void ResourceHeapAllocation::Invalidate() {

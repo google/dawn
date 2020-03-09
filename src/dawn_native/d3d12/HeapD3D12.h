@@ -22,13 +22,17 @@ namespace dawn_native { namespace d3d12 {
 
     class Heap : public ResourceHeapBase {
       public:
-        Heap(ComPtr<ID3D12Heap> heap);
+        Heap(ComPtr<ID3D12Pageable> d3d12Pageable, uint64_t size);
         ~Heap() = default;
 
         ComPtr<ID3D12Heap> GetD3D12Heap() const;
+        ComPtr<ID3D12Pageable> GetD3D12Pageable() const;
+
+        uint64_t GetSize() const;
 
       private:
-        ComPtr<ID3D12Heap> mHeap;
+        ComPtr<ID3D12Pageable> mD3d12Pageable;
+        uint64_t mSize = 0;
     };
 }}  // namespace dawn_native::d3d12
 

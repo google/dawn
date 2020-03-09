@@ -322,8 +322,11 @@ namespace dawn_native { namespace d3d12 {
         mDxgiKeyedMutex = std::move(dxgiKeyedMutex);
 
         AllocationInfo info;
-        info.mMethod = AllocationMethod::kDirect;
-        mResourceAllocation = {info, 0, std::move(d3d12Resource)};
+        info.mMethod = AllocationMethod::kExternal;
+        // When creating the ResourceHeapAllocation, the resource heap is set to nullptr because the
+        // texture is owned externally. The texture's owning entity must remain responsible for
+        // memory management.
+        mResourceAllocation = {info, 0, std::move(d3d12Resource), nullptr};
 
         return {};
     }
@@ -370,8 +373,11 @@ namespace dawn_native { namespace d3d12 {
                      ComPtr<ID3D12Resource> nativeTexture)
         : TextureBase(device, descriptor, TextureState::OwnedExternal) {
         AllocationInfo info;
-        info.mMethod = AllocationMethod::kDirect;
-        mResourceAllocation = {info, 0, std::move(nativeTexture)};
+        info.mMethod = AllocationMethod::kExternal;
+        // When creating the ResourceHeapAllocation, the resource heap is set to nullptr because the
+        // texture is owned externally. The texture's owning entity must remain responsible for
+        // memory management.
+        mResourceAllocation = {info, 0, std::move(nativeTexture), nullptr};
 
         SetIsSubresourceContentInitialized(true, 0, descriptor->mipLevelCount, 0,
                                            descriptor->arrayLayerCount);
