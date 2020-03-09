@@ -20,6 +20,7 @@
 #include "dawn_native/d3d12/DescriptorHeapAllocationD3D12.h"
 
 #include <array>
+#include <list>
 
 namespace dawn_native { namespace d3d12 {
 
@@ -44,18 +45,26 @@ namespace dawn_native { namespace d3d12 {
         MaybeError AllocateAndSwitchShaderVisibleHeaps();
 
         uint64_t GetShaderVisibleHeapSizeForTesting(D3D12_DESCRIPTOR_HEAP_TYPE heapType) const;
+        ComPtr<ID3D12DescriptorHeap> GetShaderVisibleHeapForTesting(
+            D3D12_DESCRIPTOR_HEAP_TYPE heapType) const;
+        uint64_t GetShaderVisiblePoolSizeForTesting(D3D12_DESCRIPTOR_HEAP_TYPE heapType) const;
 
         bool IsAllocationStillValid(Serial lastUsageSerial, Serial heapSerial) const;
 
       private:
-        MaybeError AllocateGPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType,
-                                   uint32_t descriptorCount,
-                                   D3D12_DESCRIPTOR_HEAP_FLAGS heapFlags);
+        struct SerialDescriptorHeap {
+            Serial heapSerial;
+            ComPtr<ID3D12DescriptorHeap> heap;
+        };
 
         struct ShaderVisibleBuffer {
             ComPtr<ID3D12DescriptorHeap> heap;
             RingBufferAllocator allocator;
+            std::list<SerialDescriptorHeap> pool;
+            D3D12_DESCRIPTOR_HEAP_TYPE heapType;
         };
+
+        MaybeError AllocateGPUHeap(ShaderVisibleBuffer* shaderVisibleBuffer);
 
         Device* mDevice;
 
