@@ -31,6 +31,9 @@ class ContinueStatement : public Statement {
   /// Constructor
   ContinueStatement();
   /// Constructor
+  /// @param source the initializer source
+  explicit ContinueStatement(const Source& source);
+  /// Constructor
   /// @param condition the condition type
   /// @param conditional the condition expression
   ContinueStatement(StatementCondition condition,

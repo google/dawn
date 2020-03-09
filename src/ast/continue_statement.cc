@@ -17,6 +17,11 @@
 namespace tint {
 namespace ast {
 
+ContinueStatement::ContinueStatement() : Statement() {}
+
+ContinueStatement::ContinueStatement(const Source& source)
+    : Statement(source) {}
+
 ContinueStatement::ContinueStatement(StatementCondition condition,
                                      std::unique_ptr<Expression> conditional)
     : Statement(),
@@ -33,24 +38,26 @@ ContinueStatement::ContinueStatement(const Source& source,
 ContinueStatement::~ContinueStatement() = default;
 
 bool ContinueStatement::IsValid() const {
-  return condition_ == StatementCondition::kNone || conditional_ != nullptr;
+  if (condition_ == StatementCondition::kNone)
+    return conditional_ == nullptr;
+
+  return conditional_ && conditional_->IsValid();
 }
 
 void ContinueStatement::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "Continue";
+  out << "Continue{";
 
   if (condition_ != StatementCondition::kNone) {
-    out << "{" << std::endl;
+    out << std::endl;
 
     make_indent(out, indent + 2);
     out << condition_ << std::endl;
     conditional_->to_str(out, indent + 2);
 
     make_indent(out, indent);
-    out << "}";
   }
-  out << std::endl;
+  out << "}" << std::endl;
 }
 
 }  // namespace ast
