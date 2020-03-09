@@ -30,6 +30,10 @@ namespace dawn_native {
     MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase*,
                                                  const BindGroupLayoutDescriptor* descriptor);
 
+    MaybeError ValidateBindingTypeWithShaderStageVisibility(
+        wgpu::BindingType bindingType,
+        wgpu::ShaderStage shaderStageVisibility);
+
     class BindGroupLayoutBase : public CachedObject {
       public:
         BindGroupLayoutBase(DeviceBase* device, const BindGroupLayoutDescriptor* descriptor);

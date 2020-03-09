@@ -132,6 +132,9 @@ namespace dawn_native {
 
                     BindGroupLayoutBinding bindingSlot;
                     bindingSlot.binding = binding;
+
+                    DAWN_TRY(ValidateBindingTypeWithShaderStageVisibility(
+                        bindingInfo.type, StageBit(module->GetExecutionModel())));
                     if (bindingInfo.type == wgpu::BindingType::StorageBuffer) {
                         bindingSlot.visibility =
                             wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute;

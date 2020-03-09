@@ -456,3 +456,24 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
         }
     }
 }
+
+// Test that declaring a storage buffer in the vertex shader without setting pipeline layout won't
+// cause crash.
+TEST_F(RenderPipelineValidationTest, StorageBufferInVertexShaderNoLayout) {
+    wgpu::ShaderModule vsModuleWithStorageBuffer =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
+        #version 450
+        #define kNumValues 100
+        layout(std430, set = 0, binding = 0) buffer Dst { uint dst[kNumValues]; };
+        void main() {
+            uint index = gl_VertexIndex;
+            dst[index] = 0x1234;
+            gl_Position = vec4(1.f, 0.f, 0.f, 1.f);
+        })");
+
+    utils::ComboRenderPipelineDescriptor descriptor(device);
+    descriptor.layout = nullptr;
+    descriptor.vertexStage.module = vsModuleWithStorageBuffer;
+    descriptor.cFragmentStage.module = fsModule;
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+}
