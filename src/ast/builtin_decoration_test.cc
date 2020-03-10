@@ -34,5 +34,13 @@ TEST_F(BuiltinDecorationTest, Is) {
   EXPECT_FALSE(d.IsSet());
 }
 
+TEST_F(BuiltinDecorationTest, ToStr) {
+  BuiltinDecoration d{Builtin::kFragDepth};
+  std::ostringstream out;
+  d.to_str(out);
+  EXPECT_EQ(out.str(), R"(BuiltinDecoration{frag_depth}
+)");
+}
+
 }  // namespace ast
 }  // namespace tint
