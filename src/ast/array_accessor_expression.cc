@@ -35,7 +35,12 @@ ArrayAccessorExpression::ArrayAccessorExpression(
 ArrayAccessorExpression::~ArrayAccessorExpression() = default;
 
 bool ArrayAccessorExpression::IsValid() const {
-  return array_ != nullptr && idx_expr_ != nullptr;
+  if (array_ == nullptr || !array_->IsValid())
+    return false;
+  if (idx_expr_ == nullptr || !idx_expr_->IsValid())
+    return false;
+
+  return true;
 }
 
 void ArrayAccessorExpression::to_str(std::ostream& out, size_t indent) const {

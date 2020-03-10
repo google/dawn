@@ -41,9 +41,7 @@ ElseStatement::~ElseStatement() = default;
 
 bool ElseStatement::IsValid() const {
   for (const auto& stmt : body_) {
-    if (stmt == nullptr)
-      return false;
-    if (!stmt->IsValid())
+    if (stmt == nullptr || !stmt->IsValid())
       return false;
   }
   if (condition_)

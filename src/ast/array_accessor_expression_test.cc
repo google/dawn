@@ -72,6 +72,20 @@ TEST_F(ArrayAccessorExpressionTest, IsValid_MissingIndex) {
   EXPECT_FALSE(exp.IsValid());
 }
 
+TEST_F(ArrayAccessorExpressionTest, IsValid_InvalidArray) {
+  auto ary = std::make_unique<IdentifierExpression>("");
+  auto idx = std::make_unique<IdentifierExpression>("idx");
+  ArrayAccessorExpression exp(std::move(ary), std::move(idx));
+  EXPECT_FALSE(exp.IsValid());
+}
+
+TEST_F(ArrayAccessorExpressionTest, IsValid_InvalidIndex) {
+  auto ary = std::make_unique<IdentifierExpression>("ary");
+  auto idx = std::make_unique<IdentifierExpression>("");
+  ArrayAccessorExpression exp(std::move(ary), std::move(idx));
+  EXPECT_FALSE(exp.IsValid());
+}
+
 TEST_F(ArrayAccessorExpressionTest, ToStr) {
   auto ary = std::make_unique<IdentifierExpression>("ary");
   auto idx = std::make_unique<IdentifierExpression>("idx");
