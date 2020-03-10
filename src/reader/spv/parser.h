@@ -31,6 +31,7 @@ class Parser : public Reader {
   /// Creates a new parser
   /// @param input the input data to parse
   explicit Parser(const std::vector<uint32_t>& input);
+  /// Destructor
   ~Parser() override;
 
   /// Run the parser

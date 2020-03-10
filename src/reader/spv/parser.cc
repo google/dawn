@@ -25,6 +25,7 @@ Parser::Parser(const std::vector<uint32_t>&) : Reader() {}
 Parser::~Parser() = default;
 
 bool Parser::Parse() {
+  set_error("SPIR-V parsing is not supported yet");
   return false;
 }
 

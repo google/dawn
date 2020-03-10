@@ -26,6 +26,10 @@
 #include "src/writer/wgsl/generator.h"
 #include "src/writer/writer.h"
 
+#if TINT_BUILD_SPV_PARSER
+#include "src/reader/spv/parser.h"
+#endif
+
 namespace {
 
 enum class Format {
@@ -110,7 +114,18 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
   return true;
 }
 
-std::vector<uint8_t> ReadFile(const std::string& input_file) {
+/// Copies the content from the file named |filename| to |buffer|,
+/// assuming each element in the file is of type |T|.  If any error occurs,
+/// writes error messages to the standard error stream and returns false.
+/// Assumes the size of a |T| object is divisible by its required alignment.
+/// @returns true if we successfully read the file.
+template <typename T>
+bool ReadFile(const std::string& input_file, std::vector<T>* buffer) {
+  if (!buffer) {
+    std::cerr << "The buffer pointer was null" << std::endl;
+    return false;
+  }
+
   FILE* file = nullptr;
 #if defined(_MSC_VER)
   fopen_s(&file, input_file.c_str(), "rb");
@@ -119,7 +134,7 @@ std::vector<uint8_t> ReadFile(const std::string& input_file) {
 #endif
   if (!file) {
     std::cerr << "Failed to open " << input_file << std::endl;
-    return {};
+    return false;
   }
 
   fseek(file, 0, SEEK_END);
@@ -129,21 +144,28 @@ std::vector<uint8_t> ReadFile(const std::string& input_file) {
     fclose(file);
     return {};
   }
+  const auto file_size = static_cast<size_t>(tell_file_size);
+  if (0 != (file_size % sizeof(T))) {
+    std::cerr << "File " << input_file
+              << " does not contain an integral number of objects: "
+              << file_size << " bytes in the file, require " << sizeof(T)
+              << " bytes per object" << std::endl;
+    fclose(file);
+    return false;
+  }
   fseek(file, 0, SEEK_SET);
 
-  size_t file_size = static_cast<size_t>(tell_file_size);
+  buffer->clear();
+  buffer->resize(file_size / sizeof(T));
 
-  std::vector<uint8_t> data;
-  data.resize(file_size);
-
-  size_t bytes_read = fread(data.data(), sizeof(uint8_t), file_size, file);
+  size_t bytes_read = fread(buffer->data(), 1, file_size, file);
   fclose(file);
   if (bytes_read != file_size) {
     std::cerr << "Failed to read " << input_file << std::endl;
-    return {};
+    return false;
   }
 
-  return data;
+  return true;
 }
 
 std::string Disassemble(const std::vector<uint32_t>& data) {
@@ -204,18 +226,28 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
-  auto data = ReadFile(options.input_filename);
-  if (data.size() == 0)
-    return 1;
-
   std::unique_ptr<tint::reader::Reader> reader;
-  std::string ext = "wgsl";
-  if (options.input_filename.size() > 4 &&
-      options.input_filename.substr(options.input_filename.size() - 4) ==
-          "wgsl") {
+  if (options.input_filename.size() > 5 &&
+      options.input_filename.substr(options.input_filename.size() - 5) ==
+          ".wgsl") {
+    std::vector<uint8_t> data;
+    if (!ReadFile<uint8_t>(options.input_filename, &data)) {
+      return 1;
+    }
     reader = std::make_unique<tint::reader::wgsl::Parser>(
         std::string(data.begin(), data.end()));
   }
+#if TINT_BUILD_SPV_PARSER
+  if (options.input_filename.size() > 4 &&
+      options.input_filename.substr(options.input_filename.size() - 4) ==
+          ".spv") {
+    std::vector<uint32_t> data;
+    if (!ReadFile<uint32_t>(options.input_filename, &data)) {
+      return 1;
+    }
+    reader = std::make_unique<tint::reader::spv::Parser>(data);
+  }
+#endif
   if (!reader) {
     std::cerr << "Failed to create reader for input file: "
               << options.input_filename << std::endl;

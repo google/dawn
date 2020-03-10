@@ -305,8 +305,9 @@ add_library(libtint ${TINT_LIB_SRCS})
 tint_default_compile_options(libtint)
 set_target_properties(libtint PROPERTIES OUTPUT_NAME "tint")
 
-if(${TINT_ENABLE_SPV_PARSER})
-  target_link_libraries(libtint SPIRV-Tools)
+if(${TINT_BUILD_SPV_PARSER})
+  # We'll use the optimizer for its nice SPIR-V in-memory representation
+  target_link_libraries(libtint SPIRV-Tools-opt SPIRV-Tools)
 endif()
 
 add_executable(tint_unittests ${TINT_TEST_SRCS})
