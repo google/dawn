@@ -37,6 +37,15 @@ Function::Function(const Source& source,
 Function::~Function() = default;
 
 bool Function::IsValid() const {
+  for (const auto& param : params_) {
+    if (param == nullptr || !param->IsValid())
+      return false;
+  }
+  for (const auto& stmt : body_) {
+    if (stmt == nullptr || !stmt->IsValid())
+      return false;
+  }
+
   if (name_.length() == 0) {
     return false;
   }
@@ -48,21 +57,28 @@ bool Function::IsValid() const {
 
 void Function::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "function -> " << return_type_->type_name() << "{" << std::endl;
-  make_indent(out, indent + 2);
-  out << name_ << std::endl;
+  out << "Function " << name_ << " -> " << return_type_->type_name()
+      << std::endl;
 
-  for (const auto& param : params_)
-    param->to_str(out, indent + 2);
+  make_indent(out, indent);
+  out << "(";
 
-  make_indent(out, indent + 2);
+  if (params_.size() > 0) {
+    out << std::endl;
+
+    for (const auto& param : params_)
+      param->to_str(out, indent + 2);
+
+    make_indent(out, indent);
+  }
+  out << ")" << std::endl;
+
+  make_indent(out, indent);
   out << "{" << std::endl;
 
   for (const auto& stmt : body_)
-    stmt->to_str(out, indent + 4);
+    stmt->to_str(out, indent + 2);
 
-  make_indent(out, indent + 2);
-  out << "}" << std::endl;
   make_indent(out, indent);
   out << "}" << std::endl;
 }
