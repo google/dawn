@@ -22,7 +22,7 @@ BuiltinDecoration::BuiltinDecoration(Builtin builtin) : builtin_(builtin) {}
 BuiltinDecoration::~BuiltinDecoration() = default;
 
 void BuiltinDecoration::to_str(std::ostream& out) const {
-  out << "builtin " << builtin_;
+  out << "BuiltinDecoration{" << builtin_ << "}" << std::endl;
 }
 
 }  // namespace ast

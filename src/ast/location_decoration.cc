@@ -22,7 +22,7 @@ LocationDecoration::LocationDecoration(size_t val) : value_(val) {}
 LocationDecoration::~LocationDecoration() = default;
 
 void LocationDecoration::to_str(std::ostream& out) const {
-  out << "location " << value_;
+  out << "LocationDecoration{" << value_ << "}" << std::endl;
 }
 
 }  // namespace ast

@@ -56,18 +56,26 @@ void Variable::info_to_str(std::ostream& out, size_t indent) const {
   out << type_->type_name() << std::endl;
 }
 
+void Variable::initializer_to_str(std::ostream& out, size_t indent) const {
+  if (initializer_ == nullptr)
+    return;
+
+  make_indent(out, indent);
+  out << "{" << std::endl;
+
+  initializer_->to_str(out, indent + 2);
+
+  make_indent(out, indent);
+  out << "}" << std::endl;
+}
+
 void Variable::to_str(std::ostream& out, size_t indent) const {
-  info_to_str(out, indent);
-
-  if (initializer_ != nullptr) {
-    make_indent(out, indent);
-    out << "{" << std::endl;
-
-    initializer_->to_str(out, indent + 2);
-
-    make_indent(out, indent);
-    out << "}" << std::endl;
-  }
+  make_indent(out, indent);
+  out << "Variable{" << std::endl;
+  info_to_str(out, indent + 2);
+  initializer_to_str(out, indent + 2);
+  make_indent(out, indent);
+  out << "}" << std::endl;
 }
 
 }  // namespace ast

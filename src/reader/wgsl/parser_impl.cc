@@ -329,11 +329,7 @@ std::unique_ptr<ast::Variable> ParserImpl::global_variable_decl() {
   }
 
   if (decos.size() > 0) {
-    auto dv = std::make_unique<ast::DecoratedVariable>();
-    dv->set_source(var->source());
-    dv->set_name(var->name());
-    dv->set_type(var->type());
-    dv->set_storage_class(var->storage_class());
+    auto dv = std::make_unique<ast::DecoratedVariable>(std::move(var));
     dv->set_decorations(std::move(decos));
 
     var = std::move(dv);

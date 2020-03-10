@@ -105,6 +105,10 @@ class Variable : public Node {
   /// @param out the stream to write to
   /// @param indent number of spaces to indent the node when writing
   void info_to_str(std::ostream& out, size_t indent) const;
+  /// Output initializer for this variable.
+  /// @param out the stream to write to
+  /// @param indent number of spaces to indent the node when writing
+  void initializer_to_str(std::ostream& out, size_t indent) const;
 
  private:
   Variable(const Variable&) = delete;

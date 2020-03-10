@@ -89,10 +89,12 @@ TEST_F(VariableTest, to_str) {
   type::F32Type t;
   Variable v{"my_var", StorageClass::kFunction, &t};
   std::ostringstream out;
-  v.to_str(out, 0);
-  EXPECT_EQ(out.str(), R"(my_var
-function
-__f32
+  v.to_str(out, 2);
+  EXPECT_EQ(out.str(), R"(  Variable{
+    my_var
+    function
+    __f32
+  }
 )");
 }
 

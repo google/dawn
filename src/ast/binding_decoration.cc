@@ -22,7 +22,7 @@ BindingDecoration::BindingDecoration(size_t val) : value_(val) {}
 BindingDecoration::~BindingDecoration() = default;
 
 void BindingDecoration::to_str(std::ostream& out) const {
-  out << "binding " << value_;
+  out << "BindingDecoration{" << value_ << "}" << std::endl;
 }
 
 }  // namespace ast

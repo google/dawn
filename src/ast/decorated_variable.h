@@ -30,6 +30,9 @@ class DecoratedVariable : public Variable {
  public:
   /// Create a new empty decorated variable statement
   DecoratedVariable();
+  /// Create a decorated variable from an existing variable
+  /// @param var the variable to initialize from
+  explicit DecoratedVariable(std::unique_ptr<Variable> var);
   /// Move constructor
   DecoratedVariable(DecoratedVariable&&);
 

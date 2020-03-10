@@ -19,6 +19,9 @@ namespace ast {
 
 DecoratedVariable::DecoratedVariable() = default;
 
+DecoratedVariable::DecoratedVariable(std::unique_ptr<Variable> var)
+    : Variable(var->source(), var->name(), var->storage_class(), var->type()) {}
+
 DecoratedVariable::DecoratedVariable(DecoratedVariable&&) = default;
 
 DecoratedVariable::~DecoratedVariable() = default;
@@ -32,17 +35,17 @@ void DecoratedVariable::to_str(std::ostream& out, size_t indent) const {
   out << "DecoratedVariable{" << std::endl;
 
   make_indent(out, indent + 2);
-  out << "decorations{" << std::endl;
+  out << "Decorations{" << std::endl;
   for (const auto& deco : decorations_) {
     make_indent(out, indent + 4);
     deco->to_str(out);
-    out << std::endl;
   }
 
   make_indent(out, indent + 2);
   out << "}" << std::endl;
 
   info_to_str(out, indent + 2);
+  initializer_to_str(out, indent + 2);
   make_indent(out, indent);
   out << "}" << std::endl;
 }

@@ -22,7 +22,7 @@ SetDecoration::SetDecoration(size_t val) : value_(val) {}
 SetDecoration::~SetDecoration() = default;
 
 void SetDecoration::to_str(std::ostream& out) const {
-  out << "set " << value_;
+  out << "SetDecoration{" << value_ << "}" << std::endl;
 }
 
 }  // namespace ast
