@@ -310,6 +310,12 @@ if(${TINT_BUILD_SPV_PARSER})
   target_link_libraries(libtint SPIRV-Tools-opt SPIRV-Tools)
 endif()
 
+if(${TINT_BUILD_SPV_PARSER})
+  list (APPEND TINT_TEST_SRCS
+    reader/spv/parser_test.cc
+  )
+endif()
+
 add_executable(tint_unittests ${TINT_TEST_SRCS})
 if (NOT MSVC)
   target_compile_options(tint_unittests PRIVATE
