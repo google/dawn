@@ -24,6 +24,7 @@ namespace tint {
 namespace reader {
 namespace spv {
 
+namespace {
 using ParserTest = testing::Test;
 
 TEST_F(ParserTest, Uint32VecEmpty) {
@@ -35,6 +36,8 @@ TEST_F(ParserTest, Uint32VecEmpty) {
 
 // TODO(dneto): uint32 vec, valid SPIR-V
 // TODO(dneto): uint32 vec, invalid SPIR-V
+
+}  // namespace
 
 }  // namespace spv
 }  // namespace reader
