@@ -30,7 +30,7 @@ bool FallthroughStatement::IsValid() const {
 
 void FallthroughStatement::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "Fallthrough" << std::endl;
+  out << "Fallthrough{}" << std::endl;
 }
 
 }  // namespace ast

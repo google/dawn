@@ -208,6 +208,7 @@ set(TINT_TEST_SRCS
   ast/decorated_variable_test.cc
   ast/else_statement_test.cc
   ast/entry_point_test.cc
+  ast/fallthrough_statement_test.cc
   ast/import_test.cc
   ast/int_literal_test.cc
   ast/location_decoration_test.cc
