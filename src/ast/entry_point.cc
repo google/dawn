@@ -42,8 +42,11 @@ bool EntryPoint::IsValid() const {
 
 void EntryPoint::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << R"(EntryPoint{")" << stage_ << R"(" as ")" << name_ << R"(" = )"
-      << fn_name_ << "}" << std::endl;
+  out << "EntryPoint{" << stage_;
+  if (name_.length() > 0)
+    out << " as " << name_;
+
+  out << " = " << fn_name_ << "}" << std::endl;
 }
 
 }  // namespace ast

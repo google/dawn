@@ -59,16 +59,8 @@ TEST_F(EntryPointTest, CreationEmpty) {
   EXPECT_EQ(e.column(), 4);
 }
 
-TEST_F(EntryPointTest, to_str) {
-  EntryPoint e(PipelineStage::kVertex, "text", "vtx_main");
-  std::ostringstream out;
-  e.to_str(out, 0);
-  EXPECT_EQ(out.str(), R"(EntryPoint{"vertex" as "text" = vtx_main}
-)");
-}
-
 TEST_F(EntryPointTest, IsValid) {
-  EntryPoint e(PipelineStage::kVertex, "main", "vtx_main");
+  EntryPoint e(PipelineStage::kVertex, "", "vtx_main");
   EXPECT_TRUE(e.IsValid());
 }
 
@@ -85,6 +77,22 @@ TEST_F(EntryPointTest, IsValid_MissingStage) {
 TEST_F(EntryPointTest, IsValid_MissingBoth) {
   EntryPoint e;
   EXPECT_FALSE(e.IsValid());
+}
+
+TEST_F(EntryPointTest, ToStr) {
+  EntryPoint e(PipelineStage::kVertex, "text", "vtx_main");
+  std::ostringstream out;
+  e.to_str(out, 2);
+  EXPECT_EQ(out.str(), R"(  EntryPoint{vertex as text = vtx_main}
+)");
+}
+
+TEST_F(EntryPointTest, ToStr_NoName) {
+  EntryPoint e(PipelineStage::kVertex, "", "vtx_main");
+  std::ostringstream out;
+  e.to_str(out, 2);
+  EXPECT_EQ(out.str(), R"(  EntryPoint{vertex = vtx_main}
+)");
 }
 
 }  // namespace ast
