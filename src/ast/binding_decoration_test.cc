@@ -34,5 +34,13 @@ TEST_F(BindingDecorationTest, Is) {
   EXPECT_FALSE(d.IsSet());
 }
 
+TEST_F(BindingDecorationTest, ToStr) {
+  BindingDecoration d{2};
+  std::ostringstream out;
+  d.to_str(out);
+  EXPECT_EQ(out.str(), R"(BindingDecoration{2}
+)");
+}
+
 }  // namespace ast
 }  // namespace tint
