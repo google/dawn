@@ -40,6 +40,15 @@ ElseStatement::ElseStatement(const Source& source,
 ElseStatement::~ElseStatement() = default;
 
 bool ElseStatement::IsValid() const {
+  for (const auto& stmt : body_) {
+    if (stmt == nullptr)
+      return false;
+    if (!stmt->IsValid())
+      return false;
+  }
+  if (condition_)
+    return condition_->IsValid();
+
   return true;
 }
 
@@ -56,6 +65,9 @@ void ElseStatement::to_str(std::ostream& out, size_t indent) const {
     stmt->to_str(out, indent + 4);
 
   make_indent(out, indent + 2);
+  out << "}" << std::endl;
+
+  make_indent(out, indent);
   out << "}" << std::endl;
 }
 

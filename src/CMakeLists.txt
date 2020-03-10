@@ -206,6 +206,7 @@ set(TINT_TEST_SRCS
   ast/const_initializer_expression_test.cc
   ast/continue_statement_test.cc
   ast/decorated_variable_test.cc
+  ast/else_statement_test.cc
   ast/entry_point_test.cc
   ast/import_test.cc
   ast/int_literal_test.cc
