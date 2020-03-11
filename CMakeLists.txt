@@ -69,9 +69,9 @@ endif()
 function(tint_default_compile_options TARGET)
   include_directories("${PROJECT_SOURCE_DIR}")
 
-  if (${TINT_BUILD_SPV_PARSER})
-    target_compile_definitions(${TARGET} PRIVATE -DTINT_BUILD_SPV_PARSER=1)
-  endif()
+  target_compile_definitions(${TARGET} PRIVATE
+      -DTINT_BUILD_SPV_PARSER=$<BOOL:${TINT_BUILD_SPV_PARSER}>)
+
   if (${COMPILER_IS_LIKE_GNU})
     target_compile_options(${TARGET} PRIVATE
       -std=c++14
