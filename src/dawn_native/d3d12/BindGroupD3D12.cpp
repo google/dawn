@@ -13,14 +13,14 @@
 // limitations under the License.
 
 #include "dawn_native/d3d12/BindGroupD3D12.h"
+
 #include "common/BitSetIterator.h"
 #include "dawn_native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn_native/d3d12/BufferD3D12.h"
+#include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/SamplerD3D12.h"
 #include "dawn_native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.h"
 #include "dawn_native/d3d12/TextureD3D12.h"
-
-#include "dawn_native/d3d12/DeviceD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
 
@@ -161,6 +161,8 @@ namespace dawn_native { namespace d3d12 {
                 } break;
 
                 case wgpu::BindingType::StorageTexture:
+                case wgpu::BindingType::ReadonlyStorageTexture:
+                case wgpu::BindingType::WriteonlyStorageTexture:
                     UNREACHABLE();
                     break;
 

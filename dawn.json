@@ -114,7 +114,9 @@
             {"value": 2, "name": "readonly storage buffer"},
             {"value": 3, "name": "sampler"},
             {"value": 4, "name": "sampled texture"},
-            {"value": 5, "name": "storage texture"}
+            {"value": 5, "name": "storage texture"},
+            {"value": 6, "name": "readonly storage texture"},
+            {"value": 7, "name": "writeonly storage texture"}
         ]
     },
     "blend descriptor": {

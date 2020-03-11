@@ -159,6 +159,12 @@ namespace dawn_native {
                 case wgpu::BindingType::Sampler:
                     DAWN_TRY(ValidateSamplerBinding(device, binding));
                     break;
+                // TODO(jiawei.shao@intel.com): support creating bind group with read-only and
+                // write-only storage textures.
+                case wgpu::BindingType::ReadonlyStorageTexture:
+                case wgpu::BindingType::WriteonlyStorageTexture:
+                    return DAWN_VALIDATION_ERROR(
+                        "Readonly and writeonly storage textures are not supported.");
                 case wgpu::BindingType::StorageTexture:
                     UNREACHABLE();
                     break;

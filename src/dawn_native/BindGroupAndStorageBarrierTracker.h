@@ -15,9 +15,8 @@
 #ifndef DAWNNATIVE_BINDGROUPANDSTORAGEBARRIERTRACKER_H_
 #define DAWNNATIVE_BINDGROUPANDSTORAGEBARRIERTRACKER_H_
 
-#include "dawn_native/BindGroupTracker.h"
-
 #include "dawn_native/BindGroup.h"
+#include "dawn_native/BindGroupTracker.h"
 
 namespace dawn_native {
 
@@ -62,6 +61,8 @@ namespace dawn_native {
                             break;
 
                         case wgpu::BindingType::StorageTexture:
+                        case wgpu::BindingType::ReadonlyStorageTexture:
+                        case wgpu::BindingType::WriteonlyStorageTexture:
                             // Not implemented.
 
                         default:

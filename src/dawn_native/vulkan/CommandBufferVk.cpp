@@ -149,6 +149,8 @@ namespace dawn_native { namespace vulkan {
                                 break;
 
                             case wgpu::BindingType::StorageTexture:
+                            case wgpu::BindingType::ReadonlyStorageTexture:
+                            case wgpu::BindingType::WriteonlyStorageTexture:
                                 // Not implemented.
 
                             case wgpu::BindingType::UniformBuffer:

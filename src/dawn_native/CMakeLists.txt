@@ -31,6 +31,7 @@ target_sources(dawn_native PRIVATE
     "BackendConnection.h"
     "BindGroup.cpp"
     "BindGroup.h"
+    "BindGroupAndStorageBarrierTracker.h"
     "BindGroupLayout.cpp"
     "BindGroupLayout.h"
     "BindGroupTracker.h"

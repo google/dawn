@@ -59,6 +59,8 @@ namespace dawn_native {
                         break;
 
                     case wgpu::BindingType::StorageTexture:
+                    case wgpu::BindingType::ReadonlyStorageTexture:
+                    case wgpu::BindingType::WriteonlyStorageTexture:
                         UNREACHABLE();
                         break;
                 }

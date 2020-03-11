@@ -33,6 +33,31 @@ namespace dawn_native {
                    lhs.textureComponentType == rhs.textureComponentType;
         }
 
+        wgpu::ShaderStage GetShaderStageVisibilityWithBindingType(wgpu::BindingType bindingType) {
+            // TODO(jiawei.shao@intel.com): support read-only and read-write storage textures.
+            switch (bindingType) {
+                case wgpu::BindingType::StorageBuffer:
+                    return wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute;
+
+                case wgpu::BindingType::WriteonlyStorageTexture:
+                    return wgpu::ShaderStage::Compute;
+
+                case wgpu::BindingType::StorageTexture:
+                    UNREACHABLE();
+                    return wgpu::ShaderStage::None;
+
+                case wgpu::BindingType::UniformBuffer:
+                case wgpu::BindingType::ReadonlyStorageBuffer:
+                case wgpu::BindingType::Sampler:
+                case wgpu::BindingType::SampledTexture:
+                case wgpu::BindingType::ReadonlyStorageTexture:
+                    return wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment |
+                           wgpu::ShaderStage::Compute;
+            }
+
+            return {};
+        }
+
     }  // anonymous namespace
 
     MaybeError ValidatePipelineLayoutDescriptor(DeviceBase* device,
@@ -135,14 +160,9 @@ namespace dawn_native {
 
                     DAWN_TRY(ValidateBindingTypeWithShaderStageVisibility(
                         bindingInfo.type, StageBit(module->GetExecutionModel())));
-                    if (bindingInfo.type == wgpu::BindingType::StorageBuffer) {
-                        bindingSlot.visibility =
-                            wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute;
-                    } else {
-                        bindingSlot.visibility = wgpu::ShaderStage::Vertex |
-                                                 wgpu::ShaderStage::Fragment |
-                                                 wgpu::ShaderStage::Compute;
-                    }
+                    bindingSlot.visibility =
+                        GetShaderStageVisibilityWithBindingType(bindingInfo.type);
+
                     bindingSlot.type = bindingInfo.type;
                     bindingSlot.hasDynamicOffset = false;
                     bindingSlot.multisampled = bindingInfo.multisampled;
