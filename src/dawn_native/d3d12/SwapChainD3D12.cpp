@@ -55,7 +55,7 @@ namespace dawn_native { namespace d3d12 {
         DAWN_TRY_ASSIGN(commandContext, device->GetPendingCommandContext());
 
         // Perform the necessary transition for the texture to be presented.
-        ToBackend(texture)->TransitionUsageNow(commandContext, mTextureUsage);
+        ToBackend(texture)->TrackUsageAndTransitionNow(commandContext, mTextureUsage);
 
         DAWN_TRY(device->ExecutePendingCommandContext());
 

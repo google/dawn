@@ -20,6 +20,7 @@
 #include "dawn_native/d3d12/CommandRecordingContext.h"
 #include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
+#include "dawn_native/d3d12/HeapD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
 
@@ -130,6 +131,29 @@ namespace dawn_native { namespace d3d12 {
     // When true is returned, a D3D12_RESOURCE_BARRIER has been created and must be used in a
     // ResourceBarrier call. Failing to do so will cause the tracked state to become invalid and can
     // cause subsequent errors.
+    bool Buffer::TrackUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
+                                                 D3D12_RESOURCE_BARRIER* barrier,
+                                                 wgpu::BufferUsage newUsage) {
+        // Track the underlying heap to ensure residency.
+        Heap* heap = ToBackend(mResourceAllocation.GetResourceHeap());
+        commandContext->TrackHeapUsage(heap, GetDevice()->GetPendingCommandSerial());
+
+        // Return the resource barrier.
+        return TransitionUsageAndGetResourceBarrier(commandContext, barrier, newUsage);
+    }
+
+    void Buffer::TrackUsageAndTransitionNow(CommandRecordingContext* commandContext,
+                                            wgpu::BufferUsage newUsage) {
+        D3D12_RESOURCE_BARRIER barrier;
+
+        if (TrackUsageAndGetResourceBarrier(commandContext, &barrier, newUsage)) {
+            commandContext->GetCommandList()->ResourceBarrier(1, &barrier);
+        }
+    }
+
+    // When true is returned, a D3D12_RESOURCE_BARRIER has been created and must be used in a
+    // ResourceBarrier call. Failing to do so will cause the tracked state to become invalid and can
+    // cause subsequent errors.
     bool Buffer::TransitionUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
                                                       D3D12_RESOURCE_BARRIER* barrier,
                                                       wgpu::BufferUsage newUsage) {
@@ -200,15 +224,6 @@ namespace dawn_native { namespace d3d12 {
         barrier->Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
         return true;
-    }
-
-    void Buffer::TransitionUsageNow(CommandRecordingContext* commandContext,
-                                    wgpu::BufferUsage usage) {
-        D3D12_RESOURCE_BARRIER barrier;
-
-        if (TransitionUsageAndGetResourceBarrier(commandContext, &barrier, usage)) {
-            commandContext->GetCommandList()->ResourceBarrier(1, &barrier);
-        }
     }
 
     D3D12_GPU_VIRTUAL_ADDRESS Buffer::GetVA() const {

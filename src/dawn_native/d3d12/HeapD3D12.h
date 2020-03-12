@@ -15,6 +15,7 @@
 #ifndef DAWNNATIVE_D3D12_HEAPD3D12_H_
 #define DAWNNATIVE_D3D12_HEAPD3D12_H_
 
+#include "common/Serial.h"
 #include "dawn_native/ResourceHeap.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
@@ -28,10 +29,17 @@ namespace dawn_native { namespace d3d12 {
         ComPtr<ID3D12Heap> GetD3D12Heap() const;
         ComPtr<ID3D12Pageable> GetD3D12Pageable() const;
 
+        // We set mLastRecordingSerial to denote the serial this heap was last recorded to be used.
+        // We must check this serial against the current serial when recording heap usages to ensure
+        // we do not process residency for this heap multiple times.
+        Serial GetLastUsage() const;
+        void SetLastUsage(Serial serial);
+
         uint64_t GetSize() const;
 
       private:
         ComPtr<ID3D12Pageable> mD3d12Pageable;
+        Serial mLastUsage = 0;
         uint64_t mSize = 0;
     };
 }}  // namespace dawn_native::d3d12

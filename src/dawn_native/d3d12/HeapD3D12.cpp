@@ -33,6 +33,14 @@ namespace dawn_native { namespace d3d12 {
         return mD3d12Pageable;
     }
 
+    Serial Heap::GetLastUsage() const {
+        return mLastUsage;
+    }
+
+    void Heap::SetLastUsage(Serial serial) {
+        mLastUsage = serial;
+    }
+
     uint64_t Heap::GetSize() const {
         return mSize;
     }
