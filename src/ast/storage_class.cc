@@ -24,11 +24,11 @@ std::ostream& operator<<(std::ostream& out, StorageClass sc) {
       break;
     }
     case StorageClass::kInput: {
-      out << "input";
+      out << "in";
       break;
     }
     case StorageClass::kOutput: {
-      out << "output";
+      out << "out";
       break;
     }
     case StorageClass::kUniform: {

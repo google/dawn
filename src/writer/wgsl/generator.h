@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "src/writer/wgsl/generator_impl.h"
 #include "src/writer/writer.h"
 
 namespace tint {
@@ -36,10 +37,10 @@ class Generator : public writer::Writer {
   bool Generate() override;
 
   /// @returns the result data
-  const std::string& result() const { return result_; }
+  std::string result() const { return impl_.result(); }
 
  private:
-  std::string result_;
+  GeneratorImpl impl_;
 };
 
 }  // namespace wgsl

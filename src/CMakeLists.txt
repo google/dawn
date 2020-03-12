@@ -181,6 +181,8 @@ set(TINT_LIB_SRCS
   writer/spv/generator.h
   writer/wgsl/generator.cc
   writer/wgsl/generator.h
+  writer/wgsl/generator_impl.cc
+  writer/wgsl/generator_impl.h
   writer/writer.cc
   writer/writer.h
 )
@@ -298,6 +300,7 @@ set(TINT_TEST_SRCS
   reader/wgsl/token_test.cc
   type_manager_test.cc
   validator_impl_import_test.cc
+  writer/wgsl/generator_impl_test.cc
 )
 
 ## Tint library

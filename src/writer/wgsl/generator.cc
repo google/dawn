@@ -25,7 +25,7 @@ Generator::Generator(ast::Module module) : writer::Writer(std::move(module)) {}
 Generator::~Generator() = default;
 
 bool Generator::Generate() {
-  return true;
+  return impl_.Generate(module_);
 }
 
 }  // namespace wgsl
