@@ -47,6 +47,20 @@ class GeneratorImpl {
   /// @returns the error from the generator
   std::string error() const { return error_; }
 
+  /// Increment the emitter indent level
+  void increment_indent() { indent_ += 2; }
+  /// Decrement the emiter indent level
+  void decrement_indent() {
+    if (indent_ < 2) {
+      indent_ = 0;
+      return;
+    }
+    indent_ -= 2;
+  }
+
+  /// Writes the current indent to the output stream
+  void make_indent();
+
   /// Handles generating an alias
   /// @param alias the alias to generate
   /// @returns true if the alias was emitted
@@ -55,6 +69,10 @@ class GeneratorImpl {
   /// @param ep the entry point
   /// @returns true if the entry point was emitted
   bool EmitEntryPoint(const ast::EntryPoint* ep);
+  /// Handles generate an Expression
+  /// @param expr the expression
+  /// @returns true if the expression was emitted
+  bool EmitExpression(ast::Expression* expr);
   /// Handles generating an import command
   /// @param import the import to generate
   /// @returns true if the import was emitted
@@ -73,6 +91,7 @@ class GeneratorImpl {
   bool EmitVariableDecorations(ast::DecoratedVariable* var);
 
  private:
+  size_t indent_ = 0;
   std::ostringstream out_;
   std::string error_;
 };

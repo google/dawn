@@ -23,6 +23,7 @@
 #include "src/ast/builtin.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/decorated_variable.h"
+#include "src/ast/identifier_expression.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/struct.h"
@@ -83,7 +84,7 @@ TEST_F(GeneratorImplTest, DISABLED_EmitAliasType_Struct) {
   GeneratorImpl g;
   ASSERT_TRUE(g.EmitAliasType(&alias));
   EXPECT_EQ(g.result(), R"(type a = struct {
-  a: f32;
+  a : f32;
   [[offset 4]] b : i32;
 }
 )");
@@ -322,9 +323,48 @@ TEST_F(GeneratorImplTest, EmitVariable_Decorated_Multiple) {
 )");
 }
 
-TEST_F(GeneratorImplTest, DISABLED_EmitVariable_Initializer) {}
+TEST_F(GeneratorImplTest, EmitVariable_Initializer) {
+  auto ident = std::make_unique<ast::IdentifierExpression>("initializer");
 
-TEST_F(GeneratorImplTest, DISABLED_EmitVariable_Const) {}
+  ast::type::F32Type f32;
+  ast::Variable v("a", ast::StorageClass::kNone, &f32);
+  v.set_initializer(std::move(ident));
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitVariable(&v));
+  EXPECT_EQ(g.result(), R"(var a : f32 = initializer;
+)");
+}
+
+TEST_F(GeneratorImplTest, EmitVariable_Const) {
+  auto ident = std::make_unique<ast::IdentifierExpression>("initializer");
+
+  ast::type::F32Type f32;
+  ast::Variable v("a", ast::StorageClass::kNone, &f32);
+  v.set_initializer(std::move(ident));
+  v.set_is_const(true);
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitVariable(&v));
+  EXPECT_EQ(g.result(), R"(const a : f32 = initializer;
+)");
+}
+
+TEST_F(GeneratorImplTest, EmitExpression_Identifier) {
+  ast::IdentifierExpression i("init");
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitExpression(&i));
+  EXPECT_EQ(g.result(), "init");
+}
+
+TEST_F(GeneratorImplTest, EmitExpression_Identifier_MultipleNames) {
+  ast::IdentifierExpression i({"std", "glsl", "init"});
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitExpression(&i));
+  EXPECT_EQ(g.result(), "std::glsl::init");
+}
 
 }  // namespace
 }  // namespace wgsl

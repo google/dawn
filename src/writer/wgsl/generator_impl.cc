@@ -19,6 +19,7 @@
 #include "src/ast/binding_decoration.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/decorated_variable.h"
+#include "src/ast/identifier_expression.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/struct.h"
@@ -76,7 +77,14 @@ bool GeneratorImpl::Generate(const ast::Module& module) {
   return true;
 }
 
+void GeneratorImpl::make_indent() {
+  for (size_t i = 0; i < indent_; i++) {
+    out_ << " ";
+  }
+}
+
 bool GeneratorImpl::EmitAliasType(const ast::type::AliasType* alias) {
+  make_indent();
   out_ << "type " << alias->name() << " = ";
   if (!EmitType(alias->type())) {
     return false;
@@ -87,6 +95,7 @@ bool GeneratorImpl::EmitAliasType(const ast::type::AliasType* alias) {
 }
 
 bool GeneratorImpl::EmitEntryPoint(const ast::EntryPoint* ep) {
+  make_indent();
   out_ << "entry_point " << ep->stage() << " ";
   if (!ep->name().empty() && ep->name() != ep->function_name()) {
     out_ << R"(as ")" << ep->name() << R"(" )";
@@ -96,7 +105,25 @@ bool GeneratorImpl::EmitEntryPoint(const ast::EntryPoint* ep) {
   return true;
 }
 
+bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
+  if (expr->IsIdentifier()) {
+    bool first = true;
+    for (const auto& part : expr->AsIdentifier()->name()) {
+      if (!first) {
+        out_ << "::";
+      }
+      first = false;
+      out_ << part;
+    }
+  } else {
+    error_ = "unknown expression type";
+    return false;
+  }
+  return true;
+}
+
 bool GeneratorImpl::EmitImport(const ast::Import* import) {
+  make_indent();
   out_ << R"(import ")" << import->path() << R"(" as )" << import->name() << ";"
        << std::endl;
   return true;
@@ -143,9 +170,10 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
       out_ << "[[" << str->decoration() << "]] ";
     }
     out_ << "struct {" << std::endl;
+
+    increment_indent();
     for (const auto& mem : str->members()) {
-      // TODO(dsinclair): This formats bad with nested structs
-      out_ << "  ";
+      make_indent();
       if (!mem->decorations().empty()) {
         out_ << "[[";
         bool first = true;
@@ -169,6 +197,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
       }
       out_ << ";" << std::endl;
     }
+    decrement_indent();
+    make_indent();
 
     out_ << "}";
   } else if (type->IsU32()) {
@@ -191,6 +221,8 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
 }
 
 bool GeneratorImpl::EmitVariable(ast::Variable* var) {
+  make_indent();
+
   if (var->IsDecorated()) {
     if (!EmitVariableDecorations(var->AsDecorated())) {
       return false;
@@ -212,8 +244,10 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
   }
 
   if (var->initializer() != nullptr) {
-    // out_ << " = ";
-    // EmitExpr(var-initializer());
+    out_ << " = ";
+    if (!EmitExpression(var->initializer())) {
+      return false;
+    }
   }
   out_ << ";" << std::endl;
 
