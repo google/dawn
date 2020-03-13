@@ -16,6 +16,8 @@
 #define DAWNNATIVE_BINDGROUPLAYOUT_H_
 
 #include "common/Constants.h"
+#include "common/Math.h"
+#include "common/SlabAllocator.h"
 #include "dawn_native/CachedObject.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
@@ -60,14 +62,47 @@ namespace dawn_native {
             bool operator()(const BindGroupLayoutBase* a, const BindGroupLayoutBase* b) const;
         };
 
+        uint32_t GetBindingCount() const;
         uint32_t GetDynamicBufferCount() const;
         uint32_t GetDynamicUniformBufferCount() const;
         uint32_t GetDynamicStorageBufferCount() const;
+
+        struct BufferBindingData {
+            uint64_t offset;
+            uint64_t size;
+        };
+
+        struct BindingDataPointers {
+            BufferBindingData* const bufferData = nullptr;
+            Ref<ObjectBase>* const bindings = nullptr;
+        };
+
+        // Compute the amount of space / alignment required to store bindings for a bind group of
+        // this layout.
+        size_t GetBindingDataSize() const;
+        static constexpr size_t GetBindingDataAlignment() {
+            static_assert(alignof(Ref<ObjectBase>) <= alignof(BufferBindingData), "");
+            return alignof(BufferBindingData);
+        }
+
+        BindingDataPointers ComputeBindingDataPointers(void* dataStart) const;
+
+      protected:
+        template <typename BindGroup>
+        SlabAllocator<BindGroup> MakeFrontendBindGroupAllocator(size_t size) {
+            return SlabAllocator<BindGroup>(
+                size,  // bytes
+                Align(sizeof(BindGroup), GetBindingDataAlignment()) + GetBindingDataSize(),  // size
+                std::max(alignof(BindGroup), GetBindingDataAlignment())  // alignment
+            );
+        }
 
       private:
         BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
         LayoutBindingInfo mBindingInfo;
+        uint32_t mBindingCount = 0;
+        uint32_t mBufferCount = 0;
         uint32_t mDynamicUniformBufferCount = 0;
         uint32_t mDynamicStorageBufferCount = 0;
     };

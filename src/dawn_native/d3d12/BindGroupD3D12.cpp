@@ -24,10 +24,6 @@
 
 namespace dawn_native { namespace d3d12 {
 
-    BindGroup::BindGroup(Device* device, const BindGroupDescriptor* descriptor)
-        : BindGroupBase(device, descriptor) {
-    }
-
     ResultOrError<bool> BindGroup::Populate(ShaderVisibleDescriptorAllocator* allocator) {
         Device* device = ToBackend(GetDevice());
 

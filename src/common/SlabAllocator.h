@@ -60,6 +60,8 @@ class SlabAllocatorImpl {
     // TODO(enga): Is uint8_t sufficient?
     using Index = uint16_t;
 
+    SlabAllocatorImpl(SlabAllocatorImpl&& rhs);
+
   protected:
     // This is essentially a singly linked list using indices instead of pointers,
     // so we store the index of "this" in |this->index|.
@@ -76,6 +78,7 @@ class SlabAllocatorImpl {
         // | ---------- allocation --------- |
         // | pad | Slab | data ------------> |
         Slab(std::unique_ptr<char[]> allocation, IndexLinkNode* head);
+        Slab(Slab&& rhs);
 
         void Splice();
 
@@ -86,11 +89,7 @@ class SlabAllocatorImpl {
         Index blocksInUse;
     };
 
-    SlabAllocatorImpl(Index blocksPerSlab,
-                      uint32_t allocationAlignment,
-                      uint32_t slabBlocksOffset,
-                      uint32_t blockStride,
-                      uint32_t indexLinkNodeOffset);
+    SlabAllocatorImpl(Index blocksPerSlab, uint32_t objectSize, uint32_t objectAlignment);
     ~SlabAllocatorImpl();
 
     // Allocate a new block of memory.
@@ -136,12 +135,12 @@ class SlabAllocatorImpl {
     // the offset to the start of the aligned memory region.
     const uint32_t mSlabBlocksOffset;
 
+    // The IndexLinkNode is stored after the Allocation itself. This is the offset to it.
+    const uint32_t mIndexLinkNodeOffset;
+
     // Because alignment of allocations may introduce padding, |mBlockStride| is the
     // distance between aligned blocks of (Allocation + IndexLinkNode)
     const uint32_t mBlockStride;
-
-    // The IndexLinkNode is stored after the Allocation itself. This is the offset to it.
-    const uint32_t mIndexLinkNodeOffset;
 
     const Index mBlocksPerSlab;  // The total number of blocks in a slab.
 
@@ -150,6 +149,8 @@ class SlabAllocatorImpl {
     struct SentinelSlab : Slab {
         SentinelSlab();
         ~SentinelSlab();
+
+        SentinelSlab(SentinelSlab&& rhs);
 
         void Prepend(Slab* slab);
     };
@@ -160,32 +161,13 @@ class SlabAllocatorImpl {
                                    // we don't thrash the current "active" slab.
 };
 
-template <typename T, size_t ObjectSize = 0>
+template <typename T>
 class SlabAllocator : public SlabAllocatorImpl {
-    // Helper struct for computing alignments
-    struct Storage {
-        Slab slab;
-        struct Block {
-            // If the size is unspecified, use sizeof(T) as default. Defined here and not as a
-            // default template parameter because T may be an incomplete type at the time of
-            // declaration.
-            static constexpr size_t kSize = ObjectSize == 0 ? sizeof(T) : ObjectSize;
-            static_assert(kSize >= sizeof(T), "");
-
-            alignas(alignof(T)) char object[kSize];
-            IndexLinkNode node;
-        } blocks[];
-    };
-
   public:
-    SlabAllocator(Index blocksPerSlab)
-        : SlabAllocatorImpl(
-              blocksPerSlab,
-              alignof(Storage),                                             // allocationAlignment
-              offsetof(Storage, blocks[0]),                                 // slabBlocksOffset
-              offsetof(Storage, blocks[1]) - offsetof(Storage, blocks[0]),  // blockStride
-              offsetof(typename Storage::Block, node)                       // indexLinkNodeOffset
-          ) {
+    SlabAllocator(size_t totalObjectBytes,
+                  uint32_t objectSize = sizeof(T),
+                  uint32_t objectAlignment = alignof(T))
+        : SlabAllocatorImpl(totalObjectBytes / objectSize, objectSize, objectAlignment) {
     }
 
     template <typename... Args>

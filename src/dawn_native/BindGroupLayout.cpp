@@ -178,6 +178,19 @@ namespace dawn_native {
             mBindingInfo.types[index] = binding.type;
             mBindingInfo.textureComponentTypes[index] = binding.textureComponentType;
 
+            // TODO(enga): This is a greedy computation because there may be holes in bindings.
+            // Fix this when we pack bindings.
+            mBindingCount = std::max(mBindingCount, index + 1);
+            switch (binding.type) {
+                case wgpu::BindingType::UniformBuffer:
+                case wgpu::BindingType::StorageBuffer:
+                case wgpu::BindingType::ReadonlyStorageBuffer:
+                    mBufferCount = std::max(mBufferCount, index + 1);
+                    break;
+                default:
+                    break;
+            }
+
             if (binding.textureDimension == wgpu::TextureViewDimension::Undefined) {
                 mBindingInfo.textureDimensions[index] = wgpu::TextureViewDimension::e2D;
             } else {
@@ -240,6 +253,10 @@ namespace dawn_native {
         return a->mBindingInfo == b->mBindingInfo;
     }
 
+    uint32_t BindGroupLayoutBase::GetBindingCount() const {
+        return mBindingCount;
+    }
+
     uint32_t BindGroupLayoutBase::GetDynamicBufferCount() const {
         return mDynamicStorageBufferCount + mDynamicUniformBufferCount;
     }
@@ -250,6 +267,25 @@ namespace dawn_native {
 
     uint32_t BindGroupLayoutBase::GetDynamicStorageBufferCount() const {
         return mDynamicStorageBufferCount;
+    }
+
+    size_t BindGroupLayoutBase::GetBindingDataSize() const {
+        // | ------ buffer-specific ----------| ------------ object pointers -------------|
+        // | --- offsets + sizes -------------| --------------- Ref<ObjectBase> ----------|
+        size_t objectPointerStart = mBufferCount * sizeof(BufferBindingData);
+        ASSERT(IsAligned(objectPointerStart, alignof(Ref<ObjectBase>)));
+        return objectPointerStart + mBindingCount * sizeof(Ref<ObjectBase>);
+    }
+
+    BindGroupLayoutBase::BindingDataPointers BindGroupLayoutBase::ComputeBindingDataPointers(
+        void* dataStart) const {
+        BufferBindingData* bufferData = reinterpret_cast<BufferBindingData*>(dataStart);
+        auto bindings = reinterpret_cast<Ref<ObjectBase>*>(bufferData + mBufferCount);
+
+        ASSERT(IsPtrAligned(bufferData, alignof(BufferBindingData)));
+        ASSERT(IsPtrAligned(bindings, alignof(Ref<ObjectBase>)));
+
+        return {bufferData, bindings};
     }
 
 }  // namespace dawn_native

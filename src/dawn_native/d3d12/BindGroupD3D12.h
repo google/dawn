@@ -24,9 +24,9 @@ namespace dawn_native { namespace d3d12 {
     class Device;
     class ShaderVisibleDescriptorAllocator;
 
-    class BindGroup : public BindGroupBase {
+    class BindGroup : public BindGroupBaseOwnBindingData {
       public:
-        BindGroup(Device* device, const BindGroupDescriptor* descriptor);
+        using BindGroupBaseOwnBindingData::BindGroupBaseOwnBindingData;
 
         // Returns true if the BindGroup was successfully populated.
         ResultOrError<bool> Populate(ShaderVisibleDescriptorAllocator* allocator);

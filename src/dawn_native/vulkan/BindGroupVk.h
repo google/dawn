@@ -24,7 +24,7 @@ namespace dawn_native { namespace vulkan {
 
     class Device;
 
-    class BindGroup : public BindGroupBase {
+    class BindGroup : public BindGroupBaseOwnBindingData {
       public:
         static ResultOrError<BindGroup*> Create(Device* device,
                                                 const BindGroupDescriptor* descriptor);
@@ -33,7 +33,7 @@ namespace dawn_native { namespace vulkan {
         VkDescriptorSet GetHandle() const;
 
       private:
-        using BindGroupBase::BindGroupBase;
+        using BindGroupBaseOwnBindingData::BindGroupBaseOwnBindingData;
         MaybeError Initialize();
 
         // The descriptor set in this allocation outlives the BindGroup because it is owned by

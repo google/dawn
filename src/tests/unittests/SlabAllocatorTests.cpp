@@ -34,7 +34,7 @@ namespace {
 
 // Test that a slab allocator of a single object works.
 TEST(SlabAllocatorTests, Single) {
-    SlabAllocator<Foo> allocator(1);
+    SlabAllocator<Foo> allocator(1 * sizeof(Foo));
 
     Foo* obj = allocator.Allocate(4);
     EXPECT_EQ(obj->value, 4);
@@ -46,7 +46,7 @@ TEST(SlabAllocatorTests, Single) {
 TEST(SlabAllocatorTests, AllocateSequential) {
     // Check small alignment
     {
-        SlabAllocator<Foo> allocator(5);
+        SlabAllocator<Foo> allocator(5 * sizeof(Foo));
 
         std::vector<Foo*> objects;
         for (int i = 0; i < 10; ++i) {
@@ -71,7 +71,7 @@ TEST(SlabAllocatorTests, AllocateSequential) {
 
     // Check large alignment
     {
-        SlabAllocator<AlignedFoo> allocator(9);
+        SlabAllocator<AlignedFoo> allocator(9 * sizeof(AlignedFoo));
 
         std::vector<AlignedFoo*> objects;
         for (int i = 0; i < 21; ++i) {
@@ -97,7 +97,7 @@ TEST(SlabAllocatorTests, AllocateSequential) {
 
 // Test that when reallocating a number of objects <= pool size, all memory is reused.
 TEST(SlabAllocatorTests, ReusesFreedMemory) {
-    SlabAllocator<Foo> allocator(17);
+    SlabAllocator<Foo> allocator(17 * sizeof(Foo));
 
     // Allocate a number of objects.
     std::set<Foo*> objects;
@@ -127,7 +127,7 @@ TEST(SlabAllocatorTests, ReusesFreedMemory) {
 // Test many allocations and deallocations. Meant to catch corner cases with partially
 // empty slabs.
 TEST(SlabAllocatorTests, AllocateDeallocateMany) {
-    SlabAllocator<Foo> allocator(17);
+    SlabAllocator<Foo> allocator(17 * sizeof(Foo));
 
     std::set<Foo*> objects;
     std::set<Foo*> set3;
