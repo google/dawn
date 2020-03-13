@@ -12,29 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_READER_SPV_PARSER_H_
-#define SRC_READER_SPV_PARSER_H_
+#ifndef SRC_READER_SPV_PARSER_IMPL_H_
+#define SRC_READER_SPV_PARSER_IMPL_H_
 
 #include <cstdint>
 #include <memory>
+#include <sstream>
 #include <vector>
 
 #include "src/reader/reader.h"
+#include "src/reader/spv/fail_stream.h"
 
 namespace tint {
 namespace reader {
 namespace spv {
 
-class ParserImpl;
-
-/// Parser for SPIR-V source data
-class Parser : public Reader {
+/// Parser implementation for SPIR-V.
+class ParserImpl : Reader {
  public:
   /// Creates a new parser
   /// @param input the input data to parse
-  explicit Parser(const std::vector<uint32_t>& input);
-  /// Destructor
-  ~Parser() override;
+  explicit ParserImpl(const std::vector<uint32_t>& input);
+  ~ParserImpl() override;
 
   /// Run the parser
   /// @returns true if the parse was successful, false otherwise.
@@ -43,12 +42,34 @@ class Parser : public Reader {
   /// @returns the module. The module in the parser will be reset after this.
   ast::Module module() override;
 
+  /// Logs failure, ands return a failure stream to accumulate diagnostic
+  /// messages. By convention, a failure should only be logged along with
+  /// a non-empty string diagnostic.
+  /// @returns the failure stream
+  FailStream& Fail() {
+    success_ = false;
+    return fail_stream_;
+  }
+
+  /// @returns the accumulated error string
+  const std::string error() { return errors_.str(); }
+
  private:
-  std::unique_ptr<ParserImpl> impl_;
+  // The SPIR-V binary we're parsing
+  std::vector<uint32_t> spv_binary_;
+
+  // The resulting module in Tint AST form.
+  ast::Module ast_module_;
+
+  // Is the parse successful?
+  bool success_ = true;
+  // Collector for diagnostic messages.
+  std::stringstream errors_;
+  FailStream fail_stream_;
 };
 
 }  // namespace spv
 }  // namespace reader
 }  // namespace tint
 
-#endif  // SRC_READER_SPV_PARSER_H_
+#endif  // SRC_READER_SPV_PARSER_IMPL_H_

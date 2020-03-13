@@ -189,8 +189,11 @@ set(TINT_LIB_SRCS
 
 if(TINT_BUILD_SPV_PARSER)
   list(APPEND TINT_LIB_SRCS
+    reader/spv/fail_stream.h
     reader/spv/parser.cc
     reader/spv/parser.h
+    reader/spv/parser_impl.cc
+    reader/spv/parser_impl.h
   )
 endif()
 

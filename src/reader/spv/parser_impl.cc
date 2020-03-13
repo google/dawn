@@ -12,43 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_READER_SPV_PARSER_H_
-#define SRC_READER_SPV_PARSER_H_
+#include <cstring>
 
-#include <cstdint>
-#include <memory>
-#include <vector>
-
-#include "src/reader/reader.h"
+#include "src/reader/spv/parser_impl.h"
 
 namespace tint {
 namespace reader {
 namespace spv {
 
-class ParserImpl;
+ParserImpl::ParserImpl(const std::vector<uint32_t>& spv_binary)
+    : Reader(), spv_binary_(spv_binary), fail_stream_(&success_, &errors_) {}
 
-/// Parser for SPIR-V source data
-class Parser : public Reader {
- public:
-  /// Creates a new parser
-  /// @param input the input data to parse
-  explicit Parser(const std::vector<uint32_t>& input);
-  /// Destructor
-  ~Parser() override;
+ParserImpl::~ParserImpl() = default;
 
-  /// Run the parser
-  /// @returns true if the parse was successful, false otherwise.
-  bool Parse() override;
+bool ParserImpl::Parse() {
+  // Exit early if we've already failed.
+  if (success_) {
+    Fail() << "SPIR-V parsing is not supported yet";
+  }
 
-  /// @returns the module. The module in the parser will be reset after this.
-  ast::Module module() override;
+  return success_;
+}
 
- private:
-  std::unique_ptr<ParserImpl> impl_;
-};
+ast::Module ParserImpl::module() {
+  // TODO(dneto): Should we clear out spv_binary_ here, to reduce
+  // memory usage?
+  return std::move(ast_module_);
+}
 
 }  // namespace spv
 }  // namespace reader
 }  // namespace tint
-
-#endif  // SRC_READER_SPV_PARSER_H_

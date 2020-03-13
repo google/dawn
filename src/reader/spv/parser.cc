@@ -14,23 +14,25 @@
 
 #include "src/reader/spv/parser.h"
 
-#include <utility>
+#include "src/reader/spv/parser_impl.h"
 
 namespace tint {
 namespace reader {
 namespace spv {
 
-Parser::Parser(const std::vector<uint32_t>&) : Reader() {}
+Parser::Parser(const std::vector<uint32_t>& spv_binary)
+    : Reader(), impl_(std::make_unique<ParserImpl>(spv_binary)) {}
 
 Parser::~Parser() = default;
 
 bool Parser::Parse() {
-  set_error("SPIR-V parsing is not supported yet");
-  return false;
+  const auto result = impl_->Parse();
+  set_error(impl_->error());
+  return result;
 }
 
 ast::Module Parser::module() {
-  return std::move(module_);
+  return impl_->module();
 }
 
 }  // namespace spv

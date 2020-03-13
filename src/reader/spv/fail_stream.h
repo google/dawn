@@ -39,11 +39,11 @@ class FailStream {
 
   /// Converts to a boolean status. A true result indicates success,
   /// and a false result indicates failure.
-  /// @returns status
+  /// @returns the status
   operator bool() const { return *status_ptr_; }
   /// Returns the current status value.  This can be more readable
   /// the conversion operator.
-  /// @returns status
+  /// @returns the status
   bool status() const { return *status_ptr_; }
 
   /// Records failure.
