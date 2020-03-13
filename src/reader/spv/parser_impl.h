@@ -33,6 +33,7 @@ class ParserImpl : Reader {
   /// Creates a new parser
   /// @param input the input data to parse
   explicit ParserImpl(const std::vector<uint32_t>& input);
+  /// Destructor
   ~ParserImpl() override;
 
   /// Run the parser

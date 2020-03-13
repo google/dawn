@@ -14,6 +14,7 @@
 
 #include <cstring>
 
+#include "spirv-tools/libspirv.hpp"
 #include "src/reader/spv/parser_impl.h"
 
 namespace tint {
@@ -26,9 +27,33 @@ ParserImpl::ParserImpl(const std::vector<uint32_t>& spv_binary)
 ParserImpl::~ParserImpl() = default;
 
 bool ParserImpl::Parse() {
-  // Exit early if we've already failed.
+  if (!success_) {
+    return false;
+  }
+
+  // Set up use of SPIRV-Tools utilities.
+  // TODO(dneto): Add option to handle other environments.
+  spvtools::SpirvTools spv_tools(SPV_ENV_WEBGPU_0);
+
+  // Error messages from SPIRV-Tools are forwarded as failures.
+  auto message_consumer =
+      [this](spv_message_level_t level, const char* /*source*/,
+             const spv_position_t& position, const char* message) {
+        switch (level) {
+          // Drop info and warning message.
+          case SPV_MSG_WARNING:
+          case SPV_MSG_INFO:
+          default:
+            // For binary validation errors, we only have the instruction
+            // number.  It's not text, so there is no column number.
+            this->Fail() << "line:" << position.index << ": " << message;
+        }
+      };
+  spv_tools.SetMessageConsumer(message_consumer);
+
+  // Only consider valid modules.
   if (success_) {
-    Fail() << "SPIR-V parsing is not supported yet";
+    success_ = spv_tools.Validate(spv_binary_);
   }
 
   return success_;
