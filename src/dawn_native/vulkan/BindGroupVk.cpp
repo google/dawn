@@ -28,16 +28,14 @@ namespace dawn_native { namespace vulkan {
     // static
     ResultOrError<BindGroup*> BindGroup::Create(Device* device,
                                                 const BindGroupDescriptor* descriptor) {
-        std::unique_ptr<BindGroup> group = std::make_unique<BindGroup>(device, descriptor);
-        DAWN_TRY(group->Initialize());
-        return group.release();
+        return ToBackend(descriptor->layout)->AllocateBindGroup(device, descriptor);
     }
 
-    MaybeError BindGroup::Initialize() {
-        Device* device = ToBackend(GetDevice());
-
-        DAWN_TRY_ASSIGN(mAllocation, ToBackend(GetLayout())->AllocateOneSet());
-
+    BindGroup::BindGroup(Device* device,
+                         const BindGroupDescriptor* descriptor,
+                         DescriptorSetAllocation descriptorSetAllocation)
+        : BindGroupBase(this, device, descriptor),
+          mDescriptorSetAllocation(descriptorSetAllocation) {
         // Now do a write of a single descriptor set with all possible chained data allocated on the
         // stack.
         uint32_t numWrites = 0;
@@ -50,7 +48,7 @@ namespace dawn_native { namespace vulkan {
             auto& write = writes[numWrites];
             write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             write.pNext = nullptr;
-            write.dstSet = mAllocation.set;
+            write.dstSet = GetHandle();
             write.dstBinding = bindingIndex;
             write.dstArrayElement = 0;
             write.descriptorCount = 1;
@@ -97,16 +95,15 @@ namespace dawn_native { namespace vulkan {
         // TODO(cwallez@chromium.org): Batch these updates
         device->fn.UpdateDescriptorSets(device->GetVkDevice(), numWrites, writes.data(), 0,
                                         nullptr);
-
-        return {};
     }
 
     BindGroup::~BindGroup() {
-        ToBackend(GetLayout())->Deallocate(&mAllocation);
+        ToBackend(GetLayout())->DeallocateDescriptorSet(&mDescriptorSetAllocation);
+        ToBackend(GetLayout())->DeallocateBindGroup(this);
     }
 
     VkDescriptorSet BindGroup::GetHandle() const {
-        return mAllocation.set;
+        return mDescriptorSetAllocation.set;
     }
 
 }}  // namespace dawn_native::vulkan

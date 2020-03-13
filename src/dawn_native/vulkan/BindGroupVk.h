@@ -17,6 +17,7 @@
 
 #include "dawn_native/BindGroup.h"
 
+#include "common/PlacementAllocated.h"
 #include "common/vulkan_platform.h"
 #include "dawn_native/vulkan/BindGroupLayoutVk.h"
 
@@ -24,21 +25,22 @@ namespace dawn_native { namespace vulkan {
 
     class Device;
 
-    class BindGroup : public BindGroupBaseOwnBindingData {
+    class BindGroup : public BindGroupBase, public PlacementAllocated {
       public:
         static ResultOrError<BindGroup*> Create(Device* device,
                                                 const BindGroupDescriptor* descriptor);
-        ~BindGroup();
+
+        BindGroup(Device* device,
+                  const BindGroupDescriptor* descriptor,
+                  DescriptorSetAllocation descriptorSetAllocation);
+        ~BindGroup() override;
 
         VkDescriptorSet GetHandle() const;
 
       private:
-        using BindGroupBaseOwnBindingData::BindGroupBaseOwnBindingData;
-        MaybeError Initialize();
-
         // The descriptor set in this allocation outlives the BindGroup because it is owned by
         // the BindGroupLayout which is referenced by the BindGroup.
-        DescriptorSetAllocation mAllocation;
+        DescriptorSetAllocation mDescriptorSetAllocation;
     };
 
 }}  // namespace dawn_native::vulkan

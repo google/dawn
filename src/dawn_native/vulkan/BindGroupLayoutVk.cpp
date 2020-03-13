@@ -15,6 +15,7 @@
 #include "dawn_native/vulkan/BindGroupLayoutVk.h"
 
 #include "common/BitSetIterator.h"
+#include "dawn_native/vulkan/BindGroupVk.h"
 #include "dawn_native/vulkan/DescriptorSetService.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
@@ -127,6 +128,12 @@ namespace dawn_native { namespace vulkan {
         return {};
     }
 
+    BindGroupLayout::BindGroupLayout(DeviceBase* device,
+                                     const BindGroupLayoutDescriptor* descriptor)
+        : BindGroupLayoutBase(device, descriptor),
+          mBindGroupAllocator(MakeFrontendBindGroupAllocator<BindGroup>(4096)) {
+    }
+
     BindGroupLayout::~BindGroupLayout() {
         Device* device = ToBackend(GetDevice());
 
@@ -148,7 +155,19 @@ namespace dawn_native { namespace vulkan {
         return mHandle;
     }
 
-    ResultOrError<DescriptorSetAllocation> BindGroupLayout::AllocateOneSet() {
+    ResultOrError<BindGroup*> BindGroupLayout::AllocateBindGroup(
+        Device* device,
+        const BindGroupDescriptor* descriptor) {
+        DescriptorSetAllocation descriptorSetAllocation;
+        DAWN_TRY_ASSIGN(descriptorSetAllocation, AllocateOneDescriptorSet());
+        return mBindGroupAllocator.Allocate(device, descriptor, descriptorSetAllocation);
+    }
+
+    void BindGroupLayout::DeallocateBindGroup(BindGroup* bindGroup) {
+        mBindGroupAllocator.Deallocate(bindGroup);
+    }
+
+    ResultOrError<DescriptorSetAllocation> BindGroupLayout::AllocateOneDescriptorSet() {
         Device* device = ToBackend(GetDevice());
 
         // Reuse a previous allocation if available.
@@ -198,16 +217,17 @@ namespace dawn_native { namespace vulkan {
         return {{mAllocations.size() - 1, descriptorSet}};
     }
 
-    void BindGroupLayout::Deallocate(DescriptorSetAllocation* allocation) {
+    void BindGroupLayout::DeallocateDescriptorSet(
+        DescriptorSetAllocation* descriptorSetAllocation) {
         // We can't reuse the descriptor set right away because the Vulkan spec says in the
         // documentation for vkCmdBindDescriptorSets that the set may be consumed any time between
         // host execution of the command and the end of the draw/dispatch.
         ToBackend(GetDevice())
             ->GetDescriptorSetService()
-            ->AddDeferredDeallocation(this, allocation->index);
+            ->AddDeferredDeallocation(this, descriptorSetAllocation->index);
 
         // Clear the content of allocation so that use after frees are more visible.
-        *allocation = {};
+        *descriptorSetAllocation = {};
     }
 
     void BindGroupLayout::FinishDeallocation(size_t index) {

@@ -17,12 +17,14 @@
 
 #include "dawn_native/BindGroupLayout.h"
 
+#include "common/SlabAllocator.h"
 #include "common/vulkan_platform.h"
 
 #include <vector>
 
 namespace dawn_native { namespace vulkan {
 
+    class BindGroup;
     class Device;
 
     VkDescriptorType VulkanDescriptorType(wgpu::BindingType type, bool isDynamic);
@@ -49,18 +51,23 @@ namespace dawn_native { namespace vulkan {
       public:
         static ResultOrError<BindGroupLayout*> Create(Device* device,
                                                       const BindGroupLayoutDescriptor* descriptor);
+
+        BindGroupLayout(DeviceBase* device, const BindGroupLayoutDescriptor* descriptor);
         ~BindGroupLayout();
 
         VkDescriptorSetLayout GetHandle() const;
 
-        ResultOrError<DescriptorSetAllocation> AllocateOneSet();
-        void Deallocate(DescriptorSetAllocation* allocation);
+        ResultOrError<BindGroup*> AllocateBindGroup(Device* device,
+                                                    const BindGroupDescriptor* descriptor);
+        void DeallocateBindGroup(BindGroup* bindGroup);
+
+        ResultOrError<DescriptorSetAllocation> AllocateOneDescriptorSet();
+        void DeallocateDescriptorSet(DescriptorSetAllocation* descriptorSetAllocation);
 
         // Interaction with the DescriptorSetService.
         void FinishDeallocation(size_t index);
 
       private:
-        using BindGroupLayoutBase::BindGroupLayoutBase;
         MaybeError Initialize();
 
         std::vector<VkDescriptorPoolSize> mPoolSizes;
@@ -74,6 +81,8 @@ namespace dawn_native { namespace vulkan {
         std::vector<size_t> mAvailableAllocations;
 
         VkDescriptorSetLayout mHandle = VK_NULL_HANDLE;
+
+        SlabAllocator<BindGroup> mBindGroupAllocator;
     };
 
 }}  // namespace dawn_native::vulkan
