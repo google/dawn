@@ -295,6 +295,10 @@ if (DAWN_ENABLE_OPENGL)
         ${DAWN_NATIVE_OPENGL_AUTOGEN_SOURCES}
         "opengl/BackendGL.cpp"
         "opengl/BackendGL.h"
+        "opengl/BindGroupGL.cpp"
+        "opengl/BindGroupGL.h"
+        "opengl/BindGroupLayoutGL.cpp"
+        "opengl/BindGroupLayoutGL.h"
         "opengl/BufferGL.cpp"
         "opengl/BufferGL.h"
         "opengl/CommandBufferGL.cpp"

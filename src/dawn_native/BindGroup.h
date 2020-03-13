@@ -77,24 +77,6 @@ namespace dawn_native {
         BindGroupLayoutBase::BindingDataPointers mBindingData;
     };
 
-    // Helper class so |BindGroupBaseOwnBindingData| can allocate memory for its binding data,
-    // before calling the BindGroupBase base class constructor.
-    class OwnBindingDataHolder {
-      protected:
-        explicit OwnBindingDataHolder(size_t size);
-        ~OwnBindingDataHolder();
-
-        void* mBindingDataAllocation;
-    };
-
-    // We don't have the complexity of placement-allocation of bind group data in
-    // the Null backend. This class, keeps the binding data in a separate allocation for simplicity.
-    class BindGroupBaseOwnBindingData : private OwnBindingDataHolder, public BindGroupBase {
-      public:
-        BindGroupBaseOwnBindingData(DeviceBase* device, const BindGroupDescriptor* descriptor);
-        ~BindGroupBaseOwnBindingData() override = default;
-    };
-
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_BINDGROUP_H_

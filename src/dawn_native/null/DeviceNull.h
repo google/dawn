@@ -38,7 +38,7 @@
 namespace dawn_native { namespace null {
 
     class Adapter;
-    using BindGroup = BindGroupBaseOwnBindingData;
+    class BindGroup;
     using BindGroupLayout = BindGroupLayoutBase;
     class Buffer;
     class CommandBuffer;
@@ -155,6 +155,24 @@ namespace dawn_native { namespace null {
 
       private:
         ResultOrError<DeviceBase*> CreateDeviceImpl(const DeviceDescriptor* descriptor) override;
+    };
+
+    // Helper class so |BindGroup| can allocate memory for its binding data,
+    // before calling the BindGroupBase base class constructor.
+    class BindGroupDataHolder {
+      protected:
+        explicit BindGroupDataHolder(size_t size);
+        ~BindGroupDataHolder();
+
+        void* mBindingDataAllocation;
+    };
+
+    // We don't have the complexity of placement-allocation of bind group data in
+    // the Null backend. This class, keeps the binding data in a separate allocation for simplicity.
+    class BindGroup : private BindGroupDataHolder, public BindGroupBase {
+      public:
+        BindGroup(DeviceBase* device, const BindGroupDescriptor* descriptor);
+        ~BindGroup() override = default;
     };
 
     class Buffer : public BufferBase {

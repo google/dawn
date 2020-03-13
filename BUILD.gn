@@ -412,6 +412,10 @@ source_set("libdawn_native_sources") {
     sources += [
       "src/dawn_native/opengl/BackendGL.cpp",
       "src/dawn_native/opengl/BackendGL.h",
+      "src/dawn_native/opengl/BindGroupGL.cpp",
+      "src/dawn_native/opengl/BindGroupGL.h",
+      "src/dawn_native/opengl/BindGroupLayoutGL.cpp",
+      "src/dawn_native/opengl/BindGroupLayoutGL.h",
       "src/dawn_native/opengl/BufferGL.cpp",
       "src/dawn_native/opengl/BufferGL.h",
       "src/dawn_native/opengl/CommandBufferGL.cpp",

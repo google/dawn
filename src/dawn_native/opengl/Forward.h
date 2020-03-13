@@ -17,17 +17,11 @@
 
 #include "dawn_native/ToBackend.h"
 
-namespace dawn_native {
-    class BindGroupBaseOwnBindingData;
-    class BindGroupLayoutBase;
-    struct RenderPassDescriptor;
-}  // namespace dawn_native
-
 namespace dawn_native { namespace opengl {
 
     class Adapter;
-    using BindGroup = BindGroupBaseOwnBindingData;
-    using BindGroupLayout = BindGroupLayoutBase;
+    class BindGroup;
+    class BindGroupLayout;
     class Buffer;
     class CommandBuffer;
     class ComputePipeline;

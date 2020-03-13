@@ -252,6 +252,25 @@ namespace dawn_native { namespace null {
         mLastSubmittedSerial++;
     }
 
+    // BindGroupDataHolder
+
+    BindGroupDataHolder::BindGroupDataHolder(size_t size)
+        : mBindingDataAllocation(malloc(size))  // malloc is guaranteed to return a
+                                                // pointer aligned enough for the allocation
+    {
+    }
+
+    BindGroupDataHolder::~BindGroupDataHolder() {
+        free(mBindingDataAllocation);
+    }
+
+    // BindGroup
+
+    BindGroup::BindGroup(DeviceBase* device, const BindGroupDescriptor* descriptor)
+        : BindGroupDataHolder(descriptor->layout->GetBindingDataSize()),
+          BindGroupBase(device, descriptor, mBindingDataAllocation) {
+    }
+
     // Buffer
 
     struct BufferMapOperation : PendingOperation {

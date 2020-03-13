@@ -181,26 +181,6 @@ namespace dawn_native {
         return {};
     }
 
-    // OwnBindingDataHolder
-
-    OwnBindingDataHolder::OwnBindingDataHolder(size_t size)
-        : mBindingDataAllocation(malloc(size))  // malloc is guaranteed to return a
-                                                // pointer aligned enough for the allocation
-    {
-    }
-
-    OwnBindingDataHolder::~OwnBindingDataHolder() {
-        free(mBindingDataAllocation);
-    }
-
-    // BindGroupBaseOwnBindingData
-
-    BindGroupBaseOwnBindingData::BindGroupBaseOwnBindingData(DeviceBase* device,
-                                                             const BindGroupDescriptor* descriptor)
-        : OwnBindingDataHolder(descriptor->layout->GetBindingDataSize()),
-          BindGroupBase(device, descriptor, mBindingDataAllocation) {
-    }
-
     // BindGroup
 
     BindGroupBase::BindGroupBase(DeviceBase* device,
