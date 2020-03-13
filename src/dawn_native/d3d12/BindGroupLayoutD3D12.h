@@ -17,15 +17,20 @@
 
 #include "dawn_native/BindGroupLayout.h"
 
+#include "common/SlabAllocator.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 namespace dawn_native { namespace d3d12 {
 
+    class BindGroup;
     class Device;
 
     class BindGroupLayout : public BindGroupLayoutBase {
       public:
         BindGroupLayout(Device* device, const BindGroupLayoutDescriptor* descriptor);
+
+        BindGroup* AllocateBindGroup(Device* device, const BindGroupDescriptor* descriptor);
+        void DeallocateBindGroup(BindGroup* bindGroup);
 
         enum DescriptorType {
             CBV,
@@ -47,6 +52,8 @@ namespace dawn_native { namespace d3d12 {
         std::array<uint32_t, kMaxBindingsPerGroup> mBindingOffsets;
         std::array<uint32_t, DescriptorType::Count> mDescriptorCounts;
         D3D12_DESCRIPTOR_RANGE mRanges[DescriptorType::Count];
+
+        SlabAllocator<BindGroup> mBindGroupAllocator;
     };
 
 }}  // namespace dawn_native::d3d12

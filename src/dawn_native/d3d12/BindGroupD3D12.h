@@ -15,6 +15,7 @@
 #ifndef DAWNNATIVE_D3D12_BINDGROUPD3D12_H_
 #define DAWNNATIVE_D3D12_BINDGROUPD3D12_H_
 
+#include "common/PlacementAllocated.h"
 #include "common/Serial.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
@@ -24,9 +25,12 @@ namespace dawn_native { namespace d3d12 {
     class Device;
     class ShaderVisibleDescriptorAllocator;
 
-    class BindGroup : public BindGroupBaseOwnBindingData {
+    class BindGroup : public BindGroupBase, public PlacementAllocated {
       public:
-        using BindGroupBaseOwnBindingData::BindGroupBaseOwnBindingData;
+        static BindGroup* Create(Device* device, const BindGroupDescriptor* descriptor);
+
+        BindGroup(Device* device, const BindGroupDescriptor* descriptor);
+        ~BindGroup() override;
 
         // Returns true if the BindGroup was successfully populated.
         ResultOrError<bool> Populate(ShaderVisibleDescriptorAllocator* allocator);
