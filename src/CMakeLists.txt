@@ -306,14 +306,32 @@ set(TINT_TEST_SRCS
   writer/wgsl/generator_impl_test.cc
 )
 
+function(tint_spvtools_compile_options TARGET)
+  # We'll use the optimizer for its nice SPIR-V in-memory representation
+  target_link_libraries(libtint SPIRV-Tools-opt SPIRV-Tools)
+  # We'll be cheating: using internal interfaces to the SPIRV-Tools
+  # optimizer.
+  target_include_directories(libtint PRIVATE ${spirv-tools_SOURCE_DIR} ${spirv-tools_BINARY_DIR})
+  if (${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
+    # The SPIRV-Tools code is conditioned against C++ and an older version of Clang.
+    # Suppress warnings triggered in our current compilation environment.
+    # TODO(dneto): Fix the issues upstream.
+    target_compile_options(${TARGET} PRIVATE
+      -Wno-newline-eof
+      -Wno-sign-conversion
+      -Wno-old-style-cast
+      -Wno-weak-vtables
+    )
+  endif()
+endfunction()
+
+
 ## Tint library
 add_library(libtint ${TINT_LIB_SRCS})
 tint_default_compile_options(libtint)
 set_target_properties(libtint PROPERTIES OUTPUT_NAME "tint")
-
 if(${TINT_BUILD_SPV_PARSER})
-  # We'll use the optimizer for its nice SPIR-V in-memory representation
-  target_link_libraries(libtint SPIRV-Tools-opt SPIRV-Tools)
+  tint_spvtools_compile_options(libtint)
 endif()
 
 if(${TINT_BUILD_SPV_PARSER})
@@ -325,6 +343,9 @@ if(${TINT_BUILD_SPV_PARSER})
 endif()
 
 add_executable(tint_unittests ${TINT_TEST_SRCS})
+if (${TINT_BUILD_SPV_PARSER})
+  tint_spvtools_compile_options(tint_unittests)
+endif()
 if (NOT MSVC)
   target_compile_options(tint_unittests PRIVATE
     -Wno-global-constructors
@@ -335,6 +356,10 @@ endif()
 ## Test executable
 target_include_directories(
     tint_unittests PRIVATE ${gmock_SOURCE_DIR}/include)
+if(${TINT_BUILD_SPV_PARSER})
+  target_include_directories(tint_unittests
+	  PRIVATE ${spirv-tools_SOURCE_DIR} ${spirv-tools_BINARY_DIR})
+endif()
 target_link_libraries(tint_unittests libtint gmock_main)
 tint_default_compile_options(tint_unittests)
 

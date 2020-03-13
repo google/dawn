@@ -20,6 +20,12 @@
 #include <sstream>
 #include <vector>
 
+#include "source/opt/constants.h"
+#include "source/opt/decoration_manager.h"
+#include "source/opt/ir_context.h"
+#include "source/opt/module.h"
+#include "source/opt/type_manager.h"
+#include "spirv-tools/libspirv.hpp"
 #include "src/reader/reader.h"
 #include "src/reader/spv/fail_stream.h"
 
@@ -56,6 +62,13 @@ class ParserImpl : Reader {
   const std::string error() { return errors_.str(); }
 
  private:
+  /// Builds the internal representation of the SPIR-V module.
+  /// Assumes the module is somewhat well-formed.  Normally you
+  /// would want to validate the SPIR-V module before attempting
+  /// to build this internal representation.
+  /// @returns true if successful.
+  bool BuildInternalModule();
+
   // The SPIR-V binary we're parsing
   std::vector<uint32_t> spv_binary_;
 
@@ -67,6 +80,19 @@ class ParserImpl : Reader {
   // Collector for diagnostic messages.
   std::stringstream errors_;
   FailStream fail_stream_;
+  spvtools::MessageConsumer message_consumer_;
+
+  // The internal representation of the SPIR-V module and its context.
+  spvtools::Context tools_context_;
+  spvtools::SpirvTools tools_;
+  // All the state is owned by ir_context_.
+  std::unique_ptr<spvtools::opt::IRContext> ir_context_;
+  // The following are borrowed pointers to the internal state of ir_context_.
+  spvtools::opt::Module* module_ = nullptr;
+  spvtools::opt::analysis::DefUseManager* def_use_mgr_ = nullptr;
+  spvtools::opt::analysis::ConstantManager* constant_mgr_ = nullptr;
+  spvtools::opt::analysis::TypeManager* type_mgr_ = nullptr;
+  spvtools::opt::analysis::DecorationManager* deco_mgr_ = nullptr;
 };
 
 }  // namespace spv
