@@ -55,4 +55,3 @@ TEST_F(KillStatementTest, ToStr) {
 
 }  // namespace ast
 }  // namespace tint
-

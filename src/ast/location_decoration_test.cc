@@ -14,6 +14,8 @@
 
 #include "src/ast/location_decoration.h"
 
+#include <sstream>
+
 #include "gtest/gtest.h"
 
 namespace tint {
@@ -32,6 +34,14 @@ TEST_F(LocationDecorationTest, Is) {
   EXPECT_FALSE(d.IsBuiltin());
   EXPECT_TRUE(d.IsLocation());
   EXPECT_FALSE(d.IsSet());
+}
+
+TEST_F(LocationDecorationTest, ToStr) {
+  LocationDecoration d{2};
+  std::ostringstream out;
+  d.to_str(out);
+  EXPECT_EQ(out.str(), R"(LocationDecoration{2}
+)");
 }
 
 }  // namespace ast
