@@ -258,6 +258,7 @@ TEST_F(GetBindGroupLayoutTests, Multisampled) {
 
     // TODO: Support multisampling
     GTEST_SKIP() << "Multisampling unimplemented";
+#if 0
     {
         binding.multisampled = true;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
@@ -267,6 +268,7 @@ TEST_F(GetBindGroupLayoutTests, Multisampled) {
         void main() {})");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
+#endif
 }
 
 // Test that texture view dimension matches the shader.
@@ -497,10 +499,8 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingType) {
 }
 
 // Test it is invalid to have conflicting binding texture multisampling in the shaders.
-TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureMultisampling) {
-    // TODO: Support multisampling
-    GTEST_SKIP() << "Multisampling unimplemented";
-
+// TODO: Support multisampling
+TEST_F(GetBindGroupLayoutTests, DISABLED_ConflictingBindingTextureMultisampling) {
     wgpu::ShaderModule vsModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
         #version 450
