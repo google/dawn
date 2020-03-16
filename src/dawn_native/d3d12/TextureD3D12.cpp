@@ -538,7 +538,7 @@ namespace dawn_native { namespace d3d12 {
         return true;
     }
 
-    D3D12_RENDER_TARGET_VIEW_DESC Texture::GetRTVDescriptor(uint32_t baseMipLevel,
+    D3D12_RENDER_TARGET_VIEW_DESC Texture::GetRTVDescriptor(uint32_t mipLevel,
                                                             uint32_t baseArrayLayer,
                                                             uint32_t layerCount) const {
         ASSERT(GetDimension() == wgpu::TextureDimension::e2D);
@@ -548,7 +548,7 @@ namespace dawn_native { namespace d3d12 {
             ASSERT(GetNumMipLevels() == 1);
             ASSERT(layerCount == 1);
             ASSERT(baseArrayLayer == 0);
-            ASSERT(baseMipLevel == 0);
+            ASSERT(mipLevel == 0);
             rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMS;
         } else {
             // Currently we always use D3D12_TEX2D_ARRAY_RTV because we cannot specify base array
@@ -560,23 +560,30 @@ namespace dawn_native { namespace d3d12 {
             rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
             rtvDesc.Texture2DArray.FirstArraySlice = baseArrayLayer;
             rtvDesc.Texture2DArray.ArraySize = layerCount;
-            rtvDesc.Texture2DArray.MipSlice = baseMipLevel;
+            rtvDesc.Texture2DArray.MipSlice = mipLevel;
             rtvDesc.Texture2DArray.PlaneSlice = 0;
         }
         return rtvDesc;
     }
 
-    D3D12_DEPTH_STENCIL_VIEW_DESC Texture::GetDSVDescriptor(uint32_t baseMipLevel) const {
+    D3D12_DEPTH_STENCIL_VIEW_DESC Texture::GetDSVDescriptor(uint32_t mipLevel,
+                                                            uint32_t baseArrayLayer,
+                                                            uint32_t layerCount) const {
         D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc;
         dsvDesc.Format = GetD3D12Format();
         dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
-        ASSERT(baseMipLevel == 0);
 
         if (IsMultisampledTexture()) {
+            ASSERT(GetNumMipLevels() == 1);
+            ASSERT(layerCount == 1);
+            ASSERT(baseArrayLayer == 0);
+            ASSERT(mipLevel == 0);
             dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMS;
         } else {
-            dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-            dsvDesc.Texture2D.MipSlice = baseMipLevel;
+            dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
+            dsvDesc.Texture2DArray.FirstArraySlice = baseArrayLayer;
+            dsvDesc.Texture2DArray.ArraySize = layerCount;
+            dsvDesc.Texture2DArray.MipSlice = mipLevel;
         }
 
         return dsvDesc;
@@ -606,40 +613,62 @@ namespace dawn_native { namespace d3d12 {
         if (GetFormat().isRenderable) {
             if (GetFormat().HasDepthOrStencil()) {
                 TrackUsageAndTransitionNow(commandContext, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-                DescriptorHeapHandle dsvHeap;
-                DAWN_TRY_ASSIGN(dsvHeap, descriptorHeapAllocator->AllocateCPUHeap(
-                                             D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1));
-                D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvHeap.GetCPUHandle(0);
-                D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = GetDSVDescriptor(baseMipLevel);
-                device->GetD3D12Device()->CreateDepthStencilView(GetD3D12Resource(), &dsvDesc,
-                                                                 dsvHandle);
 
                 D3D12_CLEAR_FLAGS clearFlags = {};
-                if (GetFormat().HasDepth()) {
-                    clearFlags |= D3D12_CLEAR_FLAG_DEPTH;
-                }
-                if (GetFormat().HasStencil()) {
-                    clearFlags |= D3D12_CLEAR_FLAG_STENCIL;
-                }
 
-                commandList->ClearDepthStencilView(dsvHandle, clearFlags, fClearColor, clearColor,
-                                                   0, nullptr);
+                for (uint32_t level = baseMipLevel; level < baseMipLevel + levelCount; ++level) {
+                    for (uint32_t layer = baseArrayLayer; layer < baseArrayLayer + layerCount;
+                         ++layer) {
+                        if (clearValue == TextureBase::ClearValue::Zero &&
+                            IsSubresourceContentInitialized(level, 1, layer, 1)) {
+                            // Skip lazy clears if already initialized.
+                            continue;
+                        }
+
+                        DescriptorHeapHandle dsvHeap;
+                        DAWN_TRY_ASSIGN(dsvHeap, descriptorHeapAllocator->AllocateCPUHeap(
+                                                     D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1));
+                        D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvHeap.GetCPUHandle(0);
+                        D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = GetDSVDescriptor(level, layer, 1);
+                        device->GetD3D12Device()->CreateDepthStencilView(GetD3D12Resource(),
+                                                                         &dsvDesc, dsvHandle);
+
+                        if (GetFormat().HasDepth()) {
+                            clearFlags |= D3D12_CLEAR_FLAG_DEPTH;
+                        }
+                        if (GetFormat().HasStencil()) {
+                            clearFlags |= D3D12_CLEAR_FLAG_STENCIL;
+                        }
+
+                        commandList->ClearDepthStencilView(dsvHandle, clearFlags, fClearColor,
+                                                           clearColor, 0, nullptr);
+                    }
+                }
             } else {
                 TrackUsageAndTransitionNow(commandContext, D3D12_RESOURCE_STATE_RENDER_TARGET);
-                DescriptorHeapHandle rtvHeap;
-                DAWN_TRY_ASSIGN(rtvHeap, descriptorHeapAllocator->AllocateCPUHeap(
-                                             D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 1));
-                D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap.GetCPUHandle(0);
+
                 const float clearColorRGBA[4] = {fClearColor, fClearColor, fClearColor,
                                                  fClearColor};
 
-                // TODO(natlee@microsoft.com): clear all array layers for 2D array textures
-                for (uint32_t i = baseMipLevel; i < baseMipLevel + levelCount; i++) {
-                    D3D12_RENDER_TARGET_VIEW_DESC rtvDesc =
-                        GetRTVDescriptor(i, baseArrayLayer, layerCount);
-                    device->GetD3D12Device()->CreateRenderTargetView(GetD3D12Resource(), &rtvDesc,
-                                                                     rtvHandle);
-                    commandList->ClearRenderTargetView(rtvHandle, clearColorRGBA, 0, nullptr);
+                for (uint32_t level = baseMipLevel; level < baseMipLevel + levelCount; ++level) {
+                    for (uint32_t layer = baseArrayLayer; layer < baseArrayLayer + layerCount;
+                         ++layer) {
+                        if (clearValue == TextureBase::ClearValue::Zero &&
+                            IsSubresourceContentInitialized(level, 1, layer, 1)) {
+                            // Skip lazy clears if already initialized.
+                            continue;
+                        }
+
+                        DescriptorHeapHandle rtvHeap;
+                        DAWN_TRY_ASSIGN(rtvHeap, descriptorHeapAllocator->AllocateCPUHeap(
+                                                     D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 1));
+                        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap.GetCPUHandle(0);
+
+                        D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = GetRTVDescriptor(level, layer, 1);
+                        device->GetD3D12Device()->CreateRenderTargetView(GetD3D12Resource(),
+                                                                         &rtvDesc, rtvHandle);
+                        commandList->ClearRenderTargetView(rtvHandle, clearColorRGBA, 0, nullptr);
+                    }
                 }
             }
         } else {
@@ -661,14 +690,20 @@ namespace dawn_native { namespace d3d12 {
 
             TrackUsageAndTransitionNow(commandContext, D3D12_RESOURCE_STATE_COPY_DEST);
 
-            // compute d3d12 texture copy locations for texture and buffer
-            Extent3D copySize = {GetSize().width, GetSize().height, 1};
-            TextureCopySplit copySplit = ComputeTextureCopySplit(
-                {0, 0, 0}, copySize, GetFormat(), uploadHandle.startOffset, rowPitch, 0);
-
             for (uint32_t level = baseMipLevel; level < baseMipLevel + levelCount; ++level) {
+                // compute d3d12 texture copy locations for texture and buffer
+                Extent3D copySize = GetMipLevelVirtualSize(level);
+                TextureCopySplit copySplit = ComputeTextureCopySplit(
+                    {0, 0, 0}, copySize, GetFormat(), uploadHandle.startOffset, rowPitch, 0);
+
                 for (uint32_t layer = baseArrayLayer; layer < baseArrayLayer + layerCount;
                      ++layer) {
+                    if (clearValue == TextureBase::ClearValue::Zero &&
+                        IsSubresourceContentInitialized(level, 1, layer, 1)) {
+                        // Skip lazy clears if already initialized.
+                        continue;
+                    }
+
                     D3D12_TEXTURE_COPY_LOCATION textureLocation =
                         ComputeTextureCopyLocationForTexture(this, level, layer);
                     for (uint32_t i = 0; i < copySplit.count; ++i) {
@@ -770,11 +805,10 @@ namespace dawn_native { namespace d3d12 {
 
     D3D12_DEPTH_STENCIL_VIEW_DESC TextureView::GetDSVDescriptor() const {
         // TODO(jiawei.shao@intel.com): support rendering into a layer of a texture.
-        ASSERT(GetLayerCount() == 1);
         ASSERT(GetLevelCount() == 1);
-        ASSERT(GetBaseMipLevel() == 0);
-        ASSERT(GetBaseArrayLayer() == 0);
-        return ToBackend(GetTexture())->GetDSVDescriptor(GetBaseMipLevel());
+        uint32_t mipLevel = GetBaseMipLevel();
+        return ToBackend(GetTexture())
+            ->GetDSVDescriptor(mipLevel, GetBaseArrayLayer(), GetLayerCount());
     }
 
 }}  // namespace dawn_native::d3d12

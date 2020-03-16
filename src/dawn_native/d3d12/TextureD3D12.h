@@ -49,10 +49,12 @@ namespace dawn_native { namespace d3d12 {
         DXGI_FORMAT GetD3D12Format() const;
         ID3D12Resource* GetD3D12Resource() const;
 
-        D3D12_RENDER_TARGET_VIEW_DESC GetRTVDescriptor(uint32_t baseMipLevel,
+        D3D12_RENDER_TARGET_VIEW_DESC GetRTVDescriptor(uint32_t mipLevel,
                                                        uint32_t baseArrayLayer,
                                                        uint32_t layerCount) const;
-        D3D12_DEPTH_STENCIL_VIEW_DESC GetDSVDescriptor(uint32_t baseMipLevel) const;
+        D3D12_DEPTH_STENCIL_VIEW_DESC GetDSVDescriptor(uint32_t mipLevel,
+                                                       uint32_t baseArrayLayer,
+                                                       uint32_t layerCount) const;
         void EnsureSubresourceContentInitialized(CommandRecordingContext* commandContext,
                                                  uint32_t baseMipLevel,
                                                  uint32_t levelCount,

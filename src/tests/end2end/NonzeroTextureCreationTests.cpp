@@ -195,7 +195,7 @@ TEST_P(NonzeroTextureCreationTests, NonRenderableTextureClearWithMultiArrayLayer
 // Test that all subresources of a renderable texture are filled because the toggle is enabled.
 TEST_P(NonzeroTextureCreationTests, AllSubresourcesFilled) {
     // TODO(crbug.com/dawn/145): Implement on other platforms.
-    DAWN_SKIP_TEST_IF(!IsMetal());
+    DAWN_SKIP_TEST_IF(!IsMetal() && !IsD3D12());
 
     wgpu::TextureDescriptor baseDescriptor;
     baseDescriptor.dimension = wgpu::TextureDimension::e2D;
@@ -251,7 +251,7 @@ TEST_P(NonzeroTextureCreationTests, AllSubresourcesFilled) {
 // Test that all subresources of a nonrenderable texture are filled because the toggle is enabled.
 TEST_P(NonzeroTextureCreationTests, NonRenderableAllSubresourcesFilled) {
     // TODO(crbug.com/dawn/145): Implement on other platforms.
-    DAWN_SKIP_TEST_IF(!IsMetal());
+    DAWN_SKIP_TEST_IF(!IsMetal() && !IsD3D12());
 
     wgpu::TextureDescriptor baseDescriptor;
     baseDescriptor.dimension = wgpu::TextureDimension::e2D;
@@ -259,7 +259,7 @@ TEST_P(NonzeroTextureCreationTests, NonRenderableAllSubresourcesFilled) {
     baseDescriptor.size.height = kSize;
     baseDescriptor.size.depth = 1;
     baseDescriptor.sampleCount = 1;
-    baseDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+    baseDescriptor.format = wgpu::TextureFormat::RGBA8Snorm;
     baseDescriptor.mipLevelCount = 1;
     baseDescriptor.arrayLayerCount = 1;
     baseDescriptor.usage = wgpu::TextureUsage::CopySrc;
