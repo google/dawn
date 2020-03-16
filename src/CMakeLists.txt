@@ -221,6 +221,7 @@ set(TINT_TEST_SRCS
   ast/int_literal_test.cc
   ast/kill_statement_test.cc
   ast/location_decoration_test.cc
+  ast/loop_statement_test.cc
   ast/module_test.cc
   ast/set_decoration_test.cc
   ast/struct_member_test.cc

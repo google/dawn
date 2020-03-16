@@ -28,6 +28,8 @@ namespace ast {
 class LoopStatement : public Statement {
  public:
   /// Constructor
+  LoopStatement();
+  /// Constructor
   /// @param body the body statements
   /// @param continuing the continuing statements
   LoopStatement(std::vector<std::unique_ptr<Statement>> body,
