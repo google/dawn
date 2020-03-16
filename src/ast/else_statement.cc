@@ -53,8 +53,15 @@ bool ElseStatement::IsValid() const {
 void ElseStatement::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
   out << "Else{" << std::endl;
-  if (condition_ != nullptr)
-    condition_->to_str(out, indent + 2);
+  if (condition_ != nullptr) {
+    make_indent(out, indent + 2);
+    out << "(" << std::endl;
+
+    condition_->to_str(out, indent + 4);
+
+    make_indent(out, indent + 2);
+    out << ")" << std::endl;
+  }
 
   make_indent(out, indent + 2);
   out << "{" << std::endl;

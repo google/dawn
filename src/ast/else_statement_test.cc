@@ -110,7 +110,9 @@ TEST_F(ElseStatementTest, ToStr) {
   std::ostringstream out;
   e.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Else{
-    ConstInitializer{true}
+    (
+      ConstInitializer{true}
+    )
     {
       Nop{}
     }

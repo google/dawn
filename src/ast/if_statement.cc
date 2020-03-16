@@ -35,11 +35,40 @@ IfStatement::IfStatement(const Source& source,
 IfStatement::~IfStatement() = default;
 
 bool IfStatement::IsValid() const {
-  if (condition_ == nullptr)
+  if (condition_ == nullptr || !condition_->IsValid())
     return false;
 
-  if (premerge_.size() > 0 && else_statements_.size() > 1)
-    return false;
+  for (const auto& stmt : body_) {
+    if (stmt == nullptr || !stmt->IsValid())
+      return false;
+  }
+
+  bool found_else = false;
+  for (const auto& el : else_statements_) {
+    // Else statement must be last
+    if (found_else)
+      return false;
+
+    if (el == nullptr || !el->IsValid())
+      return false;
+
+    if (el->condition() == nullptr)
+      found_else = true;
+  }
+
+  for (const auto& stmt : premerge_) {
+    if (stmt == nullptr || !stmt->IsValid())
+      return false;
+  }
+
+  if (premerge_.size() > 0) {
+    // Premerge only with a single else statement
+    if (else_statements_.size() != 1)
+      return false;
+    // Must be an else, not an elseif
+    if (else_statements_[0]->condition() != nullptr)
+      return false;
+  }
 
   return true;
 }
@@ -47,28 +76,43 @@ bool IfStatement::IsValid() const {
 void IfStatement::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
   out << "If{" << std::endl;
-  condition_->to_str(out, indent + 2);
-  out << std::endl;
+
+  // Open if conditional
+  make_indent(out, indent + 2);
+  out << "(" << std::endl;
+
+  condition_->to_str(out, indent + 4);
+
+  // Close if conditional
+  make_indent(out, indent + 2);
+  out << ")" << std::endl;
+
+  // Open if body
   make_indent(out, indent + 2);
   out << "{" << std::endl;
 
   for (const auto& stmt : body_)
     stmt->to_str(out, indent + 4);
 
+  // Close the if body
   make_indent(out, indent + 2);
   out << "}" << std::endl;
 
+  // Close the If
+  make_indent(out, indent);
+  out << "}" << std::endl;
+
   for (const auto& e : else_statements_)
-    e->to_str(out, indent + 2);
+    e->to_str(out, indent);
 
   if (premerge_.size() > 0) {
-    make_indent(out, indent + 2);
+    make_indent(out, indent);
     out << "premerge{" << std::endl;
 
     for (const auto& stmt : premerge_)
-      stmt->to_str(out, indent + 4);
+      stmt->to_str(out, indent + 2);
 
-    make_indent(out, indent + 2);
+    make_indent(out, indent);
     out << "}" << std::endl;
   }
 }

@@ -216,6 +216,7 @@ set(TINT_TEST_SRCS
   ast/fallthrough_statement_test.cc
   ast/function_test.cc
   ast/identifier_expression_test.cc
+  ast/if_statement_test.cc
   ast/import_test.cc
   ast/int_literal_test.cc
   ast/location_decoration_test.cc
