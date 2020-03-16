@@ -219,6 +219,7 @@ set(TINT_TEST_SRCS
   ast/if_statement_test.cc
   ast/import_test.cc
   ast/int_literal_test.cc
+  ast/kill_statement_test.cc
   ast/location_decoration_test.cc
   ast/module_test.cc
   ast/set_decoration_test.cc
