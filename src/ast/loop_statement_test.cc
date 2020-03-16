@@ -17,8 +17,8 @@
 #include <sstream>
 
 #include "gtest/gtest.h"
-#include "src/ast/kill_statement.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/kill_statement.h"
 #include "src/ast/nop_statement.h"
 
 namespace tint {

@@ -54,10 +54,10 @@ void LoopStatement::to_str(std::ostream& out, size_t indent) const {
   if (continuing_.size() > 0) {
     make_indent(out, indent + 2);
     out << "continuing {" << std::endl;
-  
+
     for (const auto& stmt : continuing_)
       stmt->to_str(out, indent + 4);
-  
+
     make_indent(out, indent + 2);
     out << "}" << std::endl;
   }

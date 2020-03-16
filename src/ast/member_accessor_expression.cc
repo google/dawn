@@ -17,6 +17,8 @@
 namespace tint {
 namespace ast {
 
+MemberAccessorExpression::MemberAccessorExpression() = default;
+
 MemberAccessorExpression::MemberAccessorExpression(
     std::unique_ptr<Expression> structure,
     std::unique_ptr<IdentifierExpression> member)
@@ -33,7 +35,13 @@ MemberAccessorExpression::MemberAccessorExpression(
 MemberAccessorExpression::~MemberAccessorExpression() = default;
 
 bool MemberAccessorExpression::IsValid() const {
-  return struct_ != nullptr && member_ != nullptr;
+  if (struct_ == nullptr || !struct_->IsValid()) {
+    return false;
+  }
+  if (member_ == nullptr || !member_->IsValid()) {
+    return false;
+  }
+  return true;
 }
 
 void MemberAccessorExpression::to_str(std::ostream& out, size_t indent) const {

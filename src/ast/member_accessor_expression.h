@@ -30,6 +30,8 @@ namespace ast {
 class MemberAccessorExpression : public Expression {
  public:
   /// Constructor
+  MemberAccessorExpression();
+  /// Constructor
   /// @param structure the structure
   /// @param member the member
   MemberAccessorExpression(std::unique_ptr<Expression> structure,
