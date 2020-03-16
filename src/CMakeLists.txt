@@ -224,6 +224,7 @@ set(TINT_TEST_SRCS
   ast/loop_statement_test.cc
   ast/member_accessor_expression_test.cc
   ast/module_test.cc
+  ast/nop_statement_test.cc
   ast/set_decoration_test.cc
   ast/struct_member_test.cc
   ast/struct_member_offset_decoration_test.cc
