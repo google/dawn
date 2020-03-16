@@ -62,6 +62,10 @@ namespace dawn_native { namespace vulkan {
                     return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
                 }
                 return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            case wgpu::BindingType::ReadonlyStorageTexture:
+            case wgpu::BindingType::WriteonlyStorageTexture:
+                return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+            case wgpu::BindingType::StorageTexture:
             default:
                 UNREACHABLE();
         }

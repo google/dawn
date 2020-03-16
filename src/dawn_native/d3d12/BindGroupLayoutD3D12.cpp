@@ -19,6 +19,27 @@
 #include "dawn_native/d3d12/DeviceD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
+    namespace {
+        BindGroupLayout::DescriptorType WGPUBindingTypeToDescriptorType(
+            wgpu::BindingType bindingType) {
+            switch (bindingType) {
+                case wgpu::BindingType::UniformBuffer:
+                    return BindGroupLayout::DescriptorType::CBV;
+                case wgpu::BindingType::StorageBuffer:
+                case wgpu::BindingType::WriteonlyStorageTexture:
+                    return BindGroupLayout::DescriptorType::UAV;
+                case wgpu::BindingType::SampledTexture:
+                case wgpu::BindingType::ReadonlyStorageBuffer:
+                case wgpu::BindingType::ReadonlyStorageTexture:
+                    return BindGroupLayout::DescriptorType::SRV;
+                case wgpu::BindingType::Sampler:
+                    return BindGroupLayout::DescriptorType::Sampler;
+                case wgpu::BindingType::StorageTexture:
+                    UNREACHABLE();
+                    return BindGroupLayout::DescriptorType::UAV;
+            }
+        }
+    }  // anonymous namespace
 
     BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor* descriptor)
         : BindGroupLayoutBase(device, descriptor),
@@ -34,27 +55,9 @@ namespace dawn_native { namespace d3d12 {
                 continue;
             }
 
-            switch (groupInfo.types[binding]) {
-                case wgpu::BindingType::UniformBuffer:
-                    mBindingOffsets[binding] = mDescriptorCounts[CBV]++;
-                    break;
-                case wgpu::BindingType::StorageBuffer:
-                    mBindingOffsets[binding] = mDescriptorCounts[UAV]++;
-                    break;
-                case wgpu::BindingType::SampledTexture:
-                case wgpu::BindingType::ReadonlyStorageBuffer:
-                    mBindingOffsets[binding] = mDescriptorCounts[SRV]++;
-                    break;
-                case wgpu::BindingType::Sampler:
-                    mBindingOffsets[binding] = mDescriptorCounts[Sampler]++;
-                    break;
-
-                case wgpu::BindingType::StorageTexture:
-                case wgpu::BindingType::ReadonlyStorageTexture:
-                case wgpu::BindingType::WriteonlyStorageTexture:
-                    UNREACHABLE();
-                    break;
-            }
+            DescriptorType descriptorType =
+                WGPUBindingTypeToDescriptorType(groupInfo.types[binding]);
+            mBindingOffsets[binding] = mDescriptorCounts[descriptorType]++;
         }
 
         auto SetDescriptorRange = [&](uint32_t index, uint32_t count, uint32_t* baseRegister,
@@ -120,29 +123,10 @@ namespace dawn_native { namespace d3d12 {
                 continue;
             }
 
-            switch (groupInfo.types[binding]) {
-                case wgpu::BindingType::UniformBuffer:
-                    mBindingOffsets[binding] += descriptorOffsets[CBV];
-                    break;
-                case wgpu::BindingType::StorageBuffer:
-                    mBindingOffsets[binding] += descriptorOffsets[UAV];
-                    break;
-                case wgpu::BindingType::SampledTexture:
-                case wgpu::BindingType::ReadonlyStorageBuffer:
-                    mBindingOffsets[binding] += descriptorOffsets[SRV];
-                    break;
-                case wgpu::BindingType::Sampler:
-                    mBindingOffsets[binding] += descriptorOffsets[Sampler];
-                    break;
-
-                case wgpu::BindingType::StorageTexture:
-                case wgpu::BindingType::ReadonlyStorageTexture:
-                case wgpu::BindingType::WriteonlyStorageTexture:
-                    UNREACHABLE();
-                    break;
-
-                    // TODO(shaobo.yan@intel.com): Implement dynamic buffer offset.
-            }
+            // TODO(shaobo.yan@intel.com): Implement dynamic buffer offset.
+            DescriptorType descriptorType =
+                WGPUBindingTypeToDescriptorType(groupInfo.types[binding]);
+            mBindingOffsets[binding] += descriptorOffsets[descriptorType];
         }
     }
 

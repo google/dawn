@@ -205,3 +205,36 @@ TEST_F(StorageTextureValidationTests, ReadWriteStorageTexture) {
         ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&descriptor));
     }
 }
+
+// Test that using read-only storage texture and write-only storage texture in
+// BindGroupLayout is valid, while using read-write storage texture is not allowed now.
+TEST_F(StorageTextureValidationTests, BindGroupLayoutWithStorageTextureBindingType) {
+    struct TestSpec {
+        wgpu::ShaderStage stage;
+        wgpu::BindingType type;
+        bool valid;
+    };
+    constexpr std::array<TestSpec, 9> kTestSpecs = {
+        {{wgpu::ShaderStage::Vertex, wgpu::BindingType::ReadonlyStorageTexture, true},
+         {wgpu::ShaderStage::Vertex, wgpu::BindingType::WriteonlyStorageTexture, false},
+         {wgpu::ShaderStage::Vertex, wgpu::BindingType::StorageTexture, false},
+         {wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageTexture, true},
+         {wgpu::ShaderStage::Fragment, wgpu::BindingType::WriteonlyStorageTexture, false},
+         {wgpu::ShaderStage::Fragment, wgpu::BindingType::StorageTexture, false},
+         {wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageTexture, true},
+         {wgpu::ShaderStage::Compute, wgpu::BindingType::WriteonlyStorageTexture, true},
+         {wgpu::ShaderStage::Compute, wgpu::BindingType::StorageTexture, false}}};
+
+    for (const auto& testSpec : kTestSpecs) {
+        wgpu::BindGroupLayoutBinding binding = {0, testSpec.stage, testSpec.type};
+        wgpu::BindGroupLayoutDescriptor descriptor;
+        descriptor.bindingCount = 1;
+        descriptor.bindings = &binding;
+
+        if (testSpec.valid) {
+            device.CreateBindGroupLayout(&descriptor);
+        } else {
+            ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor));
+        }
+    }
+}
