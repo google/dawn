@@ -29,8 +29,29 @@ const Import* Module::FindImportByName(const std::string& name) {
 
 bool Module::IsValid() const {
   for (const auto& import : imports_) {
-    if (!import->IsValid())
+    if (import == nullptr || !import->IsValid()) {
       return false;
+    }
+  }
+  for (const auto& var : global_variables_) {
+    if (var == nullptr || !var->IsValid()) {
+      return false;
+    }
+  }
+  for (const auto& ep : entry_points_) {
+    if (ep == nullptr || !ep->IsValid()) {
+      return false;
+    }
+  }
+  for (const auto& alias : alias_types_) {
+    if (alias == nullptr) {
+      return false;
+    }
+  }
+  for (const auto& func : functions_) {
+    if (func == nullptr || !func->IsValid()) {
+      return false;
+    }
   }
   return true;
 }
