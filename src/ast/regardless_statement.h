@@ -29,6 +29,8 @@ namespace ast {
 class RegardlessStatement : public Statement {
  public:
   /// Constructor
+  RegardlessStatement();
+  /// Constructor
   /// @param condition the condition expression
   /// @param body the body statements
   RegardlessStatement(std::unique_ptr<Expression> condition,
