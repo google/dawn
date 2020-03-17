@@ -157,10 +157,6 @@ TEST_P(NonzeroTextureCreationTests, NonrenderableTextureFormat) {
 // Test that textures with more than 1 array layers and nonrenderable texture formats clear to 0x01
 // because toggle is enabled
 TEST_P(NonzeroTextureCreationTests, NonRenderableTextureClearWithMultiArrayLayers) {
-    // TODO(natlee@microsoft.com): skip for now on opengl because TextureClear nonrenderable
-    // textures does not create large enough buffers for array layers greater than 1.
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-
     wgpu::TextureDescriptor descriptor;
     descriptor.dimension = wgpu::TextureDimension::e2D;
     descriptor.size.width = kSize;
@@ -194,9 +190,6 @@ TEST_P(NonzeroTextureCreationTests, NonRenderableTextureClearWithMultiArrayLayer
 
 // Test that all subresources of a renderable texture are filled because the toggle is enabled.
 TEST_P(NonzeroTextureCreationTests, AllSubresourcesFilled) {
-    // TODO(crbug.com/dawn/145): Implement on other platforms.
-    DAWN_SKIP_TEST_IF(!IsMetal() && !IsD3D12() && !IsVulkan());
-
     wgpu::TextureDescriptor baseDescriptor;
     baseDescriptor.dimension = wgpu::TextureDimension::e2D;
     baseDescriptor.size.width = kSize;
@@ -250,9 +243,6 @@ TEST_P(NonzeroTextureCreationTests, AllSubresourcesFilled) {
 
 // Test that all subresources of a nonrenderable texture are filled because the toggle is enabled.
 TEST_P(NonzeroTextureCreationTests, NonRenderableAllSubresourcesFilled) {
-    // TODO(crbug.com/dawn/145): Implement on other platforms.
-    DAWN_SKIP_TEST_IF(!IsMetal() && !IsD3D12() && !IsVulkan());
-
     wgpu::TextureDescriptor baseDescriptor;
     baseDescriptor.dimension = wgpu::TextureDimension::e2D;
     baseDescriptor.size.width = kSize;

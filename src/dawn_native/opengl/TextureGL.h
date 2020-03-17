@@ -47,7 +47,7 @@ namespace dawn_native { namespace opengl {
         MaybeError ClearTexture(GLint baseMipLevel,
                                 GLint levelCount,
                                 GLint baseArrayLayer,
-                                uint32_t layerCount,
+                                GLint layerCount,
                                 TextureBase::ClearValue clearValue);
 
         GLuint mHandle;

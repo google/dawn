@@ -691,10 +691,6 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClearUnalignedSize) {
 // This tests that the code path of CopyTextureToBuffer clears correctly for non-renderable textures
 // with more than 1 array layers
 TEST_P(TextureZeroInitTest, NonRenderableTextureClearWithMultiArrayLayers) {
-    // TODO(natlee@microsoft.com): skip for now on opengl because TextureClear nonrenderable
-    // textures does not create large enough buffers for array layers greater than 1.
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-
     wgpu::TextureDescriptor descriptor =
         CreateTextureDescriptor(1, 2, wgpu::TextureUsage::CopySrc, kNonrenderableColorFormat);
     wgpu::Texture texture = device.CreateTexture(&descriptor);
@@ -871,9 +867,6 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencilStoreOpClear) {
 // Test that if one mip of a texture is initialized and another is uninitialized, lazy clearing the
 // uninitialized mip does not clear the initialized mip.
 TEST_P(TextureZeroInitTest, PreservesInitializedMip) {
-    // TODO(crbug.com/dawn/145): Fix this on other backends
-    DAWN_SKIP_TEST_IF(!IsMetal() && !IsD3D12() && !IsVulkan());
-
     wgpu::TextureDescriptor sampleTextureDescriptor = CreateTextureDescriptor(
         2, 1,
         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled,
@@ -952,9 +945,6 @@ TEST_P(TextureZeroInitTest, PreservesInitializedMip) {
 // Test that if one layer of a texture is initialized and another is uninitialized, lazy clearing
 // the uninitialized layer does not clear the initialized layer.
 TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
-    // TODO(crbug.com/dawn/145): Fix this on other backends
-    DAWN_SKIP_TEST_IF(!IsMetal() && !IsD3D12() && !IsVulkan());
-
     wgpu::TextureDescriptor sampleTextureDescriptor = CreateTextureDescriptor(
         1, 2,
         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled,
