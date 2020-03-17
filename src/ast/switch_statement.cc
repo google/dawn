@@ -37,20 +37,33 @@ SwitchStatement::SwitchStatement(
 SwitchStatement::~SwitchStatement() = default;
 
 bool SwitchStatement::IsValid() const {
-  return condition_ != nullptr;
+  if (condition_ == nullptr || !condition_->IsValid()) {
+    return false;
+  }
+  for (const auto& stmt : body_) {
+    if (stmt == nullptr || !stmt->IsValid()) {
+      return false;
+    }
+  }
+  return true;
 }
 
 void SwitchStatement::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
   out << "Switch{" << std::endl;
   condition_->to_str(out, indent + 2);
+
   make_indent(out, indent + 2);
   out << "{" << std::endl;
 
-  for (const auto& stmt : body_)
+  for (const auto& stmt : body_) {
     stmt->to_str(out, indent + 4);
+  }
 
   make_indent(out, indent + 2);
+  out << "}" << std::endl;
+
+  make_indent(out, indent);
   out << "}" << std::endl;
 }
 
