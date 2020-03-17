@@ -29,6 +29,8 @@ namespace ast {
 class VariableStatement : public Statement {
  public:
   /// Constructor
+  VariableStatement();
+  /// Constructor
   /// @param variable the variable
   explicit VariableStatement(std::unique_ptr<Variable> variable);
   /// Constructor

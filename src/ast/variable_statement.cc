@@ -17,6 +17,8 @@
 namespace tint {
 namespace ast {
 
+VariableStatement::VariableStatement() : Statement() {}
+
 VariableStatement::VariableStatement(std::unique_ptr<Variable> variable)
     : Statement(), variable_(std::move(variable)) {}
 
@@ -27,12 +29,12 @@ VariableStatement::VariableStatement(const Source& source,
 VariableStatement::~VariableStatement() = default;
 
 bool VariableStatement::IsValid() const {
-  return variable_ != nullptr;
+  return variable_ != nullptr && variable_->IsValid();
 }
 
 void VariableStatement::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "Variable{" << std::endl;
+  out << "VariableStatement{" << std::endl;
   variable_->to_str(out, indent + 2);
   make_indent(out, indent);
   out << "}" << std::endl;
