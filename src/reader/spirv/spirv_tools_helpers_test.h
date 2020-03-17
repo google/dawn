@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_READER_SPV_SPIRV_TOOLS_HELPERS_TEST_H_
-#define SRC_READER_SPV_SPIRV_TOOLS_HELPERS_TEST_H_
+#ifndef SRC_READER_SPIRV_SPIRV_TOOLS_HELPERS_TEST_H_
+#define SRC_READER_SPIRV_SPIRV_TOOLS_HELPERS_TEST_H_
 
 #include <cstdint>
 #include <string>
@@ -33,4 +33,4 @@ std::vector<uint32_t> Assemble(const std::string& spirv_assembly);
 }  // namespace reader
 }  // namespace tint
 
-#endif  // SRC_READER_SPV_SPIRV_TOOLS_HELPERS_TEST_H_
+#endif  // SRC_READER_SPIRV_SPIRV_TOOLS_HELPERS_TEST_H_

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_READER_SPV_PARSER_H_
-#define SRC_READER_SPV_PARSER_H_
+#ifndef SRC_READER_SPIRV_PARSER_H_
+#define SRC_READER_SPIRV_PARSER_H_
 
 #include <cstdint>
 #include <memory>
@@ -51,4 +51,4 @@ class Parser : public Reader {
 }  // namespace reader
 }  // namespace tint
 
-#endif  // SRC_READER_SPV_PARSER_H_
+#endif  // SRC_READER_SPIRV_PARSER_H_
