@@ -44,6 +44,9 @@ bool Variable::IsValid() const {
   if (type_ == nullptr) {
     return false;
   }
+  if (initializer_ && !initializer_->IsValid()) {
+    return false;
+  }
   return true;
 }
 

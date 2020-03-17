@@ -15,6 +15,7 @@
 #include "src/ast/variable.h"
 
 #include "gtest/gtest.h"
+#include "src/ast/identifier_expression.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 
@@ -69,6 +70,13 @@ TEST_F(VariableTest, IsValid) {
   EXPECT_TRUE(v.IsValid());
 }
 
+TEST_F(VariableTest, IsValid_WithInitializer) {
+  type::I32Type t;
+  Variable v{"my_var", StorageClass::kNone, &t};
+  v.set_initializer(std::make_unique<IdentifierExpression>("ident"));
+  EXPECT_TRUE(v.IsValid());
+}
+
 TEST_F(VariableTest, IsValid_MissinName) {
   type::I32Type t;
   Variable v{"", StorageClass::kNone, &t};
@@ -82,6 +90,13 @@ TEST_F(VariableTest, IsValid_MissingType) {
 
 TEST_F(VariableTest, IsValid_MissingBoth) {
   Variable v;
+  EXPECT_FALSE(v.IsValid());
+}
+
+TEST_F(VariableTest, IsValid_InvalidInitializer) {
+  type::I32Type t;
+  Variable v{"my_var", StorageClass::kNone, &t};
+  v.set_initializer(std::make_unique<IdentifierExpression>(""));
   EXPECT_FALSE(v.IsValid());
 }
 
