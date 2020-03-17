@@ -34,5 +34,13 @@ TEST_F(SetDecorationTest, Is) {
   EXPECT_TRUE(d.IsSet());
 }
 
+TEST_F(SetDecorationTest, ToStr) {
+  SetDecoration d{2};
+  std::ostringstream out;
+  d.to_str(out);
+  EXPECT_EQ(out.str(), R"(SetDecoration{2}
+)");
+}
+
 }  // namespace ast
 }  // namespace tint
