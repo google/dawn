@@ -31,7 +31,7 @@
 #include "src/ast/import.h"
 #include "src/ast/module.h"
 #include "src/reader/reader.h"
-#include "src/reader/spv/fail_stream.h"
+#include "src/reader/spirv/fail_stream.h"
 
 namespace tint {
 namespace reader {

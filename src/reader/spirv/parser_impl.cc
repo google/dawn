@@ -16,7 +16,7 @@
 
 #include "source/opt/build_module.h"
 #include "spirv-tools/libspirv.hpp"
-#include "src/reader/spv/parser_impl.h"
+#include "src/reader/spirv/parser_impl.h"
 
 namespace tint {
 namespace reader {

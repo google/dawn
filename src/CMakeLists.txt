@@ -189,11 +189,11 @@ set(TINT_LIB_SRCS
 
 if(TINT_BUILD_SPV_PARSER)
   list(APPEND TINT_LIB_SRCS
-    reader/spv/fail_stream.h
-    reader/spv/parser.cc
-    reader/spv/parser.h
-    reader/spv/parser_impl.cc
-    reader/spv/parser_impl.h
+    reader/spirv/fail_stream.h
+    reader/spirv/parser.cc
+    reader/spirv/parser.h
+    reader/spirv/parser_impl.cc
+    reader/spirv/parser_impl.h
   )
 endif()
 
@@ -352,12 +352,12 @@ endif()
 
 if(${TINT_BUILD_SPV_PARSER})
   list (APPEND TINT_TEST_SRCS
-    reader/spv/fail_stream_test.cc
-    reader/spv/parser_impl_import_test.cc
-    reader/spv/parser_impl_test.cc
-    reader/spv/parser_test.cc
-    reader/spv/spirv_tools_helpers_test.cc
-    reader/spv/spirv_tools_helpers_test.h
+    reader/spirv/fail_stream_test.cc
+    reader/spirv/parser_impl_import_test.cc
+    reader/spirv/parser_impl_test.cc
+    reader/spirv/parser_test.cc
+    reader/spirv/spirv_tools_helpers_test.cc
+    reader/spirv/spirv_tools_helpers_test.h
   )
 endif()
 

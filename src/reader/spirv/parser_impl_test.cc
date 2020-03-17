@@ -12,29 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/reader/spv/parser.h"
+#include "src/reader/spirv/parser_impl.h"
 
 #include <cstdint>
 #include <vector>
 
-#include "gtest/gtest.h"
+#include "gmock/gmock.h"
+#include "src/reader/spirv/spirv_tools_helpers_test.h"
 
 namespace tint {
 namespace reader {
 namespace spv {
 
 namespace {
-using ParserTest = testing::Test;
 
-TEST_F(ParserTest, Uint32VecEmpty) {
+using ::testing::HasSubstr;
+
+using SpvParserImplTest = testing::Test;
+
+TEST_F(SpvParserImplTest, Uint32VecEmpty) {
   std::vector<uint32_t> data;
-  Parser p{data};
+  ParserImpl p{data};
   EXPECT_FALSE(p.Parse());
   // TODO(dneto): What message?
 }
 
+TEST_F(SpvParserImplTest, InvalidModuleFails) {
+  auto invalid_spv = test::Assemble("%ty = OpTypeInt 3 0");
+  ParserImpl p{invalid_spv};
+  EXPECT_FALSE(p.Parse());
+  EXPECT_THAT(
+      p.error(),
+      HasSubstr("TypeInt cannot appear before the memory model instruction"));
+  EXPECT_THAT(p.error(), HasSubstr("OpTypeInt 3 0"));
+}
+
 // TODO(dneto): uint32 vec, valid SPIR-V
-// TODO(dneto): uint32 vec, invalid SPIR-V
 
 }  // namespace
 

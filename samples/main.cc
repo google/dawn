@@ -27,7 +27,7 @@
 #include "src/writer/writer.h"
 
 #if TINT_BUILD_SPV_PARSER
-#include "src/reader/spv/parser.h"
+#include "src/reader/spirv/parser.h"
 #endif
 
 namespace {

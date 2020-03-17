@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/reader/spv/spirv_tools_helpers_test.h"
+#include "src/reader/spirv/spirv_tools_helpers_test.h"
 
 #include <cstdint>
 #include <sstream>

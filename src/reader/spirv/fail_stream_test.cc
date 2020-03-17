@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/reader/spv/fail_stream.h"
+#include "src/reader/spirv/fail_stream.h"
 
 #include <memory>
 #include <sstream>
