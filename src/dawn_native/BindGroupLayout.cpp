@@ -58,7 +58,35 @@ namespace dawn_native {
         return {};
     }
 
-    MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase*,
+    MaybeError ValidateStorageTextureFormat(DeviceBase* device,
+                                            wgpu::BindingType bindingType,
+                                            wgpu::TextureFormat storageTextureFormat) {
+        switch (bindingType) {
+            case wgpu::BindingType::ReadonlyStorageTexture:
+            case wgpu::BindingType::WriteonlyStorageTexture: {
+                DAWN_TRY(ValidateTextureFormat(storageTextureFormat));
+
+                const Format& format = device->GetValidInternalFormat(storageTextureFormat);
+                if (!format.supportsStorageUsage) {
+                    return DAWN_VALIDATION_ERROR("The storage texture format is not supported");
+                }
+            } break;
+
+            case wgpu::BindingType::StorageBuffer:
+            case wgpu::BindingType::UniformBuffer:
+            case wgpu::BindingType::ReadonlyStorageBuffer:
+            case wgpu::BindingType::Sampler:
+            case wgpu::BindingType::SampledTexture:
+                break;
+            default:
+                UNREACHABLE();
+                break;
+        }
+
+        return {};
+    }
+
+    MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
                                                  const BindGroupLayoutDescriptor* descriptor) {
         if (descriptor->nextInChain != nullptr) {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
@@ -86,6 +114,9 @@ namespace dawn_native {
 
             DAWN_TRY(
                 ValidateBindingTypeWithShaderStageVisibility(binding.type, binding.visibility));
+
+            DAWN_TRY(
+                ValidateStorageTextureFormat(device, binding.type, binding.storageTextureFormat));
 
             switch (binding.type) {
                 case wgpu::BindingType::UniformBuffer:

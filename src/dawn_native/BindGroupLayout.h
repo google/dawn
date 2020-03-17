@@ -36,6 +36,10 @@ namespace dawn_native {
         wgpu::BindingType bindingType,
         wgpu::ShaderStage shaderStageVisibility);
 
+    MaybeError ValidateStorageTextureFormat(DeviceBase* device,
+                                            wgpu::BindingType bindingType,
+                                            wgpu::TextureFormat storageTextureFormat);
+
     class BindGroupLayoutBase : public CachedObject {
       public:
         BindGroupLayoutBase(DeviceBase* device, const BindGroupLayoutDescriptor* descriptor);

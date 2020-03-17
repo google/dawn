@@ -160,6 +160,9 @@ namespace dawn_native {
 
                     DAWN_TRY(ValidateBindingTypeWithShaderStageVisibility(
                         bindingInfo.type, StageBit(module->GetExecutionModel())));
+                    DAWN_TRY(ValidateStorageTextureFormat(device, bindingInfo.type,
+                                                          bindingInfo.storageTextureFormat));
+
                     bindingSlot.visibility =
                         GetShaderStageVisibilityWithBindingType(bindingInfo.type);
 
@@ -169,6 +172,7 @@ namespace dawn_native {
                     bindingSlot.textureDimension = bindingInfo.textureDimension;
                     bindingSlot.textureComponentType =
                         Format::FormatTypeToTextureComponentType(bindingInfo.textureComponentType);
+                    bindingSlot.storageTextureFormat = bindingInfo.storageTextureFormat;
 
                     if (usedBindings[group][binding]) {
                         if (bindingSlot == bindingData[group][usedBindingsMap[group][binding]]) {

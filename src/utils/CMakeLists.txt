@@ -26,6 +26,8 @@ target_sources(dawn_utils PRIVATE
     "SystemUtils.h"
     "TerribleCommandBuffer.cpp"
     "TerribleCommandBuffer.h"
+    "TextureFormatUtils.cpp"
+    "TextureFormatUtils.h"
     "Timer.h"
     "WGPUHelpers.cpp"
     "WGPUHelpers.h"

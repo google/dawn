@@ -25,6 +25,7 @@ TEST_P(StorageTextureTests, BindGroupLayoutWithStorageTextureBindingType) {
     {
         wgpu::BindGroupLayoutBinding binding = {0, wgpu::ShaderStage::Compute,
                                                 wgpu::BindingType::ReadonlyStorageTexture};
+        binding.storageTextureFormat = wgpu::TextureFormat::R32Float;
         wgpu::BindGroupLayoutDescriptor descriptor;
         descriptor.bindingCount = 1;
         descriptor.bindings = &binding;
@@ -36,6 +37,7 @@ TEST_P(StorageTextureTests, BindGroupLayoutWithStorageTextureBindingType) {
     {
         wgpu::BindGroupLayoutBinding binding = {0, wgpu::ShaderStage::Compute,
                                                 wgpu::BindingType::WriteonlyStorageTexture};
+        binding.storageTextureFormat = wgpu::TextureFormat::R32Float;
         wgpu::BindGroupLayoutDescriptor descriptor;
         descriptor.bindingCount = 1;
         descriptor.bindings = &binding;

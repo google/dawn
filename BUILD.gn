@@ -751,6 +751,8 @@ static_library("dawn_utils") {
     "src/utils/SystemUtils.h",
     "src/utils/TerribleCommandBuffer.cpp",
     "src/utils/TerribleCommandBuffer.h",
+    "src/utils/TextureFormatUtils.cpp",
+    "src/utils/TextureFormatUtils.h",
     "src/utils/Timer.h",
     "src/utils/WGPUHelpers.cpp",
     "src/utils/WGPUHelpers.h",

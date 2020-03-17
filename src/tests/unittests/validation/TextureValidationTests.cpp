@@ -16,6 +16,7 @@
 
 #include "common/Constants.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
+#include "utils/TextureFormatUtils.h"
 #include "utils/WGPUHelpers.h"
 
 namespace {
@@ -345,37 +346,13 @@ TEST_F(TextureValidationTest, TextureFormatNotSupportTextureUsageStorage) {
     descriptor.size = {1, 1, 1};
     descriptor.usage = wgpu::TextureUsage::Storage;
 
-    wgpu::TextureFormat kSupportedFormatsWithStorageUsage[] = {
-        wgpu::TextureFormat::R32Uint,     wgpu::TextureFormat::R32Sint,
-        wgpu::TextureFormat::R32Uint,     wgpu::TextureFormat::RGBA8Unorm,
-        wgpu::TextureFormat::RGBA8Snorm,  wgpu::TextureFormat::RGBA8Uint,
-        wgpu::TextureFormat::RGBA8Sint,   wgpu::TextureFormat::RG32Uint,
-        wgpu::TextureFormat::RG32Sint,    wgpu::TextureFormat::RG32Float,
-        wgpu::TextureFormat::RGBA16Uint,  wgpu::TextureFormat::RGBA16Sint,
-        wgpu::TextureFormat::RGBA16Float, wgpu::TextureFormat::RGBA32Uint,
-        wgpu::TextureFormat::RGBA32Sint,  wgpu::TextureFormat::RGBA32Float};
-    for (wgpu::TextureFormat format : kSupportedFormatsWithStorageUsage) {
+    for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         descriptor.format = format;
-        device.CreateTexture(&descriptor);
-    }
-
-    wgpu::TextureFormat kUnsupportedFormatsWithStorageUsage[] = {
-        wgpu::TextureFormat::R8Unorm,        wgpu::TextureFormat::R8Snorm,
-        wgpu::TextureFormat::R8Uint,         wgpu::TextureFormat::R8Sint,
-        wgpu::TextureFormat::R16Uint,        wgpu::TextureFormat::R16Sint,
-        wgpu::TextureFormat::R16Float,       wgpu::TextureFormat::RG8Unorm,
-        wgpu::TextureFormat::RG8Snorm,       wgpu::TextureFormat::RG8Uint,
-        wgpu::TextureFormat::RG8Sint,        wgpu::TextureFormat::RG16Uint,
-        wgpu::TextureFormat::RG16Sint,       wgpu::TextureFormat::RG16Float,
-        wgpu::TextureFormat::RGBA8UnormSrgb, wgpu::TextureFormat::BGRA8Unorm,
-        wgpu::TextureFormat::BGRA8UnormSrgb, wgpu::TextureFormat::RGB10A2Unorm,
-        wgpu::TextureFormat::RG11B10Float,
-
-        wgpu::TextureFormat::Depth24Plus,    wgpu::TextureFormat::Depth24PlusStencil8,
-        wgpu::TextureFormat::Depth32Float};
-    for (wgpu::TextureFormat format : kUnsupportedFormatsWithStorageUsage) {
-        descriptor.format = format;
-        ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+        if (utils::TextureFormatSupportsStorageTexture(format)) {
+            device.CreateTexture(&descriptor);
+        } else {
+            ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+        }
     }
 }
 

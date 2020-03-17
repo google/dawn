@@ -17,6 +17,7 @@
 #include "common/Assert.h"
 #include "common/Math.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
+#include "utils/TextureFormatUtils.h"
 #include "utils/WGPUHelpers.h"
 
 #include <type_traits>
@@ -185,21 +186,7 @@ class TextureFormatTest : public DawnTest {
             })");
 
         // Compute the prefix needed for GLSL types that handle our texture's data.
-        const char* prefix = nullptr;
-        switch (sampleFormatInfo.type) {
-            case wgpu::TextureComponentType::Float:
-                prefix = "";
-                break;
-            case wgpu::TextureComponentType::Sint:
-                prefix = "i";
-                break;
-            case wgpu::TextureComponentType::Uint:
-                prefix = "u";
-                break;
-            default:
-                UNREACHABLE();
-                break;
-        }
+        const char* prefix = utils::GetColorTextureComponentTypePrefix(sampleFormatInfo.format);
 
         std::ostringstream fsSource;
         fsSource << "#version 450\n";

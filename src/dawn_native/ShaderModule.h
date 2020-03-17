@@ -58,6 +58,7 @@ namespace dawn_native {
             Format::Type textureComponentType = Format::Type::Float;
             bool multisampled = false;
             bool used = false;
+            wgpu::TextureFormat storageTextureFormat = wgpu::TextureFormat::Undefined;
         };
         using ModuleBindingInfo =
             std::array<std::array<BindingInfo, kMaxBindingsPerGroup>, kMaxBindGroups>;
