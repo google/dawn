@@ -17,6 +17,8 @@
 namespace tint {
 namespace ast {
 
+Struct::Struct() : Node() {}
+
 Struct::Struct(StructDecoration decoration,
                std::vector<std::unique_ptr<StructMember>> members)
     : Node(), decoration_(decoration), members_(std::move(members)) {}
@@ -29,6 +31,11 @@ Struct::Struct(const Source& source,
 Struct::~Struct() = default;
 
 bool Struct::IsValid() const {
+  for (const auto& mem : members_) {
+    if (mem == nullptr || !mem->IsValid()) {
+      return false;
+    }
+  }
   return true;
 }
 

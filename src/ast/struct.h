@@ -32,7 +32,7 @@ namespace ast {
 class Struct : public Node {
  public:
   /// Create a new empty struct statement
-  Struct() = default;
+  Struct();
   /// Create a new struct statement
   /// @param decoration The struct decorations
   /// @param members The struct members

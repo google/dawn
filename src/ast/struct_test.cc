@@ -59,6 +59,27 @@ TEST_F(StructTest, IsValid) {
   EXPECT_TRUE(s.IsValid());
 }
 
+TEST_F(StructTest, IsValid_Null_StructMember) {
+  type::I32Type i32;
+  std::vector<std::unique_ptr<StructMember>> members;
+  members.push_back(std::make_unique<StructMember>(
+      "a", &i32, std::vector<std::unique_ptr<StructMemberDecoration>>()));
+  members.push_back(nullptr);
+
+  Struct s{StructDecoration::kNone, std::move(members)};
+  EXPECT_FALSE(s.IsValid());
+}
+
+TEST_F(StructTest, IsValid_Invalid_StructMember) {
+  type::I32Type i32;
+  std::vector<std::unique_ptr<StructMember>> members;
+  members.push_back(std::make_unique<StructMember>(
+      "", &i32, std::vector<std::unique_ptr<StructMemberDecoration>>()));
+
+  Struct s{StructDecoration::kNone, std::move(members)};
+  EXPECT_FALSE(s.IsValid());
+}
+
 TEST_F(StructTest, ToStr) {
   type::I32Type i32;
   Source source{27, 4};
@@ -69,10 +90,10 @@ TEST_F(StructTest, ToStr) {
   Struct s{source, StructDecoration::kNone, std::move(members)};
 
   std::ostringstream out;
-  s.to_str(out, 0);
-  EXPECT_EQ(out.str(), R"(Struct{
-  StructMember{a: __i32}
-}
+  s.to_str(out, 2);
+  EXPECT_EQ(out.str(), R"(  Struct{
+    StructMember{a: __i32}
+  }
 )");
 }
 

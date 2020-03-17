@@ -36,7 +36,7 @@ StructMember::StructMember(
 StructMember::~StructMember() = default;
 
 bool StructMember::IsValid() const {
-  if (name_.length() == 0) {
+  if (name_.empty()) {
     return false;
   }
   if (type_ == nullptr) {
