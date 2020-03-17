@@ -17,6 +17,8 @@
 namespace tint {
 namespace ast {
 
+RelationalExpression::RelationalExpression() : Expression() {}
+
 RelationalExpression::RelationalExpression(Relation relation,
                                            std::unique_ptr<Expression> lhs,
                                            std::unique_ptr<Expression> rhs)
@@ -37,18 +39,26 @@ RelationalExpression::RelationalExpression(const Source& source,
 RelationalExpression::~RelationalExpression() = default;
 
 bool RelationalExpression::IsValid() const {
-  return relation_ != Relation::kNone && lhs_ != nullptr && rhs_ != nullptr;
+  if (lhs_ == nullptr || !lhs_->IsValid()) {
+    return false;
+  }
+  if (rhs_ == nullptr || !rhs_->IsValid()) {
+    return false;
+  }
+  return relation_ != Relation::kNone;
 }
 
 void RelationalExpression::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << relation_ << "(" << std::endl;
+  out << "Relation{" << std::endl;
   lhs_->to_str(out, indent + 2);
-  out << std::endl;
+
+  make_indent(out, indent + 2);
+  out << relation_ << std::endl;
+
   rhs_->to_str(out, indent + 2);
-  out << std::endl;
   make_indent(out, indent);
-  out << ")" << std::endl;
+  out << "}" << std::endl;
 }
 
 }  // namespace ast

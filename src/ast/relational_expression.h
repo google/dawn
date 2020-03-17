@@ -62,6 +62,8 @@ enum class Relation {
 class RelationalExpression : public Expression {
  public:
   /// Constructor
+  RelationalExpression();
+  /// Constructor
   /// @param relation the relation type
   /// @param lhs the left side of the expression
   /// @param rhs the right side of the expression
