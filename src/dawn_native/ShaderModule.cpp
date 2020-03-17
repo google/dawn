@@ -118,6 +118,11 @@ namespace dawn_native {
                 // textures when they are supported as shaderc_spvc binding types.
                 case shaderc_spvc_binding_type_storage_texture:
                     return wgpu::BindingType::StorageTexture;
+                default:
+                    // TODO(rharrison): Remove this case once I am done changing the
+                    // values in shaderc_spvc_binding_type
+                    UNREACHABLE();
+                    return wgpu::BindingType::StorageTexture;
             }
             UNREACHABLE();
         }
