@@ -459,4 +459,16 @@ TEST_P(DeviceLostTest, FenceSignalTickOnCompletion) {
     EXPECT_EQ(fence.GetCompletedValue(), 2u);
 }
 
+// Test that LostForTesting can only be called on one time
+TEST_P(DeviceLostTest, LoseForTestingOnce) {
+    // First LoseForTesting call should occur normally
+    SetCallbackAndLoseForTesting();
+
+    // Second LoseForTesting call should result in no callbacks. The LoseForTesting will return
+    // without doing anything when it sees that device has already been lost.
+    device.SetDeviceLostCallback(ToMockDeviceLostCallback, this);
+    EXPECT_CALL(*mockDeviceLostCallback, Call(_, this)).Times(0);
+    device.LoseForTesting();
+}
+
 DAWN_INSTANTIATE_TEST(DeviceLostTest, D3D12Backend(), VulkanBackend());

@@ -196,6 +196,10 @@ namespace dawn_native {
     }
 
     void DeviceBase::LoseForTesting() {
+        if (mLossStatus == LossStatus::AlreadyLost) {
+            return;
+        }
+
         mLossStatus = LossStatus::BeingLost;
         // Assert that errors are device loss so that we can continue with destruction
         AssertAndIgnoreDeviceLossError(WaitForIdleForDestruction());
