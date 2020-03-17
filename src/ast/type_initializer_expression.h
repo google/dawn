@@ -28,6 +28,7 @@ namespace ast {
 /// A type specific initializer
 class TypeInitializerExpression : public InitializerExpression {
  public:
+  TypeInitializerExpression();
   /// Constructor
   /// @param type the type
   /// @param values the values
@@ -75,7 +76,7 @@ class TypeInitializerExpression : public InitializerExpression {
  private:
   TypeInitializerExpression(const TypeInitializerExpression&) = delete;
 
-  type::Type* type_;
+  type::Type* type_ = nullptr;
   std::vector<std::unique_ptr<Expression>> values_;
 };
 

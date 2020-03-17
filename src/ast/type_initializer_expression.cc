@@ -17,6 +17,9 @@
 namespace tint {
 namespace ast {
 
+TypeInitializerExpression::TypeInitializerExpression()
+    : InitializerExpression() {}
+
 TypeInitializerExpression::TypeInitializerExpression(
     type::Type* type,
     std::vector<std::unique_ptr<Expression>> values)
@@ -31,7 +34,18 @@ TypeInitializerExpression::TypeInitializerExpression(
 TypeInitializerExpression::~TypeInitializerExpression() = default;
 
 bool TypeInitializerExpression::IsValid() const {
-  return values_.size() > 0;
+  if (values_.empty()) {
+    return false;
+  }
+  if (type_ == nullptr) {
+    return false;
+  }
+  for (const auto& val : values_) {
+    if (val == nullptr || !val->IsValid()) {
+      return false;
+    }
+  }
+  return true;
 }
 
 void TypeInitializerExpression::to_str(std::ostream& out, size_t indent) const {
