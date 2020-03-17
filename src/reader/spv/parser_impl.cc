@@ -104,6 +104,45 @@ bool ParserImpl::BuildInternalModule() {
   return true;
 }
 
+void ParserImpl::ResetInternalModule() {
+  ir_context_.reset(nullptr);
+  module_ = nullptr;
+  def_use_mgr_ = nullptr;
+  constant_mgr_ = nullptr;
+  type_mgr_ = nullptr;
+  deco_mgr_ = nullptr;
+
+  import_map_.clear();
+  glsl_std_450_imports_.clear();
+}
+
+bool ParserImpl::ParseInternalModule() {
+  return ParseExtendedInstructionImports();
+  // TODO(dneto): fill in the rest
+}
+
+bool ParserImpl::ParseExtendedInstructionImports() {
+  for (const spvtools::opt::Instruction& import : module_->ext_inst_imports()) {
+    std::string name(
+        reinterpret_cast<const char*>(import.GetInOperand(0).words.data()));
+    // TODO(dneto): Handle other extended instruction sets when needed.
+    if (name == "GLSL.std.450") {
+      // Only create the AST import once, so we can use import name 'std::glsl'.
+      // This is a canonicalization.
+      if (glsl_std_450_imports_.empty()) {
+        auto ast_import =
+            std::make_unique<tint::ast::Import>(name, "std::glsl");
+        import_map_[import.result_id()] = ast_import.get();
+        ast_module_.AddImport(std::move(ast_import));
+      }
+      glsl_std_450_imports_.insert(import.result_id());
+    } else {
+      return Fail() << "Unrecognized extended instruction set: " << name;
+    }
+  }
+  return true;
+}
+
 }  // namespace spv
 }  // namespace reader
 }  // namespace tint

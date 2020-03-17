@@ -18,6 +18,8 @@
 #include <cstdint>
 #include <memory>
 #include <sstream>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "source/opt/constants.h"
@@ -26,6 +28,8 @@
 #include "source/opt/module.h"
 #include "source/opt/type_manager.h"
 #include "spirv-tools/libspirv.hpp"
+#include "src/ast/import.h"
+#include "src/ast/module.h"
 #include "src/reader/reader.h"
 #include "src/reader/spv/fail_stream.h"
 
@@ -61,6 +65,20 @@ class ParserImpl : Reader {
   /// @returns the accumulated error string
   const std::string error() { return errors_.str(); }
 
+  /// Builds an internal representation of the SPIR-V binary,
+  /// and parses it into a Tint AST module.  Diagnostics are emitted
+  /// to the error stream.
+  /// @returns true if it was successful.
+  bool BuildAndParseInternalModule() {
+    return BuildInternalModule() && ParseInternalModule();
+  }
+
+  /// @returns the set of SPIR-V IDs for imports of the "GLSL.std.450"
+  /// extended instruction set.
+  const std::unordered_set<uint32_t>& glsl_std_450_imports() const {
+    return glsl_std_450_imports_;
+  }
+
  private:
   /// Builds the internal representation of the SPIR-V module.
   /// Assumes the module is somewhat well-formed.  Normally you
@@ -68,6 +86,17 @@ class ParserImpl : Reader {
   /// to build this internal representation.
   /// @returns true if successful.
   bool BuildInternalModule();
+
+  /// Walks the internal representation of the module to populate
+  /// the AST form of the module.
+  /// @returns true on success
+  bool ParseInternalModule();
+
+  /// Destroys the internal representation of the SPIR-V module.
+  void ResetInternalModule();
+
+  /// Parses OpExtInstImport instructions.
+  bool ParseExtendedInstructionImports();
 
   // The SPIR-V binary we're parsing
   std::vector<uint32_t> spv_binary_;
@@ -93,6 +122,12 @@ class ParserImpl : Reader {
   spvtools::opt::analysis::ConstantManager* constant_mgr_ = nullptr;
   spvtools::opt::analysis::TypeManager* type_mgr_ = nullptr;
   spvtools::opt::analysis::DecorationManager* deco_mgr_ = nullptr;
+
+  /// Maps a SPIR-V ID for an external instruction import to an AST import
+  std::unordered_map<uint32_t, ast::Import*> import_map_;
+  // The set of IDs that are imports of the GLSL.std.450 extended instruction
+  // sets.
+  std::unordered_set<uint32_t> glsl_std_450_imports_;
 };
 
 }  // namespace spv

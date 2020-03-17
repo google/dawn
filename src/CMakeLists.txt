@@ -353,8 +353,11 @@ endif()
 if(${TINT_BUILD_SPV_PARSER})
   list (APPEND TINT_TEST_SRCS
     reader/spv/fail_stream_test.cc
+    reader/spv/parser_impl_import_test.cc
     reader/spv/parser_impl_test.cc
     reader/spv/parser_test.cc
+    reader/spv/spirv_tools_helpers_test.cc
+    reader/spv/spirv_tools_helpers_test.h
   )
 endif()
 
