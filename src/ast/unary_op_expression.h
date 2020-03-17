@@ -29,6 +29,8 @@ namespace ast {
 class UnaryOpExpression : public Expression {
  public:
   /// Constructor
+  UnaryOpExpression();
+  /// Constructor
   /// @param op the op
   /// @param expr the expr
   UnaryOpExpression(UnaryOp op, std::unique_ptr<Expression> expr);

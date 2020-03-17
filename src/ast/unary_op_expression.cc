@@ -17,6 +17,8 @@
 namespace tint {
 namespace ast {
 
+UnaryOpExpression::UnaryOpExpression() : Expression() {}
+
 UnaryOpExpression::UnaryOpExpression(UnaryOp op,
                                      std::unique_ptr<Expression> expr)
     : Expression(), op_(op), expr_(std::move(expr)) {}
@@ -29,12 +31,14 @@ UnaryOpExpression::UnaryOpExpression(const Source& source,
 UnaryOpExpression::~UnaryOpExpression() = default;
 
 bool UnaryOpExpression::IsValid() const {
-  return expr_ != nullptr;
+  return expr_ != nullptr && expr_->IsValid();
 }
 
 void UnaryOpExpression::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "UnaryOp{" << op_ << std::endl;
+  out << "UnaryOp{" << std::endl;
+  make_indent(out, indent + 2);
+  out << op_ << std::endl;
   expr_->to_str(out, indent + 2);
   make_indent(out, indent);
   out << "}" << std::endl;
