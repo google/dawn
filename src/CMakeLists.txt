@@ -246,6 +246,7 @@ set(TINT_TEST_SRCS
   ast/type_initializer_expression_test.cc
   ast/uint_literal_test.cc
   ast/unary_derivative_expression_test.cc
+  ast/unary_method_expression_test.cc
   ast/variable_test.cc
   reader/wgsl/lexer_test.cc
   reader/wgsl/parser_test.cc

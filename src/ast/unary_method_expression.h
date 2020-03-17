@@ -30,6 +30,8 @@ namespace ast {
 class UnaryMethodExpression : public Expression {
  public:
   /// Constructor
+  UnaryMethodExpression();
+  /// Constructor
   /// @param op the op
   /// @param params the params
   UnaryMethodExpression(UnaryMethod op,

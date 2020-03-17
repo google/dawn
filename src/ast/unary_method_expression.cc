@@ -17,6 +17,8 @@
 namespace tint {
 namespace ast {
 
+UnaryMethodExpression::UnaryMethodExpression() : Expression() {}
+
 UnaryMethodExpression::UnaryMethodExpression(
     UnaryMethod op,
     std::vector<std::unique_ptr<Expression>> params)
@@ -31,6 +33,14 @@ UnaryMethodExpression::UnaryMethodExpression(
 UnaryMethodExpression::~UnaryMethodExpression() = default;
 
 bool UnaryMethodExpression::IsValid() const {
+  if (params_.empty()) {
+    return false;
+  }
+  for (const auto& p : params_) {
+    if (p == nullptr || !p->IsValid()) {
+      return false;
+    }
+  }
   return true;
 }
 
@@ -42,10 +52,9 @@ void UnaryMethodExpression::to_str(std::ostream& out, size_t indent) const {
   out << op_ << std::endl;
   for (const auto& param : params_) {
     param->to_str(out, indent + 2);
-    out << std::endl;
   }
   make_indent(out, indent);
-  out << "}";
+  out << "}" << std::endl;
 }
 
 }  // namespace ast
