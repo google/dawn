@@ -19,6 +19,8 @@ namespace ast {
 
 ReturnStatement::ReturnStatement() : Statement() {}
 
+ReturnStatement::ReturnStatement(const Source& source) : Statement(source) {}
+
 ReturnStatement::ReturnStatement(std::unique_ptr<Expression> value)
     : Statement(), value_(std::move(value)) {}
 
@@ -29,6 +31,9 @@ ReturnStatement::ReturnStatement(const Source& source,
 ReturnStatement::~ReturnStatement() = default;
 
 bool ReturnStatement::IsValid() const {
+  if (value_ != nullptr) {
+    return value_->IsValid();
+  }
   return true;
 }
 
@@ -38,7 +43,15 @@ void ReturnStatement::to_str(std::ostream& out, size_t indent) const {
 
   if (value_) {
     out << std::endl;
-    value_->to_str(out, indent);
+
+    make_indent(out, indent + 2);
+    out << "{" << std::endl;
+
+    value_->to_str(out, indent + 4);
+
+    make_indent(out, indent + 2);
+    out << "}" << std::endl;
+
     make_indent(out, indent);
   }
   out << "}" << std::endl;

@@ -30,6 +30,9 @@ class ReturnStatement : public Statement {
   /// Constructor
   ReturnStatement();
   /// Constructor
+  /// @param source the source information
+  explicit ReturnStatement(const Source& source);
+  /// Constructor
   /// @param value the return value
   explicit ReturnStatement(std::unique_ptr<Expression> value);
   /// Constructor

@@ -227,6 +227,7 @@ set(TINT_TEST_SRCS
   ast/nop_statement_test.cc
   ast/regardless_statement_test.cc
   ast/relational_expression_test.cc
+  ast/return_statement_test.cc
   ast/set_decoration_test.cc
   ast/struct_member_test.cc
   ast/struct_member_offset_decoration_test.cc
