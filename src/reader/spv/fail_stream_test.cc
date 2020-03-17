@@ -33,23 +33,23 @@ TEST_F(FailStreamTest, ConversionToBoolIsSameAsStatusMethod) {
   FailStream fs(&flag, nullptr);
 
   EXPECT_TRUE(fs.status());
-  EXPECT_TRUE(bool(fs));
+  EXPECT_TRUE(bool(fs));  // NOLINT
   flag = false;
   EXPECT_FALSE(fs.status());
-  EXPECT_FALSE(bool(fs));
+  EXPECT_FALSE(bool(fs));  // NOLINT
   flag = true;
   EXPECT_TRUE(fs.status());
-  EXPECT_TRUE(bool(fs));
+  EXPECT_TRUE(bool(fs));  // NOLINT
 }
 
 TEST_F(FailStreamTest, FailMethodChangesStatusToFalse) {
   bool flag = true;
   FailStream fs(&flag, nullptr);
   EXPECT_TRUE(flag);
-  EXPECT_TRUE(bool(fs));
+  EXPECT_TRUE(bool(fs));  // NOLINT
   fs.Fail();
   EXPECT_FALSE(flag);
-  EXPECT_FALSE(bool(fs));
+  EXPECT_FALSE(bool(fs));  // NOLINT
 }
 
 TEST_F(FailStreamTest, FailMethodReturnsSelf) {
