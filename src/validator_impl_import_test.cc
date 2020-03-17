@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <assert.h>
-
 #include <iostream>
 
 #include "gtest/gtest.h"
@@ -26,11 +24,9 @@ namespace {
 ast::Module build_module(std::string data) {
   auto reader = std::make_unique<tint::reader::wgsl::Parser>(
       std::string(data.begin(), data.end()));
-  assert(reader->Parse());
+  EXPECT_TRUE(reader->Parse()) << reader->error();
   return reader->module();
 }
-
-}  // namespace
 
 using ValidatorImplTest = testing::Test;
 
@@ -59,4 +55,5 @@ TEST_F(ValidatorImplTest, Import_Fail_Typo) {
   EXPECT_EQ(v.error(), "1:1: v-0001: unknown import: GLSL.std.4501");
 }
 
+}  // namespace
 }  // namespace tint
