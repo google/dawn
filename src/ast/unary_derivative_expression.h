@@ -30,6 +30,8 @@ namespace ast {
 class UnaryDerivativeExpression : public Expression {
  public:
   /// Constructor
+  UnaryDerivativeExpression();
+  /// Constructor
   /// @param op the op
   /// @param mod the derivative modifier
   /// @param param the param

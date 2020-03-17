@@ -17,6 +17,8 @@
 namespace tint {
 namespace ast {
 
+UnaryDerivativeExpression::UnaryDerivativeExpression() : Expression() {}
+
 UnaryDerivativeExpression::UnaryDerivativeExpression(
     UnaryDerivative op,
     DerivativeModifier mod,
@@ -33,6 +35,9 @@ UnaryDerivativeExpression::UnaryDerivativeExpression(
 UnaryDerivativeExpression::~UnaryDerivativeExpression() = default;
 
 bool UnaryDerivativeExpression::IsValid() const {
+  if (param_ == nullptr || !param_->IsValid()) {
+    return false;
+  }
   return true;
 }
 
@@ -43,9 +48,9 @@ void UnaryDerivativeExpression::to_str(std::ostream& out, size_t indent) const {
   out << op_ << std::endl;
   make_indent(out, indent + 2);
   out << modifier_ << std::endl;
-  param_->to_str(out, indent);
+  param_->to_str(out, indent + 2);
   make_indent(out, indent);
-  out << "}";
+  out << "}" << std::endl;
 }
 
 }  // namespace ast
