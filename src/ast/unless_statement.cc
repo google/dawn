@@ -17,6 +17,8 @@
 namespace tint {
 namespace ast {
 
+UnlessStatement::UnlessStatement() : Statement() {}
+
 UnlessStatement::UnlessStatement(std::unique_ptr<Expression> condition,
                                  std::vector<std::unique_ptr<Statement>> body)
     : Statement(), condition_(std::move(condition)), body_(std::move(body)) {}
@@ -31,22 +33,37 @@ UnlessStatement::UnlessStatement(const Source& source,
 UnlessStatement::~UnlessStatement() = default;
 
 bool UnlessStatement::IsValid() const {
-  return condition_ != nullptr;
+  if (condition_ == nullptr || !condition_->IsValid()) {
+    return false;
+  }
+  for (const auto& stmt : body_) {
+    if (stmt == nullptr || !stmt->IsValid()) {
+      return false;
+    }
+  }
+  return true;
 }
 
 void UnlessStatement::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
   out << "Unless{" << std::endl;
 
-  condition_->to_str(out, indent + 2);
-  make_indent(out, indent);
+  make_indent(out, indent + 2);
+  out << "(" << std::endl;
+
+  condition_->to_str(out, indent + 4);
+
+  make_indent(out, indent + 2);
+  out << ")" << std::endl;
+
+  make_indent(out, indent + 2);
   out << "{" << std::endl;
 
   for (const auto& stmt : body_)
     stmt->to_str(out, indent + 4);
 
   make_indent(out, indent + 2);
-  out << "}";
+  out << "}" << std::endl;
 
   make_indent(out, indent);
   out << "}" << std::endl;

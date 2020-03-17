@@ -248,6 +248,7 @@ set(TINT_TEST_SRCS
   ast/unary_derivative_expression_test.cc
   ast/unary_method_expression_test.cc
   ast/unary_op_expression_test.cc
+  ast/unless_statement_test.cc
   ast/variable_test.cc
   reader/wgsl/lexer_test.cc
   reader/wgsl/parser_test.cc

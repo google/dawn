@@ -29,6 +29,8 @@ namespace ast {
 class UnlessStatement : public Statement {
  public:
   /// Constructor
+  UnlessStatement();
+  /// Constructor
   /// @param condition the condition expression
   /// @param body the body statements
   UnlessStatement(std::unique_ptr<Expression> condition,
