@@ -36,11 +36,13 @@ StructMember::StructMember(
 StructMember::~StructMember() = default;
 
 bool StructMember::IsValid() const {
-  if (name_.empty()) {
+  if (name_.empty() || type_ == nullptr) {
     return false;
   }
-  if (type_ == nullptr) {
-    return false;
+  for (const auto& deco : decorations_) {
+    if (deco == nullptr) {
+      return false;
+    }
   }
   return true;
 }

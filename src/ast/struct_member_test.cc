@@ -69,6 +69,16 @@ TEST_F(StructMemberTest, IsValid_NullType) {
   EXPECT_FALSE(st.IsValid());
 }
 
+TEST_F(StructMemberTest, IsValid_Null_Decoration) {
+  type::I32Type i32;
+  std::vector<std::unique_ptr<StructMemberDecoration>> decorations;
+  decorations.emplace_back(std::make_unique<StructMemberOffsetDecoration>(4));
+  decorations.push_back(nullptr);
+
+  StructMember st{"a", &i32, std::move(decorations)};
+  EXPECT_FALSE(st.IsValid());
+}
+
 TEST_F(StructMemberTest, ToStr) {
   type::I32Type i32;
   std::vector<std::unique_ptr<StructMemberDecoration>> decorations;
@@ -76,16 +86,16 @@ TEST_F(StructMemberTest, ToStr) {
 
   StructMember st{"a", &i32, std::move(decorations)};
   std::ostringstream out;
-  st.to_str(out, 0);
-  EXPECT_EQ(out.str(), "StructMember{[[ offset 4 ]] a: __i32}\n");
+  st.to_str(out, 2);
+  EXPECT_EQ(out.str(), "  StructMember{[[ offset 4 ]] a: __i32}\n");
 }
 
 TEST_F(StructMemberTest, ToStrNoDecorations) {
   type::I32Type i32;
   StructMember st{"a", &i32, {}};
   std::ostringstream out;
-  st.to_str(out, 0);
-  EXPECT_EQ(out.str(), "StructMember{a: __i32}\n");
+  st.to_str(out, 2);
+  EXPECT_EQ(out.str(), "  StructMember{a: __i32}\n");
 }
 
 }  // namespace ast
