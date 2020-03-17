@@ -48,6 +48,8 @@ if (${TINT_BUILD_SPV_PARSER})
   include_directories("${PROJECT_SOURCE_DIR}/third_party/spirv-tools/include")
 endif()
 
+include_directories("${PROJECT_SOURCE_DIR}/third_party/spirv-headers/include")
+
 if(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") OR
     ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang") OR
     (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") AND

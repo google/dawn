@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/reader/spv/parser_impl.h"
+
 #include <cstring>
 
 #include "source/opt/build_module.h"
 #include "spirv-tools/libspirv.hpp"
-#include "src/reader/spirv/parser_impl.h"
 
 namespace tint {
 namespace reader {

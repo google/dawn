@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/reader/spirv/parser_impl.h"
-
 #include <memory>
 #include <sstream>
 
 #include "gmock/gmock.h"
+#include "src/reader/spirv/parser_impl.h"
 #include "src/reader/spirv/spirv_tools_helpers_test.h"
 
 namespace tint {

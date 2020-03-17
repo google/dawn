@@ -177,8 +177,16 @@ set(TINT_LIB_SRCS
   validator_impl.cc
   validator_impl.h
   # TODO(dsinclair): The writers should all be optional
-  writer/spv/generator.cc
-  writer/spv/generator.h
+  writer/spirv/binary_writer.cc
+  writer/spirv/binary_writer.h
+  writer/spirv/builder.cc
+  writer/spirv/builder.h
+  writer/spirv/generator.cc
+  writer/spirv/generator.h
+  writer/spirv/instruction.cc
+  writer/spirv/instruction.h
+  writer/spirv/operand.cc
+  writer/spirv/operand.h
   writer/wgsl/generator.cc
   writer/wgsl/generator.h
   writer/wgsl/generator_impl.cc
@@ -319,6 +327,10 @@ set(TINT_TEST_SRCS
   reader/wgsl/token_test.cc
   type_manager_test.cc
   validator_impl_import_test.cc
+  writer/spirv/binary_writer_test.cc
+  writer/spirv/builder_test.cc
+  writer/spirv/instruction_test.cc
+  writer/spirv/operand_test.cc
   writer/wgsl/generator_impl_test.cc
 )
 

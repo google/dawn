@@ -12,22 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/writer/spv/generator.h"
+#include "src/writer/spirv/builder.h"
 
-#include <utility>
+#include "gtest/gtest.h"
+#include "spirv/unified1/spirv.hpp11"
+#include "src/ast/module.h"
 
 namespace tint {
 namespace writer {
-namespace spv {
+namespace spirv {
 
-Generator::Generator(ast::Module module) : writer::Writer(std::move(module)) {}
+using BuilderTest = testing::Test;
 
-Generator::~Generator() = default;
-
-bool Generator::Generate() {
-  return true;
+TEST_F(BuilderTest, InsertsPreamble) {
+  ast::Module m;
+  Builder b;
+  ASSERT_TRUE(b.Build(m));
+  ASSERT_EQ(b.preamble().size(), 3);
+  auto pre = b.preamble();
+  EXPECT_EQ(pre[0].opcode(), spv::Op::OpCapability);
+  EXPECT_EQ(pre[1].opcode(), spv::Op::OpExtInstImport);
+  EXPECT_EQ(pre[2].opcode(), spv::Op::OpMemoryModel);
 }
 
-}  // namespace spv
+}  // namespace spirv
 }  // namespace writer
 }  // namespace tint

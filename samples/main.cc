@@ -22,7 +22,7 @@
 #include "src/reader/wgsl/parser.h"
 #include "src/type_determiner.h"
 #include "src/validator.h"
-#include "src/writer/spv/generator.h"
+#include "src/writer/spirv/generator.h"
 #include "src/writer/wgsl/generator.h"
 #include "src/writer/writer.h"
 
@@ -280,7 +280,8 @@ int main(int argc, const char** argv) {
 
   std::unique_ptr<tint::writer::Writer> writer;
   if (options.format == Format::kSpirv || options.format == Format::kSpvAsm) {
-    writer = std::make_unique<tint::writer::spv::Generator>(std::move(module));
+    writer =
+        std::make_unique<tint::writer::spirv::Generator>(std::move(module));
   } else if (options.format == Format::kWgsl) {
     writer = std::make_unique<tint::writer::wgsl::Generator>(std::move(module));
   } else {
@@ -294,12 +295,12 @@ int main(int argc, const char** argv) {
   }
 
   if (options.format == Format::kSpvAsm) {
-    auto w = static_cast<tint::writer::spv::Generator*>(writer.get());
+    auto w = static_cast<tint::writer::spirv::Generator*>(writer.get());
     auto str = Disassemble(w->result());
     // TODO(dsinclair): Write to file if output_file given
     std::cout << str << std::endl;
   } else if (options.format == Format::kSpirv) {
-    // auto w = static_cast<tint::writer::spv::Generator*>(writer.get());
+    // auto w = static_cast<tint::writer::spirv::Generator*>(writer.get());
     // TODO(dsincliair): Write to to file
   } else if (options.format == Format::kWgsl) {
     auto w = static_cast<tint::writer::wgsl::Generator*>(writer.get());

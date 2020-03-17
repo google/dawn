@@ -12,16 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_WRITER_SPV_GENERATOR_H_
-#define SRC_WRITER_SPV_GENERATOR_H_
+#ifndef SRC_WRITER_SPIRV_GENERATOR_H_
+#define SRC_WRITER_SPIRV_GENERATOR_H_
 
 #include <vector>
 
+#include "src/ast/module.h"
+#include "src/writer/spirv/binary_writer.h"
+#include "src/writer/spirv/builder.h"
 #include "src/writer/writer.h"
 
 namespace tint {
 namespace writer {
-namespace spv {
+namespace spirv {
 
 /// Class to generate SPIR-V from a Tint module
 class Generator : public writer::Writer {
@@ -36,14 +39,15 @@ class Generator : public writer::Writer {
   bool Generate() override;
 
   /// @returns the result data
-  const std::vector<uint32_t>& result() const { return result_; }
+  const std::vector<uint32_t>& result() const { return writer_.result(); }
 
  private:
-  std::vector<uint32_t> result_;
+  Builder builder_;
+  BinaryWriter writer_;
 };
 
-}  // namespace spv
+}  // namespace spirv
 }  // namespace writer
 }  // namespace tint
 
-#endif  // SRC_WRITER_SPV_GENERATOR_H_
+#endif  // SRC_WRITER_SPIRV_GENERATOR_H_
