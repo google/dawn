@@ -872,7 +872,7 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencilStoreOpClear) {
 // uninitialized mip does not clear the initialized mip.
 TEST_P(TextureZeroInitTest, PreservesInitializedMip) {
     // TODO(crbug.com/dawn/145): Fix this on other backends
-    DAWN_SKIP_TEST_IF(!IsMetal() && !IsD3D12());
+    DAWN_SKIP_TEST_IF(!IsMetal() && !IsD3D12() && !IsVulkan());
 
     wgpu::TextureDescriptor sampleTextureDescriptor = CreateTextureDescriptor(
         2, 1,
@@ -953,7 +953,7 @@ TEST_P(TextureZeroInitTest, PreservesInitializedMip) {
 // the uninitialized layer does not clear the initialized layer.
 TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
     // TODO(crbug.com/dawn/145): Fix this on other backends
-    DAWN_SKIP_TEST_IF(!IsMetal() && !IsD3D12());
+    DAWN_SKIP_TEST_IF(!IsMetal() && !IsD3D12() && !IsVulkan());
 
     wgpu::TextureDescriptor sampleTextureDescriptor = CreateTextureDescriptor(
         1, 2,
