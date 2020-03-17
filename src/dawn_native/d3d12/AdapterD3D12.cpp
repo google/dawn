@@ -34,7 +34,7 @@ namespace dawn_native { namespace d3d12 {
         }
     };
 
-    Adapter::Adapter(Backend* backend, ComPtr<IDXGIAdapter1> hardwareAdapter)
+    Adapter::Adapter(Backend* backend, ComPtr<IDXGIAdapter3> hardwareAdapter)
         : AdapterBase(backend->GetInstance(), wgpu::BackendType::D3D12),
           mHardwareAdapter(hardwareAdapter),
           mBackend(backend) {
@@ -44,7 +44,7 @@ namespace dawn_native { namespace d3d12 {
         return mDeviceInfo;
     }
 
-    IDXGIAdapter1* Adapter::GetHardwareAdapter() const {
+    IDXGIAdapter3* Adapter::GetHardwareAdapter() const {
         return mHardwareAdapter.Get();
     }
 

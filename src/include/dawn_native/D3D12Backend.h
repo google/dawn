@@ -38,6 +38,9 @@ namespace dawn_native { namespace d3d12 {
         uint64_t acquireMutexKey;
     };
 
+    DAWN_NATIVE_EXPORT uint64_t SetExternalMemoryReservation(WGPUDevice device,
+                                                             uint64_t requestedReservationSize);
+
     // Note: SharedHandle must be a handle to a texture object.
     DAWN_NATIVE_EXPORT WGPUTexture
     WrapSharedHandle(WGPUDevice device, const ExternalImageDescriptorDXGISharedHandle* descriptor);

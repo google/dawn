@@ -198,6 +198,8 @@ if (DAWN_ENABLE_D3D12)
         "d3d12/RenderPassBuilderD3D12.h"
         "d3d12/RenderPipelineD3D12.cpp"
         "d3d12/RenderPipelineD3D12.h"
+        "d3d12/ResidencyManagerD3D12.cpp"
+        "d3d12/ResidencyManagerD3D12.h"
         "d3d12/ResourceAllocatorManagerD3D12.cpp"
         "d3d12/ResourceAllocatorManagerD3D12.h"
         "d3d12/ResourceHeapAllocationD3D12.cpp"

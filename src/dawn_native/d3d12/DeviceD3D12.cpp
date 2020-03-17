@@ -32,6 +32,7 @@
 #include "dawn_native/d3d12/PlatformFunctions.h"
 #include "dawn_native/d3d12/QueueD3D12.h"
 #include "dawn_native/d3d12/RenderPipelineD3D12.h"
+#include "dawn_native/d3d12/ResidencyManagerD3D12.h"
 #include "dawn_native/d3d12/ResourceAllocatorManagerD3D12.h"
 #include "dawn_native/d3d12/SamplerD3D12.h"
 #include "dawn_native/d3d12/ShaderModuleD3D12.h"
@@ -79,6 +80,7 @@ namespace dawn_native { namespace d3d12 {
         DAWN_TRY(mShaderVisibleDescriptorAllocator->Initialize());
 
         mMapRequestTracker = std::make_unique<MapRequestTracker>(this);
+        mResidencyManager = std::make_unique<ResidencyManager>(this);
         mResourceAllocatorManager = std::make_unique<ResourceAllocatorManager>(this);
 
         DAWN_TRY(NextSerial());
@@ -152,6 +154,10 @@ namespace dawn_native { namespace d3d12 {
 
     CommandAllocatorManager* Device::GetCommandAllocatorManager() const {
         return mCommandAllocatorManager.get();
+    }
+
+    ResidencyManager* Device::GetResidencyManager() const {
+        return mResidencyManager.get();
     }
 
     ResultOrError<CommandRecordingContext*> Device::GetPendingCommandContext() {
@@ -403,6 +409,7 @@ namespace dawn_native { namespace d3d12 {
         const bool useResourceHeapTier2 = (GetDeviceInfo().resourceHeapTier >= 2);
         SetToggle(Toggle::UseD3D12ResourceHeapTier2, useResourceHeapTier2);
         SetToggle(Toggle::UseD3D12RenderPass, GetDeviceInfo().supportsRenderPass);
+        SetToggle(Toggle::UseD3D12ResidencyManagement, false);
     }
 
     MaybeError Device::WaitForIdleForDestruction() {

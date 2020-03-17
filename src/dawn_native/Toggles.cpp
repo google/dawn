@@ -83,6 +83,12 @@ namespace dawn_native {
               "versions of Windows prior to build 1809, or when this toggle is turned off, Dawn "
               "will emulate a render pass.",
               "https://crbug.com/dawn/36"}},
+            {Toggle::UseD3D12ResidencyManagement,
+             {"use_d3d12_residency_management",
+              "Enable residency management. This allows page-in and page-out of resource heaps in "
+              "GPU memory. This component improves overcommitted performance by keeping the most "
+              "recently used resources local to the GPU. Turning this component off can cause "
+              "allocation failures when application memory exceeds physical device memory."}},
             {Toggle::SkipValidation,
              {"skip_validation", "Skip expensive validation of Dawn commands.",
               "https://crbug.com/dawn/271"}},
