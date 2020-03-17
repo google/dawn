@@ -21,7 +21,7 @@
 
 namespace tint {
 namespace reader {
-namespace spv {
+namespace spirv {
 namespace {
 
 using ::testing::Eq;
@@ -71,6 +71,6 @@ TEST_F(FailStreamTest, ShiftOperatorAccumulatesValues) {
 }
 
 }  // namespace
-}  // namespace spv
+}  // namespace spirv
 }  // namespace reader
 }  // namespace tint

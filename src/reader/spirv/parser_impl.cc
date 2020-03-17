@@ -20,7 +20,7 @@
 
 namespace tint {
 namespace reader {
-namespace spv {
+namespace spirv {
 
 namespace {
 
@@ -143,6 +143,6 @@ bool ParserImpl::ParseExtendedInstructionImports() {
   return true;
 }
 
-}  // namespace spv
+}  // namespace spirv
 }  // namespace reader
 }  // namespace tint

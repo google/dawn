@@ -23,7 +23,7 @@
 
 namespace tint {
 namespace reader {
-namespace spv {
+namespace spirv {
 namespace test {
 
 /// @returns the SPIR-V module assembled from the given text.  Numeric IDs
@@ -50,6 +50,6 @@ std::vector<uint32_t> Assemble(const std::string& spirv_assembly) {
 }
 
 }  // namespace test
-}  // namespace spv
+}  // namespace spirv
 }  // namespace reader
 }  // namespace tint

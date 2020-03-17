@@ -22,7 +22,7 @@
 
 namespace tint {
 namespace reader {
-namespace spv {
+namespace spirv {
 namespace {
 
 using ::testing::ElementsAre;
@@ -69,6 +69,6 @@ TEST_F(SpvParseImport, ImportGlslStd450Twice) {
 // imports.
 
 }  // namespace
-}  // namespace spv
+}  // namespace spirv
 }  // namespace reader
 }  // namespace tint

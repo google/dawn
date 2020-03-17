@@ -35,7 +35,7 @@
 
 namespace tint {
 namespace reader {
-namespace spv {
+namespace spirv {
 
 /// Parser implementation for SPIR-V.
 class ParserImpl : Reader {
@@ -130,7 +130,7 @@ class ParserImpl : Reader {
   std::unordered_set<uint32_t> glsl_std_450_imports_;
 };
 
-}  // namespace spv
+}  // namespace spirv
 }  // namespace reader
 }  // namespace tint
 

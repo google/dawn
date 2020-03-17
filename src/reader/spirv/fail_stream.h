@@ -19,7 +19,7 @@
 
 namespace tint {
 namespace reader {
-namespace spv {
+namespace spirv {
 
 /// A FailStream object accumulates values onto a given std::ostream,
 /// and can be used to record failure by writing the false value
@@ -67,7 +67,7 @@ class FailStream {
   std::ostream* out_;
 };
 
-}  // namespace spv
+}  // namespace spirv
 }  // namespace reader
 }  // namespace tint
 

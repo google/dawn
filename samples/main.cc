@@ -245,7 +245,7 @@ int main(int argc, const char** argv) {
     if (!ReadFile<uint32_t>(options.input_filename, &data)) {
       return 1;
     }
-    reader = std::make_unique<tint::reader::spv::Parser>(data);
+    reader = std::make_unique<tint::reader::spirv::Parser>(data);
   }
 #endif
   if (!reader) {

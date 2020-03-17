@@ -23,7 +23,7 @@
 
 namespace tint {
 namespace reader {
-namespace spv {
+namespace spirv {
 
 class ParserImpl;
 
@@ -47,7 +47,7 @@ class Parser : public Reader {
   std::unique_ptr<ParserImpl> impl_;
 };
 
-}  // namespace spv
+}  // namespace spirv
 }  // namespace reader
 }  // namespace tint
 

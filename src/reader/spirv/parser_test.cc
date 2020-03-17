@@ -21,7 +21,7 @@
 
 namespace tint {
 namespace reader {
-namespace spv {
+namespace spirv {
 
 namespace {
 using ParserTest = testing::Test;
@@ -38,6 +38,6 @@ TEST_F(ParserTest, Uint32VecEmpty) {
 
 }  // namespace
 
-}  // namespace spv
+}  // namespace spirv
 }  // namespace reader
 }  // namespace tint

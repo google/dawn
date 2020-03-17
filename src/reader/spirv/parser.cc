@@ -18,7 +18,7 @@
 
 namespace tint {
 namespace reader {
-namespace spv {
+namespace spirv {
 
 Parser::Parser(const std::vector<uint32_t>& spv_binary)
     : Reader(), impl_(std::make_unique<ParserImpl>(spv_binary)) {}
@@ -35,6 +35,6 @@ ast::Module Parser::module() {
   return impl_->module();
 }
 
-}  // namespace spv
+}  // namespace spirv
 }  // namespace reader
 }  // namespace tint

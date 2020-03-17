@@ -22,7 +22,7 @@
 
 namespace tint {
 namespace reader {
-namespace spv {
+namespace spirv {
 
 namespace {
 
@@ -51,6 +51,6 @@ TEST_F(SpvParserImplTest, InvalidModuleFails) {
 
 }  // namespace
 
-}  // namespace spv
+}  // namespace spirv
 }  // namespace reader
 }  // namespace tint
