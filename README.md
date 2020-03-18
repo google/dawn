@@ -11,7 +11,10 @@ This is not an officially supported Google product.
  * Python, for fetching dependencies
 
 ## Build options
- * `TINT_BUILD_SPV_PARSER` : enable the SPIR-V input parser
+ * `TINT_BUILD_SPV_READER` : enable the SPIR-V input reader (off by default)
+ * `TINT_BUILD_WGSL_READER` : enable the WGSL input reader (on by default)
+ * `TINT_BUILD_SPV_WRITER` : enable the SPIR-V output writer (on by default)
+ * `TINT_BUILD_WGSL_WRITER` : enable the WGSL output writer (on by default)
 
 ## Building
 Tint uses Chromium dependency management so you need to [install depot_tools] and add it to your PATH.

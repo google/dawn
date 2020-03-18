@@ -12,6 +12,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+function(tint_spvtools_compile_options TARGET)
+  # We'll use the optimizer for its nice SPIR-V in-memory representation
+  target_link_libraries(${TARGET} SPIRV-Tools-opt SPIRV-Tools)
+
+  # We'll be cheating: using internal interfaces to the SPIRV-Tools
+  # optimizer.
+  target_include_directories(${TARGET} PRIVATE
+    ${spirv-tools_SOURCE_DIR}
+    ${spirv-tools_BINARY_DIR}
+  )
+
+  if (${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
+    # The SPIRV-Tools code is conditioned against C++ and an older version of Clang.
+    # Suppress warnings triggered in our current compilation environment.
+    # TODO(dneto): Fix the issues upstream.
+    target_compile_options(${TARGET} PRIVATE
+      -Wno-newline-eof
+      -Wno-sign-conversion
+      -Wno-old-style-cast
+      -Wno-weak-vtables
+    )
+  endif()
+endfunction()
+
 set(TINT_LIB_SRCS
   ast/array_accessor_expression.cc
   ast/array_accessor_expression.h
@@ -159,14 +183,6 @@ set(TINT_LIB_SRCS
   ast/variable_statement.h
   reader/reader.cc
   reader/reader.h
-  reader/wgsl/lexer.cc
-  reader/wgsl/lexer.h
-  reader/wgsl/parser.cc
-  reader/wgsl/parser.h
-  reader/wgsl/parser_impl.cc
-  reader/wgsl/parser_impl.h
-  reader/wgsl/token.cc
-  reader/wgsl/token.h
   source.h
   type_determiner.cc
   type_determiner.h
@@ -176,32 +192,54 @@ set(TINT_LIB_SRCS
   validator.h
   validator_impl.cc
   validator_impl.h
-  # TODO(dsinclair): The writers should all be optional
-  writer/spirv/binary_writer.cc
-  writer/spirv/binary_writer.h
-  writer/spirv/builder.cc
-  writer/spirv/builder.h
-  writer/spirv/generator.cc
-  writer/spirv/generator.h
-  writer/spirv/instruction.cc
-  writer/spirv/instruction.h
-  writer/spirv/operand.cc
-  writer/spirv/operand.h
-  writer/wgsl/generator.cc
-  writer/wgsl/generator.h
-  writer/wgsl/generator_impl.cc
-  writer/wgsl/generator_impl.h
   writer/writer.cc
   writer/writer.h
 )
 
-if(TINT_BUILD_SPV_PARSER)
+if(${TINT_BUILD_SPV_READER})
   list(APPEND TINT_LIB_SRCS
     reader/spirv/fail_stream.h
     reader/spirv/parser.cc
     reader/spirv/parser.h
     reader/spirv/parser_impl.cc
     reader/spirv/parser_impl.h
+  )
+endif()
+
+if(${TINT_BUILD_WGSL_READER})
+  list(APPEND TINT_LIB_SRCS
+    reader/wgsl/lexer.cc
+    reader/wgsl/lexer.h
+    reader/wgsl/parser.cc
+    reader/wgsl/parser.h
+    reader/wgsl/parser_impl.cc
+    reader/wgsl/parser_impl.h
+    reader/wgsl/token.cc
+    reader/wgsl/token.h
+  )
+endif()
+
+if(${TINT_BUILD_SPV_WRITER})
+  list(APPEND TINT_LIB_SRCS
+    writer/spirv/binary_writer.cc
+    writer/spirv/binary_writer.h
+    writer/spirv/builder.cc
+    writer/spirv/builder.h
+    writer/spirv/generator.cc
+    writer/spirv/generator.h
+    writer/spirv/instruction.cc
+    writer/spirv/instruction.h
+    writer/spirv/operand.cc
+    writer/spirv/operand.h
+  )
+endif()
+
+if(${TINT_BUILD_WGSL_WRITER})
+  list(APPEND TINT_LIB_SRCS
+    writer/wgsl/generator.cc
+    writer/wgsl/generator.h
+    writer/wgsl/generator_impl.cc
+    writer/wgsl/generator_impl.h
   )
 endif()
 
@@ -259,111 +297,21 @@ set(TINT_TEST_SRCS
   ast/unless_statement_test.cc
   ast/variable_statement_test.cc
   ast/variable_test.cc
-  reader/wgsl/lexer_test.cc
-  reader/wgsl/parser_test.cc
-  reader/wgsl/parser_impl_additive_expression_test.cc
-  reader/wgsl/parser_impl_and_expression_test.cc
-  reader/wgsl/parser_impl_argument_expression_list_test.cc
-  reader/wgsl/parser_impl_assignment_stmt_test.cc
-  reader/wgsl/parser_impl_body_stmt_test.cc
-  reader/wgsl/parser_impl_break_stmt_test.cc
-  reader/wgsl/parser_impl_builtin_decoration_test.cc
-  reader/wgsl/parser_impl_case_body_test.cc
-  reader/wgsl/parser_impl_const_expr_test.cc
-  reader/wgsl/parser_impl_const_literal_test.cc
-  reader/wgsl/parser_impl_continue_stmt_test.cc
-  reader/wgsl/parser_impl_continuing_stmt_test.cc
-  reader/wgsl/parser_impl_derivative_modifier_test.cc
-  reader/wgsl/parser_impl_else_stmt_test.cc
-  reader/wgsl/parser_impl_elseif_stmt_test.cc
-  reader/wgsl/parser_impl_entry_point_decl_test.cc
-  reader/wgsl/parser_impl_equality_expression_test.cc
-  reader/wgsl/parser_impl_exclusive_or_expression_test.cc
-  reader/wgsl/parser_impl_function_decl_test.cc
-  reader/wgsl/parser_impl_function_header_test.cc
-  reader/wgsl/parser_impl_function_type_decl_test.cc
-  reader/wgsl/parser_impl_global_constant_decl_test.cc
-  reader/wgsl/parser_impl_global_decl_test.cc
-  reader/wgsl/parser_impl_global_variable_decl_test.cc
-  reader/wgsl/parser_impl_if_stmt_test.cc
-  reader/wgsl/parser_impl_import_decl_test.cc
-  reader/wgsl/parser_impl_inclusive_or_expression_test.cc
-  reader/wgsl/parser_impl_logical_and_expression_test.cc
-  reader/wgsl/parser_impl_logical_or_expression_test.cc
-  reader/wgsl/parser_impl_loop_stmt_test.cc
-  reader/wgsl/parser_impl_multiplicative_expression_test.cc
-  reader/wgsl/parser_impl_param_list_test.cc
-  reader/wgsl/parser_impl_paren_rhs_stmt_test.cc
-  reader/wgsl/parser_impl_pipeline_stage_test.cc
-  reader/wgsl/parser_impl_postfix_expression_test.cc
-  reader/wgsl/parser_impl_premerge_stmt_test.cc
-  reader/wgsl/parser_impl_primary_expression_test.cc
-  reader/wgsl/parser_impl_regardless_stmt_test.cc
-  reader/wgsl/parser_impl_relational_expression_test.cc
-  reader/wgsl/parser_impl_shift_expression_test.cc
-  reader/wgsl/parser_impl_statement_test.cc
-  reader/wgsl/parser_impl_statements_test.cc
-  reader/wgsl/parser_impl_storage_class_test.cc
-  reader/wgsl/parser_impl_struct_body_decl_test.cc
-  reader/wgsl/parser_impl_struct_decl_test.cc
-  reader/wgsl/parser_impl_struct_decoration_decl_test.cc
-  reader/wgsl/parser_impl_struct_decoration_test.cc
-  reader/wgsl/parser_impl_struct_member_decoration_decl_test.cc
-  reader/wgsl/parser_impl_struct_member_decoration_test.cc
-  reader/wgsl/parser_impl_struct_member_test.cc
-  reader/wgsl/parser_impl_switch_body_test.cc
-  reader/wgsl/parser_impl_switch_stmt_test.cc
-  reader/wgsl/parser_impl_test.cc
-  reader/wgsl/parser_impl_type_alias_test.cc
-  reader/wgsl/parser_impl_type_decl_test.cc
-  reader/wgsl/parser_impl_unary_expression_test.cc
-  reader/wgsl/parser_impl_unless_stmt_test.cc
-  reader/wgsl/parser_impl_variable_decl_test.cc
-  reader/wgsl/parser_impl_variable_decoration_list_test.cc
-  reader/wgsl/parser_impl_variable_decoration_test.cc
-  reader/wgsl/parser_impl_variable_ident_decl_test.cc
-  reader/wgsl/parser_impl_variable_stmt_test.cc
-  reader/wgsl/parser_impl_variable_storage_decoration_test.cc
-  reader/wgsl/token_test.cc
   type_manager_test.cc
   validator_impl_import_test.cc
-  writer/spirv/binary_writer_test.cc
-  writer/spirv/builder_test.cc
-  writer/spirv/instruction_test.cc
-  writer/spirv/operand_test.cc
-  writer/wgsl/generator_impl_test.cc
 )
-
-function(tint_spvtools_compile_options TARGET)
-  # We'll use the optimizer for its nice SPIR-V in-memory representation
-  target_link_libraries(libtint SPIRV-Tools-opt SPIRV-Tools)
-  # We'll be cheating: using internal interfaces to the SPIRV-Tools
-  # optimizer.
-  target_include_directories(libtint PRIVATE ${spirv-tools_SOURCE_DIR} ${spirv-tools_BINARY_DIR})
-  if (${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
-    # The SPIRV-Tools code is conditioned against C++ and an older version of Clang.
-    # Suppress warnings triggered in our current compilation environment.
-    # TODO(dneto): Fix the issues upstream.
-    target_compile_options(${TARGET} PRIVATE
-      -Wno-newline-eof
-      -Wno-sign-conversion
-      -Wno-old-style-cast
-      -Wno-weak-vtables
-    )
-  endif()
-endfunction()
-
 
 ## Tint library
 add_library(libtint ${TINT_LIB_SRCS})
 tint_default_compile_options(libtint)
 set_target_properties(libtint PROPERTIES OUTPUT_NAME "tint")
-if(${TINT_BUILD_SPV_PARSER})
+
+if(${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
   tint_spvtools_compile_options(libtint)
 endif()
 
-if(${TINT_BUILD_SPV_PARSER})
-  list (APPEND TINT_TEST_SRCS
+if(${TINT_BUILD_SPV_READER})
+  list(APPEND TINT_TEST_SRCS
     reader/spirv/fail_stream_test.cc
     reader/spirv/parser_impl_import_test.cc
     reader/spirv/parser_impl_test.cc
@@ -373,11 +321,94 @@ if(${TINT_BUILD_SPV_PARSER})
   )
 endif()
 
-add_executable(tint_unittests ${TINT_TEST_SRCS})
-if (${TINT_BUILD_SPV_PARSER})
-  tint_spvtools_compile_options(tint_unittests)
+if(${TINT_BUILD_WGSL_READER})
+  list(APPEND TINT_TEST_SRCS
+    reader/wgsl/lexer_test.cc
+    reader/wgsl/parser_test.cc
+    reader/wgsl/parser_impl_additive_expression_test.cc
+    reader/wgsl/parser_impl_and_expression_test.cc
+    reader/wgsl/parser_impl_argument_expression_list_test.cc
+    reader/wgsl/parser_impl_assignment_stmt_test.cc
+    reader/wgsl/parser_impl_body_stmt_test.cc
+    reader/wgsl/parser_impl_break_stmt_test.cc
+    reader/wgsl/parser_impl_builtin_decoration_test.cc
+    reader/wgsl/parser_impl_case_body_test.cc
+    reader/wgsl/parser_impl_const_expr_test.cc
+    reader/wgsl/parser_impl_const_literal_test.cc
+    reader/wgsl/parser_impl_continue_stmt_test.cc
+    reader/wgsl/parser_impl_continuing_stmt_test.cc
+    reader/wgsl/parser_impl_derivative_modifier_test.cc
+    reader/wgsl/parser_impl_else_stmt_test.cc
+    reader/wgsl/parser_impl_elseif_stmt_test.cc
+    reader/wgsl/parser_impl_entry_point_decl_test.cc
+    reader/wgsl/parser_impl_equality_expression_test.cc
+    reader/wgsl/parser_impl_exclusive_or_expression_test.cc
+    reader/wgsl/parser_impl_function_decl_test.cc
+    reader/wgsl/parser_impl_function_header_test.cc
+    reader/wgsl/parser_impl_function_type_decl_test.cc
+    reader/wgsl/parser_impl_global_constant_decl_test.cc
+    reader/wgsl/parser_impl_global_decl_test.cc
+    reader/wgsl/parser_impl_global_variable_decl_test.cc
+    reader/wgsl/parser_impl_if_stmt_test.cc
+    reader/wgsl/parser_impl_import_decl_test.cc
+    reader/wgsl/parser_impl_inclusive_or_expression_test.cc
+    reader/wgsl/parser_impl_logical_and_expression_test.cc
+    reader/wgsl/parser_impl_logical_or_expression_test.cc
+    reader/wgsl/parser_impl_loop_stmt_test.cc
+    reader/wgsl/parser_impl_multiplicative_expression_test.cc
+    reader/wgsl/parser_impl_param_list_test.cc
+    reader/wgsl/parser_impl_paren_rhs_stmt_test.cc
+    reader/wgsl/parser_impl_pipeline_stage_test.cc
+    reader/wgsl/parser_impl_postfix_expression_test.cc
+    reader/wgsl/parser_impl_premerge_stmt_test.cc
+    reader/wgsl/parser_impl_primary_expression_test.cc
+    reader/wgsl/parser_impl_regardless_stmt_test.cc
+    reader/wgsl/parser_impl_relational_expression_test.cc
+    reader/wgsl/parser_impl_shift_expression_test.cc
+    reader/wgsl/parser_impl_statement_test.cc
+    reader/wgsl/parser_impl_statements_test.cc
+    reader/wgsl/parser_impl_storage_class_test.cc
+    reader/wgsl/parser_impl_struct_body_decl_test.cc
+    reader/wgsl/parser_impl_struct_decl_test.cc
+    reader/wgsl/parser_impl_struct_decoration_decl_test.cc
+    reader/wgsl/parser_impl_struct_decoration_test.cc
+    reader/wgsl/parser_impl_struct_member_decoration_decl_test.cc
+    reader/wgsl/parser_impl_struct_member_decoration_test.cc
+    reader/wgsl/parser_impl_struct_member_test.cc
+    reader/wgsl/parser_impl_switch_body_test.cc
+    reader/wgsl/parser_impl_switch_stmt_test.cc
+    reader/wgsl/parser_impl_test.cc
+    reader/wgsl/parser_impl_type_alias_test.cc
+    reader/wgsl/parser_impl_type_decl_test.cc
+    reader/wgsl/parser_impl_unary_expression_test.cc
+    reader/wgsl/parser_impl_unless_stmt_test.cc
+    reader/wgsl/parser_impl_variable_decl_test.cc
+    reader/wgsl/parser_impl_variable_decoration_list_test.cc
+    reader/wgsl/parser_impl_variable_decoration_test.cc
+    reader/wgsl/parser_impl_variable_ident_decl_test.cc
+    reader/wgsl/parser_impl_variable_stmt_test.cc
+    reader/wgsl/parser_impl_variable_storage_decoration_test.cc
+    reader/wgsl/token_test.cc
+  )
 endif()
-if (NOT MSVC)
+
+if(${TINT_BUILD_SPV_WRITER})
+  list(APPEND TINT_TEST_SRCS
+    writer/spirv/binary_writer_test.cc
+    writer/spirv/builder_test.cc
+    writer/spirv/instruction_test.cc
+    writer/spirv/operand_test.cc
+  )
+endif()
+
+if(${TINT_BUILD_WGSL_WRITER})
+  list(APPEND TINT_TEST_SRCS
+    writer/wgsl/generator_impl_test.cc
+  )
+endif()
+add_executable(tint_unittests ${TINT_TEST_SRCS})
+
+if(NOT MSVC)
   target_compile_options(tint_unittests PRIVATE
     -Wno-global-constructors
     -Wno-weak-vtables
@@ -387,11 +418,11 @@ endif()
 ## Test executable
 target_include_directories(
     tint_unittests PRIVATE ${gmock_SOURCE_DIR}/include)
-if(${TINT_BUILD_SPV_PARSER})
-  target_include_directories(tint_unittests
-	  PRIVATE ${spirv-tools_SOURCE_DIR} ${spirv-tools_BINARY_DIR})
-endif()
 target_link_libraries(tint_unittests libtint gmock_main)
 tint_default_compile_options(tint_unittests)
+
+if(${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
+  tint_spvtools_compile_options(tint_unittests)
+endif()
 
 add_test(NAME tint_unittests COMMAND tint_unittests)

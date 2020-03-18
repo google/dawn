@@ -18,6 +18,11 @@ set(TINT_SRCS
 
 ## Tint executable
 add_executable(tint ${TINT_SRCS})
-target_link_libraries(tint libtint SPIRV-Tools)
 tint_default_compile_options(tint)
+target_link_libraries(tint libtint)
+
+if(${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
+  target_link_libraries(tint SPIRV-Tools)
+endif()
+
 

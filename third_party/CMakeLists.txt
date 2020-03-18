@@ -14,8 +14,8 @@
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/googletest EXCLUDE_FROM_ALL)
 
-# SPIRV-Tools is only linked into tint if we're using the SPIR-V parser. We
-# always build it regardless so we can use the validator for testing purposes.
-set(SPIRV-Headers_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/spirv-headers CACHE STRING "")
-set(SPIRV_SKIP_TESTS ON CACHE BOOL ON)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/spirv-tools)
+if(${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
+  set(SPIRV-Headers_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/spirv-headers CACHE STRING "")
+  set(SPIRV_SKIP_TESTS ON CACHE BOOL ON)
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/spirv-tools)
+endif()

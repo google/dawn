@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/reader/spv/parser_impl.h"
+#include "src/reader/spirv/parser_impl.h"
 
 #include <cstring>
 

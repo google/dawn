@@ -27,15 +27,21 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
 endif()
 
 option(TINT_BUILD_DOCS "Build documentation" ON)
-option(TINT_BUILD_SPV_PARSER "Build the SPIR-V input parser" OFF)
-option(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
+option(TINT_BUILD_SPV_READER "Build the SPIR-V input reader" ON)
+option(TINT_BUILD_WGSL_READER "Builde the WGSL input reader" ON)
+option(TINT_BUILD_SPV_WRITER "Build the SPIR-V output writer" ON)
+option(TINT_BUILD_WGSL_WRITER "Build the WGSL output writer" ON)
 
+option(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
 option(TINT_ENABLE_MSAN "Enable memory sanitizer" OFF)
 option(TINT_ENABLE_ASAN "Enable address sanitizer" OFF)
 option(TINT_ENABLE_UBSAN "Enable undefined behaviour sanitizer" OFF)
 
 message(STATUS "Tint build docs: ${TINT_BUILD_DOCS}")
-message(STATUS "Tint build SPIR-V parser: ${TINT_BUILD_SPV_PARSER}")
+message(STATUS "Tint build SPIR-V reader: ${TINT_BUILD_SPV_READER}")
+message(STATUS "Tint build WGSL reader: ${TINT_BUILD_WGSL_READER}")
+message(STATUS "Tint build SPIR-V writer: ${TINT_BUILD_SPV_WRITER}")
+message(STATUS "Tint build WGSL writer: ${TINT_BUILD_WGSL_WRITER}")
 message(STATUS "Tint build fuzzers: ${TINT_BUILD_FUZZERS}")
 message(STATUS "Tint build with ASAN: ${TINT_ENABLE_ASAN}")
 message(STATUS "Tint build with MSAN: ${TINT_ENABLE_MSAN}")
@@ -44,7 +50,7 @@ message(STATUS "Tint build with UBSAN: ${TINT_ENABLE_UBSAN}")
 message(STATUS "Using python3")
 find_package(PythonInterp 3 REQUIRED)
 
-if (${TINT_BUILD_SPV_PARSER})
+if (${TINT_BUILD_SPV_READER})
   include_directories("${PROJECT_SOURCE_DIR}/third_party/spirv-tools/include")
 endif()
 
@@ -72,7 +78,13 @@ function(tint_default_compile_options TARGET)
   include_directories("${PROJECT_SOURCE_DIR}")
 
   target_compile_definitions(${TARGET} PRIVATE
-      -DTINT_BUILD_SPV_PARSER=$<BOOL:${TINT_BUILD_SPV_PARSER}>)
+      -DTINT_BUILD_SPV_READER=$<BOOL:${TINT_BUILD_SPV_READER}>)
+  target_compile_definitions(${TARGET} PRIVATE
+      -DTINT_BUILD_WGSL_READER=$<BOOL:${TINT_BUILD_WGSL_READER}>)
+  target_compile_definitions(${TARGET} PRIVATE
+      -DTINT_BUILD_SPV_WRITER=$<BOOL:${TINT_BUILD_SPV_WRITER}>)
+  target_compile_definitions(${TARGET} PRIVATE
+      -DTINT_BUILD_WGSL_WRITER=$<BOOL:${TINT_BUILD_WGSL_WRITER}>)
 
   if (${COMPILER_IS_LIKE_GNU})
     target_compile_options(${TARGET} PRIVATE
@@ -140,6 +152,10 @@ add_subdirectory(src)
 add_subdirectory(samples)
 
 if (${TINT_BUILD_FUZZERS})
+  if (NOT ${TINT_BUILD_WGSL_READER)
+    message(ERROR, "Fuzzers require WGSL reader to be enabled")
+  endif()
+
   add_subdirectory(fuzz)
 endif()
 

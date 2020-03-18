@@ -17,18 +17,27 @@
 #include <memory>
 #include <vector>
 
-#include "spirv-tools/libspirv.hpp"
 #include "src/reader/reader.h"
-#include "src/reader/wgsl/parser.h"
 #include "src/type_determiner.h"
 #include "src/validator.h"
-#include "src/writer/spirv/generator.h"
-#include "src/writer/wgsl/generator.h"
 #include "src/writer/writer.h"
 
-#if TINT_BUILD_SPV_PARSER
+#if TINT_BUILD_SPV_READER
 #include "src/reader/spirv/parser.h"
-#endif
+#endif  // TINT_BUILD_SPV_READER
+
+#if TINT_BUILD_WGSL_READER
+#include "src/reader/wgsl/parser.h"
+#endif  // TINT_BUILD_WGSL_READER
+
+#if TINT_BUILD_SPV_WRITER
+#include "spirv-tools/libspirv.hpp"
+#include "src/writer/spirv/generator.h"
+#endif  // TINT_BUILD_SPV_WRITER
+
+#if TINT_BUILD_WGSL_WRITER
+#include "src/writer/wgsl/generator.h"
+#endif  // TINT_BUILD_WGSL_WRITER
 
 namespace {
 
@@ -61,13 +70,22 @@ const char kUsage[] = R"(Usage: tint [options] SCRIPT [SCRIPTS...]
   --dump-ast                -- Dump the generated AST to stdout
   -h                        -- This help text)";
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
 Format parse_format(const std::string& fmt) {
+#pragma clang diagnostic pop
+
+#if TINT_BUILD_SPV_WRITER
   if (fmt == "spirv")
     return Format::kSpirv;
   if (fmt == "spvasm")
     return Format::kSpvAsm;
+#endif  // TINT_BUILD_SPV_WRITER
+
+#if TINT_BUILD_WGSL_WRITER
   if (fmt == "wgsl")
     return Format::kWgsl;
+#endif  // TINT_BUILD_WGSL_WRITER
 
   return Format::kNone;
 }
@@ -119,8 +137,12 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
 /// writes error messages to the standard error stream and returns false.
 /// Assumes the size of a |T| object is divisible by its required alignment.
 /// @returns true if we successfully read the file.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-template"
 template <typename T>
 bool ReadFile(const std::string& input_file, std::vector<T>* buffer) {
+#pragma Clang pop
+
   if (!buffer) {
     std::cerr << "The buffer pointer was null" << std::endl;
     return false;
@@ -168,6 +190,7 @@ bool ReadFile(const std::string& input_file, std::vector<T>* buffer) {
   return true;
 }
 
+#if TINT_BUILD_SPV_WRITER
 std::string Disassemble(const std::vector<uint32_t>& data) {
   std::string spv_errors;
   spv_target_env target_env = SPV_ENV_UNIVERSAL_1_0;
@@ -204,6 +227,7 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
                         SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES);
   return result;
 }
+#endif  // TINT_BUILD_SPV_WRITER
 
 }  // namespace
 
@@ -227,6 +251,7 @@ int main(int argc, const char** argv) {
   }
 
   std::unique_ptr<tint::reader::Reader> reader;
+#if TINT_BUILD_WGSL_READER
   if (options.input_filename.size() > 5 &&
       options.input_filename.substr(options.input_filename.size() - 5) ==
           ".wgsl") {
@@ -237,7 +262,9 @@ int main(int argc, const char** argv) {
     reader = std::make_unique<tint::reader::wgsl::Parser>(
         std::string(data.begin(), data.end()));
   }
-#if TINT_BUILD_SPV_PARSER
+#endif  // TINT_BUILD_WGSL_READER
+
+#if TINT_BUILD_SPV_READER
   if (options.input_filename.size() > 4 &&
       options.input_filename.substr(options.input_filename.size() - 4) ==
           ".spv") {
@@ -247,7 +274,8 @@ int main(int argc, const char** argv) {
     }
     reader = std::make_unique<tint::reader::spirv::Parser>(data);
   }
-#endif
+#endif  // TINT_BUILD_SPV_READER
+
   if (!reader) {
     std::cerr << "Failed to create reader for input file: "
               << options.input_filename << std::endl;
@@ -279,12 +307,21 @@ int main(int argc, const char** argv) {
   }
 
   std::unique_ptr<tint::writer::Writer> writer;
+
+#if TINT_BUILD_SPV_WRITER
   if (options.format == Format::kSpirv || options.format == Format::kSpvAsm) {
     writer =
         std::make_unique<tint::writer::spirv::Generator>(std::move(module));
-  } else if (options.format == Format::kWgsl) {
+  }
+#endif  // TINT_BUILD_SPV_WRITER
+
+#if TINT_BUILD_WGSL_WRITER
+  if (options.format == Format::kWgsl) {
     writer = std::make_unique<tint::writer::wgsl::Generator>(std::move(module));
-  } else {
+  }
+#endif  // TINT_BUILD_WGSL_WRITER
+
+  if (!writer) {
     std::cerr << "Unknown output format specified" << std::endl;
     return 1;
   }
@@ -294,18 +331,25 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
+#if TINT_BUILD_SPV_WRITER
   if (options.format == Format::kSpvAsm) {
     auto w = static_cast<tint::writer::spirv::Generator*>(writer.get());
     auto str = Disassemble(w->result());
     // TODO(dsinclair): Write to file if output_file given
     std::cout << str << std::endl;
-  } else if (options.format == Format::kSpirv) {
+  }
+  if (options.format == Format::kSpirv) {
     // auto w = static_cast<tint::writer::spirv::Generator*>(writer.get());
     // TODO(dsincliair): Write to to file
-  } else if (options.format == Format::kWgsl) {
+  }
+#endif  // TINT_BUILD_SPV_WRITER
+
+#if TINT_BUILD_WGSL_WRITER
+  if (options.format == Format::kWgsl) {
     auto w = static_cast<tint::writer::wgsl::Generator*>(writer.get());
     std::cout << w->result() << std::endl;
   }
+#endif  // TINT_BUILD_WGSL_WRITER
 
   return 0;
 }

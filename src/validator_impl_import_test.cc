@@ -15,42 +15,40 @@
 #include <iostream>
 
 #include "gtest/gtest.h"
-#include "src/reader/wgsl/parser.h"
+#include "src/ast/import.h"
+#include "src/ast/module.h"
 #include "src/validator_impl.h"
 
 namespace tint {
 namespace {
 
-ast::Module build_module(std::string data) {
-  auto reader = std::make_unique<tint::reader::wgsl::Parser>(
-      std::string(data.begin(), data.end()));
-  EXPECT_TRUE(reader->Parse()) << reader->error();
-  return reader->module();
-}
-
 using ValidatorImplTest = testing::Test;
 
 TEST_F(ValidatorImplTest, Import) {
-  std::string input = "import \"GLSL.std.450\" as glsl;";
-  auto module = build_module(input);
+  ast::Module m;
+  m.AddImport(std::make_unique<ast::Import>("GLSL.std.450", "glsl"));
+
   tint::ValidatorImpl v;
-  EXPECT_TRUE(v.CheckImports(module));
+  EXPECT_TRUE(v.CheckImports(m));
 }
 
 TEST_F(ValidatorImplTest, Import_Fail_NotGLSL) {
-  std::string input = "import \"not.GLSL\" as glsl;";
-  auto module = build_module(input);
+  ast::Module m;
+  m.AddImport(std::make_unique<ast::Import>(Source{1, 1}, "not.GLSL", "glsl"));
+
   tint::ValidatorImpl v;
-  EXPECT_FALSE(v.CheckImports(module));
+  EXPECT_FALSE(v.CheckImports(m));
   ASSERT_TRUE(v.has_error());
   EXPECT_EQ(v.error(), "1:1: v-0001: unknown import: not.GLSL");
 }
 
 TEST_F(ValidatorImplTest, Import_Fail_Typo) {
-  std::string input = "import \"GLSL.std.4501\" as glsl;";
-  auto module = build_module(input);
+  ast::Module m;
+  m.AddImport(
+      std::make_unique<ast::Import>(Source{1, 1}, "GLSL.std.4501", "glsl"));
+
   tint::ValidatorImpl v;
-  EXPECT_FALSE(v.CheckImports(module));
+  EXPECT_FALSE(v.CheckImports(m));
   ASSERT_TRUE(v.has_error());
   EXPECT_EQ(v.error(), "1:1: v-0001: unknown import: GLSL.std.4501");
 }
