@@ -15,6 +15,8 @@
 #include "src/reader/spirv/parser_impl.h"
 
 #include <cstring>
+#include <string>
+#include <utility>
 
 #include "source/opt/build_module.h"
 #include "spirv-tools/libspirv.hpp"
