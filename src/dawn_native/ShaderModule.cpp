@@ -113,15 +113,11 @@ namespace dawn_native {
                     return wgpu::BindingType::Sampler;
                 case shaderc_spvc_binding_type_sampled_texture:
                     return wgpu::BindingType::SampledTexture;
-
-                // TODO(jiawei.shao@intel.com): add convertion to read-only and write-only storage
-                // textures when they are supported as shaderc_spvc binding types.
+                case shaderc_spvc_binding_type_readonly_storage_texture:
+                    return wgpu::BindingType::ReadonlyStorageTexture;
+                case shaderc_spvc_binding_type_writeonly_storage_texture:
+                    return wgpu::BindingType::WriteonlyStorageTexture;
                 case shaderc_spvc_binding_type_storage_texture:
-                    return wgpu::BindingType::StorageTexture;
-                default:
-                    // TODO(rharrison): Remove this case once I am done changing the
-                    // values in shaderc_spvc_binding_type
-                    UNREACHABLE();
                     return wgpu::BindingType::StorageTexture;
             }
             UNREACHABLE();
@@ -355,6 +351,13 @@ namespace dawn_native {
                                       shaderc_spvc_shader_resource_storage_buffers,
                                       shaderc_spvc_binding_type_storage_buffer, &resource_bindings),
                                   "Unable to get binding info for storage buffers from shader"));
+        DAWN_TRY(ExtractResourcesBinding(resource_bindings));
+
+        DAWN_TRY(CheckSpvcSuccess(
+            mSpvcContext.GetBindingInfo(shaderc_spvc_shader_resource_storage_images,
+                                        shaderc_spvc_binding_type_storage_texture,
+                                        &resource_bindings),
+            "Unable to get binding info for storage textures from shader"));
         DAWN_TRY(ExtractResourcesBinding(resource_bindings));
 
         std::vector<shaderc_spvc_resource_location_info> input_stage_locations;
