@@ -18,6 +18,7 @@
 #include <limits>
 
 #include "src/ast/array_accessor_expression.h"
+#include "src/ast/as_expression.h"
 #include "src/ast/binding_decoration.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/builtin_decoration.h"
@@ -118,6 +119,9 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   if (expr->IsArrayAccessor()) {
     return EmitArrayAccessor(expr->AsArrayAccessor());
   }
+  if (expr->IsAs()) {
+    return EmitAs(expr->AsAs());
+  }
   if (expr->IsIdentifier()) {
     return EmitIdentifier(expr->AsIdentifier());
   }
@@ -140,6 +144,21 @@ bool GeneratorImpl::EmitArrayAccessor(ast::ArrayAccessorExpression* expr) {
   }
   out_ << "]";
 
+  return true;
+}
+
+bool GeneratorImpl::EmitAs(ast::AsExpression* expr) {
+  out_ << "as<";
+  if (!EmitType(expr->type())) {
+    return false;
+  }
+
+  out_ << ">(";
+  if (!EmitExpression(expr->expr())) {
+    return false;
+  }
+
+  out_ << ")";
   return true;
 }
 
