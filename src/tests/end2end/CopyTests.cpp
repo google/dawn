@@ -729,6 +729,24 @@ TEST_P(CopyTests_T2T, TextureMip) {
     }
 }
 
+TEST_P(CopyTests_T2T, SingleMipSrcMultipleMipDst) {
+    constexpr uint32_t kWidth = 256;
+    constexpr uint32_t kHeight = 128;
+    for (unsigned int i = 1; i < 4; ++i) {
+        DoTest({kWidth >> i, kHeight >> i, 0, 0, 0}, {kWidth, kHeight, 0, 0, i},
+               {kWidth >> i, kHeight >> i});
+    }
+}
+
+TEST_P(CopyTests_T2T, MultipleMipSrcSingleMipDst) {
+    constexpr uint32_t kWidth = 256;
+    constexpr uint32_t kHeight = 128;
+    for (unsigned int i = 1; i < 4; ++i) {
+        DoTest({kWidth, kHeight, 0, 0, i}, {kWidth >> i, kHeight >> i, 0, 0, 0},
+               {kWidth >> i, kHeight >> i});
+    }
+}
+
 // TODO(brandon1.jones@intel.com) Add test for ensuring blitCommandEncoder on Metal.
 
 DAWN_INSTANTIATE_TEST(CopyTests_T2T, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());

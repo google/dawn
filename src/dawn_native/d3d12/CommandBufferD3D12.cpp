@@ -53,18 +53,40 @@ namespace dawn_native { namespace d3d12 {
             }
         }
 
-        bool CanUseCopyResource(const uint32_t sourceNumMipLevels,
-                                const Extent3D& srcSize,
-                                const Extent3D& dstSize,
-                                const Extent3D& copySize) {
-            if (sourceNumMipLevels == 1 && srcSize.width == dstSize.width &&
-                srcSize.height == dstSize.height && srcSize.depth == dstSize.depth &&
-                srcSize.width == copySize.width && srcSize.height == copySize.height &&
-                srcSize.depth == copySize.depth) {
-                return true;
-            }
+        bool CanUseCopyResource(const Texture* src, const Texture* dst, const Extent3D& copySize) {
+            // Checked by validation
+            ASSERT(src->GetSampleCount() == dst->GetSampleCount());
+            ASSERT(src->GetFormat().format == dst->GetFormat().format);
 
-            return false;
+            const Extent3D& srcSize = src->GetSize();
+            const Extent3D& dstSize = dst->GetSize();
+
+            auto GetCopyDepth = [](const Texture* texture) {
+                switch (texture->GetDimension()) {
+                    case wgpu::TextureDimension::e1D:
+                        return 1u;
+                    case wgpu::TextureDimension::e2D:
+                        return texture->GetArrayLayers();
+                    case wgpu::TextureDimension::e3D:
+                        return texture->GetSize().depth;
+                }
+            };
+
+            // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-copyresource
+            // In order to use D3D12's copy resource, the textures must be the same dimensions, and
+            // the copy must be of the entire resource.
+            // TODO(dawn:129): Support 1D textures.
+            return src->GetDimension() == dst->GetDimension() &&  //
+                   dst->GetNumMipLevels() == 1 &&                 //
+                   src->GetNumMipLevels() == 1 &&      // A copy command is of a single mip, so if a
+                                                       // resource has more than one, we definitely
+                                                       // cannot use CopyResource.
+                   copySize.width == dstSize.width &&  //
+                   copySize.width == srcSize.width &&  //
+                   copySize.height == dstSize.height &&    //
+                   copySize.height == srcSize.height &&    //
+                   copySize.depth == GetCopyDepth(src) &&  //
+                   copySize.depth == GetCopyDepth(dst);
         }
 
     }  // anonymous namespace
@@ -669,8 +691,7 @@ namespace dawn_native { namespace d3d12 {
                     destination->TrackUsageAndTransitionNow(commandContext,
                                                             wgpu::TextureUsage::CopyDst);
 
-                    if (CanUseCopyResource(source->GetNumMipLevels(), source->GetSize(),
-                                           destination->GetSize(), copy->copySize)) {
+                    if (CanUseCopyResource(source, destination, copy->copySize)) {
                         commandList->CopyResource(destination->GetD3D12Resource(),
                                                   source->GetD3D12Resource());
                     } else {
