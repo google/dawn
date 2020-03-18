@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/writer/wgsl/generator_impl.h"
-
 #include "gtest/gtest.h"
+#include "src/writer/wgsl/generator_impl.h"
 
 namespace tint {
 namespace writer {
@@ -23,7 +22,23 @@ namespace {
 
 using GeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, DISABLED_Generate) {}
+TEST_F(GeneratorImplTest, EmitEntryPoint_NoName) {
+  ast::EntryPoint ep(ast::PipelineStage::kFragment, "", "frag_main");
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitEntryPoint(&ep)) << g.error();
+  EXPECT_EQ(g.result(), R"(entry_point fragment = frag_main;
+)");
+}
+
+TEST_F(GeneratorImplTest, EmitEntryPoint_WithName) {
+  ast::EntryPoint ep(ast::PipelineStage::kFragment, "main", "frag_main");
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitEntryPoint(&ep)) << g.error();
+  EXPECT_EQ(g.result(), R"(entry_point fragment as "main" = frag_main;
+)");
+}
 
 }  // namespace
 }  // namespace wgsl

@@ -15,6 +15,7 @@
 #include "src/writer/wgsl/generator_impl.h"
 
 #include <cassert>
+#include <limits>
 
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/binding_decoration.h"
