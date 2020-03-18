@@ -16,10 +16,16 @@
 
 #include <cassert>
 
+#include "src/ast/array_accessor_expression.h"
 #include "src/ast/binding_decoration.h"
+#include "src/ast/bool_literal.h"
 #include "src/ast/builtin_decoration.h"
+#include "src/ast/const_initializer_expression.h"
 #include "src/ast/decorated_variable.h"
+#include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/initializer_expression.h"
+#include "src/ast/int_literal.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/struct.h"
@@ -30,6 +36,8 @@
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
+#include "src/ast/type_initializer_expression.h"
+#include "src/ast/uint_literal.h"
 
 namespace tint {
 namespace writer {
@@ -106,18 +114,99 @@ bool GeneratorImpl::EmitEntryPoint(const ast::EntryPoint* ep) {
 }
 
 bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
+  if (expr->IsArrayAccessor()) {
+    return EmitArrayAccessor(expr->AsArrayAccessor());
+  }
   if (expr->IsIdentifier()) {
-    bool first = true;
-    for (const auto& part : expr->AsIdentifier()->name()) {
-      if (!first) {
-        out_ << "::";
-      }
-      first = false;
-      out_ << part;
-    }
-  } else {
-    error_ = "unknown expression type";
+    return EmitIdentifier(expr->AsIdentifier());
+  }
+  if (expr->IsInitializer()) {
+    return EmitInitializer(expr->AsInitializer());
+  }
+
+  error_ = "unknown expression type";
+  return false;
+}
+
+bool GeneratorImpl::EmitArrayAccessor(ast::ArrayAccessorExpression* expr) {
+  if (!EmitExpression(expr->array())) {
     return false;
+  }
+  out_ << "[";
+
+  if (!EmitExpression(expr->idx_expr())) {
+    return false;
+  }
+  out_ << "]";
+
+  return true;
+}
+
+bool GeneratorImpl::EmitInitializer(ast::InitializerExpression* expr) {
+  if (expr->IsConstInitializer()) {
+    return EmitConstInitializer(expr->AsConstInitializer());
+  }
+  return EmitTypeInitializer(expr->AsTypeInitializer());
+}
+
+bool GeneratorImpl::EmitTypeInitializer(ast::TypeInitializerExpression* expr) {
+  if (!EmitType(expr->type())) {
+    return false;
+  }
+
+  out_ << "(";
+
+  bool first = true;
+  for (const auto& e : expr->values()) {
+    if (!first) {
+      out_ << ", ";
+    }
+    first = false;
+
+    if (!EmitExpression(e.get())) {
+      return false;
+    }
+  }
+
+  out_ << ")";
+  return true;
+}
+
+bool GeneratorImpl::EmitConstInitializer(
+    ast::ConstInitializerExpression* expr) {
+  auto lit = expr->literal();
+  if (lit->IsBool()) {
+    out_ << (lit->AsBool()->IsTrue() ? "true" : "false");
+  } else if (lit->IsFloat()) {
+    auto flags = out_.flags();
+    auto precision = out_.precision();
+
+    out_.flags(flags | std::ios_base::showpoint);
+    out_.precision(std::numeric_limits<float>::max_digits10);
+
+    out_ << lit->AsFloat()->value();
+
+    out_.precision(precision);
+    out_.flags(flags);
+  } else if (lit->IsInt()) {
+    out_ << lit->AsInt()->value();
+  } else if (lit->IsUint()) {
+    out_ << lit->AsUint()->value() << "u";
+  } else {
+    error_ = "unknown literal type";
+    return false;
+  }
+  return true;
+}
+
+bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
+  bool first = true;
+  for (const auto& part : expr->AsIdentifier()->name()) {
+    if (!first) {
+      out_ << "::";
+    }
+    first = false;
+    out_ << part;
   }
   return true;
 }

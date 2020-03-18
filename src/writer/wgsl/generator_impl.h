@@ -18,11 +18,16 @@
 #include <sstream>
 #include <string>
 
+#include "src/ast/array_accessor_expression.h"
+#include "src/ast/const_initializer_expression.h"
 #include "src/ast/entry_point.h"
+#include "src/ast/identifier_expression.h"
 #include "src/ast/import.h"
+#include "src/ast/initializer_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/type.h"
+#include "src/ast/type_initializer_expression.h"
 #include "src/ast/variable.h"
 
 namespace tint {
@@ -65,6 +70,14 @@ class GeneratorImpl {
   /// @param alias the alias to generate
   /// @returns true if the alias was emitted
   bool EmitAliasType(const ast::type::AliasType* alias);
+  /// Handles an array accessor expression
+  /// @param expr the expression to emit
+  /// @returns true if the array accessor was emitted
+  bool EmitArrayAccessor(ast::ArrayAccessorExpression* expr);
+  /// Handles generating a const initializer
+  /// @param expr the const initializer expression
+  /// @returns true if the initializer is emitted
+  bool EmitConstInitializer(ast::ConstInitializerExpression* expr);
   /// Handles generating an entry_point command
   /// @param ep the entry point
   /// @returns true if the entry point was emitted
@@ -73,14 +86,26 @@ class GeneratorImpl {
   /// @param expr the expression
   /// @returns true if the expression was emitted
   bool EmitExpression(ast::Expression* expr);
+  /// Handles generating an identifier expression
+  /// @param expr the identifier expression
+  /// @returns true if the identifeir was emitted
+  bool EmitIdentifier(ast::IdentifierExpression* expr);
   /// Handles generating an import command
   /// @param import the import to generate
   /// @returns true if the import was emitted
   bool EmitImport(const ast::Import* import);
+  /// Handles generating initializer expressions
+  /// @param expr the initializer expression
+  /// @returns true if the expression was emitted
+  bool EmitInitializer(ast::InitializerExpression* expr);
   /// Handles generating type
   /// @param type the type to generate
   /// @returns true if the type is emitted
   bool EmitType(ast::type::Type* type);
+  /// Handles emitting a type initializer
+  /// @param expr the type initializer expression
+  /// @returns true if the initializer is emitted
+  bool EmitTypeInitializer(ast::TypeInitializerExpression* expr);
   /// Handles generating a variable
   /// @param var the variable to generate
   /// @returns true if the variable was emitted
