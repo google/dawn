@@ -14,9 +14,10 @@
 
 #include "src/ast/module.h"
 
+#include <sstream>
 #include <utility>
 
-#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 #include "src/ast/entry_point.h"
 #include "src/ast/function.h"
 #include "src/ast/import.h"
@@ -34,6 +35,13 @@ TEST_F(ModuleTest, Creation) {
   EXPECT_EQ(m.imports().size(), 0);
 }
 
+TEST_F(ModuleTest, ToStrEmitsPreambleAndPostamble) {
+  Module m;
+  const auto str = m.to_str();
+  const auto expected = "Module{\n}\n";
+  EXPECT_EQ(str, expected);
+}
+
 TEST_F(ModuleTest, Imports) {
   Module m;
 
@@ -42,6 +50,16 @@ TEST_F(ModuleTest, Imports) {
 
   EXPECT_EQ(2, m.imports().size());
   EXPECT_EQ("std::glsl", m.imports()[0]->name());
+}
+
+TEST_F(ModuleTest, ToStrWithImport) {
+  Module m;
+  m.AddImport(std::make_unique<Import>("GLSL.std.430", "std::glsl"));
+  const auto str = m.to_str();
+  EXPECT_EQ(str, R"(Module{
+  Import{"GLSL.std.430" as std::glsl}
+}
+)");
 }
 
 TEST_F(ModuleTest, LookupImport) {

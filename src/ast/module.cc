@@ -59,21 +59,24 @@ bool Module::IsValid() const {
 std::string Module::to_str() const {
   std::ostringstream out;
 
+  out << "Module{" << std::endl;
+  const auto indent = 2;
   for (const auto& import : imports_) {
-    import->to_str(out, 0);
+    import->to_str(out, indent);
   }
   for (const auto& var : global_variables_) {
-    var->to_str(out, 0);
+    var->to_str(out, indent);
   }
   for (const auto& ep : entry_points_) {
-    ep->to_str(out, 0);
+    ep->to_str(out, indent);
   }
   for (const auto& alias : alias_types_) {
     out << alias->name() << " -> " << alias->type()->type_name() << std::endl;
   }
   for (const auto& func : functions_) {
-    func->to_str(out, 0);
+    func->to_str(out, indent);
   }
+  out << "}" << std::endl;
 
   return out.str();
 }
