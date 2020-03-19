@@ -15,5 +15,5 @@
 
 set -e  # fail on error
 
-./third_party/cpplint/cpplint/cpplint.py `find src -type f`
-./third_party/cpplint/cpplint/cpplint.py `find samples -type f`
+./third_party/cpplint/cpplint/cpplint.py --root=. `find src -type f`
+./third_party/cpplint/cpplint/cpplint.py --root=. `find samples -type f`

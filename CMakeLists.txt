@@ -65,7 +65,7 @@ endif()
 
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
-  add_custom_target(tint_docs ALL
+  add_custom_target(tint-docs ALL
       COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
       COMMENT "Generating API documentation"
@@ -159,3 +159,14 @@ if (${TINT_BUILD_FUZZERS})
   add_subdirectory(fuzz)
 endif()
 
+add_custom_target(tint-lint
+  COMMAND ./tools/lint
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  COMMENT "Running linter"
+  VERBATIM)
+
+add_custom_target(tint-format
+  COMMAND ./tools/format
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  COMMENT "Running formatter"
+  VERBATIM)
