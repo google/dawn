@@ -209,6 +209,77 @@ namespace dawn_native {
                     return wgpu::TextureFormat::Undefined;
             }
         }
+
+        wgpu::TextureFormat ToWGPUTextureFormat(shaderc_spvc_storage_texture_format format) {
+            switch (format) {
+                case shaderc_spvc_storage_texture_format_r8unorm:
+                    return wgpu::TextureFormat::R8Unorm;
+                case shaderc_spvc_storage_texture_format_r8snorm:
+                    return wgpu::TextureFormat::R8Snorm;
+                case shaderc_spvc_storage_texture_format_r8uint:
+                    return wgpu::TextureFormat::R8Uint;
+                case shaderc_spvc_storage_texture_format_r8sint:
+                    return wgpu::TextureFormat::R8Sint;
+                case shaderc_spvc_storage_texture_format_r16uint:
+                    return wgpu::TextureFormat::R16Uint;
+                case shaderc_spvc_storage_texture_format_r16sint:
+                    return wgpu::TextureFormat::R16Sint;
+                case shaderc_spvc_storage_texture_format_r16float:
+                    return wgpu::TextureFormat::R16Float;
+                case shaderc_spvc_storage_texture_format_rg8unorm:
+                    return wgpu::TextureFormat::RG8Unorm;
+                case shaderc_spvc_storage_texture_format_rg8snorm:
+                    return wgpu::TextureFormat::RG8Snorm;
+                case shaderc_spvc_storage_texture_format_rg8uint:
+                    return wgpu::TextureFormat::RG8Uint;
+                case shaderc_spvc_storage_texture_format_rg8sint:
+                    return wgpu::TextureFormat::RG8Sint;
+                case shaderc_spvc_storage_texture_format_r32float:
+                    return wgpu::TextureFormat::R32Float;
+                case shaderc_spvc_storage_texture_format_r32uint:
+                    return wgpu::TextureFormat::R32Uint;
+                case shaderc_spvc_storage_texture_format_r32sint:
+                    return wgpu::TextureFormat::R32Sint;
+                case shaderc_spvc_storage_texture_format_rg16uint:
+                    return wgpu::TextureFormat::RG16Uint;
+                case shaderc_spvc_storage_texture_format_rg16sint:
+                    return wgpu::TextureFormat::RG16Sint;
+                case shaderc_spvc_storage_texture_format_rg16float:
+                    return wgpu::TextureFormat::RG16Float;
+                case shaderc_spvc_storage_texture_format_rgba8unorm:
+                    return wgpu::TextureFormat::RGBA8Unorm;
+                case shaderc_spvc_storage_texture_format_rgba8snorm:
+                    return wgpu::TextureFormat::RGBA8Snorm;
+                case shaderc_spvc_storage_texture_format_rgba8uint:
+                    return wgpu::TextureFormat::RGBA8Uint;
+                case shaderc_spvc_storage_texture_format_rgba8sint:
+                    return wgpu::TextureFormat::RGBA8Sint;
+                case shaderc_spvc_storage_texture_format_rgb10a2unorm:
+                    return wgpu::TextureFormat::RGB10A2Unorm;
+                case shaderc_spvc_storage_texture_format_rg11b10float:
+                    return wgpu::TextureFormat::RG11B10Float;
+                case shaderc_spvc_storage_texture_format_rg32float:
+                    return wgpu::TextureFormat::RG32Float;
+                case shaderc_spvc_storage_texture_format_rg32uint:
+                    return wgpu::TextureFormat::RG32Uint;
+                case shaderc_spvc_storage_texture_format_rg32sint:
+                    return wgpu::TextureFormat::RG32Sint;
+                case shaderc_spvc_storage_texture_format_rgba16uint:
+                    return wgpu::TextureFormat::RGBA16Uint;
+                case shaderc_spvc_storage_texture_format_rgba16sint:
+                    return wgpu::TextureFormat::RGBA16Sint;
+                case shaderc_spvc_storage_texture_format_rgba16float:
+                    return wgpu::TextureFormat::RGBA16Float;
+                case shaderc_spvc_storage_texture_format_rgba32float:
+                    return wgpu::TextureFormat::RGBA32Float;
+                case shaderc_spvc_storage_texture_format_rgba32uint:
+                    return wgpu::TextureFormat::RGBA32Uint;
+                case shaderc_spvc_storage_texture_format_rgba32sint:
+                    return wgpu::TextureFormat::RGBA32Sint;
+                default:
+                    return wgpu::TextureFormat::Undefined;
+            }
+        }
     }  // anonymous namespace
 
     MaybeError ValidateShaderModuleDescriptor(DeviceBase*,
@@ -322,11 +393,32 @@ namespace dawn_native {
                     info->textureComponentType = ToDawnFormatType(binding.texture_component_type);
                 }
                 info->type = ToWGPUBindingType(binding.binding_type);
+
+                switch (info->type) {
+                    case wgpu::BindingType::StorageTexture:
+                    case wgpu::BindingType::ReadonlyStorageTexture:
+                    case wgpu::BindingType::WriteonlyStorageTexture: {
+                        wgpu::TextureFormat storageTextureFormat =
+                            ToWGPUTextureFormat(binding.storage_texture_format);
+                        if (storageTextureFormat == wgpu::TextureFormat::Undefined) {
+                            return DAWN_VALIDATION_ERROR(
+                                "Invalid image format declaration on storage image");
+                        }
+                        const Format& format =
+                            GetDevice()->GetValidInternalFormat(storageTextureFormat);
+                        if (!format.supportsStorageUsage) {
+                            return DAWN_VALIDATION_ERROR(
+                                "The storage texture format is not supported");
+                        }
+                        info->storageTextureFormat = storageTextureFormat;
+                    } break;
+                    default:
+                        break;
+                }
             }
             return {};
         };
 
-        // TODO(jiawei.shao@intel.com): extract binding information about storage textures.
         std::vector<shaderc_spvc_binding_info> resource_bindings;
         DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetBindingInfo(
                                       shaderc_spvc_shader_resource_uniform_buffers,
