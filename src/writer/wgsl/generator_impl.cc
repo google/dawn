@@ -23,6 +23,7 @@
 #include "src/ast/bool_literal.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/call_expression.h"
+#include "src/ast/cast_expression.h"
 #include "src/ast/const_initializer_expression.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
@@ -126,6 +127,9 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   if (expr->IsCall()) {
     return EmitCall(expr->AsCall());
   }
+  if (expr->IsCast()) {
+    return EmitCast(expr->AsCast());
+  }
   if (expr->IsIdentifier()) {
     return EmitIdentifier(expr->AsIdentifier());
   }
@@ -187,6 +191,21 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
 
   out_ << ")";
 
+  return true;
+}
+
+bool GeneratorImpl::EmitCast(ast::CastExpression* expr) {
+  out_ << "cast<";
+  if (!EmitType(expr->type())) {
+    return false;
+  }
+
+  out_ << ">(";
+  if (!EmitExpression(expr->expr())) {
+    return false;
+  }
+
+  out_ << ")";
   return true;
 }
 

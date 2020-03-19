@@ -82,6 +82,10 @@ class GeneratorImpl {
   /// @param expr the call expression
   /// @returns true if the call expression is emitted
   bool EmitCall(ast::CallExpression* expr);
+  /// Handles generating a cast expression
+  /// @param expr the cast expression
+  /// @returns true if the cast was emitted
+  bool EmitCast(ast::CastExpression* expr);
   /// Handles generating a const initializer
   /// @param expr the const initializer expression
   /// @returns true if the initializer is emitted
