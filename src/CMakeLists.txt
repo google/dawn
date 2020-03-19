@@ -407,6 +407,7 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_alias_type_test.cc
     writer/wgsl/generator_impl_array_accessor_test.cc
     writer/wgsl/generator_impl_as_test.cc
+    writer/wgsl/generator_impl_call_test.cc
     writer/wgsl/generator_impl_entry_point_test.cc
     writer/wgsl/generator_impl_identifier_test.cc
     writer/wgsl/generator_impl_import_test.cc

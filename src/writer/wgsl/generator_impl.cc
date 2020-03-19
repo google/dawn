@@ -22,6 +22,7 @@
 #include "src/ast/binding_decoration.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/builtin_decoration.h"
+#include "src/ast/call_expression.h"
 #include "src/ast/const_initializer_expression.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
@@ -122,6 +123,9 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   if (expr->IsAs()) {
     return EmitAs(expr->AsAs());
   }
+  if (expr->IsCall()) {
+    return EmitCall(expr->AsCall());
+  }
   if (expr->IsIdentifier()) {
     return EmitIdentifier(expr->AsIdentifier());
   }
@@ -159,6 +163,30 @@ bool GeneratorImpl::EmitAs(ast::AsExpression* expr) {
   }
 
   out_ << ")";
+  return true;
+}
+
+bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
+  if (!EmitExpression(expr->func())) {
+    return false;
+  }
+  out_ << "(";
+
+  bool first = true;
+  const auto& params = expr->params();
+  for (const auto& param : params) {
+    if (!first) {
+      out_ << ", ";
+    }
+    first = false;
+
+    if (!EmitExpression(param.get())) {
+      return false;
+    }
+  }
+
+  out_ << ")";
+
   return true;
 }
 
