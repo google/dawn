@@ -5,9 +5,9 @@ vars = {
   'github': '/external/github.com',
 
   'cpplint_revision': '305ac8725a166ed42e3f5dd3f80d6de2cf840ef1',
-  'googletest_revision': 'e588eb1ff9ff6598666279b737b27f983156ad85',
-  'spirv_headers_revision': '0a7fc45259910f07f00c5a3fa10be5678bee1f83',
-  'spirv_tools_revision': 'e1688b60caf77e7efd9e440e57cca429ca7c5a1e',
+  'googletest_revision': '482ac6ee63429af2aa9c44f4e6427873fb68fb1f',
+  'spirv_headers_revision': 'f8bf11a0253a32375c32cad92c841237b96696c0',
+  'spirv_tools_revision': '60104cd97446877dad8ed1010a635218937a2f18',
 }
 
 deps = {
