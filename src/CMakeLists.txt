@@ -413,6 +413,7 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_identifier_test.cc
     writer/wgsl/generator_impl_import_test.cc
     writer/wgsl/generator_impl_initializer_test.cc
+    writer/wgsl/generator_impl_member_accessor_test.cc
     writer/wgsl/generator_impl_type_test.cc
     writer/wgsl/generator_impl_variable_test.cc
   )

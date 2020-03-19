@@ -31,6 +31,7 @@
 #include "src/ast/initializer_expression.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/location_decoration.h"
+#include "src/ast/member_accessor_expression.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
@@ -136,6 +137,9 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   if (expr->IsInitializer()) {
     return EmitInitializer(expr->AsInitializer());
   }
+  if (expr->IsMemberAccessor()) {
+    return EmitMemberAccessor(expr->AsMemberAccessor());
+  }
 
   error_ = "unknown expression type";
   return false;
@@ -153,6 +157,16 @@ bool GeneratorImpl::EmitArrayAccessor(ast::ArrayAccessorExpression* expr) {
   out_ << "]";
 
   return true;
+}
+
+bool GeneratorImpl::EmitMemberAccessor(ast::MemberAccessorExpression* expr) {
+  if (!EmitExpression(expr->structure())) {
+    return false;
+  }
+
+  out_ << ".";
+
+  return EmitExpression(expr->member());
 }
 
 bool GeneratorImpl::EmitAs(ast::AsExpression* expr) {

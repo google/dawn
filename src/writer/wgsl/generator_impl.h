@@ -110,6 +110,10 @@ class GeneratorImpl {
   /// @param expr the initializer expression
   /// @returns true if the expression was emitted
   bool EmitInitializer(ast::InitializerExpression* expr);
+  /// Handles a member accessor expression
+  /// @param expr the member accessor expression
+  /// @returns true if the member accessor was emitted
+  bool EmitMemberAccessor(ast::MemberAccessorExpression* expr);
   /// Handles generating type
   /// @param type the type to generate
   /// @returns true if the type is emitted
