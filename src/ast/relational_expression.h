@@ -38,16 +38,6 @@ enum class Relation {
   kGreaterThan,
   kLessThanEqual,
   kGreaterThanEqual,
-  kUnordGreaterThan,
-  kUnordGreaterThanEqual,
-  kUnordLessThan,
-  kUnordLessThanEqual,
-  kUnordEqual,
-  kUnordNotEqual,
-  kSignedGreaterThan,
-  kSignedGreaterThanEqual,
-  kSignedLessThan,
-  kSignedLessThanEqual,
   kShiftLeft,
   kShiftRight,
   kShiftRightArith,
@@ -157,36 +147,6 @@ inline std::ostream& operator<<(std::ostream& out, Relation relation) {
       break;
     case Relation::kGreaterThanEqual:
       out << "greater_than_equal";
-      break;
-    case Relation::kUnordGreaterThan:
-      out << "unord_greater_than";
-      break;
-    case Relation::kUnordGreaterThanEqual:
-      out << "unord_greater_than_equal";
-      break;
-    case Relation::kUnordLessThan:
-      out << "unord_less_than";
-      break;
-    case Relation::kUnordLessThanEqual:
-      out << "unord_less_than_equal";
-      break;
-    case Relation::kUnordEqual:
-      out << "unord_equal";
-      break;
-    case Relation::kUnordNotEqual:
-      out << "unord_not_equal";
-      break;
-    case Relation::kSignedGreaterThan:
-      out << "signed_greateR_than";
-      break;
-    case Relation::kSignedGreaterThanEqual:
-      out << "signed_greater_than_equal";
-      break;
-    case Relation::kSignedLessThan:
-      out << "signed_less_than";
-      break;
-    case Relation::kSignedLessThanEqual:
-      out << "signed_less_than_equal";
       break;
     case Relation::kShiftLeft:
       out << "shift_left";

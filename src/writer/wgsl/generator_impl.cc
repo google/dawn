@@ -32,6 +32,7 @@
 #include "src/ast/int_literal.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/member_accessor_expression.h"
+#include "src/ast/relational_expression.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
@@ -139,6 +140,9 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   }
   if (expr->IsMemberAccessor()) {
     return EmitMemberAccessor(expr->AsMemberAccessor());
+  }
+  if (expr->IsRelational()) {
+    return EmitRelational(expr->AsRelational());
   }
 
   error_ = "unknown expression type";
@@ -448,6 +452,86 @@ bool GeneratorImpl::EmitVariableDecorations(ast::DecoratedVariable* var) {
   }
   out_ << "]] ";
 
+  return true;
+}
+
+bool GeneratorImpl::EmitRelational(ast::RelationalExpression* expr) {
+  out_ << "(";
+
+  if (!EmitExpression(expr->lhs())) {
+    return false;
+  }
+  out_ << " ";
+
+  switch (expr->relation()) {
+    case ast::Relation::kAnd:
+      out_ << "&";
+      break;
+    case ast::Relation::kOr:
+      out_ << "|";
+      break;
+    case ast::Relation::kXor:
+      out_ << "^";
+      break;
+    case ast::Relation::kLogicalAnd:
+      out_ << "&&";
+      break;
+    case ast::Relation::kLogicalOr:
+      out_ << "||";
+      break;
+    case ast::Relation::kEqual:
+      out_ << "==";
+      break;
+    case ast::Relation::kNotEqual:
+      out_ << "!=";
+      break;
+    case ast::Relation::kLessThan:
+      out_ << "<";
+      break;
+    case ast::Relation::kGreaterThan:
+      out_ << ">";
+      break;
+    case ast::Relation::kLessThanEqual:
+      out_ << "<=";
+      break;
+    case ast::Relation::kGreaterThanEqual:
+      out_ << ">=";
+      break;
+    case ast::Relation::kShiftLeft:
+      out_ << "<<";
+      break;
+    case ast::Relation::kShiftRight:
+      out_ << ">>";
+      break;
+    case ast::Relation::kShiftRightArith:
+      out_ << ">>>";
+      break;
+    case ast::Relation::kAdd:
+      out_ << "+";
+      break;
+    case ast::Relation::kSubtract:
+      out_ << "-";
+      break;
+    case ast::Relation::kMultiply:
+      out_ << "*";
+      break;
+    case ast::Relation::kDivide:
+      out_ << "/";
+      break;
+    case ast::Relation::kModulo:
+      out_ << "%";
+      break;
+    case ast::Relation::kNone:
+      error_ = "missing relation type";
+      return false;
+  }
+  out_ << " ";
+
+  if (!EmitExpression(expr->rhs())) {
+    return false;
+  }
+
+  out_ << ")";
   return true;
 }
 

@@ -114,6 +114,10 @@ class GeneratorImpl {
   /// @param expr the member accessor expression
   /// @returns true if the member accessor was emitted
   bool EmitMemberAccessor(ast::MemberAccessorExpression* expr);
+  /// Handles generating a relational expression
+  /// @param expr the relational expression
+  /// @returns true if the expression was emitted, false otherwise
+  bool EmitRelational(ast::RelationalExpression* expr);
   /// Handles generating type
   /// @param type the type to generate
   /// @returns true if the type is emitted
