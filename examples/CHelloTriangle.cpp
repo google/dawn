@@ -48,7 +48,7 @@ void init() {
 
     const char* fs =
         "#version 450\n"
-        "layout(location = 0) out vec4 fragColor;"
+        "layout(location = 0) out vec4 fragColor;\n"
         "void main() {\n"
         "   fragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
         "}\n";

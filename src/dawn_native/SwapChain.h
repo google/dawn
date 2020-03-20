@@ -122,7 +122,8 @@ namespace dawn_native {
         uint32_t GetHeight() const;
         wgpu::TextureFormat GetFormat() const;
         wgpu::TextureUsage GetUsage() const;
-        Surface* GetSurface();
+        wgpu::PresentMode GetPresentMode() const;
+        Surface* GetSurface() const;
         bool IsAttached() const;
         wgpu::BackendType GetBackendType() const;
 
@@ -132,6 +133,7 @@ namespace dawn_native {
         uint32_t mHeight;
         wgpu::TextureFormat mFormat;
         wgpu::TextureUsage mUsage;
+        wgpu::PresentMode mPresentMode;
 
         // This is a weak reference to the surface. If the surface is destroyed it will call
         // DetachFromSurface and mSurface will be updated to nullptr.

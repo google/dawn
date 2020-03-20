@@ -131,13 +131,13 @@ namespace dawn_native { namespace metal {
     }
     ResultOrError<SwapChainBase*> Device::CreateSwapChainImpl(
         const SwapChainDescriptor* descriptor) {
-        return new SwapChain(this, descriptor);
+        return new OldSwapChain(this, descriptor);
     }
     ResultOrError<NewSwapChainBase*> Device::CreateSwapChainImpl(
         Surface* surface,
         NewSwapChainBase* previousSwapChain,
         const SwapChainDescriptor* descriptor) {
-        return DAWN_VALIDATION_ERROR("New swapchains not implemented.");
+        return new SwapChain(this, surface, previousSwapChain, descriptor);
     }
     ResultOrError<TextureBase*> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {
         return new Texture(this, descriptor);

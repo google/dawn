@@ -997,6 +997,7 @@ source_set("dawn_end2end_tests_sources") {
 
   if (supports_glfw_for_windowing) {
     sources += [
+      "src/tests/end2end/SwapChainTests.cpp",
       "src/tests/end2end/SwapChainValidationTests.cpp",
       "src/tests/end2end/WindowSurfaceTests.cpp",
     ]
@@ -1288,6 +1289,12 @@ if (dawn_standalone) {
     ]
     deps = [
       "third_party:glm",
+    ]
+  }
+
+  dawn_sample("ManualSwapChainTest") {
+    sources = [
+      "examples/ManualSwapChainTest.cpp",
     ]
   }
 

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "tests/unittests/validation/ValidationTest.h"
+#include "tests/DawnTest.h"
 
 #include "common/Constants.h"
 #include "common/Log.h"
@@ -22,21 +22,25 @@
 
 #include "GLFW/glfw3.h"
 
-class SwapChainValidationTests : public ValidationTest {
+class SwapChainValidationTests : public DawnTest {
   public:
-    void SetUp() override {
+    void TestSetUp() override {
+        DAWN_SKIP_TEST_IF(UsesWire());
+        DAWN_SKIP_TEST_IF(IsDawnValidationSkipped());
+
         glfwSetErrorCallback([](int code, const char* message) {
             dawn::ErrorLog() << "GLFW error " << code << " " << message;
         });
         glfwInit();
 
-        // The SwapChainValidationTests tests don't create devices so we don't need to call
+        // The SwapChainValidationTests don't create devices so we don't need to call
         // SetupGLFWWindowHintsForBackend. Set GLFW_NO_API anyway to avoid GLFW bringing up a GL
         // context that we won't use.
+        ASSERT_TRUE(!IsOpenGL());
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         window = glfwCreateWindow(400, 400, "SwapChainValidationTests window", nullptr, nullptr);
 
-        surface = utils::CreateSurfaceForWindow(instance->Get(), window);
+        surface = utils::CreateSurfaceForWindow(GetInstance(), window);
         ASSERT_NE(surface, nullptr);
 
         goodDescriptor.width = 1;
@@ -52,7 +56,9 @@ class SwapChainValidationTests : public ValidationTest {
     void TearDown() override {
         // Destroy the surface before the window as required by webgpu-native.
         surface = wgpu::Surface();
-        glfwDestroyWindow(window);
+        if (window != nullptr) {
+            glfwDestroyWindow(window);
+        }
     }
 
   protected:
@@ -86,14 +92,14 @@ class SwapChainValidationTests : public ValidationTest {
 };
 
 // Control case for a successful swapchain creation and presenting.
-TEST_F(SwapChainValidationTests, CreationSuccess) {
+TEST_P(SwapChainValidationTests, CreationSuccess) {
     wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
     wgpu::TextureView view = swapchain.GetCurrentTextureView();
     swapchain.Present();
 }
 
 // Checks that the creation size must be a valid 2D texture size.
-TEST_F(SwapChainValidationTests, InvalidCreationSize) {
+TEST_P(SwapChainValidationTests, InvalidCreationSize) {
     // A width of 0 is invalid.
     {
         wgpu::SwapChainDescriptor desc = goodDescriptor;
@@ -129,28 +135,28 @@ TEST_F(SwapChainValidationTests, InvalidCreationSize) {
 }
 
 // Checks that the creation usage must be OutputAttachment
-TEST_F(SwapChainValidationTests, InvalidCreationUsage) {
+TEST_P(SwapChainValidationTests, InvalidCreationUsage) {
     wgpu::SwapChainDescriptor desc = goodDescriptor;
     desc.usage = wgpu::TextureUsage::Sampled;
     ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &desc));
 }
 
 // Checks that the creation format must (currently) be BGRA8Unorm
-TEST_F(SwapChainValidationTests, InvalidCreationFormat) {
+TEST_P(SwapChainValidationTests, InvalidCreationFormat) {
     wgpu::SwapChainDescriptor desc = goodDescriptor;
     desc.format = wgpu::TextureFormat::RGBA8Unorm;
     ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &desc));
 }
 
 // Checks that the implementation must be zero.
-TEST_F(SwapChainValidationTests, InvalidWithImplementation) {
+TEST_P(SwapChainValidationTests, InvalidWithImplementation) {
     wgpu::SwapChainDescriptor desc = goodDescriptor;
     desc.implementation = 1;
     ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &desc));
 }
 
 // Check swapchain operations with an error swapchain are errors
-TEST_F(SwapChainValidationTests, OperationsOnErrorSwapChain) {
+TEST_P(SwapChainValidationTests, OperationsOnErrorSwapChain) {
     wgpu::SwapChain swapchain;
     ASSERT_DEVICE_ERROR(swapchain = device.CreateSwapChain(surface, &badDescriptor));
 
@@ -162,7 +168,7 @@ TEST_F(SwapChainValidationTests, OperationsOnErrorSwapChain) {
 }
 
 // Check it is invalid to call present without getting a current view.
-TEST_F(SwapChainValidationTests, PresentWithoutCurrentView) {
+TEST_P(SwapChainValidationTests, PresentWithoutCurrentView) {
     wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
 
     // Check it is invalid if we never called GetCurrentTextureView
@@ -175,7 +181,7 @@ TEST_F(SwapChainValidationTests, PresentWithoutCurrentView) {
 }
 
 // Check that the current view is in the destroyed state after the swapchain is destroyed.
-TEST_F(SwapChainValidationTests, ViewDestroyedAfterSwapChainDestruction) {
+TEST_P(SwapChainValidationTests, ViewDestroyedAfterSwapChainDestruction) {
     wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
     wgpu::TextureView view = swapchain.GetCurrentTextureView();
     swapchain = nullptr;
@@ -184,7 +190,7 @@ TEST_F(SwapChainValidationTests, ViewDestroyedAfterSwapChainDestruction) {
 }
 
 // Check that the current view is the destroyed state after present.
-TEST_F(SwapChainValidationTests, ViewDestroyedAfterPresent) {
+TEST_P(SwapChainValidationTests, ViewDestroyedAfterPresent) {
     wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
     wgpu::TextureView view = swapchain.GetCurrentTextureView();
     swapchain.Present();
@@ -193,7 +199,7 @@ TEST_F(SwapChainValidationTests, ViewDestroyedAfterPresent) {
 }
 
 // Check that returned view is of the current format / usage / dimension / size / sample count
-TEST_F(SwapChainValidationTests, ReturnedViewCharacteristics) {
+TEST_P(SwapChainValidationTests, ReturnedViewCharacteristics) {
     utils::ComboRenderPipelineDescriptor pipelineDesc(device);
     pipelineDesc.vertexStage.module =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
@@ -249,7 +255,7 @@ TEST_F(SwapChainValidationTests, ReturnedViewCharacteristics) {
 }
 
 // Check that failing to create a new swapchain doesn't replace the previous one.
-TEST_F(SwapChainValidationTests, ErrorSwapChainDoesntReplacePreviousOne) {
+TEST_P(SwapChainValidationTests, ErrorSwapChainDoesntReplacePreviousOne) {
     wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
     ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &badDescriptor));
 
@@ -258,7 +264,7 @@ TEST_F(SwapChainValidationTests, ErrorSwapChainDoesntReplacePreviousOne) {
 }
 
 // Check that after replacement, all swapchain operations are errors and the view is destroyed.
-TEST_F(SwapChainValidationTests, ReplacedSwapChainIsInvalid) {
+TEST_P(SwapChainValidationTests, ReplacedSwapChainIsInvalid) {
     {
         wgpu::SwapChain replacedSwapChain = device.CreateSwapChain(surface, &goodDescriptor);
         device.CreateSwapChain(surface, &goodDescriptor);
@@ -277,12 +283,12 @@ TEST_F(SwapChainValidationTests, ReplacedSwapChainIsInvalid) {
 
 // Check that after surface destruction, all swapchain operations are errors and the view is
 // destroyed. The test is split in two to reset the wgpu::Surface in the middle.
-TEST_F(SwapChainValidationTests, SwapChainIsInvalidAfterSurfaceDestruction_GetView) {
+TEST_P(SwapChainValidationTests, SwapChainIsInvalidAfterSurfaceDestruction_GetView) {
     wgpu::SwapChain replacedSwapChain = device.CreateSwapChain(surface, &goodDescriptor);
     surface = nullptr;
     ASSERT_DEVICE_ERROR(replacedSwapChain.GetCurrentTextureView());
 }
-TEST_F(SwapChainValidationTests, SwapChainIsInvalidAfterSurfaceDestruction_AfterGetView) {
+TEST_P(SwapChainValidationTests, SwapChainIsInvalidAfterSurfaceDestruction_AfterGetView) {
     wgpu::SwapChain replacedSwapChain = device.CreateSwapChain(surface, &goodDescriptor);
     wgpu::TextureView view = replacedSwapChain.GetCurrentTextureView();
     surface = nullptr;
@@ -293,12 +299,12 @@ TEST_F(SwapChainValidationTests, SwapChainIsInvalidAfterSurfaceDestruction_After
 
 // Test that after Device is Lost, all swap chain operations fail
 static void ToMockDeviceLostCallback(const char* message, void* userdata) {
-    ValidationTest* self = static_cast<ValidationTest*>(userdata);
+    DawnTest* self = static_cast<DawnTest*>(userdata);
     self->StartExpectDeviceError();
 }
 
 // Test that new swap chain present fails after device is lost
-TEST_F(SwapChainValidationTests, NewSwapChainPresentFailsAfterDeviceLost) {
+TEST_P(SwapChainValidationTests, NewSwapChainPresentFailsAfterDeviceLost) {
     device.SetDeviceLostCallback(ToMockDeviceLostCallback, this);
     wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
     wgpu::TextureView view = swapchain.GetCurrentTextureView();
@@ -308,7 +314,7 @@ TEST_F(SwapChainValidationTests, NewSwapChainPresentFailsAfterDeviceLost) {
 }
 
 // Test that new swap chain get current texture view fails after device is lost
-TEST_F(SwapChainValidationTests, NewSwapChainGetCurrentTextureViewFailsAfterDevLost) {
+TEST_P(SwapChainValidationTests, NewSwapChainGetCurrentTextureViewFailsAfterDevLost) {
     device.SetDeviceLostCallback(ToMockDeviceLostCallback, this);
     wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &goodDescriptor);
 
@@ -316,10 +322,12 @@ TEST_F(SwapChainValidationTests, NewSwapChainGetCurrentTextureViewFailsAfterDevL
     ASSERT_DEVICE_ERROR(swapchain.GetCurrentTextureView());
 }
 
-// Test that creation of a new swapchain fails
-TEST_F(SwapChainValidationTests, CreateNewSwapChainFailsAfterDevLost) {
+// Test that creation of a new swapchain fails after device is lost
+TEST_P(SwapChainValidationTests, CreateNewSwapChainFailsAfterDevLost) {
     device.SetDeviceLostCallback(ToMockDeviceLostCallback, this);
     device.LoseForTesting();
 
     ASSERT_DEVICE_ERROR(device.CreateSwapChain(surface, &goodDescriptor));
 }
+
+DAWN_INSTANTIATE_TEST(SwapChainValidationTests, MetalBackend(), NullBackend());

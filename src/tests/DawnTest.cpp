@@ -110,6 +110,12 @@ DawnTestParam MetalBackend(std::initializer_list<const char*> forceEnabledWorkar
                          forceDisabledWorkarounds);
 }
 
+DawnTestParam NullBackend(std::initializer_list<const char*> forceEnabledWorkarounds,
+                          std::initializer_list<const char*> forceDisabledWorkarounds) {
+    return DawnTestParam(wgpu::BackendType::Null, forceEnabledWorkarounds,
+                         forceDisabledWorkarounds);
+}
+
 DawnTestParam OpenGLBackend(std::initializer_list<const char*> forceEnabledWorkarounds,
                             std::initializer_list<const char*> forceDisabledWorkarounds) {
     return DawnTestParam(wgpu::BackendType::OpenGL, forceEnabledWorkarounds,
@@ -446,6 +452,10 @@ bool DawnTestBase::IsMetal() const {
     return mParam.backendType == wgpu::BackendType::Metal;
 }
 
+bool DawnTestBase::IsNull() const {
+    return mParam.backendType == wgpu::BackendType::Null;
+}
+
 bool DawnTestBase::IsOpenGL() const {
     return mParam.backendType == wgpu::BackendType::OpenGL;
 }
@@ -524,6 +534,14 @@ bool DawnTestBase::HasVendorIdFilter() const {
 
 uint32_t DawnTestBase::GetVendorIdFilter() const {
     return gTestEnv->GetVendorIdFilter();
+}
+
+wgpu::Instance DawnTestBase::GetInstance() const {
+    return gTestEnv->GetInstance()->Get();
+}
+
+dawn_native::Adapter DawnTestBase::GetAdapter() const {
+    return mBackendAdapter;
 }
 
 std::vector<const char*> DawnTestBase::GetRequiredExtensions() {
@@ -957,6 +975,9 @@ namespace detail {
 #endif
 #if defined(DAWN_ENABLE_BACKEND_METAL)
             case wgpu::BackendType::Metal:
+#endif
+#if defined(DAWN_ENABLE_BACKEND_NULL)
+            case wgpu::BackendType::Null:
 #endif
 #if defined(DAWN_ENABLE_BACKEND_OPENGL)
             case wgpu::BackendType::OpenGL:

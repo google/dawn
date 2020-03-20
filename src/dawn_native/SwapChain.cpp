@@ -268,6 +268,7 @@ namespace dawn_native {
           mHeight(descriptor->height),
           mFormat(descriptor->format),
           mUsage(descriptor->usage),
+          mPresentMode(descriptor->presentMode),
           mSurface(surface) {
     }
 
@@ -359,7 +360,11 @@ namespace dawn_native {
         return mUsage;
     }
 
-    Surface* NewSwapChainBase::GetSurface() {
+    wgpu::PresentMode NewSwapChainBase::GetPresentMode() const {
+        return mPresentMode;
+    }
+
+    Surface* NewSwapChainBase::GetSurface() const {
         return mSurface;
     }
 
