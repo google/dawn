@@ -146,6 +146,10 @@ class GeneratorImpl {
   /// @param stmt the nop statement
   /// @returns true if the statement was successfully emitted
   bool EmitNop(ast::NopStatement* stmt);
+  /// Handles regardless statements
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was successfully emitted
+  bool EmitRegardless(ast::RegardlessStatement* stmt);
   /// Handles generating a relational expression
   /// @param expr the relational expression
   /// @returns true if the expression was emitted, false otherwise

@@ -421,6 +421,7 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_kill_test.cc
     writer/wgsl/generator_impl_member_accessor_test.cc
     writer/wgsl/generator_impl_nop_test.cc
+    writer/wgsl/generator_impl_regardless_test.cc
     writer/wgsl/generator_impl_relational_test.cc
     writer/wgsl/generator_impl_return_test.cc
     writer/wgsl/generator_impl_type_test.cc
