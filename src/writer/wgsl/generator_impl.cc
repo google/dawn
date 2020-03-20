@@ -37,6 +37,7 @@
 #include "src/ast/location_decoration.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/relational_expression.h"
+#include "src/ast/return_statement.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/statement.h"
 #include "src/ast/struct.h"
@@ -669,6 +670,9 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsNop()) {
     return EmitNop(stmt->AsNop());
   }
+  if (stmt->IsReturn()) {
+    return EmitReturn(stmt->AsReturn());
+  }
 
   error_ = "unknown statement type";
   return false;
@@ -786,6 +790,20 @@ bool GeneratorImpl::EmitKill(ast::KillStatement*) {
 bool GeneratorImpl::EmitNop(ast::NopStatement*) {
   make_indent();
   out_ << "nop;" << std::endl;
+  return true;
+}
+
+bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
+  make_indent();
+
+  out_ << "return";
+  if (stmt->has_value()) {
+    out_ << " ";
+    if (!EmitExpression(stmt->value())) {
+      return false;
+    }
+  }
+  out_ << ";" << std::endl;
   return true;
 }
 

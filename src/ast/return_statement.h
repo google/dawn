@@ -50,6 +50,8 @@ class ReturnStatement : public Statement {
   }
   /// @returns the value
   Expression* value() const { return value_.get(); }
+  /// @returns true if the return has a value
+  bool has_value() const { return value_ != nullptr; }
 
   /// @returns true if this is a return statement
   bool IsReturn() const override { return true; }

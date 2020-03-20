@@ -150,6 +150,10 @@ class GeneratorImpl {
   /// @param expr the relational expression
   /// @returns true if the expression was emitted, false otherwise
   bool EmitRelational(ast::RelationalExpression* expr);
+  /// Handles return statements
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was successfully emitted
+  bool EmitReturn(ast::ReturnStatement* stmt);
   /// Handles statements
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted

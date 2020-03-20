@@ -44,6 +44,17 @@ TEST_F(ReturnStatementTest, IsReturn) {
   EXPECT_TRUE(r.IsReturn());
 }
 
+TEST_F(ReturnStatementTest, HasValue_WithoutValue) {
+  ReturnStatement r;
+  EXPECT_FALSE(r.has_value());
+}
+
+TEST_F(ReturnStatementTest, HasValue_WithValue) {
+  auto expr = std::make_unique<IdentifierExpression>("expr");
+  ReturnStatement r(std::move(expr));
+  EXPECT_TRUE(r.has_value());
+}
+
 TEST_F(ReturnStatementTest, IsValid_WithoutValue) {
   ReturnStatement r;
   EXPECT_TRUE(r.IsValid());
