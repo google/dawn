@@ -45,6 +45,7 @@
 #include "src/ast/type_initializer_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_derivative_expression.h"
+#include "src/ast/unary_method_expression.h"
 
 namespace tint {
 namespace writer {
@@ -147,6 +148,9 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   }
   if (expr->IsUnaryDerivative()) {
     return EmitUnaryDerivative(expr->AsUnaryDerivative());
+  }
+  if (expr->IsUnaryMethod()) {
+    return EmitUnaryMethod(expr->AsUnaryMethod());
   }
 
   error_ = "unknown expression type";
@@ -563,6 +567,51 @@ bool GeneratorImpl::EmitUnaryDerivative(ast::UnaryDerivativeExpression* expr) {
   }
 
   out_ << ")";
+  return true;
+}
+
+bool GeneratorImpl::EmitUnaryMethod(ast::UnaryMethodExpression* expr) {
+  switch (expr->op()) {
+    case ast::UnaryMethod::kAny:
+      out_ << "any";
+      break;
+    case ast::UnaryMethod::kAll:
+      out_ << "all";
+      break;
+    case ast::UnaryMethod::kIsNan:
+      out_ << "is_nan";
+      break;
+    case ast::UnaryMethod::kIsInf:
+      out_ << "is_inf";
+      break;
+    case ast::UnaryMethod::kIsFinite:
+      out_ << "is_finite";
+      break;
+    case ast::UnaryMethod::kIsNormal:
+      out_ << "is_normal";
+      break;
+    case ast::UnaryMethod::kDot:
+      out_ << "dot";
+      break;
+    case ast::UnaryMethod::kOuterProduct:
+      out_ << "outer_product";
+      break;
+  }
+  out_ << "(";
+
+  bool first = true;
+  for (const auto& param : expr->params()) {
+    if (!first) {
+      out_ << ", ";
+    }
+    first = false;
+
+    if (!EmitExpression(param.get())) {
+      return false;
+    }
+  }
+  out_ << ")";
+
   return true;
 }
 
