@@ -138,6 +138,10 @@ class GeneratorImpl {
   /// @param lit the literal to emit
   /// @returns true if the literal was successfully emitted
   bool EmitLiteral(ast::Literal* lit);
+  /// Handles a loop statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emtited
+  bool EmitLoop(ast::LoopStatement* stmt);
   /// Handles a member accessor expression
   /// @param expr the member accessor expression
   /// @returns true if the member accessor was emitted

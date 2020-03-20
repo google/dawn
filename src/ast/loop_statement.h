@@ -62,6 +62,8 @@ class LoopStatement : public Statement {
   const std::vector<std::unique_ptr<Statement>>& continuing() const {
     return continuing_;
   }
+  /// @returns true if there are continuing statements in the loop
+  bool has_continuing() const { return !continuing_.empty(); }
 
   /// @returns true if this is a loop statement
   bool IsLoop() const override { return true; }

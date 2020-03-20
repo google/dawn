@@ -35,6 +35,7 @@
 #include "src/ast/initializer_expression.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/location_decoration.h"
+#include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/regardless_statement.h"
 #include "src/ast/relational_expression.h"
@@ -671,6 +672,9 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsKill()) {
     return EmitKill(stmt->AsKill());
   }
+  if (stmt->IsLoop()) {
+    return EmitLoop(stmt->AsLoop());
+  }
   if (stmt->IsNop()) {
     return EmitNop(stmt->AsNop());
   }
@@ -800,6 +804,43 @@ bool GeneratorImpl::EmitFallthrough(ast::FallthroughStatement*) {
 bool GeneratorImpl::EmitKill(ast::KillStatement*) {
   make_indent();
   out_ << "kill;" << std::endl;
+  return true;
+}
+
+bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
+  make_indent();
+
+  out_ << "loop {" << std::endl;
+  increment_indent();
+
+  for (const auto& s : stmt->body()) {
+    if (!EmitStatement(s.get())) {
+      return false;
+    }
+  }
+
+  if (stmt->has_continuing()) {
+    out_ << std::endl;
+
+    make_indent();
+    out_ << "continuing {" << std::endl;
+
+    increment_indent();
+    for (const auto& s : stmt->continuing()) {
+      if (!EmitStatement(s.get())) {
+        return false;
+      }
+    }
+
+    decrement_indent();
+    make_indent();
+    out_ << "}" << std::endl;
+  }
+
+  decrement_indent();
+  make_indent();
+  out_ << "}" << std::endl;
+
   return true;
 }
 

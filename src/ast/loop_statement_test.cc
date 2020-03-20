@@ -60,6 +60,25 @@ TEST_F(LoopStatementTest, IsLoop) {
   EXPECT_TRUE(l.IsLoop());
 }
 
+TEST_F(LoopStatementTest, HasContinuing_WithoutContinuing) {
+  std::vector<std::unique_ptr<Statement>> body;
+  body.push_back(std::make_unique<KillStatement>());
+
+  LoopStatement l(std::move(body), {});
+  EXPECT_FALSE(l.has_continuing());
+}
+
+TEST_F(LoopStatementTest, HasContinuing_WithContinuing) {
+  std::vector<std::unique_ptr<Statement>> body;
+  body.push_back(std::make_unique<KillStatement>());
+
+  std::vector<std::unique_ptr<Statement>> continuing;
+  continuing.push_back(std::make_unique<NopStatement>());
+
+  LoopStatement l(std::move(body), std::move(continuing));
+  EXPECT_TRUE(l.has_continuing());
+}
+
 TEST_F(LoopStatementTest, IsValid) {
   std::vector<std::unique_ptr<Statement>> body;
   body.push_back(std::make_unique<KillStatement>());
