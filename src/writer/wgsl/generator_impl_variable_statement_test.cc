@@ -16,10 +16,9 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "src/ast/identifier_expression.h"
-#include "src/ast/kill_statement.h"
-#include "src/ast/nop_statement.h"
-#include "src/ast/unless_statement.h"
+#include "src/ast/type/f32_type.h"
+#include "src/ast/variable.h"
+#include "src/ast/variable_statement.h"
 #include "src/writer/wgsl/generator_impl.h"
 
 namespace tint {
@@ -29,24 +28,18 @@ namespace {
 
 using GeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, Emit_Unless) {
-  auto cond = std::make_unique<ast::IdentifierExpression>("cond");
+TEST_F(GeneratorImplTest, Emit_VariableStatement) {
+  ast::type::F32Type f32;
+  auto var =
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32);
 
-  std::vector<std::unique_ptr<ast::Statement>> body;
-  body.push_back(std::make_unique<ast::NopStatement>());
-  body.push_back(std::make_unique<ast::KillStatement>());
-
-  ast::UnlessStatement u(std::move(cond), std::move(body));
+  ast::VariableStatement stmt(std::move(var));
 
   GeneratorImpl g;
   g.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&u)) << g.error();
-  EXPECT_EQ(g.result(), R"(  unless (cond) {
-    nop;
-    kill;
-  }
-)");
+  ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
+  EXPECT_EQ(g.result(), "  var a : f32;\n");
 }
 
 }  // namespace

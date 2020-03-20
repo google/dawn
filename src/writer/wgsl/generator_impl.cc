@@ -39,7 +39,6 @@
 #include "src/ast/regardless_statement.h"
 #include "src/ast/relational_expression.h"
 #include "src/ast/return_statement.h"
-#include "src/ast/unless_statement.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/statement.h"
 #include "src/ast/struct.h"
@@ -55,6 +54,8 @@
 #include "src/ast/unary_derivative_expression.h"
 #include "src/ast/unary_method_expression.h"
 #include "src/ast/unary_op_expression.h"
+#include "src/ast/unless_statement.h"
+#include "src/ast/variable_statement.h"
 
 namespace tint {
 namespace writer {
@@ -677,6 +678,9 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   }
   if (stmt->IsReturn()) {
     return EmitReturn(stmt->AsReturn());
+  }
+  if (stmt->IsVariable()) {
+    return EmitVariable(stmt->AsVariable()->variable());
   }
   if (stmt->IsUnless()) {
     return EmitUnless(stmt->AsUnless());
