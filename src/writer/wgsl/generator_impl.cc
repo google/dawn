@@ -20,7 +20,6 @@
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
-#include "src/ast/else_statement.h"
 #include "src/ast/binding_decoration.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/break_statement.h"
@@ -31,8 +30,10 @@
 #include "src/ast/const_initializer_expression.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/decorated_variable.h"
+#include "src/ast/else_statement.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/if_statement.h"
 #include "src/ast/initializer_expression.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/location_decoration.h"
@@ -667,6 +668,9 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsFallthrough()) {
     return EmitFallthrough(stmt->AsFallthrough());
   }
+  if (stmt->IsIf()) {
+    return EmitIf(stmt->AsIf());
+  }
   if (stmt->IsKill()) {
     return EmitKill(stmt->AsKill());
   }
@@ -824,6 +828,38 @@ bool GeneratorImpl::EmitElse(ast::ElseStatement* stmt) {
 bool GeneratorImpl::EmitFallthrough(ast::FallthroughStatement*) {
   make_indent();
   out_ << "fallthrough;" << std::endl;
+  return true;
+}
+
+bool GeneratorImpl::EmitIf(ast::IfStatement* stmt) {
+  make_indent();
+
+  out_ << "if (";
+  if (!EmitExpression(stmt->condition())) {
+    return false;
+  }
+  out_ << ") {" << std::endl;
+
+  increment_indent();
+
+  for (const auto& b : stmt->body()) {
+    if (!EmitStatement(b.get())) {
+      return false;
+    }
+  }
+
+  decrement_indent();
+  make_indent();
+  out_ << "}";
+
+  for (const auto& e : stmt->else_statements()) {
+    if (!EmitElse(e.get())) {
+      return false;
+    }
+  }
+
+  out_ << std::endl;
+
   return true;
 }
 

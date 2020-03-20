@@ -126,6 +126,10 @@ class GeneratorImpl {
   /// @param expr the identifier expression
   /// @returns true if the identifeir was emitted
   bool EmitIdentifier(ast::IdentifierExpression* expr);
+  /// Handles an if statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was successfully emitted
+  bool EmitIf(ast::IfStatement* stmt);
   /// Handles generating an import command
   /// @param import the import to generate
   /// @returns true if the import was emitted

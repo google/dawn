@@ -16,9 +16,9 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "src/ast/kill_statement.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/kill_statement.h"
 #include "src/writer/wgsl/generator_impl.h"
 
 namespace tint {
@@ -64,4 +64,3 @@ TEST_F(GeneratorImplTest, Emit_ElseWithCondition) {
 }  // namespace wgsl
 }  // namespace writer
 }  // namespace tint
-
