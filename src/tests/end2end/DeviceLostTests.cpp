@@ -471,4 +471,4 @@ TEST_P(DeviceLostTest, LoseForTestingOnce) {
     device.LoseForTesting();
 }
 
-DAWN_INSTANTIATE_TEST(DeviceLostTest, D3D12Backend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(DeviceLostTest, D3D12Backend(), MetalBackend(), VulkanBackend());

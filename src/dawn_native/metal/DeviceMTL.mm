@@ -298,7 +298,12 @@ namespace dawn_native { namespace metal {
         while (GetCompletedCommandSerial() != mLastSubmittedSerial) {
             usleep(100);
         }
-        Tick();
+
+        // Artificially increase the serials so work that was pending knows it can complete.
+        mCompletedSerial++;
+        mLastSubmittedSerial++;
+
+        DAWN_TRY(TickImpl());
         return {};
     }
 
