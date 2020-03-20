@@ -412,6 +412,7 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_call_test.cc
     writer/wgsl/generator_impl_case_test.cc
     writer/wgsl/generator_impl_cast_test.cc
+    writer/wgsl/generator_impl_continue_test.cc
     writer/wgsl/generator_impl_entry_point_test.cc
     writer/wgsl/generator_impl_identifier_test.cc
     writer/wgsl/generator_impl_import_test.cc

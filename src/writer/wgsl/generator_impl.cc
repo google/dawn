@@ -28,6 +28,7 @@
 #include "src/ast/case_statement.h"
 #include "src/ast/cast_expression.h"
 #include "src/ast/const_initializer_expression.h"
+#include "src/ast/continue_statement.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
@@ -656,6 +657,9 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsCase()) {
     return EmitCase(stmt->AsCase());
   }
+  if (stmt->IsContinue()) {
+    return EmitContinue(stmt->AsContinue());
+  }
 
   error_ = "unknown statement type";
   return false;
@@ -729,6 +733,31 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
 
   make_indent();
   out_ << "}" << std::endl;
+
+  return true;
+}
+
+bool GeneratorImpl::EmitContinue(ast::ContinueStatement* stmt) {
+  make_indent();
+
+  out_ << "continue";
+
+  if (stmt->condition() != ast::StatementCondition::kNone) {
+    out_ << " ";
+    if (stmt->condition() == ast::StatementCondition::kIf) {
+      out_ << "if";
+    } else {
+      out_ << "unless";
+    }
+
+    out_ << " (";
+    if (!EmitExpression(stmt->conditional())) {
+      return false;
+    }
+    out_ << ")";
+  }
+
+  out_ << ";" << std::endl;
 
   return true;
 }

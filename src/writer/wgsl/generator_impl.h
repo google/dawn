@@ -102,6 +102,10 @@ class GeneratorImpl {
   /// @param expr the const initializer expression
   /// @returns true if the initializer is emitted
   bool EmitConstInitializer(ast::ConstInitializerExpression* expr);
+  /// Handles a continue statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted successfully
+  bool EmitContinue(ast::ContinueStatement* stmt);
   /// Handles generating an entry_point command
   /// @param ep the entry point
   /// @returns true if the entry point was emitted
