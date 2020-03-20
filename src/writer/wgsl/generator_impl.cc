@@ -104,6 +104,13 @@ bool GeneratorImpl::Generate(const ast::Module& module) {
     out_ << std::endl;
   }
 
+  for (const auto& func : module.functions()) {
+    if (!EmitFunction(func.get())) {
+      return false;
+    }
+    out_ << std::endl;
+  }
+
   return true;
 }
 
@@ -328,6 +335,48 @@ bool GeneratorImpl::EmitImport(const ast::Import* import) {
   make_indent();
   out_ << R"(import ")" << import->path() << R"(" as )" << import->name() << ";"
        << std::endl;
+  return true;
+}
+
+bool GeneratorImpl::EmitFunction(ast::Function* func) {
+  make_indent();
+
+  out_ << "fn " << func->name() << "(";
+
+  bool first = true;
+  for (const auto& v : func->params()) {
+    if (!first) {
+      out_ << ", ";
+    }
+    first = false;
+
+    out_ << v->name() << " : ";
+
+    if (!EmitType(v->type())) {
+      return false;
+    }
+  }
+
+  out_ << ") -> ";
+
+  if (!EmitType(func->return_type())) {
+    return false;
+  }
+
+  out_ << " {" << std::endl;
+
+  increment_indent();
+
+  for (const auto& s : func->body()) {
+    if (!EmitStatement(s.get())) {
+      return false;
+    }
+  }
+
+  decrement_indent();
+  make_indent();
+  out_ << "}" << std::endl;
+
   return true;
 }
 

@@ -122,6 +122,10 @@ class GeneratorImpl {
   /// @param stmt the fallthrough statement
   /// @returns true if the statement was successfully emitted
   bool EmitFallthrough(ast::FallthroughStatement* stmt);
+  /// Handles generating a function
+  /// @param func the function to generate
+  /// @returns true if the function was emitted
+  bool EmitFunction(ast::Function* func);
   /// Handles generating an identifier expression
   /// @param expr the identifier expression
   /// @returns true if the identifeir was emitted
