@@ -199,6 +199,8 @@ set(TINT_LIB_SRCS
 if(${TINT_BUILD_SPV_READER})
   list(APPEND TINT_LIB_SRCS
     reader/spirv/fail_stream.h
+    reader/spirv/namer.cc
+    reader/spirv/namer.h
     reader/spirv/parser.cc
     reader/spirv/parser.h
     reader/spirv/parser_impl.cc
@@ -313,6 +315,7 @@ endif()
 if(${TINT_BUILD_SPV_READER})
   list(APPEND TINT_TEST_SRCS
     reader/spirv/fail_stream_test.cc
+    reader/spirv/namer_test.cc
     reader/spirv/parser_impl_import_test.cc
     reader/spirv/parser_impl_test.cc
     reader/spirv/parser_test.cc
