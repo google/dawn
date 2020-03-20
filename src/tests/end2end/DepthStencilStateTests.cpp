@@ -681,6 +681,25 @@ TEST_P(DepthStencilStateTest, StencilDepthPass) {
 2);                                                         // Replace the stencil on stencil pass, depth pass, so it should be 2
 }
 
+// Test that creating a render pipeline works with for all depth and combined formats
+TEST_P(DepthStencilStateTest, CreatePipelineWithAllFormats) {
+    constexpr wgpu::TextureFormat kDepthStencilFormats[] = {
+        wgpu::TextureFormat::Depth32Float,
+        wgpu::TextureFormat::Depth24PlusStencil8,
+        wgpu::TextureFormat::Depth24Plus,
+    };
+
+    for (wgpu::TextureFormat depthStencilFormat : kDepthStencilFormats) {
+        utils::ComboRenderPipelineDescriptor descriptor(device);
+        descriptor.vertexStage.module = vsModule;
+        descriptor.cFragmentStage.module = fsModule;
+        descriptor.cDepthStencilState.format = depthStencilFormat;
+        descriptor.depthStencilState = &descriptor.cDepthStencilState;
+
+        device.CreateRenderPipeline(&descriptor);
+    }
+}
+
 DAWN_INSTANTIATE_TEST(DepthStencilStateTest,
                       D3D12Backend(),
                       MetalBackend(),

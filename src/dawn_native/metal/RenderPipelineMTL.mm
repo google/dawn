@@ -353,10 +353,16 @@ namespace dawn_native { namespace metal {
         }
 
         if (HasDepthStencilAttachment()) {
-            // TODO(kainino@chromium.org): Handle depth-only and stencil-only formats.
             wgpu::TextureFormat depthStencilFormat = GetDepthStencilFormat();
-            descriptorMTL.depthAttachmentPixelFormat = MetalPixelFormat(depthStencilFormat);
-            descriptorMTL.stencilAttachmentPixelFormat = MetalPixelFormat(depthStencilFormat);
+            const Format& internalFormat = GetDevice()->GetValidInternalFormat(depthStencilFormat);
+            MTLPixelFormat metalFormat = MetalPixelFormat(depthStencilFormat);
+
+            if (internalFormat.HasDepth()) {
+                descriptorMTL.depthAttachmentPixelFormat = metalFormat;
+            }
+            if (internalFormat.HasStencil()) {
+                descriptorMTL.stencilAttachmentPixelFormat = metalFormat;
+            }
         }
 
         const ShaderModuleBase::FragmentOutputBaseTypes& fragmentOutputBaseTypes =
