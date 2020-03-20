@@ -162,6 +162,10 @@ class GeneratorImpl {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
   bool EmitStatement(ast::Statement* stmt);
+  /// Handles generating a switch statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted
+  bool EmitSwitch(ast::SwitchStatement* stmt);
   /// Handles generating type
   /// @param type the type to generate
   /// @returns true if the type is emitted

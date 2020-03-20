@@ -44,6 +44,7 @@
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
+#include "src/ast/switch_statement.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
@@ -679,6 +680,9 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsReturn()) {
     return EmitReturn(stmt->AsReturn());
   }
+  if (stmt->IsSwitch()) {
+    return EmitSwitch(stmt->AsSwitch());
+  }
   if (stmt->IsVariable()) {
     return EmitVariable(stmt->AsVariable()->variable());
   }
@@ -837,6 +841,30 @@ bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
     }
   }
   out_ << ";" << std::endl;
+  return true;
+}
+
+bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
+  make_indent();
+
+  out_ << "switch(";
+  if (!EmitExpression(stmt->condition())) {
+    return false;
+  }
+  out_ << ") {" << std::endl;
+
+  increment_indent();
+
+  for (const auto& s : stmt->body()) {
+    if (!EmitCase(s.get())) {
+      return false;
+    }
+  }
+
+  decrement_indent();
+  make_indent();
+  out_ << "}" << std::endl;
+
   return true;
 }
 

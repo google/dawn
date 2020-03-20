@@ -424,6 +424,7 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_regardless_test.cc
     writer/wgsl/generator_impl_relational_test.cc
     writer/wgsl/generator_impl_return_test.cc
+    writer/wgsl/generator_impl_switch_test.cc
     writer/wgsl/generator_impl_type_test.cc
     writer/wgsl/generator_impl_unary_derivative_test.cc
     writer/wgsl/generator_impl_unary_method_test.cc
