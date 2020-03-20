@@ -660,6 +660,15 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsContinue()) {
     return EmitContinue(stmt->AsContinue());
   }
+  if (stmt->IsFallthrough()) {
+    return EmitFallthrough(stmt->AsFallthrough());
+  }
+  if (stmt->IsKill()) {
+    return EmitKill(stmt->AsKill());
+  }
+  if (stmt->IsNop()) {
+    return EmitNop(stmt->AsNop());
+  }
 
   error_ = "unknown statement type";
   return false;
@@ -759,6 +768,24 @@ bool GeneratorImpl::EmitContinue(ast::ContinueStatement* stmt) {
 
   out_ << ";" << std::endl;
 
+  return true;
+}
+
+bool GeneratorImpl::EmitFallthrough(ast::FallthroughStatement*) {
+  make_indent();
+  out_ << "fallthrough;" << std::endl;
+  return true;
+}
+
+bool GeneratorImpl::EmitKill(ast::KillStatement*) {
+  make_indent();
+  out_ << "kill;" << std::endl;
+  return true;
+}
+
+bool GeneratorImpl::EmitNop(ast::NopStatement*) {
+  make_indent();
+  out_ << "nop;" << std::endl;
   return true;
 }
 

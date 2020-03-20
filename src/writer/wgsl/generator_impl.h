@@ -114,6 +114,10 @@ class GeneratorImpl {
   /// @param expr the expression
   /// @returns true if the expression was emitted
   bool EmitExpression(ast::Expression* expr);
+  /// Handles generating a fallthrough statement
+  /// @param stmt the fallthrough statement
+  /// @returns true if the statement was successfully emitted
+  bool EmitFallthrough(ast::FallthroughStatement* stmt);
   /// Handles generating an identifier expression
   /// @param expr the identifier expression
   /// @returns true if the identifeir was emitted
@@ -126,6 +130,10 @@ class GeneratorImpl {
   /// @param expr the initializer expression
   /// @returns true if the expression was emitted
   bool EmitInitializer(ast::InitializerExpression* expr);
+  /// Handles generating a kill statement
+  /// @param stmt the kill statement
+  /// @returns true if the statement was successfully emitted
+  bool EmitKill(ast::KillStatement* stmt);
   /// Handles a literal
   /// @param lit the literal to emit
   /// @returns true if the literal was successfully emitted
@@ -134,6 +142,10 @@ class GeneratorImpl {
   /// @param expr the member accessor expression
   /// @returns true if the member accessor was emitted
   bool EmitMemberAccessor(ast::MemberAccessorExpression* expr);
+  /// Handles generating a nop statement
+  /// @param stmt the nop statement
+  /// @returns true if the statement was successfully emitted
+  bool EmitNop(ast::NopStatement* stmt);
   /// Handles generating a relational expression
   /// @param expr the relational expression
   /// @returns true if the expression was emitted, false otherwise
