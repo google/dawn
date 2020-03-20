@@ -16,6 +16,8 @@
 #define SRC_WRITER_SPIRV_BUILDER_H_
 
 #include <functional>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "src/ast/module.h"
@@ -42,6 +44,13 @@ class Builder {
 
   /// @returns the id bound for this module
   uint32_t id_bound() const { return next_id_; }
+
+  /// @returns the next id to be used
+  uint32_t next_id() {
+    auto id = next_id_;
+    next_id_ += 1;
+    return id;
+  }
 
   /// Iterates over all the instructions in the correct order and calls the
   /// given callback
@@ -89,13 +98,12 @@ class Builder {
   /// @returns the annotations
   const std::vector<Instruction>& annot() const { return annotations_; }
 
+  /// Generates an import instruction
+  /// @param imp the import
+  void GenerateImport(ast::Import* imp);
+
  private:
   Operand result_op();
-  uint32_t next_id() {
-    auto id = next_id_;
-    next_id_ += 1;
-    return id;
-  }
 
   uint32_t next_id_ = 1;
   std::vector<Instruction> preamble_;
@@ -103,6 +111,8 @@ class Builder {
   std::vector<Instruction> types_;
   std::vector<Instruction> instructions_;
   std::vector<Instruction> annotations_;
+
+  std::unordered_map<std::string, uint32_t> import_name_to_id_;
 };
 
 }  // namespace spirv

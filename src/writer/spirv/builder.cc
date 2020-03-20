@@ -35,10 +35,15 @@ Builder::Builder() = default;
 
 Builder::~Builder() = default;
 
-bool Builder::Build(const ast::Module&) {
+bool Builder::Build(const ast::Module& m) {
   push_preamble(spv::Op::OpCapability, {Operand::Int(SpvCapabilityShader)});
-  push_preamble(spv::Op::OpExtInstImport,
-                {result_op(), Operand::String("GLSL.std.450")});
+  push_preamble(spv::Op::OpCapability,
+                {Operand::Int(SpvCapabilityVulkanMemoryModel)});
+
+  for (const auto& imp : m.imports()) {
+    GenerateImport(imp.get());
+  }
+
   push_preamble(spv::Op::OpMemoryModel,
                 {Operand::Int(SpvAddressingModelLogical),
                  Operand::Int(SpvMemoryModelVulkanKHR)});
@@ -78,6 +83,15 @@ void Builder::iterate(std::function<void(const Instruction&)> cb) const {
   for (const auto& inst : instructions_) {
     cb(inst);
   }
+}
+
+void Builder::GenerateImport(ast::Import* imp) {
+  auto op = result_op();
+  auto id = op.to_i();
+
+  push_preamble(spv::Op::OpExtInstImport, {op, Operand::String(imp->path())});
+
+  import_name_to_id_[imp->name()] = id;
 }
 
 }  // namespace spirv
