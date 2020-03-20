@@ -43,7 +43,7 @@ class SwapChainValidationTests : public ValidationTest {
         goodDescriptor.height = 1;
         goodDescriptor.usage = wgpu::TextureUsage::OutputAttachment;
         goodDescriptor.format = wgpu::TextureFormat::BGRA8Unorm;
-        goodDescriptor.presentMode = wgpu::PresentMode::VSync;
+        goodDescriptor.presentMode = wgpu::PresentMode::Mailbox;
 
         badDescriptor = goodDescriptor;
         badDescriptor.width = 0;
