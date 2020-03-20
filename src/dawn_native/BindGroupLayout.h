@@ -55,6 +55,7 @@ namespace dawn_native {
             std::bitset<kMaxBindingsPerGroup> hasDynamicOffset;
             std::bitset<kMaxBindingsPerGroup> multisampled;
             std::bitset<kMaxBindingsPerGroup> mask;
+            std::array<wgpu::TextureFormat, kMaxBindingsPerGroup> storageTextureFormats;
         };
         const LayoutBindingInfo& GetBindingInfo() const;
 

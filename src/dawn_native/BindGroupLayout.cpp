@@ -66,8 +66,10 @@ namespace dawn_native {
             case wgpu::BindingType::WriteonlyStorageTexture: {
                 DAWN_TRY(ValidateTextureFormat(storageTextureFormat));
 
-                const Format& format = device->GetValidInternalFormat(storageTextureFormat);
-                if (!format.supportsStorageUsage) {
+                const Format* format = nullptr;
+                DAWN_TRY_ASSIGN(format, device->GetInternalFormat(storageTextureFormat));
+                ASSERT(format != nullptr);
+                if (!format->supportsStorageUsage) {
                     return DAWN_VALIDATION_ERROR("The storage texture format is not supported");
                 }
             } break;
@@ -170,7 +172,8 @@ namespace dawn_native {
 
             for (uint32_t binding : IterateBitSet(info.mask)) {
                 HashCombine(&hash, info.visibilities[binding], info.types[binding],
-                            info.textureComponentTypes[binding], info.textureDimensions[binding]);
+                            info.textureComponentTypes[binding], info.textureDimensions[binding],
+                            info.storageTextureFormats[binding]);
             }
 
             return hash;
@@ -187,7 +190,8 @@ namespace dawn_native {
                 if ((a.visibilities[binding] != b.visibilities[binding]) ||
                     (a.types[binding] != b.types[binding]) ||
                     (a.textureComponentTypes[binding] != b.textureComponentTypes[binding]) ||
-                    (a.textureDimensions[binding] != b.textureDimensions[binding])) {
+                    (a.textureDimensions[binding] != b.textureDimensions[binding]) ||
+                    (a.storageTextureFormats[binding] != b.storageTextureFormats[binding])) {
                     return false;
                 }
             }
@@ -208,6 +212,7 @@ namespace dawn_native {
             mBindingInfo.visibilities[index] = binding.visibility;
             mBindingInfo.types[index] = binding.type;
             mBindingInfo.textureComponentTypes[index] = binding.textureComponentType;
+            mBindingInfo.storageTextureFormats[index] = binding.storageTextureFormat;
 
             // TODO(enga): This is a greedy computation because there may be holes in bindings.
             // Fix this when we pack bindings.

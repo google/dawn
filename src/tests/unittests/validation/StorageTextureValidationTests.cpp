@@ -92,20 +92,44 @@ class StorageTextureValidationTests : public ValidationTest {
         }
     }
 
+    static const char* GetGLSLFloatImageTypeDeclaration(wgpu::TextureViewDimension dimension) {
+        switch (dimension) {
+            case wgpu::TextureViewDimension::e1D:
+                return "image1D";
+            case wgpu::TextureViewDimension::e2D:
+                return "image2D";
+            case wgpu::TextureViewDimension::e2DArray:
+                return "image2DArray";
+            case wgpu::TextureViewDimension::Cube:
+                return "imageCube";
+            case wgpu::TextureViewDimension::CubeArray:
+                return "imageCubeArray";
+            case wgpu::TextureViewDimension::e3D:
+                return "image3D";
+            case wgpu::TextureViewDimension::Undefined:
+            default:
+                UNREACHABLE();
+                return "";
+        }
+    }
+
     static std::string CreateComputeShaderWithStorageTexture(
         wgpu::BindingType storageTextureBindingType,
-        wgpu::TextureFormat textureFormat) {
+        wgpu::TextureFormat textureFormat,
+        wgpu::TextureViewDimension textureViewDimension = wgpu::TextureViewDimension::e2D) {
         const char* glslImageFormatQualifier = GetGLSLImageFormatQualifier(textureFormat);
         const char* textureComponentTypePrefix =
             utils::GetColorTextureComponentTypePrefix(textureFormat);
         return CreateComputeShaderWithStorageTexture(
-            storageTextureBindingType, glslImageFormatQualifier, textureComponentTypePrefix);
+            storageTextureBindingType, glslImageFormatQualifier, textureComponentTypePrefix,
+            GetGLSLFloatImageTypeDeclaration(textureViewDimension));
     }
 
     static std::string CreateComputeShaderWithStorageTexture(
         wgpu::BindingType storageTextureBindingType,
         const char* glslImageFormatQualifier,
-        const char* textureComponentTypePrefix) {
+        const char* textureComponentTypePrefix,
+        const char* glslImageTypeDeclaration = "image2D") {
         const char* memoryQualifier = "";
         switch (storageTextureBindingType) {
             case wgpu::BindingType::ReadonlyStorageTexture:
@@ -123,8 +147,8 @@ class StorageTextureValidationTests : public ValidationTest {
         ostream << "#version 450\n"
                    "layout (set = 0, binding = 0, "
                 << glslImageFormatQualifier << ") uniform " << memoryQualifier << " "
-                << textureComponentTypePrefix
-                << "image2D image0;\n"
+                << textureComponentTypePrefix << glslImageTypeDeclaration
+                << " image0;\n"
                    "void main() {\n"
                    "}\n";
 
@@ -144,6 +168,9 @@ class StorageTextureValidationTests : public ValidationTest {
         void main() {
             fragColor = vec4(1.f, 0.f, 0.f, 1.f);
         })");
+
+    const std::array<wgpu::BindingType, 2> kSupportedStorageTextureBindingTypes = {
+        wgpu::BindingType::ReadonlyStorageTexture, wgpu::BindingType::WriteonlyStorageTexture};
 };
 
 // Validate read-only storage textures can be declared in vertex and fragment
@@ -376,10 +403,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureFormatInShaders) {
         wgpu::TextureFormat::RG16Sint,     wgpu::TextureFormat::RG16Float,
         wgpu::TextureFormat::RGB10A2Unorm, wgpu::TextureFormat::RG11B10Float};
 
-    constexpr std::array<wgpu::BindingType, 2> kStorageTextureBindingTypes = {
-        wgpu::BindingType::ReadonlyStorageTexture, wgpu::BindingType::WriteonlyStorageTexture};
-
-    for (wgpu::BindingType storageTextureBindingType : kStorageTextureBindingTypes) {
+    for (wgpu::BindingType storageTextureBindingType : kSupportedStorageTextureBindingTypes) {
         for (wgpu::TextureFormat format : kWGPUTextureFormatSupportedAsSPIRVImageFormats) {
             std::string computeShader =
                 CreateComputeShaderWithStorageTexture(storageTextureBindingType, format);
@@ -410,15 +434,206 @@ TEST_F(StorageTextureValidationTests, UnsupportedSPIRVStorageTextureFormat) {
                                                                               {"r16_snorm", ""},
                                                                               {"rgb10_a2ui", "u"}}};
 
-    constexpr std::array<wgpu::BindingType, 2> kStorageTextureBindingTypes = {
-        wgpu::BindingType::ReadonlyStorageTexture, wgpu::BindingType::WriteonlyStorageTexture};
-
-    for (wgpu::BindingType bindingType : kStorageTextureBindingTypes) {
+    for (wgpu::BindingType bindingType : kSupportedStorageTextureBindingTypes) {
         for (const TextureFormatInfo& formatInfo : kUnsupportedTextureFormats) {
             std::string computeShader = CreateComputeShaderWithStorageTexture(
                 bindingType, formatInfo.name, formatInfo.componentTypePrefix);
             ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, utils::SingleShaderStage::Compute,
                                                           computeShader.c_str()));
+        }
+    }
+}
+
+// Verify when we create and use a bind group layout with storage textures in the creation of
+// render and compute pipeline, the binding type in the bind group layout must match the
+// declaration in the shader.
+TEST_F(StorageTextureValidationTests, BindGroupLayoutBindingTypeMatchesShaderDeclaration) {
+    constexpr std::array<wgpu::BindingType, 7> kSupportedBindingTypes = {
+        wgpu::BindingType::UniformBuffer,          wgpu::BindingType::StorageBuffer,
+        wgpu::BindingType::ReadonlyStorageBuffer,  wgpu::BindingType::Sampler,
+        wgpu::BindingType::SampledTexture,         wgpu::BindingType::ReadonlyStorageTexture,
+        wgpu::BindingType::WriteonlyStorageTexture};
+    constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Float;
+
+    for (wgpu::BindingType bindingTypeInShader : kSupportedStorageTextureBindingTypes) {
+        // Create the compute shader with the given binding type.
+        std::string computeShader =
+            CreateComputeShaderWithStorageTexture(bindingTypeInShader, kStorageTextureFormat);
+        wgpu::ShaderModule csModule = utils::CreateShaderModule(
+            device, utils::SingleShaderStage::Compute, computeShader.c_str());
+
+        // Set common fields of compute pipeline descriptor.
+        wgpu::ComputePipelineDescriptor defaultComputePipelineDescriptor;
+        defaultComputePipelineDescriptor.computeStage.module = csModule;
+        defaultComputePipelineDescriptor.computeStage.entryPoint = "main";
+
+        // Set common fileds of bind group layout binding.
+        wgpu::BindGroupLayoutBinding defaultBindGroupLayoutBinding;
+        defaultBindGroupLayoutBinding.binding = 0;
+        defaultBindGroupLayoutBinding.visibility = wgpu::ShaderStage::Compute;
+        defaultBindGroupLayoutBinding.storageTextureFormat = kStorageTextureFormat;
+
+        for (wgpu::BindingType bindingTypeInBindgroupLayout : kSupportedBindingTypes) {
+            wgpu::ComputePipelineDescriptor computePipelineDescriptor =
+                defaultComputePipelineDescriptor;
+
+            // Create bind group layout with different binding types.
+            wgpu::BindGroupLayoutBinding bindGroupLayoutBinding = defaultBindGroupLayoutBinding;
+            bindGroupLayoutBinding.type = bindingTypeInBindgroupLayout;
+            wgpu::BindGroupLayout bindGroupLayout =
+                utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});
+            computePipelineDescriptor.layout =
+                utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
+
+            // The binding type in the bind group layout must the same as the related image object
+            // declared in shader.
+            if (bindingTypeInBindgroupLayout == bindingTypeInShader) {
+                device.CreateComputePipeline(&computePipelineDescriptor);
+            } else {
+                ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&computePipelineDescriptor));
+            }
+        }
+    }
+}
+
+// Verify it is invalid not to set a valid texture format in a bind group layout when the binding
+// type is read-only or write-only storage texture.
+TEST_F(StorageTextureValidationTests, UndefinedStorageTextureFormatInBindGroupLayout) {
+    wgpu::BindGroupLayoutBinding errorBindGroupLayoutBinding;
+    errorBindGroupLayoutBinding.binding = 0;
+    errorBindGroupLayoutBinding.visibility = wgpu::ShaderStage::Compute;
+    errorBindGroupLayoutBinding.storageTextureFormat = wgpu::TextureFormat::Undefined;
+
+    for (wgpu::BindingType bindingType : kSupportedStorageTextureBindingTypes) {
+        errorBindGroupLayoutBinding.type = bindingType;
+        ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(device, {errorBindGroupLayoutBinding}));
+    }
+}
+
+// Verify it is invalid to create a bind group layout with storage textures and an unsupported
+// storage texture format.
+TEST_F(StorageTextureValidationTests, StorageTextureFormatInBindGroupLayout) {
+    wgpu::BindGroupLayoutBinding defaultBindGroupLayoutBinding;
+    defaultBindGroupLayoutBinding.binding = 0;
+    defaultBindGroupLayoutBinding.visibility = wgpu::ShaderStage::Compute;
+
+    for (wgpu::BindingType bindingType : kSupportedStorageTextureBindingTypes) {
+        for (wgpu::TextureFormat textureFormat : utils::kAllTextureFormats) {
+            wgpu::BindGroupLayoutBinding bindGroupLayoutBinding = defaultBindGroupLayoutBinding;
+            bindGroupLayoutBinding.type = bindingType;
+            bindGroupLayoutBinding.storageTextureFormat = textureFormat;
+            if (utils::TextureFormatSupportsStorageTexture(textureFormat)) {
+                utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});
+            } else {
+                ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding}));
+            }
+        }
+    }
+}
+
+// Verify the storage texture format in the bind group layout must match the declaration in shader.
+TEST_F(StorageTextureValidationTests, BindGroupLayoutStorageTextureFormatMatchesShaderDeclaration) {
+    for (wgpu::BindingType bindingType : kSupportedStorageTextureBindingTypes) {
+        for (wgpu::TextureFormat storageTextureFormatInShader : utils::kAllTextureFormats) {
+            if (!utils::TextureFormatSupportsStorageTexture(storageTextureFormatInShader)) {
+                continue;
+            }
+
+            // Create the compute shader module with the given binding type and storage texture
+            // format.
+            std::string computeShader =
+                CreateComputeShaderWithStorageTexture(bindingType, storageTextureFormatInShader);
+            wgpu::ShaderModule csModule = utils::CreateShaderModule(
+                device, utils::SingleShaderStage::Compute, computeShader.c_str());
+
+            // Set common fields of compute pipeline descriptor.
+            wgpu::ComputePipelineDescriptor defaultComputePipelineDescriptor;
+            defaultComputePipelineDescriptor.computeStage.module = csModule;
+            defaultComputePipelineDescriptor.computeStage.entryPoint = "main";
+
+            // Set common fileds of bind group layout binding.
+            wgpu::BindGroupLayoutBinding defaultBindGroupLayoutBinding = {
+                0, wgpu::ShaderStage::Compute, bindingType};
+
+            for (wgpu::TextureFormat storageTextureFormatInBindGroupLayout :
+                 utils::kAllTextureFormats) {
+                if (!utils::TextureFormatSupportsStorageTexture(
+                        storageTextureFormatInBindGroupLayout)) {
+                    continue;
+                }
+
+                // Create the bind group layout with the given storage texture format.
+                wgpu::BindGroupLayoutBinding bindGroupLayoutBinding = defaultBindGroupLayoutBinding;
+                bindGroupLayoutBinding.storageTextureFormat = storageTextureFormatInBindGroupLayout;
+                wgpu::BindGroupLayout bindGroupLayout =
+                    utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});
+
+                // Create the compute pipeline with the bind group layout.
+                wgpu::ComputePipelineDescriptor computePipelineDescriptor =
+                    defaultComputePipelineDescriptor;
+                computePipelineDescriptor.layout =
+                    utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
+
+                // The storage texture format in the bind group layout must be the same as the one
+                // declared in the shader.
+                if (storageTextureFormatInShader == storageTextureFormatInBindGroupLayout) {
+                    device.CreateComputePipeline(&computePipelineDescriptor);
+                } else {
+                    ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&computePipelineDescriptor));
+                }
+            }
+        }
+    }
+}
+
+// Verify the dimension of the bind group layout with storage textures must match the one declared
+// in shader.
+TEST_F(StorageTextureValidationTests, BindGroupLayoutTextureDimensionMatchesShaderDeclaration) {
+    constexpr std::array<wgpu::TextureViewDimension, 6> kAllDimensions = {
+        wgpu::TextureViewDimension::e1D,       wgpu::TextureViewDimension::e2D,
+        wgpu::TextureViewDimension::e2DArray,  wgpu::TextureViewDimension::Cube,
+        wgpu::TextureViewDimension::CubeArray, wgpu::TextureViewDimension::e3D};
+    constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Float;
+
+    for (wgpu::BindingType bindingType : kSupportedStorageTextureBindingTypes) {
+        for (wgpu::TextureViewDimension dimensionInShader : kAllDimensions) {
+            // Create the compute shader with the given texture view dimension.
+            std::string computeShader = CreateComputeShaderWithStorageTexture(
+                bindingType, kStorageTextureFormat, dimensionInShader);
+            wgpu::ShaderModule csModule = utils::CreateShaderModule(
+                device, utils::SingleShaderStage::Compute, computeShader.c_str());
+
+            // Set common fields of compute pipeline descriptor.
+            wgpu::ComputePipelineDescriptor defaultComputePipelineDescriptor;
+            defaultComputePipelineDescriptor.computeStage.module = csModule;
+            defaultComputePipelineDescriptor.computeStage.entryPoint = "main";
+
+            // Set common fileds of bind group layout binding.
+            wgpu::BindGroupLayoutBinding defaultBindGroupLayoutBinding = {
+                0, wgpu::ShaderStage::Compute, bindingType};
+            defaultBindGroupLayoutBinding.storageTextureFormat = kStorageTextureFormat;
+
+            for (wgpu::TextureViewDimension dimensionInBindGroupLayout : kAllDimensions) {
+                // Create the bind group layout with the given texture view dimension.
+                wgpu::BindGroupLayoutBinding bindGroupLayoutBinding = defaultBindGroupLayoutBinding;
+                bindGroupLayoutBinding.textureDimension = dimensionInBindGroupLayout;
+                wgpu::BindGroupLayout bindGroupLayout =
+                    utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});
+
+                // Create the compute pipeline with the bind group layout.
+                wgpu::ComputePipelineDescriptor computePipelineDescriptor =
+                    defaultComputePipelineDescriptor;
+                computePipelineDescriptor.layout =
+                    utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
+
+                // The texture dimension in the bind group layout must be the same as the one
+                // declared in the shader.
+                if (dimensionInShader == dimensionInBindGroupLayout) {
+                    device.CreateComputePipeline(&computePipelineDescriptor);
+                } else {
+                    ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&computePipelineDescriptor));
+                }
+            }
         }
     }
 }
