@@ -606,8 +606,6 @@ namespace dawn_native {
                                 "The storage texture format is not supported");
                         }
                         info->storageTextureFormat = storageTextureFormat;
-                        info->textureDimension =
-                            SpirvDimToTextureViewDimension(imageType.dim, imageType.arrayed);
                     } break;
                     default:
                         info->type = bindingType;
@@ -759,42 +757,16 @@ namespace dawn_native {
                 return false;
             }
 
-            switch (layoutBindingType) {
-                case wgpu::BindingType::SampledTexture: {
-                    Format::Type layoutTextureComponentType =
-                        Format::TextureComponentTypeToFormatType(
-                            layoutInfo.textureComponentTypes[i]);
-                    if (layoutTextureComponentType != moduleInfo.textureComponentType) {
-                        return false;
-                    }
-
-                    if (layoutInfo.textureDimensions[i] != moduleInfo.textureDimension) {
-                        return false;
-                    }
-                } break;
-
-                case wgpu::BindingType::ReadonlyStorageTexture:
-                case wgpu::BindingType::WriteonlyStorageTexture: {
-                    ASSERT(layoutInfo.storageTextureFormats[i] != wgpu::TextureFormat::Undefined);
-                    ASSERT(moduleInfo.storageTextureFormat != wgpu::TextureFormat::Undefined);
-                    if (layoutInfo.storageTextureFormats[i] != moduleInfo.storageTextureFormat) {
-                        return false;
-                    }
-                    if (layoutInfo.textureDimensions[i] != moduleInfo.textureDimension) {
-                        return false;
-                    }
-                } break;
-
-                case wgpu::BindingType::UniformBuffer:
-                case wgpu::BindingType::ReadonlyStorageBuffer:
-                case wgpu::BindingType::StorageBuffer:
-                case wgpu::BindingType::Sampler:
-                    break;
-
-                case wgpu::BindingType::StorageTexture:
-                default:
-                    UNREACHABLE();
+            if (layoutBindingType == wgpu::BindingType::SampledTexture) {
+                Format::Type layoutTextureComponentType =
+                    Format::TextureComponentTypeToFormatType(layoutInfo.textureComponentTypes[i]);
+                if (layoutTextureComponentType != moduleInfo.textureComponentType) {
                     return false;
+                }
+
+                if (layoutInfo.textureDimensions[i] != moduleInfo.textureDimension) {
+                    return false;
+                }
             }
         }
 
