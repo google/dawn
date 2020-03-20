@@ -20,6 +20,7 @@
 #include "dawn_native/Error.h"
 #include "dawn_native/Format.h"
 #include "dawn_native/Forward.h"
+#include "dawn_native/IntegerTypes.h"
 #include "dawn_native/PerStage.h"
 
 #include "dawn_native/dawn_platform.h"
@@ -28,6 +29,7 @@
 
 #include <array>
 #include <bitset>
+#include <map>
 #include <vector>
 
 namespace spirv_cross {
@@ -57,11 +59,9 @@ namespace dawn_native {
             wgpu::TextureViewDimension textureDimension = wgpu::TextureViewDimension::Undefined;
             Format::Type textureComponentType = Format::Type::Float;
             bool multisampled = false;
-            bool used = false;
             wgpu::TextureFormat storageTextureFormat = wgpu::TextureFormat::Undefined;
         };
-        using ModuleBindingInfo =
-            std::array<std::array<BindingInfo, kMaxBindingsPerGroup>, kMaxBindGroups>;
+        using ModuleBindingInfo = std::array<std::map<BindingNumber, BindingInfo>, kMaxBindGroups>;
 
         const ModuleBindingInfo& GetBindingInfo() const;
         const std::bitset<kMaxVertexAttributes>& GetUsedVertexAttributes() const;

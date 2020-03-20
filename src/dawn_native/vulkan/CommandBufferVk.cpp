@@ -140,10 +140,10 @@ namespace dawn_native { namespace vulkan {
                                     mDynamicOffsetCounts, mDynamicOffsets);
 
                 for (uint32_t index : IterateBitSet(mBindGroupLayoutsMask)) {
-                    for (uint32_t binding : IterateBitSet(mBuffersNeedingBarrier[index])) {
-                        switch (mBindingTypes[index][binding]) {
+                    for (uint32_t bindingIndex : IterateBitSet(mBuffersNeedingBarrier[index])) {
+                        switch (mBindingTypes[index][bindingIndex]) {
                             case wgpu::BindingType::StorageBuffer:
-                                ToBackend(mBuffers[index][binding])
+                                ToBackend(mBuffers[index][bindingIndex])
                                     ->TransitionUsageNow(recordingContext,
                                                          wgpu::BufferUsage::Storage);
                                 break;

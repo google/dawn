@@ -118,23 +118,22 @@ namespace dawn_native {
         const BindGroupLayoutBase::LayoutBindingInfo& layoutInfo =
             descriptor->layout->GetBindingInfo();
 
-        if (descriptor->bindingCount != layoutInfo.mask.count()) {
+        const BindGroupLayoutBase::BindingMap& bindingMap = descriptor->layout->GetBindingMap();
+
+        if (descriptor->bindingCount != bindingMap.size()) {
             return DAWN_VALIDATION_ERROR("numBindings mismatch");
         }
 
         std::bitset<kMaxBindingsPerGroup> bindingsSet;
         for (uint32_t i = 0; i < descriptor->bindingCount; ++i) {
             const BindGroupBinding& binding = descriptor->bindings[i];
-            uint32_t bindingIndex = binding.binding;
 
-            // Check that we can set this binding.
-            if (bindingIndex >= kMaxBindingsPerGroup) {
-                return DAWN_VALIDATION_ERROR("binding index too high");
-            }
-
-            if (!layoutInfo.mask[bindingIndex]) {
+            const auto& it = bindingMap.find(BindingNumber(binding.binding));
+            if (it == bindingMap.end()) {
                 return DAWN_VALIDATION_ERROR("setting non-existent binding");
             }
+            BindingIndex bindingIndex = it->second;
+            ASSERT(bindingIndex < layoutInfo.bindingCount);
 
             if (bindingsSet[bindingIndex]) {
                 return DAWN_VALIDATION_ERROR("binding set twice");
@@ -176,7 +175,7 @@ namespace dawn_native {
         //  - Each binding must be set at most once
         //
         // We don't validate the equality because it wouldn't be possible to cover it with a test.
-        ASSERT(bindingsSet == layoutInfo.mask);
+        ASSERT(bindingsSet.count() == bindingMap.size());
 
         return {};
     }
@@ -189,7 +188,7 @@ namespace dawn_native {
         : ObjectBase(device),
           mLayout(descriptor->layout),
           mBindingData(mLayout->ComputeBindingDataPointers(bindingDataStart)) {
-        for (uint32_t i = 0; i < mLayout->GetBindingCount(); ++i) {
+        for (BindingIndex i = 0; i < mLayout->GetBindingCount(); ++i) {
             // TODO(enga): Shouldn't be needed when bindings are tightly packed.
             // This is to fill Ref<ObjectBase> holes with nullptrs.
             new (&mBindingData.bindings[i]) Ref<ObjectBase>();
@@ -198,7 +197,8 @@ namespace dawn_native {
         for (uint32_t i = 0; i < descriptor->bindingCount; ++i) {
             const BindGroupBinding& binding = descriptor->bindings[i];
 
-            uint32_t bindingIndex = binding.binding;
+            BindingIndex bindingIndex =
+                descriptor->layout->GetBindingIndex(BindingNumber(binding.binding));
             ASSERT(bindingIndex < mLayout->GetBindingCount());
 
             // Only a single binding type should be set, so once we found it we can skip to the
@@ -231,7 +231,7 @@ namespace dawn_native {
     BindGroupBase::~BindGroupBase() {
         if (mLayout) {
             ASSERT(!IsError());
-            for (uint32_t i = 0; i < mLayout->GetBindingCount(); ++i) {
+            for (BindingIndex i = 0; i < mLayout->GetBindingCount(); ++i) {
                 mBindingData.bindings[i].~Ref<ObjectBase>();
             }
         }
@@ -251,33 +251,30 @@ namespace dawn_native {
         return mLayout.Get();
     }
 
-    BufferBinding BindGroupBase::GetBindingAsBufferBinding(size_t binding) {
+    BufferBinding BindGroupBase::GetBindingAsBufferBinding(BindingIndex bindingIndex) {
         ASSERT(!IsError());
-        ASSERT(binding < kMaxBindingsPerGroup);
-        ASSERT(mLayout->GetBindingInfo().mask[binding]);
-        ASSERT(mLayout->GetBindingInfo().types[binding] == wgpu::BindingType::UniformBuffer ||
-               mLayout->GetBindingInfo().types[binding] == wgpu::BindingType::StorageBuffer ||
-               mLayout->GetBindingInfo().types[binding] ==
+        ASSERT(bindingIndex < mLayout->GetBindingCount());
+        ASSERT(mLayout->GetBindingInfo().types[bindingIndex] == wgpu::BindingType::UniformBuffer ||
+               mLayout->GetBindingInfo().types[bindingIndex] == wgpu::BindingType::StorageBuffer ||
+               mLayout->GetBindingInfo().types[bindingIndex] ==
                    wgpu::BindingType::ReadonlyStorageBuffer);
-        BufferBase* buffer = static_cast<BufferBase*>(mBindingData.bindings[binding].Get());
-        return {buffer, mBindingData.bufferData[binding].offset,
-                mBindingData.bufferData[binding].size};
+        BufferBase* buffer = static_cast<BufferBase*>(mBindingData.bindings[bindingIndex].Get());
+        return {buffer, mBindingData.bufferData[bindingIndex].offset,
+                mBindingData.bufferData[bindingIndex].size};
     }
 
-    SamplerBase* BindGroupBase::GetBindingAsSampler(size_t binding) {
+    SamplerBase* BindGroupBase::GetBindingAsSampler(BindingIndex bindingIndex) {
         ASSERT(!IsError());
-        ASSERT(binding < kMaxBindingsPerGroup);
-        ASSERT(mLayout->GetBindingInfo().mask[binding]);
-        ASSERT(mLayout->GetBindingInfo().types[binding] == wgpu::BindingType::Sampler);
-        return static_cast<SamplerBase*>(mBindingData.bindings[binding].Get());
+        ASSERT(bindingIndex < mLayout->GetBindingCount());
+        ASSERT(mLayout->GetBindingInfo().types[bindingIndex] == wgpu::BindingType::Sampler);
+        return static_cast<SamplerBase*>(mBindingData.bindings[bindingIndex].Get());
     }
 
-    TextureViewBase* BindGroupBase::GetBindingAsTextureView(size_t binding) {
+    TextureViewBase* BindGroupBase::GetBindingAsTextureView(BindingIndex bindingIndex) {
         ASSERT(!IsError());
-        ASSERT(binding < kMaxBindingsPerGroup);
-        ASSERT(mLayout->GetBindingInfo().mask[binding]);
-        ASSERT(mLayout->GetBindingInfo().types[binding] == wgpu::BindingType::SampledTexture);
-        return static_cast<TextureViewBase*>(mBindingData.bindings[binding].Get());
+        ASSERT(bindingIndex < mLayout->GetBindingCount());
+        ASSERT(mLayout->GetBindingInfo().types[bindingIndex] == wgpu::BindingType::SampledTexture);
+        return static_cast<TextureViewBase*>(mBindingData.bindings[bindingIndex].Get());
     }
 
 }  // namespace dawn_native

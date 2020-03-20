@@ -239,10 +239,12 @@ namespace dawn_native { namespace opengl {
                                 uint32_t dynamicOffsetCount,
                                 uint64_t* dynamicOffsets) {
                 const auto& indices = ToBackend(mPipelineLayout)->GetBindingIndexInfo()[index];
-                const auto& layout = group->GetLayout()->GetBindingInfo();
+                const BindGroupLayoutBase::LayoutBindingInfo& layout =
+                    group->GetLayout()->GetBindingInfo();
                 uint32_t currentDynamicIndex = 0;
 
-                for (uint32_t bindingIndex : IterateBitSet(layout.mask)) {
+                for (BindingIndex bindingIndex = 0; bindingIndex < layout.bindingCount;
+                     ++bindingIndex) {
                     switch (layout.types[bindingIndex]) {
                         case wgpu::BindingType::UniformBuffer: {
                             BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);

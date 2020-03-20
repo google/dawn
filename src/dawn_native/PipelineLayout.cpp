@@ -130,11 +130,8 @@ namespace dawn_native {
         std::array<std::array<BindGroupLayoutBinding, kMaxBindingsPerGroup>, kMaxBindGroups>
             bindingData = {};
 
-        // Bitsets of used bindings
-        std::array<std::bitset<kMaxBindingsPerGroup>, kMaxBindGroups> usedBindings = {};
-
-        // A flat map of bindings to the index in |bindingData|
-        std::array<std::array<uint32_t, kMaxBindingsPerGroup>, kMaxBindGroups> usedBindingsMap = {};
+        // A map of bindings to the index in |bindingData|
+        std::array<std::map<BindingNumber, BindingIndex>, kMaxBindGroups> usedBindingsMap = {};
 
         // A counter of how many bindings we've populated in |bindingData|
         std::array<uint32_t, kMaxBindGroups> bindingCounts = {};
@@ -145,18 +142,16 @@ namespace dawn_native {
             const ShaderModuleBase::ModuleBindingInfo& info = module->GetBindingInfo();
 
             for (uint32_t group = 0; group < info.size(); ++group) {
-                for (uint32_t binding = 0; binding < info[group].size(); ++binding) {
-                    const ShaderModuleBase::BindingInfo& bindingInfo = info[group][binding];
-                    if (!bindingInfo.used) {
-                        continue;
-                    }
+                for (const auto& it : info[group]) {
+                    BindingNumber bindingNumber = it.first;
+                    const ShaderModuleBase::BindingInfo& bindingInfo = it.second;
 
                     if (bindingInfo.multisampled) {
                         return DAWN_VALIDATION_ERROR("Multisampled textures not supported (yet)");
                     }
 
                     BindGroupLayoutBinding bindingSlot;
-                    bindingSlot.binding = binding;
+                    bindingSlot.binding = bindingNumber;
 
                     DAWN_TRY(ValidateBindingTypeWithShaderStageVisibility(
                         bindingInfo.type, StageBit(module->GetExecutionModel())));
@@ -174,22 +169,24 @@ namespace dawn_native {
                         Format::FormatTypeToTextureComponentType(bindingInfo.textureComponentType);
                     bindingSlot.storageTextureFormat = bindingInfo.storageTextureFormat;
 
-                    if (usedBindings[group][binding]) {
-                        if (bindingSlot == bindingData[group][usedBindingsMap[group][binding]]) {
-                            // Already used and the data is the same. Continue.
-                            continue;
-                        } else {
-                            return DAWN_VALIDATION_ERROR(
-                                "Duplicate binding in default pipeline layout initialization not "
-                                "compatible with previous declaration");
+                    {
+                        const auto& it = usedBindingsMap[group].find(bindingNumber);
+                        if (it != usedBindingsMap[group].end()) {
+                            if (bindingSlot == bindingData[group][it->second]) {
+                                // Already used and the data is the same. Continue.
+                                continue;
+                            } else {
+                                return DAWN_VALIDATION_ERROR(
+                                    "Duplicate binding in default pipeline layout initialization "
+                                    "not compatible with previous declaration");
+                            }
                         }
                     }
 
                     uint32_t currentBindingCount = bindingCounts[group];
                     bindingData[group][currentBindingCount] = bindingSlot;
 
-                    usedBindingsMap[group][binding] = currentBindingCount;
-                    usedBindings[group].set(binding);
+                    usedBindingsMap[group][bindingNumber] = currentBindingCount;
 
                     bindingCounts[group]++;
 

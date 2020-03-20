@@ -93,23 +93,23 @@ namespace dawn_native { namespace d3d12 {
 
         const ModuleBindingInfo& moduleBindingInfo = GetBindingInfo();
         for (uint32_t group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
-            const auto& bindingOffsets =
-                ToBackend(layout->GetBindGroupLayout(group))->GetBindingOffsets();
+            const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
+            const auto& bindingOffsets = bgl->GetBindingOffsets();
             const auto& groupBindingInfo = moduleBindingInfo[group];
-            for (uint32_t binding = 0; binding < groupBindingInfo.size(); ++binding) {
-                const BindingInfo& bindingInfo = groupBindingInfo[binding];
-                if (bindingInfo.used) {
-                    uint32_t bindingOffset = bindingOffsets[binding];
-                    if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
-                        DAWN_TRY(CheckSpvcSuccess(
-                            mSpvcContext.SetDecoration(
-                                bindingInfo.id, SHADERC_SPVC_DECORATION_BINDING, bindingOffset),
-                            "Unable to set decorating binding before generating HLSL shader w/ "
-                            "spvc"));
-                    } else {
-                        compiler->set_decoration(bindingInfo.id, spv::DecorationBinding,
-                                                 bindingOffset);
-                    }
+            for (const auto& it : groupBindingInfo) {
+                const BindingInfo& bindingInfo = it.second;
+                BindingNumber bindingNumber = it.first;
+                BindingIndex bindingIndex = bgl->GetBindingIndex(bindingNumber);
+
+                uint32_t bindingOffset = bindingOffsets[bindingIndex];
+                if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
+                    DAWN_TRY(CheckSpvcSuccess(
+                        mSpvcContext.SetDecoration(bindingInfo.id, SHADERC_SPVC_DECORATION_BINDING,
+                                                   bindingOffset),
+                        "Unable to set decorating binding before generating HLSL shader w/ "
+                        "spvc"));
+                } else {
+                    compiler->set_decoration(bindingInfo.id, spv::DecorationBinding, bindingOffset);
                 }
             }
         }

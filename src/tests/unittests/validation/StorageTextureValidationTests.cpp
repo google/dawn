@@ -228,7 +228,7 @@ TEST_F(StorageTextureValidationTests, ComputePipeline) {
             utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
             #version 450
             layout(set = 0, binding = 0, rgba8) uniform readonly image2D image0;
-            layout(std430, set = 0, binding = 0) buffer Buf { uint buf; };
+            layout(std430, set = 0, binding = 1) buffer Buf { uint buf; };
             void main() {
                 vec4 pixel = imageLoad(image0, ivec2(gl_LocalInvocationID.xy));
                 buf = uint(pixel.x);

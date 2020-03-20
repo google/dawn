@@ -107,19 +107,20 @@ namespace dawn_native { namespace opengl {
         const auto& indices = layout->GetBindingIndexInfo();
 
         for (uint32_t group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
-            const auto& groupInfo = layout->GetBindGroupLayout(group)->GetBindingInfo();
+            const BindGroupLayoutBase::LayoutBindingInfo& groupInfo =
+                layout->GetBindGroupLayout(group)->GetBindingInfo();
 
-            for (uint32_t binding = 0; binding < kMaxBindingsPerGroup; ++binding) {
-                if (!groupInfo.mask[binding]) {
-                    continue;
-                }
+            for (const auto& it : layout->GetBindGroupLayout(group)->GetBindingMap()) {
+                BindingNumber bindingNumber = it.first;
+                BindingIndex bindingIndex = it.second;
 
-                std::string name = GetBindingName(group, binding);
-                switch (groupInfo.types[binding]) {
+                std::string name = GetBindingName(group, bindingNumber);
+                switch (groupInfo.types[bindingIndex]) {
                     case wgpu::BindingType::UniformBuffer: {
                         GLint location = gl.GetUniformBlockIndex(mProgram, name.c_str());
                         if (location != -1) {
-                            gl.UniformBlockBinding(mProgram, location, indices[group][binding]);
+                            gl.UniformBlockBinding(mProgram, location,
+                                                   indices[group][bindingIndex]);
                         }
                     } break;
 
@@ -129,7 +130,7 @@ namespace dawn_native { namespace opengl {
                             mProgram, GL_SHADER_STORAGE_BLOCK, name.c_str());
                         if (location != GL_INVALID_INDEX) {
                             gl.ShaderStorageBlockBinding(mProgram, location,
-                                                         indices[group][binding]);
+                                                         indices[group][bindingIndex]);
                         }
                     } break;
 

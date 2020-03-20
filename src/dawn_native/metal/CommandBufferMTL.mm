@@ -493,13 +493,15 @@ namespace dawn_native { namespace metal {
                                     uint32_t dynamicOffsetCount,
                                     uint64_t* dynamicOffsets,
                                     PipelineLayout* pipelineLayout) {
-                const auto& layout = group->GetLayout()->GetBindingInfo();
+                const BindGroupLayoutBase::LayoutBindingInfo& layout =
+                    group->GetLayout()->GetBindingInfo();
                 uint32_t currentDynamicBufferIndex = 0;
 
                 // TODO(kainino@chromium.org): Maintain buffers and offsets arrays in BindGroup
                 // so that we only have to do one setVertexBuffers and one setFragmentBuffers
                 // call here.
-                for (uint32_t bindingIndex : IterateBitSet(layout.mask)) {
+                for (BindingIndex bindingIndex = 0; bindingIndex < layout.bindingCount;
+                     ++bindingIndex) {
                     auto stage = layout.visibilities[bindingIndex];
                     bool hasVertStage = stage & wgpu::ShaderStage::Vertex && render != nil;
                     bool hasFragStage = stage & wgpu::ShaderStage::Fragment && render != nil;

@@ -29,29 +29,31 @@ namespace dawn_native {
     namespace {
         void TrackBindGroupResourceUsage(PassResourceUsageTracker* usageTracker,
                                          BindGroupBase* group) {
-            const auto& layoutInfo = group->GetLayout()->GetBindingInfo();
-
-            for (uint32_t i : IterateBitSet(layoutInfo.mask)) {
-                wgpu::BindingType type = layoutInfo.types[i];
+            const BindGroupLayoutBase::LayoutBindingInfo& layoutInfo =
+                group->GetLayout()->GetBindingInfo();
+            for (BindingIndex bindingIndex = 0; bindingIndex < layoutInfo.bindingCount;
+                 ++bindingIndex) {
+                wgpu::BindingType type = layoutInfo.types[bindingIndex];
 
                 switch (type) {
                     case wgpu::BindingType::UniformBuffer: {
-                        BufferBase* buffer = group->GetBindingAsBufferBinding(i).buffer;
+                        BufferBase* buffer = group->GetBindingAsBufferBinding(bindingIndex).buffer;
                         usageTracker->BufferUsedAs(buffer, wgpu::BufferUsage::Uniform);
                     } break;
 
                     case wgpu::BindingType::StorageBuffer: {
-                        BufferBase* buffer = group->GetBindingAsBufferBinding(i).buffer;
+                        BufferBase* buffer = group->GetBindingAsBufferBinding(bindingIndex).buffer;
                         usageTracker->BufferUsedAs(buffer, wgpu::BufferUsage::Storage);
                     } break;
 
                     case wgpu::BindingType::SampledTexture: {
-                        TextureBase* texture = group->GetBindingAsTextureView(i)->GetTexture();
+                        TextureBase* texture =
+                            group->GetBindingAsTextureView(bindingIndex)->GetTexture();
                         usageTracker->TextureUsedAs(texture, wgpu::TextureUsage::Sampled);
                     } break;
 
                     case wgpu::BindingType::ReadonlyStorageBuffer: {
-                        BufferBase* buffer = group->GetBindingAsBufferBinding(i).buffer;
+                        BufferBase* buffer = group->GetBindingAsBufferBinding(bindingIndex).buffer;
                         usageTracker->BufferUsedAs(buffer, kReadOnlyStorage);
                     } break;
 
@@ -131,7 +133,21 @@ namespace dawn_native {
                     return DAWN_VALIDATION_ERROR("dynamicOffset count mismatch");
                 }
 
-                for (uint32_t i = 0; i < dynamicOffsetCount; ++i) {
+                const BindGroupLayoutBase::LayoutBindingInfo& layoutInfo = layout->GetBindingInfo();
+                for (BindingIndex i = 0; i < dynamicOffsetCount; ++i) {
+                    // BGL creation sorts bindings such that the dynamic buffer bindings are first.
+                    // ASSERT that this true.
+                    ASSERT(layoutInfo.hasDynamicOffset[i]);
+                    switch (layoutInfo.types[i]) {
+                        case wgpu::BindingType::UniformBuffer:
+                        case wgpu::BindingType::StorageBuffer:
+                        case wgpu::BindingType::ReadonlyStorageBuffer:
+                            break;
+                        default:
+                            UNREACHABLE();
+                            break;
+                    }
+
                     if (dynamicOffsets[i] % kMinDynamicBufferOffsetAlignment != 0) {
                         return DAWN_VALIDATION_ERROR("Dynamic Buffer Offset need to be aligned");
                     }
@@ -140,9 +156,9 @@ namespace dawn_native {
 
                     // During BindGroup creation, validation ensures binding offset + binding size
                     // <= buffer size.
-                    DAWN_ASSERT(bufferBinding.buffer->GetSize() >= bufferBinding.size);
-                    DAWN_ASSERT(bufferBinding.buffer->GetSize() - bufferBinding.size >=
-                                bufferBinding.offset);
+                    ASSERT(bufferBinding.buffer->GetSize() >= bufferBinding.size);
+                    ASSERT(bufferBinding.buffer->GetSize() - bufferBinding.size >=
+                           bufferBinding.offset);
 
                     if ((dynamicOffsets[i] > bufferBinding.buffer->GetSize() -
                                                  bufferBinding.offset - bufferBinding.size)) {

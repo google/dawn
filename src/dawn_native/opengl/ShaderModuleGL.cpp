@@ -123,7 +123,7 @@ namespace dawn_native { namespace opengl {
 
         DAWN_TRY(ExtractSpirvInfo(*compiler));
 
-        const auto& bindingInfo = GetBindingInfo();
+        const ShaderModuleBase::ModuleBindingInfo& bindingInfo = GetBindingInfo();
 
         // Extract bindings names so that it can be used to get its location in program.
         // Now translate the separate sampler / textures into combined ones and store their info.
@@ -173,19 +173,18 @@ namespace dawn_native { namespace opengl {
         // Also unsets the SPIRV "Binding" decoration as it outputs "layout(binding=)" which
         // isn't supported on OSX's OpenGL.
         for (uint32_t group = 0; group < kMaxBindGroups; ++group) {
-            for (uint32_t binding = 0; binding < kMaxBindingsPerGroup; ++binding) {
-                const auto& info = bindingInfo[group][binding];
-                if (info.used) {
-                    if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
-                        mSpvcContext.SetName(info.base_type_id, GetBindingName(group, binding));
-                        mSpvcContext.UnsetDecoration(info.id, shaderc_spvc_decoration_binding);
-                        mSpvcContext.UnsetDecoration(info.id,
-                                                     shaderc_spvc_decoration_descriptorset);
-                    } else {
-                        compiler->set_name(info.base_type_id, GetBindingName(group, binding));
-                        compiler->unset_decoration(info.id, spv::DecorationBinding);
-                        compiler->unset_decoration(info.id, spv::DecorationDescriptorSet);
-                    }
+            for (const auto& it : bindingInfo[group]) {
+                BindingNumber bindingNumber = it.first;
+                const auto& info = it.second;
+
+                if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
+                    mSpvcContext.SetName(info.base_type_id, GetBindingName(group, bindingNumber));
+                    mSpvcContext.UnsetDecoration(info.id, shaderc_spvc_decoration_binding);
+                    mSpvcContext.UnsetDecoration(info.id, shaderc_spvc_decoration_descriptorset);
+                } else {
+                    compiler->set_name(info.base_type_id, GetBindingName(group, bindingNumber));
+                    compiler->unset_decoration(info.id, spv::DecorationBinding);
+                    compiler->unset_decoration(info.id, spv::DecorationDescriptorSet);
                 }
             }
         }

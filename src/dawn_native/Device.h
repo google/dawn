@@ -32,10 +32,11 @@ namespace dawn_native {
     class AdapterBase;
     class AttachmentState;
     class AttachmentStateBlueprint;
+    class BindGroupLayoutBase;
+    class DynamicUploader;
     class ErrorScope;
     class ErrorScopeTracker;
     class FenceSignalTracker;
-    class DynamicUploader;
     class StagingBufferBase;
 
     class DeviceBase {

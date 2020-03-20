@@ -38,15 +38,16 @@ namespace dawn_native {
                 mBuffersNeedingBarrier[index] = {};
 
                 const BindGroupLayoutBase* layout = bindGroup->GetLayout();
-                const auto& info = layout->GetBindingInfo();
+                const BindGroupLayoutBase::LayoutBindingInfo& info = layout->GetBindingInfo();
 
-                for (uint32_t binding : IterateBitSet(info.mask)) {
-                    if ((info.visibilities[binding] & wgpu::ShaderStage::Compute) == 0) {
+                for (BindingIndex bindingIndex = 0; bindingIndex < info.bindingCount;
+                     ++bindingIndex) {
+                    if ((info.visibilities[bindingIndex] & wgpu::ShaderStage::Compute) == 0) {
                         continue;
                     }
 
-                    mBindingTypes[index][binding] = info.types[binding];
-                    switch (info.types[binding]) {
+                    mBindingTypes[index][bindingIndex] = info.types[bindingIndex];
+                    switch (info.types[bindingIndex]) {
                         case wgpu::BindingType::UniformBuffer:
                         case wgpu::BindingType::ReadonlyStorageBuffer:
                         case wgpu::BindingType::Sampler:
@@ -55,9 +56,9 @@ namespace dawn_native {
                             break;
 
                         case wgpu::BindingType::StorageBuffer:
-                            mBuffersNeedingBarrier[index].set(binding);
-                            mBuffers[index][binding] =
-                                bindGroup->GetBindingAsBufferBinding(binding).buffer;
+                            mBuffersNeedingBarrier[index].set(bindingIndex);
+                            mBuffers[index][bindingIndex] =
+                                bindGroup->GetBindingAsBufferBinding(bindingIndex).buffer;
                             break;
 
                         case wgpu::BindingType::StorageTexture:
