@@ -19,6 +19,7 @@
 
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/as_expression.h"
+#include "src/ast/assignment_statement.h"
 #include "src/ast/binding_decoration.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/builtin_decoration.h"
@@ -34,6 +35,7 @@
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/relational_expression.h"
 #include "src/ast/set_decoration.h"
+#include "src/ast/statement.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
@@ -635,6 +637,31 @@ bool GeneratorImpl::EmitUnaryOp(ast::UnaryOpExpression* expr) {
   }
 
   out_ << ")";
+
+  return true;
+}
+
+bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
+  if (stmt->IsAssign()) {
+    return EmitAssign(stmt->AsAssign());
+  }
+
+  error_ = "unknown statement type";
+  return false;
+}
+
+bool GeneratorImpl::EmitAssign(ast::AssignmentStatement* stmt) {
+  if (!EmitExpression(stmt->lhs())) {
+    return false;
+  }
+
+  out_ << " = ";
+
+  if (!EmitExpression(stmt->rhs())) {
+    return false;
+  }
+
+  out_ << ";";
 
   return true;
 }

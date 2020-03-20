@@ -78,6 +78,10 @@ class GeneratorImpl {
   /// @param expr the as expression
   /// @returns true if the as was emitted
   bool EmitAs(ast::AsExpression* expr);
+  /// Handles an assignment statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted successfully
+  bool EmitAssign(ast::AssignmentStatement* stmt);
   /// Handles generating a call expression
   /// @param expr the call expression
   /// @returns true if the call expression is emitted
@@ -118,6 +122,10 @@ class GeneratorImpl {
   /// @param expr the relational expression
   /// @returns true if the expression was emitted, false otherwise
   bool EmitRelational(ast::RelationalExpression* expr);
+  /// Handles statements
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted
+  bool EmitStatement(ast::Statement* stmt);
   /// Handles generating type
   /// @param type the type to generate
   /// @returns true if the type is emitted
