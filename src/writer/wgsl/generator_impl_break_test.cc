@@ -16,7 +16,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "src/ast/assignment_statement.h"
+#include "src/ast/break_statement.h"
 #include "src/ast/identifier_expression.h"
 #include "src/writer/wgsl/generator_impl.h"
 
@@ -27,16 +27,36 @@ namespace {
 
 using GeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, Emit_Assign) {
-  auto lhs = std::make_unique<ast::IdentifierExpression>("lhs");
-  auto rhs = std::make_unique<ast::IdentifierExpression>("rhs");
-  ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
+TEST_F(GeneratorImplTest, Emit_Break) {
+  ast::BreakStatement b;
 
   GeneratorImpl g;
   g.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&assign)) << g.error();
-  EXPECT_EQ(g.result(), "  lhs = rhs;");
+  ASSERT_TRUE(g.EmitStatement(&b)) << g.error();
+  EXPECT_EQ(g.result(), "  break;");
+}
+
+TEST_F(GeneratorImplTest, Emit_BreakWithIf) {
+  auto expr = std::make_unique<ast::IdentifierExpression>("expr");
+  ast::BreakStatement b(ast::StatementCondition::kIf, std::move(expr));
+
+  GeneratorImpl g;
+  g.increment_indent();
+
+  ASSERT_TRUE(g.EmitStatement(&b)) << g.error();
+  EXPECT_EQ(g.result(), "  break if (expr);");
+}
+
+TEST_F(GeneratorImplTest, Emit_BreakWithUnless) {
+  auto expr = std::make_unique<ast::IdentifierExpression>("expr");
+  ast::BreakStatement b(ast::StatementCondition::kUnless, std::move(expr));
+
+  GeneratorImpl g;
+  g.increment_indent();
+
+  ASSERT_TRUE(g.EmitStatement(&b)) << g.error();
+  EXPECT_EQ(g.result(), "  break unless (expr);");
 }
 
 }  // namespace

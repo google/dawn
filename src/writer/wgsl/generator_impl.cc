@@ -22,6 +22,7 @@
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binding_decoration.h"
 #include "src/ast/bool_literal.h"
+#include "src/ast/break_statement.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/cast_expression.h"
@@ -645,12 +646,17 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsAssign()) {
     return EmitAssign(stmt->AsAssign());
   }
+  if (stmt->IsBreak()) {
+    return EmitBreak(stmt->AsBreak());
+  }
 
   error_ = "unknown statement type";
   return false;
 }
 
 bool GeneratorImpl::EmitAssign(ast::AssignmentStatement* stmt) {
+  make_indent();
+
   if (!EmitExpression(stmt->lhs())) {
     return false;
   }
@@ -659,6 +665,31 @@ bool GeneratorImpl::EmitAssign(ast::AssignmentStatement* stmt) {
 
   if (!EmitExpression(stmt->rhs())) {
     return false;
+  }
+
+  out_ << ";";
+
+  return true;
+}
+
+bool GeneratorImpl::EmitBreak(ast::BreakStatement* stmt) {
+  make_indent();
+
+  out_ << "break";
+
+  if (stmt->condition() != ast::StatementCondition::kNone) {
+    out_ << " ";
+    if (stmt->condition() == ast::StatementCondition::kIf) {
+      out_ << "if";
+    } else {
+      out_ << "unless";
+    }
+
+    out_ << " (";
+    if (!EmitExpression(stmt->conditional())) {
+      return false;
+    }
+    out_ << ")";
   }
 
   out_ << ";";

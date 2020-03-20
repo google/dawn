@@ -82,6 +82,10 @@ class GeneratorImpl {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
   bool EmitAssign(ast::AssignmentStatement* stmt);
+  /// Handles a break statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted successfully
+  bool EmitBreak(ast::BreakStatement* stmt);
   /// Handles generating a call expression
   /// @param expr the call expression
   /// @returns true if the call expression is emitted

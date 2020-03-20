@@ -86,7 +86,7 @@ class Function : public Node {
   /// @returns the function body
   const std::vector<std::unique_ptr<Statement>>& body() const { return body_; }
 
-  /// @returns true if the name and path are both present
+  /// @returns true if the name and type are both present
   bool IsValid() const override;
 
   /// Writes a representation of the node to the output stream
