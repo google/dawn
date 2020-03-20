@@ -39,6 +39,7 @@
 #include "src/ast/regardless_statement.h"
 #include "src/ast/relational_expression.h"
 #include "src/ast/return_statement.h"
+#include "src/ast/unless_statement.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/statement.h"
 #include "src/ast/struct.h"
@@ -677,6 +678,9 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsReturn()) {
     return EmitReturn(stmt->AsReturn());
   }
+  if (stmt->IsUnless()) {
+    return EmitUnless(stmt->AsUnless());
+  }
 
   error_ = "unknown statement type";
   return false;
@@ -829,6 +833,27 @@ bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
     }
   }
   out_ << ";" << std::endl;
+  return true;
+}
+
+bool GeneratorImpl::EmitUnless(ast::UnlessStatement* stmt) {
+  make_indent();
+
+  out_ << "unless (";
+  if (!EmitExpression(stmt->condition())) {
+    return false;
+  }
+  out_ << ") {" << std::endl;
+
+  increment_indent();
+  for (const auto& b : stmt->body()) {
+    if (!EmitStatement(b.get())) {
+      return false;
+    }
+  }
+  decrement_indent();
+  make_indent();
+  out_ << "}" << std::endl;
   return true;
 }
 

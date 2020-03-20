@@ -428,6 +428,7 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_unary_derivative_test.cc
     writer/wgsl/generator_impl_unary_method_test.cc
     writer/wgsl/generator_impl_unary_op_test.cc
+    writer/wgsl/generator_impl_unless_test.cc
     writer/wgsl/generator_impl_variable_test.cc
   )
 endif()
