@@ -46,6 +46,7 @@
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_derivative_expression.h"
 #include "src/ast/unary_method_expression.h"
+#include "src/ast/unary_op_expression.h"
 
 namespace tint {
 namespace writer {
@@ -151,6 +152,9 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   }
   if (expr->IsUnaryMethod()) {
     return EmitUnaryMethod(expr->AsUnaryMethod());
+  }
+  if (expr->IsUnaryOp()) {
+    return EmitUnaryOp(expr->AsUnaryOp());
   }
 
   error_ = "unknown expression type";
@@ -610,6 +614,26 @@ bool GeneratorImpl::EmitUnaryMethod(ast::UnaryMethodExpression* expr) {
       return false;
     }
   }
+  out_ << ")";
+
+  return true;
+}
+
+bool GeneratorImpl::EmitUnaryOp(ast::UnaryOpExpression* expr) {
+  switch (expr->op()) {
+    case ast::UnaryOp::kNot:
+      out_ << "!";
+      break;
+    case ast::UnaryOp::kNegation:
+      out_ << "-";
+      break;
+  }
+  out_ << "(";
+
+  if (!EmitExpression(expr->expr())) {
+    return false;
+  }
+
   out_ << ")";
 
   return true;

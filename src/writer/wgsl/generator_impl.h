@@ -134,6 +134,10 @@ class GeneratorImpl {
   /// @param expr the expression to emit
   /// @returns true if the expression was emitted
   bool EmitUnaryMethod(ast::UnaryMethodExpression* expr);
+  /// Handles a unary op expression
+  /// @param expr the expression to emit
+  /// @returns true if the expression was emitted
+  bool EmitUnaryOp(ast::UnaryOpExpression* expr);
   /// Handles generating a variable
   /// @param var the variable to generate
   /// @returns true if the variable was emitted
