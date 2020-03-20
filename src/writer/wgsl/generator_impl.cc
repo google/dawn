@@ -20,6 +20,7 @@
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
+#include "src/ast/else_statement.h"
 #include "src/ast/binding_decoration.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/break_statement.h"
@@ -660,9 +661,6 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsBreak()) {
     return EmitBreak(stmt->AsBreak());
   }
-  if (stmt->IsCase()) {
-    return EmitCase(stmt->AsCase());
-  }
   if (stmt->IsContinue()) {
     return EmitContinue(stmt->AsContinue());
   }
@@ -791,6 +789,34 @@ bool GeneratorImpl::EmitContinue(ast::ContinueStatement* stmt) {
   }
 
   out_ << ";" << std::endl;
+
+  return true;
+}
+
+bool GeneratorImpl::EmitElse(ast::ElseStatement* stmt) {
+  if (stmt->HasCondition()) {
+    out_ << " elseif (";
+    if (!EmitExpression(stmt->condition())) {
+      return false;
+    }
+    out_ << ")";
+  } else {
+    out_ << " else";
+  }
+  out_ << " {" << std::endl;
+
+  increment_indent();
+
+  for (const auto& s : stmt->body()) {
+    if (!EmitStatement(s.get())) {
+      return false;
+    }
+  }
+
+  decrement_indent();
+
+  make_indent();
+  out_ << "}";
 
   return true;
 }
