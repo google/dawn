@@ -120,11 +120,11 @@ void ParserImpl::ResetInternalModule() {
 }
 
 bool ParserImpl::ParseInternalModule() {
-  return ParseExtendedInstructionImports();
+  return RegisterExtendedInstructionImports();
   // TODO(dneto): fill in the rest
 }
 
-bool ParserImpl::ParseExtendedInstructionImports() {
+bool ParserImpl::RegisterExtendedInstructionImports() {
   for (const spvtools::opt::Instruction& import : module_->ext_inst_imports()) {
     std::string name(
         reinterpret_cast<const char*>(import.GetInOperand(0).words.data()));

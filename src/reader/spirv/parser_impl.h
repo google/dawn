@@ -96,8 +96,8 @@ class ParserImpl : Reader {
   /// Destroys the internal representation of the SPIR-V module.
   void ResetInternalModule();
 
-  /// Parses OpExtInstImport instructions.
-  bool ParseExtendedInstructionImports();
+  /// Registers extended instruction imports.  Only "GLSL.std.450" is supported.
+  bool RegisterExtendedInstructionImports();
 
   // The SPIR-V binary we're parsing
   std::vector<uint32_t> spv_binary_;
