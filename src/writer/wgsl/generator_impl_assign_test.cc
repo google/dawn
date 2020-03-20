@@ -36,7 +36,7 @@ TEST_F(GeneratorImplTest, Emit_Assign) {
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&assign)) << g.error();
-  EXPECT_EQ(g.result(), "  lhs = rhs;");
+  EXPECT_EQ(g.result(), "  lhs = rhs;\n");
 }
 
 }  // namespace

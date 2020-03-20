@@ -90,6 +90,10 @@ class GeneratorImpl {
   /// @param expr the call expression
   /// @returns true if the call expression is emitted
   bool EmitCall(ast::CallExpression* expr);
+  /// Handles a case statement
+  /// @param stmt the statement
+  /// @returns true if the statment was emitted successfully
+  bool EmitCase(ast::CaseStatement* stmt);
   /// Handles generating a cast expression
   /// @param expr the cast expression
   /// @returns true if the cast was emitted
@@ -118,6 +122,10 @@ class GeneratorImpl {
   /// @param expr the initializer expression
   /// @returns true if the expression was emitted
   bool EmitInitializer(ast::InitializerExpression* expr);
+  /// Handles a literal
+  /// @param lit the literal to emit
+  /// @returns true if the literal was successfully emitted
+  bool EmitLiteral(ast::Literal* lit);
   /// Handles a member accessor expression
   /// @param expr the member accessor expression
   /// @returns true if the member accessor was emitted

@@ -25,6 +25,7 @@
 #include "src/ast/break_statement.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/call_expression.h"
+#include "src/ast/case_statement.h"
 #include "src/ast/cast_expression.h"
 #include "src/ast/const_initializer_expression.h"
 #include "src/ast/decorated_variable.h"
@@ -274,7 +275,10 @@ bool GeneratorImpl::EmitTypeInitializer(ast::TypeInitializerExpression* expr) {
 
 bool GeneratorImpl::EmitConstInitializer(
     ast::ConstInitializerExpression* expr) {
-  auto lit = expr->literal();
+  return EmitLiteral(expr->literal());
+}
+
+bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
   if (lit->IsBool()) {
     out_ << (lit->AsBool()->IsTrue() ? "true" : "false");
   } else if (lit->IsFloat()) {
@@ -649,6 +653,9 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsBreak()) {
     return EmitBreak(stmt->AsBreak());
   }
+  if (stmt->IsCase()) {
+    return EmitCase(stmt->AsCase());
+  }
 
   error_ = "unknown statement type";
   return false;
@@ -667,7 +674,7 @@ bool GeneratorImpl::EmitAssign(ast::AssignmentStatement* stmt) {
     return false;
   }
 
-  out_ << ";";
+  out_ << ";" << std::endl;
 
   return true;
 }
@@ -692,7 +699,36 @@ bool GeneratorImpl::EmitBreak(ast::BreakStatement* stmt) {
     out_ << ")";
   }
 
-  out_ << ";";
+  out_ << ";" << std::endl;
+
+  return true;
+}
+
+bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
+  make_indent();
+
+  if (stmt->IsDefault()) {
+    out_ << "default:";
+  } else {
+    out_ << "case ";
+
+    if (!EmitLiteral(stmt->condition())) {
+      return false;
+    }
+    out_ << ":";
+  }
+  out_ << " {" << std::endl;
+  increment_indent();
+
+  for (const auto& b : stmt->body()) {
+    if (!EmitStatement(b.get())) {
+      return false;
+    }
+  }
+  decrement_indent();
+
+  make_indent();
+  out_ << "}" << std::endl;
 
   return true;
 }
