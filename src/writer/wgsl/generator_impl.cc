@@ -44,6 +44,7 @@
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_initializer_expression.h"
 #include "src/ast/uint_literal.h"
+#include "src/ast/unary_derivative_expression.h"
 
 namespace tint {
 namespace writer {
@@ -143,6 +144,9 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   }
   if (expr->IsRelational()) {
     return EmitRelational(expr->AsRelational());
+  }
+  if (expr->IsUnaryDerivative()) {
+    return EmitUnaryDerivative(expr->AsUnaryDerivative());
   }
 
   error_ = "unknown expression type";
@@ -528,6 +532,33 @@ bool GeneratorImpl::EmitRelational(ast::RelationalExpression* expr) {
   out_ << " ";
 
   if (!EmitExpression(expr->rhs())) {
+    return false;
+  }
+
+  out_ << ")";
+  return true;
+}
+
+bool GeneratorImpl::EmitUnaryDerivative(ast::UnaryDerivativeExpression* expr) {
+  switch (expr->op()) {
+    case ast::UnaryDerivative::kDpdx:
+      out_ << "dpdx";
+      break;
+    case ast::UnaryDerivative::kDpdy:
+      out_ << "dpdy";
+      break;
+    case ast::UnaryDerivative::kFwidth:
+      out_ << "fwidth";
+      break;
+  }
+
+  if (expr->modifier() != ast::DerivativeModifier::kNone) {
+    out_ << "<" << expr->modifier() << ">";
+  }
+
+  out_ << "(";
+
+  if (!EmitExpression(expr->param())) {
     return false;
   }
 

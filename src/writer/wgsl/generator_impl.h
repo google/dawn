@@ -126,6 +126,10 @@ class GeneratorImpl {
   /// @param expr the type initializer expression
   /// @returns true if the initializer is emitted
   bool EmitTypeInitializer(ast::TypeInitializerExpression* expr);
+  /// Handles a unary derivative expression
+  /// @param expr the expression to emit
+  /// @returns true if the expressionw as emitted
+  bool EmitUnaryDerivative(ast::UnaryDerivativeExpression* expr);
   /// Handles generating a variable
   /// @param var the variable to generate
   /// @returns true if the variable was emitted
