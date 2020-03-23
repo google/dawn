@@ -198,6 +198,8 @@ set(TINT_LIB_SRCS
 
 if(${TINT_BUILD_SPV_READER})
   list(APPEND TINT_LIB_SRCS
+    reader/spirv/enum_converter.h
+    reader/spirv/enum_converter.cc
     reader/spirv/fail_stream.h
     reader/spirv/namer.cc
     reader/spirv/namer.h
@@ -314,6 +316,7 @@ endif()
 
 if(${TINT_BUILD_SPV_READER})
   list(APPEND TINT_TEST_SRCS
+    reader/spirv/enum_converter_test.cc
     reader/spirv/fail_stream_test.cc
     reader/spirv/namer_test.cc
     reader/spirv/parser_impl_import_test.cc
