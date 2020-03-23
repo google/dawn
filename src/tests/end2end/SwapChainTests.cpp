@@ -160,7 +160,7 @@ TEST_P(SwapChainTests, ResizingSwapChainOnly) {
         desc.height -= i * 10;
 
         wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &desc);
-        ClearTexture(swapchain.GetCurrentTextureView(), {0.05 * i, 0.0, 0.0, 1.0});
+        ClearTexture(swapchain.GetCurrentTextureView(), {0.05f * i, 0.0f, 0.0f, 1.0f});
         swapchain.Present();
     }
 }
@@ -173,7 +173,7 @@ TEST_P(SwapChainTests, ResizingWindowOnly) {
         glfwSetWindowSize(window, 400 - 10 * i, 400 + 10 * i);
         glfwPollEvents();
 
-        ClearTexture(swapchain.GetCurrentTextureView(), {0.05 * i, 0.0, 0.0, 1.0});
+        ClearTexture(swapchain.GetCurrentTextureView(), {0.05f * i, 0.0f, 0.0f, 1.0f});
         swapchain.Present();
     }
 }
@@ -193,7 +193,7 @@ TEST_P(SwapChainTests, ResizingWindowAndSwapChain) {
         desc.height = height;
 
         wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &desc);
-        ClearTexture(swapchain.GetCurrentTextureView(), {0.05 * i, 0.0, 0.0, 1.0});
+        ClearTexture(swapchain.GetCurrentTextureView(), {0.05f * i, 0.0f, 0.0f, 1.0f});
         swapchain.Present();
     }
 }
