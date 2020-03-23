@@ -66,6 +66,7 @@ TEST_F(BuilderTest, EntryPoint_BadFunction) {
 
   Builder b;
   EXPECT_FALSE(b.GenerateEntryPoint(&ep));
+  EXPECT_EQ(b.error(), "unable to find ID for function: frag_main");
 }
 
 struct EntryPointStageData {

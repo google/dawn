@@ -120,11 +120,13 @@ bool Builder::GenerateEntryPoint(ast::EntryPoint* ep) {
 
   auto id = id_for_func_name(ep->function_name());
   if (id == 0) {
+    error_ = "unable to find ID for function: " + ep->function_name();
     return false;
   }
 
   auto stage = pipeline_stage_to_execution_model(ep->stage());
   if (stage == SpvExecutionModelMax) {
+    error_ = "Unknown pipeline stage provided";
     return false;
   }
 

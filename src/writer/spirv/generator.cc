@@ -25,8 +25,10 @@ Generator::Generator(ast::Module module) : writer::Writer(std::move(module)) {}
 Generator::~Generator() = default;
 
 bool Generator::Generate() {
-  if (!builder_.Build(module_))
+  if (!builder_.Build(module_)) {
+    set_error(builder_.error());
     return false;
+  }
 
   return writer_.Write(builder_);
 }

@@ -39,6 +39,9 @@ class Builder {
   /// @returns true if the SPIR-V was successfully built
   bool Build(const ast::Module& module);
 
+  /// @returns the error string or blank if no error was reported.
+  const std::string& error() const { return error_; }
+
   /// @returns the number of uint32_t's needed to make up the results
   uint32_t total_size() const;
 
@@ -125,6 +128,7 @@ class Builder {
  private:
   Operand result_op();
 
+  std::string error_;
   uint32_t next_id_ = 1;
   std::vector<Instruction> preamble_;
   std::vector<Instruction> debug_;
