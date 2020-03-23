@@ -143,6 +143,38 @@ TEST_F(SpvNamerTest, SaveNameFailsDueToIdReuse) {
   EXPECT_FALSE(error().empty());
 }
 
+TEST_F(SpvNamerTest, SuggestSanitizedName_TakeSuggestionWhenNoConflict) {
+  Namer namer(fail_stream_);
+
+  EXPECT_TRUE(namer.SuggestSanitizedName(1, "father"));
+  EXPECT_THAT(namer.GetName(1), Eq("father"));
+}
+
+TEST_F(SpvNamerTest,
+       SuggestSanitizedName_RejectSuggestionWhenConflictOnSameId) {
+  Namer namer(fail_stream_);
+
+  namer.SaveName(1, "lennon");
+  EXPECT_FALSE(namer.SuggestSanitizedName(1, "mccartney"));
+  EXPECT_THAT(namer.GetName(1), Eq("lennon"));
+}
+
+TEST_F(SpvNamerTest, SuggestSanitizedName_SanitizeSuggestion) {
+  Namer namer(fail_stream_);
+
+  EXPECT_TRUE(namer.SuggestSanitizedName(9, "m:kenzie"));
+  EXPECT_THAT(namer.GetName(9), Eq("m_kenzie"));
+}
+
+TEST_F(SpvNamerTest,
+       SuggestSanitizedName_GenerateNewNameWhenConflictOnDifferentId) {
+  Namer namer(fail_stream_);
+
+  namer.SaveName(7, "rice");
+  EXPECT_TRUE(namer.SuggestSanitizedName(9, "rice"));
+  EXPECT_THAT(namer.GetName(9), Eq("rice_1"));
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

@@ -75,6 +75,13 @@ class Namer {
   /// @returns true if the ID did not have a previously registered name.
   bool SaveName(uint32_t id, const std::string& name);
 
+  /// Saves a sanitized name for the given ID, if that ID does not yet
+  /// have a registered name.
+  /// @param id the SPIR-V ID
+  /// @param suggested_name the suggested name
+  /// @returns true if a name was newly registered for the ID
+  bool SuggestSanitizedName(uint32_t id, const std::string& suggested_name);
+
  private:
   FailStream fail_stream_;
 

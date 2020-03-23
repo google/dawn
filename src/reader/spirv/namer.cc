@@ -76,6 +76,15 @@ bool Namer::SaveName(uint32_t id, const std::string& name) {
   return true;
 }
 
+bool Namer::SuggestSanitizedName(uint32_t id,
+                                 const std::string& suggested_name) {
+  if (HasName(id)) {
+    return false;
+  }
+
+  return SaveName(id, FindUnusedDerivedName(Sanitize(suggested_name)));
+}
+
 }  // namespace spirv
 }  // namespace reader
 }  // namespace tint
