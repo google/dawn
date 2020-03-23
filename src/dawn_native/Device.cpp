@@ -696,7 +696,7 @@ namespace dawn_native {
     void DeviceBase::SetDefaultToggles() {
         // Sets the default-enabled toggles
         mTogglesSet.SetToggle(Toggle::LazyClearResourceOnFirstUse, true);
-        mTogglesSet.SetToggle(Toggle::UseSpvc, true);
+        mTogglesSet.SetToggle(Toggle::UseSpvc, false);
     }
 
     // Implementation details of object creation
