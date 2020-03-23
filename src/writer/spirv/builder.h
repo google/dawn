@@ -52,6 +52,22 @@ class Builder {
     return id;
   }
 
+  /// Sets the id for a given function name
+  /// @param name the name to set
+  /// @param id the id to set
+  void set_func_name_to_id(const std::string& name, uint32_t id) {
+    func_name_to_id_[name] = id;
+  }
+
+  /// Retrives the id for the given function name
+  /// @returns the id for the given name or 0 on failure
+  uint32_t id_for_func_name(const std::string& name) {
+    if (func_name_to_id_.count(name) == 0) {
+      return 0;
+    }
+    return func_name_to_id_[name];
+  }
+
   /// Iterates over all the instructions in the correct order and calls the
   /// given callback
   /// @param cb the callback to execute
@@ -98,6 +114,10 @@ class Builder {
   /// @returns the annotations
   const std::vector<Instruction>& annot() const { return annotations_; }
 
+  /// Generates an entry point instruction
+  /// @param ep the entry point
+  /// @returns true if the instruction was generated, false otherwise
+  bool GenerateEntryPoint(ast::EntryPoint* ep);
   /// Generates an import instruction
   /// @param imp the import
   void GenerateImport(ast::Import* imp);
@@ -113,6 +133,7 @@ class Builder {
   std::vector<Instruction> annotations_;
 
   std::unordered_map<std::string, uint32_t> import_name_to_id_;
+  std::unordered_map<std::string, uint32_t> func_name_to_id_;
 };
 
 }  // namespace spirv

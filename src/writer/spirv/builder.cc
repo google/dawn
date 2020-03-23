@@ -29,6 +29,26 @@ uint32_t size_of(const std::vector<Instruction>& instructions) {
   return size;
 }
 
+uint32_t pipeline_stage_to_execution_model(ast::PipelineStage stage) {
+  SpvExecutionModel model = SpvExecutionModelVertex;
+
+  switch (stage) {
+    case ast::PipelineStage::kFragment:
+      model = SpvExecutionModelFragment;
+      break;
+    case ast::PipelineStage::kVertex:
+      model = SpvExecutionModelVertex;
+      break;
+    case ast::PipelineStage::kCompute:
+      model = SpvExecutionModelGLCompute;
+      break;
+    case ast::PipelineStage::kNone:
+      model = SpvExecutionModelMax;
+      break;
+  }
+  return model;
+}
+
 }  // namespace
 
 Builder::Builder() = default;
@@ -47,6 +67,13 @@ bool Builder::Build(const ast::Module& m) {
   push_preamble(spv::Op::OpMemoryModel,
                 {Operand::Int(SpvAddressingModelLogical),
                  Operand::Int(SpvMemoryModelVulkanKHR)});
+
+  for (const auto& ep : m.entry_points()) {
+    if (!GenerateEntryPoint(ep.get())) {
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -83,6 +110,28 @@ void Builder::iterate(std::function<void(const Instruction&)> cb) const {
   for (const auto& inst : instructions_) {
     cb(inst);
   }
+}
+
+bool Builder::GenerateEntryPoint(ast::EntryPoint* ep) {
+  auto name = ep->name();
+  if (name.empty()) {
+    name = ep->function_name();
+  }
+
+  auto id = id_for_func_name(ep->function_name());
+  if (id == 0) {
+    return false;
+  }
+
+  auto stage = pipeline_stage_to_execution_model(ep->stage());
+  if (stage == SpvExecutionModelMax) {
+    return false;
+  }
+
+  push_preamble(spv::Op::OpEntryPoint,
+                {Operand::Int(stage), Operand::Int(id), Operand::String(name)});
+
+  return true;
 }
 
 void Builder::GenerateImport(ast::Import* imp) {

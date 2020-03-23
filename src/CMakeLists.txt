@@ -399,6 +399,7 @@ if(${TINT_BUILD_SPV_WRITER})
   list(APPEND TINT_TEST_SRCS
     writer/spirv/binary_writer_test.cc
     writer/spirv/builder_test.cc
+    writer/spirv/builder_test_entry_point_test.cc
     writer/spirv/instruction_test.cc
     writer/spirv/operand_test.cc
   )
