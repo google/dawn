@@ -26,6 +26,12 @@ namespace reader {
 namespace spirv {
 
 /// A Namer maps SPIR-V IDs to strings.
+///
+/// Sanitization:
+/// Some names are user-suggested, but "sanitized" in the sense that an
+/// unusual character (e.g. invalid for use in WGSL identifiers) is remapped
+/// to a safer character such as an underscore.  Also, sanitized names
+/// never start with an underscorre.
 class Namer {
  public:
   /// Creates a new namer
@@ -33,6 +39,13 @@ class Namer {
   explicit Namer(const FailStream& fail_stream);
   /// Destructor
   ~Namer();
+
+  /// Sanitizes the given string, to replace unusual characters with
+  /// obviously-valid idenfier characters. An empy string yields "empty".
+  /// A sanitized name never starts with an underscore.
+  /// @param suggested_name input string
+  /// @returns sanitized name, suitable for use as an identifier
+  static std::string Sanitize(const std::string& suggested_name);
 
   /// Registers a failure.
   /// @returns a fail stream to accumulate diagnostics.

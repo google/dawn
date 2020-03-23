@@ -18,13 +18,15 @@
 #include <sstream>
 #include <string>
 
-#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 #include "src/reader/spirv/fail_stream.h"
 
 namespace tint {
 namespace reader {
 namespace spirv {
 namespace {
+
+using ::testing::Eq;
 
 class SpvNamerTest : public testing::Test {
  public:
@@ -38,6 +40,26 @@ class SpvNamerTest : public testing::Test {
   bool success_ = true;
   FailStream fail_stream_;
 };
+
+TEST_F(SpvNamerTest, SanitizeEmpty) {
+  EXPECT_THAT(Namer::Sanitize(""), Eq("empty"));
+}
+
+TEST_F(SpvNamerTest, SanitizeLeadingUnderscore) {
+  EXPECT_THAT(Namer::Sanitize("_"), Eq("x_"));
+}
+
+TEST_F(SpvNamerTest, SanitizeLeadingDigit) {
+  EXPECT_THAT(Namer::Sanitize("7zip"), Eq("x7zip"));
+}
+
+TEST_F(SpvNamerTest, SanitizeOkChars) {
+  EXPECT_THAT(Namer::Sanitize("_abcdef12345"), Eq("x_abcdef12345"));
+}
+
+TEST_F(SpvNamerTest, SanitizeNonIdentifierChars) {
+  EXPECT_THAT(Namer::Sanitize("a:1.2'f\n"), "a_1_2_f_");
+}
 
 TEST_F(SpvNamerTest, NoFailureToStart) {
   Namer namer(fail_stream_);

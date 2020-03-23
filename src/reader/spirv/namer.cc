@@ -14,6 +14,8 @@
 
 #include "src/reader/spirv/namer.h"
 
+#include <algorithm>
+
 namespace tint {
 namespace reader {
 namespace spirv {
@@ -21,6 +23,30 @@ namespace spirv {
 Namer::Namer(const FailStream& fail_stream) : fail_stream_(fail_stream) {}
 
 Namer::~Namer() = default;
+
+std::string Namer::Sanitize(const std::string& suggested_name) {
+  if (suggested_name.empty()) {
+    return "empty";
+  }
+  // Otherwise, replace invalid characters by '_'.
+  std::string result;
+  std::string invalid_as_first_char = "_0123456789";
+  std::string valid =
+      "abcdefghijklmnopqrstuvwxyz"
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+      "_0123456789";
+  // If the first character is invalid for starting a WGSL identifier, then
+  // prefix the result with "x".
+  if ((std::string::npos != invalid_as_first_char.find(suggested_name[0])) ||
+      (std::string::npos == valid.find(suggested_name[0]))) {
+    result = "x";
+  }
+  std::transform(suggested_name.begin(), suggested_name.end(),
+                 std::back_inserter(result), [&valid](const char c) {
+                   return (std::string::npos == valid.find(c)) ? '_' : c;
+                 });
+  return result;
+}
 
 bool Namer::SaveName(uint32_t id, const std::string& name) {
   if (HasName(id)) {
