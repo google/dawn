@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "src/reader/spirv/fail_stream.h"
 
@@ -59,9 +60,18 @@ class Namer {
 
   /// @param id the SPIR-V ID
   /// @returns the name for the ID. It must have been registered.
-  const std::string& GetName(uint32_t id) {
+  const std::string& GetName(uint32_t id) const {
     return id_to_name_.find(id)->second;
   }
+
+  /// Gets the registered name for a struct member. If no name has
+  /// been registered for this member, then returns the empty string.
+  /// member index is in bounds.
+  /// @param id the SPIR-V ID of the struct
+  /// @param member_index the index of the member, counting from 0
+  /// @returns the registered name for the ID, or an empty string if
+  /// nothing has been registered.
+  std::string GetMemberName(uint32_t id, uint32_t member_index) const;
 
   /// Returns an unregistered name based on a given base name.
   /// @param base_name the base name
@@ -76,11 +86,22 @@ class Namer {
   bool SaveName(uint32_t id, const std::string& name);
 
   /// Saves a sanitized name for the given ID, if that ID does not yet
-  /// have a registered name.
+  /// have a registered name, and if the sanitized name has not already
+  /// been registered to a different ID.
   /// @param id the SPIR-V ID
   /// @param suggested_name the suggested name
   /// @returns true if a name was newly registered for the ID
   bool SuggestSanitizedName(uint32_t id, const std::string& suggested_name);
+
+  /// Saves a sanitized name for a member of a struct, if that member
+  /// does not yet have a registered name.
+  /// @param id the SPIR-V ID for the struct
+  /// @param member_index the index of the member inside the struct
+  /// @param suggested_name the suggested name
+  /// @returns true if a name was newly registered
+  bool SuggestSanitizedMemberName(uint32_t id,
+                                  uint32_t member_index,
+                                  const std::string& suggested_name);
 
  private:
   FailStream fail_stream_;
@@ -89,6 +110,11 @@ class Namer {
   std::unordered_map<uint32_t, std::string> id_to_name_;
   // Maps a name to a SPIR-V ID, or 0 (the case for derived names).
   std::unordered_map<std::string, uint32_t> name_to_id_;
+
+  // Maps a struct id and member index to a suggested sanitized name.
+  // If entry k in the vector is an empty string, then a suggestion
+  // was recorded for a higher-numbered index, but not for index k.
+  std::unordered_map<uint32_t, std::vector<std::string>> struct_member_names_;
 };
 
 }  // namespace spirv

@@ -49,6 +49,19 @@ std::string Namer::Sanitize(const std::string& suggested_name) {
   return result;
 }
 
+std::string Namer::GetMemberName(uint32_t struct_id,
+                                 uint32_t member_index) const {
+  std::string result;
+  auto where = struct_member_names_.find(struct_id);
+  if (where != struct_member_names_.end()) {
+    auto& member_names = where->second;
+    if (member_index < member_names.size()) {
+      result = member_names[member_index];
+    }
+  }
+  return result;
+}
+
 std::string Namer::FindUnusedDerivedName(const std::string& base_name) const {
   // Ensure uniqueness among names.
   std::string derived_name;
@@ -83,6 +96,21 @@ bool Namer::SuggestSanitizedName(uint32_t id,
   }
 
   return SaveName(id, FindUnusedDerivedName(Sanitize(suggested_name)));
+}
+
+bool Namer::SuggestSanitizedMemberName(uint32_t struct_id,
+                                       uint32_t member_index,
+                                       const std::string& suggested_name) {
+  // Creates an empty vector the first time we visit this struct.
+  auto& name_vector = struct_member_names_[struct_id];
+  // Resizing will set new entries to the empty string.
+  name_vector.resize(std::max(name_vector.size(), size_t(member_index + 1)));
+  auto& entry = name_vector[member_index];
+  if (entry.empty()) {
+    entry = Sanitize(suggested_name);
+    return true;
+  }
+  return false;
 }
 
 }  // namespace spirv

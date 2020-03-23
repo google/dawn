@@ -175,6 +175,47 @@ TEST_F(SpvNamerTest,
   EXPECT_THAT(namer.GetName(9), Eq("rice_1"));
 }
 
+TEST_F(SpvNamerTest, GetMemberName_EmptyStringForUnvisitedStruct) {
+  Namer namer(fail_stream_);
+  EXPECT_THAT(namer.GetMemberName(1, 2), Eq(""));
+}
+
+TEST_F(SpvNamerTest, GetMemberName_EmptyStringForUnvisitedMember) {
+  Namer namer(fail_stream_);
+  namer.SuggestSanitizedMemberName(1, 2, "mother");
+  EXPECT_THAT(namer.GetMemberName(1, 0), Eq(""));
+}
+
+TEST_F(SpvNamerTest, SuggestSanitizedMemberName_TakeSuggestionWhenNoConflict) {
+  Namer namer(fail_stream_);
+  EXPECT_TRUE(namer.SuggestSanitizedMemberName(1, 2, "mother"));
+  EXPECT_THAT(namer.GetMemberName(1, 2), Eq("mother"));
+}
+
+TEST_F(SpvNamerTest, SuggestSanitizedMemberName_TakeSanitizedSuggestion) {
+  Namer namer(fail_stream_);
+  EXPECT_TRUE(namer.SuggestSanitizedMemberName(1, 2, "m:t%er"));
+  EXPECT_THAT(namer.GetMemberName(1, 2), Eq("m_t_er"));
+}
+
+TEST_F(
+    SpvNamerTest,
+    SuggestSanitizedMemberName_TakeSuggestionWhenNoConflictAfterSuggestionForLowerMember) {
+  Namer namer(fail_stream_);
+  EXPECT_TRUE(namer.SuggestSanitizedMemberName(1, 7, "mother"));
+  EXPECT_THAT(namer.GetMemberName(1, 2), Eq(""));
+  EXPECT_TRUE(namer.SuggestSanitizedMemberName(1, 2, "mary"));
+  EXPECT_THAT(namer.GetMemberName(1, 2), Eq("mary"));
+}
+
+TEST_F(SpvNamerTest,
+       SuggestSanitizedMemberName_RejectSuggestionIfConflictOnMember) {
+  Namer namer(fail_stream_);
+  EXPECT_TRUE(namer.SuggestSanitizedMemberName(1, 2, "mother"));
+  EXPECT_FALSE(namer.SuggestSanitizedMemberName(1, 2, "mary"));
+  EXPECT_THAT(namer.GetMemberName(1, 2), Eq("mother"));
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader
