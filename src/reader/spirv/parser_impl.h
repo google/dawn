@@ -32,6 +32,7 @@
 #include "src/ast/import.h"
 #include "src/ast/module.h"
 #include "src/reader/reader.h"
+#include "src/reader/spirv/enum_converter.h"
 #include "src/reader/spirv/fail_stream.h"
 #include "src/reader/spirv/namer.h"
 
@@ -108,6 +109,9 @@ class ParserImpl : Reader {
   /// SPIR-V IDs, and uniqueness of names of fields within any single struct.
   bool RegisterUserNames();
 
+  /// Emit entry point AST nodes.
+  bool EmitEntryPoints();
+
   // The SPIR-V binary we're parsing
   std::vector<uint32_t> spv_binary_;
 
@@ -123,6 +127,8 @@ class ParserImpl : Reader {
 
   // An object used to store and generate names for SPIR-V objects.
   Namer namer_;
+  // An object used to convert SPIR-V enums to Tint enums
+  EnumConverter enum_converter_;
 
   // The internal representation of the SPIR-V module and its context.
   spvtools::Context tools_context_;

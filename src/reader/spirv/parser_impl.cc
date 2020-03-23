@@ -38,6 +38,7 @@ ParserImpl::ParserImpl(const std::vector<uint32_t>& spv_binary)
       spv_binary_(spv_binary),
       fail_stream_(&success_, &errors_),
       namer_(fail_stream_),
+      enum_converter_(fail_stream_),
       tools_context_(kTargetEnv),
       tools_(kTargetEnv) {
   // Create a message consumer to propagate error messages from SPIRV-Tools
@@ -123,8 +124,20 @@ void ParserImpl::ResetInternalModule() {
 }
 
 bool ParserImpl::ParseInternalModule() {
-  return RegisterExtendedInstructionImports() && RegisterUserNames();
+  if (!success_) {
+    return false;
+  };
+  if (!RegisterExtendedInstructionImports()) {
+    return false;
+  }
+  if (!RegisterUserNames()) {
+    return false;
+  }
+  if (!EmitEntryPoints()) {
+    return false;
+  }
   // TODO(dneto): fill in the rest
+  return true;
 }
 
 bool ParserImpl::RegisterExtendedInstructionImports() {
@@ -150,6 +163,16 @@ bool ParserImpl::RegisterExtendedInstructionImports() {
 }
 
 bool ParserImpl::RegisterUserNames() {
+  // Register entry point names. An entry point name is the point of contact
+  // between the API and the shader. It has the highest priority for
+  // preservation, so register it first.
+  for (const spvtools::opt::Instruction& entry_point :
+       module_->entry_points()) {
+    const uint32_t function_id = entry_point.GetSingleWordInOperand(1);
+    const std::string name = entry_point.GetInOperand(2).AsString();
+    namer_.SuggestSanitizedName(function_id, name);
+  }
+
   // Register names from OpName and OpMemberName
   for (const auto& inst : module_->debugs2()) {
     switch (inst.opcode()) {
@@ -176,6 +199,20 @@ bool ParserImpl::RegisterUserNames() {
   }
 
   return true;
+}
+
+bool ParserImpl::EmitEntryPoints() {
+  for (const spvtools::opt::Instruction& entry_point :
+       module_->entry_points()) {
+    const auto stage = SpvExecutionModel(entry_point.GetSingleWordInOperand(0));
+    const uint32_t function_id = entry_point.GetSingleWordInOperand(1);
+    const std::string name = namer_.GetName(function_id);
+
+    ast_module_.AddEntryPoint(std::make_unique<ast::EntryPoint>(
+        enum_converter_.ToPipelineStage(stage), "", name));
+  }
+  // The enum conversion could have failed, so return the existing status value.
+  return success_;
 }
 
 }  // namespace spirv
