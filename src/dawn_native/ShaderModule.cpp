@@ -123,19 +123,16 @@ namespace dawn_native {
             UNREACHABLE();
         }
 
-        ResultOrError<SingleShaderStage> ToSingleShaderStage(
-            shaderc_spvc_execution_model execution_model) {
+        SingleShaderStage ToSingleShaderStage(shaderc_spvc_execution_model execution_model) {
             switch (execution_model) {
                 case shaderc_spvc_execution_model_vertex:
-                    return {SingleShaderStage::Vertex};
+                    return SingleShaderStage::Vertex;
                 case shaderc_spvc_execution_model_fragment:
-                    return {SingleShaderStage::Fragment};
+                    return SingleShaderStage::Fragment;
                 case shaderc_spvc_execution_model_glcompute:
-                    return {SingleShaderStage::Compute};
+                    return SingleShaderStage::Compute;
                 default:
                     UNREACHABLE();
-                    return DAWN_VALIDATION_ERROR(
-                        "Attempted to convert invalid spvc execution model to SingleShaderStage");
             }
         }
 
@@ -360,8 +357,7 @@ namespace dawn_native {
         shaderc_spvc_execution_model execution_model;
         DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetExecutionModel(&execution_model),
                                   "Unable to get execution model for shader."));
-
-        DAWN_TRY_ASSIGN(mExecutionModel, ToSingleShaderStage(execution_model));
+        mExecutionModel = ToSingleShaderStage(execution_model);
 
         size_t push_constant_buffers_count;
         DAWN_TRY(
@@ -804,7 +800,7 @@ namespace dawn_native {
     MaybeError ShaderModuleBase::CheckSpvcSuccess(shaderc_spvc_status status,
                                                   const char* error_msg) {
         if (status != shaderc_spvc_status_success) {
-            DAWN_VALIDATION_ERROR(error_msg);
+            return DAWN_VALIDATION_ERROR(error_msg);
         }
         return {};
     }
