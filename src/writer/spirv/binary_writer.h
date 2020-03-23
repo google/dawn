@@ -30,19 +30,27 @@ class BinaryWriter {
   BinaryWriter();
   ~BinaryWriter();
 
-  /// Writes the given builder data into a binary
+  /// Writes the SPIR-V header.
+  /// @param bound the bound to output
+  void WriteHeader(uint32_t bound);
+
+  /// Writes the given builder data into a binary. Note, this does not emit
+  /// the SPIR-V header. You |must| call |WriteHeader| before |WriteBuilder|
+  /// if you want the SPIR-V to be emitted.
   /// @param builder the builder to assemble from
-  /// @returns true on success
-  bool Write(const Builder& builder);
+  void WriteBuilder(const Builder& builder);
+
+  /// Writes the given instruction into the binary.
+  /// @param inst the instruction to assemble
+  void WriteInstruction(const Instruction& inst);
 
   /// @returns the assembled SPIR-V
   const std::vector<uint32_t>& result() const { return out_; }
 
  private:
+  void process_instruction(const Instruction& inst);
   void process_op(const Operand& op);
 
-  /// Word index of the next word to fill.
-  size_t idx_ = 0;
   std::vector<uint32_t> out_;
 };
 

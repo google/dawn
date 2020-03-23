@@ -29,14 +29,14 @@ using BinaryWriterTest = testing::Test;
 TEST_F(BinaryWriterTest, Preamble) {
   Builder b;
   BinaryWriter bw;
-  ASSERT_TRUE(bw.Write(b));
+  bw.WriteHeader(5);
 
   auto res = bw.result();
   ASSERT_EQ(res.size(), 5);
   EXPECT_EQ(res[0], spv::MagicNumber);
   EXPECT_EQ(res[1], 0x00010300);  // SPIR-V 1.3
   EXPECT_EQ(res[2], 0);           // Generator ID
-  EXPECT_EQ(res[3], 1);           // ID Bound
+  EXPECT_EQ(res[3], 5);           // ID Bound
   EXPECT_EQ(res[4], 0);           // Reserved
 }
 
@@ -44,12 +44,12 @@ TEST_F(BinaryWriterTest, Float) {
   Builder b;
   b.push_preamble(spv::Op::OpNop, {Operand::Float(2.4f)});
   BinaryWriter bw;
-  ASSERT_TRUE(bw.Write(b));
+  bw.WriteBuilder(b);
 
   auto res = bw.result();
-  ASSERT_EQ(res.size(), 7);
+  ASSERT_EQ(res.size(), 2);
   float f;
-  memcpy(&f, res.data() + 6, 4);
+  memcpy(&f, res.data() + 1, 4);
   EXPECT_EQ(f, 2.4f);
 }
 
@@ -57,23 +57,23 @@ TEST_F(BinaryWriterTest, Int) {
   Builder b;
   b.push_preamble(spv::Op::OpNop, {Operand::Int(2)});
   BinaryWriter bw;
-  ASSERT_TRUE(bw.Write(b));
+  bw.WriteBuilder(b);
 
   auto res = bw.result();
-  ASSERT_EQ(res.size(), 7);
-  EXPECT_EQ(res[6], 2);
+  ASSERT_EQ(res.size(), 2);
+  EXPECT_EQ(res[1], 2);
 }
 
 TEST_F(BinaryWriterTest, String) {
   Builder b;
   b.push_preamble(spv::Op::OpNop, {Operand::String("my_string")});
   BinaryWriter bw;
-  ASSERT_TRUE(bw.Write(b));
+  bw.WriteBuilder(b);
 
   auto res = bw.result();
-  ASSERT_EQ(res.size(), 9);
+  ASSERT_EQ(res.size(), 4);
 
-  uint8_t* v = reinterpret_cast<uint8_t*>(res.data()) + (6 * 4);
+  uint8_t* v = reinterpret_cast<uint8_t*>(res.data() + 1);
   EXPECT_EQ(v[0], 'm');
   EXPECT_EQ(v[1], 'y');
   EXPECT_EQ(v[2], '_');
@@ -92,12 +92,12 @@ TEST_F(BinaryWriterTest, String_Multiple4Length) {
   Builder b;
   b.push_preamble(spv::Op::OpNop, {Operand::String("mystring")});
   BinaryWriter bw;
-  ASSERT_TRUE(bw.Write(b));
+  bw.WriteBuilder(b);
 
   auto res = bw.result();
-  ASSERT_EQ(res.size(), 9);
+  ASSERT_EQ(res.size(), 4);
 
-  uint8_t* v = reinterpret_cast<uint8_t*>(res.data()) + (6 * 4);
+  uint8_t* v = reinterpret_cast<uint8_t*>(res.data() + 1);
   EXPECT_EQ(v[0], 'm');
   EXPECT_EQ(v[1], 'y');
   EXPECT_EQ(v[2], 's');
@@ -110,6 +110,20 @@ TEST_F(BinaryWriterTest, String_Multiple4Length) {
   EXPECT_EQ(v[9], '\0');
   EXPECT_EQ(v[10], '\0');
   EXPECT_EQ(v[11], '\0');
+}
+
+TEST_F(BinaryWriterTest, TestInstructionWriter) {
+  Instruction i1{spv::Op::OpNop, {Operand::Int(2)}};
+  Instruction i2{spv::Op::OpNop, {Operand::Int(4)}};
+
+  BinaryWriter bw;
+  bw.WriteInstruction(i1);
+  bw.WriteInstruction(i2);
+
+  auto res = bw.result();
+  ASSERT_EQ(res.size(), 4);
+  EXPECT_EQ(res[1], 2);
+  EXPECT_EQ(res[3], 4);
 }
 
 }  // namespace spirv

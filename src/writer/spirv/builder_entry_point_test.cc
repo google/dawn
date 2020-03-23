@@ -20,6 +20,7 @@
 #include "src/ast/entry_point.h"
 #include "src/ast/pipeline_stage.h"
 #include "src/writer/spirv/builder.h"
+#include "src/writer/spirv/spv_dump.h"
 
 namespace tint {
 namespace writer {
@@ -36,12 +37,8 @@ TEST_F(BuilderTest, EntryPoint) {
 
   auto preamble = b.preamble();
   ASSERT_EQ(preamble.size(), 1);
-  EXPECT_EQ(preamble[0].opcode(), spv::Op::OpEntryPoint);
-
-  ASSERT_TRUE(preamble[0].operands().size() >= 3);
-  EXPECT_EQ(preamble[0].operands()[0].to_i(), SpvExecutionModelFragment);
-  EXPECT_EQ(preamble[0].operands()[1].to_i(), 2);
-  EXPECT_EQ(preamble[0].operands()[2].to_s(), "main");
+  EXPECT_EQ(DumpInstruction(preamble[0]), R"(OpEntryPoint Fragment %2 "main"
+)");
 }
 
 TEST_F(BuilderTest, EntryPoint_WithoutName) {
@@ -53,12 +50,9 @@ TEST_F(BuilderTest, EntryPoint_WithoutName) {
 
   auto preamble = b.preamble();
   ASSERT_EQ(preamble.size(), 1);
-  EXPECT_EQ(preamble[0].opcode(), spv::Op::OpEntryPoint);
-
-  ASSERT_TRUE(preamble[0].operands().size() >= 3);
-  EXPECT_EQ(preamble[0].operands()[0].to_i(), SpvExecutionModelGLCompute);
-  EXPECT_EQ(preamble[0].operands()[1].to_i(), 3);
-  EXPECT_EQ(preamble[0].operands()[2].to_s(), "compute_main");
+  EXPECT_EQ(DumpInstruction(preamble[0]),
+            R"(OpEntryPoint GLCompute %3 "compute_main"
+)");
 }
 
 TEST_F(BuilderTest, EntryPoint_BadFunction) {

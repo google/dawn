@@ -402,6 +402,8 @@ if(${TINT_BUILD_SPV_WRITER})
     writer/spirv/builder_entry_point_test.cc
     writer/spirv/instruction_test.cc
     writer/spirv/operand_test.cc
+    writer/spirv/spv_dump.cc
+    writer/spirv/spv_dump.h
   )
 endif()
 

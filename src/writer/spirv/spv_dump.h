@@ -12,29 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/writer/spirv/generator.h"
+#ifndef SRC_WRITER_SPIRV_SPV_DUMP_H_
+#define SRC_WRITER_SPIRV_SPV_DUMP_H_
 
-#include <utility>
+#include <string>
+
+#include "src/writer/spirv/builder.h"
+#include "src/writer/spirv/instruction.h"
 
 namespace tint {
 namespace writer {
 namespace spirv {
 
-Generator::Generator(ast::Module module) : writer::Writer(std::move(module)) {}
+/// Dumps the given builder to a SPIR-V disassembly string
+/// @param builder the builder to convert
+/// @returns the builder as a SPIR-V disassembly string
+std::string DumpBuilder(const Builder& builder);
 
-Generator::~Generator() = default;
-
-bool Generator::Generate() {
-  if (!builder_.Build(module_)) {
-    set_error(builder_.error());
-    return false;
-  }
-
-  writer_.WriteHeader(builder_.id_bound());
-  writer_.WriteBuilder(builder_);
-  return true;
-}
+/// Dumps the given instruction to a SPIR-V disassembly string
+/// @param inst the instruction to dump
+/// @returns the instruction as a SPIR-V disassembly string
+std::string DumpInstruction(const Instruction& inst);
 
 }  // namespace spirv
 }  // namespace writer
 }  // namespace tint
+
+#endif  // SRC_WRITER_SPIRV_SPV_DUMP_H_

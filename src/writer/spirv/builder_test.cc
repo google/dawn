@@ -21,6 +21,7 @@
 #include "spirv/unified1/spirv.hpp11"
 #include "src/ast/import.h"
 #include "src/ast/module.h"
+#include "src/writer/spirv/spv_dump.h"
 
 namespace tint {
 namespace writer {
@@ -36,28 +37,21 @@ TEST_F(BuilderTest, InsertsPreambleWithImport) {
   ASSERT_TRUE(b.Build(m));
   ASSERT_EQ(b.preamble().size(), 4);
 
-  auto pre = b.preamble();
-  EXPECT_EQ(pre[0].opcode(), spv::Op::OpCapability);
-  EXPECT_EQ(pre[0].operands()[0].to_i(), SpvCapabilityShader);
-  EXPECT_EQ(pre[1].opcode(), spv::Op::OpCapability);
-  EXPECT_EQ(pre[1].operands()[0].to_i(), SpvCapabilityVulkanMemoryModel);
-  EXPECT_EQ(pre[2].opcode(), spv::Op::OpExtInstImport);
-  EXPECT_EQ(pre[2].operands()[1].to_s(), "GLSL.std.450");
-  EXPECT_EQ(pre[3].opcode(), spv::Op::OpMemoryModel);
+  EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
+OpCapability VulkanMemoryModel
+%1 = OpExtInstImport "GLSL.std.450"
+OpMemoryModel Logical Vulkan
+)");
 }
 
 TEST_F(BuilderTest, InsertsPreambleWithoutImport) {
   ast::Module m;
   Builder b;
   ASSERT_TRUE(b.Build(m));
-  ASSERT_EQ(b.preamble().size(), 3);
-
-  auto pre = b.preamble();
-  EXPECT_EQ(pre[0].opcode(), spv::Op::OpCapability);
-  EXPECT_EQ(pre[0].operands()[0].to_i(), SpvCapabilityShader);
-  EXPECT_EQ(pre[1].opcode(), spv::Op::OpCapability);
-  EXPECT_EQ(pre[1].operands()[0].to_i(), SpvCapabilityVulkanMemoryModel);
-  EXPECT_EQ(pre[2].opcode(), spv::Op::OpMemoryModel);
+  EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
+OpCapability VulkanMemoryModel
+OpMemoryModel Logical Vulkan
+)");
 }
 
 TEST_F(BuilderTest, TracksIdBounds) {
