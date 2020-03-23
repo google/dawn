@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <sstream>
+#include <unordered_set>
 
 namespace tint {
 namespace reader {
@@ -111,6 +112,64 @@ bool Namer::SuggestSanitizedMemberName(uint32_t struct_id,
     return true;
   }
   return false;
+}
+
+void Namer::ResolveMemberNamesForStruct(uint32_t struct_id,
+                                        uint32_t num_members) {
+  auto& name_vector = struct_member_names_[struct_id];
+  // Resizing will set new entries to the empty string.
+  // It would have been an error if the client had registered a name for
+  // an out-of-bounds member index, so toss those away.
+  name_vector.resize(num_members);
+
+  std::unordered_set<std::string> used_names;
+
+  // Returns a name, based on the suggestion, which does not equal
+  // any name in the used_names set.
+  auto disambiguate_name =
+      [&used_names](const std::string& suggestion) -> std::string {
+    if (used_names.find(suggestion) == used_names.end()) {
+      // There is no collision.
+      return suggestion;
+    }
+
+    uint32_t i = 1;
+    std::string new_name;
+    do {
+      std::stringstream new_name_stream;
+      new_name_stream << suggestion << "_" << i;
+      new_name = new_name_stream.str();
+      ++i;
+    } while (used_names.find(new_name) != used_names.end());
+    return new_name;
+  };
+
+  // First ensure uniqueness among names for which we have already taken
+  // suggestions.
+  for (auto& name : name_vector) {
+    if (!name.empty()) {
+      // This modifies the names in-place, i.e. update the name_vector
+      // entries.
+      name = disambiguate_name(name);
+      used_names.insert(name);
+    }
+  }
+
+  // Now ensure uniqueness among the rest.  Doing this in a second pass
+  // allows us to preserve suggestions as much as possible.  Otherwise
+  // a generated name such as 'field1' might collide with a user-suggested
+  // name of 'field1' attached to a later member.
+  uint32_t index = 0;
+  for (auto& name : name_vector) {
+    if (name.empty()) {
+      std::stringstream suggestion;
+      suggestion << "field" << index;
+      // Again, modify the name-vector in-place.
+      name = disambiguate_name(suggestion.str());
+      used_names.insert(name);
+    }
+    index++;
+  }
 }
 
 }  // namespace spirv

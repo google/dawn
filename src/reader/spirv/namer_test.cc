@@ -216,6 +216,57 @@ TEST_F(SpvNamerTest,
   EXPECT_THAT(namer.GetMemberName(1, 2), Eq("mother"));
 }
 
+TEST_F(SpvNamerTest,
+       ResolveMemberNamesForStruct_GeneratesRegularNamesOnItsOwn) {
+  Namer namer(fail_stream_);
+  namer.ResolveMemberNamesForStruct(2, 4);
+  EXPECT_THAT(namer.GetMemberName(2, 0), Eq("field0"));
+  EXPECT_THAT(namer.GetMemberName(2, 1), Eq("field1"));
+  EXPECT_THAT(namer.GetMemberName(2, 2), Eq("field2"));
+  EXPECT_THAT(namer.GetMemberName(2, 3), Eq("field3"));
+}
+
+TEST_F(SpvNamerTest,
+       ResolveMemberNamesForStruct_ResolvesConflictBetweenSuggestedNames) {
+  Namer namer(fail_stream_);
+  namer.SuggestSanitizedMemberName(2, 0, "apple");
+  namer.SuggestSanitizedMemberName(2, 1, "apple");
+  namer.ResolveMemberNamesForStruct(2, 2);
+  EXPECT_THAT(namer.GetMemberName(2, 0), Eq("apple"));
+  EXPECT_THAT(namer.GetMemberName(2, 1), Eq("apple_1"));
+}
+
+TEST_F(SpvNamerTest, ResolveMemberNamesForStruct_FillsUnsuggestedGaps) {
+  Namer namer(fail_stream_);
+  namer.SuggestSanitizedMemberName(2, 1, "apple");
+  namer.SuggestSanitizedMemberName(2, 2, "core");
+  namer.ResolveMemberNamesForStruct(2, 4);
+  EXPECT_THAT(namer.GetMemberName(2, 0), Eq("field0"));
+  EXPECT_THAT(namer.GetMemberName(2, 1), Eq("apple"));
+  EXPECT_THAT(namer.GetMemberName(2, 2), Eq("core"));
+  EXPECT_THAT(namer.GetMemberName(2, 3), Eq("field3"));
+}
+
+TEST_F(SpvNamerTest,
+       ResolveMemberNamesForStruct_GeneratedNameAvoidsConflictWithSuggestion) {
+  Namer namer(fail_stream_);
+  namer.SuggestSanitizedMemberName(2, 0, "field1");
+  namer.ResolveMemberNamesForStruct(2, 2);
+  EXPECT_THAT(namer.GetMemberName(2, 0), Eq("field1"));
+  EXPECT_THAT(namer.GetMemberName(2, 1), Eq("field1_1"));
+}
+
+TEST_F(SpvNamerTest,
+       ResolveMemberNamesForStruct_TruncatesOutOfBoundsSuggestion) {
+  Namer namer(fail_stream_);
+  namer.SuggestSanitizedMemberName(2, 3, "sitar");
+  EXPECT_THAT(namer.GetMemberName(2, 3), Eq("sitar"));
+  namer.ResolveMemberNamesForStruct(2, 2);
+  EXPECT_THAT(namer.GetMemberName(2, 0), Eq("field0"));
+  EXPECT_THAT(namer.GetMemberName(2, 1), Eq("field1"));
+  EXPECT_THAT(namer.GetMemberName(2, 3), Eq(""));
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

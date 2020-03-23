@@ -95,13 +95,21 @@ class Namer {
 
   /// Saves a sanitized name for a member of a struct, if that member
   /// does not yet have a registered name.
-  /// @param id the SPIR-V ID for the struct
+  /// @param struct_id the SPIR-V ID for the struct
   /// @param member_index the index of the member inside the struct
   /// @param suggested_name the suggested name
   /// @returns true if a name was newly registered
-  bool SuggestSanitizedMemberName(uint32_t id,
+  bool SuggestSanitizedMemberName(uint32_t struct_id,
                                   uint32_t member_index,
                                   const std::string& suggested_name);
+
+  /// Ensure there are member names registered for members of the given struct
+  /// such that:
+  /// - Each member has a non-empty sanitized name.
+  /// - No two members in the struct have the same name.
+  /// @param struct_id the SPIR-V ID for the struct
+  /// @param num_members the number of members in the struct
+  void ResolveMemberNamesForStruct(uint32_t struct_id, uint32_t num_members);
 
  private:
   FailStream fail_stream_;
