@@ -15,6 +15,7 @@
 #include "src/reader/spirv/namer.h"
 
 #include <algorithm>
+#include <sstream>
 
 namespace tint {
 namespace reader {
@@ -48,12 +49,30 @@ std::string Namer::Sanitize(const std::string& suggested_name) {
   return result;
 }
 
+std::string Namer::FindUnusedDerivedName(const std::string& base_name) const {
+  // Ensure uniqueness among names.
+  std::string derived_name;
+  for (int i = 0;; i++) {
+    std::stringstream new_name_stream;
+    new_name_stream << base_name;
+    if (i > 0) {
+      new_name_stream << "_" << i;
+    }
+    derived_name = new_name_stream.str();
+    if (name_to_id_.count(derived_name) == 0) {
+      break;
+    }
+  }
+  return derived_name;
+}
+
 bool Namer::SaveName(uint32_t id, const std::string& name) {
   if (HasName(id)) {
     return Fail() << "internal error: ID " << id
                   << " already has registered name: " << id_to_name_[id];
   }
   id_to_name_[id] = name;
+  name_to_id_[name] = id;
   return true;
 }
 

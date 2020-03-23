@@ -63,6 +63,11 @@ class Namer {
     return id_to_name_.find(id)->second;
   }
 
+  /// Returns an unregistered name based on a given base name.
+  /// @param base_name the base name
+  /// @returns a new name
+  std::string FindUnusedDerivedName(const std::string& base_name) const;
+
   /// Records a mapping from the given ID to a name. Emits a failure
   /// if the ID already has a registered name.
   /// @param id the SPIR-V ID
@@ -75,6 +80,8 @@ class Namer {
 
   // Maps an ID to its registered name.
   std::unordered_map<uint32_t, std::string> id_to_name_;
+  // Maps a name to a SPIR-V ID, or 0 (the case for derived names).
+  std::unordered_map<std::string, uint32_t> name_to_id_;
 };
 
 }  // namespace spirv
