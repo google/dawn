@@ -317,6 +317,7 @@ if(${TINT_BUILD_SPV_READER})
     reader/spirv/fail_stream_test.cc
     reader/spirv/namer_test.cc
     reader/spirv/parser_impl_import_test.cc
+    reader/spirv/parser_impl_user_name_test.cc
     reader/spirv/parser_impl_test.cc
     reader/spirv/parser_test.cc
     reader/spirv/spirv_tools_helpers_test.cc

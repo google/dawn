@@ -19,6 +19,8 @@
 #include <utility>
 
 #include "source/opt/build_module.h"
+#include "source/opt/instruction.h"
+#include "source/opt/module.h"
 #include "spirv-tools/libspirv.hpp"
 
 namespace tint {
@@ -35,6 +37,7 @@ ParserImpl::ParserImpl(const std::vector<uint32_t>& spv_binary)
     : Reader(),
       spv_binary_(spv_binary),
       fail_stream_(&success_, &errors_),
+      namer_(fail_stream_),
       tools_context_(kTargetEnv),
       tools_(kTargetEnv) {
   // Create a message consumer to propagate error messages from SPIRV-Tools
@@ -120,7 +123,7 @@ void ParserImpl::ResetInternalModule() {
 }
 
 bool ParserImpl::ParseInternalModule() {
-  return RegisterExtendedInstructionImports();
+  return RegisterExtendedInstructionImports() && RegisterUserNames();
   // TODO(dneto): fill in the rest
 }
 
@@ -143,6 +146,35 @@ bool ParserImpl::RegisterExtendedInstructionImports() {
       return Fail() << "Unrecognized extended instruction set: " << name;
     }
   }
+  return true;
+}
+
+bool ParserImpl::RegisterUserNames() {
+  // Register names from OpName and OpMemberName
+  for (const auto& inst : module_->debugs2()) {
+    switch (inst.opcode()) {
+      case SpvOpName:
+        namer_.SuggestSanitizedName(inst.GetSingleWordInOperand(0),
+                                    inst.GetInOperand(1).AsString());
+        break;
+      case SpvOpMemberName:
+        namer_.SuggestSanitizedMemberName(inst.GetSingleWordInOperand(0),
+                                          inst.GetSingleWordInOperand(1),
+                                          inst.GetInOperand(2).AsString());
+        break;
+      default:
+        break;
+    }
+  }
+
+  // Fill in struct member names, and disambiguate them.
+  for (const auto* type_inst : module_->GetTypes()) {
+    if (type_inst->opcode() == SpvOpTypeStruct) {
+      namer_.ResolveMemberNamesForStruct(type_inst->result_id(),
+                                         type_inst->NumInOperands());
+    }
+  }
+
   return true;
 }
 

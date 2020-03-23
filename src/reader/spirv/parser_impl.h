@@ -33,6 +33,7 @@
 #include "src/ast/module.h"
 #include "src/reader/reader.h"
 #include "src/reader/spirv/fail_stream.h"
+#include "src/reader/spirv/namer.h"
 
 namespace tint {
 namespace reader {
@@ -80,6 +81,9 @@ class ParserImpl : Reader {
     return glsl_std_450_imports_;
   }
 
+  /// @returns the namer object
+  Namer& namer() { return namer_; }
+
  private:
   /// Builds the internal representation of the SPIR-V module.
   /// Assumes the module is somewhat well-formed.  Normally you
@@ -99,6 +103,11 @@ class ParserImpl : Reader {
   /// Registers extended instruction imports.  Only "GLSL.std.450" is supported.
   bool RegisterExtendedInstructionImports();
 
+  /// Registers user names for SPIR-V objects, from OpName, and OpMemberName.
+  /// Also synthesizes struct field names.  Ensures uniqueness for names for
+  /// SPIR-V IDs, and uniqueness of names of fields within any single struct.
+  bool RegisterUserNames();
+
   // The SPIR-V binary we're parsing
   std::vector<uint32_t> spv_binary_;
 
@@ -111,6 +120,9 @@ class ParserImpl : Reader {
   std::stringstream errors_;
   FailStream fail_stream_;
   spvtools::MessageConsumer message_consumer_;
+
+  // An object used to store and generate names for SPIR-V objects.
+  Namer namer_;
 
   // The internal representation of the SPIR-V module and its context.
   spvtools::Context tools_context_;
