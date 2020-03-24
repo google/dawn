@@ -521,6 +521,28 @@ TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutBindingUnbounded) {
                                          wgpu::BindingType::UniformBuffer}});
 }
 
+// Test that there can't be more than kMaxBindingPerGroup bindings per group
+TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutMaxBindings) {
+    wgpu::BindGroupLayoutBinding bindings[kMaxBindingsPerGroup + 1];
+
+    for (uint32_t i = 0; i < kMaxBindingsPerGroup + 1; i++) {
+        bindings[i].type = wgpu::BindingType::UniformBuffer;
+        bindings[i].binding = i;
+        bindings[i].visibility = wgpu::ShaderStage::Compute;
+    }
+
+    wgpu::BindGroupLayoutDescriptor desc;
+    desc.bindings = bindings;
+
+    // Control case: kMaxBindingsPerGroup bindings is allowed.
+    desc.bindingCount = kMaxBindingsPerGroup;
+    device.CreateBindGroupLayout(&desc);
+
+    // Error case: kMaxBindingsPerGroup + 1 bindings is not allowed.
+    desc.bindingCount = kMaxBindingsPerGroup + 1;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&desc));
+}
+
 // This test verifies that the BindGroupLayout bindings are correctly validated, even if the
 // binding ids are out-of-order.
 TEST_F(BindGroupLayoutValidationTest, BindGroupBinding) {

@@ -152,6 +152,10 @@ namespace dawn_native {
             bindingsSet.insert(bindingNumber);
         }
 
+        if (bindingsSet.size() > kMaxBindingsPerGroup) {
+            return DAWN_VALIDATION_ERROR("The number of bindings exceeds kMaxBindingsPerGroup.");
+        }
+
         if (dynamicUniformBufferCount > kMaxDynamicUniformBufferCount) {
             return DAWN_VALIDATION_ERROR(
                 "The number of dynamic uniform buffer exceeds the maximum value");
