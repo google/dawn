@@ -15,13 +15,22 @@
 #include "src/reader/spirv/parser_impl.h"
 
 #include <cstring>
+#include <memory>
 #include <string>
 #include <utility>
 
 #include "source/opt/build_module.h"
 #include "source/opt/instruction.h"
 #include "source/opt/module.h"
+#include "source/opt/type_manager.h"
 #include "spirv-tools/libspirv.hpp"
+#include "src/ast/type/bool_type.h"
+#include "src/ast/type/f32_type.h"
+#include "src/ast/type/i32_type.h"
+#include "src/ast/type/type.h"
+#include "src/ast/type/u32_type.h"
+#include "src/ast/type/void_type.h"
+#include "src/type_manager.h"
 
 namespace tint {
 namespace reader {
@@ -90,6 +99,77 @@ ast::Module ParserImpl::module() {
   // TODO(dneto): Should we clear out spv_binary_ here, to reduce
   // memory usage?
   return std::move(ast_module_);
+}
+
+const ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
+  if (!success_) {
+    return nullptr;
+  }
+
+  if (type_mgr_ == nullptr) {
+    Fail() << "ConvertType called when the internal module has not been built.";
+    return nullptr;
+  }
+
+  auto where = id_to_type_.find(type_id);
+  if (where != id_to_type_.end()) {
+    return where->second;
+  }
+
+  auto* spirv_type = type_mgr_->GetType(type_id);
+  if (spirv_type == nullptr) {
+    Fail() << "ID is not a SPIR-V type: " << type_id;
+    return nullptr;
+  }
+
+  const ast::type::Type* result = nullptr;
+  TypeManager* tint_tm = TypeManager::Instance();
+
+  switch (spirv_type->kind()) {
+    case spvtools::opt::analysis::Type::kVoid:
+      result = tint_tm->Get(std::make_unique<ast::type::VoidType>());
+      break;
+    case spvtools::opt::analysis::Type::kBool:
+      result = tint_tm->Get(std::make_unique<ast::type::BoolType>());
+      break;
+    case spvtools::opt::analysis::Type::kInteger: {
+      const auto* int_ty = spirv_type->AsInteger();
+      if (int_ty->width() == 32) {
+        if (int_ty->IsSigned()) {
+          result = tint_tm->Get(std::make_unique<ast::type::I32Type>());
+        } else {
+          result = tint_tm->Get(std::make_unique<ast::type::U32Type>());
+        }
+      } else {
+        Fail() << "unhandled integer width: " << int_ty->width();
+      }
+      break;
+    }
+    case spvtools::opt::analysis::Type::kFloat: {
+      const auto* float_ty = spirv_type->AsFloat();
+      if (float_ty->width() == 32) {
+        result = tint_tm->Get(std::make_unique<ast::type::F32Type>());
+      } else {
+        Fail() << "unhandled float width: " << float_ty->width();
+      }
+      break;
+    }
+    default:
+      // The error diagnostic will be generated below because result is still
+      // nullptr.
+      break;
+  }
+
+  if (result == nullptr) {
+    if (success_) {
+      // Only emit a new diagnostic if we haven't already emitted a more
+      // specific one.
+      Fail() << "unknown SPIR-V type: " << type_id;
+    }
+  } else {
+    id_to_type_[type_id] = result;
+  }
+  return result;
 }
 
 bool ParserImpl::BuildInternalModule() {

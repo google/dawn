@@ -31,6 +31,7 @@
 #include "spirv-tools/libspirv.hpp"
 #include "src/ast/import.h"
 #include "src/ast/module.h"
+#include "src/ast/type/type.h"
 #include "src/reader/reader.h"
 #include "src/reader/spirv/enum_converter.h"
 #include "src/reader/spirv/fail_stream.h"
@@ -81,6 +82,14 @@ class ParserImpl : Reader {
   const std::unordered_set<uint32_t>& glsl_std_450_imports() const {
     return glsl_std_450_imports_;
   }
+
+  /// Converts a SPIR-V type to a Tint type.
+  /// On failure, logs an error and returns null.
+  /// This should only be called after the internal
+  /// representation of the module has been built.
+  /// @param type_id the SPIR-V ID of a type.
+  /// @returns a Tint type, or nullptr
+  const ast::type::Type* ConvertType(uint32_t type_id);
 
   /// @returns the namer object
   Namer& namer() { return namer_; }
@@ -147,6 +156,9 @@ class ParserImpl : Reader {
   // The set of IDs that are imports of the GLSL.std.450 extended instruction
   // sets.
   std::unordered_set<uint32_t> glsl_std_450_imports_;
+
+  // Maps a SPIR-V type ID to a Tint type.
+  std::unordered_map<uint32_t, const ast::type::Type*> id_to_type_;
 };
 
 }  // namespace spirv
