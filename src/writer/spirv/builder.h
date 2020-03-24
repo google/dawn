@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "src/ast/module.h"
+#include "src/ast/struct_member.h"
 #include "src/writer/spirv/instruction.h"
 
 namespace tint {
@@ -117,7 +118,7 @@ class Builder {
     annotations_.push_back(Instruction{op, operands});
   }
   /// @returns the annotations
-  const std::vector<Instruction>& annot() const { return annotations_; }
+  const std::vector<Instruction>& annots() const { return annotations_; }
 
   /// Generates an entry point instruction
   /// @param ep the entry point
@@ -130,6 +131,30 @@ class Builder {
   /// @param type the type to create
   /// @returns the ID to use for the given type. Returns 0 on unknown type.
   uint32_t GenerateTypeIfNeeded(ast::type::Type* type);
+  /// Generates a matrix type declaration
+  /// @param mat the matrix to generate
+  /// @param result the result operand
+  /// @returns true if the matrix was successfully generated
+  bool GenerateMatrixType(ast::type::MatrixType* mat, const Operand& result);
+  /// Generates a vector type declaration
+  /// @param struct_type the vector to generate
+  /// @param result the result operand
+  /// @returns true if the vector was successfully generated
+  bool GenerateStructType(ast::type::StructType* struct_type,
+                          const Operand& result);
+  /// Generates a vector type declaration
+  /// @param vec the vector to generate
+  /// @param result the result operand
+  /// @returns true if the vector was successfully generated
+  bool GenerateVectorType(ast::type::VectorType* vec, const Operand& result);
+  /// Generates a struct member
+  /// @param struct_id the id of the parent structure
+  /// @param idx the index of the member
+  /// @param member the member to generate
+  /// @returns the id of the struct member or 0 on error.
+  uint32_t GenerateStructMember(uint32_t struct_id,
+                                uint32_t idx,
+                                ast::StructMember* member);
 
  private:
   /// @returns an Operand with a new result ID in it. Increments the next_id_

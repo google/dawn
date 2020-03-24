@@ -15,6 +15,9 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "src/ast/struct.h"
+#include "src/ast/struct_member.h"
+#include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
@@ -22,6 +25,7 @@
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
+#include "src/ast/type/struct_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
@@ -169,6 +173,104 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedMatrix) {
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&mat_type), 1);
   ASSERT_FALSE(b.has_error()) << b.error();
+}
+
+TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
+  auto s = std::make_unique<ast::Struct>();
+  ast::type::StructType s_type(std::move(s));
+
+  Builder b;
+  auto id = b.GenerateTypeIfNeeded(&s_type);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(id, 1);
+
+  EXPECT_EQ(b.types().size(), 1);
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeStruct
+)");
+}
+
+TEST_F(BuilderTest_Type, GenerateStruct) {
+  ast::type::F32Type f32;
+
+  std::vector<std::unique_ptr<ast::StructMemberDecoration>> decos;
+  std::vector<std::unique_ptr<ast::StructMember>> members;
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
+
+  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
+                                         std::move(members));
+  ast::type::StructType s_type(std::move(s));
+
+  Builder b;
+  auto id = b.GenerateTypeIfNeeded(&s_type);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(id, 1);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeStruct %2
+)");
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpMemberName %1 0 "a"
+)");
+}
+
+TEST_F(BuilderTest_Type, GenerateStruct_Decorated) {
+  ast::type::F32Type f32;
+
+  std::vector<std::unique_ptr<ast::StructMemberDecoration>> decos;
+  std::vector<std::unique_ptr<ast::StructMember>> members;
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
+
+  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kBlock,
+                                         std::move(members));
+  ast::type::StructType s_type(std::move(s));
+
+  Builder b;
+  auto id = b.GenerateTypeIfNeeded(&s_type);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(id, 1);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeStruct %2
+)");
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpMemberName %1 0 "a"
+)");
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 Block
+)");
+}
+
+TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers) {
+  ast::type::F32Type f32;
+
+  std::vector<std::unique_ptr<ast::StructMemberDecoration>> a_decos;
+  a_decos.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
+  std::vector<std::unique_ptr<ast::StructMemberDecoration>> b_decos;
+  b_decos.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(8));
+
+  std::vector<std::unique_ptr<ast::StructMember>> members;
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &f32, std::move(a_decos)));
+  members.push_back(
+      std::make_unique<ast::StructMember>("b", &f32, std::move(b_decos)));
+
+  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
+                                         std::move(members));
+  ast::type::StructType s_type(std::move(s));
+
+  Builder b;
+  auto id = b.GenerateTypeIfNeeded(&s_type);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(id, 1);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeStruct %2 %2
+)");
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpMemberName %1 0 "a"
+OpMemberName %1 1 "b"
+)");
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %1 0 Offset 0
+OpMemberDecorate %1 1 Offset 8
+)");
 }
 
 TEST_F(BuilderTest_Type, GenerateU32) {

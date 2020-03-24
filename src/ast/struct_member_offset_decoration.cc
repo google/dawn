@@ -17,7 +17,7 @@
 namespace tint {
 namespace ast {
 
-StructMemberOffsetDecoration::StructMemberOffsetDecoration(size_t offset)
+StructMemberOffsetDecoration::StructMemberOffsetDecoration(uint32_t offset)
     : offset_(offset) {}
 
 StructMemberOffsetDecoration::~StructMemberOffsetDecoration() = default;

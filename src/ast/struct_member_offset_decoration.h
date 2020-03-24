@@ -29,20 +29,20 @@ class StructMemberOffsetDecoration : public StructMemberDecoration {
  public:
   /// constructor
   /// @param offset the offset value
-  explicit StructMemberOffsetDecoration(size_t offset);
+  explicit StructMemberOffsetDecoration(uint32_t offset);
   ~StructMemberOffsetDecoration() override;
 
   /// @returns true if this is an offset decoration
   bool IsOffset() const override { return true; }
 
   /// @returns the offset value
-  size_t offset() const { return offset_; }
+  uint32_t offset() const { return offset_; }
 
   /// @returns the decoration as a string
   std::string to_str() const override;
 
  private:
-  size_t offset_;
+  uint32_t offset_;
 };
 
 }  // namespace ast

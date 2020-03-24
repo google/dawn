@@ -15,7 +15,11 @@
 #include "src/writer/spirv/builder.h"
 
 #include "spirv/unified1/spirv.h"
+#include "src/ast/struct.h"
+#include "src/ast/struct_member.h"
+#include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
 
 namespace tint {
@@ -168,25 +172,19 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
   } else if (type->IsI32()) {
     push_type(spv::Op::OpTypeInt, {result, Operand::Int(32), Operand::Int(1)});
   } else if (type->IsMatrix()) {
-    auto mat = type->AsMatrix();
-    ast::type::VectorType col_type(mat->type(), mat->rows());
-    auto type_id = GenerateTypeIfNeeded(&col_type);
-    if (has_error()) {
+    if (!GenerateMatrixType(type->AsMatrix(), result)) {
       return 0;
     }
-
-    push_type(spv::Op::OpTypeMatrix,
-              {result, Operand::Int(type_id), Operand::Int(mat->columns())});
+  } else if (type->IsStruct()) {
+    if (!GenerateStructType(type->AsStruct(), result)) {
+      return 0;
+    }
   } else if (type->IsU32()) {
     push_type(spv::Op::OpTypeInt, {result, Operand::Int(32), Operand::Int(0)});
   } else if (type->IsVector()) {
-    auto vec = type->AsVector();
-    auto col_type_id = GenerateTypeIfNeeded(vec->type());
-    if (has_error()) {
+    if (!GenerateVectorType(type->AsVector(), result)) {
       return 0;
     }
-    push_type(spv::Op::OpTypeVector,
-              {result, Operand::Int(col_type_id), Operand::Int(vec->size())});
   } else if (type->IsVoid()) {
     push_type(spv::Op::OpTypeVoid, {result});
   } else {
@@ -196,6 +194,84 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
 
   type_name_to_id_[type->type_name()] = id;
   return id;
+}
+
+bool Builder::GenerateMatrixType(ast::type::MatrixType* mat,
+                                 const Operand& result) {
+  ast::type::VectorType col_type(mat->type(), mat->rows());
+  auto col_type_id = GenerateTypeIfNeeded(&col_type);
+  if (has_error()) {
+    return false;
+  }
+
+  push_type(spv::Op::OpTypeMatrix,
+            {result, Operand::Int(col_type_id), Operand::Int(mat->columns())});
+  return true;
+}
+
+bool Builder::GenerateStructType(ast::type::StructType* struct_type,
+                                 const Operand& result) {
+  auto struct_id = result.to_i();
+  auto impl = struct_type->impl();
+
+  std::vector<Operand> ops;
+  ops.push_back(result);
+
+  if (impl->decoration() == ast::StructDecoration::kBlock) {
+    push_annot(spv::Op::OpDecorate,
+               {Operand::Int(struct_id), Operand::Int(SpvDecorationBlock)});
+  } else {
+    if (impl->decoration() != ast::StructDecoration::kNone) {
+      error_ = "unknown struct decoration";
+      return false;
+    }
+  }
+
+  auto& members = impl->members();
+  for (uint32_t i = 0; i < members.size(); ++i) {
+    auto mem_id = GenerateStructMember(struct_id, i, members[i].get());
+    if (mem_id == 0) {
+      return false;
+    }
+
+    ops.push_back(Operand::Int(mem_id));
+  }
+
+  push_type(spv::Op::OpTypeStruct, std::move(ops));
+  return true;
+}
+
+uint32_t Builder::GenerateStructMember(uint32_t struct_id,
+                                       uint32_t idx,
+                                       ast::StructMember* member) {
+  push_debug(spv::Op::OpMemberName, {Operand::Int(struct_id), Operand::Int(idx),
+                                     Operand::String(member->name())});
+
+  for (const auto& deco : member->decorations()) {
+    if (deco->IsOffset()) {
+      push_annot(spv::Op::OpMemberDecorate,
+                 {Operand::Int(struct_id), Operand::Int(idx),
+                  Operand::Int(SpvDecorationOffset),
+                  Operand::Int(deco->AsOffset()->offset())});
+    } else {
+      error_ = "unknown struct member decoration";
+      return 0;
+    }
+  }
+
+  return GenerateTypeIfNeeded(member->type());
+}
+
+bool Builder::GenerateVectorType(ast::type::VectorType* vec,
+                                 const Operand& result) {
+  auto type_id = GenerateTypeIfNeeded(vec->type());
+  if (has_error()) {
+    return false;
+  }
+
+  push_type(spv::Op::OpTypeVector,
+            {result, Operand::Int(type_id), Operand::Int(vec->size())});
+  return true;
 }
 
 }  // namespace spirv
