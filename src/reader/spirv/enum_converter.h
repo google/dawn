@@ -39,7 +39,7 @@ class EnumConverter {
   ast::PipelineStage ToPipelineStage(SpvExecutionModel model);
 
  private:
-  /// Registers a failure and returns a stream for logg diagnostics.
+  /// Registers a failure and returns a stream for log diagnostics.
   /// @returns a failure stream
   FailStream Fail() { return fail_stream_.Fail(); }
 
