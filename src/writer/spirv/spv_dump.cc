@@ -53,9 +53,7 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
   tools.SetMessageConsumer(msg_consumer);
 
   std::string result;
-  if (!tools.Disassemble(data, &result,
-                         SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES |
-                             SPV_BINARY_TO_TEXT_OPTION_NO_HEADER)) {
+  if (!tools.Disassemble(data, &result, SPV_BINARY_TO_TEXT_OPTION_NO_HEADER)) {
     printf("%s\n", spv_errors.c_str());
   }
   return result;
@@ -74,6 +72,15 @@ std::string DumpInstruction(const Instruction& inst) {
   BinaryWriter writer;
   writer.WriteHeader(kDefaultMaxIdBound);
   writer.WriteInstruction(inst);
+  return Disassemble(writer.result());
+}
+
+std::string DumpInstructions(const std::vector<Instruction>& insts) {
+  BinaryWriter writer;
+  writer.WriteHeader(kDefaultMaxIdBound);
+  for (const auto& inst : insts) {
+    writer.WriteInstruction(inst);
+  }
   return Disassemble(writer.result());
 }
 

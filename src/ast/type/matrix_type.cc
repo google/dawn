@@ -20,7 +20,7 @@ namespace tint {
 namespace ast {
 namespace type {
 
-MatrixType::MatrixType(Type* subtype, size_t rows, size_t columns)
+MatrixType::MatrixType(Type* subtype, uint32_t rows, uint32_t columns)
     : subtype_(subtype), rows_(rows), columns_(columns) {
   assert(rows > 1);
   assert(rows < 5);

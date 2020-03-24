@@ -41,6 +41,8 @@ class Builder {
 
   /// @returns the error string or blank if no error was reported.
   const std::string& error() const { return error_; }
+  /// @returns true if the builder encountered an error
+  bool has_error() const { return !error_.empty(); }
 
   /// @returns the number of uint32_t's needed to make up the results
   uint32_t total_size() const;
@@ -99,7 +101,7 @@ class Builder {
     types_.push_back(Instruction{op, operands});
   }
   /// @returns the type instructions
-  const std::vector<Instruction>& type() const { return types_; }
+  const std::vector<Instruction>& types() const { return types_; }
   /// Adds an instruction to the instruction list
   /// @param op the op to set
   /// @param operands the operands for the instruction
@@ -124,8 +126,14 @@ class Builder {
   /// Generates an import instruction
   /// @param imp the import
   void GenerateImport(ast::Import* imp);
+  /// Generates a type if not already created
+  /// @param type the type to create
+  /// @returns the ID to use for the given type. Returns 0 on unknown type.
+  uint32_t GenerateTypeIfNeeded(ast::type::Type* type);
 
  private:
+  /// @returns an Operand with a new result ID in it. Increments the next_id_
+  /// automatically.
   Operand result_op();
 
   std::string error_;
@@ -138,6 +146,7 @@ class Builder {
 
   std::unordered_map<std::string, uint32_t> import_name_to_id_;
   std::unordered_map<std::string, uint32_t> func_name_to_id_;
+  std::unordered_map<std::string, uint32_t> type_name_to_id_;
 };
 
 }  // namespace spirv

@@ -20,7 +20,7 @@ namespace tint {
 namespace ast {
 namespace type {
 
-VectorType::VectorType(Type* subtype, size_t size)
+VectorType::VectorType(Type* subtype, uint32_t size)
     : subtype_(subtype), size_(size) {
   assert(size_ > 1);
   assert(size_ < 5);

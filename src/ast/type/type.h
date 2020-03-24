@@ -63,7 +63,7 @@ class Type {
   /// @returns true if the type is a void type
   virtual bool IsVoid() const { return false; }
 
-  /// @returns the name for this type
+  /// @returns the name for this type. The |type_name| is unique over all types.
   virtual std::string type_name() const = 0;
 
   /// @returns the type as an alias type

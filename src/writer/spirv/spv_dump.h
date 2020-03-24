@@ -34,6 +34,11 @@ std::string DumpBuilder(const Builder& builder);
 /// @returns the instruction as a SPIR-V disassembly string
 std::string DumpInstruction(const Instruction& inst);
 
+/// Dumps the given instructions to a SPIR-V disassembly string
+/// @param insts the instructions to dump
+/// @returns the instruction as a SPIR-V disassembly string
+std::string DumpInstructions(const std::vector<Instruction>& insts);
+
 }  // namespace spirv
 }  // namespace writer
 }  // namespace tint

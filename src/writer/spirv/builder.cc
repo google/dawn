@@ -15,6 +15,8 @@
 #include "src/writer/spirv/builder.h"
 
 #include "spirv/unified1/spirv.h"
+#include "src/ast/type/matrix_type.h"
+#include "src/ast/type/vector_type.h"
 
 namespace tint {
 namespace writer {
@@ -137,12 +139,63 @@ bool Builder::GenerateEntryPoint(ast::EntryPoint* ep) {
 }
 
 void Builder::GenerateImport(ast::Import* imp) {
-  auto op = result_op();
-  auto id = op.to_i();
+  auto result = result_op();
+  auto id = result.to_i();
 
-  push_preamble(spv::Op::OpExtInstImport, {op, Operand::String(imp->path())});
+  push_preamble(spv::Op::OpExtInstImport,
+                {result, Operand::String(imp->path())});
 
   import_name_to_id_[imp->name()] = id;
+}
+
+uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
+  if (type->IsAlias()) {
+    return GenerateTypeIfNeeded(type->AsAlias()->type());
+  }
+
+  auto val = type_name_to_id_.find(type->type_name());
+  if (val != type_name_to_id_.end()) {
+    return val->second;
+  }
+
+  auto result = result_op();
+  auto id = result.to_i();
+
+  if (type->IsBool()) {
+    push_type(spv::Op::OpTypeBool, {result});
+  } else if (type->IsF32()) {
+    push_type(spv::Op::OpTypeFloat, {result, Operand::Int(32)});
+  } else if (type->IsI32()) {
+    push_type(spv::Op::OpTypeInt, {result, Operand::Int(32), Operand::Int(1)});
+  } else if (type->IsMatrix()) {
+    auto mat = type->AsMatrix();
+    ast::type::VectorType col_type(mat->type(), mat->rows());
+    auto type_id = GenerateTypeIfNeeded(&col_type);
+    if (has_error()) {
+      return 0;
+    }
+
+    push_type(spv::Op::OpTypeMatrix,
+              {result, Operand::Int(type_id), Operand::Int(mat->columns())});
+  } else if (type->IsU32()) {
+    push_type(spv::Op::OpTypeInt, {result, Operand::Int(32), Operand::Int(0)});
+  } else if (type->IsVector()) {
+    auto vec = type->AsVector();
+    auto col_type_id = GenerateTypeIfNeeded(vec->type());
+    if (has_error()) {
+      return 0;
+    }
+    push_type(spv::Op::OpTypeVector,
+              {result, Operand::Int(col_type_id), Operand::Int(vec->size())});
+  } else if (type->IsVoid()) {
+    push_type(spv::Op::OpTypeVoid, {result});
+  } else {
+    error_ = "unable to convert type: " + type->type_name();
+    return 0;
+  }
+
+  type_name_to_id_[type->type_name()] = id;
+  return id;
 }
 
 }  // namespace spirv

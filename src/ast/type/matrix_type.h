@@ -30,7 +30,7 @@ class MatrixType : public Type {
   /// @param subtype type matrix type
   /// @param rows the number of rows in the matrix
   /// @param columns the number of columns in the matrix
-  MatrixType(Type* subtype, size_t rows, size_t columns);
+  MatrixType(Type* subtype, uint32_t rows, uint32_t columns);
   /// Move constructor
   MatrixType(MatrixType&&) = default;
   ~MatrixType() override;
@@ -41,9 +41,9 @@ class MatrixType : public Type {
   /// @returns the type of the matrix
   Type* type() const { return subtype_; }
   /// @returns the number of rows in the matrix
-  size_t rows() const { return rows_; }
+  uint32_t rows() const { return rows_; }
   /// @returns the number of columns in the matrix
-  size_t columns() const { return columns_; }
+  uint32_t columns() const { return columns_; }
 
   /// @returns the name for this type
   std::string type_name() const override {
@@ -53,8 +53,8 @@ class MatrixType : public Type {
 
  private:
   Type* subtype_ = nullptr;
-  size_t rows_ = 2;
-  size_t columns_ = 2;
+  uint32_t rows_ = 2;
+  uint32_t columns_ = 2;
 };
 
 }  // namespace type
