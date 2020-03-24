@@ -57,6 +57,7 @@ namespace dawn_native {
             std::array<wgpu::BindingType, kMaxBindingsPerGroup> types;
             std::array<wgpu::TextureComponentType, kMaxBindingsPerGroup> textureComponentTypes;
             std::array<wgpu::TextureViewDimension, kMaxBindingsPerGroup> textureDimensions;
+            std::array<wgpu::TextureFormat, kMaxBindingsPerGroup> storageTextureFormats;
             std::bitset<kMaxBindingsPerGroup> hasDynamicOffset;
             std::bitset<kMaxBindingsPerGroup> multisampled;
             BindingIndex bindingCount;

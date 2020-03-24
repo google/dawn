@@ -67,8 +67,10 @@ namespace dawn_native {
             case wgpu::BindingType::WriteonlyStorageTexture: {
                 DAWN_TRY(ValidateTextureFormat(storageTextureFormat));
 
-                const Format& format = device->GetValidInternalFormat(storageTextureFormat);
-                if (!format.supportsStorageUsage) {
+                const Format* format = nullptr;
+                DAWN_TRY_ASSIGN(format, device->GetInternalFormat(storageTextureFormat));
+                ASSERT(format != nullptr);
+                if (!format->supportsStorageUsage) {
                     return DAWN_VALIDATION_ERROR("The storage texture format is not supported");
                 }
             } break;
@@ -170,7 +172,8 @@ namespace dawn_native {
 
             for (BindingIndex i = 0; i < info.bindingCount; ++i) {
                 HashCombine(&hash, info.visibilities[i], info.types[i],
-                            info.textureComponentTypes[i], info.textureDimensions[i]);
+                            info.textureComponentTypes[i], info.textureDimensions[i],
+                            info.storageTextureFormats[i]);
             }
 
             return hash;
@@ -186,7 +189,8 @@ namespace dawn_native {
             for (BindingIndex i = 0; i < a.bindingCount; ++i) {
                 if ((a.visibilities[i] != b.visibilities[i]) || (a.types[i] != b.types[i]) ||
                     (a.textureComponentTypes[i] != b.textureComponentTypes[i]) ||
-                    (a.textureDimensions[i] != b.textureDimensions[i])) {
+                    (a.textureDimensions[i] != b.textureDimensions[i]) ||
+                    (a.storageTextureFormats[i] != b.storageTextureFormats[i])) {
                     return false;
                 }
             }
@@ -275,6 +279,7 @@ namespace dawn_native {
             mBindingInfo.types[i] = binding.type;
             mBindingInfo.visibilities[i] = binding.visibility;
             mBindingInfo.textureComponentTypes[i] = binding.textureComponentType;
+            mBindingInfo.storageTextureFormats[i] = binding.storageTextureFormat;
 
             switch (binding.type) {
                 case wgpu::BindingType::UniformBuffer:

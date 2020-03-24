@@ -387,14 +387,16 @@ namespace dawn_native {
                 BindingInfo* info = &it.first->second;
                 info->id = binding.id;
                 info->base_type_id = binding.base_type_id;
-                if (binding.binding_type == shaderc_spvc_binding_type_sampled_texture) {
-                    info->multisampled = binding.multisampled;
-                    info->textureDimension = ToWGPUTextureViewDimension(binding.texture_dimension);
-                    info->textureComponentType = ToDawnFormatType(binding.texture_component_type);
-                }
                 info->type = ToWGPUBindingType(binding.binding_type);
 
                 switch (info->type) {
+                    case wgpu::BindingType::SampledTexture: {
+                        info->multisampled = binding.multisampled;
+                        info->textureDimension =
+                            ToWGPUTextureViewDimension(binding.texture_dimension);
+                        info->textureComponentType =
+                            ToDawnFormatType(binding.texture_component_type);
+                    } break;
                     case wgpu::BindingType::StorageTexture:
                     case wgpu::BindingType::ReadonlyStorageTexture:
                     case wgpu::BindingType::WriteonlyStorageTexture: {
@@ -410,7 +412,11 @@ namespace dawn_native {
                             return DAWN_VALIDATION_ERROR(
                                 "The storage texture format is not supported");
                         }
+                        // TODO(jiawei.shao@intel.com): extract info->multisampled when it is
+                        // supported for storage images in SPVC.
                         info->storageTextureFormat = storageTextureFormat;
+                        info->textureDimension =
+                            ToWGPUTextureViewDimension(binding.texture_dimension);
                     } break;
                     default:
                         break;
@@ -610,6 +616,8 @@ namespace dawn_native {
                                 "The storage texture format is not supported");
                         }
                         info->storageTextureFormat = storageTextureFormat;
+                        info->textureDimension =
+                            SpirvDimToTextureViewDimension(imageType.dim, imageType.arrayed);
                     } break;
                     default:
                         info->type = bindingType;
@@ -767,15 +775,44 @@ namespace dawn_native {
                 return false;
             }
 
-            if (layoutBindingType == wgpu::BindingType::SampledTexture) {
-                Format::Type layoutTextureComponentType = Format::TextureComponentTypeToFormatType(
-                    layoutInfo.textureComponentTypes[bindingIndex]);
-                if (layoutTextureComponentType != moduleInfo.textureComponentType) {
+            switch (layoutBindingType) {
+                case wgpu::BindingType::SampledTexture: {
+                    Format::Type layoutTextureComponentType =
+                        Format::TextureComponentTypeToFormatType(
+                            layoutInfo.textureComponentTypes[bindingIndex]);
+                    if (layoutTextureComponentType != moduleInfo.textureComponentType) {
+                        return false;
+                    }
+
+                    if (layoutInfo.textureDimensions[bindingIndex] != moduleInfo.textureDimension) {
+                        return false;
+                    }
+                } break;
+
+                case wgpu::BindingType::ReadonlyStorageTexture:
+                case wgpu::BindingType::WriteonlyStorageTexture: {
+                    ASSERT(layoutInfo.storageTextureFormats[bindingIndex] !=
+                           wgpu::TextureFormat::Undefined);
+                    ASSERT(moduleInfo.storageTextureFormat != wgpu::TextureFormat::Undefined);
+                    if (layoutInfo.storageTextureFormats[bindingIndex] !=
+                        moduleInfo.storageTextureFormat) {
+                        return false;
+                    }
+                    if (layoutInfo.textureDimensions[bindingIndex] != moduleInfo.textureDimension) {
+                        return false;
+                    }
+                } break;
+
+                case wgpu::BindingType::UniformBuffer:
+                case wgpu::BindingType::ReadonlyStorageBuffer:
+                case wgpu::BindingType::StorageBuffer:
+                case wgpu::BindingType::Sampler:
+                    break;
+
+                case wgpu::BindingType::StorageTexture:
+                default:
+                    UNREACHABLE();
                     return false;
-                }
-                if (layoutInfo.textureDimensions[bindingIndex] != moduleInfo.textureDimension) {
-                    return false;
-                }
             }
         }
 
