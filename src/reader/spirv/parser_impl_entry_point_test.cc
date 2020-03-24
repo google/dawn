@@ -25,7 +25,7 @@ namespace {
 
 using ::testing::HasSubstr;
 
-using SpvParseImport = ::testing::Test;
+using SpvParserTest_EntryPoint = ::testing::Test;
 
 std::string MakeEntryPoint(const std::string& stage,
                            const std::string& name,
@@ -35,7 +35,7 @@ std::string MakeEntryPoint(const std::string& stage,
          "%" + id + " = OpTypeVoid\n";
 }
 
-TEST_F(SpvParseImport, NoEntryPoint) {
+TEST_F(SpvParserTest_EntryPoint, NoEntryPoint) {
   ParserImpl p(test::Assemble(""));
   EXPECT_TRUE(p.BuildAndParseInternalModule());
   EXPECT_TRUE(p.error().empty());
@@ -43,7 +43,7 @@ TEST_F(SpvParseImport, NoEntryPoint) {
   EXPECT_THAT(module_ast, Not(HasSubstr("EntryPoint")));
 }
 
-TEST_F(SpvParseImport, EntryPointVertex) {
+TEST_F(SpvParserTest_EntryPoint, Vertex) {
   ParserImpl p(test::Assemble(MakeEntryPoint("Vertex", "foobar")));
   EXPECT_TRUE(p.BuildAndParseInternalModule());
   EXPECT_TRUE(p.error().empty());
@@ -51,7 +51,7 @@ TEST_F(SpvParseImport, EntryPointVertex) {
   EXPECT_THAT(module_str, HasSubstr(R"(EntryPoint{vertex = foobar})"));
 }
 
-TEST_F(SpvParseImport, EntryPointFragment) {
+TEST_F(SpvParserTest_EntryPoint, Fragment) {
   ParserImpl p(test::Assemble(MakeEntryPoint("Fragment", "blitz")));
   EXPECT_TRUE(p.BuildAndParseInternalModule());
   EXPECT_TRUE(p.error().empty());
@@ -59,7 +59,7 @@ TEST_F(SpvParseImport, EntryPointFragment) {
   EXPECT_THAT(module_str, HasSubstr(R"(EntryPoint{fragment = blitz})"));
 }
 
-TEST_F(SpvParseImport, EntryPointCompute) {
+TEST_F(SpvParserTest_EntryPoint, Compute) {
   ParserImpl p(test::Assemble(MakeEntryPoint("GLCompute", "sort")));
   EXPECT_TRUE(p.BuildAndParseInternalModule());
   EXPECT_TRUE(p.error().empty());
@@ -67,7 +67,7 @@ TEST_F(SpvParseImport, EntryPointCompute) {
   EXPECT_THAT(module_str, HasSubstr(R"(EntryPoint{compute = sort})"));
 }
 
-TEST_F(SpvParseImport, EntryPointMultiNameConflict) {
+TEST_F(SpvParserTest_EntryPoint, MultiNameConflict) {
   ParserImpl p(test::Assemble(MakeEntryPoint("GLCompute", "work", "40") +
                               MakeEntryPoint("Vertex", "work", "50") +
                               MakeEntryPoint("Fragment", "work", "60")));
@@ -79,7 +79,7 @@ TEST_F(SpvParseImport, EntryPointMultiNameConflict) {
   EXPECT_THAT(module_str, HasSubstr(R"(EntryPoint{fragment = work_2})"));
 }
 
-TEST_F(SpvParseImport, EntryPointNameIsSanitized) {
+TEST_F(SpvParserTest_EntryPoint, NameIsSanitized) {
   ParserImpl p(test::Assemble(MakeEntryPoint("GLCompute", ".1234")));
   EXPECT_TRUE(p.BuildAndParseInternalModule());
   EXPECT_TRUE(p.error().empty());
