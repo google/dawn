@@ -30,8 +30,9 @@ using SpvParseImport = ::testing::Test;
 std::string MakeEntryPoint(const std::string& stage,
                            const std::string& name,
                            const std::string& id = "42") {
-  return std::string("OpEntryPoint ") + stage + " %" + id + "2 \"" + name +
-         "\"\n";
+  return std::string("OpEntryPoint ") + stage + " %" + id + " \"" + name +
+         "\"\n" +  // Give the target ID a definition.
+         "%" + id + " = OpTypeVoid\n";
 }
 
 TEST_F(SpvParseImport, NoEntryPoint) {
@@ -43,11 +44,11 @@ TEST_F(SpvParseImport, NoEntryPoint) {
 }
 
 TEST_F(SpvParseImport, EntryPointVertex) {
-  ParserImpl p(test::Assemble(MakeEntryPoint("GLCompute", "foobar")));
+  ParserImpl p(test::Assemble(MakeEntryPoint("Vertex", "foobar")));
   EXPECT_TRUE(p.BuildAndParseInternalModule());
   EXPECT_TRUE(p.error().empty());
   const auto module_str = p.module().to_str();
-  EXPECT_THAT(module_str, HasSubstr(R"(EntryPoint{compute = foobar})"));
+  EXPECT_THAT(module_str, HasSubstr(R"(EntryPoint{vertex = foobar})"));
 }
 
 TEST_F(SpvParseImport, EntryPointFragment) {
