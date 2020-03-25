@@ -238,7 +238,7 @@ void ParserImpl::ResetInternalModule() {
 bool ParserImpl::ParseInternalModule() {
   if (!success_) {
     return false;
-  };
+  }
   if (!RegisterExtendedInstructionImports()) {
     return false;
   }

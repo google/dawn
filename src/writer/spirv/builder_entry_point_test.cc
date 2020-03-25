@@ -85,7 +85,7 @@ TEST_P(EntryPointStageTest, Emit) {
   ASSERT_EQ(preamble.size(), 1);
   EXPECT_EQ(preamble[0].opcode(), spv::Op::OpEntryPoint);
 
-  ASSERT_TRUE(preamble[0].operands().size() >= 3);
+  ASSERT_GE(preamble[0].operands().size(), 3);
   EXPECT_EQ(preamble[0].operands()[0].to_i(), params.model);
 }
 INSTANTIATE_TEST_SUITE_P(

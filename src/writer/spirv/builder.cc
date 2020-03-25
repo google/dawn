@@ -14,6 +14,8 @@
 
 #include "src/writer/spirv/builder.h"
 
+#include <utility>
+
 #include "spirv/unified1/spirv.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
@@ -73,6 +75,12 @@ bool Builder::Build(const ast::Module& m) {
   push_preamble(spv::Op::OpMemoryModel,
                 {Operand::Int(SpvAddressingModelLogical),
                  Operand::Int(SpvMemoryModelVulkanKHR)});
+
+  for (const auto& func : m.functions()) {
+    if (!GenerateFunction(func.get())) {
+      return false;
+    }
+  }
 
   for (const auto& ep : m.entry_points()) {
     if (!GenerateEntryPoint(ep.get())) {
@@ -140,6 +148,58 @@ bool Builder::GenerateEntryPoint(ast::EntryPoint* ep) {
                 {Operand::Int(stage), Operand::Int(id), Operand::String(name)});
 
   return true;
+}
+
+bool Builder::GenerateFunction(ast::Function* func) {
+  uint32_t func_type_id = GenerateFunctionTypeIfNeeded(func);
+  if (func_type_id == 0) {
+    return false;
+  }
+
+  auto func_op = result_op();
+  auto func_id = func_op.to_i();
+
+  push_debug(spv::Op::OpName,
+             {Operand::Int(func_id), Operand::String(func->name())});
+
+  auto ret_id = GenerateTypeIfNeeded(func->return_type());
+  if (ret_id == 0) {
+    return false;
+  }
+
+  // TODO(dsinclair): Handle parameters
+  push_inst(spv::Op::OpFunction, {Operand::Int(ret_id), func_op,
+                                  Operand::Int(SpvFunctionControlMaskNone),
+                                  Operand::Int(func_type_id)});
+  push_inst(spv::Op::OpLabel, {result_op()});
+
+  // TODO(dsinclair): Function body ...
+
+  push_inst(spv::Op::OpFunctionEnd, {});
+
+  func_name_to_id_[func->name()] = func_id;
+  return true;
+}
+
+uint32_t Builder::GenerateFunctionTypeIfNeeded(ast::Function* func) {
+  auto val = type_name_to_id_.find(func->type_name());
+  if (val != type_name_to_id_.end()) {
+    return val->second;
+  }
+
+  auto func_op = result_op();
+  auto func_type_id = func_op.to_i();
+
+  auto ret_id = GenerateTypeIfNeeded(func->return_type());
+  if (ret_id == 0) {
+    return 0;
+  }
+
+  // TODO(dsinclair): Handle parameters
+  push_type(spv::Op::OpTypeFunction, {func_op, Operand::Int(ret_id)});
+
+  type_name_to_id_[func->type_name()] = func_type_id;
+  return func_type_id;
 }
 
 void Builder::GenerateImport(ast::Import* imp) {

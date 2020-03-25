@@ -16,6 +16,7 @@
 #define SRC_WRITER_SPIRV_SPV_DUMP_H_
 
 #include <string>
+#include <vector>
 
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/instruction.h"

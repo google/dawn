@@ -200,7 +200,7 @@ TEST_F(SpvNamerTest, SuggestSanitizedMemberName_TakeSanitizedSuggestion) {
 
 TEST_F(
     SpvNamerTest,
-    SuggestSanitizedMemberName_TakeSuggestionWhenNoConflictAfterSuggestionForLowerMember) {
+    SuggestSanitizedMemberName_TakeSuggestionWhenNoConflictAfterSuggestionForLowerMember) {  // NOLINT
   Namer namer(fail_stream_);
   EXPECT_TRUE(namer.SuggestSanitizedMemberName(1, 7, "mother"));
   EXPECT_THAT(namer.GetMemberName(1, 2), Eq(""));

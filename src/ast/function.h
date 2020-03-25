@@ -94,6 +94,9 @@ class Function : public Node {
   /// @param indent number of spaces to indent the node when writing
   void to_str(std::ostream& out, size_t indent) const override;
 
+  /// @returns the type name for this function
+  std::string type_name() const;
+
  private:
   Function(const Function&) = delete;
 

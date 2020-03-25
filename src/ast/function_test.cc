@@ -16,6 +16,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/nop_statement.h"
+#include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/void_type.h"
 #include "src/ast/variable.h"
@@ -200,6 +201,28 @@ TEST_F(FunctionTest, ToStr_WithParams) {
     Nop{}
   }
 )");
+}
+
+TEST_F(FunctionTest, TypeName) {
+  type::VoidType void_type;
+
+  Function f("func", {}, &void_type);
+  EXPECT_EQ(f.type_name(), "__func__void");
+}
+
+TEST_F(FunctionTest, TypeName_WithParams) {
+  type::VoidType void_type;
+  type::I32Type i32;
+  type::F32Type f32;
+
+  std::vector<std::unique_ptr<Variable>> params;
+  params.push_back(
+      std::make_unique<Variable>("var1", StorageClass::kNone, &i32));
+  params.push_back(
+      std::make_unique<Variable>("var2", StorageClass::kNone, &f32));
+
+  Function f("func", std::move(params), &void_type);
+  EXPECT_EQ(f.type_name(), "__func__void__i32__f32");
 }
 
 }  // namespace ast

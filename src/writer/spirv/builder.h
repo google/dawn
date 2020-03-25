@@ -110,7 +110,7 @@ class Builder {
     instructions_.push_back(Instruction{op, operands});
   }
   /// @returns the instruction list
-  const std::vector<Instruction>& inst() const { return instructions_; }
+  const std::vector<Instruction>& instructions() const { return instructions_; }
   /// Adds an instruction to the annotations
   /// @param op the op to set
   /// @param operands the operands for the instruction
@@ -124,6 +124,14 @@ class Builder {
   /// @param ep the entry point
   /// @returns true if the instruction was generated, false otherwise
   bool GenerateEntryPoint(ast::EntryPoint* ep);
+  /// Generates the instructions for a function
+  /// @param func the function to generate
+  /// @returns true if the instructions were generated
+  bool GenerateFunction(ast::Function* func);
+  /// Generates a function type if not already created
+  /// @param func the function to generate for
+  /// @returns the ID to use for the function type. Returns 0 on failure.
+  uint32_t GenerateFunctionTypeIfNeeded(ast::Function* func);
   /// Generates an import instruction
   /// @param imp the import
   void GenerateImport(ast::Import* imp);

@@ -14,6 +14,8 @@
 
 #include "src/ast/function.h"
 
+#include <sstream>
+
 namespace tint {
 namespace ast {
 
@@ -81,6 +83,17 @@ void Function::to_str(std::ostream& out, size_t indent) const {
 
   make_indent(out, indent);
   out << "}" << std::endl;
+}
+
+std::string Function::type_name() const {
+  std::ostringstream out;
+
+  out << "__func" + return_type_->type_name();
+  for (const auto& param : params_) {
+    out << param->type()->type_name();
+  }
+
+  return out.str();
 }
 
 }  // namespace ast
