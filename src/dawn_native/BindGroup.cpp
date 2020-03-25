@@ -66,7 +66,8 @@ namespace dawn_native {
                                           wgpu::TextureUsage requiredUsage,
                                           bool multisampledBinding,
                                           wgpu::TextureComponentType requiredComponentType,
-                                          wgpu::TextureViewDimension requiredDimension) {
+                                          wgpu::TextureViewDimension requiredDimension,
+                                          wgpu::TextureFormat requiredStorageTextureFormat) {
             if (binding.textureView == nullptr || binding.sampler != nullptr ||
                 binding.buffer != nullptr) {
                 return DAWN_VALIDATION_ERROR("expected texture binding");
@@ -83,8 +84,20 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("texture multisampling mismatch");
             }
 
-            if (!texture->GetFormat().HasComponentType(requiredComponentType)) {
-                return DAWN_VALIDATION_ERROR("texture component type usage mismatch");
+            switch (requiredUsage) {
+                case wgpu::TextureUsage::Sampled: {
+                    if (!texture->GetFormat().HasComponentType(requiredComponentType)) {
+                        return DAWN_VALIDATION_ERROR("texture component type usage mismatch");
+                    }
+                } break;
+                case wgpu::TextureUsage::Storage: {
+                    if (texture->GetFormat().format != requiredStorageTextureFormat) {
+                        return DAWN_VALIDATION_ERROR("storage texture format mismatch");
+                    }
+                } break;
+                default:
+                    UNREACHABLE();
+                    break;
             }
 
             if (binding.textureView->GetDimension() != requiredDimension) {
@@ -150,10 +163,12 @@ namespace dawn_native {
                     DAWN_TRY(ValidateBufferBinding(device, binding, wgpu::BufferUsage::Storage));
                     break;
                 case wgpu::BindingType::SampledTexture:
-                    DAWN_TRY(ValidateTextureBinding(device, binding, wgpu::TextureUsage::Sampled,
-                                                    layoutInfo.multisampled[bindingIndex],
-                                                    layoutInfo.textureComponentTypes[bindingIndex],
-                                                    layoutInfo.textureDimensions[bindingIndex]));
+                    DAWN_TRY(
+                        ValidateTextureBinding(device, binding, wgpu::TextureUsage::Sampled,
+                                               layoutInfo.multisampled[bindingIndex],
+                                               layoutInfo.textureComponentTypes[bindingIndex],
+                                               layoutInfo.textureDimensions[bindingIndex],
+                                               layoutInfo.storageTextureFormats[bindingIndex]));
                     break;
                 case wgpu::BindingType::Sampler:
                     DAWN_TRY(ValidateSamplerBinding(device, binding));
@@ -162,8 +177,13 @@ namespace dawn_native {
                 // write-only storage textures.
                 case wgpu::BindingType::ReadonlyStorageTexture:
                 case wgpu::BindingType::WriteonlyStorageTexture:
-                    return DAWN_VALIDATION_ERROR(
-                        "Readonly and writeonly storage textures are not supported.");
+                    DAWN_TRY(
+                        ValidateTextureBinding(device, binding, wgpu::TextureUsage::Storage,
+                                               layoutInfo.multisampled[bindingIndex],
+                                               layoutInfo.textureComponentTypes[bindingIndex],
+                                               layoutInfo.textureDimensions[bindingIndex],
+                                               layoutInfo.storageTextureFormats[bindingIndex]));
+                    break;
                 case wgpu::BindingType::StorageTexture:
                     UNREACHABLE();
                     break;
@@ -178,7 +198,7 @@ namespace dawn_native {
         ASSERT(bindingsSet.count() == bindingMap.size());
 
         return {};
-    }
+    }  // anonymous namespace
 
     // BindGroup
 

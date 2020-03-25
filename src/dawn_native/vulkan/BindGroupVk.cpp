@@ -88,6 +88,15 @@ namespace dawn_native { namespace vulkan {
                     write.pImageInfo = &writeImageInfo[numWrites];
                 } break;
 
+                case wgpu::BindingType::ReadonlyStorageTexture:
+                case wgpu::BindingType::WriteonlyStorageTexture: {
+                    TextureView* view = ToBackend(GetBindingAsTextureView(bindingIndex));
+
+                    writeImageInfo[numWrites].imageView = view->GetHandle();
+                    writeImageInfo[numWrites].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+                    write.pImageInfo = &writeImageInfo[numWrites];
+                } break;
                 default:
                     UNREACHABLE();
             }
