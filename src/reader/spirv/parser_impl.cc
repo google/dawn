@@ -27,8 +27,10 @@
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
+#include "src/ast/type/matrix_type.h"
 #include "src/ast/type/type.h"
 #include "src/ast/type/u32_type.h"
+#include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
 #include "src/type_manager.h"
 
@@ -101,13 +103,13 @@ ast::Module ParserImpl::module() {
   return std::move(ast_module_);
 }
 
-const ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
+ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
   if (!success_) {
     return nullptr;
   }
 
   if (type_mgr_ == nullptr) {
-    Fail() << "ConvertType called when the internal module has not been built.";
+    Fail() << "ConvertType called when the internal module has not been built";
     return nullptr;
   }
 
@@ -122,7 +124,7 @@ const ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
     return nullptr;
   }
 
-  const ast::type::Type* result = nullptr;
+  ast::type::Type* result = nullptr;
   TypeManager* tint_tm = TypeManager::Instance();
 
   switch (spirv_type->kind()) {
@@ -152,6 +154,31 @@ const ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
       } else {
         Fail() << "unhandled float width: " << float_ty->width();
       }
+      break;
+    }
+    case spvtools::opt::analysis::Type::kVector: {
+      const auto* vec_ty = spirv_type->AsVector();
+      const auto num_elem = vec_ty->element_count();
+      auto* ast_elem_ty = ConvertType(type_mgr_->GetId(vec_ty->element_type()));
+      if (ast_elem_ty != nullptr) {
+        result = tint_tm->Get(
+            std::make_unique<ast::type::VectorType>(ast_elem_ty, num_elem));
+      }
+      // In the error case, we'll already have emitted a diagnostic.
+      break;
+    }
+    case spvtools::opt::analysis::Type::kMatrix: {
+      const auto* mat_ty = spirv_type->AsMatrix();
+      const auto* vec_ty = mat_ty->element_type()->AsVector();
+      const auto* scalar_ty = vec_ty->element_type();
+      const auto num_rows = vec_ty->element_count();
+      const auto num_columns = mat_ty->element_count();
+      auto* ast_scalar_ty = ConvertType(type_mgr_->GetId(scalar_ty));
+      if (ast_scalar_ty != nullptr) {
+        result = tint_tm->Get(std::make_unique<ast::type::MatrixType>(
+            ast_scalar_ty, num_rows, num_columns));
+      }
+      // In the error case, we'll already have emitted a diagnostic.
       break;
     }
     default:

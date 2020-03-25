@@ -89,7 +89,7 @@ class ParserImpl : Reader {
   /// representation of the module has been built.
   /// @param type_id the SPIR-V ID of a type.
   /// @returns a Tint type, or nullptr
-  const ast::type::Type* ConvertType(uint32_t type_id);
+  ast::type::Type* ConvertType(uint32_t type_id);
 
   /// @returns the namer object
   Namer& namer() { return namer_; }
@@ -158,7 +158,7 @@ class ParserImpl : Reader {
   std::unordered_set<uint32_t> glsl_std_450_imports_;
 
   // Maps a SPIR-V type ID to a Tint type.
-  std::unordered_map<uint32_t, const ast::type::Type*> id_to_type_;
+  std::unordered_map<uint32_t, ast::type::Type*> id_to_type_;
 };
 
 }  // namespace spirv
