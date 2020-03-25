@@ -16,20 +16,19 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/type/i32_type.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, Empty) {
-  ParserImpl p{""};
-  ASSERT_TRUE(p.Parse()) << p.error();
+  auto p = parser("");
+  ASSERT_TRUE(p->Parse()) << p->error();
 }
 
 TEST_F(ParserImplTest, DISABLED_Parses) {
-  ParserImpl p{R"(
+  auto p = parser(R"(
 import "GLSL.std.430" as glsl;
 
 [[location 0]] var<out> gl_FragColor : vec4<f32>;
@@ -37,41 +36,41 @@ import "GLSL.std.430" as glsl;
 fn main() -> void {
   gl_FragColor = vec4<f32>(.4, .2, .3, 1);
 }
-)"};
-  ASSERT_TRUE(p.Parse()) << p.error();
+)");
+  ASSERT_TRUE(p->Parse()) << p->error();
 
-  auto m = p.module();
+  auto m = p->module();
   ASSERT_EQ(1, m.imports().size());
 
   // TODO(dsinclair) check rest of AST ...
 }
 
 TEST_F(ParserImplTest, DISABLED_HandlesError) {
-  ParserImpl p{R"(
+  auto p = parser(R"(
 import "GLSL.std.430" as glsl;
 
 fn main() ->  {  # missing return type
   return;
-})"};
+})");
 
-  ASSERT_FALSE(p.Parse());
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "4:15: missing return type for function");
+  ASSERT_FALSE(p->Parse());
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "4:15: missing return type for function");
 }
 
 TEST_F(ParserImplTest, GetRegisteredType) {
-  ParserImpl p{""};
+  auto p = parser("");
   ast::type::I32Type i32;
-  p.register_alias("my_alias", &i32);
+  p->register_alias("my_alias", &i32);
 
-  auto alias = p.get_alias("my_alias");
+  auto alias = p->get_alias("my_alias");
   ASSERT_NE(alias, nullptr);
   ASSERT_EQ(alias, &i32);
 }
 
 TEST_F(ParserImplTest, GetUnregisteredType) {
-  ParserImpl p{""};
-  auto alias = p.get_alias("my_alias");
+  auto p = parser("");
+  auto alias = p->get_alias("my_alias");
   ASSERT_EQ(alias, nullptr);
 }
 

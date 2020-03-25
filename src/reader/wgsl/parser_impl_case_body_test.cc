@@ -14,54 +14,53 @@
 
 #include "gtest/gtest.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, CaseBody_Empty) {
-  ParserImpl p{""};
-  auto e = p.case_body();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("");
+  auto e = p->case_body();
+  ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_EQ(e.size(), 0);
 }
 
 TEST_F(ParserImplTest, CaseBody_Statements) {
-  ParserImpl p{R"(
+  auto p = parser(R"(
   var a: i32;
-  a = 2;)"};
+  a = 2;)");
 
-  auto e = p.case_body();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto e = p->case_body();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e.size(), 2);
   EXPECT_TRUE(e[0]->IsVariable());
   EXPECT_TRUE(e[1]->IsAssign());
 }
 
 TEST_F(ParserImplTest, CaseBody_InvalidStatement) {
-  ParserImpl p{"a ="};
-  auto e = p.case_body();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("a =");
+  auto e = p->case_body();
+  ASSERT_TRUE(p->has_error());
   EXPECT_EQ(e.size(), 0);
-  EXPECT_EQ(p.error(), "1:4: unable to parse right side of assignment");
+  EXPECT_EQ(p->error(), "1:4: unable to parse right side of assignment");
 }
 
 TEST_F(ParserImplTest, CaseBody_Fallthrough) {
-  ParserImpl p{"fallthrough;"};
-  auto e = p.case_body();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("fallthrough;");
+  auto e = p->case_body();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e.size(), 1);
   EXPECT_TRUE(e[0]->IsFallthrough());
 }
 
 TEST_F(ParserImplTest, CaseBody_Fallthrough_MissingSemicolon) {
-  ParserImpl p{"fallthrough"};
-  auto e = p.case_body();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("fallthrough");
+  auto e = p->case_body();
+  ASSERT_TRUE(p->has_error());
   EXPECT_EQ(e.size(), 0);
-  EXPECT_EQ(p.error(), "1:12: missing ;");
+  EXPECT_EQ(p->error(), "1:12: missing ;");
 }
 
 }  // namespace wgsl

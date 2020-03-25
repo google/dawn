@@ -16,17 +16,16 @@
 #include "src/ast/else_statement.h"
 #include "src/ast/if_statement.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, IfStmt) {
-  ParserImpl p{"if (a == 4) { a = b; c = d; }"};
-  auto e = p.if_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("if (a == 4) { a = b; c = d; }");
+  auto e = p->if_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsIf());
@@ -38,9 +37,9 @@ TEST_F(ParserImplTest, IfStmt) {
 }
 
 TEST_F(ParserImplTest, IfStmt_WithElse) {
-  ParserImpl p{"if (a == 4) { a = b; c = d; } elseif(c) { d = 2; } else {}"};
-  auto e = p.if_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("if (a == 4) { a = b; c = d; } elseif(c) { d = 2; } else {}");
+  auto e = p->if_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsIf());
@@ -58,16 +57,16 @@ TEST_F(ParserImplTest, IfStmt_WithElse) {
 }
 
 TEST_F(ParserImplTest, IfStmt_WithPremerge) {
-  ParserImpl p{R"(if (a == 4) {
+  auto p = parser(R"(if (a == 4) {
   a = b;
   c = d;
 } else {
   d = 2;
 } premerge {
   a = 2;
-})"};
-  auto e = p.if_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+})");
+  auto e = p->if_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsIf());
@@ -83,59 +82,59 @@ TEST_F(ParserImplTest, IfStmt_WithPremerge) {
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidCondition) {
-  ParserImpl p{"if (a = 3) {}"};
-  auto e = p.if_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("if (a = 3) {}");
+  auto e = p->if_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:7: expected )");
+  EXPECT_EQ(p->error(), "1:7: expected )");
 }
 
 TEST_F(ParserImplTest, IfStmt_MissingCondition) {
-  ParserImpl p{"if {}"};
-  auto e = p.if_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("if {}");
+  auto e = p->if_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:4: expected (");
+  EXPECT_EQ(p->error(), "1:4: expected (");
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidBody) {
-  ParserImpl p{"if (a) { fn main() -> void {}}"};
-  auto e = p.if_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("if (a) { fn main() -> void {}}");
+  auto e = p->if_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:10: missing }");
+  EXPECT_EQ(p->error(), "1:10: missing }");
 }
 
 TEST_F(ParserImplTest, IfStmt_MissingBody) {
-  ParserImpl p{"if (a)"};
-  auto e = p.if_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("if (a)");
+  auto e = p->if_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:7: missing {");
+  EXPECT_EQ(p->error(), "1:7: missing {");
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidElseif) {
-  ParserImpl p{"if (a) {} elseif (a) { fn main() -> a{}}"};
-  auto e = p.if_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("if (a) {} elseif (a) { fn main() -> a{}}");
+  auto e = p->if_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:24: missing }");
+  EXPECT_EQ(p->error(), "1:24: missing }");
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidElse) {
-  ParserImpl p{"if (a) {} else { fn main() -> a{}}"};
-  auto e = p.if_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("if (a) {} else { fn main() -> a{}}");
+  auto e = p->if_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:18: missing }");
+  EXPECT_EQ(p->error(), "1:18: missing }");
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidPremerge) {
-  ParserImpl p{"if (a) {} else {} premerge { fn main() -> a{}}"};
-  auto e = p.if_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("if (a) {} else {} premerge { fn main() -> a{}}");
+  auto e = p->if_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:30: missing }");
+  EXPECT_EQ(p->error(), "1:30: missing }");
 }
 
 }  // namespace wgsl

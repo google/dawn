@@ -15,17 +15,16 @@
 #include "gtest/gtest.h"
 #include "src/ast/else_statement.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, ElseStmt) {
-  ParserImpl p{"else { a = b; c = d; }"};
-  auto e = p.else_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("else { a = b; c = d; }");
+  auto e = p->else_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsElse());
   ASSERT_EQ(e->condition(), nullptr);
@@ -33,19 +32,19 @@ TEST_F(ParserImplTest, ElseStmt) {
 }
 
 TEST_F(ParserImplTest, ElseStmt_InvalidBody) {
-  ParserImpl p{"else { fn main() -> void {}}"};
-  auto e = p.else_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("else { fn main() -> void {}}");
+  auto e = p->else_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:8: missing }");
+  EXPECT_EQ(p->error(), "1:8: missing }");
 }
 
 TEST_F(ParserImplTest, ElseStmt_MissingBody) {
-  ParserImpl p{"else"};
-  auto e = p.else_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("else");
+  auto e = p->else_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:5: missing {");
+  EXPECT_EQ(p->error(), "1:5: missing {");
 }
 
 }  // namespace wgsl

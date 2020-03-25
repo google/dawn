@@ -14,17 +14,16 @@
 
 #include "gtest/gtest.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, LoopStmt_BodyNoContinuing) {
-  ParserImpl p{"loop { nop; }"};
-  auto e = p.loop_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("loop { nop; }");
+  auto e = p->loop_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_EQ(e->body().size(), 1);
@@ -34,9 +33,9 @@ TEST_F(ParserImplTest, LoopStmt_BodyNoContinuing) {
 }
 
 TEST_F(ParserImplTest, LoopStmt_BodyWithContinuing) {
-  ParserImpl p{"loop { nop; continuing { kill; }}"};
-  auto e = p.loop_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("loop { nop; continuing { kill; }}");
+  auto e = p->loop_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_EQ(e->body().size(), 1);
@@ -47,18 +46,18 @@ TEST_F(ParserImplTest, LoopStmt_BodyWithContinuing) {
 }
 
 TEST_F(ParserImplTest, LoopStmt_NoBodyNoContinuing) {
-  ParserImpl p{"loop { }"};
-  auto e = p.loop_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("loop { }");
+  auto e = p->loop_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_EQ(e->body().size(), 0);
   ASSERT_EQ(e->continuing().size(), 0);
 }
 
 TEST_F(ParserImplTest, LoopStmt_NoBodyWithContinuing) {
-  ParserImpl p{"loop { continuing { kill; }}"};
-  auto e = p.loop_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("loop { continuing { kill; }}");
+  auto e = p->loop_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_EQ(e->body().size(), 0);
   ASSERT_EQ(e->continuing().size(), 1);
@@ -66,35 +65,35 @@ TEST_F(ParserImplTest, LoopStmt_NoBodyWithContinuing) {
 }
 
 TEST_F(ParserImplTest, LoopStmt_MissingBracketLeft) {
-  ParserImpl p{"loop kill; }"};
-  auto e = p.loop_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("loop kill; }");
+  auto e = p->loop_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:6: missing { for loop");
+  EXPECT_EQ(p->error(), "1:6: missing { for loop");
 }
 
 TEST_F(ParserImplTest, LoopStmt_MissingBracketRight) {
-  ParserImpl p{"loop { kill; "};
-  auto e = p.loop_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("loop { kill; ");
+  auto e = p->loop_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:14: missing } for loop");
+  EXPECT_EQ(p->error(), "1:14: missing } for loop");
 }
 
 TEST_F(ParserImplTest, LoopStmt_InvalidStatements) {
-  ParserImpl p{"loop { kill }"};
-  auto e = p.loop_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("loop { kill }");
+  auto e = p->loop_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:13: missing ;");
+  EXPECT_EQ(p->error(), "1:13: missing ;");
 }
 
 TEST_F(ParserImplTest, LoopStmt_InvalidContinuing) {
-  ParserImpl p{"loop { continuing { kill }}"};
-  auto e = p.loop_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("loop { continuing { kill }}");
+  auto e = p->loop_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:26: missing ;");
+  EXPECT_EQ(p->error(), "1:26: missing ;");
 }
 
 }  // namespace wgsl

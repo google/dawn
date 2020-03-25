@@ -14,21 +14,20 @@
 
 #include "gtest/gtest.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, BodyStmt) {
-  ParserImpl p{R"({
+  auto p = parser(R"({
   kill;
   nop;
   return 1 + b / 2;
-})"};
-  auto e = p.body_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+})");
+  auto e = p->body_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e.size(), 3);
   EXPECT_TRUE(e[0]->IsKill());
   EXPECT_TRUE(e[1]->IsNop());
@@ -36,24 +35,24 @@ TEST_F(ParserImplTest, BodyStmt) {
 }
 
 TEST_F(ParserImplTest, BodyStmt_Empty) {
-  ParserImpl p{"{}"};
-  auto e = p.body_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("{}");
+  auto e = p->body_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_EQ(e.size(), 0);
 }
 
 TEST_F(ParserImplTest, BodyStmt_InvalidStmt) {
-  ParserImpl p{"{fn main() -> void {}}"};
-  auto e = p.body_stmt();
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:2: missing }");
+  auto p = parser("{fn main() -> void {}}");
+  auto e = p->body_stmt();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:2: missing }");
 }
 
 TEST_F(ParserImplTest, BodyStmt_MissingRightParen) {
-  ParserImpl p{"{return;"};
-  auto e = p.body_stmt();
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:9: missing }");
+  auto p = parser("{return;");
+  auto e = p->body_stmt();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:9: missing }");
 }
 
 }  // namespace wgsl

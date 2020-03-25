@@ -15,6 +15,7 @@
 #include "src/reader/wgsl/parser.h"
 
 #include "gtest/gtest.h"
+#include "src/context.h"
 
 namespace tint {
 namespace reader {
@@ -23,12 +24,19 @@ namespace wgsl {
 using ParserTest = testing::Test;
 
 TEST_F(ParserTest, Empty) {
-  Parser p{""};
+  TypeManager tm;
+  Context ctx;
+  ctx.type_mgr = &tm;
+  Parser p(ctx, "");
   ASSERT_TRUE(p.Parse()) << p.error();
 }
 
 TEST_F(ParserTest, DISABLED_Parses) {
-  Parser p{R"(
+  TypeManager tm;
+  Context ctx;
+  ctx.type_mgr = &tm;
+
+  Parser p(ctx, R"(
 import "GLSL.std.430" as glsl;
 
 [[location 0]] var<out> gl_FragColor : vec4<f32>;
@@ -36,7 +44,7 @@ import "GLSL.std.430" as glsl;
 fn main() -> void {
   gl_FragColor = vec4<f32>(.4, .2, .3, 1);
 }
-)"};
+)");
   ASSERT_TRUE(p.Parse()) << p.error();
 
   auto m = p.module();
@@ -46,12 +54,13 @@ fn main() -> void {
 }
 
 TEST_F(ParserTest, DISABLED_HandlesError) {
-  Parser p{R"(
+  Context ctx;
+  Parser p(ctx, R"(
 import "GLSL.std.430" as glsl;
 
 fn main() ->  {  # missing return type
   return;
-})"};
+})");
 
   ASSERT_FALSE(p.Parse());
   ASSERT_TRUE(p.has_error());

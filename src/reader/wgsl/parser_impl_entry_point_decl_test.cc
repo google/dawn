@@ -15,105 +15,104 @@
 #include "gtest/gtest.h"
 #include "src/ast/variable.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, EntryPoint_Parses) {
-  ParserImpl p{"entry_point fragment = main"};
-  auto e = p.entry_point_decl();
+  auto p = parser("entry_point fragment = main");
+  auto e = p->entry_point_decl();
   ASSERT_NE(e, nullptr);
-  ASSERT_FALSE(p.has_error());
+  ASSERT_FALSE(p->has_error());
   EXPECT_EQ(e->stage(), ast::PipelineStage::kFragment);
   EXPECT_EQ(e->name(), "main");
   EXPECT_EQ(e->function_name(), "main");
 }
 
 TEST_F(ParserImplTest, EntryPoint_ParsesWithStringName) {
-  ParserImpl p{R"(entry_point vertex as "main" = vtx_main)"};
-  auto e = p.entry_point_decl();
+  auto p = parser(R"(entry_point vertex as "main" = vtx_main)");
+  auto e = p->entry_point_decl();
   ASSERT_NE(e, nullptr);
-  ASSERT_FALSE(p.has_error());
+  ASSERT_FALSE(p->has_error());
   EXPECT_EQ(e->stage(), ast::PipelineStage::kVertex);
   EXPECT_EQ(e->name(), "main");
   EXPECT_EQ(e->function_name(), "vtx_main");
 }
 
 TEST_F(ParserImplTest, EntryPoint_ParsesWithIdentName) {
-  ParserImpl p{R"(entry_point vertex as main = vtx_main)"};
-  auto e = p.entry_point_decl();
+  auto p = parser(R"(entry_point vertex as main = vtx_main)");
+  auto e = p->entry_point_decl();
   ASSERT_NE(e, nullptr);
-  ASSERT_FALSE(p.has_error());
+  ASSERT_FALSE(p->has_error());
   EXPECT_EQ(e->stage(), ast::PipelineStage::kVertex);
   EXPECT_EQ(e->name(), "main");
   EXPECT_EQ(e->function_name(), "vtx_main");
 }
 
 TEST_F(ParserImplTest, EntryPoint_MissingFnName) {
-  ParserImpl p{R"(entry_point vertex as main =)"};
-  auto e = p.entry_point_decl();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser(R"(entry_point vertex as main =)");
+  auto e = p->entry_point_decl();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:29: invalid function name for entry point");
+  EXPECT_EQ(p->error(), "1:29: invalid function name for entry point");
 }
 
 TEST_F(ParserImplTest, EntryPoint_InvalidFnName) {
-  ParserImpl p{R"(entry_point vertex as main = 123)"};
-  auto e = p.entry_point_decl();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser(R"(entry_point vertex as main = 123)");
+  auto e = p->entry_point_decl();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:30: invalid function name for entry point");
+  EXPECT_EQ(p->error(), "1:30: invalid function name for entry point");
 }
 
 TEST_F(ParserImplTest, EntryPoint_MissingEqual) {
-  ParserImpl p{R"(entry_point vertex as main vtx_main)"};
-  auto e = p.entry_point_decl();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser(R"(entry_point vertex as main vtx_main)");
+  auto e = p->entry_point_decl();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:28: missing = for entry point");
+  EXPECT_EQ(p->error(), "1:28: missing = for entry point");
 }
 
 TEST_F(ParserImplTest, EntryPoint_MissingName) {
-  ParserImpl p{R"(entry_point vertex as = vtx_main)"};
-  auto e = p.entry_point_decl();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser(R"(entry_point vertex as = vtx_main)");
+  auto e = p->entry_point_decl();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:23: invalid name for entry point");
+  EXPECT_EQ(p->error(), "1:23: invalid name for entry point");
 }
 
 TEST_F(ParserImplTest, EntryPoint_InvalidName) {
-  ParserImpl p{R"(entry_point vertex as 123 = vtx_main)"};
-  auto e = p.entry_point_decl();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser(R"(entry_point vertex as 123 = vtx_main)");
+  auto e = p->entry_point_decl();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:23: invalid name for entry point");
+  EXPECT_EQ(p->error(), "1:23: invalid name for entry point");
 }
 
 TEST_F(ParserImplTest, EntryPoint_MissingStageWithIdent) {
-  ParserImpl p{R"(entry_point as 123 = vtx_main)"};
-  auto e = p.entry_point_decl();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser(R"(entry_point as 123 = vtx_main)");
+  auto e = p->entry_point_decl();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:13: missing pipeline stage for entry point");
+  EXPECT_EQ(p->error(), "1:13: missing pipeline stage for entry point");
 }
 
 TEST_F(ParserImplTest, EntryPoint_MissingStage) {
-  ParserImpl p{R"(entry_point = vtx_main)"};
-  auto e = p.entry_point_decl();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser(R"(entry_point = vtx_main)");
+  auto e = p->entry_point_decl();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:13: missing pipeline stage for entry point");
+  EXPECT_EQ(p->error(), "1:13: missing pipeline stage for entry point");
 }
 
 TEST_F(ParserImplTest, EntryPoint_InvalidStage) {
-  ParserImpl p{R"(entry_point invalid = vtx_main)"};
-  auto e = p.entry_point_decl();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser(R"(entry_point invalid = vtx_main)");
+  auto e = p->entry_point_decl();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:13: missing pipeline stage for entry point");
+  EXPECT_EQ(p->error(), "1:13: missing pipeline stage for entry point");
 }
 
 }  // namespace wgsl

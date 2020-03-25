@@ -18,68 +18,67 @@
 #include "src/ast/int_literal.h"
 #include "src/ast/uint_literal.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, ConstLiteral_Int) {
-  ParserImpl p{"-234"};
-  auto c = p.const_literal();
-  ASSERT_FALSE(p.has_error());
+  auto p = parser("-234");
+  auto c = p->const_literal();
+  ASSERT_FALSE(p->has_error());
   ASSERT_NE(c, nullptr);
   ASSERT_TRUE(c->IsInt());
   EXPECT_EQ(c->AsInt()->value(), -234);
 }
 
 TEST_F(ParserImplTest, ConstLiteral_Uint) {
-  ParserImpl p{"234u"};
-  auto c = p.const_literal();
-  ASSERT_FALSE(p.has_error());
+  auto p = parser("234u");
+  auto c = p->const_literal();
+  ASSERT_FALSE(p->has_error());
   ASSERT_NE(c, nullptr);
   ASSERT_TRUE(c->IsUint());
   EXPECT_EQ(c->AsUint()->value(), 234u);
 }
 
 TEST_F(ParserImplTest, ConstLiteral_Float) {
-  ParserImpl p{"234.e12"};
-  auto c = p.const_literal();
-  ASSERT_FALSE(p.has_error());
+  auto p = parser("234.e12");
+  auto c = p->const_literal();
+  ASSERT_FALSE(p->has_error());
   ASSERT_NE(c, nullptr);
   ASSERT_TRUE(c->IsFloat());
   EXPECT_FLOAT_EQ(c->AsFloat()->value(), 234e12);
 }
 
 TEST_F(ParserImplTest, ConstLiteral_InvalidFloat) {
-  ParserImpl p{"1.2e+256"};
-  auto c = p.const_literal();
+  auto p = parser("1.2e+256");
+  auto c = p->const_literal();
   ASSERT_EQ(c, nullptr);
 }
 
 TEST_F(ParserImplTest, ConstLiteral_True) {
-  ParserImpl p{"true"};
-  auto c = p.const_literal();
-  ASSERT_FALSE(p.has_error());
+  auto p = parser("true");
+  auto c = p->const_literal();
+  ASSERT_FALSE(p->has_error());
   ASSERT_NE(c, nullptr);
   ASSERT_TRUE(c->IsBool());
   EXPECT_TRUE(c->AsBool()->IsTrue());
 }
 
 TEST_F(ParserImplTest, ConstLiteral_False) {
-  ParserImpl p{"false"};
-  auto c = p.const_literal();
-  ASSERT_FALSE(p.has_error());
+  auto p = parser("false");
+  auto c = p->const_literal();
+  ASSERT_FALSE(p->has_error());
   ASSERT_NE(c, nullptr);
   ASSERT_TRUE(c->IsBool());
   EXPECT_TRUE(c->AsBool()->IsFalse());
 }
 
 TEST_F(ParserImplTest, ConstLiteral_NoMatch) {
-  ParserImpl p{"another-token"};
-  auto c = p.const_literal();
-  ASSERT_FALSE(p.has_error());
+  auto p = parser("another-token");
+  auto c = p->const_literal();
+  ASSERT_FALSE(p->has_error());
   ASSERT_EQ(c, nullptr);
 }
 

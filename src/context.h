@@ -12,14 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/reader/reader.h"
+#ifndef SRC_CONTEXT_H_
+#define SRC_CONTEXT_H_
+
+#include "src/type_manager.h"
 
 namespace tint {
-namespace reader {
 
-Reader::Reader(const Context& ctx) : ctx_(ctx) {}
+struct Context {
+  TypeManager* type_mgr = nullptr;
+};
 
-Reader::~Reader() = default;
-
-}  // namespace reader
 }  // namespace tint
+
+#endif  // SRC_CONTEXT_H_

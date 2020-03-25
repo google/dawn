@@ -15,17 +15,16 @@
 #include "gtest/gtest.h"
 #include "src/ast/statement.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, Statements) {
-  ParserImpl p{"nop; kill; return;"};
-  auto e = p.statements();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("nop; kill; return;");
+  auto e = p->statements();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e.size(), 3);
   EXPECT_TRUE(e[0]->IsNop());
   EXPECT_TRUE(e[1]->IsKill());
@@ -33,9 +32,9 @@ TEST_F(ParserImplTest, Statements) {
 }
 
 TEST_F(ParserImplTest, Statements_Empty) {
-  ParserImpl p{""};
-  auto e = p.statements();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("");
+  auto e = p->statements();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e.size(), 0);
 }
 

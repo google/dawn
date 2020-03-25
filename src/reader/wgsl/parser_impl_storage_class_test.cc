@@ -15,12 +15,12 @@
 #include "gtest/gtest.h"
 #include "src/ast/storage_class.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
-
-using ParserImplTest = testing::Test;
+namespace {
 
 struct StorageClassData {
   const char* input;
@@ -30,16 +30,41 @@ inline std::ostream& operator<<(std::ostream& out, StorageClassData data) {
   out << std::string(data.input);
   return out;
 }
-using StorageClassTest = testing::TestWithParam<StorageClassData>;
+
+class StorageClassTest : public testing::TestWithParam<StorageClassData> {
+ public:
+  StorageClassTest() = default;
+  ~StorageClassTest() = default;
+
+  void SetUp() { ctx_.type_mgr = &tm_; }
+
+  void TearDown() {
+    impl_ = nullptr;
+    ctx_.type_mgr = nullptr;
+  }
+
+  ParserImpl* parser(const std::string& str) {
+    impl_ = std::make_unique<ParserImpl>(ctx_, str);
+    return impl_.get();
+  }
+
+ private:
+  std::unique_ptr<ParserImpl> impl_;
+  Context ctx_;
+  TypeManager tm_;
+};
+
+}  // namespace
+
 TEST_P(StorageClassTest, Parses) {
   auto params = GetParam();
-  ParserImpl p{params.input};
+  auto p = parser(params.input);
 
-  auto sc = p.storage_class();
-  ASSERT_FALSE(p.has_error());
+  auto sc = p->storage_class();
+  ASSERT_FALSE(p->has_error());
   EXPECT_EQ(sc, params.result);
 
-  auto t = p.next();
+  auto t = p->next();
   EXPECT_TRUE(t.IsEof());
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -59,11 +84,11 @@ INSTANTIATE_TEST_SUITE_P(
         StorageClassData{"function", ast::StorageClass::kFunction}));
 
 TEST_F(ParserImplTest, StorageClass_NoMatch) {
-  ParserImpl p{"not-a-storage-class"};
-  auto sc = p.storage_class();
+  auto p = parser("not-a-storage-class");
+  auto sc = p->storage_class();
   ASSERT_EQ(sc, ast::StorageClass::kNone);
 
-  auto t = p.next();
+  auto t = p->next();
   EXPECT_TRUE(t.IsIdentifier());
   EXPECT_EQ(t.to_str(), "not");
 }

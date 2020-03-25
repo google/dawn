@@ -14,19 +14,18 @@
 
 #include "gtest/gtest.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, ImportDecl_Import) {
-  ParserImpl p{R"(import "GLSL.std.450" as glsl)"};
+  auto p = parser(R"(import "GLSL.std.450" as glsl)");
 
-  auto import = p.import_decl();
+  auto import = p->import_decl();
   ASSERT_NE(import, nullptr);
-  ASSERT_FALSE(p.has_error()) << p.error();
+  ASSERT_FALSE(p->has_error()) << p->error();
 
   EXPECT_EQ("GLSL.std.450", import->path());
   EXPECT_EQ("glsl", import->name());
@@ -35,59 +34,59 @@ TEST_F(ParserImplTest, ImportDecl_Import) {
 }
 
 TEST_F(ParserImplTest, ImportDecl_Import_WithNamespace) {
-  ParserImpl p{R"(import "GLSL.std.450" as std::glsl)"};
-  auto import = p.import_decl();
+  auto p = parser(R"(import "GLSL.std.450" as std::glsl)");
+  auto import = p->import_decl();
   ASSERT_NE(import, nullptr);
-  ASSERT_FALSE(p.has_error()) << p.error();
+  ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_EQ("std::glsl", import->name());
 }
 
 TEST_F(ParserImplTest, ImportDecl_Invalid_MissingPath) {
-  ParserImpl p{R"(import as glsl)"};
-  auto import = p.import_decl();
+  auto p = parser(R"(import as glsl)");
+  auto import = p->import_decl();
   ASSERT_EQ(import, nullptr);
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:8: missing path for import");
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:8: missing path for import");
 }
 
 TEST_F(ParserImplTest, ImportDecl_Invalid_EmptyPath) {
-  ParserImpl p{R"(import "" as glsl)"};
-  auto import = p.import_decl();
+  auto p = parser(R"(import "" as glsl)");
+  auto import = p->import_decl();
   ASSERT_EQ(import, nullptr);
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:8: import path must not be empty");
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:8: import path must not be empty");
 }
 
 TEST_F(ParserImplTest, ImportDecl_Invalid_NameMissingTerminatingIdentifier) {
-  ParserImpl p{R"(import "GLSL.std.450" as glsl::)"};
-  auto import = p.import_decl();
+  auto p = parser(R"(import "GLSL.std.450" as glsl::)");
+  auto import = p->import_decl();
   ASSERT_EQ(import, nullptr);
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:32: invalid name for import");
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:32: invalid name for import");
 }
 
 TEST_F(ParserImplTest, ImportDecl_Invalid_NameInvalid) {
-  ParserImpl p{R"(import "GLSL.std.450" as 12glsl)"};
-  auto import = p.import_decl();
+  auto p = parser(R"(import "GLSL.std.450" as 12glsl)");
+  auto import = p->import_decl();
   ASSERT_EQ(import, nullptr);
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:26: invalid name for import");
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:26: invalid name for import");
 }
 
 TEST_F(ParserImplTest, ImportDecl_Invalid_MissingName) {
-  ParserImpl p{R"(import "GLSL.std.450" as)"};
-  auto import = p.import_decl();
+  auto p = parser(R"(import "GLSL.std.450" as)");
+  auto import = p->import_decl();
   ASSERT_EQ(import, nullptr);
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:25: missing name for import");
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:25: missing name for import");
 }
 
 TEST_F(ParserImplTest, ImportDecl_Invalid_MissingAs) {
-  ParserImpl p{R"(import "GLSL.std.450" glsl)"};
-  auto import = p.import_decl();
+  auto p = parser(R"(import "GLSL.std.450" glsl)");
+  auto import = p->import_decl();
   ASSERT_EQ(import, nullptr);
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:23: missing 'as' for import");
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:23: missing 'as' for import");
 }
 
 }  // namespace wgsl

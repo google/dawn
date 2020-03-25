@@ -15,54 +15,53 @@
 #include "gtest/gtest.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, StructMemberDecorationDecl_EmptyStr) {
-  ParserImpl p{""};
-  auto deco = p.struct_member_decoration_decl();
-  ASSERT_FALSE(p.has_error());
+  auto p = parser("");
+  auto deco = p->struct_member_decoration_decl();
+  ASSERT_FALSE(p->has_error());
   EXPECT_EQ(deco.size(), 0);
 }
 
 TEST_F(ParserImplTest, StructMemberDecorationDecl_EmptyBlock) {
-  ParserImpl p{"[[]]"};
-  auto deco = p.struct_member_decoration_decl();
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:3: empty struct member decoration found");
+  auto p = parser("[[]]");
+  auto deco = p->struct_member_decoration_decl();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:3: empty struct member decoration found");
 }
 
 TEST_F(ParserImplTest, StructMemberDecorationDecl_Single) {
-  ParserImpl p{"[[offset 4]]"};
-  auto deco = p.struct_member_decoration_decl();
-  ASSERT_FALSE(p.has_error());
+  auto p = parser("[[offset 4]]");
+  auto deco = p->struct_member_decoration_decl();
+  ASSERT_FALSE(p->has_error());
   ASSERT_EQ(deco.size(), 1);
   EXPECT_TRUE(deco[0]->IsOffset());
 }
 
 TEST_F(ParserImplTest, StructMemberDecorationDecl_HandlesDuplicate) {
-  ParserImpl p{"[[offset 2, offset 4]]"};
-  auto deco = p.struct_member_decoration_decl();
-  ASSERT_TRUE(p.has_error()) << p.error();
-  EXPECT_EQ(p.error(), "1:21: duplicate offset decoration found");
+  auto p = parser("[[offset 2, offset 4]]");
+  auto deco = p->struct_member_decoration_decl();
+  ASSERT_TRUE(p->has_error()) << p->error();
+  EXPECT_EQ(p->error(), "1:21: duplicate offset decoration found");
 }
 
 TEST_F(ParserImplTest, StructMemberDecorationDecl_InvalidDecoration) {
-  ParserImpl p{"[[offset nan]]"};
-  auto deco = p.struct_member_decoration_decl();
-  ASSERT_TRUE(p.has_error()) << p.error();
-  EXPECT_EQ(p.error(), "1:10: invalid value for offset decoration");
+  auto p = parser("[[offset nan]]");
+  auto deco = p->struct_member_decoration_decl();
+  ASSERT_TRUE(p->has_error()) << p->error();
+  EXPECT_EQ(p->error(), "1:10: invalid value for offset decoration");
 }
 
 TEST_F(ParserImplTest, StructMemberDecorationDecl_MissingClose) {
-  ParserImpl p{"[[offset 4"};
-  auto deco = p.struct_member_decoration_decl();
-  ASSERT_TRUE(p.has_error()) << p.error();
-  EXPECT_EQ(p.error(), "1:11: missing ]] for struct member decoration");
+  auto p = parser("[[offset 4");
+  auto deco = p->struct_member_decoration_decl();
+  ASSERT_TRUE(p->has_error()) << p->error();
+  EXPECT_EQ(p->error(), "1:11: missing ]] for struct member decoration");
 }
 
 }  // namespace wgsl

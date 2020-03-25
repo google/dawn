@@ -15,17 +15,16 @@
 #include "gtest/gtest.h"
 #include "src/ast/variable.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, VariableDecl_Parses) {
-  ParserImpl p{"var my_var : f32"};
-  auto var = p.variable_decl();
-  ASSERT_FALSE(p.has_error());
+  auto p = parser("var my_var : f32");
+  auto var = p->variable_decl();
+  ASSERT_FALSE(p->has_error());
   ASSERT_NE(var, nullptr);
   ASSERT_EQ(var->name(), "my_var");
   ASSERT_NE(var->type(), nullptr);
@@ -35,27 +34,27 @@ TEST_F(ParserImplTest, VariableDecl_Parses) {
 }
 
 TEST_F(ParserImplTest, VariableDecl_MissingVar) {
-  ParserImpl p{"my_var : f32"};
-  auto v = p.variable_decl();
+  auto p = parser("my_var : f32");
+  auto v = p->variable_decl();
   ASSERT_EQ(v, nullptr);
-  ASSERT_FALSE(p.has_error());
+  ASSERT_FALSE(p->has_error());
 
-  auto t = p.next();
+  auto t = p->next();
   ASSERT_TRUE(t.IsIdentifier());
 }
 
 TEST_F(ParserImplTest, VariableDecl_InvalidIdentDecl) {
-  ParserImpl p{"var my_var f32"};
-  auto v = p.variable_decl();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("var my_var f32");
+  auto v = p->variable_decl();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(v, nullptr);
-  ASSERT_EQ(p.error(), "1:12: missing : for identifier declaration");
+  ASSERT_EQ(p->error(), "1:12: missing : for identifier declaration");
 }
 
 TEST_F(ParserImplTest, VariableDecl_WithStorageClass) {
-  ParserImpl p{"var<private> my_var : f32"};
-  auto v = p.variable_decl();
-  ASSERT_FALSE(p.has_error());
+  auto p = parser("var<private> my_var : f32");
+  auto v = p->variable_decl();
+  ASSERT_FALSE(p->has_error());
   ASSERT_NE(v, nullptr);
   EXPECT_EQ(v->name(), "my_var");
   EXPECT_TRUE(v->type()->IsF32());
@@ -63,11 +62,11 @@ TEST_F(ParserImplTest, VariableDecl_WithStorageClass) {
 }
 
 TEST_F(ParserImplTest, VariableDecl_InvalidStorageClass) {
-  ParserImpl p{"var<unknown> my_var : f32"};
-  auto v = p.variable_decl();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("var<unknown> my_var : f32");
+  auto v = p->variable_decl();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(v, nullptr);
-  EXPECT_EQ(p.error(), "1:5: invalid storage class for variable decoration");
+  EXPECT_EQ(p->error(), "1:5: invalid storage class for variable decoration");
 }
 
 }  // namespace wgsl

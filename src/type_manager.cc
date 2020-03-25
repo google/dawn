@@ -17,25 +17,6 @@
 #include <utility>
 
 namespace tint {
-namespace {
-
-TypeManager* manager_ = nullptr;
-
-}  // namespace
-
-// static
-TypeManager* TypeManager::Instance() {
-  if (!manager_) {
-    manager_ = new TypeManager();
-  }
-  return manager_;
-}
-
-// static
-void TypeManager::Destroy() {
-  delete manager_;
-  manager_ = nullptr;
-}
 
 TypeManager::TypeManager() = default;
 

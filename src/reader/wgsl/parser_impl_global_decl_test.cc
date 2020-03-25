@@ -14,25 +14,24 @@
 
 #include "gtest/gtest.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, GlobalDecl_Semicolon) {
-  ParserImpl p(";");
-  p.global_decl();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser(";");
+  p->global_decl();
+  ASSERT_FALSE(p->has_error()) << p->error();
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Import) {
-  ParserImpl p{R"(import "GLSL.std.430" as glsl;)"};
-  p.global_decl();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser(R"(import "GLSL.std.430" as glsl;)");
+  p->global_decl();
+  ASSERT_FALSE(p->has_error()) << p->error();
 
-  auto m = p.module();
+  auto m = p->module();
   ASSERT_EQ(1, m.imports().size());
 
   const auto& import = m.imports()[0];
@@ -41,27 +40,27 @@ TEST_F(ParserImplTest, GlobalDecl_Import) {
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Import_Invalid) {
-  ParserImpl p{R"(import as glsl;)"};
-  p.global_decl();
+  auto p = parser(R"(import as glsl;)");
+  p->global_decl();
 
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:8: missing path for import");
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:8: missing path for import");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Import_Invalid_MissingSemicolon) {
-  ParserImpl p{R"(import "GLSL.std.430" as glsl)"};
-  p.global_decl();
+  auto p = parser(R"(import "GLSL.std.430" as glsl)");
+  p->global_decl();
 
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:30: missing ';' for import");
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:30: missing ';' for import");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable) {
-  ParserImpl p{"var<out> a : vec2<i32> = vec2<i32>(1, 2);"};
-  p.global_decl();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("var<out> a : vec2<i32> = vec2<i32>(1, 2);");
+  p->global_decl();
+  ASSERT_FALSE(p->has_error()) << p->error();
 
-  auto m = p.module();
+  auto m = p->module();
   ASSERT_EQ(m.global_variables().size(), 1);
 
   auto v = m.global_variables()[0].get();
@@ -69,25 +68,25 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable) {
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_Invalid) {
-  ParserImpl p{"var<out> a : vec2<invalid>;"};
-  p.global_decl();
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:19: unknown type alias 'invalid'");
+  auto p = parser("var<out> a : vec2<invalid>;");
+  p->global_decl();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:19: unknown type alias 'invalid'");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_MissingSemicolon) {
-  ParserImpl p{"var<out> a : vec2<i32>"};
-  p.global_decl();
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:23: missing ';' for variable declaration");
+  auto p = parser("var<out> a : vec2<i32>");
+  p->global_decl();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:23: missing ';' for variable declaration");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalConstant) {
-  ParserImpl p{"const a : i32 = 2;"};
-  p.global_decl();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("const a : i32 = 2;");
+  p->global_decl();
+  ASSERT_FALSE(p->has_error()) << p->error();
 
-  auto m = p.module();
+  auto m = p->module();
   ASSERT_EQ(m.global_variables().size(), 1);
 
   auto v = m.global_variables()[0].get();
@@ -95,82 +94,82 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalConstant) {
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalConstant_Invalid) {
-  ParserImpl p{"const a : vec2<i32>;"};
-  p.global_decl();
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:20: missing = for const declaration");
+  auto p = parser("const a : vec2<i32>;");
+  p->global_decl();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:20: missing = for const declaration");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalConstant_MissingSemicolon) {
-  ParserImpl p{"const a : vec2<i32> = vec2<i32>(1, 2)"};
-  p.global_decl();
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:38: missing ';' for constant declaration");
+  auto p = parser("const a : vec2<i32> = vec2<i32>(1, 2)");
+  p->global_decl();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:38: missing ';' for constant declaration");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_EntryPoint) {
-  ParserImpl p{"entry_point vertex = main;"};
-  p.global_decl();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("entry_point vertex = main;");
+  p->global_decl();
+  ASSERT_FALSE(p->has_error()) << p->error();
 
-  auto m = p.module();
+  auto m = p->module();
   ASSERT_EQ(m.entry_points().size(), 1);
   EXPECT_EQ(m.entry_points()[0]->name(), "main");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_EntryPoint_Invalid) {
-  ParserImpl p{"entry_point main;"};
-  p.global_decl();
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:13: missing pipeline stage for entry point");
+  auto p = parser("entry_point main;");
+  p->global_decl();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:13: missing pipeline stage for entry point");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_EntryPoint_MissingSemicolon) {
-  ParserImpl p{"entry_point vertex = main"};
-  p.global_decl();
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:26: missing ';' for entry point");
+  auto p = parser("entry_point vertex = main");
+  p->global_decl();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:26: missing ';' for entry point");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
-  ParserImpl p{"type A = i32;"};
-  p.global_decl();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("type A = i32;");
+  p->global_decl();
+  ASSERT_FALSE(p->has_error()) << p->error();
 
-  auto m = p.module();
+  auto m = p->module();
   ASSERT_EQ(m.alias_types().size(), 1);
   EXPECT_EQ(m.alias_types()[0]->name(), "A");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_Invalid) {
-  ParserImpl p{"type A = invalid;"};
-  p.global_decl();
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:10: unknown type alias 'invalid'");
+  auto p = parser("type A = invalid;");
+  p->global_decl();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:10: unknown type alias 'invalid'");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_MissingSemicolon) {
-  ParserImpl p{"type A = i32"};
-  p.global_decl();
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:13: missing ';' for type alias");
+  auto p = parser("type A = i32");
+  p->global_decl();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:13: missing ';' for type alias");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Function) {
-  ParserImpl p{"fn main() -> void { return; }"};
-  p.global_decl();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("fn main() -> void { return; }");
+  p->global_decl();
+  ASSERT_FALSE(p->has_error()) << p->error();
 
-  auto m = p.module();
+  auto m = p->module();
   ASSERT_EQ(m.functions().size(), 1);
   EXPECT_EQ(m.functions()[0]->name(), "main");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Function_Invalid) {
-  ParserImpl p{"fn main() -> { return; }"};
-  p.global_decl();
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:14: unable to determine function return type");
+  auto p = parser("fn main() -> { return; }");
+  p->global_decl();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:14: unable to determine function return type");
 }
 
 }  // namespace wgsl

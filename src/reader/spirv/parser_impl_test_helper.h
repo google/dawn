@@ -12,29 +12,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/reader/spirv/parser.h"
+#ifndef SRC_READER_SPIRV_PARSER_IMPL_TEST_HELPER_H_
+#define SRC_READER_SPIRV_PARSER_IMPL_TEST_HELPER_H_
 
+#include <memory>
+#include <string>
+
+#include "gtest/gtest.h"
+#include "src/context.h"
 #include "src/reader/spirv/parser_impl.h"
 
 namespace tint {
 namespace reader {
 namespace spirv {
 
-Parser::Parser(const Context& ctx, const std::vector<uint32_t>& spv_binary)
-    : Reader(ctx), impl_(std::make_unique<ParserImpl>(ctx, spv_binary)) {}
+class SpvParserTest : public testing::Test {
+ public:
+  SpvParserTest() = default;
+  ~SpvParserTest() = default;
 
-Parser::~Parser() = default;
+  void SetUp() { ctx_.type_mgr = &tm_; }
 
-bool Parser::Parse() {
-  const auto result = impl_->Parse();
-  set_error(impl_->error());
-  return result;
-}
+  void TearDown() {
+    impl_ = nullptr;
+    ctx_.type_mgr = nullptr;
+  }
 
-ast::Module Parser::module() {
-  return impl_->module();
-}
+  ParserImpl* parser(const std::vector<uint32_t>& input) {
+    impl_ = std::make_unique<ParserImpl>(ctx_, input);
+    return impl_.get();
+  }
+
+ private:
+  std::unique_ptr<ParserImpl> impl_;
+  Context ctx_;
+  TypeManager tm_;
+};
 
 }  // namespace spirv
 }  // namespace reader
 }  // namespace tint
+
+#endif  // SRC_READER_WGSL_PARSER_IMPL_TEST_HELPER_H_

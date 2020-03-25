@@ -14,27 +14,26 @@
 
 #include "gtest/gtest.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, PremergeStmt) {
-  ParserImpl p{"premerge { nop; }"};
-  auto e = p.premerge_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("premerge { nop; }");
+  auto e = p->premerge_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e.size(), 1);
   ASSERT_TRUE(e[0]->IsNop());
 }
 
 TEST_F(ParserImplTest, PremergeStmt_InvalidBody) {
-  ParserImpl p{"premerge { nop }"};
-  auto e = p.premerge_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("premerge { nop }");
+  auto e = p->premerge_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e.size(), 0);
-  EXPECT_EQ(p.error(), "1:16: missing ;");
+  EXPECT_EQ(p->error(), "1:16: missing ;");
 }
 
 }  // namespace wgsl

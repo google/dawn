@@ -17,32 +17,28 @@
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 #include "src/type_manager.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, TypeDecl_ParsesType) {
-  auto tm = TypeManager::Instance();
-  auto i32 = tm->Get(std::make_unique<ast::type::I32Type>());
+  auto i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
 
-  ParserImpl p{"type a = i32"};
-  auto t = p.type_alias();
-  ASSERT_FALSE(p.has_error());
+  auto p = parser("type a = i32");
+  auto t = p->type_alias();
+  ASSERT_FALSE(p->has_error());
   ASSERT_NE(t, nullptr);
   ASSERT_TRUE(t->type()->IsI32());
   ASSERT_EQ(t->type(), i32);
-
-  TypeManager::Destroy();
 }
 
 TEST_F(ParserImplTest, TypeDecl_ParsesStruct) {
-  ParserImpl p{"type a = struct { b: i32; c: f32;}"};
-  auto t = p.type_alias();
-  ASSERT_FALSE(p.has_error());
+  auto p = parser("type a = struct { b: i32; c: f32;}");
+  auto t = p->type_alias();
+  ASSERT_FALSE(p->has_error());
   ASSERT_NE(t, nullptr);
   EXPECT_EQ(t->name(), "a");
   ASSERT_TRUE(t->type()->IsStruct());
@@ -52,43 +48,43 @@ TEST_F(ParserImplTest, TypeDecl_ParsesStruct) {
 }
 
 TEST_F(ParserImplTest, TypeDecl_MissingIdent) {
-  ParserImpl p{"type = i32"};
-  auto t = p.type_alias();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("type = i32");
+  auto t = p->type_alias();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(t, nullptr);
-  EXPECT_EQ(p.error(), "1:6: missing identifier for type alias");
+  EXPECT_EQ(p->error(), "1:6: missing identifier for type alias");
 }
 
 TEST_F(ParserImplTest, TypeDecl_InvalidIdent) {
-  ParserImpl p{"type 123 = i32"};
-  auto t = p.type_alias();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("type 123 = i32");
+  auto t = p->type_alias();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(t, nullptr);
-  EXPECT_EQ(p.error(), "1:6: missing identifier for type alias");
+  EXPECT_EQ(p->error(), "1:6: missing identifier for type alias");
 }
 
 TEST_F(ParserImplTest, TypeDecl_MissingEqual) {
-  ParserImpl p{"type a i32"};
-  auto t = p.type_alias();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("type a i32");
+  auto t = p->type_alias();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(t, nullptr);
-  EXPECT_EQ(p.error(), "1:8: missing = for type alias");
+  EXPECT_EQ(p->error(), "1:8: missing = for type alias");
 }
 
 TEST_F(ParserImplTest, TypeDecl_InvalidType) {
-  ParserImpl p{"type a = B"};
-  auto t = p.type_alias();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("type a = B");
+  auto t = p->type_alias();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(t, nullptr);
-  EXPECT_EQ(p.error(), "1:10: unknown type alias 'B'");
+  EXPECT_EQ(p->error(), "1:10: unknown type alias 'B'");
 }
 
 TEST_F(ParserImplTest, TypeDecl_InvalidStruct) {
-  ParserImpl p{"type a = [[block]] {}"};
-  auto t = p.type_alias();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("type a = [[block]] {}");
+  auto t = p->type_alias();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(t, nullptr);
-  EXPECT_EQ(p.error(), "1:20: missing struct declaration");
+  EXPECT_EQ(p->error(), "1:20: missing struct declaration");
 }
 
 }  // namespace wgsl

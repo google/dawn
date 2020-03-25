@@ -17,6 +17,7 @@
 
 #include "gmock/gmock.h"
 #include "src/reader/spirv/parser_impl.h"
+#include "src/reader/spirv/parser_impl_test_helper.h"
 #include "src/reader/spirv/spirv_tools_helpers_test.h"
 
 namespace tint {
@@ -30,34 +31,32 @@ using ::testing::HasSubstr;
 using ::testing::Not;
 using ::testing::UnorderedElementsAre;
 
-using SpvParseImport = ::testing::Test;
-
-TEST_F(SpvParseImport, NoImport) {
-  ParserImpl p(test::Assemble("%1 = OpTypeVoid"));
-  EXPECT_TRUE(p.BuildAndParseInternalModule());
-  EXPECT_TRUE(p.error().empty());
-  const auto module_ast = p.module().to_str();
+TEST_F(SpvParserTest, Import_NoImport) {
+  auto p = parser(test::Assemble("%1 = OpTypeVoid"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_TRUE(p->error().empty());
+  const auto module_ast = p->module().to_str();
   EXPECT_THAT(module_ast, Not(HasSubstr("Import")));
 }
 
-TEST_F(SpvParseImport, ImportGlslStd450) {
-  ParserImpl p(test::Assemble(R"(%1 = OpExtInstImport "GLSL.std.450")"));
-  EXPECT_TRUE(p.BuildAndParseInternalModule());
-  EXPECT_TRUE(p.error().empty());
-  EXPECT_THAT(p.glsl_std_450_imports(), ElementsAre(1));
-  const auto module_ast = p.module().to_str();
+TEST_F(SpvParserTest, Import_ImportGlslStd450) {
+  auto p = parser(test::Assemble(R"(%1 = OpExtInstImport "GLSL.std.450")"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_TRUE(p->error().empty());
+  EXPECT_THAT(p->glsl_std_450_imports(), ElementsAre(1));
+  const auto module_ast = p->module().to_str();
   EXPECT_THAT(module_ast, HasSubstr(R"(Import{"GLSL.std.450" as std::glsl})"));
 }
 
-TEST_F(SpvParseImport, ImportGlslStd450Twice) {
-  ParserImpl p(test::Assemble(R"(
+TEST_F(SpvParserTest, Import_ImportGlslStd450Twice) {
+  auto p = parser(test::Assemble(R"(
     %1  = OpExtInstImport "GLSL.std.450"
     %42 = OpExtInstImport "GLSL.std.450"
   )"));
-  EXPECT_TRUE(p.BuildAndParseInternalModule());
-  EXPECT_TRUE(p.error().empty());
-  EXPECT_THAT(p.glsl_std_450_imports(), UnorderedElementsAre(1, 42));
-  const auto module = p.module();
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_TRUE(p->error().empty());
+  EXPECT_THAT(p->glsl_std_450_imports(), UnorderedElementsAre(1, 42));
+  const auto module = p->module();
   EXPECT_EQ(module.imports().size(), 1);
   const auto module_ast = module.to_str();
   // TODO(dneto): Use a matcher to show there is only one import.

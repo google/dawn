@@ -21,26 +21,25 @@
 #include "src/ast/unary_method_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, ArgumentExpressionList_Parses) {
-  ParserImpl p{"a"};
-  auto e = p.argument_expression_list();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("a");
+  auto e = p->argument_expression_list();
+  ASSERT_FALSE(p->has_error()) << p->error();
 
   ASSERT_EQ(e.size(), 1);
   ASSERT_TRUE(e[0]->IsIdentifier());
 }
 
 TEST_F(ParserImplTest, ArgumentExpressionList_ParsesMultiple) {
-  ParserImpl p{"a, -33, 1+2"};
-  auto e = p.argument_expression_list();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("a, -33, 1+2");
+  auto e = p->argument_expression_list();
+  ASSERT_FALSE(p->has_error()) << p->error();
 
   ASSERT_EQ(e.size(), 3);
   ASSERT_TRUE(e[0]->IsIdentifier());
@@ -49,17 +48,17 @@ TEST_F(ParserImplTest, ArgumentExpressionList_ParsesMultiple) {
 }
 
 TEST_F(ParserImplTest, ArgumentExpressionList_HandlesMissingExpression) {
-  ParserImpl p{"a, "};
-  auto e = p.argument_expression_list();
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:4: unable to parse argument expression after comma");
+  auto p = parser("a, ");
+  auto e = p->argument_expression_list();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:4: unable to parse argument expression after comma");
 }
 
 TEST_F(ParserImplTest, ArgumentExpressionList_HandlesInvalidExpression) {
-  ParserImpl p{"if(a) {}"};
-  auto e = p.argument_expression_list();
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:1: unable to parse argument expression");
+  auto p = parser("if(a) {}");
+  auto e = p->argument_expression_list();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:1: unable to parse argument expression");
 }
 
 }  // namespace wgsl

@@ -16,17 +16,16 @@
 #include "src/ast/decorated_variable.h"
 #include "src/ast/variable_decoration.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, GlobalConstantDecl) {
-  ParserImpl p{"const a : f32 = 1."};
-  auto e = p.global_constant_decl();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("const a : f32 = 1.");
+  auto e = p->global_constant_decl();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   EXPECT_TRUE(e->is_const());
@@ -39,35 +38,35 @@ TEST_F(ParserImplTest, GlobalConstantDecl) {
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_MissingEqual) {
-  ParserImpl p{"const a: f32 1."};
-  auto e = p.global_constant_decl();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("const a: f32 1.");
+  auto e = p->global_constant_decl();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:14: missing = for const declaration");
+  EXPECT_EQ(p->error(), "1:14: missing = for const declaration");
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_InvalidVariable) {
-  ParserImpl p{"const a: invalid = 1."};
-  auto e = p.global_constant_decl();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("const a: invalid = 1.");
+  auto e = p->global_constant_decl();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:10: unknown type alias 'invalid'");
+  EXPECT_EQ(p->error(), "1:10: unknown type alias 'invalid'");
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_InvalidExpression) {
-  ParserImpl p{"const a: f32 = if (a) {}"};
-  auto e = p.global_constant_decl();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("const a: f32 = if (a) {}");
+  auto e = p->global_constant_decl();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:16: unable to parse const literal");
+  EXPECT_EQ(p->error(), "1:16: unable to parse const literal");
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_MissingExpression) {
-  ParserImpl p{"const a: f32 ="};
-  auto e = p.global_constant_decl();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("const a: f32 =");
+  auto e = p->global_constant_decl();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:15: unable to parse const literal");
+  EXPECT_EQ(p->error(), "1:15: unable to parse const literal");
 }
 
 }  // namespace wgsl

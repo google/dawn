@@ -18,17 +18,16 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/relational_expression.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, AdditiveExpression_Parses_Plus) {
-  ParserImpl p{"a + true"};
-  auto e = p.additive_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("a + true");
+  auto e = p->additive_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsRelational());
@@ -48,9 +47,9 @@ TEST_F(ParserImplTest, AdditiveExpression_Parses_Plus) {
 }
 
 TEST_F(ParserImplTest, AdditiveExpression_Parses_Minus) {
-  ParserImpl p{"a - true"};
-  auto e = p.additive_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("a - true");
+  auto e = p->additive_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsRelational());
@@ -70,24 +69,24 @@ TEST_F(ParserImplTest, AdditiveExpression_Parses_Minus) {
 }
 
 TEST_F(ParserImplTest, AdditiveExpression_InvalidLHS) {
-  ParserImpl p{"if (a) {} + true"};
-  auto e = p.additive_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("if (a) {} + true");
+  auto e = p->additive_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e, nullptr);
 }
 
 TEST_F(ParserImplTest, AdditiveExpression_InvalidRHS) {
-  ParserImpl p{"true + if (a) {}"};
-  auto e = p.additive_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("true + if (a) {}");
+  auto e = p->additive_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:8: unable to parse right side of + expression");
+  EXPECT_EQ(p->error(), "1:8: unable to parse right side of + expression");
 }
 
 TEST_F(ParserImplTest, AdditiveExpression_NoOr_ReturnsLHS) {
-  ParserImpl p{"a true"};
-  auto e = p.additive_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("a true");
+  auto e = p->additive_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsIdentifier());
 }

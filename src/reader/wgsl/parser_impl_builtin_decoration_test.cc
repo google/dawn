@@ -15,12 +15,12 @@
 #include "gtest/gtest.h"
 #include "src/ast/builtin.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
-
-using ParserImplTest = testing::Test;
+namespace {
 
 struct BuiltinData {
   const char* input;
@@ -30,16 +30,41 @@ inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
   out << std::string(data.input);
   return out;
 }
-using BuiltinTest = testing::TestWithParam<BuiltinData>;
+
+class BuiltinTest : public testing::TestWithParam<BuiltinData> {
+ public:
+  BuiltinTest() = default;
+  ~BuiltinTest() = default;
+
+  void SetUp() { ctx_.type_mgr = &tm_; }
+
+  void TearDown() {
+    impl_ = nullptr;
+    ctx_.type_mgr = nullptr;
+  }
+
+  ParserImpl* parser(const std::string& str) {
+    impl_ = std::make_unique<ParserImpl>(ctx_, str);
+    return impl_.get();
+  }
+
+ private:
+  std::unique_ptr<ParserImpl> impl_;
+  Context ctx_;
+  TypeManager tm_;
+};
+
+}  // namespace
+
 TEST_P(BuiltinTest, Parses) {
   auto params = GetParam();
-  ParserImpl p{params.input};
+  auto p = parser(params.input);
 
-  auto builtin = p.builtin_decoration();
-  ASSERT_FALSE(p.has_error());
+  auto builtin = p->builtin_decoration();
+  ASSERT_FALSE(p->has_error());
   EXPECT_EQ(builtin, params.result);
 
-  auto t = p.next();
+  auto t = p->next();
   EXPECT_TRUE(t.IsEof());
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -60,11 +85,11 @@ INSTANTIATE_TEST_SUITE_P(
                     ast::Builtin::kGlobalInvocationId}));
 
 TEST_F(ParserImplTest, BuiltinDecoration_NoMatch) {
-  ParserImpl p{"not-a-builtin"};
-  auto builtin = p.builtin_decoration();
+  auto p = parser("not-a-builtin");
+  auto builtin = p->builtin_decoration();
   ASSERT_EQ(builtin, ast::Builtin::kNone);
 
-  auto t = p.next();
+  auto t = p->next();
   EXPECT_TRUE(t.IsIdentifier());
   EXPECT_EQ(t.to_str(), "not");
 }

@@ -19,45 +19,38 @@
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 #include "src/type_manager.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, FunctionTypeDecl_Void) {
-  auto tm = TypeManager::Instance();
-  auto v = tm->Get(std::make_unique<ast::type::VoidType>());
+  auto v = tm()->Get(std::make_unique<ast::type::VoidType>());
 
-  ParserImpl p{"void"};
-  auto e = p.function_type_decl();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("void");
+  auto e = p->function_type_decl();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e, v);
-
-  TypeManager::Destroy();
 }
 
 TEST_F(ParserImplTest, FunctionTypeDecl_Type) {
-  auto tm = TypeManager::Instance();
-  auto f32 = tm->Get(std::make_unique<ast::type::F32Type>());
-  auto vec2 = tm->Get(std::make_unique<ast::type::VectorType>(f32, 2));
+  auto f32 = tm()->Get(std::make_unique<ast::type::F32Type>());
+  auto vec2 = tm()->Get(std::make_unique<ast::type::VectorType>(f32, 2));
 
-  ParserImpl p{"vec2<f32>"};
-  auto e = p.function_type_decl();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("vec2<f32>");
+  auto e = p->function_type_decl();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e, vec2);
-
-  TypeManager::Destroy();
 }
 
 TEST_F(ParserImplTest, FunctionTypeDecl_InvalidType) {
-  ParserImpl p{"vec2<invalid>"};
-  auto e = p.function_type_decl();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("vec2<invalid>");
+  auto e = p->function_type_decl();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:6: unknown type alias 'invalid'");
+  EXPECT_EQ(p->error(), "1:6: unknown type alias 'invalid'");
 }
 
 }  // namespace wgsl

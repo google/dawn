@@ -22,60 +22,33 @@ namespace tint {
 
 using TypeManagerTest = testing::Test;
 
-TEST_F(TypeManagerTest, Singleton) {
-  auto tm = TypeManager::Instance();
-  ASSERT_NE(tm, nullptr);
-  ASSERT_EQ(tm, TypeManager::Instance());
-
-  TypeManager::Destroy();
-}
-
-TEST_F(TypeManagerTest, Destroy) {
-  auto tm = TypeManager::Instance();
-  ASSERT_NE(tm, nullptr);
-  ASSERT_EQ(tm, TypeManager::Instance());
-
-  TypeManager::Destroy();
-
-  tm = TypeManager::Instance();
-  ASSERT_NE(tm, nullptr);
-
-  TypeManager::Destroy();
-}
-
 TEST_F(TypeManagerTest, GetUnregistered) {
-  auto tm = TypeManager::Instance();
-  auto t = tm->Get(std::make_unique<ast::type::I32Type>());
+  TypeManager tm;
+  auto t = tm.Get(std::make_unique<ast::type::I32Type>());
   ASSERT_NE(t, nullptr);
   EXPECT_TRUE(t->IsI32());
-
-  TypeManager::Destroy();
 }
 
 TEST_F(TypeManagerTest, GetSameTypeReturnsSamePtr) {
-  auto tm = TypeManager::Instance();
-  auto t = tm->Get(std::make_unique<ast::type::I32Type>());
+  TypeManager tm;
+  auto t = tm.Get(std::make_unique<ast::type::I32Type>());
   ASSERT_NE(t, nullptr);
   EXPECT_TRUE(t->IsI32());
 
-  auto t2 = tm->Get(std::make_unique<ast::type::I32Type>());
+  auto t2 = tm.Get(std::make_unique<ast::type::I32Type>());
   EXPECT_EQ(t, t2);
-
-  TypeManager::Destroy();
 }
 
 TEST_F(TypeManagerTest, GetDifferentTypeReturnsDifferentPtr) {
-  auto tm = TypeManager::Instance();
-  auto t = tm->Get(std::make_unique<ast::type::I32Type>());
+  TypeManager tm;
+  auto t = tm.Get(std::make_unique<ast::type::I32Type>());
   ASSERT_NE(t, nullptr);
   EXPECT_TRUE(t->IsI32());
 
-  auto t2 = tm->Get(std::make_unique<ast::type::U32Type>());
+  auto t2 = tm.Get(std::make_unique<ast::type::U32Type>());
   ASSERT_NE(t2, nullptr);
   EXPECT_NE(t, t2);
   EXPECT_TRUE(t2->IsU32());
-
-  TypeManager::Destroy();
 }
 
 }  // namespace tint

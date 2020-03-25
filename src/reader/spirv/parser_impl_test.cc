@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "gmock/gmock.h"
+#include "src/reader/spirv/parser_impl_test_helper.h"
 #include "src/reader/spirv/spirv_tools_helpers_test.h"
 
 namespace tint {
@@ -28,23 +29,21 @@ namespace {
 
 using ::testing::HasSubstr;
 
-using SpvParserImplTest = testing::Test;
-
-TEST_F(SpvParserImplTest, Uint32VecEmpty) {
+TEST_F(SpvParserTest, Impl_Uint32VecEmpty) {
   std::vector<uint32_t> data;
-  ParserImpl p{data};
-  EXPECT_FALSE(p.Parse());
+  auto p = parser(data);
+  EXPECT_FALSE(p->Parse());
   // TODO(dneto): What message?
 }
 
-TEST_F(SpvParserImplTest, InvalidModuleFails) {
+TEST_F(SpvParserTest, Impl_InvalidModuleFails) {
   auto invalid_spv = test::Assemble("%ty = OpTypeInt 3 0");
-  ParserImpl p{invalid_spv};
-  EXPECT_FALSE(p.Parse());
+  auto p = parser(invalid_spv);
+  EXPECT_FALSE(p->Parse());
   EXPECT_THAT(
-      p.error(),
+      p->error(),
       HasSubstr("TypeInt cannot appear before the memory model instruction"));
-  EXPECT_THAT(p.error(), HasSubstr("OpTypeInt 3 0"));
+  EXPECT_THAT(p->error(), HasSubstr("OpTypeInt 3 0"));
 }
 
 // TODO(dneto): uint32 vec, valid SPIR-V

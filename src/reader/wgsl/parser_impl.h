@@ -44,6 +44,7 @@
 #include "src/ast/unless_statement.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decoration.h"
+#include "src/context.h"
 #include "src/reader/wgsl/token.h"
 
 namespace tint {
@@ -56,8 +57,9 @@ class Lexer;
 class ParserImpl {
  public:
   /// Creates a new parser
+  /// @param ctx the context object
   /// @param input the input string to parse
-  explicit ParserImpl(const std::string& input);
+  ParserImpl(const Context& ctx, const std::string& input);
   ~ParserImpl();
 
   /// Run the parser
@@ -349,6 +351,7 @@ class ParserImpl {
   ast::type::Type* type_decl_array(Token t);
   ast::type::Type* type_decl_matrix(Token t);
 
+  const Context& ctx_;
   std::string error_;
   std::unique_ptr<Lexer> lexer_;
   std::deque<Token> token_queue_;

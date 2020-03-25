@@ -16,17 +16,16 @@
 #include "src/ast/function.h"
 #include "src/ast/type/type.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, FunctionDecl) {
-  ParserImpl p{"fn main(a : i32, b : f32) -> void { return; }"};
-  auto f = p.function_decl();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("fn main(a : i32, b : f32) -> void { return; }");
+  auto f = p->function_decl();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(f, nullptr);
 
   EXPECT_EQ(f->name(), "main");
@@ -45,19 +44,19 @@ TEST_F(ParserImplTest, FunctionDecl) {
 }
 
 TEST_F(ParserImplTest, FunctionDecl_InvalidHeader) {
-  ParserImpl p{"fn main() -> { }"};
-  auto f = p.function_decl();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("fn main() -> { }");
+  auto f = p->function_decl();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);
-  EXPECT_EQ(p.error(), "1:14: unable to determine function return type");
+  EXPECT_EQ(p->error(), "1:14: unable to determine function return type");
 }
 
 TEST_F(ParserImplTest, FunctionDecl_InvalidBody) {
-  ParserImpl p{"fn main() -> void { return }"};
-  auto f = p.function_decl();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("fn main() -> void { return }");
+  auto f = p->function_decl();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);
-  EXPECT_EQ(p.error(), "1:28: missing ;");
+  EXPECT_EQ(p->error(), "1:28: missing ;");
 }
 
 }  // namespace wgsl

@@ -15,12 +15,12 @@
 #include "gtest/gtest.h"
 #include "src/ast/storage_class.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
-
-using ParserImplTest = testing::Test;
+namespace {
 
 struct VariableStorageData {
   const char* input;
@@ -30,16 +30,41 @@ inline std::ostream& operator<<(std::ostream& out, VariableStorageData data) {
   out << std::string(data.input);
   return out;
 }
-using VariableStorageTest = testing::TestWithParam<VariableStorageData>;
+
+class VariableStorageTest : public testing::TestWithParam<VariableStorageData> {
+ public:
+  VariableStorageTest() = default;
+  ~VariableStorageTest() = default;
+
+  void SetUp() { ctx_.type_mgr = &tm_; }
+
+  void TearDown() {
+    impl_ = nullptr;
+    ctx_.type_mgr = nullptr;
+  }
+
+  ParserImpl* parser(const std::string& str) {
+    impl_ = std::make_unique<ParserImpl>(ctx_, str);
+    return impl_.get();
+  }
+
+ private:
+  std::unique_ptr<ParserImpl> impl_;
+  Context ctx_;
+  TypeManager tm_;
+};
+
+}  // namespace
+
 TEST_P(VariableStorageTest, Parses) {
   auto params = GetParam();
-  ParserImpl p{std::string("<") + params.input + ">"};
+  auto p = parser(std::string("<") + params.input + ">");
 
-  auto sc = p.variable_storage_decoration();
-  ASSERT_FALSE(p.has_error());
+  auto sc = p->variable_storage_decoration();
+  ASSERT_FALSE(p->has_error());
   EXPECT_EQ(sc, params.result);
 
-  auto t = p.next();
+  auto t = p->next();
   EXPECT_TRUE(t.IsEof());
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -60,37 +85,37 @@ INSTANTIATE_TEST_SUITE_P(
         VariableStorageData{"function", ast::StorageClass::kFunction}));
 
 TEST_F(ParserImplTest, VariableStorageDecoration_NoMatch) {
-  ParserImpl p{"<not-a-storage-class>"};
-  auto sc = p.variable_storage_decoration();
+  auto p = parser("<not-a-storage-class>");
+  auto sc = p->variable_storage_decoration();
   ASSERT_EQ(sc, ast::StorageClass::kNone);
-  ASSERT_TRUE(p.has_error());
-  ASSERT_EQ(p.error(), "1:2: invalid storage class for variable decoration");
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(p->error(), "1:2: invalid storage class for variable decoration");
 }
 
 TEST_F(ParserImplTest, VariableStorageDecoration_Empty) {
-  ParserImpl p{"<>"};
-  auto sc = p.variable_storage_decoration();
+  auto p = parser("<>");
+  auto sc = p->variable_storage_decoration();
   ASSERT_EQ(sc, ast::StorageClass::kNone);
-  ASSERT_TRUE(p.has_error());
-  ASSERT_EQ(p.error(), "1:2: invalid storage class for variable decoration");
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(p->error(), "1:2: invalid storage class for variable decoration");
 }
 
 TEST_F(ParserImplTest, VariableStorageDecoration_MissingLessThan) {
-  ParserImpl p{"in>"};
-  auto sc = p.variable_storage_decoration();
+  auto p = parser("in>");
+  auto sc = p->variable_storage_decoration();
   ASSERT_EQ(sc, ast::StorageClass::kNone);
-  ASSERT_FALSE(p.has_error());
+  ASSERT_FALSE(p->has_error());
 
-  auto t = p.next();
+  auto t = p->next();
   ASSERT_TRUE(t.IsIn());
 }
 
 TEST_F(ParserImplTest, VariableStorageDecoration_MissingGreaterThan) {
-  ParserImpl p{"<in"};
-  auto sc = p.variable_storage_decoration();
+  auto p = parser("<in");
+  auto sc = p->variable_storage_decoration();
   ASSERT_EQ(sc, ast::StorageClass::kNone);
-  ASSERT_TRUE(p.has_error());
-  ASSERT_EQ(p.error(), "1:4: missing > for variable decoration");
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(p->error(), "1:4: missing > for variable decoration");
 }
 
 }  // namespace wgsl

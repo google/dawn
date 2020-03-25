@@ -44,8 +44,9 @@ const spv_target_env kTargetEnv = SPV_ENV_WEBGPU_0;
 
 }  // namespace
 
-ParserImpl::ParserImpl(const std::vector<uint32_t>& spv_binary)
-    : Reader(),
+ParserImpl::ParserImpl(const Context& ctx,
+                       const std::vector<uint32_t>& spv_binary)
+    : Reader(ctx),
       spv_binary_(spv_binary),
       fail_stream_(&success_, &errors_),
       namer_(fail_stream_),
@@ -75,6 +76,11 @@ ParserImpl::ParserImpl(const std::vector<uint32_t>& spv_binary)
 ParserImpl::~ParserImpl() = default;
 
 bool ParserImpl::Parse() {
+  if (ctx_.type_mgr == nullptr) {
+    Fail() << "Missing type manager";
+    return false;
+  }
+
   if (!success_) {
     return false;
   }
@@ -125,22 +131,21 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
   }
 
   ast::type::Type* result = nullptr;
-  TypeManager* tint_tm = TypeManager::Instance();
 
   switch (spirv_type->kind()) {
     case spvtools::opt::analysis::Type::kVoid:
-      result = tint_tm->Get(std::make_unique<ast::type::VoidType>());
+      result = ctx_.type_mgr->Get(std::make_unique<ast::type::VoidType>());
       break;
     case spvtools::opt::analysis::Type::kBool:
-      result = tint_tm->Get(std::make_unique<ast::type::BoolType>());
+      result = ctx_.type_mgr->Get(std::make_unique<ast::type::BoolType>());
       break;
     case spvtools::opt::analysis::Type::kInteger: {
       const auto* int_ty = spirv_type->AsInteger();
       if (int_ty->width() == 32) {
         if (int_ty->IsSigned()) {
-          result = tint_tm->Get(std::make_unique<ast::type::I32Type>());
+          result = ctx_.type_mgr->Get(std::make_unique<ast::type::I32Type>());
         } else {
-          result = tint_tm->Get(std::make_unique<ast::type::U32Type>());
+          result = ctx_.type_mgr->Get(std::make_unique<ast::type::U32Type>());
         }
       } else {
         Fail() << "unhandled integer width: " << int_ty->width();
@@ -150,7 +155,7 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
     case spvtools::opt::analysis::Type::kFloat: {
       const auto* float_ty = spirv_type->AsFloat();
       if (float_ty->width() == 32) {
-        result = tint_tm->Get(std::make_unique<ast::type::F32Type>());
+        result = ctx_.type_mgr->Get(std::make_unique<ast::type::F32Type>());
       } else {
         Fail() << "unhandled float width: " << float_ty->width();
       }
@@ -161,7 +166,7 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
       const auto num_elem = vec_ty->element_count();
       auto* ast_elem_ty = ConvertType(type_mgr_->GetId(vec_ty->element_type()));
       if (ast_elem_ty != nullptr) {
-        result = tint_tm->Get(
+        result = ctx_.type_mgr->Get(
             std::make_unique<ast::type::VectorType>(ast_elem_ty, num_elem));
       }
       // In the error case, we'll already have emitted a diagnostic.
@@ -175,7 +180,7 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
       const auto num_columns = mat_ty->element_count();
       auto* ast_scalar_ty = ConvertType(type_mgr_->GetId(scalar_ty));
       if (ast_scalar_ty != nullptr) {
-        result = tint_tm->Get(std::make_unique<ast::type::MatrixType>(
+        result = ctx_.type_mgr->Get(std::make_unique<ast::type::MatrixType>(
             ast_scalar_ty, num_rows, num_columns));
       }
       // In the error case, we'll already have emitted a diagnostic.

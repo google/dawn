@@ -15,18 +15,17 @@
 #include "gtest/gtest.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, StructMemberDecoration_Offset) {
-  ParserImpl p{"offset 4"};
-  auto deco = p.struct_member_decoration();
+  auto p = parser("offset 4");
+  auto deco = p->struct_member_decoration();
   ASSERT_NE(deco, nullptr);
-  ASSERT_FALSE(p.has_error());
+  ASSERT_FALSE(p->has_error());
   ASSERT_TRUE(deco->IsOffset());
 
   auto o = deco->AsOffset();
@@ -34,19 +33,19 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset) {
 }
 
 TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingValue) {
-  ParserImpl p{"offset"};
-  auto deco = p.struct_member_decoration();
+  auto p = parser("offset");
+  auto deco = p->struct_member_decoration();
   ASSERT_EQ(deco, nullptr);
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:7: invalid value for offset decoration");
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:7: invalid value for offset decoration");
 }
 
 TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingInvalid) {
-  ParserImpl p{"offset nan"};
-  auto deco = p.struct_member_decoration();
+  auto p = parser("offset nan");
+  auto deco = p->struct_member_decoration();
   ASSERT_EQ(deco, nullptr);
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:8: invalid value for offset decoration");
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:8: invalid value for offset decoration");
 }
 
 }  // namespace wgsl

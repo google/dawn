@@ -18,18 +18,17 @@
 #include "src/ast/location_decoration.h"
 #include "src/ast/set_decoration.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, VariableDecoration_Location) {
-  ParserImpl p{"location 4"};
-  auto deco = p.variable_decoration();
+  auto p = parser("location 4");
+  auto deco = p->variable_decoration();
   ASSERT_NE(deco, nullptr);
-  ASSERT_FALSE(p.has_error());
+  ASSERT_FALSE(p->has_error());
   ASSERT_TRUE(deco->IsLocation());
 
   auto loc = deco->AsLocation();
@@ -37,25 +36,25 @@ TEST_F(ParserImplTest, VariableDecoration_Location) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Location_MissingValue) {
-  ParserImpl p{"location"};
-  auto deco = p.variable_decoration();
+  auto p = parser("location");
+  auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:9: invalid value for location decoration");
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:9: invalid value for location decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Location_MissingInvalid) {
-  ParserImpl p{"location nan"};
-  auto deco = p.variable_decoration();
+  auto p = parser("location nan");
+  auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:10: invalid value for location decoration");
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:10: invalid value for location decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Builtin) {
-  ParserImpl p{"builtin frag_depth"};
-  auto deco = p.variable_decoration();
-  ASSERT_FALSE(p.has_error());
+  auto p = parser("builtin frag_depth");
+  auto deco = p->variable_decoration();
+  ASSERT_FALSE(p->has_error());
   ASSERT_NE(deco, nullptr);
   ASSERT_TRUE(deco->IsBuiltin());
 
@@ -64,26 +63,26 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingValue) {
-  ParserImpl p{"builtin"};
-  auto deco = p.variable_decoration();
+  auto p = parser("builtin");
+  auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:8: invalid value for builtin decoration");
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:8: invalid value for builtin decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingInvalid) {
-  ParserImpl p{"builtin 3"};
-  auto deco = p.variable_decoration();
+  auto p = parser("builtin 3");
+  auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:9: invalid value for builtin decoration");
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:9: invalid value for builtin decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Binding) {
-  ParserImpl p{"binding 4"};
-  auto deco = p.variable_decoration();
+  auto p = parser("binding 4");
+  auto deco = p->variable_decoration();
   ASSERT_NE(deco, nullptr);
-  ASSERT_FALSE(p.has_error());
+  ASSERT_FALSE(p->has_error());
   ASSERT_TRUE(deco->IsBinding());
 
   auto binding = deco->AsBinding();
@@ -91,25 +90,25 @@ TEST_F(ParserImplTest, VariableDecoration_Binding) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Binding_MissingValue) {
-  ParserImpl p{"binding"};
-  auto deco = p.variable_decoration();
+  auto p = parser("binding");
+  auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:8: invalid value for binding decoration");
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:8: invalid value for binding decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Binding_MissingInvalid) {
-  ParserImpl p{"binding nan"};
-  auto deco = p.variable_decoration();
+  auto p = parser("binding nan");
+  auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:9: invalid value for binding decoration");
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:9: invalid value for binding decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecoration_set) {
-  ParserImpl p{"set 4"};
-  auto deco = p.variable_decoration();
-  ASSERT_FALSE(p.has_error());
+  auto p = parser("set 4");
+  auto deco = p->variable_decoration();
+  ASSERT_FALSE(p->has_error());
   ASSERT_NE(deco.get(), nullptr);
   ASSERT_TRUE(deco->IsSet());
 
@@ -118,19 +117,19 @@ TEST_F(ParserImplTest, VariableDecoration_set) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Set_MissingValue) {
-  ParserImpl p{"set"};
-  auto deco = p.variable_decoration();
+  auto p = parser("set");
+  auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:4: invalid value for set decoration");
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:4: invalid value for set decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Set_MissingInvalid) {
-  ParserImpl p{"set nan"};
-  auto deco = p.variable_decoration();
+  auto p = parser("set nan");
+  auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:5: invalid value for set decoration");
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:5: invalid value for set decoration");
 }
 
 }  // namespace wgsl

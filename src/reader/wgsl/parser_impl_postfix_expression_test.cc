@@ -23,17 +23,16 @@
 #include "src/ast/unary_method_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, PostfixExpression_Array_ConstantIndex) {
-  ParserImpl p{"a[1]"};
-  auto e = p.postfix_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("a[1]");
+  auto e = p->postfix_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsArrayAccessor());
@@ -52,9 +51,9 @@ TEST_F(ParserImplTest, PostfixExpression_Array_ConstantIndex) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Array_ExpressionIndex) {
-  ParserImpl p{"a[1 + b / 4]"};
-  auto e = p.postfix_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("a[1 + b / 4]");
+  auto e = p->postfix_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsArrayAccessor());
@@ -69,33 +68,33 @@ TEST_F(ParserImplTest, PostfixExpression_Array_ExpressionIndex) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Array_MissingIndex) {
-  ParserImpl p{"a[]"};
-  auto e = p.postfix_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("a[]");
+  auto e = p->postfix_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:3: unable to parse expression inside []");
+  EXPECT_EQ(p->error(), "1:3: unable to parse expression inside []");
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Array_MissingRightBrace) {
-  ParserImpl p{"a[1"};
-  auto e = p.postfix_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("a[1");
+  auto e = p->postfix_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:4: missing ] for array accessor");
+  EXPECT_EQ(p->error(), "1:4: missing ] for array accessor");
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Array_InvalidIndex) {
-  ParserImpl p{"a[if(a() {})]"};
-  auto e = p.postfix_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("a[if(a() {})]");
+  auto e = p->postfix_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:3: unable to parse expression inside []");
+  EXPECT_EQ(p->error(), "1:3: unable to parse expression inside []");
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Call_Empty) {
-  ParserImpl p{"a()"};
-  auto e = p.postfix_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("a()");
+  auto e = p->postfix_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsCall());
@@ -110,9 +109,9 @@ TEST_F(ParserImplTest, PostfixExpression_Call_Empty) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Call_WithArgs) {
-  ParserImpl p{"std::test(1, b, 2 + 3 / b)"};
-  auto e = p.postfix_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("std::test(1, b, 2 + 3 / b)");
+  auto e = p->postfix_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsCall());
@@ -131,33 +130,33 @@ TEST_F(ParserImplTest, PostfixExpression_Call_WithArgs) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Call_InvalidArg) {
-  ParserImpl p{"a(if(a) {})"};
-  auto e = p.postfix_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("a(if(a) {})");
+  auto e = p->postfix_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:3: unable to parse argument expression");
+  EXPECT_EQ(p->error(), "1:3: unable to parse argument expression");
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Call_HangingComma) {
-  ParserImpl p{"a(b, )"};
-  auto e = p.postfix_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("a(b, )");
+  auto e = p->postfix_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:6: unable to parse argument expression after comma");
+  EXPECT_EQ(p->error(), "1:6: unable to parse argument expression after comma");
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Call_MissingRightParen) {
-  ParserImpl p{"a("};
-  auto e = p.postfix_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("a(");
+  auto e = p->postfix_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:3: missing ) for call expression");
+  EXPECT_EQ(p->error(), "1:3: missing ) for call expression");
 }
 
 TEST_F(ParserImplTest, PostfixExpression_MemberAccessor) {
-  ParserImpl p{"a.b"};
-  auto e = p.postfix_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("a.b");
+  auto e = p->postfix_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsMemberAccessor());
 
@@ -172,25 +171,25 @@ TEST_F(ParserImplTest, PostfixExpression_MemberAccessor) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_MemberAccesssor_InvalidIdent) {
-  ParserImpl p{"a.if"};
-  auto e = p.postfix_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("a.if");
+  auto e = p->postfix_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:3: missing identifier for member accessor");
+  EXPECT_EQ(p->error(), "1:3: missing identifier for member accessor");
 }
 
 TEST_F(ParserImplTest, PostfixExpression_MemberAccessor_MissingIdent) {
-  ParserImpl p{"a."};
-  auto e = p.postfix_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("a.");
+  auto e = p->postfix_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:3: missing identifier for member accessor");
+  EXPECT_EQ(p->error(), "1:3: missing identifier for member accessor");
 }
 
 TEST_F(ParserImplTest, PostfixExpression_NonMatch_returnLHS) {
-  ParserImpl p{"a b"};
-  auto e = p.postfix_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("a b");
+  auto e = p->postfix_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsIdentifier());
 }

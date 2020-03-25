@@ -19,17 +19,16 @@
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_initializer_expression.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, ConstExpr_TypeDecl) {
-  ParserImpl p{"vec2<f32>(1., 2.)"};
-  auto e = p.const_expr();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("vec2<f32>(1., 2.)");
+  auto e = p->const_expr();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsInitializer());
   ASSERT_TRUE(e->AsInitializer()->IsTypeInitializer());
@@ -55,57 +54,57 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl) {
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingRightParen) {
-  ParserImpl p{"vec2<f32>(1., 2."};
-  auto e = p.const_expr();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("vec2<f32>(1., 2.");
+  auto e = p->const_expr();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:17: missing ) for type initializer");
+  EXPECT_EQ(p->error(), "1:17: missing ) for type initializer");
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingLeftParen) {
-  ParserImpl p{"vec2<f32> 1., 2.)"};
-  auto e = p.const_expr();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("vec2<f32> 1., 2.)");
+  auto e = p->const_expr();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:11: missing ( for type initializer");
+  EXPECT_EQ(p->error(), "1:11: missing ( for type initializer");
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_HangingComma) {
-  ParserImpl p{"vec2<f32>(1.,)"};
-  auto e = p.const_expr();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("vec2<f32>(1.,)");
+  auto e = p->const_expr();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:14: unable to parse const literal");
+  EXPECT_EQ(p->error(), "1:14: unable to parse const literal");
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingComma) {
-  ParserImpl p{"vec2<f32>(1. 2."};
-  auto e = p.const_expr();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("vec2<f32>(1. 2.");
+  auto e = p->const_expr();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:14: missing ) for type initializer");
+  EXPECT_EQ(p->error(), "1:14: missing ) for type initializer");
 }
 
 TEST_F(ParserImplTest, ConstExpr_MissingExpr) {
-  ParserImpl p{"vec2<f32>()"};
-  auto e = p.const_expr();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("vec2<f32>()");
+  auto e = p->const_expr();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:11: unable to parse const literal");
+  EXPECT_EQ(p->error(), "1:11: unable to parse const literal");
 }
 
 TEST_F(ParserImplTest, ConstExpr_InvalidExpr) {
-  ParserImpl p{"vec2<f32>(1., if(a) {})"};
-  auto e = p.const_expr();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("vec2<f32>(1., if(a) {})");
+  auto e = p->const_expr();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:15: unable to parse const literal");
+  EXPECT_EQ(p->error(), "1:15: unable to parse const literal");
 }
 
 TEST_F(ParserImplTest, ConstExpr_ConstLiteral) {
-  ParserImpl p{"true"};
-  auto e = p.const_expr();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("true");
+  auto e = p->const_expr();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsInitializer());
   ASSERT_TRUE(e->AsInitializer()->IsConstInitializer());
@@ -115,11 +114,11 @@ TEST_F(ParserImplTest, ConstExpr_ConstLiteral) {
 }
 
 TEST_F(ParserImplTest, ConstExpr_ConstLiteral_Invalid) {
-  ParserImpl p{"invalid"};
-  auto e = p.const_expr();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("invalid");
+  auto e = p->const_expr();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:1: unknown type alias 'invalid'");
+  EXPECT_EQ(p->error(), "1:1: unknown type alias 'invalid'");
 }
 
 }  // namespace wgsl

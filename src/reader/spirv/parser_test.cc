@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "src/context.h"
 
 namespace tint {
 namespace reader {
@@ -28,7 +29,8 @@ using ParserTest = testing::Test;
 
 TEST_F(ParserTest, Uint32VecEmpty) {
   std::vector<uint32_t> data;
-  Parser p{data};
+  Context ctx;
+  Parser p(ctx, data);
   EXPECT_FALSE(p.Parse());
   // TODO(dneto): What message?
 }

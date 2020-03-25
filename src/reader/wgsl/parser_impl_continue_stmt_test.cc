@@ -17,17 +17,16 @@
 #include "src/ast/return_statement.h"
 #include "src/ast/statement.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, ContinueStmt) {
-  ParserImpl p{"continue"};
-  auto e = p.continue_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("continue");
+  auto e = p->continue_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsContinue());
   EXPECT_EQ(e->condition(), ast::StatementCondition::kNone);
@@ -35,9 +34,9 @@ TEST_F(ParserImplTest, ContinueStmt) {
 }
 
 TEST_F(ParserImplTest, ContinueStmt_WithIf) {
-  ParserImpl p{"continue if (a == b)"};
-  auto e = p.continue_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("continue if (a == b)");
+  auto e = p->continue_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsContinue());
   EXPECT_EQ(e->condition(), ast::StatementCondition::kIf);
@@ -46,9 +45,9 @@ TEST_F(ParserImplTest, ContinueStmt_WithIf) {
 }
 
 TEST_F(ParserImplTest, ContinueStmt_WithUnless) {
-  ParserImpl p{"continue unless (a == b)"};
-  auto e = p.continue_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("continue unless (a == b)");
+  auto e = p->continue_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsContinue());
   EXPECT_EQ(e->condition(), ast::StatementCondition::kUnless);
@@ -57,19 +56,19 @@ TEST_F(ParserImplTest, ContinueStmt_WithUnless) {
 }
 
 TEST_F(ParserImplTest, ContinueStmt_InvalidRHS) {
-  ParserImpl p{"continue if (a = b)"};
-  auto e = p.continue_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("continue if (a = b)");
+  auto e = p->continue_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:16: expected )");
+  EXPECT_EQ(p->error(), "1:16: expected )");
 }
 
 TEST_F(ParserImplTest, ContinueStmt_MissingRHS) {
-  ParserImpl p{"continue if"};
-  auto e = p.continue_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("continue if");
+  auto e = p->continue_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:12: expected (");
+  EXPECT_EQ(p->error(), "1:12: expected (");
 }
 
 }  // namespace wgsl

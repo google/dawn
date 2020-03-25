@@ -21,17 +21,16 @@
 #include "src/ast/literal.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
-  ParserImpl p{"a = 123"};
-  auto e = p.assignment_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("a = 123");
+  auto e = p->assignment_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsAssign());
@@ -53,9 +52,9 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
-  ParserImpl p{"a.b.c[2].d = 123"};
-  auto e = p.assignment_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("a.b.c[2].d = 123");
+  auto e = p->assignment_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsAssign());
@@ -109,26 +108,26 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_MissingEqual) {
-  ParserImpl p{"a.b.c[2].d 123"};
-  auto e = p.assignment_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("a.b.c[2].d 123");
+  auto e = p->assignment_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:12: missing = for assignment");
+  EXPECT_EQ(p->error(), "1:12: missing = for assignment");
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_InvalidLHS) {
-  ParserImpl p{"if (true) {} = 123"};
-  auto e = p.assignment_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("if (true) {} = 123");
+  auto e = p->assignment_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e, nullptr);
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_InvalidRHS) {
-  ParserImpl p{"a.b.c[2].d = if (true) {}"};
-  auto e = p.assignment_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("a.b.c[2].d = if (true) {}");
+  auto e = p->assignment_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:14: unable to parse right side of assignment");
+  EXPECT_EQ(p->error(), "1:14: unable to parse right side of assignment");
 }
 
 }  // namespace wgsl

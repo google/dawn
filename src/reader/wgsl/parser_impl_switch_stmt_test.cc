@@ -16,20 +16,19 @@
 #include "src/ast/case_statement.h"
 #include "src/ast/switch_statement.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, SwitchStmt_WithoutDefault) {
-  ParserImpl p{R"(switch(a) {
+  auto p = parser(R"(switch(a) {
   case 1: {}
   case 2: {}
-})"};
-  auto e = p.switch_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+})");
+  auto e = p->switch_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsSwitch());
   ASSERT_EQ(e->body().size(), 2);
@@ -38,22 +37,22 @@ TEST_F(ParserImplTest, SwitchStmt_WithoutDefault) {
 }
 
 TEST_F(ParserImplTest, SwitchStmt_Empty) {
-  ParserImpl p{"switch(a) { }"};
-  auto e = p.switch_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("switch(a) { }");
+  auto e = p->switch_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsSwitch());
   ASSERT_EQ(e->body().size(), 0);
 }
 
 TEST_F(ParserImplTest, SwitchStmt_DefaultInMiddle) {
-  ParserImpl p{R"(switch(a) {
+  auto p = parser(R"(switch(a) {
   case 1: {}
   default: {}
   case 2: {}
-})"};
-  auto e = p.switch_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+})");
+  auto e = p->switch_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsSwitch());
 
@@ -64,45 +63,45 @@ TEST_F(ParserImplTest, SwitchStmt_DefaultInMiddle) {
 }
 
 TEST_F(ParserImplTest, SwitchStmt_InvalidExpression) {
-  ParserImpl p{"switch(a=b) {}"};
-  auto e = p.switch_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("switch(a=b) {}");
+  auto e = p->switch_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:9: expected )");
+  EXPECT_EQ(p->error(), "1:9: expected )");
 }
 
 TEST_F(ParserImplTest, SwitchStmt_MissingExpression) {
-  ParserImpl p{"switch {}"};
-  auto e = p.switch_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("switch {}");
+  auto e = p->switch_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:8: expected (");
+  EXPECT_EQ(p->error(), "1:8: expected (");
 }
 
 TEST_F(ParserImplTest, SwitchStmt_MissingBracketLeft) {
-  ParserImpl p{"switch(a) }"};
-  auto e = p.switch_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("switch(a) }");
+  auto e = p->switch_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:11: missing { for switch statement");
+  EXPECT_EQ(p->error(), "1:11: missing { for switch statement");
 }
 
 TEST_F(ParserImplTest, SwitchStmt_MissingBracketRight) {
-  ParserImpl p{"switch(a) {"};
-  auto e = p.switch_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("switch(a) {");
+  auto e = p->switch_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:12: missing } for switch statement");
+  EXPECT_EQ(p->error(), "1:12: missing } for switch statement");
 }
 
 TEST_F(ParserImplTest, SwitchStmt_InvalidBody) {
-  ParserImpl p{R"(switch(a) {
+  auto p = parser(R"(switch(a) {
   case: {}
-})"};
-  auto e = p.switch_stmt();
-  ASSERT_TRUE(p.has_error());
+})");
+  auto e = p->switch_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "2:7: unable to parse case conditional");
+  EXPECT_EQ(p->error(), "2:7: unable to parse case conditional");
 }
 
 }  // namespace wgsl

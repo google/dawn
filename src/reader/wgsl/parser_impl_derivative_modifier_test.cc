@@ -15,12 +15,12 @@
 #include "gtest/gtest.h"
 #include "src/ast/derivative_modifier.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
-
-using ParserImplTest = testing::Test;
+namespace {
 
 struct DerivativeModifierData {
   const char* input;
@@ -31,16 +31,42 @@ inline std::ostream& operator<<(std::ostream& out,
   out << std::string(data.input);
   return out;
 }
-using DerivativeModifierTest = testing::TestWithParam<DerivativeModifierData>;
+
+class DerivativeModifierTest
+    : public testing::TestWithParam<DerivativeModifierData> {
+ public:
+  DerivativeModifierTest() = default;
+  ~DerivativeModifierTest() = default;
+
+  void SetUp() { ctx_.type_mgr = &tm_; }
+
+  void TearDown() {
+    impl_ = nullptr;
+    ctx_.type_mgr = nullptr;
+  }
+
+  ParserImpl* parser(const std::string& str) {
+    impl_ = std::make_unique<ParserImpl>(ctx_, str);
+    return impl_.get();
+  }
+
+ private:
+  std::unique_ptr<ParserImpl> impl_;
+  Context ctx_;
+  TypeManager tm_;
+};
+
+}  // namespace
+
 TEST_P(DerivativeModifierTest, Parses) {
   auto params = GetParam();
-  ParserImpl p{params.input};
+  auto p = parser(params.input);
 
-  auto mod = p.derivative_modifier();
-  ASSERT_FALSE(p.has_error());
+  auto mod = p->derivative_modifier();
+  ASSERT_FALSE(p->has_error());
   EXPECT_EQ(mod, params.result);
 
-  auto t = p.next();
+  auto t = p->next();
   EXPECT_TRUE(t.IsEof());
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -51,11 +77,11 @@ INSTANTIATE_TEST_SUITE_P(
         DerivativeModifierData{"coarse", ast::DerivativeModifier::kCoarse}));
 
 TEST_F(ParserImplTest, DerivativeModifier_NoMatch) {
-  ParserImpl p{"not-a-modifier"};
-  auto stage = p.derivative_modifier();
+  auto p = parser("not-a-modifier");
+  auto stage = p->derivative_modifier();
   ASSERT_EQ(stage, ast::DerivativeModifier::kNone);
 
-  auto t = p.next();
+  auto t = p->next();
   EXPECT_TRUE(t.IsIdentifier());
   EXPECT_EQ(t.to_str(), "not");
 }

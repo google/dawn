@@ -16,17 +16,16 @@
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/location_decoration.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, VariableDecorationList_Parses) {
-  ParserImpl p{R"([[location 4, builtin position]])"};
-  auto decos = p.variable_decoration_list();
-  ASSERT_FALSE(p.has_error());
+  auto p = parser(R"([[location 4, builtin position]])");
+  auto decos = p->variable_decoration_list();
+  ASSERT_FALSE(p->has_error());
   ASSERT_EQ(decos.size(), 2);
   ASSERT_TRUE(decos[0]->IsLocation());
   EXPECT_EQ(decos[0]->AsLocation()->value(), 4);
@@ -35,45 +34,45 @@ TEST_F(ParserImplTest, VariableDecorationList_Parses) {
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_Empty) {
-  ParserImpl p{R"([[]])"};
-  auto decos = p.variable_decoration_list();
-  ASSERT_TRUE(p.has_error());
-  ASSERT_EQ(p.error(), "1:3: empty variable decoration list");
+  auto p = parser(R"([[]])");
+  auto decos = p->variable_decoration_list();
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(p->error(), "1:3: empty variable decoration list");
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_Invalid) {
-  ParserImpl p{R"([[invalid]])"};
-  auto decos = p.variable_decoration_list();
-  ASSERT_TRUE(p.has_error());
-  ASSERT_EQ(p.error(), "1:3: missing variable decoration for decoration list");
+  auto p = parser(R"([[invalid]])");
+  auto decos = p->variable_decoration_list();
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(p->error(), "1:3: missing variable decoration for decoration list");
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_ExtraComma) {
-  ParserImpl p{R"([[builtin position, ]])"};
-  auto decos = p.variable_decoration_list();
-  ASSERT_TRUE(p.has_error());
-  ASSERT_EQ(p.error(), "1:21: missing variable decoration after comma");
+  auto p = parser(R"([[builtin position, ]])");
+  auto decos = p->variable_decoration_list();
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(p->error(), "1:21: missing variable decoration after comma");
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_MissingComma) {
-  ParserImpl p{R"([[binding 4 location 5]])"};
-  auto decos = p.variable_decoration_list();
-  ASSERT_TRUE(p.has_error());
-  ASSERT_EQ(p.error(), "1:13: missing comma in variable decoration list");
+  auto p = parser(R"([[binding 4 location 5]])");
+  auto decos = p->variable_decoration_list();
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(p->error(), "1:13: missing comma in variable decoration list");
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_BadDecoration) {
-  ParserImpl p{R"([[location bad]])"};
-  auto decos = p.variable_decoration_list();
-  ASSERT_TRUE(p.has_error());
-  ASSERT_EQ(p.error(), "1:12: invalid value for location decoration");
+  auto p = parser(R"([[location bad]])");
+  auto decos = p->variable_decoration_list();
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(p->error(), "1:12: invalid value for location decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecorationList_InvalidBuiltin) {
-  ParserImpl p{"[[builtin invalid]]"};
-  auto decos = p.variable_decoration_list();
-  ASSERT_TRUE(p.has_error());
-  ASSERT_EQ(p.error(), "1:11: invalid value for builtin decoration");
+  auto p = parser("[[builtin invalid]]");
+  auto decos = p->variable_decoration_list();
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(p->error(), "1:11: invalid value for builtin decoration");
 }
 
 }  // namespace wgsl

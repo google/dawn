@@ -15,17 +15,16 @@
 #include "gtest/gtest.h"
 #include "src/ast/else_statement.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, ElseIfStmt) {
-  ParserImpl p{"elseif (a == 4) { a = b; c = d; }"};
-  auto e = p.elseif_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("elseif (a == 4) { a = b; c = d; }");
+  auto e = p->elseif_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e.size(), 1);
 
   ASSERT_TRUE(e[0]->IsElse());
@@ -35,9 +34,9 @@ TEST_F(ParserImplTest, ElseIfStmt) {
 }
 
 TEST_F(ParserImplTest, ElseIfStmt_Multiple) {
-  ParserImpl p{"elseif (a == 4) { a = b; c = d; } elseif(c) { d = 2; }"};
-  auto e = p.elseif_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("elseif (a == 4) { a = b; c = d; } elseif(c) { d = 2; }");
+  auto e = p->elseif_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e.size(), 2);
 
   ASSERT_TRUE(e[0]->IsElse());
@@ -52,17 +51,17 @@ TEST_F(ParserImplTest, ElseIfStmt_Multiple) {
 }
 
 TEST_F(ParserImplTest, ElseIfStmt_InvalidBody) {
-  ParserImpl p{"elseif (true) { fn main() -> void {}}"};
-  auto e = p.elseif_stmt();
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:17: missing }");
+  auto p = parser("elseif (true) { fn main() -> void {}}");
+  auto e = p->elseif_stmt();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:17: missing }");
 }
 
 TEST_F(ParserImplTest, ElseIfStmt_MissingBody) {
-  ParserImpl p{"elseif (true)"};
-  auto e = p.elseif_stmt();
-  ASSERT_TRUE(p.has_error());
-  EXPECT_EQ(p.error(), "1:14: missing {");
+  auto p = parser("elseif (true)");
+  auto e = p->elseif_stmt();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:14: missing {");
 }
 
 }  // namespace wgsl

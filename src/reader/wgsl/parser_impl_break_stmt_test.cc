@@ -17,17 +17,16 @@
 #include "src/ast/return_statement.h"
 #include "src/ast/statement.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, BreakStmt) {
-  ParserImpl p{"break"};
-  auto e = p.break_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("break");
+  auto e = p->break_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsBreak());
   EXPECT_EQ(e->condition(), ast::StatementCondition::kNone);
@@ -35,9 +34,9 @@ TEST_F(ParserImplTest, BreakStmt) {
 }
 
 TEST_F(ParserImplTest, BreakStmt_WithIf) {
-  ParserImpl p{"break if (a == b)"};
-  auto e = p.break_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("break if (a == b)");
+  auto e = p->break_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsBreak());
   EXPECT_EQ(e->condition(), ast::StatementCondition::kIf);
@@ -46,9 +45,9 @@ TEST_F(ParserImplTest, BreakStmt_WithIf) {
 }
 
 TEST_F(ParserImplTest, BreakStmt_WithUnless) {
-  ParserImpl p{"break unless (a == b)"};
-  auto e = p.break_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("break unless (a == b)");
+  auto e = p->break_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsBreak());
   EXPECT_EQ(e->condition(), ast::StatementCondition::kUnless);
@@ -57,19 +56,19 @@ TEST_F(ParserImplTest, BreakStmt_WithUnless) {
 }
 
 TEST_F(ParserImplTest, BreakStmt_InvalidRHS) {
-  ParserImpl p{"break if (a = b)"};
-  auto e = p.break_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("break if (a = b)");
+  auto e = p->break_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:13: expected )");
+  EXPECT_EQ(p->error(), "1:13: expected )");
 }
 
 TEST_F(ParserImplTest, BreakStmt_MissingRHS) {
-  ParserImpl p{"break if"};
-  auto e = p.break_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("break if");
+  auto e = p->break_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:9: expected (");
+  EXPECT_EQ(p->error(), "1:9: expected (");
 }
 
 }  // namespace wgsl

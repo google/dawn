@@ -21,17 +21,16 @@
 #include "src/ast/unary_method_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, UnaryExpression_Postix) {
-  ParserImpl p{"a[2]"};
-  auto e = p.unary_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("a[2]");
+  auto e = p->unary_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsArrayAccessor());
@@ -49,9 +48,9 @@ TEST_F(ParserImplTest, UnaryExpression_Postix) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Minus) {
-  ParserImpl p{"- 1"};
-  auto e = p.unary_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("- 1");
+  auto e = p->unary_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryOp());
 
@@ -67,17 +66,17 @@ TEST_F(ParserImplTest, UnaryExpression_Minus) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Minus_InvalidRHS) {
-  ParserImpl p{"-if(a) {}"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("-if(a) {}");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:2: unable to parse right side of - expression");
+  EXPECT_EQ(p->error(), "1:2: unable to parse right side of - expression");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Bang) {
-  ParserImpl p{"!1"};
-  auto e = p.unary_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("!1");
+  auto e = p->unary_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryOp());
 
@@ -93,17 +92,17 @@ TEST_F(ParserImplTest, UnaryExpression_Bang) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Bang_InvalidRHS) {
-  ParserImpl p{"!if (a) {}"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("!if (a) {}");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:2: unable to parse right side of ! expression");
+  EXPECT_EQ(p->error(), "1:2: unable to parse right side of ! expression");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Any) {
-  ParserImpl p{"any(a)"};
-  auto e = p.unary_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("any(a)");
+  auto e = p->unary_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryMethod());
 
@@ -117,41 +116,41 @@ TEST_F(ParserImplTest, UnaryExpression_Any) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Any_MissingParenLeft) {
-  ParserImpl p{"any a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("any a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:5: missing ( for method call");
+  EXPECT_EQ(p->error(), "1:5: missing ( for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Any_MissingParenRight) {
-  ParserImpl p{"any(a"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("any(a");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:6: missing ) for method call");
+  EXPECT_EQ(p->error(), "1:6: missing ) for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Any_MissingIdentifier) {
-  ParserImpl p{"any()"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("any()");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:5: missing identifier for method call");
+  EXPECT_EQ(p->error(), "1:5: missing identifier for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Any_InvalidIdentifier) {
-  ParserImpl p{"any(123)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("any(123)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:5: missing identifier for method call");
+  EXPECT_EQ(p->error(), "1:5: missing identifier for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_All) {
-  ParserImpl p{"all(a)"};
-  auto e = p.unary_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("all(a)");
+  auto e = p->unary_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryMethod());
 
@@ -165,41 +164,41 @@ TEST_F(ParserImplTest, UnaryExpression_All) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_All_MissingParenLeft) {
-  ParserImpl p{"all a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("all a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:5: missing ( for method call");
+  EXPECT_EQ(p->error(), "1:5: missing ( for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_All_MissingParenRight) {
-  ParserImpl p{"all(a"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("all(a");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:6: missing ) for method call");
+  EXPECT_EQ(p->error(), "1:6: missing ) for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_All_MissingIdentifier) {
-  ParserImpl p{"all()"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("all()");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:5: missing identifier for method call");
+  EXPECT_EQ(p->error(), "1:5: missing identifier for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_All_InvalidIdentifier) {
-  ParserImpl p{"all(123)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("all(123)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:5: missing identifier for method call");
+  EXPECT_EQ(p->error(), "1:5: missing identifier for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNan) {
-  ParserImpl p{"is_nan(a)"};
-  auto e = p.unary_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("is_nan(a)");
+  auto e = p->unary_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryMethod());
 
@@ -213,41 +212,41 @@ TEST_F(ParserImplTest, UnaryExpression_IsNan) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNan_MissingParenLeft) {
-  ParserImpl p{"is_nan a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("is_nan a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:8: missing ( for method call");
+  EXPECT_EQ(p->error(), "1:8: missing ( for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNan_MissingParenRight) {
-  ParserImpl p{"is_nan(a"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("is_nan(a");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:9: missing ) for method call");
+  EXPECT_EQ(p->error(), "1:9: missing ) for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNan_MissingIdentifier) {
-  ParserImpl p{"is_nan()"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("is_nan()");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:8: missing identifier for method call");
+  EXPECT_EQ(p->error(), "1:8: missing identifier for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNan_InvalidIdentifier) {
-  ParserImpl p{"is_nan(123)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("is_nan(123)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:8: missing identifier for method call");
+  EXPECT_EQ(p->error(), "1:8: missing identifier for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsInf) {
-  ParserImpl p{"is_inf(a)"};
-  auto e = p.unary_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("is_inf(a)");
+  auto e = p->unary_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryMethod());
 
@@ -261,41 +260,41 @@ TEST_F(ParserImplTest, UnaryExpression_IsInf) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsInf_MissingParenLeft) {
-  ParserImpl p{"is_inf a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("is_inf a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:8: missing ( for method call");
+  EXPECT_EQ(p->error(), "1:8: missing ( for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsInf_MissingParenRight) {
-  ParserImpl p{"is_inf(a"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("is_inf(a");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:9: missing ) for method call");
+  EXPECT_EQ(p->error(), "1:9: missing ) for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsInf_MissingIdentifier) {
-  ParserImpl p{"is_inf()"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("is_inf()");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:8: missing identifier for method call");
+  EXPECT_EQ(p->error(), "1:8: missing identifier for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsInf_InvalidIdentifier) {
-  ParserImpl p{"is_inf(123)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("is_inf(123)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:8: missing identifier for method call");
+  EXPECT_EQ(p->error(), "1:8: missing identifier for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsFinite) {
-  ParserImpl p{"is_finite(a)"};
-  auto e = p.unary_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("is_finite(a)");
+  auto e = p->unary_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryMethod());
 
@@ -309,41 +308,41 @@ TEST_F(ParserImplTest, UnaryExpression_IsFinite) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsFinite_MissingParenLeft) {
-  ParserImpl p{"is_finite a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("is_finite a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:11: missing ( for method call");
+  EXPECT_EQ(p->error(), "1:11: missing ( for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsFinite_MissingParenRight) {
-  ParserImpl p{"is_finite(a"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("is_finite(a");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:12: missing ) for method call");
+  EXPECT_EQ(p->error(), "1:12: missing ) for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsFinite_MissingIdentifier) {
-  ParserImpl p{"is_finite()"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("is_finite()");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:11: missing identifier for method call");
+  EXPECT_EQ(p->error(), "1:11: missing identifier for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsFinite_InvalidIdentifier) {
-  ParserImpl p{"is_finite(123)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("is_finite(123)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:11: missing identifier for method call");
+  EXPECT_EQ(p->error(), "1:11: missing identifier for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNormal) {
-  ParserImpl p{"is_normal(a)"};
-  auto e = p.unary_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("is_normal(a)");
+  auto e = p->unary_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryMethod());
 
@@ -357,41 +356,41 @@ TEST_F(ParserImplTest, UnaryExpression_IsNormal) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNormal_MissingParenLeft) {
-  ParserImpl p{"is_normal a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("is_normal a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:11: missing ( for method call");
+  EXPECT_EQ(p->error(), "1:11: missing ( for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNormal_MissingParenRight) {
-  ParserImpl p{"is_normal(a"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("is_normal(a");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:12: missing ) for method call");
+  EXPECT_EQ(p->error(), "1:12: missing ) for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNormal_MissingIdentifier) {
-  ParserImpl p{"is_normal()"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("is_normal()");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:11: missing identifier for method call");
+  EXPECT_EQ(p->error(), "1:11: missing identifier for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNormal_InvalidIdentifier) {
-  ParserImpl p{"is_normal(123)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("is_normal(123)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:11: missing identifier for method call");
+  EXPECT_EQ(p->error(), "1:11: missing identifier for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dot) {
-  ParserImpl p{"dot(a, b)"};
-  auto e = p.unary_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("dot(a, b)");
+  auto e = p->unary_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryMethod());
 
@@ -410,65 +409,65 @@ TEST_F(ParserImplTest, UnaryExpression_Dot) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dot_MissingParenLeft) {
-  ParserImpl p{"dot a, b)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dot a, b)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:5: missing ( for method call");
+  EXPECT_EQ(p->error(), "1:5: missing ( for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dot_MissingParenRight) {
-  ParserImpl p{"dot(a, b"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dot(a, b");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:9: missing ) for method call");
+  EXPECT_EQ(p->error(), "1:9: missing ) for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dot_MissingFirstIdentifier) {
-  ParserImpl p{"dot(, a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dot(, a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:5: missing identifier for method call");
+  EXPECT_EQ(p->error(), "1:5: missing identifier for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dot_MissingSecondIdentifier) {
-  ParserImpl p{"dot(a, )"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dot(a, )");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:8: missing identifier for method call");
+  EXPECT_EQ(p->error(), "1:8: missing identifier for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dot_MissingComma) {
-  ParserImpl p{"dot(a b)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dot(a b)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:7: missing , for method call");
+  EXPECT_EQ(p->error(), "1:7: missing , for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dot_InvalidFirstIdentifier) {
-  ParserImpl p{"dot(123, b)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dot(123, b)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:5: missing identifier for method call");
+  EXPECT_EQ(p->error(), "1:5: missing identifier for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dot_InvalidSecondIdentifier) {
-  ParserImpl p{"dot(a, 123)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dot(a, 123)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:8: missing identifier for method call");
+  EXPECT_EQ(p->error(), "1:8: missing identifier for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_OuterProduct) {
-  ParserImpl p{"outer_product(a, b)"};
-  auto e = p.unary_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("outer_product(a, b)");
+  auto e = p->unary_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryMethod());
 
@@ -487,65 +486,65 @@ TEST_F(ParserImplTest, UnaryExpression_OuterProduct) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_OuterProduct_MissingParenLeft) {
-  ParserImpl p{"outer_product a, b)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("outer_product a, b)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:15: missing ( for method call");
+  EXPECT_EQ(p->error(), "1:15: missing ( for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_OuterProduct_MissingParenRight) {
-  ParserImpl p{"outer_product(a, b"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("outer_product(a, b");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:19: missing ) for method call");
+  EXPECT_EQ(p->error(), "1:19: missing ) for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_OuterProduct_MissingFirstIdentifier) {
-  ParserImpl p{"outer_product(, b)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("outer_product(, b)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:15: missing identifier for method call");
+  EXPECT_EQ(p->error(), "1:15: missing identifier for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_OuterProduct_MissingSecondIdentifier) {
-  ParserImpl p{"outer_product(a, )"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("outer_product(a, )");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:18: missing identifier for method call");
+  EXPECT_EQ(p->error(), "1:18: missing identifier for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_OuterProduct_MissingComma) {
-  ParserImpl p{"outer_product(a b)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("outer_product(a b)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:17: missing , for method call");
+  EXPECT_EQ(p->error(), "1:17: missing , for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_OuterProduct_InvalidFirstIdentifier) {
-  ParserImpl p{"outer_product(123, b)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("outer_product(123, b)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:15: missing identifier for method call");
+  EXPECT_EQ(p->error(), "1:15: missing identifier for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_OuterProduct_InvalidSecondIdentifier) {
-  ParserImpl p{"outer_product(a, 123)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("outer_product(a, 123)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:18: missing identifier for method call");
+  EXPECT_EQ(p->error(), "1:18: missing identifier for method call");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_NoModifier) {
-  ParserImpl p{"dpdx(a)"};
-  auto e = p.unary_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("dpdx(a)");
+  auto e = p->unary_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryDerivative());
 
@@ -561,9 +560,9 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdx_NoModifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_WithModifier) {
-  ParserImpl p{"dpdx<coarse>(a)"};
-  auto e = p.unary_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("dpdx<coarse>(a)");
+  auto e = p->unary_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryDerivative());
 
@@ -579,73 +578,73 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdx_WithModifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_MissingLessThan) {
-  ParserImpl p{"dpdx coarse>(a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dpdx coarse>(a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:6: missing ( for derivative method");
+  EXPECT_EQ(p->error(), "1:6: missing ( for derivative method");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_InvalidModifier) {
-  ParserImpl p{"dpdx<invalid>(a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dpdx<invalid>(a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:6: unable to parse derivative modifier");
+  EXPECT_EQ(p->error(), "1:6: unable to parse derivative modifier");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_EmptyModifer) {
-  ParserImpl p{"dpdx coarse>(a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dpdx coarse>(a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:6: missing ( for derivative method");
+  EXPECT_EQ(p->error(), "1:6: missing ( for derivative method");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_MissingGreaterThan) {
-  ParserImpl p{"dpdx<coarse (a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dpdx<coarse (a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:13: missing > for derivative modifier");
+  EXPECT_EQ(p->error(), "1:13: missing > for derivative modifier");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_MisisngLeftParen) {
-  ParserImpl p{"dpdx<coarse>a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dpdx<coarse>a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:13: missing ( for derivative method");
+  EXPECT_EQ(p->error(), "1:13: missing ( for derivative method");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_MissingRightParen) {
-  ParserImpl p{"dpdx<coarse>(a"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dpdx<coarse>(a");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:15: missing ) for derivative method");
+  EXPECT_EQ(p->error(), "1:15: missing ) for derivative method");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_MissingIdentifier) {
-  ParserImpl p{"dpdx<coarse>()"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dpdx<coarse>()");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:14: missing identifier for derivative method");
+  EXPECT_EQ(p->error(), "1:14: missing identifier for derivative method");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_InvalidIdentifeir) {
-  ParserImpl p{"dpdx<coarse>(12345)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dpdx<coarse>(12345)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:14: missing identifier for derivative method");
+  EXPECT_EQ(p->error(), "1:14: missing identifier for derivative method");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_NoModifier) {
-  ParserImpl p{"dpdy(a)"};
-  auto e = p.unary_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("dpdy(a)");
+  auto e = p->unary_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryDerivative());
 
@@ -661,9 +660,9 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdy_NoModifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_WithModifier) {
-  ParserImpl p{"dpdy<fine>(a)"};
-  auto e = p.unary_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("dpdy<fine>(a)");
+  auto e = p->unary_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryDerivative());
 
@@ -679,73 +678,73 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdy_WithModifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_MissingLessThan) {
-  ParserImpl p{"dpdy coarse>(a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dpdy coarse>(a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:6: missing ( for derivative method");
+  EXPECT_EQ(p->error(), "1:6: missing ( for derivative method");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_InvalidModifier) {
-  ParserImpl p{"dpdy<invalid>(a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dpdy<invalid>(a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:6: unable to parse derivative modifier");
+  EXPECT_EQ(p->error(), "1:6: unable to parse derivative modifier");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_EmptyModifer) {
-  ParserImpl p{"dpdy coarse>(a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dpdy coarse>(a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:6: missing ( for derivative method");
+  EXPECT_EQ(p->error(), "1:6: missing ( for derivative method");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_MissingGreaterThan) {
-  ParserImpl p{"dpdy<coarse (a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dpdy<coarse (a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:13: missing > for derivative modifier");
+  EXPECT_EQ(p->error(), "1:13: missing > for derivative modifier");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_MisisngLeftParen) {
-  ParserImpl p{"dpdy<coarse>a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dpdy<coarse>a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:13: missing ( for derivative method");
+  EXPECT_EQ(p->error(), "1:13: missing ( for derivative method");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_MissingRightParen) {
-  ParserImpl p{"dpdy<coarse>(a"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dpdy<coarse>(a");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:15: missing ) for derivative method");
+  EXPECT_EQ(p->error(), "1:15: missing ) for derivative method");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_MissingIdentifier) {
-  ParserImpl p{"dpdy<coarse>()"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dpdy<coarse>()");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:14: missing identifier for derivative method");
+  EXPECT_EQ(p->error(), "1:14: missing identifier for derivative method");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_InvalidIdentifeir) {
-  ParserImpl p{"dpdy<coarse>(12345)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("dpdy<coarse>(12345)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:14: missing identifier for derivative method");
+  EXPECT_EQ(p->error(), "1:14: missing identifier for derivative method");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidth_NoModifier) {
-  ParserImpl p{"fwidth(a)"};
-  auto e = p.unary_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("fwidth(a)");
+  auto e = p->unary_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryDerivative());
 
@@ -761,9 +760,9 @@ TEST_F(ParserImplTest, UnaryExpression_Fwidth_NoModifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidth_WithModifier) {
-  ParserImpl p{"fwidth<coarse>(a)"};
-  auto e = p.unary_expression();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("fwidth<coarse>(a)");
+  auto e = p->unary_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryDerivative());
 
@@ -779,67 +778,67 @@ TEST_F(ParserImplTest, UnaryExpression_Fwidth_WithModifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidth_MissingLessThan) {
-  ParserImpl p{"fwidth coarse>(a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("fwidth coarse>(a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:8: missing ( for derivative method");
+  EXPECT_EQ(p->error(), "1:8: missing ( for derivative method");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidth_InvalidModifier) {
-  ParserImpl p{"fwidth<invalid>(a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("fwidth<invalid>(a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:8: unable to parse derivative modifier");
+  EXPECT_EQ(p->error(), "1:8: unable to parse derivative modifier");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidth_EmptyModifer) {
-  ParserImpl p{"fwidth coarse>(a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("fwidth coarse>(a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:8: missing ( for derivative method");
+  EXPECT_EQ(p->error(), "1:8: missing ( for derivative method");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidth_MissingGreaterThan) {
-  ParserImpl p{"fwidth<coarse (a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("fwidth<coarse (a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:15: missing > for derivative modifier");
+  EXPECT_EQ(p->error(), "1:15: missing > for derivative modifier");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidth_MisisngLeftParen) {
-  ParserImpl p{"fwidth<coarse>a)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("fwidth<coarse>a)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:15: missing ( for derivative method");
+  EXPECT_EQ(p->error(), "1:15: missing ( for derivative method");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidth_MissingRightParen) {
-  ParserImpl p{"fwidth<coarse>(a"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("fwidth<coarse>(a");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:17: missing ) for derivative method");
+  EXPECT_EQ(p->error(), "1:17: missing ) for derivative method");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidth_MissingIdentifier) {
-  ParserImpl p{"fwidth<coarse>()"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("fwidth<coarse>()");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:16: missing identifier for derivative method");
+  EXPECT_EQ(p->error(), "1:16: missing identifier for derivative method");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidht_InvalidIdentifeir) {
-  ParserImpl p{"fwidth<coarse>(12345)"};
-  auto e = p.unary_expression();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("fwidth<coarse>(12345)");
+  auto e = p->unary_expression();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:16: missing identifier for derivative method");
+  EXPECT_EQ(p->error(), "1:16: missing identifier for derivative method");
 }
 }  // namespace wgsl
 }  // namespace reader

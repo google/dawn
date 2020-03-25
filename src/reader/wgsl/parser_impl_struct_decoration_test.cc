@@ -15,12 +15,12 @@
 #include "gtest/gtest.h"
 #include "src/ast/struct_decoration.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
-
-using ParserImplTest = testing::Test;
+namespace {
 
 struct StructDecorationData {
   const char* input;
@@ -30,16 +30,42 @@ inline std::ostream& operator<<(std::ostream& out, StructDecorationData data) {
   out << std::string(data.input);
   return out;
 }
-using StructDecorationTest = testing::TestWithParam<StructDecorationData>;
+
+class StructDecorationTest
+    : public testing::TestWithParam<StructDecorationData> {
+ public:
+  StructDecorationTest() = default;
+  ~StructDecorationTest() = default;
+
+  void SetUp() { ctx_.type_mgr = &tm_; }
+
+  void TearDown() {
+    impl_ = nullptr;
+    ctx_.type_mgr = nullptr;
+  }
+
+  ParserImpl* parser(const std::string& str) {
+    impl_ = std::make_unique<ParserImpl>(ctx_, str);
+    return impl_.get();
+  }
+
+ private:
+  std::unique_ptr<ParserImpl> impl_;
+  Context ctx_;
+  TypeManager tm_;
+};
+
+}  // namespace
+
 TEST_P(StructDecorationTest, Parses) {
   auto params = GetParam();
-  ParserImpl p{params.input};
+  auto p = parser(params.input);
 
-  auto deco = p.struct_decoration();
-  ASSERT_FALSE(p.has_error());
+  auto deco = p->struct_decoration();
+  ASSERT_FALSE(p->has_error());
   EXPECT_EQ(deco, params.result);
 
-  auto t = p.next();
+  auto t = p->next();
   EXPECT_TRUE(t.IsEof());
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
@@ -48,11 +74,11 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                              "block", ast::StructDecoration::kBlock}));
 
 TEST_F(ParserImplTest, StructDecoration_NoMatch) {
-  ParserImpl p{"not-a-stage"};
-  auto deco = p.struct_decoration();
+  auto p = parser("not-a-stage");
+  auto deco = p->struct_decoration();
   ASSERT_EQ(deco, ast::StructDecoration::kNone);
 
-  auto t = p.next();
+  auto t = p->next();
   EXPECT_TRUE(t.IsIdentifier());
   EXPECT_EQ(t.to_str(), "not");
 }

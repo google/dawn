@@ -24,16 +24,10 @@
 namespace tint {
 
 /// The type manager holds all the pointers to the known types.
-///
-/// Note, the type manager is a singleton. Any synchronization for the manager
-/// must be done by the caller.
 class TypeManager {
  public:
-  /// @returns a pointer to the type manager
-  static TypeManager* Instance();
-  /// Frees the type manager and any associated types. The types should not be
-  /// used after the manager is freed.
-  static void Destroy();
+  TypeManager();
+  ~TypeManager();
 
   /// Get the given type from the type manager
   /// @param type The type to register
@@ -41,9 +35,6 @@ class TypeManager {
   ast::type::Type* Get(std::unique_ptr<ast::type::Type> type);
 
  private:
-  TypeManager();
-  ~TypeManager();
-
   std::unordered_map<std::string, std::unique_ptr<ast::type::Type>> types_;
 };
 

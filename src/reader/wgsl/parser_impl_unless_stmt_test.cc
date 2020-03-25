@@ -14,17 +14,16 @@
 
 #include "gtest/gtest.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, UnlessStmt) {
-  ParserImpl p{"unless (a) { kill; }"};
-  auto e = p.unless_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("unless (a) { kill; }");
+  auto e = p->unless_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnless());
   ASSERT_NE(e->condition(), nullptr);
@@ -34,27 +33,27 @@ TEST_F(ParserImplTest, UnlessStmt) {
 }
 
 TEST_F(ParserImplTest, UnlessStmt_InvalidCondition) {
-  ParserImpl p{"unless(if(a){}) {}"};
-  auto e = p.unless_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("unless(if(a){}) {}");
+  auto e = p->unless_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:8: unable to parse expression");
+  EXPECT_EQ(p->error(), "1:8: unable to parse expression");
 }
 
 TEST_F(ParserImplTest, UnlessStmt_EmptyCondition) {
-  ParserImpl p{"unless() {}"};
-  auto e = p.unless_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("unless() {}");
+  auto e = p->unless_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:8: unable to parse expression");
+  EXPECT_EQ(p->error(), "1:8: unable to parse expression");
 }
 
 TEST_F(ParserImplTest, UnlessStmt_InvalidBody) {
-  ParserImpl p{"unless(a + 2 - 5 == true) { kill }"};
-  auto e = p.unless_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("unless(a + 2 - 5 == true) { kill }");
+  auto e = p->unless_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:34: missing ;");
+  EXPECT_EQ(p->error(), "1:34: missing ;");
 }
 
 }  // namespace wgsl

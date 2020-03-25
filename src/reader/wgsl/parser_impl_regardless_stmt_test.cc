@@ -14,17 +14,16 @@
 
 #include "gtest/gtest.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, RegardlessStmt) {
-  ParserImpl p{"regardless (a) { kill; }"};
-  auto e = p.regardless_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("regardless (a) { kill; }");
+  auto e = p->regardless_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsRegardless());
   ASSERT_NE(e->condition(), nullptr);
@@ -34,27 +33,27 @@ TEST_F(ParserImplTest, RegardlessStmt) {
 }
 
 TEST_F(ParserImplTest, RegardlessStmt_InvalidCondition) {
-  ParserImpl p{"regardless(if(a){}) {}"};
-  auto e = p.regardless_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("regardless(if(a){}) {}");
+  auto e = p->regardless_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:12: unable to parse expression");
+  EXPECT_EQ(p->error(), "1:12: unable to parse expression");
 }
 
 TEST_F(ParserImplTest, RegardlessStmt_EmptyCondition) {
-  ParserImpl p{"regardless() {}"};
-  auto e = p.regardless_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("regardless() {}");
+  auto e = p->regardless_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:12: unable to parse expression");
+  EXPECT_EQ(p->error(), "1:12: unable to parse expression");
 }
 
 TEST_F(ParserImplTest, RegardlessStmt_InvalidBody) {
-  ParserImpl p{"regardless(a + 2 - 5 == true) { kill }"};
-  auto e = p.regardless_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("regardless(a + 2 - 5 == true) { kill }");
+  auto e = p->regardless_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:38: missing ;");
+  EXPECT_EQ(p->error(), "1:38: missing ;");
 }
 
 }  // namespace wgsl

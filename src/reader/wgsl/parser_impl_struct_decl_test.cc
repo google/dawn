@@ -15,21 +15,20 @@
 #include "gtest/gtest.h"
 #include "src/ast/type/struct_type.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, StructDecl_Parses) {
-  ParserImpl p{R"(
+  auto p = parser(R"(
 struct {
   a : i32;
   [[offset 4 ]] b : f32;
-})"};
-  auto s = p.struct_decl();
-  ASSERT_FALSE(p.has_error());
+})");
+  auto s = p->struct_decl();
+  ASSERT_FALSE(p->has_error());
   ASSERT_NE(s, nullptr);
   ASSERT_EQ(s->impl()->members().size(), 2);
   EXPECT_EQ(s->impl()->members()[0]->name(), "a");
@@ -37,13 +36,13 @@ struct {
 }
 
 TEST_F(ParserImplTest, StructDecl_ParsesWithDecoration) {
-  ParserImpl p{R"(
+  auto p = parser(R"(
 [[block]] struct {
   a : f32;
   b : f32;
-})"};
-  auto s = p.struct_decl();
-  ASSERT_FALSE(p.has_error());
+})");
+  auto s = p->struct_decl();
+  ASSERT_FALSE(p->has_error());
   ASSERT_NE(s, nullptr);
   ASSERT_EQ(s->impl()->members().size(), 2);
   EXPECT_EQ(s->impl()->members()[0]->name(), "a");
@@ -51,43 +50,43 @@ TEST_F(ParserImplTest, StructDecl_ParsesWithDecoration) {
 }
 
 TEST_F(ParserImplTest, StructDecl_EmptyMembers) {
-  ParserImpl p{"struct {}"};
-  auto s = p.struct_decl();
-  ASSERT_FALSE(p.has_error());
+  auto p = parser("struct {}");
+  auto s = p->struct_decl();
+  ASSERT_FALSE(p->has_error());
   ASSERT_NE(s, nullptr);
   ASSERT_EQ(s->impl()->members().size(), 0);
 }
 
 TEST_F(ParserImplTest, StructDecl_MissingBracketLeft) {
-  ParserImpl p{"struct }"};
-  auto s = p.struct_decl();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("struct }");
+  auto s = p->struct_decl();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(s, nullptr);
-  EXPECT_EQ(p.error(), "1:8: missing { for struct declaration");
+  EXPECT_EQ(p->error(), "1:8: missing { for struct declaration");
 }
 
 TEST_F(ParserImplTest, StructDecl_InvalidStructBody) {
-  ParserImpl p{"struct { a : B; }"};
-  auto s = p.struct_decl();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("struct { a : B; }");
+  auto s = p->struct_decl();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(s, nullptr);
-  EXPECT_EQ(p.error(), "1:14: unknown type alias 'B'");
+  EXPECT_EQ(p->error(), "1:14: unknown type alias 'B'");
 }
 
 TEST_F(ParserImplTest, StructDecl_InvalidStructDecorationDecl) {
-  ParserImpl p{"[[block struct { a : i32; }"};
-  auto s = p.struct_decl();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("[[block struct { a : i32; }");
+  auto s = p->struct_decl();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(s, nullptr);
-  EXPECT_EQ(p.error(), "1:9: missing ]] for struct decoration");
+  EXPECT_EQ(p->error(), "1:9: missing ]] for struct decoration");
 }
 
 TEST_F(ParserImplTest, StructDecl_MissingStruct) {
-  ParserImpl p{"[[block]] {}"};
-  auto s = p.struct_decl();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("[[block]] {}");
+  auto s = p->struct_decl();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(s, nullptr);
-  EXPECT_EQ(p.error(), "1:11: missing struct declaration");
+  EXPECT_EQ(p->error(), "1:11: missing struct declaration");
 }
 
 }  // namespace wgsl

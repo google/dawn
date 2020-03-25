@@ -12,35 +12,47 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef SRC_READER_WGSL_PARSER_IMPL_TEST_HELPER_H_
+#define SRC_READER_WGSL_PARSER_IMPL_TEST_HELPER_H_
+
+#include <memory>
+#include <string>
+
 #include "gtest/gtest.h"
+#include "src/context.h"
 #include "src/reader/wgsl/parser_impl.h"
-#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-TEST_F(ParserImplTest, StructDecorationDecl_Parses) {
-  auto p = parser("[[block]]");
-  auto d = p->struct_decoration_decl();
-  ASSERT_FALSE(p->has_error());
-  EXPECT_EQ(d, ast::StructDecoration::kBlock);
-}
+class ParserImplTest : public testing::Test {
+ public:
+  ParserImplTest() = default;
+  ~ParserImplTest() = default;
 
-TEST_F(ParserImplTest, StructDecorationDecl_MissingAttrRight) {
-  auto p = parser("[[block");
-  p->struct_decoration_decl();
-  ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:8: missing ]] for struct decoration");
-}
+  void SetUp() { ctx_.type_mgr = &tm_; }
 
-TEST_F(ParserImplTest, StructDecorationDecl_InvalidDecoration) {
-  auto p = parser("[[invalid]]");
-  p->struct_decoration_decl();
-  ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:3: unknown struct decoration");
-}
+  void TearDown() {
+    impl_ = nullptr;
+    ctx_.type_mgr = nullptr;
+  }
+
+  ParserImpl* parser(const std::string& str) {
+    impl_ = std::make_unique<ParserImpl>(ctx_, str);
+    return impl_.get();
+  }
+
+  TypeManager* tm() { return &tm_; }
+
+ private:
+  std::unique_ptr<ParserImpl> impl_;
+  Context ctx_;
+  TypeManager tm_;
+};
 
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint
+
+#endif  // SRC_READER_WGSL_PARSER_IMPL_TEST_HELPER_H_

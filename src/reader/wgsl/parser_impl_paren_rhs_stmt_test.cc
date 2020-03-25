@@ -14,51 +14,50 @@
 
 #include "gtest/gtest.h"
 #include "src/reader/wgsl/parser_impl.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
 namespace reader {
 namespace wgsl {
 
-using ParserImplTest = testing::Test;
-
 TEST_F(ParserImplTest, ParenRhsStmt) {
-  ParserImpl p{"(a + b)"};
-  auto e = p.paren_rhs_stmt();
-  ASSERT_FALSE(p.has_error()) << p.error();
+  auto p = parser("(a + b)");
+  auto e = p->paren_rhs_stmt();
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsRelational());
 }
 
 TEST_F(ParserImplTest, ParenRhsStmt_MissingLeftParen) {
-  ParserImpl p{"true)"};
-  auto e = p.paren_rhs_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("true)");
+  auto e = p->paren_rhs_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:1: expected (");
+  EXPECT_EQ(p->error(), "1:1: expected (");
 }
 
 TEST_F(ParserImplTest, ParenRhsStmt_MissingRightParen) {
-  ParserImpl p{"(true"};
-  auto e = p.paren_rhs_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("(true");
+  auto e = p->paren_rhs_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:6: expected )");
+  EXPECT_EQ(p->error(), "1:6: expected )");
 }
 
 TEST_F(ParserImplTest, ParenRhsStmt_InvalidExpression) {
-  ParserImpl p{"(if (a() {})"};
-  auto e = p.paren_rhs_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("(if (a() {})");
+  auto e = p->paren_rhs_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:2: unable to parse expression");
+  EXPECT_EQ(p->error(), "1:2: unable to parse expression");
 }
 
 TEST_F(ParserImplTest, ParenRhsStmt_MissingExpression) {
-  ParserImpl p{"()"};
-  auto e = p.paren_rhs_stmt();
-  ASSERT_TRUE(p.has_error());
+  auto p = parser("()");
+  auto e = p->paren_rhs_stmt();
+  ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p.error(), "1:2: unable to parse expression");
+  EXPECT_EQ(p->error(), "1:2: unable to parse expression");
 }
 
 }  // namespace wgsl
