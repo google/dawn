@@ -119,6 +119,10 @@ namespace dawn_native {
              {"disable_base_instance",
               "Disables the use of non-zero base instance which is unsupported on some "
               "platforms."}},
+            {Toggle::UseD3D12SmallShaderVisibleHeapForTesting,
+             {"use_d3d12_small_shader_visible_heap",
+              "Enable use of a small D3D12 shader visible heap, instead of using a large one by "
+              "default. This setting is used to test bindgroup encoding."}},
         }};
 
     }  // anonymous namespace

@@ -40,6 +40,7 @@ namespace dawn_native {
         MetalDisableSamplerCompare,
         DisableBaseVertex,
         DisableBaseInstance,
+        UseD3D12SmallShaderVisibleHeapForTesting,
 
         EnumCount,
         InvalidEnum = EnumCount,
