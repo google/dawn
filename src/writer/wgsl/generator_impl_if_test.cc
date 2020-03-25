@@ -69,7 +69,8 @@ TEST_F(GeneratorImplTest, Emit_IfWithElseIf) {
   ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
   EXPECT_EQ(g.result(), R"(  if (cond) {
     kill;
-  } elseif (else_cond) {
+  }
+  elseif (else_cond) {
     kill;
   }
 )");
@@ -95,7 +96,8 @@ TEST_F(GeneratorImplTest, Emit_IfWithElse) {
   ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
   EXPECT_EQ(g.result(), R"(  if (cond) {
     kill;
-  } else {
+  }
+  else {
     kill;
   }
 )");
@@ -128,9 +130,11 @@ TEST_F(GeneratorImplTest, Emit_IfWithMultiple) {
   ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
   EXPECT_EQ(g.result(), R"(  if (cond) {
     kill;
-  } elseif (else_cond) {
+  }
+  elseif (else_cond) {
     kill;
-  } else {
+  }
+  else {
     kill;
   }
 )");

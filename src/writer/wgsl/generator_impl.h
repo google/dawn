@@ -174,7 +174,12 @@ class GeneratorImpl {
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
   bool EmitReturn(ast::ReturnStatement* stmt);
-  /// Handles statements
+  /// Handles a list of statements
+  /// @param statements the statements to output
+  /// @returns true if the statements were emitted
+  bool EmitStatementBlock(
+      const std::vector<std::unique_ptr<ast::Statement>>& statements);
+  /// Handles statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
   bool EmitStatement(ast::Statement* stmt);

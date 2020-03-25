@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/reader/spirv/parser_impl.h"
-
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -21,6 +19,7 @@
 #include "gmock/gmock.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/vector_type.h"
+#include "src/reader/spirv/parser_impl.h"
 #include "src/reader/spirv/spirv_tools_helpers_test.h"
 #include "src/type_manager.h"
 

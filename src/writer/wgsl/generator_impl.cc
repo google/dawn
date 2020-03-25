@@ -363,21 +363,7 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
     return false;
   }
 
-  out_ << " {" << std::endl;
-
-  increment_indent();
-
-  for (const auto& s : func->body()) {
-    if (!EmitStatement(s.get())) {
-      return false;
-    }
-  }
-
-  decrement_indent();
-  make_indent();
-  out_ << "}" << std::endl;
-
-  return true;
+  return EmitStatementBlock(func->body());
 }
 
 bool GeneratorImpl::EmitType(ast::type::Type* type) {
@@ -704,6 +690,25 @@ bool GeneratorImpl::EmitUnaryOp(ast::UnaryOpExpression* expr) {
   return true;
 }
 
+bool GeneratorImpl::EmitStatementBlock(
+    const std::vector<std::unique_ptr<ast::Statement>>& statements) {
+  out_ << " {" << std::endl;
+
+  increment_indent();
+
+  for (const auto& s : statements) {
+    if (!EmitStatement(s.get())) {
+      return false;
+    }
+  }
+
+  decrement_indent();
+  make_indent();
+  out_ << "}" << std::endl;
+
+  return true;
+}
+
 bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsAssign()) {
     return EmitAssign(stmt->AsAssign());
@@ -805,20 +810,8 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
     }
     out_ << ":";
   }
-  out_ << " {" << std::endl;
-  increment_indent();
 
-  for (const auto& b : stmt->body()) {
-    if (!EmitStatement(b.get())) {
-      return false;
-    }
-  }
-  decrement_indent();
-
-  make_indent();
-  out_ << "}" << std::endl;
-
-  return true;
+  return EmitStatementBlock(stmt->body());
 }
 
 bool GeneratorImpl::EmitContinue(ast::ContinueStatement* stmt) {
@@ -847,31 +840,18 @@ bool GeneratorImpl::EmitContinue(ast::ContinueStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitElse(ast::ElseStatement* stmt) {
+  make_indent();
   if (stmt->HasCondition()) {
-    out_ << " elseif (";
+    out_ << "elseif (";
     if (!EmitExpression(stmt->condition())) {
       return false;
     }
     out_ << ")";
   } else {
-    out_ << " else";
-  }
-  out_ << " {" << std::endl;
-
-  increment_indent();
-
-  for (const auto& s : stmt->body()) {
-    if (!EmitStatement(s.get())) {
-      return false;
-    }
+    out_ << "else";
   }
 
-  decrement_indent();
-
-  make_indent();
-  out_ << "}";
-
-  return true;
+  return EmitStatementBlock(stmt->body());
 }
 
 bool GeneratorImpl::EmitFallthrough(ast::FallthroughStatement*) {
@@ -887,27 +867,17 @@ bool GeneratorImpl::EmitIf(ast::IfStatement* stmt) {
   if (!EmitExpression(stmt->condition())) {
     return false;
   }
-  out_ << ") {" << std::endl;
+  out_ << ")";
 
-  increment_indent();
-
-  for (const auto& b : stmt->body()) {
-    if (!EmitStatement(b.get())) {
-      return false;
-    }
+  if (!EmitStatementBlock(stmt->body())) {
+    return false;
   }
-
-  decrement_indent();
-  make_indent();
-  out_ << "}";
 
   for (const auto& e : stmt->else_statements()) {
     if (!EmitElse(e.get())) {
       return false;
     }
   }
-
-  out_ << std::endl;
 
   return true;
 }
@@ -934,18 +904,11 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
     out_ << std::endl;
 
     make_indent();
-    out_ << "continuing {" << std::endl;
+    out_ << "continuing";
 
-    increment_indent();
-    for (const auto& s : stmt->continuing()) {
-      if (!EmitStatement(s.get())) {
-        return false;
-      }
+    if (!EmitStatementBlock(stmt->continuing())) {
+      return false;
     }
-
-    decrement_indent();
-    make_indent();
-    out_ << "}" << std::endl;
   }
 
   decrement_indent();
@@ -968,18 +931,9 @@ bool GeneratorImpl::EmitRegardless(ast::RegardlessStatement* stmt) {
   if (!EmitExpression(stmt->condition())) {
     return false;
   }
-  out_ << ") {" << std::endl;
+  out_ << ")";
 
-  increment_indent();
-  for (const auto& b : stmt->body()) {
-    if (!EmitStatement(b.get())) {
-      return false;
-    }
-  }
-  decrement_indent();
-  make_indent();
-  out_ << "}" << std::endl;
-  return true;
+  return EmitStatementBlock(stmt->body());
 }
 
 bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
@@ -1027,18 +981,9 @@ bool GeneratorImpl::EmitUnless(ast::UnlessStatement* stmt) {
   if (!EmitExpression(stmt->condition())) {
     return false;
   }
-  out_ << ") {" << std::endl;
+  out_ << ")";
 
-  increment_indent();
-  for (const auto& b : stmt->body()) {
-    if (!EmitStatement(b.get())) {
-      return false;
-    }
-  }
-  decrement_indent();
-  make_indent();
-  out_ << "}" << std::endl;
-  return true;
+  return EmitStatementBlock(stmt->body());
 }
 
 }  // namespace wgsl
