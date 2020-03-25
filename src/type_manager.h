@@ -24,6 +24,9 @@
 namespace tint {
 
 /// The type manager holds all the pointers to the known types.
+///
+/// Note, the type manager is a singleton. Any synchronization for the manager
+/// must be done by the caller.
 class TypeManager {
  public:
   /// @returns a pointer to the type manager
