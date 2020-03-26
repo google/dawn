@@ -246,7 +246,7 @@ int main(int argc, const char** argv) {
     std::cout << kUsage << std::endl;
     return 0;
   }
-  if (options.input_filename == "") {
+  if (options.input_filename.empty()) {
     std::cerr << "Input file missing" << std::endl;
     std::cout << kUsage << std::endl;
     return 1;

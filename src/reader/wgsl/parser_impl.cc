@@ -372,7 +372,7 @@ std::unique_ptr<ast::Variable> ParserImpl::global_constant_decl() {
   std::tie(name, type) = variable_ident_decl();
   if (has_error())
     return nullptr;
-  if (name == "" || type == nullptr) {
+  if (name.empty() || type == nullptr) {
     set_error(peek(), "error parsing constant variable identifier");
     return nullptr;
   }
@@ -593,7 +593,7 @@ std::unique_ptr<ast::Variable> ParserImpl::variable_decl() {
   std::tie(name, type) = variable_ident_decl();
   if (has_error())
     return nullptr;
-  if (name == "" || type == nullptr) {
+  if (name.empty() || type == nullptr) {
     set_error(peek(), "invalid identifier declaration");
     return nullptr;
   }
@@ -1102,7 +1102,7 @@ std::unique_ptr<ast::StructMember> ParserImpl::struct_member() {
   std::tie(name, type) = variable_ident_decl();
   if (has_error())
     return nullptr;
-  if (name == "" || type == nullptr) {
+  if (name.empty() || type == nullptr) {
     set_error(peek(), "invalid identifier declaration");
     return nullptr;
   }
@@ -1283,7 +1283,7 @@ std::vector<std::unique_ptr<ast::Variable>> ParserImpl::param_list() {
   std::tie(name, type) = variable_ident_decl();
   if (has_error())
     return {};
-  if (name == "" || type == nullptr)
+  if (name.empty() || type == nullptr)
     return {};
 
   for (;;) {
@@ -1300,7 +1300,7 @@ std::vector<std::unique_ptr<ast::Variable>> ParserImpl::param_list() {
     std::tie(name, type) = variable_ident_decl();
     if (has_error())
       return {};
-    if (name == "" || type == nullptr) {
+    if (name.empty() || type == nullptr) {
       set_error(t, "found , but no variable declaration");
       return {};
     }
@@ -1683,7 +1683,7 @@ std::unique_ptr<ast::VariableStatement> ParserImpl::variable_stmt() {
     std::tie(name, type) = variable_ident_decl();
     if (has_error())
       return nullptr;
-    if (name == "" || type == nullptr) {
+    if (name.empty() || type == nullptr) {
       set_error(peek(), "unable to parse variable declaration");
       return nullptr;
     }

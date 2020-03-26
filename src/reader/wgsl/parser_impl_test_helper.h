@@ -26,23 +26,31 @@ namespace tint {
 namespace reader {
 namespace wgsl {
 
+/// WGSL Parser test class
 class ParserImplTest : public testing::Test {
  public:
+  /// Constructor
   ParserImplTest() = default;
   ~ParserImplTest() = default;
 
+  /// Sets up the test helper
   void SetUp() { ctx_.type_mgr = &tm_; }
 
+  /// Tears down the test helper
   void TearDown() {
     impl_ = nullptr;
     ctx_.type_mgr = nullptr;
   }
 
+  /// Retrieves the parser from the helper
+  /// @param str the string to parse
+  /// @returns the parser implementation
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(ctx_, str);
     return impl_.get();
   }
 
+  /// @returns the type manager
   TypeManager* tm() { return &tm_; }
 
  private:

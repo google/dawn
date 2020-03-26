@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "gtest/gtest.h"
 #include "src/context.h"
@@ -26,18 +27,24 @@ namespace tint {
 namespace reader {
 namespace spirv {
 
+/// SPIR-V Parser test class
 class SpvParserTest : public testing::Test {
  public:
   SpvParserTest() = default;
   ~SpvParserTest() = default;
 
+  /// Sets up the test helper
   void SetUp() { ctx_.type_mgr = &tm_; }
 
+  /// Tears down the test helper
   void TearDown() {
     impl_ = nullptr;
     ctx_.type_mgr = nullptr;
   }
 
+  /// Retrieves the parser from the helper
+  /// @param input the string to parse
+  /// @returns the parser implementation
   ParserImpl* parser(const std::vector<uint32_t>& input) {
     impl_ = std::make_unique<ParserImpl>(ctx_, input);
     return impl_.get();
@@ -53,4 +60,4 @@ class SpvParserTest : public testing::Test {
 }  // namespace reader
 }  // namespace tint
 
-#endif  // SRC_READER_WGSL_PARSER_IMPL_TEST_HELPER_H_
+#endif  // SRC_READER_SPIRV_PARSER_IMPL_TEST_HELPER_H_

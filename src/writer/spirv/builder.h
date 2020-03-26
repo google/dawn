@@ -66,6 +66,7 @@ class Builder {
   }
 
   /// Retrives the id for the given function name
+  /// @param name the function name to search for
   /// @returns the id for the given name or 0 on failure
   uint32_t id_for_func_name(const std::string& name) {
     if (func_name_to_id_.count(name) == 0) {

@@ -15,8 +15,10 @@
 #ifndef SRC_WRITER_WGSL_GENERATOR_IMPL_H_
 #define SRC_WRITER_WGSL_GENERATOR_IMPL_H_
 
+#include <memory>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/const_initializer_expression.h"

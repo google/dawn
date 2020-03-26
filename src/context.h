@@ -19,7 +19,10 @@
 
 namespace tint {
 
+/// Context object for Tint. Holds various global resources used through
+/// the system.
 struct Context {
+  /// Manager to hold all of the various type objects
   TypeManager* type_mgr = nullptr;
 };
 
