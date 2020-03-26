@@ -196,28 +196,27 @@ namespace dawn_native { namespace d3d12 {
                             BindGroup* group,
                             uint32_t dynamicOffsetCount,
                             const uint64_t* dynamicOffsets) {
+            ASSERT(dynamicOffsetCount == group->GetLayout()->GetDynamicBufferCount());
+
             // Usually, the application won't set the same offsets many times,
             // so always try to apply dynamic offsets even if the offsets stay the same
-            if (dynamicOffsetCount) {
-                // Update dynamic offsets
-                const BindGroupLayout::LayoutBindingInfo& layout =
-                    group->GetLayout()->GetBindingInfo();
-                uint32_t currentDynamicBufferIndex = 0;
-
-                for (uint32_t bindingIndex : IterateBitSet(layout.hasDynamicOffset)) {
-                    ASSERT(dynamicOffsetCount > 0);
+            if (dynamicOffsetCount != 0) {
+                // Update dynamic offsets.
+                // Dynamic buffer bindings are packed at the beginning of the layout.
+                for (BindingIndex bindingIndex = 0; bindingIndex < dynamicOffsetCount;
+                     ++bindingIndex) {
                     uint32_t parameterIndex =
                         pipelineLayout->GetDynamicRootParameterIndex(index, bindingIndex);
                     BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
 
                     // Calculate buffer locations that root descriptors links to. The location
                     // is (base buffer location + initial offset + dynamic offset)
-                    uint64_t dynamicOffset = dynamicOffsets[currentDynamicBufferIndex];
+                    uint64_t dynamicOffset = dynamicOffsets[bindingIndex];
                     uint64_t offset = binding.offset + dynamicOffset;
                     D3D12_GPU_VIRTUAL_ADDRESS bufferLocation =
                         ToBackend(binding.buffer)->GetVA() + offset;
 
-                    switch (layout.types[bindingIndex]) {
+                    switch (group->GetLayout()->GetBindingInfo(bindingIndex).type) {
                         case wgpu::BindingType::UniformBuffer:
                             if (mInCompute) {
                                 commandList->SetComputeRootConstantBufferView(parameterIndex,
@@ -253,8 +252,6 @@ namespace dawn_native { namespace d3d12 {
                             UNREACHABLE();
                             break;
                     }
-
-                    ++currentDynamicBufferIndex;
                 }
             }
 

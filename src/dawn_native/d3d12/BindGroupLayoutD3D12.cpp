@@ -45,18 +45,17 @@ namespace dawn_native { namespace d3d12 {
         : BindGroupLayoutBase(device, descriptor),
           mDescriptorCounts{},
           mBindGroupAllocator(MakeFrontendBindGroupAllocator<BindGroup>(4096)) {
-        const BindGroupLayoutBase::LayoutBindingInfo& groupInfo = GetBindingInfo();
+        for (BindingIndex bindingIndex = GetDynamicBufferCount(); bindingIndex < GetBindingCount();
+             ++bindingIndex) {
+            const BindGroupLayoutBase::BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
 
-        for (BindingIndex bindingIndex = 0; bindingIndex < groupInfo.bindingCount; ++bindingIndex) {
             // For dynamic resources, Dawn uses root descriptor in D3D12 backend.
-            // So there is no need to allocate the descriptor from descriptor heap. Skip counting
-            // dynamic resources for calculating size of descriptor heap.
-            if (groupInfo.hasDynamicOffset[bindingIndex]) {
-                continue;
-            }
+            // So there is no need to allocate the descriptor from descriptor heap.
+            // This loop starts after the dynamic buffer indices to skip counting
+            // dynamic resources in calculating the size of the descriptor heap.
+            ASSERT(!bindingInfo.hasDynamicOffset);
 
-            DescriptorType descriptorType =
-                WGPUBindingTypeToDescriptorType(groupInfo.types[bindingIndex]);
+            DescriptorType descriptorType = WGPUBindingTypeToDescriptorType(bindingInfo.type);
             mBindingOffsets[bindingIndex] = mDescriptorCounts[descriptorType]++;
         }
 
@@ -101,12 +100,14 @@ namespace dawn_native { namespace d3d12 {
                            D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
         descriptorOffsets[Sampler] = 0;
 
-        for (BindingIndex bindingIndex = 0; bindingIndex < groupInfo.bindingCount; ++bindingIndex) {
-            if (groupInfo.hasDynamicOffset[bindingIndex]) {
+        for (BindingIndex bindingIndex = 0; bindingIndex < GetBindingCount(); ++bindingIndex) {
+            const BindGroupLayoutBase::BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
+
+            if (bindingInfo.hasDynamicOffset) {
                 // Dawn is using values in mBindingOffsets to decide register number in HLSL.
                 // Root descriptor needs to set this value to set correct register number in
                 // generated HLSL shader.
-                switch (groupInfo.types[bindingIndex]) {
+                switch (bindingInfo.type) {
                     case wgpu::BindingType::UniformBuffer:
                     case wgpu::BindingType::StorageBuffer:
                     case wgpu::BindingType::ReadonlyStorageBuffer:
@@ -124,8 +125,7 @@ namespace dawn_native { namespace d3d12 {
             }
 
             // TODO(shaobo.yan@intel.com): Implement dynamic buffer offset.
-            DescriptorType descriptorType =
-                WGPUBindingTypeToDescriptorType(groupInfo.types[bindingIndex]);
+            DescriptorType descriptorType = WGPUBindingTypeToDescriptorType(bindingInfo.type);
             mBindingOffsets[bindingIndex] += descriptorOffsets[descriptorType];
         }
     }

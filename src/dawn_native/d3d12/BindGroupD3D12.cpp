@@ -81,21 +81,21 @@ namespace dawn_native { namespace d3d12 {
         mLastUsageSerial = pendingSerial;
         mHeapSerial = allocator->GetShaderVisibleHeapsSerial();
 
-        const BindGroupLayoutBase::LayoutBindingInfo& layout = bgl->GetBindingInfo();
-
         const auto& bindingOffsets = bgl->GetBindingOffsets();
 
         ID3D12Device* d3d12Device = device->GetD3D12Device().Get();
 
-        for (BindingIndex bindingIndex = 0; bindingIndex < layout.bindingCount; ++bindingIndex) {
+        for (BindingIndex bindingIndex = 0; bindingIndex < bgl->GetBindingCount(); ++bindingIndex) {
+            const BindGroupLayoutBase::BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
+
             // It's not necessary to create descriptors in descriptor heap for dynamic
             // resources. So skip allocating descriptors in descriptor heaps for dynamic
             // buffers.
-            if (layout.hasDynamicOffset[bindingIndex]) {
+            if (bindingInfo.hasDynamicOffset) {
                 continue;
             }
 
-            switch (layout.types[bindingIndex]) {
+            switch (bindingInfo.type) {
                 case wgpu::BindingType::UniformBuffer: {
                     BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
 

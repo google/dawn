@@ -89,7 +89,6 @@ namespace dawn_native { namespace d3d12 {
 
         for (uint32_t group : IterateBitSet(GetBindGroupLayoutsMask())) {
             const BindGroupLayout* bindGroupLayout = ToBackend(GetBindGroupLayout(group));
-            const BindGroupLayout::LayoutBindingInfo& groupInfo = bindGroupLayout->GetBindingInfo();
 
             // Set the root descriptor table parameter and copy ranges. Ranges are offset by the
             // bind group index Returns whether or not the parameter was set. A root parameter is
@@ -129,25 +128,30 @@ namespace dawn_native { namespace d3d12 {
             // Get calculated shader register for root descriptors
             const auto& shaderRegisters = bindGroupLayout->GetBindingOffsets();
 
-            // Init root descriptors in root signatures.
-            for (uint32_t dynamicBinding : IterateBitSet(groupInfo.hasDynamicOffset)) {
+            // Init root descriptors in root signatures for dynamic buffer bindings.
+            // These are packed at the beginning of the layout binding info.
+            for (BindingIndex dynamicBindingIndex = 0;
+                 dynamicBindingIndex < bindGroupLayout->GetDynamicBufferCount();
+                 ++dynamicBindingIndex) {
+                const BindGroupLayoutBase::BindingInfo& bindingInfo =
+                    bindGroupLayout->GetBindingInfo(dynamicBindingIndex);
+
                 D3D12_ROOT_PARAMETER* rootParameter = &rootParameters[parameterIndex];
 
                 // Setup root descriptor.
                 D3D12_ROOT_DESCRIPTOR rootDescriptor;
-                rootDescriptor.ShaderRegister = shaderRegisters[dynamicBinding];
+                rootDescriptor.ShaderRegister = shaderRegisters[dynamicBindingIndex];
                 rootDescriptor.RegisterSpace = group;
 
                 // Set root descriptors in root signatures.
                 rootParameter->Descriptor = rootDescriptor;
-                mDynamicRootParameterIndices[group][dynamicBinding] = parameterIndex++;
+                mDynamicRootParameterIndices[group][dynamicBindingIndex] = parameterIndex++;
 
                 // Set parameter types according to bind group layout descriptor.
-                rootParameter->ParameterType = RootParameterType(groupInfo.types[dynamicBinding]);
+                rootParameter->ParameterType = RootParameterType(bindingInfo.type);
 
                 // Set visibilities according to bind group layout descriptor.
-                rootParameter->ShaderVisibility =
-                    ShaderVisibilityType(groupInfo.visibilities[dynamicBinding]);
+                rootParameter->ShaderVisibility = ShaderVisibilityType(bindingInfo.visibility);
             }
         }
 
@@ -186,10 +190,11 @@ namespace dawn_native { namespace d3d12 {
         return mRootSignature;
     }
 
-    uint32_t PipelineLayout::GetDynamicRootParameterIndex(uint32_t group, uint32_t binding) const {
+    uint32_t PipelineLayout::GetDynamicRootParameterIndex(uint32_t group,
+                                                          BindingIndex bindingIndex) const {
         ASSERT(group < kMaxBindGroups);
-        ASSERT(binding < kMaxBindingsPerGroup);
-        ASSERT(GetBindGroupLayout(group)->GetBindingInfo().hasDynamicOffset[binding]);
-        return mDynamicRootParameterIndices[group][binding];
+        ASSERT(bindingIndex < kMaxBindingsPerGroup);
+        ASSERT(GetBindGroupLayout(group)->GetBindingInfo(bindingIndex).hasDynamicOffset);
+        return mDynamicRootParameterIndices[group][bindingIndex];
     }
 }}  // namespace dawn_native::d3d12

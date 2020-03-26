@@ -239,25 +239,42 @@ namespace dawn_native { namespace opengl {
                                 uint32_t dynamicOffsetCount,
                                 uint64_t* dynamicOffsets) {
                 const auto& indices = ToBackend(mPipelineLayout)->GetBindingIndexInfo()[index];
-                const BindGroupLayoutBase::LayoutBindingInfo& layout =
-                    group->GetLayout()->GetBindingInfo();
-                uint32_t currentDynamicIndex = 0;
+                uint32_t currentDynamicOffsetIndex = 0;
 
-                for (BindingIndex bindingIndex = 0; bindingIndex < layout.bindingCount;
-                     ++bindingIndex) {
-                    switch (layout.types[bindingIndex]) {
+                for (BindingIndex bindingIndex = 0;
+                     bindingIndex < group->GetLayout()->GetBindingCount(); ++bindingIndex) {
+                    const BindGroupLayoutBase::BindingInfo& bindingInfo =
+                        group->GetLayout()->GetBindingInfo(bindingIndex);
+
+                    switch (bindingInfo.type) {
                         case wgpu::BindingType::UniformBuffer: {
                             BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
                             GLuint buffer = ToBackend(binding.buffer)->GetHandle();
                             GLuint uboIndex = indices[bindingIndex];
                             GLuint offset = binding.offset;
 
-                            if (layout.hasDynamicOffset[bindingIndex]) {
-                                offset += dynamicOffsets[currentDynamicIndex];
-                                ++currentDynamicIndex;
+                            if (bindingInfo.hasDynamicOffset) {
+                                offset += dynamicOffsets[currentDynamicOffsetIndex];
+                                ++currentDynamicOffsetIndex;
                             }
 
                             gl.BindBufferRange(GL_UNIFORM_BUFFER, uboIndex, buffer, offset,
+                                               binding.size);
+                        } break;
+
+                        case wgpu::BindingType::StorageBuffer:
+                        case wgpu::BindingType::ReadonlyStorageBuffer: {
+                            BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
+                            GLuint buffer = ToBackend(binding.buffer)->GetHandle();
+                            GLuint ssboIndex = indices[bindingIndex];
+                            GLuint offset = binding.offset;
+
+                            if (bindingInfo.hasDynamicOffset) {
+                                offset += dynamicOffsets[currentDynamicOffsetIndex];
+                                ++currentDynamicOffsetIndex;
+                            }
+
+                            gl.BindBufferRange(GL_SHADER_STORAGE_BUFFER, ssboIndex, buffer, offset,
                                                binding.size);
                         } break;
 
@@ -288,22 +305,6 @@ namespace dawn_native { namespace opengl {
                                 gl.ActiveTexture(GL_TEXTURE0 + unit);
                                 gl.BindTexture(target, handle);
                             }
-                        } break;
-
-                        case wgpu::BindingType::StorageBuffer:
-                        case wgpu::BindingType::ReadonlyStorageBuffer: {
-                            BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
-                            GLuint buffer = ToBackend(binding.buffer)->GetHandle();
-                            GLuint ssboIndex = indices[bindingIndex];
-                            GLuint offset = binding.offset;
-
-                            if (layout.hasDynamicOffset[bindingIndex]) {
-                                offset += dynamicOffsets[currentDynamicIndex];
-                                ++currentDynamicIndex;
-                            }
-
-                            gl.BindBufferRange(GL_SHADER_STORAGE_BUFFER, ssboIndex, buffer, offset,
-                                               binding.size);
                         } break;
 
                         case wgpu::BindingType::StorageTexture:

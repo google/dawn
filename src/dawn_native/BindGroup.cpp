@@ -64,10 +64,7 @@ namespace dawn_native {
         MaybeError ValidateTextureBinding(const DeviceBase* device,
                                           const BindGroupBinding& binding,
                                           wgpu::TextureUsage requiredUsage,
-                                          bool multisampledBinding,
-                                          wgpu::TextureComponentType requiredComponentType,
-                                          wgpu::TextureViewDimension requiredDimension,
-                                          wgpu::TextureFormat requiredStorageTextureFormat) {
+                                          const BindGroupLayoutBase::BindingInfo& bindingInfo) {
             if (binding.textureView == nullptr || binding.sampler != nullptr ||
                 binding.buffer != nullptr) {
                 return DAWN_VALIDATION_ERROR("expected texture binding");
@@ -80,18 +77,18 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("texture binding usage mismatch");
             }
 
-            if (texture->IsMultisampledTexture() != multisampledBinding) {
+            if (texture->IsMultisampledTexture() != bindingInfo.multisampled) {
                 return DAWN_VALIDATION_ERROR("texture multisampling mismatch");
             }
 
             switch (requiredUsage) {
                 case wgpu::TextureUsage::Sampled: {
-                    if (!texture->GetFormat().HasComponentType(requiredComponentType)) {
+                    if (!texture->GetFormat().HasComponentType(bindingInfo.textureComponentType)) {
                         return DAWN_VALIDATION_ERROR("texture component type usage mismatch");
                     }
                 } break;
                 case wgpu::TextureUsage::Storage: {
-                    if (texture->GetFormat().format != requiredStorageTextureFormat) {
+                    if (texture->GetFormat().format != bindingInfo.storageTextureFormat) {
                         return DAWN_VALIDATION_ERROR("storage texture format mismatch");
                     }
                 } break;
@@ -100,7 +97,7 @@ namespace dawn_native {
                     break;
             }
 
-            if (binding.textureView->GetDimension() != requiredDimension) {
+            if (binding.textureView->GetDimension() != bindingInfo.textureDimension) {
                 return DAWN_VALIDATION_ERROR("texture view dimension mismatch");
             }
 
@@ -127,15 +124,11 @@ namespace dawn_native {
         }
 
         DAWN_TRY(device->ValidateObject(descriptor->layout));
-
-        const BindGroupLayoutBase::LayoutBindingInfo& layoutInfo =
-            descriptor->layout->GetBindingInfo();
-
-        const BindGroupLayoutBase::BindingMap& bindingMap = descriptor->layout->GetBindingMap();
-
-        if (descriptor->bindingCount != bindingMap.size()) {
+        if (descriptor->bindingCount != descriptor->layout->GetBindingCount()) {
             return DAWN_VALIDATION_ERROR("numBindings mismatch");
         }
+
+        const BindGroupLayoutBase::BindingMap& bindingMap = descriptor->layout->GetBindingMap();
 
         std::bitset<kMaxBindingsPerGroup> bindingsSet;
         for (uint32_t i = 0; i < descriptor->bindingCount; ++i) {
@@ -146,15 +139,18 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("setting non-existent binding");
             }
             BindingIndex bindingIndex = it->second;
-            ASSERT(bindingIndex < layoutInfo.bindingCount);
+            ASSERT(bindingIndex < descriptor->layout->GetBindingCount());
 
             if (bindingsSet[bindingIndex]) {
                 return DAWN_VALIDATION_ERROR("binding set twice");
             }
             bindingsSet.set(bindingIndex);
 
+            const BindGroupLayoutBase::BindingInfo& bindingInfo =
+                descriptor->layout->GetBindingInfo(bindingIndex);
+
             // Perform binding-type specific validation.
-            switch (layoutInfo.types[bindingIndex]) {
+            switch (bindingInfo.type) {
                 case wgpu::BindingType::UniformBuffer:
                     DAWN_TRY(ValidateBufferBinding(device, binding, wgpu::BufferUsage::Uniform));
                     break;
@@ -163,12 +159,8 @@ namespace dawn_native {
                     DAWN_TRY(ValidateBufferBinding(device, binding, wgpu::BufferUsage::Storage));
                     break;
                 case wgpu::BindingType::SampledTexture:
-                    DAWN_TRY(
-                        ValidateTextureBinding(device, binding, wgpu::TextureUsage::Sampled,
-                                               layoutInfo.multisampled[bindingIndex],
-                                               layoutInfo.textureComponentTypes[bindingIndex],
-                                               layoutInfo.textureDimensions[bindingIndex],
-                                               layoutInfo.storageTextureFormats[bindingIndex]));
+                    DAWN_TRY(ValidateTextureBinding(device, binding, wgpu::TextureUsage::Sampled,
+                                                    bindingInfo));
                     break;
                 case wgpu::BindingType::Sampler:
                     DAWN_TRY(ValidateSamplerBinding(device, binding));
@@ -177,12 +169,8 @@ namespace dawn_native {
                 // write-only storage textures.
                 case wgpu::BindingType::ReadonlyStorageTexture:
                 case wgpu::BindingType::WriteonlyStorageTexture:
-                    DAWN_TRY(
-                        ValidateTextureBinding(device, binding, wgpu::TextureUsage::Storage,
-                                               layoutInfo.multisampled[bindingIndex],
-                                               layoutInfo.textureComponentTypes[bindingIndex],
-                                               layoutInfo.textureDimensions[bindingIndex],
-                                               layoutInfo.storageTextureFormats[bindingIndex]));
+                    DAWN_TRY(ValidateTextureBinding(device, binding, wgpu::TextureUsage::Storage,
+                                                    bindingInfo));
                     break;
                 case wgpu::BindingType::StorageTexture:
                     UNREACHABLE();
@@ -274,9 +262,9 @@ namespace dawn_native {
     BufferBinding BindGroupBase::GetBindingAsBufferBinding(BindingIndex bindingIndex) {
         ASSERT(!IsError());
         ASSERT(bindingIndex < mLayout->GetBindingCount());
-        ASSERT(mLayout->GetBindingInfo().types[bindingIndex] == wgpu::BindingType::UniformBuffer ||
-               mLayout->GetBindingInfo().types[bindingIndex] == wgpu::BindingType::StorageBuffer ||
-               mLayout->GetBindingInfo().types[bindingIndex] ==
+        ASSERT(mLayout->GetBindingInfo(bindingIndex).type == wgpu::BindingType::UniformBuffer ||
+               mLayout->GetBindingInfo(bindingIndex).type == wgpu::BindingType::StorageBuffer ||
+               mLayout->GetBindingInfo(bindingIndex).type ==
                    wgpu::BindingType::ReadonlyStorageBuffer);
         BufferBase* buffer = static_cast<BufferBase*>(mBindingData.bindings[bindingIndex].Get());
         return {buffer, mBindingData.bufferData[bindingIndex].offset,
@@ -286,14 +274,14 @@ namespace dawn_native {
     SamplerBase* BindGroupBase::GetBindingAsSampler(BindingIndex bindingIndex) {
         ASSERT(!IsError());
         ASSERT(bindingIndex < mLayout->GetBindingCount());
-        ASSERT(mLayout->GetBindingInfo().types[bindingIndex] == wgpu::BindingType::Sampler);
+        ASSERT(mLayout->GetBindingInfo(bindingIndex).type == wgpu::BindingType::Sampler);
         return static_cast<SamplerBase*>(mBindingData.bindings[bindingIndex].Get());
     }
 
     TextureViewBase* BindGroupBase::GetBindingAsTextureView(BindingIndex bindingIndex) {
         ASSERT(!IsError());
         ASSERT(bindingIndex < mLayout->GetBindingCount());
-        ASSERT(mLayout->GetBindingInfo().types[bindingIndex] == wgpu::BindingType::SampledTexture);
+        ASSERT(mLayout->GetBindingInfo(bindingIndex).type == wgpu::BindingType::SampledTexture);
         return static_cast<TextureViewBase*>(mBindingData.bindings[bindingIndex].Get());
     }
 

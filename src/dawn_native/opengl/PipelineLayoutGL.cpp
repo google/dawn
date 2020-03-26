@@ -28,12 +28,11 @@ namespace dawn_native { namespace opengl {
         GLuint ssboIndex = 0;
 
         for (uint32_t group : IterateBitSet(GetBindGroupLayoutsMask())) {
-            const BindGroupLayoutBase::LayoutBindingInfo& groupInfo =
-                GetBindGroupLayout(group)->GetBindingInfo();
+            const BindGroupLayoutBase* bgl = GetBindGroupLayout(group);
 
-            for (BindingIndex bindingIndex = 0; bindingIndex < groupInfo.bindingCount;
+            for (BindingIndex bindingIndex = 0; bindingIndex < bgl->GetBindingCount();
                  ++bindingIndex) {
-                switch (groupInfo.types[bindingIndex]) {
+                switch (bgl->GetBindingInfo(bindingIndex).type) {
                     case wgpu::BindingType::UniformBuffer:
                         mIndexInfo[group][bindingIndex] = uboIndex;
                         uboIndex++;

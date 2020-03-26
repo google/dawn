@@ -493,19 +493,22 @@ namespace dawn_native { namespace metal {
                                     uint32_t dynamicOffsetCount,
                                     uint64_t* dynamicOffsets,
                                     PipelineLayout* pipelineLayout) {
-                const BindGroupLayoutBase::LayoutBindingInfo& layout =
-                    group->GetLayout()->GetBindingInfo();
                 uint32_t currentDynamicBufferIndex = 0;
 
                 // TODO(kainino@chromium.org): Maintain buffers and offsets arrays in BindGroup
                 // so that we only have to do one setVertexBuffers and one setFragmentBuffers
                 // call here.
-                for (BindingIndex bindingIndex = 0; bindingIndex < layout.bindingCount;
-                     ++bindingIndex) {
-                    auto stage = layout.visibilities[bindingIndex];
-                    bool hasVertStage = stage & wgpu::ShaderStage::Vertex && render != nil;
-                    bool hasFragStage = stage & wgpu::ShaderStage::Fragment && render != nil;
-                    bool hasComputeStage = stage & wgpu::ShaderStage::Compute && compute != nil;
+                for (BindingIndex bindingIndex = 0;
+                     bindingIndex < group->GetLayout()->GetBindingCount(); ++bindingIndex) {
+                    const BindGroupLayoutBase::BindingInfo& bindingInfo =
+                        group->GetLayout()->GetBindingInfo(bindingIndex);
+
+                    bool hasVertStage =
+                        bindingInfo.visibility & wgpu::ShaderStage::Vertex && render != nil;
+                    bool hasFragStage =
+                        bindingInfo.visibility & wgpu::ShaderStage::Fragment && render != nil;
+                    bool hasComputeStage =
+                        bindingInfo.visibility & wgpu::ShaderStage::Compute && compute != nil;
 
                     uint32_t vertIndex = 0;
                     uint32_t fragIndex = 0;
@@ -524,7 +527,7 @@ namespace dawn_native { namespace metal {
                             SingleShaderStage::Compute)[index][bindingIndex];
                     }
 
-                    switch (layout.types[bindingIndex]) {
+                    switch (bindingInfo.type) {
                         case wgpu::BindingType::UniformBuffer:
                         case wgpu::BindingType::StorageBuffer:
                         case wgpu::BindingType::ReadonlyStorageBuffer: {
@@ -535,7 +538,7 @@ namespace dawn_native { namespace metal {
 
                             // TODO(shaobo.yan@intel.com): Record bound buffer status to use
                             // setBufferOffset to achieve better performance.
-                            if (layout.hasDynamicOffset[bindingIndex]) {
+                            if (bindingInfo.hasDynamicOffset) {
                                 offset += dynamicOffsets[currentDynamicBufferIndex];
                                 currentDynamicBufferIndex++;
                             }

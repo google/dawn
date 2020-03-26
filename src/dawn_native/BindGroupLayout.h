@@ -51,22 +51,24 @@ namespace dawn_native {
         ~BindGroupLayoutBase() override;
 
         static BindGroupLayoutBase* MakeError(DeviceBase* device);
-
-        struct LayoutBindingInfo {
-            std::array<wgpu::ShaderStage, kMaxBindingsPerGroup> visibilities;
-            std::array<wgpu::BindingType, kMaxBindingsPerGroup> types;
-            std::array<wgpu::TextureComponentType, kMaxBindingsPerGroup> textureComponentTypes;
-            std::array<wgpu::TextureViewDimension, kMaxBindingsPerGroup> textureDimensions;
-            std::array<wgpu::TextureFormat, kMaxBindingsPerGroup> storageTextureFormats;
-            std::bitset<kMaxBindingsPerGroup> hasDynamicOffset;
-            std::bitset<kMaxBindingsPerGroup> multisampled;
-            BindingIndex bindingCount;
+        struct BindingInfo {
+            wgpu::ShaderStage visibility;
+            wgpu::BindingType type;
+            wgpu::TextureComponentType textureComponentType;
+            wgpu::TextureViewDimension textureDimension;
+            wgpu::TextureFormat storageTextureFormat;
+            bool hasDynamicOffset;
+            bool multisampled;
         };
 
         // A map from the BindingNumber to its packed BindingIndex.
         using BindingMap = std::map<BindingNumber, BindingIndex>;
 
-        const LayoutBindingInfo& GetBindingInfo() const;
+        const BindingInfo& GetBindingInfo(BindingIndex bindingIndex) const {
+            ASSERT(!IsError());
+            ASSERT(bindingIndex < kMaxBindingsPerGroup);
+            return mBindingInfo[bindingIndex];
+        }
         const BindingMap& GetBindingMap() const;
         BindingIndex GetBindingIndex(BindingNumber bindingNumber) const;
 
@@ -117,10 +119,12 @@ namespace dawn_native {
       private:
         BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
+        BindingIndex mBindingCount;
         BindingIndex mBufferCount = 0;  // |BindingIndex| because buffers are packed at the front.
         uint32_t mDynamicUniformBufferCount = 0;
         uint32_t mDynamicStorageBufferCount = 0;
-        LayoutBindingInfo mBindingInfo;
+
+        std::array<BindingInfo, kMaxBindingsPerGroup> mBindingInfo;
 
         // Map from BindGroupLayoutEntry.binding to packed indices.
         BindingMap mBindingMap;

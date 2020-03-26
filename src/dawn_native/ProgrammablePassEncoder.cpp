@@ -29,11 +29,9 @@ namespace dawn_native {
     namespace {
         void TrackBindGroupResourceUsage(PassResourceUsageTracker* usageTracker,
                                          BindGroupBase* group) {
-            const BindGroupLayoutBase::LayoutBindingInfo& layoutInfo =
-                group->GetLayout()->GetBindingInfo();
-            for (BindingIndex bindingIndex = 0; bindingIndex < layoutInfo.bindingCount;
-                 ++bindingIndex) {
-                wgpu::BindingType type = layoutInfo.types[bindingIndex];
+            for (BindingIndex bindingIndex = 0;
+                 bindingIndex < group->GetLayout()->GetBindingCount(); ++bindingIndex) {
+                wgpu::BindingType type = group->GetLayout()->GetBindingInfo(bindingIndex).type;
 
                 switch (type) {
                     case wgpu::BindingType::UniformBuffer: {
@@ -133,12 +131,13 @@ namespace dawn_native {
                     return DAWN_VALIDATION_ERROR("dynamicOffset count mismatch");
                 }
 
-                const BindGroupLayoutBase::LayoutBindingInfo& layoutInfo = layout->GetBindingInfo();
                 for (BindingIndex i = 0; i < dynamicOffsetCount; ++i) {
+                    const BindGroupLayoutBase::BindingInfo& bindingInfo = layout->GetBindingInfo(i);
+
                     // BGL creation sorts bindings such that the dynamic buffer bindings are first.
                     // ASSERT that this true.
-                    ASSERT(layoutInfo.hasDynamicOffset[i]);
-                    switch (layoutInfo.types[i]) {
+                    ASSERT(bindingInfo.hasDynamicOffset);
+                    switch (bindingInfo.type) {
                         case wgpu::BindingType::UniformBuffer:
                         case wgpu::BindingType::StorageBuffer:
                         case wgpu::BindingType::ReadonlyStorageBuffer:

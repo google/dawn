@@ -131,22 +131,23 @@ namespace dawn_native { namespace metal {
 
         // Create one resource binding entry per stage per binding.
         for (uint32_t group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
-            const BindGroupLayoutBase::LayoutBindingInfo& bgInfo =
-                layout->GetBindGroupLayout(group)->GetBindingInfo();
             const BindGroupLayoutBase::BindingMap& bindingMap =
                 layout->GetBindGroupLayout(group)->GetBindingMap();
 
             for (const auto& it : bindingMap) {
-                uint32_t binding = it.first;
+                BindingNumber bindingNumber = it.first;
                 BindingIndex bindingIndex = it.second;
 
-                for (auto stage : IterateStages(bgInfo.visibilities[bindingIndex])) {
+                const BindGroupLayoutBase::BindingInfo& bindingInfo =
+                    layout->GetBindGroupLayout(group)->GetBindingInfo(bindingIndex);
+
+                for (auto stage : IterateStages(bindingInfo.visibility)) {
                     uint32_t shaderIndex = layout->GetBindingIndexInfo(stage)[group][bindingIndex];
                     if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
                         shaderc_spvc_msl_resource_binding mslBinding;
                         mslBinding.stage = ToSpvcExecutionModel(stage);
                         mslBinding.desc_set = group;
-                        mslBinding.binding = binding;
+                        mslBinding.binding = bindingNumber;
                         mslBinding.msl_buffer = mslBinding.msl_texture = mslBinding.msl_sampler =
                             shaderIndex;
                         DAWN_TRY(CheckSpvcSuccess(mSpvcContext.AddMSLResourceBinding(mslBinding),
@@ -155,7 +156,7 @@ namespace dawn_native { namespace metal {
                         spirv_cross::MSLResourceBinding mslBinding;
                         mslBinding.stage = SpirvExecutionModelForStage(stage);
                         mslBinding.desc_set = group;
-                        mslBinding.binding = binding;
+                        mslBinding.binding = bindingNumber;
                         mslBinding.msl_buffer = mslBinding.msl_texture = mslBinding.msl_sampler =
                             shaderIndex;
 

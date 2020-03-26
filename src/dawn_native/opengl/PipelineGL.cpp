@@ -107,15 +107,14 @@ namespace dawn_native { namespace opengl {
         const auto& indices = layout->GetBindingIndexInfo();
 
         for (uint32_t group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
-            const BindGroupLayoutBase::LayoutBindingInfo& groupInfo =
-                layout->GetBindGroupLayout(group)->GetBindingInfo();
+            const BindGroupLayoutBase* bgl = layout->GetBindGroupLayout(group);
 
-            for (const auto& it : layout->GetBindGroupLayout(group)->GetBindingMap()) {
+            for (const auto& it : bgl->GetBindingMap()) {
                 BindingNumber bindingNumber = it.first;
                 BindingIndex bindingIndex = it.second;
 
                 std::string name = GetBindingName(group, bindingNumber);
-                switch (groupInfo.types[bindingIndex]) {
+                switch (bgl->GetBindingInfo(bindingIndex).type) {
                     case wgpu::BindingType::UniformBuffer: {
                         GLint location = gl.GetUniformBlockIndex(mProgram, name.c_str());
                         if (location != -1) {
@@ -178,10 +177,11 @@ namespace dawn_native { namespace opengl {
                     indices[combined.textureLocation.group][combined.textureLocation.binding];
                 mUnitsForTextures[textureIndex].push_back(textureUnit);
 
+                const BindGroupLayoutBase* bgl =
+                    layout->GetBindGroupLayout(combined.textureLocation.group);
                 wgpu::TextureComponentType componentType =
-                    layout->GetBindGroupLayout(combined.textureLocation.group)
-                        ->GetBindingInfo()
-                        .textureComponentTypes[combined.textureLocation.binding];
+                    bgl->GetBindingInfo(bgl->GetBindingIndex(combined.textureLocation.binding))
+                        .textureComponentType;
                 bool shouldUseFiltering = componentType == wgpu::TextureComponentType::Float;
 
                 GLuint samplerIndex =

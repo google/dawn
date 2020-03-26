@@ -741,7 +741,6 @@ namespace dawn_native {
         const BindGroupLayoutBase* layout) const {
         ASSERT(!IsError());
 
-        const BindGroupLayoutBase::LayoutBindingInfo& layoutInfo = layout->GetBindingInfo();
         const BindGroupLayoutBase::BindingMap& bindingMap = layout->GetBindingMap();
 
         // Iterate over all bindings used by this group in the shader, and find the
@@ -756,7 +755,9 @@ namespace dawn_native {
             }
             BindingIndex bindingIndex(bindingIt->second);
 
-            const auto& layoutBindingType = layoutInfo.types[bindingIndex];
+            const BindGroupLayoutBase::BindingInfo& bindingInfo =
+                layout->GetBindingInfo(bindingIndex);
+            const auto& layoutBindingType = bindingInfo.type;
 
             if (layoutBindingType != moduleInfo.type) {
                 // Binding mismatch between shader and bind group is invalid. For example, a
@@ -771,34 +772,31 @@ namespace dawn_native {
                 }
             }
 
-            if ((layoutInfo.visibilities[bindingIndex] & StageBit(mExecutionModel)) == 0) {
+            if ((bindingInfo.visibility & StageBit(mExecutionModel)) == 0) {
                 return false;
             }
 
             switch (layoutBindingType) {
                 case wgpu::BindingType::SampledTexture: {
                     Format::Type layoutTextureComponentType =
-                        Format::TextureComponentTypeToFormatType(
-                            layoutInfo.textureComponentTypes[bindingIndex]);
+                        Format::TextureComponentTypeToFormatType(bindingInfo.textureComponentType);
                     if (layoutTextureComponentType != moduleInfo.textureComponentType) {
                         return false;
                     }
 
-                    if (layoutInfo.textureDimensions[bindingIndex] != moduleInfo.textureDimension) {
+                    if (bindingInfo.textureDimension != moduleInfo.textureDimension) {
                         return false;
                     }
                 } break;
 
                 case wgpu::BindingType::ReadonlyStorageTexture:
                 case wgpu::BindingType::WriteonlyStorageTexture: {
-                    ASSERT(layoutInfo.storageTextureFormats[bindingIndex] !=
-                           wgpu::TextureFormat::Undefined);
+                    ASSERT(bindingInfo.storageTextureFormat != wgpu::TextureFormat::Undefined);
                     ASSERT(moduleInfo.storageTextureFormat != wgpu::TextureFormat::Undefined);
-                    if (layoutInfo.storageTextureFormats[bindingIndex] !=
-                        moduleInfo.storageTextureFormat) {
+                    if (bindingInfo.storageTextureFormat != moduleInfo.storageTextureFormat) {
                         return false;
                     }
-                    if (layoutInfo.textureDimensions[bindingIndex] != moduleInfo.textureDimension) {
+                    if (bindingInfo.textureDimension != moduleInfo.textureDimension) {
                         return false;
                     }
                 } break;

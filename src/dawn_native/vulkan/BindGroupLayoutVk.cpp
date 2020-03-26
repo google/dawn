@@ -82,8 +82,6 @@ namespace dawn_native { namespace vulkan {
     }
 
     MaybeError BindGroupLayout::Initialize() {
-        const LayoutBindingInfo& info = GetBindingInfo();
-
         // Compute the bindings that will be chained in the DescriptorSetLayout create info. We add
         // one entry per binding set. This might be optimized by computing continuous ranges of
         // bindings of the same type.
@@ -92,13 +90,14 @@ namespace dawn_native { namespace vulkan {
         for (const auto& it : GetBindingMap()) {
             BindingNumber bindingNumber = it.first;
             BindingIndex bindingIndex = it.second;
+            const BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
 
             VkDescriptorSetLayoutBinding* vkBinding = &bindings[numBindings];
             vkBinding->binding = bindingNumber;
             vkBinding->descriptorType =
-                VulkanDescriptorType(info.types[bindingIndex], info.hasDynamicOffset[bindingIndex]);
+                VulkanDescriptorType(bindingInfo.type, bindingInfo.hasDynamicOffset);
             vkBinding->descriptorCount = 1;
-            vkBinding->stageFlags = VulkanShaderStageFlags(info.visibilities[bindingIndex]);
+            vkBinding->stageFlags = VulkanShaderStageFlags(bindingInfo.visibility);
             vkBinding->pImmutableSamplers = nullptr;
 
             numBindings++;
@@ -119,9 +118,10 @@ namespace dawn_native { namespace vulkan {
         // Compute the size of descriptor pools used for this layout.
         std::map<VkDescriptorType, uint32_t> descriptorCountPerType;
 
-        for (BindingIndex bindingIndex = 0; bindingIndex < info.bindingCount; ++bindingIndex) {
+        for (BindingIndex bindingIndex = 0; bindingIndex < GetBindingCount(); ++bindingIndex) {
+            const BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
             VkDescriptorType vulkanType =
-                VulkanDescriptorType(info.types[bindingIndex], info.hasDynamicOffset[bindingIndex]);
+                VulkanDescriptorType(bindingInfo.type, bindingInfo.hasDynamicOffset);
 
             // map::operator[] will return 0 if the key doesn't exist.
             descriptorCountPerType[vulkanType]++;

@@ -167,39 +167,25 @@ namespace dawn_native {
         }
 
         return {};
-    }  // namespace dawn_native
+    }
 
     namespace {
-        size_t HashBindingInfo(const BindGroupLayoutBase::LayoutBindingInfo& info) {
-            size_t hash = 0;
-            HashCombine(&hash, info.hasDynamicOffset, info.multisampled);
 
-            for (BindingIndex i = 0; i < info.bindingCount; ++i) {
-                HashCombine(&hash, info.visibilities[i], info.types[i],
-                            info.textureComponentTypes[i], info.textureDimensions[i],
-                            info.storageTextureFormats[i]);
-            }
-
-            return hash;
+        void HashCombineBindingInfo(size_t* hash, const BindGroupLayoutBase::BindingInfo& info) {
+            HashCombine(hash, info.hasDynamicOffset, info.multisampled, info.visibility, info.type,
+                        info.textureComponentType, info.textureDimension,
+                        info.storageTextureFormat);
         }
 
-        bool operator==(const BindGroupLayoutBase::LayoutBindingInfo& a,
-                        const BindGroupLayoutBase::LayoutBindingInfo& b) {
-            if (a.bindingCount != b.bindingCount || a.hasDynamicOffset != b.hasDynamicOffset ||
-                a.multisampled != b.multisampled) {
-                return false;
-            }
-
-            for (BindingIndex i = 0; i < a.bindingCount; ++i) {
-                if ((a.visibilities[i] != b.visibilities[i]) || (a.types[i] != b.types[i]) ||
-                    (a.textureComponentTypes[i] != b.textureComponentTypes[i]) ||
-                    (a.textureDimensions[i] != b.textureDimensions[i]) ||
-                    (a.storageTextureFormats[i] != b.storageTextureFormats[i])) {
-                    return false;
-                }
-            }
-
-            return true;
+        bool operator!=(const BindGroupLayoutBase::BindingInfo& a,
+                        const BindGroupLayoutBase::BindingInfo& b) {
+            return a.hasDynamicOffset != b.hasDynamicOffset ||          //
+                   a.multisampled != b.multisampled ||                  //
+                   a.visibility != b.visibility ||                      //
+                   a.type != b.type ||                                  //
+                   a.textureComponentType != b.textureComponentType ||  //
+                   a.textureDimension != b.textureDimension ||          //
+                   a.storageTextureFormat != b.storageTextureFormat;
         }
 
         bool SortBindingsCompare(const BindGroupLayoutBinding& a, const BindGroupLayoutBinding& b) {
@@ -233,7 +219,8 @@ namespace dawn_native {
 
         // This is a utility function to help ASSERT that the BGL-binding comparator places buffers
         // first.
-        bool CheckBufferBindingsFirst(const BindGroupLayoutBinding* bindings, size_t count) {
+        bool CheckBufferBindingsFirst(const BindGroupLayoutBase::BindingInfo* bindings,
+                                      BindingIndex count) {
             ASSERT(count <= kMaxBindingsPerGroup);
 
             BindingIndex lastBufferIndex = 0;
@@ -269,21 +256,18 @@ namespace dawn_native {
 
     BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
                                              const BindGroupLayoutDescriptor* descriptor)
-        : CachedObject(device) {
-        mBindingInfo.bindingCount = descriptor->bindingCount;
-
+        : CachedObject(device), mBindingCount(descriptor->bindingCount) {
         std::vector<BindGroupLayoutBinding> sortedBindings(
             descriptor->bindings, descriptor->bindings + descriptor->bindingCount);
 
         std::sort(sortedBindings.begin(), sortedBindings.end(), SortBindingsCompare);
-        ASSERT(CheckBufferBindingsFirst(sortedBindings.data(), sortedBindings.size()));
 
-        for (BindingIndex i = 0; i < mBindingInfo.bindingCount; ++i) {
+        for (BindingIndex i = 0; i < mBindingCount; ++i) {
             const BindGroupLayoutBinding& binding = sortedBindings[i];
-            mBindingInfo.types[i] = binding.type;
-            mBindingInfo.visibilities[i] = binding.visibility;
-            mBindingInfo.textureComponentTypes[i] = binding.textureComponentType;
-            mBindingInfo.storageTextureFormats[i] = binding.storageTextureFormat;
+            mBindingInfo[i].type = binding.type;
+            mBindingInfo[i].visibility = binding.visibility;
+            mBindingInfo[i].textureComponentType = binding.textureComponentType;
+            mBindingInfo[i].storageTextureFormat = binding.storageTextureFormat;
 
             switch (binding.type) {
                 case wgpu::BindingType::UniformBuffer:
@@ -298,13 +282,14 @@ namespace dawn_native {
             }
 
             if (binding.textureDimension == wgpu::TextureViewDimension::Undefined) {
-                mBindingInfo.textureDimensions[i] = wgpu::TextureViewDimension::e2D;
+                mBindingInfo[i].textureDimension = wgpu::TextureViewDimension::e2D;
             } else {
-                mBindingInfo.textureDimensions[i] = binding.textureDimension;
+                mBindingInfo[i].textureDimension = binding.textureDimension;
             }
 
+            mBindingInfo[i].multisampled = binding.multisampled;
+            mBindingInfo[i].hasDynamicOffset = binding.hasDynamicOffset;
             if (binding.hasDynamicOffset) {
-                mBindingInfo.hasDynamicOffset.set(i);
                 switch (binding.type) {
                     case wgpu::BindingType::UniformBuffer:
                         ++mDynamicUniformBufferCount;
@@ -322,11 +307,11 @@ namespace dawn_native {
                         break;
                 }
             }
-            mBindingInfo.multisampled.set(i, binding.multisampled);
 
             const auto& it = mBindingMap.emplace(BindingNumber(binding.binding), i);
             ASSERT(it.second);
         }
+        ASSERT(CheckBufferBindingsFirst(mBindingInfo.data(), mBindingCount));
     }
 
     BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag)
@@ -345,11 +330,6 @@ namespace dawn_native {
         return new BindGroupLayoutBase(device, ObjectBase::kError);
     }
 
-    const BindGroupLayoutBase::LayoutBindingInfo& BindGroupLayoutBase::GetBindingInfo() const {
-        ASSERT(!IsError());
-        return mBindingInfo;
-    }
-
     const BindGroupLayoutBase::BindingMap& BindGroupLayoutBase::GetBindingMap() const {
         ASSERT(!IsError());
         return mBindingMap;
@@ -363,22 +343,31 @@ namespace dawn_native {
     }
 
     size_t BindGroupLayoutBase::HashFunc::operator()(const BindGroupLayoutBase* bgl) const {
-        size_t hash = HashBindingInfo(bgl->mBindingInfo);
+        size_t hash = 0;
         // std::map is sorted by key, so two BGLs constructed in different orders
         // will still hash the same.
         for (const auto& it : bgl->mBindingMap) {
             HashCombine(&hash, it.first, it.second);
+            HashCombineBindingInfo(&hash, bgl->mBindingInfo[it.second]);
         }
         return hash;
     }
 
     bool BindGroupLayoutBase::EqualityFunc::operator()(const BindGroupLayoutBase* a,
                                                        const BindGroupLayoutBase* b) const {
-        return a->mBindingInfo == b->mBindingInfo && a->mBindingMap == b->mBindingMap;
+        if (a->GetBindingCount() != b->GetBindingCount()) {
+            return false;
+        }
+        for (BindingIndex i = 0; i < a->GetBindingCount(); ++i) {
+            if (a->mBindingInfo[i] != b->mBindingInfo[i]) {
+                return false;
+            }
+        }
+        return a->mBindingMap == b->mBindingMap;
     }
 
     BindingIndex BindGroupLayoutBase::GetBindingCount() const {
-        return mBindingInfo.bindingCount;
+        return mBindingCount;
     }
 
     BindingIndex BindGroupLayoutBase::GetDynamicBufferCount() const {
@@ -398,7 +387,7 @@ namespace dawn_native {
         // | --- offsets + sizes -------------| --------------- Ref<ObjectBase> ----------|
         size_t objectPointerStart = mBufferCount * sizeof(BufferBindingData);
         ASSERT(IsAligned(objectPointerStart, alignof(Ref<ObjectBase>)));
-        return objectPointerStart + mBindingInfo.bindingCount * sizeof(Ref<ObjectBase>);
+        return objectPointerStart + mBindingCount * sizeof(Ref<ObjectBase>);
     }
 
     BindGroupLayoutBase::BindingDataPointers BindGroupLayoutBase::ComputeBindingDataPointers(

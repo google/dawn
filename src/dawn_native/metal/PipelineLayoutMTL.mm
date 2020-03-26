@@ -29,15 +29,15 @@ namespace dawn_native { namespace metal {
             uint32_t textureIndex = 0;
 
             for (uint32_t group : IterateBitSet(GetBindGroupLayoutsMask())) {
-                const BindGroupLayoutBase::LayoutBindingInfo& groupInfo =
-                    GetBindGroupLayout(group)->GetBindingInfo();
-                for (BindingIndex bindingIndex = 0; bindingIndex < groupInfo.bindingCount;
-                     ++bindingIndex) {
-                    if (!(groupInfo.visibilities[bindingIndex] & StageBit(stage))) {
+                for (BindingIndex bindingIndex = 0;
+                     bindingIndex < GetBindGroupLayout(group)->GetBindingCount(); ++bindingIndex) {
+                    const BindGroupLayoutBase::BindingInfo& bindingInfo =
+                        GetBindGroupLayout(group)->GetBindingInfo(bindingIndex);
+                    if (!(bindingInfo.visibility & StageBit(stage))) {
                         continue;
                     }
 
-                    switch (groupInfo.types[bindingIndex]) {
+                    switch (bindingInfo.type) {
                         case wgpu::BindingType::UniformBuffer:
                         case wgpu::BindingType::StorageBuffer:
                         case wgpu::BindingType::ReadonlyStorageBuffer:

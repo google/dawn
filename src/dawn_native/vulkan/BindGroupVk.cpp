@@ -43,10 +43,11 @@ namespace dawn_native { namespace vulkan {
         std::array<VkDescriptorBufferInfo, kMaxBindingsPerGroup> writeBufferInfo;
         std::array<VkDescriptorImageInfo, kMaxBindingsPerGroup> writeImageInfo;
 
-        const BindGroupLayoutBase::LayoutBindingInfo& layoutInfo = GetLayout()->GetBindingInfo();
         for (const auto& it : GetLayout()->GetBindingMap()) {
             BindingNumber bindingNumber = it.first;
             BindingIndex bindingIndex = it.second;
+            const BindGroupLayoutBase::BindingInfo& bindingInfo =
+                GetLayout()->GetBindingInfo(bindingIndex);
 
             auto& write = writes[numWrites];
             write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -55,10 +56,10 @@ namespace dawn_native { namespace vulkan {
             write.dstBinding = bindingNumber;
             write.dstArrayElement = 0;
             write.descriptorCount = 1;
-            write.descriptorType = VulkanDescriptorType(layoutInfo.types[bindingIndex],
-                                                        layoutInfo.hasDynamicOffset[bindingIndex]);
+            write.descriptorType =
+                VulkanDescriptorType(bindingInfo.type, bindingInfo.hasDynamicOffset);
 
-            switch (layoutInfo.types[bindingIndex]) {
+            switch (bindingInfo.type) {
                 case wgpu::BindingType::UniformBuffer:
                 case wgpu::BindingType::StorageBuffer:
                 case wgpu::BindingType::ReadonlyStorageBuffer: {
