@@ -21,6 +21,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 using TokenTest = testing::Test;
 
@@ -71,6 +72,7 @@ TEST_F(TokenTest, Source) {
   EXPECT_EQ(t.column(), 9);
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

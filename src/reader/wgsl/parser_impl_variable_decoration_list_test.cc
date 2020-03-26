@@ -21,6 +21,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, VariableDecorationList_Parses) {
   auto p = parser(R"([[location 4, builtin position]])");
@@ -75,6 +76,7 @@ TEST_F(ParserImplTest, VariableDecorationList_InvalidBuiltin) {
   ASSERT_EQ(p->error(), "1:11: invalid value for builtin decoration");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

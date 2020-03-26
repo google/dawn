@@ -54,8 +54,6 @@ class PipelineStageTest : public testing::TestWithParam<PipelineStageData> {
   TypeManager tm_;
 };
 
-}  // namespace
-
 TEST_P(PipelineStageTest, Parses) {
   auto params = GetParam();
   auto p = parser(params.input);
@@ -85,6 +83,7 @@ TEST_F(ParserImplTest, PipelineStage_NoMatch) {
   EXPECT_EQ(t.to_str(), "not");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

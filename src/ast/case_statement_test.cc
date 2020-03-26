@@ -21,6 +21,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using CaseStatementTest = testing::Test;
 
@@ -121,5 +122,6 @@ TEST_F(CaseStatementTest, ToStr_WithoutCondition) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

@@ -21,6 +21,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, FunctionDecl) {
   auto p = parser("fn main(a : i32, b : f32) -> void { return; }");
@@ -59,6 +60,7 @@ TEST_F(ParserImplTest, FunctionDecl_InvalidBody) {
   EXPECT_EQ(p->error(), "1:28: missing ;");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

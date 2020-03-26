@@ -18,6 +18,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using StructMemberOffsetDecorationTest = testing::Test;
 
@@ -31,5 +32,6 @@ TEST_F(StructMemberOffsetDecorationTest, Is) {
   EXPECT_TRUE(d.IsOffset());
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

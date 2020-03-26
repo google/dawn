@@ -55,8 +55,6 @@ class StructDecorationTest
   TypeManager tm_;
 };
 
-}  // namespace
-
 TEST_P(StructDecorationTest, Parses) {
   auto params = GetParam();
   auto p = parser(params.input);
@@ -83,6 +81,7 @@ TEST_F(ParserImplTest, StructDecoration_NoMatch) {
   EXPECT_EQ(t.to_str(), "not");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

@@ -23,6 +23,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using RegardlessStatementTest = testing::Test;
 
@@ -122,5 +123,6 @@ TEST_F(RegardlessStatementTest, ToStr) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

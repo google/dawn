@@ -23,6 +23,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, TypeDecl_ParsesType) {
   auto i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
@@ -87,6 +88,7 @@ TEST_F(ParserImplTest, TypeDecl_InvalidStruct) {
   EXPECT_EQ(p->error(), "1:20: missing struct declaration");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

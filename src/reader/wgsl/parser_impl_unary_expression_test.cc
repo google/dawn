@@ -26,6 +26,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, UnaryExpression_Postix) {
   auto p = parser("a[2]");
@@ -840,6 +841,8 @@ TEST_F(ParserImplTest, UnaryExpression_Fwidht_InvalidIdentifeir) {
   ASSERT_EQ(e, nullptr);
   EXPECT_EQ(p->error(), "1:16: missing identifier for derivative method");
 }
+
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

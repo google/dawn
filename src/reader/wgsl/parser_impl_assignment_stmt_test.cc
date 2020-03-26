@@ -26,6 +26,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
   auto p = parser("a = 123");
@@ -130,6 +131,7 @@ TEST_F(ParserImplTest, AssignmentStmt_InvalidRHS) {
   EXPECT_EQ(p->error(), "1:14: unable to parse right side of assignment");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

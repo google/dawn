@@ -20,6 +20,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using NopStatementTest = testing::Test;
 
@@ -53,5 +54,6 @@ TEST_F(NopStatementTest, ToStr) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

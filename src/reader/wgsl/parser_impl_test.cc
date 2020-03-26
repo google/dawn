@@ -21,6 +21,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, Empty) {
   auto p = parser("");
@@ -74,6 +75,7 @@ TEST_F(ParserImplTest, GetUnregisteredType) {
   ASSERT_EQ(alias, nullptr);
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

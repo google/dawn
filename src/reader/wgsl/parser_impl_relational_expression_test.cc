@@ -23,6 +23,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, RelationalExpression_Parses_LessThan) {
   auto p = parser("a < true");
@@ -135,6 +136,7 @@ TEST_F(ParserImplTest, RelationalExpression_NoOr_ReturnsLHS) {
   ASSERT_TRUE(e->IsIdentifier());
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

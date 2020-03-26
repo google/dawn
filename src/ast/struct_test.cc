@@ -24,6 +24,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using StructTest = testing::Test;
 
@@ -97,5 +98,6 @@ TEST_F(StructTest, ToStr) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

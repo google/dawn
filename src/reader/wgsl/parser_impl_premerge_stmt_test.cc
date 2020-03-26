@@ -19,6 +19,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, PremergeStmt) {
   auto p = parser("premerge { nop; }");
@@ -36,6 +37,7 @@ TEST_F(ParserImplTest, PremergeStmt_InvalidBody) {
   EXPECT_EQ(p->error(), "1:16: missing ;");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

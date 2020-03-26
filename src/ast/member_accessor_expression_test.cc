@@ -21,6 +21,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using MemberAccessorExpressionTest = testing::Test;
 
@@ -105,5 +106,6 @@ TEST_F(MemberAccessorExpressionTest, ToStr) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

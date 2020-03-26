@@ -20,6 +20,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using AsExpressionTest = testing::Test;
 
@@ -94,5 +95,6 @@ TEST_F(AsExpressionTest, ToStr) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

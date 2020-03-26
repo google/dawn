@@ -20,6 +20,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using KillStatementTest = testing::Test;
 
@@ -53,5 +54,6 @@ TEST_F(KillStatementTest, ToStr) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

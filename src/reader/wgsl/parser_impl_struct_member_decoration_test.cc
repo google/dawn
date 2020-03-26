@@ -20,6 +20,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, StructMemberDecoration_Offset) {
   auto p = parser("offset 4");
@@ -48,6 +49,7 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingInvalid) {
   EXPECT_EQ(p->error(), "1:8: invalid value for offset decoration");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

@@ -19,6 +19,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, GlobalDecl_Semicolon) {
   auto p = parser(";");
@@ -172,6 +173,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function_Invalid) {
   EXPECT_EQ(p->error(), "1:14: unable to determine function return type");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

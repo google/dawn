@@ -18,6 +18,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using BoolLiteralTest = testing::Test;
 
@@ -51,5 +52,6 @@ TEST_F(BoolLiteralTest, ToStr) {
   EXPECT_EQ(f.to_str(), "false");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

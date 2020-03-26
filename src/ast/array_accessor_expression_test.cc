@@ -19,6 +19,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using ArrayAccessorExpressionTest = testing::Test;
 
@@ -101,5 +102,6 @@ TEST_F(ArrayAccessorExpressionTest, ToStr) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

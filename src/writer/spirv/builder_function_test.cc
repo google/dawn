@@ -25,6 +25,7 @@
 namespace tint {
 namespace writer {
 namespace spirv {
+namespace {
 
 using BuilderTest = testing::Test;
 
@@ -74,7 +75,7 @@ TEST_F(BuilderTest, FunctionType_DeDuplicate) {
 )");
 }
 
-
+}  // namespace
 }  // namespace spirv
 }  // namespace writer
 }  // namespace tint

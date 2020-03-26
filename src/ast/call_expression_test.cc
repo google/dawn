@@ -19,6 +19,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using CallExpressionTest = testing::Test;
 
@@ -127,5 +128,6 @@ TEST_F(CallExpressionTest, ToStr_WithParams) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

@@ -21,6 +21,7 @@
 namespace tint {
 namespace ast {
 namespace type {
+namespace {
 
 using ArrayTypeTest = testing::Test;
 
@@ -64,6 +65,7 @@ TEST_F(ArrayTypeTest, TypeName) {
   EXPECT_EQ(arr.type_name(), "__array__i32_3");
 }
 
+}  // namespace
 }  // namespace type
 }  // namespace ast
 }  // namespace tint

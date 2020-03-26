@@ -19,6 +19,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, LoopStmt_BodyNoContinuing) {
   auto p = parser("loop { nop; }");
@@ -96,6 +97,7 @@ TEST_F(ParserImplTest, LoopStmt_InvalidContinuing) {
   EXPECT_EQ(p->error(), "1:26: missing ;");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

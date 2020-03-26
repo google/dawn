@@ -54,8 +54,6 @@ class VariableStorageTest : public testing::TestWithParam<VariableStorageData> {
   TypeManager tm_;
 };
 
-}  // namespace
-
 TEST_P(VariableStorageTest, Parses) {
   auto params = GetParam();
   auto p = parser(std::string("<") + params.input + ">");
@@ -118,6 +116,7 @@ TEST_F(ParserImplTest, VariableStorageDecoration_MissingGreaterThan) {
   ASSERT_EQ(p->error(), "1:4: missing > for variable decoration");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

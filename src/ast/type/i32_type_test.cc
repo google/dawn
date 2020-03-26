@@ -19,6 +19,7 @@
 namespace tint {
 namespace ast {
 namespace type {
+namespace {
 
 using I32TypeTest = testing::Test;
 
@@ -41,6 +42,7 @@ TEST_F(I32TypeTest, TypeName) {
   EXPECT_EQ(i.type_name(), "__i32");
 }
 
+}  // namespace
 }  // namespace type
 }  // namespace ast
 }  // namespace tint

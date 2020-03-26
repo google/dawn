@@ -23,6 +23,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, ConstLiteral_Int) {
   auto p = parser("-234");
@@ -82,6 +83,7 @@ TEST_F(ParserImplTest, ConstLiteral_NoMatch) {
   ASSERT_EQ(c, nullptr);
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

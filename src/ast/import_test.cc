@@ -20,6 +20,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using ImportTest = testing::Test;
 
@@ -87,5 +88,6 @@ TEST_F(ImportTest, IsValid_InvalidEndingCharacter) {
   EXPECT_FALSE(i.IsValid());
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

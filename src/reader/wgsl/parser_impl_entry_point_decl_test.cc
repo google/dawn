@@ -20,6 +20,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, EntryPoint_Parses) {
   auto p = parser("entry_point fragment = main");
@@ -115,6 +116,7 @@ TEST_F(ParserImplTest, EntryPoint_InvalidStage) {
   EXPECT_EQ(p->error(), "1:13: missing pipeline stage for entry point");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

@@ -18,6 +18,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using BindingDecorationTest = testing::Test;
 
@@ -42,5 +43,6 @@ TEST_F(BindingDecorationTest, ToStr) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

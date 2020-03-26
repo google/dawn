@@ -20,6 +20,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, SwitchBody_Case) {
   auto p = parser("case 1: { a = 4; }");
@@ -123,6 +124,7 @@ TEST_F(ParserImplTest, SwitchBody_Default_InvalidCaseBody) {
   EXPECT_EQ(p->error(), "1:12: missing } for case statement");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

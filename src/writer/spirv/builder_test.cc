@@ -26,6 +26,7 @@
 namespace tint {
 namespace writer {
 namespace spirv {
+namespace {
 
 using BuilderTest = testing::Test;
 
@@ -64,6 +65,7 @@ TEST_F(BuilderTest, TracksIdBounds) {
   EXPECT_EQ(6, b.id_bound());
 }
 
+}  // namespace
 }  // namespace spirv
 }  // namespace writer
 }  // namespace tint

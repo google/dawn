@@ -28,6 +28,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, PostfixExpression_Array_ConstantIndex) {
   auto p = parser("a[1]");
@@ -194,6 +195,7 @@ TEST_F(ParserImplTest, PostfixExpression_NonMatch_returnLHS) {
   ASSERT_TRUE(e->IsIdentifier());
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

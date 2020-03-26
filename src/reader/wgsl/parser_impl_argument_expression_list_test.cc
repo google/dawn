@@ -26,6 +26,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, ArgumentExpressionList_Parses) {
   auto p = parser("a");
@@ -61,6 +62,7 @@ TEST_F(ParserImplTest, ArgumentExpressionList_HandlesInvalidExpression) {
   EXPECT_EQ(p->error(), "1:1: unable to parse argument expression");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

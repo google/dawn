@@ -21,6 +21,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithoutInitializer) {
   auto p = parser("var<out> a : f32");
@@ -100,6 +101,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidVariableDecl) {
   EXPECT_EQ(p->error(), "1:5: invalid storage class for variable decoration");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

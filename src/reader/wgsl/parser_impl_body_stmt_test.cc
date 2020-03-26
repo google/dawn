@@ -19,6 +19,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, BodyStmt) {
   auto p = parser(R"({
@@ -55,6 +56,7 @@ TEST_F(ParserImplTest, BodyStmt_MissingRightParen) {
   EXPECT_EQ(p->error(), "1:9: missing }");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

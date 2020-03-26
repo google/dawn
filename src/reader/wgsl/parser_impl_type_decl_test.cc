@@ -30,6 +30,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, TypeDecl_Invalid) {
   auto p = parser("1234");
@@ -701,6 +702,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                                          MatrixData{"mat4x3<>", 4, 3},
                                          MatrixData{"mat4x4<>", 4, 4}));
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

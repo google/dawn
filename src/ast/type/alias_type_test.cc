@@ -21,6 +21,7 @@
 namespace tint {
 namespace ast {
 namespace type {
+namespace {
 
 using AliasTypeTest = testing::Test;
 
@@ -53,6 +54,7 @@ TEST_F(AliasTypeTest, TypeName) {
   EXPECT_EQ(at.type_name(), "__alias_Particle__i32");
 }
 
+}  // namespace
 }  // namespace type
 }  // namespace ast
 }  // namespace tint

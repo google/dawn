@@ -22,6 +22,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, ContinueStmt) {
   auto p = parser("continue");
@@ -71,6 +72,7 @@ TEST_F(ParserImplTest, ContinueStmt_MissingRHS) {
   EXPECT_EQ(p->error(), "1:12: expected (");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

@@ -54,8 +54,6 @@ class BuiltinTest : public testing::TestWithParam<BuiltinData> {
   TypeManager tm_;
 };
 
-}  // namespace
-
 TEST_P(BuiltinTest, Parses) {
   auto params = GetParam();
   auto p = parser(params.input);
@@ -94,6 +92,7 @@ TEST_F(ParserImplTest, BuiltinDecoration_NoMatch) {
   EXPECT_EQ(t.to_str(), "not");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

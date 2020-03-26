@@ -21,6 +21,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, IfStmt) {
   auto p = parser("if (a == 4) { a = b; c = d; }");
@@ -137,6 +138,7 @@ TEST_F(ParserImplTest, IfStmt_InvalidPremerge) {
   EXPECT_EQ(p->error(), "1:30: missing }");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

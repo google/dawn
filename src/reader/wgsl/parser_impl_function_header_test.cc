@@ -21,6 +21,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, FunctionHeader) {
   auto p = parser("fn main(a : i32, b: f32) -> void");
@@ -99,6 +100,7 @@ TEST_F(ParserImplTest, FunctionHeader_MissingReturnType) {
   EXPECT_EQ(p->error(), "1:13: unable to determine function return type");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

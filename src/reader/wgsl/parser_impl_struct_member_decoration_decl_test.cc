@@ -20,6 +20,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, StructMemberDecorationDecl_EmptyStr) {
   auto p = parser("");
@@ -64,6 +65,7 @@ TEST_F(ParserImplTest, StructMemberDecorationDecl_MissingClose) {
   EXPECT_EQ(p->error(), "1:11: missing ]] for struct member decoration");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

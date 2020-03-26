@@ -19,6 +19,7 @@
 #include "src/ast/type/u32_type.h"
 
 namespace tint {
+namespace {
 
 using TypeManagerTest = testing::Test;
 
@@ -51,4 +52,5 @@ TEST_F(TypeManagerTest, GetDifferentTypeReturnsDifferentPtr) {
   EXPECT_TRUE(t2->IsU32());
 }
 
+}  // namespace
 }  // namespace tint

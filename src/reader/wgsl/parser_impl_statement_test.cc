@@ -21,6 +21,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, Statement) {
   auto p = parser("return;");
@@ -284,6 +285,7 @@ TEST_F(ParserImplTest, Statement_Nop_MissingSemicolon) {
   EXPECT_EQ(p->error(), "1:4: missing ;");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

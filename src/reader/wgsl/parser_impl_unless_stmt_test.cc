@@ -19,6 +19,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, UnlessStmt) {
   auto p = parser("unless (a) { kill; }");
@@ -56,6 +57,7 @@ TEST_F(ParserImplTest, UnlessStmt_InvalidBody) {
   EXPECT_EQ(p->error(), "1:34: missing ;");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

@@ -24,6 +24,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl) {
   auto p = parser("vec2<f32>(1., 2.)");
@@ -121,6 +122,7 @@ TEST_F(ParserImplTest, ConstExpr_ConstLiteral_Invalid) {
   EXPECT_EQ(p->error(), "1:1: unknown type alias 'invalid'");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

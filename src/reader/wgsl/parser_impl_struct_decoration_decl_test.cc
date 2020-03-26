@@ -19,6 +19,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, StructDecorationDecl_Parses) {
   auto p = parser("[[block]]");
@@ -41,6 +42,7 @@ TEST_F(ParserImplTest, StructDecorationDecl_InvalidDecoration) {
   EXPECT_EQ(p->error(), "1:3: unknown struct decoration");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

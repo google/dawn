@@ -23,8 +23,8 @@
 namespace tint {
 namespace reader {
 namespace spirv {
-
 namespace {
+
 using ParserTest = testing::Test;
 
 TEST_F(ParserTest, Uint32VecEmpty) {
@@ -39,7 +39,6 @@ TEST_F(ParserTest, Uint32VecEmpty) {
 // TODO(dneto): uint32 vec, invalid SPIR-V
 
 }  // namespace
-
 }  // namespace spirv
 }  // namespace reader
 }  // namespace tint

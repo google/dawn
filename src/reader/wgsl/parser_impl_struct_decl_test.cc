@@ -20,6 +20,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, StructDecl_Parses) {
   auto p = parser(R"(
@@ -89,6 +90,7 @@ TEST_F(ParserImplTest, StructDecl_MissingStruct) {
   EXPECT_EQ(p->error(), "1:11: missing struct declaration");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

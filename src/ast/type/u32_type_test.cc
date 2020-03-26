@@ -19,6 +19,7 @@
 namespace tint {
 namespace ast {
 namespace type {
+namespace {
 
 using U32TypeTest = testing::Test;
 
@@ -41,6 +42,7 @@ TEST_F(U32TypeTest, TypeName) {
   EXPECT_EQ(u.type_name(), "__u32");
 }
 
+}  // namespace
 }  // namespace type
 }  // namespace ast
 }  // namespace tint

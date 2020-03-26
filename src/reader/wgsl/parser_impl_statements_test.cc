@@ -20,6 +20,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, Statements) {
   auto p = parser("nop; kill; return;");
@@ -38,6 +39,7 @@ TEST_F(ParserImplTest, Statements_Empty) {
   ASSERT_EQ(e.size(), 0);
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

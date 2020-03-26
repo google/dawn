@@ -23,6 +23,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, VariableDecoration_Location) {
   auto p = parser("location 4");
@@ -132,6 +133,7 @@ TEST_F(ParserImplTest, VariableDecoration_Set_MissingInvalid) {
   EXPECT_EQ(p->error(), "1:5: invalid value for set decoration");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

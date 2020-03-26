@@ -21,6 +21,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using ReturnStatementTest = testing::Test;
 
@@ -93,5 +94,6 @@ TEST_F(ReturnStatementTest, ToStr_WithoutValue) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

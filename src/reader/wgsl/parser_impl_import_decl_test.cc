@@ -19,6 +19,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, ImportDecl_Import) {
   auto p = parser(R"(import "GLSL.std.450" as glsl)");
@@ -89,6 +90,7 @@ TEST_F(ParserImplTest, ImportDecl_Invalid_MissingAs) {
   EXPECT_EQ(p->error(), "1:23: missing 'as' for import");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

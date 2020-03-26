@@ -23,6 +23,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using StructMemberTest = testing::Test;
 
@@ -98,5 +99,6 @@ TEST_F(StructMemberTest, ToStrNoDecorations) {
   EXPECT_EQ(out.str(), "  StructMember{a: __i32}\n");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

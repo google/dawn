@@ -19,6 +19,7 @@
 namespace tint {
 namespace ast {
 namespace type {
+namespace {
 
 using BoolTypeTest = testing::Test;
 
@@ -41,6 +42,7 @@ TEST_F(BoolTypeTest, TypeName) {
   EXPECT_EQ(b.type_name(), "__bool");
 }
 
+}  // namespace
 }  // namespace type
 }  // namespace ast
 }  // namespace tint

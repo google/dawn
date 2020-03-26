@@ -19,6 +19,7 @@
 namespace tint {
 namespace writer {
 namespace spirv {
+namespace {
 
 using OperandTest = testing::Test;
 
@@ -60,6 +61,7 @@ TEST_F(OperandTest, Length_String_Empty) {
   EXPECT_EQ(o.length(), 1);
 }
 
+}  // namespace
 }  // namespace spirv
 }  // namespace writer
 }  // namespace tint

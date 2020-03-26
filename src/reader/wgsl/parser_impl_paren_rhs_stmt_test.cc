@@ -19,6 +19,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, ParenRhsStmt) {
   auto p = parser("(a + b)");
@@ -60,6 +61,7 @@ TEST_F(ParserImplTest, ParenRhsStmt_MissingExpression) {
   EXPECT_EQ(p->error(), "1:2: unable to parse expression");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

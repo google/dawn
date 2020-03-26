@@ -24,7 +24,6 @@
 namespace tint {
 namespace reader {
 namespace spirv {
-
 namespace {
 
 using ::testing::HasSubstr;
@@ -49,7 +48,6 @@ TEST_F(SpvParserTest, Impl_InvalidModuleFails) {
 // TODO(dneto): uint32 vec, valid SPIR-V
 
 }  // namespace
-
 }  // namespace spirv
 }  // namespace reader
 }  // namespace tint

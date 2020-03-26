@@ -26,6 +26,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, ParamList_Single) {
   auto i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
@@ -73,6 +74,7 @@ TEST_F(ParserImplTest, ParamList_HangingComma) {
   EXPECT_EQ(p->error(), "1:8: found , but no variable declaration");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

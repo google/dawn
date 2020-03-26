@@ -23,6 +23,7 @@
 namespace tint {
 namespace writer {
 namespace spirv {
+namespace {
 
 using BinaryWriterTest = testing::Test;
 
@@ -126,6 +127,7 @@ TEST_F(BinaryWriterTest, TestInstructionWriter) {
   EXPECT_EQ(res[3], 4);
 }
 
+}  // namespace
 }  // namespace spirv
 }  // namespace writer
 }  // namespace tint

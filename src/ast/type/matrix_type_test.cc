@@ -20,6 +20,7 @@
 namespace tint {
 namespace ast {
 namespace type {
+namespace {
 
 using MatrixTypeTest = testing::Test;
 
@@ -52,6 +53,7 @@ TEST_F(MatrixTypeTest, TypeName) {
   EXPECT_EQ(m.type_name(), "__mat_2_3__i32");
 }
 
+}  // namespace
 }  // namespace type
 }  // namespace ast
 }  // namespace tint

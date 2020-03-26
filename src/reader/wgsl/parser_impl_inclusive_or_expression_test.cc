@@ -23,6 +23,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, InclusiveOrExpression_Parses) {
   auto p = parser("a | true");
@@ -69,6 +70,7 @@ TEST_F(ParserImplTest, InclusiveOrExpression_NoOr_ReturnsLHS) {
   ASSERT_TRUE(e->IsIdentifier());
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

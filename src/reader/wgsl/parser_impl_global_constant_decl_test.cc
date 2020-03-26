@@ -21,6 +21,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, GlobalConstantDecl) {
   auto p = parser("const a : f32 = 1.");
@@ -69,6 +70,7 @@ TEST_F(ParserImplTest, GlobalConstantDecl_MissingExpression) {
   EXPECT_EQ(p->error(), "1:15: unable to parse const literal");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

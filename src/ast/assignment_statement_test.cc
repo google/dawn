@@ -19,6 +19,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using AssignmentStatementTest = testing::Test;
 
@@ -105,5 +106,6 @@ TEST_F(AssignmentStatementTest, ToStr) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

@@ -21,6 +21,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using UnaryOpExpressionTest = testing::Test;
 
@@ -76,5 +77,6 @@ TEST_F(UnaryOpExpressionTest, ToStr) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

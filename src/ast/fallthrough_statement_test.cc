@@ -18,6 +18,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using FallthroughStatementTest = testing::Test;
 
@@ -52,5 +53,6 @@ TEST_F(FallthroughStatementTest, ToStr) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

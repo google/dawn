@@ -21,6 +21,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using UnlessStatementTest = testing::Test;
 
@@ -120,5 +121,6 @@ TEST_F(UnlessStatementTest, ToStr) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

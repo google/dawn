@@ -25,6 +25,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using DecoratedVariableTest = testing::Test;
 
@@ -93,5 +94,6 @@ TEST_F(DecoratedVariableTest, to_str) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

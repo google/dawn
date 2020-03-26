@@ -20,6 +20,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using BreakStatementTest = testing::Test;
 
@@ -109,5 +110,6 @@ TEST_F(BreakStatementTest, ToStr_WithCondition) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

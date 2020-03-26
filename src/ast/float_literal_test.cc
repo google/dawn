@@ -18,6 +18,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using FloatLiteralTest = testing::Test;
 
@@ -41,5 +42,6 @@ TEST_F(FloatLiteralTest, ToStr) {
   EXPECT_EQ(f.to_str(), "42.1");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

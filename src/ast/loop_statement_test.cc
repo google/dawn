@@ -23,6 +23,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using LoopStatementTest = testing::Test;
 
@@ -183,5 +184,6 @@ TEST_F(LoopStatementTest, ToStr_WithContinuing) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

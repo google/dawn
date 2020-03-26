@@ -21,6 +21,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 using LexerTest = testing::Test;
 
@@ -526,6 +527,7 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                                          "u16",
                                          "u64"));
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

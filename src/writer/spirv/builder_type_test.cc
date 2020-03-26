@@ -35,6 +35,7 @@
 namespace tint {
 namespace writer {
 namespace spirv {
+namespace {
 
 using BuilderTest_Type = testing::Test;
 
@@ -353,6 +354,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedVoid) {
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
+}  // namespace
 }  // namespace spirv
 }  // namespace writer
 }  // namespace tint

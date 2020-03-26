@@ -22,6 +22,7 @@
 namespace tint {
 namespace ast {
 namespace type {
+namespace {
 
 using StructTypeTest = testing::Test;
 
@@ -54,6 +55,7 @@ TEST_F(StructTypeTest, TypeName) {
   EXPECT_EQ(s.type_name(), "__struct_my_struct");
 }
 
+}  // namespace
 }  // namespace type
 }  // namespace ast
 }  // namespace tint

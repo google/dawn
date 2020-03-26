@@ -23,6 +23,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using FunctionTest = testing::Test;
 
@@ -225,5 +226,6 @@ TEST_F(FunctionTest, TypeName_WithParams) {
   EXPECT_EQ(f.type_name(), "__func__void__i32__f32");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

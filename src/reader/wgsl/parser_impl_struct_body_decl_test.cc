@@ -21,6 +21,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, StructBodyDecl_Parses) {
   auto i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
@@ -71,6 +72,7 @@ TEST_F(ParserImplTest, StructBodyDecl_InvalidToken) {
   EXPECT_EQ(p->error(), "4:3: invalid identifier declaration");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

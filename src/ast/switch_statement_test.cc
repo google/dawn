@@ -23,6 +23,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using SwitchStatementTest = testing::Test;
 
@@ -150,5 +151,6 @@ TEST_F(SwitchStatementTest, ToStr) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

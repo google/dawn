@@ -20,6 +20,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using LocationDecorationTest = testing::Test;
 
@@ -44,5 +45,6 @@ TEST_F(LocationDecorationTest, ToStr) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

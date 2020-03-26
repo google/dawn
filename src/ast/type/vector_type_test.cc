@@ -20,6 +20,7 @@
 namespace tint {
 namespace ast {
 namespace type {
+namespace {
 
 using VectorTypeTest = testing::Test;
 
@@ -51,6 +52,7 @@ TEST_F(VectorTypeTest, TypeName) {
   EXPECT_EQ(v.type_name(), "__vec_3__i32");
 }
 
+}  // namespace
 }  // namespace type
 }  // namespace ast
 }  // namespace tint

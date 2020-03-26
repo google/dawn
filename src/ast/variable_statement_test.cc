@@ -20,6 +20,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using VariableStatementTest = testing::Test;
 
@@ -83,5 +84,6 @@ TEST_F(VariableStatementTest, ToStr) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

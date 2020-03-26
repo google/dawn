@@ -26,6 +26,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using ModuleTest = testing::Test;
 
@@ -184,5 +185,6 @@ TEST_F(ModuleTest, IsValid_Invalid_Function) {
   EXPECT_FALSE(m.IsValid());
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

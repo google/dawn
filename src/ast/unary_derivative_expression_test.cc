@@ -21,6 +21,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using UnaryDerivativeExpressionTest = testing::Test;
 
@@ -84,5 +85,6 @@ TEST_F(UnaryDerivativeExpressionTest, ToStr) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

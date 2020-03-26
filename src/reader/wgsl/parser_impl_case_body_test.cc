@@ -19,6 +19,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, CaseBody_Empty) {
   auto p = parser("");
@@ -63,6 +64,7 @@ TEST_F(ParserImplTest, CaseBody_Fallthrough_MissingSemicolon) {
   EXPECT_EQ(p->error(), "1:12: missing ;");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

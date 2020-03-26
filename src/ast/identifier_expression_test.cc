@@ -18,6 +18,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using IdentifierExpressionTest = testing::Test;
 
@@ -80,5 +81,6 @@ TEST_F(IdentifierExpressionTest, ToStr_WithNamespace) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

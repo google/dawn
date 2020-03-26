@@ -19,6 +19,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, VariableIdentDecl_Parses) {
   auto p = parser("my_var : f32");
@@ -78,6 +79,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_InvalidType) {
   ASSERT_EQ(p->error(), "1:10: unknown type alias 'invalid'");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

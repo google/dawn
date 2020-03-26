@@ -20,6 +20,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 using ParserTest = testing::Test;
 
@@ -67,6 +68,7 @@ fn main() ->  {  # missing return type
   EXPECT_EQ(p.error(), "4:15: missing return type for function");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

@@ -21,6 +21,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using RelationalExpressionTest = testing::Test;
 
@@ -118,5 +119,6 @@ TEST_F(RelationalExpressionTest, ToStr) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

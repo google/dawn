@@ -20,6 +20,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, ElseIfStmt) {
   auto p = parser("elseif (a == 4) { a = b; c = d; }");
@@ -64,6 +65,7 @@ TEST_F(ParserImplTest, ElseIfStmt_MissingBody) {
   EXPECT_EQ(p->error(), "1:14: missing {");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

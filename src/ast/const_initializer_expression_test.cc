@@ -19,6 +19,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using ConstInitializerExpressionTest = testing::Test;
 
@@ -57,5 +58,6 @@ TEST_F(ConstInitializerExpressionTest, ToStr) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

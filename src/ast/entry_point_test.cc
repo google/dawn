@@ -20,6 +20,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using EntryPointTest = testing::Test;
 
@@ -95,5 +96,6 @@ TEST_F(EntryPointTest, ToStr_NoName) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

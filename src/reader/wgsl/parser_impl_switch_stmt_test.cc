@@ -21,6 +21,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, SwitchStmt_WithoutDefault) {
   auto p = parser(R"(switch(a) {
@@ -104,6 +105,7 @@ TEST_F(ParserImplTest, SwitchStmt_InvalidBody) {
   EXPECT_EQ(p->error(), "2:7: unable to parse case conditional");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

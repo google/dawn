@@ -33,6 +33,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, PrimaryExpression_Ident) {
   auto p = parser("a");
@@ -323,6 +324,7 @@ TEST_F(ParserImplTest, PrimaryExpression_As_InvalidExpression) {
   EXPECT_EQ(p->error(), "1:9: unable to parse expression");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

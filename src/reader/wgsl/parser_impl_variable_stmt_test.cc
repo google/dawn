@@ -21,6 +21,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl) {
   auto p = parser("var a : i32;");
@@ -103,6 +104,7 @@ TEST_F(ParserImplTest, VariableStmt_Const_InvalidInitializer) {
   EXPECT_EQ(p->error(), "1:17: missing initializer for const declaration");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

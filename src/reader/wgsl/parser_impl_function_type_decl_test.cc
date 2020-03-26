@@ -25,6 +25,7 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
 
 TEST_F(ParserImplTest, FunctionTypeDecl_Void) {
   auto v = tm()->Get(std::make_unique<ast::type::VoidType>());
@@ -53,6 +54,7 @@ TEST_F(ParserImplTest, FunctionTypeDecl_InvalidType) {
   EXPECT_EQ(p->error(), "1:6: unknown type alias 'invalid'");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

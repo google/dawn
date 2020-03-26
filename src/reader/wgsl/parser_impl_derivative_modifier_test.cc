@@ -56,8 +56,6 @@ class DerivativeModifierTest
   TypeManager tm_;
 };
 
-}  // namespace
-
 TEST_P(DerivativeModifierTest, Parses) {
   auto params = GetParam();
   auto p = parser(params.input);
@@ -86,6 +84,7 @@ TEST_F(ParserImplTest, DerivativeModifier_NoMatch) {
   EXPECT_EQ(t.to_str(), "not");
 }
 
+}  // namespace
 }  // namespace wgsl
 }  // namespace reader
 }  // namespace tint

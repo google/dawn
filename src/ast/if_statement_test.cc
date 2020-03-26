@@ -21,6 +21,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using IfStatementTest = testing::Test;
 
@@ -361,5 +362,6 @@ TEST_F(IfStatementTest, ToStr_WithPremerge) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

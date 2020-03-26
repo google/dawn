@@ -20,6 +20,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using ContinueStatementTest = testing::Test;
 
@@ -109,5 +110,6 @@ TEST_F(ContinueStatementTest, ToStr_WithCondition) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

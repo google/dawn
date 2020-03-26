@@ -20,6 +20,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using CastExpressionTest = testing::Test;
 
@@ -92,5 +93,6 @@ TEST_F(CastExpressionTest, ToStr) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

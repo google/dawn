@@ -22,6 +22,7 @@
 
 namespace tint {
 namespace ast {
+namespace {
 
 using ElseStatementTest = testing::Test;
 
@@ -135,5 +136,6 @@ TEST_F(ElseStatementTest, ToStr_NoCondition) {
 )");
 }
 
+}  // namespace
 }  // namespace ast
 }  // namespace tint

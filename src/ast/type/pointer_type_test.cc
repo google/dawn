@@ -20,6 +20,7 @@
 namespace tint {
 namespace ast {
 namespace type {
+namespace {
 
 using PointerTypeTest = testing::Test;
 
@@ -51,6 +52,7 @@ TEST_F(PointerTypeTest, TypeName) {
   EXPECT_EQ(p.type_name(), "__ptr_workgroup__i32");
 }
 
+}  // namespace
 }  // namespace type
 }  // namespace ast
 }  // namespace tint

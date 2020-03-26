@@ -25,6 +25,7 @@
 namespace tint {
 namespace writer {
 namespace spirv {
+namespace {
 
 using BuilderTest = testing::Test;
 
@@ -101,6 +102,7 @@ INSTANTIATE_TEST_SUITE_P(
 // TODO(http://crbug.com/tint/28)
 TEST_F(BuilderTest, DISABLED_EntryPoint_WithInterfaceIds) {}
 
+}  // namespace
 }  // namespace spirv
 }  // namespace writer
 }  // namespace tint
