@@ -186,6 +186,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
   EXPECT_EQ(id, 1);
 
   EXPECT_EQ(b.types().size(), 1);
+  EXPECT_EQ(DumpInstructions(b.debug()), "");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeStruct
 )");
 }
@@ -201,6 +202,7 @@ TEST_F(BuilderTest_Type, GenerateStruct) {
   auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
                                          std::move(members));
   ast::type::StructType s_type(std::move(s));
+  s_type.set_name("my_struct");
 
   Builder b;
   auto id = b.GenerateTypeIfNeeded(&s_type);
@@ -210,7 +212,8 @@ TEST_F(BuilderTest_Type, GenerateStruct) {
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeStruct %2
 )");
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpMemberName %1 0 "a"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "my_struct"
+OpMemberName %1 0 "a"
 )");
 }
 
@@ -225,6 +228,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_Decorated) {
   auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kBlock,
                                          std::move(members));
   ast::type::StructType s_type(std::move(s));
+  s_type.set_name("my_struct");
 
   Builder b;
   auto id = b.GenerateTypeIfNeeded(&s_type);
@@ -234,7 +238,8 @@ TEST_F(BuilderTest_Type, GenerateStruct_Decorated) {
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeStruct %2
 )");
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpMemberName %1 0 "a"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "my_struct"
+OpMemberName %1 0 "a"
 )");
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 Block
 )");

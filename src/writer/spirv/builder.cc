@@ -274,6 +274,11 @@ bool Builder::GenerateStructType(ast::type::StructType* struct_type,
   auto struct_id = result.to_i();
   auto impl = struct_type->impl();
 
+  if (!struct_type->name().empty()) {
+    push_debug(spv::Op::OpName,
+               {Operand::Int(struct_id), Operand::String(struct_type->name())});
+  }
+
   std::vector<Operand> ops;
   ops.push_back(result);
 
