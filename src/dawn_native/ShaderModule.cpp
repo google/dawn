@@ -412,8 +412,7 @@ namespace dawn_native {
                             return DAWN_VALIDATION_ERROR(
                                 "The storage texture format is not supported");
                         }
-                        // TODO(jiawei.shao@intel.com): extract info->multisampled when it is
-                        // supported for storage images in SPVC.
+                        info->multisampled = binding.multisampled;
                         info->storageTextureFormat = storageTextureFormat;
                         info->textureDimension =
                             ToWGPUTextureViewDimension(binding.texture_dimension);
@@ -615,6 +614,7 @@ namespace dawn_native {
                             return DAWN_VALIDATION_ERROR(
                                 "The storage texture format is not supported");
                         }
+                        info->multisampled = imageType.ms;
                         info->storageTextureFormat = storageTextureFormat;
                         info->textureDimension =
                             SpirvDimToTextureViewDimension(imageType.dim, imageType.arrayed);
