@@ -16,11 +16,11 @@
 #define DAWNNATIVE_SHADERMODULE_H_
 
 #include "common/Constants.h"
+#include "dawn_native/BindingInfo.h"
 #include "dawn_native/CachedObject.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Format.h"
 #include "dawn_native/Forward.h"
-#include "dawn_native/IntegerTypes.h"
 #include "dawn_native/PerStage.h"
 
 #include "dawn_native/dawn_platform.h"
@@ -50,18 +50,19 @@ namespace dawn_native {
 
         MaybeError ExtractSpirvInfo(const spirv_cross::Compiler& compiler);
 
-        struct BindingInfo {
+        struct ShaderBindingInfo : BindingInfo {
             // The SPIRV ID of the resource.
             uint32_t id;
             uint32_t base_type_id;
-            wgpu::BindingType type;
-            // Match the defaults in BindGroupLayoutDescriptor
-            wgpu::TextureViewDimension textureDimension = wgpu::TextureViewDimension::Undefined;
-            Format::Type textureComponentType = Format::Type::Float;
-            bool multisampled = false;
-            wgpu::TextureFormat storageTextureFormat = wgpu::TextureFormat::Undefined;
+
+          private:
+            // Disallow access to unused members.
+            using BindingInfo::hasDynamicOffset;
+            using BindingInfo::visibility;
         };
-        using ModuleBindingInfo = std::array<std::map<BindingNumber, BindingInfo>, kMaxBindGroups>;
+
+        using ModuleBindingInfo =
+            std::array<std::map<BindingNumber, ShaderBindingInfo>, kMaxBindGroups>;
 
         const ModuleBindingInfo& GetBindingInfo() const;
         const std::bitset<kMaxVertexAttributes>& GetUsedVertexAttributes() const;

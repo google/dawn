@@ -138,7 +138,7 @@ namespace dawn_native { namespace metal {
                 BindingNumber bindingNumber = it.first;
                 BindingIndex bindingIndex = it.second;
 
-                const BindGroupLayoutBase::BindingInfo& bindingInfo =
+                const BindingInfo& bindingInfo =
                     layout->GetBindGroupLayout(group)->GetBindingInfo(bindingIndex);
 
                 for (auto stage : IterateStages(bindingInfo.visibility)) {

@@ -132,7 +132,7 @@ namespace dawn_native {
                 }
 
                 for (BindingIndex i = 0; i < dynamicOffsetCount; ++i) {
-                    const BindGroupLayoutBase::BindingInfo& bindingInfo = layout->GetBindingInfo(i);
+                    const BindingInfo& bindingInfo = layout->GetBindingInfo(i);
 
                     // BGL creation sorts bindings such that the dynamic buffer bindings are first.
                     // ASSERT that this true.

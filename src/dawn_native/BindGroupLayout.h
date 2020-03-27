@@ -18,10 +18,10 @@
 #include "common/Constants.h"
 #include "common/Math.h"
 #include "common/SlabAllocator.h"
+#include "dawn_native/BindingInfo.h"
 #include "dawn_native/CachedObject.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
-#include "dawn_native/IntegerTypes.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -51,15 +51,6 @@ namespace dawn_native {
         ~BindGroupLayoutBase() override;
 
         static BindGroupLayoutBase* MakeError(DeviceBase* device);
-        struct BindingInfo {
-            wgpu::ShaderStage visibility;
-            wgpu::BindingType type;
-            wgpu::TextureComponentType textureComponentType;
-            wgpu::TextureViewDimension textureDimension;
-            wgpu::TextureFormat storageTextureFormat;
-            bool hasDynamicOffset;
-            bool multisampled;
-        };
 
         // A map from the BindingNumber to its packed BindingIndex.
         using BindingMap = std::map<BindingNumber, BindingIndex>;

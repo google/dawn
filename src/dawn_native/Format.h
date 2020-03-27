@@ -65,7 +65,7 @@ namespace dawn_native {
         bool HasDepth() const;
         bool HasStencil() const;
         bool HasDepthOrStencil() const;
-        bool HasComponentType(wgpu::TextureComponentType componentType) const;
+        bool HasComponentType(Type componentType) const;
 
         // The index of the format in the list of all known formats: a unique number for each format
         // in [0, kKnownFormatCount)

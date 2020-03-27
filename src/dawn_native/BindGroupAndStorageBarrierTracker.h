@@ -41,8 +41,7 @@ namespace dawn_native {
 
                 for (BindingIndex bindingIndex = 0; bindingIndex < layout->GetBindingCount();
                      ++bindingIndex) {
-                    const BindGroupLayoutBase::BindingInfo& bindingInfo =
-                        layout->GetBindingInfo(bindingIndex);
+                    const BindingInfo& bindingInfo = layout->GetBindingInfo(bindingIndex);
 
                     if ((bindingInfo.visibility & wgpu::ShaderStage::Compute) == 0) {
                         continue;

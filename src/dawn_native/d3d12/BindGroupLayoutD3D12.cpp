@@ -47,7 +47,7 @@ namespace dawn_native { namespace d3d12 {
           mBindGroupAllocator(MakeFrontendBindGroupAllocator<BindGroup>(4096)) {
         for (BindingIndex bindingIndex = GetDynamicBufferCount(); bindingIndex < GetBindingCount();
              ++bindingIndex) {
-            const BindGroupLayoutBase::BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
+            const BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
 
             // For dynamic resources, Dawn uses root descriptor in D3D12 backend.
             // So there is no need to allocate the descriptor from descriptor heap.
@@ -101,7 +101,7 @@ namespace dawn_native { namespace d3d12 {
         descriptorOffsets[Sampler] = 0;
 
         for (BindingIndex bindingIndex = 0; bindingIndex < GetBindingCount(); ++bindingIndex) {
-            const BindGroupLayoutBase::BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
+            const BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
 
             if (bindingInfo.hasDynamicOffset) {
                 // Dawn is using values in mBindingOffsets to decide register number in HLSL.

@@ -64,7 +64,7 @@ namespace dawn_native {
         MaybeError ValidateTextureBinding(const DeviceBase* device,
                                           const BindGroupBinding& binding,
                                           wgpu::TextureUsage requiredUsage,
-                                          const BindGroupLayoutBase::BindingInfo& bindingInfo) {
+                                          const BindingInfo& bindingInfo) {
             if (binding.textureView == nullptr || binding.sampler != nullptr ||
                 binding.buffer != nullptr) {
                 return DAWN_VALIDATION_ERROR("expected texture binding");
@@ -146,8 +146,7 @@ namespace dawn_native {
             }
             bindingsSet.set(bindingIndex);
 
-            const BindGroupLayoutBase::BindingInfo& bindingInfo =
-                descriptor->layout->GetBindingInfo(bindingIndex);
+            const BindingInfo& bindingInfo = descriptor->layout->GetBindingInfo(bindingIndex);
 
             // Perform binding-type specific validation.
             switch (bindingInfo.type) {

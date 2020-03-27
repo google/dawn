@@ -144,7 +144,7 @@ namespace dawn_native {
             for (uint32_t group = 0; group < info.size(); ++group) {
                 for (const auto& it : info[group]) {
                     BindingNumber bindingNumber = it.first;
-                    const ShaderModuleBase::BindingInfo& bindingInfo = it.second;
+                    const ShaderModuleBase::ShaderBindingInfo& bindingInfo = it.second;
 
                     if (bindingInfo.multisampled) {
                         return DAWN_VALIDATION_ERROR("Multisampled textures not supported (yet)");

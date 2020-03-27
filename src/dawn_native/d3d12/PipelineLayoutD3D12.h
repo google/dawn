@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_D3D12_PIPELINELAYOUTD3D12_H_
 #define DAWNNATIVE_D3D12_PIPELINELAYOUTD3D12_H_
 
-#include "dawn_native/IntegerTypes.h"
+#include "dawn_native/BindingInfo.h"
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 

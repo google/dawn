@@ -500,7 +500,7 @@ namespace dawn_native { namespace metal {
                 // call here.
                 for (BindingIndex bindingIndex = 0;
                      bindingIndex < group->GetLayout()->GetBindingCount(); ++bindingIndex) {
-                    const BindGroupLayoutBase::BindingInfo& bindingInfo =
+                    const BindingInfo& bindingInfo =
                         group->GetLayout()->GetBindingInfo(bindingIndex);
 
                     bool hasVertStage =

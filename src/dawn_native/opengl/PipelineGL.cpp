@@ -179,10 +179,10 @@ namespace dawn_native { namespace opengl {
 
                 const BindGroupLayoutBase* bgl =
                     layout->GetBindGroupLayout(combined.textureLocation.group);
-                wgpu::TextureComponentType componentType =
+                Format::Type componentType =
                     bgl->GetBindingInfo(bgl->GetBindingIndex(combined.textureLocation.binding))
                         .textureComponentType;
-                bool shouldUseFiltering = componentType == wgpu::TextureComponentType::Float;
+                bool shouldUseFiltering = componentType == Format::Type::Float;
 
                 GLuint samplerIndex =
                     indices[combined.samplerLocation.group][combined.samplerLocation.binding];

@@ -73,13 +73,13 @@ namespace dawn_native {
         return aspect != Color;
     }
 
-    bool Format::HasComponentType(wgpu::TextureComponentType componentType) const {
+    bool Format::HasComponentType(Type componentType) const {
         // Depth stencil textures need to be special cased but we don't support sampling them yet.
         if (aspect != Color) {
             return false;
         }
 
-        return TextureComponentTypeToFormatType(componentType) == type;
+        return componentType == type;
     }
 
     size_t Format::GetIndex() const {

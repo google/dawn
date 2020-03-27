@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_INTEGERTYPES_H_
-#define DAWNNATIVE_INTEGERTYPES_H_
+#ifndef DAWNNATIVE_BINDINGINFO_H_
+#define DAWNNATIVE_BINDINGINFO_H_
+
+#include "dawn_native/Format.h"
+#include "dawn_native/dawn_platform.h"
 
 #include <cstdint>
 
@@ -28,6 +31,16 @@ namespace dawn_native {
     // Binding numbers get mapped to a packed range of indices
     using BindingIndex = uint32_t;
 
+    struct BindingInfo {
+        wgpu::ShaderStage visibility;
+        wgpu::BindingType type;
+        Format::Type textureComponentType = Format::Type::Float;
+        wgpu::TextureViewDimension textureDimension = wgpu::TextureViewDimension::Undefined;
+        wgpu::TextureFormat storageTextureFormat = wgpu::TextureFormat::Undefined;
+        bool hasDynamicOffset = false;
+        bool multisampled = false;
+    };
+
 }  // namespace dawn_native
 
-#endif  // DAWNNATIVE_INTEGERTYPES_H_
+#endif  // DAWNNATIVE_BINDINGINFO_H_

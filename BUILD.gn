@@ -175,6 +175,7 @@ source_set("libdawn_native_sources") {
     "src/dawn_native/BindGroupLayout.cpp",
     "src/dawn_native/BindGroupLayout.h",
     "src/dawn_native/BindGroupTracker.h",
+    "src/dawn_native/BindingInfo.h",
     "src/dawn_native/BuddyAllocator.cpp",
     "src/dawn_native/BuddyAllocator.h",
     "src/dawn_native/BuddyMemoryAllocator.cpp",

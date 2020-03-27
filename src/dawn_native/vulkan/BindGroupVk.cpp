@@ -46,8 +46,7 @@ namespace dawn_native { namespace vulkan {
         for (const auto& it : GetLayout()->GetBindingMap()) {
             BindingNumber bindingNumber = it.first;
             BindingIndex bindingIndex = it.second;
-            const BindGroupLayoutBase::BindingInfo& bindingInfo =
-                GetLayout()->GetBindingInfo(bindingIndex);
+            const BindingInfo& bindingInfo = GetLayout()->GetBindingInfo(bindingIndex);
 
             auto& write = writes[numWrites];
             write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

@@ -31,7 +31,7 @@ namespace dawn_native { namespace metal {
             for (uint32_t group : IterateBitSet(GetBindGroupLayoutsMask())) {
                 for (BindingIndex bindingIndex = 0;
                      bindingIndex < GetBindGroupLayout(group)->GetBindingCount(); ++bindingIndex) {
-                    const BindGroupLayoutBase::BindingInfo& bindingInfo =
+                    const BindingInfo& bindingInfo =
                         GetBindGroupLayout(group)->GetBindingInfo(bindingIndex);
                     if (!(bindingInfo.visibility & StageBit(stage))) {
                         continue;

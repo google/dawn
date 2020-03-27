@@ -133,7 +133,7 @@ namespace dawn_native { namespace d3d12 {
             for (BindingIndex dynamicBindingIndex = 0;
                  dynamicBindingIndex < bindGroupLayout->GetDynamicBufferCount();
                  ++dynamicBindingIndex) {
-                const BindGroupLayoutBase::BindingInfo& bindingInfo =
+                const BindingInfo& bindingInfo =
                     bindGroupLayout->GetBindingInfo(dynamicBindingIndex);
 
                 D3D12_ROOT_PARAMETER* rootParameter = &rootParameters[parameterIndex];

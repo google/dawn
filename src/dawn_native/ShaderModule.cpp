@@ -379,12 +379,12 @@ namespace dawn_native {
                 }
 
                 const auto& it = mBindingInfo[binding.set].emplace(BindingNumber(binding.binding),
-                                                                   BindingInfo{});
+                                                                   ShaderBindingInfo{});
                 if (!it.second) {
                     return DAWN_VALIDATION_ERROR("Shader has duplicate bindings");
                 }
 
-                BindingInfo* info = &it.first->second;
+                ShaderBindingInfo* info = &it.first->second;
                 info->id = binding.id;
                 info->base_type_id = binding.base_type_id;
                 info->type = ToWGPUBindingType(binding.binding_type);
@@ -558,14 +558,15 @@ namespace dawn_native {
                     return DAWN_VALIDATION_ERROR("Bind group index over limits in the SPIRV");
                 }
 
-                const auto& it = mBindingInfo[set].emplace(bindingNumber, BindingInfo{});
+                const auto& it = mBindingInfo[set].emplace(bindingNumber, ShaderBindingInfo{});
                 if (!it.second) {
                     return DAWN_VALIDATION_ERROR("Shader has duplicate bindings");
                 }
 
-                BindingInfo* info = &it.first->second;
+                ShaderBindingInfo* info = &it.first->second;
                 info->id = resource.id;
                 info->base_type_id = resource.base_type_id;
+
                 switch (bindingType) {
                     case wgpu::BindingType::SampledTexture: {
                         spirv_cross::SPIRType::ImageType imageType =
@@ -747,7 +748,7 @@ namespace dawn_native {
         // corresponding binding in the BindGroupLayout, if it exists.
         for (const auto& it : mBindingInfo[group]) {
             BindingNumber bindingNumber = it.first;
-            const auto& moduleInfo = it.second;
+            const ShaderBindingInfo& moduleInfo = it.second;
 
             const auto& bindingIt = bindingMap.find(bindingNumber);
             if (bindingIt == bindingMap.end()) {
@@ -755,17 +756,15 @@ namespace dawn_native {
             }
             BindingIndex bindingIndex(bindingIt->second);
 
-            const BindGroupLayoutBase::BindingInfo& bindingInfo =
-                layout->GetBindingInfo(bindingIndex);
-            const auto& layoutBindingType = bindingInfo.type;
+            const BindingInfo& bindingInfo = layout->GetBindingInfo(bindingIndex);
 
-            if (layoutBindingType != moduleInfo.type) {
+            if (bindingInfo.type != moduleInfo.type) {
                 // Binding mismatch between shader and bind group is invalid. For example, a
                 // writable binding in the shader with a readonly storage buffer in the bind group
                 // layout is invalid. However, a readonly binding in the shader with a writable
                 // storage buffer in the bind group layout is valid.
                 bool validBindingConversion =
-                    layoutBindingType == wgpu::BindingType::StorageBuffer &&
+                    bindingInfo.type == wgpu::BindingType::StorageBuffer &&
                     moduleInfo.type == wgpu::BindingType::ReadonlyStorageBuffer;
                 if (!validBindingConversion) {
                     return false;
@@ -776,11 +775,9 @@ namespace dawn_native {
                 return false;
             }
 
-            switch (layoutBindingType) {
+            switch (bindingInfo.type) {
                 case wgpu::BindingType::SampledTexture: {
-                    Format::Type layoutTextureComponentType =
-                        Format::TextureComponentTypeToFormatType(bindingInfo.textureComponentType);
-                    if (layoutTextureComponentType != moduleInfo.textureComponentType) {
+                    if (bindingInfo.textureComponentType != moduleInfo.textureComponentType) {
                         return false;
                     }
 

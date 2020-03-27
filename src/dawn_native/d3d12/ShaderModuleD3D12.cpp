@@ -97,7 +97,7 @@ namespace dawn_native { namespace d3d12 {
             const auto& bindingOffsets = bgl->GetBindingOffsets();
             const auto& groupBindingInfo = moduleBindingInfo[group];
             for (const auto& it : groupBindingInfo) {
-                const BindingInfo& bindingInfo = it.second;
+                const ShaderBindingInfo& bindingInfo = it.second;
                 BindingNumber bindingNumber = it.first;
                 BindingIndex bindingIndex = bgl->GetBindingIndex(bindingNumber);
 
