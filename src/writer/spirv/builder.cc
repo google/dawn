@@ -24,6 +24,7 @@
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/pointer_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
@@ -282,6 +283,10 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
     if (!GenerateMatrixType(type->AsMatrix(), result)) {
       return 0;
     }
+  } else if (type->IsPointer()) {
+    if (!GeneratePointerType(type->AsPointer(), result)) {
+      return 0;
+    }
   } else if (type->IsStruct()) {
     if (!GenerateStructType(type->AsStruct(), result)) {
       return 0;
@@ -336,6 +341,24 @@ bool Builder::GenerateMatrixType(ast::type::MatrixType* mat,
 
   push_type(spv::Op::OpTypeMatrix,
             {result, Operand::Int(col_type_id), Operand::Int(mat->columns())});
+  return true;
+}
+
+bool Builder::GeneratePointerType(ast::type::PointerType* ptr,
+                                  const Operand& result) {
+  auto pointee_id = GenerateTypeIfNeeded(ptr->type());
+  if (pointee_id == 0) {
+    return false;
+  }
+
+  auto stg_class = ConvertStorageClass(ptr->storage_class());
+  if (stg_class == SpvStorageClassMax) {
+    return false;
+  }
+
+  push_type(spv::Op::OpTypePointer,
+            {result, Operand::Int(stg_class), Operand::Int(pointee_id)});
+
   return true;
 }
 
@@ -407,6 +430,34 @@ bool Builder::GenerateVectorType(ast::type::VectorType* vec,
   push_type(spv::Op::OpTypeVector,
             {result, Operand::Int(type_id), Operand::Int(vec->size())});
   return true;
+}
+
+SpvStorageClass Builder::ConvertStorageClass(ast::StorageClass klass) const {
+  switch (klass) {
+    case ast::StorageClass::kInput:
+      return SpvStorageClassInput;
+    case ast::StorageClass::kOutput:
+      return SpvStorageClassOutput;
+    case ast::StorageClass::kUniform:
+      return SpvStorageClassUniform;
+    case ast::StorageClass::kWorkgroup:
+      return SpvStorageClassWorkgroup;
+    case ast::StorageClass::kUniformConstant:
+      return SpvStorageClassUniformConstant;
+    case ast::StorageClass::kStorageBuffer:
+      return SpvStorageClassStorageBuffer;
+    case ast::StorageClass::kImage:
+      return SpvStorageClassImage;
+    case ast::StorageClass::kPushConstant:
+      return SpvStorageClassPushConstant;
+    case ast::StorageClass::kPrivate:
+      return SpvStorageClassPrivate;
+    case ast::StorageClass::kFunction:
+      return SpvStorageClassFunction;
+    case ast::StorageClass::kNone:
+      break;
+  }
+  return SpvStorageClassMax;
 }
 
 }  // namespace spirv

@@ -236,6 +236,29 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedMatrix) {
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
+TEST_F(BuilderTest_Type, GeneratePtr) {
+  ast::type::I32Type i32;
+  ast::type::PointerType ptr(&i32, ast::StorageClass::kOutput);
+
+  Builder b;
+  auto id = b.GenerateTypeIfNeeded(&ptr);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1, id);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+%1 = OpTypePointer Output %2
+)");
+}
+
+TEST_F(BuilderTest_Type, ReturnsGeneratedPtr) {
+  ast::type::I32Type i32;
+  ast::type::PointerType ptr(&i32, ast::StorageClass::kOutput);
+
+  Builder b;
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&ptr), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&ptr), 1);
+}
+
 TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
   auto s = std::make_unique<ast::Struct>();
   ast::type::StructType s_type(std::move(s));
@@ -418,6 +441,39 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedVoid) {
   EXPECT_EQ(b.GenerateTypeIfNeeded(&void_type), 1);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
+
+struct PtrData {
+  ast::StorageClass ast_class;
+  SpvStorageClass result;
+};
+inline std::ostream& operator<<(std::ostream& out, PtrData data) {
+  out << data.ast_class;
+  return out;
+}
+using PtrDataTest = testing::TestWithParam<PtrData>;
+TEST_P(PtrDataTest, ConvertStorageClass) {
+  auto params = GetParam();
+
+  Builder b;
+  EXPECT_EQ(b.ConvertStorageClass(params.ast_class), params.result);
+}
+INSTANTIATE_TEST_SUITE_P(
+    BuilderTest_Type,
+    PtrDataTest,
+    testing::Values(
+        PtrData{ast::StorageClass::kNone, SpvStorageClassMax},
+        PtrData{ast::StorageClass::kInput, SpvStorageClassInput},
+        PtrData{ast::StorageClass::kOutput, SpvStorageClassOutput},
+        PtrData{ast::StorageClass::kUniform, SpvStorageClassUniform},
+        PtrData{ast::StorageClass::kWorkgroup, SpvStorageClassWorkgroup},
+        PtrData{ast::StorageClass::kUniformConstant,
+                SpvStorageClassUniformConstant},
+        PtrData{ast::StorageClass::kStorageBuffer,
+                SpvStorageClassStorageBuffer},
+        PtrData{ast::StorageClass::kImage, SpvStorageClassImage},
+        PtrData{ast::StorageClass::kPushConstant, SpvStorageClassPushConstant},
+        PtrData{ast::StorageClass::kPrivate, SpvStorageClassPrivate},
+        PtrData{ast::StorageClass::kFunction, SpvStorageClassFunction}));
 
 }  // namespace
 }  // namespace spirv

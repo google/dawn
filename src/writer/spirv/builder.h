@@ -20,6 +20,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "spirv/unified1/spirv.h"
 #include "src/ast/literal.h"
 #include "src/ast/module.h"
 #include "src/ast/struct_member.h"
@@ -122,6 +123,11 @@ class Builder {
   /// @returns the annotations
   const std::vector<Instruction>& annots() const { return annotations_; }
 
+  /// Converts a storage class to a SPIR-V storage class.
+  /// @param klass the storage class to convert
+  /// @returns the SPIR-V storage class or SpvStorageClassMax on error.
+  SpvStorageClass ConvertStorageClass(ast::StorageClass klass) const;
+
   /// Generates an entry point instruction
   /// @param ep the entry point
   /// @returns true if the instruction was generated, false otherwise
@@ -155,6 +161,11 @@ class Builder {
   /// @param result the result operand
   /// @returns true if the matrix was successfully generated
   bool GenerateMatrixType(ast::type::MatrixType* mat, const Operand& result);
+  /// Generates a pointer type declaration
+  /// @param ptr the pointer type to generate
+  /// @param result the result operand
+  /// @returns true if the pointer was successfully generated
+  bool GeneratePointerType(ast::type::PointerType* ptr, const Operand& result);
   /// Generates a vector type declaration
   /// @param struct_type the vector to generate
   /// @param result the result operand
