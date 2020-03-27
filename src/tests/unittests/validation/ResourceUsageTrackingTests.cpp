@@ -126,7 +126,7 @@ namespace {
 
     // Test that using the same buffer as copy src/dst and writable/readable usage is allowed.
     TEST_F(ResourceUsageTrackingTest, BufferCopyAndBufferUsageInPass) {
-        // Create buffers that will be used as an copy src/dst buffer and as a storage buffer
+        // Create buffers that will be used as both a copy src/dst buffer and a storage buffer
         wgpu::Buffer bufferSrc =
             CreateBuffer(4, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
         wgpu::Buffer bufferDst =
@@ -162,11 +162,125 @@ namespace {
         }
     }
 
+    // Test that all index buffers and vertex buffers take effect even though some buffers are
+    // not used because they are overwritten by another consecutive call.
+    TEST_F(ResourceUsageTrackingTest, BufferWithMultipleSetIndexOrVertexBuffer) {
+        // Create buffers that will be used as both vertex and index buffer.
+        wgpu::Buffer buffer0 = CreateBuffer(
+            4, wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Index | wgpu::BufferUsage::Storage);
+        wgpu::Buffer buffer1 =
+            CreateBuffer(4, wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Index);
+
+        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::StorageBuffer}});
+        wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, buffer0, 0, 4}});
+
+        DummyRenderPass dummyRenderPass(device);
+
+        // Set index buffer twice. The second one overwrites the first one. No buffer is used as
+        // both read and write in the same pass. But the overwritten index buffer (buffer0) still
+        // take effect during resource tracking.
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            pass.SetIndexBuffer(buffer0);
+            pass.SetIndexBuffer(buffer1);
+            pass.SetBindGroup(0, bg);
+            pass.EndPass();
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+
+        // Set index buffer twice. The second one overwrites the first one. buffer0 is used as both
+        // read and write in the same pass
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            pass.SetIndexBuffer(buffer1);
+            pass.SetIndexBuffer(buffer0);
+            pass.SetBindGroup(0, bg);
+            pass.EndPass();
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+
+        // Set vertex buffer on the same index twice. The second one overwrites the first one. No
+        // buffer is used as both read and write in the same pass. But the overwritten vertex buffer
+        // (buffer0) still take effect during resource tracking.
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            pass.SetVertexBuffer(0, buffer0);
+            pass.SetVertexBuffer(0, buffer1);
+            pass.SetBindGroup(0, bg);
+            pass.EndPass();
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+
+        // Set vertex buffer on the same index twice. The second one overwrites the first one.
+        // buffer0 is used as both read and write in the same pass
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            pass.SetVertexBuffer(0, buffer1);
+            pass.SetVertexBuffer(0, buffer0);
+            pass.SetBindGroup(0, bg);
+            pass.EndPass();
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+    }
+
+    // Test that all consecutive SetBindGroup()s take effect even though some bind groups are not
+    // used because they are overwritten by a consecutive call.
+    TEST_F(ResourceUsageTrackingTest, BufferWithMultipleSetBindGroupsOnSameIndex) {
+        // test render pass
+        {
+            // Create buffers that will be used as index and storage buffers
+            wgpu::Buffer buffer0 =
+                CreateBuffer(4, wgpu::BufferUsage::Storage | wgpu::BufferUsage::Index);
+            wgpu::Buffer buffer1 =
+                CreateBuffer(4, wgpu::BufferUsage::Storage | wgpu::BufferUsage::Index);
+
+            // Create the bind group to use the buffer as storage
+            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::StorageBuffer}});
+            wgpu::BindGroup bg0 = utils::MakeBindGroup(device, bgl, {{0, buffer0, 0, 4}});
+            wgpu::BindGroup bg1 = utils::MakeBindGroup(device, bgl, {{0, buffer1, 0, 4}});
+
+            DummyRenderPass dummyRenderPass(device);
+
+            // Set bind group on the same index twice. The second one overwrites the first one.
+            // No buffer is used as both read and write in the same pass. But the overwritten
+            // bind group still take effect during resource tracking.
+            {
+                wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+                wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+                pass.SetIndexBuffer(buffer0);
+                pass.SetBindGroup(0, bg0);
+                pass.SetBindGroup(0, bg1);
+                pass.EndPass();
+                ASSERT_DEVICE_ERROR(encoder.Finish());
+            }
+
+            // Set bind group on the same index twice. The second one overwrites the first one.
+            // buffer0 is used as both read and write in the same pass
+            {
+                wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+                wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+                pass.SetIndexBuffer(buffer0);
+                pass.SetBindGroup(0, bg1);
+                pass.SetBindGroup(0, bg0);
+                pass.EndPass();
+                ASSERT_DEVICE_ERROR(encoder.Finish());
+            }
+        }
+
+        // TODO (yunchao.he@intel.com) test compute pass
+    }
+
     // Test that using the same texture as both readable and writable in the same pass is disallowed
     TEST_F(ResourceUsageTrackingTest, TextureWithReadAndWriteUsage) {
         // Test render pass
         {
-            // Create a texture that will be used both as a sampled texture and a render target
+            // Create a texture that will be used as both a sampled texture and a render target
             wgpu::Texture texture =
                 CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment,
                               wgpu::TextureFormat::RGBA8Unorm);
@@ -180,7 +294,7 @@ namespace {
             // Create the render pass that will use the texture as an output attachment
             utils::ComboRenderPassDescriptor renderPass({view});
 
-            // Use the texture as both sampeld and output attachment in the same pass
+            // Use the texture as both sampled and output attachment in the same pass
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
             pass.SetBindGroup(0, bg);
@@ -188,13 +302,14 @@ namespace {
             ASSERT_DEVICE_ERROR(encoder.Finish());
         }
 
-        // TODO(yunchao.he@intel.com) Test compute pass, which depends on writeonly storage buffer
+        // TODO(yunchao.he@intel.com) Test compute pass. Test code is ready, but it depends on
+        // writeonly storage buffer support
     }
 
     // Test that using a single texture as copy src/dst and writable/readable usage in pass is
     // allowed.
     TEST_F(ResourceUsageTrackingTest, TextureCopyAndTextureUsageInPass) {
-        // Create a texture that will be used both as a sampled texture and a render target
+        // Create textures that will be used as both a sampled texture and a render target
         wgpu::Texture texture0 =
             CreateTexture(wgpu::TextureUsage::CopySrc, wgpu::TextureFormat::RGBA8Unorm);
         wgpu::Texture texture1 =
@@ -232,6 +347,58 @@ namespace {
             pass.EndPass();
             encoder.Finish();
         }
+    }
+
+    // Test that all consecutive SetBindGroup()s take effect even though some bind groups are not
+    // used because they are overwritten by a consecutive call.
+    TEST_F(ResourceUsageTrackingTest, TextureWithMultipleSetBindGroupsOnSameIndex) {
+        // Test render pass
+        {
+            // Create textures that will be used as both a sampled texture and a render target
+            wgpu::Texture texture0 =
+                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment,
+                              wgpu::TextureFormat::RGBA8Unorm);
+            wgpu::TextureView view0 = texture0.CreateView();
+            wgpu::Texture texture1 =
+                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment,
+                              wgpu::TextureFormat::RGBA8Unorm);
+            wgpu::TextureView view1 = texture1.CreateView();
+
+            // Create the bind group to use the texture as sampled
+            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Vertex, wgpu::BindingType::SampledTexture}});
+            wgpu::BindGroup bg0 = utils::MakeBindGroup(device, bgl, {{0, view0}});
+            wgpu::BindGroup bg1 = utils::MakeBindGroup(device, bgl, {{0, view1}});
+
+            // Create the render pass that will use the texture as an output attachment
+            utils::ComboRenderPassDescriptor renderPass({view0});
+
+            // Set bind group on the same index twice. The second one overwrites the first one.
+            // No texture is used as both sampled and output attachment in the same pass. But the
+            // overwritten texture still take effect during resource tracking.
+            {
+                wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+                wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+                pass.SetBindGroup(0, bg0);
+                pass.SetBindGroup(0, bg1);
+                pass.EndPass();
+                ASSERT_DEVICE_ERROR(encoder.Finish());
+            }
+
+            // Set bind group on the same index twice. The second one overwrites the first one.
+            // texture0 is used as both sampled and output attachment in the same pass
+            {
+                wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+                wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+                pass.SetBindGroup(0, bg1);
+                pass.SetBindGroup(0, bg0);
+                pass.EndPass();
+                ASSERT_DEVICE_ERROR(encoder.Finish());
+            }
+        }
+
+        // TODO (yunchao.he@intel.com) Test compute pass. Test code is ready, but it depends on
+        // writeonly storage buffer support.
     }
 
     // TODO (yunchao.he@intel.com):
