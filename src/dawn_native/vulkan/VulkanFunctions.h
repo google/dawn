@@ -107,10 +107,29 @@ namespace dawn_native { namespace vulkan {
         PFN_vkGetPhysicalDeviceSparseImageFormatProperties2
             GetPhysicalDeviceSparseImageFormatProperties2 = nullptr;
 
-#ifdef VK_USE_PLATFORM_FUCHSIA
+#if defined(VK_USE_PLATFORM_FUCHSIA)
         // FUCHSIA_image_pipe_surface
         PFN_vkCreateImagePipeSurfaceFUCHSIA CreateImagePipeSurfaceFUCHSIA = nullptr;
-#endif
+#endif  // defined(VK_USE_PLATFORM_FUCHSIA)
+
+#if defined(DAWN_ENABLE_BACKEND_METAL)
+        // EXT_metal_surface
+        PFN_vkCreateMetalSurfaceEXT CreateMetalSurfaceEXT = nullptr;
+#endif  // defined(DAWN_ENABLE_BACKEND_METAL)
+
+#if defined(DAWN_PLATFORM_WINDOWS)
+        // KHR_win32_surface
+        PFN_vkCreateWin32SurfaceKHR CreateWin32SurfaceKHR = nullptr;
+        PFN_vkGetPhysicalDeviceWin32PresentationSupportKHR
+            GetPhysicalDeviceWin32PresentationSupportKHR = nullptr;
+#endif  // defined(DAWN_PLATFORM_WINDOWS)
+
+#if defined(DAWN_USE_X11)
+        // KHR_xlib_surface
+        PFN_vkCreateXlibSurfaceKHR CreateXlibSurfaceKHR = nullptr;
+        PFN_vkGetPhysicalDeviceXlibPresentationSupportKHR
+            GetPhysicalDeviceXlibPresentationSupportKHR = nullptr;
+#endif  // defined(DAWN_USE_X11)
 
         // ---------- Device procs
 

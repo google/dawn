@@ -27,18 +27,6 @@ config("khronos_headers_public") {
 
 config("vulkan_headers_config") {
   include_dirs = [ "khronos" ]
-  if (is_win) {
-    defines = [ "VK_USE_PLATFORM_WIN32_KHR" ]
-  }
-  if (is_linux && !is_chromeos) {
-    defines = [ "VK_USE_PLATFORM_XCB_KHR" ]
-  }
-  if (is_android) {
-    defines = [ "VK_USE_PLATFORM_ANDROID_KHR" ]
-  }
-  if (is_fuchsia) {
-    defines = [ "VK_USE_PLATFORM_FUCHSIA" ]
-  }
 }
 
 source_set("vulkan_headers") {
