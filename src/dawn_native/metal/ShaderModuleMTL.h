@@ -36,7 +36,7 @@ namespace dawn_native { namespace metal {
                                                    const ShaderModuleDescriptor* descriptor);
 
         struct MetalFunctionData {
-            id<MTLFunction> function;
+            id<MTLFunction> function = nil;
             MTLSize localWorkgroupSize;
             bool needsStorageBufferLength;
             ~MetalFunctionData() {
