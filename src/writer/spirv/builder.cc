@@ -1,5 +1,4 @@
-// Copyright 2020 The Tint Authors.
-//
+// Copyright 2020 The Tint Authors.  //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,12 +16,16 @@
 #include <utility>
 
 #include "spirv/unified1/spirv.h"
+#include "src/ast/bool_literal.h"
+#include "src/ast/float_literal.h"
+#include "src/ast/int_literal.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
+#include "src/ast/uint_literal.h"
 
 namespace tint {
 namespace writer {
@@ -210,6 +213,44 @@ void Builder::GenerateImport(ast::Import* imp) {
                 {result, Operand::String(imp->path())});
 
   import_name_to_id_[imp->name()] = id;
+}
+
+uint32_t Builder::GenerateLiteralIfNeeded(ast::Literal* lit) {
+  auto type_id = GenerateTypeIfNeeded(lit->type());
+  if (type_id == 0) {
+    return 0;
+  }
+  auto name = lit->name();
+  auto val = const_to_id_.find(name);
+  if (val != const_to_id_.end()) {
+    return val->second;
+  }
+
+  auto result = result_op();
+  auto result_id = result.to_i();
+
+  if (lit->IsBool()) {
+    if (lit->AsBool()->IsTrue()) {
+      push_type(spv::Op::OpConstantTrue, {Operand::Int(type_id), result});
+    } else {
+      push_type(spv::Op::OpConstantFalse, {Operand::Int(type_id), result});
+    }
+  } else if (lit->IsInt()) {
+    push_type(spv::Op::OpConstant, {Operand::Int(type_id), result,
+                                    Operand::Int(lit->AsInt()->value())});
+  } else if (lit->IsUint()) {
+    push_type(spv::Op::OpConstant, {Operand::Int(type_id), result,
+                                    Operand::Int(lit->AsUint()->value())});
+  } else if (lit->IsFloat()) {
+    push_type(spv::Op::OpConstant, {Operand::Int(type_id), result,
+                                    Operand::Float(lit->AsFloat()->value())});
+  } else {
+    error_ = "unknown literal type";
+    return 0;
+  }
+
+  const_to_id_[name] = result_id;
+  return result_id;
 }
 
 uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {

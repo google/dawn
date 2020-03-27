@@ -17,6 +17,8 @@
 
 #include <string>
 
+#include "src/ast/type/type.h"
+
 namespace tint {
 namespace ast {
 
@@ -48,12 +50,21 @@ class Literal {
   /// @returns the literal as a unsigned int literal
   UintLiteral* AsUint();
 
+  /// @returns the type of the literal
+  ast::type::Type* type() const { return type_; }
+
   /// @returns the literal as a string
   virtual std::string to_str() const = 0;
 
+  /// @returns the name for this literal. This name is unique to this value.
+  virtual std::string name() const = 0;
+
  protected:
   /// Constructor
-  Literal();
+  Literal(ast::type::Type* type);
+
+ private:
+  ast::type::Type* type_ = nullptr;
 };
 
 }  // namespace ast

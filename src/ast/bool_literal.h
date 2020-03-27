@@ -26,8 +26,9 @@ namespace ast {
 class BoolLiteral : public Literal {
  public:
   /// Constructor
+  /// @param type the type of the literal
   /// @param value the bool literals value
-  explicit BoolLiteral(bool value);
+  BoolLiteral(ast::type::Type* type, bool value);
   ~BoolLiteral() override;
 
   /// @returns true if this is a bool literal
@@ -37,6 +38,9 @@ class BoolLiteral : public Literal {
   bool IsTrue() const { return value_; }
   /// @returns true if the bool literal is false
   bool IsFalse() const { return !value_; }
+
+  /// @returns the name for this literal. This name is unique to this value.
+  std::string name() const override;
 
   /// @returns the literal as a string
   std::string to_str() const override;

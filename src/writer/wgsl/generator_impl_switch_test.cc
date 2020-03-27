@@ -21,6 +21,7 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/switch_statement.h"
+#include "src/ast/type/i32_type.h"
 #include "src/writer/wgsl/generator_impl.h"
 
 namespace tint {
@@ -36,7 +37,8 @@ TEST_F(GeneratorImplTest, Emit_Switch) {
   def_body.push_back(std::make_unique<ast::BreakStatement>());
   def->set_body(std::move(def_body));
 
-  auto case_val = std::make_unique<ast::IntLiteral>(5);
+  ast::type::I32Type i32;
+  auto case_val = std::make_unique<ast::IntLiteral>(&i32, 5);
   std::vector<std::unique_ptr<ast::Statement>> case_body;
   case_body.push_back(std::make_unique<ast::BreakStatement>());
 

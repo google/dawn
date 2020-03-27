@@ -17,12 +17,17 @@
 namespace tint {
 namespace ast {
 
-BoolLiteral::BoolLiteral(bool value) : value_(value) {}
+BoolLiteral::BoolLiteral(ast::type::Type* type, bool value)
+    : Literal(type), value_(value) {}
 
 BoolLiteral::~BoolLiteral() = default;
 
 std::string BoolLiteral::to_str() const {
   return value_ ? "true" : "false";
+}
+
+std::string BoolLiteral::name() const {
+  return value_ ? "__bool_true" : "__bool_false";
 }
 
 }  // namespace ast

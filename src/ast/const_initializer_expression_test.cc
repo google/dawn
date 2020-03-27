@@ -16,6 +16,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/bool_literal.h"
+#include "src/ast/type/bool_type.h"
 
 namespace tint {
 namespace ast {
@@ -24,14 +25,16 @@ namespace {
 using ConstInitializerExpressionTest = testing::Test;
 
 TEST_F(ConstInitializerExpressionTest, Creation) {
-  auto b = std::make_unique<BoolLiteral>(true);
+  ast::type::BoolType bool_type;
+  auto b = std::make_unique<BoolLiteral>(&bool_type, true);
   auto b_ptr = b.get();
   ConstInitializerExpression c(std::move(b));
   EXPECT_EQ(c.literal(), b_ptr);
 }
 
 TEST_F(ConstInitializerExpressionTest, Creation_WithSource) {
-  auto b = std::make_unique<BoolLiteral>(true);
+  ast::type::BoolType bool_type;
+  auto b = std::make_unique<BoolLiteral>(&bool_type, true);
   ConstInitializerExpression c(Source{20, 2}, std::move(b));
   auto src = c.source();
   EXPECT_EQ(src.line, 20);
@@ -39,7 +42,8 @@ TEST_F(ConstInitializerExpressionTest, Creation_WithSource) {
 }
 
 TEST_F(ConstInitializerExpressionTest, IsValid) {
-  auto b = std::make_unique<BoolLiteral>(true);
+  ast::type::BoolType bool_type;
+  auto b = std::make_unique<BoolLiteral>(&bool_type, true);
   ConstInitializerExpression c(std::move(b));
   EXPECT_TRUE(c.IsValid());
 }
@@ -50,7 +54,8 @@ TEST_F(ConstInitializerExpressionTest, IsValid_MissingLiteral) {
 }
 
 TEST_F(ConstInitializerExpressionTest, ToStr) {
-  auto b = std::make_unique<BoolLiteral>(true);
+  ast::type::BoolType bool_type;
+  auto b = std::make_unique<BoolLiteral>(&bool_type, true);
   ConstInitializerExpression c(std::move(b));
   std::ostringstream out;
   c.to_str(out, 2);

@@ -17,12 +17,17 @@
 namespace tint {
 namespace ast {
 
-IntLiteral::IntLiteral(int32_t value) : value_(value) {}
+IntLiteral::IntLiteral(ast::type::Type* type, int32_t value)
+    : Literal(type), value_(value) {}
 
 IntLiteral::~IntLiteral() = default;
 
 std::string IntLiteral::to_str() const {
   return std::to_string(value_);
+}
+
+std::string IntLiteral::name() const {
+  return "__int" + std::to_string(value_);
 }
 
 }  // namespace ast

@@ -14,15 +14,26 @@
 
 #include "src/ast/float_literal.h"
 
+#include <sstream>
+
 namespace tint {
 namespace ast {
 
-FloatLiteral::FloatLiteral(float value) : value_(value) {}
+FloatLiteral::FloatLiteral(ast::type::Type* type, float value)
+    : Literal(type), value_(value) {}
 
 FloatLiteral::~FloatLiteral() = default;
 
 std::string FloatLiteral::to_str() const {
   return std::to_string(value_);
+}
+
+std::string FloatLiteral::name() const {
+  std::ostringstream out;
+  out.flags(out.flags() | std::ios_base::showpoint);
+  out.precision(std::numeric_limits<float>::max_digits10);
+  out << "__float" << value_;
+  return out.str();
 }
 
 }  // namespace ast

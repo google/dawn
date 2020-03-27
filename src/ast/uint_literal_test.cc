@@ -15,6 +15,7 @@
 #include "src/ast/uint_literal.h"
 
 #include "gtest/gtest.h"
+#include "src/ast/type/u32_type.h"
 
 namespace tint {
 namespace ast {
@@ -23,13 +24,15 @@ namespace {
 using UintLiteralTest = testing::Test;
 
 TEST_F(UintLiteralTest, Value) {
-  UintLiteral u{47};
+  ast::type::U32Type u32;
+  UintLiteral u{&u32, 47};
   ASSERT_TRUE(u.IsUint());
   EXPECT_EQ(u.value(), 47);
 }
 
 TEST_F(UintLiteralTest, Is) {
-  UintLiteral u{42};
+  ast::type::U32Type u32;
+  UintLiteral u{&u32, 42};
   EXPECT_FALSE(u.IsBool());
   EXPECT_FALSE(u.IsInt());
   EXPECT_FALSE(u.IsFloat());
@@ -37,7 +40,8 @@ TEST_F(UintLiteralTest, Is) {
 }
 
 TEST_F(UintLiteralTest, ToStr) {
-  UintLiteral i{42};
+  ast::type::U32Type u32;
+  UintLiteral i{&u32, 42};
 
   EXPECT_EQ(i.to_str(), "42");
 }

@@ -15,6 +15,7 @@
 #include "src/ast/int_literal.h"
 
 #include "gtest/gtest.h"
+#include "src/ast/type/i32_type.h"
 
 namespace tint {
 namespace ast {
@@ -23,13 +24,15 @@ namespace {
 using IntLiteralTest = testing::Test;
 
 TEST_F(IntLiteralTest, Value) {
-  IntLiteral i{47};
+  ast::type::I32Type i32;
+  IntLiteral i{&i32, 47};
   ASSERT_TRUE(i.IsInt());
   EXPECT_EQ(i.value(), 47);
 }
 
 TEST_F(IntLiteralTest, Is) {
-  IntLiteral i{42};
+  ast::type::I32Type i32;
+  IntLiteral i{&i32, 42};
   EXPECT_FALSE(i.IsBool());
   EXPECT_TRUE(i.IsInt());
   EXPECT_FALSE(i.IsFloat());
@@ -37,7 +40,8 @@ TEST_F(IntLiteralTest, Is) {
 }
 
 TEST_F(IntLiteralTest, ToStr) {
-  IntLiteral i{-42};
+  ast::type::I32Type i32;
+  IntLiteral i{&i32, -42};
 
   EXPECT_EQ(i.to_str(), "-42");
 }

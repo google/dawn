@@ -26,8 +26,9 @@ namespace ast {
 class IntLiteral : public Literal {
  public:
   /// Constructor
+  /// @param type the type
   /// @param value the int literals value
-  explicit IntLiteral(int32_t value);
+  IntLiteral(ast::type::Type* type, int32_t value);
   ~IntLiteral() override;
 
   /// @returns true if this is a int literal
@@ -35,6 +36,9 @@ class IntLiteral : public Literal {
 
   /// @returns the int literal value
   int32_t value() const { return value_; }
+
+  /// @returns the name for this literal. This name is unique to this value.
+  std::string name() const override;
 
   /// @returns the literal as a string
   std::string to_str() const override;

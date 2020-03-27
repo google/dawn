@@ -19,6 +19,7 @@
 #include "src/ast/const_initializer_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/int_literal.h"
+#include "src/ast/type/i32_type.h"
 #include "src/writer/wgsl/generator_impl.h"
 
 namespace tint {
@@ -29,7 +30,8 @@ namespace {
 using GeneratorImplTest = testing::Test;
 
 TEST_F(GeneratorImplTest, EmitExpression_ArrayAccessor) {
-  auto lit = std::make_unique<ast::IntLiteral>(5);
+  ast::type::I32Type i32;
+  auto lit = std::make_unique<ast::IntLiteral>(&i32, 5);
   auto idx = std::make_unique<ast::ConstInitializerExpression>(std::move(lit));
   auto ary = std::make_unique<ast::IdentifierExpression>("ary");
 

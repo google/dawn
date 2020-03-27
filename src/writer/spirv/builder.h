@@ -20,6 +20,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "src/ast/literal.h"
 #include "src/ast/module.h"
 #include "src/ast/struct_member.h"
 #include "src/writer/spirv/instruction.h"
@@ -136,6 +137,10 @@ class Builder {
   /// Generates an import instruction
   /// @param imp the import
   void GenerateImport(ast::Import* imp);
+  /// Generates a literal constant if needed
+  /// @param lit the literal to generate
+  /// @returns the ID on success or 0 on failure
+  uint32_t GenerateLiteralIfNeeded(ast::Literal* lit);
   /// Generates a type if not already created
   /// @param type the type to create
   /// @returns the ID to use for the given type. Returns 0 on unknown type.
@@ -181,6 +186,7 @@ class Builder {
   std::unordered_map<std::string, uint32_t> import_name_to_id_;
   std::unordered_map<std::string, uint32_t> func_name_to_id_;
   std::unordered_map<std::string, uint32_t> type_name_to_id_;
+  std::unordered_map<std::string, uint32_t> const_to_id_;
 };
 
 }  // namespace spirv

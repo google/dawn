@@ -38,7 +38,8 @@ namespace {
 using GeneratorImplTest = testing::Test;
 
 TEST_F(GeneratorImplTest, EmitInitializer_Bool) {
-  auto lit = std::make_unique<ast::BoolLiteral>(false);
+  ast::type::BoolType bool_type;
+  auto lit = std::make_unique<ast::BoolLiteral>(&bool_type, false);
   ast::ConstInitializerExpression expr(std::move(lit));
 
   GeneratorImpl g;
@@ -47,7 +48,8 @@ TEST_F(GeneratorImplTest, EmitInitializer_Bool) {
 }
 
 TEST_F(GeneratorImplTest, EmitInitializer_Int) {
-  auto lit = std::make_unique<ast::IntLiteral>(-12345);
+  ast::type::I32Type i32;
+  auto lit = std::make_unique<ast::IntLiteral>(&i32, -12345);
   ast::ConstInitializerExpression expr(std::move(lit));
 
   GeneratorImpl g;
@@ -56,7 +58,8 @@ TEST_F(GeneratorImplTest, EmitInitializer_Int) {
 }
 
 TEST_F(GeneratorImplTest, EmitInitializer_UInt) {
-  auto lit = std::make_unique<ast::UintLiteral>(56779);
+  ast::type::U32Type u32;
+  auto lit = std::make_unique<ast::UintLiteral>(&u32, 56779);
   ast::ConstInitializerExpression expr(std::move(lit));
 
   GeneratorImpl g;
@@ -65,7 +68,8 @@ TEST_F(GeneratorImplTest, EmitInitializer_UInt) {
 }
 
 TEST_F(GeneratorImplTest, EmitInitializer_Float) {
-  auto lit = std::make_unique<ast::FloatLiteral>(1.5e27);
+  ast::type::F32Type f32;
+  auto lit = std::make_unique<ast::FloatLiteral>(&f32, 1.5e27);
   ast::ConstInitializerExpression expr(std::move(lit));
 
   GeneratorImpl g;
@@ -76,7 +80,7 @@ TEST_F(GeneratorImplTest, EmitInitializer_Float) {
 TEST_F(GeneratorImplTest, EmitInitializer_Type_Float) {
   ast::type::F32Type f32;
 
-  auto lit = std::make_unique<ast::FloatLiteral>(-1.2e-5);
+  auto lit = std::make_unique<ast::FloatLiteral>(&f32, -1.2e-5);
   std::vector<std::unique_ptr<ast::Expression>> values;
   values.push_back(
       std::make_unique<ast::ConstInitializerExpression>(std::move(lit)));
@@ -91,7 +95,7 @@ TEST_F(GeneratorImplTest, EmitInitializer_Type_Float) {
 TEST_F(GeneratorImplTest, EmitInitializer_Type_Bool) {
   ast::type::BoolType b;
 
-  auto lit = std::make_unique<ast::BoolLiteral>(true);
+  auto lit = std::make_unique<ast::BoolLiteral>(&b, true);
   std::vector<std::unique_ptr<ast::Expression>> values;
   values.push_back(
       std::make_unique<ast::ConstInitializerExpression>(std::move(lit)));
@@ -106,7 +110,7 @@ TEST_F(GeneratorImplTest, EmitInitializer_Type_Bool) {
 TEST_F(GeneratorImplTest, EmitInitializer_Type_Int) {
   ast::type::I32Type i32;
 
-  auto lit = std::make_unique<ast::IntLiteral>(-12345);
+  auto lit = std::make_unique<ast::IntLiteral>(&i32, -12345);
   std::vector<std::unique_ptr<ast::Expression>> values;
   values.push_back(
       std::make_unique<ast::ConstInitializerExpression>(std::move(lit)));
@@ -121,7 +125,7 @@ TEST_F(GeneratorImplTest, EmitInitializer_Type_Int) {
 TEST_F(GeneratorImplTest, EmitInitializer_Type_Uint) {
   ast::type::U32Type u32;
 
-  auto lit = std::make_unique<ast::UintLiteral>(12345);
+  auto lit = std::make_unique<ast::UintLiteral>(&u32, 12345);
   std::vector<std::unique_ptr<ast::Expression>> values;
   values.push_back(
       std::make_unique<ast::ConstInitializerExpression>(std::move(lit)));
@@ -137,9 +141,9 @@ TEST_F(GeneratorImplTest, EmitInitializer_Type_Vec) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
 
-  auto lit1 = std::make_unique<ast::FloatLiteral>(1.f);
-  auto lit2 = std::make_unique<ast::FloatLiteral>(2.f);
-  auto lit3 = std::make_unique<ast::FloatLiteral>(3.f);
+  auto lit1 = std::make_unique<ast::FloatLiteral>(&f32, 1.f);
+  auto lit2 = std::make_unique<ast::FloatLiteral>(&f32, 2.f);
+  auto lit3 = std::make_unique<ast::FloatLiteral>(&f32, 3.f);
   std::vector<std::unique_ptr<ast::Expression>> values;
   values.push_back(
       std::make_unique<ast::ConstInitializerExpression>(std::move(lit1)));
@@ -164,8 +168,8 @@ TEST_F(GeneratorImplTest, EmitInitializer_Type_Mat) {
   std::vector<std::unique_ptr<ast::Expression>> mat_values;
 
   for (size_t i = 0; i < 3; i++) {
-    auto lit1 = std::make_unique<ast::FloatLiteral>(1.f + (i * 2));
-    auto lit2 = std::make_unique<ast::FloatLiteral>(2.f + (i * 2));
+    auto lit1 = std::make_unique<ast::FloatLiteral>(&f32, 1.f + (i * 2));
+    auto lit2 = std::make_unique<ast::FloatLiteral>(&f32, 2.f + (i * 2));
 
     std::vector<std::unique_ptr<ast::Expression>> values;
     values.push_back(
@@ -195,9 +199,9 @@ TEST_F(GeneratorImplTest, EmitInitializer_Type_Array) {
   std::vector<std::unique_ptr<ast::Expression>> ary_values;
 
   for (size_t i = 0; i < 3; i++) {
-    auto lit1 = std::make_unique<ast::FloatLiteral>(1.f + (i * 3));
-    auto lit2 = std::make_unique<ast::FloatLiteral>(2.f + (i * 3));
-    auto lit3 = std::make_unique<ast::FloatLiteral>(3.f + (i * 3));
+    auto lit1 = std::make_unique<ast::FloatLiteral>(&f32, 1.f + (i * 3));
+    auto lit2 = std::make_unique<ast::FloatLiteral>(&f32, 2.f + (i * 3));
+    auto lit3 = std::make_unique<ast::FloatLiteral>(&f32, 3.f + (i * 3));
 
     std::vector<std::unique_ptr<ast::Expression>> values;
     values.push_back(

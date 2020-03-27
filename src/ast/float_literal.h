@@ -26,8 +26,9 @@ namespace ast {
 class FloatLiteral : public Literal {
  public:
   /// Constructor
+  /// @param type the type of the literal
   /// @param value the float literals value
-  explicit FloatLiteral(float value);
+  FloatLiteral(ast::type::Type* type, float value);
   ~FloatLiteral() override;
 
   /// @returns true if this is a float literal
@@ -35,6 +36,9 @@ class FloatLiteral : public Literal {
 
   /// @returns the float literal value
   float value() const { return value_; }
+
+  /// @returns the name for this literal. This name is unique to this value.
+  std::string name() const override;
 
   /// @returns the literal as a string
   std::string to_str() const override;

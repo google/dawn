@@ -19,6 +19,7 @@
 #include "src/ast/const_initializer_expression.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/nop_statement.h"
+#include "src/ast/type/bool_type.h"
 
 namespace tint {
 namespace ast {
@@ -27,8 +28,9 @@ namespace {
 using ElseStatementTest = testing::Test;
 
 TEST_F(ElseStatementTest, Creation) {
+  ast::type::BoolType bool_type;
   auto cond = std::make_unique<ConstInitializerExpression>(
-      std::make_unique<BoolLiteral>(true));
+      std::make_unique<BoolLiteral>(&bool_type, true));
   std::vector<std::unique_ptr<Statement>> body;
   body.push_back(std::make_unique<NopStatement>());
 
@@ -54,8 +56,9 @@ TEST_F(ElseStatementTest, IsElse) {
 }
 
 TEST_F(ElseStatementTest, HasCondition) {
+  ast::type::BoolType bool_type;
   auto cond = std::make_unique<ConstInitializerExpression>(
-      std::make_unique<BoolLiteral>(true));
+      std::make_unique<BoolLiteral>(&bool_type, true));
   ElseStatement e(std::move(cond), {});
   EXPECT_TRUE(e.HasCondition());
 }
@@ -102,8 +105,9 @@ TEST_F(ElseStatementTest, IsValid_InvalidBodyStatement) {
 }
 
 TEST_F(ElseStatementTest, ToStr) {
+  ast::type::BoolType bool_type;
   auto cond = std::make_unique<ConstInitializerExpression>(
-      std::make_unique<BoolLiteral>(true));
+      std::make_unique<BoolLiteral>(&bool_type, true));
   std::vector<std::unique_ptr<Statement>> body;
   body.push_back(std::make_unique<NopStatement>());
 

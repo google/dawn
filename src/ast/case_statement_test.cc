@@ -18,6 +18,7 @@
 #include "src/ast/bool_literal.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/nop_statement.h"
+#include "src/ast/type/bool_type.h"
 
 namespace tint {
 namespace ast {
@@ -26,7 +27,8 @@ namespace {
 using CaseStatementTest = testing::Test;
 
 TEST_F(CaseStatementTest, Creation) {
-  auto b = std::make_unique<BoolLiteral>(true);
+  ast::type::BoolType bool_type;
+  auto b = std::make_unique<BoolLiteral>(&bool_type, true);
   std::vector<std::unique_ptr<Statement>> stmts;
   stmts.push_back(std::make_unique<NopStatement>());
 
@@ -40,7 +42,8 @@ TEST_F(CaseStatementTest, Creation) {
 }
 
 TEST_F(CaseStatementTest, Creation_WithSource) {
-  auto b = std::make_unique<BoolLiteral>(true);
+  ast::type::BoolType bool_type;
+  auto b = std::make_unique<BoolLiteral>(&bool_type, true);
   std::vector<std::unique_ptr<Statement>> stmts;
   stmts.push_back(std::make_unique<NopStatement>());
 
@@ -60,7 +63,8 @@ TEST_F(CaseStatementTest, IsDefault_WithoutCondition) {
 }
 
 TEST_F(CaseStatementTest, IsDefault_WithCondition) {
-  auto b = std::make_unique<BoolLiteral>(true);
+  ast::type::BoolType bool_type;
+  auto b = std::make_unique<BoolLiteral>(&bool_type, true);
   CaseStatement c;
   c.set_condition(std::move(b));
   EXPECT_FALSE(c.IsDefault());
@@ -77,7 +81,8 @@ TEST_F(CaseStatementTest, IsValid) {
 }
 
 TEST_F(CaseStatementTest, IsValid_NullBodyStatement) {
-  auto b = std::make_unique<BoolLiteral>(true);
+  ast::type::BoolType bool_type;
+  auto b = std::make_unique<BoolLiteral>(&bool_type, true);
   std::vector<std::unique_ptr<Statement>> stmts;
   stmts.push_back(std::make_unique<NopStatement>());
   stmts.push_back(nullptr);
@@ -87,7 +92,8 @@ TEST_F(CaseStatementTest, IsValid_NullBodyStatement) {
 }
 
 TEST_F(CaseStatementTest, IsValid_InvalidBodyStatement) {
-  auto b = std::make_unique<BoolLiteral>(true);
+  ast::type::BoolType bool_type;
+  auto b = std::make_unique<BoolLiteral>(&bool_type, true);
   std::vector<std::unique_ptr<Statement>> stmts;
   stmts.push_back(std::make_unique<IfStatement>());
 
@@ -96,7 +102,8 @@ TEST_F(CaseStatementTest, IsValid_InvalidBodyStatement) {
 }
 
 TEST_F(CaseStatementTest, ToStr_WithCondition) {
-  auto b = std::make_unique<BoolLiteral>(true);
+  ast::type::BoolType bool_type;
+  auto b = std::make_unique<BoolLiteral>(&bool_type, true);
   std::vector<std::unique_ptr<Statement>> stmts;
   stmts.push_back(std::make_unique<NopStatement>());
   CaseStatement c(std::move(b), std::move(stmts));

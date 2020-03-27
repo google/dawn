@@ -264,6 +264,7 @@ set(TINT_TEST_SRCS
   ast/else_statement_test.cc
   ast/entry_point_test.cc
   ast/fallthrough_statement_test.cc
+  ast/float_literal_test.cc
   ast/function_test.cc
   ast/identifier_expression_test.cc
   ast/if_statement_test.cc
@@ -406,9 +407,10 @@ if(${TINT_BUILD_SPV_WRITER})
   list(APPEND TINT_TEST_SRCS
     writer/spirv/binary_writer_test.cc
     writer/spirv/builder_test.cc
-    writer/spirv/builder_type_test.cc
     writer/spirv/builder_entry_point_test.cc
     writer/spirv/builder_function_test.cc
+    writer/spirv/builder_literal_test.cc
+    writer/spirv/builder_type_test.cc
     writer/spirv/instruction_test.cc
     writer/spirv/operand_test.cc
     writer/spirv/spv_dump.cc

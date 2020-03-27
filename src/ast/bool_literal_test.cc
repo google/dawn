@@ -15,6 +15,7 @@
 #include "src/ast/bool_literal.h"
 
 #include "gtest/gtest.h"
+#include "src/ast/type/bool_type.h"
 
 namespace tint {
 namespace ast {
@@ -23,21 +24,24 @@ namespace {
 using BoolLiteralTest = testing::Test;
 
 TEST_F(BoolLiteralTest, True) {
-  BoolLiteral b{true};
+  ast::type::BoolType bool_type;
+  BoolLiteral b{&bool_type, true};
   ASSERT_TRUE(b.IsBool());
   ASSERT_TRUE(b.IsTrue());
   ASSERT_FALSE(b.IsFalse());
 }
 
 TEST_F(BoolLiteralTest, False) {
-  BoolLiteral b{false};
+  ast::type::BoolType bool_type;
+  BoolLiteral b{&bool_type, false};
   ASSERT_TRUE(b.IsBool());
   ASSERT_FALSE(b.IsTrue());
   ASSERT_TRUE(b.IsFalse());
 }
 
 TEST_F(BoolLiteralTest, Is) {
-  BoolLiteral b{false};
+  ast::type::BoolType bool_type;
+  BoolLiteral b{&bool_type, false};
   EXPECT_TRUE(b.IsBool());
   EXPECT_FALSE(b.IsInt());
   EXPECT_FALSE(b.IsFloat());
@@ -45,8 +49,9 @@ TEST_F(BoolLiteralTest, Is) {
 }
 
 TEST_F(BoolLiteralTest, ToStr) {
-  BoolLiteral t{true};
-  BoolLiteral f{false};
+  ast::type::BoolType bool_type;
+  BoolLiteral t{&bool_type, true};
+  BoolLiteral f{&bool_type, false};
 
   EXPECT_EQ(t.to_str(), "true");
   EXPECT_EQ(f.to_str(), "false");

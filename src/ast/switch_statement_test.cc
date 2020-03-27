@@ -20,6 +20,7 @@
 #include "src/ast/bool_literal.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/type/bool_type.h"
 
 namespace tint {
 namespace ast {
@@ -28,7 +29,8 @@ namespace {
 using SwitchStatementTest = testing::Test;
 
 TEST_F(SwitchStatementTest, Creation) {
-  auto lit = std::make_unique<BoolLiteral>(true);
+  ast::type::BoolType bool_type;
+  auto lit = std::make_unique<BoolLiteral>(&bool_type, true);
   auto ident = std::make_unique<IdentifierExpression>("ident");
   std::vector<std::unique_ptr<CaseStatement>> body;
   body.push_back(std::make_unique<CaseStatement>(
@@ -59,7 +61,8 @@ TEST_F(SwitchStatementTest, IsSwitch) {
 }
 
 TEST_F(SwitchStatementTest, IsValid) {
-  auto lit = std::make_unique<BoolLiteral>(true);
+  ast::type::BoolType bool_type;
+  auto lit = std::make_unique<BoolLiteral>(&bool_type, true);
   auto ident = std::make_unique<IdentifierExpression>("ident");
   std::vector<std::unique_ptr<CaseStatement>> body;
   body.push_back(std::make_unique<CaseStatement>(
@@ -70,7 +73,8 @@ TEST_F(SwitchStatementTest, IsValid) {
 }
 
 TEST_F(SwitchStatementTest, IsValid_Null_Condition) {
-  auto lit = std::make_unique<BoolLiteral>(true);
+  ast::type::BoolType bool_type;
+  auto lit = std::make_unique<BoolLiteral>(&bool_type, true);
   std::vector<std::unique_ptr<CaseStatement>> body;
   body.push_back(std::make_unique<CaseStatement>(
       std::move(lit), std::vector<std::unique_ptr<Statement>>()));
@@ -81,7 +85,8 @@ TEST_F(SwitchStatementTest, IsValid_Null_Condition) {
 }
 
 TEST_F(SwitchStatementTest, IsValid_Invalid_Condition) {
-  auto lit = std::make_unique<BoolLiteral>(true);
+  ast::type::BoolType bool_type;
+  auto lit = std::make_unique<BoolLiteral>(&bool_type, true);
   auto ident = std::make_unique<IdentifierExpression>("");
   std::vector<std::unique_ptr<CaseStatement>> body;
   body.push_back(std::make_unique<CaseStatement>(
@@ -92,7 +97,8 @@ TEST_F(SwitchStatementTest, IsValid_Invalid_Condition) {
 }
 
 TEST_F(SwitchStatementTest, IsValid_Null_BodyStatement) {
-  auto lit = std::make_unique<BoolLiteral>(true);
+  ast::type::BoolType bool_type;
+  auto lit = std::make_unique<BoolLiteral>(&bool_type, true);
   auto ident = std::make_unique<IdentifierExpression>("ident");
   std::vector<std::unique_ptr<CaseStatement>> body;
   body.push_back(std::make_unique<CaseStatement>(
@@ -132,7 +138,8 @@ TEST_F(SwitchStatementTest, ToStr_Empty) {
 }
 
 TEST_F(SwitchStatementTest, ToStr) {
-  auto lit = std::make_unique<BoolLiteral>(true);
+  ast::type::BoolType bool_type;
+  auto lit = std::make_unique<BoolLiteral>(&bool_type, true);
   auto ident = std::make_unique<IdentifierExpression>("ident");
   std::vector<std::unique_ptr<CaseStatement>> body;
   body.push_back(std::make_unique<CaseStatement>(

@@ -15,6 +15,7 @@
 #include "src/ast/float_literal.h"
 
 #include "gtest/gtest.h"
+#include "src/ast/type/f32_type.h"
 
 namespace tint {
 namespace ast {
@@ -23,13 +24,15 @@ namespace {
 using FloatLiteralTest = testing::Test;
 
 TEST_F(FloatLiteralTest, Value) {
-  FloatLiteral f{47.2};
+  ast::type::F32Type f32;
+  FloatLiteral f{&f32, 47.2f};
   ASSERT_TRUE(f.IsFloat());
-  EXPECT_EQ(f.value(), 47.2);
+  EXPECT_EQ(f.value(), 47.2f);
 }
 
 TEST_F(FloatLiteralTest, Is) {
-  FloatLiteral f{42};
+  ast::type::F32Type f32;
+  FloatLiteral f{&f32, 42.f};
   EXPECT_FALSE(f.IsBool());
   EXPECT_FALSE(f.IsInt());
   EXPECT_TRUE(f.IsFloat());
@@ -37,9 +40,16 @@ TEST_F(FloatLiteralTest, Is) {
 }
 
 TEST_F(FloatLiteralTest, ToStr) {
-  FloatLiteral f{42.1};
+  ast::type::F32Type f32;
+  FloatLiteral f{&f32, 42.1f};
 
-  EXPECT_EQ(f.to_str(), "42.1");
+  EXPECT_EQ(f.to_str(), "42.099998");
+}
+
+TEST_F(FloatLiteralTest, ToName) {
+  ast::type::F32Type f32;
+  FloatLiteral f{&f32, 42.1f};
+  EXPECT_EQ(f.name(), "__float42.0999985");
 }
 
 }  // namespace
