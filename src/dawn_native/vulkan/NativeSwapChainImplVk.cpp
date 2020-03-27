@@ -83,8 +83,8 @@ namespace dawn_native { namespace vulkan {
     }
 
     void NativeSwapChainImpl::UpdateSurfaceConfig() {
-        if (mDevice->ConsumedError(
-                GatherSurfaceInfo(*ToBackend(mDevice->GetAdapter()), mSurface, &mInfo))) {
+        if (mDevice->ConsumedError(GatherSurfaceInfo(*ToBackend(mDevice->GetAdapter()), mSurface),
+                                   &mInfo)) {
             ASSERT(false);
         }
 

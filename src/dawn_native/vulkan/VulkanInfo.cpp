@@ -324,21 +324,22 @@ namespace dawn_native { namespace vulkan {
         return info;
     }
 
-    MaybeError GatherSurfaceInfo(const Adapter& adapter,
-                                 VkSurfaceKHR surface,
-                                 VulkanSurfaceInfo* info) {
+    ResultOrError<VulkanSurfaceInfo> GatherSurfaceInfo(const Adapter& adapter,
+                                                       VkSurfaceKHR surface) {
+        VulkanSurfaceInfo info = {};
+
         VkPhysicalDevice physicalDevice = adapter.GetPhysicalDevice();
         const VulkanFunctions& vkFunctions = adapter.GetBackend()->GetFunctions();
 
         // Get the surface capabilities
         DAWN_TRY(CheckVkSuccess(vkFunctions.GetPhysicalDeviceSurfaceCapabilitiesKHR(
-                                    physicalDevice, surface, &info->capabilities),
+                                    physicalDevice, surface, &info.capabilities),
                                 "vkGetPhysicalDeviceSurfaceCapabilitiesKHR"));
 
         // Query which queue families support presenting this surface
         {
             size_t nQueueFamilies = adapter.GetDeviceInfo().queueFamilies.size();
-            info->supportedQueueFamilies.resize(nQueueFamilies, false);
+            info.supportedQueueFamilies.resize(nQueueFamilies, false);
 
             for (uint32_t i = 0; i < nQueueFamilies; ++i) {
                 VkBool32 supported = VK_FALSE;
@@ -346,7 +347,7 @@ namespace dawn_native { namespace vulkan {
                                             physicalDevice, i, surface, &supported),
                                         "vkGetPhysicalDeviceSurfaceSupportKHR"));
 
-                info->supportedQueueFamilies[i] = (supported == VK_TRUE);
+                info.supportedQueueFamilies[i] = (supported == VK_TRUE);
             }
         }
 
@@ -359,9 +360,9 @@ namespace dawn_native { namespace vulkan {
                 return DAWN_DEVICE_LOST_ERROR("vkGetPhysicalDeviceSurfaceFormatsKHR");
             }
 
-            info->formats.resize(count);
+            info.formats.resize(count);
             DAWN_TRY(CheckVkSuccess(vkFunctions.GetPhysicalDeviceSurfaceFormatsKHR(
-                                        physicalDevice, surface, &count, info->formats.data()),
+                                        physicalDevice, surface, &count, info.formats.data()),
                                     "vkGetPhysicalDeviceSurfaceFormatsKHR"));
         }
 
@@ -375,13 +376,13 @@ namespace dawn_native { namespace vulkan {
                 return DAWN_DEVICE_LOST_ERROR("vkGetPhysicalDeviceSurfacePresentModesKHR");
             }
 
-            info->presentModes.resize(count);
+            info.presentModes.resize(count);
             DAWN_TRY(CheckVkSuccess(vkFunctions.GetPhysicalDeviceSurfacePresentModesKHR(
-                                        physicalDevice, surface, &count, info->presentModes.data()),
+                                        physicalDevice, surface, &count, info.presentModes.data()),
                                     "vkGetPhysicalDeviceSurfacePresentModesKHR"));
         }
 
-        return {};
+        return info;
     }
 
 }}  // namespace dawn_native::vulkan
