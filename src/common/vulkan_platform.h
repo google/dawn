@@ -143,6 +143,7 @@ namespace dawn_native { namespace vulkan {
         }                                                                           \
     }  // namespace dawn_native::vulkan
 
+#define VK_NO_PROTOTYPES
 #include <vulkan/vulkan.h>
 
 // Redefine VK_NULL_HANDLE for better type safety where possible.
