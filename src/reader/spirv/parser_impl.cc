@@ -48,7 +48,6 @@ const spv_target_env kTargetEnv = SPV_ENV_WEBGPU_0;
 
 ParserImpl::ParserImpl(Context* ctx, const std::vector<uint32_t>& spv_binary)
     : Reader(ctx),
-      ctx_(ctx),
       spv_binary_(spv_binary),
       fail_stream_(&success_, &errors_),
       namer_(fail_stream_),
@@ -188,7 +187,7 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
       auto* ast_elem_ty =
           ConvertType(type_mgr_->GetId(rtarr_ty->element_type()));
       if (ast_elem_ty != nullptr) {
-        result = ctx_.type_mgr->Get(
+        result = ctx_.type_mgr().Get(
             std::make_unique<ast::type::ArrayType>(ast_elem_ty));
       }
       // In the error case, we'll already have emitted a diagnostic.
@@ -229,7 +228,7 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
                << num_elem;
         return nullptr;
       }
-      result = ctx_.type_mgr->Get(std::make_unique<ast::type::ArrayType>(
+      result = ctx_.type_mgr().Get(std::make_unique<ast::type::ArrayType>(
           ast_elem_ty, static_cast<uint32_t>(num_elem)));
       break;
     }

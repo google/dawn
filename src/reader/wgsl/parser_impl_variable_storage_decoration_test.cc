@@ -38,9 +38,7 @@ class VariableStorageTest : public testing::TestWithParam<VariableStorageData> {
 
   void SetUp() { ctx_.Reset(); }
 
-  void TearDown() {
-    impl_ = nullptr;
-  }
+  void TearDown() { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);

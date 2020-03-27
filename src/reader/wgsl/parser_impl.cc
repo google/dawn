@@ -2093,7 +2093,7 @@ std::unique_ptr<ast::Literal> ParserImpl::const_literal() {
   if (t.IsTrue()) {
     next();  // Consume the peek
 
-    auto type = ctx_.type_mgr->Get(std::make_unique<ast::type::BoolType>());
+    auto type = ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
     if (!type) {
       return nullptr;
     }
@@ -2101,7 +2101,7 @@ std::unique_ptr<ast::Literal> ParserImpl::const_literal() {
   }
   if (t.IsFalse()) {
     next();  // Consume the peek
-    auto type = ctx_.type_mgr->Get(std::make_unique<ast::type::BoolType>());
+    auto type = ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
     if (!type) {
       return nullptr;
     }
@@ -2109,7 +2109,7 @@ std::unique_ptr<ast::Literal> ParserImpl::const_literal() {
   }
   if (t.IsIntLiteral()) {
     next();  // Consume the peek
-    auto type = ctx_.type_mgr->Get(std::make_unique<ast::type::I32Type>());
+    auto type = ctx_.type_mgr().Get(std::make_unique<ast::type::I32Type>());
     if (!type) {
       return nullptr;
     }
@@ -2117,7 +2117,7 @@ std::unique_ptr<ast::Literal> ParserImpl::const_literal() {
   }
   if (t.IsUintLiteral()) {
     next();  // Consume the peek
-    auto type = ctx_.type_mgr->Get(std::make_unique<ast::type::U32Type>());
+    auto type = ctx_.type_mgr().Get(std::make_unique<ast::type::U32Type>());
     if (!type) {
       return nullptr;
     }
@@ -2125,7 +2125,7 @@ std::unique_ptr<ast::Literal> ParserImpl::const_literal() {
   }
   if (t.IsFloatLiteral()) {
     next();  // Consume the peek
-    auto type = ctx_.type_mgr->Get(std::make_unique<ast::type::F32Type>());
+    auto type = ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>());
     if (!type) {
       return nullptr;
     }

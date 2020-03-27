@@ -127,9 +127,7 @@ class VecTest : public testing::TestWithParam<VecData> {
 
   void SetUp() { ctx_.Reset(); }
 
-  void TearDown() {
-    impl_ = nullptr;
-  }
+  void TearDown() { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -163,9 +161,7 @@ class VecMissingGreaterThanTest : public testing::TestWithParam<VecData> {
 
   void SetUp() { ctx_.Reset(); }
 
-  void TearDown() {
-    impl_ = nullptr;
-  }
+  void TearDown() { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -198,9 +194,7 @@ class VecMissingLessThanTest : public testing::TestWithParam<VecData> {
 
   void SetUp() { ctx_.Reset(); }
 
-  void TearDown() {
-    impl_ = nullptr;
-  }
+  void TearDown() { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -233,9 +227,7 @@ class VecBadType : public testing::TestWithParam<VecData> {
 
   void SetUp() { ctx_.Reset(); }
 
-  void TearDown() {
-    impl_ = nullptr;
-  }
+  void TearDown() { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -268,9 +260,7 @@ class VecMissingType : public testing::TestWithParam<VecData> {
 
   void SetUp() { ctx_.Reset(); }
 
-  void TearDown() {
-    impl_ = nullptr;
-  }
+  void TearDown() { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -485,9 +475,7 @@ class MatrixTest : public testing::TestWithParam<MatrixData> {
 
   void SetUp() { ctx_.Reset(); }
 
-  void TearDown() {
-    impl_ = nullptr;
-  }
+  void TearDown() { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -529,9 +517,7 @@ class MatrixMissingGreaterThanTest : public testing::TestWithParam<MatrixData> {
 
   void SetUp() { ctx_.Reset(); }
 
-  void TearDown() {
-    impl_ = nullptr;
-  }
+  void TearDown() { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -569,9 +555,7 @@ class MatrixMissingLessThanTest : public testing::TestWithParam<MatrixData> {
 
   void SetUp() { ctx_.Reset(); }
 
-  void TearDown() {
-    impl_ = nullptr;
-  }
+  void TearDown() { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -609,9 +593,7 @@ class MatrixBadType : public testing::TestWithParam<MatrixData> {
 
   void SetUp() { ctx_.Reset(); }
 
-  void TearDown() {
-    impl_ = nullptr;
-  }
+  void TearDown() { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -649,9 +631,7 @@ class MatrixMissingType : public testing::TestWithParam<MatrixData> {
 
   void SetUp() { ctx_.Reset(); }
 
-  void TearDown() {
-    impl_ = nullptr;
-  }
+  void TearDown() { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);

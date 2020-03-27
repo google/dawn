@@ -37,9 +37,7 @@ class SpvParserTest : public testing::Test {
   void SetUp() { ctx_.Reset(); }
 
   /// Tears down the test helper
-  void TearDown() {
-    impl_ = nullptr;
-  }
+  void TearDown() { impl_ = nullptr; }
 
   /// Retrieves the parser from the helper
   /// @param input the SPIR-V binary to parse

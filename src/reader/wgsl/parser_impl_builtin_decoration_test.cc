@@ -38,9 +38,7 @@ class BuiltinTest : public testing::TestWithParam<BuiltinData> {
 
   void SetUp() { ctx_.Reset(); }
 
-  void TearDown() {
-    impl_ = nullptr;
-  }
+  void TearDown() { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);

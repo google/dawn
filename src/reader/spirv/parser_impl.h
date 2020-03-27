@@ -122,8 +122,6 @@ class ParserImpl : Reader {
   /// Emit entry point AST nodes.
   bool EmitEntryPoints();
 
-  // The Tint context
-  Context ctx_;
   // The SPIR-V binary we're parsing
   std::vector<uint32_t> spv_binary_;
 
