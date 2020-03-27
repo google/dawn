@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "gmock/gmock.h"
+#include "src/ast/type/array_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/reader/spirv/parser_impl.h"
@@ -322,6 +323,96 @@ TEST_F(SpvParserTest, ConvertType_MatrixOverF32) {
   EXPECT_EQ(m44->AsMatrix()->columns(), 4);
 
   EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, ConvertType_RuntimeArray) {
+  auto p = parser(test::Assemble(R"(
+    %uint = OpTypeInt 32 0
+    %10 = OpTypeRuntimeArray %uint
+  )"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+
+  auto* type = p->ConvertType(10);
+  ASSERT_NE(type, nullptr);
+  EXPECT_TRUE(type->IsArray());
+  auto* arr_type = type->AsArray();
+  EXPECT_TRUE(arr_type->IsRuntimeArray());
+  ASSERT_NE(arr_type, nullptr);
+  ASSERT_EQ(arr_type->size(), 0u);
+  auto* elem_type = arr_type->type();
+  ASSERT_NE(elem_type, nullptr);
+  EXPECT_TRUE(elem_type->IsU32());
+  EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, ConvertType_Array) {
+  auto p = parser(test::Assemble(R"(
+    %uint = OpTypeInt 32 0
+    %uint_42 = OpConstant %uint 42
+    %10 = OpTypeArray %uint %uint_42
+  )"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+
+  auto* type = p->ConvertType(10);
+  ASSERT_NE(type, nullptr);
+  EXPECT_TRUE(type->IsArray());
+  auto* arr_type = type->AsArray();
+  EXPECT_FALSE(arr_type->IsRuntimeArray());
+  ASSERT_NE(arr_type, nullptr);
+  ASSERT_EQ(arr_type->size(), 42u);
+  auto* elem_type = arr_type->type();
+  ASSERT_NE(elem_type, nullptr);
+  EXPECT_TRUE(elem_type->IsU32());
+  EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, ConvertType_ArrayBadLengthIsSpecConstantValue) {
+  auto p = parser(test::Assemble(R"(
+    OpDecorate %uint_42 SpecId 12
+    %uint = OpTypeInt 32 0
+    %uint_42 = OpSpecConstant %uint 42
+    %10 = OpTypeArray %uint %uint_42
+  )"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+
+  auto* type = p->ConvertType(10);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_THAT(p->error(),
+              Eq("Array type 10 length is a specialization constant"));
+}
+
+TEST_F(SpvParserTest, ConvertType_ArrayBadLengthIsSpecConstantExpr) {
+  auto p = parser(test::Assemble(R"(
+    %uint = OpTypeInt 32 0
+    %uint_42 = OpConstant %uint 42
+    %sum = OpSpecConstantOp %uint IAdd %uint_42 %uint_42
+    %10 = OpTypeArray %uint %sum
+  )"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+
+  auto* type = p->ConvertType(10);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_THAT(p->error(),
+              Eq("Array type 10 length is a specialization constant"));
+}
+
+// TODO(dneto): Maybe add a test where the length operand is not a constant.
+// E.g. it's the ID of a type.  That won't validate, and the SPIRV-Tools
+// optimizer representation doesn't handle it and asserts out instead.
+
+TEST_F(SpvParserTest, ConvertType_ArrayBadTooBig) {
+  auto p = parser(test::Assemble(R"(
+    %uint64 = OpTypeInt 64 0
+    %uint64_big = OpConstant %uint64 5000000000
+    %10 = OpTypeArray %uint64 %uint64_big
+  )"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+
+  auto* type = p->ConvertType(10);
+  ASSERT_EQ(type, nullptr);
+  // TODO(dneto): Right now it's rejected earlier in the flow because
+  // we can't even utter the uint64 type.
+  EXPECT_THAT(p->error(), Eq("unhandled integer width: 64"));
 }
 
 }  // namespace

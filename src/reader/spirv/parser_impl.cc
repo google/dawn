@@ -15,6 +15,7 @@
 #include "src/reader/spirv/parser_impl.h"
 
 #include <cstring>
+#include <limits>
 #include <memory>
 #include <string>
 #include <utility>
@@ -24,6 +25,7 @@
 #include "source/opt/module.h"
 #include "source/opt/type_manager.h"
 #include "spirv-tools/libspirv.hpp"
+#include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
@@ -46,6 +48,7 @@ const spv_target_env kTargetEnv = SPV_ENV_WEBGPU_0;
 
 ParserImpl::ParserImpl(Context* ctx, const std::vector<uint32_t>& spv_binary)
     : Reader(ctx),
+      ctx_(ctx),
       spv_binary_(spv_binary),
       fail_stream_(&success_, &errors_),
       namer_(fail_stream_),
@@ -178,6 +181,56 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
             ast_scalar_ty, num_rows, num_columns));
       }
       // In the error case, we'll already have emitted a diagnostic.
+      break;
+    }
+    case spvtools::opt::analysis::Type::kRuntimeArray: {
+      const auto* rtarr_ty = spirv_type->AsRuntimeArray();
+      auto* ast_elem_ty =
+          ConvertType(type_mgr_->GetId(rtarr_ty->element_type()));
+      if (ast_elem_ty != nullptr) {
+        result = ctx_.type_mgr->Get(
+            std::make_unique<ast::type::ArrayType>(ast_elem_ty));
+      }
+      // In the error case, we'll already have emitted a diagnostic.
+      break;
+    }
+    case spvtools::opt::analysis::Type::kArray: {
+      const auto* arr_ty = spirv_type->AsArray();
+      auto* ast_elem_ty = ConvertType(type_mgr_->GetId(arr_ty->element_type()));
+      if (ast_elem_ty == nullptr) {
+        // In the error case, we'll already have emitted a diagnostic.
+        break;
+      }
+      const auto& length_info = arr_ty->length_info();
+      if (length_info.words.empty()) {
+        // The internal representation is invalid. The discriminant vector
+        // is mal-formed.
+        Fail() << "internal error: Array length info is invalid";
+        return nullptr;
+      }
+      if (length_info.words[0] !=
+          spvtools::opt::analysis::Array::LengthInfo::kConstant) {
+        Fail() << "Array type " << type_id
+               << " length is a specialization constant";
+        return nullptr;
+      }
+      const auto* constant =
+          constant_mgr_->FindDeclaredConstant(length_info.id);
+      if (constant == nullptr) {
+        Fail() << "Array type " << type_id << " length ID " << length_info.id
+               << " does not name an OpConstant";
+        return nullptr;
+      }
+      const uint64_t num_elem = constant->GetZeroExtendedValue();
+      // For now, limit to only 32bits.
+      if (num_elem > std::numeric_limits<uint32_t>::max()) {
+        Fail() << "Array type " << type_id
+               << " has too many elements (more than can fit in 32 bits): "
+               << num_elem;
+        return nullptr;
+      }
+      result = ctx_.type_mgr->Get(std::make_unique<ast::type::ArrayType>(
+          ast_elem_ty, static_cast<uint32_t>(num_elem)));
       break;
     }
     default:

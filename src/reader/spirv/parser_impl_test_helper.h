@@ -42,8 +42,8 @@ class SpvParserTest : public testing::Test {
   }
 
   /// Retrieves the parser from the helper
-  /// @param input the string to parse
-  /// @returns the parser implementation
+  /// @param input the SPIR-V binary to parse
+  /// @returns a parser for the given binary
   ParserImpl* parser(const std::vector<uint32_t>& input) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, input);
     return impl_.get();
