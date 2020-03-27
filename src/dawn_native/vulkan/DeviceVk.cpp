@@ -777,6 +777,16 @@ namespace dawn_native { namespace vulkan {
         mRecordingContext.used = false;
         fn.DestroyCommandPool(mVkDevice, mRecordingContext.commandPool, nullptr);
 
+        for (VkSemaphore semaphore : mRecordingContext.waitSemaphores) {
+            fn.DestroySemaphore(mVkDevice, semaphore, nullptr);
+        }
+        mRecordingContext.waitSemaphores.clear();
+
+        for (VkSemaphore semaphore : mRecordingContext.signalSemaphores) {
+            fn.DestroySemaphore(mVkDevice, semaphore, nullptr);
+        }
+        mRecordingContext.signalSemaphores.clear();
+
         // Some operations might have been started since the last submit and waiting
         // on a serial that doesn't have a corresponding fence enqueued. Force all
         // operations to look as if they were completed (because they were).
@@ -790,12 +800,6 @@ namespace dawn_native { namespace vulkan {
             fn.DestroyCommandPool(mVkDevice, commands.pool, nullptr);
         }
         mUnusedCommands.clear();
-
-        // TODO(jiajie.hu@intel.com): In rare cases, a DAWN_TRY() failure may leave semaphores
-        // untagged for deletion. But for most of the time when everything goes well, these
-        // assertions can be helpful in catching bugs.
-        ASSERT(mRecordingContext.waitSemaphores.empty());
-        ASSERT(mRecordingContext.signalSemaphores.empty());
 
         for (VkFence fence : mUnusedFences) {
             fn.DestroyFence(mVkDevice, fence, nullptr);
