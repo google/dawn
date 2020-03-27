@@ -14,6 +14,7 @@
 
 #include "src/ast/float_literal.h"
 
+#include <limits>
 #include <sstream>
 
 namespace tint {

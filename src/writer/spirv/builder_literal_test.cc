@@ -169,4 +169,3 @@ TEST_F(BuilderTest, Literal_F32_Dedup) {
 }  // namespace spirv
 }  // namespace writer
 }  // namespace tint
-;
