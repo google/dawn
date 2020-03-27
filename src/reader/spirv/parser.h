@@ -31,9 +31,9 @@ class ParserImpl;
 class Parser : public Reader {
  public:
   /// Creates a new parser
-  /// @param ctx the context object
+  /// @param ctx the non-null context object
   /// @param input the input data to parse
-  Parser(const Context& ctx, const std::vector<uint32_t>& input);
+  Parser(Context* ctx, const std::vector<uint32_t>& input);
   /// Destructor
   ~Parser() override;
 

@@ -52,5 +52,18 @@ TEST_F(TypeManagerTest, GetDifferentTypeReturnsDifferentPtr) {
   EXPECT_TRUE(t2->IsU32());
 }
 
+TEST_F(TypeManagerTest, ResetClearsPreviousData) {
+  TypeManager tm;
+  auto t = tm.Get(std::make_unique<ast::type::I32Type>());
+  ASSERT_NE(t, nullptr);
+
+  EXPECT_FALSE(tm.TypesForTesting().empty());
+  tm.Reset();
+  EXPECT_TRUE(tm.TypesForTesting().empty());
+
+  auto t2 = tm.Get(std::make_unique<ast::type::I32Type>());
+  ASSERT_NE(t2, nullptr);
+}
+
 }  // namespace
 }  // namespace tint

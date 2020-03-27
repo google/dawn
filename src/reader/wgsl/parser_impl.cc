@@ -71,8 +71,8 @@ namespace tint {
 namespace reader {
 namespace wgsl {
 
-ParserImpl::ParserImpl(const Context& ctx, const std::string& input)
-    : ctx_(ctx), lexer_(std::make_unique<Lexer>(input)) {}
+ParserImpl::ParserImpl(Context* ctx, const std::string& input)
+    : ctx_(*ctx), lexer_(std::make_unique<Lexer>(input)) {}
 
 ParserImpl::~ParserImpl() = default;
 
@@ -134,11 +134,6 @@ ast::type::Type* ParserImpl::get_alias(const std::string& name) {
 }
 
 bool ParserImpl::Parse() {
-  if (ctx_.type_mgr == nullptr) {
-    set_error(peek(), "missing type manager");
-    return false;
-  }
-
   translation_unit();
   return !has_error();
 }
@@ -690,7 +685,7 @@ ast::type::AliasType* ParserImpl::type_alias() {
     }
 
     str->set_name(name);
-    type = ctx_.type_mgr->Get(std::move(str));
+    type = ctx_.type_mgr().Get(std::move(str));
   }
   if (type == nullptr) {
     set_error(peek(), "invalid type for alias");
@@ -698,7 +693,7 @@ ast::type::AliasType* ParserImpl::type_alias() {
   }
 
   auto alias =
-      ctx_.type_mgr->Get(std::make_unique<ast::type::AliasType>(name, type));
+      ctx_.type_mgr().Get(std::make_unique<ast::type::AliasType>(name, type));
   register_alias(name, alias);
 
   return alias->AsAlias();
@@ -738,19 +733,19 @@ ast::type::Type* ParserImpl::type_decl() {
   }
   if (t.IsBool()) {
     next();  // Consume the peek
-    return ctx_.type_mgr->Get(std::make_unique<ast::type::BoolType>());
+    return ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
   }
   if (t.IsF32()) {
     next();  // Consume the peek
-    return ctx_.type_mgr->Get(std::make_unique<ast::type::F32Type>());
+    return ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>());
   }
   if (t.IsI32()) {
     next();  // Consume the peek
-    return ctx_.type_mgr->Get(std::make_unique<ast::type::I32Type>());
+    return ctx_.type_mgr().Get(std::make_unique<ast::type::I32Type>());
   }
   if (t.IsU32()) {
     next();  // Consume the peek
-    return ctx_.type_mgr->Get(std::make_unique<ast::type::U32Type>());
+    return ctx_.type_mgr().Get(std::make_unique<ast::type::U32Type>());
   }
   if (t.IsVec2() || t.IsVec3() || t.IsVec4()) {
     return type_decl_vector(t);
@@ -806,7 +801,7 @@ ast::type::Type* ParserImpl::type_decl_pointer(Token t) {
     return nullptr;
   }
 
-  return ctx_.type_mgr->Get(
+  return ctx_.type_mgr().Get(
       std::make_unique<ast::type::PointerType>(subtype, sc));
 }
 
@@ -839,7 +834,7 @@ ast::type::Type* ParserImpl::type_decl_vector(Token t) {
     return nullptr;
   }
 
-  return ctx_.type_mgr->Get(
+  return ctx_.type_mgr().Get(
       std::make_unique<ast::type::VectorType>(subtype, count));
 }
 
@@ -880,7 +875,7 @@ ast::type::Type* ParserImpl::type_decl_array(Token t) {
     return nullptr;
   }
 
-  return ctx_.type_mgr->Get(
+  return ctx_.type_mgr().Get(
       std::make_unique<ast::type::ArrayType>(subtype, size));
 }
 
@@ -920,7 +915,7 @@ ast::type::Type* ParserImpl::type_decl_matrix(Token t) {
     return nullptr;
   }
 
-  return ctx_.type_mgr->Get(
+  return ctx_.type_mgr().Get(
       std::make_unique<ast::type::MatrixType>(subtype, rows, columns));
 }
 
@@ -1214,7 +1209,7 @@ ast::type::Type* ParserImpl::function_type_decl() {
   auto t = peek();
   if (t.IsVoid()) {
     next();  // Consume the peek
-    return ctx_.type_mgr->Get(std::make_unique<ast::type::VoidType>());
+    return ctx_.type_mgr().Get(std::make_unique<ast::type::VoidType>());
   }
   return type_decl();
 }

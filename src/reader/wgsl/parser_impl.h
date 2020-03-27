@@ -57,9 +57,9 @@ class Lexer;
 class ParserImpl {
  public:
   /// Creates a new parser
-  /// @param ctx the context object
+  /// @param ctx the non-null context object
   /// @param input the input string to parse
-  ParserImpl(const Context& ctx, const std::string& input);
+  ParserImpl(Context* ctx, const std::string& input);
   ~ParserImpl();
 
   /// Run the parser
@@ -351,7 +351,7 @@ class ParserImpl {
   ast::type::Type* type_decl_array(Token t);
   ast::type::Type* type_decl_matrix(Token t);
 
-  const Context& ctx_;
+  Context& ctx_;
   std::string error_;
   std::unique_ptr<Lexer> lexer_;
   std::deque<Token> token_queue_;

@@ -45,9 +45,9 @@ namespace spirv {
 class ParserImpl : Reader {
  public:
   /// Creates a new parser
-  /// @param ctx the context object
+  /// @param ctx the non-null context object
   /// @param input the input data to parse
-  ParserImpl(const Context& ctx, const std::vector<uint32_t>& input);
+  ParserImpl(Context* ctx, const std::vector<uint32_t>& input);
   /// Destructor
   ~ParserImpl() override;
 

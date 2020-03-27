@@ -12,32 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/reader/wgsl/parser.h"
+#include "src/context.h"
 
-#include "src/reader/wgsl/parser_impl.h"
+#include <utility>
+
+#include "src/type_manager.h"
 
 namespace tint {
-namespace reader {
-namespace wgsl {
 
-Parser::Parser(Context* ctx, const std::string& input)
-    : Reader(ctx), impl_(std::make_unique<ParserImpl>(ctx, input)) {}
+Context::Context() = default;
 
-Parser::~Parser() = default;
+Context::~Context() = default;
 
-bool Parser::Parse() {
-  bool ret = impl_->Parse();
-
-  if (impl_->has_error())
-    set_error(impl_->error());
-
-  return ret;
+void Context::Reset() {
+  type_mgr_.Reset();
 }
 
-ast::Module Parser::module() {
-  return impl_->module();
-}
-
-}  // namespace wgsl
-}  // namespace reader
 }  // namespace tint

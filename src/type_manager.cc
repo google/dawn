@@ -22,6 +22,10 @@ TypeManager::TypeManager() = default;
 
 TypeManager::~TypeManager() = default;
 
+void TypeManager::Reset() {
+  types_.clear();
+}
+
 ast::type::Type* TypeManager::Get(std::unique_ptr<ast::type::Type> type) {
   auto name = type->type_name();
 

@@ -21,9 +21,19 @@ namespace tint {
 
 /// Context object for Tint. Holds various global resources used through
 /// the system.
-struct Context {
-  /// Manager to hold all of the various type objects
-  TypeManager* type_mgr = nullptr;
+class Context {
+ public:
+  /// Constructs a context with an empty type manager.
+  Context();
+  /// Destructor
+  ~Context();
+  /// Resets the state of this context.
+  void Reset();
+
+  TypeManager& type_mgr() { return type_mgr_; }
+
+ private:
+  TypeManager type_mgr_;
 };
 
 }  // namespace tint

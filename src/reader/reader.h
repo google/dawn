@@ -42,15 +42,15 @@ class Reader {
 
  protected:
   /// Constructor
-  /// @param ctx the context object
-  explicit Reader(const Context& ctx);
+  /// @param ctx the context object, must be non-null
+  explicit Reader(Context* ctx);
 
   /// Sets the error string
   /// @param msg the error message
   void set_error(const std::string& msg) { error_ = msg; }
 
   /// The Tint context object
-  const Context& ctx_;
+  Context& ctx_;
 
   /// An error message, if an error was encountered
   std::string error_;

@@ -34,26 +34,24 @@ class SpvParserTest : public testing::Test {
   ~SpvParserTest() = default;
 
   /// Sets up the test helper
-  void SetUp() { ctx_.type_mgr = &tm_; }
+  void SetUp() { ctx_.Reset(); }
 
   /// Tears down the test helper
   void TearDown() {
     impl_ = nullptr;
-    ctx_.type_mgr = nullptr;
   }
 
   /// Retrieves the parser from the helper
   /// @param input the string to parse
   /// @returns the parser implementation
   ParserImpl* parser(const std::vector<uint32_t>& input) {
-    impl_ = std::make_unique<ParserImpl>(ctx_, input);
+    impl_ = std::make_unique<ParserImpl>(&ctx_, input);
     return impl_.get();
   }
 
  private:
   std::unique_ptr<ParserImpl> impl_;
   Context ctx_;
-  TypeManager tm_;
 };
 
 }  // namespace spirv

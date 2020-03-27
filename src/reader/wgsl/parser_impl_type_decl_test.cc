@@ -125,22 +125,20 @@ class VecTest : public testing::TestWithParam<VecData> {
   VecTest() = default;
   ~VecTest() = default;
 
-  void SetUp() { ctx_.type_mgr = &tm_; }
+  void SetUp() { ctx_.Reset(); }
 
   void TearDown() {
     impl_ = nullptr;
-    ctx_.type_mgr = nullptr;
   }
 
   ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(ctx_, str);
+    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
     return impl_.get();
   }
 
  private:
   std::unique_ptr<ParserImpl> impl_;
   Context ctx_;
-  TypeManager tm_;
 };
 
 TEST_P(VecTest, Parse) {
@@ -163,22 +161,20 @@ class VecMissingGreaterThanTest : public testing::TestWithParam<VecData> {
   VecMissingGreaterThanTest() = default;
   ~VecMissingGreaterThanTest() = default;
 
-  void SetUp() { ctx_.type_mgr = &tm_; }
+  void SetUp() { ctx_.Reset(); }
 
   void TearDown() {
     impl_ = nullptr;
-    ctx_.type_mgr = nullptr;
   }
 
   ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(ctx_, str);
+    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
     return impl_.get();
   }
 
  private:
   std::unique_ptr<ParserImpl> impl_;
   Context ctx_;
-  TypeManager tm_;
 };
 
 TEST_P(VecMissingGreaterThanTest, Handles_Missing_GreaterThan) {
@@ -200,22 +196,20 @@ class VecMissingLessThanTest : public testing::TestWithParam<VecData> {
   VecMissingLessThanTest() = default;
   ~VecMissingLessThanTest() = default;
 
-  void SetUp() { ctx_.type_mgr = &tm_; }
+  void SetUp() { ctx_.Reset(); }
 
   void TearDown() {
     impl_ = nullptr;
-    ctx_.type_mgr = nullptr;
   }
 
   ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(ctx_, str);
+    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
     return impl_.get();
   }
 
  private:
   std::unique_ptr<ParserImpl> impl_;
   Context ctx_;
-  TypeManager tm_;
 };
 
 TEST_P(VecMissingLessThanTest, Handles_Missing_GreaterThan) {
@@ -237,22 +231,20 @@ class VecBadType : public testing::TestWithParam<VecData> {
   VecBadType() = default;
   ~VecBadType() = default;
 
-  void SetUp() { ctx_.type_mgr = &tm_; }
+  void SetUp() { ctx_.Reset(); }
 
   void TearDown() {
     impl_ = nullptr;
-    ctx_.type_mgr = nullptr;
   }
 
   ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(ctx_, str);
+    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
     return impl_.get();
   }
 
  private:
   std::unique_ptr<ParserImpl> impl_;
   Context ctx_;
-  TypeManager tm_;
 };
 
 TEST_P(VecBadType, Handles_Unknown_Type) {
@@ -274,22 +266,20 @@ class VecMissingType : public testing::TestWithParam<VecData> {
   VecMissingType() = default;
   ~VecMissingType() = default;
 
-  void SetUp() { ctx_.type_mgr = &tm_; }
+  void SetUp() { ctx_.Reset(); }
 
   void TearDown() {
     impl_ = nullptr;
-    ctx_.type_mgr = nullptr;
   }
 
   ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(ctx_, str);
+    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
     return impl_.get();
   }
 
  private:
   std::unique_ptr<ParserImpl> impl_;
   Context ctx_;
-  TypeManager tm_;
 };
 
 TEST_P(VecMissingType, Handles_Missing_Type) {
@@ -493,22 +483,20 @@ class MatrixTest : public testing::TestWithParam<MatrixData> {
   MatrixTest() = default;
   ~MatrixTest() = default;
 
-  void SetUp() { ctx_.type_mgr = &tm_; }
+  void SetUp() { ctx_.Reset(); }
 
   void TearDown() {
     impl_ = nullptr;
-    ctx_.type_mgr = nullptr;
   }
 
   ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(ctx_, str);
+    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
     return impl_.get();
   }
 
  private:
   std::unique_ptr<ParserImpl> impl_;
   Context ctx_;
-  TypeManager tm_;
 };
 
 TEST_P(MatrixTest, Parse) {
@@ -539,22 +527,20 @@ class MatrixMissingGreaterThanTest : public testing::TestWithParam<MatrixData> {
   MatrixMissingGreaterThanTest() = default;
   ~MatrixMissingGreaterThanTest() = default;
 
-  void SetUp() { ctx_.type_mgr = &tm_; }
+  void SetUp() { ctx_.Reset(); }
 
   void TearDown() {
     impl_ = nullptr;
-    ctx_.type_mgr = nullptr;
   }
 
   ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(ctx_, str);
+    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
     return impl_.get();
   }
 
  private:
   std::unique_ptr<ParserImpl> impl_;
   Context ctx_;
-  TypeManager tm_;
 };
 TEST_P(MatrixMissingGreaterThanTest, Handles_Missing_GreaterThan) {
   auto params = GetParam();
@@ -581,22 +567,20 @@ class MatrixMissingLessThanTest : public testing::TestWithParam<MatrixData> {
   MatrixMissingLessThanTest() = default;
   ~MatrixMissingLessThanTest() = default;
 
-  void SetUp() { ctx_.type_mgr = &tm_; }
+  void SetUp() { ctx_.Reset(); }
 
   void TearDown() {
     impl_ = nullptr;
-    ctx_.type_mgr = nullptr;
   }
 
   ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(ctx_, str);
+    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
     return impl_.get();
   }
 
  private:
   std::unique_ptr<ParserImpl> impl_;
   Context ctx_;
-  TypeManager tm_;
 };
 TEST_P(MatrixMissingLessThanTest, Handles_Missing_GreaterThan) {
   auto params = GetParam();
@@ -623,22 +607,20 @@ class MatrixBadType : public testing::TestWithParam<MatrixData> {
   MatrixBadType() = default;
   ~MatrixBadType() = default;
 
-  void SetUp() { ctx_.type_mgr = &tm_; }
+  void SetUp() { ctx_.Reset(); }
 
   void TearDown() {
     impl_ = nullptr;
-    ctx_.type_mgr = nullptr;
   }
 
   ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(ctx_, str);
+    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
     return impl_.get();
   }
 
  private:
   std::unique_ptr<ParserImpl> impl_;
   Context ctx_;
-  TypeManager tm_;
 };
 TEST_P(MatrixBadType, Handles_Unknown_Type) {
   auto params = GetParam();
@@ -665,22 +647,20 @@ class MatrixMissingType : public testing::TestWithParam<MatrixData> {
   MatrixMissingType() = default;
   ~MatrixMissingType() = default;
 
-  void SetUp() { ctx_.type_mgr = &tm_; }
+  void SetUp() { ctx_.Reset(); }
 
   void TearDown() {
     impl_ = nullptr;
-    ctx_.type_mgr = nullptr;
   }
 
   ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(ctx_, str);
+    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
     return impl_.get();
   }
 
  private:
   std::unique_ptr<ParserImpl> impl_;
   Context ctx_;
-  TypeManager tm_;
 };
 TEST_P(MatrixMissingType, Handles_Missing_Type) {
   auto params = GetParam();

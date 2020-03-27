@@ -25,19 +25,15 @@ namespace {
 using ParserTest = testing::Test;
 
 TEST_F(ParserTest, Empty) {
-  TypeManager tm;
   Context ctx;
-  ctx.type_mgr = &tm;
-  Parser p(ctx, "");
+  Parser p(&ctx, "");
   ASSERT_TRUE(p.Parse()) << p.error();
 }
 
 TEST_F(ParserTest, DISABLED_Parses) {
-  TypeManager tm;
   Context ctx;
-  ctx.type_mgr = &tm;
 
-  Parser p(ctx, R"(
+  Parser p(&ctx, R"(
 import "GLSL.std.430" as glsl;
 
 [[location 0]] var<out> gl_FragColor : vec4<f32>;
@@ -56,7 +52,7 @@ fn main() -> void {
 
 TEST_F(ParserTest, DISABLED_HandlesError) {
   Context ctx;
-  Parser p(ctx, R"(
+  Parser p(&ctx, R"(
 import "GLSL.std.430" as glsl;
 
 fn main() ->  {  # missing return type

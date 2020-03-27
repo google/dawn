@@ -30,7 +30,7 @@ using ParserTest = testing::Test;
 TEST_F(ParserTest, Uint32VecEmpty) {
   std::vector<uint32_t> data;
   Context ctx;
-  Parser p(ctx, data);
+  Parser p(&ctx, data);
   EXPECT_FALSE(p.Parse());
   // TODO(dneto): What message?
 }

@@ -252,10 +252,7 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
-  tint::TypeManager type_manager;
-
   tint::Context ctx;
-  ctx.type_mgr = &type_manager;
 
   std::unique_ptr<tint::reader::Reader> reader;
 #if TINT_BUILD_WGSL_READER
@@ -267,7 +264,7 @@ int main(int argc, const char** argv) {
       return 1;
     }
     reader = std::make_unique<tint::reader::wgsl::Parser>(
-        ctx, std::string(data.begin(), data.end()));
+        &ctx, std::string(data.begin(), data.end()));
   }
 #endif  // TINT_BUILD_WGSL_READER
 
@@ -279,7 +276,7 @@ int main(int argc, const char** argv) {
     if (!ReadFile<uint32_t>(options.input_filename, &data)) {
       return 1;
     }
-    reader = std::make_unique<tint::reader::spirv::Parser>(ctx, data);
+    reader = std::make_unique<tint::reader::spirv::Parser>(&ctx, data);
   }
 #endif  // TINT_BUILD_SPV_READER
 

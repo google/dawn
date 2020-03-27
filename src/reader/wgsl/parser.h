@@ -30,9 +30,9 @@ class ParserImpl;
 class Parser : public Reader {
  public:
   /// Creates a new parser
-  /// @param ctx the context object
+  /// @param ctx the non-null context object
   /// @param input the input string to parse
-  Parser(const Context& ctx, const std::string& input);
+  Parser(Context* ctx, const std::string& input);
   ~Parser() override;
 
   /// Run the parser

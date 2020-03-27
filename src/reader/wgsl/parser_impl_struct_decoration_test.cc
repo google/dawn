@@ -37,22 +37,20 @@ class StructDecorationTest
   StructDecorationTest() = default;
   ~StructDecorationTest() = default;
 
-  void SetUp() { ctx_.type_mgr = &tm_; }
+  void SetUp() { ctx_.Reset(); }
 
   void TearDown() {
     impl_ = nullptr;
-    ctx_.type_mgr = nullptr;
   }
 
   ParserImpl* parser(const std::string& str) {
-    impl_ = std::make_unique<ParserImpl>(ctx_, str);
+    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
     return impl_.get();
   }
 
  private:
   std::unique_ptr<ParserImpl> impl_;
   Context ctx_;
-  TypeManager tm_;
 };
 
 TEST_P(StructDecorationTest, Parses) {

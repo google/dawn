@@ -181,6 +181,8 @@ set(TINT_LIB_SRCS
   ast/variable_decoration.h
   ast/variable_statement.cc
   ast/variable_statement.h
+  context.h
+  context.cc
   reader/reader.cc
   reader/reader.h
   source.h
