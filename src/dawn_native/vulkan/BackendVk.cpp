@@ -196,9 +196,9 @@ namespace dawn_native { namespace vulkan {
             layersToRequest.push_back(kLayerNameFuchsiaImagePipeSwapchain);
             usedKnobs.fuchsiaImagePipeSwapchain = true;
         }
-        if (mGlobalInfo.macosSurface) {
-            extensionsToRequest.push_back(kExtensionNameMvkMacosSurface);
-            usedKnobs.macosSurface = true;
+        if (mGlobalInfo.metalSurface) {
+            extensionsToRequest.push_back(kExtensionNameExtMetalSurface);
+            usedKnobs.metalSurface = true;
         }
         if (mGlobalInfo.surface) {
             extensionsToRequest.push_back(kExtensionNameKhrSurface);

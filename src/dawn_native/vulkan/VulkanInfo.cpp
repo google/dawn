@@ -56,7 +56,7 @@ namespace dawn_native { namespace vulkan {
 
     const char kExtensionNameExtDebugMarker[] = "VK_EXT_debug_marker";
     const char kExtensionNameExtDebugReport[] = "VK_EXT_debug_report";
-    const char kExtensionNameMvkMacosSurface[] = "VK_MVK_macos_surface";
+    const char kExtensionNameExtMetalSurface[] = "VK_EXT_metal_surface";
     const char kExtensionNameKhrExternalMemory[] = "VK_KHR_external_memory";
     const char kExtensionNameKhrExternalMemoryCapabilities[] =
         "VK_KHR_external_memory_capabilities";
@@ -130,8 +130,8 @@ namespace dawn_native { namespace vulkan {
                 if (IsExtensionName(extension, kExtensionNameExtDebugReport)) {
                     info.debugReport = true;
                 }
-                if (IsExtensionName(extension, kExtensionNameMvkMacosSurface)) {
-                    info.macosSurface = true;
+                if (IsExtensionName(extension, kExtensionNameExtMetalSurface)) {
+                    info.metalSurface = true;
                 }
                 if (IsExtensionName(extension, kExtensionNameKhrExternalMemoryCapabilities)) {
                     info.externalMemoryCapabilities = true;

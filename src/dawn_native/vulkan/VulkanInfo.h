@@ -32,7 +32,7 @@ namespace dawn_native { namespace vulkan {
 
     extern const char kExtensionNameExtDebugMarker[];
     extern const char kExtensionNameExtDebugReport[];
-    extern const char kExtensionNameMvkMacosSurface[];
+    extern const char kExtensionNameExtMetalSurface[];
     extern const char kExtensionNameKhrExternalMemory[];
     extern const char kExtensionNameKhrExternalMemoryCapabilities[];
     extern const char kExtensionNameKhrExternalMemoryFD[];
@@ -66,7 +66,7 @@ namespace dawn_native { namespace vulkan {
         bool externalMemoryCapabilities = false;
         bool externalSemaphoreCapabilities = false;
         bool getPhysicalDeviceProperties2 = false;
-        bool macosSurface = false;
+        bool metalSurface = false;
         bool surface = false;
         bool waylandSurface = false;
         bool win32Surface = false;
