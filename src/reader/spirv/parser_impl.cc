@@ -183,6 +183,7 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
       break;
     }
     case spvtools::opt::analysis::Type::kRuntimeArray: {
+      // TODO(dneto): Handle ArrayStride. Blocked by crbug.com/tint/30
       const auto* rtarr_ty = spirv_type->AsRuntimeArray();
       auto* ast_elem_ty =
           ConvertType(type_mgr_->GetId(rtarr_ty->element_type()));
@@ -194,6 +195,7 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
       break;
     }
     case spvtools::opt::analysis::Type::kArray: {
+      // TODO(dneto): Handle ArrayStride. Blocked by crbug.com/tint/30
       const auto* arr_ty = spirv_type->AsArray();
       auto* ast_elem_ty = ConvertType(type_mgr_->GetId(arr_ty->element_type()));
       if (ast_elem_ty == nullptr) {
