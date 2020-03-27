@@ -69,6 +69,66 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedAlias) {
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
+TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
+  ast::type::I32Type i32;
+  ast::type::ArrayType ary(&i32);
+
+  Builder b;
+  auto id = b.GenerateTypeIfNeeded(&ary);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1, id);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+%1 = OpTypeRuntimeArray %2
+)");
+}
+
+TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
+  ast::type::I32Type i32;
+  ast::type::ArrayType ary(&i32);
+
+  Builder b;
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1);
+  ASSERT_FALSE(b.has_error()) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+%1 = OpTypeRuntimeArray %2
+)");
+}
+
+TEST_F(BuilderTest_Type, GenerateArray) {
+  ast::type::I32Type i32;
+  ast::type::ArrayType ary(&i32, 4);
+
+  Builder b;
+  auto id = b.GenerateTypeIfNeeded(&ary);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1, id);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+%3 = OpTypeInt 32 0
+%4 = OpConstant %3 4
+%1 = OpTypeArray %2 %4
+)");
+}
+
+TEST_F(BuilderTest_Type, ReturnsGeneratedArray) {
+  ast::type::I32Type i32;
+  ast::type::ArrayType ary(&i32, 4);
+
+  Builder b;
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1);
+  ASSERT_FALSE(b.has_error()) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+%3 = OpTypeInt 32 0
+%4 = OpConstant %3 4
+%1 = OpTypeArray %2 %4
+)");
+}
+
 TEST_F(BuilderTest_Type, GenerateBool) {
   ast::type::BoolType bool_type;
 

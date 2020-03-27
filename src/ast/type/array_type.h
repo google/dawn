@@ -34,7 +34,7 @@ class ArrayType : public Type {
   /// Constructor
   /// @param subtype the type of the array elements
   /// @param size the number of elements in the array
-  ArrayType(Type* subtype, size_t size);
+  ArrayType(Type* subtype, uint32_t size);
   /// Move constructor
   ArrayType(ArrayType&&) = default;
   ~ArrayType() override;
@@ -48,9 +48,9 @@ class ArrayType : public Type {
   /// @returns the array type
   Type* type() const { return subtype_; }
   /// @returns the array size. Size is 0 for a runtime array
-  size_t size() const { return size_; }
+  uint32_t size() const { return size_; }
 
-  /// @returns the name for th type
+  /// @returns the name for the type
   std::string type_name() const override {
     assert(subtype_);
 
@@ -63,7 +63,7 @@ class ArrayType : public Type {
 
  private:
   Type* subtype_ = nullptr;
-  size_t size_ = 0;
+  uint32_t size_ = 0;
 };
 
 }  // namespace type

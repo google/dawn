@@ -145,6 +145,11 @@ class Builder {
   /// @param type the type to create
   /// @returns the ID to use for the given type. Returns 0 on unknown type.
   uint32_t GenerateTypeIfNeeded(ast::type::Type* type);
+  /// Generates an array type declaration
+  /// @param ary the array to generate
+  /// @param result the result operand
+  /// @returns true if the array was successfully generated
+  bool GenerateArrayType(ast::type::ArrayType* ary, const Operand& result);
   /// Generates a matrix type declaration
   /// @param mat the matrix to generate
   /// @param result the result operand

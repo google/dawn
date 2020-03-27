@@ -22,8 +22,10 @@
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
+#include "src/ast/type/array_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/struct_type.h"
+#include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/uint_literal.h"
 
@@ -266,7 +268,11 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
   auto result = result_op();
   auto id = result.to_i();
 
-  if (type->IsBool()) {
+  if (type->IsArray()) {
+    if (!GenerateArrayType(type->AsArray(), result)) {
+      return 0;
+    }
+  } else if (type->IsBool()) {
     push_type(spv::Op::OpTypeBool, {result});
   } else if (type->IsF32()) {
     push_type(spv::Op::OpTypeFloat, {result, Operand::Int(32)});
@@ -295,6 +301,29 @@ uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
 
   type_name_to_id_[type->type_name()] = id;
   return id;
+}
+
+bool Builder::GenerateArrayType(ast::type::ArrayType* ary,
+                                const Operand& result) {
+  auto elem_type = GenerateTypeIfNeeded(ary->type());
+  if (elem_type == 0) {
+    return false;
+  }
+
+  if (ary->IsRuntimeArray()) {
+    push_type(spv::Op::OpTypeRuntimeArray, {result, Operand::Int(elem_type)});
+  } else {
+    ast::type::U32Type u32;
+    ast::IntLiteral ary_size(&u32, ary->size());
+    auto len_id = GenerateLiteralIfNeeded(&ary_size);
+    if (len_id == 0) {
+      return false;
+    }
+
+    push_type(spv::Op::OpTypeArray,
+              {result, Operand::Int(elem_type), Operand::Int(len_id)});
+  }
+  return true;
 }
 
 bool Builder::GenerateMatrixType(ast::type::MatrixType* mat,

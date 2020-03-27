@@ -20,7 +20,7 @@ namespace type {
 
 ArrayType::ArrayType(Type* subtype) : subtype_(subtype) {}
 
-ArrayType::ArrayType(Type* subtype, size_t size)
+ArrayType::ArrayType(Type* subtype, uint32_t size)
     : subtype_(subtype), size_(size) {}
 
 ArrayType::~ArrayType() = default;
