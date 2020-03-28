@@ -61,7 +61,7 @@ class Literal {
 
  protected:
   /// Constructor
-  Literal(ast::type::Type* type);
+  explicit Literal(ast::type::Type* type);
 
  private:
   ast::type::Type* type_ = nullptr;
