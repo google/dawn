@@ -14,9 +14,9 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/bool_literal.h"
-#include "src/ast/const_initializer_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/relational_expression.h"
+#include "src/ast/scalar_constructor_expression.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
@@ -40,9 +40,9 @@ TEST_F(ParserImplTest, ShiftExpression_Parses_ShiftLeft) {
   ASSERT_EQ(ident->name().size(), 1);
   EXPECT_EQ(ident->name()[0], "a");
 
-  ASSERT_TRUE(rel->rhs()->IsInitializer());
-  ASSERT_TRUE(rel->rhs()->AsInitializer()->IsConstInitializer());
-  auto init = rel->rhs()->AsInitializer()->AsConstInitializer();
+  ASSERT_TRUE(rel->rhs()->IsConstructor());
+  ASSERT_TRUE(rel->rhs()->AsConstructor()->IsScalarConstructor());
+  auto init = rel->rhs()->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(init->literal()->IsBool());
   ASSERT_TRUE(init->literal()->AsBool()->IsTrue());
 }
@@ -62,9 +62,9 @@ TEST_F(ParserImplTest, ShiftExpression_Parses_ShiftRight) {
   ASSERT_EQ(ident->name().size(), 1);
   EXPECT_EQ(ident->name()[0], "a");
 
-  ASSERT_TRUE(rel->rhs()->IsInitializer());
-  ASSERT_TRUE(rel->rhs()->AsInitializer()->IsConstInitializer());
-  auto init = rel->rhs()->AsInitializer()->AsConstInitializer();
+  ASSERT_TRUE(rel->rhs()->IsConstructor());
+  ASSERT_TRUE(rel->rhs()->AsConstructor()->IsScalarConstructor());
+  auto init = rel->rhs()->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(init->literal()->IsBool());
   ASSERT_TRUE(init->literal()->AsBool()->IsTrue());
 }
@@ -84,9 +84,9 @@ TEST_F(ParserImplTest, ShiftExpression_Parses_ShiftRightArith) {
   ASSERT_EQ(ident->name().size(), 1);
   EXPECT_EQ(ident->name()[0], "a");
 
-  ASSERT_TRUE(rel->rhs()->IsInitializer());
-  ASSERT_TRUE(rel->rhs()->AsInitializer()->IsConstInitializer());
-  auto init = rel->rhs()->AsInitializer()->AsConstInitializer();
+  ASSERT_TRUE(rel->rhs()->IsConstructor());
+  ASSERT_TRUE(rel->rhs()->AsConstructor()->IsScalarConstructor());
+  auto init = rel->rhs()->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(init->literal()->IsBool());
   ASSERT_TRUE(init->literal()->AsBool()->IsTrue());
 }

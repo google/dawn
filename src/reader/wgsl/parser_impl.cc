@@ -25,7 +25,6 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/cast_expression.h"
-#include "src/ast/const_initializer_expression.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/else_statement.h"
@@ -40,6 +39,7 @@
 #include "src/ast/nop_statement.h"
 #include "src/ast/relational_expression.h"
 #include "src/ast/return_statement.h"
+#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/statement_condition.h"
 #include "src/ast/struct_member_offset_decoration.h"
@@ -55,7 +55,7 @@
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
-#include "src/ast/type_initializer_expression.h"
+#include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_derivative.h"
 #include "src/ast/unary_derivative_expression.h"
@@ -347,7 +347,7 @@ std::unique_ptr<ast::Variable> ParserImpl::global_variable_decl() {
       return nullptr;
     }
 
-    var->set_initializer(std::move(expr));
+    var->set_constructor(std::move(expr));
   }
   return var;
 }
@@ -386,10 +386,10 @@ std::unique_ptr<ast::Variable> ParserImpl::global_constant_decl() {
   if (has_error())
     return nullptr;
   if (init == nullptr) {
-    set_error(peek(), "error parsing constant initializer");
+    set_error(peek(), "error parsing scalar constructor");
     return nullptr;
   }
-  var->set_initializer(std::move(init));
+  var->set_constructor(std::move(init));
 
   return var;
 }
@@ -1689,18 +1689,18 @@ std::unique_ptr<ast::VariableStatement> ParserImpl::variable_stmt() {
       return nullptr;
     }
 
-    auto initializer = logical_or_expression();
+    auto constructor = logical_or_expression();
     if (has_error())
       return nullptr;
-    if (initializer == nullptr) {
-      set_error(peek(), "missing initializer for const declaration");
+    if (constructor == nullptr) {
+      set_error(peek(), "missing constructor for const declaration");
       return nullptr;
     }
 
     auto var = std::make_unique<ast::Variable>(source, name,
                                                ast::StorageClass::kNone, type);
     var->set_is_const(true);
-    var->set_initializer(std::move(initializer));
+    var->set_constructor(std::move(constructor));
 
     return std::make_unique<ast::VariableStatement>(source, std::move(var));
   }
@@ -1714,14 +1714,14 @@ std::unique_ptr<ast::VariableStatement> ParserImpl::variable_stmt() {
   t = peek();
   if (t.IsEqual()) {
     next();  // Consume the peek
-    auto initializer = logical_or_expression();
+    auto constructor = logical_or_expression();
     if (has_error())
       return nullptr;
-    if (initializer == nullptr) {
-      set_error(peek(), "missing initializer for variable declaration");
+    if (constructor == nullptr) {
+      set_error(peek(), "missing constructor for variable declaration");
       return nullptr;
     }
-    var->set_initializer(std::move(initializer));
+    var->set_constructor(std::move(constructor));
   }
 
   return std::make_unique<ast::VariableStatement>(source, std::move(var));
@@ -2137,7 +2137,7 @@ std::unique_ptr<ast::Literal> ParserImpl::const_literal() {
 // const_expr
 //   : type_decl PAREN_LEFT (const_expr COMMA)? const_expr PAREN_RIGHT
 //   | const_literal
-std::unique_ptr<ast::InitializerExpression> ParserImpl::const_expr() {
+std::unique_ptr<ast::ConstructorExpression> ParserImpl::const_expr() {
   auto t = peek();
   auto source = t.source();
 
@@ -2145,7 +2145,7 @@ std::unique_ptr<ast::InitializerExpression> ParserImpl::const_expr() {
   if (type != nullptr) {
     t = next();
     if (!t.IsParenLeft()) {
-      set_error(t, "missing ( for type initializer");
+      set_error(t, "missing ( for type constructor");
       return nullptr;
     }
 
@@ -2177,10 +2177,10 @@ std::unique_ptr<ast::InitializerExpression> ParserImpl::const_expr() {
 
     t = next();
     if (!t.IsParenRight()) {
-      set_error(t, "missing ) for type initializer");
+      set_error(t, "missing ) for type constructor");
       return nullptr;
     }
-    return std::make_unique<ast::TypeInitializerExpression>(source, type,
+    return std::make_unique<ast::TypeConstructorExpression>(source, type,
                                                             std::move(params));
   }
 
@@ -2191,8 +2191,8 @@ std::unique_ptr<ast::InitializerExpression> ParserImpl::const_expr() {
     set_error(peek(), "unable to parse const literal");
     return nullptr;
   }
-  return std::make_unique<ast::ConstInitializerExpression>(source,
-                                                           std::move(lit));
+  return std::make_unique<ast::ScalarConstructorExpression>(source,
+                                                            std::move(lit));
 }
 
 // primary_expression
@@ -2210,8 +2210,8 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
   if (has_error())
     return nullptr;
   if (lit != nullptr) {
-    return std::make_unique<ast::ConstInitializerExpression>(source,
-                                                             std::move(lit));
+    return std::make_unique<ast::ScalarConstructorExpression>(source,
+                                                              std::move(lit));
   }
 
   t = peek();
@@ -2293,7 +2293,7 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
   if (type != nullptr) {
     t = next();
     if (!t.IsParenLeft()) {
-      set_error(t, "missing ( for type initializer");
+      set_error(t, "missing ( for type constructor");
       return nullptr;
     }
 
@@ -2303,10 +2303,10 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
 
     t = next();
     if (!t.IsParenRight()) {
-      set_error(t, "missing ) for type initializer");
+      set_error(t, "missing ) for type constructor");
       return nullptr;
     }
-    return std::make_unique<ast::TypeInitializerExpression>(source, type,
+    return std::make_unique<ast::TypeConstructorExpression>(source, type,
                                                             std::move(params));
   }
   return nullptr;

@@ -36,7 +36,7 @@ class RegardlessStatement : public Statement {
   RegardlessStatement(std::unique_ptr<Expression> condition,
                       std::vector<std::unique_ptr<Statement>> body);
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the regardless statement source
   /// @param condition the condition expression
   /// @param body the body statements
   RegardlessStatement(const Source& source,

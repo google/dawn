@@ -26,7 +26,7 @@ class NopStatement : public Statement {
   /// Constructor
   NopStatement();
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the nop statement source
   explicit NopStatement(const Source& source);
   /// Move constructor
   NopStatement(NopStatement&&) = default;

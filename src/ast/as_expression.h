@@ -36,7 +36,7 @@ class AsExpression : public Expression {
   /// @param expr the expr
   AsExpression(type::Type* type, std::unique_ptr<Expression> expr);
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the as expression source
   /// @param type the type
   /// @param expr the expr
   AsExpression(const Source& source,

@@ -36,7 +36,7 @@ class UnlessStatement : public Statement {
   UnlessStatement(std::unique_ptr<Expression> condition,
                   std::vector<std::unique_ptr<Statement>> body);
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the unless statement source
   /// @param condition the condition expression
   /// @param body the body statements
   UnlessStatement(const Source& source,

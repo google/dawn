@@ -20,13 +20,13 @@
 #include "src/ast/binding_decoration.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/builtin_decoration.h"
-#include "src/ast/const_initializer_expression.h"
+#include "src/ast/constructor_expression.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
-#include "src/ast/initializer_expression.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/return_statement.h"
+#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
@@ -37,7 +37,7 @@
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
-#include "src/ast/type_initializer_expression.h"
+#include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 
 namespace tint {
@@ -173,8 +173,8 @@ bool Builder::GenerateEntryPoint(ast::EntryPoint* ep) {
 }
 
 uint32_t Builder::GenerateExpression(ast::Expression* expr) {
-  if (expr->IsInitializer()) {
-    return GenerateInitializerExpression(expr->AsInitializer(), false);
+  if (expr->IsConstructor()) {
+    return GenerateConstructorExpression(expr->AsConstructor(), false);
   }
 
   error_ = "unknown expression type";
@@ -239,13 +239,13 @@ uint32_t Builder::GenerateFunctionTypeIfNeeded(ast::Function* func) {
 
 bool Builder::GenerateGlobalVariable(ast::Variable* var) {
   uint32_t init_id = 0;
-  if (var->has_initializer()) {
-    if (!var->initializer()->IsInitializer()) {
-      error_ = "constant initializer expected";
+  if (var->has_constructor()) {
+    if (!var->constructor()->IsConstructor()) {
+      error_ = "scalar constructor expected";
       return false;
     }
 
-    init_id = GenerateInitializerExpression(var->initializer()->AsInitializer(),
+    init_id = GenerateConstructorExpression(var->constructor()->AsConstructor(),
                                             true);
     if (init_id == 0) {
       return false;
@@ -253,8 +253,8 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
   }
 
   if (var->is_const()) {
-    if (!var->has_initializer()) {
-      error_ = "missing initializer for constant";
+    if (!var->has_constructor()) {
+      error_ = "missing constructor for constant";
       return false;
     }
 
@@ -280,7 +280,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
 
   std::vector<Operand> ops = {Operand::Int(type_id), result,
                               Operand::Int(ConvertStorageClass(sc))};
-  if (var->has_initializer()) {
+  if (var->has_constructor()) {
     ops.push_back(Operand::Int(init_id));
   }
 
@@ -327,14 +327,14 @@ void Builder::GenerateImport(ast::Import* imp) {
   import_name_to_id_[imp->name()] = id;
 }
 
-uint32_t Builder::GenerateInitializerExpression(
-    ast::InitializerExpression* expr,
+uint32_t Builder::GenerateConstructorExpression(
+    ast::ConstructorExpression* expr,
     bool is_global_init) {
-  if (expr->IsConstInitializer()) {
-    return GenerateLiteralIfNeeded(expr->AsConstInitializer()->literal());
+  if (expr->IsScalarConstructor()) {
+    return GenerateLiteralIfNeeded(expr->AsScalarConstructor()->literal());
   }
-  if (expr->IsTypeInitializer()) {
-    auto init = expr->AsTypeInitializer();
+  if (expr->IsTypeConstructor()) {
+    auto init = expr->AsTypeConstructor();
     auto type_id = GenerateTypeIfNeeded(init->type());
     if (type_id == 0) {
       return 0;
@@ -345,12 +345,12 @@ uint32_t Builder::GenerateInitializerExpression(
 
     std::vector<Operand> ops;
     for (const auto& e : init->values()) {
-      if (is_global_init && !e->IsInitializer()) {
-        error_ = "initializer must be a constant expression";
+      if (is_global_init && !e->IsConstructor()) {
+        error_ = "constructor must be a constant expression";
         return 0;
       }
       auto id =
-          GenerateInitializerExpression(e->AsInitializer(), is_global_init);
+          GenerateConstructorExpression(e->AsConstructor(), is_global_init);
       if (id == 0) {
         return 0;
       }
@@ -375,7 +375,7 @@ uint32_t Builder::GenerateInitializerExpression(
     return result.to_i();
   }
 
-  error_ = "unknown initializer expression";
+  error_ = "unknown constructor expression";
   return 0;
 }
 

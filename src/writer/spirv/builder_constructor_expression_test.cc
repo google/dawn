@@ -17,12 +17,12 @@
 #include "gtest/gtest.h"
 #include "spirv/unified1/spirv.h"
 #include "spirv/unified1/spirv.hpp11"
-#include "src/ast/const_initializer_expression.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/relational_expression.h"
+#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/vector_type.h"
-#include "src/ast/type_initializer_expression.h"
+#include "src/ast/type_constructor_expression.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
 
@@ -33,13 +33,13 @@ namespace {
 
 using BuilderTest = testing::Test;
 
-TEST_F(BuilderTest, Initializer_Const) {
+TEST_F(BuilderTest, Constructor_Const) {
   ast::type::F32Type f32;
   auto fl = std::make_unique<ast::FloatLiteral>(&f32, 42.2f);
-  ast::ConstInitializerExpression c(std::move(fl));
+  ast::ScalarConstructorExpression c(std::move(fl));
 
   Builder b;
-  EXPECT_EQ(b.GenerateInitializerExpression(&c, true), 2);
+  EXPECT_EQ(b.GenerateConstructorExpression(&c, true), 2);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
@@ -47,22 +47,22 @@ TEST_F(BuilderTest, Initializer_Const) {
 )");
 }
 
-TEST_F(BuilderTest, Initializer_Type) {
+TEST_F(BuilderTest, Constructor_Type) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
 
   std::vector<std::unique_ptr<ast::Expression>> vals;
-  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
 
-  ast::TypeInitializerExpression t(&vec, std::move(vals));
+  ast::TypeConstructorExpression t(&vec, std::move(vals));
 
   Builder b;
-  EXPECT_EQ(b.GenerateInitializerExpression(&t, true), 5);
+  EXPECT_EQ(b.GenerateConstructorExpression(&t, true), 5);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
@@ -73,47 +73,47 @@ TEST_F(BuilderTest, Initializer_Type) {
 )");
 }
 
-TEST_F(BuilderTest, Initializer_Type_Dedups) {
+TEST_F(BuilderTest, Constructor_Type_Dedups) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
 
   std::vector<std::unique_ptr<ast::Expression>> vals;
-  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
 
-  ast::TypeInitializerExpression t(&vec, std::move(vals));
+  ast::TypeConstructorExpression t(&vec, std::move(vals));
 
   Builder b;
-  EXPECT_EQ(b.GenerateInitializerExpression(&t, true), 5);
-  EXPECT_EQ(b.GenerateInitializerExpression(&t, true), 5);
+  EXPECT_EQ(b.GenerateConstructorExpression(&t, true), 5);
+  EXPECT_EQ(b.GenerateConstructorExpression(&t, true), 5);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
-TEST_F(BuilderTest, Initializer_NonConst_Type_Fails) {
+TEST_F(BuilderTest, Constructor_NonConst_Type_Fails) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 2);
   auto rel = std::make_unique<ast::RelationalExpression>(
       ast::Relation::kAdd,
-      std::make_unique<ast::ConstInitializerExpression>(
+      std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::FloatLiteral>(&f32, 3.0f)),
-      std::make_unique<ast::ConstInitializerExpression>(
+      std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
 
   std::vector<std::unique_ptr<ast::Expression>> vals;
-  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
   vals.push_back(std::move(rel));
 
-  ast::TypeInitializerExpression t(&vec, std::move(vals));
+  ast::TypeConstructorExpression t(&vec, std::move(vals));
 
   Builder b;
-  EXPECT_EQ(b.GenerateInitializerExpression(&t, true), 0);
+  EXPECT_EQ(b.GenerateConstructorExpression(&t, true), 0);
   EXPECT_TRUE(b.has_error());
-  EXPECT_EQ(b.error(), R"(initializer must be a constant expression)");
+  EXPECT_EQ(b.error(), R"(constructor must be a constant expression)");
 }
 
 }  // namespace

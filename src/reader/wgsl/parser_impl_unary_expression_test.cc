@@ -14,9 +14,9 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/array_accessor_expression.h"
-#include "src/ast/const_initializer_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/int_literal.h"
+#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/unary_derivative_expression.h"
 #include "src/ast/unary_method_expression.h"
 #include "src/ast/unary_op_expression.h"
@@ -41,9 +41,9 @@ TEST_F(ParserImplTest, UnaryExpression_Postix) {
   ASSERT_EQ(ident->name().size(), 1);
   EXPECT_EQ(ident->name()[0], "a");
 
-  ASSERT_TRUE(ary->idx_expr()->IsInitializer());
-  ASSERT_TRUE(ary->idx_expr()->AsInitializer()->IsConstInitializer());
-  auto init = ary->idx_expr()->AsInitializer()->AsConstInitializer();
+  ASSERT_TRUE(ary->idx_expr()->IsConstructor());
+  ASSERT_TRUE(ary->idx_expr()->AsConstructor()->IsScalarConstructor());
+  auto init = ary->idx_expr()->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(init->literal()->IsInt());
   ASSERT_EQ(init->literal()->AsInt()->value(), 2);
 }
@@ -58,10 +58,10 @@ TEST_F(ParserImplTest, UnaryExpression_Minus) {
   auto u = e->AsUnaryOp();
   ASSERT_EQ(u->op(), ast::UnaryOp::kNegation);
 
-  ASSERT_TRUE(u->expr()->IsInitializer());
-  ASSERT_TRUE(u->expr()->AsInitializer()->IsConstInitializer());
+  ASSERT_TRUE(u->expr()->IsConstructor());
+  ASSERT_TRUE(u->expr()->AsConstructor()->IsScalarConstructor());
 
-  auto init = u->expr()->AsInitializer()->AsConstInitializer();
+  auto init = u->expr()->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(init->literal()->IsInt());
   EXPECT_EQ(init->literal()->AsInt()->value(), 1);
 }
@@ -84,10 +84,10 @@ TEST_F(ParserImplTest, UnaryExpression_Bang) {
   auto u = e->AsUnaryOp();
   ASSERT_EQ(u->op(), ast::UnaryOp::kNot);
 
-  ASSERT_TRUE(u->expr()->IsInitializer());
-  ASSERT_TRUE(u->expr()->AsInitializer()->IsConstInitializer());
+  ASSERT_TRUE(u->expr()->IsConstructor());
+  ASSERT_TRUE(u->expr()->AsConstructor()->IsScalarConstructor());
 
-  auto init = u->expr()->AsInitializer()->AsConstInitializer();
+  auto init = u->expr()->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(init->literal()->IsInt());
   EXPECT_EQ(init->literal()->AsInt()->value(), 1);
 }

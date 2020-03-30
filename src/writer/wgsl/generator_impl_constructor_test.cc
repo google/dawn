@@ -17,9 +17,9 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/bool_literal.h"
-#include "src/ast/const_initializer_expression.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/int_literal.h"
+#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
@@ -37,107 +37,107 @@ namespace {
 
 using GeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, EmitInitializer_Bool) {
+TEST_F(GeneratorImplTest, EmitConstructor_Bool) {
   ast::type::BoolType bool_type;
   auto lit = std::make_unique<ast::BoolLiteral>(&bool_type, false);
-  ast::ConstInitializerExpression expr(std::move(lit));
+  ast::ScalarConstructorExpression expr(std::move(lit));
 
   GeneratorImpl g;
-  ASSERT_TRUE(g.EmitInitializer(&expr)) << g.error();
+  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
   EXPECT_EQ(g.result(), "false");
 }
 
-TEST_F(GeneratorImplTest, EmitInitializer_Int) {
+TEST_F(GeneratorImplTest, EmitConstructor_Int) {
   ast::type::I32Type i32;
   auto lit = std::make_unique<ast::IntLiteral>(&i32, -12345);
-  ast::ConstInitializerExpression expr(std::move(lit));
+  ast::ScalarConstructorExpression expr(std::move(lit));
 
   GeneratorImpl g;
-  ASSERT_TRUE(g.EmitInitializer(&expr)) << g.error();
+  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
   EXPECT_EQ(g.result(), "-12345");
 }
 
-TEST_F(GeneratorImplTest, EmitInitializer_UInt) {
+TEST_F(GeneratorImplTest, EmitConstructor_UInt) {
   ast::type::U32Type u32;
   auto lit = std::make_unique<ast::UintLiteral>(&u32, 56779);
-  ast::ConstInitializerExpression expr(std::move(lit));
+  ast::ScalarConstructorExpression expr(std::move(lit));
 
   GeneratorImpl g;
-  ASSERT_TRUE(g.EmitInitializer(&expr)) << g.error();
+  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
   EXPECT_EQ(g.result(), "56779u");
 }
 
-TEST_F(GeneratorImplTest, EmitInitializer_Float) {
+TEST_F(GeneratorImplTest, EmitConstructor_Float) {
   ast::type::F32Type f32;
   auto lit = std::make_unique<ast::FloatLiteral>(&f32, 1.5e27);
-  ast::ConstInitializerExpression expr(std::move(lit));
+  ast::ScalarConstructorExpression expr(std::move(lit));
 
   GeneratorImpl g;
-  ASSERT_TRUE(g.EmitInitializer(&expr)) << g.error();
+  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
   EXPECT_EQ(g.result(), "1.49999995e+27");
 }
 
-TEST_F(GeneratorImplTest, EmitInitializer_Type_Float) {
+TEST_F(GeneratorImplTest, EmitConstructor_Type_Float) {
   ast::type::F32Type f32;
 
   auto lit = std::make_unique<ast::FloatLiteral>(&f32, -1.2e-5);
   std::vector<std::unique_ptr<ast::Expression>> values;
   values.push_back(
-      std::make_unique<ast::ConstInitializerExpression>(std::move(lit)));
+      std::make_unique<ast::ScalarConstructorExpression>(std::move(lit)));
 
-  ast::TypeInitializerExpression expr(&f32, std::move(values));
+  ast::TypeConstructorExpression expr(&f32, std::move(values));
 
   GeneratorImpl g;
-  ASSERT_TRUE(g.EmitInitializer(&expr)) << g.error();
+  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
   EXPECT_EQ(g.result(), "f32(-1.20000004e-05)");
 }
 
-TEST_F(GeneratorImplTest, EmitInitializer_Type_Bool) {
+TEST_F(GeneratorImplTest, EmitConstructor_Type_Bool) {
   ast::type::BoolType b;
 
   auto lit = std::make_unique<ast::BoolLiteral>(&b, true);
   std::vector<std::unique_ptr<ast::Expression>> values;
   values.push_back(
-      std::make_unique<ast::ConstInitializerExpression>(std::move(lit)));
+      std::make_unique<ast::ScalarConstructorExpression>(std::move(lit)));
 
-  ast::TypeInitializerExpression expr(&b, std::move(values));
+  ast::TypeConstructorExpression expr(&b, std::move(values));
 
   GeneratorImpl g;
-  ASSERT_TRUE(g.EmitInitializer(&expr)) << g.error();
+  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
   EXPECT_EQ(g.result(), "bool(true)");
 }
 
-TEST_F(GeneratorImplTest, EmitInitializer_Type_Int) {
+TEST_F(GeneratorImplTest, EmitConstructor_Type_Int) {
   ast::type::I32Type i32;
 
   auto lit = std::make_unique<ast::IntLiteral>(&i32, -12345);
   std::vector<std::unique_ptr<ast::Expression>> values;
   values.push_back(
-      std::make_unique<ast::ConstInitializerExpression>(std::move(lit)));
+      std::make_unique<ast::ScalarConstructorExpression>(std::move(lit)));
 
-  ast::TypeInitializerExpression expr(&i32, std::move(values));
+  ast::TypeConstructorExpression expr(&i32, std::move(values));
 
   GeneratorImpl g;
-  ASSERT_TRUE(g.EmitInitializer(&expr)) << g.error();
+  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
   EXPECT_EQ(g.result(), "i32(-12345)");
 }
 
-TEST_F(GeneratorImplTest, EmitInitializer_Type_Uint) {
+TEST_F(GeneratorImplTest, EmitConstructor_Type_Uint) {
   ast::type::U32Type u32;
 
   auto lit = std::make_unique<ast::UintLiteral>(&u32, 12345);
   std::vector<std::unique_ptr<ast::Expression>> values;
   values.push_back(
-      std::make_unique<ast::ConstInitializerExpression>(std::move(lit)));
+      std::make_unique<ast::ScalarConstructorExpression>(std::move(lit)));
 
-  ast::TypeInitializerExpression expr(&u32, std::move(values));
+  ast::TypeConstructorExpression expr(&u32, std::move(values));
 
   GeneratorImpl g;
-  ASSERT_TRUE(g.EmitInitializer(&expr)) << g.error();
+  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
   EXPECT_EQ(g.result(), "u32(12345u)");
 }
 
-TEST_F(GeneratorImplTest, EmitInitializer_Type_Vec) {
+TEST_F(GeneratorImplTest, EmitConstructor_Type_Vec) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
 
@@ -146,20 +146,20 @@ TEST_F(GeneratorImplTest, EmitInitializer_Type_Vec) {
   auto lit3 = std::make_unique<ast::FloatLiteral>(&f32, 3.f);
   std::vector<std::unique_ptr<ast::Expression>> values;
   values.push_back(
-      std::make_unique<ast::ConstInitializerExpression>(std::move(lit1)));
+      std::make_unique<ast::ScalarConstructorExpression>(std::move(lit1)));
   values.push_back(
-      std::make_unique<ast::ConstInitializerExpression>(std::move(lit2)));
+      std::make_unique<ast::ScalarConstructorExpression>(std::move(lit2)));
   values.push_back(
-      std::make_unique<ast::ConstInitializerExpression>(std::move(lit3)));
+      std::make_unique<ast::ScalarConstructorExpression>(std::move(lit3)));
 
-  ast::TypeInitializerExpression expr(&vec, std::move(values));
+  ast::TypeConstructorExpression expr(&vec, std::move(values));
 
   GeneratorImpl g;
-  ASSERT_TRUE(g.EmitInitializer(&expr)) << g.error();
+  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
   EXPECT_EQ(g.result(), "vec3<f32>(1.00000000, 2.00000000, 3.00000000)");
 }
 
-TEST_F(GeneratorImplTest, EmitInitializer_Type_Mat) {
+TEST_F(GeneratorImplTest, EmitConstructor_Type_Mat) {
   ast::type::F32Type f32;
   ast::type::MatrixType mat(&f32, 3, 2);
 
@@ -173,25 +173,25 @@ TEST_F(GeneratorImplTest, EmitInitializer_Type_Mat) {
 
     std::vector<std::unique_ptr<ast::Expression>> values;
     values.push_back(
-        std::make_unique<ast::ConstInitializerExpression>(std::move(lit1)));
+        std::make_unique<ast::ScalarConstructorExpression>(std::move(lit1)));
     values.push_back(
-        std::make_unique<ast::ConstInitializerExpression>(std::move(lit2)));
+        std::make_unique<ast::ScalarConstructorExpression>(std::move(lit2)));
 
-    mat_values.push_back(std::make_unique<ast::TypeInitializerExpression>(
+    mat_values.push_back(std::make_unique<ast::TypeConstructorExpression>(
         &vec, std::move(values)));
   }
 
-  ast::TypeInitializerExpression expr(&mat, std::move(mat_values));
+  ast::TypeConstructorExpression expr(&mat, std::move(mat_values));
 
   GeneratorImpl g;
-  ASSERT_TRUE(g.EmitInitializer(&expr)) << g.error();
+  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
   EXPECT_EQ(g.result(),
             std::string("mat2x3<f32>(vec2<f32>(1.00000000, 2.00000000), ") +
                 "vec2<f32>(3.00000000, 4.00000000), " +
                 "vec2<f32>(5.00000000, 6.00000000))");
 }
 
-TEST_F(GeneratorImplTest, EmitInitializer_Type_Array) {
+TEST_F(GeneratorImplTest, EmitConstructor_Type_Array) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
   ast::type::ArrayType ary(&vec, 3);
@@ -205,20 +205,20 @@ TEST_F(GeneratorImplTest, EmitInitializer_Type_Array) {
 
     std::vector<std::unique_ptr<ast::Expression>> values;
     values.push_back(
-        std::make_unique<ast::ConstInitializerExpression>(std::move(lit1)));
+        std::make_unique<ast::ScalarConstructorExpression>(std::move(lit1)));
     values.push_back(
-        std::make_unique<ast::ConstInitializerExpression>(std::move(lit2)));
+        std::make_unique<ast::ScalarConstructorExpression>(std::move(lit2)));
     values.push_back(
-        std::make_unique<ast::ConstInitializerExpression>(std::move(lit3)));
+        std::make_unique<ast::ScalarConstructorExpression>(std::move(lit3)));
 
-    ary_values.push_back(std::make_unique<ast::TypeInitializerExpression>(
+    ary_values.push_back(std::make_unique<ast::TypeConstructorExpression>(
         &vec, std::move(values)));
   }
 
-  ast::TypeInitializerExpression expr(&ary, std::move(ary_values));
+  ast::TypeConstructorExpression expr(&ary, std::move(ary_values));
 
   GeneratorImpl g;
-  ASSERT_TRUE(g.EmitInitializer(&expr)) << g.error();
+  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
   EXPECT_EQ(g.result(), std::string("array<vec3<f32>, 3>(") +
                             "vec3<f32>(1.00000000, 2.00000000, 3.00000000), " +
                             "vec3<f32>(4.00000000, 5.00000000, 6.00000000), " +

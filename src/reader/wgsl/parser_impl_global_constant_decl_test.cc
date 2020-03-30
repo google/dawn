@@ -34,8 +34,8 @@ TEST_F(ParserImplTest, GlobalConstantDecl) {
   ASSERT_NE(e->type(), nullptr);
   EXPECT_TRUE(e->type()->IsF32());
 
-  ASSERT_NE(e->initializer(), nullptr);
-  EXPECT_TRUE(e->initializer()->IsInitializer());
+  ASSERT_NE(e->constructor(), nullptr);
+  EXPECT_TRUE(e->constructor()->IsConstructor());
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_MissingEqual) {

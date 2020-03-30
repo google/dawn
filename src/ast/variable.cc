@@ -44,7 +44,7 @@ bool Variable::IsValid() const {
   if (type_ == nullptr) {
     return false;
   }
-  if (initializer_ && !initializer_->IsValid()) {
+  if (constructor_ && !constructor_->IsValid()) {
     return false;
   }
   return true;
@@ -59,14 +59,14 @@ void Variable::info_to_str(std::ostream& out, size_t indent) const {
   out << type_->type_name() << std::endl;
 }
 
-void Variable::initializer_to_str(std::ostream& out, size_t indent) const {
-  if (initializer_ == nullptr)
+void Variable::constructor_to_str(std::ostream& out, size_t indent) const {
+  if (constructor_ == nullptr)
     return;
 
   make_indent(out, indent);
   out << "{" << std::endl;
 
-  initializer_->to_str(out, indent + 2);
+  constructor_->to_str(out, indent + 2);
 
   make_indent(out, indent);
   out << "}" << std::endl;
@@ -76,7 +76,7 @@ void Variable::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
   out << "Variable{" << std::endl;
   info_to_str(out, indent + 2);
-  initializer_to_str(out, indent + 2);
+  constructor_to_str(out, indent + 2);
   make_indent(out, indent);
   out << "}" << std::endl;
 }

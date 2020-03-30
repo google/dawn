@@ -26,7 +26,7 @@ class KillStatement : public Statement {
   /// Constructor
   KillStatement();
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the kill statement source
   explicit KillStatement(const Source& source);
   /// Move constructor
   KillStatement(KillStatement&&) = default;

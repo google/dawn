@@ -12,31 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/initializer_expression.h"
+#include "src/ast/constructor_expression.h"
 
 #include <assert.h>
 
-#include "src/ast/const_initializer_expression.h"
-#include "src/ast/type_initializer_expression.h"
+#include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/type_constructor_expression.h"
 
 namespace tint {
 namespace ast {
 
-InitializerExpression::InitializerExpression() = default;
+ConstructorExpression::ConstructorExpression() = default;
 
-InitializerExpression::~InitializerExpression() = default;
+ConstructorExpression::~ConstructorExpression() = default;
 
-InitializerExpression::InitializerExpression(const Source& source)
+ConstructorExpression::ConstructorExpression(const Source& source)
     : Expression(source) {}
 
-ConstInitializerExpression* InitializerExpression::AsConstInitializer() {
-  assert(IsConstInitializer());
-  return static_cast<ConstInitializerExpression*>(this);
+ScalarConstructorExpression* ConstructorExpression::AsScalarConstructor() {
+  assert(IsScalarConstructor());
+  return static_cast<ScalarConstructorExpression*>(this);
 }
 
-TypeInitializerExpression* InitializerExpression::AsTypeInitializer() {
-  assert(IsTypeInitializer());
-  return static_cast<TypeInitializerExpression*>(this);
+TypeConstructorExpression* ConstructorExpression::AsTypeConstructor() {
+  assert(IsTypeConstructor());
+  return static_cast<TypeConstructorExpression*>(this);
 }
 
 }  // namespace ast

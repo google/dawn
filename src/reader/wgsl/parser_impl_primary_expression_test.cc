@@ -17,12 +17,12 @@
 #include "src/ast/as_expression.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/cast_expression.h"
-#include "src/ast/const_initializer_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/int_literal.h"
+#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
-#include "src/ast/type_initializer_expression.h"
+#include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_derivative_expression.h"
 #include "src/ast/unary_method_expression.h"
 #include "src/ast/unary_op_expression.h"
@@ -73,33 +73,33 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl) {
   auto e = p->primary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsInitializer());
-  ASSERT_TRUE(e->AsInitializer()->IsTypeInitializer());
-  auto ty = e->AsInitializer()->AsTypeInitializer();
+  ASSERT_TRUE(e->IsConstructor());
+  ASSERT_TRUE(e->AsConstructor()->IsTypeConstructor());
+  auto ty = e->AsConstructor()->AsTypeConstructor();
 
   ASSERT_EQ(ty->values().size(), 4);
   const auto& val = ty->values();
-  ASSERT_TRUE(val[0]->IsInitializer());
-  ASSERT_TRUE(val[0]->AsInitializer()->IsConstInitializer());
-  auto ident = val[0]->AsInitializer()->AsConstInitializer();
+  ASSERT_TRUE(val[0]->IsConstructor());
+  ASSERT_TRUE(val[0]->AsConstructor()->IsScalarConstructor());
+  auto ident = val[0]->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(ident->literal()->IsInt());
   EXPECT_EQ(ident->literal()->AsInt()->value(), 1);
 
-  ASSERT_TRUE(val[1]->IsInitializer());
-  ASSERT_TRUE(val[1]->AsInitializer()->IsConstInitializer());
-  ident = val[1]->AsInitializer()->AsConstInitializer();
+  ASSERT_TRUE(val[1]->IsConstructor());
+  ASSERT_TRUE(val[1]->AsConstructor()->IsScalarConstructor());
+  ident = val[1]->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(ident->literal()->IsInt());
   EXPECT_EQ(ident->literal()->AsInt()->value(), 2);
 
-  ASSERT_TRUE(val[2]->IsInitializer());
-  ASSERT_TRUE(val[2]->AsInitializer()->IsConstInitializer());
-  ident = val[2]->AsInitializer()->AsConstInitializer();
+  ASSERT_TRUE(val[2]->IsConstructor());
+  ASSERT_TRUE(val[2]->AsConstructor()->IsScalarConstructor());
+  ident = val[2]->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(ident->literal()->IsInt());
   EXPECT_EQ(ident->literal()->AsInt()->value(), 3);
 
-  ASSERT_TRUE(val[3]->IsInitializer());
-  ASSERT_TRUE(val[3]->AsInitializer()->IsConstInitializer());
-  ident = val[3]->AsInitializer()->AsConstInitializer();
+  ASSERT_TRUE(val[3]->IsConstructor());
+  ASSERT_TRUE(val[3]->AsConstructor()->IsScalarConstructor());
+  ident = val[3]->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(ident->literal()->IsInt());
   EXPECT_EQ(ident->literal()->AsInt()->value(), 4);
 }
@@ -117,7 +117,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingLeftParen) {
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:11: missing ( for type initializer");
+  EXPECT_EQ(p->error(), "1:11: missing ( for type constructor");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingRightParen) {
@@ -125,7 +125,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingRightParen) {
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:25: missing ) for type initializer");
+  EXPECT_EQ(p->error(), "1:25: missing ) for type constructor");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidValue) {
@@ -141,9 +141,9 @@ TEST_F(ParserImplTest, PrimaryExpression_ConstLiteral_True) {
   auto e = p->primary_expression();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsInitializer());
-  ASSERT_TRUE(e->AsInitializer()->IsConstInitializer());
-  auto init = e->AsInitializer()->AsConstInitializer();
+  ASSERT_TRUE(e->IsConstructor());
+  ASSERT_TRUE(e->AsConstructor()->IsScalarConstructor());
+  auto init = e->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(init->literal()->IsBool());
   EXPECT_TRUE(init->literal()->AsBool()->IsTrue());
 }
@@ -192,8 +192,8 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast) {
   auto c = e->AsCast();
   ASSERT_EQ(c->type(), f32_type);
 
-  ASSERT_TRUE(c->expr()->IsInitializer());
-  ASSERT_TRUE(c->expr()->AsInitializer()->IsConstInitializer());
+  ASSERT_TRUE(c->expr()->IsConstructor());
+  ASSERT_TRUE(c->expr()->AsConstructor()->IsScalarConstructor());
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Cast_MissingGreaterThan) {
@@ -264,8 +264,8 @@ TEST_F(ParserImplTest, PrimaryExpression_As) {
   auto c = e->AsAs();
   ASSERT_EQ(c->type(), f32_type);
 
-  ASSERT_TRUE(c->expr()->IsInitializer());
-  ASSERT_TRUE(c->expr()->AsInitializer()->IsConstInitializer());
+  ASSERT_TRUE(c->expr()->IsConstructor());
+  ASSERT_TRUE(c->expr()->AsConstructor()->IsScalarConstructor());
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_As_MissingGreaterThan) {

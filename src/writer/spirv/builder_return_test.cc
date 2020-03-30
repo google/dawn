@@ -15,12 +15,12 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-#include "src/ast/const_initializer_expression.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/return_statement.h"
+#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/vector_type.h"
-#include "src/ast/type_initializer_expression.h"
+#include "src/ast/type_constructor_expression.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
 
@@ -47,15 +47,15 @@ TEST_F(BuilderTest, Return_WithValue) {
   ast::type::VectorType vec(&f32, 3);
 
   std::vector<std::unique_ptr<ast::Expression>> vals;
-  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
 
   auto val =
-      std::make_unique<ast::TypeInitializerExpression>(&vec, std::move(vals));
+      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
   ast::ReturnStatement ret(std::move(val));
 

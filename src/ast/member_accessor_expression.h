@@ -37,7 +37,7 @@ class MemberAccessorExpression : public Expression {
   MemberAccessorExpression(std::unique_ptr<Expression> structure,
                            std::unique_ptr<IdentifierExpression> member);
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the member accessor expression source
   /// @param structure the structure
   /// @param member the member
   MemberAccessorExpression(const Source& source,

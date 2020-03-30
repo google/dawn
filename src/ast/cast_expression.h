@@ -36,7 +36,7 @@ class CastExpression : public Expression {
   /// @param expr the expr
   CastExpression(type::Type* type, std::unique_ptr<Expression> expr);
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the cast expression source
   /// @param type the type
   /// @param expr the expr
   CastExpression(const Source& source,

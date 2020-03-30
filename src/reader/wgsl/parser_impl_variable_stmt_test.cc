@@ -32,7 +32,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl) {
   ASSERT_NE(e->variable(), nullptr);
   EXPECT_EQ(e->variable()->name(), "a");
 
-  EXPECT_EQ(e->variable()->initializer(), nullptr);
+  EXPECT_EQ(e->variable()->constructor(), nullptr);
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_WithInit) {
@@ -44,8 +44,8 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_WithInit) {
   ASSERT_NE(e->variable(), nullptr);
   EXPECT_EQ(e->variable()->name(), "a");
 
-  ASSERT_NE(e->variable()->initializer(), nullptr);
-  EXPECT_TRUE(e->variable()->initializer()->IsInitializer());
+  ASSERT_NE(e->variable()->constructor(), nullptr);
+  EXPECT_TRUE(e->variable()->constructor()->IsConstructor());
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_Invalid) {
@@ -56,12 +56,12 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_Invalid) {
   EXPECT_EQ(p->error(), "1:9: unknown type alias 'invalid'");
 }
 
-TEST_F(ParserImplTest, VariableStmt_VariableDecl_InitializerInvalid) {
+TEST_F(ParserImplTest, VariableStmt_VariableDecl_ConstructorInvalid) {
   auto p = parser("var a : i32 = if(a) {}");
   auto e = p->variable_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:15: missing initializer for variable declaration");
+  EXPECT_EQ(p->error(), "1:15: missing constructor for variable declaration");
 }
 
 TEST_F(ParserImplTest, VariableStmt_Const) {
@@ -88,20 +88,20 @@ TEST_F(ParserImplTest, VariableStmt_Const_MissingEqual) {
   EXPECT_EQ(p->error(), "1:15: missing = for constant declaration");
 }
 
-TEST_F(ParserImplTest, VariableStmt_Const_MissingInitializer) {
+TEST_F(ParserImplTest, VariableStmt_Const_MissingConstructor) {
   auto p = parser("const a : i32 =");
   auto e = p->variable_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:16: missing initializer for const declaration");
+  EXPECT_EQ(p->error(), "1:16: missing constructor for const declaration");
 }
 
-TEST_F(ParserImplTest, VariableStmt_Const_InvalidInitializer) {
+TEST_F(ParserImplTest, VariableStmt_Const_InvalidConstructor) {
   auto p = parser("const a : i32 = if (a) {}");
   auto e = p->variable_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:17: missing initializer for const declaration");
+  EXPECT_EQ(p->error(), "1:17: missing constructor for const declaration");
 }
 
 }  // namespace

@@ -71,10 +71,10 @@ TEST_F(VariableTest, IsValid) {
   EXPECT_TRUE(v.IsValid());
 }
 
-TEST_F(VariableTest, IsValid_WithInitializer) {
+TEST_F(VariableTest, IsValid_WithConstructor) {
   type::I32Type t;
   Variable v{"my_var", StorageClass::kNone, &t};
-  v.set_initializer(std::make_unique<IdentifierExpression>("ident"));
+  v.set_constructor(std::make_unique<IdentifierExpression>("ident"));
   EXPECT_TRUE(v.IsValid());
 }
 
@@ -94,10 +94,10 @@ TEST_F(VariableTest, IsValid_MissingBoth) {
   EXPECT_FALSE(v.IsValid());
 }
 
-TEST_F(VariableTest, IsValid_InvalidInitializer) {
+TEST_F(VariableTest, IsValid_InvalidConstructor) {
   type::I32Type t;
   Variable v{"my_var", StorageClass::kNone, &t};
-  v.set_initializer(std::make_unique<IdentifierExpression>(""));
+  v.set_constructor(std::make_unique<IdentifierExpression>(""));
   EXPECT_FALSE(v.IsValid());
 }
 

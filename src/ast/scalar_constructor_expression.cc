@@ -12,33 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/const_initializer_expression.h"
+#include "src/ast/scalar_constructor_expression.h"
 
 namespace tint {
 namespace ast {
 
-ConstInitializerExpression::ConstInitializerExpression()
-    : InitializerExpression() {}
+ScalarConstructorExpression::ScalarConstructorExpression()
+    : ConstructorExpression() {}
 
-ConstInitializerExpression::ConstInitializerExpression(
+ScalarConstructorExpression::ScalarConstructorExpression(
     std::unique_ptr<Literal> literal)
-    : InitializerExpression(), literal_(std::move(literal)) {}
+    : ConstructorExpression(), literal_(std::move(literal)) {}
 
-ConstInitializerExpression::ConstInitializerExpression(
+ScalarConstructorExpression::ScalarConstructorExpression(
     const Source& source,
     std::unique_ptr<Literal> litearl)
-    : InitializerExpression(source), literal_(std::move(litearl)) {}
+    : ConstructorExpression(source), literal_(std::move(litearl)) {}
 
-ConstInitializerExpression::~ConstInitializerExpression() = default;
+ScalarConstructorExpression::~ScalarConstructorExpression() = default;
 
-bool ConstInitializerExpression::IsValid() const {
+bool ScalarConstructorExpression::IsValid() const {
   return literal_ != nullptr;
 }
 
-void ConstInitializerExpression::to_str(std::ostream& out,
-                                        size_t indent) const {
+void ScalarConstructorExpression::to_str(std::ostream& out,
+                                         size_t indent) const {
   make_indent(out, indent);
-  out << "ConstInitializer{" << literal_->to_str() << "}" << std::endl;
+  out << "ScalarConstructor{" << literal_->to_str() << "}" << std::endl;
 }
 
 }  // namespace ast

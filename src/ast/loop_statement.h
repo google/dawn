@@ -35,7 +35,7 @@ class LoopStatement : public Statement {
   LoopStatement(std::vector<std::unique_ptr<Statement>> body,
                 std::vector<std::unique_ptr<Statement>> continuing);
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the loop statement source
   /// @param body the body statements
   /// @param continuing the continuing statements
   LoopStatement(const Source& source,

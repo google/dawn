@@ -25,7 +25,7 @@ class AsExpression;
 class CallExpression;
 class CastExpression;
 class IdentifierExpression;
-class InitializerExpression;
+class ConstructorExpression;
 class MemberAccessorExpression;
 class RelationalExpression;
 class UnaryDerivativeExpression;
@@ -47,8 +47,8 @@ class Expression : public Node {
   virtual bool IsCast() const { return false; }
   /// @returns true if this is an identifier expression
   virtual bool IsIdentifier() const { return false; }
-  /// @returns true if this is an initializer expression
-  virtual bool IsInitializer() const { return false; }
+  /// @returns true if this is an constructor expression
+  virtual bool IsConstructor() const { return false; }
   /// @returns true if this is a member accessor expression
   virtual bool IsMemberAccessor() const { return false; }
   /// @returns true if this is a relational expression
@@ -70,8 +70,8 @@ class Expression : public Node {
   CastExpression* AsCast();
   /// @returns the expression as an identifier
   IdentifierExpression* AsIdentifier();
-  /// @returns the expression as an initializer
-  InitializerExpression* AsInitializer();
+  /// @returns the expression as an constructor
+  ConstructorExpression* AsConstructor();
   /// @returns the expression as a member accessor
   MemberAccessorExpression* AsMemberAccessor();
   /// @returns the expression as a relational expression

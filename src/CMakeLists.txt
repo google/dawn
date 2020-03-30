@@ -59,8 +59,8 @@ set(TINT_LIB_SRCS
   ast/case_statement.h
   ast/cast_expression.cc
   ast/cast_expression.h
-  ast/const_initializer_expression.cc
-  ast/const_initializer_expression.h
+  ast/constructor_expression.cc
+  ast/constructor_expression.h
   ast/continue_statement.cc
   ast/continue_statement.h
   ast/decorated_variable.cc
@@ -85,8 +85,6 @@ set(TINT_LIB_SRCS
   ast/if_statement.h
   ast/import.cc
   ast/import.h
-  ast/initializer_expression.cc
-  ast/initializer_expression.h
   ast/int_literal.cc
   ast/int_literal.h
   ast/kill_statement.cc
@@ -113,6 +111,8 @@ set(TINT_LIB_SRCS
   ast/relational_expression.h
   ast/return_statement.cc
   ast/return_statement.h
+  ast/scalar_constructor_expression.cc
+  ast/scalar_constructor_expression.h
   ast/set_decoration.cc
   ast/set_decoration.h
   ast/statement.cc
@@ -133,8 +133,8 @@ set(TINT_LIB_SRCS
   ast/struct_member_offset_decoration.h
   ast/switch_statement.cc
   ast/switch_statement.h
-  ast/type_initializer_expression.h
-  ast/type_initializer_expression.cc
+  ast/type_constructor_expression.h
+  ast/type_constructor_expression.cc
   ast/type/alias_type.cc
   ast/type/alias_type.h
   ast/type/array_type.cc
@@ -260,7 +260,6 @@ set(TINT_TEST_SRCS
   ast/call_expression_test.cc
   ast/case_statement_test.cc
   ast/cast_expression_test.cc
-  ast/const_initializer_expression_test.cc
   ast/continue_statement_test.cc
   ast/decorated_variable_test.cc
   ast/else_statement_test.cc
@@ -281,6 +280,7 @@ set(TINT_TEST_SRCS
   ast/regardless_statement_test.cc
   ast/relational_expression_test.cc
   ast/return_statement_test.cc
+  ast/scalar_constructor_expression_test.cc
   ast/set_decoration_test.cc
   ast/struct_member_test.cc
   ast/struct_member_offset_decoration_test.cc
@@ -296,7 +296,7 @@ set(TINT_TEST_SRCS
   ast/type/struct_type_test.cc
   ast/type/u32_type_test.cc
   ast/type/vector_type_test.cc
-  ast/type_initializer_expression_test.cc
+  ast/type_constructor_expression_test.cc
   ast/uint_literal_test.cc
   ast/unary_derivative_expression_test.cc
   ast/unary_method_expression_test.cc
@@ -410,10 +410,10 @@ endif()
 if(${TINT_BUILD_SPV_WRITER})
   list(APPEND TINT_TEST_SRCS
     writer/spirv/binary_writer_test.cc
+    writer/spirv/builder_constructor_expression_test.cc
     writer/spirv/builder_entry_point_test.cc
     writer/spirv/builder_function_test.cc
     writer/spirv/builder_global_variable_test.cc
-    writer/spirv/builder_initializer_expression_test.cc
     writer/spirv/builder_literal_test.cc
     writer/spirv/builder_return_test.cc
     writer/spirv/builder_test.cc
@@ -436,6 +436,7 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_call_test.cc
     writer/wgsl/generator_impl_case_test.cc
     writer/wgsl/generator_impl_cast_test.cc
+    writer/wgsl/generator_impl_constructor_test.cc
     writer/wgsl/generator_impl_continue_test.cc
     writer/wgsl/generator_impl_else_test.cc
     writer/wgsl/generator_impl_entry_point_test.cc
@@ -444,7 +445,6 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_identifier_test.cc
     writer/wgsl/generator_impl_if_test.cc
     writer/wgsl/generator_impl_import_test.cc
-    writer/wgsl/generator_impl_initializer_test.cc
     writer/wgsl/generator_impl_kill_test.cc
     writer/wgsl/generator_impl_loop_test.cc
     writer/wgsl/generator_impl_member_accessor_test.cc

@@ -91,12 +91,12 @@ TEST_F(GeneratorImplTest, EmitVariable_Decorated_Multiple) {
 )");
 }
 
-TEST_F(GeneratorImplTest, EmitVariable_Initializer) {
+TEST_F(GeneratorImplTest, EmitVariable_Constructor) {
   auto ident = std::make_unique<ast::IdentifierExpression>("initializer");
 
   ast::type::F32Type f32;
   ast::Variable v("a", ast::StorageClass::kNone, &f32);
-  v.set_initializer(std::move(ident));
+  v.set_constructor(std::move(ident));
 
   GeneratorImpl g;
   ASSERT_TRUE(g.EmitVariable(&v)) << g.error();
@@ -109,7 +109,7 @@ TEST_F(GeneratorImplTest, EmitVariable_Const) {
 
   ast::type::F32Type f32;
   ast::Variable v("a", ast::StorageClass::kNone, &f32);
-  v.set_initializer(std::move(ident));
+  v.set_constructor(std::move(ident));
   v.set_is_const(true);
 
   GeneratorImpl g;

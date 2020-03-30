@@ -27,14 +27,13 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/cast_expression.h"
-#include "src/ast/const_initializer_expression.h"
+#include "src/ast/constructor_expression.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/initializer_expression.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/loop_statement.h"
@@ -42,6 +41,7 @@
 #include "src/ast/regardless_statement.h"
 #include "src/ast/relational_expression.h"
 #include "src/ast/return_statement.h"
+#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/statement.h"
 #include "src/ast/struct.h"
@@ -53,7 +53,7 @@
 #include "src/ast/type/pointer_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
-#include "src/ast/type_initializer_expression.h"
+#include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_derivative_expression.h"
 #include "src/ast/unary_method_expression.h"
@@ -158,8 +158,8 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   if (expr->IsIdentifier()) {
     return EmitIdentifier(expr->AsIdentifier());
   }
-  if (expr->IsInitializer()) {
-    return EmitInitializer(expr->AsInitializer());
+  if (expr->IsConstructor()) {
+    return EmitConstructor(expr->AsConstructor());
   }
   if (expr->IsMemberAccessor()) {
     return EmitMemberAccessor(expr->AsMemberAccessor());
@@ -259,14 +259,14 @@ bool GeneratorImpl::EmitCast(ast::CastExpression* expr) {
   return true;
 }
 
-bool GeneratorImpl::EmitInitializer(ast::InitializerExpression* expr) {
-  if (expr->IsConstInitializer()) {
-    return EmitConstInitializer(expr->AsConstInitializer());
+bool GeneratorImpl::EmitConstructor(ast::ConstructorExpression* expr) {
+  if (expr->IsScalarConstructor()) {
+    return EmitScalarConstructor(expr->AsScalarConstructor());
   }
-  return EmitTypeInitializer(expr->AsTypeInitializer());
+  return EmitTypeConstructor(expr->AsTypeConstructor());
 }
 
-bool GeneratorImpl::EmitTypeInitializer(ast::TypeInitializerExpression* expr) {
+bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
   if (!EmitType(expr->type())) {
     return false;
   }
@@ -289,8 +289,8 @@ bool GeneratorImpl::EmitTypeInitializer(ast::TypeInitializerExpression* expr) {
   return true;
 }
 
-bool GeneratorImpl::EmitConstInitializer(
-    ast::ConstInitializerExpression* expr) {
+bool GeneratorImpl::EmitScalarConstructor(
+    ast::ScalarConstructorExpression* expr) {
   return EmitLiteral(expr->literal());
 }
 
@@ -480,9 +480,9 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
     return false;
   }
 
-  if (var->initializer() != nullptr) {
+  if (var->constructor() != nullptr) {
     out_ << " = ";
-    if (!EmitExpression(var->initializer())) {
+    if (!EmitExpression(var->constructor())) {
       return false;
     }
   }

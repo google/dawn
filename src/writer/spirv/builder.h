@@ -156,11 +156,11 @@ class Builder {
   /// Generates an import instruction
   /// @param imp the import
   void GenerateImport(ast::Import* imp);
-  /// Generates an initializer expression
+  /// Generates an constructor expression
   /// @param expr the expression to generate
-  /// @param is_global_init set true if this is a global variable initializer
+  /// @param is_global_init set true if this is a global variable constructor
   /// @returns the ID of the expression or 0 on failure.
-  uint32_t GenerateInitializerExpression(ast::InitializerExpression* expr,
+  uint32_t GenerateConstructorExpression(ast::ConstructorExpression* expr,
                                          bool is_global_init);
   /// Generates a literal constant if needed
   /// @param lit the literal to generate

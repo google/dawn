@@ -36,7 +36,7 @@ class AssignmentStatement : public Statement {
   AssignmentStatement(std::unique_ptr<Expression> lhs,
                       std::unique_ptr<Expression> rhs);
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the assignment statement source
   /// @param lhs the left side of the expression
   /// @param rhs the right side of the expression
   AssignmentStatement(const Source& source,

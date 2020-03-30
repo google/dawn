@@ -39,7 +39,7 @@ class UnaryDerivativeExpression : public Expression {
                             DerivativeModifier mod,
                             std::unique_ptr<Expression> param);
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the unary derivative expression source
   /// @param op the op
   /// @param mod the derivative modifier
   /// @param param the param

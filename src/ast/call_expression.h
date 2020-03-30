@@ -36,7 +36,7 @@ class CallExpression : public Expression {
   CallExpression(std::unique_ptr<Expression> func,
                  std::vector<std::unique_ptr<Expression>> params);
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the call expression source
   /// @param func the function
   /// @param params the parameters
   CallExpression(const Source& source,

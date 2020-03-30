@@ -16,9 +16,9 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/bool_literal.h"
-#include "src/ast/const_initializer_expression.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/nop_statement.h"
+#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/bool_type.h"
 
 namespace tint {
@@ -29,7 +29,7 @@ using ElseStatementTest = testing::Test;
 
 TEST_F(ElseStatementTest, Creation) {
   ast::type::BoolType bool_type;
-  auto cond = std::make_unique<ConstInitializerExpression>(
+  auto cond = std::make_unique<ScalarConstructorExpression>(
       std::make_unique<BoolLiteral>(&bool_type, true));
   std::vector<std::unique_ptr<Statement>> body;
   body.push_back(std::make_unique<NopStatement>());
@@ -57,7 +57,7 @@ TEST_F(ElseStatementTest, IsElse) {
 
 TEST_F(ElseStatementTest, HasCondition) {
   ast::type::BoolType bool_type;
-  auto cond = std::make_unique<ConstInitializerExpression>(
+  auto cond = std::make_unique<ScalarConstructorExpression>(
       std::make_unique<BoolLiteral>(&bool_type, true));
   ElseStatement e(std::move(cond), {});
   EXPECT_TRUE(e.HasCondition());
@@ -91,7 +91,7 @@ TEST_F(ElseStatementTest, IsValid_WithNullBodyStatement) {
 }
 
 TEST_F(ElseStatementTest, IsValid_InvalidCondition) {
-  auto cond = std::make_unique<ConstInitializerExpression>();
+  auto cond = std::make_unique<ScalarConstructorExpression>();
   ElseStatement e(std::move(cond), {});
   EXPECT_FALSE(e.IsValid());
 }
@@ -106,7 +106,7 @@ TEST_F(ElseStatementTest, IsValid_InvalidBodyStatement) {
 
 TEST_F(ElseStatementTest, ToStr) {
   ast::type::BoolType bool_type;
-  auto cond = std::make_unique<ConstInitializerExpression>(
+  auto cond = std::make_unique<ScalarConstructorExpression>(
       std::make_unique<BoolLiteral>(&bool_type, true));
   std::vector<std::unique_ptr<Statement>> body;
   body.push_back(std::make_unique<NopStatement>());
@@ -116,7 +116,7 @@ TEST_F(ElseStatementTest, ToStr) {
   e.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Else{
     (
-      ConstInitializer{true}
+      ScalarConstructor{true}
     )
     {
       Nop{}

@@ -18,15 +18,15 @@
 #include "src/ast/binding_decoration.h"
 #include "src/ast/builtin.h"
 #include "src/ast/builtin_decoration.h"
-#include "src/ast/const_initializer_expression.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/location_decoration.h"
+#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/vector_type.h"
-#include "src/ast/type_initializer_expression.h"
+#include "src/ast/type_constructor_expression.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decoration.h"
 #include "src/writer/spirv/builder.h"
@@ -67,23 +67,23 @@ TEST_F(BuilderTest, GlobalVar_WithStorageClass) {
 )");
 }
 
-TEST_F(BuilderTest, GlobalVar_WithInitializer) {
+TEST_F(BuilderTest, GlobalVar_WithConstructor) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
 
   std::vector<std::unique_ptr<ast::Expression>> vals;
-  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
 
   auto init =
-      std::make_unique<ast::TypeInitializerExpression>(&vec, std::move(vals));
+      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
-  v.set_initializer(std::move(init));
+  v.set_constructor(std::move(init));
 
   Builder b;
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
@@ -106,18 +106,18 @@ TEST_F(BuilderTest, GlobalVar_Const) {
   ast::type::VectorType vec(&f32, 3);
 
   std::vector<std::unique_ptr<ast::Expression>> vals;
-  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
-  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
 
   auto init =
-      std::make_unique<ast::TypeInitializerExpression>(&vec, std::move(vals));
+      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
-  v.set_initializer(std::move(init));
+  v.set_constructor(std::move(init));
   v.set_is_const(true);
 
   Builder b;

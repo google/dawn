@@ -61,7 +61,7 @@ class RelationalExpression : public Expression {
                        std::unique_ptr<Expression> lhs,
                        std::unique_ptr<Expression> rhs);
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the relational expression source
   /// @param relation the relation type
   /// @param lhs the left side of the expression
   /// @param rhs the right side of the expression

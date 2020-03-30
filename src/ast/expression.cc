@@ -20,8 +20,8 @@
 #include "src/ast/as_expression.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/cast_expression.h"
+#include "src/ast/constructor_expression.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/initializer_expression.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/relational_expression.h"
 #include "src/ast/unary_derivative_expression.h"
@@ -62,9 +62,9 @@ IdentifierExpression* Expression::AsIdentifier() {
   return static_cast<IdentifierExpression*>(this);
 }
 
-InitializerExpression* Expression::AsInitializer() {
-  assert(IsInitializer());
-  return static_cast<InitializerExpression*>(this);
+ConstructorExpression* Expression::AsConstructor() {
+  assert(IsConstructor());
+  return static_cast<ConstructorExpression*>(this);
 }
 
 MemberAccessorExpression* Expression::AsMemberAccessor() {

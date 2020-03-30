@@ -138,7 +138,7 @@ TEST_F(ParserImplTest, Statement_Variable_Invalid) {
   auto e = p->statement();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:14: missing initializer for variable declaration");
+  EXPECT_EQ(p->error(), "1:14: missing constructor for variable declaration");
 }
 
 TEST_F(ParserImplTest, Statement_Variable_MissingSemicolon) {

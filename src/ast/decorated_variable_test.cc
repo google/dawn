@@ -70,7 +70,7 @@ TEST_F(DecoratedVariableTest, to_str) {
   type::F32Type t;
   auto var = std::make_unique<Variable>("my_var", StorageClass::kFunction, &t);
   DecoratedVariable dv(std::move(var));
-  dv.set_initializer(std::make_unique<IdentifierExpression>("expr"));
+  dv.set_constructor(std::make_unique<IdentifierExpression>("expr"));
 
   std::vector<std::unique_ptr<VariableDecoration>> decos;
   decos.push_back(std::make_unique<BindingDecoration>(2));

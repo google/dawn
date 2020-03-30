@@ -31,7 +31,7 @@ class BreakStatement : public Statement {
   /// Constructor
   BreakStatement();
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the break statement source
   explicit BreakStatement(const Source& source);
   /// Constructor
   /// @param condition the condition type
@@ -39,7 +39,7 @@ class BreakStatement : public Statement {
   BreakStatement(StatementCondition condition,
                  std::unique_ptr<Expression> conditional);
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the break statement source
   /// @param condition the condition type
   /// @param conditional the condition expression
   BreakStatement(const Source& source,

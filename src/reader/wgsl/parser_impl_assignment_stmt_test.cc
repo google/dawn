@@ -15,11 +15,11 @@
 #include "gtest/gtest.h"
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
-#include "src/ast/const_initializer_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/literal.h"
 #include "src/ast/member_accessor_expression.h"
+#include "src/ast/scalar_constructor_expression.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
@@ -43,10 +43,10 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
   ASSERT_EQ(ident->name().size(), 1);
   EXPECT_EQ(ident->name()[0], "a");
 
-  ASSERT_TRUE(e->rhs()->IsInitializer());
-  ASSERT_TRUE(e->rhs()->AsInitializer()->IsConstInitializer());
+  ASSERT_TRUE(e->rhs()->IsConstructor());
+  ASSERT_TRUE(e->rhs()->AsConstructor()->IsScalarConstructor());
 
-  auto init = e->rhs()->AsInitializer()->AsConstInitializer();
+  auto init = e->rhs()->AsConstructor()->AsScalarConstructor();
   ASSERT_NE(init->literal(), nullptr);
   ASSERT_TRUE(init->literal()->IsInt());
   EXPECT_EQ(init->literal()->AsInt()->value(), 123);
@@ -62,9 +62,9 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
   ASSERT_NE(e->lhs(), nullptr);
   ASSERT_NE(e->rhs(), nullptr);
 
-  ASSERT_TRUE(e->rhs()->IsInitializer());
-  ASSERT_TRUE(e->rhs()->AsInitializer()->IsConstInitializer());
-  auto init = e->rhs()->AsInitializer()->AsConstInitializer();
+  ASSERT_TRUE(e->rhs()->IsConstructor());
+  ASSERT_TRUE(e->rhs()->AsConstructor()->IsScalarConstructor());
+  auto init = e->rhs()->AsConstructor()->AsScalarConstructor();
   ASSERT_NE(init->literal(), nullptr);
   ASSERT_TRUE(init->literal()->IsInt());
   EXPECT_EQ(init->literal()->AsInt()->value(), 123);
@@ -80,9 +80,9 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
   ASSERT_TRUE(mem->structure()->IsArrayAccessor());
   auto ary = mem->structure()->AsArrayAccessor();
 
-  ASSERT_TRUE(ary->idx_expr()->IsInitializer());
-  ASSERT_TRUE(ary->idx_expr()->AsInitializer()->IsConstInitializer());
-  init = ary->idx_expr()->AsInitializer()->AsConstInitializer();
+  ASSERT_TRUE(ary->idx_expr()->IsConstructor());
+  ASSERT_TRUE(ary->idx_expr()->AsConstructor()->IsScalarConstructor());
+  init = ary->idx_expr()->AsConstructor()->AsScalarConstructor();
   ASSERT_NE(init->literal(), nullptr);
   ASSERT_TRUE(init->literal()->IsInt());
   EXPECT_EQ(init->literal()->AsInt()->value(), 2);

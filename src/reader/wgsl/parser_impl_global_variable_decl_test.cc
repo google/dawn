@@ -23,7 +23,7 @@ namespace reader {
 namespace wgsl {
 namespace {
 
-TEST_F(ParserImplTest, GlobalVariableDecl_WithoutInitializer) {
+TEST_F(ParserImplTest, GlobalVariableDecl_WithoutConstructor) {
   auto p = parser("var<out> a : f32");
   auto e = p->global_variable_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
@@ -33,11 +33,11 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithoutInitializer) {
   EXPECT_TRUE(e->type()->IsF32());
   EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
 
-  ASSERT_EQ(e->initializer(), nullptr);
+  ASSERT_EQ(e->constructor(), nullptr);
   ASSERT_FALSE(e->IsDecorated());
 }
 
-TEST_F(ParserImplTest, GlobalVariableDecl_WithInitializer) {
+TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
   auto p = parser("var<out> a : f32 = 1.");
   auto e = p->global_variable_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
@@ -47,9 +47,9 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithInitializer) {
   EXPECT_TRUE(e->type()->IsF32());
   EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
 
-  ASSERT_NE(e->initializer(), nullptr);
-  ASSERT_TRUE(e->initializer()->IsInitializer());
-  ASSERT_TRUE(e->initializer()->AsInitializer()->IsConstInitializer());
+  ASSERT_NE(e->constructor(), nullptr);
+  ASSERT_TRUE(e->constructor()->IsConstructor());
+  ASSERT_TRUE(e->constructor()->AsConstructor()->IsScalarConstructor());
 
   ASSERT_FALSE(e->IsDecorated());
 }
@@ -66,7 +66,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
   EXPECT_TRUE(e->type()->IsF32());
   EXPECT_EQ(e->storage_class(), ast::StorageClass::kOutput);
 
-  ASSERT_EQ(e->initializer(), nullptr);
+  ASSERT_EQ(e->constructor(), nullptr);
 
   ASSERT_TRUE(e->IsDecorated());
   auto v = e->AsDecorated();

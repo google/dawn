@@ -36,7 +36,7 @@ class ReturnStatement : public Statement {
   /// @param value the return value
   explicit ReturnStatement(std::unique_ptr<Expression> value);
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the return statement source
   /// @param value the return value
   ReturnStatement(const Source& source, std::unique_ptr<Expression> value);
   /// Move constructor

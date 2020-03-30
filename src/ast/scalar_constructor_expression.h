@@ -12,37 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_AST_CONST_INITIALIZER_EXPRESSION_H_
-#define SRC_AST_CONST_INITIALIZER_EXPRESSION_H_
+#ifndef SRC_AST_SCALAR_CONSTRUCTOR_EXPRESSION_H_
+#define SRC_AST_SCALAR_CONSTRUCTOR_EXPRESSION_H_
 
 #include <memory>
 #include <utility>
 
-#include "src/ast/initializer_expression.h"
+#include "src/ast/constructor_expression.h"
 #include "src/ast/literal.h"
 
 namespace tint {
 namespace ast {
 
-/// A constant initializer
-class ConstInitializerExpression : public InitializerExpression {
+/// A scalar constructor
+class ScalarConstructorExpression : public ConstructorExpression {
  public:
   /// Constructor
-  ConstInitializerExpression();
+  ScalarConstructorExpression();
   /// Constructor
   /// @param literal the const literal
-  explicit ConstInitializerExpression(std::unique_ptr<Literal> literal);
+  explicit ScalarConstructorExpression(std::unique_ptr<Literal> literal);
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the constructor source
   /// @param literal the const literal
-  ConstInitializerExpression(const Source& source,
-                             std::unique_ptr<Literal> literal);
+  ScalarConstructorExpression(const Source& source,
+                              std::unique_ptr<Literal> literal);
   /// Move constructor
-  ConstInitializerExpression(ConstInitializerExpression&&) = default;
-  ~ConstInitializerExpression() override;
+  ScalarConstructorExpression(ScalarConstructorExpression&&) = default;
+  ~ScalarConstructorExpression() override;
 
-  /// @returns true if this is a constant initializer
-  bool IsConstInitializer() const override { return true; }
+  /// @returns true if this is a scalar constructor
+  bool IsScalarConstructor() const override { return true; }
 
   /// Set the literal value
   /// @param literal the literal
@@ -61,7 +61,7 @@ class ConstInitializerExpression : public InitializerExpression {
   void to_str(std::ostream& out, size_t indent) const override;
 
  private:
-  ConstInitializerExpression(const ConstInitializerExpression&) = delete;
+  ScalarConstructorExpression(const ScalarConstructorExpression&) = delete;
 
   std::unique_ptr<Literal> literal_;
 };
@@ -69,4 +69,4 @@ class ConstInitializerExpression : public InitializerExpression {
 }  // namespace ast
 }  // namespace tint
 
-#endif  // SRC_AST_CONST_INITIALIZER_EXPRESSION_H_
+#endif  // SRC_AST_SCALAR_CONSTRUCTOR_EXPRESSION_H_

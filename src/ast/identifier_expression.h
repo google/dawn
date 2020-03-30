@@ -39,7 +39,7 @@ class IdentifierExpression : public Expression {
   /// @param name the name
   explicit IdentifierExpression(std::vector<std::string> name);
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the identifier expression source
   /// @param name the name
   IdentifierExpression(const Source& source, std::vector<std::string> name);
   /// Move constructor

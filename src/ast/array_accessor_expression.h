@@ -35,7 +35,7 @@ class ArrayAccessorExpression : public Expression {
   ArrayAccessorExpression(std::unique_ptr<Expression> array,
                           std::unique_ptr<Expression> idx_expr);
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the array accessor source
   /// @param array the array
   /// @param idx_expr the index expression
   ArrayAccessorExpression(const Source& source,

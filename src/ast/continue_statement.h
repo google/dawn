@@ -31,7 +31,7 @@ class ContinueStatement : public Statement {
   /// Constructor
   ContinueStatement();
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the continue statement source
   explicit ContinueStatement(const Source& source);
   /// Constructor
   /// @param condition the condition type
@@ -39,7 +39,7 @@ class ContinueStatement : public Statement {
   ContinueStatement(StatementCondition condition,
                     std::unique_ptr<Expression> conditional);
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the continue statement source
   /// @param condition the condition type
   /// @param conditional the condition expression
   ContinueStatement(const Source& source,

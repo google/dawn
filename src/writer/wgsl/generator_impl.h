@@ -21,15 +21,15 @@
 #include <vector>
 
 #include "src/ast/array_accessor_expression.h"
-#include "src/ast/const_initializer_expression.h"
+#include "src/ast/constructor_expression.h"
 #include "src/ast/entry_point.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/import.h"
-#include "src/ast/initializer_expression.h"
 #include "src/ast/module.h"
+#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/type.h"
-#include "src/ast/type_initializer_expression.h"
+#include "src/ast/type_constructor_expression.h"
 #include "src/ast/variable.h"
 
 namespace tint {
@@ -100,10 +100,10 @@ class GeneratorImpl {
   /// @param expr the cast expression
   /// @returns true if the cast was emitted
   bool EmitCast(ast::CastExpression* expr);
-  /// Handles generating a const initializer
-  /// @param expr the const initializer expression
-  /// @returns true if the initializer is emitted
-  bool EmitConstInitializer(ast::ConstInitializerExpression* expr);
+  /// Handles generating a scalar constructor
+  /// @param expr the scalar constructor expression
+  /// @returns true if the scalar constructor is emitted
+  bool EmitScalarConstructor(ast::ScalarConstructorExpression* expr);
   /// Handles a continue statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
@@ -140,10 +140,10 @@ class GeneratorImpl {
   /// @param import the import to generate
   /// @returns true if the import was emitted
   bool EmitImport(const ast::Import* import);
-  /// Handles generating initializer expressions
-  /// @param expr the initializer expression
+  /// Handles generating constructor expressions
+  /// @param expr the constructor expression
   /// @returns true if the expression was emitted
-  bool EmitInitializer(ast::InitializerExpression* expr);
+  bool EmitConstructor(ast::ConstructorExpression* expr);
   /// Handles generating a kill statement
   /// @param stmt the kill statement
   /// @returns true if the statement was successfully emitted
@@ -198,10 +198,10 @@ class GeneratorImpl {
   /// @param type the type to generate
   /// @returns true if the type is emitted
   bool EmitType(ast::type::Type* type);
-  /// Handles emitting a type initializer
-  /// @param expr the type initializer expression
-  /// @returns true if the initializer is emitted
-  bool EmitTypeInitializer(ast::TypeInitializerExpression* expr);
+  /// Handles emitting a type constructor
+  /// @param expr the type constructor expression
+  /// @returns true if the constructor is emitted
+  bool EmitTypeConstructor(ast::TypeConstructorExpression* expr);
   /// Handles a unary derivative expression
   /// @param expr the expression to emit
   /// @returns true if the expression was emitted

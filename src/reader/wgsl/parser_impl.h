@@ -24,11 +24,11 @@
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/builtin.h"
+#include "src/ast/constructor_expression.h"
 #include "src/ast/derivative_modifier.h"
 #include "src/ast/entry_point.h"
 #include "src/ast/function.h"
 #include "src/ast/import.h"
-#include "src/ast/initializer_expression.h"
 #include "src/ast/literal.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/module.h"
@@ -239,8 +239,8 @@ class ParserImpl {
   /// @returns the const literal parsed or nullptr if none found
   std::unique_ptr<ast::Literal> const_literal();
   /// Parses a `const_expr` grammar element
-  /// @returns the parsed initializer expression or nullptr on error
-  std::unique_ptr<ast::InitializerExpression> const_expr();
+  /// @returns the parsed constructor expression or nullptr on error
+  std::unique_ptr<ast::ConstructorExpression> const_expr();
   /// Parses a `primary_expression` grammar element
   /// @returns the parsed expression or nullptr
   std::unique_ptr<ast::Expression> primary_expression();

@@ -72,15 +72,15 @@ class Variable : public Node {
   /// @returns the storage class
   StorageClass storage_class() const { return storage_class_; }
 
-  /// Sets the initializer
-  /// @param expr the initializer expression
-  void set_initializer(std::unique_ptr<Expression> expr) {
-    initializer_ = std::move(expr);
+  /// Sets the constructor
+  /// @param expr the constructor expression
+  void set_constructor(std::unique_ptr<Expression> expr) {
+    constructor_ = std::move(expr);
   }
-  /// @returns the initializer expression or nullptr if none set
-  Expression* initializer() const { return initializer_.get(); }
-  /// @returns true if the variable has an initializer
-  bool has_initializer() const { return initializer_ != nullptr; }
+  /// @returns the constructor expression or nullptr if none set
+  Expression* constructor() const { return constructor_.get(); }
+  /// @returns true if the variable has an constructor
+  bool has_constructor() const { return constructor_ != nullptr; }
 
   /// Sets if the variable is constant
   /// @param val the value to be set
@@ -107,10 +107,10 @@ class Variable : public Node {
   /// @param out the stream to write to
   /// @param indent number of spaces to indent the node when writing
   void info_to_str(std::ostream& out, size_t indent) const;
-  /// Output initializer for this variable.
+  /// Output constructor for this variable.
   /// @param out the stream to write to
   /// @param indent number of spaces to indent the node when writing
-  void initializer_to_str(std::ostream& out, size_t indent) const;
+  void constructor_to_str(std::ostream& out, size_t indent) const;
 
  private:
   Variable(const Variable&) = delete;
@@ -119,7 +119,7 @@ class Variable : public Node {
   std::string name_;
   StorageClass storage_class_ = StorageClass::kNone;
   type::Type* type_ = nullptr;
-  std::unique_ptr<Expression> initializer_;
+  std::unique_ptr<Expression> constructor_;
 };
 
 }  // namespace ast

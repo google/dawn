@@ -12,28 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/type_initializer_expression.h"
+#include "src/ast/type_constructor_expression.h"
 
 namespace tint {
 namespace ast {
 
-TypeInitializerExpression::TypeInitializerExpression()
-    : InitializerExpression() {}
+TypeConstructorExpression::TypeConstructorExpression()
+    : ConstructorExpression() {}
 
-TypeInitializerExpression::TypeInitializerExpression(
+TypeConstructorExpression::TypeConstructorExpression(
     type::Type* type,
     std::vector<std::unique_ptr<Expression>> values)
-    : InitializerExpression(), type_(type), values_(std::move(values)) {}
+    : ConstructorExpression(), type_(type), values_(std::move(values)) {}
 
-TypeInitializerExpression::TypeInitializerExpression(
+TypeConstructorExpression::TypeConstructorExpression(
     const Source& source,
     type::Type* type,
     std::vector<std::unique_ptr<Expression>> values)
-    : InitializerExpression(source), type_(type), values_(std::move(values)) {}
+    : ConstructorExpression(source), type_(type), values_(std::move(values)) {}
 
-TypeInitializerExpression::~TypeInitializerExpression() = default;
+TypeConstructorExpression::~TypeConstructorExpression() = default;
 
-bool TypeInitializerExpression::IsValid() const {
+bool TypeConstructorExpression::IsValid() const {
   if (values_.empty()) {
     return false;
   }
@@ -48,9 +48,9 @@ bool TypeInitializerExpression::IsValid() const {
   return true;
 }
 
-void TypeInitializerExpression::to_str(std::ostream& out, size_t indent) const {
+void TypeConstructorExpression::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "TypeInitializer{" << std::endl;
+  out << "TypeConstructor{" << std::endl;
   make_indent(out, indent + 2);
   out << type_->type_name() << std::endl;
 

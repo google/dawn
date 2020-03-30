@@ -35,7 +35,7 @@ class UnaryOpExpression : public Expression {
   /// @param expr the expr
   UnaryOpExpression(UnaryOp op, std::unique_ptr<Expression> expr);
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the unary op expression source
   /// @param op the op
   /// @param expr the expr
   UnaryOpExpression(const Source& source,

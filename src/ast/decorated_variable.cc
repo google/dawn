@@ -45,7 +45,7 @@ void DecoratedVariable::to_str(std::ostream& out, size_t indent) const {
   out << "}" << std::endl;
 
   info_to_str(out, indent + 2);
-  initializer_to_str(out, indent + 2);
+  constructor_to_str(out, indent + 2);
   make_indent(out, indent);
   out << "}" << std::endl;
 }

@@ -15,10 +15,10 @@
 #include "gtest/gtest.h"
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/call_expression.h"
-#include "src/ast/const_initializer_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/member_accessor_expression.h"
+#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/unary_derivative_expression.h"
 #include "src/ast/unary_method_expression.h"
 #include "src/ast/unary_op_expression.h"
@@ -44,9 +44,9 @@ TEST_F(ParserImplTest, PostfixExpression_Array_ConstantIndex) {
   ASSERT_EQ(ident->name().size(), 1);
   EXPECT_EQ(ident->name()[0], "a");
 
-  ASSERT_TRUE(ary->idx_expr()->IsInitializer());
-  ASSERT_TRUE(ary->idx_expr()->AsInitializer()->IsConstInitializer());
-  auto c = ary->idx_expr()->AsInitializer()->AsConstInitializer();
+  ASSERT_TRUE(ary->idx_expr()->IsConstructor());
+  ASSERT_TRUE(ary->idx_expr()->AsConstructor()->IsScalarConstructor());
+  auto c = ary->idx_expr()->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(c->literal()->IsInt());
   EXPECT_EQ(c->literal()->AsInt()->value(), 1);
 }
@@ -125,7 +125,7 @@ TEST_F(ParserImplTest, PostfixExpression_Call_WithArgs) {
   EXPECT_EQ(func->name()[1], "test");
 
   EXPECT_EQ(c->params().size(), 3);
-  EXPECT_TRUE(c->params()[0]->IsInitializer());
+  EXPECT_TRUE(c->params()[0]->IsConstructor());
   EXPECT_TRUE(c->params()[1]->IsIdentifier());
   EXPECT_TRUE(c->params()[2]->IsRelational());
 }

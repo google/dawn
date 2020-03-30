@@ -34,7 +34,7 @@ class VariableStatement : public Statement {
   /// @param variable the variable
   explicit VariableStatement(std::unique_ptr<Variable> variable);
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the variable statement source
   /// @param variable the variable
   VariableStatement(const Source& source, std::unique_ptr<Variable> variable);
   /// Move constructor

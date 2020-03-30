@@ -37,7 +37,7 @@ class UnaryMethodExpression : public Expression {
   UnaryMethodExpression(UnaryMethod op,
                         std::vector<std::unique_ptr<Expression>> params);
   /// Constructor
-  /// @param source the initializer source
+  /// @param source the unary method source
   /// @param op the op
   /// @param params the params
   UnaryMethodExpression(const Source& source,
