@@ -64,6 +64,10 @@ namespace dawn_native { namespace d3d12 {
             CheckHRESULT(mD3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&mCommandQueue)),
                          "D3D12 create command queue"));
 
+        // If PIX is not attached, the QueryInterface fails. Hence, no need to check the return
+        // value.
+        mCommandQueue.As(&mD3d12SharingContract);
+
         DAWN_TRY(CheckHRESULT(mD3d12Device->CreateFence(mLastSubmittedSerial, D3D12_FENCE_FLAG_NONE,
                                                         IID_PPV_ARGS(&mFence)),
                               "D3D12 create fence"));
@@ -122,6 +126,10 @@ namespace dawn_native { namespace d3d12 {
 
     ComPtr<ID3D12CommandQueue> Device::GetCommandQueue() const {
         return mCommandQueue;
+    }
+
+    ID3D12SharingContract* Device::GetSharingContract() const {
+        return mD3d12SharingContract.Get();
     }
 
     ComPtr<ID3D12CommandSignature> Device::GetDispatchIndirectSignature() const {
@@ -322,9 +330,11 @@ namespace dawn_native { namespace d3d12 {
 
     TextureBase* Device::WrapSharedHandle(const ExternalImageDescriptor* descriptor,
                                           HANDLE sharedHandle,
-                                          uint64_t acquireMutexKey) {
+                                          uint64_t acquireMutexKey,
+                                          bool isSwapChainTexture) {
         TextureBase* dawnTexture;
-        if (ConsumedError(Texture::Create(this, descriptor, sharedHandle, acquireMutexKey),
+        if (ConsumedError(Texture::Create(this, descriptor, sharedHandle, acquireMutexKey,
+                                          isSwapChainTexture),
                           &dawnTexture))
             return nullptr;
 

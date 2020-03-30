@@ -62,7 +62,8 @@ namespace dawn_native { namespace d3d12 {
                                  const ExternalImageDescriptorDXGISharedHandle* descriptor) {
         Device* backendDevice = reinterpret_cast<Device*>(device);
         TextureBase* texture = backendDevice->WrapSharedHandle(descriptor, descriptor->sharedHandle,
-                                                               descriptor->acquireMutexKey);
+                                                               descriptor->acquireMutexKey,
+                                                               descriptor->isSwapChainTexture);
         return reinterpret_cast<WGPUTexture>(texture);
     }
 

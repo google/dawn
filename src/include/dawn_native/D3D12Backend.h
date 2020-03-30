@@ -36,6 +36,7 @@ namespace dawn_native { namespace d3d12 {
 
         HANDLE sharedHandle;
         uint64_t acquireMutexKey;
+        bool isSwapChainTexture = false;
     };
 
     DAWN_NATIVE_EXPORT uint64_t SetExternalMemoryReservation(WGPUDevice device,

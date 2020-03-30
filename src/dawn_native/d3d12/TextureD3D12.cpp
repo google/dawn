@@ -284,14 +284,15 @@ namespace dawn_native { namespace d3d12 {
     ResultOrError<TextureBase*> Texture::Create(Device* device,
                                                 const ExternalImageDescriptor* descriptor,
                                                 HANDLE sharedHandle,
-                                                uint64_t acquireMutexKey) {
+                                                uint64_t acquireMutexKey,
+                                                bool isSwapChainTexture) {
         const TextureDescriptor* textureDescriptor =
             reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor);
 
         Ref<Texture> dawnTexture =
             AcquireRef(new Texture(device, textureDescriptor, TextureState::OwnedExternal));
         DAWN_TRY(dawnTexture->InitializeAsExternalTexture(textureDescriptor, sharedHandle,
-                                                          acquireMutexKey));
+                                                          acquireMutexKey, isSwapChainTexture));
 
         dawnTexture->SetIsSubresourceContentInitialized(descriptor->isCleared, 0,
                                                         textureDescriptor->mipLevelCount, 0,
@@ -301,7 +302,8 @@ namespace dawn_native { namespace d3d12 {
 
     MaybeError Texture::InitializeAsExternalTexture(const TextureDescriptor* descriptor,
                                                     HANDLE sharedHandle,
-                                                    uint64_t acquireMutexKey) {
+                                                    uint64_t acquireMutexKey,
+                                                    bool isSwapChainTexture) {
         Device* dawnDevice = ToBackend(GetDevice());
         DAWN_TRY(ValidateTextureDescriptor(dawnDevice, descriptor));
         DAWN_TRY(ValidateTextureDescriptorCanBeWrapped(descriptor));
@@ -322,6 +324,7 @@ namespace dawn_native { namespace d3d12 {
 
         mAcquireMutexKey = acquireMutexKey;
         mDxgiKeyedMutex = std::move(dxgiKeyedMutex);
+        mSwapChainTexture = isSwapChainTexture;
 
         AllocationInfo info;
         info.mMethod = AllocationMethod::kExternal;
@@ -391,6 +394,20 @@ namespace dawn_native { namespace d3d12 {
 
     void Texture::DestroyImpl() {
         Device* device = ToBackend(GetDevice());
+
+        // In PIX's D3D12-only mode, there is no way to determine frame boundaries
+        // for WebGPU since Dawn does not manage DXGI swap chains. Without assistance,
+        // PIX will wait forever for a present that never happens.
+        // If we know we're dealing with a swapbuffer texture, inform PIX we've
+        // "presented" the texture so it can determine frame boundaries and use its
+        // contents for the UI.
+        if (mSwapChainTexture) {
+            ID3D12SharingContract* d3dSharingContract = device->GetSharingContract();
+            if (d3dSharingContract != nullptr) {
+                d3dSharingContract->Present(mResourceAllocation.GetD3D12Resource().Get(), 0, 0);
+            }
+        }
+
         device->DeallocateMemory(mResourceAllocation);
 
         if (mDxgiKeyedMutex != nullptr) {

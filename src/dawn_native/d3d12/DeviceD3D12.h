@@ -59,6 +59,7 @@ namespace dawn_native { namespace d3d12 {
 
         ComPtr<ID3D12Device> GetD3D12Device() const;
         ComPtr<ID3D12CommandQueue> GetCommandQueue() const;
+        ID3D12SharingContract* GetSharingContract() const;
 
         ComPtr<ID3D12CommandSignature> GetDispatchIndirectSignature() const;
         ComPtr<ID3D12CommandSignature> GetDrawIndirectSignature() const;
@@ -102,7 +103,8 @@ namespace dawn_native { namespace d3d12 {
 
         TextureBase* WrapSharedHandle(const ExternalImageDescriptor* descriptor,
                                       HANDLE sharedHandle,
-                                      uint64_t acquireMutexKey);
+                                      uint64_t acquireMutexKey,
+                                      bool isSwapChainTexture);
         ResultOrError<ComPtr<IDXGIKeyedMutex>> CreateKeyedMutexForTexture(
             ID3D12Resource* d3d12Resource);
         void ReleaseKeyedMutexForTexture(ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex);
@@ -146,6 +148,7 @@ namespace dawn_native { namespace d3d12 {
 
         ComPtr<ID3D12Device> mD3d12Device;  // Device is owned by adapter and will not be outlived.
         ComPtr<ID3D12CommandQueue> mCommandQueue;
+        ComPtr<ID3D12SharingContract> mD3d12SharingContract;
 
         // 11on12 device and device context corresponding to mCommandQueue
         ComPtr<ID3D11On12Device> mD3d11On12Device;
