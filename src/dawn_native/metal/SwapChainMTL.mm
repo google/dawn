@@ -84,9 +84,11 @@ namespace dawn_native { namespace metal {
         [mLayer setDevice:ToBackend(GetDevice())->GetMTLDevice()];
         [mLayer setPixelFormat:MetalPixelFormat(GetFormat())];
 
-        if (@available(macos 10.13, ios 11.0, *)) {
+#if defined(DAWN_PLATFORM_MACOS)
+        if (@available(macos 10.13, *)) {
             [mLayer setDisplaySyncEnabled:(GetPresentMode() != wgpu::PresentMode::Immediate)];
         }
+#endif  // defined(DAWN_PLATFORM_MACOS)
 
         // There is no way to control Fifo vs. Mailbox in Metal.
     }
