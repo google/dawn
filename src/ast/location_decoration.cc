@@ -17,7 +17,7 @@
 namespace tint {
 namespace ast {
 
-LocationDecoration::LocationDecoration(size_t val) : value_(val) {}
+LocationDecoration::LocationDecoration(uint32_t val) : value_(val) {}
 
 LocationDecoration::~LocationDecoration() = default;
 

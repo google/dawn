@@ -27,21 +27,21 @@ class LocationDecoration : public VariableDecoration {
  public:
   /// constructor
   /// @param value the location value
-  explicit LocationDecoration(size_t value);
+  explicit LocationDecoration(uint32_t value);
   ~LocationDecoration() override;
 
   /// @returns true if this is a location decoration
   bool IsLocation() const override { return true; }
 
   /// @returns the location value
-  size_t value() const { return value_; }
+  uint32_t value() const { return value_; }
 
   /// Outputs the decoration to the given stream
   /// @param out the stream to output too
   void to_str(std::ostream& out) const override;
 
  private:
-  size_t value_;
+  uint32_t value_;
 };
 
 }  // namespace ast

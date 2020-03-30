@@ -17,7 +17,7 @@
 namespace tint {
 namespace ast {
 
-SetDecoration::SetDecoration(size_t val) : value_(val) {}
+SetDecoration::SetDecoration(uint32_t val) : value_(val) {}
 
 SetDecoration::~SetDecoration() = default;
 

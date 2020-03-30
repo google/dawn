@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "spirv/unified1/spirv.h"
+#include "src/ast/builtin.h"
 #include "src/ast/literal.h"
 #include "src/ast/module.h"
 #include "src/ast/struct_member.h"
@@ -127,6 +128,10 @@ class Builder {
   /// @param klass the storage class to convert
   /// @returns the SPIR-V storage class or SpvStorageClassMax on error.
   SpvStorageClass ConvertStorageClass(ast::StorageClass klass) const;
+  /// Converts a builtin to a SPIR-V builtin
+  /// @param builtin the builtin to convert
+  /// @returns the SPIR-V builtin or SpvBuiltInMax on error.
+  SpvBuiltIn ConvertBuiltin(ast::Builtin builtin) const;
 
   /// Generates an entry point instruction
   /// @param ep the entry point
@@ -140,6 +145,10 @@ class Builder {
   /// @param func the function to generate for
   /// @returns the ID to use for the function type. Returns 0 on failure.
   uint32_t GenerateFunctionTypeIfNeeded(ast::Function* func);
+  /// Generates a global variable
+  /// @param var the variable to generate
+  /// @returns true if the variable is emited.
+  bool GenerateGlobalVariable(ast::Variable* var);
   /// Generates an import instruction
   /// @param imp the import
   void GenerateImport(ast::Import* imp);

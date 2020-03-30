@@ -16,9 +16,14 @@
 #include <utility>
 
 #include "spirv/unified1/spirv.h"
+#include "src/ast/binding_decoration.h"
 #include "src/ast/bool_literal.h"
+#include "src/ast/builtin_decoration.h"
+#include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/int_literal.h"
+#include "src/ast/location_decoration.h"
+#include "src/ast/set_decoration.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
@@ -81,6 +86,12 @@ bool Builder::Build(const ast::Module& m) {
   push_preamble(spv::Op::OpMemoryModel,
                 {Operand::Int(SpvAddressingModelLogical),
                  Operand::Int(SpvMemoryModelVulkanKHR)});
+
+  for (const auto& var : m.global_variables()) {
+    if (!GenerateGlobalVariable(var.get())) {
+      return false;
+    }
+  }
 
   for (const auto& func : m.functions()) {
     if (!GenerateFunction(func.get())) {
@@ -206,6 +217,60 @@ uint32_t Builder::GenerateFunctionTypeIfNeeded(ast::Function* func) {
 
   type_name_to_id_[func->type_name()] = func_type_id;
   return func_type_id;
+}
+
+bool Builder::GenerateGlobalVariable(ast::Variable* var) {
+  auto result = result_op();
+  auto var_id = result.to_i();
+
+  if (var->is_const()) {
+    // TODO(dsinclair): Handle const variables
+    return false;
+  }
+
+  auto sc = var->storage_class() == ast::StorageClass::kNone
+                ? ast::StorageClass::kPrivate
+                : var->storage_class();
+
+  ast::type::PointerType pt(var->type(), sc);
+  auto type_id = GenerateTypeIfNeeded(&pt);
+  if (type_id == 0) {
+    return false;
+  }
+
+  // TODO(dsinclair): Handle variable initializer
+  push_debug(spv::Op::OpName,
+             {Operand::Int(var_id), Operand::String(var->name())});
+  push_type(spv::Op::OpVariable, {Operand::Int(type_id), result,
+                                  Operand::Int(ConvertStorageClass(sc))});
+
+  if (var->IsDecorated()) {
+    for (const auto& deco : var->AsDecorated()->decorations()) {
+      if (deco->IsBuiltin()) {
+        push_debug(spv::Op::OpDecorate,
+                   {Operand::Int(var_id), Operand::Int(SpvDecorationBuiltIn),
+                    Operand::Int(ConvertBuiltin(deco->AsBuiltin()->value()))});
+      } else if (deco->IsLocation()) {
+        push_debug(spv::Op::OpDecorate,
+                   {Operand::Int(var_id), Operand::Int(SpvDecorationLocation),
+                    Operand::Int(deco->AsLocation()->value())});
+      } else if (deco->IsBinding()) {
+        push_debug(spv::Op::OpDecorate,
+                   {Operand::Int(var_id), Operand::Int(SpvDecorationBinding),
+                    Operand::Int(deco->AsBinding()->value())});
+      } else if (deco->IsSet()) {
+        push_debug(
+            spv::Op::OpDecorate,
+            {Operand::Int(var_id), Operand::Int(SpvDecorationDescriptorSet),
+             Operand::Int(deco->AsSet()->value())});
+      } else {
+        error_ = "unknown decoration";
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 void Builder::GenerateImport(ast::Import* imp) {
@@ -353,6 +418,7 @@ bool Builder::GeneratePointerType(ast::type::PointerType* ptr,
 
   auto stg_class = ConvertStorageClass(ptr->storage_class());
   if (stg_class == SpvStorageClassMax) {
+    error_ = "invalid storage class for pointer";
     return false;
   }
 
@@ -458,6 +524,36 @@ SpvStorageClass Builder::ConvertStorageClass(ast::StorageClass klass) const {
       break;
   }
   return SpvStorageClassMax;
+}
+
+SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin) const {
+  switch (builtin) {
+    case ast::Builtin::kPosition:
+      return SpvBuiltInPosition;
+    case ast::Builtin::kVertexIdx:
+      return SpvBuiltInVertexIndex;
+    case ast::Builtin::kInstanceIdx:
+      return SpvBuiltInInstanceIndex;
+    case ast::Builtin::kFrontFacing:
+      return SpvBuiltInFrontFacing;
+    case ast::Builtin::kFragCoord:
+      return SpvBuiltInFragCoord;
+    case ast::Builtin::kFragDepth:
+      return SpvBuiltInFragDepth;
+    case ast::Builtin::kNumWorkgroups:
+      return SpvBuiltInNumWorkgroups;
+    case ast::Builtin::kWorkgroupSize:
+      return SpvBuiltInWorkgroupSize;
+    case ast::Builtin::kLocalInvocationId:
+      return SpvBuiltInLocalInvocationId;
+    case ast::Builtin::kLocalInvocationIdx:
+      return SpvBuiltInLocalInvocationIndex;
+    case ast::Builtin::kGlobalInvocationId:
+      return SpvBuiltInGlobalInvocationId;
+    case ast::Builtin::kNone:
+      break;
+  }
+  return SpvBuiltInMax;
 }
 
 }  // namespace spirv
