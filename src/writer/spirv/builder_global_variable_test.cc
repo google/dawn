@@ -18,11 +18,15 @@
 #include "src/ast/binding_decoration.h"
 #include "src/ast/builtin.h"
 #include "src/ast/builtin_decoration.h"
+#include "src/ast/const_initializer_expression.h"
 #include "src/ast/decorated_variable.h"
+#include "src/ast/float_literal.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/type/f32_type.h"
+#include "src/ast/type/vector_type.h"
+#include "src/ast/type_initializer_expression.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decoration.h"
 #include "src/writer/spirv/builder.h"
@@ -63,9 +67,70 @@ TEST_F(BuilderTest, GlobalVar_WithStorageClass) {
 )");
 }
 
-TEST_F(BuilderTest, DISABLED_GlobalVar_WithInitializer) {}
+TEST_F(BuilderTest, GlobalVar_WithInitializer) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
 
-TEST_F(BuilderTest, DISABLED_GlobalVar_Const) {}
+  std::vector<std::unique_ptr<ast::Expression>> vals;
+  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+
+  auto init =
+      std::make_unique<ast::TypeInitializerExpression>(&vec, std::move(vals));
+
+  ast::Variable v("var", ast::StorageClass::kOutput, &f32);
+  v.set_initializer(std::move(init));
+
+  Builder b;
+  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  ASSERT_FALSE(b.has_error()) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %6 "var"
+)");
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeVector %2 3
+%3 = OpConstant %2 1
+%4 = OpConstant %2 3
+%5 = OpCompositeConstruct %1 %3 %3 %4
+%7 = OpTypePointer Output %2
+%6 = OpVariable %7 Output %5
+)");
+}
+
+TEST_F(BuilderTest, GlobalVar_Const) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+
+  std::vector<std::unique_ptr<ast::Expression>> vals;
+  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(std::make_unique<ast::ConstInitializerExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+
+  auto init =
+      std::make_unique<ast::TypeInitializerExpression>(&vec, std::move(vals));
+
+  ast::Variable v("var", ast::StorageClass::kOutput, &f32);
+  v.set_initializer(std::move(init));
+  v.set_is_const(true);
+
+  Builder b;
+  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  ASSERT_FALSE(b.has_error()) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeVector %2 3
+%3 = OpConstant %2 1
+%4 = OpConstant %2 3
+%5 = OpCompositeConstruct %1 %3 %3 %4
+)");
+}
 
 TEST_F(BuilderTest, GlobalVar_WithLocation) {
   ast::type::F32Type f32;

@@ -49,6 +49,9 @@ class Operand {
   Operand(const Operand&) = default;
   ~Operand();
 
+  /// Copy assignment
+  Operand& operator=(const Operand&) = default;
+
   /// Sets the float value
   /// @param val the value to set
   void set_float(float val) { float_val_ = val; }

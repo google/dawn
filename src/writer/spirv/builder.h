@@ -137,6 +137,10 @@ class Builder {
   /// @param ep the entry point
   /// @returns true if the instruction was generated, false otherwise
   bool GenerateEntryPoint(ast::EntryPoint* ep);
+  /// Generates an expression
+  /// @param expr the expression to generate
+  /// @returns the resulting ID of the expression or 0 on error
+  uint32_t GenerateExpression(ast::Expression* expr);
   /// Generates the instructions for a function
   /// @param func the function to generate
   /// @returns true if the instructions were generated
@@ -152,6 +156,12 @@ class Builder {
   /// Generates an import instruction
   /// @param imp the import
   void GenerateImport(ast::Import* imp);
+  /// Generates an initializer expression
+  /// @param expr the expression to generate
+  /// @param is_global_init set true if this is a global variable initializer
+  /// @returns the ID of the expression or 0 on failure.
+  uint32_t GenerateInitializerExpression(ast::InitializerExpression* expr,
+                                         bool is_global_init);
   /// Generates a literal constant if needed
   /// @param lit the literal to generate
   /// @returns the ID on success or 0 on failure

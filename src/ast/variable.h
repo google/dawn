@@ -79,6 +79,8 @@ class Variable : public Node {
   }
   /// @returns the initializer expression or nullptr if none set
   Expression* initializer() const { return initializer_.get(); }
+  /// @returns true if the variable has an initializer
+  bool has_initializer() const { return initializer_ != nullptr; }
 
   /// Sets if the variable is constant
   /// @param val the value to be set

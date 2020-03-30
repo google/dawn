@@ -13,14 +13,17 @@
 
 #include "src/writer/spirv/builder.h"
 
+#include <sstream>
 #include <utility>
 
 #include "spirv/unified1/spirv.h"
 #include "src/ast/binding_decoration.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/builtin_decoration.h"
+#include "src/ast/const_initializer_expression.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
+#include "src/ast/initializer_expression.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/set_decoration.h"
@@ -33,6 +36,7 @@
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
+#include "src/ast/type_initializer_expression.h"
 #include "src/ast/uint_literal.h"
 
 namespace tint {
@@ -167,6 +171,15 @@ bool Builder::GenerateEntryPoint(ast::EntryPoint* ep) {
   return true;
 }
 
+uint32_t Builder::GenerateExpression(ast::Expression* expr) {
+  if (expr->IsInitializer()) {
+    return GenerateInitializerExpression(expr->AsInitializer(), false);
+  }
+
+  error_ = "unknown expression type";
+  return 0;
+}
+
 bool Builder::GenerateFunction(ast::Function* func) {
   uint32_t func_type_id = GenerateFunctionTypeIfNeeded(func);
   if (func_type_id == 0) {
@@ -220,13 +233,32 @@ uint32_t Builder::GenerateFunctionTypeIfNeeded(ast::Function* func) {
 }
 
 bool Builder::GenerateGlobalVariable(ast::Variable* var) {
-  auto result = result_op();
-  auto var_id = result.to_i();
+  uint32_t init_id = 0;
+  if (var->has_initializer()) {
+    if (!var->initializer()->IsInitializer()) {
+      error_ = "constant initializer expected";
+      return false;
+    }
+
+    init_id = GenerateInitializerExpression(var->initializer()->AsInitializer(),
+                                            true);
+    if (init_id == 0) {
+      return false;
+    }
+  }
 
   if (var->is_const()) {
-    // TODO(dsinclair): Handle const variables
-    return false;
+    if (!var->has_initializer()) {
+      error_ = "missing initializer for constant";
+      return false;
+    }
+
+    // TODO(dsinclair): Store variable name to id
+    return true;
   }
+
+  auto result = result_op();
+  auto var_id = result.to_i();
 
   auto sc = var->storage_class() == ast::StorageClass::kNone
                 ? ast::StorageClass::kPrivate
@@ -238,11 +270,16 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     return false;
   }
 
-  // TODO(dsinclair): Handle variable initializer
   push_debug(spv::Op::OpName,
              {Operand::Int(var_id), Operand::String(var->name())});
-  push_type(spv::Op::OpVariable, {Operand::Int(type_id), result,
-                                  Operand::Int(ConvertStorageClass(sc))});
+
+  std::vector<Operand> ops = {Operand::Int(type_id), result,
+                              Operand::Int(ConvertStorageClass(sc))};
+  if (var->has_initializer()) {
+    ops.push_back(Operand::Int(init_id));
+  }
+
+  push_type(spv::Op::OpVariable, std::move(ops));
 
   if (var->IsDecorated()) {
     for (const auto& deco : var->AsDecorated()->decorations()) {
@@ -270,6 +307,8 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     }
   }
 
+  // TODO(dsinclair) Mapping of variable name to id
+
   return true;
 }
 
@@ -281,6 +320,58 @@ void Builder::GenerateImport(ast::Import* imp) {
                 {result, Operand::String(imp->path())});
 
   import_name_to_id_[imp->name()] = id;
+}
+
+uint32_t Builder::GenerateInitializerExpression(
+    ast::InitializerExpression* expr,
+    bool is_global_init) {
+  if (expr->IsConstInitializer()) {
+    return GenerateLiteralIfNeeded(expr->AsConstInitializer()->literal());
+  }
+  if (expr->IsTypeInitializer()) {
+    auto init = expr->AsTypeInitializer();
+    auto type_id = GenerateTypeIfNeeded(init->type());
+    if (type_id == 0) {
+      return 0;
+    }
+
+    std::ostringstream out;
+    out << "__const";
+
+    std::vector<Operand> ops;
+    for (const auto& e : init->values()) {
+      if (is_global_init && !e->IsInitializer()) {
+        error_ = "initializer must be a constant expression";
+        return 0;
+      }
+      auto id =
+          GenerateInitializerExpression(e->AsInitializer(), is_global_init);
+      if (id == 0) {
+        return 0;
+      }
+
+      out << "_" << id;
+      ops.push_back(Operand::Int(id));
+    }
+
+    auto str = out.str();
+    auto val = const_to_id_.find(str);
+    if (val != const_to_id_.end()) {
+      return val->second;
+    }
+
+    auto result = result_op();
+    ops.insert(ops.begin(), result);
+    ops.insert(ops.begin(), Operand::Int(type_id));
+
+    const_to_id_[str] = result.to_i();
+
+    push_type(spv::Op::OpCompositeConstruct, ops);
+    return result.to_i();
+  }
+
+  error_ = "unknown initializer expression";
+  return 0;
 }
 
 uint32_t Builder::GenerateLiteralIfNeeded(ast::Literal* lit) {
