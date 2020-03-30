@@ -25,12 +25,19 @@
 #include "source/opt/instruction.h"
 #include "source/opt/module.h"
 #include "source/opt/type_manager.h"
+#include "source/opt/types.h"
 #include "spirv-tools/libspirv.hpp"
+#include "src/ast/struct.h"
+#include "src/ast/struct_decoration.h"
+#include "src/ast/struct_member.h"
+#include "src/ast/struct_member_decoration.h"
+#include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/struct_type.h"
 #include "src/ast/type/type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
@@ -127,130 +134,38 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
     return nullptr;
   }
 
-  ast::type::Type* result = nullptr;
+  auto save = [this, type_id](ast::type::Type* type) {
+    if (type != nullptr) {
+      id_to_type_[type_id] = type;
+    }
+    return type;
+  };
 
   switch (spirv_type->kind()) {
     case spvtools::opt::analysis::Type::kVoid:
-      result = ctx_.type_mgr().Get(std::make_unique<ast::type::VoidType>());
-      break;
+      return save(ctx_.type_mgr().Get(std::make_unique<ast::type::VoidType>()));
     case spvtools::opt::analysis::Type::kBool:
-      result = ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
-      break;
-    case spvtools::opt::analysis::Type::kInteger: {
-      const auto* int_ty = spirv_type->AsInteger();
-      if (int_ty->width() == 32) {
-        if (int_ty->IsSigned()) {
-          result = ctx_.type_mgr().Get(std::make_unique<ast::type::I32Type>());
-        } else {
-          result = ctx_.type_mgr().Get(std::make_unique<ast::type::U32Type>());
-        }
-      } else {
-        Fail() << "unhandled integer width: " << int_ty->width();
-      }
-      break;
-    }
-    case spvtools::opt::analysis::Type::kFloat: {
-      const auto* float_ty = spirv_type->AsFloat();
-      if (float_ty->width() == 32) {
-        result = ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>());
-      } else {
-        Fail() << "unhandled float width: " << float_ty->width();
-      }
-      break;
-    }
-    case spvtools::opt::analysis::Type::kVector: {
-      const auto* vec_ty = spirv_type->AsVector();
-      const auto num_elem = vec_ty->element_count();
-      auto* ast_elem_ty = ConvertType(type_mgr_->GetId(vec_ty->element_type()));
-      if (ast_elem_ty != nullptr) {
-        result = ctx_.type_mgr().Get(
-            std::make_unique<ast::type::VectorType>(ast_elem_ty, num_elem));
-      }
-      // In the error case, we'll already have emitted a diagnostic.
-      break;
-    }
-    case spvtools::opt::analysis::Type::kMatrix: {
-      const auto* mat_ty = spirv_type->AsMatrix();
-      const auto* vec_ty = mat_ty->element_type()->AsVector();
-      const auto* scalar_ty = vec_ty->element_type();
-      const auto num_rows = vec_ty->element_count();
-      const auto num_columns = mat_ty->element_count();
-      auto* ast_scalar_ty = ConvertType(type_mgr_->GetId(scalar_ty));
-      if (ast_scalar_ty != nullptr) {
-        result = ctx_.type_mgr().Get(std::make_unique<ast::type::MatrixType>(
-            ast_scalar_ty, num_rows, num_columns));
-      }
-      // In the error case, we'll already have emitted a diagnostic.
-      break;
-    }
-    case spvtools::opt::analysis::Type::kRuntimeArray: {
-      // TODO(dneto): Handle ArrayStride. Blocked by crbug.com/tint/30
-      const auto* rtarr_ty = spirv_type->AsRuntimeArray();
-      auto* ast_elem_ty =
-          ConvertType(type_mgr_->GetId(rtarr_ty->element_type()));
-      if (ast_elem_ty != nullptr) {
-        result = ctx_.type_mgr().Get(
-            std::make_unique<ast::type::ArrayType>(ast_elem_ty));
-      }
-      // In the error case, we'll already have emitted a diagnostic.
-      break;
-    }
-    case spvtools::opt::analysis::Type::kArray: {
-      // TODO(dneto): Handle ArrayStride. Blocked by crbug.com/tint/30
-      const auto* arr_ty = spirv_type->AsArray();
-      auto* ast_elem_ty = ConvertType(type_mgr_->GetId(arr_ty->element_type()));
-      if (ast_elem_ty == nullptr) {
-        // In the error case, we'll already have emitted a diagnostic.
-        break;
-      }
-      const auto& length_info = arr_ty->length_info();
-      if (length_info.words.empty()) {
-        // The internal representation is invalid. The discriminant vector
-        // is mal-formed.
-        Fail() << "internal error: Array length info is invalid";
-        return nullptr;
-      }
-      if (length_info.words[0] !=
-          spvtools::opt::analysis::Array::LengthInfo::kConstant) {
-        Fail() << "Array type " << type_id
-               << " length is a specialization constant";
-        return nullptr;
-      }
-      const auto* constant =
-          constant_mgr_->FindDeclaredConstant(length_info.id);
-      if (constant == nullptr) {
-        Fail() << "Array type " << type_id << " length ID " << length_info.id
-               << " does not name an OpConstant";
-        return nullptr;
-      }
-      const uint64_t num_elem = constant->GetZeroExtendedValue();
-      // For now, limit to only 32bits.
-      if (num_elem > std::numeric_limits<uint32_t>::max()) {
-        Fail() << "Array type " << type_id
-               << " has too many elements (more than can fit in 32 bits): "
-               << num_elem;
-        return nullptr;
-      }
-      result = ctx_.type_mgr().Get(std::make_unique<ast::type::ArrayType>(
-          ast_elem_ty, static_cast<uint32_t>(num_elem)));
-      break;
-    }
+      return save(ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>()));
+    case spvtools::opt::analysis::Type::kInteger:
+      return save(ConvertType(spirv_type->AsInteger()));
+    case spvtools::opt::analysis::Type::kFloat:
+      return save(ConvertType(spirv_type->AsFloat()));
+    case spvtools::opt::analysis::Type::kVector:
+      return save(ConvertType(spirv_type->AsVector()));
+    case spvtools::opt::analysis::Type::kMatrix:
+      return save(ConvertType(spirv_type->AsMatrix()));
+    case spvtools::opt::analysis::Type::kRuntimeArray:
+      return save(ConvertType(spirv_type->AsRuntimeArray()));
+    case spvtools::opt::analysis::Type::kArray:
+      return save(ConvertType(spirv_type->AsArray()));
+    case spvtools::opt::analysis::Type::kStruct:
+      return save(ConvertType(spirv_type->AsStruct()));
     default:
-      // The error diagnostic will be generated below because result is still
-      // nullptr.
       break;
   }
 
-  if (result == nullptr) {
-    if (success_) {
-      // Only emit a new diagnostic if we haven't already emitted a more
-      // specific one.
-      Fail() << "unknown SPIR-V type: " << type_id;
-    }
-  } else {
-    id_to_type_[type_id] = result;
-  }
-  return result;
+  Fail() << "unknown SPIR-V type: " << type_id;
+  return nullptr;
 }
 
 DecorationList ParserImpl::GetDecorationsFor(uint32_t id) const {
@@ -287,6 +202,29 @@ DecorationList ParserImpl::GetDecorationsForMember(
     result.push_back(d);
   }
   return result;
+}
+
+std::unique_ptr<ast::StructMemberDecoration>
+ParserImpl::ConvertMemberDecoration(const Decoration& decoration) {
+  if (decoration.empty()) {
+    Fail() << "malformed SPIR-V decoration: it's empty";
+    return nullptr;
+  }
+  switch (decoration[0]) {
+    case SpvDecorationOffset:
+      if (decoration.size() != 2) {
+        Fail()
+            << "malformed Offset decoration: expected 1 literal operand, has "
+            << decoration.size() - 1;
+        return nullptr;
+      }
+      return std::make_unique<ast::StructMemberOffsetDecoration>(decoration[1]);
+    default:
+      // TODO(dneto): Support the remaining member decorations.
+      break;
+  }
+  Fail() << "unhandled member decoration: " << decoration[0];
+  return nullptr;
 }
 
 bool ParserImpl::BuildInternalModule() {
@@ -410,6 +348,153 @@ bool ParserImpl::EmitEntryPoints() {
   }
   // The enum conversion could have failed, so return the existing status value.
   return success_;
+}
+
+ast::type::Type* ParserImpl::ConvertType(
+    const spvtools::opt::analysis::Integer* int_ty) {
+  if (int_ty->width() == 32) {
+    if (int_ty->IsSigned()) {
+      return ctx_.type_mgr().Get(std::make_unique<ast::type::I32Type>());
+    } else {
+      return ctx_.type_mgr().Get(std::make_unique<ast::type::U32Type>());
+    }
+  }
+  Fail() << "unhandled integer width: " << int_ty->width();
+  return nullptr;
+}
+
+ast::type::Type* ParserImpl::ConvertType(
+    const spvtools::opt::analysis::Float* float_ty) {
+  if (float_ty->width() == 32) {
+    return ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>());
+  }
+  Fail() << "unhandled float width: " << float_ty->width();
+  return nullptr;
+}
+
+ast::type::Type* ParserImpl::ConvertType(
+    const spvtools::opt::analysis::Vector* vec_ty) {
+  const auto num_elem = vec_ty->element_count();
+  auto* ast_elem_ty = ConvertType(type_mgr_->GetId(vec_ty->element_type()));
+  if (ast_elem_ty == nullptr) {
+    return nullptr;
+  }
+  return ctx_.type_mgr().Get(
+      std::make_unique<ast::type::VectorType>(ast_elem_ty, num_elem));
+}
+
+ast::type::Type* ParserImpl::ConvertType(
+    const spvtools::opt::analysis::Matrix* mat_ty) {
+  const auto* vec_ty = mat_ty->element_type()->AsVector();
+  const auto* scalar_ty = vec_ty->element_type();
+  const auto num_rows = vec_ty->element_count();
+  const auto num_columns = mat_ty->element_count();
+  auto* ast_scalar_ty = ConvertType(type_mgr_->GetId(scalar_ty));
+  if (ast_scalar_ty == nullptr) {
+    return nullptr;
+  }
+  return ctx_.type_mgr().Get(std::make_unique<ast::type::MatrixType>(
+      ast_scalar_ty, num_rows, num_columns));
+}
+
+ast::type::Type* ParserImpl::ConvertType(
+    const spvtools::opt::analysis::RuntimeArray* rtarr_ty) {
+  // TODO(dneto): Handle ArrayStride. Blocked by crbug.com/tint/30
+  auto* ast_elem_ty = ConvertType(type_mgr_->GetId(rtarr_ty->element_type()));
+  if (ast_elem_ty == nullptr) {
+    return nullptr;
+  }
+  return ctx_.type_mgr().Get(
+      std::make_unique<ast::type::ArrayType>(ast_elem_ty));
+}
+
+ast::type::Type* ParserImpl::ConvertType(
+    const spvtools::opt::analysis::Array* arr_ty) {
+  // TODO(dneto): Handle ArrayStride. Blocked by crbug.com/tint/30
+  auto* ast_elem_ty = ConvertType(type_mgr_->GetId(arr_ty->element_type()));
+  if (ast_elem_ty == nullptr) {
+    return nullptr;
+  }
+  const auto& length_info = arr_ty->length_info();
+  if (length_info.words.empty()) {
+    // The internal representation is invalid. The discriminant vector
+    // is mal-formed.
+    Fail() << "internal error: Array length info is invalid";
+    return nullptr;
+  }
+  if (length_info.words[0] !=
+      spvtools::opt::analysis::Array::LengthInfo::kConstant) {
+    Fail() << "Array type " << type_mgr_->GetId(arr_ty)
+           << " length is a specialization constant";
+    return nullptr;
+  }
+  const auto* constant = constant_mgr_->FindDeclaredConstant(length_info.id);
+  if (constant == nullptr) {
+    Fail() << "Array type " << type_mgr_->GetId(arr_ty) << " length ID "
+           << length_info.id << " does not name an OpConstant";
+    return nullptr;
+  }
+  const uint64_t num_elem = constant->GetZeroExtendedValue();
+  // For now, limit to only 32bits.
+  if (num_elem > std::numeric_limits<uint32_t>::max()) {
+    Fail() << "Array type " << type_mgr_->GetId(arr_ty)
+           << " has too many elements (more than can fit in 32 bits): "
+           << num_elem;
+    return nullptr;
+  }
+  return ctx_.type_mgr().Get(std::make_unique<ast::type::ArrayType>(
+      ast_elem_ty, static_cast<uint32_t>(num_elem)));
+}
+
+ast::type::Type* ParserImpl::ConvertType(
+    const spvtools::opt::analysis::Struct* struct_ty) {
+  const auto type_id = type_mgr_->GetId(struct_ty);
+  // Compute the struct decoration.
+  auto struct_decorations = this->GetDecorationsFor(type_id);
+  auto ast_struct_decoration = ast::StructDecoration::kNone;
+  if (struct_decorations.size() == 1 &&
+      struct_decorations[0][0] == SpvDecorationBlock) {
+    ast_struct_decoration = ast::StructDecoration::kBlock;
+  } else if (struct_decorations.size() > 1) {
+    Fail() << "can't handle a struct with more than one decoration: struct "
+           << type_id << " has " << struct_decorations.size();
+    return nullptr;
+  }
+
+  // Compute members
+  std::vector<std::unique_ptr<ast::StructMember>> ast_members;
+  const auto members = struct_ty->element_types();
+  for (size_t member_index = 0; member_index < members.size(); ++member_index) {
+    auto* ast_member_ty = ConvertType(type_mgr_->GetId(members[member_index]));
+    if (ast_member_ty == nullptr) {
+      // Already emitted diagnostics.
+      return nullptr;
+    }
+    std::vector<std::unique_ptr<ast::StructMemberDecoration>>
+        ast_member_decorations;
+    for (auto& deco : GetDecorationsForMember(type_id, member_index)) {
+      auto ast_member_decoration = ConvertMemberDecoration(deco);
+      if (ast_member_decoration == nullptr) {
+        // Already emitted diagnostics.
+        return nullptr;
+      }
+      ast_member_decorations.push_back(std::move(ast_member_decoration));
+    }
+    const auto member_name = namer_.GetMemberName(type_id, member_index);
+    auto ast_struct_member = std::make_unique<ast::StructMember>(
+        member_name, ast_member_ty, std::move(ast_member_decorations));
+    ast_members.push_back(std::move(ast_struct_member));
+  }
+
+  // Now make the struct.
+  auto ast_struct = std::make_unique<ast::Struct>(ast_struct_decoration,
+                                                  std::move(ast_members));
+  auto ast_struct_type =
+      std::make_unique<ast::type::StructType>(std::move(ast_struct));
+  // The struct might not have a name yet. Suggest one.
+  namer_.SuggestSanitizedName(type_id, "S");
+  ast_struct_type->set_name(namer_.GetName(type_id));
+  return ctx_.type_mgr().Get(std::move(ast_struct_type));
 }
 
 }  // namespace spirv

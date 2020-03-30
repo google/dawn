@@ -17,8 +17,10 @@
 #include <vector>
 
 #include "gmock/gmock.h"
+#include "src/ast/struct.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/reader/spirv/parser_impl.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
@@ -414,6 +416,75 @@ TEST_F(SpvParserTest, ConvertType_ArrayBadTooBig) {
   // we can't even utter the uint64 type.
   EXPECT_THAT(p->error(), Eq("unhandled integer width: 64"));
 }
+
+TEST_F(SpvParserTest, ConvertType_StructTwoMembers) {
+  auto p = parser(test::Assemble(R"(
+    %uint = OpTypeInt 32 0
+    %float = OpTypeFloat 32
+    %10 = OpTypeStruct %uint %float
+  )"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+
+  auto* type = p->ConvertType(10);
+  ASSERT_NE(type, nullptr) << p->error();
+  EXPECT_TRUE(type->IsStruct());
+  std::stringstream ss;
+  type->AsStruct()->impl()->to_str(ss, 0);
+  EXPECT_THAT(ss.str(), Eq(R"(Struct{
+  StructMember{field0: __u32}
+  StructMember{field1: __f32}
+}
+)"));
+}
+
+TEST_F(SpvParserTest, ConvertType_StructWithBlockDecoration) {
+  auto p = parser(test::Assemble(R"(
+    OpDecorate %10 Block
+    %uint = OpTypeInt 32 0
+    %10 = OpTypeStruct %uint
+  )"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+
+  auto* type = p->ConvertType(10);
+  ASSERT_NE(type, nullptr);
+  EXPECT_TRUE(type->IsStruct());
+  std::stringstream ss;
+  type->AsStruct()->impl()->to_str(ss, 0);
+  EXPECT_THAT(ss.str(), Eq(R"([[block]] Struct{
+  StructMember{field0: __u32}
+}
+)"));
+}
+
+TEST_F(SpvParserTest, ConvertType_StructWithMemberDecorations) {
+  auto p = parser(test::Assemble(R"(
+    OpMemberDecorate %10 0 Offset 0
+    OpMemberDecorate %10 1 Offset 8
+    OpMemberDecorate %10 2 Offset 16
+    %float = OpTypeFloat 32
+    %vec = OpTypeVector %float 2
+    %mat = OpTypeMatrix %vec 2
+    %10 = OpTypeStruct %float %vec %mat
+  )"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+
+  auto* type = p->ConvertType(10);
+  ASSERT_NE(type, nullptr) << p->error();
+  EXPECT_TRUE(type->IsStruct());
+  std::stringstream ss;
+  type->AsStruct()->impl()->to_str(ss, 0);
+  EXPECT_THAT(ss.str(), Eq(R"(Struct{
+  StructMember{[[ offset 0 ]] field0: __f32}
+  StructMember{[[ offset 8 ]] field1: __vec_2__f32}
+  StructMember{[[ offset 16 ]] field2: __mat_2_2__f32}
+}
+)"));
+}
+
+// TODO(dneto): Demonstrate other member deocrations. Blocked on
+// crbug.com/tint/30
+// TODO(dneto): Demonstrate multiple member deocrations. Blocked on
+// crbug.com/tint/30
 
 }  // namespace
 }  // namespace spirv

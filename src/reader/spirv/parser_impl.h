@@ -28,9 +28,11 @@
 #include "source/opt/ir_context.h"
 #include "source/opt/module.h"
 #include "source/opt/type_manager.h"
+#include "source/opt/types.h"
 #include "spirv-tools/libspirv.hpp"
 #include "src/ast/import.h"
 #include "src/ast/module.h"
+#include "src/ast/struct_member_decoration.h"
 #include "src/ast/type/type.h"
 #include "src/reader/reader.h"
 #include "src/reader/spirv/enum_converter.h"
@@ -91,10 +93,9 @@ class ParserImpl : Reader {
     return glsl_std_450_imports_;
   }
 
-  /// Converts a SPIR-V type to a Tint type.
-  /// On failure, logs an error and returns null.
-  /// This should only be called after the internal
-  /// representation of the module has been built.
+  /// Converts a SPIR-V type to a Tint type, and saves it for fast lookup.
+  /// On failure, logs an error and returns null.  This should only be called
+  /// after the internal representation of the module has been built.
   /// @param type_id the SPIR-V ID of a type.
   /// @returns a Tint type, or nullptr
   ast::type::Type* ConvertType(uint32_t type_id);
@@ -117,6 +118,13 @@ class ParserImpl : Reader {
   /// @returns the list of decorations on the member
   DecorationList GetDecorationsForMember(uint32_t id,
                                          uint32_t member_index) const;
+
+  /// Converts a SPIR-V decoration.  On failure, emits a diagnostic and returns
+  /// nullptr.
+  /// @param decoration an encoded SPIR-V Decoration
+  /// @returns the corresponding ast::StructuMemberDecoration
+  std::unique_ptr<ast::StructMemberDecoration> ConvertMemberDecoration(
+      const Decoration& decoration);
 
  private:
   /// Builds the internal representation of the SPIR-V module.
@@ -144,6 +152,23 @@ class ParserImpl : Reader {
 
   /// Emit entry point AST nodes.
   bool EmitEntryPoints();
+
+  /// Converts a specific SPIR-V type to a Tint type. Integer case
+  ast::type::Type* ConvertType(const spvtools::opt::analysis::Integer* int_ty);
+  /// Converts a specific SPIR-V type to a Tint type. Float case
+  ast::type::Type* ConvertType(const spvtools::opt::analysis::Float* float_ty);
+  /// Converts a specific SPIR-V type to a Tint type. Vector case
+  ast::type::Type* ConvertType(const spvtools::opt::analysis::Vector* vec_ty);
+  /// Converts a specific SPIR-V type to a Tint type. Matrix case
+  ast::type::Type* ConvertType(const spvtools::opt::analysis::Matrix* mat_ty);
+  /// Converts a specific SPIR-V type to a Tint type. RuntimeArray case
+  ast::type::Type* ConvertType(
+      const spvtools::opt::analysis::RuntimeArray* rtarr_ty);
+  /// Converts a specific SPIR-V type to a Tint type. Array case
+  ast::type::Type* ConvertType(const spvtools::opt::analysis::Array* arr_ty);
+  /// Converts a specific SPIR-V type to a Tint type. Struct case
+  ast::type::Type* ConvertType(
+      const spvtools::opt::analysis::Struct* struct_ty);
 
   // The SPIR-V binary we're parsing
   std::vector<uint32_t> spv_binary_;

@@ -1,0 +1,85 @@
+// Copyright 2020 The Tint Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include <cstdint>
+#include <memory>
+#include <vector>
+
+#include "gmock/gmock.h"
+#include "spirv/unified1/spirv.h"
+#include "src/ast/struct_member_decoration.h"
+#include "src/ast/struct_member_offset_decoration.h"
+#include "src/reader/spirv/parser_impl.h"
+#include "src/reader/spirv/parser_impl_test_helper.h"
+#include "src/reader/spirv/spirv_tools_helpers_test.h"
+
+namespace tint {
+namespace reader {
+namespace spirv {
+namespace {
+
+using ::testing::Eq;
+
+TEST_F(SpvParserTest, ConvertMemberDecoration_Empty) {
+  auto p = parser(std::vector<uint32_t>{});
+
+  auto result = p->ConvertMemberDecoration({});
+  EXPECT_EQ(result.get(), nullptr);
+  EXPECT_THAT(p->error(), Eq("malformed SPIR-V decoration: it's empty"));
+}
+
+TEST_F(SpvParserTest, ConvertMemberDecoration_OffsetWithoutOperand) {
+  auto p = parser(std::vector<uint32_t>{});
+
+  auto result = p->ConvertMemberDecoration({SpvDecorationOffset});
+  EXPECT_EQ(result.get(), nullptr);
+  EXPECT_THAT(
+      p->error(),
+      Eq("malformed Offset decoration: expected 1 literal operand, has 0"));
+}
+
+TEST_F(SpvParserTest, ConvertMemberDecoration_OffsetWithTooManyOperands) {
+  auto p = parser(std::vector<uint32_t>{});
+
+  auto result = p->ConvertMemberDecoration({SpvDecorationOffset, 3, 4});
+  EXPECT_EQ(result.get(), nullptr);
+  EXPECT_THAT(
+      p->error(),
+      Eq("malformed Offset decoration: expected 1 literal operand, has 2"));
+}
+
+TEST_F(SpvParserTest, ConvertMemberDecoration_Offset) {
+  auto p = parser(std::vector<uint32_t>{});
+
+  auto result = p->ConvertMemberDecoration({SpvDecorationOffset, 8});
+  ASSERT_NE(result.get(), nullptr);
+  EXPECT_TRUE(result->IsOffset());
+  auto* offset_deco = result->AsOffset();
+  ASSERT_NE(offset_deco, nullptr);
+  EXPECT_EQ(offset_deco->offset(), 8);
+  EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, ConvertMemberDecoration_UnhandledDecoration) {
+  auto p = parser(std::vector<uint32_t>{});
+
+  auto result = p->ConvertMemberDecoration({12345678});
+  EXPECT_EQ(result.get(), nullptr);
+  EXPECT_THAT(p->error(), Eq("unhandled member decoration: 12345678"));
+}
+
+}  // namespace
+}  // namespace spirv
+}  // namespace reader
+}  // namespace tint
