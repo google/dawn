@@ -30,7 +30,7 @@ namespace ast {
 
 class DecoratedVariable;
 
-/// A Variable statement.
+/// A variable.
 class Variable : public Node {
  public:
   /// Create a new empty variable statement

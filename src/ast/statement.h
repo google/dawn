@@ -34,7 +34,7 @@ class RegardlessStatement;
 class ReturnStatement;
 class SwitchStatement;
 class UnlessStatement;
-class VariableStatement;
+class VariableDeclStatement;
 
 /// Base statement class
 class Statement : public Node {
@@ -70,7 +70,7 @@ class Statement : public Node {
   /// @returns true if this is an unless statement
   virtual bool IsUnless() const { return false; }
   /// @returns true if this is an variable statement
-  virtual bool IsVariable() const { return false; }
+  virtual bool IsVariableDecl() const { return false; }
 
   /// @returns the statement as an assign statement
   AssignmentStatement* AsAssign();
@@ -101,7 +101,7 @@ class Statement : public Node {
   /// @returns the statement as an unless statement
   UnlessStatement* AsUnless();
   /// @returns the statement as an variable statement
-  VariableStatement* AsVariable();
+  VariableDeclStatement* AsVariableDecl();
 
  protected:
   /// Constructor

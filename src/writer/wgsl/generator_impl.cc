@@ -59,7 +59,7 @@
 #include "src/ast/unary_method_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/unless_statement.h"
-#include "src/ast/variable_statement.h"
+#include "src/ast/variable_decl_statement.h"
 
 namespace tint {
 namespace writer {
@@ -752,8 +752,8 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsSwitch()) {
     return EmitSwitch(stmt->AsSwitch());
   }
-  if (stmt->IsVariable()) {
-    return EmitVariable(stmt->AsVariable()->variable());
+  if (stmt->IsVariableDecl()) {
+    return EmitVariable(stmt->AsVariableDecl()->variable());
   }
   if (stmt->IsUnless()) {
     return EmitUnless(stmt->AsUnless());

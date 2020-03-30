@@ -179,8 +179,8 @@ set(TINT_LIB_SRCS
   ast/variable.h
   ast/variable_decoration.cc
   ast/variable_decoration.h
-  ast/variable_statement.cc
-  ast/variable_statement.h
+  ast/variable_decl_statement.cc
+  ast/variable_decl_statement.h
   context.h
   context.cc
   reader/reader.cc
@@ -302,7 +302,7 @@ set(TINT_TEST_SRCS
   ast/unary_method_expression_test.cc
   ast/unary_op_expression_test.cc
   ast/unless_statement_test.cc
-  ast/variable_statement_test.cc
+  ast/variable_decl_statement_test.cc
   ast/variable_test.cc
   type_manager_test.cc
   validator_impl_import_test.cc
@@ -458,7 +458,7 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_unary_method_test.cc
     writer/wgsl/generator_impl_unary_op_test.cc
     writer/wgsl/generator_impl_unless_test.cc
-    writer/wgsl/generator_impl_variable_statement_test.cc
+    writer/wgsl/generator_impl_variable_decl_statement_test.cc
     writer/wgsl/generator_impl_variable_test.cc
   )
 endif()

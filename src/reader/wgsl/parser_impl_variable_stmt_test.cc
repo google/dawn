@@ -14,7 +14,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/statement.h"
-#include "src/ast/variable_statement.h"
+#include "src/ast/variable_decl_statement.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
@@ -28,7 +28,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl) {
   auto e = p->variable_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsVariable());
+  ASSERT_TRUE(e->IsVariableDecl());
   ASSERT_NE(e->variable(), nullptr);
   EXPECT_EQ(e->variable()->name(), "a");
 
@@ -40,7 +40,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_WithInit) {
   auto e = p->variable_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsVariable());
+  ASSERT_TRUE(e->IsVariableDecl());
   ASSERT_NE(e->variable(), nullptr);
   EXPECT_EQ(e->variable()->name(), "a");
 
@@ -69,7 +69,7 @@ TEST_F(ParserImplTest, VariableStmt_Const) {
   auto e = p->variable_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsVariable());
+  ASSERT_TRUE(e->IsVariableDecl());
 }
 
 TEST_F(ParserImplTest, VariableStmt_Const_InvalidVarIdent) {

@@ -18,7 +18,7 @@
 #include "gtest/gtest.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/variable.h"
-#include "src/ast/variable_statement.h"
+#include "src/ast/variable_decl_statement.h"
 #include "src/writer/wgsl/generator_impl.h"
 
 namespace tint {
@@ -28,12 +28,12 @@ namespace {
 
 using GeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, Emit_VariableStatement) {
+TEST_F(GeneratorImplTest, Emit_VariableDeclStatement) {
   ast::type::F32Type f32;
   auto var =
       std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32);
 
-  ast::VariableStatement stmt(std::move(var));
+  ast::VariableDeclStatement stmt(std::move(var));
 
   GeneratorImpl g;
   g.increment_indent();

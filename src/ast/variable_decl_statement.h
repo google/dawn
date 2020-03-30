@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_AST_VARIABLE_STATEMENT_H_
-#define SRC_AST_VARIABLE_STATEMENT_H_
+#ifndef SRC_AST_VARIABLE_DECL_STATEMENT_H_
+#define SRC_AST_VARIABLE_DECL_STATEMENT_H_
 
 #include <memory>
 #include <utility>
@@ -25,21 +25,22 @@
 namespace tint {
 namespace ast {
 
-/// A variable statement
-class VariableStatement : public Statement {
+/// A variable declaration statement
+class VariableDeclStatement : public Statement {
  public:
   /// Constructor
-  VariableStatement();
+  VariableDeclStatement();
   /// Constructor
   /// @param variable the variable
-  explicit VariableStatement(std::unique_ptr<Variable> variable);
+  explicit VariableDeclStatement(std::unique_ptr<Variable> variable);
   /// Constructor
   /// @param source the variable statement source
   /// @param variable the variable
-  VariableStatement(const Source& source, std::unique_ptr<Variable> variable);
+  VariableDeclStatement(const Source& source,
+                        std::unique_ptr<Variable> variable);
   /// Move constructor
-  VariableStatement(VariableStatement&&) = default;
-  ~VariableStatement() override;
+  VariableDeclStatement(VariableDeclStatement&&) = default;
+  ~VariableDeclStatement() override;
 
   /// Sets the variable
   /// @param variable the variable to set
@@ -50,7 +51,7 @@ class VariableStatement : public Statement {
   Variable* variable() const { return variable_.get(); }
 
   /// @returns true if this is an variable statement
-  bool IsVariable() const override { return true; }
+  bool IsVariableDecl() const override { return true; }
 
   /// @returns true if the node is valid
   bool IsValid() const override;
@@ -61,7 +62,7 @@ class VariableStatement : public Statement {
   void to_str(std::ostream& out, size_t indent) const override;
 
  private:
-  VariableStatement(const VariableStatement&) = delete;
+  VariableDeclStatement(const VariableDeclStatement&) = delete;
 
   std::unique_ptr<Variable> variable_;
 };
@@ -69,4 +70,4 @@ class VariableStatement : public Statement {
 }  // namespace ast
 }  // namespace tint
 
-#endif  // SRC_AST_VARIABLE_STATEMENT_H_
+#endif  // SRC_AST_VARIABLE_DECL_STATEMENT_H_

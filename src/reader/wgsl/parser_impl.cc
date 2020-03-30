@@ -63,7 +63,7 @@
 #include "src/ast/unary_method_expression.h"
 #include "src/ast/unary_op.h"
 #include "src/ast/unary_op_expression.h"
-#include "src/ast/variable_statement.h"
+#include "src/ast/variable_decl_statement.h"
 #include "src/reader/wgsl/lexer.h"
 #include "src/type_manager.h"
 
@@ -1667,7 +1667,7 @@ std::unique_ptr<ast::ContinueStatement> ParserImpl::continue_stmt() {
 //   : variable_decl
 //   | variable_decl EQUAL logical_or_expression
 //   | CONST variable_ident_decl EQUAL logical_or_expression
-std::unique_ptr<ast::VariableStatement> ParserImpl::variable_stmt() {
+std::unique_ptr<ast::VariableDeclStatement> ParserImpl::variable_stmt() {
   auto t = peek();
   auto source = t.source();
   if (t.IsConst()) {
@@ -1702,7 +1702,7 @@ std::unique_ptr<ast::VariableStatement> ParserImpl::variable_stmt() {
     var->set_is_const(true);
     var->set_constructor(std::move(constructor));
 
-    return std::make_unique<ast::VariableStatement>(source, std::move(var));
+    return std::make_unique<ast::VariableDeclStatement>(source, std::move(var));
   }
 
   auto var = variable_decl();
@@ -1724,7 +1724,7 @@ std::unique_ptr<ast::VariableStatement> ParserImpl::variable_stmt() {
     var->set_constructor(std::move(constructor));
   }
 
-  return std::make_unique<ast::VariableStatement>(source, std::move(var));
+  return std::make_unique<ast::VariableDeclStatement>(source, std::move(var));
 }
 
 // if_stmt

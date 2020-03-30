@@ -36,7 +36,7 @@ TEST_F(ParserImplTest, CaseBody_Statements) {
   auto e = p->case_body();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e.size(), 2);
-  EXPECT_TRUE(e[0]->IsVariable());
+  EXPECT_TRUE(e[0]->IsVariableDecl());
   EXPECT_TRUE(e[1]->IsAssign());
 }
 

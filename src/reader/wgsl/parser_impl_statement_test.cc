@@ -130,7 +130,7 @@ TEST_F(ParserImplTest, Statement_Variable) {
   auto e = p->statement();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsVariable());
+  ASSERT_TRUE(e->IsVariableDecl());
 }
 
 TEST_F(ParserImplTest, Statement_Variable_Invalid) {

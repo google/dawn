@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/variable_statement.h"
+#include "src/ast/variable_decl_statement.h"
 
 #include "gtest/gtest.h"
 #include "src/ast/type/f32_type.h"
@@ -22,59 +22,59 @@ namespace tint {
 namespace ast {
 namespace {
 
-using VariableStatementTest = testing::Test;
+using VariableDeclStatementTest = testing::Test;
 
-TEST_F(VariableStatementTest, Creation) {
+TEST_F(VariableDeclStatementTest, Creation) {
   type::F32Type f32;
   auto var = std::make_unique<Variable>("a", StorageClass::kNone, &f32);
   auto var_ptr = var.get();
 
-  VariableStatement stmt(std::move(var));
+  VariableDeclStatement stmt(std::move(var));
   EXPECT_EQ(stmt.variable(), var_ptr);
 }
 
-TEST_F(VariableStatementTest, Creation_WithSource) {
+TEST_F(VariableDeclStatementTest, Creation_WithSource) {
   type::F32Type f32;
   auto var = std::make_unique<Variable>("a", StorageClass::kNone, &f32);
 
-  VariableStatement stmt(Source{20, 2}, std::move(var));
+  VariableDeclStatement stmt(Source{20, 2}, std::move(var));
   auto src = stmt.source();
   EXPECT_EQ(src.line, 20);
   EXPECT_EQ(src.column, 2);
 }
 
-TEST_F(VariableStatementTest, IsVariable) {
-  VariableStatement s;
-  EXPECT_TRUE(s.IsVariable());
+TEST_F(VariableDeclStatementTest, IsVariableDecl) {
+  VariableDeclStatement s;
+  EXPECT_TRUE(s.IsVariableDecl());
 }
 
-TEST_F(VariableStatementTest, IsValid) {
+TEST_F(VariableDeclStatementTest, IsValid) {
   type::F32Type f32;
   auto var = std::make_unique<Variable>("a", StorageClass::kNone, &f32);
-  VariableStatement stmt(std::move(var));
+  VariableDeclStatement stmt(std::move(var));
   EXPECT_TRUE(stmt.IsValid());
 }
 
-TEST_F(VariableStatementTest, IsValid_InvalidVariable) {
+TEST_F(VariableDeclStatementTest, IsValid_InvalidVariable) {
   type::F32Type f32;
   auto var = std::make_unique<Variable>("", StorageClass::kNone, &f32);
-  VariableStatement stmt(std::move(var));
+  VariableDeclStatement stmt(std::move(var));
   EXPECT_FALSE(stmt.IsValid());
 }
 
-TEST_F(VariableStatementTest, IsValid_NullVariable) {
-  VariableStatement stmt;
+TEST_F(VariableDeclStatementTest, IsValid_NullVariable) {
+  VariableDeclStatement stmt;
   EXPECT_FALSE(stmt.IsValid());
 }
 
-TEST_F(VariableStatementTest, ToStr) {
+TEST_F(VariableDeclStatementTest, ToStr) {
   type::F32Type f32;
   auto var = std::make_unique<Variable>("a", StorageClass::kNone, &f32);
 
-  VariableStatement stmt(Source{20, 2}, std::move(var));
+  VariableDeclStatement stmt(Source{20, 2}, std::move(var));
   std::ostringstream out;
   stmt.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  VariableStatement{
+  EXPECT_EQ(out.str(), R"(  VariableDeclStatement{
     Variable{
       a
       none

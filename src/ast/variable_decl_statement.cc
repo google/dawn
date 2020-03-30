@@ -12,29 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/variable_statement.h"
+#include "src/ast/variable_decl_statement.h"
 
 namespace tint {
 namespace ast {
 
-VariableStatement::VariableStatement() : Statement() {}
+VariableDeclStatement::VariableDeclStatement() : Statement() {}
 
-VariableStatement::VariableStatement(std::unique_ptr<Variable> variable)
+VariableDeclStatement::VariableDeclStatement(std::unique_ptr<Variable> variable)
     : Statement(), variable_(std::move(variable)) {}
 
-VariableStatement::VariableStatement(const Source& source,
-                                     std::unique_ptr<Variable> variable)
+VariableDeclStatement::VariableDeclStatement(const Source& source,
+                                             std::unique_ptr<Variable> variable)
     : Statement(source), variable_(std::move(variable)) {}
 
-VariableStatement::~VariableStatement() = default;
+VariableDeclStatement::~VariableDeclStatement() = default;
 
-bool VariableStatement::IsValid() const {
+bool VariableDeclStatement::IsValid() const {
   return variable_ != nullptr && variable_->IsValid();
 }
 
-void VariableStatement::to_str(std::ostream& out, size_t indent) const {
+void VariableDeclStatement::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "VariableStatement{" << std::endl;
+  out << "VariableDeclStatement{" << std::endl;
   variable_->to_str(out, indent + 2);
   make_indent(out, indent);
   out << "}" << std::endl;

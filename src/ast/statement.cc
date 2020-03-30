@@ -30,7 +30,7 @@
 #include "src/ast/return_statement.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/unless_statement.h"
-#include "src/ast/variable_statement.h"
+#include "src/ast/variable_decl_statement.h"
 
 namespace tint {
 namespace ast {
@@ -111,9 +111,9 @@ UnlessStatement* Statement::AsUnless() {
   return static_cast<UnlessStatement*>(this);
 }
 
-VariableStatement* Statement::AsVariable() {
-  assert(IsVariable());
-  return static_cast<VariableStatement*>(this);
+VariableDeclStatement* Statement::AsVariableDecl() {
+  assert(IsVariableDecl());
+  return static_cast<VariableDeclStatement*>(this);
 }
 
 }  // namespace ast

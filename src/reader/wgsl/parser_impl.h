@@ -201,7 +201,7 @@ class ParserImpl {
   std::unique_ptr<ast::ContinueStatement> continue_stmt();
   /// Parses a `variable_stmt` grammar element
   /// @returns the parsed variable or nullptr
-  std::unique_ptr<ast::VariableStatement> variable_stmt();
+  std::unique_ptr<ast::VariableDeclStatement> variable_stmt();
   /// Parses a `if_stmt` grammar element
   /// @returns the parsed statement or nullptr
   std::unique_ptr<ast::IfStatement> if_stmt();
