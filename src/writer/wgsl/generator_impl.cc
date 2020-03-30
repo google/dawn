@@ -363,7 +363,7 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
     return false;
   }
 
-  return EmitStatementBlock(func->body());
+  return EmitStatementBlockAndNewline(func->body());
 }
 
 bool GeneratorImpl::EmitType(ast::type::Type* type) {
@@ -704,9 +704,18 @@ bool GeneratorImpl::EmitStatementBlock(
 
   decrement_indent();
   make_indent();
-  out_ << "}" << std::endl;
+  out_ << "}";
 
   return true;
+}
+
+bool GeneratorImpl::EmitStatementBlockAndNewline(
+    const std::vector<std::unique_ptr<ast::Statement>>& statements) {
+  const bool result = EmitStatementBlock(statements);
+  if (result) {
+    out_ << std::endl;
+  }
+  return result;
 }
 
 bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
@@ -811,7 +820,7 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
     out_ << ":";
   }
 
-  return EmitStatementBlock(stmt->body());
+  return EmitStatementBlockAndNewline(stmt->body());
 }
 
 bool GeneratorImpl::EmitContinue(ast::ContinueStatement* stmt) {
@@ -840,15 +849,14 @@ bool GeneratorImpl::EmitContinue(ast::ContinueStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitElse(ast::ElseStatement* stmt) {
-  make_indent();
   if (stmt->HasCondition()) {
-    out_ << "elseif (";
+    out_ << " elseif (";
     if (!EmitExpression(stmt->condition())) {
       return false;
     }
     out_ << ")";
   } else {
-    out_ << "else";
+    out_ << " else";
   }
 
   return EmitStatementBlock(stmt->body());
@@ -878,6 +886,7 @@ bool GeneratorImpl::EmitIf(ast::IfStatement* stmt) {
       return false;
     }
   }
+  out_ << std::endl;
 
   return true;
 }
@@ -906,7 +915,7 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
     make_indent();
     out_ << "continuing";
 
-    if (!EmitStatementBlock(stmt->continuing())) {
+    if (!EmitStatementBlockAndNewline(stmt->continuing())) {
       return false;
     }
   }
@@ -933,7 +942,7 @@ bool GeneratorImpl::EmitRegardless(ast::RegardlessStatement* stmt) {
   }
   out_ << ")";
 
-  return EmitStatementBlock(stmt->body());
+  return EmitStatementBlockAndNewline(stmt->body());
 }
 
 bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
@@ -983,7 +992,7 @@ bool GeneratorImpl::EmitUnless(ast::UnlessStatement* stmt) {
   }
   out_ << ")";
 
-  return EmitStatementBlock(stmt->body());
+  return EmitStatementBlockAndNewline(stmt->body());
 }
 
 }  // namespace wgsl

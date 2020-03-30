@@ -38,10 +38,9 @@ TEST_F(GeneratorImplTest, Emit_Else) {
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitElse(&e)) << g.error();
-  EXPECT_EQ(g.result(), R"(  else {
+  EXPECT_EQ(g.result(), R"( else {
     kill;
-  }
-)");
+  })");
 }
 
 TEST_F(GeneratorImplTest, Emit_ElseWithCondition) {
@@ -56,10 +55,9 @@ TEST_F(GeneratorImplTest, Emit_ElseWithCondition) {
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitElse(&e)) << g.error();
-  EXPECT_EQ(g.result(), R"(  elseif (cond) {
+  EXPECT_EQ(g.result(), R"( elseif (cond) {
     kill;
-  }
-)");
+  })");
 }
 
 }  // namespace
