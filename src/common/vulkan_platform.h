@@ -174,7 +174,7 @@ namespace dawn_native { namespace vulkan {
 // Redefine VK_NULL_HANDLE for better type safety where possible.
 #undef VK_NULL_HANDLE
 #if defined(DAWN_PLATFORM_64_BIT)
-static constexpr nullptr_t VK_NULL_HANDLE = nullptr;
+static constexpr std::nullptr_t VK_NULL_HANDLE = nullptr;
 #elif defined(DAWN_PLATFORM_32_BIT)
 static constexpr uint64_t VK_NULL_HANDLE = 0;
 #else
