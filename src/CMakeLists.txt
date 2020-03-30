@@ -324,6 +324,7 @@ if(${TINT_BUILD_SPV_READER})
     reader/spirv/namer_test.cc
     reader/spirv/parser_impl_convert_type_test.cc
     reader/spirv/parser_impl_entry_point_test.cc
+    reader/spirv/parser_impl_get_decorations_test.cc
     reader/spirv/parser_impl_import_test.cc
     reader/spirv/parser_impl_user_name_test.cc
     reader/spirv/parser_impl_test.cc

@@ -21,6 +21,7 @@
 #include <utility>
 
 #include "source/opt/build_module.h"
+#include "source/opt/decoration_manager.h"
 #include "source/opt/instruction.h"
 #include "source/opt/module.h"
 #include "source/opt/type_manager.h"
@@ -248,6 +249,42 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
     }
   } else {
     id_to_type_[type_id] = result;
+  }
+  return result;
+}
+
+DecorationList ParserImpl::GetDecorationsFor(uint32_t id) const {
+  DecorationList result;
+  const auto& decorations = deco_mgr_->GetDecorationsFor(id, true);
+  for (const auto* inst : decorations) {
+    if (inst->opcode() != SpvOpDecorate) {
+      continue;
+    }
+    // Example: OpDecorate %struct_id Block
+    // Example: OpDecorate %array_ty ArrayStride 16
+    std::vector<uint32_t> inst_as_words;
+    inst->ToBinaryWithoutAttachedDebugInsts(&inst_as_words);
+    Decoration d(inst_as_words.begin() + 2, inst_as_words.end());
+    result.push_back(d);
+  }
+  return result;
+}
+
+DecorationList ParserImpl::GetDecorationsForMember(
+    uint32_t id,
+    uint32_t member_index) const {
+  DecorationList result;
+  const auto& decorations = deco_mgr_->GetDecorationsFor(id, true);
+  for (const auto* inst : decorations) {
+    if ((inst->opcode() != SpvOpMemberDecorate) ||
+        (inst->GetSingleWordInOperand(1) != member_index)) {
+      continue;
+    }
+    // Example: OpMemberDecorate %struct_id 2 Offset 24
+    std::vector<uint32_t> inst_as_words;
+    inst->ToBinaryWithoutAttachedDebugInsts(&inst_as_words);
+    Decoration d(inst_as_words.begin() + 3, inst_as_words.end());
+    result.push_back(d);
   }
   return result;
 }

@@ -41,6 +41,13 @@ namespace tint {
 namespace reader {
 namespace spirv {
 
+/// The binary representation of a SPIR-V decoration enum followed by its
+/// operands, if any.
+/// Example:   { SpvDecorationBlock }
+/// Example:   { SpvDecorationArrayStride, 16 }
+using Decoration = std::vector<uint32_t>;
+using DecorationList = std::vector<Decoration>;
+
 /// Parser implementation for SPIR-V.
 class ParserImpl : Reader {
  public:
@@ -94,6 +101,22 @@ class ParserImpl : Reader {
 
   /// @returns the namer object
   Namer& namer() { return namer_; }
+
+  /// Gets the list of decorations for a SPIR-V result ID.  Returns an empty
+  /// vector if the ID is not a result ID, or if no decorations target that ID.
+  /// The internal representation must have already been built.
+  /// @param id SPIR-V ID
+  /// @returns the list of decorations on the given ID
+  DecorationList GetDecorationsFor(uint32_t id) const;
+  /// Gets the list of decorations for the member of a struct.  Returns an empty
+  /// list if the |id| is not the ID of a struct, or if the member index is out
+  /// of range, or if the target member has no decorations.
+  /// The internal representation must have already been built.
+  /// @param id SPIR-V ID of a struct
+  /// @param member_index the member within the struct
+  /// @returns the list of decorations on the member
+  DecorationList GetDecorationsForMember(uint32_t id,
+                                         uint32_t member_index) const;
 
  private:
   /// Builds the internal representation of the SPIR-V module.
