@@ -416,6 +416,9 @@ namespace dawn_native { namespace d3d12 {
     }
 
     MaybeError Device::WaitForIdleForDestruction() {
+        // Immediately forget about all pending commands
+        mPendingCommands.Release();
+
         DAWN_TRY(NextSerial());
         // Wait for all in-flight commands to finish executing
         DAWN_TRY(WaitForSerial(mLastSubmittedSerial));
