@@ -124,6 +124,152 @@ namespace {
         }
     }
 
+    // Test that using the same buffer as both readable and writable in different passes is allowed
+    TEST_F(ResourceUsageTrackingTest, BufferWithReadAndWriteUsageInDifferentPasses) {
+        // Test render pass
+        {
+            // Create buffers that will be used as index and storage buffers
+            wgpu::Buffer buffer0 =
+                CreateBuffer(4, wgpu::BufferUsage::Storage | wgpu::BufferUsage::Index);
+            wgpu::Buffer buffer1 =
+                CreateBuffer(4, wgpu::BufferUsage::Storage | wgpu::BufferUsage::Index);
+
+            // Create bind groups to use the buffer as storage
+            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::StorageBuffer}});
+            wgpu::BindGroup bg0 = utils::MakeBindGroup(device, bgl, {{0, buffer0, 0, 4}});
+            wgpu::BindGroup bg1 = utils::MakeBindGroup(device, bgl, {{0, buffer1, 0, 4}});
+
+            // Use these two buffers as both index and storage in different render passes
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            DummyRenderPass dummyRenderPass(device);
+
+            wgpu::RenderPassEncoder pass0 = encoder.BeginRenderPass(&dummyRenderPass);
+            pass0.SetIndexBuffer(buffer0);
+            pass0.SetBindGroup(0, bg1);
+            pass0.EndPass();
+
+            wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&dummyRenderPass);
+            pass1.SetIndexBuffer(buffer1);
+            pass1.SetBindGroup(0, bg0);
+            pass1.EndPass();
+
+            encoder.Finish();
+        }
+
+        // Test compute pass
+        {
+            // Create buffer and bind groups that will be used as storage and uniform bindings
+            wgpu::Buffer buffer =
+                CreateBuffer(4, wgpu::BufferUsage::Storage | wgpu::BufferUsage::Uniform);
+
+            wgpu::BindGroupLayout bgl0 = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer}});
+            wgpu::BindGroupLayout bgl1 = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::UniformBuffer}});
+            wgpu::BindGroup bg0 = utils::MakeBindGroup(device, bgl0, {{0, buffer, 0, 4}});
+            wgpu::BindGroup bg1 = utils::MakeBindGroup(device, bgl1, {{0, buffer, 0, 4}});
+
+            // Use the buffer as both storage and uniform in different compute passes
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+            wgpu::ComputePassEncoder pass0 = encoder.BeginComputePass();
+            pass0.SetBindGroup(0, bg0);
+            pass0.EndPass();
+
+            wgpu::ComputePassEncoder pass1 = encoder.BeginComputePass();
+            pass1.SetBindGroup(1, bg1);
+            pass1.EndPass();
+
+            encoder.Finish();
+        }
+
+        // Test render pass and compute pass mixed together with resource dependency.
+        {
+            // Create buffer and bind groups that will be used as storage and uniform bindings
+            wgpu::Buffer buffer = CreateBuffer(4, wgpu::BufferUsage::Storage);
+
+            wgpu::BindGroupLayout bgl0 = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer}});
+            wgpu::BindGroupLayout bgl1 = utils::MakeBindGroupLayout(
+                device,
+                {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageBuffer}});
+            wgpu::BindGroup bg0 = utils::MakeBindGroup(device, bgl0, {{0, buffer, 0, 4}});
+            wgpu::BindGroup bg1 = utils::MakeBindGroup(device, bgl1, {{0, buffer, 0, 4}});
+
+            // Use the buffer as storage and uniform in render pass and compute pass respectively
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+            wgpu::ComputePassEncoder pass0 = encoder.BeginComputePass();
+            pass0.SetBindGroup(0, bg0);
+            pass0.EndPass();
+
+            DummyRenderPass dummyRenderPass(device);
+            wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&dummyRenderPass);
+            pass1.SetBindGroup(1, bg1);
+            pass1.EndPass();
+
+            encoder.Finish();
+        }
+    }
+
+    // Test that using the same buffer as both readable and writable in the different draws is
+    // disallowed
+    TEST_F(ResourceUsageTrackingTest, BufferWithReadAndWriteUsageInDifferentDrawsOrDispatches) {
+        // Test render pass
+        {
+            // Create a buffer and a bind group
+            wgpu::Buffer buffer =
+                CreateBuffer(4, wgpu::BufferUsage::Storage | wgpu::BufferUsage::Index);
+            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::StorageBuffer}});
+            wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, 4}});
+
+            // It is not allowed to use the same buffer as both readable and writable in different
+            // draws within the same render pass.
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            DummyRenderPass dummyRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+
+            pass.SetIndexBuffer(buffer);
+            pass.Draw(3, 1, 0, 0);
+
+            pass.SetBindGroup(0, bg);
+            pass.Draw(3, 1, 0, 0);
+
+            pass.EndPass();
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+
+        // test compute pass
+        {
+            // Create a buffer and bind groups
+            wgpu::Buffer buffer = CreateBuffer(4, wgpu::BufferUsage::Storage);
+
+            wgpu::BindGroupLayout bgl0 = utils::MakeBindGroupLayout(
+                device,
+                {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageBuffer}});
+            wgpu::BindGroupLayout bgl1 = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer}});
+            wgpu::BindGroup bg0 = utils::MakeBindGroup(device, bgl0, {{0, buffer, 0, 4}});
+            wgpu::BindGroup bg1 = utils::MakeBindGroup(device, bgl1, {{0, buffer, 0, 4}});
+
+            // It is not allowed to use the same buffer as both readable and writable in different
+            // dispatches within the same compute pass.
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+
+            pass.SetBindGroup(0, bg0);
+            pass.Dispatch(1, 1, 1);
+
+            pass.SetBindGroup(0, bg1);
+            pass.Dispatch(1, 1, 1);
+
+            pass.EndPass();
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+    }
+
     // Test that using the same buffer as copy src/dst and writable/readable usage is allowed.
     TEST_F(ResourceUsageTrackingTest, BufferCopyAndBufferUsageInPass) {
         // Create buffers that will be used as both a copy src/dst buffer and a storage buffer
@@ -305,6 +451,56 @@ namespace {
         // TODO(yunchao.he@intel.com) Test compute pass. Test code is ready, but it depends on
         // writeonly storage buffer support
     }
+
+    // Test that using the same texture as both readable and writable in different passes is
+    // allowed
+    TEST_F(ResourceUsageTrackingTest, TextureWithReadAndWriteUsageInDifferentPasses) {
+        // Test render pass
+        {
+            // Create a texture that will be used both as a sampled texture and a render target
+            wgpu::Texture t0 =
+                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment,
+                              wgpu::TextureFormat::RGBA8Unorm);
+            wgpu::TextureView v0 = t0.CreateView();
+            wgpu::Texture t1 =
+                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment,
+                              wgpu::TextureFormat::RGBA8Unorm);
+            wgpu::TextureView v1 = t1.CreateView();
+
+            // Create the bind group to use the texture as sampled
+            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Vertex, wgpu::BindingType::SampledTexture}});
+            wgpu::BindGroup bg0 = utils::MakeBindGroup(device, bgl, {{0, v0}});
+            wgpu::BindGroup bg1 = utils::MakeBindGroup(device, bgl, {{0, v1}});
+
+            // Create the render pass that will use the texture as an output attachment
+            utils::ComboRenderPassDescriptor renderPass0({v1});
+            utils::ComboRenderPassDescriptor renderPass1({v0});
+
+            // Use the texture as both sampeld and output attachment in different passes
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+            wgpu::RenderPassEncoder pass0 = encoder.BeginRenderPass(&renderPass0);
+            pass0.SetBindGroup(0, bg0);
+            pass0.EndPass();
+
+            wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&renderPass1);
+            pass1.SetBindGroup(0, bg1);
+            pass1.EndPass();
+
+            encoder.Finish();
+        }
+
+        // TODO (yunchao.he@intel.com) Test compute pass. Test code is ready, but it depends on
+        // writeonly storage texture support.
+        // TODO (yunchao.he@intel.com) Test compute pass and render pass mixed together with
+        // resource dependency. Test code is ready, but it depends on writeonly storage texture
+        // support.
+    }
+
+    // TODO (yunchao.he@intel.com) Test that using the same texture as both readable and writable in
+    // the different draws/dispatches is disallowed Test code is ready, but it depends on writeonly
+    // storage texture support.
 
     // Test that using a single texture as copy src/dst and writable/readable usage in pass is
     // allowed.
