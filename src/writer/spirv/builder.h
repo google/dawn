@@ -166,6 +166,14 @@ class Builder {
   /// @param lit the literal to generate
   /// @returns the ID on success or 0 on failure
   uint32_t GenerateLiteralIfNeeded(ast::Literal* lit);
+  /// Generates a return statement
+  /// @param stmt the statement to generate
+  /// @returns true on success, false otherwise
+  bool GenerateReturnStatement(ast::ReturnStatement* stmt);
+  /// Generates a statement
+  /// @param stmt the statement to generate
+  /// @returns true if the statement was generated
+  bool GenerateStatement(ast::Statement* stmt);
   /// Generates a type if not already created
   /// @param type the type to create
   /// @returns the ID to use for the given type. Returns 0 on unknown type.

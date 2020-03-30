@@ -26,6 +26,7 @@
 #include "src/ast/initializer_expression.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/location_decoration.h"
+#include "src/ast/return_statement.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
@@ -203,7 +204,11 @@ bool Builder::GenerateFunction(ast::Function* func) {
                                   Operand::Int(func_type_id)});
   push_inst(spv::Op::OpLabel, {result_op()});
 
-  // TODO(dsinclair): Function body ...
+  for (const auto& stmt : func->body()) {
+    if (!GenerateStatement(stmt.get())) {
+      return false;
+    }
+  }
 
   push_inst(spv::Op::OpFunctionEnd, {});
 
@@ -410,6 +415,29 @@ uint32_t Builder::GenerateLiteralIfNeeded(ast::Literal* lit) {
 
   const_to_id_[name] = result_id;
   return result_id;
+}
+
+bool Builder::GenerateReturnStatement(ast::ReturnStatement* stmt) {
+  if (stmt->has_value()) {
+    auto val_id = GenerateExpression(stmt->value());
+    if (val_id == 0) {
+      return false;
+    }
+    push_inst(spv::Op::OpReturnValue, {Operand::Int(val_id)});
+  } else {
+    push_inst(spv::Op::OpReturn, {});
+  }
+
+  return true;
+}
+
+bool Builder::GenerateStatement(ast::Statement* stmt) {
+  if (stmt->IsReturn()) {
+    return GenerateReturnStatement(stmt->AsReturn());
+  }
+
+  error_ = "Unknown statement";
+  return false;
 }
 
 uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
