@@ -50,7 +50,9 @@ class Operand {
   ~Operand();
 
   /// Copy assignment
-  Operand& operator=(const Operand&) = default;
+  /// @param b the operand to copy
+  /// @returns a copy of this operand
+  Operand& operator=(const Operand& b) = default;
 
   /// Sets the float value
   /// @param val the value to set

@@ -61,6 +61,7 @@ class Literal {
 
  protected:
   /// Constructor
+  /// @param type the type of the literal
   explicit Literal(ast::type::Type* type);
 
  private:

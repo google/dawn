@@ -30,6 +30,7 @@ class Context {
   /// Resets the state of this context.
   void Reset();
 
+  /// @returns the Type Manager
   TypeManager& type_mgr() { return type_mgr_; }
 
  private:
