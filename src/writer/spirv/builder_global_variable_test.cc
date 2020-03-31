@@ -95,7 +95,7 @@ TEST_F(BuilderTest, GlobalVar_WithConstructor) {
 %1 = OpTypeVector %2 3
 %3 = OpConstant %2 1
 %4 = OpConstant %2 3
-%5 = OpCompositeConstruct %1 %3 %3 %4
+%5 = OpConstantComposite %1 %3 %3 %4
 %7 = OpTypePointer Output %2
 %6 = OpVariable %7 Output %5
 )");
@@ -128,7 +128,7 @@ TEST_F(BuilderTest, GlobalVar_Const) {
 %1 = OpTypeVector %2 3
 %3 = OpConstant %2 1
 %4 = OpConstant %2 3
-%5 = OpCompositeConstruct %1 %3 %3 %4
+%5 = OpConstantComposite %1 %3 %3 %4
 )");
 }
 

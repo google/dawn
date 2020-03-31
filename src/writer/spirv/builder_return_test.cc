@@ -67,7 +67,7 @@ TEST_F(BuilderTest, Return_WithValue) {
 %1 = OpTypeVector %2 3
 %3 = OpConstant %2 1
 %4 = OpConstant %2 3
-%5 = OpCompositeConstruct %1 %3 %3 %4
+%5 = OpConstantComposite %1 %3 %3 %4
 )");
   EXPECT_EQ(DumpInstructions(b.instructions()), R"(OpReturnValue %5
 )");

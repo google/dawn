@@ -69,7 +69,7 @@ TEST_F(BuilderTest, Constructor_Type) {
 %1 = OpTypeVector %2 3
 %3 = OpConstant %2 1
 %4 = OpConstant %2 3
-%5 = OpCompositeConstruct %1 %3 %3 %4
+%5 = OpConstantComposite %1 %3 %3 %4
 )");
 }
 

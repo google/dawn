@@ -371,7 +371,9 @@ uint32_t Builder::GenerateConstructorExpression(
 
     const_to_id_[str] = result.to_i();
 
-    push_type(spv::Op::OpCompositeConstruct, ops);
+    // TODO(dsinclair) For non-global constant's this should be
+    // in the instructions and ben an OpCompositeConstruct call.
+    push_type(spv::Op::OpConstantComposite, ops);
     return result.to_i();
   }
 
