@@ -135,7 +135,7 @@ TEST_P(OpArrayLengthTest, Compute) {
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, mBindGroup);
     pass.SetBindGroup(1, resultBindGroup);
-    pass.Dispatch(1, 1, 1);
+    pass.Dispatch(1);
     pass.EndPass();
 
     wgpu::CommandBuffer commands = encoder.Finish();

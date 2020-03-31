@@ -29,7 +29,7 @@ protected:
       wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
       pass.SetPipeline(pipeline);
       pass.SetBindGroup(0, bindGroup);
-      pass.Dispatch(1, 1, 1);
+      pass.Dispatch(1);
       pass.EndPass();
       return encoder.Finish();
   }

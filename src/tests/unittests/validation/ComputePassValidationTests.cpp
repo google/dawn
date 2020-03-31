@@ -56,8 +56,8 @@ TEST_F(ComputePassValidationTest, ReadWriteUsage) {
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);
 
-    pass.Dispatch(1, 1, 1);
-    pass.Dispatch(1, 1, 1);
+    pass.Dispatch(1);
+    pass.Dispatch(1);
 
     pass.EndPass();
     ASSERT_DEVICE_ERROR(encoder.Finish());
@@ -95,8 +95,8 @@ TEST_F(ComputePassValidationTest, MultipleWrites) {
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);
 
-    pass.Dispatch(1, 1, 1);
-    pass.Dispatch(1, 1, 1);
+    pass.Dispatch(1);
+    pass.Dispatch(1);
 
     pass.EndPass();
     encoder.Finish();
@@ -137,10 +137,10 @@ TEST_F(ComputePassValidationTest, MultipleWritesSeparateBindGroups) {
     pass.SetPipeline(pipeline);
 
     pass.SetBindGroup(0, bindGroupA);
-    pass.Dispatch(1, 1, 1);
+    pass.Dispatch(1);
 
     pass.SetBindGroup(0, bindGroupB);
-    pass.Dispatch(1, 1, 1);
+    pass.Dispatch(1);
 
     pass.EndPass();
     encoder.Finish();

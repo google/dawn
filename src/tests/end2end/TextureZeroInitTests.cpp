@@ -616,7 +616,7 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
     wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
     pass.SetPipeline(computePipeline);
     pass.SetBindGroup(0, bindGroup);
-    pass.Dispatch(1, 1, 1);
+    pass.Dispatch(1);
     pass.EndPass();
     wgpu::CommandBuffer commands = encoder.Finish();
     EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commands));

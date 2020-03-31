@@ -260,10 +260,10 @@ namespace {
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
 
             pass.SetBindGroup(0, bg0);
-            pass.Dispatch(1, 1, 1);
+            pass.Dispatch(1);
 
             pass.SetBindGroup(0, bg1);
-            pass.Dispatch(1, 1, 1);
+            pass.Dispatch(1);
 
             pass.EndPass();
             ASSERT_DEVICE_ERROR(encoder.Finish());

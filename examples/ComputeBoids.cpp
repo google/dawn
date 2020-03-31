@@ -269,7 +269,7 @@ wgpu::CommandBuffer createCommandBuffer(const wgpu::TextureView backbufferView, 
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(updatePipeline);
         pass.SetBindGroup(0, updateBGs[i]);
-        pass.Dispatch(kNumParticles, 1, 1);
+        pass.Dispatch(kNumParticles);
         pass.EndPass();
     }
 

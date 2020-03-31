@@ -835,7 +835,7 @@ class SetBindGroupValidationTest : public ValidationTest {
         wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
         computePassEncoder.SetPipeline(computePipeline);
         computePassEncoder.SetBindGroup(0, bindGroup, count, offsets);
-        computePassEncoder.Dispatch(1, 1, 1);
+        computePassEncoder.Dispatch(1);
         computePassEncoder.EndPass();
         if (!expectation) {
             ASSERT_DEVICE_ERROR(commandEncoder.Finish());

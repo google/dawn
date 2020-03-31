@@ -54,7 +54,7 @@ TEST_P(ComputeStorageBufferBarrierTests, AddIncrement) {
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);
     for (uint32_t i = 0; i < kIterations; ++i) {
-        pass.Dispatch(kNumValues, 1, 1);
+        pass.Dispatch(kNumValues);
     }
     pass.EndPass();
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -115,9 +115,9 @@ TEST_P(ComputeStorageBufferBarrierTests, AddPingPong) {
 
     for (uint32_t i = 0; i < kIterations / 2; ++i) {
         pass.SetBindGroup(0, bindGroups[0]);
-        pass.Dispatch(kNumValues, 1, 1);
+        pass.Dispatch(kNumValues);
         pass.SetBindGroup(0, bindGroups[1]);
-        pass.Dispatch(kNumValues, 1, 1);
+        pass.Dispatch(kNumValues);
     }
     pass.EndPass();
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -181,7 +181,7 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroups[b]);
-        pass.Dispatch(kNumValues, 1, 1);
+        pass.Dispatch(kNumValues);
         pass.EndPass();
     }
 
