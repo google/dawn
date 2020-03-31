@@ -464,7 +464,8 @@ ast::type::Type* ParserImpl::ConvertType(
   // Compute members
   std::vector<std::unique_ptr<ast::StructMember>> ast_members;
   const auto members = struct_ty->element_types();
-  for (size_t member_index = 0; member_index < members.size(); ++member_index) {
+  for (uint32_t member_index = 0; member_index < members.size();
+       ++member_index) {
     auto* ast_member_ty = ConvertType(type_mgr_->GetId(members[member_index]));
     if (ast_member_ty == nullptr) {
       // Already emitted diagnostics.
