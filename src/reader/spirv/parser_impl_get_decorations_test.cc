@@ -97,7 +97,8 @@ TEST_F(SpvParserTest, GetDecorationsForMember_MemberWithoutDecoration) {
   EXPECT_TRUE(p->error().empty());
 }
 
-TEST_F(SpvParserTest, GetDecorationsForMember_OneDecoration) {
+// TODO(dneto): Enable when ArrayStride is handled
+TEST_F(SpvParserTest, DISABLED_GetDecorationsForMember_OneDecoration) {
   auto p = parser(test::Assemble(R"(
     OpMemberDecorate %10 1 ArrayStride 12
     %uint = OpTypeInt 32 0
@@ -105,14 +106,17 @@ TEST_F(SpvParserTest, GetDecorationsForMember_OneDecoration) {
     %arr = OpTypeArray %uint %uint_2
     %10 = OpTypeStruct %uint %arr
   )"));
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
   auto decorations = p->GetDecorationsForMember(10, 1);
   EXPECT_THAT(decorations,
               UnorderedElementsAre(Decoration{SpvDecorationArrayStride, 12}));
   EXPECT_TRUE(p->error().empty());
 }
 
-TEST_F(SpvParserTest, GetDecorationsForMember_MultiDecoration) {
+// TODO(dneto): Enable when ArrayStride, MatrixStride, ColMajor are handled
+// crbug.com/tint/30 for ArrayStride
+// crbug.com/tint/31 for matrix layout
+TEST_F(SpvParserTest, DISABLED_GetDecorationsForMember_MultiDecoration) {
   auto p = parser(test::Assemble(R"(
     OpMemberDecorate %50 1 RelaxedPrecision
     OpMemberDecorate %50 2 ArrayStride 16
@@ -126,7 +130,7 @@ TEST_F(SpvParserTest, GetDecorationsForMember_MultiDecoration) {
     %arr = OpTypeArray %mat %uint_2
     %50 = OpTypeStruct %uint %float %arr
   )"));
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
 
   EXPECT_TRUE(p->GetDecorationsForMember(50, 0).empty());
   EXPECT_THAT(p->GetDecorationsForMember(50, 1),

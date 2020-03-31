@@ -32,6 +32,7 @@
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
+#include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
@@ -77,7 +78,6 @@ ParserImpl::ParserImpl(Context* ctx, const std::vector<uint32_t>& spv_binary)
         // For binary validation errors, we only have the instruction
         // number.  It's not text, so there is no column number.
         this->Fail() << "line:" << position.index << ": " << message;
-        this->Fail() << "error: line " << position.index << ": " << message;
     }
   };
 }
@@ -85,23 +85,27 @@ ParserImpl::ParserImpl(Context* ctx, const std::vector<uint32_t>& spv_binary)
 ParserImpl::~ParserImpl() = default;
 
 bool ParserImpl::Parse() {
+  // Set up use of SPIRV-Tools utilities.
+  spvtools::SpirvTools spv_tools(kTargetEnv);
+
+  // Error messages from SPIRV-Tools are forwarded as failures, including
+  // setting |success_| to false.
+  spv_tools.SetMessageConsumer(message_consumer_);
+
   if (!success_) {
     return false;
   }
 
-  // Set up use of SPIRV-Tools utilities.
-  spvtools::SpirvTools spv_tools(kTargetEnv);
-
-  // Error messages from SPIRV-Tools are forwarded as failures.
-  spv_tools.SetMessageConsumer(message_consumer_);
-
-  // Only consider valid modules.
-  if (success_) {
-    success_ = spv_tools.Validate(spv_binary_);
+  // Only consider valid modules.  On failure, the message consumer
+  // will set the error status.
+  if (!spv_tools.Validate(spv_binary_)) {
+    return false;
   }
-
-  if (success_) {
-    success_ = BuildInternalModule();
+  if (!BuildInternalModule()) {
+    return false;
+  }
+  if (!ParseInternalModule()) {
+    return false;
   }
 
   return success_;
@@ -160,6 +164,11 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
       return save(ConvertType(spirv_type->AsArray()));
     case spvtools::opt::analysis::Type::kStruct:
       return save(ConvertType(spirv_type->AsStruct()));
+    case spvtools::opt::analysis::Type::kFunction:
+    case spvtools::opt::analysis::Type::kPointer:
+      // For now, just return null without erroring out.
+      // TODO(dneto)
+      return nullptr;
     default:
       break;
   }
@@ -228,6 +237,9 @@ ParserImpl::ConvertMemberDecoration(const Decoration& decoration) {
 }
 
 bool ParserImpl::BuildInternalModule() {
+  if (!success_) {
+    return false;
+  }
   tools_.SetMessageConsumer(message_consumer_);
 
   const spv_context& context = tools_context_.CContext();
@@ -243,7 +255,7 @@ bool ParserImpl::BuildInternalModule() {
   type_mgr_ = ir_context_->get_type_mgr();
   deco_mgr_ = ir_context_->get_decoration_mgr();
 
-  return true;
+  return success_;
 }
 
 void ParserImpl::ResetInternalModule() {
@@ -265,10 +277,16 @@ bool ParserImpl::ParseInternalModule() {
   if (!RegisterExtendedInstructionImports()) {
     return false;
   }
-  if (!RegisterUserNames()) {
+  if (!RegisterUserAndStructMemberNames()) {
     return false;
   }
   if (!EmitEntryPoints()) {
+    return false;
+  }
+  if (!RegisterTypes()) {
+    return false;
+  }
+  if (!EmitAliasTypes()) {
     return false;
   }
   // TODO(dneto): fill in the rest
@@ -297,7 +315,10 @@ bool ParserImpl::RegisterExtendedInstructionImports() {
   return true;
 }
 
-bool ParserImpl::RegisterUserNames() {
+bool ParserImpl::RegisterUserAndStructMemberNames() {
+  if (!success_) {
+    return false;
+  }
   // Register entry point names. An entry point name is the point of contact
   // between the API and the shader. It has the highest priority for
   // preservation, so register it first.
@@ -490,12 +511,75 @@ ast::type::Type* ParserImpl::ConvertType(
   // Now make the struct.
   auto ast_struct = std::make_unique<ast::Struct>(ast_struct_decoration,
                                                   std::move(ast_members));
+  // The struct type will be assigned a name during EmitAliasTypes.
   auto ast_struct_type =
       std::make_unique<ast::type::StructType>(std::move(ast_struct));
-  // The struct might not have a name yet. Suggest one.
+  // Set the struct name before registering it.
   namer_.SuggestSanitizedName(type_id, "S");
   ast_struct_type->set_name(namer_.GetName(type_id));
   return ctx_.type_mgr().Get(std::move(ast_struct_type));
+}
+
+bool ParserImpl::RegisterTypes() {
+  if (!success_) {
+    return false;
+  }
+  for (auto& type_or_const : module_->types_values()) {
+    const auto* type = type_mgr_->GetType(type_or_const.result_id());
+    if (type == nullptr) {
+      continue;
+    }
+    ConvertType(type_or_const.result_id());
+  }
+  return success_;
+}
+
+bool ParserImpl::EmitAliasTypes() {
+  if (!success_) {
+    return false;
+  }
+  // The algorithm here emits type definitions in the order presented in
+  // the SPIR-V module.  This is valid because:
+  //
+  // - There are no back-references.  OpTypeForwarddPointer is not supported
+  //   by the WebGPU shader programming model.
+  // - Arrays are always sized by an OpConstant of scalar integral type.
+  //   WGSL currently doesn't have specialization constants.
+  //   crbug.com/32 tracks implementation in case they are added.
+  for (auto& type_or_const : module_->types_values()) {
+    const auto type_id = type_or_const.result_id();
+    // We only care about struct, arrays, and runtime arrays.
+    switch (type_or_const.opcode()) {
+      case SpvOpTypeStruct:
+        // The struct already got a name when the type was first registered.
+        break;
+      case SpvOpTypeRuntimeArray:
+        // Runtime arrays are always decorated with ArrayStride so always get a
+        // type alias.
+        namer_.SuggestSanitizedName(type_id, "RTArr");
+        break;
+      case SpvOpTypeArray:
+        // Only make a type aliase for arrays with decorations.
+        if (GetDecorationsFor(type_id).empty()) {
+          continue;
+        }
+        namer_.SuggestSanitizedName(type_id, "Arr");
+        break;
+      default:
+        // Ignore constants, and any other types.
+        continue;
+    }
+    auto* ast_underlying_type = id_to_type_[type_id];
+    if (ast_underlying_type == nullptr) {
+      Fail() << "internal error: no type registered for SPIR-V ID: " << type_id;
+      return false;
+    }
+    const auto name = namer_.GetName(type_id);
+    auto* ast_type = ctx_.type_mgr().Get(
+        std::make_unique<ast::type::AliasType>(name, ast_underlying_type));
+    ast_module_.AddAliasType(ast_type->AsAlias());
+  }
+  return success_;
 }
 
 }  // namespace spirv

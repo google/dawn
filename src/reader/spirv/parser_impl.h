@@ -126,33 +126,54 @@ class ParserImpl : Reader {
   std::unique_ptr<ast::StructMemberDecoration> ConvertMemberDecoration(
       const Decoration& decoration);
 
- private:
   /// Builds the internal representation of the SPIR-V module.
   /// Assumes the module is somewhat well-formed.  Normally you
   /// would want to validate the SPIR-V module before attempting
   /// to build this internal representation.
-  /// @returns true if successful.
+  /// This is a no-op if the parser has already failed.
+  /// @returns true if the parser is still successful.
   bool BuildInternalModule();
 
   /// Walks the internal representation of the module to populate
   /// the AST form of the module.
-  /// @returns true on success
+  /// This is a no-op if the parser has already failed.
+  /// @returns true if the parser is still successful.
   bool ParseInternalModule();
 
   /// Destroys the internal representation of the SPIR-V module.
   void ResetInternalModule();
 
   /// Registers extended instruction imports.  Only "GLSL.std.450" is supported.
+  /// This is a no-op if the parser has already failed.
+  /// @returns true if parser is still successful.
   bool RegisterExtendedInstructionImports();
 
   /// Registers user names for SPIR-V objects, from OpName, and OpMemberName.
   /// Also synthesizes struct field names.  Ensures uniqueness for names for
   /// SPIR-V IDs, and uniqueness of names of fields within any single struct.
-  bool RegisterUserNames();
+  /// This is a no-op if the parser has already failed.
+  /// @returns true if parser is still successful.
+  bool RegisterUserAndStructMemberNames();
 
   /// Emit entry point AST nodes.
+  /// This is a no-op if the parser has already failed.
+  /// @returns true if parser is still successful.
   bool EmitEntryPoints();
 
+  /// Register Tint AST types for SPIR-V types.
+  /// This is a no-op if the parser has already failed.
+  /// @returns true if parser is still successful.
+  bool RegisterTypes();
+
+  /// Emit type alias declarations for types requiring user-specified names:
+  /// - struct types
+  /// - decorated arrays and runtime arrays
+  /// TODO(dneto): I expect images and samplers to require names as well.
+  /// This is a no-op if the parser has already failed.
+  /// @returns true if parser is still successful.
+  bool EmitAliasTypes();
+
+ private:
   /// Converts a specific SPIR-V type to a Tint type. Integer case
   ast::type::Type* ConvertType(const spvtools::opt::analysis::Integer* int_ty);
   /// Converts a specific SPIR-V type to a Tint type. Float case
