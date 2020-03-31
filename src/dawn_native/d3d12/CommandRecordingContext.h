@@ -35,7 +35,7 @@ namespace dawn_native { namespace d3d12 {
         void Release();
         bool IsOpen() const;
 
-        MaybeError ExecuteCommandList(ID3D12CommandQueue* d3d12CommandQueue);
+        MaybeError ExecuteCommandList(Device* device);
 
         void TrackHeapUsage(Heap* heap, Serial serial);
 

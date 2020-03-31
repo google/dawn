@@ -463,4 +463,8 @@ namespace dawn_native {
         mState = BufferState::Destroyed;
     }
 
+    bool BufferBase::IsMapped() const {
+        return mState == BufferState::Mapped;
+    }
+
 }  // namespace dawn_native

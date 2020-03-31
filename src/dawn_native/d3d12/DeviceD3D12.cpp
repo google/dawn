@@ -228,7 +228,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     MaybeError Device::ExecutePendingCommandContext() {
-        return mPendingCommands.ExecuteCommandList(mCommandQueue.Get());
+        return mPendingCommands.ExecuteCommandList(this);
     }
 
     ResultOrError<BindGroupBase*> Device::CreateBindGroupImpl(
@@ -307,7 +307,6 @@ namespace dawn_native { namespace d3d12 {
         Buffer* dstBuffer = ToBackend(destination);
         StagingBuffer* srcBuffer = ToBackend(source);
         dstBuffer->TrackUsageAndTransitionNow(commandRecordingContext, wgpu::BufferUsage::CopyDst);
-        srcBuffer->TrackUsage(commandRecordingContext);
 
         commandRecordingContext->GetCommandList()->CopyBufferRegion(
             dstBuffer->GetD3D12Resource().Get(), destinationOffset, srcBuffer->GetResource(),

@@ -82,6 +82,8 @@ namespace dawn_native {
 
         void DestroyInternal();
 
+        bool IsMapped() const;
+
       private:
         virtual MaybeError MapAtCreationImpl(uint8_t** mappedPointer) = 0;
         virtual MaybeError SetSubDataImpl(uint32_t start, uint32_t count, const void* data);

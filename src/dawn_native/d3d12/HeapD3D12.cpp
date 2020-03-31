@@ -15,8 +15,17 @@
 #include "dawn_native/d3d12/HeapD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
-    Heap::Heap(ComPtr<ID3D12Pageable> d3d12Pageable, uint64_t size)
-        : mD3d12Pageable(std::move(d3d12Pageable)), mSize(size) {
+    Heap::Heap(ComPtr<ID3D12Pageable> d3d12Pageable, D3D12_HEAP_TYPE d3d12HeapType, uint64_t size)
+        : mD3d12Pageable(std::move(d3d12Pageable)), mD3d12HeapType(d3d12HeapType), mSize(size) {
+    }
+
+    Heap::~Heap() {
+        // When a heap is destroyed, it no longer resides in resident memory, so we must evict it
+        // from the LRU cache. If this heap is not manually removed from the LRU-cache, the
+        // ResidencyManager will attempt to use it after it has been deallocated.
+        if (IsInResidencyLRUCache()) {
+            RemoveFromList();
+        }
     }
 
     // This function should only be used when mD3D12Pageable was initialized from a ID3D12Pageable
@@ -33,6 +42,10 @@ namespace dawn_native { namespace d3d12 {
         return mD3d12Pageable;
     }
 
+    D3D12_HEAP_TYPE Heap::GetD3D12HeapType() const {
+        return mD3d12HeapType;
+    }
+
     Serial Heap::GetLastUsage() const {
         return mLastUsage;
     }
@@ -41,7 +54,38 @@ namespace dawn_native { namespace d3d12 {
         mLastUsage = serial;
     }
 
+    uint64_t Heap::GetLastSubmission() const {
+        return mLastSubmission;
+    }
+
+    void Heap::SetLastSubmission(Serial serial) {
+        mLastSubmission = serial;
+    }
+
     uint64_t Heap::GetSize() const {
         return mSize;
     }
+
+    bool Heap::IsInResidencyLRUCache() const {
+        return IsInList();
+    }
+
+    void Heap::IncrementResidencyLock() {
+        ASSERT(mD3d12HeapType != D3D12_HEAP_TYPE_DEFAULT);
+        mResidencyLockRefCount++;
+    }
+
+    void Heap::DecrementResidencyLock() {
+        ASSERT(mD3d12HeapType != D3D12_HEAP_TYPE_DEFAULT);
+        mResidencyLockRefCount--;
+    }
+
+    bool Heap::IsResidencyLocked() const {
+        if (mResidencyLockRefCount == 0) {
+            return false;
+        }
+
+        return true;
+    }
+
 }}  // namespace dawn_native::d3d12

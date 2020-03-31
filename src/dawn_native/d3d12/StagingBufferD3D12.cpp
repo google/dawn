@@ -16,6 +16,7 @@
 #include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/HeapD3D12.h"
+#include "dawn_native/d3d12/ResidencyManagerD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
 
@@ -41,6 +42,11 @@ namespace dawn_native { namespace d3d12 {
                         mDevice->AllocateMemory(D3D12_HEAP_TYPE_UPLOAD, resourceDescriptor,
                                                 D3D12_RESOURCE_STATE_GENERIC_READ));
 
+        // The mapped buffer can be accessed at any time, so it must be locked to ensure it is never
+        // evicted. This buffer should already have been made resident when it was created.
+        DAWN_TRY(mDevice->GetResidencyManager()->LockMappableHeap(
+            ToBackend(mUploadHeap.GetResourceHeap())));
+
         return CheckHRESULT(GetResource()->Map(0, nullptr, &mMappedPointer), "ID3D12Resource::Map");
     }
 
@@ -50,6 +56,12 @@ namespace dawn_native { namespace d3d12 {
         if (mUploadHeap.GetInfo().mMethod == AllocationMethod::kInvalid) {
             return;
         }
+
+        // The underlying heap was locked in residency upon creation. We must unlock it when this
+        // buffer becomes unmapped.
+        mDevice->GetResidencyManager()->UnlockMappableHeap(
+            ToBackend(mUploadHeap.GetResourceHeap()));
+
         // Invalidate the CPU virtual address & flush cache (if needed).
         GetResource()->Unmap(0, nullptr);
         mMappedPointer = nullptr;
@@ -59,11 +71,5 @@ namespace dawn_native { namespace d3d12 {
 
     ID3D12Resource* StagingBuffer::GetResource() const {
         return mUploadHeap.GetD3D12Resource().Get();
-    }
-
-    void StagingBuffer::TrackUsage(CommandRecordingContext* commandContext) {
-        // Track the underlying heap to ensure residency.
-        Heap* heap = ToBackend(mUploadHeap.GetResourceHeap());
-        commandContext->TrackHeapUsage(heap, mDevice->GetPendingCommandSerial());
     }
 }}  // namespace dawn_native::d3d12

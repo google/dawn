@@ -351,3 +351,15 @@ TEST(LinkedList, NodeMoveConstructor) {
     EXPECT_EQ(&n2_new, n3.previous());
     EXPECT_EQ(2, n2_new.id());
 }
+
+TEST(LinkedList, IsInList) {
+    LinkedList<Node> list;
+
+    Node n(1);
+
+    EXPECT_FALSE(n.IsInList());
+    list.Append(&n);
+    EXPECT_TRUE(n.IsInList());
+    n.RemoveFromList();
+    EXPECT_FALSE(n.IsInList());
+}

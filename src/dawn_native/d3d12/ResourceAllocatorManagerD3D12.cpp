@@ -18,6 +18,7 @@
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/HeapAllocatorD3D12.h"
 #include "dawn_native/d3d12/HeapD3D12.h"
+#include "dawn_native/d3d12/ResidencyManagerD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
     namespace {
@@ -255,6 +256,10 @@ namespace dawn_native { namespace d3d12 {
 
         Heap* heap = ToBackend(allocation.GetResourceHeap());
 
+        // Before calling CreatePlacedResource, we must ensure the target heap is resident.
+        // CreatePlacedResource will fail if it is not.
+        DAWN_TRY(mDevice->GetResidencyManager()->EnsureHeapsAreResident(&heap, 1));
+
         // With placed resources, a single heap can be reused.
         // The resource placed at an offset is only reclaimed
         // upon Tick or after the last command list using the resource has completed
@@ -296,6 +301,11 @@ namespace dawn_native { namespace d3d12 {
             return ResourceHeapAllocation{};  // Invalid
         }
 
+        // CreateCommittedResource will implicitly make the created resource resident. We must
+        // ensure enough free memory exists before allocating to avoid an out-of-memory error when
+        // overcommitted.
+        DAWN_TRY(mDevice->GetResidencyManager()->EnsureCanMakeResident(resourceInfo.SizeInBytes));
+
         // Note: Heap flags are inferred by the resource descriptor and do not need to be explicitly
         // provided to CreateCommittedResource.
         ComPtr<ID3D12Resource> committedResource;
@@ -310,7 +320,11 @@ namespace dawn_native { namespace d3d12 {
         // heap granularity, every directly allocated ResourceHeapAllocation also stores a Heap
         // object. This object is created manually, and must be deleted manually upon deallocation
         // of the committed resource.
-        Heap* heap = new Heap(committedResource, resourceInfo.SizeInBytes);
+        Heap* heap = new Heap(committedResource, heapType, resourceInfo.SizeInBytes);
+
+        // Calling CreateCommittedResource implicitly calls MakeResident on the resource. We must
+        // track this to avoid calling MakeResident a second time.
+        mDevice->GetResidencyManager()->TrackResidentAllocation(heap);
 
         AllocationInfo info;
         info.mMethod = AllocationMethod::kDirect;

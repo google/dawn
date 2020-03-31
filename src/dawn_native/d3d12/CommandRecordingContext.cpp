@@ -14,7 +14,9 @@
 #include "dawn_native/d3d12/CommandRecordingContext.h"
 #include "dawn_native/d3d12/CommandAllocatorManager.h"
 #include "dawn_native/d3d12/D3D12Error.h"
+#include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/HeapD3D12.h"
+#include "dawn_native/d3d12/ResidencyManagerD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
 
@@ -52,7 +54,7 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-    MaybeError CommandRecordingContext::ExecuteCommandList(ID3D12CommandQueue* d3d12CommandQueue) {
+    MaybeError CommandRecordingContext::ExecuteCommandList(Device* device) {
         if (IsOpen()) {
             // Shared textures must be transitioned to common state after the last usage in order
             // for them to be used by other APIs like D3D11. We ensure this by transitioning to the
@@ -68,9 +70,11 @@ namespace dawn_native { namespace d3d12 {
                 Release();
                 DAWN_TRY(std::move(error));
             }
+            DAWN_TRY(device->GetResidencyManager()->EnsureHeapsAreResident(
+                mHeapsPendingUsage.data(), mHeapsPendingUsage.size()));
 
             ID3D12CommandList* d3d12CommandList = GetCommandList();
-            d3d12CommandQueue->ExecuteCommandLists(1, &d3d12CommandList);
+            device->GetCommandQueue()->ExecuteCommandLists(1, &d3d12CommandList);
 
             mIsOpen = false;
             mSharedTextures.clear();

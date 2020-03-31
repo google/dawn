@@ -33,8 +33,6 @@ namespace dawn_native { namespace d3d12 {
 
         MaybeError Initialize() override;
 
-        void TrackUsage(CommandRecordingContext* commandContext);
-
       private:
         Device* mDevice;
         ResourceHeapAllocation mUploadHeap;

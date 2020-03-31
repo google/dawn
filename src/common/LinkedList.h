@@ -7,6 +7,8 @@
 #ifndef COMMON_LINKED_LIST_H
 #define COMMON_LINKED_LIST_H
 
+#include "common/Assert.h"
+
 // Simple LinkedList type. (See the Q&A section to understand how this
 // differs from std::list).
 //
@@ -115,6 +117,12 @@ class LinkNode {
         this->previous_ = e;
         e->next_->previous_ = this;
         e->next_ = this;
+    }
+
+    // Check if |this| is in a list.
+    bool IsInList() const {
+        ASSERT((this->previous_ == nullptr) == (this->next_ == nullptr));
+        return this->next_ != nullptr;
     }
 
     // Remove |this| from the linked list.
