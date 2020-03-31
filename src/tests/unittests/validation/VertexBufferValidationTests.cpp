@@ -101,7 +101,7 @@ TEST_F(VertexBufferValidationTest, VertexBuffersInheritedBetweenPipelines) {
     {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline1);
-        pass.Draw(3, 1, 0, 0);
+        pass.Draw(3);
         pass.EndPass();
     }
     ASSERT_DEVICE_ERROR(encoder.Finish());
@@ -113,9 +113,9 @@ TEST_F(VertexBufferValidationTest, VertexBuffersInheritedBetweenPipelines) {
         pass.SetPipeline(pipeline2);
         pass.SetVertexBuffer(0, vertexBuffer1);
         pass.SetVertexBuffer(1, vertexBuffer2);
-        pass.Draw(3, 1, 0, 0);
+        pass.Draw(3);
         pass.SetPipeline(pipeline1);
-        pass.Draw(3, 1, 0, 0);
+        pass.Draw(3);
         pass.EndPass();
     }
     encoder.Finish();
@@ -139,14 +139,14 @@ TEST_F(VertexBufferValidationTest, VertexBuffersNotInheritedBetweenRendePasses) 
         pass.SetPipeline(pipeline2);
         pass.SetVertexBuffer(0, vertexBuffer1);
         pass.SetVertexBuffer(1, vertexBuffer2);
-        pass.Draw(3, 1, 0, 0);
+        pass.Draw(3);
         pass.EndPass();
     }
     {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline1);
         pass.SetVertexBuffer(0, vertexBuffer1);
-        pass.Draw(3, 1, 0, 0);
+        pass.Draw(3);
         pass.EndPass();
     }
     encoder.Finish();
@@ -158,13 +158,13 @@ TEST_F(VertexBufferValidationTest, VertexBuffersNotInheritedBetweenRendePasses) 
         pass.SetPipeline(pipeline2);
         pass.SetVertexBuffer(0, vertexBuffer1);
         pass.SetVertexBuffer(1, vertexBuffer2);
-        pass.Draw(3, 1, 0, 0);
+        pass.Draw(3);
         pass.EndPass();
     }
     {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline1);
-        pass.Draw(3, 1, 0, 0);
+        pass.Draw(3);
         pass.EndPass();
     }
     ASSERT_DEVICE_ERROR(encoder.Finish());

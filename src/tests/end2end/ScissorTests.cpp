@@ -57,7 +57,7 @@ TEST_P(ScissorTest, DefaultsToWholeRenderTarget) {
     {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
-        pass.Draw(6, 1, 0, 0);
+        pass.Draw(6);
         pass.EndPass();
     }
 
@@ -80,7 +80,7 @@ TEST_P(ScissorTest, LargerThanAttachment) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.SetScissorRect(0, 0, 200, 200);
-        pass.Draw(6, 1, 0, 0);
+        pass.Draw(6);
         pass.EndPass();
     }
 
@@ -108,7 +108,7 @@ TEST_P(ScissorTest, PartialRect) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.SetScissorRect(kX, kY, kW, kH);
-        pass.Draw(6, 1, 0, 0);
+        pass.Draw(6);
         pass.EndPass();
     }
 
@@ -139,7 +139,7 @@ TEST_P(ScissorTest, NoInheritanceBetweenRenderPass) {
     {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
-        pass.Draw(6, 1, 0, 0);
+        pass.Draw(6);
         pass.EndPass();
     }
 

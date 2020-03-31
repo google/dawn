@@ -171,7 +171,7 @@ protected:
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&mRenderPass.renderPassInfo);
             pass.SetPipeline(pipeline);
             pass.SetBindGroup(0, bindGroup);
-            pass.Draw(6, 1, 0, 0);
+            pass.Draw(6);
             pass.EndPass();
         }
 
@@ -507,7 +507,7 @@ class TextureViewRenderingTest : public DawnTest {
         {
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassInfo);
             pass.SetPipeline(oneColorPipeline);
-            pass.Draw(6, 1, 0, 0);
+            pass.Draw(6);
             pass.EndPass();
         }
 

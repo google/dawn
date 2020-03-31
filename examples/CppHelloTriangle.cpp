@@ -163,7 +163,7 @@ void frame() {
         pass.SetBindGroup(0, bindGroup);
         pass.SetVertexBuffer(0, vertexBuffer);
         pass.SetIndexBuffer(indexBuffer);
-        pass.DrawIndexed(3, 1, 0, 0, 0);
+        pass.DrawIndexed(3);
         pass.EndPass();
     }
 

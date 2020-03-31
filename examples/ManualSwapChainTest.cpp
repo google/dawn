@@ -140,7 +140,7 @@ void DoRender(WindowData* data) {
 
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&desc);
         pass.SetPipeline(trianglePipeline);
-        pass.Draw(3, 1, 0, 0);
+        pass.Draw(3);
         pass.EndPass();
     } else {
         data->clearCycle -= 1.0 / 60.f;

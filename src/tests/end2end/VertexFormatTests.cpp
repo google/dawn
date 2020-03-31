@@ -383,7 +383,7 @@ class VertexFormatTest : public DawnTest {
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
             pass.SetPipeline(pipeline);
             pass.SetVertexBuffer(0, vertexBuffer);
-            pass.Draw(3, 1, 0, 0);
+            pass.Draw(3);
             pass.EndPass();
         }
 

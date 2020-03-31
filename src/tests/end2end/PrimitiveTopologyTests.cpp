@@ -200,7 +200,7 @@ class PrimitiveTopologyTest : public DawnTest {
                 wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
                 pass.SetPipeline(pipeline);
                 pass.SetVertexBuffer(0, vertexBuffer);
-                pass.Draw(6, 1, 0, 0);
+                pass.Draw(6);
                 pass.EndPass();
             }
 

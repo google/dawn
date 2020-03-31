@@ -550,7 +550,7 @@ void DrawCallPerf::RecordRenderCommands(Encoder pass) {
                 UNREACHABLE();
                 break;
         }
-        pass.Draw(3, 1, 0, 0);
+        pass.Draw(3);
     }
 }
 

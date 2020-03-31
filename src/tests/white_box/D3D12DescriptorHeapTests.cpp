@@ -136,7 +136,7 @@ TEST_P(D3D12DescriptorHeapTests, SwitchOverHeaps) {
         for (uint32_t i = 0; i < samplerHeapSize + 1; ++i) {
             pass.SetBindGroup(0, utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
                                                       {{0, sampler}}));
-            pass.Draw(3, 1, 0, 0);
+            pass.Draw(3);
         }
 
         pass.EndPass();
@@ -313,7 +313,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBO) {
 
         for (uint32_t i = 0; i < numOfEncodedBindGroups; ++i) {
             pass.SetBindGroup(0, bindGroups[i]);
-            pass.Draw(3, 1, 0, 0);
+            pass.Draw(3);
         }
 
         pass.EndPass();
@@ -360,7 +360,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeUBOOverflowMultipleSubmit) {
 
             pass.SetPipeline(renderPipeline);
             pass.SetBindGroup(0, bindGroup);
-            pass.Draw(3, 1, 0, 0);
+            pass.Draw(3);
             pass.EndPass();
         }
 
@@ -399,7 +399,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeUBOOverflowMultipleSubmit) {
 
             for (uint32_t i = 0; i < heapSize; ++i) {
                 pass.SetBindGroup(0, bindGroups[i]);
-                pass.Draw(3, 1, 0, 0);
+                pass.Draw(3);
             }
 
             pass.EndPass();
@@ -455,12 +455,12 @@ TEST_P(D3D12DescriptorHeapTests, EncodeReuseUBOOverflow) {
         // Encode a heap worth of descriptors plus one more.
         for (uint32_t i = 0; i < heapSize + 1; ++i) {
             pass.SetBindGroup(0, bindGroups[i]);
-            pass.Draw(3, 1, 0, 0);
+            pass.Draw(3);
         }
 
         // Re-encode the first bindgroup again.
         pass.SetBindGroup(0, bindGroups[0]);
-        pass.Draw(3, 1, 0, 0);
+        pass.Draw(3);
 
         pass.EndPass();
     }
@@ -518,7 +518,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeReuseUBOMultipleSubmits) {
 
             for (uint32_t i = 0; i < heapSize + 1; ++i) {
                 pass.SetBindGroup(0, bindGroups[i]);
-                pass.Draw(3, 1, 0, 0);
+                pass.Draw(3);
             }
 
             pass.EndPass();
@@ -540,7 +540,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeReuseUBOMultipleSubmits) {
             pass.SetPipeline(pipeline);
 
             pass.SetBindGroup(0, bindGroups[0]);
-            pass.Draw(3, 1, 0, 0);
+            pass.Draw(3);
 
             pass.EndPass();
         }
@@ -672,7 +672,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
 
         for (uint32_t i = 0; i < kNumOfHeaps * bindGroupsPerHeap; ++i) {
             pass.SetBindGroup(0, bindGroups[i % kNumOfBindGroups]);
-            pass.Draw(3, 1, 0, 0);
+            pass.Draw(3);
         }
 
         pass.EndPass();

@@ -274,18 +274,18 @@ void frame() {
         pass.SetBindGroup(0, bindGroup[0]);
         pass.SetVertexBuffer(0, vertexBuffer);
         pass.SetIndexBuffer(indexBuffer);
-        pass.DrawIndexed(36, 1, 0, 0, 0);
+        pass.DrawIndexed(36);
 
         pass.SetStencilReference(0x1);
         pass.SetPipeline(planePipeline);
         pass.SetBindGroup(0, bindGroup[0]);
         pass.SetVertexBuffer(0, planeBuffer);
-        pass.DrawIndexed(6, 1, 0, 0, 0);
+        pass.DrawIndexed(6);
 
         pass.SetPipeline(reflectionPipeline);
         pass.SetVertexBuffer(0, vertexBuffer);
         pass.SetBindGroup(0, bindGroup[1]);
-        pass.DrawIndexed(36, 1, 0, 0, 0);
+        pass.DrawIndexed(36);
 
         pass.EndPass();
     }

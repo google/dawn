@@ -190,7 +190,7 @@ TEST_P(OpArrayLengthTest, Fragment) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, mBindGroup);
-        pass.Draw(1, 1, 0, 0);
+        pass.Draw(1);
         pass.EndPass();
     }
 
@@ -251,7 +251,7 @@ TEST_P(OpArrayLengthTest, Vertex) {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, mBindGroup);
-        pass.Draw(1, 1, 0, 0);
+        pass.Draw(1);
         pass.EndPass();
     }
 

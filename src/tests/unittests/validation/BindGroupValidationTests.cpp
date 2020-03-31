@@ -816,7 +816,7 @@ class SetBindGroupValidationTest : public ValidationTest {
         wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
         renderPassEncoder.SetPipeline(renderPipeline);
         renderPassEncoder.SetBindGroup(0, bindGroup, count, offsets);
-        renderPassEncoder.Draw(3, 1, 0, 0);
+        renderPassEncoder.Draw(3);
         renderPassEncoder.EndPass();
         if (!expectation) {
             ASSERT_DEVICE_ERROR(commandEncoder.Finish());
@@ -1124,7 +1124,7 @@ TEST_F(SetBindGroupPersistenceValidationTest, BindGroupBeforePipeline) {
     renderPassEncoder.SetBindGroup(0, bindGroup0);
     renderPassEncoder.SetBindGroup(1, bindGroup1);
     renderPassEncoder.SetPipeline(pipeline);
-    renderPassEncoder.Draw(3, 1, 0, 0);
+    renderPassEncoder.Draw(3);
 
     renderPassEncoder.EndPass();
     commandEncoder.Finish();
@@ -1182,13 +1182,13 @@ TEST_F(SetBindGroupPersistenceValidationTest, NotVulkanInheritance) {
     renderPassEncoder.SetPipeline(pipelineA);
     renderPassEncoder.SetBindGroup(0, bindGroupA0);
     renderPassEncoder.SetBindGroup(1, bindGroupA1);
-    renderPassEncoder.Draw(3, 1, 0, 0);
+    renderPassEncoder.Draw(3);
 
     renderPassEncoder.SetPipeline(pipelineB);
     renderPassEncoder.SetBindGroup(0, bindGroupB0);
     // This draw is valid.
     // Bind group 1 persists even though it is not "inherited".
-    renderPassEncoder.Draw(3, 1, 0, 0);
+    renderPassEncoder.Draw(3);
 
     renderPassEncoder.EndPass();
     commandEncoder.Finish();

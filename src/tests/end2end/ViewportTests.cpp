@@ -127,7 +127,7 @@ class ViewportTest : public DawnTest {
                 renderPass1.SetViewport(viewport.x, viewport.y, viewport.width, viewport.height,
                                         viewport.minDepth, viewport.maxDepth);
             }
-            renderPass1.Draw(6, 1, 0, 0);
+            renderPass1.Draw(6);
             renderPass1.EndPass();
         }
 
@@ -147,7 +147,7 @@ class ViewportTest : public DawnTest {
             wgpu::RenderPassEncoder renderPass2 =
                 commandEncoder.BeginRenderPass(&renderPassDescriptor2);
             renderPass2.SetPipeline(CreatePipelineForTest(wgpu::CompareFunction::Greater));
-            renderPass2.Draw(6, 1, 0, 0);
+            renderPass2.Draw(6);
             renderPass2.EndPass();
         }
 

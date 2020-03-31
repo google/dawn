@@ -279,7 +279,7 @@ wgpu::CommandBuffer createCommandBuffer(const wgpu::TextureView backbufferView, 
         pass.SetPipeline(renderPipeline);
         pass.SetVertexBuffer(0, bufferDst);
         pass.SetVertexBuffer(1, modelBuffer);
-        pass.Draw(3, kNumParticles, 0, 0);
+        pass.Draw(3, kNumParticles);
         pass.EndPass();
     }
 

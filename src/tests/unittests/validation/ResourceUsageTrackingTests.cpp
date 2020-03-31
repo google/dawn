@@ -232,10 +232,10 @@ namespace {
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
 
             pass.SetIndexBuffer(buffer);
-            pass.Draw(3, 1, 0, 0);
+            pass.Draw(3);
 
             pass.SetBindGroup(0, bg);
-            pass.Draw(3, 1, 0, 0);
+            pass.Draw(3);
 
             pass.EndPass();
             ASSERT_DEVICE_ERROR(encoder.Finish());

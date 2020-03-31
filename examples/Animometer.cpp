@@ -161,7 +161,7 @@ void frame() {
         for (size_t i = 0; i < kNumTriangles; i++) {
             uint32_t offset = i * sizeof(ShaderData);
             pass.SetBindGroup(0, bindGroup, 1, &offset);
-            pass.Draw(3, 1, 0, 0);
+            pass.Draw(3);
         }
 
         pass.EndPass();

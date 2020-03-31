@@ -84,7 +84,7 @@ class CullingTest : public DawnTest {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPass = commandEncoder.BeginRenderPass(&renderPassDescriptor);
         renderPass.SetPipeline(CreatePipelineForTest(frontFace, cullMode));
-        renderPass.Draw(6, 1, 0, 0);
+        renderPass.Draw(6);
         renderPass.EndPass();
         wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
         wgpu::Queue queue = device.CreateQueue();

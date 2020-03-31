@@ -180,7 +180,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
             pass.SetPipeline(renderPipeline);
             pass.SetBindGroup(0, bindGroup);
-            pass.Draw(6, 1, 0, 0);
+            pass.Draw(6);
             pass.EndPass();
         }
 

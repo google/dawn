@@ -143,7 +143,7 @@ protected:
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&mRenderPass.renderPassInfo);
             pass.SetPipeline(mPipeline);
             pass.SetBindGroup(0, bindGroup);
-            pass.Draw(6, 1, 0, 0);
+            pass.Draw(6);
             pass.EndPass();
         }
 

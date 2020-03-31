@@ -211,7 +211,7 @@ TEST_P(BindGroupTests, ReusedUBO) {
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);
-    pass.Draw(3, 1, 0, 0);
+    pass.Draw(3);
     pass.EndPass();
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -316,7 +316,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);
-    pass.Draw(3, 1, 0, 0);
+    pass.Draw(3);
     pass.EndPass();
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -400,7 +400,7 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroups[0]);
     pass.SetBindGroup(1, bindGroups[1]);
-    pass.Draw(3, 1, 0, 0);
+    pass.Draw(3);
     pass.EndPass();
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -446,10 +446,10 @@ TEST_P(BindGroupTests, DrawTwiceInSamePipelineWithFourBindGroupSets) {
     pass.SetBindGroup(1, bindGroup);
     pass.SetBindGroup(2, bindGroup);
     pass.SetBindGroup(3, bindGroup);
-    pass.Draw(3, 1, 0, 0);
+    pass.Draw(3);
 
     pass.SetPipeline(pipeline);
-    pass.Draw(3, 1, 0, 0);
+    pass.Draw(3);
     pass.EndPass();
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -489,7 +489,7 @@ TEST_P(BindGroupTests, SetBindGroupBeforePipeline) {
     // Set the bind group, then the pipeline, and draw.
     pass.SetBindGroup(0, bindGroup);
     pass.SetPipeline(pipeline);
-    pass.Draw(3, 1, 0, 0);
+    pass.Draw(3);
 
     pass.EndPass();
 
@@ -550,7 +550,7 @@ TEST_P(BindGroupTests, SetDynamicBindGroupBeforePipeline) {
 
     // Set the pipeline and draw.
     pass.SetPipeline(pipeline);
-    pass.Draw(3, 1, 0, 0);
+    pass.Draw(3);
 
     pass.EndPass();
 
@@ -627,7 +627,7 @@ TEST_P(BindGroupTests, BindGroupsPersistAfterPipelineChange) {
     // Both bind groups match the pipeline.
     // They should persist and not need to be bound again.
     pass.SetPipeline(pipeline1);
-    pass.Draw(3, 1, 0, 0);
+    pass.Draw(3);
 
     pass.EndPass();
 
@@ -721,7 +721,7 @@ TEST_P(BindGroupTests, DrawThenChangePipelineAndBindGroup) {
     dynamicOffset = color2Offset;
     pass.SetBindGroup(2, storageBindGroup, 1, &dynamicOffset);
 
-    pass.Draw(3, 1, 0, 0);
+    pass.Draw(3);
 
     // Set the pipeline to (uniform, storage, storage)
     //  - The first bind group should persist (inherited on some backends)
@@ -734,7 +734,7 @@ TEST_P(BindGroupTests, DrawThenChangePipelineAndBindGroup) {
     dynamicOffset = color3Offset;
     pass.SetBindGroup(1, storageBindGroup, 1, &dynamicOffset);
 
-    pass.Draw(3, 1, 0, 0);
+    pass.Draw(3);
     pass.EndPass();
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -773,7 +773,7 @@ TEST_P(BindGroupTests, BindGroupLayoutVisibilityCanBeNone) {
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);
-    pass.Draw(3, 1, 0, 0);
+    pass.Draw(3);
     pass.EndPass();
 
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -831,7 +831,7 @@ TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
             pass.SetPipeline(pipeline);
             pass.SetBindGroup(0, bindGroup);
-            pass.Draw(3, 1, 0, 0);
+            pass.Draw(3);
             pass.EndPass();
 
             wgpu::CommandBuffer commands = encoder.Finish();

@@ -103,7 +103,7 @@ TEST_P(RenderBundleTest, Basic) {
     renderBundleEncoder.SetPipeline(pipeline);
     renderBundleEncoder.SetVertexBuffer(0, vertexBuffer);
     renderBundleEncoder.SetBindGroup(0, bindGroups[0]);
-    renderBundleEncoder.Draw(6, 1, 0, 0);
+    renderBundleEncoder.Draw(6);
 
     wgpu::RenderBundle renderBundle = renderBundleEncoder.Finish();
 
@@ -133,7 +133,7 @@ TEST_P(RenderBundleTest, MultipleBundles) {
         renderBundleEncoder.SetPipeline(pipeline);
         renderBundleEncoder.SetVertexBuffer(0, vertexBuffer);
         renderBundleEncoder.SetBindGroup(0, bindGroups[0]);
-        renderBundleEncoder.Draw(3, 1, 0, 0);
+        renderBundleEncoder.Draw(3);
 
         renderBundles[0] = renderBundleEncoder.Finish();
     }
@@ -143,7 +143,7 @@ TEST_P(RenderBundleTest, MultipleBundles) {
         renderBundleEncoder.SetPipeline(pipeline);
         renderBundleEncoder.SetVertexBuffer(0, vertexBuffer);
         renderBundleEncoder.SetBindGroup(0, bindGroups[1]);
-        renderBundleEncoder.Draw(3, 1, 3, 0);
+        renderBundleEncoder.Draw(3, 1, 3);
 
         renderBundles[1] = renderBundleEncoder.Finish();
     }
@@ -172,7 +172,7 @@ TEST_P(RenderBundleTest, BundleAndRenderPassCommands) {
     renderBundleEncoder.SetPipeline(pipeline);
     renderBundleEncoder.SetVertexBuffer(0, vertexBuffer);
     renderBundleEncoder.SetBindGroup(0, bindGroups[0]);
-    renderBundleEncoder.Draw(3, 1, 0, 0);
+    renderBundleEncoder.Draw(3);
 
     wgpu::RenderBundle renderBundle = renderBundleEncoder.Finish();
 
@@ -184,7 +184,7 @@ TEST_P(RenderBundleTest, BundleAndRenderPassCommands) {
     pass.SetPipeline(pipeline);
     pass.SetVertexBuffer(0, vertexBuffer);
     pass.SetBindGroup(0, bindGroups[1]);
-    pass.Draw(3, 1, 3, 0);
+    pass.Draw(3, 1, 3);
 
     pass.ExecuteBundles(1, &renderBundle);
     pass.EndPass();

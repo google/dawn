@@ -160,7 +160,7 @@ TEST_F(RenderBundleValidationTest, SimpleSuccess) {
     renderBundleEncoder.SetBindGroup(0, bg0);
     renderBundleEncoder.SetBindGroup(1, bg1);
     renderBundleEncoder.SetVertexBuffer(0, vertexBuffer);
-    renderBundleEncoder.Draw(3, 0, 0, 0);
+    renderBundleEncoder.Draw(3);
     wgpu::RenderBundle renderBundle = renderBundleEncoder.Finish();
 
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
@@ -248,7 +248,7 @@ TEST_F(RenderBundleValidationTest, StateInheritance) {
         renderBundleEncoder.SetBindGroup(0, bg0);
         renderBundleEncoder.SetBindGroup(1, bg1);
         renderBundleEncoder.SetVertexBuffer(0, vertexBuffer);
-        renderBundleEncoder.Draw(3, 0, 0, 0);
+        renderBundleEncoder.Draw(3);
         ASSERT_DEVICE_ERROR(wgpu::RenderBundle renderBundle = renderBundleEncoder.Finish());
 
         pass.ExecuteBundles(1, &renderBundle);
@@ -267,7 +267,7 @@ TEST_F(RenderBundleValidationTest, StateInheritance) {
 
         renderBundleEncoder.SetPipeline(pipeline);
         renderBundleEncoder.SetVertexBuffer(0, vertexBuffer);
-        renderBundleEncoder.Draw(3, 0, 0, 0);
+        renderBundleEncoder.Draw(3);
         ASSERT_DEVICE_ERROR(wgpu::RenderBundle renderBundle = renderBundleEncoder.Finish());
 
         pass.ExecuteBundles(1, &renderBundle);
@@ -286,7 +286,7 @@ TEST_F(RenderBundleValidationTest, StateInheritance) {
         pass.SetBindGroup(1, bg1);
 
         renderBundleEncoder.SetVertexBuffer(0, vertexBuffer);
-        renderBundleEncoder.Draw(3, 0, 0, 0);
+        renderBundleEncoder.Draw(3);
         ASSERT_DEVICE_ERROR(wgpu::RenderBundle renderBundle = renderBundleEncoder.Finish());
 
         pass.ExecuteBundles(1, &renderBundle);
@@ -305,7 +305,7 @@ TEST_F(RenderBundleValidationTest, StateInheritance) {
         renderBundleEncoder.SetPipeline(pipeline);
         renderBundleEncoder.SetBindGroup(0, bg0);
         renderBundleEncoder.SetBindGroup(1, bg1);
-        renderBundleEncoder.Draw(3, 0, 0, 0);
+        renderBundleEncoder.Draw(3);
         ASSERT_DEVICE_ERROR(wgpu::RenderBundle renderBundle = renderBundleEncoder.Finish());
 
         pass.ExecuteBundles(1, &renderBundle);
@@ -335,7 +335,7 @@ TEST_F(RenderBundleValidationTest, StatePersistence) {
         pass.SetBindGroup(0, bg0);
         pass.SetBindGroup(1, bg1);
         pass.SetVertexBuffer(0, vertexBuffer);
-        pass.Draw(3, 0, 0, 0);
+        pass.Draw(3);
         pass.EndPass();
 
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
@@ -354,7 +354,7 @@ TEST_F(RenderBundleValidationTest, StatePersistence) {
         pass.ExecuteBundles(1, &renderBundle);
         pass.SetPipeline(pipeline);
         pass.SetVertexBuffer(0, vertexBuffer);
-        pass.Draw(3, 0, 0, 0);
+        pass.Draw(3);
         pass.EndPass();
 
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
@@ -373,7 +373,7 @@ TEST_F(RenderBundleValidationTest, StatePersistence) {
 
         pass.ExecuteBundles(1, &renderBundle);
         pass.SetVertexBuffer(0, vertexBuffer);
-        pass.Draw(3, 0, 0, 0);
+        pass.Draw(3);
         pass.EndPass();
 
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
@@ -392,7 +392,7 @@ TEST_F(RenderBundleValidationTest, StatePersistence) {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bg0);
         pass.SetBindGroup(1, bg1);
-        pass.Draw(3, 0, 0, 0);
+        pass.Draw(3);
         pass.EndPass();
 
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
@@ -420,7 +420,7 @@ TEST_F(RenderBundleValidationTest, ClearsState) {
         pass.SetBindGroup(0, bg0);
         pass.SetBindGroup(1, bg1);
         pass.SetVertexBuffer(0, vertexBuffer);
-        pass.Draw(3, 0, 0, 0);
+        pass.Draw(3);
         pass.EndPass();
 
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
@@ -436,7 +436,7 @@ TEST_F(RenderBundleValidationTest, ClearsState) {
         pass.ExecuteBundles(1, &renderBundle);
         pass.SetPipeline(pipeline);
         pass.SetVertexBuffer(0, vertexBuffer);
-        pass.Draw(3, 0, 0, 0);
+        pass.Draw(3);
         pass.EndPass();
 
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
@@ -452,7 +452,7 @@ TEST_F(RenderBundleValidationTest, ClearsState) {
         pass.SetBindGroup(1, bg1);
         pass.ExecuteBundles(1, &renderBundle);
         pass.SetVertexBuffer(0, vertexBuffer);
-        pass.Draw(3, 0, 0, 0);
+        pass.Draw(3);
         pass.EndPass();
 
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
@@ -468,7 +468,7 @@ TEST_F(RenderBundleValidationTest, ClearsState) {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bg0);
         pass.SetBindGroup(1, bg1);
-        pass.Draw(3, 0, 0, 0);
+        pass.Draw(3);
         pass.EndPass();
 
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
@@ -484,7 +484,7 @@ TEST_F(RenderBundleValidationTest, ClearsState) {
         pass.SetBindGroup(1, bg1);
         pass.SetVertexBuffer(0, vertexBuffer);
         pass.ExecuteBundles(0, nullptr);
-        pass.Draw(3, 0, 0, 0);
+        pass.Draw(3);
 
         pass.EndPass();
         commandEncoder.Finish();
@@ -506,7 +506,7 @@ TEST_F(RenderBundleValidationTest, MultipleBundles) {
     renderBundleEncoder0.SetBindGroup(0, bg0);
     renderBundleEncoder0.SetBindGroup(1, bg1);
     renderBundleEncoder0.SetVertexBuffer(0, vertexBuffer);
-    renderBundleEncoder0.Draw(3, 1, 0, 0);
+    renderBundleEncoder0.Draw(3);
     renderBundles[0] = renderBundleEncoder0.Finish();
 
     wgpu::RenderBundleEncoder renderBundleEncoder1 = device.CreateRenderBundleEncoder(&desc);
@@ -514,7 +514,7 @@ TEST_F(RenderBundleValidationTest, MultipleBundles) {
     renderBundleEncoder1.SetBindGroup(0, bg0);
     renderBundleEncoder1.SetBindGroup(1, bg1);
     renderBundleEncoder1.SetVertexBuffer(0, vertexBuffer);
-    renderBundleEncoder1.Draw(3, 1, 0, 0);
+    renderBundleEncoder1.Draw(3);
     renderBundles[1] = renderBundleEncoder1.Finish();
 
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
@@ -537,7 +537,7 @@ TEST_F(RenderBundleValidationTest, ExecuteMultipleTimes) {
     renderBundleEncoder.SetBindGroup(0, bg0);
     renderBundleEncoder.SetBindGroup(1, bg1);
     renderBundleEncoder.SetVertexBuffer(0, vertexBuffer);
-    renderBundleEncoder.Draw(3, 1, 0, 0);
+    renderBundleEncoder.Draw(3);
     wgpu::RenderBundle renderBundle = renderBundleEncoder.Finish();
 
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
@@ -617,7 +617,7 @@ TEST_F(RenderBundleValidationTest, UsageTracking) {
         renderBundleEncoder.SetBindGroup(0, bg0);
         renderBundleEncoder.SetBindGroup(1, bg1Vertex);
         renderBundleEncoder.SetVertexBuffer(0, vertexBuffer);
-        renderBundleEncoder.Draw(3, 0, 0, 0);
+        renderBundleEncoder.Draw(3);
         renderBundle0 = renderBundleEncoder.Finish();
     }
 
@@ -628,7 +628,7 @@ TEST_F(RenderBundleValidationTest, UsageTracking) {
         renderBundleEncoder.SetBindGroup(0, bg0);
         renderBundleEncoder.SetBindGroup(1, bg1);
         renderBundleEncoder.SetVertexBuffer(0, vertexStorageBuffer);
-        renderBundleEncoder.Draw(3, 0, 0, 0);
+        renderBundleEncoder.Draw(3);
         renderBundle1 = renderBundleEncoder.Finish();
     }
 
@@ -640,7 +640,7 @@ TEST_F(RenderBundleValidationTest, UsageTracking) {
         renderBundleEncoder.SetBindGroup(0, bg0);
         renderBundleEncoder.SetBindGroup(1, bg1Vertex);
         renderBundleEncoder.SetVertexBuffer(0, vertexStorageBuffer);
-        renderBundleEncoder.Draw(3, 0, 0, 0);
+        renderBundleEncoder.Draw(3);
         ASSERT_DEVICE_ERROR(renderBundleEncoder.Finish());
     }
 
@@ -668,7 +668,7 @@ TEST_F(RenderBundleValidationTest, UsageTracking) {
         pass.SetBindGroup(0, bg0);
         pass.SetBindGroup(1, bg1Vertex);
         pass.SetVertexBuffer(0, vertexBuffer);
-        pass.Draw(3, 0, 0, 0);
+        pass.Draw(3);
 
         pass.ExecuteBundles(1, &renderBundle1);
         pass.EndPass();
@@ -688,7 +688,7 @@ TEST_F(RenderBundleValidationTest, UsageTracking) {
         pass.SetBindGroup(0, bg0);
         pass.SetBindGroup(1, bg1);
         pass.SetVertexBuffer(0, vertexStorageBuffer);
-        pass.Draw(3, 0, 0, 0);
+        pass.Draw(3);
 
         pass.EndPass();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());

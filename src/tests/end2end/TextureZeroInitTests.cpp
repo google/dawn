@@ -399,7 +399,7 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepth) {
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     auto pass = encoder.BeginRenderPass(&renderPassDescriptor);
     pass.SetPipeline(CreatePipelineForTest());
-    pass.Draw(6, 1, 0, 0);
+    pass.Draw(6);
     pass.EndPass();
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
     // Expect 0 lazy clears, depth stencil texture will clear using loadop
@@ -441,7 +441,7 @@ TEST_P(TextureZeroInitTest, RenderingLoadingStencil) {
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     auto pass = encoder.BeginRenderPass(&renderPassDescriptor);
     pass.SetPipeline(CreatePipelineForTest());
-    pass.Draw(6, 1, 0, 0);
+    pass.Draw(6);
     pass.EndPass();
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
     // Expect 0 lazy clears, depth stencil texture will clear using loadop
@@ -480,7 +480,7 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencil) {
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     auto pass = encoder.BeginRenderPass(&renderPassDescriptor);
     pass.SetPipeline(CreatePipelineForTest());
-    pass.Draw(6, 1, 0, 0);
+    pass.Draw(6);
     pass.EndPass();
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
     // Expect 0 lazy clears, depth stencil texture will clear using loadop
@@ -550,7 +550,7 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
     pass.SetPipeline(renderPipeline);
     pass.SetBindGroup(0, bindGroup);
-    pass.Draw(6, 1, 0, 0);
+    pass.Draw(6);
     pass.EndPass();
     wgpu::CommandBuffer commands = encoder.Finish();
     // Expect 1 lazy clear for sampled texture
@@ -767,7 +767,7 @@ TEST_P(TextureZeroInitTest, RenderPassStoreOpClear) {
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
     pass.SetPipeline(renderPipeline);
     pass.SetBindGroup(0, bindGroup);
-    pass.Draw(6, 1, 0, 0);
+    pass.Draw(6);
     pass.EndPass();
     commands = encoder.Finish();
     // Expect 0 lazy clears, sample texture is initialized by copyBufferToTexture and render texture
@@ -821,7 +821,7 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencilStoreOpClear) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDescriptor);
         pass.SetPipeline(CreatePipelineForTest());
-        pass.Draw(6, 1, 0, 0);
+        pass.Draw(6);
         pass.EndPass();
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         // Expect 0 lazy clears, depth stencil texture will clear using loadop
@@ -846,7 +846,7 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencilStoreOpClear) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDescriptor);
         pass.SetPipeline(CreatePipelineForTest());
-        pass.Draw(6, 1, 0, 0);
+        pass.Draw(6);
         pass.EndPass();
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         // Expect 0 lazy clears, depth stencil texture will clear using loadop
@@ -916,7 +916,7 @@ TEST_P(TextureZeroInitTest, PreservesInitializedMip) {
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
     pass.SetPipeline(renderPipeline);
     pass.SetBindGroup(0, bindGroup);
-    pass.Draw(6, 1, 0, 0);
+    pass.Draw(6);
     pass.EndPass();
     commands = encoder.Finish();
     // Expect 1 lazy clears, because not all mips of the sample texture are initialized by
@@ -998,7 +998,7 @@ TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
     pass.SetPipeline(renderPipeline);
     pass.SetBindGroup(0, bindGroup);
-    pass.Draw(6, 1, 0, 0);
+    pass.Draw(6);
     pass.EndPass();
     commands = encoder.Finish();
     // Expect 1 lazy clears, because not all array layers of the sample texture are initialized by

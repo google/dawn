@@ -82,7 +82,7 @@ void main() {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bg1);
         pass.SetBindGroup(1, bg2);
-        pass.Draw(3, 0, 0, 0);
+        pass.Draw(3);
         pass.EndPass();
         commandEncoder.Finish();
     }
@@ -90,7 +90,7 @@ void main() {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
-        pass.Draw(3, 0, 0, 0);
+        pass.Draw(3);
         pass.EndPass();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
@@ -99,7 +99,7 @@ void main() {
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(1, bg2);
-        pass.Draw(3, 0, 0, 0);
+        pass.Draw(3);
         pass.EndPass();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }
@@ -108,7 +108,7 @@ void main() {
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bg1);
-        pass.Draw(3, 0, 0, 0);
+        pass.Draw(3);
         pass.EndPass();
         ASSERT_DEVICE_ERROR(commandEncoder.Finish());
     }

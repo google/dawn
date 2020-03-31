@@ -278,7 +278,7 @@ class TextureFormatTest : public DawnTest {
         wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDesc);
         renderPass.SetPipeline(pipeline);
         renderPass.SetBindGroup(0, bindGroup);
-        renderPass.Draw(3, 1, 0, 0);
+        renderPass.Draw(3);
         renderPass.EndPass();
 
         {
