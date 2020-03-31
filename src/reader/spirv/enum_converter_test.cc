@@ -26,6 +26,8 @@ namespace reader {
 namespace spirv {
 namespace {
 
+// Pipeline stage
+
 struct PipelineStageCase {
   SpvExecutionModel model;
   bool expect_success;
@@ -86,6 +88,80 @@ INSTANTIATE_TEST_SUITE_P(
                                       ast::PipelineStage::kNone},
                     PipelineStageCase{SpvExecutionModelTessellationControl,
                                       false, ast::PipelineStage::kNone}));
+
+// Storage class
+
+struct StorageClassCase {
+  SpvStorageClass sc;
+  bool expect_success;
+  ast::StorageClass expected;
+};
+inline std::ostream& operator<<(std::ostream& out, StorageClassCase scc) {
+  out << "StorageClassCase{ SpvStorageClass:" << int(scc.sc)
+      << " expect_success?:" << int(scc.expect_success)
+      << " expected:" << int(scc.expected) << "}";
+  return out;
+}
+
+class SpvStorageClassTest : public testing::TestWithParam<StorageClassCase> {
+ public:
+  SpvStorageClassTest()
+      : success_(true),
+        fail_stream_(&success_, &errors_),
+        converter_(fail_stream_) {}
+
+  std::string error() const { return errors_.str(); }
+
+ protected:
+  bool success_ = true;
+  std::stringstream errors_;
+  FailStream fail_stream_;
+  EnumConverter converter_;
+};
+
+TEST_P(SpvStorageClassTest, Samples) {
+  const auto params = GetParam();
+
+  const auto result = converter_.ToStorageClass(params.sc);
+  EXPECT_EQ(success_, params.expect_success);
+  if (params.expect_success) {
+    EXPECT_EQ(result, params.expected);
+    EXPECT_TRUE(error().empty());
+  } else {
+    EXPECT_EQ(result, params.expected);
+    EXPECT_THAT(error(),
+                ::testing::StartsWith("unknown SPIR-V storage class: "));
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    EnumConverterGood,
+    SpvStorageClassTest,
+    testing::Values(
+        StorageClassCase{SpvStorageClassInput, true, ast::StorageClass::kInput},
+        StorageClassCase{SpvStorageClassOutput, true,
+                         ast::StorageClass::kOutput},
+        StorageClassCase{SpvStorageClassUniform, true,
+                         ast::StorageClass::kUniform},
+        StorageClassCase{SpvStorageClassWorkgroup, true,
+                         ast::StorageClass::kWorkgroup},
+        StorageClassCase{SpvStorageClassUniformConstant, true,
+                         ast::StorageClass::kUniformConstant},
+        StorageClassCase{SpvStorageClassStorageBuffer, true,
+                         ast::StorageClass::kStorageBuffer},
+        StorageClassCase{SpvStorageClassImage, true, ast::StorageClass::kImage},
+        StorageClassCase{SpvStorageClassPushConstant, true,
+                         ast::StorageClass::kPushConstant},
+        StorageClassCase{SpvStorageClassPrivate, true,
+                         ast::StorageClass::kPrivate},
+        StorageClassCase{SpvStorageClassFunction, true,
+                         ast::StorageClass::kFunction}));
+
+INSTANTIATE_TEST_SUITE_P(EnumConverterBad,
+                         SpvStorageClassTest,
+                         testing::Values(StorageClassCase{
+                             SpvStorageClass(9999), false,
+                             ast::StorageClass::kNone}));
 
 }  // namespace
 }  // namespace spirv

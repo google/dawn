@@ -17,6 +17,7 @@
 
 #include "spirv/unified1/spirv.h"
 #include "src/ast/pipeline_stage.h"
+#include "src/ast/storage_class.h"
 #include "src/reader/spirv/fail_stream.h"
 
 namespace tint {
@@ -37,6 +38,12 @@ class EnumConverter {
   /// @param model the SPIR-V entry point execution model
   /// @returns a Tint AST pipeline stage
   ast::PipelineStage ToPipelineStage(SpvExecutionModel model);
+
+  /// Converts a SPIR-V storage class to a Tint storage class.
+  /// On failure, logs an error and returns kNone
+  /// @param sc the SPIR-V storage class
+  /// @returns a Tint AST pipeline stage
+  ast::StorageClass ToStorageClass(SpvStorageClass sc);
 
  private:
   /// Registers a failure and returns a stream for log diagnostics.

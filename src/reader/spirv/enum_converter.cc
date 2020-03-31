@@ -38,6 +38,36 @@ ast::PipelineStage EnumConverter::ToPipelineStage(SpvExecutionModel model) {
   return ast::PipelineStage::kNone;
 }
 
+ast::StorageClass EnumConverter::ToStorageClass(SpvStorageClass sc) {
+  switch (sc) {
+    case SpvStorageClassInput:
+      return ast::StorageClass::kInput;
+    case SpvStorageClassOutput:
+      return ast::StorageClass::kOutput;
+    case SpvStorageClassUniform:
+      return ast::StorageClass::kUniform;
+    case SpvStorageClassWorkgroup:
+      return ast::StorageClass::kWorkgroup;
+    case SpvStorageClassUniformConstant:
+      return ast::StorageClass::kUniformConstant;
+    case SpvStorageClassStorageBuffer:
+      return ast::StorageClass::kStorageBuffer;
+    case SpvStorageClassImage:
+      return ast::StorageClass::kImage;
+    case SpvStorageClassPushConstant:
+      return ast::StorageClass::kPushConstant;
+    case SpvStorageClassPrivate:
+      return ast::StorageClass::kPrivate;
+    case SpvStorageClassFunction:
+      return ast::StorageClass::kFunction;
+    default:
+      break;
+  }
+
+  Fail() << "unknown SPIR-V storage class: " << uint32_t(sc);
+  return ast::StorageClass::kNone;
+}
+
 }  // namespace spirv
 }  // namespace reader
 }  // namespace tint
