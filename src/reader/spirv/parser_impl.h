@@ -173,6 +173,11 @@ class ParserImpl : Reader {
   /// @returns true if parser is still successful.
   bool EmitAliasTypes();
 
+  /// Emits module-scope variables.
+  /// This is a no-op if the parser has already failed.
+  /// @returns true if parser is still successful.
+  bool EmitModuleScopeVariables();
+
  private:
   /// Converts a specific SPIR-V type to a Tint type. Integer case
   ast::type::Type* ConvertType(const spvtools::opt::analysis::Integer* int_ty);

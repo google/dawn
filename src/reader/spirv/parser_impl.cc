@@ -14,6 +14,7 @@
 
 #include "src/reader/spirv/parser_impl.h"
 
+#include <cassert>
 #include <cstring>
 #include <limits>
 #include <memory>
@@ -44,6 +45,8 @@
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
+#include "src/ast/variable.h"
+#include "src/ast/variable_decl_statement.h"
 #include "src/type_manager.h"
 
 namespace tint {
@@ -288,6 +291,9 @@ bool ParserImpl::ParseInternalModule() {
     return false;
   }
   if (!EmitAliasTypes()) {
+    return false;
+  }
+  if (!EmitModuleScopeVariables()) {
     return false;
   }
   // TODO(dneto): fill in the rest
@@ -600,6 +606,41 @@ bool ParserImpl::EmitAliasTypes() {
     auto* ast_type = ctx_.type_mgr().Get(
         std::make_unique<ast::type::AliasType>(name, ast_underlying_type));
     ast_module_.AddAliasType(ast_type->AsAlias());
+  }
+  return success_;
+}
+
+bool ParserImpl::EmitModuleScopeVariables() {
+  if (!success_) {
+    return false;
+  }
+  for (const auto& type_or_value : module_->types_values()) {
+    if (type_or_value.opcode() != SpvOpVariable) {
+      continue;
+    }
+    const auto& var = type_or_value;
+    const auto spirv_storage_class = var.GetSingleWordInOperand(0);
+    auto ast_storage_class = enum_converter_.ToStorageClass(
+        static_cast<SpvStorageClass>(spirv_storage_class));
+    if (!success_) {
+      return false;
+    }
+    auto* ast_type = id_to_type_[var.type_id()];
+    if (ast_type == nullptr) {
+      return Fail() << "internal error: failed to register Tint AST type for "
+                       "SPIR-V type with ID: "
+                    << var.type_id();
+    }
+    auto* ast_store_type = ast_type->AsPointer()->type();
+    if (!namer_.HasName(var.result_id())) {
+      namer_.SuggestSanitizedName(var.result_id(),
+                                  "x_" + std::to_string(var.result_id()));
+    }
+    auto ast_var = std::make_unique<ast::Variable>(
+        namer_.GetName(var.result_id()), ast_storage_class, ast_store_type);
+    // TODO(dneto): decorated variables
+    // TODO(dneto): initializers (a.k.a. constructor expression)
+    ast_module_.AddGlobalVariable(std::move(ast_var));
   }
   return success_;
 }
