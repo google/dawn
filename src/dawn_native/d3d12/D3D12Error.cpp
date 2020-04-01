@@ -23,7 +23,12 @@ namespace dawn_native { namespace d3d12 {
         }
 
         std::string message = std::string(context) + " failed with " + std::to_string(result);
-        return DAWN_INTERNAL_ERROR(message);
+
+        if (result == DXGI_ERROR_DEVICE_REMOVED) {
+            return DAWN_DEVICE_LOST_ERROR(message);
+        } else {
+            return DAWN_INTERNAL_ERROR(message);
+        }
     }
 
     MaybeError CheckOutOfMemoryHRESULT(HRESULT result, const char* context) {
