@@ -32,7 +32,7 @@
             {"value": 0, "name": "discrete GPU"},
             {"value": 1, "name": "integrated GPU"},
             {"value": 2, "name": "CPU"},
-            {"value": 3, "name": "Unknown"}
+            {"value": 3, "name": "unknown"}
         ]
     },
     "address mode": {

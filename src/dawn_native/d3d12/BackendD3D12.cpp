@@ -61,7 +61,7 @@ namespace dawn_native { namespace d3d12 {
             }
 
             if (FAILED(functions->createDxgiFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory)))) {
-                return DAWN_DEVICE_LOST_ERROR("Failed to create a DXGI factory");
+                return DAWN_INTERNAL_ERROR("Failed to create a DXGI factory");
             }
 
             ASSERT(factory != nullptr);

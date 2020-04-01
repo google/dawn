@@ -43,7 +43,7 @@ namespace dawn_native { namespace metal {
             [mtlDevice newComputePipelineStateWithFunction:computeData.function error:&error];
         if (error != nil) {
             NSLog(@" error => %@", error);
-            return DAWN_DEVICE_LOST_ERROR("Error creating pipeline state");
+            return DAWN_INTERNAL_ERROR("Error creating pipeline state");
         }
 
         // Copy over the local workgroup size as it is passed to dispatch explicitly in Metal

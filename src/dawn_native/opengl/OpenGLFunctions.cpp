@@ -22,7 +22,7 @@ namespace dawn_native { namespace opengl {
     MaybeError OpenGLFunctions::Initialize(GetProcAddress getProc) {
         PFNGLGETSTRINGPROC getString = reinterpret_cast<PFNGLGETSTRINGPROC>(getProc("glGetString"));
         if (getString == nullptr) {
-            return DAWN_DEVICE_LOST_ERROR("Couldn't load glGetString");
+            return DAWN_INTERNAL_ERROR("Couldn't load glGetString");
         }
 
         std::string version = reinterpret_cast<const char*>(getString(GL_VERSION));

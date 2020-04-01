@@ -49,8 +49,7 @@ namespace dawn_native {
         };
         void AppendBacktrace(const char* file, const char* function, int line);
 
-        InternalErrorType GetInternalType() const;
-        wgpu::ErrorType GetType() const;
+        InternalErrorType GetType() const;
         const std::string& GetMessage() const;
         const std::vector<BacktraceRecord>& GetBacktrace() const;
 

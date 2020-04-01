@@ -18,10 +18,43 @@
 #include "dawn_native/dawn_platform.h"
 
 namespace dawn_native {
+
     void AssertAndIgnoreDeviceLossError(MaybeError maybeError) {
         if (maybeError.IsError()) {
             std::unique_ptr<ErrorData> errorData = maybeError.AcquireError();
-            ASSERT(errorData->GetType() == wgpu::ErrorType::DeviceLost);
+            ASSERT(errorData->GetType() == InternalErrorType::DeviceLost);
         }
     }
+
+    wgpu::ErrorType ToWGPUErrorType(InternalErrorType type) {
+        switch (type) {
+            case InternalErrorType::Validation:
+                return wgpu::ErrorType::Validation;
+            case InternalErrorType::OutOfMemory:
+                return wgpu::ErrorType::OutOfMemory;
+
+            // There is no equivalent of Internal errors in the WebGPU API. Internal errors cause
+            // the device at the API level to be lost, so treat it like a DeviceLost error.
+            case InternalErrorType::Internal:
+            case InternalErrorType::DeviceLost:
+                return wgpu::ErrorType::DeviceLost;
+
+            default:
+                return wgpu::ErrorType::Unknown;
+        }
+    }
+
+    InternalErrorType FromWGPUErrorType(wgpu::ErrorType type) {
+        switch (type) {
+            case wgpu::ErrorType::Validation:
+                return InternalErrorType::Validation;
+            case wgpu::ErrorType::OutOfMemory:
+                return InternalErrorType::OutOfMemory;
+            case wgpu::ErrorType::DeviceLost:
+                return InternalErrorType::DeviceLost;
+            default:
+                return InternalErrorType::Internal;
+        }
+    }
+
 }  // namespace dawn_native

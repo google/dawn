@@ -52,7 +52,7 @@ namespace dawn_native { namespace vulkan {
 
         mMappedPointer = mAllocation.GetMappedPointer();
         if (mMappedPointer == nullptr) {
-            return DAWN_DEVICE_LOST_ERROR("Unable to map staging buffer.");
+            return DAWN_INTERNAL_ERROR("Unable to map staging buffer.");
         }
 
         return {};

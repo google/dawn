@@ -36,7 +36,7 @@ namespace dawn_native { namespace opengl {
         DawnSwapChainNextTexture next = {};
         DawnSwapChainError error = im.GetNextTexture(im.userData, &next);
         if (error) {
-            GetDevice()->HandleError(wgpu::ErrorType::Unknown, error);
+            GetDevice()->HandleError(InternalErrorType::Internal, error);
             return nullptr;
         }
         GLuint nativeTexture = next.texture.u32;

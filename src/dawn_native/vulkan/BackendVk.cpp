@@ -86,7 +86,7 @@ namespace dawn_native { namespace vulkan {
         if (GetInstance()->IsBackendValidationEnabled()) {
             std::string vkDataDir = GetExecutableDirectory() + DAWN_VK_DATA_DIR;
             if (!SetEnvironmentVar("VK_LAYER_PATH", vkDataDir.c_str())) {
-                return DAWN_DEVICE_LOST_ERROR("Couldn't set VK_LAYER_PATH");
+                return DAWN_INTERNAL_ERROR("Couldn't set VK_LAYER_PATH");
             }
         }
 #endif
@@ -94,7 +94,7 @@ namespace dawn_native { namespace vulkan {
         std::string fullSwiftshaderICDPath =
             GetExecutableDirectory() + DAWN_SWIFTSHADER_VK_ICD_JSON;
         if (!SetEnvironmentVar("VK_ICD_FILENAMES", fullSwiftshaderICDPath.c_str())) {
-            return DAWN_DEVICE_LOST_ERROR("Couldn't set VK_ICD_FILENAMES");
+            return DAWN_INTERNAL_ERROR("Couldn't set VK_ICD_FILENAMES");
         }
 #endif
 
@@ -112,7 +112,7 @@ namespace dawn_native { namespace vulkan {
         }
 #endif
 
-        return DAWN_DEVICE_LOST_ERROR("Couldn't load Vulkan");
+        return DAWN_INTERNAL_ERROR("Couldn't load Vulkan");
     }
 
     MaybeError Backend::Initialize() {

@@ -45,7 +45,7 @@ namespace dawn_native { namespace d3d12 {
                                "D3D12SerializeVersionedRootSignature", &error) ||
             !mD3D12Lib.GetProc(&d3d12CreateVersionedRootSignatureDeserializer,
                                "D3D12CreateVersionedRootSignatureDeserializer", &error)) {
-            return DAWN_DEVICE_LOST_ERROR(error.c_str());
+            return DAWN_INTERNAL_ERROR(error.c_str());
         }
 
         return {};
@@ -55,7 +55,7 @@ namespace dawn_native { namespace d3d12 {
         std::string error;
         if (!mD3D11Lib.Open("d3d11.dll", &error) ||
             !mD3D11Lib.GetProc(&d3d11on12CreateDevice, "D3D11On12CreateDevice", &error)) {
-            return DAWN_DEVICE_LOST_ERROR(error.c_str());
+            return DAWN_INTERNAL_ERROR(error.c_str());
         }
 
         return {};
@@ -66,7 +66,7 @@ namespace dawn_native { namespace d3d12 {
         if (!mDXGILib.Open("dxgi.dll", &error) ||
             !mDXGILib.GetProc(&dxgiGetDebugInterface1, "DXGIGetDebugInterface1", &error) ||
             !mDXGILib.GetProc(&createDxgiFactory2, "CreateDXGIFactory2", &error)) {
-            return DAWN_DEVICE_LOST_ERROR(error.c_str());
+            return DAWN_INTERNAL_ERROR(error.c_str());
         }
 
         return {};
@@ -76,7 +76,7 @@ namespace dawn_native { namespace d3d12 {
         std::string error;
         if (!mD3DCompilerLib.Open("d3dcompiler_47.dll", &error) ||
             !mD3DCompilerLib.GetProc(&d3dCompile, "D3DCompile", &error)) {
-            return DAWN_DEVICE_LOST_ERROR(error.c_str());
+            return DAWN_INTERNAL_ERROR(error.c_str());
         }
 
         return {};

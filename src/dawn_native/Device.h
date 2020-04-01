@@ -44,7 +44,7 @@ namespace dawn_native {
         DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor);
         virtual ~DeviceBase();
 
-        void HandleError(wgpu::ErrorType type, const char* message);
+        void HandleError(InternalErrorType type, const char* message);
 
         bool ConsumedError(MaybeError maybeError) {
             if (DAWN_UNLIKELY(maybeError.IsError())) {

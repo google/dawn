@@ -93,7 +93,7 @@ namespace dawn_native { namespace vulkan {
             // incomplete otherwise. This means that both values represent a success.
             // This is the same for all Enumarte functions
             if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
-                return DAWN_DEVICE_LOST_ERROR("vkEnumerateInstanceLayerProperties");
+                return DAWN_INTERNAL_ERROR("vkEnumerateInstanceLayerProperties");
             }
 
             info.layers.resize(count);
@@ -123,7 +123,7 @@ namespace dawn_native { namespace vulkan {
         // Gather the info about the instance extensions
         {
             if (!EnumerateInstanceExtensions(nullptr, vkFunctions, &info.extensions)) {
-                return DAWN_DEVICE_LOST_ERROR("vkEnumerateInstanceExtensionProperties");
+                return DAWN_INTERNAL_ERROR("vkEnumerateInstanceExtensionProperties");
             }
 
             for (const auto& extension : info.extensions) {
@@ -169,7 +169,7 @@ namespace dawn_native { namespace vulkan {
             std::vector<VkExtensionProperties> layer_extensions;
             if (!EnumerateInstanceExtensions(kLayerNameFuchsiaImagePipeSwapchain, vkFunctions,
                                              &layer_extensions)) {
-                return DAWN_DEVICE_LOST_ERROR("vkEnumerateInstanceExtensionProperties");
+                return DAWN_INTERNAL_ERROR("vkEnumerateInstanceExtensionProperties");
             }
 
             for (const auto& extension : layer_extensions) {
@@ -207,7 +207,7 @@ namespace dawn_native { namespace vulkan {
         VkResult result =
             VkResult::WrapUnsafe(vkFunctions.EnumeratePhysicalDevices(instance, &count, nullptr));
         if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
-            return DAWN_DEVICE_LOST_ERROR("vkEnumeratePhysicalDevices");
+            return DAWN_INTERNAL_ERROR("vkEnumeratePhysicalDevices");
         }
 
         std::vector<VkPhysicalDevice> physicalDevices(count);
@@ -254,7 +254,7 @@ namespace dawn_native { namespace vulkan {
             VkResult result = VkResult::WrapUnsafe(
                 vkFunctions.EnumerateDeviceLayerProperties(physicalDevice, &count, nullptr));
             if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
-                return DAWN_DEVICE_LOST_ERROR("vkEnumerateDeviceLayerProperties");
+                return DAWN_INTERNAL_ERROR("vkEnumerateDeviceLayerProperties");
             }
 
             info.layers.resize(count);
@@ -269,7 +269,7 @@ namespace dawn_native { namespace vulkan {
             VkResult result = VkResult::WrapUnsafe(vkFunctions.EnumerateDeviceExtensionProperties(
                 physicalDevice, nullptr, &count, nullptr));
             if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
-                return DAWN_DEVICE_LOST_ERROR("vkEnumerateDeviceExtensionProperties");
+                return DAWN_INTERNAL_ERROR("vkEnumerateDeviceExtensionProperties");
             }
 
             info.extensions.resize(count);
@@ -357,7 +357,7 @@ namespace dawn_native { namespace vulkan {
             VkResult result = VkResult::WrapUnsafe(vkFunctions.GetPhysicalDeviceSurfaceFormatsKHR(
                 physicalDevice, surface, &count, nullptr));
             if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
-                return DAWN_DEVICE_LOST_ERROR("vkGetPhysicalDeviceSurfaceFormatsKHR");
+                return DAWN_INTERNAL_ERROR("vkGetPhysicalDeviceSurfaceFormatsKHR");
             }
 
             info.formats.resize(count);
@@ -373,7 +373,7 @@ namespace dawn_native { namespace vulkan {
                 VkResult::WrapUnsafe(vkFunctions.GetPhysicalDeviceSurfacePresentModesKHR(
                     physicalDevice, surface, &count, nullptr));
             if (result != VK_SUCCESS && result != VK_INCOMPLETE) {
-                return DAWN_DEVICE_LOST_ERROR("vkGetPhysicalDeviceSurfacePresentModesKHR");
+                return DAWN_INTERNAL_ERROR("vkGetPhysicalDeviceSurfacePresentModesKHR");
             }
 
             info.presentModes.resize(count);

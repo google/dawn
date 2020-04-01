@@ -43,7 +43,7 @@ namespace dawn_native { namespace vulkan {
         DawnSwapChainError error = im.GetNextTexture(im.userData, &next);
 
         if (error) {
-            GetDevice()->HandleError(wgpu::ErrorType::Unknown, error);
+            GetDevice()->HandleError(InternalErrorType::Internal, error);
             return nullptr;
         }
 
