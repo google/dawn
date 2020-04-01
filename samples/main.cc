@@ -224,9 +224,11 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
   tools.SetMessageConsumer(msg_consumer);
 
   std::string result;
-  tools.Disassemble(data, &result,
-                    SPV_BINARY_TO_TEXT_OPTION_INDENT |
-                        SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES);
+  if (!tools.Disassemble(data, &result,
+                         SPV_BINARY_TO_TEXT_OPTION_INDENT |
+                             SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES)) {
+    std::cerr << spv_errors << std::endl;
+  }
   return result;
 }
 #endif  // TINT_BUILD_SPV_WRITER

@@ -231,6 +231,8 @@ if(${TINT_BUILD_SPV_WRITER})
     writer/spirv/binary_writer.h
     writer/spirv/builder.cc
     writer/spirv/builder.h
+    writer/spirv/function.cc
+    writer/spirv/function.h
     writer/spirv/generator.cc
     writer/spirv/generator.h
     writer/spirv/instruction.cc
@@ -416,6 +418,7 @@ if(${TINT_BUILD_SPV_WRITER})
     writer/spirv/builder_constructor_expression_test.cc
     writer/spirv/builder_entry_point_test.cc
     writer/spirv/builder_function_test.cc
+    writer/spirv/builder_function_variable_test.cc
     writer/spirv/builder_global_variable_test.cc
     writer/spirv/builder_literal_test.cc
     writer/spirv/builder_return_test.cc

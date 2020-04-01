@@ -39,6 +39,7 @@
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
+#include "src/ast/variable_decl_statement.h"
 
 namespace tint {
 namespace writer {
@@ -125,7 +126,9 @@ uint32_t Builder::total_size() const {
   size += size_of(debug_);
   size += size_of(annotations_);
   size += size_of(types_);
-  size += size_of(instructions_);
+  for (const auto& func : functions_) {
+    size += func.word_length();
+  }
 
   return size;
 }
@@ -143,8 +146,8 @@ void Builder::iterate(std::function<void(const Instruction&)> cb) const {
   for (const auto& inst : types_) {
     cb(inst);
   }
-  for (const auto& inst : instructions_) {
-    cb(inst);
+  for (const auto& func : functions_) {
+    func.iterate(cb);
   }
 }
 
@@ -199,18 +202,19 @@ bool Builder::GenerateFunction(ast::Function* func) {
   }
 
   // TODO(dsinclair): Handle parameters
-  push_inst(spv::Op::OpFunction, {Operand::Int(ret_id), func_op,
-                                  Operand::Int(SpvFunctionControlMaskNone),
-                                  Operand::Int(func_type_id)});
-  push_inst(spv::Op::OpLabel, {result_op()});
+
+  auto definition_inst = Instruction{
+      spv::Op::OpFunction,
+      {Operand::Int(ret_id), func_op, Operand::Int(SpvFunctionControlMaskNone),
+       Operand::Int(func_type_id)}};
+  std::vector<Instruction> params;
+  push_function(Function{definition_inst, result_op(), std::move(params)});
 
   for (const auto& stmt : func->body()) {
     if (!GenerateStatement(stmt.get())) {
       return false;
     }
   }
-
-  push_inst(spv::Op::OpFunctionEnd, {});
 
   func_name_to_id_[func->name()] = func_id;
   return true;
@@ -235,6 +239,52 @@ uint32_t Builder::GenerateFunctionTypeIfNeeded(ast::Function* func) {
 
   type_name_to_id_[func->type_name()] = func_type_id;
   return func_type_id;
+}
+
+bool Builder::GenerateFunctionVariable(ast::Variable* var) {
+  uint32_t init_id = 0;
+  if (var->has_constructor()) {
+    init_id = GenerateExpression(var->constructor());
+    if (init_id == 0) {
+      return false;
+    }
+  }
+
+  if (var->is_const()) {
+    if (!var->has_constructor()) {
+      error_ = "missing constructor for constant";
+      return false;
+    }
+
+    // TODO(dsinclair): Store variable name to id
+    return true;
+  }
+
+  auto result = result_op();
+  auto var_id = result.to_i();
+  auto sc = ast::StorageClass::kFunction;
+  ast::type::PointerType pt(var->type(), sc);
+  auto type_id = GenerateTypeIfNeeded(&pt);
+  if (type_id == 0) {
+    return false;
+  }
+
+  push_debug(spv::Op::OpName,
+             {Operand::Int(var_id), Operand::String(var->name())});
+
+  // TODO(dsinclair) We could detect if the constructor is fully const and emit
+  // an initializer value for the variable instead of doing the OpLoad.
+
+  push_function_var(
+      {Operand::Int(type_id), result, Operand::Int(ConvertStorageClass(sc))});
+  if (var->has_constructor()) {
+    push_function_inst(spv::Op::OpStore,
+                       {Operand::Int(var_id), Operand::Int(init_id)});
+  }
+
+  // TODO(dsinclair) Mapping of variable name to id
+
+  return true;
 }
 
 bool Builder::GenerateGlobalVariable(ast::Variable* var) {
@@ -344,10 +394,14 @@ uint32_t Builder::GenerateConstructorExpression(
     out << "__const";
 
     std::vector<Operand> ops;
+    bool constructor_is_const = true;
     for (const auto& e : init->values()) {
-      if (is_global_init && !e->IsConstructor()) {
-        error_ = "constructor must be a constant expression";
-        return 0;
+      if (!e->IsConstructor()) {
+        if (is_global_init) {
+          error_ = "constructor must be a constant expression";
+          return 0;
+        }
+        constructor_is_const = false;
       }
       auto id =
           GenerateConstructorExpression(e->AsConstructor(), is_global_init);
@@ -371,9 +425,11 @@ uint32_t Builder::GenerateConstructorExpression(
 
     const_to_id_[str] = result.to_i();
 
-    // TODO(dsinclair) For non-global constant's this should be
-    // in the instructions and ben an OpCompositeConstruct call.
-    push_type(spv::Op::OpConstantComposite, ops);
+    if (constructor_is_const) {
+      push_type(spv::Op::OpConstantComposite, ops);
+    } else {
+      push_function_inst(spv::Op::OpCompositeConstruct, ops);
+    }
     return result.to_i();
   }
 
@@ -425,9 +481,9 @@ bool Builder::GenerateReturnStatement(ast::ReturnStatement* stmt) {
     if (val_id == 0) {
       return false;
     }
-    push_inst(spv::Op::OpReturnValue, {Operand::Int(val_id)});
+    push_function_inst(spv::Op::OpReturnValue, {Operand::Int(val_id)});
   } else {
-    push_inst(spv::Op::OpReturn, {});
+    push_function_inst(spv::Op::OpReturn, {});
   }
 
   return true;
@@ -437,9 +493,16 @@ bool Builder::GenerateStatement(ast::Statement* stmt) {
   if (stmt->IsReturn()) {
     return GenerateReturnStatement(stmt->AsReturn());
   }
+  if (stmt->IsVariableDecl()) {
+    return GenerateVariableDeclStatement(stmt->AsVariableDecl());
+  }
 
   error_ = "Unknown statement";
   return false;
+}
+
+bool Builder::GenerateVariableDeclStatement(ast::VariableDeclStatement* stmt) {
+  return GenerateFunctionVariable(stmt->variable());
 }
 
 uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {

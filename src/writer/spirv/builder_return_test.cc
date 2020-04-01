@@ -35,10 +35,11 @@ TEST_F(BuilderTest, Return) {
   ast::ReturnStatement ret;
 
   Builder b;
+  b.push_function(Function{});
   EXPECT_TRUE(b.GenerateReturnStatement(&ret));
   ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.instructions()), R"(OpReturn
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpReturn
 )");
 }
 
@@ -60,6 +61,7 @@ TEST_F(BuilderTest, Return_WithValue) {
   ast::ReturnStatement ret(std::move(val));
 
   Builder b;
+  b.push_function(Function{});
   EXPECT_TRUE(b.GenerateReturnStatement(&ret));
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -69,7 +71,8 @@ TEST_F(BuilderTest, Return_WithValue) {
 %4 = OpConstant %2 3
 %5 = OpConstantComposite %1 %3 %3 %4
 )");
-  EXPECT_EQ(DumpInstructions(b.instructions()), R"(OpReturnValue %5
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpReturnValue %5
 )");
 }
 

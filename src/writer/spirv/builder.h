@@ -25,6 +25,7 @@
 #include "src/ast/literal.h"
 #include "src/ast/module.h"
 #include "src/ast/struct_member.h"
+#include "src/writer/spirv/function.h"
 #include "src/writer/spirv/instruction.h"
 
 namespace tint {
@@ -107,14 +108,6 @@ class Builder {
   }
   /// @returns the type instructions
   const std::vector<Instruction>& types() const { return types_; }
-  /// Adds an instruction to the instruction list
-  /// @param op the op to set
-  /// @param operands the operands for the instruction
-  void push_inst(spv::Op op, const std::vector<Operand>& operands) {
-    instructions_.push_back(Instruction{op, operands});
-  }
-  /// @returns the instruction list
-  const std::vector<Instruction>& instructions() const { return instructions_; }
   /// Adds an instruction to the annotations
   /// @param op the op to set
   /// @param operands the operands for the instruction
@@ -123,6 +116,23 @@ class Builder {
   }
   /// @returns the annotations
   const std::vector<Instruction>& annots() const { return annotations_; }
+
+  /// Adds a function to the builder
+  /// @param func the function to add
+  void push_function(const Function& func) { functions_.push_back(func); }
+  /// @returns the functions
+  const std::vector<Function>& functions() const { return functions_; }
+  /// Pushes an instruction to the current function
+  /// @param op the operation
+  /// @param operands the operands
+  void push_function_inst(spv::Op op, const std::vector<Operand>& operands) {
+    functions_.back().push_inst(op, operands);
+  }
+  /// Pushes a variable to the current function
+  /// @param operands the variable operands
+  void push_function_var(const std::vector<Operand>& operands) {
+    functions_.back().push_var(operands);
+  }
 
   /// Converts a storage class to a SPIR-V storage class.
   /// @param klass the storage class to convert
@@ -149,6 +159,10 @@ class Builder {
   /// @param func the function to generate for
   /// @returns the ID to use for the function type. Returns 0 on failure.
   uint32_t GenerateFunctionTypeIfNeeded(ast::Function* func);
+  /// Generates a function variable
+  /// @param var the variable
+  /// @returns true if the variable was generated
+  bool GenerateFunctionVariable(ast::Variable* var);
   /// Generates a global variable
   /// @param var the variable to generate
   /// @returns true if the variable is emited.
@@ -199,11 +213,6 @@ class Builder {
   /// @returns true if the vector was successfully generated
   bool GenerateStructType(ast::type::StructType* struct_type,
                           const Operand& result);
-  /// Generates a vector type declaration
-  /// @param vec the vector to generate
-  /// @param result the result operand
-  /// @returns true if the vector was successfully generated
-  bool GenerateVectorType(ast::type::VectorType* vec, const Operand& result);
   /// Generates a struct member
   /// @param struct_id the id of the parent structure
   /// @param idx the index of the member
@@ -212,6 +221,15 @@ class Builder {
   uint32_t GenerateStructMember(uint32_t struct_id,
                                 uint32_t idx,
                                 ast::StructMember* member);
+  /// Generates a variable declaration statement
+  /// @param stmt the statement to generate
+  /// @returns true on successfull generation
+  bool GenerateVariableDeclStatement(ast::VariableDeclStatement* stmt);
+  /// Generates a vector type declaration
+  /// @param vec the vector to generate
+  /// @param result the result operand
+  /// @returns true if the vector was successfully generated
+  bool GenerateVectorType(ast::type::VectorType* vec, const Operand& result);
 
  private:
   /// @returns an Operand with a new result ID in it. Increments the next_id_
@@ -223,8 +241,8 @@ class Builder {
   std::vector<Instruction> preamble_;
   std::vector<Instruction> debug_;
   std::vector<Instruction> types_;
-  std::vector<Instruction> instructions_;
   std::vector<Instruction> annotations_;
+  std::vector<Function> functions_;
 
   std::unordered_map<std::string, uint32_t> import_name_to_id_;
   std::unordered_map<std::string, uint32_t> func_name_to_id_;
