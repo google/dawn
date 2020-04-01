@@ -20,7 +20,9 @@
 #include "src/ast/struct.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/pointer_type.h"
 #include "src/ast/type/struct_type.h"
+#include "src/ast/type/type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/reader/spirv/parser_impl.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
@@ -484,10 +486,221 @@ TEST_F(SpvParserTest, ConvertType_StructWithMemberDecorations) {
 )"));
 }
 
-// TODO(dneto): Demonstrate other member deocrations. Blocked on
+// TODO(dneto): Demonstrate other member decorations. Blocked on
 // crbug.com/tint/30
 // TODO(dneto): Demonstrate multiple member deocrations. Blocked on
 // crbug.com/tint/30
+
+TEST_F(SpvParserTest, ConvertType_InvalidPointeetype) {
+  // Disallow pointer-to-function
+  auto p = parser(test::Assemble(R"(
+  %void = OpTypeVoid
+  %42 = OpTypeFunction %void
+  %3 = OpTypePointer Input %42
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule()) << p->error();
+
+  auto* type = p->ConvertType(3);
+  EXPECT_EQ(type, nullptr);
+  EXPECT_THAT(p->error(),
+              Eq("SPIR-V pointer type with ID 3 has invalid pointee type 42"));
+}
+
+TEST_F(SpvParserTest, DISABLED_ConvertType_InvalidStorageClass) {
+  // Disallow invalid storage class
+  auto p = parser(test::Assemble(R"(
+  %1 = OpTypeFloat 32
+  %3 = OpTypePointer !999 %1   ; Special syntax to inject 999 as the storage class
+  )"));
+  // TODO(dneto): I can't get it past module building.
+  EXPECT_FALSE(p->BuildInternalModule()) << p->error();
+}
+
+TEST_F(SpvParserTest, ConvertType_PointerInput) {
+  auto p = parser(test::Assemble(R"(
+  %float = OpTypeFloat 32
+  %3 = OpTypePointer Input %float
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+
+  auto* type = p->ConvertType(3);
+  EXPECT_TRUE(type->IsPointer());
+  auto* ptr_ty = type->AsPointer();
+  EXPECT_NE(ptr_ty, nullptr);
+  EXPECT_TRUE(ptr_ty->type()->IsF32());
+  EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kInput);
+  EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, ConvertType_PointerOutput) {
+  auto p = parser(test::Assemble(R"(
+  %float = OpTypeFloat 32
+  %3 = OpTypePointer Output %float
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+
+  auto* type = p->ConvertType(3);
+  EXPECT_TRUE(type->IsPointer());
+  auto* ptr_ty = type->AsPointer();
+  EXPECT_NE(ptr_ty, nullptr);
+  EXPECT_TRUE(ptr_ty->type()->IsF32());
+  EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kOutput);
+  EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, ConvertType_PointerUniform) {
+  auto p = parser(test::Assemble(R"(
+  %float = OpTypeFloat 32
+  %3 = OpTypePointer Uniform %float
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+
+  auto* type = p->ConvertType(3);
+  EXPECT_TRUE(type->IsPointer());
+  auto* ptr_ty = type->AsPointer();
+  EXPECT_NE(ptr_ty, nullptr);
+  EXPECT_TRUE(ptr_ty->type()->IsF32());
+  EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kUniform);
+  EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, ConvertType_PointerWorkgroup) {
+  auto p = parser(test::Assemble(R"(
+  %float = OpTypeFloat 32
+  %3 = OpTypePointer Workgroup %float
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+
+  auto* type = p->ConvertType(3);
+  EXPECT_TRUE(type->IsPointer());
+  auto* ptr_ty = type->AsPointer();
+  EXPECT_NE(ptr_ty, nullptr);
+  EXPECT_TRUE(ptr_ty->type()->IsF32());
+  EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kWorkgroup);
+  EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, ConvertType_PointerUniformConstant) {
+  auto p = parser(test::Assemble(R"(
+  %float = OpTypeFloat 32
+  %3 = OpTypePointer UniformConstant %float
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+
+  auto* type = p->ConvertType(3);
+  EXPECT_TRUE(type->IsPointer());
+  auto* ptr_ty = type->AsPointer();
+  EXPECT_NE(ptr_ty, nullptr);
+  EXPECT_TRUE(ptr_ty->type()->IsF32());
+  EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kUniformConstant);
+  EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, ConvertType_PointerStorageBuffer) {
+  auto p = parser(test::Assemble(R"(
+  %float = OpTypeFloat 32
+  %3 = OpTypePointer StorageBuffer %float
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+
+  auto* type = p->ConvertType(3);
+  EXPECT_TRUE(type->IsPointer());
+  auto* ptr_ty = type->AsPointer();
+  EXPECT_NE(ptr_ty, nullptr);
+  EXPECT_TRUE(ptr_ty->type()->IsF32());
+  EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kStorageBuffer);
+  EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, ConvertType_PointerImage) {
+  auto p = parser(test::Assemble(R"(
+  %float = OpTypeFloat 32
+  %3 = OpTypePointer Image %float
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+
+  auto* type = p->ConvertType(3);
+  EXPECT_TRUE(type->IsPointer());
+  auto* ptr_ty = type->AsPointer();
+  EXPECT_NE(ptr_ty, nullptr);
+  EXPECT_TRUE(ptr_ty->type()->IsF32());
+  EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kImage);
+  EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, ConvertType_PointerPushConstant) {
+  auto p = parser(test::Assemble(R"(
+  %float = OpTypeFloat 32
+  %3 = OpTypePointer PushConstant %float
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+
+  auto* type = p->ConvertType(3);
+  EXPECT_TRUE(type->IsPointer());
+  auto* ptr_ty = type->AsPointer();
+  EXPECT_NE(ptr_ty, nullptr);
+  EXPECT_TRUE(ptr_ty->type()->IsF32());
+  EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kPushConstant);
+  EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, ConvertType_PointerPrivate) {
+  auto p = parser(test::Assemble(R"(
+  %float = OpTypeFloat 32
+  %3 = OpTypePointer Private %float
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+
+  auto* type = p->ConvertType(3);
+  EXPECT_TRUE(type->IsPointer());
+  auto* ptr_ty = type->AsPointer();
+  EXPECT_NE(ptr_ty, nullptr);
+  EXPECT_TRUE(ptr_ty->type()->IsF32());
+  EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kPrivate);
+  EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, ConvertType_PointerFunction) {
+  auto p = parser(test::Assemble(R"(
+  %float = OpTypeFloat 32
+  %3 = OpTypePointer Function %float
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+
+  auto* type = p->ConvertType(3);
+  EXPECT_TRUE(type->IsPointer());
+  auto* ptr_ty = type->AsPointer();
+  EXPECT_NE(ptr_ty, nullptr);
+  EXPECT_TRUE(ptr_ty->type()->IsF32());
+  EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kFunction);
+  EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, ConvertType_PointerToPointer) {
+  // FYI:  The reader suports pointer-to-pointer even while WebGPU does not.
+  auto p = parser(test::Assemble(R"(
+  %float = OpTypeFloat 32
+  %42 = OpTypePointer Output %float
+  %3 = OpTypePointer Input %42
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+
+  auto* type = p->ConvertType(3);
+  EXPECT_NE(type, nullptr);
+  EXPECT_TRUE(type->IsPointer());
+
+  auto* ptr_ty = type->AsPointer();
+  EXPECT_NE(ptr_ty, nullptr);
+  EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kInput);
+  EXPECT_TRUE(ptr_ty->type()->IsPointer());
+
+  auto* ptr_ptr_ty = ptr_ty->type()->AsPointer();
+  EXPECT_NE(ptr_ptr_ty, nullptr);
+  EXPECT_EQ(ptr_ptr_ty->storage_class(), ast::StorageClass::kOutput);
+  EXPECT_TRUE(ptr_ptr_ty->type()->IsF32());
+
+  EXPECT_TRUE(p->error().empty());
+}
 
 }  // namespace
 }  // namespace spirv

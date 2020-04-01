@@ -38,6 +38,7 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/pointer_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/type.h"
 #include "src/ast/type/u32_type.h"
@@ -164,10 +165,10 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
       return save(ConvertType(spirv_type->AsArray()));
     case spvtools::opt::analysis::Type::kStruct:
       return save(ConvertType(spirv_type->AsStruct()));
-    case spvtools::opt::analysis::Type::kFunction:
     case spvtools::opt::analysis::Type::kPointer:
-      // For now, just return null without erroring out.
-      // TODO(dneto)
+      return save(ConvertType(spirv_type->AsPointer()));
+    case spvtools::opt::analysis::Type::kFunction:
+      // TODO(dneto). For now return null without erroring out.
       return nullptr;
     default:
       break;
@@ -518,6 +519,27 @@ ast::type::Type* ParserImpl::ConvertType(
   namer_.SuggestSanitizedName(type_id, "S");
   ast_struct_type->set_name(namer_.GetName(type_id));
   return ctx_.type_mgr().Get(std::move(ast_struct_type));
+}
+
+ast::type::Type* ParserImpl::ConvertType(
+    const spvtools::opt::analysis::Pointer* ptr_ty) {
+  auto* ast_elem_ty = ConvertType(type_mgr_->GetId(ptr_ty->pointee_type()));
+  if (ast_elem_ty == nullptr) {
+    Fail() << "SPIR-V pointer type with ID " << type_mgr_->GetId(ptr_ty)
+           << " has invalid pointee type "
+           << type_mgr_->GetId(ptr_ty->pointee_type());
+    return nullptr;
+  }
+  auto ast_storage_class =
+      enum_converter_.ToStorageClass(ptr_ty->storage_class());
+  if (ast_storage_class == ast::StorageClass::kNone) {
+    Fail() << "SPIR-V pointer type with ID " << type_mgr_->GetId(ptr_ty)
+           << " has invalid storage class "
+           << static_cast<uint32_t>(ptr_ty->storage_class());
+    return nullptr;
+  }
+  return ctx_.type_mgr().Get(
+      std::make_unique<ast::type::PointerType>(ast_elem_ty, ast_storage_class));
 }
 
 bool ParserImpl::RegisterTypes() {

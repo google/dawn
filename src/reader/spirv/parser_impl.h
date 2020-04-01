@@ -190,6 +190,8 @@ class ParserImpl : Reader {
   /// Converts a specific SPIR-V type to a Tint type. Struct case
   ast::type::Type* ConvertType(
       const spvtools::opt::analysis::Struct* struct_ty);
+  /// Converts a specific SPIR-V type to a Tint type. Pointer case
+  ast::type::Type* ConvertType(const spvtools::opt::analysis::Pointer* ptr_ty);
 
   // The SPIR-V binary we're parsing
   std::vector<uint32_t> spv_binary_;
