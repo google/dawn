@@ -28,6 +28,8 @@
 #include "source/opt/type_manager.h"
 #include "source/opt/types.h"
 #include "spirv-tools/libspirv.hpp"
+#include "src/ast/builtin_decoration.h"
+#include "src/ast/decorated_variable.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_decoration.h"
 #include "src/ast/struct_member.h"
@@ -47,6 +49,7 @@
 #include "src/ast/type/void_type.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/ast/variable_decoration.h"
 #include "src/type_manager.h"
 
 namespace tint {
@@ -638,7 +641,34 @@ bool ParserImpl::EmitModuleScopeVariables() {
     }
     auto ast_var = std::make_unique<ast::Variable>(
         namer_.GetName(var.result_id()), ast_storage_class, ast_store_type);
-    // TODO(dneto): decorated variables
+
+    std::vector<std::unique_ptr<ast::VariableDecoration>> ast_decorations;
+    for (auto& deco : GetDecorationsFor(var.result_id())) {
+      if (deco.empty()) {
+        return Fail() << "malformed decoration on ID " << var.result_id()
+                      << ": it is empty";
+      }
+      if (deco[0] == SpvDecorationBuiltIn) {
+        if (deco.size() == 1) {
+          return Fail() << "malformed BuiltIn decoration on ID "
+                        << var.result_id() << ": has no operand";
+        }
+        auto ast_builtin =
+            enum_converter_.ToBuiltin(static_cast<SpvBuiltIn>(deco[1]));
+        if (ast_builtin == ast::Builtin::kNone) {
+          return false;
+        }
+        ast_decorations.emplace_back(
+            std::make_unique<ast::BuiltinDecoration>(ast_builtin));
+      }
+    }
+    if (!ast_decorations.empty()) {
+      auto decorated_var =
+          std::make_unique<ast::DecoratedVariable>(std::move(ast_var));
+      decorated_var->set_decorations(std::move(ast_decorations));
+      ast_var = std::move(decorated_var);
+    }
+
     // TODO(dneto): initializers (a.k.a. constructor expression)
     ast_module_.AddGlobalVariable(std::move(ast_var));
   }

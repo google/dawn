@@ -121,6 +121,28 @@ TEST_F(SpvParserTest, ModuleScopeVar_PrivateVar) {
   })"));
 }
 
+TEST_F(SpvParserTest, ModuleScopeVar_BuiltinVerteIndex) {
+  auto p = parser(test::Assemble(R"(
+    OpDecorate %52 BuiltIn VertexIndex
+    %uint = OpTypeInt 32 0
+    %ptr = OpTypePointer Input %uint
+    %52 = OpVariable %ptr Input
+  )"));
+
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  DecoratedVariable{
+    Decorations{
+      BuiltinDecoration{vertex_idx}
+    }
+    x_52
+    in
+    __u32
+  })"));
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader
