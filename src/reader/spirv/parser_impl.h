@@ -178,7 +178,26 @@ class ParserImpl : Reader {
   /// @returns true if parser is still successful.
   bool EmitModuleScopeVariables();
 
+  /// Emits functions, with callees preceding their callers.
+  /// This is a no-op if the parser has already failed.
+  /// @returns true if parser is still successful.
+  bool EmitFunctions();
+
+  /// Emits a single function, if it has a body.
+  /// This is a no-op if the parser has already failed.
+  /// @param f the function to emit
+  /// @returns true if parser is still successful.
+  bool EmitFunction(const spvtools::opt::Function& f);
+
  private:
+  /// @returns a name for the given ID. Generates a name if non exists.
+  std::string Name(uint32_t id) {
+    if (!namer_.HasName(id)) {
+      namer_.SuggestSanitizedName(id, "x_" + std::to_string(id));
+    }
+    return namer_.GetName(id);
+  }
+
   /// Converts a specific SPIR-V type to a Tint type. Integer case
   ast::type::Type* ConvertType(const spvtools::opt::analysis::Integer* int_ty);
   /// Converts a specific SPIR-V type to a Tint type. Float case
@@ -197,6 +216,16 @@ class ParserImpl : Reader {
       const spvtools::opt::analysis::Struct* struct_ty);
   /// Converts a specific SPIR-V type to a Tint type. Pointer case
   ast::type::Type* ConvertType(const spvtools::opt::analysis::Pointer* ptr_ty);
+
+  /// Creates an AST Variable node for a SPIR-V ID, including any attached
+  /// decorations.
+  /// @param id the SPIR-V result ID
+  /// @param sc the storage class, which can be ast::StorageClass::kNone
+  /// @param type the type
+  /// @returns a new Variable node, or null in the error case
+  std::unique_ptr<ast::Variable> MakeVariable(uint32_t id,
+                                              ast::StorageClass sc,
+                                              ast::type::Type* type);
 
   // The SPIR-V binary we're parsing
   std::vector<uint32_t> spv_binary_;

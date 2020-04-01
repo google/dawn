@@ -19,10 +19,14 @@
 #include <limits>
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
+#include "source/opt/basic_block.h"
 #include "source/opt/build_module.h"
 #include "source/opt/decoration_manager.h"
+#include "source/opt/function.h"
 #include "source/opt/instruction.h"
 #include "source/opt/module.h"
 #include "source/opt/type_manager.h"
@@ -59,6 +63,53 @@ namespace spirv {
 namespace {
 
 const spv_target_env kTargetEnv = SPV_ENV_WEBGPU_0;
+
+// A FunctionTraverser is used to compute an ordering of functions in the
+// module such that callees precede callers.
+class FunctionTraverser {
+ public:
+  explicit FunctionTraverser(const spvtools::opt::Module& module)
+      : module_(module) {}
+
+  // @returns the functions in the modules such that callees precede callers.
+  std::vector<const spvtools::opt::Function*> TopologicallyOrderedFunctions() {
+    visited_.clear();
+    ordered_.clear();
+    id_to_func_.clear();
+    for (const auto& f : module_) {
+      id_to_func_[f.result_id()] = &f;
+    }
+    for (const auto& f : module_) {
+      Visit(f);
+    }
+    return ordered_;
+  }
+
+ private:
+  void Visit(const spvtools::opt::Function& f) {
+    if (visited_.count(&f)) {
+      return;
+    }
+    visited_.insert(&f);
+    for (const auto& bb : f) {
+      for (const auto& inst : bb) {
+        if (inst.opcode() != SpvOpFunctionCall) {
+          continue;
+        }
+        const auto* callee = id_to_func_[inst.GetSingleWordInOperand(0)];
+        if (callee) {
+          Visit(*callee);
+        }
+      }
+    }
+    ordered_.push_back(&f);
+  }
+
+  const spvtools::opt::Module& module_;
+  std::unordered_set<const spvtools::opt::Function*> visited_;
+  std::unordered_map<uint32_t, const spvtools::opt::Function*> id_to_func_;
+  std::vector<const spvtools::opt::Function*> ordered_;
+};
 
 }  // namespace
 
@@ -174,7 +225,10 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
     case spvtools::opt::analysis::Type::kPointer:
       return save(ConvertType(spirv_type->AsPointer()));
     case spvtools::opt::analysis::Type::kFunction:
-      // TODO(dneto). For now return null without erroring out.
+      // Tint doesn't have a Function type.
+      // We need to convert the result type and parameter types.
+      // But the SPIR-V defines those before defining the function
+      // type.  No further work is required here.
       return nullptr;
     default:
       break;
@@ -299,8 +353,10 @@ bool ParserImpl::ParseInternalModule() {
   if (!EmitModuleScopeVariables()) {
     return false;
   }
-  // TODO(dneto): fill in the rest
-  return true;
+  if (!EmitFunctions()) {
+    return false;
+  }
+  return success_;
 }
 
 bool ParserImpl::RegisterExtendedInstructionImports() {
@@ -635,43 +691,105 @@ bool ParserImpl::EmitModuleScopeVariables() {
                     << var.type_id();
     }
     auto* ast_store_type = ast_type->AsPointer()->type();
-    if (!namer_.HasName(var.result_id())) {
-      namer_.SuggestSanitizedName(var.result_id(),
-                                  "x_" + std::to_string(var.result_id()));
-    }
-    auto ast_var = std::make_unique<ast::Variable>(
-        namer_.GetName(var.result_id()), ast_storage_class, ast_store_type);
-
-    std::vector<std::unique_ptr<ast::VariableDecoration>> ast_decorations;
-    for (auto& deco : GetDecorationsFor(var.result_id())) {
-      if (deco.empty()) {
-        return Fail() << "malformed decoration on ID " << var.result_id()
-                      << ": it is empty";
-      }
-      if (deco[0] == SpvDecorationBuiltIn) {
-        if (deco.size() == 1) {
-          return Fail() << "malformed BuiltIn decoration on ID "
-                        << var.result_id() << ": has no operand";
-        }
-        auto ast_builtin =
-            enum_converter_.ToBuiltin(static_cast<SpvBuiltIn>(deco[1]));
-        if (ast_builtin == ast::Builtin::kNone) {
-          return false;
-        }
-        ast_decorations.emplace_back(
-            std::make_unique<ast::BuiltinDecoration>(ast_builtin));
-      }
-    }
-    if (!ast_decorations.empty()) {
-      auto decorated_var =
-          std::make_unique<ast::DecoratedVariable>(std::move(ast_var));
-      decorated_var->set_decorations(std::move(ast_decorations));
-      ast_var = std::move(decorated_var);
-    }
+    auto ast_var =
+        MakeVariable(var.result_id(), ast_storage_class, ast_store_type);
 
     // TODO(dneto): initializers (a.k.a. constructor expression)
     ast_module_.AddGlobalVariable(std::move(ast_var));
   }
+  return success_;
+}
+
+std::unique_ptr<ast::Variable> ParserImpl::MakeVariable(uint32_t id,
+                                                        ast::StorageClass sc,
+                                                        ast::type::Type* type) {
+  if (type == nullptr) {
+    Fail() << "internal error: can't make ast::Variable for null type";
+    return nullptr;
+  }
+
+  auto ast_var = std::make_unique<ast::Variable>(Name(id), sc, type);
+
+  std::vector<std::unique_ptr<ast::VariableDecoration>> ast_decorations;
+  for (auto& deco : GetDecorationsFor(id)) {
+    if (deco.empty()) {
+      Fail() << "malformed decoration on ID " << id << ": it is empty";
+      return nullptr;
+    }
+    if (deco[0] == SpvDecorationBuiltIn) {
+      if (deco.size() == 1) {
+        Fail() << "malformed BuiltIn decoration on ID " << id
+               << ": has no operand";
+        return nullptr;
+      }
+      auto ast_builtin =
+          enum_converter_.ToBuiltin(static_cast<SpvBuiltIn>(deco[1]));
+      if (ast_builtin == ast::Builtin::kNone) {
+        return nullptr;
+      }
+      ast_decorations.emplace_back(
+          std::make_unique<ast::BuiltinDecoration>(ast_builtin));
+    }
+  }
+  if (!ast_decorations.empty()) {
+    auto decorated_var =
+        std::make_unique<ast::DecoratedVariable>(std::move(ast_var));
+    decorated_var->set_decorations(std::move(ast_decorations));
+    ast_var = std::move(decorated_var);
+  }
+  return ast_var;
+}
+
+bool ParserImpl::EmitFunctions() {
+  if (!success_) {
+    return false;
+  }
+  for (const auto* f :
+       FunctionTraverser(*module_).TopologicallyOrderedFunctions()) {
+    EmitFunction(*f);
+  }
+  return success_;
+}
+
+bool ParserImpl::EmitFunction(const spvtools::opt::Function& f) {
+  if (!success_) {
+    return false;
+  }
+  // We only care about functions with bodies.
+  if (f.cbegin() == f.cend()) {
+    return true;
+  }
+
+  const auto name = Name(f.result_id());
+  // Surprisingly, the "type id" on an OpFunction is the result type of the
+  // function, not the type of the function.  This is the one exceptional case
+  // in SPIR-V where the type ID is not the type of the result ID.
+  auto* ret_ty = ConvertType(f.type_id());
+  if (!success_) {
+    return false;
+  }
+  if (ret_ty == nullptr) {
+    return Fail()
+           << "internal error: unregistered return type for function with ID "
+           << f.result_id();
+  }
+
+  std::vector<std::unique_ptr<ast::Variable>> ast_params;
+  f.ForEachParam([this, &ast_params](const spvtools::opt::Instruction* param) {
+    auto* ast_type = ConvertType(param->type_id());
+    if (ast_type != nullptr) {
+      ast_params.emplace_back(std::move(MakeVariable(
+          param->result_id(), ast::StorageClass::kNone, ast_type)));
+    }
+  });
+  if (!success_) {
+    return false;
+  }
+
+  auto ast_fn =
+      std::make_unique<ast::Function>(name, std::move(ast_params), ret_ty);
+  ast_module_.AddFunction(std::move(ast_fn));
+
   return success_;
 }
 
