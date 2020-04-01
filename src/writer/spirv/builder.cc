@@ -19,6 +19,7 @@
 #include "spirv/unified1/spirv.h"
 #include "src/ast/binding_decoration.h"
 #include "src/ast/bool_literal.h"
+#include "src/ast/identifier_expression.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/decorated_variable.h"
@@ -76,7 +77,10 @@ uint32_t pipeline_stage_to_execution_model(ast::PipelineStage stage) {
 
 }  // namespace
 
-Builder::Builder() = default;
+Builder::Builder() {
+  // Push the global variable map onto the stack
+  variable_stack_.push_back({});
+}
 
 Builder::~Builder() = default;
 
@@ -176,6 +180,9 @@ bool Builder::GenerateEntryPoint(ast::EntryPoint* ep) {
 }
 
 uint32_t Builder::GenerateExpression(ast::Expression* expr) {
+  if (expr->IsIdentifier()) {
+    return GenerateIdentifierExpression(expr->AsIdentifier());
+  }
   if (expr->IsConstructor()) {
     return GenerateConstructorExpression(expr->AsConstructor(), false);
   }
@@ -210,11 +217,15 @@ bool Builder::GenerateFunction(ast::Function* func) {
   std::vector<Instruction> params;
   push_function(Function{definition_inst, result_op(), std::move(params)});
 
+  variable_stack_.push_back({});
+
   for (const auto& stmt : func->body()) {
     if (!GenerateStatement(stmt.get())) {
       return false;
     }
   }
+
+  variable_stack_.pop_back();
 
   func_name_to_id_[func->name()] = func_id;
   return true;
@@ -255,8 +266,7 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
       error_ = "missing constructor for constant";
       return false;
     }
-
-    // TODO(dsinclair): Store variable name to id
+    variable_stack_.back()[var->name()] = init_id;
     return true;
   }
 
@@ -282,7 +292,7 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
                        {Operand::Int(var_id), Operand::Int(init_id)});
   }
 
-  // TODO(dsinclair) Mapping of variable name to id
+  variable_stack_.back()[var->name()] = var_id;
 
   return true;
 }
@@ -307,8 +317,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
       error_ = "missing constructor for constant";
       return false;
     }
-
-    // TODO(dsinclair): Store variable name to id
+    variable_stack_[0][var->name()] = init_id;
     return true;
   }
 
@@ -361,10 +370,24 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
       }
     }
   }
-
-  // TODO(dsinclair) Mapping of variable name to id
-
+  variable_stack_[0][var->name()] = var_id;
   return true;
+}
+
+uint32_t Builder::GenerateIdentifierExpression(ast::IdentifierExpression* expr) {
+  for (auto iter = variable_stack_.rbegin(); iter != variable_stack_.rend(); ++iter) {
+    auto& map = *iter;
+
+    // TODO(dsinclair): handle names with namespaces in them ...
+
+    auto val = map.find(expr->name()[0]);
+    if (val != map.end()) {
+      return val->second;
+    }
+  }
+
+  error_ = "unable to find name for identifier: " + expr->name()[0];
+  return 0;
 }
 
 void Builder::GenerateImport(ast::Import* imp) {

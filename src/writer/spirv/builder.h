@@ -167,6 +167,10 @@ class Builder {
   /// @param var the variable to generate
   /// @returns true if the variable is emited.
   bool GenerateGlobalVariable(ast::Variable* var);
+  /// Generates an identifier expression
+  /// @param expr the expresssion to generate
+  /// @returns the id of the expression or 0 on failure
+  uint32_t GenerateIdentifierExpression(ast::IdentifierExpression* expr);
   /// Generates an import instruction
   /// @param imp the import
   void GenerateImport(ast::Import* imp);
@@ -248,6 +252,7 @@ class Builder {
   std::unordered_map<std::string, uint32_t> func_name_to_id_;
   std::unordered_map<std::string, uint32_t> type_name_to_id_;
   std::unordered_map<std::string, uint32_t> const_to_id_;
+  std::vector<std::unordered_map<std::string, uint32_t>> variable_stack_;
 };
 
 }  // namespace spirv

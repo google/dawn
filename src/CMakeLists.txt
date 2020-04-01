@@ -420,6 +420,7 @@ if(${TINT_BUILD_SPV_WRITER})
     writer/spirv/builder_function_test.cc
     writer/spirv/builder_function_variable_test.cc
     writer/spirv/builder_global_variable_test.cc
+    writer/spirv/builder_ident_expression_test.cc
     writer/spirv/builder_literal_test.cc
     writer/spirv/builder_return_test.cc
     writer/spirv/builder_test.cc
