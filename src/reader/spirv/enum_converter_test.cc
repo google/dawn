@@ -84,8 +84,8 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(
     EnumConverterBad,
     SpvPipelineStageTest,
-    testing::Values(PipelineStageCase{SpvExecutionModel(9999), false,
-                                      ast::PipelineStage::kNone},
+    testing::Values(PipelineStageCase{static_cast<SpvExecutionModel>(9999),
+                                      false, ast::PipelineStage::kNone},
                     PipelineStageCase{SpvExecutionModelTessellationControl,
                                       false, ast::PipelineStage::kNone}));
 
@@ -160,8 +160,79 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(EnumConverterBad,
                          SpvStorageClassTest,
                          testing::Values(StorageClassCase{
-                             SpvStorageClass(9999), false,
+                             static_cast<SpvStorageClass>(9999), false,
                              ast::StorageClass::kNone}));
+
+// Builtin
+
+struct BuiltinCase {
+  SpvBuiltIn builtin;
+  bool expect_success;
+  ast::Builtin expected;
+};
+inline std::ostream& operator<<(std::ostream& out, BuiltinCase bc) {
+  out << "BuiltinCase{ SpvBuiltIn:" << int(bc.builtin)
+      << " expect_success?:" << int(bc.expect_success)
+      << " expected:" << int(bc.expected) << "}";
+  return out;
+}
+
+class SpvBuiltinTest : public testing::TestWithParam<BuiltinCase> {
+ public:
+  SpvBuiltinTest()
+      : success_(true),
+        fail_stream_(&success_, &errors_),
+        converter_(fail_stream_) {}
+
+  std::string error() const { return errors_.str(); }
+
+ protected:
+  bool success_ = true;
+  std::stringstream errors_;
+  FailStream fail_stream_;
+  EnumConverter converter_;
+};
+
+TEST_P(SpvBuiltinTest, Samples) {
+  const auto params = GetParam();
+
+  const auto result = converter_.ToBuiltin(params.builtin);
+  EXPECT_EQ(success_, params.expect_success);
+  if (params.expect_success) {
+    EXPECT_EQ(result, params.expected);
+    EXPECT_TRUE(error().empty());
+  } else {
+    EXPECT_EQ(result, params.expected);
+    EXPECT_THAT(error(), ::testing::StartsWith("unknown SPIR-V builtin: "));
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    EnumConverterGood,
+    SpvBuiltinTest,
+    testing::Values(
+        BuiltinCase{SpvBuiltInPosition, true, ast::Builtin::kPosition},
+        BuiltinCase{SpvBuiltInVertexIndex, true, ast::Builtin::kVertexIdx},
+        BuiltinCase{SpvBuiltInInstanceIndex, true, ast::Builtin::kInstanceIdx},
+        BuiltinCase{SpvBuiltInFrontFacing, true, ast::Builtin::kFrontFacing},
+        BuiltinCase{SpvBuiltInFragCoord, true, ast::Builtin::kFragCoord},
+        BuiltinCase{SpvBuiltInFragDepth, true, ast::Builtin::kFragDepth},
+        BuiltinCase{SpvBuiltInNumWorkgroups, true,
+                    ast::Builtin::kNumWorkgroups},
+        BuiltinCase{SpvBuiltInWorkgroupSize, true,
+                    ast::Builtin::kWorkgroupSize},
+        BuiltinCase{SpvBuiltInLocalInvocationId, true,
+                    ast::Builtin::kLocalInvocationId},
+        BuiltinCase{SpvBuiltInLocalInvocationIndex, true,
+                    ast::Builtin::kLocalInvocationIdx},
+        BuiltinCase{SpvBuiltInGlobalInvocationId, true,
+                    ast::Builtin::kGlobalInvocationId}));
+
+INSTANTIATE_TEST_SUITE_P(EnumConverterBad,
+                         SpvBuiltinTest,
+                         testing::Values(BuiltinCase{
+                             static_cast<SpvBuiltIn>(9999), false,
+                             ast::Builtin::kNone}));
 
 }  // namespace
 }  // namespace spirv

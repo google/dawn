@@ -68,6 +68,38 @@ ast::StorageClass EnumConverter::ToStorageClass(SpvStorageClass sc) {
   return ast::StorageClass::kNone;
 }
 
+ast::Builtin EnumConverter::ToBuiltin(SpvBuiltIn b) {
+  switch (b) {
+    case SpvBuiltInPosition:
+      return ast::Builtin::kPosition;
+    case SpvBuiltInVertexIndex:
+      return ast::Builtin::kVertexIdx;
+    case SpvBuiltInInstanceIndex:
+      return ast::Builtin::kInstanceIdx;
+    case SpvBuiltInFrontFacing:
+      return ast::Builtin::kFrontFacing;
+    case SpvBuiltInFragCoord:
+      return ast::Builtin::kFragCoord;
+    case SpvBuiltInFragDepth:
+      return ast::Builtin::kFragDepth;
+    case SpvBuiltInNumWorkgroups:
+      return ast::Builtin::kNumWorkgroups;
+    case SpvBuiltInWorkgroupSize:
+      return ast::Builtin::kWorkgroupSize;
+    case SpvBuiltInLocalInvocationId:
+      return ast::Builtin::kLocalInvocationId;
+    case SpvBuiltInLocalInvocationIndex:
+      return ast::Builtin::kLocalInvocationIdx;
+    case SpvBuiltInGlobalInvocationId:
+      return ast::Builtin::kGlobalInvocationId;
+    default:
+      break;
+  }
+
+  Fail() << "unknown SPIR-V builtin: " << uint32_t(b);
+  return ast::Builtin::kNone;
+}
+
 }  // namespace spirv
 }  // namespace reader
 }  // namespace tint
