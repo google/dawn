@@ -66,22 +66,22 @@ namespace dawn_native {
         return mLayout.Get();
     }
 
-    MaybeError PipelineBase::ValidateGetBindGroupLayout(uint32_t group) {
+    MaybeError PipelineBase::ValidateGetBindGroupLayout(uint32_t groupIndex) {
         DAWN_TRY(GetDevice()->ValidateIsAlive());
         DAWN_TRY(GetDevice()->ValidateObject(this));
         DAWN_TRY(GetDevice()->ValidateObject(mLayout.Get()));
-        if (group >= kMaxBindGroups) {
+        if (groupIndex >= kMaxBindGroups) {
             return DAWN_VALIDATION_ERROR("Bind group layout index out of bounds");
         }
         return {};
     }
 
-    BindGroupLayoutBase* PipelineBase::GetBindGroupLayout(uint32_t group) {
-        if (GetDevice()->ConsumedError(ValidateGetBindGroupLayout(group))) {
+    BindGroupLayoutBase* PipelineBase::GetBindGroupLayout(uint32_t groupIndex) {
+        if (GetDevice()->ConsumedError(ValidateGetBindGroupLayout(groupIndex))) {
             return BindGroupLayoutBase::MakeError(GetDevice());
         }
 
-        if (!mLayout->GetBindGroupLayoutsMask()[group]) {
+        if (!mLayout->GetBindGroupLayoutsMask()[groupIndex]) {
             // Get or create an empty bind group layout.
             // TODO(enga): Consider caching this object on the Device and reusing it.
             // Today, this can't be done correctly because of the order of Device destruction.
@@ -99,7 +99,7 @@ namespace dawn_native {
             return bgl;
         }
 
-        BindGroupLayoutBase* bgl = mLayout->GetBindGroupLayout(group);
+        BindGroupLayoutBase* bgl = mLayout->GetBindGroupLayout(groupIndex);
         bgl->Reference();
         return bgl;
     }
