@@ -122,11 +122,11 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
   })"));
 }
 
-TEST_F(SpvParserTest, DISABLED_EmitFunctions_NonVoidResultType) {
+TEST_F(SpvParserTest, EmitFunctions_NonVoidResultType) {
   auto p = parser(test::Assemble(Names({"ret_float"}) + CommonTypes() + R"(
      %fn_ret_float = OpTypeFunction %float
 
-     %ret_float = OpFunction %float None %nf_ret_float
+     %ret_float = OpFunction %float None %fn_ret_float
      %ret_float_entry = OpLabel
      OpReturnValue %float_0
      OpFunctionEnd

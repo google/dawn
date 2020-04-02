@@ -49,12 +49,12 @@ TEST_F(SpvParserTest, ModuleScopeVar_BadStorageClass) {
   EXPECT_THAT(p->error(), HasSubstr("unknown SPIR-V storage class: 5"));
 }
 
-TEST_F(SpvParserTest, DISABLED_ModuleScopeVar_BadPointerType) {
+TEST_F(SpvParserTest, ModuleScopeVar_BadPointerType) {
   auto p = parser(test::Assemble(R"(
     %float = OpTypeFloat 32
     %fn_ty = OpTypeFunction %float
-    %fn_ptr_ty = OpTypePointer Private %fn_ty
-    %52 = OpVariable %ptr Private
+    %3 = OpTypePointer Private %fn_ty
+    %52 = OpVariable %3 Private
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
   // Normally we should run ParserImpl::RegisterTypes before emitting
@@ -62,7 +62,7 @@ TEST_F(SpvParserTest, DISABLED_ModuleScopeVar_BadPointerType) {
   // us catch this error.
   EXPECT_FALSE(p->EmitModuleScopeVariables());
   EXPECT_THAT(p->error(), HasSubstr("internal error: failed to register Tint "
-                                    "AST type for SPIR-V type with ID: 4"));
+                                    "AST type for SPIR-V type with ID: 3"));
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_AnonWorkgroupVar) {
