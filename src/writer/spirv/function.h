@@ -15,6 +15,7 @@
 #ifndef SRC_WRITER_SPIRV_FUNCTION_H_
 #define SRC_WRITER_SPIRV_FUNCTION_H_
 
+#include <functional>
 #include <vector>
 
 #include "spirv/unified1/spirv.hpp11"
