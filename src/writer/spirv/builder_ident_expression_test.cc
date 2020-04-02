@@ -16,14 +16,14 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/float_literal.h"
+#include "src/ast/identifier_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/f32_type.h"
-#include "src/ast/type_constructor_expression.h"
 #include "src/ast/type/vector_type.h"
+#include "src/ast/type_constructor_expression.h"
+#include "src/ast/variable.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
-#include "src/ast/identifier_expression.h"
-#include "src/ast/variable.h"
 
 namespace tint {
 namespace writer {
@@ -144,4 +144,3 @@ TEST_F(BuilderTest, DISABLED_IdentifierExpression_MultiName) {}
 }  // namespace spirv
 }  // namespace writer
 }  // namespace tint
-

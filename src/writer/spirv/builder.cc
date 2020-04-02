@@ -17,13 +17,14 @@
 #include <utility>
 
 #include "spirv/unified1/spirv.h"
+#include "src/ast/assignment_statement.h"
 #include "src/ast/binding_decoration.h"
 #include "src/ast/bool_literal.h"
-#include "src/ast/identifier_expression.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
+#include "src/ast/identifier_expression.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/return_statement.h"
@@ -153,6 +154,21 @@ void Builder::iterate(std::function<void(const Instruction&)> cb) const {
   for (const auto& func : functions_) {
     func.iterate(cb);
   }
+}
+
+bool Builder::GenerateAssignStatement(ast::AssignmentStatement* assign) {
+  auto lhs_id = GenerateExpression(assign->lhs());
+  if (lhs_id == 0) {
+    return false;
+  }
+  auto rhs_id = GenerateExpression(assign->rhs());
+  if (rhs_id == 0) {
+    return false;
+  }
+
+  push_function_inst(spv::Op::OpStore,
+                     {Operand::Int(lhs_id), Operand::Int(rhs_id)});
+  return true;
 }
 
 bool Builder::GenerateEntryPoint(ast::EntryPoint* ep) {
@@ -374,8 +390,10 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
   return true;
 }
 
-uint32_t Builder::GenerateIdentifierExpression(ast::IdentifierExpression* expr) {
-  for (auto iter = variable_stack_.rbegin(); iter != variable_stack_.rend(); ++iter) {
+uint32_t Builder::GenerateIdentifierExpression(
+    ast::IdentifierExpression* expr) {
+  for (auto iter = variable_stack_.rbegin(); iter != variable_stack_.rend();
+       ++iter) {
     auto& map = *iter;
 
     // TODO(dsinclair): handle names with namespaces in them ...
@@ -513,6 +531,9 @@ bool Builder::GenerateReturnStatement(ast::ReturnStatement* stmt) {
 }
 
 bool Builder::GenerateStatement(ast::Statement* stmt) {
+  if (stmt->IsAssign()) {
+    return GenerateAssignStatement(stmt->AsAssign());
+  }
   if (stmt->IsReturn()) {
     return GenerateReturnStatement(stmt->AsReturn());
   }

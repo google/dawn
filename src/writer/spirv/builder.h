@@ -143,6 +143,10 @@ class Builder {
   /// @returns the SPIR-V builtin or SpvBuiltInMax on error.
   SpvBuiltIn ConvertBuiltin(ast::Builtin builtin) const;
 
+  /// Generates an assignment statement
+  /// @param assign the statement to generate
+  /// @returns true if the statement was successfully generated
+  bool GenerateAssignStatement(ast::AssignmentStatement* assign);
   /// Generates an entry point instruction
   /// @param ep the entry point
   /// @returns true if the instruction was generated, false otherwise
