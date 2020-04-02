@@ -161,7 +161,6 @@ namespace dawn_native {
                     commands->NextCommand<EndRenderPassCmd>();
                     DAWN_TRY(ValidateFinalDebugGroupStackSize(debugGroupStackSize));
                     return {};
-                    break;
                 }
 
                 case Command::ExecuteBundles: {
@@ -225,7 +224,6 @@ namespace dawn_native {
                     commands->NextCommand<EndComputePassCmd>();
                     DAWN_TRY(ValidateFinalDebugGroupStackSize(debugGroupStackSize));
                     return {};
-                    break;
                 }
 
                 case Command::Dispatch: {

@@ -98,11 +98,10 @@ namespace dawn_native { namespace d3d12 {
                             if ((flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) ||
                                 (flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET)) {
                                 return Default_OnlyRenderableOrDepthTextures;
-                            } else {
-                                return Default_OnlyNonRenderableOrDepthTextures;
                             }
-                            break;
+                            return Default_OnlyNonRenderableOrDepthTextures;
                         }
+
                         default:
                             UNREACHABLE();
                     }

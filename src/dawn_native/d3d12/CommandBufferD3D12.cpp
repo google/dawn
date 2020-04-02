@@ -758,7 +758,6 @@ namespace dawn_native { namespace d3d12 {
                 case Command::EndComputePass: {
                     mCommands.NextCommand<EndComputePassCmd>();
                     return {};
-                    break;
                 }
 
                 case Command::SetComputePipeline: {
@@ -1160,7 +1159,6 @@ namespace dawn_native { namespace d3d12 {
                         ResolveMultisampledRenderPass(commandContext, renderPass);
                     }
                     return {};
-                    break;
                 }
 
                 case Command::SetStencilReference: {

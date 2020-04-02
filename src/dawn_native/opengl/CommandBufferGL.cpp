@@ -654,7 +654,6 @@ namespace dawn_native { namespace opengl {
                 case Command::EndComputePass: {
                     mCommands.NextCommand<EndComputePassCmd>();
                     return;
-                    break;
                 }
 
                 case Command::Dispatch: {
@@ -1013,7 +1012,6 @@ namespace dawn_native { namespace opengl {
                     }
                     gl.DeleteFramebuffers(1, &fbo);
                     return;
-                    break;
                 }
 
                 case Command::SetStencilReference: {

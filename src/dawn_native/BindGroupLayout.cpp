@@ -48,7 +48,6 @@ namespace dawn_native {
 
             case wgpu::BindingType::StorageTexture: {
                 return DAWN_VALIDATION_ERROR("Read-write storage texture binding is not supported");
-                break;
             }
 
             case wgpu::BindingType::UniformBuffer:

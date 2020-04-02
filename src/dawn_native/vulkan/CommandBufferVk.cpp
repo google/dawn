@@ -572,7 +572,6 @@ namespace dawn_native { namespace vulkan {
                 case Command::EndComputePass: {
                     mCommands.NextCommand<EndComputePassCmd>();
                     return;
-                    break;
                 }
 
                 case Command::Dispatch: {
@@ -876,7 +875,6 @@ namespace dawn_native { namespace vulkan {
                     mCommands.NextCommand<EndRenderPassCmd>();
                     device->fn.CmdEndRenderPass(commands);
                     return {};
-                    break;
                 }
 
                 case Command::SetBlendColor: {

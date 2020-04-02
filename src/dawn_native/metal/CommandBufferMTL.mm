@@ -845,7 +845,6 @@ namespace dawn_native { namespace metal {
                     mCommands.NextCommand<EndComputePassCmd>();
                     commandContext->EndCompute();
                     return;
-                    break;
                 }
 
                 case Command::Dispatch: {
@@ -1218,7 +1217,6 @@ namespace dawn_native { namespace metal {
                     mCommands.NextCommand<EndRenderPassCmd>();
                     commandContext->EndRender();
                     return;
-                    break;
                 }
 
                 case Command::SetStencilReference: {
