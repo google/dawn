@@ -30,7 +30,44 @@ namespace ast {
 
 class DecoratedVariable;
 
-/// A variable.
+/// A Variable statement.
+///
+/// An instance of this class represents one of two constructs in WGSL, "var" and
+/// "const" declarations.
+///
+/// 1. A "var" declaration, is a name for typed storage.  Examples:
+///
+///       // Declared outside a function, i.e. at module scope, requires
+///       // a storage class.
+///       var<workgroup> width : i32;     // no initializer
+///       var<private> height : i32 = 3;  // with initializer
+///
+///       // A variable declared inside a function doesn't take a storage class,
+///       // and maps to SPIR-V Private storage.
+///       var computed_depth : i32;
+///       var area : i32 = compute_area(width, height);
+///
+/// 2. A "const" declaration, is a name for a typed value.  Examples:
+///
+///       const twice_depth : i32 = width + width;  // Must have initializer
+///
+///
+/// From the WGSL draft, about "var"::
+///
+///   A variable is a named reference to storage that can contain a value of a
+///   particular type.
+///
+///   Two types are associated with a variable: its store type (the type of
+///   value that may be placed in the referenced storage) and its reference
+///   type (the type of the variable itself).  If a variable has store type T
+///   and storage class S, then its reference type is pointer-to-T-in-S.
+///
+/// This class uses the term "type" to refer to the value type of the "const",
+/// or the store type of the "var".
+///
+/// The storage class for a "const" is always StorageClass::kNone.
+/// The storage class for a "var" is StorageClass::kNone when using the
+/// defaulting syntax for a "var" declared inside a function.
 class Variable : public Node {
  public:
   /// Create a new empty variable statement
@@ -38,13 +75,13 @@ class Variable : public Node {
   /// Create a variable
   /// @param name the variables name
   /// @param sc the variable storage class
-  /// @param type the variables type
+  /// @param type the value type of the const, or the store type of the variable
   Variable(const std::string& name, StorageClass sc, type::Type* type);
   /// Create a variable
   /// @param source the variable source
   /// @param name the variables name
   /// @param sc the variable storage class
-  /// @param type the variables type
+  /// @param type the type of the const value, or store type of the variable
   Variable(const Source& source,
            const std::string& name,
            StorageClass sc,
@@ -60,10 +97,10 @@ class Variable : public Node {
   /// @returns the variable name
   const std::string& name() { return name_; }
 
-  /// Sets the type of the variable
+  /// Sets the value type if a const, or the store type if a var
   /// @param type the type
   void set_type(type::Type* type) { type_ = type; }
-  /// @returns the variables type.
+  /// @returns the variable's type.
   type::Type* type() const { return type_; }
 
   /// Sets the storage class
@@ -118,6 +155,7 @@ class Variable : public Node {
   bool is_const_ = false;
   std::string name_;
   StorageClass storage_class_ = StorageClass::kNone;
+  // The value type if a const, and the store type if a var
   type::Type* type_ = nullptr;
   std::unique_ptr<Expression> constructor_;
 };
