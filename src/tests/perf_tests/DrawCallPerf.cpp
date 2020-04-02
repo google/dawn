@@ -306,7 +306,8 @@ void DrawCallPerf::TestSetUp() {
                 mVertexBuffers[i] = utils::CreateBufferFromData(
                     device, kVertexData, sizeof(kVertexData), wgpu::BufferUsage::Vertex);
             }
-        } break;
+            break;
+        }
 
         case VertexBuffer::Dynamic: {
             std::vector<char> data(mAlignedVertexDataSize * kNumDraws);
@@ -316,7 +317,8 @@ void DrawCallPerf::TestSetUp() {
 
             mVertexBuffers[0] = utils::CreateBufferFromData(device, data.data(), data.size(),
                                                             wgpu::BufferUsage::Vertex);
-        } break;
+            break;
+        }
     }
 
     // Create the bind group layout.
@@ -505,7 +507,8 @@ void DrawCallPerf::RecordRenderCommands(Encoder pass) {
                     // Because of the pipeline layout change, we need to rebind bind group index 0.
                     pass.SetBindGroup(0, mConstantBindGroup);
                 }
-            } break;
+                break;
+            }
         }
 
         // Set the vertex buffer, if it changes.
@@ -535,7 +538,8 @@ void DrawCallPerf::RecordRenderCommands(Encoder pass) {
                 wgpu::BindGroup bindGroup = utils::MakeBindGroup(
                     device, mUniformBindGroupLayout, {{0, mUniformBuffers[i], 0, kUniformSize}});
                 pass.SetBindGroup(uniformBindGroupIndex, bindGroup);
-            } break;
+                break;
+            }
 
             case BindGroup::Multiple:
                 pass.SetBindGroup(uniformBindGroupIndex, mUniformBindGroups[i]);
@@ -544,7 +548,8 @@ void DrawCallPerf::RecordRenderCommands(Encoder pass) {
             case BindGroup::Dynamic: {
                 uint32_t dynamicOffset = static_cast<uint32_t>(i * mAlignedUniformSize);
                 pass.SetBindGroup(uniformBindGroupIndex, mUniformBindGroups[0], 1, &dynamicOffset);
-            } break;
+                break;
+            }
 
             default:
                 UNREACHABLE();

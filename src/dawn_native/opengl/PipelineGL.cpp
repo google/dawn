@@ -121,7 +121,8 @@ namespace dawn_native { namespace opengl {
                             gl.UniformBlockBinding(mProgram, location,
                                                    indices[group][bindingIndex]);
                         }
-                    } break;
+                        break;
+                    }
 
                     case wgpu::BindingType::StorageBuffer:
                     case wgpu::BindingType::ReadonlyStorageBuffer: {
@@ -131,7 +132,8 @@ namespace dawn_native { namespace opengl {
                             gl.ShaderStorageBlockBinding(mProgram, location,
                                                          indices[group][bindingIndex]);
                         }
-                    } break;
+                        break;
+                    }
 
                     case wgpu::BindingType::Sampler:
                     case wgpu::BindingType::SampledTexture:

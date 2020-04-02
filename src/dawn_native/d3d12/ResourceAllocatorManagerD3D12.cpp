@@ -88,7 +88,8 @@ namespace dawn_native { namespace d3d12 {
                         default:
                             UNREACHABLE();
                     }
-                } break;
+                    break;
+                }
                 case D3D12_RESOURCE_DIMENSION_TEXTURE1D:
                 case D3D12_RESOURCE_DIMENSION_TEXTURE2D:
                 case D3D12_RESOURCE_DIMENSION_TEXTURE3D: {
@@ -100,11 +101,13 @@ namespace dawn_native { namespace d3d12 {
                             } else {
                                 return Default_OnlyNonRenderableOrDepthTextures;
                             }
-                        } break;
+                            break;
+                        }
                         default:
                             UNREACHABLE();
                     }
-                } break;
+                    break;
+                }
                 default:
                     UNREACHABLE();
             }

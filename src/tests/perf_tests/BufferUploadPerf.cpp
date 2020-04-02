@@ -119,7 +119,8 @@ void BufferUploadPerf::Step() {
             }
             // Make sure all SetSubData's are flushed.
             queue.Submit(0, nullptr);
-        } break;
+            break;
+        }
 
         case UploadMethod::CreateBufferMapped: {
             wgpu::BufferDescriptor desc = {};
@@ -137,7 +138,8 @@ void BufferUploadPerf::Step() {
 
             wgpu::CommandBuffer commands = encoder.Finish();
             queue.Submit(1, &commands);
-        } break;
+            break;
+        }
     }
 }
 

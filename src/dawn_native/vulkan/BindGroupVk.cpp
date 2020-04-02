@@ -68,13 +68,15 @@ namespace dawn_native { namespace vulkan {
                     writeBufferInfo[numWrites].offset = binding.offset;
                     writeBufferInfo[numWrites].range = binding.size;
                     write.pBufferInfo = &writeBufferInfo[numWrites];
-                } break;
+                    break;
+                }
 
                 case wgpu::BindingType::Sampler: {
                     Sampler* sampler = ToBackend(GetBindingAsSampler(bindingIndex));
                     writeImageInfo[numWrites].sampler = sampler->GetHandle();
                     write.pImageInfo = &writeImageInfo[numWrites];
-                } break;
+                    break;
+                }
 
                 case wgpu::BindingType::SampledTexture: {
                     TextureView* view = ToBackend(GetBindingAsTextureView(bindingIndex));
@@ -86,7 +88,8 @@ namespace dawn_native { namespace vulkan {
                         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
                     write.pImageInfo = &writeImageInfo[numWrites];
-                } break;
+                    break;
+                }
 
                 case wgpu::BindingType::ReadonlyStorageTexture:
                 case wgpu::BindingType::WriteonlyStorageTexture: {
@@ -96,7 +99,8 @@ namespace dawn_native { namespace vulkan {
                     writeImageInfo[numWrites].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
                     write.pImageInfo = &writeImageInfo[numWrites];
-                } break;
+                    break;
+                }
                 default:
                     UNREACHABLE();
             }

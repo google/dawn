@@ -55,7 +55,8 @@ namespace dawn_native {
                 if (!InheritsFromCAMetalLayer(metalDesc->layer)) {
                     return DAWN_VALIDATION_ERROR("layer must be a CAMetalLayer");
                 }
-            } break;
+                break;
+            }
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 
 #if defined(DAWN_PLATFORM_WINDOWS)
@@ -69,7 +70,8 @@ namespace dawn_native {
                 if (IsWindow(static_cast<HWND>(hwndDesc->hwnd)) == 0) {
                     return DAWN_VALIDATION_ERROR("Invalid HWND");
                 }
-            } break;
+                break;
+            }
 #endif  // defined(DAWN_PLATFORM_WINDOWS)
 
 #if defined(DAWN_USE_X11)
@@ -93,7 +95,8 @@ namespace dawn_native {
                 if (status == 0) {
                     return DAWN_VALIDATION_ERROR("Invalid X Window");
                 }
-            } break;
+                break;
+            }
 #endif  // defined(DAWN_USE_X11)
 
             case wgpu::SType::SurfaceDescriptorFromHTMLCanvasId:
@@ -115,7 +118,8 @@ namespace dawn_native {
                     static_cast<const SurfaceDescriptorFromMetalLayer*>(chainedDescriptor);
                 mType = Type::MetalLayer;
                 mMetalLayer = metalDesc->layer;
-            } break;
+                break;
+            }
 
             case wgpu::SType::SurfaceDescriptorFromWindowsHWND: {
                 const SurfaceDescriptorFromWindowsHWND* hwndDesc =
@@ -123,7 +127,8 @@ namespace dawn_native {
                 mType = Type::WindowsHWND;
                 mHInstance = hwndDesc->hinstance;
                 mHWND = hwndDesc->hwnd;
-            } break;
+                break;
+            }
 
             case wgpu::SType::SurfaceDescriptorFromXlib: {
                 const SurfaceDescriptorFromXlib* xDesc =
@@ -131,7 +136,8 @@ namespace dawn_native {
                 mType = Type::Xlib;
                 mXDisplay = xDesc->display;
                 mXWindow = xDesc->window;
-            } break;
+                break;
+            }
 
             default:
                 UNREACHABLE();

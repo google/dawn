@@ -34,7 +34,8 @@ namespace dawn_native {
                     return DAWN_VALIDATION_ERROR(
                         "storage buffer binding is not supported in vertex shader");
                 }
-            } break;
+                break;
+            }
 
             case wgpu::BindingType::WriteonlyStorageTexture: {
                 if ((shaderStageVisibility &
@@ -42,11 +43,13 @@ namespace dawn_native {
                     return DAWN_VALIDATION_ERROR(
                         "write-only storage texture binding is only supported in compute shader");
                 }
-            } break;
+                break;
+            }
 
             case wgpu::BindingType::StorageTexture: {
                 return DAWN_VALIDATION_ERROR("Read-write storage texture binding is not supported");
-            } break;
+                break;
+            }
 
             case wgpu::BindingType::UniformBuffer:
             case wgpu::BindingType::ReadonlyStorageBuffer:
@@ -73,7 +76,8 @@ namespace dawn_native {
                 if (!format->supportsStorageUsage) {
                     return DAWN_VALIDATION_ERROR("The storage texture format is not supported");
                 }
-            } break;
+                break;
+            }
 
             case wgpu::BindingType::StorageBuffer:
             case wgpu::BindingType::UniformBuffer:

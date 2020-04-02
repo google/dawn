@@ -396,7 +396,8 @@ namespace dawn_native {
                             ToWGPUTextureViewDimension(binding.texture_dimension);
                         info->textureComponentType =
                             ToDawnFormatType(binding.texture_component_type);
-                    } break;
+                        break;
+                    }
                     case wgpu::BindingType::StorageTexture:
                     case wgpu::BindingType::ReadonlyStorageTexture:
                     case wgpu::BindingType::WriteonlyStorageTexture: {
@@ -416,7 +417,8 @@ namespace dawn_native {
                         info->storageTextureFormat = storageTextureFormat;
                         info->textureDimension =
                             ToWGPUTextureViewDimension(binding.texture_dimension);
-                    } break;
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -580,7 +582,8 @@ namespace dawn_native {
                         info->textureComponentType =
                             SpirvCrossBaseTypeToFormatType(textureComponentType);
                         info->type = bindingType;
-                    } break;
+                        break;
+                    }
                     case wgpu::BindingType::StorageBuffer: {
                         // Differentiate between readonly storage bindings and writable ones
                         // based on the NonWritable decoration
@@ -590,7 +593,8 @@ namespace dawn_native {
                         } else {
                             info->type = wgpu::BindingType::StorageBuffer;
                         }
-                    } break;
+                        break;
+                    }
                     case wgpu::BindingType::StorageTexture: {
                         spirv_cross::Bitset flags = compiler.get_decoration_bitset(resource.id);
                         if (flags.get(spv::DecorationNonReadable)) {
@@ -619,7 +623,8 @@ namespace dawn_native {
                         info->storageTextureFormat = storageTextureFormat;
                         info->textureDimension =
                             SpirvDimToTextureViewDimension(imageType.dim, imageType.arrayed);
-                    } break;
+                        break;
+                    }
                     default:
                         info->type = bindingType;
                 }
@@ -784,7 +789,8 @@ namespace dawn_native {
                     if (bindingInfo.textureDimension != moduleInfo.textureDimension) {
                         return false;
                     }
-                } break;
+                    break;
+                }
 
                 case wgpu::BindingType::ReadonlyStorageTexture:
                 case wgpu::BindingType::WriteonlyStorageTexture: {
@@ -796,7 +802,8 @@ namespace dawn_native {
                     if (bindingInfo.textureDimension != moduleInfo.textureDimension) {
                         return false;
                     }
-                } break;
+                    break;
+                }
 
                 case wgpu::BindingType::UniformBuffer:
                 case wgpu::BindingType::ReadonlyStorageBuffer:

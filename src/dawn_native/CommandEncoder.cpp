@@ -793,12 +793,14 @@ namespace dawn_native {
                 case Command::BeginComputePass: {
                     commands->NextCommand<BeginComputePassCmd>();
                     DAWN_TRY(ValidateComputePass(commands));
-                } break;
+                    break;
+                }
 
                 case Command::BeginRenderPass: {
                     const BeginRenderPassCmd* cmd = commands->NextCommand<BeginRenderPassCmd>();
                     DAWN_TRY(ValidateRenderPass(commands, cmd));
-                } break;
+                    break;
+                }
 
                 case Command::CopyBufferToBuffer: {
                     const CopyBufferToBufferCmd* copy =
@@ -813,7 +815,8 @@ namespace dawn_native {
 
                     DAWN_TRY(ValidateCanUseAs(copy->source.Get(), wgpu::BufferUsage::CopySrc));
                     DAWN_TRY(ValidateCanUseAs(copy->destination.Get(), wgpu::BufferUsage::CopyDst));
-                } break;
+                    break;
+                }
 
                 case Command::CopyBufferToTexture: {
                     const CopyBufferToTextureCmd* copy =
@@ -846,7 +849,8 @@ namespace dawn_native {
                         ValidateCanUseAs(copy->source.buffer.Get(), wgpu::BufferUsage::CopySrc));
                     DAWN_TRY(ValidateCanUseAs(copy->destination.texture.Get(),
                                               wgpu::TextureUsage::CopyDst));
-                } break;
+                    break;
+                }
 
                 case Command::CopyTextureToBuffer: {
                     const CopyTextureToBufferCmd* copy =
@@ -879,7 +883,8 @@ namespace dawn_native {
                         ValidateCanUseAs(copy->source.texture.Get(), wgpu::TextureUsage::CopySrc));
                     DAWN_TRY(ValidateCanUseAs(copy->destination.buffer.Get(),
                                               wgpu::BufferUsage::CopyDst));
-                } break;
+                    break;
+                }
 
                 case Command::CopyTextureToTexture: {
                     const CopyTextureToTextureCmd* copy =
@@ -904,24 +909,28 @@ namespace dawn_native {
                         ValidateCanUseAs(copy->source.texture.Get(), wgpu::TextureUsage::CopySrc));
                     DAWN_TRY(ValidateCanUseAs(copy->destination.texture.Get(),
                                               wgpu::TextureUsage::CopyDst));
-                } break;
+                    break;
+                }
 
                 case Command::InsertDebugMarker: {
                     const InsertDebugMarkerCmd* cmd = commands->NextCommand<InsertDebugMarkerCmd>();
                     commands->NextData<char>(cmd->length + 1);
-                } break;
+                    break;
+                }
 
                 case Command::PopDebugGroup: {
                     commands->NextCommand<PopDebugGroupCmd>();
                     DAWN_TRY(ValidateCanPopDebugGroup(debugGroupStackSize));
                     debugGroupStackSize--;
-                } break;
+                    break;
+                }
 
                 case Command::PushDebugGroup: {
                     const PushDebugGroupCmd* cmd = commands->NextCommand<PushDebugGroupCmd>();
                     commands->NextData<char>(cmd->length + 1);
                     debugGroupStackSize++;
-                } break;
+                    break;
+                }
                 default:
                     return DAWN_VALIDATION_ERROR("Command disallowed outside of a pass");
             }

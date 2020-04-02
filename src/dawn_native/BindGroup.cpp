@@ -86,12 +86,14 @@ namespace dawn_native {
                     if (!texture->GetFormat().HasComponentType(bindingInfo.textureComponentType)) {
                         return DAWN_VALIDATION_ERROR("texture component type usage mismatch");
                     }
-                } break;
+                    break;
+                }
                 case wgpu::TextureUsage::Storage: {
                     if (texture->GetFormat().format != bindingInfo.storageTextureFormat) {
                         return DAWN_VALIDATION_ERROR("storage texture format mismatch");
                     }
-                } break;
+                    break;
+                }
                 default:
                     UNREACHABLE();
                     break;

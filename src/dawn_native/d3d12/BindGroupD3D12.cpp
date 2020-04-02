@@ -108,7 +108,8 @@ namespace dawn_native { namespace d3d12 {
                     d3d12Device->CreateConstantBufferView(
                         &desc, cbvSrvUavDescriptorHeapAllocation.GetCPUHandle(
                                    bindingOffsets[bindingIndex]));
-                } break;
+                    break;
+                }
                 case wgpu::BindingType::StorageBuffer: {
                     BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
 
@@ -132,7 +133,8 @@ namespace dawn_native { namespace d3d12 {
                         ToBackend(binding.buffer)->GetD3D12Resource().Get(), nullptr, &desc,
                         cbvSrvUavDescriptorHeapAllocation.GetCPUHandle(
                             bindingOffsets[bindingIndex]));
-                } break;
+                    break;
+                }
                 case wgpu::BindingType::ReadonlyStorageBuffer: {
                     BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
 
@@ -152,7 +154,8 @@ namespace dawn_native { namespace d3d12 {
                         ToBackend(binding.buffer)->GetD3D12Resource().Get(), &desc,
                         cbvSrvUavDescriptorHeapAllocation.GetCPUHandle(
                             bindingOffsets[bindingIndex]));
-                } break;
+                    break;
+                }
                 case wgpu::BindingType::SampledTexture: {
                     auto* view = ToBackend(GetBindingAsTextureView(bindingIndex));
                     auto& srv = view->GetSRVDescriptor();
@@ -160,14 +163,16 @@ namespace dawn_native { namespace d3d12 {
                         ToBackend(view->GetTexture())->GetD3D12Resource(), &srv,
                         cbvSrvUavDescriptorHeapAllocation.GetCPUHandle(
                             bindingOffsets[bindingIndex]));
-                } break;
+                    break;
+                }
                 case wgpu::BindingType::Sampler: {
                     auto* sampler = ToBackend(GetBindingAsSampler(bindingIndex));
                     auto& samplerDesc = sampler->GetSamplerDescriptor();
                     d3d12Device->CreateSampler(
                         &samplerDesc,
                         samplerDescriptorHeapAllocation.GetCPUHandle(bindingOffsets[bindingIndex]));
-                } break;
+                    break;
+                }
 
                 case wgpu::BindingType::StorageTexture:
                 case wgpu::BindingType::ReadonlyStorageTexture:
