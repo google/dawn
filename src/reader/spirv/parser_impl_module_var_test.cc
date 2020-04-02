@@ -49,7 +49,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BadStorageClass) {
   EXPECT_THAT(p->error(), HasSubstr("unknown SPIR-V storage class: 5"));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_BadPointerType) {
+TEST_F(SpvParserTest, DISABLED_ModuleScopeVar_BadPointerType) {
   auto p = parser(test::Assemble(R"(
     %float = OpTypeFloat 32
     %fn_ty = OpTypeFunction %float

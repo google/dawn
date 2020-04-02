@@ -778,8 +778,8 @@ bool ParserImpl::EmitFunction(const spvtools::opt::Function& f) {
   f.ForEachParam([this, &ast_params](const spvtools::opt::Instruction* param) {
     auto* ast_type = ConvertType(param->type_id());
     if (ast_type != nullptr) {
-      ast_params.emplace_back(std::move(MakeVariable(
-          param->result_id(), ast::StorageClass::kNone, ast_type)));
+      ast_params.emplace_back(
+          MakeVariable(param->result_id(), ast::StorageClass::kNone, ast_type));
     }
   });
   if (!success_) {
