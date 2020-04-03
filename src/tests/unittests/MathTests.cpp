@@ -82,7 +82,7 @@ TEST(Math, AlignPtr) {
 
         ASSERT_GE(aligned - unaligned, 0);
         ASSERT_LT(static_cast<size_t>(aligned - unaligned), kTestAlignment);
-        ASSERT_EQ(reinterpret_cast<uintptr_t>(aligned) & (kTestAlignment -1), 0u);
+        ASSERT_EQ(reinterpret_cast<uintptr_t>(aligned) & (kTestAlignment - 1), 0u);
     }
 }
 
@@ -190,4 +190,22 @@ TEST(Math, SRGBToLinear) {
     ASSERT_EQ(SRGBToLinear(2.0f), 1.0f);
 
     ASSERT_FLOAT_EQ(SRGBToLinear(0.5f), 0.21404114f);
+}
+
+// Tests for RoundUp
+TEST(Math, RoundUp) {
+    ASSERT_EQ(RoundUp(2, 2), 2u);
+    ASSERT_EQ(RoundUp(2, 4), 4u);
+    ASSERT_EQ(RoundUp(6, 2), 6u);
+    ASSERT_EQ(RoundUp(8, 4), 8u);
+    ASSERT_EQ(RoundUp(12, 6), 12u);
+
+    ASSERT_EQ(RoundUp(3, 3), 3u);
+    ASSERT_EQ(RoundUp(3, 5), 5u);
+    ASSERT_EQ(RoundUp(5, 3), 6u);
+    ASSERT_EQ(RoundUp(9, 5), 10u);
+
+    // Test extrema
+    ASSERT_EQ(RoundUp(0x7FFFFFFFFFFFFFFFull, 0x8000000000000000ull), 0x8000000000000000ull);
+    ASSERT_EQ(RoundUp(1, 1), 1u);
 }

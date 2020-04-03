@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 #if defined(DAWN_COMPILER_MSVC)
 #    include <intrin.h>
@@ -151,4 +152,11 @@ float SRGBToLinear(float srgb) {
     } else {
         return std::pow((srgb + 0.055f) / 1.055f, 2.4f);
     }
+}
+
+uint64_t RoundUp(uint64_t n, uint64_t m) {
+    ASSERT(m > 0);
+    ASSERT(n > 0);
+    ASSERT(m <= std::numeric_limits<uint64_t>::max() - n);
+    return ((n + m - 1) / m) * m;
 }
