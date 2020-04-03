@@ -27,7 +27,7 @@ namespace dawn_wire { namespace server {
         bool Server::Handle{{Suffix}}(const volatile char** commands, size_t* size) {
             {{Suffix}}Cmd cmd;
             DeserializeResult deserializeResult = cmd.Deserialize(commands, size, &mAllocator
-                {%- if command.has_dawn_object -%}
+                {%- if command.may_have_dawn_object -%}
                     , *this
                 {%- endif -%}
             );

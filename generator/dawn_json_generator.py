@@ -25,10 +25,14 @@ from generator_lib import Generator, run_generator, FileRender
 class Name:
     def __init__(self, name, native=False):
         self.native = native
+        self.name = name
         if native:
             self.chunks = [name]
         else:
             self.chunks = name.split(' ')
+
+    def get(self):
+        return self.name
 
     def CamelChunk(self, chunk):
         return chunk[0].upper() + chunk[1:]
@@ -145,18 +149,23 @@ class Record:
     def __init__(self, name):
         self.name = Name(name)
         self.members = []
-        self.has_dawn_object = False
+        self.may_have_dawn_object = False
 
     def update_metadata(self):
-        def has_dawn_object(member):
+        def may_have_dawn_object(member):
             if isinstance(member.type, ObjectType):
                 return True
             elif isinstance(member.type, StructureType):
-                return member.type.has_dawn_object
+                return member.type.may_have_dawn_object
             else:
                 return False
 
-        self.has_dawn_object = any(has_dawn_object(member) for member in self.members)
+        self.may_have_dawn_object = any(may_have_dawn_object(member) for member in self.members)
+
+        # set may_have_dawn_object to true if the type is chained or extensible. Chained structs
+        # may contain a Dawn object.
+        if isinstance(self, StructureType):
+            self.may_have_dawn_object = self.may_have_dawn_object or self.chained or self.extensible
 
 class StructureType(Record, Type):
     def __init__(self, name, json_data):

@@ -100,7 +100,7 @@ namespace dawn_wire {
         //* Serialize the structure and everything it points to into serializeBuffer which must be
         //* big enough to contain all the data (as queried from GetRequiredSize).
         void Serialize(char* serializeBuffer
-            {%- if command.has_dawn_object -%}
+            {%- if command.may_have_dawn_object -%}
                 , const ObjectIdProvider& objectIdProvider
             {%- endif -%}
         ) const;
@@ -113,7 +113,7 @@ namespace dawn_wire {
         //*  - Success if everything went well (yay!)
         //*  - FatalError is something bad happened (buffer too small for example)
         DeserializeResult Deserialize(const volatile char** buffer, size_t* size, DeserializeAllocator* allocator
-            {%- if command.has_dawn_object -%}
+            {%- if command.may_have_dawn_object -%}
                 , const ObjectIdResolver& resolver
             {%- endif -%}
         );

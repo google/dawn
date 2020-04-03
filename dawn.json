@@ -1237,6 +1237,13 @@
             {"name": "alpha to coverage enabled", "type": "bool", "default": "false"}
         ]
     },
+    "render pipeline descriptor dummy extension": {
+        "category": "structure",
+        "chained": true,
+        "members": [
+            {"name": "dummy stage", "type": "programmable stage descriptor"}
+        ]
+    },
     "sampler": {
         "category": "object"
     },
@@ -1254,6 +1261,13 @@
             {"name": "lod min clamp", "type": "float", "default": "0.0f"},
             {"name": "lod max clamp", "type": "float", "default": "1000.0f"},
             {"name": "compare", "type": "compare function", "default": "never"}
+        ]
+    },
+    "sampler descriptor dummy anisotropic filtering": {
+        "category": "structure",
+        "chained": true,
+        "members": [
+            {"name": "max anisotropy", "type": "float"}
         ]
     },
     "shader module": {
@@ -1376,11 +1390,13 @@
         "category": "enum",
         "javascript": false,
         "values": [
-            {"value": 0, "name": "invalid"},
+            {"value": 0, "name": "invalid", "valid": false},
             {"value": 1, "name": "surface descriptor from metal layer"},
             {"value": 2, "name": "surface descriptor from windows HWND"},
             {"value": 3, "name": "surface descriptor from xlib"},
-            {"value": 4, "name": "surface descriptor from HTML canvas id"}
+            {"value": 4, "name": "surface descriptor from HTML canvas id"},
+            {"value": 5, "name": "sampler descriptor dummy anisotropic filtering"},
+            {"value": 6, "name": "render pipeline descriptor dummy extension"}
         ]
     },
     "texture": {

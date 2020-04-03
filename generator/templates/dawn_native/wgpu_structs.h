@@ -50,7 +50,13 @@ namespace dawn_native {
                 ChainedStruct const * nextInChain = nullptr;
             {% endif %}
             {% for member in type.members %}
-                {{as_annotated_frontendType(member)}} {{render_cpp_default_value(member)}};
+                {% set member_declaration = as_annotated_frontendType(member) + render_cpp_default_value(member) %}
+                {% if type.chained and loop.first %}
+                    //* Align the first member to ChainedStruct to match the C struct layout.
+                    alignas(ChainedStruct) {{member_declaration}};
+                {% else %}
+                    {{member_declaration}};
+                {% endif %}
             {% endfor %}
         };
 
