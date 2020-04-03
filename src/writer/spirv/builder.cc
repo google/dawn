@@ -78,10 +78,7 @@ uint32_t pipeline_stage_to_execution_model(ast::PipelineStage stage) {
 
 }  // namespace
 
-Builder::Builder() {
-  // Push the global variable map onto the stack
-  variable_stack_.push_back({});
-}
+Builder::Builder() : scope_stack_({}) {}
 
 Builder::~Builder() = default;
 
@@ -233,7 +230,7 @@ bool Builder::GenerateFunction(ast::Function* func) {
   std::vector<Instruction> params;
   push_function(Function{definition_inst, result_op(), std::move(params)});
 
-  variable_stack_.push_back({});
+  scope_stack_.push_scope();
 
   for (const auto& stmt : func->body()) {
     if (!GenerateStatement(stmt.get())) {
@@ -241,7 +238,7 @@ bool Builder::GenerateFunction(ast::Function* func) {
     }
   }
 
-  variable_stack_.pop_back();
+  scope_stack_.pop_scope();
 
   func_name_to_id_[func->name()] = func_id;
   return true;
@@ -282,7 +279,7 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
       error_ = "missing constructor for constant";
       return false;
     }
-    variable_stack_.back()[var->name()] = init_id;
+    scope_stack_.set(var->name(), init_id);
     return true;
   }
 
@@ -308,7 +305,7 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
                        {Operand::Int(var_id), Operand::Int(init_id)});
   }
 
-  variable_stack_.back()[var->name()] = var_id;
+  scope_stack_.set(var->name(), var_id);
 
   return true;
 }
@@ -333,7 +330,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
       error_ = "missing constructor for constant";
       return false;
     }
-    variable_stack_[0][var->name()] = init_id;
+    scope_stack_.set_global(var->name(), init_id);
     return true;
   }
 
@@ -386,26 +383,21 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
       }
     }
   }
-  variable_stack_[0][var->name()] = var_id;
+  scope_stack_.set_global(var->name(), var_id);
   return true;
 }
 
 uint32_t Builder::GenerateIdentifierExpression(
     ast::IdentifierExpression* expr) {
-  for (auto iter = variable_stack_.rbegin(); iter != variable_stack_.rend();
-       ++iter) {
-    auto& map = *iter;
+  // TODO(dsinclair): handle names with namespaces in them ...
 
-    // TODO(dsinclair): handle names with namespaces in them ...
-
-    auto val = map.find(expr->name()[0]);
-    if (val != map.end()) {
-      return val->second;
-    }
+  uint32_t val = 0;
+  if (!scope_stack_.get(expr->name()[0], &val)) {
+    error_ = "unable to find name for identifier: " + expr->name()[0];
+    return 0;
   }
 
-  error_ = "unable to find name for identifier: " + expr->name()[0];
-  return 0;
+  return val;
 }
 
 void Builder::GenerateImport(ast::Import* imp) {

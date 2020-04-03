@@ -185,6 +185,7 @@ set(TINT_LIB_SRCS
   context.cc
   reader/reader.cc
   reader/reader.h
+  scope_stack.h
   source.h
   type_determiner.cc
   type_determiner.h
@@ -306,6 +307,7 @@ set(TINT_TEST_SRCS
   ast/unless_statement_test.cc
   ast/variable_decl_statement_test.cc
   ast/variable_test.cc
+  scope_stack_test.cc
   type_manager_test.cc
   validator_impl_import_test.cc
 )

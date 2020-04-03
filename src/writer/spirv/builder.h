@@ -25,6 +25,7 @@
 #include "src/ast/literal.h"
 #include "src/ast/module.h"
 #include "src/ast/struct_member.h"
+#include "src/scope_stack.h"
 #include "src/writer/spirv/function.h"
 #include "src/writer/spirv/instruction.h"
 
@@ -256,7 +257,7 @@ class Builder {
   std::unordered_map<std::string, uint32_t> func_name_to_id_;
   std::unordered_map<std::string, uint32_t> type_name_to_id_;
   std::unordered_map<std::string, uint32_t> const_to_id_;
-  std::vector<std::unordered_map<std::string, uint32_t>> variable_stack_;
+  ScopeStack<uint32_t> scope_stack_;
 };
 
 }  // namespace spirv
