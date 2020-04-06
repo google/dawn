@@ -28,6 +28,16 @@ deps = {
     'url': '{chromium_git}/chromium/src/third_party/binutils@01aa7745b0bab64ae22600f09fd6483c60f22ebf',
     'condition': 'dawn_standalone',
   },
+  'tools/clang/dsymutil': {
+    'packages': [
+      {
+        'package': 'chromium/llvm-build-tools/dsymutil',
+        'version': 'M56jPzDv1620Rnm__jTMYS62Zi8rxHVq7yw0qeBFEgkC',
+      }
+    ],
+    'condition': 'checkout_mac or checkout_ios',
+    'dep_type': 'cipd',
+  },
 
   # Testing, GTest and GMock
   'testing': {
