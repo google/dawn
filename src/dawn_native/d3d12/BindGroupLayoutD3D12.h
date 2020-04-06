@@ -24,13 +24,18 @@ namespace dawn_native { namespace d3d12 {
 
     class BindGroup;
     class Device;
+    class NonShaderVisibleDescriptorAllocator;
+    class CPUDescriptorHeapAllocation;
 
     class BindGroupLayout final : public BindGroupLayoutBase {
       public:
         BindGroupLayout(Device* device, const BindGroupLayoutDescriptor* descriptor);
 
-        BindGroup* AllocateBindGroup(Device* device, const BindGroupDescriptor* descriptor);
-        void DeallocateBindGroup(BindGroup* bindGroup);
+        ResultOrError<BindGroup*> AllocateBindGroup(Device* device,
+                                                    const BindGroupDescriptor* descriptor);
+        void DeallocateBindGroup(BindGroup* bindGroup,
+                                 CPUDescriptorHeapAllocation* viewAllocation,
+                                 CPUDescriptorHeapAllocation* samplerAllocation);
 
         enum DescriptorType {
             CBV,
@@ -55,6 +60,10 @@ namespace dawn_native { namespace d3d12 {
         D3D12_DESCRIPTOR_RANGE mRanges[DescriptorType::Count];
 
         SlabAllocator<BindGroup> mBindGroupAllocator;
+
+        // TODO(dawn:155): Store and bucket allocators by size on the device.
+        std::unique_ptr<NonShaderVisibleDescriptorAllocator> mSamplerAllocator;
+        std::unique_ptr<NonShaderVisibleDescriptorAllocator> mViewAllocator;
     };
 
 }}  // namespace dawn_native::d3d12

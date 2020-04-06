@@ -15,7 +15,9 @@
 #include "tests/DawnTest.h"
 
 #include "dawn_native/Toggles.h"
+#include "dawn_native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
+#include "dawn_native/d3d12/NonShaderVisibleDescriptorAllocatorD3D12.h"
 #include "dawn_native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
@@ -91,6 +93,31 @@ class D3D12DescriptorHeapTests : public DawnTest {
 
     wgpu::ShaderModule mSimpleVSModule;
     wgpu::ShaderModule mSimpleFSModule;
+};
+
+class DummyNonShaderVisibleDescriptorAllocator {
+  public:
+    DummyNonShaderVisibleDescriptorAllocator(Device* device,
+                                             uint32_t descriptorCount,
+                                             uint32_t allocationsPerHeap)
+        : mAllocator(device,
+                     descriptorCount,
+                     allocationsPerHeap * descriptorCount,
+                     D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER) {
+    }
+
+    CPUDescriptorHeapAllocation AllocateCPUDescriptors() {
+        dawn_native::ResultOrError<CPUDescriptorHeapAllocation> result =
+            mAllocator.AllocateCPUDescriptors();
+        return (result.IsSuccess()) ? result.AcquireSuccess() : CPUDescriptorHeapAllocation{};
+    }
+
+    void Deallocate(CPUDescriptorHeapAllocation& allocation) {
+        mAllocator.Deallocate(&allocation);
+    }
+
+  private:
+    NonShaderVisibleDescriptorAllocator mAllocator;
 };
 
 // Verify the shader visible heaps switch over within a single submit.
@@ -685,6 +712,157 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
         RGBA8 notFilled(0, 0, 0, 0);
         EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, 0, 0);
         EXPECT_PIXEL_RGBA8_EQ(notFilled, renderPass.color, kRTSize - 1, 0);
+    }
+}
+
+// Verify a single allocate/deallocate.
+// One non-shader visible heap will be created.
+TEST_P(D3D12DescriptorHeapTests, Single) {
+    constexpr uint32_t kDescriptorCount = 4;
+    constexpr uint32_t kAllocationsPerHeap = 3;
+    DummyNonShaderVisibleDescriptorAllocator allocator(mD3DDevice, kDescriptorCount,
+                                                       kAllocationsPerHeap);
+
+    CPUDescriptorHeapAllocation allocation = allocator.AllocateCPUDescriptors();
+    EXPECT_EQ(allocation.GetHeapIndex(), 0u);
+    EXPECT_NE(allocation.OffsetFrom(0, 0).ptr, 0u);
+
+    allocator.Deallocate(allocation);
+    EXPECT_FALSE(allocation.IsValid());
+}
+
+// Verify allocating many times causes the pool to increase in size.
+// Creates |kNumOfHeaps| non-shader visible heaps.
+TEST_P(D3D12DescriptorHeapTests, Sequential) {
+    constexpr uint32_t kDescriptorCount = 4;
+    constexpr uint32_t kAllocationsPerHeap = 3;
+    DummyNonShaderVisibleDescriptorAllocator allocator(mD3DDevice, kDescriptorCount,
+                                                       kAllocationsPerHeap);
+
+    // Allocate |kNumOfHeaps| worth.
+    constexpr uint32_t kNumOfHeaps = 2;
+
+    std::set<uint32_t> allocatedHeaps;
+
+    std::vector<CPUDescriptorHeapAllocation> allocations;
+    for (uint32_t i = 0; i < kAllocationsPerHeap * kNumOfHeaps; i++) {
+        CPUDescriptorHeapAllocation allocation = allocator.AllocateCPUDescriptors();
+        EXPECT_EQ(allocation.GetHeapIndex(), i / kAllocationsPerHeap);
+        EXPECT_NE(allocation.OffsetFrom(0, 0).ptr, 0u);
+        allocations.push_back(allocation);
+        allocatedHeaps.insert(allocation.GetHeapIndex());
+    }
+
+    EXPECT_EQ(allocatedHeaps.size(), kNumOfHeaps);
+
+    // Deallocate all.
+    for (CPUDescriptorHeapAllocation& allocation : allocations) {
+        allocator.Deallocate(allocation);
+        EXPECT_FALSE(allocation.IsValid());
+    }
+}
+
+// Verify that re-allocating a number of allocations < pool size, all heaps are reused.
+// Creates and reuses |kNumofHeaps| non-shader visible heaps.
+TEST_P(D3D12DescriptorHeapTests, ReuseFreedHeaps) {
+    constexpr uint32_t kDescriptorCount = 4;
+    constexpr uint32_t kAllocationsPerHeap = 25;
+    DummyNonShaderVisibleDescriptorAllocator allocator(mD3DDevice, kDescriptorCount,
+                                                       kAllocationsPerHeap);
+
+    constexpr uint32_t kNumofHeaps = 10;
+
+    std::list<CPUDescriptorHeapAllocation> allocations;
+    std::set<size_t> allocationPtrs;
+
+    // Allocate |kNumofHeaps| heaps worth.
+    for (uint32_t i = 0; i < kAllocationsPerHeap * kNumofHeaps; i++) {
+        CPUDescriptorHeapAllocation allocation = allocator.AllocateCPUDescriptors();
+        allocations.push_back(allocation);
+        EXPECT_TRUE(allocationPtrs.insert(allocation.OffsetFrom(0, 0).ptr).second);
+    }
+
+    // Deallocate all.
+    for (CPUDescriptorHeapAllocation& allocation : allocations) {
+        allocator.Deallocate(allocation);
+        EXPECT_FALSE(allocation.IsValid());
+    }
+
+    allocations.clear();
+
+    // Re-allocate all again.
+    std::set<size_t> reallocatedPtrs;
+    for (uint32_t i = 0; i < kAllocationsPerHeap * kNumofHeaps; i++) {
+        CPUDescriptorHeapAllocation allocation = allocator.AllocateCPUDescriptors();
+        allocations.push_back(allocation);
+        EXPECT_TRUE(reallocatedPtrs.insert(allocation.OffsetFrom(0, 0).ptr).second);
+        EXPECT_TRUE(std::find(allocationPtrs.begin(), allocationPtrs.end(),
+                              allocation.OffsetFrom(0, 0).ptr) != allocationPtrs.end());
+    }
+
+    // Deallocate all again.
+    for (CPUDescriptorHeapAllocation& allocation : allocations) {
+        allocator.Deallocate(allocation);
+        EXPECT_FALSE(allocation.IsValid());
+    }
+}
+
+// Verify allocating then deallocating many times.
+TEST_P(D3D12DescriptorHeapTests, AllocateDeallocateMany) {
+    constexpr uint32_t kDescriptorCount = 4;
+    constexpr uint32_t kAllocationsPerHeap = 25;
+    DummyNonShaderVisibleDescriptorAllocator allocator(mD3DDevice, kDescriptorCount,
+                                                       kAllocationsPerHeap);
+
+    std::list<CPUDescriptorHeapAllocation> list3;
+    std::list<CPUDescriptorHeapAllocation> list5;
+    std::list<CPUDescriptorHeapAllocation> allocations;
+
+    constexpr uint32_t kNumofHeaps = 2;
+
+    // Allocate |kNumofHeaps| heaps worth.
+    for (uint32_t i = 0; i < kAllocationsPerHeap * kNumofHeaps; i++) {
+        CPUDescriptorHeapAllocation allocation = allocator.AllocateCPUDescriptors();
+        EXPECT_NE(allocation.OffsetFrom(0, 0).ptr, 0u);
+        if (i % 3 == 0) {
+            list3.push_back(allocation);
+        } else {
+            allocations.push_back(allocation);
+        }
+    }
+
+    // Deallocate every 3rd allocation.
+    for (auto it = list3.begin(); it != list3.end(); it = list3.erase(it)) {
+        allocator.Deallocate(*it);
+    }
+
+    // Allocate again.
+    for (uint32_t i = 0; i < kAllocationsPerHeap * kNumofHeaps; i++) {
+        CPUDescriptorHeapAllocation allocation = allocator.AllocateCPUDescriptors();
+        EXPECT_NE(allocation.OffsetFrom(0, 0).ptr, 0u);
+        if (i % 5 == 0) {
+            list5.push_back(allocation);
+        } else {
+            allocations.push_back(allocation);
+        }
+    }
+
+    // Deallocate every 5th allocation.
+    for (auto it = list5.begin(); it != list5.end(); it = list5.erase(it)) {
+        allocator.Deallocate(*it);
+    }
+
+    // Allocate again.
+    for (uint32_t i = 0; i < kAllocationsPerHeap * kNumofHeaps; i++) {
+        CPUDescriptorHeapAllocation allocation = allocator.AllocateCPUDescriptors();
+        EXPECT_NE(allocation.OffsetFrom(0, 0).ptr, 0u);
+        allocations.push_back(allocation);
+    }
+
+    // Deallocate remaining.
+    for (CPUDescriptorHeapAllocation& allocation : allocations) {
+        allocator.Deallocate(allocation);
+        EXPECT_FALSE(allocation.IsValid());
     }
 }
 

@@ -43,6 +43,10 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("Buffer binding size larger than the buffer");
             }
 
+            if (bindingSize == 0) {
+                return DAWN_VALIDATION_ERROR("Buffer binding size cannot be zero.");
+            }
+
             // Note that no overflow can happen because we already checked that
             // bufferSize >= bindingSize
             if (binding.offset > bufferSize - bindingSize) {

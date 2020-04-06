@@ -240,7 +240,7 @@ TEST_F(BindGroupValidationTest, BufferBindingType) {
     binding.textureView = nullptr;
     binding.buffer = nullptr;
     binding.offset = 0;
-    binding.size = 0;
+    binding.size = 1024;
 
     wgpu::BindGroupDescriptor descriptor;
     descriptor.layout = layout;
@@ -421,7 +421,9 @@ TEST_F(BindGroupValidationTest, BufferBindingOOB) {
 
     // Success case, touching the end of the buffer works
     utils::MakeBindGroup(device, layout, {{0, buffer, 3*256, 256}});
-    utils::MakeBindGroup(device, layout, {{0, buffer, 1024, 0}});
+
+    // Error case, zero size is invalid.
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 1024, 0}}));
 
     // Success case, touching the full buffer works
     utils::MakeBindGroup(device, layout, {{0, buffer, 0, 1024}});
