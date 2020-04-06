@@ -18,9 +18,12 @@ again.
 ## Code reviews
 
 All submissions, including submissions by project members, require review. We
-use GitHub pull requests for this purpose. Consult
-[GitHub Help](https://help.github.com/articles/about-pull-requests/) for more
-information on using pull requests.
+use [Dawn's Gerrit](https://dawn-review.googlesource.com/) for this purpose.
+
+Tint generally follows the Google C++ style guide. There is a clang-format file
+provided and a `tools/format` script which will run the formatter. There is also
+a `tools/lint` script to run a linter. Overall try to use the same style and
+convention as code around your change.
 
 ## Community Guidelines
 
