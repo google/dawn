@@ -46,9 +46,6 @@ namespace dawn_native { namespace d3d12 {
     Device::Device(Adapter* adapter, const DeviceDescriptor* descriptor)
         : DeviceBase(adapter, descriptor) {
         InitTogglesFromDriver();
-        if (descriptor != nullptr) {
-            ApplyToggleOverrides(descriptor);
-        }
     }
 
     MaybeError Device::Initialize() {

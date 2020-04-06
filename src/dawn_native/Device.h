@@ -195,7 +195,7 @@ namespace dawn_native {
 
       protected:
         void SetToggle(Toggle toggle, bool isEnabled);
-        void ApplyToggleOverrides(const DeviceDescriptor* deviceDescriptor);
+        void ForceSetToggle(Toggle toggle, bool isEnabled);
         void BaseDestructor();
 
         std::unique_ptr<DynamicUploader> mDynamicUploader;
@@ -263,6 +263,7 @@ namespace dawn_native {
                                              TextureBase* texture,
                                              const TextureViewDescriptor* descriptor);
 
+        void ApplyToggleOverrides(const DeviceDescriptor* deviceDescriptor);
         void ApplyExtensions(const DeviceDescriptor* deviceDescriptor);
 
         void SetDefaultToggles();
@@ -309,6 +310,7 @@ namespace dawn_native {
         FormatTable mFormatTable;
 
         TogglesSet mEnabledToggles;
+        TogglesSet mOverridenToggles;
         size_t mLazyClearCountForTesting = 0;
 
         ExtensionsSet mEnabledExtensions;

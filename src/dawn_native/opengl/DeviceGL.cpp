@@ -38,9 +38,6 @@ namespace dawn_native { namespace opengl {
                    const OpenGLFunctions& functions)
         : DeviceBase(adapter, descriptor), gl(functions) {
         InitTogglesFromDriver();
-        if (descriptor != nullptr) {
-            ApplyToggleOverrides(descriptor);
-        }
         mFormatTable = BuildGLFormatTable();
     }
 

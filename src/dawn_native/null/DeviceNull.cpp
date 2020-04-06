@@ -80,10 +80,6 @@ namespace dawn_native { namespace null {
 
     Device::Device(Adapter* adapter, const DeviceDescriptor* descriptor)
         : DeviceBase(adapter, descriptor) {
-        // Apply toggle overrides if necessary for test
-        if (descriptor != nullptr) {
-            ApplyToggleOverrides(descriptor);
-        }
     }
 
     Device::~Device() {

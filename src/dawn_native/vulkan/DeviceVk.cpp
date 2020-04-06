@@ -47,9 +47,6 @@ namespace dawn_native { namespace vulkan {
     Device::Device(Adapter* adapter, const DeviceDescriptor* descriptor)
         : DeviceBase(adapter, descriptor) {
         InitTogglesFromDriver();
-        if (descriptor != nullptr) {
-            ApplyToggleOverrides(descriptor);
-        }
 
         // Set the device as lost until successfully created.
         mLossStatus = LossStatus::AlreadyLost;
@@ -460,10 +457,10 @@ namespace dawn_native { namespace vulkan {
         ASSERT(supportsD32s8 || supportsD24s8);
 
         if (!supportsD24s8) {
-            SetToggle(Toggle::VulkanUseD32S8, true);
+            ForceSetToggle(Toggle::VulkanUseD32S8, true);
         }
         if (!supportsD32s8) {
-            SetToggle(Toggle::VulkanUseD32S8, false);
+            ForceSetToggle(Toggle::VulkanUseD32S8, false);
         }
     }
 

@@ -14,6 +14,7 @@
 
 #include "dawn_native/Device.h"
 
+#include "common/Log.h"
 #include "dawn_native/Adapter.h"
 #include "dawn_native/AttachmentState.h"
 #include "dawn_native/BindGroup.h"
@@ -72,13 +73,14 @@ namespace dawn_native {
         mErrorScopeTracker = std::make_unique<ErrorScopeTracker>(this);
         mFenceSignalTracker = std::make_unique<FenceSignalTracker>(this);
         mDynamicUploader = std::make_unique<DynamicUploader>(this);
-        SetDefaultToggles();
 
         if (descriptor != nullptr) {
+            ApplyToggleOverrides(descriptor);
             ApplyExtensions(descriptor);
         }
-
         mFormatTable = BuildFormatTable(this);
+
+        SetDefaultToggles();
     }
 
     DeviceBase::~DeviceBase() {
@@ -655,23 +657,6 @@ namespace dawn_native {
         }
     }
 
-    void DeviceBase::ApplyToggleOverrides(const DeviceDescriptor* deviceDescriptor) {
-        ASSERT(deviceDescriptor);
-
-        for (const char* toggleName : deviceDescriptor->forceEnabledToggles) {
-            Toggle toggle = GetAdapter()->GetInstance()->ToggleNameToEnum(toggleName);
-            if (toggle != Toggle::InvalidEnum) {
-                mEnabledToggles.Set(toggle, true);
-            }
-        }
-        for (const char* toggleName : deviceDescriptor->forceDisabledToggles) {
-            Toggle toggle = GetAdapter()->GetInstance()->ToggleNameToEnum(toggleName);
-            if (toggle != Toggle::InvalidEnum) {
-                mEnabledToggles.Set(toggle, false);
-            }
-        }
-    }
-
     void DeviceBase::ApplyExtensions(const DeviceDescriptor* deviceDescriptor) {
         ASSERT(deviceDescriptor);
         ASSERT(GetAdapter()->SupportsAllRequestedExtensions(deviceDescriptor->requiredExtensions));
@@ -684,16 +669,8 @@ namespace dawn_native {
         return mEnabledExtensions.GetEnabledExtensionNames();
     }
 
-    std::vector<const char*> DeviceBase::GetTogglesUsed() const {
-        return mEnabledToggles.GetContainedToggleNames();
-    }
-
     bool DeviceBase::IsExtensionEnabled(Extension extension) const {
         return mEnabledExtensions.IsEnabled(extension);
-    }
-
-    bool DeviceBase::IsToggleEnabled(Toggle toggle) const {
-        return mEnabledToggles.Has(toggle);
     }
 
     bool DeviceBase::IsValidationEnabled() const {
@@ -706,12 +683,6 @@ namespace dawn_native {
 
     void DeviceBase::IncrementLazyClearCountForTesting() {
         ++mLazyClearCountForTesting;
-    }
-
-    void DeviceBase::SetDefaultToggles() {
-        // Sets the default-enabled toggles
-        mEnabledToggles.Set(Toggle::LazyClearResourceOnFirstUse, true);
-        mEnabledToggles.Set(Toggle::UseSpvc, false);
     }
 
     // Implementation details of object creation
@@ -912,8 +883,52 @@ namespace dawn_native {
         return mDynamicUploader.get();
     }
 
+    // The Toggle device facility
+
+    std::vector<const char*> DeviceBase::GetTogglesUsed() const {
+        return mEnabledToggles.GetContainedToggleNames();
+    }
+
+    bool DeviceBase::IsToggleEnabled(Toggle toggle) const {
+        return mEnabledToggles.Has(toggle);
+    }
+
     void DeviceBase::SetToggle(Toggle toggle, bool isEnabled) {
+        if (!mOverridenToggles.Has(toggle)) {
+            mEnabledToggles.Set(toggle, isEnabled);
+        }
+    }
+
+    void DeviceBase::ForceSetToggle(Toggle toggle, bool isEnabled) {
+        if (!mOverridenToggles.Has(toggle) && mEnabledToggles.Has(toggle) != isEnabled) {
+            dawn::WarningLog() << "Forcing toggle \"" << ToggleEnumToName(toggle) << "\" to "
+                               << isEnabled << "when it was overriden to be " << !isEnabled;
+        }
         mEnabledToggles.Set(toggle, isEnabled);
+    }
+
+    void DeviceBase::SetDefaultToggles() {
+        SetToggle(Toggle::LazyClearResourceOnFirstUse, true);
+        SetToggle(Toggle::UseSpvc, false);
+    }
+
+    void DeviceBase::ApplyToggleOverrides(const DeviceDescriptor* deviceDescriptor) {
+        ASSERT(deviceDescriptor);
+
+        for (const char* toggleName : deviceDescriptor->forceEnabledToggles) {
+            Toggle toggle = GetAdapter()->GetInstance()->ToggleNameToEnum(toggleName);
+            if (toggle != Toggle::InvalidEnum) {
+                mEnabledToggles.Set(toggle, true);
+                mOverridenToggles.Set(toggle, true);
+            }
+        }
+        for (const char* toggleName : deviceDescriptor->forceDisabledToggles) {
+            Toggle toggle = GetAdapter()->GetInstance()->ToggleNameToEnum(toggleName);
+            if (toggle != Toggle::InvalidEnum) {
+                mEnabledToggles.Set(toggle, false);
+                mOverridenToggles.Set(toggle, true);
+            }
+        }
     }
 
 }  // namespace dawn_native

@@ -49,9 +49,6 @@ namespace dawn_native { namespace metal {
         mCommandQueue = [mMtlDevice newCommandQueue];
 
         InitTogglesFromDriver();
-        if (descriptor != nil) {
-            ApplyToggleOverrides(descriptor);
-        }
     }
 
     Device::~Device() {
