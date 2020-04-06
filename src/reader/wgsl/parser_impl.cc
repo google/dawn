@@ -808,7 +808,7 @@ ast::type::Type* ParserImpl::type_decl_pointer(Token t) {
 ast::type::Type* ParserImpl::type_decl_vector(Token t) {
   next();  // Consume the peek
 
-  size_t count = 2;
+  uint32_t count = 2;
   if (t.IsVec3())
     count = 3;
   else if (t.IsVec4())
@@ -856,7 +856,7 @@ ast::type::Type* ParserImpl::type_decl_array(Token t) {
   }
 
   t = next();
-  size_t size = 0;
+  uint32_t size = 0;
   if (t.IsComma()) {
     t = next();
     if (!t.IsIntLiteral()) {
@@ -867,7 +867,7 @@ ast::type::Type* ParserImpl::type_decl_array(Token t) {
       set_error(t, "invalid size for array declaration");
       return nullptr;
     }
-    size = static_cast<size_t>(t.to_i32());
+    size = static_cast<uint32_t>(t.to_i32());
     t = next();
   }
   if (!t.IsGreaterThan()) {
@@ -882,8 +882,8 @@ ast::type::Type* ParserImpl::type_decl_array(Token t) {
 ast::type::Type* ParserImpl::type_decl_matrix(Token t) {
   next();  // Consume the peek
 
-  size_t rows = 2;
-  size_t columns = 2;
+  uint32_t rows = 2;
+  uint32_t columns = 2;
   if (t.IsMat3x2() || t.IsMat3x3() || t.IsMat3x4()) {
     rows = 3;
   } else if (t.IsMat4x2() || t.IsMat4x3() || t.IsMat4x4()) {
@@ -1181,8 +1181,7 @@ ParserImpl::struct_member_decoration() {
     return nullptr;
   }
 
-  return std::make_unique<ast::StructMemberOffsetDecoration>(
-      static_cast<size_t>(val));
+  return std::make_unique<ast::StructMemberOffsetDecoration>(val);
 }
 
 // function_decl

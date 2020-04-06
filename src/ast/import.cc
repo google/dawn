@@ -14,6 +14,8 @@
 
 #include "src/ast/import.h"
 
+#include <cctype>
+
 namespace tint {
 namespace ast {
 

@@ -37,7 +37,7 @@ TEST_F(ScopeStackTest, Global_SetWithPointer) {
   ScopeStack<ast::Variable*> s;
   s.set_global("var", &v);
 
-  ast::Variable* v2;
+  ast::Variable* v2 = nullptr;
   EXPECT_TRUE(s.get("var", &v2));
   EXPECT_EQ(v2->name(), "my_var");
 }
