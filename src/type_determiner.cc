@@ -23,8 +23,62 @@ TypeDeterminer::TypeDeterminer(Context* ctx) : ctx_(*ctx) {
 
 TypeDeterminer::~TypeDeterminer() = default;
 
-bool TypeDeterminer::Determine(ast::Module*) {
+bool TypeDeterminer::Determine(ast::Module* mod) {
+  for (const auto& var : mod->global_variables()) {
+    variable_stack_.set_global(var->name(), var.get());
+  }
+
+  for (const auto& func : mod->functions()) {
+    name_to_function_[func->name()] = func.get();
+  }
+
+  if (!DetermineFunctions(mod->functions())) {
+    return false;
+  }
   return true;
+}
+
+bool TypeDeterminer::DetermineFunctions(const ast::FunctionList& funcs) {
+  for (const auto& func : funcs) {
+    if (!DetermineFunction(func.get())) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool TypeDeterminer::DetermineFunction(ast::Function* func) {
+  variable_stack_.push_scope();
+  if (!DetermineResultType(func->body())) {
+    return false;
+  }
+  variable_stack_.pop_scope();
+
+  return true;
+}
+
+bool TypeDeterminer::DetermineResultType(const ast::StatementList& stmts) {
+  for (const auto& stmt : stmts) {
+    if (!DetermineResultType(stmt.get())) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool TypeDeterminer::DetermineResultType(ast::Statement*) {
+  error_ = "unknown statement type for type determination";
+  return false;
+}
+
+bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
+  // This is blindly called above, so in some cases the expression won't exist.
+  if (!expr) {
+    return true;
+  }
+
+  error_ = "unknown expression for type determination";
+  return false;
 }
 
 }  // namespace tint

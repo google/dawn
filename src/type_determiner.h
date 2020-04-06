@@ -38,13 +38,33 @@ class TypeDeterminer {
   explicit TypeDeterminer(Context* ctx);
   ~TypeDeterminer();
 
-  /// Runs the type determiner
-  /// @param module the module to update with typing information
-  /// @returns true if the type determiner was successful
-  bool Determine(ast::Module* module);
-
   /// @returns error messages from the type determiner
   const std::string& error() { return error_; }
+
+  /// Runs the type determiner
+  /// @param mod the module to update with typing information
+  /// @returns true if the type determiner was successful
+  bool Determine(ast::Module* mod);
+  /// Determines type information for functions
+  /// @param funcs the functions to check
+  /// @returns true if the determination was successful
+  bool DetermineFunctions(const ast::FunctionList& funcs);
+  /// Determines type information for a function
+  /// @param func the function to check
+  /// @returns true if the determination was successful
+  bool DetermineFunction(ast::Function* func);
+  /// Determines type information for a set of statements
+  /// @param stmts the statements to check
+  /// @returns true if the determination was successful
+  bool DetermineResultType(const ast::StatementList& stmts);
+  /// Determines type information for a statement
+  /// @param stmt the statement to check
+  /// @returns true if the determination was successful
+  bool DetermineResultType(ast::Statement* stmt);
+  /// Determines type information for an expression
+  /// @param expr the expression to check
+  /// @returns true if the determination was successful
+  bool DetermineResultType(ast::Expression* expr);
 
  private:
   Context& ctx_;
