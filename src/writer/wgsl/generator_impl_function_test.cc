@@ -30,7 +30,7 @@ namespace {
 using GeneratorImplTest = testing::Test;
 
 TEST_F(GeneratorImplTest, Emit_Function) {
-  std::vector<std::unique_ptr<ast::Statement>> body;
+  ast::StatementList body;
   body.push_back(std::make_unique<ast::KillStatement>());
   body.push_back(std::make_unique<ast::ReturnStatement>());
 
@@ -50,13 +50,13 @@ TEST_F(GeneratorImplTest, Emit_Function) {
 }
 
 TEST_F(GeneratorImplTest, Emit_Function_WithParams) {
-  std::vector<std::unique_ptr<ast::Statement>> body;
+  ast::StatementList body;
   body.push_back(std::make_unique<ast::KillStatement>());
   body.push_back(std::make_unique<ast::ReturnStatement>());
 
   ast::type::F32Type f32;
   ast::type::I32Type i32;
-  std::vector<std::unique_ptr<ast::Variable>> params;
+  ast::VariableList params;
   params.push_back(
       std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32));
   params.push_back(

@@ -20,12 +20,12 @@ namespace ast {
 CallExpression::CallExpression() : Expression() {}
 
 CallExpression::CallExpression(std::unique_ptr<Expression> func,
-                               std::vector<std::unique_ptr<Expression>> params)
+                               ExpressionList params)
     : Expression(), func_(std::move(func)), params_(std::move(params)) {}
 
 CallExpression::CallExpression(const Source& source,
                                std::unique_ptr<Expression> func,
-                               std::vector<std::unique_ptr<Expression>> params)
+                               ExpressionList params)
     : Expression(source), func_(std::move(func)), params_(std::move(params)) {}
 
 CallExpression::~CallExpression() = default;

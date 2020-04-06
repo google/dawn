@@ -17,8 +17,8 @@
 
 #include <memory>
 #include <utility>
-#include <vector>
 
+#include "src/ast/case_statement.h"
 #include "src/ast/expression.h"
 #include "src/ast/literal.h"
 #include "src/ast/statement.h"
@@ -36,14 +36,14 @@ class SwitchStatement : public Statement {
   /// @param condition the switch condition
   /// @param body the switch body
   SwitchStatement(std::unique_ptr<Expression> condition,
-                  std::vector<std::unique_ptr<CaseStatement>> body);
+                  CaseStatementList body);
   /// Constructor
   /// @param source the source information
   /// @param condition the switch condition
   /// @param body the switch body
   SwitchStatement(const Source& source,
                   std::unique_ptr<Expression> condition,
-                  std::vector<std::unique_ptr<CaseStatement>> body);
+                  CaseStatementList body);
   /// Move constructor
   SwitchStatement(SwitchStatement&&) = default;
   ~SwitchStatement() override;
@@ -60,13 +60,9 @@ class SwitchStatement : public Statement {
 
   /// Sets the switch body
   /// @param body the switch body
-  void set_body(std::vector<std::unique_ptr<CaseStatement>> body) {
-    body_ = std::move(body);
-  }
+  void set_body(CaseStatementList body) { body_ = std::move(body); }
   /// @returns the Switch body
-  const std::vector<std::unique_ptr<CaseStatement>>& body() const {
-    return body_;
-  }
+  const CaseStatementList& body() const { return body_; }
 
   /// @returns true if this is a switch statement
   bool IsSwitch() const override { return true; }
@@ -83,7 +79,7 @@ class SwitchStatement : public Statement {
   SwitchStatement(const SwitchStatement&) = delete;
 
   std::unique_ptr<Expression> condition_;
-  std::vector<std::unique_ptr<CaseStatement>> body_;
+  CaseStatementList body_;
 };
 
 }  // namespace ast

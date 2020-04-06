@@ -32,24 +32,22 @@ class ElseStatement : public Statement {
   ElseStatement();
   /// Constructor
   /// @param body the else body
-  explicit ElseStatement(std::vector<std::unique_ptr<Statement>> body);
+  explicit ElseStatement(StatementList body);
   /// Constructor
   /// @param condition the else condition
   /// @param body the else body
-  ElseStatement(std::unique_ptr<Expression> condition,
-                std::vector<std::unique_ptr<Statement>> body);
+  ElseStatement(std::unique_ptr<Expression> condition, StatementList body);
   /// Constructor
   /// @param source the source information
   /// @param body the else body
-  ElseStatement(const Source& source,
-                std::vector<std::unique_ptr<Statement>> body);
+  ElseStatement(const Source& source, StatementList body);
   /// Constructor
   /// @param source the source information
   /// @param condition the else condition
   /// @param body the else body
   ElseStatement(const Source& source,
                 std::unique_ptr<Expression> condition,
-                std::vector<std::unique_ptr<Statement>> body);
+                StatementList body);
   /// Move constructor
   ElseStatement(ElseStatement&&) = default;
   ~ElseStatement() override;
@@ -66,11 +64,9 @@ class ElseStatement : public Statement {
 
   /// Sets the else body
   /// @param body the else body
-  void set_body(std::vector<std::unique_ptr<Statement>> body) {
-    body_ = std::move(body);
-  }
+  void set_body(StatementList body) { body_ = std::move(body); }
   /// @returns the else body
-  const std::vector<std::unique_ptr<Statement>>& body() const { return body_; }
+  const StatementList& body() const { return body_; }
 
   /// @returns true if this is a else statement
   bool IsElse() const override { return true; }
@@ -87,8 +83,11 @@ class ElseStatement : public Statement {
   ElseStatement(const ElseStatement&) = delete;
 
   std::unique_ptr<Expression> condition_;
-  std::vector<std::unique_ptr<Statement>> body_;
+  StatementList body_;
 };
+
+/// A list of unique else statements
+using ElseStatementList = std::vector<std::unique_ptr<ElseStatement>>;
 
 }  // namespace ast
 }  // namespace tint

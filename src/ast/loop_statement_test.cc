@@ -14,6 +14,7 @@
 
 #include "src/ast/loop_statement.h"
 
+#include <memory>
 #include <sstream>
 
 #include "gtest/gtest.h"
@@ -28,11 +29,11 @@ namespace {
 using LoopStatementTest = testing::Test;
 
 TEST_F(LoopStatementTest, Creation) {
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<KillStatement>());
   auto b_ptr = body[0].get();
 
-  std::vector<std::unique_ptr<Statement>> continuing;
+  StatementList continuing;
   continuing.push_back(std::make_unique<NopStatement>());
   auto c_ptr = continuing[0].get();
 
@@ -44,10 +45,10 @@ TEST_F(LoopStatementTest, Creation) {
 }
 
 TEST_F(LoopStatementTest, Creation_WithSource) {
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<KillStatement>());
 
-  std::vector<std::unique_ptr<Statement>> continuing;
+  StatementList continuing;
   continuing.push_back(std::make_unique<NopStatement>());
 
   LoopStatement l(Source{20, 2}, std::move(body), std::move(continuing));
@@ -62,7 +63,7 @@ TEST_F(LoopStatementTest, IsLoop) {
 }
 
 TEST_F(LoopStatementTest, HasContinuing_WithoutContinuing) {
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<KillStatement>());
 
   LoopStatement l(std::move(body), {});
@@ -70,10 +71,10 @@ TEST_F(LoopStatementTest, HasContinuing_WithoutContinuing) {
 }
 
 TEST_F(LoopStatementTest, HasContinuing_WithContinuing) {
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<KillStatement>());
 
-  std::vector<std::unique_ptr<Statement>> continuing;
+  StatementList continuing;
   continuing.push_back(std::make_unique<NopStatement>());
 
   LoopStatement l(std::move(body), std::move(continuing));
@@ -81,10 +82,10 @@ TEST_F(LoopStatementTest, HasContinuing_WithContinuing) {
 }
 
 TEST_F(LoopStatementTest, IsValid) {
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<KillStatement>());
 
-  std::vector<std::unique_ptr<Statement>> continuing;
+  StatementList continuing;
   continuing.push_back(std::make_unique<NopStatement>());
 
   LoopStatement l(std::move(body), std::move(continuing));
@@ -92,7 +93,7 @@ TEST_F(LoopStatementTest, IsValid) {
 }
 
 TEST_F(LoopStatementTest, IsValid_WithoutContinuing) {
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<KillStatement>());
 
   LoopStatement l(std::move(body), {});
@@ -105,11 +106,11 @@ TEST_F(LoopStatementTest, IsValid_WithoutBody) {
 }
 
 TEST_F(LoopStatementTest, IsValid_NullBodyStatement) {
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<KillStatement>());
   body.push_back(nullptr);
 
-  std::vector<std::unique_ptr<Statement>> continuing;
+  StatementList continuing;
   continuing.push_back(std::make_unique<NopStatement>());
 
   LoopStatement l(std::move(body), std::move(continuing));
@@ -117,11 +118,11 @@ TEST_F(LoopStatementTest, IsValid_NullBodyStatement) {
 }
 
 TEST_F(LoopStatementTest, IsValid_InvalidBodyStatement) {
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<KillStatement>());
   body.push_back(std::make_unique<IfStatement>());
 
-  std::vector<std::unique_ptr<Statement>> continuing;
+  StatementList continuing;
   continuing.push_back(std::make_unique<NopStatement>());
 
   LoopStatement l(std::move(body), std::move(continuing));
@@ -129,10 +130,10 @@ TEST_F(LoopStatementTest, IsValid_InvalidBodyStatement) {
 }
 
 TEST_F(LoopStatementTest, IsValid_NullContinuingStatement) {
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<KillStatement>());
 
-  std::vector<std::unique_ptr<Statement>> continuing;
+  StatementList continuing;
   continuing.push_back(std::make_unique<NopStatement>());
   continuing.push_back(nullptr);
 
@@ -141,10 +142,10 @@ TEST_F(LoopStatementTest, IsValid_NullContinuingStatement) {
 }
 
 TEST_F(LoopStatementTest, IsValid_InvalidContinuingStatement) {
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<KillStatement>());
 
-  std::vector<std::unique_ptr<Statement>> continuing;
+  StatementList continuing;
   continuing.push_back(std::make_unique<NopStatement>());
   continuing.push_back(std::make_unique<IfStatement>());
 
@@ -153,7 +154,7 @@ TEST_F(LoopStatementTest, IsValid_InvalidContinuingStatement) {
 }
 
 TEST_F(LoopStatementTest, ToStr) {
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<KillStatement>());
 
   LoopStatement l(std::move(body), {});
@@ -166,10 +167,10 @@ TEST_F(LoopStatementTest, ToStr) {
 }
 
 TEST_F(LoopStatementTest, ToStr_WithContinuing) {
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<KillStatement>());
 
-  std::vector<std::unique_ptr<Statement>> continuing;
+  StatementList continuing;
   continuing.push_back(std::make_unique<NopStatement>());
 
   LoopStatement l(std::move(body), std::move(continuing));

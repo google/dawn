@@ -37,20 +37,18 @@ class StructMember : public Node {
   /// @param name The struct member name
   /// @param type The struct member type
   /// @param decorations The struct member decorations
-  StructMember(
-      const std::string& name,
-      type::Type* type,
-      std::vector<std::unique_ptr<StructMemberDecoration>> decorations);
+  StructMember(const std::string& name,
+               type::Type* type,
+               StructMemberDecorationList decorations);
   /// Create a new struct member statement
   /// @param source The input source for the struct member statement
   /// @param name The struct member name
   /// @param type The struct member type
   /// @param decorations The struct member decorations
-  StructMember(
-      const Source& source,
-      const std::string& name,
-      type::Type* type,
-      std::vector<std::unique_ptr<StructMemberDecoration>> decorations);
+  StructMember(const Source& source,
+               const std::string& name,
+               type::Type* type,
+               StructMemberDecorationList decorations);
   /// Move constructor
   StructMember(StructMember&&) = default;
 
@@ -68,15 +66,11 @@ class StructMember : public Node {
   type::Type* type() const { return type_; }
   /// Sets the decorations
   /// @param decorations the decorations
-  void set_decorations(
-      std::vector<std::unique_ptr<StructMemberDecoration>> decorations) {
+  void set_decorations(StructMemberDecorationList decorations) {
     decorations_ = std::move(decorations);
   }
   /// @returns the decorations
-  const std::vector<std::unique_ptr<StructMemberDecoration>>& decorations()
-      const {
-    return decorations_;
-  }
+  const StructMemberDecorationList& decorations() const { return decorations_; }
 
   /// @returns true if the node is valid
   bool IsValid() const override;
@@ -91,8 +85,11 @@ class StructMember : public Node {
 
   std::string name_;
   type::Type* type_ = nullptr;
-  std::vector<std::unique_ptr<StructMemberDecoration>> decorations_;
+  StructMemberDecorationList decorations_;
 };
+
+/// A list of unique struct members
+using StructMemberList = std::vector<std::unique_ptr<StructMember>>;
 
 }  // namespace ast
 }  // namespace tint

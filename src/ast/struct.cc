@@ -19,13 +19,12 @@ namespace ast {
 
 Struct::Struct() : Node() {}
 
-Struct::Struct(StructDecoration decoration,
-               std::vector<std::unique_ptr<StructMember>> members)
+Struct::Struct(StructDecoration decoration, StructMemberList members)
     : Node(), decoration_(decoration), members_(std::move(members)) {}
 
 Struct::Struct(const Source& source,
                StructDecoration decoration,
-               std::vector<std::unique_ptr<StructMember>> members)
+               StructMemberList members)
     : Node(source), decoration_(decoration), members_(std::move(members)) {}
 
 Struct::~Struct() = default;

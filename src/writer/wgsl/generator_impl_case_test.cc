@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include <memory>
-#include <vector>
 
 #include "gtest/gtest.h"
 #include "src/ast/break_statement.h"
@@ -34,7 +33,7 @@ TEST_F(GeneratorImplTest, Emit_Case) {
   ast::type::I32Type i32;
   auto cond = std::make_unique<ast::IntLiteral>(&i32, 5);
 
-  std::vector<std::unique_ptr<ast::Statement>> body;
+  ast::StatementList body;
   body.push_back(std::make_unique<ast::BreakStatement>());
 
   ast::CaseStatement c(std::move(cond), std::move(body));
@@ -52,7 +51,7 @@ TEST_F(GeneratorImplTest, Emit_Case) {
 TEST_F(GeneratorImplTest, Emit_Case_Default) {
   ast::CaseStatement c;
 
-  std::vector<std::unique_ptr<ast::Statement>> body;
+  ast::StatementList body;
   body.push_back(std::make_unique<ast::BreakStatement>());
 
   c.set_body(std::move(body));

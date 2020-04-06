@@ -29,7 +29,7 @@ using StructMemberTest = testing::Test;
 
 TEST_F(StructMemberTest, Creation) {
   type::I32Type i32;
-  std::vector<std::unique_ptr<StructMemberDecoration>> decorations;
+  StructMemberDecorationList decorations;
   decorations.emplace_back(std::make_unique<StructMemberOffsetDecoration>(4));
 
   StructMember st{"a", &i32, std::move(decorations)};
@@ -72,7 +72,7 @@ TEST_F(StructMemberTest, IsValid_NullType) {
 
 TEST_F(StructMemberTest, IsValid_Null_Decoration) {
   type::I32Type i32;
-  std::vector<std::unique_ptr<StructMemberDecoration>> decorations;
+  StructMemberDecorationList decorations;
   decorations.emplace_back(std::make_unique<StructMemberOffsetDecoration>(4));
   decorations.push_back(nullptr);
 
@@ -82,7 +82,7 @@ TEST_F(StructMemberTest, IsValid_Null_Decoration) {
 
 TEST_F(StructMemberTest, ToStr) {
   type::I32Type i32;
-  std::vector<std::unique_ptr<StructMemberDecoration>> decorations;
+  StructMemberDecorationList decorations;
   decorations.emplace_back(std::make_unique<StructMemberOffsetDecoration>(4));
 
   StructMember st{"a", &i32, std::move(decorations)};

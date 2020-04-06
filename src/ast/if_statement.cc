@@ -22,12 +22,12 @@ namespace ast {
 IfStatement::IfStatement() : Statement() {}
 
 IfStatement::IfStatement(std::unique_ptr<Expression> condition,
-                         std::vector<std::unique_ptr<Statement>> body)
+                         StatementList body)
     : Statement(), condition_(std::move(condition)), body_(std::move(body)) {}
 
 IfStatement::IfStatement(const Source& source,
                          std::unique_ptr<Expression> condition,
-                         std::vector<std::unique_ptr<Statement>> body)
+                         StatementList body)
     : Statement(source),
       condition_(std::move(condition)),
       body_(std::move(body)) {}

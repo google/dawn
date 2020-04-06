@@ -17,7 +17,6 @@
 
 #include <memory>
 #include <utility>
-#include <vector>
 
 #include "src/ast/variable.h"
 #include "src/ast/variable_decoration.h"
@@ -40,13 +39,11 @@ class DecoratedVariable : public Variable {
 
   /// Sets a decoration to the variable
   /// @param decos the decorations to set
-  void set_decorations(std::vector<std::unique_ptr<VariableDecoration>> decos) {
+  void set_decorations(VariableDecorationList decos) {
     decorations_ = std::move(decos);
   }
   /// @returns the decorations attached to this variable
-  const std::vector<std::unique_ptr<VariableDecoration>>& decorations() const {
-    return decorations_;
-  }
+  const VariableDecorationList& decorations() const { return decorations_; }
 
   /// @returns true if this is a decorated variable
   bool IsDecorated() const override { return true; }
@@ -61,7 +58,7 @@ class DecoratedVariable : public Variable {
  private:
   DecoratedVariable(const DecoratedVariable&) = delete;
 
-  std::vector<std::unique_ptr<VariableDecoration>> decorations_;
+  VariableDecorationList decorations_;
 };
 
 }  // namespace ast

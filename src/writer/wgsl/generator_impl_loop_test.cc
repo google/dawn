@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include <memory>
-#include <vector>
 
 #include "gtest/gtest.h"
 #include "src/ast/kill_statement.h"
@@ -29,7 +28,7 @@ namespace {
 using GeneratorImplTest = testing::Test;
 
 TEST_F(GeneratorImplTest, Emit_Loop) {
-  std::vector<std::unique_ptr<ast::Statement>> body;
+  ast::StatementList body;
   body.push_back(std::make_unique<ast::KillStatement>());
 
   ast::LoopStatement l(std::move(body), {});
@@ -45,10 +44,10 @@ TEST_F(GeneratorImplTest, Emit_Loop) {
 }
 
 TEST_F(GeneratorImplTest, Emit_LoopWithContinuing) {
-  std::vector<std::unique_ptr<ast::Statement>> body;
+  ast::StatementList body;
   body.push_back(std::make_unique<ast::KillStatement>());
 
-  std::vector<std::unique_ptr<ast::Statement>> continuing;
+  ast::StatementList continuing;
   continuing.push_back(std::make_unique<ast::NopStatement>());
 
   ast::LoopStatement l(std::move(body), std::move(continuing));

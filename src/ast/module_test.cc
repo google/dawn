@@ -163,8 +163,7 @@ TEST_F(ModuleTest, IsValid_Null_Alias) {
 
 TEST_F(ModuleTest, IsValid_Function) {
   type::F32Type f32;
-  auto func = std::make_unique<Function>(
-      "main", std::vector<std::unique_ptr<Variable>>(), &f32);
+  auto func = std::make_unique<Function>("main", VariableList(), &f32);
 
   Module m;
   m.AddFunction(std::move(func));

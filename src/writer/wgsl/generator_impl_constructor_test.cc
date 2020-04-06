@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>
-#include <vector>
-
 #include "gtest/gtest.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/float_literal.h"
@@ -81,7 +78,7 @@ TEST_F(GeneratorImplTest, EmitConstructor_Type_Float) {
   ast::type::F32Type f32;
 
   auto lit = std::make_unique<ast::FloatLiteral>(&f32, -1.2e-5);
-  std::vector<std::unique_ptr<ast::Expression>> values;
+  ast::ExpressionList values;
   values.push_back(
       std::make_unique<ast::ScalarConstructorExpression>(std::move(lit)));
 
@@ -96,7 +93,7 @@ TEST_F(GeneratorImplTest, EmitConstructor_Type_Bool) {
   ast::type::BoolType b;
 
   auto lit = std::make_unique<ast::BoolLiteral>(&b, true);
-  std::vector<std::unique_ptr<ast::Expression>> values;
+  ast::ExpressionList values;
   values.push_back(
       std::make_unique<ast::ScalarConstructorExpression>(std::move(lit)));
 
@@ -111,7 +108,7 @@ TEST_F(GeneratorImplTest, EmitConstructor_Type_Int) {
   ast::type::I32Type i32;
 
   auto lit = std::make_unique<ast::IntLiteral>(&i32, -12345);
-  std::vector<std::unique_ptr<ast::Expression>> values;
+  ast::ExpressionList values;
   values.push_back(
       std::make_unique<ast::ScalarConstructorExpression>(std::move(lit)));
 
@@ -126,7 +123,7 @@ TEST_F(GeneratorImplTest, EmitConstructor_Type_Uint) {
   ast::type::U32Type u32;
 
   auto lit = std::make_unique<ast::UintLiteral>(&u32, 12345);
-  std::vector<std::unique_ptr<ast::Expression>> values;
+  ast::ExpressionList values;
   values.push_back(
       std::make_unique<ast::ScalarConstructorExpression>(std::move(lit)));
 
@@ -144,7 +141,7 @@ TEST_F(GeneratorImplTest, EmitConstructor_Type_Vec) {
   auto lit1 = std::make_unique<ast::FloatLiteral>(&f32, 1.f);
   auto lit2 = std::make_unique<ast::FloatLiteral>(&f32, 2.f);
   auto lit3 = std::make_unique<ast::FloatLiteral>(&f32, 3.f);
-  std::vector<std::unique_ptr<ast::Expression>> values;
+  ast::ExpressionList values;
   values.push_back(
       std::make_unique<ast::ScalarConstructorExpression>(std::move(lit1)));
   values.push_back(
@@ -165,13 +162,13 @@ TEST_F(GeneratorImplTest, EmitConstructor_Type_Mat) {
 
   ast::type::VectorType vec(&f32, 2);
 
-  std::vector<std::unique_ptr<ast::Expression>> mat_values;
+  ast::ExpressionList mat_values;
 
   for (size_t i = 0; i < 3; i++) {
     auto lit1 = std::make_unique<ast::FloatLiteral>(&f32, 1.f + (i * 2));
     auto lit2 = std::make_unique<ast::FloatLiteral>(&f32, 2.f + (i * 2));
 
-    std::vector<std::unique_ptr<ast::Expression>> values;
+    ast::ExpressionList values;
     values.push_back(
         std::make_unique<ast::ScalarConstructorExpression>(std::move(lit1)));
     values.push_back(
@@ -196,14 +193,14 @@ TEST_F(GeneratorImplTest, EmitConstructor_Type_Array) {
   ast::type::VectorType vec(&f32, 3);
   ast::type::ArrayType ary(&vec, 3);
 
-  std::vector<std::unique_ptr<ast::Expression>> ary_values;
+  ast::ExpressionList ary_values;
 
   for (size_t i = 0; i < 3; i++) {
     auto lit1 = std::make_unique<ast::FloatLiteral>(&f32, 1.f + (i * 3));
     auto lit2 = std::make_unique<ast::FloatLiteral>(&f32, 2.f + (i * 3));
     auto lit3 = std::make_unique<ast::FloatLiteral>(&f32, 3.f + (i * 3));
 
-    std::vector<std::unique_ptr<ast::Expression>> values;
+    ast::ExpressionList values;
     values.push_back(
         std::make_unique<ast::ScalarConstructorExpression>(std::move(lit1)));
     values.push_back(

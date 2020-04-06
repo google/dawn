@@ -27,7 +27,7 @@ using UnlessStatementTest = testing::Test;
 
 TEST_F(UnlessStatementTest, Creation) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<NopStatement>());
 
   auto ident_ptr = ident.get();
@@ -41,7 +41,7 @@ TEST_F(UnlessStatementTest, Creation) {
 
 TEST_F(UnlessStatementTest, Creation_WithSource) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<NopStatement>());
 
   UnlessStatement u(Source{20, 2}, std::move(ident), std::move(body));
@@ -57,7 +57,7 @@ TEST_F(UnlessStatementTest, IsUnless) {
 
 TEST_F(UnlessStatementTest, IsValid) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<NopStatement>());
 
   UnlessStatement u(std::move(ident), std::move(body));
@@ -65,7 +65,7 @@ TEST_F(UnlessStatementTest, IsValid) {
 }
 
 TEST_F(UnlessStatementTest, IsValid_NullCondition) {
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<NopStatement>());
 
   UnlessStatement u;
@@ -75,7 +75,7 @@ TEST_F(UnlessStatementTest, IsValid_NullCondition) {
 
 TEST_F(UnlessStatementTest, IsValid_InvalidCondition) {
   auto ident = std::make_unique<IdentifierExpression>("");
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<NopStatement>());
 
   UnlessStatement u(std::move(ident), std::move(body));
@@ -84,7 +84,7 @@ TEST_F(UnlessStatementTest, IsValid_InvalidCondition) {
 
 TEST_F(UnlessStatementTest, IsValid_NullBodyStatement) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<NopStatement>());
   body.push_back(nullptr);
 
@@ -94,7 +94,7 @@ TEST_F(UnlessStatementTest, IsValid_NullBodyStatement) {
 
 TEST_F(UnlessStatementTest, IsValid_InvalidBodyStatement) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<NopStatement>());
   body.push_back(std::make_unique<IfStatement>());
 
@@ -104,7 +104,7 @@ TEST_F(UnlessStatementTest, IsValid_InvalidBodyStatement) {
 
 TEST_F(UnlessStatementTest, ToStr) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<NopStatement>());
 
   UnlessStatement u(std::move(ident), std::move(body));

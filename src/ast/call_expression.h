@@ -17,7 +17,6 @@
 
 #include <memory>
 #include <utility>
-#include <vector>
 
 #include "src/ast/expression.h"
 #include "src/ast/literal.h"
@@ -33,15 +32,14 @@ class CallExpression : public Expression {
   /// Constructor
   /// @param func the function
   /// @param params the parameters
-  CallExpression(std::unique_ptr<Expression> func,
-                 std::vector<std::unique_ptr<Expression>> params);
+  CallExpression(std::unique_ptr<Expression> func, ExpressionList params);
   /// Constructor
   /// @param source the call expression source
   /// @param func the function
   /// @param params the parameters
   CallExpression(const Source& source,
                  std::unique_ptr<Expression> func,
-                 std::vector<std::unique_ptr<Expression>> params);
+                 ExpressionList params);
   /// Move constructor
   CallExpression(CallExpression&&) = default;
   ~CallExpression() override;
@@ -54,13 +52,9 @@ class CallExpression : public Expression {
 
   /// Sets the parameters
   /// @param params the parameters
-  void set_params(std::vector<std::unique_ptr<Expression>> params) {
-    params_ = std::move(params);
-  }
+  void set_params(ExpressionList params) { params_ = std::move(params); }
   /// @returns the parameters
-  const std::vector<std::unique_ptr<Expression>>& params() const {
-    return params_;
-  }
+  const ExpressionList& params() const { return params_; }
 
   /// @returns true if this is a call expression
   bool IsCall() const override { return true; }
@@ -77,7 +71,7 @@ class CallExpression : public Expression {
   CallExpression(const CallExpression&) = delete;
 
   std::unique_ptr<Expression> func_;
-  std::vector<std::unique_ptr<Expression>> params_;
+  ExpressionList params_;
 };
 
 }  // namespace ast

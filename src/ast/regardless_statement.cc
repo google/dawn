@@ -19,15 +19,13 @@ namespace ast {
 
 RegardlessStatement::RegardlessStatement() : Statement() {}
 
-RegardlessStatement::RegardlessStatement(
-    std::unique_ptr<Expression> condition,
-    std::vector<std::unique_ptr<Statement>> body)
+RegardlessStatement::RegardlessStatement(std::unique_ptr<Expression> condition,
+                                         StatementList body)
     : Statement(), condition_(std::move(condition)), body_(std::move(body)) {}
 
-RegardlessStatement::RegardlessStatement(
-    const Source& source,
-    std::unique_ptr<Expression> condition,
-    std::vector<std::unique_ptr<Statement>> body)
+RegardlessStatement::RegardlessStatement(const Source& source,
+                                         std::unique_ptr<Expression> condition,
+                                         StatementList body)
     : Statement(source),
       condition_(std::move(condition)),
       body_(std::move(body)) {}

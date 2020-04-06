@@ -15,8 +15,10 @@
 #ifndef SRC_AST_IMPORT_H_
 #define SRC_AST_IMPORT_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include "src/ast/node.h"
 
@@ -69,6 +71,9 @@ class Import : public Node {
   std::string path_;
   std::string name_;
 };
+
+/// A list of unique imports
+using ImportList = std::vector<std::unique_ptr<Import>>;
 
 }  // namespace ast
 }  // namespace tint

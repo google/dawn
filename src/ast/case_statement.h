@@ -35,15 +35,14 @@ class CaseStatement : public Statement {
   /// Constructor
   /// @param condition the case condition
   /// @param body the case body
-  CaseStatement(std::unique_ptr<Literal> condition,
-                std::vector<std::unique_ptr<Statement>> body);
+  CaseStatement(std::unique_ptr<Literal> condition, StatementList body);
   /// Constructor
   /// @param source the source information
   /// @param condition the case condition
   /// @param body the case body
   CaseStatement(const Source& source,
                 std::unique_ptr<Literal> condition,
-                std::vector<std::unique_ptr<Statement>> body);
+                StatementList body);
   /// Move constructor
   CaseStatement(CaseStatement&&) = default;
   ~CaseStatement() override;
@@ -60,11 +59,9 @@ class CaseStatement : public Statement {
 
   /// Sets the case body
   /// @param body the case body
-  void set_body(std::vector<std::unique_ptr<Statement>> body) {
-    body_ = std::move(body);
-  }
+  void set_body(StatementList body) { body_ = std::move(body); }
   /// @returns the case body
-  const std::vector<std::unique_ptr<Statement>>& body() const { return body_; }
+  const StatementList& body() const { return body_; }
 
   /// @returns true if this is a case statement
   bool IsCase() const override { return true; }
@@ -81,8 +78,11 @@ class CaseStatement : public Statement {
   CaseStatement(const CaseStatement&) = delete;
 
   std::unique_ptr<Literal> condition_;
-  std::vector<std::unique_ptr<Statement>> body_;
+  StatementList body_;
 };
+
+/// A list of unique case statements
+using CaseStatementList = std::vector<std::unique_ptr<CaseStatement>>;
 
 }  // namespace ast
 }  // namespace tint

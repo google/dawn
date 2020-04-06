@@ -110,11 +110,11 @@ TEST_F(GeneratorImplTest, EmitType_Struct) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;
 
-  std::vector<std::unique_ptr<ast::StructMember>> members;
+  ast::StructMemberList members;
   members.push_back(std::make_unique<ast::StructMember>(
-      "a", &i32, std::vector<std::unique_ptr<ast::StructMemberDecoration>>{}));
+      "a", &i32, ast::StructMemberDecorationList{}));
 
-  std::vector<std::unique_ptr<ast::StructMemberDecoration>> b_deco;
+  ast::StructMemberDecorationList b_deco;
   b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));
@@ -136,11 +136,11 @@ TEST_F(GeneratorImplTest, EmitType_Struct_WithDecoration) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;
 
-  std::vector<std::unique_ptr<ast::StructMember>> members;
+  ast::StructMemberList members;
   members.push_back(std::make_unique<ast::StructMember>(
-      "a", &i32, std::vector<std::unique_ptr<ast::StructMemberDecoration>>{}));
+      "a", &i32, ast::StructMemberDecorationList{}));
 
-  std::vector<std::unique_ptr<ast::StructMemberDecoration>> b_deco;
+  ast::StructMemberDecorationList b_deco;
   b_deco.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
   members.push_back(
       std::make_unique<ast::StructMember>("b", &f32, std::move(b_deco)));

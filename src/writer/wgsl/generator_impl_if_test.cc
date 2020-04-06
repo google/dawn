@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>
-#include <vector>
-
 #include "gtest/gtest.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/identifier_expression.h"
@@ -31,7 +28,7 @@ using GeneratorImplTest = testing::Test;
 
 TEST_F(GeneratorImplTest, Emit_If) {
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
-  std::vector<std::unique_ptr<ast::Statement>> body;
+  ast::StatementList body;
   body.push_back(std::make_unique<ast::KillStatement>());
 
   ast::IfStatement i(std::move(cond), std::move(body));
@@ -49,15 +46,15 @@ TEST_F(GeneratorImplTest, Emit_If) {
 TEST_F(GeneratorImplTest, Emit_IfWithElseIf) {
   auto else_cond = std::make_unique<ast::IdentifierExpression>("else_cond");
 
-  std::vector<std::unique_ptr<ast::Statement>> else_body;
+  ast::StatementList else_body;
   else_body.push_back(std::make_unique<ast::KillStatement>());
 
-  std::vector<std::unique_ptr<ast::ElseStatement>> elses;
+  ast::ElseStatementList elses;
   elses.push_back(std::make_unique<ast::ElseStatement>(std::move(else_cond),
                                                        std::move(else_body)));
 
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
-  std::vector<std::unique_ptr<ast::Statement>> body;
+  ast::StatementList body;
   body.push_back(std::make_unique<ast::KillStatement>());
 
   ast::IfStatement i(std::move(cond), std::move(body));
@@ -76,14 +73,14 @@ TEST_F(GeneratorImplTest, Emit_IfWithElseIf) {
 }
 
 TEST_F(GeneratorImplTest, Emit_IfWithElse) {
-  std::vector<std::unique_ptr<ast::Statement>> else_body;
+  ast::StatementList else_body;
   else_body.push_back(std::make_unique<ast::KillStatement>());
 
-  std::vector<std::unique_ptr<ast::ElseStatement>> elses;
+  ast::ElseStatementList elses;
   elses.push_back(std::make_unique<ast::ElseStatement>(std::move(else_body)));
 
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
-  std::vector<std::unique_ptr<ast::Statement>> body;
+  ast::StatementList body;
   body.push_back(std::make_unique<ast::KillStatement>());
 
   ast::IfStatement i(std::move(cond), std::move(body));
@@ -104,19 +101,19 @@ TEST_F(GeneratorImplTest, Emit_IfWithElse) {
 TEST_F(GeneratorImplTest, Emit_IfWithMultiple) {
   auto else_cond = std::make_unique<ast::IdentifierExpression>("else_cond");
 
-  std::vector<std::unique_ptr<ast::Statement>> else_body;
+  ast::StatementList else_body;
   else_body.push_back(std::make_unique<ast::KillStatement>());
 
-  std::vector<std::unique_ptr<ast::Statement>> else_body_2;
+  ast::StatementList else_body_2;
   else_body_2.push_back(std::make_unique<ast::KillStatement>());
 
-  std::vector<std::unique_ptr<ast::ElseStatement>> elses;
+  ast::ElseStatementList elses;
   elses.push_back(std::make_unique<ast::ElseStatement>(std::move(else_cond),
                                                        std::move(else_body)));
   elses.push_back(std::make_unique<ast::ElseStatement>(std::move(else_body_2)));
 
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
-  std::vector<std::unique_ptr<ast::Statement>> body;
+  ast::StatementList body;
   body.push_back(std::make_unique<ast::KillStatement>());
 
   ast::IfStatement i(std::move(cond), std::move(body));

@@ -37,7 +37,7 @@ TEST_F(GeneratorImplTest, EmitExpression_Call_WithoutParams) {
 
 TEST_F(GeneratorImplTest, EmitExpression_Call_WithParams) {
   auto id = std::make_unique<ast::IdentifierExpression>("my_func");
-  std::vector<std::unique_ptr<ast::Expression>> params;
+  ast::ExpressionList params;
   params.push_back(std::make_unique<ast::IdentifierExpression>("param1"));
   params.push_back(std::make_unique<ast::IdentifierExpression>("param2"));
   ast::CallExpression call(std::move(id), std::move(params));

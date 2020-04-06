@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include <memory>
-#include <vector>
 
 #include "gtest/gtest.h"
 #include "src/ast/else_statement.h"
@@ -29,7 +28,7 @@ namespace {
 using GeneratorImplTest = testing::Test;
 
 TEST_F(GeneratorImplTest, Emit_Else) {
-  std::vector<std::unique_ptr<ast::Statement>> body;
+  ast::StatementList body;
   body.push_back(std::make_unique<ast::KillStatement>());
 
   ast::ElseStatement e(std::move(body));
@@ -46,7 +45,7 @@ TEST_F(GeneratorImplTest, Emit_Else) {
 TEST_F(GeneratorImplTest, Emit_ElseWithCondition) {
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
 
-  std::vector<std::unique_ptr<ast::Statement>> body;
+  ast::StatementList body;
   body.push_back(std::make_unique<ast::KillStatement>());
 
   ast::ElseStatement e(std::move(cond), std::move(body));

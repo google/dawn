@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include <memory>
-#include <vector>
 
 #include "gtest/gtest.h"
 #include "src/ast/binding_decoration.h"
@@ -55,7 +54,7 @@ TEST_F(GeneratorImplTest, EmitVariable_StorageClass) {
 TEST_F(GeneratorImplTest, EmitVariable_Decorated) {
   ast::type::F32Type f32;
 
-  std::vector<std::unique_ptr<ast::VariableDecoration>> decos;
+  ast::VariableDecorationList decos;
   decos.push_back(std::make_unique<ast::LocationDecoration>(2));
 
   ast::DecoratedVariable dv;
@@ -72,7 +71,7 @@ TEST_F(GeneratorImplTest, EmitVariable_Decorated) {
 TEST_F(GeneratorImplTest, EmitVariable_Decorated_Multiple) {
   ast::type::F32Type f32;
 
-  std::vector<std::unique_ptr<ast::VariableDecoration>> decos;
+  ast::VariableDecorationList decos;
   decos.push_back(
       std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kPosition));
   decos.push_back(std::make_unique<ast::BindingDecoration>(0));

@@ -15,8 +15,10 @@
 #ifndef SRC_AST_ENTRY_POINT_H_
 #define SRC_AST_ENTRY_POINT_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include "src/ast/node.h"
 #include "src/ast/pipeline_stage.h"
@@ -82,6 +84,9 @@ class EntryPoint : public Node {
   std::string name_;
   std::string fn_name_;
 };
+
+/// A list of unique entry points.
+using EntryPointList = std::vector<std::unique_ptr<EntryPoint>>;
 
 }  // namespace ast
 }  // namespace tint

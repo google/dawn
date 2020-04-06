@@ -32,9 +32,9 @@ TEST_F(SwitchStatementTest, Creation) {
   ast::type::BoolType bool_type;
   auto lit = std::make_unique<BoolLiteral>(&bool_type, true);
   auto ident = std::make_unique<IdentifierExpression>("ident");
-  std::vector<std::unique_ptr<CaseStatement>> body;
-  body.push_back(std::make_unique<CaseStatement>(
-      std::move(lit), std::vector<std::unique_ptr<Statement>>()));
+  CaseStatementList body;
+  body.push_back(
+      std::make_unique<CaseStatement>(std::move(lit), StatementList()));
 
   auto ident_ptr = ident.get();
   auto case_ptr = body[0].get();
@@ -48,8 +48,7 @@ TEST_F(SwitchStatementTest, Creation) {
 TEST_F(SwitchStatementTest, Creation_WithSource) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
 
-  SwitchStatement stmt(Source{20, 2}, std::move(ident),
-                       std::vector<std::unique_ptr<CaseStatement>>());
+  SwitchStatement stmt(Source{20, 2}, std::move(ident), CaseStatementList());
   auto src = stmt.source();
   EXPECT_EQ(src.line, 20);
   EXPECT_EQ(src.column, 2);
@@ -64,9 +63,9 @@ TEST_F(SwitchStatementTest, IsValid) {
   ast::type::BoolType bool_type;
   auto lit = std::make_unique<BoolLiteral>(&bool_type, true);
   auto ident = std::make_unique<IdentifierExpression>("ident");
-  std::vector<std::unique_ptr<CaseStatement>> body;
-  body.push_back(std::make_unique<CaseStatement>(
-      std::move(lit), std::vector<std::unique_ptr<Statement>>()));
+  CaseStatementList body;
+  body.push_back(
+      std::make_unique<CaseStatement>(std::move(lit), StatementList()));
 
   SwitchStatement stmt(std::move(ident), std::move(body));
   EXPECT_TRUE(stmt.IsValid());
@@ -75,9 +74,9 @@ TEST_F(SwitchStatementTest, IsValid) {
 TEST_F(SwitchStatementTest, IsValid_Null_Condition) {
   ast::type::BoolType bool_type;
   auto lit = std::make_unique<BoolLiteral>(&bool_type, true);
-  std::vector<std::unique_ptr<CaseStatement>> body;
-  body.push_back(std::make_unique<CaseStatement>(
-      std::move(lit), std::vector<std::unique_ptr<Statement>>()));
+  CaseStatementList body;
+  body.push_back(
+      std::make_unique<CaseStatement>(std::move(lit), StatementList()));
 
   SwitchStatement stmt;
   stmt.set_body(std::move(body));
@@ -88,9 +87,9 @@ TEST_F(SwitchStatementTest, IsValid_Invalid_Condition) {
   ast::type::BoolType bool_type;
   auto lit = std::make_unique<BoolLiteral>(&bool_type, true);
   auto ident = std::make_unique<IdentifierExpression>("");
-  std::vector<std::unique_ptr<CaseStatement>> body;
-  body.push_back(std::make_unique<CaseStatement>(
-      std::move(lit), std::vector<std::unique_ptr<Statement>>()));
+  CaseStatementList body;
+  body.push_back(
+      std::make_unique<CaseStatement>(std::move(lit), StatementList()));
 
   SwitchStatement stmt(std::move(ident), std::move(body));
   EXPECT_FALSE(stmt.IsValid());
@@ -100,9 +99,9 @@ TEST_F(SwitchStatementTest, IsValid_Null_BodyStatement) {
   ast::type::BoolType bool_type;
   auto lit = std::make_unique<BoolLiteral>(&bool_type, true);
   auto ident = std::make_unique<IdentifierExpression>("ident");
-  std::vector<std::unique_ptr<CaseStatement>> body;
-  body.push_back(std::make_unique<CaseStatement>(
-      std::move(lit), std::vector<std::unique_ptr<Statement>>()));
+  CaseStatementList body;
+  body.push_back(
+      std::make_unique<CaseStatement>(std::move(lit), StatementList()));
   body.push_back(nullptr);
 
   SwitchStatement stmt(std::move(ident), std::move(body));
@@ -112,10 +111,10 @@ TEST_F(SwitchStatementTest, IsValid_Null_BodyStatement) {
 TEST_F(SwitchStatementTest, IsValid_Invalid_BodyStatement) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
 
-  std::vector<std::unique_ptr<Statement>> case_body;
+  StatementList case_body;
   case_body.push_back(nullptr);
 
-  std::vector<std::unique_ptr<CaseStatement>> body;
+  CaseStatementList body;
   body.push_back(
       std::make_unique<CaseStatement>(nullptr, std::move(case_body)));
 
@@ -141,9 +140,9 @@ TEST_F(SwitchStatementTest, ToStr) {
   ast::type::BoolType bool_type;
   auto lit = std::make_unique<BoolLiteral>(&bool_type, true);
   auto ident = std::make_unique<IdentifierExpression>("ident");
-  std::vector<std::unique_ptr<CaseStatement>> body;
-  body.push_back(std::make_unique<CaseStatement>(
-      std::move(lit), std::vector<std::unique_ptr<Statement>>()));
+  CaseStatementList body;
+  body.push_back(
+      std::make_unique<CaseStatement>(std::move(lit), StatementList()));
 
   SwitchStatement stmt(std::move(ident), std::move(body));
   std::ostringstream out;

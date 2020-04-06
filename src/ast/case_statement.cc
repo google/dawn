@@ -20,12 +20,12 @@ namespace ast {
 CaseStatement::CaseStatement() : Statement() {}
 
 CaseStatement::CaseStatement(std::unique_ptr<Literal> condition,
-                             std::vector<std::unique_ptr<Statement>> body)
+                             StatementList body)
     : Statement(), condition_(std::move(condition)), body_(std::move(body)) {}
 
 CaseStatement::CaseStatement(const Source& source,
                              std::unique_ptr<Literal> condition,
-                             std::vector<std::unique_ptr<Statement>> body)
+                             StatementList body)
     : Statement(source),
       condition_(std::move(condition)),
       body_(std::move(body)) {}

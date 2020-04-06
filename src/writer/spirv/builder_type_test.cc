@@ -277,8 +277,8 @@ TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
 TEST_F(BuilderTest_Type, GenerateStruct) {
   ast::type::F32Type f32;
 
-  std::vector<std::unique_ptr<ast::StructMemberDecoration>> decos;
-  std::vector<std::unique_ptr<ast::StructMember>> members;
+  ast::StructMemberDecorationList decos;
+  ast::StructMemberList members;
   members.push_back(
       std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
 
@@ -303,8 +303,8 @@ OpMemberName %1 0 "a"
 TEST_F(BuilderTest_Type, GenerateStruct_Decorated) {
   ast::type::F32Type f32;
 
-  std::vector<std::unique_ptr<ast::StructMemberDecoration>> decos;
-  std::vector<std::unique_ptr<ast::StructMember>> members;
+  ast::StructMemberDecorationList decos;
+  ast::StructMemberList members;
   members.push_back(
       std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
 
@@ -331,12 +331,12 @@ OpMemberName %1 0 "a"
 TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers) {
   ast::type::F32Type f32;
 
-  std::vector<std::unique_ptr<ast::StructMemberDecoration>> a_decos;
+  ast::StructMemberDecorationList a_decos;
   a_decos.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(0));
-  std::vector<std::unique_ptr<ast::StructMemberDecoration>> b_decos;
+  ast::StructMemberDecorationList b_decos;
   b_decos.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(8));
 
-  std::vector<std::unique_ptr<ast::StructMember>> members;
+  ast::StructMemberList members;
   members.push_back(
       std::make_unique<ast::StructMember>("a", &f32, std::move(a_decos)));
   members.push_back(

@@ -72,7 +72,7 @@ TEST_F(DecoratedVariableTest, to_str) {
   DecoratedVariable dv(std::move(var));
   dv.set_constructor(std::make_unique<IdentifierExpression>("expr"));
 
-  std::vector<std::unique_ptr<VariableDecoration>> decos;
+  VariableDecorationList decos;
   decos.push_back(std::make_unique<BindingDecoration>(2));
   decos.push_back(std::make_unique<SetDecoration>(1));
 

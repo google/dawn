@@ -40,7 +40,7 @@ class Function : public Node {
   /// @param params the function parameters
   /// @param return_type the return type
   Function(const std::string& name,
-           std::vector<std::unique_ptr<Variable>> params,
+           VariableList params,
            type::Type* return_type);
   /// Create a function
   /// @param source the variable source
@@ -49,7 +49,7 @@ class Function : public Node {
   /// @param return_type the return type
   Function(const Source& source,
            const std::string& name,
-           std::vector<std::unique_ptr<Variable>> params,
+           VariableList params,
            type::Type* return_type);
   /// Move constructor
   Function(Function&&) = default;
@@ -64,13 +64,9 @@ class Function : public Node {
 
   /// Sets the function parameters
   /// @param params the function parameters
-  void set_params(std::vector<std::unique_ptr<Variable>> params) {
-    params_ = std::move(params);
-  }
+  void set_params(VariableList params) { params_ = std::move(params); }
   /// @returns the function params
-  const std::vector<std::unique_ptr<Variable>>& params() const {
-    return params_;
-  }
+  const VariableList& params() const { return params_; }
 
   /// Sets the return type of the function
   /// @param type the return type
@@ -80,11 +76,9 @@ class Function : public Node {
 
   /// Sets the body of the function
   /// @param body the function body
-  void set_body(std::vector<std::unique_ptr<Statement>> body) {
-    body_ = std::move(body);
-  }
+  void set_body(StatementList body) { body_ = std::move(body); }
   /// @returns the function body
-  const std::vector<std::unique_ptr<Statement>>& body() const { return body_; }
+  const StatementList& body() const { return body_; }
 
   /// @returns true if the name and type are both present
   bool IsValid() const override;
@@ -101,10 +95,13 @@ class Function : public Node {
   Function(const Function&) = delete;
 
   std::string name_;
-  std::vector<std::unique_ptr<Variable>> params_;
+  VariableList params_;
   type::Type* return_type_ = nullptr;
-  std::vector<std::unique_ptr<Statement>> body_;
+  StatementList body_;
 };
+
+/// A list of unique functions
+using FunctionList = std::vector<std::unique_ptr<Function>>;
 
 }  // namespace ast
 }  // namespace tint

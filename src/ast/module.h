@@ -43,9 +43,7 @@ class Module {
     imports_.push_back(std::move(import));
   }
   /// @returns the imports for this module
-  const std::vector<std::unique_ptr<Import>>& imports() const {
-    return imports_;
-  }
+  const ImportList& imports() const { return imports_; }
   /// Find the import of the given name
   /// @param name The import name to search for
   /// @returns the import with the given name if found, nullptr otherwise.
@@ -57,9 +55,7 @@ class Module {
     global_variables_.push_back(std::move(var));
   }
   /// @returns the global variables for the module
-  const std::vector<std::unique_ptr<Variable>>& global_variables() const {
-    return global_variables_;
-  }
+  const VariableList& global_variables() const { return global_variables_; }
 
   /// Adds an entry point to the module
   /// @param ep the entry point to add
@@ -67,9 +63,7 @@ class Module {
     entry_points_.push_back(std::move(ep));
   }
   /// @returns the entry points in the module
-  const std::vector<std::unique_ptr<EntryPoint>>& entry_points() const {
-    return entry_points_;
-  }
+  const EntryPointList& entry_points() const { return entry_points_; }
 
   /// Adds a type alias to the module
   /// @param type the alias to add
@@ -85,9 +79,7 @@ class Module {
     functions_.push_back(std::move(func));
   }
   /// @returns the modules functions
-  const std::vector<std::unique_ptr<Function>>& functions() const {
-    return functions_;
-  }
+  const FunctionList& functions() const { return functions_; }
 
   /// @returns true if all required fields in the AST are present.
   bool IsValid() const;
@@ -98,12 +90,12 @@ class Module {
  private:
   Module(const Module&) = delete;
 
-  std::vector<std::unique_ptr<Import>> imports_;
-  std::vector<std::unique_ptr<Variable>> global_variables_;
-  std::vector<std::unique_ptr<EntryPoint>> entry_points_;
+  ImportList imports_;
+  VariableList global_variables_;
+  EntryPointList entry_points_;
   // The alias types are owned by the type manager
   std::vector<type::AliasType*> alias_types_;
-  std::vector<std::unique_ptr<Function>> functions_;
+  FunctionList functions_;
 };
 
 }  // namespace ast

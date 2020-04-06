@@ -15,7 +15,9 @@
 #ifndef SRC_AST_STRUCT_MEMBER_DECORATION_H_
 #define SRC_AST_STRUCT_MEMBER_DECORATION_H_
 
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace tint {
 namespace ast {
@@ -39,6 +41,10 @@ class StructMemberDecoration {
  protected:
   StructMemberDecoration();
 };
+
+/// A list of unique struct member decorations
+using StructMemberDecorationList =
+    std::vector<std::unique_ptr<StructMemberDecoration>>;
 
 }  // namespace ast
 }  // namespace tint

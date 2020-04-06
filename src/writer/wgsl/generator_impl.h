@@ -15,10 +15,8 @@
 #ifndef SRC_WRITER_WGSL_GENERATOR_IMPL_H_
 #define SRC_WRITER_WGSL_GENERATOR_IMPL_H_
 
-#include <memory>
 #include <sstream>
 #include <string>
-#include <vector>
 
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/constructor_expression.h"
@@ -179,13 +177,11 @@ class GeneratorImpl {
   /// Handles a brace-enclosed list of statements.
   /// @param statements the statements to output
   /// @returns true if the statements were emitted
-  bool EmitStatementBlock(
-      const std::vector<std::unique_ptr<ast::Statement>>& statements);
+  bool EmitStatementBlock(const ast::StatementList& statements);
   /// Handles a brace-enclosed list of statements and trailing newline.
   /// @param statements the statements to output
   /// @returns true if the statements were emitted
-  bool EmitStatementBlockAndNewline(
-      const std::vector<std::unique_ptr<ast::Statement>>& statements);
+  bool EmitStatementBlockAndNewline(const ast::StatementList& statements);
   /// Handles statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted

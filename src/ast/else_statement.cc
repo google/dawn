@@ -19,20 +19,19 @@ namespace ast {
 
 ElseStatement::ElseStatement() : Statement() {}
 
-ElseStatement::ElseStatement(std::vector<std::unique_ptr<Statement>> body)
+ElseStatement::ElseStatement(StatementList body)
     : Statement(), body_(std::move(body)) {}
 
 ElseStatement::ElseStatement(std::unique_ptr<Expression> condition,
-                             std::vector<std::unique_ptr<Statement>> body)
+                             StatementList body)
     : Statement(), condition_(std::move(condition)), body_(std::move(body)) {}
 
-ElseStatement::ElseStatement(const Source& source,
-                             std::vector<std::unique_ptr<Statement>> body)
+ElseStatement::ElseStatement(const Source& source, StatementList body)
     : Statement(source), body_(std::move(body)) {}
 
 ElseStatement::ElseStatement(const Source& source,
                              std::unique_ptr<Expression> condition,
-                             std::vector<std::unique_ptr<Statement>> body)
+                             StatementList body)
     : Statement(source),
       condition_(std::move(condition)),
       body_(std::move(body)) {}

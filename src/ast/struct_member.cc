@@ -17,17 +17,15 @@
 namespace tint {
 namespace ast {
 
-StructMember::StructMember(
-    const std::string& name,
-    type::Type* type,
-    std::vector<std::unique_ptr<StructMemberDecoration>> decorations)
+StructMember::StructMember(const std::string& name,
+                           type::Type* type,
+                           StructMemberDecorationList decorations)
     : Node(), name_(name), type_(type), decorations_(std::move(decorations)) {}
 
-StructMember::StructMember(
-    const Source& source,
-    const std::string& name,
-    type::Type* type,
-    std::vector<std::unique_ptr<StructMemberDecoration>> decorations)
+StructMember::StructMember(const Source& source,
+                           const std::string& name,
+                           type::Type* type,
+                           StructMemberDecorationList decorations)
     : Node(source),
       name_(name),
       type_(type),

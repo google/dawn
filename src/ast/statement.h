@@ -15,6 +15,9 @@
 #ifndef SRC_AST_STATEMENT_H_
 #define SRC_AST_STATEMENT_H_
 
+#include <memory>
+#include <vector>
+
 #include "src/ast/node.h"
 
 namespace tint {
@@ -115,6 +118,9 @@ class Statement : public Node {
  private:
   Statement(const Statement&) = delete;
 };
+
+/// A list of unique statements
+using StatementList = std::vector<std::unique_ptr<Statement>>;
 
 }  // namespace ast
 }  // namespace tint

@@ -17,7 +17,6 @@
 
 #include <memory>
 #include <utility>
-#include <vector>
 
 #include "src/ast/else_statement.h"
 #include "src/ast/expression.h"
@@ -34,15 +33,14 @@ class IfStatement : public Statement {
   /// Constructor
   /// @param condition the if condition
   /// @param body the if body
-  IfStatement(std::unique_ptr<Expression> condition,
-              std::vector<std::unique_ptr<Statement>> body);
+  IfStatement(std::unique_ptr<Expression> condition, StatementList body);
   /// Constructor
   /// @param source the source information
   /// @param condition the if condition
   /// @param body the if body
   IfStatement(const Source& source,
               std::unique_ptr<Expression> condition,
-              std::vector<std::unique_ptr<Statement>> body);
+              StatementList body);
   /// Move constructor
   IfStatement(IfStatement&&) = default;
   ~IfStatement() override;
@@ -57,32 +55,23 @@ class IfStatement : public Statement {
 
   /// Sets the if body
   /// @param body the if body
-  void set_body(std::vector<std::unique_ptr<Statement>> body) {
-    body_ = std::move(body);
-  }
+  void set_body(StatementList body) { body_ = std::move(body); }
   /// @returns the if body
-  const std::vector<std::unique_ptr<Statement>>& body() const { return body_; }
+  const StatementList& body() const { return body_; }
 
   /// Sets the else statements
   /// @param else_statements the else statements to set
-  void set_else_statements(
-      std::vector<std::unique_ptr<ElseStatement>> else_statements) {
+  void set_else_statements(ElseStatementList else_statements) {
     else_statements_ = std::move(else_statements);
   }
   /// @returns the else statements
-  const std::vector<std::unique_ptr<ElseStatement>>& else_statements() const {
-    return else_statements_;
-  }
+  const ElseStatementList& else_statements() const { return else_statements_; }
 
   /// Sets the premerge statements
   /// @param premerge the premerge statements
-  void set_premerge(std::vector<std::unique_ptr<Statement>> premerge) {
-    premerge_ = std::move(premerge);
-  }
+  void set_premerge(StatementList premerge) { premerge_ = std::move(premerge); }
   /// @returns the premerge statements
-  const std::vector<std::unique_ptr<Statement>>& premerge() const {
-    return premerge_;
-  }
+  const StatementList& premerge() const { return premerge_; }
 
   /// @returns true if this is a if statement
   bool IsIf() const override { return true; }
@@ -99,9 +88,9 @@ class IfStatement : public Statement {
   IfStatement(const IfStatement&) = delete;
 
   std::unique_ptr<Expression> condition_;
-  std::vector<std::unique_ptr<Statement>> body_;
-  std::vector<std::unique_ptr<ElseStatement>> else_statements_;
-  std::vector<std::unique_ptr<Statement>> premerge_;
+  StatementList body_;
+  ElseStatementList else_statements_;
+  StatementList premerge_;
 };
 
 }  // namespace ast

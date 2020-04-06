@@ -15,9 +15,7 @@
 #ifndef SRC_AST_UNARY_METHOD_EXPRESSION_H_
 #define SRC_AST_UNARY_METHOD_EXPRESSION_H_
 
-#include <memory>
 #include <utility>
-#include <vector>
 
 #include "src/ast/expression.h"
 #include "src/ast/literal.h"
@@ -34,15 +32,14 @@ class UnaryMethodExpression : public Expression {
   /// Constructor
   /// @param op the op
   /// @param params the params
-  UnaryMethodExpression(UnaryMethod op,
-                        std::vector<std::unique_ptr<Expression>> params);
+  UnaryMethodExpression(UnaryMethod op, ExpressionList params);
   /// Constructor
   /// @param source the unary method source
   /// @param op the op
   /// @param params the params
   UnaryMethodExpression(const Source& source,
                         UnaryMethod op,
-                        std::vector<std::unique_ptr<Expression>> params);
+                        ExpressionList params);
   /// Move constructor
   UnaryMethodExpression(UnaryMethodExpression&&) = default;
   ~UnaryMethodExpression() override;
@@ -55,13 +52,9 @@ class UnaryMethodExpression : public Expression {
 
   /// Sets the params
   /// @param params the parameters
-  void set_params(std::vector<std::unique_ptr<Expression>> params) {
-    params_ = std::move(params);
-  }
+  void set_params(ExpressionList params) { params_ = std::move(params); }
   /// @returns the params
-  const std::vector<std::unique_ptr<Expression>>& params() const {
-    return params_;
-  }
+  const ExpressionList& params() const { return params_; }
 
   /// @returns true if this is an as expression
   bool IsUnaryMethod() const override { return true; }
@@ -78,7 +71,7 @@ class UnaryMethodExpression : public Expression {
   UnaryMethodExpression(const UnaryMethodExpression&) = delete;
 
   UnaryMethod op_ = UnaryMethod::kAny;
-  std::vector<std::unique_ptr<Expression>> params_;
+  ExpressionList params_;
 };
 
 }  // namespace ast

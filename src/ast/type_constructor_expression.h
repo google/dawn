@@ -17,7 +17,6 @@
 
 #include <memory>
 #include <utility>
-#include <vector>
 
 #include "src/ast/constructor_expression.h"
 #include "src/ast/type/type.h"
@@ -32,16 +31,14 @@ class TypeConstructorExpression : public ConstructorExpression {
   /// Constructor
   /// @param type the type
   /// @param values the values
-  explicit TypeConstructorExpression(
-      type::Type* type,
-      std::vector<std::unique_ptr<Expression>> values);
+  explicit TypeConstructorExpression(type::Type* type, ExpressionList values);
   /// Constructor
   /// @param source the constructor source
   /// @param type the type
   /// @param values the constructor values
   TypeConstructorExpression(const Source& source,
                             type::Type* type,
-                            std::vector<std::unique_ptr<Expression>> values);
+                            ExpressionList values);
   /// Move constructor
   TypeConstructorExpression(TypeConstructorExpression&&) = default;
   ~TypeConstructorExpression() override;
@@ -57,13 +54,9 @@ class TypeConstructorExpression : public ConstructorExpression {
 
   /// Set the values
   /// @param values the values
-  void set_values(std::vector<std::unique_ptr<Expression>> values) {
-    values_ = std::move(values);
-  }
+  void set_values(ExpressionList values) { values_ = std::move(values); }
   /// @returns the values
-  const std::vector<std::unique_ptr<Expression>>& values() const {
-    return values_;
-  }
+  const ExpressionList& values() const { return values_; }
 
   /// @returns true if the node is valid
   bool IsValid() const override;
@@ -77,7 +70,7 @@ class TypeConstructorExpression : public ConstructorExpression {
   TypeConstructorExpression(const TypeConstructorExpression&) = delete;
 
   type::Type* type_ = nullptr;
-  std::vector<std::unique_ptr<Expression>> values_;
+  ExpressionList values_;
 };
 
 }  // namespace ast

@@ -549,7 +549,7 @@ ast::type::Type* ParserImpl::ConvertType(
   }
 
   // Compute members
-  std::vector<std::unique_ptr<ast::StructMember>> ast_members;
+  ast::StructMemberList ast_members;
   const auto members = struct_ty->element_types();
   for (uint32_t member_index = 0; member_index < members.size();
        ++member_index) {
@@ -558,8 +558,7 @@ ast::type::Type* ParserImpl::ConvertType(
       // Already emitted diagnostics.
       return nullptr;
     }
-    std::vector<std::unique_ptr<ast::StructMemberDecoration>>
-        ast_member_decorations;
+    ast::StructMemberDecorationList ast_member_decorations;
     for (auto& deco : GetDecorationsForMember(type_id, member_index)) {
       auto ast_member_decoration = ConvertMemberDecoration(deco);
       if (ast_member_decoration == nullptr) {
@@ -710,7 +709,7 @@ std::unique_ptr<ast::Variable> ParserImpl::MakeVariable(uint32_t id,
 
   auto ast_var = std::make_unique<ast::Variable>(Name(id), sc, type);
 
-  std::vector<std::unique_ptr<ast::VariableDecoration>> ast_decorations;
+  ast::VariableDecorationList ast_decorations;
   for (auto& deco : GetDecorationsFor(id)) {
     if (deco.empty()) {
       Fail() << "malformed decoration on ID " << id << ": it is empty";
@@ -774,7 +773,7 @@ bool ParserImpl::EmitFunction(const spvtools::opt::Function& f) {
            << f.result_id();
   }
 
-  std::vector<std::unique_ptr<ast::Variable>> ast_params;
+  ast::VariableList ast_params;
   f.ForEachParam([this, &ast_params](const spvtools::opt::Instruction* param) {
     auto* ast_type = ConvertType(param->type_id());
     if (ast_type != nullptr) {

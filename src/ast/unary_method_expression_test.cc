@@ -14,6 +14,7 @@
 
 #include "src/ast/unary_method_expression.h"
 
+#include <memory>
 #include <sstream>
 
 #include "gtest/gtest.h"
@@ -26,7 +27,7 @@ namespace {
 using UnaryMethodExpressionTest = testing::Test;
 
 TEST_F(UnaryMethodExpressionTest, Creation) {
-  std::vector<std::unique_ptr<Expression>> params;
+  ExpressionList params;
   params.push_back(std::make_unique<IdentifierExpression>("ident"));
 
   auto ident_ptr = params[0].get();
@@ -38,7 +39,7 @@ TEST_F(UnaryMethodExpressionTest, Creation) {
 }
 
 TEST_F(UnaryMethodExpressionTest, Creation_WithSource) {
-  std::vector<std::unique_ptr<Expression>> params;
+  ExpressionList params;
   params.push_back(std::make_unique<IdentifierExpression>("ident"));
 
   UnaryMethodExpression u(Source{20, 2}, UnaryMethod::kAll, std::move(params));
@@ -53,7 +54,7 @@ TEST_F(UnaryMethodExpressionTest, IsUnaryMethod) {
 }
 
 TEST_F(UnaryMethodExpressionTest, IsValid) {
-  std::vector<std::unique_ptr<Expression>> params;
+  ExpressionList params;
   params.push_back(std::make_unique<IdentifierExpression>("ident"));
 
   UnaryMethodExpression u(UnaryMethod::kAll, std::move(params));
@@ -61,7 +62,7 @@ TEST_F(UnaryMethodExpressionTest, IsValid) {
 }
 
 TEST_F(UnaryMethodExpressionTest, IsValid_NullParam) {
-  std::vector<std::unique_ptr<Expression>> params;
+  ExpressionList params;
   params.push_back(std::make_unique<IdentifierExpression>("ident"));
   params.push_back(nullptr);
 
@@ -70,7 +71,7 @@ TEST_F(UnaryMethodExpressionTest, IsValid_NullParam) {
 }
 
 TEST_F(UnaryMethodExpressionTest, IsValid_InvalidParam) {
-  std::vector<std::unique_ptr<Expression>> params;
+  ExpressionList params;
   params.push_back(std::make_unique<IdentifierExpression>(""));
 
   UnaryMethodExpression u(UnaryMethod::kAll, std::move(params));
@@ -84,7 +85,7 @@ TEST_F(UnaryMethodExpressionTest, IsValid_EmptyParams) {
 }
 
 TEST_F(UnaryMethodExpressionTest, ToStr) {
-  std::vector<std::unique_ptr<Expression>> params;
+  ExpressionList params;
   params.push_back(std::make_unique<IdentifierExpression>("ident"));
 
   UnaryMethodExpression u(UnaryMethod::kAll, std::move(params));

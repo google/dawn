@@ -20,12 +20,12 @@
 #include <string>
 #include <unordered_map>
 #include <utility>
-#include <vector>
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/builtin.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/derivative_modifier.h"
+#include "src/ast/else_statement.h"
 #include "src/ast/entry_point.h"
 #include "src/ast/function.h"
 #include "src/ast/import.h"
@@ -113,9 +113,8 @@ class ParserImpl {
   /// @returns the const object or nullptr
   std::unique_ptr<ast::Variable> global_constant_decl();
   /// Parses a `variable_decoration_list` grammar element
-  /// @returns a vector of parsed variable decorations
-  std::vector<std::unique_ptr<ast::VariableDecoration>>
-  variable_decoration_list();
+  /// @returns the parsed variable decorations
+  ast::VariableDecorationList variable_decoration_list();
   /// Parses a `variable_decoration` grammar element
   /// @returns the variable decoration or nullptr if an error is encountered
   std::unique_ptr<ast::VariableDecoration> variable_decoration();
@@ -152,14 +151,13 @@ class ParserImpl {
   ast::StructDecoration struct_decoration();
   /// Parses a `struct_body_decl` grammar element
   /// @returns the struct members
-  std::vector<std::unique_ptr<ast::StructMember>> struct_body_decl();
+  ast::StructMemberList struct_body_decl();
   /// Parses a `struct_member` grammar element
   /// @returns the struct member or nullptr
   std::unique_ptr<ast::StructMember> struct_member();
   /// Parses a `struct_member_decoration_decl` grammar element
   /// @returns the list of decorations
-  std::vector<std::unique_ptr<ast::StructMemberDecoration>>
-  struct_member_decoration_decl();
+  ast::StructMemberDecorationList struct_member_decoration_decl();
   /// Parses a `struct_member_decoration` grammar element
   /// @returns the decoration or nullptr if none found
   std::unique_ptr<ast::StructMemberDecoration> struct_member_decoration();
@@ -174,7 +172,7 @@ class ParserImpl {
   std::unique_ptr<ast::Function> function_header();
   /// Parses a `param_list` grammar element
   /// @returns the parsed variables
-  std::vector<std::unique_ptr<ast::Variable>> param_list();
+  ast::VariableList param_list();
   /// Parses a `entry_point_decl` grammar element
   /// @returns the EntryPoint or nullptr on error
   std::unique_ptr<ast::EntryPoint> entry_point_decl();
@@ -183,13 +181,13 @@ class ParserImpl {
   ast::PipelineStage pipeline_stage();
   /// Parses a `body_stmt` grammar element
   /// @returns the parsed statements
-  std::vector<std::unique_ptr<ast::Statement>> body_stmt();
+  ast::StatementList body_stmt();
   /// Parses a `paren_rhs_stmt` grammar element
   /// @returns the parsed element or nullptr
   std::unique_ptr<ast::Expression> paren_rhs_stmt();
   /// Parses a `statements` grammar element
   /// @returns the statements parsed
-  std::vector<std::unique_ptr<ast::Statement>> statements();
+  ast::StatementList statements();
   /// Parses a `statement` grammar element
   /// @returns the parsed statement or nullptr
   std::unique_ptr<ast::Statement> statement();
@@ -207,13 +205,13 @@ class ParserImpl {
   std::unique_ptr<ast::IfStatement> if_stmt();
   /// Parses a `elseif_stmt` grammar element
   /// @returns the parsed elements
-  std::vector<std::unique_ptr<ast::ElseStatement>> elseif_stmt();
+  ast::ElseStatementList elseif_stmt();
   /// Parses a `else_stmt` grammar element
   /// @returns the parsed statement or nullptr
   std::unique_ptr<ast::ElseStatement> else_stmt();
   /// Parses a `premerge_stmt` grammar element
   /// @returns the parsed statements
-  std::vector<std::unique_ptr<ast::Statement>> premerge_stmt();
+  ast::StatementList premerge_stmt();
   /// Parses a `unless_stmt` grammar element
   /// @returns the parsed element or nullptr
   std::unique_ptr<ast::UnlessStatement> unless_stmt();
@@ -228,13 +226,13 @@ class ParserImpl {
   std::unique_ptr<ast::CaseStatement> switch_body();
   /// Parses a `case_body` grammar element
   /// @returns the parsed statements
-  std::vector<std::unique_ptr<ast::Statement>> case_body();
+  ast::StatementList case_body();
   /// Parses a `loop_stmt` grammar element
   /// @returns the parsed loop or nullptr
   std::unique_ptr<ast::LoopStatement> loop_stmt();
   /// Parses a `continuing_stmt` grammar element
   /// @returns the parsed statements
-  std::vector<std::unique_ptr<ast::Statement>> continuing_stmt();
+  ast::StatementList continuing_stmt();
   /// Parses a `const_literal` grammar element
   /// @returns the const literal parsed or nullptr if none found
   std::unique_ptr<ast::Literal> const_literal();
@@ -246,7 +244,7 @@ class ParserImpl {
   std::unique_ptr<ast::Expression> primary_expression();
   /// Parses a `argument_expression_list` grammar element
   /// @returns the list of arguments
-  std::vector<std::unique_ptr<ast::Expression>> argument_expression_list();
+  ast::ExpressionList argument_expression_list();
   /// Parses the recursive portion of the postfix_expression
   /// @param prefix the left side of the expression
   /// @returns the parsed expression or nullptr

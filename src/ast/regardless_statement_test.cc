@@ -29,7 +29,7 @@ using RegardlessStatementTest = testing::Test;
 
 TEST_F(RegardlessStatementTest, Creation) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
-  std::vector<std::unique_ptr<Statement>> stmts;
+  StatementList stmts;
   stmts.push_back(std::make_unique<KillStatement>());
 
   auto ident_ptr = ident.get();
@@ -43,7 +43,7 @@ TEST_F(RegardlessStatementTest, Creation) {
 
 TEST_F(RegardlessStatementTest, Creation_WithSource) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
-  std::vector<std::unique_ptr<Statement>> stmts;
+  StatementList stmts;
   stmts.push_back(std::make_unique<KillStatement>());
 
   RegardlessStatement r(Source{20, 2}, std::move(ident), std::move(stmts));
@@ -59,7 +59,7 @@ TEST_F(RegardlessStatementTest, IsRegardless) {
 
 TEST_F(RegardlessStatementTest, IsValid) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
-  std::vector<std::unique_ptr<Statement>> stmts;
+  StatementList stmts;
   stmts.push_back(std::make_unique<KillStatement>());
 
   RegardlessStatement r(std::move(ident), std::move(stmts));
@@ -67,7 +67,7 @@ TEST_F(RegardlessStatementTest, IsValid) {
 }
 
 TEST_F(RegardlessStatementTest, IsValid_NullCondition) {
-  std::vector<std::unique_ptr<Statement>> stmts;
+  StatementList stmts;
   stmts.push_back(std::make_unique<KillStatement>());
 
   RegardlessStatement r;
@@ -77,7 +77,7 @@ TEST_F(RegardlessStatementTest, IsValid_NullCondition) {
 
 TEST_F(RegardlessStatementTest, IsValid_InvalidCondition) {
   auto ident = std::make_unique<IdentifierExpression>("");
-  std::vector<std::unique_ptr<Statement>> stmts;
+  StatementList stmts;
   stmts.push_back(std::make_unique<KillStatement>());
 
   RegardlessStatement r(std::move(ident), std::move(stmts));
@@ -86,7 +86,7 @@ TEST_F(RegardlessStatementTest, IsValid_InvalidCondition) {
 
 TEST_F(RegardlessStatementTest, IsValid_NullBodyStatement) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
-  std::vector<std::unique_ptr<Statement>> stmts;
+  StatementList stmts;
   stmts.push_back(std::make_unique<KillStatement>());
   stmts.push_back(nullptr);
 
@@ -98,7 +98,7 @@ TEST_F(RegardlessStatementTest, IsValid_NullBodyStatement) {
 
 TEST_F(RegardlessStatementTest, IsValid_InvalidBodyStatement) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
-  std::vector<std::unique_ptr<Statement>> stmts;
+  StatementList stmts;
   stmts.push_back(std::make_unique<KillStatement>());
   stmts.push_back(std::make_unique<IfStatement>());
 
@@ -108,7 +108,7 @@ TEST_F(RegardlessStatementTest, IsValid_InvalidBodyStatement) {
 
 TEST_F(RegardlessStatementTest, ToStr) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
-  std::vector<std::unique_ptr<Statement>> stmts;
+  StatementList stmts;
   stmts.push_back(std::make_unique<KillStatement>());
 
   RegardlessStatement r(std::move(ident), std::move(stmts));

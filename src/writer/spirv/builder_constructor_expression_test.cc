@@ -51,7 +51,7 @@ TEST_F(BuilderTest, Constructor_Type) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
 
-  std::vector<std::unique_ptr<ast::Expression>> vals;
+  ast::ExpressionList vals;
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -77,7 +77,7 @@ TEST_F(BuilderTest, Constructor_Type_Dedups) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
 
-  std::vector<std::unique_ptr<ast::Expression>> vals;
+  ast::ExpressionList vals;
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -103,7 +103,7 @@ TEST_F(BuilderTest, Constructor_NonConst_Type_Fails) {
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
 
-  std::vector<std::unique_ptr<ast::Expression>> vals;
+  ast::ExpressionList vals;
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
   vals.push_back(std::move(rel));

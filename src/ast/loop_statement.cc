@@ -19,13 +19,12 @@ namespace ast {
 
 LoopStatement::LoopStatement() : Statement() {}
 
-LoopStatement::LoopStatement(std::vector<std::unique_ptr<Statement>> body,
-                             std::vector<std::unique_ptr<Statement>> continuing)
+LoopStatement::LoopStatement(StatementList body, StatementList continuing)
     : Statement(), body_(std::move(body)), continuing_(std::move(continuing)) {}
 
 LoopStatement::LoopStatement(const Source& source,
-                             std::vector<std::unique_ptr<Statement>> body,
-                             std::vector<std::unique_ptr<Statement>> continuing)
+                             StatementList body,
+                             StatementList continuing)
     : Statement(source),
       body_(std::move(body)),
       continuing_(std::move(continuing)) {}

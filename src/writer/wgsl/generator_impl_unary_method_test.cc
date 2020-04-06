@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include <memory>
-#include <vector>
 
 #include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
@@ -38,7 +37,7 @@ TEST_P(UnaryMethodTest, Emit) {
   auto params = GetParam();
 
   auto expr = std::make_unique<ast::IdentifierExpression>("expr");
-  std::vector<std::unique_ptr<ast::Expression>> ops;
+  ast::ExpressionList ops;
   ops.push_back(std::move(expr));
 
   ast::UnaryMethodExpression method(params.method, std::move(ops));
@@ -62,7 +61,7 @@ TEST_P(UnaryMethodTest_MultiParam, Emit) {
 
   auto expr1 = std::make_unique<ast::IdentifierExpression>("expr1");
   auto expr2 = std::make_unique<ast::IdentifierExpression>("expr2");
-  std::vector<std::unique_ptr<ast::Expression>> ops;
+  ast::ExpressionList ops;
   ops.push_back(std::move(expr1));
   ops.push_back(std::move(expr2));
 

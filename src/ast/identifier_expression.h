@@ -15,7 +15,6 @@
 #ifndef SRC_AST_IDENTIFIER_EXPRESSION_H_
 #define SRC_AST_IDENTIFIER_EXPRESSION_H_
 
-#include <memory>
 #include <string>
 #include <utility>
 #include <vector>

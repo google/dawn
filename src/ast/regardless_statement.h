@@ -17,7 +17,6 @@
 
 #include <memory>
 #include <utility>
-#include <vector>
 
 #include "src/ast/expression.h"
 #include "src/ast/statement.h"
@@ -34,14 +33,14 @@ class RegardlessStatement : public Statement {
   /// @param condition the condition expression
   /// @param body the body statements
   RegardlessStatement(std::unique_ptr<Expression> condition,
-                      std::vector<std::unique_ptr<Statement>> body);
+                      StatementList body);
   /// Constructor
   /// @param source the regardless statement source
   /// @param condition the condition expression
   /// @param body the body statements
   RegardlessStatement(const Source& source,
                       std::unique_ptr<Expression> condition,
-                      std::vector<std::unique_ptr<Statement>> body);
+                      StatementList body);
   /// Move constructor
   RegardlessStatement(RegardlessStatement&&) = default;
   ~RegardlessStatement() override;
@@ -56,11 +55,9 @@ class RegardlessStatement : public Statement {
 
   /// Sets the body statements
   /// @param body the body statements
-  void set_body(std::vector<std::unique_ptr<Statement>> body) {
-    body_ = std::move(body);
-  }
+  void set_body(StatementList body) { body_ = std::move(body); }
   /// @returns the body statements
-  const std::vector<std::unique_ptr<Statement>>& body() const { return body_; }
+  const StatementList& body() const { return body_; }
 
   /// @returns true if this is an regardless statement
   bool IsRegardless() const override { return true; }
@@ -77,7 +74,7 @@ class RegardlessStatement : public Statement {
   RegardlessStatement(const RegardlessStatement&) = delete;
 
   std::unique_ptr<Expression> condition_;
-  std::vector<std::unique_ptr<Statement>> body_;
+  StatementList body_;
 };
 
 }  // namespace ast

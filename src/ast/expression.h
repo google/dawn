@@ -15,6 +15,9 @@
 #ifndef SRC_AST_EXPRESSION_H_
 #define SRC_AST_EXPRESSION_H_
 
+#include <memory>
+#include <vector>
+
 #include "src/ast/node.h"
 #include "src/ast/type/type.h"
 
@@ -104,6 +107,9 @@ class Expression : public Node {
 
   type::Type* result_type_ = nullptr;
 };
+
+/// A list of unique expressions
+using ExpressionList = std::vector<std::unique_ptr<Expression>>;
 
 }  // namespace ast
 }  // namespace tint

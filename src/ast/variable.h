@@ -19,6 +19,7 @@
 #include <ostream>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "src/ast/expression.h"
 #include "src/ast/node.h"
@@ -169,6 +170,9 @@ class Variable : public Node {
   type::Type* type_ = nullptr;
   std::unique_ptr<Expression> constructor_;
 };
+
+/// A list of unique variables
+using VariableList = std::vector<std::unique_ptr<Variable>>;
 
 }  // namespace ast
 }  // namespace tint

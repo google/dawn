@@ -21,15 +21,13 @@ namespace ast {
 
 SwitchStatement::SwitchStatement() : Statement() {}
 
-SwitchStatement::SwitchStatement(
-    std::unique_ptr<Expression> condition,
-    std::vector<std::unique_ptr<CaseStatement>> body)
+SwitchStatement::SwitchStatement(std::unique_ptr<Expression> condition,
+                                 CaseStatementList body)
     : Statement(), condition_(std::move(condition)), body_(std::move(body)) {}
 
-SwitchStatement::SwitchStatement(
-    const Source& source,
-    std::unique_ptr<Expression> condition,
-    std::vector<std::unique_ptr<CaseStatement>> body)
+SwitchStatement::SwitchStatement(const Source& source,
+                                 std::unique_ptr<Expression> condition,
+                                 CaseStatementList body)
     : Statement(source),
       condition_(std::move(condition)),
       body_(std::move(body)) {}

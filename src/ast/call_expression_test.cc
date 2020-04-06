@@ -25,7 +25,7 @@ using CallExpressionTest = testing::Test;
 
 TEST_F(CallExpressionTest, Creation) {
   auto func = std::make_unique<IdentifierExpression>("func");
-  std::vector<std::unique_ptr<Expression>> params;
+  ExpressionList params;
   params.push_back(std::make_unique<IdentifierExpression>("param1"));
   params.push_back(std::make_unique<IdentifierExpression>("param2"));
 
@@ -69,7 +69,7 @@ TEST_F(CallExpressionTest, IsValid_MissingFunction) {
 
 TEST_F(CallExpressionTest, IsValid_NullParam) {
   auto func = std::make_unique<IdentifierExpression>("func");
-  std::vector<std::unique_ptr<Expression>> params;
+  ExpressionList params;
   params.push_back(std::make_unique<IdentifierExpression>("param1"));
   params.push_back(nullptr);
   params.push_back(std::make_unique<IdentifierExpression>("param2"));
@@ -80,7 +80,7 @@ TEST_F(CallExpressionTest, IsValid_NullParam) {
 
 TEST_F(CallExpressionTest, IsValid_InvalidFunction) {
   auto func = std::make_unique<IdentifierExpression>("");
-  std::vector<std::unique_ptr<Expression>> params;
+  ExpressionList params;
   params.push_back(std::make_unique<IdentifierExpression>("param1"));
 
   CallExpression stmt(std::move(func), std::move(params));
@@ -89,7 +89,7 @@ TEST_F(CallExpressionTest, IsValid_InvalidFunction) {
 
 TEST_F(CallExpressionTest, IsValid_InvalidParam) {
   auto func = std::make_unique<IdentifierExpression>("func");
-  std::vector<std::unique_ptr<Expression>> params;
+  ExpressionList params;
   params.push_back(std::make_unique<IdentifierExpression>(""));
 
   CallExpression stmt(std::move(func), std::move(params));
@@ -111,7 +111,7 @@ TEST_F(CallExpressionTest, ToStr_NoParams) {
 
 TEST_F(CallExpressionTest, ToStr_WithParams) {
   auto func = std::make_unique<IdentifierExpression>("func");
-  std::vector<std::unique_ptr<Expression>> params;
+  ExpressionList params;
   params.push_back(std::make_unique<IdentifierExpression>("param1"));
   params.push_back(std::make_unique<IdentifierExpression>("param2"));
 

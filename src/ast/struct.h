@@ -15,11 +15,9 @@
 #ifndef SRC_AST_STRUCT_H_
 #define SRC_AST_STRUCT_H_
 
-#include <memory>
 #include <ostream>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "src/ast/node.h"
 #include "src/ast/struct_decoration.h"
@@ -36,15 +34,14 @@ class Struct : public Node {
   /// Create a new struct statement
   /// @param decoration The struct decorations
   /// @param members The struct members
-  Struct(StructDecoration decoration,
-         std::vector<std::unique_ptr<StructMember>> members);
+  Struct(StructDecoration decoration, StructMemberList members);
   /// Create a new struct statement
   /// @param source The input source for the import statement
   /// @param decoration The struct decorations
   /// @param members The struct members
   Struct(const Source& source,
          StructDecoration decoration,
-         std::vector<std::unique_ptr<StructMember>> members);
+         StructMemberList members);
   /// Move constructor
   Struct(Struct&&) = default;
 
@@ -58,13 +55,9 @@ class Struct : public Node {
 
   /// Sets the struct members
   /// @param members the members to set
-  void set_members(std::vector<std::unique_ptr<StructMember>> members) {
-    members_ = std::move(members);
-  }
+  void set_members(StructMemberList members) { members_ = std::move(members); }
   /// @returns the members
-  const std::vector<std::unique_ptr<StructMember>>& members() const {
-    return members_;
-  }
+  const StructMemberList& members() const { return members_; }
 
   /// @returns true if the node is valid
   bool IsValid() const override;
@@ -78,7 +71,7 @@ class Struct : public Node {
   Struct(const Struct&) = delete;
 
   StructDecoration decoration_ = StructDecoration::kNone;
-  std::vector<std::unique_ptr<StructMember>> members_;
+  StructMemberList members_;
 };
 
 }  // namespace ast

@@ -15,9 +15,7 @@
 #ifndef SRC_AST_LOOP_STATEMENT_H_
 #define SRC_AST_LOOP_STATEMENT_H_
 
-#include <memory>
 #include <utility>
-#include <vector>
 
 #include "src/ast/statement.h"
 
@@ -32,36 +30,31 @@ class LoopStatement : public Statement {
   /// Constructor
   /// @param body the body statements
   /// @param continuing the continuing statements
-  LoopStatement(std::vector<std::unique_ptr<Statement>> body,
-                std::vector<std::unique_ptr<Statement>> continuing);
+  LoopStatement(StatementList body, StatementList continuing);
   /// Constructor
   /// @param source the loop statement source
   /// @param body the body statements
   /// @param continuing the continuing statements
   LoopStatement(const Source& source,
-                std::vector<std::unique_ptr<Statement>> body,
-                std::vector<std::unique_ptr<Statement>> continuing);
+                StatementList body,
+                StatementList continuing);
   /// Move constructor
   LoopStatement(LoopStatement&&) = default;
   ~LoopStatement() override;
 
   /// Sets the body statements
   /// @param body the body statements
-  void set_body(std::vector<std::unique_ptr<Statement>> body) {
-    body_ = std::move(body);
-  }
+  void set_body(StatementList body) { body_ = std::move(body); }
   /// @returns the body statements
-  const std::vector<std::unique_ptr<Statement>>& body() const { return body_; }
+  const StatementList& body() const { return body_; }
 
   /// Sets the continuing statements
   /// @param continuing the continuing statements
-  void set_continuing(std::vector<std::unique_ptr<Statement>> continuing) {
+  void set_continuing(StatementList continuing) {
     continuing_ = std::move(continuing);
   }
   /// @returns the continuing statements
-  const std::vector<std::unique_ptr<Statement>>& continuing() const {
-    return continuing_;
-  }
+  const StatementList& continuing() const { return continuing_; }
   /// @returns true if there are continuing statements in the loop
   bool has_continuing() const { return !continuing_.empty(); }
 
@@ -79,8 +72,8 @@ class LoopStatement : public Statement {
  private:
   LoopStatement(const LoopStatement&) = delete;
 
-  std::vector<std::unique_ptr<Statement>> body_;
-  std::vector<std::unique_ptr<Statement>> continuing_;
+  StatementList body_;
+  StatementList continuing_;
 };
 
 }  // namespace ast

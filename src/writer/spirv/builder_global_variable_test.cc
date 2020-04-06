@@ -71,7 +71,7 @@ TEST_F(BuilderTest, GlobalVar_WithConstructor) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
 
-  std::vector<std::unique_ptr<ast::Expression>> vals;
+  ast::ExpressionList vals;
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -105,7 +105,7 @@ TEST_F(BuilderTest, GlobalVar_Const) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
 
-  std::vector<std::unique_ptr<ast::Expression>> vals;
+  ast::ExpressionList vals;
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -136,7 +136,7 @@ TEST_F(BuilderTest, GlobalVar_WithLocation) {
   ast::type::F32Type f32;
   auto v =
       std::make_unique<ast::Variable>("var", ast::StorageClass::kOutput, &f32);
-  std::vector<std::unique_ptr<ast::VariableDecoration>> decos;
+  ast::VariableDecorationList decos;
   decos.push_back(std::make_unique<ast::LocationDecoration>(5));
 
   ast::DecoratedVariable dv(std::move(v));
@@ -157,7 +157,7 @@ TEST_F(BuilderTest, GlobalVar_WithBindingAndSet) {
   ast::type::F32Type f32;
   auto v =
       std::make_unique<ast::Variable>("var", ast::StorageClass::kOutput, &f32);
-  std::vector<std::unique_ptr<ast::VariableDecoration>> decos;
+  ast::VariableDecorationList decos;
   decos.push_back(std::make_unique<ast::BindingDecoration>(2));
   decos.push_back(std::make_unique<ast::SetDecoration>(3));
 
@@ -180,7 +180,7 @@ TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
   ast::type::F32Type f32;
   auto v =
       std::make_unique<ast::Variable>("var", ast::StorageClass::kOutput, &f32);
-  std::vector<std::unique_ptr<ast::VariableDecoration>> decos;
+  ast::VariableDecorationList decos;
   decos.push_back(
       std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kPosition));
 

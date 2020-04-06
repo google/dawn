@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include <memory>
-#include <vector>
 
 #include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
@@ -32,7 +31,7 @@ using GeneratorImplTest = testing::Test;
 TEST_F(GeneratorImplTest, Emit_Unless) {
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
 
-  std::vector<std::unique_ptr<ast::Statement>> body;
+  ast::StatementList body;
   body.push_back(std::make_unique<ast::NopStatement>());
   body.push_back(std::make_unique<ast::KillStatement>());
 

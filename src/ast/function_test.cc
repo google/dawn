@@ -31,7 +31,7 @@ TEST_F(FunctionTest, Creation) {
   type::VoidType void_type;
   type::I32Type i32;
 
-  std::vector<std::unique_ptr<Variable>> params;
+  VariableList params;
   params.push_back(
       std::make_unique<Variable>("var", StorageClass::kNone, &i32));
   auto var_ptr = params[0].get();
@@ -47,7 +47,7 @@ TEST_F(FunctionTest, Creation_WithSource) {
   type::VoidType void_type;
   type::I32Type i32;
 
-  std::vector<std::unique_ptr<Variable>> params;
+  VariableList params;
   params.push_back(
       std::make_unique<Variable>("var", StorageClass::kNone, &i32));
 
@@ -61,11 +61,11 @@ TEST_F(FunctionTest, IsValid) {
   type::VoidType void_type;
   type::I32Type i32;
 
-  std::vector<std::unique_ptr<Variable>> params;
+  VariableList params;
   params.push_back(
       std::make_unique<Variable>("var", StorageClass::kNone, &i32));
 
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<NopStatement>());
 
   Function f("func", std::move(params), &void_type);
@@ -77,7 +77,7 @@ TEST_F(FunctionTest, IsValid_EmptyName) {
   type::VoidType void_type;
   type::I32Type i32;
 
-  std::vector<std::unique_ptr<Variable>> params;
+  VariableList params;
   params.push_back(
       std::make_unique<Variable>("var", StorageClass::kNone, &i32));
 
@@ -88,7 +88,7 @@ TEST_F(FunctionTest, IsValid_EmptyName) {
 TEST_F(FunctionTest, IsValid_MissingReturnType) {
   type::I32Type i32;
 
-  std::vector<std::unique_ptr<Variable>> params;
+  VariableList params;
   params.push_back(
       std::make_unique<Variable>("var", StorageClass::kNone, &i32));
 
@@ -100,7 +100,7 @@ TEST_F(FunctionTest, IsValid_NullParam) {
   type::VoidType void_type;
   type::I32Type i32;
 
-  std::vector<std::unique_ptr<Variable>> params;
+  VariableList params;
   params.push_back(
       std::make_unique<Variable>("var", StorageClass::kNone, &i32));
   params.push_back(nullptr);
@@ -112,7 +112,7 @@ TEST_F(FunctionTest, IsValid_NullParam) {
 TEST_F(FunctionTest, IsValid_InvalidParam) {
   type::VoidType void_type;
 
-  std::vector<std::unique_ptr<Variable>> params;
+  VariableList params;
   params.push_back(
       std::make_unique<Variable>("var", StorageClass::kNone, nullptr));
 
@@ -124,11 +124,11 @@ TEST_F(FunctionTest, IsValid_NullBodyStatement) {
   type::VoidType void_type;
   type::I32Type i32;
 
-  std::vector<std::unique_ptr<Variable>> params;
+  VariableList params;
   params.push_back(
       std::make_unique<Variable>("var", StorageClass::kNone, &i32));
 
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<NopStatement>());
   body.push_back(nullptr);
 
@@ -141,11 +141,11 @@ TEST_F(FunctionTest, IsValid_InvalidBodyStatement) {
   type::VoidType void_type;
   type::I32Type i32;
 
-  std::vector<std::unique_ptr<Variable>> params;
+  VariableList params;
   params.push_back(
       std::make_unique<Variable>("var", StorageClass::kNone, &i32));
 
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<NopStatement>());
   body.push_back(nullptr);
 
@@ -158,7 +158,7 @@ TEST_F(FunctionTest, ToStr) {
   type::VoidType void_type;
   type::I32Type i32;
 
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<NopStatement>());
 
   Function f("func", {}, &void_type);
@@ -178,11 +178,11 @@ TEST_F(FunctionTest, ToStr_WithParams) {
   type::VoidType void_type;
   type::I32Type i32;
 
-  std::vector<std::unique_ptr<Variable>> params;
+  VariableList params;
   params.push_back(
       std::make_unique<Variable>("var", StorageClass::kNone, &i32));
 
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<NopStatement>());
 
   Function f("func", std::move(params), &void_type);
@@ -216,7 +216,7 @@ TEST_F(FunctionTest, TypeName_WithParams) {
   type::I32Type i32;
   type::F32Type f32;
 
-  std::vector<std::unique_ptr<Variable>> params;
+  VariableList params;
   params.push_back(
       std::make_unique<Variable>("var1", StorageClass::kNone, &i32));
   params.push_back(

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include <memory>
-#include <vector>
 
 #include "gtest/gtest.h"
 #include "src/ast/break_statement.h"
@@ -33,19 +32,19 @@ using GeneratorImplTest = testing::Test;
 
 TEST_F(GeneratorImplTest, Emit_Switch) {
   auto def = std::make_unique<ast::CaseStatement>();
-  std::vector<std::unique_ptr<ast::Statement>> def_body;
+  ast::StatementList def_body;
   def_body.push_back(std::make_unique<ast::BreakStatement>());
   def->set_body(std::move(def_body));
 
   ast::type::I32Type i32;
   auto case_val = std::make_unique<ast::IntLiteral>(&i32, 5);
-  std::vector<std::unique_ptr<ast::Statement>> case_body;
+  ast::StatementList case_body;
   case_body.push_back(std::make_unique<ast::BreakStatement>());
 
   auto case_stmt = std::make_unique<ast::CaseStatement>(std::move(case_val),
                                                         std::move(case_body));
 
-  std::vector<std::unique_ptr<ast::CaseStatement>> body;
+  ast::CaseStatementList body;
   body.push_back(std::move(case_stmt));
   body.push_back(std::move(def));
 

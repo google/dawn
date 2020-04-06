@@ -17,7 +17,6 @@
 
 #include <memory>
 #include <utility>
-#include <vector>
 
 #include "src/ast/expression.h"
 #include "src/ast/statement.h"
@@ -33,15 +32,14 @@ class UnlessStatement : public Statement {
   /// Constructor
   /// @param condition the condition expression
   /// @param body the body statements
-  UnlessStatement(std::unique_ptr<Expression> condition,
-                  std::vector<std::unique_ptr<Statement>> body);
+  UnlessStatement(std::unique_ptr<Expression> condition, StatementList body);
   /// Constructor
   /// @param source the unless statement source
   /// @param condition the condition expression
   /// @param body the body statements
   UnlessStatement(const Source& source,
                   std::unique_ptr<Expression> condition,
-                  std::vector<std::unique_ptr<Statement>> body);
+                  StatementList body);
   /// Move constructor
   UnlessStatement(UnlessStatement&&) = default;
   ~UnlessStatement() override;
@@ -56,11 +54,9 @@ class UnlessStatement : public Statement {
 
   /// Sets the body statements
   /// @param body the body statements
-  void set_body(std::vector<std::unique_ptr<Statement>> body) {
-    body_ = std::move(body);
-  }
+  void set_body(StatementList body) { body_ = std::move(body); }
   /// @returns the body statements
-  const std::vector<std::unique_ptr<Statement>>& body() const { return body_; }
+  const StatementList& body() const { return body_; }
 
   /// @returns true if this is an unless statement
   bool IsUnless() const override { return true; }
@@ -77,7 +73,7 @@ class UnlessStatement : public Statement {
   UnlessStatement(const UnlessStatement&) = delete;
 
   std::unique_ptr<Expression> condition_;
-  std::vector<std::unique_ptr<Statement>> body_;
+  StatementList body_;
 };
 
 }  // namespace ast

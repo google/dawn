@@ -29,7 +29,7 @@ using CaseStatementTest = testing::Test;
 TEST_F(CaseStatementTest, Creation) {
   ast::type::BoolType bool_type;
   auto b = std::make_unique<BoolLiteral>(&bool_type, true);
-  std::vector<std::unique_ptr<Statement>> stmts;
+  StatementList stmts;
   stmts.push_back(std::make_unique<NopStatement>());
 
   auto bool_ptr = b.get();
@@ -44,7 +44,7 @@ TEST_F(CaseStatementTest, Creation) {
 TEST_F(CaseStatementTest, Creation_WithSource) {
   ast::type::BoolType bool_type;
   auto b = std::make_unique<BoolLiteral>(&bool_type, true);
-  std::vector<std::unique_ptr<Statement>> stmts;
+  StatementList stmts;
   stmts.push_back(std::make_unique<NopStatement>());
 
   CaseStatement c(Source{20, 2}, std::move(b), std::move(stmts));
@@ -54,7 +54,7 @@ TEST_F(CaseStatementTest, Creation_WithSource) {
 }
 
 TEST_F(CaseStatementTest, IsDefault_WithoutCondition) {
-  std::vector<std::unique_ptr<Statement>> stmts;
+  StatementList stmts;
   stmts.push_back(std::make_unique<NopStatement>());
 
   CaseStatement c;
@@ -83,7 +83,7 @@ TEST_F(CaseStatementTest, IsValid) {
 TEST_F(CaseStatementTest, IsValid_NullBodyStatement) {
   ast::type::BoolType bool_type;
   auto b = std::make_unique<BoolLiteral>(&bool_type, true);
-  std::vector<std::unique_ptr<Statement>> stmts;
+  StatementList stmts;
   stmts.push_back(std::make_unique<NopStatement>());
   stmts.push_back(nullptr);
 
@@ -94,7 +94,7 @@ TEST_F(CaseStatementTest, IsValid_NullBodyStatement) {
 TEST_F(CaseStatementTest, IsValid_InvalidBodyStatement) {
   ast::type::BoolType bool_type;
   auto b = std::make_unique<BoolLiteral>(&bool_type, true);
-  std::vector<std::unique_ptr<Statement>> stmts;
+  StatementList stmts;
   stmts.push_back(std::make_unique<IfStatement>());
 
   CaseStatement c(std::move(b), std::move(stmts));
@@ -104,7 +104,7 @@ TEST_F(CaseStatementTest, IsValid_InvalidBodyStatement) {
 TEST_F(CaseStatementTest, ToStr_WithCondition) {
   ast::type::BoolType bool_type;
   auto b = std::make_unique<BoolLiteral>(&bool_type, true);
-  std::vector<std::unique_ptr<Statement>> stmts;
+  StatementList stmts;
   stmts.push_back(std::make_unique<NopStatement>());
   CaseStatement c(std::move(b), std::move(stmts));
 
@@ -117,7 +117,7 @@ TEST_F(CaseStatementTest, ToStr_WithCondition) {
 }
 
 TEST_F(CaseStatementTest, ToStr_WithoutCondition) {
-  std::vector<std::unique_ptr<Statement>> stmts;
+  StatementList stmts;
   stmts.push_back(std::make_unique<NopStatement>());
   CaseStatement c(nullptr, std::move(stmts));
 

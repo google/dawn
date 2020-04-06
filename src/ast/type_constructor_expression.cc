@@ -20,15 +20,13 @@ namespace ast {
 TypeConstructorExpression::TypeConstructorExpression()
     : ConstructorExpression() {}
 
-TypeConstructorExpression::TypeConstructorExpression(
-    type::Type* type,
-    std::vector<std::unique_ptr<Expression>> values)
+TypeConstructorExpression::TypeConstructorExpression(type::Type* type,
+                                                     ExpressionList values)
     : ConstructorExpression(), type_(type), values_(std::move(values)) {}
 
-TypeConstructorExpression::TypeConstructorExpression(
-    const Source& source,
-    type::Type* type,
-    std::vector<std::unique_ptr<Expression>> values)
+TypeConstructorExpression::TypeConstructorExpression(const Source& source,
+                                                     type::Type* type,
+                                                     ExpressionList values)
     : ConstructorExpression(source), type_(type), values_(std::move(values)) {}
 
 TypeConstructorExpression::~TypeConstructorExpression() = default;

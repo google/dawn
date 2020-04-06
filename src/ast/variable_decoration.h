@@ -15,8 +15,10 @@
 #ifndef SRC_AST_VARIABLE_DECORATION_H_
 #define SRC_AST_VARIABLE_DECORATION_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
+#include <vector>
 
 namespace tint {
 namespace ast {
@@ -56,6 +58,9 @@ class VariableDecoration {
  protected:
   VariableDecoration();
 };
+
+/// A list of unique variable decorations
+using VariableDecorationList = std::vector<std::unique_ptr<VariableDecoration>>;
 
 }  // namespace ast
 }  // namespace tint

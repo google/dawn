@@ -31,7 +31,7 @@ TEST_F(ElseStatementTest, Creation) {
   ast::type::BoolType bool_type;
   auto cond = std::make_unique<ScalarConstructorExpression>(
       std::make_unique<BoolLiteral>(&bool_type, true));
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<NopStatement>());
 
   auto cond_ptr = cond.get();
@@ -74,7 +74,7 @@ TEST_F(ElseStatementTest, IsValid) {
 }
 
 TEST_F(ElseStatementTest, IsValid_WithBody) {
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<NopStatement>());
 
   ElseStatement e(std::move(body));
@@ -82,7 +82,7 @@ TEST_F(ElseStatementTest, IsValid_WithBody) {
 }
 
 TEST_F(ElseStatementTest, IsValid_WithNullBodyStatement) {
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<NopStatement>());
   body.push_back(nullptr);
 
@@ -97,7 +97,7 @@ TEST_F(ElseStatementTest, IsValid_InvalidCondition) {
 }
 
 TEST_F(ElseStatementTest, IsValid_InvalidBodyStatement) {
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<IfStatement>());
 
   ElseStatement e(std::move(body));
@@ -108,7 +108,7 @@ TEST_F(ElseStatementTest, ToStr) {
   ast::type::BoolType bool_type;
   auto cond = std::make_unique<ScalarConstructorExpression>(
       std::make_unique<BoolLiteral>(&bool_type, true));
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<NopStatement>());
 
   ElseStatement e(std::move(cond), std::move(body));
@@ -126,7 +126,7 @@ TEST_F(ElseStatementTest, ToStr) {
 }
 
 TEST_F(ElseStatementTest, ToStr_NoCondition) {
-  std::vector<std::unique_ptr<Statement>> body;
+  StatementList body;
   body.push_back(std::make_unique<NopStatement>());
 
   ElseStatement e(std::move(body));

@@ -14,6 +14,7 @@
 
 #include "src/ast/struct.h"
 
+#include <memory>
 #include <sstream>
 #include <utility>
 
@@ -30,9 +31,9 @@ using StructTest = testing::Test;
 
 TEST_F(StructTest, Creation) {
   type::I32Type i32;
-  std::vector<std::unique_ptr<StructMember>> members;
-  members.push_back(std::make_unique<StructMember>(
-      "a", &i32, std::vector<std::unique_ptr<StructMemberDecoration>>()));
+  StructMemberList members;
+  members.push_back(
+      std::make_unique<StructMember>("a", &i32, StructMemberDecorationList()));
 
   Struct s{StructDecoration::kNone, std::move(members)};
   EXPECT_EQ(s.members().size(), 1);
@@ -44,9 +45,9 @@ TEST_F(StructTest, Creation) {
 TEST_F(StructTest, CreationWithSource) {
   type::I32Type i32;
   Source source{27, 4};
-  std::vector<std::unique_ptr<StructMember>> members;
-  members.emplace_back(std::make_unique<StructMember>(
-      "a", &i32, std::vector<std::unique_ptr<StructMemberDecoration>>()));
+  StructMemberList members;
+  members.emplace_back(
+      std::make_unique<StructMember>("a", &i32, StructMemberDecorationList()));
 
   Struct s{source, StructDecoration::kNone, std::move(members)};
   EXPECT_EQ(s.members().size(), 1);
@@ -62,9 +63,9 @@ TEST_F(StructTest, IsValid) {
 
 TEST_F(StructTest, IsValid_Null_StructMember) {
   type::I32Type i32;
-  std::vector<std::unique_ptr<StructMember>> members;
-  members.push_back(std::make_unique<StructMember>(
-      "a", &i32, std::vector<std::unique_ptr<StructMemberDecoration>>()));
+  StructMemberList members;
+  members.push_back(
+      std::make_unique<StructMember>("a", &i32, StructMemberDecorationList()));
   members.push_back(nullptr);
 
   Struct s{StructDecoration::kNone, std::move(members)};
@@ -73,9 +74,9 @@ TEST_F(StructTest, IsValid_Null_StructMember) {
 
 TEST_F(StructTest, IsValid_Invalid_StructMember) {
   type::I32Type i32;
-  std::vector<std::unique_ptr<StructMember>> members;
-  members.push_back(std::make_unique<StructMember>(
-      "", &i32, std::vector<std::unique_ptr<StructMemberDecoration>>()));
+  StructMemberList members;
+  members.push_back(
+      std::make_unique<StructMember>("", &i32, StructMemberDecorationList()));
 
   Struct s{StructDecoration::kNone, std::move(members)};
   EXPECT_FALSE(s.IsValid());
@@ -84,9 +85,9 @@ TEST_F(StructTest, IsValid_Invalid_StructMember) {
 TEST_F(StructTest, ToStr) {
   type::I32Type i32;
   Source source{27, 4};
-  std::vector<std::unique_ptr<StructMember>> members;
-  members.emplace_back(std::make_unique<StructMember>(
-      "a", &i32, std::vector<std::unique_ptr<StructMemberDecoration>>()));
+  StructMemberList members;
+  members.emplace_back(
+      std::make_unique<StructMember>("a", &i32, StructMemberDecorationList()));
 
   Struct s{source, StructDecoration::kNone, std::move(members)};
 

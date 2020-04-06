@@ -690,8 +690,7 @@ bool GeneratorImpl::EmitUnaryOp(ast::UnaryOpExpression* expr) {
   return true;
 }
 
-bool GeneratorImpl::EmitStatementBlock(
-    const std::vector<std::unique_ptr<ast::Statement>>& statements) {
+bool GeneratorImpl::EmitStatementBlock(const ast::StatementList& statements) {
   out_ << " {" << std::endl;
 
   increment_indent();
@@ -710,7 +709,7 @@ bool GeneratorImpl::EmitStatementBlock(
 }
 
 bool GeneratorImpl::EmitStatementBlockAndNewline(
-    const std::vector<std::unique_ptr<ast::Statement>>& statements) {
+    const ast::StatementList& statements) {
   const bool result = EmitStatementBlock(statements);
   if (result) {
     out_ << std::endl;

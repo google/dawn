@@ -20,7 +20,7 @@ namespace tint {
 namespace ast {
 
 Function::Function(const std::string& name,
-                   std::vector<std::unique_ptr<Variable>> params,
+                   VariableList params,
                    type::Type* return_type)
     : Node(),
       name_(name),
@@ -29,7 +29,7 @@ Function::Function(const std::string& name,
 
 Function::Function(const Source& source,
                    const std::string& name,
-                   std::vector<std::unique_ptr<Variable>> params,
+                   VariableList params,
                    type::Type* return_type)
     : Node(source),
       name_(name),

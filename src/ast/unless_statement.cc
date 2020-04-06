@@ -20,12 +20,12 @@ namespace ast {
 UnlessStatement::UnlessStatement() : Statement() {}
 
 UnlessStatement::UnlessStatement(std::unique_ptr<Expression> condition,
-                                 std::vector<std::unique_ptr<Statement>> body)
+                                 StatementList body)
     : Statement(), condition_(std::move(condition)), body_(std::move(body)) {}
 
 UnlessStatement::UnlessStatement(const Source& source,
                                  std::unique_ptr<Expression> condition,
-                                 std::vector<std::unique_ptr<Statement>> body)
+                                 StatementList body)
     : Statement(source),
       condition_(std::move(condition)),
       body_(std::move(body)) {}

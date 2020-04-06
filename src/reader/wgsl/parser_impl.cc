@@ -15,6 +15,7 @@
 #include "src/reader/wgsl/parser_impl.h"
 
 #include <memory>
+#include <vector>
 
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/as_expression.h"
@@ -396,9 +397,8 @@ std::unique_ptr<ast::Variable> ParserImpl::global_constant_decl() {
 
 // variable_decoration_list
 //  : ATTR_LEFT variable_decoration (COMMA variable_decoration)* ATTR_RIGHT
-std::vector<std::unique_ptr<ast::VariableDecoration>>
-ParserImpl::variable_decoration_list() {
-  std::vector<std::unique_ptr<ast::VariableDecoration>> decos;
+ast::VariableDecorationList ParserImpl::variable_decoration_list() {
+  ast::VariableDecorationList decos;
 
   auto t = peek();
   if (!t.IsAttrLeft())
@@ -1045,7 +1045,7 @@ ast::StructDecoration ParserImpl::struct_decoration() {
 
 // struct_body_decl
 //   : BRACKET_LEFT struct_member* BRACKET_RIGHT
-std::vector<std::unique_ptr<ast::StructMember>> ParserImpl::struct_body_decl() {
+ast::StructMemberList ParserImpl::struct_body_decl() {
   auto t = peek();
   if (!t.IsBracketLeft())
     return {};
@@ -1056,7 +1056,7 @@ std::vector<std::unique_ptr<ast::StructMember>> ParserImpl::struct_body_decl() {
   if (t.IsBracketRight())
     return {};
 
-  std::vector<std::unique_ptr<ast::StructMember>> members;
+  ast::StructMemberList members;
   for (;;) {
     auto mem = struct_member();
     if (has_error())
@@ -1116,8 +1116,7 @@ std::unique_ptr<ast::StructMember> ParserImpl::struct_member() {
 //   :
 //   | ATTR_LEFT (struct_member_decoration COMMA)*
 //                struct_member_decoration ATTR_RIGHT
-std::vector<std::unique_ptr<ast::StructMemberDecoration>>
-ParserImpl::struct_member_decoration_decl() {
+ast::StructMemberDecorationList ParserImpl::struct_member_decoration_decl() {
   auto t = peek();
   if (!t.IsAttrLeft())
     return {};
@@ -1130,7 +1129,7 @@ ParserImpl::struct_member_decoration_decl() {
     return {};
   }
 
-  std::vector<std::unique_ptr<ast::StructMemberDecoration>> decos;
+  ast::StructMemberDecorationList decos;
   bool found_offset = false;
   for (;;) {
     auto deco = struct_member_decoration();
@@ -1266,11 +1265,11 @@ std::unique_ptr<ast::Function> ParserImpl::function_header() {
 // param_list
 //   :
 //   | (variable_ident_decl COMMA)* variable_ident_decl
-std::vector<std::unique_ptr<ast::Variable>> ParserImpl::param_list() {
+ast::VariableList ParserImpl::param_list() {
   auto t = peek();
   auto source = t.source();
 
-  std::vector<std::unique_ptr<ast::Variable>> ret;
+  ast::VariableList ret;
 
   std::string name;
   ast::type::Type* type;
@@ -1380,7 +1379,7 @@ ast::PipelineStage ParserImpl::pipeline_stage() {
 
 // body_stmt
 //   : BRACKET_LEFT statements BRACKET_RIGHT
-std::vector<std::unique_ptr<ast::Statement>> ParserImpl::body_stmt() {
+ast::StatementList ParserImpl::body_stmt() {
   auto t = peek();
   if (!t.IsBracketLeft())
     return {};
@@ -1429,8 +1428,8 @@ std::unique_ptr<ast::Expression> ParserImpl::paren_rhs_stmt() {
 
 // statements
 //   : statement*
-std::vector<std::unique_ptr<ast::Statement>> ParserImpl::statements() {
-  std::vector<std::unique_ptr<ast::Statement>> ret;
+ast::StatementList ParserImpl::statements() {
+  ast::StatementList ret;
 
   for (;;) {
     auto stmt = statement();
@@ -1782,12 +1781,12 @@ std::unique_ptr<ast::IfStatement> ParserImpl::if_stmt() {
 
 // elseif_stmt
 //   : ELSE_IF paren_rhs_stmt body_stmt elseif_stmt?
-std::vector<std::unique_ptr<ast::ElseStatement>> ParserImpl::elseif_stmt() {
+ast::ElseStatementList ParserImpl::elseif_stmt() {
   auto t = peek();
   if (!t.IsElseIf())
     return {};
 
-  std::vector<std::unique_ptr<ast::ElseStatement>> ret;
+  ast::ElseStatementList ret;
   for (;;) {
     auto source = t.source();
     next();  // Consume the peek
@@ -1846,7 +1845,7 @@ std::unique_ptr<ast::ElseStatement> ParserImpl::else_stmt() {
 
 // premerge_stmt
 //   : PREMERGE body_stmt
-std::vector<std::unique_ptr<ast::Statement>> ParserImpl::premerge_stmt() {
+ast::StatementList ParserImpl::premerge_stmt() {
   auto t = peek();
   if (!t.IsPremerge())
     return {};
@@ -1931,7 +1930,7 @@ std::unique_ptr<ast::SwitchStatement> ParserImpl::switch_stmt() {
     return nullptr;
   }
 
-  std::vector<std::unique_ptr<ast::CaseStatement>> body;
+  ast::CaseStatementList body;
   for (;;) {
     auto stmt = switch_body();
     if (has_error())
@@ -2006,8 +2005,8 @@ std::unique_ptr<ast::CaseStatement> ParserImpl::switch_body() {
 //   :
 //   | statement case_body
 //   | FALLTHROUGH SEMICOLON
-std::vector<std::unique_ptr<ast::Statement>> ParserImpl::case_body() {
-  std::vector<std::unique_ptr<ast::Statement>> ret;
+ast::StatementList ParserImpl::case_body() {
+  ast::StatementList ret;
   for (;;) {
     auto t = peek();
     if (t.IsFallthrough()) {
@@ -2072,7 +2071,7 @@ std::unique_ptr<ast::LoopStatement> ParserImpl::loop_stmt() {
 
 // continuing_stmt
 //   : CONTINUING body_stmt
-std::vector<std::unique_ptr<ast::Statement>> ParserImpl::continuing_stmt() {
+ast::StatementList ParserImpl::continuing_stmt() {
   auto t = peek();
   if (!t.IsContinuing())
     return {};
@@ -2148,7 +2147,7 @@ std::unique_ptr<ast::ConstructorExpression> ParserImpl::const_expr() {
       return nullptr;
     }
 
-    std::vector<std::unique_ptr<ast::Expression>> params;
+    ast::ExpressionList params;
     auto param = const_expr();
     if (has_error())
       return nullptr;
@@ -2313,8 +2312,7 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
 
 // argument_expression_list
 //   : (logical_or_expression COMMA)* logical_or_expression
-std::vector<std::unique_ptr<ast::Expression>>
-ParserImpl::argument_expression_list() {
+ast::ExpressionList ParserImpl::argument_expression_list() {
   auto arg = logical_or_expression();
   if (has_error())
     return {};
@@ -2323,7 +2321,7 @@ ParserImpl::argument_expression_list() {
     return {};
   }
 
-  std::vector<std::unique_ptr<ast::Expression>> ret;
+  ast::ExpressionList ret;
   ret.push_back(std::move(arg));
 
   for (;;) {
@@ -2379,7 +2377,7 @@ std::unique_ptr<ast::Expression> ParserImpl::postfix_expr(
     next();  // Consume the peek
 
     t = peek();
-    std::vector<std::unique_ptr<ast::Expression>> params;
+    ast::ExpressionList params;
     if (!t.IsParenRight() && !t.IsEof()) {
       params = argument_expression_list();
       if (has_error())
@@ -2501,7 +2499,7 @@ std::unique_ptr<ast::Expression> ParserImpl::unary_expression() {
       set_error(t, "missing identifier for method call");
       return nullptr;
     }
-    std::vector<std::unique_ptr<ast::Expression>> ident;
+    ast::ExpressionList ident;
     ident.push_back(
         std::make_unique<ast::IdentifierExpression>(source, t.to_str()));
 
@@ -2531,7 +2529,7 @@ std::unique_ptr<ast::Expression> ParserImpl::unary_expression() {
       set_error(t, "missing identifier for method call");
       return nullptr;
     }
-    std::vector<std::unique_ptr<ast::Expression>> ident;
+    ast::ExpressionList ident;
     ident.push_back(
         std::make_unique<ast::IdentifierExpression>(source, t.to_str()));
 
