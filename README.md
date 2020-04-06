@@ -9,6 +9,7 @@ This is not an officially supported Google product.
  * CMake (3.10.2 or later)
  * Ninja (or other build tool)
  * Python, for fetching dependencies
+ * [depot_tools] in your path
 
 ## Build options
  * `TINT_BUILD_SPV_READER` : enable the SPIR-V input reader (off by default)
@@ -17,9 +18,10 @@ This is not an officially supported Google product.
  * `TINT_BUILD_WGSL_WRITER` : enable the WGSL output writer (on by default)
 
 ## Building
-Tint uses Chromium dependency management so you need to [install depot_tools] and add it to your PATH.
+Tint uses Chromium dependency management so you need to install [depot_tools]
+and add it to your PATH.
 
-[install depot_tools]: http://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up
+[depot_tools]: http://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up
 
 ### Getting source & dependencies
 
