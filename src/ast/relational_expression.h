@@ -48,7 +48,7 @@ enum class Relation {
   kModulo,
 };
 
-/// An xor expression
+/// A Relational Expression
 class RelationalExpression : public Expression {
  public:
   /// Constructor
@@ -78,6 +78,49 @@ class RelationalExpression : public Expression {
   void set_relation(Relation relation) { relation_ = relation; }
   /// @returns the relation
   Relation relation() const { return relation_; }
+
+  /// @returns true if the relation is and
+  bool IsAnd() const { return relation_ == Relation::kAnd; }
+  /// @returns true if the relation is or
+  bool IsOr() const { return relation_ == Relation::kOr; }
+  /// @returns true if the relation is xor
+  bool IsXor() const { return relation_ == Relation::kXor; }
+  /// @returns true if the relation is logical and
+  bool IsLogicalAnd() const { return relation_ == Relation::kLogicalAnd; }
+  /// @returns true if the relation is logical or
+  bool IsLogicalOr() const { return relation_ == Relation::kLogicalOr; }
+  /// @returns true if the relation is equal
+  bool IsEqual() const { return relation_ == Relation::kEqual; }
+  /// @returns true if the relation is not equal
+  bool IsNotEqual() const { return relation_ == Relation::kNotEqual; }
+  /// @returns true if the relation is less than
+  bool IsLessThan() const { return relation_ == Relation::kLessThan; }
+  /// @returns true if the relation is greater than
+  bool IsGreaterThan() const { return relation_ == Relation::kGreaterThan; }
+  /// @returns true if the relation is less than equal
+  bool IsLessThanEqual() const { return relation_ == Relation::kLessThanEqual; }
+  /// @returns true if the relation is greater than equal
+  bool IsGreaterThanEqual() const {
+    return relation_ == Relation::kGreaterThanEqual;
+  }
+  /// @returns true if the relation is shift left
+  bool IsShiftLeft() const { return relation_ == Relation::kShiftLeft; }
+  /// @returns true if the relation is shift right
+  bool IsShiftRight() const { return relation_ == Relation::kShiftRight; }
+  /// @returns true if the relation is shift right arith
+  bool IsShiftRightArith() const {
+    return relation_ == Relation::kShiftRightArith;
+  }
+  /// @returns true if the relation is add
+  bool IsAdd() const { return relation_ == Relation::kAdd; }
+  /// @returns true if the relation is subtract
+  bool IsSubtract() const { return relation_ == Relation::kSubtract; }
+  /// @returns true if the relation is multiply
+  bool IsMultiply() const { return relation_ == Relation::kMultiply; }
+  /// @returns true if the relation is divide
+  bool IsDivide() const { return relation_ == Relation::kDivide; }
+  /// @returns true if the relation is modulo
+  bool IsModulo() const { return relation_ == Relation::kModulo; }
 
   /// Sets the left side of the expression
   /// @param lhs the left side to set
