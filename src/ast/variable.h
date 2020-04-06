@@ -43,7 +43,7 @@ class DecoratedVariable;
 ///       var<private> height : i32 = 3;  // with initializer
 ///
 ///       // A variable declared inside a function doesn't take a storage class,
-///       // and maps to SPIR-V Private storage.
+///       // and maps to SPIR-V Function storage.
 ///       var computed_depth : i32;
 ///       var area : i32 = compute_area(width, height);
 ///
