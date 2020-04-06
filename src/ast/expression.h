@@ -16,6 +16,7 @@
 #define SRC_AST_EXPRESSION_H_
 
 #include "src/ast/node.h"
+#include "src/ast/type/type.h"
 
 namespace tint {
 namespace ast {
@@ -36,6 +37,12 @@ class UnaryOpExpression;
 class Expression : public Node {
  public:
   ~Expression() override;
+
+  /// Sets the resulting type of this expression
+  /// @param type the result type to set
+  void set_result_type(type::Type* type) { result_type_ = type; }
+  /// @returns the resulting type from this expression
+  type::Type* result_type() const { return result_type_; }
 
   /// @returns true if this is an array accessor expression
   virtual bool IsArrayAccessor() const { return false; }
@@ -94,6 +101,8 @@ class Expression : public Node {
 
  private:
   Expression(const Expression&) = delete;
+
+  type::Type* result_type_ = nullptr;
 };
 
 }  // namespace ast
