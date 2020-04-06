@@ -17,7 +17,6 @@
 #include "common/BitSetIterator.h"
 #include "dawn_native/d3d12/BindGroupD3D12.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
-#include "dawn_native/d3d12/NonShaderVisibleDescriptorAllocatorD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
     namespace {
@@ -41,9 +40,6 @@ namespace dawn_native { namespace d3d12 {
             }
         }
     }  // anonymous namespace
-
-    // TODO(dawn:155): Figure out this value.
-    static constexpr uint16_t kDescriptorHeapSize = 1024;
 
     BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor* descriptor)
         : BindGroupLayoutBase(device, descriptor),
@@ -132,54 +128,14 @@ namespace dawn_native { namespace d3d12 {
             DescriptorType descriptorType = WGPUBindingTypeToDescriptorType(bindingInfo.type);
             mBindingOffsets[bindingIndex] += descriptorOffsets[descriptorType];
         }
-
-        const uint32_t viewDescriptorCount = GetCbvUavSrvDescriptorCount();
-        if (viewDescriptorCount > 0) {
-            mViewAllocator = std::make_unique<NonShaderVisibleDescriptorAllocator>(
-                device, viewDescriptorCount, kDescriptorHeapSize,
-                D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-        }
-
-        const uint32_t samplerDescriptorCount = GetSamplerDescriptorCount();
-        if (samplerDescriptorCount > 0) {
-            mSamplerAllocator = std::make_unique<NonShaderVisibleDescriptorAllocator>(
-                device, samplerDescriptorCount, kDescriptorHeapSize,
-                D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-        }
     }
 
-    ResultOrError<BindGroup*> BindGroupLayout::AllocateBindGroup(
-        Device* device,
-        const BindGroupDescriptor* descriptor) {
-        uint32_t viewSizeIncrement = 0;
-        CPUDescriptorHeapAllocation viewAllocation;
-        if (GetCbvUavSrvDescriptorCount() > 0) {
-            DAWN_TRY_ASSIGN(viewAllocation, mViewAllocator->AllocateCPUDescriptors());
-            viewSizeIncrement = mViewAllocator->GetSizeIncrement();
-        }
-
-        uint32_t samplerSizeIncrement = 0;
-        CPUDescriptorHeapAllocation samplerAllocation;
-        if (GetSamplerDescriptorCount() > 0) {
-            DAWN_TRY_ASSIGN(samplerAllocation, mSamplerAllocator->AllocateCPUDescriptors());
-            samplerSizeIncrement = mSamplerAllocator->GetSizeIncrement();
-        }
-
-        return mBindGroupAllocator.Allocate(device, descriptor, viewSizeIncrement, viewAllocation,
-                                            samplerSizeIncrement, samplerAllocation);
+    BindGroup* BindGroupLayout::AllocateBindGroup(Device* device,
+                                                  const BindGroupDescriptor* descriptor) {
+        return mBindGroupAllocator.Allocate(device, descriptor);
     }
 
-    void BindGroupLayout::DeallocateBindGroup(BindGroup* bindGroup,
-                                              CPUDescriptorHeapAllocation* viewAllocation,
-                                              CPUDescriptorHeapAllocation* samplerAllocation) {
-        if (viewAllocation->IsValid()) {
-            mViewAllocator->Deallocate(viewAllocation);
-        }
-
-        if (samplerAllocation->IsValid()) {
-            mSamplerAllocator->Deallocate(samplerAllocation);
-        }
-
+    void BindGroupLayout::DeallocateBindGroup(BindGroup* bindGroup) {
         mBindGroupAllocator.Deallocate(bindGroup);
     }
 
