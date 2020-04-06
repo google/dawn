@@ -33,6 +33,7 @@ namespace {
             options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_1);
 
             // Using the options that are used by Dawn, they appear in ShaderModuleD3D12.cpp
+            options.SetForceZeroInitializedVariables(true);
             options.SetHLSLShaderModel(51);
             // TODO (hao.x.li@intel.com): The HLSLPointCoordCompat and HLSLPointSizeCompat are
             // required temporarily for https://bugs.chromium.org/p/dawn/issues/detail?id=146,

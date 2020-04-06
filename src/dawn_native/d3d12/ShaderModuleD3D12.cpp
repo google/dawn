@@ -43,6 +43,7 @@ namespace dawn_native { namespace d3d12 {
         if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
             shaderc_spvc::CompileOptions options = GetCompileOptions();
 
+            options.SetForceZeroInitializedVariables(true);
             options.SetHLSLShaderModel(51);
             // PointCoord and PointSize are not supported in HLSL
             // TODO (hao.x.li@intel.com): The point_coord_compat and point_size_compat are
@@ -74,6 +75,9 @@ namespace dawn_native { namespace d3d12 {
             // If these options are changed, the values in DawnSPIRVCrossHLSLFastFuzzer.cpp need to
             // be updated.
             spirv_cross::CompilerGLSL::Options options_glsl;
+            // Force all uninitialized variables to be 0, otherwise they will fail to compile
+            // by FXC.
+            options_glsl.force_zero_initialized_variables = true;
 
             spirv_cross::CompilerHLSL::Options options_hlsl;
             options_hlsl.shader_model = 51;
