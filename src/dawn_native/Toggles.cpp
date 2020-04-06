@@ -127,19 +127,19 @@ namespace dawn_native {
 
     }  // anonymous namespace
 
-    void TogglesSet::SetToggle(Toggle toggle, bool enabled) {
+    void TogglesSet::Set(Toggle toggle, bool enabled) {
         ASSERT(toggle != Toggle::InvalidEnum);
         const size_t toggleIndex = static_cast<size_t>(toggle);
         toggleBitset.set(toggleIndex, enabled);
     }
 
-    bool TogglesSet::IsEnabled(Toggle toggle) const {
+    bool TogglesSet::Has(Toggle toggle) const {
         ASSERT(toggle != Toggle::InvalidEnum);
         const size_t toggleIndex = static_cast<size_t>(toggle);
         return toggleBitset.test(toggleIndex);
     }
 
-    std::vector<const char*> TogglesSet::GetEnabledToggleNames() const {
+    std::vector<const char*> TogglesSet::GetContainedToggleNames() const {
         std::vector<const char*> togglesNameInUse(toggleBitset.count());
 
         uint32_t index = 0;

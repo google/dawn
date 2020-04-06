@@ -46,14 +46,14 @@ namespace dawn_native {
         InvalidEnum = EnumCount,
     };
 
-    // A wrapper of the bitset to store if a toggle is enabled or not. This wrapper provides the
+    // A wrapper of the bitset to store if a toggle is present or not. This wrapper provides the
     // convenience to convert the enums of enum class Toggle to the indices of a bitset.
     struct TogglesSet {
         std::bitset<static_cast<size_t>(Toggle::EnumCount)> toggleBitset;
 
-        void SetToggle(Toggle toggle, bool enabled);
-        bool IsEnabled(Toggle toggle) const;
-        std::vector<const char*> GetEnabledToggleNames() const;
+        void Set(Toggle toggle, bool enabled);
+        bool Has(Toggle toggle) const;
+        std::vector<const char*> GetContainedToggleNames() const;
     };
 
     const char* ToggleEnumToName(Toggle toggle);

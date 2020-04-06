@@ -308,7 +308,7 @@ namespace dawn_native {
 
         FormatTable mFormatTable;
 
-        TogglesSet mTogglesSet;
+        TogglesSet mEnabledToggles;
         size_t mLazyClearCountForTesting = 0;
 
         ExtensionsSet mEnabledExtensions;

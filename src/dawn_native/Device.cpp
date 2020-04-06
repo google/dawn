@@ -661,13 +661,13 @@ namespace dawn_native {
         for (const char* toggleName : deviceDescriptor->forceEnabledToggles) {
             Toggle toggle = GetAdapter()->GetInstance()->ToggleNameToEnum(toggleName);
             if (toggle != Toggle::InvalidEnum) {
-                mTogglesSet.SetToggle(toggle, true);
+                mEnabledToggles.Set(toggle, true);
             }
         }
         for (const char* toggleName : deviceDescriptor->forceDisabledToggles) {
             Toggle toggle = GetAdapter()->GetInstance()->ToggleNameToEnum(toggleName);
             if (toggle != Toggle::InvalidEnum) {
-                mTogglesSet.SetToggle(toggle, false);
+                mEnabledToggles.Set(toggle, false);
             }
         }
     }
@@ -685,7 +685,7 @@ namespace dawn_native {
     }
 
     std::vector<const char*> DeviceBase::GetTogglesUsed() const {
-        return mTogglesSet.GetEnabledToggleNames();
+        return mEnabledToggles.GetContainedToggleNames();
     }
 
     bool DeviceBase::IsExtensionEnabled(Extension extension) const {
@@ -693,7 +693,7 @@ namespace dawn_native {
     }
 
     bool DeviceBase::IsToggleEnabled(Toggle toggle) const {
-        return mTogglesSet.IsEnabled(toggle);
+        return mEnabledToggles.Has(toggle);
     }
 
     bool DeviceBase::IsValidationEnabled() const {
@@ -710,8 +710,8 @@ namespace dawn_native {
 
     void DeviceBase::SetDefaultToggles() {
         // Sets the default-enabled toggles
-        mTogglesSet.SetToggle(Toggle::LazyClearResourceOnFirstUse, true);
-        mTogglesSet.SetToggle(Toggle::UseSpvc, false);
+        mEnabledToggles.Set(Toggle::LazyClearResourceOnFirstUse, true);
+        mEnabledToggles.Set(Toggle::UseSpvc, false);
     }
 
     // Implementation details of object creation
@@ -913,7 +913,7 @@ namespace dawn_native {
     }
 
     void DeviceBase::SetToggle(Toggle toggle, bool isEnabled) {
-        mTogglesSet.SetToggle(toggle, isEnabled);
+        mEnabledToggles.Set(toggle, isEnabled);
     }
 
 }  // namespace dawn_native
