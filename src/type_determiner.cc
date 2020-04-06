@@ -16,7 +16,10 @@
 
 namespace tint {
 
-TypeDeterminer::TypeDeterminer() = default;
+TypeDeterminer::TypeDeterminer(Context* ctx) : ctx_(*ctx) {
+  // TODO(dsinclair): Temporary usage to avoid compiler warning
+  static_cast<void>(ctx_.type_mgr());
+}
 
 TypeDeterminer::~TypeDeterminer() = default;
 

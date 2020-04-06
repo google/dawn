@@ -16,16 +16,26 @@
 #define SRC_TYPE_DETERMINER_H_
 
 #include <string>
+#include <unordered_map>
 
 #include "src/ast/module.h"
+#include "src/context.h"
+#include "src/scope_stack.h"
 
 namespace tint {
+namespace ast {
+
+class Function;
+class Variable;
+
+}  // namespace ast
 
 /// Determines types for all items in the given tint module
 class TypeDeterminer {
  public:
   /// Constructor
-  TypeDeterminer();
+  /// @param ctx the tint context
+  explicit TypeDeterminer(Context* ctx);
   ~TypeDeterminer();
 
   /// Runs the type determiner
@@ -37,7 +47,10 @@ class TypeDeterminer {
   const std::string& error() { return error_; }
 
  private:
+  Context& ctx_;
   std::string error_;
+  ScopeStack<ast::Variable*> variable_stack_;
+  std::unordered_map<std::string, ast::Function*> name_to_function_;
 };
 
 }  // namespace tint

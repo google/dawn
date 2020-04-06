@@ -292,22 +292,27 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
-  auto module = reader->module();
+  auto mod = reader->module();
   if (options.dump_ast) {
-    std::cout << std::endl << module.to_str() << std::endl;
+    std::cout << std::endl << mod.to_str() << std::endl;
   }
   if (options.parse_only) {
     return 1;
   }
 
-  tint::TypeDeterminer td;
-  if (!td.Determine(&module)) {
+  if (!mod.IsValid()) {
+    std::cerr << "Invalid module generated..." << std::endl;
+    return 1;
+  }
+
+  tint::TypeDeterminer td(&ctx);
+  if (!td.Determine(&mod)) {
     std::cerr << td.error() << std::endl;
     return 1;
   }
 
   tint::Validator v;
-  if (!v.Validate(module)) {
+  if (!v.Validate(mod)) {
     std::cerr << v.error() << std::endl;
     return 1;
   }
@@ -316,14 +321,13 @@ int main(int argc, const char** argv) {
 
 #if TINT_BUILD_SPV_WRITER
   if (options.format == Format::kSpirv || options.format == Format::kSpvAsm) {
-    writer =
-        std::make_unique<tint::writer::spirv::Generator>(std::move(module));
+    writer = std::make_unique<tint::writer::spirv::Generator>(std::move(mod));
   }
 #endif  // TINT_BUILD_SPV_WRITER
 
 #if TINT_BUILD_WGSL_WRITER
   if (options.format == Format::kWgsl) {
-    writer = std::make_unique<tint::writer::wgsl::Generator>(std::move(module));
+    writer = std::make_unique<tint::writer::wgsl::Generator>(std::move(mod));
   }
 #endif  // TINT_BUILD_WGSL_WRITER
 
