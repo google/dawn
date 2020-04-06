@@ -31,7 +31,7 @@ namespace dawn_native { namespace metal {
                                              IOSurfaceRef ioSurface,
                                              uint32_t plane);
 
-    class Texture : public TextureBase {
+    class Texture final : public TextureBase {
       public:
         Texture(Device* device, const TextureDescriptor* descriptor);
         Texture(Device* device, const TextureDescriptor* descriptor, id<MTLTexture> mtlTexture);
@@ -39,7 +39,6 @@ namespace dawn_native { namespace metal {
                 const ExternalImageDescriptor* descriptor,
                 IOSurfaceRef ioSurface,
                 uint32_t plane);
-        ~Texture();
 
         id<MTLTexture> GetMTLTexture();
 
@@ -49,6 +48,8 @@ namespace dawn_native { namespace metal {
                                                  uint32_t layerCount);
 
       private:
+        ~Texture() override;
+
         void DestroyImpl() override;
 
         MaybeError ClearTexture(uint32_t baseMipLevel,
@@ -60,14 +61,15 @@ namespace dawn_native { namespace metal {
         id<MTLTexture> mMtlTexture = nil;
     };
 
-    class TextureView : public TextureViewBase {
+    class TextureView final : public TextureViewBase {
       public:
         TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor);
-        ~TextureView();
 
         id<MTLTexture> GetMTLTexture();
 
       private:
+        ~TextureView() override;
+
         id<MTLTexture> mMtlTextureView = nil;
     };
 

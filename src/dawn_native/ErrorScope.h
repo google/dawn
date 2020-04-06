@@ -35,11 +35,10 @@ namespace dawn_native {
     // To simplify ErrorHandling, there is a sentinel root error scope which has
     // no parent. All uncaptured errors are handled by the root error scope. Its
     // callback is called immediately once it encounters an error.
-    class ErrorScope : public RefCounted {
+    class ErrorScope final : public RefCounted {
       public:
         ErrorScope();  // Constructor for the root error scope.
         ErrorScope(wgpu::ErrorFilter errorFilter, ErrorScope* parent);
-        ~ErrorScope();
 
         void SetCallback(wgpu::ErrorCallback callback, void* userdata);
         ErrorScope* GetParent();
@@ -49,6 +48,7 @@ namespace dawn_native {
         void Destroy();
 
       private:
+        ~ErrorScope() override;
         bool IsRoot() const;
         static void HandleErrorImpl(ErrorScope* scope, wgpu::ErrorType type, const char* message);
 

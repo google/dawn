@@ -24,15 +24,15 @@ namespace dawn_native { namespace vulkan {
 
     class Device;
 
-    class PipelineLayout : public PipelineLayoutBase {
+    class PipelineLayout final : public PipelineLayoutBase {
       public:
         static ResultOrError<PipelineLayout*> Create(Device* device,
                                                      const PipelineLayoutDescriptor* descriptor);
-        ~PipelineLayout();
 
         VkPipelineLayout GetHandle() const;
 
       private:
+        ~PipelineLayout() override;
         using PipelineLayoutBase::PipelineLayoutBase;
         MaybeError Initialize();
 

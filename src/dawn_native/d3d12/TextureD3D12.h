@@ -32,7 +32,7 @@ namespace dawn_native { namespace d3d12 {
                                                 const TextureDescriptor* descriptor);
     MaybeError ValidateTextureDescriptorCanBeWrapped(const TextureDescriptor* descriptor);
 
-    class Texture : public TextureBase {
+    class Texture final : public TextureBase {
       public:
         static ResultOrError<TextureBase*> Create(Device* device,
                                                   const TextureDescriptor* descriptor);
@@ -44,8 +44,6 @@ namespace dawn_native { namespace d3d12 {
         Texture(Device* device,
                 const TextureDescriptor* descriptor,
                 ComPtr<ID3D12Resource> d3d12Texture);
-
-        ~Texture();
 
         DXGI_FORMAT GetD3D12Format() const;
         ID3D12Resource* GetD3D12Resource() const;
@@ -71,6 +69,7 @@ namespace dawn_native { namespace d3d12 {
                                         D3D12_RESOURCE_STATES newState);
 
       private:
+        ~Texture() override;
         using TextureBase::TextureBase;
 
         MaybeError InitializeAsInternalTexture();
@@ -108,7 +107,7 @@ namespace dawn_native { namespace d3d12 {
         ComPtr<IDXGIKeyedMutex> mDxgiKeyedMutex;
     };
 
-    class TextureView : public TextureViewBase {
+    class TextureView final : public TextureViewBase {
       public:
         TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor);
 

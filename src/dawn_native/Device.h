@@ -241,7 +241,7 @@ namespace dawn_native {
                                            const BindGroupDescriptor* descriptor);
         MaybeError CreateBindGroupLayoutInternal(BindGroupLayoutBase** result,
                                                  const BindGroupLayoutDescriptor* descriptor);
-        MaybeError CreateBufferInternal(BufferBase** result, const BufferDescriptor* descriptor);
+        ResultOrError<BufferBase*> CreateBufferInternal(const BufferDescriptor* descriptor);
         MaybeError CreateComputePipelineInternal(ComputePipelineBase** result,
                                                  const ComputePipelineDescriptor* descriptor);
         MaybeError CreatePipelineLayoutInternal(PipelineLayoutBase** result,

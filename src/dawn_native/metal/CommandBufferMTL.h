@@ -29,14 +29,14 @@ namespace dawn_native { namespace metal {
     class CommandRecordingContext;
     class Device;
 
-    class CommandBuffer : public CommandBufferBase {
+    class CommandBuffer final : public CommandBufferBase {
       public:
         CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
-        ~CommandBuffer();
 
         void FillCommands(CommandRecordingContext* commandContext);
 
       private:
+        ~CommandBuffer() override;
         void EncodeComputePass(CommandRecordingContext* commandContext);
         void EncodeRenderPass(CommandRecordingContext* commandContext,
                               MTLRenderPassDescriptor* mtlRenderPass,

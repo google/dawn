@@ -237,9 +237,9 @@ namespace dawn_native { namespace d3d12 {
         return new BindGroupLayout(this, descriptor);
     }
     ResultOrError<BufferBase*> Device::CreateBufferImpl(const BufferDescriptor* descriptor) {
-        std::unique_ptr<Buffer> buffer = std::make_unique<Buffer>(this, descriptor);
+        Ref<Buffer> buffer = AcquireRef(new Buffer(this, descriptor));
         DAWN_TRY(buffer->Initialize());
-        return buffer.release();
+        return buffer.Detach();
     }
     CommandBufferBase* Device::CreateCommandBuffer(CommandEncoder* encoder,
                                                    const CommandBufferDescriptor* descriptor) {

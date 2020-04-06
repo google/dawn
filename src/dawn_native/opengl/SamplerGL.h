@@ -23,15 +23,16 @@ namespace dawn_native { namespace opengl {
 
     class Device;
 
-    class Sampler : public SamplerBase {
+    class Sampler final : public SamplerBase {
       public:
         Sampler(Device* device, const SamplerDescriptor* descriptor);
-        ~Sampler();
 
         GLuint GetFilteringHandle() const;
         GLuint GetNonFilteringHandle() const;
 
       private:
+        ~Sampler() override;
+
         void SetupGLSampler(GLuint sampler, const SamplerDescriptor* descriptor, bool forceNearest);
 
         GLuint mFilteringHandle;

@@ -44,14 +44,14 @@ namespace dawn_native { namespace d3d12 {
     class RenderPassBuilder;
     class RenderPipeline;
 
-    class CommandBuffer : public CommandBufferBase {
+    class CommandBuffer final : public CommandBufferBase {
       public:
         CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
-        ~CommandBuffer();
 
         MaybeError RecordCommands(CommandRecordingContext* commandContext);
 
       private:
+        ~CommandBuffer() override;
         MaybeError RecordComputePass(CommandRecordingContext* commandContext,
                                      BindGroupStateTracker* bindingTracker);
         MaybeError RecordRenderPass(CommandRecordingContext* commandContext,

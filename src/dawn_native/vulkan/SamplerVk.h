@@ -24,14 +24,14 @@ namespace dawn_native { namespace vulkan {
 
     class Device;
 
-    class Sampler : public SamplerBase {
+    class Sampler final : public SamplerBase {
       public:
         static ResultOrError<Sampler*> Create(Device* device, const SamplerDescriptor* descriptor);
-        ~Sampler();
 
         VkSampler GetHandle() const;
 
       private:
+        ~Sampler() override;
         using SamplerBase::SamplerBase;
         MaybeError Initialize(const SamplerDescriptor* descriptor);
 

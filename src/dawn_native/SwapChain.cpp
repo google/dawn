@@ -25,7 +25,7 @@ namespace dawn_native {
 
     namespace {
 
-        class ErrorSwapChain : public SwapChainBase {
+        class ErrorSwapChain final : public SwapChainBase {
           public:
             ErrorSwapChain(DeviceBase* device) : SwapChainBase(device, ObjectBase::kError) {
             }

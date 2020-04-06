@@ -28,9 +28,6 @@ namespace dawn_native {
         ASSERT((payload & kPayloadMask) == payload);
     }
 
-    RefCounted::~RefCounted() {
-    }
-
     uint64_t RefCounted::GetRefCountForTesting() const {
         return mRefCount >> kPayloadBits;
     }

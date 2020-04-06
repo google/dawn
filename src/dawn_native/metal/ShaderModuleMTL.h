@@ -30,7 +30,7 @@ namespace dawn_native { namespace metal {
     class Device;
     class PipelineLayout;
 
-    class ShaderModule : public ShaderModuleBase {
+    class ShaderModule final : public ShaderModuleBase {
       public:
         static ResultOrError<ShaderModule*> Create(Device* device,
                                                    const ShaderModuleDescriptor* descriptor);
@@ -50,6 +50,7 @@ namespace dawn_native { namespace metal {
 
       private:
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
+        ~ShaderModule() override = default;
         MaybeError Initialize(const ShaderModuleDescriptor* descriptor);
 
         shaderc_spvc::CompileOptions GetMSLCompileOptions();

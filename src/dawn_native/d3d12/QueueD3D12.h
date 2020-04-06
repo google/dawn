@@ -25,7 +25,7 @@ namespace dawn_native { namespace d3d12 {
     class Device;
     class CommandBuffer;
 
-    class Queue : public QueueBase {
+    class Queue final : public QueueBase {
       public:
         Queue(Device* device);
 

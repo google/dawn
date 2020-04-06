@@ -169,16 +169,17 @@ namespace dawn_native { namespace null {
 
     // We don't have the complexity of placement-allocation of bind group data in
     // the Null backend. This class, keeps the binding data in a separate allocation for simplicity.
-    class BindGroup : private BindGroupDataHolder, public BindGroupBase {
+    class BindGroup final : private BindGroupDataHolder, public BindGroupBase {
       public:
         BindGroup(DeviceBase* device, const BindGroupDescriptor* descriptor);
+
+      private:
         ~BindGroup() override = default;
     };
 
-    class Buffer : public BufferBase {
+    class Buffer final : public BufferBase {
       public:
         Buffer(Device* device, const BufferDescriptor* descriptor);
-        ~Buffer();
 
         void MapOperationCompleted(uint32_t serial, void* ptr, bool isWrite);
         void CopyFromStaging(StagingBufferBase* staging,
@@ -187,6 +188,8 @@ namespace dawn_native { namespace null {
                              uint64_t size);
 
       private:
+        ~Buffer() override;
+
         // Dawn API
         MaybeError SetSubDataImpl(uint32_t start, uint32_t count, const void* data) override;
         MaybeError MapReadAsyncImpl(uint32_t serial) override;
@@ -201,33 +204,35 @@ namespace dawn_native { namespace null {
         std::unique_ptr<uint8_t[]> mBackingData;
     };
 
-    class CommandBuffer : public CommandBufferBase {
+    class CommandBuffer final : public CommandBufferBase {
       public:
         CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
-        ~CommandBuffer();
 
       private:
+        ~CommandBuffer() override;
+
         CommandIterator mCommands;
     };
 
-    class Queue : public QueueBase {
+    class Queue final : public QueueBase {
       public:
         Queue(Device* device);
-        ~Queue();
 
       private:
+        ~Queue() override;
         MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
     };
 
-    class SwapChain : public NewSwapChainBase {
+    class SwapChain final : public NewSwapChainBase {
       public:
         SwapChain(Device* device,
                   Surface* surface,
                   NewSwapChainBase* previousSwapChain,
                   const SwapChainDescriptor* descriptor);
-        ~SwapChain() override;
 
       private:
+        ~SwapChain() override;
+
         Ref<Texture> mTexture;
 
         MaybeError PresentImpl() override;
@@ -235,12 +240,12 @@ namespace dawn_native { namespace null {
         void DetachFromSurfaceImpl() override;
     };
 
-    class OldSwapChain : public OldSwapChainBase {
+    class OldSwapChain final : public OldSwapChainBase {
       public:
         OldSwapChain(Device* device, const SwapChainDescriptor* descriptor);
-        ~OldSwapChain();
 
       protected:
+        ~OldSwapChain() override;
         TextureBase* GetNextTextureImpl(const TextureDescriptor* descriptor) override;
         MaybeError OnBeforePresent(TextureBase*) override;
     };

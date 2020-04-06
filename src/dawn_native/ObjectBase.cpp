@@ -26,9 +26,6 @@ namespace dawn_native {
         : RefCounted(kErrorPayload), mDevice(device) {
     }
 
-    ObjectBase::~ObjectBase() {
-    }
-
     DeviceBase* ObjectBase::GetDevice() const {
         return mDevice;
     }

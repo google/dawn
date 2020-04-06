@@ -23,11 +23,10 @@ namespace dawn_native { namespace metal {
 
     class Device;
 
-    class RenderPipeline : public RenderPipelineBase {
+    class RenderPipeline final : public RenderPipelineBase {
       public:
         static ResultOrError<RenderPipeline*> Create(Device* device,
                                                      const RenderPipelineDescriptor* descriptor);
-        ~RenderPipeline();
 
         MTLIndexType GetMTLIndexType() const;
         MTLPrimitiveType GetMTLPrimitiveTopology() const;
@@ -45,6 +44,7 @@ namespace dawn_native { namespace metal {
         wgpu::ShaderStage GetStagesRequiringStorageBufferLength() const;
 
       private:
+        ~RenderPipeline() override;
         using RenderPipelineBase::RenderPipelineBase;
         MaybeError Initialize(const RenderPipelineDescriptor* descriptor);
 

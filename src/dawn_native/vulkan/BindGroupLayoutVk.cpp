@@ -75,10 +75,9 @@ namespace dawn_native { namespace vulkan {
     ResultOrError<BindGroupLayout*> BindGroupLayout::Create(
         Device* device,
         const BindGroupLayoutDescriptor* descriptor) {
-        std::unique_ptr<BindGroupLayout> bgl =
-            std::make_unique<BindGroupLayout>(device, descriptor);
+        Ref<BindGroupLayout> bgl = AcquireRef(new BindGroupLayout(device, descriptor));
         DAWN_TRY(bgl->Initialize());
-        return bgl.release();
+        return bgl.Detach();
     }
 
     MaybeError BindGroupLayout::Initialize() {

@@ -31,16 +31,16 @@ namespace dawn_native { namespace vulkan {
     struct CommandRecordingContext;
     class Device;
 
-    class CommandBuffer : public CommandBufferBase {
+    class CommandBuffer final : public CommandBufferBase {
       public:
         static CommandBuffer* Create(CommandEncoder* encoder,
                                      const CommandBufferDescriptor* descriptor);
-        ~CommandBuffer();
 
         MaybeError RecordCommands(CommandRecordingContext* recordingContext);
 
       private:
         CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
+        ~CommandBuffer() override;
 
         void RecordComputePass(CommandRecordingContext* recordingContext);
         MaybeError RecordRenderPass(CommandRecordingContext* recordingContext,

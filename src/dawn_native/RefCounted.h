@@ -23,7 +23,6 @@ namespace dawn_native {
     class RefCounted {
       public:
         RefCounted(uint64_t payload = 0);
-        virtual ~RefCounted();
 
         uint64_t GetRefCountForTesting() const;
         uint64_t GetRefCountPayload() const;
@@ -33,6 +32,8 @@ namespace dawn_native {
         void Release();
 
       protected:
+        virtual ~RefCounted() = default;
+
         std::atomic_uint64_t mRefCount;
     };
 

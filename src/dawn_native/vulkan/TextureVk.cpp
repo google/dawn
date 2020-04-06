@@ -407,10 +407,10 @@ namespace dawn_native { namespace vulkan {
 
     // static
     ResultOrError<Texture*> Texture::Create(Device* device, const TextureDescriptor* descriptor) {
-        std::unique_ptr<Texture> texture =
-            std::make_unique<Texture>(device, descriptor, TextureState::OwnedInternal);
+        Ref<Texture> texture =
+            AcquireRef(new Texture(device, descriptor, TextureState::OwnedInternal));
         DAWN_TRY(texture->InitializeAsInternalTexture());
-        return texture.release();
+        return texture.Detach();
     }
 
     // static
@@ -419,10 +419,10 @@ namespace dawn_native { namespace vulkan {
         const ExternalImageDescriptor* descriptor,
         const TextureDescriptor* textureDescriptor,
         external_memory::Service* externalMemoryService) {
-        std::unique_ptr<Texture> texture =
-            std::make_unique<Texture>(device, textureDescriptor, TextureState::OwnedInternal);
+        Ref<Texture> texture =
+            AcquireRef(new Texture(device, textureDescriptor, TextureState::OwnedInternal));
         DAWN_TRY(texture->InitializeFromExternal(descriptor, externalMemoryService));
-        return texture.release();
+        return texture.Detach();
     }
 
     MaybeError Texture::InitializeAsInternalTexture() {
@@ -803,9 +803,9 @@ namespace dawn_native { namespace vulkan {
     // static
     ResultOrError<TextureView*> TextureView::Create(TextureBase* texture,
                                                     const TextureViewDescriptor* descriptor) {
-        std::unique_ptr<TextureView> view = std::make_unique<TextureView>(texture, descriptor);
+        Ref<TextureView> view = AcquireRef(new TextureView(texture, descriptor));
         DAWN_TRY(view->Initialize(descriptor));
-        return view.release();
+        return view.Detach();
     }
 
     MaybeError TextureView::Initialize(const TextureViewDescriptor* descriptor) {

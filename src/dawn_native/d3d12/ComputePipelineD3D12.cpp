@@ -25,10 +25,9 @@ namespace dawn_native { namespace d3d12 {
     ResultOrError<ComputePipeline*> ComputePipeline::Create(
         Device* device,
         const ComputePipelineDescriptor* descriptor) {
-        std::unique_ptr<ComputePipeline> pipeline =
-            std::make_unique<ComputePipeline>(device, descriptor);
+        Ref<ComputePipeline> pipeline = AcquireRef(new ComputePipeline(device, descriptor));
         DAWN_TRY(pipeline->Initialize(descriptor));
-        return pipeline.release();
+        return pipeline.Detach();
     }
 
     MaybeError ComputePipeline::Initialize(const ComputePipelineDescriptor* descriptor) {

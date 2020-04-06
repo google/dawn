@@ -38,7 +38,6 @@ namespace dawn_native {
                          const RenderBundleDescriptor* descriptor,
                          AttachmentState* attachmentState,
                          PassResourceUsage resourceUsage);
-        ~RenderBundleBase() override;
 
         static RenderBundleBase* MakeError(DeviceBase* device);
 
@@ -46,6 +45,9 @@ namespace dawn_native {
 
         const AttachmentState* GetAttachmentState() const;
         const PassResourceUsage& GetResourceUsage() const;
+
+      protected:
+        ~RenderBundleBase() override;
 
       private:
         RenderBundleBase(DeviceBase* device, ErrorTag errorTag);

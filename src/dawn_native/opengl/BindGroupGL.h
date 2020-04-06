@@ -23,12 +23,14 @@ namespace dawn_native { namespace opengl {
     class BindGroupLayout;
     class Device;
 
-    class BindGroup : public BindGroupBase, public PlacementAllocated {
+    class BindGroup final : public BindGroupBase, public PlacementAllocated {
       public:
         BindGroup(Device* device, const BindGroupDescriptor* descriptor);
-        ~BindGroup() override;
 
         static BindGroup* Create(Device* device, const BindGroupDescriptor* descriptor);
+
+      private:
+        ~BindGroup() override;
     };
 
 }}  // namespace dawn_native::opengl

@@ -34,7 +34,6 @@ namespace dawn_native {
     class Surface final : public RefCounted {
       public:
         Surface(InstanceBase* instance, const SurfaceDescriptor* descriptor);
-        ~Surface();
 
         void SetAttachedSwapChain(NewSwapChainBase* swapChain);
         NewSwapChainBase* GetAttachedSwapChain() const;
@@ -56,6 +55,8 @@ namespace dawn_native {
         uint32_t GetXWindow() const;
 
       private:
+        ~Surface() override;
+
         Ref<InstanceBase> mInstance;
         Type mType;
 

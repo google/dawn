@@ -23,7 +23,7 @@ namespace dawn_native { namespace opengl {
     class BindGroup;
     class Device;
 
-    class BindGroupLayout : public BindGroupLayoutBase {
+    class BindGroupLayout final : public BindGroupLayoutBase {
       public:
         BindGroupLayout(DeviceBase* device, const BindGroupLayoutDescriptor* descriptor);
 
@@ -31,6 +31,7 @@ namespace dawn_native { namespace opengl {
         void DeallocateBindGroup(BindGroup* bindGroup);
 
       private:
+        ~BindGroupLayout() override = default;
         SlabAllocator<BindGroup> mBindGroupAllocator;
     };
 

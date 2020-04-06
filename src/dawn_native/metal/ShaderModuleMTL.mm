@@ -57,11 +57,9 @@ namespace dawn_native { namespace metal {
     // static
     ResultOrError<ShaderModule*> ShaderModule::Create(Device* device,
                                                       const ShaderModuleDescriptor* descriptor) {
-        std::unique_ptr<ShaderModule> module(new ShaderModule(device, descriptor));
-        if (!module)
-            return DAWN_VALIDATION_ERROR("Unable to create ShaderModule");
+        Ref<ShaderModule> module = AcquireRef(new ShaderModule(device, descriptor));
         DAWN_TRY(module->Initialize(descriptor));
-        return module.release();
+        return module.Detach();
     }
 
     ShaderModule::ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor)

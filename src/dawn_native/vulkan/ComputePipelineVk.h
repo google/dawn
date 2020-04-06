@@ -24,15 +24,15 @@ namespace dawn_native { namespace vulkan {
 
     class Device;
 
-    class ComputePipeline : public ComputePipelineBase {
+    class ComputePipeline final : public ComputePipelineBase {
       public:
         static ResultOrError<ComputePipeline*> Create(Device* device,
                                                       const ComputePipelineDescriptor* descriptor);
-        ~ComputePipeline();
 
         VkPipeline GetHandle() const;
 
       private:
+        ~ComputePipeline() override;
         using ComputePipelineBase::ComputePipelineBase;
         MaybeError Initialize(const ComputePipelineDescriptor* descriptor);
 

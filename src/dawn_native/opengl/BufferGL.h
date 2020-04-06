@@ -23,14 +23,14 @@ namespace dawn_native { namespace opengl {
 
     class Device;
 
-    class Buffer : public BufferBase {
+    class Buffer final : public BufferBase {
       public:
         Buffer(Device* device, const BufferDescriptor* descriptor);
-        ~Buffer();
 
         GLuint GetHandle() const;
 
       private:
+        ~Buffer() override;
         // Dawn API
         MaybeError SetSubDataImpl(uint32_t start, uint32_t count, const void* data) override;
         MaybeError MapReadAsyncImpl(uint32_t serial) override;

@@ -22,7 +22,7 @@ namespace dawn_native { namespace metal {
     class CommandBuffer;
     class Device;
 
-    class Queue : public QueueBase {
+    class Queue final : public QueueBase {
       public:
         Queue(Device* device);
 

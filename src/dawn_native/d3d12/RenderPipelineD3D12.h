@@ -23,17 +23,17 @@ namespace dawn_native { namespace d3d12 {
 
     class Device;
 
-    class RenderPipeline : public RenderPipelineBase {
+    class RenderPipeline final : public RenderPipelineBase {
       public:
         static ResultOrError<RenderPipeline*> Create(Device* device,
                                                      const RenderPipelineDescriptor* descriptor);
         RenderPipeline() = delete;
-        ~RenderPipeline();
 
         D3D12_PRIMITIVE_TOPOLOGY GetD3D12PrimitiveTopology() const;
         ComPtr<ID3D12PipelineState> GetPipelineState();
 
       private:
+        ~RenderPipeline() override;
         using RenderPipelineBase::RenderPipelineBase;
         MaybeError Initialize(const RenderPipelineDescriptor* descriptor);
         D3D12_INPUT_LAYOUT_DESC ComputeInputLayout(

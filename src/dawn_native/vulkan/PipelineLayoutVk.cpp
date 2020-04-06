@@ -26,10 +26,9 @@ namespace dawn_native { namespace vulkan {
     ResultOrError<PipelineLayout*> PipelineLayout::Create(
         Device* device,
         const PipelineLayoutDescriptor* descriptor) {
-        std::unique_ptr<PipelineLayout> layout =
-            std::make_unique<PipelineLayout>(device, descriptor);
+        Ref<PipelineLayout> layout = AcquireRef(new PipelineLayout(device, descriptor));
         DAWN_TRY(layout->Initialize());
-        return layout.release();
+        return layout.Detach();
     }
 
     MaybeError PipelineLayout::Initialize() {

@@ -117,9 +117,9 @@ namespace dawn_native { namespace vulkan {
 
     // static
     ResultOrError<Buffer*> Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
-        std::unique_ptr<Buffer> buffer = std::make_unique<Buffer>(device, descriptor);
+        Ref<Buffer> buffer = AcquireRef(new Buffer(device, descriptor));
         DAWN_TRY(buffer->Initialize());
-        return buffer.release();
+        return buffer.Detach();
     }
 
     MaybeError Buffer::Initialize() {

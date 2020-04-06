@@ -26,10 +26,9 @@ namespace dawn_native { namespace vulkan {
     struct CommandRecordingContext;
     class Device;
 
-    class Buffer : public BufferBase {
+    class Buffer final : public BufferBase {
       public:
         static ResultOrError<Buffer*> Create(Device* device, const BufferDescriptor* descriptor);
-        ~Buffer();
 
         void OnMapReadCommandSerialFinished(uint32_t mapSerial, const void* data);
         void OnMapWriteCommandSerialFinished(uint32_t mapSerial, void* data);
@@ -42,6 +41,7 @@ namespace dawn_native { namespace vulkan {
         void TransitionUsageNow(CommandRecordingContext* recordingContext, wgpu::BufferUsage usage);
 
       private:
+        ~Buffer() override;
         using BufferBase::BufferBase;
         MaybeError Initialize();
 

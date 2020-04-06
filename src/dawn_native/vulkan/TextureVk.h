@@ -37,7 +37,7 @@ namespace dawn_native { namespace vulkan {
     bool IsSampleCountSupported(const dawn_native::vulkan::Device* device,
                                 const VkImageCreateInfo& imageCreateInfo);
 
-    class Texture : public TextureBase {
+    class Texture final : public TextureBase {
       public:
         // Used to create a regular texture from a descriptor.
         static ResultOrError<Texture*> Create(Device* device, const TextureDescriptor* descriptor);
@@ -52,7 +52,6 @@ namespace dawn_native { namespace vulkan {
             external_memory::Service* externalMemoryService);
 
         Texture(Device* device, const TextureDescriptor* descriptor, VkImage nativeImage);
-        ~Texture();
 
         VkImage GetHandle() const;
         VkImageAspectFlags GetVkAspectMask() const;
@@ -77,6 +76,7 @@ namespace dawn_native { namespace vulkan {
                                       std::vector<VkSemaphore> waitSemaphores);
 
       private:
+        ~Texture() override;
         using TextureBase::TextureBase;
         MaybeError InitializeAsInternalTexture();
 
@@ -113,15 +113,14 @@ namespace dawn_native { namespace vulkan {
         wgpu::TextureUsage mLastUsage = wgpu::TextureUsage::None;
     };
 
-    class TextureView : public TextureViewBase {
+    class TextureView final : public TextureViewBase {
       public:
         static ResultOrError<TextureView*> Create(TextureBase* texture,
                                                   const TextureViewDescriptor* descriptor);
-        ~TextureView();
-
         VkImageView GetHandle() const;
 
       private:
+        ~TextureView() override;
         using TextureViewBase::TextureViewBase;
         MaybeError Initialize(const TextureViewDescriptor* descriptor);
 

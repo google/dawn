@@ -25,7 +25,7 @@ namespace dawn_native { namespace vulkan {
 
     class Device;
 
-    class BindGroup : public BindGroupBase, public PlacementAllocated {
+    class BindGroup final : public BindGroupBase, public PlacementAllocated {
       public:
         static ResultOrError<BindGroup*> Create(Device* device,
                                                 const BindGroupDescriptor* descriptor);
@@ -33,11 +33,12 @@ namespace dawn_native { namespace vulkan {
         BindGroup(Device* device,
                   const BindGroupDescriptor* descriptor,
                   DescriptorSetAllocation descriptorSetAllocation);
-        ~BindGroup() override;
 
         VkDescriptorSet GetHandle() const;
 
       private:
+        ~BindGroup() override;
+
         // The descriptor set in this allocation outlives the BindGroup because it is owned by
         // the BindGroupLayout which is referenced by the BindGroup.
         DescriptorSetAllocation mDescriptorSetAllocation;

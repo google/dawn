@@ -31,7 +31,6 @@ namespace dawn_native {
     class Fence final : public ObjectBase {
       public:
         Fence(QueueBase* queue, const FenceDescriptor* descriptor);
-        ~Fence();
 
         static Fence* MakeError(DeviceBase* device);
 
@@ -50,6 +49,7 @@ namespace dawn_native {
 
       private:
         Fence(DeviceBase* device, ObjectBase::ErrorTag tag);
+        ~Fence() override;
 
         MaybeError ValidateOnCompletion(uint64_t value, WGPUFenceCompletionStatus* status) const;
 

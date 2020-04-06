@@ -24,15 +24,15 @@ namespace dawn_native { namespace vulkan {
 
     class Device;
 
-    class RenderPipeline : public RenderPipelineBase {
+    class RenderPipeline final : public RenderPipelineBase {
       public:
         static ResultOrError<RenderPipeline*> Create(Device* device,
                                                      const RenderPipelineDescriptor* descriptor);
-        ~RenderPipeline();
 
         VkPipeline GetHandle() const;
 
       private:
+        ~RenderPipeline() override;
         using RenderPipelineBase::RenderPipelineBase;
         MaybeError Initialize(const RenderPipelineDescriptor* descriptor);
 

@@ -56,16 +56,18 @@ namespace dawn_native {
         uint32_t mSampleCount = 0;
     };
 
-    class AttachmentState : public AttachmentStateBlueprint, public CachedObject {
+    class AttachmentState final : public AttachmentStateBlueprint, public CachedObject {
       public:
         AttachmentState(DeviceBase* device, const AttachmentStateBlueprint& blueprint);
-        ~AttachmentState() override;
 
         std::bitset<kMaxColorAttachments> GetColorAttachmentsMask() const;
         wgpu::TextureFormat GetColorAttachmentFormat(uint32_t index) const;
         bool HasDepthStencilAttachment() const;
         wgpu::TextureFormat GetDepthStencilFormat() const;
         uint32_t GetSampleCount() const;
+
+      private:
+        ~AttachmentState() override;
     };
 
 }  // namespace dawn_native

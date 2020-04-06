@@ -36,7 +36,7 @@ namespace dawn_native { namespace metal {
     // The number of Metal buffers Dawn can use in a generic way (i.e. that aren't reserved)
     static constexpr size_t kGenericMetalBufferSlots = kMetalBufferTableSize - 1;
 
-    class PipelineLayout : public PipelineLayoutBase {
+    class PipelineLayout final : public PipelineLayoutBase {
       public:
         PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor);
 
@@ -48,6 +48,7 @@ namespace dawn_native { namespace metal {
         uint32_t GetBufferBindingCount(SingleShaderStage stage);
 
       private:
+        ~PipelineLayout() override = default;
         PerStage<BindingIndexInfo> mIndexInfo;
         PerStage<uint32_t> mBufferBindingCount;
     };

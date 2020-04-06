@@ -315,10 +315,9 @@ namespace dawn_native { namespace metal {
     ResultOrError<RenderPipeline*> RenderPipeline::Create(
         Device* device,
         const RenderPipelineDescriptor* descriptor) {
-        std::unique_ptr<RenderPipeline> pipeline =
-            std::make_unique<RenderPipeline>(device, descriptor);
+        Ref<RenderPipeline> pipeline = AcquireRef(new RenderPipeline(device, descriptor));
         DAWN_TRY(pipeline->Initialize(descriptor));
-        return pipeline.release();
+        return pipeline.Detach();
     }
 
     MaybeError RenderPipeline::Initialize(const RenderPipelineDescriptor* descriptor) {

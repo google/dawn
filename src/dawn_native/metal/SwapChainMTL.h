@@ -25,25 +25,26 @@ namespace dawn_native { namespace metal {
     class Device;
     class Texture;
 
-    class OldSwapChain : public OldSwapChainBase {
+    class OldSwapChain final : public OldSwapChainBase {
       public:
         OldSwapChain(Device* device, const SwapChainDescriptor* descriptor);
-        ~OldSwapChain();
 
       protected:
+        ~OldSwapChain() override;
         TextureBase* GetNextTextureImpl(const TextureDescriptor* descriptor) override;
         MaybeError OnBeforePresent(TextureBase* texture) override;
     };
 
-    class SwapChain : public NewSwapChainBase {
+    class SwapChain final : public NewSwapChainBase {
       public:
         SwapChain(Device* device,
                   Surface* surface,
                   NewSwapChainBase* previousSwapChain,
                   const SwapChainDescriptor* descriptor);
-        ~SwapChain() override;
 
       private:
+        ~SwapChain() override;
+
         CAMetalLayer* mLayer = nullptr;
 
         id<CAMetalDrawable> mCurrentDrawable = nil;

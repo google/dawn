@@ -47,13 +47,12 @@ namespace dawn_native { namespace vulkan {
     // the pools are reused when no longer used. Minimizing the number of descriptor pool allocation
     // is important because creating them can incur GPU memory allocation which is usually an
     // expensive syscall.
-    class BindGroupLayout : public BindGroupLayoutBase {
+    class BindGroupLayout final : public BindGroupLayoutBase {
       public:
         static ResultOrError<BindGroupLayout*> Create(Device* device,
                                                       const BindGroupLayoutDescriptor* descriptor);
 
         BindGroupLayout(DeviceBase* device, const BindGroupLayoutDescriptor* descriptor);
-        ~BindGroupLayout();
 
         VkDescriptorSetLayout GetHandle() const;
 
@@ -68,6 +67,7 @@ namespace dawn_native { namespace vulkan {
         void FinishDeallocation(size_t index);
 
       private:
+        ~BindGroupLayout() override;
         MaybeError Initialize();
 
         std::vector<VkDescriptorPoolSize> mPoolSizes;
