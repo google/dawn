@@ -17,7 +17,7 @@ import("../scripts/dawn_features.gni")
 import("../scripts/dawn_overrides_with_defaults.gni")
 
 ###############################################################################
-# Third-party dependencies needed by libdawn_native
+# Third-party dependencies needed by dawn_native
 ###############################################################################
 
 # Empty targets to add the include dirs and list the sources of Khronos headers for header inclusion check.

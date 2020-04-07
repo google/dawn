@@ -91,8 +91,8 @@ static_library("dawn_utils") {
   ]
   deps = [
     "${dawn_root}/src/common",
-    "${dawn_root}/src/dawn_native:libdawn_native",
-    "${dawn_root}/src/dawn_wire:libdawn_wire",
+    "${dawn_root}/src/dawn_native",
+    "${dawn_root}/src/dawn_wire",
     "${dawn_shaderc_dir}:libshaderc",
   ]
   libs = []
@@ -149,15 +149,14 @@ test("dawn_unittests") {
     "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawncpp",
     "${dawn_root}/src/dawn:libdawn_proc",
-    "${dawn_root}/src/dawn_native:libdawn_native",
-    "${dawn_root}/src/dawn_native:libdawn_native_sources",
-    "${dawn_root}/src/dawn_wire:libdawn_wire",
+    "${dawn_root}/src/dawn_native",
+    "${dawn_root}/src/dawn_native:dawn_native_sources",
+    "${dawn_root}/src/dawn_wire",
     "third_party:gmock_and_gtest",
   ]
 
-  # Add internal Dawn Native headers and config for internal unittests.
-  deps += [ "${dawn_root}/src/dawn_native:libdawn_native_headers" ]
-  configs += [ "${dawn_root}/src/dawn_native:libdawn_native_internal" ]
+  # Add internal dawn_native config for internal unittests.
+  configs += [ "${dawn_root}/src/dawn_native:dawn_native_internal" ]
 
   sources = get_target_outputs(":mock_webgpu_gen")
   sources += [
@@ -251,8 +250,8 @@ source_set("dawn_end2end_tests_sources") {
     "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawncpp",
     "${dawn_root}/src/dawn:libdawn_proc",
-    "${dawn_root}/src/dawn_native:libdawn_native",
-    "${dawn_root}/src/dawn_wire:libdawn_wire",
+    "${dawn_root}/src/dawn_native",
+    "${dawn_root}/src/dawn_wire",
     "third_party:gmock_and_gtest",
   ]
 
@@ -338,7 +337,7 @@ source_set("dawn_end2end_tests_sources") {
 }
 
 source_set("dawn_white_box_tests_sources") {
-  configs += [ "${dawn_root}/src/dawn_native:libdawn_native_internal" ]
+  configs += [ "${dawn_root}/src/dawn_native:dawn_native_internal" ]
   testonly = true
 
   deps = [
@@ -346,12 +345,12 @@ source_set("dawn_white_box_tests_sources") {
     "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawncpp",
     "${dawn_root}/src/dawn:libdawn_proc",
-    "${dawn_root}/src/dawn_native:libdawn_native_sources",
+    "${dawn_root}/src/dawn_native:dawn_native_sources",
 
-    # Static because the tests both link against and have libdawn_native
+    # Static because the tests both link against and have dawn_native
     # sources. MSVC errors when both importing and exporting symbols.
-    "${dawn_root}/src/dawn_native:libdawn_native_static",
-    "${dawn_root}/src/dawn_wire:libdawn_wire",
+    "${dawn_root}/src/dawn_native:dawn_native_static",
+    "${dawn_root}/src/dawn_wire",
     "third_party:gmock_and_gtest",
   ]
 
@@ -401,8 +400,8 @@ test("dawn_end2end_tests") {
     "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawncpp",
     "${dawn_root}/src/dawn:libdawn_proc",
-    "${dawn_root}/src/dawn_native:libdawn_native",
-    "${dawn_root}/src/dawn_wire:libdawn_wire",
+    "${dawn_root}/src/dawn_native",
+    "${dawn_root}/src/dawn_wire",
     "third_party:gmock_and_gtest",
   ]
 
@@ -438,9 +437,9 @@ test("dawn_perf_tests") {
     "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawncpp",
     "${dawn_root}/src/dawn:libdawn_proc",
-    "${dawn_root}/src/dawn_native:libdawn_native",
+    "${dawn_root}/src/dawn_native",
     "${dawn_root}/src/dawn_platform",
-    "${dawn_root}/src/dawn_wire:libdawn_wire",
+    "${dawn_root}/src/dawn_wire",
     "third_party:gmock_and_gtest",
   ]
 
@@ -496,7 +495,7 @@ if (dawn_standalone) {
     deps = [
       ":dawn_glfw",
       "${dawn_root}/src/common",
-      "${dawn_root}/src/dawn_native:libdawn_native",
+      "${dawn_root}/src/dawn_native",
     ]
     libs = []
 
@@ -545,8 +544,8 @@ if (dawn_standalone) {
       "${dawn_root}/src/common",
       "${dawn_root}/src/dawn:dawncpp",
       "${dawn_root}/src/dawn:libdawn_proc",
-      "${dawn_root}/src/dawn_native:libdawn_native",
-      "${dawn_root}/src/dawn_wire:libdawn_wire",
+      "${dawn_root}/src/dawn_native",
+      "${dawn_root}/src/dawn_wire",
     ]
     public_configs = [ "${dawn_root}/src/common:dawn_internal" ]
   }
@@ -641,19 +640,19 @@ group("dawn_fuzzers") {
 
 group("libdawn_native") {
   deps = [
-    "src/dawn_native:libdawn_native",
+    "src/dawn_native",
   ]
 }
 
 group("libdawn_native_sources") {
   deps = [
-    "src/dawn_native:libdawn_native_sources",
+    "src/dawn_native:dawn_native_sources",
   ]
 }
 
 group("libdawn_wire") {
   deps = [
-    "src/dawn_wire:libdawn_wire",
+    "src/dawn_wire",
   ]
 }
 

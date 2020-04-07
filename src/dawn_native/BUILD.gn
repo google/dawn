@@ -35,7 +35,7 @@ if (use_swiftshader) {
   import("${dawn_swiftshader_dir}/src/Vulkan/vulkan.gni")
 }
 
-config("libdawn_native_internal") {
+config("dawn_native_internal") {
   configs = [ "${dawn_root}/src/common:dawn_internal" ]
 
   # Suppress warnings that Metal isn't in the deployment target of Chrome:
@@ -53,7 +53,7 @@ config("libdawn_native_internal") {
   }
 }
 
-config("libdawn_native_weak_framework") {
+config("dawn_native_weak_framework") {
   if (is_mac && dawn_enable_metal) {
     ldflags = [
       "-weak_framework",
@@ -62,7 +62,7 @@ config("libdawn_native_weak_framework") {
   }
 }
 
-dawn_json_generator("libdawn_native_utils_gen") {
+dawn_json_generator("dawn_native_utils_gen") {
   target = "dawn_native_utils"
   outputs = [
     "src/dawn_native/ProcTable.cpp",
@@ -74,7 +74,7 @@ dawn_json_generator("libdawn_native_utils_gen") {
 }
 
 if (dawn_enable_opengl) {
-  dawn_generator("libdawn_native_opengl_loader_gen") {
+  dawn_generator("dawn_native_opengl_loader_gen") {
     script = "${dawn_root}/generator/opengl_loader_generator.py"
     args = [
       "--gl-xml",
@@ -90,9 +90,9 @@ if (dawn_enable_opengl) {
   }
 }
 
-# Public libdawn_native headers so they can be publically visible for
-# dependencies of libdawn_native
-source_set("libdawn_native_headers") {
+# Public dawn_native headers so they can be publicly visible for
+# dependencies of dawn_native
+source_set("dawn_native_headers") {
   public_deps = [
     "${dawn_root}/src/dawn:dawncpp_headers",
   ]
@@ -111,13 +111,13 @@ source_set("libdawn_native_headers") {
   ]
 }
 
-# The meat of the compilation for libdawn_native so that we can cheaply have
+# The meat of the compilation for dawn_native so that we can cheaply have
 # shared_library / static_library versions of it. It compiles all the files
 # except those that define exported symbols.
-source_set("libdawn_native_sources") {
+source_set("dawn_native_sources") {
   deps = [
-    ":libdawn_native_headers",
-    ":libdawn_native_utils_gen",
+    ":dawn_native_headers",
+    ":dawn_native_utils_gen",
     "${dawn_root}/src/common",
     "${dawn_shaderc_dir}:spirv_cross",
     "${dawn_spirv_tools_dir}:spvtools_val",
@@ -126,17 +126,17 @@ source_set("libdawn_native_sources") {
   libs = []
   data_deps = []
 
-  configs += [ ":libdawn_native_internal" ]
+  configs += [ ":dawn_native_internal" ]
 
-  # Dependencies that are needed to compile libdawn_native entry points in
+  # Dependencies that are needed to compile dawn_native entry points in
   # FooBackend.cpp need to be public deps so they are propagated to the
-  # libdawn_native target
+  # dawn_native target
   public_deps = [
     "${dawn_root}/src/dawn_platform",
     "${dawn_shaderc_dir}:libshaderc_spvc",
   ]
 
-  sources = get_target_outputs(":libdawn_native_utils_gen")
+  sources = get_target_outputs(":dawn_native_utils_gen")
   sources += [
     "Adapter.cpp",
     "Adapter.h",
@@ -387,10 +387,10 @@ source_set("libdawn_native_sources") {
 
   if (dawn_enable_opengl) {
     public_deps += [
-      ":libdawn_native_opengl_loader_gen",
+      ":dawn_native_opengl_loader_gen",
       "${dawn_root}/third_party:khronos_platform",
     ]
-    sources += get_target_outputs(":libdawn_native_opengl_loader_gen")
+    sources += get_target_outputs(":dawn_native_opengl_loader_gen")
     sources += [
       "opengl/BackendGL.cpp",
       "opengl/BackendGL.h",
@@ -554,26 +554,26 @@ source_set("libdawn_native_sources") {
   }
 }
 
-# The static and shared libraries for libdawn_native. Most of the files are
-# already compiled in libdawn_native_sources, but we still need to compile
+# The static and shared libraries for dawn_native. Most of the files are
+# already compiled in dawn_native_sources, but we still need to compile
 # files defining exported symbols.
-dawn_component("libdawn_native") {
+dawn_component("dawn_native") {
   DEFINE_PREFIX = "DAWN_NATIVE"
 
   #Make headers publically visible
   public_deps = [
-    ":libdawn_native_headers",
+    ":dawn_native_headers",
   ]
 
   deps = [
-    ":libdawn_native_sources",
+    ":dawn_native_sources",
     "${dawn_root}/src/common",
   ]
   sources = [
     "DawnNative.cpp",
   ]
-  configs = [ ":libdawn_native_internal" ]
-  public_configs = [ ":libdawn_native_weak_framework" ]
+  configs = [ ":dawn_native_internal" ]
+  public_configs = [ ":dawn_native_weak_framework" ]
 
   if (dawn_enable_d3d12) {
     sources += [ "d3d12/D3D12Backend.cpp" ]
@@ -600,4 +600,11 @@ dawn_component("libdawn_native") {
       }
     }
   }
+}
+
+# Temporary group for a 3-way patch with Chromium
+group("libdawn_native_headers") {
+  deps = [
+    ":dawn_native_headers",
+  ]
 }

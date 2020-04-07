@@ -88,8 +88,8 @@ static_library("dawn_wire_server_fuzzer_common") {
     "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawncpp",
     "${dawn_root}/src/dawn:libdawn_proc",
-    "${dawn_root}/src/dawn_native:libdawn_native_static",
-    "${dawn_root}/src/dawn_wire:libdawn_wire_static",
+    "${dawn_root}/src/dawn_native:dawn_native_static",
+    "${dawn_root}/src/dawn_wire:dawn_wire_static",
   ]
 }
 

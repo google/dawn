@@ -17,9 +17,9 @@ import("../../scripts/dawn_overrides_with_defaults.gni")
 import("${dawn_root}/generator/dawn_generator.gni")
 import("${dawn_root}/scripts/dawn_component.gni")
 
-# Public libdawn_wire headers so they can be publically visible for
-# dependencies of libdawn_wire
-source_set("libdawn_wire_headers") {
+# Public dawn_wire headers so they can be publically visible for
+# dependencies of dawn_wire
+source_set("dawn_wire_headers") {
   public_deps = [
     "${dawn_root}/src/dawn:dawn_headers",
   ]
@@ -32,7 +32,7 @@ source_set("libdawn_wire_headers") {
   ]
 }
 
-dawn_json_generator("libdawn_wire_gen") {
+dawn_json_generator("dawn_wire_gen") {
   target = "dawn_wire"
   outputs = [
     "src/dawn_wire/WireCmd_autogen.h",
@@ -50,16 +50,16 @@ dawn_json_generator("libdawn_wire_gen") {
   ]
 }
 
-dawn_component("libdawn_wire") {
+dawn_component("dawn_wire") {
   DEFINE_PREFIX = "DAWN_WIRE"
 
   deps = [
-    ":libdawn_wire_gen",
+    ":dawn_wire_gen",
     "${dawn_root}/src/common",
   ]
 
   configs = [ "${dawn_root}/src/common:dawn_internal" ]
-  sources = get_target_outputs(":libdawn_wire_gen")
+  sources = get_target_outputs(":dawn_wire_gen")
   sources += [
     "WireClient.cpp",
     "WireDeserializeAllocator.cpp",
@@ -90,6 +90,13 @@ dawn_component("libdawn_wire") {
 
   # Make headers publicly visible
   public_deps = [
-    ":libdawn_wire_headers",
+    ":dawn_wire_headers",
+  ]
+}
+
+# Temporary group for a 3-way patch with Chromium
+group("libdawn_wire_headers") {
+  deps = [
+    ":dawn_wire_headers",
   ]
 }
