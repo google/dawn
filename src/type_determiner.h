@@ -26,6 +26,7 @@ namespace tint {
 namespace ast {
 
 class ArrayAccessorExpression;
+class AsExpression;
 class ConstructorExpression;
 class IdentifierExpression;
 class Function;
@@ -71,6 +72,7 @@ class TypeDeterminer {
 
  private:
   bool DetermineArrayAccessor(ast::ArrayAccessorExpression* expr);
+  bool DetermineAs(ast::AsExpression* expr);
   bool DetermineConstructor(ast::ConstructorExpression* expr);
   bool DetermineIdentifier(ast::IdentifierExpression* expr);
   Context& ctx_;

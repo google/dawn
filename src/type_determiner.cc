@@ -17,6 +17,7 @@
 #include <memory>
 
 #include "src/ast/array_accessor_expression.h"
+#include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/case_statement.h"
@@ -183,6 +184,9 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
   if (expr->IsArrayAccessor()) {
     return DetermineArrayAccessor(expr->AsArrayAccessor());
   }
+  if (expr->IsAs()) {
+    return DetermineAs(expr->AsAs());
+  }
   if (expr->IsConstructor()) {
     return DetermineConstructor(expr->AsConstructor());
   }
@@ -212,6 +216,11 @@ bool TypeDeterminer::DetermineArrayAccessor(
     error_ = "invalid parent type in array accessor";
     return false;
   }
+  return true;
+}
+
+bool TypeDeterminer::DetermineAs(ast::AsExpression* expr) {
+  expr->set_result_type(expr->type());
   return true;
 }
 

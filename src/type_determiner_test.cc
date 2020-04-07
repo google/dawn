@@ -19,6 +19,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/array_accessor_expression.h"
+#include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/case_statement.h"
@@ -476,6 +477,16 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
   EXPECT_TRUE(td()->DetermineResultType(&acc));
   ASSERT_NE(acc.result_type(), nullptr);
   EXPECT_TRUE(acc.result_type()->IsF32());
+}
+
+TEST_F(TypeDeterminerTest, Expr_As) {
+  ast::type::F32Type f32;
+  ast::AsExpression as(&f32,
+                       std::make_unique<ast::IdentifierExpression>("name"));
+
+  EXPECT_TRUE(td()->DetermineResultType(&as));
+  ASSERT_NE(as.result_type(), nullptr);
+  EXPECT_TRUE(as.result_type()->IsF32());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Constructor_Scalar) {
