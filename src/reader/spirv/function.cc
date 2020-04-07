@@ -32,6 +32,7 @@ FunctionEmitter::FunctionEmitter(ParserImpl* pi,
     : parser_impl_(*pi),
       ast_module_(pi->get_module()),
       ir_context_(*(pi->ir_context())),
+      type_mgr_(ir_context_.get_type_mgr()),
       fail_stream_(pi->fail_stream()),
       namer_(pi->namer()),
       function_(function) {}
@@ -50,6 +51,15 @@ bool FunctionEmitter::Emit() {
   if (!EmitFunctionDeclaration()) {
     return false;
   }
+
+  // Start populating the body.
+
+  if (!EmitFunctionVariables()) {
+    return false;
+  }
+
+  // Set the body of the AST function node.
+  parser_impl_.get_module().functions().back()->set_body(std::move(ast_body_));
 
   return success();
 }
@@ -93,6 +103,49 @@ bool FunctionEmitter::EmitFunctionDeclaration() {
       std::make_unique<ast::Function>(name, std::move(ast_params), ret_ty);
   ast_module_.AddFunction(std::move(ast_fn));
 
+  return success();
+}
+
+ast::type::Type* FunctionEmitter::GetVariableStoreType(
+    const spvtools::opt::Instruction& var_decl_inst) {
+  const auto type_id = var_decl_inst.type_id();
+  auto* var_ref_type = type_mgr_->GetType(type_id);
+  if (!var_ref_type) {
+    Fail() << "internal error: variable type id " << type_id
+           << " has no registered type";
+    return nullptr;
+  }
+  auto* var_ref_ptr_type = var_ref_type->AsPointer();
+  if (!var_ref_ptr_type) {
+    Fail() << "internal error: variable type id " << type_id
+           << " is not a pointer type";
+    return nullptr;
+  }
+  auto var_store_type_id = type_mgr_->GetId(var_ref_ptr_type->pointee_type());
+  return parser_impl_.ConvertType(var_store_type_id);
+}
+
+bool FunctionEmitter::EmitFunctionVariables() {
+  if (failed()) {
+    return false;
+  }
+  for (auto& inst : *function_.entry()) {
+    if (inst.opcode() != SpvOpVariable) {
+      continue;
+    }
+    auto* var_store_type = GetVariableStoreType(inst);
+    if (failed()) {
+      return false;
+    }
+    // Use StorageClass::kNone because function variables should not explicitly mention
+    // their storage class.
+    auto var =
+        parser_impl_.MakeVariable(inst.result_id(),
+                                  ast::StorageClass::kNone, var_store_type);
+    // TODO(dneto): Add the initializer via Variable::set_constructor.
+    auto var_decl_stmt = std::make_unique<ast::VariableDeclStatement>(std::move(var));
+    ast_body_.emplace_back(std::move(var_decl_stmt));
+  }
   return success();
 }
 

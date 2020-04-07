@@ -329,6 +329,7 @@ if(${TINT_BUILD_SPV_READER})
     reader/spirv/enum_converter_test.cc
     reader/spirv/fail_stream_test.cc
     reader/spirv/function_decl_test.cc
+    reader/spirv/function_var_test.cc
     reader/spirv/namer_test.cc
     reader/spirv/parser_impl_convert_member_decoration_test.cc
     reader/spirv/parser_impl_convert_type_test.cc

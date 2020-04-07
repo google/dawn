@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <string>
+#include <sstream>
 #include <vector>
 
 #include "gtest/gtest.h"
@@ -51,6 +52,7 @@ class SpvParserTest : public testing::Test {
   /// Gets the internal representation of the function with the given ID.
   /// Assumes ParserImpl::BuildInternalRepresentation has been run and
   /// succeeded.
+  /// @param id the SPIR-V ID of the function
   /// @returns the internal representation of the function
   spvtools::opt::Function* spirv_function(uint32_t id) {
     return impl_->ir_context()->GetFunction(id);
@@ -60,6 +62,17 @@ class SpvParserTest : public testing::Test {
   std::unique_ptr<ParserImpl> impl_;
   Context ctx_;
 };
+
+/// Returns the string dump of a function body.
+/// @param body the statement in the body
+/// @returnss the string dump of a function body.
+inline std::string ToString(const std::vector<std::unique_ptr<ast::Statement>>& body) {
+  std::ostringstream outs;
+  for (const auto& stmt : body) {
+    stmt->to_str(outs, 0);
+  }
+  return outs.str();
+}
 
 }  // namespace spirv
 }  // namespace reader

@@ -17,6 +17,7 @@
 
 #include "source/opt/function.h"
 #include "source/opt/ir_context.h"
+#include "source/opt/type_manager.h"
 #include "src/ast/module.h"
 #include "src/reader/spirv/fail_stream.h"
 #include "src/reader/spirv/namer.h"
@@ -46,6 +47,9 @@ class FunctionEmitter {
   /// @returns true if emission has failed.
   bool failed() const { return !success(); }
 
+  /// @returns the body of the function.
+  const std::vector<std::unique_ptr<ast::Statement>>& ast_body() { return ast_body_; }
+
   /// Records failure.
   /// @returns a FailStream on which to emit diagnostics.
   FailStream& Fail() { return fail_stream_.Fail(); }
@@ -56,10 +60,20 @@ class FunctionEmitter {
   /// @returns true if emission has not yet failed.
   bool EmitFunctionDeclaration();
 
+  /// Emits declarations of function variables.
+  /// @returns false if emission failed.
+  bool EmitFunctionVariables();
+
  private:
+  /// @returns the store type for the OpVariable instruction, or
+  /// null on failure.
+  ast::type::Type* GetVariableStoreType(
+      const spvtools::opt::Instruction& var_decl_inst);
+
   ParserImpl& parser_impl_;
   ast::Module& ast_module_;
   spvtools::opt::IRContext& ir_context_;
+  spvtools::opt::analysis::TypeManager* type_mgr_;
   FailStream& fail_stream_;
   Namer& namer_;
   const spvtools::opt::Function& function_;
