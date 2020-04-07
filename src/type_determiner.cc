@@ -96,6 +96,15 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     return DetermineResultType(e->condition()) &&
            DetermineResultType(e->body());
   }
+  if (stmt->IsFallthrough()) {
+    return true;
+  }
+  if (stmt->IsKill()) {
+    return true;
+  }
+  if (stmt->IsNop()) {
+    return true;
+  }
 
   error_ = "unknown statement type for type determination";
   return false;
