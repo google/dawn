@@ -41,6 +41,7 @@
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/switch_statement.h"
+#include "src/ast/unary_op_expression.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
@@ -1427,6 +1428,39 @@ TEST_F(TypeDeterminerTest, Expr_UnaryMethod_OuterProduct) {
   EXPECT_EQ(mat->rows(), 3);
   EXPECT_EQ(mat->columns(), 2);
 }
+
+using UnaryOpExpressionTest = testing::TestWithParam<ast::UnaryOp>;
+TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
+  auto op = GetParam();
+
+  ast::type::F32Type f32;
+
+  ast::type::VectorType vec4(&f32, 4);
+
+  auto var =
+      std::make_unique<ast::Variable>("ident", ast::StorageClass::kNone, &vec4);
+
+  ast::Module m;
+  m.AddGlobalVariable(std::move(var));
+
+  Context ctx;
+  TypeDeterminer td(&ctx);
+
+  // Register the global
+  EXPECT_TRUE(td.Determine(&m));
+
+  ast::UnaryOpExpression der(
+      op, std::make_unique<ast::IdentifierExpression>("ident"));
+  EXPECT_TRUE(td.DetermineResultType(&der));
+  ASSERT_NE(der.result_type(), nullptr);
+  ASSERT_TRUE(der.result_type()->IsVector());
+  EXPECT_TRUE(der.result_type()->AsVector()->type()->IsF32());
+  EXPECT_EQ(der.result_type()->AsVector()->size(), 4);
+}
+INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
+                         UnaryOpExpressionTest,
+                         testing::Values(ast::UnaryOp::kNegation,
+                                         ast::UnaryOp::kNot));
 
 }  // namespace
 }  // namespace tint

@@ -41,6 +41,7 @@
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/ast/unary_op_expression.h"
 #include "src/ast/unary_derivative_expression.h"
 #include "src/ast/unary_method_expression.h"
 #include "src/ast/unless_statement.h"
@@ -219,6 +220,9 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
   }
   if (expr->IsUnaryMethod()) {
     return DetermineUnaryMethod(expr->AsUnaryMethod());
+  }
+  if (expr->IsUnaryOp()) {
+    return DetermineUnaryOp(expr->AsUnaryOp());
   }
 
   error_ = "unknown expression for type determination";
@@ -480,6 +484,15 @@ bool TypeDeterminer::DetermineUnaryMethod(ast::UnaryMethodExpression* expr) {
     }
   }
   return true;
+}
+
+bool TypeDeterminer::DetermineUnaryOp(ast::UnaryOpExpression* expr) {
+    // Result type matches the parameter type.
+    if (!DetermineResultType(expr->expr())) {
+      return false;
+    }
+    expr->set_result_type(expr->expr()->result_type());
+    return true;
 }
 
 }  // namespace tint
