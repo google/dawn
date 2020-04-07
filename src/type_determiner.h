@@ -28,6 +28,7 @@ namespace ast {
 class ArrayAccessorExpression;
 class AsExpression;
 class CallExpression;
+class CastExpression;
 class ConstructorExpression;
 class IdentifierExpression;
 class Function;
@@ -79,6 +80,7 @@ class TypeDeterminer {
   bool DetermineArrayAccessor(ast::ArrayAccessorExpression* expr);
   bool DetermineAs(ast::AsExpression* expr);
   bool DetermineCall(ast::CallExpression* expr);
+  bool DetermineCast(ast::CastExpression* expr);
   bool DetermineConstructor(ast::ConstructorExpression* expr);
   bool DetermineIdentifier(ast::IdentifierExpression* expr);
   Context& ctx_;

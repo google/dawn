@@ -22,6 +22,7 @@
 #include "src/ast/break_statement.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/case_statement.h"
+#include "src/ast/cast_expression.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/identifier_expression.h"
@@ -197,6 +198,9 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
   if (expr->IsCall()) {
     return DetermineCall(expr->AsCall());
   }
+  if (expr->IsCast()) {
+    return DetermineCast(expr->AsCast());
+  }
   if (expr->IsConstructor()) {
     return DetermineConstructor(expr->AsConstructor());
   }
@@ -242,6 +246,11 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
     return false;
   }
   expr->set_result_type(expr->func()->result_type());
+  return true;
+}
+
+bool TypeDeterminer::DetermineCast(ast::CastExpression* expr) {
+  expr->set_result_type(expr->type());
   return true;
 }
 

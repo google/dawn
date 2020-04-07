@@ -24,6 +24,7 @@
 #include "src/ast/break_statement.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/case_statement.h"
+#include "src/ast/cast_expression.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/float_literal.h"
@@ -548,6 +549,16 @@ TEST_F(TypeDeterminerTest, Expr_Call_WithParams) {
   EXPECT_TRUE(a_ptr->result_type()->IsF32());
   ASSERT_NE(b_ptr->result_type(), nullptr);
   EXPECT_TRUE(b_ptr->result_type()->IsI32());
+}
+
+TEST_F(TypeDeterminerTest, Expr_Cast) {
+  ast::type::F32Type f32;
+  ast::CastExpression cast(&f32,
+                           std::make_unique<ast::IdentifierExpression>("name"));
+
+  EXPECT_TRUE(td()->DetermineResultType(&cast));
+  ASSERT_NE(cast.result_type(), nullptr);
+  EXPECT_TRUE(cast.result_type()->IsF32());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Constructor_Scalar) {
