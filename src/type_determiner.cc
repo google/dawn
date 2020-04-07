@@ -16,6 +16,7 @@
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/break_statement.h"
+#include "src/ast/case_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type_constructor_expression.h"
 
@@ -79,6 +80,10 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
   if (stmt->IsBreak()) {
     auto b = stmt->AsBreak();
     return DetermineResultType(b->conditional());
+  }
+  if (stmt->IsCase()) {
+    auto c = stmt->AsCase();
+    return DetermineResultType(c->body());
   }
 
   error_ = "unknown statement type for type determination";
