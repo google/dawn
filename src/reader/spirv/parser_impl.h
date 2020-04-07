@@ -90,6 +90,13 @@ class ParserImpl : Reader {
   bool BuildAndParseInternalModule() {
     return BuildInternalModule() && ParseInternalModule();
   }
+  /// Builds an internal representation of the SPIR-V binary,
+  /// and parses the module, except functions, into a Tint AST module.
+  /// Diagnostics are emitted to the error stream.
+  /// @returns true if it was successful.
+  bool BuildAndParseInternalModuleExceptFunctions() {
+    return BuildInternalModule() && ParseInternalModuleExceptFunctions();
+  }
 
   /// @returns the set of SPIR-V IDs for imports of the "GLSL.std.450"
   /// extended instruction set.
@@ -148,6 +155,12 @@ class ParserImpl : Reader {
   /// This is a no-op if the parser has already failed.
   /// @returns true if the parser is still successful.
   bool ParseInternalModule();
+
+  /// Walks the internal representation of the module, except for function
+  /// definitions, to populate the AST form of the module.
+  /// This is a no-op if the parser has already failed.
+  /// @returns true if the parser is still successful.
+  bool ParseInternalModuleExceptFunctions();
 
   /// Destroys the internal representation of the SPIR-V module.
   void ResetInternalModule();

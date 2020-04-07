@@ -336,6 +336,19 @@ bool ParserImpl::ParseInternalModule() {
   if (!success_) {
     return false;
   }
+  if (!ParseInternalModuleExceptFunctions()) {
+    return false;
+  }
+  if (!EmitFunctions()) {
+    return false;
+  }
+  return success_;
+}
+
+bool ParserImpl::ParseInternalModuleExceptFunctions() {
+  if (!success_) {
+    return false;
+  }
   if (!RegisterExtendedInstructionImports()) {
     return false;
   }
@@ -352,9 +365,6 @@ bool ParserImpl::ParseInternalModule() {
     return false;
   }
   if (!EmitModuleScopeVariables()) {
-    return false;
-  }
-  if (!EmitFunctions()) {
     return false;
   }
   return success_;

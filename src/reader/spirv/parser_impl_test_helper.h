@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "source/opt/ir_context.h"
 #include "src/context.h"
 #include "src/reader/spirv/parser_impl.h"
 
@@ -45,6 +46,14 @@ class SpvParserTest : public testing::Test {
   ParserImpl* parser(const std::vector<uint32_t>& input) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, input);
     return impl_.get();
+  }
+
+  /// Gets the internal representation of the function with the given ID.
+  /// Assumes ParserImpl::BuildInternalRepresentation has been run and
+  /// succeeded.
+  /// @returns the internal representation of the function
+  spvtools::opt::Function* spirv_function(uint32_t id) {
+    return impl_->ir_context()->GetFunction(id);
   }
 
  private:
