@@ -41,7 +41,6 @@
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/switch_statement.h"
-#include "src/ast/unary_op_expression.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
@@ -52,6 +51,7 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_derivative_expression.h"
 #include "src/ast/unary_method_expression.h"
+#include "src/ast/unary_op_expression.h"
 #include "src/ast/unless_statement.h"
 #include "src/ast/variable_decl_statement.h"
 
@@ -105,6 +105,12 @@ TEST_F(TypeDeterminerTest, Stmt_Break) {
   EXPECT_TRUE(cond_ptr->result_type()->IsI32());
 }
 
+TEST_F(TypeDeterminerTest, Stmt_Break_WithoutCondition) {
+  ast::type::I32Type i32;
+  ast::BreakStatement brk;
+  EXPECT_TRUE(td()->DetermineResultType(&brk));
+}
+
 TEST_F(TypeDeterminerTest, Stmt_Case) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;
@@ -143,6 +149,12 @@ TEST_F(TypeDeterminerTest, Stmt_Continue) {
   EXPECT_TRUE(td()->DetermineResultType(&stmt));
   ASSERT_NE(cond_ptr->result_type(), nullptr);
   EXPECT_TRUE(cond_ptr->result_type()->IsI32());
+}
+
+TEST_F(TypeDeterminerTest, Stmt_Continue_WithoutStatement) {
+  ast::type::I32Type i32;
+  ast::ContinueStatement stmt;
+  EXPECT_TRUE(td()->DetermineResultType(&stmt));
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Else) {
@@ -311,6 +323,12 @@ TEST_F(TypeDeterminerTest, Stmt_Return) {
   EXPECT_TRUE(td()->DetermineResultType(&ret));
   ASSERT_NE(cond_ptr->result_type(), nullptr);
   EXPECT_TRUE(cond_ptr->result_type()->IsI32());
+}
+
+TEST_F(TypeDeterminerTest, Stmt_Return_WithoutValue) {
+  ast::type::I32Type i32;
+  ast::ReturnStatement ret;
+  EXPECT_TRUE(td()->DetermineResultType(&ret));
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Switch) {

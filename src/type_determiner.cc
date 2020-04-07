@@ -41,9 +41,9 @@
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
-#include "src/ast/unary_op_expression.h"
 #include "src/ast/unary_derivative_expression.h"
 #include "src/ast/unary_method_expression.h"
+#include "src/ast/unary_op_expression.h"
 #include "src/ast/unless_statement.h"
 #include "src/ast/variable_decl_statement.h"
 
@@ -381,9 +381,8 @@ bool TypeDeterminer::DetermineRelational(ast::RelationalExpression* expr) {
 
     } else if (lhs_type->IsMatrix() && rhs_type->IsVector()) {
       auto mat = lhs_type->AsMatrix();
-      expr->set_result_type(
-          ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
-              mat->type(), mat->rows())));
+      expr->set_result_type(ctx_.type_mgr().Get(
+          std::make_unique<ast::type::VectorType>(mat->type(), mat->rows())));
     } else if (lhs_type->IsVector() && rhs_type->IsMatrix()) {
       auto mat = rhs_type->AsMatrix();
       expr->set_result_type(
@@ -487,12 +486,12 @@ bool TypeDeterminer::DetermineUnaryMethod(ast::UnaryMethodExpression* expr) {
 }
 
 bool TypeDeterminer::DetermineUnaryOp(ast::UnaryOpExpression* expr) {
-    // Result type matches the parameter type.
-    if (!DetermineResultType(expr->expr())) {
-      return false;
-    }
-    expr->set_result_type(expr->expr()->result_type());
-    return true;
+  // Result type matches the parameter type.
+  if (!DetermineResultType(expr->expr())) {
+    return false;
+  }
+  expr->set_result_type(expr->expr()->result_type());
+  return true;
 }
 
 }  // namespace tint
