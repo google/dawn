@@ -18,10 +18,12 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "src/ast/assignment_statement.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/f32_type.h"
+#include "src/ast/type/i32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 
@@ -38,6 +40,28 @@ class TypeDeterminerTest : public testing::Test {
   Context ctx_;
   std::unique_ptr<TypeDeterminer> td_;
 };
+
+TEST_F(TypeDeterminerTest, Stmt_Assign) {
+  ast::type::F32Type f32;
+  ast::type::I32Type i32;
+
+  auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 2));
+  auto lhs_ptr = lhs.get();
+
+  auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
+  auto rhs_ptr = rhs.get();
+
+  ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
+
+  EXPECT_TRUE(td()->DetermineResultType(&assign));
+  ASSERT_NE(lhs_ptr->result_type(), nullptr);
+  ASSERT_NE(rhs_ptr->result_type(), nullptr);
+
+  EXPECT_TRUE(lhs_ptr->result_type()->IsI32());
+  EXPECT_TRUE(rhs_ptr->result_type()->IsF32());
+}
 
 TEST_F(TypeDeterminerTest, Expr_Constructor_Scalar) {
   ast::type::F32Type f32;
