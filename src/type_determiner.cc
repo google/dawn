@@ -14,6 +14,9 @@
 
 #include "src/type_determiner.h"
 
+#include <memory>
+
+#include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/case_statement.h"
@@ -26,6 +29,9 @@
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/switch_statement.h"
+#include "src/ast/type/array_type.h"
+#include "src/ast/type/matrix_type.h"
+#include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unless_statement.h"
 #include "src/ast/variable_decl_statement.h"
@@ -174,6 +180,9 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
     return true;
   }
 
+  if (expr->IsArrayAccessor()) {
+    return DetermineArrayAccessor(expr->AsArrayAccessor());
+  }
   if (expr->IsConstructor()) {
     return DetermineConstructor(expr->AsConstructor());
   }
@@ -183,6 +192,27 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
 
   error_ = "unknown expression for type determination";
   return false;
+}
+
+bool TypeDeterminer::DetermineArrayAccessor(
+    ast::ArrayAccessorExpression* expr) {
+  if (!DetermineResultType(expr->array())) {
+    return false;
+  }
+  auto parent_type = expr->array()->result_type();
+  if (parent_type->IsArray()) {
+    expr->set_result_type(parent_type->AsArray()->type());
+  } else if (parent_type->IsVector()) {
+    expr->set_result_type(parent_type->AsVector()->type());
+  } else if (parent_type->IsMatrix()) {
+    auto m = parent_type->AsMatrix();
+    expr->set_result_type(ctx_.type_mgr().Get(
+        std::make_unique<ast::type::VectorType>(m->type(), m->rows())));
+  } else {
+    error_ = "invalid parent type in array accessor";
+    return false;
+  }
+  return true;
 }
 
 bool TypeDeterminer::DetermineConstructor(ast::ConstructorExpression* expr) {

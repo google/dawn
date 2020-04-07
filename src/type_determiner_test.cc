@@ -18,6 +18,7 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/case_statement.h"
@@ -32,8 +33,10 @@
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/switch_statement.h"
+#include "src/ast/type/array_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
+#include "src/ast/type/matrix_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unless_statement.h"
@@ -374,6 +377,105 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
   EXPECT_TRUE(td()->DetermineResultType(&decl));
   ASSERT_NE(init_ptr->result_type(), nullptr);
   EXPECT_TRUE(init_ptr->result_type()->IsI32());
+}
+
+TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
+  ast::type::I32Type i32;
+  ast::type::F32Type f32;
+  ast::type::ArrayType ary(&f32, 3);
+
+  auto idx = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 2));
+
+  ast::Module m;
+  auto var =
+      std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone, &ary);
+  m.AddGlobalVariable(std::move(var));
+
+  // Register the global
+  EXPECT_TRUE(td()->Determine(&m));
+
+  ast::ArrayAccessorExpression acc(
+      std::make_unique<ast::IdentifierExpression>("my_var"), std::move(idx));
+  EXPECT_TRUE(td()->DetermineResultType(&acc));
+  ASSERT_NE(acc.result_type(), nullptr);
+  EXPECT_TRUE(acc.result_type()->IsF32());
+}
+
+TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix) {
+  ast::type::I32Type i32;
+  ast::type::F32Type f32;
+  ast::type::MatrixType mat(&f32, 3, 2);
+
+  auto idx = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 2));
+
+  ast::Module m;
+  auto var =
+      std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone, &mat);
+  m.AddGlobalVariable(std::move(var));
+
+  // Register the global
+  EXPECT_TRUE(td()->Determine(&m));
+
+  ast::ArrayAccessorExpression acc(
+      std::make_unique<ast::IdentifierExpression>("my_var"), std::move(idx));
+  EXPECT_TRUE(td()->DetermineResultType(&acc));
+  ASSERT_NE(acc.result_type(), nullptr);
+  ASSERT_TRUE(acc.result_type()->IsVector());
+  EXPECT_EQ(acc.result_type()->AsVector()->size(), 3);
+}
+
+TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
+  ast::type::I32Type i32;
+  ast::type::F32Type f32;
+  ast::type::MatrixType mat(&f32, 3, 2);
+
+  auto idx1 = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 2));
+  auto idx2 = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 1));
+
+  ast::Module m;
+  auto var =
+      std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone, &mat);
+  m.AddGlobalVariable(std::move(var));
+
+  // Register the global
+  EXPECT_TRUE(td()->Determine(&m));
+
+  ast::ArrayAccessorExpression acc(
+      std::make_unique<ast::ArrayAccessorExpression>(
+          std::make_unique<ast::IdentifierExpression>("my_var"),
+          std::move(idx1)),
+      std::move(idx2));
+
+  EXPECT_TRUE(td()->DetermineResultType(&acc));
+  ASSERT_NE(acc.result_type(), nullptr);
+  EXPECT_TRUE(acc.result_type()->IsF32());
+}
+
+TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
+  ast::type::I32Type i32;
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+
+  auto idx = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 2));
+
+  ast::Module m;
+  auto var =
+      std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone, &vec);
+  m.AddGlobalVariable(std::move(var));
+
+  // Register the global
+  EXPECT_TRUE(td()->Determine(&m));
+
+  ast::ArrayAccessorExpression acc(
+      std::make_unique<ast::IdentifierExpression>("my_var"), std::move(idx));
+  EXPECT_TRUE(td()->DetermineResultType(&acc));
+  ASSERT_NE(acc.result_type(), nullptr);
+  EXPECT_TRUE(acc.result_type()->IsF32());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Constructor_Scalar) {
