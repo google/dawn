@@ -639,19 +639,19 @@ group("dawn_fuzzers") {
 ###############################################################################
 
 group("libdawn_native") {
-  deps = [
+  public_deps = [
     "src/dawn_native",
   ]
 }
 
 group("libdawn_native_sources") {
-  deps = [
+  public_deps = [
     "src/dawn_native:dawn_native_sources",
   ]
 }
 
 group("libdawn_wire") {
-  deps = [
+  public_deps = [
     "src/dawn_wire",
   ]
 }
@@ -659,21 +659,21 @@ group("libdawn_wire") {
 # Temporary groups to make a 5-way patch to fix crbug.com/913171
 group("dawn_unittests_temp_group") {
   testonly = true
-  deps = [
+  public_deps = [
     ":dawn_unittests",
   ]
 }
 
 group("dawn_end2end_tests_temp_group") {
   testonly = true
-  deps = [
+  public_deps = [
     ":dawn_end2end_tests",
   ]
 }
 
 group("dawn_perf_tests_temp_group") {
   testonly = true
-  deps = [
+  public_deps = [
     ":dawn_perf_tests",
   ]
   data_deps = [
