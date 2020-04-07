@@ -28,12 +28,14 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/loop_statement.h"
+#include "src/ast/member_accessor_expression.h"
 #include "src/ast/regardless_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unless_statement.h"
@@ -41,7 +43,10 @@
 
 namespace tint {
 
-TypeDeterminer::TypeDeterminer(Context* ctx) : ctx_(*ctx) {}
+TypeDeterminer::TypeDeterminer(Context* ctx) : ctx_(*ctx) {
+  // TODO(dsinclair): Temporary usage to avoid compiler warning
+  static_cast<void>(ctx_.type_mgr());
+}
 
 TypeDeterminer::~TypeDeterminer() = default;
 
@@ -174,15 +179,6 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
   return false;
 }
 
-bool TypeDeterminer::DetermineResultType(const ast::ExpressionList& exprs) {
-  for (const auto& expr : exprs) {
-    if (!DetermineResultType(expr.get())) {
-      return false;
-    }
-  }
-  return true;
-}
-
 bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
   // This is blindly called above, so in some cases the expression won't exist.
   if (!expr) {
@@ -206,6 +202,9 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
   }
   if (expr->IsIdentifier()) {
     return DetermineIdentifier(expr->AsIdentifier());
+  }
+  if (expr->IsMemberAccessor()) {
+    return DetermineMemberAccessor(expr->AsMemberAccessor());
   }
 
   error_ = "unknown expression for type determination";
@@ -240,9 +239,6 @@ bool TypeDeterminer::DetermineAs(ast::AsExpression* expr) {
 
 bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
   if (!DetermineResultType(expr->func())) {
-    return false;
-  }
-  if (!DetermineResultType(expr->params())) {
     return false;
   }
   expr->set_result_type(expr->func()->result_type());
@@ -283,7 +279,45 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
     return true;
   }
 
-  error_ = "unknown identifier for type determination";
+  return true;
+}
+
+bool TypeDeterminer::DetermineMemberAccessor(
+    ast::MemberAccessorExpression* expr) {
+  if (!DetermineResultType(expr->structure())) {
+    return false;
+  }
+
+  auto data_type = expr->structure()->result_type();
+  if (data_type->IsStruct()) {
+    auto strct = data_type->AsStruct()->impl();
+    auto name = expr->member()->name()[0];
+
+    for (const auto& member : strct->members()) {
+      if (member->name() != name) {
+        continue;
+      }
+
+      expr->set_result_type(member->type());
+      return true;
+    }
+
+    error_ = "struct member not found";
+    return false;
+  }
+  if (data_type->IsVector()) {
+    auto vec = data_type->AsVector();
+
+    // The vector will have a number of components equal to the length of the
+    // swizzle. This assumes the validator will check that the swizzle
+    // is correct.
+    expr->set_result_type(
+        ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
+            vec->type(), expr->member()->name()[0].size())));
+    return true;
+  }
+
+  error_ = "invalid type in member accessor";
   return false;
 }
 

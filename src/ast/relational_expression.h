@@ -48,7 +48,7 @@ enum class Relation {
   kModulo,
 };
 
-/// A Relational Expression
+/// An xor expression
 class RelationalExpression : public Expression {
  public:
   /// Constructor

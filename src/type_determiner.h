@@ -31,6 +31,7 @@ class CallExpression;
 class CastExpression;
 class ConstructorExpression;
 class IdentifierExpression;
+class MemberAccessorExpression;
 class Function;
 class Variable;
 
@@ -67,10 +68,6 @@ class TypeDeterminer {
   /// @param stmt the statement to check
   /// @returns true if the determination was successful
   bool DetermineResultType(ast::Statement* stmt);
-  /// Determines type information for a list of expressions
-  /// @param exprs the expressions to check
-  /// @returns true if the determination was successful
-  bool DetermineResultType(const ast::ExpressionList& exprs);
   /// Determines type information for an expression
   /// @param expr the expression to check
   /// @returns true if the determination was successful
@@ -83,6 +80,8 @@ class TypeDeterminer {
   bool DetermineCast(ast::CastExpression* expr);
   bool DetermineConstructor(ast::ConstructorExpression* expr);
   bool DetermineIdentifier(ast::IdentifierExpression* expr);
+  bool DetermineMemberAccessor(ast::MemberAccessorExpression* expr);
+
   Context& ctx_;
   std::string error_;
   ScopeStack<ast::Variable*> variable_stack_;
