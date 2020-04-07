@@ -54,6 +54,7 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/variable_decoration.h"
+#include "src/reader/spirv/function.h"
 #include "src/type_manager.h"
 
 namespace tint {
@@ -707,7 +708,7 @@ std::unique_ptr<ast::Variable> ParserImpl::MakeVariable(uint32_t id,
     return nullptr;
   }
 
-  auto ast_var = std::make_unique<ast::Variable>(Name(id), sc, type);
+  auto ast_var = std::make_unique<ast::Variable>(namer_.Name(id), sc, type);
 
   ast::VariableDecorationList ast_decorations;
   for (auto& deco : GetDecorationsFor(id)) {
@@ -745,50 +746,12 @@ bool ParserImpl::EmitFunctions() {
   }
   for (const auto* f :
        FunctionTraverser(*module_).TopologicallyOrderedFunctions()) {
-    EmitFunction(*f);
-  }
-  return success_;
-}
-
-bool ParserImpl::EmitFunction(const spvtools::opt::Function& f) {
-  if (!success_) {
-    return false;
-  }
-  // We only care about functions with bodies.
-  if (f.cbegin() == f.cend()) {
-    return true;
-  }
-
-  const auto name = Name(f.result_id());
-  // Surprisingly, the "type id" on an OpFunction is the result type of the
-  // function, not the type of the function.  This is the one exceptional case
-  // in SPIR-V where the type ID is not the type of the result ID.
-  auto* ret_ty = ConvertType(f.type_id());
-  if (!success_) {
-    return false;
-  }
-  if (ret_ty == nullptr) {
-    return Fail()
-           << "internal error: unregistered return type for function with ID "
-           << f.result_id();
-  }
-
-  ast::VariableList ast_params;
-  f.ForEachParam([this, &ast_params](const spvtools::opt::Instruction* param) {
-    auto* ast_type = ConvertType(param->type_id());
-    if (ast_type != nullptr) {
-      ast_params.emplace_back(
-          MakeVariable(param->result_id(), ast::StorageClass::kNone, ast_type));
+    if (!success_) {
+      return false;
     }
-  });
-  if (!success_) {
-    return false;
+    FunctionEmitter emitter(this, *f);
+    success_ = emitter.Emit();
   }
-
-  auto ast_fn =
-      std::make_unique<ast::Function>(name, std::move(ast_params), ret_ty);
-  ast_module_.AddFunction(std::move(ast_fn));
-
   return success_;
 }
 

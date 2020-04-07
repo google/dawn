@@ -216,6 +216,23 @@ TEST_F(SpvNamerTest,
   EXPECT_THAT(namer.GetMemberName(1, 2), Eq("mother"));
 }
 
+TEST_F(SpvNamerTest, Name_GeneratesNameIfNoneRegistered) {
+  Namer namer(fail_stream_);
+  EXPECT_THAT(namer.Name(14), Eq("x_14"));
+}
+
+TEST_F(SpvNamerTest, Name_GeneratesNameWithoutConflict) {
+  Namer namer(fail_stream_);
+  namer.SaveName(42, "x_14");
+  EXPECT_THAT(namer.Name(14), Eq("x_14_1"));
+}
+
+TEST_F(SpvNamerTest, Name_ReturnsRegisteredName) {
+  Namer namer(fail_stream_);
+  namer.SaveName(14, "hello");
+  EXPECT_THAT(namer.Name(14), Eq("hello"));
+}
+
 TEST_F(SpvNamerTest,
        ResolveMemberNamesForStruct_GeneratesRegularNamesOnItsOwn) {
   Namer namer(fail_stream_);

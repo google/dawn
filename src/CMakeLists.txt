@@ -204,6 +204,8 @@ if(${TINT_BUILD_SPV_READER})
     reader/spirv/enum_converter.h
     reader/spirv/enum_converter.cc
     reader/spirv/fail_stream.h
+    reader/spirv/function.cc
+    reader/spirv/function.h
     reader/spirv/namer.cc
     reader/spirv/namer.h
     reader/spirv/parser.cc

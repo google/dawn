@@ -32,7 +32,7 @@ namespace spirv {
 /// Some names are user-suggested, but "sanitized" in the sense that an
 /// unusual character (e.g. invalid for use in WGSL identifiers) is remapped
 /// to a safer character such as an underscore.  Also, sanitized names
-/// never start with an underscorre.
+/// never start with an underscore.
 class Namer {
  public:
   /// Creates a new namer
@@ -62,6 +62,17 @@ class Namer {
   /// @returns the name for the ID. It must have been registered.
   const std::string& GetName(uint32_t id) const {
     return id_to_name_.find(id)->second;
+  }
+
+  /// Gets a unique name for the ID. If one already exists, then return
+  /// that, otherwise synthesize a name and remember it for later.
+  /// @param id the SPIR-V ID
+  /// @returns a name for the given ID. Generates a name if non exists.
+  const std::string& Name(uint32_t id) {
+    if (!HasName(id)) {
+      SuggestSanitizedName(id, "x_" + std::to_string(id));
+    }
+    return GetName(id);
   }
 
   /// Gets the registered name for a struct member. If no name has
