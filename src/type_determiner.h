@@ -30,9 +30,10 @@ class AsExpression;
 class CallExpression;
 class CastExpression;
 class ConstructorExpression;
+class Function;
 class IdentifierExpression;
 class MemberAccessorExpression;
-class Function;
+class RelationalExpression;
 class Variable;
 
 }  // namespace ast
@@ -81,6 +82,7 @@ class TypeDeterminer {
   bool DetermineConstructor(ast::ConstructorExpression* expr);
   bool DetermineIdentifier(ast::IdentifierExpression* expr);
   bool DetermineMemberAccessor(ast::MemberAccessorExpression* expr);
+  bool DetermineRelational(ast::RelationalExpression* expr);
 
   Context& ctx_;
   std::string error_;

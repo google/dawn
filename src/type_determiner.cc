@@ -30,10 +30,12 @@
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/regardless_statement.h"
+#include "src/ast/relational_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/array_type.h"
+#include "src/ast/type/bool_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
@@ -206,6 +208,9 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
   if (expr->IsMemberAccessor()) {
     return DetermineMemberAccessor(expr->AsMemberAccessor());
   }
+  if (expr->IsRelational()) {
+    return DetermineRelational(expr->AsRelational());
+  }
 
   error_ = "unknown expression for type determination";
   return false;
@@ -318,6 +323,81 @@ bool TypeDeterminer::DetermineMemberAccessor(
   }
 
   error_ = "invalid type in member accessor";
+  return false;
+}
+
+bool TypeDeterminer::DetermineRelational(ast::RelationalExpression* expr) {
+  if (!DetermineResultType(expr->lhs()) || !DetermineResultType(expr->rhs())) {
+    return false;
+  }
+
+  // Result type matches first parameter type
+  if (expr->IsAnd() || expr->IsOr() || expr->IsXor() || expr->IsShiftLeft() ||
+      expr->IsShiftRight() || expr->IsShiftRightArith() || expr->IsAdd() ||
+      expr->IsSubtract() || expr->IsDivide() || expr->IsModulo()) {
+    expr->set_result_type(expr->lhs()->result_type());
+    return true;
+  }
+  // Result type is a scalar or vector of boolean type
+  if (expr->IsLogicalAnd() || expr->IsLogicalOr() || expr->IsEqual() ||
+      expr->IsNotEqual() || expr->IsLessThan() || expr->IsGreaterThan() ||
+      expr->IsLessThanEqual() || expr->IsGreaterThanEqual()) {
+    auto bool_type =
+        ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
+    auto param_type = expr->lhs()->result_type();
+    if (param_type->IsVector()) {
+      expr->set_result_type(
+          ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
+              bool_type, param_type->AsVector()->size())));
+    } else {
+      expr->set_result_type(bool_type);
+    }
+    return true;
+  }
+  if (expr->IsMultiply()) {
+    auto lhs_type = expr->lhs()->result_type();
+    auto rhs_type = expr->rhs()->result_type();
+
+    // Note, the ordering here matters. The later checks depend on the prior
+    // checks having been done.
+    if (lhs_type->IsMatrix() && rhs_type->IsMatrix()) {
+      expr->set_result_type(
+          ctx_.type_mgr().Get(std::make_unique<ast::type::MatrixType>(
+              lhs_type->AsMatrix()->type(), lhs_type->AsMatrix()->rows(),
+              rhs_type->AsMatrix()->columns())));
+
+    } else if (lhs_type->IsMatrix() && rhs_type->IsVector()) {
+      auto mat = lhs_type->AsMatrix();
+      expr->set_result_type(
+          ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
+              mat->type(), mat->rows())));
+    } else if (lhs_type->IsVector() && rhs_type->IsMatrix()) {
+      auto mat = rhs_type->AsMatrix();
+      expr->set_result_type(
+          ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
+              mat->type(), mat->columns())));
+    } else if (lhs_type->IsMatrix()) {
+      // matrix * scalar
+      expr->set_result_type(lhs_type);
+    } else if (rhs_type->IsMatrix()) {
+      // scalar * matrix
+      expr->set_result_type(rhs_type);
+    } else if (lhs_type->IsVector() && rhs_type->IsVector()) {
+      expr->set_result_type(lhs_type);
+    } else if (lhs_type->IsVector()) {
+      // Vector * scalar
+      expr->set_result_type(lhs_type);
+    } else if (rhs_type->IsVector()) {
+      // Scalar * vector
+      expr->set_result_type(rhs_type);
+    } else {
+      // Scalar * Scalar
+      expr->set_result_type(lhs_type);
+    }
+
+    return true;
+  }
+
   return false;
 }
 
