@@ -381,7 +381,7 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutWithStorageTextureBindingTy
          {wgpu::ShaderStage::Compute, wgpu::BindingType::StorageTexture, false}}};
 
     for (const auto& testSpec : kTestSpecs) {
-        wgpu::BindGroupLayoutBinding binding = {0, testSpec.stage, testSpec.type};
+        wgpu::BindGroupLayoutEntry binding = {0, testSpec.stage, testSpec.type};
         binding.storageTextureFormat = wgpu::TextureFormat::R32Uint;
         wgpu::BindGroupLayoutDescriptor descriptor;
         descriptor.bindingCount = 1;
@@ -462,7 +462,7 @@ TEST_F(StorageTextureValidationTests, UnsupportedSPIRVStorageTextureFormat) {
 // Verify when we create and use a bind group layout with storage textures in the creation of
 // render and compute pipeline, the binding type in the bind group layout must match the
 // declaration in the shader.
-TEST_F(StorageTextureValidationTests, BindGroupLayoutBindingTypeMatchesShaderDeclaration) {
+TEST_F(StorageTextureValidationTests, BindGroupLayoutEntryTypeMatchesShaderDeclaration) {
     constexpr std::array<wgpu::BindingType, 7> kSupportedBindingTypes = {
         wgpu::BindingType::UniformBuffer,          wgpu::BindingType::StorageBuffer,
         wgpu::BindingType::ReadonlyStorageBuffer,  wgpu::BindingType::Sampler,
@@ -483,17 +483,17 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutBindingTypeMatchesShaderDec
         defaultComputePipelineDescriptor.computeStage.entryPoint = "main";
 
         // Set common fileds of bind group layout binding.
-        wgpu::BindGroupLayoutBinding defaultBindGroupLayoutBinding;
-        defaultBindGroupLayoutBinding.binding = 0;
-        defaultBindGroupLayoutBinding.visibility = wgpu::ShaderStage::Compute;
-        defaultBindGroupLayoutBinding.storageTextureFormat = kStorageTextureFormat;
+        wgpu::BindGroupLayoutEntry defaultBindGroupLayoutEntry;
+        defaultBindGroupLayoutEntry.binding = 0;
+        defaultBindGroupLayoutEntry.visibility = wgpu::ShaderStage::Compute;
+        defaultBindGroupLayoutEntry.storageTextureFormat = kStorageTextureFormat;
 
         for (wgpu::BindingType bindingTypeInBindgroupLayout : kSupportedBindingTypes) {
             wgpu::ComputePipelineDescriptor computePipelineDescriptor =
                 defaultComputePipelineDescriptor;
 
             // Create bind group layout with different binding types.
-            wgpu::BindGroupLayoutBinding bindGroupLayoutBinding = defaultBindGroupLayoutBinding;
+            wgpu::BindGroupLayoutEntry bindGroupLayoutBinding = defaultBindGroupLayoutEntry;
             bindGroupLayoutBinding.type = bindingTypeInBindgroupLayout;
             wgpu::BindGroupLayout bindGroupLayout =
                 utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});
@@ -514,27 +514,27 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutBindingTypeMatchesShaderDec
 // Verify it is invalid not to set a valid texture format in a bind group layout when the binding
 // type is read-only or write-only storage texture.
 TEST_F(StorageTextureValidationTests, UndefinedStorageTextureFormatInBindGroupLayout) {
-    wgpu::BindGroupLayoutBinding errorBindGroupLayoutBinding;
-    errorBindGroupLayoutBinding.binding = 0;
-    errorBindGroupLayoutBinding.visibility = wgpu::ShaderStage::Compute;
-    errorBindGroupLayoutBinding.storageTextureFormat = wgpu::TextureFormat::Undefined;
+    wgpu::BindGroupLayoutEntry errorBindGroupLayoutEntry;
+    errorBindGroupLayoutEntry.binding = 0;
+    errorBindGroupLayoutEntry.visibility = wgpu::ShaderStage::Compute;
+    errorBindGroupLayoutEntry.storageTextureFormat = wgpu::TextureFormat::Undefined;
 
     for (wgpu::BindingType bindingType : kSupportedStorageTextureBindingTypes) {
-        errorBindGroupLayoutBinding.type = bindingType;
-        ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(device, {errorBindGroupLayoutBinding}));
+        errorBindGroupLayoutEntry.type = bindingType;
+        ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(device, {errorBindGroupLayoutEntry}));
     }
 }
 
 // Verify it is invalid to create a bind group layout with storage textures and an unsupported
 // storage texture format.
 TEST_F(StorageTextureValidationTests, StorageTextureFormatInBindGroupLayout) {
-    wgpu::BindGroupLayoutBinding defaultBindGroupLayoutBinding;
-    defaultBindGroupLayoutBinding.binding = 0;
-    defaultBindGroupLayoutBinding.visibility = wgpu::ShaderStage::Compute;
+    wgpu::BindGroupLayoutEntry defaultBindGroupLayoutEntry;
+    defaultBindGroupLayoutEntry.binding = 0;
+    defaultBindGroupLayoutEntry.visibility = wgpu::ShaderStage::Compute;
 
     for (wgpu::BindingType bindingType : kSupportedStorageTextureBindingTypes) {
         for (wgpu::TextureFormat textureFormat : utils::kAllTextureFormats) {
-            wgpu::BindGroupLayoutBinding bindGroupLayoutBinding = defaultBindGroupLayoutBinding;
+            wgpu::BindGroupLayoutEntry bindGroupLayoutBinding = defaultBindGroupLayoutEntry;
             bindGroupLayoutBinding.type = bindingType;
             bindGroupLayoutBinding.storageTextureFormat = textureFormat;
             if (utils::TextureFormatSupportsStorageTexture(textureFormat)) {
@@ -567,8 +567,8 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutStorageTextureFormatMatches
             defaultComputePipelineDescriptor.computeStage.entryPoint = "main";
 
             // Set common fileds of bind group layout binding.
-            wgpu::BindGroupLayoutBinding defaultBindGroupLayoutBinding = {
-                0, wgpu::ShaderStage::Compute, bindingType};
+            wgpu::BindGroupLayoutEntry defaultBindGroupLayoutEntry = {0, wgpu::ShaderStage::Compute,
+                                                                      bindingType};
 
             for (wgpu::TextureFormat storageTextureFormatInBindGroupLayout :
                  utils::kAllTextureFormats) {
@@ -578,7 +578,7 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutStorageTextureFormatMatches
                 }
 
                 // Create the bind group layout with the given storage texture format.
-                wgpu::BindGroupLayoutBinding bindGroupLayoutBinding = defaultBindGroupLayoutBinding;
+                wgpu::BindGroupLayoutEntry bindGroupLayoutBinding = defaultBindGroupLayoutEntry;
                 bindGroupLayoutBinding.storageTextureFormat = storageTextureFormatInBindGroupLayout;
                 wgpu::BindGroupLayout bindGroupLayout =
                     utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});
@@ -624,13 +624,13 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutTextureDimensionMatchesShad
             defaultComputePipelineDescriptor.computeStage.entryPoint = "main";
 
             // Set common fileds of bind group layout binding.
-            wgpu::BindGroupLayoutBinding defaultBindGroupLayoutBinding = {
-                0, wgpu::ShaderStage::Compute, bindingType};
-            defaultBindGroupLayoutBinding.storageTextureFormat = kStorageTextureFormat;
+            wgpu::BindGroupLayoutEntry defaultBindGroupLayoutEntry = {0, wgpu::ShaderStage::Compute,
+                                                                      bindingType};
+            defaultBindGroupLayoutEntry.storageTextureFormat = kStorageTextureFormat;
 
             for (wgpu::TextureViewDimension dimensionInBindGroupLayout : kAllDimensions) {
                 // Create the bind group layout with the given texture view dimension.
-                wgpu::BindGroupLayoutBinding bindGroupLayoutBinding = defaultBindGroupLayoutBinding;
+                wgpu::BindGroupLayoutEntry bindGroupLayoutBinding = defaultBindGroupLayoutEntry;
                 bindGroupLayoutBinding.textureDimension = dimensionInBindGroupLayout;
                 wgpu::BindGroupLayout bindGroupLayout =
                     utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});
@@ -657,7 +657,7 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutTextureDimensionMatchesShad
 // are allowed to have dynamic offsets.
 TEST_F(StorageTextureValidationTests, StorageTextureCannotHaveDynamicOffsets) {
     for (wgpu::BindingType storageBindingType : kSupportedStorageTextureBindingTypes) {
-        wgpu::BindGroupLayoutBinding bindGroupLayoutBinding;
+        wgpu::BindGroupLayoutEntry bindGroupLayoutBinding;
         bindGroupLayoutBinding.binding = 0;
         bindGroupLayoutBinding.visibility = wgpu::ShaderStage::Compute;
         bindGroupLayoutBinding.type = storageBindingType;
@@ -674,7 +674,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureBindingTypeInBindGroup) {
     constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Float;
     for (wgpu::BindingType storageBindingType : kSupportedStorageTextureBindingTypes) {
         // Create a bind group layout.
-        wgpu::BindGroupLayoutBinding bindGroupLayoutBinding;
+        wgpu::BindGroupLayoutEntry bindGroupLayoutBinding;
         bindGroupLayoutBinding.binding = 0;
         bindGroupLayoutBinding.visibility = wgpu::ShaderStage::Compute;
         bindGroupLayoutBinding.type = storageBindingType;
@@ -718,7 +718,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureUsageInBindGroup) {
 
     for (wgpu::BindingType storageBindingType : kSupportedStorageTextureBindingTypes) {
         // Create a bind group layout.
-        wgpu::BindGroupLayoutBinding bindGroupLayoutBinding;
+        wgpu::BindGroupLayoutEntry bindGroupLayoutBinding;
         bindGroupLayoutBinding.binding = 0;
         bindGroupLayoutBinding.visibility = wgpu::ShaderStage::Compute;
         bindGroupLayoutBinding.type = storageBindingType;
@@ -747,10 +747,10 @@ TEST_F(StorageTextureValidationTests, StorageTextureUsageInBindGroup) {
 // group must match the corresponding bind group binding.
 TEST_F(StorageTextureValidationTests, StorageTextureFormatInBindGroup) {
     for (wgpu::BindingType storageBindingType : kSupportedStorageTextureBindingTypes) {
-        wgpu::BindGroupLayoutBinding defaultBindGroupLayoutBinding;
-        defaultBindGroupLayoutBinding.binding = 0;
-        defaultBindGroupLayoutBinding.visibility = wgpu::ShaderStage::Compute;
-        defaultBindGroupLayoutBinding.type = storageBindingType;
+        wgpu::BindGroupLayoutEntry defaultBindGroupLayoutEntry;
+        defaultBindGroupLayoutEntry.binding = 0;
+        defaultBindGroupLayoutEntry.visibility = wgpu::ShaderStage::Compute;
+        defaultBindGroupLayoutEntry.type = storageBindingType;
 
         for (wgpu::TextureFormat formatInBindGroupLayout : utils::kAllTextureFormats) {
             if (!utils::TextureFormatSupportsStorageTexture(formatInBindGroupLayout)) {
@@ -758,7 +758,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureFormatInBindGroup) {
             }
 
             // Create a bind group layout with given storage texture format.
-            wgpu::BindGroupLayoutBinding bindGroupLayoutBinding = defaultBindGroupLayoutBinding;
+            wgpu::BindGroupLayoutEntry bindGroupLayoutBinding = defaultBindGroupLayoutEntry;
             bindGroupLayoutBinding.storageTextureFormat = formatInBindGroupLayout;
             wgpu::BindGroupLayout bindGroupLayout =
                 utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});
@@ -808,15 +808,15 @@ TEST_F(StorageTextureValidationTests, StorageTextureViewDimensionInBindGroup) {
     kDefaultTextureViewDescriptor.baseArrayLayer = 0;
 
     for (wgpu::BindingType storageBindingType : kSupportedStorageTextureBindingTypes) {
-        wgpu::BindGroupLayoutBinding defaultBindGroupLayoutBinding;
-        defaultBindGroupLayoutBinding.binding = 0;
-        defaultBindGroupLayoutBinding.visibility = wgpu::ShaderStage::Compute;
-        defaultBindGroupLayoutBinding.type = storageBindingType;
-        defaultBindGroupLayoutBinding.storageTextureFormat = kStorageTextureFormat;
+        wgpu::BindGroupLayoutEntry defaultBindGroupLayoutEntry;
+        defaultBindGroupLayoutEntry.binding = 0;
+        defaultBindGroupLayoutEntry.visibility = wgpu::ShaderStage::Compute;
+        defaultBindGroupLayoutEntry.type = storageBindingType;
+        defaultBindGroupLayoutEntry.storageTextureFormat = kStorageTextureFormat;
 
         for (wgpu::TextureViewDimension dimensionInBindGroupLayout : kSupportedDimensions) {
             // Create a bind group layout with given texture view dimension.
-            wgpu::BindGroupLayoutBinding bindGroupLayoutBinding = defaultBindGroupLayoutBinding;
+            wgpu::BindGroupLayoutEntry bindGroupLayoutBinding = defaultBindGroupLayoutEntry;
             bindGroupLayoutBinding.textureDimension = dimensionInBindGroupLayout;
             wgpu::BindGroupLayout bindGroupLayout =
                 utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});

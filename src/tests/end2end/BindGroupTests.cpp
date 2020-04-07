@@ -754,8 +754,8 @@ TEST_P(BindGroupTests, DrawThenChangePipelineAndBindGroup) {
 TEST_P(BindGroupTests, BindGroupLayoutVisibilityCanBeNone) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-    wgpu::BindGroupLayoutBinding binding = {0, wgpu::ShaderStage::None,
-                                            wgpu::BindingType::UniformBuffer};
+    wgpu::BindGroupLayoutEntry binding = {0, wgpu::ShaderStage::None,
+                                          wgpu::BindingType::UniformBuffer};
     wgpu::BindGroupLayoutDescriptor descriptor;
     descriptor.bindingCount = 1;
     descriptor.bindings = &binding;

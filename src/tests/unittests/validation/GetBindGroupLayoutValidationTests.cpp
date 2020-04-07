@@ -102,7 +102,7 @@ TEST_F(GetBindGroupLayoutTests, DefaultShaderStageAndDynamicOffsets) {
         void main() {
         })");
 
-    wgpu::BindGroupLayoutBinding binding = {};
+    wgpu::BindGroupLayoutEntry binding = {};
     binding.binding = 0;
     binding.type = wgpu::BindingType::UniformBuffer;
     binding.multisampled = false;
@@ -150,7 +150,7 @@ TEST_F(GetBindGroupLayoutTests, ComputePipeline) {
 
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&descriptor);
 
-    wgpu::BindGroupLayoutBinding binding = {};
+    wgpu::BindGroupLayoutEntry binding = {};
     binding.binding = 0;
     binding.type = wgpu::BindingType::UniformBuffer;
     binding.visibility = kVisibilityAll;
@@ -165,7 +165,7 @@ TEST_F(GetBindGroupLayoutTests, ComputePipeline) {
 
 // Test that the binding type matches the shader.
 TEST_F(GetBindGroupLayoutTests, BindingType) {
-    wgpu::BindGroupLayoutBinding binding = {};
+    wgpu::BindGroupLayoutEntry binding = {};
     binding.binding = 0;
     binding.hasDynamicOffset = false;
     binding.multisampled = false;
@@ -236,7 +236,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
 
 // Test that multisampling matches the shader.
 TEST_F(GetBindGroupLayoutTests, Multisampled) {
-    wgpu::BindGroupLayoutBinding binding = {};
+    wgpu::BindGroupLayoutEntry binding = {};
     binding.binding = 0;
     binding.type = wgpu::BindingType::SampledTexture;
     binding.visibility = kVisibilityAll;
@@ -273,7 +273,7 @@ TEST_F(GetBindGroupLayoutTests, Multisampled) {
 
 // Test that texture view dimension matches the shader.
 TEST_F(GetBindGroupLayoutTests, TextureDimension) {
-    wgpu::BindGroupLayoutBinding binding = {};
+    wgpu::BindGroupLayoutEntry binding = {};
     binding.binding = 0;
     binding.type = wgpu::BindingType::SampledTexture;
     binding.visibility = kVisibilityAll;
@@ -347,7 +347,7 @@ TEST_F(GetBindGroupLayoutTests, TextureDimension) {
 
 // Test that texture component type matches the shader.
 TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
-    wgpu::BindGroupLayoutBinding binding = {};
+    wgpu::BindGroupLayoutEntry binding = {};
     binding.binding = 0;
     binding.type = wgpu::BindingType::SampledTexture;
     binding.visibility = kVisibilityAll;
@@ -391,7 +391,7 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
 
 // Test that binding= indices match.
 TEST_F(GetBindGroupLayoutTests, BindingIndices) {
-    wgpu::BindGroupLayoutBinding binding = {};
+    wgpu::BindGroupLayoutEntry binding = {};
     binding.type = wgpu::BindingType::UniformBuffer;
     binding.visibility = kVisibilityAll;
     binding.hasDynamicOffset = false;
@@ -619,7 +619,7 @@ TEST_F(GetBindGroupLayoutTests, UnusedIndex) {
 // Test that after explicitly creating a pipeline with a pipeline layout, calling
 // GetBindGroupLayout reflects the same bind group layouts.
 TEST_F(GetBindGroupLayoutTests, Reflection) {
-    wgpu::BindGroupLayoutBinding binding = {};
+    wgpu::BindGroupLayoutEntry binding = {};
     binding.binding = 0;
     binding.type = wgpu::BindingType::UniformBuffer;
     binding.visibility = wgpu::ShaderStage::Vertex;

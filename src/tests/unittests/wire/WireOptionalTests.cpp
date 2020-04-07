@@ -35,7 +35,7 @@ TEST_F(WireOptionalTests, OptionalObjectValue) {
         .WillOnce(Return(apiBindGroupLayout));
 
     // The `sampler`, `textureView` and `buffer` members of a binding are optional.
-    WGPUBindGroupBinding binding;
+    WGPUBindGroupEntry binding;
     binding.binding = 0;
     binding.sampler = nullptr;
     binding.textureView = nullptr;

@@ -313,7 +313,7 @@ TEST_F(WireArgumentTests, StructureOfObjectArrayArgument) {
 // Test that the wire is able to send structures that contain objects
 TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
     static constexpr int NUM_BINDINGS = 3;
-    WGPUBindGroupLayoutBinding bindings[NUM_BINDINGS]{
+    WGPUBindGroupLayoutEntry bindings[NUM_BINDINGS]{
         {0, WGPUShaderStage_Vertex, WGPUBindingType_Sampler, false, false,
          WGPUTextureViewDimension_2D, WGPUTextureComponentType_Float},
         {1, WGPUShaderStage_Vertex, WGPUBindingType_SampledTexture, false, false,

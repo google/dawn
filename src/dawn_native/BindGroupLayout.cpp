@@ -102,7 +102,7 @@ namespace dawn_native {
         uint32_t dynamicUniformBufferCount = 0;
         uint32_t dynamicStorageBufferCount = 0;
         for (BindingIndex i = 0; i < descriptor->bindingCount; ++i) {
-            const BindGroupLayoutBinding& binding = descriptor->bindings[i];
+            const BindGroupLayoutEntry& binding = descriptor->bindings[i];
             BindingNumber bindingNumber = BindingNumber(binding.binding);
 
             DAWN_TRY(ValidateShaderStage(binding.visibility));
@@ -149,7 +149,7 @@ namespace dawn_native {
 
             if (binding.multisampled) {
                 return DAWN_VALIDATION_ERROR(
-                    "BindGroupLayoutBinding::multisampled must be false (for now)");
+                    "BindGroupLayoutEntry::multisampled must be false (for now)");
             }
 
             bindingsSet.insert(bindingNumber);
@@ -190,7 +190,7 @@ namespace dawn_native {
                    a.storageTextureFormat != b.storageTextureFormat;
         }
 
-        bool SortBindingsCompare(const BindGroupLayoutBinding& a, const BindGroupLayoutBinding& b) {
+        bool SortBindingsCompare(const BindGroupLayoutEntry& a, const BindGroupLayoutEntry& b) {
             if (a.hasDynamicOffset != b.hasDynamicOffset) {
                 // Buffers with dynamic offsets should come before those without.
                 // This makes it easy to iterate over the dynamic buffer bindings
@@ -258,13 +258,13 @@ namespace dawn_native {
     BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
                                              const BindGroupLayoutDescriptor* descriptor)
         : CachedObject(device), mBindingCount(descriptor->bindingCount) {
-        std::vector<BindGroupLayoutBinding> sortedBindings(
+        std::vector<BindGroupLayoutEntry> sortedBindings(
             descriptor->bindings, descriptor->bindings + descriptor->bindingCount);
 
         std::sort(sortedBindings.begin(), sortedBindings.end(), SortBindingsCompare);
 
         for (BindingIndex i = 0; i < mBindingCount; ++i) {
-            const BindGroupLayoutBinding& binding = sortedBindings[i];
+            const BindGroupLayoutEntry& binding = sortedBindings[i];
             mBindingInfo[i].type = binding.type;
             mBindingInfo[i].visibility = binding.visibility;
             mBindingInfo[i].textureComponentType =

@@ -91,7 +91,7 @@ namespace utils {
                                                  const wgpu::BindGroupLayout* bindGroupLayout);
     wgpu::BindGroupLayout MakeBindGroupLayout(
         const wgpu::Device& device,
-        std::initializer_list<wgpu::BindGroupLayoutBinding> bindingsInitializer);
+        std::initializer_list<wgpu::BindGroupLayoutEntry> bindingsInitializer);
 
     // Helpers to make creating bind groups look nicer:
     //
@@ -111,7 +111,7 @@ namespace utils {
                                     uint64_t offset = 0,
                                     uint64_t size = wgpu::kWholeSize);
 
-        wgpu::BindGroupBinding GetAsBinding() const;
+        wgpu::BindGroupEntry GetAsBinding() const;
 
         uint32_t binding;
         wgpu::Sampler sampler;

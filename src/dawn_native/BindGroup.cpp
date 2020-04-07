@@ -29,7 +29,7 @@ namespace dawn_native {
         // Helper functions to perform binding-type specific validation
 
         MaybeError ValidateBufferBinding(const DeviceBase* device,
-                                         const BindGroupBinding& binding,
+                                         const BindGroupEntry& binding,
                                          wgpu::BufferUsage requiredUsage) {
             if (binding.buffer == nullptr || binding.sampler != nullptr ||
                 binding.textureView != nullptr) {
@@ -66,7 +66,7 @@ namespace dawn_native {
         }
 
         MaybeError ValidateTextureBinding(const DeviceBase* device,
-                                          const BindGroupBinding& binding,
+                                          const BindGroupEntry& binding,
                                           wgpu::TextureUsage requiredUsage,
                                           const BindingInfo& bindingInfo) {
             if (binding.textureView == nullptr || binding.sampler != nullptr ||
@@ -110,8 +110,7 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateSamplerBinding(const DeviceBase* device,
-                                          const BindGroupBinding& binding) {
+        MaybeError ValidateSamplerBinding(const DeviceBase* device, const BindGroupEntry& binding) {
             if (binding.sampler == nullptr || binding.textureView != nullptr ||
                 binding.buffer != nullptr) {
                 return DAWN_VALIDATION_ERROR("expected sampler binding");
@@ -138,7 +137,7 @@ namespace dawn_native {
 
         std::bitset<kMaxBindingsPerGroup> bindingsSet;
         for (uint32_t i = 0; i < descriptor->bindingCount; ++i) {
-            const BindGroupBinding& binding = descriptor->bindings[i];
+            const BindGroupEntry& binding = descriptor->bindings[i];
 
             const auto& it = bindingMap.find(BindingNumber(binding.binding));
             if (it == bindingMap.end()) {
@@ -208,7 +207,7 @@ namespace dawn_native {
         }
 
         for (uint32_t i = 0; i < descriptor->bindingCount; ++i) {
-            const BindGroupBinding& binding = descriptor->bindings[i];
+            const BindGroupEntry& binding = descriptor->bindings[i];
 
             BindingIndex bindingIndex =
                 descriptor->layout->GetBindingIndex(BindingNumber(binding.binding));

@@ -216,6 +216,10 @@ namespace wgpu {
 
     {% endfor %}
 
+    // TODO(dawn:22): Remove this once users use the "Entry" version.
+    using BindGroupBinding = BindGroupEntry;
+    using BindGroupLayoutBinding = BindGroupLayoutEntry;
+
 }  // namespace wgpu
 
 #endif // WEBGPU_CPP_H_

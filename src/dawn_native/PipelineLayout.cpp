@@ -25,7 +25,7 @@ namespace dawn_native {
 
     namespace {
 
-        bool operator==(const BindGroupLayoutBinding& lhs, const BindGroupLayoutBinding& rhs) {
+        bool operator==(const BindGroupLayoutEntry& lhs, const BindGroupLayoutEntry& rhs) {
             return lhs.binding == rhs.binding && lhs.visibility == rhs.visibility &&
                    lhs.type == rhs.type && lhs.hasDynamicOffset == rhs.hasDynamicOffset &&
                    lhs.multisampled == rhs.multisampled &&
@@ -127,7 +127,7 @@ namespace dawn_native {
         ASSERT(count > 0);
 
         // Data which BindGroupLayoutDescriptor will point to for creation
-        std::array<std::array<BindGroupLayoutBinding, kMaxBindingsPerGroup>, kMaxBindGroups>
+        std::array<std::array<BindGroupLayoutEntry, kMaxBindingsPerGroup>, kMaxBindGroups>
             bindingData = {};
 
         // A map of bindings to the index in |bindingData|
@@ -150,7 +150,7 @@ namespace dawn_native {
                         return DAWN_VALIDATION_ERROR("Multisampled textures not supported (yet)");
                     }
 
-                    BindGroupLayoutBinding bindingSlot;
+                    BindGroupLayoutEntry bindingSlot;
                     bindingSlot.binding = bindingNumber;
 
                     DAWN_TRY(ValidateBindingTypeWithShaderStageVisibility(

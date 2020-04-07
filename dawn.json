@@ -59,7 +59,7 @@
     "bind group": {
         "category": "object"
     },
-    "bind group binding": {
+    "bind group entry": {
         "category": "structure",
         "extensible": false,
         "members": [
@@ -78,13 +78,13 @@
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "layout", "type": "bind group layout"},
             {"name": "binding count", "type": "uint32_t"},
-            {"name": "bindings", "type": "bind group binding", "annotation": "const*", "length": "binding count"}
+            {"name": "bindings", "type": "bind group entry", "annotation": "const*", "length": "binding count"}
         ]
     },
     "bind group layout": {
         "category": "object"
     },
-    "bind group layout binding": {
+    "bind group layout entry": {
         "category": "structure",
         "extensible": false,
         "members": [
@@ -104,7 +104,7 @@
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "binding count", "type": "uint32_t"},
-            {"name": "bindings", "type": "bind group layout binding", "annotation": "const*", "length": "binding count"}
+            {"name": "bindings", "type": "bind group layout entry", "annotation": "const*", "length": "binding count"}
         ]
     },
     "binding type": {
