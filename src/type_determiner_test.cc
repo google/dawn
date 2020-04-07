@@ -49,6 +49,7 @@
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/ast/unary_derivative_expression.h"
 #include "src/ast/unless_statement.h"
 #include "src/ast/variable_decl_statement.h"
 
@@ -1230,6 +1231,42 @@ TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Matrix_Matrix) {
   EXPECT_EQ(mat->rows(), 4);
   EXPECT_EQ(mat->columns(), 4);
 }
+
+using UnaryDerivativeExpressionTest =
+    testing::TestWithParam<ast::UnaryDerivative>;
+TEST_P(UnaryDerivativeExpressionTest, Expr_UnaryDerivative) {
+  auto derivative = GetParam();
+
+  ast::type::F32Type f32;
+
+  ast::type::VectorType vec4(&f32, 4);
+
+  auto var =
+      std::make_unique<ast::Variable>("ident", ast::StorageClass::kNone, &vec4);
+
+  ast::Module m;
+  m.AddGlobalVariable(std::move(var));
+
+  Context ctx;
+  TypeDeterminer td(&ctx);
+
+  // Register the global
+  EXPECT_TRUE(td.Determine(&m));
+
+  ast::UnaryDerivativeExpression der(
+      derivative, ast::DerivativeModifier::kNone,
+      std::make_unique<ast::IdentifierExpression>("ident"));
+  EXPECT_TRUE(td.DetermineResultType(&der));
+  ASSERT_NE(der.result_type(), nullptr);
+  ASSERT_TRUE(der.result_type()->IsVector());
+  EXPECT_TRUE(der.result_type()->AsVector()->type()->IsF32());
+  EXPECT_EQ(der.result_type()->AsVector()->size(), 4);
+}
+INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
+                         UnaryDerivativeExpressionTest,
+                         testing::Values(ast::UnaryDerivative::kDpdx,
+                                         ast::UnaryDerivative::kDpdy,
+                                         ast::UnaryDerivative::kFwidth));
 
 }  // namespace
 }  // namespace tint

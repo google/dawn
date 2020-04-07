@@ -34,6 +34,7 @@ class Function;
 class IdentifierExpression;
 class MemberAccessorExpression;
 class RelationalExpression;
+class UnaryDerivativeExpression;
 class Variable;
 
 }  // namespace ast
@@ -83,6 +84,7 @@ class TypeDeterminer {
   bool DetermineIdentifier(ast::IdentifierExpression* expr);
   bool DetermineMemberAccessor(ast::MemberAccessorExpression* expr);
   bool DetermineRelational(ast::RelationalExpression* expr);
+  bool DetermineUnaryDerivative(ast::UnaryDerivativeExpression* expr);
 
   Context& ctx_;
   std::string error_;

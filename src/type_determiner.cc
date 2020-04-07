@@ -40,6 +40,7 @@
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/ast/unary_derivative_expression.h"
 #include "src/ast/unless_statement.h"
 #include "src/ast/variable_decl_statement.h"
 
@@ -210,6 +211,9 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
   }
   if (expr->IsRelational()) {
     return DetermineRelational(expr->AsRelational());
+  }
+  if (expr->IsUnaryDerivative()) {
+    return DetermineUnaryDerivative(expr->AsUnaryDerivative());
   }
 
   error_ = "unknown expression for type determination";
@@ -399,6 +403,16 @@ bool TypeDeterminer::DetermineRelational(ast::RelationalExpression* expr) {
   }
 
   return false;
+}
+
+bool TypeDeterminer::DetermineUnaryDerivative(
+    ast::UnaryDerivativeExpression* expr) {
+  // The result type must be the same as the type of the parameter.
+  if (!DetermineResultType(expr->param())) {
+    return false;
+  }
+  expr->set_result_type(expr->param()->result_type());
+  return true;
 }
 
 }  // namespace tint
