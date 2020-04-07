@@ -39,9 +39,24 @@ FunctionEmitter::FunctionEmitter(ParserImpl* pi,
 FunctionEmitter::~FunctionEmitter() = default;
 
 bool FunctionEmitter::Emit() {
+  if (failed()) {
+    return false;
+  }
   // We only care about functions with bodies.
   if (function_.cbegin() == function_.cend()) {
     return true;
+  }
+
+  if (!EmitFunctionDeclaration()) {
+    return false;
+  }
+
+  return success();
+}
+
+bool FunctionEmitter::EmitFunctionDeclaration() {
+  if (failed()) {
+    return false;
   }
 
   const auto name = namer_.Name(function_.result_id());

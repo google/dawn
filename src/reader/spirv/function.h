@@ -50,6 +50,12 @@ class FunctionEmitter {
   /// @returns a FailStream on which to emit diagnostics.
   FailStream& Fail() { return fail_stream_.Fail(); }
 
+  /// Emits the declaration, which comprises the name, parameters, and
+  /// return type. The function AST node is appended to the module
+  /// AST node.
+  /// @returns true if emission has not yet failed.
+  bool EmitFunctionDeclaration();
+
  private:
   ParserImpl& parser_impl_;
   ast::Module& ast_module_;
@@ -57,6 +63,7 @@ class FunctionEmitter {
   FailStream& fail_stream_;
   Namer& namer_;
   const spvtools::opt::Function& function_;
+  std::vector<std::unique_ptr<ast::Statement>> ast_body_;
 };
 
 }  // namespace spirv
