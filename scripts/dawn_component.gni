@@ -107,7 +107,7 @@ template("dawn_component") {
   }
 
   static_library("${libname}_static") {
-    output_name = libname
+    output_name = libname + "_static"
 
     complete_static_lib = dawn_complete_static_libs
 

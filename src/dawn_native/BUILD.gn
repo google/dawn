@@ -15,14 +15,21 @@
 import("../../scripts/dawn_overrides_with_defaults.gni")
 
 import("//build_overrides/build.gni")
-import("//build_overrides/vulkan_validation_layers.gni")
 import("${dawn_root}/generator/dawn_generator.gni")
 import("${dawn_root}/scripts/dawn_component.gni")
 import("${dawn_root}/scripts/dawn_features.gni")
 
 # Import mac_min_system_version
 if (is_mac) {
-  import("//build/config/mac/mac_sdk.gni")
+  if (dawn_has_build) {
+    import("//build/config/mac/mac_sdk.gni")
+  } else {
+    mac_min_system_version = "10.11.0"
+  }
+}
+
+if (dawn_enable_vulkan_validation_layers) {
+  import("//build_overrides/vulkan_validation_layers.gni")
 }
 
 # Swiftshader is an optional dependency of Dawn so we only use it if the path

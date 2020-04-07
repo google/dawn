@@ -20,6 +20,9 @@
 # MUST be unset in other projects (will default to false).
 dawn_standalone = true
 
+# True if Dawn can access build/, testing/ and other Chrome folders.
+dawn_has_build = true
+
 # Defaults for these are set again in dawn_overrides_with_defaults.gni so that
 # users of Dawn don't have to set dirs if they happen to use the same as Dawn.
 
