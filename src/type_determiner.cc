@@ -18,6 +18,7 @@
 #include "src/ast/break_statement.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/continue_statement.h"
+#include "src/ast/else_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type_constructor_expression.h"
 
@@ -89,6 +90,11 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
   if (stmt->IsContinue()) {
     auto c = stmt->AsContinue();
     return DetermineResultType(c->conditional());
+  }
+  if (stmt->IsElse()) {
+    auto e = stmt->AsElse();
+    return DetermineResultType(e->condition()) &&
+           DetermineResultType(e->body());
   }
 
   error_ = "unknown statement type for type determination";

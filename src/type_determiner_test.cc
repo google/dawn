@@ -22,6 +22,7 @@
 #include "src/ast/break_statement.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/continue_statement.h"
+#include "src/ast/else_statement.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
@@ -118,6 +119,35 @@ TEST_F(TypeDeterminerTest, Stmt_Continue) {
   EXPECT_TRUE(td()->DetermineResultType(&stmt));
   ASSERT_NE(cond_ptr->result_type(), nullptr);
   EXPECT_TRUE(cond_ptr->result_type()->IsI32());
+}
+
+TEST_F(TypeDeterminerTest, Stmt_Else) {
+  ast::type::I32Type i32;
+  ast::type::F32Type f32;
+
+  auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 2));
+  auto lhs_ptr = lhs.get();
+
+  auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
+  auto rhs_ptr = rhs.get();
+
+  ast::StatementList body;
+  body.push_back(std::make_unique<ast::AssignmentStatement>(std::move(lhs),
+                                                            std::move(rhs)));
+
+  ast::ElseStatement stmt(std::make_unique<ast::ScalarConstructorExpression>(
+                              std::make_unique<ast::IntLiteral>(&i32, 3)),
+                          std::move(body));
+
+  EXPECT_TRUE(td()->DetermineResultType(&stmt));
+  ASSERT_NE(stmt.condition()->result_type(), nullptr);
+  ASSERT_NE(lhs_ptr->result_type(), nullptr);
+  ASSERT_NE(rhs_ptr->result_type(), nullptr);
+  EXPECT_TRUE(stmt.condition()->result_type()->IsI32());
+  EXPECT_TRUE(lhs_ptr->result_type()->IsI32());
+  EXPECT_TRUE(rhs_ptr->result_type()->IsF32());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Constructor_Scalar) {
