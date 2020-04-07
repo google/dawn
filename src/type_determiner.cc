@@ -27,6 +27,7 @@
 #include "src/ast/switch_statement.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unless_statement.h"
+#include "src/ast/variable_decl_statement.h"
 
 namespace tint {
 
@@ -155,6 +156,11 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     auto u = stmt->AsUnless();
     return DetermineResultType(u->condition()) &&
            DetermineResultType(u->body());
+  }
+  if (stmt->IsVariableDecl()) {
+    auto v = stmt->AsVariableDecl();
+    variable_stack_.set(v->variable()->name(), v->variable());
+    return DetermineResultType(v->variable()->constructor());
   }
 
   error_ = "unknown statement type for type determination";

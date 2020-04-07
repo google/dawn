@@ -36,6 +36,7 @@
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unless_statement.h"
+#include "src/ast/variable_decl_statement.h"
 
 namespace tint {
 namespace {
@@ -357,6 +358,21 @@ TEST_F(TypeDeterminerTest, Stmt_Unless) {
   EXPECT_TRUE(unless.condition()->result_type()->IsI32());
   EXPECT_TRUE(lhs_ptr->result_type()->IsI32());
   EXPECT_TRUE(rhs_ptr->result_type()->IsF32());
+}
+
+TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
+  ast::type::I32Type i32;
+  auto var =
+      std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone, &i32);
+  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 2)));
+  auto init_ptr = var->constructor();
+
+  ast::VariableDeclStatement decl(std::move(var));
+
+  EXPECT_TRUE(td()->DetermineResultType(&decl));
+  ASSERT_NE(init_ptr->result_type(), nullptr);
+  EXPECT_TRUE(init_ptr->result_type()->IsI32());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Constructor_Scalar) {
