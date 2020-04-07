@@ -36,11 +36,13 @@
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
+#include "src/ast/type/f32_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_derivative_expression.h"
+#include "src/ast/unary_method_expression.h"
 #include "src/ast/unless_statement.h"
 #include "src/ast/variable_decl_statement.h"
 
@@ -214,6 +216,9 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
   }
   if (expr->IsUnaryDerivative()) {
     return DetermineUnaryDerivative(expr->AsUnaryDerivative());
+  }
+  if (expr->IsUnaryMethod()) {
+    return DetermineUnaryMethod(expr->AsUnaryMethod());
   }
 
   error_ = "unknown expression for type determination";
@@ -412,6 +417,68 @@ bool TypeDeterminer::DetermineUnaryDerivative(
     return false;
   }
   expr->set_result_type(expr->param()->result_type());
+  return true;
+}
+
+bool TypeDeterminer::DetermineUnaryMethod(ast::UnaryMethodExpression* expr) {
+  for (const auto& param : expr->params()) {
+    if (!DetermineResultType(param.get())) {
+      return false;
+    }
+  }
+
+  switch (expr->op()) {
+    case ast::UnaryMethod::kAny:
+    case ast::UnaryMethod::kAll: {
+      expr->set_result_type(
+          ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>()));
+      break;
+    }
+    case ast::UnaryMethod::kIsNan:
+    case ast::UnaryMethod::kIsInf:
+    case ast::UnaryMethod::kIsFinite:
+    case ast::UnaryMethod::kIsNormal: {
+      if (expr->params().empty()) {
+        error_ = "incorrect number of parameters";
+        return false;
+      }
+
+      auto bool_type =
+          ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
+      auto param_type = expr->params()[0]->result_type();
+      if (param_type->IsVector()) {
+        expr->set_result_type(
+            ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
+                bool_type, param_type->AsVector()->size())));
+      } else {
+        expr->set_result_type(bool_type);
+      }
+      break;
+    }
+    case ast::UnaryMethod::kDot: {
+      expr->set_result_type(
+          ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>()));
+      break;
+    }
+    case ast::UnaryMethod::kOuterProduct: {
+      if (expr->params().size() != 2) {
+        error_ = "incorrect number of parameters for outer product";
+        return false;
+      }
+      auto param0_type = expr->params()[0]->result_type();
+      auto param1_type = expr->params()[1]->result_type();
+      if (!param0_type->IsVector() || !param1_type->IsVector()) {
+        error_ = "invalid parameter type for outer product";
+        return false;
+      }
+      expr->set_result_type(
+          ctx_.type_mgr().Get(std::make_unique<ast::type::MatrixType>(
+              ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>()),
+              param0_type->AsVector()->size(),
+              param1_type->AsVector()->size())));
+      break;
+    }
+  }
   return true;
 }
 

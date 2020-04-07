@@ -50,6 +50,7 @@
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_derivative_expression.h"
+#include "src/ast/unary_method_expression.h"
 #include "src/ast/unless_statement.h"
 #include "src/ast/variable_decl_statement.h"
 
@@ -1267,6 +1268,165 @@ INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          testing::Values(ast::UnaryDerivative::kDpdx,
                                          ast::UnaryDerivative::kDpdy,
                                          ast::UnaryDerivative::kFwidth));
+
+using UnaryMethodExpressionBoolTest = testing::TestWithParam<ast::UnaryMethod>;
+TEST_P(UnaryMethodExpressionBoolTest, Expr_UnaryMethod_Any) {
+  auto op = GetParam();
+
+  ast::type::BoolType bool_type;
+  ast::type::VectorType vec3(&bool_type, 3);
+
+  auto var = std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone,
+                                             &vec3);
+
+  ast::Module m;
+  m.AddGlobalVariable(std::move(var));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("my_var"));
+
+  ast::UnaryMethodExpression exp(op, std::move(params));
+
+  Context ctx;
+  TypeDeterminer td(&ctx);
+
+  // Register the variable
+  EXPECT_TRUE(td.Determine(&m));
+
+  EXPECT_TRUE(td.DetermineResultType(&exp));
+  ASSERT_NE(exp.result_type(), nullptr);
+  EXPECT_TRUE(exp.result_type()->IsBool());
+}
+INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
+                         UnaryMethodExpressionBoolTest,
+                         testing::Values(ast::UnaryMethod::kAny,
+                                         ast::UnaryMethod::kAll));
+
+using UnaryMethodExpressionVecTest = testing::TestWithParam<ast::UnaryMethod>;
+TEST_P(UnaryMethodExpressionVecTest, Expr_UnaryMethod_Bool) {
+  auto op = GetParam();
+
+  ast::type::F32Type f32;
+  ast::type::VectorType vec3(&f32, 3);
+
+  auto var = std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone,
+                                             &vec3);
+
+  ast::Module m;
+  m.AddGlobalVariable(std::move(var));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("my_var"));
+
+  ast::UnaryMethodExpression exp(op, std::move(params));
+
+  Context ctx;
+  TypeDeterminer td(&ctx);
+
+  // Register the variable
+  EXPECT_TRUE(td.Determine(&m));
+
+  EXPECT_TRUE(td.DetermineResultType(&exp));
+  ASSERT_NE(exp.result_type(), nullptr);
+  ASSERT_TRUE(exp.result_type()->IsVector());
+  EXPECT_TRUE(exp.result_type()->AsVector()->type()->IsBool());
+  EXPECT_EQ(exp.result_type()->AsVector()->size(), 3);
+}
+TEST_P(UnaryMethodExpressionVecTest, Expr_UnaryMethod_Vec) {
+  auto op = GetParam();
+
+  ast::type::F32Type f32;
+
+  auto var =
+      std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone, &f32);
+
+  ast::Module m;
+  m.AddGlobalVariable(std::move(var));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("my_var"));
+
+  ast::UnaryMethodExpression exp(op, std::move(params));
+
+  Context ctx;
+  TypeDeterminer td(&ctx);
+
+  // Register the variable
+  EXPECT_TRUE(td.Determine(&m));
+
+  EXPECT_TRUE(td.DetermineResultType(&exp));
+  ASSERT_NE(exp.result_type(), nullptr);
+  EXPECT_TRUE(exp.result_type()->IsBool());
+}
+INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
+                         UnaryMethodExpressionVecTest,
+                         testing::Values(ast::UnaryMethod::kIsInf,
+                                         ast::UnaryMethod::kIsNan,
+                                         ast::UnaryMethod::kIsFinite,
+                                         ast::UnaryMethod::kIsNormal));
+
+TEST_F(TypeDeterminerTest, Expr_UnaryMethod_Dot) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec3(&f32, 3);
+
+  auto var = std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone,
+                                             &vec3);
+
+  ast::Module m;
+  m.AddGlobalVariable(std::move(var));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("my_var"));
+  params.push_back(std::make_unique<ast::IdentifierExpression>("my_var"));
+
+  ast::UnaryMethodExpression exp(ast::UnaryMethod::kDot, std::move(params));
+
+  Context ctx;
+  TypeDeterminer td(&ctx);
+
+  // Register the variable
+  EXPECT_TRUE(td.Determine(&m));
+
+  EXPECT_TRUE(td.DetermineResultType(&exp));
+  ASSERT_NE(exp.result_type(), nullptr);
+  EXPECT_TRUE(exp.result_type()->IsF32());
+}
+
+TEST_F(TypeDeterminerTest, Expr_UnaryMethod_OuterProduct) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec3(&f32, 3);
+  ast::type::VectorType vec2(&f32, 2);
+
+  auto var1 =
+      std::make_unique<ast::Variable>("v3", ast::StorageClass::kNone, &vec3);
+  auto var2 =
+      std::make_unique<ast::Variable>("v2", ast::StorageClass::kNone, &vec2);
+
+  ast::Module m;
+  m.AddGlobalVariable(std::move(var1));
+  m.AddGlobalVariable(std::move(var2));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("v3"));
+  params.push_back(std::make_unique<ast::IdentifierExpression>("v2"));
+
+  ast::UnaryMethodExpression exp(ast::UnaryMethod::kOuterProduct,
+                                 std::move(params));
+
+  Context ctx;
+  TypeDeterminer td(&ctx);
+
+  // Register the variable
+  EXPECT_TRUE(td.Determine(&m));
+
+  EXPECT_TRUE(td.DetermineResultType(&exp));
+  ASSERT_NE(exp.result_type(), nullptr);
+  ASSERT_TRUE(exp.result_type()->IsMatrix());
+  auto mat = exp.result_type()->AsMatrix();
+  EXPECT_TRUE(mat->type()->IsF32());
+  EXPECT_EQ(mat->rows(), 3);
+  EXPECT_EQ(mat->columns(), 2);
+}
 
 }  // namespace
 }  // namespace tint
