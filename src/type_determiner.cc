@@ -26,6 +26,7 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/ast/unless_statement.h"
 
 namespace tint {
 
@@ -149,6 +150,11 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
       }
     }
     return true;
+  }
+  if (stmt->IsUnless()) {
+    auto u = stmt->AsUnless();
+    return DetermineResultType(u->condition()) &&
+           DetermineResultType(u->body());
   }
 
   error_ = "unknown statement type for type determination";
