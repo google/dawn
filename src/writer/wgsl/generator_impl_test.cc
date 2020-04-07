@@ -23,7 +23,17 @@ namespace {
 
 using GeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, DISABLED_Generate) {}
+TEST_F(GeneratorImplTest, Generate) {
+  ast::Module m;
+  m.AddImport(std::make_unique<ast::Import>("GLSL.std.430", "a"));
+
+  GeneratorImpl g;
+
+  ASSERT_TRUE(g.Generate(m)) << g.error();
+  EXPECT_EQ(g.result(), R"(import "GLSL.std.430" as a;
+
+)");
+}
 
 }  // namespace
 }  // namespace wgsl

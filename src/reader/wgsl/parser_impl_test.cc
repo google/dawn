@@ -28,12 +28,13 @@ TEST_F(ParserImplTest, Empty) {
   ASSERT_TRUE(p->Parse()) << p->error();
 }
 
-TEST_F(ParserImplTest, DISABLED_Parses) {
+TEST_F(ParserImplTest, Parses) {
   auto p = parser(R"(
 import "GLSL.std.430" as glsl;
 
 [[location 0]] var<out> gl_FragColor : vec4<f32>;
 
+entry_point vertex = main;
 fn main() -> void {
   gl_FragColor = vec4<f32>(.4, .2, .3, 1);
 }
@@ -42,11 +43,12 @@ fn main() -> void {
 
   auto m = p->module();
   ASSERT_EQ(1, m.imports().size());
-
-  // TODO(dsinclair) check rest of AST ...
+  ASSERT_EQ(1, m.entry_points().size());
+  ASSERT_EQ(1, m.functions().size());
+  ASSERT_EQ(1, m.global_variables().size());
 }
 
-TEST_F(ParserImplTest, DISABLED_HandlesError) {
+TEST_F(ParserImplTest, HandlesError) {
   auto p = parser(R"(
 import "GLSL.std.430" as glsl;
 
@@ -56,7 +58,7 @@ fn main() ->  {  # missing return type
 
   ASSERT_FALSE(p->Parse());
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "4:15: missing return type for function");
+  EXPECT_EQ(p->error(), "4:15: unable to determine function return type");
 }
 
 TEST_F(ParserImplTest, GetRegisteredType) {

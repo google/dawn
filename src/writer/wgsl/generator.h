@@ -39,6 +39,9 @@ class Generator : public writer::Writer {
   /// @returns the result data
   std::string result() const { return impl_.result(); }
 
+  /// @returns the error
+  std::string error() const { return impl_.error(); }
+
  private:
   GeneratorImpl impl_;
 };
