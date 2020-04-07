@@ -25,6 +25,7 @@
 namespace tint {
 namespace ast {
 
+class ConstructorExpression;
 class Function;
 class Variable;
 
@@ -67,6 +68,8 @@ class TypeDeterminer {
   bool DetermineResultType(ast::Expression* expr);
 
  private:
+  bool DetermineConstructor(ast::ConstructorExpression* expr);
+
   Context& ctx_;
   std::string error_;
   ScopeStack<ast::Variable*> variable_stack_;

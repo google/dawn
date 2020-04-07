@@ -308,6 +308,7 @@ set(TINT_TEST_SRCS
   ast/variable_decl_statement_test.cc
   ast/variable_test.cc
   scope_stack_test.cc
+  type_determiner_test.cc
   type_manager_test.cc
   validator_impl_import_test.cc
 )

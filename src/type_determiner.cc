@@ -14,6 +14,9 @@
 
 #include "src/type_determiner.h"
 
+#include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/type_constructor_expression.h"
+
 namespace tint {
 
 TypeDeterminer::TypeDeterminer(Context* ctx) : ctx_(*ctx) {
@@ -77,8 +80,21 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
     return true;
   }
 
+  if (expr->IsConstructor()) {
+    return DetermineConstructor(expr->AsConstructor());
+  }
+
   error_ = "unknown expression for type determination";
   return false;
+}
+
+bool TypeDeterminer::DetermineConstructor(ast::ConstructorExpression* expr) {
+  if (expr->IsTypeConstructor()) {
+    expr->set_result_type(expr->AsTypeConstructor()->type());
+  } else {
+    expr->set_result_type(expr->AsScalarConstructor()->literal()->type());
+  }
+  return true;
 }
 
 }  // namespace tint
