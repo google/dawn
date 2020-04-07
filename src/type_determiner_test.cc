@@ -24,6 +24,7 @@
 #include "src/ast/continue_statement.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/float_literal.h"
+#include "src/ast/if_statement.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/f32_type.h"
@@ -146,6 +147,60 @@ TEST_F(TypeDeterminerTest, Stmt_Else) {
   ASSERT_NE(lhs_ptr->result_type(), nullptr);
   ASSERT_NE(rhs_ptr->result_type(), nullptr);
   EXPECT_TRUE(stmt.condition()->result_type()->IsI32());
+  EXPECT_TRUE(lhs_ptr->result_type()->IsI32());
+  EXPECT_TRUE(rhs_ptr->result_type()->IsF32());
+}
+
+TEST_F(TypeDeterminerTest, Stmt_If) {
+  ast::type::I32Type i32;
+  ast::type::F32Type f32;
+
+  auto else_lhs = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 2));
+  auto else_lhs_ptr = else_lhs.get();
+
+  auto else_rhs = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
+  auto else_rhs_ptr = else_rhs.get();
+
+  ast::StatementList else_body;
+  else_body.push_back(std::make_unique<ast::AssignmentStatement>(
+      std::move(else_lhs), std::move(else_rhs)));
+
+  auto else_stmt = std::make_unique<ast::ElseStatement>(
+      std::make_unique<ast::ScalarConstructorExpression>(
+          std::make_unique<ast::IntLiteral>(&i32, 3)),
+      std::move(else_body));
+
+  ast::ElseStatementList else_stmts;
+  else_stmts.push_back(std::move(else_stmt));
+
+  auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 2));
+  auto lhs_ptr = lhs.get();
+
+  auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
+  auto rhs_ptr = rhs.get();
+
+  ast::StatementList body;
+  body.push_back(std::make_unique<ast::AssignmentStatement>(std::move(lhs),
+                                                            std::move(rhs)));
+
+  ast::IfStatement stmt(std::make_unique<ast::ScalarConstructorExpression>(
+                            std::make_unique<ast::IntLiteral>(&i32, 3)),
+                        std::move(body));
+  stmt.set_else_statements(std::move(else_stmts));
+
+  EXPECT_TRUE(td()->DetermineResultType(&stmt));
+  ASSERT_NE(stmt.condition()->result_type(), nullptr);
+  ASSERT_NE(else_lhs_ptr->result_type(), nullptr);
+  ASSERT_NE(else_rhs_ptr->result_type(), nullptr);
+  ASSERT_NE(lhs_ptr->result_type(), nullptr);
+  ASSERT_NE(rhs_ptr->result_type(), nullptr);
+  EXPECT_TRUE(stmt.condition()->result_type()->IsI32());
+  EXPECT_TRUE(else_lhs_ptr->result_type()->IsI32());
+  EXPECT_TRUE(else_rhs_ptr->result_type()->IsF32());
   EXPECT_TRUE(lhs_ptr->result_type()->IsI32());
   EXPECT_TRUE(rhs_ptr->result_type()->IsF32());
 }
