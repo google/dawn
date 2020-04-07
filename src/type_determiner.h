@@ -27,6 +27,7 @@ namespace ast {
 
 class ArrayAccessorExpression;
 class AsExpression;
+class CallExpression;
 class ConstructorExpression;
 class IdentifierExpression;
 class Function;
@@ -65,6 +66,10 @@ class TypeDeterminer {
   /// @param stmt the statement to check
   /// @returns true if the determination was successful
   bool DetermineResultType(ast::Statement* stmt);
+  /// Determines type information for a list of expressions
+  /// @param exprs the expressions to check
+  /// @returns true if the determination was successful
+  bool DetermineResultType(const ast::ExpressionList& exprs);
   /// Determines type information for an expression
   /// @param expr the expression to check
   /// @returns true if the determination was successful
@@ -73,6 +78,7 @@ class TypeDeterminer {
  private:
   bool DetermineArrayAccessor(ast::ArrayAccessorExpression* expr);
   bool DetermineAs(ast::AsExpression* expr);
+  bool DetermineCall(ast::CallExpression* expr);
   bool DetermineConstructor(ast::ConstructorExpression* expr);
   bool DetermineIdentifier(ast::IdentifierExpression* expr);
   Context& ctx_;

@@ -20,6 +20,7 @@
 #include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/break_statement.h"
+#include "src/ast/call_expression.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/else_statement.h"
@@ -39,10 +40,7 @@
 
 namespace tint {
 
-TypeDeterminer::TypeDeterminer(Context* ctx) : ctx_(*ctx) {
-  // TODO(dsinclair): Temporary usage to avoid compiler warning
-  static_cast<void>(ctx_.type_mgr());
-}
+TypeDeterminer::TypeDeterminer(Context* ctx) : ctx_(*ctx) {}
 
 TypeDeterminer::~TypeDeterminer() = default;
 
@@ -175,6 +173,15 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
   return false;
 }
 
+bool TypeDeterminer::DetermineResultType(const ast::ExpressionList& exprs) {
+  for (const auto& expr : exprs) {
+    if (!DetermineResultType(expr.get())) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
   // This is blindly called above, so in some cases the expression won't exist.
   if (!expr) {
@@ -186,6 +193,9 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
   }
   if (expr->IsAs()) {
     return DetermineAs(expr->AsAs());
+  }
+  if (expr->IsCall()) {
+    return DetermineCall(expr->AsCall());
   }
   if (expr->IsConstructor()) {
     return DetermineConstructor(expr->AsConstructor());
@@ -221,6 +231,17 @@ bool TypeDeterminer::DetermineArrayAccessor(
 
 bool TypeDeterminer::DetermineAs(ast::AsExpression* expr) {
   expr->set_result_type(expr->type());
+  return true;
+}
+
+bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
+  if (!DetermineResultType(expr->func())) {
+    return false;
+  }
+  if (!DetermineResultType(expr->params())) {
+    return false;
+  }
+  expr->set_result_type(expr->func()->result_type());
   return true;
 }
 

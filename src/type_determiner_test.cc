@@ -22,6 +22,7 @@
 #include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/break_statement.h"
+#include "src/ast/call_expression.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/else_statement.h"
@@ -487,6 +488,66 @@ TEST_F(TypeDeterminerTest, Expr_As) {
   EXPECT_TRUE(td()->DetermineResultType(&as));
   ASSERT_NE(as.result_type(), nullptr);
   EXPECT_TRUE(as.result_type()->IsF32());
+}
+
+TEST_F(TypeDeterminerTest, Expr_Call) {
+  ast::type::F32Type f32;
+
+  ast::VariableList params;
+  auto func =
+      std::make_unique<ast::Function>("my_func", std::move(params), &f32);
+  ast::Module m;
+  m.AddFunction(std::move(func));
+
+  // Register the function
+  EXPECT_TRUE(td()->Determine(&m));
+
+  ast::ExpressionList call_params;
+  ast::CallExpression call(
+      std::make_unique<ast::IdentifierExpression>("my_func"),
+      std::move(call_params));
+  EXPECT_TRUE(td()->DetermineResultType(&call));
+  ASSERT_NE(call.result_type(), nullptr);
+  EXPECT_TRUE(call.result_type()->IsF32());
+}
+
+TEST_F(TypeDeterminerTest, Expr_Call_WithParams) {
+  ast::type::F32Type f32;
+  ast::type::I32Type i32;
+
+  ast::VariableList params;
+  params.push_back(
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32));
+  params.push_back(
+      std::make_unique<ast::Variable>("b", ast::StorageClass::kNone, &i32));
+
+  auto func =
+      std::make_unique<ast::Function>("my_func", std::move(params), &f32);
+  ast::Module m;
+  m.AddFunction(std::move(func));
+
+  // Register the function
+  EXPECT_TRUE(td()->Determine(&m));
+
+  ast::ExpressionList call_params;
+  call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.5f)));
+  auto a_ptr = call_params.back().get();
+  call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 1)));
+  auto b_ptr = call_params.back().get();
+
+  ast::CallExpression call(
+      std::make_unique<ast::IdentifierExpression>("my_func"),
+      std::move(call_params));
+  EXPECT_TRUE(td()->DetermineResultType(&call));
+  ASSERT_NE(call.result_type(), nullptr);
+  EXPECT_TRUE(call.result_type()->IsF32());
+
+  ASSERT_NE(a_ptr->result_type(), nullptr);
+  EXPECT_TRUE(a_ptr->result_type()->IsF32());
+  ASSERT_NE(b_ptr->result_type(), nullptr);
+  EXPECT_TRUE(b_ptr->result_type()->IsI32());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Constructor_Scalar) {
