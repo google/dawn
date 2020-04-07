@@ -20,6 +20,7 @@
 #include "src/ast/continue_statement.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/loop_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type_constructor_expression.h"
 
@@ -116,6 +117,11 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
   }
   if (stmt->IsKill()) {
     return true;
+  }
+  if (stmt->IsLoop()) {
+    auto l = stmt->AsLoop();
+    return DetermineResultType(l->body()) &&
+           DetermineResultType(l->continuing());
   }
   if (stmt->IsNop()) {
     return true;
