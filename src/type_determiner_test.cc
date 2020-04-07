@@ -28,6 +28,7 @@
 #include "src/ast/int_literal.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/regardless_statement.h"
+#include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
@@ -276,6 +277,20 @@ TEST_F(TypeDeterminerTest, Stmt_Regardless) {
   EXPECT_TRUE(regardless.condition()->result_type()->IsI32());
   EXPECT_TRUE(lhs_ptr->result_type()->IsI32());
   EXPECT_TRUE(rhs_ptr->result_type()->IsF32());
+}
+
+TEST_F(TypeDeterminerTest, Stmt_Return) {
+  ast::type::I32Type i32;
+
+  auto cond = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 2));
+  auto cond_ptr = cond.get();
+
+  ast::ReturnStatement ret(std::move(cond));
+
+  EXPECT_TRUE(td()->DetermineResultType(&ret));
+  ASSERT_NE(cond_ptr->result_type(), nullptr);
+  EXPECT_TRUE(cond_ptr->result_type()->IsI32());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Constructor_Scalar) {
