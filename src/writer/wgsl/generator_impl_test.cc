@@ -14,6 +14,8 @@
 
 #include "src/writer/wgsl/generator_impl.h"
 
+#include <memory>
+
 #include "gtest/gtest.h"
 
 namespace tint {
