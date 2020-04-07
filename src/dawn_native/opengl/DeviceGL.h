@@ -34,10 +34,12 @@ namespace dawn_native { namespace opengl {
 
     class Device : public DeviceBase {
       public:
-        Device(AdapterBase* adapter,
-               const DeviceDescriptor* descriptor,
-               const OpenGLFunctions& functions);
+        static ResultOrError<Device*> Create(AdapterBase* adapter,
+                                             const DeviceDescriptor* descriptor,
+                                             const OpenGLFunctions& functions);
         ~Device();
+
+        MaybeError Initialize();
 
         // Contains all the OpenGL entry points, glDoFoo is called via device->gl.DoFoo.
         const OpenGLFunctions gl;
@@ -63,6 +65,10 @@ namespace dawn_native { namespace opengl {
                                            uint64_t size) override;
 
       private:
+        Device(AdapterBase* adapter,
+               const DeviceDescriptor* descriptor,
+               const OpenGLFunctions& functions);
+
         ResultOrError<BindGroupBase*> CreateBindGroupImpl(
             const BindGroupDescriptor* descriptor) override;
         ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(

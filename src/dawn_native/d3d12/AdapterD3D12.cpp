@@ -95,9 +95,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     ResultOrError<DeviceBase*> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor) {
-        std::unique_ptr<Device> device = std::make_unique<Device>(this, descriptor);
-        DAWN_TRY(device->Initialize());
-        return device.release();
+        return Device::Create(this, descriptor);
     }
 
 }}  // namespace dawn_native::d3d12

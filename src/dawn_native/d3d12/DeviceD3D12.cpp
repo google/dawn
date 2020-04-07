@@ -43,12 +43,16 @@
 
 namespace dawn_native { namespace d3d12 {
 
-    Device::Device(Adapter* adapter, const DeviceDescriptor* descriptor)
-        : DeviceBase(adapter, descriptor) {
-        InitTogglesFromDriver();
+    // static
+    ResultOrError<Device*> Device::Create(Adapter* adapter, const DeviceDescriptor* descriptor) {
+        Ref<Device> device = AcquireRef(new Device(adapter, descriptor));
+        DAWN_TRY(device->Initialize());
+        return device.Detach();
     }
 
     MaybeError Device::Initialize() {
+        InitTogglesFromDriver();
+
         mD3d12Device = ToBackend(GetAdapter())->GetDevice();
 
         ASSERT(mD3d12Device != nullptr);
@@ -110,7 +114,7 @@ namespace dawn_native { namespace d3d12 {
         GetD3D12Device()->CreateCommandSignature(&programDesc, NULL,
                                                  IID_PPV_ARGS(&mDrawIndexedIndirectSignature));
 
-        return {};
+        return DeviceBase::Initialize();
     }
 
     Device::~Device() {

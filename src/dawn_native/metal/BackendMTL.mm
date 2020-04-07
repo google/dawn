@@ -206,8 +206,9 @@ namespace dawn_native { namespace metal {
 
       private:
         ResultOrError<DeviceBase*> CreateDeviceImpl(const DeviceDescriptor* descriptor) override {
-            return {new Device(this, mDevice, descriptor)};
+            return Device::Create(this, mDevice, descriptor);
         }
+
         void InitializeSupportedExtensions() {
 #if defined(DAWN_PLATFORM_MACOS)
             if ([mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v1]) {

@@ -66,20 +66,13 @@ namespace dawn_native {
     // DeviceBase
 
     DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor)
-        : mAdapter(adapter),
-          mRootErrorScope(AcquireRef(new ErrorScope())),
-          mCurrentErrorScope(mRootErrorScope.Get()) {
-        mCaches = std::make_unique<DeviceBase::Caches>();
-        mErrorScopeTracker = std::make_unique<ErrorScopeTracker>(this);
-        mFenceSignalTracker = std::make_unique<FenceSignalTracker>(this);
-        mDynamicUploader = std::make_unique<DynamicUploader>(this);
-
+        : mAdapter(adapter) {
         if (descriptor != nullptr) {
             ApplyToggleOverrides(descriptor);
             ApplyExtensions(descriptor);
         }
-        mFormatTable = BuildFormatTable(this);
 
+        mFormatTable = BuildFormatTable(this);
         SetDefaultToggles();
     }
 
@@ -95,6 +88,18 @@ namespace dawn_native {
         ASSERT(mCaches->renderPipelines.empty());
         ASSERT(mCaches->samplers.empty());
         ASSERT(mCaches->shaderModules.empty());
+    }
+
+    MaybeError DeviceBase::Initialize() {
+        mRootErrorScope = AcquireRef(new ErrorScope());
+        mCurrentErrorScope = mRootErrorScope.Get();
+
+        mCaches = std::make_unique<DeviceBase::Caches>();
+        mErrorScopeTracker = std::make_unique<ErrorScopeTracker>(this);
+        mFenceSignalTracker = std::make_unique<FenceSignalTracker>(this);
+        mDynamicUploader = std::make_unique<DynamicUploader>(this);
+
+        return {};
     }
 
     void DeviceBase::BaseDestructor() {

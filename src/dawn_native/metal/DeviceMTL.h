@@ -36,8 +36,12 @@ namespace dawn_native { namespace metal {
 
     class Device : public DeviceBase {
       public:
-        Device(AdapterBase* adapter, id<MTLDevice> mtlDevice, const DeviceDescriptor* descriptor);
+        static ResultOrError<Device*> Create(AdapterBase* adapter,
+                                             id<MTLDevice> mtlDevice,
+                                             const DeviceDescriptor* descriptor);
         ~Device();
+
+        MaybeError Initialize();
 
         CommandBufferBase* CreateCommandBuffer(CommandEncoder* encoder,
                                                const CommandBufferDescriptor* descriptor) override;
@@ -68,6 +72,8 @@ namespace dawn_native { namespace metal {
                                            uint64_t size) override;
 
       private:
+        Device(AdapterBase* adapter, id<MTLDevice> mtlDevice, const DeviceDescriptor* descriptor);
+
         ResultOrError<BindGroupBase*> CreateBindGroupImpl(
             const BindGroupDescriptor* descriptor) override;
         ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(

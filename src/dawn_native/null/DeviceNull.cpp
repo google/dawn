@@ -43,7 +43,7 @@ namespace dawn_native { namespace null {
     }
 
     ResultOrError<DeviceBase*> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor) {
-        return {new Device(this, descriptor)};
+        return Device::Create(this, descriptor);
     }
 
     class Backend : public BackendConnection {
@@ -78,8 +78,11 @@ namespace dawn_native { namespace null {
 
     // Device
 
-    Device::Device(Adapter* adapter, const DeviceDescriptor* descriptor)
-        : DeviceBase(adapter, descriptor) {
+    // static
+    ResultOrError<Device*> Device::Create(Adapter* adapter, const DeviceDescriptor* descriptor) {
+        Ref<Device> device = AcquireRef(new Device(adapter, descriptor));
+        DAWN_TRY(device->Initialize());
+        return device.Detach();
     }
 
     Device::~Device() {
@@ -87,6 +90,10 @@ namespace dawn_native { namespace null {
         // This assert is in the destructor rather than Device::Destroy() because it needs to make
         // sure buffers have been destroyed before the device.
         ASSERT(mMemoryUsage == 0);
+    }
+
+    MaybeError Device::Initialize() {
+        return DeviceBase::Initialize();
     }
 
     ResultOrError<BindGroupBase*> Device::CreateBindGroupImpl(

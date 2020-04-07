@@ -43,7 +43,7 @@ namespace dawn_native { namespace vulkan {
 
     class Device : public DeviceBase {
       public:
-        Device(Adapter* adapter, const DeviceDescriptor* descriptor);
+        static ResultOrError<Device*> Create(Adapter* adapter, const DeviceDescriptor* descriptor);
         ~Device();
 
         MaybeError Initialize();
@@ -101,6 +101,8 @@ namespace dawn_native { namespace vulkan {
         ResourceMemoryAllocator* GetResourceMemoryAllocatorForTesting() const;
 
       private:
+        Device(Adapter* adapter, const DeviceDescriptor* descriptor);
+
         ResultOrError<BindGroupBase*> CreateBindGroupImpl(
             const BindGroupDescriptor* descriptor) override;
         ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(

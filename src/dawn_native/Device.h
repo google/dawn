@@ -196,6 +196,8 @@ namespace dawn_native {
       protected:
         void SetToggle(Toggle toggle, bool isEnabled);
         void ForceSetToggle(Toggle toggle, bool isEnabled);
+
+        MaybeError Initialize();
         void BaseDestructor();
 
         std::unique_ptr<DynamicUploader> mDynamicUploader;

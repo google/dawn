@@ -33,16 +33,30 @@
 
 namespace dawn_native { namespace opengl {
 
+    // static
+    ResultOrError<Device*> Device::Create(AdapterBase* adapter,
+                                          const DeviceDescriptor* descriptor,
+                                          const OpenGLFunctions& functions) {
+        Ref<Device> device = AcquireRef(new Device(adapter, descriptor, functions));
+        DAWN_TRY(device->Initialize());
+        return device.Detach();
+    }
+
     Device::Device(AdapterBase* adapter,
                    const DeviceDescriptor* descriptor,
                    const OpenGLFunctions& functions)
         : DeviceBase(adapter, descriptor), gl(functions) {
-        InitTogglesFromDriver();
-        mFormatTable = BuildGLFormatTable();
     }
 
     Device::~Device() {
         BaseDestructor();
+    }
+
+    MaybeError Device::Initialize() {
+        InitTogglesFromDriver();
+        mFormatTable = BuildGLFormatTable();
+
+        return DeviceBase::Initialize();
     }
 
     void Device::InitTogglesFromDriver() {
