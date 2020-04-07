@@ -42,7 +42,7 @@ TEST_F(ParserImplTest, ContinueStmt_WithIf) {
   ASSERT_TRUE(e->IsContinue());
   EXPECT_EQ(e->condition(), ast::StatementCondition::kIf);
   ASSERT_NE(e->conditional(), nullptr);
-  EXPECT_TRUE(e->conditional()->IsRelational());
+  EXPECT_TRUE(e->conditional()->IsBinary());
 }
 
 TEST_F(ParserImplTest, ContinueStmt_WithUnless) {
@@ -53,7 +53,7 @@ TEST_F(ParserImplTest, ContinueStmt_WithUnless) {
   ASSERT_TRUE(e->IsContinue());
   EXPECT_EQ(e->condition(), ast::StatementCondition::kUnless);
   ASSERT_NE(e->conditional(), nullptr);
-  EXPECT_TRUE(e->conditional()->IsRelational());
+  EXPECT_TRUE(e->conditional()->IsBinary());
 }
 
 TEST_F(ParserImplTest, ContinueStmt_InvalidRHS) {

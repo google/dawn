@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/binary_expression.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/relational_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
@@ -31,9 +31,9 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_LessThan) {
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
-  ASSERT_TRUE(e->IsRelational());
-  auto rel = e->AsRelational();
-  EXPECT_EQ(ast::Relation::kLessThan, rel->relation());
+  ASSERT_TRUE(e->IsBinary());
+  auto rel = e->AsBinary();
+  EXPECT_EQ(ast::BinaryOp::kLessThan, rel->op());
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
   auto ident = rel->lhs()->AsIdentifier();
@@ -53,9 +53,9 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_GreaterThan) {
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
-  ASSERT_TRUE(e->IsRelational());
-  auto rel = e->AsRelational();
-  EXPECT_EQ(ast::Relation::kGreaterThan, rel->relation());
+  ASSERT_TRUE(e->IsBinary());
+  auto rel = e->AsBinary();
+  EXPECT_EQ(ast::BinaryOp::kGreaterThan, rel->op());
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
   auto ident = rel->lhs()->AsIdentifier();
@@ -75,9 +75,9 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_LessThanEqual) {
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
-  ASSERT_TRUE(e->IsRelational());
-  auto rel = e->AsRelational();
-  EXPECT_EQ(ast::Relation::kLessThanEqual, rel->relation());
+  ASSERT_TRUE(e->IsBinary());
+  auto rel = e->AsBinary();
+  EXPECT_EQ(ast::BinaryOp::kLessThanEqual, rel->op());
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
   auto ident = rel->lhs()->AsIdentifier();
@@ -97,9 +97,9 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_GreaterThanEqual) {
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
-  ASSERT_TRUE(e->IsRelational());
-  auto rel = e->AsRelational();
-  EXPECT_EQ(ast::Relation::kGreaterThanEqual, rel->relation());
+  ASSERT_TRUE(e->IsBinary());
+  auto rel = e->AsBinary();
+  EXPECT_EQ(ast::BinaryOp::kGreaterThanEqual, rel->op());
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
   auto ident = rel->lhs()->AsIdentifier();

@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/binary_expression.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/relational_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
@@ -31,9 +31,9 @@ TEST_F(ParserImplTest, InclusiveOrExpression_Parses) {
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
-  ASSERT_TRUE(e->IsRelational());
-  auto rel = e->AsRelational();
-  EXPECT_EQ(ast::Relation::kOr, rel->relation());
+  ASSERT_TRUE(e->IsBinary());
+  auto rel = e->AsBinary();
+  EXPECT_EQ(ast::BinaryOp::kOr, rel->op());
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
   auto ident = rel->lhs()->AsIdentifier();

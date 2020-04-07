@@ -15,13 +15,13 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "src/ast/binary_expression.h"
 #include "src/ast/binding_decoration.h"
 #include "src/ast/builtin.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/location_decoration.h"
-#include "src/ast/relational_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/storage_class.h"
@@ -97,13 +97,13 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
 )");
 }
 
-// DISABLED until we have RelationalExpression Output
+// DISABLED until we have BinaryExpression Output
 TEST_F(BuilderTest, DISABLED_FunctionVar_WithNonConstantConstructor) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 2);
 
-  auto rel = std::make_unique<ast::RelationalExpression>(
-      ast::Relation::kAdd,
+  auto rel = std::make_unique<ast::BinaryExpression>(
+      ast::BinaryOp::kAdd,
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::FloatLiteral>(&f32, 3.0f)),
       std::make_unique<ast::ScalarConstructorExpression>(

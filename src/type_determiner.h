@@ -27,13 +27,13 @@ namespace ast {
 
 class ArrayAccessorExpression;
 class AsExpression;
+class BinaryExpression;
 class CallExpression;
 class CastExpression;
 class ConstructorExpression;
 class Function;
 class IdentifierExpression;
 class MemberAccessorExpression;
-class RelationalExpression;
 class UnaryDerivativeExpression;
 class UnaryMethodExpression;
 class UnaryOpExpression;
@@ -80,12 +80,12 @@ class TypeDeterminer {
  private:
   bool DetermineArrayAccessor(ast::ArrayAccessorExpression* expr);
   bool DetermineAs(ast::AsExpression* expr);
+  bool DetermineBinary(ast::BinaryExpression* expr);
   bool DetermineCall(ast::CallExpression* expr);
   bool DetermineCast(ast::CastExpression* expr);
   bool DetermineConstructor(ast::ConstructorExpression* expr);
   bool DetermineIdentifier(ast::IdentifierExpression* expr);
   bool DetermineMemberAccessor(ast::MemberAccessorExpression* expr);
-  bool DetermineRelational(ast::RelationalExpression* expr);
   bool DetermineUnaryDerivative(ast::UnaryDerivativeExpression* expr);
   bool DetermineUnaryMethod(ast::UnaryMethodExpression* expr);
   bool DetermineUnaryOp(ast::UnaryOpExpression* expr);

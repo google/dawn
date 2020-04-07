@@ -26,7 +26,7 @@ TEST_F(ParserImplTest, ParenRhsStmt) {
   auto e = p->paren_rhs_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsRelational());
+  ASSERT_TRUE(e->IsBinary());
 }
 
 TEST_F(ParserImplTest, ParenRhsStmt_MissingLeftParen) {

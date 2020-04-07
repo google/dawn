@@ -58,7 +58,7 @@ TEST_F(ParserImplTest, Statement_Return_Value) {
   ASSERT_TRUE(e->IsReturn());
   auto ret = e->AsReturn();
   ASSERT_NE(ret->value(), nullptr);
-  EXPECT_TRUE(ret->value()->IsRelational());
+  EXPECT_TRUE(ret->value()->IsBinary());
 }
 
 TEST_F(ParserImplTest, Statement_Return_MissingSemi) {

@@ -17,8 +17,8 @@
 #include "gtest/gtest.h"
 #include "spirv/unified1/spirv.h"
 #include "spirv/unified1/spirv.hpp11"
+#include "src/ast/binary_expression.h"
 #include "src/ast/float_literal.h"
-#include "src/ast/relational_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/vector_type.h"
@@ -96,8 +96,8 @@ TEST_F(BuilderTest, Constructor_Type_Dedups) {
 TEST_F(BuilderTest, Constructor_NonConst_Type_Fails) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 2);
-  auto rel = std::make_unique<ast::RelationalExpression>(
-      ast::Relation::kAdd,
+  auto rel = std::make_unique<ast::BinaryExpression>(
+      ast::BinaryOp::kAdd,
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::FloatLiteral>(&f32, 3.0f)),
       std::make_unique<ast::ScalarConstructorExpression>(

@@ -18,12 +18,12 @@
 
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/as_expression.h"
+#include "src/ast/binary_expression.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/cast_expression.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/member_accessor_expression.h"
-#include "src/ast/relational_expression.h"
 #include "src/ast/unary_derivative_expression.h"
 #include "src/ast/unary_method_expression.h"
 #include "src/ast/unary_op_expression.h"
@@ -47,6 +47,11 @@ AsExpression* Expression::AsAs() {
   return static_cast<AsExpression*>(this);
 }
 
+BinaryExpression* Expression::AsBinary() {
+  assert(IsBinary());
+  return static_cast<BinaryExpression*>(this);
+}
+
 CallExpression* Expression::AsCall() {
   assert(IsCall());
   return static_cast<CallExpression*>(this);
@@ -57,24 +62,19 @@ CastExpression* Expression::AsCast() {
   return static_cast<CastExpression*>(this);
 }
 
-IdentifierExpression* Expression::AsIdentifier() {
-  assert(IsIdentifier());
-  return static_cast<IdentifierExpression*>(this);
-}
-
 ConstructorExpression* Expression::AsConstructor() {
   assert(IsConstructor());
   return static_cast<ConstructorExpression*>(this);
 }
 
+IdentifierExpression* Expression::AsIdentifier() {
+  assert(IsIdentifier());
+  return static_cast<IdentifierExpression*>(this);
+}
+
 MemberAccessorExpression* Expression::AsMemberAccessor() {
   assert(IsMemberAccessor());
   return static_cast<MemberAccessorExpression*>(this);
-}
-
-RelationalExpression* Expression::AsRelational() {
-  assert(IsRelational());
-  return static_cast<RelationalExpression*>(this);
 }
 
 UnaryDerivativeExpression* Expression::AsUnaryDerivative() {

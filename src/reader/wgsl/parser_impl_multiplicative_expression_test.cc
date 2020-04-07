@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/binary_expression.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/relational_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
@@ -31,9 +31,9 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Multiply) {
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
-  ASSERT_TRUE(e->IsRelational());
-  auto rel = e->AsRelational();
-  EXPECT_EQ(ast::Relation::kMultiply, rel->relation());
+  ASSERT_TRUE(e->IsBinary());
+  auto rel = e->AsBinary();
+  EXPECT_EQ(ast::BinaryOp::kMultiply, rel->op());
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
   auto ident = rel->lhs()->AsIdentifier();
@@ -53,9 +53,9 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Divide) {
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
-  ASSERT_TRUE(e->IsRelational());
-  auto rel = e->AsRelational();
-  EXPECT_EQ(ast::Relation::kDivide, rel->relation());
+  ASSERT_TRUE(e->IsBinary());
+  auto rel = e->AsBinary();
+  EXPECT_EQ(ast::BinaryOp::kDivide, rel->op());
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
   auto ident = rel->lhs()->AsIdentifier();
@@ -75,9 +75,9 @@ TEST_F(ParserImplTest, MultiplicativeExpression_Parses_Modulo) {
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
-  ASSERT_TRUE(e->IsRelational());
-  auto rel = e->AsRelational();
-  EXPECT_EQ(ast::Relation::kModulo, rel->relation());
+  ASSERT_TRUE(e->IsBinary());
+  auto rel = e->AsBinary();
+  EXPECT_EQ(ast::BinaryOp::kModulo, rel->op());
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
   auto ident = rel->lhs()->AsIdentifier();

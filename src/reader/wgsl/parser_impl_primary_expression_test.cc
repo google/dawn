@@ -153,7 +153,7 @@ TEST_F(ParserImplTest, PrimaryExpression_ParenExpr) {
   auto e = p->primary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsRelational());
+  ASSERT_TRUE(e->IsBinary());
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_MissingRightParen) {

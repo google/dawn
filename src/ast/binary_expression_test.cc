@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/relational_expression.h"
+#include "src/ast/binary_expression.h"
 
 #include <sstream>
 
@@ -23,95 +23,95 @@ namespace tint {
 namespace ast {
 namespace {
 
-using RelationalExpressionTest = testing::Test;
+using BinaryExpressionTest = testing::Test;
 
-TEST_F(RelationalExpressionTest, Creation) {
+TEST_F(BinaryExpressionTest, Creation) {
   auto lhs = std::make_unique<IdentifierExpression>("lhs");
   auto rhs = std::make_unique<IdentifierExpression>("rhs");
 
   auto lhs_ptr = lhs.get();
   auto rhs_ptr = rhs.get();
 
-  RelationalExpression r(Relation::kEqual, std::move(lhs), std::move(rhs));
+  BinaryExpression r(BinaryOp::kEqual, std::move(lhs), std::move(rhs));
   EXPECT_EQ(r.lhs(), lhs_ptr);
   EXPECT_EQ(r.rhs(), rhs_ptr);
-  EXPECT_EQ(r.relation(), Relation::kEqual);
+  EXPECT_EQ(r.op(), BinaryOp::kEqual);
 }
 
-TEST_F(RelationalExpressionTest, Creation_WithSource) {
+TEST_F(BinaryExpressionTest, Creation_WithSource) {
   auto lhs = std::make_unique<IdentifierExpression>("lhs");
   auto rhs = std::make_unique<IdentifierExpression>("rhs");
 
-  RelationalExpression r(Source{20, 2}, Relation::kEqual, std::move(lhs),
-                         std::move(rhs));
+  BinaryExpression r(Source{20, 2}, BinaryOp::kEqual, std::move(lhs),
+                     std::move(rhs));
   auto src = r.source();
   EXPECT_EQ(src.line, 20);
   EXPECT_EQ(src.column, 2);
 }
 
-TEST_F(RelationalExpressionTest, IsRelational) {
-  RelationalExpression r;
-  EXPECT_TRUE(r.IsRelational());
+TEST_F(BinaryExpressionTest, IsBinaryal) {
+  BinaryExpression r;
+  EXPECT_TRUE(r.IsBinary());
 }
 
-TEST_F(RelationalExpressionTest, IsValid) {
+TEST_F(BinaryExpressionTest, IsValid) {
   auto lhs = std::make_unique<IdentifierExpression>("lhs");
   auto rhs = std::make_unique<IdentifierExpression>("rhs");
 
-  RelationalExpression r(Relation::kEqual, std::move(lhs), std::move(rhs));
+  BinaryExpression r(BinaryOp::kEqual, std::move(lhs), std::move(rhs));
   EXPECT_TRUE(r.IsValid());
 }
 
-TEST_F(RelationalExpressionTest, IsValid_Null_LHS) {
+TEST_F(BinaryExpressionTest, IsValid_Null_LHS) {
   auto rhs = std::make_unique<IdentifierExpression>("rhs");
 
-  RelationalExpression r;
-  r.set_relation(Relation::kEqual);
+  BinaryExpression r;
+  r.set_op(BinaryOp::kEqual);
   r.set_rhs(std::move(rhs));
   EXPECT_FALSE(r.IsValid());
 }
 
-TEST_F(RelationalExpressionTest, IsValid_Invalid_LHS) {
+TEST_F(BinaryExpressionTest, IsValid_Invalid_LHS) {
   auto lhs = std::make_unique<IdentifierExpression>("");
   auto rhs = std::make_unique<IdentifierExpression>("rhs");
 
-  RelationalExpression r(Relation::kEqual, std::move(lhs), std::move(rhs));
+  BinaryExpression r(BinaryOp::kEqual, std::move(lhs), std::move(rhs));
   EXPECT_FALSE(r.IsValid());
 }
 
-TEST_F(RelationalExpressionTest, IsValid_Null_RHS) {
+TEST_F(BinaryExpressionTest, IsValid_Null_RHS) {
   auto lhs = std::make_unique<IdentifierExpression>("lhs");
 
-  RelationalExpression r;
-  r.set_relation(Relation::kEqual);
+  BinaryExpression r;
+  r.set_op(BinaryOp::kEqual);
   r.set_lhs(std::move(lhs));
   EXPECT_FALSE(r.IsValid());
 }
 
-TEST_F(RelationalExpressionTest, IsValid_Invalid_RHS) {
+TEST_F(BinaryExpressionTest, IsValid_Invalid_RHS) {
   auto lhs = std::make_unique<IdentifierExpression>("lhs");
   auto rhs = std::make_unique<IdentifierExpression>("");
 
-  RelationalExpression r(Relation::kEqual, std::move(lhs), std::move(rhs));
+  BinaryExpression r(BinaryOp::kEqual, std::move(lhs), std::move(rhs));
   EXPECT_FALSE(r.IsValid());
 }
 
-TEST_F(RelationalExpressionTest, IsValid_Relation_None) {
+TEST_F(BinaryExpressionTest, IsValid_Binary_None) {
   auto lhs = std::make_unique<IdentifierExpression>("lhs");
   auto rhs = std::make_unique<IdentifierExpression>("rhs");
 
-  RelationalExpression r(Relation::kNone, std::move(lhs), std::move(rhs));
+  BinaryExpression r(BinaryOp::kNone, std::move(lhs), std::move(rhs));
   EXPECT_FALSE(r.IsValid());
 }
 
-TEST_F(RelationalExpressionTest, ToStr) {
+TEST_F(BinaryExpressionTest, ToStr) {
   auto lhs = std::make_unique<IdentifierExpression>("lhs");
   auto rhs = std::make_unique<IdentifierExpression>("rhs");
 
-  RelationalExpression r(Relation::kEqual, std::move(lhs), std::move(rhs));
+  BinaryExpression r(BinaryOp::kEqual, std::move(lhs), std::move(rhs));
   std::ostringstream out;
   r.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  Relation{
+  EXPECT_EQ(out.str(), R"(  Binary{
     Identifier{lhs}
     equal
     Identifier{rhs}

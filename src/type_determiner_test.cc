@@ -22,6 +22,7 @@
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
+#include "src/ast/binary_expression.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/case_statement.h"
@@ -35,7 +36,6 @@
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/regardless_statement.h"
-#include "src/ast/relational_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/struct.h"
@@ -778,8 +778,8 @@ TEST_F(TypeDeterminerTest, Expr_MultiLevel) {
   EXPECT_EQ(mem.result_type()->AsVector()->size(), 2);
 }
 
-using Expr_Relational_BitwiseTest = testing::TestWithParam<ast::Relation>;
-TEST_P(Expr_Relational_BitwiseTest, Scalar) {
+using Expr_Binary_BitwiseTest = testing::TestWithParam<ast::BinaryOp>;
+TEST_P(Expr_Binary_BitwiseTest, Scalar) {
   auto op = GetParam();
 
   ast::type::I32Type i32;
@@ -796,7 +796,7 @@ TEST_P(Expr_Relational_BitwiseTest, Scalar) {
   // Register the global
   ASSERT_TRUE(td.Determine(&m)) << td.error();
 
-  ast::RelationalExpression expr(
+  ast::BinaryExpression expr(
       op, std::make_unique<ast::IdentifierExpression>("val"),
       std::make_unique<ast::IdentifierExpression>("val"));
 
@@ -805,7 +805,7 @@ TEST_P(Expr_Relational_BitwiseTest, Scalar) {
   EXPECT_TRUE(expr.result_type()->IsI32());
 }
 
-TEST_P(Expr_Relational_BitwiseTest, Vector) {
+TEST_P(Expr_Binary_BitwiseTest, Vector) {
   auto op = GetParam();
 
   ast::type::I32Type i32;
@@ -823,7 +823,7 @@ TEST_P(Expr_Relational_BitwiseTest, Vector) {
   // Register the global
   ASSERT_TRUE(td.Determine(&m)) << td.error();
 
-  ast::RelationalExpression expr(
+  ast::BinaryExpression expr(
       op, std::make_unique<ast::IdentifierExpression>("val"),
       std::make_unique<ast::IdentifierExpression>("val"));
 
@@ -834,20 +834,20 @@ TEST_P(Expr_Relational_BitwiseTest, Vector) {
   EXPECT_EQ(expr.result_type()->AsVector()->size(), 3);
 }
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
-                         Expr_Relational_BitwiseTest,
-                         testing::Values(ast::Relation::kAnd,
-                                         ast::Relation::kOr,
-                                         ast::Relation::kXor,
-                                         ast::Relation::kShiftLeft,
-                                         ast::Relation::kShiftRight,
-                                         ast::Relation::kShiftRightArith,
-                                         ast::Relation::kAdd,
-                                         ast::Relation::kSubtract,
-                                         ast::Relation::kDivide,
-                                         ast::Relation::kModulo));
+                         Expr_Binary_BitwiseTest,
+                         testing::Values(ast::BinaryOp::kAnd,
+                                         ast::BinaryOp::kOr,
+                                         ast::BinaryOp::kXor,
+                                         ast::BinaryOp::kShiftLeft,
+                                         ast::BinaryOp::kShiftRight,
+                                         ast::BinaryOp::kShiftRightArith,
+                                         ast::BinaryOp::kAdd,
+                                         ast::BinaryOp::kSubtract,
+                                         ast::BinaryOp::kDivide,
+                                         ast::BinaryOp::kModulo));
 
-using Expr_Relational_LogicalTest = testing::TestWithParam<ast::Relation>;
-TEST_P(Expr_Relational_LogicalTest, Scalar) {
+using Expr_Binary_LogicalTest = testing::TestWithParam<ast::BinaryOp>;
+TEST_P(Expr_Binary_LogicalTest, Scalar) {
   auto op = GetParam();
 
   ast::type::BoolType bool_type;
@@ -864,7 +864,7 @@ TEST_P(Expr_Relational_LogicalTest, Scalar) {
   // Register the global
   ASSERT_TRUE(td.Determine(&m)) << td.error();
 
-  ast::RelationalExpression expr(
+  ast::BinaryExpression expr(
       op, std::make_unique<ast::IdentifierExpression>("val"),
       std::make_unique<ast::IdentifierExpression>("val"));
 
@@ -873,7 +873,7 @@ TEST_P(Expr_Relational_LogicalTest, Scalar) {
   EXPECT_TRUE(expr.result_type()->IsBool());
 }
 
-TEST_P(Expr_Relational_LogicalTest, Vector) {
+TEST_P(Expr_Binary_LogicalTest, Vector) {
   auto op = GetParam();
 
   ast::type::BoolType bool_type;
@@ -891,7 +891,7 @@ TEST_P(Expr_Relational_LogicalTest, Vector) {
   // Register the global
   ASSERT_TRUE(td.Determine(&m)) << td.error();
 
-  ast::RelationalExpression expr(
+  ast::BinaryExpression expr(
       op, std::make_unique<ast::IdentifierExpression>("val"),
       std::make_unique<ast::IdentifierExpression>("val"));
 
@@ -902,12 +902,12 @@ TEST_P(Expr_Relational_LogicalTest, Vector) {
   EXPECT_EQ(expr.result_type()->AsVector()->size(), 3);
 }
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
-                         Expr_Relational_LogicalTest,
-                         testing::Values(ast::Relation::kLogicalAnd,
-                                         ast::Relation::kLogicalOr));
+                         Expr_Binary_LogicalTest,
+                         testing::Values(ast::BinaryOp::kLogicalAnd,
+                                         ast::BinaryOp::kLogicalOr));
 
-using Expr_Relational_CompareTest = testing::TestWithParam<ast::Relation>;
-TEST_P(Expr_Relational_CompareTest, Scalar) {
+using Expr_Binary_CompareTest = testing::TestWithParam<ast::BinaryOp>;
+TEST_P(Expr_Binary_CompareTest, Scalar) {
   auto op = GetParam();
 
   ast::type::I32Type i32;
@@ -924,7 +924,7 @@ TEST_P(Expr_Relational_CompareTest, Scalar) {
   // Register the global
   ASSERT_TRUE(td.Determine(&m)) << td.error();
 
-  ast::RelationalExpression expr(
+  ast::BinaryExpression expr(
       op, std::make_unique<ast::IdentifierExpression>("val"),
       std::make_unique<ast::IdentifierExpression>("val"));
 
@@ -933,7 +933,7 @@ TEST_P(Expr_Relational_CompareTest, Scalar) {
   EXPECT_TRUE(expr.result_type()->IsBool());
 }
 
-TEST_P(Expr_Relational_CompareTest, Vector) {
+TEST_P(Expr_Binary_CompareTest, Vector) {
   auto op = GetParam();
 
   ast::type::I32Type i32;
@@ -951,7 +951,7 @@ TEST_P(Expr_Relational_CompareTest, Vector) {
   // Register the global
   ASSERT_TRUE(td.Determine(&m)) << td.error();
 
-  ast::RelationalExpression expr(
+  ast::BinaryExpression expr(
       op, std::make_unique<ast::IdentifierExpression>("val"),
       std::make_unique<ast::IdentifierExpression>("val"));
 
@@ -962,15 +962,15 @@ TEST_P(Expr_Relational_CompareTest, Vector) {
   EXPECT_EQ(expr.result_type()->AsVector()->size(), 3);
 }
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
-                         Expr_Relational_CompareTest,
-                         testing::Values(ast::Relation::kEqual,
-                                         ast::Relation::kNotEqual,
-                                         ast::Relation::kLessThan,
-                                         ast::Relation::kGreaterThan,
-                                         ast::Relation::kLessThanEqual,
-                                         ast::Relation::kGreaterThanEqual));
+                         Expr_Binary_CompareTest,
+                         testing::Values(ast::BinaryOp::kEqual,
+                                         ast::BinaryOp::kNotEqual,
+                                         ast::BinaryOp::kLessThan,
+                                         ast::BinaryOp::kGreaterThan,
+                                         ast::BinaryOp::kLessThanEqual,
+                                         ast::BinaryOp::kGreaterThanEqual));
 
-TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Scalar_Scalar) {
+TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Scalar) {
   ast::type::I32Type i32;
 
   auto var =
@@ -985,8 +985,8 @@ TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Scalar_Scalar) {
   // Register the global
   ASSERT_TRUE(td.Determine(&m)) << td.error();
 
-  ast::RelationalExpression expr(
-      ast::Relation::kMultiply,
+  ast::BinaryExpression expr(
+      ast::BinaryOp::kMultiply,
       std::make_unique<ast::IdentifierExpression>("val"),
       std::make_unique<ast::IdentifierExpression>("val"));
 
@@ -995,7 +995,7 @@ TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Scalar_Scalar) {
   EXPECT_TRUE(expr.result_type()->IsI32());
 }
 
-TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Vector_Scalar) {
+TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Scalar) {
   ast::type::F32Type f32;
   ast::type::VectorType vec3(&f32, 3);
 
@@ -1014,8 +1014,8 @@ TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Vector_Scalar) {
   // Register the global
   ASSERT_TRUE(td.Determine(&m)) << td.error();
 
-  ast::RelationalExpression expr(
-      ast::Relation::kMultiply,
+  ast::BinaryExpression expr(
+      ast::BinaryOp::kMultiply,
       std::make_unique<ast::IdentifierExpression>("vector"),
       std::make_unique<ast::IdentifierExpression>("scalar"));
 
@@ -1026,7 +1026,7 @@ TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Vector_Scalar) {
   EXPECT_EQ(expr.result_type()->AsVector()->size(), 3);
 }
 
-TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Scalar_Vector) {
+TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Vector) {
   ast::type::F32Type f32;
   ast::type::VectorType vec3(&f32, 3);
 
@@ -1045,8 +1045,8 @@ TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Scalar_Vector) {
   // Register the global
   ASSERT_TRUE(td.Determine(&m)) << td.error();
 
-  ast::RelationalExpression expr(
-      ast::Relation::kMultiply,
+  ast::BinaryExpression expr(
+      ast::BinaryOp::kMultiply,
       std::make_unique<ast::IdentifierExpression>("scalar"),
       std::make_unique<ast::IdentifierExpression>("vector"));
 
@@ -1057,7 +1057,7 @@ TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Scalar_Vector) {
   EXPECT_EQ(expr.result_type()->AsVector()->size(), 3);
 }
 
-TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Vector_Vector) {
+TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Vector) {
   ast::type::F32Type f32;
   ast::type::VectorType vec3(&f32, 3);
 
@@ -1073,8 +1073,8 @@ TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Vector_Vector) {
   // Register the global
   ASSERT_TRUE(td.Determine(&m)) << td.error();
 
-  ast::RelationalExpression expr(
-      ast::Relation::kMultiply,
+  ast::BinaryExpression expr(
+      ast::BinaryOp::kMultiply,
       std::make_unique<ast::IdentifierExpression>("vector"),
       std::make_unique<ast::IdentifierExpression>("vector"));
 
@@ -1085,7 +1085,7 @@ TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Vector_Vector) {
   EXPECT_EQ(expr.result_type()->AsVector()->size(), 3);
 }
 
-TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Matrix_Scalar) {
+TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Scalar) {
   ast::type::F32Type f32;
   ast::type::MatrixType mat3x2(&f32, 3, 2);
 
@@ -1104,8 +1104,8 @@ TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Matrix_Scalar) {
   // Register the global
   ASSERT_TRUE(td.Determine(&m)) << td.error();
 
-  ast::RelationalExpression expr(
-      ast::Relation::kMultiply,
+  ast::BinaryExpression expr(
+      ast::BinaryOp::kMultiply,
       std::make_unique<ast::IdentifierExpression>("matrix"),
       std::make_unique<ast::IdentifierExpression>("scalar"));
 
@@ -1119,7 +1119,7 @@ TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Matrix_Scalar) {
   EXPECT_EQ(mat->columns(), 2);
 }
 
-TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Scalar_Matrix) {
+TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Matrix) {
   ast::type::F32Type f32;
   ast::type::MatrixType mat3x2(&f32, 3, 2);
 
@@ -1138,8 +1138,8 @@ TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Scalar_Matrix) {
   // Register the global
   ASSERT_TRUE(td.Determine(&m)) << td.error();
 
-  ast::RelationalExpression expr(
-      ast::Relation::kMultiply,
+  ast::BinaryExpression expr(
+      ast::BinaryOp::kMultiply,
       std::make_unique<ast::IdentifierExpression>("scalar"),
       std::make_unique<ast::IdentifierExpression>("matrix"));
 
@@ -1153,7 +1153,7 @@ TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Scalar_Matrix) {
   EXPECT_EQ(mat->columns(), 2);
 }
 
-TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Matrix_Vector) {
+TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Vector) {
   ast::type::F32Type f32;
   ast::type::VectorType vec3(&f32, 2);
   ast::type::MatrixType mat3x2(&f32, 3, 2);
@@ -1173,8 +1173,8 @@ TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Matrix_Vector) {
   // Register the global
   ASSERT_TRUE(td.Determine(&m)) << td.error();
 
-  ast::RelationalExpression expr(
-      ast::Relation::kMultiply,
+  ast::BinaryExpression expr(
+      ast::BinaryOp::kMultiply,
       std::make_unique<ast::IdentifierExpression>("matrix"),
       std::make_unique<ast::IdentifierExpression>("vector"));
 
@@ -1185,7 +1185,7 @@ TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Matrix_Vector) {
   EXPECT_EQ(expr.result_type()->AsVector()->size(), 3);
 }
 
-TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Vector_Matrix) {
+TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Matrix) {
   ast::type::F32Type f32;
   ast::type::VectorType vec3(&f32, 3);
   ast::type::MatrixType mat3x2(&f32, 3, 2);
@@ -1205,8 +1205,8 @@ TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Vector_Matrix) {
   // Register the global
   ASSERT_TRUE(td.Determine(&m)) << td.error();
 
-  ast::RelationalExpression expr(
-      ast::Relation::kMultiply,
+  ast::BinaryExpression expr(
+      ast::BinaryOp::kMultiply,
       std::make_unique<ast::IdentifierExpression>("vector"),
       std::make_unique<ast::IdentifierExpression>("matrix"));
 
@@ -1217,7 +1217,7 @@ TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Vector_Matrix) {
   EXPECT_EQ(expr.result_type()->AsVector()->size(), 2);
 }
 
-TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Matrix_Matrix) {
+TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Matrix) {
   ast::type::F32Type f32;
   ast::type::MatrixType mat4x3(&f32, 4, 3);
   ast::type::MatrixType mat3x4(&f32, 3, 4);
@@ -1237,8 +1237,8 @@ TEST_F(TypeDeterminerTest, Expr_Relational_Multiply_Matrix_Matrix) {
   // Register the global
   ASSERT_TRUE(td.Determine(&m)) << td.error();
 
-  ast::RelationalExpression expr(
-      ast::Relation::kMultiply,
+  ast::BinaryExpression expr(
+      ast::BinaryOp::kMultiply,
       std::make_unique<ast::IdentifierExpression>("mat4x3"),
       std::make_unique<ast::IdentifierExpression>("mat3x4"));
 

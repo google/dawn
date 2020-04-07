@@ -45,7 +45,7 @@ TEST_F(ParserImplTest, ArgumentExpressionList_ParsesMultiple) {
   ASSERT_EQ(e.size(), 3);
   ASSERT_TRUE(e[0]->IsIdentifier());
   ASSERT_TRUE(e[1]->IsConstructor());
-  ASSERT_TRUE(e[2]->IsRelational());
+  ASSERT_TRUE(e[2]->IsBinary());
 }
 
 TEST_F(ParserImplTest, ArgumentExpressionList_HandlesMissingExpression) {

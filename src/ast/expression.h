@@ -26,12 +26,12 @@ namespace ast {
 
 class ArrayAccessorExpression;
 class AsExpression;
+class BinaryExpression;
 class CallExpression;
 class CastExpression;
 class IdentifierExpression;
 class ConstructorExpression;
 class MemberAccessorExpression;
-class RelationalExpression;
 class UnaryDerivativeExpression;
 class UnaryMethodExpression;
 class UnaryOpExpression;
@@ -61,8 +61,8 @@ class Expression : public Node {
   virtual bool IsConstructor() const { return false; }
   /// @returns true if this is a member accessor expression
   virtual bool IsMemberAccessor() const { return false; }
-  /// @returns true if this is a relational expression
-  virtual bool IsRelational() const { return false; }
+  /// @returns true if this is a binary expression
+  virtual bool IsBinary() const { return false; }
   /// @returns true if this is a unary derivative expression
   virtual bool IsUnaryDerivative() const { return false; }
   /// @returns true if this is a unary method expression
@@ -84,8 +84,8 @@ class Expression : public Node {
   ConstructorExpression* AsConstructor();
   /// @returns the expression as a member accessor
   MemberAccessorExpression* AsMemberAccessor();
-  /// @returns the expression as a relational expression
-  RelationalExpression* AsRelational();
+  /// @returns the expression as a binary expression
+  BinaryExpression* AsBinary();
   /// @returns the expression as a unary derivative expression
   UnaryDerivativeExpression* AsUnaryDerivative();
   /// @returns the expression as a unary method expression

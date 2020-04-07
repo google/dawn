@@ -19,6 +19,7 @@
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
+#include "src/ast/binary_expression.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/case_statement.h"
@@ -30,7 +31,6 @@
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/regardless_statement.h"
-#include "src/ast/relational_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/switch_statement.h"
@@ -197,6 +197,9 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
   if (expr->IsAs()) {
     return DetermineAs(expr->AsAs());
   }
+  if (expr->IsBinary()) {
+    return DetermineBinary(expr->AsBinary());
+  }
   if (expr->IsCall()) {
     return DetermineCall(expr->AsCall());
   }
@@ -211,9 +214,6 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
   }
   if (expr->IsMemberAccessor()) {
     return DetermineMemberAccessor(expr->AsMemberAccessor());
-  }
-  if (expr->IsRelational()) {
-    return DetermineRelational(expr->AsRelational());
   }
   if (expr->IsUnaryDerivative()) {
     return DetermineUnaryDerivative(expr->AsUnaryDerivative());
@@ -339,7 +339,7 @@ bool TypeDeterminer::DetermineMemberAccessor(
   return false;
 }
 
-bool TypeDeterminer::DetermineRelational(ast::RelationalExpression* expr) {
+bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
   if (!DetermineResultType(expr->lhs()) || !DetermineResultType(expr->rhs())) {
     return false;
   }

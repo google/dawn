@@ -43,6 +43,8 @@ set(TINT_LIB_SRCS
   ast/as_expression.h
   ast/assignment_statement.cc
   ast/assignment_statement.h
+  ast/binary_expression.cc
+  ast/binary_expression.h
   ast/binding_decoration.cc
   ast/binding_decoration.h
   ast/bool_literal.h
@@ -107,8 +109,6 @@ set(TINT_LIB_SRCS
   ast/pipeline_stage.h
   ast/regardless_statement.cc
   ast/regardless_statement.h
-  ast/relational_expression.cc
-  ast/relational_expression.h
   ast/return_statement.cc
   ast/return_statement.h
   ast/scalar_constructor_expression.cc
@@ -281,7 +281,7 @@ set(TINT_TEST_SRCS
   ast/module_test.cc
   ast/nop_statement_test.cc
   ast/regardless_statement_test.cc
-  ast/relational_expression_test.cc
+  ast/binary_expression_test.cc
   ast/return_statement_test.cc
   ast/scalar_constructor_expression_test.cc
   ast/set_decoration_test.cc

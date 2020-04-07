@@ -15,8 +15,8 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "src/ast/binary_expression.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/relational_expression.h"
 #include "src/writer/wgsl/generator_impl.h"
 
 namespace tint {
@@ -24,23 +24,22 @@ namespace writer {
 namespace wgsl {
 namespace {
 
-struct RelationData {
+struct BinaryData {
   const char* result;
-  ast::Relation relation;
+  ast::BinaryOp op;
 };
-inline std::ostream& operator<<(std::ostream& out, RelationData data) {
-  out << data.relation;
+inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
+  out << data.op;
   return out;
 }
-using RelationTest = testing::TestWithParam<RelationData>;
-TEST_P(RelationTest, Emit) {
+using BinaryTest = testing::TestWithParam<BinaryData>;
+TEST_P(BinaryTest, Emit) {
   auto params = GetParam();
 
   auto left = std::make_unique<ast::IdentifierExpression>("left");
   auto right = std::make_unique<ast::IdentifierExpression>("right");
 
-  ast::RelationalExpression expr(params.relation, std::move(left),
-                                 std::move(right));
+  ast::BinaryExpression expr(params.op, std::move(left), std::move(right));
 
   GeneratorImpl g;
   ASSERT_TRUE(g.EmitExpression(&expr)) << g.error();
@@ -48,27 +47,27 @@ TEST_P(RelationTest, Emit) {
 }
 INSTANTIATE_TEST_SUITE_P(
     GeneratorImplTest,
-    RelationTest,
+    BinaryTest,
     testing::Values(
-        RelationData{"(left & right)", ast::Relation::kAnd},
-        RelationData{"(left | right)", ast::Relation::kOr},
-        RelationData{"(left ^ right)", ast::Relation::kXor},
-        RelationData{"(left && right)", ast::Relation::kLogicalAnd},
-        RelationData{"(left || right)", ast::Relation::kLogicalOr},
-        RelationData{"(left == right)", ast::Relation::kEqual},
-        RelationData{"(left != right)", ast::Relation::kNotEqual},
-        RelationData{"(left < right)", ast::Relation::kLessThan},
-        RelationData{"(left > right)", ast::Relation::kGreaterThan},
-        RelationData{"(left <= right)", ast::Relation::kLessThanEqual},
-        RelationData{"(left >= right)", ast::Relation::kGreaterThanEqual},
-        RelationData{"(left << right)", ast::Relation::kShiftLeft},
-        RelationData{"(left >> right)", ast::Relation::kShiftRight},
-        RelationData{"(left >>> right)", ast::Relation::kShiftRightArith},
-        RelationData{"(left + right)", ast::Relation::kAdd},
-        RelationData{"(left - right)", ast::Relation::kSubtract},
-        RelationData{"(left * right)", ast::Relation::kMultiply},
-        RelationData{"(left / right)", ast::Relation::kDivide},
-        RelationData{"(left % right)", ast::Relation::kModulo}));
+        BinaryData{"(left & right)", ast::BinaryOp::kAnd},
+        BinaryData{"(left | right)", ast::BinaryOp::kOr},
+        BinaryData{"(left ^ right)", ast::BinaryOp::kXor},
+        BinaryData{"(left && right)", ast::BinaryOp::kLogicalAnd},
+        BinaryData{"(left || right)", ast::BinaryOp::kLogicalOr},
+        BinaryData{"(left == right)", ast::BinaryOp::kEqual},
+        BinaryData{"(left != right)", ast::BinaryOp::kNotEqual},
+        BinaryData{"(left < right)", ast::BinaryOp::kLessThan},
+        BinaryData{"(left > right)", ast::BinaryOp::kGreaterThan},
+        BinaryData{"(left <= right)", ast::BinaryOp::kLessThanEqual},
+        BinaryData{"(left >= right)", ast::BinaryOp::kGreaterThanEqual},
+        BinaryData{"(left << right)", ast::BinaryOp::kShiftLeft},
+        BinaryData{"(left >> right)", ast::BinaryOp::kShiftRight},
+        BinaryData{"(left >>> right)", ast::BinaryOp::kShiftRightArith},
+        BinaryData{"(left + right)", ast::BinaryOp::kAdd},
+        BinaryData{"(left - right)", ast::BinaryOp::kSubtract},
+        BinaryData{"(left * right)", ast::BinaryOp::kMultiply},
+        BinaryData{"(left / right)", ast::BinaryOp::kDivide},
+        BinaryData{"(left % right)", ast::BinaryOp::kModulo}));
 
 }  // namespace
 }  // namespace wgsl

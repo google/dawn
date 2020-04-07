@@ -82,6 +82,10 @@ class GeneratorImpl {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
   bool EmitAssign(ast::AssignmentStatement* stmt);
+  /// Handles generating a binary expression
+  /// @param expr the binary expression
+  /// @returns true if the expression was emitted, false otherwise
+  bool EmitBinary(ast::BinaryExpression* expr);
   /// Handles a break statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
@@ -166,10 +170,6 @@ class GeneratorImpl {
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
   bool EmitRegardless(ast::RegardlessStatement* stmt);
-  /// Handles generating a relational expression
-  /// @param expr the relational expression
-  /// @returns true if the expression was emitted, false otherwise
-  bool EmitRelational(ast::RelationalExpression* expr);
   /// Handles return statements
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted

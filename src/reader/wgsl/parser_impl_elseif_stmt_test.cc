@@ -30,7 +30,7 @@ TEST_F(ParserImplTest, ElseIfStmt) {
 
   ASSERT_TRUE(e[0]->IsElse());
   ASSERT_NE(e[0]->condition(), nullptr);
-  ASSERT_TRUE(e[0]->condition()->IsRelational());
+  ASSERT_TRUE(e[0]->condition()->IsBinary());
   EXPECT_EQ(e[0]->body().size(), 2);
 }
 
@@ -42,7 +42,7 @@ TEST_F(ParserImplTest, ElseIfStmt_Multiple) {
 
   ASSERT_TRUE(e[0]->IsElse());
   ASSERT_NE(e[0]->condition(), nullptr);
-  ASSERT_TRUE(e[0]->condition()->IsRelational());
+  ASSERT_TRUE(e[0]->condition()->IsBinary());
   EXPECT_EQ(e[0]->body().size(), 2);
 
   ASSERT_TRUE(e[1]->IsElse());

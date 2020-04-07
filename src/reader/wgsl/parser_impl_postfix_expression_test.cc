@@ -65,7 +65,7 @@ TEST_F(ParserImplTest, PostfixExpression_Array_ExpressionIndex) {
   ASSERT_EQ(ident->name().size(), 1);
   EXPECT_EQ(ident->name()[0], "a");
 
-  ASSERT_TRUE(ary->idx_expr()->IsRelational());
+  ASSERT_TRUE(ary->idx_expr()->IsBinary());
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Array_MissingIndex) {
@@ -127,7 +127,7 @@ TEST_F(ParserImplTest, PostfixExpression_Call_WithArgs) {
   EXPECT_EQ(c->params().size(), 3);
   EXPECT_TRUE(c->params()[0]->IsConstructor());
   EXPECT_TRUE(c->params()[1]->IsIdentifier());
-  EXPECT_TRUE(c->params()[2]->IsRelational());
+  EXPECT_TRUE(c->params()[2]->IsBinary());
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Call_InvalidArg) {

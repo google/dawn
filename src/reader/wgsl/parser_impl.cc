@@ -19,6 +19,7 @@
 
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/as_expression.h"
+#include "src/ast/binary_expression.h"
 #include "src/ast/binding_decoration.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/break_statement.h"
@@ -38,7 +39,6 @@
 #include "src/ast/location_decoration.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/nop_statement.h"
-#include "src/ast/relational_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
@@ -2633,13 +2633,13 @@ std::unique_ptr<ast::Expression> ParserImpl::multiplicative_expr(
     std::unique_ptr<ast::Expression> lhs) {
   auto t = peek();
 
-  ast::Relation relation = ast::Relation::kNone;
+  ast::BinaryOp op = ast::BinaryOp::kNone;
   if (t.IsStar())
-    relation = ast::Relation::kMultiply;
+    op = ast::BinaryOp::kMultiply;
   else if (t.IsForwardSlash())
-    relation = ast::Relation::kDivide;
+    op = ast::BinaryOp::kDivide;
   else if (t.IsMod())
-    relation = ast::Relation::kModulo;
+    op = ast::BinaryOp::kModulo;
   else
     return lhs;
 
@@ -2654,8 +2654,8 @@ std::unique_ptr<ast::Expression> ParserImpl::multiplicative_expr(
     set_error(peek(), "unable to parse right side of " + name + " expression");
     return nullptr;
   }
-  return multiplicative_expr(std::make_unique<ast::RelationalExpression>(
-      source, relation, std::move(lhs), std::move(rhs)));
+  return multiplicative_expr(std::make_unique<ast::BinaryExpression>(
+      source, op, std::move(lhs), std::move(rhs)));
 }
 
 // multiplicative_expression
@@ -2678,11 +2678,11 @@ std::unique_ptr<ast::Expression> ParserImpl::additive_expr(
     std::unique_ptr<ast::Expression> lhs) {
   auto t = peek();
 
-  ast::Relation relation = ast::Relation::kNone;
+  ast::BinaryOp op = ast::BinaryOp::kNone;
   if (t.IsPlus())
-    relation = ast::Relation::kAdd;
+    op = ast::BinaryOp::kAdd;
   else if (t.IsMinus())
-    relation = ast::Relation::kSubtract;
+    op = ast::BinaryOp::kSubtract;
   else
     return lhs;
 
@@ -2696,8 +2696,8 @@ std::unique_ptr<ast::Expression> ParserImpl::additive_expr(
     set_error(peek(), "unable to parse right side of + expression");
     return nullptr;
   }
-  return additive_expr(std::make_unique<ast::RelationalExpression>(
-      source, relation, std::move(lhs), std::move(rhs)));
+  return additive_expr(std::make_unique<ast::BinaryExpression>(
+      source, op, std::move(lhs), std::move(rhs)));
 }
 
 // additive_expression
@@ -2725,22 +2725,22 @@ std::unique_ptr<ast::Expression> ParserImpl::shift_expr(
   auto t3 = peek(2);
 
   auto name = "";
-  ast::Relation relation = ast::Relation::kNone;
+  ast::BinaryOp op = ast::BinaryOp::kNone;
   if (t.IsLessThan() && t2.IsLessThan()) {
     next();  // Consume the t peek
     next();  // Consume the t2 peek
-    relation = ast::Relation::kShiftLeft;
+    op = ast::BinaryOp::kShiftLeft;
     name = "<<";
   } else if (t.IsGreaterThan() && t2.IsGreaterThan() && t3.IsGreaterThan()) {
     next();  // Consume the t peek
     next();  // Consume the t2 peek
     next();  // Consume the t3 peek
-    relation = ast::Relation::kShiftRightArith;
+    op = ast::BinaryOp::kShiftRightArith;
     name = ">>>";
   } else if (t.IsGreaterThan() && t2.IsGreaterThan()) {
     next();  // Consume the t peek
     next();  // Consume the t2 peek
-    relation = ast::Relation::kShiftRight;
+    op = ast::BinaryOp::kShiftRight;
     name = ">>";
   } else {
     return lhs;
@@ -2754,8 +2754,8 @@ std::unique_ptr<ast::Expression> ParserImpl::shift_expr(
                           " expression");
     return nullptr;
   }
-  return shift_expr(std::make_unique<ast::RelationalExpression>(
-      source, relation, std::move(lhs), std::move(rhs)));
+  return shift_expr(std::make_unique<ast::BinaryExpression>(
+      source, op, std::move(lhs), std::move(rhs)));
 }
 
 // shift_expression
@@ -2779,15 +2779,15 @@ std::unique_ptr<ast::Expression> ParserImpl::shift_expression() {
 std::unique_ptr<ast::Expression> ParserImpl::relational_expr(
     std::unique_ptr<ast::Expression> lhs) {
   auto t = peek();
-  ast::Relation relation = ast::Relation::kNone;
+  ast::BinaryOp op = ast::BinaryOp::kNone;
   if (t.IsLessThan())
-    relation = ast::Relation::kLessThan;
+    op = ast::BinaryOp::kLessThan;
   else if (t.IsGreaterThan())
-    relation = ast::Relation::kGreaterThan;
+    op = ast::BinaryOp::kGreaterThan;
   else if (t.IsLessThanEqual())
-    relation = ast::Relation::kLessThanEqual;
+    op = ast::BinaryOp::kLessThanEqual;
   else if (t.IsGreaterThanEqual())
-    relation = ast::Relation::kGreaterThanEqual;
+    op = ast::BinaryOp::kGreaterThanEqual;
   else
     return lhs;
 
@@ -2802,8 +2802,8 @@ std::unique_ptr<ast::Expression> ParserImpl::relational_expr(
     set_error(peek(), "unable to parse right side of " + name + " expression");
     return nullptr;
   }
-  return relational_expr(std::make_unique<ast::RelationalExpression>(
-      source, relation, std::move(lhs), std::move(rhs)));
+  return relational_expr(std::make_unique<ast::BinaryExpression>(
+      source, op, std::move(lhs), std::move(rhs)));
 }
 
 // relational_expression
@@ -2825,11 +2825,11 @@ std::unique_ptr<ast::Expression> ParserImpl::relational_expression() {
 std::unique_ptr<ast::Expression> ParserImpl::equality_expr(
     std::unique_ptr<ast::Expression> lhs) {
   auto t = peek();
-  ast::Relation relation = ast::Relation::kNone;
+  ast::BinaryOp op = ast::BinaryOp::kNone;
   if (t.IsEqualEqual())
-    relation = ast::Relation::kEqual;
+    op = ast::BinaryOp::kEqual;
   else if (t.IsNotEqual())
-    relation = ast::Relation::kNotEqual;
+    op = ast::BinaryOp::kNotEqual;
   else
     return lhs;
 
@@ -2844,8 +2844,8 @@ std::unique_ptr<ast::Expression> ParserImpl::equality_expr(
     set_error(peek(), "unable to parse right side of " + name + " expression");
     return nullptr;
   }
-  return equality_expr(std::make_unique<ast::RelationalExpression>(
-      source, relation, std::move(lhs), std::move(rhs)));
+  return equality_expr(std::make_unique<ast::BinaryExpression>(
+      source, op, std::move(lhs), std::move(rhs)));
 }
 
 // equality_expression
@@ -2879,8 +2879,8 @@ std::unique_ptr<ast::Expression> ParserImpl::and_expr(
     set_error(peek(), "unable to parse right side of & expression");
     return nullptr;
   }
-  return and_expr(std::make_unique<ast::RelationalExpression>(
-      source, ast::Relation::kAnd, std::move(lhs), std::move(rhs)));
+  return and_expr(std::make_unique<ast::BinaryExpression>(
+      source, ast::BinaryOp::kAnd, std::move(lhs), std::move(rhs)));
 }
 
 // and_expression
@@ -2914,8 +2914,8 @@ std::unique_ptr<ast::Expression> ParserImpl::exclusive_or_expr(
     set_error(peek(), "unable to parse right side of ^ expression");
     return nullptr;
   }
-  return exclusive_or_expr(std::make_unique<ast::RelationalExpression>(
-      source, ast::Relation::kXor, std::move(lhs), std::move(rhs)));
+  return exclusive_or_expr(std::make_unique<ast::BinaryExpression>(
+      source, ast::BinaryOp::kXor, std::move(lhs), std::move(rhs)));
 }
 
 // exclusive_or_expression
@@ -2949,8 +2949,8 @@ std::unique_ptr<ast::Expression> ParserImpl::inclusive_or_expr(
     set_error(peek(), "unable to parse right side of | expression");
     return nullptr;
   }
-  return inclusive_or_expr(std::make_unique<ast::RelationalExpression>(
-      source, ast::Relation::kOr, std::move(lhs), std::move(rhs)));
+  return inclusive_or_expr(std::make_unique<ast::BinaryExpression>(
+      source, ast::BinaryOp::kOr, std::move(lhs), std::move(rhs)));
 }
 
 // inclusive_or_expression
@@ -2984,8 +2984,8 @@ std::unique_ptr<ast::Expression> ParserImpl::logical_and_expr(
     set_error(peek(), "unable to parse right side of && expression");
     return nullptr;
   }
-  return logical_and_expr(std::make_unique<ast::RelationalExpression>(
-      source, ast::Relation::kLogicalAnd, std::move(lhs), std::move(rhs)));
+  return logical_and_expr(std::make_unique<ast::BinaryExpression>(
+      source, ast::BinaryOp::kLogicalAnd, std::move(lhs), std::move(rhs)));
 }
 
 // logical_and_expression
@@ -3019,8 +3019,8 @@ std::unique_ptr<ast::Expression> ParserImpl::logical_or_expr(
     set_error(peek(), "unable to parse right side of || expression");
     return nullptr;
   }
-  return logical_or_expr(std::make_unique<ast::RelationalExpression>(
-      source, ast::Relation::kLogicalOr, std::move(lhs), std::move(rhs)));
+  return logical_or_expr(std::make_unique<ast::BinaryExpression>(
+      source, ast::BinaryOp::kLogicalOr, std::move(lhs), std::move(rhs)));
 }
 
 // logical_or_expression

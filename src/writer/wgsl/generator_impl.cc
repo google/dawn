@@ -20,6 +20,7 @@
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
+#include "src/ast/binary_expression.h"
 #include "src/ast/binding_decoration.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/break_statement.h"
@@ -39,7 +40,6 @@
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/regardless_statement.h"
-#include "src/ast/relational_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
@@ -149,6 +149,9 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   if (expr->IsAs()) {
     return EmitAs(expr->AsAs());
   }
+  if (expr->IsBinary()) {
+    return EmitBinary(expr->AsBinary());
+  }
   if (expr->IsCall()) {
     return EmitCall(expr->AsCall());
   }
@@ -163,9 +166,6 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   }
   if (expr->IsMemberAccessor()) {
     return EmitMemberAccessor(expr->AsMemberAccessor());
-  }
-  if (expr->IsRelational()) {
-    return EmitRelational(expr->AsRelational());
   }
   if (expr->IsUnaryDerivative()) {
     return EmitUnaryDerivative(expr->AsUnaryDerivative());
@@ -518,7 +518,7 @@ bool GeneratorImpl::EmitVariableDecorations(ast::DecoratedVariable* var) {
   return true;
 }
 
-bool GeneratorImpl::EmitRelational(ast::RelationalExpression* expr) {
+bool GeneratorImpl::EmitBinary(ast::BinaryExpression* expr) {
   out_ << "(";
 
   if (!EmitExpression(expr->lhs())) {
@@ -526,66 +526,66 @@ bool GeneratorImpl::EmitRelational(ast::RelationalExpression* expr) {
   }
   out_ << " ";
 
-  switch (expr->relation()) {
-    case ast::Relation::kAnd:
+  switch (expr->op()) {
+    case ast::BinaryOp::kAnd:
       out_ << "&";
       break;
-    case ast::Relation::kOr:
+    case ast::BinaryOp::kOr:
       out_ << "|";
       break;
-    case ast::Relation::kXor:
+    case ast::BinaryOp::kXor:
       out_ << "^";
       break;
-    case ast::Relation::kLogicalAnd:
+    case ast::BinaryOp::kLogicalAnd:
       out_ << "&&";
       break;
-    case ast::Relation::kLogicalOr:
+    case ast::BinaryOp::kLogicalOr:
       out_ << "||";
       break;
-    case ast::Relation::kEqual:
+    case ast::BinaryOp::kEqual:
       out_ << "==";
       break;
-    case ast::Relation::kNotEqual:
+    case ast::BinaryOp::kNotEqual:
       out_ << "!=";
       break;
-    case ast::Relation::kLessThan:
+    case ast::BinaryOp::kLessThan:
       out_ << "<";
       break;
-    case ast::Relation::kGreaterThan:
+    case ast::BinaryOp::kGreaterThan:
       out_ << ">";
       break;
-    case ast::Relation::kLessThanEqual:
+    case ast::BinaryOp::kLessThanEqual:
       out_ << "<=";
       break;
-    case ast::Relation::kGreaterThanEqual:
+    case ast::BinaryOp::kGreaterThanEqual:
       out_ << ">=";
       break;
-    case ast::Relation::kShiftLeft:
+    case ast::BinaryOp::kShiftLeft:
       out_ << "<<";
       break;
-    case ast::Relation::kShiftRight:
+    case ast::BinaryOp::kShiftRight:
       out_ << ">>";
       break;
-    case ast::Relation::kShiftRightArith:
+    case ast::BinaryOp::kShiftRightArith:
       out_ << ">>>";
       break;
-    case ast::Relation::kAdd:
+    case ast::BinaryOp::kAdd:
       out_ << "+";
       break;
-    case ast::Relation::kSubtract:
+    case ast::BinaryOp::kSubtract:
       out_ << "-";
       break;
-    case ast::Relation::kMultiply:
+    case ast::BinaryOp::kMultiply:
       out_ << "*";
       break;
-    case ast::Relation::kDivide:
+    case ast::BinaryOp::kDivide:
       out_ << "/";
       break;
-    case ast::Relation::kModulo:
+    case ast::BinaryOp::kModulo:
       out_ << "%";
       break;
-    case ast::Relation::kNone:
-      error_ = "missing relation type";
+    case ast::BinaryOp::kNone:
+      error_ = "missing binary operation type";
       return false;
   }
   out_ << " ";
