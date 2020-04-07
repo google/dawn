@@ -130,7 +130,7 @@ extern "C" {
     );
 {% endfor %}
 
-typedef void (*WGPUProc)();
+typedef void (*WGPUProc)(void);
 
 #if !defined(WGPU_SKIP_PROCS)
 
