@@ -24,6 +24,7 @@
 #include "src/ast/continue_statement.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/float_literal.h"
+#include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/loop_statement.h"
@@ -404,6 +405,65 @@ TEST_F(TypeDeterminerTest, Expr_Constructor_Type) {
   ASSERT_TRUE(tc.result_type()->IsVector());
   EXPECT_TRUE(tc.result_type()->AsVector()->type()->IsF32());
   EXPECT_EQ(tc.result_type()->AsVector()->size(), 3);
+}
+
+TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalVariable) {
+  ast::type::F32Type f32;
+
+  ast::Module m;
+  auto var =
+      std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone, &f32);
+  m.AddGlobalVariable(std::move(var));
+
+  // Register the global
+  EXPECT_TRUE(td()->Determine(&m));
+
+  ast::IdentifierExpression ident("my_var");
+  EXPECT_TRUE(td()->DetermineResultType(&ident));
+  ASSERT_NE(ident.result_type(), nullptr);
+  EXPECT_TRUE(ident.result_type()->IsF32());
+}
+
+TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
+  ast::type::F32Type f32;
+
+  auto my_var = std::make_unique<ast::IdentifierExpression>("my_var");
+  auto my_var_ptr = my_var.get();
+
+  ast::StatementList body;
+  body.push_back(std::make_unique<ast::VariableDeclStatement>(
+      std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone,
+                                      &f32)));
+
+  body.push_back(std::make_unique<ast::AssignmentStatement>(
+      std::move(my_var),
+      std::make_unique<ast::IdentifierExpression>("my_var")));
+
+  ast::Function f("my_func", {}, &f32);
+  f.set_body(std::move(body));
+
+  EXPECT_TRUE(td()->DetermineFunction(&f));
+
+  ASSERT_NE(my_var_ptr->result_type(), nullptr);
+  EXPECT_TRUE(my_var_ptr->result_type()->IsF32());
+}
+
+TEST_F(TypeDeterminerTest, Expr_Identifier_Function) {
+  ast::type::F32Type f32;
+
+  ast::VariableList params;
+  auto func =
+      std::make_unique<ast::Function>("my_func", std::move(params), &f32);
+  ast::Module m;
+  m.AddFunction(std::move(func));
+
+  // Register the function
+  EXPECT_TRUE(td()->Determine(&m));
+
+  ast::IdentifierExpression ident("my_func");
+  EXPECT_TRUE(td()->DetermineResultType(&ident));
+  ASSERT_NE(ident.result_type(), nullptr);
+  EXPECT_TRUE(ident.result_type()->IsF32());
 }
 
 }  // namespace

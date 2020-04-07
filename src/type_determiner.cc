@@ -19,6 +19,7 @@
 #include "src/ast/case_statement.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/else_statement.h"
+#include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/regardless_statement.h"
@@ -176,6 +177,9 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
   if (expr->IsConstructor()) {
     return DetermineConstructor(expr->AsConstructor());
   }
+  if (expr->IsIdentifier()) {
+    return DetermineIdentifier(expr->AsIdentifier());
+  }
 
   error_ = "unknown expression for type determination";
   return false;
@@ -188,6 +192,30 @@ bool TypeDeterminer::DetermineConstructor(ast::ConstructorExpression* expr) {
     expr->set_result_type(expr->AsScalarConstructor()->literal()->type());
   }
   return true;
+}
+
+bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
+  if (expr->name().size() > 1) {
+    // TODO(dsinclair): Handle imports
+    error_ = "imports not handled in type determination";
+    return false;
+  }
+
+  auto name = expr->name()[0];
+  ast::Variable* var;
+  if (variable_stack_.get(name, &var)) {
+    expr->set_result_type(var->type());
+    return true;
+  }
+
+  auto iter = name_to_function_.find(name);
+  if (iter != name_to_function_.end()) {
+    expr->set_result_type(iter->second->return_type());
+    return true;
+  }
+
+  error_ = "unknown identifier for type determination";
+  return false;
 }
 
 }  // namespace tint
