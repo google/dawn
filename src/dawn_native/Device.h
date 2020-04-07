@@ -158,7 +158,6 @@ namespace dawn_native {
                                            const TextureViewDescriptor* descriptor);
 
         void InjectError(wgpu::ErrorType type, const char* message);
-
         void Tick();
 
         void SetDeviceLostCallback(wgpu::DeviceLostCallback callback, void* userdata);
@@ -183,6 +182,27 @@ namespace dawn_native {
 
         DynamicUploader* GetDynamicUploader() const;
 
+        // The device state which is a combination of creation state and loss state.
+        //
+        //   - BeingCreated: the device didn't finish creation yet and the frontend cannot be used
+        //     (both for the application calling WebGPU, or re-entrant calls). No work exists on
+        //     the GPU timeline.
+        //   - Alive: the device is usable and might have work happening on the GPU timeline.
+        //   - BeingDisconnected: the device is no longer usable because we are waiting for all
+        //     work on the GPU timeline to finish. (this is to make validation prevent the
+        //     application from adding more work during the transition from Available to
+        //     Disconnected)
+        //   - Disconnected: there is no longer work happening on the GPU timeline and the CPU data
+        //     structures can be safely destroyed without additional synchronization.
+        enum class State {
+            BeingCreated,
+            Alive,
+            BeingDisconnected,
+            Disconnected,
+        };
+        State GetState() const;
+        bool IsLost() const;
+
         std::vector<const char*> GetEnabledExtensions() const;
         std::vector<const char*> GetTogglesUsed() const;
         bool IsExtensionEnabled(Extension extension) const;
@@ -191,23 +211,13 @@ namespace dawn_native {
         size_t GetLazyClearCountForTesting();
         void IncrementLazyClearCountForTesting();
         void LoseForTesting();
-        bool IsLost() const;
 
       protected:
         void SetToggle(Toggle toggle, bool isEnabled);
         void ForceSetToggle(Toggle toggle, bool isEnabled);
 
         MaybeError Initialize();
-        void BaseDestructor();
-
-        std::unique_ptr<DynamicUploader> mDynamicUploader;
-        // LossStatus::Alive means the device is alive and can be used normally.
-        // LossStatus::BeingLost means the device is in the process of being lost and should not
-        //              accept any new commands.
-        // LossStatus::AlreadyLost means the device has been lost and can no longer be used,
-        //             all resources have been freed.
-        enum class LossStatus { Alive, BeingLost, AlreadyLost };
-        LossStatus mLossStatus = LossStatus::Alive;
+        void ShutDownBase();
 
       private:
         virtual ResultOrError<BindGroupBase*> CreateBindGroupImpl(
@@ -272,9 +282,9 @@ namespace dawn_native {
 
         void ConsumeError(std::unique_ptr<ErrorData> error);
 
-        // Destroy is used to clean up and release resources used by device, does not wait for GPU
-        // or check errors.
-        virtual void Destroy() = 0;
+        // ShutDownImpl is used to clean up and release resources used by device, does not wait for
+        // GPU or check errors.
+        virtual void ShutDownImpl() = 0;
 
         // WaitForIdleForDestruction waits for GPU to finish, checks errors and gets ready for
         // destruction. This is only used when properly destructing the device. For a real
@@ -282,9 +292,8 @@ namespace dawn_native {
         // resources.
         virtual MaybeError WaitForIdleForDestruction() = 0;
 
-        void HandleLoss(const char* message);
         wgpu::DeviceLostCallback mDeviceLostCallback = nullptr;
-        void* mDeviceLostUserdata;
+        void* mDeviceLostUserdata = nullptr;
 
         AdapterBase* mAdapter = nullptr;
 
@@ -303,11 +312,13 @@ namespace dawn_native {
             void* userdata;
         };
 
+        std::unique_ptr<DynamicUploader> mDynamicUploader;
         std::unique_ptr<ErrorScopeTracker> mErrorScopeTracker;
         std::unique_ptr<FenceSignalTracker> mFenceSignalTracker;
         std::vector<DeferredCreateBufferMappedAsync> mDeferredCreateBufferMappedAsyncResults;
 
         uint32_t mRefCount = 1;
+        State mState = State::BeingCreated;
 
         FormatTable mFormatTable;
 

@@ -140,7 +140,7 @@ namespace dawn_native { namespace d3d12 {
             TextureBase* texture,
             const TextureViewDescriptor* descriptor) override;
 
-        void Destroy() override;
+        void ShutDownImpl() override;
         MaybeError WaitForIdleForDestruction() override;
 
         Serial mCompletedSerial = 0;

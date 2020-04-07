@@ -16,7 +16,6 @@
 
 #include "dawn_native/BackendConnection.h"
 #include "dawn_native/BindGroupLayout.h"
-#include "dawn_native/DynamicUploader.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/metal/BindGroupLayoutMTL.h"
 #include "dawn_native/metal/BindGroupMTL.h"
@@ -58,7 +57,7 @@ namespace dawn_native { namespace metal {
     }
 
     Device::~Device() {
-        BaseDestructor();
+        ShutDownBase();
     }
 
     MaybeError Device::Initialize() {
@@ -174,7 +173,6 @@ namespace dawn_native { namespace metal {
     MaybeError Device::TickImpl() {
         Serial completedSerial = GetCompletedCommandSerial();
 
-        mDynamicUploader->Deallocate(completedSerial);
         mMapTracker->Tick(completedSerial);
 
         if (mCommandContext.GetCommands() != nil) {
@@ -317,13 +315,12 @@ namespace dawn_native { namespace metal {
         return {};
     }
 
-    void Device::Destroy() {
-        ASSERT(mLossStatus != LossStatus::AlreadyLost);
+    void Device::ShutDownImpl() {
+        ASSERT(GetState() == State::Disconnected);
 
         [mCommandContext.AcquireCommands() release];
 
         mMapTracker = nullptr;
-        mDynamicUploader = nullptr;
 
         [mCommandQueue release];
         mCommandQueue = nil;

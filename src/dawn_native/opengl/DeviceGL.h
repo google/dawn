@@ -97,7 +97,7 @@ namespace dawn_native { namespace opengl {
 
         void InitTogglesFromDriver();
         void CheckPassedFences();
-        void Destroy() override;
+        void ShutDownImpl() override;
         MaybeError WaitForIdleForDestruction() override;
 
         Serial mCompletedSerial = 0;

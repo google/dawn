@@ -17,7 +17,6 @@
 #include "common/Platform.h"
 #include "dawn_native/BackendConnection.h"
 #include "dawn_native/Commands.h"
-#include "dawn_native/DynamicUploader.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/VulkanBackend.h"
@@ -54,29 +53,37 @@ namespace dawn_native { namespace vulkan {
     Device::Device(Adapter* adapter, const DeviceDescriptor* descriptor)
         : DeviceBase(adapter, descriptor) {
         InitTogglesFromDriver();
-
-        // Set the device as lost until successfully created.
-        mLossStatus = LossStatus::AlreadyLost;
     }
 
     MaybeError Device::Initialize() {
         // Copy the adapter's device info to the device so that we can change the "knobs"
         mDeviceInfo = ToBackend(GetAdapter())->GetDeviceInfo();
 
+        // Initialize the "instance" procs of our local function table.
         VulkanFunctions* functions = GetMutableFunctions();
         *functions = ToBackend(GetAdapter())->GetBackend()->GetFunctions();
 
-        VkPhysicalDevice physicalDevice = ToBackend(GetAdapter())->GetPhysicalDevice();
+        // Two things are crucial if device initialization fails: the function pointers to destroy
+        // objects, and the fence deleter that calls these functions. Do not do anything before
+        // these two are set up, so that a failed initialization doesn't cause a crash in
+        // ShutDownImpl()
+        {
+            VkPhysicalDevice physicalDevice = ToBackend(GetAdapter())->GetPhysicalDevice();
 
-        VulkanDeviceKnobs usedDeviceKnobs = {};
-        DAWN_TRY_ASSIGN(usedDeviceKnobs, CreateDevice(physicalDevice));
-        *static_cast<VulkanDeviceKnobs*>(&mDeviceInfo) = usedDeviceKnobs;
+            VulkanDeviceKnobs usedDeviceKnobs = {};
+            DAWN_TRY_ASSIGN(usedDeviceKnobs, CreateDevice(physicalDevice));
+            *static_cast<VulkanDeviceKnobs*>(&mDeviceInfo) = usedDeviceKnobs;
 
-        DAWN_TRY(functions->LoadDeviceProcs(mVkDevice, mDeviceInfo));
+            DAWN_TRY(functions->LoadDeviceProcs(mVkDevice, mDeviceInfo));
 
-        GatherQueueFromDevice();
+            // The queue can be loaded before the fenced deleter because their lifetime is tied to
+            // the device.
+            GatherQueueFromDevice();
+
+            mDeleter = std::make_unique<FencedDeleter>(this);
+        }
+
         mDescriptorSetService = std::make_unique<DescriptorSetService>(this);
-        mDeleter = std::make_unique<FencedDeleter>(this);
         mMapRequestTracker = std::make_unique<MapRequestTracker>(this);
         mRenderPassCache = std::make_unique<RenderPassCache>(this);
         mResourceMemoryAllocator = std::make_unique<ResourceMemoryAllocator>(this);
@@ -94,34 +101,7 @@ namespace dawn_native { namespace vulkan {
     }
 
     Device::~Device() {
-        BaseDestructor();
-
-        mDescriptorSetService = nullptr;
-
-        // The frontend asserts DynamicUploader is destructed by the backend.
-        // It is usually destructed in Destroy(), but Destroy isn't always called if device
-        // initialization failed.
-        mDynamicUploader = nullptr;
-
-        // We still need to properly handle Vulkan object deletion even if the device has been lost,
-        // so the Deleter and vkDevice cannot be destroyed in Device::Destroy().
-        // We need handle deleting all child objects by calling Tick() again with a large serial to
-        // force all operations to look as if they were completed, and delete all objects before
-        // destroying the Deleter and vkDevice.
-        // The Deleter may be null if initialization failed.
-        if (mDeleter != nullptr) {
-            mCompletedSerial = std::numeric_limits<Serial>::max();
-            mDeleter->Tick(mCompletedSerial);
-            mDeleter = nullptr;
-        }
-
-        // VkQueues are destroyed when the VkDevice is destroyed
-        // The VkDevice is needed to destroy child objects, so it must be destroyed last after all
-        // child objects have been deleted.
-        if (mVkDevice != VK_NULL_HANDLE) {
-            fn.DestroyDevice(mVkDevice, nullptr);
-            mVkDevice = VK_NULL_HANDLE;
-        }
+        ShutDownBase();
     }
 
     ResultOrError<BindGroupBase*> Device::CreateBindGroupImpl(
@@ -198,13 +178,7 @@ namespace dawn_native { namespace vulkan {
 
         mDescriptorSetService->Tick(mCompletedSerial);
         mMapRequestTracker->Tick(mCompletedSerial);
-
-        // Uploader should tick before the resource allocator
-        // as it enqueues resources to be released.
-        mDynamicUploader->Deallocate(mCompletedSerial);
-
         mResourceMemoryAllocator->Tick(mCompletedSerial);
-
         mDeleter->Tick(mCompletedSerial);
 
         if (mRecordingContext.used) {
@@ -422,8 +396,6 @@ namespace dawn_native { namespace vulkan {
         DAWN_TRY(CheckVkSuccess(fn.CreateDevice(physicalDevice, &createInfo, nullptr, &mVkDevice),
                                 "vkCreateDevice"));
 
-        // Device created. Mark it as alive.
-        mLossStatus = LossStatus::Alive;
         return usedKnobs;
     }
 
@@ -774,8 +746,27 @@ namespace dawn_native { namespace vulkan {
         return {};
     }
 
-    void Device::Destroy() {
-        ASSERT(mLossStatus != LossStatus::AlreadyLost);
+    void Device::ShutDownImpl() {
+        ASSERT(GetState() == State::Disconnected);
+
+        // We failed during initialization so early that we don't even have a VkDevice. There is
+        // nothing to do.
+        if (mVkDevice == VK_NULL_HANDLE) {
+            return;
+        }
+
+        // The deleter is the second thing we initialize. If it is not present, it means that
+        // only the VkDevice was created and nothing else. Destroy the device and do nothing else
+        // because the function pointers might not have been loaded (and there is nothing to
+        // destroy anyway).
+        if (mDeleter == nullptr) {
+            fn.DestroyDevice(mVkDevice, nullptr);
+            mVkDevice = VK_NULL_HANDLE;
+            return;
+        }
+
+        // Enough of the Device's initialization happened that we can now do regular robust
+        // deinitialization.
 
         // Immediately tag the recording context as unused so we don't try to submit it in Tick.
         mRecordingContext.used = false;
@@ -810,18 +801,30 @@ namespace dawn_native { namespace vulkan {
         }
         mUnusedFences.clear();
 
-        // Free services explicitly so that they can free Vulkan objects before vkDestroyDevice
-        mDynamicUploader = nullptr;
-
         // Releasing the uploader enqueues buffers to be released.
         // Call Tick() again to clear them before releasing the deleter.
         mDeleter->Tick(mCompletedSerial);
 
         mMapRequestTracker = nullptr;
+        mDescriptorSetService = nullptr;
 
         // The VkRenderPasses in the cache can be destroyed immediately since all commands referring
         // to them are guaranteed to be finished executing.
         mRenderPassCache = nullptr;
+
+        // We need handle deleting all child objects by calling Tick() again with a large serial to
+        // force all operations to look as if they were completed, and delete all objects before
+        // destroying the Deleter and vkDevice.
+        ASSERT(mDeleter != nullptr);
+        mDeleter->Tick(std::numeric_limits<Serial>::max());
+        mDeleter = nullptr;
+
+        // VkQueues are destroyed when the VkDevice is destroyed
+        // The VkDevice is needed to destroy child objects, so it must be destroyed last after all
+        // child objects have been deleted.
+        ASSERT(mVkDevice != VK_NULL_HANDLE);
+        fn.DestroyDevice(mVkDevice, nullptr);
+        mVkDevice = VK_NULL_HANDLE;
     }
 
 }}  // namespace dawn_native::vulkan
