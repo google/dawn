@@ -24,6 +24,7 @@
 #include "src/ast/regardless_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/switch_statement.h"
 #include "src/ast/type_constructor_expression.h"
 
 namespace tint {
@@ -125,6 +126,9 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     return DetermineResultType(l->body()) &&
            DetermineResultType(l->continuing());
   }
+  if (stmt->IsNop()) {
+    return true;
+  }
   if (stmt->IsRegardless()) {
     auto r = stmt->AsRegardless();
     return DetermineResultType(r->condition()) &&
@@ -134,7 +138,16 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     auto r = stmt->AsReturn();
     return DetermineResultType(r->value());
   }
-  if (stmt->IsNop()) {
+  if (stmt->IsSwitch()) {
+    auto s = stmt->AsSwitch();
+    if (!DetermineResultType(s->condition())) {
+      return false;
+    }
+    for (const auto& case_stmt : s->body()) {
+      if (!DetermineResultType(case_stmt.get())) {
+        return false;
+      }
+    }
     return true;
   }
 
