@@ -800,11 +800,11 @@ std::unique_ptr<ast::Expression> ParserImpl::MakeConstantExpression(
         std::make_unique<ast::FloatLiteral>(ast_type, spirv_const->GetFloat()));
   }
   if (ast_type->IsBool()) {
-    const bool value = spirv_const->AsNullConstant() ? false :
-      spirv_const->AsBoolConstant()->value();
+    const bool value = spirv_const->AsNullConstant()
+                           ? false
+                           : spirv_const->AsBoolConstant()->value();
     return std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::BoolLiteral>(
-            ast_type, value));
+        std::make_unique<ast::BoolLiteral>(ast_type, value));
   }
   auto spirv_composite_const = spirv_const->AsCompositeConstant();
   if (spirv_composite_const != nullptr) {

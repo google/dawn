@@ -16,13 +16,13 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/binary_expression.h"
-#include "src/ast/type_constructor_expression.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/vector_type.h"
+#include "src/ast/type_constructor_expression.h"
 #include "src/context.h"
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
@@ -69,26 +69,28 @@ TEST_F(BuilderTest, Binary_Add_Integer_Vectors) {
 
   ast::ExpressionList vals;
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::IntLiteral>(&i32, 1)));
+      std::make_unique<ast::IntLiteral>(&i32, 1)));
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::IntLiteral>(&i32, 1)));
+      std::make_unique<ast::IntLiteral>(&i32, 1)));
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::IntLiteral>(&i32, 1)));
-  auto lhs = std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+      std::make_unique<ast::IntLiteral>(&i32, 1)));
+  auto lhs =
+      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::IntLiteral>(&i32, 1)));
+      std::make_unique<ast::IntLiteral>(&i32, 1)));
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::IntLiteral>(&i32, 1)));
+      std::make_unique<ast::IntLiteral>(&i32, 1)));
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::IntLiteral>(&i32, 1)));
-  auto rhs = std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+      std::make_unique<ast::IntLiteral>(&i32, 1)));
+  auto rhs =
+      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   Context ctx;
   TypeDeterminer td(&ctx);
 
-  ast::BinaryExpression expr(
-      ast::BinaryOp::kAdd, std::move(lhs), std::move(rhs));
+  ast::BinaryExpression expr(ast::BinaryOp::kAdd, std::move(lhs),
+                             std::move(rhs));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -140,26 +142,28 @@ TEST_F(BuilderTest, Binary_Add_Float_Vectors) {
 
   ast::ExpressionList vals;
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  auto lhs = std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  auto lhs =
+      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
   vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
-  auto rhs = std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  auto rhs =
+      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
 
   Context ctx;
   TypeDeterminer td(&ctx);
 
-  ast::BinaryExpression expr(
-      ast::BinaryOp::kAdd, std::move(lhs), std::move(rhs));
+  ast::BinaryExpression expr(ast::BinaryOp::kAdd, std::move(lhs),
+                             std::move(rhs));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 

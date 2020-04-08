@@ -15,6 +15,9 @@
 #ifndef SRC_READER_SPIRV_FUNCTION_H_
 #define SRC_READER_SPIRV_FUNCTION_H_
 
+#include <memory>
+#include <vector>
+
 #include "source/opt/constants.h"
 #include "source/opt/function.h"
 #include "source/opt/ir_context.h"
@@ -50,7 +53,9 @@ class FunctionEmitter {
   bool failed() const { return !success(); }
 
   /// @returns the body of the function.
-  const std::vector<std::unique_ptr<ast::Statement>>& ast_body() { return ast_body_; }
+  const std::vector<std::unique_ptr<ast::Statement>>& ast_body() {
+    return ast_body_;
+  }
 
   /// Records failure.
   /// @returns a FailStream on which to emit diagnostics.

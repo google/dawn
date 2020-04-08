@@ -14,6 +14,8 @@
 
 #include "src/reader/spirv/function.h"
 
+#include <utility>
+
 #include "source/opt/basic_block.h"
 #include "source/opt/function.h"
 #include "source/opt/instruction.h"
@@ -154,7 +156,8 @@ bool FunctionEmitter::EmitFunctionVariables() {
           parser_impl_.MakeConstantExpression(inst.GetSingleWordInOperand(1)));
     }
     // TODO(dneto): Add the initializer via Variable::set_constructor.
-    auto var_decl_stmt = std::make_unique<ast::VariableDeclStatement>(std::move(var));
+    auto var_decl_stmt =
+        std::make_unique<ast::VariableDeclStatement>(std::move(var));
     ast_body_.emplace_back(std::move(var_decl_stmt));
   }
   return success();

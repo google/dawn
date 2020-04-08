@@ -16,8 +16,8 @@
 #define SRC_READER_SPIRV_PARSER_IMPL_TEST_HELPER_H_
 
 #include <memory>
-#include <string>
 #include <sstream>
+#include <string>
 #include <vector>
 
 #include "gtest/gtest.h"
@@ -66,7 +66,8 @@ class SpvParserTest : public testing::Test {
 /// Returns the string dump of a function body.
 /// @param body the statement in the body
 /// @returnss the string dump of a function body.
-inline std::string ToString(const std::vector<std::unique_ptr<ast::Statement>>& body) {
+inline std::string ToString(
+    const std::vector<std::unique_ptr<ast::Statement>>& body) {
   std::ostringstream outs;
   for (const auto& stmt : body) {
     stmt->to_str(outs, 0);

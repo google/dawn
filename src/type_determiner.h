@@ -67,7 +67,7 @@ class TypeDeterminer {
   /// Determines type information for a set of statements
   /// @param stmts the statements to check
   /// @returns true if the determination was successful
-  bool DetermineResultType(const ast::StatementList& stmts);
+  bool DetermineStatements(const ast::StatementList& stmts);
   /// Determines type information for a statement
   /// @param stmt the statement to check
   /// @returns true if the determination was successful
@@ -76,6 +76,11 @@ class TypeDeterminer {
   /// @param expr the expression to check
   /// @returns true if the determination was successful
   bool DetermineResultType(ast::Expression* expr);
+  /// Determines the storage class for variables. This assumes that it is only
+  /// called for things in function scope, not module scope.
+  /// @param stmt the statement to check
+  /// @returns false on error
+  bool DetermineVariableStorageClass(ast::Statement* stmt);
 
  private:
   bool DetermineArrayAccessor(ast::ArrayAccessorExpression* expr);

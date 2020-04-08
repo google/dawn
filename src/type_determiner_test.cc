@@ -1480,5 +1480,69 @@ INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          testing::Values(ast::UnaryOp::kNegation,
                                          ast::UnaryOp::kNot));
 
+TEST_F(TypeDeterminerTest, StorageClass_SetsIfMissing) {
+  ast::type::I32Type i32;
+
+  auto var =
+      std::make_unique<ast::Variable>("var", ast::StorageClass::kNone, &i32);
+  auto var_ptr = var.get();
+  auto stmt = std::make_unique<ast::VariableDeclStatement>(std::move(var));
+
+  auto func =
+      std::make_unique<ast::Function>("func", ast::VariableList{}, &i32);
+  ast::StatementList stmts;
+  stmts.push_back(std::move(stmt));
+  func->set_body(std::move(stmts));
+
+  ast::Module m;
+  m.AddFunction(std::move(func));
+
+  EXPECT_TRUE(td()->Determine(&m)) << td()->error();
+  EXPECT_EQ(var_ptr->storage_class(), ast::StorageClass::kFunction);
+}
+
+TEST_F(TypeDeterminerTest, StorageClass_DoesNotSetOnConst) {
+  ast::type::I32Type i32;
+
+  auto var =
+      std::make_unique<ast::Variable>("var", ast::StorageClass::kNone, &i32);
+  var->set_is_const(true);
+  auto var_ptr = var.get();
+  auto stmt = std::make_unique<ast::VariableDeclStatement>(std::move(var));
+
+  auto func =
+      std::make_unique<ast::Function>("func", ast::VariableList{}, &i32);
+  ast::StatementList stmts;
+  stmts.push_back(std::move(stmt));
+  func->set_body(std::move(stmts));
+
+  ast::Module m;
+  m.AddFunction(std::move(func));
+
+  EXPECT_TRUE(td()->Determine(&m)) << td()->error();
+  EXPECT_EQ(var_ptr->storage_class(), ast::StorageClass::kNone);
+}
+
+TEST_F(TypeDeterminerTest, StorageClass_NonFunctionClassError) {
+  ast::type::I32Type i32;
+
+  auto var = std::make_unique<ast::Variable>(
+      "var", ast::StorageClass::kWorkgroup, &i32);
+  auto stmt = std::make_unique<ast::VariableDeclStatement>(std::move(var));
+
+  auto func =
+      std::make_unique<ast::Function>("func", ast::VariableList{}, &i32);
+  ast::StatementList stmts;
+  stmts.push_back(std::move(stmt));
+  func->set_body(std::move(stmts));
+
+  ast::Module m;
+  m.AddFunction(std::move(func));
+
+  EXPECT_FALSE(td()->Determine(&m));
+  EXPECT_EQ(td()->error(),
+            "function variable has a non-function storage class");
+}
+
 }  // namespace
 }  // namespace tint

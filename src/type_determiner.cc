@@ -82,7 +82,7 @@ bool TypeDeterminer::DetermineFunctions(const ast::FunctionList& funcs) {
 
 bool TypeDeterminer::DetermineFunction(ast::Function* func) {
   variable_stack_.push_scope();
-  if (!DetermineResultType(func->body())) {
+  if (!DetermineStatements(func->body())) {
     return false;
   }
   variable_stack_.pop_scope();
@@ -90,12 +90,40 @@ bool TypeDeterminer::DetermineFunction(ast::Function* func) {
   return true;
 }
 
-bool TypeDeterminer::DetermineResultType(const ast::StatementList& stmts) {
+bool TypeDeterminer::DetermineStatements(const ast::StatementList& stmts) {
   for (const auto& stmt : stmts) {
+    if (!DetermineVariableStorageClass(stmt.get())) {
+      return false;
+    }
+
     if (!DetermineResultType(stmt.get())) {
       return false;
     }
   }
+  return true;
+}
+
+bool TypeDeterminer::DetermineVariableStorageClass(ast::Statement* stmt) {
+  if (!stmt->IsVariableDecl()) {
+    return true;
+  }
+
+  auto var = stmt->AsVariableDecl()->variable();
+  // Nothing to do for const
+  if (var->is_const()) {
+    return true;
+  }
+
+  if (var->storage_class() == ast::StorageClass::kFunction) {
+    return true;
+  }
+
+  if (var->storage_class() != ast::StorageClass::kNone) {
+    error_ = "function variable has a non-function storage class";
+    return false;
+  }
+
+  var->set_storage_class(ast::StorageClass::kFunction);
   return true;
 }
 
@@ -110,7 +138,7 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
   }
   if (stmt->IsCase()) {
     auto c = stmt->AsCase();
-    return DetermineResultType(c->body());
+    return DetermineStatements(c->body());
   }
   if (stmt->IsContinue()) {
     auto c = stmt->AsContinue();
@@ -119,7 +147,7 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
   if (stmt->IsElse()) {
     auto e = stmt->AsElse();
     return DetermineResultType(e->condition()) &&
-           DetermineResultType(e->body());
+           DetermineStatements(e->body());
   }
   if (stmt->IsFallthrough()) {
     return true;
@@ -127,7 +155,7 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
   if (stmt->IsIf()) {
     auto i = stmt->AsIf();
     if (!DetermineResultType(i->condition()) ||
-        !DetermineResultType(i->body())) {
+        !DetermineStatements(i->body())) {
       return false;
     }
 
@@ -143,8 +171,8 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
   }
   if (stmt->IsLoop()) {
     auto l = stmt->AsLoop();
-    return DetermineResultType(l->body()) &&
-           DetermineResultType(l->continuing());
+    return DetermineStatements(l->body()) &&
+           DetermineStatements(l->continuing());
   }
   if (stmt->IsNop()) {
     return true;
@@ -152,7 +180,7 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
   if (stmt->IsRegardless()) {
     auto r = stmt->AsRegardless();
     return DetermineResultType(r->condition()) &&
-           DetermineResultType(r->body());
+           DetermineStatements(r->body());
   }
   if (stmt->IsReturn()) {
     auto r = stmt->AsReturn();
@@ -173,7 +201,7 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
   if (stmt->IsUnless()) {
     auto u = stmt->AsUnless();
     return DetermineResultType(u->condition()) &&
-           DetermineResultType(u->body());
+           DetermineStatements(u->body());
   }
   if (stmt->IsVariableDecl()) {
     auto v = stmt->AsVariableDecl();
