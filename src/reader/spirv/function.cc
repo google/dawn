@@ -92,7 +92,7 @@ bool FunctionEmitter::EmitFunctionDeclaration() {
            << function_.result_id();
   }
 
-  std::vector<std::unique_ptr<ast::Variable>> ast_params;
+  ast::VariableList ast_params;
   function_.ForEachParam(
       [this, &ast_params](const spvtools::opt::Instruction* param) {
         auto* ast_type = parser_impl_.ConvertType(param->type_id());

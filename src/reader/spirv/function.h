@@ -53,9 +53,7 @@ class FunctionEmitter {
   bool failed() const { return !success(); }
 
   /// @returns the body of the function.
-  const std::vector<std::unique_ptr<ast::Statement>>& ast_body() {
-    return ast_body_;
-  }
+  const ast::StatementList& ast_body() { return ast_body_; }
 
   /// Records failure.
   /// @returns a FailStream on which to emit diagnostics.
@@ -91,7 +89,7 @@ class FunctionEmitter {
   FailStream& fail_stream_;
   Namer& namer_;
   const spvtools::opt::Function& function_;
-  std::vector<std::unique_ptr<ast::Statement>> ast_body_;
+  ast::StatementList ast_body_;
 };
 
 }  // namespace spirv
