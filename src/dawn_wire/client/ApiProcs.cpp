@@ -368,6 +368,22 @@ namespace dawn_wire { namespace client {
         cmd.Serialize(allocatedBuffer, *buffer->device->GetClient());
     }
 
+    void ClientBufferDestroy(WGPUBuffer cBuffer) {
+        Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
+
+        // Cancel or remove all mappings
+        buffer->writeHandle = nullptr;
+        buffer->readHandle = nullptr;
+        buffer->ClearMapRequests(WGPUBufferMapAsyncStatus_Unknown);
+
+        BufferDestroyCmd cmd;
+        cmd.self = cBuffer;
+        size_t requiredSize = cmd.GetRequiredSize();
+        char* allocatedBuffer =
+            static_cast<char*>(buffer->device->GetClient()->GetCmdSpace(requiredSize));
+        cmd.Serialize(allocatedBuffer, *buffer->device->GetClient());
+    }
+
     WGPUFence ClientQueueCreateFence(WGPUQueue cSelf, WGPUFenceDescriptor const* descriptor) {
         Queue* queue = reinterpret_cast<Queue*>(cSelf);
         Device* device = queue->device;

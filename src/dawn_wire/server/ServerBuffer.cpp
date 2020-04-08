@@ -31,6 +31,19 @@ namespace dawn_wire { namespace server {
         return true;
     }
 
+    bool Server::PreHandleBufferDestroy(const BufferDestroyCmd& cmd) {
+        // Destroying a buffer does an implicit unmapping.
+        auto* buffer = BufferObjects().Get(cmd.selfId);
+        DAWN_ASSERT(buffer != nullptr);
+
+        // The buffer was destroyed. Clear the Read/WriteHandle.
+        buffer->readHandle = nullptr;
+        buffer->writeHandle = nullptr;
+        buffer->mapWriteState = BufferMapWriteState::Unmapped;
+
+        return true;
+    }
+
     bool Server::DoBufferMapAsync(ObjectId bufferId,
                                   uint32_t requestSerial,
                                   bool isWrite,

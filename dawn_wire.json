@@ -106,6 +106,7 @@
             "FenceOnCompletion"
         ],
         "client_handwritten_commands": [
+            "BufferDestroy",
             "BufferUnmap",
             "DeviceCreateBuffer",
             "DeviceCreateBufferMapped",
@@ -119,6 +120,7 @@
             "Fence"
         ],
         "server_custom_pre_handler_commands": [
+            "BufferDestroy",
             "BufferUnmap"
         ],
         "server_handwritten_commands": [
