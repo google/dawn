@@ -27,6 +27,37 @@ namespace {
 using ::testing::HasSubstr;
 using ::testing::Not;
 
+std::string CommonTypes() {
+  return R"(
+    %void = OpTypeVoid
+    %voidfn = OpTypeFunction %void
+
+    %bool = OpTypeBool
+    %float = OpTypeFloat 32
+    %uint = OpTypeInt 32 0
+    %int = OpTypeInt 32 1
+
+    %ptr_bool = OpTypePointer Private %bool
+    %ptr_float = OpTypePointer Private %float
+    %ptr_uint = OpTypePointer Private %uint
+    %ptr_int = OpTypePointer Private %int
+
+    %true = OpConstantTrue %bool
+    %false = OpConstantFalse %bool
+    %float_0 = OpConstant %float 0.0
+    %float_1p5 = OpConstant %float 1.5
+    %uint_1 = OpConstant %uint 1
+    %int_m1 = OpConstant %int -1
+    %uint_2 = OpConstant %uint 2
+
+    %v2float = OpTypeVector %float 2
+    %m3v2float = OpTypeMatrix %v2float 3
+
+    %arr2uint = OpTypeArray %uint %uint_2
+    %strct = OpTypeStruct %uint %float %arr2uint
+  )";
+}
+
 TEST_F(SpvParserTest, ModuleScopeVar_NoVar) {
   auto p = parser(test::Assemble(""));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
@@ -140,6 +171,228 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinVerteIndex) {
     x_52
     in
     __u32
+  })"));
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_ScalarInitializers) {
+  auto p = parser(test::Assemble(CommonTypes() + R"(
+     %1 = OpVariable %ptr_bool Private %true
+     %2 = OpVariable %ptr_bool Private %false
+     %3 = OpVariable %ptr_int Private %int_m1
+     %4 = OpVariable %ptr_uint Private %uint_1
+     %5 = OpVariable %ptr_float Private %float_1p5
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
+    x_1
+    private
+    __bool
+    {
+      ScalarConstructor{true}
+    }
+  }
+  Variable{
+    x_2
+    private
+    __bool
+    {
+      ScalarConstructor{false}
+    }
+  }
+  Variable{
+    x_3
+    private
+    __i32
+    {
+      ScalarConstructor{-1}
+    }
+  }
+  Variable{
+    x_4
+    private
+    __u32
+    {
+      ScalarConstructor{1}
+    }
+  }
+  Variable{
+    x_5
+    private
+    __f32
+    {
+      ScalarConstructor{1.500000}
+    }
+  })"));
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_ScalarNullInitializers) {
+  auto p = parser(test::Assemble(CommonTypes() + R"(
+     %null_bool = OpConstantNull %bool
+     %null_int = OpConstantNull %int
+     %null_uint = OpConstantNull %uint
+     %null_float = OpConstantNull %float
+
+     %1 = OpVariable %ptr_bool Private %null_bool
+     %2 = OpVariable %ptr_int Private %null_int
+     %3 = OpVariable %ptr_uint Private %null_uint
+     %4 = OpVariable %ptr_float Private %null_float
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
+    x_1
+    private
+    __bool
+    {
+      ScalarConstructor{false}
+    }
+  }
+  Variable{
+    x_2
+    private
+    __i32
+    {
+      ScalarConstructor{0}
+    }
+  }
+  Variable{
+    x_3
+    private
+    __u32
+    {
+      ScalarConstructor{0}
+    }
+  }
+  Variable{
+    x_4
+    private
+    __f32
+    {
+      ScalarConstructor{0.000000}
+    }
+  })"));
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_VectorInitializer) {
+  auto p = parser(test::Assemble(CommonTypes() + R"(
+     %ptr = OpTypePointer Private %v2float
+     %two = OpConstant %float 2.0
+     %const = OpConstantComposite %v2float %float_1p5 %two
+     %200 = OpVariable %ptr Private %const
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
+    x_200
+    private
+    __vec_2__f32
+    {
+      TypeConstructor{
+        __vec_2__f32
+        ScalarConstructor{1.500000}
+        ScalarConstructor{2.000000}
+      }
+    }
+  })"));
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_MatrixInitializer) {
+  auto p = parser(test::Assemble(CommonTypes() + R"(
+     %ptr = OpTypePointer Private %m3v2float
+     %two = OpConstant %float 2.0
+     %three = OpConstant %float 3.0
+     %four = OpConstant %float 4.0
+     %v0 = OpConstantComposite %v2float %float_1p5 %two
+     %v1 = OpConstantComposite %v2float %two %three
+     %v2 = OpConstantComposite %v2float %three %four
+     %const = OpConstantComposite %m3v2float %v0 %v1 %v2
+     %200 = OpVariable %ptr Private %const
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
+    x_200
+    private
+    __mat_2_3__f32
+    {
+      TypeConstructor{
+        __mat_2_3__f32
+        TypeConstructor{
+          __vec_2__f32
+          ScalarConstructor{1.500000}
+          ScalarConstructor{2.000000}
+        }
+        TypeConstructor{
+          __vec_2__f32
+          ScalarConstructor{2.000000}
+          ScalarConstructor{3.000000}
+        }
+        TypeConstructor{
+          __vec_2__f32
+          ScalarConstructor{3.000000}
+          ScalarConstructor{4.000000}
+        }
+      }
+    }
+  })"));
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_ArrayInitializer) {
+  auto p = parser(test::Assemble(CommonTypes() + R"(
+     %ptr = OpTypePointer Private %arr2uint
+     %two = OpConstant %uint 2
+     %const = OpConstantComposite %arr2uint %uint_1 %two
+     %200 = OpVariable %ptr Private %const
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
+    x_200
+    private
+    __array__u32_2
+    {
+      TypeConstructor{
+        __array__u32_2
+        ScalarConstructor{1}
+        ScalarConstructor{2}
+      }
+    }
+  })"));
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_StructInitializer) {
+  auto p = parser(test::Assemble(CommonTypes() + R"(
+     %ptr = OpTypePointer Private %strct
+     %two = OpConstant %uint 2
+     %arrconst = OpConstantComposite %arr2uint %uint_1 %two
+     %const = OpConstantComposite %strct %uint_1 %float_1p5 %arrconst
+     %200 = OpVariable %ptr Private %const
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
+    x_200
+    private
+    __struct_S
+    {
+      TypeConstructor{
+        __struct_S
+        ScalarConstructor{1}
+        ScalarConstructor{1.500000}
+        TypeConstructor{
+          __array__u32_2
+          ScalarConstructor{1}
+          ScalarConstructor{2}
+        }
+      }
+    }
   })"));
 }
 

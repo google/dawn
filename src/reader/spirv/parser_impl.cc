@@ -710,7 +710,13 @@ bool ParserImpl::EmitModuleScopeVariables() {
     auto* ast_store_type = ast_type->AsPointer()->type();
     auto ast_var =
         MakeVariable(var.result_id(), ast_storage_class, ast_store_type);
-
+    if (var.NumInOperands() > 1) {
+      // SPIR-V initializers are always constants.
+      // (OpenCL also allows the ID of an OpVariable, but we don't handle that
+      // here.)
+      ast_var->set_constructor(
+          MakeConstantExpression(var.GetSingleWordInOperand(1)));
+    }
     // TODO(dneto): initializers (a.k.a. constructor expression)
     ast_module_.AddGlobalVariable(std::move(ast_var));
   }
