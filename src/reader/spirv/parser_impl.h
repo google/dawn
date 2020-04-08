@@ -221,6 +221,11 @@ class ParserImpl : Reader {
                                               ast::StorageClass sc,
                                               ast::type::Type* type);
 
+  /// Creates an AST expression node for a SPIR-V constant.
+  /// @param id the SPIR-V ID of the constant
+  /// @returns a new Literal node
+  std::unique_ptr<ast::Expression> MakeConstantExpression(uint32_t id);
+
  private:
   /// Converts a specific SPIR-V type to a Tint type. Integer case
   ast::type::Type* ConvertType(const spvtools::opt::analysis::Integer* int_ty);

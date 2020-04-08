@@ -18,6 +18,11 @@
 #include "source/opt/function.h"
 #include "source/opt/instruction.h"
 #include "source/opt/module.h"
+#include "src/ast/bool_literal.h"
+#include "src/ast/float_literal.h"
+#include "src/ast/int_literal.h"
+#include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/uint_literal.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/reader/spirv/fail_stream.h"
@@ -32,6 +37,8 @@ FunctionEmitter::FunctionEmitter(ParserImpl* pi,
     : parser_impl_(*pi),
       ast_module_(pi->get_module()),
       ir_context_(*(pi->ir_context())),
+      def_use_mgr_(ir_context_.get_def_use_mgr()),
+      constant_mgr_(ir_context_.get_constant_mgr()),
       type_mgr_(ir_context_.get_type_mgr()),
       fail_stream_(pi->fail_stream()),
       namer_(pi->namer()),
@@ -142,6 +149,13 @@ bool FunctionEmitter::EmitFunctionVariables() {
     auto var =
         parser_impl_.MakeVariable(inst.result_id(),
                                   ast::StorageClass::kNone, var_store_type);
+    if (inst.NumInOperands() > 1) {
+      // SPIR-V initializers are always constants.
+      // (OpenCL also allows the ID of an OpVariable, but we don't handle that
+      // here.)
+      var->set_constructor(
+          parser_impl_.MakeConstantExpression(inst.GetSingleWordInOperand(1)));
+    }
     // TODO(dneto): Add the initializer via Variable::set_constructor.
     auto var_decl_stmt = std::make_unique<ast::VariableDeclStatement>(std::move(var));
     ast_body_.emplace_back(std::move(var_decl_stmt));

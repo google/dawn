@@ -25,6 +25,7 @@
 
 #include "source/opt/basic_block.h"
 #include "source/opt/build_module.h"
+#include "source/opt/constants.h"
 #include "source/opt/decoration_manager.h"
 #include "source/opt/function.h"
 #include "source/opt/instruction.h"
@@ -32,8 +33,12 @@
 #include "source/opt/type_manager.h"
 #include "source/opt/types.h"
 #include "spirv-tools/libspirv.hpp"
+#include "src/ast/bool_literal.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/decorated_variable.h"
+#include "src/ast/float_literal.h"
+#include "src/ast/int_literal.h"
+#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_decoration.h"
 #include "src/ast/struct_member.h"
@@ -51,6 +56,8 @@
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
+#include "src/ast/type_constructor_expression.h"
+#include "src/ast/uint_literal.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/variable_decoration.h"
@@ -748,6 +755,80 @@ std::unique_ptr<ast::Variable> ParserImpl::MakeVariable(uint32_t id,
     ast_var = std::move(decorated_var);
   }
   return ast_var;
+}
+
+std::unique_ptr<ast::Expression> ParserImpl::MakeConstantExpression(
+    uint32_t id) {
+  if (!success_) {
+    return nullptr;
+  }
+  const auto* inst = def_use_mgr_->GetDef(id);
+  if (inst == nullptr) {
+    Fail() << "ID " << id << " is not a registered instruction";
+    return nullptr;
+  }
+  auto* ast_type = ConvertType(inst->type_id());
+  if (ast_type == nullptr) {
+    return nullptr;
+  }
+  // TODO(dneto): Handle spec constants too?
+  const auto* spirv_const = constant_mgr_->FindDeclaredConstant(id);
+  if (spirv_const == nullptr) {
+    Fail() << "ID " << id << " is not a constant";
+    return nullptr;
+  }
+  // TODO(dneto): Note: NullConstant for int, uint, float map to a regular 0.
+  // So canonicalization should map that way too.
+  // Currently "null<type>" is missing from the WGSL parser.
+  // See https://bugs.chromium.org/p/tint/issues/detail?id=34
+  if (ast_type->IsU32()) {
+    return std::make_unique<ast::ScalarConstructorExpression>(
+        std::make_unique<ast::UintLiteral>(ast_type, spirv_const->GetU32()));
+  }
+  if (ast_type->IsI32()) {
+    return std::make_unique<ast::ScalarConstructorExpression>(
+        std::make_unique<ast::IntLiteral>(ast_type, spirv_const->GetS32()));
+  }
+  if (ast_type->IsF32()) {
+    return std::make_unique<ast::ScalarConstructorExpression>(
+        std::make_unique<ast::FloatLiteral>(ast_type, spirv_const->GetFloat()));
+  }
+  if (ast_type->IsBool()) {
+    const bool value = spirv_const->AsNullConstant() ? false :
+      spirv_const->AsBoolConstant()->value();
+    return std::make_unique<ast::ScalarConstructorExpression>(
+        std::make_unique<ast::BoolLiteral>(
+            ast_type, value));
+  }
+  auto spirv_composite_const = spirv_const->AsCompositeConstant();
+  if (spirv_composite_const != nullptr) {
+    // Handle vector, matrix, array, and struct
+
+    // TODO(dneto): Handle the spirv_composite_const->IsZero() case specially.
+    // See https://github.com/gpuweb/gpuweb/issues/685
+
+    // Generate a composite from explicit components.
+    ast::ExpressionList ast_components;
+    for (const auto* component : spirv_composite_const->GetComponents()) {
+      auto* def = constant_mgr_->GetDefiningInstruction(component);
+      if (def == nullptr) {
+        Fail() << "internal error: SPIR-V constant doesn't have defining "
+                  "instruction";
+        return nullptr;
+      }
+      auto ast_component = MakeConstantExpression(def->result_id());
+      if (!success_) {
+        // We've already emitted a diagnostic.
+        return nullptr;
+      }
+      ast_components.emplace_back(std::move(ast_component));
+    }
+    return std::make_unique<ast::TypeConstructorExpression>(
+        ast_type, std::move(ast_components));
+  }
+  Fail() << "Unhandled constant type " << inst->type_id() << " for value ID "
+         << id;
+  return nullptr;
 }
 
 bool ParserImpl::EmitFunctions() {

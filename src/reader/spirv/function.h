@@ -15,9 +15,11 @@
 #ifndef SRC_READER_SPIRV_FUNCTION_H_
 #define SRC_READER_SPIRV_FUNCTION_H_
 
+#include "source/opt/constants.h"
 #include "source/opt/function.h"
 #include "source/opt/ir_context.h"
 #include "source/opt/type_manager.h"
+#include "src/ast/expression.h"
 #include "src/ast/module.h"
 #include "src/reader/spirv/fail_stream.h"
 #include "src/reader/spirv/namer.h"
@@ -73,6 +75,8 @@ class FunctionEmitter {
   ParserImpl& parser_impl_;
   ast::Module& ast_module_;
   spvtools::opt::IRContext& ir_context_;
+  spvtools::opt::analysis::DefUseManager* def_use_mgr_;
+  spvtools::opt::analysis::ConstantManager* constant_mgr_;
   spvtools::opt::analysis::TypeManager* type_mgr_;
   FailStream& fail_stream_;
   Namer& namer_;
