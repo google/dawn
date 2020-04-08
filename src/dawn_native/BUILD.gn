@@ -28,7 +28,9 @@ if (is_mac) {
   }
 }
 
-if (dawn_enable_vulkan_validation_layers) {
+enable_vulkan_validation_layers = dawn_enable_vulkan_validation_layers &&
+                                  dawn_vulkan_validation_layers_dir != ""
+if (enable_vulkan_validation_layers) {
   import("//build_overrides/vulkan_validation_layers.gni")
 }
 
@@ -100,9 +102,7 @@ if (dawn_enable_opengl) {
 # Public dawn_native headers so they can be publicly visible for
 # dependencies of dawn_native
 source_set("dawn_native_headers") {
-  public_deps = [
-    "${dawn_root}/src/dawn:dawncpp_headers",
-  ]
+  public_deps = [ "${dawn_root}/src/dawn:dawncpp_headers" ]
   all_dependent_configs = [ "${dawn_root}/src/common:dawn_public_include_dirs" ]
   sources = [
     "${dawn_root}/src/include/dawn_native/DawnNative.h",
@@ -531,13 +531,14 @@ source_set("dawn_native_sources") {
       # Necessary to ensure that the Vulkan libraries will be in the
       # final Fuchsia package.
       data_deps = [
-        # NOTE: The line below is a work around for http://crbug.com/1001081
-        "//third_party/fuchsia-sdk/sdk:trace_engine",
         "//third_party/fuchsia-sdk:vulkan_base",
         "//third_party/fuchsia-sdk:vulkan_validation",
+
+        # NOTE: The line below is a work around for http://crbug.com/1001081
+        "//third_party/fuchsia-sdk/sdk:trace_engine",
       ]
     }
-    if (dawn_enable_vulkan_validation_layers) {
+    if (enable_vulkan_validation_layers) {
       defines += [
         "DAWN_ENABLE_VULKAN_VALIDATION_LAYERS",
         "DAWN_VK_DATA_DIR=\"$vulkan_data_subdir\"",
@@ -568,17 +569,13 @@ dawn_component("dawn_native") {
   DEFINE_PREFIX = "DAWN_NATIVE"
 
   #Make headers publically visible
-  public_deps = [
-    ":dawn_native_headers",
-  ]
+  public_deps = [ ":dawn_native_headers" ]
 
   deps = [
     ":dawn_native_sources",
     "${dawn_root}/src/common",
   ]
-  sources = [
-    "DawnNative.cpp",
-  ]
+  sources = [ "DawnNative.cpp" ]
   configs = [ ":dawn_native_internal" ]
   public_configs = [ ":dawn_native_weak_framework" ]
 
@@ -597,10 +594,9 @@ dawn_component("dawn_native") {
   if (dawn_enable_vulkan) {
     sources += [ "vulkan/VulkanBackend.cpp" ]
 
-    if (dawn_enable_vulkan_validation_layers) {
-      data_deps = [
-        "${dawn_vulkan_validation_layers_dir}:vulkan_validation_layers",
-      ]
+    if (enable_vulkan_validation_layers) {
+      data_deps =
+          [ "${dawn_vulkan_validation_layers_dir}:vulkan_validation_layers" ]
       if (!is_android) {
         data_deps +=
             [ "${dawn_vulkan_validation_layers_dir}:vulkan_gen_json_files" ]
@@ -611,7 +607,5 @@ dawn_component("dawn_native") {
 
 # Temporary group for a 3-way patch with Chromium
 group("libdawn_native_headers") {
-  public_deps = [
-    ":dawn_native_headers",
-  ]
+  public_deps = [ ":dawn_native_headers" ]
 }

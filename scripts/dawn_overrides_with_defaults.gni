@@ -62,6 +62,7 @@ if (!defined(dawn_swiftshader_dir)) {
   dawn_swiftshader_dir = ""
 }
 
-if (!defined(dawn_vulkan_validaion_layers_dir)) {
-  dawn_vulkan_validaion_layers_dir = "//third_party/vulkan-validation-layers"
+if (!defined(dawn_vulkan_validation_layers_dir)) {
+  # Default to VVLs not being available.
+  dawn_vulkan_validation_layers_dir = ""
 }

@@ -47,9 +47,7 @@ source_set("vulkan_headers") {
 }
 
 source_set("khronos_platform") {
-  sources = [
-    "khronos/KHR/khrplatform.h",
-  ]
+  sources = [ "khronos/KHR/khrplatform.h" ]
 
   public_configs = [ ":khronos_headers_public" ]
 }
@@ -77,9 +75,7 @@ if (!build_with_chromium) {
 
   static_library("gtest") {
     testonly = true
-    sources = [
-      "${googletest_dir}/googletest/src/gtest-all.cc",
-    ]
+    sources = [ "${googletest_dir}/googletest/src/gtest-all.cc" ]
     public_configs = [ ":gtest_config" ]
   }
 
@@ -93,9 +89,7 @@ if (!build_with_chromium) {
 
   static_library("gmock") {
     testonly = true
-    sources = [
-      "${googletest_dir}/googlemock/src/gmock-all.cc",
-    ]
+    sources = [ "${googletest_dir}/googlemock/src/gmock-all.cc" ]
     public_configs = [ ":gmock_config" ]
   }
 
@@ -149,8 +143,10 @@ if (is_win || (is_linux && !is_chromeos) || is_mac) {
   static_library("glfw") {
     public_configs = [ ":glfw_public" ]
 
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
+    if (dawn_has_build) {
+      configs -= [ "//build/config/compiler:chromium_code" ]
+      configs += [ "//build/config/compiler:no_chromium_code" ]
+    }
 
     if (is_win && !is_clang) {
       # nonstandard extension, function/data pointer conversion in expression
