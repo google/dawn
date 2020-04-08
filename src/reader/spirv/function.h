@@ -66,6 +66,11 @@ class FunctionEmitter {
   /// @returns false if emission failed.
   bool EmitFunctionVariables();
 
+  /// Makes an expression
+  /// @param id the SPIR-V ID of the value
+  /// @returns true if emission has not yet failed.
+  std::unique_ptr<ast::Expression> MakeExpression(uint32_t id);
+
  private:
   /// @returns the store type for the OpVariable instruction, or
   /// null on failure.

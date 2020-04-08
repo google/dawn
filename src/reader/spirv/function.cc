@@ -163,6 +163,18 @@ bool FunctionEmitter::EmitFunctionVariables() {
   return success();
 }
 
+std::unique_ptr<ast::Expression> FunctionEmitter::MakeExpression(uint32_t id) {
+  if (failed()) {
+    return nullptr;
+  }
+  const auto* spirv_constant = constant_mgr_->FindDeclaredConstant(id);
+  if (spirv_constant) {
+    return parser_impl_.MakeConstantExpression(id);
+  }
+  Fail() << "unhandled expression for ID " << id;
+  return nullptr;
+}
+
 }  // namespace spirv
 }  // namespace reader
 }  // namespace tint
