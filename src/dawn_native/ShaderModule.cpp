@@ -110,6 +110,9 @@ namespace dawn_native {
                 case shaderc_spvc_binding_type_readonly_storage_buffer:
                     return wgpu::BindingType::ReadonlyStorageBuffer;
                 case shaderc_spvc_binding_type_sampler:
+                case shaderc_spvc_binding_type_comparison_sampler:
+                    // TODO: Break out comparison sampler into its own case, once Dawn has seperate
+                    // handling
                     return wgpu::BindingType::Sampler;
                 case shaderc_spvc_binding_type_sampled_texture:
                     return wgpu::BindingType::SampledTexture;
@@ -120,10 +123,6 @@ namespace dawn_native {
                 case shaderc_spvc_binding_type_storage_texture:
                     return wgpu::BindingType::StorageTexture;
                 default:
-                    // This default needs to be here temporarily, to avoid
-                    // build/dependency issues when spvc adds a new entry to the
-                    // enum. Once the new entry is available I will land a
-                    // second patch to remove this default.
                     UNREACHABLE();
             }
         }
