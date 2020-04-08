@@ -27,7 +27,7 @@ namespace dawn_native { namespace d3d12 {
     class Adapter : public AdapterBase {
       public:
         Adapter(Backend* backend, ComPtr<IDXGIAdapter3> hardwareAdapter);
-        virtual ~Adapter() = default;
+        ~Adapter() override = default;
 
         const D3D12DeviceInfo& GetDeviceInfo() const;
         IDXGIAdapter3* GetHardwareAdapter() const;

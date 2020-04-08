@@ -79,13 +79,14 @@ namespace dawn_native {
 
     RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device,
                                              const RenderBundleEncoderDescriptor* descriptor)
-        : RenderEncoderBase(device, &mEncodingContext),
-          mEncodingContext(device, this),
+        : RenderEncoderBase(device, &mBundleEncodingContext),
+          mBundleEncodingContext(device, this),
           mAttachmentState(device->GetOrCreateAttachmentState(descriptor)) {
     }
 
     RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device, ErrorTag errorTag)
-        : RenderEncoderBase(device, &mEncodingContext, errorTag), mEncodingContext(device, this) {
+        : RenderEncoderBase(device, &mBundleEncodingContext, errorTag),
+          mBundleEncodingContext(device, this) {
     }
 
     // static
@@ -98,18 +99,19 @@ namespace dawn_native {
     }
 
     CommandIterator RenderBundleEncoder::AcquireCommands() {
-        return mEncodingContext.AcquireCommands();
+        return mBundleEncodingContext.AcquireCommands();
     }
 
     RenderBundleBase* RenderBundleEncoder::Finish(const RenderBundleDescriptor* descriptor) {
         PassResourceUsage usages = mUsageTracker.AcquireResourceUsage();
 
         DeviceBase* device = GetDevice();
-        // Even if mEncodingContext.Finish() validation fails, calling it will mutate the internal
-        // state of the encoding context. Subsequent calls to encode commands will generate errors.
-        if (device->ConsumedError(mEncodingContext.Finish()) ||
+        // Even if mBundleEncodingContext.Finish() validation fails, calling it will mutate the
+        // internal state of the encoding context. Subsequent calls to encode commands will generate
+        // errors.
+        if (device->ConsumedError(mBundleEncodingContext.Finish()) ||
             (device->IsValidationEnabled() &&
-             device->ConsumedError(ValidateFinish(mEncodingContext.GetIterator(), usages)))) {
+             device->ConsumedError(ValidateFinish(mBundleEncodingContext.GetIterator(), usages)))) {
             return RenderBundleBase::MakeError(device);
         }
 

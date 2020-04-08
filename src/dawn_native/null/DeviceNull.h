@@ -84,7 +84,7 @@ namespace dawn_native { namespace null {
     class Device : public DeviceBase {
       public:
         static ResultOrError<Device*> Create(Adapter* adapter, const DeviceDescriptor* descriptor);
-        ~Device();
+        ~Device() override;
 
         MaybeError Initialize();
 
@@ -152,7 +152,7 @@ namespace dawn_native { namespace null {
     class Adapter : public AdapterBase {
       public:
         Adapter(InstanceBase* instance);
-        virtual ~Adapter();
+        ~Adapter() override;
 
         // Used for the tests that intend to use an adapter without all extensions enabled.
         void SetSupportedExtensions(const std::vector<const char*>& requiredExtensions);

@@ -35,7 +35,6 @@ protected:
   }
 
   wgpu::PipelineLayout MakeBasicPipelineLayout(
-      wgpu::Device device,
       std::vector<wgpu::BindGroupLayout> bindingInitializer) const {
       wgpu::PipelineLayoutDescriptor descriptor;
 
@@ -103,7 +102,7 @@ protected:
       wgpu::ShaderModule vsModule = MakeSimpleVSModule();
       wgpu::ShaderModule fsModule = MakeFSModule(bindingTypes);
 
-      wgpu::PipelineLayout pipelineLayout = MakeBasicPipelineLayout(device, bindGroupLayouts);
+      wgpu::PipelineLayout pipelineLayout = MakeBasicPipelineLayout(bindGroupLayouts);
 
       utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
       pipelineDescriptor.layout = pipelineLayout;

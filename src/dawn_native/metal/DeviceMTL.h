@@ -39,7 +39,7 @@ namespace dawn_native { namespace metal {
         static ResultOrError<Device*> Create(AdapterBase* adapter,
                                              id<MTLDevice> mtlDevice,
                                              const DeviceDescriptor* descriptor);
-        ~Device();
+        ~Device() override;
 
         MaybeError Initialize();
 

@@ -86,6 +86,17 @@ config("dawn_internal") {
   # Only internal Dawn targets can use this config, this means only targets in
   # this BUILD.gn file.
   visibility = [ ":*" ]
+
+  # Enable more warnings that were found when using Dawn in other projects
+  if (is_clang) {
+    cflags = [
+      "-Wstrict-prototypes",
+      "-Winconsistent-missing-destructor-override",
+      "-Wshadow-field",
+      "-Wmissing-field-initializers",
+      "-Wcstring-format-directive",
+    ]
+  }
 }
 
 ###############################################################################

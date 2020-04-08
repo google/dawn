@@ -20,8 +20,8 @@
 
 namespace dawn_wire { namespace client {
 
-    Device::Device(Client* client, uint32_t refcount, uint32_t id)
-        : ObjectBase(this, refcount, id), mClient(client) {
+    Device::Device(Client* client, uint32_t initialRefcount, uint32_t initialId)
+        : ObjectBase(this, initialRefcount, initialId), mClient(client) {
         this->device = this;
     }
 

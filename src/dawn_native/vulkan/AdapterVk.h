@@ -27,7 +27,7 @@ namespace dawn_native { namespace vulkan {
     class Adapter : public AdapterBase {
       public:
         Adapter(Backend* backend, VkPhysicalDevice physicalDevice);
-        virtual ~Adapter() = default;
+        ~Adapter() override = default;
 
         const VulkanDeviceInfo& GetDeviceInfo() const;
         VkPhysicalDevice GetPhysicalDevice() const;

@@ -315,12 +315,12 @@ TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
     static constexpr int NUM_BINDINGS = 3;
     WGPUBindGroupLayoutEntry bindings[NUM_BINDINGS]{
         {0, WGPUShaderStage_Vertex, WGPUBindingType_Sampler, false, false,
-         WGPUTextureViewDimension_2D, WGPUTextureComponentType_Float},
+         WGPUTextureViewDimension_2D, WGPUTextureComponentType_Float, WGPUTextureFormat_RGBA8Unorm},
         {1, WGPUShaderStage_Vertex, WGPUBindingType_SampledTexture, false, false,
-         WGPUTextureViewDimension_2D, WGPUTextureComponentType_Float},
+         WGPUTextureViewDimension_2D, WGPUTextureComponentType_Float, WGPUTextureFormat_RGBA8Unorm},
         {2, static_cast<WGPUShaderStage>(WGPUShaderStage_Vertex | WGPUShaderStage_Fragment),
          WGPUBindingType_UniformBuffer, false, false, WGPUTextureViewDimension_2D,
-         WGPUTextureComponentType_Float},
+         WGPUTextureComponentType_Float, WGPUTextureFormat_RGBA8Unorm},
     };
     WGPUBindGroupLayoutDescriptor bglDescriptor = {};
     bglDescriptor.bindingCount = NUM_BINDINGS;

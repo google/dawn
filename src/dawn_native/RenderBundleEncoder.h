@@ -44,7 +44,7 @@ namespace dawn_native {
 
         MaybeError ValidateFinish(CommandIterator* commands, const PassResourceUsage& usages) const;
 
-        EncodingContext mEncodingContext;
+        EncodingContext mBundleEncodingContext;
         Ref<AttachmentState> mAttachmentState;
     };
 }  // namespace dawn_native

@@ -42,7 +42,7 @@ namespace dawn_wire {
     class DAWN_WIRE_EXPORT WireClient : public CommandHandler {
       public:
         WireClient(const WireClientDescriptor& descriptor);
-        ~WireClient();
+        ~WireClient() override;
 
         static DawnProcTable GetProcs();
 

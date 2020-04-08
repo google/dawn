@@ -28,7 +28,7 @@ void InitDawnPerfTestEnvironment(int argc, char** argv);
 class DawnPerfTestEnvironment : public DawnTestEnvironment {
   public:
     DawnPerfTestEnvironment(int argc, char** argv);
-    ~DawnPerfTestEnvironment();
+    ~DawnPerfTestEnvironment() override;
 
     void SetUp() override;
     void TearDown() override;

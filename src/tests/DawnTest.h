@@ -132,7 +132,7 @@ void InitDawnEnd2EndTestEnvironment(int argc, char** argv);
 class DawnTestEnvironment : public testing::Environment {
   public:
     DawnTestEnvironment(int argc, char** argv);
-    ~DawnTestEnvironment() = default;
+    ~DawnTestEnvironment() override = default;
 
     static void SetEnvironment(DawnTestEnvironment* env);
 

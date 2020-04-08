@@ -37,7 +37,7 @@ namespace dawn_native { namespace opengl {
         static ResultOrError<Device*> Create(AdapterBase* adapter,
                                              const DeviceDescriptor* descriptor,
                                              const OpenGLFunctions& functions);
-        ~Device();
+        ~Device() override;
 
         MaybeError Initialize();
 

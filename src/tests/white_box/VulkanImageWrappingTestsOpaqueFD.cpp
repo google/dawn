@@ -152,7 +152,7 @@ namespace dawn_native { namespace vulkan {
             }
 
             // Wraps a vulkan image from external memory
-            wgpu::Texture WrapVulkanImage(wgpu::Device device,
+            wgpu::Texture WrapVulkanImage(wgpu::Device dawnDevice,
                                           const wgpu::TextureDescriptor* textureDescriptor,
                                           int memoryFd,
                                           VkDeviceSize allocationSize,
@@ -170,7 +170,7 @@ namespace dawn_native { namespace vulkan {
                 descriptor.waitFDs = waitFDs;
 
                 WGPUTexture texture =
-                    dawn_native::vulkan::WrapVulkanImage(device.Get(), &descriptor);
+                    dawn_native::vulkan::WrapVulkanImage(dawnDevice.Get(), &descriptor);
 
                 if (expectValid) {
                     EXPECT_NE(texture, nullptr) << "Failed to wrap image, are external memory / "
@@ -185,8 +185,8 @@ namespace dawn_native { namespace vulkan {
             // Exports the signal from a wrapped texture and ignores it
             // We have to export the signal before destroying the wrapped texture else it's an
             // assertion failure
-            void IgnoreSignalSemaphore(wgpu::Device device, wgpu::Texture wrappedTexture) {
-                int fd = dawn_native::vulkan::ExportSignalSemaphoreOpaqueFD(device.Get(),
+            void IgnoreSignalSemaphore(wgpu::Device dawnDevice, wgpu::Texture wrappedTexture) {
+                int fd = dawn_native::vulkan::ExportSignalSemaphoreOpaqueFD(dawnDevice.Get(),
                                                                             wrappedTexture.Get());
                 ASSERT_NE(fd, -1);
                 close(fd);
@@ -407,26 +407,28 @@ namespace dawn_native { namespace vulkan {
         int defaultFd;
 
         // Clear a texture on a given device
-        void ClearImage(wgpu::Device device, wgpu::Texture wrappedTexture, wgpu::Color clearColor) {
+        void ClearImage(wgpu::Device dawnDevice,
+                        wgpu::Texture wrappedTexture,
+                        wgpu::Color clearColor) {
             wgpu::TextureView wrappedView = wrappedTexture.CreateView();
 
             // Submit a clear operation
             utils::ComboRenderPassDescriptor renderPassDescriptor({wrappedView}, {});
             renderPassDescriptor.cColorAttachments[0].clearColor = clearColor;
 
-            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::CommandEncoder encoder = dawnDevice.CreateCommandEncoder();
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDescriptor);
             pass.EndPass();
 
             wgpu::CommandBuffer commands = encoder.Finish();
 
-            wgpu::Queue queue = device.CreateQueue();
+            wgpu::Queue queue = dawnDevice.CreateQueue();
             queue.Submit(1, &commands);
         }
 
         // Submits a 1x1x1 copy from source to destination
-        void SimpleCopyTextureToTexture(wgpu::Device device,
-                                        wgpu::Queue queue,
+        void SimpleCopyTextureToTexture(wgpu::Device dawnDevice,
+                                        wgpu::Queue dawnQueue,
                                         wgpu::Texture source,
                                         wgpu::Texture destination) {
             wgpu::TextureCopyView copySrc;
@@ -443,11 +445,11 @@ namespace dawn_native { namespace vulkan {
 
             wgpu::Extent3D copySize = {1, 1, 1};
 
-            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::CommandEncoder encoder = dawnDevice.CreateCommandEncoder();
             encoder.CopyTextureToTexture(&copySrc, &copyDst, &copySize);
             wgpu::CommandBuffer commands = encoder.Finish();
 
-            queue.Submit(1, &commands);
+            dawnQueue.Submit(1, &commands);
         }
     };
 

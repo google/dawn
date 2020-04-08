@@ -27,7 +27,7 @@ namespace dawn_native { namespace d3d12 {
     class StagingBuffer : public StagingBufferBase {
       public:
         StagingBuffer(size_t size, Device* device);
-        ~StagingBuffer();
+        ~StagingBuffer() override;
 
         ID3D12Resource* GetResource() const;
 

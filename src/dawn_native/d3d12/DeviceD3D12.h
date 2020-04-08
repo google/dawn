@@ -46,7 +46,7 @@ namespace dawn_native { namespace d3d12 {
     class Device : public DeviceBase {
       public:
         static ResultOrError<Device*> Create(Adapter* adapter, const DeviceDescriptor* descriptor);
-        ~Device();
+        ~Device() override;
 
         MaybeError Initialize();
 

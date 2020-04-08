@@ -190,10 +190,10 @@ namespace dawn_native { namespace metal {
                 std::string result_str;
                 DAWN_TRY(CheckSpvcSuccess(result.GetStringOutput(&result_str),
                                           "Unable to get MSL shader text"));
-                mslSource = [NSString stringWithFormat:@"%s", result_str.c_str()];
+                mslSource = [[NSString alloc] initWithUTF8String:result_str.c_str()];
             } else {
                 std::string msl = compiler->compile();
-                mslSource = [NSString stringWithFormat:@"%s", msl.c_str()];
+                mslSource = [[NSString alloc] initWithUTF8String:msl.c_str()];
             }
             auto mtlDevice = ToBackend(GetDevice())->GetMTLDevice();
             NSError* error = nil;
@@ -216,7 +216,7 @@ namespace dawn_native { namespace metal {
                 functionName = "main0";
             }
 
-            NSString* name = [NSString stringWithFormat:@"%s", functionName];
+            NSString* name = [[NSString alloc] initWithUTF8String:functionName];
             out->function = [library newFunctionWithName:name];
             [library release];
         }

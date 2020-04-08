@@ -55,8 +55,7 @@ class D3D12DescriptorHeapTests : public DawnTest {
         })");
     }
 
-    utils::BasicRenderPass MakeRenderPass(const wgpu::Device& device,
-                                          uint32_t width,
+    utils::BasicRenderPass MakeRenderPass(uint32_t width,
                                           uint32_t height,
                                           wgpu::TextureFormat format) {
         DAWN_ASSERT(width > 0 && height > 0);
@@ -291,7 +290,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBO) {
         dawn_native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
 
     utils::BasicRenderPass renderPass =
-        MakeRenderPass(device, kRTSize, kRTSize, wgpu::TextureFormat::R32Float);
+        MakeRenderPass(kRTSize, kRTSize, wgpu::TextureFormat::R32Float);
 
     utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
     pipelineDescriptor.vertexStage.module = mSimpleVSModule;

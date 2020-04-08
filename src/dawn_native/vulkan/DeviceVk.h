@@ -44,7 +44,7 @@ namespace dawn_native { namespace vulkan {
     class Device : public DeviceBase {
       public:
         static ResultOrError<Device*> Create(Adapter* adapter, const DeviceDescriptor* descriptor);
-        ~Device();
+        ~Device() override;
 
         MaybeError Initialize();
 
