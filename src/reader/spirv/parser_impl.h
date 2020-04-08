@@ -214,7 +214,7 @@ class ParserImpl : Reader {
   /// Creates an AST Variable node for a SPIR-V ID, including any attached
   /// decorations.
   /// @param id the SPIR-V result ID
-  /// @param sc the storage class, which can be ast::StorageClass::kNone
+  /// @param sc the storage class, which cannot be ast::StorageClass::kNone
   /// @param type the type
   /// @returns a new Variable node, or null in the error case
   std::unique_ptr<ast::Variable> MakeVariable(uint32_t id,

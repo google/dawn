@@ -87,21 +87,21 @@ TEST_F(SpvParserTest, EmitFunctionVariables_AnonymousVars) {
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_1
-    none
+    function
     __u32
   }
 }
 VariableDeclStatement{
   Variable{
     x_2
-    none
+    function
     __u32
   }
 }
 VariableDeclStatement{
   Variable{
     x_3
-    none
+    function
     __u32
   }
 }
@@ -125,21 +125,21 @@ TEST_F(SpvParserTest, EmitFunctionVariables_NamedVars) {
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
   Variable{
     a
-    none
+    function
     __u32
   }
 }
 VariableDeclStatement{
   Variable{
     b
-    none
+    function
     __u32
   }
 }
 VariableDeclStatement{
   Variable{
     c
-    none
+    function
     __u32
   }
 }
@@ -163,21 +163,21 @@ TEST_F(SpvParserTest, EmitFunctionVariables_MixedTypes) {
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
   Variable{
     a
-    none
+    function
     __u32
   }
 }
 VariableDeclStatement{
   Variable{
     b
-    none
+    function
     __i32
   }
 }
 VariableDeclStatement{
   Variable{
     c
-    none
+    function
     __f32
   }
 }
@@ -204,7 +204,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ScalarInitializers) {
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
   Variable{
     a
-    none
+    function
     __bool
     {
       ScalarConstructor{true}
@@ -214,7 +214,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ScalarInitializers) {
 VariableDeclStatement{
   Variable{
     b
-    none
+    function
     __bool
     {
       ScalarConstructor{false}
@@ -224,7 +224,7 @@ VariableDeclStatement{
 VariableDeclStatement{
   Variable{
     c
-    none
+    function
     __i32
     {
       ScalarConstructor{-1}
@@ -234,7 +234,7 @@ VariableDeclStatement{
 VariableDeclStatement{
   Variable{
     d
-    none
+    function
     __u32
     {
       ScalarConstructor{1}
@@ -244,7 +244,7 @@ VariableDeclStatement{
 VariableDeclStatement{
   Variable{
     e
-    none
+    function
     __f32
     {
       ScalarConstructor{1.500000}
@@ -278,7 +278,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ScalarNullInitializers) {
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
   Variable{
     a
-    none
+    function
     __bool
     {
       ScalarConstructor{false}
@@ -288,7 +288,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ScalarNullInitializers) {
 VariableDeclStatement{
   Variable{
     b
-    none
+    function
     __i32
     {
       ScalarConstructor{0}
@@ -298,7 +298,7 @@ VariableDeclStatement{
 VariableDeclStatement{
   Variable{
     c
-    none
+    function
     __u32
     {
       ScalarConstructor{0}
@@ -308,7 +308,7 @@ VariableDeclStatement{
 VariableDeclStatement{
   Variable{
     d
-    none
+    function
     __f32
     {
       ScalarConstructor{0.000000}
@@ -337,7 +337,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_VectorInitializer) {
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_200
-    none
+    function
     __vec_2__f32
     {
       TypeConstructor{
@@ -375,7 +375,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_MatrixInitializer) {
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_200
-    none
+    function
     __mat_2_3__f32
     {
       TypeConstructor{
@@ -421,7 +421,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer) {
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_200
-    none
+    function
     __array__u32_2
     {
       TypeConstructor{
@@ -455,7 +455,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer) {
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_200
-    none
+    function
     __struct_S
     {
       TypeConstructor{

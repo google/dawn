@@ -144,11 +144,8 @@ bool FunctionEmitter::EmitFunctionVariables() {
     if (failed()) {
       return false;
     }
-    // Use StorageClass::kNone because function variables should not explicitly mention
-    // their storage class.
-    auto var =
-        parser_impl_.MakeVariable(inst.result_id(),
-                                  ast::StorageClass::kNone, var_store_type);
+    auto var = parser_impl_.MakeVariable(
+        inst.result_id(), ast::StorageClass::kFunction, var_store_type);
     if (inst.NumInOperands() > 1) {
       // SPIR-V initializers are always constants.
       // (OpenCL also allows the ID of an OpVariable, but we don't handle that
