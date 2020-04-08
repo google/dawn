@@ -429,6 +429,9 @@ TEST_F(BindGroupValidationTest, BufferBindingOOB) {
     utils::MakeBindGroup(device, layout, {{0, buffer, 0, 1024}});
     utils::MakeBindGroup(device, layout, {{0, buffer, 0, wgpu::kWholeSize}});
 
+    // Success case, whole size causes the rest of the buffer to be used but not beyond.
+    utils::MakeBindGroup(device, layout, {{0, buffer, 256, wgpu::kWholeSize}});
+
     // Error case, offset is OOB
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 256*5, 0}}));
 
@@ -437,7 +440,6 @@ TEST_F(BindGroupValidationTest, BufferBindingOOB) {
 
     // Error case, offset+size is OOB
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 1024, 256}}));
-    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 256, wgpu::kWholeSize}}));
 
     // Error case, offset+size overflows to be 0
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 256, uint32_t(0) - uint32_t(256)}}));

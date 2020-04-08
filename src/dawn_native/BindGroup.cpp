@@ -38,7 +38,14 @@ namespace dawn_native {
             DAWN_TRY(device->ValidateObject(binding.buffer));
 
             uint64_t bufferSize = binding.buffer->GetSize();
-            uint64_t bindingSize = (binding.size == wgpu::kWholeSize) ? bufferSize : binding.size;
+
+            // Handle wgpu::WholeSize, avoiding overflows.
+            if (binding.offset > bufferSize) {
+                return DAWN_VALIDATION_ERROR("Buffer binding doesn't fit in the buffer");
+            }
+            uint64_t bindingSize =
+                (binding.size == wgpu::kWholeSize) ? bufferSize - binding.offset : binding.size;
+
             if (bindingSize > bufferSize) {
                 return DAWN_VALIDATION_ERROR("Buffer binding size larger than the buffer");
             }
