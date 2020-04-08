@@ -18,6 +18,7 @@
 
 #include "spirv/unified1/spirv.h"
 #include "src/ast/assignment_statement.h"
+#include "src/ast/binary_expression.h"
 #include "src/ast/binding_decoration.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/builtin_decoration.h"
@@ -163,8 +164,7 @@ bool Builder::GenerateAssignStatement(ast::AssignmentStatement* assign) {
     return false;
   }
 
-  push_function_inst(spv::Op::OpStore,
-                     {Operand::Int(lhs_id), Operand::Int(rhs_id)});
+  GenerateStore(lhs_id, rhs_id);
   return true;
 }
 
@@ -193,11 +193,14 @@ bool Builder::GenerateEntryPoint(ast::EntryPoint* ep) {
 }
 
 uint32_t Builder::GenerateExpression(ast::Expression* expr) {
-  if (expr->IsIdentifier()) {
-    return GenerateIdentifierExpression(expr->AsIdentifier());
+  if (expr->IsBinary()) {
+    return GenerateBinaryExpression(expr->AsBinary());
   }
   if (expr->IsConstructor()) {
     return GenerateConstructorExpression(expr->AsConstructor(), false);
+  }
+  if (expr->IsIdentifier()) {
+    return GenerateIdentifierExpression(expr->AsIdentifier());
   }
 
   error_ = "unknown expression type";
@@ -301,13 +304,16 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
   push_function_var(
       {Operand::Int(type_id), result, Operand::Int(ConvertStorageClass(sc))});
   if (var->has_constructor()) {
-    push_function_inst(spv::Op::OpStore,
-                       {Operand::Int(var_id), Operand::Int(init_id)});
+    GenerateStore(var_id, init_id);
   }
 
   scope_stack_.set(var->name(), var_id);
 
   return true;
+}
+
+void Builder::GenerateStore(uint32_t to, uint32_t from) {
+  push_function_inst(spv::Op::OpStore, {Operand::Int(to), Operand::Int(from)});
 }
 
 bool Builder::GenerateGlobalVariable(ast::Variable* var) {
@@ -508,6 +514,41 @@ uint32_t Builder::GenerateLiteralIfNeeded(ast::Literal* lit) {
   return result_id;
 }
 
+uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
+  if (expr->IsAdd()) {
+    auto lhs_id = GenerateExpression(expr->lhs());
+    if (lhs_id == 0) {
+      return 0;
+    }
+    auto rhs_id = GenerateExpression(expr->rhs());
+    if (rhs_id == 0) {
+      return 0;
+    }
+
+    auto result = result_op();
+    auto result_id = result.to_i();
+
+    auto expr_type = expr->result_type();
+    auto type_id = GenerateTypeIfNeeded(expr_type);
+    if (type_id == 0) {
+      return 0;
+    }
+
+    // This handles int and float and the vectors of those types. Other types
+    // should have been rejected by validation.
+    spv::Op op = spv::Op::OpIAdd;
+    if (expr_type->IsF32() ||
+        (expr_type->IsVector() && expr_type->AsVector()->type()->IsF32())) {
+      op = spv::Op::OpFAdd;
+    }
+    push_function_inst(op, {Operand::Int(type_id), result, Operand::Int(lhs_id),
+                            Operand::Int(rhs_id)});
+
+    return result_id;
+  }
+  return 0;
+}
+
 bool Builder::GenerateReturnStatement(ast::ReturnStatement* stmt) {
   if (stmt->has_value()) {
     auto val_id = GenerateExpression(stmt->value());
@@ -542,6 +583,11 @@ bool Builder::GenerateVariableDeclStatement(ast::VariableDeclStatement* stmt) {
 }
 
 uint32_t Builder::GenerateTypeIfNeeded(ast::type::Type* type) {
+  if (type == nullptr) {
+    error_ = "attempting to generate type from null type";
+    return 0;
+  }
+
   if (type->IsAlias()) {
     return GenerateTypeIfNeeded(type->AsAlias()->type());
   }

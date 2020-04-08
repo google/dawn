@@ -189,6 +189,10 @@ class Builder {
   /// @param lit the literal to generate
   /// @returns the ID on success or 0 on failure
   uint32_t GenerateLiteralIfNeeded(ast::Literal* lit);
+  /// Generates a binary expression
+  /// @param expr the expression to generate
+  /// @returns the expression ID on success or 0 otherwise
+  uint32_t GenerateBinaryExpression(ast::BinaryExpression* expr);
   /// Generates a return statement
   /// @param stmt the statement to generate
   /// @returns true on success, false otherwise
@@ -197,6 +201,10 @@ class Builder {
   /// @param stmt the statement to generate
   /// @returns true if the statement was generated
   bool GenerateStatement(ast::Statement* stmt);
+  /// Geneates an OpStore
+  /// @param to the ID to store too
+  /// @param from the ID to store from
+  void GenerateStore(uint32_t to, uint32_t from);
   /// Generates a type if not already created
   /// @param type the type to create
   /// @returns the ID to use for the given type. Returns 0 on unknown type.
