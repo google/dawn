@@ -1,0 +1,219 @@
+# Copyright 2020 The Tint Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build_overrides/build.gni")
+import("//build_overrides/tint.gni")
+
+config("tint_common_config") {
+  cflags = []
+  ldflags = []
+  include_dirs = []
+  defines = []
+}
+
+source_set("libtint") {
+  sources = [
+    "src/ast/array_accessor_expression.cc",
+    "src/ast/array_accessor_expression.h",
+    "src/ast/as_expression.cc",
+    "src/ast/as_expression.h",
+    "src/ast/assignment_statement.cc",
+    "src/ast/assignment_statement.h",
+    "src/ast/binary_expression.cc",
+    "src/ast/binary_expression.h",
+    "src/ast/binding_decoration.cc",
+    "src/ast/binding_decoration.h",
+    "src/ast/bool_literal.h",
+    "src/ast/bool_literal.cc",
+    "src/ast/break_statement.cc",
+    "src/ast/break_statement.h",
+    "src/ast/builtin.cc",
+    "src/ast/builtin.h",
+    "src/ast/builtin_decoration.cc",
+    "src/ast/builtin_decoration.h",
+    "src/ast/call_expression.cc",
+    "src/ast/call_expression.h",
+    "src/ast/case_statement.cc",
+    "src/ast/case_statement.h",
+    "src/ast/cast_expression.cc",
+    "src/ast/cast_expression.h",
+    "src/ast/constructor_expression.cc",
+    "src/ast/constructor_expression.h",
+    "src/ast/continue_statement.cc",
+    "src/ast/continue_statement.h",
+    "src/ast/decorated_variable.cc",
+    "src/ast/decorated_variable.h",
+    "src/ast/derivative_modifier.cc",
+    "src/ast/derivative_modifier.h",
+    "src/ast/else_statement.cc",
+    "src/ast/else_statement.h",
+    "src/ast/entry_point.cc",
+    "src/ast/entry_point.h",
+    "src/ast/expression.cc",
+    "src/ast/expression.h",
+    "src/ast/fallthrough_statement.cc",
+    "src/ast/fallthrough_statement.h",
+    "src/ast/float_literal.cc",
+    "src/ast/float_literal.h",
+    "src/ast/function.cc",
+    "src/ast/function.h",
+    "src/ast/identifier_expression.cc",
+    "src/ast/identifier_expression.h",
+    "src/ast/if_statement.cc",
+    "src/ast/if_statement.h",
+    "src/ast/import.cc",
+    "src/ast/import.h",
+    "src/ast/int_literal.cc",
+    "src/ast/int_literal.h",
+    "src/ast/kill_statement.cc",
+    "src/ast/kill_statement.h",
+    "src/ast/literal.h",
+    "src/ast/literal.cc",
+    "src/ast/location_decoration.cc",
+    "src/ast/location_decoration.h",
+    "src/ast/loop_statement.cc",
+    "src/ast/loop_statement.h",
+    "src/ast/member_accessor_expression.cc",
+    "src/ast/member_accessor_expression.h",
+    "src/ast/module.cc",
+    "src/ast/module.h",
+    "src/ast/node.cc",
+    "src/ast/node.h",
+    "src/ast/nop_statement.cc",
+    "src/ast/nop_statement.h",
+    "src/ast/pipeline_stage.cc",
+    "src/ast/pipeline_stage.h",
+    "src/ast/regardless_statement.cc",
+    "src/ast/regardless_statement.h",
+    "src/ast/return_statement.cc",
+    "src/ast/return_statement.h",
+    "src/ast/scalar_constructor_expression.cc",
+    "src/ast/scalar_constructor_expression.h",
+    "src/ast/set_decoration.cc",
+    "src/ast/set_decoration.h",
+    "src/ast/statement.cc",
+    "src/ast/statement.h",
+    "src/ast/statement_condition.cc",
+    "src/ast/statement_condition.h",
+    "src/ast/storage_class.cc",
+    "src/ast/storage_class.h",
+    "src/ast/struct_decoration.cc",
+    "src/ast/struct_decoration.h",
+    "src/ast/struct.cc",
+    "src/ast/struct.h",
+    "src/ast/struct_member.cc",
+    "src/ast/struct_member.h",
+    "src/ast/struct_member_decoration.cc",
+    "src/ast/struct_member_decoration.h",
+    "src/ast/struct_member_offset_decoration.cc",
+    "src/ast/struct_member_offset_decoration.h",
+    "src/ast/switch_statement.cc",
+    "src/ast/switch_statement.h",
+    "src/ast/type_constructor_expression.h",
+    "src/ast/type_constructor_expression.cc",
+    "src/ast/type/alias_type.cc",
+    "src/ast/type/alias_type.h",
+    "src/ast/type/array_type.cc",
+    "src/ast/type/array_type.h",
+    "src/ast/type/bool_type.cc",
+    "src/ast/type/bool_type.h",
+    "src/ast/type/f32_type.cc",
+    "src/ast/type/f32_type.h",
+    "src/ast/type/i32_type.cc",
+    "src/ast/type/i32_type.h",
+    "src/ast/type/matrix_type.cc",
+    "src/ast/type/matrix_type.h",
+    "src/ast/type/pointer_type.cc",
+    "src/ast/type/pointer_type.h",
+    "src/ast/type/struct_type.cc",
+    "src/ast/type/struct_type.h",
+    "src/ast/type/type.cc",
+    "src/ast/type/type.h",
+    "src/ast/type/u32_type.cc",
+    "src/ast/type/u32_type.h",
+    "src/ast/type/vector_type.cc",
+    "src/ast/type/vector_type.h",
+    "src/ast/type/void_type.cc",
+    "src/ast/type/void_type.h",
+    "src/ast/uint_literal.cc",
+    "src/ast/uint_literal.h",
+    "src/ast/unary_derivative.cc",
+    "src/ast/unary_derivative.h",
+    "src/ast/unary_derivative_expression.cc",
+    "src/ast/unary_derivative_expression.h",
+    "src/ast/unary_method.cc",
+    "src/ast/unary_method.h",
+    "src/ast/unary_method_expression.cc",
+    "src/ast/unary_method_expression.h",
+    "src/ast/unary_op.cc",
+    "src/ast/unary_op.h",
+    "src/ast/unary_op_expression.cc",
+    "src/ast/unary_op_expression.h",
+    "src/ast/unless_statement.cc",
+    "src/ast/unless_statement.h",
+    "src/ast/variable.cc",
+    "src/ast/variable.h",
+    "src/ast/variable_decoration.cc",
+    "src/ast/variable_decoration.h",
+    "src/ast/variable_decl_statement.cc",
+    "src/ast/variable_decl_statement.h",
+    "src/context.h",
+    "src/context.cc",
+    "src/reader/reader.cc",
+    "src/reader/reader.h",
+    "src/scope_stack.h",
+    "src/source.h",
+    "src/type_determiner.cc",
+    "src/type_determiner.h",
+    "src/type_manager.cc",
+    "src/type_manager.h",
+    "src/validator.cc",
+    "src/validator.h",
+    "src/validator_impl.cc",
+    "src/validator_impl.h",
+    "src/writer/writer.cc",
+    "src/writer/writer.h",
+  ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+
+  # Suppress warnings from the Chromium Clang plugin
+  configs -= [ "//build/config/clang:find_bad_constructs" ]
+}
+
+executable("tint") {
+  sources = [
+    "samples/main.cc",
+  ]
+  deps = [
+    ":libtint",
+  ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+
+  # Suppress warnings from the Chromium Clang plugin
+  configs -= [ "//build/config/clang:find_bad_constructs" ]
+}
+
+group("tint_all") {
+  deps = [
+      ":tint",
+    ]
+}
