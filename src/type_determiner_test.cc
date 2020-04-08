@@ -58,6 +58,18 @@
 namespace tint {
 namespace {
 
+class FakeStmt : public ast::Statement {
+ public:
+  bool IsValid() const override { return true; }
+  void to_str(std::ostream&, size_t) const override {}
+};
+
+class FakeExpr : public ast::Expression {
+ public:
+  bool IsValid() const override { return true; }
+  void to_str(std::ostream&, size_t) const override {}
+};
+
 class TypeDeterminerTest : public testing::Test {
  public:
   void SetUp() { td_ = std::make_unique<TypeDeterminer>(&ctx_); }
@@ -68,6 +80,23 @@ class TypeDeterminerTest : public testing::Test {
   Context ctx_;
   std::unique_ptr<TypeDeterminer> td_;
 };
+
+TEST_F(TypeDeterminerTest, Error_WithEmptySource) {
+  FakeStmt s;
+  s.set_source(Source{0, 0});
+
+  EXPECT_FALSE(td()->DetermineResultType(&s));
+  EXPECT_EQ(td()->error(), "unknown statement type for type determination");
+}
+
+TEST_F(TypeDeterminerTest, Stmt_Error_Unknown) {
+  FakeStmt s;
+  s.set_source(Source{2, 30});
+
+  EXPECT_FALSE(td()->DetermineResultType(&s));
+  EXPECT_EQ(td()->error(),
+            "2:30: unknown statement type for type determination");
+}
 
 TEST_F(TypeDeterminerTest, Stmt_Assign) {
   ast::type::F32Type f32;
@@ -408,6 +437,14 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
   EXPECT_TRUE(td()->DetermineResultType(&decl));
   ASSERT_NE(init_ptr->result_type(), nullptr);
   EXPECT_TRUE(init_ptr->result_type()->IsI32());
+}
+
+TEST_F(TypeDeterminerTest, Expr_Error_Unknown) {
+  FakeExpr e;
+  e.set_source(Source{2, 30});
+
+  EXPECT_FALSE(td()->DetermineResultType(&e));
+  EXPECT_EQ(td()->error(), "2:30: unknown expression for type determination");
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {

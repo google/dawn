@@ -49,12 +49,18 @@
 
 namespace tint {
 
-TypeDeterminer::TypeDeterminer(Context* ctx) : ctx_(*ctx) {
-  // TODO(dsinclair): Temporary usage to avoid compiler warning
-  static_cast<void>(ctx_.type_mgr());
-}
+TypeDeterminer::TypeDeterminer(Context* ctx) : ctx_(*ctx) {}
 
 TypeDeterminer::~TypeDeterminer() = default;
+
+void TypeDeterminer::set_error(const Source& src, const std::string& msg) {
+  error_ = "";
+  if (src.line > 0) {
+    error_ +=
+        std::to_string(src.line) + ":" + std::to_string(src.column) + ": ";
+  }
+  error_ += msg;
+}
 
 bool TypeDeterminer::Determine(ast::Module* mod) {
   for (const auto& var : mod->global_variables()) {
@@ -209,7 +215,7 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     return DetermineResultType(v->variable()->constructor());
   }
 
-  error_ = "unknown statement type for type determination";
+  set_error(stmt->source(), "unknown statement type for type determination");
   return false;
 }
 
@@ -253,7 +259,7 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
     return DetermineUnaryOp(expr->AsUnaryOp());
   }
 
-  error_ = "unknown expression for type determination";
+  set_error(expr->source(), "unknown expression for type determination");
   return false;
 }
 
@@ -272,7 +278,7 @@ bool TypeDeterminer::DetermineArrayAccessor(
     expr->set_result_type(ctx_.type_mgr().Get(
         std::make_unique<ast::type::VectorType>(m->type(), m->rows())));
   } else {
-    error_ = "invalid parent type in array accessor";
+    set_error(expr->source(), "invalid parent type in array accessor");
     return false;
   }
   return true;
@@ -308,7 +314,7 @@ bool TypeDeterminer::DetermineConstructor(ast::ConstructorExpression* expr) {
 bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
   if (expr->name().size() > 1) {
     // TODO(dsinclair): Handle imports
-    error_ = "imports not handled in type determination";
+    set_error(expr->source(), "imports not handled in type determination");
     return false;
   }
 
@@ -348,7 +354,7 @@ bool TypeDeterminer::DetermineMemberAccessor(
       return true;
     }
 
-    error_ = "struct member not found";
+    set_error(expr->source(), "struct member not found");
     return false;
   }
   if (data_type->IsVector()) {
@@ -363,7 +369,7 @@ bool TypeDeterminer::DetermineMemberAccessor(
     return true;
   }
 
-  error_ = "invalid type in member accessor";
+  set_error(expr->source(), "invalid type in member accessor");
   return false;
 }
 
@@ -470,7 +476,7 @@ bool TypeDeterminer::DetermineUnaryMethod(ast::UnaryMethodExpression* expr) {
     case ast::UnaryMethod::kIsFinite:
     case ast::UnaryMethod::kIsNormal: {
       if (expr->params().empty()) {
-        error_ = "incorrect number of parameters";
+        set_error(expr->source(), "incorrect number of parameters");
         return false;
       }
 
@@ -493,13 +499,14 @@ bool TypeDeterminer::DetermineUnaryMethod(ast::UnaryMethodExpression* expr) {
     }
     case ast::UnaryMethod::kOuterProduct: {
       if (expr->params().size() != 2) {
-        error_ = "incorrect number of parameters for outer product";
+        set_error(expr->source(),
+                  "incorrect number of parameters for outer product");
         return false;
       }
       auto param0_type = expr->params()[0]->result_type();
       auto param1_type = expr->params()[1]->result_type();
       if (!param0_type->IsVector() || !param1_type->IsVector()) {
-        error_ = "invalid parameter type for outer product";
+        set_error(expr->source(), "invalid parameter type for outer product");
         return false;
       }
       expr->set_result_type(

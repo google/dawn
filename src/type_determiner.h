@@ -83,6 +83,8 @@ class TypeDeterminer {
   bool DetermineVariableStorageClass(ast::Statement* stmt);
 
  private:
+  void set_error(const Source& src, const std::string& msg);
+
   bool DetermineArrayAccessor(ast::ArrayAccessorExpression* expr);
   bool DetermineAs(ast::AsExpression* expr);
   bool DetermineBinary(ast::BinaryExpression* expr);
