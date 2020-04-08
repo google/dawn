@@ -18,8 +18,10 @@
 #include <memory>
 #include <vector>
 
+#include "source/opt/basic_block.h"
 #include "source/opt/constants.h"
 #include "source/opt/function.h"
+#include "source/opt/instruction.h"
 #include "source/opt/ir_context.h"
 #include "source/opt/type_manager.h"
 #include "src/ast/expression.h"
@@ -65,9 +67,28 @@ class FunctionEmitter {
   /// @returns true if emission has not yet failed.
   bool EmitFunctionDeclaration();
 
+  /// Emits the function body, populating |ast_body_|
+  /// @returns false if emission failed.
+  bool EmitBody();
+
   /// Emits declarations of function variables.
   /// @returns false if emission failed.
   bool EmitFunctionVariables();
+
+  /// Emits statements in the body.
+  /// @returns false if emission failed.
+  bool EmitFunctionBodyStatements();
+
+  /// Emits a basic block
+  /// @param bb internal representation of the basic block
+  /// @returns false if emission failed.
+  bool EmitStatementsInBasicBlock(const spvtools::opt::BasicBlock& bb);
+
+  /// Emits a normal instruction: not a terminator, label, or variable
+  /// declaration.
+  /// @param inst the instruction
+  /// @returns false if emission failed.
+  bool EmitStatement(const spvtools::opt::Instruction& inst);
 
   /// Makes an expression
   /// @param id the SPIR-V ID of the value

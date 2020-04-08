@@ -20,9 +20,8 @@
 #include "source/opt/function.h"
 #include "source/opt/instruction.h"
 #include "source/opt/module.h"
-#include "src/ast/bool_literal.h"
-#include "src/ast/float_literal.h"
-#include "src/ast/int_literal.h"
+#include "src/ast/assignment_statement.h"
+#include "src/ast/identifier_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable.h"
@@ -61,9 +60,7 @@ bool FunctionEmitter::Emit() {
     return false;
   }
 
-  // Start populating the body.
-
-  if (!EmitFunctionVariables()) {
+  if (!EmitBody()) {
     return false;
   }
 
@@ -134,6 +131,16 @@ ast::type::Type* FunctionEmitter::GetVariableStoreType(
   return parser_impl_.ConvertType(var_store_type_id);
 }
 
+bool FunctionEmitter::EmitBody() {
+  if (!EmitFunctionVariables()) {
+    return false;
+  }
+  if (!EmitFunctionBodyStatements()) {
+    return false;
+  }
+  return success();
+}
+
 bool FunctionEmitter::EmitFunctionVariables() {
   if (failed()) {
     return false;
@@ -171,8 +178,64 @@ std::unique_ptr<ast::Expression> FunctionEmitter::MakeExpression(uint32_t id) {
   if (spirv_constant) {
     return parser_impl_.MakeConstantExpression(id);
   }
+  const auto* inst = def_use_mgr_->GetDef(id);
+  if (inst == nullptr) {
+    Fail() << "ID " << id << " does not have a defining SPIR-V instruction";
+    return nullptr;
+  }
+  switch (inst->opcode()) {
+    case SpvOpVariable:
+      // This is not a declaration, but a use of an identifier.
+      return std::make_unique<ast::IdentifierExpression>(namer_.Name(id));
+    default:
+      break;
+  }
   Fail() << "unhandled expression for ID " << id;
   return nullptr;
+}
+
+bool FunctionEmitter::EmitFunctionBodyStatements() {
+  // TODO(dneto): For now, emit only regular statements in the entry block.
+  // We'll use assignments as markers in the tests, to be able to tell where
+  // code is placed in control flow. First prove that we can emit assignments.
+  return EmitStatementsInBasicBlock(*function_.entry());
+}
+
+bool FunctionEmitter::EmitStatementsInBasicBlock(
+    const spvtools::opt::BasicBlock& bb) {
+  const auto* terminator = bb.terminator();
+  const auto* merge = bb.GetMergeInst();  // Might be nullptr
+  // Emit regular statements.
+  for (auto& inst : bb) {
+    if (&inst == terminator || &inst == merge || inst.opcode() == SpvOpLabel ||
+        inst.opcode() == SpvOpVariable) {
+      continue;
+    }
+    if (!EmitStatement(inst)) {
+      return false;
+    }
+  }
+  // TODO(dneto): Handle the terminator
+  return true;
+}
+
+bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
+  switch (inst.opcode()) {
+    case SpvOpStore: {
+      // TODO(dneto): Order of evaluation?
+      auto lhs = MakeExpression(inst.GetSingleWordInOperand(0));
+      auto rhs = MakeExpression(inst.GetSingleWordInOperand(1));
+      ast_body_.emplace_back(std::make_unique<ast::AssignmentStatement>(
+          std::move(lhs), std::move(rhs)));
+      return success();
+    }
+    case SpvOpFunctionCall:
+      // TODO(dneto): Fill this out.  Make this pass, for existing tests
+      return success();
+    default:
+      break;
+  }
+  return Fail() << "unhandled instruction with opcode " << inst.opcode();
 }
 
 }  // namespace spirv
