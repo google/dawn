@@ -143,7 +143,7 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
 #pragma clang diagnostic ignored "-Wunused-template"
 template <typename T>
 bool ReadFile(const std::string& input_file, std::vector<T>* buffer) {
-#pragma Clang pop
+#pragma clang diagnostic pop
 
   if (!buffer) {
     std::cerr << "The buffer pointer was null" << std::endl;
