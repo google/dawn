@@ -181,7 +181,7 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroups[b]);
-        pass.Dispatch(kNumValues);
+        pass.Dispatch(kNumValues / 4);
         pass.EndPass();
     }
 
