@@ -32,7 +32,7 @@ class OpArrayLengthTest : public DawnTest {
         bufferDesc.size = 256;
         mStorageBuffer256 = device.CreateBuffer(&bufferDesc);
 
-        bufferDesc.size = 512;
+        bufferDesc.size = 512 + 256;
         mStorageBuffer512 = device.CreateBuffer(&bufferDesc);
 
         // Put them all in a bind group for tests to bind them easily.
@@ -47,7 +47,7 @@ class OpArrayLengthTest : public DawnTest {
                                           {
                                               {0, mStorageBuffer4, 0, 4},
                                               {1, mStorageBuffer256, 0, wgpu::kWholeSize},
-                                              {2, mStorageBuffer512, 0, 512},
+                                              {2, mStorageBuffer512, 256, wgpu::kWholeSize},
                                           });
 
         // Common shader code to use these buffers in shaders, assuming they are in bindgroup index

@@ -227,8 +227,9 @@ namespace dawn_native {
                 ASSERT(mBindingData.bindings[bindingIndex].Get() == nullptr);
                 mBindingData.bindings[bindingIndex] = binding.buffer;
                 mBindingData.bufferData[bindingIndex].offset = binding.offset;
-                uint64_t bufferSize =
-                    (binding.size == wgpu::kWholeSize) ? binding.buffer->GetSize() : binding.size;
+                uint64_t bufferSize = (binding.size == wgpu::kWholeSize)
+                                          ? binding.buffer->GetSize() - binding.offset
+                                          : binding.size;
                 mBindingData.bufferData[bindingIndex].size = bufferSize;
                 continue;
             }
