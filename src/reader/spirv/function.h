@@ -111,6 +111,8 @@ class FunctionEmitter {
   Namer& namer_;
   const spvtools::opt::Function& function_;
   ast::StatementList ast_body_;
+  // The set of IDs that have already had an identifier name generated for it.
+  std::unordered_set<uint32_t> identifier_values_;
 };
 
 }  // namespace spirv

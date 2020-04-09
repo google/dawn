@@ -29,7 +29,7 @@ namespace {
 
 using ::testing::HasSubstr;
 
-TEST_F(SpvParserTest, EmitFunctionVariables_StoreBoolConst) {
+TEST_F(SpvParserTest, EmitStatement_StoreBoolConst) {
   auto p = parser(test::Assemble(R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
@@ -64,7 +64,7 @@ Assignment{
 })"));
 }
 
-TEST_F(SpvParserTest, EmitFunctionVariables_StoreUintConst) {
+TEST_F(SpvParserTest, EmitStatement_StoreUintConst) {
   auto p = parser(test::Assemble(R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
@@ -92,7 +92,7 @@ Assignment{
 })"));
 }
 
-TEST_F(SpvParserTest, EmitFunctionVariables_StoreIntConst) {
+TEST_F(SpvParserTest, EmitStatement_StoreIntConst) {
   auto p = parser(test::Assemble(R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
@@ -120,7 +120,7 @@ Assignment{
 })"));
 }
 
-TEST_F(SpvParserTest, EmitFunctionVariables_StoreFloatConst) {
+TEST_F(SpvParserTest, EmitStatement_StoreFloatConst) {
   auto p = parser(test::Assemble(R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
@@ -146,6 +146,116 @@ Assignment{
   Identifier{x_1}
   ScalarConstructor{0.000000}
 })"));
+}
+
+TEST_F(SpvParserTest, EmitStatement_LoadBool) {
+  auto p = parser(test::Assemble(R"(
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+     %ty = OpTypeBool
+     %true = OpConstantTrue %ty
+     %false = OpConstantFalse %ty
+     %null = OpConstantNull %ty
+     %ptr_ty = OpTypePointer Function %ty
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpVariable %ptr_ty Function %true
+     %2 = OpLoad %ty %1
+     OpReturn
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_2
+    none
+    __bool
+    {
+      Identifier{x_1}
+    }
+  })"));
+}
+
+TEST_F(SpvParserTest, EmitStatement_LoadScalar) {
+  auto p = parser(test::Assemble(R"(
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+     %ty = OpTypeInt 32 0
+     %ty_42 = OpConstant %ty 42
+     %ptr_ty = OpTypePointer Function %ty
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpVariable %ptr_ty Function %ty_42
+     %2 = OpLoad %ty %1
+     %3 = OpLoad %ty %1
+     OpReturn
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_2
+    none
+    __u32
+    {
+      Identifier{x_1}
+    }
+  }
+}
+VariableDeclStatement{
+  Variable{
+    x_3
+    none
+    __u32
+    {
+      Identifier{x_1}
+    }
+  }
+})"));
+}
+
+TEST_F(SpvParserTest, EmitStatement_UseLoadedScalarTwice) {
+  auto p = parser(test::Assemble(R"(
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+     %ty = OpTypeInt 32 0
+     %ty_42 = OpConstant %ty 42
+     %ptr_ty = OpTypePointer Function %ty
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpVariable %ptr_ty Function %ty_42
+     %2 = OpLoad %ty %1
+     OpStore %1 %2
+     OpStore %1 %2
+     OpReturn
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_2
+    none
+    __u32
+    {
+      Identifier{x_1}
+    }
+  }
+}
+Assignment{
+  Identifier{x_1}
+  Identifier{x_2}
+}
+Assignment{
+  Identifier{x_1}
+  Identifier{x_2}
+}
+)"));
 }
 
 }  // namespace

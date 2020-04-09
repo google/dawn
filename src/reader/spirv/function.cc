@@ -23,6 +23,7 @@
 #include "src/ast/assignment_statement.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/storage_class.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
@@ -166,6 +167,8 @@ bool FunctionEmitter::EmitFunctionVariables() {
     auto var_decl_stmt =
         std::make_unique<ast::VariableDeclStatement>(std::move(var));
     ast_body_.emplace_back(std::move(var_decl_stmt));
+    // Save this as an already-named value.
+    identifier_values_.insert(inst.result_id());
   }
   return success();
 }
@@ -173,6 +176,9 @@ bool FunctionEmitter::EmitFunctionVariables() {
 std::unique_ptr<ast::Expression> FunctionEmitter::MakeExpression(uint32_t id) {
   if (failed()) {
     return nullptr;
+  }
+  if (identifier_values_.count(id)) {
+    return std::make_unique<ast::IdentifierExpression>(namer_.Name(id));
   }
   const auto* spirv_constant = constant_mgr_->FindDeclaredConstant(id);
   if (spirv_constant) {
@@ -184,13 +190,10 @@ std::unique_ptr<ast::Expression> FunctionEmitter::MakeExpression(uint32_t id) {
     return nullptr;
   }
   switch (inst->opcode()) {
-    case SpvOpVariable:
-      // This is not a declaration, but a use of an identifier.
-      return std::make_unique<ast::IdentifierExpression>(namer_.Name(id));
     default:
       break;
   }
-  Fail() << "unhandled expression for ID " << id;
+  Fail() << "unhandled expression for ID " << id << "\n" << inst->PrettyPrint();
   return nullptr;
 }
 
@@ -227,6 +230,27 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       auto rhs = MakeExpression(inst.GetSingleWordInOperand(1));
       ast_body_.emplace_back(std::make_unique<ast::AssignmentStatement>(
           std::move(lhs), std::move(rhs)));
+      return success();
+    }
+    case SpvOpLoad: {
+      // Memory accesses must be issued in SPIR-V program order.
+      // So represent a load by a new const definition.
+      auto ast_initializer = MakeExpression(inst.GetSingleWordInOperand(0));
+      if (!ast_initializer) {
+        return false;
+      }
+      auto ast_const =
+          parser_impl_.MakeVariable(inst.result_id(), ast::StorageClass::kNone,
+                                    parser_impl_.ConvertType(inst.type_id()));
+      if (!ast_const) {
+        return false;
+      }
+      ast_const->set_constructor(std::move(ast_initializer));
+      ast_const->set_is_const(true);
+      ast_body_.emplace_back(
+          std::make_unique<ast::VariableDeclStatement>(std::move(ast_const)));
+      // Save this as an already-named value.
+      identifier_values_.insert(inst.result_id());
       return success();
     }
     case SpvOpFunctionCall:
