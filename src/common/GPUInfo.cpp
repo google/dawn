@@ -33,4 +33,7 @@ namespace gpu_info {
     bool IsQualcomm(PCIVendorID vendorId) {
         return vendorId == kVendorID_Qualcomm;
     }
+    bool IsSwiftshader(PCIVendorID vendorId, PCIDeviceID deviceId) {
+        return vendorId == kVendorID_Google && deviceId == kDeviceID_Swiftshader;
+    }
 }  // namespace gpu_info

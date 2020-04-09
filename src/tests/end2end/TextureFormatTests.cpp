@@ -582,16 +582,28 @@ TEST_P(TextureFormatTest, RGBA32Float) {
 
 // Test the R16Float format
 TEST_P(TextureFormatTest, R16Float) {
+    // TODO(https://crbug.com/swiftshader/147) Rendering INFINITY isn't handled correctly by
+    // swiftshader
+    DAWN_SKIP_TEST_IF(IsVulkan() && IsSwiftshader());
+
     DoFloat16Test({wgpu::TextureFormat::R16Float, 2, wgpu::TextureComponentType::Float, 1});
 }
 
 // Test the RG16Float format
 TEST_P(TextureFormatTest, RG16Float) {
+    // TODO(https://crbug.com/swiftshader/147) Rendering INFINITY isn't handled correctly by
+    // swiftshader
+    DAWN_SKIP_TEST_IF(IsVulkan() && IsSwiftshader());
+
     DoFloat16Test({wgpu::TextureFormat::RG16Float, 4, wgpu::TextureComponentType::Float, 2});
 }
 
 // Test the RGBA16Float format
 TEST_P(TextureFormatTest, RGBA16Float) {
+    // TODO(https://crbug.com/swiftshader/147) Rendering INFINITY isn't handled correctly by
+    // swiftshader
+    DAWN_SKIP_TEST_IF(IsVulkan() && IsSwiftshader());
+
     DoFloat16Test({wgpu::TextureFormat::RGBA16Float, 8, wgpu::TextureComponentType::Float, 4});
 }
 

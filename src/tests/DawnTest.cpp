@@ -488,6 +488,10 @@ bool DawnTestBase::IsQualcomm() const {
     return gpu_info::IsQualcomm(mAdapterProperties.vendorID);
 }
 
+bool DawnTestBase::IsSwiftshader() const {
+    return gpu_info::IsSwiftshader(mAdapterProperties.vendorID, mAdapterProperties.deviceID);
+}
+
 bool DawnTestBase::IsWindows() const {
 #ifdef DAWN_PLATFORM_WINDOWS
     return true;
