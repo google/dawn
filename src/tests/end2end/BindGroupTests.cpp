@@ -876,4 +876,23 @@ TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
     DoTest(red, black, blue, RGBA8(64, 0, 255, 0));
 }
 
+// This is a regression test for crbug.com/dawn/355 which tests that destruction of a bind group
+// that holds the last reference to its bind group layout does not result in a use-after-free. In
+// the bug, the destructor of BindGroupBase, when destroying member mLayout,
+// Ref<BindGroupLayoutBase> assigns to Ref::mPointee, AFTER calling Release(). After the BGL is
+// destroyed, the storage for |mPointee| has been freed.
+TEST_P(BindGroupTests, LastReferenceToBindGroupLayout) {
+    wgpu::BufferDescriptor bufferDesc;
+    bufferDesc.size = sizeof(float);
+    bufferDesc.usage = wgpu::BufferUsage::Uniform;
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+
+    wgpu::BindGroup bg;
+    {
+        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Vertex, wgpu::BindingType::UniformBuffer}});
+        bg = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, sizeof(float)}});
+    }
+}
+
 DAWN_INSTANTIATE_TEST(BindGroupTests, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());

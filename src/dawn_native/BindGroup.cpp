@@ -257,6 +257,14 @@ namespace dawn_native {
         }
     }
 
+    void BindGroupBase::DeleteThis() {
+        // Add another ref to the layout so that if this is the last ref, the layout
+        // is destroyed after the bind group. The bind group is slab-allocated inside
+        // memory owned by the layout (except for the null backend).
+        Ref<BindGroupLayoutBase> layout = mLayout;
+        RefCounted::DeleteThis();
+    }
+
     BindGroupBase::BindGroupBase(DeviceBase* device, ObjectBase::ErrorTag tag)
         : ObjectBase(device, tag), mBindingData() {
     }
