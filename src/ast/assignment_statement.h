@@ -43,7 +43,7 @@ class AssignmentStatement : public Statement {
                       std::unique_ptr<Expression> lhs,
                       std::unique_ptr<Expression> rhs);
   /// Move constructor
-  AssignmentStatement(AssignmentStatement&&) = default;
+  AssignmentStatement(AssignmentStatement&&);
   ~AssignmentStatement() override;
 
   /// Sets the left side of the statement
@@ -59,7 +59,7 @@ class AssignmentStatement : public Statement {
   Expression* rhs() const { return rhs_.get(); }
 
   /// @returns true if this is an assignment statement
-  bool IsAssign() const override { return true; }
+  bool IsAssign() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

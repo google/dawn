@@ -33,7 +33,7 @@ class StructMemberOffsetDecoration : public StructMemberDecoration {
   ~StructMemberOffsetDecoration() override;
 
   /// @returns true if this is an offset decoration
-  bool IsOffset() const override { return true; }
+  bool IsOffset() const override;
 
   /// @returns the offset value
   uint32_t offset() const { return offset_; }

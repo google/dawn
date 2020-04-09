@@ -28,7 +28,13 @@ CastExpression::CastExpression(const Source& source,
                                std::unique_ptr<Expression> expr)
     : Expression(source), type_(type), expr_(std::move(expr)) {}
 
+CastExpression::CastExpression(CastExpression&&) = default;
+
 CastExpression::~CastExpression() = default;
+
+bool CastExpression::IsCast() const {
+  return true;
+}
 
 bool CastExpression::IsValid() const {
   if (expr_ == nullptr || !expr_->IsValid())

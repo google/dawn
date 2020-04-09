@@ -22,6 +22,16 @@ U32Type::U32Type() = default;
 
 U32Type::~U32Type() = default;
 
+U32Type::U32Type(U32Type&&) = default;
+
+bool U32Type::IsU32() const {
+  return true;
+}
+
+std::string U32Type::type_name() const {
+  return "__u32";
+}
+
 }  // namespace type
 }  // namespace ast
 }  // namespace tint

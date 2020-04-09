@@ -35,7 +35,7 @@ class FallthroughStatement : public Statement {
   ~FallthroughStatement() override;
 
   /// @returns true if this is an fallthrough statement
-  bool IsFallthrough() const override { return true; }
+  bool IsFallthrough() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

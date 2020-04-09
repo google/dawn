@@ -29,14 +29,14 @@ class U32Type : public Type {
   /// Constructor
   U32Type();
   /// Move constructor
-  U32Type(U32Type&&) = default;
+  U32Type(U32Type&&);
   ~U32Type() override;
 
   /// @returns true if the type is a u32 type
-  bool IsU32() const override { return true; }
+  bool IsU32() const override;
 
   /// @returns the name for th type
-  std::string type_name() const override { return "__u32"; }
+  std::string type_name() const override;
 };
 
 }  // namespace type

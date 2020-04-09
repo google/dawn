@@ -32,10 +32,10 @@ namespace ast {
 /// Represents all the source in a given program.
 class Module {
  public:
-  Module() = default;
+  Module();
   /// Move constructor
-  Module(Module&&) = default;
-  ~Module() = default;
+  Module(Module&&);
+  ~Module();
 
   /// Add the given import to the module
   /// @param import The import to add.

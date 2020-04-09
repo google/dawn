@@ -35,7 +35,7 @@ class AliasType : public Type {
   ~AliasType() override;
 
   /// @returns true if the type is an alias type
-  bool IsAlias() const override { return true; }
+  bool IsAlias() const override;
 
   /// @returns the alias name
   const std::string& name() const { return name_; }
@@ -43,9 +43,7 @@ class AliasType : public Type {
   Type* type() const { return subtype_; }
 
   /// @returns the name for this type
-  std::string type_name() const override {
-    return "__alias_" + name_ + subtype_->type_name();
-  }
+  std::string type_name() const override;
 
  private:
   std::string name_;

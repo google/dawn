@@ -37,6 +37,50 @@ Expression::Expression(const Source& source) : Node(source) {}
 
 Expression::~Expression() = default;
 
+bool Expression::IsArrayAccessor() const {
+  return false;
+}
+
+bool Expression::IsAs() const {
+  return false;
+}
+
+bool Expression::IsCall() const {
+  return false;
+}
+
+bool Expression::IsCast() const {
+  return false;
+}
+
+bool Expression::IsIdentifier() const {
+  return false;
+}
+
+bool Expression::IsConstructor() const {
+  return false;
+}
+
+bool Expression::IsMemberAccessor() const {
+  return false;
+}
+
+bool Expression::IsBinary() const {
+  return false;
+}
+
+bool Expression::IsUnaryDerivative() const {
+  return false;
+}
+
+bool Expression::IsUnaryMethod() const {
+  return false;
+}
+
+bool Expression::IsUnaryOp() const {
+  return false;
+}
+
 ArrayAccessorExpression* Expression::AsArrayAccessor() {
   assert(IsArrayAccessor());
   return static_cast<ArrayAccessorExpression*>(this);

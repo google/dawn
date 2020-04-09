@@ -21,6 +21,16 @@ namespace type {
 PointerType::PointerType(Type* subtype, StorageClass storage_class)
     : subtype_(subtype), storage_class_(storage_class) {}
 
+bool PointerType::IsPointer() const {
+  return true;
+}
+
+std::string PointerType::type_name() const {
+  std::ostringstream out;
+  out << "__ptr_" << storage_class_ << subtype_->type_name();
+  return out.str();
+}
+
 PointerType::~PointerType() = default;
 
 }  // namespace type

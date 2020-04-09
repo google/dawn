@@ -34,13 +34,13 @@ class VariableDecoration {
   virtual ~VariableDecoration();
 
   /// @returns true if this is a binding decoration
-  virtual bool IsBinding() const { return false; }
+  virtual bool IsBinding() const;
   /// @returns true if this is a builtin decoration
-  virtual bool IsBuiltin() const { return false; }
+  virtual bool IsBuiltin() const;
   /// @returns true if this is a location decoration
-  virtual bool IsLocation() const { return false; }
+  virtual bool IsLocation() const;
   /// @returns true if this is a set decoration
-  virtual bool IsSet() const { return false; }
+  virtual bool IsSet() const;
 
   /// @returns the decoration as a binding decoration
   BindingDecoration* AsBinding();

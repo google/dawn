@@ -29,6 +29,18 @@ ConstructorExpression::~ConstructorExpression() = default;
 ConstructorExpression::ConstructorExpression(const Source& source)
     : Expression(source) {}
 
+bool ConstructorExpression::IsConstructor() const {
+  return true;
+}
+
+bool ConstructorExpression::IsScalarConstructor() const {
+  return false;
+}
+
+bool ConstructorExpression::IsTypeConstructor() const {
+  return false;
+}
+
 ScalarConstructorExpression* ConstructorExpression::AsScalarConstructor() {
   assert(IsScalarConstructor());
   return static_cast<ScalarConstructorExpression*>(this);

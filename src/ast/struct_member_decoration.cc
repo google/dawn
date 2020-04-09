@@ -25,6 +25,10 @@ StructMemberDecoration::StructMemberDecoration() = default;
 
 StructMemberDecoration::~StructMemberDecoration() = default;
 
+bool StructMemberDecoration::IsOffset() const {
+  return false;
+}
+
 StructMemberOffsetDecoration* StructMemberDecoration::AsOffset() {
   assert(IsOffset());
   return static_cast<StructMemberOffsetDecoration*>(this);

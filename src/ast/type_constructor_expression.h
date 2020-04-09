@@ -40,11 +40,11 @@ class TypeConstructorExpression : public ConstructorExpression {
                             type::Type* type,
                             ExpressionList values);
   /// Move constructor
-  TypeConstructorExpression(TypeConstructorExpression&&) = default;
+  TypeConstructorExpression(TypeConstructorExpression&&);
   ~TypeConstructorExpression() override;
 
   /// @returns true if this is a type constructor
-  bool IsTypeConstructor() const override { return true; }
+  bool IsTypeConstructor() const override;
 
   /// Set the type
   /// @param type the type

@@ -34,7 +34,13 @@ BreakStatement::BreakStatement(const Source& source,
       condition_(condition),
       conditional_(std::move(conditional)) {}
 
+BreakStatement::BreakStatement(BreakStatement&&) = default;
+
 BreakStatement::~BreakStatement() = default;
+
+bool BreakStatement::IsBreak() const {
+  return true;
+}
 
 bool BreakStatement::IsValid() const {
   if (condition_ == StatementCondition::kNone)

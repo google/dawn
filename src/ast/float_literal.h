@@ -32,7 +32,7 @@ class FloatLiteral : public Literal {
   ~FloatLiteral() override;
 
   /// @returns true if this is a float literal
-  bool IsFloat() const override { return true; }
+  bool IsFloat() const override;
 
   /// @returns the float literal value
   float value() const { return value_; }

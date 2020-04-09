@@ -22,6 +22,10 @@ IntLiteral::IntLiteral(ast::type::Type* type, int32_t value)
 
 IntLiteral::~IntLiteral() = default;
 
+bool IntLiteral::IsInt() const {
+  return true;
+}
+
 std::string IntLiteral::to_str() const {
   return std::to_string(value_);
 }

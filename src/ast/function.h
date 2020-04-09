@@ -34,7 +34,7 @@ namespace ast {
 class Function : public Node {
  public:
   /// Create a new empty function statement
-  Function() = default;
+  Function();
   /// Create a function
   /// @param name the function name
   /// @param params the function parameters
@@ -52,7 +52,7 @@ class Function : public Node {
            VariableList params,
            type::Type* return_type);
   /// Move constructor
-  Function(Function&&) = default;
+  Function(Function&&);
 
   ~Function() override;
 

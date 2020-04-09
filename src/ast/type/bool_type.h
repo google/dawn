@@ -33,10 +33,10 @@ class BoolType : public Type {
   ~BoolType() override;
 
   /// @returns true if the type is a bool type
-  bool IsBool() const override { return true; }
+  bool IsBool() const override;
 
   /// @returns the name for this type
-  std::string type_name() const override { return "__bool"; }
+  std::string type_name() const override;
 };
 
 }  // namespace type

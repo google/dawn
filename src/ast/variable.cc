@@ -21,6 +21,8 @@
 namespace tint {
 namespace ast {
 
+Variable::Variable() = default;
+
 Variable::Variable(const std::string& name, StorageClass sc, type::Type* type)
     : Node(), name_(name), storage_class_(sc), type_(type) {}
 
@@ -30,11 +32,17 @@ Variable::Variable(const Source& source,
                    type::Type* type)
     : Node(source), name_(name), storage_class_(sc), type_(type) {}
 
+Variable::Variable(Variable&&) = default;
+
 Variable::~Variable() = default;
 
 DecoratedVariable* Variable::AsDecorated() {
   assert(IsDecorated());
   return static_cast<DecoratedVariable*>(this);
+}
+
+bool Variable::IsDecorated() const {
+  return false;
 }
 
 bool Variable::IsValid() const {

@@ -32,7 +32,7 @@ class UintLiteral : public Literal {
   ~UintLiteral() override;
 
   /// @returns true if this is a uint literal
-  bool IsUint() const override { return true; }
+  bool IsUint() const override;
 
   /// @returns the uint literal value
   uint32_t value() const { return value_; }

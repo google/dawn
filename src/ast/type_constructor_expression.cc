@@ -29,7 +29,14 @@ TypeConstructorExpression::TypeConstructorExpression(const Source& source,
                                                      ExpressionList values)
     : ConstructorExpression(source), type_(type), values_(std::move(values)) {}
 
+TypeConstructorExpression::TypeConstructorExpression(
+    TypeConstructorExpression&&) = default;
+
 TypeConstructorExpression::~TypeConstructorExpression() = default;
+
+bool TypeConstructorExpression::IsTypeConstructor() const {
+  return true;
+}
 
 bool TypeConstructorExpression::IsValid() const {
   if (values_.empty()) {

@@ -34,8 +34,8 @@ source_set("libtint") {
     "src/ast/binary_expression.h",
     "src/ast/binding_decoration.cc",
     "src/ast/binding_decoration.h",
-    "src/ast/bool_literal.h",
     "src/ast/bool_literal.cc",
+    "src/ast/bool_literal.h",
     "src/ast/break_statement.cc",
     "src/ast/break_statement.h",
     "src/ast/builtin.cc",
@@ -78,8 +78,8 @@ source_set("libtint") {
     "src/ast/int_literal.h",
     "src/ast/kill_statement.cc",
     "src/ast/kill_statement.h",
-    "src/ast/literal.h",
     "src/ast/literal.cc",
+    "src/ast/literal.h",
     "src/ast/location_decoration.cc",
     "src/ast/location_decoration.h",
     "src/ast/loop_statement.cc",
@@ -108,10 +108,10 @@ source_set("libtint") {
     "src/ast/statement_condition.h",
     "src/ast/storage_class.cc",
     "src/ast/storage_class.h",
-    "src/ast/struct_decoration.cc",
-    "src/ast/struct_decoration.h",
     "src/ast/struct.cc",
     "src/ast/struct.h",
+    "src/ast/struct_decoration.cc",
+    "src/ast/struct_decoration.h",
     "src/ast/struct_member.cc",
     "src/ast/struct_member.h",
     "src/ast/struct_member_decoration.cc",
@@ -120,8 +120,6 @@ source_set("libtint") {
     "src/ast/struct_member_offset_decoration.h",
     "src/ast/switch_statement.cc",
     "src/ast/switch_statement.h",
-    "src/ast/type_constructor_expression.h",
-    "src/ast/type_constructor_expression.cc",
     "src/ast/type/alias_type.cc",
     "src/ast/type/alias_type.h",
     "src/ast/type/array_type.cc",
@@ -146,6 +144,8 @@ source_set("libtint") {
     "src/ast/type/vector_type.h",
     "src/ast/type/void_type.cc",
     "src/ast/type/void_type.h",
+    "src/ast/type_constructor_expression.cc",
+    "src/ast/type_constructor_expression.h",
     "src/ast/uint_literal.cc",
     "src/ast/uint_literal.h",
     "src/ast/unary_derivative.cc",
@@ -164,12 +164,12 @@ source_set("libtint") {
     "src/ast/unless_statement.h",
     "src/ast/variable.cc",
     "src/ast/variable.h",
-    "src/ast/variable_decoration.cc",
-    "src/ast/variable_decoration.h",
     "src/ast/variable_decl_statement.cc",
     "src/ast/variable_decl_statement.h",
-    "src/context.h",
+    "src/ast/variable_decoration.cc",
+    "src/ast/variable_decoration.h",
     "src/context.cc",
+    "src/context.h",
     "src/reader/reader.cc",
     "src/reader/reader.h",
     "src/scope_stack.h",
@@ -186,34 +186,26 @@ source_set("libtint") {
     "src/writer/writer.h",
   ]
 
+  configs += [ ":tint_common_config" ]
+
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
   }
-
-  # Suppress warnings from the Chromium Clang plugin
-  configs -= [ "//build/config/clang:find_bad_constructs" ]
 }
 
 executable("tint") {
-  sources = [
-    "samples/main.cc",
-  ]
-  deps = [
-    ":libtint",
-  ]
+  sources = [ "samples/main.cc" ]
+  deps = [ ":libtint" ]
+
+  configs += [ ":tint_common_config" ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
   }
-
-  # Suppress warnings from the Chromium Clang plugin
-  configs -= [ "//build/config/clang:find_bad_constructs" ]
 }
 
 group("tint_all") {
-  deps = [
-      ":tint",
-    ]
+  deps = [ ":tint" ]
 }

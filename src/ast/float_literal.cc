@@ -25,6 +25,10 @@ FloatLiteral::FloatLiteral(ast::type::Type* type, float value)
 
 FloatLiteral::~FloatLiteral() = default;
 
+bool FloatLiteral::IsFloat() const {
+  return true;
+}
+
 std::string FloatLiteral::to_str() const {
   return std::to_string(value_);
 }

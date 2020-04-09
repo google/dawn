@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+﻿// Copyright 2020 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ class IfStatement : public Statement {
               std::unique_ptr<Expression> condition,
               StatementList body);
   /// Move constructor
-  IfStatement(IfStatement&&) = default;
+  IfStatement(IfStatement&&);
   ~IfStatement() override;
 
   /// Sets the condition for the if statement
@@ -74,7 +74,7 @@ class IfStatement : public Statement {
   const StatementList& premerge() const { return premerge_; }
 
   /// @returns true if this is a if statement
-  bool IsIf() const override { return true; }
+  bool IsIf() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

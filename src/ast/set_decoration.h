@@ -31,7 +31,7 @@ class SetDecoration : public VariableDecoration {
   ~SetDecoration() override;
 
   /// @returns true if this is a set decoration
-  bool IsSet() const override { return true; }
+  bool IsSet() const override;
 
   /// @returns the set value
   uint32_t value() const { return value_; }

@@ -36,6 +36,50 @@ Type::Type() = default;
 
 Type::~Type() = default;
 
+bool Type::IsAlias() const {
+  return false;
+}
+
+bool Type::IsArray() const {
+  return false;
+}
+
+bool Type::IsBool() const {
+  return false;
+}
+
+bool Type::IsF32() const {
+  return false;
+}
+
+bool Type::IsI32() const {
+  return false;
+}
+
+bool Type::IsMatrix() const {
+  return false;
+}
+
+bool Type::IsPointer() const {
+  return false;
+}
+
+bool Type::IsStruct() const {
+  return false;
+}
+
+bool Type::IsU32() const {
+  return false;
+}
+
+bool Type::IsVector() const {
+  return false;
+}
+
+bool Type::IsVoid() const {
+  return false;
+}
+
 AliasType* Type::AsAlias() {
   assert(IsAlias());
   return static_cast<AliasType*>(this);

@@ -23,7 +23,23 @@ ArrayType::ArrayType(Type* subtype) : subtype_(subtype) {}
 ArrayType::ArrayType(Type* subtype, uint32_t size)
     : subtype_(subtype), size_(size) {}
 
+ArrayType::ArrayType(ArrayType&&) = default;
+
 ArrayType::~ArrayType() = default;
+
+bool ArrayType::IsArray() const {
+  return true;
+}
+
+std::string ArrayType::type_name() const {
+  assert(subtype_);
+
+  std::string type_name = "__array" + subtype_->type_name();
+  if (!IsRuntimeArray())
+    type_name += "_" + std::to_string(size_);
+
+  return type_name;
+}
 
 }  // namespace type
 }  // namespace ast

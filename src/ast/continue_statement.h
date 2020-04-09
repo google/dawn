@@ -46,7 +46,7 @@ class ContinueStatement : public Statement {
                     StatementCondition condition,
                     std::unique_ptr<Expression> conditional);
   /// Move constructor
-  ContinueStatement(ContinueStatement&&) = default;
+  ContinueStatement(ContinueStatement&&);
   ~ContinueStatement() override;
 
   /// Sets the condition type
@@ -64,7 +64,7 @@ class ContinueStatement : public Statement {
   Expression* conditional() const { return conditional_.get(); }
 
   /// @returns true if this is an continue statement
-  bool IsContinue() const override { return true; }
+  bool IsContinue() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

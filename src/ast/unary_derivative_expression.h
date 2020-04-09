@@ -48,7 +48,7 @@ class UnaryDerivativeExpression : public Expression {
                             DerivativeModifier mod,
                             std::unique_ptr<Expression> param);
   /// Move constructor
-  UnaryDerivativeExpression(UnaryDerivativeExpression&&) = default;
+  UnaryDerivativeExpression(UnaryDerivativeExpression&&);
   ~UnaryDerivativeExpression() override;
 
   /// Sets the op
@@ -72,7 +72,7 @@ class UnaryDerivativeExpression : public Expression {
   Expression* param() const { return param_.get(); }
 
   /// @returns true if this is an as expression
-  bool IsUnaryDerivative() const override { return true; }
+  bool IsUnaryDerivative() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

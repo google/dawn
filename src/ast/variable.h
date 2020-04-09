@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+﻿// Copyright 2020 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ class DecoratedVariable;
 class Variable : public Node {
  public:
   /// Create a new empty variable statement
-  Variable() = default;
+  Variable();
   /// Create a variable
   /// @param name the variables name
   /// @param sc the variable storage class
@@ -97,7 +97,7 @@ class Variable : public Node {
            StorageClass sc,
            type::Type* type);
   /// Move constructor
-  Variable(Variable&&) = default;
+  Variable(Variable&&);
 
   ~Variable() override;
 
@@ -137,7 +137,7 @@ class Variable : public Node {
   bool is_const() const { return is_const_; }
 
   /// @returns true if this is a decorated variable
-  virtual bool IsDecorated() const { return false; }
+  virtual bool IsDecorated() const;
 
   /// @returns the expression as a decorated variable
   DecoratedVariable* AsDecorated();

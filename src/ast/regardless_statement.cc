@@ -30,7 +30,12 @@ RegardlessStatement::RegardlessStatement(const Source& source,
       condition_(std::move(condition)),
       body_(std::move(body)) {}
 
+RegardlessStatement::RegardlessStatement(RegardlessStatement&&) = default;
 RegardlessStatement::~RegardlessStatement() = default;
+
+bool RegardlessStatement::IsRegardless() const {
+  return true;
+}
 
 bool RegardlessStatement::IsValid() const {
   if (condition_ == nullptr || !condition_->IsValid()) {

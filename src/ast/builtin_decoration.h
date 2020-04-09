@@ -30,7 +30,7 @@ class BuiltinDecoration : public VariableDecoration {
   ~BuiltinDecoration() override;
 
   /// @returns true if this is a builtin decoration
-  bool IsBuiltin() const override { return true; }
+  bool IsBuiltin() const override;
 
   /// @returns the builtin value
   Builtin value() const { return builtin_; }

@@ -46,7 +46,7 @@ class BreakStatement : public Statement {
                  StatementCondition condition,
                  std::unique_ptr<Expression> conditional);
   /// Move constructor
-  BreakStatement(BreakStatement&&) = default;
+  BreakStatement(BreakStatement&&);
   ~BreakStatement() override;
 
   /// Sets the condition type
@@ -64,7 +64,7 @@ class BreakStatement : public Statement {
   Expression* conditional() const { return conditional_.get(); }
 
   /// @returns true if this is an break statement
-  bool IsBreak() const override { return true; }
+  bool IsBreak() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

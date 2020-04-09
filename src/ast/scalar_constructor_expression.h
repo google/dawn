@@ -38,11 +38,11 @@ class ScalarConstructorExpression : public ConstructorExpression {
   ScalarConstructorExpression(const Source& source,
                               std::unique_ptr<Literal> literal);
   /// Move constructor
-  ScalarConstructorExpression(ScalarConstructorExpression&&) = default;
+  ScalarConstructorExpression(ScalarConstructorExpression&&);
   ~ScalarConstructorExpression() override;
 
   /// @returns true if this is a scalar constructor
-  bool IsScalarConstructor() const override { return true; }
+  bool IsScalarConstructor() const override;
 
   /// Set the literal value
   /// @param literal the literal

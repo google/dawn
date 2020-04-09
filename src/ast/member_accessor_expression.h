@@ -44,7 +44,7 @@ class MemberAccessorExpression : public Expression {
                            std::unique_ptr<Expression> structure,
                            std::unique_ptr<IdentifierExpression> member);
   /// Move constructor
-  MemberAccessorExpression(MemberAccessorExpression&&) = default;
+  MemberAccessorExpression(MemberAccessorExpression&&);
   ~MemberAccessorExpression() override;
 
   /// Sets the structure
@@ -64,7 +64,7 @@ class MemberAccessorExpression : public Expression {
   IdentifierExpression* member() const { return member_.get(); }
 
   /// @returns true if this is a member accessor expression
-  bool IsMemberAccessor() const override { return true; }
+  bool IsMemberAccessor() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

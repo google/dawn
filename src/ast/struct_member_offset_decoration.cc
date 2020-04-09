@@ -20,6 +20,10 @@ namespace ast {
 StructMemberOffsetDecoration::StructMemberOffsetDecoration(uint32_t offset)
     : offset_(offset) {}
 
+bool StructMemberOffsetDecoration::IsOffset() const {
+  return true;
+}
+
 StructMemberOffsetDecoration::~StructMemberOffsetDecoration() = default;
 
 std::string StructMemberOffsetDecoration::to_str() const {

@@ -42,7 +42,7 @@ class AsExpression : public Expression {
                type::Type* type,
                std::unique_ptr<Expression> expr);
   /// Move constructor
-  AsExpression(AsExpression&&) = default;
+  AsExpression(AsExpression&&);
   ~AsExpression() override;
 
   /// Sets the type
@@ -58,7 +58,7 @@ class AsExpression : public Expression {
   Expression* expr() const { return expr_.get(); }
 
   /// @returns true if this is an as expression
-  bool IsAs() const override { return true; }
+  bool IsAs() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

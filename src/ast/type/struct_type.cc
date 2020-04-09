@@ -23,6 +23,16 @@ namespace type {
 StructType::StructType(std::unique_ptr<Struct> impl)
     : struct_(std::move(impl)) {}
 
+StructType::StructType(StructType&&) = default;
+
+bool StructType::IsStruct() const {
+  return true;
+}
+
+std::string StructType::type_name() const {
+  return "__struct_" + name_;
+}
+
 StructType::~StructType() = default;
 
 }  // namespace type

@@ -21,6 +21,10 @@ BindingDecoration::BindingDecoration(uint32_t val) : value_(val) {}
 
 BindingDecoration::~BindingDecoration() = default;
 
+bool BindingDecoration::IsBinding() const {
+  return true;
+}
+
 void BindingDecoration::to_str(std::ostream& out) const {
   out << "BindingDecoration{" << value_ << "}" << std::endl;
 }

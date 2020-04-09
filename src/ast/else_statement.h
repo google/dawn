@@ -49,7 +49,7 @@ class ElseStatement : public Statement {
                 std::unique_ptr<Expression> condition,
                 StatementList body);
   /// Move constructor
-  ElseStatement(ElseStatement&&) = default;
+  ElseStatement(ElseStatement&&);
   ~ElseStatement() override;
 
   /// Sets the condition for the else statement
@@ -69,7 +69,7 @@ class ElseStatement : public Statement {
   const StatementList& body() const { return body_; }
 
   /// @returns true if this is a else statement
-  bool IsElse() const override { return true; }
+  bool IsElse() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

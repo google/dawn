@@ -28,7 +28,13 @@ UnaryOpExpression::UnaryOpExpression(const Source& source,
                                      std::unique_ptr<Expression> expr)
     : Expression(source), op_(op), expr_(std::move(expr)) {}
 
+UnaryOpExpression::UnaryOpExpression(UnaryOpExpression&&) = default;
+
 UnaryOpExpression::~UnaryOpExpression() = default;
+
+bool UnaryOpExpression::IsUnaryOp() const {
+  return true;
+}
 
 bool UnaryOpExpression::IsValid() const {
   return expr_ != nullptr && expr_->IsValid();

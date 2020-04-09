@@ -36,7 +36,13 @@ ElseStatement::ElseStatement(const Source& source,
       condition_(std::move(condition)),
       body_(std::move(body)) {}
 
+ElseStatement::ElseStatement(ElseStatement&&) = default;
+
 ElseStatement::~ElseStatement() = default;
+
+bool ElseStatement::IsElse() const {
+  return true;
+}
 
 bool ElseStatement::IsValid() const {
   for (const auto& stmt : body_) {

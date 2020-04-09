@@ -30,7 +30,13 @@ BinaryExpression::BinaryExpression(const Source& source,
                                    std::unique_ptr<Expression> rhs)
     : Expression(source), op_(op), lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
 
+BinaryExpression::BinaryExpression(BinaryExpression&&) = default;
+
 BinaryExpression::~BinaryExpression() = default;
+
+bool BinaryExpression::IsBinary() const {
+  return true;
+}
 
 bool BinaryExpression::IsValid() const {
   if (lhs_ == nullptr || !lhs_->IsValid()) {

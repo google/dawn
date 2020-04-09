@@ -26,6 +26,10 @@ DecoratedVariable::DecoratedVariable(DecoratedVariable&&) = default;
 
 DecoratedVariable::~DecoratedVariable() = default;
 
+bool DecoratedVariable::IsDecorated() const {
+  return true;
+}
+
 bool DecoratedVariable::IsValid() const {
   return Variable::IsValid();
 }

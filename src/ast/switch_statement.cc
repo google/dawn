@@ -32,6 +32,12 @@ SwitchStatement::SwitchStatement(const Source& source,
       condition_(std::move(condition)),
       body_(std::move(body)) {}
 
+bool SwitchStatement::IsSwitch() const {
+  return true;
+}
+
+SwitchStatement::SwitchStatement(SwitchStatement&&) = default;
+
 SwitchStatement::~SwitchStatement() = default;
 
 bool SwitchStatement::IsValid() const {

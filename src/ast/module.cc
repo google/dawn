@@ -19,6 +19,12 @@
 namespace tint {
 namespace ast {
 
+Module::Module() = default;
+
+Module::Module(Module&&) = default;
+
+Module::~Module() = default;
+
 const Import* Module::FindImportByName(const std::string& name) {
   for (const auto& import : imports_) {
     if (import->name() == name)
@@ -43,7 +49,7 @@ bool Module::IsValid() const {
       return false;
     }
   }
-  for (const auto& alias : alias_types_) {
+  for (auto* const alias : alias_types_) {
     if (alias == nullptr) {
       return false;
     }
@@ -70,7 +76,7 @@ std::string Module::to_str() const {
   for (const auto& ep : entry_points_) {
     ep->to_str(out, indent);
   }
-  for (const auto& alias : alias_types_) {
+  for (auto* const alias : alias_types_) {
     out << alias->name() << " -> " << alias->type()->type_name() << std::endl;
   }
   for (const auto& func : functions_) {

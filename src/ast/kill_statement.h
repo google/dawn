@@ -33,7 +33,7 @@ class KillStatement : public Statement {
   ~KillStatement() override;
 
   /// @returns true if this is a kill statement
-  bool IsKill() const override { return true; }
+  bool IsKill() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

@@ -27,6 +27,8 @@ Struct::Struct(const Source& source,
                StructMemberList members)
     : Node(source), decoration_(decoration), members_(std::move(members)) {}
 
+Struct::Struct(Struct&&) = default;
+
 Struct::~Struct() = default;
 
 bool Struct::IsValid() const {

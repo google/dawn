@@ -28,7 +28,13 @@ UnaryMethodExpression::UnaryMethodExpression(const Source& source,
                                              ExpressionList params)
     : Expression(source), op_(op), params_(std::move(params)) {}
 
+UnaryMethodExpression::UnaryMethodExpression(UnaryMethodExpression&&) = default;
+
 UnaryMethodExpression::~UnaryMethodExpression() = default;
+
+bool UnaryMethodExpression::IsUnaryMethod() const {
+  return true;
+}
 
 bool UnaryMethodExpression::IsValid() const {
   if (params_.empty()) {

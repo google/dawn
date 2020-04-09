@@ -40,7 +40,7 @@ class ReturnStatement : public Statement {
   /// @param value the return value
   ReturnStatement(const Source& source, std::unique_ptr<Expression> value);
   /// Move constructor
-  ReturnStatement(ReturnStatement&&) = default;
+  ReturnStatement(ReturnStatement&&);
   ~ReturnStatement() override;
 
   /// Sets the value
@@ -54,7 +54,7 @@ class ReturnStatement : public Statement {
   bool has_value() const { return value_ != nullptr; }
 
   /// @returns true if this is a return statement
-  bool IsReturn() const override { return true; }
+  bool IsReturn() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

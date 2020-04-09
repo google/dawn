@@ -39,7 +39,7 @@ class VariableDeclStatement : public Statement {
   VariableDeclStatement(const Source& source,
                         std::unique_ptr<Variable> variable);
   /// Move constructor
-  VariableDeclStatement(VariableDeclStatement&&) = default;
+  VariableDeclStatement(VariableDeclStatement&&);
   ~VariableDeclStatement() override;
 
   /// Sets the variable
@@ -51,7 +51,7 @@ class VariableDeclStatement : public Statement {
   Variable* variable() const { return variable_.get(); }
 
   /// @returns true if this is an variable statement
-  bool IsVariableDecl() const override { return true; }
+  bool IsVariableDecl() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

@@ -42,7 +42,7 @@ class CastExpression : public Expression {
                  type::Type* type,
                  std::unique_ptr<Expression> expr);
   /// Move constructor
-  CastExpression(CastExpression&&) = default;
+  CastExpression(CastExpression&&);
   ~CastExpression() override;
 
   /// Sets the type
@@ -58,7 +58,7 @@ class CastExpression : public Expression {
   Expression* expr() const { return expr_.get(); }
 
   /// @returns true if this is a cast expression
-  bool IsCast() const override { return true; }
+  bool IsCast() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

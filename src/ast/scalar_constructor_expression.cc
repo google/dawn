@@ -29,7 +29,14 @@ ScalarConstructorExpression::ScalarConstructorExpression(
     std::unique_ptr<Literal> litearl)
     : ConstructorExpression(source), literal_(std::move(litearl)) {}
 
+ScalarConstructorExpression::ScalarConstructorExpression(
+    ScalarConstructorExpression&&) = default;
+
 ScalarConstructorExpression::~ScalarConstructorExpression() = default;
+
+bool ScalarConstructorExpression::IsScalarConstructor() const {
+  return true;
+}
 
 bool ScalarConstructorExpression::IsValid() const {
   return literal_ != nullptr;

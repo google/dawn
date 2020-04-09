@@ -36,11 +36,11 @@ class ArrayType : public Type {
   /// @param size the number of elements in the array
   ArrayType(Type* subtype, uint32_t size);
   /// Move constructor
-  ArrayType(ArrayType&&) = default;
+  ArrayType(ArrayType&&);
   ~ArrayType() override;
 
   /// @returns true if the type is an array type
-  bool IsArray() const override { return true; }
+  bool IsArray() const override;
   /// @returns true if this is a runtime array.
   /// i.e. the size is determined at runtime
   bool IsRuntimeArray() const { return size_ == 0; }
@@ -51,15 +51,7 @@ class ArrayType : public Type {
   uint32_t size() const { return size_; }
 
   /// @returns the name for the type
-  std::string type_name() const override {
-    assert(subtype_);
-
-    std::string type_name = "__array" + subtype_->type_name();
-    if (!IsRuntimeArray())
-      type_name += "_" + std::to_string(size_);
-
-    return type_name;
-  }
+  std::string type_name() const override;
 
  private:
   Type* subtype_ = nullptr;

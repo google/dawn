@@ -41,7 +41,7 @@ class UnaryMethodExpression : public Expression {
                         UnaryMethod op,
                         ExpressionList params);
   /// Move constructor
-  UnaryMethodExpression(UnaryMethodExpression&&) = default;
+  UnaryMethodExpression(UnaryMethodExpression&&);
   ~UnaryMethodExpression() override;
 
   /// Sets the op
@@ -57,7 +57,7 @@ class UnaryMethodExpression : public Expression {
   const ExpressionList& params() const { return params_; }
 
   /// @returns true if this is an as expression
-  bool IsUnaryMethod() const override { return true; }
+  bool IsUnaryMethod() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

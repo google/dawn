@@ -19,6 +19,8 @@
 namespace tint {
 namespace ast {
 
+Function::Function() = default;
+
 Function::Function(const std::string& name,
                    VariableList params,
                    type::Type* return_type)
@@ -35,6 +37,8 @@ Function::Function(const Source& source,
       name_(name),
       params_(std::move(params)),
       return_type_(return_type) {}
+
+Function::Function(Function&&) = default;
 
 Function::~Function() = default;
 

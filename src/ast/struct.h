@@ -43,7 +43,7 @@ class Struct : public Node {
          StructDecoration decoration,
          StructMemberList members);
   /// Move constructor
-  Struct(Struct&&) = default;
+  Struct(Struct&&);
 
   ~Struct() override;
 

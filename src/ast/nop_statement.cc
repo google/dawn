@@ -23,6 +23,10 @@ NopStatement::NopStatement(const Source& source) : Statement(source) {}
 
 NopStatement::~NopStatement() = default;
 
+bool NopStatement::IsNop() const {
+  return true;
+}
+
 bool NopStatement::IsValid() const {
   return true;
 }

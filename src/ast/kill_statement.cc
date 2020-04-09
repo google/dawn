@@ -23,6 +23,10 @@ KillStatement::KillStatement(const Source& source) : Statement(source) {}
 
 KillStatement::~KillStatement() = default;
 
+bool KillStatement::IsKill() const {
+  return true;
+}
+
 bool KillStatement::IsValid() const {
   return true;
 }

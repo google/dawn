@@ -41,7 +41,7 @@ class UnlessStatement : public Statement {
                   std::unique_ptr<Expression> condition,
                   StatementList body);
   /// Move constructor
-  UnlessStatement(UnlessStatement&&) = default;
+  UnlessStatement(UnlessStatement&&);
   ~UnlessStatement() override;
 
   /// Sets the condition expression
@@ -59,7 +59,7 @@ class UnlessStatement : public Statement {
   const StatementList& body() const { return body_; }
 
   /// @returns true if this is an unless statement
-  bool IsUnless() const override { return true; }
+  bool IsUnless() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

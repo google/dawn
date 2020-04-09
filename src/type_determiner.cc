@@ -114,7 +114,7 @@ bool TypeDeterminer::DetermineVariableStorageClass(ast::Statement* stmt) {
     return true;
   }
 
-  auto var = stmt->AsVariableDecl()->variable();
+  auto* var = stmt->AsVariableDecl()->variable();
   // Nothing to do for const
   if (var->is_const()) {
     return true;
@@ -135,23 +135,23 @@ bool TypeDeterminer::DetermineVariableStorageClass(ast::Statement* stmt) {
 
 bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
   if (stmt->IsAssign()) {
-    auto a = stmt->AsAssign();
+    auto* a = stmt->AsAssign();
     return DetermineResultType(a->lhs()) && DetermineResultType(a->rhs());
   }
   if (stmt->IsBreak()) {
-    auto b = stmt->AsBreak();
+    auto* b = stmt->AsBreak();
     return DetermineResultType(b->conditional());
   }
   if (stmt->IsCase()) {
-    auto c = stmt->AsCase();
+    auto* c = stmt->AsCase();
     return DetermineStatements(c->body());
   }
   if (stmt->IsContinue()) {
-    auto c = stmt->AsContinue();
+    auto* c = stmt->AsContinue();
     return DetermineResultType(c->conditional());
   }
   if (stmt->IsElse()) {
-    auto e = stmt->AsElse();
+    auto* e = stmt->AsElse();
     return DetermineResultType(e->condition()) &&
            DetermineStatements(e->body());
   }
@@ -159,7 +159,7 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     return true;
   }
   if (stmt->IsIf()) {
-    auto i = stmt->AsIf();
+    auto* i = stmt->AsIf();
     if (!DetermineResultType(i->condition()) ||
         !DetermineStatements(i->body())) {
       return false;
@@ -176,7 +176,7 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     return true;
   }
   if (stmt->IsLoop()) {
-    auto l = stmt->AsLoop();
+    auto* l = stmt->AsLoop();
     return DetermineStatements(l->body()) &&
            DetermineStatements(l->continuing());
   }
@@ -184,16 +184,16 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     return true;
   }
   if (stmt->IsRegardless()) {
-    auto r = stmt->AsRegardless();
+    auto* r = stmt->AsRegardless();
     return DetermineResultType(r->condition()) &&
            DetermineStatements(r->body());
   }
   if (stmt->IsReturn()) {
-    auto r = stmt->AsReturn();
+    auto* r = stmt->AsReturn();
     return DetermineResultType(r->value());
   }
   if (stmt->IsSwitch()) {
-    auto s = stmt->AsSwitch();
+    auto* s = stmt->AsSwitch();
     if (!DetermineResultType(s->condition())) {
       return false;
     }
@@ -205,12 +205,12 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     return true;
   }
   if (stmt->IsUnless()) {
-    auto u = stmt->AsUnless();
+    auto* u = stmt->AsUnless();
     return DetermineResultType(u->condition()) &&
            DetermineStatements(u->body());
   }
   if (stmt->IsVariableDecl()) {
-    auto v = stmt->AsVariableDecl();
+    auto* v = stmt->AsVariableDecl();
     variable_stack_.set(v->variable()->name(), v->variable());
     return DetermineResultType(v->variable()->constructor());
   }
@@ -268,13 +268,13 @@ bool TypeDeterminer::DetermineArrayAccessor(
   if (!DetermineResultType(expr->array())) {
     return false;
   }
-  auto parent_type = expr->array()->result_type();
+  auto* parent_type = expr->array()->result_type();
   if (parent_type->IsArray()) {
     expr->set_result_type(parent_type->AsArray()->type());
   } else if (parent_type->IsVector()) {
     expr->set_result_type(parent_type->AsVector()->type());
   } else if (parent_type->IsMatrix()) {
-    auto m = parent_type->AsMatrix();
+    auto* m = parent_type->AsMatrix();
     expr->set_result_type(ctx_.type_mgr().Get(
         std::make_unique<ast::type::VectorType>(m->type(), m->rows())));
   } else {
@@ -340,9 +340,9 @@ bool TypeDeterminer::DetermineMemberAccessor(
     return false;
   }
 
-  auto data_type = expr->structure()->result_type();
+  auto* data_type = expr->structure()->result_type();
   if (data_type->IsStruct()) {
-    auto strct = data_type->AsStruct()->impl();
+    auto* strct = data_type->AsStruct()->impl();
     auto name = expr->member()->name()[0];
 
     for (const auto& member : strct->members()) {
@@ -358,7 +358,7 @@ bool TypeDeterminer::DetermineMemberAccessor(
     return false;
   }
   if (data_type->IsVector()) {
-    auto vec = data_type->AsVector();
+    auto* vec = data_type->AsVector();
 
     // The vector will have a number of components equal to the length of the
     // swizzle. This assumes the validator will check that the swizzle
@@ -389,9 +389,9 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
   if (expr->IsLogicalAnd() || expr->IsLogicalOr() || expr->IsEqual() ||
       expr->IsNotEqual() || expr->IsLessThan() || expr->IsGreaterThan() ||
       expr->IsLessThanEqual() || expr->IsGreaterThanEqual()) {
-    auto bool_type =
+    auto* bool_type =
         ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
-    auto param_type = expr->lhs()->result_type();
+    auto* param_type = expr->lhs()->result_type();
     if (param_type->IsVector()) {
       expr->set_result_type(
           ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
@@ -402,8 +402,8 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
     return true;
   }
   if (expr->IsMultiply()) {
-    auto lhs_type = expr->lhs()->result_type();
-    auto rhs_type = expr->rhs()->result_type();
+    auto* lhs_type = expr->lhs()->result_type();
+    auto* rhs_type = expr->rhs()->result_type();
 
     // Note, the ordering here matters. The later checks depend on the prior
     // checks having been done.
@@ -414,11 +414,11 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
               rhs_type->AsMatrix()->columns())));
 
     } else if (lhs_type->IsMatrix() && rhs_type->IsVector()) {
-      auto mat = lhs_type->AsMatrix();
+      auto* mat = lhs_type->AsMatrix();
       expr->set_result_type(ctx_.type_mgr().Get(
           std::make_unique<ast::type::VectorType>(mat->type(), mat->rows())));
     } else if (lhs_type->IsVector() && rhs_type->IsMatrix()) {
-      auto mat = rhs_type->AsMatrix();
+      auto* mat = rhs_type->AsMatrix();
       expr->set_result_type(
           ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
               mat->type(), mat->columns())));
@@ -480,9 +480,9 @@ bool TypeDeterminer::DetermineUnaryMethod(ast::UnaryMethodExpression* expr) {
         return false;
       }
 
-      auto bool_type =
+      auto* bool_type =
           ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
-      auto param_type = expr->params()[0]->result_type();
+      auto* param_type = expr->params()[0]->result_type();
       if (param_type->IsVector()) {
         expr->set_result_type(
             ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
@@ -503,8 +503,8 @@ bool TypeDeterminer::DetermineUnaryMethod(ast::UnaryMethodExpression* expr) {
                   "incorrect number of parameters for outer product");
         return false;
       }
-      auto param0_type = expr->params()[0]->result_type();
-      auto param1_type = expr->params()[1]->result_type();
+      auto* param0_type = expr->params()[0]->result_type();
+      auto* param1_type = expr->params()[1]->result_type();
       if (!param0_type->IsVector() || !param1_type->IsVector()) {
         set_error(expr->source(), "invalid parameter type for outer product");
         return false;

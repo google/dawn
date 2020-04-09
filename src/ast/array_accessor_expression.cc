@@ -32,7 +32,14 @@ ArrayAccessorExpression::ArrayAccessorExpression(
       array_(std::move(array)),
       idx_expr_(std::move(idx_expr)) {}
 
+ArrayAccessorExpression::ArrayAccessorExpression(ArrayAccessorExpression&&) =
+    default;
+
 ArrayAccessorExpression::~ArrayAccessorExpression() = default;
+
+bool ArrayAccessorExpression::IsArrayAccessor() const {
+  return true;
+}
 
 bool ArrayAccessorExpression::IsValid() const {
   if (array_ == nullptr || !array_->IsValid())

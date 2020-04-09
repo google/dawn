@@ -30,7 +30,13 @@ CaseStatement::CaseStatement(const Source& source,
       condition_(std::move(condition)),
       body_(std::move(body)) {}
 
+CaseStatement::CaseStatement(CaseStatement&&) = default;
+
 CaseStatement::~CaseStatement() = default;
+
+bool CaseStatement::IsCase() const {
+  return true;
+}
 
 bool CaseStatement::IsValid() const {
   for (const auto& stmt : body_) {

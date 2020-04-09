@@ -39,7 +39,69 @@ Statement::Statement() = default;
 
 Statement::Statement(const Source& source) : Node(source) {}
 
+Statement::Statement(Statement&&) = default;
+
 Statement::~Statement() = default;
+
+bool Statement::IsAssign() const {
+  return false;
+}
+
+bool Statement::IsBreak() const {
+  return false;
+}
+
+bool Statement::IsCase() const {
+  return false;
+}
+
+bool Statement::IsContinue() const {
+  return false;
+}
+
+bool Statement::IsElse() const {
+  return false;
+}
+
+bool Statement::IsFallthrough() const {
+  return false;
+}
+
+bool Statement::IsIf() const {
+  return false;
+}
+
+bool Statement::IsKill() const {
+  return false;
+}
+
+bool Statement::IsLoop() const {
+  return false;
+}
+
+bool Statement::IsNop() const {
+  return false;
+}
+
+bool Statement::IsRegardless() const {
+  return false;
+}
+
+bool Statement::IsReturn() const {
+  return false;
+}
+
+bool Statement::IsSwitch() const {
+  return false;
+}
+
+bool Statement::IsUnless() const {
+  return false;
+}
+
+bool Statement::IsVariableDecl() const {
+  return false;
+}
 
 AssignmentStatement* Statement::AsAssign() {
   assert(IsAssign());

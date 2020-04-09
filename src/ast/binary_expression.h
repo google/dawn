@@ -70,7 +70,7 @@ class BinaryExpression : public Expression {
                    std::unique_ptr<Expression> lhs,
                    std::unique_ptr<Expression> rhs);
   /// Move constructor
-  BinaryExpression(BinaryExpression&&) = default;
+  BinaryExpression(BinaryExpression&&);
   ~BinaryExpression() override;
 
   /// Sets the binary op type
@@ -131,7 +131,7 @@ class BinaryExpression : public Expression {
   Expression* rhs() const { return rhs_.get(); }
 
   /// @returns true if this is a op expression
-  bool IsBinary() const override { return true; }
+  bool IsBinary() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

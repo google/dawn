@@ -32,7 +32,14 @@ UnaryDerivativeExpression::UnaryDerivativeExpression(
     std::unique_ptr<Expression> param)
     : Expression(source), op_(op), modifier_(mod), param_(std::move(param)) {}
 
+UnaryDerivativeExpression::UnaryDerivativeExpression(
+    UnaryDerivativeExpression&&) = default;
+
 UnaryDerivativeExpression::~UnaryDerivativeExpression() = default;
+
+bool UnaryDerivativeExpression::IsUnaryDerivative() const {
+  return true;
+}
 
 bool UnaryDerivativeExpression::IsValid() const {
   if (param_ == nullptr || !param_->IsValid()) {

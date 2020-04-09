@@ -39,7 +39,7 @@ class LoopStatement : public Statement {
                 StatementList body,
                 StatementList continuing);
   /// Move constructor
-  LoopStatement(LoopStatement&&) = default;
+  LoopStatement(LoopStatement&&);
   ~LoopStatement() override;
 
   /// Sets the body statements
@@ -59,7 +59,7 @@ class LoopStatement : public Statement {
   bool has_continuing() const { return !continuing_.empty(); }
 
   /// @returns true if this is a loop statement
-  bool IsLoop() const override { return true; }
+  bool IsLoop() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

@@ -22,6 +22,14 @@ I32Type::I32Type() = default;
 
 I32Type::~I32Type() = default;
 
+bool I32Type::IsI32() const {
+  return true;
+}
+
+std::string I32Type::type_name() const {
+  return "__i32";
+}
+
 }  // namespace type
 }  // namespace ast
 }  // namespace tint

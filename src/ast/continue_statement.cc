@@ -35,7 +35,13 @@ ContinueStatement::ContinueStatement(const Source& source,
       condition_(condition),
       conditional_(std::move(conditional)) {}
 
+ContinueStatement::ContinueStatement(ContinueStatement&&) = default;
+
 ContinueStatement::~ContinueStatement() = default;
+
+bool ContinueStatement::IsContinue() const {
+  return true;
+}
 
 bool ContinueStatement::IsValid() const {
   if (condition_ == StatementCondition::kNone)

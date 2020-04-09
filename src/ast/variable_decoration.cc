@@ -28,6 +28,22 @@ VariableDecoration::VariableDecoration() = default;
 
 VariableDecoration::~VariableDecoration() = default;
 
+bool VariableDecoration::IsBinding() const {
+  return false;
+}
+
+bool VariableDecoration::IsBuiltin() const {
+  return false;
+}
+
+bool VariableDecoration::IsLocation() const {
+  return false;
+}
+
+bool VariableDecoration::IsSet() const {
+  return false;
+}
+
 BindingDecoration* VariableDecoration::AsBinding() {
   assert(IsBinding());
   return static_cast<BindingDecoration*>(this);

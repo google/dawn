@@ -42,7 +42,7 @@ class UnaryOpExpression : public Expression {
                     UnaryOp op,
                     std::unique_ptr<Expression> expr);
   /// Move constructor
-  UnaryOpExpression(UnaryOpExpression&&) = default;
+  UnaryOpExpression(UnaryOpExpression&&);
   ~UnaryOpExpression() override;
 
   /// Sets the op
@@ -58,7 +58,7 @@ class UnaryOpExpression : public Expression {
   Expression* expr() const { return expr_.get(); }
 
   /// @returns true if this is an as expression
-  bool IsUnaryOp() const override { return true; }
+  bool IsUnaryOp() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

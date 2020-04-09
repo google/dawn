@@ -31,7 +31,13 @@ IdentifierExpression::IdentifierExpression(const Source& source,
                                            std::vector<std::string> name)
     : Expression(source), name_(std::move(name)) {}
 
+IdentifierExpression::IdentifierExpression(IdentifierExpression&&) = default;
+
 IdentifierExpression::~IdentifierExpression() = default;
+
+bool IdentifierExpression::IsIdentifier() const {
+  return true;
+}
 
 bool IdentifierExpression::IsValid() const {
   if (name_.size() == 0)

@@ -30,7 +30,13 @@ UnlessStatement::UnlessStatement(const Source& source,
       condition_(std::move(condition)),
       body_(std::move(body)) {}
 
+UnlessStatement::UnlessStatement(UnlessStatement&&) = default;
+
 UnlessStatement::~UnlessStatement() = default;
+
+bool UnlessStatement::IsUnless() const {
+  return true;
+}
 
 bool UnlessStatement::IsValid() const {
   if (condition_ == nullptr || !condition_->IsValid()) {

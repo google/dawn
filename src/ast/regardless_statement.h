@@ -42,7 +42,7 @@ class RegardlessStatement : public Statement {
                       std::unique_ptr<Expression> condition,
                       StatementList body);
   /// Move constructor
-  RegardlessStatement(RegardlessStatement&&) = default;
+  RegardlessStatement(RegardlessStatement&&);
   ~RegardlessStatement() override;
 
   /// Sets the condition expression
@@ -60,7 +60,7 @@ class RegardlessStatement : public Statement {
   const StatementList& body() const { return body_; }
 
   /// @returns true if this is an regardless statement
-  bool IsRegardless() const override { return true; }
+  bool IsRegardless() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

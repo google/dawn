@@ -28,6 +28,22 @@ Literal::Literal(ast::type::Type* type) : type_(type) {}
 
 Literal::~Literal() = default;
 
+bool Literal::IsBool() const {
+  return false;
+}
+
+bool Literal::IsFloat() const {
+  return false;
+}
+
+bool Literal::IsInt() const {
+  return false;
+}
+
+bool Literal::IsUint() const {
+  return false;
+}
+
 BoolLiteral* Literal::AsBool() {
   assert(IsBool());
   return static_cast<BoolLiteral*>(this);

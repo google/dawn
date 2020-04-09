@@ -44,7 +44,7 @@ class CaseStatement : public Statement {
                 std::unique_ptr<Literal> condition,
                 StatementList body);
   /// Move constructor
-  CaseStatement(CaseStatement&&) = default;
+  CaseStatement(CaseStatement&&);
   ~CaseStatement() override;
 
   /// Sets the condition for the case statement
@@ -64,7 +64,7 @@ class CaseStatement : public Statement {
   const StatementList& body() const { return body_; }
 
   /// @returns true if this is a case statement
-  bool IsCase() const override { return true; }
+  bool IsCase() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

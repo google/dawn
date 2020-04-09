@@ -29,7 +29,13 @@ LoopStatement::LoopStatement(const Source& source,
       body_(std::move(body)),
       continuing_(std::move(continuing)) {}
 
+LoopStatement::LoopStatement(LoopStatement&&) = default;
+
 LoopStatement::~LoopStatement() = default;
+
+bool LoopStatement::IsLoop() const {
+  return true;
+}
 
 bool LoopStatement::IsValid() const {
   for (const auto& stmt : body_) {

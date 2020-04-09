@@ -27,7 +27,12 @@ AsExpression::AsExpression(const Source& source,
                            std::unique_ptr<Expression> expr)
     : Expression(source), type_(type), expr_(std::move(expr)) {}
 
+AsExpression::AsExpression(AsExpression&&) = default;
 AsExpression::~AsExpression() = default;
+
+bool AsExpression::IsAs() const {
+  return true;
+}
 
 bool AsExpression::IsValid() const {
   if (expr_ == nullptr || !expr_->IsValid())

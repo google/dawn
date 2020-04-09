@@ -33,13 +33,13 @@ class Literal {
   virtual ~Literal();
 
   /// @returns true if this is a bool literal
-  virtual bool IsBool() const { return false; }
+  virtual bool IsBool() const;
   /// @returns true if this is a float literal
-  virtual bool IsFloat() const { return false; }
+  virtual bool IsFloat() const;
   /// @returns true if this is a signed int literal
-  virtual bool IsInt() const { return false; }
+  virtual bool IsInt() const;
   /// @returns true if this is a unsigned int literal
-  virtual bool IsUint() const { return false; }
+  virtual bool IsUint() const;
 
   /// @returns the literal as a boolean literal
   BoolLiteral* AsBool();

@@ -42,7 +42,7 @@ class IdentifierExpression : public Expression {
   /// @param name the name
   IdentifierExpression(const Source& source, std::vector<std::string> name);
   /// Move constructor
-  IdentifierExpression(IdentifierExpression&&) = default;
+  IdentifierExpression(IdentifierExpression&&);
   ~IdentifierExpression() override;
 
   /// Sets the name
@@ -52,7 +52,7 @@ class IdentifierExpression : public Expression {
   std::vector<std::string> name() const { return name_; }
 
   /// @returns true if this is an identifier expression
-  bool IsIdentifier() const override { return true; }
+  bool IsIdentifier() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

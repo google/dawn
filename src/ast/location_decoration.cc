@@ -21,6 +21,10 @@ LocationDecoration::LocationDecoration(uint32_t val) : value_(val) {}
 
 LocationDecoration::~LocationDecoration() = default;
 
+bool LocationDecoration::IsLocation() const {
+  return true;
+}
+
 void LocationDecoration::to_str(std::ostream& out) const {
   out << "LocationDecoration{" << value_ << "}" << std::endl;
 }

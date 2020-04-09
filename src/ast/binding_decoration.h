@@ -31,7 +31,7 @@ class BindingDecoration : public VariableDecoration {
   ~BindingDecoration() override;
 
   /// @returns true if this is a binding decoration
-  bool IsBinding() const override { return true; }
+  bool IsBinding() const override;
 
   /// @returns the binding value
   uint32_t value() const { return value_; }

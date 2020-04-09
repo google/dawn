@@ -41,27 +41,27 @@ class Type {
   virtual ~Type();
 
   /// @returns true if the type is an alias type
-  virtual bool IsAlias() const { return false; }
+  virtual bool IsAlias() const;
   /// @returns true if the type is an array type
-  virtual bool IsArray() const { return false; }
+  virtual bool IsArray() const;
   /// @returns true if the type is a bool type
-  virtual bool IsBool() const { return false; }
+  virtual bool IsBool() const;
   /// @returns true if the type is an f32 type
-  virtual bool IsF32() const { return false; }
+  virtual bool IsF32() const;
   /// @returns true if the type is an i32 type
-  virtual bool IsI32() const { return false; }
+  virtual bool IsI32() const;
   /// @returns true if the type is a matrix type
-  virtual bool IsMatrix() const { return false; }
+  virtual bool IsMatrix() const;
   /// @returns true if the type is a ptr type
-  virtual bool IsPointer() const { return false; }
+  virtual bool IsPointer() const;
   /// @returns true if the type is a struct type
-  virtual bool IsStruct() const { return false; }
+  virtual bool IsStruct() const;
   /// @returns true if the type is a u32 type
-  virtual bool IsU32() const { return false; }
+  virtual bool IsU32() const;
   /// @returns true if the type is a vec type
-  virtual bool IsVector() const { return false; }
+  virtual bool IsVector() const;
   /// @returns true if the type is a void type
-  virtual bool IsVoid() const { return false; }
+  virtual bool IsVoid() const;
 
   /// @returns the name for this type. The |type_name| is unique over all types.
   virtual std::string type_name() const = 0;

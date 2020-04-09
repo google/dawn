@@ -33,7 +33,7 @@ class NopStatement : public Statement {
   ~NopStatement() override;
 
   /// @returns true if this is a nop statement
-  bool IsNop() const override { return true; }
+  bool IsNop() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

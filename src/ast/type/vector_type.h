@@ -31,11 +31,11 @@ class VectorType : public Type {
   /// @param size the number of elements in the vector
   VectorType(Type* subtype, uint32_t size);
   /// Move constructor
-  VectorType(VectorType&&) = default;
+  VectorType(VectorType&&);
   ~VectorType() override;
 
   /// @returns true if the type is a vector type
-  bool IsVector() const override { return true; }
+  bool IsVector() const override;
 
   /// @returns the type of the vector elements
   Type* type() const { return subtype_; }
@@ -43,9 +43,7 @@ class VectorType : public Type {
   uint32_t size() const { return size_; }
 
   /// @returns the name for th type
-  std::string type_name() const override {
-    return "__vec_" + std::to_string(size_) + subtype_->type_name();
-  }
+  std::string type_name() const override;
 
  private:
   Type* subtype_ = nullptr;

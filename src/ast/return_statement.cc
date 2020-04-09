@@ -28,7 +28,13 @@ ReturnStatement::ReturnStatement(const Source& source,
                                  std::unique_ptr<Expression> value)
     : Statement(source), value_(std::move(value)) {}
 
+ReturnStatement::ReturnStatement(ReturnStatement&&) = default;
+
 ReturnStatement::~ReturnStatement() = default;
+
+bool ReturnStatement::IsReturn() const {
+  return true;
+}
 
 bool ReturnStatement::IsValid() const {
   if (value_ != nullptr) {

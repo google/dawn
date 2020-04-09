@@ -21,6 +21,10 @@ SetDecoration::SetDecoration(uint32_t val) : value_(val) {}
 
 SetDecoration::~SetDecoration() = default;
 
+bool SetDecoration::IsSet() const {
+  return true;
+}
+
 void SetDecoration::to_str(std::ostream& out) const {
   out << "SetDecoration{" << value_ << "}" << std::endl;
 }

@@ -46,7 +46,7 @@ class DecoratedVariable : public Variable {
   const VariableDecorationList& decorations() const { return decorations_; }
 
   /// @returns true if this is a decorated variable
-  bool IsDecorated() const override { return true; }
+  bool IsDecorated() const override;
 
   /// @returns true if the name and path are both present
   bool IsValid() const override;

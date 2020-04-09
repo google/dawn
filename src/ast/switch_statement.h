@@ -45,7 +45,7 @@ class SwitchStatement : public Statement {
                   std::unique_ptr<Expression> condition,
                   CaseStatementList body);
   /// Move constructor
-  SwitchStatement(SwitchStatement&&) = default;
+  SwitchStatement(SwitchStatement&&);
   ~SwitchStatement() override;
 
   /// Sets the condition for the switch statement
@@ -65,7 +65,7 @@ class SwitchStatement : public Statement {
   const CaseStatementList& body() const { return body_; }
 
   /// @returns true if this is a switch statement
-  bool IsSwitch() const override { return true; }
+  bool IsSwitch() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

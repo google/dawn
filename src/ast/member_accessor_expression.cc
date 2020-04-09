@@ -32,7 +32,14 @@ MemberAccessorExpression::MemberAccessorExpression(
       struct_(std::move(structure)),
       member_(std::move(member)) {}
 
+MemberAccessorExpression::MemberAccessorExpression(MemberAccessorExpression&&) =
+    default;
+
 MemberAccessorExpression::~MemberAccessorExpression() = default;
+
+bool MemberAccessorExpression::IsMemberAccessor() const {
+  return true;
+}
 
 bool MemberAccessorExpression::IsValid() const {
   if (struct_ == nullptr || !struct_->IsValid()) {

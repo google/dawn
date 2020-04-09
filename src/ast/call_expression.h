@@ -41,7 +41,7 @@ class CallExpression : public Expression {
                  std::unique_ptr<Expression> func,
                  ExpressionList params);
   /// Move constructor
-  CallExpression(CallExpression&&) = default;
+  CallExpression(CallExpression&&);
   ~CallExpression() override;
 
   /// Sets the func
@@ -57,7 +57,7 @@ class CallExpression : public Expression {
   const ExpressionList& params() const { return params_; }
 
   /// @returns true if this is a call expression
-  bool IsCall() const override { return true; }
+  bool IsCall() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

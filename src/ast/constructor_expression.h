@@ -29,12 +29,12 @@ class ConstructorExpression : public Expression {
   ~ConstructorExpression() override;
 
   /// @returns true if this is an constructor expression
-  bool IsConstructor() const override { return true; }
+  bool IsConstructor() const override;
 
   /// @returns true if this is a scalar constructor
-  virtual bool IsScalarConstructor() const { return false; }
+  virtual bool IsScalarConstructor() const;
   /// @returns true if this is a type constructor
-  virtual bool IsTypeConstructor() const { return false; }
+  virtual bool IsTypeConstructor() const;
 
   /// @returns this as a scalar constructor expression
   ScalarConstructorExpression* AsScalarConstructor();

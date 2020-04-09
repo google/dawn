@@ -32,7 +32,7 @@ class BoolLiteral : public Literal {
   ~BoolLiteral() override;
 
   /// @returns true if this is a bool literal
-  bool IsBool() const override { return true; }
+  bool IsBool() const override;
 
   /// @returns true if the bool literal is true
   bool IsTrue() const { return value_; }

@@ -33,10 +33,10 @@ class F32Type : public Type {
   ~F32Type() override;
 
   /// @returns true if the type is an f32 type
-  bool IsF32() const override { return true; }
+  bool IsF32() const override;
 
   /// @returns the name for this type
-  std::string type_name() const override { return "__f32"; }
+  std::string type_name() const override;
 };
 
 }  // namespace type

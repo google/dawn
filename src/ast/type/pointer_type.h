@@ -37,7 +37,7 @@ class PointerType : public Type {
   ~PointerType() override;
 
   /// @returns true if the type is a pointer type
-  bool IsPointer() const override { return true; }
+  bool IsPointer() const override;
 
   /// @returns the pointee type
   Type* type() const { return subtype_; }
@@ -45,11 +45,7 @@ class PointerType : public Type {
   StorageClass storage_class() const { return storage_class_; }
 
   /// @returns the name for this type
-  std::string type_name() const override {
-    std::ostringstream out;
-    out << "__ptr_" << storage_class_ << subtype_->type_name();
-    return out.str();
-  }
+  std::string type_name() const override;
 
  private:
   Type* subtype_;

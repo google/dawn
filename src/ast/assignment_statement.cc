@@ -28,7 +28,13 @@ AssignmentStatement::AssignmentStatement(const Source& source,
                                          std::unique_ptr<Expression> rhs)
     : Statement(source), lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
 
+AssignmentStatement::AssignmentStatement(AssignmentStatement&&) = default;
+
 AssignmentStatement::~AssignmentStatement() = default;
+
+bool AssignmentStatement::IsAssign() const {
+  return true;
+}
 
 bool AssignmentStatement::IsValid() const {
   if (lhs_ == nullptr || !lhs_->IsValid())

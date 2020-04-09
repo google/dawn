@@ -33,10 +33,10 @@ class I32Type : public Type {
   ~I32Type() override;
 
   /// @returns true if the type is an i32 type
-  bool IsI32() const override { return true; }
+  bool IsI32() const override;
 
   /// @returns the name for this type
-  std::string type_name() const override { return "__i32"; }
+  std::string type_name() const override;
 };
 
 }  // namespace type

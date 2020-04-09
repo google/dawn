@@ -30,7 +30,7 @@ class StructMemberDecoration {
   virtual ~StructMemberDecoration();
 
   /// @returns true if this is an offset decoration
-  virtual bool IsOffset() const { return false; }
+  virtual bool IsOffset() const;
 
   /// @returns the decoration as an offset decoration
   StructMemberOffsetDecoration* AsOffset();

@@ -36,7 +36,7 @@ class MatrixType : public Type {
   ~MatrixType() override;
 
   /// @returns true if the type is a matrix type
-  bool IsMatrix() const override { return true; }
+  bool IsMatrix() const override;
 
   /// @returns the type of the matrix
   Type* type() const { return subtype_; }
@@ -46,10 +46,7 @@ class MatrixType : public Type {
   uint32_t columns() const { return columns_; }
 
   /// @returns the name for this type
-  std::string type_name() const override {
-    return "__mat_" + std::to_string(rows_) + "_" + std::to_string(columns_) +
-           subtype_->type_name();
-  }
+  std::string type_name() const override;
 
  private:
   Type* subtype_ = nullptr;

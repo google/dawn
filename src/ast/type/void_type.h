@@ -29,14 +29,14 @@ class VoidType : public Type {
   /// Constructor
   VoidType();
   /// Move constructor
-  VoidType(VoidType&&) = default;
+  VoidType(VoidType&&);
   ~VoidType() override;
 
   /// @returns true if the type is a void type
-  bool IsVoid() const override { return true; }
+  bool IsVoid() const override;
 
   /// @returns the name for this type
-  std::string type_name() const override { return "__void"; }
+  std::string type_name() const override;
 };
 
 }  // namespace type

@@ -32,7 +32,7 @@ class IntLiteral : public Literal {
   ~IntLiteral() override;
 
   /// @returns true if this is a int literal
-  bool IsInt() const override { return true; }
+  bool IsInt() const override;
 
   /// @returns the int literal value
   int32_t value() const { return value_; }

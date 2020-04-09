@@ -21,6 +21,10 @@ BuiltinDecoration::BuiltinDecoration(Builtin builtin) : builtin_(builtin) {}
 
 BuiltinDecoration::~BuiltinDecoration() = default;
 
+bool BuiltinDecoration::IsBuiltin() const {
+  return true;
+}
+
 void BuiltinDecoration::to_str(std::ostream& out) const {
   out << "BuiltinDecoration{" << builtin_ << "}" << std::endl;
 }

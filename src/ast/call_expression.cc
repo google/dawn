@@ -28,7 +28,13 @@ CallExpression::CallExpression(const Source& source,
                                ExpressionList params)
     : Expression(source), func_(std::move(func)), params_(std::move(params)) {}
 
+CallExpression::CallExpression(CallExpression&&) = default;
+
 CallExpression::~CallExpression() = default;
+
+bool CallExpression::IsCall() const {
+  return true;
+}
 
 bool CallExpression::IsValid() const {
   if (func_ == nullptr || !func_->IsValid())

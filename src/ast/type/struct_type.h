@@ -32,7 +32,7 @@ class StructType : public Type {
   /// @param impl the struct data
   explicit StructType(std::unique_ptr<Struct> impl);
   /// Move constructor
-  StructType(StructType&&) = default;
+  StructType(StructType&&);
   ~StructType() override;
 
   /// Sets the name of the struct
@@ -42,13 +42,13 @@ class StructType : public Type {
   const std::string& name() const { return name_; }
 
   /// @returns true if the type is a struct type
-  bool IsStruct() const override { return true; }
+  bool IsStruct() const override;
 
   /// @returns the struct name
   Struct* impl() const { return struct_.get(); }
 
   /// @returns the name for th type
-  std::string type_name() const override { return "__struct_" + name_; }
+  std::string type_name() const override;
 
  private:
   std::string name_;

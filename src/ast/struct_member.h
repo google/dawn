@@ -32,7 +32,7 @@ namespace ast {
 class StructMember : public Node {
  public:
   /// Create a new empty struct member statement
-  StructMember() = default;
+  StructMember();
   /// Create a new struct member statement
   /// @param name The struct member name
   /// @param type The struct member type
@@ -50,7 +50,7 @@ class StructMember : public Node {
                type::Type* type,
                StructMemberDecorationList decorations);
   /// Move constructor
-  StructMember(StructMember&&) = default;
+  StructMember(StructMember&&);
 
   ~StructMember() override;
 

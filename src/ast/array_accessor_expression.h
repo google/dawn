@@ -42,7 +42,7 @@ class ArrayAccessorExpression : public Expression {
                           std::unique_ptr<Expression> array,
                           std::unique_ptr<Expression> idx_expr);
   /// Move constructor
-  ArrayAccessorExpression(ArrayAccessorExpression&&) = default;
+  ArrayAccessorExpression(ArrayAccessorExpression&&);
   ~ArrayAccessorExpression() override;
 
   /// Sets the array
@@ -62,7 +62,7 @@ class ArrayAccessorExpression : public Expression {
   Expression* idx_expr() const { return idx_expr_.get(); }
 
   /// @returns true if this is an array accessor expression
-  bool IsArrayAccessor() const override { return true; }
+  bool IsArrayAccessor() const override;
 
   /// @returns true if the node is valid
   bool IsValid() const override;

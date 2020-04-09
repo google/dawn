@@ -32,7 +32,13 @@ IfStatement::IfStatement(const Source& source,
       condition_(std::move(condition)),
       body_(std::move(body)) {}
 
+IfStatement::IfStatement(IfStatement&&) = default;
+
 IfStatement::~IfStatement() = default;
+
+bool IfStatement::IsIf() const {
+  return true;
+}
 
 bool IfStatement::IsValid() const {
   if (condition_ == nullptr || !condition_->IsValid())

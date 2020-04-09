@@ -45,35 +45,35 @@ class Statement : public Node {
   ~Statement() override;
 
   /// @returns true if this is an assign statement
-  virtual bool IsAssign() const { return false; }
+  virtual bool IsAssign() const;
   /// @returns true if this is a break statement
-  virtual bool IsBreak() const { return false; }
+  virtual bool IsBreak() const;
   /// @returns true if this is a case statement
-  virtual bool IsCase() const { return false; }
+  virtual bool IsCase() const;
   /// @returns true if this is a continue statement
-  virtual bool IsContinue() const { return false; }
+  virtual bool IsContinue() const;
   /// @returns true if this is an else statement
-  virtual bool IsElse() const { return false; }
+  virtual bool IsElse() const;
   /// @returns true if this is a fallthrough statement
-  virtual bool IsFallthrough() const { return false; }
+  virtual bool IsFallthrough() const;
   /// @returns true if this is an if statement
-  virtual bool IsIf() const { return false; }
+  virtual bool IsIf() const;
   /// @returns true if this is a kill statement
-  virtual bool IsKill() const { return false; }
+  virtual bool IsKill() const;
   /// @returns true if this is a loop statement
-  virtual bool IsLoop() const { return false; }
+  virtual bool IsLoop() const;
   /// @returns true if this is a nop statement
-  virtual bool IsNop() const { return false; }
+  virtual bool IsNop() const;
   /// @returns true if this is an regardless statement
-  virtual bool IsRegardless() const { return false; }
+  virtual bool IsRegardless() const;
   /// @returns true if this is a return statement
-  virtual bool IsReturn() const { return false; }
+  virtual bool IsReturn() const;
   /// @returns true if this is a switch statement
-  virtual bool IsSwitch() const { return false; }
+  virtual bool IsSwitch() const;
   /// @returns true if this is an unless statement
-  virtual bool IsUnless() const { return false; }
+  virtual bool IsUnless() const;
   /// @returns true if this is an variable statement
-  virtual bool IsVariableDecl() const { return false; }
+  virtual bool IsVariableDecl() const;
 
   /// @returns the statement as an assign statement
   AssignmentStatement* AsAssign();
@@ -113,7 +113,7 @@ class Statement : public Node {
   /// @param source the source of the expression
   explicit Statement(const Source& source);
   /// Move constructor
-  Statement(Statement&&) = default;
+  Statement(Statement&&);
 
  private:
   Statement(const Statement&) = delete;

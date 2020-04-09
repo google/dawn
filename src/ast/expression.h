@@ -48,27 +48,27 @@ class Expression : public Node {
   type::Type* result_type() const { return result_type_; }
 
   /// @returns true if this is an array accessor expression
-  virtual bool IsArrayAccessor() const { return false; }
+  virtual bool IsArrayAccessor() const;
   /// @returns true if this is an as expression
-  virtual bool IsAs() const { return false; }
+  virtual bool IsAs() const;
   /// @returns true if this is a call expression
-  virtual bool IsCall() const { return false; }
+  virtual bool IsCall() const;
   /// @returns true if this is a cast expression
-  virtual bool IsCast() const { return false; }
+  virtual bool IsCast() const;
   /// @returns true if this is an identifier expression
-  virtual bool IsIdentifier() const { return false; }
+  virtual bool IsIdentifier() const;
   /// @returns true if this is an constructor expression
-  virtual bool IsConstructor() const { return false; }
+  virtual bool IsConstructor() const;
   /// @returns true if this is a member accessor expression
-  virtual bool IsMemberAccessor() const { return false; }
+  virtual bool IsMemberAccessor() const;
   /// @returns true if this is a binary expression
-  virtual bool IsBinary() const { return false; }
+  virtual bool IsBinary() const;
   /// @returns true if this is a unary derivative expression
-  virtual bool IsUnaryDerivative() const { return false; }
+  virtual bool IsUnaryDerivative() const;
   /// @returns true if this is a unary method expression
-  virtual bool IsUnaryMethod() const { return false; }
+  virtual bool IsUnaryMethod() const;
   /// @returns true if this is a unary op expression
-  virtual bool IsUnaryOp() const { return false; }
+  virtual bool IsUnaryOp() const;
 
   /// @returns the expression as an array accessor
   ArrayAccessorExpression* AsArrayAccessor();
