@@ -49,11 +49,11 @@ import("dawn_overrides_with_defaults.gni")
 template("dawn_component") {
   # Copy the target_name in the local scope so it doesn't get shadowed in the
   # definition of targets.
-  libname = target_name
+  name = target_name
 
   # The config that will apply to dependents of the shared library so they know
   # they should "import" the symbols
-  config("${libname}_shared_public_config") {
+  config("${name}_shared_public_config") {
     defines = [ "${invoker.DEFINE_PREFIX}_SHARED_LIBRARY" ]
 
     # Executable needs an rpath to find our shared libraries on OSX and Linux
@@ -68,8 +68,9 @@ template("dawn_component") {
     }
   }
 
-  shared_library("${libname}_shared") {
-    output_name = libname
+  shared_library("${name}_shared") {
+    # The "tool" for creating shared libraries will automatically add the "lib" prefix
+    output_name = name
 
     # Copy all variables except "configs", which has a default value
     forward_variables_from(invoker, "*", [ "configs" ])
@@ -81,7 +82,7 @@ template("dawn_component") {
     if (is_mac) {
       ldflags = [
         "-install_name",
-        "@rpath/${libname}.dylib",
+        "@rpath/lib${name}.dylib",
       ]
     }
 
@@ -89,7 +90,7 @@ template("dawn_component") {
     if (!defined(public_configs)) {
       public_configs = []
     }
-    public_configs += [ ":${libname}_shared_public_config" ]
+    public_configs += [ ":${name}_shared_public_config" ]
 
     # Tell sources of this library to export the symbols (and not import)
     if (!defined(defines)) {
@@ -106,8 +107,8 @@ template("dawn_component") {
     }
   }
 
-  static_library("${libname}_static") {
-    output_name = libname + "_static"
+  static_library("${name}_static") {
+    output_name = name + "_static"
 
     complete_static_lib = dawn_complete_static_libs
 
@@ -118,14 +119,14 @@ template("dawn_component") {
     }
   }
 
-  group(libname) {
+  group(name) {
     if (is_component_build) {
       public_deps = [
-        ":${libname}_shared",
+        ":${name}_shared",
       ]
     } else {
       public_deps = [
-        ":${libname}_static",
+        ":${name}_static",
       ]
     }
   }

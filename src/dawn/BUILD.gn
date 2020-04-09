@@ -88,25 +88,32 @@ source_set("dawncpp") {
 }
 
 ###############################################################################
-# libdawn_proc
+# dawn_proc
 ###############################################################################
 
-dawn_json_generator("libdawn_proc_gen") {
+dawn_json_generator("dawn_proc_gen") {
   target = "dawn_proc"
   outputs = [
     "src/dawn/dawn_proc.c",
   ]
 }
 
-dawn_component("libdawn_proc") {
+dawn_component("dawn_proc") {
   DEFINE_PREFIX = "WGPU"
 
   public_deps = [
     ":dawn_headers",
   ]
   deps = [
-    ":libdawn_proc_gen",
+    ":dawn_proc_gen",
   ]
-  sources = get_target_outputs(":libdawn_proc_gen")
+  sources = get_target_outputs(":dawn_proc_gen")
   sources += [ "${dawn_root}/src/include/dawn/dawn_proc.h" ]
+}
+
+# Temporary group while we do a 3-way patch with Chromium
+group("libdawn_proc") {
+  public_deps = [
+    ":dawn_proc",
+  ]
 }
