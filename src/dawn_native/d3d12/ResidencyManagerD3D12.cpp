@@ -110,7 +110,15 @@ namespace dawn_native { namespace d3d12 {
         // continue to make forward progress. Note the choice to halve memory is arbitrarily chosen
         // and subject to future experimentation.
         mVideoMemoryInfo.externalReservation =
-            std::min(queryVideoMemoryInfo.Budget / 2, mVideoMemoryInfo.externalReservation);
+            std::min(queryVideoMemoryInfo.Budget / 2, mVideoMemoryInfo.externalRequest);
+
+        mVideoMemoryInfo.dawnUsage =
+            queryVideoMemoryInfo.CurrentUsage - mVideoMemoryInfo.externalReservation;
+
+        // If we're restricting the budget for testing, leave the budget as is.
+        if (mRestrictBudgetForTesting) {
+            return;
+        }
 
         // We cap Dawn's budget to 95% of the provided budget. Leaving some budget unused
         // decreases fluctuations in the operating-system-defined budget, which improves stability
@@ -119,8 +127,6 @@ namespace dawn_native { namespace d3d12 {
         static constexpr float kBudgetCap = 0.95;
         mVideoMemoryInfo.dawnBudget =
             (queryVideoMemoryInfo.Budget - mVideoMemoryInfo.externalReservation) * kBudgetCap;
-        mVideoMemoryInfo.dawnUsage =
-            queryVideoMemoryInfo.CurrentUsage - mVideoMemoryInfo.externalReservation;
     }
 
     // Removes from the LRU and returns the least recently used heap when possible. Returns nullptr
@@ -280,4 +286,21 @@ namespace dawn_native { namespace d3d12 {
 
         mLRUCache.Append(heap);
     }
+
+    // Places an artifical cap on Dawn's budget so we can test in a predictable manner. If used,
+    // this function must be called before any resources have been created.
+    void ResidencyManager::RestrictBudgetForTesting(uint64_t artificialBudgetCap) {
+        ASSERT(mLRUCache.empty());
+        ASSERT(!mRestrictBudgetForTesting);
+
+        mRestrictBudgetForTesting = true;
+        UpdateVideoMemoryInfo();
+
+        // Dawn has a non-zero memory usage even before any resources have been created, and this
+        // value can vary depending on the environment Dawn is running in. By adding this in
+        // addition to the artificial budget cap, we can create a predictable and reproducible
+        // budget for testing.
+        mVideoMemoryInfo.dawnBudget = mVideoMemoryInfo.dawnUsage + artificialBudgetCap;
+    }
+
 }}  // namespace dawn_native::d3d12
