@@ -93,10 +93,3 @@ dawn_component("dawn_wire") {
     ":dawn_wire_headers",
   ]
 }
-
-# Temporary group for a 3-way patch with Chromium
-group("libdawn_wire_headers") {
-  public_deps = [
-    ":dawn_wire_headers",
-  ]
-}

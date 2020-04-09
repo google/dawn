@@ -102,7 +102,9 @@ if (dawn_enable_opengl) {
 # Public dawn_native headers so they can be publicly visible for
 # dependencies of dawn_native
 source_set("dawn_native_headers") {
-  public_deps = [ "${dawn_root}/src/dawn:dawncpp_headers" ]
+  public_deps = [
+    "${dawn_root}/src/dawn:dawncpp_headers",
+  ]
   all_dependent_configs = [ "${dawn_root}/src/common:dawn_public_include_dirs" ]
   sources = [
     "${dawn_root}/src/include/dawn_native/DawnNative.h",
@@ -569,13 +571,17 @@ dawn_component("dawn_native") {
   DEFINE_PREFIX = "DAWN_NATIVE"
 
   #Make headers publically visible
-  public_deps = [ ":dawn_native_headers" ]
+  public_deps = [
+    ":dawn_native_headers",
+  ]
 
   deps = [
     ":dawn_native_sources",
     "${dawn_root}/src/common",
   ]
-  sources = [ "DawnNative.cpp" ]
+  sources = [
+    "DawnNative.cpp",
+  ]
   configs = [ ":dawn_native_internal" ]
   public_configs = [ ":dawn_native_weak_framework" ]
 
@@ -595,17 +601,13 @@ dawn_component("dawn_native") {
     sources += [ "vulkan/VulkanBackend.cpp" ]
 
     if (enable_vulkan_validation_layers) {
-      data_deps =
-          [ "${dawn_vulkan_validation_layers_dir}:vulkan_validation_layers" ]
+      data_deps = [
+        "${dawn_vulkan_validation_layers_dir}:vulkan_validation_layers",
+      ]
       if (!is_android) {
         data_deps +=
             [ "${dawn_vulkan_validation_layers_dir}:vulkan_gen_json_files" ]
       }
     }
   }
-}
-
-# Temporary group for a 3-way patch with Chromium
-group("libdawn_native_headers") {
-  public_deps = [ ":dawn_native_headers" ]
 }

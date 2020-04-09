@@ -17,14 +17,6 @@ import("../../scripts/dawn_overrides_with_defaults.gni")
 import("${dawn_root}/generator/dawn_generator.gni")
 import("${dawn_root}/scripts/dawn_component.gni")
 
-# Temporary group to not break Chromium `gn check` on Dawn CQ.
-group("libdawn") {
-  deps = [
-    ":dawncpp",
-    ":libdawn_proc",
-  ]
-}
-
 ###############################################################################
 # Dawn headers
 ###############################################################################
