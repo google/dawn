@@ -30,10 +30,11 @@ namespace reader {
 namespace spirv {
 
 /// SPIR-V Parser test class
-class SpvParserTest : public testing::Test {
+template <typename T>
+class SpvParserTestBase : public T {
  public:
-  SpvParserTest() = default;
-  ~SpvParserTest() = default;
+  SpvParserTestBase() = default;
+  ~SpvParserTestBase() = default;
 
   /// Sets up the test helper
   void SetUp() { ctx_.Reset(); }
@@ -62,6 +63,9 @@ class SpvParserTest : public testing::Test {
   std::unique_ptr<ParserImpl> impl_;
   Context ctx_;
 };
+
+// Use this form when you don't need to template any further.
+using SpvParserTest = SpvParserTestBase<::testing::Test>;
 
 /// Returns the string dump of a function body.
 /// @param body the statement in the body

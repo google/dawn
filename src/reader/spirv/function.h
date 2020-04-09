@@ -90,10 +90,29 @@ class FunctionEmitter {
   /// @returns false if emission failed.
   bool EmitStatement(const spvtools::opt::Instruction& inst);
 
+  /// Emits a const definition for a SPIR-V value.
+  /// @param inst the SPIR-V instruction defining the value
+  /// @param ast_expr the already-computed AST expression for the value
+  /// @returns false if emission failed.
+  bool EmitConstDefinition(const spvtools::opt::Instruction& inst,
+                           std::unique_ptr<ast::Expression> ast_expr);
+
   /// Makes an expression
   /// @param id the SPIR-V ID of the value
   /// @returns true if emission has not yet failed.
   std::unique_ptr<ast::Expression> MakeExpression(uint32_t id);
+
+  /// Creates an expression and supporting statements for a combinatorial
+  /// instruction, or returns null.  A SPIR-V instruction is combinatorial
+  /// if it has no side effects and its result depends only on its operands,
+  /// and not on accessing external state like memory or the state of other
+  /// invocations.  Statements are only created if required to provide values
+  /// to the expression. Supporting statements are not required to be
+  /// combinatorial.
+  /// @param inst a SPIR-V instruction representing an exrpression
+  /// @returns an AST expression for the instruction, or nullptr.
+  std::unique_ptr<ast::Expression> MaybeEmitCombinatorialValue(
+      const spvtools::opt::Instruction& inst);
 
  private:
   /// @returns the store type for the OpVariable instruction, or
@@ -113,6 +132,9 @@ class FunctionEmitter {
   ast::StatementList ast_body_;
   // The set of IDs that have already had an identifier name generated for it.
   std::unordered_set<uint32_t> identifier_values_;
+  // Mapping from SPIR-V ID that is used at most once, to its AST expression.
+  std::unordered_map<uint32_t, std::unique_ptr<ast::Expression>>
+      singly_used_values_;
 };
 
 }  // namespace spirv

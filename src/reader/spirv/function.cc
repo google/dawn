@@ -21,6 +21,7 @@
 #include "source/opt/instruction.h"
 #include "source/opt/module.h"
 #include "src/ast/assignment_statement.h"
+#include "src/ast/binary_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/storage_class.h"
@@ -33,6 +34,19 @@
 namespace tint {
 namespace reader {
 namespace spirv {
+
+namespace {
+// @returns the AST binary op for the given opcode, or kNone
+ast::BinaryOp ConvertBinaryOp(SpvOp opcode) {
+  switch (opcode) {
+    case SpvOpIAdd:
+      return ast::BinaryOp::kAdd;
+    default:
+      break;
+  }
+  return ast::BinaryOp::kNone;
+}
+}  // namespace
 
 FunctionEmitter::FunctionEmitter(ParserImpl* pi,
                                  const spvtools::opt::Function& function)
@@ -180,6 +194,11 @@ std::unique_ptr<ast::Expression> FunctionEmitter::MakeExpression(uint32_t id) {
   if (identifier_values_.count(id)) {
     return std::make_unique<ast::IdentifierExpression>(namer_.Name(id));
   }
+  if (singly_used_values_.count(id)) {
+    auto expr = std::move(singly_used_values_[id]);
+    singly_used_values_.erase(id);
+    return expr;
+  }
   const auto* spirv_constant = constant_mgr_->FindDeclaredConstant(id);
   if (spirv_constant) {
     return parser_impl_.MakeConstantExpression(id);
@@ -222,7 +241,45 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(
   return true;
 }
 
+bool FunctionEmitter::EmitConstDefinition(
+    const spvtools::opt::Instruction& inst,
+    std::unique_ptr<ast::Expression> ast_expr) {
+  if (!ast_expr) {
+    return false;
+  }
+  auto ast_const =
+      parser_impl_.MakeVariable(inst.result_id(), ast::StorageClass::kNone,
+                                parser_impl_.ConvertType(inst.type_id()));
+  if (!ast_const) {
+    return false;
+  }
+  ast_const->set_constructor(std::move(ast_expr));
+  ast_const->set_is_const(true);
+  ast_body_.emplace_back(
+      std::make_unique<ast::VariableDeclStatement>(std::move(ast_const)));
+  // Save this as an already-named value.
+  identifier_values_.insert(inst.result_id());
+  return success();
+}
+
 bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
+  // Handle combinatorial instructions first.
+  auto combinatorial_expr = MaybeEmitCombinatorialValue(inst);
+  if (combinatorial_expr != nullptr) {
+    if (def_use_mgr_->NumUses(&inst) == 1) {
+      // If it's used once, then defer emitting the expression until it's used.
+      // Any supporting statements have already been emitted.
+      singly_used_values_[inst.result_id()] = std::move(combinatorial_expr);
+      return success();
+    }
+    // Otherwise, generate a const definition for it now and later use
+    // the const's name at the uses of the value.
+    return EmitConstDefinition(inst, std::move(combinatorial_expr));
+  }
+  if (failed()) {
+    return false;
+  }
+
   switch (inst.opcode()) {
     case SpvOpStore: {
       // TODO(dneto): Order of evaluation?
@@ -232,27 +289,11 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
           std::move(lhs), std::move(rhs)));
       return success();
     }
-    case SpvOpLoad: {
+    case SpvOpLoad:
       // Memory accesses must be issued in SPIR-V program order.
       // So represent a load by a new const definition.
-      auto ast_initializer = MakeExpression(inst.GetSingleWordInOperand(0));
-      if (!ast_initializer) {
-        return false;
-      }
-      auto ast_const =
-          parser_impl_.MakeVariable(inst.result_id(), ast::StorageClass::kNone,
-                                    parser_impl_.ConvertType(inst.type_id()));
-      if (!ast_const) {
-        return false;
-      }
-      ast_const->set_constructor(std::move(ast_initializer));
-      ast_const->set_is_const(true);
-      ast_body_.emplace_back(
-          std::make_unique<ast::VariableDeclStatement>(std::move(ast_const)));
-      // Save this as an already-named value.
-      identifier_values_.insert(inst.result_id());
-      return success();
-    }
+      return EmitConstDefinition(
+          inst, MakeExpression(inst.GetSingleWordInOperand(0)));
     case SpvOpFunctionCall:
       // TODO(dneto): Fill this out.  Make this pass, for existing tests
       return success();
@@ -260,6 +301,58 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       break;
   }
   return Fail() << "unhandled instruction with opcode " << inst.opcode();
+}
+
+std::unique_ptr<ast::Expression> FunctionEmitter::MaybeEmitCombinatorialValue(
+    const spvtools::opt::Instruction& inst) {
+  if (inst.result_id() == 0) {
+    return nullptr;
+  }
+
+  // TODO(dneto): Fill in the following cases.
+
+  auto operand = [this, &inst](uint32_t operand_index) {
+    return this->MakeExpression(inst.GetSingleWordInOperand(operand_index));
+  };
+
+  auto binary_op = ConvertBinaryOp(inst.opcode());
+  if (binary_op != ast::BinaryOp::kNone) {
+    return std::make_unique<ast::BinaryExpression>(binary_op, operand(0),
+                                                   operand(1));
+  }
+  // binary operator
+  // unary operator
+  // builtin readonly function
+  // glsl.std.450 readonly function
+
+  // Instructions:
+  // 	OpCopyObject
+  // 	OpUndef
+  // 	OpBitcast
+  // 	OpSatConvertSToU
+  // 	OpSatConvertUToS
+  // 	OpSatConvertFToS
+  // 	OpSatConvertFToU
+  // 	OpSatConvertSToF
+  // 	OpSatConvertUToF
+  // 	OpUConvert
+  // 	OpSConvert
+  // 	OpFConvert
+  // 	OpConvertPtrToU // Not in WebGPU
+  // 	OpConvertUToPtr // Not in WebGPU
+  // 	OpPtrCastToGeneric // Not in Vulkan
+  // 	OpGenericCastToPtr // Not in Vulkan
+  // 	OpGenericCastToPtrExplicit // Not in Vulkan
+  //
+  //    OpAccessChain
+  //    OpInBoundsAccessChain
+  //    OpArrayLength
+  //    OpVectorExtractDynamic
+  //    OpVectorInsertDynamic
+  //    OpCompositeExtract
+  //    OpCompositeInsert
+
+  return nullptr;
 }
 
 }  // namespace spirv
