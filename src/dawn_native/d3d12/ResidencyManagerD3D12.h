@@ -29,8 +29,8 @@ namespace dawn_native { namespace d3d12 {
       public:
         ResidencyManager(Device* device);
 
-        MaybeError LockMappableHeap(Heap* heap);
-        void UnlockMappableHeap(Heap* heap);
+        MaybeError LockHeap(Heap* heap);
+        void UnlockHeap(Heap* heap);
         MaybeError EnsureCanMakeResident(uint64_t allocationSize);
         MaybeError EnsureHeapsAreResident(Heap** heaps, size_t heapCount);
 

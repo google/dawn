@@ -64,7 +64,12 @@ namespace dawn_native { namespace d3d12 {
         D3D12_HEAP_TYPE mD3d12HeapType;
         // mLastUsage denotes the last time this heap was recorded for use.
         Serial mLastUsage = 0;
-        // mLastSubmission denotes the last time this heap was submitted to the GPU.
+        // mLastSubmission denotes the last time this heap was submitted to the GPU. Note that
+        // although this variable often contains the same value as mLastUsage, it can differ in some
+        // situations. When some asynchronous APIs (like SetSubData) are called, mLastUsage is
+        // updated upon the call, but the backend operation is deferred until the next submission
+        // to the GPU. This makes mLastSubmission unique from mLastUsage, and allows us to
+        // accurately identify when heaps are evictable.
         Serial mLastSubmission = 0;
         uint32_t mResidencyLockRefCount = 0;
         uint64_t mSize = 0;

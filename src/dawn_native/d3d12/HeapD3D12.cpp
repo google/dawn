@@ -71,12 +71,10 @@ namespace dawn_native { namespace d3d12 {
     }
 
     void Heap::IncrementResidencyLock() {
-        ASSERT(mD3d12HeapType != D3D12_HEAP_TYPE_DEFAULT);
         mResidencyLockRefCount++;
     }
 
     void Heap::DecrementResidencyLock() {
-        ASSERT(mD3d12HeapType != D3D12_HEAP_TYPE_DEFAULT);
         mResidencyLockRefCount--;
     }
 

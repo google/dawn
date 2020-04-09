@@ -32,7 +32,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     // Increments number of locks on a heap to ensure the heap remains resident.
-    MaybeError ResidencyManager::LockMappableHeap(Heap* heap) {
+    MaybeError ResidencyManager::LockHeap(Heap* heap) {
         if (!mResidencyManagementEnabled) {
             return {};
         }
@@ -46,9 +46,9 @@ namespace dawn_native { namespace d3d12 {
         if (!heap->IsInResidencyLRUCache() && !heap->IsResidencyLocked()) {
             DAWN_TRY(EnsureCanMakeResident(heap->GetSize()));
             ID3D12Pageable* pageable = heap->GetD3D12Pageable().Get();
-            DAWN_TRY(
-                CheckHRESULT(mDevice->GetD3D12Device()->MakeResident(1, &pageable),
-                             "Making a heap resident due to an underlying resource being mapped."));
+            DAWN_TRY(CheckHRESULT(mDevice->GetD3D12Device()->MakeResident(1, &pageable),
+                                  "Making a scheduled-to-be-used resource resident in "
+                                  "device local memory"));
         }
 
         // Since we can't evict the heap, it's unnecessary to track the heap in the LRU Cache.
@@ -63,7 +63,7 @@ namespace dawn_native { namespace d3d12 {
 
     // Decrements number of locks on a heap. When the number of locks becomes zero, the heap is
     // inserted into the LRU cache and becomes eligible for eviction.
-    void ResidencyManager::UnlockMappableHeap(Heap* heap) {
+    void ResidencyManager::UnlockHeap(Heap* heap) {
         if (!mResidencyManagementEnabled) {
             return;
         }
@@ -240,8 +240,13 @@ namespace dawn_native { namespace d3d12 {
                 sizeToMakeResident += heap->GetSize();
             }
 
-            mLRUCache.Append(heap);
+            // If we submit a command list to the GPU, we must ensure that heaps referenced by that
+            // command list stay resident at least until that command list has finished execution.
+            // Setting this serial unnecessarily can leave the LRU in a state where nothing is
+            // eligible for eviction, even though some evictions may be possible.
             heap->SetLastSubmission(pendingCommandSerial);
+
+            mLRUCache.Append(heap);
         }
 
         if (heapsToMakeResident.size() != 0) {
