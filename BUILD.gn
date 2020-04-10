@@ -13,397 +13,45 @@
 # limitations under the License.
 
 import("//build_overrides/build.gni")
-import("generator/dawn_generator.gni")
 import("scripts/dawn_features.gni")
 import("scripts/dawn_overrides_with_defaults.gni")
 
+group("all") {
+  testonly = true
+  deps = [
+    "src/fuzzers:dawn_fuzzers",
+    "src/tests:dawn_tests",
+  ]
+  if (dawn_standalone) {
+    deps += [ "examples:dawn_samples" ]
+  }
+}
+
+###############################################################################
+# Temporary Dawn end2end test target
+###############################################################################
+
+# It is not possible to move a target around with a proxy group without
+# breaking swarming tests. This is a temporary target that is a duplicate of
+# //src/tests:dawn_end2end_tests that's used temporarily so that we can land
+# the split of src/tests/BUILD.gn in a Chromium roll and switch which targets
+# the swarmed tests use.
+
 import("//testing/test.gni")
 
-###############################################################################
-# GLFW wrapping target
-###############################################################################
-
-supports_glfw_for_windowing = is_win || (is_linux && !is_chromeos) || is_mac
-
-# GLFW does not support ChromeOS, Android or Fuchsia, so provide a small mock
-# library that can be linked into the Dawn tests on these platforms. Otherwise,
-# use the real library from third_party/.
-if (supports_glfw_for_windowing) {
-  group("dawn_glfw") {
-    public_deps = [
-      "third_party:glfw",
-    ]
-  }
-} else if (is_fuchsia) {
-  # The mock implementation of GLFW on Fuchsia
-  config("dawn_glfw_public_config") {
-    # Allow inclusion of <GLFW/glfw3.h>
-    include_dirs = [ "${dawn_glfw_dir}/include" ]
-
-    # The GLFW/glfw3.h header includes <GL/gl.h> by default, but the latter
-    # does not exist on Fuchsia. Defining GLFW_INCLUDE_NONE helps work around
-    # the issue, but it needs to be defined for any file that includes the
-    # header.
-    defines = [
-      "GLFW_INCLUDE_NONE",
-      "GLFW_INCLUDE_VULKAN",
-    ]
-  }
-
-  static_library("dawn_glfw") {
-    sources = [
-      # NOTE: The header below is required to pass "gn check".
-      "${dawn_glfw_dir}/include/GLFW/glfw3.h",
-      "src/utils/Glfw3Fuchsia.cpp",
-    ]
-    public_configs = [ ":dawn_glfw_public_config" ]
-    deps = [
-      "${dawn_root}/src/common",
-    ]
-  }
-} else {
-  # Just skip GLFW on other systems
-  group("dawn_glfw") {
-  }
-}
-
-###############################################################################
-# Utils for tests and samples
-###############################################################################
-
-static_library("dawn_utils") {
-  configs += [ "${dawn_root}/src/common:dawn_internal" ]
-
-  sources = [
-    "src/utils/ComboRenderBundleEncoderDescriptor.cpp",
-    "src/utils/ComboRenderBundleEncoderDescriptor.h",
-    "src/utils/ComboRenderPipelineDescriptor.cpp",
-    "src/utils/ComboRenderPipelineDescriptor.h",
-    "src/utils/SystemUtils.cpp",
-    "src/utils/SystemUtils.h",
-    "src/utils/TerribleCommandBuffer.cpp",
-    "src/utils/TerribleCommandBuffer.h",
-    "src/utils/TextureFormatUtils.cpp",
-    "src/utils/TextureFormatUtils.h",
-    "src/utils/Timer.h",
-    "src/utils/WGPUHelpers.cpp",
-    "src/utils/WGPUHelpers.h",
-  ]
-  deps = [
-    "${dawn_root}/src/common",
-    "${dawn_root}/src/dawn_native",
-    "${dawn_root}/src/dawn_wire",
-    "${dawn_shaderc_dir}:libshaderc",
-  ]
-  libs = []
-
-  if (is_win) {
-    sources += [ "src/utils/WindowsTimer.cpp" ]
-  } else if (is_mac) {
-    sources += [
-      "src/utils/OSXTimer.cpp",
-      "src/utils/ObjCUtils.h",
-      "src/utils/ObjCUtils.mm",
-    ]
-    libs += [ "QuartzCore.framework" ]
-  } else {
-    sources += [ "src/utils/PosixTimer.cpp" ]
-  }
-
-  if (supports_glfw_for_windowing) {
-    sources += [
-      "src/utils/GLFWUtils.cpp",
-      "src/utils/GLFWUtils.h",
-    ]
-    deps += [ ":dawn_glfw" ]
-
-    if (dawn_enable_metal) {
-      sources += [ "src/utils/GLFWUtils_metal.mm" ]
-      libs += [ "Metal.framework" ]
-    }
-  }
-
-  public_deps = [
-    "${dawn_root}/src/dawn:dawncpp_headers",
-  ]
-}
-
-###############################################################################
-# Dawn test targets
-###############################################################################
-
-dawn_json_generator("mock_webgpu_gen") {
-  target = "mock_webgpu"
-  outputs = [
-    "src/dawn/mock_webgpu.h",
-    "src/dawn/mock_webgpu.cpp",
-  ]
-}
-
-test("dawn_unittests") {
-  configs += [ "${dawn_root}/src/common:dawn_internal" ]
-
-  deps = [
-    ":dawn_utils",
-    ":mock_webgpu_gen",
-    "${dawn_root}/src/common",
-    "${dawn_root}/src/dawn:dawncpp",
-    "${dawn_root}/src/dawn:libdawn_proc",
-    "${dawn_root}/src/dawn_native",
-    "${dawn_root}/src/dawn_native:dawn_native_sources",
-    "${dawn_root}/src/dawn_wire",
-    "third_party:gmock_and_gtest",
-  ]
-
-  # Add internal dawn_native config for internal unittests.
-  configs += [ "${dawn_root}/src/dawn_native:dawn_native_internal" ]
-
-  sources = get_target_outputs(":mock_webgpu_gen")
-  sources += [
-    "src/dawn_wire/client/ClientMemoryTransferService_mock.cpp",
-    "src/dawn_wire/client/ClientMemoryTransferService_mock.h",
-    "src/dawn_wire/server/ServerMemoryTransferService_mock.cpp",
-    "src/dawn_wire/server/ServerMemoryTransferService_mock.h",
-    "src/tests/unittests/BitSetIteratorTests.cpp",
-    "src/tests/unittests/BuddyAllocatorTests.cpp",
-    "src/tests/unittests/BuddyMemoryAllocatorTests.cpp",
-    "src/tests/unittests/CommandAllocatorTests.cpp",
-    "src/tests/unittests/EnumClassBitmasksTests.cpp",
-    "src/tests/unittests/ErrorTests.cpp",
-    "src/tests/unittests/ExtensionTests.cpp",
-    "src/tests/unittests/GetProcAddressTests.cpp",
-    "src/tests/unittests/LinkedListTests.cpp",
-    "src/tests/unittests/MathTests.cpp",
-    "src/tests/unittests/ObjectBaseTests.cpp",
-    "src/tests/unittests/PerStageTests.cpp",
-    "src/tests/unittests/PlacementAllocatedTests.cpp",
-    "src/tests/unittests/RefCountedTests.cpp",
-    "src/tests/unittests/ResultTests.cpp",
-    "src/tests/unittests/RingBufferAllocatorTests.cpp",
-    "src/tests/unittests/SerialMapTests.cpp",
-    "src/tests/unittests/SerialQueueTests.cpp",
-    "src/tests/unittests/SlabAllocatorTests.cpp",
-    "src/tests/unittests/SystemUtilsTests.cpp",
-    "src/tests/unittests/ToBackendTests.cpp",
-    "src/tests/unittests/validation/BindGroupValidationTests.cpp",
-    "src/tests/unittests/validation/BufferValidationTests.cpp",
-    "src/tests/unittests/validation/CommandBufferValidationTests.cpp",
-    "src/tests/unittests/validation/ComputeIndirectValidationTests.cpp",
-    "src/tests/unittests/validation/ComputePassValidationTests.cpp",
-    "src/tests/unittests/validation/ComputeValidationTests.cpp",
-    "src/tests/unittests/validation/CopyCommandsValidationTests.cpp",
-    "src/tests/unittests/validation/DebugMarkerValidationTests.cpp",
-    "src/tests/unittests/validation/DrawIndirectValidationTests.cpp",
-    "src/tests/unittests/validation/DynamicStateCommandValidationTests.cpp",
-    "src/tests/unittests/validation/ErrorScopeValidationTests.cpp",
-    "src/tests/unittests/validation/FenceValidationTests.cpp",
-    "src/tests/unittests/validation/GetBindGroupLayoutValidationTests.cpp",
-    "src/tests/unittests/validation/QueueSubmitValidationTests.cpp",
-    "src/tests/unittests/validation/RenderBundleValidationTests.cpp",
-    "src/tests/unittests/validation/RenderPassDescriptorValidationTests.cpp",
-    "src/tests/unittests/validation/RenderPassValidationTests.cpp",
-    "src/tests/unittests/validation/RenderPipelineValidationTests.cpp",
-    "src/tests/unittests/validation/ResourceUsageTrackingTests.cpp",
-    "src/tests/unittests/validation/SamplerValidationTests.cpp",
-    "src/tests/unittests/validation/ShaderModuleValidationTests.cpp",
-    "src/tests/unittests/validation/StorageTextureValidationTests.cpp",
-    "src/tests/unittests/validation/TextureValidationTests.cpp",
-    "src/tests/unittests/validation/TextureViewValidationTests.cpp",
-    "src/tests/unittests/validation/ToggleValidationTests.cpp",
-    "src/tests/unittests/validation/ValidationTest.cpp",
-    "src/tests/unittests/validation/ValidationTest.h",
-    "src/tests/unittests/validation/VertexBufferValidationTests.cpp",
-    "src/tests/unittests/validation/VertexStateValidationTests.cpp",
-    "src/tests/unittests/wire/WireArgumentTests.cpp",
-    "src/tests/unittests/wire/WireBasicTests.cpp",
-    "src/tests/unittests/wire/WireBufferMappingTests.cpp",
-    "src/tests/unittests/wire/WireErrorCallbackTests.cpp",
-    "src/tests/unittests/wire/WireExtensionTests.cpp",
-    "src/tests/unittests/wire/WireFenceTests.cpp",
-    "src/tests/unittests/wire/WireInjectTextureTests.cpp",
-    "src/tests/unittests/wire/WireMemoryTransferServiceTests.cpp",
-    "src/tests/unittests/wire/WireOptionalTests.cpp",
-    "src/tests/unittests/wire/WireTest.cpp",
-    "src/tests/unittests/wire/WireTest.h",
-    "src/tests/unittests/wire/WireWGPUDevicePropertiesTests.cpp",
-  ]
-
-  if (dawn_enable_d3d12) {
-    sources += [ "src/tests/unittests/d3d12/CopySplitTests.cpp" ]
-  }
-
-  # When building inside Chromium, use their gtest main function because it is
-  # needed to run in swarming correctly.
-  if (build_with_chromium) {
-    sources += [ "//gpu/dawn_unittests_main.cc" ]
-  } else {
-    sources += [ "src/tests/UnittestsMain.cpp" ]
-  }
-}
-
-source_set("dawn_end2end_tests_sources") {
-  configs += [ "${dawn_root}/src/common:dawn_internal" ]
-  testonly = true
-
-  deps = [
-    ":dawn_utils",
-    "${dawn_root}/src/common",
-    "${dawn_root}/src/dawn:dawncpp",
-    "${dawn_root}/src/dawn:libdawn_proc",
-    "${dawn_root}/src/dawn_native",
-    "${dawn_root}/src/dawn_wire",
-    "third_party:gmock_and_gtest",
-  ]
-
-  sources = [
-    "src/tests/DawnTest.h",
-    "src/tests/end2end/BasicTests.cpp",
-    "src/tests/end2end/BindGroupTests.cpp",
-    "src/tests/end2end/BufferTests.cpp",
-    "src/tests/end2end/ClipSpaceTests.cpp",
-    "src/tests/end2end/ColorStateTests.cpp",
-    "src/tests/end2end/CompressedTextureFormatTests.cpp",
-    "src/tests/end2end/ComputeCopyStorageBufferTests.cpp",
-    "src/tests/end2end/ComputeIndirectTests.cpp",
-    "src/tests/end2end/ComputeSharedMemoryTests.cpp",
-    "src/tests/end2end/ComputeStorageBufferBarrierTests.cpp",
-    "src/tests/end2end/CopyTests.cpp",
-    "src/tests/end2end/CullingTests.cpp",
-    "src/tests/end2end/DebugMarkerTests.cpp",
-    "src/tests/end2end/DepthStencilStateTests.cpp",
-    "src/tests/end2end/DestroyTests.cpp",
-    "src/tests/end2end/DeviceLostTests.cpp",
-    "src/tests/end2end/DrawIndexedIndirectTests.cpp",
-    "src/tests/end2end/DrawIndexedTests.cpp",
-    "src/tests/end2end/DrawIndirectTests.cpp",
-    "src/tests/end2end/DrawTests.cpp",
-    "src/tests/end2end/DynamicBufferOffsetTests.cpp",
-    "src/tests/end2end/FenceTests.cpp",
-    "src/tests/end2end/GpuMemorySynchronizationTests.cpp",
-    "src/tests/end2end/IndexFormatTests.cpp",
-    "src/tests/end2end/MultisampledRenderingTests.cpp",
-    "src/tests/end2end/NonzeroTextureCreationTests.cpp",
-    "src/tests/end2end/ObjectCachingTests.cpp",
-    "src/tests/end2end/OpArrayLengthTests.cpp",
-    "src/tests/end2end/PrimitiveTopologyTests.cpp",
-    "src/tests/end2end/RenderBundleTests.cpp",
-    "src/tests/end2end/RenderPassLoadOpTests.cpp",
-    "src/tests/end2end/RenderPassTests.cpp",
-    "src/tests/end2end/SamplerTests.cpp",
-    "src/tests/end2end/ScissorTests.cpp",
-    "src/tests/end2end/StorageTextureTests.cpp",
-    "src/tests/end2end/TextureFormatTests.cpp",
-    "src/tests/end2end/TextureViewTests.cpp",
-    "src/tests/end2end/TextureZeroInitTests.cpp",
-    "src/tests/end2end/VertexFormatTests.cpp",
-    "src/tests/end2end/VertexStateTests.cpp",
-    "src/tests/end2end/ViewportOrientationTests.cpp",
-    "src/tests/end2end/ViewportTests.cpp",
-  ]
-
-  # Validation tests that need OS windows live in end2end tests.
-  sources += [
-    "src/tests/unittests/validation/ValidationTest.cpp",
-    "src/tests/unittests/validation/ValidationTest.h",
-  ]
-
-  libs = []
-
-  if (dawn_enable_d3d12) {
-    sources += [ "src/tests/end2end/D3D12ResourceWrappingTests.cpp" ]
-    libs += [
-      "d3d11.lib",
-      "dxgi.lib",
-    ]
-  }
-
-  if (dawn_enable_metal) {
-    sources += [ "src/tests/end2end/IOSurfaceWrappingTests.cpp" ]
-    libs += [ "IOSurface.framework" ]
-  }
-
-  if (dawn_enable_opengl) {
-    assert(supports_glfw_for_windowing)
-  }
-
-  if (supports_glfw_for_windowing) {
-    sources += [
-      "src/tests/end2end/SwapChainTests.cpp",
-      "src/tests/end2end/SwapChainValidationTests.cpp",
-      "src/tests/end2end/WindowSurfaceTests.cpp",
-    ]
-    deps += [ ":dawn_glfw" ]
-  }
-}
-
-source_set("dawn_white_box_tests_sources") {
-  configs += [ "${dawn_root}/src/dawn_native:dawn_native_internal" ]
-  testonly = true
-
-  deps = [
-    ":dawn_utils",
-    "${dawn_root}/src/common",
-    "${dawn_root}/src/dawn:dawncpp",
-    "${dawn_root}/src/dawn:libdawn_proc",
-    "${dawn_root}/src/dawn_native:dawn_native_sources",
-
-    # Static because the tests both link against and have dawn_native
-    # sources. MSVC errors when both importing and exporting symbols.
-    "${dawn_root}/src/dawn_native:dawn_native_static",
-    "${dawn_root}/src/dawn_wire",
-    "third_party:gmock_and_gtest",
-  ]
-
-  sources = [
-    "src/tests/DawnTest.h",
-  ]
-
-  if (dawn_enable_vulkan) {
-    deps += [ "third_party:vulkan_headers" ]
-
-    if (is_chromeos) {
-      sources += [ "src/tests/white_box/VulkanImageWrappingTestsDmaBuf.cpp" ]
-    } else if (is_linux) {
-      sources += [ "src/tests/white_box/VulkanImageWrappingTestsOpaqueFD.cpp" ]
-    }
-
-    if (dawn_enable_error_injection) {
-      sources += [ "src/tests/white_box/VulkanErrorInjectorTests.cpp" ]
-    }
-  }
-
-  if (dawn_enable_d3d12) {
-    sources += [
-      "src/tests/white_box/D3D12DescriptorHeapTests.cpp",
-      "src/tests/white_box/D3D12ResidencyTests.cpp",
-      "src/tests/white_box/D3D12SmallTextureTests.cpp",
-    ]
-  }
-
-  if (dawn_enable_metal) {
-    sources += [ "src/tests/white_box/MetalAutoreleasePoolTests.mm" ]
-  }
-
-  if (dawn_enable_opengl) {
-    deps += [ ":dawn_glfw" ]
-  }
-
-  libs = []
-}
-
 test("dawn_end2end_tests") {
-  configs += [ "${dawn_root}/src/common:dawn_internal" ]
+  configs += [ "src/common:dawn_internal" ]
 
   deps = [
-    ":dawn_end2end_tests_sources",
-    ":dawn_utils",
-    ":dawn_white_box_tests_sources",
-    "${dawn_root}/src/common",
-    "${dawn_root}/src/dawn:dawncpp",
-    "${dawn_root}/src/dawn:libdawn_proc",
-    "${dawn_root}/src/dawn_native",
-    "${dawn_root}/src/dawn_wire",
-    "third_party:gmock_and_gtest",
+    "src/common",
+    "src/dawn:dawncpp",
+    "src/dawn:libdawn_proc",
+    "src/dawn_native",
+    "src/dawn_wire",
+    "src/tests:dawn_end2end_tests_sources",
+    "src/tests:dawn_white_box_tests_sources",
+    "src/tests:gmock_and_gtest",
+    "src/utils:dawn_utils",
   ]
 
   sources = [
@@ -422,217 +70,12 @@ test("dawn_end2end_tests") {
   }
 
   if (dawn_enable_opengl) {
-    deps += [ ":dawn_glfw" ]
+    deps += [ "src/utils:dawn_glfw" ]
   }
 
   if (is_chromeos) {
     libs += [ "gbm" ]
   }
-}
-
-test("dawn_perf_tests") {
-  configs += [ "${dawn_root}/src/common:dawn_internal" ]
-
-  deps = [
-    ":dawn_utils",
-    "${dawn_root}/src/common",
-    "${dawn_root}/src/dawn:dawncpp",
-    "${dawn_root}/src/dawn:libdawn_proc",
-    "${dawn_root}/src/dawn_native",
-    "${dawn_root}/src/dawn_platform",
-    "${dawn_root}/src/dawn_wire",
-    "third_party:gmock_and_gtest",
-  ]
-
-  sources = [
-    "src/tests/DawnTest.cpp",
-    "src/tests/DawnTest.h",
-    "src/tests/ParamGenerator.h",
-    "src/tests/perf_tests/BufferUploadPerf.cpp",
-    "src/tests/perf_tests/DawnPerfTest.cpp",
-    "src/tests/perf_tests/DawnPerfTest.h",
-    "src/tests/perf_tests/DawnPerfTestPlatform.cpp",
-    "src/tests/perf_tests/DawnPerfTestPlatform.h",
-    "src/tests/perf_tests/DrawCallPerf.cpp",
-  ]
-
-  libs = []
-
-  # When building inside Chromium, use their gtest main function because it is
-  # needed to run in swarming correctly.
-  if (build_with_chromium) {
-    sources += [ "//gpu/dawn_perf_tests_main.cc" ]
-  } else {
-    sources += [ "src/tests/PerfTestsMain.cpp" ]
-  }
-
-  if (dawn_enable_metal) {
-    libs += [ "IOSurface.framework" ]
-  }
-
-  if (dawn_enable_opengl) {
-    deps += [ ":dawn_glfw" ]
-  }
-}
-
-###############################################################################
-# Dawn samples, only in standalone builds
-###############################################################################
-
-if (dawn_standalone) {
-  # Library to handle the interaction of Dawn with GLFW windows in samples
-  static_library("dawn_bindings") {
-    configs += [ "${dawn_root}/src/common:dawn_internal" ]
-
-    sources = [
-      "src/utils/BackendBinding.cpp",
-      "src/utils/BackendBinding.h",
-    ]
-
-    public_deps = [
-      "${dawn_root}/src/dawn:dawn_headers",
-    ]
-
-    deps = [
-      ":dawn_glfw",
-      "${dawn_root}/src/common",
-      "${dawn_root}/src/dawn_native",
-    ]
-    libs = []
-
-    if (dawn_enable_d3d12) {
-      sources += [ "src/utils/D3D12Binding.cpp" ]
-    }
-
-    if (dawn_enable_metal) {
-      sources += [ "src/utils/MetalBinding.mm" ]
-      libs += [
-        "Metal.framework",
-        "QuartzCore.framework",
-      ]
-
-      # Suppress warnings that Metal isn't in the deployment target of Chrome
-      if (is_mac) {
-        cflags_objcc = [ "-Wno-unguarded-availability" ]
-      }
-    }
-
-    if (dawn_enable_null) {
-      sources += [ "src/utils/NullBinding.cpp" ]
-    }
-
-    if (dawn_enable_opengl) {
-      sources += [ "src/utils/OpenGLBinding.cpp" ]
-    }
-
-    if (dawn_enable_vulkan) {
-      sources += [ "src/utils/VulkanBinding.cpp" ]
-    }
-  }
-
-  # Static library to contain code and dependencies common to all samples
-  static_library("dawn_sample_utils") {
-    sources = [
-      "examples/SampleUtils.cpp",
-      "examples/SampleUtils.h",
-    ]
-
-    # Export all of these as public deps so that `gn check` allows includes
-    public_deps = [
-      ":dawn_bindings",
-      ":dawn_glfw",
-      ":dawn_utils",
-      "${dawn_root}/src/common",
-      "${dawn_root}/src/dawn:dawncpp",
-      "${dawn_root}/src/dawn:libdawn_proc",
-      "${dawn_root}/src/dawn_native",
-      "${dawn_root}/src/dawn_wire",
-    ]
-    public_configs = [ "${dawn_root}/src/common:dawn_internal" ]
-  }
-
-  # Template for samples to avoid listing dawn_sample_utils as a dep every time
-  template("dawn_sample") {
-    executable(target_name) {
-      deps = [
-        ":dawn_sample_utils",
-      ]
-      forward_variables_from(invoker, "*", [ "deps" ])
-
-      if (defined(invoker.deps)) {
-        deps += invoker.deps
-      }
-    }
-  }
-
-  dawn_sample("CppHelloTriangle") {
-    sources = [
-      "examples/CppHelloTriangle.cpp",
-    ]
-  }
-
-  dawn_sample("CHelloTriangle") {
-    sources = [
-      "examples/CHelloTriangle.cpp",
-    ]
-  }
-
-  dawn_sample("ComputeBoids") {
-    sources = [
-      "examples/ComputeBoids.cpp",
-    ]
-    deps = [
-      "third_party:glm",
-    ]
-  }
-
-  dawn_sample("Animometer") {
-    sources = [
-      "examples/Animometer.cpp",
-    ]
-  }
-
-  dawn_sample("CubeReflection") {
-    sources = [
-      "examples/CubeReflection.cpp",
-    ]
-    deps = [
-      "third_party:glm",
-    ]
-  }
-
-  dawn_sample("ManualSwapChainTest") {
-    sources = [
-      "examples/ManualSwapChainTest.cpp",
-    ]
-  }
-
-  group("dawn_samples") {
-    deps = [
-      ":Animometer",
-      ":CHelloTriangle",
-      ":ComputeBoids",
-      ":CppHelloTriangle",
-      ":CubeReflection",
-    ]
-  }
-}
-
-###############################################################################
-# Fuzzers
-###############################################################################
-
-group("dawn_fuzzers") {
-  testonly = true
-  deps = [
-    "src/fuzzers:dawn_spirv_cross_glsl_fast_fuzzer",
-    "src/fuzzers:dawn_spirv_cross_hlsl_fast_fuzzer",
-    "src/fuzzers:dawn_spirv_cross_msl_fast_fuzzer",
-    "src/fuzzers:dawn_spvc_glsl_fast_fuzzer",
-    "src/fuzzers:dawn_spvc_hlsl_fast_fuzzer",
-    "src/fuzzers:dawn_spvc_msl_fast_fuzzer",
-    "src/fuzzers:dawn_wire_server_and_frontend_fuzzer",
-  ]
 }
 
 ###############################################################################
@@ -643,7 +86,7 @@ group("dawn_fuzzers") {
 group("dawn_unittests_temp_group") {
   testonly = true
   public_deps = [
-    ":dawn_unittests",
+    "src/tests:dawn_unittests",
   ]
 }
 
@@ -657,9 +100,9 @@ group("dawn_end2end_tests_temp_group") {
 group("dawn_perf_tests_temp_group") {
   testonly = true
   public_deps = [
-    ":dawn_perf_tests",
+    "src/tests:dawn_perf_tests",
   ]
   data_deps = [
-    ":dawn_perf_tests",
+    "src/tests:dawn_perf_tests",
   ]
 }

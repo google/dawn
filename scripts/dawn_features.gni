@@ -78,3 +78,6 @@ declare_args() {
   dawn_enable_vulkan_validation_layers =
       dawn_enable_vulkan && ((is_linux && !is_chromeos) || is_win)
 }
+
+dawn_supports_glfw_for_windowing =
+    is_win || (is_linux && !is_chromeos) || is_mac

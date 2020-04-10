@@ -182,3 +182,17 @@ dawn_fuzzer_test("dawn_wire_server_and_vulkan_backend_fuzzer") {
 
   additional_configs = [ "${dawn_root}/src/common:dawn_internal" ]
 }
+
+# A group target to build all the fuzzers
+group("dawn_fuzzers") {
+  testonly = true
+  deps = [
+    ":dawn_spirv_cross_glsl_fast_fuzzer",
+    ":dawn_spirv_cross_hlsl_fast_fuzzer",
+    ":dawn_spirv_cross_msl_fast_fuzzer",
+    ":dawn_spvc_glsl_fast_fuzzer",
+    ":dawn_spvc_hlsl_fast_fuzzer",
+    ":dawn_spvc_msl_fast_fuzzer",
+    ":dawn_wire_server_and_frontend_fuzzer",
+  ]
+}
