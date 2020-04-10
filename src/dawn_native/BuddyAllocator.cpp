@@ -81,14 +81,11 @@ namespace dawn_native {
         //  Allocate(size=8, alignment=4) will be satified by using F1.
         //  Allocate(size=8, alignment=16) will be satisified by using F2.
         //
-        for (size_t currLevel = allocationBlockLevel; currLevel >= 0; currLevel--) {
+        for (size_t ii = 0; ii <= allocationBlockLevel; ++ii) {
+            size_t currLevel = allocationBlockLevel - ii;
             BuddyBlock* freeBlock = mFreeLists[currLevel].head;
             if (freeBlock && (freeBlock->mOffset % alignment == 0)) {
                 return currLevel;
-            }
-
-            if (currLevel == 0) {
-                break;
             }
         }
         return kInvalidOffset;  // No free block exists at any level.
