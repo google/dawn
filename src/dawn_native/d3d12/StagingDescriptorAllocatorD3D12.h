@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_D3D12_NONSHADERVISIBLEDESCRIPTORALLOCATOR_H_
-#define DAWNNATIVE_D3D12_NONSHADERVISIBLEDESCRIPTORALLOCATOR_H_
+#ifndef DAWNNATIVE_D3D12_STAGINGDESCRIPTORALLOCATOR_H_
+#define DAWNNATIVE_D3D12_STAGINGDESCRIPTORALLOCATOR_H_
 
 #include "dawn_native/Error.h"
 
@@ -21,7 +21,7 @@
 
 #include <vector>
 
-// |NonShaderVisibleDescriptorAllocator| allocates a fixed-size block of descriptors from a CPU
+// |StagingDescriptorAllocator| allocates a fixed-size block of descriptors from a CPU
 // descriptor heap pool.
 // Internally, it manages a list of heaps using a fixed-size block allocator. The fixed-size
 // block allocator is backed by a list of free blocks (free-list). The heap is in one of two
@@ -34,14 +34,14 @@ namespace dawn_native { namespace d3d12 {
 
     class Device;
 
-    class NonShaderVisibleDescriptorAllocator {
+    class StagingDescriptorAllocator {
       public:
-        NonShaderVisibleDescriptorAllocator() = default;
-        NonShaderVisibleDescriptorAllocator(Device* device,
-                                            uint32_t descriptorCount,
-                                            uint32_t heapSize,
-                                            D3D12_DESCRIPTOR_HEAP_TYPE heapType);
-        ~NonShaderVisibleDescriptorAllocator();
+        StagingDescriptorAllocator() = default;
+        StagingDescriptorAllocator(Device* device,
+                                   uint32_t descriptorCount,
+                                   uint32_t heapSize,
+                                   D3D12_DESCRIPTOR_HEAP_TYPE heapType);
+        ~StagingDescriptorAllocator();
 
         ResultOrError<CPUDescriptorHeapAllocation> AllocateCPUDescriptors();
 
@@ -75,4 +75,4 @@ namespace dawn_native { namespace d3d12 {
 
 }}  // namespace dawn_native::d3d12
 
-#endif  // DAWNNATIVE_D3D12_NONSHADERVISIBLEDESCRIPTORALLOCATOR_H_
+#endif  // DAWNNATIVE_D3D12_STAGINGDESCRIPTORALLOCATOR_H_

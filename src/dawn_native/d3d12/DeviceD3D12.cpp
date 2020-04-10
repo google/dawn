@@ -37,10 +37,14 @@
 #include "dawn_native/d3d12/ShaderModuleD3D12.h"
 #include "dawn_native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.h"
 #include "dawn_native/d3d12/StagingBufferD3D12.h"
+#include "dawn_native/d3d12/StagingDescriptorAllocatorD3D12.h"
 #include "dawn_native/d3d12/SwapChainD3D12.h"
 #include "dawn_native/d3d12/TextureD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
+
+    // TODO(dawn:155): Figure out this value.
+    static constexpr uint16_t kStagingDescriptorHeapSize = 1024;
 
     // static
     ResultOrError<Device*> Device::Create(Adapter* adapter, const DeviceDescriptor* descriptor) {
@@ -82,6 +86,17 @@ namespace dawn_native { namespace d3d12 {
         mShaderVisibleDescriptorAllocator =
             std::make_unique<ShaderVisibleDescriptorAllocator>(this);
         DAWN_TRY(mShaderVisibleDescriptorAllocator->Initialize());
+
+        // Zero sized allocator is never requested and does not need to exist.
+        for (uint32_t countIndex = 1; countIndex < kNumOfStagingDescriptorAllocators;
+             countIndex++) {
+            mViewAllocators[countIndex] = std::make_unique<StagingDescriptorAllocator>(
+                this, countIndex, kStagingDescriptorHeapSize,
+                D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+            mSamplerAllocators[countIndex] = std::make_unique<StagingDescriptorAllocator>(
+                this, countIndex, kStagingDescriptorHeapSize, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+        }
 
         mMapRequestTracker = std::make_unique<MapRequestTracker>(this);
         mResidencyManager = std::make_unique<ResidencyManager>(this);
@@ -457,5 +472,17 @@ namespace dawn_native { namespace d3d12 {
 
     ShaderVisibleDescriptorAllocator* Device::GetShaderVisibleDescriptorAllocator() const {
         return mShaderVisibleDescriptorAllocator.get();
+    }
+
+    StagingDescriptorAllocator* Device::GetViewStagingDescriptorAllocator(
+        uint32_t descriptorCount) const {
+        ASSERT(descriptorCount < kNumOfStagingDescriptorAllocators);
+        return mViewAllocators[descriptorCount].get();
+    }
+
+    StagingDescriptorAllocator* Device::GetSamplerStagingDescriptorAllocator(
+        uint32_t descriptorCount) const {
+        ASSERT(descriptorCount < kNumOfStagingDescriptorAllocators);
+        return mSamplerAllocators[descriptorCount].get();
     }
 }}  // namespace dawn_native::d3d12

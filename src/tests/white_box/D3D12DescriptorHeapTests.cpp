@@ -17,8 +17,8 @@
 #include "dawn_native/Toggles.h"
 #include "dawn_native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
-#include "dawn_native/d3d12/NonShaderVisibleDescriptorAllocatorD3D12.h"
 #include "dawn_native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.h"
+#include "dawn_native/d3d12/StagingDescriptorAllocatorD3D12.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
@@ -94,11 +94,11 @@ class D3D12DescriptorHeapTests : public DawnTest {
     wgpu::ShaderModule mSimpleFSModule;
 };
 
-class DummyNonShaderVisibleDescriptorAllocator {
+class DummyStagingDescriptorAllocator {
   public:
-    DummyNonShaderVisibleDescriptorAllocator(Device* device,
-                                             uint32_t descriptorCount,
-                                             uint32_t allocationsPerHeap)
+    DummyStagingDescriptorAllocator(Device* device,
+                                    uint32_t descriptorCount,
+                                    uint32_t allocationsPerHeap)
         : mAllocator(device,
                      descriptorCount,
                      allocationsPerHeap * descriptorCount,
@@ -116,7 +116,7 @@ class DummyNonShaderVisibleDescriptorAllocator {
     }
 
   private:
-    NonShaderVisibleDescriptorAllocator mAllocator;
+    StagingDescriptorAllocator mAllocator;
 };
 
 // Verify the shader visible heaps switch over within a single submit.
@@ -719,8 +719,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
 TEST_P(D3D12DescriptorHeapTests, Single) {
     constexpr uint32_t kDescriptorCount = 4;
     constexpr uint32_t kAllocationsPerHeap = 3;
-    DummyNonShaderVisibleDescriptorAllocator allocator(mD3DDevice, kDescriptorCount,
-                                                       kAllocationsPerHeap);
+    DummyStagingDescriptorAllocator allocator(mD3DDevice, kDescriptorCount, kAllocationsPerHeap);
 
     CPUDescriptorHeapAllocation allocation = allocator.AllocateCPUDescriptors();
     EXPECT_EQ(allocation.GetHeapIndex(), 0u);
@@ -735,8 +734,7 @@ TEST_P(D3D12DescriptorHeapTests, Single) {
 TEST_P(D3D12DescriptorHeapTests, Sequential) {
     constexpr uint32_t kDescriptorCount = 4;
     constexpr uint32_t kAllocationsPerHeap = 3;
-    DummyNonShaderVisibleDescriptorAllocator allocator(mD3DDevice, kDescriptorCount,
-                                                       kAllocationsPerHeap);
+    DummyStagingDescriptorAllocator allocator(mD3DDevice, kDescriptorCount, kAllocationsPerHeap);
 
     // Allocate |kNumOfHeaps| worth.
     constexpr uint32_t kNumOfHeaps = 2;
@@ -766,8 +764,7 @@ TEST_P(D3D12DescriptorHeapTests, Sequential) {
 TEST_P(D3D12DescriptorHeapTests, ReuseFreedHeaps) {
     constexpr uint32_t kDescriptorCount = 4;
     constexpr uint32_t kAllocationsPerHeap = 25;
-    DummyNonShaderVisibleDescriptorAllocator allocator(mD3DDevice, kDescriptorCount,
-                                                       kAllocationsPerHeap);
+    DummyStagingDescriptorAllocator allocator(mD3DDevice, kDescriptorCount, kAllocationsPerHeap);
 
     constexpr uint32_t kNumofHeaps = 10;
 
@@ -810,8 +807,7 @@ TEST_P(D3D12DescriptorHeapTests, ReuseFreedHeaps) {
 TEST_P(D3D12DescriptorHeapTests, AllocateDeallocateMany) {
     constexpr uint32_t kDescriptorCount = 4;
     constexpr uint32_t kAllocationsPerHeap = 25;
-    DummyNonShaderVisibleDescriptorAllocator allocator(mD3DDevice, kDescriptorCount,
-                                                       kAllocationsPerHeap);
+    DummyStagingDescriptorAllocator allocator(mD3DDevice, kDescriptorCount, kAllocationsPerHeap);
 
     std::list<CPUDescriptorHeapAllocation> list3;
     std::list<CPUDescriptorHeapAllocation> list5;

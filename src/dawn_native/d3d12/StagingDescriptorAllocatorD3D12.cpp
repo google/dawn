@@ -16,15 +16,14 @@
 
 #include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
-#include "dawn_native/d3d12/NonShaderVisibleDescriptorAllocatorD3D12.h"
+#include "dawn_native/d3d12/StagingDescriptorAllocatorD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
 
-    NonShaderVisibleDescriptorAllocator::NonShaderVisibleDescriptorAllocator(
-        Device* device,
-        uint32_t descriptorCount,
-        uint32_t heapSize,
-        D3D12_DESCRIPTOR_HEAP_TYPE heapType)
+    StagingDescriptorAllocator::StagingDescriptorAllocator(Device* device,
+                                                           uint32_t descriptorCount,
+                                                           uint32_t heapSize,
+                                                           D3D12_DESCRIPTOR_HEAP_TYPE heapType)
         : mDevice(device),
           mSizeIncrement(device->GetD3D12Device()->GetDescriptorHandleIncrementSize(heapType)),
           mBlockSize(descriptorCount * mSizeIncrement),
@@ -35,7 +34,7 @@ namespace dawn_native { namespace d3d12 {
         ASSERT(descriptorCount <= heapSize);
     }
 
-    NonShaderVisibleDescriptorAllocator::~NonShaderVisibleDescriptorAllocator() {
+    StagingDescriptorAllocator::~StagingDescriptorAllocator() {
         const Index freeBlockIndicesSize = GetFreeBlockIndicesSize();
         for (auto& buffer : mPool) {
             ASSERT(buffer.freeBlockIndices.size() == freeBlockIndicesSize);
@@ -44,7 +43,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     ResultOrError<CPUDescriptorHeapAllocation>
-    NonShaderVisibleDescriptorAllocator::AllocateCPUDescriptors() {
+    StagingDescriptorAllocator::AllocateCPUDescriptors() {
         if (mAvailableHeaps.empty()) {
             DAWN_TRY(AllocateCPUHeap());
         }
@@ -70,7 +69,7 @@ namespace dawn_native { namespace d3d12 {
         return CPUDescriptorHeapAllocation{baseCPUDescriptor, heapIndex};
     }
 
-    MaybeError NonShaderVisibleDescriptorAllocator::AllocateCPUHeap() {
+    MaybeError StagingDescriptorAllocator::AllocateCPUHeap() {
         D3D12_DESCRIPTOR_HEAP_DESC heapDescriptor;
         heapDescriptor.Type = mHeapType;
         heapDescriptor.NumDescriptors = mHeapSize;
@@ -98,7 +97,7 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-    void NonShaderVisibleDescriptorAllocator::Deallocate(CPUDescriptorHeapAllocation* allocation) {
+    void StagingDescriptorAllocator::Deallocate(CPUDescriptorHeapAllocation* allocation) {
         const uint32_t heapIndex = allocation->GetHeapIndex();
 
         ASSERT(heapIndex < mPool.size());
@@ -125,12 +124,11 @@ namespace dawn_native { namespace d3d12 {
         allocation->Invalidate();
     }
 
-    uint32_t NonShaderVisibleDescriptorAllocator::GetSizeIncrement() const {
+    uint32_t StagingDescriptorAllocator::GetSizeIncrement() const {
         return mSizeIncrement;
     }
 
-    NonShaderVisibleDescriptorAllocator::Index
-    NonShaderVisibleDescriptorAllocator::GetFreeBlockIndicesSize() const {
+    StagingDescriptorAllocator::Index StagingDescriptorAllocator::GetFreeBlockIndicesSize() const {
         return ((mHeapSize * mSizeIncrement) / mBlockSize);
     }
 
