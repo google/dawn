@@ -17,7 +17,8 @@ cmake_minimum_required(VERSION 3.10)
 # When upgrading to CMake 3.11 we can remove DAWN_DUMMY_FILE because source-less add_library
 # becomes available.
 # When upgrading to CMake 3.12 we should add CONFIGURE_DEPENDS to DawnGenerator to rerun CMake in
-# case any of the generator files changes.
+# case any of the generator files changes. We should also remove the CACHE "" FORCE stuff to
+# override options in third_party dependencies.
 
 project(
     Dawn
