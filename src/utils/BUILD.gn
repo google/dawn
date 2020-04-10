@@ -26,7 +26,7 @@ import("${dawn_root}/scripts/dawn_features.gni")
 if (dawn_supports_glfw_for_windowing) {
   group("dawn_glfw") {
     public_deps = [
-      "${dawn_root}/third_party:glfw",
+      "${dawn_root}/third_party/gn/glfw",
     ]
   }
 } else if (is_fuchsia) {

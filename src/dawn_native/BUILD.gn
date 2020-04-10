@@ -397,7 +397,7 @@ source_set("dawn_native_sources") {
   if (dawn_enable_opengl) {
     public_deps += [
       ":dawn_native_opengl_loader_gen",
-      "${dawn_root}/third_party:khronos_platform",
+      "${dawn_root}/third_party/khronos:khronos_platform",
     ]
     sources += get_target_outputs(":dawn_native_opengl_loader_gen")
     sources += [
@@ -447,7 +447,7 @@ source_set("dawn_native_sources") {
   }
 
   if (dawn_enable_vulkan) {
-    public_deps += [ "${dawn_root}/third_party:vulkan_headers" ]
+    public_deps += [ "${dawn_root}/third_party/khronos:vulkan_headers" ]
     sources += [
       "vulkan/AdapterVk.cpp",
       "vulkan/AdapterVk.h",

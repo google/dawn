@@ -77,7 +77,7 @@ dawn_sample("ComputeBoids") {
     "ComputeBoids.cpp",
   ]
   deps = [
-    "${dawn_root}/third_party:glm",
+    "${dawn_root}/third_party/gn/glm",
   ]
 }
 
@@ -92,7 +92,7 @@ dawn_sample("CubeReflection") {
     "CubeReflection.cpp",
   ]
   deps = [
-    "${dawn_root}/third_party:glm",
+    "${dawn_root}/third_party/gn/glm",
   ]
 }
 
