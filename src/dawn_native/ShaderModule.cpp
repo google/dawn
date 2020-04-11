@@ -700,7 +700,7 @@ namespace dawn_native {
                     SpirvCrossBaseTypeToFormatType(shaderFragmentOutputBaseType);
                 if (formatType == Format::Type::Other) {
                     return DAWN_VALIDATION_ERROR("Unexpected Fragment output type");
-                };
+                }
                 mFragmentOutputFormatBaseTypes[location] = formatType;
             }
         }

@@ -183,7 +183,7 @@ namespace dawn_native { namespace metal {
             if (!instance->ConsumedError(GetDevicePCIInfo(device, &ids))) {
                 mPCIInfo.vendorId = ids.vendorId;
                 mPCIInfo.deviceId = ids.deviceId;
-            };
+            }
 
 #if defined(DAWN_PLATFORM_IOS)
             mAdapterType = wgpu::AdapterType::IntegratedGPU;

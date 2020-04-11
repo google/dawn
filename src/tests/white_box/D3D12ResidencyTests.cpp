@@ -194,7 +194,7 @@ TEST_P(D3D12ResidencyTests, OvercommitLargeResources) {
 TEST_P(D3D12ResidencyTests, AsyncMappedBufferRead) {
     // Dawn currently only manages LOCAL_MEMORY. Mappable buffers exist in NON_LOCAL_MEMORY on
     // discrete devices.
-    DAWN_SKIP_TEST_IF(!IsUMA())
+    DAWN_SKIP_TEST_IF(!IsUMA());
 
     // Create a mappable buffer.
     wgpu::Buffer buffer = CreateBuffer(4, wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst);
@@ -239,7 +239,7 @@ TEST_P(D3D12ResidencyTests, AsyncMappedBufferRead) {
 TEST_P(D3D12ResidencyTests, AsyncMappedBufferWrite) {
     // Dawn currently only manages LOCAL_MEMORY. Mappable buffers exist in NON_LOCAL_MEMORY on
     // discrete devices.
-    DAWN_SKIP_TEST_IF(!IsUMA())
+    DAWN_SKIP_TEST_IF(!IsUMA());
 
     // Create a mappable buffer.
     wgpu::Buffer buffer = CreateBuffer(4, wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc);

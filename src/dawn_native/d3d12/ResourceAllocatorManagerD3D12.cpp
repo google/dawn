@@ -162,7 +162,7 @@ namespace dawn_native { namespace d3d12 {
         DAWN_TRY_ASSIGN(subAllocation,
                         CreatePlacedResource(heapType, resourceDescriptor, initialUsage));
         if (subAllocation.GetInfo().mMethod != AllocationMethod::kInvalid) {
-            return subAllocation;
+            return std::move(subAllocation);
         }
 
         // If sub-allocation fails, fall-back to direct allocation (committed resource).
@@ -170,7 +170,7 @@ namespace dawn_native { namespace d3d12 {
         DAWN_TRY_ASSIGN(directAllocation,
                         CreateCommittedResource(heapType, resourceDescriptor, initialUsage));
 
-        return directAllocation;
+        return std::move(directAllocation);
     }
 
     void ResourceAllocatorManager::Tick(Serial completedSerial) {

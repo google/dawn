@@ -196,7 +196,7 @@ namespace dawn_native { namespace vulkan {
 
         // TODO(cwallez@chromium:org): Each layer can expose additional extensions, query them?
 
-        return info;
+        return std::move(info);
     }
 
     ResultOrError<std::vector<VkPhysicalDevice>> GetPhysicalDevices(const Backend& backend) {
@@ -215,7 +215,7 @@ namespace dawn_native { namespace vulkan {
             vkFunctions.EnumeratePhysicalDevices(instance, &count, physicalDevices.data()),
             "vkEnumeratePhysicalDevices"));
 
-        return physicalDevices;
+        return std::move(physicalDevices);
     }
 
     ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const Adapter& adapter) {
@@ -321,7 +321,7 @@ namespace dawn_native { namespace vulkan {
 
         // TODO(cwallez@chromium.org): gather info about formats
 
-        return info;
+        return std::move(info);
     }
 
     ResultOrError<VulkanSurfaceInfo> GatherSurfaceInfo(const Adapter& adapter,
@@ -382,7 +382,7 @@ namespace dawn_native { namespace vulkan {
                                     "vkGetPhysicalDeviceSurfacePresentModesKHR"));
         }
 
-        return info;
+        return std::move(info);
     }
 
 }}  // namespace dawn_native::vulkan

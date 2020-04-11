@@ -95,6 +95,12 @@ config("dawn_internal") {
       "-Wshadow-field",
       "-Wmissing-field-initializers",
       "-Wcstring-format-directive",
+      "-Wtautological-unsigned-zero-compare",
+      "-Wreturn-std-move-in-c++11",
+
+      # Turn on the following flag after removing the empty statement in
+      # third_party/glm/glm/simd/common.h:106
+      # "-Wextra-semi-stmt",
     ]
   }
 }
@@ -143,13 +149,9 @@ if (is_win || is_linux || is_mac || is_fuchsia || is_android) {
     ]
 
     public_configs = [ ":dawn_internal" ]
-    deps = [
-      "${dawn_root}/src/dawn:dawn_headers",
-    ]
+    deps = [ "${dawn_root}/src/dawn:dawn_headers" ]
     if (dawn_enable_vulkan) {
-      public_deps = [
-        "${dawn_root}/third_party/khronos:vulkan_headers",
-      ]
+      public_deps = [ "${dawn_root}/third_party/khronos:vulkan_headers" ]
     }
     if (is_android) {
       libs = [ "log" ]

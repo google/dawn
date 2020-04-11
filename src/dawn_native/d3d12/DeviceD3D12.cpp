@@ -395,7 +395,7 @@ namespace dawn_native { namespace d3d12 {
         DAWN_TRY(CheckHRESULT(d3d11Texture.As(&dxgiKeyedMutex),
                               "D3D12 QueryInterface ID3D11Texture2D to IDXGIKeyedMutex"));
 
-        return dxgiKeyedMutex;
+        return std::move(dxgiKeyedMutex);
     }
 
     void Device::ReleaseKeyedMutexForTexture(ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex) {

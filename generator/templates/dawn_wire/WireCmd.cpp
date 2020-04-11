@@ -414,12 +414,12 @@ namespace dawn_wire {
 
     // Macro to simplify error handling, similar to DAWN_TRY but for DeserializeResult.
 #define DESERIALIZE_TRY(EXPR) \
-    { \
+    do { \
         DeserializeResult exprResult = EXPR; \
         if (exprResult != DeserializeResult::Success) { \
             return exprResult; \
         } \
-    }
+    } while (0)
 
     ObjectHandle::ObjectHandle() = default;
     ObjectHandle::ObjectHandle(ObjectId id, ObjectSerial serial) : id(id), serial(serial) {}

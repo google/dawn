@@ -45,7 +45,7 @@ namespace utils {
             std::unique_ptr<wgpu::SurfaceDescriptorFromMetalLayer> desc =
                 std::make_unique<wgpu::SurfaceDescriptorFromMetalLayer>();
             desc->layer = [view layer];
-            return desc;
+            return std::move(desc);
         }
 
         return nullptr;

@@ -19,11 +19,13 @@
 
 namespace dawn_native { namespace vulkan {
 
-#define GET_GLOBAL_PROC(name)                                                          \
-    name = reinterpret_cast<decltype(name)>(GetInstanceProcAddr(nullptr, "vk" #name)); \
-    if (name == nullptr) {                                                             \
-        return DAWN_INTERNAL_ERROR(std::string("Couldn't get proc vk") + #name);       \
-    }
+#define GET_GLOBAL_PROC(name)                                                              \
+    do {                                                                                   \
+        name = reinterpret_cast<decltype(name)>(GetInstanceProcAddr(nullptr, "vk" #name)); \
+        if (name == nullptr) {                                                             \
+            return DAWN_INTERNAL_ERROR(std::string("Couldn't get proc vk") + #name);       \
+        }                                                                                  \
+    } while (0)
 
     MaybeError VulkanFunctions::LoadGlobalProcs(const DynamicLib& vulkanLib) {
         if (!vulkanLib.GetProc(&GetInstanceProcAddr, "vkGetInstanceProcAddr")) {
@@ -41,11 +43,13 @@ namespace dawn_native { namespace vulkan {
         return {};
     }
 
-#define GET_INSTANCE_PROC_BASE(name, procName)                                              \
-    name = reinterpret_cast<decltype(name)>(GetInstanceProcAddr(instance, "vk" #procName)); \
-    if (name == nullptr) {                                                                  \
-        return DAWN_INTERNAL_ERROR(std::string("Couldn't get proc vk") + #procName);        \
-    }
+#define GET_INSTANCE_PROC_BASE(name, procName)                                                  \
+    do {                                                                                        \
+        name = reinterpret_cast<decltype(name)>(GetInstanceProcAddr(instance, "vk" #procName)); \
+        if (name == nullptr) {                                                                  \
+            return DAWN_INTERNAL_ERROR(std::string("Couldn't get proc vk") + #procName);        \
+        }                                                                                       \
+    } while (0)
 
 #define GET_INSTANCE_PROC(name) GET_INSTANCE_PROC_BASE(name, name)
 #define GET_INSTANCE_PROC_VENDOR(name, vendor) GET_INSTANCE_PROC_BASE(name, name##vendor)
@@ -144,11 +148,13 @@ namespace dawn_native { namespace vulkan {
         return {};
     }
 
-#define GET_DEVICE_PROC(name)                                                       \
-    name = reinterpret_cast<decltype(name)>(GetDeviceProcAddr(device, "vk" #name)); \
-    if (name == nullptr) {                                                          \
-        return DAWN_INTERNAL_ERROR(std::string("Couldn't get proc vk") + #name);    \
-    }
+#define GET_DEVICE_PROC(name)                                                           \
+    do {                                                                                \
+        name = reinterpret_cast<decltype(name)>(GetDeviceProcAddr(device, "vk" #name)); \
+        if (name == nullptr) {                                                          \
+            return DAWN_INTERNAL_ERROR(std::string("Couldn't get proc vk") + #name);    \
+        }                                                                               \
+    } while (0)
 
     MaybeError VulkanFunctions::LoadDeviceProcs(VkDevice device,
                                                 const VulkanDeviceInfo& deviceInfo) {

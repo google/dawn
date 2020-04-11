@@ -689,13 +689,15 @@
 #define INTERNAL_TRACE_EVENT_ADD_SCOPED(platform, category, name, ...)                         \
     INTERNAL_TRACE_EVENT_GET_CATEGORY_INFO(platform, ::dawn_platform::TraceCategory::category) \
     dawn_platform::TraceEvent::TraceEndOnScopeClose INTERNALTRACEEVENTUID(profileScope);       \
-    if (*INTERNALTRACEEVENTUID(catstatic)) {                                                   \
-        dawn_platform::TraceEvent::addTraceEvent(                                              \
-            platform, TRACE_EVENT_PHASE_BEGIN, INTERNALTRACEEVENTUID(catstatic), name,         \
-            dawn_platform::TraceEvent::noEventId, TRACE_EVENT_FLAG_NONE, ##__VA_ARGS__);       \
-        INTERNALTRACEEVENTUID(profileScope)                                                    \
-            .initialize(platform, INTERNALTRACEEVENTUID(catstatic), name);                     \
-    }
+    do {                                                                                       \
+        if (*INTERNALTRACEEVENTUID(catstatic)) {                                               \
+            dawn_platform::TraceEvent::addTraceEvent(                                          \
+                platform, TRACE_EVENT_PHASE_BEGIN, INTERNALTRACEEVENTUID(catstatic), name,     \
+                dawn_platform::TraceEvent::noEventId, TRACE_EVENT_FLAG_NONE, ##__VA_ARGS__);   \
+            INTERNALTRACEEVENTUID(profileScope)                                                \
+                .initialize(platform, INTERNALTRACEEVENTUID(catstatic), name);                 \
+        }                                                                                      \
+    } while (0)
 
 // Implementation detail: internal macro to create static category and add
 // event if the category is enabled.

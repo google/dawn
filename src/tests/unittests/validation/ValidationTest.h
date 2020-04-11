@@ -22,7 +22,7 @@
 #define ASSERT_DEVICE_ERROR(statement) \
     StartExpectDeviceError(); \
     statement; \
-    ASSERT_TRUE(EndExpectDeviceError());
+    ASSERT_TRUE(EndExpectDeviceError())
 
 class ValidationTest : public testing::Test {
   public:

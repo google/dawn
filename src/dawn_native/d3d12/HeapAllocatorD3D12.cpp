@@ -57,7 +57,7 @@ namespace dawn_native { namespace d3d12 {
         // Calling CreateHeap implicitly calls MakeResident on the new heap. We must track this to
         // avoid calling MakeResident a second time.
         mDevice->GetResidencyManager()->TrackResidentAllocation(ToBackend(heapBase.get()));
-        return heapBase;
+        return std::move(heapBase);
     }
 
     void HeapAllocator::DeallocateResourceHeap(std::unique_ptr<ResourceHeapBase> heap) {

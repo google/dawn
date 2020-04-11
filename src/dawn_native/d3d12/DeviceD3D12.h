@@ -39,10 +39,10 @@ namespace dawn_native { namespace d3d12 {
     class StagingDescriptorAllocator;
 
 #define ASSERT_SUCCESS(hr)            \
-    {                                 \
+    do {                              \
         HRESULT succeeded = hr;       \
         ASSERT(SUCCEEDED(succeeded)); \
-    }
+    } while (0)
 
     // Definition of backend types
     class Device : public DeviceBase {

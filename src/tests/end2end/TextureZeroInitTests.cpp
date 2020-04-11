@@ -18,15 +18,17 @@
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
-#define EXPECT_LAZY_CLEAR(N, statement)                                                   \
-    if (UsesWire()) {                                                                     \
-        statement;                                                                        \
-    } else {                                                                              \
-        size_t lazyClearsBefore = dawn_native::GetLazyClearCountForTesting(device.Get()); \
-        statement;                                                                        \
-        size_t lazyClearsAfter = dawn_native::GetLazyClearCountForTesting(device.Get());  \
-        EXPECT_EQ(N, lazyClearsAfter - lazyClearsBefore);                                 \
-    }
+#define EXPECT_LAZY_CLEAR(N, statement)                                                       \
+    do {                                                                                      \
+        if (UsesWire()) {                                                                     \
+            statement;                                                                        \
+        } else {                                                                              \
+            size_t lazyClearsBefore = dawn_native::GetLazyClearCountForTesting(device.Get()); \
+            statement;                                                                        \
+            size_t lazyClearsAfter = dawn_native::GetLazyClearCountForTesting(device.Get());  \
+            EXPECT_EQ(N, lazyClearsAfter - lazyClearsBefore);                                 \
+        }                                                                                     \
+    } while (0)
 
 class TextureZeroInitTest : public DawnTest {
   protected:

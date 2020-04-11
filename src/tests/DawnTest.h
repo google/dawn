@@ -63,7 +63,7 @@
     StartExpectDeviceError();          \
     statement;                         \
     FlushWire();                       \
-    ASSERT_TRUE(EndExpectDeviceError());
+    ASSERT_TRUE(EndExpectDeviceError())
 
 struct RGBA8 {
     constexpr RGBA8() : RGBA8(0, 0, 0, 0) {
@@ -314,12 +314,14 @@ class DawnTestBase {
 };
 
 // Skip a test when the given condition is satisfied.
-#define DAWN_SKIP_TEST_IF(condition)                        \
-    if (condition) {                                        \
-        dawn::InfoLog() << "Test skipped: " #condition "."; \
-        GTEST_SKIP();                                       \
-        return;                                             \
-    }
+#define DAWN_SKIP_TEST_IF(condition)                            \
+    do {                                                        \
+        if (condition) {                                        \
+            dawn::InfoLog() << "Test skipped: " #condition "."; \
+            GTEST_SKIP();                                       \
+            return;                                             \
+        }                                                       \
+    } while (0)
 
 template <typename Params = DawnTestParam>
 class DawnTestWithParams : public DawnTestBase, public ::testing::TestWithParam<Params> {

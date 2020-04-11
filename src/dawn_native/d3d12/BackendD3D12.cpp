@@ -65,7 +65,7 @@ namespace dawn_native { namespace d3d12 {
             }
 
             ASSERT(factory != nullptr);
-            return factory;
+            return std::move(factory);
         }
 
     }  // anonymous namespace

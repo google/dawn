@@ -120,7 +120,7 @@ namespace dawn_native { namespace vulkan {
             DAWN_TRY_ASSIGN(subAllocation,
                             mAllocatorsPerType[memoryType]->AllocateMemory(requirements));
             if (subAllocation.GetInfo().mMethod != AllocationMethod::kInvalid) {
-                return subAllocation;
+                return std::move(subAllocation);
             }
         }
 
