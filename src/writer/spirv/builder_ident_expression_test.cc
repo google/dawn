@@ -18,12 +18,17 @@
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/type/i32_type.h"
 #include "src/ast/type/f32_type.h"
+#include "src/context.h"
+#include "src/type_determiner.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/variable.h"
+#include "src/ast/int_literal.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
+#include "src/ast/binary_expression.h"
 
 namespace tint {
 namespace writer {
@@ -138,7 +143,73 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
   EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 1);
 }
 
-TEST_F(BuilderTest, DISABLED_IdentifierExpression_MultiName) {}
+TEST_F(BuilderTest, IdentifierExpression_Load) {
+  ast::type::I32Type i32;
+
+  Context ctx;
+  TypeDeterminer td(&ctx);
+
+  ast::Variable var("var", ast::StorageClass::kPrivate, &i32);
+
+  td.RegisterVariableForTesting(&var);
+
+  auto lhs = std::make_unique<ast::IdentifierExpression>("var");
+  auto rhs = std::make_unique<ast::IdentifierExpression>("var");
+
+  ast::BinaryExpression expr(ast::BinaryOp::kAdd, std::move(lhs),
+                             std::move(rhs));
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b;
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(&var)) << b.error();
+
+  ASSERT_EQ(b.GenerateBinaryExpression(&expr), 6) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%4 = OpLoad %3 %1
+%5 = OpLoad %3 %1
+%6 = OpIAdd %3 %4 %5
+)");
+}
+
+TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
+  ast::type::I32Type i32;
+
+  Context ctx;
+  TypeDeterminer td(&ctx);
+
+  ast::Variable var("var", ast::StorageClass::kNone, &i32);
+  var.set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+        std::make_unique<ast::IntLiteral>(&i32, 2)));
+  var.set_is_const(true);
+
+  td.RegisterVariableForTesting(&var);
+
+  auto lhs = std::make_unique<ast::IdentifierExpression>("var");
+  auto rhs = std::make_unique<ast::IdentifierExpression>("var");
+
+  ast::BinaryExpression expr(ast::BinaryOp::kAdd, std::move(lhs),
+                             std::move(rhs));
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b;
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(&var)) << b.error();
+
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 3) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 1
+%2 = OpConstant %1 2
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%3 = OpIAdd %1 %2 %2
+)");
+}
 
 }  // namespace
 }  // namespace spirv

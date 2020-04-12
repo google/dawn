@@ -156,6 +156,10 @@ class Builder {
   /// @param expr the expression to generate
   /// @returns the resulting ID of the expression or 0 on error
   uint32_t GenerateExpression(ast::Expression* expr);
+  /// Generates an expression and emits a load if necessary
+  /// @param expr the expression
+  /// @returns the SPIR-V result id
+  uint32_t GenerateExpressionAndLoad(ast::Expression* expr);
   /// Generates the instructions for a function
   /// @param func the function to generate
   /// @returns true if the instructions were generated
@@ -266,6 +270,7 @@ class Builder {
   std::unordered_map<std::string, uint32_t> type_name_to_id_;
   std::unordered_map<std::string, uint32_t> const_to_id_;
   ScopeStack<uint32_t> scope_stack_;
+  std::unordered_map<uint32_t, ast::Variable*> spirv_id_to_variable_;
 };
 
 }  // namespace spirv

@@ -207,6 +207,34 @@ uint32_t Builder::GenerateExpression(ast::Expression* expr) {
   return 0;
 }
 
+uint32_t Builder::GenerateExpressionAndLoad(ast::Expression* expr) {
+  auto id = GenerateExpression(expr);
+  if (id == 0) {
+    return false;
+  }
+
+  // Only need to load identifiers
+  if (!expr->IsIdentifier()) {
+    return id;
+  }
+  if (spirv_id_to_variable_.find(id) == spirv_id_to_variable_.end()) {
+    error_ = "missing generated ID for variable";
+    return 0;
+  }
+  auto var = spirv_id_to_variable_[id];
+  if (var->is_const()) {
+    return id;
+  }
+
+  auto type_id = GenerateTypeIfNeeded(expr->result_type());
+  auto result = result_op();
+  auto result_id = result.to_i();
+  push_function_inst(spv::Op::OpLoad,
+                     {Operand::Int(type_id), result, Operand::Int(id)});
+
+  return result_id;
+}
+
 bool Builder::GenerateFunction(ast::Function* func) {
   uint32_t func_type_id = GenerateFunctionTypeIfNeeded(func);
   if (func_type_id == 0) {
@@ -283,6 +311,7 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
       return false;
     }
     scope_stack_.set(var->name(), init_id);
+    spirv_id_to_variable_[init_id] = var;
     return true;
   }
 
@@ -308,6 +337,7 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
   }
 
   scope_stack_.set(var->name(), var_id);
+  spirv_id_to_variable_[var_id] = var;
 
   return true;
 }
@@ -337,6 +367,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
       return false;
     }
     scope_stack_.set_global(var->name(), init_id);
+    spirv_id_to_variable_[init_id] = var;
     return true;
   }
 
@@ -390,6 +421,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     }
   }
   scope_stack_.set_global(var->name(), var_id);
+  spirv_id_to_variable_[var_id] = var;
   return true;
 }
 
@@ -516,11 +548,11 @@ uint32_t Builder::GenerateLiteralIfNeeded(ast::Literal* lit) {
 
 uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
   if (expr->IsAdd()) {
-    auto lhs_id = GenerateExpression(expr->lhs());
+    auto lhs_id = GenerateExpressionAndLoad(expr->lhs());
     if (lhs_id == 0) {
       return 0;
     }
-    auto rhs_id = GenerateExpression(expr->rhs());
+    auto rhs_id = GenerateExpressionAndLoad(expr->rhs());
     if (rhs_id == 0) {
       return 0;
     }

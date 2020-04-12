@@ -82,6 +82,12 @@ class TypeDeterminer {
   /// @returns false on error
   bool DetermineVariableStorageClass(ast::Statement* stmt);
 
+  /// Testing method to set a given variable into the type stack
+  /// @param var the variable to set
+  void RegisterVariableForTesting(ast::Variable* var) {
+    variable_stack_.set(var->name(), var);
+  }
+
  private:
   void set_error(const Source& src, const std::string& msg);
 
