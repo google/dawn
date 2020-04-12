@@ -15,20 +15,20 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "src/ast/binary_expression.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/int_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
-#include "src/ast/type/i32_type.h"
 #include "src/ast/type/f32_type.h"
-#include "src/context.h"
-#include "src/type_determiner.h"
+#include "src/ast/type/i32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/variable.h"
-#include "src/ast/int_literal.h"
+#include "src/context.h"
+#include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
-#include "src/ast/binary_expression.h"
 
 namespace tint {
 namespace writer {
@@ -185,7 +185,7 @@ TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
 
   ast::Variable var("var", ast::StorageClass::kNone, &i32);
   var.set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::IntLiteral>(&i32, 2)));
+      std::make_unique<ast::IntLiteral>(&i32, 2)));
   var.set_is_const(true);
 
   td.RegisterVariableForTesting(&var);

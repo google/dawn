@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/reader/spirv/function.h"
-
 #include <string>
 #include <vector>
 
 #include "gmock/gmock.h"
+#include "src/reader/spirv/function.h"
 #include "src/reader/spirv/parser_impl.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
 #include "src/reader/spirv/spirv_tools_helpers_test.h"
@@ -137,50 +136,38 @@ TEST_P(SpvBinaryTest, EmitExpression) {
      << "\n        " << GetParam().ast_rhs;
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(ss.str())) << assembly;
 }
-INSTANTIATE_TEST_SUITE_P(SpvParserTest,
-                         SpvBinaryTest,
-                         ::testing::Values(
-			   // Both uint
-			   BinaryData{
-                             "uint", "uint_10", "OpIAdd", "uint_20", "__u32",
-                             "ScalarConstructor{10}", "add",
-                             "ScalarConstructor{20}"},
-			   // Both int
-			   BinaryData{
-                             "int", "int_30", "OpIAdd", "int_40", "__i32",
-                             "ScalarConstructor{30}", "add",
-                             "ScalarConstructor{40}"},
-			   // Mixed, returning uint
-			   BinaryData{
-                             "uint", "int_30", "OpIAdd", "uint_10", "__u32",
-                             "ScalarConstructor{30}", "add",
-                             "ScalarConstructor{10}"},
-			   // Mixed, returning int
-			   BinaryData{
-                             "int", "int_30", "OpIAdd", "uint_10", "__i32",
-                             "ScalarConstructor{30}", "add",
-                             "ScalarConstructor{10}"},
-			   // Both v2uint
-			   BinaryData{
-                             "v2uint", "v2uint_10_20", "OpIAdd", "v2uint_20_10", "__vec_2__u32",
-                             AstFor("v2uint_10_20"), "add",
-                             AstFor("v2uint_20_10")},
-			   // Both v2int
-			   BinaryData{
-                             "v2int", "v2int_30_40", "OpIAdd", "v2int_40_30", "__vec_2__i32",
-                             AstFor("v2int_30_40"), "add",
-                             AstFor("v2int_40_30")},
-			   // Mixed, returning v2uint
-			   BinaryData{
-                             "v2uint", "v2int_30_40", "OpIAdd", "v2uint_10_20", "__vec_2__u32",
-                             AstFor("v2int_30_40"), "add",
-                             AstFor("v2uint_10_20")},
-			   // Mixed, returning v2int
-			   BinaryData{
-                             "v2int", "v2int_40_30", "OpIAdd", "v2uint_20_10", "__vec_2__i32",
-                             AstFor("v2int_40_30"), "add",
-                             AstFor("v2uint_20_10")}
-			     ));
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest,
+    SpvBinaryTest,
+    ::testing::Values(
+        // Both uint
+        BinaryData{"uint", "uint_10", "OpIAdd", "uint_20", "__u32",
+                   "ScalarConstructor{10}", "add", "ScalarConstructor{20}"},
+        // Both int
+        BinaryData{"int", "int_30", "OpIAdd", "int_40", "__i32",
+                   "ScalarConstructor{30}", "add", "ScalarConstructor{40}"},
+        // Mixed, returning uint
+        BinaryData{"uint", "int_30", "OpIAdd", "uint_10", "__u32",
+                   "ScalarConstructor{30}", "add", "ScalarConstructor{10}"},
+        // Mixed, returning int
+        BinaryData{"int", "int_30", "OpIAdd", "uint_10", "__i32",
+                   "ScalarConstructor{30}", "add", "ScalarConstructor{10}"},
+        // Both v2uint
+        BinaryData{"v2uint", "v2uint_10_20", "OpIAdd", "v2uint_20_10",
+                   "__vec_2__u32", AstFor("v2uint_10_20"), "add",
+                   AstFor("v2uint_20_10")},
+        // Both v2int
+        BinaryData{"v2int", "v2int_30_40", "OpIAdd", "v2int_40_30",
+                   "__vec_2__i32", AstFor("v2int_30_40"), "add",
+                   AstFor("v2int_40_30")},
+        // Mixed, returning v2uint
+        BinaryData{"v2uint", "v2int_30_40", "OpIAdd", "v2uint_10_20",
+                   "__vec_2__u32", AstFor("v2int_30_40"), "add",
+                   AstFor("v2uint_10_20")},
+        // Mixed, returning v2int
+        BinaryData{"v2int", "v2int_40_30", "OpIAdd", "v2uint_20_10",
+                   "__vec_2__i32", AstFor("v2int_40_30"), "add",
+                   AstFor("v2uint_20_10")}));
 
 }  // namespace
 }  // namespace spirv
