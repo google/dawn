@@ -1,10 +1,15 @@
+.cipd
 .DS_Store
 .gclient
 .gclient_entries
 .vscode
 build
+buildtools
 out
 third_party/cpplint
+third_party/binutils
 third_party/googletest
+third_party/llvm-build
 third_party/spirv-headers
 third_party/spirv-tools
+tools/clang
