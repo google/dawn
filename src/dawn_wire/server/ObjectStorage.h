@@ -25,9 +25,9 @@ namespace dawn_wire { namespace server {
 
     template <typename T>
     struct ObjectDataBase {
-        // The backend-provided handle and serial to this object.
+        // The backend-provided handle and generation to this object.
         T handle;
-        uint32_t serial = 0;
+        uint32_t generation = 0;
 
         // Whether this object has been allocated, used by the KnownObjects queries
         // TODO(cwallez@chromium.org): make this an internal bit vector in KnownObjects.

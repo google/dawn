@@ -20,13 +20,13 @@
 namespace dawn_wire {
 
     using ObjectId = uint32_t;
-    using ObjectSerial = uint32_t;
+    using ObjectGeneration = uint32_t;
     struct ObjectHandle {
       ObjectId id;
-      ObjectSerial serial;
+      ObjectGeneration generation;
 
       ObjectHandle();
-      ObjectHandle(ObjectId id, ObjectSerial serial);
+      ObjectHandle(ObjectId id, ObjectGeneration generation);
       ObjectHandle(const volatile ObjectHandle& rhs);
 
       // MSVC has a bug where it thinks the volatile copy assignment is a duplicate.

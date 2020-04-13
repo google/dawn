@@ -40,7 +40,7 @@ namespace dawn_wire { namespace client {
         ReservedTexture result;
         result.texture = reinterpret_cast<WGPUTexture>(allocation->object.get());
         result.id = allocation->object->id;
-        result.generation = allocation->serial;
+        result.generation = allocation->generation;
         return result;
     }
 

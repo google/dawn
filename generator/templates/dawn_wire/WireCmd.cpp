@@ -422,16 +422,20 @@ namespace dawn_wire {
     } while (0)
 
     ObjectHandle::ObjectHandle() = default;
-    ObjectHandle::ObjectHandle(ObjectId id, ObjectSerial serial) : id(id), serial(serial) {}
-    ObjectHandle::ObjectHandle(const volatile ObjectHandle& rhs) : id(rhs.id), serial(rhs.serial) {}
+    ObjectHandle::ObjectHandle(ObjectId id, ObjectGeneration generation)
+        : id(id), generation(generation) {
+    }
+    ObjectHandle::ObjectHandle(const volatile ObjectHandle& rhs)
+        : id(rhs.id), generation(rhs.generation) {
+    }
     ObjectHandle& ObjectHandle::AssignFrom(const ObjectHandle& rhs) {
         id = rhs.id;
-        serial = rhs.serial;
+        generation = rhs.generation;
         return *this;
     }
     ObjectHandle& ObjectHandle::AssignFrom(const volatile ObjectHandle& rhs) {
         id = rhs.id;
-        serial = rhs.serial;
+        generation = rhs.generation;
         return *this;
     }
 

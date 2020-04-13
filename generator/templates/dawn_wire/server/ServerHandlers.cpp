@@ -52,7 +52,7 @@ namespace dawn_wire { namespace server {
                 if ({{name}}Data == nullptr) {
                     return false;
                 }
-                {{name}}Data->serial = cmd.{{name}}.serial;
+                {{name}}Data->generation = cmd.{{name}}.generation;
             {% endfor %}
 
             //* Do command

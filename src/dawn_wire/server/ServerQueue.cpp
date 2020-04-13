@@ -31,7 +31,7 @@ namespace dawn_wire { namespace server {
 
         FenceCompletionUserdata* userdata = new FenceCompletionUserdata;
         userdata->server = this;
-        userdata->fence = ObjectHandle{fenceId, fence->serial};
+        userdata->fence = ObjectHandle{fenceId, fence->generation};
         userdata->value = signalValue;
 
         mProcs.fenceOnCompletion(cFence, signalValue, ForwardFenceCompletedValue, userdata);

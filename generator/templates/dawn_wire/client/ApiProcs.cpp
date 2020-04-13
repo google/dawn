@@ -47,7 +47,7 @@ namespace dawn_wire { namespace client {
                     //* For object creation, store the object ID the client will use for the result.
                     {% if method.return_type.category == "object" %}
                         auto* allocation = self->device->GetClient()->{{method.return_type.name.CamelCase()}}Allocator().New(self->device);
-                        cmd.result = ObjectHandle{allocation->object->id, allocation->serial};
+                        cmd.result = ObjectHandle{allocation->object->id, allocation->generation};
                     {% endif %}
 
                     {% for arg in method.arguments %}

@@ -33,8 +33,8 @@ namespace dawn_wire { namespace client {
 
                 {% if member.type.dict_name == "ObjectHandle" %}
                     {{Type}}* {{name}} = {{Type}}Allocator().GetObject(cmd.{{name}}.id);
-                    uint32_t {{name}}Serial = {{Type}}Allocator().GetSerial(cmd.{{name}}.id);
-                    if ({{name}}Serial != cmd.{{name}}.serial) {
+                    uint32_t {{name}}Generation = {{Type}}Allocator().GetGeneration(cmd.{{name}}.id);
+                    if ({{name}}Generation != cmd.{{name}}.generation) {
                         {{name}} = nullptr;
                     }
                 {% endif %}
