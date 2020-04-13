@@ -68,7 +68,7 @@ namespace dawn_native { namespace d3d12 {
 
     ResultOrError<std::string> ShaderModule::GetHLSLSource(PipelineLayout* layout) {
         std::unique_ptr<spirv_cross::CompilerHLSL> compiler_impl;
-        spirv_cross::CompilerHLSL* compiler;
+        spirv_cross::CompilerHLSL* compiler = nullptr;
         if (!GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
             // If these options are changed, the values in DawnSPIRVCrossHLSLFastFuzzer.cpp need to
             // be updated.

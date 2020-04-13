@@ -104,9 +104,9 @@ namespace {
         std::tuple<Pipeline, VertexBuffer, BindGroup, UniformData, RenderBundle>;
 
     template <typename T>
-    int AssignParam(T& lhs, T rhs) {
+    unsigned int AssignParam(T& lhs, T rhs) {
         lhs = rhs;
-        return 0;
+        return 0u;
     }
 
     // This helper function allows creating a DrawCallParam from a list of arguments

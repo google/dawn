@@ -960,12 +960,12 @@ namespace dawn_native { namespace vulkan {
                                                        allocationSizeA, memoryTypeIndexA, {});
 
         // Draw a non-trivial picture
-        int width = 640, height = 480, pixelSize = 4;
+        uint32_t width = 640, height = 480, pixelSize = 4;
         uint32_t rowPitch = Align(width * pixelSize, kTextureRowPitchAlignment);
         uint32_t size = rowPitch * (height - 1) + width * pixelSize;
         unsigned char data[size];
-        for (int row = 0; row < height; row++) {
-            for (int col = 0; col < width; col++) {
+        for (uint32_t row = 0; row < height; row++) {
+            for (uint32_t col = 0; col < width; col++) {
                 float normRow = static_cast<float>(row) / height;
                 float normCol = static_cast<float>(col) / width;
                 float dist = sqrt(normRow * normRow + normCol * normCol) * 3;

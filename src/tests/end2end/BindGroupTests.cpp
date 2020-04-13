@@ -19,7 +19,7 @@
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
-constexpr static unsigned int kRTSize = 8;
+constexpr static uint32_t kRTSize = 8;
 
 class BindGroupTests : public DawnTest {
 protected:
@@ -218,7 +218,7 @@ TEST_P(BindGroupTests, ReusedUBO) {
 
     RGBA8 filled(0, 255, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);
-    int min = 1, max = kRTSize - 3;
+    uint32_t min = 1, max = kRTSize - 3;
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color,    min, min);
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color,    max, min);
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color,    min, max);
@@ -290,13 +290,13 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     wgpu::Texture texture = device.CreateTexture(&descriptor);
     wgpu::TextureView textureView = texture.CreateView();
 
-    int width = kRTSize, height = kRTSize;
-    int widthInBytes = width * sizeof(RGBA8);
+    uint32_t width = kRTSize, height = kRTSize;
+    uint32_t widthInBytes = width * sizeof(RGBA8);
     widthInBytes = (widthInBytes + 255) & ~255;
-    int sizeInBytes = widthInBytes * height;
-    int size = sizeInBytes / sizeof(RGBA8);
+    uint32_t sizeInBytes = widthInBytes * height;
+    uint32_t size = sizeInBytes / sizeof(RGBA8);
     std::vector<RGBA8> data = std::vector<RGBA8>(size);
-    for (int i = 0; i < size; i++) {
+    for (uint32_t i = 0; i < size; i++) {
         data[i] = RGBA8(0, 255, 0, 255);
     }
     wgpu::Buffer stagingBuffer =
@@ -323,7 +323,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
 
     RGBA8 filled(0, 255, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);
-    int min = 1, max = kRTSize - 3;
+    uint32_t min = 1, max = kRTSize - 3;
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color,    min, min);
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color,    max, min);
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color,    min, max);
@@ -407,7 +407,7 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
 
     RGBA8 filled(255, 255, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);
-    int min = 1, max = kRTSize - 3;
+    uint32_t min = 1, max = kRTSize - 3;
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, min);
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, max, min);
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, max);
@@ -456,7 +456,7 @@ TEST_P(BindGroupTests, DrawTwiceInSamePipelineWithFourBindGroupSets) {
 
     RGBA8 filled(255, 0, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);
-    int min = 1, max = kRTSize - 3;
+    uint32_t min = 1, max = kRTSize - 3;
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, min);
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, max, min);
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, max);
@@ -498,7 +498,7 @@ TEST_P(BindGroupTests, SetBindGroupBeforePipeline) {
     // The result should be red.
     RGBA8 filled(255, 0, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);
-    int min = 1, max = kRTSize - 3;
+    uint32_t min = 1, max = kRTSize - 3;
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, min);
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, max, min);
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, max);
@@ -559,7 +559,7 @@ TEST_P(BindGroupTests, SetDynamicBindGroupBeforePipeline) {
     // The result should be RGBAunorm(1, 0, 0, 0.5) + RGBAunorm(0, 1, 0, 0.5)
     RGBA8 filled(255, 255, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);
-    int min = 1, max = kRTSize - 3;
+    uint32_t min = 1, max = kRTSize - 3;
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, min);
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, max, min);
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, max);
@@ -636,7 +636,7 @@ TEST_P(BindGroupTests, BindGroupsPersistAfterPipelineChange) {
     // The result should be RGBAunorm(1, 0, 0, 0.5) + RGBAunorm(0, 1, 0, 0.5)
     RGBA8 filled(255, 255, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);
-    int min = 1, max = kRTSize - 3;
+    uint32_t min = 1, max = kRTSize - 3;
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, min);
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, max, min);
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, max);
@@ -741,7 +741,7 @@ TEST_P(BindGroupTests, DrawThenChangePipelineAndBindGroup) {
 
     RGBA8 filled(255, 255, 255, 255);
     RGBA8 notFilled(0, 0, 0, 0);
-    int min = 1, max = kRTSize - 3;
+    uint32_t min = 1, max = kRTSize - 3;
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, min);
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, max, min);
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, max);
