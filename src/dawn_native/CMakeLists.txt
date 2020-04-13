@@ -151,6 +151,10 @@ if (DAWN_USE_X11)
     target_link_libraries(dawn_native PRIVATE ${X11_LIBRARIES})
 endif()
 
+if (WIN32)
+    target_link_libraries(dawn_native PRIVATE user32.lib)
+endif()
+
 if (DAWN_ENABLE_D3D12)
     target_sources(dawn_native PRIVATE
         "${DAWN_INCLUDE_DIR}/dawn_native/D3D12Backend.h"

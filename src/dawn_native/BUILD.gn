@@ -262,6 +262,14 @@ source_set("dawn_native_sources") {
     "dawn_platform.h",
   ]
 
+  if (dawn_use_x11) {
+    libs += [ "X11" ]
+  }
+
+  if (is_win) {
+    libs += [ "user32.lib" ]
+  }
+
   if (dawn_enable_d3d12) {
     libs += [ "dxguid.lib" ]
     sources += [
@@ -557,10 +565,6 @@ source_set("dawn_native_sources") {
         "DAWN_SWIFTSHADER_VK_ICD_JSON=\"${swiftshader_icd_file_name}\"",
       ]
     }
-  }
-
-  if (dawn_use_x11) {
-    libs += [ "X11" ]
   }
 }
 
