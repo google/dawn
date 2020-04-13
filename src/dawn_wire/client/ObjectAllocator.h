@@ -16,6 +16,7 @@
 #define DAWNWIRE_CLIENT_OBJECTALLOCATOR_H_
 
 #include "common/Assert.h"
+#include "common/Compiler.h"
 
 #include <memory>
 #include <vector>
@@ -46,24 +47,29 @@ namespace dawn_wire { namespace client {
 
         ObjectAndSerial* New(ObjectOwner* owner) {
             uint32_t id = GetNewId();
-            T* result = new T(owner, 1, id);
-            auto object = std::unique_ptr<T>(result);
+            auto object = std::make_unique<T>(owner, 1, id);
 
             if (id >= mObjects.size()) {
                 ASSERT(id == mObjects.size());
                 mObjects.emplace_back(std::move(object), 0);
             } else {
                 ASSERT(mObjects[id].object == nullptr);
-                // TODO(cwallez@chromium.org): investigate if overflows could cause bad things to
-                // happen
+
                 mObjects[id].serial++;
+                // The serial should never overflow. We don't recycle ObjectIds that would overflow
+                // their next serial.
+                ASSERT(mObjects[id].serial != 0);
+
                 mObjects[id].object = std::move(object);
             }
 
             return &mObjects[id];
         }
         void Free(T* obj) {
-            FreeId(obj->id);
+            if (DAWN_LIKELY(mObjects[obj->id].serial != std::numeric_limits<uint32_t>::max())) {
+                // Only recycle this ObjectId if the serial won't overflow on the next allocation.
+                FreeId(obj->id);
+            }
             mObjects[obj->id].object = nullptr;
         }
 
