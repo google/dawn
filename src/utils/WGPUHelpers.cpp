@@ -275,13 +275,10 @@ namespace utils {
     wgpu::BindGroupLayout MakeBindGroupLayout(
         const wgpu::Device& device,
         std::initializer_list<wgpu::BindGroupLayoutEntry> bindingsInitializer) {
-        constexpr wgpu::ShaderStage kNoStages{};
 
         std::vector<wgpu::BindGroupLayoutEntry> bindings;
         for (const wgpu::BindGroupLayoutEntry& binding : bindingsInitializer) {
-            if (binding.visibility != kNoStages) {
-                bindings.push_back(binding);
-            }
+            bindings.push_back(binding);
         }
 
         wgpu::BindGroupLayoutDescriptor descriptor;

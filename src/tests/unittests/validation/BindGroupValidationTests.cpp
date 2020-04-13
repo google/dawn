@@ -600,6 +600,24 @@ TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutVisibilityNone) {
     device.CreateBindGroupLayout(&descriptor);
 }
 
+// This test verifies that binding with none visibility in bind group layout can be supported in
+// bind group
+TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutVisibilityNoneExpectsBindGroupEntry) {
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Vertex, wgpu::BindingType::UniformBuffer},
+                    {1, wgpu::ShaderStage::None, wgpu::BindingType::UniformBuffer},
+                });
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = wgpu::BufferUsage::Uniform;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    utils::MakeBindGroup(device, bgl, {{0, buffer}, {1, buffer}});
+
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, bgl, {{0, buffer}}));
+}
+
 // Check that dynamic buffer numbers exceed maximum value in one bind group layout.
 TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
     wgpu::BindGroupLayout bgl[2];
