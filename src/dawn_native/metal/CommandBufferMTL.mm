@@ -990,6 +990,8 @@ namespace dawn_native { namespace metal {
                     CopyIntoTrueResolveTarget(commandContext, trueResolveTextures[i],
                                               trueResolveLevels[i], trueResolveSlices[i],
                                               temporaryResolveTextures[i], width, height);
+                    [temporaryResolveTextures[i] release];
+                    temporaryResolveTextures[i] = nil;
                 }
                 return;
             }
