@@ -180,7 +180,8 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
         if (memoryTypeIndex == -1) {
             return DAWN_VALIDATION_ERROR("Unable to find appropriate memory type for import");
         }
-        MemoryImportParams params = {memoryRequirements.size, memoryTypeIndex};
+        MemoryImportParams params = {memoryRequirements.size,
+                                     static_cast<uint32_t>(memoryTypeIndex)};
         return params;
     }
 
