@@ -281,6 +281,7 @@ INSTANTIATE_TEST_SUITE_P(
     BuilderTest,
     BinaryCompareUnsignedIntegerTest,
     testing::Values(BinaryData{ast::BinaryOp::kEqual, "OpIEqual"},
+                    BinaryData{ast::BinaryOp::kGreaterThan, "OpUGreaterThan"},
                     BinaryData{ast::BinaryOp::kLessThan, "OpULessThan"},
                     BinaryData{ast::BinaryOp::kNotEqual, "OpINotEqual"}));
 
@@ -364,6 +365,7 @@ INSTANTIATE_TEST_SUITE_P(
     BuilderTest,
     BinaryCompareSignedIntegerTest,
     testing::Values(BinaryData{ast::BinaryOp::kEqual, "OpIEqual"},
+                    BinaryData{ast::BinaryOp::kGreaterThan, "OpSGreaterThan"},
                     BinaryData{ast::BinaryOp::kLessThan, "OpSLessThan"},
                     BinaryData{ast::BinaryOp::kNotEqual, "OpINotEqual"}));
 
@@ -447,6 +449,8 @@ INSTANTIATE_TEST_SUITE_P(
     BuilderTest,
     BinaryCompareFloatTest,
     testing::Values(BinaryData{ast::BinaryOp::kEqual, "OpFOrdEqual"},
+                    BinaryData{ast::BinaryOp::kGreaterThan,
+                               "OpFOrdGreaterThan"},
                     BinaryData{ast::BinaryOp::kLessThan, "OpFOrdLessThan"},
                     BinaryData{ast::BinaryOp::kNotEqual, "OpFOrdNotEqual"}));
 
