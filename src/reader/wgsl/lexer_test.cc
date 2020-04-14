@@ -478,7 +478,6 @@ INSTANTIATE_TEST_SUITE_P(
         TokenData{"private", Token::Type::kPrivate},
         TokenData{"ptr", Token::Type::kPtr},
         TokenData{"push_constant", Token::Type::kPushConstant},
-        TokenData{"regardless", Token::Type::kRegardless},
         TokenData{"return", Token::Type::kReturn},
         TokenData{"set", Token::Type::kSet},
         TokenData{"storage_buffer", Token::Type::kStorageBuffer},
@@ -525,7 +524,8 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                                          "typedef",
                                          "u8",
                                          "u16",
-                                         "u64"));
+                                         "u64",
+                                         "regardless"));
 
 }  // namespace
 }  // namespace wgsl

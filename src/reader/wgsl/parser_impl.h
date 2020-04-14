@@ -33,7 +33,6 @@
 #include "src/ast/loop_statement.h"
 #include "src/ast/module.h"
 #include "src/ast/pipeline_stage.h"
-#include "src/ast/regardless_statement.h"
 #include "src/ast/statement.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/struct.h"
@@ -215,9 +214,6 @@ class ParserImpl {
   /// Parses a `unless_stmt` grammar element
   /// @returns the parsed element or nullptr
   std::unique_ptr<ast::UnlessStatement> unless_stmt();
-  /// Parses a `regardless_stmt` grammar element
-  /// @returns the parsed element or nullptr
-  std::unique_ptr<ast::RegardlessStatement> regardless_stmt();
   /// Parses a `switch_stmt` grammar element
   /// @returns the parsed statement or nullptr
   std::unique_ptr<ast::SwitchStatement> switch_stmt();

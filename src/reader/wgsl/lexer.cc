@@ -606,8 +606,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kPtr, source, "ptr"};
   if (str == "push_constant")
     return {Token::Type::kPushConstant, source, "push_constant"};
-  if (str == "regardless")
-    return {Token::Type::kRegardless, source, "regardless"};
   if (str == "return")
     return {Token::Type::kReturn, source, "return"};
   if (str == "set")
@@ -683,7 +681,8 @@ Token Lexer::check_reserved(const Source& source, const std::string& str) {
     return {Token::Type::kReservedKeyword, source, "u16"};
   if (str == "u64")
     return {Token::Type::kReservedKeyword, source, "u64"};
-
+  if (str == "regardless")
+    return {Token::Type::kReservedKeyword, source, "regardless"};
   return {};
 }
 

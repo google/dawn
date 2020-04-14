@@ -39,7 +39,6 @@
 #include "src/ast/location_decoration.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
-#include "src/ast/regardless_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
@@ -742,9 +741,6 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsNop()) {
     return EmitNop(stmt->AsNop());
   }
-  if (stmt->IsRegardless()) {
-    return EmitRegardless(stmt->AsRegardless());
-  }
   if (stmt->IsReturn()) {
     return EmitReturn(stmt->AsReturn());
   }
@@ -930,18 +926,6 @@ bool GeneratorImpl::EmitNop(ast::NopStatement*) {
   make_indent();
   out_ << "nop;" << std::endl;
   return true;
-}
-
-bool GeneratorImpl::EmitRegardless(ast::RegardlessStatement* stmt) {
-  make_indent();
-
-  out_ << "regardless (";
-  if (!EmitExpression(stmt->condition())) {
-    return false;
-  }
-  out_ << ")";
-
-  return EmitStatementBlockAndNewline(stmt->body());
 }
 
 bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {

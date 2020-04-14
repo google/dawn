@@ -33,7 +33,6 @@ class IfStatement;
 class KillStatement;
 class LoopStatement;
 class NopStatement;
-class RegardlessStatement;
 class ReturnStatement;
 class SwitchStatement;
 class UnlessStatement;
@@ -64,8 +63,6 @@ class Statement : public Node {
   virtual bool IsLoop() const;
   /// @returns true if this is a nop statement
   virtual bool IsNop() const;
-  /// @returns true if this is an regardless statement
-  virtual bool IsRegardless() const;
   /// @returns true if this is a return statement
   virtual bool IsReturn() const;
   /// @returns true if this is a switch statement
@@ -95,8 +92,6 @@ class Statement : public Node {
   LoopStatement* AsLoop();
   /// @returns the statement as a nop statement
   NopStatement* AsNop();
-  /// @returns the statement as an regardless statement
-  RegardlessStatement* AsRegardless();
   /// @returns the statement as a return statement
   ReturnStatement* AsReturn();
   /// @returns the statement as a switch statement

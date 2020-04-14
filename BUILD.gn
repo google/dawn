@@ -94,8 +94,6 @@ source_set("libtint") {
     "src/ast/nop_statement.h",
     "src/ast/pipeline_stage.cc",
     "src/ast/pipeline_stage.h",
-    "src/ast/regardless_statement.cc",
-    "src/ast/regardless_statement.h",
     "src/ast/return_statement.cc",
     "src/ast/return_statement.h",
     "src/ast/scalar_constructor_expression.cc",

@@ -109,22 +109,6 @@ TEST_F(ParserImplTest, Statement_Unless_Invalid) {
   EXPECT_EQ(p->error(), "1:9: unable to parse expression");
 }
 
-TEST_F(ParserImplTest, Statement_Regardless) {
-  auto p = parser("regardless (a) {}");
-  auto e = p->statement();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsRegardless());
-}
-
-TEST_F(ParserImplTest, Statement_Regardless_Invalid) {
-  auto p = parser("regardless () {}");
-  auto e = p->statement();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:13: unable to parse expression");
-}
-
 TEST_F(ParserImplTest, Statement_Variable) {
   auto p = parser("var a : i32 = 1;");
   auto e = p->statement();

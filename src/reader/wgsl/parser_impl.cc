@@ -1449,7 +1449,6 @@ ast::StatementList ParserImpl::statements() {
 //   | RETURN logical_or_expression SEMICOLON
 //   | if_stmt
 //   | unless_stmt
-//   | regardless_stmt
 //   | switch_stmt
 //   | loop_stmt
 //   | variable_stmt SEMICOLON
@@ -1497,12 +1496,6 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
     return nullptr;
   if (unless != nullptr)
     return unless;
-
-  auto regardless = regardless_stmt();
-  if (has_error())
-    return nullptr;
-  if (regardless != nullptr)
-    return regardless;
 
   auto sw = switch_stmt();
   if (has_error())
@@ -1878,32 +1871,6 @@ std::unique_ptr<ast::UnlessStatement> ParserImpl::unless_stmt() {
 
   return std::make_unique<ast::UnlessStatement>(source, std::move(condition),
                                                 std::move(body));
-}
-
-// regardless_stmt
-//   : REGARDLESS paren_rhs_stmt body_stmt
-std::unique_ptr<ast::RegardlessStatement> ParserImpl::regardless_stmt() {
-  auto t = peek();
-  if (!t.IsRegardless())
-    return nullptr;
-
-  auto source = t.source();
-  next();  // Consume the peek
-
-  auto condition = paren_rhs_stmt();
-  if (has_error())
-    return nullptr;
-  if (condition == nullptr) {
-    set_error(peek(), "unable to parse regardless condition");
-    return nullptr;
-  }
-
-  auto body = body_stmt();
-  if (has_error())
-    return nullptr;
-
-  return std::make_unique<ast::RegardlessStatement>(
-      source, std::move(condition), std::move(body));
 }
 
 // switch_stmt

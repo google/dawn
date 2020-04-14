@@ -26,7 +26,6 @@
 #include "src/ast/kill_statement.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/nop_statement.h"
-#include "src/ast/regardless_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/unless_statement.h"
@@ -80,10 +79,6 @@ bool Statement::IsLoop() const {
 }
 
 bool Statement::IsNop() const {
-  return false;
-}
-
-bool Statement::IsRegardless() const {
   return false;
 }
 
@@ -151,11 +146,6 @@ LoopStatement* Statement::AsLoop() {
 NopStatement* Statement::AsNop() {
   assert(IsNop());
   return static_cast<NopStatement*>(this);
-}
-
-RegardlessStatement* Statement::AsRegardless() {
-  assert(IsRegardless());
-  return static_cast<RegardlessStatement*>(this);
 }
 
 ReturnStatement* Statement::AsReturn() {

@@ -30,7 +30,6 @@
 #include "src/ast/if_statement.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
-#include "src/ast/regardless_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/switch_statement.h"
@@ -182,11 +181,6 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
   }
   if (stmt->IsNop()) {
     return true;
-  }
-  if (stmt->IsRegardless()) {
-    auto* r = stmt->AsRegardless();
-    return DetermineResultType(r->condition()) &&
-           DetermineStatements(r->body());
   }
   if (stmt->IsReturn()) {
     auto* r = stmt->AsReturn();

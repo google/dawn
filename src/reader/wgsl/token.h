@@ -569,8 +569,6 @@ class Token {
   bool IsPtr() const { return type_ == Type::kPtr; }
   /// @returns true if token is a 'push_constant'
   bool IsPushConstant() const { return type_ == Type::kPushConstant; }
-  /// @returns true if token is a 'regardless'
-  bool IsRegardless() const { return type_ == Type::kRegardless; }
   /// @returns true if token is a 'return'
   bool IsReturn() const { return type_ == Type::kReturn; }
   /// @returns true if token is a 'set'
