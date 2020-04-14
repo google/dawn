@@ -44,6 +44,8 @@ ast::BinaryOp ConvertBinaryOp(SpvOp opcode) {
       return ast::BinaryOp::kAdd;
     case SpvOpFSub:
       return ast::BinaryOp::kSubtract;
+    case SpvOpFMul:
+      return ast::BinaryOp::kMultiply;
     default:
       break;
   }
