@@ -35,7 +35,19 @@ namespace {
 
 using BuilderTest = testing::Test;
 
-TEST_F(BuilderTest, Binary_Add_Integer) {
+struct BinaryData {
+  ast::BinaryOp op;
+  std::string name;
+};
+inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
+  out << data.op;
+  return out;
+}
+
+using BinaryArithIntegerTest = testing::TestWithParam<BinaryData>;
+TEST_P(BinaryArithIntegerTest, Scalar) {
+  auto param = GetParam();
+
   ast::type::I32Type i32;
 
   auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
@@ -43,8 +55,7 @@ TEST_F(BuilderTest, Binary_Add_Integer) {
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::IntLiteral>(&i32, 4));
 
-  ast::BinaryExpression expr(ast::BinaryOp::kAdd, std::move(lhs),
-                             std::move(rhs));
+  ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
   Context ctx;
   TypeDeterminer td(&ctx);
@@ -59,11 +70,12 @@ TEST_F(BuilderTest, Binary_Add_Integer) {
 %3 = OpConstant %1 4
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%4 = OpIAdd %1 %2 %3
-)");
+            "%4 = " + param.name + " %1 %2 %3\n");
 }
 
-TEST_F(BuilderTest, Binary_Add_Integer_Vectors) {
+TEST_P(BinaryArithIntegerTest, Vector) {
+  auto param = GetParam();
+
   ast::type::I32Type i32;
   ast::type::VectorType vec3(&i32, 3);
 
@@ -89,8 +101,7 @@ TEST_F(BuilderTest, Binary_Add_Integer_Vectors) {
   Context ctx;
   TypeDeterminer td(&ctx);
 
-  ast::BinaryExpression expr(ast::BinaryOp::kAdd, std::move(lhs),
-                             std::move(rhs));
+  ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -104,11 +115,17 @@ TEST_F(BuilderTest, Binary_Add_Integer_Vectors) {
 %4 = OpConstantComposite %1 %3 %3 %3
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%5 = OpIAdd %1 %4 %4
-)");
+            "%5 = " + param.name + " %1 %4 %4\n");
 }
+INSTANTIATE_TEST_SUITE_P(BuilderTest,
+                         BinaryArithIntegerTest,
+                         testing::Values(BinaryData{ast::BinaryOp::kAdd,
+                                                    "OpIAdd"}));
 
-TEST_F(BuilderTest, Binary_Add_Float) {
+using BinaryArithFloatTest = testing::TestWithParam<BinaryData>;
+TEST_P(BinaryArithFloatTest, Scalar) {
+  auto param = GetParam();
+
   ast::type::F32Type f32;
 
   auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
@@ -116,8 +133,7 @@ TEST_F(BuilderTest, Binary_Add_Float) {
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 4.5f));
 
-  ast::BinaryExpression expr(ast::BinaryOp::kAdd, std::move(lhs),
-                             std::move(rhs));
+  ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
   Context ctx;
   TypeDeterminer td(&ctx);
@@ -132,11 +148,12 @@ TEST_F(BuilderTest, Binary_Add_Float) {
 %3 = OpConstant %1 4.5
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%4 = OpFAdd %1 %2 %3
-)");
+            "%4 = " + param.name + " %1 %2 %3\n");
 }
 
-TEST_F(BuilderTest, Binary_Add_Float_Vectors) {
+TEST_P(BinaryArithFloatTest, Vector) {
+  auto param = GetParam();
+
   ast::type::F32Type f32;
   ast::type::VectorType vec3(&f32, 3);
 
@@ -162,8 +179,7 @@ TEST_F(BuilderTest, Binary_Add_Float_Vectors) {
   Context ctx;
   TypeDeterminer td(&ctx);
 
-  ast::BinaryExpression expr(ast::BinaryOp::kAdd, std::move(lhs),
-                             std::move(rhs));
+  ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
@@ -177,9 +193,12 @@ TEST_F(BuilderTest, Binary_Add_Float_Vectors) {
 %4 = OpConstantComposite %1 %3 %3 %3
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%5 = OpFAdd %1 %4 %4
-)");
+            "%5 = " + param.name + " %1 %4 %4\n");
 }
+INSTANTIATE_TEST_SUITE_P(BuilderTest,
+                         BinaryArithFloatTest,
+                         testing::Values(BinaryData{ast::BinaryOp::kAdd,
+                                                    "OpFAdd"}));
 
 }  // namespace
 }  // namespace spirv
