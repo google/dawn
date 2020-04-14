@@ -617,6 +617,8 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
     op = lhs_is_float_or_vec ? spv::Op::OpFOrdNotEqual : spv::Op::OpINotEqual;
   } else if (expr->IsOr()) {
     op = spv::Op::OpBitwiseOr;
+  } else if (expr->IsXor()) {
+    op = spv::Op::OpBitwiseXor;
   } else {
     return 0;
   }
