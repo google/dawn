@@ -51,7 +51,7 @@ class BitSetIterator final {
       private:
         unsigned long getNextBit();
 
-        static const size_t BitsPerWord = sizeof(uint32_t) * 8;
+        static constexpr size_t kBitsPerWord = sizeof(uint32_t) * 8;
         std::bitset<N> mBits;
         unsigned long mCurrentBit;
         unsigned long mOffset;
@@ -88,7 +88,7 @@ BitSetIterator<N, T>::Iterator::Iterator(const std::bitset<N>& bits)
     if (bits.any()) {
         mCurrentBit = getNextBit();
     } else {
-        mOffset = static_cast<unsigned long>(roundUp(N, BitsPerWord));
+        mOffset = static_cast<unsigned long>(roundUp(N, kBitsPerWord));
     }
 }
 
@@ -120,8 +120,8 @@ unsigned long BitSetIterator<N, T>::Iterator::getNextBit() {
             return ScanForward(wordBits) + mOffset;
         }
 
-        mBits >>= BitsPerWord;
-        mOffset += BitsPerWord;
+        mBits >>= kBitsPerWord;
+        mOffset += kBitsPerWord;
     }
     return 0;
 }
