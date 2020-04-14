@@ -547,38 +547,50 @@ uint32_t Builder::GenerateLiteralIfNeeded(ast::Literal* lit) {
 }
 
 uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
+  auto lhs_id = GenerateExpressionAndLoad(expr->lhs());
+  if (lhs_id == 0) {
+    return 0;
+  }
+  auto rhs_id = GenerateExpressionAndLoad(expr->rhs());
+  if (rhs_id == 0) {
+    return 0;
+  }
+
+  auto result = result_op();
+  auto result_id = result.to_i();
+
+  auto lhs_type = expr->lhs()->result_type();
+
+  auto expr_type = expr->result_type();
+  auto type_id = GenerateTypeIfNeeded(expr_type);
+  if (type_id == 0) {
+    return 0;
+  }
+
+  spv::Op op = spv::Op::OpNop;
   if (expr->IsAdd()) {
-    auto lhs_id = GenerateExpressionAndLoad(expr->lhs());
-    if (lhs_id == 0) {
-      return 0;
-    }
-    auto rhs_id = GenerateExpressionAndLoad(expr->rhs());
-    if (rhs_id == 0) {
-      return 0;
-    }
-
-    auto result = result_op();
-    auto result_id = result.to_i();
-
-    auto expr_type = expr->result_type();
-    auto type_id = GenerateTypeIfNeeded(expr_type);
-    if (type_id == 0) {
-      return 0;
-    }
-
     // This handles int and float and the vectors of those types. Other types
     // should have been rejected by validation.
-    spv::Op op = spv::Op::OpIAdd;
+    op = spv::Op::OpIAdd;
     if (expr_type->IsF32() ||
         (expr_type->IsVector() && expr_type->AsVector()->type()->IsF32())) {
       op = spv::Op::OpFAdd;
     }
-    push_function_inst(op, {Operand::Int(type_id), result, Operand::Int(lhs_id),
-                            Operand::Int(rhs_id)});
-
-    return result_id;
+  } else if (expr->IsEqual()) {
+    // This handles int and float and the vectors of those types. Other types
+    // should have been rejected by validation.
+    op = spv::Op::OpIEqual;
+    if (lhs_type->IsF32() ||
+        (lhs_type->IsVector() && lhs_type->AsVector()->type()->IsF32())) {
+      op = spv::Op::OpFOrdEqual;
+    }
+  } else {
+    return 0;
   }
-  return 0;
+
+  push_function_inst(op, {Operand::Int(type_id), result, Operand::Int(lhs_id),
+                          Operand::Int(rhs_id)});
+  return result_id;
 }
 
 bool Builder::GenerateReturnStatement(ast::ReturnStatement* stmt) {

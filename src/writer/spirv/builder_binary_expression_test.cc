@@ -200,6 +200,168 @@ INSTANTIATE_TEST_SUITE_P(BuilderTest,
                          testing::Values(BinaryData{ast::BinaryOp::kAdd,
                                                     "OpFAdd"}));
 
+using BinaryCompareIntegerTest = testing::TestWithParam<BinaryData>;
+TEST_P(BinaryCompareIntegerTest, Scalar) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+
+  auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 3));
+  auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 4));
+
+  ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
+
+  Context ctx;
+  TypeDeterminer td(&ctx);
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b;
+  b.push_function(Function{});
+
+  ASSERT_EQ(b.GenerateBinaryExpression(&expr), 4) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 1
+%2 = OpConstant %1 3
+%3 = OpConstant %1 4
+%5 = OpTypeBool
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            "%4 = " + param.name + " %5 %2 %3\n");
+}
+
+TEST_P(BinaryCompareIntegerTest, Vector) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+  ast::type::VectorType vec3(&i32, 3);
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 1)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 1)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 1)));
+  auto lhs =
+      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 1)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 1)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 1)));
+  auto rhs =
+      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+
+  Context ctx;
+  TypeDeterminer td(&ctx);
+
+  ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b;
+  b.push_function(Function{});
+
+  ASSERT_EQ(b.GenerateBinaryExpression(&expr), 5) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+%1 = OpTypeVector %2 3
+%3 = OpConstant %2 1
+%4 = OpConstantComposite %1 %3 %3 %3
+%7 = OpTypeBool
+%6 = OpTypeVector %7 3
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            "%5 = " + param.name + " %6 %4 %4\n");
+}
+INSTANTIATE_TEST_SUITE_P(BuilderTest,
+                         BinaryCompareIntegerTest,
+                         testing::Values(BinaryData{ast::BinaryOp::kEqual,
+                                                    "OpIEqual"}));
+
+using BinaryCompareFloatTest = testing::TestWithParam<BinaryData>;
+TEST_P(BinaryCompareFloatTest, Scalar) {
+  auto param = GetParam();
+
+  ast::type::F32Type f32;
+
+  auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.2f));
+  auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 4.5f));
+
+  ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
+
+  Context ctx;
+  TypeDeterminer td(&ctx);
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b;
+  b.push_function(Function{});
+
+  ASSERT_EQ(b.GenerateBinaryExpression(&expr), 4) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
+%2 = OpConstant %1 3.20000005
+%3 = OpConstant %1 4.5
+%5 = OpTypeBool
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            "%4 = " + param.name + " %5 %2 %3\n");
+}
+
+TEST_P(BinaryCompareFloatTest, Vector) {
+  auto param = GetParam();
+
+  ast::type::F32Type f32;
+  ast::type::VectorType vec3(&f32, 3);
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  auto lhs =
+      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  auto rhs =
+      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+
+  Context ctx;
+  TypeDeterminer td(&ctx);
+
+  ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b;
+  b.push_function(Function{});
+
+  ASSERT_EQ(b.GenerateBinaryExpression(&expr), 5) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeVector %2 3
+%3 = OpConstant %2 1
+%4 = OpConstantComposite %1 %3 %3 %3
+%7 = OpTypeBool
+%6 = OpTypeVector %7 3
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            "%5 = " + param.name + " %6 %4 %4\n");
+}
+INSTANTIATE_TEST_SUITE_P(BuilderTest,
+                         BinaryCompareFloatTest,
+                         testing::Values(BinaryData{ast::BinaryOp::kEqual,
+                                                    "OpFOrdEqual"}));
+
 }  // namespace
 }  // namespace spirv
 }  // namespace writer
