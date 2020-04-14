@@ -615,6 +615,8 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
     }
   } else if (expr->IsNotEqual()) {
     op = lhs_is_float_or_vec ? spv::Op::OpFOrdNotEqual : spv::Op::OpINotEqual;
+  } else if (expr->IsOr()) {
+    op = spv::Op::OpBitwiseOr;
   } else {
     return 0;
   }

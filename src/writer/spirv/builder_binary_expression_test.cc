@@ -122,7 +122,8 @@ INSTANTIATE_TEST_SUITE_P(
     BuilderTest,
     BinaryArithIntegerTest,
     testing::Values(BinaryData{ast::BinaryOp::kAdd, "OpIAdd"},
-                    BinaryData{ast::BinaryOp::kAnd, "OpBitwiseAnd"}));
+                    BinaryData{ast::BinaryOp::kAnd, "OpBitwiseAnd"},
+                    BinaryData{ast::BinaryOp::kOr, "OpBitwiseOr"}));
 
 using BinaryArithFloatTest = testing::TestWithParam<BinaryData>;
 TEST_P(BinaryArithFloatTest, Scalar) {
