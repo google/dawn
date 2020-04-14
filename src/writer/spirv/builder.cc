@@ -635,6 +635,12 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
     op = lhs_is_float_or_vec ? spv::Op::OpFOrdNotEqual : spv::Op::OpINotEqual;
   } else if (expr->IsOr()) {
     op = spv::Op::OpBitwiseOr;
+  } else if (expr->IsShiftLeft()) {
+    op = spv::Op::OpShiftLeftLogical;
+  } else if (expr->IsShiftRight()) {
+    op = spv::Op::OpShiftRightLogical;
+  } else if (expr->IsShiftRightArith()) {
+    op = spv::Op::OpShiftRightArithmetic;
   } else if (expr->IsSubtract()) {
     op = lhs_is_float_or_vec ? spv::Op::OpFSub : spv::Op::OpISub;
   } else if (expr->IsXor()) {

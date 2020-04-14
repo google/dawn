@@ -120,13 +120,17 @@ TEST_P(BinaryArithSignedIntegerTest, Vector) {
 INSTANTIATE_TEST_SUITE_P(
     BuilderTest,
     BinaryArithSignedIntegerTest,
-    testing::Values(BinaryData{ast::BinaryOp::kAdd, "OpIAdd"},
-                    BinaryData{ast::BinaryOp::kAnd, "OpBitwiseAnd"},
-                    BinaryData{ast::BinaryOp::kDivide, "OpSDiv"},
-                    BinaryData{ast::BinaryOp::kModulo, "OpSMod"},
-                    BinaryData{ast::BinaryOp::kOr, "OpBitwiseOr"},
-                    BinaryData{ast::BinaryOp::kSubtract, "OpISub"},
-                    BinaryData{ast::BinaryOp::kXor, "OpBitwiseXor"}));
+    testing::Values(
+        BinaryData{ast::BinaryOp::kAdd, "OpIAdd"},
+        BinaryData{ast::BinaryOp::kAnd, "OpBitwiseAnd"},
+        BinaryData{ast::BinaryOp::kDivide, "OpSDiv"},
+        BinaryData{ast::BinaryOp::kModulo, "OpSMod"},
+        BinaryData{ast::BinaryOp::kOr, "OpBitwiseOr"},
+        BinaryData{ast::BinaryOp::kShiftLeft, "OpShiftLeftLogical"},
+        BinaryData{ast::BinaryOp::kShiftRight, "OpShiftRightLogical"},
+        BinaryData{ast::BinaryOp::kShiftRightArith, "OpShiftRightArithmetic"},
+        BinaryData{ast::BinaryOp::kSubtract, "OpISub"},
+        BinaryData{ast::BinaryOp::kXor, "OpBitwiseXor"}));
 
 using BinaryArithUnsignedIntegerTest = testing::TestWithParam<BinaryData>;
 TEST_P(BinaryArithUnsignedIntegerTest, Scalar) {
@@ -203,13 +207,17 @@ TEST_P(BinaryArithUnsignedIntegerTest, Vector) {
 INSTANTIATE_TEST_SUITE_P(
     BuilderTest,
     BinaryArithUnsignedIntegerTest,
-    testing::Values(BinaryData{ast::BinaryOp::kAdd, "OpIAdd"},
-                    BinaryData{ast::BinaryOp::kAnd, "OpBitwiseAnd"},
-                    BinaryData{ast::BinaryOp::kDivide, "OpUDiv"},
-                    BinaryData{ast::BinaryOp::kModulo, "OpUMod"},
-                    BinaryData{ast::BinaryOp::kOr, "OpBitwiseOr"},
-                    BinaryData{ast::BinaryOp::kSubtract, "OpISub"},
-                    BinaryData{ast::BinaryOp::kXor, "OpBitwiseXor"}));
+    testing::Values(
+        BinaryData{ast::BinaryOp::kAdd, "OpIAdd"},
+        BinaryData{ast::BinaryOp::kAnd, "OpBitwiseAnd"},
+        BinaryData{ast::BinaryOp::kDivide, "OpUDiv"},
+        BinaryData{ast::BinaryOp::kModulo, "OpUMod"},
+        BinaryData{ast::BinaryOp::kOr, "OpBitwiseOr"},
+        BinaryData{ast::BinaryOp::kShiftLeft, "OpShiftLeftLogical"},
+        BinaryData{ast::BinaryOp::kShiftRight, "OpShiftRightLogical"},
+        BinaryData{ast::BinaryOp::kShiftRightArith, "OpShiftRightArithmetic"},
+        BinaryData{ast::BinaryOp::kSubtract, "OpISub"},
+        BinaryData{ast::BinaryOp::kXor, "OpBitwiseXor"}));
 
 using BinaryArithFloatTest = testing::TestWithParam<BinaryData>;
 TEST_P(BinaryArithFloatTest, Scalar) {
