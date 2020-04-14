@@ -280,12 +280,13 @@ TEST_P(BinaryCompareUnsignedIntegerTest, Vector) {
 INSTANTIATE_TEST_SUITE_P(
     BuilderTest,
     BinaryCompareUnsignedIntegerTest,
-    testing::Values(BinaryData{ast::BinaryOp::kEqual, "OpIEqual"},
-                    BinaryData{ast::BinaryOp::kGreaterThan, "OpUGreaterThan"},
-                    BinaryData{ast::BinaryOp::kLessThan, "OpULessThan"},
-                    BinaryData{ast::BinaryOp::kLessThanEqual,
-                               "OpULessThanEqual"},
-                    BinaryData{ast::BinaryOp::kNotEqual, "OpINotEqual"}));
+    testing::Values(
+        BinaryData{ast::BinaryOp::kEqual, "OpIEqual"},
+        BinaryData{ast::BinaryOp::kGreaterThan, "OpUGreaterThan"},
+        BinaryData{ast::BinaryOp::kGreaterThanEqual, "OpUGreaterThanEqual"},
+        BinaryData{ast::BinaryOp::kLessThan, "OpULessThan"},
+        BinaryData{ast::BinaryOp::kLessThanEqual, "OpULessThanEqual"},
+        BinaryData{ast::BinaryOp::kNotEqual, "OpINotEqual"}));
 
 using BinaryCompareSignedIntegerTest = testing::TestWithParam<BinaryData>;
 TEST_P(BinaryCompareSignedIntegerTest, Scalar) {
@@ -366,12 +367,13 @@ TEST_P(BinaryCompareSignedIntegerTest, Vector) {
 INSTANTIATE_TEST_SUITE_P(
     BuilderTest,
     BinaryCompareSignedIntegerTest,
-    testing::Values(BinaryData{ast::BinaryOp::kEqual, "OpIEqual"},
-                    BinaryData{ast::BinaryOp::kGreaterThan, "OpSGreaterThan"},
-                    BinaryData{ast::BinaryOp::kLessThan, "OpSLessThan"},
-                    BinaryData{ast::BinaryOp::kLessThanEqual,
-                               "OpSLessThanEqual"},
-                    BinaryData{ast::BinaryOp::kNotEqual, "OpINotEqual"}));
+    testing::Values(
+        BinaryData{ast::BinaryOp::kEqual, "OpIEqual"},
+        BinaryData{ast::BinaryOp::kGreaterThan, "OpSGreaterThan"},
+        BinaryData{ast::BinaryOp::kGreaterThanEqual, "OpSGreaterThanEqual"},
+        BinaryData{ast::BinaryOp::kLessThan, "OpSLessThan"},
+        BinaryData{ast::BinaryOp::kLessThanEqual, "OpSLessThanEqual"},
+        BinaryData{ast::BinaryOp::kNotEqual, "OpINotEqual"}));
 
 using BinaryCompareFloatTest = testing::TestWithParam<BinaryData>;
 TEST_P(BinaryCompareFloatTest, Scalar) {
@@ -455,6 +457,7 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(
         BinaryData{ast::BinaryOp::kEqual, "OpFOrdEqual"},
         BinaryData{ast::BinaryOp::kGreaterThan, "OpFOrdGreaterThan"},
+        BinaryData{ast::BinaryOp::kGreaterThanEqual, "OpFOrdGreaterThanEqual"},
         BinaryData{ast::BinaryOp::kLessThan, "OpFOrdLessThan"},
         BinaryData{ast::BinaryOp::kLessThanEqual, "OpFOrdLessThanEqual"},
         BinaryData{ast::BinaryOp::kNotEqual, "OpFOrdNotEqual"}));
