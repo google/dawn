@@ -180,6 +180,10 @@ class Builder {
   /// @param expr the expresssion to generate
   /// @returns the id of the expression or 0 on failure
   uint32_t GenerateIdentifierExpression(ast::IdentifierExpression* expr);
+  /// Generates an if statement
+  /// @param stmt the statement to generate
+  /// @returns true on success
+  bool GenerateIfStatement(ast::IfStatement* stmt);
   /// Generates an import instruction
   /// @param imp the import
   void GenerateImport(ast::Import* imp);

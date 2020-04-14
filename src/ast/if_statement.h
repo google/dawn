@@ -66,6 +66,8 @@ class IfStatement : public Statement {
   }
   /// @returns the else statements
   const ElseStatementList& else_statements() const { return else_statements_; }
+  /// @returns true if there are else statements
+  bool has_else_statements() const { return !else_statements_.empty(); }
 
   /// @returns true if this is a if statement
   bool IsIf() const override;

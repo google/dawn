@@ -26,6 +26,7 @@
 #include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/if_statement.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/return_statement.h"
@@ -628,6 +629,56 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
   return result_id;
 }
 
+bool Builder::GenerateIfStatement(ast::IfStatement* stmt) {
+  auto cond_id = GenerateExpression(stmt->condition());
+  if (cond_id == 0) {
+    return false;
+  }
+
+  auto merge_block = result_op();
+  auto merge_block_id = merge_block.to_i();
+
+  push_function_inst(spv::Op::OpSelectionMerge,
+                     {Operand::Int(merge_block_id),
+                      Operand::Int(SpvSelectionControlMaskNone)});
+
+  auto true_block = result_op();
+  auto true_block_id = true_block.to_i();
+
+  // if there are no else statements we branch on false to the merge block
+  // otherwise we branch to the false block
+  auto false_block_id =
+      stmt->has_else_statements() ? next_id() : merge_block_id;
+
+  push_function_inst(spv::Op::OpBranchConditional,
+                     {Operand::Int(cond_id), Operand::Int(true_block_id),
+                      Operand::Int(false_block_id)});
+
+  // Output true block
+  push_function_inst(spv::Op::OpLabel, {true_block});
+  for (const auto& inst : stmt->body()) {
+    if (!GenerateStatement(inst.get())) {
+      return 0;
+    }
+  }
+
+  // TODO(dsinclair): The branch should be optional based on how the
+  // StatementList ended ...
+
+  push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
+
+  if (false_block_id != merge_block_id) {
+    push_function_inst(spv::Op::OpLabel, {Operand::Int(false_block_id)});
+
+    // TODO(dsinclair): Output else statements, pass in merge_block_id?
+  }
+
+  // Output the merge block
+  push_function_inst(spv::Op::OpLabel, {merge_block});
+
+  return true;
+}
+
 bool Builder::GenerateReturnStatement(ast::ReturnStatement* stmt) {
   if (stmt->has_value()) {
     auto val_id = GenerateExpression(stmt->value());
@@ -645,6 +696,9 @@ bool Builder::GenerateReturnStatement(ast::ReturnStatement* stmt) {
 bool Builder::GenerateStatement(ast::Statement* stmt) {
   if (stmt->IsAssign()) {
     return GenerateAssignStatement(stmt->AsAssign());
+  }
+  if (stmt->IsIf()) {
+    return GenerateIfStatement(stmt->AsIf());
   }
   if (stmt->IsReturn()) {
     return GenerateReturnStatement(stmt->AsReturn());
