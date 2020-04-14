@@ -41,8 +41,8 @@ std::string CommonTypes() {
   %uint_20 = OpConstant %uint 20
   %int_30 = OpConstant %int 30
   %int_40 = OpConstant %int 40
-  %float_50 = OpConstant %uint 50
-  %float_60 = OpConstant %uint 60
+  %float_50 = OpConstant %float 50
+  %float_60 = OpConstant %float 60
 
   %ptr_uint = OpTypePointer Function %uint
   %ptr_int = OpTypePointer Function %int
@@ -50,11 +50,14 @@ std::string CommonTypes() {
 
   %v2uint = OpTypeVector %uint 2
   %v2int = OpTypeVector %int 2
+  %v2float = OpTypeVector %float 2
 
   %v2uint_10_20 = OpConstantComposite %v2uint %uint_10 %uint_20
   %v2uint_20_10 = OpConstantComposite %v2uint %uint_20 %uint_10
   %v2int_30_40 = OpConstantComposite %v2int %int_30 %int_40
   %v2int_40_30 = OpConstantComposite %v2int %int_40 %int_30
+  %v2float_50_60 = OpConstantComposite %v2float %float_50 %float_60
+  %v2float_60_50 = OpConstantComposite %v2float %float_60 %float_50
 )";
 }
 
@@ -86,6 +89,20 @@ std::string AstFor(std::string assembly) {
           __vec_2__i32
           ScalarConstructor{40}
           ScalarConstructor{30}
+        })";
+  }
+  if (assembly == "v2float_50_60") {
+    return R"(TypeConstructor{
+          __vec_2__f32
+          ScalarConstructor{50.000000}
+          ScalarConstructor{60.000000}
+        })";
+  }
+  if (assembly == "v2float_60_50") {
+    return R"(TypeConstructor{
+          __vec_2__f32
+          ScalarConstructor{60.000000}
+          ScalarConstructor{50.000000}
         })";
   }
   return "bad case";
@@ -136,8 +153,9 @@ TEST_P(SpvBinaryTest, EmitExpression) {
      << "\n        " << GetParam().ast_rhs;
   EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(ss.str())) << assembly;
 }
+
 INSTANTIATE_TEST_SUITE_P(
-    SpvParserTest,
+    SpvParserTest_IAdd,
     SpvBinaryTest,
     ::testing::Values(
         // Both uint
@@ -168,6 +186,19 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"v2int", "v2int_40_30", "OpIAdd", "v2uint_20_10",
                    "__vec_2__i32", AstFor("v2int_40_30"), "add",
                    AstFor("v2uint_20_10")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_FAdd,
+    SpvBinaryTest,
+    ::testing::Values(
+        // Scalar float
+        BinaryData{"float", "float_50", "OpFAdd", "float_60", "__f32",
+                   "ScalarConstructor{50.000000}", "add",
+                   "ScalarConstructor{60.000000}"},
+        // Vector float
+        BinaryData{"v2float", "v2float_50_60", "OpFAdd", "v2float_60_50",
+                   "__vec_2__f32", AstFor("v2float_50_60"), "add",
+                   AstFor("v2float_60_50")}));
 
 }  // namespace
 }  // namespace spirv

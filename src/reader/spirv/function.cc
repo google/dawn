@@ -40,6 +40,7 @@ namespace {
 ast::BinaryOp ConvertBinaryOp(SpvOp opcode) {
   switch (opcode) {
     case SpvOpIAdd:
+    case SpvOpFAdd:
       return ast::BinaryOp::kAdd;
     default:
       break;
