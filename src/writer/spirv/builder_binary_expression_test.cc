@@ -45,8 +45,8 @@ inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
   return out;
 }
 
-using BinaryArithIntegerTest = testing::TestWithParam<BinaryData>;
-TEST_P(BinaryArithIntegerTest, Scalar) {
+using BinaryArithSignedIntegerTest = testing::TestWithParam<BinaryData>;
+TEST_P(BinaryArithSignedIntegerTest, Scalar) {
   auto param = GetParam();
 
   ast::type::I32Type i32;
@@ -73,8 +73,7 @@ TEST_P(BinaryArithIntegerTest, Scalar) {
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             "%4 = " + param.name + " %1 %2 %3\n");
 }
-
-TEST_P(BinaryArithIntegerTest, Vector) {
+TEST_P(BinaryArithSignedIntegerTest, Vector) {
   auto param = GetParam();
 
   ast::type::I32Type i32;
@@ -120,9 +119,92 @@ TEST_P(BinaryArithIntegerTest, Vector) {
 }
 INSTANTIATE_TEST_SUITE_P(
     BuilderTest,
-    BinaryArithIntegerTest,
+    BinaryArithSignedIntegerTest,
     testing::Values(BinaryData{ast::BinaryOp::kAdd, "OpIAdd"},
                     BinaryData{ast::BinaryOp::kAnd, "OpBitwiseAnd"},
+                    BinaryData{ast::BinaryOp::kModulo, "OpSMod"},
+                    BinaryData{ast::BinaryOp::kOr, "OpBitwiseOr"},
+                    BinaryData{ast::BinaryOp::kSubtract, "OpISub"},
+                    BinaryData{ast::BinaryOp::kXor, "OpBitwiseXor"}));
+
+using BinaryArithUnsignedIntegerTest = testing::TestWithParam<BinaryData>;
+TEST_P(BinaryArithUnsignedIntegerTest, Scalar) {
+  auto param = GetParam();
+
+  ast::type::U32Type u32;
+
+  auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&u32, 3));
+  auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&u32, 4));
+
+  ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
+
+  Context ctx;
+  TypeDeterminer td(&ctx);
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b;
+  b.push_function(Function{});
+
+  ASSERT_EQ(b.GenerateBinaryExpression(&expr), 4) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 0
+%2 = OpConstant %1 3
+%3 = OpConstant %1 4
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            "%4 = " + param.name + " %1 %2 %3\n");
+}
+TEST_P(BinaryArithUnsignedIntegerTest, Vector) {
+  auto param = GetParam();
+
+  ast::type::U32Type u32;
+  ast::type::VectorType vec3(&u32, 3);
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&u32, 1)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&u32, 1)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&u32, 1)));
+  auto lhs =
+      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&u32, 1)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&u32, 1)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&u32, 1)));
+  auto rhs =
+      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+
+  Context ctx;
+  TypeDeterminer td(&ctx);
+
+  ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b;
+  b.push_function(Function{});
+
+  ASSERT_EQ(b.GenerateBinaryExpression(&expr), 5) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 0
+%1 = OpTypeVector %2 3
+%3 = OpConstant %2 1
+%4 = OpConstantComposite %1 %3 %3 %3
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            "%5 = " + param.name + " %1 %4 %4\n");
+}
+INSTANTIATE_TEST_SUITE_P(
+    BuilderTest,
+    BinaryArithUnsignedIntegerTest,
+    testing::Values(BinaryData{ast::BinaryOp::kAdd, "OpIAdd"},
+                    BinaryData{ast::BinaryOp::kAnd, "OpBitwiseAnd"},
+                    BinaryData{ast::BinaryOp::kModulo, "OpUMod"},
                     BinaryData{ast::BinaryOp::kOr, "OpBitwiseOr"},
                     BinaryData{ast::BinaryOp::kSubtract, "OpISub"},
                     BinaryData{ast::BinaryOp::kXor, "OpBitwiseXor"}));
@@ -204,6 +286,7 @@ INSTANTIATE_TEST_SUITE_P(
     BuilderTest,
     BinaryArithFloatTest,
     testing::Values(BinaryData{ast::BinaryOp::kAdd, "OpFAdd"},
+                    BinaryData{ast::BinaryOp::kModulo, "OpFMod"},
                     BinaryData{ast::BinaryOp::kSubtract, "OpFSub"}));
 
 using BinaryCompareUnsignedIntegerTest = testing::TestWithParam<BinaryData>;

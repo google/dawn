@@ -615,6 +615,14 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
     } else {
       op = spv::Op::OpSLessThanEqual;
     }
+  } else if (expr->IsModulo()) {
+    if (lhs_is_float_or_vec) {
+      op = spv::Op::OpFMod;
+    } else if (lhs_is_unsigned) {
+      op = spv::Op::OpUMod;
+    } else {
+      op = spv::Op::OpSMod;
+    }
   } else if (expr->IsNotEqual()) {
     op = lhs_is_float_or_vec ? spv::Op::OpFOrdNotEqual : spv::Op::OpINotEqual;
   } else if (expr->IsOr()) {
