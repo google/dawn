@@ -122,6 +122,7 @@ INSTANTIATE_TEST_SUITE_P(
     BinaryArithSignedIntegerTest,
     testing::Values(BinaryData{ast::BinaryOp::kAdd, "OpIAdd"},
                     BinaryData{ast::BinaryOp::kAnd, "OpBitwiseAnd"},
+                    BinaryData{ast::BinaryOp::kDivide, "OpSDiv"},
                     BinaryData{ast::BinaryOp::kModulo, "OpSMod"},
                     BinaryData{ast::BinaryOp::kOr, "OpBitwiseOr"},
                     BinaryData{ast::BinaryOp::kSubtract, "OpISub"},
@@ -204,6 +205,7 @@ INSTANTIATE_TEST_SUITE_P(
     BinaryArithUnsignedIntegerTest,
     testing::Values(BinaryData{ast::BinaryOp::kAdd, "OpIAdd"},
                     BinaryData{ast::BinaryOp::kAnd, "OpBitwiseAnd"},
+                    BinaryData{ast::BinaryOp::kDivide, "OpUDiv"},
                     BinaryData{ast::BinaryOp::kModulo, "OpUMod"},
                     BinaryData{ast::BinaryOp::kOr, "OpBitwiseOr"},
                     BinaryData{ast::BinaryOp::kSubtract, "OpISub"},
@@ -286,6 +288,7 @@ INSTANTIATE_TEST_SUITE_P(
     BuilderTest,
     BinaryArithFloatTest,
     testing::Values(BinaryData{ast::BinaryOp::kAdd, "OpFAdd"},
+                    BinaryData{ast::BinaryOp::kDivide, "OpFDiv"},
                     BinaryData{ast::BinaryOp::kModulo, "OpFMod"},
                     BinaryData{ast::BinaryOp::kSubtract, "OpFSub"}));
 

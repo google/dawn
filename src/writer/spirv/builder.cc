@@ -581,6 +581,14 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
     op = spv::Op::OpBitwiseAnd;
   } else if (expr->IsAdd()) {
     op = lhs_is_float_or_vec ? spv::Op::OpFAdd : spv::Op::OpIAdd;
+  } else if (expr->IsDivide()) {
+    if (lhs_is_float_or_vec) {
+      op = spv::Op::OpFDiv;
+    } else if (lhs_is_unsigned) {
+      op = spv::Op::OpUDiv;
+    } else {
+      op = spv::Op::OpSDiv;
+    }
   } else if (expr->IsEqual()) {
     op = lhs_is_float_or_vec ? spv::Op::OpFOrdEqual : spv::Op::OpIEqual;
   } else if (expr->IsGreaterThan()) {
