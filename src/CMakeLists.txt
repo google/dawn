@@ -327,6 +327,7 @@ if(${TINT_BUILD_SPV_READER})
     reader/spirv/fail_stream_test.cc
     reader/spirv/function_arithmetic_test.cc
     reader/spirv/function_decl_test.cc
+    reader/spirv/function_logical_test.cc
     reader/spirv/function_var_test.cc
     reader/spirv/function_memory_test.cc
     reader/spirv/namer_test.cc
