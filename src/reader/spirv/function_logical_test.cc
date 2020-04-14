@@ -193,6 +193,27 @@ INSTANTIATE_TEST_SUITE_P(
                    "__vec_2__bool", AstFor("v2int_30_40"), "equal",
                    AstFor("v2int_40_30")}));
 
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_INotEqual,
+    SpvBinaryLogicalTest,
+    ::testing::Values(
+        // Both uint
+        BinaryData{"bool", "uint_10", "OpINotEqual", "uint_20", "__bool",
+                   "ScalarConstructor{10}", "not_equal",
+                   "ScalarConstructor{20}"},
+        // Both int
+        BinaryData{"bool", "int_30", "OpINotEqual", "int_40", "__bool",
+                   "ScalarConstructor{30}", "not_equal",
+                   "ScalarConstructor{40}"},
+        // Both v2uint
+        BinaryData{"v2bool", "v2uint_10_20", "OpINotEqual", "v2uint_20_10",
+                   "__vec_2__bool", AstFor("v2uint_10_20"), "not_equal",
+                   AstFor("v2uint_20_10")},
+        // Both v2int
+        BinaryData{"v2bool", "v2int_30_40", "OpINotEqual", "v2int_40_30",
+                   "__vec_2__bool", AstFor("v2int_30_40"), "not_equal",
+                   AstFor("v2int_40_30")}));
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader
