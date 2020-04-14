@@ -34,7 +34,6 @@ TEST_F(ParserImplTest, IfStmt) {
   ASSERT_TRUE(e->condition()->IsBinary());
   EXPECT_EQ(e->body().size(), 2);
   EXPECT_EQ(e->else_statements().size(), 0);
-  EXPECT_EQ(e->premerge().size(), 0);
 }
 
 TEST_F(ParserImplTest, IfStmt_WithElse) {
@@ -55,31 +54,6 @@ TEST_F(ParserImplTest, IfStmt_WithElse) {
 
   ASSERT_EQ(e->else_statements()[1]->condition(), nullptr);
   EXPECT_EQ(e->else_statements()[1]->body().size(), 0);
-}
-
-TEST_F(ParserImplTest, IfStmt_WithPremerge) {
-  auto p = parser(R"(if (a == 4) {
-  a = b;
-  c = d;
-} else {
-  d = 2;
-} premerge {
-  a = 2;
-})");
-  auto e = p->if_stmt();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-
-  ASSERT_TRUE(e->IsIf());
-  ASSERT_NE(e->condition(), nullptr);
-  ASSERT_TRUE(e->condition()->IsBinary());
-  EXPECT_EQ(e->body().size(), 2);
-
-  ASSERT_EQ(e->else_statements().size(), 1);
-  ASSERT_EQ(e->else_statements()[0]->condition(), nullptr);
-  EXPECT_EQ(e->else_statements()[0]->body().size(), 1);
-
-  ASSERT_EQ(e->premerge().size(), 1);
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidCondition) {
@@ -128,14 +102,6 @@ TEST_F(ParserImplTest, IfStmt_InvalidElse) {
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
   EXPECT_EQ(p->error(), "1:18: missing }");
-}
-
-TEST_F(ParserImplTest, IfStmt_InvalidPremerge) {
-  auto p = parser("if (a) {} else {} premerge { fn main() -> a{}}");
-  auto e = p->if_stmt();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:30: missing }");
 }
 
 }  // namespace

@@ -208,9 +208,6 @@ class ParserImpl {
   /// Parses a `else_stmt` grammar element
   /// @returns the parsed statement or nullptr
   std::unique_ptr<ast::ElseStatement> else_stmt();
-  /// Parses a `premerge_stmt` grammar element
-  /// @returns the parsed statements
-  ast::StatementList premerge_stmt();
   /// Parses a `unless_stmt` grammar element
   /// @returns the parsed element or nullptr
   std::unique_ptr<ast::UnlessStatement> unless_stmt();

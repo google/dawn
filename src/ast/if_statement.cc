@@ -62,20 +62,6 @@ bool IfStatement::IsValid() const {
       found_else = true;
   }
 
-  for (const auto& stmt : premerge_) {
-    if (stmt == nullptr || !stmt->IsValid())
-      return false;
-  }
-
-  if (premerge_.size() > 0) {
-    // Premerge only with a single else statement
-    if (else_statements_.size() != 1)
-      return false;
-    // Must be an else, not an elseif
-    if (else_statements_[0]->condition() != nullptr)
-      return false;
-  }
-
   return true;
 }
 
@@ -108,18 +94,8 @@ void IfStatement::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
   out << "}" << std::endl;
 
-  for (const auto& e : else_statements_)
+  for (const auto& e : else_statements_) {
     e->to_str(out, indent);
-
-  if (premerge_.size() > 0) {
-    make_indent(out, indent);
-    out << "premerge{" << std::endl;
-
-    for (const auto& stmt : premerge_)
-      stmt->to_str(out, indent + 2);
-
-    make_indent(out, indent);
-    out << "}" << std::endl;
   }
 }
 

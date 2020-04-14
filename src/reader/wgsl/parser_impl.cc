@@ -1720,7 +1720,7 @@ std::unique_ptr<ast::VariableDeclStatement> ParserImpl::variable_stmt() {
 
 // if_stmt
 //   : IF paren_rhs_stmt body_stmt
-//           {(elseif_stmt else_stmt?) | (else_stmt premerge_stmt?)}
+//           {(elseif_stmt else_stmt?) | (else_stmt?)}
 std::unique_ptr<ast::IfStatement> ParserImpl::if_stmt() {
   auto t = peek();
   if (!t.IsIf())
@@ -1758,13 +1758,6 @@ std::unique_ptr<ast::IfStatement> ParserImpl::if_stmt() {
   auto stmt = std::make_unique<ast::IfStatement>(source, std::move(condition),
                                                  std::move(body));
   if (el != nullptr) {
-    if (elseif.size() == 0) {
-      auto premerge = premerge_stmt();
-      if (has_error())
-        return nullptr;
-
-      stmt->set_premerge(std::move(premerge));
-    }
     elseif.push_back(std::move(el));
   }
   stmt->set_else_statements(std::move(elseif));
@@ -1834,17 +1827,6 @@ std::unique_ptr<ast::ElseStatement> ParserImpl::else_stmt() {
     return nullptr;
 
   return std::make_unique<ast::ElseStatement>(source, std::move(body));
-}
-
-// premerge_stmt
-//   : PREMERGE body_stmt
-ast::StatementList ParserImpl::premerge_stmt() {
-  auto t = peek();
-  if (!t.IsPremerge())
-    return {};
-
-  next();  // Consume the peek
-  return body_stmt();
 }
 
 // unless_stmt

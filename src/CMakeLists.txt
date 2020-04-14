@@ -385,7 +385,6 @@ if(${TINT_BUILD_WGSL_READER})
     reader/wgsl/parser_impl_paren_rhs_stmt_test.cc
     reader/wgsl/parser_impl_pipeline_stage_test.cc
     reader/wgsl/parser_impl_postfix_expression_test.cc
-    reader/wgsl/parser_impl_premerge_stmt_test.cc
     reader/wgsl/parser_impl_primary_expression_test.cc
     reader/wgsl/parser_impl_relational_expression_test.cc
     reader/wgsl/parser_impl_shift_expression_test.cc

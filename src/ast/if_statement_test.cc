@@ -79,23 +79,6 @@ TEST_F(IfStatementTest, IsValid_WithElseStatements) {
   EXPECT_TRUE(stmt.IsValid());
 }
 
-TEST_F(IfStatementTest, IsValid_WithPremerge) {
-  auto cond = std::make_unique<IdentifierExpression>("cond");
-  StatementList body;
-  body.push_back(std::make_unique<NopStatement>());
-
-  ElseStatementList else_stmts;
-  else_stmts.push_back(std::make_unique<ElseStatement>());
-
-  StatementList premerge;
-  premerge.push_back(std::make_unique<NopStatement>());
-
-  IfStatement stmt(std::move(cond), std::move(body));
-  stmt.set_else_statements(std::move(else_stmts));
-  stmt.set_premerge(std::move(premerge));
-  EXPECT_TRUE(stmt.IsValid());
-}
-
 TEST_F(IfStatementTest, IsValid_MissingCondition) {
   StatementList body;
   body.push_back(std::make_unique<NopStatement>());
@@ -160,72 +143,6 @@ TEST_F(IfStatementTest, IsValid_InvalidElseStatement) {
 
   IfStatement stmt(std::move(cond), std::move(body));
   stmt.set_else_statements(std::move(else_stmts));
-  EXPECT_FALSE(stmt.IsValid());
-}
-
-TEST_F(IfStatementTest, IsValid_NullPremergeStatement) {
-  auto cond = std::make_unique<IdentifierExpression>("cond");
-  StatementList body;
-  body.push_back(std::make_unique<NopStatement>());
-
-  ElseStatementList else_stmts;
-  else_stmts.push_back(std::make_unique<ElseStatement>());
-
-  StatementList premerge;
-  premerge.push_back(std::make_unique<NopStatement>());
-  premerge.push_back(nullptr);
-
-  IfStatement stmt(std::move(cond), std::move(body));
-  stmt.set_else_statements(std::move(else_stmts));
-  stmt.set_premerge(std::move(premerge));
-  EXPECT_FALSE(stmt.IsValid());
-}
-
-TEST_F(IfStatementTest, IsValid_InvalidPremergeStatement) {
-  auto cond = std::make_unique<IdentifierExpression>("cond");
-  StatementList body;
-  body.push_back(std::make_unique<NopStatement>());
-
-  ElseStatementList else_stmts;
-  else_stmts.push_back(std::make_unique<ElseStatement>());
-
-  StatementList premerge;
-  premerge.push_back(std::make_unique<IfStatement>());
-
-  IfStatement stmt(std::move(cond), std::move(body));
-  stmt.set_else_statements(std::move(else_stmts));
-  stmt.set_premerge(std::move(premerge));
-  EXPECT_FALSE(stmt.IsValid());
-}
-
-TEST_F(IfStatementTest, IsValid_PremergeWithElseIf) {
-  auto cond = std::make_unique<IdentifierExpression>("cond");
-  StatementList body;
-  body.push_back(std::make_unique<NopStatement>());
-
-  ElseStatementList else_stmts;
-  else_stmts.push_back(std::make_unique<ElseStatement>());
-  else_stmts[0]->set_condition(std::make_unique<IdentifierExpression>("ident"));
-
-  StatementList premerge;
-  premerge.push_back(std::make_unique<NopStatement>());
-
-  IfStatement stmt(std::move(cond), std::move(body));
-  stmt.set_else_statements(std::move(else_stmts));
-  stmt.set_premerge(std::move(premerge));
-  EXPECT_FALSE(stmt.IsValid());
-}
-
-TEST_F(IfStatementTest, IsValid_PremergeWithoutElse) {
-  auto cond = std::make_unique<IdentifierExpression>("cond");
-  StatementList body;
-  body.push_back(std::make_unique<NopStatement>());
-
-  StatementList premerge;
-  premerge.push_back(std::make_unique<NopStatement>());
-
-  IfStatement stmt(std::move(cond), std::move(body));
-  stmt.set_premerge(std::move(premerge));
   EXPECT_FALSE(stmt.IsValid());
 }
 
@@ -323,41 +240,6 @@ TEST_F(IfStatementTest, ToStr_WithElseStatements) {
       Nop{}
       Kill{}
     }
-  }
-)");
-}
-
-TEST_F(IfStatementTest, ToStr_WithPremerge) {
-  auto cond = std::make_unique<IdentifierExpression>("cond");
-  StatementList body;
-  body.push_back(std::make_unique<NopStatement>());
-
-  ElseStatementList else_stmts;
-  else_stmts.push_back(std::make_unique<ElseStatement>());
-
-  StatementList premerge;
-  premerge.push_back(std::make_unique<NopStatement>());
-
-  IfStatement stmt(std::move(cond), std::move(body));
-  stmt.set_else_statements(std::move(else_stmts));
-  stmt.set_premerge(std::move(premerge));
-
-  std::ostringstream out;
-  stmt.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  If{
-    (
-      Identifier{cond}
-    )
-    {
-      Nop{}
-    }
-  }
-  Else{
-    {
-    }
-  }
-  premerge{
-    Nop{}
   }
 )");
 }

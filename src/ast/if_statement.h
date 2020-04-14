@@ -67,12 +67,6 @@ class IfStatement : public Statement {
   /// @returns the else statements
   const ElseStatementList& else_statements() const { return else_statements_; }
 
-  /// Sets the premerge statements
-  /// @param premerge the premerge statements
-  void set_premerge(StatementList premerge) { premerge_ = std::move(premerge); }
-  /// @returns the premerge statements
-  const StatementList& premerge() const { return premerge_; }
-
   /// @returns true if this is a if statement
   bool IsIf() const override;
 
@@ -90,7 +84,6 @@ class IfStatement : public Statement {
   std::unique_ptr<Expression> condition_;
   StatementList body_;
   ElseStatementList else_statements_;
-  StatementList premerge_;
 };
 
 }  // namespace ast

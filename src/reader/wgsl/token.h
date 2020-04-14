@@ -561,8 +561,6 @@ class Token {
   bool IsOuterProduct() const { return type_ == Type::kOuterProduct; }
   /// @returns true if token is a 'position'
   bool IsPosition() const { return type_ == Type::kPosition; }
-  /// @returns true if token is a 'premerge'
-  bool IsPremerge() const { return type_ == Type::kPremerge; }
   /// @returns true if token is a 'private'
   bool IsPrivate() const { return type_ == Type::kPrivate; }
   /// @returns true if token is a 'ptr'

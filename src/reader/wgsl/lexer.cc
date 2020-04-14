@@ -598,8 +598,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kOuterProduct, source, "outer_product"};
   if (str == "position")
     return {Token::Type::kPosition, source, "position"};
-  if (str == "premerge")
-    return {Token::Type::kPremerge, source, "premerge"};
   if (str == "private")
     return {Token::Type::kPrivate, source, "private"};
   if (str == "ptr")
@@ -673,6 +671,8 @@ Token Lexer::check_reserved(const Source& source, const std::string& str) {
     return {Token::Type::kReservedKeyword, source, "i64"};
   if (str == "let")
     return {Token::Type::kReservedKeyword, source, "let"};
+  if (str == "premerge")
+    return {Token::Type::kReservedKeyword, source, "premerge"};
   if (str == "typedef")
     return {Token::Type::kReservedKeyword, source, "typedef"};
   if (str == "u8")
