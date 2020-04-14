@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build_overrides/build.gni")
-import("scripts/dawn_features.gni")
 import("scripts/dawn_overrides_with_defaults.gni")
 
 group("all") {
@@ -25,33 +23,4 @@ group("all") {
   if (dawn_standalone) {
     deps += [ "examples:dawn_samples" ]
   }
-}
-
-###############################################################################
-# Temporary groups
-###############################################################################
-
-# Temporary groups to make a 5-way patch to fix crbug.com/913171
-group("dawn_unittests_temp_group") {
-  testonly = true
-  public_deps = [
-    "src/tests:dawn_unittests",
-  ]
-}
-
-group("dawn_end2end_tests_temp_group") {
-  testonly = true
-  public_deps = [
-    "src/tests:dawn_end2end_tests",
-  ]
-}
-
-group("dawn_perf_tests_temp_group") {
-  testonly = true
-  public_deps = [
-    "src/tests:dawn_perf_tests",
-  ]
-  data_deps = [
-    "src/tests:dawn_perf_tests",
-  ]
 }

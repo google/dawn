@@ -110,10 +110,3 @@ dawn_component("dawn_proc") {
   sources = get_target_outputs(":dawn_proc_gen")
   sources += [ "${dawn_root}/src/include/dawn/dawn_proc.h" ]
 }
-
-# Temporary group while we do a 3-way patch with Chromium
-group("libdawn_proc") {
-  public_deps = [
-    ":dawn_proc",
-  ]
-}
