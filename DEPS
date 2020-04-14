@@ -91,7 +91,7 @@ deps = {
 
   # Dependencies for samples: GLM
   'third_party/glm': {
-    'url': '{github_git}/g-truc/glm.git@06f084063fd6d9aa2ef6904517650700ae47b63d',
+    'url': '{github_git}/g-truc/glm.git@bf71a834948186f4097caa076cd2663c69a10e1e',
     'condition': 'dawn_standalone',
   },
 

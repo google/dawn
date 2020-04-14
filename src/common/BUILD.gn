@@ -99,10 +99,7 @@ config("dawn_internal") {
       "-Wreturn-std-move-in-c++11",
       "-Wconditional-uninitialized",
       "-Wc++11-narrowing",
-
-      # Turn on the following flag after removing the empty statement in
-      # third_party/glm/glm/simd/common.h:106
-      # "-Wextra-semi-stmt",
+      "-Wextra-semi-stmt",
     ]
   }
 }
