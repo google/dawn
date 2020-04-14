@@ -226,6 +226,19 @@ INSTANTIATE_TEST_SUITE_P(
                    "__vec_2__f32", AstFor("v2float_50_60"), "multiply",
                    AstFor("v2float_60_50")}));
 
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_FDiv,
+    SpvBinaryTest,
+    ::testing::Values(
+        // Scalar float
+        BinaryData{"float", "float_50", "OpFDiv", "float_60", "__f32",
+                   "ScalarConstructor{50.000000}", "divide",
+                   "ScalarConstructor{60.000000}"},
+        // Vector float
+        BinaryData{"v2float", "v2float_50_60", "OpFDiv", "v2float_60_50",
+                   "__vec_2__f32", AstFor("v2float_50_60"), "divide",
+                   AstFor("v2float_60_50")}));
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader
