@@ -124,6 +124,7 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(BinaryData{ast::BinaryOp::kAdd, "OpIAdd"},
                     BinaryData{ast::BinaryOp::kAnd, "OpBitwiseAnd"},
                     BinaryData{ast::BinaryOp::kOr, "OpBitwiseOr"},
+                    BinaryData{ast::BinaryOp::kSubtract, "OpISub"},
                     BinaryData{ast::BinaryOp::kXor, "OpBitwiseXor"}));
 
 using BinaryArithFloatTest = testing::TestWithParam<BinaryData>;
@@ -199,10 +200,11 @@ TEST_P(BinaryArithFloatTest, Vector) {
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             "%5 = " + param.name + " %1 %4 %4\n");
 }
-INSTANTIATE_TEST_SUITE_P(BuilderTest,
-                         BinaryArithFloatTest,
-                         testing::Values(BinaryData{ast::BinaryOp::kAdd,
-                                                    "OpFAdd"}));
+INSTANTIATE_TEST_SUITE_P(
+    BuilderTest,
+    BinaryArithFloatTest,
+    testing::Values(BinaryData{ast::BinaryOp::kAdd, "OpFAdd"},
+                    BinaryData{ast::BinaryOp::kSubtract, "OpFSub"}));
 
 using BinaryCompareUnsignedIntegerTest = testing::TestWithParam<BinaryData>;
 TEST_P(BinaryCompareUnsignedIntegerTest, Scalar) {
