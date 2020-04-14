@@ -276,10 +276,11 @@ TEST_P(BinaryCompareIntegerTest, Vector) {
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             "%5 = " + param.name + " %6 %4 %4\n");
 }
-INSTANTIATE_TEST_SUITE_P(BuilderTest,
-                         BinaryCompareIntegerTest,
-                         testing::Values(BinaryData{ast::BinaryOp::kEqual,
-                                                    "OpIEqual"}));
+INSTANTIATE_TEST_SUITE_P(
+    BuilderTest,
+    BinaryCompareIntegerTest,
+    testing::Values(BinaryData{ast::BinaryOp::kEqual, "OpIEqual"},
+                    BinaryData{ast::BinaryOp::kNotEqual, "OpINotEqual"}));
 
 using BinaryCompareFloatTest = testing::TestWithParam<BinaryData>;
 TEST_P(BinaryCompareFloatTest, Scalar) {
@@ -357,10 +358,11 @@ TEST_P(BinaryCompareFloatTest, Vector) {
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             "%5 = " + param.name + " %6 %4 %4\n");
 }
-INSTANTIATE_TEST_SUITE_P(BuilderTest,
-                         BinaryCompareFloatTest,
-                         testing::Values(BinaryData{ast::BinaryOp::kEqual,
-                                                    "OpFOrdEqual"}));
+INSTANTIATE_TEST_SUITE_P(
+    BuilderTest,
+    BinaryCompareFloatTest,
+    testing::Values(BinaryData{ast::BinaryOp::kEqual, "OpFOrdEqual"},
+                    BinaryData{ast::BinaryOp::kNotEqual, "OpFOrdNotEqual"}));
 
 }  // namespace
 }  // namespace spirv
