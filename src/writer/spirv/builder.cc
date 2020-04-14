@@ -630,8 +630,12 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
   return result_id;
 }
 
-bool Builder::GenerateIfStatement(ast::IfStatement* stmt) {
-  auto cond_id = GenerateExpression(stmt->condition());
+bool Builder::GenerateConditionalBlock(
+    ast::Expression* cond,
+    const ast::StatementList& true_body,
+    size_t cur_else_idx,
+    const ast::ElseStatementList& else_stmts) {
+  auto cond_id = GenerateExpression(cond);
   if (cond_id == 0) {
     return false;
   }
@@ -646,10 +650,10 @@ bool Builder::GenerateIfStatement(ast::IfStatement* stmt) {
   auto true_block = result_op();
   auto true_block_id = true_block.to_i();
 
-  // if there are no else statements we branch on false to the merge block
+  // if there are no more else statements we branch on false to the merge block
   // otherwise we branch to the false block
   auto false_block_id =
-      stmt->has_else_statements() ? next_id() : merge_block_id;
+      cur_else_idx < else_stmts.size() ? next_id() : merge_block_id;
 
   push_function_inst(spv::Op::OpBranchConditional,
                      {Operand::Int(cond_id), Operand::Int(true_block_id),
@@ -657,28 +661,33 @@ bool Builder::GenerateIfStatement(ast::IfStatement* stmt) {
 
   // Output true block
   push_function_inst(spv::Op::OpLabel, {true_block});
-  for (const auto& inst : stmt->body()) {
-    if (!GenerateStatement(inst.get())) {
-      return false;
-    }
+  if (!GenerateStatementList(true_body)) {
+    return false;
   }
-
   // TODO(dsinclair): The branch should be optional based on how the
   // StatementList ended ...
   push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
 
+  // Start the false block if needed
   if (false_block_id != merge_block_id) {
     push_function_inst(spv::Op::OpLabel, {Operand::Int(false_block_id)});
 
-    for (const auto& else_stmt : stmt->else_statements()) {
-      if (!GenerateElseStatement(else_stmt.get())) {
+    auto* else_stmt = else_stmts[cur_else_idx].get();
+    // Handle the else case by just outputting the statements.
+    if (!else_stmt->HasCondition()) {
+      if (!GenerateStatementList(else_stmt->body())) {
         return false;
       }
+      // TODO(dsinclair): The branch should be optional based on how the
+      // StatementList ended ...
+      push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
+    } else {
+      if (!GenerateConditionalBlock(else_stmt->condition(), else_stmt->body(),
+                                    cur_else_idx + 1, else_stmts)) {
+        return false;
+      }
+      push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
     }
-
-    // TODO(dsinclair): The branch should be optional based on how the
-    // StatementList ended ...
-    push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
   }
 
   // Output the merge block
@@ -687,17 +696,10 @@ bool Builder::GenerateIfStatement(ast::IfStatement* stmt) {
   return true;
 }
 
-bool Builder::GenerateElseStatement(ast::ElseStatement* stmt) {
-  // TODO(dsinclair): handle else if
-  if (stmt->HasCondition()) {
-    error_ = "else if not handled yet";
+bool Builder::GenerateIfStatement(ast::IfStatement* stmt) {
+  if (!GenerateConditionalBlock(stmt->condition(), stmt->body(), 0,
+                                stmt->else_statements())) {
     return false;
-  }
-
-  for (const auto& inst : stmt->body()) {
-    if (!GenerateStatement(inst.get())) {
-      return false;
-    }
   }
   return true;
 }
@@ -713,6 +715,15 @@ bool Builder::GenerateReturnStatement(ast::ReturnStatement* stmt) {
     push_function_inst(spv::Op::OpReturn, {});
   }
 
+  return true;
+}
+
+bool Builder::GenerateStatementList(const ast::StatementList& list) {
+  for (const auto& inst : list) {
+    if (!GenerateStatement(inst.get())) {
+      return false;
+    }
+  }
   return true;
 }
 

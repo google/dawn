@@ -22,6 +22,7 @@
 
 #include "spirv/unified1/spirv.h"
 #include "src/ast/builtin.h"
+#include "src/ast/else_statement.h"
 #include "src/ast/literal.h"
 #include "src/ast/module.h"
 #include "src/ast/struct_member.h"
@@ -148,10 +149,6 @@ class Builder {
   /// @param assign the statement to generate
   /// @returns true if the statement was successfully generated
   bool GenerateAssignStatement(ast::AssignmentStatement* assign);
-  /// Generates an else statement
-  /// @param stmt the statement to generate
-  /// @returns true on successfull generation
-  bool GenerateElseStatement(ast::ElseStatement* stmt);
   /// Generates an entry point instruction
   /// @param ep the entry point
   /// @returns true if the instruction was generated, false otherwise
@@ -209,10 +206,24 @@ class Builder {
   /// @param stmt the statement to generate
   /// @returns true on success, false otherwise
   bool GenerateReturnStatement(ast::ReturnStatement* stmt);
+  /// Generates a conditional section merge block
+  /// @param cond the condition
+  /// @param true_body the statements making up the true block
+  /// @param cur_else_idx the index of the current else statement to process
+  /// @param else_stmts the list of all else statements
+  /// @returns true on success, false on failure
+  bool GenerateConditionalBlock(ast::Expression* cond,
+                                const ast::StatementList& true_body,
+                                size_t cur_else_idx,
+                                const ast::ElseStatementList& else_stmts);
   /// Generates a statement
   /// @param stmt the statement to generate
   /// @returns true if the statement was generated
   bool GenerateStatement(ast::Statement* stmt);
+  /// Generates a list of statements
+  /// @param list the statement list to generate
+  /// @returns true on successful generation
+  bool GenerateStatementList(const ast::StatementList& list);
   /// Geneates an OpStore
   /// @param to the ID to store too
   /// @param from the ID to store from
