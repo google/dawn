@@ -166,7 +166,6 @@ test("dawn_unittests") {
     "unittests/validation/QueueSubmitValidationTests.cpp",
     "unittests/validation/RenderBundleValidationTests.cpp",
     "unittests/validation/RenderPassDescriptorValidationTests.cpp",
-    "unittests/validation/RenderPassValidationTests.cpp",
     "unittests/validation/RenderPipelineValidationTests.cpp",
     "unittests/validation/ResourceUsageTrackingTests.cpp",
     "unittests/validation/SamplerValidationTests.cpp",
