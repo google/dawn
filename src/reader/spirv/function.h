@@ -16,6 +16,8 @@
 #define SRC_READER_SPIRV_FUNCTION_H_
 
 #include <memory>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "source/opt/basic_block.h"

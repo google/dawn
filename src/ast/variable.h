@@ -1,4 +1,4 @@
-﻿// Copyright 2020 The Tint Authors.
+// Copyright 2020 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ class DecoratedVariable;
 /// 3. A formal parameter to a function is a name for a typed value to
 ///    be passed into a function.  Example:
 ///
-///       fn twice(a: i32) -> i32 { // "a:i32" is the formal parameter
+///       fn twice(a: i32) -> i32 {  // "a:i32" is the formal parameter
 ///         return a + a;
 ///       }
 ///

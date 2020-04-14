@@ -337,23 +337,23 @@ std::unique_ptr<ast::Expression> FunctionEmitter::MaybeEmitCombinatorialValue(
   // glsl.std.450 readonly function
 
   // Instructions:
-  // 	OpCopyObject
-  // 	OpUndef
-  // 	OpBitcast
-  // 	OpSatConvertSToU
-  // 	OpSatConvertUToS
-  // 	OpSatConvertFToS
-  // 	OpSatConvertFToU
-  // 	OpSatConvertSToF
-  // 	OpSatConvertUToF
-  // 	OpUConvert
-  // 	OpSConvert
-  // 	OpFConvert
-  // 	OpConvertPtrToU // Not in WebGPU
-  // 	OpConvertUToPtr // Not in WebGPU
-  // 	OpPtrCastToGeneric // Not in Vulkan
-  // 	OpGenericCastToPtr // Not in Vulkan
-  // 	OpGenericCastToPtrExplicit // Not in Vulkan
+  //    OpCopyObject
+  //    OpUndef
+  //    OpBitcast
+  //    OpSatConvertSToU
+  //    OpSatConvertUToS
+  //    OpSatConvertFToS
+  //    OpSatConvertFToU
+  //    OpSatConvertSToF
+  //    OpSatConvertUToF
+  //    OpUConvert
+  //    OpSConvert
+  //    OpFConvert
+  //    OpConvertPtrToU // Not in WebGPU
+  //    OpConvertUToPtr // Not in WebGPU
+  //    OpPtrCastToGeneric // Not in Vulkan
+  //    OpGenericCastToPtr // Not in Vulkan
+  //    OpGenericCastToPtrExplicit // Not in Vulkan
   //
   //    OpAccessChain
   //    OpInBoundsAccessChain
