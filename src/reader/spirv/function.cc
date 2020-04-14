@@ -209,6 +209,10 @@ std::unique_ptr<ast::Expression> FunctionEmitter::MakeExpression(uint32_t id) {
     return nullptr;
   }
   switch (inst->opcode()) {
+    case SpvOpVariable:
+      // This occurs for module-scope variables.
+      return std::make_unique<ast::IdentifierExpression>(
+          namer_.Name(inst->result_id()));
     default:
       break;
   }

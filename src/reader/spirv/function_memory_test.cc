@@ -257,6 +257,28 @@ Assignment{
 )"));
 }
 
+TEST_F(SpvParserTest, EmitStatement_StoreToModuleScopeVar) {
+  auto p = parser(test::Assemble(R"(
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+     %ty = OpTypeInt 32 0
+     %val = OpConstant %ty 42
+     %ptr_ty = OpTypePointer Workgroup %ty
+     %1 = OpVariable %ptr_ty Workgroup
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     OpStore %1 %val
+     OpReturn
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody());
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Assignment{
+  Identifier{x_1}
+  ScalarConstructor{42}
+})"));
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader
