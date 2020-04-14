@@ -48,6 +48,12 @@ ast::BinaryOp ConvertBinaryOp(SpvOp opcode) {
       return ast::BinaryOp::kMultiply;
     case SpvOpFDiv:
       return ast::BinaryOp::kDivide;
+    case SpvOpShiftLeftLogical:
+      return ast::BinaryOp::kShiftLeft;
+    case SpvOpShiftRightLogical:
+      return ast::BinaryOp::kShiftRight;
+    case SpvOpShiftRightArithmetic:
+      return ast::BinaryOp::kShiftRightArith;
     case SpvOpIEqual:
       return ast::BinaryOp::kEqual;
     case SpvOpINotEqual:
