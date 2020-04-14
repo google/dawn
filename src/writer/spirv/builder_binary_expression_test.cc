@@ -21,6 +21,7 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
+#include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/context.h"
@@ -200,8 +201,91 @@ INSTANTIATE_TEST_SUITE_P(BuilderTest,
                          testing::Values(BinaryData{ast::BinaryOp::kAdd,
                                                     "OpFAdd"}));
 
-using BinaryCompareIntegerTest = testing::TestWithParam<BinaryData>;
-TEST_P(BinaryCompareIntegerTest, Scalar) {
+using BinaryCompareUnsignedIntegerTest = testing::TestWithParam<BinaryData>;
+TEST_P(BinaryCompareUnsignedIntegerTest, Scalar) {
+  auto param = GetParam();
+
+  ast::type::U32Type u32;
+
+  auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&u32, 3));
+  auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&u32, 4));
+
+  ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
+
+  Context ctx;
+  TypeDeterminer td(&ctx);
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b;
+  b.push_function(Function{});
+
+  ASSERT_EQ(b.GenerateBinaryExpression(&expr), 4) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 0
+%2 = OpConstant %1 3
+%3 = OpConstant %1 4
+%5 = OpTypeBool
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            "%4 = " + param.name + " %5 %2 %3\n");
+}
+
+TEST_P(BinaryCompareUnsignedIntegerTest, Vector) {
+  auto param = GetParam();
+
+  ast::type::U32Type u32;
+  ast::type::VectorType vec3(&u32, 3);
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&u32, 1)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&u32, 1)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&u32, 1)));
+  auto lhs =
+      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&u32, 1)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&u32, 1)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&u32, 1)));
+  auto rhs =
+      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+
+  Context ctx;
+  TypeDeterminer td(&ctx);
+
+  ast::BinaryExpression expr(param.op, std::move(lhs), std::move(rhs));
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b;
+  b.push_function(Function{});
+
+  ASSERT_EQ(b.GenerateBinaryExpression(&expr), 5) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 0
+%1 = OpTypeVector %2 3
+%3 = OpConstant %2 1
+%4 = OpConstantComposite %1 %3 %3 %3
+%7 = OpTypeBool
+%6 = OpTypeVector %7 3
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            "%5 = " + param.name + " %6 %4 %4\n");
+}
+INSTANTIATE_TEST_SUITE_P(
+    BuilderTest,
+    BinaryCompareUnsignedIntegerTest,
+    testing::Values(BinaryData{ast::BinaryOp::kEqual, "OpIEqual"},
+                    BinaryData{ast::BinaryOp::kLessThan, "OpULessThan"},
+                    BinaryData{ast::BinaryOp::kNotEqual, "OpINotEqual"}));
+
+using BinaryCompareSignedIntegerTest = testing::TestWithParam<BinaryData>;
+TEST_P(BinaryCompareSignedIntegerTest, Scalar) {
   auto param = GetParam();
 
   ast::type::I32Type i32;
@@ -230,7 +314,7 @@ TEST_P(BinaryCompareIntegerTest, Scalar) {
             "%4 = " + param.name + " %5 %2 %3\n");
 }
 
-TEST_P(BinaryCompareIntegerTest, Vector) {
+TEST_P(BinaryCompareSignedIntegerTest, Vector) {
   auto param = GetParam();
 
   ast::type::I32Type i32;
@@ -278,8 +362,9 @@ TEST_P(BinaryCompareIntegerTest, Vector) {
 }
 INSTANTIATE_TEST_SUITE_P(
     BuilderTest,
-    BinaryCompareIntegerTest,
+    BinaryCompareSignedIntegerTest,
     testing::Values(BinaryData{ast::BinaryOp::kEqual, "OpIEqual"},
+                    BinaryData{ast::BinaryOp::kLessThan, "OpSLessThan"},
                     BinaryData{ast::BinaryOp::kNotEqual, "OpINotEqual"}));
 
 using BinaryCompareFloatTest = testing::TestWithParam<BinaryData>;
@@ -362,6 +447,7 @@ INSTANTIATE_TEST_SUITE_P(
     BuilderTest,
     BinaryCompareFloatTest,
     testing::Values(BinaryData{ast::BinaryOp::kEqual, "OpFOrdEqual"},
+                    BinaryData{ast::BinaryOp::kLessThan, "OpFOrdLessThan"},
                     BinaryData{ast::BinaryOp::kNotEqual, "OpFOrdNotEqual"}));
 
 }  // namespace

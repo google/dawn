@@ -570,12 +570,23 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
   bool lhs_is_float_or_vec =
       lhs_type->IsF32() ||
       (lhs_type->IsVector() && lhs_type->AsVector()->type()->IsF32());
+  bool lhs_is_unsigned =
+      lhs_type->IsU32() ||
+      (lhs_type->IsVector() && lhs_type->AsVector()->type()->IsU32());
 
   spv::Op op = spv::Op::OpNop;
   if (expr->IsAdd()) {
     op = lhs_is_float_or_vec ? spv::Op::OpFAdd : spv::Op::OpIAdd;
   } else if (expr->IsEqual()) {
     op = lhs_is_float_or_vec ? spv::Op::OpFOrdEqual : spv::Op::OpIEqual;
+  } else if (expr->IsLessThan()) {
+    if (lhs_is_float_or_vec) {
+      op = spv::Op::OpFOrdLessThan;
+    } else if (lhs_is_unsigned) {
+      op = spv::Op::OpULessThan;
+    } else {
+      op = spv::Op::OpSLessThan;
+    }
   } else if (expr->IsNotEqual()) {
     op = lhs_is_float_or_vec ? spv::Op::OpFOrdNotEqual : spv::Op::OpINotEqual;
   } else {
