@@ -575,7 +575,9 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
       (lhs_type->IsVector() && lhs_type->AsVector()->type()->IsU32());
 
   spv::Op op = spv::Op::OpNop;
-  if (expr->IsAdd()) {
+  if (expr->IsAnd()) {
+    op = spv::Op::OpBitwiseAnd;
+  } else if (expr->IsAdd()) {
     op = lhs_is_float_or_vec ? spv::Op::OpFAdd : spv::Op::OpIAdd;
   } else if (expr->IsEqual()) {
     op = lhs_is_float_or_vec ? spv::Op::OpFOrdEqual : spv::Op::OpIEqual;

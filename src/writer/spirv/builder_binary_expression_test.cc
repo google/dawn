@@ -118,10 +118,11 @@ TEST_P(BinaryArithIntegerTest, Vector) {
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             "%5 = " + param.name + " %1 %4 %4\n");
 }
-INSTANTIATE_TEST_SUITE_P(BuilderTest,
-                         BinaryArithIntegerTest,
-                         testing::Values(BinaryData{ast::BinaryOp::kAdd,
-                                                    "OpIAdd"}));
+INSTANTIATE_TEST_SUITE_P(
+    BuilderTest,
+    BinaryArithIntegerTest,
+    testing::Values(BinaryData{ast::BinaryOp::kAdd, "OpIAdd"},
+                    BinaryData{ast::BinaryOp::kAnd, "OpBitwiseAnd"}));
 
 using BinaryArithFloatTest = testing::TestWithParam<BinaryData>;
 TEST_P(BinaryArithFloatTest, Scalar) {
