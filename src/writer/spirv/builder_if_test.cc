@@ -17,6 +17,7 @@
 #include "gtest/gtest.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/bool_literal.h"
+#include "src/ast/else_statement.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/int_literal.h"
@@ -109,19 +110,88 @@ OpBranch %6
 )");
 }
 
-TEST_F(BuilderTest, DISABLED_If_WithStatements_Returns) {
-  // if (a) { return; }
-}
+TEST_F(BuilderTest, If_WithElse) {
+  ast::type::BoolType bool_type;
+  ast::type::I32Type i32;
 
-TEST_F(BuilderTest, DISABLED_If_WithElse) {}
+  auto var =
+      std::make_unique<ast::Variable>("v", ast::StorageClass::kPrivate, &i32);
+
+  ast::StatementList body;
+  body.push_back(std::make_unique<ast::AssignmentStatement>(
+      std::make_unique<ast::IdentifierExpression>("v"),
+      std::make_unique<ast::ScalarConstructorExpression>(
+          std::make_unique<ast::IntLiteral>(&i32, 2))));
+
+  ast::StatementList else_body;
+  else_body.push_back(std::make_unique<ast::AssignmentStatement>(
+      std::make_unique<ast::IdentifierExpression>("v"),
+      std::make_unique<ast::ScalarConstructorExpression>(
+          std::make_unique<ast::IntLiteral>(&i32, 3))));
+
+  ast::ElseStatementList else_stmts;
+  else_stmts.push_back(
+      std::make_unique<ast::ElseStatement>(std::move(else_body)));
+
+  auto cond = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::BoolLiteral>(&bool_type, true));
+
+  ast::IfStatement expr(std::move(cond), std::move(body));
+  expr.set_else_statements(std::move(else_stmts));
+
+  Context ctx;
+  TypeDeterminer td(&ctx);
+  td.RegisterVariableForTesting(var.get());
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b;
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+
+  EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
+%2 = OpTypePointer Private %3
+%1 = OpVariable %2 Private
+%4 = OpTypeBool
+%5 = OpConstantTrue %4
+%9 = OpConstant %3 2
+%10 = OpConstant %3 3
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpSelectionMerge %6 None
+OpBranchConditional %5 %7 %8
+%7 = OpLabel
+OpStore %1 %9
+OpBranch %6
+%8 = OpLabel
+OpStore %1 %10
+OpBranch %6
+%6 = OpLabel
+)");
+}
 
 TEST_F(BuilderTest, DISABLED_If_WithElseIf) {}
 
 TEST_F(BuilderTest, DISABLED_If_WithMultiple) {}
 
-TEST_F(BuilderTest, DISABLED_If_WithBreak) {}
+TEST_F(BuilderTest, DISABLED_If_WithBreak) {
+  // if (a) {
+  //   break;
+  // }
+}
 
-TEST_F(BuilderTest, DISABLED_If_WithContinue) {}
+TEST_F(BuilderTest, DISABLED_If_WithContinue) {
+  // if (a) {
+  //   continue;
+  // }
+}
+
+TEST_F(BuilderTest, DISABLED_IF_WithReturn) {
+  // if (a) {
+  //   return;
+  // }
+}
 
 }  // namespace
 }  // namespace spirv

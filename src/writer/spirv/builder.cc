@@ -24,6 +24,7 @@
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/decorated_variable.h"
+#include "src/ast/else_statement.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
@@ -658,24 +659,46 @@ bool Builder::GenerateIfStatement(ast::IfStatement* stmt) {
   push_function_inst(spv::Op::OpLabel, {true_block});
   for (const auto& inst : stmt->body()) {
     if (!GenerateStatement(inst.get())) {
-      return 0;
+      return false;
     }
   }
 
   // TODO(dsinclair): The branch should be optional based on how the
   // StatementList ended ...
-
   push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
 
   if (false_block_id != merge_block_id) {
     push_function_inst(spv::Op::OpLabel, {Operand::Int(false_block_id)});
 
-    // TODO(dsinclair): Output else statements, pass in merge_block_id?
+    for (const auto& else_stmt : stmt->else_statements()) {
+      if (!GenerateElseStatement(else_stmt.get())) {
+        return false;
+      }
+    }
+
+    // TODO(dsinclair): The branch should be optional based on how the
+    // StatementList ended ...
+    push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
   }
 
   // Output the merge block
   push_function_inst(spv::Op::OpLabel, {merge_block});
 
+  return true;
+}
+
+bool Builder::GenerateElseStatement(ast::ElseStatement* stmt) {
+  // TODO(dsinclair): handle else if
+  if (stmt->HasCondition()) {
+    error_ = "else if not handled yet";
+    return false;
+  }
+
+  for (const auto& inst : stmt->body()) {
+    if (!GenerateStatement(inst.get())) {
+      return false;
+    }
+  }
   return true;
 }
 
