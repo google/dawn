@@ -111,7 +111,6 @@ namespace dawn_native {
         switch (mState) {
             case State::BeingCreated:
                 // The GPU timeline was never started so we don't have to wait.
-                mState = State::Disconnected;
                 break;
 
             case State::Alive:
@@ -119,7 +118,6 @@ namespace dawn_native {
                 // complete before proceeding with destruction.
                 // Assert that errors are device loss so that we can continue with destruction
                 AssertAndIgnoreDeviceLossError(WaitForIdleForDestruction());
-                mState = State::Disconnected;
                 break;
 
             case State::BeingDisconnected:
@@ -133,13 +131,20 @@ namespace dawn_native {
                 break;
         }
 
-        // The GPU timeline is finished so all services can be freed immediately. They need to be
-        // freed before ShutDownImpl() because they might relinquish resources that will be freed by
-        // backends in the ShutDownImpl() call.
-        // Still tick the ones that might have pending callbacks.
-        mErrorScopeTracker->Tick(GetCompletedCommandSerial());
+        // Skip handling device facilities if they haven't even been created (or failed doing so)
+        if (mState != State::BeingCreated) {
+            // The GPU timeline is finished so all services can be freed immediately. They need to
+            // be freed before ShutDownImpl() because they might relinquish resources that will be
+            // freed by backends in the ShutDownImpl() call. Still tick the ones that might have
+            // pending callbacks.
+            mErrorScopeTracker->Tick(GetCompletedCommandSerial());
+            mFenceSignalTracker->Tick(GetCompletedCommandSerial());
+        }
+
+        // At this point GPU operations are always finished, so we are in the disconnected state.
+        mState = State::Disconnected;
+
         mErrorScopeTracker = nullptr;
-        mFenceSignalTracker->Tick(GetCompletedCommandSerial());
         mFenceSignalTracker = nullptr;
         mDynamicUploader = nullptr;
 
