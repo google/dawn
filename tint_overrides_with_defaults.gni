@@ -46,6 +46,11 @@ declare_args() {
     tint_build_spv_writer = false
   }
 
+  # Build the WGSL input reader
+  if (!defined(tint_build_wgsl_reader)) {
+    tint_build_wgsl_reader = false
+  }
+
   # TODO(rharrison): Implement support for the reset of the reader/writers
 
   # Generate fuzzers

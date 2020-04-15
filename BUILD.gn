@@ -32,6 +32,12 @@ config("tint_common_config") {
   } else {
     defines += [ "TINT_BUILD_SPV_WRITER=0" ]
   }
+
+  if (tint_build_wgsl_reader) {
+    defines += [ "TINT_BUILD_WGSL_READER=1" ]
+  } else {
+    defines += [ "TINT_BUILD_WGSL_READER=0" ]
+  }
 }
 
 # libtint source sets are divided into a non-optional core in :libtint_core and
@@ -276,8 +282,29 @@ source_set("libtint_spv_writer") {
   }
 }
 
+source_set("libtint_wgsl_reader") {
+  sources = [
+    "src/reader/wgsl/lexer.cc",
+    "src/reader/wgsl/lexer.h",
+    "src/reader/wgsl/parser.cc",
+    "src/reader/wgsl/parser.h",
+    "src/reader/wgsl/parser_impl.cc",
+    "src/reader/wgsl/parser_impl.h",
+    "src/reader/wgsl/token.cc",
+    "src/reader/wgsl/token.h",
+  ]
+
+  configs += [ ":tint_common_config" ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+}
+
 source_set("libtint") {
   deps = [ ":libtint_core" ]
+
   if (tint_build_spv_reader) {
     deps += [ ":libtint_spv_reader" ]
   }
@@ -286,6 +313,10 @@ source_set("libtint") {
     deps += [ ":libtint_spv_writer" ]
   }
 
+  if (tint_build_wgsl_reader) {
+    deps += [ ":libtint_wgsl_reader" ]
+  }
+
   configs += [ ":tint_common_config" ]
 
   if (build_with_chromium) {
@@ -294,11 +325,23 @@ source_set("libtint") {
   }
 }
 
-executable("tint") {
+config("tint_exe_config") {
+  include_dirs = []
+  if (tint_build_spv_reader || tint_build_spv_writer) {
+    include_dirs = [ "${tint_spirv_tools_dir}/include/" ]
+  }
+}
+
+executable("tint_exe") {
   sources = [ "samples/main.cc" ]
   deps = [ ":libtint" ]
 
+  if (tint_build_spv_reader || tint_build_spv_writer) {
+    deps += ["${tint_spirv_headers_dir}/:spv_headers" ]
+  }
+
   configs += [ ":tint_common_config" ]
+  configs += [ ":tint_exe_config" ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
@@ -307,5 +350,5 @@ executable("tint") {
 }
 
 group("tint_all") {
-  deps = [ ":tint" ]
+  deps = [ ":tint_exe" ]
 }

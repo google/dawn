@@ -343,7 +343,7 @@ int main(int argc, const char** argv) {
 
 #if TINT_BUILD_SPV_WRITER
   if (options.format == Format::kSpvAsm) {
-    auto w = static_cast<tint::writer::spirv::Generator*>(writer.get());
+    auto* w = static_cast<tint::writer::spirv::Generator*>(writer.get());
     auto str = Disassemble(w->result());
     // TODO(dsinclair): Write to file if output_file given
     std::cout << str << std::endl;

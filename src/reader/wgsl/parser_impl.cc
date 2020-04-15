@@ -224,7 +224,7 @@ void ParserImpl::global_decl() {
     return;
   }
 
-  auto ta = type_alias();
+  auto* ta = type_alias();
   if (has_error())
     return;
   if (ta != nullptr) {
@@ -612,7 +612,7 @@ std::pair<std::string, ast::type::Type*> ParserImpl::variable_ident_decl() {
     return {};
   }
 
-  auto type = type_decl();
+  auto* type = type_decl();
   if (has_error())
     return {};
   if (type == nullptr) {
@@ -672,7 +672,7 @@ ast::type::AliasType* ParserImpl::type_alias() {
     return nullptr;
   }
 
-  auto type = type_decl();
+  auto* type = type_decl();
   if (has_error())
     return nullptr;
   if (type == nullptr) {
@@ -692,7 +692,7 @@ ast::type::AliasType* ParserImpl::type_alias() {
     return nullptr;
   }
 
-  auto alias =
+  auto* alias =
       ctx_.type_mgr().Get(std::make_unique<ast::type::AliasType>(name, type));
   register_alias(name, alias);
 
@@ -724,7 +724,7 @@ ast::type::Type* ParserImpl::type_decl() {
   auto t = peek();
   if (t.IsIdentifier()) {
     next();  // Consume the peek
-    auto alias = get_alias(t.to_str());
+    auto* alias = get_alias(t.to_str());
     if (alias == nullptr) {
       set_error(t, "unknown type alias '" + t.to_str() + "'");
       return nullptr;
@@ -787,7 +787,7 @@ ast::type::Type* ParserImpl::type_decl_pointer(Token t) {
     return nullptr;
   }
 
-  auto subtype = type_decl();
+  auto* subtype = type_decl();
   if (has_error())
     return nullptr;
   if (subtype == nullptr) {
@@ -820,7 +820,7 @@ ast::type::Type* ParserImpl::type_decl_vector(Token t) {
     return nullptr;
   }
 
-  auto subtype = type_decl();
+  auto* subtype = type_decl();
   if (has_error())
     return nullptr;
   if (subtype == nullptr) {
@@ -847,7 +847,7 @@ ast::type::Type* ParserImpl::type_decl_array(Token t) {
     return nullptr;
   }
 
-  auto subtype = type_decl();
+  auto* subtype = type_decl();
   if (has_error())
     return nullptr;
   if (subtype == nullptr) {
@@ -901,7 +901,7 @@ ast::type::Type* ParserImpl::type_decl_matrix(Token t) {
     return nullptr;
   }
 
-  auto subtype = type_decl();
+  auto* subtype = type_decl();
   if (has_error())
     return nullptr;
   if (subtype == nullptr) {
@@ -1251,7 +1251,7 @@ std::unique_ptr<ast::Function> ParserImpl::function_header() {
     return nullptr;
   }
 
-  auto type = function_type_decl();
+  auto* type = function_type_decl();
   if (has_error())
     return nullptr;
   if (type == nullptr) {
@@ -1585,7 +1585,7 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
 }
 
 // break_stmt
-//   : BREAK ({IF | UNLESS} paren_rhs_stmt)?
+//   : BREAK ({IF | UNLESS} paren_rhs_stmt)?
 std::unique_ptr<ast::BreakStatement> ParserImpl::break_stmt() {
   auto t = peek();
   if (!t.IsBreak())
@@ -1620,7 +1620,7 @@ std::unique_ptr<ast::BreakStatement> ParserImpl::break_stmt() {
 }
 
 // continue_stmt
-//   : CONTINUE ({IF | UNLESS} paren_rhs_stmt)?
+//   : CONTINUE ({IF | UNLESS} paren_rhs_stmt)?
 std::unique_ptr<ast::ContinueStatement> ParserImpl::continue_stmt() {
   auto t = peek();
   if (!t.IsContinue())
@@ -2040,7 +2040,7 @@ std::unique_ptr<ast::Literal> ParserImpl::const_literal() {
   if (t.IsTrue()) {
     next();  // Consume the peek
 
-    auto type = ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
+    auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
     if (!type) {
       return nullptr;
     }
@@ -2048,7 +2048,7 @@ std::unique_ptr<ast::Literal> ParserImpl::const_literal() {
   }
   if (t.IsFalse()) {
     next();  // Consume the peek
-    auto type = ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
+    auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
     if (!type) {
       return nullptr;
     }
@@ -2056,7 +2056,7 @@ std::unique_ptr<ast::Literal> ParserImpl::const_literal() {
   }
   if (t.IsIntLiteral()) {
     next();  // Consume the peek
-    auto type = ctx_.type_mgr().Get(std::make_unique<ast::type::I32Type>());
+    auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::I32Type>());
     if (!type) {
       return nullptr;
     }
@@ -2064,7 +2064,7 @@ std::unique_ptr<ast::Literal> ParserImpl::const_literal() {
   }
   if (t.IsUintLiteral()) {
     next();  // Consume the peek
-    auto type = ctx_.type_mgr().Get(std::make_unique<ast::type::U32Type>());
+    auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::U32Type>());
     if (!type) {
       return nullptr;
     }
@@ -2072,7 +2072,7 @@ std::unique_ptr<ast::Literal> ParserImpl::const_literal() {
   }
   if (t.IsFloatLiteral()) {
     next();  // Consume the peek
-    auto type = ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>());
+    auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>());
     if (!type) {
       return nullptr;
     }
@@ -2088,7 +2088,7 @@ std::unique_ptr<ast::ConstructorExpression> ParserImpl::const_expr() {
   auto t = peek();
   auto source = t.source();
 
-  auto type = type_decl();
+  auto* type = type_decl();
   if (type != nullptr) {
     t = next();
     if (!t.IsParenLeft()) {
@@ -2181,7 +2181,7 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
       return nullptr;
     }
 
-    auto type = type_decl();
+    auto* type = type_decl();
     if (has_error())
       return nullptr;
     if (type == nullptr) {
@@ -2234,7 +2234,7 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
                                                        std::move(ident));
   }
 
-  auto type = type_decl();
+  auto* type = type_decl();
   if (has_error())
     return nullptr;
   if (type != nullptr) {
@@ -2673,7 +2673,7 @@ std::unique_ptr<ast::Expression> ParserImpl::shift_expr(
   auto t2 = peek(1);
   auto t3 = peek(2);
 
-  auto name = "";
+  auto* name = "";
   ast::BinaryOp op = ast::BinaryOp::kNone;
   if (t.IsLessThan() && t2.IsLessThan()) {
     next();  // Consume the t peek
