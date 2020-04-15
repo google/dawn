@@ -196,6 +196,17 @@ INSTANTIATE_TEST_SUITE_P(
                    AstFor("v2int_40_30")}));
 
 INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_FOrdEqual,
+    SpvBinaryLogicalTest,
+    ::testing::Values(BinaryData{"bool", "float_50", "OpFOrdEqual", "float_60",
+                                 "__bool", "ScalarConstructor{50.000000}",
+                                 "equal", "ScalarConstructor{60.000000}"},
+                      BinaryData{"v2bool", "v2float_50_60", "OpFOrdEqual",
+                                 "v2float_60_50", "__vec_2__bool",
+                                 AstFor("v2float_50_60"), "equal",
+                                 AstFor("v2float_60_50")}));
+
+INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_INotEqual,
     SpvBinaryLogicalTest,
     ::testing::Values(
@@ -215,6 +226,18 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"v2bool", "v2int_30_40", "OpINotEqual", "v2int_40_30",
                    "__vec_2__bool", AstFor("v2int_30_40"), "not_equal",
                    AstFor("v2int_40_30")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_FOrdNotEqual,
+    SpvBinaryLogicalTest,
+    ::testing::Values(BinaryData{"bool", "float_50", "OpFOrdNotEqual",
+                                 "float_60", "__bool",
+                                 "ScalarConstructor{50.000000}", "not_equal",
+                                 "ScalarConstructor{60.000000}"},
+                      BinaryData{"v2bool", "v2float_50_60", "OpFOrdNotEqual",
+                                 "v2float_60_50", "__vec_2__bool",
+                                 AstFor("v2float_50_60"), "not_equal",
+                                 AstFor("v2float_60_50")}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_LogicalAnd,
