@@ -58,6 +58,12 @@ ast::BinaryOp ConvertBinaryOp(SpvOp opcode) {
       return ast::BinaryOp::kEqual;
     case SpvOpINotEqual:
       return ast::BinaryOp::kNotEqual;
+    case SpvOpBitwiseAnd:
+      return ast::BinaryOp::kAnd;
+    case SpvOpBitwiseOr:
+      return ast::BinaryOp::kOr;
+    case SpvOpBitwiseXor:
+      return ast::BinaryOp::kXor;
     default:
       break;
   }

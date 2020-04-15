@@ -350,6 +350,104 @@ INSTANTIATE_TEST_SUITE_P(
                    "v2uint_20_10", "__vec_2__i32", AstFor("v2int_40_30"),
                    "shift_right_arith", AstFor("v2uint_20_10")}));
 
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_BitwiseAnd,
+    SpvBinaryTest,
+    ::testing::Values(
+        // Both uint
+        BinaryData{"uint", "uint_10", "OpBitwiseAnd", "uint_20", "__u32",
+                   "ScalarConstructor{10}", "and", "ScalarConstructor{20}"},
+        // Both int
+        BinaryData{"int", "int_30", "OpBitwiseAnd", "int_40", "__i32",
+                   "ScalarConstructor{30}", "and", "ScalarConstructor{40}"},
+        // Mixed, returning uint
+        BinaryData{"uint", "int_30", "OpBitwiseAnd", "uint_10", "__u32",
+                   "ScalarConstructor{30}", "and", "ScalarConstructor{10}"},
+        // Mixed, returning int
+        BinaryData{"int", "int_30", "OpBitwiseAnd", "uint_10", "__i32",
+                   "ScalarConstructor{30}", "and", "ScalarConstructor{10}"},
+        // Both v2uint
+        BinaryData{"v2uint", "v2uint_10_20", "OpBitwiseAnd", "v2uint_20_10",
+                   "__vec_2__u32", AstFor("v2uint_10_20"), "and",
+                   AstFor("v2uint_20_10")},
+        // Both v2int
+        BinaryData{"v2int", "v2int_30_40", "OpBitwiseAnd", "v2int_40_30",
+                   "__vec_2__i32", AstFor("v2int_30_40"), "and",
+                   AstFor("v2int_40_30")},
+        // Mixed, returning v2uint
+        BinaryData{"v2uint", "v2int_30_40", "OpBitwiseAnd", "v2uint_10_20",
+                   "__vec_2__u32", AstFor("v2int_30_40"), "and",
+                   AstFor("v2uint_10_20")},
+        // Mixed, returning v2int
+        BinaryData{"v2int", "v2int_40_30", "OpBitwiseAnd", "v2uint_20_10",
+                   "__vec_2__i32", AstFor("v2int_40_30"), "and",
+                   AstFor("v2uint_20_10")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_BitwiseOr,
+    SpvBinaryTest,
+    ::testing::Values(
+        // Both uint
+        BinaryData{"uint", "uint_10", "OpBitwiseOr", "uint_20", "__u32",
+                   "ScalarConstructor{10}", "or", "ScalarConstructor{20}"},
+        // Both int
+        BinaryData{"int", "int_30", "OpBitwiseOr", "int_40", "__i32",
+                   "ScalarConstructor{30}", "or", "ScalarConstructor{40}"},
+        // Mixed, returning uint
+        BinaryData{"uint", "int_30", "OpBitwiseOr", "uint_10", "__u32",
+                   "ScalarConstructor{30}", "or", "ScalarConstructor{10}"},
+        // Mixed, returning int
+        BinaryData{"int", "int_30", "OpBitwiseOr", "uint_10", "__i32",
+                   "ScalarConstructor{30}", "or", "ScalarConstructor{10}"},
+        // Both v2uint
+        BinaryData{"v2uint", "v2uint_10_20", "OpBitwiseOr", "v2uint_20_10",
+                   "__vec_2__u32", AstFor("v2uint_10_20"), "or",
+                   AstFor("v2uint_20_10")},
+        // Both v2int
+        BinaryData{"v2int", "v2int_30_40", "OpBitwiseOr", "v2int_40_30",
+                   "__vec_2__i32", AstFor("v2int_30_40"), "or",
+                   AstFor("v2int_40_30")},
+        // Mixed, returning v2uint
+        BinaryData{"v2uint", "v2int_30_40", "OpBitwiseOr", "v2uint_10_20",
+                   "__vec_2__u32", AstFor("v2int_30_40"), "or",
+                   AstFor("v2uint_10_20")},
+        // Mixed, returning v2int
+        BinaryData{"v2int", "v2int_40_30", "OpBitwiseOr", "v2uint_20_10",
+                   "__vec_2__i32", AstFor("v2int_40_30"), "or",
+                   AstFor("v2uint_20_10")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_BitwiseXor,
+    SpvBinaryTest,
+    ::testing::Values(
+        // Both uint
+        BinaryData{"uint", "uint_10", "OpBitwiseXor", "uint_20", "__u32",
+                   "ScalarConstructor{10}", "xor", "ScalarConstructor{20}"},
+        // Both int
+        BinaryData{"int", "int_30", "OpBitwiseXor", "int_40", "__i32",
+                   "ScalarConstructor{30}", "xor", "ScalarConstructor{40}"},
+        // Mixed, returning uint
+        BinaryData{"uint", "int_30", "OpBitwiseXor", "uint_10", "__u32",
+                   "ScalarConstructor{30}", "xor", "ScalarConstructor{10}"},
+        // Mixed, returning int
+        BinaryData{"int", "int_30", "OpBitwiseXor", "uint_10", "__i32",
+                   "ScalarConstructor{30}", "xor", "ScalarConstructor{10}"},
+        // Both v2uint
+        BinaryData{"v2uint", "v2uint_10_20", "OpBitwiseXor", "v2uint_20_10",
+                   "__vec_2__u32", AstFor("v2uint_10_20"), "xor",
+                   AstFor("v2uint_20_10")},
+        // Both v2int
+        BinaryData{"v2int", "v2int_30_40", "OpBitwiseXor", "v2int_40_30",
+                   "__vec_2__i32", AstFor("v2int_30_40"), "xor",
+                   AstFor("v2int_40_30")},
+        // Mixed, returning v2uint
+        BinaryData{"v2uint", "v2int_30_40", "OpBitwiseXor", "v2uint_10_20",
+                   "__vec_2__u32", AstFor("v2int_30_40"), "xor",
+                   AstFor("v2uint_10_20")},
+        // Mixed, returning v2int
+        BinaryData{"v2int", "v2int_40_30", "OpBitwiseXor", "v2uint_20_10",
+                   "__vec_2__i32", AstFor("v2int_40_30"), "xor",
+                   AstFor("v2uint_20_10")}));
 }  // namespace
 }  // namespace spirv
 }  // namespace reader
