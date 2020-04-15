@@ -13,16 +13,30 @@
 # limitations under the License.
 
 import("//build_overrides/build.gni")
-import("//build_overrides/tint.gni")
+import("tint_overrides_with_defaults.gni")
 
 config("tint_common_config") {
   cflags = []
   ldflags = []
   include_dirs = []
   defines = []
+
+  if (tint_build_spv_reader) {
+    defines += [ "TINT_BUILD_SPV_READER=1" ]
+  } else {
+    defines += [ "TINT_BUILD_SPV_READER=0" ]
+  }
 }
 
-source_set("libtint") {
+# libtint source sets are divided into a non-optional core in :libtint_core and
+# optional :libtint_* subsets, because ninja does not like having multiple source
+# files with the same name, like function.cc, in the same source set target.
+#
+# Targets that want to use tint as a library should depend on ":libtint" and use
+# the build flags to control what is included, instead of trying to specify the
+# subsets that they want.
+
+source_set("libtint_core") {
   sources = [
     "src/ast/array_accessor_expression.cc",
     "src/ast/array_accessor_expression.h",
@@ -183,6 +197,58 @@ source_set("libtint") {
     "src/writer/writer.cc",
     "src/writer/writer.h",
   ]
+
+  configs += [ ":tint_common_config" ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+}
+
+config("tint_spv_reader_config") {
+  include_dirs = [
+    "${tint_spirv_tools_dir}/",
+    "${tint_spirv_tools_dir}/include",
+    "${target_gen_dir}/${tint_spirv_tools_gen}",
+  ]
+}
+
+source_set("libtint_spv_reader") {
+  sources = [
+    "src/reader/spirv/enum_converter.cc",
+    "src/reader/spirv/enum_converter.h",
+    "src/reader/spirv/fail_stream.h",
+    "src/reader/spirv/function.cc",
+    "src/reader/spirv/function.h",
+    "src/reader/spirv/namer.cc",
+    "src/reader/spirv/namer.h",
+    "src/reader/spirv/parser.cc",
+    "src/reader/spirv/parser.h",
+    "src/reader/spirv/parser_impl.cc",
+    "src/reader/spirv/parser_impl.h",
+  ]
+
+  deps = [
+    "${tint_spirv_headers_dir}/:spv_headers",
+    "${tint_spirv_tools_dir}/:spvtools_opt",
+    "${tint_spirv_tools_dir}/:spvtools_val",
+  ]
+
+  configs += [ ":tint_common_config" ]
+  configs += [ ":tint_spv_reader_config" ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+}
+
+source_set("libtint") {
+  deps = [ ":libtint_core" ]
+  if (tint_build_spv_reader) {
+    deps += [ ":libtint_spv_reader" ]
+  }
 
   configs += [ ":tint_common_config" ]
 

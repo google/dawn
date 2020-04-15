@@ -17,13 +17,31 @@ import("//build_overrides/tint.gni")
 # This file contains Tint-related build flags.
 
 declare_args() {
+  # Path to spirv-tools checkout
+  if (!defined(tint_spirv_tools_dir)) {
+    tint_spirv_tools_dir = "//third_party/spirv-tools"
+  }
+
+  # Path to spirv-tools generated files, relative to |target_gen_dir|
+  if (!defined(tint_spirv_tools_gen)) {
+    tint_spirv_tools_gen = "third_party/spirv-tools"
+  }
+
+  # Path to spirv-headers checkout
+  if (!defined(tint_spirv_headers_dir)) {
+    tint_spirv_headers_dir = "//third_party/spirv-headers"
+  }
+
   # Generate documentation
   # TODO(rharrison): Implement documentation support
   tint_build_doc = false
 
-  # Generate SPIR-V input parser
-  # TODO(rharrison): Implement SPIR-V input parser support
-  tint_build_spv_parser = false
+  # Build the SPIR-V input reader
+  if (!defined(tint_build_spv_reader)) {
+    tint_build_spv_reader = false
+  }
+
+  # TODO(rharrison): Implement support for the reset of the reader/writers
 
   # Generate fuzzers
   # TODO(rharrison): Implement fuzzer support

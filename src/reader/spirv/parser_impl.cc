@@ -806,7 +806,7 @@ std::unique_ptr<ast::Expression> ParserImpl::MakeConstantExpression(
     return std::make_unique<ast::ScalarConstructorExpression>(
         std::make_unique<ast::BoolLiteral>(ast_type, value));
   }
-  auto spirv_composite_const = spirv_const->AsCompositeConstant();
+  auto* spirv_composite_const = spirv_const->AsCompositeConstant();
   if (spirv_composite_const != nullptr) {
     // Handle vector, matrix, array, and struct
 
