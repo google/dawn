@@ -188,6 +188,7 @@ test("dawn_unittests") {
     "unittests/wire/WireFenceTests.cpp",
     "unittests/wire/WireInjectTextureTests.cpp",
     "unittests/wire/WireMemoryTransferServiceTests.cpp",
+    "unittests/wire/WireMultipleDeviceTests.cpp",
     "unittests/wire/WireOptionalTests.cpp",
     "unittests/wire/WireTest.cpp",
     "unittests/wire/WireTest.h",
