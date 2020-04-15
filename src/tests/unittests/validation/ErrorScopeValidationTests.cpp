@@ -184,7 +184,8 @@ TEST_F(ErrorScopeValidationTest, AsynchronousThenSynchronous) {
     device.Tick();
 }
 
-// Test that if the device is destroyed before the callback occurs, it is called with UNKNOWN.
+// Test that if the device is destroyed before the callback occurs, it is called with NoError
+// because all previous operations are waited upon before the destruction returns.
 TEST_F(ErrorScopeValidationTest, DeviceDestroyedBeforeCallback) {
     wgpu::Queue queue = device.CreateQueue();
 
@@ -192,6 +193,6 @@ TEST_F(ErrorScopeValidationTest, DeviceDestroyedBeforeCallback) {
     queue.Submit(0, nullptr);
     device.PopErrorScope(ToMockDevicePopErrorScopeCallback, this);
 
-    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_Unknown, _, this)).Times(1);
+    EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, this)).Times(1);
     device = nullptr;
 }

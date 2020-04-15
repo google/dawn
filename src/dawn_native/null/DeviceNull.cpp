@@ -188,6 +188,8 @@ namespace dawn_native { namespace null {
     }
 
     MaybeError Device::WaitForIdleForDestruction() {
+        // Fake all commands being completed
+        mCompletedSerial = mLastSubmittedSerial;
         return {};
     }
 

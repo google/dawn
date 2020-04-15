@@ -441,6 +441,20 @@ TEST_P(DeviceLostTest, FenceOnCompletionBeforeLossFails) {
     EXPECT_EQ(fence.GetCompletedValue(), 0u);
 }
 
+// Regression test for the Null backend not properly setting the completedSerial when
+// WaitForIdleForDestruction is called, causing the fence signaling to not be retired and an
+// ASSERT to fire.
+TEST_P(DeviceLostTest, AfterSubmitAndSerial) {
+    queue.Submit(0, nullptr);
+
+    wgpu::FenceDescriptor descriptor;
+    descriptor.initialValue = 0;
+    wgpu::Fence fence = queue.CreateFence(&descriptor);
+
+    queue.Signal(fence, 1);
+    SetCallbackAndLoseForTesting();
+}
+
 // Test that when you Signal, then Tick, then device lost, the fence completed value would be 2
 TEST_P(DeviceLostTest, FenceSignalTickOnCompletion) {
     wgpu::FenceDescriptor descriptor;
@@ -471,4 +485,8 @@ TEST_P(DeviceLostTest, LoseForTestingOnce) {
     device.LoseForTesting();
 }
 
-DAWN_INSTANTIATE_TEST(DeviceLostTest, D3D12Backend(), MetalBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(DeviceLostTest,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      NullBackend(),
+                      VulkanBackend());
