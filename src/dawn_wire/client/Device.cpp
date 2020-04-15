@@ -43,7 +43,8 @@ namespace dawn_wire { namespace client {
     }
 
     void Device::HandleDeviceLost(const char* message) {
-        if (mDeviceLostCallback) {
+        if (mDeviceLostCallback && !mDidRunLostCallback) {
+            mDidRunLostCallback = true;
             mDeviceLostCallback(message, mDeviceLostUserdata);
         }
     }

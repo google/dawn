@@ -52,6 +52,10 @@ namespace dawn_wire {
 
         ReservedTexture ReserveTexture(WGPUDevice device);
 
+        // Disconnects the client.
+        // Commands allocated after this point will not be sent.
+        void Disconnect();
+
       private:
         std::unique_ptr<client::Client> mImpl;
     };

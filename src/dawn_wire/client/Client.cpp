@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "dawn_wire/client/Client.h"
+
+#include "common/Compiler.h"
 #include "dawn_wire/client/Device.h"
 
 namespace dawn_wire { namespace client {
@@ -42,6 +44,23 @@ namespace dawn_wire { namespace client {
         result.id = allocation->object->id;
         result.generation = allocation->generation;
         return result;
+    }
+
+    void* Client::GetCmdSpace(size_t size) {
+        if (DAWN_UNLIKELY(mIsDisconnected)) {
+            if (size > mDummyCmdSpace.size()) {
+                mDummyCmdSpace.resize(size);
+            }
+            return mDummyCmdSpace.data();
+        }
+        return mSerializer->GetCmdSpace(size);
+    }
+
+    void Client::Disconnect() {
+        if (!mIsDisconnected) {
+            mIsDisconnected = true;
+            mDevice->HandleDeviceLost("GPU connection lost");
+        }
     }
 
 }}  // namespace dawn_wire::client

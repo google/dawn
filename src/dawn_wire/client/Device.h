@@ -52,6 +52,7 @@ namespace dawn_wire { namespace client {
         Client* mClient = nullptr;
         WGPUErrorCallback mErrorCallback = nullptr;
         WGPUDeviceLostCallback mDeviceLostCallback = nullptr;
+        bool mDidRunLostCallback = false;
         void* mErrorUserdata;
         void* mDeviceLostUserdata;
     };

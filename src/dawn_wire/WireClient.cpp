@@ -42,6 +42,10 @@ namespace dawn_wire {
         return mImpl->ReserveTexture(device);
     }
 
+    void WireClient::Disconnect() {
+        mImpl->Disconnect();
+    }
+
     namespace client {
         MemoryTransferService::~MemoryTransferService() = default;
 

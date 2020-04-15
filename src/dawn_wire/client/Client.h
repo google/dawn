@@ -33,13 +33,6 @@ namespace dawn_wire { namespace client {
         Client(CommandSerializer* serializer, MemoryTransferService* memoryTransferService);
         ~Client();
 
-        const volatile char* HandleCommands(const volatile char* commands, size_t size);
-        ReservedTexture ReserveTexture(WGPUDevice device);
-
-        void* GetCmdSpace(size_t size) {
-            return mSerializer->GetCmdSpace(size);
-        }
-
         WGPUDevice GetDevice() const {
             return reinterpret_cast<WGPUDeviceImpl*>(mDevice);
         }
@@ -47,6 +40,13 @@ namespace dawn_wire { namespace client {
         MemoryTransferService* GetMemoryTransferService() const {
             return mMemoryTransferService;
         }
+
+        const volatile char* HandleCommands(const volatile char* commands, size_t size);
+        ReservedTexture ReserveTexture(WGPUDevice device);
+
+        void* GetCmdSpace(size_t size);
+
+        void Disconnect();
 
       private:
 #include "dawn_wire/client/ClientPrototypes_autogen.inc"
@@ -56,6 +56,9 @@ namespace dawn_wire { namespace client {
         WireDeserializeAllocator mAllocator;
         MemoryTransferService* mMemoryTransferService = nullptr;
         std::unique_ptr<MemoryTransferService> mOwnedMemoryTransferService = nullptr;
+
+        std::vector<char> mDummyCmdSpace;
+        bool mIsDisconnected = false;
     };
 
     DawnProcTable GetProcs();
