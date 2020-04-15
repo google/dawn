@@ -338,6 +338,43 @@ INSTANTIATE_TEST_SUITE_P(
                    AstFor("v2float_60_50")}));
 
 INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_UMod,
+    SpvBinaryTest,
+    ::testing::Values(
+        // Both uint
+        BinaryData{"uint", "uint_10", "OpUMod", "uint_20", "__u32",
+                   "ScalarConstructor{10}", "modulo", "ScalarConstructor{20}"},
+        // Both v2uint
+        BinaryData{"v2uint", "v2uint_10_20", "OpUMod", "v2uint_20_10",
+                   "__vec_2__u32", AstFor("v2uint_10_20"), "modulo",
+                   AstFor("v2uint_20_10")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_SMod,
+    SpvBinaryTest,
+    ::testing::Values(
+        // Both int
+        BinaryData{"int", "int_30", "OpSMod", "int_40", "__i32",
+                   "ScalarConstructor{30}", "modulo", "ScalarConstructor{40}"},
+        // Both v2int
+        BinaryData{"v2int", "v2int_30_40", "OpSMod", "v2int_40_30",
+                   "__vec_2__i32", AstFor("v2int_30_40"), "modulo",
+                   AstFor("v2int_40_30")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_FMod,
+    SpvBinaryTest,
+    ::testing::Values(
+        // Scalar float
+        BinaryData{"float", "float_50", "OpFMod", "float_60", "__f32",
+                   "ScalarConstructor{50.000000}", "modulo",
+                   "ScalarConstructor{60.000000}"},
+        // Vector float
+        BinaryData{"v2float", "v2float_50_60", "OpFMod", "v2float_60_50",
+                   "__vec_2__f32", AstFor("v2float_50_60"), "modulo",
+                   AstFor("v2float_60_50")}));
+
+INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_ShiftLeftLogical,
     SpvBinaryTest,
     ::testing::Values(

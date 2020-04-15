@@ -52,6 +52,10 @@ ast::BinaryOp ConvertBinaryOp(SpvOp opcode) {
     case SpvOpSDiv:
     case SpvOpFDiv:
       return ast::BinaryOp::kDivide;
+    case SpvOpUMod:
+    case SpvOpSMod:
+    case SpvOpFMod:
+      return ast::BinaryOp::kModulo;
     case SpvOpShiftLeftLogical:
       return ast::BinaryOp::kShiftLeft;
     case SpvOpShiftRightLogical:
