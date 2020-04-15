@@ -356,7 +356,7 @@ int main(int argc, const char** argv) {
 
 #if TINT_BUILD_WGSL_WRITER
   if (options.format == Format::kWgsl) {
-    auto w = static_cast<tint::writer::wgsl::Generator*>(writer.get());
+    auto* w = static_cast<tint::writer::wgsl::Generator*>(writer.get());
     std::cout << w->result() << std::endl;
   }
 #endif  // TINT_BUILD_WGSL_WRITER

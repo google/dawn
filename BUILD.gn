@@ -38,6 +38,12 @@ config("tint_common_config") {
   } else {
     defines += [ "TINT_BUILD_WGSL_READER=0" ]
   }
+
+  if (tint_build_wgsl_writer) {
+    defines += [ "TINT_BUILD_WGSL_WRITER=1" ]
+  } else {
+    defines += [ "TINT_BUILD_WGSL_WRITER=0" ]
+  }
 }
 
 # libtint source sets are divided into a non-optional core in :libtint_core and
@@ -302,6 +308,22 @@ source_set("libtint_wgsl_reader") {
   }
 }
 
+source_set("libtint_wgsl_writer") {
+  sources = [
+    "src/writer/wgsl/generator.cc",
+    "src/writer/wgsl/generator.h",
+    "src/writer/wgsl/generator_impl.cc",
+    "src/writer/wgsl/generator_impl.h",
+  ]
+
+  configs += [ ":tint_common_config" ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+}
+
 source_set("libtint") {
   deps = [ ":libtint_core" ]
 
@@ -315,6 +337,10 @@ source_set("libtint") {
 
   if (tint_build_wgsl_reader) {
     deps += [ ":libtint_wgsl_reader" ]
+  }
+
+  if (tint_build_wgsl_writer) {
+    deps += [ ":libtint_wgsl_writer" ]
   }
 
   configs += [ ":tint_common_config" ]

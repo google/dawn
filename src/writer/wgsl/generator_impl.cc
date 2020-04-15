@@ -86,7 +86,7 @@ bool GeneratorImpl::Generate(const ast::Module& module) {
   if (!module.entry_points().empty())
     out_ << std::endl;
 
-  for (const auto& alias : module.alias_types()) {
+  for (auto* const alias : module.alias_types()) {
     if (!EmitAliasType(alias)) {
       return false;
     }
@@ -367,10 +367,10 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
 
 bool GeneratorImpl::EmitType(ast::type::Type* type) {
   if (type->IsAlias()) {
-    auto alias = type->AsAlias();
+    auto* alias = type->AsAlias();
     out_ << alias->name();
   } else if (type->IsArray()) {
-    auto ary = type->AsArray();
+    auto* ary = type->AsArray();
     out_ << "array<";
     if (!EmitType(ary->type())) {
       return false;
@@ -387,21 +387,21 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
   } else if (type->IsI32()) {
     out_ << "i32";
   } else if (type->IsMatrix()) {
-    auto mat = type->AsMatrix();
+    auto* mat = type->AsMatrix();
     out_ << "mat" << mat->columns() << "x" << mat->rows() << "<";
     if (!EmitType(mat->type())) {
       return false;
     }
     out_ << ">";
   } else if (type->IsPointer()) {
-    auto ptr = type->AsPointer();
+    auto* ptr = type->AsPointer();
     out_ << "ptr<" << ptr->storage_class() << ", ";
     if (!EmitType(ptr->type())) {
       return false;
     }
     out_ << ">";
   } else if (type->IsStruct()) {
-    auto str = type->AsStruct()->impl();
+    auto* str = type->AsStruct()->impl();
     if (str->decoration() != ast::StructDecoration::kNone) {
       out_ << "[[" << str->decoration() << "]] ";
     }
@@ -440,7 +440,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type) {
   } else if (type->IsU32()) {
     out_ << "u32";
   } else if (type->IsVector()) {
-    auto vec = type->AsVector();
+    auto* vec = type->AsVector();
     out_ << "vec" << vec->size() << "<";
     if (!EmitType(vec->type())) {
       return false;
