@@ -201,6 +201,43 @@ INSTANTIATE_TEST_SUITE_P(
                    AstFor("v2float_60_50")}));
 
 INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_ISub,
+    SpvBinaryTest,
+    ::testing::Values(
+        // Both uint
+        BinaryData{"uint", "uint_10", "OpISub", "uint_20", "__u32",
+                   "ScalarConstructor{10}", "subtract",
+                   "ScalarConstructor{20}"},
+        // Both int
+        BinaryData{"int", "int_30", "OpISub", "int_40", "__i32",
+                   "ScalarConstructor{30}", "subtract",
+                   "ScalarConstructor{40}"},
+        // Mixed, returning uint
+        BinaryData{"uint", "int_30", "OpISub", "uint_10", "__u32",
+                   "ScalarConstructor{30}", "subtract",
+                   "ScalarConstructor{10}"},
+        // Mixed, returning int
+        BinaryData{"int", "int_30", "OpISub", "uint_10", "__i32",
+                   "ScalarConstructor{30}", "subtract",
+                   "ScalarConstructor{10}"},
+        // Both v2uint
+        BinaryData{"v2uint", "v2uint_10_20", "OpISub", "v2uint_20_10",
+                   "__vec_2__u32", AstFor("v2uint_10_20"), "subtract",
+                   AstFor("v2uint_20_10")},
+        // Both v2int
+        BinaryData{"v2int", "v2int_30_40", "OpISub", "v2int_40_30",
+                   "__vec_2__i32", AstFor("v2int_30_40"), "subtract",
+                   AstFor("v2int_40_30")},
+        // Mixed, returning v2uint
+        BinaryData{"v2uint", "v2int_30_40", "OpISub", "v2uint_10_20",
+                   "__vec_2__u32", AstFor("v2int_30_40"), "subtract",
+                   AstFor("v2uint_10_20")},
+        // Mixed, returning v2int
+        BinaryData{"v2int", "v2int_40_30", "OpISub", "v2uint_20_10",
+                   "__vec_2__i32", AstFor("v2int_40_30"), "subtract",
+                   AstFor("v2uint_20_10")}));
+
+INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_FSub,
     SpvBinaryTest,
     ::testing::Values(
@@ -214,6 +251,43 @@ INSTANTIATE_TEST_SUITE_P(
                    AstFor("v2float_60_50")}));
 
 INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_IMul,
+    SpvBinaryTest,
+    ::testing::Values(
+        // Both uint
+        BinaryData{"uint", "uint_10", "OpIMul", "uint_20", "__u32",
+                   "ScalarConstructor{10}", "multiply",
+                   "ScalarConstructor{20}"},
+        // Both int
+        BinaryData{"int", "int_30", "OpIMul", "int_40", "__i32",
+                   "ScalarConstructor{30}", "multiply",
+                   "ScalarConstructor{40}"},
+        // Mixed, returning uint
+        BinaryData{"uint", "int_30", "OpIMul", "uint_10", "__u32",
+                   "ScalarConstructor{30}", "multiply",
+                   "ScalarConstructor{10}"},
+        // Mixed, returning int
+        BinaryData{"int", "int_30", "OpIMul", "uint_10", "__i32",
+                   "ScalarConstructor{30}", "multiply",
+                   "ScalarConstructor{10}"},
+        // Both v2uint
+        BinaryData{"v2uint", "v2uint_10_20", "OpIMul", "v2uint_20_10",
+                   "__vec_2__u32", AstFor("v2uint_10_20"), "multiply",
+                   AstFor("v2uint_20_10")},
+        // Both v2int
+        BinaryData{"v2int", "v2int_30_40", "OpIMul", "v2int_40_30",
+                   "__vec_2__i32", AstFor("v2int_30_40"), "multiply",
+                   AstFor("v2int_40_30")},
+        // Mixed, returning v2uint
+        BinaryData{"v2uint", "v2int_30_40", "OpIMul", "v2uint_10_20",
+                   "__vec_2__u32", AstFor("v2int_30_40"), "multiply",
+                   AstFor("v2uint_10_20")},
+        // Mixed, returning v2int
+        BinaryData{"v2int", "v2int_40_30", "OpIMul", "v2uint_20_10",
+                   "__vec_2__i32", AstFor("v2int_40_30"), "multiply",
+                   AstFor("v2uint_20_10")}));
+
+INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_FMul,
     SpvBinaryTest,
     ::testing::Values(
@@ -225,6 +299,30 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"v2float", "v2float_50_60", "OpFMul", "v2float_60_50",
                    "__vec_2__f32", AstFor("v2float_50_60"), "multiply",
                    AstFor("v2float_60_50")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_UDiv,
+    SpvBinaryTest,
+    ::testing::Values(
+        // Both uint
+        BinaryData{"uint", "uint_10", "OpUDiv", "uint_20", "__u32",
+                   "ScalarConstructor{10}", "divide", "ScalarConstructor{20}"},
+        // Both v2uint
+        BinaryData{"v2uint", "v2uint_10_20", "OpUDiv", "v2uint_20_10",
+                   "__vec_2__u32", AstFor("v2uint_10_20"), "divide",
+                   AstFor("v2uint_20_10")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_SDiv,
+    SpvBinaryTest,
+    ::testing::Values(
+        // Both int
+        BinaryData{"int", "int_30", "OpSDiv", "int_40", "__i32",
+                   "ScalarConstructor{30}", "divide", "ScalarConstructor{40}"},
+        // Both v2int
+        BinaryData{"v2int", "v2int_30_40", "OpSDiv", "v2int_40_30",
+                   "__vec_2__i32", AstFor("v2int_30_40"), "divide",
+                   AstFor("v2int_40_30")}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_FDiv,

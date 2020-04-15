@@ -42,10 +42,14 @@ ast::BinaryOp ConvertBinaryOp(SpvOp opcode) {
     case SpvOpIAdd:
     case SpvOpFAdd:
       return ast::BinaryOp::kAdd;
+    case SpvOpISub:
     case SpvOpFSub:
       return ast::BinaryOp::kSubtract;
+    case SpvOpIMul:
     case SpvOpFMul:
       return ast::BinaryOp::kMultiply;
+    case SpvOpUDiv:
+    case SpvOpSDiv:
     case SpvOpFDiv:
       return ast::BinaryOp::kDivide;
     case SpvOpShiftLeftLogical:
