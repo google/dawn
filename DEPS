@@ -13,19 +13,19 @@ vars = {
 deps = {
   # Dependencies required to use GN/Clang in standalone
   'build': {
-    'url': '{chromium_git}/chromium/src/build@f3d0ca5f46b7b190dbbdc6be508ca11dd5c54302',
+    'url': '{chromium_git}/chromium/src/build@896323eeda1bd1b01156b70625d5e14de225ebc3',
     'condition': 'dawn_standalone',
   },
   'buildtools': {
-    'url': '{chromium_git}/chromium/src/buildtools@74cfb57006f83cfe050817526db359d5c8a11628',
+    'url': '{chromium_git}/chromium/src/buildtools@2c41dfb19abe40908834803b6fed797b0f341fe1',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-    'url': '{chromium_git}/chromium/src/tools/clang@3605577b67603ec5776afcfada9e0ff4ea05cf0e',
+    'url': '{chromium_git}/chromium/src/tools/clang@698732d5db36040c07d5cc5f9137fcc943494c11',
     'condition': 'dawn_standalone',
   },
   'third_party/binutils': {
-    'url': '{chromium_git}/chromium/src/third_party/binutils@01aa7745b0bab64ae22600f09fd6483c60f22ebf',
+    'url': '{chromium_git}/chromium/src/third_party/binutils@f9ce777698a819dff4d6a033b31122d91a49b62e',
     'condition': 'dawn_standalone',
   },
   'tools/clang/dsymutil': {
