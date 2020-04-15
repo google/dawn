@@ -27,6 +27,8 @@ Function::Function(const Instruction& declaration,
                    const std::vector<Instruction>& params)
     : declaration_(declaration), label_op_(label_op), params_(params) {}
 
+Function::Function(const Function& other) = default;
+
 Function::~Function() = default;
 
 void Function::iterate(std::function<void(const Instruction&)> cb) const {

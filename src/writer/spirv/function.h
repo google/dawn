@@ -42,7 +42,7 @@ class Function {
            const std::vector<Instruction>& params);
   /// Copy constructor
   /// @param other the function to copy
-  Function(const Function& other) = default;
+  Function(const Function& other);
   ~Function();
 
   /// Iterates over the function call the cb on each instruction

@@ -26,6 +26,12 @@ config("tint_common_config") {
   } else {
     defines += [ "TINT_BUILD_SPV_READER=0" ]
   }
+
+  if (tint_build_spv_writer) {
+    defines += [ "TINT_BUILD_SPV_WRITER=1" ]
+  } else {
+    defines += [ "TINT_BUILD_SPV_WRITER=0" ]
+  }
 }
 
 # libtint source sets are divided into a non-optional core in :libtint_core and
@@ -244,10 +250,40 @@ source_set("libtint_spv_reader") {
   }
 }
 
+source_set("libtint_spv_writer") {
+  sources = [
+    "src/writer/spirv/binary_writer.cc",
+    "src/writer/spirv/binary_writer.h",
+    "src/writer/spirv/builder.cc",
+    "src/writer/spirv/builder.h",
+    "src/writer/spirv/function.cc",
+    "src/writer/spirv/function.h",
+    "src/writer/spirv/generator.cc",
+    "src/writer/spirv/generator.h",
+    "src/writer/spirv/instruction.cc",
+    "src/writer/spirv/instruction.h",
+    "src/writer/spirv/operand.cc",
+    "src/writer/spirv/operand.h",
+  ]
+
+  deps = [ "${tint_spirv_headers_dir}/:spv_headers" ]
+
+  configs += [ ":tint_common_config" ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+}
+
 source_set("libtint") {
   deps = [ ":libtint_core" ]
   if (tint_build_spv_reader) {
     deps += [ ":libtint_spv_reader" ]
+  }
+
+  if (tint_build_spv_writer) {
+    deps += [ ":libtint_spv_writer" ]
   }
 
   configs += [ ":tint_common_config" ]

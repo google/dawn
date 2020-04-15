@@ -223,7 +223,7 @@ uint32_t Builder::GenerateExpressionAndLoad(ast::Expression* expr) {
     error_ = "missing generated ID for variable";
     return 0;
   }
-  auto var = spirv_id_to_variable_[id];
+  auto* var = spirv_id_to_variable_[id];
   if (var->is_const()) {
     return id;
   }
@@ -457,7 +457,7 @@ uint32_t Builder::GenerateConstructorExpression(
     return GenerateLiteralIfNeeded(expr->AsScalarConstructor()->literal());
   }
   if (expr->IsTypeConstructor()) {
-    auto init = expr->AsTypeConstructor();
+    auto* init = expr->AsTypeConstructor();
     auto type_id = GenerateTypeIfNeeded(init->type());
     if (type_id == 0) {
       return 0;
@@ -568,7 +568,7 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
 
   // Handle int and float and the vectors of those types. Other types
   // should have been rejected by validation.
-  auto lhs_type = expr->lhs()->result_type();
+  auto* lhs_type = expr->lhs()->result_type();
   bool lhs_is_float_or_vec =
       lhs_type->IsF32() ||
       (lhs_type->IsVector() && lhs_type->AsVector()->type()->IsF32());
@@ -888,7 +888,7 @@ bool Builder::GeneratePointerType(ast::type::PointerType* ptr,
 bool Builder::GenerateStructType(ast::type::StructType* struct_type,
                                  const Operand& result) {
   auto struct_id = result.to_i();
-  auto impl = struct_type->impl();
+  auto* impl = struct_type->impl();
 
   if (!struct_type->name().empty()) {
     push_debug(spv::Op::OpName,

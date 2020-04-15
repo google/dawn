@@ -32,7 +32,7 @@ class Instruction {
   /// @param operands the operand values for the instruction
   Instruction(spv::Op op, std::vector<Operand> operands);
   /// Copy Constructor
-  Instruction(const Instruction&) = default;
+  Instruction(const Instruction&);
   ~Instruction();
 
   /// @returns the instructions op
