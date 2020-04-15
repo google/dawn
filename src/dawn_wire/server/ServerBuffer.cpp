@@ -153,34 +153,6 @@ namespace dawn_wire { namespace server {
         return true;
     }
 
-    bool Server::DoDeviceCreateBufferMappedAsync(WGPUDevice device,
-                                                 const WGPUBufferDescriptor* descriptor,
-                                                 uint32_t requestSerial,
-                                                 ObjectHandle bufferResult,
-                                                 uint64_t handleCreateInfoLength,
-                                                 const uint8_t* handleCreateInfo) {
-        if (!DoDeviceCreateBufferMapped(device, descriptor, bufferResult, handleCreateInfoLength,
-                                        handleCreateInfo)) {
-            return false;
-        }
-
-        auto* bufferData = BufferObjects().Get(bufferResult.id);
-        ASSERT(bufferData != nullptr);
-
-        ReturnBufferMapWriteAsyncCallbackCmd cmd;
-        cmd.buffer = ObjectHandle{bufferResult.id, bufferResult.generation};
-        cmd.requestSerial = requestSerial;
-        cmd.status = bufferData->mapWriteState == BufferMapWriteState::Mapped
-                         ? WGPUBufferMapAsyncStatus_Success
-                         : WGPUBufferMapAsyncStatus_Error;
-
-        size_t requiredSize = cmd.GetRequiredSize();
-        char* allocatedBuffer = static_cast<char*>(GetCmdSpace(requiredSize));
-        cmd.Serialize(allocatedBuffer);
-
-        return true;
-    }
-
     bool Server::DoBufferSetSubDataInternal(ObjectId bufferId,
                                             uint64_t start,
                                             uint64_t offset,

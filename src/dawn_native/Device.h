@@ -140,9 +140,6 @@ namespace dawn_native {
         BindGroupLayoutBase* CreateBindGroupLayout(const BindGroupLayoutDescriptor* descriptor);
         BufferBase* CreateBuffer(const BufferDescriptor* descriptor);
         WGPUCreateBufferMappedResult CreateBufferMapped(const BufferDescriptor* descriptor);
-        void CreateBufferMappedAsync(const BufferDescriptor* descriptor,
-                                     wgpu::BufferCreateMappedCallback callback,
-                                     void* userdata);
         CommandEncoder* CreateCommandEncoder(const CommandEncoderDescriptor* descriptor);
         ComputePipelineBase* CreateComputePipeline(const ComputePipelineDescriptor* descriptor);
         PipelineLayoutBase* CreatePipelineLayout(const PipelineLayoutDescriptor* descriptor);
@@ -305,17 +302,9 @@ namespace dawn_native {
         struct Caches;
         std::unique_ptr<Caches> mCaches;
 
-        struct DeferredCreateBufferMappedAsync {
-            wgpu::BufferCreateMappedCallback callback;
-            WGPUBufferMapAsyncStatus status;
-            WGPUCreateBufferMappedResult result;
-            void* userdata;
-        };
-
         std::unique_ptr<DynamicUploader> mDynamicUploader;
         std::unique_ptr<ErrorScopeTracker> mErrorScopeTracker;
         std::unique_ptr<FenceSignalTracker> mFenceSignalTracker;
-        std::vector<DeferredCreateBufferMappedAsync> mDeferredCreateBufferMappedAsyncResults;
 
         uint32_t mRefCount = 1;
         State mState = State::BeingCreated;

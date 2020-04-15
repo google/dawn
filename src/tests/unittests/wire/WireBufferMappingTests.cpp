@@ -69,18 +69,6 @@ namespace {
                           void* userdata));
     };
 
-    std::unique_ptr<StrictMock<MockBufferCreateMappedCallback>> mockCreateBufferMappedCallback;
-    uint32_t* lastCreateMappedPointer = nullptr;
-    void ToMockCreateBufferMappedCallback(WGPUBufferMapAsyncStatus status,
-                                          WGPUCreateBufferMappedResult result,
-                                          void* userdata) {
-        // Assume the data is uint32_t to make writing matchers easier
-        lastCreateMappedPointer = static_cast<uint32_t*>(result.data);
-        // Unpack WGPUCreateBufferMappedResult to make writing matchers easier
-        mockCreateBufferMappedCallback->Call(status, result.buffer, lastCreateMappedPointer,
-                                             result.dataLength, userdata);
-    }
-
 }  // anonymous namespace
 
 class WireBufferMappingTests : public WireTest {
@@ -94,8 +82,6 @@ class WireBufferMappingTests : public WireTest {
 
         mockBufferMapReadCallback = std::make_unique<StrictMock<MockBufferMapReadCallback>>();
         mockBufferMapWriteCallback = std::make_unique<StrictMock<MockBufferMapWriteCallback>>();
-        mockCreateBufferMappedCallback =
-            std::make_unique<StrictMock<MockBufferCreateMappedCallback>>();
 
         WGPUBufferDescriptor descriptor = {};
         descriptor.size = kBufferSize;
@@ -115,7 +101,6 @@ class WireBufferMappingTests : public WireTest {
         // Delete mocks so that expectations are checked
         mockBufferMapReadCallback = nullptr;
         mockBufferMapWriteCallback = nullptr;
-        mockCreateBufferMappedCallback = nullptr;
     }
 
     void FlushServer() {
@@ -123,7 +108,6 @@ class WireBufferMappingTests : public WireTest {
 
         Mock::VerifyAndClearExpectations(&mockBufferMapReadCallback);
         Mock::VerifyAndClearExpectations(&mockBufferMapWriteCallback);
-        Mock::VerifyAndClearExpectations(&mockCreateBufferMappedCallback);
     }
 
   protected:
@@ -629,187 +613,3 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapFailure) {
     FlushClient();
 }
 
-// Test successful CreateBufferMappedAsync
-TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncSuccess) {
-    WGPUBufferDescriptor descriptor = {};
-    descriptor.size = kBufferSize;
-
-    WGPUCreateBufferMappedResult apiResult;
-    uint32_t serverBufferContent = 31337;
-    apiResult.buffer = apiBuffer;
-    apiResult.data = reinterpret_cast<uint8_t*>(&serverBufferContent);
-    apiResult.dataLength = kBufferSize;
-
-    uint32_t updatedContent = 4242;
-    uint32_t zero = 0;
-
-    wgpuDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback,
-                                      nullptr);
-
-    EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
-        .WillOnce(Return(apiResult))
-        .RetiresOnSaturation();
-
-    FlushClient();
-
-    WGPUBuffer buffer;
-    // The callback always gets a buffer full of zeroes.
-    EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(WGPUBufferMapAsyncStatus_Success, _, Pointee(Eq(zero)), kBufferSize, _))
-        .WillOnce(::testing::SaveArg<1>(&buffer));
-
-    FlushServer();
-
-    // Write something to the mapped pointer
-    *lastCreateMappedPointer = updatedContent;
-
-    wgpuBufferUnmap(buffer);
-    EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
-
-    FlushClient();
-
-    // After the buffer is unmapped, the content of the buffer is updated on the server
-    ASSERT_EQ(serverBufferContent, updatedContent);
-}
-
-// Test CreateBufferMappedAsync with map error
-TEST_F(WireBufferMappingTests, CreateBufferMappedAsyncMapError) {
-    WGPUBufferDescriptor descriptor = {};
-
-    WGPUCreateBufferMappedResult apiResult;
-    apiResult.buffer = apiBuffer;
-    apiResult.data = nullptr;  // error mapping
-    apiResult.dataLength = kBufferSize;
-
-    wgpuDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback,
-                                      nullptr);
-
-    EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
-        .WillOnce(Return(apiResult))
-        .RetiresOnSaturation();
-
-    FlushClient();
-
-    WGPUBuffer buffer;
-    EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(WGPUBufferMapAsyncStatus_Error, _, nullptr, 0, _))
-        .WillOnce(::testing::SaveArg<1>(&buffer));
-
-    FlushServer();
-
-    wgpuBufferUnmap(buffer);
-    EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
-
-    FlushClient();
-}
-
-// Test that the CreateBufferMappedCallback isn't fired twice when unmap() is called inside the
-// callback
-TEST_F(WireBufferMappingTests, UnmapInsideCreateBufferMappedAsyncCallback) {
-    WGPUBufferDescriptor descriptor = {};
-    descriptor.size = kBufferSize;
-
-    WGPUCreateBufferMappedResult apiResult;
-    uint32_t serverBufferContent = 31337;
-    apiResult.buffer = apiBuffer;
-    apiResult.data = reinterpret_cast<uint8_t*>(&serverBufferContent);
-    apiResult.dataLength = kBufferSize;
-
-    uint32_t zero = 0;
-
-    wgpuDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback,
-                                      nullptr);
-
-    EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
-        .WillOnce(Return(apiResult))
-        .RetiresOnSaturation();
-
-    FlushClient();
-
-    WGPUBuffer buffer;
-    // The callback always gets a buffer full of zeroes.
-    EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(WGPUBufferMapAsyncStatus_Success, _, Pointee(Eq(zero)), kBufferSize, _))
-        .WillOnce(DoAll(::testing::SaveArg<1>(&buffer),
-                        InvokeWithoutArgs([&]() { wgpuBufferUnmap(buffer); })));
-
-    FlushServer();
-
-    EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
-
-    FlushClient();
-}
-
-// Test that the CreateBufferMappedCallback isn't fired twice when the buffer is deleted inside
-// the callback
-TEST_F(WireBufferMappingTests, ReleaseInsideCreateBufferMappedAsyncCallback) {
-    WGPUBufferDescriptor descriptor = {};
-    descriptor.size = kBufferSize;
-
-    WGPUCreateBufferMappedResult apiResult;
-    uint32_t serverBufferContent = 31337;
-    apiResult.buffer = apiBuffer;
-    apiResult.data = reinterpret_cast<uint8_t*>(&serverBufferContent);
-    apiResult.dataLength = kBufferSize;
-
-    uint32_t zero = 0;
-
-    wgpuDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback,
-                                      nullptr);
-
-    EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
-        .WillOnce(Return(apiResult))
-        .RetiresOnSaturation();
-
-    FlushClient();
-
-    WGPUBuffer buffer;
-    // The callback always gets a buffer full of zeroes.
-    EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(WGPUBufferMapAsyncStatus_Success, _, Pointee(Eq(zero)), kBufferSize, _))
-        .WillOnce(DoAll(::testing::SaveArg<1>(&buffer),
-                        InvokeWithoutArgs([&]() { wgpuBufferRelease(buffer); })));
-
-    FlushServer();
-
-    EXPECT_CALL(api, BufferRelease(apiBuffer));
-
-    FlushClient();
-}
-
-// Test that the CreateBufferMappedCallback isn't fired twice when the buffer is destroyed inside
-// the callback
-TEST_F(WireBufferMappingTests, DestroyInsideCreateBufferMappedAsyncCallback) {
-    WGPUBufferDescriptor descriptor = {};
-    descriptor.size = kBufferSize;
-
-    WGPUCreateBufferMappedResult apiResult;
-    uint32_t serverBufferContent = 31337;
-    apiResult.buffer = apiBuffer;
-    apiResult.data = reinterpret_cast<uint8_t*>(&serverBufferContent);
-    apiResult.dataLength = kBufferSize;
-
-    uint32_t zero = 0;
-
-    wgpuDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback,
-                                      nullptr);
-
-    EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
-        .WillOnce(Return(apiResult))
-        .RetiresOnSaturation();
-
-    FlushClient();
-
-    WGPUBuffer buffer;
-    // The callback always gets a buffer full of zeroes.
-    EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(WGPUBufferMapAsyncStatus_Success, _, Pointee(Eq(zero)), kBufferSize, _))
-        .WillOnce(DoAll(::testing::SaveArg<1>(&buffer),
-                        InvokeWithoutArgs([&]() { wgpuBufferDestroy(buffer); })));
-
-    FlushServer();
-
-    EXPECT_CALL(api, BufferDestroy(apiBuffer));
-
-    FlushClient();
-}

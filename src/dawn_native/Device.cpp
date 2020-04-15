@@ -87,7 +87,6 @@ namespace dawn_native {
     }
 
     DeviceBase::~DeviceBase() {
-        ASSERT(mDeferredCreateBufferMappedAsyncResults.empty());
     }
 
     MaybeError DeviceBase::Initialize() {
@@ -544,27 +543,6 @@ namespace dawn_native {
 
         return result;
     }
-    void DeviceBase::CreateBufferMappedAsync(const BufferDescriptor* descriptor,
-                                             wgpu::BufferCreateMappedCallback callback,
-                                             void* userdata) {
-        WGPUCreateBufferMappedResult result = CreateBufferMapped(descriptor);
-
-        WGPUBufferMapAsyncStatus status = WGPUBufferMapAsyncStatus_Success;
-        if (IsLost()) {
-            status = WGPUBufferMapAsyncStatus_DeviceLost;
-        } else if (result.data == nullptr || result.dataLength != descriptor->size) {
-            status = WGPUBufferMapAsyncStatus_Error;
-        }
-
-        DeferredCreateBufferMappedAsync deferred_info;
-        deferred_info.callback = callback;
-        deferred_info.status = status;
-        deferred_info.result = result;
-        deferred_info.userdata = userdata;
-
-        // The callback is deferred so it matches the async behavior of WebGPU.
-        mDeferredCreateBufferMappedAsyncResults.push_back(deferred_info);
-    }
     CommandEncoder* DeviceBase::CreateCommandEncoder(const CommandEncoderDescriptor* descriptor) {
         return new CommandEncoder(this, descriptor);
     }
@@ -668,14 +646,6 @@ namespace dawn_native {
     // Other Device API methods
 
     void DeviceBase::Tick() {
-        // We need to do the deferred callback even if Device is lost since Buffer Map Async will
-        // send callback with device lost status when device is lost.
-        {
-            auto deferredResults = std::move(mDeferredCreateBufferMappedAsyncResults);
-            for (const auto& deferred : deferredResults) {
-                deferred.callback(deferred.status, deferred.result, deferred.userdata);
-            }
-        }
         if (ConsumedError(ValidateIsAlive())) {
             return;
         }

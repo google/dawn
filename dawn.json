@@ -203,14 +203,6 @@
             }
         ]
     },
-    "buffer create mapped callback": {
-        "category": "callback",
-        "args": [
-            {"name": "status", "type": "buffer map async status"},
-            {"name": "result", "type": "create buffer mapped result"},
-            {"name": "userdata", "type": "void", "annotation": "*"}
-        ]
-    },
     "buffer copy view": {
         "category": "structure",
         "extensible": true,
@@ -531,14 +523,6 @@
                 "returns": "create buffer mapped result",
                 "args": [
                     {"name": "descriptor", "type": "buffer descriptor", "annotation": "const*"}
-                ]
-            },
-            {
-                "name": "create buffer mapped async",
-                "args": [
-                    {"name": "descriptor", "type": "buffer descriptor", "annotation": "const*"},
-                    {"name": "callback", "type": "buffer create mapped callback"},
-                    {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
             },
             {

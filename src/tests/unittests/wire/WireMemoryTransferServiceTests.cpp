@@ -70,16 +70,6 @@ namespace {
                           void* userdata));
     };
 
-    std::unique_ptr<StrictMock<MockBufferCreateMappedCallback>> mockCreateBufferMappedCallback;
-    void ToMockCreateBufferMappedCallback(WGPUBufferMapAsyncStatus status,
-                                          WGPUCreateBufferMappedResult result,
-                                          void* userdata) {
-        // Assume the data is uint32_t to make writing matchers easier
-        mockCreateBufferMappedCallback->Call(status, result.buffer,
-                                             static_cast<uint32_t*>(result.data), result.dataLength,
-                                             userdata);
-    }
-
 }  // anonymous namespace
 
 // WireMemoryTransferServiceTests test the MemoryTransferService with buffer mapping.
@@ -113,8 +103,6 @@ class WireMemoryTransferServiceTests : public WireTest {
 
         mockBufferMapReadCallback = std::make_unique<StrictMock<MockBufferMapReadCallback>>();
         mockBufferMapWriteCallback = std::make_unique<StrictMock<MockBufferMapWriteCallback>>();
-        mockCreateBufferMappedCallback =
-            std::make_unique<StrictMock<MockBufferCreateMappedCallback>>();
 
         // TODO(enga): Make this thread-safe.
         mBufferContent++;
@@ -131,7 +119,6 @@ class WireMemoryTransferServiceTests : public WireTest {
         // Delete mocks so that expectations are checked
         mockBufferMapReadCallback = nullptr;
         mockBufferMapWriteCallback = nullptr;
-        mockCreateBufferMappedCallback = nullptr;
     }
 
     void FlushClient(bool success = true) {
@@ -144,7 +131,6 @@ class WireMemoryTransferServiceTests : public WireTest {
 
         Mock::VerifyAndClearExpectations(&mockBufferMapReadCallback);
         Mock::VerifyAndClearExpectations(&mockBufferMapWriteCallback);
-        Mock::VerifyAndClearExpectations(&mockCreateBufferMappedCallback);
         Mock::VerifyAndClearExpectations(&clientMemoryTransferService);
     }
 
@@ -186,27 +172,6 @@ class WireMemoryTransferServiceTests : public WireTest {
             .RetiresOnSaturation();
 
         return std::make_pair(apiResult, result);
-    }
-
-    WGPUCreateBufferMappedResult CreateBufferMappedAsync() {
-        WGPUBufferDescriptor descriptor = {};
-        descriptor.size = sizeof(mBufferContent);
-
-        wgpuDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback,
-                                          nullptr);
-
-        WGPUBuffer apiBuffer = api.GetNewBuffer();
-
-        WGPUCreateBufferMappedResult apiResult;
-        apiResult.buffer = apiBuffer;
-        apiResult.data = reinterpret_cast<uint8_t*>(&mMappedBufferContent);
-        apiResult.dataLength = sizeof(mMappedBufferContent);
-
-        EXPECT_CALL(api, DeviceCreateBufferMapped(apiDevice, _))
-            .WillOnce(Return(apiResult))
-            .RetiresOnSaturation();
-
-        return apiResult;
     }
 
     ClientReadHandle* ExpectReadHandleCreation() {
@@ -932,168 +897,6 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDestroyBeforeUnmap) {
         EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
         FlushClient();
     }
-}
-
-// Test successful CreateBufferMappedAsync.
-TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedAsyncSuccess) {
-    // The client should create and serialize a WriteHandle on createBufferMappedAsync
-    ClientWriteHandle* clientHandle = ExpectWriteHandleCreation();
-    ExpectWriteHandleSerialization(clientHandle);
-
-    WGPUCreateBufferMappedResult apiResult = CreateBufferMappedAsync();
-
-    // The server should then deserialize the WriteHandle from the client.
-    ServerWriteHandle* serverHandle = ExpectServerWriteHandleDeserialization();
-
-    FlushClient();
-
-    // The client receives a success callback. Save the buffer argument so we can call Unmap.
-    WGPUBuffer buffer;
-    EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(WGPUBufferMapAsyncStatus_Success, _, &mMappedBufferContent,
-                     sizeof(mMappedBufferContent), _))
-
-        .WillOnce(SaveArg<1>(&buffer));
-
-    // Since the mapping succeeds, the client opens the WriteHandle.
-    ExpectClientWriteHandleOpen(clientHandle, &mMappedBufferContent);
-
-    FlushServer();
-
-    // The client writes to the handle contents.
-    mMappedBufferContent = mUpdatedBufferContent;
-
-    // The client will then flush and destroy the handle on Unmap()
-    ExpectClientWriteHandleSerializeFlush(clientHandle);
-    EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
-
-    wgpuBufferUnmap(buffer);
-
-    // The server deserializes the Flush message.
-    ExpectServerWriteHandleDeserializeFlush(serverHandle, mUpdatedBufferContent);
-
-    // After the handle is updated it can be destroyed.
-    EXPECT_CALL(serverMemoryTransferService, OnWriteHandleDestroy(serverHandle)).Times(1);
-    EXPECT_CALL(api, BufferUnmap(apiResult.buffer)).Times(1);
-
-    FlushClient();
-}
-
-// Test CreateBufferMappedAsync WriteHandle creation failure.
-TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedAsyncWriteHandleCreationFailure) {
-    // Mock a WriteHandle creation failure
-    MockWriteHandleCreationFailure();
-
-    WGPUBufferDescriptor descriptor = {};
-    descriptor.size = sizeof(mBufferContent);
-
-    // Failed creation of a WriteHandle is a fatal failure. The client synchronously receives
-    // a DEVICE_LOST callback.
-    EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(WGPUBufferMapAsyncStatus_DeviceLost, _, nullptr, 0, _))
-        .Times(1);
-
-    wgpuDeviceCreateBufferMappedAsync(device, &descriptor, ToMockCreateBufferMappedCallback,
-                                      nullptr);
-}
-
-// Test CreateBufferMappedAsync DeserializeWriteHandle failure.
-TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedAsyncDeserializeWriteHandleFailure) {
-    // The client should create and serialize a WriteHandle on createBufferMappedAsync
-    ClientWriteHandle* clientHandle = ExpectWriteHandleCreation();
-    ExpectWriteHandleSerialization(clientHandle);
-
-    WGPUCreateBufferMappedResult apiResult = CreateBufferMappedAsync();
-    DAWN_UNUSED(apiResult);
-
-    // The server should then deserialize the WriteHandle from the client.
-    // Mock a deserialization failure.
-    MockServerWriteHandleDeserializeFailure();
-
-    FlushClient(false);
-
-    // The server hit a fatal failure and never returned the callback. It is called when the
-    // wire is destructed.
-    EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(WGPUBufferMapAsyncStatus_Unknown, _, nullptr, 0, _))
-        .Times(1);
-
-    EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
-}
-
-// Test CreateBufferMappedAsync handle Open failure.
-TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedAsyncHandleOpenFailure) {
-    // The client should create and serialize a WriteHandle on createBufferMappedAsync
-    ClientWriteHandle* clientHandle = ExpectWriteHandleCreation();
-    ExpectWriteHandleSerialization(clientHandle);
-
-    WGPUCreateBufferMappedResult apiResult = CreateBufferMappedAsync();
-    DAWN_UNUSED(apiResult);
-
-    // The server should then deserialize the WriteHandle from the client.
-    ServerWriteHandle* serverHandle = ExpectServerWriteHandleDeserialization();
-
-    FlushClient();
-
-    // Since the mapping succeeds, the client opens the WriteHandle.
-    MockClientWriteHandleOpenFailure(clientHandle);
-
-    // Failing to open a handle is a fatal failure. The client receives a DEVICE_LOST callback.
-    EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(WGPUBufferMapAsyncStatus_DeviceLost, _, nullptr, 0, _))
-        .Times(1);
-
-    // Since opening the handle fails, it is destroyed immediately.
-    EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
-
-    FlushServer(false);
-
-    EXPECT_CALL(serverMemoryTransferService, OnWriteHandleDestroy(serverHandle)).Times(1);
-}
-
-// Test CreateBufferMappedAsync DeserializeFlush failure.
-TEST_F(WireMemoryTransferServiceTests, CreateBufferMappedAsyncDeserializeFlushFailure) {
-    // The client should create and serialize a WriteHandle on createBufferMappedAsync
-    ClientWriteHandle* clientHandle = ExpectWriteHandleCreation();
-    ExpectWriteHandleSerialization(clientHandle);
-
-    WGPUCreateBufferMappedResult apiResult = CreateBufferMappedAsync();
-    DAWN_UNUSED(apiResult);
-
-    // The server should then deserialize the WriteHandle from the client.
-    ServerWriteHandle* serverHandle = ExpectServerWriteHandleDeserialization();
-
-    FlushClient();
-
-    // The client receives a success callback. Save the buffer argument so we can call Unmap.
-    WGPUBuffer buffer;
-    EXPECT_CALL(*mockCreateBufferMappedCallback,
-                Call(WGPUBufferMapAsyncStatus_Success, _, &mMappedBufferContent,
-                     sizeof(mMappedBufferContent), _))
-
-        .WillOnce(SaveArg<1>(&buffer));
-
-    // Since the mapping succeeds, the client opens the WriteHandle.
-    ExpectClientWriteHandleOpen(clientHandle, &mMappedBufferContent);
-
-    FlushServer();
-
-    // The client writes to the handle contents.
-    mMappedBufferContent = mUpdatedBufferContent;
-
-    // The client will then flush and destroy the handle on Unmap()
-    ExpectClientWriteHandleSerializeFlush(clientHandle);
-    EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
-
-    wgpuBufferUnmap(buffer);
-
-    // The server deserializes the Flush message.
-    // Mock a deserialization failure.
-    MockServerWriteHandleDeserializeFlushFailure(serverHandle);
-
-    FlushClient(false);
-
-    EXPECT_CALL(serverMemoryTransferService, OnWriteHandleDestroy(serverHandle)).Times(1);
 }
 
 // Test successful CreateBufferMapped.

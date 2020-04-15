@@ -76,17 +76,6 @@ bool ProcTableAsClass::DevicePopErrorScope(WGPUDevice self,
     return OnDevicePopErrorScopeCallback(self, callback, userdata);
 }
 
-void ProcTableAsClass::DeviceCreateBufferMappedAsync(WGPUDevice self,
-                                                     const WGPUBufferDescriptor* descriptor,
-                                                     WGPUBufferCreateMappedCallback callback,
-                                                     void* userdata) {
-    auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
-    object->createBufferMappedCallback = callback;
-    object->userdata = userdata;
-
-    OnDeviceCreateBufferMappedAsyncCallback(self, descriptor, callback, userdata);
-}
-
 void ProcTableAsClass::BufferMapReadAsync(WGPUBuffer self,
                                           WGPUBufferMapReadCallback callback,
                                           void* userdata) {
@@ -130,12 +119,6 @@ void ProcTableAsClass::CallDeviceLostCallback(WGPUDevice device, const char* mes
     object->deviceLostCallback(message, object->userdata);
 }
 
-void ProcTableAsClass::CallCreateBufferMappedCallback(WGPUDevice device,
-                                                      WGPUBufferMapAsyncStatus status,
-                                                      WGPUCreateBufferMappedResult result) {
-    auto object = reinterpret_cast<ProcTableAsClass::Object*>(device);
-    object->createBufferMappedCallback(status, result, object->userdata);
-}
 void ProcTableAsClass::CallMapReadCallback(WGPUBuffer buffer,
                                            WGPUBufferMapAsyncStatus status,
                                            const void* data,

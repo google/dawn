@@ -40,14 +40,6 @@
             { "name": "handle create info length", "type": "uint64_t" },
             { "name": "handle create info", "type": "uint8_t", "annotation": "const*", "length": "handle create info length", "skip_serialize": true}
         ],
-        "device create buffer mapped async": [
-            { "name": "device", "type": "device" },
-            { "name": "descriptor", "type": "buffer descriptor", "annotation": "const*" },
-            { "name": "request serial", "type": "uint32_t" },
-            { "name": "result", "type": "ObjectHandle", "handle_type": "buffer" },
-            { "name": "handle create info length", "type": "uint64_t" },
-            { "name": "handle create info", "type": "uint8_t", "annotation": "const*", "length": "handle create info length", "skip_serialize": true}
-        ],
         "device pop error scope": [
             { "name": "device", "type": "device" },
             { "name": "request serial", "type": "uint64_t" }
@@ -98,7 +90,6 @@
             "BufferMapReadAsync",
             "BufferMapWriteAsync",
             "BufferSetSubData",
-            "DeviceCreateBufferMappedAsync",
             "DevicePopErrorScope",
             "DeviceSetDeviceLostCallback",
             "DeviceSetUncapturedErrorCallback",
