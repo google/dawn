@@ -57,6 +57,8 @@ std::string CommonTypes() {
   %v2int = OpTypeVector %int 2
   %v2float = OpTypeVector %float 2
 
+  %v2bool_t_f = OpConstantComposite %v2bool %true %false
+  %v2bool_f_t = OpConstantComposite %v2bool %false %true
   %v2uint_10_20 = OpConstantComposite %v2uint %uint_10 %uint_20
   %v2uint_20_10 = OpConstantComposite %v2uint %uint_20 %uint_10
   %v2int_30_40 = OpConstantComposite %v2int %int_30 %int_40
@@ -213,6 +215,28 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"v2bool", "v2int_30_40", "OpINotEqual", "v2int_40_30",
                    "__vec_2__bool", AstFor("v2int_30_40"), "not_equal",
                    AstFor("v2int_40_30")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_LogicalAnd,
+    SpvBinaryLogicalTest,
+    ::testing::Values(BinaryData{"bool", "true", "OpLogicalAnd", "false",
+                                 "__bool", "ScalarConstructor{true}",
+                                 "logical_and", "ScalarConstructor{false}"},
+                      BinaryData{"v2bool", "v2bool_t_f", "OpLogicalAnd",
+                                 "v2bool_f_t", "__vec_2__bool",
+                                 AstFor("v2bool_t_f"), "logical_and",
+                                 AstFor("v2bool_f_t")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_LogicalOr,
+    SpvBinaryLogicalTest,
+    ::testing::Values(BinaryData{"bool", "true", "OpLogicalOr", "false",
+                                 "__bool", "ScalarConstructor{true}",
+                                 "logical_or", "ScalarConstructor{false}"},
+                      BinaryData{"v2bool", "v2bool_t_f", "OpLogicalOr",
+                                 "v2bool_f_t", "__vec_2__bool",
+                                 AstFor("v2bool_t_f"), "logical_or",
+                                 AstFor("v2bool_f_t")}));
 
 }  // namespace
 }  // namespace spirv
