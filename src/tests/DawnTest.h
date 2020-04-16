@@ -59,11 +59,15 @@
 
 // Should only be used to test validation of function that can't be tested by regular validation
 // tests;
-#define ASSERT_DEVICE_ERROR(statement) \
-    StartExpectDeviceError();          \
-    statement;                         \
-    FlushWire();                       \
-    ASSERT_TRUE(EndExpectDeviceError())
+#define ASSERT_DEVICE_ERROR(statement)                          \
+    StartExpectDeviceError();                                   \
+    statement;                                                  \
+    FlushWire();                                                \
+    if (!EndExpectDeviceError()) {                              \
+        FAIL() << "Expected device error in:\n " << #statement; \
+    }                                                           \
+    do {                                                        \
+    } while (0)
 
 struct RGBA8 {
     constexpr RGBA8() : RGBA8(0, 0, 0, 0) {
