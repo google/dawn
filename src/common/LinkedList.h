@@ -166,6 +166,13 @@ class LinkedList {
     LinkedList() : root_(&root_, &root_) {
     }
 
+    ~LinkedList() {
+        // If any LinkNodes still exist in the LinkedList, there will be outstanding references to
+        // root_ even after it has been freed. We should remove root_ from the list to prevent any
+        // future access.
+        root_.RemoveFromList();
+    }
+
     // Appends |e| to the end of the linked list.
     void Append(LinkNode<T>* e) {
         e->InsertBefore(&root_);
