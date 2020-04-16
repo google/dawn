@@ -276,4 +276,29 @@ TEST_P(D3D12ResidencyTests, AsyncMappedBufferWrite) {
     EXPECT_FALSE(CheckIfBufferIsResident(buffer));
 }
 
+// Check that overcommitting in a single submit works, then make sure the budget is enforced after.
+TEST_P(D3D12ResidencyTests, OvercommitInASingleSubmit) {
+    // Create enough buffers to exceed the budget
+    constexpr uint32_t numberOfBuffersToOvercommit = 5;
+    std::vector<wgpu::Buffer> bufferSet1 = AllocateBuffers(
+        kDirectlyAllocatedResourceSize,
+        (kRestrictedBudgetSize / kDirectlyAllocatedResourceSize) + numberOfBuffersToOvercommit);
+    // Touch the buffers, which creates an overcommitted command list.
+    TouchBuffers(0, bufferSet1.size(), bufferSet1);
+    // Ensure that all of these buffers are resident, even though we're exceeding the budget.
+    for (uint32_t i = 0; i < bufferSet1.size(); i++) {
+        EXPECT_TRUE(CheckIfBufferIsResident(bufferSet1[i]));
+    }
+
+    // Allocate another set of buffers that exceeds the budget.
+    std::vector<wgpu::Buffer> bufferSet2 = AllocateBuffers(
+        kDirectlyAllocatedResourceSize,
+        (kRestrictedBudgetSize / kDirectlyAllocatedResourceSize) + numberOfBuffersToOvercommit);
+    // Ensure the first <numberOfBuffersToOvercommit> buffers in the second buffer set were evicted,
+    // since they shouldn't fit in the budget.
+    for (uint32_t i = 0; i < numberOfBuffersToOvercommit; i++) {
+        EXPECT_FALSE(CheckIfBufferIsResident(bufferSet2[i]));
+    }
+}
+
 DAWN_INSTANTIATE_TEST(D3D12ResidencyTests, D3D12Backend());

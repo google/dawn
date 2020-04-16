@@ -171,9 +171,10 @@ namespace dawn_native { namespace d3d12 {
         }
 
         std::vector<ID3D12Pageable*> resourcesToEvict;
-
+        uint64_t sizeNeededToBeUnderBudget =
+            memoryUsageAfterMakeResident - mVideoMemoryInfo.dawnBudget;
         uint64_t sizeEvicted = 0;
-        while (sizeEvicted < sizeToMakeResident) {
+        while (sizeEvicted < sizeNeededToBeUnderBudget) {
             Heap* heap;
             DAWN_TRY_ASSIGN(heap, RemoveSingleEntryFromLRU());
 
