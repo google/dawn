@@ -20,7 +20,7 @@ using namespace testing;
 
 class MockDevicePopErrorScopeCallback {
   public:
-    MOCK_METHOD3(Call, void(WGPUErrorType type, const char* message, void* userdata));
+    MOCK_METHOD(void, Call, (WGPUErrorType type, const char* message, void* userdata));
 };
 
 static std::unique_ptr<MockDevicePopErrorScopeCallback> mockDevicePopErrorScopeCallback;

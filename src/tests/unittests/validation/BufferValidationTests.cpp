@@ -22,11 +22,12 @@ using namespace testing;
 
 class MockBufferMapReadCallback {
     public:
-      MOCK_METHOD4(Call,
-                   void(WGPUBufferMapAsyncStatus status,
-                        const uint32_t* ptr,
-                        uint64_t dataLength,
-                        void* userdata));
+      MOCK_METHOD(void,
+                  Call,
+                  (WGPUBufferMapAsyncStatus status,
+                   const uint32_t* ptr,
+                   uint64_t dataLength,
+                   void* userdata));
 };
 
 static std::unique_ptr<MockBufferMapReadCallback> mockBufferMapReadCallback;
@@ -41,11 +42,10 @@ static void ToMockBufferMapReadCallback(WGPUBufferMapAsyncStatus status,
 
 class MockBufferMapWriteCallback {
     public:
-      MOCK_METHOD4(Call,
-                   void(WGPUBufferMapAsyncStatus status,
-                        uint32_t* ptr,
-                        uint64_t dataLength,
-                        void* userdata));
+      MOCK_METHOD(
+          void,
+          Call,
+          (WGPUBufferMapAsyncStatus status, uint32_t* ptr, uint64_t dataLength, void* userdata));
 };
 
 static std::unique_ptr<MockBufferMapWriteCallback> mockBufferMapWriteCallback;

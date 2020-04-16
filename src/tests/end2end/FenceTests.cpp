@@ -22,7 +22,7 @@ using namespace testing;
 
 class MockFenceOnCompletionCallback {
   public:
-    MOCK_METHOD2(Call, void(WGPUFenceCompletionStatus status, void* userdata));
+    MOCK_METHOD(void, Call, (WGPUFenceCompletionStatus status, void* userdata));
 };
 
 static std::unique_ptr<MockFenceOnCompletionCallback> mockFenceOnCompletionCallback;
@@ -32,7 +32,7 @@ static void ToMockFenceOnCompletionCallback(WGPUFenceCompletionStatus status, vo
 
 class MockPopErrorScopeCallback {
   public:
-    MOCK_METHOD3(Call, void(WGPUErrorType type, const char* message, void* userdata));
+    MOCK_METHOD(void, Call, (WGPUErrorType type, const char* message, void* userdata));
 };
 
 static std::unique_ptr<MockPopErrorScopeCallback> mockPopErrorScopeCallback;

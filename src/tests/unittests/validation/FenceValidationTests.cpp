@@ -20,7 +20,7 @@ using namespace testing;
 
 class MockFenceOnCompletionCallback {
   public:
-    MOCK_METHOD2(Call, void(WGPUFenceCompletionStatus status, void* userdata));
+    MOCK_METHOD(void, Call, (WGPUFenceCompletionStatus status, void* userdata));
 };
 
 struct FenceOnCompletionExpectation {

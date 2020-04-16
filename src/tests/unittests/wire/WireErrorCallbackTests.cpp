@@ -22,7 +22,7 @@ namespace {
     // Mock classes to add expectations on the wire calling callbacks
     class MockDeviceErrorCallback {
       public:
-        MOCK_METHOD3(Call, void(WGPUErrorType type, const char* message, void* userdata));
+        MOCK_METHOD(void, Call, (WGPUErrorType type, const char* message, void* userdata));
     };
 
     std::unique_ptr<StrictMock<MockDeviceErrorCallback>> mockDeviceErrorCallback;
@@ -32,7 +32,7 @@ namespace {
 
     class MockDevicePopErrorScopeCallback {
       public:
-        MOCK_METHOD3(Call, void(WGPUErrorType type, const char* message, void* userdata));
+        MOCK_METHOD(void, Call, (WGPUErrorType type, const char* message, void* userdata));
     };
 
     std::unique_ptr<StrictMock<MockDevicePopErrorScopeCallback>> mockDevicePopErrorScopeCallback;
@@ -44,7 +44,7 @@ namespace {
 
     class MockDeviceLostCallback {
       public:
-        MOCK_METHOD2(Call, void(const char* message, void* userdata));
+        MOCK_METHOD(void, Call, (const char* message, void* userdata));
     };
 
     std::unique_ptr<StrictMock<MockDeviceLostCallback>> mockDeviceLostCallback;

@@ -64,27 +64,30 @@ namespace dawn_wire { namespace client {
         MockReadHandle* NewReadHandle();
         MockWriteHandle* NewWriteHandle();
 
-        MOCK_METHOD1(OnCreateReadHandle, ReadHandle*(size_t));
-        MOCK_METHOD1(OnCreateWriteHandle, WriteHandle*(size_t));
+        MOCK_METHOD(ReadHandle*, OnCreateReadHandle, (size_t));
+        MOCK_METHOD(WriteHandle*, OnCreateWriteHandle, (size_t));
 
-        MOCK_METHOD1(OnReadHandleSerializeCreateSize, size_t(const ReadHandle*));
-        MOCK_METHOD2(OnReadHandleSerializeCreate, void(const ReadHandle*, void* serializePointer));
-        MOCK_METHOD5(OnReadHandleDeserializeInitialData,
-                     bool(const ReadHandle*,
-                          const uint32_t* deserializePointer,
-                          size_t deserializeSize,
-                          const void** data,
-                          size_t* dataLength));
-        MOCK_METHOD1(OnReadHandleDestroy, void(const ReadHandle*));
+        MOCK_METHOD(size_t, OnReadHandleSerializeCreateSize, (const ReadHandle*));
+        MOCK_METHOD(void, OnReadHandleSerializeCreate, (const ReadHandle*, void* serializePointer));
+        MOCK_METHOD(bool,
+                    OnReadHandleDeserializeInitialData,
+                    (const ReadHandle*,
+                     const uint32_t* deserializePointer,
+                     size_t deserializeSize,
+                     const void** data,
+                     size_t* dataLength));
+        MOCK_METHOD(void, OnReadHandleDestroy, (const ReadHandle*));
 
-        MOCK_METHOD1(OnWriteHandleSerializeCreateSize, size_t(const void* WriteHandle));
-        MOCK_METHOD2(OnWriteHandleSerializeCreate,
-                     void(const void* WriteHandle, void* serializePointer));
-        MOCK_METHOD1(OnWriteHandleOpen, std::pair<void*, size_t>(const void* WriteHandle));
-        MOCK_METHOD1(OnWriteHandleSerializeFlushSize, size_t(const void* WriteHandle));
-        MOCK_METHOD2(OnWriteHandleSerializeFlush,
-                     void(const void* WriteHandle, void* serializePointer));
-        MOCK_METHOD1(OnWriteHandleDestroy, void(const void* WriteHandle));
+        MOCK_METHOD(size_t, OnWriteHandleSerializeCreateSize, (const void* WriteHandle));
+        MOCK_METHOD(void,
+                    OnWriteHandleSerializeCreate,
+                    (const void* WriteHandle, void* serializePointer));
+        MOCK_METHOD((std::pair<void*, size_t>), OnWriteHandleOpen, (const void* WriteHandle));
+        MOCK_METHOD(size_t, OnWriteHandleSerializeFlushSize, (const void* WriteHandle));
+        MOCK_METHOD(void,
+                    OnWriteHandleSerializeFlush,
+                    (const void* WriteHandle, void* serializePointer));
+        MOCK_METHOD(void, OnWriteHandleDestroy, (const void* WriteHandle));
     };
 
 }}  //  namespace dawn_wire::client

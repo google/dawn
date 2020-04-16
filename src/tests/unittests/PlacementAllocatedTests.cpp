@@ -28,7 +28,7 @@ namespace {
 
     class MockDestructor {
       public:
-        MOCK_METHOD2(Call, void(void*, DestructedClass));
+        MOCK_METHOD(void, Call, (void*, DestructedClass));
     };
 
     std::unique_ptr<StrictMock<MockDestructor>> mockDestructor;

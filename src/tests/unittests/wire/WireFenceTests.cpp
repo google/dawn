@@ -21,7 +21,7 @@ namespace {
 
     class MockFenceOnCompletionCallback {
       public:
-        MOCK_METHOD2(Call, void(WGPUFenceCompletionStatus status, void* userdata));
+        MOCK_METHOD(void, Call, (WGPUFenceCompletionStatus status, void* userdata));
     };
 
     std::unique_ptr<StrictMock<MockFenceOnCompletionCallback>> mockFenceOnCompletionCallback;

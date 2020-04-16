@@ -25,11 +25,12 @@ namespace {
     // Mock classes to add expectations on the wire calling callbacks
     class MockBufferMapReadCallback {
       public:
-        MOCK_METHOD4(Call,
-                     void(WGPUBufferMapAsyncStatus status,
-                          const uint32_t* ptr,
-                          uint64_t dataLength,
-                          void* userdata));
+        MOCK_METHOD(void,
+                    Call,
+                    (WGPUBufferMapAsyncStatus status,
+                     const uint32_t* ptr,
+                     uint64_t dataLength,
+                     void* userdata));
     };
 
     std::unique_ptr<StrictMock<MockBufferMapReadCallback>> mockBufferMapReadCallback;
@@ -44,11 +45,10 @@ namespace {
 
     class MockBufferMapWriteCallback {
       public:
-        MOCK_METHOD4(Call,
-                     void(WGPUBufferMapAsyncStatus status,
-                          uint32_t* ptr,
-                          uint64_t dataLength,
-                          void* userdata));
+        MOCK_METHOD(
+            void,
+            Call,
+            (WGPUBufferMapAsyncStatus status, uint32_t* ptr, uint64_t dataLength, void* userdata));
     };
 
     std::unique_ptr<StrictMock<MockBufferMapWriteCallback>> mockBufferMapWriteCallback;
@@ -62,12 +62,13 @@ namespace {
 
     class MockBufferCreateMappedCallback {
       public:
-        MOCK_METHOD5(Call,
-                     void(WGPUBufferMapAsyncStatus status,
-                          WGPUBuffer buffer,
-                          uint32_t* ptr,
-                          uint64_t dataLength,
-                          void* userdata));
+        MOCK_METHOD(void,
+                    Call,
+                    (WGPUBufferMapAsyncStatus status,
+                     WGPUBuffer buffer,
+                     uint32_t* ptr,
+                     uint64_t dataLength,
+                     void* userdata));
     };
 
 }  // anonymous namespace

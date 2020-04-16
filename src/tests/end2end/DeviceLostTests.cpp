@@ -24,7 +24,7 @@ using namespace testing;
 
 class MockDeviceLostCallback {
   public:
-    MOCK_METHOD2(Call, void(const char* message, void* userdata));
+    MOCK_METHOD(void, Call, (const char* message, void* userdata));
 };
 
 static std::unique_ptr<MockDeviceLostCallback> mockDeviceLostCallback;
@@ -36,7 +36,7 @@ static void ToMockDeviceLostCallback(const char* message, void* userdata) {
 
 class MockFenceOnCompletionCallback {
   public:
-    MOCK_METHOD2(Call, void(WGPUFenceCompletionStatus status, void* userdata));
+    MOCK_METHOD(void, Call, (WGPUFenceCompletionStatus status, void* userdata));
 };
 
 static std::unique_ptr<MockFenceOnCompletionCallback> mockFenceOnCompletionCallback;
