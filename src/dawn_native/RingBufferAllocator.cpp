@@ -67,7 +67,7 @@ namespace dawn_native {
         // If the buffer is not split where waste occurs (e.g. cannot fit new sub-alloc in front), a
         // subsequent sub-alloc could fail where the used size was previously adjusted to include
         // the wasted.
-        if (allocationSize == 0 || mUsedSize >= mMaxBlockSize) {
+        if (mUsedSize >= mMaxBlockSize) {
             return kInvalidOffset;
         }
 

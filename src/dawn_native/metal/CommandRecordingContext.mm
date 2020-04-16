@@ -43,8 +43,14 @@ namespace dawn_native { namespace metal {
     }
 
     id<MTLCommandBuffer> CommandRecordingContext::AcquireCommands() {
-        ASSERT(!mInEncoder);
+        if (mCommands == nil) {
+            return nil;
+        }
 
+        // A blit encoder can be left open from SetSubData, make sure we close it.
+        EndBlit();
+
+        ASSERT(!mInEncoder);
         id<MTLCommandBuffer> commands = mCommands;
         mCommands = nil;
         return commands;

@@ -213,10 +213,6 @@ namespace dawn_native { namespace metal {
 
         mLastSubmittedSerial++;
 
-        // Ensure the blit encoder is ended. It may have been opened to perform a lazy clear or
-        // buffer upload.
-        mCommandContext.EndBlit();
-
         // Acquire the pending command buffer, which is retained. It must be released later.
         id<MTLCommandBuffer> pendingCommands = mCommandContext.AcquireCommands();
 
@@ -268,6 +264,11 @@ namespace dawn_native { namespace metal {
                                                BufferBase* destination,
                                                uint64_t destinationOffset,
                                                uint64_t size) {
+        // Metal validation layers forbid  0-sized copies, skip it since it is a noop.
+        if (size == 0) {
+            return {};
+        }
+
         id<MTLBuffer> uploadBuffer = ToBackend(source)->GetBufferHandle();
         id<MTLBuffer> buffer = ToBackend(destination)->GetMTLBuffer();
         [GetPendingCommandContext()->EnsureBlit() copyFromBuffer:uploadBuffer
