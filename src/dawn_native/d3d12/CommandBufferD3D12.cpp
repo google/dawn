@@ -309,7 +309,7 @@ namespace dawn_native { namespace d3d12 {
             DAWN_TRY_ASSIGN(rtvHeap,
                             allocator->AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, rtvCount));
             ASSERT(rtvHeap.Get() != nullptr);
-            ID3D12Device* d3dDevice = device->GetD3D12Device().Get();
+            ID3D12Device* d3dDevice = device->GetD3D12Device();
             unsigned int rtvIndex = 0;
             for (uint32_t i :
                  IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {

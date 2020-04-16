@@ -135,8 +135,8 @@ namespace dawn_native { namespace d3d12 {
         ShutDownBase();
     }
 
-    ComPtr<ID3D12Device> Device::GetD3D12Device() const {
-        return mD3d12Device;
+    ID3D12Device* Device::GetD3D12Device() const {
+        return mD3d12Device.Get();
     }
 
     ComPtr<ID3D12CommandQueue> Device::GetCommandQueue() const {

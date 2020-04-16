@@ -44,7 +44,7 @@ namespace dawn_native { namespace d3d12 {
 
         const auto& bindingOffsets = bgl->GetBindingOffsets();
 
-        ID3D12Device* d3d12Device = device->GetD3D12Device().Get();
+        ID3D12Device* d3d12Device = device->GetD3D12Device();
 
         // It's not necessary to create descriptors in the descriptor heap for dynamic resources.
         // This is because they are created as root descriptors which are never heap allocated.
@@ -162,7 +162,7 @@ namespace dawn_native { namespace d3d12 {
         const BindGroupLayout* bgl = ToBackend(GetLayout());
         const Serial pendingSerial = device->GetPendingCommandSerial();
 
-        ID3D12Device* d3d12Device = device->GetD3D12Device().Get();
+        ID3D12Device* d3d12Device = device->GetD3D12Device();
 
         // CPU bindgroups are sparsely allocated across CPU heaps. Instead of doing
         // simple copies per bindgroup, a single non-simple copy could be issued.

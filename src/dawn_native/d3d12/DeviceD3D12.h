@@ -59,7 +59,7 @@ namespace dawn_native { namespace d3d12 {
         Serial GetLastSubmittedCommandSerial() const final override;
         MaybeError TickImpl() override;
 
-        ComPtr<ID3D12Device> GetD3D12Device() const;
+        ID3D12Device* GetD3D12Device() const;
         ComPtr<ID3D12CommandQueue> GetCommandQueue() const;
         ID3D12SharingContract* GetSharingContract() const;
 
