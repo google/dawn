@@ -116,6 +116,7 @@ class ProcTableAsClass {
 class MockProcTable : public ProcTableAsClass {
     public:
         MockProcTable();
+        ~MockProcTable() override;
 
         void IgnoreAllReleaseCalls();
 

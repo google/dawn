@@ -149,8 +149,9 @@ void ProcTableAsClass::CallFenceOnCompletionCallback(WGPUFence fence,
     }
 {% endfor %}
 
-MockProcTable::MockProcTable() {
-}
+MockProcTable::MockProcTable() = default;
+
+MockProcTable::~MockProcTable() = default;
 
 void MockProcTable::IgnoreAllReleaseCalls() {
     {% for type in by_category["object"] %}
