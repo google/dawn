@@ -79,6 +79,36 @@ uint32_t pipeline_stage_to_execution_model(ast::PipelineStage stage) {
   return model;
 }
 
+bool is_float_scalar(ast::type::Type* type) {
+  return type->IsF32();
+}
+
+bool is_float_matrix(ast::type::Type* type) {
+  return type->IsMatrix() && type->AsMatrix()->type()->IsF32();
+}
+
+bool is_float_vector(ast::type::Type* type) {
+  return type->IsVector() && type->AsVector()->type()->IsF32();
+}
+
+bool is_float_scalar_or_vector(ast::type::Type* type) {
+  return is_float_scalar(type) || is_float_vector(type);
+}
+
+bool is_unsigned_scalar_or_vector(ast::type::Type* type) {
+  return type->IsU32() ||
+         (type->IsVector() && type->AsVector()->type()->IsU32());
+}
+
+bool is_signed_scalar_or_vector(ast::type::Type* type) {
+  return type->IsI32() ||
+         (type->IsVector() && type->AsVector()->type()->IsI32());
+}
+
+bool is_integer_scalar_or_vector(ast::type::Type* type) {
+  return is_unsigned_scalar_or_vector(type) || is_signed_scalar_or_vector(type);
+}
+
 }  // namespace
 
 Builder::Builder() : scope_stack_({}) {}
@@ -569,12 +599,9 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
   // Handle int and float and the vectors of those types. Other types
   // should have been rejected by validation.
   auto* lhs_type = expr->lhs()->result_type();
-  bool lhs_is_float_or_vec =
-      lhs_type->IsF32() ||
-      (lhs_type->IsVector() && lhs_type->AsVector()->type()->IsF32());
-  bool lhs_is_unsigned =
-      lhs_type->IsU32() ||
-      (lhs_type->IsVector() && lhs_type->AsVector()->type()->IsU32());
+  auto* rhs_type = expr->rhs()->result_type();
+  bool lhs_is_float_or_vec = is_float_scalar_or_vector(lhs_type);
+  bool lhs_is_unsigned = is_unsigned_scalar_or_vector(lhs_type);
 
   spv::Op op = spv::Op::OpNop;
   if (expr->IsAnd()) {
@@ -630,6 +657,45 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
       op = spv::Op::OpUMod;
     } else {
       op = spv::Op::OpSMod;
+    }
+  } else if (expr->IsMultiply()) {
+    if (is_integer_scalar_or_vector(lhs_type)) {
+      // If the left hand side is an integer then this _has_ to be OpIMul as
+      // there there is no other integer multiplication.
+      op = spv::Op::OpIMul;
+    } else if (is_float_scalar(lhs_type) && is_float_scalar(rhs_type)) {
+      // Float scalars multiply with OpFMul
+      op = spv::Op::OpFMul;
+    } else if (is_float_vector(lhs_type) && is_float_vector(rhs_type)) {
+      // Float vectors must be validated to be the same size and then use OpFMul
+      op = spv::Op::OpFMul;
+    } else if (is_float_scalar(lhs_type) && is_float_vector(rhs_type)) {
+      // Scalar * Vector we need to flip lhs and rhs types
+      // because OpVectorTimesScalar expects <vector>, <scalar>
+      std::swap(lhs_id, rhs_id);
+      op = spv::Op::OpVectorTimesScalar;
+    } else if (is_float_vector(lhs_type) && is_float_scalar(rhs_type)) {
+      // float vector * scalar
+      op = spv::Op::OpVectorTimesScalar;
+    } else if (is_float_scalar(lhs_type) && is_float_matrix(rhs_type)) {
+      // Scalar * Matrix we need to flip lhs and rhs types because
+      // OpMatrixTimesScalar expects <matrix>, <scalar>
+      std::swap(lhs_id, rhs_id);
+      op = spv::Op::OpMatrixTimesScalar;
+    } else if (is_float_matrix(lhs_type) && is_float_scalar(rhs_type)) {
+      // float matrix * scalar
+      op = spv::Op::OpMatrixTimesScalar;
+    } else if (is_float_vector(lhs_type) && is_float_matrix(rhs_type)) {
+      // float vector * matrix
+      op = spv::Op::OpVectorTimesMatrix;
+    } else if (is_float_matrix(lhs_type) && is_float_vector(rhs_type)) {
+      // float matrix * vector
+      op = spv::Op::OpMatrixTimesVector;
+    } else if (is_float_matrix(lhs_type) && is_float_matrix(rhs_type)) {
+      // float matrix * matrix
+      op = spv::Op::OpMatrixTimesMatrix;
+    } else {
+      return 0;
     }
   } else if (expr->IsNotEqual()) {
     op = lhs_is_float_or_vec ? spv::Op::OpFOrdNotEqual : spv::Op::OpINotEqual;
