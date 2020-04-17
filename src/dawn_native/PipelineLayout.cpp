@@ -49,6 +49,7 @@ namespace dawn_native {
                 case wgpu::BindingType::UniformBuffer:
                 case wgpu::BindingType::ReadonlyStorageBuffer:
                 case wgpu::BindingType::Sampler:
+                case wgpu::BindingType::ComparisonSampler:
                 case wgpu::BindingType::SampledTexture:
                 case wgpu::BindingType::ReadonlyStorageTexture:
                     return wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment |

@@ -117,12 +117,29 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateSamplerBinding(const DeviceBase* device, const BindGroupEntry& binding) {
+        MaybeError ValidateSamplerBinding(const DeviceBase* device,
+                                          const BindGroupEntry& binding,
+                                          wgpu::BindingType bindingType) {
             if (binding.sampler == nullptr || binding.textureView != nullptr ||
                 binding.buffer != nullptr) {
                 return DAWN_VALIDATION_ERROR("expected sampler binding");
             }
             DAWN_TRY(device->ValidateObject(binding.sampler));
+
+            switch (bindingType) {
+                case wgpu::BindingType::Sampler:
+                    if (binding.sampler->HasCompareFunction()) {
+                        return DAWN_VALIDATION_ERROR("Did not expect comparison sampler");
+                    }
+                    break;
+                case wgpu::BindingType::ComparisonSampler:
+                    if (!binding.sampler->HasCompareFunction()) {
+                        return DAWN_VALIDATION_ERROR("Expected comparison sampler");
+                    }
+                    break;
+                default:
+                    UNREACHABLE();
+            }
 
             return {};
         }
@@ -174,7 +191,8 @@ namespace dawn_native {
                                                     bindingInfo));
                     break;
                 case wgpu::BindingType::Sampler:
-                    DAWN_TRY(ValidateSamplerBinding(device, binding));
+                case wgpu::BindingType::ComparisonSampler:
+                    DAWN_TRY(ValidateSamplerBinding(device, binding, bindingInfo.type));
                     break;
                 // TODO(jiawei.shao@intel.com): support creating bind group with read-only and
                 // write-only storage textures.
@@ -294,7 +312,8 @@ namespace dawn_native {
     SamplerBase* BindGroupBase::GetBindingAsSampler(BindingIndex bindingIndex) {
         ASSERT(!IsError());
         ASSERT(bindingIndex < mLayout->GetBindingCount());
-        ASSERT(mLayout->GetBindingInfo(bindingIndex).type == wgpu::BindingType::Sampler);
+        ASSERT(mLayout->GetBindingInfo(bindingIndex).type == wgpu::BindingType::Sampler ||
+               mLayout->GetBindingInfo(bindingIndex).type == wgpu::BindingType::ComparisonSampler);
         return static_cast<SamplerBase*>(mBindingData.bindings[bindingIndex].Get());
     }
 

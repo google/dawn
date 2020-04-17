@@ -34,6 +34,7 @@ namespace dawn_native { namespace d3d12 {
                 case wgpu::BindingType::ReadonlyStorageTexture:
                     return BindGroupLayout::DescriptorType::SRV;
                 case wgpu::BindingType::Sampler:
+                case wgpu::BindingType::ComparisonSampler:
                     return BindGroupLayout::DescriptorType::Sampler;
                 case wgpu::BindingType::StorageTexture:
                     UNREACHABLE();
@@ -116,6 +117,7 @@ namespace dawn_native { namespace d3d12 {
                         break;
                     case wgpu::BindingType::SampledTexture:
                     case wgpu::BindingType::Sampler:
+                    case wgpu::BindingType::ComparisonSampler:
                     case wgpu::BindingType::StorageTexture:
                     case wgpu::BindingType::ReadonlyStorageTexture:
                     case wgpu::BindingType::WriteonlyStorageTexture:

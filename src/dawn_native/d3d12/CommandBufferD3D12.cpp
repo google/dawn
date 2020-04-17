@@ -165,6 +165,7 @@ namespace dawn_native { namespace d3d12 {
                             case wgpu::BindingType::UniformBuffer:
                             case wgpu::BindingType::ReadonlyStorageBuffer:
                             case wgpu::BindingType::Sampler:
+                            case wgpu::BindingType::ComparisonSampler:
                             case wgpu::BindingType::SampledTexture:
                                 // Don't require barriers.
 
@@ -246,6 +247,7 @@ namespace dawn_native { namespace d3d12 {
                             break;
                         case wgpu::BindingType::SampledTexture:
                         case wgpu::BindingType::Sampler:
+                        case wgpu::BindingType::ComparisonSampler:
                         case wgpu::BindingType::StorageTexture:
                         case wgpu::BindingType::ReadonlyStorageTexture:
                         case wgpu::BindingType::WriteonlyStorageTexture:

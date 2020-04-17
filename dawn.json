@@ -114,10 +114,11 @@
             {"value": 1, "name": "storage buffer"},
             {"value": 2, "name": "readonly storage buffer"},
             {"value": 3, "name": "sampler"},
-            {"value": 4, "name": "sampled texture"},
-            {"value": 5, "name": "storage texture"},
-            {"value": 6, "name": "readonly storage texture"},
-            {"value": 7, "name": "writeonly storage texture"}
+            {"value": 4, "name": "comparison sampler"},
+            {"value": 5, "name": "sampled texture"},
+            {"value": 6, "name": "storage texture"},
+            {"value": 7, "name": "readonly storage texture"},
+            {"value": 8, "name": "writeonly storage texture"}
         ]
     },
     "blend descriptor": {

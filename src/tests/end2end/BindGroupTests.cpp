@@ -264,16 +264,13 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     wgpu::Buffer buffer = utils::CreateBufferFromData(device, &transform, sizeof(transform),
                                                       wgpu::BufferUsage::Uniform);
 
-    wgpu::SamplerDescriptor samplerDescriptor;
+    wgpu::SamplerDescriptor samplerDescriptor = {};
     samplerDescriptor.minFilter = wgpu::FilterMode::Nearest;
     samplerDescriptor.magFilter = wgpu::FilterMode::Nearest;
     samplerDescriptor.mipmapFilter = wgpu::FilterMode::Nearest;
     samplerDescriptor.addressModeU = wgpu::AddressMode::ClampToEdge;
     samplerDescriptor.addressModeV = wgpu::AddressMode::ClampToEdge;
     samplerDescriptor.addressModeW = wgpu::AddressMode::ClampToEdge;
-    samplerDescriptor.lodMinClamp = kLodMin;
-    samplerDescriptor.lodMaxClamp = kLodMax;
-    samplerDescriptor.compare = wgpu::CompareFunction::Never;
 
     wgpu::Sampler sampler = device.CreateSampler(&samplerDescriptor);
 

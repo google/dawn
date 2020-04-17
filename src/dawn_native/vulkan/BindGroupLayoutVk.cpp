@@ -53,6 +53,7 @@ namespace dawn_native { namespace vulkan {
                 }
                 return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             case wgpu::BindingType::Sampler:
+            case wgpu::BindingType::ComparisonSampler:
                 return VK_DESCRIPTOR_TYPE_SAMPLER;
             case wgpu::BindingType::SampledTexture:
                 return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
