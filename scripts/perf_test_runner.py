@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python3
 #
 # Copyright 2019 The Dawn Authors
 #
