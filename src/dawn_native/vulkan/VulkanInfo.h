@@ -25,7 +25,7 @@ namespace dawn_native { namespace vulkan {
     class Adapter;
     class Backend;
 
-    extern const char kLayerNameLunargStandardValidation[];
+    extern const char kLayerNameKhronosValidation[];
     extern const char kLayerNameLunargVKTrace[];
     extern const char kLayerNameRenderDocCapture[];
     extern const char kLayerNameFuchsiaImagePipeSwapchain[];
@@ -56,7 +56,7 @@ namespace dawn_native { namespace vulkan {
     // Global information - gathered before the instance is created
     struct VulkanGlobalKnobs {
         // Layers
-        bool standardValidation = false;
+        bool validation = false;
         bool vktrace = false;
         bool renderDocCapture = false;
         bool fuchsiaImagePipeSwapchain = false;

@@ -180,9 +180,9 @@ namespace dawn_native { namespace vulkan {
 #endif
 
         if (GetInstance()->IsBackendValidationEnabled()) {
-            if (mGlobalInfo.standardValidation) {
-                layersToRequest.push_back(kLayerNameLunargStandardValidation);
-                usedKnobs.standardValidation = true;
+            if (mGlobalInfo.validation) {
+                layersToRequest.push_back(kLayerNameKhronosValidation);
+                usedKnobs.validation = true;
             }
             if (mGlobalInfo.debugReport) {
                 extensionsToRequest.push_back(kExtensionNameExtDebugReport);

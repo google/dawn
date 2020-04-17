@@ -49,7 +49,7 @@ namespace dawn_native { namespace vulkan {
 
     }  // namespace
 
-    const char kLayerNameLunargStandardValidation[] = "VK_LAYER_LUNARG_standard_validation";
+    const char kLayerNameKhronosValidation[] = "VK_LAYER_KHRONOS_validation";
     const char kLayerNameLunargVKTrace[] = "VK_LAYER_LUNARG_vktrace";
     const char kLayerNameRenderDocCapture[] = "VK_LAYER_RENDERDOC_Capture";
     const char kLayerNameFuchsiaImagePipeSwapchain[] = "VK_LAYER_FUCHSIA_imagepipe_swapchain";
@@ -102,8 +102,8 @@ namespace dawn_native { namespace vulkan {
                 "vkEnumerateInstanceLayerProperties"));
 
             for (const auto& layer : info.layers) {
-                if (IsLayerName(layer, kLayerNameLunargStandardValidation)) {
-                    info.standardValidation = true;
+                if (IsLayerName(layer, kLayerNameKhronosValidation)) {
+                    info.validation = true;
                 }
                 if (IsLayerName(layer, kLayerNameLunargVKTrace)) {
                     info.vktrace = true;
