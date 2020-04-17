@@ -48,7 +48,7 @@ TEST_F(QueueSubmitValidationTest, SubmitWithMappedBuffer) {
         commands = encoder.Finish();
     }
 
-    wgpu::Queue queue = device.CreateQueue();
+    wgpu::Queue queue = device.GetDefaultQueue();
 
     // Submitting when the buffer has never been mapped should succeed
     queue.Submit(1, &commands);

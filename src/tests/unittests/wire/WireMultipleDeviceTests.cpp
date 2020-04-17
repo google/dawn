@@ -135,14 +135,14 @@ TEST_F(WireMultipleDeviceTests, ValidatesSameDevice) {
     WireHolder wireB;
 
     // Create the objects
-    WGPUQueue queueA = wgpuDeviceCreateQueue(wireA.ClientDevice());
-    WGPUQueue queueB = wgpuDeviceCreateQueue(wireB.ClientDevice());
+    WGPUQueue queueA = wgpuDeviceGetDefaultQueue(wireA.ClientDevice());
+    WGPUQueue queueB = wgpuDeviceGetDefaultQueue(wireB.ClientDevice());
 
     WGPUFenceDescriptor desc = {};
     WGPUFence fenceA = wgpuQueueCreateFence(queueA, &desc);
 
     // Flush on wire B. We should see the queue created.
-    EXPECT_CALL(*wireB.Api(), DeviceCreateQueue(wireB.ServerDevice()))
+    EXPECT_CALL(*wireB.Api(), DeviceGetDefaultQueue(wireB.ServerDevice()))
         .WillOnce(Return(wireB.Api()->GetNewQueue()));
     wireB.FlushClient();
 

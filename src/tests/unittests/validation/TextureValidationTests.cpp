@@ -23,6 +23,10 @@ namespace {
 
 class TextureValidationTest : public ValidationTest {
   protected:
+    void SetUp() override {
+        queue = device.GetDefaultQueue();
+    }
+
     wgpu::TextureDescriptor CreateDefaultTextureDescriptor() {
         wgpu::TextureDescriptor descriptor;
         descriptor.size.width = kWidth;
@@ -37,7 +41,7 @@ class TextureValidationTest : public ValidationTest {
         return descriptor;
     }
 
-    wgpu::Queue queue = device.CreateQueue();
+    wgpu::Queue queue;
 
   private:
     static constexpr uint32_t kWidth = 32;

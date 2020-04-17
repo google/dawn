@@ -238,7 +238,6 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTexture) {
     }
 
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
-    wgpu::Queue queue = device.CreateQueue();
     queue.Submit(1, &commandBuffer);
 
     VerifyResolveTarget(kGreen, mResolveTexture);
@@ -279,7 +278,6 @@ TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTest) {
     }
 
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
-    wgpu::Queue queue = device.CreateQueue();
     queue.Submit(1, &commandBuffer);
 
     // The color of the pixel in the middle of mResolveTexture should be green if MSAA resolve runs
@@ -317,7 +315,6 @@ TEST_P(MultisampledRenderingTest, ResolveInAnotherRenderPass) {
     }
 
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
-    wgpu::Queue queue = device.CreateQueue();
     queue.Submit(1, &commandBuffer);
 
     VerifyResolveTarget(kGreen, mResolveTexture);
@@ -351,7 +348,6 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargets) {
     }
 
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
-    wgpu::Queue queue = device.CreateQueue();
     queue.Submit(1, &commandBuffer);
 
     VerifyResolveTarget(kRed, mResolveTexture);
@@ -390,7 +386,6 @@ TEST_P(MultisampledRenderingTest, ResolveOneMultisampledTextureTwice) {
     }
 
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
-    wgpu::Queue queue = device.CreateQueue();
     queue.Submit(1, &commandBuffer);
 
     VerifyResolveTarget(kGreen, mResolveTexture);
@@ -429,7 +424,6 @@ TEST_P(MultisampledRenderingTest, ResolveIntoOneMipmapLevelOf2DTexture) {
     }
 
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
-    wgpu::Queue queue = device.CreateQueue();
     queue.Submit(1, &commandBuffer);
 
     VerifyResolveTarget(kGreen, resolveTexture, kBaseMipLevel, 0);
@@ -488,7 +482,6 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DArrayTexture) {
     }
 
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
-    wgpu::Queue queue = device.CreateQueue();
     queue.Submit(1, &commandBuffer);
 
     VerifyResolveTarget(kRed, resolveTexture1, kBaseMipLevel1, kBaseArrayLayer1);

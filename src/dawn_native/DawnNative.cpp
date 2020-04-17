@@ -166,6 +166,11 @@ namespace dawn_native {
         return deviceBase->GetLazyClearCountForTesting();
     }
 
+    size_t GetDeprecationWarningCountForTesting(WGPUDevice device) {
+        dawn_native::DeviceBase* deviceBase = reinterpret_cast<dawn_native::DeviceBase*>(device);
+        return deviceBase->GetDeprecationWarningCountForTesting();
+    }
+
     bool IsTextureSubresourceInitialized(WGPUTexture texture,
                                          uint32_t baseMipLevel,
                                          uint32_t levelCount,

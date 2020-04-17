@@ -175,6 +175,9 @@ namespace dawn_native {
     // Backdoor to get the number of lazy clears for testing
     DAWN_NATIVE_EXPORT size_t GetLazyClearCountForTesting(WGPUDevice device);
 
+    // Backdoor to get the number of deprecation warnings for testing
+    DAWN_NATIVE_EXPORT size_t GetDeprecationWarningCountForTesting(WGPUDevice device);
+
     //  Query if texture has been initialized
     DAWN_NATIVE_EXPORT bool IsTextureSubresourceInitialized(WGPUTexture texture,
                                                             uint32_t baseMipLevel,

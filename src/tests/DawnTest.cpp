@@ -729,7 +729,7 @@ void DawnTestBase::SetUp() {
     // the deferred expectations.
     dawnProcSetProcs(&procs);
     device = wgpu::Device::Acquire(cDevice);
-    queue = device.CreateQueue();
+    queue = device.GetDefaultQueue();
 
     device.SetUncapturedErrorCallback(OnDeviceError, this);
     device.SetDeviceLostCallback(OnDeviceLost, this);

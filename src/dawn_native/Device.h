@@ -154,6 +154,8 @@ namespace dawn_native {
         TextureViewBase* CreateTextureView(TextureBase* texture,
                                            const TextureViewDescriptor* descriptor);
 
+        QueueBase* GetDefaultQueue();
+
         void InjectError(wgpu::ErrorType type, const char* message);
         void Tick();
 
@@ -207,13 +209,15 @@ namespace dawn_native {
         bool IsValidationEnabled() const;
         size_t GetLazyClearCountForTesting();
         void IncrementLazyClearCountForTesting();
+        size_t GetDeprecationWarningCountForTesting();
+        void EmitDeprecationWarning(const char* warning);
         void LoseForTesting();
 
       protected:
         void SetToggle(Toggle toggle, bool isEnabled);
         void ForceSetToggle(Toggle toggle, bool isEnabled);
 
-        MaybeError Initialize();
+        MaybeError Initialize(QueueBase* defaultQueue);
         void ShutDownBase();
 
       private:
@@ -226,7 +230,6 @@ namespace dawn_native {
             const ComputePipelineDescriptor* descriptor) = 0;
         virtual ResultOrError<PipelineLayoutBase*> CreatePipelineLayoutImpl(
             const PipelineLayoutDescriptor* descriptor) = 0;
-        virtual ResultOrError<QueueBase*> CreateQueueImpl() = 0;
         virtual ResultOrError<RenderPipelineBase*> CreateRenderPipelineImpl(
             const RenderPipelineDescriptor* descriptor) = 0;
         virtual ResultOrError<SamplerBase*> CreateSamplerImpl(
@@ -255,7 +258,6 @@ namespace dawn_native {
                                                  const ComputePipelineDescriptor* descriptor);
         MaybeError CreatePipelineLayoutInternal(PipelineLayoutBase** result,
                                                 const PipelineLayoutDescriptor* descriptor);
-        MaybeError CreateQueueInternal(QueueBase** result);
         MaybeError CreateRenderBundleEncoderInternal(
             RenderBundleEncoder** result,
             const RenderBundleEncoderDescriptor* descriptor);
@@ -305,6 +307,10 @@ namespace dawn_native {
         std::unique_ptr<DynamicUploader> mDynamicUploader;
         std::unique_ptr<ErrorScopeTracker> mErrorScopeTracker;
         std::unique_ptr<FenceSignalTracker> mFenceSignalTracker;
+        Ref<QueueBase> mDefaultQueue;
+
+        struct DeprecationWarnings;
+        std::unique_ptr<DeprecationWarnings> mDeprecationWarnings;
 
         uint32_t mRefCount = 1;
         State mState = State::BeingCreated;

@@ -92,7 +92,6 @@ TEST_P(ClipSpaceTest, ClipSpace) {
     renderPass.Draw(6);
     renderPass.EndPass();
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
-    wgpu::Queue queue = device.CreateQueue();
     queue.Submit(1, &commandBuffer);
 
     EXPECT_PIXEL_RGBA8_EQ(RGBA8::kRed, colorTexture, kSize - 1, kSize - 1);

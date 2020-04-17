@@ -233,9 +233,9 @@ TEST_F(WireArgumentTests, ObjectsAsPointerArgument) {
     }
 
     // Create queue
-    WGPUQueue queue = wgpuDeviceCreateQueue(device);
+    WGPUQueue queue = wgpuDeviceGetDefaultQueue(device);
     WGPUQueue apiQueue = api.GetNewQueue();
-    EXPECT_CALL(api, DeviceCreateQueue(apiDevice)).WillOnce(Return(apiQueue));
+    EXPECT_CALL(api, DeviceGetDefaultQueue(apiDevice)).WillOnce(Return(apiQueue));
 
     // Submit command buffer and check we got a call with both API-side command buffers
     wgpuQueueSubmit(queue, 2, cmdBufs);

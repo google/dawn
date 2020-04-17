@@ -50,7 +50,7 @@ static std::vector<ShaderData> shaderData;
 void init() {
     device = CreateCppDawnDevice();
 
-    queue = device.CreateQueue();
+    queue = device.GetDefaultQueue();
     swapchain = GetSwapChain(device);
     swapchain.Configure(GetPreferredSwapChainTextureFormat(), wgpu::TextureUsage::OutputAttachment,
                         640, 480);

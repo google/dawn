@@ -45,7 +45,7 @@
 
 namespace dawn_native {
 
-    // DeviceBase::Caches
+    // DeviceBase sub-structures
 
     // The caches are unordered_sets of pointers with special hash and compare functions
     // to compare the value of the objects, instead of the pointers.
@@ -73,6 +73,11 @@ namespace dawn_native {
         ContentLessObjectCache<ShaderModuleBase> shaderModules;
     };
 
+    struct DeviceBase::DeprecationWarnings {
+        std::unordered_set<const char*> emitted;
+        size_t count = 0;
+    };
+
     // DeviceBase
 
     DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor)
@@ -89,7 +94,8 @@ namespace dawn_native {
     DeviceBase::~DeviceBase() {
     }
 
-    MaybeError DeviceBase::Initialize() {
+    MaybeError DeviceBase::Initialize(QueueBase* defaultQueue) {
+        mDefaultQueue = AcquireRef(defaultQueue);
         mRootErrorScope = AcquireRef(new ErrorScope());
         mCurrentErrorScope = mRootErrorScope.Get();
 
@@ -97,6 +103,7 @@ namespace dawn_native {
         mErrorScopeTracker = std::make_unique<ErrorScopeTracker>(this);
         mFenceSignalTracker = std::make_unique<FenceSignalTracker>(this);
         mDynamicUploader = std::make_unique<DynamicUploader>(this);
+        mDeprecationWarnings = std::make_unique<DeprecationWarnings>();
 
         // Starting from now the backend can start doing reentrant calls so the device is marked as
         // alive.
@@ -567,13 +574,10 @@ namespace dawn_native {
         return result;
     }
     QueueBase* DeviceBase::CreateQueue() {
-        QueueBase* result = nullptr;
-
-        if (ConsumedError(CreateQueueInternal(&result))) {
-            return QueueBase::MakeError(this);
-        }
-
-        return result;
+        // TODO(dawn:22): Remove this once users use GetDefaultQueue
+        EmitDeprecationWarning(
+            "Device::CreateQueue is deprecated, use Device::GetDefaultQueue instead");
+        return GetDefaultQueue();
     }
     SamplerBase* DeviceBase::CreateSampler(const SamplerDescriptor* descriptor) {
         SamplerBase* result = nullptr;
@@ -674,6 +678,15 @@ namespace dawn_native {
         }
     }
 
+    QueueBase* DeviceBase::GetDefaultQueue() {
+        // Backends gave the default queue during initialization.
+        ASSERT(mDefaultQueue.Get() != nullptr);
+
+        // Returns a new reference to the queue.
+        mDefaultQueue->Reference();
+        return mDefaultQueue.Get();
+    }
+
     void DeviceBase::ApplyExtensions(const DeviceDescriptor* deviceDescriptor) {
         ASSERT(deviceDescriptor);
         ASSERT(GetAdapter()->SupportsAllRequestedExtensions(deviceDescriptor->requiredExtensions));
@@ -700,6 +713,17 @@ namespace dawn_native {
 
     void DeviceBase::IncrementLazyClearCountForTesting() {
         ++mLazyClearCountForTesting;
+    }
+
+    size_t DeviceBase::GetDeprecationWarningCountForTesting() {
+        return mDeprecationWarnings->count;
+    }
+
+    void DeviceBase::EmitDeprecationWarning(const char* warning) {
+        mDeprecationWarnings->count++;
+        if (mDeprecationWarnings->emitted.insert(warning).second) {
+            dawn::WarningLog() << warning;
+        }
     }
 
     // Implementation details of object creation
@@ -767,12 +791,6 @@ namespace dawn_native {
             DAWN_TRY(ValidatePipelineLayoutDescriptor(this, descriptor));
         }
         DAWN_TRY_ASSIGN(*result, GetOrCreatePipelineLayout(descriptor));
-        return {};
-    }
-
-    MaybeError DeviceBase::CreateQueueInternal(QueueBase** result) {
-        DAWN_TRY(ValidateIsAlive());
-        DAWN_TRY_ASSIGN(*result, CreateQueueImpl());
         return {};
     }
 

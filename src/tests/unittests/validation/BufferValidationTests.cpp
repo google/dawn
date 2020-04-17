@@ -98,7 +98,7 @@ class BufferValidationTest : public ValidationTest {
 
             mockBufferMapReadCallback = std::make_unique<MockBufferMapReadCallback>();
             mockBufferMapWriteCallback = std::make_unique<MockBufferMapWriteCallback>();
-            queue = device.CreateQueue();
+            queue = device.GetDefaultQueue();
         }
 
         void TearDown() override {

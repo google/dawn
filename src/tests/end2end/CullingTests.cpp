@@ -87,7 +87,6 @@ class CullingTest : public DawnTest {
         renderPass.Draw(6);
         renderPass.EndPass();
         wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
-        wgpu::Queue queue = device.CreateQueue();
         queue.Submit(1, &commandBuffer);
 
         const RGBA8 kBackgroundColor = RGBA8::kBlue;

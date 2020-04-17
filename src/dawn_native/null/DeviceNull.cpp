@@ -89,7 +89,7 @@ namespace dawn_native { namespace null {
     }
 
     MaybeError Device::Initialize() {
-        return DeviceBase::Initialize();
+        return DeviceBase::Initialize(new Queue(this));
     }
 
     ResultOrError<BindGroupBase*> Device::CreateBindGroupImpl(
@@ -115,9 +115,6 @@ namespace dawn_native { namespace null {
     ResultOrError<PipelineLayoutBase*> Device::CreatePipelineLayoutImpl(
         const PipelineLayoutDescriptor* descriptor) {
         return new PipelineLayout(this, descriptor);
-    }
-    ResultOrError<QueueBase*> Device::CreateQueueImpl() {
-        return new Queue(this);
     }
     ResultOrError<RenderPipelineBase*> Device::CreateRenderPipelineImpl(
         const RenderPipelineDescriptor* descriptor) {

@@ -26,7 +26,7 @@ WGPUTextureFormat swapChainFormat;
 
 void init() {
     device = CreateCppDawnDevice().Release();
-    queue = wgpuDeviceCreateQueue(device);
+    queue = wgpuDeviceGetDefaultQueue(device);
 
     {
         WGPUSwapChainDescriptor descriptor = {};

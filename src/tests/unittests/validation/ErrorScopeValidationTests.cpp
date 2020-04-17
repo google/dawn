@@ -134,7 +134,7 @@ TEST_F(ErrorScopeValidationTest, PushPopBalanced) {
 // Test that error scopes do not call their callbacks until after an enclosed Queue::Submit
 // completes
 TEST_F(ErrorScopeValidationTest, CallbackAfterQueueSubmit) {
-    wgpu::Queue queue = device.CreateQueue();
+    wgpu::Queue queue = device.GetDefaultQueue();
 
     device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
     queue.Submit(0, nullptr);
@@ -149,7 +149,7 @@ TEST_F(ErrorScopeValidationTest, CallbackAfterQueueSubmit) {
 // Test that parent error scopes do not call their callbacks until after an enclosed Queue::Submit
 // completes
 TEST_F(ErrorScopeValidationTest, CallbackAfterQueueSubmitNested) {
-    wgpu::Queue queue = device.CreateQueue();
+    wgpu::Queue queue = device.GetDefaultQueue();
 
     device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
     device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
@@ -167,7 +167,7 @@ TEST_F(ErrorScopeValidationTest, CallbackAfterQueueSubmitNested) {
 
 // Test a callback that returns asynchronously followed by a synchronous one
 TEST_F(ErrorScopeValidationTest, AsynchronousThenSynchronous) {
-    wgpu::Queue queue = device.CreateQueue();
+    wgpu::Queue queue = device.GetDefaultQueue();
 
     device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
     queue.Submit(0, nullptr);
@@ -187,7 +187,7 @@ TEST_F(ErrorScopeValidationTest, AsynchronousThenSynchronous) {
 // Test that if the device is destroyed before the callback occurs, it is called with NoError
 // because all previous operations are waited upon before the destruction returns.
 TEST_F(ErrorScopeValidationTest, DeviceDestroyedBeforeCallback) {
-    wgpu::Queue queue = device.CreateQueue();
+    wgpu::Queue queue = device.GetDefaultQueue();
 
     device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
     queue.Submit(0, nullptr);

@@ -307,7 +307,7 @@ int main(int argc, const char* argv[]) {
             dawn::ErrorLog() << errorTypeName << " error: " << message;
         },
         nullptr);
-    queue = device.CreateQueue();
+    queue = device.GetDefaultQueue();
 
     // The hacky pipeline to render a triangle.
     utils::ComboRenderPipelineDescriptor pipelineDesc(device);

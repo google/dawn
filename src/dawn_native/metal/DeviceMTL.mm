@@ -64,7 +64,7 @@ namespace dawn_native { namespace metal {
         InitTogglesFromDriver();
         mCommandQueue = [mMtlDevice newCommandQueue];
 
-        return DeviceBase::Initialize();
+        return DeviceBase::Initialize(new Queue(this));
     }
 
     void Device::InitTogglesFromDriver() {
@@ -123,9 +123,6 @@ namespace dawn_native { namespace metal {
     ResultOrError<PipelineLayoutBase*> Device::CreatePipelineLayoutImpl(
         const PipelineLayoutDescriptor* descriptor) {
         return new PipelineLayout(this, descriptor);
-    }
-    ResultOrError<QueueBase*> Device::CreateQueueImpl() {
-        return new Queue(this);
     }
     ResultOrError<RenderPipelineBase*> Device::CreateRenderPipelineImpl(
         const RenderPipelineDescriptor* descriptor) {

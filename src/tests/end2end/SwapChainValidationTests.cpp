@@ -86,7 +86,6 @@ class SwapChainValidationTests : public DawnTest {
         pass.EndPass();
         wgpu::CommandBuffer commands = encoder.Finish();
 
-        wgpu::Queue queue = device.CreateQueue();
         ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
     }
 };
@@ -244,7 +243,6 @@ TEST_P(SwapChainValidationTests, ReturnedViewCharacteristics) {
     pass.EndPass();
     wgpu::CommandBuffer commands = encoder.Finish();
 
-    wgpu::Queue queue = device.CreateQueue();
     queue.Submit(1, &commands);
 
     // Check that view doesn't have extra formats like Sampled.

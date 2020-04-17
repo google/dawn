@@ -594,6 +594,10 @@
                 ]
             },
             {
+                "name": "get default queue",
+                "returns": "queue"
+            },
+            {
                 "name": "inject error",
                 "args": [
                     {"name": "type", "type": "error type"},

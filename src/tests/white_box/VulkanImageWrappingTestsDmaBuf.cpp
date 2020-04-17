@@ -305,7 +305,7 @@ namespace dawn_native { namespace vulkan {
 
             wgpu::CommandBuffer commands = encoder.Finish();
 
-            wgpu::Queue queue = dawnDevice.CreateQueue();
+            wgpu::Queue queue = dawnDevice.GetDefaultQueue();
             queue.Submit(1, &commands);
         }
 
@@ -482,7 +482,7 @@ namespace dawn_native { namespace vulkan {
         ClearImage(secondDevice, copySrcTexture, {1 / 255.0f, 2 / 255.0f, 3 / 255.0f, 4 / 255.0f});
 
         // Copy color B on |secondDevice|
-        wgpu::Queue secondDeviceQueue = secondDevice.CreateQueue();
+        wgpu::Queue secondDeviceQueue = secondDevice.GetDefaultQueue();
         SimpleCopyTextureToTexture(secondDevice, secondDeviceQueue, copySrcTexture,
                                    secondDeviceWrappedTexture);
 
@@ -578,7 +578,7 @@ namespace dawn_native { namespace vulkan {
             secondDevice, &defaultDescriptor, nextFd, defaultStride, defaultModifier, {signalFd});
 
         // Copy color B on |secondDevice|
-        wgpu::Queue secondDeviceQueue = secondDevice.CreateQueue();
+        wgpu::Queue secondDeviceQueue = secondDevice.GetDefaultQueue();
 
         // Create a buffer on |secondDevice|
         wgpu::Buffer copySrcBuffer =
@@ -681,8 +681,8 @@ namespace dawn_native { namespace vulkan {
             wgpu::Device::Acquire(reinterpret_cast<WGPUDevice>(thirdDeviceVk));
 
         // Make queue for device 2 and 3
-        wgpu::Queue secondDeviceQueue = secondDevice.CreateQueue();
-        wgpu::Queue thirdDeviceQueue = thirdDevice.CreateQueue();
+        wgpu::Queue secondDeviceQueue = secondDevice.GetDefaultQueue();
+        wgpu::Queue thirdDeviceQueue = thirdDevice.GetDefaultQueue();
 
         // Create BOs for A, B, C
         gbm_bo* gbmBoA = CreateGbmBo(1, 1, true /* linear */);
@@ -773,7 +773,7 @@ namespace dawn_native { namespace vulkan {
             textures.push_back(device.CreateTexture(&descriptor));
         }
 
-        wgpu::Queue secondDeviceQueue = secondDevice.CreateQueue();
+        wgpu::Queue secondDeviceQueue = secondDevice.GetDefaultQueue();
 
         // Make an image on |secondDevice|
         gbm_bo* gbmBo = CreateGbmBo(640, 480, false /* linear */);

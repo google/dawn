@@ -50,9 +50,7 @@ if (!build_with_chromium) {
 
   static_library("gtest") {
     testonly = true
-    sources = [
-      "${googletest_dir}/googletest/src/gtest-all.cc",
-    ]
+    sources = [ "${googletest_dir}/googletest/src/gtest-all.cc" ]
     public_configs = [ ":gtest_config" ]
   }
 
@@ -66,9 +64,7 @@ if (!build_with_chromium) {
 
   static_library("gmock") {
     testonly = true
-    sources = [
-      "${googletest_dir}/googlemock/src/gmock-all.cc",
-    ]
+    sources = [ "${googletest_dir}/googlemock/src/gmock-all.cc" ]
     public_configs = [ ":gmock_config" ]
   }
 
@@ -241,6 +237,7 @@ source_set("dawn_end2end_tests_sources") {
     "end2end/CopyTests.cpp",
     "end2end/CullingTests.cpp",
     "end2end/DebugMarkerTests.cpp",
+    "end2end/DeprecatedAPITests.cpp",
     "end2end/DepthStencilStateTests.cpp",
     "end2end/DestroyTests.cpp",
     "end2end/DeviceLostTests.cpp",
@@ -257,6 +254,7 @@ source_set("dawn_end2end_tests_sources") {
     "end2end/ObjectCachingTests.cpp",
     "end2end/OpArrayLengthTests.cpp",
     "end2end/PrimitiveTopologyTests.cpp",
+    "end2end/QueueTests.cpp",
     "end2end/RenderBundleTests.cpp",
     "end2end/RenderPassLoadOpTests.cpp",
     "end2end/RenderPassTests.cpp",
@@ -325,9 +323,7 @@ source_set("dawn_white_box_tests_sources") {
     "${dawn_root}/src/dawn_native:dawn_native_static",
   ]
 
-  sources = [
-    "DawnTest.h",
-  ]
+  sources = [ "DawnTest.h" ]
 
   if (dawn_enable_vulkan) {
     deps += [ "${dawn_root}/third_party/khronos:vulkan_headers" ]
