@@ -37,10 +37,10 @@ class SpvParserTestBase : public T {
   ~SpvParserTestBase() = default;
 
   /// Sets up the test helper
-  void SetUp() { ctx_.Reset(); }
+  void SetUp() override { ctx_.Reset(); }
 
   /// Tears down the test helper
-  void TearDown() { impl_ = nullptr; }
+  void TearDown() override { impl_ = nullptr; }
 
   /// Retrieves the parser from the helper
   /// @param input the SPIR-V binary to parse

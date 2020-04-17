@@ -23,19 +23,19 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, VariableDecl_Parses) {
-  auto p = parser("var my_var : f32");
+  auto* p = parser("var my_var : f32");
   auto var = p->variable_decl();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(var, nullptr);
   ASSERT_EQ(var->name(), "my_var");
   ASSERT_NE(var->type(), nullptr);
-  ASSERT_EQ(var->source().line, 1);
-  ASSERT_EQ(var->source().column, 1);
+  ASSERT_EQ(var->source().line, 1u);
+  ASSERT_EQ(var->source().column, 1u);
   ASSERT_TRUE(var->type()->IsF32());
 }
 
 TEST_F(ParserImplTest, VariableDecl_MissingVar) {
-  auto p = parser("my_var : f32");
+  auto* p = parser("my_var : f32");
   auto v = p->variable_decl();
   ASSERT_EQ(v, nullptr);
   ASSERT_FALSE(p->has_error());
@@ -45,7 +45,7 @@ TEST_F(ParserImplTest, VariableDecl_MissingVar) {
 }
 
 TEST_F(ParserImplTest, VariableDecl_InvalidIdentDecl) {
-  auto p = parser("var my_var f32");
+  auto* p = parser("var my_var f32");
   auto v = p->variable_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(v, nullptr);
@@ -53,7 +53,7 @@ TEST_F(ParserImplTest, VariableDecl_InvalidIdentDecl) {
 }
 
 TEST_F(ParserImplTest, VariableDecl_WithStorageClass) {
-  auto p = parser("var<private> my_var : f32");
+  auto* p = parser("var<private> my_var : f32");
   auto v = p->variable_decl();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(v, nullptr);
@@ -63,7 +63,7 @@ TEST_F(ParserImplTest, VariableDecl_WithStorageClass) {
 }
 
 TEST_F(ParserImplTest, VariableDecl_InvalidStorageClass) {
-  auto p = parser("var<unknown> my_var : f32");
+  auto* p = parser("var<unknown> my_var : f32");
   auto v = p->variable_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(v, nullptr);

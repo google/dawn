@@ -34,20 +34,20 @@ TEST_F(ElseStatementTest, Creation) {
   StatementList body;
   body.push_back(std::make_unique<NopStatement>());
 
-  auto cond_ptr = cond.get();
-  auto nop_ptr = body[0].get();
+  auto* cond_ptr = cond.get();
+  auto* nop_ptr = body[0].get();
 
   ElseStatement e(std::move(cond), std::move(body));
   EXPECT_EQ(e.condition(), cond_ptr);
-  ASSERT_EQ(e.body().size(), 1);
+  ASSERT_EQ(e.body().size(), 1u);
   EXPECT_EQ(e.body()[0].get(), nop_ptr);
 }
 
 TEST_F(ElseStatementTest, Creation_WithSource) {
   ElseStatement e(Source{20, 2}, {});
   auto src = e.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(ElseStatementTest, IsElse) {

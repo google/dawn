@@ -23,17 +23,17 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, ElseStmt) {
-  auto p = parser("else { a = b; c = d; }");
+  auto* p = parser("else { a = b; c = d; }");
   auto e = p->else_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsElse());
   ASSERT_EQ(e->condition(), nullptr);
-  EXPECT_EQ(e->body().size(), 2);
+  EXPECT_EQ(e->body().size(), 2u);
 }
 
 TEST_F(ParserImplTest, ElseStmt_InvalidBody) {
-  auto p = parser("else { fn main() -> void {}}");
+  auto* p = parser("else { fn main() -> void {}}");
   auto e = p->else_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -41,7 +41,7 @@ TEST_F(ParserImplTest, ElseStmt_InvalidBody) {
 }
 
 TEST_F(ParserImplTest, ElseStmt_MissingBody) {
-  auto p = parser("else");
+  auto* p = parser("else");
   auto e = p->else_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);

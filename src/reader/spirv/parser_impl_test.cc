@@ -30,14 +30,14 @@ using ::testing::HasSubstr;
 
 TEST_F(SpvParserTest, Impl_Uint32VecEmpty) {
   std::vector<uint32_t> data;
-  auto p = parser(data);
+  auto* p = parser(data);
   EXPECT_FALSE(p->Parse());
   // TODO(dneto): What message?
 }
 
 TEST_F(SpvParserTest, Impl_InvalidModuleFails) {
   auto invalid_spv = test::Assemble("%ty = OpTypeInt 3 0");
-  auto p = parser(invalid_spv);
+  auto* p = parser(invalid_spv);
   EXPECT_FALSE(p->Parse());
   EXPECT_THAT(
       p->error(),

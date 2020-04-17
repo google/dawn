@@ -39,7 +39,7 @@ TEST_F(BuilderTest, Literal_Bool_True) {
   Builder b;
   auto id = b.GenerateLiteralIfNeeded(&b_true);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(2, id);
+  EXPECT_EQ(2u, id);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
 %2 = OpConstantTrue %1
@@ -53,7 +53,7 @@ TEST_F(BuilderTest, Literal_Bool_False) {
   Builder b;
   auto id = b.GenerateLiteralIfNeeded(&b_false);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(2, id);
+  EXPECT_EQ(2u, id);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
 %2 = OpConstantFalse %1
@@ -66,11 +66,11 @@ TEST_F(BuilderTest, Literal_Bool_Dedup) {
   ast::BoolLiteral b_false(&bool_type, false);
 
   Builder b;
-  ASSERT_NE(b.GenerateLiteralIfNeeded(&b_true), 0);
+  ASSERT_NE(b.GenerateLiteralIfNeeded(&b_true), 0u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  ASSERT_NE(b.GenerateLiteralIfNeeded(&b_false), 0);
+  ASSERT_NE(b.GenerateLiteralIfNeeded(&b_false), 0u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  ASSERT_NE(b.GenerateLiteralIfNeeded(&b_true), 0);
+  ASSERT_NE(b.GenerateLiteralIfNeeded(&b_true), 0u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
@@ -86,7 +86,7 @@ TEST_F(BuilderTest, Literal_I32) {
   Builder b;
   auto id = b.GenerateLiteralIfNeeded(&i);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(2, id);
+  EXPECT_EQ(2u, id);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 1
 %2 = OpConstant %1 -23
@@ -99,8 +99,8 @@ TEST_F(BuilderTest, Literal_I32_Dedup) {
   ast::IntLiteral i2(&i32, -23);
 
   Builder b;
-  ASSERT_NE(b.GenerateLiteralIfNeeded(&i1), 0);
-  ASSERT_NE(b.GenerateLiteralIfNeeded(&i2), 0);
+  ASSERT_NE(b.GenerateLiteralIfNeeded(&i1), 0u);
+  ASSERT_NE(b.GenerateLiteralIfNeeded(&i2), 0u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 1
@@ -115,7 +115,7 @@ TEST_F(BuilderTest, Literal_U32) {
   Builder b;
   auto id = b.GenerateLiteralIfNeeded(&i);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(2, id);
+  EXPECT_EQ(2u, id);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 0
 %2 = OpConstant %1 23
@@ -128,8 +128,8 @@ TEST_F(BuilderTest, Literal_U32_Dedup) {
   ast::UintLiteral i2(&u32, 23);
 
   Builder b;
-  ASSERT_NE(b.GenerateLiteralIfNeeded(&i1), 0);
-  ASSERT_NE(b.GenerateLiteralIfNeeded(&i2), 0);
+  ASSERT_NE(b.GenerateLiteralIfNeeded(&i1), 0u);
+  ASSERT_NE(b.GenerateLiteralIfNeeded(&i2), 0u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 0
@@ -144,7 +144,7 @@ TEST_F(BuilderTest, Literal_F32) {
   Builder b;
   auto id = b.GenerateLiteralIfNeeded(&i);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(2, id);
+  EXPECT_EQ(2u, id);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
 %2 = OpConstant %1 23.2450008
@@ -157,8 +157,8 @@ TEST_F(BuilderTest, Literal_F32_Dedup) {
   ast::FloatLiteral i2(&f32, 23.245f);
 
   Builder b;
-  ASSERT_NE(b.GenerateLiteralIfNeeded(&i1), 0);
-  ASSERT_NE(b.GenerateLiteralIfNeeded(&i2), 0);
+  ASSERT_NE(b.GenerateLiteralIfNeeded(&i1), 0u);
+  ASSERT_NE(b.GenerateLiteralIfNeeded(&i2), 0u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32

@@ -137,7 +137,7 @@ TEST_P(SpvBinaryTest, EmitExpression) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+  auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
       << p->error() << "\n"
       << assembly;

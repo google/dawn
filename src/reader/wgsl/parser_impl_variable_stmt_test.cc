@@ -24,7 +24,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl) {
-  auto p = parser("var a : i32;");
+  auto* p = parser("var a : i32;");
   auto e = p->variable_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
@@ -36,7 +36,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl) {
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_WithInit) {
-  auto p = parser("var a : i32 = 1;");
+  auto* p = parser("var a : i32 = 1;");
   auto e = p->variable_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
@@ -49,7 +49,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_WithInit) {
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_Invalid) {
-  auto p = parser("var a : invalid;");
+  auto* p = parser("var a : invalid;");
   auto e = p->variable_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -57,7 +57,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_Invalid) {
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_ConstructorInvalid) {
-  auto p = parser("var a : i32 = if(a) {}");
+  auto* p = parser("var a : i32 = if(a) {}");
   auto e = p->variable_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -65,7 +65,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_ConstructorInvalid) {
 }
 
 TEST_F(ParserImplTest, VariableStmt_Const) {
-  auto p = parser("const a : i32 = 1");
+  auto* p = parser("const a : i32 = 1");
   auto e = p->variable_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
@@ -73,7 +73,7 @@ TEST_F(ParserImplTest, VariableStmt_Const) {
 }
 
 TEST_F(ParserImplTest, VariableStmt_Const_InvalidVarIdent) {
-  auto p = parser("const a : invalid = 1");
+  auto* p = parser("const a : invalid = 1");
   auto e = p->variable_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -81,7 +81,7 @@ TEST_F(ParserImplTest, VariableStmt_Const_InvalidVarIdent) {
 }
 
 TEST_F(ParserImplTest, VariableStmt_Const_MissingEqual) {
-  auto p = parser("const a : i32 1");
+  auto* p = parser("const a : i32 1");
   auto e = p->variable_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -89,7 +89,7 @@ TEST_F(ParserImplTest, VariableStmt_Const_MissingEqual) {
 }
 
 TEST_F(ParserImplTest, VariableStmt_Const_MissingConstructor) {
-  auto p = parser("const a : i32 =");
+  auto* p = parser("const a : i32 =");
   auto e = p->variable_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -97,7 +97,7 @@ TEST_F(ParserImplTest, VariableStmt_Const_MissingConstructor) {
 }
 
 TEST_F(ParserImplTest, VariableStmt_Const_InvalidConstructor) {
-  auto p = parser("const a : i32 = if (a) {}");
+  auto* p = parser("const a : i32 = if (a) {}");
   auto e = p->variable_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);

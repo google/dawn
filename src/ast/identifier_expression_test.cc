@@ -24,20 +24,20 @@ using IdentifierExpressionTest = testing::Test;
 
 TEST_F(IdentifierExpressionTest, Creation) {
   IdentifierExpression i("ident");
-  ASSERT_EQ(i.name().size(), 1);
+  ASSERT_EQ(i.name().size(), 1u);
   EXPECT_EQ(i.name()[0], "ident");
 }
 
 TEST_F(IdentifierExpressionTest, Creation_WithSource) {
   IdentifierExpression i(Source{20, 2}, {"ns1", "ns2", "ident"});
-  ASSERT_EQ(i.name().size(), 3);
+  ASSERT_EQ(i.name().size(), 3u);
   EXPECT_EQ(i.name()[0], "ns1");
   EXPECT_EQ(i.name()[1], "ns2");
   EXPECT_EQ(i.name()[2], "ident");
 
   auto src = i.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(IdentifierExpressionTest, IsIdentifier) {

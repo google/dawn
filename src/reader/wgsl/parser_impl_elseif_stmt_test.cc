@@ -23,43 +23,43 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, ElseIfStmt) {
-  auto p = parser("elseif (a == 4) { a = b; c = d; }");
+  auto* p = parser("elseif (a == 4) { a = b; c = d; }");
   auto e = p->elseif_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_EQ(e.size(), 1);
+  ASSERT_EQ(e.size(), 1u);
 
   ASSERT_TRUE(e[0]->IsElse());
   ASSERT_NE(e[0]->condition(), nullptr);
   ASSERT_TRUE(e[0]->condition()->IsBinary());
-  EXPECT_EQ(e[0]->body().size(), 2);
+  EXPECT_EQ(e[0]->body().size(), 2u);
 }
 
 TEST_F(ParserImplTest, ElseIfStmt_Multiple) {
-  auto p = parser("elseif (a == 4) { a = b; c = d; } elseif(c) { d = 2; }");
+  auto* p = parser("elseif (a == 4) { a = b; c = d; } elseif(c) { d = 2; }");
   auto e = p->elseif_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_EQ(e.size(), 2);
+  ASSERT_EQ(e.size(), 2u);
 
   ASSERT_TRUE(e[0]->IsElse());
   ASSERT_NE(e[0]->condition(), nullptr);
   ASSERT_TRUE(e[0]->condition()->IsBinary());
-  EXPECT_EQ(e[0]->body().size(), 2);
+  EXPECT_EQ(e[0]->body().size(), 2u);
 
   ASSERT_TRUE(e[1]->IsElse());
   ASSERT_NE(e[1]->condition(), nullptr);
   ASSERT_TRUE(e[1]->condition()->IsIdentifier());
-  EXPECT_EQ(e[1]->body().size(), 1);
+  EXPECT_EQ(e[1]->body().size(), 1u);
 }
 
 TEST_F(ParserImplTest, ElseIfStmt_InvalidBody) {
-  auto p = parser("elseif (true) { fn main() -> void {}}");
+  auto* p = parser("elseif (true) { fn main() -> void {}}");
   auto e = p->elseif_stmt();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:17: missing }");
 }
 
 TEST_F(ParserImplTest, ElseIfStmt_MissingBody) {
-  auto p = parser("elseif (true)");
+  auto* p = parser("elseif (true)");
   auto e = p->elseif_stmt();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:14: missing {");

@@ -36,12 +36,12 @@ TEST_F(SwitchStatementTest, Creation) {
   body.push_back(
       std::make_unique<CaseStatement>(std::move(lit), StatementList()));
 
-  auto ident_ptr = ident.get();
-  auto case_ptr = body[0].get();
+  auto* ident_ptr = ident.get();
+  auto* case_ptr = body[0].get();
 
   SwitchStatement stmt(std::move(ident), std::move(body));
   EXPECT_EQ(stmt.condition(), ident_ptr);
-  ASSERT_EQ(stmt.body().size(), 1);
+  ASSERT_EQ(stmt.body().size(), 1u);
   EXPECT_EQ(stmt.body()[0].get(), case_ptr);
 }
 
@@ -50,8 +50,8 @@ TEST_F(SwitchStatementTest, Creation_WithSource) {
 
   SwitchStatement stmt(Source{20, 2}, std::move(ident), CaseStatementList());
   auto src = stmt.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(SwitchStatementTest, IsSwitch) {

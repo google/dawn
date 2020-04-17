@@ -28,7 +28,7 @@ using StructTypeTest = testing::Test;
 
 TEST_F(StructTypeTest, Creation) {
   auto impl = std::make_unique<Struct>();
-  auto ptr = impl.get();
+  auto* ptr = impl.get();
   StructType s{std::move(impl)};
   EXPECT_EQ(s.impl(), ptr);
 }

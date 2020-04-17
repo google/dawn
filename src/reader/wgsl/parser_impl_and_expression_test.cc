@@ -26,36 +26,36 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, AndExpression_Parses) {
-  auto p = parser("a & true");
+  auto* p = parser("a & true");
   auto e = p->and_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsBinary());
-  auto rel = e->AsBinary();
+  auto* rel = e->AsBinary();
   EXPECT_EQ(ast::BinaryOp::kAnd, rel->op());
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
-  auto ident = rel->lhs()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = rel->lhs()->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 
   ASSERT_TRUE(rel->rhs()->IsConstructor());
   ASSERT_TRUE(rel->rhs()->AsConstructor()->IsScalarConstructor());
-  auto init = rel->rhs()->AsConstructor()->AsScalarConstructor();
+  auto* init = rel->rhs()->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(init->literal()->IsBool());
   ASSERT_TRUE(init->literal()->AsBool()->IsTrue());
 }
 
 TEST_F(ParserImplTest, AndExpression_InvalidLHS) {
-  auto p = parser("if (a) {} & true");
+  auto* p = parser("if (a) {} & true");
   auto e = p->and_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e, nullptr);
 }
 
 TEST_F(ParserImplTest, AndExpression_InvalidRHS) {
-  auto p = parser("true & if (a) {}");
+  auto* p = parser("true & if (a) {}");
   auto e = p->and_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -63,7 +63,7 @@ TEST_F(ParserImplTest, AndExpression_InvalidRHS) {
 }
 
 TEST_F(ParserImplTest, AndExpression_NoOr_ReturnsLHS) {
-  auto p = parser("a true");
+  auto* p = parser("a true");
   auto e = p->and_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);

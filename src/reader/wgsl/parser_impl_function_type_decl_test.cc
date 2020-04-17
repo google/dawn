@@ -28,27 +28,27 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, FunctionTypeDecl_Void) {
-  auto v = tm()->Get(std::make_unique<ast::type::VoidType>());
+  auto* v = tm()->Get(std::make_unique<ast::type::VoidType>());
 
-  auto p = parser("void");
-  auto e = p->function_type_decl();
+  auto* p = parser("void");
+  auto* e = p->function_type_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e, v);
 }
 
 TEST_F(ParserImplTest, FunctionTypeDecl_Type) {
-  auto f32 = tm()->Get(std::make_unique<ast::type::F32Type>());
-  auto vec2 = tm()->Get(std::make_unique<ast::type::VectorType>(f32, 2));
+  auto* f32 = tm()->Get(std::make_unique<ast::type::F32Type>());
+  auto* vec2 = tm()->Get(std::make_unique<ast::type::VectorType>(f32, 2));
 
-  auto p = parser("vec2<f32>");
-  auto e = p->function_type_decl();
+  auto* p = parser("vec2<f32>");
+  auto* e = p->function_type_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e, vec2);
 }
 
 TEST_F(ParserImplTest, FunctionTypeDecl_InvalidType) {
-  auto p = parser("vec2<invalid>");
-  auto e = p->function_type_decl();
+  auto* p = parser("vec2<invalid>");
+  auto* e = p->function_type_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
   EXPECT_EQ(p->error(), "1:6: unknown type alias 'invalid'");

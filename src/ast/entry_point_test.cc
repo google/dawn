@@ -30,8 +30,8 @@ TEST_F(EntryPointTest, Creation) {
   EXPECT_EQ(e.name(), "main");
   EXPECT_EQ(e.function_name(), "vtx_main");
   EXPECT_EQ(e.stage(), PipelineStage::kVertex);
-  EXPECT_EQ(e.line(), 0);
-  EXPECT_EQ(e.column(), 0);
+  EXPECT_EQ(e.line(), 0u);
+  EXPECT_EQ(e.column(), 0u);
 }
 
 TEST_F(EntryPointTest, CreationWithSource) {
@@ -41,8 +41,8 @@ TEST_F(EntryPointTest, CreationWithSource) {
   EXPECT_EQ(e.name(), "main");
   EXPECT_EQ(e.function_name(), "vtx_main");
   EXPECT_EQ(e.stage(), PipelineStage::kVertex);
-  EXPECT_EQ(e.line(), 27);
-  EXPECT_EQ(e.column(), 4);
+  EXPECT_EQ(e.line(), 27u);
+  EXPECT_EQ(e.column(), 4u);
 }
 
 TEST_F(EntryPointTest, CreationEmpty) {
@@ -56,8 +56,8 @@ TEST_F(EntryPointTest, CreationEmpty) {
   EXPECT_EQ(e.function_name(), "my_func");
   EXPECT_EQ(e.name(), "a_name");
   EXPECT_EQ(e.stage(), PipelineStage::kFragment);
-  EXPECT_EQ(e.line(), 27);
-  EXPECT_EQ(e.column(), 4);
+  EXPECT_EQ(e.line(), 27u);
+  EXPECT_EQ(e.column(), 4u);
 }
 
 TEST_F(EntryPointTest, IsValid) {

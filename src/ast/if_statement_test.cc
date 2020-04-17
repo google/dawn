@@ -30,12 +30,12 @@ TEST_F(IfStatementTest, Creation) {
   StatementList body;
   body.push_back(std::make_unique<NopStatement>());
 
-  auto cond_ptr = cond.get();
-  auto stmt_ptr = body[0].get();
+  auto* cond_ptr = cond.get();
+  auto* stmt_ptr = body[0].get();
 
   IfStatement stmt(std::move(cond), std::move(body));
   EXPECT_EQ(stmt.condition(), cond_ptr);
-  ASSERT_EQ(stmt.body().size(), 1);
+  ASSERT_EQ(stmt.body().size(), 1u);
   EXPECT_EQ(stmt.body()[0].get(), stmt_ptr);
 }
 
@@ -46,8 +46,8 @@ TEST_F(IfStatementTest, Creation_WithSource) {
 
   IfStatement stmt(Source{20, 2}, std::move(cond), std::move(body));
   auto src = stmt.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(IfStatementTest, IsIf) {

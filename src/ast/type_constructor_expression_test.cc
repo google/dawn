@@ -33,11 +33,11 @@ TEST_F(TypeConstructorExpressionTest, Creation) {
   type::F32Type f32;
   ExpressionList expr;
   expr.push_back(std::make_unique<IdentifierExpression>("expr"));
-  auto expr_ptr = expr[0].get();
+  auto* expr_ptr = expr[0].get();
 
   TypeConstructorExpression t(&f32, std::move(expr));
   EXPECT_EQ(t.type(), &f32);
-  ASSERT_EQ(t.values().size(), 1);
+  ASSERT_EQ(t.values().size(), 1u);
   EXPECT_EQ(t.values()[0].get(), expr_ptr);
 }
 
@@ -48,8 +48,8 @@ TEST_F(TypeConstructorExpressionTest, Creation_WithSource) {
 
   TypeConstructorExpression t(Source{20, 2}, &f32, std::move(expr));
   auto src = t.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(TypeConstructorExpressionTest, IsTypeConstructor) {

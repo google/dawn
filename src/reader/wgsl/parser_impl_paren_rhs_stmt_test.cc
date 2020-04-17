@@ -22,7 +22,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, ParenRhsStmt) {
-  auto p = parser("(a + b)");
+  auto* p = parser("(a + b)");
   auto e = p->paren_rhs_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
@@ -30,7 +30,7 @@ TEST_F(ParserImplTest, ParenRhsStmt) {
 }
 
 TEST_F(ParserImplTest, ParenRhsStmt_MissingLeftParen) {
-  auto p = parser("true)");
+  auto* p = parser("true)");
   auto e = p->paren_rhs_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -38,7 +38,7 @@ TEST_F(ParserImplTest, ParenRhsStmt_MissingLeftParen) {
 }
 
 TEST_F(ParserImplTest, ParenRhsStmt_MissingRightParen) {
-  auto p = parser("(true");
+  auto* p = parser("(true");
   auto e = p->paren_rhs_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -46,7 +46,7 @@ TEST_F(ParserImplTest, ParenRhsStmt_MissingRightParen) {
 }
 
 TEST_F(ParserImplTest, ParenRhsStmt_InvalidExpression) {
-  auto p = parser("(if (a() {})");
+  auto* p = parser("(if (a() {})");
   auto e = p->paren_rhs_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -54,7 +54,7 @@ TEST_F(ParserImplTest, ParenRhsStmt_InvalidExpression) {
 }
 
 TEST_F(ParserImplTest, ParenRhsStmt_MissingExpression) {
-  auto p = parser("()");
+  auto* p = parser("()");
   auto e = p->paren_rhs_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);

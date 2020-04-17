@@ -32,12 +32,12 @@ TEST_F(CaseStatementTest, Creation) {
   StatementList stmts;
   stmts.push_back(std::make_unique<NopStatement>());
 
-  auto bool_ptr = b.get();
-  auto nop_ptr = stmts[0].get();
+  auto* bool_ptr = b.get();
+  auto* nop_ptr = stmts[0].get();
 
   CaseStatement c(std::move(b), std::move(stmts));
   EXPECT_EQ(c.condition(), bool_ptr);
-  ASSERT_EQ(c.body().size(), 1);
+  ASSERT_EQ(c.body().size(), 1u);
   EXPECT_EQ(c.body()[0].get(), nop_ptr);
 }
 
@@ -49,8 +49,8 @@ TEST_F(CaseStatementTest, Creation_WithSource) {
 
   CaseStatement c(Source{20, 2}, std::move(b), std::move(stmts));
   auto src = c.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(CaseStatementTest, IsDefault_WithoutCondition) {

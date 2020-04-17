@@ -1,4 +1,3 @@
-
 // Copyright 2020 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -71,7 +70,7 @@ class FakeExpr : public ast::Expression {
 
 class TypeDeterminerTest : public testing::Test {
  public:
-  void SetUp() { td_ = std::make_unique<TypeDeterminer>(&ctx_); }
+  void SetUp() override { td_ = std::make_unique<TypeDeterminer>(&ctx_); }
 
   TypeDeterminer* td() const { return td_.get(); }
 
@@ -103,11 +102,11 @@ TEST_F(TypeDeterminerTest, Stmt_Assign) {
 
   auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::IntLiteral>(&i32, 2));
-  auto lhs_ptr = lhs.get();
+  auto* lhs_ptr = lhs.get();
 
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
-  auto rhs_ptr = rhs.get();
+  auto* rhs_ptr = rhs.get();
 
   ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
 
@@ -124,7 +123,7 @@ TEST_F(TypeDeterminerTest, Stmt_Break) {
 
   auto cond = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::IntLiteral>(&i32, 2));
-  auto cond_ptr = cond.get();
+  auto* cond_ptr = cond.get();
 
   ast::BreakStatement brk(ast::StatementCondition::kIf, std::move(cond));
 
@@ -145,11 +144,11 @@ TEST_F(TypeDeterminerTest, Stmt_Case) {
 
   auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::IntLiteral>(&i32, 2));
-  auto lhs_ptr = lhs.get();
+  auto* lhs_ptr = lhs.get();
 
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
-  auto rhs_ptr = rhs.get();
+  auto* rhs_ptr = rhs.get();
 
   ast::StatementList body;
   body.push_back(std::make_unique<ast::AssignmentStatement>(std::move(lhs),
@@ -170,7 +169,7 @@ TEST_F(TypeDeterminerTest, Stmt_Continue) {
 
   auto cond = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::IntLiteral>(&i32, 2));
-  auto cond_ptr = cond.get();
+  auto* cond_ptr = cond.get();
 
   ast::ContinueStatement stmt(ast::StatementCondition::kIf, std::move(cond));
 
@@ -191,11 +190,11 @@ TEST_F(TypeDeterminerTest, Stmt_Else) {
 
   auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::IntLiteral>(&i32, 2));
-  auto lhs_ptr = lhs.get();
+  auto* lhs_ptr = lhs.get();
 
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
-  auto rhs_ptr = rhs.get();
+  auto* rhs_ptr = rhs.get();
 
   ast::StatementList body;
   body.push_back(std::make_unique<ast::AssignmentStatement>(std::move(lhs),
@@ -220,11 +219,11 @@ TEST_F(TypeDeterminerTest, Stmt_If) {
 
   auto else_lhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::IntLiteral>(&i32, 2));
-  auto else_lhs_ptr = else_lhs.get();
+  auto* else_lhs_ptr = else_lhs.get();
 
   auto else_rhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
-  auto else_rhs_ptr = else_rhs.get();
+  auto* else_rhs_ptr = else_rhs.get();
 
   ast::StatementList else_body;
   else_body.push_back(std::make_unique<ast::AssignmentStatement>(
@@ -240,11 +239,11 @@ TEST_F(TypeDeterminerTest, Stmt_If) {
 
   auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::IntLiteral>(&i32, 2));
-  auto lhs_ptr = lhs.get();
+  auto* lhs_ptr = lhs.get();
 
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
-  auto rhs_ptr = rhs.get();
+  auto* rhs_ptr = rhs.get();
 
   ast::StatementList body;
   body.push_back(std::make_unique<ast::AssignmentStatement>(std::move(lhs),
@@ -274,11 +273,11 @@ TEST_F(TypeDeterminerTest, Stmt_Loop) {
 
   auto body_lhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::IntLiteral>(&i32, 2));
-  auto body_lhs_ptr = body_lhs.get();
+  auto* body_lhs_ptr = body_lhs.get();
 
   auto body_rhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
-  auto body_rhs_ptr = body_rhs.get();
+  auto* body_rhs_ptr = body_rhs.get();
 
   ast::StatementList body;
   body.push_back(std::make_unique<ast::AssignmentStatement>(
@@ -286,11 +285,11 @@ TEST_F(TypeDeterminerTest, Stmt_Loop) {
 
   auto continuing_lhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::IntLiteral>(&i32, 2));
-  auto continuing_lhs_ptr = continuing_lhs.get();
+  auto* continuing_lhs_ptr = continuing_lhs.get();
 
   auto continuing_rhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
-  auto continuing_rhs_ptr = continuing_rhs.get();
+  auto* continuing_rhs_ptr = continuing_rhs.get();
 
   ast::StatementList continuing;
   continuing.push_back(std::make_unique<ast::AssignmentStatement>(
@@ -314,7 +313,7 @@ TEST_F(TypeDeterminerTest, Stmt_Return) {
 
   auto cond = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::IntLiteral>(&i32, 2));
-  auto cond_ptr = cond.get();
+  auto* cond_ptr = cond.get();
 
   ast::ReturnStatement ret(std::move(cond));
 
@@ -335,11 +334,11 @@ TEST_F(TypeDeterminerTest, Stmt_Switch) {
 
   auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::IntLiteral>(&i32, 2));
-  auto lhs_ptr = lhs.get();
+  auto* lhs_ptr = lhs.get();
 
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
-  auto rhs_ptr = rhs.get();
+  auto* rhs_ptr = rhs.get();
 
   ast::StatementList body;
   body.push_back(std::make_unique<ast::AssignmentStatement>(std::move(lhs),
@@ -369,11 +368,11 @@ TEST_F(TypeDeterminerTest, Stmt_Unless) {
 
   auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::IntLiteral>(&i32, 2));
-  auto lhs_ptr = lhs.get();
+  auto* lhs_ptr = lhs.get();
 
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
-  auto rhs_ptr = rhs.get();
+  auto* rhs_ptr = rhs.get();
 
   ast::StatementList body;
   body.push_back(std::make_unique<ast::AssignmentStatement>(std::move(lhs),
@@ -399,7 +398,7 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
       std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone, &i32);
   var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::IntLiteral>(&i32, 2)));
-  auto init_ptr = var->constructor();
+  auto* init_ptr = var->constructor();
 
   ast::VariableDeclStatement decl(std::move(var));
 
@@ -460,7 +459,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix) {
   EXPECT_TRUE(td()->DetermineResultType(&acc));
   ASSERT_NE(acc.result_type(), nullptr);
   ASSERT_TRUE(acc.result_type()->IsVector());
-  EXPECT_EQ(acc.result_type()->AsVector()->size(), 3);
+  EXPECT_EQ(acc.result_type()->AsVector()->size(), 3u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
@@ -584,7 +583,7 @@ TEST_F(TypeDeterminerTest, Expr_Constructor_Type) {
   ASSERT_NE(tc.result_type(), nullptr);
   ASSERT_TRUE(tc.result_type()->IsVector());
   EXPECT_TRUE(tc.result_type()->AsVector()->type()->IsF32());
-  EXPECT_EQ(tc.result_type()->AsVector()->size(), 3);
+  EXPECT_EQ(tc.result_type()->AsVector()->size(), 3u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalVariable) {
@@ -608,7 +607,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
   ast::type::F32Type f32;
 
   auto my_var = std::make_unique<ast::IdentifierExpression>("my_var");
-  auto my_var_ptr = my_var.get();
+  auto* my_var_ptr = my_var.get();
 
   ast::StatementList body;
   body.push_back(std::make_unique<ast::VariableDeclStatement>(
@@ -700,7 +699,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
   ASSERT_NE(mem.result_type(), nullptr);
   ASSERT_TRUE(mem.result_type()->IsVector());
   EXPECT_TRUE(mem.result_type()->AsVector()->type()->IsF32());
-  EXPECT_EQ(mem.result_type()->AsVector()->size(), 2);
+  EXPECT_EQ(mem.result_type()->AsVector()->size(), 2u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_MultiLevel) {
@@ -781,7 +780,7 @@ TEST_F(TypeDeterminerTest, Expr_MultiLevel) {
   ASSERT_NE(mem.result_type(), nullptr);
   ASSERT_TRUE(mem.result_type()->IsVector());
   EXPECT_TRUE(mem.result_type()->AsVector()->type()->IsF32());
-  EXPECT_EQ(mem.result_type()->AsVector()->size(), 2);
+  EXPECT_EQ(mem.result_type()->AsVector()->size(), 2u);
 }
 
 using Expr_Binary_BitwiseTest = testing::TestWithParam<ast::BinaryOp>;
@@ -837,7 +836,7 @@ TEST_P(Expr_Binary_BitwiseTest, Vector) {
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsVector());
   EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsI32());
-  EXPECT_EQ(expr.result_type()->AsVector()->size(), 3);
+  EXPECT_EQ(expr.result_type()->AsVector()->size(), 3u);
 }
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          Expr_Binary_BitwiseTest,
@@ -905,7 +904,7 @@ TEST_P(Expr_Binary_LogicalTest, Vector) {
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsVector());
   EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsBool());
-  EXPECT_EQ(expr.result_type()->AsVector()->size(), 3);
+  EXPECT_EQ(expr.result_type()->AsVector()->size(), 3u);
 }
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          Expr_Binary_LogicalTest,
@@ -965,7 +964,7 @@ TEST_P(Expr_Binary_CompareTest, Vector) {
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsVector());
   EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsBool());
-  EXPECT_EQ(expr.result_type()->AsVector()->size(), 3);
+  EXPECT_EQ(expr.result_type()->AsVector()->size(), 3u);
 }
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          Expr_Binary_CompareTest,
@@ -1029,7 +1028,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Scalar) {
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsVector());
   EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
-  EXPECT_EQ(expr.result_type()->AsVector()->size(), 3);
+  EXPECT_EQ(expr.result_type()->AsVector()->size(), 3u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Vector) {
@@ -1060,7 +1059,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Vector) {
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsVector());
   EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
-  EXPECT_EQ(expr.result_type()->AsVector()->size(), 3);
+  EXPECT_EQ(expr.result_type()->AsVector()->size(), 3u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Vector) {
@@ -1088,7 +1087,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Vector) {
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsVector());
   EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
-  EXPECT_EQ(expr.result_type()->AsVector()->size(), 3);
+  EXPECT_EQ(expr.result_type()->AsVector()->size(), 3u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Scalar) {
@@ -1119,10 +1118,10 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Scalar) {
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsMatrix());
 
-  auto mat = expr.result_type()->AsMatrix();
+  auto* mat = expr.result_type()->AsMatrix();
   EXPECT_TRUE(mat->type()->IsF32());
-  EXPECT_EQ(mat->rows(), 3);
-  EXPECT_EQ(mat->columns(), 2);
+  EXPECT_EQ(mat->rows(), 3u);
+  EXPECT_EQ(mat->columns(), 2u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Matrix) {
@@ -1153,10 +1152,10 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Matrix) {
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsMatrix());
 
-  auto mat = expr.result_type()->AsMatrix();
+  auto* mat = expr.result_type()->AsMatrix();
   EXPECT_TRUE(mat->type()->IsF32());
-  EXPECT_EQ(mat->rows(), 3);
-  EXPECT_EQ(mat->columns(), 2);
+  EXPECT_EQ(mat->rows(), 3u);
+  EXPECT_EQ(mat->columns(), 2u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Vector) {
@@ -1188,7 +1187,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Vector) {
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsVector());
   EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
-  EXPECT_EQ(expr.result_type()->AsVector()->size(), 3);
+  EXPECT_EQ(expr.result_type()->AsVector()->size(), 3u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Matrix) {
@@ -1220,7 +1219,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Matrix) {
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsVector());
   EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
-  EXPECT_EQ(expr.result_type()->AsVector()->size(), 2);
+  EXPECT_EQ(expr.result_type()->AsVector()->size(), 2u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Matrix) {
@@ -1252,10 +1251,10 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Matrix) {
   ASSERT_NE(expr.result_type(), nullptr);
   ASSERT_TRUE(expr.result_type()->IsMatrix());
 
-  auto mat = expr.result_type()->AsMatrix();
+  auto* mat = expr.result_type()->AsMatrix();
   EXPECT_TRUE(mat->type()->IsF32());
-  EXPECT_EQ(mat->rows(), 4);
-  EXPECT_EQ(mat->columns(), 4);
+  EXPECT_EQ(mat->rows(), 4u);
+  EXPECT_EQ(mat->columns(), 4u);
 }
 
 using UnaryDerivativeExpressionTest =
@@ -1286,7 +1285,7 @@ TEST_P(UnaryDerivativeExpressionTest, Expr_UnaryDerivative) {
   ASSERT_NE(der.result_type(), nullptr);
   ASSERT_TRUE(der.result_type()->IsVector());
   EXPECT_TRUE(der.result_type()->AsVector()->type()->IsF32());
-  EXPECT_EQ(der.result_type()->AsVector()->size(), 4);
+  EXPECT_EQ(der.result_type()->AsVector()->size(), 4u);
 }
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          UnaryDerivativeExpressionTest,
@@ -1355,7 +1354,7 @@ TEST_P(UnaryMethodExpressionVecTest, Expr_UnaryMethod_Bool) {
   ASSERT_NE(exp.result_type(), nullptr);
   ASSERT_TRUE(exp.result_type()->IsVector());
   EXPECT_TRUE(exp.result_type()->AsVector()->type()->IsBool());
-  EXPECT_EQ(exp.result_type()->AsVector()->size(), 3);
+  EXPECT_EQ(exp.result_type()->AsVector()->size(), 3u);
 }
 TEST_P(UnaryMethodExpressionVecTest, Expr_UnaryMethod_Vec) {
   auto op = GetParam();
@@ -1447,10 +1446,10 @@ TEST_F(TypeDeterminerTest, Expr_UnaryMethod_OuterProduct) {
   EXPECT_TRUE(td.DetermineResultType(&exp));
   ASSERT_NE(exp.result_type(), nullptr);
   ASSERT_TRUE(exp.result_type()->IsMatrix());
-  auto mat = exp.result_type()->AsMatrix();
+  auto* mat = exp.result_type()->AsMatrix();
   EXPECT_TRUE(mat->type()->IsF32());
-  EXPECT_EQ(mat->rows(), 3);
-  EXPECT_EQ(mat->columns(), 2);
+  EXPECT_EQ(mat->rows(), 3u);
+  EXPECT_EQ(mat->columns(), 2u);
 }
 
 using UnaryOpExpressionTest = testing::TestWithParam<ast::UnaryOp>;
@@ -1479,7 +1478,7 @@ TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
   ASSERT_NE(der.result_type(), nullptr);
   ASSERT_TRUE(der.result_type()->IsVector());
   EXPECT_TRUE(der.result_type()->AsVector()->type()->IsF32());
-  EXPECT_EQ(der.result_type()->AsVector()->size(), 4);
+  EXPECT_EQ(der.result_type()->AsVector()->size(), 4u);
 }
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          UnaryOpExpressionTest,
@@ -1491,7 +1490,7 @@ TEST_F(TypeDeterminerTest, StorageClass_SetsIfMissing) {
 
   auto var =
       std::make_unique<ast::Variable>("var", ast::StorageClass::kNone, &i32);
-  auto var_ptr = var.get();
+  auto* var_ptr = var.get();
   auto stmt = std::make_unique<ast::VariableDeclStatement>(std::move(var));
 
   auto func =
@@ -1513,7 +1512,7 @@ TEST_F(TypeDeterminerTest, StorageClass_DoesNotSetOnConst) {
   auto var =
       std::make_unique<ast::Variable>("var", ast::StorageClass::kNone, &i32);
   var->set_is_const(true);
-  auto var_ptr = var.get();
+  auto* var_ptr = var.get();
   auto stmt = std::make_unique<ast::VariableDeclStatement>(std::move(var));
 
   auto func =

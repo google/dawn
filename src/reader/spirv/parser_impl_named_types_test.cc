@@ -35,7 +35,7 @@ namespace {
 using ::testing::HasSubstr;
 
 TEST_F(SpvParserTest, NamedTypes_AnonStruct) {
-  auto p = parser(test::Assemble(R"(
+  auto* p = parser(test::Assemble(R"(
     %uint = OpTypeInt 32 0
     %s = OpTypeStruct %uint %uint
   )"));
@@ -44,7 +44,7 @@ TEST_F(SpvParserTest, NamedTypes_AnonStruct) {
 }
 
 TEST_F(SpvParserTest, NamedTypes_NamedStruct) {
-  auto p = parser(test::Assemble(R"(
+  auto* p = parser(test::Assemble(R"(
     OpName %s "mystruct"
     %uint = OpTypeInt 32 0
     %s = OpTypeStruct %uint %uint
@@ -55,7 +55,7 @@ TEST_F(SpvParserTest, NamedTypes_NamedStruct) {
 
 // TODO(dneto): Enable this when array types can have ArrayStride
 TEST_F(SpvParserTest, DISABLED_NamedTypes_AnonArrayWithDecoration) {
-  auto p = parser(test::Assemble(R"(
+  auto* p = parser(test::Assemble(R"(
     OpDecorate %arr ArrayStride 16
     %uint = OpTypeInt 32 0
     %uint_3 = OpConstant %uint 3
@@ -69,7 +69,7 @@ TEST_F(SpvParserTest, DISABLED_NamedTypes_AnonArrayWithDecoration) {
 // an OpName?
 
 TEST_F(SpvParserTest, NamedTypes_AnonRTArray) {
-  auto p = parser(test::Assemble(R"(
+  auto* p = parser(test::Assemble(R"(
     %uint = OpTypeInt 32 0
     %arr = OpTypeRuntimeArray %uint
   )"));
@@ -78,7 +78,7 @@ TEST_F(SpvParserTest, NamedTypes_AnonRTArray) {
 }
 
 TEST_F(SpvParserTest, NamedTypes_NamedRTArray) {
-  auto p = parser(test::Assemble(R"(
+  auto* p = parser(test::Assemble(R"(
     OpName %arr "myrtarr"
     %uint = OpTypeInt 32 0
     %arr = OpTypeRuntimeArray %uint

@@ -28,7 +28,7 @@ TEST_F(VectorTypeTest, Creation) {
   I32Type i32;
   VectorType v{&i32, 2};
   EXPECT_EQ(v.type(), &i32);
-  EXPECT_EQ(v.size(), 2);
+  EXPECT_EQ(v.size(), 2u);
 }
 
 TEST_F(VectorTypeTest, Is) {

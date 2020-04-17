@@ -28,7 +28,7 @@ TEST_F(AsExpressionTest, Create) {
   type::F32Type f32;
   auto expr = std::make_unique<IdentifierExpression>("expr");
 
-  auto expr_ptr = expr.get();
+  auto* expr_ptr = expr.get();
 
   AsExpression exp(&f32, std::move(expr));
   ASSERT_EQ(exp.type(), &f32);
@@ -41,8 +41,8 @@ TEST_F(AsExpressionTest, CreateWithSource) {
 
   AsExpression exp(Source{20, 2}, &f32, std::move(expr));
   auto src = exp.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(AsExpressionTest, IsAs) {

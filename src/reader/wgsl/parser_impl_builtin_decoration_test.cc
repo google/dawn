@@ -36,9 +36,9 @@ class BuiltinTest : public testing::TestWithParam<BuiltinData> {
   BuiltinTest() = default;
   ~BuiltinTest() = default;
 
-  void SetUp() { ctx_.Reset(); }
+  void SetUp() override { ctx_.Reset(); }
 
-  void TearDown() { impl_ = nullptr; }
+  void TearDown() override { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -52,7 +52,7 @@ class BuiltinTest : public testing::TestWithParam<BuiltinData> {
 
 TEST_P(BuiltinTest, Parses) {
   auto params = GetParam();
-  auto p = parser(params.input);
+  auto* p = parser(params.input);
 
   auto builtin = p->builtin_decoration();
   ASSERT_FALSE(p->has_error());
@@ -79,7 +79,7 @@ INSTANTIATE_TEST_SUITE_P(
                     ast::Builtin::kGlobalInvocationId}));
 
 TEST_F(ParserImplTest, BuiltinDecoration_NoMatch) {
-  auto p = parser("not-a-builtin");
+  auto* p = parser("not-a-builtin");
   auto builtin = p->builtin_decoration();
   ASSERT_EQ(builtin, ast::Builtin::kNone);
 

@@ -23,20 +23,20 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, Statements) {
-  auto p = parser("nop; kill; return;");
+  auto* p = parser("nop; kill; return;");
   auto e = p->statements();
   ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_EQ(e.size(), 3);
+  ASSERT_EQ(e.size(), 3u);
   EXPECT_TRUE(e[0]->IsNop());
   EXPECT_TRUE(e[1]->IsKill());
   EXPECT_TRUE(e[2]->IsReturn());
 }
 
 TEST_F(ParserImplTest, Statements_Empty) {
-  auto p = parser("");
+  auto* p = parser("");
   auto e = p->statements();
   ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_EQ(e.size(), 0);
+  ASSERT_EQ(e.size(), 0u);
 }
 
 }  // namespace

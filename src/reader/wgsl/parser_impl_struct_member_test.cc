@@ -25,35 +25,35 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, StructMember_Parses) {
-  auto i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
+  auto* i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
 
-  auto p = parser("a : i32;");
+  auto* p = parser("a : i32;");
   auto m = p->struct_member();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(m, nullptr);
 
   EXPECT_EQ(m->name(), "a");
   EXPECT_EQ(m->type(), i32);
-  EXPECT_EQ(m->decorations().size(), 0);
+  EXPECT_EQ(m->decorations().size(), 0u);
 }
 
 TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
-  auto i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
+  auto* i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
 
-  auto p = parser("[[offset 2]] a : i32;");
+  auto* p = parser("[[offset 2]] a : i32;");
   auto m = p->struct_member();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(m, nullptr);
 
   EXPECT_EQ(m->name(), "a");
   EXPECT_EQ(m->type(), i32);
-  EXPECT_EQ(m->decorations().size(), 1);
+  EXPECT_EQ(m->decorations().size(), 1u);
   EXPECT_TRUE(m->decorations()[0]->IsOffset());
-  EXPECT_EQ(m->decorations()[0]->AsOffset()->offset(), 2);
+  EXPECT_EQ(m->decorations()[0]->AsOffset()->offset(), 2u);
 }
 
 TEST_F(ParserImplTest, StructMember_InvalidDecoration) {
-  auto p = parser("[[offset nan]] a : i32;");
+  auto* p = parser("[[offset nan]] a : i32;");
   auto m = p->struct_member();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(m, nullptr);
@@ -61,7 +61,7 @@ TEST_F(ParserImplTest, StructMember_InvalidDecoration) {
 }
 
 TEST_F(ParserImplTest, StructMember_InvalidVariable) {
-  auto p = parser("[[offset 4]] a : B;");
+  auto* p = parser("[[offset 4]] a : B;");
   auto m = p->struct_member();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(m, nullptr);
@@ -69,7 +69,7 @@ TEST_F(ParserImplTest, StructMember_InvalidVariable) {
 }
 
 TEST_F(ParserImplTest, StructMember_MissingSemicolon) {
-  auto p = parser("a : i32");
+  auto* p = parser("a : i32");
   auto m = p->struct_member();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(m, nullptr);

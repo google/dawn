@@ -22,6 +22,11 @@ declare_args() {
     tint_spirv_tools_dir = "//third_party/spirv-tools"
   }
 
+  # Path to googletest checkout
+  if (!defined(tint_googletest_dir)) {
+    tint_googletest_dir = "//third_party/googletest"
+  }
+
   # Path to spirv-tools generated files, relative to |target_gen_dir|
   if (!defined(tint_spirv_tools_gen)) {
     tint_spirv_tools_gen = "third_party/spirv-tools"

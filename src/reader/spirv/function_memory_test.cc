@@ -29,7 +29,7 @@ namespace {
 using ::testing::HasSubstr;
 
 TEST_F(SpvParserTest, EmitStatement_StoreBoolConst) {
-  auto p = parser(test::Assemble(R"(
+  auto* p = parser(test::Assemble(R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %ty = OpTypeBool
@@ -64,7 +64,7 @@ Assignment{
 }
 
 TEST_F(SpvParserTest, EmitStatement_StoreUintConst) {
-  auto p = parser(test::Assemble(R"(
+  auto* p = parser(test::Assemble(R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %ty = OpTypeInt 32 0
@@ -92,7 +92,7 @@ Assignment{
 }
 
 TEST_F(SpvParserTest, EmitStatement_StoreIntConst) {
-  auto p = parser(test::Assemble(R"(
+  auto* p = parser(test::Assemble(R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %ty = OpTypeInt 32 1
@@ -120,7 +120,7 @@ Assignment{
 }
 
 TEST_F(SpvParserTest, EmitStatement_StoreFloatConst) {
-  auto p = parser(test::Assemble(R"(
+  auto* p = parser(test::Assemble(R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %ty = OpTypeFloat 32
@@ -148,7 +148,7 @@ Assignment{
 }
 
 TEST_F(SpvParserTest, EmitStatement_LoadBool) {
-  auto p = parser(test::Assemble(R"(
+  auto* p = parser(test::Assemble(R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %ty = OpTypeBool
@@ -178,7 +178,7 @@ TEST_F(SpvParserTest, EmitStatement_LoadBool) {
 }
 
 TEST_F(SpvParserTest, EmitStatement_LoadScalar) {
-  auto p = parser(test::Assemble(R"(
+  auto* p = parser(test::Assemble(R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %ty = OpTypeInt 32 0
@@ -218,7 +218,7 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTest, EmitStatement_UseLoadedScalarTwice) {
-  auto p = parser(test::Assemble(R"(
+  auto* p = parser(test::Assemble(R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %ty = OpTypeInt 32 0
@@ -258,7 +258,7 @@ Assignment{
 }
 
 TEST_F(SpvParserTest, EmitStatement_StoreToModuleScopeVar) {
-  auto p = parser(test::Assemble(R"(
+  auto* p = parser(test::Assemble(R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %ty = OpTypeInt 32 0

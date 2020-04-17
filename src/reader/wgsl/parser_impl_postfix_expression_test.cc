@@ -31,45 +31,45 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, PostfixExpression_Array_ConstantIndex) {
-  auto p = parser("a[1]");
+  auto* p = parser("a[1]");
   auto e = p->postfix_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsArrayAccessor());
-  auto ary = e->AsArrayAccessor();
+  auto* ary = e->AsArrayAccessor();
 
   ASSERT_TRUE(ary->array()->IsIdentifier());
-  auto ident = ary->array()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = ary->array()->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 
   ASSERT_TRUE(ary->idx_expr()->IsConstructor());
   ASSERT_TRUE(ary->idx_expr()->AsConstructor()->IsScalarConstructor());
-  auto c = ary->idx_expr()->AsConstructor()->AsScalarConstructor();
+  auto* c = ary->idx_expr()->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(c->literal()->IsInt());
   EXPECT_EQ(c->literal()->AsInt()->value(), 1);
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Array_ExpressionIndex) {
-  auto p = parser("a[1 + b / 4]");
+  auto* p = parser("a[1 + b / 4]");
   auto e = p->postfix_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsArrayAccessor());
-  auto ary = e->AsArrayAccessor();
+  auto* ary = e->AsArrayAccessor();
 
   ASSERT_TRUE(ary->array()->IsIdentifier());
-  auto ident = ary->array()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = ary->array()->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 
   ASSERT_TRUE(ary->idx_expr()->IsBinary());
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Array_MissingIndex) {
-  auto p = parser("a[]");
+  auto* p = parser("a[]");
   auto e = p->postfix_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -77,7 +77,7 @@ TEST_F(ParserImplTest, PostfixExpression_Array_MissingIndex) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Array_MissingRightBrace) {
-  auto p = parser("a[1");
+  auto* p = parser("a[1");
   auto e = p->postfix_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -85,7 +85,7 @@ TEST_F(ParserImplTest, PostfixExpression_Array_MissingRightBrace) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Array_InvalidIndex) {
-  auto p = parser("a[if(a() {})]");
+  auto* p = parser("a[if(a() {})]");
   auto e = p->postfix_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -93,45 +93,45 @@ TEST_F(ParserImplTest, PostfixExpression_Array_InvalidIndex) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Call_Empty) {
-  auto p = parser("a()");
+  auto* p = parser("a()");
   auto e = p->postfix_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsCall());
-  auto c = e->AsCall();
+  auto* c = e->AsCall();
 
   ASSERT_TRUE(c->func()->IsIdentifier());
-  auto func = c->func()->AsIdentifier();
-  ASSERT_EQ(func->name().size(), 1);
+  auto* func = c->func()->AsIdentifier();
+  ASSERT_EQ(func->name().size(), 1u);
   EXPECT_EQ(func->name()[0], "a");
 
-  EXPECT_EQ(c->params().size(), 0);
+  EXPECT_EQ(c->params().size(), 0u);
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Call_WithArgs) {
-  auto p = parser("std::test(1, b, 2 + 3 / b)");
+  auto* p = parser("std::test(1, b, 2 + 3 / b)");
   auto e = p->postfix_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsCall());
-  auto c = e->AsCall();
+  auto* c = e->AsCall();
 
   ASSERT_TRUE(c->func()->IsIdentifier());
-  auto func = c->func()->AsIdentifier();
-  ASSERT_EQ(func->name().size(), 2);
+  auto* func = c->func()->AsIdentifier();
+  ASSERT_EQ(func->name().size(), 2u);
   EXPECT_EQ(func->name()[0], "std");
   EXPECT_EQ(func->name()[1], "test");
 
-  EXPECT_EQ(c->params().size(), 3);
+  EXPECT_EQ(c->params().size(), 3u);
   EXPECT_TRUE(c->params()[0]->IsConstructor());
   EXPECT_TRUE(c->params()[1]->IsIdentifier());
   EXPECT_TRUE(c->params()[2]->IsBinary());
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Call_InvalidArg) {
-  auto p = parser("a(if(a) {})");
+  auto* p = parser("a(if(a) {})");
   auto e = p->postfix_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -139,7 +139,7 @@ TEST_F(ParserImplTest, PostfixExpression_Call_InvalidArg) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Call_HangingComma) {
-  auto p = parser("a(b, )");
+  auto* p = parser("a(b, )");
   auto e = p->postfix_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -147,7 +147,7 @@ TEST_F(ParserImplTest, PostfixExpression_Call_HangingComma) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_Call_MissingRightParen) {
-  auto p = parser("a(");
+  auto* p = parser("a(");
   auto e = p->postfix_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -155,24 +155,24 @@ TEST_F(ParserImplTest, PostfixExpression_Call_MissingRightParen) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_MemberAccessor) {
-  auto p = parser("a.b");
+  auto* p = parser("a.b");
   auto e = p->postfix_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsMemberAccessor());
 
-  auto m = e->AsMemberAccessor();
+  auto* m = e->AsMemberAccessor();
   ASSERT_TRUE(m->structure()->IsIdentifier());
-  ASSERT_EQ(m->structure()->AsIdentifier()->name().size(), 1);
+  ASSERT_EQ(m->structure()->AsIdentifier()->name().size(), 1u);
   EXPECT_EQ(m->structure()->AsIdentifier()->name()[0], "a");
 
   ASSERT_TRUE(m->member()->IsIdentifier());
-  ASSERT_EQ(m->member()->AsIdentifier()->name().size(), 1);
+  ASSERT_EQ(m->member()->AsIdentifier()->name().size(), 1u);
   EXPECT_EQ(m->member()->AsIdentifier()->name()[0], "b");
 }
 
 TEST_F(ParserImplTest, PostfixExpression_MemberAccesssor_InvalidIdent) {
-  auto p = parser("a.if");
+  auto* p = parser("a.if");
   auto e = p->postfix_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -180,7 +180,7 @@ TEST_F(ParserImplTest, PostfixExpression_MemberAccesssor_InvalidIdent) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_MemberAccessor_MissingIdent) {
-  auto p = parser("a.");
+  auto* p = parser("a.");
   auto e = p->postfix_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -188,7 +188,7 @@ TEST_F(ParserImplTest, PostfixExpression_MemberAccessor_MissingIdent) {
 }
 
 TEST_F(ParserImplTest, PostfixExpression_NonMatch_returnLHS) {
-  auto p = parser("a b");
+  auto* p = parser("a b");
   auto e = p->postfix_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);

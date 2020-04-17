@@ -26,14 +26,14 @@ using NopStatementTest = testing::Test;
 
 TEST_F(NopStatementTest, Creation) {
   NopStatement n;
-  EXPECT_EQ(n.line(), 0);
-  EXPECT_EQ(n.column(), 0);
+  EXPECT_EQ(n.line(), 0u);
+  EXPECT_EQ(n.column(), 0u);
 }
 
 TEST_F(NopStatementTest, Creation_WithSource) {
   NopStatement n(Source{20, 2});
-  EXPECT_EQ(n.line(), 20);
-  EXPECT_EQ(n.column(), 2);
+  EXPECT_EQ(n.line(), 20u);
+  EXPECT_EQ(n.column(), 2u);
 }
 
 TEST_F(NopStatementTest, IsNop) {

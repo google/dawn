@@ -32,7 +32,7 @@ TEST_F(BreakStatementTest, Creation) {
 
 TEST_F(BreakStatementTest, CreationWithConditional) {
   auto expr = std::make_unique<IdentifierExpression>("expr");
-  auto expr_ptr = expr.get();
+  auto* expr_ptr = expr.get();
 
   BreakStatement stmt(StatementCondition::kIf, std::move(expr));
   EXPECT_EQ(stmt.condition(), StatementCondition::kIf);
@@ -42,8 +42,8 @@ TEST_F(BreakStatementTest, CreationWithConditional) {
 TEST_F(BreakStatementTest, Creation_WithSource) {
   BreakStatement stmt(Source{20, 2});
   auto src = stmt.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(BreakStatementTest, Creation_WithSourceAndCondition) {
@@ -52,8 +52,8 @@ TEST_F(BreakStatementTest, Creation_WithSourceAndCondition) {
   BreakStatement stmt(Source{20, 2}, StatementCondition::kUnless,
                       std::move(expr));
   auto src = stmt.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(BreakStatementTest, IsBreak) {

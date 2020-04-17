@@ -35,7 +35,7 @@ std::string MakeEntryPoint(const std::string& stage,
 }
 
 TEST_F(SpvParserTest, EntryPoint_NoEntryPoint) {
-  auto p = parser(test::Assemble(""));
+  auto* p = parser(test::Assemble(""));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_ast = p->module().to_str();
@@ -43,7 +43,7 @@ TEST_F(SpvParserTest, EntryPoint_NoEntryPoint) {
 }
 
 TEST_F(SpvParserTest, EntryPoint_Vertex) {
-  auto p = parser(test::Assemble(MakeEntryPoint("Vertex", "foobar")));
+  auto* p = parser(test::Assemble(MakeEntryPoint("Vertex", "foobar")));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
@@ -51,7 +51,7 @@ TEST_F(SpvParserTest, EntryPoint_Vertex) {
 }
 
 TEST_F(SpvParserTest, EntryPoint_Fragment) {
-  auto p = parser(test::Assemble(MakeEntryPoint("Fragment", "blitz")));
+  auto* p = parser(test::Assemble(MakeEntryPoint("Fragment", "blitz")));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
@@ -59,7 +59,7 @@ TEST_F(SpvParserTest, EntryPoint_Fragment) {
 }
 
 TEST_F(SpvParserTest, EntryPoint_Compute) {
-  auto p = parser(test::Assemble(MakeEntryPoint("GLCompute", "sort")));
+  auto* p = parser(test::Assemble(MakeEntryPoint("GLCompute", "sort")));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
@@ -67,9 +67,9 @@ TEST_F(SpvParserTest, EntryPoint_Compute) {
 }
 
 TEST_F(SpvParserTest, EntryPoint_MultiNameConflict) {
-  auto p = parser(test::Assemble(MakeEntryPoint("GLCompute", "work", "40") +
-                                 MakeEntryPoint("Vertex", "work", "50") +
-                                 MakeEntryPoint("Fragment", "work", "60")));
+  auto* p = parser(test::Assemble(MakeEntryPoint("GLCompute", "work", "40") +
+                                  MakeEntryPoint("Vertex", "work", "50") +
+                                  MakeEntryPoint("Fragment", "work", "60")));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
@@ -79,7 +79,7 @@ TEST_F(SpvParserTest, EntryPoint_MultiNameConflict) {
 }
 
 TEST_F(SpvParserTest, EntryPoint_NameIsSanitized) {
-  auto p = parser(test::Assemble(MakeEntryPoint("GLCompute", ".1234")));
+  auto* p = parser(test::Assemble(MakeEntryPoint("GLCompute", ".1234")));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();

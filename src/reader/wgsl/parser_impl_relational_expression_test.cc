@@ -26,102 +26,102 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, RelationalExpression_Parses_LessThan) {
-  auto p = parser("a < true");
+  auto* p = parser("a < true");
   auto e = p->relational_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsBinary());
-  auto rel = e->AsBinary();
+  auto* rel = e->AsBinary();
   EXPECT_EQ(ast::BinaryOp::kLessThan, rel->op());
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
-  auto ident = rel->lhs()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = rel->lhs()->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 
   ASSERT_TRUE(rel->rhs()->IsConstructor());
   ASSERT_TRUE(rel->rhs()->AsConstructor()->IsScalarConstructor());
-  auto init = rel->rhs()->AsConstructor()->AsScalarConstructor();
+  auto* init = rel->rhs()->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(init->literal()->IsBool());
   ASSERT_TRUE(init->literal()->AsBool()->IsTrue());
 }
 
 TEST_F(ParserImplTest, RelationalExpression_Parses_GreaterThan) {
-  auto p = parser("a > true");
+  auto* p = parser("a > true");
   auto e = p->relational_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsBinary());
-  auto rel = e->AsBinary();
+  auto* rel = e->AsBinary();
   EXPECT_EQ(ast::BinaryOp::kGreaterThan, rel->op());
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
-  auto ident = rel->lhs()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = rel->lhs()->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 
   ASSERT_TRUE(rel->rhs()->IsConstructor());
   ASSERT_TRUE(rel->rhs()->AsConstructor()->IsScalarConstructor());
-  auto init = rel->rhs()->AsConstructor()->AsScalarConstructor();
+  auto* init = rel->rhs()->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(init->literal()->IsBool());
   ASSERT_TRUE(init->literal()->AsBool()->IsTrue());
 }
 
 TEST_F(ParserImplTest, RelationalExpression_Parses_LessThanEqual) {
-  auto p = parser("a <= true");
+  auto* p = parser("a <= true");
   auto e = p->relational_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsBinary());
-  auto rel = e->AsBinary();
+  auto* rel = e->AsBinary();
   EXPECT_EQ(ast::BinaryOp::kLessThanEqual, rel->op());
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
-  auto ident = rel->lhs()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = rel->lhs()->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 
   ASSERT_TRUE(rel->rhs()->IsConstructor());
   ASSERT_TRUE(rel->rhs()->AsConstructor()->IsScalarConstructor());
-  auto init = rel->rhs()->AsConstructor()->AsScalarConstructor();
+  auto* init = rel->rhs()->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(init->literal()->IsBool());
   ASSERT_TRUE(init->literal()->AsBool()->IsTrue());
 }
 
 TEST_F(ParserImplTest, RelationalExpression_Parses_GreaterThanEqual) {
-  auto p = parser("a >= true");
+  auto* p = parser("a >= true");
   auto e = p->relational_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsBinary());
-  auto rel = e->AsBinary();
+  auto* rel = e->AsBinary();
   EXPECT_EQ(ast::BinaryOp::kGreaterThanEqual, rel->op());
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
-  auto ident = rel->lhs()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = rel->lhs()->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 
   ASSERT_TRUE(rel->rhs()->IsConstructor());
   ASSERT_TRUE(rel->rhs()->AsConstructor()->IsScalarConstructor());
-  auto init = rel->rhs()->AsConstructor()->AsScalarConstructor();
+  auto* init = rel->rhs()->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(init->literal()->IsBool());
   ASSERT_TRUE(init->literal()->AsBool()->IsTrue());
 }
 
 TEST_F(ParserImplTest, RelationalExpression_InvalidLHS) {
-  auto p = parser("if (a) {} < true");
+  auto* p = parser("if (a) {} < true");
   auto e = p->relational_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e, nullptr);
 }
 
 TEST_F(ParserImplTest, RelationalExpression_InvalidRHS) {
-  auto p = parser("true < if (a) {}");
+  auto* p = parser("true < if (a) {}");
   auto e = p->relational_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -129,7 +129,7 @@ TEST_F(ParserImplTest, RelationalExpression_InvalidRHS) {
 }
 
 TEST_F(ParserImplTest, RelationalExpression_NoOr_ReturnsLHS) {
-  auto p = parser("a true");
+  auto* p = parser("a true");
   auto e = p->relational_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);

@@ -26,10 +26,10 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, TypeDecl_ParsesType) {
-  auto i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
+  auto* i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
 
-  auto p = parser("type a = i32");
-  auto t = p->type_alias();
+  auto* p = parser("type a = i32");
+  auto* t = p->type_alias();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(t, nullptr);
   ASSERT_TRUE(t->type()->IsI32());
@@ -37,52 +37,52 @@ TEST_F(ParserImplTest, TypeDecl_ParsesType) {
 }
 
 TEST_F(ParserImplTest, TypeDecl_ParsesStruct) {
-  auto p = parser("type a = struct { b: i32; c: f32;}");
-  auto t = p->type_alias();
+  auto* p = parser("type a = struct { b: i32; c: f32;}");
+  auto* t = p->type_alias();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(t, nullptr);
   EXPECT_EQ(t->name(), "a");
   ASSERT_TRUE(t->type()->IsStruct());
 
-  auto s = t->type()->AsStruct();
-  EXPECT_EQ(s->impl()->members().size(), 2);
+  auto* s = t->type()->AsStruct();
+  EXPECT_EQ(s->impl()->members().size(), 2u);
 }
 
 TEST_F(ParserImplTest, TypeDecl_MissingIdent) {
-  auto p = parser("type = i32");
-  auto t = p->type_alias();
+  auto* p = parser("type = i32");
+  auto* t = p->type_alias();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(t, nullptr);
   EXPECT_EQ(p->error(), "1:6: missing identifier for type alias");
 }
 
 TEST_F(ParserImplTest, TypeDecl_InvalidIdent) {
-  auto p = parser("type 123 = i32");
-  auto t = p->type_alias();
+  auto* p = parser("type 123 = i32");
+  auto* t = p->type_alias();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(t, nullptr);
   EXPECT_EQ(p->error(), "1:6: missing identifier for type alias");
 }
 
 TEST_F(ParserImplTest, TypeDecl_MissingEqual) {
-  auto p = parser("type a i32");
-  auto t = p->type_alias();
+  auto* p = parser("type a i32");
+  auto* t = p->type_alias();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(t, nullptr);
   EXPECT_EQ(p->error(), "1:8: missing = for type alias");
 }
 
 TEST_F(ParserImplTest, TypeDecl_InvalidType) {
-  auto p = parser("type a = B");
-  auto t = p->type_alias();
+  auto* p = parser("type a = B");
+  auto* t = p->type_alias();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(t, nullptr);
   EXPECT_EQ(p->error(), "1:10: unknown type alias 'B'");
 }
 
 TEST_F(ParserImplTest, TypeDecl_InvalidStruct) {
-  auto p = parser("type a = [[block]] {}");
-  auto t = p->type_alias();
+  auto* p = parser("type a = [[block]] {}");
+  auto* t = p->type_alias();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(t, nullptr);
   EXPECT_EQ(p->error(), "1:20: missing struct declaration");

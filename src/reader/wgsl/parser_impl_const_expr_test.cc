@@ -27,23 +27,23 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl) {
-  auto p = parser("vec2<f32>(1., 2.)");
+  auto* p = parser("vec2<f32>(1., 2.)");
   auto e = p->const_expr();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsConstructor());
   ASSERT_TRUE(e->AsConstructor()->IsTypeConstructor());
 
-  auto t = e->AsConstructor()->AsTypeConstructor();
+  auto* t = e->AsConstructor()->AsTypeConstructor();
   ASSERT_TRUE(t->type()->IsVector());
-  EXPECT_EQ(t->type()->AsVector()->size(), 2);
+  EXPECT_EQ(t->type()->AsVector()->size(), 2u);
 
-  ASSERT_EQ(t->values().size(), 2);
+  ASSERT_EQ(t->values().size(), 2u);
   auto& v = t->values();
 
   ASSERT_TRUE(v[0]->IsConstructor());
   ASSERT_TRUE(v[0]->AsConstructor()->IsScalarConstructor());
-  auto c = v[0]->AsConstructor()->AsScalarConstructor();
+  auto* c = v[0]->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(c->literal()->IsFloat());
   EXPECT_FLOAT_EQ(c->literal()->AsFloat()->value(), 1.);
 
@@ -55,7 +55,7 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl) {
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingRightParen) {
-  auto p = parser("vec2<f32>(1., 2.");
+  auto* p = parser("vec2<f32>(1., 2.");
   auto e = p->const_expr();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -63,7 +63,7 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingRightParen) {
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingLeftParen) {
-  auto p = parser("vec2<f32> 1., 2.)");
+  auto* p = parser("vec2<f32> 1., 2.)");
   auto e = p->const_expr();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -71,7 +71,7 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingLeftParen) {
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_HangingComma) {
-  auto p = parser("vec2<f32>(1.,)");
+  auto* p = parser("vec2<f32>(1.,)");
   auto e = p->const_expr();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -79,7 +79,7 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_HangingComma) {
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingComma) {
-  auto p = parser("vec2<f32>(1. 2.");
+  auto* p = parser("vec2<f32>(1. 2.");
   auto e = p->const_expr();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -87,7 +87,7 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingComma) {
 }
 
 TEST_F(ParserImplTest, ConstExpr_MissingExpr) {
-  auto p = parser("vec2<f32>()");
+  auto* p = parser("vec2<f32>()");
   auto e = p->const_expr();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -95,7 +95,7 @@ TEST_F(ParserImplTest, ConstExpr_MissingExpr) {
 }
 
 TEST_F(ParserImplTest, ConstExpr_InvalidExpr) {
-  auto p = parser("vec2<f32>(1., if(a) {})");
+  auto* p = parser("vec2<f32>(1., if(a) {})");
   auto e = p->const_expr();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -103,19 +103,19 @@ TEST_F(ParserImplTest, ConstExpr_InvalidExpr) {
 }
 
 TEST_F(ParserImplTest, ConstExpr_ConstLiteral) {
-  auto p = parser("true");
+  auto* p = parser("true");
   auto e = p->const_expr();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsConstructor());
   ASSERT_TRUE(e->AsConstructor()->IsScalarConstructor());
-  auto c = e->AsConstructor()->AsScalarConstructor();
+  auto* c = e->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(c->literal()->IsBool());
   EXPECT_TRUE(c->literal()->AsBool()->IsTrue());
 }
 
 TEST_F(ParserImplTest, ConstExpr_ConstLiteral_Invalid) {
-  auto p = parser("invalid");
+  auto* p = parser("invalid");
   auto e = p->const_expr();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);

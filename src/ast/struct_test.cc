@@ -36,10 +36,10 @@ TEST_F(StructTest, Creation) {
       std::make_unique<StructMember>("a", &i32, StructMemberDecorationList()));
 
   Struct s{StructDecoration::kNone, std::move(members)};
-  EXPECT_EQ(s.members().size(), 1);
+  EXPECT_EQ(s.members().size(), 1u);
   EXPECT_EQ(s.decoration(), StructDecoration::kNone);
-  EXPECT_EQ(s.line(), 0);
-  EXPECT_EQ(s.column(), 0);
+  EXPECT_EQ(s.line(), 0u);
+  EXPECT_EQ(s.column(), 0u);
 }
 
 TEST_F(StructTest, CreationWithSource) {
@@ -50,10 +50,10 @@ TEST_F(StructTest, CreationWithSource) {
       std::make_unique<StructMember>("a", &i32, StructMemberDecorationList()));
 
   Struct s{source, StructDecoration::kNone, std::move(members)};
-  EXPECT_EQ(s.members().size(), 1);
+  EXPECT_EQ(s.members().size(), 1u);
   EXPECT_EQ(s.decoration(), StructDecoration::kNone);
-  EXPECT_EQ(s.line(), 27);
-  EXPECT_EQ(s.column(), 4);
+  EXPECT_EQ(s.line(), 27u);
+  EXPECT_EQ(s.column(), 4u);
 }
 
 TEST_F(StructTest, IsValid) {

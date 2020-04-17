@@ -22,51 +22,51 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, LoopStmt_BodyNoContinuing) {
-  auto p = parser("loop { nop; }");
+  auto* p = parser("loop { nop; }");
   auto e = p->loop_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
-  ASSERT_EQ(e->body().size(), 1);
+  ASSERT_EQ(e->body().size(), 1u);
   EXPECT_TRUE(e->body()[0]->IsNop());
 
-  EXPECT_EQ(e->continuing().size(), 0);
+  EXPECT_EQ(e->continuing().size(), 0u);
 }
 
 TEST_F(ParserImplTest, LoopStmt_BodyWithContinuing) {
-  auto p = parser("loop { nop; continuing { kill; }}");
+  auto* p = parser("loop { nop; continuing { kill; }}");
   auto e = p->loop_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
-  ASSERT_EQ(e->body().size(), 1);
+  ASSERT_EQ(e->body().size(), 1u);
   EXPECT_TRUE(e->body()[0]->IsNop());
 
-  EXPECT_EQ(e->continuing().size(), 1);
+  EXPECT_EQ(e->continuing().size(), 1u);
   EXPECT_TRUE(e->continuing()[0]->IsKill());
 }
 
 TEST_F(ParserImplTest, LoopStmt_NoBodyNoContinuing) {
-  auto p = parser("loop { }");
+  auto* p = parser("loop { }");
   auto e = p->loop_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
-  ASSERT_EQ(e->body().size(), 0);
-  ASSERT_EQ(e->continuing().size(), 0);
+  ASSERT_EQ(e->body().size(), 0u);
+  ASSERT_EQ(e->continuing().size(), 0u);
 }
 
 TEST_F(ParserImplTest, LoopStmt_NoBodyWithContinuing) {
-  auto p = parser("loop { continuing { kill; }}");
+  auto* p = parser("loop { continuing { kill; }}");
   auto e = p->loop_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
-  ASSERT_EQ(e->body().size(), 0);
-  ASSERT_EQ(e->continuing().size(), 1);
+  ASSERT_EQ(e->body().size(), 0u);
+  ASSERT_EQ(e->continuing().size(), 1u);
   EXPECT_TRUE(e->continuing()[0]->IsKill());
 }
 
 TEST_F(ParserImplTest, LoopStmt_MissingBracketLeft) {
-  auto p = parser("loop kill; }");
+  auto* p = parser("loop kill; }");
   auto e = p->loop_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -74,7 +74,7 @@ TEST_F(ParserImplTest, LoopStmt_MissingBracketLeft) {
 }
 
 TEST_F(ParserImplTest, LoopStmt_MissingBracketRight) {
-  auto p = parser("loop { kill; ");
+  auto* p = parser("loop { kill; ");
   auto e = p->loop_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -82,7 +82,7 @@ TEST_F(ParserImplTest, LoopStmt_MissingBracketRight) {
 }
 
 TEST_F(ParserImplTest, LoopStmt_InvalidStatements) {
-  auto p = parser("loop { kill }");
+  auto* p = parser("loop { kill }");
   auto e = p->loop_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -90,7 +90,7 @@ TEST_F(ParserImplTest, LoopStmt_InvalidStatements) {
 }
 
 TEST_F(ParserImplTest, LoopStmt_InvalidContinuing) {
-  auto p = parser("loop { continuing { kill }}");
+  auto* p = parser("loop { continuing { kill }}");
   auto e = p->loop_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);

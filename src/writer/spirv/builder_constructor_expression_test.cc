@@ -39,7 +39,7 @@ TEST_F(BuilderTest, Constructor_Const) {
   ast::ScalarConstructorExpression c(std::move(fl));
 
   Builder b;
-  EXPECT_EQ(b.GenerateConstructorExpression(&c, true), 2);
+  EXPECT_EQ(b.GenerateConstructorExpression(&c, true), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
@@ -62,7 +62,7 @@ TEST_F(BuilderTest, Constructor_Type) {
   ast::TypeConstructorExpression t(&vec, std::move(vals));
 
   Builder b;
-  EXPECT_EQ(b.GenerateConstructorExpression(&t, true), 5);
+  EXPECT_EQ(b.GenerateConstructorExpression(&t, true), 5u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
@@ -88,8 +88,8 @@ TEST_F(BuilderTest, Constructor_Type_Dedups) {
   ast::TypeConstructorExpression t(&vec, std::move(vals));
 
   Builder b;
-  EXPECT_EQ(b.GenerateConstructorExpression(&t, true), 5);
-  EXPECT_EQ(b.GenerateConstructorExpression(&t, true), 5);
+  EXPECT_EQ(b.GenerateConstructorExpression(&t, true), 5u);
+  EXPECT_EQ(b.GenerateConstructorExpression(&t, true), 5u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
@@ -111,7 +111,7 @@ TEST_F(BuilderTest, Constructor_NonConst_Type_Fails) {
   ast::TypeConstructorExpression t(&vec, std::move(vals));
 
   Builder b;
-  EXPECT_EQ(b.GenerateConstructorExpression(&t, true), 0);
+  EXPECT_EQ(b.GenerateConstructorExpression(&t, true), 0u);
   EXPECT_TRUE(b.has_error());
   EXPECT_EQ(b.error(), R"(constructor must be a constant expression)");
 }

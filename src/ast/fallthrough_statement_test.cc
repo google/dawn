@@ -24,15 +24,15 @@ using FallthroughStatementTest = testing::Test;
 
 TEST_F(FallthroughStatementTest, Creation) {
   FallthroughStatement stmt;
-  EXPECT_EQ(stmt.line(), 0);
-  EXPECT_EQ(stmt.column(), 0);
+  EXPECT_EQ(stmt.line(), 0u);
+  EXPECT_EQ(stmt.column(), 0u);
 }
 
 TEST_F(FallthroughStatementTest, Creation_WithSource) {
   FallthroughStatement stmt(Source{20, 2});
   auto src = stmt.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(FallthroughStatementTest, IsFallthrough) {

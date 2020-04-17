@@ -59,7 +59,7 @@ std::string CommonTypes() {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_NoVar) {
-  auto p = parser(test::Assemble(""));
+  auto* p = parser(test::Assemble(""));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_ast = p->module().to_str();
@@ -67,7 +67,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_NoVar) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_BadStorageClass) {
-  auto p = parser(test::Assemble(R"(
+  auto* p = parser(test::Assemble(R"(
     %float = OpTypeFloat 32
     %ptr = OpTypePointer CrossWorkgroup %float
     %52 = OpVariable %ptr CrossWorkgroup
@@ -81,7 +81,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BadStorageClass) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_BadPointerType) {
-  auto p = parser(test::Assemble(R"(
+  auto* p = parser(test::Assemble(R"(
     %float = OpTypeFloat 32
     %fn_ty = OpTypeFunction %float
     %3 = OpTypePointer Private %fn_ty
@@ -97,7 +97,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BadPointerType) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_AnonWorkgroupVar) {
-  auto p = parser(test::Assemble(R"(
+  auto* p = parser(test::Assemble(R"(
     %float = OpTypeFloat 32
     %ptr = OpTypePointer Workgroup %float
     %52 = OpVariable %ptr Workgroup
@@ -115,7 +115,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_AnonWorkgroupVar) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_NamedWorkgroupVar) {
-  auto p = parser(test::Assemble(R"(
+  auto* p = parser(test::Assemble(R"(
     OpName %52 "the_counter"
     %float = OpTypeFloat 32
     %ptr = OpTypePointer Workgroup %float
@@ -134,7 +134,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_NamedWorkgroupVar) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_PrivateVar) {
-  auto p = parser(test::Assemble(R"(
+  auto* p = parser(test::Assemble(R"(
     OpName %52 "my_own_private_idaho"
     %float = OpTypeFloat 32
     %ptr = OpTypePointer Private %float
@@ -153,7 +153,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_PrivateVar) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_BuiltinVerteIndex) {
-  auto p = parser(test::Assemble(R"(
+  auto* p = parser(test::Assemble(R"(
     OpDecorate %52 BuiltIn VertexIndex
     %uint = OpTypeInt 32 0
     %ptr = OpTypePointer Input %uint
@@ -175,7 +175,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_BuiltinVerteIndex) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_ScalarInitializers) {
-  auto p = parser(test::Assemble(CommonTypes() + R"(
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
      %1 = OpVariable %ptr_bool Private %true
      %2 = OpVariable %ptr_bool Private %false
      %3 = OpVariable %ptr_int Private %int_m1
@@ -228,7 +228,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarInitializers) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_ScalarNullInitializers) {
-  auto p = parser(test::Assemble(CommonTypes() + R"(
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
      %null_bool = OpConstantNull %bool
      %null_int = OpConstantNull %int
      %null_uint = OpConstantNull %uint
@@ -277,7 +277,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ScalarNullInitializers) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_VectorInitializer) {
-  auto p = parser(test::Assemble(CommonTypes() + R"(
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2float
      %two = OpConstant %float 2.0
      %const = OpConstantComposite %v2float %float_1p5 %two
@@ -301,7 +301,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorInitializer) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_MatrixInitializer) {
-  auto p = parser(test::Assemble(CommonTypes() + R"(
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %m3v2float
      %two = OpConstant %float 2.0
      %three = OpConstant %float 3.0
@@ -343,7 +343,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_MatrixInitializer) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_ArrayInitializer) {
-  auto p = parser(test::Assemble(CommonTypes() + R"(
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %arr2uint
      %two = OpConstant %uint 2
      %const = OpConstantComposite %arr2uint %uint_1 %two
@@ -367,7 +367,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_ArrayInitializer) {
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_StructInitializer) {
-  auto p = parser(test::Assemble(CommonTypes() + R"(
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %strct
      %two = OpConstant %uint 2
      %arrconst = OpConstantComposite %arr2uint %uint_1 %two

@@ -70,7 +70,7 @@ std::string CommonTypes() {
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_AnonymousVars) {
-  auto p = parser(test::Assemble(CommonTypes() + R"(
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpVariable %ptr_uint Function
@@ -108,7 +108,7 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_NamedVars) {
-  auto p = parser(test::Assemble(Names({"a", "b", "c"}) + CommonTypes() + R"(
+  auto* p = parser(test::Assemble(Names({"a", "b", "c"}) + CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %a = OpVariable %ptr_uint Function
@@ -146,7 +146,7 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_MixedTypes) {
-  auto p = parser(test::Assemble(Names({"a", "b", "c"}) + CommonTypes() + R"(
+  auto* p = parser(test::Assemble(Names({"a", "b", "c"}) + CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %a = OpVariable %ptr_uint Function
@@ -184,7 +184,7 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_ScalarInitializers) {
-  auto p = parser(
+  auto* p = parser(
       test::Assemble(Names({"a", "b", "c", "d", "e"}) + CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
@@ -254,7 +254,7 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_ScalarNullInitializers) {
-  auto p =
+  auto* p =
       parser(test::Assemble(Names({"a", "b", "c", "d"}) + CommonTypes() + R"(
      %null_bool = OpConstantNull %bool
      %null_int = OpConstantNull %int
@@ -318,7 +318,7 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_VectorInitializer) {
-  auto p = parser(test::Assemble(CommonTypes() + R"(
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Function %v2float
      %two = OpConstant %float 2.0
      %const = OpConstantComposite %v2float %float_1p5 %two
@@ -351,7 +351,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_VectorInitializer) {
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_MatrixInitializer) {
-  auto p = parser(test::Assemble(CommonTypes() + R"(
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Function %m3v2float
      %two = OpConstant %float 2.0
      %three = OpConstant %float 3.0
@@ -402,7 +402,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_MatrixInitializer) {
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer) {
-  auto p = parser(test::Assemble(CommonTypes() + R"(
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Function %arr2uint
      %two = OpConstant %uint 2
      %const = OpConstantComposite %arr2uint %uint_1 %two
@@ -435,7 +435,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer) {
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer) {
-  auto p = parser(test::Assemble(CommonTypes() + R"(
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Function %strct
      %two = OpConstant %uint 2
      %arrconst = OpConstantComposite %arr2uint %uint_1 %two

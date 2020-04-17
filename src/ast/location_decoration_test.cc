@@ -26,7 +26,7 @@ using LocationDecorationTest = testing::Test;
 
 TEST_F(LocationDecorationTest, Creation) {
   LocationDecoration d{2};
-  EXPECT_EQ(2, d.value());
+  EXPECT_EQ(2u, d.value());
 }
 
 TEST_F(LocationDecorationTest, Is) {

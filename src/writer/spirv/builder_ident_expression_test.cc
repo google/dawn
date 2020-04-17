@@ -68,7 +68,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
 )");
 
   ast::IdentifierExpression expr("var");
-  EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 5);
+  EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 5u);
 }
 
 TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
@@ -85,7 +85,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
 )");
 
   ast::IdentifierExpression expr("var");
-  EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 1);
+  EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 1u);
 }
 
 TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
@@ -119,7 +119,7 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
 )");
 
   ast::IdentifierExpression expr("var");
-  EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 5);
+  EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 5u);
 }
 
 TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
@@ -140,7 +140,7 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
 )");
 
   ast::IdentifierExpression expr("var");
-  EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 1);
+  EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 1u);
 }
 
 TEST_F(BuilderTest, IdentifierExpression_Load) {
@@ -165,7 +165,7 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(&var)) << b.error();
 
-  ASSERT_EQ(b.GenerateBinaryExpression(&expr), 6) << b.error();
+  ASSERT_EQ(b.GenerateBinaryExpression(&expr), 6u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %1 = OpVariable %2 Private
@@ -202,7 +202,7 @@ TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(&var)) << b.error();
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 3) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 3u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 1
 %2 = OpConstant %1 2
 )");

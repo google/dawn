@@ -24,20 +24,20 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, FunctionHeader) {
-  auto p = parser("fn main(a : i32, b: f32) -> void");
+  auto* p = parser("fn main(a : i32, b: f32) -> void");
   auto f = p->function_header();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(f, nullptr);
 
   EXPECT_EQ(f->name(), "main");
-  ASSERT_EQ(f->params().size(), 2);
+  ASSERT_EQ(f->params().size(), 2u);
   EXPECT_EQ(f->params()[0]->name(), "a");
   EXPECT_EQ(f->params()[1]->name(), "b");
   EXPECT_TRUE(f->return_type()->IsVoid());
 }
 
 TEST_F(ParserImplTest, FunctionHeader_MissingIdent) {
-  auto p = parser("fn () ->");
+  auto* p = parser("fn () ->");
   auto f = p->function_header();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);
@@ -45,7 +45,7 @@ TEST_F(ParserImplTest, FunctionHeader_MissingIdent) {
 }
 
 TEST_F(ParserImplTest, FunctionHeader_InvalidIdent) {
-  auto p = parser("fn 133main() -> i32");
+  auto* p = parser("fn 133main() -> i32");
   auto f = p->function_header();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);
@@ -53,7 +53,7 @@ TEST_F(ParserImplTest, FunctionHeader_InvalidIdent) {
 }
 
 TEST_F(ParserImplTest, FunctionHeader_MissingParenLeft) {
-  auto p = parser("fn main) -> i32");
+  auto* p = parser("fn main) -> i32");
   auto f = p->function_header();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);
@@ -61,7 +61,7 @@ TEST_F(ParserImplTest, FunctionHeader_MissingParenLeft) {
 }
 
 TEST_F(ParserImplTest, FunctionHeader_InvalidParamList) {
-  auto p = parser("fn main(a :i32,) -> i32");
+  auto* p = parser("fn main(a :i32,) -> i32");
   auto f = p->function_header();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);
@@ -69,7 +69,7 @@ TEST_F(ParserImplTest, FunctionHeader_InvalidParamList) {
 }
 
 TEST_F(ParserImplTest, FunctionHeader_MissingParenRight) {
-  auto p = parser("fn main( -> i32");
+  auto* p = parser("fn main( -> i32");
   auto f = p->function_header();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);
@@ -77,7 +77,7 @@ TEST_F(ParserImplTest, FunctionHeader_MissingParenRight) {
 }
 
 TEST_F(ParserImplTest, FunctionHeader_MissingArrow) {
-  auto p = parser("fn main() i32");
+  auto* p = parser("fn main() i32");
   auto f = p->function_header();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);
@@ -85,7 +85,7 @@ TEST_F(ParserImplTest, FunctionHeader_MissingArrow) {
 }
 
 TEST_F(ParserImplTest, FunctionHeader_InvalidReturnType) {
-  auto p = parser("fn main() -> invalid");
+  auto* p = parser("fn main() -> invalid");
   auto f = p->function_header();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);
@@ -93,7 +93,7 @@ TEST_F(ParserImplTest, FunctionHeader_InvalidReturnType) {
 }
 
 TEST_F(ParserImplTest, FunctionHeader_MissingReturnType) {
-  auto p = parser("fn main() ->");
+  auto* p = parser("fn main() ->");
   auto f = p->function_header();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);

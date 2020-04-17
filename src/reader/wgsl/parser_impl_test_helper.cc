@@ -11,27 +11,24 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-#include "src/ast/struct_member_offset_decoration.h"
-
-#include "gtest/gtest.h"
+#include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
-namespace ast {
-namespace {
+namespace reader {
+namespace wgsl {
 
-using StructMemberOffsetDecorationTest = testing::Test;
+ParserImplTest::ParserImplTest() = default;
 
-TEST_F(StructMemberOffsetDecorationTest, Creation) {
-  StructMemberOffsetDecoration d{2};
-  EXPECT_EQ(2u, d.offset());
+ParserImplTest::~ParserImplTest() = default;
+
+void ParserImplTest::SetUp() {
+  ctx_.Reset();
 }
 
-TEST_F(StructMemberOffsetDecorationTest, Is) {
-  StructMemberOffsetDecoration d{2};
-  EXPECT_TRUE(d.IsOffset());
+void ParserImplTest::TearDown() {
+  impl_ = nullptr;
 }
 
-}  // namespace
-}  // namespace ast
+}  // namespace wgsl
+}  // namespace reader
 }  // namespace tint

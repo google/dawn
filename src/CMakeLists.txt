@@ -402,6 +402,7 @@ if(${TINT_BUILD_WGSL_READER})
     reader/wgsl/parser_impl_switch_body_test.cc
     reader/wgsl/parser_impl_switch_stmt_test.cc
     reader/wgsl/parser_impl_test.cc
+    reader/wgsl/parser_impl_test_helper.cc
     reader/wgsl/parser_impl_test_helper.h
     reader/wgsl/parser_impl_type_alias_test.cc
     reader/wgsl/parser_impl_type_decl_test.cc

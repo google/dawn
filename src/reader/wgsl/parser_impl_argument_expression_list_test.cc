@@ -29,34 +29,34 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, ArgumentExpressionList_Parses) {
-  auto p = parser("a");
+  auto* p = parser("a");
   auto e = p->argument_expression_list();
   ASSERT_FALSE(p->has_error()) << p->error();
 
-  ASSERT_EQ(e.size(), 1);
+  ASSERT_EQ(e.size(), 1u);
   ASSERT_TRUE(e[0]->IsIdentifier());
 }
 
 TEST_F(ParserImplTest, ArgumentExpressionList_ParsesMultiple) {
-  auto p = parser("a, -33, 1+2");
+  auto* p = parser("a, -33, 1+2");
   auto e = p->argument_expression_list();
   ASSERT_FALSE(p->has_error()) << p->error();
 
-  ASSERT_EQ(e.size(), 3);
+  ASSERT_EQ(e.size(), 3u);
   ASSERT_TRUE(e[0]->IsIdentifier());
   ASSERT_TRUE(e[1]->IsConstructor());
   ASSERT_TRUE(e[2]->IsBinary());
 }
 
 TEST_F(ParserImplTest, ArgumentExpressionList_HandlesMissingExpression) {
-  auto p = parser("a, ");
+  auto* p = parser("a, ");
   auto e = p->argument_expression_list();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:4: unable to parse argument expression after comma");
 }
 
 TEST_F(ParserImplTest, ArgumentExpressionList_HandlesInvalidExpression) {
-  auto p = parser("if(a) {}");
+  auto* p = parser("if(a) {}");
   auto e = p->argument_expression_list();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:1: unable to parse argument expression");

@@ -37,7 +37,7 @@ TEST_F(BuilderTest, EntryPoint) {
   ASSERT_TRUE(b.GenerateEntryPoint(&ep));
 
   auto preamble = b.preamble();
-  ASSERT_EQ(preamble.size(), 1);
+  ASSERT_EQ(preamble.size(), 1u);
   EXPECT_EQ(DumpInstruction(preamble[0]), R"(OpEntryPoint Fragment %2 "main"
 )");
 }
@@ -50,7 +50,7 @@ TEST_F(BuilderTest, EntryPoint_WithoutName) {
   ASSERT_TRUE(b.GenerateEntryPoint(&ep));
 
   auto preamble = b.preamble();
-  ASSERT_EQ(preamble.size(), 1);
+  ASSERT_EQ(preamble.size(), 1u);
   EXPECT_EQ(DumpInstruction(preamble[0]),
             R"(OpEntryPoint GLCompute %3 "compute_main"
 )");
@@ -83,10 +83,10 @@ TEST_P(EntryPointStageTest, Emit) {
   ASSERT_TRUE(b.GenerateEntryPoint(&ep));
 
   auto preamble = b.preamble();
-  ASSERT_EQ(preamble.size(), 1);
+  ASSERT_EQ(preamble.size(), 1u);
   EXPECT_EQ(preamble[0].opcode(), spv::Op::OpEntryPoint);
 
-  ASSERT_GE(preamble[0].operands().size(), 3);
+  ASSERT_GE(preamble[0].operands().size(), 3u);
   EXPECT_EQ(preamble[0].operands()[0].to_i(), params.model);
 }
 INSTANTIATE_TEST_SUITE_P(

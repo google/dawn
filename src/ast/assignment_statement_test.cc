@@ -27,8 +27,8 @@ TEST_F(AssignmentStatementTest, Creation) {
   auto lhs = std::make_unique<ast::IdentifierExpression>("lhs");
   auto rhs = std::make_unique<ast::IdentifierExpression>("rhs");
 
-  auto lhs_ptr = lhs.get();
-  auto rhs_ptr = rhs.get();
+  auto* lhs_ptr = lhs.get();
+  auto* rhs_ptr = rhs.get();
 
   AssignmentStatement stmt(std::move(lhs), std::move(rhs));
   EXPECT_EQ(stmt.lhs(), lhs_ptr);
@@ -41,8 +41,8 @@ TEST_F(AssignmentStatementTest, CreationWithSource) {
 
   AssignmentStatement stmt(Source{20, 2}, std::move(lhs), std::move(rhs));
   auto src = stmt.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(AssignmentStatementTest, IsAssign) {

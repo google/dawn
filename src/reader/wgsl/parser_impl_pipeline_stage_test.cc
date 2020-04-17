@@ -36,9 +36,9 @@ class PipelineStageTest : public testing::TestWithParam<PipelineStageData> {
   PipelineStageTest() = default;
   ~PipelineStageTest() = default;
 
-  void SetUp() { ctx_.Reset(); }
+  void SetUp() override { ctx_.Reset(); }
 
-  void TearDown() { impl_ = nullptr; }
+  void TearDown() override { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -52,7 +52,7 @@ class PipelineStageTest : public testing::TestWithParam<PipelineStageData> {
 
 TEST_P(PipelineStageTest, Parses) {
   auto params = GetParam();
-  auto p = parser(params.input);
+  auto* p = parser(params.input);
 
   auto stage = p->pipeline_stage();
   ASSERT_FALSE(p->has_error());
@@ -70,7 +70,7 @@ INSTANTIATE_TEST_SUITE_P(
         PipelineStageData{"compute", ast::PipelineStage::kCompute}));
 
 TEST_F(ParserImplTest, PipelineStage_NoMatch) {
-  auto p = parser("not-a-stage");
+  auto* p = parser("not-a-stage");
   auto stage = p->pipeline_stage();
   ASSERT_EQ(stage, ast::PipelineStage::kNone);
 

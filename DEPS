@@ -9,17 +9,15 @@ vars = {
   'buildtools_revision': '74cfb57006f83cfe050817526db359d5c8a11628',
   'clang_revision': '3605577b67603ec5776afcfada9e0ff4ea05cf0e',
   'cpplint_revision': '305ac8725a166ed42e3f5dd3f80d6de2cf840ef1',
-  'googletest_revision': '482ac6ee63429af2aa9c44f4e6427873fb68fb1f',
+  'googletest_revision': 'dcc92d0ab6c4ce022162a23566d44f673251eee4',
   'spirv_headers_revision': 'f8bf11a0253a32375c32cad92c841237b96696c0',
   'spirv_tools_revision': '60104cd97446877dad8ed1010a635218937a2f18',
+  'testing_revision': 'e5ced5141379ee8ae28b4f93d3c02df039d2b052',
 }
 
 deps = {
   'third_party/cpplint': Var('chromium_git') + Var('github') +
       '/google/styleguide.git@' + Var('cpplint_revision'),
-
-  'third_party/googletest': Var('chromium_git') + Var('github') +
-      '/google/googletest.git@' + Var('googletest_revision'),
 
   'third_party/spirv-headers': Var('chromium_git') + Var('github') +
       '/KhronosGroup/SPIRV-Headers.git@' + Var('spirv_headers_revision'),
@@ -39,6 +37,13 @@ deps = {
 
   'third_party/binutils': Var('chromium_git') +
       '/chromium/src/third_party/binutils@' + Var('binutils_revision'),
+
+  # Dependencies required for testing
+  'testing': Var('chromium_git') + '/chromium/src/testing@' +
+      Var('testing_revision'),
+
+  'third_party/googletest': Var('chromium_git') + Var('github') +
+      '/google/googletest.git@' + Var('googletest_revision'),
 }
 
 hooks = [

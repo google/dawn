@@ -24,7 +24,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, SwitchStmt_WithoutDefault) {
-  auto p = parser(R"(switch(a) {
+  auto* p = parser(R"(switch(a) {
   case 1: {}
   case 2: {}
 })");
@@ -32,22 +32,22 @@ TEST_F(ParserImplTest, SwitchStmt_WithoutDefault) {
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsSwitch());
-  ASSERT_EQ(e->body().size(), 2);
+  ASSERT_EQ(e->body().size(), 2u);
   EXPECT_FALSE(e->body()[0]->IsDefault());
   EXPECT_FALSE(e->body()[1]->IsDefault());
 }
 
 TEST_F(ParserImplTest, SwitchStmt_Empty) {
-  auto p = parser("switch(a) { }");
+  auto* p = parser("switch(a) { }");
   auto e = p->switch_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsSwitch());
-  ASSERT_EQ(e->body().size(), 0);
+  ASSERT_EQ(e->body().size(), 0u);
 }
 
 TEST_F(ParserImplTest, SwitchStmt_DefaultInMiddle) {
-  auto p = parser(R"(switch(a) {
+  auto* p = parser(R"(switch(a) {
   case 1: {}
   default: {}
   case 2: {}
@@ -57,14 +57,14 @@ TEST_F(ParserImplTest, SwitchStmt_DefaultInMiddle) {
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsSwitch());
 
-  ASSERT_EQ(e->body().size(), 3);
+  ASSERT_EQ(e->body().size(), 3u);
   ASSERT_FALSE(e->body()[0]->IsDefault());
   ASSERT_TRUE(e->body()[1]->IsDefault());
   ASSERT_FALSE(e->body()[2]->IsDefault());
 }
 
 TEST_F(ParserImplTest, SwitchStmt_InvalidExpression) {
-  auto p = parser("switch(a=b) {}");
+  auto* p = parser("switch(a=b) {}");
   auto e = p->switch_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -72,7 +72,7 @@ TEST_F(ParserImplTest, SwitchStmt_InvalidExpression) {
 }
 
 TEST_F(ParserImplTest, SwitchStmt_MissingExpression) {
-  auto p = parser("switch {}");
+  auto* p = parser("switch {}");
   auto e = p->switch_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -80,7 +80,7 @@ TEST_F(ParserImplTest, SwitchStmt_MissingExpression) {
 }
 
 TEST_F(ParserImplTest, SwitchStmt_MissingBracketLeft) {
-  auto p = parser("switch(a) }");
+  auto* p = parser("switch(a) }");
   auto e = p->switch_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -88,7 +88,7 @@ TEST_F(ParserImplTest, SwitchStmt_MissingBracketLeft) {
 }
 
 TEST_F(ParserImplTest, SwitchStmt_MissingBracketRight) {
-  auto p = parser("switch(a) {");
+  auto* p = parser("switch(a) {");
   auto e = p->switch_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -96,7 +96,7 @@ TEST_F(ParserImplTest, SwitchStmt_MissingBracketRight) {
 }
 
 TEST_F(ParserImplTest, SwitchStmt_InvalidBody) {
-  auto p = parser(R"(switch(a) {
+  auto* p = parser(R"(switch(a) {
   case: {}
 })");
   auto e = p->switch_stmt();

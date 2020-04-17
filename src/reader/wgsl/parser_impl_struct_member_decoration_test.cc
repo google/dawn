@@ -23,18 +23,18 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, StructMemberDecoration_Offset) {
-  auto p = parser("offset 4");
+  auto* p = parser("offset 4");
   auto deco = p->struct_member_decoration();
   ASSERT_NE(deco, nullptr);
   ASSERT_FALSE(p->has_error());
   ASSERT_TRUE(deco->IsOffset());
 
-  auto o = deco->AsOffset();
-  EXPECT_EQ(o->offset(), 4);
+  auto* o = deco->AsOffset();
+  EXPECT_EQ(o->offset(), 4u);
 }
 
 TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingValue) {
-  auto p = parser("offset");
+  auto* p = parser("offset");
   auto deco = p->struct_member_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
@@ -42,7 +42,7 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingValue) {
 }
 
 TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingInvalid) {
-  auto p = parser("offset nan");
+  auto* p = parser("offset nan");
   auto deco = p->struct_member_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());

@@ -24,7 +24,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithoutConstructor) {
-  auto p = parser("var<out> a : f32");
+  auto* p = parser("var<out> a : f32");
   auto e = p->global_variable_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
@@ -38,7 +38,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithoutConstructor) {
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
-  auto p = parser("var<out> a : f32 = 1.");
+  auto* p = parser("var<out> a : f32 = 1.");
   auto e = p->global_variable_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
@@ -55,7 +55,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
-  auto p = parser("[[binding 2, set 1]] var<out> a : f32");
+  auto* p = parser("[[binding 2, set 1]] var<out> a : f32");
   auto e = p->global_variable_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
@@ -69,16 +69,16 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
   ASSERT_EQ(e->constructor(), nullptr);
 
   ASSERT_TRUE(e->IsDecorated());
-  auto v = e->AsDecorated();
+  auto* v = e->AsDecorated();
 
   auto& decos = v->decorations();
-  ASSERT_EQ(decos.size(), 2);
+  ASSERT_EQ(decos.size(), 2u);
   ASSERT_TRUE(decos[0]->IsBinding());
   ASSERT_TRUE(decos[1]->IsSet());
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidDecoration) {
-  auto p = parser("[[binding]] var<out> a : f32");
+  auto* p = parser("[[binding]] var<out> a : f32");
   auto e = p->global_variable_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -86,7 +86,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidDecoration) {
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidConstExpr) {
-  auto p = parser("var<out> a : f32 = if (a) {}");
+  auto* p = parser("var<out> a : f32 = if (a) {}");
   auto e = p->global_variable_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -94,7 +94,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidConstExpr) {
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidVariableDecl) {
-  auto p = parser("var<invalid> a : f32;");
+  auto* p = parser("var<invalid> a : f32;");
   auto e = p->global_variable_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);

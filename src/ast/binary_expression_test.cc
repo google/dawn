@@ -29,8 +29,8 @@ TEST_F(BinaryExpressionTest, Creation) {
   auto lhs = std::make_unique<IdentifierExpression>("lhs");
   auto rhs = std::make_unique<IdentifierExpression>("rhs");
 
-  auto lhs_ptr = lhs.get();
-  auto rhs_ptr = rhs.get();
+  auto* lhs_ptr = lhs.get();
+  auto* rhs_ptr = rhs.get();
 
   BinaryExpression r(BinaryOp::kEqual, std::move(lhs), std::move(rhs));
   EXPECT_EQ(r.lhs(), lhs_ptr);
@@ -45,8 +45,8 @@ TEST_F(BinaryExpressionTest, Creation_WithSource) {
   BinaryExpression r(Source{20, 2}, BinaryOp::kEqual, std::move(lhs),
                      std::move(rhs));
   auto src = r.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(BinaryExpressionTest, IsBinaryal) {

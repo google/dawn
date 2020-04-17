@@ -22,18 +22,18 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, ContinuingStmt) {
-  auto p = parser("continuing { nop; }");
+  auto* p = parser("continuing { nop; }");
   auto e = p->continuing_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_EQ(e.size(), 1);
+  ASSERT_EQ(e.size(), 1u);
   ASSERT_TRUE(e[0]->IsNop());
 }
 
 TEST_F(ParserImplTest, ContinuingStmt_InvalidBody) {
-  auto p = parser("continuing { nop }");
+  auto* p = parser("continuing { nop }");
   auto e = p->continuing_stmt();
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e.size(), 0);
+  ASSERT_EQ(e.size(), 0u);
   EXPECT_EQ(p->error(), "1:18: missing ;");
 }
 

@@ -36,7 +36,7 @@ TEST_F(BuilderTest, InsertsPreambleWithImport) {
 
   Builder b;
   ASSERT_TRUE(b.Build(m));
-  ASSERT_EQ(b.preamble().size(), 4);
+  ASSERT_EQ(b.preamble().size(), 4u);
 
   EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
 OpCapability VulkanMemoryModel
@@ -62,7 +62,7 @@ TEST_F(BuilderTest, TracksIdBounds) {
     EXPECT_EQ(b.next_id(), i + 1);
   }
 
-  EXPECT_EQ(6, b.id_bound());
+  EXPECT_EQ(6u, b.id_bound());
 }
 
 }  // namespace

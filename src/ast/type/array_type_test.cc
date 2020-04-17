@@ -29,7 +29,7 @@ TEST_F(ArrayTypeTest, CreateSizedArray) {
   U32Type u32;
   ArrayType arr{&u32, 3};
   EXPECT_EQ(arr.type(), &u32);
-  EXPECT_EQ(arr.size(), 3);
+  EXPECT_EQ(arr.size(), 3u);
   EXPECT_TRUE(arr.IsArray());
   EXPECT_FALSE(arr.IsRuntimeArray());
 }
@@ -38,7 +38,7 @@ TEST_F(ArrayTypeTest, CreateRuntimeArray) {
   U32Type u32;
   ArrayType arr{&u32};
   EXPECT_EQ(arr.type(), &u32);
-  EXPECT_EQ(arr.size(), 0);
+  EXPECT_EQ(arr.size(), 0u);
   EXPECT_TRUE(arr.IsArray());
   EXPECT_TRUE(arr.IsRuntimeArray());
 }

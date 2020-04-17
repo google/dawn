@@ -30,14 +30,14 @@ namespace wgsl {
 class ParserImplTest : public testing::Test {
  public:
   /// Constructor
-  ParserImplTest() = default;
-  ~ParserImplTest() = default;
+  ParserImplTest();
+  ~ParserImplTest() override;
 
   /// Sets up the test helper
-  void SetUp() { ctx_.Reset(); }
+  void SetUp() override;
 
   /// Tears down the test helper
-  void TearDown() { impl_ = nullptr; }
+  void TearDown() override;
 
   /// Retrieves the parser from the helper
   /// @param str the string to parse

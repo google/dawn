@@ -30,11 +30,11 @@ TEST_F(UnaryMethodExpressionTest, Creation) {
   ExpressionList params;
   params.push_back(std::make_unique<IdentifierExpression>("ident"));
 
-  auto ident_ptr = params[0].get();
+  auto* ident_ptr = params[0].get();
 
   UnaryMethodExpression u(UnaryMethod::kAll, std::move(params));
   EXPECT_EQ(u.op(), UnaryMethod::kAll);
-  ASSERT_EQ(u.params().size(), 1);
+  ASSERT_EQ(u.params().size(), 1u);
   EXPECT_EQ(u.params()[0].get(), ident_ptr);
 }
 
@@ -44,8 +44,8 @@ TEST_F(UnaryMethodExpressionTest, Creation_WithSource) {
 
   UnaryMethodExpression u(Source{20, 2}, UnaryMethod::kAll, std::move(params));
   auto src = u.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(UnaryMethodExpressionTest, IsUnaryMethod) {

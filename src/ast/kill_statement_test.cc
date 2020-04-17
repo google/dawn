@@ -26,14 +26,14 @@ using KillStatementTest = testing::Test;
 
 TEST_F(KillStatementTest, Creation) {
   KillStatement k;
-  EXPECT_EQ(k.line(), 0);
-  EXPECT_EQ(k.column(), 0);
+  EXPECT_EQ(k.line(), 0u);
+  EXPECT_EQ(k.column(), 0u);
 }
 
 TEST_F(KillStatementTest, Creation_WithSource) {
   KillStatement k(Source{20, 2});
-  EXPECT_EQ(k.line(), 20);
-  EXPECT_EQ(k.column(), 2);
+  EXPECT_EQ(k.line(), 20u);
+  EXPECT_EQ(k.column(), 2u);
 }
 
 TEST_F(KillStatementTest, IsKill) {

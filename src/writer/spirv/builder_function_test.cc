@@ -42,7 +42,7 @@ TEST_F(BuilderTest, Function_Empty) {
 %1 = OpTypeFunction %2
 )");
 
-  ASSERT_GE(b.functions().size(), 1);
+  ASSERT_GE(b.functions().size(), 1u);
   const auto& ret = b.functions()[0];
   EXPECT_EQ(DumpInstruction(ret.declaration()), R"(%3 = OpFunction %2 None %1
 )");

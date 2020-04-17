@@ -22,19 +22,19 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, UnlessStmt) {
-  auto p = parser("unless (a) { kill; }");
+  auto* p = parser("unless (a) { kill; }");
   auto e = p->unless_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnless());
   ASSERT_NE(e->condition(), nullptr);
   EXPECT_TRUE(e->condition()->IsIdentifier());
-  ASSERT_EQ(e->body().size(), 1);
+  ASSERT_EQ(e->body().size(), 1u);
   EXPECT_TRUE(e->body()[0]->IsKill());
 }
 
 TEST_F(ParserImplTest, UnlessStmt_InvalidCondition) {
-  auto p = parser("unless(if(a){}) {}");
+  auto* p = parser("unless(if(a){}) {}");
   auto e = p->unless_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -42,7 +42,7 @@ TEST_F(ParserImplTest, UnlessStmt_InvalidCondition) {
 }
 
 TEST_F(ParserImplTest, UnlessStmt_EmptyCondition) {
-  auto p = parser("unless() {}");
+  auto* p = parser("unless() {}");
   auto e = p->unless_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -50,7 +50,7 @@ TEST_F(ParserImplTest, UnlessStmt_EmptyCondition) {
 }
 
 TEST_F(ParserImplTest, UnlessStmt_InvalidBody) {
-  auto p = parser("unless(a + 2 - 5 == true) { kill }");
+  auto* p = parser("unless(a + 2 - 5 == true) { kill }");
   auto e = p->unless_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);

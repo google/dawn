@@ -23,7 +23,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, EntryPoint_Parses) {
-  auto p = parser("entry_point fragment = main");
+  auto* p = parser("entry_point fragment = main");
   auto e = p->entry_point_decl();
   ASSERT_NE(e, nullptr);
   ASSERT_FALSE(p->has_error());
@@ -33,7 +33,7 @@ TEST_F(ParserImplTest, EntryPoint_Parses) {
 }
 
 TEST_F(ParserImplTest, EntryPoint_ParsesWithStringName) {
-  auto p = parser(R"(entry_point vertex as "main" = vtx_main)");
+  auto* p = parser(R"(entry_point vertex as "main" = vtx_main)");
   auto e = p->entry_point_decl();
   ASSERT_NE(e, nullptr);
   ASSERT_FALSE(p->has_error());
@@ -43,7 +43,7 @@ TEST_F(ParserImplTest, EntryPoint_ParsesWithStringName) {
 }
 
 TEST_F(ParserImplTest, EntryPoint_ParsesWithIdentName) {
-  auto p = parser(R"(entry_point vertex as main = vtx_main)");
+  auto* p = parser(R"(entry_point vertex as main = vtx_main)");
   auto e = p->entry_point_decl();
   ASSERT_NE(e, nullptr);
   ASSERT_FALSE(p->has_error());
@@ -53,7 +53,7 @@ TEST_F(ParserImplTest, EntryPoint_ParsesWithIdentName) {
 }
 
 TEST_F(ParserImplTest, EntryPoint_MissingFnName) {
-  auto p = parser(R"(entry_point vertex as main =)");
+  auto* p = parser(R"(entry_point vertex as main =)");
   auto e = p->entry_point_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -61,7 +61,7 @@ TEST_F(ParserImplTest, EntryPoint_MissingFnName) {
 }
 
 TEST_F(ParserImplTest, EntryPoint_InvalidFnName) {
-  auto p = parser(R"(entry_point vertex as main = 123)");
+  auto* p = parser(R"(entry_point vertex as main = 123)");
   auto e = p->entry_point_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -69,7 +69,7 @@ TEST_F(ParserImplTest, EntryPoint_InvalidFnName) {
 }
 
 TEST_F(ParserImplTest, EntryPoint_MissingEqual) {
-  auto p = parser(R"(entry_point vertex as main vtx_main)");
+  auto* p = parser(R"(entry_point vertex as main vtx_main)");
   auto e = p->entry_point_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -77,7 +77,7 @@ TEST_F(ParserImplTest, EntryPoint_MissingEqual) {
 }
 
 TEST_F(ParserImplTest, EntryPoint_MissingName) {
-  auto p = parser(R"(entry_point vertex as = vtx_main)");
+  auto* p = parser(R"(entry_point vertex as = vtx_main)");
   auto e = p->entry_point_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -85,7 +85,7 @@ TEST_F(ParserImplTest, EntryPoint_MissingName) {
 }
 
 TEST_F(ParserImplTest, EntryPoint_InvalidName) {
-  auto p = parser(R"(entry_point vertex as 123 = vtx_main)");
+  auto* p = parser(R"(entry_point vertex as 123 = vtx_main)");
   auto e = p->entry_point_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -93,7 +93,7 @@ TEST_F(ParserImplTest, EntryPoint_InvalidName) {
 }
 
 TEST_F(ParserImplTest, EntryPoint_MissingStageWithIdent) {
-  auto p = parser(R"(entry_point as 123 = vtx_main)");
+  auto* p = parser(R"(entry_point as 123 = vtx_main)");
   auto e = p->entry_point_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -101,7 +101,7 @@ TEST_F(ParserImplTest, EntryPoint_MissingStageWithIdent) {
 }
 
 TEST_F(ParserImplTest, EntryPoint_MissingStage) {
-  auto p = parser(R"(entry_point = vtx_main)");
+  auto* p = parser(R"(entry_point = vtx_main)");
   auto e = p->entry_point_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -109,7 +109,7 @@ TEST_F(ParserImplTest, EntryPoint_MissingStage) {
 }
 
 TEST_F(ParserImplTest, EntryPoint_InvalidStage) {
-  auto p = parser(R"(entry_point invalid = vtx_main)");
+  auto* p = parser(R"(entry_point invalid = vtx_main)");
   auto e = p->entry_point_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);

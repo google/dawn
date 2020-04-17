@@ -26,18 +26,18 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, VariableDecoration_Location) {
-  auto p = parser("location 4");
+  auto* p = parser("location 4");
   auto deco = p->variable_decoration();
   ASSERT_NE(deco, nullptr);
   ASSERT_FALSE(p->has_error());
   ASSERT_TRUE(deco->IsLocation());
 
-  auto loc = deco->AsLocation();
-  EXPECT_EQ(loc->value(), 4);
+  auto* loc = deco->AsLocation();
+  EXPECT_EQ(loc->value(), 4u);
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Location_MissingValue) {
-  auto p = parser("location");
+  auto* p = parser("location");
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
@@ -45,7 +45,7 @@ TEST_F(ParserImplTest, VariableDecoration_Location_MissingValue) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Location_MissingInvalid) {
-  auto p = parser("location nan");
+  auto* p = parser("location nan");
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
@@ -53,18 +53,18 @@ TEST_F(ParserImplTest, VariableDecoration_Location_MissingInvalid) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Builtin) {
-  auto p = parser("builtin frag_depth");
+  auto* p = parser("builtin frag_depth");
   auto deco = p->variable_decoration();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(deco, nullptr);
   ASSERT_TRUE(deco->IsBuiltin());
 
-  auto builtin = deco->AsBuiltin();
+  auto* builtin = deco->AsBuiltin();
   EXPECT_EQ(builtin->value(), ast::Builtin::kFragDepth);
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingValue) {
-  auto p = parser("builtin");
+  auto* p = parser("builtin");
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
@@ -72,7 +72,7 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingValue) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingInvalid) {
-  auto p = parser("builtin 3");
+  auto* p = parser("builtin 3");
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
@@ -80,18 +80,18 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingInvalid) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Binding) {
-  auto p = parser("binding 4");
+  auto* p = parser("binding 4");
   auto deco = p->variable_decoration();
   ASSERT_NE(deco, nullptr);
   ASSERT_FALSE(p->has_error());
   ASSERT_TRUE(deco->IsBinding());
 
-  auto binding = deco->AsBinding();
-  EXPECT_EQ(binding->value(), 4);
+  auto* binding = deco->AsBinding();
+  EXPECT_EQ(binding->value(), 4u);
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Binding_MissingValue) {
-  auto p = parser("binding");
+  auto* p = parser("binding");
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
@@ -99,7 +99,7 @@ TEST_F(ParserImplTest, VariableDecoration_Binding_MissingValue) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Binding_MissingInvalid) {
-  auto p = parser("binding nan");
+  auto* p = parser("binding nan");
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
@@ -107,18 +107,18 @@ TEST_F(ParserImplTest, VariableDecoration_Binding_MissingInvalid) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_set) {
-  auto p = parser("set 4");
+  auto* p = parser("set 4");
   auto deco = p->variable_decoration();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(deco.get(), nullptr);
   ASSERT_TRUE(deco->IsSet());
 
-  auto set = deco->AsSet();
-  EXPECT_EQ(set->value(), 4);
+  auto* set = deco->AsSet();
+  EXPECT_EQ(set->value(), 4u);
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Set_MissingValue) {
-  auto p = parser("set");
+  auto* p = parser("set");
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
@@ -126,7 +126,7 @@ TEST_F(ParserImplTest, VariableDecoration_Set_MissingValue) {
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Set_MissingInvalid) {
-  auto p = parser("set nan");
+  auto* p = parser("set nan");
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());

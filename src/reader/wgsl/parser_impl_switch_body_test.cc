@@ -23,18 +23,18 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, SwitchBody_Case) {
-  auto p = parser("case 1: { a = 4; }");
+  auto* p = parser("case 1: { a = 4; }");
   auto e = p->switch_body();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsCase());
   EXPECT_FALSE(e->IsDefault());
-  ASSERT_EQ(e->body().size(), 1);
+  ASSERT_EQ(e->body().size(), 1u);
   EXPECT_TRUE(e->body()[0]->IsAssign());
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_InvalidConstLiteral) {
-  auto p = parser("case a == 4: { a = 4; }");
+  auto* p = parser("case a == 4: { a = 4; }");
   auto e = p->switch_body();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -42,7 +42,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_InvalidConstLiteral) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_MissingConstLiteral) {
-  auto p = parser("case: { a = 4; }");
+  auto* p = parser("case: { a = 4; }");
   auto e = p->switch_body();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -50,7 +50,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_MissingConstLiteral) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_MissingColon) {
-  auto p = parser("case 1 { a = 4; }");
+  auto* p = parser("case 1 { a = 4; }");
   auto e = p->switch_body();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -58,7 +58,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_MissingColon) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_MissingBracketLeft) {
-  auto p = parser("case 1: a = 4; }");
+  auto* p = parser("case 1: a = 4; }");
   auto e = p->switch_body();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -66,7 +66,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_MissingBracketLeft) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_MissingBracketRight) {
-  auto p = parser("case 1: { a = 4; ");
+  auto* p = parser("case 1: { a = 4; ");
   auto e = p->switch_body();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -74,7 +74,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_MissingBracketRight) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_InvalidCaseBody) {
-  auto p = parser("case 1: { fn main() -> void {} }");
+  auto* p = parser("case 1: { fn main() -> void {} }");
   auto e = p->switch_body();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -82,18 +82,18 @@ TEST_F(ParserImplTest, SwitchBody_Case_InvalidCaseBody) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Default) {
-  auto p = parser("default: { a = 4; }");
+  auto* p = parser("default: { a = 4; }");
   auto e = p->switch_body();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsCase());
   EXPECT_TRUE(e->IsDefault());
-  ASSERT_EQ(e->body().size(), 1);
+  ASSERT_EQ(e->body().size(), 1u);
   EXPECT_TRUE(e->body()[0]->IsAssign());
 }
 
 TEST_F(ParserImplTest, SwitchBody_Default_MissingColon) {
-  auto p = parser("default { a = 4; }");
+  auto* p = parser("default { a = 4; }");
   auto e = p->switch_body();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -101,7 +101,7 @@ TEST_F(ParserImplTest, SwitchBody_Default_MissingColon) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Default_MissingBracketLeft) {
-  auto p = parser("default: a = 4; }");
+  auto* p = parser("default: a = 4; }");
   auto e = p->switch_body();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -109,7 +109,7 @@ TEST_F(ParserImplTest, SwitchBody_Default_MissingBracketLeft) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Default_MissingBracketRight) {
-  auto p = parser("default: { a = 4; ");
+  auto* p = parser("default: { a = 4; ");
   auto e = p->switch_body();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -117,7 +117,7 @@ TEST_F(ParserImplTest, SwitchBody_Default_MissingBracketRight) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Default_InvalidCaseBody) {
-  auto p = parser("default: { fn main() -> void {} }");
+  auto* p = parser("default: { fn main() -> void {} }");
   auto e = p->switch_body();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);

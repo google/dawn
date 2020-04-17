@@ -27,7 +27,7 @@ using UnaryOpExpressionTest = testing::Test;
 
 TEST_F(UnaryOpExpressionTest, Creation) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
-  auto ident_ptr = ident.get();
+  auto* ident_ptr = ident.get();
 
   UnaryOpExpression u(UnaryOp::kNot, std::move(ident));
   EXPECT_EQ(u.op(), UnaryOp::kNot);
@@ -38,8 +38,8 @@ TEST_F(UnaryOpExpressionTest, Creation_WithSource) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
   UnaryOpExpression u(Source{20, 2}, UnaryOp::kNot, std::move(ident));
   auto src = u.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(UnaryOpExpressionTest, IsUnaryOp) {

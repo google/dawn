@@ -50,7 +50,7 @@ std::string CommonTypes() {
 }
 
 TEST_F(SpvParserTest, EmitFunctions_NoFunctions) {
-  auto p = parser(test::Assemble(CommonTypes()));
+  auto* p = parser(test::Assemble(CommonTypes()));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_ast = p->module().to_str();
@@ -58,7 +58,7 @@ TEST_F(SpvParserTest, EmitFunctions_NoFunctions) {
 }
 
 TEST_F(SpvParserTest, EmitFunctions_FunctionWithoutBody) {
-  auto p = parser(test::Assemble(Names({"main"}) + CommonTypes() + R"(
+  auto* p = parser(test::Assemble(Names({"main"}) + CommonTypes() + R"(
      %main = OpFunction %void None %voidfn
      OpFunctionEnd
   )"));
@@ -69,7 +69,7 @@ TEST_F(SpvParserTest, EmitFunctions_FunctionWithoutBody) {
 }
 
 TEST_F(SpvParserTest, EmitFunctions_VoidFunctionWithoutParams) {
-  auto p = parser(test::Assemble(Names({"main"}) + CommonTypes() + R"(
+  auto* p = parser(test::Assemble(Names({"main"}) + CommonTypes() + R"(
      %main = OpFunction %void None %voidfn
      %entry = OpLabel
      OpReturn
@@ -85,7 +85,7 @@ TEST_F(SpvParserTest, EmitFunctions_VoidFunctionWithoutParams) {
 }
 
 TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
-  auto p = parser(
+  auto* p = parser(
       test::Assemble(Names({"root", "branch", "leaf"}) + CommonTypes() + R"(
      %root = OpFunction %void None %voidfn
      %root_entry = OpLabel
@@ -123,7 +123,7 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
 }
 
 TEST_F(SpvParserTest, EmitFunctions_NonVoidResultType) {
-  auto p = parser(test::Assemble(Names({"ret_float"}) + CommonTypes() + R"(
+  auto* p = parser(test::Assemble(Names({"ret_float"}) + CommonTypes() + R"(
      %fn_ret_float = OpTypeFunction %float
 
      %ret_float = OpFunction %float None %fn_ret_float
@@ -142,8 +142,8 @@ TEST_F(SpvParserTest, EmitFunctions_NonVoidResultType) {
 }
 
 TEST_F(SpvParserTest, EmitFunctions_MixedParamTypes) {
-  auto p = parser(test::Assemble(Names({"mixed_params", "a", "b", "c"}) +
-                                 CommonTypes() + R"(
+  auto* p = parser(test::Assemble(Names({"mixed_params", "a", "b", "c"}) +
+                                  CommonTypes() + R"(
      %fn_mixed_params = OpTypeFunction %float %uint %float %int
 
      %mixed_params = OpFunction %void None %fn_mixed_params
@@ -181,7 +181,7 @@ TEST_F(SpvParserTest, EmitFunctions_MixedParamTypes) {
 }
 
 TEST_F(SpvParserTest, EmitFunctions_GenerateParamNames) {
-  auto p = parser(test::Assemble(Names({"mixed_params"}) + CommonTypes() + R"(
+  auto* p = parser(test::Assemble(Names({"mixed_params"}) + CommonTypes() + R"(
      %fn_mixed_params = OpTypeFunction %float %uint %float %int
 
      %mixed_params = OpFunction %void None %fn_mixed_params

@@ -24,7 +24,7 @@ using BindingDecorationTest = testing::Test;
 
 TEST_F(BindingDecorationTest, Creation) {
   BindingDecoration d{2};
-  EXPECT_EQ(2, d.value());
+  EXPECT_EQ(2u, d.value());
 }
 
 TEST_F(BindingDecorationTest, Is) {

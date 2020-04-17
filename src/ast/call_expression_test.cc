@@ -29,15 +29,15 @@ TEST_F(CallExpressionTest, Creation) {
   params.push_back(std::make_unique<IdentifierExpression>("param1"));
   params.push_back(std::make_unique<IdentifierExpression>("param2"));
 
-  auto func_ptr = func.get();
-  auto param1_ptr = params[0].get();
-  auto param2_ptr = params[1].get();
+  auto* func_ptr = func.get();
+  auto* param1_ptr = params[0].get();
+  auto* param2_ptr = params[1].get();
 
   CallExpression stmt(std::move(func), std::move(params));
   EXPECT_EQ(stmt.func(), func_ptr);
 
   const auto& vec = stmt.params();
-  ASSERT_EQ(vec.size(), 2);
+  ASSERT_EQ(vec.size(), 2u);
   EXPECT_EQ(vec[0].get(), param1_ptr);
   EXPECT_EQ(vec[1].get(), param2_ptr);
 }
@@ -46,8 +46,8 @@ TEST_F(CallExpressionTest, Creation_WithSource) {
   auto func = std::make_unique<IdentifierExpression>("func");
   CallExpression stmt(Source{20, 2}, std::move(func), {});
   auto src = stmt.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(CallExpressionTest, IsCall) {

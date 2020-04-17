@@ -27,7 +27,7 @@ TEST_F(UintLiteralTest, Value) {
   ast::type::U32Type u32;
   UintLiteral u{&u32, 47};
   ASSERT_TRUE(u.IsUint());
-  EXPECT_EQ(u.value(), 47);
+  EXPECT_EQ(u.value(), 47u);
 }
 
 TEST_F(UintLiteralTest, Is) {

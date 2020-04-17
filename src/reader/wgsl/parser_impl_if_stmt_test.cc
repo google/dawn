@@ -24,7 +24,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, IfStmt) {
-  auto p = parser("if (a == 4) { a = b; c = d; }");
+  auto* p = parser("if (a == 4) { a = b; c = d; }");
   auto e = p->if_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
@@ -32,12 +32,13 @@ TEST_F(ParserImplTest, IfStmt) {
   ASSERT_TRUE(e->IsIf());
   ASSERT_NE(e->condition(), nullptr);
   ASSERT_TRUE(e->condition()->IsBinary());
-  EXPECT_EQ(e->body().size(), 2);
-  EXPECT_EQ(e->else_statements().size(), 0);
+  EXPECT_EQ(e->body().size(), 2u);
+  EXPECT_EQ(e->else_statements().size(), 0u);
 }
 
 TEST_F(ParserImplTest, IfStmt_WithElse) {
-  auto p = parser("if (a == 4) { a = b; c = d; } elseif(c) { d = 2; } else {}");
+  auto* p =
+      parser("if (a == 4) { a = b; c = d; } elseif(c) { d = 2; } else {}");
   auto e = p->if_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
@@ -45,19 +46,19 @@ TEST_F(ParserImplTest, IfStmt_WithElse) {
   ASSERT_TRUE(e->IsIf());
   ASSERT_NE(e->condition(), nullptr);
   ASSERT_TRUE(e->condition()->IsBinary());
-  EXPECT_EQ(e->body().size(), 2);
+  EXPECT_EQ(e->body().size(), 2u);
 
-  ASSERT_EQ(e->else_statements().size(), 2);
+  ASSERT_EQ(e->else_statements().size(), 2u);
   ASSERT_NE(e->else_statements()[0]->condition(), nullptr);
   ASSERT_TRUE(e->else_statements()[0]->condition()->IsIdentifier());
-  EXPECT_EQ(e->else_statements()[0]->body().size(), 1);
+  EXPECT_EQ(e->else_statements()[0]->body().size(), 1u);
 
   ASSERT_EQ(e->else_statements()[1]->condition(), nullptr);
-  EXPECT_EQ(e->else_statements()[1]->body().size(), 0);
+  EXPECT_EQ(e->else_statements()[1]->body().size(), 0u);
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidCondition) {
-  auto p = parser("if (a = 3) {}");
+  auto* p = parser("if (a = 3) {}");
   auto e = p->if_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -65,7 +66,7 @@ TEST_F(ParserImplTest, IfStmt_InvalidCondition) {
 }
 
 TEST_F(ParserImplTest, IfStmt_MissingCondition) {
-  auto p = parser("if {}");
+  auto* p = parser("if {}");
   auto e = p->if_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -73,7 +74,7 @@ TEST_F(ParserImplTest, IfStmt_MissingCondition) {
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidBody) {
-  auto p = parser("if (a) { fn main() -> void {}}");
+  auto* p = parser("if (a) { fn main() -> void {}}");
   auto e = p->if_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -81,7 +82,7 @@ TEST_F(ParserImplTest, IfStmt_InvalidBody) {
 }
 
 TEST_F(ParserImplTest, IfStmt_MissingBody) {
-  auto p = parser("if (a)");
+  auto* p = parser("if (a)");
   auto e = p->if_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -89,7 +90,7 @@ TEST_F(ParserImplTest, IfStmt_MissingBody) {
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidElseif) {
-  auto p = parser("if (a) {} elseif (a) { fn main() -> a{}}");
+  auto* p = parser("if (a) {} elseif (a) { fn main() -> a{}}");
   auto e = p->if_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -97,7 +98,7 @@ TEST_F(ParserImplTest, IfStmt_InvalidElseif) {
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidElse) {
-  auto p = parser("if (a) {} else { fn main() -> a{}}");
+  auto* p = parser("if (a) {} else { fn main() -> a{}}");
   auto e = p->if_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);

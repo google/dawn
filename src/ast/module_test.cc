@@ -33,13 +33,13 @@ using ModuleTest = testing::Test;
 TEST_F(ModuleTest, Creation) {
   Module m;
 
-  EXPECT_EQ(m.imports().size(), 0);
+  EXPECT_EQ(m.imports().size(), 0u);
 }
 
 TEST_F(ModuleTest, ToStrEmitsPreambleAndPostamble) {
   Module m;
   const auto str = m.to_str();
-  const auto expected = "Module{\n}\n";
+  auto* const expected = "Module{\n}\n";
   EXPECT_EQ(str, expected);
 }
 
@@ -49,7 +49,7 @@ TEST_F(ModuleTest, Imports) {
   m.AddImport(std::make_unique<Import>("GLSL.std.430", "std::glsl"));
   m.AddImport(std::make_unique<Import>("OpenCL.debug.100", "std::debug"));
 
-  EXPECT_EQ(2, m.imports().size());
+  EXPECT_EQ(2u, m.imports().size());
   EXPECT_EQ("std::glsl", m.imports()[0]->name());
 }
 
@@ -70,7 +70,7 @@ TEST_F(ModuleTest, LookupImport) {
   m.AddImport(std::move(i));
   m.AddImport(std::make_unique<Import>("OpenCL.debug.100", "std::debug"));
 
-  auto import = m.FindImportByName("std::glsl");
+  auto* import = m.FindImportByName("std::glsl");
   ASSERT_NE(nullptr, import);
   EXPECT_EQ(import->path(), "GLSL.std.430");
   EXPECT_EQ(import->name(), "std::glsl");

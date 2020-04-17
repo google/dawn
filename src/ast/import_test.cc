@@ -29,8 +29,8 @@ TEST_F(ImportTest, Creation) {
 
   EXPECT_EQ(i.path(), "GLSL.std.430");
   EXPECT_EQ(i.name(), "std::glsl");
-  EXPECT_EQ(i.line(), 0);
-  EXPECT_EQ(i.column(), 0);
+  EXPECT_EQ(i.line(), 0u);
+  EXPECT_EQ(i.column(), 0u);
 }
 
 TEST_F(ImportTest, CreationWithSource) {
@@ -39,8 +39,8 @@ TEST_F(ImportTest, CreationWithSource) {
 
   EXPECT_EQ(i.path(), "GLSL.std.430");
   EXPECT_EQ(i.name(), "std::glsl");
-  EXPECT_EQ(i.line(), 27);
-  EXPECT_EQ(i.column(), 4);
+  EXPECT_EQ(i.line(), 27u);
+  EXPECT_EQ(i.column(), 4u);
 }
 
 TEST_F(ImportTest, CreationEmpty) {
@@ -52,8 +52,8 @@ TEST_F(ImportTest, CreationEmpty) {
 
   EXPECT_EQ(i.path(), "GLSL.std.430");
   EXPECT_EQ(i.name(), "std::glsl");
-  EXPECT_EQ(i.line(), 27);
-  EXPECT_EQ(i.column(), 4);
+  EXPECT_EQ(i.line(), 27u);
+  EXPECT_EQ(i.column(), 4u);
 }
 
 TEST_F(ImportTest, to_str) {

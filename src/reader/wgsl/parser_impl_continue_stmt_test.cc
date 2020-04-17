@@ -25,7 +25,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, ContinueStmt) {
-  auto p = parser("continue");
+  auto* p = parser("continue");
   auto e = p->continue_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
@@ -35,7 +35,7 @@ TEST_F(ParserImplTest, ContinueStmt) {
 }
 
 TEST_F(ParserImplTest, ContinueStmt_WithIf) {
-  auto p = parser("continue if (a == b)");
+  auto* p = parser("continue if (a == b)");
   auto e = p->continue_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
@@ -46,7 +46,7 @@ TEST_F(ParserImplTest, ContinueStmt_WithIf) {
 }
 
 TEST_F(ParserImplTest, ContinueStmt_WithUnless) {
-  auto p = parser("continue unless (a == b)");
+  auto* p = parser("continue unless (a == b)");
   auto e = p->continue_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
@@ -57,7 +57,7 @@ TEST_F(ParserImplTest, ContinueStmt_WithUnless) {
 }
 
 TEST_F(ParserImplTest, ContinueStmt_InvalidRHS) {
-  auto p = parser("continue if (a = b)");
+  auto* p = parser("continue if (a = b)");
   auto e = p->continue_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -65,7 +65,7 @@ TEST_F(ParserImplTest, ContinueStmt_InvalidRHS) {
 }
 
 TEST_F(ParserImplTest, ContinueStmt_MissingRHS) {
-  auto p = parser("continue if");
+  auto* p = parser("continue if");
   auto e = p->continue_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);

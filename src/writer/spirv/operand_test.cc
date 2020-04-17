@@ -32,7 +32,7 @@ TEST_F(OperandTest, CreateFloat) {
 TEST_F(OperandTest, CreateInt) {
   auto o = Operand::Int(1);
   EXPECT_TRUE(o.IsInt());
-  EXPECT_EQ(o.to_i(), 1);
+  EXPECT_EQ(o.to_i(), 1u);
 }
 
 TEST_F(OperandTest, CreateString) {
@@ -43,22 +43,22 @@ TEST_F(OperandTest, CreateString) {
 
 TEST_F(OperandTest, Length_Float) {
   auto o = Operand::Float(1.2f);
-  EXPECT_EQ(o.length(), 1);
+  EXPECT_EQ(o.length(), 1u);
 }
 
 TEST_F(OperandTest, Length_Int) {
   auto o = Operand::Int(1);
-  EXPECT_EQ(o.length(), 1);
+  EXPECT_EQ(o.length(), 1u);
 }
 
 TEST_F(OperandTest, Length_String) {
   auto o = Operand::String("my string");
-  EXPECT_EQ(o.length(), 3);
+  EXPECT_EQ(o.length(), 3u);
 }
 
 TEST_F(OperandTest, Length_String_Empty) {
   auto o = Operand::String("");
-  EXPECT_EQ(o.length(), 1);
+  EXPECT_EQ(o.length(), 1u);
 }
 
 }  // namespace

@@ -33,12 +33,12 @@ TEST_F(BinaryWriterTest, Preamble) {
   bw.WriteHeader(5);
 
   auto res = bw.result();
-  ASSERT_EQ(res.size(), 5);
+  ASSERT_EQ(res.size(), 5u);
   EXPECT_EQ(res[0], spv::MagicNumber);
-  EXPECT_EQ(res[1], 0x00010300);  // SPIR-V 1.3
-  EXPECT_EQ(res[2], 0);           // Generator ID
-  EXPECT_EQ(res[3], 5);           // ID Bound
-  EXPECT_EQ(res[4], 0);           // Reserved
+  EXPECT_EQ(res[1], 0x00010300u);  // SPIR-V 1.3
+  EXPECT_EQ(res[2], 0u);           // Generator ID
+  EXPECT_EQ(res[3], 5u);           // ID Bound
+  EXPECT_EQ(res[4], 0u);           // Reserved
 }
 
 TEST_F(BinaryWriterTest, Float) {
@@ -48,7 +48,7 @@ TEST_F(BinaryWriterTest, Float) {
   bw.WriteBuilder(b);
 
   auto res = bw.result();
-  ASSERT_EQ(res.size(), 2);
+  ASSERT_EQ(res.size(), 2u);
   float f;
   memcpy(&f, res.data() + 1, 4);
   EXPECT_EQ(f, 2.4f);
@@ -61,8 +61,8 @@ TEST_F(BinaryWriterTest, Int) {
   bw.WriteBuilder(b);
 
   auto res = bw.result();
-  ASSERT_EQ(res.size(), 2);
-  EXPECT_EQ(res[1], 2);
+  ASSERT_EQ(res.size(), 2u);
+  EXPECT_EQ(res[1], 2u);
 }
 
 TEST_F(BinaryWriterTest, String) {
@@ -72,7 +72,7 @@ TEST_F(BinaryWriterTest, String) {
   bw.WriteBuilder(b);
 
   auto res = bw.result();
-  ASSERT_EQ(res.size(), 4);
+  ASSERT_EQ(res.size(), 4u);
 
   uint8_t* v = reinterpret_cast<uint8_t*>(res.data() + 1);
   EXPECT_EQ(v[0], 'm');
@@ -96,7 +96,7 @@ TEST_F(BinaryWriterTest, String_Multiple4Length) {
   bw.WriteBuilder(b);
 
   auto res = bw.result();
-  ASSERT_EQ(res.size(), 4);
+  ASSERT_EQ(res.size(), 4u);
 
   uint8_t* v = reinterpret_cast<uint8_t*>(res.data() + 1);
   EXPECT_EQ(v[0], 'm');
@@ -122,9 +122,9 @@ TEST_F(BinaryWriterTest, TestInstructionWriter) {
   bw.WriteInstruction(i2);
 
   auto res = bw.result();
-  ASSERT_EQ(res.size(), 4);
-  EXPECT_EQ(res[1], 2);
-  EXPECT_EQ(res[3], 4);
+  ASSERT_EQ(res.size(), 4u);
+  EXPECT_EQ(res[1], 2u);
+  EXPECT_EQ(res[3], 4u);
 }
 
 }  // namespace

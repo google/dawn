@@ -24,7 +24,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, FunctionDecl) {
-  auto p = parser("fn main(a : i32, b : f32) -> void { return; }");
+  auto* p = parser("fn main(a : i32, b : f32) -> void { return; }");
   auto f = p->function_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(f, nullptr);
@@ -33,19 +33,19 @@ TEST_F(ParserImplTest, FunctionDecl) {
   ASSERT_NE(f->return_type(), nullptr);
   EXPECT_TRUE(f->return_type()->IsVoid());
 
-  ASSERT_EQ(f->params().size(), 2);
+  ASSERT_EQ(f->params().size(), 2u);
   EXPECT_EQ(f->params()[0]->name(), "a");
   EXPECT_EQ(f->params()[1]->name(), "b");
 
   ASSERT_NE(f->return_type(), nullptr);
   EXPECT_TRUE(f->return_type()->IsVoid());
 
-  ASSERT_EQ(f->body().size(), 1);
+  ASSERT_EQ(f->body().size(), 1u);
   EXPECT_TRUE(f->body()[0]->IsReturn());
 }
 
 TEST_F(ParserImplTest, FunctionDecl_InvalidHeader) {
-  auto p = parser("fn main() -> { }");
+  auto* p = parser("fn main() -> { }");
   auto f = p->function_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);
@@ -53,7 +53,7 @@ TEST_F(ParserImplTest, FunctionDecl_InvalidHeader) {
 }
 
 TEST_F(ParserImplTest, FunctionDecl_InvalidBody) {
-  auto p = parser("fn main() -> void { return }");
+  auto* p = parser("fn main() -> void { return }");
   auto f = p->function_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(f, nullptr);

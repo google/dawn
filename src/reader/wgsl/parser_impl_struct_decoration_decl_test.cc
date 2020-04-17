@@ -22,21 +22,21 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, StructDecorationDecl_Parses) {
-  auto p = parser("[[block]]");
+  auto* p = parser("[[block]]");
   auto d = p->struct_decoration_decl();
   ASSERT_FALSE(p->has_error());
   EXPECT_EQ(d, ast::StructDecoration::kBlock);
 }
 
 TEST_F(ParserImplTest, StructDecorationDecl_MissingAttrRight) {
-  auto p = parser("[[block");
+  auto* p = parser("[[block");
   p->struct_decoration_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:8: missing ]] for struct decoration");
 }
 
 TEST_F(ParserImplTest, StructDecorationDecl_InvalidDecoration) {
-  auto p = parser("[[invalid]]");
+  auto* p = parser("[[invalid]]");
   p->struct_decoration_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:3: unknown struct decoration");

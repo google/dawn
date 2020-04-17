@@ -38,9 +38,9 @@ class DerivativeModifierTest
   DerivativeModifierTest() = default;
   ~DerivativeModifierTest() = default;
 
-  void SetUp() { ctx_.Reset(); }
+  void SetUp() override { ctx_.Reset(); }
 
-  void TearDown() { impl_ = nullptr; }
+  void TearDown() override { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -54,7 +54,7 @@ class DerivativeModifierTest
 
 TEST_P(DerivativeModifierTest, Parses) {
   auto params = GetParam();
-  auto p = parser(params.input);
+  auto* p = parser(params.input);
 
   auto mod = p->derivative_modifier();
   ASSERT_FALSE(p->has_error());
@@ -71,7 +71,7 @@ INSTANTIATE_TEST_SUITE_P(
         DerivativeModifierData{"coarse", ast::DerivativeModifier::kCoarse}));
 
 TEST_F(ParserImplTest, DerivativeModifier_NoMatch) {
-  auto p = parser("not-a-modifier");
+  auto* p = parser("not-a-modifier");
   auto stage = p->derivative_modifier();
   ASSERT_EQ(stage, ast::DerivativeModifier::kNone);
 

@@ -24,7 +24,7 @@ using SetDecorationTest = testing::Test;
 
 TEST_F(SetDecorationTest, Creation) {
   SetDecoration d{2};
-  EXPECT_EQ(2, d.value());
+  EXPECT_EQ(2u, d.value());
 }
 
 TEST_F(SetDecorationTest, Is) {

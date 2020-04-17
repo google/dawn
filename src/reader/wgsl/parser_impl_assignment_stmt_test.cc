@@ -29,7 +29,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
-  auto p = parser("a = 123");
+  auto* p = parser("a = 123");
   auto e = p->assignment_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
@@ -39,21 +39,21 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
   ASSERT_NE(e->rhs(), nullptr);
 
   ASSERT_TRUE(e->lhs()->IsIdentifier());
-  auto ident = e->lhs()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = e->lhs()->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 
   ASSERT_TRUE(e->rhs()->IsConstructor());
   ASSERT_TRUE(e->rhs()->AsConstructor()->IsScalarConstructor());
 
-  auto init = e->rhs()->AsConstructor()->AsScalarConstructor();
+  auto* init = e->rhs()->AsConstructor()->AsScalarConstructor();
   ASSERT_NE(init->literal(), nullptr);
   ASSERT_TRUE(init->literal()->IsInt());
   EXPECT_EQ(init->literal()->AsInt()->value(), 123);
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
-  auto p = parser("a.b.c[2].d = 123");
+  auto* p = parser("a.b.c[2].d = 123");
   auto e = p->assignment_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
@@ -64,21 +64,21 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
 
   ASSERT_TRUE(e->rhs()->IsConstructor());
   ASSERT_TRUE(e->rhs()->AsConstructor()->IsScalarConstructor());
-  auto init = e->rhs()->AsConstructor()->AsScalarConstructor();
+  auto* init = e->rhs()->AsConstructor()->AsScalarConstructor();
   ASSERT_NE(init->literal(), nullptr);
   ASSERT_TRUE(init->literal()->IsInt());
   EXPECT_EQ(init->literal()->AsInt()->value(), 123);
 
   ASSERT_TRUE(e->lhs()->IsMemberAccessor());
-  auto mem = e->lhs()->AsMemberAccessor();
+  auto* mem = e->lhs()->AsMemberAccessor();
 
   ASSERT_TRUE(mem->member()->IsIdentifier());
-  auto ident = mem->member()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = mem->member()->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "d");
 
   ASSERT_TRUE(mem->structure()->IsArrayAccessor());
-  auto ary = mem->structure()->AsArrayAccessor();
+  auto* ary = mem->structure()->AsArrayAccessor();
 
   ASSERT_TRUE(ary->idx_expr()->IsConstructor());
   ASSERT_TRUE(ary->idx_expr()->AsConstructor()->IsScalarConstructor());
@@ -91,7 +91,7 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
   mem = ary->array()->AsMemberAccessor();
   ASSERT_TRUE(mem->member()->IsIdentifier());
   ident = mem->member()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "c");
 
   ASSERT_TRUE(mem->structure()->IsMemberAccessor());
@@ -99,17 +99,17 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
 
   ASSERT_TRUE(mem->structure()->IsIdentifier());
   ident = mem->structure()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 
   ASSERT_TRUE(mem->member()->IsIdentifier());
   ident = mem->member()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "b");
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_MissingEqual) {
-  auto p = parser("a.b.c[2].d 123");
+  auto* p = parser("a.b.c[2].d 123");
   auto e = p->assignment_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -117,14 +117,14 @@ TEST_F(ParserImplTest, AssignmentStmt_MissingEqual) {
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_InvalidLHS) {
-  auto p = parser("if (true) {} = 123");
+  auto* p = parser("if (true) {} = 123");
   auto e = p->assignment_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e, nullptr);
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_InvalidRHS) {
-  auto p = parser("a.b.c[2].d = if (true) {}");
+  auto* p = parser("a.b.c[2].d = if (true) {}");
   auto e = p->assignment_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);

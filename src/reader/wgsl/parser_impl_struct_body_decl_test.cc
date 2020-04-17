@@ -24,28 +24,28 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, StructBodyDecl_Parses) {
-  auto i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
+  auto* i32 = tm()->Get(std::make_unique<ast::type::I32Type>());
 
-  auto p = parser("{a : i32;}");
+  auto* p = parser("{a : i32;}");
   auto m = p->struct_body_decl();
   ASSERT_FALSE(p->has_error());
-  ASSERT_EQ(m.size(), 1);
+  ASSERT_EQ(m.size(), 1u);
 
   const auto& mem = m[0];
   EXPECT_EQ(mem->name(), "a");
   EXPECT_EQ(mem->type(), i32);
-  EXPECT_EQ(mem->decorations().size(), 0);
+  EXPECT_EQ(mem->decorations().size(), 0u);
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_ParsesEmpty) {
-  auto p = parser("{}");
+  auto* p = parser("{}");
   auto m = p->struct_body_decl();
   ASSERT_FALSE(p->has_error());
-  ASSERT_EQ(m.size(), 0);
+  ASSERT_EQ(m.size(), 0u);
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_InvalidMember) {
-  auto p = parser(R"(
+  auto* p = parser(R"(
 {
   [[offset nan]] a : i32;
 })");
@@ -55,14 +55,14 @@ TEST_F(ParserImplTest, StructBodyDecl_InvalidMember) {
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_MissingClosingBracket) {
-  auto p = parser("{a : i32;");
+  auto* p = parser("{a : i32;");
   auto m = p->struct_body_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:10: missing } for struct declaration");
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_InvalidToken) {
-  auto p = parser(R"(
+  auto* p = parser(R"(
 {
   a : i32;
   1.23

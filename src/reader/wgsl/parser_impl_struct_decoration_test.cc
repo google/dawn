@@ -37,9 +37,9 @@ class StructDecorationTest
   StructDecorationTest() = default;
   ~StructDecorationTest() = default;
 
-  void SetUp() { ctx_.Reset(); }
+  void SetUp() override { ctx_.Reset(); }
 
-  void TearDown() { impl_ = nullptr; }
+  void TearDown() override { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -53,7 +53,7 @@ class StructDecorationTest
 
 TEST_P(StructDecorationTest, Parses) {
   auto params = GetParam();
-  auto p = parser(params.input);
+  auto* p = parser(params.input);
 
   auto deco = p->struct_decoration();
   ASSERT_FALSE(p->has_error());
@@ -68,7 +68,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                              "block", ast::StructDecoration::kBlock}));
 
 TEST_F(ParserImplTest, StructDecoration_NoMatch) {
-  auto p = parser("not-a-stage");
+  auto* p = parser("not-a-stage");
   auto deco = p->struct_decoration();
   ASSERT_EQ(deco, ast::StructDecoration::kNone);
 

@@ -23,7 +23,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, StructDecl_Parses) {
-  auto p = parser(R"(
+  auto* p = parser(R"(
 struct {
   a : i32;
   [[offset 4 ]] b : f32;
@@ -31,13 +31,13 @@ struct {
   auto s = p->struct_decl();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(s, nullptr);
-  ASSERT_EQ(s->impl()->members().size(), 2);
+  ASSERT_EQ(s->impl()->members().size(), 2u);
   EXPECT_EQ(s->impl()->members()[0]->name(), "a");
   EXPECT_EQ(s->impl()->members()[1]->name(), "b");
 }
 
 TEST_F(ParserImplTest, StructDecl_ParsesWithDecoration) {
-  auto p = parser(R"(
+  auto* p = parser(R"(
 [[block]] struct {
   a : f32;
   b : f32;
@@ -45,21 +45,21 @@ TEST_F(ParserImplTest, StructDecl_ParsesWithDecoration) {
   auto s = p->struct_decl();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(s, nullptr);
-  ASSERT_EQ(s->impl()->members().size(), 2);
+  ASSERT_EQ(s->impl()->members().size(), 2u);
   EXPECT_EQ(s->impl()->members()[0]->name(), "a");
   EXPECT_EQ(s->impl()->members()[1]->name(), "b");
 }
 
 TEST_F(ParserImplTest, StructDecl_EmptyMembers) {
-  auto p = parser("struct {}");
+  auto* p = parser("struct {}");
   auto s = p->struct_decl();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(s, nullptr);
-  ASSERT_EQ(s->impl()->members().size(), 0);
+  ASSERT_EQ(s->impl()->members().size(), 0u);
 }
 
 TEST_F(ParserImplTest, StructDecl_MissingBracketLeft) {
-  auto p = parser("struct }");
+  auto* p = parser("struct }");
   auto s = p->struct_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(s, nullptr);
@@ -67,7 +67,7 @@ TEST_F(ParserImplTest, StructDecl_MissingBracketLeft) {
 }
 
 TEST_F(ParserImplTest, StructDecl_InvalidStructBody) {
-  auto p = parser("struct { a : B; }");
+  auto* p = parser("struct { a : B; }");
   auto s = p->struct_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(s, nullptr);
@@ -75,7 +75,7 @@ TEST_F(ParserImplTest, StructDecl_InvalidStructBody) {
 }
 
 TEST_F(ParserImplTest, StructDecl_InvalidStructDecorationDecl) {
-  auto p = parser("[[block struct { a : i32; }");
+  auto* p = parser("[[block struct { a : i32; }");
   auto s = p->struct_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(s, nullptr);
@@ -83,7 +83,7 @@ TEST_F(ParserImplTest, StructDecl_InvalidStructDecorationDecl) {
 }
 
 TEST_F(ParserImplTest, StructDecl_MissingStruct) {
-  auto p = parser("[[block]] {}");
+  auto* p = parser("[[block]] {}");
   auto s = p->struct_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(s, nullptr);

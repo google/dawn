@@ -30,12 +30,12 @@ TEST_F(UnlessStatementTest, Creation) {
   StatementList body;
   body.push_back(std::make_unique<NopStatement>());
 
-  auto ident_ptr = ident.get();
-  auto nop_ptr = body[0].get();
+  auto* ident_ptr = ident.get();
+  auto* nop_ptr = body[0].get();
 
   UnlessStatement u(std::move(ident), std::move(body));
   EXPECT_EQ(u.condition(), ident_ptr);
-  ASSERT_EQ(u.body().size(), 1);
+  ASSERT_EQ(u.body().size(), 1u);
   EXPECT_EQ(u.body()[0].get(), nop_ptr);
 }
 
@@ -46,8 +46,8 @@ TEST_F(UnlessStatementTest, Creation_WithSource) {
 
   UnlessStatement u(Source{20, 2}, std::move(ident), std::move(body));
   auto src = u.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(UnlessStatementTest, IsUnless) {

@@ -27,7 +27,7 @@ using ReturnStatementTest = testing::Test;
 
 TEST_F(ReturnStatementTest, Creation) {
   auto expr = std::make_unique<IdentifierExpression>("expr");
-  auto expr_ptr = expr.get();
+  auto* expr_ptr = expr.get();
 
   ReturnStatement r(std::move(expr));
   EXPECT_EQ(r.value(), expr_ptr);
@@ -36,8 +36,8 @@ TEST_F(ReturnStatementTest, Creation) {
 TEST_F(ReturnStatementTest, Creation_WithSource) {
   ReturnStatement r(Source{20, 2});
   auto src = r.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(ReturnStatementTest, IsReturn) {

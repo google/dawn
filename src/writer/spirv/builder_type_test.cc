@@ -46,9 +46,9 @@ TEST_F(BuilderTest_Type, GenerateAlias) {
   Builder b;
   auto id = b.GenerateTypeIfNeeded(&alias_type);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(id, 1);
+  EXPECT_EQ(id, 1u);
 
-  EXPECT_EQ(b.types().size(), 1);
+  EXPECT_EQ(b.types().size(), 1u);
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
 )");
 }
@@ -59,13 +59,13 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedAlias) {
   ast::type::AliasType alias_type("my_type", &f32);
 
   Builder b;
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&alias_type), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&alias_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 2);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&alias_type), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&alias_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&f32), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&f32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
@@ -76,7 +76,7 @@ TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
   Builder b;
   auto id = b.GenerateTypeIfNeeded(&ary);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(1, id);
+  EXPECT_EQ(1u, id);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
 %1 = OpTypeRuntimeArray %2
@@ -88,8 +88,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
   ast::type::ArrayType ary(&i32);
 
   Builder b;
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1);
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
@@ -104,7 +104,7 @@ TEST_F(BuilderTest_Type, GenerateArray) {
   Builder b;
   auto id = b.GenerateTypeIfNeeded(&ary);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(1, id);
+  EXPECT_EQ(1u, id);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
 %3 = OpTypeInt 32 0
@@ -118,8 +118,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedArray) {
   ast::type::ArrayType ary(&i32, 4);
 
   Builder b;
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1);
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
@@ -135,9 +135,9 @@ TEST_F(BuilderTest_Type, GenerateBool) {
   Builder b;
   auto id = b.GenerateTypeIfNeeded(&bool_type);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(id, 1);
+  EXPECT_EQ(id, 1u);
 
-  ASSERT_EQ(b.types().size(), 1);
+  ASSERT_EQ(b.types().size(), 1u);
   EXPECT_EQ(DumpInstruction(b.types()[0]), R"(%1 = OpTypeBool
 )");
 }
@@ -147,11 +147,11 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedBool) {
   ast::type::BoolType bool_type;
 
   Builder b;
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&bool_type), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&bool_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 2);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&bool_type), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&bool_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
@@ -161,9 +161,9 @@ TEST_F(BuilderTest_Type, GenerateF32) {
   Builder b;
   auto id = b.GenerateTypeIfNeeded(&f32);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(id, 1);
+  EXPECT_EQ(id, 1u);
 
-  ASSERT_EQ(b.types().size(), 1);
+  ASSERT_EQ(b.types().size(), 1u);
   EXPECT_EQ(DumpInstruction(b.types()[0]), R"(%1 = OpTypeFloat 32
 )");
 }
@@ -173,11 +173,11 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedF32) {
   ast::type::F32Type f32;
 
   Builder b;
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&f32), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&f32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 2);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&f32), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&f32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
@@ -187,9 +187,9 @@ TEST_F(BuilderTest_Type, GenerateI32) {
   Builder b;
   auto id = b.GenerateTypeIfNeeded(&i32);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(id, 1);
+  EXPECT_EQ(id, 1u);
 
-  ASSERT_EQ(b.types().size(), 1);
+  ASSERT_EQ(b.types().size(), 1u);
   EXPECT_EQ(DumpInstruction(b.types()[0]), R"(%1 = OpTypeInt 32 1
 )");
 }
@@ -199,11 +199,11 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedI32) {
   ast::type::F32Type f32;
 
   Builder b;
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&f32), 2);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&f32), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
@@ -214,9 +214,9 @@ TEST_F(BuilderTest_Type, GenerateMatrix) {
   Builder b;
   auto id = b.GenerateTypeIfNeeded(&mat_type);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(id, 1);
+  EXPECT_EQ(id, 1u);
 
-  EXPECT_EQ(b.types().size(), 3);
+  EXPECT_EQ(b.types().size(), 3u);
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypeVector %3 3
 %1 = OpTypeMatrix %2 2
@@ -228,11 +228,11 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedMatrix) {
   ast::type::MatrixType mat_type(&i32, 3, 4);
 
   Builder b;
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&mat_type), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&mat_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 3);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 3u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&mat_type), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&mat_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
@@ -243,7 +243,7 @@ TEST_F(BuilderTest_Type, GeneratePtr) {
   Builder b;
   auto id = b.GenerateTypeIfNeeded(&ptr);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(1, id);
+  EXPECT_EQ(1u, id);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
 %1 = OpTypePointer Output %2
@@ -255,8 +255,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedPtr) {
   ast::type::PointerType ptr(&i32, ast::StorageClass::kOutput);
 
   Builder b;
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&ptr), 1);
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&ptr), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&ptr), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&ptr), 1u);
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
@@ -266,9 +266,9 @@ TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
   Builder b;
   auto id = b.GenerateTypeIfNeeded(&s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(id, 1);
+  EXPECT_EQ(id, 1u);
 
-  EXPECT_EQ(b.types().size(), 1);
+  EXPECT_EQ(b.types().size(), 1u);
   EXPECT_EQ(DumpInstructions(b.debug()), "");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeStruct
 )");
@@ -290,7 +290,7 @@ TEST_F(BuilderTest_Type, GenerateStruct) {
   Builder b;
   auto id = b.GenerateTypeIfNeeded(&s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(id, 1);
+  EXPECT_EQ(id, 1u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeStruct %2
@@ -316,7 +316,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_Decorated) {
   Builder b;
   auto id = b.GenerateTypeIfNeeded(&s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(id, 1);
+  EXPECT_EQ(id, 1u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeStruct %2
@@ -349,7 +349,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers) {
   Builder b;
   auto id = b.GenerateTypeIfNeeded(&s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(id, 1);
+  EXPECT_EQ(id, 1u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeStruct %2 %2
@@ -368,9 +368,9 @@ TEST_F(BuilderTest_Type, GenerateU32) {
   Builder b;
   auto id = b.GenerateTypeIfNeeded(&u32);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(id, 1);
+  EXPECT_EQ(id, 1u);
 
-  ASSERT_EQ(b.types().size(), 1);
+  ASSERT_EQ(b.types().size(), 1u);
   EXPECT_EQ(DumpInstruction(b.types()[0]), R"(%1 = OpTypeInt 32 0
 )");
 }
@@ -380,11 +380,11 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedU32) {
   ast::type::F32Type f32;
 
   Builder b;
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&u32), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&u32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&f32), 2);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&f32), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&u32), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&u32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
@@ -395,9 +395,9 @@ TEST_F(BuilderTest_Type, GenerateVector) {
   Builder b;
   auto id = b.GenerateTypeIfNeeded(&vec_type);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(id, 1);
+  EXPECT_EQ(id, 1u);
 
-  EXPECT_EQ(b.types().size(), 2);
+  EXPECT_EQ(b.types().size(), 2u);
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
 )");
@@ -408,11 +408,11 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedVector) {
   ast::type::VectorType vec_type(&i32, 3);
 
   Builder b;
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&vec_type), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&vec_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 2);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&vec_type), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&vec_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 
@@ -422,9 +422,9 @@ TEST_F(BuilderTest_Type, GenerateVoid) {
   Builder b;
   auto id = b.GenerateTypeIfNeeded(&void_type);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(id, 1);
+  EXPECT_EQ(id, 1u);
 
-  ASSERT_EQ(b.types().size(), 1);
+  ASSERT_EQ(b.types().size(), 1u);
   EXPECT_EQ(DumpInstruction(b.types()[0]), R"(%1 = OpTypeVoid
 )");
 }
@@ -434,11 +434,11 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedVoid) {
   ast::type::VoidType void_type;
 
   Builder b;
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&void_type), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&void_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 2);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&void_type), 1);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(&void_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
 }
 

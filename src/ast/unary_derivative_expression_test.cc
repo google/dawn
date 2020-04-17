@@ -27,7 +27,7 @@ using UnaryDerivativeExpressionTest = testing::Test;
 
 TEST_F(UnaryDerivativeExpressionTest, Creation) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
-  auto ident_ptr = ident.get();
+  auto* ident_ptr = ident.get();
 
   UnaryDerivativeExpression d(UnaryDerivative::kDpdy,
                               DerivativeModifier::kCoarse, std::move(ident));
@@ -42,8 +42,8 @@ TEST_F(UnaryDerivativeExpressionTest, Creation_WithSource) {
   UnaryDerivativeExpression d(Source{20, 2}, UnaryDerivative::kDpdy,
                               DerivativeModifier::kCoarse, std::move(ident));
   auto src = d.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(UnaryDerivativeExpressionTest, IsUnaryDerivative) {

@@ -25,7 +25,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, BreakStmt) {
-  auto p = parser("break");
+  auto* p = parser("break");
   auto e = p->break_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
@@ -35,7 +35,7 @@ TEST_F(ParserImplTest, BreakStmt) {
 }
 
 TEST_F(ParserImplTest, BreakStmt_WithIf) {
-  auto p = parser("break if (a == b)");
+  auto* p = parser("break if (a == b)");
   auto e = p->break_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
@@ -46,7 +46,7 @@ TEST_F(ParserImplTest, BreakStmt_WithIf) {
 }
 
 TEST_F(ParserImplTest, BreakStmt_WithUnless) {
-  auto p = parser("break unless (a == b)");
+  auto* p = parser("break unless (a == b)");
   auto e = p->break_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
@@ -57,7 +57,7 @@ TEST_F(ParserImplTest, BreakStmt_WithUnless) {
 }
 
 TEST_F(ParserImplTest, BreakStmt_InvalidRHS) {
-  auto p = parser("break if (a = b)");
+  auto* p = parser("break if (a = b)");
   auto e = p->break_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -65,7 +65,7 @@ TEST_F(ParserImplTest, BreakStmt_InvalidRHS) {
 }
 
 TEST_F(ParserImplTest, BreakStmt_MissingRHS) {
-  auto p = parser("break if");
+  auto* p = parser("break if");
   auto e = p->break_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);

@@ -13,12 +13,14 @@
 # limitations under the License.
 
 import("//build_overrides/build.gni")
+import("//testing/test.gni")
 import("tint_overrides_with_defaults.gni")
 
+###############################################################################
+# Common - Configs, etc. shared across targets
+###############################################################################
+
 config("tint_common_config") {
-  cflags = []
-  ldflags = []
-  include_dirs = []
   defines = []
 
   if (tint_build_spv_reader) {
@@ -46,15 +48,20 @@ config("tint_common_config") {
   }
 }
 
-# libtint source sets are divided into a non-optional core in :libtint_core and
-# optional :libtint_* subsets, because ninja does not like having multiple source
-# files with the same name, like function.cc, in the same source set target.
+###############################################################################
+# Library - Tint core and optional modules of libtint
+###############################################################################
+# libtint source sets are divided into a non-optional core in :libtint_core_src
+# and optional :libtint_*_src subsets, because ninja does not like having
+# multiple source files with the same name, like function.cc, in the same
+# source set
+# target.
 #
-# Targets that want to use tint as a library should depend on ":libtint" and use
-# the build flags to control what is included, instead of trying to specify the
-# subsets that they want.
+# Targets that want to use tint as a library should depend on ":libtint" and
+# use the build flags to control what is included, instead of trying to specify
+# the subsets that they want.
 
-source_set("libtint_core") {
+source_set("libtint_core_src") {
   sources = [
     "src/ast/array_accessor_expression.cc",
     "src/ast/array_accessor_expression.h",
@@ -224,7 +231,7 @@ source_set("libtint_core") {
   }
 }
 
-config("tint_spv_reader_config") {
+config("libtint_spv_config") {
   include_dirs = [
     "${tint_spirv_tools_dir}/",
     "${tint_spirv_tools_dir}/include",
@@ -232,7 +239,7 @@ config("tint_spv_reader_config") {
   ]
 }
 
-source_set("libtint_spv_reader") {
+source_set("libtint_spv_reader_src") {
   sources = [
     "src/reader/spirv/enum_converter.cc",
     "src/reader/spirv/enum_converter.h",
@@ -253,8 +260,10 @@ source_set("libtint_spv_reader") {
     "${tint_spirv_tools_dir}/:spvtools_val",
   ]
 
-  configs += [ ":tint_common_config" ]
-  configs += [ ":tint_spv_reader_config" ]
+  configs += [
+    ":tint_common_config",
+    ":libtint_spv_config",
+  ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
@@ -262,7 +271,7 @@ source_set("libtint_spv_reader") {
   }
 }
 
-source_set("libtint_spv_writer") {
+source_set("libtint_spv_writer_src") {
   sources = [
     "src/writer/spirv/binary_writer.cc",
     "src/writer/spirv/binary_writer.h",
@@ -280,7 +289,10 @@ source_set("libtint_spv_writer") {
 
   deps = [ "${tint_spirv_headers_dir}/:spv_headers" ]
 
-  configs += [ ":tint_common_config" ]
+  configs += [
+    ":tint_common_config",
+    ":libtint_spv_config",
+  ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
@@ -288,7 +300,7 @@ source_set("libtint_spv_writer") {
   }
 }
 
-source_set("libtint_wgsl_reader") {
+source_set("libtint_wgsl_reader_src") {
   sources = [
     "src/reader/wgsl/lexer.cc",
     "src/reader/wgsl/lexer.h",
@@ -308,7 +320,7 @@ source_set("libtint_wgsl_reader") {
   }
 }
 
-source_set("libtint_wgsl_writer") {
+source_set("libtint_wgsl_writer_src") {
   sources = [
     "src/writer/wgsl/generator.cc",
     "src/writer/wgsl/generator.h",
@@ -325,22 +337,22 @@ source_set("libtint_wgsl_writer") {
 }
 
 source_set("libtint") {
-  deps = [ ":libtint_core" ]
+  deps = [ ":libtint_core_src" ]
 
   if (tint_build_spv_reader) {
-    deps += [ ":libtint_spv_reader" ]
+    deps += [ ":libtint_spv_reader_src" ]
   }
 
   if (tint_build_spv_writer) {
-    deps += [ ":libtint_spv_writer" ]
+    deps += [ ":libtint_spv_writer_src" ]
   }
 
   if (tint_build_wgsl_reader) {
-    deps += [ ":libtint_wgsl_reader" ]
+    deps += [ ":libtint_wgsl_reader_src" ]
   }
 
   if (tint_build_wgsl_writer) {
-    deps += [ ":libtint_wgsl_writer" ]
+    deps += [ ":libtint_wgsl_writer_src" ]
   }
 
   configs += [ ":tint_common_config" ]
@@ -350,6 +362,408 @@ source_set("libtint") {
     configs += [ "//build/config/compiler:no_chromium_code" ]
   }
 }
+
+###############################################################################
+# Gtest Gmock - Handle building inside and outside of Chromium.
+###############################################################################
+# When building outside of Chromium we need to define our own targets for GTest
+# and GMock. However when compiling inside of Chromium we need to reuse the
+# existing targets, both because Chromium has a special harness for swarming
+# and because otherwise the "gn check" fails.
+
+if (!build_with_chromium) {
+  # When we aren't in Chromium we define out own targets based on the location
+  # of the googletest repo.
+  config("gtest_config") {
+    include_dirs = [
+      "${tint_googletest_dir}/googletest",
+      "${tint_googletest_dir}/googletest/include",
+    ]
+  }
+  static_library("gtest") {
+    testonly = true
+    sources = [ "${tint_googletest_dir}/googletest/src/gtest-all.cc" ]
+    public_configs = [ ":gtest_config" ]
+  }
+
+  config("gmock_config") {
+    include_dirs = [
+      "${tint_googletest_dir}/googlemock",
+      "${tint_googletest_dir}/googlemock/include",
+      "${tint_googletest_dir}/googletest/include",
+    ]
+  }
+
+  static_library("gmock") {
+    testonly = true
+    sources = [
+      "${tint_googletest_dir}/googlemock/src/gmock-all.cc",
+      "${tint_googletest_dir}/googlemock/src/gmock_main.cc",
+    ]
+    public_configs = [ ":gmock_config" ]
+  }
+
+  group("gmock_and_gtest") {
+    testonly = true
+    public_deps = [
+      ":gmock",
+      ":gtest",
+    ]
+  }
+} else {
+  # When we are in Chromium we reuse its targets, and also add some deps that
+  # are needed to launch the test in swarming mode.
+  group("gmock_and_gtest") {
+    testonly = true
+    public_deps = [
+      "//base",
+      "//base/test:test_support",
+      "//testing/gmock",
+      "//testing/gtest",
+    ]
+  }
+}
+
+###############################################################################
+# Tests - For libtint core and optional modules
+###############################################################################
+config("tint_unittests_config") {
+  include_dirs = [
+    "${tint_googletest_dir}/googlemock/include",
+    "${tint_googletest_dir}/googletest/include",
+  ]
+}
+
+source_set("tint_unittests_core_src") {
+  sources = [
+    "src/ast/array_accessor_expression_test.cc",
+    "src/ast/as_expression_test.cc",
+    "src/ast/assignment_statement_test.cc",
+    "src/ast/binary_expression_test.cc",
+    "src/ast/binding_decoration_test.cc",
+    "src/ast/bool_literal_test.cc",
+    "src/ast/break_statement_test.cc",
+    "src/ast/builtin_decoration_test.cc",
+    "src/ast/call_expression_test.cc",
+    "src/ast/case_statement_test.cc",
+    "src/ast/cast_expression_test.cc",
+    "src/ast/continue_statement_test.cc",
+    "src/ast/decorated_variable_test.cc",
+    "src/ast/else_statement_test.cc",
+    "src/ast/entry_point_test.cc",
+    "src/ast/fallthrough_statement_test.cc",
+    "src/ast/float_literal_test.cc",
+    "src/ast/function_test.cc",
+    "src/ast/identifier_expression_test.cc",
+    "src/ast/if_statement_test.cc",
+    "src/ast/import_test.cc",
+    "src/ast/int_literal_test.cc",
+    "src/ast/kill_statement_test.cc",
+    "src/ast/location_decoration_test.cc",
+    "src/ast/loop_statement_test.cc",
+    "src/ast/member_accessor_expression_test.cc",
+    "src/ast/module_test.cc",
+    "src/ast/nop_statement_test.cc",
+    "src/ast/return_statement_test.cc",
+    "src/ast/scalar_constructor_expression_test.cc",
+    "src/ast/set_decoration_test.cc",
+    "src/ast/struct_member_offset_decoration_test.cc",
+    "src/ast/struct_member_test.cc",
+    "src/ast/struct_test.cc",
+    "src/ast/switch_statement_test.cc",
+    "src/ast/type/alias_type_test.cc",
+    "src/ast/type/array_type_test.cc",
+    "src/ast/type/bool_type_test.cc",
+    "src/ast/type/f32_type_test.cc",
+    "src/ast/type/i32_type_test.cc",
+    "src/ast/type/matrix_type_test.cc",
+    "src/ast/type/pointer_type_test.cc",
+    "src/ast/type/struct_type_test.cc",
+    "src/ast/type/u32_type_test.cc",
+    "src/ast/type/vector_type_test.cc",
+    "src/ast/type_constructor_expression_test.cc",
+    "src/ast/uint_literal_test.cc",
+    "src/ast/unary_derivative_expression_test.cc",
+    "src/ast/unary_method_expression_test.cc",
+    "src/ast/unary_op_expression_test.cc",
+    "src/ast/unless_statement_test.cc",
+    "src/ast/variable_decl_statement_test.cc",
+    "src/ast/variable_test.cc",
+    "src/scope_stack_test.cc",
+    "src/type_determiner_test.cc",
+    "src/type_manager_test.cc",
+    "src/validator_impl_import_test.cc",
+  ]
+
+  configs += [
+    ":tint_common_config",
+    ":tint_unittests_config",
+  ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+}
+
+source_set("tint_unittests_spv_reader_src") {
+  sources = [
+    "src/reader/spirv/enum_converter_test.cc",
+    "src/reader/spirv/fail_stream_test.cc",
+    "src/reader/spirv/function_arithmetic_test.cc",
+    "src/reader/spirv/function_decl_test.cc",
+    "src/reader/spirv/function_logical_test.cc",
+    "src/reader/spirv/function_memory_test.cc",
+    "src/reader/spirv/function_var_test.cc",
+    "src/reader/spirv/namer_test.cc",
+    "src/reader/spirv/parser_impl_convert_member_decoration_test.cc",
+    "src/reader/spirv/parser_impl_convert_type_test.cc",
+    "src/reader/spirv/parser_impl_entry_point_test.cc",
+    "src/reader/spirv/parser_impl_function_decl_test.cc",
+    "src/reader/spirv/parser_impl_get_decorations_test.cc",
+    "src/reader/spirv/parser_impl_import_test.cc",
+    "src/reader/spirv/parser_impl_module_var_test.cc",
+    "src/reader/spirv/parser_impl_named_types_test.cc",
+    "src/reader/spirv/parser_impl_test.cc",
+    "src/reader/spirv/parser_impl_user_name_test.cc",
+    "src/reader/spirv/parser_test.cc",
+    "src/reader/spirv/spirv_tools_helpers_test.cc",
+    "src/reader/spirv/spirv_tools_helpers_test.h",
+  ]
+
+  deps = [ "${tint_spirv_headers_dir}/:spv_headers" ]
+
+  configs += [
+    ":libtint_spv_config",
+    ":tint_common_config",
+    ":tint_unittests_config",
+  ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+}
+
+source_set("tint_unittests_spv_writer_src") {
+  sources = [
+    "src/writer/spirv/binary_writer_test.cc",
+    "src/writer/spirv/builder_assign_test.cc",
+    "src/writer/spirv/builder_binary_expression_test.cc",
+    "src/writer/spirv/builder_constructor_expression_test.cc",
+    "src/writer/spirv/builder_entry_point_test.cc",
+    "src/writer/spirv/builder_function_test.cc",
+    "src/writer/spirv/builder_function_variable_test.cc",
+    "src/writer/spirv/builder_global_variable_test.cc",
+    "src/writer/spirv/builder_ident_expression_test.cc",
+    "src/writer/spirv/builder_if_test.cc",
+    "src/writer/spirv/builder_literal_test.cc",
+    "src/writer/spirv/builder_return_test.cc",
+    "src/writer/spirv/builder_test.cc",
+    "src/writer/spirv/builder_type_test.cc",
+    "src/writer/spirv/instruction_test.cc",
+    "src/writer/spirv/operand_test.cc",
+    "src/writer/spirv/spv_dump.cc",
+    "src/writer/spirv/spv_dump.h",
+  ]
+  deps = [ "${tint_spirv_headers_dir}/:spv_headers" ]
+
+  configs += [
+    ":libtint_spv_config",
+    ":tint_common_config",
+    ":tint_unittests_config",
+  ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+}
+
+source_set("tint_unittests_wgsl_reader_src") {
+  sources = [
+    "src/reader/wgsl/lexer_test.cc",
+    "src/reader/wgsl/parser_impl_additive_expression_test.cc",
+    "src/reader/wgsl/parser_impl_and_expression_test.cc",
+    "src/reader/wgsl/parser_impl_argument_expression_list_test.cc",
+    "src/reader/wgsl/parser_impl_assignment_stmt_test.cc",
+    "src/reader/wgsl/parser_impl_body_stmt_test.cc",
+    "src/reader/wgsl/parser_impl_break_stmt_test.cc",
+    "src/reader/wgsl/parser_impl_builtin_decoration_test.cc",
+    "src/reader/wgsl/parser_impl_case_body_test.cc",
+    "src/reader/wgsl/parser_impl_const_expr_test.cc",
+    "src/reader/wgsl/parser_impl_const_literal_test.cc",
+    "src/reader/wgsl/parser_impl_continue_stmt_test.cc",
+    "src/reader/wgsl/parser_impl_continuing_stmt_test.cc",
+    "src/reader/wgsl/parser_impl_derivative_modifier_test.cc",
+    "src/reader/wgsl/parser_impl_else_stmt_test.cc",
+    "src/reader/wgsl/parser_impl_elseif_stmt_test.cc",
+    "src/reader/wgsl/parser_impl_entry_point_decl_test.cc",
+    "src/reader/wgsl/parser_impl_equality_expression_test.cc",
+    "src/reader/wgsl/parser_impl_exclusive_or_expression_test.cc",
+    "src/reader/wgsl/parser_impl_function_decl_test.cc",
+    "src/reader/wgsl/parser_impl_function_header_test.cc",
+    "src/reader/wgsl/parser_impl_function_type_decl_test.cc",
+    "src/reader/wgsl/parser_impl_global_constant_decl_test.cc",
+    "src/reader/wgsl/parser_impl_global_decl_test.cc",
+    "src/reader/wgsl/parser_impl_global_variable_decl_test.cc",
+    "src/reader/wgsl/parser_impl_if_stmt_test.cc",
+    "src/reader/wgsl/parser_impl_import_decl_test.cc",
+    "src/reader/wgsl/parser_impl_inclusive_or_expression_test.cc",
+    "src/reader/wgsl/parser_impl_logical_and_expression_test.cc",
+    "src/reader/wgsl/parser_impl_logical_or_expression_test.cc",
+    "src/reader/wgsl/parser_impl_loop_stmt_test.cc",
+    "src/reader/wgsl/parser_impl_multiplicative_expression_test.cc",
+    "src/reader/wgsl/parser_impl_param_list_test.cc",
+    "src/reader/wgsl/parser_impl_paren_rhs_stmt_test.cc",
+    "src/reader/wgsl/parser_impl_pipeline_stage_test.cc",
+    "src/reader/wgsl/parser_impl_postfix_expression_test.cc",
+    "src/reader/wgsl/parser_impl_primary_expression_test.cc",
+    "src/reader/wgsl/parser_impl_relational_expression_test.cc",
+    "src/reader/wgsl/parser_impl_shift_expression_test.cc",
+    "src/reader/wgsl/parser_impl_statement_test.cc",
+    "src/reader/wgsl/parser_impl_statements_test.cc",
+    "src/reader/wgsl/parser_impl_storage_class_test.cc",
+    "src/reader/wgsl/parser_impl_struct_body_decl_test.cc",
+    "src/reader/wgsl/parser_impl_struct_decl_test.cc",
+    "src/reader/wgsl/parser_impl_struct_decoration_decl_test.cc",
+    "src/reader/wgsl/parser_impl_struct_decoration_test.cc",
+    "src/reader/wgsl/parser_impl_struct_member_decoration_decl_test.cc",
+    "src/reader/wgsl/parser_impl_struct_member_decoration_test.cc",
+    "src/reader/wgsl/parser_impl_struct_member_test.cc",
+    "src/reader/wgsl/parser_impl_switch_body_test.cc",
+    "src/reader/wgsl/parser_impl_switch_stmt_test.cc",
+    "src/reader/wgsl/parser_impl_test.cc",
+    "src/reader/wgsl/parser_impl_test_helper.cc",
+    "src/reader/wgsl/parser_impl_test_helper.h",
+    "src/reader/wgsl/parser_impl_type_alias_test.cc",
+    "src/reader/wgsl/parser_impl_type_decl_test.cc",
+    "src/reader/wgsl/parser_impl_unary_expression_test.cc",
+    "src/reader/wgsl/parser_impl_unless_stmt_test.cc",
+    "src/reader/wgsl/parser_impl_variable_decl_test.cc",
+    "src/reader/wgsl/parser_impl_variable_decoration_list_test.cc",
+    "src/reader/wgsl/parser_impl_variable_decoration_test.cc",
+    "src/reader/wgsl/parser_impl_variable_ident_decl_test.cc",
+    "src/reader/wgsl/parser_impl_variable_stmt_test.cc",
+    "src/reader/wgsl/parser_impl_variable_storage_decoration_test.cc",
+    "src/reader/wgsl/parser_test.cc",
+    "src/reader/wgsl/token_test.cc",
+  ]
+
+  configs += [
+    ":tint_common_config",
+    ":tint_unittests_config",
+  ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+}
+
+source_set("tint_unittests_wgsl_writer_src") {
+  sources = [
+    "src/writer/wgsl/generator_impl_alias_type_test.cc",
+    "src/writer/wgsl/generator_impl_array_accessor_test.cc",
+    "src/writer/wgsl/generator_impl_as_test.cc",
+    "src/writer/wgsl/generator_impl_assign_test.cc",
+    "src/writer/wgsl/generator_impl_break_test.cc",
+    "src/writer/wgsl/generator_impl_call_test.cc",
+    "src/writer/wgsl/generator_impl_case_test.cc",
+    "src/writer/wgsl/generator_impl_cast_test.cc",
+    "src/writer/wgsl/generator_impl_constructor_test.cc",
+    "src/writer/wgsl/generator_impl_continue_test.cc",
+    "src/writer/wgsl/generator_impl_else_test.cc",
+    "src/writer/wgsl/generator_impl_entry_point_test.cc",
+    "src/writer/wgsl/generator_impl_fallthrough_test.cc",
+    "src/writer/wgsl/generator_impl_function_test.cc",
+    "src/writer/wgsl/generator_impl_identifier_test.cc",
+    "src/writer/wgsl/generator_impl_if_test.cc",
+    "src/writer/wgsl/generator_impl_import_test.cc",
+    "src/writer/wgsl/generator_impl_kill_test.cc",
+    "src/writer/wgsl/generator_impl_loop_test.cc",
+    "src/writer/wgsl/generator_impl_member_accessor_test.cc",
+    "src/writer/wgsl/generator_impl_nop_test.cc",
+    "src/writer/wgsl/generator_impl_relational_test.cc",
+    "src/writer/wgsl/generator_impl_return_test.cc",
+    "src/writer/wgsl/generator_impl_switch_test.cc",
+    "src/writer/wgsl/generator_impl_test.cc",
+    "src/writer/wgsl/generator_impl_type_test.cc",
+    "src/writer/wgsl/generator_impl_unary_derivative_test.cc",
+    "src/writer/wgsl/generator_impl_unary_method_test.cc",
+    "src/writer/wgsl/generator_impl_unary_op_test.cc",
+    "src/writer/wgsl/generator_impl_unless_test.cc",
+    "src/writer/wgsl/generator_impl_variable_decl_statement_test.cc",
+    "src/writer/wgsl/generator_impl_variable_test.cc",
+  ]
+
+  configs += [
+    ":tint_common_config",
+    ":tint_unittests_config",
+  ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+}
+
+source_set("tint_unittests_src") {
+  deps = [ ":tint_unittests_core_src" ]
+
+  if (tint_build_spv_reader) {
+    deps += [ ":tint_unittests_spv_reader_src" ]
+  }
+
+  if (tint_build_spv_writer) {
+    deps += [ ":tint_unittests_spv_writer_src" ]
+  }
+
+  if (tint_build_wgsl_reader) {
+    deps += [ ":tint_unittests_wgsl_reader_src" ]
+  }
+
+  if (tint_build_wgsl_writer) {
+    deps += [ ":tint_unittests_wgsl_writer_src" ]
+  }
+
+  configs += [
+    ":tint_common_config",
+    ":tint_unittests_config",
+  ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+}
+
+test("tint_unittests") {
+  deps = [
+    ":gmock_and_gtest",
+    ":libtint",
+    ":tint_unittests_src",
+  ]
+
+  # TODO(rharrison): Use main() from chromium for chromium tree builds. This
+  # requires adding a file to //gpu like Dawn has done.
+
+  configs += [
+    ":tint_common_config",
+    ":tint_unittests_config",
+  ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+
+  testonly = true
+}
+
+###############################################################################
+# Samples - Executables exposing command line functionality
+###############################################################################
 
 config("tint_exe_config") {
   include_dirs = []
@@ -363,7 +777,7 @@ executable("tint_exe") {
   deps = [ ":libtint" ]
 
   if (tint_build_spv_reader || tint_build_spv_writer) {
-    deps += ["${tint_spirv_headers_dir}/:spv_headers" ]
+    deps += [ "${tint_spirv_headers_dir}/:spv_headers" ]
   }
 
   configs += [ ":tint_common_config" ]
@@ -373,8 +787,4 @@ executable("tint_exe") {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
   }
-}
-
-group("tint_all") {
-  deps = [ ":tint_exe" ]
 }

@@ -22,7 +22,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, VariableIdentDecl_Parses) {
-  auto p = parser("my_var : f32");
+  auto* p = parser("my_var : f32");
   std::string name;
   ast::type::Type* type;
   std::tie(name, type) = p->variable_ident_decl();
@@ -33,7 +33,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_Parses) {
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MissingIdent) {
-  auto p = parser(": f32");
+  auto* p = parser(": f32");
   std::string name;
   ast::type::Type* type;
   std::tie(name, type) = p->variable_ident_decl();
@@ -46,21 +46,21 @@ TEST_F(ParserImplTest, VariableIdentDecl_MissingIdent) {
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MissingColon) {
-  auto p = parser("my_var f32");
+  auto* p = parser("my_var f32");
   auto r = p->variable_ident_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:8: missing : for identifier declaration");
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MissingType) {
-  auto p = parser("my_var :");
+  auto* p = parser("my_var :");
   auto r = p->variable_ident_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:9: invalid type for identifier declaration");
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_InvalidIdent) {
-  auto p = parser("123 : f32");
+  auto* p = parser("123 : f32");
   std::string name;
   ast::type::Type* type;
   std::tie(name, type) = p->variable_ident_decl();
@@ -73,7 +73,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_InvalidIdent) {
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_InvalidType) {
-  auto p = parser("my_var : invalid");
+  auto* p = parser("my_var : invalid");
   auto r = p->variable_ident_decl();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:10: unknown type alias 'invalid'");

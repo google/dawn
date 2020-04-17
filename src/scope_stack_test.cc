@@ -27,7 +27,7 @@ TEST_F(ScopeStackTest, Global) {
 
   uint32_t val = 0;
   EXPECT_TRUE(s.get("var", &val));
-  EXPECT_EQ(val, 5);
+  EXPECT_EQ(val, 5u);
 }
 
 TEST_F(ScopeStackTest, Global_SetWithPointer) {
@@ -49,7 +49,7 @@ TEST_F(ScopeStackTest, Global_CanNotPop) {
 
   uint32_t val = 0;
   EXPECT_TRUE(s.get("var", &val));
-  EXPECT_EQ(val, 5);
+  EXPECT_EQ(val, 5u);
 }
 
 TEST_F(ScopeStackTest, Scope) {
@@ -59,14 +59,14 @@ TEST_F(ScopeStackTest, Scope) {
 
   uint32_t val = 0;
   EXPECT_TRUE(s.get("var", &val));
-  EXPECT_EQ(val, 5);
+  EXPECT_EQ(val, 5u);
 }
 
 TEST_F(ScopeStackTest, Get_MissingName) {
   ScopeStack<uint32_t> s;
   uint32_t ret = 0;
   EXPECT_FALSE(s.get("val", &ret));
-  EXPECT_EQ(ret, 0);
+  EXPECT_EQ(ret, 0u);
 }
 
 TEST_F(ScopeStackTest, Has) {
@@ -87,7 +87,7 @@ TEST_F(ScopeStackTest, ReturnsScopeBeforeGlobalFirst) {
 
   uint32_t ret;
   EXPECT_TRUE(s.get("var", &ret));
-  EXPECT_EQ(ret, 5);
+  EXPECT_EQ(ret, 5u);
 }
 
 }  // namespace

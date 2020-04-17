@@ -22,35 +22,35 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, BodyStmt) {
-  auto p = parser(R"({
+  auto* p = parser(R"({
   kill;
   nop;
   return 1 + b / 2;
 })");
   auto e = p->body_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_EQ(e.size(), 3);
+  ASSERT_EQ(e.size(), 3u);
   EXPECT_TRUE(e[0]->IsKill());
   EXPECT_TRUE(e[1]->IsNop());
   EXPECT_TRUE(e[2]->IsReturn());
 }
 
 TEST_F(ParserImplTest, BodyStmt_Empty) {
-  auto p = parser("{}");
+  auto* p = parser("{}");
   auto e = p->body_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
-  EXPECT_EQ(e.size(), 0);
+  EXPECT_EQ(e.size(), 0u);
 }
 
 TEST_F(ParserImplTest, BodyStmt_InvalidStmt) {
-  auto p = parser("{fn main() -> void {}}");
+  auto* p = parser("{fn main() -> void {}}");
   auto e = p->body_stmt();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:2: missing }");
 }
 
 TEST_F(ParserImplTest, BodyStmt_MissingRightParen) {
-  auto p = parser("{return;");
+  auto* p = parser("{return;");
   auto e = p->body_stmt();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:9: missing }");

@@ -27,7 +27,7 @@ using CastExpressionTest = testing::Test;
 TEST_F(CastExpressionTest, Creation) {
   type::F32Type f32;
   auto expr = std::make_unique<IdentifierExpression>("expr");
-  auto expr_ptr = expr.get();
+  auto* expr_ptr = expr.get();
 
   CastExpression c(&f32, std::move(expr));
   EXPECT_EQ(c.type(), &f32);
@@ -40,8 +40,8 @@ TEST_F(CastExpressionTest, Creation_withSource) {
 
   CastExpression c(Source{20, 2}, &f32, std::move(expr));
   auto src = c.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(CastExpressionTest, IsCast) {

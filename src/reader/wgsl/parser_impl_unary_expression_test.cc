@@ -29,45 +29,45 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, UnaryExpression_Postix) {
-  auto p = parser("a[2]");
+  auto* p = parser("a[2]");
   auto e = p->unary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_TRUE(e->IsArrayAccessor());
-  auto ary = e->AsArrayAccessor();
+  auto* ary = e->AsArrayAccessor();
   ASSERT_TRUE(ary->array()->IsIdentifier());
-  auto ident = ary->array()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = ary->array()->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 
   ASSERT_TRUE(ary->idx_expr()->IsConstructor());
   ASSERT_TRUE(ary->idx_expr()->AsConstructor()->IsScalarConstructor());
-  auto init = ary->idx_expr()->AsConstructor()->AsScalarConstructor();
+  auto* init = ary->idx_expr()->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(init->literal()->IsInt());
   ASSERT_EQ(init->literal()->AsInt()->value(), 2);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Minus) {
-  auto p = parser("- 1");
+  auto* p = parser("- 1");
   auto e = p->unary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryOp());
 
-  auto u = e->AsUnaryOp();
+  auto* u = e->AsUnaryOp();
   ASSERT_EQ(u->op(), ast::UnaryOp::kNegation);
 
   ASSERT_TRUE(u->expr()->IsConstructor());
   ASSERT_TRUE(u->expr()->AsConstructor()->IsScalarConstructor());
 
-  auto init = u->expr()->AsConstructor()->AsScalarConstructor();
+  auto* init = u->expr()->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(init->literal()->IsInt());
   EXPECT_EQ(init->literal()->AsInt()->value(), 1);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Minus_InvalidRHS) {
-  auto p = parser("-if(a) {}");
+  auto* p = parser("-if(a) {}");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -75,25 +75,25 @@ TEST_F(ParserImplTest, UnaryExpression_Minus_InvalidRHS) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Bang) {
-  auto p = parser("!1");
+  auto* p = parser("!1");
   auto e = p->unary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryOp());
 
-  auto u = e->AsUnaryOp();
+  auto* u = e->AsUnaryOp();
   ASSERT_EQ(u->op(), ast::UnaryOp::kNot);
 
   ASSERT_TRUE(u->expr()->IsConstructor());
   ASSERT_TRUE(u->expr()->AsConstructor()->IsScalarConstructor());
 
-  auto init = u->expr()->AsConstructor()->AsScalarConstructor();
+  auto* init = u->expr()->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(init->literal()->IsInt());
   EXPECT_EQ(init->literal()->AsInt()->value(), 1);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Bang_InvalidRHS) {
-  auto p = parser("!if (a) {}");
+  auto* p = parser("!if (a) {}");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -101,23 +101,23 @@ TEST_F(ParserImplTest, UnaryExpression_Bang_InvalidRHS) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Any) {
-  auto p = parser("any(a)");
+  auto* p = parser("any(a)");
   auto e = p->unary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryMethod());
 
-  auto u = e->AsUnaryMethod();
+  auto* u = e->AsUnaryMethod();
   ASSERT_EQ(u->op(), ast::UnaryMethod::kAny);
-  ASSERT_EQ(u->params().size(), 1);
+  ASSERT_EQ(u->params().size(), 1u);
   ASSERT_TRUE(u->params()[0]->IsIdentifier());
-  auto ident = u->params()[0]->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = u->params()[0]->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Any_MissingParenLeft) {
-  auto p = parser("any a)");
+  auto* p = parser("any a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -125,7 +125,7 @@ TEST_F(ParserImplTest, UnaryExpression_Any_MissingParenLeft) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Any_MissingParenRight) {
-  auto p = parser("any(a");
+  auto* p = parser("any(a");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -133,7 +133,7 @@ TEST_F(ParserImplTest, UnaryExpression_Any_MissingParenRight) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Any_MissingIdentifier) {
-  auto p = parser("any()");
+  auto* p = parser("any()");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -141,7 +141,7 @@ TEST_F(ParserImplTest, UnaryExpression_Any_MissingIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Any_InvalidIdentifier) {
-  auto p = parser("any(123)");
+  auto* p = parser("any(123)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -149,23 +149,23 @@ TEST_F(ParserImplTest, UnaryExpression_Any_InvalidIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_All) {
-  auto p = parser("all(a)");
+  auto* p = parser("all(a)");
   auto e = p->unary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryMethod());
 
-  auto u = e->AsUnaryMethod();
+  auto* u = e->AsUnaryMethod();
   ASSERT_EQ(u->op(), ast::UnaryMethod::kAll);
-  ASSERT_EQ(u->params().size(), 1);
+  ASSERT_EQ(u->params().size(), 1u);
   ASSERT_TRUE(u->params()[0]->IsIdentifier());
-  auto ident = u->params()[0]->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = u->params()[0]->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_All_MissingParenLeft) {
-  auto p = parser("all a)");
+  auto* p = parser("all a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -173,7 +173,7 @@ TEST_F(ParserImplTest, UnaryExpression_All_MissingParenLeft) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_All_MissingParenRight) {
-  auto p = parser("all(a");
+  auto* p = parser("all(a");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -181,7 +181,7 @@ TEST_F(ParserImplTest, UnaryExpression_All_MissingParenRight) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_All_MissingIdentifier) {
-  auto p = parser("all()");
+  auto* p = parser("all()");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -189,7 +189,7 @@ TEST_F(ParserImplTest, UnaryExpression_All_MissingIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_All_InvalidIdentifier) {
-  auto p = parser("all(123)");
+  auto* p = parser("all(123)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -197,23 +197,23 @@ TEST_F(ParserImplTest, UnaryExpression_All_InvalidIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNan) {
-  auto p = parser("is_nan(a)");
+  auto* p = parser("is_nan(a)");
   auto e = p->unary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryMethod());
 
-  auto u = e->AsUnaryMethod();
+  auto* u = e->AsUnaryMethod();
   ASSERT_EQ(u->op(), ast::UnaryMethod::kIsNan);
-  ASSERT_EQ(u->params().size(), 1);
+  ASSERT_EQ(u->params().size(), 1u);
   ASSERT_TRUE(u->params()[0]->IsIdentifier());
-  auto ident = u->params()[0]->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = u->params()[0]->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNan_MissingParenLeft) {
-  auto p = parser("is_nan a)");
+  auto* p = parser("is_nan a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -221,7 +221,7 @@ TEST_F(ParserImplTest, UnaryExpression_IsNan_MissingParenLeft) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNan_MissingParenRight) {
-  auto p = parser("is_nan(a");
+  auto* p = parser("is_nan(a");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -229,7 +229,7 @@ TEST_F(ParserImplTest, UnaryExpression_IsNan_MissingParenRight) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNan_MissingIdentifier) {
-  auto p = parser("is_nan()");
+  auto* p = parser("is_nan()");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -237,7 +237,7 @@ TEST_F(ParserImplTest, UnaryExpression_IsNan_MissingIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNan_InvalidIdentifier) {
-  auto p = parser("is_nan(123)");
+  auto* p = parser("is_nan(123)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -245,23 +245,23 @@ TEST_F(ParserImplTest, UnaryExpression_IsNan_InvalidIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsInf) {
-  auto p = parser("is_inf(a)");
+  auto* p = parser("is_inf(a)");
   auto e = p->unary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryMethod());
 
-  auto u = e->AsUnaryMethod();
+  auto* u = e->AsUnaryMethod();
   ASSERT_EQ(u->op(), ast::UnaryMethod::kIsInf);
-  ASSERT_EQ(u->params().size(), 1);
+  ASSERT_EQ(u->params().size(), 1u);
   ASSERT_TRUE(u->params()[0]->IsIdentifier());
-  auto ident = u->params()[0]->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = u->params()[0]->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsInf_MissingParenLeft) {
-  auto p = parser("is_inf a)");
+  auto* p = parser("is_inf a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -269,7 +269,7 @@ TEST_F(ParserImplTest, UnaryExpression_IsInf_MissingParenLeft) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsInf_MissingParenRight) {
-  auto p = parser("is_inf(a");
+  auto* p = parser("is_inf(a");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -277,7 +277,7 @@ TEST_F(ParserImplTest, UnaryExpression_IsInf_MissingParenRight) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsInf_MissingIdentifier) {
-  auto p = parser("is_inf()");
+  auto* p = parser("is_inf()");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -285,7 +285,7 @@ TEST_F(ParserImplTest, UnaryExpression_IsInf_MissingIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsInf_InvalidIdentifier) {
-  auto p = parser("is_inf(123)");
+  auto* p = parser("is_inf(123)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -293,23 +293,23 @@ TEST_F(ParserImplTest, UnaryExpression_IsInf_InvalidIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsFinite) {
-  auto p = parser("is_finite(a)");
+  auto* p = parser("is_finite(a)");
   auto e = p->unary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryMethod());
 
-  auto u = e->AsUnaryMethod();
+  auto* u = e->AsUnaryMethod();
   ASSERT_EQ(u->op(), ast::UnaryMethod::kIsFinite);
-  ASSERT_EQ(u->params().size(), 1);
+  ASSERT_EQ(u->params().size(), 1u);
   ASSERT_TRUE(u->params()[0]->IsIdentifier());
-  auto ident = u->params()[0]->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = u->params()[0]->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsFinite_MissingParenLeft) {
-  auto p = parser("is_finite a)");
+  auto* p = parser("is_finite a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -317,7 +317,7 @@ TEST_F(ParserImplTest, UnaryExpression_IsFinite_MissingParenLeft) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsFinite_MissingParenRight) {
-  auto p = parser("is_finite(a");
+  auto* p = parser("is_finite(a");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -325,7 +325,7 @@ TEST_F(ParserImplTest, UnaryExpression_IsFinite_MissingParenRight) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsFinite_MissingIdentifier) {
-  auto p = parser("is_finite()");
+  auto* p = parser("is_finite()");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -333,7 +333,7 @@ TEST_F(ParserImplTest, UnaryExpression_IsFinite_MissingIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsFinite_InvalidIdentifier) {
-  auto p = parser("is_finite(123)");
+  auto* p = parser("is_finite(123)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -341,23 +341,23 @@ TEST_F(ParserImplTest, UnaryExpression_IsFinite_InvalidIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNormal) {
-  auto p = parser("is_normal(a)");
+  auto* p = parser("is_normal(a)");
   auto e = p->unary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryMethod());
 
-  auto u = e->AsUnaryMethod();
+  auto* u = e->AsUnaryMethod();
   ASSERT_EQ(u->op(), ast::UnaryMethod::kIsNormal);
-  ASSERT_EQ(u->params().size(), 1);
+  ASSERT_EQ(u->params().size(), 1u);
   ASSERT_TRUE(u->params()[0]->IsIdentifier());
-  auto ident = u->params()[0]->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = u->params()[0]->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNormal_MissingParenLeft) {
-  auto p = parser("is_normal a)");
+  auto* p = parser("is_normal a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -365,7 +365,7 @@ TEST_F(ParserImplTest, UnaryExpression_IsNormal_MissingParenLeft) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNormal_MissingParenRight) {
-  auto p = parser("is_normal(a");
+  auto* p = parser("is_normal(a");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -373,7 +373,7 @@ TEST_F(ParserImplTest, UnaryExpression_IsNormal_MissingParenRight) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNormal_MissingIdentifier) {
-  auto p = parser("is_normal()");
+  auto* p = parser("is_normal()");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -381,7 +381,7 @@ TEST_F(ParserImplTest, UnaryExpression_IsNormal_MissingIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNormal_InvalidIdentifier) {
-  auto p = parser("is_normal(123)");
+  auto* p = parser("is_normal(123)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -389,28 +389,28 @@ TEST_F(ParserImplTest, UnaryExpression_IsNormal_InvalidIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dot) {
-  auto p = parser("dot(a, b)");
+  auto* p = parser("dot(a, b)");
   auto e = p->unary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryMethod());
 
-  auto u = e->AsUnaryMethod();
+  auto* u = e->AsUnaryMethod();
   ASSERT_EQ(u->op(), ast::UnaryMethod::kDot);
-  ASSERT_EQ(u->params().size(), 2);
+  ASSERT_EQ(u->params().size(), 2u);
   ASSERT_TRUE(u->params()[0]->IsIdentifier());
-  auto ident = u->params()[0]->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = u->params()[0]->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 
   ASSERT_TRUE(u->params()[1]->IsIdentifier());
   ident = u->params()[1]->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "b");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dot_MissingParenLeft) {
-  auto p = parser("dot a, b)");
+  auto* p = parser("dot a, b)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -418,7 +418,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dot_MissingParenLeft) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dot_MissingParenRight) {
-  auto p = parser("dot(a, b");
+  auto* p = parser("dot(a, b");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -426,7 +426,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dot_MissingParenRight) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dot_MissingFirstIdentifier) {
-  auto p = parser("dot(, a)");
+  auto* p = parser("dot(, a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -434,7 +434,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dot_MissingFirstIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dot_MissingSecondIdentifier) {
-  auto p = parser("dot(a, )");
+  auto* p = parser("dot(a, )");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -442,7 +442,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dot_MissingSecondIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dot_MissingComma) {
-  auto p = parser("dot(a b)");
+  auto* p = parser("dot(a b)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -450,7 +450,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dot_MissingComma) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dot_InvalidFirstIdentifier) {
-  auto p = parser("dot(123, b)");
+  auto* p = parser("dot(123, b)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -458,7 +458,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dot_InvalidFirstIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dot_InvalidSecondIdentifier) {
-  auto p = parser("dot(a, 123)");
+  auto* p = parser("dot(a, 123)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -466,28 +466,28 @@ TEST_F(ParserImplTest, UnaryExpression_Dot_InvalidSecondIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_OuterProduct) {
-  auto p = parser("outer_product(a, b)");
+  auto* p = parser("outer_product(a, b)");
   auto e = p->unary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryMethod());
 
-  auto u = e->AsUnaryMethod();
+  auto* u = e->AsUnaryMethod();
   ASSERT_EQ(u->op(), ast::UnaryMethod::kOuterProduct);
-  ASSERT_EQ(u->params().size(), 2);
+  ASSERT_EQ(u->params().size(), 2u);
   ASSERT_TRUE(u->params()[0]->IsIdentifier());
-  auto ident = u->params()[0]->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = u->params()[0]->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 
   ASSERT_TRUE(u->params()[1]->IsIdentifier());
   ident = u->params()[1]->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "b");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_OuterProduct_MissingParenLeft) {
-  auto p = parser("outer_product a, b)");
+  auto* p = parser("outer_product a, b)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -495,7 +495,7 @@ TEST_F(ParserImplTest, UnaryExpression_OuterProduct_MissingParenLeft) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_OuterProduct_MissingParenRight) {
-  auto p = parser("outer_product(a, b");
+  auto* p = parser("outer_product(a, b");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -503,7 +503,7 @@ TEST_F(ParserImplTest, UnaryExpression_OuterProduct_MissingParenRight) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_OuterProduct_MissingFirstIdentifier) {
-  auto p = parser("outer_product(, b)");
+  auto* p = parser("outer_product(, b)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -511,7 +511,7 @@ TEST_F(ParserImplTest, UnaryExpression_OuterProduct_MissingFirstIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_OuterProduct_MissingSecondIdentifier) {
-  auto p = parser("outer_product(a, )");
+  auto* p = parser("outer_product(a, )");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -519,7 +519,7 @@ TEST_F(ParserImplTest, UnaryExpression_OuterProduct_MissingSecondIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_OuterProduct_MissingComma) {
-  auto p = parser("outer_product(a b)");
+  auto* p = parser("outer_product(a b)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -527,7 +527,7 @@ TEST_F(ParserImplTest, UnaryExpression_OuterProduct_MissingComma) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_OuterProduct_InvalidFirstIdentifier) {
-  auto p = parser("outer_product(123, b)");
+  auto* p = parser("outer_product(123, b)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -535,7 +535,7 @@ TEST_F(ParserImplTest, UnaryExpression_OuterProduct_InvalidFirstIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_OuterProduct_InvalidSecondIdentifier) {
-  auto p = parser("outer_product(a, 123)");
+  auto* p = parser("outer_product(a, 123)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -543,43 +543,43 @@ TEST_F(ParserImplTest, UnaryExpression_OuterProduct_InvalidSecondIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_NoModifier) {
-  auto p = parser("dpdx(a)");
+  auto* p = parser("dpdx(a)");
   auto e = p->unary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryDerivative());
 
-  auto deriv = e->AsUnaryDerivative();
+  auto* deriv = e->AsUnaryDerivative();
   EXPECT_EQ(deriv->op(), ast::UnaryDerivative::kDpdx);
   EXPECT_EQ(deriv->modifier(), ast::DerivativeModifier::kNone);
 
   ASSERT_NE(deriv->param(), nullptr);
   ASSERT_TRUE(deriv->param()->IsIdentifier());
-  auto ident = deriv->param()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = deriv->param()->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_WithModifier) {
-  auto p = parser("dpdx<coarse>(a)");
+  auto* p = parser("dpdx<coarse>(a)");
   auto e = p->unary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryDerivative());
 
-  auto deriv = e->AsUnaryDerivative();
+  auto* deriv = e->AsUnaryDerivative();
   EXPECT_EQ(deriv->op(), ast::UnaryDerivative::kDpdx);
   EXPECT_EQ(deriv->modifier(), ast::DerivativeModifier::kCoarse);
 
   ASSERT_NE(deriv->param(), nullptr);
   ASSERT_TRUE(deriv->param()->IsIdentifier());
-  auto ident = deriv->param()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = deriv->param()->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_MissingLessThan) {
-  auto p = parser("dpdx coarse>(a)");
+  auto* p = parser("dpdx coarse>(a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -587,7 +587,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdx_MissingLessThan) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_InvalidModifier) {
-  auto p = parser("dpdx<invalid>(a)");
+  auto* p = parser("dpdx<invalid>(a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -595,7 +595,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdx_InvalidModifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_EmptyModifer) {
-  auto p = parser("dpdx coarse>(a)");
+  auto* p = parser("dpdx coarse>(a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -603,7 +603,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdx_EmptyModifer) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_MissingGreaterThan) {
-  auto p = parser("dpdx<coarse (a)");
+  auto* p = parser("dpdx<coarse (a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -611,7 +611,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdx_MissingGreaterThan) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_MisisngLeftParen) {
-  auto p = parser("dpdx<coarse>a)");
+  auto* p = parser("dpdx<coarse>a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -619,7 +619,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdx_MisisngLeftParen) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_MissingRightParen) {
-  auto p = parser("dpdx<coarse>(a");
+  auto* p = parser("dpdx<coarse>(a");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -627,7 +627,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdx_MissingRightParen) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_MissingIdentifier) {
-  auto p = parser("dpdx<coarse>()");
+  auto* p = parser("dpdx<coarse>()");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -635,7 +635,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdx_MissingIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_InvalidIdentifeir) {
-  auto p = parser("dpdx<coarse>(12345)");
+  auto* p = parser("dpdx<coarse>(12345)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -643,43 +643,43 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdx_InvalidIdentifeir) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_NoModifier) {
-  auto p = parser("dpdy(a)");
+  auto* p = parser("dpdy(a)");
   auto e = p->unary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryDerivative());
 
-  auto deriv = e->AsUnaryDerivative();
+  auto* deriv = e->AsUnaryDerivative();
   EXPECT_EQ(deriv->op(), ast::UnaryDerivative::kDpdy);
   EXPECT_EQ(deriv->modifier(), ast::DerivativeModifier::kNone);
 
   ASSERT_NE(deriv->param(), nullptr);
   ASSERT_TRUE(deriv->param()->IsIdentifier());
-  auto ident = deriv->param()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = deriv->param()->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_WithModifier) {
-  auto p = parser("dpdy<fine>(a)");
+  auto* p = parser("dpdy<fine>(a)");
   auto e = p->unary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryDerivative());
 
-  auto deriv = e->AsUnaryDerivative();
+  auto* deriv = e->AsUnaryDerivative();
   EXPECT_EQ(deriv->op(), ast::UnaryDerivative::kDpdy);
   EXPECT_EQ(deriv->modifier(), ast::DerivativeModifier::kFine);
 
   ASSERT_NE(deriv->param(), nullptr);
   ASSERT_TRUE(deriv->param()->IsIdentifier());
-  auto ident = deriv->param()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = deriv->param()->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_MissingLessThan) {
-  auto p = parser("dpdy coarse>(a)");
+  auto* p = parser("dpdy coarse>(a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -687,7 +687,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdy_MissingLessThan) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_InvalidModifier) {
-  auto p = parser("dpdy<invalid>(a)");
+  auto* p = parser("dpdy<invalid>(a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -695,7 +695,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdy_InvalidModifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_EmptyModifer) {
-  auto p = parser("dpdy coarse>(a)");
+  auto* p = parser("dpdy coarse>(a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -703,7 +703,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdy_EmptyModifer) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_MissingGreaterThan) {
-  auto p = parser("dpdy<coarse (a)");
+  auto* p = parser("dpdy<coarse (a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -711,7 +711,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdy_MissingGreaterThan) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_MisisngLeftParen) {
-  auto p = parser("dpdy<coarse>a)");
+  auto* p = parser("dpdy<coarse>a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -719,7 +719,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdy_MisisngLeftParen) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_MissingRightParen) {
-  auto p = parser("dpdy<coarse>(a");
+  auto* p = parser("dpdy<coarse>(a");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -727,7 +727,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdy_MissingRightParen) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_MissingIdentifier) {
-  auto p = parser("dpdy<coarse>()");
+  auto* p = parser("dpdy<coarse>()");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -735,7 +735,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdy_MissingIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_InvalidIdentifeir) {
-  auto p = parser("dpdy<coarse>(12345)");
+  auto* p = parser("dpdy<coarse>(12345)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -743,43 +743,43 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdy_InvalidIdentifeir) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidth_NoModifier) {
-  auto p = parser("fwidth(a)");
+  auto* p = parser("fwidth(a)");
   auto e = p->unary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryDerivative());
 
-  auto deriv = e->AsUnaryDerivative();
+  auto* deriv = e->AsUnaryDerivative();
   EXPECT_EQ(deriv->op(), ast::UnaryDerivative::kFwidth);
   EXPECT_EQ(deriv->modifier(), ast::DerivativeModifier::kNone);
 
   ASSERT_NE(deriv->param(), nullptr);
   ASSERT_TRUE(deriv->param()->IsIdentifier());
-  auto ident = deriv->param()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = deriv->param()->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidth_WithModifier) {
-  auto p = parser("fwidth<coarse>(a)");
+  auto* p = parser("fwidth<coarse>(a)");
   auto e = p->unary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsUnaryDerivative());
 
-  auto deriv = e->AsUnaryDerivative();
+  auto* deriv = e->AsUnaryDerivative();
   EXPECT_EQ(deriv->op(), ast::UnaryDerivative::kFwidth);
   EXPECT_EQ(deriv->modifier(), ast::DerivativeModifier::kCoarse);
 
   ASSERT_NE(deriv->param(), nullptr);
   ASSERT_TRUE(deriv->param()->IsIdentifier());
-  auto ident = deriv->param()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = deriv->param()->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidth_MissingLessThan) {
-  auto p = parser("fwidth coarse>(a)");
+  auto* p = parser("fwidth coarse>(a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -787,7 +787,7 @@ TEST_F(ParserImplTest, UnaryExpression_Fwidth_MissingLessThan) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidth_InvalidModifier) {
-  auto p = parser("fwidth<invalid>(a)");
+  auto* p = parser("fwidth<invalid>(a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -795,7 +795,7 @@ TEST_F(ParserImplTest, UnaryExpression_Fwidth_InvalidModifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidth_EmptyModifer) {
-  auto p = parser("fwidth coarse>(a)");
+  auto* p = parser("fwidth coarse>(a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -803,7 +803,7 @@ TEST_F(ParserImplTest, UnaryExpression_Fwidth_EmptyModifer) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidth_MissingGreaterThan) {
-  auto p = parser("fwidth<coarse (a)");
+  auto* p = parser("fwidth<coarse (a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -811,7 +811,7 @@ TEST_F(ParserImplTest, UnaryExpression_Fwidth_MissingGreaterThan) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidth_MisisngLeftParen) {
-  auto p = parser("fwidth<coarse>a)");
+  auto* p = parser("fwidth<coarse>a)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -819,7 +819,7 @@ TEST_F(ParserImplTest, UnaryExpression_Fwidth_MisisngLeftParen) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidth_MissingRightParen) {
-  auto p = parser("fwidth<coarse>(a");
+  auto* p = parser("fwidth<coarse>(a");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -827,7 +827,7 @@ TEST_F(ParserImplTest, UnaryExpression_Fwidth_MissingRightParen) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidth_MissingIdentifier) {
-  auto p = parser("fwidth<coarse>()");
+  auto* p = parser("fwidth<coarse>()");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -835,7 +835,7 @@ TEST_F(ParserImplTest, UnaryExpression_Fwidth_MissingIdentifier) {
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidht_InvalidIdentifeir) {
-  auto p = parser("fwidth<coarse>(12345)");
+  auto* p = parser("fwidth<coarse>(12345)");
   auto e = p->unary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);

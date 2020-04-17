@@ -46,10 +46,10 @@ fn main() -> void {
   ASSERT_TRUE(p.Parse()) << p.error();
 
   auto m = p.module();
-  ASSERT_EQ(1, m.imports().size());
-  ASSERT_EQ(1, m.entry_points().size());
-  ASSERT_EQ(1, m.functions().size());
-  ASSERT_EQ(1, m.global_variables().size());
+  ASSERT_EQ(1u, m.imports().size());
+  ASSERT_EQ(1u, m.entry_points().size());
+  ASSERT_EQ(1u, m.functions().size());
+  ASSERT_EQ(1u, m.global_variables().size());
 }
 
 TEST_F(ParserTest, HandlesError) {

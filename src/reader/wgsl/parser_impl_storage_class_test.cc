@@ -36,9 +36,9 @@ class StorageClassTest : public testing::TestWithParam<StorageClassData> {
   StorageClassTest() = default;
   ~StorageClassTest() = default;
 
-  void SetUp() { ctx_.Reset(); }
+  void SetUp() override { ctx_.Reset(); }
 
-  void TearDown() { impl_ = nullptr; }
+  void TearDown() override { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -52,7 +52,7 @@ class StorageClassTest : public testing::TestWithParam<StorageClassData> {
 
 TEST_P(StorageClassTest, Parses) {
   auto params = GetParam();
-  auto p = parser(params.input);
+  auto* p = parser(params.input);
 
   auto sc = p->storage_class();
   ASSERT_FALSE(p->has_error());
@@ -78,7 +78,7 @@ INSTANTIATE_TEST_SUITE_P(
         StorageClassData{"function", ast::StorageClass::kFunction}));
 
 TEST_F(ParserImplTest, StorageClass_NoMatch) {
-  auto p = parser("not-a-storage-class");
+  auto* p = parser("not-a-storage-class");
   auto sc = p->storage_class();
   ASSERT_EQ(sc, ast::StorageClass::kNone);
 

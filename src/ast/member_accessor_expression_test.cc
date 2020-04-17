@@ -29,8 +29,8 @@ TEST_F(MemberAccessorExpressionTest, Creation) {
   auto str = std::make_unique<IdentifierExpression>("structure");
   auto mem = std::make_unique<IdentifierExpression>("member");
 
-  auto str_ptr = str.get();
-  auto mem_ptr = mem.get();
+  auto* str_ptr = str.get();
+  auto* mem_ptr = mem.get();
 
   MemberAccessorExpression stmt(std::move(str), std::move(mem));
   EXPECT_EQ(stmt.structure(), str_ptr);
@@ -43,8 +43,8 @@ TEST_F(MemberAccessorExpressionTest, Creation_WithSource) {
 
   MemberAccessorExpression stmt(Source{20, 2}, std::move(str), std::move(mem));
   auto src = stmt.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(MemberAccessorExpressionTest, IsMemberAccessor) {

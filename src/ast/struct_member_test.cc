@@ -35,10 +35,10 @@ TEST_F(StructMemberTest, Creation) {
   StructMember st{"a", &i32, std::move(decorations)};
   EXPECT_EQ(st.name(), "a");
   EXPECT_EQ(st.type(), &i32);
-  EXPECT_EQ(st.decorations().size(), 1);
+  EXPECT_EQ(st.decorations().size(), 1u);
   EXPECT_TRUE(st.decorations()[0]->IsOffset());
-  EXPECT_EQ(st.line(), 0);
-  EXPECT_EQ(st.column(), 0);
+  EXPECT_EQ(st.line(), 0u);
+  EXPECT_EQ(st.column(), 0u);
 }
 
 TEST_F(StructMemberTest, CreationWithSource) {
@@ -48,9 +48,9 @@ TEST_F(StructMemberTest, CreationWithSource) {
   StructMember st{s, "a", &i32, {}};
   EXPECT_EQ(st.name(), "a");
   EXPECT_EQ(st.type(), &i32);
-  EXPECT_EQ(st.decorations().size(), 0);
-  EXPECT_EQ(st.line(), 27);
-  EXPECT_EQ(st.column(), 4);
+  EXPECT_EQ(st.decorations().size(), 0u);
+  EXPECT_EQ(st.line(), 27u);
+  EXPECT_EQ(st.column(), 4u);
 }
 
 TEST_F(StructMemberTest, IsValid) {

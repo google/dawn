@@ -36,24 +36,24 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, PrimaryExpression_Ident) {
-  auto p = parser("a");
+  auto* p = parser("a");
   auto e = p->primary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsIdentifier());
-  auto ident = e->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1);
+  auto* ident = e->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 1u);
   EXPECT_EQ(ident->name()[0], "a");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Ident_WithNamespace) {
-  auto p = parser("a::b::c::d");
+  auto* p = parser("a::b::c::d");
   auto e = p->primary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsIdentifier());
-  auto ident = e->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 4);
+  auto* ident = e->AsIdentifier();
+  ASSERT_EQ(ident->name().size(), 4u);
   EXPECT_EQ(ident->name()[0], "a");
   EXPECT_EQ(ident->name()[1], "b");
   EXPECT_EQ(ident->name()[2], "c");
@@ -61,7 +61,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Ident_WithNamespace) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Ident_MissingIdent) {
-  auto p = parser("a::");
+  auto* p = parser("a::");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -69,19 +69,19 @@ TEST_F(ParserImplTest, PrimaryExpression_Ident_MissingIdent) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl) {
-  auto p = parser("vec4<i32>(1, 2, 3, 4))");
+  auto* p = parser("vec4<i32>(1, 2, 3, 4))");
   auto e = p->primary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsConstructor());
   ASSERT_TRUE(e->AsConstructor()->IsTypeConstructor());
-  auto ty = e->AsConstructor()->AsTypeConstructor();
+  auto* ty = e->AsConstructor()->AsTypeConstructor();
 
-  ASSERT_EQ(ty->values().size(), 4);
+  ASSERT_EQ(ty->values().size(), 4u);
   const auto& val = ty->values();
   ASSERT_TRUE(val[0]->IsConstructor());
   ASSERT_TRUE(val[0]->AsConstructor()->IsScalarConstructor());
-  auto ident = val[0]->AsConstructor()->AsScalarConstructor();
+  auto* ident = val[0]->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(ident->literal()->IsInt());
   EXPECT_EQ(ident->literal()->AsInt()->value(), 1);
 
@@ -105,7 +105,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidTypeDecl) {
-  auto p = parser("vec4<if>(2., 3., 4., 5.)");
+  auto* p = parser("vec4<if>(2., 3., 4., 5.)");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -113,7 +113,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidTypeDecl) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingLeftParen) {
-  auto p = parser("vec4<f32> 2., 3., 4., 5.)");
+  auto* p = parser("vec4<f32> 2., 3., 4., 5.)");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -121,7 +121,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingLeftParen) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingRightParen) {
-  auto p = parser("vec4<f32>(2., 3., 4., 5.");
+  auto* p = parser("vec4<f32>(2., 3., 4., 5.");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -129,7 +129,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingRightParen) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidValue) {
-  auto p = parser("i32(if(a) {})");
+  auto* p = parser("i32(if(a) {})");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -137,19 +137,19 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidValue) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_ConstLiteral_True) {
-  auto p = parser("true");
+  auto* p = parser("true");
   auto e = p->primary_expression();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsConstructor());
   ASSERT_TRUE(e->AsConstructor()->IsScalarConstructor());
-  auto init = e->AsConstructor()->AsScalarConstructor();
+  auto* init = e->AsConstructor()->AsScalarConstructor();
   ASSERT_TRUE(init->literal()->IsBool());
   EXPECT_TRUE(init->literal()->AsBool()->IsTrue());
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_ParenExpr) {
-  auto p = parser("(a == b)");
+  auto* p = parser("(a == b)");
   auto e = p->primary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
@@ -157,7 +157,7 @@ TEST_F(ParserImplTest, PrimaryExpression_ParenExpr) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_MissingRightParen) {
-  auto p = parser("(a == b");
+  auto* p = parser("(a == b");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -165,7 +165,7 @@ TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_MissingRightParen) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_MissingExpr) {
-  auto p = parser("()");
+  auto* p = parser("()");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -173,7 +173,7 @@ TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_MissingExpr) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_InvalidExpr) {
-  auto p = parser("(if (a) {})");
+  auto* p = parser("(if (a) {})");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -181,15 +181,15 @@ TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_InvalidExpr) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Cast) {
-  auto f32_type = tm()->Get(std::make_unique<ast::type::F32Type>());
+  auto* f32_type = tm()->Get(std::make_unique<ast::type::F32Type>());
 
-  auto p = parser("cast<f32>(1)");
+  auto* p = parser("cast<f32>(1)");
   auto e = p->primary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsCast());
 
-  auto c = e->AsCast();
+  auto* c = e->AsCast();
   ASSERT_EQ(c->type(), f32_type);
 
   ASSERT_TRUE(c->expr()->IsConstructor());
@@ -197,7 +197,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Cast_MissingGreaterThan) {
-  auto p = parser("cast<f32(1)");
+  auto* p = parser("cast<f32(1)");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -205,7 +205,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast_MissingGreaterThan) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Cast_MissingType) {
-  auto p = parser("cast<>(1)");
+  auto* p = parser("cast<>(1)");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -213,7 +213,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast_MissingType) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Cast_InvalidType) {
-  auto p = parser("cast<invalid>(1)");
+  auto* p = parser("cast<invalid>(1)");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -221,7 +221,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast_InvalidType) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Cast_MissingLeftParen) {
-  auto p = parser("cast<f32>1)");
+  auto* p = parser("cast<f32>1)");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -229,7 +229,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast_MissingLeftParen) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Cast_MissingRightParen) {
-  auto p = parser("cast<f32>(1");
+  auto* p = parser("cast<f32>(1");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -237,7 +237,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast_MissingRightParen) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Cast_MissingExpression) {
-  auto p = parser("cast<f32>()");
+  auto* p = parser("cast<f32>()");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -245,7 +245,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast_MissingExpression) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Cast_InvalidExpression) {
-  auto p = parser("cast<f32>(if (a) {})");
+  auto* p = parser("cast<f32>(if (a) {})");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -253,15 +253,15 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast_InvalidExpression) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_As) {
-  auto f32_type = tm()->Get(std::make_unique<ast::type::F32Type>());
+  auto* f32_type = tm()->Get(std::make_unique<ast::type::F32Type>());
 
-  auto p = parser("as<f32>(1)");
+  auto* p = parser("as<f32>(1)");
   auto e = p->primary_expression();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsAs());
 
-  auto c = e->AsAs();
+  auto* c = e->AsAs();
   ASSERT_EQ(c->type(), f32_type);
 
   ASSERT_TRUE(c->expr()->IsConstructor());
@@ -269,7 +269,7 @@ TEST_F(ParserImplTest, PrimaryExpression_As) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_As_MissingGreaterThan) {
-  auto p = parser("as<f32(1)");
+  auto* p = parser("as<f32(1)");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -277,7 +277,7 @@ TEST_F(ParserImplTest, PrimaryExpression_As_MissingGreaterThan) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_As_MissingType) {
-  auto p = parser("as<>(1)");
+  auto* p = parser("as<>(1)");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -285,7 +285,7 @@ TEST_F(ParserImplTest, PrimaryExpression_As_MissingType) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_As_InvalidType) {
-  auto p = parser("as<invalid>(1)");
+  auto* p = parser("as<invalid>(1)");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -293,7 +293,7 @@ TEST_F(ParserImplTest, PrimaryExpression_As_InvalidType) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_As_MissingLeftParen) {
-  auto p = parser("as<f32>1)");
+  auto* p = parser("as<f32>1)");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -301,7 +301,7 @@ TEST_F(ParserImplTest, PrimaryExpression_As_MissingLeftParen) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_As_MissingRightParen) {
-  auto p = parser("as<f32>(1");
+  auto* p = parser("as<f32>(1");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -309,7 +309,7 @@ TEST_F(ParserImplTest, PrimaryExpression_As_MissingRightParen) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_As_MissingExpression) {
-  auto p = parser("as<f32>()");
+  auto* p = parser("as<f32>()");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
@@ -317,7 +317,7 @@ TEST_F(ParserImplTest, PrimaryExpression_As_MissingExpression) {
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_As_InvalidExpression) {
-  auto p = parser("as<f32>(if (a) {})");
+  auto* p = parser("as<f32>(if (a) {})");
   auto e = p->primary_expression();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);

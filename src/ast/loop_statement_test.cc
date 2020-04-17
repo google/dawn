@@ -31,16 +31,16 @@ using LoopStatementTest = testing::Test;
 TEST_F(LoopStatementTest, Creation) {
   StatementList body;
   body.push_back(std::make_unique<KillStatement>());
-  auto b_ptr = body[0].get();
+  auto* b_ptr = body[0].get();
 
   StatementList continuing;
   continuing.push_back(std::make_unique<NopStatement>());
-  auto c_ptr = continuing[0].get();
+  auto* c_ptr = continuing[0].get();
 
   LoopStatement l(std::move(body), std::move(continuing));
-  ASSERT_EQ(l.body().size(), 1);
+  ASSERT_EQ(l.body().size(), 1u);
   EXPECT_EQ(l.body()[0].get(), b_ptr);
-  ASSERT_EQ(l.continuing().size(), 1);
+  ASSERT_EQ(l.continuing().size(), 1u);
   EXPECT_EQ(l.continuing()[0].get(), c_ptr);
 }
 
@@ -53,8 +53,8 @@ TEST_F(LoopStatementTest, Creation_WithSource) {
 
   LoopStatement l(Source{20, 2}, std::move(body), std::move(continuing));
   auto src = l.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(LoopStatementTest, IsLoop) {

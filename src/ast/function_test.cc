@@ -34,11 +34,11 @@ TEST_F(FunctionTest, Creation) {
   VariableList params;
   params.push_back(
       std::make_unique<Variable>("var", StorageClass::kNone, &i32));
-  auto var_ptr = params[0].get();
+  auto* var_ptr = params[0].get();
 
   Function f("func", std::move(params), &void_type);
   EXPECT_EQ(f.name(), "func");
-  ASSERT_EQ(f.params().size(), 1);
+  ASSERT_EQ(f.params().size(), 1u);
   EXPECT_EQ(f.return_type(), &void_type);
   EXPECT_EQ(f.params()[0].get(), var_ptr);
 }
@@ -53,8 +53,8 @@ TEST_F(FunctionTest, Creation_WithSource) {
 
   Function f(Source{20, 2}, "func", std::move(params), &void_type);
   auto src = f.source();
-  EXPECT_EQ(src.line, 20);
-  EXPECT_EQ(src.column, 2);
+  EXPECT_EQ(src.line, 20u);
+  EXPECT_EQ(src.column, 2u);
 }
 
 TEST_F(FunctionTest, IsValid) {

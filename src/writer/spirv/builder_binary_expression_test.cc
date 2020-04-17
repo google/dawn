@@ -67,7 +67,7 @@ TEST_P(BinaryArithSignedIntegerTest, Scalar) {
   Builder b;
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 4) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 4u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 1
 %2 = OpConstant %1 3
 %3 = OpConstant %1 4
@@ -110,7 +110,7 @@ TEST_P(BinaryArithSignedIntegerTest, Vector) {
   Builder b;
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
 %1 = OpTypeVector %2 3
 %3 = OpConstant %2 1
@@ -155,7 +155,7 @@ TEST_P(BinaryArithUnsignedIntegerTest, Scalar) {
   Builder b;
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 4) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 4u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 0
 %2 = OpConstant %1 3
 %3 = OpConstant %1 4
@@ -198,7 +198,7 @@ TEST_P(BinaryArithUnsignedIntegerTest, Vector) {
   Builder b;
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 0
 %1 = OpTypeVector %2 3
 %3 = OpConstant %2 1
@@ -243,7 +243,7 @@ TEST_P(BinaryArithFloatTest, Scalar) {
   Builder b;
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 4) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 4u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
 %2 = OpConstant %1 3.20000005
 %3 = OpConstant %1 4.5
@@ -287,7 +287,7 @@ TEST_P(BinaryArithFloatTest, Vector) {
   Builder b;
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
 %3 = OpConstant %2 1
@@ -325,7 +325,7 @@ TEST_P(BinaryCompareUnsignedIntegerTest, Scalar) {
   Builder b;
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 4) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 4u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 0
 %2 = OpConstant %1 3
 %3 = OpConstant %1 4
@@ -370,7 +370,7 @@ TEST_P(BinaryCompareUnsignedIntegerTest, Vector) {
   Builder b;
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 0
 %1 = OpTypeVector %2 3
 %3 = OpConstant %2 1
@@ -412,7 +412,7 @@ TEST_P(BinaryCompareSignedIntegerTest, Scalar) {
   Builder b;
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 4) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 4u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 1
 %2 = OpConstant %1 3
 %3 = OpConstant %1 4
@@ -457,7 +457,7 @@ TEST_P(BinaryCompareSignedIntegerTest, Vector) {
   Builder b;
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
 %1 = OpTypeVector %2 3
 %3 = OpConstant %2 1
@@ -499,7 +499,7 @@ TEST_P(BinaryCompareFloatTest, Scalar) {
   Builder b;
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 4) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 4u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
 %2 = OpConstant %1 3.20000005
 %3 = OpConstant %1 4.5
@@ -544,7 +544,7 @@ TEST_P(BinaryCompareFloatTest, Vector) {
   Builder b;
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
 %3 = OpConstant %2 1
@@ -594,7 +594,7 @@ TEST_F(BuilderTest, Binary_Multiply_VectorScalar) {
   Builder b;
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
 %3 = OpConstant %2 1
@@ -632,7 +632,7 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarVector) {
   Builder b;
   b.push_function(Function{});
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
 %2 = OpConstant %1 1
 %3 = OpTypeVector %1 3
@@ -665,7 +665,7 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixScalar) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 8) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 8u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
 %4 = OpTypeVector %5 3
 %3 = OpTypeMatrix %4 3
@@ -702,7 +702,7 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 8) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 8u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
 %4 = OpTypeVector %5 3
 %3 = OpTypeMatrix %4 3
@@ -748,7 +748,7 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 9) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 9u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
 %4 = OpTypeVector %5 3
 %3 = OpTypeMatrix %4 3
@@ -796,7 +796,7 @@ TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 9) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 9u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
 %4 = OpTypeVector %5 3
 %3 = OpTypeMatrix %4 3
@@ -834,7 +834,7 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 8) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 8u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
 %4 = OpTypeVector %5 3
 %3 = OpTypeMatrix %4 3

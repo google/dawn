@@ -33,80 +33,80 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, TypeDecl_Invalid) {
-  auto p = parser("1234");
-  auto t = p->type_decl();
+  auto* p = parser("1234");
+  auto* t = p->type_decl();
   EXPECT_EQ(t, nullptr);
   EXPECT_FALSE(p->has_error());
 }
 
 TEST_F(ParserImplTest, TypeDecl_Identifier) {
-  auto p = parser("A");
+  auto* p = parser("A");
 
-  auto int_type = tm()->Get(std::make_unique<ast::type::I32Type>());
+  auto* int_type = tm()->Get(std::make_unique<ast::type::I32Type>());
   // Pre-register to make sure that it's the same type.
-  auto alias_type =
+  auto* alias_type =
       tm()->Get(std::make_unique<ast::type::AliasType>("A", int_type));
 
   p->register_alias("A", alias_type);
 
-  auto t = p->type_decl();
+  auto* t = p->type_decl();
   ASSERT_NE(t, nullptr);
   EXPECT_EQ(t, alias_type);
   ASSERT_TRUE(t->IsAlias());
 
-  auto alias = t->AsAlias();
+  auto* alias = t->AsAlias();
   EXPECT_EQ(alias->name(), "A");
   EXPECT_EQ(alias->type(), int_type);
 }
 
 TEST_F(ParserImplTest, TypeDecl_Identifier_NotFound) {
-  auto p = parser("B");
+  auto* p = parser("B");
 
-  auto t = p->type_decl();
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:1: unknown type alias 'B'");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Bool) {
-  auto p = parser("bool");
+  auto* p = parser("bool");
 
-  auto bool_type = tm()->Get(std::make_unique<ast::type::BoolType>());
+  auto* bool_type = tm()->Get(std::make_unique<ast::type::BoolType>());
 
-  auto t = p->type_decl();
+  auto* t = p->type_decl();
   ASSERT_NE(t, nullptr);
   EXPECT_EQ(t, bool_type);
   ASSERT_TRUE(t->IsBool());
 }
 
 TEST_F(ParserImplTest, TypeDecl_F32) {
-  auto p = parser("f32");
+  auto* p = parser("f32");
 
-  auto float_type = tm()->Get(std::make_unique<ast::type::F32Type>());
+  auto* float_type = tm()->Get(std::make_unique<ast::type::F32Type>());
 
-  auto t = p->type_decl();
+  auto* t = p->type_decl();
   ASSERT_NE(t, nullptr);
   EXPECT_EQ(t, float_type);
   ASSERT_TRUE(t->IsF32());
 }
 
 TEST_F(ParserImplTest, TypeDecl_I32) {
-  auto p = parser("i32");
+  auto* p = parser("i32");
 
-  auto int_type = tm()->Get(std::make_unique<ast::type::I32Type>());
+  auto* int_type = tm()->Get(std::make_unique<ast::type::I32Type>());
 
-  auto t = p->type_decl();
+  auto* t = p->type_decl();
   ASSERT_NE(t, nullptr);
   EXPECT_EQ(t, int_type);
   ASSERT_TRUE(t->IsI32());
 }
 
 TEST_F(ParserImplTest, TypeDecl_U32) {
-  auto p = parser("u32");
+  auto* p = parser("u32");
 
-  auto uint_type = tm()->Get(std::make_unique<ast::type::U32Type>());
+  auto* uint_type = tm()->Get(std::make_unique<ast::type::U32Type>());
 
-  auto t = p->type_decl();
+  auto* t = p->type_decl();
   ASSERT_NE(t, nullptr);
   EXPECT_EQ(t, uint_type);
   ASSERT_TRUE(t->IsU32());
@@ -125,9 +125,9 @@ class VecTest : public testing::TestWithParam<VecData> {
   VecTest() = default;
   ~VecTest() = default;
 
-  void SetUp() { ctx_.Reset(); }
+  void SetUp() override { ctx_.Reset(); }
 
-  void TearDown() { impl_ = nullptr; }
+  void TearDown() override { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -141,8 +141,8 @@ class VecTest : public testing::TestWithParam<VecData> {
 
 TEST_P(VecTest, Parse) {
   auto params = GetParam();
-  auto p = parser(params.input);
-  auto t = p->type_decl();
+  auto* p = parser(params.input);
+  auto* t = p->type_decl();
   ASSERT_NE(t, nullptr);
   ASSERT_FALSE(p->has_error());
   EXPECT_TRUE(t->IsVector());
@@ -159,9 +159,9 @@ class VecMissingGreaterThanTest : public testing::TestWithParam<VecData> {
   VecMissingGreaterThanTest() = default;
   ~VecMissingGreaterThanTest() = default;
 
-  void SetUp() { ctx_.Reset(); }
+  void SetUp() override { ctx_.Reset(); }
 
-  void TearDown() { impl_ = nullptr; }
+  void TearDown() override { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -175,8 +175,8 @@ class VecMissingGreaterThanTest : public testing::TestWithParam<VecData> {
 
 TEST_P(VecMissingGreaterThanTest, Handles_Missing_GreaterThan) {
   auto params = GetParam();
-  auto p = parser(params.input);
-  auto t = p->type_decl();
+  auto* p = parser(params.input);
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:9: missing > for vector");
@@ -192,9 +192,9 @@ class VecMissingLessThanTest : public testing::TestWithParam<VecData> {
   VecMissingLessThanTest() = default;
   ~VecMissingLessThanTest() = default;
 
-  void SetUp() { ctx_.Reset(); }
+  void SetUp() override { ctx_.Reset(); }
 
-  void TearDown() { impl_ = nullptr; }
+  void TearDown() override { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -208,8 +208,8 @@ class VecMissingLessThanTest : public testing::TestWithParam<VecData> {
 
 TEST_P(VecMissingLessThanTest, Handles_Missing_GreaterThan) {
   auto params = GetParam();
-  auto p = parser(params.input);
-  auto t = p->type_decl();
+  auto* p = parser(params.input);
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:5: missing < for vector");
@@ -225,9 +225,9 @@ class VecBadType : public testing::TestWithParam<VecData> {
   VecBadType() = default;
   ~VecBadType() = default;
 
-  void SetUp() { ctx_.Reset(); }
+  void SetUp() override { ctx_.Reset(); }
 
-  void TearDown() { impl_ = nullptr; }
+  void TearDown() override { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -241,8 +241,8 @@ class VecBadType : public testing::TestWithParam<VecData> {
 
 TEST_P(VecBadType, Handles_Unknown_Type) {
   auto params = GetParam();
-  auto p = parser(params.input);
-  auto t = p->type_decl();
+  auto* p = parser(params.input);
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:6: unknown type alias 'unknown'");
@@ -258,9 +258,9 @@ class VecMissingType : public testing::TestWithParam<VecData> {
   VecMissingType() = default;
   ~VecMissingType() = default;
 
-  void SetUp() { ctx_.Reset(); }
+  void SetUp() override { ctx_.Reset(); }
 
-  void TearDown() { impl_ = nullptr; }
+  void TearDown() override { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -274,8 +274,8 @@ class VecMissingType : public testing::TestWithParam<VecData> {
 
 TEST_P(VecMissingType, Handles_Missing_Type) {
   auto params = GetParam();
-  auto p = parser(params.input);
-  auto t = p->type_decl();
+  auto* p = parser(params.input);
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:6: unable to determine subtype for vector");
@@ -287,173 +287,173 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                                          VecData{"vec4<>", 4}));
 
 TEST_F(ParserImplTest, TypeDecl_Ptr) {
-  auto p = parser("ptr<function, f32>");
-  auto t = p->type_decl();
+  auto* p = parser("ptr<function, f32>");
+  auto* t = p->type_decl();
   ASSERT_NE(t, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
   ASSERT_TRUE(t->IsPointer());
 
-  auto ptr = t->AsPointer();
+  auto* ptr = t->AsPointer();
   ASSERT_TRUE(ptr->type()->IsF32());
   ASSERT_EQ(ptr->storage_class(), ast::StorageClass::kFunction);
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_ToVec) {
-  auto p = parser("ptr<function, vec2<f32>>");
-  auto t = p->type_decl();
+  auto* p = parser("ptr<function, vec2<f32>>");
+  auto* t = p->type_decl();
   ASSERT_NE(t, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
   ASSERT_TRUE(t->IsPointer());
 
-  auto ptr = t->AsPointer();
+  auto* ptr = t->AsPointer();
   ASSERT_TRUE(ptr->type()->IsVector());
   ASSERT_EQ(ptr->storage_class(), ast::StorageClass::kFunction);
 
-  auto vec = ptr->type()->AsVector();
-  ASSERT_EQ(vec->size(), 2);
+  auto* vec = ptr->type()->AsVector();
+  ASSERT_EQ(vec->size(), 2u);
   ASSERT_TRUE(vec->type()->IsF32());
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingLessThan) {
-  auto p = parser("ptr private, f32>");
-  auto t = p->type_decl();
+  auto* p = parser("ptr private, f32>");
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:5: missing < for ptr declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingGreaterThan) {
-  auto p = parser("ptr<function, f32");
-  auto t = p->type_decl();
+  auto* p = parser("ptr<function, f32");
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:18: missing > for ptr declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingComma) {
-  auto p = parser("ptr<function f32>");
-  auto t = p->type_decl();
+  auto* p = parser("ptr<function f32>");
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:14: missing , for ptr declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingStorageClass) {
-  auto p = parser("ptr<, f32>");
-  auto t = p->type_decl();
+  auto* p = parser("ptr<, f32>");
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:5: missing storage class for ptr declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingParams) {
-  auto p = parser("ptr<>");
-  auto t = p->type_decl();
+  auto* p = parser("ptr<>");
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:5: missing storage class for ptr declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingType) {
-  auto p = parser("ptr<function,>");
-  auto t = p->type_decl();
+  auto* p = parser("ptr<function,>");
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:14: missing type for ptr declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_BadStorageClass) {
-  auto p = parser("ptr<unknown, f32>");
-  auto t = p->type_decl();
+  auto* p = parser("ptr<unknown, f32>");
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:5: missing storage class for ptr declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_BadType) {
-  auto p = parser("ptr<function, unknown>");
-  auto t = p->type_decl();
+  auto* p = parser("ptr<function, unknown>");
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:15: unknown type alias 'unknown'");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array) {
-  auto p = parser("array<f32, 5>");
-  auto t = p->type_decl();
+  auto* p = parser("array<f32, 5>");
+  auto* t = p->type_decl();
   ASSERT_NE(t, nullptr);
   ASSERT_FALSE(p->has_error());
   ASSERT_TRUE(t->IsArray());
 
-  auto a = t->AsArray();
+  auto* a = t->AsArray();
   ASSERT_FALSE(a->IsRuntimeArray());
-  ASSERT_EQ(a->size(), 5);
+  ASSERT_EQ(a->size(), 5u);
   ASSERT_TRUE(a->type()->IsF32());
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Runtime) {
-  auto p = parser("array<u32>");
-  auto t = p->type_decl();
+  auto* p = parser("array<u32>");
+  auto* t = p->type_decl();
   ASSERT_NE(t, nullptr);
   ASSERT_FALSE(p->has_error());
   ASSERT_TRUE(t->IsArray());
 
-  auto a = t->AsArray();
+  auto* a = t->AsArray();
   ASSERT_TRUE(a->IsRuntimeArray());
   ASSERT_TRUE(a->type()->IsU32());
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_BadType) {
-  auto p = parser("array<unknown, 3>");
-  auto t = p->type_decl();
+  auto* p = parser("array<unknown, 3>");
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:7: unknown type alias 'unknown'");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_ZeroSize) {
-  auto p = parser("array<f32, 0>");
-  auto t = p->type_decl();
+  auto* p = parser("array<f32, 0>");
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:12: invalid size for array declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_NegativeSize) {
-  auto p = parser("array<f32, -1>");
-  auto t = p->type_decl();
+  auto* p = parser("array<f32, -1>");
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:12: invalid size for array declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_BadSize) {
-  auto p = parser("array<f32, invalid>");
-  auto t = p->type_decl();
+  auto* p = parser("array<f32, invalid>");
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:12: missing size of array declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_MissingLessThan) {
-  auto p = parser("array f32>");
-  auto t = p->type_decl();
+  auto* p = parser("array f32>");
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:7: missing < for array declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_MissingGreaterThan) {
-  auto p = parser("array<f32");
-  auto t = p->type_decl();
+  auto* p = parser("array<f32");
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:10: missing > for array declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_MissingComma) {
-  auto p = parser("array<f32 3>");
-  auto t = p->type_decl();
+  auto* p = parser("array<f32 3>");
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:11: missing > for array declaration");
@@ -473,9 +473,9 @@ class MatrixTest : public testing::TestWithParam<MatrixData> {
   MatrixTest() = default;
   ~MatrixTest() = default;
 
-  void SetUp() { ctx_.Reset(); }
+  void SetUp() override { ctx_.Reset(); }
 
-  void TearDown() { impl_ = nullptr; }
+  void TearDown() override { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -489,12 +489,12 @@ class MatrixTest : public testing::TestWithParam<MatrixData> {
 
 TEST_P(MatrixTest, Parse) {
   auto params = GetParam();
-  auto p = parser(params.input);
-  auto t = p->type_decl();
+  auto* p = parser(params.input);
+  auto* t = p->type_decl();
   ASSERT_NE(t, nullptr);
   ASSERT_FALSE(p->has_error());
   EXPECT_TRUE(t->IsMatrix());
-  auto mat = t->AsMatrix();
+  auto* mat = t->AsMatrix();
   EXPECT_EQ(mat->rows(), params.rows);
   EXPECT_EQ(mat->columns(), params.columns);
 }
@@ -515,9 +515,9 @@ class MatrixMissingGreaterThanTest : public testing::TestWithParam<MatrixData> {
   MatrixMissingGreaterThanTest() = default;
   ~MatrixMissingGreaterThanTest() = default;
 
-  void SetUp() { ctx_.Reset(); }
+  void SetUp() override { ctx_.Reset(); }
 
-  void TearDown() { impl_ = nullptr; }
+  void TearDown() override { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -530,8 +530,8 @@ class MatrixMissingGreaterThanTest : public testing::TestWithParam<MatrixData> {
 };
 TEST_P(MatrixMissingGreaterThanTest, Handles_Missing_GreaterThan) {
   auto params = GetParam();
-  auto p = parser(params.input);
-  auto t = p->type_decl();
+  auto* p = parser(params.input);
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:11: missing > for matrix");
@@ -553,9 +553,9 @@ class MatrixMissingLessThanTest : public testing::TestWithParam<MatrixData> {
   MatrixMissingLessThanTest() = default;
   ~MatrixMissingLessThanTest() = default;
 
-  void SetUp() { ctx_.Reset(); }
+  void SetUp() override { ctx_.Reset(); }
 
-  void TearDown() { impl_ = nullptr; }
+  void TearDown() override { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -568,8 +568,8 @@ class MatrixMissingLessThanTest : public testing::TestWithParam<MatrixData> {
 };
 TEST_P(MatrixMissingLessThanTest, Handles_Missing_GreaterThan) {
   auto params = GetParam();
-  auto p = parser(params.input);
-  auto t = p->type_decl();
+  auto* p = parser(params.input);
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:8: missing < for matrix");
@@ -591,9 +591,9 @@ class MatrixBadType : public testing::TestWithParam<MatrixData> {
   MatrixBadType() = default;
   ~MatrixBadType() = default;
 
-  void SetUp() { ctx_.Reset(); }
+  void SetUp() override { ctx_.Reset(); }
 
-  void TearDown() { impl_ = nullptr; }
+  void TearDown() override { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -606,8 +606,8 @@ class MatrixBadType : public testing::TestWithParam<MatrixData> {
 };
 TEST_P(MatrixBadType, Handles_Unknown_Type) {
   auto params = GetParam();
-  auto p = parser(params.input);
-  auto t = p->type_decl();
+  auto* p = parser(params.input);
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:8: unknown type alias 'unknown'");
@@ -629,9 +629,9 @@ class MatrixMissingType : public testing::TestWithParam<MatrixData> {
   MatrixMissingType() = default;
   ~MatrixMissingType() = default;
 
-  void SetUp() { ctx_.Reset(); }
+  void SetUp() override { ctx_.Reset(); }
 
-  void TearDown() { impl_ = nullptr; }
+  void TearDown() override { impl_ = nullptr; }
 
   ParserImpl* parser(const std::string& str) {
     impl_ = std::make_unique<ParserImpl>(&ctx_, str);
@@ -644,8 +644,8 @@ class MatrixMissingType : public testing::TestWithParam<MatrixData> {
 };
 TEST_P(MatrixMissingType, Handles_Missing_Type) {
   auto params = GetParam();
-  auto p = parser(params.input);
-  auto t = p->type_decl();
+  auto* p = parser(params.input);
+  auto* t = p->type_decl();
   ASSERT_EQ(t, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:8: unable to determine subtype for matrix");

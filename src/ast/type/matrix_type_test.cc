@@ -28,8 +28,8 @@ TEST_F(MatrixTypeTest, Creation) {
   I32Type i32;
   MatrixType m{&i32, 2, 4};
   EXPECT_EQ(m.type(), &i32);
-  EXPECT_EQ(m.rows(), 2);
-  EXPECT_EQ(m.columns(), 4);
+  EXPECT_EQ(m.rows(), 2u);
+  EXPECT_EQ(m.columns(), 4u);
 }
 
 TEST_F(MatrixTypeTest, Is) {

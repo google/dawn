@@ -58,7 +58,7 @@ TEST_F(TokenTest, HandlesMinI32) {
 
 TEST_F(TokenTest, ReturnsU32) {
   Token t2(Source{1, 1}, 2345u);
-  EXPECT_EQ(t2.to_u32(), 2345);
+  EXPECT_EQ(t2.to_u32(), 2345u);
 }
 
 TEST_F(TokenTest, ReturnsMaxU32) {
@@ -68,8 +68,8 @@ TEST_F(TokenTest, ReturnsMaxU32) {
 
 TEST_F(TokenTest, Source) {
   Token t(Token::Type::kUintLiteral, Source{3, 9});
-  EXPECT_EQ(t.line(), 3);
-  EXPECT_EQ(t.column(), 9);
+  EXPECT_EQ(t.line(), 3u);
+  EXPECT_EQ(t.column(), 9u);
 }
 
 }  // namespace

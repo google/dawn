@@ -26,7 +26,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, ConstLiteral_Int) {
-  auto p = parser("-234");
+  auto* p = parser("-234");
   auto c = p->const_literal();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(c, nullptr);
@@ -35,7 +35,7 @@ TEST_F(ParserImplTest, ConstLiteral_Int) {
 }
 
 TEST_F(ParserImplTest, ConstLiteral_Uint) {
-  auto p = parser("234u");
+  auto* p = parser("234u");
   auto c = p->const_literal();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(c, nullptr);
@@ -44,7 +44,7 @@ TEST_F(ParserImplTest, ConstLiteral_Uint) {
 }
 
 TEST_F(ParserImplTest, ConstLiteral_Float) {
-  auto p = parser("234.e12");
+  auto* p = parser("234.e12");
   auto c = p->const_literal();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(c, nullptr);
@@ -53,13 +53,13 @@ TEST_F(ParserImplTest, ConstLiteral_Float) {
 }
 
 TEST_F(ParserImplTest, ConstLiteral_InvalidFloat) {
-  auto p = parser("1.2e+256");
+  auto* p = parser("1.2e+256");
   auto c = p->const_literal();
   ASSERT_EQ(c, nullptr);
 }
 
 TEST_F(ParserImplTest, ConstLiteral_True) {
-  auto p = parser("true");
+  auto* p = parser("true");
   auto c = p->const_literal();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(c, nullptr);
@@ -68,7 +68,7 @@ TEST_F(ParserImplTest, ConstLiteral_True) {
 }
 
 TEST_F(ParserImplTest, ConstLiteral_False) {
-  auto p = parser("false");
+  auto* p = parser("false");
   auto c = p->const_literal();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(c, nullptr);
@@ -77,7 +77,7 @@ TEST_F(ParserImplTest, ConstLiteral_False) {
 }
 
 TEST_F(ParserImplTest, ConstLiteral_NoMatch) {
-  auto p = parser("another-token");
+  auto* p = parser("another-token");
   auto c = p->const_literal();
   ASSERT_FALSE(p->has_error());
   ASSERT_EQ(c, nullptr);
