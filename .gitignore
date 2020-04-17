@@ -23,6 +23,7 @@ third_party/swiftshader/
 third_party/spirv-cross/
 third_party/spirv-headers/
 third_party/vulkan-headers/
+third_party/vulkan-loader/
 third_party/vulkan-validation-layers/
 tools
 out

@@ -74,9 +74,13 @@ declare_args() {
 # Put them in two separate declare_args() when setting the value of one
 # argument based on another.
 declare_args() {
-  # Uses our built version of Vulkan validation layers
+  # Uses our built version of the Vulkan validation layers
   dawn_enable_vulkan_validation_layers =
-      dawn_enable_vulkan && ((is_linux && !is_chromeos) || is_win)
+      dawn_enable_vulkan && ((is_linux && !is_chromeos) || is_win || is_mac)
+
+  # Uses our built version of the Vulkan loader on platforms where we can't
+  # assume to have one present at the system level.
+  dawn_enable_vulkan_loader = dawn_enable_vulkan && is_mac
 }
 
 dawn_supports_glfw_for_windowing =
