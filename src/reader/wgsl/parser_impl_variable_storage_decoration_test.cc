@@ -34,7 +34,7 @@ inline std::ostream& operator<<(std::ostream& out, VariableStorageData data) {
 class VariableStorageTest : public testing::TestWithParam<VariableStorageData> {
  public:
   VariableStorageTest() = default;
-  ~VariableStorageTest() = default;
+  ~VariableStorageTest() override = default;
 
   void SetUp() override { ctx_.Reset(); }
 

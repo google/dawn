@@ -34,7 +34,7 @@ inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
 class BuiltinTest : public testing::TestWithParam<BuiltinData> {
  public:
   BuiltinTest() = default;
-  ~BuiltinTest() = default;
+  ~BuiltinTest() override = default;
 
   void SetUp() override { ctx_.Reset(); }
 

@@ -34,7 +34,7 @@ inline std::ostream& operator<<(std::ostream& out, StorageClassData data) {
 class StorageClassTest : public testing::TestWithParam<StorageClassData> {
  public:
   StorageClassTest() = default;
-  ~StorageClassTest() = default;
+  ~StorageClassTest() override = default;
 
   void SetUp() override { ctx_.Reset(); }
 

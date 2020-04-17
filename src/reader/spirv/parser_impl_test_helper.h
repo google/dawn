@@ -34,7 +34,7 @@ template <typename T>
 class SpvParserTestBase : public T {
  public:
   SpvParserTestBase() = default;
-  ~SpvParserTestBase() = default;
+  ~SpvParserTestBase() override = default;
 
   /// Sets up the test helper
   void SetUp() override { ctx_.Reset(); }

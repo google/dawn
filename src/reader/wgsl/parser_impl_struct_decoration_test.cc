@@ -35,7 +35,7 @@ class StructDecorationTest
     : public testing::TestWithParam<StructDecorationData> {
  public:
   StructDecorationTest() = default;
-  ~StructDecorationTest() = default;
+  ~StructDecorationTest() override = default;
 
   void SetUp() override { ctx_.Reset(); }
 

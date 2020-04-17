@@ -36,7 +36,7 @@ class DerivativeModifierTest
     : public testing::TestWithParam<DerivativeModifierData> {
  public:
   DerivativeModifierTest() = default;
-  ~DerivativeModifierTest() = default;
+  ~DerivativeModifierTest() override = default;
 
   void SetUp() override { ctx_.Reset(); }
 

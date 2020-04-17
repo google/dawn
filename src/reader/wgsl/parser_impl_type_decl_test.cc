@@ -123,7 +123,7 @@ inline std::ostream& operator<<(std::ostream& out, VecData data) {
 class VecTest : public testing::TestWithParam<VecData> {
  public:
   VecTest() = default;
-  ~VecTest() = default;
+  ~VecTest() override = default;
 
   void SetUp() override { ctx_.Reset(); }
 
@@ -157,7 +157,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
 class VecMissingGreaterThanTest : public testing::TestWithParam<VecData> {
  public:
   VecMissingGreaterThanTest() = default;
-  ~VecMissingGreaterThanTest() = default;
+  ~VecMissingGreaterThanTest() override = default;
 
   void SetUp() override { ctx_.Reset(); }
 
@@ -190,7 +190,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
 class VecMissingLessThanTest : public testing::TestWithParam<VecData> {
  public:
   VecMissingLessThanTest() = default;
-  ~VecMissingLessThanTest() = default;
+  ~VecMissingLessThanTest() override = default;
 
   void SetUp() override { ctx_.Reset(); }
 
@@ -223,7 +223,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
 class VecBadType : public testing::TestWithParam<VecData> {
  public:
   VecBadType() = default;
-  ~VecBadType() = default;
+  ~VecBadType() override = default;
 
   void SetUp() override { ctx_.Reset(); }
 
@@ -256,7 +256,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
 class VecMissingType : public testing::TestWithParam<VecData> {
  public:
   VecMissingType() = default;
-  ~VecMissingType() = default;
+  ~VecMissingType() override = default;
 
   void SetUp() override { ctx_.Reset(); }
 
@@ -471,7 +471,7 @@ inline std::ostream& operator<<(std::ostream& out, MatrixData data) {
 class MatrixTest : public testing::TestWithParam<MatrixData> {
  public:
   MatrixTest() = default;
-  ~MatrixTest() = default;
+  ~MatrixTest() override = default;
 
   void SetUp() override { ctx_.Reset(); }
 
@@ -513,7 +513,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
 class MatrixMissingGreaterThanTest : public testing::TestWithParam<MatrixData> {
  public:
   MatrixMissingGreaterThanTest() = default;
-  ~MatrixMissingGreaterThanTest() = default;
+  ~MatrixMissingGreaterThanTest() override = default;
 
   void SetUp() override { ctx_.Reset(); }
 
@@ -551,7 +551,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
 class MatrixMissingLessThanTest : public testing::TestWithParam<MatrixData> {
  public:
   MatrixMissingLessThanTest() = default;
-  ~MatrixMissingLessThanTest() = default;
+  ~MatrixMissingLessThanTest() override = default;
 
   void SetUp() override { ctx_.Reset(); }
 
@@ -589,7 +589,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
 class MatrixBadType : public testing::TestWithParam<MatrixData> {
  public:
   MatrixBadType() = default;
-  ~MatrixBadType() = default;
+  ~MatrixBadType() override = default;
 
   void SetUp() override { ctx_.Reset(); }
 
@@ -627,7 +627,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
 class MatrixMissingType : public testing::TestWithParam<MatrixData> {
  public:
   MatrixMissingType() = default;
-  ~MatrixMissingType() = default;
+  ~MatrixMissingType() override = default;
 
   void SetUp() override { ctx_.Reset(); }
 

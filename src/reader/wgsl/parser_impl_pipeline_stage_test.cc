@@ -34,7 +34,7 @@ inline std::ostream& operator<<(std::ostream& out, PipelineStageData data) {
 class PipelineStageTest : public testing::TestWithParam<PipelineStageData> {
  public:
   PipelineStageTest() = default;
-  ~PipelineStageTest() = default;
+  ~PipelineStageTest() override = default;
 
   void SetUp() override { ctx_.Reset(); }
 
