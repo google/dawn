@@ -20,22 +20,22 @@ namespace dawn_native { namespace d3d12 {
 
     D3D12_COMPARISON_FUNC ToD3D12ComparisonFunc(wgpu::CompareFunction func) {
         switch (func) {
-            case wgpu::CompareFunction::Always:
-                return D3D12_COMPARISON_FUNC_ALWAYS;
-            case wgpu::CompareFunction::Equal:
-                return D3D12_COMPARISON_FUNC_EQUAL;
-            case wgpu::CompareFunction::Greater:
-                return D3D12_COMPARISON_FUNC_GREATER;
-            case wgpu::CompareFunction::GreaterEqual:
-                return D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+            case wgpu::CompareFunction::Never:
+                return D3D12_COMPARISON_FUNC_NEVER;
             case wgpu::CompareFunction::Less:
                 return D3D12_COMPARISON_FUNC_LESS;
             case wgpu::CompareFunction::LessEqual:
                 return D3D12_COMPARISON_FUNC_LESS_EQUAL;
-            case wgpu::CompareFunction::Never:
-                return D3D12_COMPARISON_FUNC_NEVER;
+            case wgpu::CompareFunction::Greater:
+                return D3D12_COMPARISON_FUNC_GREATER;
+            case wgpu::CompareFunction::GreaterEqual:
+                return D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+            case wgpu::CompareFunction::Equal:
+                return D3D12_COMPARISON_FUNC_EQUAL;
             case wgpu::CompareFunction::NotEqual:
                 return D3D12_COMPARISON_FUNC_NOT_EQUAL;
+            case wgpu::CompareFunction::Always:
+                return D3D12_COMPARISON_FUNC_ALWAYS;
             default:
                 UNREACHABLE();
         }

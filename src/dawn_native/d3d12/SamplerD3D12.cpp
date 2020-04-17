@@ -83,7 +83,12 @@ namespace dawn_native { namespace d3d12 {
         mSamplerDesc.AddressW = AddressMode(descriptor->addressModeW);
         mSamplerDesc.MipLODBias = 0.f;
         mSamplerDesc.MaxAnisotropy = 1;
-        mSamplerDesc.ComparisonFunc = ToD3D12ComparisonFunc(descriptor->compare);
+        if (descriptor->compare != wgpu::CompareFunction::Undefined) {
+            mSamplerDesc.ComparisonFunc = ToD3D12ComparisonFunc(descriptor->compare);
+        } else {
+            // Still set the function so it's not garbage.
+            mSamplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+        }
         mSamplerDesc.MinLOD = descriptor->lodMinClamp;
         mSamplerDesc.MaxLOD = descriptor->lodMaxClamp;
     }

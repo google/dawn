@@ -14,6 +14,8 @@
 
 #include "dawn_native/metal/UtilsMetal.h"
 
+#include "common/Assert.h"
+
 namespace dawn_native { namespace metal {
 
     MTLCompareFunction ToMetalCompareFunction(wgpu::CompareFunction compareFunction) {
@@ -34,6 +36,8 @@ namespace dawn_native { namespace metal {
                 return MTLCompareFunctionEqual;
             case wgpu::CompareFunction::Always:
                 return MTLCompareFunctionAlways;
+            default:
+                UNREACHABLE();
         }
     }
 

@@ -394,14 +394,15 @@
     "compare function": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "never"},
-            {"value": 1, "name": "less"},
-            {"value": 2, "name": "less equal"},
-            {"value": 3, "name": "greater"},
-            {"value": 4, "name": "greater equal"},
-            {"value": 5, "name": "equal"},
-            {"value": 6, "name": "not equal"},
-            {"value": 7, "name": "always"}
+            {"value": 0, "name": "undefined"},
+            {"value": 1, "name": "never"},
+            {"value": 2, "name": "less"},
+            {"value": 3, "name": "less equal"},
+            {"value": 4, "name": "greater"},
+            {"value": 5, "name": "greater equal"},
+            {"value": 6, "name": "equal"},
+            {"value": 7, "name": "not equal"},
+            {"value": 8, "name": "always"}
         ]
     },
     "compute pass descriptor": {
@@ -1248,7 +1249,7 @@
             {"name": "mipmap filter", "type": "filter mode", "default": "nearest"},
             {"name": "lod min clamp", "type": "float", "default": "0.0f"},
             {"name": "lod max clamp", "type": "float", "default": "1000.0f"},
-            {"name": "compare", "type": "compare function", "default": "never"}
+            {"name": "compare", "type": "compare function", "default": "undefined"}
         ]
     },
     "sampler descriptor dummy anisotropic filtering": {

@@ -52,7 +52,7 @@ namespace dawn_native { namespace metal {
 
     // static
     ResultOrError<Sampler*> Sampler::Create(Device* device, const SamplerDescriptor* descriptor) {
-        if (descriptor->compare != wgpu::CompareFunction::Never &&
+        if (descriptor->compare != wgpu::CompareFunction::Undefined &&
             device->IsToggleEnabled(Toggle::MetalDisableSamplerCompare)) {
             return DAWN_VALIDATION_ERROR("Sampler compare function not supported.");
         }
@@ -75,10 +75,12 @@ namespace dawn_native { namespace metal {
         mtlDesc.lodMinClamp = descriptor->lodMinClamp;
         mtlDesc.lodMaxClamp = descriptor->lodMaxClamp;
 
-        if (descriptor->compare != wgpu::CompareFunction::Never) {
-            // Anything other than Never is unsupported before A9, which we validate in
+        if (descriptor->compare != wgpu::CompareFunction::Undefined) {
+            // Sampler compare is unsupported before A9, which we validate in
             // Sampler::Create.
             mtlDesc.compareFunction = ToMetalCompareFunction(descriptor->compare);
+            // The value is default-initialized in the else-case, and we don't set it or the
+            // Metal debug device errors.
         }
 
         mMtlSamplerState = [device->GetMTLDevice() newSamplerStateWithDescriptor:mtlDesc];

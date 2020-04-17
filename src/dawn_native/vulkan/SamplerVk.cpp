@@ -79,8 +79,14 @@ namespace dawn_native { namespace vulkan {
         createInfo.mipLodBias = 0.0f;
         createInfo.anisotropyEnable = VK_FALSE;
         createInfo.maxAnisotropy = 1.0f;
-        createInfo.compareOp = ToVulkanCompareOp(descriptor->compare);
-        createInfo.compareEnable = createInfo.compareOp == VK_COMPARE_OP_NEVER ? VK_FALSE : VK_TRUE;
+        if (descriptor->compare != wgpu::CompareFunction::Undefined) {
+            createInfo.compareOp = ToVulkanCompareOp(descriptor->compare);
+            createInfo.compareEnable = VK_TRUE;
+        } else {
+            // Still set the compareOp so it's not garbage.
+            createInfo.compareOp = VK_COMPARE_OP_NEVER;
+            createInfo.compareEnable = VK_FALSE;
+        }
         createInfo.minLod = descriptor->lodMinClamp;
         createInfo.maxLod = descriptor->lodMaxClamp;
         createInfo.unnormalizedCoordinates = VK_FALSE;
