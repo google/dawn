@@ -14,6 +14,7 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
 namespace {
@@ -422,6 +423,225 @@ namespace {
         // TODO (yunchao.he@intel.com) test compute pass
     }
 
+    // Test that it is invalid to have resource usage conflicts even when all bindings are not
+    // visible to the programmable pass where it is used.
+    TEST_F(ResourceUsageTrackingTest, BufferUsageConflictBetweenInvisibleStagesInBindGroup) {
+        wgpu::Buffer buffer = CreateBuffer(4, wgpu::BufferUsage::Storage);
+
+        // Test render pass for bind group. The conflict of readonly storage and storage usage
+        // doesn't reside in render related stages at all
+        {
+            // Create a bind group whose bindings are not visible in render pass
+            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
+                         {1, wgpu::ShaderStage::None, wgpu::BindingType::ReadonlyStorageBuffer}});
+            wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, buffer}, {1, buffer}});
+
+            // These two bindings are invisible in render pass. But we still track these bindings.
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            DummyRenderPass dummyRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            pass.SetBindGroup(0, bg);
+            pass.EndPass();
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+
+        // Test compute pass for bind group. The conflict of readonly storage and storage usage
+        // doesn't reside in compute related stage at all
+        {
+            // Create a bind group whose bindings are not visible in compute pass
+            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageBuffer},
+                         {1, wgpu::ShaderStage::None, wgpu::BindingType::StorageBuffer}});
+            wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, buffer}, {1, buffer}});
+
+            // These two bindings are invisible in compute pass. But we still track these bindings.
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+            pass.SetBindGroup(0, bg);
+            pass.EndPass();
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+    }
+
+    // Test that it is invalid to have resource usage conflicts even when one of the bindings is not
+    // visible to the programmable pass where it is used.
+    TEST_F(ResourceUsageTrackingTest, BufferUsageConflictWithInvisibleStageInBindGroup) {
+        // Test render pass for bind group and index buffer. The conflict of storage and index
+        // buffer usage resides between fragment stage and compute stage. But the compute stage
+        // binding is not visible in render pass.
+        {
+            wgpu::Buffer buffer =
+                CreateBuffer(4, wgpu::BufferUsage::Storage | wgpu::BufferUsage::Index);
+            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer}});
+            wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, buffer}});
+
+            // Buffer usage in compute stage in bind group conflicts with index buffer. And binding
+            // for compute stage is not visible in render pass. But we still track this binding.
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            DummyRenderPass dummyRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            pass.SetIndexBuffer(buffer);
+            pass.SetBindGroup(0, bg);
+            pass.EndPass();
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+
+        // Test compute pass for bind group. The conflict of readonly storage and storage buffer
+        // usage resides between compute stage and fragment stage. But the fragment stage binding is
+        // not visible in compute pass.
+        {
+            wgpu::Buffer buffer = CreateBuffer(4, wgpu::BufferUsage::Storage);
+            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageBuffer},
+                         {1, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer}});
+            wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, buffer}, {1, buffer}});
+
+            // Buffer usage in compute stage conflicts with buffer usage in fragment stage. And
+            // binding for fragment stage is not visible in compute pass. But we still track this
+            // binding.
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+            pass.SetBindGroup(0, bg);
+            pass.EndPass();
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+    }
+
+    // Test that it is valid for multiple readonly usages upon the same buffer even though some
+    // bindings are not used/visible.
+    TEST_F(ResourceUsageTrackingTest, MultipleReadonlyBufferUsagesWithInvisibleStage) {
+        // Test render pass for bind group and index buffer with invisible binding, no conflict
+        // happens because all buffer usages are readonly.
+        {
+            wgpu::Buffer buffer =
+                CreateBuffer(4, wgpu::BufferUsage::Storage | wgpu::BufferUsage::Index);
+            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+                device,
+                {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageBuffer}});
+            wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, buffer}});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            DummyRenderPass dummyRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            pass.SetIndexBuffer(buffer);
+            pass.SetBindGroup(0, bg);
+            pass.EndPass();
+            encoder.Finish();
+        }
+
+        // Test compute pass for bind group with invisible binding, no conflict happens because all
+        // buffer usages are readonly.
+        {
+            wgpu::Buffer buffer =
+                CreateBuffer(4, wgpu::BufferUsage::Storage | wgpu::BufferUsage::Uniform);
+            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageBuffer},
+                         {1, wgpu::ShaderStage::Compute, wgpu::BindingType::UniformBuffer}});
+            wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, buffer}, {1, buffer}});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+            pass.SetBindGroup(0, bg);
+            pass.EndPass();
+            encoder.Finish();
+        }
+    }
+
+    // Test that it is invalid to have resource usage conflicts even when one of the bindings is not
+    // used in the pipeline.
+    TEST_F(ResourceUsageTrackingTest, BufferUsageConflictWithUnusedPipelineBindings) {
+        wgpu::Buffer buffer = CreateBuffer(4, wgpu::BufferUsage::Storage);
+
+        // Test render pass for bind groups with unused bindings. The conflict of readonly storage
+        // and storage usages resides in different bind groups, although some bindings may not be
+        // used because its bind group layout is not designated in pipeline layout.
+        {
+            // Create bind groups. The bindings are visible for render pass.
+            wgpu::BindGroupLayout bgl0 = utils::MakeBindGroupLayout(
+                device,
+                {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageBuffer}});
+            wgpu::BindGroupLayout bgl1 = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::StorageBuffer}});
+            wgpu::BindGroup bg0 = utils::MakeBindGroup(device, bgl0, {{0, buffer}});
+            wgpu::BindGroup bg1 = utils::MakeBindGroup(device, bgl1, {{0, buffer}});
+
+            // Create a passthrough render pipeline
+            wgpu::ShaderModule vsModule =
+                utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
+                #version 450
+                void main() {
+                })");
+
+            wgpu::ShaderModule fsModule =
+                utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
+                #version 450
+                layout(std140, set = 0, binding = 0) readonly buffer RBuffer {
+                    readonly float value;
+                } rBuffer;
+                void main() {
+                })");
+            utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
+            pipelineDescriptor.vertexStage.module = vsModule;
+            pipelineDescriptor.cFragmentStage.module = fsModule;
+            pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl0);
+            wgpu::RenderPipeline rp = device.CreateRenderPipeline(&pipelineDescriptor);
+
+            // Resource in bg1 conflicts with resources used in bg0. However, bindings in bg1 is
+            // not used in pipeline. But we still track this binding.
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            DummyRenderPass dummyRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            pass.SetBindGroup(0, bg0);
+            pass.SetBindGroup(1, bg1);
+            pass.SetPipeline(rp);
+            pass.Draw(3);
+            pass.EndPass();
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+
+        // Test compute pass for bind groups with unused bindings. The conflict of readonly storage
+        // and storage usages resides in different bind groups, although some bindings may not be
+        // used because its bind group layout is not designated in pipeline layout.
+        {
+            // Create bind groups. The bindings are visible for compute pass.
+            wgpu::BindGroupLayout bgl0 = utils::MakeBindGroupLayout(
+                device,
+                {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageBuffer}});
+            wgpu::BindGroupLayout bgl1 = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer}});
+            wgpu::BindGroup bg0 = utils::MakeBindGroup(device, bgl0, {{0, buffer}});
+            wgpu::BindGroup bg1 = utils::MakeBindGroup(device, bgl1, {{0, buffer}});
+
+            // Create a passthrough compute pipeline
+            wgpu::ShaderModule csModule =
+                utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
+                #version 450
+                layout(std140, set = 0, binding = 0) readonly buffer RBuffer {
+                    readonly float value;
+                } rBuffer;
+                void main() {
+                })");
+            wgpu::ComputePipelineDescriptor pipelineDescriptor;
+            pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl0);
+            pipelineDescriptor.computeStage.module = csModule;
+            pipelineDescriptor.computeStage.entryPoint = "main";
+            wgpu::ComputePipeline cp = device.CreateComputePipeline(&pipelineDescriptor);
+
+            // Resource in bg1 conflicts with resources used in bg0. However, the binding in bg1 is
+            // not used in pipeline. But we still track this binding.
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+            pass.SetBindGroup(0, bg0);
+            pass.SetBindGroup(1, bg1);
+            pass.SetPipeline(cp);
+            pass.Dispatch(1);
+            pass.EndPass();
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+    }
+
     // Test that using the same texture as both readable and writable in the same pass is disallowed
     TEST_F(ResourceUsageTrackingTest, TextureWithReadAndWriteUsage) {
         // Test render pass
@@ -596,6 +816,9 @@ namespace {
         // TODO (yunchao.he@intel.com) Test compute pass. Test code is ready, but it depends on
         // writeonly storage buffer support.
     }
+
+    // TODO (yunchao.he@intel.com): Test that all unused bindings bindGroup still take effect for
+    // resource tracking. Test code is ready, but it depends on writeonly storage buffer support
 
     // TODO (yunchao.he@intel.com):
     // 1. Add tests for overritten tests:
