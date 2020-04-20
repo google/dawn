@@ -715,7 +715,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
       // (OpenCL also allows the ID of an OpVariable, but we don't handle that
       // here.)
       ast_var->set_constructor(
-          MakeConstantExpression(var.GetSingleWordInOperand(1)));
+          MakeConstantExpression(var.GetSingleWordInOperand(1)).expr);
     }
     // TODO(dneto): initializers (a.k.a. constructor expression)
     ast_module_.AddGlobalVariable(std::move(ast_var));
@@ -763,48 +763,50 @@ std::unique_ptr<ast::Variable> ParserImpl::MakeVariable(uint32_t id,
   return ast_var;
 }
 
-std::unique_ptr<ast::Expression> ParserImpl::MakeConstantExpression(
-    uint32_t id) {
+TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
   if (!success_) {
-    return nullptr;
+    return {};
   }
   const auto* inst = def_use_mgr_->GetDef(id);
   if (inst == nullptr) {
     Fail() << "ID " << id << " is not a registered instruction";
-    return nullptr;
+    return {};
   }
   auto* ast_type = ConvertType(inst->type_id());
   if (ast_type == nullptr) {
-    return nullptr;
+    return {};
   }
   // TODO(dneto): Handle spec constants too?
   const auto* spirv_const = constant_mgr_->FindDeclaredConstant(id);
   if (spirv_const == nullptr) {
     Fail() << "ID " << id << " is not a constant";
-    return nullptr;
+    return {};
   }
   // TODO(dneto): Note: NullConstant for int, uint, float map to a regular 0.
   // So canonicalization should map that way too.
   // Currently "null<type>" is missing from the WGSL parser.
   // See https://bugs.chromium.org/p/tint/issues/detail?id=34
   if (ast_type->IsU32()) {
-    return std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::UintLiteral>(ast_type, spirv_const->GetU32()));
+    return {ast_type, std::make_unique<ast::ScalarConstructorExpression>(
+                          std::make_unique<ast::UintLiteral>(
+                              ast_type, spirv_const->GetU32()))};
   }
   if (ast_type->IsI32()) {
-    return std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::IntLiteral>(ast_type, spirv_const->GetS32()));
+    return {ast_type, std::make_unique<ast::ScalarConstructorExpression>(
+                          std::make_unique<ast::IntLiteral>(
+                              ast_type, spirv_const->GetS32()))};
   }
   if (ast_type->IsF32()) {
-    return std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::FloatLiteral>(ast_type, spirv_const->GetFloat()));
+    return {ast_type, std::make_unique<ast::ScalarConstructorExpression>(
+                          std::make_unique<ast::FloatLiteral>(
+                              ast_type, spirv_const->GetFloat()))};
   }
   if (ast_type->IsBool()) {
     const bool value = spirv_const->AsNullConstant()
                            ? false
                            : spirv_const->AsBoolConstant()->value();
-    return std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::BoolLiteral>(ast_type, value));
+    return {ast_type, std::make_unique<ast::ScalarConstructorExpression>(
+                          std::make_unique<ast::BoolLiteral>(ast_type, value))};
   }
   auto* spirv_composite_const = spirv_const->AsCompositeConstant();
   if (spirv_composite_const != nullptr) {
@@ -820,21 +822,21 @@ std::unique_ptr<ast::Expression> ParserImpl::MakeConstantExpression(
       if (def == nullptr) {
         Fail() << "internal error: SPIR-V constant doesn't have defining "
                   "instruction";
-        return nullptr;
+        return {};
       }
       auto ast_component = MakeConstantExpression(def->result_id());
       if (!success_) {
         // We've already emitted a diagnostic.
-        return nullptr;
+        return {};
       }
-      ast_components.emplace_back(std::move(ast_component));
+      ast_components.emplace_back(std::move(ast_component.expr));
     }
-    return std::make_unique<ast::TypeConstructorExpression>(
-        ast_type, std::move(ast_components));
+    return {ast_type, std::make_unique<ast::TypeConstructorExpression>(
+                          ast_type, std::move(ast_components))};
   }
   Fail() << "Unhandled constant type " << inst->type_id() << " for value ID "
          << id;
-  return nullptr;
+  return {};
 }
 
 bool ParserImpl::EmitFunctions() {

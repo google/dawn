@@ -50,6 +50,25 @@ namespace spirv {
 using Decoration = std::vector<uint32_t>;
 using DecorationList = std::vector<Decoration>;
 
+// An AST expression with its type.
+struct TypedExpression {
+  /// Dummy constructor
+  TypedExpression() : type(nullptr), expr(nullptr) {}
+  /// Constructor
+  /// @param t the type
+  /// @param e the expression
+  TypedExpression(ast::type::Type* t, std::unique_ptr<ast::Expression> e)
+      : type(t), expr(std::move(e)) {}
+  /// Move constructor
+  /// @param other the other typed expression
+  TypedExpression(TypedExpression&& other)
+      : type(other.type), expr(std::move(other.expr)) {}
+  /// The type
+  ast::type::Type* type;
+  /// The expression
+  std::unique_ptr<ast::Expression> expr;
+};
+
 /// Parser implementation for SPIR-V.
 class ParserImpl : Reader {
  public:
@@ -224,7 +243,7 @@ class ParserImpl : Reader {
   /// Creates an AST expression node for a SPIR-V constant.
   /// @param id the SPIR-V ID of the constant
   /// @returns a new Literal node
-  std::unique_ptr<ast::Expression> MakeConstantExpression(uint32_t id);
+  TypedExpression MakeConstantExpression(uint32_t id);
 
  private:
   /// Converts a specific SPIR-V type to a Tint type. Integer case

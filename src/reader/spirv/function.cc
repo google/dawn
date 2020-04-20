@@ -212,7 +212,8 @@ bool FunctionEmitter::EmitFunctionVariables() {
       // (OpenCL also allows the ID of an OpVariable, but we don't handle that
       // here.)
       var->set_constructor(
-          parser_impl_.MakeConstantExpression(inst.GetSingleWordInOperand(1)));
+          parser_impl_.MakeConstantExpression(inst.GetSingleWordInOperand(1))
+              .expr);
     }
     // TODO(dneto): Add the initializer via Variable::set_constructor.
     auto var_decl_stmt =
@@ -224,12 +225,14 @@ bool FunctionEmitter::EmitFunctionVariables() {
   return success();
 }
 
-std::unique_ptr<ast::Expression> FunctionEmitter::MakeExpression(uint32_t id) {
+TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
   if (failed()) {
-    return nullptr;
+    return {};
   }
   if (identifier_values_.count(id)) {
-    return std::make_unique<ast::IdentifierExpression>(namer_.Name(id));
+    return TypedExpression(
+        parser_impl_.ConvertType(def_use_mgr_->GetDef(id)->type_id()),
+        std::make_unique<ast::IdentifierExpression>(namer_.Name(id)));
   }
   if (singly_used_values_.count(id)) {
     auto expr = std::move(singly_used_values_[id]);
@@ -243,18 +246,19 @@ std::unique_ptr<ast::Expression> FunctionEmitter::MakeExpression(uint32_t id) {
   const auto* inst = def_use_mgr_->GetDef(id);
   if (inst == nullptr) {
     Fail() << "ID " << id << " does not have a defining SPIR-V instruction";
-    return nullptr;
+    return {};
   }
   switch (inst->opcode()) {
     case SpvOpVariable:
       // This occurs for module-scope variables.
-      return std::make_unique<ast::IdentifierExpression>(
-          namer_.Name(inst->result_id()));
+      return TypedExpression(parser_impl_.ConvertType(inst->type_id()),
+                             std::make_unique<ast::IdentifierExpression>(
+                                 namer_.Name(inst->result_id())));
     default:
       break;
   }
   Fail() << "unhandled expression for ID " << id << "\n" << inst->PrettyPrint();
-  return nullptr;
+  return {};
 }
 
 bool FunctionEmitter::EmitFunctionBodyStatements() {
@@ -284,8 +288,8 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(
 
 bool FunctionEmitter::EmitConstDefinition(
     const spvtools::opt::Instruction& inst,
-    std::unique_ptr<ast::Expression> ast_expr) {
-  if (!ast_expr) {
+    TypedExpression ast_expr) {
+  if (!ast_expr.expr) {
     return false;
   }
   auto ast_const =
@@ -294,7 +298,7 @@ bool FunctionEmitter::EmitConstDefinition(
   if (!ast_const) {
     return false;
   }
-  ast_const->set_constructor(std::move(ast_expr));
+  ast_const->set_constructor(std::move(ast_expr.expr));
   ast_const->set_is_const(true);
   ast_body_.emplace_back(
       std::make_unique<ast::VariableDeclStatement>(std::move(ast_const)));
@@ -306,11 +310,12 @@ bool FunctionEmitter::EmitConstDefinition(
 bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
   // Handle combinatorial instructions first.
   auto combinatorial_expr = MaybeEmitCombinatorialValue(inst);
-  if (combinatorial_expr != nullptr) {
+  if (combinatorial_expr.expr != nullptr) {
     if (def_use_mgr_->NumUses(&inst) == 1) {
       // If it's used once, then defer emitting the expression until it's used.
       // Any supporting statements have already been emitted.
-      singly_used_values_[inst.result_id()] = std::move(combinatorial_expr);
+      singly_used_values_.insert(
+          std::make_pair(inst.result_id(), std::move(combinatorial_expr)));
       return success();
     }
     // Otherwise, generate a const definition for it now and later use
@@ -327,7 +332,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       auto lhs = MakeExpression(inst.GetSingleWordInOperand(0));
       auto rhs = MakeExpression(inst.GetSingleWordInOperand(1));
       ast_body_.emplace_back(std::make_unique<ast::AssignmentStatement>(
-          std::move(lhs), std::move(rhs)));
+          std::move(lhs.expr), std::move(rhs.expr)));
       return success();
     }
     case SpvOpLoad:
@@ -344,10 +349,10 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
   return Fail() << "unhandled instruction with opcode " << inst.opcode();
 }
 
-std::unique_ptr<ast::Expression> FunctionEmitter::MaybeEmitCombinatorialValue(
+TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     const spvtools::opt::Instruction& inst) {
   if (inst.result_id() == 0) {
-    return nullptr;
+    return {};
   }
 
   // TODO(dneto): Fill in the following cases.
@@ -356,10 +361,14 @@ std::unique_ptr<ast::Expression> FunctionEmitter::MaybeEmitCombinatorialValue(
     return this->MakeExpression(inst.GetSingleWordInOperand(operand_index));
   };
 
+  auto* ast_type =
+      inst.type_id() != 0 ? parser_impl_.ConvertType(inst.type_id()) : nullptr;
+
   auto binary_op = ConvertBinaryOp(inst.opcode());
   if (binary_op != ast::BinaryOp::kNone) {
-    return std::make_unique<ast::BinaryExpression>(binary_op, operand(0),
-                                                   operand(1));
+    return {ast_type, std::make_unique<ast::BinaryExpression>(
+                          binary_op, std::move(operand(0).expr),
+                          std::move(operand(1).expr))};
   }
   // binary operator
   // unary operator
@@ -393,7 +402,7 @@ std::unique_ptr<ast::Expression> FunctionEmitter::MaybeEmitCombinatorialValue(
   //    OpCompositeExtract
   //    OpCompositeInsert
 
-  return nullptr;
+  return {};
 }
 
 }  // namespace spirv
