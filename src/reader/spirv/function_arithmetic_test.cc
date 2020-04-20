@@ -334,6 +334,64 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_UnsignedVec) {
       << ToString(fe.ast_body());
 }
 
+TEST_F(SpvUnaryArithTest, FNegate_Scalar) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpFNegate %float %float_50
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __f32
+    {
+      UnaryOp{
+        negation
+        ScalarConstructor{50.000000}
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvUnaryArithTest, FNegate_Vector) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpFNegate %v2float %v2float_50_60
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __vec_2__f32
+    {
+      UnaryOp{
+        negation
+        TypeConstructor{
+          __vec_2__f32
+          ScalarConstructor{50.000000}
+          ScalarConstructor{60.000000}
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
 struct BinaryData {
   const std::string res_type;
   const std::string lhs;
@@ -1021,9 +1079,6 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"v2int", "v2int_40_30", "OpBitwiseXor", "v2uint_20_10",
                    "__vec_2__i32", AstFor("v2int_40_30"), "xor",
                    AstFor("v2uint_20_10")}));
-
-// TODO(dneto): OpSNegate
-// TODO(dneto): OpFNegate
 
 // TODO(dneto): OpSRem. Missing from WGSL
 // https://github.com/gpuweb/gpuweb/issues/702

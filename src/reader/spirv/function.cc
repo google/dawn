@@ -47,6 +47,7 @@ namespace {
 bool GetUnaryOp(SpvOp opcode, ast::UnaryOp* ast_unary_op) {
   switch (opcode) {
     case SpvOpSNegate:
+    case SpvOpFNegate:
       *ast_unary_op = ast::UnaryOp::kNegation;
       return true;
     // TODO(dneto): SpvOpNegate SpvOpNot SpvLogicalNot
