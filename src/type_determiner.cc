@@ -581,10 +581,17 @@ ast::type::Type* TypeDeterminer::GetImportData(
   // get FP64 support or otherwise we'll need to differentiate.
   //   * radians
   //   * degrees
+  //   * sin, cos, tan
+  //   * asin, acos, atan
+  //   * sinh, cosh, tanh
+  //   * asinh, acosh, atanh
 
   if (name == "round" || name == "roundeven" || name == "trunc" ||
       name == "fabs" || name == "fsign" || name == "floor" || name == "ceil" ||
-      name == "fract" || name == "radians" || name == "degrees") {
+      name == "fract" || name == "radians" || name == "degrees" ||
+      name == "sin" || name == "cos" || name == "tan" || name == "asin" ||
+      name == "acos" || name == "atan" || name == "sinh" || name == "cosh" ||
+      name == "tanh" || name == "asinh" || name == "acosh" || name == "atanh") {
     if (params.size() != 1) {
       error_ = "incorrect number of parameters for " + name +
                ". Expected 1 got " + std::to_string(params.size());
@@ -616,6 +623,30 @@ ast::type::Type* TypeDeterminer::GetImportData(
       *id = GLSLstd450Radians;
     } else if (name == "degrees") {
       *id = GLSLstd450Degrees;
+    } else if (name == "sin") {
+      *id = GLSLstd450Sin;
+    } else if (name == "cos") {
+      *id = GLSLstd450Cos;
+    } else if (name == "tan") {
+      *id = GLSLstd450Tan;
+    } else if (name == "asin") {
+      *id = GLSLstd450Asin;
+    } else if (name == "acos") {
+      *id = GLSLstd450Acos;
+    } else if (name == "atan") {
+      *id = GLSLstd450Atan;
+    } else if (name == "sinh") {
+      *id = GLSLstd450Sinh;
+    } else if (name == "cosh") {
+      *id = GLSLstd450Cosh;
+    } else if (name == "tanh") {
+      *id = GLSLstd450Tanh;
+    } else if (name == "asinh") {
+      *id = GLSLstd450Asinh;
+    } else if (name == "acosh") {
+      *id = GLSLstd450Acosh;
+    } else if (name == "atanh") {
+      *id = GLSLstd450Atanh;
     }
 
     return params[0]->result_type();

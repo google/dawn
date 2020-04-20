@@ -1585,19 +1585,31 @@ TEST_P(ImportData_FloatTest, Error_MultipleParams) {
                                param.name + ". Expected 1 got 3");
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    TypeDeterminerTest,
-    ImportData_FloatTest,
-    testing::Values(GLSLData{"round", GLSLstd450Round},
-                    GLSLData{"roundeven", GLSLstd450RoundEven},
-                    GLSLData{"trunc", GLSLstd450Trunc},
-                    GLSLData{"fabs", GLSLstd450FAbs},
-                    GLSLData{"fsign", GLSLstd450FSign},
-                    GLSLData{"floor", GLSLstd450Floor},
-                    GLSLData{"ceil", GLSLstd450Ceil},
-                    GLSLData{"fract", GLSLstd450Fract},
-                    GLSLData{"radians", GLSLstd450Radians},
-                    GLSLData{"degrees", GLSLstd450Degrees}));
+INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
+                         ImportData_FloatTest,
+                         testing::Values(GLSLData{"round", GLSLstd450Round},
+                                         GLSLData{"roundeven",
+                                                  GLSLstd450RoundEven},
+                                         GLSLData{"trunc", GLSLstd450Trunc},
+                                         GLSLData{"fabs", GLSLstd450FAbs},
+                                         GLSLData{"fsign", GLSLstd450FSign},
+                                         GLSLData{"floor", GLSLstd450Floor},
+                                         GLSLData{"ceil", GLSLstd450Ceil},
+                                         GLSLData{"fract", GLSLstd450Fract},
+                                         GLSLData{"radians", GLSLstd450Radians},
+                                         GLSLData{"degrees", GLSLstd450Degrees},
+                                         GLSLData{"sin", GLSLstd450Sin},
+                                         GLSLData{"cos", GLSLstd450Cos},
+                                         GLSLData{"tan", GLSLstd450Tan},
+                                         GLSLData{"asin", GLSLstd450Asin},
+                                         GLSLData{"acos", GLSLstd450Acos},
+                                         GLSLData{"atan", GLSLstd450Atan},
+                                         GLSLData{"sinh", GLSLstd450Sinh},
+                                         GLSLData{"cosh", GLSLstd450Cosh},
+                                         GLSLData{"tanh", GLSLstd450Tanh},
+                                         GLSLData{"asinh", GLSLstd450Asinh},
+                                         GLSLData{"acosh", GLSLstd450Acosh},
+                                         GLSLData{"atanh", GLSLstd450Atanh}));
 
 }  // namespace
 }  // namespace tint
