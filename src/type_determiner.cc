@@ -595,7 +595,7 @@ ast::type::Type* TypeDeterminer::GetImportData(
       name == "acos" || name == "atan" || name == "sinh" || name == "cosh" ||
       name == "tanh" || name == "asinh" || name == "acosh" || name == "atanh" ||
       name == "exp" || name == "log" || name == "exp2" || name == "log2" ||
-      name == "sqrt" || name == "inversesqrt") {
+      name == "sqrt" || name == "inversesqrt" || name == "normalize") {
     if (params.size() != 1) {
       error_ = "incorrect number of parameters for " + name +
                ". Expected 1 got " + std::to_string(params.size());
@@ -663,6 +663,8 @@ ast::type::Type* TypeDeterminer::GetImportData(
       *id = GLSLstd450Sqrt;
     } else if (name == "inversesqrt") {
       *id = GLSLstd450InverseSqrt;
+    } else if (name == "normalize") {
+      *id = GLSLstd450Normalize;
     }
 
     return params[0]->result_type();

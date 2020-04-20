@@ -1615,7 +1615,8 @@ INSTANTIATE_TEST_SUITE_P(
                     GLSLData{"exp2", GLSLstd450Exp2},
                     GLSLData{"log2", GLSLstd450Log2},
                     GLSLData{"sqrt", GLSLstd450Sqrt},
-                    GLSLData{"inversesqrt", GLSLstd450InverseSqrt}));
+                    GLSLData{"inversesqrt", GLSLstd450InverseSqrt},
+                    GLSLData{"normalize", GLSLstd450Normalize}));
 
 }  // namespace
 }  // namespace tint
