@@ -949,7 +949,7 @@ ast::type::Type* ParserImpl::ForcedResultType(
     ast::type::Type* first_operand_type) {
   const bool binary_match_first_operand =
       AssumesResultSignednessMatchesBinaryFirstOperand(op);
-  const bool unary_match_operand = (op == SpvOpSNegate);
+  const bool unary_match_operand = (op == SpvOpSNegate) || (op == SpvOpNot);
   if (binary_match_first_operand || unary_match_operand) {
     return first_operand_type;
   }

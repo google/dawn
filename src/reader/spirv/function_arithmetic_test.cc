@@ -299,6 +299,39 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_UnsignedVec) {
       << ToString(fe.ast_body());
 }
 
+TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_SignedVec) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpSNegate %v2uint %v2int_30_40
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __vec_2__u32
+    {
+      As<__vec_2__u32>{
+        UnaryOp{
+          negation
+          TypeConstructor{
+            __vec_2__i32
+            ScalarConstructor{30}
+            ScalarConstructor{40}
+          }
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
 TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_UnsignedVec) {
   const auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
@@ -1079,6 +1112,251 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"v2int", "v2int_40_30", "OpBitwiseXor", "v2uint_20_10",
                    "__vec_2__i32", AstFor("v2int_40_30"), "xor",
                    AstFor("v2uint_20_10")}));
+
+TEST_F(SpvUnaryArithTest, Not_Int_Int) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpNot %int %int_30
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __i32
+    {
+      UnaryOp{
+        not
+        ScalarConstructor{30}
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvUnaryArithTest, Not_Int_Uint) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpNot %int %uint_10
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __i32
+    {
+      As<__i32>{
+        UnaryOp{
+          not
+          ScalarConstructor{10}
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvUnaryArithTest, Not_Uint_Int) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpNot %uint %int_30
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __u32
+    {
+      As<__u32>{
+        UnaryOp{
+          not
+          ScalarConstructor{30}
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvUnaryArithTest, Not_Uint_Uint) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpNot %uint %uint_10
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __u32
+    {
+      UnaryOp{
+        not
+        ScalarConstructor{10}
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvUnaryArithTest, Not_SignedVec_SignedVec) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpNot %v2int %v2int_30_40
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __vec_2__i32
+    {
+      UnaryOp{
+        not
+        TypeConstructor{
+          __vec_2__i32
+          ScalarConstructor{30}
+          ScalarConstructor{40}
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvUnaryArithTest, Not_SignedVec_UnsignedVec) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpNot %v2int %v2uint_10_20
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __vec_2__i32
+    {
+      As<__vec_2__i32>{
+        UnaryOp{
+          not
+          TypeConstructor{
+            __vec_2__u32
+            ScalarConstructor{10}
+            ScalarConstructor{20}
+          }
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvUnaryArithTest, Not_UnsignedVec_SignedVec) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpNot %v2uint %v2int_30_40
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __vec_2__u32
+    {
+      As<__vec_2__u32>{
+        UnaryOp{
+          not
+          TypeConstructor{
+            __vec_2__i32
+            ScalarConstructor{30}
+            ScalarConstructor{40}
+          }
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+TEST_F(SpvUnaryArithTest, Not_UnsignedVec_UnsignedVec) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpNot %v2uint %v2uint_10_20
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __vec_2__u32
+    {
+      UnaryOp{
+        not
+        TypeConstructor{
+          __vec_2__u32
+          ScalarConstructor{10}
+          ScalarConstructor{20}
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+// TODO(dneto): OpBitFieldInsert
+// TODO(dneto): OpBitFieldSExtract
+// TODO(dneto): OpBitFieldUExtract
+// TODO(dneto): OpBitReverse
+// TODO(dneto): OpBitCount
 
 // TODO(dneto): OpSRem. Missing from WGSL
 // https://github.com/gpuweb/gpuweb/issues/702
