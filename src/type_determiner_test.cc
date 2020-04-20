@@ -1479,7 +1479,19 @@ TEST_F(TypeDeterminerTest, StorageClass_NonFunctionClassError) {
             "function variable has a non-function storage class");
 }
 
-TEST_F(TypeDeterminerTest, ImportData_Round_Scalar) {
+struct GLSLData {
+  const char* name;
+  uint32_t value;
+};
+inline std::ostream& operator<<(std::ostream& out, GLSLData data) {
+  out << data.name;
+  return out;
+}
+using ImportData_FloatTest = TypeDeterminerTestWithParam<GLSLData>;
+
+TEST_P(ImportData_FloatTest, Scalar) {
+  auto param = GetParam();
+
   ast::type::F32Type f32;
 
   ast::ExpressionList params;
@@ -1489,13 +1501,15 @@ TEST_F(TypeDeterminerTest, ImportData_Round_Scalar) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", "round", params, &id);
+  auto* type = td()->GetImportData("GLSL.std.450", param.name, params, &id);
   ASSERT_NE(type, nullptr);
   EXPECT_TRUE(type->is_float_scalar());
-  EXPECT_EQ(id, GLSLstd450Round);
+  EXPECT_EQ(id, param.value);
 }
 
-TEST_F(TypeDeterminerTest, ImportData_Round_Vector) {
+TEST_P(ImportData_FloatTest, Vector) {
+  auto param = GetParam();
+
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
 
@@ -1514,14 +1528,16 @@ TEST_F(TypeDeterminerTest, ImportData_Round_Vector) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", "round", params, &id);
+  auto* type = td()->GetImportData("GLSL.std.450", param.name, params, &id);
   ASSERT_NE(type, nullptr);
   EXPECT_TRUE(type->is_float_vector());
   EXPECT_EQ(type->AsVector()->size(), 3);
-  EXPECT_EQ(id, GLSLstd450Round);
+  EXPECT_EQ(id, param.value);
 }
 
-TEST_F(TypeDeterminerTest, ImportData_Round_Error_Integer) {
+TEST_P(ImportData_FloatTest, Error_Integer) {
+  auto param = GetParam();
+
   ast::type::I32Type i32;
 
   ast::ExpressionList params;
@@ -1531,23 +1547,26 @@ TEST_F(TypeDeterminerTest, ImportData_Round_Error_Integer) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", "round", params, &id);
+  auto* type = td()->GetImportData("GLSL.std.450", param.name, params, &id);
   ASSERT_EQ(type, nullptr);
-  EXPECT_EQ(
-      td()->error(),
-      "incorrect type for round. Requires a float scalar or a float vector");
+  EXPECT_EQ(td()->error(), std::string("incorrect type for ") + param.name +
+                               ". Requires a float scalar or a float vector");
 }
 
-TEST_F(TypeDeterminerTest, ImportData_Round_Error_NoParams) {
+TEST_P(ImportData_FloatTest, Error_NoParams) {
+  auto param = GetParam();
+
   ast::ExpressionList params;
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", "round", params, &id);
+  auto* type = td()->GetImportData("GLSL.std.450", param.name, params, &id);
   ASSERT_EQ(type, nullptr);
-  EXPECT_EQ(td()->error(),
-            "incorrect number of parameters for round. Expected 1 got 0");
+  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
+                               param.name + ". Expected 1 got 0");
 }
 
-TEST_F(TypeDeterminerTest, ImportData_Round_Error_MultipleParams) {
+TEST_P(ImportData_FloatTest, Error_MultipleParams) {
+  auto param = GetParam();
+
   ast::type::F32Type f32;
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -1560,11 +1579,17 @@ TEST_F(TypeDeterminerTest, ImportData_Round_Error_MultipleParams) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", "round", params, &id);
+  auto* type = td()->GetImportData("GLSL.std.450", param.name, params, &id);
   ASSERT_EQ(type, nullptr);
-  EXPECT_EQ(td()->error(),
-            "incorrect number of parameters for round. Expected 1 got 3");
+  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
+                               param.name + ". Expected 1 got 3");
 }
+
+INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
+                         ImportData_FloatTest,
+                         testing::Values(GLSLData{"round", GLSLstd450Round},
+                                         GLSLData{"roundeven",
+                                                  GLSLstd450RoundEven}));
 
 }  // namespace
 }  // namespace tint

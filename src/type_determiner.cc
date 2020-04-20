@@ -576,19 +576,23 @@ ast::type::Type* TypeDeterminer::GetImportData(
     return nullptr;
   }
 
-  if (name == "round") {
+  if (name == "round" || name == "roundeven") {
     if (params.size() != 1) {
-      error_ = "incorrect number of parameters for round. Expected 1 got " +
-               std::to_string(params.size());
+      error_ = "incorrect number of parameters for " + name +
+               ". Expected 1 got " + std::to_string(params.size());
       return nullptr;
     }
     if (!params[0]->result_type()->is_float_scalar_or_vector()) {
-      error_ =
-          "incorrect type for round. Requires a float scalar or a float vector";
+      error_ = "incorrect type for " + name +
+               ". Requires a float scalar or a float vector";
       return nullptr;
     }
 
-    *id = GLSLstd450Round;
+    if (name == "round") {
+      *id = GLSLstd450Round;
+    } else if (name == "roundeven") {
+      *id = GLSLstd450RoundEven;
+    }
     return params[0]->result_type();
   }
 
