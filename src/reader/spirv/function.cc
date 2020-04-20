@@ -20,6 +20,7 @@
 #include "source/opt/function.h"
 #include "source/opt/instruction.h"
 #include "source/opt/module.h"
+#include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/identifier_expression.h"
@@ -83,6 +84,7 @@ ast::BinaryOp ConvertBinaryOp(SpvOp opcode) {
   }
   return ast::BinaryOp::kNone;
 }
+
 }  // namespace
 
 FunctionEmitter::FunctionEmitter(ParserImpl* pi,
@@ -358,19 +360,30 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   // TODO(dneto): Fill in the following cases.
 
   auto operand = [this, &inst](uint32_t operand_index) {
-    return this->MakeExpression(inst.GetSingleWordInOperand(operand_index));
+    auto expr =
+        this->MakeExpression(inst.GetSingleWordInOperand(operand_index));
+    return parser_impl_.RectifyOperandSignedness(inst.opcode(),
+                                                 std::move(expr));
   };
 
-  auto* ast_type =
+  ast::type::Type* ast_type =
       inst.type_id() != 0 ? parser_impl_.ConvertType(inst.type_id()) : nullptr;
 
   auto binary_op = ConvertBinaryOp(inst.opcode());
   if (binary_op != ast::BinaryOp::kNone) {
-    return {ast_type, std::make_unique<ast::BinaryExpression>(
-                          binary_op, std::move(operand(0).expr),
-                          std::move(operand(1).expr))};
+    auto arg0 = operand(0);
+    auto arg1 = operand(1);
+    auto binary_expr = std::make_unique<ast::BinaryExpression>(
+        binary_op, std::move(arg0.expr), std::move(arg1.expr));
+    auto* forced_result_ty =
+        parser_impl_.ForcedResultType(inst.opcode(), arg0.type);
+    if (forced_result_ty && forced_result_ty != ast_type) {
+      return {ast_type, std::make_unique<ast::AsExpression>(
+                            ast_type, std::move(binary_expr))};
+    }
+    return {ast_type, std::move(binary_expr)};
   }
-  // binary operator
+
   // unary operator
   // builtin readonly function
   // glsl.std.450 readonly function

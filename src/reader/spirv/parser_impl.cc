@@ -33,6 +33,8 @@
 #include "source/opt/type_manager.h"
 #include "source/opt/types.h"
 #include "spirv-tools/libspirv.hpp"
+#include "src/ast/as_expression.h"
+#include "src/ast/binary_expression.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/decorated_variable.h"
@@ -118,6 +120,52 @@ class FunctionTraverser {
   std::unordered_map<uint32_t, const spvtools::opt::Function*> id_to_func_;
   std::vector<const spvtools::opt::Function*> ordered_;
 };
+
+// Returns true if the opcode operates as if its operands are signed integral.
+bool AssumesSignedOperands(SpvOp opcode) {
+  switch (opcode) {
+    case SpvOpSDiv:
+    case SpvOpSRem:
+    case SpvOpSMod:
+    case SpvOpSLessThan:
+    case SpvOpSLessThanEqual:
+    case SpvOpSGreaterThan:
+    case SpvOpSGreaterThanEqual:
+      return true;
+    default:
+      break;
+  }
+  return false;
+}
+
+// Returns true if the opcode operates as if its operands are unsigned integral.
+bool AssumesUnsignedOperands(SpvOp opcode) {
+  switch (opcode) {
+    case SpvOpUDiv:
+    case SpvOpUMod:
+    case SpvOpULessThan:
+    case SpvOpULessThanEqual:
+    case SpvOpUGreaterThan:
+    case SpvOpUGreaterThanEqual:
+      return true;
+    default:
+      break;
+  }
+  return false;
+}
+
+// Returns true if the operation is binary, and the WGSL operation requires
+// the signedness of the result to match the signedness of the first operand.
+bool AssumesResultSignednessMatchesBinaryFirstOperand(SpvOp opcode) {
+  switch (opcode) {
+    // TODO(dneto): More arithmetic operations.
+    case SpvOpSDiv:
+      return true;
+    default:
+      break;
+  }
+  return false;
+}
 
 }  // namespace
 
@@ -458,11 +506,13 @@ bool ParserImpl::EmitEntryPoints() {
 ast::type::Type* ParserImpl::ConvertType(
     const spvtools::opt::analysis::Integer* int_ty) {
   if (int_ty->width() == 32) {
-    if (int_ty->IsSigned()) {
-      return ctx_.type_mgr().Get(std::make_unique<ast::type::I32Type>());
-    } else {
-      return ctx_.type_mgr().Get(std::make_unique<ast::type::U32Type>());
-    }
+    auto signed_ty =
+        ctx_.type_mgr().Get(std::make_unique<ast::type::I32Type>());
+    auto unsigned_ty =
+        ctx_.type_mgr().Get(std::make_unique<ast::type::U32Type>());
+    signed_type_for_[unsigned_ty] = signed_ty;
+    unsigned_type_for_[signed_ty] = unsigned_ty;
+    return int_ty->IsSigned() ? signed_ty : unsigned_ty;
   }
   Fail() << "unhandled integer width: " << int_ty->width();
   return nullptr;
@@ -484,8 +534,23 @@ ast::type::Type* ParserImpl::ConvertType(
   if (ast_elem_ty == nullptr) {
     return nullptr;
   }
-  return ctx_.type_mgr().Get(
+  auto* this_ty = ctx_.type_mgr().Get(
       std::make_unique<ast::type::VectorType>(ast_elem_ty, num_elem));
+  // Generate the opposite-signedness vector type, if this type is integral.
+  if (unsigned_type_for_.count(ast_elem_ty)) {
+    auto* other_ty =
+        ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
+            unsigned_type_for_[ast_elem_ty], num_elem));
+    signed_type_for_[other_ty] = this_ty;
+    unsigned_type_for_[this_ty] = other_ty;
+  } else if (signed_type_for_.count(ast_elem_ty)) {
+    auto* other_ty =
+        ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
+            signed_type_for_[ast_elem_ty], num_elem));
+    unsigned_type_for_[other_ty] = this_ty;
+    signed_type_for_[this_ty] = other_ty;
+  }
+  return this_ty;
 }
 
 ast::type::Type* ParserImpl::ConvertType(
@@ -782,6 +847,7 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
     Fail() << "ID " << id << " is not a constant";
     return {};
   }
+
   // TODO(dneto): Note: NullConstant for int, uint, float map to a regular 0.
   // So canonicalization should map that way too.
   // Currently "null<type>" is missing from the WGSL parser.
@@ -837,6 +903,53 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
   Fail() << "Unhandled constant type " << inst->type_id() << " for value ID "
          << id;
   return {};
+}
+
+TypedExpression ParserImpl::RectifyOperandSignedness(SpvOp op,
+                                                     TypedExpression&& expr) {
+  const bool requires_signed = AssumesSignedOperands(op);
+  const bool requires_unsigned = AssumesUnsignedOperands(op);
+  if (!requires_signed && !requires_unsigned) {
+    // No conversion is required, assuming our tables are complete.
+    return std::move(expr);
+  }
+  if (!expr.expr) {
+    Fail() << "internal error: RectifyOperandSignedness given a null expr\n";
+    return {};
+  }
+  auto* type = expr.type;
+  if (!type) {
+    Fail() << "internal error: unmapped type for: " << expr.expr->str() << "\n";
+    return {};
+  }
+  if (requires_unsigned) {
+    auto* unsigned_ty = unsigned_type_for_[type];
+    if (unsigned_ty != nullptr) {
+      // Conversion is required.
+      return {unsigned_ty, std::make_unique<ast::AsExpression>(
+                               unsigned_ty, std::move(expr.expr))};
+    }
+  } else if (requires_signed) {
+    auto* signed_ty = signed_type_for_[type];
+    if (signed_ty != nullptr) {
+      // Conversion is required.
+      return {signed_ty, std::make_unique<ast::AsExpression>(
+                             signed_ty, std::move(expr.expr))};
+    }
+  }
+  // We should not reach here.
+  return std::move(expr);
+}
+
+ast::type::Type* ParserImpl::ForcedResultType(
+    SpvOp op,
+    ast::type::Type* first_operand_type) {
+  const bool binary_match_first_operand =
+      AssumesResultSignednessMatchesBinaryFirstOperand(op);
+  if (binary_match_first_operand) {
+    return first_operand_type;
+  }
+  return nullptr;
 }
 
 bool ParserImpl::EmitFunctions() {

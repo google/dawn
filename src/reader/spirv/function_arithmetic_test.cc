@@ -91,6 +91,15 @@ std::string AstFor(std::string assembly) {
           ScalarConstructor{30}
         })";
   }
+  if (assembly == "cast_int_v2uint_10_20") {
+    return R"(As<__vec_2__i32>{
+          TypeConstructor{
+            __vec_2__u32
+            ScalarConstructor{10}
+            ScalarConstructor{20}
+          }
+        })";
+  }
   if (assembly == "v2float_50_60") {
     return R"(TypeConstructor{
           __vec_2__f32
@@ -126,6 +135,7 @@ inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
 }
 
 using SpvBinaryTest = SpvParserTestBase<::testing::TestWithParam<BinaryData>>;
+using SpvBinaryTestBasic = SpvParserTestBase<::testing::Test>;
 
 TEST_P(SpvBinaryTest, EmitExpression) {
   const auto assembly = CommonTypes() + R"(
@@ -323,6 +333,110 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"v2int", "v2int_30_40", "OpSDiv", "v2int_40_30",
                    "__vec_2__i32", AstFor("v2int_30_40"), "divide",
                    AstFor("v2int_40_30")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_SDiv_MixedSignednessOperands,
+    SpvBinaryTest,
+    ::testing::Values(
+        // Mixed, returning int, second arg uint
+        BinaryData{"int", "int_30", "OpSDiv", "uint_10", "__i32",
+                   "ScalarConstructor{30}", "divide",
+                   R"(As<__i32>{
+          ScalarConstructor{10}
+        })"},
+        // Mixed, returning int, first arg uint
+        BinaryData{"int", "uint_10", "OpSDiv", "int_30", "__i32",
+                   R"(As<__i32>{
+          ScalarConstructor{10}
+        })",
+                   "divide", "ScalarConstructor{30}"},
+        // Mixed, returning v2int, first arg v2uint
+        BinaryData{"v2int", "v2uint_10_20", "OpSDiv", "v2int_30_40",
+                   "__vec_2__i32", AstFor("cast_int_v2uint_10_20"), "divide",
+                   AstFor("v2int_30_40")},
+        // Mixed, returning v2int, second arg v2uint
+        BinaryData{"v2int", "v2int_30_40", "OpSDiv", "v2uint_10_20",
+                   "__vec_2__i32", AstFor("v2int_30_40"), "divide",
+                   AstFor("cast_int_v2uint_10_20")}));
+
+TEST_F(SpvBinaryTestBasic, SDiv_Scalar_UnsignedResult) {
+  // The WGSL signed division operator expects both operands to be signed
+  // and the result is signed as well.
+  // In this test SPIR-V demands an unsigned result, so we have to
+  // wrap the result with an as-cast.
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpSDiv %uint %int_30 %int_40
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << "\n"
+      << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __u32
+    {
+      As<__u32>{
+        Binary{
+          ScalarConstructor{30}
+          divide
+          ScalarConstructor{40}
+        }
+      }
+    }
+  })"));
+}
+
+TEST_F(SpvBinaryTestBasic, SDiv_Vector_UnsignedResult) {
+  // The WGSL signed division operator expects both operands to be signed
+  // and the result is signed as well.
+  // In this test SPIR-V demands an unsigned result, so we have to
+  // wrap the result with an as-cast.
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpSDiv %v2uint %v2int_30_40 %v2int_40_30
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << "\n"
+      << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __vec_2__u32
+    {
+      As<__vec_2__u32>{
+        Binary{
+          TypeConstructor{
+            __vec_2__i32
+            ScalarConstructor{30}
+            ScalarConstructor{40}
+          }
+          divide
+          TypeConstructor{
+            __vec_2__i32
+            ScalarConstructor{40}
+            ScalarConstructor{30}
+          }
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_FDiv,

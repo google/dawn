@@ -30,6 +30,7 @@
 #include "source/opt/type_manager.h"
 #include "source/opt/types.h"
 #include "spirv-tools/libspirv.hpp"
+#include "src/ast/expression.h"
 #include "src/ast/import.h"
 #include "src/ast/module.h"
 #include "src/ast/struct_member_decoration.h"
@@ -245,6 +246,28 @@ class ParserImpl : Reader {
   /// @returns a new Literal node
   TypedExpression MakeConstantExpression(uint32_t id);
 
+  /// Converts a given expression to the signedness demanded for an operand
+  /// of the given SPIR-V opcode, if required.  If the operation assumes
+  /// signed integer operands, and |expr| is unsigned, then return an
+  /// as-cast expression converting it to signed. Otherwise, return
+  /// |expr| itself.  Similarly, convert as required from unsigned
+  /// to signed. Assumes all SPIR-V types have been mapped to AST types.
+  /// @param op the SPIR-V opcode
+  /// @param expr an expression
+  /// @returns expr, or a cast of expr
+  TypedExpression RectifyOperandSignedness(SpvOp op, TypedExpression&& expr);
+
+  /// Returns the "forced" result type for the given SPIR-V opcode.
+  /// If the WGSL result type for an operation has a more strict rule than
+  /// requried by SPIR-V, then we say the result type is "forced".  This occurs
+  /// for signed integer division (OpSDiv), for example, where the result type
+  /// in WGSL must match the operand types.
+  /// @param op the SPIR-V opcode
+  /// @param first_operand_type the AST type for the first operand.
+  /// @returns the forced AST result type, or nullptr if no forcing is required.
+  ast::type::Type* ForcedResultType(SpvOp op,
+                                    ast::type::Type* first_operand_type);
+
  private:
   /// Converts a specific SPIR-V type to a Tint type. Integer case
   ast::type::Type* ConvertType(const spvtools::opt::analysis::Integer* int_ty);
@@ -303,6 +326,11 @@ class ParserImpl : Reader {
 
   // Maps a SPIR-V type ID to a Tint type.
   std::unordered_map<uint32_t, ast::type::Type*> id_to_type_;
+
+  // Maps an unsigned type corresponding to the given signed type.
+  std::unordered_map<ast::type::Type*, ast::type::Type*> signed_type_for_;
+  // Maps an signed type corresponding to the given unsigned type.
+  std::unordered_map<ast::type::Type*, ast::type::Type*> unsigned_type_for_;
 };
 
 }  // namespace spirv
