@@ -47,7 +47,7 @@ class Module {
   /// Find the import of the given name
   /// @param name The import name to search for
   /// @returns the import with the given name if found, nullptr otherwise.
-  const Import* FindImportByName(const std::string& name);
+  Import* FindImportByName(const std::string& name);
 
   /// Add a global variable to the module
   /// @param var the variable to add

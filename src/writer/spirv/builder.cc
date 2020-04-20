@@ -22,6 +22,7 @@
 #include "src/ast/binding_decoration.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/builtin_decoration.h"
+#include "src/ast/call_expression.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/else_statement.h"
@@ -430,10 +431,18 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
 
 uint32_t Builder::GenerateIdentifierExpression(
     ast::IdentifierExpression* expr) {
-  // TODO(dsinclair): handle names with namespaces in them ...
-
   uint32_t val = 0;
-  if (!scope_stack_.get(expr->name(), &val)) {
+  if (expr->has_path()) {
+    auto* imp = mod_->FindImportByName(expr->path());
+    if (imp == nullptr) {
+      error_ = "unable to find import for " + expr->path();
+      return 0;
+    }
+    val = imp->GetIdForMethod(expr->name());
+    if (val == 0) {
+      error_ = "unable to lookup: " + expr->name() + " in " + expr->path();
+    }
+  } else if (!scope_stack_.get(expr->name(), &val)) {
     error_ = "unable to find name for identifier: " + expr->name();
     return 0;
   }
@@ -688,6 +697,59 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
 
   push_function_inst(op, {Operand::Int(type_id), result, Operand::Int(lhs_id),
                           Operand::Int(rhs_id)});
+  return result_id;
+}
+
+uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
+  // TODO(dsinclair): Support regular function calls
+  if (!expr->func()->IsIdentifier() ||
+      !expr->func()->AsIdentifier()->has_path()) {
+    error_ = "function calls not supported yet.";
+    return 0;
+  }
+
+  auto* ident = expr->func()->AsIdentifier();
+
+  auto type_id = GenerateTypeIfNeeded(expr->func()->result_type());
+  if (type_id == 0) {
+    return 0;
+  }
+
+  auto set_iter = import_name_to_id_.find(ident->path());
+  if (set_iter == import_name_to_id_.end()) {
+    error_ = "unknown import " + ident->path();
+    return 0;
+  }
+  auto set_id = set_iter->second;
+
+  auto* imp = mod_->FindImportByName(ident->path());
+  if (imp == nullptr) {
+    error_ = "unknown import " + ident->path();
+    return 0;
+  }
+
+  auto inst_id = imp->GetIdForMethod(ident->name());
+  if (inst_id == 0) {
+    error_ = "unknown method " + ident->name();
+    return 0;
+  }
+
+  auto result = result_op();
+  auto result_id = result.to_i();
+
+  std::vector<Operand> ops{Operand::Int(type_id), result, Operand::Int(set_id),
+                           Operand::Int(inst_id)};
+
+  for (const auto& param : expr->params()) {
+    auto id = GenerateExpression(param.get());
+    if (id == 0) {
+      return 0;
+    }
+    ops.push_back(Operand::Int(id));
+  }
+
+  push_function_inst(spv::Op::OpExtInst, std::move(ops));
+
   return result_id;
 }
 

@@ -16,8 +16,10 @@
 
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "gtest/gtest.h"
+#include "spirv/unified1/GLSL.std.450.h"
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
@@ -568,6 +570,27 @@ TEST_F(TypeDeterminerTest, Expr_Call_WithParams) {
   EXPECT_TRUE(td()->DetermineResultType(&call));
   ASSERT_NE(param_ptr->result_type(), nullptr);
   EXPECT_TRUE(param_ptr->result_type()->IsF32());
+}
+
+TEST_F(TypeDeterminerTest, Expr_Call_GLSLImport) {
+  ast::type::F32Type f32;
+
+  mod()->AddImport(std::make_unique<ast::Import>("GLSL.std.450", "std"));
+
+  // Register the function
+  EXPECT_TRUE(td()->Determine());
+
+  ast::ExpressionList call_params;
+  call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.4)));
+
+  std::vector<std::string> name{"std", "round"};
+  ast::CallExpression call(std::make_unique<ast::IdentifierExpression>(name),
+                           std::move(call_params));
+
+  EXPECT_TRUE(td()->DetermineResultType(&call));
+  ASSERT_NE(call.result_type(), nullptr);
+  EXPECT_TRUE(call.result_type()->IsF32());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Cast) {
@@ -1454,6 +1477,93 @@ TEST_F(TypeDeterminerTest, StorageClass_NonFunctionClassError) {
   EXPECT_FALSE(td()->Determine());
   EXPECT_EQ(td()->error(),
             "function variable has a non-function storage class");
+}
+
+TEST_F(TypeDeterminerTest, ImportData_Round_Scalar) {
+  ast::type::F32Type f32;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&f32, 1.f)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type = td()->GetImportData("GLSL.std.450", "round", params, &id);
+  ASSERT_NE(type, nullptr);
+  EXPECT_TRUE(type->is_float_scalar());
+  EXPECT_EQ(id, GLSLstd450Round);
+}
+
+TEST_F(TypeDeterminerTest, ImportData_Round_Vector) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+
+  ast::ExpressionList params;
+  params.push_back(
+      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type = td()->GetImportData("GLSL.std.450", "round", params, &id);
+  ASSERT_NE(type, nullptr);
+  EXPECT_TRUE(type->is_float_vector());
+  EXPECT_EQ(type->AsVector()->size(), 3);
+  EXPECT_EQ(id, GLSLstd450Round);
+}
+
+TEST_F(TypeDeterminerTest, ImportData_Round_Error_Integer) {
+  ast::type::I32Type i32;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 1)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type = td()->GetImportData("GLSL.std.450", "round", params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(
+      td()->error(),
+      "incorrect type for round. Requires a float scalar or a float vector");
+}
+
+TEST_F(TypeDeterminerTest, ImportData_Round_Error_NoParams) {
+  ast::ExpressionList params;
+  uint32_t id = 0;
+  auto* type = td()->GetImportData("GLSL.std.450", "round", params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(),
+            "incorrect number of parameters for round. Expected 1 got 0");
+}
+
+TEST_F(TypeDeterminerTest, ImportData_Round_Error_MultipleParams) {
+  ast::type::F32Type f32;
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type = td()->GetImportData("GLSL.std.450", "round", params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(),
+            "incorrect number of parameters for round. Expected 1 got 3");
 }
 
 }  // namespace

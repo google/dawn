@@ -71,6 +71,10 @@ class TypeDeterminer {
   /// @param stmt the statement to check
   /// @returns true if the determination was successful
   bool DetermineResultType(ast::Statement* stmt);
+  /// Determines type information for an expression list
+  /// @param list the expression list to check
+  /// @returns true if the determination was successful
+  bool DetermineResultType(const ast::ExpressionList& list);
   /// Determines type information for an expression
   /// @param expr the expression to check
   /// @returns true if the determination was successful
@@ -86,6 +90,17 @@ class TypeDeterminer {
   void RegisterVariableForTesting(ast::Variable* var) {
     variable_stack_.set(var->name(), var);
   }
+
+  /// Retrieves information for the requested import.
+  /// @param path the import path
+  /// @param name the method name to get information on
+  /// @param params the parameters to the method call
+  /// @param id out parameter for the external call ID. Must not be a nullptr.
+  /// @returns the return type of |name| in |path| or nullptr on error.
+  ast::type::Type* GetImportData(const std::string& path,
+                                 const std::string& name,
+                                 const ast::ExpressionList& params,
+                                 uint32_t* id);
 
  private:
   void set_error(const Source& src, const std::string& msg);

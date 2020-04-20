@@ -16,6 +16,7 @@
 
 #include <memory>
 
+#include "spirv/unified1/GLSL.std.450.h"
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
@@ -214,6 +215,15 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
   return false;
 }
 
+bool TypeDeterminer::DetermineResultType(const ast::ExpressionList& list) {
+  for (const auto& expr : list) {
+    if (!DetermineResultType(expr.get())) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
   // This is blindly called above, so in some cases the expression won't exist.
   if (!expr) {
@@ -285,14 +295,43 @@ bool TypeDeterminer::DetermineAs(ast::AsExpression* expr) {
 }
 
 bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
-  for (const auto& param : expr->params()) {
-    if (!DetermineResultType(param.get())) {
-      return false;
-    }
+  if (!DetermineResultType(expr->params())) {
+    return false;
   }
 
-  if (!DetermineResultType(expr->func())) {
-    return false;
+  // The expression has to be an identifier as you can't store function pointers
+  // but, if it isn't we'll just use the normal result determination to be on
+  // the safe side.
+  if (expr->func()->IsIdentifier()) {
+    auto* ident = expr->func()->AsIdentifier();
+
+    if (ident->has_path()) {
+      auto* imp = mod_->FindImportByName(ident->path());
+      if (imp == nullptr) {
+        error_ = "Unable to find import for " + ident->name();
+        return false;
+      }
+
+      uint32_t ext_id = 0;
+      auto* result_type =
+          GetImportData(imp->path(), ident->name(), expr->params(), &ext_id);
+      if (result_type == nullptr) {
+        return false;
+      }
+
+      imp->AddMethodId(ident->name(), ext_id);
+      expr->func()->set_result_type(result_type);
+    } else {
+      // An identifier with a single name is a function call, not an import
+      // lookup which we can handle with the regular identifier lookup.
+      if (!DetermineResultType(ident)) {
+        return false;
+      }
+    }
+  } else {
+    if (!DetermineResultType(expr->func())) {
+      return false;
+    }
   }
   expr->set_result_type(expr->func()->result_type());
   return true;
@@ -314,8 +353,8 @@ bool TypeDeterminer::DetermineConstructor(ast::ConstructorExpression* expr) {
 
 bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
   if (expr->has_path()) {
-    // TODO(dsinclair): Handle imports
-    set_error(expr->source(), "imports not handled in type determination");
+    set_error(expr->source(),
+              "determine identifier should not be called with imports");
     return false;
   }
 
@@ -459,10 +498,8 @@ bool TypeDeterminer::DetermineUnaryDerivative(
 }
 
 bool TypeDeterminer::DetermineUnaryMethod(ast::UnaryMethodExpression* expr) {
-  for (const auto& param : expr->params()) {
-    if (!DetermineResultType(param.get())) {
-      return false;
-    }
+  if (!DetermineResultType(expr->params())) {
+    return false;
   }
 
   switch (expr->op()) {
@@ -528,6 +565,34 @@ bool TypeDeterminer::DetermineUnaryOp(ast::UnaryOpExpression* expr) {
   }
   expr->set_result_type(expr->expr()->result_type());
   return true;
+}
+
+ast::type::Type* TypeDeterminer::GetImportData(
+    const std::string& path,
+    const std::string& name,
+    const ast::ExpressionList& params,
+    uint32_t* id) {
+  if (path != "GLSL.std.450") {
+    return nullptr;
+  }
+
+  if (name == "round") {
+    if (params.size() != 1) {
+      error_ = "incorrect number of parameters for round. Expected 1 got " +
+               std::to_string(params.size());
+      return nullptr;
+    }
+    if (!params[0]->result_type()->is_float_scalar_or_vector()) {
+      error_ =
+          "incorrect type for round. Requires a float scalar or a float vector";
+      return nullptr;
+    }
+
+    *id = GLSLstd450Round;
+    return params[0]->result_type();
+  }
+
+  return nullptr;
 }
 
 }  // namespace tint

@@ -25,7 +25,7 @@ Module::Module(Module&&) = default;
 
 Module::~Module() = default;
 
-const Import* Module::FindImportByName(const std::string& name) {
+Import* Module::FindImportByName(const std::string& name) {
   for (const auto& import : imports_) {
     if (import->name() == name)
       return import.get();

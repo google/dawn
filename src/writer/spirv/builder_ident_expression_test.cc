@@ -217,6 +217,31 @@ TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
 )");
 }
 
+TEST_F(BuilderTest, IdentifierExpression_ImportMethod) {
+  auto imp = std::make_unique<ast::Import>("GLSL.std.450", "std");
+  imp->AddMethodId("round", 42u);
+
+  ast::Module mod;
+  mod.AddImport(std::move(imp));
+  Builder b(&mod);
+
+  ast::IdentifierExpression expr(std::vector<std::string>({"std", "round"}));
+  EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 42u) << b.error();
+}
+
+TEST_F(BuilderTest, IdentifierExpression_ImportMethod_NotFound) {
+  auto imp = std::make_unique<ast::Import>("GLSL.std.450", "std");
+
+  ast::Module mod;
+  mod.AddImport(std::move(imp));
+  Builder b(&mod);
+
+  ast::IdentifierExpression expr(std::vector<std::string>({"std", "ceil"}));
+  EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 0u);
+  ASSERT_TRUE(b.has_error());
+  EXPECT_EQ(b.error(), "unable to lookup: ceil in std");
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace writer

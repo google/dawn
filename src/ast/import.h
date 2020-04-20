@@ -18,6 +18,7 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "src/ast/node.h"
@@ -31,13 +32,13 @@ class Import : public Node {
   /// Create a new empty import statement
   Import() = default;
   /// Create a new import statement
-  /// @param path The import path e.g. GLSL.std.430
-  /// @param name The import reference name e.g. std::
+  /// @param path The import path e.g. GLSL.std.450
+  /// @param name The import reference name e.g. std
   Import(const std::string& path, const std::string& name);
   /// Create a new import statement
   /// @param source The input source for the import statement
   /// @param path The import path e.g. GLSL.std.430
-  /// @param name The import reference name e.g. std::
+  /// @param name The import reference name e.g. std
   Import(const Source& source,
          const std::string& path,
          const std::string& name);
@@ -57,6 +58,24 @@ class Import : public Node {
   /// @returns the import name
   const std::string& name() const { return name_; }
 
+  /// Add the given |name| to map to the given |id|
+  /// @param name the name to map
+  /// @param id the id to map too
+  void AddMethodId(const std::string& name, uint32_t id) {
+    method_to_id_map_[name] = id;
+  }
+
+  /// Retrieves the id for a given name
+  /// @param name the name to lookup
+  /// @returns the id for the given name or 0 on failure
+  uint32_t GetIdForMethod(const std::string& name) const {
+    auto val = method_to_id_map_.find(name);
+    if (val == method_to_id_map_.end()) {
+      return 0;
+    }
+    return val->second;
+  }
+
   /// @returns true if the name and path are both present
   bool IsValid() const override;
 
@@ -70,6 +89,7 @@ class Import : public Node {
 
   std::string path_;
   std::string name_;
+  std::unordered_map<std::string, uint32_t> method_to_id_map_;
 };
 
 /// A list of unique imports
