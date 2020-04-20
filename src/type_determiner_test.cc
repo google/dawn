@@ -1594,7 +1594,8 @@ INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                                          GLSLData{"fabs", GLSLstd450FAbs},
                                          GLSLData{"fsign", GLSLstd450FSign},
                                          GLSLData{"floor", GLSLstd450Floor},
-                                         GLSLData{"ceil", GLSLstd450Ceil}));
+                                         GLSLData{"ceil", GLSLstd450Ceil},
+                                         GLSLData{"fract", GLSLstd450Fract}));
 
 }  // namespace
 }  // namespace tint

@@ -577,7 +577,8 @@ ast::type::Type* TypeDeterminer::GetImportData(
   }
 
   if (name == "round" || name == "roundeven" || name == "trunc" ||
-      name == "fabs" || name == "fsign" || name == "floor" || name == "ceil") {
+      name == "fabs" || name == "fsign" || name == "floor" || name == "ceil" ||
+      name == "fract") {
     if (params.size() != 1) {
       error_ = "incorrect number of parameters for " + name +
                ". Expected 1 got " + std::to_string(params.size());
@@ -603,6 +604,8 @@ ast::type::Type* TypeDeterminer::GetImportData(
       *id = GLSLstd450Floor;
     } else if (name == "ceil") {
       *id = GLSLstd450Ceil;
+    } else if (name == "fract") {
+      *id = GLSLstd450Fract;
     }
 
     return params[0]->result_type();
