@@ -577,7 +577,7 @@ ast::type::Type* TypeDeterminer::GetImportData(
   }
 
   if (name == "round" || name == "roundeven" || name == "trunc" ||
-      name == "fabs") {
+      name == "fabs" || name == "fsign") {
     if (params.size() != 1) {
       error_ = "incorrect number of parameters for " + name +
                ". Expected 1 got " + std::to_string(params.size());
@@ -597,6 +597,8 @@ ast::type::Type* TypeDeterminer::GetImportData(
       *id = GLSLstd450Trunc;
     } else if (name == "fabs") {
       *id = GLSLstd450FAbs;
+    } else if (name == "fsign") {
+      *id = GLSLstd450FSign;
     }
 
     return params[0]->result_type();
