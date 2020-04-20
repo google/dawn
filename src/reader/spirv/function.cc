@@ -425,6 +425,13 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     return {ast_type, std::move(unary_expr)};
   }
 
+  if (inst.opcode() == SpvOpBitcast) {
+    auto target_ty = parser_impl_.ConvertType(inst.type_id());
+    auto cast = std::make_unique<ast::AsExpression>(target_ty, operand(0));
+    cast->set_result_type(target_ty);
+    return cast;
+  }
+
   // builtin readonly function
   // glsl.std.450 readonly function
 
@@ -434,13 +441,13 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   //    OpBitcast
   //    OpSatConvertSToU
   //    OpSatConvertUToS
-  //    OpSatConvertFToS
-  //    OpSatConvertFToU
-  //    OpSatConvertSToF
-  //    OpSatConvertUToF
-  //    OpUConvert
-  //    OpSConvert
-  //    OpFConvert
+  //    OpConvertFToS
+  //    OpConvertFToU
+  //    OpConvertSToF
+  //    OpConvertUToF
+  //    OpUConvert // Only needed when multiple widths supported
+  //    OpSConvert // Only needed when multiple widths supported
+  //    OpFConvert // Only needed when multiple widths supported
   //    OpConvertPtrToU // Not in WebGPU
   //    OpConvertUToPtr // Not in WebGPU
   //    OpPtrCastToGeneric // Not in Vulkan
