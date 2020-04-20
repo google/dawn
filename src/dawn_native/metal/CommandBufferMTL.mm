@@ -571,8 +571,7 @@ namespace dawn_native { namespace metal {
                             break;
                         }
 
-                        case wgpu::BindingType::Sampler:
-                        case wgpu::BindingType::ComparisonSampler: {
+                        case wgpu::BindingType::Sampler: {
                             auto sampler = ToBackend(group->GetBindingAsSampler(bindingIndex));
                             if (hasVertStage) {
                                 [render setVertexSamplerState:sampler->GetMTLSamplerState()

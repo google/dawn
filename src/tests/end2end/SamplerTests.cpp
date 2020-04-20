@@ -122,13 +122,16 @@ protected:
     void TestAddressModes(AddressModeTestCase u, AddressModeTestCase v, AddressModeTestCase w) {
         wgpu::Sampler sampler;
         {
-            wgpu::SamplerDescriptor descriptor = {};
+            wgpu::SamplerDescriptor descriptor;
             descriptor.minFilter = wgpu::FilterMode::Nearest;
             descriptor.magFilter = wgpu::FilterMode::Nearest;
             descriptor.mipmapFilter = wgpu::FilterMode::Nearest;
             descriptor.addressModeU = u.mMode;
             descriptor.addressModeV = v.mMode;
             descriptor.addressModeW = w.mMode;
+            descriptor.lodMinClamp = kLodMin;
+            descriptor.lodMaxClamp = kLodMax;
+            descriptor.compare = wgpu::CompareFunction::Never;
             sampler = device.CreateSampler(&descriptor);
         }
 

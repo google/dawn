@@ -110,9 +110,10 @@ namespace dawn_native {
                 case shaderc_spvc_binding_type_readonly_storage_buffer:
                     return wgpu::BindingType::ReadonlyStorageBuffer;
                 case shaderc_spvc_binding_type_sampler:
-                    return wgpu::BindingType::Sampler;
                 case shaderc_spvc_binding_type_comparison_sampler:
-                    return wgpu::BindingType::ComparisonSampler;
+                    // TODO: Break out comparison sampler into its own case, once Dawn has seperate
+                    // handling
+                    return wgpu::BindingType::Sampler;
                 case shaderc_spvc_binding_type_sampled_texture:
                     return wgpu::BindingType::SampledTexture;
                 case shaderc_spvc_binding_type_readonly_storage_texture:
@@ -772,16 +773,6 @@ namespace dawn_native {
                 bool validBindingConversion =
                     bindingInfo.type == wgpu::BindingType::StorageBuffer &&
                     moduleInfo.type == wgpu::BindingType::ReadonlyStorageBuffer;
-
-                // TODO(crbug.com/dawn/367): Temporarily allow using either a sampler or a
-                // comparison sampler until we can perform the proper shader analysis of what type
-                // is used in the shader module.
-                validBindingConversion |= (bindingInfo.type == wgpu::BindingType::Sampler &&
-                                           moduleInfo.type == wgpu::BindingType::ComparisonSampler);
-                validBindingConversion |=
-                    (bindingInfo.type == wgpu::BindingType::ComparisonSampler &&
-                     moduleInfo.type == wgpu::BindingType::Sampler);
-
                 if (!validBindingConversion) {
                     return false;
                 }
@@ -820,7 +811,6 @@ namespace dawn_native {
                 case wgpu::BindingType::ReadonlyStorageBuffer:
                 case wgpu::BindingType::StorageBuffer:
                 case wgpu::BindingType::Sampler:
-                case wgpu::BindingType::ComparisonSampler:
                     break;
 
                 case wgpu::BindingType::StorageTexture:

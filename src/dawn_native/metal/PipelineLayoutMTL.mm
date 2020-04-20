@@ -45,7 +45,6 @@ namespace dawn_native { namespace metal {
                             bufferIndex++;
                             break;
                         case wgpu::BindingType::Sampler:
-                        case wgpu::BindingType::ComparisonSampler:
                             mIndexInfo[stage][group][bindingIndex] = samplerIndex;
                             samplerIndex++;
                             break;

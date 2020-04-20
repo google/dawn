@@ -80,10 +80,6 @@ namespace dawn_native {
         return new SamplerBase(device, ObjectBase::kError);
     }
 
-    bool SamplerBase::HasCompareFunction() const {
-        return mCompareFunction != wgpu::CompareFunction::Undefined;
-    }
-
     size_t SamplerBase::HashFunc::operator()(const SamplerBase* module) const {
         size_t hash = 0;
 

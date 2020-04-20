@@ -123,8 +123,7 @@ namespace dawn_native { namespace d3d12 {
                         viewAllocation.OffsetFrom(viewSizeIncrement, bindingOffsets[bindingIndex]));
                     break;
                 }
-                case wgpu::BindingType::Sampler:
-                case wgpu::BindingType::ComparisonSampler: {
+                case wgpu::BindingType::Sampler: {
                     auto* sampler = ToBackend(GetBindingAsSampler(bindingIndex));
                     auto& samplerDesc = sampler->GetSamplerDescriptor();
                     d3d12Device->CreateSampler(

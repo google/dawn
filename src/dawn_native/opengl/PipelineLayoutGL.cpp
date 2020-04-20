@@ -38,7 +38,6 @@ namespace dawn_native { namespace opengl {
                         uboIndex++;
                         break;
                     case wgpu::BindingType::Sampler:
-                    case wgpu::BindingType::ComparisonSampler:
                         mIndexInfo[group][bindingIndex] = samplerIndex;
                         samplerIndex++;
                         break;

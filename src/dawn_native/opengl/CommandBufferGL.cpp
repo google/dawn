@@ -280,8 +280,7 @@ namespace dawn_native { namespace opengl {
                             break;
                         }
 
-                        case wgpu::BindingType::Sampler:
-                        case wgpu::BindingType::ComparisonSampler: {
+                        case wgpu::BindingType::Sampler: {
                             Sampler* sampler = ToBackend(group->GetBindingAsSampler(bindingIndex));
                             GLuint samplerIndex = indices[bindingIndex];
 
