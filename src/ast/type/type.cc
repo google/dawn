@@ -80,6 +80,34 @@ bool Type::IsVoid() const {
   return false;
 }
 
+bool Type::is_float_scalar() {
+  return IsF32();
+}
+
+bool Type::is_float_matrix() {
+  return IsMatrix() && AsMatrix()->type()->is_float_scalar();
+}
+
+bool Type::is_float_vector() {
+  return IsVector() && AsVector()->type()->is_float_scalar();
+}
+
+bool Type::is_float_scalar_or_vector() {
+  return is_float_scalar() || is_float_vector();
+}
+
+bool Type::is_unsigned_scalar_or_vector() {
+  return IsU32() || (IsVector() && AsVector()->type()->IsU32());
+}
+
+bool Type::is_signed_scalar_or_vector() {
+  return IsI32() || (IsVector() && AsVector()->type()->IsI32());
+}
+
+bool Type::is_integer_scalar_or_vector() {
+  return is_unsigned_scalar_or_vector() || is_signed_scalar_or_vector();
+}
+
 AliasType* Type::AsAlias() {
   assert(IsAlias());
   return static_cast<AliasType*>(this);

@@ -66,6 +66,21 @@ class Type {
   /// @returns the name for this type. The |type_name| is unique over all types.
   virtual std::string type_name() const = 0;
 
+  /// @returns true if this type is a float scalar
+  bool is_float_scalar();
+  /// @returns true if this type is a float matrix
+  bool is_float_matrix();
+  /// @returns true if this type is a float vector
+  bool is_float_vector();
+  /// @returns true if this type is a float scalar or vector
+  bool is_float_scalar_or_vector();
+  /// @returns true if this type is an unsigned scalar or vector
+  bool is_unsigned_scalar_or_vector();
+  /// @returns true if this type is a signed scalar or vector
+  bool is_signed_scalar_or_vector();
+  /// @returns true if this type is an integer scalar or vector
+  bool is_integer_scalar_or_vector();
+
   /// @returns the type as an alias type
   AliasType* AsAlias();
   /// @returns the type as an array type
