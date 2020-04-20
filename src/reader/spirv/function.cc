@@ -427,9 +427,8 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
 
   if (inst.opcode() == SpvOpBitcast) {
     auto target_ty = parser_impl_.ConvertType(inst.type_id());
-    auto cast = std::make_unique<ast::AsExpression>(target_ty, operand(0));
-    cast->set_result_type(target_ty);
-    return cast;
+    return {target_ty,
+            std::make_unique<ast::AsExpression>(target_ty, operand(0).expr)};
   }
 
   // builtin readonly function
