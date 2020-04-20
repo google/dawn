@@ -40,10 +40,11 @@ TEST_F(BuilderTest, Loop_Empty) {
   ast::LoopStatement expr;
 
   Context ctx;
-  TypeDeterminer td(&ctx);
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_TRUE(b.GenerateLoopStatement(&expr)) << b.error();
@@ -79,11 +80,12 @@ TEST_F(BuilderTest, Loop_WithoutContinuing) {
   ast::LoopStatement expr(std::move(body), std::move(continuing));
 
   Context ctx;
-  TypeDeterminer td(&ctx);
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -133,11 +135,12 @@ TEST_F(BuilderTest, Loop_WithContinuing) {
   ast::LoopStatement expr(std::move(body), std::move(continuing));
 
   Context ctx;
-  TypeDeterminer td(&ctx);
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
