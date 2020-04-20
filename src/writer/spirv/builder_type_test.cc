@@ -43,7 +43,8 @@ TEST_F(BuilderTest_Type, GenerateAlias) {
   ast::type::F32Type f32;
   ast::type::AliasType alias_type("my_type", &f32);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   auto id = b.GenerateTypeIfNeeded(&alias_type);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
@@ -58,7 +59,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedAlias) {
   ast::type::F32Type f32;
   ast::type::AliasType alias_type("my_type", &f32);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&alias_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 2u);
@@ -73,7 +75,8 @@ TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
   ast::type::I32Type i32;
   ast::type::ArrayType ary(&i32);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   auto id = b.GenerateTypeIfNeeded(&ary);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(1u, id);
@@ -87,7 +90,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
   ast::type::I32Type i32;
   ast::type::ArrayType ary(&i32);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1u);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -101,7 +105,8 @@ TEST_F(BuilderTest_Type, GenerateArray) {
   ast::type::I32Type i32;
   ast::type::ArrayType ary(&i32, 4);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   auto id = b.GenerateTypeIfNeeded(&ary);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(1u, id);
@@ -117,7 +122,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedArray) {
   ast::type::I32Type i32;
   ast::type::ArrayType ary(&i32, 4);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1u);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ary), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -132,7 +138,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedArray) {
 TEST_F(BuilderTest_Type, GenerateBool) {
   ast::type::BoolType bool_type;
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   auto id = b.GenerateTypeIfNeeded(&bool_type);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
@@ -146,7 +153,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedBool) {
   ast::type::I32Type i32;
   ast::type::BoolType bool_type;
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&bool_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 2u);
@@ -158,7 +166,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedBool) {
 TEST_F(BuilderTest_Type, GenerateF32) {
   ast::type::F32Type f32;
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   auto id = b.GenerateTypeIfNeeded(&f32);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
@@ -172,7 +181,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedF32) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&f32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 2u);
@@ -184,7 +194,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedF32) {
 TEST_F(BuilderTest_Type, GenerateI32) {
   ast::type::I32Type i32;
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   auto id = b.GenerateTypeIfNeeded(&i32);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
@@ -198,7 +209,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedI32) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&f32), 2u);
@@ -211,7 +223,8 @@ TEST_F(BuilderTest_Type, GenerateMatrix) {
   ast::type::F32Type f32;
   ast::type::MatrixType mat_type(&f32, 3, 2);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   auto id = b.GenerateTypeIfNeeded(&mat_type);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
@@ -227,7 +240,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedMatrix) {
   ast::type::I32Type i32;
   ast::type::MatrixType mat_type(&i32, 3, 4);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&mat_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 3u);
@@ -240,7 +254,8 @@ TEST_F(BuilderTest_Type, GeneratePtr) {
   ast::type::I32Type i32;
   ast::type::PointerType ptr(&i32, ast::StorageClass::kOutput);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   auto id = b.GenerateTypeIfNeeded(&ptr);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(1u, id);
@@ -254,7 +269,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedPtr) {
   ast::type::I32Type i32;
   ast::type::PointerType ptr(&i32, ast::StorageClass::kOutput);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ptr), 1u);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&ptr), 1u);
 }
@@ -263,7 +279,8 @@ TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
   auto s = std::make_unique<ast::Struct>();
   ast::type::StructType s_type(std::move(s));
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   auto id = b.GenerateTypeIfNeeded(&s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
@@ -287,7 +304,8 @@ TEST_F(BuilderTest_Type, GenerateStruct) {
   ast::type::StructType s_type(std::move(s));
   s_type.set_name("my_struct");
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   auto id = b.GenerateTypeIfNeeded(&s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
@@ -313,7 +331,8 @@ TEST_F(BuilderTest_Type, GenerateStruct_Decorated) {
   ast::type::StructType s_type(std::move(s));
   s_type.set_name("my_struct");
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   auto id = b.GenerateTypeIfNeeded(&s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
@@ -346,7 +365,8 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers) {
                                          std::move(members));
   ast::type::StructType s_type(std::move(s));
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   auto id = b.GenerateTypeIfNeeded(&s_type);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
@@ -365,7 +385,8 @@ OpMemberDecorate %1 1 Offset 8
 TEST_F(BuilderTest_Type, GenerateU32) {
   ast::type::U32Type u32;
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   auto id = b.GenerateTypeIfNeeded(&u32);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
@@ -379,7 +400,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedU32) {
   ast::type::U32Type u32;
   ast::type::F32Type f32;
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&u32), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&f32), 2u);
@@ -392,7 +414,8 @@ TEST_F(BuilderTest_Type, GenerateVector) {
   ast::type::F32Type f32;
   ast::type::VectorType vec_type(&f32, 3);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   auto id = b.GenerateTypeIfNeeded(&vec_type);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
@@ -407,7 +430,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedVector) {
   ast::type::I32Type i32;
   ast::type::VectorType vec_type(&i32, 3);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&vec_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 2u);
@@ -419,7 +443,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedVector) {
 TEST_F(BuilderTest_Type, GenerateVoid) {
   ast::type::VoidType void_type;
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   auto id = b.GenerateTypeIfNeeded(&void_type);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
@@ -433,7 +458,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedVoid) {
   ast::type::I32Type i32;
   ast::type::VoidType void_type;
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_EQ(b.GenerateTypeIfNeeded(&void_type), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(b.GenerateTypeIfNeeded(&i32), 2u);
@@ -454,7 +480,8 @@ using PtrDataTest = testing::TestWithParam<PtrData>;
 TEST_P(PtrDataTest, ConvertStorageClass) {
   auto params = GetParam();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_EQ(b.ConvertStorageClass(params.ast_class), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(

@@ -34,8 +34,8 @@ TEST_F(BuilderTest, InsertsPreambleWithImport) {
   ast::Module m;
   m.AddImport(std::make_unique<ast::Import>("GLSL.std.450", "glsl"));
 
-  Builder b;
-  ASSERT_TRUE(b.Build(m));
+  Builder b(&m);
+  ASSERT_TRUE(b.Build());
   ASSERT_EQ(b.preamble().size(), 4u);
 
   EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
@@ -47,8 +47,8 @@ OpMemoryModel Logical Vulkan
 
 TEST_F(BuilderTest, InsertsPreambleWithoutImport) {
   ast::Module m;
-  Builder b;
-  ASSERT_TRUE(b.Build(m));
+  Builder b(&m);
+  ASSERT_TRUE(b.Build());
   EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
 OpCapability VulkanMemoryModel
 OpMemoryModel Logical Vulkan
@@ -56,7 +56,8 @@ OpMemoryModel Logical Vulkan
 }
 
 TEST_F(BuilderTest, TracksIdBounds) {
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
 
   for (size_t i = 0; i < 5; i++) {
     EXPECT_EQ(b.next_id(), i + 1);

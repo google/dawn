@@ -38,13 +38,13 @@ namespace spirv {
 class Builder {
  public:
   /// Constructor
-  Builder();
+  /// @param mod the module to generate from
+  explicit Builder(ast::Module* mod);
   ~Builder();
 
   /// Generates the SPIR-V instructions for the given module
-  /// @param module the module to generate from
   /// @returns true if the SPIR-V was successfully built
-  bool Build(const ast::Module& module);
+  bool Build();
 
   /// @returns the error string or blank if no error was reported.
   const std::string& error() const { return error_; }
@@ -280,6 +280,7 @@ class Builder {
   /// automatically.
   Operand result_op();
 
+  ast::Module* mod_;
   std::string error_;
   uint32_t next_id_ = 1;
   std::vector<Instruction> preamble_;

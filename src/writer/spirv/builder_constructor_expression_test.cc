@@ -38,7 +38,8 @@ TEST_F(BuilderTest, Constructor_Const) {
   auto fl = std::make_unique<ast::FloatLiteral>(&f32, 42.2f);
   ast::ScalarConstructorExpression c(std::move(fl));
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_EQ(b.GenerateConstructorExpression(&c, true), 2u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -61,7 +62,8 @@ TEST_F(BuilderTest, Constructor_Type) {
 
   ast::TypeConstructorExpression t(&vec, std::move(vals));
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_EQ(b.GenerateConstructorExpression(&t, true), 5u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -87,7 +89,8 @@ TEST_F(BuilderTest, Constructor_Type_Dedups) {
 
   ast::TypeConstructorExpression t(&vec, std::move(vals));
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_EQ(b.GenerateConstructorExpression(&t, true), 5u);
   EXPECT_EQ(b.GenerateConstructorExpression(&t, true), 5u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -110,7 +113,8 @@ TEST_F(BuilderTest, Constructor_NonConst_Type_Fails) {
 
   ast::TypeConstructorExpression t(&vec, std::move(vals));
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_EQ(b.GenerateConstructorExpression(&t, true), 0u);
   EXPECT_TRUE(b.has_error());
   EXPECT_EQ(b.error(), R"(constructor must be a constant expression)");

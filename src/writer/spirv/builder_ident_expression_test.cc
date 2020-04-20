@@ -56,7 +56,8 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
   v.set_constructor(std::move(init));
   v.set_is_const(true);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -75,7 +76,8 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
   ast::type::F32Type f32;
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
@@ -107,7 +109,8 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
   v.set_constructor(std::move(init));
   v.set_is_const(true);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_TRUE(b.GenerateFunctionVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -126,7 +129,8 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
   ast::type::F32Type f32;
   ast::Variable v("var", ast::StorageClass::kNone, &f32);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateFunctionVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
@@ -161,7 +165,8 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(&var)) << b.error();
 
@@ -198,7 +203,8 @@ TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(&var)) << b.error();
 

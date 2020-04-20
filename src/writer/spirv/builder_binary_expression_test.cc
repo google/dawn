@@ -64,7 +64,8 @@ TEST_P(BinaryArithSignedIntegerTest, Scalar) {
   TypeDeterminer td(&ctx);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 4u) << b.error();
@@ -107,7 +108,8 @@ TEST_P(BinaryArithSignedIntegerTest, Vector) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5u) << b.error();
@@ -152,7 +154,8 @@ TEST_P(BinaryArithUnsignedIntegerTest, Scalar) {
   TypeDeterminer td(&ctx);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 4u) << b.error();
@@ -195,7 +198,8 @@ TEST_P(BinaryArithUnsignedIntegerTest, Vector) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5u) << b.error();
@@ -240,7 +244,8 @@ TEST_P(BinaryArithFloatTest, Scalar) {
   TypeDeterminer td(&ctx);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 4u) << b.error();
@@ -284,7 +289,8 @@ TEST_P(BinaryArithFloatTest, Vector) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5u) << b.error();
@@ -322,7 +328,8 @@ TEST_P(BinaryCompareUnsignedIntegerTest, Scalar) {
   TypeDeterminer td(&ctx);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 4u) << b.error();
@@ -367,7 +374,8 @@ TEST_P(BinaryCompareUnsignedIntegerTest, Vector) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5u) << b.error();
@@ -409,7 +417,8 @@ TEST_P(BinaryCompareSignedIntegerTest, Scalar) {
   TypeDeterminer td(&ctx);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 4u) << b.error();
@@ -454,7 +463,8 @@ TEST_P(BinaryCompareSignedIntegerTest, Vector) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5u) << b.error();
@@ -496,7 +506,8 @@ TEST_P(BinaryCompareFloatTest, Scalar) {
   TypeDeterminer td(&ctx);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 4u) << b.error();
@@ -541,7 +552,8 @@ TEST_P(BinaryCompareFloatTest, Vector) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5u) << b.error();
@@ -591,7 +603,8 @@ TEST_F(BuilderTest, Binary_Multiply_VectorScalar) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5u) << b.error();
@@ -629,7 +642,8 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarVector) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_EQ(b.GenerateBinaryExpression(&expr), 5u) << b.error();
@@ -661,7 +675,8 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixScalar) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -698,7 +713,8 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -744,7 +760,8 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -792,7 +809,8 @@ TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -830,7 +848,8 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 

@@ -37,7 +37,8 @@ TEST_F(BuilderTest, Assign_Var) {
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 

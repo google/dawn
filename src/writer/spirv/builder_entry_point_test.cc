@@ -32,7 +32,8 @@ using BuilderTest = testing::Test;
 TEST_F(BuilderTest, EntryPoint) {
   ast::EntryPoint ep(ast::PipelineStage::kFragment, "main", "frag_main");
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.set_func_name_to_id("frag_main", 2);
   ASSERT_TRUE(b.GenerateEntryPoint(&ep));
 
@@ -45,7 +46,8 @@ TEST_F(BuilderTest, EntryPoint) {
 TEST_F(BuilderTest, EntryPoint_WithoutName) {
   ast::EntryPoint ep(ast::PipelineStage::kCompute, "", "compute_main");
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.set_func_name_to_id("compute_main", 3);
   ASSERT_TRUE(b.GenerateEntryPoint(&ep));
 
@@ -59,7 +61,8 @@ TEST_F(BuilderTest, EntryPoint_WithoutName) {
 TEST_F(BuilderTest, EntryPoint_BadFunction) {
   ast::EntryPoint ep(ast::PipelineStage::kFragment, "main", "frag_main");
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_FALSE(b.GenerateEntryPoint(&ep));
   EXPECT_EQ(b.error(), "unable to find ID for function: frag_main");
 }
@@ -78,7 +81,8 @@ TEST_P(EntryPointStageTest, Emit) {
 
   ast::EntryPoint ep(params.stage, "", "main");
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.set_func_name_to_id("main", 3);
   ASSERT_TRUE(b.GenerateEntryPoint(&ep));
 

@@ -33,7 +33,8 @@ TEST_F(BuilderTest, Function_Empty) {
   ast::type::VoidType void_type;
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func));
 
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "a_func"
@@ -56,7 +57,8 @@ TEST_F(BuilderTest, FunctionType) {
   ast::type::VoidType void_type;
   ast::Function func("a_func", {}, &void_type);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func));
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -68,7 +70,8 @@ TEST_F(BuilderTest, FunctionType_DeDuplicate) {
   ast::Function func1("a_func", {}, &void_type);
   ast::Function func2("b_func", {}, &void_type);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   ASSERT_TRUE(b.GenerateFunction(&func1));
   ASSERT_TRUE(b.GenerateFunction(&func2));
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid

@@ -82,16 +82,16 @@ uint32_t pipeline_stage_to_execution_model(ast::PipelineStage stage) {
 
 }  // namespace
 
-Builder::Builder() : scope_stack_({}) {}
+Builder::Builder(ast::Module* mod) : mod_(mod), scope_stack_({}) {}
 
 Builder::~Builder() = default;
 
-bool Builder::Build(const ast::Module& m) {
+bool Builder::Build() {
   push_preamble(spv::Op::OpCapability, {Operand::Int(SpvCapabilityShader)});
   push_preamble(spv::Op::OpCapability,
                 {Operand::Int(SpvCapabilityVulkanMemoryModel)});
 
-  for (const auto& imp : m.imports()) {
+  for (const auto& imp : mod_->imports()) {
     GenerateImport(imp.get());
   }
 
@@ -99,19 +99,19 @@ bool Builder::Build(const ast::Module& m) {
                 {Operand::Int(SpvAddressingModelLogical),
                  Operand::Int(SpvMemoryModelVulkanKHR)});
 
-  for (const auto& var : m.global_variables()) {
+  for (const auto& var : mod_->global_variables()) {
     if (!GenerateGlobalVariable(var.get())) {
       return false;
     }
   }
 
-  for (const auto& func : m.functions()) {
+  for (const auto& func : mod_->functions()) {
     if (!GenerateFunction(func.get())) {
       return false;
     }
   }
 
-  for (const auto& ep : m.entry_points()) {
+  for (const auto& ep : mod_->entry_points()) {
     if (!GenerateEntryPoint(ep.get())) {
       return false;
     }

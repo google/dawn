@@ -43,7 +43,8 @@ TEST_F(BuilderTest, GlobalVar_NoStorageClass) {
   ast::type::F32Type f32;
   ast::Variable v("var", ast::StorageClass::kNone, &f32);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
@@ -57,7 +58,8 @@ TEST_F(BuilderTest, GlobalVar_WithStorageClass) {
   ast::type::F32Type f32;
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
@@ -85,7 +87,8 @@ TEST_F(BuilderTest, GlobalVar_WithConstructor) {
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
   v.set_constructor(std::move(init));
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -120,7 +123,8 @@ TEST_F(BuilderTest, GlobalVar_Const) {
   v.set_constructor(std::move(init));
   v.set_is_const(true);
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
@@ -142,7 +146,8 @@ TEST_F(BuilderTest, GlobalVar_WithLocation) {
   ast::DecoratedVariable dv(std::move(v));
   dv.set_decorations(std::move(decos));
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&dv)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 OpDecorate %1 Location 5
@@ -164,7 +169,8 @@ TEST_F(BuilderTest, GlobalVar_WithBindingAndSet) {
   ast::DecoratedVariable dv(std::move(v));
   dv.set_decorations(std::move(decos));
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&dv)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 OpDecorate %1 Binding 2
@@ -187,7 +193,8 @@ TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
   ast::DecoratedVariable dv(std::move(v));
   dv.set_decorations(std::move(decos));
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&dv)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 OpDecorate %1 BuiltIn Position
@@ -210,7 +217,8 @@ using BuiltinDataTest = testing::TestWithParam<BuiltinData>;
 TEST_P(BuiltinDataTest, Convert) {
   auto params = GetParam();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   EXPECT_EQ(b.ConvertBuiltin(params.builtin), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(

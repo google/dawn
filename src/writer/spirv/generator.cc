@@ -20,12 +20,13 @@ namespace tint {
 namespace writer {
 namespace spirv {
 
-Generator::Generator(ast::Module module) : writer::Writer(std::move(module)) {}
+Generator::Generator(ast::Module module)
+    : writer::Writer(std::move(module)), builder_(&module_) {}
 
 Generator::~Generator() = default;
 
 bool Generator::Generate() {
-  if (!builder_.Build(module_)) {
+  if (!builder_.Build()) {
     set_error(builder_.error());
     return false;
   }

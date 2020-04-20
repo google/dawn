@@ -50,7 +50,8 @@ TEST_F(BuilderTest, If_Empty) {
   TypeDeterminer td(&ctx);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
 
   EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
@@ -93,7 +94,8 @@ TEST_F(BuilderTest, If_WithStatements) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -155,7 +157,8 @@ TEST_F(BuilderTest, If_WithElse) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -224,7 +227,8 @@ TEST_F(BuilderTest, If_WithElseIf) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 
@@ -317,7 +321,8 @@ TEST_F(BuilderTest, If_WithMultiple) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
 

@@ -34,7 +34,8 @@ using BuilderTest = testing::Test;
 TEST_F(BuilderTest, Return) {
   ast::ReturnStatement ret;
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateReturnStatement(&ret));
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -60,7 +61,8 @@ TEST_F(BuilderTest, Return_WithValue) {
 
   ast::ReturnStatement ret(std::move(val));
 
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateReturnStatement(&ret));
   ASSERT_FALSE(b.has_error()) << b.error();

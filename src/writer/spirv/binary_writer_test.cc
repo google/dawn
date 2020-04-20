@@ -28,7 +28,8 @@ namespace {
 using BinaryWriterTest = testing::Test;
 
 TEST_F(BinaryWriterTest, Preamble) {
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   BinaryWriter bw;
   bw.WriteHeader(5);
 
@@ -42,7 +43,8 @@ TEST_F(BinaryWriterTest, Preamble) {
 }
 
 TEST_F(BinaryWriterTest, Float) {
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_preamble(spv::Op::OpNop, {Operand::Float(2.4f)});
   BinaryWriter bw;
   bw.WriteBuilder(b);
@@ -55,7 +57,8 @@ TEST_F(BinaryWriterTest, Float) {
 }
 
 TEST_F(BinaryWriterTest, Int) {
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_preamble(spv::Op::OpNop, {Operand::Int(2)});
   BinaryWriter bw;
   bw.WriteBuilder(b);
@@ -66,7 +69,8 @@ TEST_F(BinaryWriterTest, Int) {
 }
 
 TEST_F(BinaryWriterTest, String) {
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_preamble(spv::Op::OpNop, {Operand::String("my_string")});
   BinaryWriter bw;
   bw.WriteBuilder(b);
@@ -90,7 +94,8 @@ TEST_F(BinaryWriterTest, String) {
 }
 
 TEST_F(BinaryWriterTest, String_Multiple4Length) {
-  Builder b;
+  ast::Module mod;
+  Builder b(&mod);
   b.push_preamble(spv::Op::OpNop, {Operand::String("mystring")});
   BinaryWriter bw;
   bw.WriteBuilder(b);
