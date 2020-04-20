@@ -202,6 +202,10 @@ class Builder {
   /// @param expr the expression to generate
   /// @returns the expression ID on success or 0 otherwise
   uint32_t GenerateBinaryExpression(ast::BinaryExpression* expr);
+  /// Generates a loop statement
+  /// @param stmt the statement to generate
+  /// @returns true on successful generation
+  bool GenerateLoopStatement(ast::LoopStatement* stmt);
   /// Generates a return statement
   /// @param stmt the statement to generate
   /// @returns true on success, false otherwise

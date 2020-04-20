@@ -30,6 +30,7 @@
 #include "src/ast/if_statement.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/location_decoration.h"
+#include "src/ast/loop_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
@@ -808,6 +809,43 @@ bool Builder::GenerateReturnStatement(ast::ReturnStatement* stmt) {
   return true;
 }
 
+bool Builder::GenerateLoopStatement(ast::LoopStatement* stmt) {
+  auto loop_header = result_op();
+  auto loop_header_id = loop_header.to_i();
+  push_function_inst(spv::Op::OpBranch, {Operand::Int(loop_header_id)});
+  push_function_inst(spv::Op::OpLabel, {loop_header});
+
+  auto merge_block = result_op();
+  auto merge_block_id = merge_block.to_i();
+  auto continue_block = result_op();
+  auto continue_block_id = continue_block.to_i();
+
+  auto body_block = result_op();
+  auto body_block_id = body_block.to_i();
+
+  push_function_inst(
+      spv::Op::OpLoopMerge,
+      {Operand::Int(merge_block_id), Operand::Int(continue_block_id),
+       Operand::Int(SpvLoopControlMaskNone)});
+
+  push_function_inst(spv::Op::OpBranch, {Operand::Int(body_block_id)});
+  push_function_inst(spv::Op::OpLabel, {body_block});
+  if (!GenerateStatementList(stmt->body())) {
+    return false;
+  }
+  push_function_inst(spv::Op::OpBranch, {Operand::Int(continue_block_id)});
+
+  push_function_inst(spv::Op::OpLabel, {continue_block});
+  if (!GenerateStatementList(stmt->continuing())) {
+    return false;
+  }
+  push_function_inst(spv::Op::OpBranch, {Operand::Int(loop_header_id)});
+
+  push_function_inst(spv::Op::OpLabel, {merge_block});
+
+  return true;
+}
+
 bool Builder::GenerateStatementList(const ast::StatementList& list) {
   for (const auto& inst : list) {
     if (!GenerateStatement(inst.get())) {
@@ -823,6 +861,9 @@ bool Builder::GenerateStatement(ast::Statement* stmt) {
   }
   if (stmt->IsIf()) {
     return GenerateIfStatement(stmt->AsIf());
+  }
+  if (stmt->IsLoop()) {
+    return GenerateLoopStatement(stmt->AsLoop());
   }
   if (stmt->IsReturn()) {
     return GenerateReturnStatement(stmt->AsReturn());
