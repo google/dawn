@@ -60,6 +60,7 @@
 #include "src/ast/type/void_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
+#include "src/ast/unary_op_expression.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/variable_decoration.h"
@@ -124,6 +125,7 @@ class FunctionTraverser {
 // Returns true if the opcode operates as if its operands are signed integral.
 bool AssumesSignedOperands(SpvOp opcode) {
   switch (opcode) {
+    case SpvOpSNegate:
     case SpvOpSDiv:
     case SpvOpSRem:
     case SpvOpSMod:
@@ -158,9 +160,9 @@ bool AssumesUnsignedOperands(SpvOp opcode) {
 // the signedness of the result to match the signedness of the first operand.
 bool AssumesResultSignednessMatchesBinaryFirstOperand(SpvOp opcode) {
   switch (opcode) {
-    // TODO(dneto): More arithmetic operations.
     case SpvOpSDiv:
     case SpvOpSMod:
+    case SpvOpSRem:
       return true;
     default:
       break;
@@ -947,7 +949,8 @@ ast::type::Type* ParserImpl::ForcedResultType(
     ast::type::Type* first_operand_type) {
   const bool binary_match_first_operand =
       AssumesResultSignednessMatchesBinaryFirstOperand(op);
-  if (binary_match_first_operand) {
+  const bool unary_match_operand = (op == SpvOpSNegate);
+  if (binary_match_first_operand || unary_match_operand) {
     return first_operand_type;
   }
   return nullptr;

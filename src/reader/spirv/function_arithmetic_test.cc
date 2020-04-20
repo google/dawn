@@ -117,6 +117,223 @@ std::string AstFor(std::string assembly) {
   return "bad case";
 }
 
+using SpvUnaryArithTest = SpvParserTestBase<::testing::Test>;
+
+TEST_F(SpvUnaryArithTest, SNegate_Int_Int) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpSNegate %int %int_30
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __i32
+    {
+      UnaryOp{
+        negation
+        ScalarConstructor{30}
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvUnaryArithTest, SNegate_Int_Uint) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpSNegate %int %uint_10
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __i32
+    {
+      UnaryOp{
+        negation
+        As<__i32>{
+          ScalarConstructor{10}
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvUnaryArithTest, SNegate_Uint_Int) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpSNegate %uint %int_30
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __u32
+    {
+      As<__u32>{
+        UnaryOp{
+          negation
+          ScalarConstructor{30}
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvUnaryArithTest, SNegate_Uint_Uint) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpSNegate %uint %uint_10
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __u32
+    {
+      As<__u32>{
+        UnaryOp{
+          negation
+          As<__i32>{
+            ScalarConstructor{10}
+          }
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvUnaryArithTest, SNegate_SignedVec_SignedVec) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpSNegate %v2int %v2int_30_40
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __vec_2__i32
+    {
+      UnaryOp{
+        negation
+        TypeConstructor{
+          __vec_2__i32
+          ScalarConstructor{30}
+          ScalarConstructor{40}
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvUnaryArithTest, SNegate_SignedVec_UnsignedVec) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpSNegate %v2int %v2uint_10_20
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __vec_2__i32
+    {
+      UnaryOp{
+        negation
+        As<__vec_2__i32>{
+          TypeConstructor{
+            __vec_2__u32
+            ScalarConstructor{10}
+            ScalarConstructor{20}
+          }
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_UnsignedVec) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpSNegate %v2uint %v2uint_10_20
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __vec_2__u32
+    {
+      As<__vec_2__u32>{
+        UnaryOp{
+          negation
+          As<__vec_2__i32>{
+            TypeConstructor{
+              __vec_2__u32
+              ScalarConstructor{10}
+              ScalarConstructor{20}
+            }
+          }
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
 struct BinaryData {
   const std::string res_type;
   const std::string lhs;
@@ -804,6 +1021,28 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"v2int", "v2int_40_30", "OpBitwiseXor", "v2uint_20_10",
                    "__vec_2__i32", AstFor("v2int_40_30"), "xor",
                    AstFor("v2uint_20_10")}));
+
+// TODO(dneto): OpSNegate
+// TODO(dneto): OpFNegate
+
+// TODO(dneto): OpSRem. Missing from WGSL
+// https://github.com/gpuweb/gpuweb/issues/702
+
+// TODO(dneto): OpFRem. Missing from WGSL
+// https://github.com/gpuweb/gpuweb/issues/702
+
+// TODO(dneto): OpVectorTimesScalar
+// TODO(dneto): OpMatrixTimesScalar
+// TODO(dneto): OpVectorTimesMatrix
+// TODO(dneto): OpMatrixTimesVector
+// TODO(dneto): OpMatrixTimesMatrix
+// TODO(dneto): OpOuterProduct
+// TODO(dneto): OpDot
+// TODO(dneto): OpIAddCarry
+// TODO(dneto): OpISubBorrow
+// TODO(dneto): OpIMulExtended
+// TODO(dneto): OpSMulExtended
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

@@ -27,6 +27,8 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/uint_literal.h"
+#include "src/ast/unary_op.h"
+#include "src/ast/unary_op_expression.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/reader/spirv/fail_stream.h"
@@ -37,6 +39,25 @@ namespace reader {
 namespace spirv {
 
 namespace {
+
+// Gets the AST unary opcode for the given SPIR-V opcode, if any
+// @param opcode SPIR-V opcode
+// @param ast_unary_op return parameter
+// @returns true if it was a unary operation
+bool GetUnaryOp(SpvOp opcode, ast::UnaryOp* ast_unary_op) {
+  switch (opcode) {
+    case SpvOpSNegate:
+      *ast_unary_op = ast::UnaryOp::kNegation;
+      return true;
+    // TODO(dneto): SpvOpNegate SpvOpNot SpvLogicalNot
+    default:
+      break;
+  }
+  return false;
+}
+
+// Converts a SPIR-V opcode to its corresponding AST binary opcode, if any
+// @param opcode SPIR-V opcode
 // @returns the AST binary op for the given opcode, or kNone
 ast::BinaryOp ConvertBinaryOp(SpvOp opcode) {
   switch (opcode) {
@@ -386,7 +407,20 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     return {ast_type, std::move(binary_expr)};
   }
 
-  // unary operator
+  auto unary_op = ast::UnaryOp::kNegation;
+  if (GetUnaryOp(inst.opcode(), &unary_op)) {
+    auto arg0 = operand(0);
+    auto unary_expr = std::make_unique<ast::UnaryOpExpression>(
+        unary_op, std::move(arg0.expr));
+    auto* forced_result_ty =
+        parser_impl_.ForcedResultType(inst.opcode(), arg0.type);
+    if (forced_result_ty && forced_result_ty != ast_type) {
+      return {ast_type, std::make_unique<ast::AsExpression>(
+                            ast_type, std::move(unary_expr))};
+    }
+    return {ast_type, std::move(unary_expr)};
+  }
+
   // builtin readonly function
   // glsl.std.450 readonly function
 
