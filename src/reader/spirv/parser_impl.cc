@@ -160,6 +160,7 @@ bool AssumesResultSignednessMatchesBinaryFirstOperand(SpvOp opcode) {
   switch (opcode) {
     // TODO(dneto): More arithmetic operations.
     case SpvOpSDiv:
+    case SpvOpSMod:
       return true;
     default:
       break;

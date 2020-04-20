@@ -463,6 +463,9 @@ INSTANTIATE_TEST_SUITE_P(
                    "__vec_2__u32", AstFor("v2uint_10_20"), "modulo",
                    AstFor("v2uint_20_10")}));
 
+// Currently WGSL is missing a mapping for OpSRem
+// https://github.com/gpuweb/gpuweb/issues/702
+
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_SMod,
     SpvBinaryTest,
@@ -474,6 +477,110 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"v2int", "v2int_30_40", "OpSMod", "v2int_40_30",
                    "__vec_2__i32", AstFor("v2int_30_40"), "modulo",
                    AstFor("v2int_40_30")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_SMod_MixedSignednessOperands,
+    SpvBinaryTest,
+    ::testing::Values(
+        // Mixed, returning int, second arg uint
+        BinaryData{"int", "int_30", "OpSMod", "uint_10", "__i32",
+                   "ScalarConstructor{30}", "modulo",
+                   R"(As<__i32>{
+          ScalarConstructor{10}
+        })"},
+        // Mixed, returning int, first arg uint
+        BinaryData{"int", "uint_10", "OpSMod", "int_30", "__i32",
+                   R"(As<__i32>{
+          ScalarConstructor{10}
+        })",
+                   "modulo", "ScalarConstructor{30}"},
+        // Mixed, returning v2int, first arg v2uint
+        BinaryData{"v2int", "v2uint_10_20", "OpSMod", "v2int_30_40",
+                   "__vec_2__i32", AstFor("cast_int_v2uint_10_20"), "modulo",
+                   AstFor("v2int_30_40")},
+        // Mixed, returning v2int, second arg v2uint
+        BinaryData{"v2int", "v2int_30_40", "OpSMod", "v2uint_10_20",
+                   "__vec_2__i32", AstFor("v2int_30_40"), "modulo",
+                   AstFor("cast_int_v2uint_10_20")}));
+
+TEST_F(SpvBinaryTestBasic, SMod_Scalar_UnsignedResult) {
+  // The WGSL signed modulus operator expects both operands to be signed
+  // and the result is signed as well.
+  // In this test SPIR-V demands an unsigned result, so we have to
+  // wrap the result with an as-cast.
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpSMod %uint %int_30 %int_40
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << "\n"
+      << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __u32
+    {
+      As<__u32>{
+        Binary{
+          ScalarConstructor{30}
+          modulo
+          ScalarConstructor{40}
+        }
+      }
+    }
+  })"));
+}
+
+TEST_F(SpvBinaryTestBasic, SMod_Vector_UnsignedResult) {
+  // The WGSL signed modulus operator expects both operands to be signed
+  // and the result is signed as well.
+  // In this test SPIR-V demands an unsigned result, so we have to
+  // wrap the result with an as-cast.
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpSMod %v2uint %v2int_30_40 %v2int_40_30
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << "\n"
+      << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __vec_2__u32
+    {
+      As<__vec_2__u32>{
+        Binary{
+          TypeConstructor{
+            __vec_2__i32
+            ScalarConstructor{30}
+            ScalarConstructor{40}
+          }
+          modulo
+          TypeConstructor{
+            __vec_2__i32
+            ScalarConstructor{40}
+            ScalarConstructor{30}
+          }
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_FMod,
