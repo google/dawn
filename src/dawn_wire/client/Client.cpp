@@ -21,6 +21,7 @@ namespace dawn_wire { namespace client {
 
     Client::Client(CommandSerializer* serializer, MemoryTransferService* memoryTransferService)
         : ClientBase(),
+          mDevice(DeviceAllocator().New(this)->object.get()),
           mSerializer(serializer),
           mMemoryTransferService(memoryTransferService) {
         if (mMemoryTransferService == nullptr) {
@@ -28,8 +29,6 @@ namespace dawn_wire { namespace client {
             mOwnedMemoryTransferService = CreateInlineMemoryTransferService();
             mMemoryTransferService = mOwnedMemoryTransferService.get();
         }
-
-        mDevice = DeviceAllocator().New(this)->object.get();
     }
 
     Client::~Client() {

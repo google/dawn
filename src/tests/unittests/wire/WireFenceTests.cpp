@@ -44,6 +44,12 @@ class WireFenceTests : public WireTest {
             std::make_unique<StrictMock<MockFenceOnCompletionCallback>>();
 
         {
+            queue = wgpuDeviceGetDefaultQueue(device);
+            apiQueue = api.GetNewQueue();
+            EXPECT_CALL(api, DeviceGetDefaultQueue(apiDevice)).WillOnce(Return(apiQueue));
+            FlushClient();
+        }
+        {
             WGPUFenceDescriptor descriptor = {};
             descriptor.initialValue = 1;
 
@@ -83,6 +89,9 @@ class WireFenceTests : public WireTest {
     // A successfully created fence
     WGPUFence fence;
     WGPUFence apiFence;
+
+    WGPUQueue queue;
+    WGPUQueue apiQueue;
 };
 
 // Check that signaling a fence succeeds
@@ -218,8 +227,7 @@ TEST_F(WireFenceTests, DestroyBeforeOnCompletionEnd) {
 }
 
 // Test that signaling a fence on a wrong queue is invalid
-// DISABLED until we have support for multiple queues.
-TEST_F(WireFenceTests, DISABLED_SignalWrongQueue) {
+TEST_F(WireFenceTests, SignalWrongQueue) {
     WGPUQueue queue2 = wgpuDeviceGetDefaultQueue(device);
     WGPUQueue apiQueue2 = api.GetNewQueue();
     EXPECT_CALL(api, DeviceGetDefaultQueue(apiDevice)).WillOnce(Return(apiQueue2));
@@ -232,8 +240,7 @@ TEST_F(WireFenceTests, DISABLED_SignalWrongQueue) {
 }
 
 // Test that signaling a fence on a wrong queue does not update fence signaled value
-// DISABLED until we have support for multiple queues.
-TEST_F(WireFenceTests, DISABLED_SignalWrongQueueDoesNotUpdateValue) {
+TEST_F(WireFenceTests, SignalWrongQueueDoesNotUpdateValue) {
     WGPUQueue queue2 = wgpuDeviceGetDefaultQueue(device);
     WGPUQueue apiQueue2 = api.GetNewQueue();
     EXPECT_CALL(api, DeviceGetDefaultQueue(apiDevice)).WillOnce(Return(apiQueue2));

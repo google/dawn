@@ -69,12 +69,6 @@ class WireMultipleDeviceTests : public testing::Test {
             mS2cBuf->SetHandler(mWireClient.get());
 
             mClientDevice = mWireClient->GetDevice();
-
-            // The GetDefaultQueue is done on WireClient startup so we expect it now.
-            mClientQueue = wgpuDeviceGetDefaultQueue(mClientDevice);
-            mServerQueue = mApi.GetNewQueue();
-            EXPECT_CALL(mApi, DeviceGetDefaultQueue(mServerDevice)).WillOnce(Return(mServerQueue));
-            FlushClient();
         }
 
         ~WireHolder() {
@@ -103,14 +97,6 @@ class WireMultipleDeviceTests : public testing::Test {
             return mServerDevice;
         }
 
-        WGPUQueue ClientQueue() {
-            return mClientQueue;
-        }
-
-        WGPUQueue ServerQueue() {
-            return mServerQueue;
-        }
-
       private:
         testing::StrictMock<MockProcTable> mApi;
         std::unique_ptr<dawn_wire::WireServer> mWireServer;
@@ -119,8 +105,6 @@ class WireMultipleDeviceTests : public testing::Test {
         std::unique_ptr<utils::TerribleCommandBuffer> mC2sBuf;
         WGPUDevice mServerDevice;
         WGPUDevice mClientDevice;
-        WGPUQueue mServerQueue;
-        WGPUQueue mClientQueue;
     };
 
     void ExpectInjectedError(WireHolder* wire) {
@@ -150,12 +134,20 @@ TEST_F(WireMultipleDeviceTests, ValidatesSameDevice) {
     WireHolder wireA;
     WireHolder wireB;
 
-    // Create the fence
+    // Create the objects
+    WGPUQueue queueA = wgpuDeviceGetDefaultQueue(wireA.ClientDevice());
+    WGPUQueue queueB = wgpuDeviceGetDefaultQueue(wireB.ClientDevice());
+
     WGPUFenceDescriptor desc = {};
-    WGPUFence fenceA = wgpuQueueCreateFence(wireA.ClientQueue(), &desc);
+    WGPUFence fenceA = wgpuQueueCreateFence(queueA, &desc);
+
+    // Flush on wire B. We should see the queue created.
+    EXPECT_CALL(*wireB.Api(), DeviceGetDefaultQueue(wireB.ServerDevice()))
+        .WillOnce(Return(wireB.Api()->GetNewQueue()));
+    wireB.FlushClient();
 
     // Signal with a fence from a different wire.
-    wgpuQueueSignal(wireB.ClientQueue(), fenceA, 1u);
+    wgpuQueueSignal(queueB, fenceA, 1u);
 
     // We should inject an error into the server.
     ExpectInjectedError(&wireB);

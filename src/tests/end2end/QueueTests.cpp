@@ -25,7 +25,7 @@ class QueueTests : public DawnTest {};
 TEST_P(QueueTests, GetDefaultQueueSameObject) {
     wgpu::Queue q1 = device.GetDefaultQueue();
     wgpu::Queue q2 = device.GetDefaultQueue();
-    EXPECT_EQ(q1.Get(), q2.Get());
+    EXPECT_EQ(q1.Get() == q2.Get(), !UsesWire());
 }
 
 DAWN_INSTANTIATE_TEST(QueueTests,

@@ -123,9 +123,7 @@ class WireTest : public testing::Test {
 
     testing::StrictMock<MockProcTable> api;
     WGPUDevice apiDevice;
-    WGPUQueue apiQueue;
     WGPUDevice device;
-    WGPUQueue queue;
 
     dawn_wire::WireServer* GetWireServer();
     dawn_wire::WireClient* GetWireClient();

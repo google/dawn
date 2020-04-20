@@ -70,12 +70,6 @@ void WireTest::SetUp() {
     dawnProcSetProcs(&clientProcs);
 
     apiDevice = mockDevice;
-
-    // The GetDefaultQueue is done on WireClient startup so we expect it now.
-    queue = wgpuDeviceGetDefaultQueue(device);
-    apiQueue = api.GetNewQueue();
-    EXPECT_CALL(api, DeviceGetDefaultQueue(apiDevice)).WillOnce(Return(apiQueue));
-    FlushClient();
 }
 
 void WireTest::TearDown() {
@@ -110,7 +104,6 @@ dawn_wire::WireClient* WireTest::GetWireClient() {
 }
 
 void WireTest::DeleteServer() {
-    EXPECT_CALL(api, QueueRelease(apiQueue)).Times(1);
     mWireServer = nullptr;
 }
 
