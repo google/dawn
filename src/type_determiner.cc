@@ -284,6 +284,12 @@ bool TypeDeterminer::DetermineAs(ast::AsExpression* expr) {
 }
 
 bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
+  for (const auto& param : expr->params()) {
+    if (!DetermineResultType(param.get())) {
+      return false;
+    }
+  }
+
   if (!DetermineResultType(expr->func())) {
     return false;
   }

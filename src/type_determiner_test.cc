@@ -545,6 +545,32 @@ TEST_F(TypeDeterminerTest, Expr_Call) {
   EXPECT_TRUE(call.result_type()->IsF32());
 }
 
+TEST_F(TypeDeterminerTest, Expr_Call_WithParams) {
+  ast::type::F32Type f32;
+
+  ast::VariableList params;
+  auto func =
+      std::make_unique<ast::Function>("my_func", std::move(params), &f32);
+  ast::Module m;
+  m.AddFunction(std::move(func));
+
+  // Register the function
+  EXPECT_TRUE(td()->Determine(&m));
+
+  ast::ExpressionList call_params;
+  call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.4)));
+
+  auto* param_ptr = call_params.back().get();
+
+  ast::CallExpression call(
+      std::make_unique<ast::IdentifierExpression>("my_func"),
+      std::move(call_params));
+  EXPECT_TRUE(td()->DetermineResultType(&call));
+  ASSERT_NE(param_ptr->result_type(), nullptr);
+  EXPECT_TRUE(param_ptr->result_type()->IsF32());
+}
+
 TEST_F(TypeDeterminerTest, Expr_Cast) {
   ast::type::F32Type f32;
   ast::CastExpression cast(&f32,
