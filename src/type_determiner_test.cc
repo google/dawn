@@ -1618,5 +1618,91 @@ INSTANTIATE_TEST_SUITE_P(
                     GLSLData{"inversesqrt", GLSLstd450InverseSqrt},
                     GLSLData{"normalize", GLSLstd450Normalize}));
 
+TEST_F(TypeDeterminerTest, ImportData_Length_Scalar) {
+  ast::type::F32Type f32;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&f32, 1.f)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type = td()->GetImportData("GLSL.std.450", "length", params, &id);
+  ASSERT_NE(type, nullptr);
+  EXPECT_TRUE(type->is_float_scalar());
+  EXPECT_EQ(id, GLSLstd450Length);
+}
+
+TEST_F(TypeDeterminerTest, ImportData_Length_FloatVector) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+
+  ast::ExpressionList params;
+  params.push_back(
+      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type = td()->GetImportData("GLSL.std.450", "length", params, &id);
+  ASSERT_NE(type, nullptr);
+  EXPECT_TRUE(type->is_float_scalar());
+  EXPECT_EQ(id, GLSLstd450Length);
+}
+
+TEST_F(TypeDeterminerTest, ImportData_Length_Error_Integer) {
+  ast::type::I32Type i32;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 1)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type = td()->GetImportData("GLSL.std.450", "length", params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(
+      td()->error(),
+      "incorrect type for length. Requires a float scalar or a float vector");
+}
+
+TEST_F(TypeDeterminerTest, ImportData_Length_Error_NoParams) {
+  ast::ExpressionList params;
+  uint32_t id = 0;
+  auto* type = td()->GetImportData("GLSL.std.450", "length", params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(),
+            "incorrect number of parameters for length. Expected 1 got 0");
+}
+
+TEST_F(TypeDeterminerTest, ImportData_Length_Error_MultipleParams) {
+  ast::type::F32Type f32;
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type = td()->GetImportData("GLSL.std.450", "length", params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(),
+            "incorrect number of parameters for length. Expected 1 got 3");
+}
+
 }  // namespace
 }  // namespace tint

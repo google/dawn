@@ -668,6 +668,24 @@ ast::type::Type* TypeDeterminer::GetImportData(
     }
 
     return params[0]->result_type();
+  } else if (name == "length") {
+    if (params.size() != 1) {
+      error_ = "incorrect number of parameters for " + name +
+               ". Expected 1 got " + std::to_string(params.size());
+      return nullptr;
+    }
+    if (!params[0]->result_type()->is_float_scalar_or_vector()) {
+      error_ = "incorrect type for " + name +
+               ". Requires a float scalar or a float vector";
+      return nullptr;
+    }
+
+    *id = GLSLstd450Length;
+    auto* result_type = params[0]->result_type();
+
+    // Length returns a scalar of the same type as the parameter.
+    return result_type->is_float_scalar() ? result_type
+                                          : result_type->AsVector()->type();
   }
 
   return nullptr;
