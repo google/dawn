@@ -1585,17 +1585,19 @@ TEST_P(ImportData_FloatTest, Error_MultipleParams) {
                                param.name + ". Expected 1 got 3");
 }
 
-INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
-                         ImportData_FloatTest,
-                         testing::Values(GLSLData{"round", GLSLstd450Round},
-                                         GLSLData{"roundeven",
-                                                  GLSLstd450RoundEven},
-                                         GLSLData{"trunc", GLSLstd450Trunc},
-                                         GLSLData{"fabs", GLSLstd450FAbs},
-                                         GLSLData{"fsign", GLSLstd450FSign},
-                                         GLSLData{"floor", GLSLstd450Floor},
-                                         GLSLData{"ceil", GLSLstd450Ceil},
-                                         GLSLData{"fract", GLSLstd450Fract}));
+INSTANTIATE_TEST_SUITE_P(
+    TypeDeterminerTest,
+    ImportData_FloatTest,
+    testing::Values(GLSLData{"round", GLSLstd450Round},
+                    GLSLData{"roundeven", GLSLstd450RoundEven},
+                    GLSLData{"trunc", GLSLstd450Trunc},
+                    GLSLData{"fabs", GLSLstd450FAbs},
+                    GLSLData{"fsign", GLSLstd450FSign},
+                    GLSLData{"floor", GLSLstd450Floor},
+                    GLSLData{"ceil", GLSLstd450Ceil},
+                    GLSLData{"fract", GLSLstd450Fract},
+                    GLSLData{"radians", GLSLstd450Radians},
+                    GLSLData{"degrees", GLSLstd450Degrees}));
 
 }  // namespace
 }  // namespace tint

@@ -576,9 +576,15 @@ ast::type::Type* TypeDeterminer::GetImportData(
     return nullptr;
   }
 
+  // Most of these are floating-point general except the below which are only
+  // FP16 and FP32. We only have FP32 at this point so the below works, if we
+  // get FP64 support or otherwise we'll need to differentiate.
+  //   * radians
+  //   * degrees
+
   if (name == "round" || name == "roundeven" || name == "trunc" ||
       name == "fabs" || name == "fsign" || name == "floor" || name == "ceil" ||
-      name == "fract") {
+      name == "fract" || name == "radians" || name == "degrees") {
     if (params.size() != 1) {
       error_ = "incorrect number of parameters for " + name +
                ". Expected 1 got " + std::to_string(params.size());
@@ -606,6 +612,10 @@ ast::type::Type* TypeDeterminer::GetImportData(
       *id = GLSLstd450Ceil;
     } else if (name == "fract") {
       *id = GLSLstd450Fract;
+    } else if (name == "radians") {
+      *id = GLSLstd450Radians;
+    } else if (name == "degrees") {
+      *id = GLSLstd450Degrees;
     }
 
     return params[0]->result_type();
