@@ -1592,7 +1592,8 @@ INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                                                   GLSLstd450RoundEven},
                                          GLSLData{"trunc", GLSLstd450Trunc},
                                          GLSLData{"fabs", GLSLstd450FAbs},
-                                         GLSLData{"fsign", GLSLstd450FSign}));
+                                         GLSLData{"fsign", GLSLstd450FSign},
+                                         GLSLData{"floor", GLSLstd450Floor}));
 
 }  // namespace
 }  // namespace tint
