@@ -19,7 +19,24 @@
 
 #include "tests/DawnTest.h"
 
-class DeprecationTests : public DawnTest {};
+#include "utils/WGPUHelpers.h"
+
+class DeprecationTests : public DawnTest {
+  protected:
+    void TestSetUp() override {
+        // Skip when validation is off because warnings might be emitted during validation calls
+        DAWN_SKIP_TEST_IF(IsDawnValidationSkipped());
+    }
+
+    void TearDown() override {
+        if (!UsesWire()) {
+            EXPECT_EQ(mLastWarningCount,
+                      dawn_native::GetDeprecationWarningCountForTesting(device.Get()));
+        }
+    }
+
+    size_t mLastWarningCount = 0;
+};
 
 #define EXPECT_DEPRECATION_WARNING(statement)                                    \
     do {                                                                         \
@@ -31,7 +48,9 @@ class DeprecationTests : public DawnTest {};
             statement;                                                           \
             size_t warningsAfter =                                               \
                 dawn_native::GetDeprecationWarningCountForTesting(device.Get()); \
+            EXPECT_EQ(mLastWarningCount, warningsBefore);                        \
             EXPECT_EQ(warningsAfter, warningsBefore + 1);                        \
+            mLastWarningCount = warningsAfter;                                   \
         }                                                                        \
     } while (0)
 
@@ -48,6 +67,89 @@ TEST_P(DeprecationTests, CreateQueueReturnsFunctionalQueue) {
     EXPECT_DEPRECATION_WARNING(q = device.CreateQueue());
 
     q.Submit(0, nullptr);
+}
+
+// Tests for BindGroupLayoutEntry::textureDimension -> viewDimension
+
+// Test that creating a BGL with textureDimension produces a deprecation warning.
+TEST_P(DeprecationTests, BGLEntryTextureDimensionIsDeprecated) {
+    wgpu::BindGroupLayoutEntry entryDesc = {
+        .type = wgpu::BindingType::SampledTexture,
+        .textureDimension = wgpu::TextureViewDimension::e2D,
+    };
+
+    wgpu::BindGroupLayoutDescriptor bglDesc = {
+        .bindingCount = 1,
+        .bindings = &entryDesc,
+    };
+    EXPECT_DEPRECATION_WARNING(device.CreateBindGroupLayout(&bglDesc));
+}
+
+// Test that creating a BGL with default viewDimension and textureDimension doesn't emit a warning
+TEST_P(DeprecationTests, BGLEntryTextureDimensionAndViewUndefinedEmitsNoWarning) {
+    wgpu::BindGroupLayoutEntry entryDesc = {
+        .type = wgpu::BindingType::Sampler,
+    };
+
+    wgpu::BindGroupLayoutDescriptor bglDesc = {
+        .bindingCount = 1,
+        .bindings = &entryDesc,
+    };
+    device.CreateBindGroupLayout(&bglDesc);
+}
+// Test that creating a BGL with both textureDimension and viewDimension is an error
+TEST_P(DeprecationTests, BGLEntryTextureAndViewDimensionIsInvalid) {
+    wgpu::BindGroupLayoutEntry entryDesc = {
+        .type = wgpu::BindingType::SampledTexture,
+        .textureDimension = wgpu::TextureViewDimension::e2D,
+        .viewDimension = wgpu::TextureViewDimension::e2D,
+    };
+
+    wgpu::BindGroupLayoutDescriptor bglDesc = {
+        .bindingCount = 1,
+        .bindings = &entryDesc,
+    };
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&bglDesc));
+}
+
+// Test that creating a BGL with both textureDimension still does correct state tracking
+TEST_P(DeprecationTests, BGLEntryTextureDimensionStateTracking) {
+    // Create a BGL that expects a cube map
+    wgpu::BindGroupLayoutEntry entryDesc = {
+        .type = wgpu::BindingType::SampledTexture,
+        .textureDimension = wgpu::TextureViewDimension::Cube,
+    };
+
+    wgpu::BindGroupLayoutDescriptor bglDesc = {
+        .bindingCount = 1,
+        .bindings = &entryDesc,
+    };
+    wgpu::BindGroupLayout layout;
+    EXPECT_DEPRECATION_WARNING(layout = device.CreateBindGroupLayout(&bglDesc));
+
+    // Create a 2D array view and a cube view
+    wgpu::TextureDescriptor textureDesc = {
+        .usage = wgpu::TextureUsage::Sampled,
+        .size = {1, 1, 1},
+        .arrayLayerCount = 6,
+        .format = wgpu::TextureFormat::RGBA8Unorm,
+    };
+    wgpu::Texture texture = device.CreateTexture(&textureDesc);
+
+    wgpu::TextureViewDescriptor viewDesc = {
+        .dimension = wgpu::TextureViewDimension::e2DArray,
+        .baseArrayLayer = 0,
+        .arrayLayerCount = 6,
+    };
+    wgpu::TextureView arrayView = texture.CreateView(&viewDesc);
+
+    viewDesc.dimension = wgpu::TextureViewDimension::Cube;
+    wgpu::TextureView cubeView = texture.CreateView(&viewDesc);
+
+    // textureDimension is correctly taken into account and only the BindGroup with the Cube view is
+    // valid.
+    utils::MakeBindGroup(device, layout, {{0, cubeView}});
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, arrayView}}));
 }
 
 DAWN_INSTANTIATE_TEST(DeprecationTests,

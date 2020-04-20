@@ -603,7 +603,7 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutStorageTextureFormatMatches
 
 // Verify the dimension of the bind group layout with storage textures must match the one declared
 // in shader.
-TEST_F(StorageTextureValidationTests, BindGroupLayoutTextureDimensionMatchesShaderDeclaration) {
+TEST_F(StorageTextureValidationTests, BindGroupLayoutViewDimensionMatchesShaderDeclaration) {
     constexpr std::array<wgpu::TextureViewDimension, 6> kAllDimensions = {
         wgpu::TextureViewDimension::e1D,       wgpu::TextureViewDimension::e2D,
         wgpu::TextureViewDimension::e2DArray,  wgpu::TextureViewDimension::Cube,
@@ -631,7 +631,7 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutTextureDimensionMatchesShad
             for (wgpu::TextureViewDimension dimensionInBindGroupLayout : kAllDimensions) {
                 // Create the bind group layout with the given texture view dimension.
                 wgpu::BindGroupLayoutEntry bindGroupLayoutBinding = defaultBindGroupLayoutEntry;
-                bindGroupLayoutBinding.textureDimension = dimensionInBindGroupLayout;
+                bindGroupLayoutBinding.viewDimension = dimensionInBindGroupLayout;
                 wgpu::BindGroupLayout bindGroupLayout =
                     utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});
 
@@ -817,7 +817,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureViewDimensionInBindGroup) {
         for (wgpu::TextureViewDimension dimensionInBindGroupLayout : kSupportedDimensions) {
             // Create a bind group layout with given texture view dimension.
             wgpu::BindGroupLayoutEntry bindGroupLayoutBinding = defaultBindGroupLayoutEntry;
-            bindGroupLayoutBinding.textureDimension = dimensionInBindGroupLayout;
+            bindGroupLayoutBinding.viewDimension = dimensionInBindGroupLayout;
             wgpu::BindGroupLayout bindGroupLayout =
                 utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding});
 

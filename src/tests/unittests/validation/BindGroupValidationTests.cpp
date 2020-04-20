@@ -304,9 +304,15 @@ TEST_F(BindGroupValidationTest, TextureUsage) {
 
 // Check that a texture must have the correct component type
 TEST_F(BindGroupValidationTest, TextureComponentType) {
-    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, false,
-                  wgpu::TextureViewDimension::e2D, wgpu::TextureComponentType::Float}});
+    wgpu::BindGroupLayout layout =
+        utils::MakeBindGroupLayout(device, {{0,
+                                             wgpu::ShaderStage::Fragment,
+                                             wgpu::BindingType::SampledTexture,
+                                             false,
+                                             false,
+                                             {},
+                                             wgpu::TextureViewDimension::e2D,
+                                             wgpu::TextureComponentType::Float}});
 
     // Control case: setting a Float typed texture view works.
     utils::MakeBindGroup(device, layout, {{0, mSampledTextureView}});
@@ -321,9 +327,15 @@ TEST_F(BindGroupValidationTest, TextureComponentType) {
 
 // Check that a texture must have the correct dimension
 TEST_F(BindGroupValidationTest, TextureDimension) {
-    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, false,
-                  wgpu::TextureViewDimension::e2D, wgpu::TextureComponentType::Float}});
+    wgpu::BindGroupLayout layout =
+        utils::MakeBindGroupLayout(device, {{0,
+                                             wgpu::ShaderStage::Fragment,
+                                             wgpu::BindingType::SampledTexture,
+                                             false,
+                                             false,
+                                             {},
+                                             wgpu::TextureViewDimension::e2D,
+                                             wgpu::TextureComponentType::Float}});
 
     // Control case: setting a 2D texture view works.
     utils::MakeBindGroup(device, layout, {{0, mSampledTextureView}});

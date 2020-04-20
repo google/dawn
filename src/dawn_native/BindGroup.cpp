@@ -110,7 +110,7 @@ namespace dawn_native {
                     break;
             }
 
-            if (binding.textureView->GetDimension() != bindingInfo.textureDimension) {
+            if (binding.textureView->GetDimension() != bindingInfo.viewDimension) {
                 return DAWN_VALIDATION_ERROR("texture view dimension mismatch");
             }
 
