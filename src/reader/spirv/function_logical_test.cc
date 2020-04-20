@@ -129,6 +129,35 @@ std::string AstFor(std::string assembly) {
   return "bad case";
 }
 
+using SpvUnaryLogicalTest = SpvParserTestBase<::testing::Test>;
+
+TEST_F(SpvUnaryLogicalTest, LogicalNot_Scalar) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpLogicalNot %bool %true
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __bool
+    {
+      UnaryOp{
+        not
+        ScalarConstructor{true}
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
 struct BinaryData {
   const std::string res_type;
   const std::string lhs;

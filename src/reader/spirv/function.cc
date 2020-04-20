@@ -50,7 +50,10 @@ bool GetUnaryOp(SpvOp opcode, ast::UnaryOp* ast_unary_op) {
     case SpvOpFNegate:
       *ast_unary_op = ast::UnaryOp::kNegation;
       return true;
-    // TODO(dneto): SpvOpNegate SpvOpNot SpvLogicalNot
+    case SpvOpLogicalNot:
+      // TODO(dneto): SpvOpNot
+      *ast_unary_op = ast::UnaryOp::kNot;
+      return true;
     default:
       break;
   }
