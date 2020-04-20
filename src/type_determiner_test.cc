@@ -1589,7 +1589,8 @@ INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          ImportData_FloatTest,
                          testing::Values(GLSLData{"round", GLSLstd450Round},
                                          GLSLData{"roundeven",
-                                                  GLSLstd450RoundEven}));
+                                                  GLSLstd450RoundEven},
+                                         GLSLData{"trunc", GLSLstd450Trunc}));
 
 }  // namespace
 }  // namespace tint

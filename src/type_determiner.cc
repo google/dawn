@@ -576,7 +576,7 @@ ast::type::Type* TypeDeterminer::GetImportData(
     return nullptr;
   }
 
-  if (name == "round" || name == "roundeven") {
+  if (name == "round" || name == "roundeven" || name == "trunc") {
     if (params.size() != 1) {
       error_ = "incorrect number of parameters for " + name +
                ". Expected 1 got " + std::to_string(params.size());
@@ -592,7 +592,10 @@ ast::type::Type* TypeDeterminer::GetImportData(
       *id = GLSLstd450Round;
     } else if (name == "roundeven") {
       *id = GLSLstd450RoundEven;
+    } else if (name == "trunc") {
+      *id = GLSLstd450Trunc;
     }
+
     return params[0]->result_type();
   }
 
