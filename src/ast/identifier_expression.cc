@@ -36,7 +36,7 @@ IdentifierExpression::IdentifierExpression(IdentifierExpression&&) = default;
 IdentifierExpression::~IdentifierExpression() = default;
 
 std::string IdentifierExpression::path() const {
-  if (segments_.empty() || segments_.size() < 2) {
+  if (segments_.size() < 2) {
     return "";
   }
 
