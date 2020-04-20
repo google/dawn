@@ -305,8 +305,8 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
-  tint::TypeDeterminer td(&ctx);
-  if (!td.Determine(&mod)) {
+  tint::TypeDeterminer td(&ctx, &mod);
+  if (!td.Determine()) {
     std::cerr << td.error() << std::endl;
     return 1;
   }

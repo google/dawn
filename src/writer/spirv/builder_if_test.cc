@@ -47,10 +47,10 @@ TEST_F(BuilderTest, If_Empty) {
   ast::IfStatement expr(std::move(cond), ast::StatementList{});
 
   Context ctx;
-  TypeDeterminer td(&ctx);
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Module mod;
   Builder b(&mod);
   b.push_function(Function{});
 
@@ -89,12 +89,12 @@ TEST_F(BuilderTest, If_WithStatements) {
   ast::IfStatement expr(std::move(cond), std::move(body));
 
   Context ctx;
-  TypeDeterminer td(&ctx);
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Module mod;
   Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
@@ -152,12 +152,12 @@ TEST_F(BuilderTest, If_WithElse) {
   expr.set_else_statements(std::move(else_stmts));
 
   Context ctx;
-  TypeDeterminer td(&ctx);
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Module mod;
   Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
@@ -222,12 +222,12 @@ TEST_F(BuilderTest, If_WithElseIf) {
   expr.set_else_statements(std::move(else_stmts));
 
   Context ctx;
-  TypeDeterminer td(&ctx);
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Module mod;
   Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
@@ -316,12 +316,12 @@ TEST_F(BuilderTest, If_WithMultiple) {
   expr.set_else_statements(std::move(else_stmts));
 
   Context ctx;
-  TypeDeterminer td(&ctx);
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Module mod;
   Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();

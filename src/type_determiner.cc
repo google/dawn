@@ -48,7 +48,8 @@
 
 namespace tint {
 
-TypeDeterminer::TypeDeterminer(Context* ctx) : ctx_(*ctx) {}
+TypeDeterminer::TypeDeterminer(Context* ctx, ast::Module* mod)
+    : ctx_(*ctx), mod_(mod) {}
 
 TypeDeterminer::~TypeDeterminer() = default;
 
@@ -61,16 +62,16 @@ void TypeDeterminer::set_error(const Source& src, const std::string& msg) {
   error_ += msg;
 }
 
-bool TypeDeterminer::Determine(ast::Module* mod) {
-  for (const auto& var : mod->global_variables()) {
+bool TypeDeterminer::Determine() {
+  for (const auto& var : mod_->global_variables()) {
     variable_stack_.set_global(var->name(), var.get());
   }
 
-  for (const auto& func : mod->functions()) {
+  for (const auto& func : mod_->functions()) {
     name_to_function_[func->name()] = func.get();
   }
 
-  if (!DetermineFunctions(mod->functions())) {
+  if (!DetermineFunctions(mod_->functions())) {
     return false;
   }
   return true;

@@ -46,16 +46,15 @@ class TypeDeterminer {
  public:
   /// Constructor
   /// @param ctx the tint context
-  explicit TypeDeterminer(Context* ctx);
+  /// @param mod the module to update with typing information
+  TypeDeterminer(Context* ctx, ast::Module* mod);
   ~TypeDeterminer();
 
   /// @returns error messages from the type determiner
   const std::string& error() { return error_; }
 
-  /// Runs the type determiner
-  /// @param mod the module to update with typing information
   /// @returns true if the type determiner was successful
-  bool Determine(ast::Module* mod);
+  bool Determine();
   /// Determines type information for functions
   /// @param funcs the functions to check
   /// @returns true if the determination was successful
@@ -104,6 +103,7 @@ class TypeDeterminer {
   bool DetermineUnaryOp(ast::UnaryOpExpression* expr);
 
   Context& ctx_;
+  ast::Module* mod_;
   std::string error_;
   ScopeStack<ast::Variable*> variable_stack_;
   std::unordered_map<std::string, ast::Function*> name_to_function_;

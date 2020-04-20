@@ -151,7 +151,8 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
   ast::type::I32Type i32;
 
   Context ctx;
-  TypeDeterminer td(&ctx);
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
 
   ast::Variable var("var", ast::StorageClass::kPrivate, &i32);
 
@@ -165,7 +166,6 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Module mod;
   Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(&var)) << b.error();
@@ -186,7 +186,8 @@ TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
   ast::type::I32Type i32;
 
   Context ctx;
-  TypeDeterminer td(&ctx);
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
 
   ast::Variable var("var", ast::StorageClass::kNone, &i32);
   var.set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
@@ -203,7 +204,6 @@ TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
 
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
-  ast::Module mod;
   Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(&var)) << b.error();

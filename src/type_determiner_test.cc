@@ -70,7 +70,8 @@ class FakeExpr : public ast::Expression {
 
 class TypeDeterminerHelper {
  public:
-  TypeDeterminerHelper() : td_(std::make_unique<TypeDeterminer>(&ctx_)) {}
+  TypeDeterminerHelper()
+      : td_(std::make_unique<TypeDeterminer>(&ctx_, &mod_)) {}
 
   TypeDeterminer* td() const { return td_.get(); }
   ast::Module* mod() { return &mod_; }
@@ -435,7 +436,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
   mod()->AddGlobalVariable(std::move(var));
 
   // Register the global
-  EXPECT_TRUE(td()->Determine(mod()));
+  EXPECT_TRUE(td()->Determine());
 
   ast::ArrayAccessorExpression acc(
       std::make_unique<ast::IdentifierExpression>("my_var"), std::move(idx));
@@ -456,7 +457,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix) {
   mod()->AddGlobalVariable(std::move(var));
 
   // Register the global
-  EXPECT_TRUE(td()->Determine(mod()));
+  EXPECT_TRUE(td()->Determine());
 
   ast::ArrayAccessorExpression acc(
       std::make_unique<ast::IdentifierExpression>("my_var"), std::move(idx));
@@ -480,7 +481,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
   mod()->AddGlobalVariable(std::move(var));
 
   // Register the global
-  EXPECT_TRUE(td()->Determine(mod()));
+  EXPECT_TRUE(td()->Determine());
 
   ast::ArrayAccessorExpression acc(
       std::make_unique<ast::ArrayAccessorExpression>(
@@ -505,7 +506,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
   mod()->AddGlobalVariable(std::move(var));
 
   // Register the global
-  EXPECT_TRUE(td()->Determine(mod()));
+  EXPECT_TRUE(td()->Determine());
 
   ast::ArrayAccessorExpression acc(
       std::make_unique<ast::IdentifierExpression>("my_var"), std::move(idx));
@@ -533,7 +534,7 @@ TEST_F(TypeDeterminerTest, Expr_Call) {
   mod()->AddFunction(std::move(func));
 
   // Register the function
-  EXPECT_TRUE(td()->Determine(mod()));
+  EXPECT_TRUE(td()->Determine());
 
   ast::ExpressionList call_params;
   ast::CallExpression call(
@@ -553,7 +554,7 @@ TEST_F(TypeDeterminerTest, Expr_Call_WithParams) {
   mod()->AddFunction(std::move(func));
 
   // Register the function
-  EXPECT_TRUE(td()->Determine(mod()));
+  EXPECT_TRUE(td()->Determine());
 
   ast::ExpressionList call_params;
   call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
@@ -617,7 +618,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalVariable) {
   mod()->AddGlobalVariable(std::move(var));
 
   // Register the global
-  EXPECT_TRUE(td()->Determine(mod()));
+  EXPECT_TRUE(td()->Determine());
 
   ast::IdentifierExpression ident("my_var");
   EXPECT_TRUE(td()->DetermineResultType(&ident));
@@ -658,7 +659,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function) {
   mod()->AddFunction(std::move(func));
 
   // Register the function
-  EXPECT_TRUE(td()->Determine(mod()));
+  EXPECT_TRUE(td()->Determine());
 
   ast::IdentifierExpression ident("my_func");
   EXPECT_TRUE(td()->DetermineResultType(&ident));
@@ -688,7 +689,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
   mod()->AddGlobalVariable(std::move(var));
 
   // Register the global
-  EXPECT_TRUE(td()->Determine(mod()));
+  EXPECT_TRUE(td()->Determine());
 
   auto ident = std::make_unique<ast::IdentifierExpression>("my_struct");
   auto mem_ident = std::make_unique<ast::IdentifierExpression>("second_member");
@@ -708,7 +709,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
   mod()->AddGlobalVariable(std::move(var));
 
   // Register the global
-  EXPECT_TRUE(td()->Determine(mod()));
+  EXPECT_TRUE(td()->Determine());
 
   auto ident = std::make_unique<ast::IdentifierExpression>("my_vec");
   auto swizzle = std::make_unique<ast::IdentifierExpression>("xy");
@@ -776,7 +777,7 @@ TEST_F(TypeDeterminerTest, Expr_MultiLevel) {
   mod()->AddGlobalVariable(std::move(var));
 
   // Register the global
-  EXPECT_TRUE(td()->Determine(mod()));
+  EXPECT_TRUE(td()->Determine());
 
   auto ident = std::make_unique<ast::IdentifierExpression>("c");
   auto mem_ident = std::make_unique<ast::IdentifierExpression>("mem");
@@ -811,7 +812,7 @@ TEST_P(Expr_Binary_BitwiseTest, Scalar) {
   mod()->AddGlobalVariable(std::move(var));
 
   // Register the global
-  ASSERT_TRUE(td()->Determine(mod())) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(
       op, std::make_unique<ast::IdentifierExpression>("val"),
@@ -833,7 +834,7 @@ TEST_P(Expr_Binary_BitwiseTest, Vector) {
   mod()->AddGlobalVariable(std::move(var));
 
   // Register the global
-  ASSERT_TRUE(td()->Determine(mod())) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(
       op, std::make_unique<ast::IdentifierExpression>("val"),
@@ -869,7 +870,7 @@ TEST_P(Expr_Binary_LogicalTest, Scalar) {
   mod()->AddGlobalVariable(std::move(var));
 
   // Register the global
-  ASSERT_TRUE(td()->Determine((mod()))) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(
       op, std::make_unique<ast::IdentifierExpression>("val"),
@@ -891,7 +892,7 @@ TEST_P(Expr_Binary_LogicalTest, Vector) {
   mod()->AddGlobalVariable(std::move(var));
 
   // Register the global
-  ASSERT_TRUE(td()->Determine(mod())) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(
       op, std::make_unique<ast::IdentifierExpression>("val"),
@@ -919,7 +920,7 @@ TEST_P(Expr_Binary_CompareTest, Scalar) {
   mod()->AddGlobalVariable(std::move(var));
 
   // Register the global
-  ASSERT_TRUE(td()->Determine((mod()))) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(
       op, std::make_unique<ast::IdentifierExpression>("val"),
@@ -941,7 +942,7 @@ TEST_P(Expr_Binary_CompareTest, Vector) {
   mod()->AddGlobalVariable(std::move(var));
 
   // Register the global
-  ASSERT_TRUE(td()->Determine((mod()))) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(
       op, std::make_unique<ast::IdentifierExpression>("val"),
@@ -970,7 +971,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Scalar) {
   mod()->AddGlobalVariable(std::move(var));
 
   // Register the global
-  ASSERT_TRUE(td()->Determine((mod()))) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(
       ast::BinaryOp::kMultiply,
@@ -994,7 +995,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Scalar) {
   mod()->AddGlobalVariable(std::move(vector));
 
   // Register the global
-  ASSERT_TRUE(td()->Determine((mod()))) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(
       ast::BinaryOp::kMultiply,
@@ -1020,7 +1021,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Vector) {
   mod()->AddGlobalVariable(std::move(vector));
 
   // Register the global
-  ASSERT_TRUE(td()->Determine((mod()))) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(
       ast::BinaryOp::kMultiply,
@@ -1043,7 +1044,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Vector) {
   mod()->AddGlobalVariable(std::move(vector));
 
   // Register the global
-  ASSERT_TRUE(td()->Determine((mod()))) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(
       ast::BinaryOp::kMultiply,
@@ -1069,7 +1070,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Scalar) {
   mod()->AddGlobalVariable(std::move(matrix));
 
   // Register the global
-  ASSERT_TRUE(td()->Determine((mod()))) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(
       ast::BinaryOp::kMultiply,
@@ -1098,7 +1099,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Matrix) {
   mod()->AddGlobalVariable(std::move(matrix));
 
   // Register the global
-  ASSERT_TRUE(td()->Determine((mod()))) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(
       ast::BinaryOp::kMultiply,
@@ -1128,7 +1129,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Vector) {
   mod()->AddGlobalVariable(std::move(matrix));
 
   // Register the global
-  ASSERT_TRUE(td()->Determine((mod()))) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(
       ast::BinaryOp::kMultiply,
@@ -1155,7 +1156,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Matrix) {
   mod()->AddGlobalVariable(std::move(matrix));
 
   // Register the global
-  ASSERT_TRUE(td()->Determine((mod()))) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(
       ast::BinaryOp::kMultiply,
@@ -1182,7 +1183,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Matrix) {
   mod()->AddGlobalVariable(std::move(matrix2));
 
   // Register the global
-  ASSERT_TRUE(td()->Determine((mod()))) << td()->error();
+  ASSERT_TRUE(td()->Determine()) << td()->error();
 
   ast::BinaryExpression expr(
       ast::BinaryOp::kMultiply,
@@ -1213,7 +1214,7 @@ TEST_P(UnaryDerivativeExpressionTest, Expr_UnaryDerivative) {
   mod()->AddGlobalVariable(std::move(var));
 
   // Register the global
-  EXPECT_TRUE(td()->Determine((mod())));
+  EXPECT_TRUE(td()->Determine());
 
   ast::UnaryDerivativeExpression der(
       derivative, ast::DerivativeModifier::kNone,
@@ -1248,7 +1249,7 @@ TEST_P(UnaryMethodExpressionBoolTest, Expr_UnaryMethod_Any) {
   ast::UnaryMethodExpression exp(op, std::move(params));
 
   // Register the variable
-  EXPECT_TRUE(td()->Determine((mod())));
+  EXPECT_TRUE(td()->Determine());
 
   EXPECT_TRUE(td()->DetermineResultType(&exp));
   ASSERT_NE(exp.result_type(), nullptr);
@@ -1277,7 +1278,7 @@ TEST_P(UnaryMethodExpressionVecTest, Expr_UnaryMethod_Bool) {
   ast::UnaryMethodExpression exp(op, std::move(params));
 
   // Register the variable
-  EXPECT_TRUE(td()->Determine((mod())));
+  EXPECT_TRUE(td()->Determine());
 
   EXPECT_TRUE(td()->DetermineResultType(&exp));
   ASSERT_NE(exp.result_type(), nullptr);
@@ -1300,7 +1301,7 @@ TEST_P(UnaryMethodExpressionVecTest, Expr_UnaryMethod_Vec) {
   ast::UnaryMethodExpression exp(op, std::move(params));
 
   // Register the variable
-  EXPECT_TRUE(td()->Determine((mod())));
+  EXPECT_TRUE(td()->Determine());
 
   EXPECT_TRUE(td()->DetermineResultType(&exp));
   ASSERT_NE(exp.result_type(), nullptr);
@@ -1328,7 +1329,7 @@ TEST_F(TypeDeterminerTest, Expr_UnaryMethod_Dot) {
   ast::UnaryMethodExpression exp(ast::UnaryMethod::kDot, std::move(params));
 
   // Register the variable
-  EXPECT_TRUE(td()->Determine((mod())));
+  EXPECT_TRUE(td()->Determine());
 
   EXPECT_TRUE(td()->DetermineResultType(&exp));
   ASSERT_NE(exp.result_type(), nullptr);
@@ -1355,7 +1356,7 @@ TEST_F(TypeDeterminerTest, Expr_UnaryMethod_OuterProduct) {
                                  std::move(params));
 
   // Register the variable
-  EXPECT_TRUE(td()->Determine((mod())));
+  EXPECT_TRUE(td()->Determine());
 
   EXPECT_TRUE(td()->DetermineResultType(&exp));
   ASSERT_NE(exp.result_type(), nullptr);
@@ -1379,7 +1380,7 @@ TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
   mod()->AddGlobalVariable(std::move(var));
 
   // Register the global
-  EXPECT_TRUE(td()->Determine((mod())));
+  EXPECT_TRUE(td()->Determine());
 
   ast::UnaryOpExpression der(
       op, std::make_unique<ast::IdentifierExpression>("ident"));
@@ -1410,7 +1411,7 @@ TEST_F(TypeDeterminerTest, StorageClass_SetsIfMissing) {
 
   mod()->AddFunction(std::move(func));
 
-  EXPECT_TRUE(td()->Determine((mod()))) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_EQ(var_ptr->storage_class(), ast::StorageClass::kFunction);
 }
 
@@ -1431,7 +1432,7 @@ TEST_F(TypeDeterminerTest, StorageClass_DoesNotSetOnConst) {
 
   mod()->AddFunction(std::move(func));
 
-  EXPECT_TRUE(td()->Determine((mod()))) << td()->error();
+  EXPECT_TRUE(td()->Determine()) << td()->error();
   EXPECT_EQ(var_ptr->storage_class(), ast::StorageClass::kNone);
 }
 
@@ -1450,7 +1451,7 @@ TEST_F(TypeDeterminerTest, StorageClass_NonFunctionClassError) {
 
   mod()->AddFunction(std::move(func));
 
-  EXPECT_FALSE(td()->Determine((mod())));
+  EXPECT_FALSE(td()->Determine());
   EXPECT_EQ(td()->error(),
             "function variable has a non-function storage class");
 }
