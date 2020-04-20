@@ -585,13 +585,17 @@ ast::type::Type* TypeDeterminer::GetImportData(
   //   * asin, acos, atan
   //   * sinh, cosh, tanh
   //   * asinh, acosh, atanh
+  //   * exp, exp2
+  //   * log, log2
 
   if (name == "round" || name == "roundeven" || name == "trunc" ||
       name == "fabs" || name == "fsign" || name == "floor" || name == "ceil" ||
       name == "fract" || name == "radians" || name == "degrees" ||
       name == "sin" || name == "cos" || name == "tan" || name == "asin" ||
       name == "acos" || name == "atan" || name == "sinh" || name == "cosh" ||
-      name == "tanh" || name == "asinh" || name == "acosh" || name == "atanh") {
+      name == "tanh" || name == "asinh" || name == "acosh" || name == "atanh" ||
+      name == "exp" || name == "log" || name == "exp2" || name == "log2" ||
+      name == "sqrt" || name == "inversesqrt") {
     if (params.size() != 1) {
       error_ = "incorrect number of parameters for " + name +
                ". Expected 1 got " + std::to_string(params.size());
@@ -647,6 +651,18 @@ ast::type::Type* TypeDeterminer::GetImportData(
       *id = GLSLstd450Acosh;
     } else if (name == "atanh") {
       *id = GLSLstd450Atanh;
+    } else if (name == "exp") {
+      *id = GLSLstd450Exp;
+    } else if (name == "log") {
+      *id = GLSLstd450Log;
+    } else if (name == "exp2") {
+      *id = GLSLstd450Exp2;
+    } else if (name == "log2") {
+      *id = GLSLstd450Log2;
+    } else if (name == "sqrt") {
+      *id = GLSLstd450Sqrt;
+    } else if (name == "inversesqrt") {
+      *id = GLSLstd450InverseSqrt;
     }
 
     return params[0]->result_type();
