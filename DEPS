@@ -61,7 +61,7 @@ deps = {
 
   # SPIRV-Cross
   'third_party/spirv-cross': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Cross@54658d62559a364319cb222afe826d0d68c55ad0',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Cross@f38cbeb814c73510b85697adbe5e894f9eac978f',
     'condition': 'dawn_standalone',
   },
 
@@ -75,11 +75,11 @@ deps = {
     'condition': 'dawn_standalone',
   },
   'third_party/glslang': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/glslang@4d2298bfd78a82f77f2325c4ade096ccdab1f00d',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/glslang@3f4e5c4563068f277141f5fb3d96ec02afc7ac95',
     'condition': 'dawn_standalone',
   },
   'third_party/shaderc': {
-    'url': '{chromium_git}/external/github.com/google/shaderc@1926de0638b6dd74b759293a5bd21c473d0b1ade',
+    'url': '{chromium_git}/external/github.com/google/shaderc@a10a0b33493e3ff1c0de1dc8406ed8de230ba8c1',
     'condition': 'dawn_standalone',
   },
 
