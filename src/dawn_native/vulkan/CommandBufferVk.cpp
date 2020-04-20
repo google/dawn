@@ -156,6 +156,7 @@ namespace dawn_native { namespace vulkan {
                             case wgpu::BindingType::UniformBuffer:
                             case wgpu::BindingType::ReadonlyStorageBuffer:
                             case wgpu::BindingType::Sampler:
+                            case wgpu::BindingType::ComparisonSampler:
                             case wgpu::BindingType::SampledTexture:
                                 // Don't require barriers.
 

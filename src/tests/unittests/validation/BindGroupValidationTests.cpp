@@ -1506,3 +1506,126 @@ TEST_F(BindingsValidationTest, BindGroupsWithLessBindingsThanPipelineLayout) {
 
     TestComputePassBindings(bg.data(), kBindingNum, computePipeline, false);
 }
+
+class ComparisonSamplerBindingTest : public ValidationTest {
+  protected:
+    wgpu::RenderPipeline CreateFragmentPipeline(wgpu::BindGroupLayout* bindGroupLayout,
+                                                const char* fragmentSource) {
+        wgpu::ShaderModule vsModule =
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
+                #version 450
+                void main() {
+                })");
+
+        wgpu::ShaderModule fsModule =
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fragmentSource);
+
+        utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
+        pipelineDescriptor.vertexStage.module = vsModule;
+        pipelineDescriptor.cFragmentStage.module = fsModule;
+        wgpu::PipelineLayout pipelineLayout =
+            utils::MakeBasicPipelineLayout(device, bindGroupLayout);
+        pipelineDescriptor.layout = pipelineLayout;
+        return device.CreateRenderPipeline(&pipelineDescriptor);
+    }
+};
+
+// TODO(crbug.com/dawn/367): Disabled until we can perform shader analysis
+// of which samplers are comparison samplers.
+TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
+    // Test that sampler binding works with normal sampler in the shader.
+    {
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler}});
+
+        CreateFragmentPipeline(&bindGroupLayout, R"(
+        #version 450
+        layout(set = 0, binding = 0) uniform sampler samp;
+
+        void main() {
+        })");
+    }
+
+    // Test that comparison sampler binding works with shadow sampler in the shader.
+    {
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ComparisonSampler}});
+
+        CreateFragmentPipeline(&bindGroupLayout, R"(
+        #version 450
+        layout(set = 0, binding = 0) uniform samplerShadow samp;
+
+        void main() {
+        })");
+    }
+
+    // Test that sampler binding does not work with comparison sampler in the shader.
+    {
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler}});
+
+        ASSERT_DEVICE_ERROR(CreateFragmentPipeline(&bindGroupLayout, R"(
+        #version 450
+        layout(set = 0, binding = 0) uniform samplerShadow samp;
+
+        void main() {
+        })"));
+    }
+
+    // Test that comparison sampler binding does not work with normal sampler in the shader.
+    {
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ComparisonSampler}});
+
+        ASSERT_DEVICE_ERROR(CreateFragmentPipeline(&bindGroupLayout, R"(
+        #version 450
+        layout(set = 0, binding = 0) uniform sampler samp;
+
+        void main() {
+        })"));
+    }
+}
+
+TEST_F(ComparisonSamplerBindingTest, SamplerAndBindGroupMatches) {
+    // Test that sampler binding works with normal sampler.
+    {
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler}});
+
+        wgpu::SamplerDescriptor desc = {};
+        utils::MakeBindGroup(device, bindGroupLayout, {{0, device.CreateSampler(&desc)}});
+    }
+
+    // Test that comparison sampler binding works with sampler w/ compare function.
+    {
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ComparisonSampler}});
+
+        wgpu::SamplerDescriptor desc = {
+            .compare = wgpu::CompareFunction::Never,
+        };
+        utils::MakeBindGroup(device, bindGroupLayout, {{0, device.CreateSampler(&desc)}});
+    }
+
+    // Test that sampler binding does not work with sampler w/ compare function.
+    {
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler}});
+
+        wgpu::SamplerDescriptor desc = {
+            .compare = wgpu::CompareFunction::Never,
+        };
+        ASSERT_DEVICE_ERROR(
+            utils::MakeBindGroup(device, bindGroupLayout, {{0, device.CreateSampler(&desc)}}));
+    }
+
+    // Test that comparison sampler binding does not work with normal sampler.
+    {
+        wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ComparisonSampler}});
+
+        wgpu::SamplerDescriptor desc = {};
+        ASSERT_DEVICE_ERROR(
+            utils::MakeBindGroup(device, bindGroupLayout, {{0, device.CreateSampler(&desc)}}));
+    }
+}

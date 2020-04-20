@@ -86,16 +86,13 @@ protected:
         wgpu::FilterMode kFilterMode = wgpu::FilterMode::Nearest;
         wgpu::AddressMode kAddressMode = wgpu::AddressMode::ClampToEdge;
 
-        wgpu::SamplerDescriptor samplerDescriptor;
+        wgpu::SamplerDescriptor samplerDescriptor = {};
         samplerDescriptor.minFilter = kFilterMode;
         samplerDescriptor.magFilter = kFilterMode;
         samplerDescriptor.mipmapFilter = kFilterMode;
         samplerDescriptor.addressModeU = kAddressMode;
         samplerDescriptor.addressModeV = kAddressMode;
         samplerDescriptor.addressModeW = kAddressMode;
-        samplerDescriptor.lodMinClamp = kLodMin;
-        samplerDescriptor.lodMaxClamp = kLodMax;
-        samplerDescriptor.compare = wgpu::CompareFunction::Never;
         mSampler = device.CreateSampler(&samplerDescriptor);
 
         mVSModule = CreateDefaultVertexShaderModule(device);

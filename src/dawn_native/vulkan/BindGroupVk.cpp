@@ -71,7 +71,8 @@ namespace dawn_native { namespace vulkan {
                     break;
                 }
 
-                case wgpu::BindingType::Sampler: {
+                case wgpu::BindingType::Sampler:
+                case wgpu::BindingType::ComparisonSampler: {
                     Sampler* sampler = ToBackend(GetBindingAsSampler(bindingIndex));
                     writeImageInfo[numWrites].sampler = sampler->GetHandle();
                     write.pImageInfo = &writeImageInfo[numWrites];

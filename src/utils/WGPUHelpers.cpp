@@ -244,7 +244,7 @@ namespace utils {
     }
 
     wgpu::SamplerDescriptor GetDefaultSamplerDescriptor() {
-        wgpu::SamplerDescriptor desc;
+        wgpu::SamplerDescriptor desc = {};
 
         desc.minFilter = wgpu::FilterMode::Linear;
         desc.magFilter = wgpu::FilterMode::Linear;
@@ -252,9 +252,6 @@ namespace utils {
         desc.addressModeU = wgpu::AddressMode::Repeat;
         desc.addressModeV = wgpu::AddressMode::Repeat;
         desc.addressModeW = wgpu::AddressMode::Repeat;
-        desc.lodMinClamp = kLodMin;
-        desc.lodMaxClamp = kLodMax;
-        desc.compare = wgpu::CompareFunction::Never;
 
         return desc;
     }

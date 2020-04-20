@@ -33,6 +33,8 @@ namespace dawn_native {
 
         static SamplerBase* MakeError(DeviceBase* device);
 
+        bool HasCompareFunction() const;
+
         // Functors necessary for the unordered_set<SamplerBase*>-based cache.
         struct HashFunc {
             size_t operator()(const SamplerBase* module) const;
