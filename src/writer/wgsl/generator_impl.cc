@@ -319,14 +319,11 @@ bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
 }
 
 bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
-  bool first = true;
-  for (const auto& part : expr->AsIdentifier()->name()) {
-    if (!first) {
-      out_ << "::";
-    }
-    first = false;
-    out_ << part;
+  auto* ident = expr->AsIdentifier();
+  if (ident->has_path()) {
+    out_ << ident->path() << "::";
   }
+  out_ << ident->name();
   return true;
 }
 

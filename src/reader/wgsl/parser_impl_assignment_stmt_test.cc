@@ -40,8 +40,7 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
 
   ASSERT_TRUE(e->lhs()->IsIdentifier());
   auto* ident = e->lhs()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 
   ASSERT_TRUE(e->rhs()->IsConstructor());
   ASSERT_TRUE(e->rhs()->AsConstructor()->IsScalarConstructor());
@@ -74,8 +73,7 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
 
   ASSERT_TRUE(mem->member()->IsIdentifier());
   auto* ident = mem->member()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "d");
+  EXPECT_EQ(ident->name(), "d");
 
   ASSERT_TRUE(mem->structure()->IsArrayAccessor());
   auto* ary = mem->structure()->AsArrayAccessor();
@@ -91,21 +89,18 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
   mem = ary->array()->AsMemberAccessor();
   ASSERT_TRUE(mem->member()->IsIdentifier());
   ident = mem->member()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "c");
+  EXPECT_EQ(ident->name(), "c");
 
   ASSERT_TRUE(mem->structure()->IsMemberAccessor());
   mem = mem->structure()->AsMemberAccessor();
 
   ASSERT_TRUE(mem->structure()->IsIdentifier());
   ident = mem->structure()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 
   ASSERT_TRUE(mem->member()->IsIdentifier());
   ident = mem->member()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "b");
+  EXPECT_EQ(ident->name(), "b");
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_MissingEqual) {

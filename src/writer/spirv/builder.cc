@@ -433,8 +433,8 @@ uint32_t Builder::GenerateIdentifierExpression(
   // TODO(dsinclair): handle names with namespaces in them ...
 
   uint32_t val = 0;
-  if (!scope_stack_.get(expr->name()[0], &val)) {
-    error_ = "unable to find name for identifier: " + expr->name()[0];
+  if (!scope_stack_.get(expr->name(), &val)) {
+    error_ = "unable to find name for identifier: " + expr->name();
     return 0;
   }
 

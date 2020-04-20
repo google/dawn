@@ -37,8 +37,7 @@ TEST_F(ParserImplTest, AdditiveExpression_Parses_Plus) {
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
   auto* ident = rel->lhs()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 
   ASSERT_TRUE(rel->rhs()->IsConstructor());
   ASSERT_TRUE(rel->rhs()->AsConstructor()->IsScalarConstructor());
@@ -59,8 +58,7 @@ TEST_F(ParserImplTest, AdditiveExpression_Parses_Minus) {
 
   ASSERT_TRUE(rel->lhs()->IsIdentifier());
   auto* ident = rel->lhs()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 
   ASSERT_TRUE(rel->rhs()->IsConstructor());
   ASSERT_TRUE(rel->rhs()->AsConstructor()->IsScalarConstructor());

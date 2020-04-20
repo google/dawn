@@ -313,13 +313,13 @@ bool TypeDeterminer::DetermineConstructor(ast::ConstructorExpression* expr) {
 }
 
 bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
-  if (expr->name().size() > 1) {
+  if (expr->has_path()) {
     // TODO(dsinclair): Handle imports
     set_error(expr->source(), "imports not handled in type determination");
     return false;
   }
 
-  auto name = expr->name()[0];
+  auto name = expr->name();
   ast::Variable* var;
   if (variable_stack_.get(name, &var)) {
     expr->set_result_type(var->type());
@@ -344,7 +344,7 @@ bool TypeDeterminer::DetermineMemberAccessor(
   auto* data_type = expr->structure()->result_type();
   if (data_type->IsStruct()) {
     auto* strct = data_type->AsStruct()->impl();
-    auto name = expr->member()->name()[0];
+    auto name = expr->member()->name();
 
     for (const auto& member : strct->members()) {
       if (member->name() != name) {
@@ -366,7 +366,7 @@ bool TypeDeterminer::DetermineMemberAccessor(
     // is correct.
     expr->set_result_type(
         ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
-            vec->type(), expr->member()->name()[0].size())));
+            vec->type(), expr->member()->name().size())));
     return true;
   }
 

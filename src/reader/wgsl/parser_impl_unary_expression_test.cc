@@ -38,8 +38,7 @@ TEST_F(ParserImplTest, UnaryExpression_Postix) {
   auto* ary = e->AsArrayAccessor();
   ASSERT_TRUE(ary->array()->IsIdentifier());
   auto* ident = ary->array()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 
   ASSERT_TRUE(ary->idx_expr()->IsConstructor());
   ASSERT_TRUE(ary->idx_expr()->AsConstructor()->IsScalarConstructor());
@@ -112,8 +111,7 @@ TEST_F(ParserImplTest, UnaryExpression_Any) {
   ASSERT_EQ(u->params().size(), 1u);
   ASSERT_TRUE(u->params()[0]->IsIdentifier());
   auto* ident = u->params()[0]->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Any_MissingParenLeft) {
@@ -160,8 +158,7 @@ TEST_F(ParserImplTest, UnaryExpression_All) {
   ASSERT_EQ(u->params().size(), 1u);
   ASSERT_TRUE(u->params()[0]->IsIdentifier());
   auto* ident = u->params()[0]->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_All_MissingParenLeft) {
@@ -208,8 +205,7 @@ TEST_F(ParserImplTest, UnaryExpression_IsNan) {
   ASSERT_EQ(u->params().size(), 1u);
   ASSERT_TRUE(u->params()[0]->IsIdentifier());
   auto* ident = u->params()[0]->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNan_MissingParenLeft) {
@@ -256,8 +252,7 @@ TEST_F(ParserImplTest, UnaryExpression_IsInf) {
   ASSERT_EQ(u->params().size(), 1u);
   ASSERT_TRUE(u->params()[0]->IsIdentifier());
   auto* ident = u->params()[0]->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsInf_MissingParenLeft) {
@@ -304,8 +299,7 @@ TEST_F(ParserImplTest, UnaryExpression_IsFinite) {
   ASSERT_EQ(u->params().size(), 1u);
   ASSERT_TRUE(u->params()[0]->IsIdentifier());
   auto* ident = u->params()[0]->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsFinite_MissingParenLeft) {
@@ -352,8 +346,7 @@ TEST_F(ParserImplTest, UnaryExpression_IsNormal) {
   ASSERT_EQ(u->params().size(), 1u);
   ASSERT_TRUE(u->params()[0]->IsIdentifier());
   auto* ident = u->params()[0]->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_IsNormal_MissingParenLeft) {
@@ -400,13 +393,11 @@ TEST_F(ParserImplTest, UnaryExpression_Dot) {
   ASSERT_EQ(u->params().size(), 2u);
   ASSERT_TRUE(u->params()[0]->IsIdentifier());
   auto* ident = u->params()[0]->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 
   ASSERT_TRUE(u->params()[1]->IsIdentifier());
   ident = u->params()[1]->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "b");
+  EXPECT_EQ(ident->name(), "b");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dot_MissingParenLeft) {
@@ -477,13 +468,11 @@ TEST_F(ParserImplTest, UnaryExpression_OuterProduct) {
   ASSERT_EQ(u->params().size(), 2u);
   ASSERT_TRUE(u->params()[0]->IsIdentifier());
   auto* ident = u->params()[0]->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 
   ASSERT_TRUE(u->params()[1]->IsIdentifier());
   ident = u->params()[1]->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "b");
+  EXPECT_EQ(ident->name(), "b");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_OuterProduct_MissingParenLeft) {
@@ -556,8 +545,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdx_NoModifier) {
   ASSERT_NE(deriv->param(), nullptr);
   ASSERT_TRUE(deriv->param()->IsIdentifier());
   auto* ident = deriv->param()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_WithModifier) {
@@ -574,8 +562,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdx_WithModifier) {
   ASSERT_NE(deriv->param(), nullptr);
   ASSERT_TRUE(deriv->param()->IsIdentifier());
   auto* ident = deriv->param()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdx_MissingLessThan) {
@@ -656,8 +643,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdy_NoModifier) {
   ASSERT_NE(deriv->param(), nullptr);
   ASSERT_TRUE(deriv->param()->IsIdentifier());
   auto* ident = deriv->param()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_WithModifier) {
@@ -674,8 +660,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dpdy_WithModifier) {
   ASSERT_NE(deriv->param(), nullptr);
   ASSERT_TRUE(deriv->param()->IsIdentifier());
   auto* ident = deriv->param()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Dpdy_MissingLessThan) {
@@ -756,8 +741,7 @@ TEST_F(ParserImplTest, UnaryExpression_Fwidth_NoModifier) {
   ASSERT_NE(deriv->param(), nullptr);
   ASSERT_TRUE(deriv->param()->IsIdentifier());
   auto* ident = deriv->param()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidth_WithModifier) {
@@ -774,8 +758,7 @@ TEST_F(ParserImplTest, UnaryExpression_Fwidth_WithModifier) {
   ASSERT_NE(deriv->param(), nullptr);
   ASSERT_TRUE(deriv->param()->IsIdentifier());
   auto* ident = deriv->param()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Fwidth_MissingLessThan) {

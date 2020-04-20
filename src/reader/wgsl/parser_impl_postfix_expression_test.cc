@@ -41,8 +41,7 @@ TEST_F(ParserImplTest, PostfixExpression_Array_ConstantIndex) {
 
   ASSERT_TRUE(ary->array()->IsIdentifier());
   auto* ident = ary->array()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 
   ASSERT_TRUE(ary->idx_expr()->IsConstructor());
   ASSERT_TRUE(ary->idx_expr()->AsConstructor()->IsScalarConstructor());
@@ -62,8 +61,7 @@ TEST_F(ParserImplTest, PostfixExpression_Array_ExpressionIndex) {
 
   ASSERT_TRUE(ary->array()->IsIdentifier());
   auto* ident = ary->array()->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 
   ASSERT_TRUE(ary->idx_expr()->IsBinary());
 }
@@ -103,8 +101,7 @@ TEST_F(ParserImplTest, PostfixExpression_Call_Empty) {
 
   ASSERT_TRUE(c->func()->IsIdentifier());
   auto* func = c->func()->AsIdentifier();
-  ASSERT_EQ(func->name().size(), 1u);
-  EXPECT_EQ(func->name()[0], "a");
+  EXPECT_EQ(func->name(), "a");
 
   EXPECT_EQ(c->params().size(), 0u);
 }
@@ -120,9 +117,8 @@ TEST_F(ParserImplTest, PostfixExpression_Call_WithArgs) {
 
   ASSERT_TRUE(c->func()->IsIdentifier());
   auto* func = c->func()->AsIdentifier();
-  ASSERT_EQ(func->name().size(), 2u);
-  EXPECT_EQ(func->name()[0], "std");
-  EXPECT_EQ(func->name()[1], "test");
+  EXPECT_EQ(func->path(), "std");
+  EXPECT_EQ(func->name(), "test");
 
   EXPECT_EQ(c->params().size(), 3u);
   EXPECT_TRUE(c->params()[0]->IsConstructor());
@@ -163,12 +159,10 @@ TEST_F(ParserImplTest, PostfixExpression_MemberAccessor) {
 
   auto* m = e->AsMemberAccessor();
   ASSERT_TRUE(m->structure()->IsIdentifier());
-  ASSERT_EQ(m->structure()->AsIdentifier()->name().size(), 1u);
-  EXPECT_EQ(m->structure()->AsIdentifier()->name()[0], "a");
+  EXPECT_EQ(m->structure()->AsIdentifier()->name(), "a");
 
   ASSERT_TRUE(m->member()->IsIdentifier());
-  ASSERT_EQ(m->member()->AsIdentifier()->name().size(), 1u);
-  EXPECT_EQ(m->member()->AsIdentifier()->name()[0], "b");
+  EXPECT_EQ(m->member()->AsIdentifier()->name(), "b");
 }
 
 TEST_F(ParserImplTest, PostfixExpression_MemberAccesssor_InvalidIdent) {

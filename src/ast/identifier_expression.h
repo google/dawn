@@ -35,21 +35,30 @@ class IdentifierExpression : public Expression {
   /// @param name the name
   IdentifierExpression(const Source& source, const std::string& name);
   /// Constructor
-  /// @param name the name
-  explicit IdentifierExpression(std::vector<std::string> name);
+  /// @param segments the name segments
+  explicit IdentifierExpression(std::vector<std::string> segments);
   /// Constructor
   /// @param source the identifier expression source
-  /// @param name the name
-  IdentifierExpression(const Source& source, std::vector<std::string> name);
+  /// @param segments the name segments
+  IdentifierExpression(const Source& source, std::vector<std::string> segments);
   /// Move constructor
   IdentifierExpression(IdentifierExpression&&);
   ~IdentifierExpression() override;
 
-  /// Sets the name
-  /// @param name the name
-  void set_name(std::vector<std::string> name) { name_ = std::move(name); }
+  /// Sets the name segments
+  /// @param segments the name segments
+  void set_segments(std::vector<std::string> segments) {
+    segments_ = std::move(segments);
+  }
   /// @returns the name
-  std::vector<std::string> name() const { return name_; }
+  std::vector<std::string> segments() const { return segments_; }
+
+  /// @returns true if this identifier has a path component
+  bool has_path() const { return segments_.size() > 1; }
+  /// @returns the path part of the identifier or blank if no path
+  std::string path() const;
+  /// @returns the name part of the identifier
+  std::string name() const { return segments_.back(); }
 
   /// @returns true if this is an identifier expression
   bool IsIdentifier() const override;
@@ -65,7 +74,7 @@ class IdentifierExpression : public Expression {
  private:
   IdentifierExpression(const IdentifierExpression&) = delete;
 
-  std::vector<std::string> name_;
+  std::vector<std::string> segments_;
 };
 
 }  // namespace ast

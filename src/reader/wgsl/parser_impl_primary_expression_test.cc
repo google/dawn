@@ -42,8 +42,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Ident) {
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsIdentifier());
   auto* ident = e->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 1u);
-  EXPECT_EQ(ident->name()[0], "a");
+  EXPECT_EQ(ident->name(), "a");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Ident_WithNamespace) {
@@ -53,11 +52,8 @@ TEST_F(ParserImplTest, PrimaryExpression_Ident_WithNamespace) {
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsIdentifier());
   auto* ident = e->AsIdentifier();
-  ASSERT_EQ(ident->name().size(), 4u);
-  EXPECT_EQ(ident->name()[0], "a");
-  EXPECT_EQ(ident->name()[1], "b");
-  EXPECT_EQ(ident->name()[2], "c");
-  EXPECT_EQ(ident->name()[3], "d");
+  EXPECT_EQ(ident->path(), "a::b::c");
+  EXPECT_EQ(ident->name(), "d");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_Ident_MissingIdent) {
