@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_OBJECTBASE_H_
 #define DAWNNATIVE_OBJECTBASE_H_
 
-#include "dawn_native/RefCounted.h"
+#include "common/RefCounted.h"
 
 namespace dawn_native {
 

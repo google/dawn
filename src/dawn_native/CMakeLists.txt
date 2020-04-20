@@ -102,8 +102,6 @@ target_sources(dawn_native PRIVATE
     "ProgrammablePassEncoder.h"
     "Queue.cpp"
     "Queue.h"
-    "RefCounted.cpp"
-    "RefCounted.h"
     "RenderBundle.cpp"
     "RenderBundle.h"
     "RenderBundleEncoder.cpp"

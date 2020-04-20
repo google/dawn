@@ -15,9 +15,9 @@
 #ifndef DAWNNATIVE_SURFACE_H_
 #define DAWNNATIVE_SURFACE_H_
 
+#include "common/RefCounted.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
-#include "dawn_native/RefCounted.h"
 
 #include "dawn_native/dawn_platform.h"
 

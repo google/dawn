@@ -17,6 +17,9 @@
 
 #include <cstdint>
 
+template <typename T>
+class Ref;
+
 namespace dawn_native {
 
     class AdapterBase;
@@ -47,9 +50,6 @@ namespace dawn_native {
     class TextureViewBase;
 
     class DeviceBase;
-
-    template <typename T>
-    class Ref;
 
     template <typename T>
     class PerStage;

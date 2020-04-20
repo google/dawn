@@ -90,7 +90,7 @@ namespace {
         }
 
       protected:
-        dawn_native::Ref<dawn_native::InstanceBase> mNativeInstance;
+        Ref<dawn_native::InstanceBase> mNativeInstance;
         dawn_native::null::Adapter mNativeAdapter;
 
         std::unique_ptr<utils::TerribleCommandBuffer> mC2sBuf;

@@ -31,6 +31,8 @@ target_sources(dawn_common PRIVATE
     "Math.h"
     "PlacementAllocated.h"
     "Platform.h"
+    "RefCounted.cpp"
+    "RefCounted.h"
     "Result.cpp"
     "Result.h"
     "Serial.h"

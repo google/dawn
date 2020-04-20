@@ -17,7 +17,7 @@
 
 #include "dawn_native/dawn_platform.h"
 
-#include "dawn_native/RefCounted.h"
+#include "common/RefCounted.h"
 
 #include <string>
 

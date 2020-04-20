@@ -15,8 +15,8 @@
 #ifndef DAWNNATIVE_FENCESIGNALTRACKER_H_
 #define DAWNNATIVE_FENCESIGNALTRACKER_H_
 
+#include "common/RefCounted.h"
 #include "common/SerialQueue.h"
-#include "dawn_native/RefCounted.h"
 
 namespace dawn_native {
 

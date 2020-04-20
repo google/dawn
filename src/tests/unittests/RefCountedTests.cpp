@@ -15,9 +15,7 @@
 #include <gtest/gtest.h>
 #include <thread>
 
-#include "dawn_native/RefCounted.h"
-
-using namespace dawn_native;
+#include "common/RefCounted.h"
 
 struct RCTest : public RefCounted {
     RCTest() : RefCounted() {
@@ -48,7 +46,7 @@ TEST(RefCounted, StartsWithOneRef) {
     auto test = new RCTest(&deleted);
 
     test->Release();
-    ASSERT_TRUE(deleted);
+    EXPECT_TRUE(deleted);
 }
 
 // Test adding refs keep the RC alive.
@@ -58,10 +56,10 @@ TEST(RefCounted, AddingRefKeepsAlive) {
 
     test->Reference();
     test->Release();
-    ASSERT_FALSE(deleted);
+    EXPECT_FALSE(deleted);
 
     test->Release();
-    ASSERT_TRUE(deleted);
+    EXPECT_TRUE(deleted);
 }
 
 // Test that Reference and Release atomically change the refcount.
@@ -79,7 +77,7 @@ TEST(RefCounted, RaceOnReferenceRelease) {
 
     t1.join();
     t2.join();
-    ASSERT_EQ(test->GetRefCountForTesting(), 200001u);
+    EXPECT_EQ(test->GetRefCountForTesting(), 200001u);
 
     auto releaseManyTimes = [test]() {
         for (uint32_t i = 0; i < 100000; ++i) {
@@ -91,7 +89,10 @@ TEST(RefCounted, RaceOnReferenceRelease) {
     std::thread t4(releaseManyTimes);
     t3.join();
     t4.join();
-    ASSERT_EQ(test->GetRefCountForTesting(), 1u);
+    EXPECT_EQ(test->GetRefCountForTesting(), 1u);
+
+    test->Release();
+    EXPECT_TRUE(deleted);
 }
 
 // Test Ref remove reference when going out of scope
@@ -101,7 +102,7 @@ TEST(Ref, EndOfScopeRemovesRef) {
         Ref<RCTest> test(new RCTest(&deleted));
         test->Release();
     }
-    ASSERT_TRUE(deleted);
+    EXPECT_TRUE(deleted);
 }
 
 // Test getting pointer out of the Ref
@@ -110,18 +111,18 @@ TEST(Ref, Gets) {
     Ref<RCTest> test(original);
     test->Release();
 
-    ASSERT_EQ(test.Get(), original);
-    ASSERT_EQ(&*test, original);
-    ASSERT_EQ(test->GetThis(), original);
+    EXPECT_EQ(test.Get(), original);
+    EXPECT_EQ(&*test, original);
+    EXPECT_EQ(test->GetThis(), original);
 }
 
 // Test Refs default to null
 TEST(Ref, DefaultsToNull) {
     Ref<RCTest> test;
 
-    ASSERT_EQ(test.Get(), nullptr);
-    ASSERT_EQ(&*test, nullptr);
-    ASSERT_EQ(test->GetThis(), nullptr);
+    EXPECT_EQ(test.Get(), nullptr);
+    EXPECT_EQ(&*test, nullptr);
+    EXPECT_EQ(test->GetThis(), nullptr);
 }
 
 // Test Refs can be used inside ifs
@@ -131,7 +132,7 @@ TEST(Ref, BoolConversion) {
     full->Release();
 
     if (!full || empty) {
-        ASSERT_TRUE(false);
+        EXPECT_TRUE(false);
     }
 }
 
@@ -144,13 +145,13 @@ TEST(Ref, CopyConstructor) {
     Ref<RCTest> destination(source);
     original->Release();
 
-    ASSERT_EQ(source.Get(), original);
-    ASSERT_EQ(destination.Get(), original);
+    EXPECT_EQ(source.Get(), original);
+    EXPECT_EQ(destination.Get(), original);
 
     source = nullptr;
-    ASSERT_FALSE(deleted);
+    EXPECT_FALSE(deleted);
     destination = nullptr;
-    ASSERT_TRUE(deleted);
+    EXPECT_TRUE(deleted);
 }
 
 // Test Ref's copy assignment
@@ -164,15 +165,15 @@ TEST(Ref, CopyAssignment) {
     Ref<RCTest> destination;
     destination = source;
 
-    ASSERT_EQ(source.Get(), original);
-    ASSERT_EQ(destination.Get(), original);
+    EXPECT_EQ(source.Get(), original);
+    EXPECT_EQ(destination.Get(), original);
 
     source = nullptr;
     // This fails when address sanitizer is turned on
-    ASSERT_FALSE(deleted);
+    EXPECT_FALSE(deleted);
 
     destination = nullptr;
-    ASSERT_TRUE(deleted);
+    EXPECT_TRUE(deleted);
 }
 
 // Test Ref's move constructor
@@ -184,12 +185,12 @@ TEST(Ref, MoveConstructor) {
     Ref<RCTest> destination(std::move(source));
     original->Release();
 
-    ASSERT_EQ(source.Get(), nullptr);
-    ASSERT_EQ(destination.Get(), original);
-    ASSERT_FALSE(deleted);
+    EXPECT_EQ(source.Get(), nullptr);
+    EXPECT_EQ(destination.Get(), original);
+    EXPECT_FALSE(deleted);
 
     destination = nullptr;
-    ASSERT_TRUE(deleted);
+    EXPECT_TRUE(deleted);
 }
 
 // Test Ref's move assignment
@@ -203,38 +204,55 @@ TEST(Ref, MoveAssignment) {
     Ref<RCTest> destination;
     destination = std::move(source);
 
-    ASSERT_EQ(source.Get(), nullptr);
-    ASSERT_EQ(destination.Get(), original);
-    ASSERT_FALSE(deleted);
+    EXPECT_EQ(source.Get(), nullptr);
+    EXPECT_EQ(destination.Get(), original);
+    EXPECT_FALSE(deleted);
 
     destination = nullptr;
-    ASSERT_TRUE(deleted);
+    EXPECT_TRUE(deleted);
 }
 
 // Test the payload initial value is set correctly
 TEST(Ref, InitialPayloadValue) {
     RCTest* testDefaultConstructor = new RCTest();
-    ASSERT_EQ(testDefaultConstructor->GetRefCountPayload(), 0u);
+    EXPECT_EQ(testDefaultConstructor->GetRefCountPayload(), 0u);
     testDefaultConstructor->Release();
 
     RCTest* testZero = new RCTest(uint64_t(0ull));
-    ASSERT_EQ(testZero->GetRefCountPayload(), 0u);
+    EXPECT_EQ(testZero->GetRefCountPayload(), 0u);
     testZero->Release();
 
     RCTest* testOne = new RCTest(1ull);
-    ASSERT_EQ(testOne->GetRefCountPayload(), 1u);
+    EXPECT_EQ(testOne->GetRefCountPayload(), 1u);
     testOne->Release();
 }
 
 // Test that the payload survives ref and release operations
 TEST(Ref, PayloadUnchangedByRefCounting) {
     RCTest* test = new RCTest(1ull);
-    ASSERT_EQ(test->GetRefCountPayload(), 1u);
+    EXPECT_EQ(test->GetRefCountPayload(), 1u);
 
     test->Reference();
-    ASSERT_EQ(test->GetRefCountPayload(), 1u);
+    EXPECT_EQ(test->GetRefCountPayload(), 1u);
     test->Release();
-    ASSERT_EQ(test->GetRefCountPayload(), 1u);
+    EXPECT_EQ(test->GetRefCountPayload(), 1u);
 
     test->Release();
+}
+
+// Test that Detach pulls out the pointer and stops tracking it.
+TEST(Ref, Detach) {
+    bool deleted = false;
+    RCTest* original = new RCTest(&deleted);
+
+    Ref<RCTest> test(original);
+    original->Release();
+
+    RCTest* detached = test.Detach();
+    EXPECT_EQ(detached, original);
+    EXPECT_EQ(detached->GetRefCountForTesting(), 1u);
+    EXPECT_EQ(test.Get(), nullptr);
+
+    detached->Release();
+    EXPECT_TRUE(deleted);
 }

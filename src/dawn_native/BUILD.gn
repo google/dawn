@@ -230,8 +230,6 @@ source_set("dawn_native_sources") {
     "ProgrammablePassEncoder.h",
     "Queue.cpp",
     "Queue.h",
-    "RefCounted.cpp",
-    "RefCounted.h",
     "RenderBundle.cpp",
     "RenderBundle.h",
     "RenderBundleEncoder.cpp",

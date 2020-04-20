@@ -38,7 +38,7 @@ class ExtensionTests : public testing::Test {
         static_cast<size_t>(dawn_native::Extension::EnumCount);
 
   protected:
-    dawn_native::Ref<dawn_native::InstanceBase> mInstanceBase;
+    Ref<dawn_native::InstanceBase> mInstanceBase;
     dawn_native::null::Adapter mAdapterBase;
 };
 

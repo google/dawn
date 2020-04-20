@@ -15,10 +15,10 @@
 #ifndef DAWNNATIVE_INSTANCE_H_
 #define DAWNNATIVE_INSTANCE_H_
 
+#include "common/RefCounted.h"
 #include "dawn_native/Adapter.h"
 #include "dawn_native/BackendConnection.h"
 #include "dawn_native/Extensions.h"
-#include "dawn_native/RefCounted.h"
 #include "dawn_native/Toggles.h"
 #include "dawn_native/dawn_platform.h"
 
