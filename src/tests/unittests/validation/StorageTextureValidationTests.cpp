@@ -188,8 +188,8 @@ class StorageTextureValidationTests : public ValidationTest {
         wgpu::BindingType::ReadonlyStorageTexture, wgpu::BindingType::WriteonlyStorageTexture};
 };
 
-// Validate read-only storage textures can be declared in vertex and fragment
-// shaders, while writeonly storage textures can't.
+// Validate read-only storage textures can be declared in vertex and fragment shaders, while
+// writeonly storage textures cannot be used in vertex shaders.
 TEST_F(StorageTextureValidationTests, RenderPipeline) {
     // Readonly storage texture can be declared in a vertex shader.
     {
@@ -243,7 +243,7 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
         ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
     }
 
-    // Write-only storage textures cannot be declared in a fragment shader.
+    // Write-only storage textures can be declared in a fragment shader.
     {
         wgpu::ShaderModule fsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
@@ -257,7 +257,7 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
         descriptor.layout = nullptr;
         descriptor.vertexStage.module = mDefaultVSModule;
         descriptor.cFragmentStage.module = fsModule;
-        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+        device.CreateRenderPipeline(&descriptor);
     }
 }
 
@@ -374,7 +374,7 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutWithStorageTextureBindingTy
          {wgpu::ShaderStage::Vertex, wgpu::BindingType::WriteonlyStorageTexture, false},
          {wgpu::ShaderStage::Vertex, wgpu::BindingType::StorageTexture, false},
          {wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageTexture, true},
-         {wgpu::ShaderStage::Fragment, wgpu::BindingType::WriteonlyStorageTexture, false},
+         {wgpu::ShaderStage::Fragment, wgpu::BindingType::WriteonlyStorageTexture, true},
          {wgpu::ShaderStage::Fragment, wgpu::BindingType::StorageTexture, false},
          {wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageTexture, true},
          {wgpu::ShaderStage::Compute, wgpu::BindingType::WriteonlyStorageTexture, true},

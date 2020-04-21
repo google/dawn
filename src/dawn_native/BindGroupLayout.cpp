@@ -38,10 +38,9 @@ namespace dawn_native {
             }
 
             case wgpu::BindingType::WriteonlyStorageTexture: {
-                if ((shaderStageVisibility &
-                     (wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment)) != 0) {
+                if ((shaderStageVisibility & wgpu::ShaderStage::Vertex) != 0) {
                     return DAWN_VALIDATION_ERROR(
-                        "write-only storage texture binding is only supported in compute shader");
+                        "write-only storage texture binding is not supported in vertex shader");
                 }
                 break;
             }

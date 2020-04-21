@@ -36,10 +36,8 @@ namespace dawn_native {
             // TODO(jiawei.shao@intel.com): support read-only and read-write storage textures.
             switch (bindingType) {
                 case wgpu::BindingType::StorageBuffer:
-                    return wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute;
-
                 case wgpu::BindingType::WriteonlyStorageTexture:
-                    return wgpu::ShaderStage::Compute;
+                    return wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute;
 
                 case wgpu::BindingType::StorageTexture:
                     UNREACHABLE();
