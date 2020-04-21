@@ -35,6 +35,7 @@ std::string CommonTypes() {
 
     %bool = OpTypeBool
     %cond = OpUndef %bool
+    %cond2 = OpUndef %bool
 
     %uint = OpTypeInt 32 0
     %selector = OpUndef %uint
@@ -502,7 +503,7 @@ TEST_F(SpvParserTest,
 }
 
 TEST_F(SpvParserTest,
-       ComputeBlockOrder_Nest_If_In_If) {
+       ComputeBlockOrder_Nest_If_Contains_If) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -691,8 +692,466 @@ TEST_F(SpvParserTest,
       << assembly;
 }
 
-// TODO(dneto): test nesting
-// TODO(dneto): test loops
+TEST_F(SpvParserTest, ComputeBlockOrder_Loop_SingleBlock_Simple) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     ; The entry block can't be the target of a branch
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %20 None
+     OpBranchConditional %cond %20 %99
+
+     %99 = OpLabel
+     OpReturn
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.ComputeBlockOrderAndPositions();
+
+  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 99)) << assembly;
+}
+
+TEST_F(SpvParserTest, ComputeBlockOrder_Loop_SingleBlock_Infinite) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     ; The entry block can't be the target of a branch
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %20 None
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.ComputeBlockOrderAndPositions();
+
+  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 99)) << assembly;
+}
+
+TEST_F(SpvParserTest, ComputeBlockOrder_Loop_SingleBlock_DupInfinite) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     ; The entry block can't be the target of a branch
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %20 None
+     OpBranchConditional %cond %20 %20
+
+     %99 = OpLabel
+     OpReturn
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.ComputeBlockOrderAndPositions();
+
+  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 99)) << assembly;
+}
+
+TEST_F(SpvParserTest, ComputeBlockOrder_Loop_HeaderHasBreakIf) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99 ; like While
+
+     %30 = OpLabel ; trivial body
+     OpBranch %50
+
+     %50 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.ComputeBlockOrderAndPositions();
+
+  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 50, 99)) << assembly;
+}
+
+TEST_F(SpvParserTest, ComputeBlockOrder_Loop_HeaderHasBreakUnless) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %99 %30 ; has break-unless
+
+     %30 = OpLabel ; trivial body
+     OpBranch %50
+
+     %50 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.ComputeBlockOrderAndPositions();
+
+  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 50, 99)) << assembly;
+}
+
+TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasBreak) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %99 ; break
+
+     %50 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.ComputeBlockOrderAndPositions();
+
+  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 50, 99)) << assembly;
+}
+
+TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasBreakIf) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranchConditional %cond2 %99 %40 ; break-if
+
+     %40 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.ComputeBlockOrderAndPositions();
+
+  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 40, 50, 99)) << assembly;
+}
+
+TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasBreakUnless) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranchConditional %cond2 %40 %99 ; break-unless
+
+     %40 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.ComputeBlockOrderAndPositions();
+
+  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 40, 50, 99)) << assembly;
+}
+
+TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasContinueIf) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranchConditional %cond2 %50 %40 ; continue-if
+
+     %40 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.ComputeBlockOrderAndPositions();
+
+  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 40, 50, 99)) << assembly;
+}
+
+TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasContinueUnless) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranchConditional %cond2 %40 %50 ; continue-unless
+
+     %40 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.ComputeBlockOrderAndPositions();
+
+  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 40, 50, 99)) << assembly;
+}
+
+TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasSwitchContinueBreak) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpSwitch %selector %99 50 %50 ; default is break, 50 is continue
+
+     %40 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.ComputeBlockOrderAndPositions();
+
+  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 50, 99)) << assembly;
+}
+
+TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Continue_Sequence) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel
+     OpBranch %60
+
+     %60 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.ComputeBlockOrderAndPositions();
+
+  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 50, 60, 99)) << assembly;
+}
+
+TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Continue_ContainsIf) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel
+     OpSelectionMerge %89 None
+     OpBranchConditional %cond2 %60 %70
+
+     %89 = OpLabel
+     OpBranch %20 ; backedge
+
+     %60 = OpLabel
+     OpBranch %89
+
+     %70 = OpLabel
+     OpBranch %89
+
+     %99 = OpLabel
+     OpReturn
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.ComputeBlockOrderAndPositions();
+
+  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 50, 60, 70, 89, 99)) << assembly;
+}
+
+TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Continue_HasBreakIf) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel
+     OpBranchConditional %cond2 %99 %20
+
+     %99 = OpLabel
+     OpReturn
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.ComputeBlockOrderAndPositions();
+
+  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 50, 99)) << assembly;
+}
+
+TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Continue_HasBreakUnless) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel
+     OpBranchConditional %cond2 %20 %99
+
+     %99 = OpLabel
+     OpReturn
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.ComputeBlockOrderAndPositions();
+
+  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 50, 99)) << assembly;
+}
+
+TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Continue_SwitchBreak) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel
+     OpSwitch %selector %20 99 %99 ; yes, this is obtuse but valid
+
+     %99 = OpLabel
+     OpReturn
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.ComputeBlockOrderAndPositions();
+
+  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 50, 99)) << assembly;
+}
 
 }  // namespace
 }  // namespace spirv
