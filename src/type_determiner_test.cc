@@ -1901,7 +1901,14 @@ TEST_P(ImportData_TwoParamTest, Error_TooManyParams) {
 
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                          ImportData_TwoParamTest,
-                         testing::Values(GLSLData{"atan2", GLSLstd450Atan2}));
+                         testing::Values(GLSLData{"atan2", GLSLstd450Atan2},
+                                         GLSLData{"pow", GLSLstd450Pow},
+                                         GLSLData{"fmin", GLSLstd450FMin},
+                                         GLSLData{"fmax", GLSLstd450FMax},
+                                         GLSLData{"step", GLSLstd450Step},
+                                         GLSLData{"reflect", GLSLstd450Reflect},
+                                         GLSLData{"nmin", GLSLstd450NMin},
+                                         GLSLData{"nmax", GLSLstd450NMax}));
 
 }  // namespace
 }  // namespace tint

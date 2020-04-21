@@ -686,7 +686,9 @@ ast::type::Type* TypeDeterminer::GetImportData(
     // Length returns a scalar of the same type as the parameter.
     return result_type->is_float_scalar() ? result_type
                                           : result_type->AsVector()->type();
-  } else if (name == "atan2") {
+  } else if (name == "atan2" || name == "pow" || name == "fmin" ||
+             name == "fmax" || name == "step" || name == "reflect" ||
+             name == "nmin" || name == "nmax") {
     if (params.size() != 2) {
       error_ = "incorrect number of parameters for " + name +
                ". Expected 2 got " + std::to_string(params.size());
@@ -705,6 +707,20 @@ ast::type::Type* TypeDeterminer::GetImportData(
 
     if (name == "atan2") {
       *id = GLSLstd450Atan2;
+    } else if (name == "pow") {
+      *id = GLSLstd450Pow;
+    } else if (name == "fmin") {
+      *id = GLSLstd450FMin;
+    } else if (name == "fmax") {
+      *id = GLSLstd450FMax;
+    } else if (name == "step") {
+      *id = GLSLstd450Step;
+    } else if (name == "reflect") {
+      *id = GLSLstd450Reflect;
+    } else if (name == "nmin") {
+      *id = GLSLstd450NMin;
+    } else if (name == "nmax") {
+      *id = GLSLstd450NMax;
     }
 
     return params[0]->result_type();
