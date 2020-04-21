@@ -28,7 +28,7 @@ namespace dawn_native { namespace d3d12 {
     ResultOrError<ShaderModule*> ShaderModule::Create(Device* device,
                                                       const ShaderModuleDescriptor* descriptor) {
         Ref<ShaderModule> module = AcquireRef(new ShaderModule(device, descriptor));
-        DAWN_TRY(module->Initialize(descriptor));
+        DAWN_TRY(module->Initialize());
         return module.Detach();
     }
 
@@ -36,8 +36,9 @@ namespace dawn_native { namespace d3d12 {
         : ShaderModuleBase(device, descriptor) {
     }
 
-    MaybeError ShaderModule::Initialize(const ShaderModuleDescriptor* descriptor) {
-        mSpirv.assign(descriptor->code, descriptor->code + descriptor->codeSize);
+    MaybeError ShaderModule::Initialize() {
+        const std::vector<uint32_t>& spirv = GetSpirv();
+
         if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
             shaderc_spvc::CompileOptions options = GetCompileOptions();
 
@@ -52,7 +53,7 @@ namespace dawn_native { namespace d3d12 {
             options.SetHLSLPointSizeCompat(true);
 
             DAWN_TRY(CheckSpvcSuccess(
-                mSpvcContext.InitializeForHlsl(descriptor->code, descriptor->codeSize, options),
+                mSpvcContext.InitializeForHlsl(spirv.data(), spirv.size(), options),
                 "Unable to initialize instance of spvc"));
 
             spirv_cross::Compiler* compiler;
@@ -60,14 +61,17 @@ namespace dawn_native { namespace d3d12 {
                                       "Unable to get cross compiler"));
             DAWN_TRY(ExtractSpirvInfo(*compiler));
         } else {
-            spirv_cross::CompilerHLSL compiler(descriptor->code, descriptor->codeSize);
+            spirv_cross::CompilerHLSL compiler(spirv);
             DAWN_TRY(ExtractSpirvInfo(compiler));
         }
         return {};
     }
 
     ResultOrError<std::string> ShaderModule::GetHLSLSource(PipelineLayout* layout) {
-        std::unique_ptr<spirv_cross::CompilerHLSL> compiler_impl;
+        ASSERT(!IsError());
+        const std::vector<uint32_t>& spirv = GetSpirv();
+
+        std::unique_ptr<spirv_cross::CompilerHLSL> compilerImpl;
         spirv_cross::CompilerHLSL* compiler = nullptr;
         if (!GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
             // If these options are changed, the values in DawnSPIRVCrossHLSLFastFuzzer.cpp need to
@@ -87,8 +91,8 @@ namespace dawn_native { namespace d3d12 {
             options_hlsl.point_coord_compat = true;
             options_hlsl.point_size_compat = true;
 
-            compiler_impl = std::make_unique<spirv_cross::CompilerHLSL>(mSpirv);
-            compiler = compiler_impl.get();
+            compilerImpl = std::make_unique<spirv_cross::CompilerHLSL>(spirv);
+            compiler = compilerImpl.get();
             compiler->set_common_options(options_glsl);
             compiler->set_hlsl_options(options_hlsl);
         }

@@ -32,9 +32,7 @@ namespace dawn_native { namespace d3d12 {
       private:
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModule() override = default;
-        MaybeError Initialize(const ShaderModuleDescriptor* descriptor);
-
-        std::vector<uint32_t> mSpirv;
+        MaybeError Initialize();
     };
 
 }}  // namespace dawn_native::d3d12

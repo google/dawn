@@ -51,7 +51,7 @@ namespace dawn_native { namespace opengl {
     ResultOrError<ShaderModule*> ShaderModule::Create(Device* device,
                                                       const ShaderModuleDescriptor* descriptor) {
         Ref<ShaderModule> module = AcquireRef(new ShaderModule(device, descriptor));
-        DAWN_TRY(module->Initialize(descriptor));
+        DAWN_TRY(module->Initialize());
         return module.Detach();
     }
 
@@ -67,10 +67,11 @@ namespace dawn_native { namespace opengl {
         : ShaderModuleBase(device, descriptor) {
     }
 
-    MaybeError ShaderModule::Initialize(const ShaderModuleDescriptor* descriptor) {
-        std::unique_ptr<spirv_cross::CompilerGLSL> compiler_impl;
-        spirv_cross::CompilerGLSL* compiler;
+    MaybeError ShaderModule::Initialize() {
+        const std::vector<uint32_t>& spirv = GetSpirv();
 
+        std::unique_ptr<spirv_cross::CompilerGLSL> compilerImpl;
+        spirv_cross::CompilerGLSL* compiler;
         if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
             // If these options are changed, the values in DawnSPIRVCrossGLSLFastFuzzer.cpp need to
             // be updated.
@@ -90,7 +91,7 @@ namespace dawn_native { namespace opengl {
             options.SetGLSLLanguageVersion(440);
 #endif
             DAWN_TRY(CheckSpvcSuccess(
-                mSpvcContext.InitializeForGlsl(descriptor->code, descriptor->codeSize, options),
+                mSpvcContext.InitializeForGlsl(spirv.data(), spirv.size(), options),
                 "Unable to initialize instance of spvc"));
             DAWN_TRY(CheckSpvcSuccess(mSpvcContext.GetCompiler(reinterpret_cast<void**>(&compiler)),
                                       "Unable to get cross compiler"));
@@ -108,15 +109,14 @@ namespace dawn_native { namespace opengl {
 
             // TODO(cwallez@chromium.org): discover the backing context version and use that.
 #if defined(DAWN_PLATFORM_APPLE)
-        options.version = 410;
+            options.version = 410;
 #else
-        options.version = 440;
+            options.version = 440;
 #endif
 
-        compiler_impl =
-            std::make_unique<spirv_cross::CompilerGLSL>(descriptor->code, descriptor->codeSize);
-        compiler = compiler_impl.get();
-        compiler->set_common_options(options);
+            compilerImpl = std::make_unique<spirv_cross::CompilerGLSL>(spirv);
+            compiler = compilerImpl.get();
+            compiler->set_common_options(options);
         }
 
         DAWN_TRY(ExtractSpirvInfo(*compiler));

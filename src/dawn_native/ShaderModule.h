@@ -83,13 +83,12 @@ namespace dawn_native {
             bool operator()(const ShaderModuleBase* a, const ShaderModuleBase* b) const;
         };
 
-        shaderc_spvc::Context* GetContext() {
-            return &mSpvcContext;
-        }
+        shaderc_spvc::Context* GetContext();
+        const std::vector<uint32_t>& GetSpirv() const;
 
       protected:
         static MaybeError CheckSpvcSuccess(shaderc_spvc_status status, const char* error_msg);
-        shaderc_spvc::CompileOptions GetCompileOptions();
+        shaderc_spvc::CompileOptions GetCompileOptions() const;
 
         shaderc_spvc::Context mSpvcContext;
 
@@ -103,9 +102,7 @@ namespace dawn_native {
         MaybeError ExtractSpirvInfoWithSpvc();
         MaybeError ExtractSpirvInfoWithSpirvCross(const spirv_cross::Compiler& compiler);
 
-        // TODO(cwallez@chromium.org): The code is only stored for deduplication. We could maybe
-        // store a cryptographic hash of the code instead?
-        std::vector<uint32_t> mCode;
+        std::vector<uint32_t> mSpirv;
 
         ModuleBindingInfo mBindingInfo;
         std::bitset<kMaxVertexAttributes> mUsedVertexAttributes;

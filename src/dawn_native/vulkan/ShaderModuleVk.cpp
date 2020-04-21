@@ -28,7 +28,7 @@ namespace dawn_native { namespace vulkan {
         Ref<ShaderModule> module = AcquireRef(new ShaderModule(device, descriptor));
         if (!module)
             return DAWN_VALIDATION_ERROR("Unable to create ShaderModule");
-        DAWN_TRY(module->Initialize(descriptor));
+        DAWN_TRY(module->Initialize());
         return module.Detach();
     }
 
@@ -36,14 +36,16 @@ namespace dawn_native { namespace vulkan {
         : ShaderModuleBase(device, descriptor) {
     }
 
-    MaybeError ShaderModule::Initialize(const ShaderModuleDescriptor* descriptor) {
+    MaybeError ShaderModule::Initialize() {
+        const std::vector<uint32_t>& spirv = GetSpirv();
+
         // Use SPIRV-Cross to extract info from the SPIRV even if Vulkan consumes SPIRV. We want to
         // have a translation step eventually anyway.
         if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
             shaderc_spvc::CompileOptions options = GetCompileOptions();
 
             DAWN_TRY(CheckSpvcSuccess(
-                mSpvcContext.InitializeForVulkan(descriptor->code, descriptor->codeSize, options),
+                mSpvcContext.InitializeForVulkan(spirv.data(), spirv.size(), options),
                 "Unable to initialize instance of spvc"));
 
             spirv_cross::Compiler* compiler;
@@ -51,7 +53,7 @@ namespace dawn_native { namespace vulkan {
                                       "Unable to get cross compiler"));
             DAWN_TRY(ExtractSpirvInfo(*compiler));
         } else {
-            spirv_cross::Compiler compiler(descriptor->code, descriptor->codeSize);
+            spirv_cross::Compiler compiler(spirv);
             DAWN_TRY(ExtractSpirvInfo(compiler));
         }
 
@@ -69,8 +71,8 @@ namespace dawn_native { namespace vulkan {
             createInfo.codeSize = vulkanSource.size() * sizeof(uint32_t);
             createInfo.pCode = vulkanSource.data();
         } else {
-            createInfo.codeSize = descriptor->codeSize * sizeof(uint32_t);
-            createInfo.pCode = descriptor->code;
+            createInfo.codeSize = spirv.size() * sizeof(uint32_t);
+            createInfo.pCode = spirv.data();
         }
 
         Device* device = ToBackend(GetDevice());

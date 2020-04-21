@@ -324,7 +324,7 @@ namespace dawn_native {
     // ShaderModuleBase
 
     ShaderModuleBase::ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor)
-        : CachedObject(device), mCode(descriptor->code, descriptor->code + descriptor->codeSize) {
+        : CachedObject(device), mSpirv(descriptor->code, descriptor->code + descriptor->codeSize) {
         mFragmentOutputFormatBaseTypes.fill(Format::Other);
         if (GetDevice()->IsToggleEnabled(Toggle::UseSpvcParser)) {
             mSpvcContext.SetUseSpvcParser(true);
@@ -836,7 +836,7 @@ namespace dawn_native {
     size_t ShaderModuleBase::HashFunc::operator()(const ShaderModuleBase* module) const {
         size_t hash = 0;
 
-        for (uint32_t word : module->mCode) {
+        for (uint32_t word : module->mSpirv) {
             HashCombine(&hash, word);
         }
 
@@ -845,7 +845,7 @@ namespace dawn_native {
 
     bool ShaderModuleBase::EqualityFunc::operator()(const ShaderModuleBase* a,
                                                     const ShaderModuleBase* b) const {
-        return a->mCode == b->mCode;
+        return a->mSpirv == b->mSpirv;
     }
 
     MaybeError ShaderModuleBase::CheckSpvcSuccess(shaderc_spvc_status status,
@@ -856,7 +856,15 @@ namespace dawn_native {
         return {};
     }
 
-    shaderc_spvc::CompileOptions ShaderModuleBase::GetCompileOptions() {
+    shaderc_spvc::Context* ShaderModuleBase::GetContext() {
+        return &mSpvcContext;
+    }
+
+    const std::vector<uint32_t>& ShaderModuleBase::GetSpirv() const {
+        return mSpirv;
+    }
+
+    shaderc_spvc::CompileOptions ShaderModuleBase::GetCompileOptions() const {
         shaderc_spvc::CompileOptions options;
         options.SetValidate(GetDevice()->IsValidationEnabled());
         return options;

@@ -34,7 +34,7 @@ namespace dawn_native { namespace vulkan {
       private:
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModule() override;
-        MaybeError Initialize(const ShaderModuleDescriptor* descriptor);
+        MaybeError Initialize();
 
         VkShaderModule mHandle = VK_NULL_HANDLE;
     };
