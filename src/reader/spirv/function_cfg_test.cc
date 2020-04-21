@@ -145,6 +145,29 @@ TEST_F(SpvParserTest, ComputeBlockOrder_ReorderSequence) {
   EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30));
 }
 
+TEST_F(SpvParserTest, ComputeBlockOrder_DupConditionalBranch) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %20
+
+     %99 = OpLabel
+     OpReturn
+
+     %20 = OpLabel
+     OpBranch %99
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.ComputeBlockOrderAndPositions();
+
+  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 99));
+}
+
 TEST_F(SpvParserTest, ComputeBlockOrder_RespectConditionalBranchOrder) {
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
@@ -271,6 +294,36 @@ TEST_F(SpvParserTest,
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.rspo(), ElementsAre(10, 30, 20, 80, 99));
+}
+
+TEST_F(SpvParserTest,
+       ComputeBlockOrder_Switch_DefaultSameAsACase) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %30 20 %20 30 %30 40 %40
+
+     %99 = OpLabel
+     OpReturn
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %40 = OpLabel
+     OpBranch %99
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.ComputeBlockOrderAndPositions();
+
+  EXPECT_THAT(fe.rspo(), ElementsAre(10, 40, 20, 30, 99));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_RespectSwitchCaseFallthrough) {
