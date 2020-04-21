@@ -27,7 +27,7 @@ class WireOptionalTests : public WireTest {
 // Test passing nullptr instead of objects - object as value version
 TEST_F(WireOptionalTests, OptionalObjectValue) {
     WGPUBindGroupLayoutDescriptor bglDesc = {};
-    bglDesc.bindingCount = 0;
+    bglDesc.entryCount = 0;
     WGPUBindGroupLayout bgl = wgpuDeviceCreateBindGroupLayout(device, &bglDesc);
 
     WGPUBindGroupLayout apiBindGroupLayout = api.GetNewBindGroupLayout();
@@ -35,27 +35,27 @@ TEST_F(WireOptionalTests, OptionalObjectValue) {
         .WillOnce(Return(apiBindGroupLayout));
 
     // The `sampler`, `textureView` and `buffer` members of a binding are optional.
-    WGPUBindGroupEntry binding;
-    binding.binding = 0;
-    binding.sampler = nullptr;
-    binding.textureView = nullptr;
-    binding.buffer = nullptr;
+    WGPUBindGroupEntry entry;
+    entry.binding = 0;
+    entry.sampler = nullptr;
+    entry.textureView = nullptr;
+    entry.buffer = nullptr;
 
     WGPUBindGroupDescriptor bgDesc = {};
     bgDesc.layout = bgl;
-    bgDesc.bindingCount = 1;
-    bgDesc.bindings = &binding;
+    bgDesc.entryCount = 1;
+    bgDesc.entries = &entry;
 
     wgpuDeviceCreateBindGroup(device, &bgDesc);
 
     WGPUBindGroup apiDummyBindGroup = api.GetNewBindGroup();
     EXPECT_CALL(api, DeviceCreateBindGroup(
                          apiDevice, MatchesLambda([](const WGPUBindGroupDescriptor* desc) -> bool {
-                             return desc->nextInChain == nullptr && desc->bindingCount == 1 &&
-                                    desc->bindings[0].binding == 0 &&
-                                    desc->bindings[0].sampler == nullptr &&
-                                    desc->bindings[0].buffer == nullptr &&
-                                    desc->bindings[0].textureView == nullptr;
+                             return desc->nextInChain == nullptr && desc->entryCount == 1 &&
+                                    desc->entries[0].binding == 0 &&
+                                    desc->entries[0].sampler == nullptr &&
+                                    desc->entries[0].buffer == nullptr &&
+                                    desc->entries[0].textureView == nullptr;
                          })))
         .WillOnce(Return(apiDummyBindGroup));
 

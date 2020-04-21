@@ -102,26 +102,26 @@ namespace dawn_native {
         std::set<BindingNumber> bindingsSet;
         uint32_t dynamicUniformBufferCount = 0;
         uint32_t dynamicStorageBufferCount = 0;
-        for (BindingIndex i = 0; i < descriptor->bindingCount; ++i) {
-            const BindGroupLayoutEntry& binding = descriptor->bindings[i];
-            BindingNumber bindingNumber = BindingNumber(binding.binding);
+        for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
+            const BindGroupLayoutEntry& entry = descriptor->entries[i];
+            BindingNumber bindingNumber = BindingNumber(entry.binding);
 
-            DAWN_TRY(ValidateShaderStage(binding.visibility));
-            DAWN_TRY(ValidateBindingType(binding.type));
-            DAWN_TRY(ValidateTextureComponentType(binding.textureComponentType));
+            DAWN_TRY(ValidateShaderStage(entry.visibility));
+            DAWN_TRY(ValidateBindingType(entry.type));
+            DAWN_TRY(ValidateTextureComponentType(entry.textureComponentType));
 
-            if (binding.viewDimension != wgpu::TextureViewDimension::Undefined) {
-                DAWN_TRY(ValidateTextureViewDimension(binding.viewDimension));
+            if (entry.viewDimension != wgpu::TextureViewDimension::Undefined) {
+                DAWN_TRY(ValidateTextureViewDimension(entry.viewDimension));
 
                 // TODO(dawn:22): Remove this once users use viewDimension
-                if (binding.textureDimension != wgpu::TextureViewDimension::Undefined) {
+                if (entry.textureDimension != wgpu::TextureViewDimension::Undefined) {
                     return DAWN_VALIDATION_ERROR(
                         "Cannot use both viewDimension and textureDimension");
                 }
             } else {
                 // TODO(dawn:22): Remove this once users use viewDimension
-                if (binding.textureDimension != wgpu::TextureViewDimension::Undefined) {
-                    DAWN_TRY(ValidateTextureViewDimension(binding.textureDimension));
+                if (entry.textureDimension != wgpu::TextureViewDimension::Undefined) {
+                    DAWN_TRY(ValidateTextureViewDimension(entry.textureDimension));
                     device->EmitDeprecationWarning(
                         "BindGroupLayoutEntry::textureDimension is deprecated, use viewDimension "
                         "instead");
@@ -132,21 +132,19 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("some binding index was specified more than once");
             }
 
-            DAWN_TRY(
-                ValidateBindingTypeWithShaderStageVisibility(binding.type, binding.visibility));
+            DAWN_TRY(ValidateBindingTypeWithShaderStageVisibility(entry.type, entry.visibility));
 
-            DAWN_TRY(
-                ValidateStorageTextureFormat(device, binding.type, binding.storageTextureFormat));
+            DAWN_TRY(ValidateStorageTextureFormat(device, entry.type, entry.storageTextureFormat));
 
-            switch (binding.type) {
+            switch (entry.type) {
                 case wgpu::BindingType::UniformBuffer:
-                    if (binding.hasDynamicOffset) {
+                    if (entry.hasDynamicOffset) {
                         ++dynamicUniformBufferCount;
                     }
                     break;
                 case wgpu::BindingType::StorageBuffer:
                 case wgpu::BindingType::ReadonlyStorageBuffer:
-                    if (binding.hasDynamicOffset) {
+                    if (entry.hasDynamicOffset) {
                         ++dynamicStorageBufferCount;
                     }
                     break;
@@ -155,7 +153,7 @@ namespace dawn_native {
                 case wgpu::BindingType::ComparisonSampler:
                 case wgpu::BindingType::ReadonlyStorageTexture:
                 case wgpu::BindingType::WriteonlyStorageTexture:
-                    if (binding.hasDynamicOffset) {
+                    if (entry.hasDynamicOffset) {
                         return DAWN_VALIDATION_ERROR("Samplers and textures cannot be dynamic");
                     }
                     break;
@@ -163,7 +161,7 @@ namespace dawn_native {
                     return DAWN_VALIDATION_ERROR("storage textures aren't supported (yet)");
             }
 
-            if (binding.multisampled) {
+            if (entry.multisampled) {
                 return DAWN_VALIDATION_ERROR(
                     "BindGroupLayoutEntry::multisampled must be false (for now)");
             }
@@ -273,9 +271,9 @@ namespace dawn_native {
 
     BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
                                              const BindGroupLayoutDescriptor* descriptor)
-        : CachedObject(device), mBindingCount(descriptor->bindingCount) {
+        : CachedObject(device), mBindingCount(descriptor->entryCount) {
         std::vector<BindGroupLayoutEntry> sortedBindings(
-            descriptor->bindings, descriptor->bindings + descriptor->bindingCount);
+            descriptor->entries, descriptor->entries + descriptor->entryCount);
 
         std::sort(sortedBindings.begin(), sortedBindings.end(), SortBindingsCompare);
 

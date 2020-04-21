@@ -105,11 +105,11 @@ TEST_P(DeviceLostTest, SubmitFails) {
 TEST_P(DeviceLostTest, CreateBindGroupLayoutFails) {
     SetCallbackAndLoseForTesting();
 
-    wgpu::BindGroupLayoutEntry binding = {0, wgpu::ShaderStage::None,
-                                          wgpu::BindingType::UniformBuffer};
+    wgpu::BindGroupLayoutEntry entry = {0, wgpu::ShaderStage::None,
+                                        wgpu::BindingType::UniformBuffer};
     wgpu::BindGroupLayoutDescriptor descriptor;
-    descriptor.bindingCount = 1;
-    descriptor.bindings = &binding;
+    descriptor.entryCount = 1;
+    descriptor.entries = &entry;
     ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor));
 }
 
@@ -139,18 +139,18 @@ TEST_P(DeviceLostTest, GetBindGroupLayoutFails) {
 TEST_P(DeviceLostTest, CreateBindGroupFails) {
     SetCallbackAndLoseForTesting();
 
-    wgpu::BindGroupEntry binding;
-    binding.binding = 0;
-    binding.sampler = nullptr;
-    binding.textureView = nullptr;
-    binding.buffer = nullptr;
-    binding.offset = 0;
-    binding.size = 0;
+    wgpu::BindGroupEntry entry;
+    entry.binding = 0;
+    entry.sampler = nullptr;
+    entry.textureView = nullptr;
+    entry.buffer = nullptr;
+    entry.offset = 0;
+    entry.size = 0;
 
     wgpu::BindGroupDescriptor descriptor;
     descriptor.layout = nullptr;
-    descriptor.bindingCount = 1;
-    descriptor.bindings = &binding;
+    descriptor.entryCount = 1;
+    descriptor.entries = &entry;
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
 }
 

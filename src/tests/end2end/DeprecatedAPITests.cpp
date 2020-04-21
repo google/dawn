@@ -79,8 +79,8 @@ TEST_P(DeprecationTests, BGLEntryTextureDimensionIsDeprecated) {
     };
 
     wgpu::BindGroupLayoutDescriptor bglDesc = {
-        .bindingCount = 1,
-        .bindings = &entryDesc,
+        .entryCount = 1,
+        .entries = &entryDesc,
     };
     EXPECT_DEPRECATION_WARNING(device.CreateBindGroupLayout(&bglDesc));
 }
@@ -92,8 +92,8 @@ TEST_P(DeprecationTests, BGLEntryTextureDimensionAndViewUndefinedEmitsNoWarning)
     };
 
     wgpu::BindGroupLayoutDescriptor bglDesc = {
-        .bindingCount = 1,
-        .bindings = &entryDesc,
+        .entryCount = 1,
+        .entries = &entryDesc,
     };
     device.CreateBindGroupLayout(&bglDesc);
 }
@@ -106,8 +106,8 @@ TEST_P(DeprecationTests, BGLEntryTextureAndViewDimensionIsInvalid) {
     };
 
     wgpu::BindGroupLayoutDescriptor bglDesc = {
-        .bindingCount = 1,
-        .bindings = &entryDesc,
+        .entryCount = 1,
+        .entries = &entryDesc,
     };
     ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&bglDesc));
 }
@@ -121,8 +121,8 @@ TEST_P(DeprecationTests, BGLEntryTextureDimensionStateTracking) {
     };
 
     wgpu::BindGroupLayoutDescriptor bglDesc = {
-        .bindingCount = 1,
-        .bindings = &entryDesc,
+        .entryCount = 1,
+        .entries = &entryDesc,
     };
     wgpu::BindGroupLayout layout;
     EXPECT_DEPRECATION_WARNING(layout = device.CreateBindGroupLayout(&bglDesc));
@@ -150,6 +150,161 @@ TEST_P(DeprecationTests, BGLEntryTextureDimensionStateTracking) {
     // valid.
     utils::MakeBindGroup(device, layout, {{0, cubeView}});
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, arrayView}}));
+}
+
+// Test for BindGroupLayout::bindings/bindingCount -> entries/entryCount
+
+// Test that creating a BGL with bindings emits a deprecation warning.
+TEST_P(DeprecationTests, BGLDescBindingIsDeprecated) {
+    wgpu::BindGroupLayoutEntry entryDesc = {
+        .type = wgpu::BindingType::Sampler,
+    };
+
+    wgpu::BindGroupLayoutDescriptor bglDesc = {
+        .bindingCount = 1,
+        .bindings = &entryDesc,
+    };
+    EXPECT_DEPRECATION_WARNING(device.CreateBindGroupLayout(&bglDesc));
+}
+
+// Test that creating a BGL with both entries and bindings is an error
+TEST_P(DeprecationTests, BGLDescBindingAndEntriesIsInvalid) {
+    wgpu::BindGroupLayoutEntry entryDesc = {
+        .type = wgpu::BindingType::Sampler,
+    };
+
+    wgpu::BindGroupLayoutDescriptor bglDesc = {
+        .bindingCount = 1,
+        .bindings = &entryDesc,
+        .entryCount = 1,
+        .entries = &entryDesc,
+    };
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&bglDesc));
+}
+
+// Test that creating a BGL with both entries and bindings to 0 doesn't emit warnings
+TEST_P(DeprecationTests, BGLDescBindingAndEntriesBothZeroEmitsNoWarning) {
+    // TODO(cwallez@chromium.org): In Vulkan it is disallowed to create 0-sized descriptor pools
+    // but the Vulkan backend doesn't special case it yet.
+    DAWN_SKIP_TEST_IF(IsVulkan());
+
+    wgpu::BindGroupLayoutDescriptor bglDesc = {
+        .bindingCount = 0,
+        .bindings = nullptr,
+        .entryCount = 0,
+        .entries = nullptr,
+    };
+    device.CreateBindGroupLayout(&bglDesc);
+}
+
+// Test that creating a BGL with bindings still does correct state tracking
+TEST_P(DeprecationTests, BGLDescBindingStateTracking) {
+    wgpu::BindGroupLayoutEntry entryDesc = {
+        .binding = 0,
+        .type = wgpu::BindingType::Sampler,
+    };
+
+    wgpu::BindGroupLayoutDescriptor bglDesc = {
+        .bindingCount = 1,
+        .bindings = &entryDesc,
+    };
+    wgpu::BindGroupLayout layout;
+    EXPECT_DEPRECATION_WARNING(layout = device.CreateBindGroupLayout(&bglDesc));
+
+    // Test a case where if |bindings| wasn't taken into account, no validation error would happen
+    // because the layout would be empty
+    wgpu::BindGroupDescriptor badBgDesc = {
+        .layout = layout,
+        .entryCount = 0,
+        .entries = nullptr,
+    };
+    ASSERT_DEVICE_ERROR(device.CreateBindGroup(&badBgDesc));
+}
+
+// Test for BindGroup::bindings/bindingCount -> entries/entryCount
+
+// Test that creating a BG with bindings emits a deprecation warning.
+TEST_P(DeprecationTests, BGDescBindingIsDeprecated) {
+    wgpu::SamplerDescriptor samplerDesc = {};
+    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
+
+    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler}});
+
+    wgpu::BindGroupEntry entryDesc = {
+        .binding = 0,
+        .sampler = sampler,
+    };
+
+    wgpu::BindGroupDescriptor bgDesc = {
+        .layout = layout,
+        .bindingCount = 1,
+        .bindings = &entryDesc,
+    };
+    EXPECT_DEPRECATION_WARNING(device.CreateBindGroup(&bgDesc));
+}
+
+// Test that creating a BG with both entries and bindings is an error
+TEST_P(DeprecationTests, BGDescBindingAndEntriesIsInvalid) {
+    wgpu::SamplerDescriptor samplerDesc = {};
+    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
+
+    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler}});
+
+    wgpu::BindGroupEntry entryDesc = {
+        .binding = 0,
+        .sampler = sampler,
+    };
+
+    wgpu::BindGroupDescriptor bgDesc = {
+        .layout = layout,
+        .bindingCount = 1,
+        .bindings = &entryDesc,
+        .entryCount = 1,
+        .entries = &entryDesc,
+    };
+    ASSERT_DEVICE_ERROR(device.CreateBindGroup(&bgDesc));
+}
+
+// Test that creating a BG with both entries and bindings to 0 doesn't emit warnings
+TEST_P(DeprecationTests, BGDescBindingAndEntriesBothZeroEmitsNoWarning) {
+    // TODO(cwallez@chromium.org): In Vulkan it is disallowed to create 0-sized descriptor pools
+    // but the Vulkan backend doesn't special case it yet.
+    DAWN_SKIP_TEST_IF(IsVulkan());
+
+    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {});
+
+    wgpu::BindGroupDescriptor bgDesc = {
+        .layout = layout,
+        .bindingCount = 0,
+        .bindings = nullptr,
+        .entryCount = 0,
+        .entries = nullptr,
+    };
+    device.CreateBindGroup(&bgDesc);
+}
+
+// Test that creating a BG with bindings still does correct state tracking
+TEST_P(DeprecationTests, BGDescBindingStateTracking) {
+    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {});
+
+    // Test a case where if |bindings| wasn't taken into account, no validation error would happen
+    // because it would match the empty layout.
+    wgpu::SamplerDescriptor samplerDesc = {};
+    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
+
+    wgpu::BindGroupEntry entryDesc = {
+        .binding = 0,
+        .sampler = sampler,
+    };
+
+    wgpu::BindGroupDescriptor bgDesc = {
+        .layout = layout,
+        .bindingCount = 1,
+        .bindings = &entryDesc,
+    };
+    EXPECT_DEPRECATION_WARNING(ASSERT_DEVICE_ERROR(device.CreateBindGroup(&bgDesc)));
 }
 
 DAWN_INSTANTIATE_TEST(DeprecationTests,

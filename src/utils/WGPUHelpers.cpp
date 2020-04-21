@@ -271,16 +271,15 @@ namespace utils {
 
     wgpu::BindGroupLayout MakeBindGroupLayout(
         const wgpu::Device& device,
-        std::initializer_list<wgpu::BindGroupLayoutEntry> bindingsInitializer) {
-
-        std::vector<wgpu::BindGroupLayoutEntry> bindings;
-        for (const wgpu::BindGroupLayoutEntry& binding : bindingsInitializer) {
-            bindings.push_back(binding);
+        std::initializer_list<wgpu::BindGroupLayoutEntry> entriesInitializer) {
+        std::vector<wgpu::BindGroupLayoutEntry> entries;
+        for (const wgpu::BindGroupLayoutEntry& entry : entriesInitializer) {
+            entries.push_back(entry);
         }
 
         wgpu::BindGroupLayoutDescriptor descriptor;
-        descriptor.bindingCount = static_cast<uint32_t>(bindings.size());
-        descriptor.bindings = bindings.data();
+        descriptor.entryCount = static_cast<uint32_t>(entries.size());
+        descriptor.entries = entries.data();
         return device.CreateBindGroupLayout(&descriptor);
     }
 
@@ -317,16 +316,16 @@ namespace utils {
     wgpu::BindGroup MakeBindGroup(
         const wgpu::Device& device,
         const wgpu::BindGroupLayout& layout,
-        std::initializer_list<BindingInitializationHelper> bindingsInitializer) {
-        std::vector<wgpu::BindGroupEntry> bindings;
-        for (const BindingInitializationHelper& helper : bindingsInitializer) {
-            bindings.push_back(helper.GetAsBinding());
+        std::initializer_list<BindingInitializationHelper> entriesInitializer) {
+        std::vector<wgpu::BindGroupEntry> entries;
+        for (const BindingInitializationHelper& helper : entriesInitializer) {
+            entries.push_back(helper.GetAsBinding());
         }
 
         wgpu::BindGroupDescriptor descriptor;
         descriptor.layout = layout;
-        descriptor.bindingCount = bindings.size();
-        descriptor.bindings = bindings.data();
+        descriptor.entryCount = entries.size();
+        descriptor.entries = entries.data();
 
         return device.CreateBindGroup(&descriptor);
     }

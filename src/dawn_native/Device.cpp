@@ -731,10 +731,25 @@ namespace dawn_native {
     MaybeError DeviceBase::CreateBindGroupInternal(BindGroupBase** result,
                                                    const BindGroupDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
-        if (IsValidationEnabled()) {
-            DAWN_TRY(ValidateBindGroupDescriptor(this, descriptor));
+
+        // TODO(dawn:22): Remove this once users use entries/entryCount
+        BindGroupDescriptor fixedDescriptor = *descriptor;
+        if (fixedDescriptor.bindingCount != 0) {
+            if (fixedDescriptor.entryCount != 0) {
+                return DAWN_VALIDATION_ERROR("Cannot use bindings and entries at the same time");
+            } else {
+                EmitDeprecationWarning(
+                    "BindGroupEntry::bindings/bindingCount is deprecated, use entries/entryCount "
+                    "instead");
+                fixedDescriptor.entryCount = fixedDescriptor.bindingCount;
+                fixedDescriptor.entries = fixedDescriptor.bindings;
+            }
         }
-        DAWN_TRY_ASSIGN(*result, CreateBindGroupImpl(descriptor));
+
+        if (IsValidationEnabled()) {
+            DAWN_TRY(ValidateBindGroupDescriptor(this, &fixedDescriptor));
+        }
+        DAWN_TRY_ASSIGN(*result, CreateBindGroupImpl(&fixedDescriptor));
         return {};
     }
 
@@ -742,10 +757,25 @@ namespace dawn_native {
         BindGroupLayoutBase** result,
         const BindGroupLayoutDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
-        if (IsValidationEnabled()) {
-            DAWN_TRY(ValidateBindGroupLayoutDescriptor(this, descriptor));
+
+        // TODO(dawn:22): Remove this once users use entries/entryCount
+        BindGroupLayoutDescriptor fixedDescriptor = *descriptor;
+        if (fixedDescriptor.bindingCount != 0) {
+            if (fixedDescriptor.entryCount != 0) {
+                return DAWN_VALIDATION_ERROR("Cannot use bindings and entries at the same time");
+            } else {
+                EmitDeprecationWarning(
+                    "BindGroupLayoutEntry::bindings/bindingCount is deprecated, use "
+                    "entries/entryCount instead");
+                fixedDescriptor.entryCount = fixedDescriptor.bindingCount;
+                fixedDescriptor.entries = fixedDescriptor.bindings;
+            }
         }
-        DAWN_TRY_ASSIGN(*result, GetOrCreateBindGroupLayout(descriptor));
+
+        if (IsValidationEnabled()) {
+            DAWN_TRY(ValidateBindGroupLayoutDescriptor(this, &fixedDescriptor));
+        }
+        DAWN_TRY_ASSIGN(*result, GetOrCreateBindGroupLayout(&fixedDescriptor));
         return {};
     }
 

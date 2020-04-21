@@ -89,8 +89,8 @@ namespace dawn_native {
             // a Ref<BindGroupLayoutBase>, then the VkDevice will be destroyed before the
             // VkDescriptorSetLayout.
             BindGroupLayoutDescriptor desc = {};
-            desc.bindingCount = 0;
-            desc.bindings = nullptr;
+            desc.entryCount = 0;
+            desc.entries = nullptr;
 
             BindGroupLayoutBase* bgl = nullptr;
             if (GetDevice()->ConsumedError(GetDevice()->GetOrCreateBindGroupLayout(&desc), &bgl)) {

@@ -75,8 +75,8 @@ TEST_F(BindGroupValidationTest, NextInChainNullptr) {
 
     wgpu::BindGroupDescriptor descriptor;
     descriptor.layout = layout;
-    descriptor.bindingCount = 0;
-    descriptor.bindings = nullptr;
+    descriptor.entryCount = 0;
+    descriptor.entries = nullptr;
 
     // Control case: check that nextInChain = nullptr is valid
     descriptor.nextInChain = nullptr;
@@ -88,15 +88,15 @@ TEST_F(BindGroupValidationTest, NextInChainNullptr) {
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
 }
 
-// Check constraints on bindingCount
-TEST_F(BindGroupValidationTest, bindingCountMismatch) {
+// Check constraints on entryCount
+TEST_F(BindGroupValidationTest, EntryCountMismatch) {
     wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
         device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler}});
 
     // Control case: check that a descriptor with one binding is ok
     utils::MakeBindGroup(device, layout, {{0, mSampler}});
 
-    // Check that bindingCount != layout.bindingCount fails.
+    // Check that entryCount != layout.entryCount fails.
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {}));
 }
 
@@ -149,8 +149,8 @@ TEST_F(BindGroupValidationTest, SamplerBindingType) {
 
     wgpu::BindGroupDescriptor descriptor;
     descriptor.layout = layout;
-    descriptor.bindingCount = 1;
-    descriptor.bindings = &binding;
+    descriptor.entryCount = 1;
+    descriptor.entries = &binding;
 
     // Not setting anything fails
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
@@ -198,8 +198,8 @@ TEST_F(BindGroupValidationTest, TextureBindingType) {
 
     wgpu::BindGroupDescriptor descriptor;
     descriptor.layout = layout;
-    descriptor.bindingCount = 1;
-    descriptor.bindings = &binding;
+    descriptor.entryCount = 1;
+    descriptor.entries = &binding;
 
     // Not setting anything fails
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
@@ -252,8 +252,8 @@ TEST_F(BindGroupValidationTest, BufferBindingType) {
 
     wgpu::BindGroupDescriptor descriptor;
     descriptor.layout = layout;
-    descriptor.bindingCount = 1;
-    descriptor.bindings = &binding;
+    descriptor.entryCount = 1;
+    descriptor.entries = &binding;
 
     // Not setting anything fails
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
@@ -473,8 +473,8 @@ class BindGroupLayoutValidationTest : public ValidationTest {
                                    bool expected) {
         wgpu::BindGroupLayoutDescriptor descriptor;
 
-        descriptor.bindingCount = count;
-        descriptor.bindings = binding;
+        descriptor.entryCount = count;
+        descriptor.entries = binding;
 
         if (!expected) {
             ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor));
@@ -526,23 +526,23 @@ TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutEntryUnbounded) {
 
 // Test that there can't be more than kMaxBindingPerGroup bindings per group
 TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutMaxBindings) {
-    wgpu::BindGroupLayoutEntry bindings[kMaxBindingsPerGroup + 1];
+    wgpu::BindGroupLayoutEntry entries[kMaxBindingsPerGroup + 1];
 
     for (uint32_t i = 0; i < kMaxBindingsPerGroup + 1; i++) {
-        bindings[i].type = wgpu::BindingType::UniformBuffer;
-        bindings[i].binding = i;
-        bindings[i].visibility = wgpu::ShaderStage::Compute;
+        entries[i].type = wgpu::BindingType::UniformBuffer;
+        entries[i].binding = i;
+        entries[i].visibility = wgpu::ShaderStage::Compute;
     }
 
     wgpu::BindGroupLayoutDescriptor desc;
-    desc.bindings = bindings;
+    desc.entries = entries;
 
     // Control case: kMaxBindingsPerGroup bindings is allowed.
-    desc.bindingCount = kMaxBindingsPerGroup;
+    desc.entryCount = kMaxBindingsPerGroup;
     device.CreateBindGroupLayout(&desc);
 
     // Error case: kMaxBindingsPerGroup + 1 bindings is not allowed.
-    desc.bindingCount = kMaxBindingsPerGroup + 1;
+    desc.entryCount = kMaxBindingsPerGroup + 1;
     ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&desc));
 }
 
@@ -594,8 +594,8 @@ TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutVisibilityNone) {
     wgpu::BindGroupLayoutEntry binding = {0, wgpu::ShaderStage::None,
                                           wgpu::BindingType::UniformBuffer};
     wgpu::BindGroupLayoutDescriptor descriptor;
-    descriptor.bindingCount = 1;
-    descriptor.bindings = &binding;
+    descriptor.entryCount = 1;
+    descriptor.entries = &binding;
     device.CreateBindGroupLayout(&descriptor);
 }
 
@@ -642,8 +642,8 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
     auto MakeBindGroupLayout = [&](wgpu::BindGroupLayoutEntry* binding,
                                    uint32_t count) -> wgpu::BindGroupLayout {
         wgpu::BindGroupLayoutDescriptor descriptor;
-        descriptor.bindingCount = count;
-        descriptor.bindings = binding;
+        descriptor.entryCount = count;
+        descriptor.entries = binding;
         return device.CreateBindGroupLayout(&descriptor);
     };
 
@@ -1055,8 +1055,8 @@ class SetBindGroupPersistenceValidationTest : public ValidationTest {
 
             // Create the bind group layout.
             wgpu::BindGroupLayoutDescriptor bglDescriptor;
-            bglDescriptor.bindingCount = static_cast<uint32_t>(bindings.size());
-            bglDescriptor.bindings = bindings.data();
+            bglDescriptor.entryCount = static_cast<uint32_t>(bindings.size());
+            bglDescriptor.entries = bindings.data();
             bindGroupLayouts[l] = device.CreateBindGroupLayout(&bglDescriptor);
         }
 

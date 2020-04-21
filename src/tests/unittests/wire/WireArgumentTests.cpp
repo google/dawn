@@ -49,8 +49,8 @@ TEST_F(WireArgumentTests, ValueArgument) {
 TEST_F(WireArgumentTests, ValueArrayArgument) {
     // Create a bindgroup.
     WGPUBindGroupLayoutDescriptor bglDescriptor = {};
-    bglDescriptor.bindingCount = 0;
-    bglDescriptor.bindings = nullptr;
+    bglDescriptor.entryCount = 0;
+    bglDescriptor.entries = nullptr;
 
     WGPUBindGroupLayout bgl = wgpuDeviceCreateBindGroupLayout(device, &bglDescriptor);
     WGPUBindGroupLayout apiBgl = api.GetNewBindGroupLayout();
@@ -58,8 +58,8 @@ TEST_F(WireArgumentTests, ValueArrayArgument) {
 
     WGPUBindGroupDescriptor bindGroupDescriptor = {};
     bindGroupDescriptor.layout = bgl;
-    bindGroupDescriptor.bindingCount = 0;
-    bindGroupDescriptor.bindings = nullptr;
+    bindGroupDescriptor.entryCount = 0;
+    bindGroupDescriptor.entries = nullptr;
 
     WGPUBindGroup bindGroup = wgpuDeviceCreateBindGroup(device, &bindGroupDescriptor);
     WGPUBindGroup apiBindGroup = api.GetNewBindGroup();
@@ -284,8 +284,8 @@ TEST_F(WireArgumentTests, StructureOfValuesArgument) {
 // Test that the wire is able to send structures that contain objects
 TEST_F(WireArgumentTests, StructureOfObjectArrayArgument) {
     WGPUBindGroupLayoutDescriptor bglDescriptor = {};
-    bglDescriptor.bindingCount = 0;
-    bglDescriptor.bindings = nullptr;
+    bglDescriptor.entryCount = 0;
+    bglDescriptor.entries = nullptr;
 
     WGPUBindGroupLayout bgl = wgpuDeviceCreateBindGroupLayout(device, &bglDescriptor);
     WGPUBindGroupLayout apiBgl = api.GetNewBindGroupLayout();
@@ -313,7 +313,7 @@ TEST_F(WireArgumentTests, StructureOfObjectArrayArgument) {
 // Test that the wire is able to send structures that contain objects
 TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
     static constexpr int NUM_BINDINGS = 3;
-    WGPUBindGroupLayoutEntry bindings[NUM_BINDINGS]{
+    WGPUBindGroupLayoutEntry entries[NUM_BINDINGS]{
         {0,
          WGPUShaderStage_Vertex,
          WGPUBindingType_Sampler,
@@ -343,24 +343,24 @@ TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
          WGPUTextureFormat_RGBA8Unorm},
     };
     WGPUBindGroupLayoutDescriptor bglDescriptor = {};
-    bglDescriptor.bindingCount = NUM_BINDINGS;
-    bglDescriptor.bindings = bindings;
+    bglDescriptor.entryCount = NUM_BINDINGS;
+    bglDescriptor.entries = entries;
 
     wgpuDeviceCreateBindGroupLayout(device, &bglDescriptor);
     WGPUBindGroupLayout apiBgl = api.GetNewBindGroupLayout();
     EXPECT_CALL(
         api,
         DeviceCreateBindGroupLayout(
-            apiDevice, MatchesLambda([bindings](const WGPUBindGroupLayoutDescriptor* desc) -> bool {
+            apiDevice, MatchesLambda([entries](const WGPUBindGroupLayoutDescriptor* desc) -> bool {
                 for (int i = 0; i < NUM_BINDINGS; ++i) {
-                    const auto& a = desc->bindings[i];
-                    const auto& b = bindings[i];
+                    const auto& a = desc->entries[i];
+                    const auto& b = entries[i];
                     if (a.binding != b.binding || a.visibility != b.visibility ||
                         a.type != b.type) {
                         return false;
                     }
                 }
-                return desc->nextInChain == nullptr && desc->bindingCount == 3;
+                return desc->nextInChain == nullptr && desc->entryCount == 3;
             })))
         .WillOnce(Return(apiBgl));
 

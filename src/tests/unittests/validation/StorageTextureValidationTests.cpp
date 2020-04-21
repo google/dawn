@@ -381,11 +381,12 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutWithStorageTextureBindingTy
          {wgpu::ShaderStage::Compute, wgpu::BindingType::StorageTexture, false}}};
 
     for (const auto& testSpec : kTestSpecs) {
-        wgpu::BindGroupLayoutEntry binding = {0, testSpec.stage, testSpec.type};
-        binding.storageTextureFormat = wgpu::TextureFormat::R32Uint;
+        wgpu::BindGroupLayoutEntry entry = {0, testSpec.stage, testSpec.type};
+        entry.storageTextureFormat = wgpu::TextureFormat::R32Uint;
+
         wgpu::BindGroupLayoutDescriptor descriptor;
-        descriptor.bindingCount = 1;
-        descriptor.bindings = &binding;
+        descriptor.entryCount = 1;
+        descriptor.entries = &entry;
 
         if (testSpec.valid) {
             device.CreateBindGroupLayout(&descriptor);

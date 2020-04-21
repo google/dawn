@@ -108,8 +108,8 @@ TEST_F(GetBindGroupLayoutTests, DefaultShaderStageAndDynamicOffsets) {
     binding.multisampled = false;
 
     wgpu::BindGroupLayoutDescriptor desc = {};
-    desc.bindingCount = 1;
-    desc.bindings = &binding;
+    desc.entryCount = 1;
+    desc.entries = &binding;
 
     // Check that visibility and dynamic offsets match
     binding.hasDynamicOffset = false;
@@ -157,8 +157,8 @@ TEST_F(GetBindGroupLayoutTests, ComputePipeline) {
     binding.hasDynamicOffset = false;
 
     wgpu::BindGroupLayoutDescriptor desc = {};
-    desc.bindingCount = 1;
-    desc.bindings = &binding;
+    desc.entryCount = 1;
+    desc.entries = &binding;
 
     EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
 }
@@ -171,8 +171,8 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
     binding.multisampled = false;
 
     wgpu::BindGroupLayoutDescriptor desc = {};
-    desc.bindingCount = 1;
-    desc.bindings = &binding;
+    desc.entryCount = 1;
+    desc.entries = &binding;
 
     {
         // Storage buffer binding is not supported in vertex shader.
@@ -243,8 +243,8 @@ TEST_F(GetBindGroupLayoutTests, Multisampled) {
     binding.hasDynamicOffset = false;
 
     wgpu::BindGroupLayoutDescriptor desc = {};
-    desc.bindingCount = 1;
-    desc.bindings = &binding;
+    desc.entryCount = 1;
+    desc.entries = &binding;
 
     {
         binding.multisampled = false;
@@ -281,8 +281,8 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
     binding.multisampled = false;
 
     wgpu::BindGroupLayoutDescriptor desc = {};
-    desc.bindingCount = 1;
-    desc.bindings = &binding;
+    desc.entryCount = 1;
+    desc.entries = &binding;
 
     {
         binding.viewDimension = wgpu::TextureViewDimension::e1D;
@@ -355,8 +355,8 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
     binding.multisampled = false;
 
     wgpu::BindGroupLayoutDescriptor desc = {};
-    desc.bindingCount = 1;
-    desc.bindings = &binding;
+    desc.entryCount = 1;
+    desc.entries = &binding;
 
     {
         binding.textureComponentType = wgpu::TextureComponentType::Float;
@@ -398,8 +398,8 @@ TEST_F(GetBindGroupLayoutTests, BindingIndices) {
     binding.multisampled = false;
 
     wgpu::BindGroupLayoutDescriptor desc = {};
-    desc.bindingCount = 1;
-    desc.bindings = &binding;
+    desc.entryCount = 1;
+    desc.entries = &binding;
 
     {
         binding.binding = 0;
@@ -605,8 +605,8 @@ TEST_F(GetBindGroupLayoutTests, UnusedIndex) {
         void main() {})");
 
     wgpu::BindGroupLayoutDescriptor desc = {};
-    desc.bindingCount = 0;
-    desc.bindings = nullptr;
+    desc.entryCount = 0;
+    desc.entries = nullptr;
 
     wgpu::BindGroupLayout emptyBindGroupLayout = device.CreateBindGroupLayout(&desc);
 
@@ -625,8 +625,8 @@ TEST_F(GetBindGroupLayoutTests, Reflection) {
     binding.visibility = wgpu::ShaderStage::Vertex;
 
     wgpu::BindGroupLayoutDescriptor bglDesc = {};
-    bglDesc.bindingCount = 1;
-    bglDesc.bindings = &binding;
+    bglDesc.entryCount = 1;
+    bglDesc.entries = &binding;
 
     wgpu::BindGroupLayout bindGroupLayout = device.CreateBindGroupLayout(&bglDesc);
 
@@ -663,8 +663,8 @@ TEST_F(GetBindGroupLayoutTests, Reflection) {
 
     {
         wgpu::BindGroupLayoutDescriptor emptyDesc = {};
-        emptyDesc.bindingCount = 0;
-        emptyDesc.bindings = nullptr;
+        emptyDesc.entryCount = 0;
+        emptyDesc.entries = nullptr;
 
         wgpu::BindGroupLayout emptyBindGroupLayout = device.CreateBindGroupLayout(&emptyDesc);
 
