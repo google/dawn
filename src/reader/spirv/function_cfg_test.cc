@@ -79,6 +79,50 @@ TEST_F(SpvParserTest, ComputeBlockOrder_IgnoreStaticalyUnreachable) {
   EXPECT_THAT(fe.rspo(), ElementsAre(10, 20));
 }
 
+TEST_F(SpvParserTest, ComputeBlockOrder_KillIsDeadEnd) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %15 = OpLabel ; statically dead
+     OpReturn
+
+     %20 = OpLabel
+     OpKill        ; Kill doesn't lead anywhere
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.ComputeBlockOrderAndPositions();
+
+  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20));
+}
+
+TEST_F(SpvParserTest, ComputeBlockOrder_UnreachableIsDeadEnd) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %15 = OpLabel ; statically dead
+     OpReturn
+
+     %20 = OpLabel
+     OpUnreachable ; Unreachable doesn't lead anywhere
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.ComputeBlockOrderAndPositions();
+
+  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20));
+}
+
 TEST_F(SpvParserTest, ComputeBlockOrder_ReorderSequence) {
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
