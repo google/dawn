@@ -166,6 +166,35 @@ class DAWN_NO_DISCARD Result<const T*, E> {
     intptr_t mPayload = detail::kEmptyPayload;
 };
 
+template <typename T>
+class Ref;
+
+template <typename T, typename E>
+class DAWN_NO_DISCARD Result<Ref<T>, E> {
+  public:
+    static_assert(alignof_if_defined_else_default<T, 4> >= 4,
+                  "Result<Ref<T>, E> reserves two bits for tagging pointers");
+    static_assert(alignof_if_defined_else_default<E, 4> >= 4,
+                  "Result<Ref<T>, E> reserves two bits for tagging pointers");
+
+    Result(Ref<T>&& success);
+    Result(std::unique_ptr<E> error);
+
+    Result(Result<Ref<T>, E>&& other);
+    Result<Ref<T>, E>& operator=(Result<Ref<T>, E>&& other);
+
+    ~Result();
+
+    bool IsError() const;
+    bool IsSuccess() const;
+
+    Ref<T> AcquireSuccess();
+    std::unique_ptr<E> AcquireError();
+
+  private:
+    intptr_t mPayload = detail::kEmptyPayload;
+};
+
 // Catchall definition of Result<T, E> implemented as a tagged struct. It could be improved to use
 // a tagged union instead if it turns out to be a hotspot. T and E must be movable and default
 // constructible.
@@ -363,6 +392,61 @@ const T* Result<const T*, E>::AcquireSuccess() {
 
 template <typename T, typename E>
 std::unique_ptr<E> Result<const T*, E>::AcquireError() {
+    std::unique_ptr<E> error(detail::GetErrorFromPayload<E>(mPayload));
+    mPayload = detail::kEmptyPayload;
+    return std::move(error);
+}
+
+// Implementation of Result<Ref<T>, E>
+template <typename T, typename E>
+Result<Ref<T>, E>::Result(Ref<T>&& success)
+    : mPayload(detail::MakePayload(success.Detach(), detail::Success)) {
+}
+
+template <typename T, typename E>
+Result<Ref<T>, E>::Result(std::unique_ptr<E> error)
+    : mPayload(detail::MakePayload(error.release(), detail::Error)) {
+}
+
+template <typename T, typename E>
+Result<Ref<T>, E>::Result(Result<Ref<T>, E>&& other) : mPayload(other.mPayload) {
+    other.mPayload = detail::kEmptyPayload;
+}
+
+template <typename T, typename E>
+Result<Ref<T>, E>& Result<Ref<T>, E>::operator=(Result<Ref<T>, E>&& other) {
+    ASSERT(mPayload == detail::kEmptyPayload);
+    mPayload = other.mPayload;
+    other.mPayload = detail::kEmptyPayload;
+    return *this;
+}
+
+template <typename T, typename E>
+Result<Ref<T>, E>::~Result() {
+    ASSERT(mPayload == detail::kEmptyPayload);
+}
+
+template <typename T, typename E>
+bool Result<Ref<T>, E>::IsError() const {
+    return detail::GetPayloadType(mPayload) == detail::Error;
+}
+
+template <typename T, typename E>
+bool Result<Ref<T>, E>::IsSuccess() const {
+    return detail::GetPayloadType(mPayload) == detail::Success;
+}
+
+template <typename T, typename E>
+Ref<T> Result<Ref<T>, E>::AcquireSuccess() {
+    ASSERT(IsSuccess());
+    Ref<T> success = AcquireRef(detail::GetSuccessFromPayload<T>(mPayload));
+    mPayload = detail::kEmptyPayload;
+    return success;
+}
+
+template <typename T, typename E>
+std::unique_ptr<E> Result<Ref<T>, E>::AcquireError() {
+    ASSERT(IsError());
     std::unique_ptr<E> error(detail::GetErrorFromPayload<E>(mPayload));
     mPayload = detail::kEmptyPayload;
     return std::move(error);
