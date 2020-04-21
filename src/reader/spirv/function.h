@@ -36,6 +36,23 @@ namespace tint {
 namespace reader {
 namespace spirv {
 
+/// Bookkeeping info for a basic block.
+struct BlockInfo {
+  /// Constructor
+  /// @param bb internal representation of the basic block
+  explicit BlockInfo(const spvtools::opt::BasicBlock& bb)
+      : basic_block(&bb), id(bb.id()) {}
+
+  /// The internal representation of the basic block.
+  const spvtools::opt::BasicBlock* basic_block;
+
+  /// The ID of the OpLabel instruction that starts this block.
+  uint32_t id = 0;
+
+  /// The position of this block in the reverse structured post-order.
+  uint32_t pos = 0;
+};
+
 /// A FunctionEmitter emits a SPIR-V function onto a Tint AST module.
 class FunctionEmitter {
  public:
@@ -72,6 +89,14 @@ class FunctionEmitter {
   /// Emits the function body, populating |ast_body_|
   /// @returns false if emission failed.
   bool EmitBody();
+
+  /// Determines the output order for the basic blocks in the function.
+  /// Populates |rspo_| and the |pos| block info member.
+  void ComputeBlockOrderAndPositions();
+
+  /// @returns the reverse structured post order of the basic blocks in
+  /// the function.
+  const std::vector<uint32_t>& rspo() const { return rspo_; }
 
   /// Emits declarations of function variables.
   /// @returns false if emission failed.
@@ -116,6 +141,16 @@ class FunctionEmitter {
   TypedExpression MaybeEmitCombinatorialValue(
       const spvtools::opt::Instruction& inst);
 
+  /// Gets the block info for a block ID, if any exists
+  /// @param id the SPIR-V ID of the OpLabel instruction starting the block
+  /// @returns the block info for the given ID, if it exists, or nullptr
+  BlockInfo* GetBlockInfo(uint32_t id) {
+    auto where = block_info_.find(id);
+    if (where == block_info_.end())
+      return nullptr;
+    return where->second.get();
+  }
+
  private:
   /// @returns the store type for the OpVariable instruction, or
   /// null on failure.
@@ -136,6 +171,13 @@ class FunctionEmitter {
   std::unordered_set<uint32_t> identifier_values_;
   // Mapping from SPIR-V ID that is used at most once, to its AST expression.
   std::unordered_map<uint32_t, TypedExpression> singly_used_values_;
+
+  // The IDs of basic blocks, in reverse structured post-order (RSPO).
+  // This is the output order for the basic blocks.
+  std::vector<uint32_t> rspo_;
+
+  // Mapping from block ID to its bookkeeping info.
+  std::unordered_map<uint32_t, std::unique_ptr<BlockInfo>> block_info_;
 };
 
 }  // namespace spirv

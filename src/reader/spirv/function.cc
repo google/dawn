@@ -14,7 +14,10 @@
 
 #include "src/reader/spirv/function.h"
 
+#include <unordered_map>
+#include <unordered_set>
 #include <utility>
+#include <vector>
 
 #include "source/opt/basic_block.h"
 #include "source/opt/function.h"
@@ -111,6 +114,97 @@ ast::BinaryOp ConvertBinaryOp(SpvOp opcode) {
   // https://bugs.chromium.org/p/tint/issues/detail?id=52
   return ast::BinaryOp::kNone;
 }
+
+// @returns the merge block ID for the given basic block, or 0 if there is none.
+uint32_t MergeFor(const spvtools::opt::BasicBlock& bb) {
+  // Get the OpSelectionMerge or OpLoopMerge instruction, if any.
+  auto* inst = bb.GetMergeInst();
+  return inst == nullptr ? 0 : inst->GetSingleWordInOperand(0);
+}
+
+// @returns the continue target ID for the given basic block, or 0 if there
+// is none.
+uint32_t ContinueTargetFor(const spvtools::opt::BasicBlock& bb) {
+  // Get the OpLoopMerge instruction, if any.
+  auto* inst = bb.GetLoopMergeInst();
+  return inst == nullptr ? 0 : inst->GetSingleWordInOperand(1);
+}
+
+// A structured traverser produces the reverse structured post-order of the
+// CFG of a function.  The blocks traversed are the transitive closure (minimum
+// fixed point) of:
+//  - the entry block
+//  - a block reached by a branch from another block in the set
+//  - a block mentioned as a merge block or continue target for a block in the
+//  set
+class StructuredTraverser {
+ public:
+  explicit StructuredTraverser(const spvtools::opt::Function& function)
+      : function_(function) {
+    for (auto& block : function_) {
+      id_to_block_[block.id()] = &block;
+    }
+  }
+
+  // Returns the reverse postorder traversal of the CFG, where:
+  //  - a merge block always follows its associated constructs
+  //  - a continue target always follows the associated loop construct, if any
+  // @returns the IDs of blocks in reverse structured post order
+  std::vector<uint32_t> ReverseStructuredPostOrder() {
+    visit_order_.clear();
+    visited_.clear();
+    VisitBackward(function_.entry()->id());
+
+    std::vector<uint32_t> order(visit_order_.rbegin(), visit_order_.rend());
+    return order;
+  }
+
+ private:
+  // Executes a depth first search of the CFG, where right after we visit a
+  // header, we will visit its merge block, then its continue target (if any).
+  // Also records the post order ordering.
+  void VisitBackward(uint32_t id) {
+    if (id == 0)
+      return;
+    if (visited_.count(id))
+      return;
+    visited_.insert(id);
+
+    const spvtools::opt::BasicBlock* bb =
+        id_to_block_[id];  // non-null for valid modules
+    VisitBackward(MergeFor(*bb));
+    VisitBackward(ContinueTargetFor(*bb));
+
+    // Visit successors. We will naturally skip the continue target and merge
+    // blocks.
+    auto* terminator = bb->terminator();
+    auto opcode = terminator->opcode();
+    if (opcode == SpvOpBranchConditional) {
+      // Visit the false branch, then the true branch, to make them come
+      // out in the natural order for an "if".
+      VisitBackward(terminator->GetSingleWordInOperand(2));
+      VisitBackward(terminator->GetSingleWordInOperand(1));
+    } else if (opcode == SpvOpBranch) {
+      VisitBackward(terminator->GetSingleWordInOperand(0));
+    } else if (opcode == SpvOpSwitch) {
+      // TODO(dneto): Consider visiting the labels in literal-value order.
+      std::vector<uint32_t> successors;
+      bb->ForEachSuccessorLabel([&successors](const uint32_t succ_id) {
+        successors.push_back(succ_id);
+      });
+      for (auto succ_id : successors) {
+        VisitBackward(succ_id);
+      }
+    }
+
+    visit_order_.push_back(id);
+  }
+
+  const spvtools::opt::Function& function_;
+  std::unordered_map<uint32_t, const spvtools::opt::BasicBlock*> id_to_block_;
+  std::vector<uint32_t> visit_order_;
+  std::unordered_set<uint32_t> visited_;
+};
 
 }  // namespace
 
@@ -213,6 +307,8 @@ ast::type::Type* FunctionEmitter::GetVariableStoreType(
 }
 
 bool FunctionEmitter::EmitBody() {
+  ComputeBlockOrderAndPositions();
+
   if (!EmitFunctionVariables()) {
     return false;
   }
@@ -220,6 +316,18 @@ bool FunctionEmitter::EmitBody() {
     return false;
   }
   return success();
+}
+
+void FunctionEmitter::ComputeBlockOrderAndPositions() {
+  for (auto& block : function_) {
+    block_info_[block.id()] = std::make_unique<BlockInfo>(block);
+  }
+
+  rspo_ = StructuredTraverser(function_).ReverseStructuredPostOrder();
+
+  for (uint32_t i = 0; i < rspo_.size(); ++i) {
+    GetBlockInfo(rspo_[i])->pos = i;
+  }
 }
 
 bool FunctionEmitter::EmitFunctionVariables() {

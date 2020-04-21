@@ -511,6 +511,7 @@ source_set("tint_unittests_spv_reader_src") {
     "src/reader/spirv/enum_converter_test.cc",
     "src/reader/spirv/fail_stream_test.cc",
     "src/reader/spirv/function_arithmetic_test.cc",
+    "src/reader/spirv/function_cfg_test.cc",
     "src/reader/spirv/function_conversion_test.cc",
     "src/reader/spirv/function_decl_test.cc",
     "src/reader/spirv/function_logical_test.cc",
