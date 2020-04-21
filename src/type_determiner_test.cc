@@ -1521,7 +1521,8 @@ TEST_P(ImportData_SingleParamTest, Scalar) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", param.name, params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
   ASSERT_NE(type, nullptr);
   EXPECT_TRUE(type->is_float_scalar());
   EXPECT_EQ(id, param.value);
@@ -1548,7 +1549,8 @@ TEST_P(ImportData_SingleParamTest, Vector) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", param.name, params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
   ASSERT_NE(type, nullptr);
   EXPECT_TRUE(type->is_float_vector());
   EXPECT_EQ(type->AsVector()->size(), 3);
@@ -1567,7 +1569,8 @@ TEST_P(ImportData_SingleParamTest, Error_Integer) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", param.name, params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
   ASSERT_EQ(type, nullptr);
   EXPECT_EQ(td()->error(), std::string("incorrect type for ") + param.name +
                                ". Requires a float scalar or a float vector");
@@ -1578,7 +1581,8 @@ TEST_P(ImportData_SingleParamTest, Error_NoParams) {
 
   ast::ExpressionList params;
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", param.name, params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
   ASSERT_EQ(type, nullptr);
   EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
                                param.name + ". Expected 1 got 0");
@@ -1599,7 +1603,8 @@ TEST_P(ImportData_SingleParamTest, Error_MultipleParams) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", param.name, params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
   ASSERT_EQ(type, nullptr);
   EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
                                param.name + ". Expected 1 got 3");
@@ -1648,7 +1653,8 @@ TEST_F(TypeDeterminerTest, ImportData_Length_Scalar) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", "length", params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "length", params, &id);
   ASSERT_NE(type, nullptr);
   EXPECT_TRUE(type->is_float_scalar());
   EXPECT_EQ(id, GLSLstd450Length);
@@ -1673,7 +1679,8 @@ TEST_F(TypeDeterminerTest, ImportData_Length_FloatVector) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", "length", params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "length", params, &id);
   ASSERT_NE(type, nullptr);
   EXPECT_TRUE(type->is_float_scalar());
   EXPECT_EQ(id, GLSLstd450Length);
@@ -1689,7 +1696,8 @@ TEST_F(TypeDeterminerTest, ImportData_Length_Error_Integer) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", "length", params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "length", params, &id);
   ASSERT_EQ(type, nullptr);
   EXPECT_EQ(
       td()->error(),
@@ -1699,7 +1707,8 @@ TEST_F(TypeDeterminerTest, ImportData_Length_Error_Integer) {
 TEST_F(TypeDeterminerTest, ImportData_Length_Error_NoParams) {
   ast::ExpressionList params;
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", "length", params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "length", params, &id);
   ASSERT_EQ(type, nullptr);
   EXPECT_EQ(td()->error(),
             "incorrect number of parameters for length. Expected 1 got 0");
@@ -1718,7 +1727,8 @@ TEST_F(TypeDeterminerTest, ImportData_Length_Error_MultipleParams) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", "length", params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "length", params, &id);
   ASSERT_EQ(type, nullptr);
   EXPECT_EQ(td()->error(),
             "incorrect number of parameters for length. Expected 1 got 3");
@@ -1740,7 +1750,8 @@ TEST_P(ImportData_TwoParamTest, Scalar) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", param.name, params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
   ASSERT_NE(type, nullptr);
   EXPECT_TRUE(type->is_float_scalar());
   EXPECT_EQ(id, param.value);
@@ -1777,7 +1788,8 @@ TEST_P(ImportData_TwoParamTest, Vector) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", param.name, params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
   ASSERT_NE(type, nullptr);
   EXPECT_TRUE(type->is_float_vector());
   EXPECT_EQ(type->AsVector()->size(), 3);
@@ -1798,7 +1810,8 @@ TEST_P(ImportData_TwoParamTest, Error_Integer) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", param.name, params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
   ASSERT_EQ(type, nullptr);
   EXPECT_EQ(td()->error(),
             std::string("incorrect type for ") + param.name +
@@ -1810,7 +1823,8 @@ TEST_P(ImportData_TwoParamTest, Error_NoParams) {
 
   ast::ExpressionList params;
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", param.name, params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
   ASSERT_EQ(type, nullptr);
   EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
                                param.name + ". Expected 2 got 0");
@@ -1827,7 +1841,8 @@ TEST_P(ImportData_TwoParamTest, Error_OneParam) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", param.name, params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
   ASSERT_EQ(type, nullptr);
   EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
                                param.name + ". Expected 2 got 1");
@@ -1863,7 +1878,8 @@ TEST_P(ImportData_TwoParamTest, Error_MismatchedParamCount) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", param.name, params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
   ASSERT_EQ(type, nullptr);
   EXPECT_EQ(td()->error(),
             std::string("mismatched parameter types for ") + param.name);
@@ -1892,7 +1908,8 @@ TEST_P(ImportData_TwoParamTest, Error_MismatchedParamType) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", param.name, params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
   ASSERT_EQ(type, nullptr);
   EXPECT_EQ(td()->error(),
             std::string("mismatched parameter types for ") + param.name);
@@ -1913,7 +1930,8 @@ TEST_P(ImportData_TwoParamTest, Error_TooManyParams) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", param.name, params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
   ASSERT_EQ(type, nullptr);
   EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
                                param.name + ". Expected 2 got 3");
@@ -1942,7 +1960,8 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Scalar) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", "distance", params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "distance", params, &id);
   ASSERT_NE(type, nullptr);
   EXPECT_TRUE(type->is_float_scalar());
   EXPECT_EQ(id, GLSLstd450Distance);
@@ -1977,7 +1996,8 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Vector) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", "distance", params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "distance", params, &id);
   ASSERT_NE(type, nullptr);
   EXPECT_TRUE(type->IsF32());
   EXPECT_EQ(id, GLSLstd450Distance);
@@ -1995,7 +2015,8 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Error_Integer) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", "distance", params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "distance", params, &id);
   ASSERT_EQ(type, nullptr);
   EXPECT_EQ(td()->error(),
             "incorrect type for distance. Requires float scalar or a float "
@@ -2005,7 +2026,8 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Error_Integer) {
 TEST_F(TypeDeterminerTest, ImportData_Distance_Error_NoParams) {
   ast::ExpressionList params;
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", "distance", params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "distance", params, &id);
   ASSERT_EQ(type, nullptr);
   EXPECT_EQ(td()->error(),
             "incorrect number of parameters for distance. Expected 2 got 0");
@@ -2020,7 +2042,8 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Error_OneParam) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", "distance", params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "distance", params, &id);
   ASSERT_EQ(type, nullptr);
   EXPECT_EQ(td()->error(),
             "incorrect number of parameters for distance. Expected 2 got 1");
@@ -2054,7 +2077,8 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Error_MismatchedParamCount) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", "distance", params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "distance", params, &id);
   ASSERT_EQ(type, nullptr);
   EXPECT_EQ(td()->error(), "mismatched parameter types for distance");
 }
@@ -2080,7 +2104,8 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Error_MismatchedParamType) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", "distance", params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "distance", params, &id);
   ASSERT_EQ(type, nullptr);
   EXPECT_EQ(td()->error(), "mismatched parameter types for distance");
 }
@@ -2098,7 +2123,8 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Error_TooManyParams) {
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
   uint32_t id = 0;
-  auto* type = td()->GetImportData("GLSL.std.450", "distance", params, &id);
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "distance", params, &id);
   ASSERT_EQ(type, nullptr);
   EXPECT_EQ(td()->error(),
             "incorrect number of parameters for distance. Expected 2 got 3");

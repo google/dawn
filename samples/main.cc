@@ -288,7 +288,7 @@ int main(int argc, const char** argv) {
     return 1;
   }
   if (!reader->Parse()) {
-    std::cerr << reader->error() << std::endl;
+    std::cerr << "Parse: " << reader->error() << std::endl;
     return 1;
   }
 
@@ -307,13 +307,13 @@ int main(int argc, const char** argv) {
 
   tint::TypeDeterminer td(&ctx, &mod);
   if (!td.Determine()) {
-    std::cerr << td.error() << std::endl;
+    std::cerr << "Type Determination: " << td.error() << std::endl;
     return 1;
   }
 
   tint::Validator v;
   if (!v.Validate(mod)) {
-    std::cerr << v.error() << std::endl;
+    std::cerr << "Validation: " << v.error() << std::endl;
     return 1;
   }
 

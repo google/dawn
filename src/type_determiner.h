@@ -92,12 +92,14 @@ class TypeDeterminer {
   }
 
   /// Retrieves information for the requested import.
+  /// @param src the source of the import
   /// @param path the import path
   /// @param name the method name to get information on
   /// @param params the parameters to the method call
   /// @param id out parameter for the external call ID. Must not be a nullptr.
   /// @returns the return type of |name| in |path| or nullptr on error.
-  ast::type::Type* GetImportData(const std::string& path,
+  ast::type::Type* GetImportData(const Source& src,
+                                 const std::string& path,
                                  const std::string& name,
                                  const ast::ExpressionList& params,
                                  uint32_t* id);

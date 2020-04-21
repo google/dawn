@@ -126,7 +126,8 @@ bool TypeDeterminer::DetermineVariableStorageClass(ast::Statement* stmt) {
   }
 
   if (var->storage_class() != ast::StorageClass::kNone) {
-    error_ = "function variable has a non-function storage class";
+    set_error(stmt->source(),
+              "function variable has a non-function storage class");
     return false;
   }
 
@@ -308,14 +309,16 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
     if (ident->has_path()) {
       auto* imp = mod_->FindImportByName(ident->path());
       if (imp == nullptr) {
-        error_ = "Unable to find import for " + ident->name();
+        set_error(expr->source(), "Unable to find import for " + ident->name());
         return false;
       }
 
       uint32_t ext_id = 0;
-      auto* result_type =
-          GetImportData(imp->path(), ident->name(), expr->params(), &ext_id);
+      auto* result_type = GetImportData(expr->source(), imp->path(),
+                                        ident->name(), expr->params(), &ext_id);
       if (result_type == nullptr) {
+        set_error(expr->source(),
+                  "Unable to determine result type for GLSL expression");
         return false;
       }
 
@@ -414,7 +417,8 @@ bool TypeDeterminer::DetermineMemberAccessor(
     return true;
   }
 
-  set_error(expr->source(), "invalid type in member accessor");
+  set_error(expr->source(),
+            "invalid type " + data_type->type_name() + " in member accessor");
   return false;
 }
 
@@ -489,6 +493,7 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
     return true;
   }
 
+  set_error(expr->source(), "Unknown binary expression");
   return false;
 }
 
@@ -573,6 +578,7 @@ bool TypeDeterminer::DetermineUnaryOp(ast::UnaryOpExpression* expr) {
 }
 
 ast::type::Type* TypeDeterminer::GetImportData(
+    const Source& source,
     const std::string& path,
     const std::string& name,
     const ast::ExpressionList& params,
@@ -603,13 +609,14 @@ ast::type::Type* TypeDeterminer::GetImportData(
       name == "sqrt" || name == "inversesqrt" || name == "normalize" ||
       name == "length") {
     if (params.size() != 1) {
-      error_ = "incorrect number of parameters for " + name +
-               ". Expected 1 got " + std::to_string(params.size());
+      set_error(source, "incorrect number of parameters for " + name +
+                            ". Expected 1 got " +
+                            std::to_string(params.size()));
       return nullptr;
     }
     if (!params[0]->result_type()->is_float_scalar_or_vector()) {
-      error_ = "incorrect type for " + name +
-               ". Requires a float scalar or a float vector";
+      set_error(source, "incorrect type for " + name +
+                            ". Requires a float scalar or a float vector");
       return nullptr;
     }
 
