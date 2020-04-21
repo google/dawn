@@ -686,6 +686,28 @@ ast::type::Type* TypeDeterminer::GetImportData(
     // Length returns a scalar of the same type as the parameter.
     return result_type->is_float_scalar() ? result_type
                                           : result_type->AsVector()->type();
+  } else if (name == "atan2") {
+    if (params.size() != 2) {
+      error_ = "incorrect number of parameters for " + name +
+               ". Expected 2 got " + std::to_string(params.size());
+      return nullptr;
+    }
+    if (!params[0]->result_type()->is_float_scalar_or_vector() ||
+        !params[1]->result_type()->is_float_scalar_or_vector()) {
+      error_ = "incorrect type for " + name +
+               ". Requires float scalar or a float vector values";
+      return nullptr;
+    }
+    if (params[0]->result_type() != params[1]->result_type()) {
+      error_ = "mismatched parameter types for " + name;
+      return nullptr;
+    }
+
+    if (name == "atan2") {
+      *id = GLSLstd450Atan2;
+    }
+
+    return params[0]->result_type();
   }
 
   return nullptr;
