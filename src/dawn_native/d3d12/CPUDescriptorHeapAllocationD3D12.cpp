@@ -23,6 +23,11 @@ namespace dawn_native { namespace d3d12 {
         : mBaseDescriptor(baseDescriptor), mHeapIndex(heapIndex) {
     }
 
+    D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorHeapAllocation::GetBaseDescriptor() const {
+        ASSERT(IsValid());
+        return mBaseDescriptor;
+    }
+
     D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorHeapAllocation::OffsetFrom(
         uint32_t sizeIncrementInBytes,
         uint32_t offsetInDescriptorCount) const {

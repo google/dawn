@@ -27,6 +27,8 @@ namespace dawn_native { namespace d3d12 {
         CPUDescriptorHeapAllocation() = default;
         CPUDescriptorHeapAllocation(D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor, uint32_t heapIndex);
 
+        D3D12_CPU_DESCRIPTOR_HANDLE GetBaseDescriptor() const;
+
         D3D12_CPU_DESCRIPTOR_HANDLE OffsetFrom(uint32_t sizeIncrementInBytes,
                                                uint32_t offsetInDescriptorCount) const;
         uint32_t GetHeapIndex() const;

@@ -180,10 +180,10 @@ namespace dawn_native { namespace d3d12 {
             }
 
             d3d12Device->CopyDescriptorsSimple(
-                viewDescriptorCount, viewDescriptorHeapAllocation.GetCPUHandle(0),
-                mCPUViewAllocation.OffsetFrom(0, 0), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+                viewDescriptorCount, viewDescriptorHeapAllocation.GetBaseCPUDescriptor(),
+                mCPUViewAllocation.GetBaseDescriptor(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-            mBaseViewDescriptor = viewDescriptorHeapAllocation.GetGPUHandle(0);
+            mBaseViewDescriptor = viewDescriptorHeapAllocation.GetBaseGPUDescriptor();
         }
 
         const uint32_t samplerDescriptorCount = bgl->GetSamplerDescriptorCount();
@@ -197,10 +197,10 @@ namespace dawn_native { namespace d3d12 {
             }
 
             d3d12Device->CopyDescriptorsSimple(
-                samplerDescriptorCount, samplerDescriptorHeapAllocation.GetCPUHandle(0),
-                mCPUSamplerAllocation.OffsetFrom(0, 0), D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+                samplerDescriptorCount, samplerDescriptorHeapAllocation.GetBaseCPUDescriptor(),
+                mCPUSamplerAllocation.GetBaseDescriptor(), D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 
-            mBaseSamplerDescriptor = samplerDescriptorHeapAllocation.GetGPUHandle(0);
+            mBaseSamplerDescriptor = samplerDescriptorHeapAllocation.GetBaseGPUDescriptor();
         }
 
         // Record both the device and heap serials to determine later if the allocations are still

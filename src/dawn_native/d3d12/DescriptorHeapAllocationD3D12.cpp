@@ -17,30 +17,21 @@
 
 namespace dawn_native { namespace d3d12 {
 
-    DescriptorHeapAllocation::DescriptorHeapAllocation() : mSizeIncrement(0) {
-    }
-
     DescriptorHeapAllocation::DescriptorHeapAllocation(
-        uint32_t sizeIncrement,
         D3D12_CPU_DESCRIPTOR_HANDLE baseCPUDescriptorHandle,
         D3D12_GPU_DESCRIPTOR_HANDLE baseGPUDescriptorHandle)
-        : mSizeIncrement(sizeIncrement),
-          mBaseCPUDescriptorHandle(baseCPUDescriptorHandle),
+        : mBaseCPUDescriptorHandle(baseCPUDescriptorHandle),
           mBaseGPUDescriptorHandle(baseGPUDescriptorHandle) {
     }
 
-    D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHeapAllocation::GetCPUHandle(uint32_t offset) const {
+    D3D12_GPU_DESCRIPTOR_HANDLE DescriptorHeapAllocation::GetBaseGPUDescriptor() const {
         ASSERT(!IsInvalid());
-        D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = mBaseCPUDescriptorHandle;
-        cpuHandle.ptr += mSizeIncrement * offset;
-        return cpuHandle;
+        return mBaseGPUDescriptorHandle;
     }
 
-    D3D12_GPU_DESCRIPTOR_HANDLE DescriptorHeapAllocation::GetGPUHandle(uint32_t offset) const {
+    D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHeapAllocation::GetBaseCPUDescriptor() const {
         ASSERT(!IsInvalid());
-        D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle = mBaseGPUDescriptorHandle;
-        gpuHandle.ptr += mSizeIncrement * offset;
-        return gpuHandle;
+        return mBaseCPUDescriptorHandle;
     }
 
     bool DescriptorHeapAllocation::IsInvalid() const {

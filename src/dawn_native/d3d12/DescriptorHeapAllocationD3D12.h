@@ -21,23 +21,20 @@
 
 namespace dawn_native { namespace d3d12 {
 
-    // Wrapper for a handle into a descriptor heap.
+    // Wrapper for a handle into a GPU-only descriptor heap.
     class DescriptorHeapAllocation {
       public:
-        DescriptorHeapAllocation();
-        DescriptorHeapAllocation(uint32_t sizeIncrement,
-                                 D3D12_CPU_DESCRIPTOR_HANDLE baseCPUDescriptorHandle,
+        DescriptorHeapAllocation() = default;
+        DescriptorHeapAllocation(D3D12_CPU_DESCRIPTOR_HANDLE baseCPUDescriptorHandle,
                                  D3D12_GPU_DESCRIPTOR_HANDLE baseGPUDescriptorHandle);
         ~DescriptorHeapAllocation() = default;
 
-        D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandle(uint32_t offset) const;
-        D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle(uint32_t offset) const;
+        D3D12_GPU_DESCRIPTOR_HANDLE GetBaseGPUDescriptor() const;
+        D3D12_CPU_DESCRIPTOR_HANDLE GetBaseCPUDescriptor() const;
 
         bool IsInvalid() const;
 
       private:
-        uint32_t mSizeIncrement;
-
         D3D12_CPU_DESCRIPTOR_HANDLE mBaseCPUDescriptorHandle = {0};
         D3D12_GPU_DESCRIPTOR_HANDLE mBaseGPUDescriptorHandle = {0};
     };
