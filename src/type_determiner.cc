@@ -595,7 +595,8 @@ ast::type::Type* TypeDeterminer::GetImportData(
       name == "acos" || name == "atan" || name == "sinh" || name == "cosh" ||
       name == "tanh" || name == "asinh" || name == "acosh" || name == "atanh" ||
       name == "exp" || name == "log" || name == "exp2" || name == "log2" ||
-      name == "sqrt" || name == "inversesqrt" || name == "normalize") {
+      name == "sqrt" || name == "inversesqrt" || name == "normalize" ||
+      name == "length") {
     if (params.size() != 1) {
       error_ = "incorrect number of parameters for " + name +
                ". Expected 1 got " + std::to_string(params.size());
@@ -607,6 +608,7 @@ ast::type::Type* TypeDeterminer::GetImportData(
       return nullptr;
     }
 
+    auto* result_type = params[0]->result_type();
     if (name == "round") {
       *id = GLSLstd450Round;
     } else if (name == "roundeven") {
@@ -665,30 +667,18 @@ ast::type::Type* TypeDeterminer::GetImportData(
       *id = GLSLstd450InverseSqrt;
     } else if (name == "normalize") {
       *id = GLSLstd450Normalize;
+    } else if (name == "length") {
+      *id = GLSLstd450Length;
+
+      // Length returns a scalar of the same type as the parameter.
+      return result_type->is_float_scalar() ? result_type
+                                            : result_type->AsVector()->type();
     }
 
-    return params[0]->result_type();
-  } else if (name == "length") {
-    if (params.size() != 1) {
-      error_ = "incorrect number of parameters for " + name +
-               ". Expected 1 got " + std::to_string(params.size());
-      return nullptr;
-    }
-    if (!params[0]->result_type()->is_float_scalar_or_vector()) {
-      error_ = "incorrect type for " + name +
-               ". Requires a float scalar or a float vector";
-      return nullptr;
-    }
-
-    *id = GLSLstd450Length;
-    auto* result_type = params[0]->result_type();
-
-    // Length returns a scalar of the same type as the parameter.
-    return result_type->is_float_scalar() ? result_type
-                                          : result_type->AsVector()->type();
+    return result_type;
   } else if (name == "atan2" || name == "pow" || name == "fmin" ||
              name == "fmax" || name == "step" || name == "reflect" ||
-             name == "nmin" || name == "nmax") {
+             name == "nmin" || name == "nmax" || name == "distance") {
     if (params.size() != 2) {
       error_ = "incorrect number of parameters for " + name +
                ". Expected 2 got " + std::to_string(params.size());
@@ -705,6 +695,7 @@ ast::type::Type* TypeDeterminer::GetImportData(
       return nullptr;
     }
 
+    auto* result_type = params[0]->result_type();
     if (name == "atan2") {
       *id = GLSLstd450Atan2;
     } else if (name == "pow") {
@@ -721,9 +712,15 @@ ast::type::Type* TypeDeterminer::GetImportData(
       *id = GLSLstd450NMin;
     } else if (name == "nmax") {
       *id = GLSLstd450NMax;
+    } else if (name == "distance") {
+      *id = GLSLstd450Distance;
+
+      // Distance returns a scalar of the same type as the parameter.
+      return result_type->is_float_scalar() ? result_type
+                                            : result_type->AsVector()->type();
     }
 
-    return params[0]->result_type();
+    return result_type;
   }
 
   return nullptr;
