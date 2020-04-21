@@ -318,7 +318,8 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
                                         ident->name(), expr->params(), &ext_id);
       if (result_type == nullptr) {
         set_error(expr->source(),
-                  "Unable to determine result type for GLSL expression");
+                  "Unable to determine result type for GLSL expression " +
+                      ident->name());
         return false;
       }
 
