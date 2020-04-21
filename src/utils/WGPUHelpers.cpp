@@ -51,9 +51,13 @@ namespace utils {
             ptrdiff_t resultSize = resultEnd - resultBegin;
             // SetSource takes data as uint32_t*.
 
+            wgpu::ShaderModuleSPIRVDescriptor spirvDesc;
+            spirvDesc.codeSize = static_cast<uint32_t>(resultSize);
+            spirvDesc.code = result.cbegin();
+
             wgpu::ShaderModuleDescriptor descriptor;
-            descriptor.codeSize = static_cast<uint32_t>(resultSize);
-            descriptor.code = result.cbegin();
+            descriptor.nextInChain = &spirvDesc;
+
             return device.CreateShaderModule(&descriptor);
         }
 
@@ -111,6 +115,18 @@ namespace utils {
         }
 
         return CreateShaderModuleFromResult(device, result);
+    }
+
+    std::vector<uint32_t> CompileGLSLToSpirv(SingleShaderStage stage, const char* source) {
+        shaderc_shader_kind kind = ShadercShaderKind(stage);
+
+        shaderc::Compiler compiler;
+        auto result = compiler.CompileGlslToSpv(source, strlen(source), kind, "myshader?");
+        if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
+            dawn::ErrorLog() << result.GetErrorMessage();
+            return {};
+        }
+        return {result.cbegin(), result.cend()};
     }
 
     wgpu::Buffer CreateBufferFromData(const wgpu::Device& device,

@@ -282,12 +282,7 @@ namespace dawn_native {
         }
     }  // anonymous namespace
 
-    MaybeError ValidateShaderModuleDescriptor(DeviceBase*,
-                                              const ShaderModuleDescriptor* descriptor) {
-        if (descriptor->nextInChain != nullptr) {
-            return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
-        }
-
+    MaybeError ValidateSpirv(DeviceBase*, const uint32_t* code, uint32_t codeSize) {
         spvtools::SpirvTools spirvTools(SPV_ENV_VULKAN_1_1);
 
         std::ostringstream errorStream;
@@ -314,8 +309,47 @@ namespace dawn_native {
             }
         });
 
-        if (!spirvTools.Validate(descriptor->code, descriptor->codeSize)) {
+        if (!spirvTools.Validate(code, codeSize)) {
             return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
+        }
+
+        return {};
+    }
+
+    MaybeError ValidateShaderModuleDescriptor(DeviceBase* device,
+                                              const ShaderModuleDescriptor* descriptor) {
+        if (descriptor->codeSize != 0) {
+            if (descriptor->nextInChain != nullptr) {
+                return DAWN_VALIDATION_ERROR("Cannot set both code/codeSize and nextInChain");
+            }
+
+            device->EmitDeprecationWarning(
+                "ShaderModuleDescriptor::code/codeSize is deprecated, chain "
+                "ShaderModuleSPIRVDescriptor instead.");
+            return ValidateSpirv(device, descriptor->code, descriptor->codeSize);
+        }
+
+        // For now only a single SPIRV or WGSL subdescriptor is allowed.
+        const ChainedStruct* chainedDescriptor = descriptor->nextInChain;
+        if (chainedDescriptor->nextInChain != nullptr) {
+            return DAWN_VALIDATION_ERROR("chained nextInChain must be nullptr");
+        }
+
+        switch (chainedDescriptor->sType) {
+            case wgpu::SType::ShaderModuleSPIRVDescriptor: {
+                const ShaderModuleSPIRVDescriptor* spirvDesc =
+                    static_cast<const ShaderModuleSPIRVDescriptor*>(chainedDescriptor);
+                DAWN_TRY(ValidateSpirv(device, spirvDesc->code, spirvDesc->codeSize));
+                break;
+            }
+
+            case wgpu::SType::ShaderModuleWGSLDescriptor: {
+                return DAWN_VALIDATION_ERROR("WGSL not supported (yet)");
+                break;
+            }
+
+            default:
+                return DAWN_VALIDATION_ERROR("Unsupported sType");
         }
 
         return {};
@@ -324,7 +358,19 @@ namespace dawn_native {
     // ShaderModuleBase
 
     ShaderModuleBase::ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor)
-        : CachedObject(device), mSpirv(descriptor->code, descriptor->code + descriptor->codeSize) {
+        : CachedObject(device) {
+        // Extract the correct SPIRV from the descriptor.
+        if (descriptor->codeSize != 0) {
+            mSpirv.assign(descriptor->code, descriptor->code + descriptor->codeSize);
+        } else {
+            ASSERT(descriptor->nextInChain != nullptr);
+            ASSERT(descriptor->nextInChain->sType == wgpu::SType::ShaderModuleSPIRVDescriptor);
+
+            const ShaderModuleSPIRVDescriptor* spirvDesc =
+                static_cast<const ShaderModuleSPIRVDescriptor*>(descriptor->nextInChain);
+            mSpirv.assign(spirvDesc->code, spirvDesc->code + spirvDesc->codeSize);
+        }
+
         mFragmentOutputFormatBaseTypes.fill(Format::Other);
         if (GetDevice()->IsToggleEnabled(Toggle::UseSpvcParser)) {
             mSpvcContext.SetUseSpvcParser(true);

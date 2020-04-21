@@ -66,7 +66,6 @@ TEST_F(WireOptionalTests, OptionalObjectValue) {
 TEST_F(WireOptionalTests, OptionalStructPointer) {
     // Create shader module
     WGPUShaderModuleDescriptor vertexDescriptor = {};
-    vertexDescriptor.codeSize = 0;
     WGPUShaderModule vsModule = wgpuDeviceCreateShaderModule(device, &vertexDescriptor);
     WGPUShaderModule apiVsModule = api.GetNewShaderModule();
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiVsModule));

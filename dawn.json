@@ -1273,8 +1273,23 @@
         "extensible": true,
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
+            {"name": "code size", "type": "uint32_t",  "default": 0},
+            {"name": "code", "type": "uint32_t", "annotation": "const*", "length": "code size", "optional": true}
+        ]
+    },
+    "shader module SPIRV descriptor": {
+        "category": "structure",
+        "chained": true,
+        "members": [
             {"name": "code size", "type": "uint32_t"},
             {"name": "code", "type": "uint32_t", "annotation": "const*", "length": "code size"}
+        ]
+    },
+    "shader module WGSL descriptor": {
+        "category": "structure",
+        "chained": true,
+        "members": [
+            {"name": "source", "type": "char", "annotation": "const*", "length": "strlen"}
         ]
     },
     "shader stage": {
@@ -1390,8 +1405,10 @@
             {"value": 2, "name": "surface descriptor from windows HWND"},
             {"value": 3, "name": "surface descriptor from xlib"},
             {"value": 4, "name": "surface descriptor from HTML canvas id"},
-            {"value": 5, "name": "sampler descriptor dummy anisotropic filtering"},
-            {"value": 6, "name": "render pipeline descriptor dummy extension"}
+            {"value": 5, "name": "shader module SPIRV descriptor"},
+            {"value": 6, "name": "shader module WGSL descriptor"},
+            {"value": 7, "name": "sampler descriptor dummy anisotropic filtering"},
+            {"value": 8, "name": "render pipeline descriptor dummy extension"}
         ]
     },
     "texture": {

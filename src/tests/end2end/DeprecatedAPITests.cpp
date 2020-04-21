@@ -19,6 +19,7 @@
 
 #include "tests/DawnTest.h"
 
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
 class DeprecationTests : public DawnTest {
@@ -305,6 +306,70 @@ TEST_P(DeprecationTests, BGDescBindingStateTracking) {
         .bindings = &entryDesc,
     };
     EXPECT_DEPRECATION_WARNING(ASSERT_DEVICE_ERROR(device.CreateBindGroup(&bgDesc)));
+}
+
+// Tests for ShaderModuleDescriptor.code/codeSize -> ShaderModuleSPIRVDescriptor
+
+static const char kEmptyShader[] = R"(#version 450
+void main() {
+})";
+
+// That creating a ShaderModule without the chained descriptor gives a warning.
+TEST_P(DeprecationTests, ShaderModuleNoSubDescriptorIsDeprecated) {
+    std::vector<uint32_t> spirv =
+        CompileGLSLToSpirv(utils::SingleShaderStage::Compute, kEmptyShader);
+
+    wgpu::ShaderModuleDescriptor descriptor = {
+        .codeSize = static_cast<uint32_t>(spirv.size()),
+        .code = spirv.data(),
+    };
+    EXPECT_DEPRECATION_WARNING(device.CreateShaderModule(&descriptor));
+}
+
+// That creating a ShaderModule with both inline code and the chained descriptor is an error.
+TEST_P(DeprecationTests, ShaderModuleBothInlinedAndChainedIsInvalid) {
+    std::vector<uint32_t> spirv =
+        CompileGLSLToSpirv(utils::SingleShaderStage::Compute, kEmptyShader);
+
+    wgpu::ShaderModuleSPIRVDescriptor spirvDesc;
+    spirvDesc.codeSize = static_cast<uint32_t>(spirv.size());
+    spirvDesc.code = spirv.data();
+
+    wgpu::ShaderModuleDescriptor descriptor = {
+        .nextInChain = &spirvDesc,
+        .codeSize = static_cast<uint32_t>(spirv.size()),
+        .code = spirv.data(),
+    };
+    ASSERT_DEVICE_ERROR(device.CreateShaderModule(&descriptor));
+}
+
+// That creating a ShaderModule with both inline code still does correct state tracking
+TEST_P(DeprecationTests, ShaderModuleInlinedCodeStateTracking) {
+    std::vector<uint32_t> spirv =
+        CompileGLSLToSpirv(utils::SingleShaderStage::Compute, kEmptyShader);
+
+    wgpu::ShaderModuleDescriptor descriptor = {
+        .codeSize = static_cast<uint32_t>(spirv.size()),
+        .code = spirv.data(),
+    };
+    wgpu::ShaderModule module;
+    EXPECT_DEPRECATION_WARNING(module = device.CreateShaderModule(&descriptor));
+
+    // Creating a compute pipeline works, because it is a compute module.
+    wgpu::ComputePipelineDescriptor computePipelineDesc = {
+        .computeStage =
+            {
+                .module = module,
+                .entryPoint = "main",
+            },
+    };
+    device.CreateComputePipeline(&computePipelineDesc);
+
+    utils::ComboRenderPipelineDescriptor renderPipelineDesc(device);
+    renderPipelineDesc.vertexStage.module =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, kEmptyShader);
+    renderPipelineDesc.cFragmentStage.module = module;
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&renderPipelineDesc));
 }
 
 DAWN_INSTANTIATE_TEST(DeprecationTests,
