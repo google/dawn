@@ -400,12 +400,17 @@ bool TypeDeterminer::DetermineMemberAccessor(
   if (data_type->IsVector()) {
     auto* vec = data_type->AsVector();
 
-    // The vector will have a number of components equal to the length of the
-    // swizzle. This assumes the validator will check that the swizzle
-    // is correct.
-    expr->set_result_type(
-        ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
-            vec->type(), expr->member()->name().size())));
+    auto size = expr->member()->name().size();
+    if (size == 1) {
+      // A single element swizzle is just the type of the vector.
+      expr->set_result_type(vec->type());
+    } else {
+      // The vector will have a number of components equal to the length of the
+      // swizzle. This assumes the validator will check that the swizzle
+      // is correct.
+      expr->set_result_type(ctx_.type_mgr().Get(
+          std::make_unique<ast::type::VectorType>(vec->type(), size)));
+    }
     return true;
   }
 

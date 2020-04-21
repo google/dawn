@@ -745,6 +745,26 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
   EXPECT_EQ(mem.result_type()->AsVector()->size(), 2u);
 }
 
+TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec3(&f32, 3);
+
+  auto var = std::make_unique<ast::Variable>("my_vec", ast::StorageClass::kNone,
+                                             &vec3);
+  mod()->AddGlobalVariable(std::move(var));
+
+  // Register the global
+  EXPECT_TRUE(td()->Determine());
+
+  auto ident = std::make_unique<ast::IdentifierExpression>("my_vec");
+  auto swizzle = std::make_unique<ast::IdentifierExpression>("x");
+
+  ast::MemberAccessorExpression mem(std::move(ident), std::move(swizzle));
+  EXPECT_TRUE(td()->DetermineResultType(&mem)) << td()->error();
+  ASSERT_NE(mem.result_type(), nullptr);
+  ASSERT_TRUE(mem.result_type()->IsF32());
+}
+
 TEST_F(TypeDeterminerTest, Expr_MultiLevel) {
   // struct b {
   //   vec4<f32> foo
