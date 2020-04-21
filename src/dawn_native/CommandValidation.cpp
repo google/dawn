@@ -315,10 +315,11 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("Texture missing usage for the pass");
             }
 
-            // For textures the only read-only usage in a pass is Sampled, so checking the
-            // usage constraint simplifies to checking a single usage bit is set.
-            if (!wgpu::HasZeroOrOneBits(usage)) {
-                return DAWN_VALIDATION_ERROR("Texture used with more than one usage in pass");
+            bool readOnly = (usage & kReadOnlyTextureUsages) == usage;
+            bool singleUse = wgpu::HasZeroOrOneBits(usage);
+            if (!readOnly && !singleUse) {
+                return DAWN_VALIDATION_ERROR(
+                    "Texture used as writable usage and another usage in pass");
             }
         }
 

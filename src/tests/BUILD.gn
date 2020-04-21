@@ -339,6 +339,8 @@ source_set("dawn_white_box_tests_sources") {
     }
   }
 
+  sources += [ "white_box/InternalResourceUsageTests.cpp" ]
+
   if (dawn_enable_d3d12) {
     sources += [
       "white_box/D3D12DescriptorHeapTests.cpp",

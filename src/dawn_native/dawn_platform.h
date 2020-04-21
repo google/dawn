@@ -22,4 +22,13 @@
 // (wgpu::Buffer is dawn_native::BufferBase*)
 #include <dawn_native/wgpu_structs_autogen.h>
 
+namespace dawn_native {
+    // Add an extra buffer usage (readonly storage buffer usage) and an extra texture usage
+    // (readonly storage texture usage) for render pass resource tracking
+    static constexpr wgpu::BufferUsage kReadOnlyStorageBuffer =
+        static_cast<wgpu::BufferUsage>(0x80000000);
+    static constexpr wgpu::TextureUsage kReadonlyStorageTexture =
+        static_cast<wgpu::TextureUsage>(0x80000000);
+}  // namespace dawn_native
+
 #endif  // DAWNNATIVE_DAWNPLATFORM_H_

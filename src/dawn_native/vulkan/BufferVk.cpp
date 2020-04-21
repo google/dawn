@@ -66,8 +66,8 @@ namespace dawn_native { namespace vulkan {
             if (usage & (wgpu::BufferUsage::Index | wgpu::BufferUsage::Vertex)) {
                 flags |= VK_PIPELINE_STAGE_VERTEX_INPUT_BIT;
             }
-            if (usage &
-                (wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage | kReadOnlyStorage)) {
+            if (usage & (wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage |
+                         kReadOnlyStorageBuffer)) {
                 flags |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT |
                          VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT |
                          VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;

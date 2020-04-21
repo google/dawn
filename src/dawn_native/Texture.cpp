@@ -20,6 +20,7 @@
 #include "common/Constants.h"
 #include "common/Math.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/PassResourceUsage.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
 namespace dawn_native {
@@ -353,6 +354,12 @@ namespace dawn_native {
         uint32_t subresourceCount =
             GetSubresourceIndex(descriptor->mipLevelCount, descriptor->arrayLayerCount);
         mIsSubresourceContentInitializedAtIndex = std::vector<bool>(subresourceCount, false);
+
+        // Add readonly storage usage if the texture has a storage usage. The validation rules in
+        // ValidatePassResourceUsage will make sure we don't use both at the same time.
+        if (mUsage & wgpu::TextureUsage::Storage) {
+            mUsage |= kReadonlyStorageTexture;
+        }
     }
 
     static Format kUnusedFormat;

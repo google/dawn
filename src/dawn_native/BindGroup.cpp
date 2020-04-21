@@ -320,7 +320,11 @@ namespace dawn_native {
     TextureViewBase* BindGroupBase::GetBindingAsTextureView(BindingIndex bindingIndex) {
         ASSERT(!IsError());
         ASSERT(bindingIndex < mLayout->GetBindingCount());
-        ASSERT(mLayout->GetBindingInfo(bindingIndex).type == wgpu::BindingType::SampledTexture);
+        ASSERT(mLayout->GetBindingInfo(bindingIndex).type == wgpu::BindingType::SampledTexture ||
+               mLayout->GetBindingInfo(bindingIndex).type ==
+                   wgpu::BindingType::ReadonlyStorageTexture ||
+               mLayout->GetBindingInfo(bindingIndex).type ==
+                   wgpu::BindingType::WriteonlyStorageTexture);
         return static_cast<TextureViewBase*>(mBindingData.bindings[bindingIndex].Get());
     }
 
