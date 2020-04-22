@@ -74,11 +74,6 @@ namespace dawn_native {
     }
 
     bool Format::HasComponentType(Type componentType) const {
-        // Depth stencil textures need to be special cased but we don't support sampling them yet.
-        if (aspect != Color) {
-            return false;
-        }
-
         return componentType == type;
     }
 
@@ -150,6 +145,22 @@ namespace dawn_native {
             AddFormat(internalFormat);
         };
 
+        auto AddDepthFormat = [&AddFormat](wgpu::TextureFormat format, uint32_t byteSize,
+                                           Type type) {
+            Format internalFormat;
+            internalFormat.format = format;
+            internalFormat.isRenderable = true;
+            internalFormat.isCompressed = false;
+            internalFormat.isSupported = true;
+            internalFormat.supportsStorageUsage = false;
+            internalFormat.aspect = Aspect::Depth;
+            internalFormat.type = type;
+            internalFormat.blockByteSize = byteSize;
+            internalFormat.blockWidth = 1;
+            internalFormat.blockHeight = 1;
+            AddFormat(internalFormat);
+        };
+
         auto AddCompressedFormat = [&AddFormat](wgpu::TextureFormat format, uint32_t byteSize,
                                                 uint32_t width, uint32_t height, bool isSupported) {
             Format internalFormat;
@@ -214,8 +225,10 @@ namespace dawn_native {
         AddColorFormat(wgpu::TextureFormat::RGBA32Sint, true, true, 16, Type::Sint);
         AddColorFormat(wgpu::TextureFormat::RGBA32Float, true, true, 16, Type::Float);
 
-        // Depth stencil formats
-        AddDepthStencilFormat(wgpu::TextureFormat::Depth32Float, Aspect::Depth, 4);
+        // Depth only formats
+        AddDepthFormat(wgpu::TextureFormat::Depth32Float, 4, Type::Float);
+
+        // Packed depth/depth-stencil formats
         AddDepthStencilFormat(wgpu::TextureFormat::Depth24Plus, Aspect::Depth, 4);
         // TODO(cwallez@chromium.org): It isn't clear if this format should be copyable
         // because its size isn't well defined, is it 4, 5 or 8?
