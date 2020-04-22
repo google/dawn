@@ -46,6 +46,7 @@
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
+#include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
 
 namespace tint {
@@ -205,6 +206,9 @@ uint32_t Builder::GenerateExpression(ast::Expression* expr) {
   }
   if (expr->IsIdentifier()) {
     return GenerateIdentifierExpression(expr->AsIdentifier());
+  }
+  if (expr->IsUnaryOp()) {
+    return GenerateUnaryOpExpression(expr->AsUnaryOp());
   }
 
   error_ = "unknown expression type: " + expr->str();
@@ -448,6 +452,40 @@ uint32_t Builder::GenerateIdentifierExpression(
   }
 
   return val;
+}
+
+uint32_t Builder::GenerateUnaryOpExpression(ast::UnaryOpExpression* expr) {
+  auto result = result_op();
+  auto result_id = result.to_i();
+
+  auto val_id = GenerateExpression(expr->expr());
+  if (val_id == 0) {
+    return 0;
+  }
+
+  auto type_id = GenerateTypeIfNeeded(expr->result_type());
+  if (type_id == 0) {
+    return 0;
+  }
+
+  spv::Op op = spv::Op::OpNop;
+  if (expr->op() == ast::UnaryOp::kNegation) {
+    if (expr->result_type()->is_float_scalar_or_vector()) {
+      op = spv::Op::OpFNegate;
+    } else {
+      op = spv::Op::OpSNegate;
+    }
+  } else if (expr->op() == ast::UnaryOp::kNot) {
+    op = spv::Op::OpNot;
+  }
+  if (op == spv::Op::OpNop) {
+    error_ = "invalid unary op type";
+    return 0;
+  }
+
+  push_function_inst(op, {Operand::Int(type_id), result, Operand::Int(val_id)});
+
+  return result_id;
 }
 
 void Builder::GenerateImport(ast::Import* imp) {
