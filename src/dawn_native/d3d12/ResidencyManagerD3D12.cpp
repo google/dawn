@@ -1,3 +1,4 @@
+#include "ResidencyManagerD3D12.h"
 // Copyright 2020 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,8 +20,6 @@
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/Forward.h"
 #include "dawn_native/d3d12/HeapD3D12.h"
-
-#include "dawn_native/d3d12/d3d12_platform.h"
 
 namespace dawn_native { namespace d3d12 {
 
@@ -84,24 +83,43 @@ namespace dawn_native { namespace d3d12 {
         }
     }
 
-    // Allows an application component external to Dawn to cap Dawn's residency budget to prevent
-    // competition for device local memory. Returns the amount of memory reserved, which may be less
+    // Allows an application component external to Dawn to cap Dawn's residency budgets to prevent
+    // competition for device memory. Returns the amount of memory reserved, which may be less
     // that the requested reservation when under pressure.
-    uint64_t ResidencyManager::SetExternalMemoryReservation(uint64_t requestedReservationSize) {
-        mVideoMemoryInfo.externalRequest = requestedReservationSize;
-        UpdateVideoMemoryInfo();
-        return mVideoMemoryInfo.externalReservation;
+    uint64_t ResidencyManager::SetExternalMemoryReservation(MemorySegment segment,
+                                                            uint64_t requestedReservationSize) {
+        MemorySegmentInfo* segmentInfo = nullptr;
+        switch (segment) {
+            case MemorySegment::Local:
+                segmentInfo = &mVideoMemoryInfo.local;
+                break;
+            case MemorySegment::NonLocal:
+                segmentInfo = &mVideoMemoryInfo.nonLocal;
+                break;
+            default:
+                UNREACHABLE();
+        }
+
+        segmentInfo->externalRequest = requestedReservationSize;
+
+        UpdateMemorySegmentInfo(segmentInfo);
+
+        return segmentInfo->externalReservation;
     }
 
     void ResidencyManager::UpdateVideoMemoryInfo() {
-        if (!mResidencyManagementEnabled) {
-            return;
+        UpdateMemorySegmentInfo(&mVideoMemoryInfo.local);
+        if (!mDevice->GetDeviceInfo().isUMA) {
+            UpdateMemorySegmentInfo(&mVideoMemoryInfo.nonLocal);
         }
+    }
 
+    void ResidencyManager::UpdateMemorySegmentInfo(MemorySegmentInfo* segmentInfo) {
         DXGI_QUERY_VIDEO_MEMORY_INFO queryVideoMemoryInfo;
+
         ToBackend(mDevice->GetAdapter())
             ->GetHardwareAdapter()
-            ->QueryVideoMemoryInfo(0, DXGI_MEMORY_SEGMENT_GROUP_LOCAL, &queryVideoMemoryInfo);
+            ->QueryVideoMemoryInfo(0, segmentInfo->dxgiSegment, &queryVideoMemoryInfo);
 
         // The video memory budget provided by QueryVideoMemoryInfo is defined by the operating
         // system, and may be lower than expected in certain scenarios. Under memory pressure, we
@@ -109,11 +127,10 @@ namespace dawn_native { namespace d3d12 {
         // component from consuming a disproportionate share of memory and ensures that Dawn can
         // continue to make forward progress. Note the choice to halve memory is arbitrarily chosen
         // and subject to future experimentation.
-        mVideoMemoryInfo.externalReservation =
-            std::min(queryVideoMemoryInfo.Budget / 2, mVideoMemoryInfo.externalRequest);
+        segmentInfo->externalReservation =
+            std::min(queryVideoMemoryInfo.Budget / 2, segmentInfo->externalRequest);
 
-        mVideoMemoryInfo.dawnUsage =
-            queryVideoMemoryInfo.CurrentUsage - mVideoMemoryInfo.externalReservation;
+        segmentInfo->usage = queryVideoMemoryInfo.CurrentUsage - segmentInfo->externalReservation;
 
         // If we're restricting the budget for testing, leave the budget as is.
         if (mRestrictBudgetForTesting) {
@@ -125,8 +142,8 @@ namespace dawn_native { namespace d3d12 {
         // for both Dawn and other applications on the system. Note the value of 95% is arbitrarily
         // chosen and subject to future experimentation.
         static constexpr float kBudgetCap = 0.95;
-        mVideoMemoryInfo.dawnBudget =
-            (queryVideoMemoryInfo.Budget - mVideoMemoryInfo.externalReservation) * kBudgetCap;
+        segmentInfo->budget =
+            (queryVideoMemoryInfo.Budget - segmentInfo->externalReservation) * kBudgetCap;
     }
 
     // Removes from the LRU and returns the least recently used heap when possible. Returns nullptr
@@ -161,18 +178,18 @@ namespace dawn_native { namespace d3d12 {
             return {};
         }
 
-        UpdateVideoMemoryInfo();
+        UpdateMemorySegmentInfo(&mVideoMemoryInfo.local);
 
-        uint64_t memoryUsageAfterMakeResident = sizeToMakeResident + mVideoMemoryInfo.dawnUsage;
+        uint64_t memoryUsageAfterMakeResident = sizeToMakeResident + mVideoMemoryInfo.local.usage;
 
         // Return when we can call MakeResident and remain under budget.
-        if (memoryUsageAfterMakeResident < mVideoMemoryInfo.dawnBudget) {
+        if (memoryUsageAfterMakeResident < mVideoMemoryInfo.local.budget) {
             return {};
         }
 
         std::vector<ID3D12Pageable*> resourcesToEvict;
         uint64_t sizeNeededToBeUnderBudget =
-            memoryUsageAfterMakeResident - mVideoMemoryInfo.dawnBudget;
+            memoryUsageAfterMakeResident - mVideoMemoryInfo.local.budget;
         uint64_t sizeEvicted = 0;
         while (sizeEvicted < sizeNeededToBeUnderBudget) {
             Heap* heap;
@@ -301,7 +318,11 @@ namespace dawn_native { namespace d3d12 {
         // value can vary depending on the environment Dawn is running in. By adding this in
         // addition to the artificial budget cap, we can create a predictable and reproducible
         // budget for testing.
-        mVideoMemoryInfo.dawnBudget = mVideoMemoryInfo.dawnUsage + artificialBudgetCap;
+        mVideoMemoryInfo.local.budget = mVideoMemoryInfo.local.usage + artificialBudgetCap;
+        if (!mDevice->GetDeviceInfo().isUMA) {
+            mVideoMemoryInfo.nonLocal.budget =
+                mVideoMemoryInfo.nonLocal.usage + artificialBudgetCap;
+        }
     }
 
 }}  // namespace dawn_native::d3d12

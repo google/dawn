@@ -17,8 +17,11 @@
 
 #include "common/LinkedList.h"
 #include "common/Serial.h"
+#include "dawn_native/D3D12Backend.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/dawn_platform.h"
+
+#include "dawn_native/d3d12/d3d12_platform.h"
 
 namespace dawn_native { namespace d3d12 {
 
@@ -34,22 +37,31 @@ namespace dawn_native { namespace d3d12 {
         MaybeError EnsureCanMakeResident(uint64_t allocationSize);
         MaybeError EnsureHeapsAreResident(Heap** heaps, size_t heapCount);
 
-        uint64_t SetExternalMemoryReservation(uint64_t requestedReservationSize);
+        uint64_t SetExternalMemoryReservation(MemorySegment segment,
+                                              uint64_t requestedReservationSize);
 
         void TrackResidentAllocation(Heap* heap);
 
-        void RestrictBudgetForTesting(uint64_t);
+        void RestrictBudgetForTesting(uint64_t artificialBudgetCap);
 
       private:
-        struct VideoMemoryInfo {
-            uint64_t dawnBudget;
-            uint64_t dawnUsage;
+        struct MemorySegmentInfo {
+            const DXGI_MEMORY_SEGMENT_GROUP dxgiSegment;
+            uint64_t budget;
+            uint64_t usage;
             uint64_t externalReservation;
             uint64_t externalRequest;
         };
+
+        struct VideoMemoryInfo {
+            MemorySegmentInfo local = {DXGI_MEMORY_SEGMENT_GROUP_LOCAL, 0, 0, 0, 0};
+            MemorySegmentInfo nonLocal = {DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL, 0, 0, 0, 0};
+        };
+
         ResultOrError<Heap*> RemoveSingleEntryFromLRU();
         bool ShouldTrackHeap(Heap* heap) const;
         void UpdateVideoMemoryInfo();
+        void UpdateMemorySegmentInfo(MemorySegmentInfo* segmentInfo);
 
         Device* mDevice;
         LinkedList<Heap> mLRUCache;

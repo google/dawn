@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn_native/ResourceMemoryAllocation.h"
+#include "dawn_native/D3D12Backend.h"
 #include "dawn_native/d3d12/BufferD3D12.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/ResidencyManagerD3D12.h"
-#include "dawn_native/d3d12/ResourceHeapAllocationD3D12.h"
 #include "tests/DawnTest.h"
 #include "utils/WGPUHelpers.h"
 
@@ -298,6 +297,21 @@ TEST_P(D3D12ResidencyTests, OvercommitInASingleSubmit) {
     // since they shouldn't fit in the budget.
     for (uint32_t i = 0; i < numberOfBuffersToOvercommit; i++) {
         EXPECT_FALSE(CheckIfBufferIsResident(bufferSet2[i]));
+    }
+}
+
+TEST_P(D3D12ResidencyTests, SetExternalReservation) {
+    // Set an external reservation of 20% the budget. We should succesfully reserve the amount we
+    // request.
+    uint64_t amountReserved = dawn_native::d3d12::SetExternalMemoryReservation(
+        device.Get(), kRestrictedBudgetSize * .2, dawn_native::d3d12::MemorySegment::Local);
+    EXPECT_EQ(amountReserved, kRestrictedBudgetSize * .2);
+
+    // If we're on a non-UMA device, we should also check the NON_LOCAL memory segment.
+    if (!IsUMA()) {
+        amountReserved = dawn_native::d3d12::SetExternalMemoryReservation(
+            device.Get(), kRestrictedBudgetSize * .2, dawn_native::d3d12::MemorySegment::NonLocal);
+        EXPECT_EQ(amountReserved, kRestrictedBudgetSize * .2);
     }
 }
 
