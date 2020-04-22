@@ -43,7 +43,7 @@ class Expression : public Node {
 
   /// Sets the resulting type of this expression
   /// @param type the result type to set
-  void set_result_type(type::Type* type) { result_type_ = type; }
+  void set_result_type(type::Type* type);
   /// @returns the resulting type from this expression
   type::Type* result_type() const { return result_type_; }
 

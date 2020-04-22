@@ -267,6 +267,7 @@ set(TINT_TEST_SRCS
   ast/decorated_variable_test.cc
   ast/else_statement_test.cc
   ast/entry_point_test.cc
+  ast/expression_test.cc
   ast/fallthrough_statement_test.cc
   ast/float_literal_test.cc
   ast/function_test.cc

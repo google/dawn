@@ -451,6 +451,7 @@ source_set("tint_unittests_core_src") {
     "src/ast/decorated_variable_test.cc",
     "src/ast/else_statement_test.cc",
     "src/ast/entry_point_test.cc",
+    "src/ast/expression_test.cc",
     "src/ast/fallthrough_statement_test.cc",
     "src/ast/float_literal_test.cc",
     "src/ast/function_test.cc",

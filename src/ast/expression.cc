@@ -24,6 +24,7 @@
 #include "src/ast/constructor_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/member_accessor_expression.h"
+#include "src/ast/type/alias_type.h"
 #include "src/ast/unary_derivative_expression.h"
 #include "src/ast/unary_method_expression.h"
 #include "src/ast/unary_op_expression.h"
@@ -36,6 +37,14 @@ Expression::Expression() = default;
 Expression::Expression(const Source& source) : Node(source) {}
 
 Expression::~Expression() = default;
+
+void Expression::set_result_type(type::Type* type) {
+  // The expression result should never be an alias type
+  while (type->IsAlias()) {
+    type = type->AsAlias()->type();
+  }
+  result_type_ = type;
+}
 
 bool Expression::IsArrayAccessor() const {
   return false;
