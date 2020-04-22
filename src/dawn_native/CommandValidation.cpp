@@ -317,9 +317,9 @@ namespace dawn_native {
 
             bool readOnly = (usage & kReadOnlyTextureUsages) == usage;
             bool singleUse = wgpu::HasZeroOrOneBits(usage);
-            if (!readOnly && !singleUse) {
+            if (pass.passType == PassType::Render && !readOnly && !singleUse) {
                 return DAWN_VALIDATION_ERROR(
-                    "Texture used as writable usage and another usage in pass");
+                    "Texture used as writable usage and another usage in render pass");
             }
         }
 

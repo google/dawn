@@ -30,7 +30,9 @@ namespace dawn_native {
     // Base class for shared functionality between ComputePassEncoder and RenderPassEncoder.
     class ProgrammablePassEncoder : public ObjectBase {
       public:
-        ProgrammablePassEncoder(DeviceBase* device, EncodingContext* encodingContext);
+        ProgrammablePassEncoder(DeviceBase* device,
+                                EncodingContext* encodingContext,
+                                PassType passType);
 
         void InsertDebugMarker(const char* groupLabel);
         void PopDebugGroup();
@@ -45,7 +47,8 @@ namespace dawn_native {
         // Construct an "error" programmable pass encoder.
         ProgrammablePassEncoder(DeviceBase* device,
                                 EncodingContext* encodingContext,
-                                ErrorTag errorTag);
+                                ErrorTag errorTag,
+                                PassType passType);
 
         EncodingContext* mEncodingContext = nullptr;
         PassResourceUsageTracker mUsageTracker;

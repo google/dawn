@@ -32,6 +32,7 @@ namespace dawn_native {
     // information.
     class PassResourceUsageTracker {
       public:
+        PassResourceUsageTracker(PassType passType);
         void BufferUsedAs(BufferBase* buffer, wgpu::BufferUsage usage);
         void TextureUsedAs(TextureBase* texture, wgpu::TextureUsage usage);
 
@@ -39,6 +40,7 @@ namespace dawn_native {
         PassResourceUsage AcquireResourceUsage();
 
       private:
+        PassType mPassType;
         std::map<BufferBase*, wgpu::BufferUsage> mBufferUsages;
         std::map<TextureBase*, wgpu::TextureUsage> mTextureUsages;
     };

@@ -18,6 +18,8 @@
 #include "dawn_native/Texture.h"
 
 namespace dawn_native {
+    PassResourceUsageTracker::PassResourceUsageTracker(PassType passType) : mPassType(passType) {
+    }
 
     void PassResourceUsageTracker::BufferUsedAs(BufferBase* buffer, wgpu::BufferUsage usage) {
         // std::map's operator[] will create the key and return 0 if the key didn't exist
@@ -34,6 +36,7 @@ namespace dawn_native {
     // Returns the per-pass usage for use by backends for APIs with explicit barriers.
     PassResourceUsage PassResourceUsageTracker::AcquireResourceUsage() {
         PassResourceUsage result;
+        result.passType = mPassType;
         result.buffers.reserve(mBufferUsages.size());
         result.bufferUsages.reserve(mBufferUsages.size());
         result.textures.reserve(mTextureUsages.size());

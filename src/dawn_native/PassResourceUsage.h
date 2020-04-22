@@ -25,10 +25,13 @@ namespace dawn_native {
     class BufferBase;
     class TextureBase;
 
+    enum class PassType { Render, Compute };
+
     // Which resources are used by pass and how they are used. The command buffer validation
     // pre-computes this information so that backends with explicit barriers don't have to
     // re-compute it.
     struct PassResourceUsage {
+        PassType passType;
         std::vector<BufferBase*> buffers;
         std::vector<wgpu::BufferUsage> bufferUsages;
 

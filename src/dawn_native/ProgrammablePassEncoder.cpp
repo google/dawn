@@ -86,14 +86,16 @@ namespace dawn_native {
     }  // namespace
 
     ProgrammablePassEncoder::ProgrammablePassEncoder(DeviceBase* device,
-                                                     EncodingContext* encodingContext)
-        : ObjectBase(device), mEncodingContext(encodingContext) {
+                                                     EncodingContext* encodingContext,
+                                                     PassType passType)
+        : ObjectBase(device), mEncodingContext(encodingContext), mUsageTracker(passType) {
     }
 
     ProgrammablePassEncoder::ProgrammablePassEncoder(DeviceBase* device,
                                                      EncodingContext* encodingContext,
-                                                     ErrorTag errorTag)
-        : ObjectBase(device, errorTag), mEncodingContext(encodingContext) {
+                                                     ErrorTag errorTag,
+                                                     PassType passType)
+        : ObjectBase(device, errorTag), mEncodingContext(encodingContext), mUsageTracker(passType) {
     }
 
     void ProgrammablePassEncoder::InsertDebugMarker(const char* groupLabel) {

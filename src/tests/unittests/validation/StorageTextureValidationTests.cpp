@@ -974,7 +974,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureAndOutputAttachmentInOneRend
 
 // Verify it is invalid to use a a texture as both read-only storage texture and write-only storage
 // texture in one render pass.
-TEST_F(StorageTextureValidationTests, ReadOnlyStorageTextureAndWriteOnlyStorageTexture) {
+TEST_F(StorageTextureValidationTests, ReadOnlyAndWriteOnlyStorageTextureInOneRenderPass) {
     constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
     wgpu::Texture storageTexture = CreateTexture(wgpu::TextureUsage::Storage, kFormat);
 
@@ -993,7 +993,7 @@ TEST_F(StorageTextureValidationTests, ReadOnlyStorageTextureAndWriteOnlyStorageT
         utils::MakeBindGroup(device, bindGroupLayout,
                              {{0, storageTexture.CreateView()}, {1, storageTexture.CreateView()}});
 
-    // It is invalid to use a a texture as both read-only storage texture and write-only storage
+    // It is invalid to use a texture as both read-only storage texture and write-only storage
     // texture in one render pass.
     wgpu::Texture outputAttachment = CreateTexture(wgpu::TextureUsage::OutputAttachment, kFormat);
     utils::ComboRenderPassDescriptor renderPassDescriptor({outputAttachment.CreateView()});
@@ -1002,4 +1002,67 @@ TEST_F(StorageTextureValidationTests, ReadOnlyStorageTextureAndWriteOnlyStorageT
     renderPassEncoder.SetBindGroup(0, bindGroup);
     renderPassEncoder.EndPass();
     ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
+// Verify it is valid to use a texture as both storage texture (read-only or write-only) and
+// sampled texture in one compute pass.
+TEST_F(StorageTextureValidationTests, StorageTextureAndSampledTextureInOneComputePass) {
+    constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
+    wgpu::Texture storageTexture =
+        CreateTexture(wgpu::TextureUsage::Storage | wgpu::TextureUsage::Sampled, kFormat);
+
+    for (wgpu::BindingType storageTextureType : kSupportedStorageTextureBindingTypes) {
+        // Create a bind group that binds the same texture as both storage texture and sampled
+        // texture.
+        wgpu::BindGroupLayout bindGroupLayout =
+            utils::MakeBindGroupLayout(device, {{.binding = 0,
+                                                 .visibility = wgpu::ShaderStage::Compute,
+                                                 .type = storageTextureType,
+                                                 .storageTextureFormat = kFormat},
+                                                {.binding = 1,
+                                                 .visibility = wgpu::ShaderStage::Compute,
+                                                 .type = wgpu::BindingType::SampledTexture,
+                                                 .storageTextureFormat = kFormat}});
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(
+            device, bindGroupLayout,
+            {{0, storageTexture.CreateView()}, {1, storageTexture.CreateView()}});
+
+        // It is valid to use a a texture as both storage texture (read-only or write-only) and
+        // sampled texture in one compute pass.
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder computePassEncoder = encoder.BeginComputePass();
+        computePassEncoder.SetBindGroup(0, bindGroup);
+        computePassEncoder.EndPass();
+        encoder.Finish();
+    }
+}
+
+// Verify it is valid to use a texture as both read-only storage texture and write-only storage
+// texture in one compute pass.
+TEST_F(StorageTextureValidationTests, ReadOnlyAndWriteOnlyStorageTextureInOneComputePass) {
+    constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
+    wgpu::Texture storageTexture = CreateTexture(wgpu::TextureUsage::Storage, kFormat);
+
+    // Create a bind group that uses the same texture as both read-only and write-only storage
+    // texture.
+    wgpu::BindGroupLayout bindGroupLayout =
+        utils::MakeBindGroupLayout(device, {{.binding = 0,
+                                             .visibility = wgpu::ShaderStage::Compute,
+                                             .type = wgpu::BindingType::ReadonlyStorageTexture,
+                                             .storageTextureFormat = kFormat},
+                                            {.binding = 1,
+                                             .visibility = wgpu::ShaderStage::Compute,
+                                             .type = wgpu::BindingType::WriteonlyStorageTexture,
+                                             .storageTextureFormat = kFormat}});
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, bindGroupLayout,
+                             {{0, storageTexture.CreateView()}, {1, storageTexture.CreateView()}});
+
+    // It is valid to use a texture as both read-only storage texture and write-only storage
+    // texture in one compute pass.
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder computePassEncoder = encoder.BeginComputePass();
+    computePassEncoder.SetBindGroup(0, bindGroup);
+    computePassEncoder.EndPass();
+    encoder.Finish();
 }

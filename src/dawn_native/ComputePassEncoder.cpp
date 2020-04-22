@@ -25,14 +25,15 @@ namespace dawn_native {
     ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
                                            CommandEncoder* commandEncoder,
                                            EncodingContext* encodingContext)
-        : ProgrammablePassEncoder(device, encodingContext), mCommandEncoder(commandEncoder) {
+        : ProgrammablePassEncoder(device, encodingContext, PassType::Compute),
+          mCommandEncoder(commandEncoder) {
     }
 
     ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
                                            CommandEncoder* commandEncoder,
                                            EncodingContext* encodingContext,
                                            ErrorTag errorTag)
-        : ProgrammablePassEncoder(device, encodingContext, errorTag),
+        : ProgrammablePassEncoder(device, encodingContext, errorTag, PassType::Compute),
           mCommandEncoder(commandEncoder) {
     }
 

@@ -526,7 +526,7 @@ namespace dawn_native {
     RenderPassEncoder* CommandEncoder::BeginRenderPass(const RenderPassDescriptor* descriptor) {
         DeviceBase* device = GetDevice();
 
-        PassResourceUsageTracker usageTracker;
+        PassResourceUsageTracker usageTracker(PassType::Render);
         bool success =
             mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
                 uint32_t width = 0;

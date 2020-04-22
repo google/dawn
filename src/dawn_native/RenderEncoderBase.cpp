@@ -27,7 +27,7 @@
 namespace dawn_native {
 
     RenderEncoderBase::RenderEncoderBase(DeviceBase* device, EncodingContext* encodingContext)
-        : ProgrammablePassEncoder(device, encodingContext),
+        : ProgrammablePassEncoder(device, encodingContext, PassType::Render),
           mDisableBaseVertex(device->IsToggleEnabled(Toggle::DisableBaseVertex)),
           mDisableBaseInstance(device->IsToggleEnabled(Toggle::DisableBaseInstance)) {
     }
@@ -35,7 +35,7 @@ namespace dawn_native {
     RenderEncoderBase::RenderEncoderBase(DeviceBase* device,
                                          EncodingContext* encodingContext,
                                          ErrorTag errorTag)
-        : ProgrammablePassEncoder(device, encodingContext, errorTag),
+        : ProgrammablePassEncoder(device, encodingContext, errorTag, PassType::Render),
           mDisableBaseVertex(device->IsToggleEnabled(Toggle::DisableBaseVertex)),
           mDisableBaseInstance(device->IsToggleEnabled(Toggle::DisableBaseInstance)) {
     }
