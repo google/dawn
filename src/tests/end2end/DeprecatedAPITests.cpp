@@ -288,6 +288,10 @@ TEST_P(DeprecationTests, BGDescBindingAndEntriesBothZeroEmitsNoWarning) {
 
 // Test that creating a BG with bindings still does correct state tracking
 TEST_P(DeprecationTests, BGDescBindingStateTracking) {
+    // TODO(cwallez@chromium.org): In Vulkan it is disallowed to create 0-sized descriptor pools
+    // but the Vulkan backend doesn't special case it yet.
+    DAWN_SKIP_TEST_IF(IsVulkan());
+
     wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {});
 
     // Test a case where if |bindings| wasn't taken into account, no validation error would happen

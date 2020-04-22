@@ -27,7 +27,6 @@
 #include "dawn_native/vulkan/BufferVk.h"
 #include "dawn_native/vulkan/CommandBufferVk.h"
 #include "dawn_native/vulkan/ComputePipelineVk.h"
-#include "dawn_native/vulkan/DescriptorSetService.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
 #include "dawn_native/vulkan/PipelineLayoutVk.h"
 #include "dawn_native/vulkan/QueueVk.h"
@@ -83,7 +82,6 @@ namespace dawn_native { namespace vulkan {
             mDeleter = std::make_unique<FencedDeleter>(this);
         }
 
-        mDescriptorSetService = std::make_unique<DescriptorSetService>(this);
         mMapRequestTracker = std::make_unique<MapRequestTracker>(this);
         mRenderPassCache = std::make_unique<RenderPassCache>(this);
         mResourceMemoryAllocator = std::make_unique<ResourceMemoryAllocator>(this);
@@ -173,7 +171,12 @@ namespace dawn_native { namespace vulkan {
         CheckPassedFences();
         RecycleCompletedCommands();
 
-        mDescriptorSetService->Tick(mCompletedSerial);
+        for (Ref<BindGroupLayout>& bgl :
+             mBindGroupLayoutsPendingDeallocation.IterateUpTo(mCompletedSerial)) {
+            bgl->FinishDeallocation(mCompletedSerial);
+        }
+        mBindGroupLayoutsPendingDeallocation.ClearUpTo(mCompletedSerial);
+
         mMapRequestTracker->Tick(mCompletedSerial);
         mResourceMemoryAllocator->Tick(mCompletedSerial);
         mDeleter->Tick(mCompletedSerial);
@@ -213,16 +216,16 @@ namespace dawn_native { namespace vulkan {
         return mMapRequestTracker.get();
     }
 
-    DescriptorSetService* Device::GetDescriptorSetService() const {
-        return mDescriptorSetService.get();
-    }
-
     FencedDeleter* Device::GetFencedDeleter() const {
         return mDeleter.get();
     }
 
     RenderPassCache* Device::GetRenderPassCache() const {
         return mRenderPassCache.get();
+    }
+
+    void Device::EnqueueDeferredDeallocation(BindGroupLayout* bindGroupLayout) {
+        mBindGroupLayoutsPendingDeallocation.Enqueue(bindGroupLayout, GetPendingCommandSerial());
     }
 
     CommandRecordingContext* Device::GetPendingRecordingContext() {
@@ -808,7 +811,6 @@ namespace dawn_native { namespace vulkan {
         mDeleter->Tick(mCompletedSerial);
 
         mMapRequestTracker = nullptr;
-        mDescriptorSetService = nullptr;
 
         // The VkRenderPasses in the cache can be destroyed immediately since all commands referring
         // to them are guaranteed to be finished executing.
