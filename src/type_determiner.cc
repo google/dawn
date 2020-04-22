@@ -734,6 +734,42 @@ ast::type::Type* TypeDeterminer::GetImportData(
     }
 
     return result_type;
+  } else if (name == "fclamp" || name == "fmix" || name == "smoothstep" ||
+             name == "fma" || name == "nclamp" || name == "faceforward") {
+    if (params.size() != 3) {
+      error_ = "incorrect number of parameters for " + name +
+               ". Expected 3 got " + std::to_string(params.size());
+      return nullptr;
+    }
+    if (!params[0]->result_type()->is_float_scalar_or_vector() ||
+        !params[1]->result_type()->is_float_scalar_or_vector() ||
+        !params[2]->result_type()->is_float_scalar_or_vector()) {
+      error_ = "incorrect type for " + name +
+               ". Requires float scalar or a float vector values";
+      return nullptr;
+    }
+    if (params[0]->result_type() != params[1]->result_type() ||
+        params[0]->result_type() != params[2]->result_type()) {
+      error_ = "mismatched parameter types for " + name;
+      return nullptr;
+    }
+
+    auto* result_type = params[0]->result_type();
+    if (name == "fclamp") {
+      *id = GLSLstd450FClamp;
+    } else if (name == "fmix") {
+      *id = GLSLstd450FMix;
+    } else if (name == "smoothstep") {
+      *id = GLSLstd450SmoothStep;
+    } else if (name == "fma") {
+      *id = GLSLstd450Fma;
+    } else if (name == "nclamp") {
+      *id = GLSLstd450NClamp;
+    } else if (name == "faceforward") {
+      *id = GLSLstd450FaceForward;
+    }
+
+    return result_type;
   }
 
   return nullptr;
