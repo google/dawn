@@ -207,7 +207,7 @@ uint32_t Builder::GenerateExpression(ast::Expression* expr) {
     return GenerateIdentifierExpression(expr->AsIdentifier());
   }
 
-  error_ = "unknown expression type";
+  error_ = "unknown expression type: " + expr->str();
   return 0;
 }
 
