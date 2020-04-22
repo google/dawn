@@ -19,9 +19,7 @@
 #include "dawn_native/CommandAllocator.h"
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/Error.h"
-
 #include "dawn_native/d3d12/Forward.h"
-#include "dawn_native/d3d12/d3d12_platform.h"
 
 #include <array>
 
@@ -30,12 +28,6 @@ namespace dawn_native {
 }  // namespace dawn_native
 
 namespace dawn_native { namespace d3d12 {
-
-    struct OMSetRenderTargetArgs {
-        unsigned int numRTVs = 0;
-        std::array<D3D12_CPU_DESCRIPTOR_HANDLE, kMaxColorAttachments> RTVs = {};
-        D3D12_CPU_DESCRIPTOR_HANDLE dsv = {};
-    };
 
     class BindGroupStateTracker;
     class CommandRecordingContext;
@@ -58,9 +50,9 @@ namespace dawn_native { namespace d3d12 {
                                     BindGroupStateTracker* bindingTracker,
                                     BeginRenderPassCmd* renderPass,
                                     bool passHasUAV);
-        void SetupRenderPass(CommandRecordingContext* commandContext,
-                             BeginRenderPassCmd* renderPass,
-                             RenderPassBuilder* renderPassBuilder);
+        MaybeError SetupRenderPass(CommandRecordingContext* commandContext,
+                                   BeginRenderPassCmd* renderPass,
+                                   RenderPassBuilder* renderPassBuilder);
         void EmulateBeginRenderPass(CommandRecordingContext* commandContext,
                                     const RenderPassBuilder* renderPassBuilder) const;
 

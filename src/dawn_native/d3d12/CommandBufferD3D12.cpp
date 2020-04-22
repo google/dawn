@@ -24,7 +24,6 @@
 #include "dawn_native/d3d12/BufferD3D12.h"
 #include "dawn_native/d3d12/CommandRecordingContext.h"
 #include "dawn_native/d3d12/ComputePipelineD3D12.h"
-#include "dawn_native/d3d12/DescriptorHeapAllocator.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/PipelineLayoutD3D12.h"
 #include "dawn_native/d3d12/PlatformFunctions.h"
@@ -32,6 +31,7 @@
 #include "dawn_native/d3d12/RenderPipelineD3D12.h"
 #include "dawn_native/d3d12/SamplerD3D12.h"
 #include "dawn_native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.h"
+#include "dawn_native/d3d12/StagingDescriptorAllocatorD3D12.h"
 #include "dawn_native/d3d12/TextureCopySplitter.h"
 #include "dawn_native/d3d12/TextureD3D12.h"
 #include "dawn_native/d3d12/UtilsD3D12.h"
@@ -296,53 +296,6 @@ namespace dawn_native { namespace d3d12 {
     };
 
     namespace {
-
-        // TODO(jiawei.shao@intel.com): use hash map <RenderPass, OMSetRenderTargetArgs> as
-        // cache to avoid redundant RTV and DSV memory allocations.
-        ResultOrError<OMSetRenderTargetArgs> GetSubpassOMSetRenderTargetArgs(
-            BeginRenderPassCmd* renderPass,
-            Device* device) {
-            OMSetRenderTargetArgs args = {};
-
-            uint32_t rtvCount = static_cast<uint32_t>(
-                renderPass->attachmentState->GetColorAttachmentsMask().count());
-            DescriptorHeapAllocator* allocator = device->GetDescriptorHeapAllocator();
-            DescriptorHeapHandle rtvHeap;
-            DAWN_TRY_ASSIGN(rtvHeap,
-                            allocator->AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, rtvCount));
-            ASSERT(rtvHeap.Get() != nullptr);
-            ID3D12Device* d3dDevice = device->GetD3D12Device();
-            unsigned int rtvIndex = 0;
-            for (uint32_t i :
-                 IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
-                ASSERT(rtvIndex < rtvCount);
-                TextureView* view = ToBackend(renderPass->colorAttachments[i].view).Get();
-                D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap.GetCPUHandle(rtvIndex);
-                D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = view->GetRTVDescriptor();
-                d3dDevice->CreateRenderTargetView(ToBackend(view->GetTexture())->GetD3D12Resource(),
-                                                  &rtvDesc, rtvHandle);
-                args.RTVs[rtvIndex] = rtvHandle;
-
-                ++rtvIndex;
-            }
-            args.numRTVs = rtvCount;
-
-            if (renderPass->attachmentState->HasDepthStencilAttachment()) {
-                DescriptorHeapHandle dsvHeap;
-                DAWN_TRY_ASSIGN(dsvHeap,
-                                allocator->AllocateCPUHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1));
-                ASSERT(dsvHeap.Get() != nullptr);
-                TextureView* view = ToBackend(renderPass->depthStencilAttachment.view).Get();
-                D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvHeap.GetCPUHandle(0);
-                D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = view->GetDSVDescriptor();
-                d3dDevice->CreateDepthStencilView(ToBackend(view->GetTexture())->GetD3D12Resource(),
-                                                  &dsvDesc, dsvHandle);
-                args.dsv = dsvHandle;
-            }
-
-            return args;
-        }
-
         class VertexBufferTracker {
           public:
             void OnSetVertexBuffer(uint32_t slot, Buffer* buffer, uint64_t offset) {
@@ -839,12 +792,28 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-    void CommandBuffer::SetupRenderPass(CommandRecordingContext* commandContext,
-                                        BeginRenderPassCmd* renderPass,
-                                        RenderPassBuilder* renderPassBuilder) {
+    MaybeError CommandBuffer::SetupRenderPass(CommandRecordingContext* commandContext,
+                                              BeginRenderPassCmd* renderPass,
+                                              RenderPassBuilder* renderPassBuilder) {
+        Device* device = ToBackend(GetDevice());
+
         for (uint32_t i : IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
             RenderPassColorAttachmentInfo& attachmentInfo = renderPass->colorAttachments[i];
             TextureView* view = ToBackend(attachmentInfo.view.Get());
+
+            // Set view attachment.
+            CPUDescriptorHeapAllocation rtvAllocation;
+            DAWN_TRY_ASSIGN(
+                rtvAllocation,
+                device->GetRenderTargetViewAllocator()->AllocateTransientCPUDescriptors());
+
+            const D3D12_RENDER_TARGET_VIEW_DESC viewDesc = view->GetRTVDescriptor();
+            const D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor = rtvAllocation.GetBaseDescriptor();
+
+            device->GetD3D12Device()->CreateRenderTargetView(
+                ToBackend(view->GetTexture())->GetD3D12Resource(), &viewDesc, baseDescriptor);
+
+            renderPassBuilder->SetRenderTargetView(i, baseDescriptor);
 
             // Set color load operation.
             renderPassBuilder->SetRenderTargetBeginningAccess(
@@ -871,6 +840,20 @@ namespace dawn_native { namespace d3d12 {
                 renderPass->depthStencilAttachment;
             TextureView* view = ToBackend(renderPass->depthStencilAttachment.view.Get());
 
+            // Set depth attachment.
+            CPUDescriptorHeapAllocation dsvAllocation;
+            DAWN_TRY_ASSIGN(
+                dsvAllocation,
+                device->GetDepthStencilViewAllocator()->AllocateTransientCPUDescriptors());
+
+            const D3D12_DEPTH_STENCIL_VIEW_DESC viewDesc = view->GetDSVDescriptor();
+            const D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor = dsvAllocation.GetBaseDescriptor();
+
+            device->GetD3D12Device()->CreateDepthStencilView(
+                ToBackend(view->GetTexture())->GetD3D12Resource(), &viewDesc, baseDescriptor);
+
+            renderPassBuilder->SetDepthStencilView(baseDescriptor);
+
             const bool hasDepth = view->GetTexture()->GetFormat().HasDepth();
             const bool hasStencil = view->GetTexture()->GetFormat().HasStencil();
 
@@ -894,6 +877,8 @@ namespace dawn_native { namespace d3d12 {
         } else {
             renderPassBuilder->SetDepthStencilNoAccess();
         }
+
+        return {};
     }
 
     void CommandBuffer::EmulateBeginRenderPass(CommandRecordingContext* commandContext,
@@ -958,17 +943,14 @@ namespace dawn_native { namespace d3d12 {
                                                BeginRenderPassCmd* renderPass,
                                                const bool passHasUAV) {
         Device* device = ToBackend(GetDevice());
-        OMSetRenderTargetArgs args;
-        DAWN_TRY_ASSIGN(args, GetSubpassOMSetRenderTargetArgs(renderPass, device));
-
         const bool useRenderPass = device->IsToggleEnabled(Toggle::UseD3D12RenderPass);
 
         // renderPassBuilder must be scoped to RecordRenderPass because any underlying
         // D3D12_RENDER_PASS_ENDING_ACCESS_RESOLVE_SUBRESOURCE_PARAMETERS structs must remain
         // valid until after EndRenderPass() has been called.
-        RenderPassBuilder renderPassBuilder(args, passHasUAV);
+        RenderPassBuilder renderPassBuilder(passHasUAV);
 
-        SetupRenderPass(commandContext, renderPass, &renderPassBuilder);
+        DAWN_TRY(SetupRenderPass(commandContext, renderPass, &renderPassBuilder));
 
         // Use D3D12's native render pass API if it's available, otherwise emulate the
         // beginning and ending access operations.

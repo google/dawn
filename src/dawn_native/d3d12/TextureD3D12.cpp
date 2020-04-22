@@ -21,11 +21,11 @@
 #include "dawn_native/d3d12/BufferD3D12.h"
 #include "dawn_native/d3d12/CommandRecordingContext.h"
 #include "dawn_native/d3d12/D3D12Error.h"
-#include "dawn_native/d3d12/DescriptorHeapAllocator.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/HeapD3D12.h"
 #include "dawn_native/d3d12/ResourceAllocatorManagerD3D12.h"
 #include "dawn_native/d3d12/StagingBufferD3D12.h"
+#include "dawn_native/d3d12/StagingDescriptorAllocatorD3D12.h"
 #include "dawn_native/d3d12/TextureCopySplitter.h"
 #include "dawn_native/d3d12/UtilsD3D12.h"
 
@@ -622,7 +622,6 @@ namespace dawn_native { namespace d3d12 {
         ID3D12GraphicsCommandList* commandList = commandContext->GetCommandList();
 
         Device* device = ToBackend(GetDevice());
-        DescriptorHeapAllocator* descriptorHeapAllocator = device->GetDescriptorHeapAllocator();
 
         uint8_t clearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0 : 1;
         float fClearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0.f : 1.f;
@@ -642,13 +641,14 @@ namespace dawn_native { namespace d3d12 {
                             continue;
                         }
 
-                        DescriptorHeapHandle dsvHeap;
-                        DAWN_TRY_ASSIGN(dsvHeap, descriptorHeapAllocator->AllocateCPUHeap(
-                                                     D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1));
-                        D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvHeap.GetCPUHandle(0);
+                        CPUDescriptorHeapAllocation dsvHandle;
+                        DAWN_TRY_ASSIGN(dsvHandle, device->GetDepthStencilViewAllocator()
+                                                       ->AllocateTransientCPUDescriptors());
+                        const D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor =
+                            dsvHandle.GetBaseDescriptor();
                         D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = GetDSVDescriptor(level, layer, 1);
                         device->GetD3D12Device()->CreateDepthStencilView(GetD3D12Resource(),
-                                                                         &dsvDesc, dsvHandle);
+                                                                         &dsvDesc, baseDescriptor);
 
                         if (GetFormat().HasDepth()) {
                             clearFlags |= D3D12_CLEAR_FLAG_DEPTH;
@@ -657,7 +657,7 @@ namespace dawn_native { namespace d3d12 {
                             clearFlags |= D3D12_CLEAR_FLAG_STENCIL;
                         }
 
-                        commandList->ClearDepthStencilView(dsvHandle, clearFlags, fClearColor,
+                        commandList->ClearDepthStencilView(baseDescriptor, clearFlags, fClearColor,
                                                            clearColor, 0, nullptr);
                     }
                 }
@@ -676,10 +676,10 @@ namespace dawn_native { namespace d3d12 {
                             continue;
                         }
 
-                        DescriptorHeapHandle rtvHeap;
-                        DAWN_TRY_ASSIGN(rtvHeap, descriptorHeapAllocator->AllocateCPUHeap(
-                                                     D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 1));
-                        D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap.GetCPUHandle(0);
+                        CPUDescriptorHeapAllocation rtvHeap;
+                        DAWN_TRY_ASSIGN(rtvHeap, device->GetRenderTargetViewAllocator()
+                                                     ->AllocateTransientCPUDescriptors());
+                        const D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = rtvHeap.GetBaseDescriptor();
 
                         D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = GetRTVDescriptor(level, layer, 1);
                         device->GetD3D12Device()->CreateRenderTargetView(GetD3D12Resource(),

@@ -25,8 +25,6 @@ namespace dawn_native { namespace d3d12 {
 
     class TextureView;
 
-    struct OMSetRenderTargetArgs;
-
     // RenderPassBuilder stores parameters related to render pass load and store operations.
     // When the D3D12 render pass API is available, the needed descriptors can be fetched
     // directly from the RenderPassBuilder. When the D3D12 render pass API is not available, the
@@ -34,7 +32,7 @@ namespace dawn_native { namespace d3d12 {
     // operations is extracted from the descriptors.
     class RenderPassBuilder {
       public:
-        RenderPassBuilder(const OMSetRenderTargetArgs& args, bool hasUAV);
+        RenderPassBuilder(bool hasUAV);
 
         uint32_t GetColorAttachmentCount() const;
 
@@ -72,6 +70,10 @@ namespace dawn_native { namespace d3d12 {
                               DXGI_FORMAT format);
         void SetStencilNoAccess();
 
+        void SetRenderTargetView(uint32_t attachmentIndex,
+                                 D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor);
+        void SetDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor);
+
       private:
         uint32_t mColorAttachmentCount = 0;
         bool mHasDepth = false;
@@ -79,7 +81,7 @@ namespace dawn_native { namespace d3d12 {
         D3D12_RENDER_PASS_DEPTH_STENCIL_DESC mRenderPassDepthStencilDesc;
         std::array<D3D12_RENDER_PASS_RENDER_TARGET_DESC, kMaxColorAttachments>
             mRenderPassRenderTargetDescriptors;
-        const D3D12_CPU_DESCRIPTOR_HANDLE* mRenderTargetViews;
+        std::array<D3D12_CPU_DESCRIPTOR_HANDLE, kMaxColorAttachments> mRenderTargetViews;
         std::array<D3D12_RENDER_PASS_ENDING_ACCESS_RESOLVE_SUBRESOURCE_PARAMETERS,
                    kMaxColorAttachments>
             mSubresourceParams;

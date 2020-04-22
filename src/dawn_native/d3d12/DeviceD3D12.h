@@ -67,7 +67,6 @@ namespace dawn_native { namespace d3d12 {
         ComPtr<ID3D12CommandSignature> GetDrawIndirectSignature() const;
         ComPtr<ID3D12CommandSignature> GetDrawIndexedIndirectSignature() const;
 
-        DescriptorHeapAllocator* GetDescriptorHeapAllocator() const;
         MapRequestTracker* GetMapRequestTracker() const;
         CommandAllocatorManager* GetCommandAllocatorManager() const;
         ResidencyManager* GetResidencyManager() const;
@@ -109,6 +108,10 @@ namespace dawn_native { namespace d3d12 {
 
         StagingDescriptorAllocator* GetSamplerStagingDescriptorAllocator(
             uint32_t descriptorCount) const;
+
+        StagingDescriptorAllocator* GetRenderTargetViewAllocator() const;
+
+        StagingDescriptorAllocator* GetDepthStencilViewAllocator() const;
 
         TextureBase* WrapSharedHandle(const ExternalImageDescriptor* descriptor,
                                       HANDLE sharedHandle,
@@ -173,7 +176,6 @@ namespace dawn_native { namespace d3d12 {
         SerialQueue<ComPtr<IUnknown>> mUsedComObjectRefs;
 
         std::unique_ptr<CommandAllocatorManager> mCommandAllocatorManager;
-        std::unique_ptr<DescriptorHeapAllocator> mDescriptorHeapAllocator;
         std::unique_ptr<MapRequestTracker> mMapRequestTracker;
         std::unique_ptr<ResourceAllocatorManager> mResourceAllocatorManager;
         std::unique_ptr<ResidencyManager> mResidencyManager;
@@ -187,6 +189,10 @@ namespace dawn_native { namespace d3d12 {
 
         std::array<std::unique_ptr<StagingDescriptorAllocator>, kNumOfStagingDescriptorAllocators>
             mSamplerAllocators;
+
+        std::unique_ptr<StagingDescriptorAllocator> mRenderTargetViewAllocator;
+
+        std::unique_ptr<StagingDescriptorAllocator> mDepthStencilViewAllocator;
     };
 
 }}  // namespace dawn_native::d3d12

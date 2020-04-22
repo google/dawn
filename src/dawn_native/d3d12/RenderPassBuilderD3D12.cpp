@@ -102,17 +102,22 @@ namespace dawn_native { namespace d3d12 {
         }
     }  // anonymous namespace
 
-    RenderPassBuilder::RenderPassBuilder(const OMSetRenderTargetArgs& args, bool hasUAV)
-        : mColorAttachmentCount(args.numRTVs), mRenderTargetViews(args.RTVs.data()) {
-        for (uint32_t i = 0; i < mColorAttachmentCount; i++) {
-            mRenderPassRenderTargetDescriptors[i].cpuDescriptor = args.RTVs[i];
-        }
-
-        mRenderPassDepthStencilDesc.cpuDescriptor = args.dsv;
-
+    RenderPassBuilder::RenderPassBuilder(bool hasUAV) {
         if (hasUAV) {
             mRenderPassFlags = D3D12_RENDER_PASS_FLAG_ALLOW_UAV_WRITES;
         }
+    }
+
+    void RenderPassBuilder::SetRenderTargetView(uint32_t attachmentIndex,
+                                                D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor) {
+        ASSERT(mColorAttachmentCount < kMaxColorAttachments);
+        mRenderTargetViews[attachmentIndex] = baseDescriptor;
+        mRenderPassRenderTargetDescriptors[attachmentIndex].cpuDescriptor = baseDescriptor;
+        mColorAttachmentCount++;
+    }
+
+    void RenderPassBuilder::SetDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor) {
+        mRenderPassDepthStencilDesc.cpuDescriptor = baseDescriptor;
     }
 
     uint32_t RenderPassBuilder::GetColorAttachmentCount() const {
@@ -138,7 +143,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     const D3D12_CPU_DESCRIPTOR_HANDLE* RenderPassBuilder::GetRenderTargetViews() const {
-        return mRenderTargetViews;
+        return mRenderTargetViews.data();
     }
 
     void RenderPassBuilder::SetRenderTargetBeginningAccess(uint32_t attachment,
