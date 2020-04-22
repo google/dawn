@@ -19,7 +19,8 @@
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   std::string str(reinterpret_cast<const char*>(data), size);
 
-  tint::reader::wgsl::Parser parser(str);
+  tint::Context ctx;
+  tint::reader::wgsl::Parser parser(&ctx, str);
   parser.Parse();
 
   return 0;

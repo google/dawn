@@ -152,7 +152,7 @@ add_subdirectory(src)
 add_subdirectory(samples)
 
 if (${TINT_BUILD_FUZZERS})
-  if (NOT ${TINT_BUILD_WGSL_READER)
+  if (NOT ${TINT_BUILD_WGSL_READER})
     message(ERROR, "Fuzzers require WGSL reader to be enabled")
   endif()
 
