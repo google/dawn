@@ -177,6 +177,10 @@ class Builder {
   /// @param var the variable to generate
   /// @returns true if the variable is emited.
   bool GenerateGlobalVariable(ast::Variable* var);
+  /// Generates an array accessor expression
+  /// @param expr the expresssion to generate
+  /// @returns the id of the expression or 0 on failure
+  uint32_t GenerateAccessorExpression(ast::Expression* expr);
   /// Generates an identifier expression
   /// @param expr the expresssion to generate
   /// @returns the id of the expression or 0 on failure

@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "spirv/unified1/spirv.h"
+#include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/binding_decoration.h"
@@ -32,6 +33,7 @@
 #include "src/ast/int_literal.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/loop_statement.h"
+#include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
@@ -198,6 +200,9 @@ bool Builder::GenerateEntryPoint(ast::EntryPoint* ep) {
 }
 
 uint32_t Builder::GenerateExpression(ast::Expression* expr) {
+  if (expr->IsArrayAccessor()) {
+    return GenerateAccessorExpression(expr->AsArrayAccessor());
+  }
   if (expr->IsBinary()) {
     return GenerateBinaryExpression(expr->AsBinary());
   }
@@ -434,6 +439,77 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
   scope_stack_.set_global(var->name(), var_id);
   spirv_id_to_variable_[var_id] = var;
   return true;
+}
+
+uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
+  assert(expr->IsArrayAccessor() || expr->IsMemberAccessor());
+
+  auto result = result_op();
+  auto result_id = result.to_i();
+
+  std::vector<Operand> idx_list;
+
+  ast::Expression* source = expr;
+  while (true) {
+    if (source->IsArrayAccessor()) {
+      auto* ary_accessor = source->AsArrayAccessor();
+      source = ary_accessor->array();
+
+      auto idx = GenerateExpression(ary_accessor->idx_expr());
+      if (idx == 0) {
+        return 0;
+      }
+      idx_list.insert(idx_list.begin(), Operand::Int(idx));
+
+    } else if (source->IsMemberAccessor()) {
+      auto* mem_accessor = source->AsMemberAccessor();
+      source = mem_accessor->structure();
+
+      auto* data_type = mem_accessor->structure()->result_type();
+      if (data_type->IsStruct()) {
+        auto* strct = data_type->AsStruct()->impl();
+        auto name = mem_accessor->member()->name();
+
+        uint32_t i = 0;
+        for (; i < strct->members().size(); ++i) {
+          const auto& member = strct->members()[i];
+          if (member->name() != name) {
+            continue;
+          }
+
+          break;
+        }
+        idx_list.insert(idx_list.begin(), Operand::Int(i));
+
+      } else if (data_type->IsVector()) {
+        // TODO(dsinclair): Handle swizzle
+      } else {
+        error_ = "invalid type for member accessor";
+        return 0;
+      }
+    } else {
+      break;
+    }
+  }
+
+  auto source_id = GenerateExpression(source);
+  if (source_id == 0) {
+    return 0;
+  }
+
+  // The access chain results in a pointer, so wrap the return type.
+  ast::type::PointerType ptr(expr->result_type(), ast::StorageClass::kFunction);
+  auto type_id = GenerateTypeIfNeeded(&ptr);
+  if (type_id == 0) {
+    return 0;
+  }
+
+  idx_list.insert(idx_list.begin(), Operand::Int(source_id));
+  idx_list.insert(idx_list.begin(), result);
+  idx_list.insert(idx_list.begin(), Operand::Int(type_id));
+  push_function_inst(spv::Op::OpAccessChain, idx_list);
+
+  return result_id;
 }
 
 uint32_t Builder::GenerateIdentifierExpression(
