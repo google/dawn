@@ -165,8 +165,10 @@ TEST_F(GeneratorImplTest, EmitConstructor_Type_Mat) {
   ast::ExpressionList mat_values;
 
   for (size_t i = 0; i < 3; i++) {
-    auto lit1 = std::make_unique<ast::FloatLiteral>(&f32, 1.f + (i * 2));
-    auto lit2 = std::make_unique<ast::FloatLiteral>(&f32, 2.f + (i * 2));
+    auto lit1 = std::make_unique<ast::FloatLiteral>(
+        &f32, static_cast<float>(1 + (i * 2)));
+    auto lit2 = std::make_unique<ast::FloatLiteral>(
+        &f32, static_cast<float>(2 + (i * 2)));
 
     ast::ExpressionList values;
     values.push_back(
@@ -196,9 +198,12 @@ TEST_F(GeneratorImplTest, EmitConstructor_Type_Array) {
   ast::ExpressionList ary_values;
 
   for (size_t i = 0; i < 3; i++) {
-    auto lit1 = std::make_unique<ast::FloatLiteral>(&f32, 1.f + (i * 3));
-    auto lit2 = std::make_unique<ast::FloatLiteral>(&f32, 2.f + (i * 3));
-    auto lit3 = std::make_unique<ast::FloatLiteral>(&f32, 3.f + (i * 3));
+    auto lit1 = std::make_unique<ast::FloatLiteral>(
+        &f32, static_cast<float>(1 + (i * 3)));
+    auto lit2 = std::make_unique<ast::FloatLiteral>(
+        &f32, static_cast<float>(2 + (i * 3)));
+    auto lit3 = std::make_unique<ast::FloatLiteral>(
+        &f32, static_cast<float>(3 + (i * 3)));
 
     ast::ExpressionList values;
     values.push_back(

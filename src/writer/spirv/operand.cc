@@ -54,8 +54,9 @@ uint32_t Operand::length() const {
       break;
     case Kind::kString:
       // SPIR-V always nul-terminates strings. The length is rounded up to a
-      // multiple of 4 bytes with 0 bytes padding the end.
-      val = static_cast<uint32_t>(ceil((str_val_.length() + 1) / 4.0));
+      // multiple of 4 bytes with 0 bytes padding the end. Accounting for the
+      // nul terminator is why '+ 4u' is used here instead of '+ 3u'.
+      val = static_cast<uint32_t>((str_val_.length() + 4u) >> 2);
       break;
   }
   return val;
