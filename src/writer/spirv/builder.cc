@@ -201,6 +201,9 @@ uint32_t Builder::GenerateExpression(ast::Expression* expr) {
   if (expr->IsBinary()) {
     return GenerateBinaryExpression(expr->AsBinary());
   }
+  if (expr->IsCall()) {
+    return GenerateCallExpression(expr->AsCall());
+  }
   if (expr->IsConstructor()) {
     return GenerateConstructorExpression(expr->AsConstructor(), false);
   }
