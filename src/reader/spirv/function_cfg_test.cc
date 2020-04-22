@@ -27,6 +27,7 @@ namespace spirv {
 namespace {
 
 using ::testing::ElementsAre;
+using ::testing::Eq;
 
 std::string CommonTypes() {
   return R"(
@@ -46,6 +47,245 @@ std::string CommonTypes() {
   )";
 }
 
+TEST_F(SpvParserTest, TerminatorsAreSane_SingleBlock) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %42 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_TRUE(fe.TerminatorsAreSane());
+}
+
+TEST_F(SpvParserTest, TerminatorsAreSane_Sequence) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %20 = OpLabel
+     OpBranch %30
+
+     %30 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_TRUE(fe.TerminatorsAreSane()) << p->error();
+}
+
+TEST_F(SpvParserTest, TerminatorsAreSane_If) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %20 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %30 %40
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %40 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_TRUE(fe.TerminatorsAreSane()) << p->error();
+}
+
+TEST_F(SpvParserTest, TerminatorsAreSane_Switch) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %80 20 %20 30 %30
+
+     %20 = OpLabel
+     OpBranch %30 ; fall through
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %80 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_TRUE(fe.TerminatorsAreSane());
+}
+
+TEST_F(SpvParserTest, TerminatorsAreSane_Loop_SingleBlock) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %20 None
+     OpBranchConditional %cond %20 %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_TRUE(fe.TerminatorsAreSane());
+}
+
+TEST_F(SpvParserTest, TerminatorsAreSane_Loop_Simple) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %40 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel
+     OpBranch %20 ; back edge
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_TRUE(fe.TerminatorsAreSane());
+}
+
+TEST_F(SpvParserTest, TerminatorsAreSane_Kill) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpKill
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_TRUE(fe.TerminatorsAreSane());
+}
+
+TEST_F(SpvParserTest, TerminatorsAreSane_Unreachable) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpUnreachable
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_TRUE(fe.TerminatorsAreSane());
+}
+
+TEST_F(SpvParserTest, TerminatorsAreSane_MissingTerminator) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+
+     OpFunctionEnd
+  )"));
+  // The SPIRV-Tools internal representation rejects this case earlier.
+  EXPECT_FALSE(p->BuildAndParseInternalModuleExceptFunctions());
+}
+
+TEST_F(SpvParserTest, TerminatorsAreSane_DisallowLoopToEntryBlock) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpBranch %10 ; not allowed
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_FALSE(fe.TerminatorsAreSane());
+  EXPECT_THAT(p->error(), Eq("Block 20 branches to function entry block 10"));
+}
+
+TEST_F(SpvParserTest, TerminatorsAreSane_DisallowNonBlock) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %void ; definitely wrong
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_FALSE(fe.TerminatorsAreSane());
+  EXPECT_THAT(p->error(), Eq("Block 10 in function 100 branches to 1 which is "
+                             "not a block in the function"));
+}
+
+TEST_F(SpvParserTest, TerminatorsAreSane_DisallowBlockInDifferentFunction) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %210
+
+     OpFunctionEnd
+
+
+     %200 = OpFunction %void None %voidfn
+
+     %210 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_FALSE(fe.TerminatorsAreSane());
+  EXPECT_THAT(p->error(), Eq("Block 10 in function 100 branches to 210 which "
+                             "is not a block in the function"));
+}
+
 TEST_F(SpvParserTest, ComputeBlockOrder_OneBlock) {
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
@@ -57,6 +297,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_OneBlock) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(42));
@@ -79,6 +320,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_IgnoreStaticalyUnreachable) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20));
@@ -101,6 +343,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_KillIsDeadEnd) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20));
@@ -123,6 +366,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_UnreachableIsDeadEnd) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20));
@@ -145,6 +389,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_ReorderSequence) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30));
@@ -168,6 +413,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_DupConditionalBranch) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 99));
@@ -194,6 +440,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_RespectConditionalBranchOrder) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 99));
@@ -217,6 +464,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_TrueOnlyBranch) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 99));
@@ -240,6 +488,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_FalseOnlyBranch) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 99));
@@ -266,6 +515,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_SwitchOrderNaturallyReversed) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 30, 20, 99));
@@ -296,6 +546,7 @@ TEST_F(SpvParserTest,
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 30, 20, 80, 99));
@@ -326,6 +577,7 @@ TEST_F(SpvParserTest,
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 40, 20, 30, 99));
@@ -359,6 +611,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_RespectSwitchCaseFallthrough) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 30, 50, 20, 40, 99))
@@ -394,6 +647,7 @@ TEST_F(SpvParserTest,
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 80, 30, 40, 99))
@@ -426,6 +680,7 @@ TEST_F(SpvParserTest,
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 80, 30, 99)) << assembly;
@@ -462,6 +717,7 @@ TEST_F(SpvParserTest,
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 50, 40, 20, 30, 99))
@@ -503,6 +759,7 @@ TEST_F(SpvParserTest,
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 30, 50, 70, 20, 40, 60, 99))
@@ -552,6 +809,7 @@ TEST_F(SpvParserTest,
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(),
@@ -602,6 +860,7 @@ TEST_F(SpvParserTest,
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(),
@@ -652,6 +911,7 @@ TEST_F(SpvParserTest,
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(),
@@ -696,6 +956,7 @@ TEST_F(SpvParserTest,
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 40, 49, 50, 60, 79, 99))
@@ -720,6 +981,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_SingleBlock_Simple) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 99)) << assembly;
@@ -743,6 +1005,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_SingleBlock_Infinite) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 99)) << assembly;
@@ -766,6 +1029,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_SingleBlock_DupInfinite) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 99)) << assembly;
@@ -794,6 +1058,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_HeaderHasBreakIf) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 99)) << assembly;
@@ -822,6 +1087,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_HeaderHasBreakUnless) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 99)) << assembly;
@@ -850,6 +1116,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasBreak) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 99)) << assembly;
@@ -881,6 +1148,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasBreakIf) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 40, 50, 99))
@@ -913,6 +1181,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasBreakUnless) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 40, 50, 99))
@@ -952,6 +1221,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Body_If) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 40, 45, 49, 50, 99))
@@ -988,6 +1258,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Body_If_Break) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 40, 49, 50, 99))
@@ -1020,6 +1291,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasContinueIf) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 40, 50, 99))
@@ -1052,6 +1324,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasContinueUnless) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 40, 50, 99))
@@ -1088,6 +1361,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Body_If_Continue) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 40, 49, 50, 99))
@@ -1127,6 +1401,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Body_Switch) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 45, 40, 49, 50, 99))
@@ -1168,6 +1443,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Body_Switch_CaseBreaks) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 45, 40, 49, 50, 99))
@@ -1207,6 +1483,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Body_Switch_CaseContinues) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 45, 40, 49, 50, 99))
@@ -1239,6 +1516,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasSwitchContinueBreak) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 99));
@@ -1270,6 +1548,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Continue_Sequence) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 60, 99));
@@ -1308,6 +1587,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Continue_ContainsIf) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 60, 70, 89, 99));
@@ -1336,6 +1616,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Continue_HasBreakIf) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 99));
@@ -1364,6 +1645,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Continue_HasBreakUnless) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 99));
@@ -1392,6 +1674,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Continue_SwitchBreak) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 99));
@@ -1433,6 +1716,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Loop) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(),
@@ -1475,6 +1759,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Loop_InnerBreak) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(),
@@ -1517,6 +1802,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Loop_InnerContinue) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(),
@@ -1559,6 +1845,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Loop_InnerContinueBreaks) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(),
@@ -1601,6 +1888,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Loop_InnerContinueContinues) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(),
@@ -1648,6 +1936,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Loop_SwitchBackedgeBreakContinue) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(),

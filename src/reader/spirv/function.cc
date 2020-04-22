@@ -307,6 +307,12 @@ ast::type::Type* FunctionEmitter::GetVariableStoreType(
 }
 
 bool FunctionEmitter::EmitBody() {
+  RegisterBasicBlocks();
+
+  if (!TerminatorsAreSane()) {
+    return false;
+  }
+
   ComputeBlockOrderAndPositions();
 
   if (!EmitFunctionVariables()) {
@@ -318,11 +324,42 @@ bool FunctionEmitter::EmitBody() {
   return success();
 }
 
-void FunctionEmitter::ComputeBlockOrderAndPositions() {
+void FunctionEmitter::RegisterBasicBlocks() {
   for (auto& block : function_) {
     block_info_[block.id()] = std::make_unique<BlockInfo>(block);
   }
+}
 
+bool FunctionEmitter::TerminatorsAreSane() {
+  if (failed()) {
+    return false;
+  }
+
+  const auto entry_id = function_.begin()->id();
+  for (const auto& block : function_) {
+    if (!block.terminator()) {
+      return Fail() << "Block " << block.id() << " has no terminator";
+    }
+  }
+  for (const auto& block : function_) {
+    block.WhileEachSuccessorLabel(
+        [this, &block, entry_id](const uint32_t succ_id) -> bool {
+          if (succ_id == entry_id) {
+            return Fail() << "Block " << block.id()
+                          << " branches to function entry block " << entry_id;
+          }
+          if (!GetBlockInfo(succ_id)) {
+            return Fail() << "Block " << block.id() << " in function "
+                          << function_.DefInst().result_id() << " branches to "
+                          << succ_id << " which is not a block in the function";
+          }
+          return true;
+        });
+  }
+  return success();
+}
+
+void FunctionEmitter::ComputeBlockOrderAndPositions() {
   block_order_ = StructuredTraverser(function_).ReverseStructuredPostOrder();
 
   for (uint32_t i = 0; i < block_order_.size(); ++i) {

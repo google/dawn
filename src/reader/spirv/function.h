@@ -90,8 +90,18 @@ class FunctionEmitter {
   /// @returns false if emission failed.
   bool EmitBody();
 
+  /// Records a mapping from block ID to a BlockInfo struct.  Populates
+  /// |block_info_|
+  void RegisterBasicBlocks();
+
+  /// Verifies that terminators only branch to labels in the current function.
+  /// Assumes basic blocks have been registered.
+  /// @returns true if terminators are sane
+  bool TerminatorsAreSane();
+
   /// Determines the output order for the basic blocks in the function.
   /// Populates |block_order_| and the |pos| block info member.
+  /// Assumes basic blocks have been registered.
   void ComputeBlockOrderAndPositions();
 
   /// @returns the reverse structured post order of the basic blocks in
