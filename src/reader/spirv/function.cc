@@ -323,10 +323,10 @@ void FunctionEmitter::ComputeBlockOrderAndPositions() {
     block_info_[block.id()] = std::make_unique<BlockInfo>(block);
   }
 
-  rspo_ = StructuredTraverser(function_).ReverseStructuredPostOrder();
+  block_order_ = StructuredTraverser(function_).ReverseStructuredPostOrder();
 
-  for (uint32_t i = 0; i < rspo_.size(); ++i) {
-    GetBlockInfo(rspo_[i])->pos = i;
+  for (uint32_t i = 0; i < block_order_.size(); ++i) {
+    GetBlockInfo(block_order_[i])->pos = i;
   }
 }
 

@@ -91,12 +91,12 @@ class FunctionEmitter {
   bool EmitBody();
 
   /// Determines the output order for the basic blocks in the function.
-  /// Populates |rspo_| and the |pos| block info member.
+  /// Populates |block_order_| and the |pos| block info member.
   void ComputeBlockOrderAndPositions();
 
   /// @returns the reverse structured post order of the basic blocks in
   /// the function.
-  const std::vector<uint32_t>& rspo() const { return rspo_; }
+  const std::vector<uint32_t>& block_order() const { return block_order_; }
 
   /// Emits declarations of function variables.
   /// @returns false if emission failed.
@@ -174,7 +174,7 @@ class FunctionEmitter {
 
   // The IDs of basic blocks, in reverse structured post-order (RSPO).
   // This is the output order for the basic blocks.
-  std::vector<uint32_t> rspo_;
+  std::vector<uint32_t> block_order_;
 
   // Mapping from block ID to its bookkeeping info.
   std::unordered_map<uint32_t, std::unique_ptr<BlockInfo>> block_info_;

@@ -59,7 +59,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_OneBlock) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(42));
+  EXPECT_THAT(fe.block_order(), ElementsAre(42));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_IgnoreStaticalyUnreachable) {
@@ -81,7 +81,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_IgnoreStaticalyUnreachable) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20));
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_KillIsDeadEnd) {
@@ -103,7 +103,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_KillIsDeadEnd) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20));
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_UnreachableIsDeadEnd) {
@@ -125,7 +125,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_UnreachableIsDeadEnd) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20));
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_ReorderSequence) {
@@ -147,7 +147,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_ReorderSequence) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30));
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_DupConditionalBranch) {
@@ -170,7 +170,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_DupConditionalBranch) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 99));
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 99));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_RespectConditionalBranchOrder) {
@@ -196,7 +196,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_RespectConditionalBranchOrder) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 99));
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 99));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_TrueOnlyBranch) {
@@ -219,7 +219,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_TrueOnlyBranch) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 99));
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 99));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_FalseOnlyBranch) {
@@ -242,7 +242,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_FalseOnlyBranch) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 99));
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 99));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_SwitchOrderNaturallyReversed) {
@@ -268,7 +268,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_SwitchOrderNaturallyReversed) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 30, 20, 99));
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 30, 20, 99));
 }
 
 TEST_F(SpvParserTest,
@@ -298,7 +298,7 @@ TEST_F(SpvParserTest,
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 30, 20, 80, 99));
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 30, 20, 80, 99));
 }
 
 TEST_F(SpvParserTest,
@@ -328,7 +328,7 @@ TEST_F(SpvParserTest,
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 40, 20, 30, 99));
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 40, 20, 30, 99));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_RespectSwitchCaseFallthrough) {
@@ -361,7 +361,8 @@ TEST_F(SpvParserTest, ComputeBlockOrder_RespectSwitchCaseFallthrough) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 30, 50, 20, 40, 99)) << assembly;
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 30, 50, 20, 40, 99))
+      << assembly;
 }
 
 TEST_F(SpvParserTest,
@@ -395,7 +396,8 @@ TEST_F(SpvParserTest,
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 80, 30, 40, 99)) << assembly;
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 80, 30, 40, 99))
+      << assembly;
 }
 
 TEST_F(SpvParserTest,
@@ -426,7 +428,7 @@ TEST_F(SpvParserTest,
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 80, 30, 99)) << assembly;
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 80, 30, 99)) << assembly;
 }
 
 TEST_F(SpvParserTest,
@@ -462,7 +464,8 @@ TEST_F(SpvParserTest,
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 50, 40, 20, 30, 99)) << assembly;
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 50, 40, 20, 30, 99))
+      << assembly;
 }
 
 TEST_F(SpvParserTest,
@@ -502,7 +505,7 @@ TEST_F(SpvParserTest,
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 30, 50, 70, 20, 40, 60, 99))
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 30, 50, 70, 20, 40, 60, 99))
       << assembly;
 }
 
@@ -551,7 +554,8 @@ TEST_F(SpvParserTest,
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 40, 49, 50, 60, 70, 79, 99))
+  EXPECT_THAT(fe.block_order(),
+              ElementsAre(10, 20, 30, 40, 49, 50, 60, 70, 79, 99))
       << assembly;
 }
 
@@ -600,7 +604,8 @@ TEST_F(SpvParserTest,
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 40, 49, 50, 60, 70, 79, 99))
+  EXPECT_THAT(fe.block_order(),
+              ElementsAre(10, 20, 30, 40, 49, 50, 60, 70, 79, 99))
       << assembly;
 }
 
@@ -649,7 +654,8 @@ TEST_F(SpvParserTest,
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 40, 49, 50, 60, 70, 79, 99))
+  EXPECT_THAT(fe.block_order(),
+              ElementsAre(10, 20, 30, 40, 49, 50, 60, 70, 79, 99))
       << assembly;
 }
 
@@ -692,7 +698,7 @@ TEST_F(SpvParserTest,
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 40, 49, 50, 60, 79, 99))
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 40, 49, 50, 60, 79, 99))
       << assembly;
 }
 
@@ -716,7 +722,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_SingleBlock_Simple) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 99)) << assembly;
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 99)) << assembly;
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_SingleBlock_Infinite) {
@@ -739,7 +745,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_SingleBlock_Infinite) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 99)) << assembly;
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 99)) << assembly;
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_SingleBlock_DupInfinite) {
@@ -762,7 +768,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_SingleBlock_DupInfinite) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 99)) << assembly;
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 99)) << assembly;
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_HeaderHasBreakIf) {
@@ -790,7 +796,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_HeaderHasBreakIf) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 50, 99)) << assembly;
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 99)) << assembly;
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_HeaderHasBreakUnless) {
@@ -818,7 +824,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_HeaderHasBreakUnless) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 50, 99)) << assembly;
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 99)) << assembly;
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasBreak) {
@@ -846,7 +852,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasBreak) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 50, 99)) << assembly;
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 99)) << assembly;
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasBreakIf) {
@@ -877,7 +883,8 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasBreakIf) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 40, 50, 99)) << assembly;
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 40, 50, 99))
+      << assembly;
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasBreakUnless) {
@@ -908,7 +915,8 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasBreakUnless) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 40, 50, 99)) << assembly;
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 40, 50, 99))
+      << assembly;
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Body_If) {
@@ -946,7 +954,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Body_If) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 40, 45, 49, 50, 99))
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 40, 45, 49, 50, 99))
       << assembly;
 }
 
@@ -982,7 +990,8 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Body_If_Break) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 40, 49, 50, 99)) << assembly;
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 40, 49, 50, 99))
+      << assembly;
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasContinueIf) {
@@ -1013,7 +1022,8 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasContinueIf) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 40, 50, 99)) << assembly;
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 40, 50, 99))
+      << assembly;
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasContinueUnless) {
@@ -1044,7 +1054,8 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasContinueUnless) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 40, 50, 99)) << assembly;
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 40, 50, 99))
+      << assembly;
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Body_If_Continue) {
@@ -1079,7 +1090,8 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Body_If_Continue) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 40, 49, 50, 99)) << assembly;
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 40, 49, 50, 99))
+      << assembly;
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Body_Switch) {
@@ -1117,7 +1129,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Body_Switch) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 45, 40, 49, 50, 99))
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 45, 40, 49, 50, 99))
       << assembly;
 }
 
@@ -1158,7 +1170,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Body_Switch_CaseBreaks) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 45, 40, 49, 50, 99))
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 45, 40, 49, 50, 99))
       << assembly;
 }
 
@@ -1197,7 +1209,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Body_Switch_CaseContinues) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 45, 40, 49, 50, 99))
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 45, 40, 49, 50, 99))
       << assembly;
 }
 
@@ -1229,7 +1241,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_BodyHasSwitchContinueBreak) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 50, 99));
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 99));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Continue_Sequence) {
@@ -1260,7 +1272,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Continue_Sequence) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 50, 60, 99));
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 60, 99));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Continue_ContainsIf) {
@@ -1298,7 +1310,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Continue_ContainsIf) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 50, 60, 70, 89, 99));
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 60, 70, 89, 99));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Continue_HasBreakIf) {
@@ -1326,7 +1338,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Continue_HasBreakIf) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 50, 99));
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 99));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Continue_HasBreakUnless) {
@@ -1354,7 +1366,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Continue_HasBreakUnless) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 50, 99));
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 99));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Continue_SwitchBreak) {
@@ -1382,7 +1394,7 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Continue_SwitchBreak) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 50, 99));
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 99));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Loop) {
@@ -1423,7 +1435,8 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Loop) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 35, 37, 40, 49, 50, 99));
+  EXPECT_THAT(fe.block_order(),
+              ElementsAre(10, 20, 30, 35, 37, 40, 49, 50, 99));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Loop_InnerBreak) {
@@ -1464,7 +1477,8 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Loop_InnerBreak) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 35, 37, 40, 49, 50, 99));
+  EXPECT_THAT(fe.block_order(),
+              ElementsAre(10, 20, 30, 35, 37, 40, 49, 50, 99));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Loop_InnerContinue) {
@@ -1505,7 +1519,8 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Loop_InnerContinue) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 35, 37, 40, 49, 50, 99));
+  EXPECT_THAT(fe.block_order(),
+              ElementsAre(10, 20, 30, 35, 37, 40, 49, 50, 99));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Loop_InnerContinueBreaks) {
@@ -1546,7 +1561,8 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Loop_InnerContinueBreaks) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 35, 37, 40, 49, 50, 99));
+  EXPECT_THAT(fe.block_order(),
+              ElementsAre(10, 20, 30, 35, 37, 40, 49, 50, 99));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Loop_InnerContinueContinues) {
@@ -1587,7 +1603,8 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Loop_InnerContinueContinues) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 35, 37, 40, 49, 50, 99));
+  EXPECT_THAT(fe.block_order(),
+              ElementsAre(10, 20, 30, 35, 37, 40, 49, 50, 99));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Loop_SwitchBackedgeBreakContinue) {
@@ -1633,7 +1650,8 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Loop_SwitchBackedgeBreakContinue) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.rspo(), ElementsAre(10, 20, 30, 35, 37, 40, 49, 50, 99));
+  EXPECT_THAT(fe.block_order(),
+              ElementsAre(10, 20, 30, 35, 37, 40, 49, 50, 99));
 }
 
 }  // namespace
