@@ -72,6 +72,35 @@ class Statement : public Node {
   /// @returns true if this is an variable statement
   virtual bool IsVariableDecl() const;
 
+  /// @returns the statement as a const assign statement
+  const AssignmentStatement* AsAssign() const;
+  /// @returns the statement as a const break statement
+  const BreakStatement* AsBreak() const;
+  /// @returns the statement as a const case statement
+  const CaseStatement* AsCase() const;
+  /// @returns the statement as a const continue statement
+  const ContinueStatement* AsContinue() const;
+  /// @returns the statement as a const else statement
+  const ElseStatement* AsElse() const;
+  /// @returns the statement as a const fallthrough statement
+  const FallthroughStatement* AsFallthrough() const;
+  /// @returns the statement as a const if statement
+  const IfStatement* AsIf() const;
+  /// @returns the statement as a const kill statement
+  const KillStatement* AsKill() const;
+  /// @returns the statement as a const loop statement
+  const LoopStatement* AsLoop() const;
+  /// @returns the statement as a const nop statement
+  const NopStatement* AsNop() const;
+  /// @returns the statement as a const return statement
+  const ReturnStatement* AsReturn() const;
+  /// @returns the statement as a const switch statement
+  const SwitchStatement* AsSwitch() const;
+  /// @returns the statement as a const unless statement
+  const UnlessStatement* AsUnless() const;
+  /// @returns the statement as a const variable statement
+  const VariableDeclStatement* AsVariableDecl() const;
+
   /// @returns the statement as an assign statement
   AssignmentStatement* AsAssign();
   /// @returns the statement as a break statement

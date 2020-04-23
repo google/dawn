@@ -98,6 +98,76 @@ bool Statement::IsVariableDecl() const {
   return false;
 }
 
+const AssignmentStatement* Statement::AsAssign() const {
+  assert(IsAssign());
+  return static_cast<const AssignmentStatement*>(this);
+}
+
+const BreakStatement* Statement::AsBreak() const {
+  assert(IsBreak());
+  return static_cast<const BreakStatement*>(this);
+}
+
+const CaseStatement* Statement::AsCase() const {
+  assert(IsCase());
+  return static_cast<const CaseStatement*>(this);
+}
+
+const ContinueStatement* Statement::AsContinue() const {
+  assert(IsContinue());
+  return static_cast<const ContinueStatement*>(this);
+}
+
+const ElseStatement* Statement::AsElse() const {
+  assert(IsElse());
+  return static_cast<const ElseStatement*>(this);
+}
+
+const FallthroughStatement* Statement::AsFallthrough() const {
+  assert(IsFallthrough());
+  return static_cast<const FallthroughStatement*>(this);
+}
+
+const IfStatement* Statement::AsIf() const {
+  assert(IsIf());
+  return static_cast<const IfStatement*>(this);
+}
+
+const KillStatement* Statement::AsKill() const {
+  assert(IsKill());
+  return static_cast<const KillStatement*>(this);
+}
+
+const LoopStatement* Statement::AsLoop() const {
+  assert(IsLoop());
+  return static_cast<const LoopStatement*>(this);
+}
+
+const NopStatement* Statement::AsNop() const {
+  assert(IsNop());
+  return static_cast<const NopStatement*>(this);
+}
+
+const ReturnStatement* Statement::AsReturn() const {
+  assert(IsReturn());
+  return static_cast<const ReturnStatement*>(this);
+}
+
+const SwitchStatement* Statement::AsSwitch() const {
+  assert(IsSwitch());
+  return static_cast<const SwitchStatement*>(this);
+}
+
+const UnlessStatement* Statement::AsUnless() const {
+  assert(IsUnless());
+  return static_cast<const UnlessStatement*>(this);
+}
+
+const VariableDeclStatement* Statement::AsVariableDecl() const {
+  assert(IsVariableDecl());
+  return static_cast<const VariableDeclStatement*>(this);
+}
+
 AssignmentStatement* Statement::AsAssign() {
   assert(IsAssign());
   return static_cast<AssignmentStatement*>(this);
