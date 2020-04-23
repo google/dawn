@@ -363,6 +363,52 @@ INSTANTIATE_TEST_SUITE_P(
                                  AstFor("v2float_60_50")}));
 
 INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_FOrdLessThan,
+    SpvBinaryLogicalTest,
+    ::testing::Values(BinaryData{"bool", "float_50", "OpFOrdLessThan",
+                                 "float_60", "__bool",
+                                 "ScalarConstructor{50.000000}", "less_than",
+                                 "ScalarConstructor{60.000000}"},
+                      BinaryData{"v2bool", "v2float_50_60", "OpFOrdLessThan",
+                                 "v2float_60_50", "__vec_2__bool",
+                                 AstFor("v2float_50_60"), "less_than",
+                                 AstFor("v2float_60_50")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_FOrdLessThanEqual,
+    SpvBinaryLogicalTest,
+    ::testing::Values(
+        BinaryData{"bool", "float_50", "OpFOrdLessThanEqual", "float_60",
+                   "__bool", "ScalarConstructor{50.000000}", "less_than_equal",
+                   "ScalarConstructor{60.000000}"},
+        BinaryData{"v2bool", "v2float_50_60", "OpFOrdLessThanEqual",
+                   "v2float_60_50", "__vec_2__bool", AstFor("v2float_50_60"),
+                   "less_than_equal", AstFor("v2float_60_50")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_FOrdGreaterThan,
+    SpvBinaryLogicalTest,
+    ::testing::Values(BinaryData{"bool", "float_50", "OpFOrdGreaterThan",
+                                 "float_60", "__bool",
+                                 "ScalarConstructor{50.000000}", "greater_than",
+                                 "ScalarConstructor{60.000000}"},
+                      BinaryData{"v2bool", "v2float_50_60", "OpFOrdGreaterThan",
+                                 "v2float_60_50", "__vec_2__bool",
+                                 AstFor("v2float_50_60"), "greater_than",
+                                 AstFor("v2float_60_50")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_FOrdGreaterThanEqual,
+    SpvBinaryLogicalTest,
+    ::testing::Values(
+        BinaryData{"bool", "float_50", "OpFOrdGreaterThanEqual", "float_60",
+                   "__bool", "ScalarConstructor{50.000000}",
+                   "greater_than_equal", "ScalarConstructor{60.000000}"},
+        BinaryData{"v2bool", "v2float_50_60", "OpFOrdGreaterThanEqual",
+                   "v2float_60_50", "__vec_2__bool", AstFor("v2float_50_60"),
+                   "greater_than_equal", AstFor("v2float_60_50")}));
+
+INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_LogicalAnd,
     SpvBinaryLogicalTest,
     ::testing::Values(BinaryData{"bool", "true", "OpLogicalAnd", "false",
@@ -642,16 +688,14 @@ INSTANTIATE_TEST_SUITE_P(
 // TODO(dneto): OpIsInf - likely builtin function TBD
 // TODO(dneto): Kernel-guarded instructions.
 // TODO(dneto): OpSelect - likely builtin function TBD
+//
+// Unordered float inequalities: blocked pending the resolution of
+// https://github.com/gpuweb/gpuweb/issues/706
 // TODO(dneto): OpFUnordEqual
-// TODO(dneto): OpFOrdNotEqual
 // TODO(dneto): OpFUnordNotEqual
-// TODO(dneto): OpFOrdLessThan
 // TODO(dneto): OpFUnordLessThan
-// TODO(dneto): OpFOrdGreaterThan
 // TODO(dneto): OpFUnordGreaterThan
-// TODO(dneto): OpFOrdLessThanEqual
 // TODO(dneto): OpFUnordLessThanEqual
-// TODO(dneto): OpFOrdGreaterThanEqual
 // TODO(dneto): OpFUnordGreaterThanEqual
 
 }  // namespace
