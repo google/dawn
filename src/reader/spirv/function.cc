@@ -110,12 +110,16 @@ ast::BinaryOp ConvertBinaryOp(SpvOp opcode) {
     case SpvOpLogicalOr:
       return ast::BinaryOp::kLogicalOr;
     case SpvOpUGreaterThan:
+    case SpvOpSGreaterThan:
       return ast::BinaryOp::kGreaterThan;
     case SpvOpUGreaterThanEqual:
+    case SpvOpSGreaterThanEqual:
       return ast::BinaryOp::kGreaterThanEqual;
     case SpvOpULessThan:
+    case SpvOpSLessThan:
       return ast::BinaryOp::kLessThan;
     case SpvOpULessThanEqual:
+    case SpvOpSLessThanEqual:
       return ast::BinaryOp::kLessThanEqual;
     default:
       break;

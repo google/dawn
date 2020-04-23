@@ -91,11 +91,39 @@ std::string AstFor(std::string assembly) {
           ScalarConstructor{20}
         })";
   }
+  if (assembly == "cast_uint_10") {
+    return R"(As<__i32>{
+          ScalarConstructor{10}
+        })";
+  }
+  if (assembly == "cast_uint_20") {
+    return R"(As<__i32>{
+          ScalarConstructor{20}
+        })";
+  }
+  if (assembly == "cast_v2uint_10_20") {
+    return R"(As<__vec_2__i32>{
+          TypeConstructor{
+            __vec_2__u32
+            ScalarConstructor{10}
+            ScalarConstructor{20}
+          }
+        })";
+  }
   if (assembly == "v2uint_20_10") {
     return R"(TypeConstructor{
           __vec_2__u32
           ScalarConstructor{20}
           ScalarConstructor{10}
+        })";
+  }
+  if (assembly == "cast_v2uint_20_10") {
+    return R"(As<__vec_2__i32>{
+          TypeConstructor{
+            __vec_2__u32
+            ScalarConstructor{20}
+            ScalarConstructor{10}
+          }
         })";
   }
   if (assembly == "cast_int_30") {
@@ -492,16 +520,128 @@ INSTANTIATE_TEST_SUITE_P(
                    "__vec_2__bool", AstFor("v2uint_10_20"), "less_than_equal",
                    AstFor("cast_v2int_40_30")}));
 
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_SGreaterThan,
+    SpvBinaryLogicalTest,
+    ::testing::Values(
+        // Both signed
+        BinaryData{"bool", "int_30", "OpSGreaterThan", "int_40", "__bool",
+                   "ScalarConstructor{30}", "greater_than",
+                   "ScalarConstructor{40}"},
+        // First arg unsigned
+        BinaryData{"bool", "uint_10", "OpSGreaterThan", "int_40", "__bool",
+                   AstFor("cast_uint_10"), "greater_than",
+                   "ScalarConstructor{40}"},
+        // Second arg unsigned
+        BinaryData{"bool", "int_30", "OpSGreaterThan", "uint_20", "__bool",
+                   "ScalarConstructor{30}", "greater_than",
+                   AstFor("cast_uint_20")},
+        // Vector, both signed
+        BinaryData{"v2bool", "v2int_30_40", "OpSGreaterThan", "v2int_40_30",
+                   "__vec_2__bool", AstFor("v2int_30_40"), "greater_than",
+                   AstFor("v2int_40_30")},
+        // First arg unsigned
+        BinaryData{"v2bool", "v2uint_10_20", "OpSGreaterThan", "v2int_40_30",
+                   "__vec_2__bool", AstFor("cast_v2uint_10_20"), "greater_than",
+                   AstFor("v2int_40_30")},
+        // Second arg unsigned
+        BinaryData{"v2bool", "v2int_30_40", "OpSGreaterThan", "v2uint_20_10",
+                   "__vec_2__bool", AstFor("v2int_30_40"), "greater_than",
+                   AstFor("cast_v2uint_20_10")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_SGreaterThanEqual,
+    SpvBinaryLogicalTest,
+    ::testing::Values(
+        // Both signed
+        BinaryData{"bool", "int_30", "OpSGreaterThanEqual", "int_40", "__bool",
+                   "ScalarConstructor{30}", "greater_than_equal",
+                   "ScalarConstructor{40}"},
+        // First arg unsigned
+        BinaryData{"bool", "uint_10", "OpSGreaterThanEqual", "int_40", "__bool",
+                   AstFor("cast_uint_10"), "greater_than_equal",
+                   "ScalarConstructor{40}"},
+        // Second arg unsigned
+        BinaryData{"bool", "int_30", "OpSGreaterThanEqual", "uint_20", "__bool",
+                   "ScalarConstructor{30}", "greater_than_equal",
+                   AstFor("cast_uint_20")},
+        // Vector, both signed
+        BinaryData{"v2bool", "v2int_30_40", "OpSGreaterThanEqual",
+                   "v2int_40_30", "__vec_2__bool", AstFor("v2int_30_40"),
+                   "greater_than_equal", AstFor("v2int_40_30")},
+        // First arg unsigned
+        BinaryData{"v2bool", "v2uint_10_20", "OpSGreaterThanEqual",
+                   "v2int_40_30", "__vec_2__bool", AstFor("cast_v2uint_10_20"),
+                   "greater_than_equal", AstFor("v2int_40_30")},
+        // Second arg unsigned
+        BinaryData{"v2bool", "v2int_30_40", "OpSGreaterThanEqual",
+                   "v2uint_20_10", "__vec_2__bool", AstFor("v2int_30_40"),
+                   "greater_than_equal", AstFor("cast_v2uint_20_10")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_SLessThan,
+    SpvBinaryLogicalTest,
+    ::testing::Values(
+        // Both signed
+        BinaryData{"bool", "int_30", "OpSLessThan", "int_40", "__bool",
+                   "ScalarConstructor{30}", "less_than",
+                   "ScalarConstructor{40}"},
+        // First arg unsigned
+        BinaryData{"bool", "uint_10", "OpSLessThan", "int_40", "__bool",
+                   AstFor("cast_uint_10"), "less_than",
+                   "ScalarConstructor{40}"},
+        // Second arg unsigned
+        BinaryData{"bool", "int_30", "OpSLessThan", "uint_20", "__bool",
+                   "ScalarConstructor{30}", "less_than",
+                   AstFor("cast_uint_20")},
+        // Vector, both signed
+        BinaryData{"v2bool", "v2int_30_40", "OpSLessThan", "v2int_40_30",
+                   "__vec_2__bool", AstFor("v2int_30_40"), "less_than",
+                   AstFor("v2int_40_30")},
+        // First arg unsigned
+        BinaryData{"v2bool", "v2uint_10_20", "OpSLessThan", "v2int_40_30",
+                   "__vec_2__bool", AstFor("cast_v2uint_10_20"), "less_than",
+                   AstFor("v2int_40_30")},
+        // Second arg unsigned
+        BinaryData{"v2bool", "v2int_30_40", "OpSLessThan", "v2uint_20_10",
+                   "__vec_2__bool", AstFor("v2int_30_40"), "less_than",
+                   AstFor("cast_v2uint_20_10")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_SLessThanEqual,
+    SpvBinaryLogicalTest,
+    ::testing::Values(
+        // Both signed
+        BinaryData{"bool", "int_30", "OpSLessThanEqual", "int_40", "__bool",
+                   "ScalarConstructor{30}", "less_than_equal",
+                   "ScalarConstructor{40}"},
+        // First arg unsigned
+        BinaryData{"bool", "uint_10", "OpSLessThanEqual", "int_40", "__bool",
+                   AstFor("cast_uint_10"), "less_than_equal",
+                   "ScalarConstructor{40}"},
+        // Second arg unsigned
+        BinaryData{"bool", "int_30", "OpSLessThanEqual", "uint_20", "__bool",
+                   "ScalarConstructor{30}", "less_than_equal",
+                   AstFor("cast_uint_20")},
+        // Vector, both signed
+        BinaryData{"v2bool", "v2int_30_40", "OpSLessThanEqual", "v2int_40_30",
+                   "__vec_2__bool", AstFor("v2int_30_40"), "less_than_equal",
+                   AstFor("v2int_40_30")},
+        // First arg unsigned
+        BinaryData{"v2bool", "v2uint_10_20", "OpSLessThanEqual", "v2int_40_30",
+                   "__vec_2__bool", AstFor("cast_v2uint_10_20"),
+                   "less_than_equal", AstFor("v2int_40_30")},
+        // Second arg unsigned
+        BinaryData{"v2bool", "v2int_30_40", "OpSLessThanEqual", "v2uint_20_10",
+                   "__vec_2__bool", AstFor("v2int_30_40"), "less_than_equal",
+                   AstFor("cast_v2uint_20_10")}));
+
 // TODO(dneto): OpAny  - likely builtin function TBD
 // TODO(dneto): OpAll  - likely builtin function TBD
 // TODO(dneto): OpIsNan - likely builtin function TBD
 // TODO(dneto): OpIsInf - likely builtin function TBD
 // TODO(dneto): Kernel-guarded instructions.
 // TODO(dneto): OpSelect - likely builtin function TBD
-// TODO(dneto): OpSGreaterThan
-// TODO(dneto): OpSGreaterThanEqual
-// TODO(dneto): OpSLessThan
-// TODO(dneto): OpSLessThanEqual
 // TODO(dneto): OpFUnordEqual
 // TODO(dneto): OpFOrdNotEqual
 // TODO(dneto): OpFUnordNotEqual
