@@ -38,6 +38,7 @@
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/pointer_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
@@ -274,19 +275,30 @@ bool TypeDeterminer::DetermineArrayAccessor(
   if (!DetermineResultType(expr->array())) {
     return false;
   }
-  auto* parent_type = expr->array()->result_type();
+
+  auto* res = expr->array()->result_type();
+  auto* parent_type = res->UnwrapPtrIfNeeded();
+  ast::type::Type* ret = nullptr;
   if (parent_type->IsArray()) {
-    expr->set_result_type(parent_type->AsArray()->type());
+    ret = parent_type->AsArray()->type();
   } else if (parent_type->IsVector()) {
-    expr->set_result_type(parent_type->AsVector()->type());
+    ret = parent_type->AsVector()->type();
   } else if (parent_type->IsMatrix()) {
     auto* m = parent_type->AsMatrix();
-    expr->set_result_type(ctx_.type_mgr().Get(
-        std::make_unique<ast::type::VectorType>(m->type(), m->rows())));
+    ret = ctx_.type_mgr().Get(
+        std::make_unique<ast::type::VectorType>(m->type(), m->rows()));
   } else {
     set_error(expr->source(), "invalid parent type in array accessor");
     return false;
   }
+
+  // If we're extracting from a pointer, we return a pointer.
+  if (res->IsPointer()) {
+    ret = ctx_.type_mgr().Get(std::make_unique<ast::type::PointerType>(
+        ret, res->AsPointer()->storage_class()));
+  }
+  expr->set_result_type(ret);
+
   return true;
 }
 
@@ -365,7 +377,15 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
   auto name = expr->name();
   ast::Variable* var;
   if (variable_stack_.get(name, &var)) {
-    expr->set_result_type(var->type());
+    // A constant is the type, but a variable is always a pointer so synthesize
+    // the pointer around the variable type.
+    if (var->is_const()) {
+      expr->set_result_type(var->type());
+    } else {
+      expr->set_result_type(
+          ctx_.type_mgr().Get(std::make_unique<ast::type::PointerType>(
+              var->type(), var->storage_class())));
+    }
     return true;
   }
 
@@ -384,43 +404,52 @@ bool TypeDeterminer::DetermineMemberAccessor(
     return false;
   }
 
-  auto* data_type = expr->structure()->result_type();
+  auto* res = expr->structure()->result_type();
+  auto* data_type = res->UnwrapPtrIfNeeded();
+  ast::type::Type* ret = nullptr;
   if (data_type->IsStruct()) {
     auto* strct = data_type->AsStruct()->impl();
     auto name = expr->member()->name();
 
     for (const auto& member : strct->members()) {
-      if (member->name() != name) {
-        continue;
+      if (member->name() == name) {
+        ret = member->type();
+        break;
       }
-
-      expr->set_result_type(member->type());
-      return true;
     }
 
-    set_error(expr->source(), "struct member not found");
-    return false;
-  }
-  if (data_type->IsVector()) {
+    if (ret == nullptr) {
+      set_error(expr->source(), "struct member " + name + " not found");
+      return false;
+    }
+  } else if (data_type->IsVector()) {
     auto* vec = data_type->AsVector();
 
     auto size = expr->member()->name().size();
     if (size == 1) {
       // A single element swizzle is just the type of the vector.
-      expr->set_result_type(vec->type());
+      ret = vec->type();
     } else {
       // The vector will have a number of components equal to the length of the
       // swizzle. This assumes the validator will check that the swizzle
       // is correct.
-      expr->set_result_type(ctx_.type_mgr().Get(
-          std::make_unique<ast::type::VectorType>(vec->type(), size)));
+      ret = ctx_.type_mgr().Get(
+          std::make_unique<ast::type::VectorType>(vec->type(), size));
     }
-    return true;
+  } else {
+    set_error(expr->source(),
+              "invalid type " + data_type->type_name() + " in member accessor");
+    return false;
   }
 
-  set_error(expr->source(),
-            "invalid type " + data_type->type_name() + " in member accessor");
-  return false;
+  // If we're extracting from a pointer, we return a pointer.
+  if (res->IsPointer()) {
+    ret = ctx_.type_mgr().Get(std::make_unique<ast::type::PointerType>(
+        ret, res->AsPointer()->storage_class()));
+  }
+  expr->set_result_type(ret);
+
+  return true;
 }
 
 bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
@@ -432,7 +461,7 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
   if (expr->IsAnd() || expr->IsOr() || expr->IsXor() || expr->IsShiftLeft() ||
       expr->IsShiftRight() || expr->IsShiftRightArith() || expr->IsAdd() ||
       expr->IsSubtract() || expr->IsDivide() || expr->IsModulo()) {
-    expr->set_result_type(expr->lhs()->result_type());
+    expr->set_result_type(expr->lhs()->result_type()->UnwrapPtrIfNeeded());
     return true;
   }
   // Result type is a scalar or vector of boolean type
@@ -441,7 +470,7 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
       expr->IsLessThanEqual() || expr->IsGreaterThanEqual()) {
     auto* bool_type =
         ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
-    auto* param_type = expr->lhs()->result_type();
+    auto* param_type = expr->lhs()->result_type()->UnwrapPtrIfNeeded();
     if (param_type->IsVector()) {
       expr->set_result_type(
           ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
@@ -452,8 +481,8 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
     return true;
   }
   if (expr->IsMultiply()) {
-    auto* lhs_type = expr->lhs()->result_type();
-    auto* rhs_type = expr->rhs()->result_type();
+    auto* lhs_type = expr->lhs()->result_type()->UnwrapPtrIfNeeded();
+    auto* rhs_type = expr->rhs()->result_type()->UnwrapPtrIfNeeded();
 
     // Note, the ordering here matters. The later checks depend on the prior
     // checks having been done.
@@ -504,7 +533,7 @@ bool TypeDeterminer::DetermineUnaryDerivative(
   if (!DetermineResultType(expr->param())) {
     return false;
   }
-  expr->set_result_type(expr->param()->result_type());
+  expr->set_result_type(expr->param()->result_type()->UnwrapPtrIfNeeded());
   return true;
 }
 
@@ -531,7 +560,7 @@ bool TypeDeterminer::DetermineUnaryMethod(ast::UnaryMethodExpression* expr) {
 
       auto* bool_type =
           ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
-      auto* param_type = expr->params()[0]->result_type();
+      auto* param_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
       if (param_type->IsVector()) {
         expr->set_result_type(
             ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
@@ -552,8 +581,8 @@ bool TypeDeterminer::DetermineUnaryMethod(ast::UnaryMethodExpression* expr) {
                   "incorrect number of parameters for outer product");
         return false;
       }
-      auto* param0_type = expr->params()[0]->result_type();
-      auto* param1_type = expr->params()[1]->result_type();
+      auto* param0_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
+      auto* param1_type = expr->params()[1]->result_type()->UnwrapPtrIfNeeded();
       if (!param0_type->IsVector() || !param1_type->IsVector()) {
         set_error(expr->source(), "invalid parameter type for outer product");
         return false;
@@ -574,7 +603,7 @@ bool TypeDeterminer::DetermineUnaryOp(ast::UnaryOpExpression* expr) {
   if (!DetermineResultType(expr->expr())) {
     return false;
   }
-  expr->set_result_type(expr->expr()->result_type());
+  expr->set_result_type(expr->expr()->result_type()->UnwrapPtrIfNeeded());
   return true;
 }
 

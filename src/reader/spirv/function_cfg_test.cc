@@ -1159,8 +1159,7 @@ TEST_F(SpvParserTest,
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 30, 20, 80, 99));
 }
 
-TEST_F(SpvParserTest,
-       ComputeBlockOrder_Switch_DefaultSameAsACase) {
+TEST_F(SpvParserTest, ComputeBlockOrder_Switch_DefaultSameAsACase) {
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -1373,8 +1372,7 @@ TEST_F(SpvParserTest,
       << assembly;
 }
 
-TEST_F(SpvParserTest,
-       ComputeBlockOrder_Nest_If_Contains_If) {
+TEST_F(SpvParserTest, ComputeBlockOrder_Nest_If_Contains_If) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -1424,8 +1422,7 @@ TEST_F(SpvParserTest,
       << assembly;
 }
 
-TEST_F(SpvParserTest,
-       ComputeBlockOrder_Nest_If_In_SwitchCase) {
+TEST_F(SpvParserTest, ComputeBlockOrder_Nest_If_In_SwitchCase) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -1475,8 +1472,7 @@ TEST_F(SpvParserTest,
       << assembly;
 }
 
-TEST_F(SpvParserTest,
-       ComputeBlockOrder_Nest_IfFallthrough_In_SwitchCase) {
+TEST_F(SpvParserTest, ComputeBlockOrder_Nest_IfFallthrough_In_SwitchCase) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -1526,8 +1522,7 @@ TEST_F(SpvParserTest,
       << assembly;
 }
 
-TEST_F(SpvParserTest,
-       ComputeBlockOrder_Nest_IfBreak_In_SwitchCase) {
+TEST_F(SpvParserTest, ComputeBlockOrder_Nest_IfBreak_In_SwitchCase) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 

@@ -46,6 +46,7 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
+#include "src/ast/type/pointer_type.h"
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
@@ -433,8 +434,33 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
 
   auto idx = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::IntLiteral>(&i32, 2));
-  auto var =
-      std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone, &ary);
+  auto var = std::make_unique<ast::Variable>(
+      "my_var", ast::StorageClass::kFunction, &ary);
+  mod()->AddGlobalVariable(std::move(var));
+
+  // Register the global
+  EXPECT_TRUE(td()->Determine());
+
+  ast::ArrayAccessorExpression acc(
+      std::make_unique<ast::IdentifierExpression>("my_var"), std::move(idx));
+  EXPECT_TRUE(td()->DetermineResultType(&acc));
+  ASSERT_NE(acc.result_type(), nullptr);
+  ASSERT_TRUE(acc.result_type()->IsPointer());
+
+  auto* ptr = acc.result_type()->AsPointer();
+  EXPECT_TRUE(ptr->type()->IsF32());
+}
+
+TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array_Constant) {
+  ast::type::I32Type i32;
+  ast::type::F32Type f32;
+  ast::type::ArrayType ary(&f32, 3);
+
+  auto idx = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::IntLiteral>(&i32, 2));
+  auto var = std::make_unique<ast::Variable>(
+      "my_var", ast::StorageClass::kFunction, &ary);
+  var->set_is_const(true);
   mod()->AddGlobalVariable(std::move(var));
 
   // Register the global
@@ -465,8 +491,11 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix) {
       std::make_unique<ast::IdentifierExpression>("my_var"), std::move(idx));
   EXPECT_TRUE(td()->DetermineResultType(&acc));
   ASSERT_NE(acc.result_type(), nullptr);
-  ASSERT_TRUE(acc.result_type()->IsVector());
-  EXPECT_EQ(acc.result_type()->AsVector()->size(), 3u);
+  ASSERT_TRUE(acc.result_type()->IsPointer());
+
+  auto* ptr = acc.result_type()->AsPointer();
+  ASSERT_TRUE(ptr->type()->IsVector());
+  EXPECT_EQ(ptr->type()->AsVector()->size(), 3u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
@@ -493,7 +522,10 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
 
   EXPECT_TRUE(td()->DetermineResultType(&acc));
   ASSERT_NE(acc.result_type(), nullptr);
-  EXPECT_TRUE(acc.result_type()->IsF32());
+  ASSERT_TRUE(acc.result_type()->IsPointer());
+
+  auto* ptr = acc.result_type()->AsPointer();
+  EXPECT_TRUE(ptr->type()->IsF32());
 }
 
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
@@ -514,7 +546,10 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
       std::make_unique<ast::IdentifierExpression>("my_var"), std::move(idx));
   EXPECT_TRUE(td()->DetermineResultType(&acc));
   ASSERT_NE(acc.result_type(), nullptr);
-  EXPECT_TRUE(acc.result_type()->IsF32());
+  ASSERT_TRUE(acc.result_type()->IsPointer());
+
+  auto* ptr = acc.result_type()->AsPointer();
+  EXPECT_TRUE(ptr->type()->IsF32());
 }
 
 TEST_F(TypeDeterminerTest, Expr_As) {
@@ -646,7 +681,50 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalVariable) {
   ast::IdentifierExpression ident("my_var");
   EXPECT_TRUE(td()->DetermineResultType(&ident));
   ASSERT_NE(ident.result_type(), nullptr);
+  EXPECT_TRUE(ident.result_type()->IsPointer());
+  EXPECT_TRUE(ident.result_type()->AsPointer()->type()->IsF32());
+}
+
+TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalConstant) {
+  ast::type::F32Type f32;
+  auto var =
+      std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone, &f32);
+  var->set_is_const(true);
+  mod()->AddGlobalVariable(std::move(var));
+
+  // Register the global
+  EXPECT_TRUE(td()->Determine());
+
+  ast::IdentifierExpression ident("my_var");
+  EXPECT_TRUE(td()->DetermineResultType(&ident));
+  ASSERT_NE(ident.result_type(), nullptr);
   EXPECT_TRUE(ident.result_type()->IsF32());
+}
+
+TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
+  ast::type::F32Type f32;
+
+  auto my_var = std::make_unique<ast::IdentifierExpression>("my_var");
+  auto* my_var_ptr = my_var.get();
+
+  auto var =
+      std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone, &f32);
+  var->set_is_const(true);
+
+  ast::StatementList body;
+  body.push_back(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+
+  body.push_back(std::make_unique<ast::AssignmentStatement>(
+      std::move(my_var),
+      std::make_unique<ast::IdentifierExpression>("my_var")));
+
+  ast::Function f("my_func", {}, &f32);
+  f.set_body(std::move(body));
+
+  EXPECT_TRUE(td()->DetermineFunction(&f));
+
+  ASSERT_NE(my_var_ptr->result_type(), nullptr);
+  EXPECT_TRUE(my_var_ptr->result_type()->IsF32());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
@@ -670,7 +748,8 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
   EXPECT_TRUE(td()->DetermineFunction(&f));
 
   ASSERT_NE(my_var_ptr->result_type(), nullptr);
-  EXPECT_TRUE(my_var_ptr->result_type()->IsF32());
+  EXPECT_TRUE(my_var_ptr->result_type()->IsPointer());
+  EXPECT_TRUE(my_var_ptr->result_type()->AsPointer()->type()->IsF32());
 }
 
 TEST_F(TypeDeterminerTest, Expr_Identifier_Function) {
@@ -720,7 +799,10 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
   ast::MemberAccessorExpression mem(std::move(ident), std::move(mem_ident));
   EXPECT_TRUE(td()->DetermineResultType(&mem));
   ASSERT_NE(mem.result_type(), nullptr);
-  EXPECT_TRUE(mem.result_type()->IsF32());
+  ASSERT_TRUE(mem.result_type()->IsPointer());
+
+  auto* ptr = mem.result_type()->AsPointer();
+  EXPECT_TRUE(ptr->type()->IsF32());
 }
 
 TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
@@ -740,9 +822,12 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
   ast::MemberAccessorExpression mem(std::move(ident), std::move(swizzle));
   EXPECT_TRUE(td()->DetermineResultType(&mem)) << td()->error();
   ASSERT_NE(mem.result_type(), nullptr);
-  ASSERT_TRUE(mem.result_type()->IsVector());
-  EXPECT_TRUE(mem.result_type()->AsVector()->type()->IsF32());
-  EXPECT_EQ(mem.result_type()->AsVector()->size(), 2u);
+  ASSERT_TRUE(mem.result_type()->IsPointer());
+
+  auto* ptr = mem.result_type()->AsPointer();
+  ASSERT_TRUE(ptr->type()->IsVector());
+  EXPECT_TRUE(ptr->type()->AsVector()->type()->IsF32());
+  EXPECT_EQ(ptr->type()->AsVector()->size(), 2u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
@@ -762,10 +847,13 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
   ast::MemberAccessorExpression mem(std::move(ident), std::move(swizzle));
   EXPECT_TRUE(td()->DetermineResultType(&mem)) << td()->error();
   ASSERT_NE(mem.result_type(), nullptr);
-  ASSERT_TRUE(mem.result_type()->IsF32());
+  ASSERT_TRUE(mem.result_type()->IsPointer());
+
+  auto* ptr = mem.result_type()->AsPointer();
+  ASSERT_TRUE(ptr->type()->IsF32());
 }
 
-TEST_F(TypeDeterminerTest, Expr_MultiLevel) {
+TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
   // struct b {
   //   vec4<f32> foo
   // }
@@ -803,6 +891,7 @@ TEST_F(TypeDeterminerTest, Expr_MultiLevel) {
   auto strctB = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
                                               std::move(b_members));
   ast::type::StructType stB(std::move(strctB));
+  stB.set_name("B");
 
   ast::type::VectorType vecB(&stB, 3);
 
@@ -814,6 +903,7 @@ TEST_F(TypeDeterminerTest, Expr_MultiLevel) {
                                               std::move(a_members));
 
   ast::type::StructType stA(std::move(strctA));
+  stA.set_name("A");
 
   auto var =
       std::make_unique<ast::Variable>("c", ast::StorageClass::kNone, &stA);
@@ -838,10 +928,14 @@ TEST_F(TypeDeterminerTest, Expr_MultiLevel) {
           std::move(foo_ident)),
       std::move(swizzle));
   EXPECT_TRUE(td()->DetermineResultType(&mem)) << td()->error();
+
   ASSERT_NE(mem.result_type(), nullptr);
-  ASSERT_TRUE(mem.result_type()->IsVector());
-  EXPECT_TRUE(mem.result_type()->AsVector()->type()->IsF32());
-  EXPECT_EQ(mem.result_type()->AsVector()->size(), 2u);
+  ASSERT_TRUE(mem.result_type()->IsPointer());
+
+  auto* ptr = mem.result_type()->AsPointer();
+  ASSERT_TRUE(ptr->type()->IsVector());
+  EXPECT_TRUE(ptr->type()->AsVector()->type()->IsF32());
+  EXPECT_EQ(ptr->type()->AsVector()->size(), 2u);
 }
 
 using Expr_Binary_BitwiseTest = TypeDeterminerTestWithParam<ast::BinaryOp>;

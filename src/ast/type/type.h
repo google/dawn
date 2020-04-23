@@ -66,6 +66,9 @@ class Type {
   /// @returns the name for this type. The |type_name| is unique over all types.
   virtual std::string type_name() const = 0;
 
+  /// @returns the pointee type if this is a pointer, |this| otherwise
+  Type* UnwrapPtrIfNeeded();
+
   /// @returns true if this type is a float scalar
   bool is_float_scalar();
   /// @returns true if this type is a float matrix

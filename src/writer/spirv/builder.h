@@ -157,10 +157,6 @@ class Builder {
   /// @param expr the expression to generate
   /// @returns the resulting ID of the expression or 0 on error
   uint32_t GenerateExpression(ast::Expression* expr);
-  /// Generates an expression and emits a load if necessary
-  /// @param expr the expression
-  /// @returns the SPIR-V result id
-  uint32_t GenerateExpressionAndLoad(ast::Expression* expr);
   /// Generates the instructions for a function
   /// @param func the function to generate
   /// @returns true if the instructions were generated
@@ -240,6 +236,11 @@ class Builder {
   /// @param list the statement list to generate
   /// @returns true on successful generation
   bool GenerateStatementList(const ast::StatementList& list);
+  /// Geneates an OpLoad
+  /// @param type the type to load
+  /// @param id the variable id to load
+  /// @returns the ID of the loaded value
+  uint32_t GenerateLoad(ast::type::Type* type, uint32_t id);
   /// Geneates an OpStore
   /// @param to the ID to store too
   /// @param from the ID to store from

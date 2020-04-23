@@ -21,6 +21,8 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/vector_type.h"
+#include "src/context.h"
+#include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
 
@@ -37,18 +39,23 @@ TEST_F(BuilderTest, Assign_Var) {
 
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
 
-  ast::Module mod;
-  Builder b(&mod);
-  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
-  ASSERT_FALSE(b.has_error()) << b.error();
-
   auto ident = std::make_unique<ast::IdentifierExpression>("var");
   auto val = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0f));
 
   ast::AssignmentStatement assign(std::move(ident), std::move(val));
 
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(&v);
+
+  ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
+
+  Builder b(&mod);
   b.push_function(Function{});
+  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_TRUE(b.GenerateAssignStatement(&assign)) << b.error();
   EXPECT_FALSE(b.has_error());

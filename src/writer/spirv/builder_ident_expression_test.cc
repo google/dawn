@@ -56,7 +56,11 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
   v.set_constructor(std::move(init));
   v.set_is_const(true);
 
+  Context ctx;
   ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(&v);
+
   Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -69,6 +73,8 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
 )");
 
   ast::IdentifierExpression expr("var");
+  ASSERT_TRUE(td.DetermineResultType(&expr));
+
   EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 5u);
 }
 
@@ -76,8 +82,13 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
   ast::type::F32Type f32;
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
 
+  Context ctx;
   ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(&v);
+
   Builder b(&mod);
+  b.push_function(Function{});
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
@@ -87,6 +98,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
 )");
 
   ast::IdentifierExpression expr("var");
+  ASSERT_TRUE(td.DetermineResultType(&expr));
   EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 1u);
 }
 
@@ -109,7 +121,11 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
   v.set_constructor(std::move(init));
   v.set_is_const(true);
 
+  Context ctx;
   ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(&v);
+
   Builder b(&mod);
   EXPECT_TRUE(b.GenerateFunctionVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -122,6 +138,7 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
 )");
 
   ast::IdentifierExpression expr("var");
+  ASSERT_TRUE(td.DetermineResultType(&expr));
   EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 5u);
 }
 
@@ -129,7 +146,11 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
   ast::type::F32Type f32;
   ast::Variable v("var", ast::StorageClass::kNone, &f32);
 
+  Context ctx;
   ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(&v);
+
   Builder b(&mod);
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateFunctionVariable(&v)) << b.error();
@@ -144,6 +165,7 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
 )");
 
   ast::IdentifierExpression expr("var");
+  ASSERT_TRUE(td.DetermineResultType(&expr));
   EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 1u);
 }
 
@@ -170,7 +192,7 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(&var)) << b.error();
 
-  ASSERT_EQ(b.GenerateBinaryExpression(&expr), 6u) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 6u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %1 = OpVariable %2 Private
@@ -215,31 +237,6 @@ TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             R"(%3 = OpIAdd %1 %2 %2
 )");
-}
-
-TEST_F(BuilderTest, IdentifierExpression_ImportMethod) {
-  auto imp = std::make_unique<ast::Import>("GLSL.std.450", "std");
-  imp->AddMethodId("round", 42u);
-
-  ast::Module mod;
-  mod.AddImport(std::move(imp));
-  Builder b(&mod);
-
-  ast::IdentifierExpression expr(std::vector<std::string>({"std", "round"}));
-  EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 42u) << b.error();
-}
-
-TEST_F(BuilderTest, IdentifierExpression_ImportMethod_NotFound) {
-  auto imp = std::make_unique<ast::Import>("GLSL.std.450", "std");
-
-  ast::Module mod;
-  mod.AddImport(std::move(imp));
-  Builder b(&mod);
-
-  ast::IdentifierExpression expr(std::vector<std::string>({"std", "ceil"}));
-  EXPECT_EQ(b.GenerateIdentifierExpression(&expr), 0u);
-  ASSERT_TRUE(b.has_error());
-  EXPECT_EQ(b.error(), "unable to lookup: ceil in std");
 }
 
 }  // namespace

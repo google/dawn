@@ -226,34 +226,6 @@ uint32_t Builder::GenerateExpression(ast::Expression* expr) {
   return 0;
 }
 
-uint32_t Builder::GenerateExpressionAndLoad(ast::Expression* expr) {
-  auto id = GenerateExpression(expr);
-  if (id == 0) {
-    return false;
-  }
-
-  // Only need to load identifiers
-  if (!expr->IsIdentifier()) {
-    return id;
-  }
-  if (spirv_id_to_variable_.find(id) == spirv_id_to_variable_.end()) {
-    error_ = "missing generated ID for variable";
-    return 0;
-  }
-  auto* var = spirv_id_to_variable_[id];
-  if (var->is_const()) {
-    return id;
-  }
-
-  auto type_id = GenerateTypeIfNeeded(expr->result_type());
-  auto result = result_op();
-  auto result_id = result.to_i();
-  push_function_inst(spv::Op::OpLoad,
-                     {Operand::Int(type_id), result, Operand::Int(id)});
-
-  return result_id;
-}
-
 bool Builder::GenerateFunction(ast::Function* func) {
   uint32_t func_type_id = GenerateFunctionTypeIfNeeded(func);
   if (func_type_id == 0) {
@@ -468,7 +440,8 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
       auto* mem_accessor = source->AsMemberAccessor();
       source = mem_accessor->structure();
 
-      auto* data_type = mem_accessor->structure()->result_type();
+      auto* data_type =
+          mem_accessor->structure()->result_type()->UnwrapPtrIfNeeded();
       if (data_type->IsStruct()) {
         auto* strct = data_type->AsStruct()->impl();
         auto name = mem_accessor->member()->name();
@@ -476,11 +449,9 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
         uint32_t i = 0;
         for (; i < strct->members().size(); ++i) {
           const auto& member = strct->members()[i];
-          if (member->name() != name) {
-            continue;
+          if (member->name() == name) {
+            break;
           }
-
-          break;
         }
 
         ast::type::U32Type u32;
@@ -507,9 +478,7 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
     return 0;
   }
 
-  // The access chain results in a pointer, so wrap the return type.
-  ast::type::PointerType ptr(expr->result_type(), ast::StorageClass::kFunction);
-  auto type_id = GenerateTypeIfNeeded(&ptr);
+  auto type_id = GenerateTypeIfNeeded(expr->result_type());
   if (type_id == 0) {
     return 0;
   }
@@ -535,12 +504,23 @@ uint32_t Builder::GenerateIdentifierExpression(
     if (val == 0) {
       error_ = "unable to lookup: " + expr->name() + " in " + expr->path();
     }
-  } else if (!scope_stack_.get(expr->name(), &val)) {
-    error_ = "unable to find name for identifier: " + expr->name();
-    return 0;
+    return val;
+  }
+  if (scope_stack_.get(expr->name(), &val)) {
+    return val;
   }
 
-  return val;
+  error_ = "unable to find name for identifier: " + expr->name();
+  return 0;
+}
+
+uint32_t Builder::GenerateLoad(ast::type::Type* type, uint32_t id) {
+  auto type_id = GenerateTypeIfNeeded(type->UnwrapPtrIfNeeded());
+  auto result = result_op();
+  auto result_id = result.to_i();
+  push_function_inst(spv::Op::OpLoad,
+                     {Operand::Int(type_id), result, Operand::Int(id)});
+  return result_id;
 }
 
 uint32_t Builder::GenerateUnaryOpExpression(ast::UnaryOpExpression* expr) {
@@ -686,13 +666,20 @@ uint32_t Builder::GenerateLiteralIfNeeded(ast::Literal* lit) {
 }
 
 uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
-  auto lhs_id = GenerateExpressionAndLoad(expr->lhs());
+  auto lhs_id = GenerateExpression(expr->lhs());
   if (lhs_id == 0) {
     return 0;
   }
-  auto rhs_id = GenerateExpressionAndLoad(expr->rhs());
+  if (expr->lhs()->result_type()->IsPointer()) {
+    lhs_id = GenerateLoad(expr->lhs()->result_type(), lhs_id);
+  }
+
+  auto rhs_id = GenerateExpression(expr->rhs());
   if (rhs_id == 0) {
     return 0;
+  }
+  if (expr->rhs()->result_type()->IsPointer()) {
+    rhs_id = GenerateLoad(expr->rhs()->result_type(), rhs_id);
   }
 
   auto result = result_op();
@@ -705,8 +692,8 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
 
   // Handle int and float and the vectors of those types. Other types
   // should have been rejected by validation.
-  auto* lhs_type = expr->lhs()->result_type();
-  auto* rhs_type = expr->rhs()->result_type();
+  auto* lhs_type = expr->lhs()->result_type()->UnwrapPtrIfNeeded();
+  auto* rhs_type = expr->rhs()->result_type()->UnwrapPtrIfNeeded();
   bool lhs_is_float_or_vec = lhs_type->is_float_scalar_or_vector();
   bool lhs_is_unsigned = lhs_type->is_unsigned_scalar_or_vector();
 
@@ -819,6 +806,7 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
   } else if (expr->IsXor()) {
     op = spv::Op::OpBitwiseXor;
   } else {
+    error_ = "unknown binary expression";
     return 0;
   }
 

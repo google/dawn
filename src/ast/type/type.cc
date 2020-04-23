@@ -36,6 +36,13 @@ Type::Type() = default;
 
 Type::~Type() = default;
 
+Type* Type::UnwrapPtrIfNeeded() {
+  if (IsPointer()) {
+    return AsPointer()->type();
+  }
+  return this;
+}
+
 bool Type::IsAlias() const {
   return false;
 }

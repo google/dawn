@@ -93,7 +93,7 @@ class Expression : public Node {
   /// @returns the expression as a unary op expression
   const UnaryOpExpression* AsUnaryOp() const;
 
- /// @returns the expression as an array accessor
+  /// @returns the expression as an array accessor
   ArrayAccessorExpression* AsArrayAccessor();
   /// @returns the expression as an as
   AsExpression* AsAs();

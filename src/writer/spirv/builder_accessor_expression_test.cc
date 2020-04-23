@@ -132,6 +132,13 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
 TEST_F(BuilderTest, MemberAccessor) {
   ast::type::F32Type f32;
 
+  // my_struct {
+  //   a : f32
+  //   b : f32
+  // }
+  // var ident : my_struct
+  // ident.b
+
   ast::StructMemberDecorationList decos;
   ast::StructMemberList members;
   members.push_back(
@@ -180,6 +187,15 @@ TEST_F(BuilderTest, MemberAccessor) {
 TEST_F(BuilderTest, MemberAccessor_Nested) {
   ast::type::F32Type f32;
 
+  // inner_struct {
+  //   a : f32
+  // }
+  // my_struct {
+  //   inner : inner_struct
+  // }
+  //
+  // var ident : my_struct
+  // ident.inner.a
   ast::StructMemberDecorationList decos;
   ast::StructMemberList inner_members;
   inner_members.push_back(
