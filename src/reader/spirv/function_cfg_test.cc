@@ -894,6 +894,10 @@ TEST_F(SpvParserTest, ComputeBlockOrder_OneBlock) {
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(42));
+
+  const auto* bi = fe.GetBlockInfo(42);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->pos, 0u);
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_IgnoreStaticalyUnreachable) {
@@ -986,6 +990,16 @@ TEST_F(SpvParserTest, ComputeBlockOrder_ReorderSequence) {
   fe.ComputeBlockOrderAndPositions();
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30));
+
+  const auto* bi10 = fe.GetBlockInfo(10);
+  ASSERT_NE(bi10, nullptr);
+  EXPECT_EQ(bi10->pos, 0u);
+  const auto* bi20 = fe.GetBlockInfo(20);
+  ASSERT_NE(bi20, nullptr);
+  EXPECT_EQ(bi20->pos, 1u);
+  const auto* bi30 = fe.GetBlockInfo(30);
+  ASSERT_NE(bi30, nullptr);
+  EXPECT_EQ(bi30->pos, 2u);
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_DupConditionalBranch) {
