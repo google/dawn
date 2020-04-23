@@ -235,11 +235,44 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
 }
 
 TEST_F(BuilderTest, DISABLED_MemberAccessor_Swizzle_Single) {
-  // vec.x
+  ast::type::F32Type f32;
+  ast::type::VectorType vec3(&f32, 3);
+
+  ast::Variable var("ident", ast::StorageClass::kFunction, &vec3);
+
+  ast::MemberAccessorExpression expr(
+      std::make_unique<ast::IdentifierExpression>("ident"),
+      std::make_unique<ast::IdentifierExpression>("y"));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(&var);
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 6u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypeVector %3 3
+%1 = OpTypePointer Function %2
+%5 = OpTypeInt 32 0
+%6 = OpConstant %5 1
+%7 = OpTypePointer Function %3
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
+            R"(%1 = OpVariable %1 Function
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%7 = OpAccessChain %7 %1 %6
+)");
 }
 
 TEST_F(BuilderTest, DISABLED_MemberAccessor_Swizzle_Multiple) {
-  // vec.xy
+  // vec.yx
 }
 
 TEST_F(BuilderTest, DISABLED_Accessor_Mixed) {
