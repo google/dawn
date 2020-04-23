@@ -151,7 +151,6 @@ test("dawn_unittests") {
     "unittests/validation/BufferValidationTests.cpp",
     "unittests/validation/CommandBufferValidationTests.cpp",
     "unittests/validation/ComputeIndirectValidationTests.cpp",
-    "unittests/validation/ComputePassValidationTests.cpp",
     "unittests/validation/ComputeValidationTests.cpp",
     "unittests/validation/CopyCommandsValidationTests.cpp",
     "unittests/validation/DebugMarkerValidationTests.cpp",

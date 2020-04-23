@@ -82,7 +82,8 @@ namespace {
         }
     }
 
-    // Test that using the same buffer as both readable and writable in the same pass is disallowed
+    // Test that it is invalid to use the same buffer as both readable and writable in the same
+    // render pass. But it is valid in compute pass.
     TEST_F(ResourceUsageTrackingTest, BufferWithReadAndWriteUsage) {
         // test render pass for index buffer and storage buffer
         {
@@ -94,7 +95,7 @@ namespace {
                 device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::StorageBuffer}});
             wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, 4}});
 
-            // Use the buffer as both index and storage in render pass
+            // It is invalid to use the buffer as both index and storage in render pass
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             DummyRenderPass dummyRenderPass(device);
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
@@ -116,12 +117,12 @@ namespace {
             wgpu::BindGroup bg =
                 utils::MakeBindGroup(device, bgl, {{0, buffer, 0, 4}, {1, buffer, 256, 4}});
 
-            // Use the buffer as both storage and readonly storage in compute pass
+            // It is valid to use the buffer as both storage and readonly storage in compute pass.
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
             pass.SetBindGroup(0, bg);
             pass.EndPass();
-            ASSERT_DEVICE_ERROR(encoder.Finish());
+            encoder.Finish();
         }
     }
 
@@ -455,12 +456,13 @@ namespace {
                          {1, wgpu::ShaderStage::None, wgpu::BindingType::StorageBuffer}});
             wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, buffer}, {1, buffer}});
 
-            // These two bindings are invisible in compute pass. But we still track these bindings.
+            // These two bindings are invisible in compute pass. We still track these invisible
+            // bindings, but read and write usages in one compute pass is allowed.
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
             pass.SetBindGroup(0, bg);
             pass.EndPass();
-            ASSERT_DEVICE_ERROR(encoder.Finish());
+            encoder.Finish();
         }
     }
 
@@ -499,13 +501,13 @@ namespace {
             wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, buffer}, {1, buffer}});
 
             // Buffer usage in compute stage conflicts with buffer usage in fragment stage. And
-            // binding for fragment stage is not visible in compute pass. But we still track this
-            // binding.
+            // binding for fragment stage is not visible in compute pass. We still track this
+            // invisible binding, but read and write usages in one compute pass is allowed.
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
             pass.SetBindGroup(0, bg);
             pass.EndPass();
-            ASSERT_DEVICE_ERROR(encoder.Finish());
+            encoder.Finish();
         }
     }
 
@@ -630,7 +632,8 @@ namespace {
             wgpu::ComputePipeline cp = device.CreateComputePipeline(&pipelineDescriptor);
 
             // Resource in bg1 conflicts with resources used in bg0. However, the binding in bg1 is
-            // not used in pipeline. But we still track this binding.
+            // not used in pipeline. But we still track this binding and read/write usage in one
+            // dispatch is not allowed.
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
             pass.SetBindGroup(0, bg0);
@@ -638,7 +641,9 @@ namespace {
             pass.SetPipeline(cp);
             pass.Dispatch(1);
             pass.EndPass();
-            ASSERT_DEVICE_ERROR(encoder.Finish());
+            encoder.Finish();
+            // TODO (yunchao.he@intel.com): add resource tracking per dispatch for compute pass
+            // ASSERT_DEVICE_ERROR(encoder.Finish());
         }
     }
 
