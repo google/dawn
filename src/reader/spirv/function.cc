@@ -109,6 +109,14 @@ ast::BinaryOp ConvertBinaryOp(SpvOp opcode) {
       return ast::BinaryOp::kLogicalAnd;
     case SpvOpLogicalOr:
       return ast::BinaryOp::kLogicalOr;
+    case SpvOpUGreaterThan:
+      return ast::BinaryOp::kGreaterThan;
+    case SpvOpUGreaterThanEqual:
+      return ast::BinaryOp::kGreaterThanEqual;
+    case SpvOpULessThan:
+      return ast::BinaryOp::kLessThan;
+    case SpvOpULessThanEqual:
+      return ast::BinaryOp::kLessThanEqual;
     default:
       break;
   }
