@@ -22,6 +22,21 @@
 
 namespace dawn_native { namespace d3d12 {
     namespace {
+        MemorySegment GetMemorySegment(Device* device, D3D12_HEAP_TYPE heapType) {
+            if (device->GetDeviceInfo().isUMA) {
+                return MemorySegment::Local;
+            }
+
+            D3D12_HEAP_PROPERTIES heapProperties =
+                device->GetD3D12Device()->GetCustomHeapProperties(0, heapType);
+
+            if (heapProperties.MemoryPoolPreference == D3D12_MEMORY_POOL_L1) {
+                return MemorySegment::Local;
+            }
+
+            return MemorySegment::NonLocal;
+        }
+
         D3D12_HEAP_TYPE GetD3D12HeapType(ResourceHeapKind resourceHeapKind) {
             switch (resourceHeapKind) {
                 case Readback_OnlyBuffers:
@@ -143,7 +158,8 @@ namespace dawn_native { namespace d3d12 {
         for (uint32_t i = 0; i < ResourceHeapKind::EnumCount; i++) {
             const ResourceHeapKind resourceHeapKind = static_cast<ResourceHeapKind>(i);
             mHeapAllocators[i] = std::make_unique<HeapAllocator>(
-                mDevice, GetD3D12HeapType(resourceHeapKind), GetD3D12HeapFlags(resourceHeapKind));
+                mDevice, GetD3D12HeapType(resourceHeapKind), GetD3D12HeapFlags(resourceHeapKind),
+                GetMemorySegment(device, GetD3D12HeapType(resourceHeapKind)));
             mSubAllocatedResourceAllocators[i] = std::make_unique<BuddyMemoryAllocator>(
                 kMaxHeapSize, kMinHeapSize, mHeapAllocators[i].get());
         }
@@ -310,7 +326,8 @@ namespace dawn_native { namespace d3d12 {
         // CreateCommittedResource will implicitly make the created resource resident. We must
         // ensure enough free memory exists before allocating to avoid an out-of-memory error when
         // overcommitted.
-        DAWN_TRY(mDevice->GetResidencyManager()->EnsureCanMakeResident(resourceInfo.SizeInBytes));
+        DAWN_TRY(mDevice->GetResidencyManager()->EnsureCanAllocate(
+            resourceInfo.SizeInBytes, GetMemorySegment(mDevice, heapType)));
 
         // Note: Heap flags are inferred by the resource descriptor and do not need to be explicitly
         // provided to CreateCommittedResource.
@@ -326,7 +343,8 @@ namespace dawn_native { namespace d3d12 {
         // heap granularity, every directly allocated ResourceHeapAllocation also stores a Heap
         // object. This object is created manually, and must be deleted manually upon deallocation
         // of the committed resource.
-        Heap* heap = new Heap(committedResource, heapType, resourceInfo.SizeInBytes);
+        Heap* heap = new Heap(committedResource, GetMemorySegment(mDevice, heapType),
+                              resourceInfo.SizeInBytes);
 
         // Calling CreateCommittedResource implicitly calls MakeResident on the resource. We must
         // track this to avoid calling MakeResident a second time.

@@ -17,10 +17,13 @@
 
 #include "common/LinkedList.h"
 #include "common/Serial.h"
+#include "dawn_native/D3D12Backend.h"
 #include "dawn_native/ResourceHeap.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 namespace dawn_native { namespace d3d12 {
+
+    class Device;
 
     // This class is used to represent heap allocations, but also serves as a node within the
     // ResidencyManager's LRU cache. This node is inserted into the LRU-cache when it is first
@@ -29,12 +32,12 @@ namespace dawn_native { namespace d3d12 {
     // is destroyed.
     class Heap : public ResourceHeapBase, public LinkNode<Heap> {
       public:
-        Heap(ComPtr<ID3D12Pageable> d3d12Pageable, D3D12_HEAP_TYPE heapType, uint64_t size);
+        Heap(ComPtr<ID3D12Pageable> d3d12Pageable, MemorySegment memorySegment, uint64_t size);
         ~Heap();
 
         ComPtr<ID3D12Heap> GetD3D12Heap() const;
         ComPtr<ID3D12Pageable> GetD3D12Pageable() const;
-        D3D12_HEAP_TYPE GetD3D12HeapType() const;
+        MemorySegment GetMemorySegment() const;
 
         // We set mLastRecordingSerial to denote the serial this heap was last recorded to be used.
         // We must check this serial against the current serial when recording heap usages to ensure
@@ -61,7 +64,7 @@ namespace dawn_native { namespace d3d12 {
 
       private:
         ComPtr<ID3D12Pageable> mD3d12Pageable;
-        D3D12_HEAP_TYPE mD3d12HeapType;
+        MemorySegment mMemorySegment;
         // mLastUsage denotes the last time this heap was recorded for use.
         Serial mLastUsage = 0;
         // mLastSubmission denotes the last time this heap was submitted to the GPU. Note that

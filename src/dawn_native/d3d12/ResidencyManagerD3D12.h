@@ -34,7 +34,8 @@ namespace dawn_native { namespace d3d12 {
 
         MaybeError LockHeap(Heap* heap);
         void UnlockHeap(Heap* heap);
-        MaybeError EnsureCanMakeResident(uint64_t allocationSize);
+
+        MaybeError EnsureCanAllocate(uint64_t allocationSize, MemorySegment memorySegment);
         MaybeError EnsureHeapsAreResident(Heap** heaps, size_t heapCount);
 
         uint64_t SetExternalMemoryReservation(MemorySegment segment,
@@ -47,24 +48,25 @@ namespace dawn_native { namespace d3d12 {
       private:
         struct MemorySegmentInfo {
             const DXGI_MEMORY_SEGMENT_GROUP dxgiSegment;
-            uint64_t budget;
-            uint64_t usage;
-            uint64_t externalReservation;
-            uint64_t externalRequest;
+            LinkedList<Heap> lruCache = {};
+            uint64_t budget = 0;
+            uint64_t usage = 0;
+            uint64_t externalReservation = 0;
+            uint64_t externalRequest = 0;
         };
 
         struct VideoMemoryInfo {
-            MemorySegmentInfo local = {DXGI_MEMORY_SEGMENT_GROUP_LOCAL, 0, 0, 0, 0};
-            MemorySegmentInfo nonLocal = {DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL, 0, 0, 0, 0};
+            MemorySegmentInfo local = {DXGI_MEMORY_SEGMENT_GROUP_LOCAL};
+            MemorySegmentInfo nonLocal = {DXGI_MEMORY_SEGMENT_GROUP_NON_LOCAL};
         };
 
-        ResultOrError<Heap*> RemoveSingleEntryFromLRU();
-        bool ShouldTrackHeap(Heap* heap) const;
+        MemorySegmentInfo* GetMemorySegmentInfo(MemorySegment memorySegment);
+        MaybeError EnsureCanMakeResident(uint64_t allocationSize, MemorySegmentInfo* memorySegment);
+        ResultOrError<Heap*> RemoveSingleEntryFromLRU(MemorySegmentInfo* memorySegment);
         void UpdateVideoMemoryInfo();
         void UpdateMemorySegmentInfo(MemorySegmentInfo* segmentInfo);
 
         Device* mDevice;
-        LinkedList<Heap> mLRUCache;
         bool mResidencyManagementEnabled = false;
         bool mRestrictBudgetForTesting = false;
         VideoMemoryInfo mVideoMemoryInfo = {};

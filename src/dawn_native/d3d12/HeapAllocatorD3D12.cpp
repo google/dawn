@@ -22,8 +22,12 @@ namespace dawn_native { namespace d3d12 {
 
     HeapAllocator::HeapAllocator(Device* device,
                                  D3D12_HEAP_TYPE heapType,
-                                 D3D12_HEAP_FLAGS heapFlags)
-        : mDevice(device), mHeapType(heapType), mHeapFlags(heapFlags) {
+                                 D3D12_HEAP_FLAGS heapFlags,
+                                 MemorySegment memorySegment)
+        : mDevice(device),
+          mHeapType(heapType),
+          mHeapFlags(heapFlags),
+          mMemorySegment(memorySegment) {
     }
 
     ResultOrError<std::unique_ptr<ResourceHeapBase>> HeapAllocator::AllocateResourceHeap(
@@ -44,7 +48,7 @@ namespace dawn_native { namespace d3d12 {
 
         // CreateHeap will implicitly make the created heap resident. We must ensure enough free
         // memory exists before allocating to avoid an out-of-memory error when overcommitted.
-        DAWN_TRY(mDevice->GetResidencyManager()->EnsureCanMakeResident(size));
+        DAWN_TRY(mDevice->GetResidencyManager()->EnsureCanAllocate(size, mMemorySegment));
 
         ComPtr<ID3D12Heap> d3d12Heap;
         DAWN_TRY(CheckOutOfMemoryHRESULT(
@@ -52,7 +56,7 @@ namespace dawn_native { namespace d3d12 {
             "ID3D12Device::CreateHeap"));
 
         std::unique_ptr<ResourceHeapBase> heapBase =
-            std::make_unique<Heap>(std::move(d3d12Heap), heapDesc.Properties.Type, size);
+            std::make_unique<Heap>(std::move(d3d12Heap), mMemorySegment, size);
 
         // Calling CreateHeap implicitly calls MakeResident on the new heap. We must track this to
         // avoid calling MakeResident a second time.
