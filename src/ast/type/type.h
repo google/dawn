@@ -82,6 +82,29 @@ class Type {
   bool is_integer_scalar_or_vector();
 
   /// @returns the type as an alias type
+  const AliasType* AsAlias() const;
+  /// @returns the type as an array type
+  const ArrayType* AsArray() const;
+  /// @returns the type as a bool type
+  const BoolType* AsBool() const;
+  /// @returns the type as a f32 type
+  const F32Type* AsF32() const;
+  /// @returns the type as an i32 type
+  const I32Type* AsI32() const;
+  /// @returns the type as a matrix type
+  const MatrixType* AsMatrix() const;
+  /// @returns the type as a pointer type
+  const PointerType* AsPointer() const;
+  /// @returns the type as a struct type
+  const StructType* AsStruct() const;
+  /// @returns the type as a u32 type
+  const U32Type* AsU32() const;
+  /// @returns the type as a vector type
+  const VectorType* AsVector() const;
+  /// @returns the type as a void type
+  const VoidType* AsVoid() const;
+
+  /// @returns the type as an alias type
   AliasType* AsAlias();
   /// @returns the type as an array type
   ArrayType* AsArray();

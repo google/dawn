@@ -108,6 +108,61 @@ bool Type::is_integer_scalar_or_vector() {
   return is_unsigned_scalar_or_vector() || is_signed_scalar_or_vector();
 }
 
+const AliasType* Type::AsAlias() const {
+  assert(IsAlias());
+  return static_cast<const AliasType*>(this);
+}
+
+const ArrayType* Type::AsArray() const {
+  assert(IsArray());
+  return static_cast<const ArrayType*>(this);
+}
+
+const BoolType* Type::AsBool() const {
+  assert(IsBool());
+  return static_cast<const BoolType*>(this);
+}
+
+const F32Type* Type::AsF32() const {
+  assert(IsF32());
+  return static_cast<const F32Type*>(this);
+}
+
+const I32Type* Type::AsI32() const {
+  assert(IsI32());
+  return static_cast<const I32Type*>(this);
+}
+
+const MatrixType* Type::AsMatrix() const {
+  assert(IsMatrix());
+  return static_cast<const MatrixType*>(this);
+}
+
+const PointerType* Type::AsPointer() const {
+  assert(IsPointer());
+  return static_cast<const PointerType*>(this);
+}
+
+const StructType* Type::AsStruct() const {
+  assert(IsStruct());
+  return static_cast<const StructType*>(this);
+}
+
+const U32Type* Type::AsU32() const {
+  assert(IsU32());
+  return static_cast<const U32Type*>(this);
+}
+
+const VectorType* Type::AsVector() const {
+  assert(IsVector());
+  return static_cast<const VectorType*>(this);
+}
+
+const VoidType* Type::AsVoid() const {
+  assert(IsVoid());
+  return static_cast<const VoidType*>(this);
+}
+
 AliasType* Type::AsAlias() {
   assert(IsAlias());
   return static_cast<AliasType*>(this);
