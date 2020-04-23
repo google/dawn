@@ -89,6 +89,60 @@ bool Expression::IsUnaryMethod() const {
 bool Expression::IsUnaryOp() const {
   return false;
 }
+const ArrayAccessorExpression* Expression::AsArrayAccessor() const {
+  assert(IsArrayAccessor());
+  return static_cast<const ArrayAccessorExpression*>(this);
+}
+
+const AsExpression* Expression::AsAs() const {
+  assert(IsAs());
+  return static_cast<const AsExpression*>(this);
+}
+
+const BinaryExpression* Expression::AsBinary() const {
+  assert(IsBinary());
+  return static_cast<const BinaryExpression*>(this);
+}
+
+const CallExpression* Expression::AsCall() const {
+  assert(IsCall());
+  return static_cast<const CallExpression*>(this);
+}
+
+const CastExpression* Expression::AsCast() const {
+  assert(IsCast());
+  return static_cast<const CastExpression*>(this);
+}
+
+const ConstructorExpression* Expression::AsConstructor() const {
+  assert(IsConstructor());
+  return static_cast<const ConstructorExpression*>(this);
+}
+
+const IdentifierExpression* Expression::AsIdentifier() const {
+  assert(IsIdentifier());
+  return static_cast<const IdentifierExpression*>(this);
+}
+
+const MemberAccessorExpression* Expression::AsMemberAccessor() const {
+  assert(IsMemberAccessor());
+  return static_cast<const MemberAccessorExpression*>(this);
+}
+
+const UnaryDerivativeExpression* Expression::AsUnaryDerivative() const {
+  assert(IsUnaryDerivative());
+  return static_cast<const UnaryDerivativeExpression*>(this);
+}
+
+const UnaryMethodExpression* Expression::AsUnaryMethod() const {
+  assert(IsUnaryMethod());
+  return static_cast<const UnaryMethodExpression*>(this);
+}
+
+const UnaryOpExpression* Expression::AsUnaryOp() const {
+  assert(IsUnaryOp());
+  return static_cast<const UnaryOpExpression*>(this);
+}
 
 ArrayAccessorExpression* Expression::AsArrayAccessor() {
   assert(IsArrayAccessor());

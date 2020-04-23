@@ -71,6 +71,29 @@ class Expression : public Node {
   virtual bool IsUnaryOp() const;
 
   /// @returns the expression as an array accessor
+  const ArrayAccessorExpression* AsArrayAccessor() const;
+  /// @returns the expression as an as
+  const AsExpression* AsAs() const;
+  /// @returns the expression as a call
+  const CallExpression* AsCall() const;
+  /// @returns the expression as a cast
+  const CastExpression* AsCast() const;
+  /// @returns the expression as an identifier
+  const IdentifierExpression* AsIdentifier() const;
+  /// @returns the expression as an constructor
+  const ConstructorExpression* AsConstructor() const;
+  /// @returns the expression as a member accessor
+  const MemberAccessorExpression* AsMemberAccessor() const;
+  /// @returns the expression as a binary expression
+  const BinaryExpression* AsBinary() const;
+  /// @returns the expression as a unary derivative expression
+  const UnaryDerivativeExpression* AsUnaryDerivative() const;
+  /// @returns the expression as a unary method expression
+  const UnaryMethodExpression* AsUnaryMethod() const;
+  /// @returns the expression as a unary op expression
+  const UnaryOpExpression* AsUnaryOp() const;
+
+ /// @returns the expression as an array accessor
   ArrayAccessorExpression* AsArrayAccessor();
   /// @returns the expression as an as
   AsExpression* AsAs();
