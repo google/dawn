@@ -309,7 +309,7 @@ TEST_F(SpvParserTest, RegisterMerges_NoMerges) {
   EXPECT_EQ(bi->continue_for_header, 0u);
   EXPECT_EQ(bi->header_for_merge, 0u);
   EXPECT_EQ(bi->header_for_continue, 0u);
-  EXPECT_FALSE(bi->single_block_loop);
+  EXPECT_FALSE(bi->is_single_block_loop);
 }
 
 TEST_F(SpvParserTest, RegisterMerges_GoodSelectionMerge_BranchConditional) {
@@ -340,7 +340,7 @@ TEST_F(SpvParserTest, RegisterMerges_GoodSelectionMerge_BranchConditional) {
   EXPECT_EQ(bi10->continue_for_header, 0u);
   EXPECT_EQ(bi10->header_for_merge, 0u);
   EXPECT_EQ(bi10->header_for_continue, 0u);
-  EXPECT_FALSE(bi10->single_block_loop);
+  EXPECT_FALSE(bi10->is_single_block_loop);
 
   // Middle block is neither header nor merge
   const auto* bi20 = fe.GetBlockInfo(20);
@@ -349,7 +349,7 @@ TEST_F(SpvParserTest, RegisterMerges_GoodSelectionMerge_BranchConditional) {
   EXPECT_EQ(bi20->continue_for_header, 0u);
   EXPECT_EQ(bi20->header_for_merge, 0u);
   EXPECT_EQ(bi20->header_for_continue, 0u);
-  EXPECT_FALSE(bi20->single_block_loop);
+  EXPECT_FALSE(bi20->is_single_block_loop);
 
   // Merge block points to the header
   const auto* bi99 = fe.GetBlockInfo(99);
@@ -358,7 +358,7 @@ TEST_F(SpvParserTest, RegisterMerges_GoodSelectionMerge_BranchConditional) {
   EXPECT_EQ(bi99->continue_for_header, 0u);
   EXPECT_EQ(bi99->header_for_merge, 10u);
   EXPECT_EQ(bi99->header_for_continue, 0u);
-  EXPECT_FALSE(bi99->single_block_loop);
+  EXPECT_FALSE(bi99->is_single_block_loop);
 }
 
 TEST_F(SpvParserTest, RegisterMerges_GoodSelectionMerge_Switch) {
@@ -389,7 +389,7 @@ TEST_F(SpvParserTest, RegisterMerges_GoodSelectionMerge_Switch) {
   EXPECT_EQ(bi10->continue_for_header, 0u);
   EXPECT_EQ(bi10->header_for_merge, 0u);
   EXPECT_EQ(bi10->header_for_continue, 0u);
-  EXPECT_FALSE(bi10->single_block_loop);
+  EXPECT_FALSE(bi10->is_single_block_loop);
 
   // Middle block is neither header nor merge
   const auto* bi20 = fe.GetBlockInfo(20);
@@ -398,7 +398,7 @@ TEST_F(SpvParserTest, RegisterMerges_GoodSelectionMerge_Switch) {
   EXPECT_EQ(bi20->continue_for_header, 0u);
   EXPECT_EQ(bi20->header_for_merge, 0u);
   EXPECT_EQ(bi20->header_for_continue, 0u);
-  EXPECT_FALSE(bi20->single_block_loop);
+  EXPECT_FALSE(bi20->is_single_block_loop);
 
   // Merge block points to the header
   const auto* bi99 = fe.GetBlockInfo(99);
@@ -407,7 +407,7 @@ TEST_F(SpvParserTest, RegisterMerges_GoodSelectionMerge_Switch) {
   EXPECT_EQ(bi99->continue_for_header, 0u);
   EXPECT_EQ(bi99->header_for_merge, 10u);
   EXPECT_EQ(bi99->header_for_continue, 0u);
-  EXPECT_FALSE(bi99->single_block_loop);
+  EXPECT_FALSE(bi99->is_single_block_loop);
 }
 
 TEST_F(SpvParserTest, RegisterMerges_GoodLoopMerge_SingleBlockLoop) {
@@ -438,7 +438,7 @@ TEST_F(SpvParserTest, RegisterMerges_GoodLoopMerge_SingleBlockLoop) {
   EXPECT_EQ(bi10->continue_for_header, 0u);
   EXPECT_EQ(bi10->header_for_merge, 0u);
   EXPECT_EQ(bi10->header_for_continue, 0u);
-  EXPECT_FALSE(bi10->single_block_loop);
+  EXPECT_FALSE(bi10->is_single_block_loop);
 
   // Single block loop is its own continue, and marked as single block loop.
   const auto* bi20 = fe.GetBlockInfo(20);
@@ -447,7 +447,7 @@ TEST_F(SpvParserTest, RegisterMerges_GoodLoopMerge_SingleBlockLoop) {
   EXPECT_EQ(bi20->continue_for_header, 20u);
   EXPECT_EQ(bi20->header_for_merge, 0u);
   EXPECT_EQ(bi20->header_for_continue, 20u);
-  EXPECT_TRUE(bi20->single_block_loop);
+  EXPECT_TRUE(bi20->is_single_block_loop);
 
   // Merge block points to the header
   const auto* bi99 = fe.GetBlockInfo(99);
@@ -456,7 +456,7 @@ TEST_F(SpvParserTest, RegisterMerges_GoodLoopMerge_SingleBlockLoop) {
   EXPECT_EQ(bi99->continue_for_header, 0u);
   EXPECT_EQ(bi99->header_for_merge, 20u);
   EXPECT_EQ(bi99->header_for_continue, 0u);
-  EXPECT_FALSE(bi99->single_block_loop);
+  EXPECT_FALSE(bi99->is_single_block_loop);
 }
 
 TEST_F(SpvParserTest, RegisterMerges_GoodLoopMerge_MultiBlockLoop_Branch) {
@@ -493,7 +493,7 @@ TEST_F(SpvParserTest, RegisterMerges_GoodLoopMerge_MultiBlockLoop_Branch) {
   EXPECT_EQ(bi20->continue_for_header, 40u);
   EXPECT_EQ(bi20->header_for_merge, 0u);
   EXPECT_EQ(bi20->header_for_continue, 0u);
-  EXPECT_FALSE(bi20->single_block_loop);
+  EXPECT_FALSE(bi20->is_single_block_loop);
 
   // Continue block points to header
   const auto* bi40 = fe.GetBlockInfo(40);
@@ -502,7 +502,7 @@ TEST_F(SpvParserTest, RegisterMerges_GoodLoopMerge_MultiBlockLoop_Branch) {
   EXPECT_EQ(bi40->continue_for_header, 0u);
   EXPECT_EQ(bi40->header_for_merge, 0u);
   EXPECT_EQ(bi40->header_for_continue, 20u);
-  EXPECT_FALSE(bi40->single_block_loop);
+  EXPECT_FALSE(bi40->is_single_block_loop);
 
   // Merge block points to the header
   const auto* bi99 = fe.GetBlockInfo(99);
@@ -511,7 +511,7 @@ TEST_F(SpvParserTest, RegisterMerges_GoodLoopMerge_MultiBlockLoop_Branch) {
   EXPECT_EQ(bi99->continue_for_header, 0u);
   EXPECT_EQ(bi99->header_for_merge, 20u);
   EXPECT_EQ(bi99->header_for_continue, 0u);
-  EXPECT_FALSE(bi99->single_block_loop);
+  EXPECT_FALSE(bi99->is_single_block_loop);
 }
 
 TEST_F(SpvParserTest,
@@ -549,7 +549,7 @@ TEST_F(SpvParserTest,
   EXPECT_EQ(bi20->continue_for_header, 40u);
   EXPECT_EQ(bi20->header_for_merge, 0u);
   EXPECT_EQ(bi20->header_for_continue, 0u);
-  EXPECT_FALSE(bi20->single_block_loop);
+  EXPECT_FALSE(bi20->is_single_block_loop);
 
   // Continue block points to header
   const auto* bi40 = fe.GetBlockInfo(40);
@@ -558,7 +558,7 @@ TEST_F(SpvParserTest,
   EXPECT_EQ(bi40->continue_for_header, 0u);
   EXPECT_EQ(bi40->header_for_merge, 0u);
   EXPECT_EQ(bi40->header_for_continue, 20u);
-  EXPECT_FALSE(bi40->single_block_loop);
+  EXPECT_FALSE(bi40->is_single_block_loop);
 
   // Merge block points to the header
   const auto* bi99 = fe.GetBlockInfo(99);
@@ -567,7 +567,7 @@ TEST_F(SpvParserTest,
   EXPECT_EQ(bi99->continue_for_header, 0u);
   EXPECT_EQ(bi99->header_for_merge, 20u);
   EXPECT_EQ(bi99->header_for_continue, 0u);
-  EXPECT_FALSE(bi99->single_block_loop);
+  EXPECT_FALSE(bi99->is_single_block_loop);
 }
 
 TEST_F(SpvParserTest, RegisterMerges_SelectionMerge_BadTerminator) {

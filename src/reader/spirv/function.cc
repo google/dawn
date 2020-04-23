@@ -390,7 +390,8 @@ bool FunctionEmitter::RegisterMerges() {
     const auto block_id = block.id();
     auto* block_info = GetBlockInfo(block_id);
     if (!block_info) {
-      return Fail() << "internal error: assumed blocks were registered";
+      return Fail() << "internal error: block " << block_id << " missing; blocks should already "
+                       "have been registered";
     }
 
     if (const auto* inst = block.GetMergeInst()) {
@@ -464,18 +465,18 @@ bool FunctionEmitter::RegisterMerges() {
     }
 
     // Check single-block loop cases.
-    bool single_block_loop = false;
+    bool is_single_block_loop = false;
     block_info->basic_block->ForEachSuccessorLabel(
-        [&single_block_loop, block_id](const uint32_t succ) {
+        [&is_single_block_loop, block_id](const uint32_t succ) {
           if (block_id == succ)
-            single_block_loop = true;
+            is_single_block_loop = true;
         });
-    block_info->single_block_loop = single_block_loop;
+    block_info->is_single_block_loop = is_single_block_loop;
     const auto ct = block_info->continue_for_header;
-    if (single_block_loop && ct != block_id) {
+    if (is_single_block_loop && ct != block_id) {
       return Fail() << "Block " << block_id
                     << " branches to itself but is not its own continue target";
-    } else if (!single_block_loop && ct == block_id) {
+    } else if (!is_single_block_loop && ct == block_id) {
       return Fail() << "Loop header block " << block_id
                     << " declares itself as its own continue target, but "
                        "does not branch to itself";

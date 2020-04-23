@@ -64,7 +64,7 @@ struct BlockInfo {
   uint32_t header_for_continue = 0;
   /// Is this block a single-block loop: A loop header that declares itself
   /// as its own continue target, and has branch to itself.
-  bool single_block_loop = false;
+  bool is_single_block_loop = false;
 };
 
 /// A FunctionEmitter emits a SPIR-V function onto a Tint AST module.
@@ -113,7 +113,7 @@ class FunctionEmitter {
   /// @returns true if terminators are sane
   bool TerminatorsAreSane();
 
-  /// Populates merge-header cross-links and the |single_block_loop| member
+  /// Populates merge-header cross-links and the |is_single_block_loop| member
   /// of BlockInfo.  Also verifies that merge instructions go to blocks in
   /// the same function.  Assumes basic blocks have been registered, and
   /// terminators are sane.
