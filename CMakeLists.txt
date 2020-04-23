@@ -152,11 +152,12 @@ add_subdirectory(src)
 add_subdirectory(samples)
 
 if (${TINT_BUILD_FUZZERS})
+  # TODO(rharrison): Remove this check ones there are other fuzzers.
   if (NOT ${TINT_BUILD_WGSL_READER})
     message(ERROR, "Fuzzers require WGSL reader to be enabled")
   endif()
 
-  add_subdirectory(fuzz)
+  add_subdirectory(fuzzers)
 endif()
 
 add_custom_target(tint-lint
