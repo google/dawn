@@ -892,4 +892,32 @@ TEST_P(BindGroupTests, LastReferenceToBindGroupLayout) {
     }
 }
 
+// Test that bind groups with an empty bind group layout may be created and used.
+TEST_P(BindGroupTests, EmptyLayout) {
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(device, {});
+    wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {});
+    wgpu::ComputePipelineDescriptor pipelineDesc = {
+        .layout = utils::MakeBasicPipelineLayout(device, &bgl),
+        .computeStage =
+            {
+                .module = utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
+                    #version 450
+                    void main() {
+                    })"),
+                .entryPoint = "main",
+            },
+    };
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bg);
+    pass.Dispatch(1);
+    pass.EndPass();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+}
+
 DAWN_INSTANTIATE_TEST(BindGroupTests, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());

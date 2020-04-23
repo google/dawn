@@ -185,10 +185,6 @@ TEST_P(DeprecationTests, BGLDescBindingAndEntriesIsInvalid) {
 
 // Test that creating a BGL with both entries and bindings to 0 doesn't emit warnings
 TEST_P(DeprecationTests, BGLDescBindingAndEntriesBothZeroEmitsNoWarning) {
-    // TODO(cwallez@chromium.org): In Vulkan it is disallowed to create 0-sized descriptor pools
-    // but the Vulkan backend doesn't special case it yet.
-    DAWN_SKIP_TEST_IF(IsVulkan());
-
     wgpu::BindGroupLayoutDescriptor bglDesc = {
         .bindingCount = 0,
         .bindings = nullptr,
@@ -270,10 +266,6 @@ TEST_P(DeprecationTests, BGDescBindingAndEntriesIsInvalid) {
 
 // Test that creating a BG with both entries and bindings to 0 doesn't emit warnings
 TEST_P(DeprecationTests, BGDescBindingAndEntriesBothZeroEmitsNoWarning) {
-    // TODO(cwallez@chromium.org): In Vulkan it is disallowed to create 0-sized descriptor pools
-    // but the Vulkan backend doesn't special case it yet.
-    DAWN_SKIP_TEST_IF(IsVulkan());
-
     wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {});
 
     wgpu::BindGroupDescriptor bgDesc = {
