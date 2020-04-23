@@ -51,6 +51,20 @@ struct BlockInfo {
 
   /// The position of this block in the reverse structured post-order.
   uint32_t pos = 0;
+
+  /// If this block is a header, then this is the ID of the merge block.
+  uint32_t merge_for_header = 0;
+  /// If this block is a loop header, then this is the ID of the continue
+  /// target.
+  uint32_t continue_for_header = 0;
+  /// If this block is a merge, then this is the ID of the header.
+  uint32_t header_for_merge = 0;
+  /// If this block is a continue target, then this is the ID of the loop
+  /// header.
+  uint32_t header_for_continue = 0;
+  /// Is this block a single-block loop: A loop header that declares itself
+  /// as its own continue target, and has branch to itself.
+  bool single_block_loop = false;
 };
 
 /// A FunctionEmitter emits a SPIR-V function onto a Tint AST module.
@@ -98,6 +112,13 @@ class FunctionEmitter {
   /// Assumes basic blocks have been registered.
   /// @returns true if terminators are sane
   bool TerminatorsAreSane();
+
+  /// Populates merge-header cross-links and the |single_block_loop| member
+  /// of BlockInfo.  Also verifies that merge instructions go to blocks in
+  /// the same function.  Assumes basic blocks have been registered, and
+  /// terminators are sane.
+  /// @returns false if registration fails
+  bool RegisterMerges();
 
   /// Determines the output order for the basic blocks in the function.
   /// Populates |block_order_| and the |pos| block info member.

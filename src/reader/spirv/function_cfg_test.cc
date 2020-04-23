@@ -44,6 +44,8 @@ std::string CommonTypes() {
 
     %uint = OpTypeInt 32 0
     %selector = OpUndef %uint
+
+    %999 = OpConstant %uint 999
   )";
 }
 
@@ -249,7 +251,7 @@ TEST_F(SpvParserTest, TerminatorsAreSane_DisallowNonBlock) {
      %100 = OpFunction %void None %voidfn
 
      %10 = OpLabel
-     OpBranch %void ; definitely wrong
+     OpBranch %999 ; definitely wrong
 
      OpFunctionEnd
   )"));
@@ -257,8 +259,9 @@ TEST_F(SpvParserTest, TerminatorsAreSane_DisallowNonBlock) {
   FunctionEmitter fe(p, *spirv_function(100));
   fe.RegisterBasicBlocks();
   EXPECT_FALSE(fe.TerminatorsAreSane());
-  EXPECT_THAT(p->error(), Eq("Block 10 in function 100 branches to 1 which is "
-                             "not a block in the function"));
+  EXPECT_THAT(p->error(),
+              Eq("Block 10 in function 100 branches to 999 which is "
+                 "not a block in the function"));
 }
 
 TEST_F(SpvParserTest, TerminatorsAreSane_DisallowBlockInDifferentFunction) {
@@ -284,6 +287,596 @@ TEST_F(SpvParserTest, TerminatorsAreSane_DisallowBlockInDifferentFunction) {
   EXPECT_FALSE(fe.TerminatorsAreSane());
   EXPECT_THAT(p->error(), Eq("Block 10 in function 100 branches to 210 which "
                              "is not a block in the function"));
+}
+
+TEST_F(SpvParserTest, RegisterMerges_NoMerges) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_TRUE(fe.RegisterMerges());
+
+  const auto* bi = fe.GetBlockInfo(10);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->merge_for_header, 0u);
+  EXPECT_EQ(bi->continue_for_header, 0u);
+  EXPECT_EQ(bi->header_for_merge, 0u);
+  EXPECT_EQ(bi->header_for_continue, 0u);
+  EXPECT_FALSE(bi->single_block_loop);
+}
+
+TEST_F(SpvParserTest, RegisterMerges_GoodSelectionMerge_BranchConditional) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %99
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_TRUE(fe.RegisterMerges());
+
+  // Header points to the merge
+  const auto* bi10 = fe.GetBlockInfo(10);
+  ASSERT_NE(bi10, nullptr);
+  EXPECT_EQ(bi10->merge_for_header, 99u);
+  EXPECT_EQ(bi10->continue_for_header, 0u);
+  EXPECT_EQ(bi10->header_for_merge, 0u);
+  EXPECT_EQ(bi10->header_for_continue, 0u);
+  EXPECT_FALSE(bi10->single_block_loop);
+
+  // Middle block is neither header nor merge
+  const auto* bi20 = fe.GetBlockInfo(20);
+  ASSERT_NE(bi20, nullptr);
+  EXPECT_EQ(bi20->merge_for_header, 0u);
+  EXPECT_EQ(bi20->continue_for_header, 0u);
+  EXPECT_EQ(bi20->header_for_merge, 0u);
+  EXPECT_EQ(bi20->header_for_continue, 0u);
+  EXPECT_FALSE(bi20->single_block_loop);
+
+  // Merge block points to the header
+  const auto* bi99 = fe.GetBlockInfo(99);
+  ASSERT_NE(bi99, nullptr);
+  EXPECT_EQ(bi99->merge_for_header, 0u);
+  EXPECT_EQ(bi99->continue_for_header, 0u);
+  EXPECT_EQ(bi99->header_for_merge, 10u);
+  EXPECT_EQ(bi99->header_for_continue, 0u);
+  EXPECT_FALSE(bi99->single_block_loop);
+}
+
+TEST_F(SpvParserTest, RegisterMerges_GoodSelectionMerge_Switch) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %20
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_TRUE(fe.RegisterMerges());
+
+  // Header points to the merge
+  const auto* bi10 = fe.GetBlockInfo(10);
+  ASSERT_NE(bi10, nullptr);
+  EXPECT_EQ(bi10->merge_for_header, 99u);
+  EXPECT_EQ(bi10->continue_for_header, 0u);
+  EXPECT_EQ(bi10->header_for_merge, 0u);
+  EXPECT_EQ(bi10->header_for_continue, 0u);
+  EXPECT_FALSE(bi10->single_block_loop);
+
+  // Middle block is neither header nor merge
+  const auto* bi20 = fe.GetBlockInfo(20);
+  ASSERT_NE(bi20, nullptr);
+  EXPECT_EQ(bi20->merge_for_header, 0u);
+  EXPECT_EQ(bi20->continue_for_header, 0u);
+  EXPECT_EQ(bi20->header_for_merge, 0u);
+  EXPECT_EQ(bi20->header_for_continue, 0u);
+  EXPECT_FALSE(bi20->single_block_loop);
+
+  // Merge block points to the header
+  const auto* bi99 = fe.GetBlockInfo(99);
+  ASSERT_NE(bi99, nullptr);
+  EXPECT_EQ(bi99->merge_for_header, 0u);
+  EXPECT_EQ(bi99->continue_for_header, 0u);
+  EXPECT_EQ(bi99->header_for_merge, 10u);
+  EXPECT_EQ(bi99->header_for_continue, 0u);
+  EXPECT_FALSE(bi99->single_block_loop);
+}
+
+TEST_F(SpvParserTest, RegisterMerges_GoodLoopMerge_SingleBlockLoop) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %20 None
+     OpBranchConditional %cond %20 %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_TRUE(fe.RegisterMerges());
+
+  // Entry block is not special
+  const auto* bi10 = fe.GetBlockInfo(10);
+  ASSERT_NE(bi10, nullptr);
+  EXPECT_EQ(bi10->merge_for_header, 0u);
+  EXPECT_EQ(bi10->continue_for_header, 0u);
+  EXPECT_EQ(bi10->header_for_merge, 0u);
+  EXPECT_EQ(bi10->header_for_continue, 0u);
+  EXPECT_FALSE(bi10->single_block_loop);
+
+  // Single block loop is its own continue, and marked as single block loop.
+  const auto* bi20 = fe.GetBlockInfo(20);
+  ASSERT_NE(bi20, nullptr);
+  EXPECT_EQ(bi20->merge_for_header, 99u);
+  EXPECT_EQ(bi20->continue_for_header, 20u);
+  EXPECT_EQ(bi20->header_for_merge, 0u);
+  EXPECT_EQ(bi20->header_for_continue, 20u);
+  EXPECT_TRUE(bi20->single_block_loop);
+
+  // Merge block points to the header
+  const auto* bi99 = fe.GetBlockInfo(99);
+  ASSERT_NE(bi99, nullptr);
+  EXPECT_EQ(bi99->merge_for_header, 0u);
+  EXPECT_EQ(bi99->continue_for_header, 0u);
+  EXPECT_EQ(bi99->header_for_merge, 20u);
+  EXPECT_EQ(bi99->header_for_continue, 0u);
+  EXPECT_FALSE(bi99->single_block_loop);
+}
+
+TEST_F(SpvParserTest, RegisterMerges_GoodLoopMerge_MultiBlockLoop_Branch) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %40 None
+     OpBranch %30
+
+     %30 = OpLabel
+     OpBranchConditional %cond %40 %99
+
+     %40 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_TRUE(fe.RegisterMerges());
+
+  // Loop header points to continue and merge
+  const auto* bi20 = fe.GetBlockInfo(20);
+  ASSERT_NE(bi20, nullptr);
+  EXPECT_EQ(bi20->merge_for_header, 99u);
+  EXPECT_EQ(bi20->continue_for_header, 40u);
+  EXPECT_EQ(bi20->header_for_merge, 0u);
+  EXPECT_EQ(bi20->header_for_continue, 0u);
+  EXPECT_FALSE(bi20->single_block_loop);
+
+  // Continue block points to header
+  const auto* bi40 = fe.GetBlockInfo(40);
+  ASSERT_NE(bi40, nullptr);
+  EXPECT_EQ(bi40->merge_for_header, 0u);
+  EXPECT_EQ(bi40->continue_for_header, 0u);
+  EXPECT_EQ(bi40->header_for_merge, 0u);
+  EXPECT_EQ(bi40->header_for_continue, 20u);
+  EXPECT_FALSE(bi40->single_block_loop);
+
+  // Merge block points to the header
+  const auto* bi99 = fe.GetBlockInfo(99);
+  ASSERT_NE(bi99, nullptr);
+  EXPECT_EQ(bi99->merge_for_header, 0u);
+  EXPECT_EQ(bi99->continue_for_header, 0u);
+  EXPECT_EQ(bi99->header_for_merge, 20u);
+  EXPECT_EQ(bi99->header_for_continue, 0u);
+  EXPECT_FALSE(bi99->single_block_loop);
+}
+
+TEST_F(SpvParserTest,
+       RegisterMerges_GoodLoopMerge_MultiBlockLoop_BranchConditional) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %40 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_TRUE(fe.RegisterMerges());
+
+  // Loop header points to continue and merge
+  const auto* bi20 = fe.GetBlockInfo(20);
+  ASSERT_NE(bi20, nullptr);
+  EXPECT_EQ(bi20->merge_for_header, 99u);
+  EXPECT_EQ(bi20->continue_for_header, 40u);
+  EXPECT_EQ(bi20->header_for_merge, 0u);
+  EXPECT_EQ(bi20->header_for_continue, 0u);
+  EXPECT_FALSE(bi20->single_block_loop);
+
+  // Continue block points to header
+  const auto* bi40 = fe.GetBlockInfo(40);
+  ASSERT_NE(bi40, nullptr);
+  EXPECT_EQ(bi40->merge_for_header, 0u);
+  EXPECT_EQ(bi40->continue_for_header, 0u);
+  EXPECT_EQ(bi40->header_for_merge, 0u);
+  EXPECT_EQ(bi40->header_for_continue, 20u);
+  EXPECT_FALSE(bi40->single_block_loop);
+
+  // Merge block points to the header
+  const auto* bi99 = fe.GetBlockInfo(99);
+  ASSERT_NE(bi99, nullptr);
+  EXPECT_EQ(bi99->merge_for_header, 0u);
+  EXPECT_EQ(bi99->continue_for_header, 0u);
+  EXPECT_EQ(bi99->header_for_merge, 20u);
+  EXPECT_EQ(bi99->header_for_continue, 0u);
+  EXPECT_FALSE(bi99->single_block_loop);
+}
+
+TEST_F(SpvParserTest, RegisterMerges_SelectionMerge_BadTerminator) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranch %30
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_FALSE(fe.RegisterMerges());
+  EXPECT_THAT(p->error(), Eq("Selection header 10 does not end in an "
+                             "OpBranchConditional or OpSwitch instruction"));
+}
+
+TEST_F(SpvParserTest, RegisterMerges_LoopMerge_BadTerminator) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %40 None
+     OpSwitch %selector %99 30 %30
+
+     %30 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_FALSE(fe.RegisterMerges());
+  EXPECT_THAT(p->error(), Eq("Loop header 20 does not end in an OpBranch or "
+                             "OpBranchConditional instruction"));
+}
+
+TEST_F(SpvParserTest, RegisterMerges_BadMergeBlock) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %void None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_FALSE(fe.RegisterMerges());
+  EXPECT_THAT(p->error(),
+              Eq("Structured header block 10 declares invalid merge block 1"));
+}
+
+TEST_F(SpvParserTest, RegisterMerges_HeaderIsItsOwnMerge) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %10 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_FALSE(fe.RegisterMerges());
+  EXPECT_THAT(p->error(),
+              Eq("Structured header block 10 cannot be its own merge block"));
+}
+
+TEST_F(SpvParserTest, RegisterMerges_MergeReused) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %49 None
+     OpBranchConditional %cond %20 %49
+
+     %20 = OpLabel
+     OpBranch %49
+
+     %49 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel
+     OpSelectionMerge %49 None  ; can't reuse merge block
+     OpBranchConditional %cond %60 %99
+
+     %60 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_FALSE(fe.RegisterMerges());
+  EXPECT_THAT(
+      p->error(),
+      Eq("Block 49 declared as merge block for more than one header: 10, 50"));
+}
+
+TEST_F(SpvParserTest, RegisterMerges_EntryBlockIsLoopHeader) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpLoopMerge %99 %30 None
+     OpBranchConditional %cond %10 %99
+
+     %30 = OpLabel
+     OpBranch %10
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_FALSE(fe.RegisterMerges());
+  EXPECT_THAT(p->error(),
+              Eq("Function entry block 10 cannot be a loop header"));
+}
+
+TEST_F(SpvParserTest, RegisterMerges_BadContinueTarget) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %999 None
+     OpBranchConditional %cond %20 %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_FALSE(fe.RegisterMerges());
+  EXPECT_THAT(p->error(),
+              Eq("Structured header 20 declares invalid continue target 999"));
+}
+
+TEST_F(SpvParserTest, RegisterMerges_MergeSameAsContinue) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %50 %50 None
+     OpBranchConditional %cond %20 %99
+
+
+     %50 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_FALSE(fe.RegisterMerges());
+  EXPECT_THAT(p->error(),
+              Eq("Invalid structured header block 20: declares block 50 as "
+                 "both its merge block and continue target"));
+}
+
+TEST_F(SpvParserTest, RegisterMerges_ContinueReused) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %49 %40 None
+     OpBranchConditional %cond %30 %49
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel
+     OpBranch %20
+
+     %49 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel
+     OpLoopMerge %99 %40 None
+     OpBranchConditional %cond %60 %99
+
+     %60 = OpLabel
+     OpBranch %70
+
+     %70 = OpLabel
+     OpBranch %50
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_FALSE(fe.RegisterMerges());
+  EXPECT_THAT(p->error(), Eq("Block 40 declared as continue target for more "
+                             "than one header: 20, 50"));
+}
+
+TEST_F(SpvParserTest, RegisterMerges_SingleBlockLoop_NotItsOwnContinue) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %30 None
+     OpBranchConditional %cond %20 %99
+
+     %30 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_FALSE(fe.RegisterMerges());
+  EXPECT_THAT(
+      p->error(),
+      Eq("Block 20 branches to itself but is not its own continue target"));
+}
+
+TEST_F(SpvParserTest, RegisterMerges_NotSingleBlockLoop_IsItsOwnContinue) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %20 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  EXPECT_FALSE(fe.RegisterMerges());
+  EXPECT_THAT(p->error(), Eq("Loop header block 20 declares itself as its own "
+                             "continue target, but does not branch to itself"));
 }
 
 TEST_F(SpvParserTest, ComputeBlockOrder_OneBlock) {

@@ -312,6 +312,9 @@ bool FunctionEmitter::EmitBody() {
   if (!TerminatorsAreSane()) {
     return false;
   }
+  if (!RegisterMerges()) {
+    return false;
+  }
 
   ComputeBlockOrderAndPositions();
 
@@ -355,6 +358,110 @@ bool FunctionEmitter::TerminatorsAreSane() {
           }
           return true;
         });
+  }
+  return success();
+}
+
+bool FunctionEmitter::RegisterMerges() {
+  if (failed()) {
+    return false;
+  }
+
+  const auto entry_id = function_.begin()->id();
+  for (const auto& block : function_) {
+    const auto block_id = block.id();
+    auto* block_info = GetBlockInfo(block_id);
+    if (!block_info) {
+      return Fail() << "internal error: assumed blocks were registered";
+    }
+
+    if (const auto* inst = block.GetMergeInst()) {
+      auto terminator_opcode = block.terminator()->opcode();
+      switch (inst->opcode()) {
+        case SpvOpSelectionMerge:
+          if ((terminator_opcode != SpvOpBranchConditional) &&
+              (terminator_opcode != SpvOpSwitch)) {
+            return Fail() << "Selection header " << block_id
+                          << " does not end in an OpBranchConditional or "
+                             "OpSwitch instruction";
+          }
+          break;
+        case SpvOpLoopMerge:
+          if ((terminator_opcode != SpvOpBranchConditional) &&
+              (terminator_opcode != SpvOpBranch)) {
+            return Fail() << "Loop header " << block_id
+                          << " does not end in an OpBranch or "
+                             "OpBranchConditional instruction";
+          }
+          break;
+        default:
+          break;
+      }
+
+      const uint32_t header = block.id();
+      auto* header_info = block_info;
+      const uint32_t merge = inst->GetSingleWordInOperand(0);
+      auto* merge_info = GetBlockInfo(merge);
+      if (!merge_info) {
+        return Fail() << "Structured header block " << header
+                      << " declares invalid merge block " << merge;
+      }
+      if (merge == header) {
+        return Fail() << "Structured header block " << header
+                      << " cannot be its own merge block";
+      }
+      if (merge_info->header_for_merge) {
+        return Fail() << "Block " << merge
+                      << " declared as merge block for more than one header: "
+                      << merge_info->header_for_merge << ", " << header;
+      }
+      merge_info->header_for_merge = header;
+      header_info->merge_for_header = merge;
+
+      if (inst->opcode() == SpvOpLoopMerge) {
+        if (header == entry_id) {
+          return Fail() << "Function entry block " << entry_id
+                        << " cannot be a loop header";
+        }
+        const uint32_t ct = inst->GetSingleWordInOperand(1);
+        auto* ct_info = GetBlockInfo(ct);
+        if (!ct_info) {
+          return Fail() << "Structured header " << header
+                        << " declares invalid continue target " << ct;
+        }
+        if (ct == merge) {
+          return Fail() << "Invalid structured header block " << header
+                        << ": declares block " << ct
+                        << " as both its merge block and continue target";
+        }
+        if (ct_info->header_for_continue) {
+          return Fail()
+                 << "Block " << ct
+                 << " declared as continue target for more than one header: "
+                 << ct_info->header_for_continue << ", " << header;
+        }
+        ct_info->header_for_continue = header;
+        header_info->continue_for_header = ct;
+      }
+    }
+
+    // Check single-block loop cases.
+    bool single_block_loop = false;
+    block_info->basic_block->ForEachSuccessorLabel(
+        [&single_block_loop, block_id](const uint32_t succ) {
+          if (block_id == succ)
+            single_block_loop = true;
+        });
+    block_info->single_block_loop = single_block_loop;
+    const auto ct = block_info->continue_for_header;
+    if (single_block_loop && ct != block_id) {
+      return Fail() << "Block " << block_id
+                    << " branches to itself but is not its own continue target";
+    } else if (!single_block_loop && ct == block_id) {
+      return Fail() << "Loop header block " << block_id
+                    << " declares itself as its own continue target, but "
+                       "does not branch to itself";
+    }
   }
   return success();
 }
