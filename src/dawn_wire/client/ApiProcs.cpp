@@ -370,6 +370,11 @@ namespace dawn_wire { namespace client {
     void ClientDeviceRelease(WGPUDevice) {
     }
 
+    WGPUQueue ClientHandwrittenDeviceGetDefaultQueue(WGPUDevice cSelf) {
+        Device* device = reinterpret_cast<Device*>(cSelf);
+        return device->GetDefaultQueue();
+    }
+
     void ClientHandwrittenDeviceSetUncapturedErrorCallback(WGPUDevice cSelf,
                                                            WGPUErrorCallback callback,
                                                            void* userdata) {

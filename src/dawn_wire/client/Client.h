@@ -33,9 +33,7 @@ namespace dawn_wire { namespace client {
         Client(CommandSerializer* serializer, MemoryTransferService* memoryTransferService);
         ~Client();
 
-        WGPUDevice GetDevice() const {
-            return reinterpret_cast<WGPUDeviceImpl*>(mDevice);
-        }
+        WGPUDevice GetDevice();
 
         MemoryTransferService* GetMemoryTransferService() const {
             return mMemoryTransferService;

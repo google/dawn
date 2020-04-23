@@ -21,7 +21,6 @@ namespace dawn_wire { namespace client {
 
     Client::Client(CommandSerializer* serializer, MemoryTransferService* memoryTransferService)
         : ClientBase(),
-          mDevice(DeviceAllocator().New(this)->object.get()),
           mSerializer(serializer),
           mMemoryTransferService(memoryTransferService) {
         if (mMemoryTransferService == nullptr) {
@@ -32,7 +31,16 @@ namespace dawn_wire { namespace client {
     }
 
     Client::~Client() {
-        DeviceAllocator().Free(mDevice);
+        if (mDevice != nullptr) {
+            DeviceAllocator().Free(mDevice);
+        }
+    }
+
+    WGPUDevice Client::GetDevice() {
+        if (mDevice == nullptr) {
+            mDevice = DeviceAllocator().New(this)->object.get();
+        }
+        return reinterpret_cast<WGPUDeviceImpl*>(mDevice);
     }
 
     ReservedTexture Client::ReserveTexture(WGPUDevice cDevice) {
@@ -57,8 +65,12 @@ namespace dawn_wire { namespace client {
     }
 
     void Client::Disconnect() {
-        if (!mIsDisconnected) {
-            mIsDisconnected = true;
+        if (mIsDisconnected) {
+            return;
+        }
+
+        mIsDisconnected = true;
+        if (mDevice != nullptr) {
             mDevice->HandleDeviceLost("GPU connection lost");
         }
     }
