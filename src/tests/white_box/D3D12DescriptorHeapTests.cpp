@@ -580,8 +580,11 @@ TEST_P(D3D12DescriptorHeapTests, EncodeReuseUBOMultipleSubmits) {
 }
 
 // Verify encoding many sampler and ubo worth of bindgroups.
-// Shader-visible heaps should switch out |kNumOfHeaps| times.
+// Shader-visible heaps should switch out |kNumOfViewHeaps| times.
 TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
+    DAWN_SKIP_TEST_IF(!mD3DDevice->IsToggleEnabled(
+        dawn_native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
+
     // Create a solid filled texture.
     wgpu::TextureDescriptor descriptor;
     descriptor.dimension = wgpu::TextureDimension::e2D;
@@ -658,9 +661,26 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
         wgpu::SamplerDescriptor samplerDescriptor;
         wgpu::Sampler sampler = device.CreateSampler(&samplerDescriptor);
 
-        constexpr uint32_t kNumOfBindGroups = 4;
+        ShaderVisibleDescriptorAllocator* allocator =
+            mD3DDevice->GetShaderVisibleDescriptorAllocator();
+
+        const Serial heapSerial = allocator->GetShaderVisibleHeapsSerial();
+
+        const uint32_t viewHeapSize =
+            GetShaderVisibleHeapSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+        // "Small" view heap is always 2 x sampler heap size and encodes 3x the descriptors per
+        // group. This means the count of heaps switches is determined by the total number of views
+        // to encode. Compute the number of bindgroups to encode by counting the required views for
+        // |kNumOfViewHeaps| heaps worth.
+        constexpr uint32_t kViewsPerBindGroup = 3;
+        constexpr uint32_t kNumOfViewHeaps = 5;
+
+        const uint32_t numOfEncodedBindGroups =
+            (viewHeapSize * kNumOfViewHeaps) / kViewsPerBindGroup;
+
         std::vector<wgpu::BindGroup> bindGroups;
-        for (uint32_t i = 0; i < kNumOfBindGroups - 1; i++) {
+        for (uint32_t i = 0; i < numOfEncodedBindGroups - 1; i++) {
             std::array<float, 4> fillColor = GetSolidColor(i + 1);  // Avoid black
             wgpu::Buffer uniformBuffer = utils::CreateBufferFromData(
                 device, &fillColor, sizeof(fillColor), wgpu::BufferUsage::Uniform);
@@ -688,16 +708,8 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
 
         pass.SetPipeline(pipeline);
 
-        constexpr uint32_t kBindingsPerGroup = 4;
-        constexpr uint32_t kNumOfHeaps = 5;
-
-        const uint32_t heapSize = GetShaderVisibleHeapSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-        const uint32_t bindGroupsPerHeap = heapSize / kBindingsPerGroup;
-
-        ASSERT_TRUE(heapSize % kBindingsPerGroup == 0);
-
-        for (uint32_t i = 0; i < kNumOfHeaps * bindGroupsPerHeap; ++i) {
-            pass.SetBindGroup(0, bindGroups[i % kNumOfBindGroups]);
+        for (uint32_t i = 0; i < numOfEncodedBindGroups; ++i) {
+            pass.SetBindGroup(0, bindGroups[i]);
             pass.Draw(3);
         }
 
@@ -711,6 +723,8 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
         RGBA8 notFilled(0, 0, 0, 0);
         EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, 0, 0);
         EXPECT_PIXEL_RGBA8_EQ(notFilled, renderPass.color, kRTSize - 1, 0);
+
+        EXPECT_EQ(allocator->GetShaderVisibleHeapsSerial(), heapSerial + kNumOfViewHeaps);
     }
 }
 
