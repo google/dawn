@@ -145,8 +145,8 @@ namespace dawn_native { namespace metal {
         const SwapChainDescriptor* descriptor) {
         return new SwapChain(this, surface, previousSwapChain, descriptor);
     }
-    ResultOrError<TextureBase*> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {
-        return new Texture(this, descriptor);
+    ResultOrError<Ref<TextureBase>> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {
+        return AcquireRef(new Texture(this, descriptor));
     }
     ResultOrError<TextureViewBase*> Device::CreateTextureViewImpl(
         TextureBase* texture,

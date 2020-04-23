@@ -113,10 +113,10 @@ namespace dawn_native { namespace d3d12 {
 
         StagingDescriptorAllocator* GetDepthStencilViewAllocator() const;
 
-        TextureBase* WrapSharedHandle(const ExternalImageDescriptor* descriptor,
-                                      HANDLE sharedHandle,
-                                      uint64_t acquireMutexKey,
-                                      bool isSwapChainTexture);
+        Ref<TextureBase> WrapSharedHandle(const ExternalImageDescriptor* descriptor,
+                                          HANDLE sharedHandle,
+                                          uint64_t acquireMutexKey,
+                                          bool isSwapChainTexture);
         ResultOrError<ComPtr<IDXGIKeyedMutex>> CreateKeyedMutexForTexture(
             ID3D12Resource* d3d12Resource);
         void ReleaseKeyedMutexForTexture(ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex);
@@ -146,7 +146,8 @@ namespace dawn_native { namespace d3d12 {
             Surface* surface,
             NewSwapChainBase* previousSwapChain,
             const SwapChainDescriptor* descriptor) override;
-        ResultOrError<TextureBase*> CreateTextureImpl(const TextureDescriptor* descriptor) override;
+        ResultOrError<Ref<TextureBase>> CreateTextureImpl(
+            const TextureDescriptor* descriptor) override;
         ResultOrError<TextureViewBase*> CreateTextureViewImpl(
             TextureBase* texture,
             const TextureViewDescriptor* descriptor) override;

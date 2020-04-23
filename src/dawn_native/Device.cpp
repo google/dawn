@@ -628,13 +628,13 @@ namespace dawn_native {
         return result;
     }
     TextureBase* DeviceBase::CreateTexture(const TextureDescriptor* descriptor) {
-        TextureBase* result = nullptr;
+        Ref<TextureBase> result;
 
-        if (ConsumedError(CreateTextureInternal(&result, descriptor))) {
+        if (ConsumedError(CreateTextureInternal(descriptor), &result)) {
             return TextureBase::MakeError(this);
         }
 
-        return result;
+        return result.Detach();
     }
     TextureViewBase* DeviceBase::CreateTextureView(TextureBase* texture,
                                                    const TextureViewDescriptor* descriptor) {
@@ -918,14 +918,13 @@ namespace dawn_native {
         return {};
     }
 
-    MaybeError DeviceBase::CreateTextureInternal(TextureBase** result,
-                                                 const TextureDescriptor* descriptor) {
+    ResultOrError<Ref<TextureBase>> DeviceBase::CreateTextureInternal(
+        const TextureDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
         if (IsValidationEnabled()) {
             DAWN_TRY(ValidateTextureDescriptor(this, descriptor));
         }
-        DAWN_TRY_ASSIGN(*result, CreateTextureImpl(descriptor));
-        return {};
+        return CreateTextureImpl(descriptor);
     }
 
     MaybeError DeviceBase::CreateTextureViewInternal(TextureViewBase** result,

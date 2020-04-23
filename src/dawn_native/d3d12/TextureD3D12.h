@@ -34,13 +34,13 @@ namespace dawn_native { namespace d3d12 {
 
     class Texture final : public TextureBase {
       public:
-        static ResultOrError<TextureBase*> Create(Device* device,
-                                                  const TextureDescriptor* descriptor);
-        static ResultOrError<TextureBase*> Create(Device* device,
-                                                  const ExternalImageDescriptor* descriptor,
-                                                  HANDLE sharedHandle,
-                                                  uint64_t acquireMutexKey,
-                                                  bool isSwapChainTexture);
+        static ResultOrError<Ref<TextureBase>> Create(Device* device,
+                                                      const TextureDescriptor* descriptor);
+        static ResultOrError<Ref<TextureBase>> Create(Device* device,
+                                                      const ExternalImageDescriptor* descriptor,
+                                                      HANDLE sharedHandle,
+                                                      uint64_t acquireMutexKey,
+                                                      bool isSwapChainTexture);
         Texture(Device* device,
                 const TextureDescriptor* descriptor,
                 ComPtr<ID3D12Resource> d3d12Texture);

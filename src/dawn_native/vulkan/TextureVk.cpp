@@ -406,11 +406,12 @@ namespace dawn_native { namespace vulkan {
     }
 
     // static
-    ResultOrError<Texture*> Texture::Create(Device* device, const TextureDescriptor* descriptor) {
+    ResultOrError<Ref<TextureBase>> Texture::Create(Device* device,
+                                                    const TextureDescriptor* descriptor) {
         Ref<Texture> texture =
             AcquireRef(new Texture(device, descriptor, TextureState::OwnedInternal));
         DAWN_TRY(texture->InitializeAsInternalTexture());
-        return texture.Detach();
+        return std::move(texture);
     }
 
     // static

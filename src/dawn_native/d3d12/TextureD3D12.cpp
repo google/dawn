@@ -273,19 +273,19 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-    ResultOrError<TextureBase*> Texture::Create(Device* device,
-                                                const TextureDescriptor* descriptor) {
+    ResultOrError<Ref<TextureBase>> Texture::Create(Device* device,
+                                                    const TextureDescriptor* descriptor) {
         Ref<Texture> dawnTexture =
             AcquireRef(new Texture(device, descriptor, TextureState::OwnedInternal));
         DAWN_TRY(dawnTexture->InitializeAsInternalTexture());
-        return dawnTexture.Detach();
+        return std::move(dawnTexture);
     }
 
-    ResultOrError<TextureBase*> Texture::Create(Device* device,
-                                                const ExternalImageDescriptor* descriptor,
-                                                HANDLE sharedHandle,
-                                                uint64_t acquireMutexKey,
-                                                bool isSwapChainTexture) {
+    ResultOrError<Ref<TextureBase>> Texture::Create(Device* device,
+                                                    const ExternalImageDescriptor* descriptor,
+                                                    HANDLE sharedHandle,
+                                                    uint64_t acquireMutexKey,
+                                                    bool isSwapChainTexture) {
         const TextureDescriptor* textureDescriptor =
             reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor);
 
@@ -297,7 +297,7 @@ namespace dawn_native { namespace d3d12 {
         dawnTexture->SetIsSubresourceContentInitialized(descriptor->isCleared, 0,
                                                         textureDescriptor->mipLevelCount, 0,
                                                         textureDescriptor->arrayLayerCount);
-        return dawnTexture.Detach();
+        return std::move(dawnTexture);
     }
 
     MaybeError Texture::InitializeAsExternalTexture(const TextureDescriptor* descriptor,

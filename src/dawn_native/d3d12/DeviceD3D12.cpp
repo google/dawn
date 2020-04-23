@@ -292,7 +292,7 @@ namespace dawn_native { namespace d3d12 {
         const SwapChainDescriptor* descriptor) {
         return DAWN_VALIDATION_ERROR("New swapchains not implemented.");
     }
-    ResultOrError<TextureBase*> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {
+    ResultOrError<Ref<TextureBase>> Device::CreateTextureImpl(const TextureDescriptor* descriptor) {
         return Texture::Create(this, descriptor);
     }
     ResultOrError<TextureViewBase*> Device::CreateTextureViewImpl(
@@ -339,11 +339,11 @@ namespace dawn_native { namespace d3d12 {
                                                          initialUsage);
     }
 
-    TextureBase* Device::WrapSharedHandle(const ExternalImageDescriptor* descriptor,
-                                          HANDLE sharedHandle,
-                                          uint64_t acquireMutexKey,
-                                          bool isSwapChainTexture) {
-        TextureBase* dawnTexture;
+    Ref<TextureBase> Device::WrapSharedHandle(const ExternalImageDescriptor* descriptor,
+                                              HANDLE sharedHandle,
+                                              uint64_t acquireMutexKey,
+                                              bool isSwapChainTexture) {
+        Ref<TextureBase> dawnTexture;
         if (ConsumedError(Texture::Create(this, descriptor, sharedHandle, acquireMutexKey,
                                           isSwapChainTexture),
                           &dawnTexture))

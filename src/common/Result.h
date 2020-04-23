@@ -177,11 +177,14 @@ class DAWN_NO_DISCARD Result<Ref<T>, E> {
     static_assert(alignof_if_defined_else_default<E, 4> >= 4,
                   "Result<Ref<T>, E> reserves two bits for tagging pointers");
 
-    Result(Ref<T>&& success);
+    template <typename U>
+    Result(Ref<U>&& success);
     Result(std::unique_ptr<E> error);
 
-    Result(Result<Ref<T>, E>&& other);
-    Result<Ref<T>, E>& operator=(Result<Ref<T>, E>&& other);
+    template <typename U>
+    Result(Result<Ref<U>, E>&& other);
+    template <typename U>
+    Result<Ref<U>, E>& operator=(Result<Ref<U>, E>&& other);
 
     ~Result();
 
@@ -192,6 +195,9 @@ class DAWN_NO_DISCARD Result<Ref<T>, E> {
     std::unique_ptr<E> AcquireError();
 
   private:
+    template <typename T2, typename E2>
+    friend class Result;
+
     intptr_t mPayload = detail::kEmptyPayload;
 };
 
@@ -399,8 +405,10 @@ std::unique_ptr<E> Result<const T*, E>::AcquireError() {
 
 // Implementation of Result<Ref<T>, E>
 template <typename T, typename E>
-Result<Ref<T>, E>::Result(Ref<T>&& success)
+template <typename U>
+Result<Ref<T>, E>::Result(Ref<U>&& success)
     : mPayload(detail::MakePayload(success.Detach(), detail::Success)) {
+    static_assert(std::is_convertible<U*, T*>::value, "");
 }
 
 template <typename T, typename E>
@@ -409,12 +417,16 @@ Result<Ref<T>, E>::Result(std::unique_ptr<E> error)
 }
 
 template <typename T, typename E>
-Result<Ref<T>, E>::Result(Result<Ref<T>, E>&& other) : mPayload(other.mPayload) {
+template <typename U>
+Result<Ref<T>, E>::Result(Result<Ref<U>, E>&& other) : mPayload(other.mPayload) {
+    static_assert(std::is_convertible<U*, T*>::value, "");
     other.mPayload = detail::kEmptyPayload;
 }
 
 template <typename T, typename E>
-Result<Ref<T>, E>& Result<Ref<T>, E>::operator=(Result<Ref<T>, E>&& other) {
+template <typename U>
+Result<Ref<U>, E>& Result<Ref<T>, E>::operator=(Result<Ref<U>, E>&& other) {
+    static_assert(std::is_convertible<U*, T*>::value, "");
     ASSERT(mPayload == detail::kEmptyPayload);
     mPayload = other.mPayload;
     other.mPayload = detail::kEmptyPayload;

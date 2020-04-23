@@ -40,7 +40,8 @@ namespace dawn_native { namespace vulkan {
     class Texture final : public TextureBase {
       public:
         // Used to create a regular texture from a descriptor.
-        static ResultOrError<Texture*> Create(Device* device, const TextureDescriptor* descriptor);
+        static ResultOrError<Ref<TextureBase>> Create(Device* device,
+                                                      const TextureDescriptor* descriptor);
 
         // Creates a texture and initializes it with a VkImage that references an external memory
         // object. Before the texture can be used, the VkDeviceMemory associated with the external

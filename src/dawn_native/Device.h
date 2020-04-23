@@ -243,7 +243,7 @@ namespace dawn_native {
             Surface* surface,
             NewSwapChainBase* previousSwapChain,
             const SwapChainDescriptor* descriptor) = 0;
-        virtual ResultOrError<TextureBase*> CreateTextureImpl(
+        virtual ResultOrError<Ref<TextureBase>> CreateTextureImpl(
             const TextureDescriptor* descriptor) = 0;
         virtual ResultOrError<TextureViewBase*> CreateTextureViewImpl(
             TextureBase* texture,
@@ -269,7 +269,7 @@ namespace dawn_native {
         MaybeError CreateSwapChainInternal(SwapChainBase** result,
                                            Surface* surface,
                                            const SwapChainDescriptor* descriptor);
-        MaybeError CreateTextureInternal(TextureBase** result, const TextureDescriptor* descriptor);
+        ResultOrError<Ref<TextureBase>> CreateTextureInternal(const TextureDescriptor* descriptor);
         MaybeError CreateTextureViewInternal(TextureViewBase** result,
                                              TextureBase* texture,
                                              const TextureViewDescriptor* descriptor);
