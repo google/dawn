@@ -115,7 +115,8 @@ namespace dawn_native { namespace vulkan {
     }
 
     BindGroup::~BindGroup() {
-        ToBackend(GetLayout())->DeallocateBindGroup(this, &mDescriptorSetAllocation);
+        ToBackend(GetLayout())->DeallocateDescriptorSet(&mDescriptorSetAllocation);
+        ToBackend(GetLayout())->DeallocateBindGroup(this);
     }
 
     VkDescriptorSet BindGroup::GetHandle() const {
