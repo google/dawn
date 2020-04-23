@@ -158,6 +158,38 @@ TEST_F(SpvUnaryLogicalTest, LogicalNot_Scalar) {
       << ToString(fe.ast_body());
 }
 
+TEST_F(SpvUnaryLogicalTest, LogicalNot_Vector) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpLogicalNot %v2bool %v2bool_t_f
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __vec_2__bool
+    {
+      UnaryOp{
+        not
+        TypeConstructor{
+          __vec_2__bool
+          ScalarConstructor{true}
+          ScalarConstructor{false}
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+
 struct BinaryData {
   const std::string res_type;
   const std::string lhs;
@@ -289,6 +321,34 @@ INSTANTIATE_TEST_SUITE_P(
                                  "v2bool_f_t", "__vec_2__bool",
                                  AstFor("v2bool_t_f"), "logical_or",
                                  AstFor("v2bool_f_t")}));
+
+// TODO(dneto): OpAny
+// TODO(dneto): OpAll
+// TODO(dneto): OpIsNan
+// TODO(dneto): OpIsInf
+// TODO(dneto): Kernel-guarded instructions.
+// TODO(dneto): OpLogicalEqual
+// TODO(dneto): OpLogicalNotEqual
+// TODO(dneto): OpSelect
+// TODO(dneto): OpUGreaterThan
+// TODO(dneto): OpSGreaterThan
+// TODO(dneto): OpUGreaterThanEqual
+// TODO(dneto): OpSGreaterThanEqual
+// TODO(dneto): OpULessThan
+// TODO(dneto): OpSLessThan
+// TODO(dneto): OpULessThanEqual
+// TODO(dneto): OpSLessThanEqual
+// TODO(dneto): OpFUnordEqual
+// TODO(dneto): OpFOrdNotEqual
+// TODO(dneto): OpFUnordNotEqual
+// TODO(dneto): OpFOrdLessThan
+// TODO(dneto): OpFUnordLessThan
+// TODO(dneto): OpFOrdGreaterThan
+// TODO(dneto): OpFUnordGreaterThan
+// TODO(dneto): OpFOrdLessThanEqual
+// TODO(dneto): OpFUnordLessThanEqual
+// TODO(dneto): OpFOrdGreaterThanEqual
+// TODO(dneto): OpFUnordGreaterThanEqual
 
 }  // namespace
 }  // namespace spirv
