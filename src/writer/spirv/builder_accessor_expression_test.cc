@@ -16,11 +16,15 @@
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/int_literal.h"
+#include "src/ast/member_accessor_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/struct.h"
+#include "src/ast/struct_member.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
+#include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/variable.h"
 #include "src/context.h"
@@ -123,6 +127,123 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             R"(%8 = OpAccessChain %12 %1 %11 %10
 )");
+}
+
+TEST_F(BuilderTest, MemberAccessor) {
+  ast::type::F32Type f32;
+
+  ast::StructMemberDecorationList decos;
+  ast::StructMemberList members;
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
+  members.push_back(
+      std::make_unique<ast::StructMember>("b", &f32, std::move(decos)));
+
+  auto s = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
+                                         std::move(members));
+  ast::type::StructType s_type(std::move(s));
+  s_type.set_name("my_struct");
+
+  ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
+
+  ast::MemberAccessorExpression expr(
+      std::make_unique<ast::IdentifierExpression>("ident"),
+      std::make_unique<ast::IdentifierExpression>("b"));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(&var);
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 5u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+%3 = OpTypeStruct %4 %4
+%2 = OpTypePointer Function %3
+%6 = OpTypeInt 32 0
+%7 = OpConstant %6 1
+%8 = OpTypePointer Function %4
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
+            R"(%1 = OpVariable %2 Function
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%5 = OpAccessChain %8 %1 %7
+)");
+}
+
+TEST_F(BuilderTest, MemberAccessor_Nested) {
+  ast::type::F32Type f32;
+
+  ast::StructMemberDecorationList decos;
+  ast::StructMemberList inner_members;
+  inner_members.push_back(
+      std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
+  inner_members.push_back(
+      std::make_unique<ast::StructMember>("b", &f32, std::move(decos)));
+
+  ast::type::StructType inner_struct(std::make_unique<ast::Struct>(
+      ast::StructDecoration::kNone, std::move(inner_members)));
+
+  ast::StructMemberList outer_members;
+  outer_members.push_back(std::make_unique<ast::StructMember>(
+      "inner", &inner_struct, std::move(decos)));
+
+  ast::type::StructType s_type(std::make_unique<ast::Struct>(
+      ast::StructDecoration::kNone, std::move(outer_members)));
+  s_type.set_name("my_struct");
+
+  ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
+
+  ast::MemberAccessorExpression expr(
+      std::make_unique<ast::MemberAccessorExpression>(
+          std::make_unique<ast::IdentifierExpression>("ident"),
+          std::make_unique<ast::IdentifierExpression>("inner")),
+      std::make_unique<ast::IdentifierExpression>("a"));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(&var);
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 6u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
+%4 = OpTypeStruct %5 %5
+%3 = OpTypeStruct %4
+%2 = OpTypePointer Function %3
+%7 = OpTypeInt 32 0
+%8 = OpConstant %7 0
+%9 = OpTypePointer Function %5
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
+            R"(%1 = OpVariable %2 Function
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%6 = OpAccessChain %9 %1 %8 %8
+)");
+}
+
+TEST_F(BuilderTest, DISABLED_MemberAccessor_Swizzle_Single) {
+  // vec.x
+}
+
+TEST_F(BuilderTest, DISABLED_MemberAccessor_Swizzle_Multiple) {
+  // vec.xy
+}
+
+TEST_F(BuilderTest, DISABLED_Accessor_Mixed) {
+  // a[0].foo[2].bar.baz.yx
 }
 
 }  // namespace

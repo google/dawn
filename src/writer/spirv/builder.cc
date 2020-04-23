@@ -215,6 +215,9 @@ uint32_t Builder::GenerateExpression(ast::Expression* expr) {
   if (expr->IsIdentifier()) {
     return GenerateIdentifierExpression(expr->AsIdentifier());
   }
+  if (expr->IsMemberAccessor()) {
+    return GenerateAccessorExpression(expr->AsMemberAccessor());
+  }
   if (expr->IsUnaryOp()) {
     return GenerateUnaryOpExpression(expr->AsUnaryOp());
   }
@@ -479,7 +482,14 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
 
           break;
         }
-        idx_list.insert(idx_list.begin(), Operand::Int(i));
+
+        ast::type::U32Type u32;
+        ast::IntLiteral idx(&u32, i);
+        auto idx_id = GenerateLiteralIfNeeded(&idx);
+        if (idx_id == 0) {
+          return false;
+        }
+        idx_list.insert(idx_list.begin(), Operand::Int(idx_id));
 
       } else if (data_type->IsVector()) {
         // TODO(dsinclair): Handle swizzle
