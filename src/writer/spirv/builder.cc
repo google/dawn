@@ -171,6 +171,12 @@ bool Builder::GenerateAssignStatement(ast::AssignmentStatement* assign) {
     return false;
   }
 
+  // If the thing we're assigning is a pointer then we must load it first.
+  if (assign->rhs()->result_type()->IsPointer()) {
+    rhs_id =
+        GenerateLoad(assign->rhs()->result_type()->UnwrapPtrIfNeeded(), rhs_id);
+  }
+
   GenerateStore(lhs_id, rhs_id);
   return true;
 }

@@ -14,6 +14,8 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/array_accessor_expression.h"
+#include "src/ast/assignment_statement.h"
+#include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/member_accessor_expression.h"
@@ -247,6 +249,157 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             R"(%6 = OpAccessChain %9 %1 %8 %8
+)");
+}
+
+TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
+  ast::type::F32Type f32;
+
+  // inner_struct {
+  //   a : f32
+  // }
+  // my_struct {
+  //   inner : inner_struct
+  // }
+  //
+  // var ident : my_struct
+  // ident.inner.a = 2.0f;
+
+  ast::StructMemberDecorationList decos;
+  ast::StructMemberList inner_members;
+  inner_members.push_back(
+      std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
+  inner_members.push_back(
+      std::make_unique<ast::StructMember>("b", &f32, std::move(decos)));
+
+  ast::type::StructType inner_struct(std::make_unique<ast::Struct>(
+      ast::StructDecoration::kNone, std::move(inner_members)));
+
+  ast::StructMemberList outer_members;
+  outer_members.push_back(std::make_unique<ast::StructMember>(
+      "inner", &inner_struct, std::move(decos)));
+
+  ast::type::StructType s_type(std::make_unique<ast::Struct>(
+      ast::StructDecoration::kNone, std::move(outer_members)));
+  s_type.set_name("my_struct");
+
+  ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
+
+  auto lhs = std::make_unique<ast::MemberAccessorExpression>(
+      std::make_unique<ast::MemberAccessorExpression>(
+          std::make_unique<ast::IdentifierExpression>("ident"),
+          std::make_unique<ast::IdentifierExpression>("inner")),
+      std::make_unique<ast::IdentifierExpression>("a"));
+
+  auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.f));
+
+  ast::AssignmentStatement expr(std::move(lhs), std::move(rhs));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(&var);
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+
+  EXPECT_TRUE(b.GenerateAssignStatement(&expr)) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
+%4 = OpTypeStruct %5 %5
+%3 = OpTypeStruct %4
+%2 = OpTypePointer Function %3
+%7 = OpTypeInt 32 0
+%8 = OpConstant %7 0
+%9 = OpTypePointer Function %5
+%10 = OpConstant %5 2
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
+            R"(%1 = OpVariable %2 Function
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%6 = OpAccessChain %9 %1 %8 %8
+OpStore %6 %10
+)");
+}
+
+TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
+  ast::type::F32Type f32;
+
+  // inner_struct {
+  //   a : f32
+  // }
+  // my_struct {
+  //   inner : inner_struct
+  // }
+  //
+  // var ident : my_struct
+  // var store : f32 = ident.inner.a
+
+  ast::StructMemberDecorationList decos;
+  ast::StructMemberList inner_members;
+  inner_members.push_back(
+      std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
+  inner_members.push_back(
+      std::make_unique<ast::StructMember>("b", &f32, std::move(decos)));
+
+  ast::type::StructType inner_struct(std::make_unique<ast::Struct>(
+      ast::StructDecoration::kNone, std::move(inner_members)));
+
+  ast::StructMemberList outer_members;
+  outer_members.push_back(std::make_unique<ast::StructMember>(
+      "inner", &inner_struct, std::move(decos)));
+
+  ast::type::StructType s_type(std::make_unique<ast::Struct>(
+      ast::StructDecoration::kNone, std::move(outer_members)));
+  s_type.set_name("my_struct");
+
+  ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
+  ast::Variable store("store", ast::StorageClass::kFunction, &f32);
+
+  auto lhs = std::make_unique<ast::IdentifierExpression>("store");
+
+  auto rhs = std::make_unique<ast::MemberAccessorExpression>(
+      std::make_unique<ast::MemberAccessorExpression>(
+          std::make_unique<ast::IdentifierExpression>("ident"),
+          std::make_unique<ast::IdentifierExpression>("inner")),
+      std::make_unique<ast::IdentifierExpression>("a"));
+
+  ast::AssignmentStatement expr(std::move(lhs), std::move(rhs));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(&var);
+  td.RegisterVariableForTesting(&store);
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(&store)) << b.error();
+
+  EXPECT_TRUE(b.GenerateAssignStatement(&expr)) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
+%4 = OpTypeStruct %5 %5
+%3 = OpTypeStruct %4
+%2 = OpTypePointer Function %3
+%7 = OpTypePointer Function %5
+%9 = OpTypeInt 32 0
+%10 = OpConstant %9 0
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
+            R"(%1 = OpVariable %2 Function
+%6 = OpVariable %7 Function
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%8 = OpAccessChain %7 %1 %10 %10
+%11 = OpLoad %5 %8
+OpStore %6 %11
 )");
 }
 
