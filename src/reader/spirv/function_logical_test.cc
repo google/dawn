@@ -189,7 +189,6 @@ TEST_F(SpvUnaryLogicalTest, LogicalNot_Vector) {
       << ToString(fe.ast_body());
 }
 
-
 struct BinaryData {
   const std::string res_type;
   const std::string lhs;
@@ -322,13 +321,33 @@ INSTANTIATE_TEST_SUITE_P(
                                  AstFor("v2bool_t_f"), "logical_or",
                                  AstFor("v2bool_f_t")}));
 
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_LogicalEqual,
+    SpvBinaryLogicalTest,
+    ::testing::Values(BinaryData{"bool", "true", "OpLogicalEqual", "false",
+                                 "__bool", "ScalarConstructor{true}", "equal",
+                                 "ScalarConstructor{false}"},
+                      BinaryData{"v2bool", "v2bool_t_f", "OpLogicalEqual",
+                                 "v2bool_f_t", "__vec_2__bool",
+                                 AstFor("v2bool_t_f"), "equal",
+                                 AstFor("v2bool_f_t")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_LogicalNotEqual,
+    SpvBinaryLogicalTest,
+    ::testing::Values(BinaryData{"bool", "true", "OpLogicalNotEqual", "false",
+                                 "__bool", "ScalarConstructor{true}",
+                                 "not_equal", "ScalarConstructor{false}"},
+                      BinaryData{"v2bool", "v2bool_t_f", "OpLogicalNotEqual",
+                                 "v2bool_f_t", "__vec_2__bool",
+                                 AstFor("v2bool_t_f"), "not_equal",
+                                 AstFor("v2bool_f_t")}));
+
 // TODO(dneto): OpAny
 // TODO(dneto): OpAll
 // TODO(dneto): OpIsNan
 // TODO(dneto): OpIsInf
 // TODO(dneto): Kernel-guarded instructions.
-// TODO(dneto): OpLogicalEqual
-// TODO(dneto): OpLogicalNotEqual
 // TODO(dneto): OpSelect
 // TODO(dneto): OpUGreaterThan
 // TODO(dneto): OpSGreaterThan
