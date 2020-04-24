@@ -576,7 +576,7 @@ TEST_F(SpvParserTest, RegisterMerges_SelectionMerge_BadTerminator) {
 
      %10 = OpLabel
      OpSelectionMerge %99 None
-     OpBranch %30
+     OpBranch %20
 
      %20 = OpLabel
      OpBranch %99
@@ -606,6 +606,9 @@ TEST_F(SpvParserTest, RegisterMerges_LoopMerge_BadTerminator) {
      OpSwitch %selector %99 30 %30
 
      %30 = OpLabel
+     OpBranch %99
+
+     %40 = OpLabel
      OpBranch %20
 
      %99 = OpLabel
