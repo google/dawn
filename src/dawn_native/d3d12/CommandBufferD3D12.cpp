@@ -298,13 +298,13 @@ namespace dawn_native { namespace d3d12 {
     namespace {
         class VertexBufferTracker {
           public:
-            void OnSetVertexBuffer(uint32_t slot, Buffer* buffer, uint64_t offset) {
+            void OnSetVertexBuffer(uint32_t slot, Buffer* buffer, uint64_t offset, uint64_t size) {
                 mStartSlot = std::min(mStartSlot, slot);
                 mEndSlot = std::max(mEndSlot, slot + 1);
 
                 auto* d3d12BufferView = &mD3D12BufferViews[slot];
                 d3d12BufferView->BufferLocation = buffer->GetVA() + offset;
-                d3d12BufferView->SizeInBytes = buffer->GetSize() - offset;
+                d3d12BufferView->SizeInBytes = size;
                 // The bufferView stride is set based on the vertex state before a draw.
             }
 
@@ -360,9 +360,9 @@ namespace dawn_native { namespace d3d12 {
 
         class IndexBufferTracker {
           public:
-            void OnSetIndexBuffer(Buffer* buffer, uint64_t offset) {
+            void OnSetIndexBuffer(Buffer* buffer, uint64_t offset, uint64_t size) {
                 mD3D12BufferView.BufferLocation = buffer->GetVA() + offset;
-                mD3D12BufferView.SizeInBytes = buffer->GetSize() - offset;
+                mD3D12BufferView.SizeInBytes = size;
 
                 // We don't need to dirty the state unless BufferLocation or SizeInBytes
                 // change, but most of the time this will always be the case.
@@ -1113,7 +1113,8 @@ namespace dawn_native { namespace d3d12 {
                 case Command::SetIndexBuffer: {
                     SetIndexBufferCmd* cmd = iter->NextCommand<SetIndexBufferCmd>();
 
-                    indexBufferTracker.OnSetIndexBuffer(ToBackend(cmd->buffer.Get()), cmd->offset);
+                    indexBufferTracker.OnSetIndexBuffer(ToBackend(cmd->buffer.Get()), cmd->offset,
+                                                        cmd->size);
                     break;
                 }
 
@@ -1121,7 +1122,7 @@ namespace dawn_native { namespace d3d12 {
                     SetVertexBufferCmd* cmd = iter->NextCommand<SetVertexBufferCmd>();
 
                     vertexBufferTracker.OnSetVertexBuffer(cmd->slot, ToBackend(cmd->buffer.Get()),
-                                                          cmd->offset);
+                                                          cmd->offset, cmd->size);
                     break;
                 }
 

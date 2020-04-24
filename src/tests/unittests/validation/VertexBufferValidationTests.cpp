@@ -211,3 +211,75 @@ TEST_F(VertexBufferValidationTest, VertexBufferSlotValidation) {
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 }
+
+// Test that for OOB validation of vertex buffer offset and size.
+TEST_F(VertexBufferValidationTest, VertexBufferOffsetOOBValidation) {
+    wgpu::Buffer buffer = MakeVertexBuffer();
+
+    DummyRenderPass renderPass(device);
+    // Control case, using the full buffer, with or without an explicit size is valid.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        // Explicit size
+        pass.SetVertexBuffer(0, buffer, 0, 256);
+        // Implicit size
+        pass.SetVertexBuffer(0, buffer, 0, 0);
+        pass.SetVertexBuffer(0, buffer, 256 - 4, 0);
+        pass.SetVertexBuffer(0, buffer, 4, 0);
+        // Implicit size of zero
+        pass.SetVertexBuffer(0, buffer, 256, 0);
+        pass.EndPass();
+        encoder.Finish();
+    }
+
+    // Bad case, offset + size is larger than the buffer
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetVertexBuffer(0, buffer, 4, 256);
+        pass.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Bad case, size is 0 but the offset is larger than the buffer
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetVertexBuffer(0, buffer, 256 + 4, 0);
+        pass.EndPass();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    utils::ComboRenderBundleEncoderDescriptor renderBundleDesc = {};
+    renderBundleDesc.colorFormatsCount = 1;
+    renderBundleDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
+
+    // Control case, using the full buffer, with or without an explicit size is valid.
+    {
+        wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
+        // Explicit size
+        encoder.SetVertexBuffer(0, buffer, 0, 256);
+        // Implicit size
+        encoder.SetVertexBuffer(0, buffer, 0, 0);
+        encoder.SetVertexBuffer(0, buffer, 256 - 4, 0);
+        encoder.SetVertexBuffer(0, buffer, 4, 0);
+        // Implicit size of zero
+        encoder.SetVertexBuffer(0, buffer, 256, 0);
+        encoder.Finish();
+    }
+
+    // Bad case, offset + size is larger than the buffer
+    {
+        wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
+        encoder.SetVertexBuffer(0, buffer, 4, 256);
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Bad case, size is 0 but the offset is larger than the buffer
+    {
+        wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
+        encoder.SetVertexBuffer(0, buffer, 256 + 4, 0);
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}

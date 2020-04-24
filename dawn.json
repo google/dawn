@@ -1001,14 +1001,16 @@
                 "args": [
                     {"name": "slot", "type": "uint32_t"},
                     {"name": "buffer", "type": "buffer"},
-                    {"name": "offset", "type": "uint64_t", "default": "0"}
+                    {"name": "offset", "type": "uint64_t", "default": "0"},
+                    {"name": "size", "type": "uint64_t", "default": "0"}
                 ]
             },
             {
                 "name": "set index buffer",
                 "args": [
                     {"name": "buffer", "type": "buffer"},
-                    {"name": "offset", "type": "uint64_t", "default": "0"}
+                    {"name": "offset", "type": "uint64_t", "default": "0"},
+                    {"name": "size", "type": "uint64_t", "default": "0"}
                 ]
             },
             {
@@ -1186,14 +1188,16 @@
                 "args": [
                     {"name": "slot", "type": "uint32_t"},
                     {"name": "buffer", "type": "buffer"},
-                    {"name": "offset", "type": "uint64_t", "default": "0"}
+                    {"name": "offset", "type": "uint64_t", "default": "0"},
+                    {"name": "size", "type": "uint64_t", "default": "0"}
                 ]
             },
             {
                 "name": "set index buffer",
                 "args": [
                     {"name": "buffer", "type": "buffer"},
-                    {"name": "offset", "type": "uint64_t", "default": "0"}
+                    {"name": "offset", "type": "uint64_t", "default": "0"},
+                    {"name": "size", "type": "uint64_t", "default": "0"}
                 ]
             },
             {

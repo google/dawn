@@ -218,12 +218,14 @@ namespace dawn_native {
     struct SetIndexBufferCmd {
         Ref<BufferBase> buffer;
         uint64_t offset;
+        uint64_t size;
     };
 
     struct SetVertexBufferCmd {
         uint32_t slot;
         Ref<BufferBase> buffer;
         uint64_t offset;
+        uint64_t size;
     };
 
     // This needs to be called before the CommandIterator is freed so that the Ref<> present in
