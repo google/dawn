@@ -41,6 +41,7 @@
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/switch_statement.h"
+#include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
@@ -787,6 +788,43 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
 
   auto var = std::make_unique<ast::Variable>("my_struct",
                                              ast::StorageClass::kNone, &st);
+
+  mod()->AddGlobalVariable(std::move(var));
+
+  // Register the global
+  EXPECT_TRUE(td()->Determine());
+
+  auto ident = std::make_unique<ast::IdentifierExpression>("my_struct");
+  auto mem_ident = std::make_unique<ast::IdentifierExpression>("second_member");
+
+  ast::MemberAccessorExpression mem(std::move(ident), std::move(mem_ident));
+  EXPECT_TRUE(td()->DetermineResultType(&mem));
+  ASSERT_NE(mem.result_type(), nullptr);
+  ASSERT_TRUE(mem.result_type()->IsPointer());
+
+  auto* ptr = mem.result_type()->AsPointer();
+  EXPECT_TRUE(ptr->type()->IsF32());
+}
+
+TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
+  ast::type::I32Type i32;
+  ast::type::F32Type f32;
+
+  ast::StructMemberDecorationList decos;
+  ast::StructMemberList members;
+  members.push_back(std::make_unique<ast::StructMember>("first_member", &i32,
+                                                        std::move(decos)));
+  members.push_back(std::make_unique<ast::StructMember>("second_member", &f32,
+                                                        std::move(decos)));
+
+  auto strct = std::make_unique<ast::Struct>(ast::StructDecoration::kNone,
+                                             std::move(members));
+
+  auto st = std::make_unique<ast::type::StructType>(std::move(strct));
+  ast::type::AliasType alias("alias", st.get());
+
+  auto var = std::make_unique<ast::Variable>("my_struct",
+                                             ast::StorageClass::kNone, &alias);
 
   mod()->AddGlobalVariable(std::move(var));
 
