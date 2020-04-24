@@ -19,7 +19,7 @@ import "GLSL.std.450" as std;
 [[location 0]] var<in> a_particlePos : vec2<f32>;
 [[location 1]] var<in> a_particleVel : vec2<f32>;
 [[location 2]] var<in> a_pos : vec2<f32>;
-[[builtin position]] var gl_Position : vec4<f32>;
+[[builtin position]] var<in> gl_Position : vec4<f32>;
 
 fn vtx_main() -> void {
   var angle : f32 = -std::atan2(a_particleVel.x, a_particleVel.y);
@@ -64,7 +64,7 @@ type Particles = struct {
 [[binding 1, set 0]] var<storage_buffer> particlesA : Particles;
 [[binding 2, set 0]] var<storage_buffer> particlesB : Particles;
 
-[[builtin global_invocation_id]] var gl_GlobalInvocationID : vec3<u32>;
+[[builtin global_invocation_id]] var<in> gl_GlobalInvocationID : vec3<u32>;
 
 # https://github.com/austinEng/Project6-Vulkan-Flocking/blob/master/data/shaders/computeparticles/particle.comp
 fn compute_main() -> void {
