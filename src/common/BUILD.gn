@@ -90,16 +90,19 @@ config("dawn_internal") {
   # Enable more warnings that were found when using Dawn in other projects
   if (is_clang) {
     cflags = [
-      "-Wstrict-prototypes",
-      "-Winconsistent-missing-destructor-override",
-      "-Wshadow-field",
-      "-Wmissing-field-initializers",
-      "-Wcstring-format-directive",
-      "-Wtautological-unsigned-zero-compare",
-      "-Wreturn-std-move-in-c++11",
       "-Wconditional-uninitialized",
+      "-Wcstring-format-directive",
       "-Wc++11-narrowing",
+      "-Wdeprecated-copy",
       "-Wextra-semi-stmt",
+      "-Winconsistent-missing-destructor-override",
+      "-Winvalid-offsetof",
+      "-Wmissing-field-initializers",
+      "-Wpessimizing-move",
+      "-Wreturn-std-move-in-c++11",
+      "-Wshadow-field",
+      "-Wstrict-prototypes",
+      "-Wtautological-unsigned-zero-compare",
     ]
   }
 }

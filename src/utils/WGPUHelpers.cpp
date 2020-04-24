@@ -176,6 +176,10 @@ namespace utils {
         }
     }
 
+    ComboRenderPassDescriptor::ComboRenderPassDescriptor(const ComboRenderPassDescriptor& other) {
+        *this = other;
+    }
+
     const ComboRenderPassDescriptor& ComboRenderPassDescriptor::operator=(
         const ComboRenderPassDescriptor& otherRenderPass) {
         cDepthStencilAttachmentInfo = otherRenderPass.cDepthStencilAttachmentInfo;

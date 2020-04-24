@@ -425,9 +425,16 @@ namespace dawn_wire {
     ObjectHandle::ObjectHandle(ObjectId id, ObjectGeneration generation)
         : id(id), generation(generation) {
     }
+
     ObjectHandle::ObjectHandle(const volatile ObjectHandle& rhs)
         : id(rhs.id), generation(rhs.generation) {
     }
+    ObjectHandle& ObjectHandle::operator=(const volatile ObjectHandle& rhs) {
+        id = rhs.id;
+        generation = rhs.generation;
+        return *this;
+    }
+
     ObjectHandle& ObjectHandle::AssignFrom(const ObjectHandle& rhs) {
         id = rhs.id;
         generation = rhs.generation;

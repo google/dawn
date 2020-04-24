@@ -27,7 +27,9 @@ namespace dawn_wire {
 
       ObjectHandle();
       ObjectHandle(ObjectId id, ObjectGeneration generation);
+
       ObjectHandle(const volatile ObjectHandle& rhs);
+      ObjectHandle& operator=(const volatile ObjectHandle& rhs);
 
       // MSVC has a bug where it thinks the volatile copy assignment is a duplicate.
       // Workaround this by forwarding to a different function AssignFrom.

@@ -59,6 +59,8 @@ namespace utils {
       public:
         ComboRenderPassDescriptor(std::initializer_list<wgpu::TextureView> colorAttachmentInfo,
                                   wgpu::TextureView depthStencil = wgpu::TextureView());
+
+        ComboRenderPassDescriptor(const ComboRenderPassDescriptor& otherRenderPass);
         const ComboRenderPassDescriptor& operator=(
             const ComboRenderPassDescriptor& otherRenderPass);
 
