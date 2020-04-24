@@ -329,9 +329,11 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
       auto* result_type = GetImportData(expr->source(), imp->path(),
                                         ident->name(), expr->params(), &ext_id);
       if (result_type == nullptr) {
-        set_error(expr->source(),
-                  "Unable to determine result type for GLSL expression " +
-                      ident->name());
+        if (error_.empty()) {
+          set_error(expr->source(),
+                    "Unable to determine result type for GLSL expression " +
+                        ident->name());
+        }
         return false;
       }
 
@@ -644,13 +646,14 @@ ast::type::Type* TypeDeterminer::GetImportData(
                             std::to_string(params.size()));
       return nullptr;
     }
-    if (!params[0]->result_type()->is_float_scalar_or_vector()) {
+
+    auto* result_type = params[0]->result_type()->UnwrapPtrIfNeeded();
+    if (!result_type->is_float_scalar_or_vector()) {
       set_error(source, "incorrect type for " + name +
                             ". Requires a float scalar or a float vector");
       return nullptr;
     }
 
-    auto* result_type = params[0]->result_type();
     if (name == "round") {
       *id = GLSLstd450Round;
     } else if (name == "roundeven") {
@@ -726,18 +729,20 @@ ast::type::Type* TypeDeterminer::GetImportData(
                ". Expected 2 got " + std::to_string(params.size());
       return nullptr;
     }
-    if (!params[0]->result_type()->is_float_scalar_or_vector() ||
-        !params[1]->result_type()->is_float_scalar_or_vector()) {
+
+    auto* result_type_0 = params[0]->result_type()->UnwrapPtrIfNeeded();
+    auto* result_type_1 = params[1]->result_type()->UnwrapPtrIfNeeded();
+    if (!result_type_0->is_float_scalar_or_vector() ||
+        !result_type_1->is_float_scalar_or_vector()) {
       error_ = "incorrect type for " + name +
                ". Requires float scalar or a float vector values";
       return nullptr;
     }
-    if (params[0]->result_type() != params[1]->result_type()) {
+    if (result_type_0 != result_type_1) {
       error_ = "mismatched parameter types for " + name;
       return nullptr;
     }
 
-    auto* result_type = params[0]->result_type();
     if (name == "atan2") {
       *id = GLSLstd450Atan2;
     } else if (name == "pow") {
@@ -758,11 +763,12 @@ ast::type::Type* TypeDeterminer::GetImportData(
       *id = GLSLstd450Distance;
 
       // Distance returns a scalar of the same type as the parameter.
-      return result_type->is_float_scalar() ? result_type
-                                            : result_type->AsVector()->type();
+      return result_type_0->is_float_scalar()
+                 ? result_type_0
+                 : result_type_0->AsVector()->type();
     }
 
-    return result_type;
+    return result_type_0;
   } else if (name == "fclamp" || name == "fmix" || name == "smoothstep" ||
              name == "fma" || name == "nclamp" || name == "faceforward") {
     if (params.size() != 3) {
@@ -770,20 +776,22 @@ ast::type::Type* TypeDeterminer::GetImportData(
                ". Expected 3 got " + std::to_string(params.size());
       return nullptr;
     }
-    if (!params[0]->result_type()->is_float_scalar_or_vector() ||
-        !params[1]->result_type()->is_float_scalar_or_vector() ||
-        !params[2]->result_type()->is_float_scalar_or_vector()) {
+
+    auto* result_type_0 = params[0]->result_type()->UnwrapPtrIfNeeded();
+    auto* result_type_1 = params[1]->result_type()->UnwrapPtrIfNeeded();
+    auto* result_type_2 = params[2]->result_type()->UnwrapPtrIfNeeded();
+    if (!result_type_0->is_float_scalar_or_vector() ||
+        !result_type_1->is_float_scalar_or_vector() ||
+        !result_type_2->is_float_scalar_or_vector()) {
       error_ = "incorrect type for " + name +
                ". Requires float scalar or a float vector values";
       return nullptr;
     }
-    if (params[0]->result_type() != params[1]->result_type() ||
-        params[0]->result_type() != params[2]->result_type()) {
+    if (result_type_0 != result_type_1 || result_type_0 != result_type_2) {
       error_ = "mismatched parameter types for " + name;
       return nullptr;
     }
 
-    auto* result_type = params[0]->result_type();
     if (name == "fclamp") {
       *id = GLSLstd450FClamp;
     } else if (name == "fmix") {
@@ -798,7 +806,7 @@ ast::type::Type* TypeDeterminer::GetImportData(
       *id = GLSLstd450FaceForward;
     }
 
-    return result_type;
+    return result_type_0;
   }
 
   return nullptr;
