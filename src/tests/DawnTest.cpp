@@ -796,7 +796,7 @@ std::ostringstream& DawnTestBase::AddBufferExpectation(const char* file,
     deferred.readbackOffset = readback.offset;
     deferred.size = size;
     deferred.rowBytes = size;
-    deferred.rowPitch = size;
+    deferred.bytesPerRow = size;
     deferred.expectation.reset(expectation);
 
     mDeferredExpectations.push_back(std::move(deferred));
@@ -815,8 +815,8 @@ std::ostringstream& DawnTestBase::AddTextureExpectation(const char* file,
                                                         uint32_t slice,
                                                         uint32_t pixelSize,
                                                         detail::Expectation* expectation) {
-    uint32_t rowPitch = Align(width * pixelSize, kTextureRowPitchAlignment);
-    uint32_t size = rowPitch * (height - 1) + width * pixelSize;
+    uint32_t bytesPerRow = Align(width * pixelSize, kTextureBytesPerRowAlignment);
+    uint32_t size = bytesPerRow * (height - 1) + width * pixelSize;
 
     auto readback = ReserveReadback(size);
 
@@ -825,7 +825,7 @@ std::ostringstream& DawnTestBase::AddTextureExpectation(const char* file,
     wgpu::TextureCopyView textureCopyView =
         utils::CreateTextureCopyView(texture, level, slice, {x, y, 0});
     wgpu::BufferCopyView bufferCopyView =
-        utils::CreateBufferCopyView(readback.buffer, readback.offset, rowPitch, 0);
+        utils::CreateBufferCopyView(readback.buffer, readback.offset, bytesPerRow, 0);
     wgpu::Extent3D copySize = {width, height, 1};
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -841,7 +841,7 @@ std::ostringstream& DawnTestBase::AddTextureExpectation(const char* file,
     deferred.readbackOffset = readback.offset;
     deferred.size = size;
     deferred.rowBytes = width * pixelSize;
-    deferred.rowPitch = rowPitch;
+    deferred.bytesPerRow = bytesPerRow;
     deferred.expectation.reset(expectation);
 
     mDeferredExpectations.push_back(std::move(deferred));
@@ -929,15 +929,16 @@ void DawnTestBase::ResolveExpectations() {
 
         uint32_t size;
         std::vector<char> packedData;
-        if (expectation.rowBytes != expectation.rowPitch) {
-            DAWN_ASSERT(expectation.rowPitch > expectation.rowBytes);
+        if (expectation.rowBytes != expectation.bytesPerRow) {
+            DAWN_ASSERT(expectation.bytesPerRow > expectation.rowBytes);
             uint32_t rowCount =
-                (expectation.size + expectation.rowPitch - 1) / expectation.rowPitch;
+                (expectation.size + expectation.bytesPerRow - 1) / expectation.bytesPerRow;
             uint32_t packedSize = rowCount * expectation.rowBytes;
             packedData.resize(packedSize);
             for (uint32_t r = 0; r < rowCount; ++r) {
                 for (uint32_t i = 0; i < expectation.rowBytes; ++i) {
-                    packedData[i + r * expectation.rowBytes] = data[i + r * expectation.rowPitch];
+                    packedData[i + r * expectation.rowBytes] =
+                        data[i + r * expectation.bytesPerRow];
                 }
             }
             data = packedData.data();

@@ -564,7 +564,7 @@ namespace dawn_native { namespace d3d12 {
 
                     auto copySplit = ComputeTextureCopySplit(
                         copy->destination.origin, copy->copySize, texture->GetFormat(),
-                        copy->source.offset, copy->source.rowPitch, copy->source.imageHeight);
+                        copy->source.offset, copy->source.bytesPerRow, copy->source.rowsPerImage);
 
                     D3D12_TEXTURE_COPY_LOCATION textureLocation =
                         ComputeTextureCopyLocationForTexture(texture, copy->destination.mipLevel,
@@ -576,7 +576,7 @@ namespace dawn_native { namespace d3d12 {
                         D3D12_TEXTURE_COPY_LOCATION bufferLocation =
                             ComputeBufferLocationForCopyTextureRegion(
                                 texture, buffer->GetD3D12Resource().Get(), info.bufferSize,
-                                copySplit.offset, copy->source.rowPitch);
+                                copySplit.offset, copy->source.bytesPerRow);
                         D3D12_BOX sourceRegion =
                             ComputeD3D12BoxFromOffsetAndSize(info.bufferOffset, info.copySize);
 
@@ -601,8 +601,8 @@ namespace dawn_native { namespace d3d12 {
 
                     TextureCopySplit copySplit = ComputeTextureCopySplit(
                         copy->source.origin, copy->copySize, texture->GetFormat(),
-                        copy->destination.offset, copy->destination.rowPitch,
-                        copy->destination.imageHeight);
+                        copy->destination.offset, copy->destination.bytesPerRow,
+                        copy->destination.rowsPerImage);
 
                     D3D12_TEXTURE_COPY_LOCATION textureLocation =
                         ComputeTextureCopyLocationForTexture(texture, copy->source.mipLevel,
@@ -614,7 +614,7 @@ namespace dawn_native { namespace d3d12 {
                         D3D12_TEXTURE_COPY_LOCATION bufferLocation =
                             ComputeBufferLocationForCopyTextureRegion(
                                 texture, buffer->GetD3D12Resource().Get(), info.bufferSize,
-                                copySplit.offset, copy->destination.rowPitch);
+                                copySplit.offset, copy->destination.bytesPerRow);
 
                         D3D12_BOX sourceRegion =
                             ComputeD3D12BoxFromOffsetAndSize(info.textureOffset, info.copySize);

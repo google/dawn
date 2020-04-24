@@ -215,8 +215,10 @@
         "members": [
             {"name": "buffer", "type": "buffer"},
             {"name": "offset", "type": "uint64_t", "default": 0},
-            {"name": "row pitch", "type": "uint32_t"},
-            {"name": "image height", "type": "uint32_t"}
+            {"name": "row pitch", "type": "uint32_t", "default": 0},
+            {"name": "image height", "type": "uint32_t", "default": 0},
+            {"name": "bytes per row", "type": "uint32_t", "default": 0},
+            {"name": "rows per image", "type": "uint32_t", "default": 0}
         ]
     },
     "buffer descriptor": {

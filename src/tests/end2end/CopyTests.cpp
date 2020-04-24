@@ -37,7 +37,7 @@ class CopyTests : public DawnTest {
         struct BufferSpec {
             uint64_t size;
             uint64_t offset;
-            uint32_t rowPitch;
+            uint32_t bytesPerRow;
         };
 
         static void FillTextureData(uint32_t width,
@@ -56,8 +56,8 @@ class CopyTests : public DawnTest {
         }
 
         BufferSpec MinimumBufferSpec(uint32_t width, uint32_t height) {
-            uint32_t rowPitch = Align(width * kBytesPerTexel, kTextureRowPitchAlignment);
-            return { rowPitch * (height - 1) + width * kBytesPerTexel, 0, rowPitch };
+            uint32_t bytesPerRow = Align(width * kBytesPerTexel, kTextureBytesPerRowAlignment);
+            return {bytesPerRow * (height - 1) + width * kBytesPerTexel, 0, bytesPerRow};
         }
 
         static void PackTextureData(const RGBA8* srcData, uint32_t width, uint32_t height, uint32_t srcTexelsPerRow, RGBA8* dstData, uint32_t dstTexelsPerRow) {
@@ -90,8 +90,8 @@ class CopyTests_T2B : public CopyTests {
 
             uint32_t width = textureSpec.width >> textureSpec.level;
             uint32_t height = textureSpec.height >> textureSpec.level;
-            uint32_t rowPitch = Align(kBytesPerTexel * width, kTextureRowPitchAlignment);
-            uint32_t texelsPerRow = rowPitch / kBytesPerTexel;
+            uint32_t bytesPerRow = Align(kBytesPerTexel * width, kTextureBytesPerRowAlignment);
+            uint32_t texelsPerRow = bytesPerRow / kBytesPerTexel;
             uint32_t texelCountPerLayer = texelsPerRow * (height - 1) + width;
 
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -99,7 +99,7 @@ class CopyTests_T2B : public CopyTests {
             std::vector<std::vector<RGBA8>> textureArrayData(textureSpec.arraySize);
             for (uint32_t slice = 0; slice < textureSpec.arraySize; ++slice) {
                 textureArrayData[slice].resize(texelCountPerLayer);
-                FillTextureData(width, height, rowPitch / kBytesPerTexel, slice,
+                FillTextureData(width, height, bytesPerRow / kBytesPerTexel, slice,
                                 textureArrayData[slice].data());
 
                 // Create an upload buffer and use it to populate the current slice of the texture in `level` mip level
@@ -108,16 +108,17 @@ class CopyTests_T2B : public CopyTests {
                     static_cast<uint32_t>(sizeof(RGBA8) * textureArrayData[slice].size()),
                     wgpu::BufferUsage::CopySrc);
                 wgpu::BufferCopyView bufferCopyView =
-                    utils::CreateBufferCopyView(uploadBuffer, 0, rowPitch, 0);
+                    utils::CreateBufferCopyView(uploadBuffer, 0, bytesPerRow, 0);
                 wgpu::TextureCopyView textureCopyView =
                     utils::CreateTextureCopyView(texture, textureSpec.level, slice, {0, 0, 0});
                 wgpu::Extent3D copySize = {width, height, 1};
                 encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
             }
 
-            // Create a buffer of size `size * textureSpec.arrayLayer` and populate it with empty data (0,0,0,0)
-            // Note: Prepopulating the buffer with empty data ensures that there is not random data in the expectation
-            // and helps ensure that the padding due to the row pitch is not modified by the copy
+            // Create a buffer of size `size * textureSpec.arrayLayer` and populate it with empty
+            // data (0,0,0,0) Note: Prepopulating the buffer with empty data ensures that there is
+            // not random data in the expectation and helps ensure that the padding due to the bytes
+            // per row is not modified by the copy
             wgpu::BufferDescriptor bufDescriptor;
             bufDescriptor.size = bufferSpec.size * textureSpec.arraySize;
             bufDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
@@ -128,11 +129,12 @@ class CopyTests_T2B : public CopyTests {
 
             uint64_t bufferOffset = bufferSpec.offset;
             for (uint32_t slice = 0; slice < textureSpec.arraySize; ++slice) {
-                // Copy the region [(`x`, `y`), (`x + copyWidth, `y + copyWidth`)] from the `level` mip into the buffer at `offset + bufferSpec.size * slice` and `rowPitch`
+                // Copy the region [(`x`, `y`), (`x + copyWidth, `y + copyWidth`)] from the `level`
+                // mip into the buffer at `offset + bufferSpec.size * slice` and `bytesPerRow`
                 wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
                     texture, textureSpec.level, slice, {textureSpec.x, textureSpec.y, 0});
                 wgpu::BufferCopyView bufferCopyView =
-                    utils::CreateBufferCopyView(buffer, bufferOffset, bufferSpec.rowPitch, 0);
+                    utils::CreateBufferCopyView(buffer, bufferOffset, bufferSpec.bytesPerRow, 0);
                 wgpu::Extent3D copySize = {textureSpec.copyWidth, textureSpec.copyHeight, 1};
                 encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copySize);
                 bufferOffset += bufferSpec.size;
@@ -142,22 +144,28 @@ class CopyTests_T2B : public CopyTests {
             queue.Submit(1, &commands);
 
             bufferOffset = bufferSpec.offset;
-            std::vector<RGBA8> expected(bufferSpec.rowPitch / kBytesPerTexel * (textureSpec.copyHeight - 1) + textureSpec.copyWidth);
+            std::vector<RGBA8> expected(bufferSpec.bytesPerRow / kBytesPerTexel *
+                                            (textureSpec.copyHeight - 1) +
+                                        textureSpec.copyWidth);
             for (uint32_t slice = 0; slice < textureSpec.arraySize; ++slice) {
                 // Pack the data used to create the upload buffer in the specified copy region to have the same format as the expected buffer data.
                 std::fill(expected.begin(), expected.end(), RGBA8());
                 PackTextureData(
-                    &textureArrayData[slice][textureSpec.x + textureSpec.y * (rowPitch / kBytesPerTexel)],
-                    textureSpec.copyWidth,
-                    textureSpec.copyHeight,
-                    rowPitch / kBytesPerTexel,
-                    expected.data(),
-                    bufferSpec.rowPitch / kBytesPerTexel);
+                    &textureArrayData[slice][textureSpec.x +
+                                             textureSpec.y * (bytesPerRow / kBytesPerTexel)],
+                    textureSpec.copyWidth, textureSpec.copyHeight, bytesPerRow / kBytesPerTexel,
+                    expected.data(), bufferSpec.bytesPerRow / kBytesPerTexel);
 
-                EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<const uint32_t*>(expected.data()), buffer, bufferOffset, static_cast<uint32_t>(expected.size())) <<
-                    "Texture to Buffer copy failed copying region [(" << textureSpec.x << ", " << textureSpec.y << "), (" << textureSpec.x + textureSpec.copyWidth << ", " << textureSpec.y + textureSpec.copyHeight <<
-                    ")) from " << textureSpec.width << " x " << textureSpec.height << " texture at mip level " << textureSpec.level << " layer " << slice <<
-                    " to " << bufDescriptor.size << "-byte buffer with offset " << bufferOffset << " and row pitch " << bufferSpec.rowPitch << std::endl;
+                EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<const uint32_t*>(expected.data()),
+                                           buffer, bufferOffset,
+                                           static_cast<uint32_t>(expected.size()))
+                    << "Texture to Buffer copy failed copying region [(" << textureSpec.x << ", "
+                    << textureSpec.y << "), (" << textureSpec.x + textureSpec.copyWidth << ", "
+                    << textureSpec.y + textureSpec.copyHeight << ")) from " << textureSpec.width
+                    << " x " << textureSpec.height << " texture at mip level " << textureSpec.level
+                    << " layer " << slice << " to " << bufDescriptor.size
+                    << "-byte buffer with offset " << bufferOffset << " and bytes per row "
+                    << bufferSpec.bytesPerRow << std::endl;
 
                 bufferOffset += bufferSpec.size;
             }
@@ -205,14 +213,15 @@ protected:
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
-        // Create an upload buffer filled with empty data and use it to populate the `level` mip of the texture
-        // Note: Prepopulating the texture with empty data ensures that there is not random data in the expectation
-        // and helps ensure that the padding due to the row pitch is not modified by the copy
+        // Create an upload buffer filled with empty data and use it to populate the `level` mip of
+        // the texture Note: Prepopulating the texture with empty data ensures that there is not
+        // random data in the expectation and helps ensure that the padding due to the bytes per row
+        // is not modified by the copy
         {
             uint32_t width = textureSpec.width >> textureSpec.level;
             uint32_t height = textureSpec.height >> textureSpec.level;
-            uint32_t rowPitch = Align(kBytesPerTexel * width, kTextureRowPitchAlignment);
-            uint32_t texelsPerRow = rowPitch / kBytesPerTexel;
+            uint32_t bytesPerRow = Align(kBytesPerTexel * width, kTextureBytesPerRowAlignment);
+            uint32_t texelsPerRow = bytesPerRow / kBytesPerTexel;
             uint32_t texelCount = texelsPerRow * (height - 1) + width;
 
             std::vector<RGBA8> emptyData(texelCount);
@@ -220,17 +229,18 @@ protected:
                 device, emptyData.data(), static_cast<uint32_t>(sizeof(RGBA8) * emptyData.size()),
                 wgpu::BufferUsage::CopySrc);
             wgpu::BufferCopyView bufferCopyView =
-                utils::CreateBufferCopyView(uploadBuffer, 0, rowPitch, 0);
+                utils::CreateBufferCopyView(uploadBuffer, 0, bytesPerRow, 0);
             wgpu::TextureCopyView textureCopyView =
                 utils::CreateTextureCopyView(texture, textureSpec.level, 0, {0, 0, 0});
             wgpu::Extent3D copySize = {width, height, 1};
             encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
         }
 
-        // Copy to the region [(`x`, `y`), (`x + copyWidth, `y + copyWidth`)] at the `level` mip from the buffer at the specified `offset` and `rowPitch`
+        // Copy to the region [(`x`, `y`), (`x + copyWidth, `y + copyWidth`)] at the `level` mip
+        // from the buffer at the specified `offset` and `bytesPerRow`
         {
             wgpu::BufferCopyView bufferCopyView =
-                utils::CreateBufferCopyView(buffer, bufferSpec.offset, bufferSpec.rowPitch, 0);
+                utils::CreateBufferCopyView(buffer, bufferSpec.offset, bufferSpec.bytesPerRow, 0);
             wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
                 texture, textureSpec.level, 0, {textureSpec.x, textureSpec.y, 0});
             wgpu::Extent3D copySize = {textureSpec.copyWidth, textureSpec.copyHeight, 1};
@@ -241,15 +251,23 @@ protected:
         queue.Submit(1, &commands);
 
         // Pack the data used to create the buffer in the specified copy region to have the same format as the expected texture data.
-        uint32_t rowPitch = Align(kBytesPerTexel * textureSpec.copyWidth, kTextureRowPitchAlignment);
-        std::vector<RGBA8> expected(rowPitch / kBytesPerTexel * (textureSpec.copyHeight - 1) + textureSpec.copyWidth);
-        PackTextureData(&bufferData[bufferSpec.offset / kBytesPerTexel], textureSpec.copyWidth, textureSpec.copyHeight, bufferSpec.rowPitch / kBytesPerTexel, expected.data(), textureSpec.copyWidth);
+        uint32_t bytesPerRow =
+            Align(kBytesPerTexel * textureSpec.copyWidth, kTextureBytesPerRowAlignment);
+        std::vector<RGBA8> expected(bytesPerRow / kBytesPerTexel * (textureSpec.copyHeight - 1) +
+                                    textureSpec.copyWidth);
+        PackTextureData(&bufferData[bufferSpec.offset / kBytesPerTexel], textureSpec.copyWidth,
+                        textureSpec.copyHeight, bufferSpec.bytesPerRow / kBytesPerTexel,
+                        expected.data(), textureSpec.copyWidth);
 
-        EXPECT_TEXTURE_RGBA8_EQ(expected.data(), texture, textureSpec.x, textureSpec.y, textureSpec.copyWidth, textureSpec.copyHeight, textureSpec.level, 0) <<
-            "Buffer to Texture copy failed copying "
-            << bufferSpec.size << "-byte buffer with offset " << bufferSpec.offset << " and row pitch " << bufferSpec.rowPitch << " to [("
-            << textureSpec.x << ", " << textureSpec.y << "), (" << textureSpec.x + textureSpec.copyWidth << ", " << textureSpec.y + textureSpec.copyHeight <<
-            ")) region of " << textureSpec.width << " x " << textureSpec.height << " texture at mip level " << textureSpec.level << std::endl;
+        EXPECT_TEXTURE_RGBA8_EQ(expected.data(), texture, textureSpec.x, textureSpec.y,
+                                textureSpec.copyWidth, textureSpec.copyHeight, textureSpec.level, 0)
+            << "Buffer to Texture copy failed copying " << bufferSpec.size
+            << "-byte buffer with offset " << bufferSpec.offset << " and bytes per row "
+            << bufferSpec.bytesPerRow << " to [(" << textureSpec.x << ", " << textureSpec.y
+            << "), (" << textureSpec.x + textureSpec.copyWidth << ", "
+            << textureSpec.y + textureSpec.copyHeight << ")) region of " << textureSpec.width
+            << " x " << textureSpec.height << " texture at mip level " << textureSpec.level
+            << std::endl;
     }
 
 
@@ -302,14 +320,14 @@ class CopyTests_T2T : public CopyTests {
         // `level` mip level
         uint32_t width = srcSpec.width >> srcSpec.level;
         uint32_t height = srcSpec.height >> srcSpec.level;
-        uint32_t rowPitch = Align(kBytesPerTexel * width, kTextureRowPitchAlignment);
-        uint32_t texelsPerRow = rowPitch / kBytesPerTexel;
+        uint32_t bytesPerRow = Align(kBytesPerTexel * width, kTextureBytesPerRowAlignment);
+        uint32_t texelsPerRow = bytesPerRow / kBytesPerTexel;
         uint32_t texelCountPerLayer = texelsPerRow * (height - 1) + width;
 
         std::vector<std::vector<RGBA8>> textureArrayData(srcSpec.arraySize);
         for (uint32_t slice = 0; slice < srcSpec.arraySize; ++slice) {
             textureArrayData[slice].resize(texelCountPerLayer);
-            FillTextureData(width, height, rowPitch / kBytesPerTexel, slice,
+            FillTextureData(width, height, bytesPerRow / kBytesPerTexel, slice,
                             textureArrayData[slice].data());
 
             wgpu::Buffer uploadBuffer = utils::CreateBufferFromData(
@@ -317,7 +335,7 @@ class CopyTests_T2T : public CopyTests {
                 static_cast<uint32_t>(sizeof(RGBA8) * textureArrayData[slice].size()),
                 wgpu::BufferUsage::CopySrc);
             wgpu::BufferCopyView bufferCopyView =
-                utils::CreateBufferCopyView(uploadBuffer, 0, rowPitch, 0);
+                utils::CreateBufferCopyView(uploadBuffer, 0, bytesPerRow, 0);
             wgpu::TextureCopyView textureCopyView =
                 utils::CreateTextureCopyView(srcTexture, srcSpec.level, slice, {0, 0, 0});
             wgpu::Extent3D bufferCopySize = {width, height, 1};
@@ -327,12 +345,12 @@ class CopyTests_T2T : public CopyTests {
 
         // Create an upload buffer filled with empty data and use it to populate the `level` mip of
         // the texture. Note: Prepopulating the texture with empty data ensures that there is not
-        // random data in the expectation and helps ensure that the padding due to the row pitch is
-        // not modified by the copy
+        // random data in the expectation and helps ensure that the padding due to the bytes per row
+        // is not modified by the copy
         {
             uint32_t dstWidth = dstSpec.width >> dstSpec.level;
             uint32_t dstHeight = dstSpec.height >> dstSpec.level;
-            uint32_t dstRowPitch = Align(kBytesPerTexel * dstWidth, kTextureRowPitchAlignment);
+            uint32_t dstRowPitch = Align(kBytesPerTexel * dstWidth, kTextureBytesPerRowAlignment);
             uint32_t dstTexelsPerRow = dstRowPitch / kBytesPerTexel;
             uint32_t dstTexelCount = dstTexelsPerRow * (dstHeight - 1) + dstWidth;
 
@@ -361,11 +379,11 @@ class CopyTests_T2T : public CopyTests {
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
-        std::vector<RGBA8> expected(rowPitch / kBytesPerTexel * (copy.height - 1) + copy.width);
+        std::vector<RGBA8> expected(bytesPerRow / kBytesPerTexel * (copy.height - 1) + copy.width);
         for (uint32_t slice = 0; slice < srcSpec.arraySize; ++slice) {
             std::fill(expected.begin(), expected.end(), RGBA8());
             PackTextureData(
-                &textureArrayData[slice][srcSpec.x + srcSpec.y * (rowPitch / kBytesPerTexel)],
+                &textureArrayData[slice][srcSpec.x + srcSpec.y * (bytesPerRow / kBytesPerTexel)],
                 copy.width, copy.height, texelsPerRow, expected.data(), copy.width);
 
             EXPECT_TEXTURE_RGBA8_EQ(expected.data(), dstTexture, dstSpec.x, dstSpec.y, copy.width,
@@ -486,7 +504,8 @@ TEST_P(CopyTests_T2B, OffsetBufferUnaligned) {
     }
 }
 
-// Test that copying without a 512-byte aligned buffer offset that is greater than the row pitch works
+// Test that copying without a 512-byte aligned buffer offset that is greater than the bytes per row
+// works
 TEST_P(CopyTests_T2B, OffsetBufferUnalignedSmallRowPitch) {
     constexpr uint32_t kWidth = 32;
     constexpr uint32_t kHeight = 128;
@@ -498,25 +517,26 @@ TEST_P(CopyTests_T2B, OffsetBufferUnalignedSmallRowPitch) {
     }
 }
 
-// Test that copying with a greater row pitch than needed on a 256-byte aligned texture works
+// Test that copying with a greater bytes per row than needed on a 256-byte aligned texture works
 TEST_P(CopyTests_T2B, RowPitchAligned) {
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight);
     for (unsigned int i = 1; i < 4; ++i) {
-        bufferSpec.rowPitch += 256;
+        bufferSpec.bytesPerRow += 256;
         bufferSpec.size += 256 * kHeight;
         DoTest({ kWidth, kHeight, 0, 0, kWidth, kHeight, 0 }, bufferSpec);
     }
 }
 
-// Test that copying with a greater row pitch than needed on a texture that is not 256-byte aligned works
+// Test that copying with a greater bytes per row than needed on a texture that is not 256-byte
+// aligned works
 TEST_P(CopyTests_T2B, RowPitchUnaligned) {
     constexpr uint32_t kWidth = 259;
     constexpr uint32_t kHeight = 127;
     BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight);
     for (unsigned int i = 1; i < 4; ++i) {
-        bufferSpec.rowPitch += 256;
+        bufferSpec.bytesPerRow += 256;
         bufferSpec.size += 256 * kHeight;
         DoTest({ kWidth, kHeight, 0, 0, kWidth, kHeight, 0 }, bufferSpec);
     }
@@ -647,7 +667,8 @@ TEST_P(CopyTests_B2T, OffsetBufferUnaligned) {
     }
 }
 
-// Test that copying without a 512-byte aligned buffer offset that is greater than the row pitch works
+// Test that copying without a 512-byte aligned buffer offset that is greater than the bytes per row
+// works
 TEST_P(CopyTests_B2T, OffsetBufferUnalignedSmallRowPitch) {
     constexpr uint32_t kWidth = 32;
     constexpr uint32_t kHeight = 128;
@@ -659,25 +680,26 @@ TEST_P(CopyTests_B2T, OffsetBufferUnalignedSmallRowPitch) {
     }
 }
 
-// Test that copying with a greater row pitch than needed on a 256-byte aligned texture works
+// Test that copying with a greater bytes per row than needed on a 256-byte aligned texture works
 TEST_P(CopyTests_B2T, RowPitchAligned) {
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight);
     for (unsigned int i = 1; i < 4; ++i) {
-        bufferSpec.rowPitch += 256;
+        bufferSpec.bytesPerRow += 256;
         bufferSpec.size += 256 * kHeight;
         DoTest({ kWidth, kHeight, 0, 0, kWidth, kHeight, 0 }, bufferSpec);
     }
 }
 
-// Test that copying with a greater row pitch than needed on a texture that is not 256-byte aligned works
+// Test that copying with a greater bytes per row than needed on a texture that is not 256-byte
+// aligned works
 TEST_P(CopyTests_B2T, RowPitchUnaligned) {
     constexpr uint32_t kWidth = 259;
     constexpr uint32_t kHeight = 127;
     BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight);
     for (unsigned int i = 1; i < 4; ++i) {
-        bufferSpec.rowPitch += 256;
+        bufferSpec.bytesPerRow += 256;
         bufferSpec.size += 256 * kHeight;
         DoTest({ kWidth, kHeight, 0, 0, kWidth, kHeight, 0 }, bufferSpec);
     }

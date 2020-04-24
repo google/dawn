@@ -98,7 +98,7 @@ protected:
         wgpu::Texture texture = device.CreateTexture(&descriptor);
 
         // Create a 2x2 checkerboard texture, with black in the top left and bottom right corners.
-        const uint32_t rowPixels = kTextureRowPitchAlignment / sizeof(RGBA8);
+        const uint32_t rowPixels = kTextureBytesPerRowAlignment / sizeof(RGBA8);
         RGBA8 data[rowPixels * 2];
         data[0] = data[rowPixels + 1] = RGBA8::kBlack;
         data[1] = data[rowPixels] = RGBA8::kWhite;

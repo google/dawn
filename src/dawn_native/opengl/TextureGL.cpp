@@ -286,17 +286,17 @@ namespace dawn_native { namespace opengl {
         } else {
             // TODO(natlee@microsoft.com): test compressed textures are cleared
             // create temp buffer with clear color to copy to the texture image
-            ASSERT(kTextureRowPitchAlignment % GetFormat().blockByteSize == 0);
-            uint32_t rowPitch =
+            ASSERT(kTextureBytesPerRowAlignment % GetFormat().blockByteSize == 0);
+            uint32_t bytesPerRow =
                 Align((GetSize().width / GetFormat().blockWidth) * GetFormat().blockByteSize,
-                      kTextureRowPitchAlignment);
+                      kTextureBytesPerRowAlignment);
 
             // Make sure that we are not rounding
-            ASSERT(rowPitch % GetFormat().blockByteSize == 0);
+            ASSERT(bytesPerRow % GetFormat().blockByteSize == 0);
             ASSERT(GetSize().height % GetFormat().blockHeight == 0);
 
             dawn_native::BufferDescriptor descriptor;
-            descriptor.size = rowPitch * (GetSize().height / GetFormat().blockHeight);
+            descriptor.size = bytesPerRow * (GetSize().height / GetFormat().blockHeight);
             if (descriptor.size > std::numeric_limits<uint32_t>::max()) {
                 return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate buffer.");
             }
@@ -317,7 +317,7 @@ namespace dawn_native { namespace opengl {
 
             // Bind buffer and texture, and make the buffer to texture copy
             gl.PixelStorei(GL_UNPACK_ROW_LENGTH,
-                           (rowPitch / GetFormat().blockByteSize) * GetFormat().blockWidth);
+                           (bytesPerRow / GetFormat().blockByteSize) * GetFormat().blockWidth);
             gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
             for (GLint level = baseMipLevel; level < baseMipLevel + levelCount; ++level) {
                 gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER, srcBuffer->GetHandle());

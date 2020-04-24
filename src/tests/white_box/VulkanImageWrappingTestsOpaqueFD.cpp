@@ -676,8 +676,8 @@ namespace dawn_native { namespace vulkan {
         wgpu::BufferCopyView copyDst;
         copyDst.buffer = copyDstBuffer;
         copyDst.offset = 0;
-        copyDst.rowPitch = 256;
-        copyDst.imageHeight = 0;
+        copyDst.bytesPerRow = 256;
+        copyDst.rowsPerImage = 0;
 
         wgpu::Extent3D copySize = {1, 1, 1};
 
@@ -732,8 +732,8 @@ namespace dawn_native { namespace vulkan {
         wgpu::BufferCopyView copySrc;
         copySrc.buffer = copySrcBuffer;
         copySrc.offset = 0;
-        copySrc.rowPitch = 256;
-        copySrc.imageHeight = 0;
+        copySrc.bytesPerRow = 256;
+        copySrc.rowsPerImage = 0;
 
         wgpu::TextureCopyView copyDst;
         copyDst.texture = secondDeviceWrappedTexture;
@@ -961,8 +961,8 @@ namespace dawn_native { namespace vulkan {
 
         // Draw a non-trivial picture
         uint32_t width = 640, height = 480, pixelSize = 4;
-        uint32_t rowPitch = Align(width * pixelSize, kTextureRowPitchAlignment);
-        uint32_t size = rowPitch * (height - 1) + width * pixelSize;
+        uint32_t bytesPerRow = Align(width * pixelSize, kTextureBytesPerRowAlignment);
+        uint32_t size = bytesPerRow * (height - 1) + width * pixelSize;
         unsigned char data[size];
         for (uint32_t row = 0; row < height; row++) {
             for (uint32_t col = 0; col < width; col++) {
@@ -982,7 +982,7 @@ namespace dawn_native { namespace vulkan {
             wgpu::Buffer copySrcBuffer =
                 utils::CreateBufferFromData(secondDevice, data, size, wgpu::BufferUsage::CopySrc);
             wgpu::BufferCopyView copySrc =
-                utils::CreateBufferCopyView(copySrcBuffer, 0, rowPitch, 0);
+                utils::CreateBufferCopyView(copySrcBuffer, 0, bytesPerRow, 0);
             wgpu::TextureCopyView copyDst =
                 utils::CreateTextureCopyView(wrappedTexture, 0, 0, {0, 0, 0});
             wgpu::Extent3D copySize = {width, height, 1};
@@ -1010,7 +1010,7 @@ namespace dawn_native { namespace vulkan {
             wgpu::TextureCopyView copySrc =
                 utils::CreateTextureCopyView(nextWrappedTexture, 0, 0, {0, 0, 0});
             wgpu::BufferCopyView copyDst =
-                utils::CreateBufferCopyView(copyDstBuffer, 0, rowPitch, 0);
+                utils::CreateBufferCopyView(copyDstBuffer, 0, bytesPerRow, 0);
 
             wgpu::Extent3D copySize = {width, height, 1};
 

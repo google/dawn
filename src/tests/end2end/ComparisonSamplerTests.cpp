@@ -158,7 +158,7 @@ class ComparisonSamplerTest : public DawnTest {
                 wgpu::BufferCopyView bufferCopyView = {
                     .buffer = mTextureUploadBuffer,
                     .offset = 0,
-                    .rowPitch = kTextureRowPitchAlignment,
+                    .rowPitch = kTextureBytesPerRowAlignment,
                     .imageHeight = 1,
                 };
                 wgpu::TextureCopyView textureCopyView = {

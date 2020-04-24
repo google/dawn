@@ -721,10 +721,10 @@ namespace dawn_native { namespace vulkan {
         } else {
             // TODO(natlee@microsoft.com): test compressed textures are cleared
             // create temp buffer with clear color to copy to the texture image
-            uint32_t rowPitch =
+            uint32_t bytesPerRow =
                 Align((GetSize().width / GetFormat().blockWidth) * GetFormat().blockByteSize,
-                      kTextureRowPitchAlignment);
-            uint64_t bufferSize64 = rowPitch * (GetSize().height / GetFormat().blockHeight);
+                      kTextureBytesPerRowAlignment);
+            uint64_t bufferSize64 = bytesPerRow * (GetSize().height / GetFormat().blockHeight);
             if (bufferSize64 > std::numeric_limits<uint32_t>::max()) {
                 return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate buffer.");
             }
@@ -737,9 +737,9 @@ namespace dawn_native { namespace vulkan {
 
             // compute the buffer image copy to set the clear region of entire texture
             dawn_native::BufferCopy bufferCopy;
-            bufferCopy.imageHeight = 0;
+            bufferCopy.rowsPerImage = 0;
             bufferCopy.offset = uploadHandle.startOffset;
-            bufferCopy.rowPitch = rowPitch;
+            bufferCopy.bytesPerRow = bytesPerRow;
 
             for (uint32_t level = baseMipLevel; level < baseMipLevel + levelCount; ++level) {
                 Extent3D copySize = GetMipLevelVirtualSize(level);

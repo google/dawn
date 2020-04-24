@@ -19,6 +19,7 @@
 
 #include "tests/DawnTest.h"
 
+#include "common/Constants.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
@@ -363,6 +364,136 @@ TEST_P(DeprecationTests, ShaderModuleInlinedCodeStateTracking) {
     renderPipelineDesc.cFragmentStage.module = module;
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&renderPipelineDesc));
 }
+
+// Tests for BufferCopyView.rowPitch/imageHeight -> bytesPerRow/rowsPerImage
+
+class BufferCopyViewDeprecationTests : public DeprecationTests {
+  protected:
+    void TestSetUp() override {
+        DeprecationTests::TestSetUp();
+
+        wgpu::BufferDescriptor bufferDesc = {
+            .usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst,
+            .size = kTextureBytesPerRowAlignment * 2,
+        };
+        buffer = device.CreateBuffer(&bufferDesc);
+
+        wgpu::TextureDescriptor textureDesc = {
+            .usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst,
+            .size = {2, 2, 1},
+            .format = wgpu::TextureFormat::RGBA8Unorm,
+        };
+        texture = device.CreateTexture(&textureDesc);
+    }
+
+    enum CopyType {
+        B2T,
+        T2B,
+    };
+    void DoCopy(CopyType type, const wgpu::BufferCopyView& bufferView) {
+        wgpu::TextureCopyView textureCopyView = {
+            .texture = texture,
+            .mipLevel = 0,
+            .arrayLayer = 0,
+            .origin = {0, 0},
+        };
+        wgpu::Extent3D copySize = {2, 2, 1};
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        switch (type) {
+            case B2T:
+                encoder.CopyBufferToTexture(&bufferView, &textureCopyView, &copySize);
+                break;
+            case T2B:
+                encoder.CopyTextureToBuffer(&textureCopyView, &bufferView, &copySize);
+                break;
+        }
+        encoder.Finish();
+    }
+
+    wgpu::Buffer buffer;
+    wgpu::Texture texture;
+};
+
+// Test that using rowPitch produces a deprecation warning.
+TEST_P(BufferCopyViewDeprecationTests, RowPitchIsDeprecated) {
+    wgpu::BufferCopyView view = {
+        .buffer = buffer,
+        .rowPitch = 256,
+    };
+    EXPECT_DEPRECATION_WARNING(DoCopy(B2T, view));
+    EXPECT_DEPRECATION_WARNING(DoCopy(T2B, view));
+}
+
+// Test that using imageHeight produces a deprecation warning.
+TEST_P(BufferCopyViewDeprecationTests, ImageHeightIsDeprecated) {
+    wgpu::BufferCopyView view = {
+        .buffer = buffer,
+        .imageHeight = 2,
+        .bytesPerRow = 256,
+    };
+    EXPECT_DEPRECATION_WARNING(DoCopy(B2T, view));
+    EXPECT_DEPRECATION_WARNING(DoCopy(T2B, view));
+}
+
+// Test that using both rowPitch and bytesPerRow produces a validation error.
+TEST_P(BufferCopyViewDeprecationTests, BothRowPitchAndBytesPerRowIsInvalid) {
+    wgpu::BufferCopyView view = {
+        .buffer = buffer,
+        .rowPitch = 256,
+        .bytesPerRow = 256,
+    };
+    ASSERT_DEVICE_ERROR(DoCopy(B2T, view));
+    ASSERT_DEVICE_ERROR(DoCopy(T2B, view));
+}
+
+// Test that using both imageHeight and rowsPerImage produces a validation error.
+TEST_P(BufferCopyViewDeprecationTests, BothImageHeightAndRowsPerImageIsInvalid) {
+    wgpu::BufferCopyView view = {
+        .buffer = buffer,
+        .imageHeight = 2,
+        .bytesPerRow = 256,
+        .rowsPerImage = 2,
+    };
+    ASSERT_DEVICE_ERROR(DoCopy(B2T, view));
+    ASSERT_DEVICE_ERROR(DoCopy(T2B, view));
+}
+
+// Test that rowPitch is correctly taken into account for validation
+TEST_P(BufferCopyViewDeprecationTests, RowPitchTakenIntoAccountForValidation) {
+    wgpu::BufferCopyView view = {
+        .buffer = buffer,
+        .rowPitch = 256,
+    };
+    EXPECT_DEPRECATION_WARNING(DoCopy(B2T, view));
+    EXPECT_DEPRECATION_WARNING(DoCopy(T2B, view));
+
+    view.rowPitch = 128;
+    ASSERT_DEVICE_ERROR(EXPECT_DEPRECATION_WARNING(DoCopy(B2T, view)));
+    ASSERT_DEVICE_ERROR(EXPECT_DEPRECATION_WARNING(DoCopy(T2B, view)));
+}
+
+// Test that imageHeight is correctly taken into account for validation
+TEST_P(BufferCopyViewDeprecationTests, ImageHeightTakenIntoAccountForValidation) {
+    wgpu::BufferCopyView view = {
+        .buffer = buffer,
+        .imageHeight = 2,
+        .bytesPerRow = 256,
+    };
+    EXPECT_DEPRECATION_WARNING(DoCopy(B2T, view));
+    EXPECT_DEPRECATION_WARNING(DoCopy(T2B, view));
+
+    view.imageHeight = 1;
+    ASSERT_DEVICE_ERROR(EXPECT_DEPRECATION_WARNING(DoCopy(B2T, view)));
+    ASSERT_DEVICE_ERROR(EXPECT_DEPRECATION_WARNING(DoCopy(T2B, view)));
+}
+
+DAWN_INSTANTIATE_TEST(BufferCopyViewDeprecationTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      NullBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());
 
 DAWN_INSTANTIATE_TEST(DeprecationTests,
                       D3D12Backend(),

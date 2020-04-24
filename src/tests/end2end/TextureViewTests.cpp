@@ -117,9 +117,9 @@ protected:
 
         // Create a texture with pixel = (0, 0, 0, level * 10 + layer + 1) at level `level` and
         // layer `layer`.
-        static_assert((kTextureRowPitchAlignment % sizeof(RGBA8)) == 0,
-            "Texture row pitch alignment must be a multiple of sizeof(RGBA8).");
-        constexpr uint32_t kPixelsPerRowPitch = kTextureRowPitchAlignment / sizeof(RGBA8);
+        static_assert((kTextureBytesPerRowAlignment % sizeof(RGBA8)) == 0,
+                      "Texture bytes per row alignment must be a multiple of sizeof(RGBA8).");
+        constexpr uint32_t kPixelsPerRowPitch = kTextureBytesPerRowAlignment / sizeof(RGBA8);
         ASSERT_LE(textureWidthLevel0, kPixelsPerRowPitch);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -135,7 +135,7 @@ protected:
                 wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(
                     device, data.data(), data.size() * sizeof(RGBA8), wgpu::BufferUsage::CopySrc);
                 wgpu::BufferCopyView bufferCopyView =
-                    utils::CreateBufferCopyView(stagingBuffer, 0, kTextureRowPitchAlignment, 0);
+                    utils::CreateBufferCopyView(stagingBuffer, 0, kTextureBytesPerRowAlignment, 0);
                 wgpu::TextureCopyView textureCopyView =
                     utils::CreateTextureCopyView(mTexture, level, layer, {0, 0, 0});
                 wgpu::Extent3D copySize = {texWidth, texHeight, 1};
@@ -514,9 +514,10 @@ class TextureViewRenderingTest : public DawnTest {
         // Check if the right pixels (Green) have been written into the right part of the texture.
         uint32_t textureViewWidth = textureWidthLevel0 >> textureViewBaseLevel;
         uint32_t textureViewHeight = textureHeightLevel0 >> textureViewBaseLevel;
-        uint32_t rowPitch = Align(kBytesPerTexel * textureWidthLevel0, kTextureRowPitchAlignment);
+        uint32_t bytesPerRow =
+            Align(kBytesPerTexel * textureWidthLevel0, kTextureBytesPerRowAlignment);
         uint32_t expectedDataSize =
-            rowPitch / kBytesPerTexel * (textureWidthLevel0 - 1) + textureHeightLevel0;
+            bytesPerRow / kBytesPerTexel * (textureWidthLevel0 - 1) + textureHeightLevel0;
         constexpr RGBA8 kExpectedPixel(0, 255, 0, 255);
         std::vector<RGBA8> expected(expectedDataSize, kExpectedPixel);
         EXPECT_TEXTURE_RGBA8_EQ(

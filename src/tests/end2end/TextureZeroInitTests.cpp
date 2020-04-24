@@ -638,13 +638,13 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClear) {
     wgpu::Texture texture = device.CreateTexture(&descriptor);
 
     // Set buffer with dirty data so we know it is cleared by the lazy cleared texture copy
-    uint32_t rowPitch = Align(kSize * kFormatBlockByteSize, kTextureRowPitchAlignment);
-    uint32_t bufferSize = rowPitch * kSize;
+    uint32_t bytesPerRow = Align(kSize * kFormatBlockByteSize, kTextureBytesPerRowAlignment);
+    uint32_t bufferSize = bytesPerRow * kSize;
     std::vector<uint8_t> data(bufferSize, 100);
     wgpu::Buffer bufferDst = utils::CreateBufferFromData(
         device, data.data(), static_cast<uint32_t>(data.size()), wgpu::BufferUsage::CopySrc);
 
-    wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(bufferDst, 0, rowPitch, 0);
+    wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(bufferDst, 0, bytesPerRow, 0);
     wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
     wgpu::Extent3D copySize = {kSize, kSize, 1};
 
@@ -669,12 +669,13 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClearUnalignedSize) {
     wgpu::Texture texture = device.CreateTexture(&descriptor);
 
     // Set buffer with dirty data so we know it is cleared by the lazy cleared texture copy
-    uint32_t rowPitch = Align(kUnalignedSize * kFormatBlockByteSize, kTextureRowPitchAlignment);
-    uint32_t bufferSize = rowPitch * kUnalignedSize;
+    uint32_t bytesPerRow =
+        Align(kUnalignedSize * kFormatBlockByteSize, kTextureBytesPerRowAlignment);
+    uint32_t bufferSize = bytesPerRow * kUnalignedSize;
     std::vector<uint8_t> data(bufferSize, 100);
     wgpu::Buffer bufferDst = utils::CreateBufferFromData(
         device, data.data(), static_cast<uint32_t>(data.size()), wgpu::BufferUsage::CopySrc);
-    wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(bufferDst, 0, rowPitch, 0);
+    wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(bufferDst, 0, bytesPerRow, 0);
     wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
     wgpu::Extent3D copySize = {kUnalignedSize, kUnalignedSize, 1};
 

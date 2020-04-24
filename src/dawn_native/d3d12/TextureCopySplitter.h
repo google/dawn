@@ -47,8 +47,8 @@ namespace dawn_native { namespace d3d12 {
                                              Extent3D copySize,
                                              const Format& format,
                                              uint64_t offset,
-                                             uint32_t rowPitch,
-                                             uint32_t imageHeight);
+                                             uint32_t bytesPerRow,
+                                             uint32_t rowsPerImage);
 }}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_TEXTURECOPYSPLITTER_H_

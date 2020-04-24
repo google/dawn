@@ -68,8 +68,8 @@ class CopyCommandTest : public ValidationTest {
         uint32_t depth,
         wgpu::TextureFormat format = wgpu::TextureFormat::RGBA8Unorm) {
         uint32_t bytesPerPixel = TextureFormatPixelSize(format);
-        uint32_t rowPitch = Align(width * bytesPerPixel, kTextureRowPitchAlignment);
-        return (rowPitch * (height - 1) + width * bytesPerPixel) * depth;
+        uint32_t bytesPerRow = Align(width * bytesPerPixel, kTextureBytesPerRowAlignment);
+        return (bytesPerRow * (height - 1) + width * bytesPerPixel) * depth;
     }
 
     void ValidateExpectation(wgpu::CommandEncoder encoder, utils::Expectation expectation) {
@@ -291,7 +291,7 @@ TEST_F(CopyCommandTest_B2T, Success) {
                     {0, 0, 0}, {1, 1, 1});
     }
 
-    // Copies with a 256-byte aligned row pitch but unaligned texture region
+    // Copies with a 256-byte aligned bytes per row but unaligned texture region
     {
         // Unaligned region
         TestB2TCopy(utils::Expectation::Success, source, 0, 256, 0, destination, 0, 0, {0, 0, 0},
@@ -336,16 +336,16 @@ TEST_F(CopyCommandTest_B2T, OutOfBoundsOnBuffer) {
     TestB2TCopy(utils::Expectation::Failure, source, 4, 256, 0, destination, 0, 0, {0, 0, 0},
                 {4, 4, 1});
 
-    // OOB on the buffer because (row pitch * (height - 1) + width * bytesPerPixel) * depth
+    // OOB on the buffer because (bytes per row * (height - 1) + width * bytesPerPixel) * depth
     // overflows
     TestB2TCopy(utils::Expectation::Failure, source, 0, 512, 0, destination, 0, 0, {0, 0, 0},
                 {4, 3, 1});
 
-    // Not OOB on the buffer although row pitch * height overflows
-    // but (row pitch * (height - 1) + width * bytesPerPixel) * depth does not overflow
+    // Not OOB on the buffer although bytes per row * height overflows
+    // but (bytes per row * (height - 1) + width * bytesPerPixel) * depth does not overflow
     {
         uint32_t sourceBufferSize = BufferSizeForTextureCopy(7, 3, 1);
-        ASSERT_TRUE(256 * 3 > sourceBufferSize) << "row pitch * height should overflow buffer";
+        ASSERT_TRUE(256 * 3 > sourceBufferSize) << "bytes per row * height should overflow buffer";
         wgpu::Buffer sourceBuffer = CreateBuffer(sourceBufferSize, wgpu::BufferUsage::CopySrc);
 
         TestB2TCopy(utils::Expectation::Success, source, 0, 256, 0, destination, 0, 0, {0, 0, 0},
@@ -420,15 +420,15 @@ TEST_F(CopyCommandTest_B2T, IncorrectRowPitch) {
     wgpu::Texture destination = Create2DTexture(128, 16, 5, 1, wgpu::TextureFormat::RGBA8Unorm,
                                                 wgpu::TextureUsage::CopyDst);
 
-    // Default row pitch is not 256-byte aligned
+    // Default bytes per row is not 256-byte aligned
     TestB2TCopy(utils::Expectation::Failure, source, 0, 0, 0, destination, 0, 0, {0, 0, 0},
                 {3, 4, 1});
 
-    // Row pitch is not 256-byte aligned
+    // bytes per row is not 256-byte aligned
     TestB2TCopy(utils::Expectation::Failure, source, 0, 128, 0, destination, 0, 0, {0, 0, 0},
                 {4, 4, 1});
 
-    // Row pitch is less than width * bytesPerPixel
+    // bytes per row is less than width * bytesPerPixel
     TestB2TCopy(utils::Expectation::Failure, source, 0, 256, 0, destination, 0, 0, {0, 0, 0},
                 {65, 1, 1});
 }
@@ -626,7 +626,7 @@ TEST_F(CopyCommandTest_T2B, Success) {
                     bufferSize - 4, 256, 0, {1, 1, 1});
     }
 
-    // Copies with a 256-byte aligned row pitch but unaligned texture region
+    // Copies with a 256-byte aligned bytes per row but unaligned texture region
     {
         // Unaligned region
         TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0, 256, 0,
@@ -695,16 +695,17 @@ TEST_F(CopyCommandTest_T2B, OutOfBoundsOnBuffer) {
     TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 4, 256, 0,
                 {4, 4, 1});
 
-    // OOB on the buffer because (row pitch * (height - 1) + width * bytesPerPixel) * depth
+    // OOB on the buffer because (bytes per row * (height - 1) + width * bytesPerPixel) * depth
     // overflows
     TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 512, 0,
                 {4, 3, 1});
 
-    // Not OOB on the buffer although row pitch * height overflows
-    // but (row pitch * (height - 1) + width * bytesPerPixel) * depth does not overflow
+    // Not OOB on the buffer although bytes per row * height overflows
+    // but (bytes per row * (height - 1) + width * bytesPerPixel) * depth does not overflow
     {
         uint32_t destinationBufferSize = BufferSizeForTextureCopy(7, 3, 1);
-        ASSERT_TRUE(256 * 3 > destinationBufferSize) << "row pitch * height should overflow buffer";
+        ASSERT_TRUE(256 * 3 > destinationBufferSize)
+            << "bytes per row * height should overflow buffer";
         wgpu::Buffer destinationBuffer =
             CreateBuffer(destinationBufferSize, wgpu::BufferUsage::CopyDst);
         TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destinationBuffer, 0, 256,
@@ -752,15 +753,15 @@ TEST_F(CopyCommandTest_T2B, IncorrectRowPitch) {
                                            wgpu::TextureUsage::CopyDst);
     wgpu::Buffer destination = CreateBuffer(bufferSize, wgpu::BufferUsage::CopySrc);
 
-    // Default row pitch is not 256-byte aligned
+    // Default bytes per row is not 256-byte aligned
     TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 256, 0,
                 {3, 4, 1});
 
-    // Row pitch is not 256-byte aligned
+    // bytes per row is not 256-byte aligned
     TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 257, 0,
                 {4, 4, 1});
 
-    // Row pitch is less than width * bytesPerPixel
+    // bytes per row is less than width * bytesPerPixel
     TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 256, 0,
                 {65, 1, 1});
 }
@@ -1198,16 +1199,16 @@ class CopyCommandTest_CompressedTextureFormats : public CopyCommandTest {
                           wgpu::Buffer buffer,
                           uint64_t bufferOffset,
                           uint32_t bufferRowPitch,
-                          uint32_t imageHeight,
+                          uint32_t rowsPerImage,
                           wgpu::Texture texture,
                           uint32_t level,
                           uint32_t arraySlice,
                           wgpu::Origin3D origin,
                           wgpu::Extent3D extent3D) {
-        TestB2TCopy(expectation, buffer, bufferOffset, bufferRowPitch, imageHeight, texture, level,
+        TestB2TCopy(expectation, buffer, bufferOffset, bufferRowPitch, rowsPerImage, texture, level,
                     arraySlice, origin, extent3D);
         TestT2BCopy(expectation, texture, level, arraySlice, origin, buffer, bufferOffset,
-                    bufferRowPitch, imageHeight, extent3D);
+                    bufferRowPitch, rowsPerImage, extent3D);
     }
 
     void TestBothT2TCopies(utils::Expectation expectation,
@@ -1336,7 +1337,7 @@ TEST_F(CopyCommandTest_CompressedTextureFormats, RowPitch) {
     }
 }
 
-// Tests to verify that imageHeight must be a multiple of the compressed texture block height in
+// Tests to verify that rowsPerImage must be a multiple of the compressed texture block height in
 // buffer-to-texture or texture-to-buffer copies with compressed texture formats.
 TEST_F(CopyCommandTest_CompressedTextureFormats, ImageHeight) {
     wgpu::Buffer buffer =
@@ -1345,14 +1346,14 @@ TEST_F(CopyCommandTest_CompressedTextureFormats, ImageHeight) {
     for (wgpu::TextureFormat bcFormat : kBCFormats) {
         wgpu::Texture texture = Create2DTexture(bcFormat);
 
-        // Valid usages of imageHeight in B2T and T2B copies with compressed texture formats.
+        // Valid usages of rowsPerImage in B2T and T2B copies with compressed texture formats.
         {
             constexpr uint32_t kValidImageHeight = 8;
             TestBothTBCopies(utils::Expectation::Success, buffer, 0, 256, kValidImageHeight,
                              texture, 0, 0, {0, 0, 0}, {4, 4, 1});
         }
 
-        // Failures on invalid imageHeight.
+        // Failures on invalid rowsPerImage.
         {
             constexpr uint32_t kInvalidImageHeight = 3;
             TestBothTBCopies(utils::Expectation::Failure, buffer, 0, 256, kInvalidImageHeight,

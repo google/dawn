@@ -691,10 +691,10 @@ namespace dawn_native { namespace d3d12 {
         } else {
             // TODO(natlee@microsoft.com): test compressed textures are cleared
             // create temp buffer with clear color to copy to the texture image
-            uint32_t rowPitch =
+            uint32_t bytesPerRow =
                 Align((GetSize().width / GetFormat().blockWidth) * GetFormat().blockByteSize,
-                      kTextureRowPitchAlignment);
-            uint64_t bufferSize64 = rowPitch * (GetSize().height / GetFormat().blockHeight);
+                      kTextureBytesPerRowAlignment);
+            uint64_t bufferSize64 = bytesPerRow * (GetSize().height / GetFormat().blockHeight);
             if (bufferSize64 > std::numeric_limits<uint32_t>::max()) {
                 return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate buffer.");
             }
@@ -711,7 +711,7 @@ namespace dawn_native { namespace d3d12 {
                 // compute d3d12 texture copy locations for texture and buffer
                 Extent3D copySize = GetMipLevelVirtualSize(level);
                 TextureCopySplit copySplit = ComputeTextureCopySplit(
-                    {0, 0, 0}, copySize, GetFormat(), uploadHandle.startOffset, rowPitch, 0);
+                    {0, 0, 0}, copySize, GetFormat(), uploadHandle.startOffset, bytesPerRow, 0);
 
                 for (uint32_t layer = baseArrayLayer; layer < baseArrayLayer + layerCount;
                      ++layer) {
@@ -729,7 +729,7 @@ namespace dawn_native { namespace d3d12 {
                         D3D12_TEXTURE_COPY_LOCATION bufferLocation =
                             ComputeBufferLocationForCopyTextureRegion(
                                 this, ToBackend(uploadHandle.stagingBuffer)->GetResource(),
-                                info.bufferSize, copySplit.offset, rowPitch);
+                                info.bufferSize, copySplit.offset, bytesPerRow);
                         D3D12_BOX sourceRegion =
                             ComputeD3D12BoxFromOffsetAndSize(info.bufferOffset, info.copySize);
 

@@ -329,9 +329,9 @@ namespace dawn_native { namespace vulkan {
 
         BufferCopy tempBufferCopy;
         tempBufferCopy.buffer = tempBuffer.Get();
-        tempBufferCopy.imageHeight = copySize.height;
+        tempBufferCopy.rowsPerImage = copySize.height;
         tempBufferCopy.offset = 0;
-        tempBufferCopy.rowPitch = copySize.width / format.blockWidth * format.blockByteSize;
+        tempBufferCopy.bytesPerRow = copySize.width / format.blockWidth * format.blockByteSize;
 
         VkCommandBuffer commands = recordingContext->commandBuffer;
         VkImage srcImage = ToBackend(srcCopy.texture)->GetHandle();

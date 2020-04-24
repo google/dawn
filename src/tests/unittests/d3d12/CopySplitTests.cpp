@@ -39,8 +39,8 @@ namespace {
 
     struct BufferSpec {
         uint64_t offset;
-        uint32_t rowPitch;
-        uint32_t imageHeight;
+        uint32_t bytesPerRow;
+        uint32_t rowsPerImage;
     };
 
     // Check that each copy region fits inside the buffer footprint
@@ -123,14 +123,14 @@ namespace {
         for (uint32_t i = 0; i < copySplit.count; ++i) {
             const auto& copy = copySplit.copies[i];
 
-            uint32_t rowPitchInTexels =
-                bufferSpec.rowPitch / textureSpec.texelBlockSizeInBytes * texelsPerBlock;
+            uint32_t bytesPerRowInTexels =
+                bufferSpec.bytesPerRow / textureSpec.texelBlockSizeInBytes * texelsPerBlock;
             uint32_t slicePitchInTexels =
-                rowPitchInTexels * (bufferSpec.imageHeight / textureSpec.blockHeight);
+                bytesPerRowInTexels * (bufferSpec.rowsPerImage / textureSpec.blockHeight);
             uint32_t absoluteTexelOffset =
                 copySplit.offset / textureSpec.texelBlockSizeInBytes * texelsPerBlock +
                 copy.bufferOffset.x / textureSpec.blockWidth * texelsPerBlock +
-                copy.bufferOffset.y / textureSpec.blockHeight * rowPitchInTexels +
+                copy.bufferOffset.y / textureSpec.blockHeight * bytesPerRowInTexels +
                 copy.bufferOffset.z * slicePitchInTexels;
 
             ASSERT(absoluteTexelOffset >=
@@ -140,8 +140,8 @@ namespace {
                 bufferSpec.offset / textureSpec.texelBlockSizeInBytes * texelsPerBlock;
 
             uint32_t z = relativeTexelOffset / slicePitchInTexels;
-            uint32_t y = (relativeTexelOffset % slicePitchInTexels) / rowPitchInTexels;
-            uint32_t x = relativeTexelOffset % rowPitchInTexels;
+            uint32_t y = (relativeTexelOffset % slicePitchInTexels) / bytesPerRowInTexels;
+            uint32_t x = relativeTexelOffset % bytesPerRowInTexels;
 
             ASSERT_EQ(copy.textureOffset.x - textureSpec.x, x);
             ASSERT_EQ(copy.textureOffset.y - textureSpec.y, y);
@@ -167,8 +167,8 @@ namespace {
     }
 
     std::ostream& operator<<(std::ostream& os, const BufferSpec& bufferSpec) {
-        os << "BufferSpec(" << bufferSpec.offset << ", " << bufferSpec.rowPitch << ", "
-           << bufferSpec.imageHeight << ")";
+        os << "BufferSpec(" << bufferSpec.offset << ", " << bufferSpec.bytesPerRow << ", "
+           << bufferSpec.rowsPerImage << ")";
         return os;
     }
 
@@ -217,43 +217,44 @@ namespace {
         {64, 48, 16, 1024, 1024, 1, 16, 4, 4},
     };
 
-    // Define base buffer sizes to work with: some offsets aligned, some unaligned. rowPitch is the minimum required
+    // Define base buffer sizes to work with: some offsets aligned, some unaligned. bytesPerRow is
+    // the minimum required
     std::array<BufferSpec, 13> BaseBufferSpecs(const TextureSpec& textureSpec) {
-        uint32_t rowPitch =
-            Align(textureSpec.texelBlockSizeInBytes * textureSpec.width, kTextureRowPitchAlignment);
+        uint32_t bytesPerRow = Align(textureSpec.texelBlockSizeInBytes * textureSpec.width,
+                                     kTextureBytesPerRowAlignment);
 
         auto alignNonPow2 = [](uint32_t value, uint32_t size) -> uint32_t {
             return value == 0 ? 0 : ((value - 1) / size + 1) * size;
         };
 
         return {
-            BufferSpec{alignNonPow2(0, textureSpec.texelBlockSizeInBytes), rowPitch,
+            BufferSpec{alignNonPow2(0, textureSpec.texelBlockSizeInBytes), bytesPerRow,
                        textureSpec.height},
-            BufferSpec{alignNonPow2(512, textureSpec.texelBlockSizeInBytes), rowPitch,
+            BufferSpec{alignNonPow2(512, textureSpec.texelBlockSizeInBytes), bytesPerRow,
                        textureSpec.height},
-            BufferSpec{alignNonPow2(1024, textureSpec.texelBlockSizeInBytes), rowPitch,
+            BufferSpec{alignNonPow2(1024, textureSpec.texelBlockSizeInBytes), bytesPerRow,
                        textureSpec.height},
-            BufferSpec{alignNonPow2(1024, textureSpec.texelBlockSizeInBytes), rowPitch,
+            BufferSpec{alignNonPow2(1024, textureSpec.texelBlockSizeInBytes), bytesPerRow,
                        textureSpec.height * 2},
 
-            BufferSpec{alignNonPow2(32, textureSpec.texelBlockSizeInBytes), rowPitch,
+            BufferSpec{alignNonPow2(32, textureSpec.texelBlockSizeInBytes), bytesPerRow,
                        textureSpec.height},
-            BufferSpec{alignNonPow2(64, textureSpec.texelBlockSizeInBytes), rowPitch,
+            BufferSpec{alignNonPow2(64, textureSpec.texelBlockSizeInBytes), bytesPerRow,
                        textureSpec.height},
-            BufferSpec{alignNonPow2(64, textureSpec.texelBlockSizeInBytes), rowPitch,
+            BufferSpec{alignNonPow2(64, textureSpec.texelBlockSizeInBytes), bytesPerRow,
                        textureSpec.height * 2},
 
-            BufferSpec{alignNonPow2(31, textureSpec.texelBlockSizeInBytes), rowPitch,
+            BufferSpec{alignNonPow2(31, textureSpec.texelBlockSizeInBytes), bytesPerRow,
                        textureSpec.height},
-            BufferSpec{alignNonPow2(257, textureSpec.texelBlockSizeInBytes), rowPitch,
+            BufferSpec{alignNonPow2(257, textureSpec.texelBlockSizeInBytes), bytesPerRow,
                        textureSpec.height},
-            BufferSpec{alignNonPow2(511, textureSpec.texelBlockSizeInBytes), rowPitch,
+            BufferSpec{alignNonPow2(511, textureSpec.texelBlockSizeInBytes), bytesPerRow,
                        textureSpec.height},
-            BufferSpec{alignNonPow2(513, textureSpec.texelBlockSizeInBytes), rowPitch,
+            BufferSpec{alignNonPow2(513, textureSpec.texelBlockSizeInBytes), bytesPerRow,
                        textureSpec.height},
-            BufferSpec{alignNonPow2(1023, textureSpec.texelBlockSizeInBytes), rowPitch,
+            BufferSpec{alignNonPow2(1023, textureSpec.texelBlockSizeInBytes), bytesPerRow,
                        textureSpec.height},
-            BufferSpec{alignNonPow2(1023, textureSpec.texelBlockSizeInBytes), rowPitch,
+            BufferSpec{alignNonPow2(1023, textureSpec.texelBlockSizeInBytes), bytesPerRow,
                        textureSpec.height * 2},
         };
     }
@@ -280,7 +281,7 @@ class CopySplitTest : public testing::Test {
             TextureCopySplit copySplit = ComputeTextureCopySplit(
                 {textureSpec.x, textureSpec.y, textureSpec.z},
                 {textureSpec.width, textureSpec.height, textureSpec.depth}, fakeFormat,
-                bufferSpec.offset, bufferSpec.rowPitch, bufferSpec.imageHeight);
+                bufferSpec.offset, bufferSpec.bytesPerRow, bufferSpec.rowsPerImage);
             ValidateCopySplit(textureSpec, bufferSpec, copySplit);
             return copySplit;
         }
@@ -418,9 +419,9 @@ TEST_F(CopySplitTest, BufferOffset) {
 TEST_F(CopySplitTest, RowPitch) {
     for (TextureSpec textureSpec : kBaseTextureSpecs) {
         for (BufferSpec bufferSpec : BaseBufferSpecs(textureSpec)) {
-            uint32_t baseRowPitch = bufferSpec.rowPitch;
+            uint32_t baseRowPitch = bufferSpec.bytesPerRow;
             for (uint32_t i = 0; i < 5; ++i) {
-                bufferSpec.rowPitch = baseRowPitch + i * 256;
+                bufferSpec.bytesPerRow = baseRowPitch + i * 256;
 
                 TextureCopySplit copySplit = DoTest(textureSpec, bufferSpec);
                 if (HasFatalFailure()) {
@@ -437,9 +438,9 @@ TEST_F(CopySplitTest, RowPitch) {
 TEST_F(CopySplitTest, ImageHeight) {
     for (TextureSpec textureSpec : kBaseTextureSpecs) {
         for (BufferSpec bufferSpec : BaseBufferSpecs(textureSpec)) {
-            uint32_t baseImageHeight = bufferSpec.imageHeight;
+            uint32_t baseImageHeight = bufferSpec.rowsPerImage;
             for (uint32_t i = 0; i < 5; ++i) {
-                bufferSpec.imageHeight = baseImageHeight + i * 256;
+                bufferSpec.rowsPerImage = baseImageHeight + i * 256;
 
                 TextureCopySplit copySplit = DoTest(textureSpec, bufferSpec);
                 if (HasFatalFailure()) {

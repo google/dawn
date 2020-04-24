@@ -28,8 +28,8 @@ struct CopyConfig {
     uint32_t viewMipmapLevel = 0;
     uint32_t viewArrayLayer = 0;
     uint32_t bufferOffset = 0;
-    uint32_t rowPitchAlignment = kTextureRowPitchAlignment;
-    uint32_t imageHeight = 0;
+    uint32_t bytesPerRowAlignment = kTextureBytesPerRowAlignment;
+    uint32_t rowsPerImage = 0;
 };
 
 class CompressedTextureBCFormatTest : public DawnTest {
@@ -52,7 +52,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
                                            const CopyConfig& copyConfig) {
         ASSERT(IsBCFormatSupported());
 
-        // Compute the upload buffer size with rowPitchAlignment and the copy region.
+        // Compute the upload buffer size with bytesPerRowAlignment and the copy region.
         const wgpu::Extent3D textureSize = copyConfig.textureDescriptor.size;
         uint32_t actualWidthAtLevel = textureSize.width >> copyConfig.viewMipmapLevel;
         uint32_t actualHeightAtLevel = textureSize.height >> copyConfig.viewMipmapLevel;
@@ -61,8 +61,8 @@ class CompressedTextureBCFormatTest : public DawnTest {
         uint32_t copyHeightInBlockAtLevel =
             (actualHeightAtLevel + kBCBlockHeightInTexels - 1) / kBCBlockHeightInTexels;
         uint32_t bufferRowPitchInBytes = 0;
-        if (copyConfig.rowPitchAlignment != 0) {
-            bufferRowPitchInBytes = copyConfig.rowPitchAlignment;
+        if (copyConfig.bytesPerRowAlignment != 0) {
+            bufferRowPitchInBytes = copyConfig.bytesPerRowAlignment;
         } else {
             bufferRowPitchInBytes =
                 copyWidthInBlockAtLevel *
@@ -89,7 +89,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
             device, uploadData.data(), uploadBufferSize, wgpu::BufferUsage::CopySrc);
         wgpu::BufferCopyView bufferCopyView =
             utils::CreateBufferCopyView(stagingBuffer, copyConfig.bufferOffset,
-                                        copyConfig.rowPitchAlignment, copyConfig.imageHeight);
+                                        copyConfig.bytesPerRowAlignment, copyConfig.rowsPerImage);
         wgpu::TextureCopyView textureCopyView =
             utils::CreateTextureCopyView(bcCompressedTexture, copyConfig.viewMipmapLevel,
                                          copyConfig.viewArrayLayer, copyConfig.copyOrigin3D);
@@ -488,7 +488,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoSubRegion) {
     }
 }
 
-// Test using rowPitch == 0 in the copies with BC formats works correctly.
+// Test using bytesPerRow == 0 in the copies with BC formats works correctly.
 TEST_P(CompressedTextureBCFormatTest, CopyWithZeroRowPitch) {
     // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
     // bots.
@@ -504,11 +504,11 @@ TEST_P(CompressedTextureBCFormatTest, CopyWithZeroRowPitch) {
     config.textureDescriptor.size.height = 8;
     config.textureDescriptor.size.depth = 1;
 
-    config.rowPitchAlignment = 0;
+    config.bytesPerRowAlignment = 0;
 
     for (wgpu::TextureFormat format : kBCFormats) {
         config.textureDescriptor.format = format;
-        config.textureDescriptor.size.width = kTextureRowPitchAlignment /
+        config.textureDescriptor.size.width = kTextureBytesPerRowAlignment /
                                               CompressedFormatBlockSizeInBytes(format) *
                                               kBCBlockWidthInTexels;
         config.copyExtent3D = config.textureDescriptor.size;
@@ -870,7 +870,7 @@ TEST_P(CompressedTextureBCFormatTest, BufferOffsetAndExtentFitRowPitch) {
         config.textureDescriptor.format = format;
 
         const uint32_t blockSizeInBytes = CompressedFormatBlockSizeInBytes(format);
-        const uint32_t blockCountPerRowPitch = config.rowPitchAlignment / blockSizeInBytes;
+        const uint32_t blockCountPerRowPitch = config.bytesPerRowAlignment / blockSizeInBytes;
 
         config.bufferOffset = (blockCountPerRowPitch - blockCountPerRow) * blockSizeInBytes;
 
@@ -879,7 +879,7 @@ TEST_P(CompressedTextureBCFormatTest, BufferOffsetAndExtentFitRowPitch) {
 }
 
 // Test the special case of the B2T copies on the D3D12 backend that the buffer offset exceeds the
-// slice pitch (slicePitch = rowPitch * (imageHeightInTexels / blockHeightInTexels)). On D3D12
+// slice pitch (slicePitch = bytesPerRow * (rowsPerImage / blockHeightInTexels)). On D3D12
 // backend the texelOffset.y will be greater than 0 after calcuting the texelOffset in the function
 // ComputeTexelOffsets().
 TEST_P(CompressedTextureBCFormatTest, BufferOffsetExceedsSlicePitch) {
@@ -900,16 +900,16 @@ TEST_P(CompressedTextureBCFormatTest, BufferOffsetExceedsSlicePitch) {
     const wgpu::Extent3D textureSizeLevel0 = config.textureDescriptor.size;
     const uint32_t blockCountPerRow = textureSizeLevel0.width / kBCBlockWidthInTexels;
     const uint32_t slicePitchInBytes =
-        config.rowPitchAlignment * (textureSizeLevel0.height / kBCBlockHeightInTexels);
+        config.bytesPerRowAlignment * (textureSizeLevel0.height / kBCBlockHeightInTexels);
 
     for (wgpu::TextureFormat format : kBCFormats) {
         config.textureDescriptor.format = format;
 
         const uint32_t blockSizeInBytes = CompressedFormatBlockSizeInBytes(format);
-        const uint32_t blockCountPerRowPitch = config.rowPitchAlignment / blockSizeInBytes;
+        const uint32_t blockCountPerRowPitch = config.bytesPerRowAlignment / blockSizeInBytes;
 
         config.bufferOffset = (blockCountPerRowPitch - blockCountPerRow) * blockSizeInBytes +
-                              config.rowPitchAlignment + slicePitchInBytes;
+                              config.bytesPerRowAlignment + slicePitchInBytes;
 
         TestCopyRegionIntoBCFormatTextures(config);
     }
@@ -940,7 +940,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyWithBufferOffsetAndExtentExceedRowPitc
         config.textureDescriptor.format = format;
 
         const uint32_t blockSizeInBytes = CompressedFormatBlockSizeInBytes(format);
-        const uint32_t blockCountPerRowPitch = config.rowPitchAlignment / blockSizeInBytes;
+        const uint32_t blockCountPerRowPitch = config.bytesPerRowAlignment / blockSizeInBytes;
         config.bufferOffset =
             (blockCountPerRowPitch - blockCountPerRow + kExceedRowBlockCount) * blockSizeInBytes;
 
@@ -949,7 +949,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyWithBufferOffsetAndExtentExceedRowPitc
 }
 
 // Test the special case of the B2T copies on the D3D12 backend that the slicePitch is equal to the
-// rowPitch. On D3D12 backend the texelOffset.z will be greater than 0 after calcuting the
+// bytesPerRow. On D3D12 backend the texelOffset.z will be greater than 0 after calcuting the
 // texelOffset in the function ComputeTexelOffsets().
 TEST_P(CompressedTextureBCFormatTest, RowPitchEqualToSlicePitch) {
     // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
@@ -964,13 +964,13 @@ TEST_P(CompressedTextureBCFormatTest, RowPitchEqualToSlicePitch) {
     config.copyExtent3D = config.textureDescriptor.size;
 
     const uint32_t blockCountPerRow = config.textureDescriptor.size.width / kBCBlockWidthInTexels;
-    const uint32_t slicePitchInBytes = config.rowPitchAlignment;
+    const uint32_t slicePitchInBytes = config.bytesPerRowAlignment;
 
     for (wgpu::TextureFormat format : kBCFormats) {
         config.textureDescriptor.format = format;
 
         const uint32_t blockSizeInBytes = CompressedFormatBlockSizeInBytes(format);
-        const uint32_t blockCountPerRowPitch = config.rowPitchAlignment / blockSizeInBytes;
+        const uint32_t blockCountPerRowPitch = config.bytesPerRowAlignment / blockSizeInBytes;
 
         config.bufferOffset =
             (blockCountPerRowPitch - blockCountPerRow) * blockSizeInBytes + slicePitchInBytes;
@@ -997,7 +997,7 @@ TEST_P(CompressedTextureBCFormatTest, LargeImageHeight) {
     config.textureDescriptor.size = {8, 8, 1};
     config.copyExtent3D = config.textureDescriptor.size;
 
-    config.imageHeight = config.textureDescriptor.size.height * 2;
+    config.rowsPerImage = config.textureDescriptor.size.height * 2;
 
     for (wgpu::TextureFormat format : kBCFormats) {
         config.textureDescriptor.format = format;
@@ -1040,7 +1040,7 @@ TEST_P(CompressedTextureBCFormatTest, LargeImageHeightAndClampedCopyExtent) {
 
     config.copyExtent3D = {kCopyWidthAtLevel, kCopyHeightAtLevel, 1};
 
-    config.imageHeight = kCopyHeightAtLevel * 2;
+    config.rowsPerImage = kCopyHeightAtLevel * 2;
 
     for (wgpu::TextureFormat format : kBCFormats) {
         config.textureDescriptor.format = format;
