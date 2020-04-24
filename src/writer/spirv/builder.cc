@@ -172,10 +172,7 @@ bool Builder::GenerateAssignStatement(ast::AssignmentStatement* assign) {
   }
 
   // If the thing we're assigning is a pointer then we must load it first.
-  if (assign->rhs()->result_type()->IsPointer()) {
-    rhs_id =
-        GenerateLoad(assign->rhs()->result_type()->UnwrapPtrIfNeeded(), rhs_id);
-  }
+  rhs_id = GenerateLoadIfNeeded(assign->rhs()->result_type(), rhs_id);
 
   GenerateStore(lhs_id, rhs_id);
   return true;
@@ -520,7 +517,11 @@ uint32_t Builder::GenerateIdentifierExpression(
   return 0;
 }
 
-uint32_t Builder::GenerateLoad(ast::type::Type* type, uint32_t id) {
+uint32_t Builder::GenerateLoadIfNeeded(ast::type::Type* type, uint32_t id) {
+  if (!type->IsPointer()) {
+    return id;
+  }
+
   auto type_id = GenerateTypeIfNeeded(type->UnwrapPtrIfNeeded());
   auto result = result_op();
   auto result_id = result.to_i();
@@ -599,8 +600,13 @@ uint32_t Builder::GenerateConstructorExpression(
         }
         constructor_is_const = false;
       }
-      auto id =
-          GenerateConstructorExpression(e->AsConstructor(), is_global_init);
+      uint32_t id = 0;
+      if (constructor_is_const) {
+        id = GenerateConstructorExpression(e->AsConstructor(), is_global_init);
+      } else {
+        id = GenerateExpression(e.get());
+        id = GenerateLoadIfNeeded(e->result_type(), id);
+      }
       if (id == 0) {
         return 0;
       }
@@ -676,17 +682,13 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
   if (lhs_id == 0) {
     return 0;
   }
-  if (expr->lhs()->result_type()->IsPointer()) {
-    lhs_id = GenerateLoad(expr->lhs()->result_type(), lhs_id);
-  }
+  lhs_id = GenerateLoadIfNeeded(expr->lhs()->result_type(), lhs_id);
 
   auto rhs_id = GenerateExpression(expr->rhs());
   if (rhs_id == 0) {
     return 0;
   }
-  if (expr->rhs()->result_type()->IsPointer()) {
-    rhs_id = GenerateLoad(expr->rhs()->result_type(), rhs_id);
-  }
+  rhs_id = GenerateLoadIfNeeded(expr->rhs()->result_type(), rhs_id);
 
   auto result = result_op();
   auto result_id = result.to_i();

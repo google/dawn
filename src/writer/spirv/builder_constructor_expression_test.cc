@@ -19,10 +19,13 @@
 #include "spirv/unified1/spirv.hpp11"
 #include "src/ast/binary_expression.h"
 #include "src/ast/float_literal.h"
+#include "src/ast/identifier_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/context.h"
+#include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
 
@@ -72,6 +75,48 @@ TEST_F(BuilderTest, Constructor_Type) {
 %3 = OpConstant %2 1
 %4 = OpConstant %2 3
 %5 = OpConstantComposite %1 %3 %3 %4
+)");
+}
+
+TEST_F(BuilderTest, Constructor_Type_NonConstructorParam) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 2);
+
+  auto var = std::make_unique<ast::Variable>(
+      "ident", ast::StorageClass::kFunction, &f32);
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(std::make_unique<ast::IdentifierExpression>("ident"));
+
+  ast::TypeConstructorExpression t(&vec, std::move(vals));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(var.get());
+  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateFunctionVariable(var.get())) << b.error();
+
+  EXPECT_EQ(b.GenerateConstructorExpression(&t, false), 7u);
+  ASSERT_FALSE(b.has_error()) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypePointer Function %3
+%4 = OpTypeVector %3 2
+%5 = OpConstant %3 1
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
+            R"(%1 = OpVariable %2 Function
+)");
+
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%6 = OpLoad %3 %1
+%7 = OpCompositeConstruct %4 %5 %6
 )");
 }
 

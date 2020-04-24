@@ -362,7 +362,13 @@ bool TypeDeterminer::DetermineCast(ast::CastExpression* expr) {
 
 bool TypeDeterminer::DetermineConstructor(ast::ConstructorExpression* expr) {
   if (expr->IsTypeConstructor()) {
-    expr->set_result_type(expr->AsTypeConstructor()->type());
+    auto* ty = expr->AsTypeConstructor();
+    for (const auto& value : ty->values()) {
+      if (!DetermineResultType(value.get())) {
+        return false;
+      }
+    }
+    expr->set_result_type(ty->type());
   } else {
     expr->set_result_type(expr->AsScalarConstructor()->literal()->type());
   }
