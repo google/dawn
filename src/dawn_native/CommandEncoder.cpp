@@ -119,7 +119,7 @@ namespace dawn_native {
 
             if (rowsPerImage % format.blockHeight != 0) {
                 return DAWN_VALIDATION_ERROR(
-                    "rowsPerImage must be a multiple of compressed texture format block width");
+                    "rowsPerImage must be a multiple of compressed texture format block height");
             }
 
             return {};
