@@ -55,16 +55,16 @@ using DecorationList = std::vector<Decoration>;
 // An AST expression with its type.
 struct TypedExpression {
   /// Dummy constructor
-  TypedExpression() : type(nullptr), expr(nullptr) {}
+  TypedExpression();
   /// Constructor
   /// @param t the type
   /// @param e the expression
-  TypedExpression(ast::type::Type* t, std::unique_ptr<ast::Expression> e)
-      : type(t), expr(std::move(e)) {}
+  TypedExpression(ast::type::Type* t, std::unique_ptr<ast::Expression> e);
   /// Move constructor
   /// @param other the other typed expression
-  TypedExpression(TypedExpression&& other)
-      : type(other.type), expr(std::move(other.expr)) {}
+  TypedExpression(TypedExpression&& other);
+  /// Destructor
+  ~TypedExpression();
   /// The type
   ast::type::Type* type;
   /// The expression

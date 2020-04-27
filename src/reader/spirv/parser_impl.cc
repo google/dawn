@@ -172,6 +172,17 @@ bool AssumesResultSignednessMatchesBinaryFirstOperand(SpvOp opcode) {
 
 }  // namespace
 
+TypedExpression::TypedExpression() : type(nullptr), expr(nullptr) {}
+
+TypedExpression::TypedExpression(ast::type::Type* t,
+                                 std::unique_ptr<ast::Expression> e)
+    : type(t), expr(std::move(e)) {}
+
+TypedExpression::TypedExpression(TypedExpression&& other)
+    : type(other.type), expr(std::move(other.expr)) {}
+
+TypedExpression::~TypedExpression() {}
+
 ParserImpl::ParserImpl(Context* ctx, const std::vector<uint32_t>& spv_binary)
     : Reader(ctx),
       spv_binary_(spv_binary),
@@ -509,9 +520,9 @@ bool ParserImpl::EmitEntryPoints() {
 ast::type::Type* ParserImpl::ConvertType(
     const spvtools::opt::analysis::Integer* int_ty) {
   if (int_ty->width() == 32) {
-    auto signed_ty =
+    auto* signed_ty =
         ctx_.type_mgr().Get(std::make_unique<ast::type::I32Type>());
-    auto unsigned_ty =
+    auto* unsigned_ty =
         ctx_.type_mgr().Get(std::make_unique<ast::type::U32Type>());
     signed_type_for_[unsigned_ty] = signed_ty;
     unsigned_type_for_[signed_ty] = unsigned_ty;

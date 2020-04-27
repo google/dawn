@@ -22,7 +22,6 @@ import("tint_overrides_with_defaults.gni")
 
 config("tint_common_config") {
   defines = []
-
   if (tint_build_spv_reader) {
     defines += [ "TINT_BUILD_SPV_READER=1" ]
   } else {
@@ -46,6 +45,144 @@ config("tint_common_config") {
   } else {
     defines += [ "TINT_BUILD_WGSL_WRITER=0" ]
   }
+
+  include_dirs = [
+    "${target_gen_dir}",
+    "${tint_root_dir}/",
+    "${tint_spirv_headers_dir}/include",
+    "${tint_spirv_tools_dir}/",
+    "${tint_spirv_tools_dir}/include",
+  ]
+}
+
+###############################################################################
+# Generated - Generated source files
+###############################################################################
+# These are copies of rules from SPIRV-Tools with the names tweaked to be Tint
+# specific. They are needed here because referencing generated files in sibling
+# packages is difficult/impossible in Chromium. Parts of Tint's SPIRV handling
+# code depend on internal parts of SPIRV-Tools. This causes issues because when
+# Tint references the internal headers, since it causes a dependency on these
+# generated files, but they are not visible in the context building Tint. Thus
+# Tint generates its own copy of the generated files. Since they come from the
+# same source of truth, they should not vary.
+
+template("tint_core_tables") {
+  assert(defined(invoker.version), "Need version in $target_name generation.")
+
+  action("tint_core_tables_" + target_name) {
+    script = "${tint_spirv_tools_dir}/utils/generate_grammar_tables.py"
+
+    version = invoker.version
+
+    core_json_file = "${tint_spirv_headers_dir}/include/spirv/$version/spirv.core.grammar.json"
+    core_insts_file = "${target_gen_dir}/core.insts-$version.inc"
+    operand_kinds_file = "${target_gen_dir}/operand.kinds-$version.inc"
+    debuginfo_insts_file =
+        "${tint_spirv_tools_dir}/source/extinst.debuginfo.grammar.json"
+    cldebuginfo100_insts_file = "${tint_spirv_tools_dir}/source/extinst.opencl.debuginfo.100.grammar.json"
+
+    sources = [
+      cldebuginfo100_insts_file,
+      core_json_file,
+      debuginfo_insts_file,
+    ]
+    outputs = [
+      core_insts_file,
+      operand_kinds_file,
+    ]
+    args = [
+      "--spirv-core-grammar",
+      rebase_path(core_json_file, root_build_dir),
+      "--core-insts-output",
+      rebase_path(core_insts_file, root_build_dir),
+      "--extinst-debuginfo-grammar",
+      rebase_path(debuginfo_insts_file, root_build_dir),
+      "--extinst-cldebuginfo100-grammar",
+      rebase_path(cldebuginfo100_insts_file, root_build_dir),
+      "--operand-kinds-output",
+      rebase_path(operand_kinds_file, root_build_dir),
+    ]
+  }
+}
+
+template("tint_core_enums") {
+  assert(defined(invoker.version), "Need version in $target_name generation.")
+
+  action("tint_core_enums_" + target_name) {
+    script = "${tint_spirv_tools_dir}/utils/generate_grammar_tables.py"
+
+    version = invoker.version
+
+    core_json_file = "${tint_spirv_headers_dir}/include/spirv/$version/spirv.core.grammar.json"
+    debuginfo_insts_file =
+        "${tint_spirv_tools_dir}/source/extinst.debuginfo.grammar.json"
+    cldebuginfo100_insts_file = "${tint_spirv_tools_dir}/source/extinst.opencl.debuginfo.100.grammar.json"
+
+    extension_enum_file = "${target_gen_dir}/extension_enum.inc"
+    extension_map_file = "${target_gen_dir}/enum_string_mapping.inc"
+
+    args = [
+      "--spirv-core-grammar",
+      rebase_path(core_json_file, root_build_dir),
+      "--extinst-debuginfo-grammar",
+      rebase_path(debuginfo_insts_file, root_build_dir),
+      "--extinst-cldebuginfo100-grammar",
+      rebase_path(cldebuginfo100_insts_file, root_build_dir),
+      "--extension-enum-output",
+      rebase_path(extension_enum_file, root_build_dir),
+      "--enum-string-mapping-output",
+      rebase_path(extension_map_file, root_build_dir),
+    ]
+    inputs = [
+      core_json_file,
+      debuginfo_insts_file,
+      cldebuginfo100_insts_file,
+    ]
+    outputs = [
+      extension_enum_file,
+      extension_map_file,
+    ]
+  }
+}
+
+template("tint_language_header") {
+  assert(defined(invoker.name), "Need name in $target_name generation.")
+
+  action("tint_language_header_" + target_name) {
+    script = "${tint_spirv_tools_dir}/utils/generate_language_headers.py"
+
+    name = invoker.name
+    extinst_output_path = "${target_gen_dir}/${name}.h"
+
+    args = [
+      "--extinst-grammar",
+      rebase_path(invoker.grammar_file, root_build_dir),
+      "--extinst-output-path",
+      rebase_path(extinst_output_path, root_build_dir),
+    ]
+    inputs = [ invoker.grammar_file ]
+    outputs = [ "${extinst_output_path}" ]
+  }
+}
+
+tint_core_tables("unified1") {
+  version = "unified1"
+}
+
+tint_core_enums("unified1") {
+  version = "unified1"
+}
+
+tint_language_header("debuginfo") {
+  name = "DebugInfo"
+  grammar_file = "${tint_spirv_tools_dir}/source/extinst.debuginfo.grammar.json"
+}
+
+tint_language_header("cldebuginfo100") {
+  name = "OpenCLDebugInfo100"
+  grammar_file =
+      "${tint_spirv_tools_dir}/source/extinst.opencl.debuginfo.100.grammar.json"
 }
 
 ###############################################################################
@@ -223,20 +360,19 @@ source_set("libtint_core_src") {
     "src/writer/writer.h",
   ]
 
+  deps = [
+    ":tint_core_enums_unified1",
+    ":tint_core_tables_unified1",
+    ":tint_language_header_cldebuginfo100",
+    ":tint_language_header_debuginfo",
+  ]
+
   configs += [ ":tint_common_config" ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
   }
-}
-
-config("libtint_spv_config") {
-  include_dirs = [
-    "${tint_spirv_tools_dir}/",
-    "${tint_spirv_tools_dir}/include",
-    "${target_gen_dir}/${tint_spirv_tools_gen}",
-  ]
 }
 
 source_set("libtint_spv_reader_src") {
@@ -255,15 +391,15 @@ source_set("libtint_spv_reader_src") {
   ]
 
   deps = [
-    "${tint_spirv_headers_dir}/:spv_headers",
+    ":tint_core_enums_unified1",
+    ":tint_core_tables_unified1",
+    ":tint_language_header_cldebuginfo100",
+    ":tint_language_header_debuginfo",
     "${tint_spirv_tools_dir}/:spvtools_opt",
     "${tint_spirv_tools_dir}/:spvtools_val",
   ]
 
-  configs += [
-    ":tint_common_config",
-    ":libtint_spv_config",
-  ]
+  configs += [ ":tint_common_config" ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
@@ -287,12 +423,7 @@ source_set("libtint_spv_writer_src") {
     "src/writer/spirv/operand.h",
   ]
 
-  deps = [ "${tint_spirv_headers_dir}/:spv_headers" ]
-
-  configs += [
-    ":tint_common_config",
-    ":libtint_spv_config",
-  ]
+  configs += [ ":tint_common_config" ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
@@ -535,10 +666,7 @@ source_set("tint_unittests_spv_reader_src") {
     "src/reader/spirv/spirv_tools_helpers_test.h",
   ]
 
-  deps = [ "${tint_spirv_headers_dir}/:spv_headers" ]
-
   configs += [
-    ":libtint_spv_config",
     ":tint_common_config",
     ":tint_unittests_config",
   ]
@@ -574,10 +702,8 @@ source_set("tint_unittests_spv_writer_src") {
     "src/writer/spirv/spv_dump.cc",
     "src/writer/spirv/spv_dump.h",
   ]
-  deps = [ "${tint_spirv_headers_dir}/:spv_headers" ]
 
   configs += [
-    ":libtint_spv_config",
     ":tint_common_config",
     ":tint_unittests_config",
   ]
@@ -770,13 +896,35 @@ test("tint_unittests") {
 }
 
 ###############################################################################
+# Fuzzers - Libfuzzer based fuzzing targets for Chromium
+###############################################################################
+# To run the fuzzers outside of Chromium, use the CMake based builds.
+
+if (build_with_chromium) {
+  import("//testing/libfuzzer/fuzzer_test.gni")
+
+  source_set("tint_wgsl_reader_fuzzer_src") {
+    sources = [ "fuzzers/tint_wgsl_reader_fuzzer.cc" ]
+    configs += [ ":tint_common_config" ]
+  }
+
+  fuzzer_test("tint_wgsl_reader_fuzzer") {
+    sources = []
+    deps = [
+      ":libtint",
+      ":tint_wgsl_reader_fuzzer_src",
+    ]
+  }
+}
+
+###############################################################################
 # Samples - Executables exposing command line functionality
 ###############################################################################
 
 config("tint_exe_config") {
   include_dirs = []
   if (tint_build_spv_reader || tint_build_spv_writer) {
-    include_dirs = [ "${tint_spirv_tools_dir}/include/" ]
+    include_dirs += [ "${tint_spirv_tools_dir}/include/" ]
   }
 }
 
@@ -788,8 +936,10 @@ executable("tint_exe") {
     deps += [ "${tint_spirv_headers_dir}/:spv_headers" ]
   }
 
-  configs += [ ":tint_common_config" ]
-  configs += [ ":tint_exe_config" ]
+  configs += [
+    ":tint_common_config",
+    ":tint_exe_config",
+  ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]

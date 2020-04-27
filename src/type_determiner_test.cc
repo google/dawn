@@ -1685,7 +1685,7 @@ TEST_P(ImportData_SingleParamTest, Vector) {
       td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
   ASSERT_NE(type, nullptr);
   EXPECT_TRUE(type->is_float_vector());
-  EXPECT_EQ(type->AsVector()->size(), 3);
+  EXPECT_EQ(type->AsVector()->size(), 3u);
   EXPECT_EQ(id, param.value);
 }
 
@@ -1924,7 +1924,7 @@ TEST_P(ImportData_TwoParamTest, Vector) {
       td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
   ASSERT_NE(type, nullptr);
   EXPECT_TRUE(type->is_float_vector());
-  EXPECT_EQ(type->AsVector()->size(), 3);
+  EXPECT_EQ(type->AsVector()->size(), 3u);
   EXPECT_EQ(id, param.value);
 }
 
@@ -2332,7 +2332,7 @@ TEST_P(ImportData_ThreeParamTest, Vector) {
       td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
   ASSERT_NE(type, nullptr);
   EXPECT_TRUE(type->is_float_vector());
-  EXPECT_EQ(type->AsVector()->size(), 3);
+  EXPECT_EQ(type->AsVector()->size(), 3u);
   EXPECT_EQ(id, param.value);
 }
 

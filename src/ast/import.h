@@ -30,7 +30,7 @@ namespace ast {
 class Import : public Node {
  public:
   /// Create a new empty import statement
-  Import() = default;
+  Import();
   /// Create a new import statement
   /// @param path The import path e.g. GLSL.std.450
   /// @param name The import reference name e.g. std
@@ -43,7 +43,7 @@ class Import : public Node {
          const std::string& path,
          const std::string& name);
   /// Move constructor
-  Import(Import&&) = default;
+  Import(Import&&);
 
   ~Import() override;
 

@@ -19,6 +19,8 @@
 namespace tint {
 namespace ast {
 
+Import::Import() = default;
+
 Import::Import(const std::string& path, const std::string& name)
     : Node(), path_(path), name_(name) {}
 
@@ -26,6 +28,8 @@ Import::Import(const Source& source,
                const std::string& path,
                const std::string& name)
     : Node(source), path_(path), name_(name) {}
+
+Import::Import(Import&&) = default;
 
 Import::~Import() = default;
 

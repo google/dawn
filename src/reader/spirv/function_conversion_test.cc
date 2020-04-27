@@ -71,7 +71,7 @@ TEST_F(SpvUnaryConversionTest, Bitcast_Scalar) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+  auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
@@ -97,7 +97,7 @@ TEST_F(SpvUnaryConversionTest, Bitcast_Vector) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+  auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();

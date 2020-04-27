@@ -127,7 +127,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Int_Int) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+  auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
@@ -154,7 +154,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Int_Uint) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+  auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
@@ -183,7 +183,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Uint_Int) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+  auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
@@ -212,7 +212,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Uint_Uint) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+  auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
@@ -243,7 +243,7 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_SignedVec) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+  auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
@@ -274,7 +274,7 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_UnsignedVec) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+  auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
@@ -307,7 +307,7 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_SignedVec) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+  auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
@@ -340,7 +340,7 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_UnsignedVec) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+  auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
@@ -375,7 +375,7 @@ TEST_F(SpvUnaryArithTest, FNegate_Scalar) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+  auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
@@ -402,7 +402,7 @@ TEST_F(SpvUnaryArithTest, FNegate_Vector) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+  auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
@@ -680,7 +680,7 @@ TEST_F(SpvBinaryArithTestBasic, SDiv_Scalar_UnsignedResult) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+  auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
       << p->error() << "\n"
       << assembly;
@@ -715,7 +715,7 @@ TEST_F(SpvBinaryArithTestBasic, SDiv_Vector_UnsignedResult) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+  auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
       << p->error() << "\n"
       << assembly;
@@ -824,7 +824,7 @@ TEST_F(SpvBinaryArithTestBasic, SMod_Scalar_UnsignedResult) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+  auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
       << p->error() << "\n"
       << assembly;
@@ -859,7 +859,7 @@ TEST_F(SpvBinaryArithTestBasic, SMod_Vector_UnsignedResult) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+  auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
       << p->error() << "\n"
       << assembly;
