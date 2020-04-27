@@ -199,6 +199,8 @@ set(TINT_LIB_SRCS
 
 if(${TINT_BUILD_SPV_READER})
   list(APPEND TINT_LIB_SRCS
+    reader/spirv/construct.h
+    reader/spirv/construct.cc
     reader/spirv/enum_converter.h
     reader/spirv/enum_converter.cc
     reader/spirv/fail_stream.h

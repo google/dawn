@@ -29,6 +29,7 @@
 #include "source/opt/type_manager.h"
 #include "src/ast/expression.h"
 #include "src/ast/module.h"
+#include "src/reader/spirv/construct.h"
 #include "src/reader/spirv/fail_stream.h"
 #include "src/reader/spirv/namer.h"
 #include "src/reader/spirv/parser_impl.h"
@@ -66,6 +67,9 @@ struct BlockInfo {
   /// Is this block a single-block loop: A loop header that declares itself
   /// as its own continue target, and has branch to itself.
   bool is_single_block_loop = false;
+
+  /// The immediately enclosing structured construct.
+  const Construct* construct = nullptr;
 };
 
 inline std::ostream& operator<<(std::ostream& o, const BlockInfo& bi) {
@@ -147,6 +151,17 @@ class FunctionEmitter {
   /// @returns false if invalid nesting was detected
   bool VerifyHeaderContinueMergeOrder();
 
+  /// Labels each basic block with its nearest enclosing structured construct.
+  /// Populates the |construct| member of BlockInfo, and the |constructs_| list.
+  /// Assumes terminators are sane and merges have been registered, block
+  /// order has been computed, and each block is labeled with its position.
+  /// Checks nesting of structured control flow constructs.
+  /// @returns false if bad nesting has been detected
+  bool LabelControlFlowConstructs();
+
+  /// @returns the structured constructs
+  const ConstructList& constructs() const { return constructs_; }
+
   /// Emits declarations of function variables.
   /// @returns false if emission failed.
   bool EmitFunctionVariables();
@@ -227,6 +242,9 @@ class FunctionEmitter {
 
   // Mapping from block ID to its bookkeeping info.
   std::unordered_map<uint32_t, std::unique_ptr<BlockInfo>> block_info_;
+
+  // Structured constructs, where enclosing constructs precede their children.
+  ConstructList constructs_;
 };
 
 }  // namespace spirv

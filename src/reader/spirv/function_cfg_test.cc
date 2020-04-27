@@ -2751,6 +2751,795 @@ TEST_F(SpvParserTest,
       << Dump(fe.block_order());
 }
 
+TEST_F(SpvParserTest,
+       LabelControlFlowConstructs_OuterConstructIsFunction_SingleBlock) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_TRUE(fe.LabelControlFlowConstructs());
+  EXPECT_EQ(fe.constructs().size(), 1u);
+  auto& c = fe.constructs().front();
+  EXPECT_THAT(ToString(c), Eq("Construct{ Function [0,1) begin_id:10 end_id:0 "
+                              "depth:0 parent:null }"));
+  EXPECT_EQ(fe.GetBlockInfo(10)->construct, c.get());
+}
+
+TEST_F(SpvParserTest,
+       LabelControlFlowConstructs_OuterConstructIsFunction_MultiBlock) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %5
+
+     %5 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_TRUE(fe.LabelControlFlowConstructs());
+  EXPECT_EQ(fe.constructs().size(), 1u);
+  auto& c = fe.constructs().front();
+  EXPECT_THAT(ToString(c), Eq("Construct{ Function [0,2) begin_id:10 end_id:0 "
+                              "depth:0 parent:null }"));
+  EXPECT_EQ(fe.GetBlockInfo(10)->construct, c.get());
+  EXPECT_EQ(fe.GetBlockInfo(5)->construct, c.get());
+}
+
+TEST_F(SpvParserTest,
+       LabelControlFlowConstructs_FunctionIsOnlyIfSelectionAndItsMerge) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %30
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_TRUE(fe.LabelControlFlowConstructs());
+  const auto& constructs = fe.constructs();
+  EXPECT_EQ(constructs.size(), 2u);
+  EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
+  Construct{ Function [0,4) begin_id:10 end_id:0 depth:0 parent:null }
+  Construct{ Selection [0,3) begin_id:10 end_id:99 depth:1 parent:Function@10 }
+})")) << constructs;
+  // The block records the nearest enclosing construct.
+  EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(20)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(30)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(99)->construct, constructs[0].get());
+}
+
+TEST_F(
+    SpvParserTest,
+    LabelControlFlowConstructs_PaddingBlocksBeforeAndAfterStructuredConstruct) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %5 = OpLabel
+     OpBranch %10
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %30
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpBranch %200
+
+     %200 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_TRUE(fe.LabelControlFlowConstructs());
+  const auto& constructs = fe.constructs();
+  EXPECT_EQ(constructs.size(), 2u);
+  EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
+  Construct{ Function [0,6) begin_id:5 end_id:0 depth:0 parent:null }
+  Construct{ Selection [1,4) begin_id:10 end_id:99 depth:1 parent:Function@5 }
+})")) << constructs;
+  // The block records the nearest enclosing construct.
+  EXPECT_EQ(fe.GetBlockInfo(5)->construct, constructs[0].get());
+  EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(20)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(30)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(99)->construct, constructs[0].get());
+  EXPECT_EQ(fe.GetBlockInfo(200)->construct, constructs[0].get());
+}
+
+TEST_F(SpvParserTest, LabelControlFlowConstructs_SwitchSelection) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %40 20 %20 30 %30
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %40 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_TRUE(fe.LabelControlFlowConstructs());
+  const auto& constructs = fe.constructs();
+  EXPECT_EQ(constructs.size(), 2u);
+  EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
+  Construct{ Function [0,5) begin_id:10 end_id:0 depth:0 parent:null }
+  Construct{ Selection [0,4) begin_id:10 end_id:99 depth:1 parent:Function@10 }
+})")) << constructs;
+  // The block records the nearest enclosing construct.
+  EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(20)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(30)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(40)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(99)->construct, constructs[0].get());
+}
+
+TEST_F(SpvParserTest, LabelControlFlowConstructs_SingleBlockLoop) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %20 None
+     OpBranchConditional %cond %20 %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_TRUE(fe.LabelControlFlowConstructs());
+  const auto& constructs = fe.constructs();
+  EXPECT_EQ(constructs.size(), 2u);
+  // A single-block loop consists *only* of a continue target with one block in
+  // it.
+  EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
+  Construct{ Function [0,3) begin_id:10 end_id:0 depth:0 parent:null }
+  Construct{ Continue [1,2) begin_id:20 end_id:99 depth:1 parent:Function@10 in-c:Continue@20 }
+})")) << constructs;
+  // The block records the nearest enclosing construct.
+  EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[0].get());
+  EXPECT_EQ(fe.GetBlockInfo(20)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(99)->construct, constructs[0].get());
+}
+
+TEST_F(SpvParserTest, LabelControlFlowConstructs_MultiBlockLoop) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %40 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_TRUE(fe.LabelControlFlowConstructs());
+  const auto& constructs = fe.constructs();
+  // A single-block loop consists *only* of a continue target with one block in
+  // it.
+  EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
+  Construct{ Function [0,6) begin_id:10 end_id:0 depth:0 parent:null }
+  Construct{ Continue [3,5) begin_id:40 end_id:99 depth:1 parent:Function@10 in-c:Continue@40 }
+  Construct{ Loop [1,3) begin_id:20 end_id:40 depth:1 parent:Function@10 in-c-l:Loop@20 }
+})")) << constructs;
+  // The block records the nearest enclosing construct.
+  EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[0].get());
+  EXPECT_EQ(fe.GetBlockInfo(20)->construct, constructs[2].get());
+  EXPECT_EQ(fe.GetBlockInfo(30)->construct, constructs[2].get());
+  EXPECT_EQ(fe.GetBlockInfo(40)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(50)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(99)->construct, constructs[0].get());
+}
+
+TEST_F(SpvParserTest,
+       LabelControlFlowConstructs_MergeBlockIsAlsoSingleBlockLoop) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %50 None
+     OpBranchConditional %cond %20 %50
+
+     %20 = OpLabel
+     OpBranch %50
+
+     ; %50 is the merge block for the selection starting at 10,
+     ; and its own continue target.
+     %50 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %50 %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_TRUE(fe.LabelControlFlowConstructs());
+  const auto& constructs = fe.constructs();
+  EXPECT_EQ(constructs.size(), 3u);
+  // A single-block loop consists *only* of a continue target with one block in
+  // it.
+  EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
+  Construct{ Function [0,4) begin_id:10 end_id:0 depth:0 parent:null }
+  Construct{ Selection [0,2) begin_id:10 end_id:50 depth:1 parent:Function@10 }
+  Construct{ Continue [2,3) begin_id:50 end_id:99 depth:1 parent:Function@10 in-c:Continue@50 }
+})")) << constructs;
+  // The block records the nearest enclosing construct.
+  EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(20)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(50)->construct, constructs[2].get());
+  EXPECT_EQ(fe.GetBlockInfo(99)->construct, constructs[0].get());
+}
+
+TEST_F(SpvParserTest,
+       LabelControlFlowConstructs_MergeBlockIsAlsoMultiBlockLoopHeader) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %50 None
+     OpBranchConditional %cond %20 %50
+
+     %20 = OpLabel
+     OpBranch %50
+
+     ; %50 is the merge block for the selection starting at 10,
+     ; and a loop block header but not its own continue target.
+     %50 = OpLabel
+     OpLoopMerge %99 %60 None
+     OpBranchConditional %cond %60 %99
+
+     %60 = OpLabel
+     OpBranch %50
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_TRUE(fe.LabelControlFlowConstructs());
+  const auto& constructs = fe.constructs();
+  EXPECT_EQ(constructs.size(), 4u);
+  EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
+  Construct{ Function [0,5) begin_id:10 end_id:0 depth:0 parent:null }
+  Construct{ Selection [0,2) begin_id:10 end_id:50 depth:1 parent:Function@10 }
+  Construct{ Continue [3,4) begin_id:60 end_id:99 depth:1 parent:Function@10 in-c:Continue@60 }
+  Construct{ Loop [2,3) begin_id:50 end_id:60 depth:1 parent:Function@10 in-c-l:Loop@50 }
+})")) << constructs;
+  // The block records the nearest enclosing construct.
+  EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(20)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(50)->construct, constructs[3].get());
+  EXPECT_EQ(fe.GetBlockInfo(60)->construct, constructs[2].get());
+  EXPECT_EQ(fe.GetBlockInfo(99)->construct, constructs[0].get());
+}
+
+TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_If_If) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %50
+
+     %20 = OpLabel
+     OpSelectionMerge %40 None
+     OpBranchConditional %cond %30 %40 ;; true only
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel ; merge for first inner "if"
+     OpBranch %49
+
+     %49 = OpLabel ; an extra padding block
+     OpBranch %99
+
+     %50 = OpLabel
+     OpSelectionMerge %89 None
+     OpBranchConditional %cond %89 %60 ;; false only
+
+     %60 = OpLabel
+     OpBranch %89
+
+     %89 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_TRUE(fe.LabelControlFlowConstructs());
+  const auto& constructs = fe.constructs();
+  EXPECT_EQ(constructs.size(), 4u);
+  EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
+  Construct{ Function [0,9) begin_id:10 end_id:0 depth:0 parent:null }
+  Construct{ Selection [0,8) begin_id:10 end_id:99 depth:1 parent:Function@10 }
+  Construct{ Selection [1,3) begin_id:20 end_id:40 depth:2 parent:Selection@10 }
+  Construct{ Selection [5,7) begin_id:50 end_id:89 depth:2 parent:Selection@10 }
+})")) << constructs;
+  // The block records the nearest enclosing construct.
+  EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(20)->construct, constructs[2].get());
+  EXPECT_EQ(fe.GetBlockInfo(30)->construct, constructs[2].get());
+  EXPECT_EQ(fe.GetBlockInfo(40)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(49)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(50)->construct, constructs[3].get());
+  EXPECT_EQ(fe.GetBlockInfo(60)->construct, constructs[3].get());
+  EXPECT_EQ(fe.GetBlockInfo(89)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(99)->construct, constructs[0].get());
+}
+
+TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_Switch_If) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %20 50 %50
+
+     %20 = OpLabel ; if-then nested in case 20
+     OpSelectionMerge %49 None
+     OpBranchConditional %cond %30 %49
+
+     %30 = OpLabel
+     OpBranch %49
+
+     %49 = OpLabel
+     OpBranch %99
+
+     %50 = OpLabel ; unles-then nested in case 50
+     OpSelectionMerge %89 None
+     OpBranchConditional %cond %89 %60
+
+     %60 = OpLabel
+     OpBranch %89
+
+     %89 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_TRUE(fe.LabelControlFlowConstructs());
+  const auto& constructs = fe.constructs();
+  EXPECT_EQ(constructs.size(), 4u);
+  // The ordering among siblings depends on the computed block order.
+  EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
+  Construct{ Function [0,8) begin_id:10 end_id:0 depth:0 parent:null }
+  Construct{ Selection [0,7) begin_id:10 end_id:99 depth:1 parent:Function@10 }
+  Construct{ Selection [1,3) begin_id:50 end_id:89 depth:2 parent:Selection@10 }
+  Construct{ Selection [4,6) begin_id:20 end_id:49 depth:2 parent:Selection@10 }
+})")) << constructs;
+  // The block records the nearest enclosing construct.
+  EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(20)->construct, constructs[3].get());
+  EXPECT_EQ(fe.GetBlockInfo(30)->construct, constructs[3].get());
+  EXPECT_EQ(fe.GetBlockInfo(49)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(50)->construct, constructs[2].get());
+  EXPECT_EQ(fe.GetBlockInfo(60)->construct, constructs[2].get());
+  EXPECT_EQ(fe.GetBlockInfo(89)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(99)->construct, constructs[0].get());
+}
+
+TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_If_Switch) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %99
+
+     %20 = OpLabel
+     OpSelectionMerge %89 None
+     OpSwitch %selector %89 20 %30
+
+     %30 = OpLabel
+     OpBranch %89
+
+     %89 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_TRUE(fe.LabelControlFlowConstructs());
+  const auto& constructs = fe.constructs();
+  EXPECT_EQ(constructs.size(), 3u);
+  EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
+  Construct{ Function [0,5) begin_id:10 end_id:0 depth:0 parent:null }
+  Construct{ Selection [0,4) begin_id:10 end_id:99 depth:1 parent:Function@10 }
+  Construct{ Selection [1,3) begin_id:20 end_id:89 depth:2 parent:Selection@10 }
+})")) << constructs;
+  // The block records the nearest enclosing construct.
+  EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(20)->construct, constructs[2].get());
+  EXPECT_EQ(fe.GetBlockInfo(30)->construct, constructs[2].get());
+  EXPECT_EQ(fe.GetBlockInfo(89)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(99)->construct, constructs[0].get());
+}
+
+TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_Loop_Loop) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %89 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel ; single block loop
+     OpLoopMerge %40 %30 None
+     OpBranchConditional %cond2 %30 %40
+
+     %40 = OpLabel ; padding block
+     OpBranch %50
+
+     %50 = OpLabel ; outer continue target
+     OpBranch %60
+
+     %60 = OpLabel
+     OpBranch %20
+
+     %89 = OpLabel ; outer merge
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_TRUE(fe.LabelControlFlowConstructs());
+  const auto& constructs = fe.constructs();
+  EXPECT_EQ(constructs.size(), 4u);
+  EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
+  Construct{ Function [0,8) begin_id:10 end_id:0 depth:0 parent:null }
+  Construct{ Continue [4,6) begin_id:50 end_id:89 depth:1 parent:Function@10 in-c:Continue@50 }
+  Construct{ Loop [1,4) begin_id:20 end_id:50 depth:1 parent:Function@10 in-c-l:Loop@20 }
+  Construct{ Continue [2,3) begin_id:30 end_id:40 depth:2 parent:Loop@20 in-c:Continue@30 }
+})")) << constructs;
+  // The block records the nearest enclosing construct.
+  EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[0].get());
+  EXPECT_EQ(fe.GetBlockInfo(20)->construct, constructs[2].get());
+  EXPECT_EQ(fe.GetBlockInfo(30)->construct, constructs[3].get());
+  EXPECT_EQ(fe.GetBlockInfo(40)->construct, constructs[2].get());
+  EXPECT_EQ(fe.GetBlockInfo(50)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(60)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(89)->construct, constructs[0].get());
+  EXPECT_EQ(fe.GetBlockInfo(99)->construct, constructs[0].get());
+}
+
+TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_Loop_If) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %80 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel ; If, nested in the loop construct
+     OpSelectionMerge %49 None
+     OpBranchConditional %cond2 %40 %49
+
+     %40 = OpLabel
+     OpBranch %49
+
+     %49 = OpLabel ; merge for inner if
+     OpBranch %80
+
+     %80 = OpLabel ; continue target
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_TRUE(fe.LabelControlFlowConstructs());
+  const auto& constructs = fe.constructs();
+  EXPECT_EQ(constructs.size(), 4u);
+  EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
+  Construct{ Function [0,7) begin_id:10 end_id:0 depth:0 parent:null }
+  Construct{ Continue [5,6) begin_id:80 end_id:99 depth:1 parent:Function@10 in-c:Continue@80 }
+  Construct{ Loop [1,5) begin_id:20 end_id:80 depth:1 parent:Function@10 in-c-l:Loop@20 }
+  Construct{ Selection [2,4) begin_id:30 end_id:49 depth:2 parent:Loop@20 in-c-l:Loop@20 }
+})")) << constructs;
+  // The block records the nearest enclosing construct.
+  EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[0].get());
+  EXPECT_EQ(fe.GetBlockInfo(20)->construct, constructs[2].get());
+  EXPECT_EQ(fe.GetBlockInfo(30)->construct, constructs[3].get());
+  EXPECT_EQ(fe.GetBlockInfo(40)->construct, constructs[3].get());
+  EXPECT_EQ(fe.GetBlockInfo(49)->construct, constructs[2].get());
+  EXPECT_EQ(fe.GetBlockInfo(80)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(99)->construct, constructs[0].get());
+}
+
+TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_LoopContinue_If) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %30 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel ; If, nested at the top of the continue construct head
+     OpSelectionMerge %49 None
+     OpBranchConditional %cond2 %40 %49
+
+     %40 = OpLabel
+     OpBranch %49
+
+     %49 = OpLabel ; merge for inner if, backedge
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_TRUE(fe.LabelControlFlowConstructs());
+  const auto& constructs = fe.constructs();
+  EXPECT_EQ(constructs.size(), 4u);
+  EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
+  Construct{ Function [0,6) begin_id:10 end_id:0 depth:0 parent:null }
+  Construct{ Continue [2,5) begin_id:30 end_id:99 depth:1 parent:Function@10 in-c:Continue@30 }
+  Construct{ Loop [1,2) begin_id:20 end_id:30 depth:1 parent:Function@10 in-c-l:Loop@20 }
+  Construct{ Selection [2,4) begin_id:30 end_id:49 depth:2 parent:Continue@30 in-c:Continue@30 }
+})")) << constructs;
+  // The block records the nearest enclosing construct.
+  EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[0].get());
+  EXPECT_EQ(fe.GetBlockInfo(20)->construct, constructs[2].get());
+  EXPECT_EQ(fe.GetBlockInfo(30)->construct, constructs[3].get());
+  EXPECT_EQ(fe.GetBlockInfo(40)->construct, constructs[3].get());
+  EXPECT_EQ(fe.GetBlockInfo(49)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(99)->construct, constructs[0].get());
+}
+
+TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_If_SingleBlockLoop) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %99
+
+     %20 = OpLabel
+     OpLoopMerge %89 %20 None
+     OpBranchConditional %cond %20 %99
+
+     %89 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_TRUE(fe.LabelControlFlowConstructs());
+  const auto& constructs = fe.constructs();
+  EXPECT_EQ(constructs.size(), 3u);
+  EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
+  Construct{ Function [0,4) begin_id:10 end_id:0 depth:0 parent:null }
+  Construct{ Selection [0,3) begin_id:10 end_id:99 depth:1 parent:Function@10 }
+  Construct{ Continue [1,2) begin_id:20 end_id:89 depth:2 parent:Selection@10 in-c:Continue@20 }
+})")) << constructs;
+  // The block records the nearest enclosing construct.
+  EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(20)->construct, constructs[2].get());
+  EXPECT_EQ(fe.GetBlockInfo(99)->construct, constructs[0].get());
+}
+
+TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_If_MultiBlockLoop) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %99
+
+     %20 = OpLabel ; start loop body
+     OpLoopMerge %89 %40 None
+     OpBranchConditional %cond %30 %89
+
+     %30 = OpLabel ; body block
+     OpBranch %40
+
+     %40 = OpLabel ; continue target
+     OpBranch %50
+
+     %50 = OpLabel ; backedge block
+     OpBranch %20
+
+     %89 = OpLabel ; merge for the loop
+     OpBranch %20
+
+     %99 = OpLabel ; merge for the if
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_TRUE(fe.LabelControlFlowConstructs());
+  const auto& constructs = fe.constructs();
+  EXPECT_EQ(constructs.size(), 4u);
+  EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
+  Construct{ Function [0,7) begin_id:10 end_id:0 depth:0 parent:null }
+  Construct{ Selection [0,6) begin_id:10 end_id:99 depth:1 parent:Function@10 }
+  Construct{ Continue [3,5) begin_id:40 end_id:89 depth:2 parent:Selection@10 in-c:Continue@40 }
+  Construct{ Loop [1,3) begin_id:20 end_id:40 depth:2 parent:Selection@10 in-c-l:Loop@20 }
+})")) << constructs;
+  // The block records the nearest enclosing construct.
+  EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(20)->construct, constructs[3].get());
+  EXPECT_EQ(fe.GetBlockInfo(30)->construct, constructs[3].get());
+  EXPECT_EQ(fe.GetBlockInfo(40)->construct, constructs[2].get());
+  EXPECT_EQ(fe.GetBlockInfo(50)->construct, constructs[2].get());
+  EXPECT_EQ(fe.GetBlockInfo(89)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(99)->construct, constructs[0].get());
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

@@ -377,6 +377,8 @@ source_set("libtint_core_src") {
 
 source_set("libtint_spv_reader_src") {
   sources = [
+    "src/reader/spirv/construct.h",
+    "src/reader/spirv/construct.cc",
     "src/reader/spirv/enum_converter.cc",
     "src/reader/spirv/enum_converter.h",
     "src/reader/spirv/fail_stream.h",

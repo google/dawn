@@ -437,6 +437,9 @@ bool FunctionEmitter::EmitBody() {
   if (!VerifyHeaderContinueMergeOrder()) {
     return false;
   }
+  if (!LabelControlFlowConstructs()) {
+    return false;
+  }
 
   if (!EmitFunctionVariables()) {
     return false;
@@ -657,6 +660,149 @@ bool FunctionEmitter::VerifyHeaderContinueMergeOrder() {
                         << ct;
         }
   }
+  return success();
+}
+
+bool FunctionEmitter::LabelControlFlowConstructs() {
+  // Label each block in the block order with its nearest enclosing structured
+  // control flow construct. Populates the |construct| member of BlockInfo.
+
+  //  Keep a stack of enclosing structured control flow constructs.  Start
+  //  with the synthetic construct representing the entire function.
+  //
+  //  Scan from left to right in the block order, and check conditions
+  //  on each block in the following order:
+  //
+  //        a. When you reach a merge block, the top of the stack should
+  //           be the associated header. Pop it off.
+  //        b. When you reach a header, push it on the stack.
+  //        c. When you reach a continue target, push it on the stack.
+  //           (A block can be both a header and a continue target, in the case
+  //           of a single-block loop, in which case it should also be its
+  //           own backedge block.)
+  //        c. When you reach a block with an edge branching backward (in the
+  //           structured order) to block T:
+  //            T should be a loop header, and the top of the stack should be a
+  //            continue target associated with T.
+  //            This is the end of the continue construct. Pop the continue
+  //            target off the stack.
+  //       (Note: We pop the merge off first because a merge block that marks
+  //       the end of one construct can be a single-block loop.  So that block
+  //       is a merge, a header, a continue target, and a backedge block.
+  //       But we want to finish processing of the merge before dealing with
+  //       the loop.)
+  //
+  //      In the same scan, mark each basic block with the nearest enclosing
+  //      header: the most recent header for which we haven't reached its merge
+  //      block. Also mark the the most recent continue target for which we
+  //      haven't reached the backedge block.
+
+  assert(block_order_.size() > 0);
+  constructs_.clear();
+  const auto entry_id = block_order_[0];
+
+  // The stack of enclosing constructs.
+  std::vector<Construct*> enclosing;
+
+  // Creates a control flow construct and pushes it onto the stack.
+  // Its parent is the top of the stack, or nullptr if the stack is empty.
+  // Returns the newly created construct.
+  auto push_construct = [this, &enclosing](size_t depth, Construct::Kind k,
+                                           uint32_t begin_id,
+                                           uint32_t end_id) -> Construct* {
+    const auto begin_pos = GetBlockInfo(begin_id)->pos;
+    const auto end_pos =
+        end_id == 0 ? uint32_t(block_order_.size()) : GetBlockInfo(end_id)->pos;
+    const auto* parent = enclosing.empty() ? nullptr : enclosing.back();
+    // A loop construct is added right after its associated continue construct.
+    // In that case, adjust the parent up.
+    if (k == Construct::kLoop) {
+      assert(parent);
+      assert(parent->kind == Construct::kContinue);
+      parent = parent->parent;
+    }
+    constructs_.push_back(std::make_unique<Construct>(
+        parent, int(depth), k, begin_id, end_id, begin_pos, end_pos));
+    Construct* result = constructs_.back().get();
+    enclosing.push_back(result);
+    return result;
+  };
+
+  // Make a synthetic kFunction construct to enclose all blocks in the function.
+  push_construct(0, Construct::kFunction, entry_id, 0);
+  // The entry block can be a selection construct, so be sure to process
+  // it anyway.
+
+  for (uint32_t i = 0; i < block_order_.size(); ++i) {
+    const auto block_id = block_order_[i];
+    assert(block_id > 0);
+    auto* block_info = GetBlockInfo(block_id);
+    assert(block_info);
+
+    if (enclosing.empty()) {
+      return Fail() << "internal error: too many merge blocks before block "
+                    << block_id;
+    }
+    const Construct* top = enclosing.back();
+
+    while (block_id == top->end_id) {
+      // We've reached a predeclared end of the construct.  Pop it off the
+      // stack.
+      enclosing.pop_back();
+      if (enclosing.empty()) {
+        return Fail() << "internal error: too many merge blocks before block "
+                      << block_id;
+      }
+      top = enclosing.back();
+    }
+
+    const auto merge = block_info->merge_for_header;
+    if (merge != 0) {
+      // The current block is a header.
+      const auto header = block_id;
+      const auto* header_info = block_info;
+      const auto depth = 1 + top->depth;
+      const auto ct = header_info->continue_for_header;
+      if (ct != 0) {
+        // The current block is a loop header.
+        // We should see the continue construct after the loop construct, so
+        // push the loop construct last.
+
+        // From the interval rule, the continue construct consists of blocks
+        // in the block order, starting at the continue target, until just
+        // before the merge block.
+        top = push_construct(depth, Construct::kContinue, ct, merge);
+        // A single block loop has an empty loop construct.
+        if (!header_info->is_single_block_loop) {
+          // From the interval rule, the loop construct consists of blocks
+          // in the block order, starting at the header, until just
+          // before the continue target.
+          top = push_construct(depth, Construct::kLoop, header, ct);
+        }
+      } else {
+        // From the interval rule, the selection construct consists of blocks
+        // in the block order, starting at the header, until just before the
+        // merge block.
+        top = push_construct(depth, Construct::kSelection, header, merge);
+      }
+    }
+
+    assert(top);
+    block_info->construct = top;
+  }
+
+  // At the end of the block list, we should only have the kFunction construct
+  // left.
+  if (enclosing.size() != 1) {
+    return Fail() << "internal error: unbalanced structured constructs when "
+                     "labeling structured constructs: ended with "
+                  << enclosing.size() - 1 << " unterminated constructs";
+  }
+  const auto* top = enclosing[0];
+  if (top->kind != Construct::kFunction || top->depth != 0) {
+    return Fail() << "internal error: outermost construct is not a function?!";
+  }
+
   return success();
 }
 
