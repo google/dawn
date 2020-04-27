@@ -16,6 +16,7 @@
 #define SRC_READER_SPIRV_FUNCTION_H_
 
 #include <memory>
+#include <ostream>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -66,6 +67,17 @@ struct BlockInfo {
   /// as its own continue target, and has branch to itself.
   bool is_single_block_loop = false;
 };
+
+inline std::ostream& operator<<(std::ostream& o, const BlockInfo& bi) {
+  o << "BlockInfo{"
+    << " id: " << bi.id << " pos: " << bi.pos
+    << " merge_for_header: " << bi.merge_for_header
+    << " continue_for_header: " << bi.continue_for_header
+    << " header_for_merge: " << bi.header_for_merge
+    << " header_for_merge: " << bi.header_for_merge
+    << " single_block_loop: " << int(bi.is_single_block_loop) << "}";
+  return o;
+}
 
 /// A FunctionEmitter emits a SPIR-V function onto a Tint AST module.
 class FunctionEmitter {
@@ -128,6 +140,12 @@ class FunctionEmitter {
   /// @returns the reverse structured post order of the basic blocks in
   /// the function.
   const std::vector<uint32_t>& block_order() const { return block_order_; }
+
+  /// Verifies that the orderings among a structured header, continue target,
+  /// and merge block are valid. Assumes block order has been computed, and
+  /// merges are valid and recorded.
+  /// @returns false if invalid nesting was detected
+  bool VerifyHeaderContinueMergeOrder();
 
   /// Emits declarations of function variables.
   /// @returns false if emission failed.

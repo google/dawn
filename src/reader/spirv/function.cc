@@ -37,6 +37,105 @@
 #include "src/reader/spirv/fail_stream.h"
 #include "src/reader/spirv/parser_impl.h"
 
+// Terms:
+//    CFG: the control flow graph of the function, where basic blocks are the
+//    nodes, and branches form the directed arcs.  The function entry block is
+//    the root of the CFG.
+//
+//    Suppose H is a header block (i.e. has an OpSelectionMerge or OpLoopMerge).
+//    Then:
+//    - Let M(H) be the merge block named by the merge instruction in H.
+//    - If H is a loop header, i.e. has an OpLoopMerge instruction, then let
+//      CT(H) be the continue target block named by the OpLoopMerge
+//      instruction.
+//    - If H is a selection construct whose header ends in
+//      OpBranchConditional with true target %then and false target %else,
+//      then  TT(H) = %then and FT(H) = %else
+//
+// Determining output block order:
+//    The "structured post-order traversal" of the CFG is a post-order traversal
+//    of the basic blocks in the CFG, where:
+//      We visit the entry node of the function first.
+//      When visiting a header block:
+//        We next visit its merge block
+//        Then if it's a loop header, we next visit the continue target,
+//      Then we visit the block's successors (whether it's a header or not)
+//        If the block ends in an OpBranchConditional, we visit the false target
+//        before the true target.
+//
+//    The "reverse structured post-order traversal" of the CFG is the reverse
+//    of the structured post-order traversal.
+//    This is the order of basic blocks as they should be emitted to the WGSL
+//    function. It is the order computed by ComputeBlockOrder, and stored in
+//    the |FunctionEmiter::block_order_|.
+//    Blocks not in this ordering are ignored by the rest of the algorithm.
+//
+//    Note:
+//     - A block D in the function might not appear in this order because
+//       no block in the order branches to D.
+//     - An unreachable block D might still be in the order because some header
+//       block in the order names D as its continue target, or merge block,
+//       or D is reachable from one of those otherwise-unreachable continue
+//       targets or merge blocks.
+//
+// Terms:
+//    Let Pos(B) be the index position of a block B in the computed block order.
+//
+// CFG intervals and valid nesting:
+//
+//    A correctly structured CFG satisfies nesting rules that we can check by
+//    comparing positions of related blocks.
+//
+//    If header block H is in the block order, then the following holds:
+//
+//      Pos(H) < Pos(M(H))
+//
+//      If CT(H) exists, then:
+//
+//         Pos(H) <= Pos(CT(H)), with equality exactly for single-block loops
+//         Pos(CT(H)) < Pos(M)
+//
+//    This gives us the fundamental ordering of blocks in relation to a
+//    structured construct:
+//      The blocks before H in the block order, are not in the construct
+//      The blocks at M(H) or later in the block order, are not in the construct
+//      The blocks in a selection headed at H are in positions [ Pos(H),
+//      Pos(M(H)) ) The blocks in a loop construct headed at H are in positions
+//      [ Pos(H), Pos(CT(H)) ) The blocks in the continue construct for loop
+//      headed at H are in
+//        positions [ Pos(CT(H)), Pos(M(H)) )
+//
+//      Schematically, for a selection construct headed by H, the blocks are in
+//      order from left to right:
+//
+//                 ...a-b-c H d-e-f M(H) n-o-p...
+//
+//           where ...a-b-c: blocks before the selection construct
+//           where H and d-e-f: blocks in the selection construct
+//           where M(H) and n-o-p...: blocks after the selection construct
+//
+//      Schematically, for a single-block loop construct headed by H, there are
+//      blocks in order from left to right:
+//
+//                 ...a-b-c H M(H) n-o-p...
+//
+//           where ...a-b-c: blocks before the loop
+//           where H is the continue construct; CT(H)=H, and the loop construct
+//           is *empty* where M(H) and n-o-p...: blocks after the loop and
+//           continue constructs
+//
+//      Schematically, for a multi-block loop construct headed by H, there are
+//      blocks in order from left to right:
+//
+//                 ...a-b-c H d-e-f CT(H) j-k-l M(H) n-o-p...
+//
+//           where ...a-b-c: blocks before the loop
+//           where H and d-e-f: blocks in the loop construct
+//           where CT(H) and j-k-l: blocks in the continue construct
+//           where M(H) and n-o-p...: blocks after the loop and continue
+//           constructs
+//
+
 namespace tint {
 namespace reader {
 namespace spirv {
@@ -335,6 +434,9 @@ bool FunctionEmitter::EmitBody() {
   }
 
   ComputeBlockOrderAndPositions();
+  if (!VerifyHeaderContinueMergeOrder()) {
+    return false;
+  }
 
   if (!EmitFunctionVariables()) {
     return false;
@@ -491,6 +593,71 @@ void FunctionEmitter::ComputeBlockOrderAndPositions() {
   for (uint32_t i = 0; i < block_order_.size(); ++i) {
     GetBlockInfo(block_order_[i])->pos = i;
   }
+}
+
+bool FunctionEmitter::VerifyHeaderContinueMergeOrder() {
+  // Verify interval rules for a structured header block:
+  //
+  //    If the CFG satisfies structured control flow rules, then:
+  //    If header H is reachable, then the following "interval rules" hold,
+  //    where M(H) is H's merge block, and CT(H) is H's continue target:
+  //
+  //      Pos(H) < Pos(M(H))
+  //
+  //      If CT(H) exists, then:
+  //         Pos(H) <= Pos(CT(H)), with equality exactly for single-block loops
+  //         Pos(CT(H)) < Pos(M)
+  //
+  for (auto block_id : block_order_) {
+    const auto* block_info = GetBlockInfo(block_id);
+    const auto merge = block_info->merge_for_header;
+    if (merge == 0) {
+      continue;
+    }
+      // This is a header.
+      const auto header = block_id;
+      const auto* header_info = block_info;
+      const auto header_pos = header_info->pos;
+      const auto merge_pos = GetBlockInfo(merge)->pos;
+
+      // Pos(H) < Pos(M(H))
+      // Note: When recording merges we made sure H != M(H)
+      if (merge_pos <= header_pos) {
+        return Fail() << "Header " << header
+                      << " does not strictly dominate its merge block "
+                      << merge;
+        // TODO(dneto): Report a path from the entry block to the merge block
+        // without going through the header block.
+      }
+
+      const auto ct = block_info->continue_for_header;
+      if (ct == 0) {
+        continue;
+      }
+      // Furthermore, this is a loop header.
+      const auto* ct_info = GetBlockInfo(ct);
+      const auto ct_pos = ct_info->pos;
+      // Pos(H) <= Pos(CT(H)), with equality only for single-block loops.
+      if (header_info->is_single_block_loop && ct_pos != header_pos) {
+        Fail() << "Internal error: Single block loop.  CT pos is not the "
+                  "header pos. Should have already checked this";
+      }
+      if (!header_info->is_single_block_loop && (ct_pos <= header_pos)) {
+        Fail() << "Loop header " << header
+               << " does not dominate its continue target " << ct;
+      }
+        // Pos(CT(H)) < Pos(M(H))
+        // Note: When recording merges we made sure CT(H) != M(H)
+        if (merge_pos <= ct_pos) {
+          return Fail() << "Merge block " << merge
+                        << " for loop headed at block " << header
+                        << " appears at or before the loop's continue "
+                           "construct headed by "
+                           "block "
+                        << ct;
+        }
+  }
+  return success();
 }
 
 bool FunctionEmitter::EmitFunctionVariables() {

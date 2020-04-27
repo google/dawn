@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -25,6 +26,16 @@ namespace tint {
 namespace reader {
 namespace spirv {
 namespace {
+
+std::string Dump(const std::vector<uint32_t>& v) {
+  std::ostringstream o;
+  o << "{";
+  for (auto a : v) {
+    o << a << " ";
+  }
+  o << "}";
+  return o.str();
+}
 
 using ::testing::ElementsAre;
 using ::testing::Eq;
@@ -2546,6 +2557,198 @@ TEST_F(SpvParserTest, ComputeBlockOrder_Loop_Loop_SwitchBackedgeBreakContinue) {
 
   EXPECT_THAT(fe.block_order(),
               ElementsAre(10, 20, 30, 35, 37, 40, 49, 50, 99));
+}
+
+TEST_F(SpvParserTest, VerifyHeaderContinueMergeOrder_Selection_Good) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %30
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+}
+
+TEST_F(SpvParserTest, VerifyHeaderContinueMergeOrder_SingleBlockLoop_Good) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %20 None
+     OpBranchConditional %cond %20 %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder()) << p->error();
+}
+
+TEST_F(SpvParserTest, VerifyHeaderContinueMergeOrder_MultiBlockLoop_Good) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %30 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+}
+
+TEST_F(SpvParserTest,
+       VerifyHeaderContinueMergeOrder_HeaderDoesNotStrictlyDominateMerge) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel
+     OpSelectionMerge %20 None ; this is backward
+     OpBranchConditional %cond2 %60 %99
+
+     %60 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_FALSE(fe.VerifyHeaderContinueMergeOrder());
+  EXPECT_THAT(p->error(),
+              Eq("Header 50 does not strictly dominate its merge block 20"))
+      << *fe.GetBlockInfo(50) << std::endl
+      << *fe.GetBlockInfo(20) << std::endl
+      << Dump(fe.block_order());
+}
+
+TEST_F(
+    SpvParserTest,
+    VerifyHeaderContinueMergeOrder_HeaderDoesNotStrictlyDominateContinueTarget) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel
+     OpLoopMerge %99 %20 None ; this is backward
+     OpBranchConditional %cond %60 %99
+
+     %60 = OpLabel
+     OpBranch %50
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_FALSE(fe.VerifyHeaderContinueMergeOrder());
+  EXPECT_THAT(p->error(),
+              Eq("Loop header 50 does not dominate its continue target 20"))
+      << *fe.GetBlockInfo(50) << std::endl
+      << *fe.GetBlockInfo(20) << std::endl
+      << Dump(fe.block_order());
+}
+
+TEST_F(SpvParserTest,
+       VerifyHeaderContinueMergeOrder_MergeInsideContinueTarget) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel
+     OpLoopMerge %60 %70 None
+     OpBranchConditional %cond %60 %99
+
+     %60 = OpLabel
+     OpBranch %70
+
+     %70 = OpLabel
+     OpBranch %50
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  fe.RegisterMerges();
+  EXPECT_FALSE(fe.VerifyHeaderContinueMergeOrder());
+  EXPECT_THAT(p->error(),
+              Eq("Merge block 60 for loop headed at block 50 appears at or "
+                 "before the loop's continue construct headed by block 70"))
+      << Dump(fe.block_order());
 }
 
 }  // namespace
