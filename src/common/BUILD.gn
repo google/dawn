@@ -104,6 +104,25 @@ config("dawn_internal") {
       "-Wstrict-prototypes",
       "-Wtautological-unsigned-zero-compare",
     ]
+
+    # clang-cl doesn't know -pedantic, pass it explicitly to the clang driver on Windows
+    if (is_win) {
+      cflags += [ "/clang:-pedantic" ]
+    } else {
+      cflags += [ "-pedantic" ]
+    }
+
+    # Flags for -pedantic warnings that haven't been fixed yet.
+    cflags += [
+      "-Wno-c++20-designator",
+      "-Wno-four-char-constants",
+      "-Wno-gnu-anonymous-struct",
+      "-Wno-gnu-zero-variadic-macro-arguments",
+      "-Wno-language-extension-token",
+      "-Wno-microsoft-enum-value",
+      "-Wno-nested-anon-types",
+      "-Wno-vla-extension",
+    ]
   }
 }
 
