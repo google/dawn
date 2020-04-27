@@ -252,6 +252,75 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
 )");
 }
 
+TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
+  ast::type::F32Type f32;
+
+  // type Inner = struct {
+  //   a : f32
+  //   b : f32
+  // }
+  // my_struct {
+  //   inner : Inner
+  // }
+  //
+  // var ident : my_struct
+  // ident.inner.a
+  ast::StructMemberDecorationList decos;
+  ast::StructMemberList inner_members;
+  inner_members.push_back(
+      std::make_unique<ast::StructMember>("a", &f32, std::move(decos)));
+  inner_members.push_back(
+      std::make_unique<ast::StructMember>("b", &f32, std::move(decos)));
+
+  ast::type::StructType inner_struct(std::make_unique<ast::Struct>(
+      ast::StructDecoration::kNone, std::move(inner_members)));
+
+  ast::type::AliasType alias("Inner", &inner_struct);
+
+  ast::StructMemberList outer_members;
+  outer_members.push_back(std::make_unique<ast::StructMember>(
+      "inner", &alias, std::move(decos)));
+
+  ast::type::StructType s_type(std::make_unique<ast::Struct>(
+      ast::StructDecoration::kNone, std::move(outer_members)));
+  s_type.set_name("my_struct");
+
+  ast::Variable var("ident", ast::StorageClass::kFunction, &s_type);
+
+  ast::MemberAccessorExpression expr(
+      std::make_unique<ast::MemberAccessorExpression>(
+          std::make_unique<ast::IdentifierExpression>("ident"),
+          std::make_unique<ast::IdentifierExpression>("inner")),
+      std::make_unique<ast::IdentifierExpression>("a"));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(&var);
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 6u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
+%4 = OpTypeStruct %5 %5
+%3 = OpTypeStruct %4
+%2 = OpTypePointer Function %3
+%7 = OpTypeInt 32 0
+%8 = OpConstant %7 0
+%9 = OpTypePointer Function %5
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
+            R"(%1 = OpVariable %2 Function
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%6 = OpAccessChain %9 %1 %8 %8
+)");
+}
+
 TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
   ast::type::F32Type f32;
 

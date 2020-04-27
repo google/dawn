@@ -445,6 +445,11 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
 
       auto* data_type =
           mem_accessor->structure()->result_type()->UnwrapPtrIfNeeded();
+
+      while (data_type->IsAlias()) {
+        data_type = data_type->AsAlias()->type();
+      }
+
       if (data_type->IsStruct()) {
         auto* strct = data_type->AsStruct()->impl();
         auto name = mem_accessor->member()->name();
@@ -468,7 +473,7 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
       } else if (data_type->IsVector()) {
         // TODO(dsinclair): Handle swizzle
       } else {
-        error_ = "invalid type for member accessor";
+        error_ = "invalid type for member accessor: " + data_type->type_name();
         return 0;
       }
     } else {
