@@ -896,17 +896,16 @@ TEST_P(BindGroupTests, LastReferenceToBindGroupLayout) {
 TEST_P(BindGroupTests, EmptyLayout) {
     wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(device, {});
     wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {});
-    wgpu::ComputePipelineDescriptor pipelineDesc = {
-        .layout = utils::MakeBasicPipelineLayout(device, &bgl),
-        .computeStage =
-            {
-                .module = utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
-                    #version 450
-                    void main() {
-                    })"),
-                .entryPoint = "main",
-            },
-    };
+
+    wgpu::ComputePipelineDescriptor pipelineDesc;
+    pipelineDesc.layout = utils::MakeBasicPipelineLayout(device, &bgl);
+    pipelineDesc.computeStage.entryPoint = "main";
+    pipelineDesc.computeStage.module =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
+        #version 450
+        void main() {
+        })");
+
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();

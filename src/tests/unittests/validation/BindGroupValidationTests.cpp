@@ -1601,9 +1601,8 @@ TEST_F(ComparisonSamplerBindingTest, SamplerAndBindGroupMatches) {
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ComparisonSampler}});
 
-        wgpu::SamplerDescriptor desc = {
-            .compare = wgpu::CompareFunction::Never,
-        };
+        wgpu::SamplerDescriptor desc = {};
+        desc.compare = wgpu::CompareFunction::Never;
         utils::MakeBindGroup(device, bindGroupLayout, {{0, device.CreateSampler(&desc)}});
     }
 
@@ -1612,9 +1611,8 @@ TEST_F(ComparisonSamplerBindingTest, SamplerAndBindGroupMatches) {
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler}});
 
-        wgpu::SamplerDescriptor desc = {
-            .compare = wgpu::CompareFunction::Never,
-        };
+        wgpu::SamplerDescriptor desc;
+        desc.compare = wgpu::CompareFunction::Never;
         ASSERT_DEVICE_ERROR(
             utils::MakeBindGroup(device, bindGroupLayout, {{0, device.CreateSampler(&desc)}}));
     }

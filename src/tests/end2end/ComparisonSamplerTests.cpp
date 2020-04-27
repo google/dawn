@@ -61,31 +61,28 @@ class ComparisonSamplerTest : public DawnTest {
 
         mRenderPipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 
-        wgpu::BufferDescriptor uniformBufferDesc = {
-            .usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst,
-            .size = sizeof(float),
-        };
+        wgpu::BufferDescriptor uniformBufferDesc;
+        uniformBufferDesc.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
+        uniformBufferDesc.size = sizeof(float);
         mUniformBuffer = device.CreateBuffer(&uniformBufferDesc);
 
-        wgpu::BufferDescriptor textureUploadDesc = {
-            .usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst,
-            .size = sizeof(float),
-        };
+        wgpu::BufferDescriptor textureUploadDesc;
+        textureUploadDesc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+        textureUploadDesc.size = sizeof(float);
         mTextureUploadBuffer = device.CreateBuffer(&textureUploadDesc);
 
-        wgpu::TextureDescriptor inputTextureDesc = {
-            .usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled |
-                     wgpu::TextureUsage::OutputAttachment,
-            .size = {1, 1, 1},
-            .format = wgpu::TextureFormat::Depth32Float,
-        };
+        wgpu::TextureDescriptor inputTextureDesc;
+        inputTextureDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled |
+                                 wgpu::TextureUsage::OutputAttachment;
+        inputTextureDesc.size = {1, 1, 1};
+        inputTextureDesc.format = wgpu::TextureFormat::Depth32Float;
         mInputTexture = device.CreateTexture(&inputTextureDesc);
 
-        wgpu::TextureDescriptor outputTextureDesc = {
-            .usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc,
-            .size = {1, 1, 1},
-            .format = wgpu::TextureFormat::RGBA8Unorm,
-        };
+        wgpu::TextureDescriptor outputTextureDesc;
+        outputTextureDesc.usage =
+            wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+        outputTextureDesc.size = {1, 1, 1};
+        outputTextureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
         mOutputTexture = device.CreateTexture(&outputTextureDesc);
     }
 
@@ -94,9 +91,8 @@ class ComparisonSamplerTest : public DawnTest {
                           std::vector<float> textureValues) {
         mUniformBuffer.SetSubData(0, sizeof(float), &compareRef);
 
-        wgpu::SamplerDescriptor samplerDesc = {
-            .compare = compare,
-        };
+        wgpu::SamplerDescriptor samplerDesc;
+        samplerDesc.compare = compare;
         wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
 
         wgpu::BindGroup bindGroup =
@@ -155,16 +151,14 @@ class ComparisonSamplerTest : public DawnTest {
                     return;
                 }
                 mTextureUploadBuffer.SetSubData(0, sizeof(float), &textureValue);
-                wgpu::BufferCopyView bufferCopyView = {
-                    .buffer = mTextureUploadBuffer,
-                    .offset = 0,
-                    .rowPitch = kTextureBytesPerRowAlignment,
-                    .imageHeight = 1,
-                };
-                wgpu::TextureCopyView textureCopyView = {
-                    .texture = mInputTexture,
-                    .origin = {0, 0, 0},
-                };
+                wgpu::BufferCopyView bufferCopyView;
+                bufferCopyView.buffer = mTextureUploadBuffer;
+                bufferCopyView.offset = 0;
+                bufferCopyView.rowPitch = kTextureBytesPerRowAlignment;
+                bufferCopyView.imageHeight = 1;
+                wgpu::TextureCopyView textureCopyView;
+                textureCopyView.texture = mInputTexture;
+                textureCopyView.origin = {0, 0, 0};
                 wgpu::Extent3D copySize = {1, 1, 1};
                 commandEncoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
             }

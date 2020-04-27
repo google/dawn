@@ -19,6 +19,7 @@
 
 #include <array>
 #include <initializer_list>
+#include <vector>
 
 #include "common/Constants.h"
 

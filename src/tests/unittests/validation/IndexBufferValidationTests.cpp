@@ -20,10 +20,9 @@ class IndexBufferValidationTest : public ValidationTest {};
 
 // Test that for OOB validation of index buffer offset and size.
 TEST_F(IndexBufferValidationTest, IndexBufferOffsetOOBValidation) {
-    wgpu::BufferDescriptor bufferDesc = {
-        .usage = wgpu::BufferUsage::Index,
-        .size = 256,
-    };
+    wgpu::BufferDescriptor bufferDesc;
+    bufferDesc.usage = wgpu::BufferUsage::Index;
+    bufferDesc.size = 256;
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
 
     DummyRenderPass renderPass(device);
