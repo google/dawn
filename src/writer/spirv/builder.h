@@ -149,6 +149,14 @@ class Builder {
   /// @param assign the statement to generate
   /// @returns true if the statement was successfully generated
   bool GenerateAssignStatement(ast::AssignmentStatement* assign);
+  /// Generates a break statement
+  /// @param stmt the statement to generate
+  /// @returns true if the statement was successfully generated
+  bool GenerateBreakStatement(ast::BreakStatement* stmt);
+  /// Generates a continue statement
+  /// @param stmt the statement to generate
+  /// @returns true if the statement was successfully generated
+  bool GenerateContinueStatement(ast::ContinueStatement* stmt);
   /// Generates an entry point instruction
   /// @param ep the entry point
   /// @returns true if the instruction was generated, false otherwise
@@ -308,6 +316,8 @@ class Builder {
   std::unordered_map<std::string, uint32_t> const_to_id_;
   ScopeStack<uint32_t> scope_stack_;
   std::unordered_map<uint32_t, ast::Variable*> spirv_id_to_variable_;
+  std::vector<uint32_t> merge_stack_;
+  std::vector<uint32_t> continue_stack_;
 };
 
 }  // namespace spirv

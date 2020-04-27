@@ -495,7 +495,8 @@ bool FunctionEmitter::RegisterMerges() {
     const auto block_id = block.id();
     auto* block_info = GetBlockInfo(block_id);
     if (!block_info) {
-      return Fail() << "internal error: block " << block_id << " missing; blocks should already "
+      return Fail() << "internal error: block " << block_id
+                    << " missing; blocks should already "
                        "have been registered";
     }
 
@@ -617,48 +618,47 @@ bool FunctionEmitter::VerifyHeaderContinueMergeOrder() {
     if (merge == 0) {
       continue;
     }
-      // This is a header.
-      const auto header = block_id;
-      const auto* header_info = block_info;
-      const auto header_pos = header_info->pos;
-      const auto merge_pos = GetBlockInfo(merge)->pos;
+    // This is a header.
+    const auto header = block_id;
+    const auto* header_info = block_info;
+    const auto header_pos = header_info->pos;
+    const auto merge_pos = GetBlockInfo(merge)->pos;
 
-      // Pos(H) < Pos(M(H))
-      // Note: When recording merges we made sure H != M(H)
-      if (merge_pos <= header_pos) {
-        return Fail() << "Header " << header
-                      << " does not strictly dominate its merge block "
-                      << merge;
-        // TODO(dneto): Report a path from the entry block to the merge block
-        // without going through the header block.
-      }
+    // Pos(H) < Pos(M(H))
+    // Note: When recording merges we made sure H != M(H)
+    if (merge_pos <= header_pos) {
+      return Fail() << "Header " << header
+                    << " does not strictly dominate its merge block " << merge;
+      // TODO(dneto): Report a path from the entry block to the merge block
+      // without going through the header block.
+    }
 
-      const auto ct = block_info->continue_for_header;
-      if (ct == 0) {
-        continue;
-      }
-      // Furthermore, this is a loop header.
-      const auto* ct_info = GetBlockInfo(ct);
-      const auto ct_pos = ct_info->pos;
-      // Pos(H) <= Pos(CT(H)), with equality only for single-block loops.
-      if (header_info->is_single_block_loop && ct_pos != header_pos) {
-        Fail() << "Internal error: Single block loop.  CT pos is not the "
-                  "header pos. Should have already checked this";
-      }
-      if (!header_info->is_single_block_loop && (ct_pos <= header_pos)) {
-        Fail() << "Loop header " << header
-               << " does not dominate its continue target " << ct;
-      }
-        // Pos(CT(H)) < Pos(M(H))
-        // Note: When recording merges we made sure CT(H) != M(H)
-        if (merge_pos <= ct_pos) {
-          return Fail() << "Merge block " << merge
-                        << " for loop headed at block " << header
-                        << " appears at or before the loop's continue "
-                           "construct headed by "
-                           "block "
-                        << ct;
-        }
+    const auto ct = block_info->continue_for_header;
+    if (ct == 0) {
+      continue;
+    }
+    // Furthermore, this is a loop header.
+    const auto* ct_info = GetBlockInfo(ct);
+    const auto ct_pos = ct_info->pos;
+    // Pos(H) <= Pos(CT(H)), with equality only for single-block loops.
+    if (header_info->is_single_block_loop && ct_pos != header_pos) {
+      Fail() << "Internal error: Single block loop.  CT pos is not the "
+                "header pos. Should have already checked this";
+    }
+    if (!header_info->is_single_block_loop && (ct_pos <= header_pos)) {
+      Fail() << "Loop header " << header
+             << " does not dominate its continue target " << ct;
+    }
+    // Pos(CT(H)) < Pos(M(H))
+    // Note: When recording merges we made sure CT(H) != M(H)
+    if (merge_pos <= ct_pos) {
+      return Fail() << "Merge block " << merge << " for loop headed at block "
+                    << header
+                    << " appears at or before the loop's continue "
+                       "construct headed by "
+                       "block "
+                    << ct;
+    }
   }
   return success();
 }

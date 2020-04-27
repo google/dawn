@@ -84,6 +84,19 @@ uint32_t pipeline_stage_to_execution_model(ast::PipelineStage stage) {
   return model;
 }
 
+// A terminator is anything which will case a SPIR-V terminator to be emitted.
+// This means things like breaks, fallthroughs and continues which all emit an
+// OpBranch or return for the OpReturn emission.
+bool LastIsTerminator(const ast::StatementList& stmts) {
+  if (stmts.empty()) {
+    return false;
+  }
+
+  auto* last = stmts.back().get();
+  return last->IsBreak() || last->IsContinue() || last->IsReturn() ||
+         last->IsKill() || last->IsFallthrough();
+}
+
 }  // namespace
 
 Builder::Builder(ast::Module* mod) : mod_(mod), scope_stack_({}) {}
@@ -175,6 +188,24 @@ bool Builder::GenerateAssignStatement(ast::AssignmentStatement* assign) {
   rhs_id = GenerateLoadIfNeeded(assign->rhs()->result_type(), rhs_id);
 
   GenerateStore(lhs_id, rhs_id);
+  return true;
+}
+
+bool Builder::GenerateBreakStatement(ast::BreakStatement*) {
+  if (merge_stack_.empty()) {
+    error_ = "Attempted to break with a merge block";
+    return false;
+  }
+  push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_stack_.back())});
+  return true;
+}
+
+bool Builder::GenerateContinueStatement(ast::ContinueStatement*) {
+  if (continue_stack_.empty()) {
+    error_ = "Attempted to continue with a continue block";
+    return false;
+  }
+  push_function_inst(spv::Op::OpBranch, {Operand::Int(continue_stack_.back())});
   return true;
 }
 
@@ -988,18 +1019,28 @@ bool Builder::GenerateLoopStatement(ast::LoopStatement* stmt) {
       {Operand::Int(merge_block_id), Operand::Int(continue_block_id),
        Operand::Int(SpvLoopControlMaskNone)});
 
+  continue_stack_.push_back(continue_block_id);
+  merge_stack_.push_back(merge_block_id);
+
   push_function_inst(spv::Op::OpBranch, {Operand::Int(body_block_id)});
   push_function_inst(spv::Op::OpLabel, {body_block});
   if (!GenerateStatementList(stmt->body())) {
     return false;
   }
-  push_function_inst(spv::Op::OpBranch, {Operand::Int(continue_block_id)});
+
+  // We only branch if the last element of the body didn't already branch.
+  if (!LastIsTerminator(stmt->body())) {
+    push_function_inst(spv::Op::OpBranch, {Operand::Int(continue_block_id)});
+  }
 
   push_function_inst(spv::Op::OpLabel, {continue_block});
   if (!GenerateStatementList(stmt->continuing())) {
     return false;
   }
   push_function_inst(spv::Op::OpBranch, {Operand::Int(loop_header_id)});
+
+  merge_stack_.pop_back();
+  continue_stack_.pop_back();
 
   push_function_inst(spv::Op::OpLabel, {merge_block});
 
@@ -1018,6 +1059,12 @@ bool Builder::GenerateStatementList(const ast::StatementList& list) {
 bool Builder::GenerateStatement(ast::Statement* stmt) {
   if (stmt->IsAssign()) {
     return GenerateAssignStatement(stmt->AsAssign());
+  }
+  if (stmt->IsBreak()) {
+    return GenerateBreakStatement(stmt->AsBreak());
+  }
+  if (stmt->IsContinue()) {
+    return GenerateContinueStatement(stmt->AsContinue());
   }
   if (stmt->IsIf()) {
     return GenerateIfStatement(stmt->AsIf());

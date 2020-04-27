@@ -278,8 +278,8 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
   ast::type::AliasType alias("Inner", &inner_struct);
 
   ast::StructMemberList outer_members;
-  outer_members.push_back(std::make_unique<ast::StructMember>(
-      "inner", &alias, std::move(decos)));
+  outer_members.push_back(
+      std::make_unique<ast::StructMember>("inner", &alias, std::move(decos)));
 
   ast::type::StructType s_type(std::make_unique<ast::Struct>(
       ast::StructDecoration::kNone, std::move(outer_members)));

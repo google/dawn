@@ -16,6 +16,8 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/assignment_statement.h"
+#include "src/ast/break_statement.h"
+#include "src/ast/continue_statement.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/int_literal.h"
 #include "src/ast/loop_statement.h"
@@ -166,9 +168,73 @@ OpBranch %4
 )");
 }
 
-TEST_F(BuilderTest, DISABLED_Loop_WithContinuing) {}
+TEST_F(BuilderTest, Loop_WithContinue) {
+  // loop {
+  //   continue;
+  // }
+  ast::StatementList body;
+  body.push_back(std::make_unique<ast::ContinueStatement>());
 
-TEST_F(BuilderTest, DISABLED_Loop_WithBreak) {}
+  ast::StatementList continuing;
+  ast::LoopStatement expr(std::move(body), std::move(continuing));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+
+  EXPECT_TRUE(b.GenerateLoopStatement(&expr)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpBranch %1
+%1 = OpLabel
+OpLoopMerge %2 %3 None
+OpBranch %4
+%4 = OpLabel
+OpBranch %3
+%3 = OpLabel
+OpBranch %1
+%2 = OpLabel
+)");
+}
+
+TEST_F(BuilderTest, DISABLED_Loop_WithConditionalContinue) {}
+
+TEST_F(BuilderTest, Loop_WithBreak) {
+  // loop {
+  //   break;
+  // }
+  ast::StatementList body;
+  body.push_back(std::make_unique<ast::BreakStatement>());
+
+  ast::StatementList continuing;
+  ast::LoopStatement expr(std::move(body), std::move(continuing));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+
+  EXPECT_TRUE(b.GenerateLoopStatement(&expr)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpBranch %1
+%1 = OpLabel
+OpLoopMerge %2 %3 None
+OpBranch %4
+%4 = OpLabel
+OpBranch %2
+%3 = OpLabel
+OpBranch %1
+%2 = OpLabel
+)");
+}
+
+TEST_F(BuilderTest, DISABLED_Loop_WithConditionalBreak) {}
 
 }  // namespace
 }  // namespace spirv

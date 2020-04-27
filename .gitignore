@@ -6,6 +6,7 @@
 build
 buildtools
 out
+testing
 third_party/cpplint
 third_party/binutils
 third_party/googletest
