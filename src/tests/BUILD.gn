@@ -90,6 +90,31 @@ if (!build_with_chromium) {
 }
 
 ###############################################################################
+# Wrapping of Chromium targets
+###############################################################################
+
+# These targets are separated because they are Chromium sources files that
+# can't use the dawn_internal config, otherwise Dawn's warning flags get
+# applied while compiling a bunch of Chromium's //base (via header inclusion)
+if (build_with_chromium) {
+  source_set("dawn_unittests_main") {
+    testonly = true
+    deps = [ ":gmock_and_gtest" ]
+    sources = [ "//gpu/dawn_unittests_main.cc" ]
+  }
+  source_set("dawn_end2end_tests_main") {
+    testonly = true
+    deps = [ ":gmock_and_gtest" ]
+    sources = [ "//gpu/dawn_end2end_tests_main.cc" ]
+  }
+  source_set("dawn_perf_tests_main") {
+    testonly = true
+    deps = [ ":gmock_and_gtest" ]
+    sources = [ "//gpu/dawn_perf_tests_main.cc" ]
+  }
+}
+
+###############################################################################
 # Dawn unittests
 ###############################################################################
 
@@ -198,7 +223,7 @@ test("dawn_unittests") {
   # When building inside Chromium, use their gtest main function because it is
   # needed to run in swarming correctly.
   if (build_with_chromium) {
-    sources += [ "//gpu/dawn_unittests_main.cc" ]
+    deps += [ ":dawn_unittests_main" ]
   } else {
     sources += [ "UnittestsMain.cpp" ]
   }
@@ -386,7 +411,7 @@ test("dawn_end2end_tests") {
   # When building inside Chromium, use their gtest main function because it is
   # needed to run in swarming correctly.
   if (build_with_chromium) {
-    sources += [ "//gpu/dawn_end2end_tests_main.cc" ]
+    deps += [ ":dawn_end2end_tests_main" ]
   } else {
     sources += [ "End2EndTestsMain.cpp" ]
   }
@@ -435,7 +460,7 @@ test("dawn_perf_tests") {
   # When building inside Chromium, use their gtest main function because it is
   # needed to run in swarming correctly.
   if (build_with_chromium) {
-    sources += [ "//gpu/dawn_perf_tests_main.cc" ]
+    deps += [ ":dawn_perf_tests_main" ]
   } else {
     sources += [ "PerfTestsMain.cpp" ]
   }
