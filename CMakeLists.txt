@@ -31,11 +31,13 @@ option(TINT_BUILD_SPV_READER "Build the SPIR-V input reader" ON)
 option(TINT_BUILD_WGSL_READER "Builde the WGSL input reader" ON)
 option(TINT_BUILD_SPV_WRITER "Build the SPIR-V output writer" ON)
 option(TINT_BUILD_WGSL_WRITER "Build the WGSL output writer" ON)
-
 option(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
+
 option(TINT_ENABLE_MSAN "Enable memory sanitizer" OFF)
 option(TINT_ENABLE_ASAN "Enable address sanitizer" OFF)
 option(TINT_ENABLE_UBSAN "Enable undefined behaviour sanitizer" OFF)
+
+option(TINT_CHECK_CHROMIUM_STYLE "Check for [chromium-style] issues during build" OFF)
 
 message(STATUS "Tint build docs: ${TINT_BUILD_DOCS}")
 message(STATUS "Tint build SPIR-V reader: ${TINT_BUILD_SPV_READER}")
@@ -46,9 +48,14 @@ message(STATUS "Tint build fuzzers: ${TINT_BUILD_FUZZERS}")
 message(STATUS "Tint build with ASAN: ${TINT_ENABLE_ASAN}")
 message(STATUS "Tint build with MSAN: ${TINT_ENABLE_MSAN}")
 message(STATUS "Tint build with UBSAN: ${TINT_ENABLE_UBSAN}")
+message(STATUS "Tint build checking [chromium-style]: ${TINT_CHECK_CHROMIUM_STYLE}")
 
 message(STATUS "Using python3")
 find_package(PythonInterp 3 REQUIRED)
+
+if (${TINT_CHECK_CHROMIUM_STYLE})
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xclang -add-plugin -Xclang find-bad-constructs")
+endif()
 
 if (${TINT_BUILD_SPV_READER})
   include_directories("${PROJECT_SOURCE_DIR}/third_party/spirv-tools/include")

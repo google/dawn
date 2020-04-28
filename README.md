@@ -53,6 +53,13 @@ cmake ../..
 make # -j N for N-way parallel build
 ```
 
+### Compiling using gn + ninja
+```sh
+mkdir -p out/Debug
+gn gen out/Debug
+autoninja -C out/Debug
+```
+
 ### Fuzzers on MacOS
 If you are attempting fuzz, using `TINT_BUILD_FUZZERS=ON`, the version of llvm
 in the XCode SDK does not have the needed libfuzzer functionality included.
@@ -66,6 +73,26 @@ ld: file not found:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDe
 The solution to this problem is to use a full version llvm, like what you would
 get via homebrew, `brew install llvm`, and use something like `CC=<path to full
 clang> cmake ..` to setup a build using that toolchain.
+
+### Checking [chromium-style] issues in CMake builds
+The gn based work flow uses the Chromium toolchain for building in anticipation
+of integration of Tint into Chromium based projects. This toolchain has
+additional plugins for checking for style issues, which are marked with
+[chromium-style] in log messages. This means that this toolchain is more strict
+then the default clang toolchain.
+
+In the future we will have a CQ that will build this work flow and flag issues
+automatically. Until that is in place, to avoid causing breakages you can run
+the [chromium-style] checks using the CMake based work flows. This requires
+setting `CC` to the version of clang checked out by `gclient sync` and setting
+the `TINT_CHECK_CHROMIUM_STYLE` to `ON`.
+
+```sh
+mkdir -p out/style
+cd out/style
+cmake ../..
+CC=../../third_party/llvm-build/Release+Asserts/bin/clang cmake -DTINT_CHECK_CHROMIUM_STYLE=ON ../../ # add -GNinja for ninja builds
+```
 
 ## Issues
 Please file any issues or feature requests at
