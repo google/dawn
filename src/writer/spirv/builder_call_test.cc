@@ -75,6 +75,55 @@ OpFunctionEnd
 )");
 }
 
+TEST_F(BuilderTest, Call_GLSLMethod_WithLoad) {
+  ast::type::F32Type f32;
+  ast::type::VoidType void_type;
+
+  auto var = std::make_unique<ast::Variable>("ident",
+                                             ast::StorageClass::kPrivate, &f32);
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("ident"));
+
+  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>(
+                               std::vector<std::string>{"std", "round"}),
+                           std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(var.get());
+
+  auto imp = std::make_unique<ast::Import>("GLSL.std.450", "std");
+  auto* glsl = imp.get();
+  mod.AddImport(std::move(imp));
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  ast::Function func("a_func", {}, &void_type);
+
+  Builder b(&mod);
+  b.GenerateImport(glsl);
+  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 9u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(%1 = OpExtInstImport "GLSL.std.450"
+OpName %2 "ident"
+OpName %7 "a_func"
+%4 = OpTypeFloat 32
+%3 = OpTypePointer Private %4
+%2 = OpVariable %3 Private
+%6 = OpTypeVoid
+%5 = OpTypeFunction %6
+%7 = OpFunction %6 None %5
+%8 = OpLabel
+%10 = OpLoad %4 %2
+%9 = OpExtInst %4 %1 Round %10
+OpFunctionEnd
+)");
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace writer

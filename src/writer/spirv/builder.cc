@@ -904,7 +904,7 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
     if (id == 0) {
       return 0;
     }
-    ops.push_back(Operand::Int(id));
+    ops.push_back(Operand::Int(GenerateLoadIfNeeded(param->result_type(), id)));
   }
 
   push_function_inst(spv::Op::OpExtInst, std::move(ops));
