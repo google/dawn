@@ -204,6 +204,7 @@ class DawnTestBase {
     bool IsBackendValidationEnabled() const;
     bool IsDawnValidationSkipped() const;
     bool IsSpvcBeingUsed() const;
+    bool IsSpvcParserBeingUsed() const;
 
     void StartExpectDeviceError();
     bool EndExpectDeviceError();

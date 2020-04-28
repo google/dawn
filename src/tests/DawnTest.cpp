@@ -532,6 +532,10 @@ bool DawnTestBase::IsSpvcBeingUsed() const {
     return gTestEnv->IsSpvcBeingUsed();
 }
 
+bool DawnTestBase::IsSpvcParserBeingUsed() const {
+    return gTestEnv->IsSpvcParserBeingUsed();
+}
+
 bool DawnTestBase::HasVendorIdFilter() const {
     return gTestEnv->HasVendorIdFilter();
 }

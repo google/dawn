@@ -589,7 +589,9 @@ namespace dawn_native { namespace metal {
                             break;
                         }
 
-                        case wgpu::BindingType::SampledTexture: {
+                        case wgpu::BindingType::SampledTexture:
+                        case wgpu::BindingType::ReadonlyStorageTexture:
+                        case wgpu::BindingType::WriteonlyStorageTexture: {
                             auto textureView =
                                 ToBackend(group->GetBindingAsTextureView(bindingIndex));
                             if (hasVertStage) {
@@ -608,8 +610,6 @@ namespace dawn_native { namespace metal {
                         }
 
                         case wgpu::BindingType::StorageTexture:
-                        case wgpu::BindingType::ReadonlyStorageTexture:
-                        case wgpu::BindingType::WriteonlyStorageTexture:
                             UNREACHABLE();
                             break;
                     }
