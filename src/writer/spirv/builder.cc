@@ -13,6 +13,7 @@
 
 #include "src/writer/spirv/builder.h"
 
+#include <limits>
 #include <sstream>
 #include <utility>
 
@@ -95,6 +96,28 @@ bool LastIsTerminator(const ast::StatementList& stmts) {
   auto* last = stmts.back().get();
   return last->IsBreak() || last->IsContinue() || last->IsReturn() ||
          last->IsKill() || last->IsFallthrough();
+}
+
+uint32_t IndexFromName(char name) {
+  switch (name) {
+    case 'x':
+    case 'r':
+    case 's':
+      return 0;
+    case 'y':
+    case 'g':
+    case 't':
+      return 1;
+    case 'z':
+    case 'b':
+    case 'p':
+      return 2;
+    case 'w':
+    case 'a':
+    case 'q':
+      return 3;
+  }
+  return std::numeric_limits<uint32_t>::max();
 }
 
 }  // namespace
@@ -502,7 +525,28 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
         idx_list.insert(idx_list.begin(), Operand::Int(idx_id));
 
       } else if (data_type->IsVector()) {
-        // TODO(dsinclair): Handle swizzle
+        auto swiz = mem_accessor->member()->name();
+        if (swiz.size() == 1) {
+          // A single item swizzle is a simple access chain
+          auto val = IndexFromName(swiz[0]);
+          if (val == std::numeric_limits<uint32_t>::max()) {
+            error_ = "invalid swizzle name: " + swiz;
+            return false;
+          }
+
+          ast::type::U32Type u32;
+          ast::IntLiteral idx(&u32, val);
+          auto idx_id = GenerateLiteralIfNeeded(&idx);
+          if (idx_id == 0) {
+            return false;
+          }
+          idx_list.insert(idx_list.begin(), Operand::Int(idx_id));
+        } else {
+          // A multi-item swizzle means we need to generate the access chain
+          // to the current point and then pull values out of it
+          //
+          // TODO(dsinclair): Handle multi-item swizzle
+        }
       } else {
         error_ = "invalid type for member accessor: " + data_type->type_name();
         return 0;

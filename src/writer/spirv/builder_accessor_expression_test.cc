@@ -472,7 +472,7 @@ OpStore %6 %11
 )");
 }
 
-TEST_F(BuilderTest, DISABLED_MemberAccessor_Swizzle_Single) {
+TEST_F(BuilderTest, MemberAccessor_Swizzle_Single) {
   ast::type::F32Type f32;
   ast::type::VectorType vec3(&f32, 3);
 
@@ -492,20 +492,20 @@ TEST_F(BuilderTest, DISABLED_MemberAccessor_Swizzle_Single) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 6u);
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 5u);
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
-%2 = OpTypeVector %3 3
-%1 = OpTypePointer Function %2
-%5 = OpTypeInt 32 0
-%6 = OpConstant %5 1
-%7 = OpTypePointer Function %3
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+%3 = OpTypeVector %4 3
+%2 = OpTypePointer Function %3
+%6 = OpTypeInt 32 0
+%7 = OpConstant %6 1
+%8 = OpTypePointer Function %4
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%1 = OpVariable %1 Function
+            R"(%1 = OpVariable %2 Function
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%7 = OpAccessChain %7 %1 %6
+            R"(%5 = OpAccessChain %8 %1 %7
 )");
 }
 
