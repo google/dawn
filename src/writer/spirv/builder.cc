@@ -680,6 +680,9 @@ uint32_t Builder::GenerateConstructorExpression(
         }
         constructor_is_const = false;
       }
+    }
+
+    for (const auto& e : init->values()) {
       uint32_t id = 0;
       if (constructor_is_const) {
         id = GenerateConstructorExpression(e->AsConstructor(), is_global_init);
@@ -691,8 +694,32 @@ uint32_t Builder::GenerateConstructorExpression(
         return 0;
       }
 
-      out << "_" << id;
-      ops.push_back(Operand::Int(id));
+      auto* result_type = e->result_type()->UnwrapPtrIfNeeded();
+
+      // If we're putting a vector into the constructed composite we need to
+      // extract each of the values and insert them individually
+      if (result_type->IsVector()) {
+        auto* vec = result_type->AsVector();
+        auto result_type_id = GenerateTypeIfNeeded(vec->type());
+        if (result_type_id == 0) {
+          return 0;
+        }
+
+        for (uint32_t i = 0; i < vec->size(); ++i) {
+          auto extract = result_op();
+          auto extract_id = extract.to_i();
+
+          push_function_inst(spv::Op::OpCompositeExtract,
+                             {Operand::Int(result_type_id), extract,
+                              Operand::Int(id), Operand::Int(i)});
+
+          out << "_" << extract_id;
+          ops.push_back(Operand::Int(extract_id));
+        }
+      } else {
+        out << "_" << id;
+        ops.push_back(Operand::Int(id));
+      }
     }
 
     auto str = out.str();

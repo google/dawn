@@ -65,7 +65,11 @@ TEST_F(BuilderTest, Constructor_Type) {
 
   ast::TypeConstructorExpression t(&vec, std::move(vals));
 
+  Context ctx;
   ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
+
   Builder b(&mod);
   EXPECT_EQ(b.GenerateConstructorExpression(&t, true), 5u);
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -120,6 +124,54 @@ TEST_F(BuilderTest, Constructor_Type_NonConstructorParam) {
 )");
 }
 
+TEST_F(BuilderTest, Constructor_Type_NonConstVector) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec2(&f32, 2);
+  ast::type::VectorType vec4(&f32, 4);
+
+  auto var = std::make_unique<ast::Variable>(
+      "ident", ast::StorageClass::kFunction, &vec2);
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(std::make_unique<ast::IdentifierExpression>("ident"));
+
+  ast::TypeConstructorExpression t(&vec4, std::move(vals));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(var.get());
+  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateFunctionVariable(var.get())) << b.error();
+
+  EXPECT_EQ(b.GenerateConstructorExpression(&t, false), 10u);
+  ASSERT_FALSE(b.has_error()) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+%3 = OpTypeVector %4 2
+%2 = OpTypePointer Function %3
+%5 = OpTypeVector %4 4
+%6 = OpConstant %4 1
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
+            R"(%1 = OpVariable %2 Function
+)");
+
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%7 = OpLoad %3 %1
+%8 = OpCompositeExtract %4 %7 0
+%9 = OpCompositeExtract %4 %7 1
+%10 = OpCompositeConstruct %5 %6 %6 %8 %9
+)");
+}
+
 TEST_F(BuilderTest, Constructor_Type_Dedups) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
@@ -134,7 +186,11 @@ TEST_F(BuilderTest, Constructor_Type_Dedups) {
 
   ast::TypeConstructorExpression t(&vec, std::move(vals));
 
+  Context ctx;
   ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
+
   Builder b(&mod);
   EXPECT_EQ(b.GenerateConstructorExpression(&t, true), 5u);
   EXPECT_EQ(b.GenerateConstructorExpression(&t, true), 5u);

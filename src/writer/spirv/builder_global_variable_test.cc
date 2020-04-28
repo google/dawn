@@ -29,6 +29,8 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decoration.h"
+#include "src/context.h"
+#include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
 
@@ -84,10 +86,15 @@ TEST_F(BuilderTest, GlobalVar_WithConstructor) {
   auto init =
       std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
+
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
   v.set_constructor(std::move(init));
+  td.RegisterVariableForTesting(&v);
 
-  ast::Module mod;
   Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
@@ -119,11 +126,16 @@ TEST_F(BuilderTest, GlobalVar_Const) {
   auto init =
       std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
+
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
   v.set_constructor(std::move(init));
   v.set_is_const(true);
+  td.RegisterVariableForTesting(&v);
 
-  ast::Module mod;
   Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();

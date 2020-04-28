@@ -52,13 +52,15 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
   auto init =
       std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
+
   ast::Variable v("var", ast::StorageClass::kOutput, &f32);
   v.set_constructor(std::move(init));
   v.set_is_const(true);
 
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(&v);
 
   Builder b(&mod);
@@ -117,13 +119,14 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
   auto init =
       std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
-  ast::Variable v("var", ast::StorageClass::kOutput, &f32);
-  v.set_constructor(std::move(init));
-  v.set_is_const(true);
-
   Context ctx;
   ast::Module mod;
   TypeDeterminer td(&ctx, &mod);
+  EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
+
+  ast::Variable v("var", ast::StorageClass::kOutput, &f32);
+  v.set_constructor(std::move(init));
+  v.set_is_const(true);
   td.RegisterVariableForTesting(&v);
 
   Builder b(&mod);

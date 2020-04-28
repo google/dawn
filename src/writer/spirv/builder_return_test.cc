@@ -21,6 +21,8 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/context.h"
+#include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
 
@@ -61,7 +63,11 @@ TEST_F(BuilderTest, Return_WithValue) {
 
   ast::ReturnStatement ret(std::move(val));
 
+  Context ctx;
   ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  EXPECT_TRUE(td.DetermineResultType(&ret)) << td.error();
+
   Builder b(&mod);
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateReturnStatement(&ret));
