@@ -440,6 +440,9 @@ bool FunctionEmitter::EmitBody() {
   if (!LabelControlFlowConstructs()) {
     return false;
   }
+  if (!FindSwitchCaseHeaders()) {
+    return false;
+  }
 
   if (!EmitFunctionVariables()) {
     return false;
@@ -803,6 +806,111 @@ bool FunctionEmitter::LabelControlFlowConstructs() {
     return Fail() << "internal error: outermost construct is not a function?!";
   }
 
+  return success();
+}
+
+bool FunctionEmitter::FindSwitchCaseHeaders() {
+  if (failed()) {
+    return false;
+  }
+  for (auto& construct : constructs_) {
+    if (construct->kind != Construct::kSelection) {
+      continue;
+    }
+    const auto* branch =
+        GetBlockInfo(construct->begin_id)->basic_block->terminator();
+    if (branch->opcode() != SpvOpSwitch) {
+      continue;
+    }
+
+    // Mark the default block
+    const auto default_id = branch->GetSingleWordInOperand(1);
+    auto* default_block = GetBlockInfo(default_id);
+    // A default target can't be a backedge.
+    if (construct->begin_pos >= default_block->pos) {
+      // An OpSwitch must dominate its cases.  Also, it can't be a self-loop
+      // as that would be a backedge, and backedges can only target a loop,
+      // and loops use an OpLoopMerge instruction, which can't preceded an
+      // OpSwitch.
+      return Fail() << "Switch branch from block " << construct->begin_id
+                    << " to default target block " << default_id
+                    << " can't be a back-edge";
+    }
+    // A default target can be the merge block, but can't go past it.
+    if (construct->end_pos < default_block->pos) {
+      return Fail() << "Switch branch from block " << construct->begin_id
+                    << " to default block " << default_id
+                    << " escapes the selection construct";
+    }
+    if (default_block->default_head_for) {
+      // An OpSwitch must dominate its cases, including the default target.
+      return Fail() << "Block " << default_id
+                    << " is declared as the default target for two OpSwitch "
+                       "instructions, at blocks "
+                    << default_block->default_head_for->begin_id << " and "
+                    << construct->begin_id;
+    }
+
+    default_block->default_head_for = construct.get();
+    default_block->default_is_merge = default_block->pos == construct->end_pos;
+
+    // Map a case target to the list of values selecting that case.
+    std::unordered_map<uint32_t, std::vector<uint64_t>> block_to_values;
+    std::vector<uint32_t> case_targets;
+    std::unordered_set<uint64_t> case_values;
+
+    // Process case targets.
+    for (uint32_t iarg = 2; iarg + 1 < branch->NumInOperands(); iarg += 2) {
+      const auto o = branch->GetInOperand(iarg);
+      const auto value = branch->GetInOperand(iarg).AsLiteralUint64();
+      const auto case_target_id = branch->GetSingleWordInOperand(iarg + 1);
+
+      if (case_values.count(value)) {
+        return Fail() << "Duplicate case value " << value
+                      << " in OpSwitch in block " << construct->begin_id;
+      }
+      case_values.insert(value);
+      if (block_to_values.count(case_target_id) == 0) {
+        case_targets.push_back(case_target_id);
+      }
+      block_to_values[case_target_id].push_back(value);
+    }
+
+    for (uint32_t case_target_id : case_targets) {
+      auto* case_block = GetBlockInfo(case_target_id);
+
+      case_block->case_values = std::make_unique<std::vector<uint64_t>>(std::move(block_to_values[case_target_id]));
+
+      // A case target can't be a back-edge.
+      if (construct->begin_pos >= case_block->pos) {
+        // An OpSwitch must dominate its cases.  Also, it can't be a self-loop
+        // as that would be a backedge, and backedges can only target a loop,
+        // and loops use an OpLoopMerge instruction, which can't preceded an
+        // OpSwitch.
+        return Fail() << "Switch branch from block " << construct->begin_id
+                      << " to case target block " << case_target_id
+                      << " can't be a back-edge";
+      }
+      // A case target can be the merge block, but can't go past it.
+      if (construct->end_pos < case_block->pos) {
+        return Fail() << "Switch branch from block " << construct->begin_id
+                      << " to case target block " << case_target_id
+                      << " escapes the selection construct";
+      }
+
+      // Mark the target as a case target.
+      if (case_block->case_head_for) {
+        // An OpSwitch must dominate its cases.
+        return Fail()
+               << "Block " << case_target_id
+               << " is declared as the switch case target for two OpSwitch "
+                  "instructions, at blocks "
+               << case_block->case_head_for->begin_id << " and "
+               << construct->begin_id;
+      }
+      case_block->case_head_for = construct.get();
+    }
+  }
   return success();
 }
 

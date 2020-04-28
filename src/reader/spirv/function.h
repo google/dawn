@@ -70,6 +70,23 @@ struct BlockInfo {
 
   /// The immediately enclosing structured construct.
   const Construct* construct = nullptr;
+
+  /// The following fields record relationships among blocks in a selection
+  /// construct for an OpSwitch instruction.
+
+  /// If not null, then the pointed-at construct is a selection for an OpSwitch,
+  /// and this block is a case target for it.  We say this block "heads" the
+  /// case construct.
+  const Construct* case_head_for = nullptr;
+  /// If not null, then the pointed-at construct is a selection for an OpSwitch,
+  /// and this block is the default target for it.  We say this block "heads"
+  /// the default case construct.
+  const Construct* default_head_for = nullptr;
+  /// Is this a default target for a switch, and is it also the merge for its
+  /// switch?
+  bool default_is_merge = false;
+  /// The list of switch values that cause a branch to this block.
+  std::unique_ptr<std::vector<uint64_t>> case_values;
 };
 
 inline std::ostream& operator<<(std::ostream& o, const BlockInfo& bi) {
@@ -161,6 +178,11 @@ class FunctionEmitter {
 
   /// @returns the structured constructs
   const ConstructList& constructs() const { return constructs_; }
+
+  /// Marks blocks targets of a switch, either as the head of a case or
+  /// as the default target.
+  /// @returns false on failure
+  bool FindSwitchCaseHeaders();
 
   /// Emits declarations of function variables.
   /// @returns false if emission failed.

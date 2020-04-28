@@ -39,6 +39,7 @@ std::string Dump(const std::vector<uint32_t>& v) {
 
 using ::testing::ElementsAre;
 using ::testing::Eq;
+using ::testing::UnorderedElementsAre;
 
 std::string CommonTypes() {
   return R"(
@@ -3539,6 +3540,624 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_If_MultiBlockLoop) {
   EXPECT_EQ(fe.GetBlockInfo(89)->construct, constructs[1].get());
   EXPECT_EQ(fe.GetBlockInfo(99)->construct, constructs[0].get());
 }
+
+TEST_F(SpvParserTest, FindSwitchCaseHeaders_DefaultIsLongRangeBackedge) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %10 30 %30
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  fe.RegisterMerges();
+  fe.LabelControlFlowConstructs();
+  EXPECT_FALSE(fe.FindSwitchCaseHeaders());
+  EXPECT_THAT(p->error(), Eq("Switch branch from block 20 to default target "
+                             "block 10 can't be a back-edge"));
+}
+
+TEST_F(SpvParserTest, FindSwitchCaseHeaders_DefaultIsSelfLoop) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %20 30 %30
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  fe.RegisterMerges();
+  fe.LabelControlFlowConstructs();
+  EXPECT_FALSE(fe.FindSwitchCaseHeaders());
+  // Self-loop that isn't its own continue target is already rejected with a
+  // different message.
+  EXPECT_THAT(
+      p->error(),
+      Eq("Block 20 branches to itself but is not its own continue target"));
+}
+
+TEST_F(SpvParserTest, FindSwitchCaseHeaders_DefaultCantEscapeSwitch) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %50 None
+     OpSwitch %selector %99 30 %30 ; default goes past the merge
+
+     %30 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel ; merge
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  fe.RegisterMerges();
+  fe.LabelControlFlowConstructs();
+  EXPECT_FALSE(fe.FindSwitchCaseHeaders());
+  EXPECT_THAT(p->error(), Eq("Switch branch from block 10 to default block 99 "
+                             "escapes the selection construct"));
+}
+
+TEST_F(SpvParserTest, FindSwitchCaseHeaders_DefaultForTwoSwitches) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %89 20 %20
+
+     %20 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel
+     OpSelectionMerge %89 None
+     OpSwitch %selector %89 60 %60
+
+     %60 = OpLabel
+     OpBranch %89
+
+     %89 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  fe.RegisterMerges();
+  fe.LabelControlFlowConstructs();
+  EXPECT_FALSE(fe.FindSwitchCaseHeaders());
+  EXPECT_THAT(p->error(), Eq("Block 89 is declared as the default target for "
+                             "two OpSwitch instructions, at blocks 10 and 50"));
+}
+
+TEST_F(SpvParserTest, FindSwitchCaseHeaders_CaseIsLongRangeBackedge) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 10 %10
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  fe.RegisterMerges();
+  fe.LabelControlFlowConstructs();
+  EXPECT_FALSE(fe.FindSwitchCaseHeaders());
+  EXPECT_THAT(p->error(), Eq("Switch branch from block 20 to case target "
+                             "block 10 can't be a back-edge"));
+}
+
+TEST_F(SpvParserTest, FindSwitchCaseHeaders_CaseIsSelfLoop) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %20
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  fe.RegisterMerges();
+  fe.LabelControlFlowConstructs();
+  EXPECT_FALSE(fe.FindSwitchCaseHeaders());
+  // The error is caught earlier
+  EXPECT_THAT(
+      p->error(),
+      Eq("Block 20 branches to itself but is not its own continue target"));
+}
+
+TEST_F(SpvParserTest, FindSwitchCaseHeaders_CaseCanBeSwitchMerge) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  fe.RegisterMerges();
+  fe.LabelControlFlowConstructs();
+  EXPECT_TRUE(fe.FindSwitchCaseHeaders());
+}
+
+TEST_F(SpvParserTest, FindSwitchCaseHeaders_CaseCantEscapeSwitch) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None ; force %99 to be very late in block order
+     OpBranchConditional %cond %20 %99
+
+     %20 = OpLabel
+     OpSelectionMerge %89 None
+     OpSwitch %selector %89 20 %99
+
+     %89 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  fe.RegisterMerges();
+  fe.LabelControlFlowConstructs();
+  EXPECT_FALSE(fe.FindSwitchCaseHeaders());
+  EXPECT_THAT(p->error(), Eq("Switch branch from block 20 to case target block "
+                             "99 escapes the selection construct"));
+}
+
+TEST_F(SpvParserTest, FindSwitchCaseHeaders_CaseForMoreThanOneSwitch) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %20 50 %50
+
+     %20 = OpLabel
+     OpSelectionMerge %89 None
+     OpSwitch %selector %89 50 %50
+
+     %50 = OpLabel
+     OpBranch %89
+
+     %89 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  fe.RegisterMerges();
+  fe.LabelControlFlowConstructs();
+  EXPECT_FALSE(fe.FindSwitchCaseHeaders());
+  EXPECT_THAT(p->error(),
+              Eq("Block 50 is declared as the switch case target for two "
+                 "OpSwitch instructions, at blocks 10 and 20"));
+}
+
+TEST_F(SpvParserTest, FindSwitchCaseHeaders_CaseIsMergeForAnotherConstruct) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %49 None
+     OpSwitch %selector %49 20 %20
+
+     %20 = OpLabel
+     OpBranch %49
+
+     %49 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel
+     OpSelectionMerge %20 None ; points back to the case.
+     OpBranchConditional %cond %60 %99
+
+     %60 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  fe.RegisterMerges();
+  fe.LabelControlFlowConstructs();
+  EXPECT_FALSE(fe.FindSwitchCaseHeaders());
+  EXPECT_THAT(p->error(), Eq("Switch branch from block 10 to case target block "
+                             "20 escapes the selection construct"));
+}
+
+TEST_F(SpvParserTest, FindSwitchCaseHeaders_NoSwitch) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  fe.RegisterMerges();
+  fe.LabelControlFlowConstructs();
+  EXPECT_TRUE(fe.FindSwitchCaseHeaders());
+
+  const auto* bi10 = fe.GetBlockInfo(10);
+  ASSERT_NE(bi10, nullptr);
+  EXPECT_EQ(bi10->case_head_for, nullptr);
+  EXPECT_EQ(bi10->default_head_for, nullptr);
+  EXPECT_FALSE(bi10->default_is_merge);
+  EXPECT_EQ(bi10->case_values.get(), nullptr);
+}
+
+TEST_F(SpvParserTest, FindSwitchCaseHeaders_DefaultIsMerge) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %20
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  fe.RegisterMerges();
+  fe.LabelControlFlowConstructs();
+  EXPECT_TRUE(fe.FindSwitchCaseHeaders());
+
+  const auto* bi99 = fe.GetBlockInfo(99);
+  ASSERT_NE(bi99, nullptr);
+  EXPECT_EQ(bi99->case_head_for, nullptr);
+  ASSERT_NE(bi99->default_head_for, nullptr);
+  EXPECT_EQ(bi99->default_head_for->begin_id, 10);
+  EXPECT_TRUE(bi99->default_is_merge);
+  EXPECT_EQ(bi99->case_values.get(), nullptr);
+}
+
+TEST_F(SpvParserTest, FindSwitchCaseHeaders_DefaultIsNotMerge) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %30 20 %20
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  fe.RegisterMerges();
+  fe.LabelControlFlowConstructs();
+  EXPECT_TRUE(fe.FindSwitchCaseHeaders());
+
+  const auto* bi30 = fe.GetBlockInfo(30);
+  ASSERT_NE(bi30, nullptr);
+  EXPECT_EQ(bi30->case_head_for, nullptr);
+  ASSERT_NE(bi30->default_head_for, nullptr);
+  EXPECT_EQ(bi30->default_head_for->begin_id, 10);
+  EXPECT_FALSE(bi30->default_is_merge);
+  EXPECT_EQ(bi30->case_values.get(), nullptr);
+}
+
+TEST_F(SpvParserTest, FindSwitchCaseHeaders_CaseIsNotDefault) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %30 200 %20
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  fe.RegisterMerges();
+  fe.LabelControlFlowConstructs();
+  EXPECT_TRUE(fe.FindSwitchCaseHeaders());
+
+  const auto* bi20 = fe.GetBlockInfo(20);
+  ASSERT_NE(bi20, nullptr);
+  ASSERT_NE(bi20->case_head_for, nullptr);
+  EXPECT_EQ(bi20->case_head_for->begin_id, 10);
+  EXPECT_EQ(bi20->default_head_for, nullptr);
+  EXPECT_FALSE(bi20->default_is_merge);
+  EXPECT_THAT(*(bi20->case_values.get()), UnorderedElementsAre(200));
+}
+
+TEST_F(SpvParserTest, FindSwitchCaseHeaders_CaseIsDefault) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %20 200 %20
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  fe.RegisterMerges();
+  fe.LabelControlFlowConstructs();
+  EXPECT_TRUE(fe.FindSwitchCaseHeaders());
+
+  const auto* bi20 = fe.GetBlockInfo(20);
+  ASSERT_NE(bi20, nullptr);
+  ASSERT_NE(bi20->case_head_for, nullptr);
+  EXPECT_EQ(bi20->case_head_for->begin_id, 10);
+  EXPECT_EQ(bi20->default_head_for, bi20->case_head_for);
+  EXPECT_FALSE(bi20->default_is_merge);
+  EXPECT_THAT(*(bi20->case_values.get()), UnorderedElementsAre(200));
+}
+
+TEST_F(SpvParserTest, FindSwitchCaseHeaders_ManyCasesWithSameValue_Error) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 200 %20 200 %30
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  fe.RegisterMerges();
+  fe.LabelControlFlowConstructs();
+  EXPECT_FALSE(fe.FindSwitchCaseHeaders());
+
+  EXPECT_THAT(p->error(),
+              Eq("Duplicate case value 200 in OpSwitch in block 10"));
+}
+
+TEST_F(SpvParserTest, FindSwitchCaseHeaders_ManyValuesWithSameCase) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 200 %20 300 %20
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  fe.RegisterMerges();
+  fe.LabelControlFlowConstructs();
+  EXPECT_TRUE(fe.FindSwitchCaseHeaders());
+
+  const auto* bi20 = fe.GetBlockInfo(20);
+  ASSERT_NE(bi20, nullptr);
+  ASSERT_NE(bi20->case_head_for, nullptr);
+  EXPECT_EQ(bi20->case_head_for->begin_id, 10);
+  EXPECT_EQ(bi20->default_head_for, nullptr);
+  EXPECT_FALSE(bi20->default_is_merge);
+  EXPECT_THAT(*(bi20->case_values.get()), UnorderedElementsAre(200, 300));
+}
+
+TEST_F(SpvParserTest, DISABLED_BranchEscapesIfConstruct) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %99
+
+     %20 = OpLabel
+     OpSelectionMerge %50 None
+     OpBranchConditional %cond2 %30 %50
+
+     %30 = OpLabel
+     OpBranch %80   ; bad exit to %80
+
+     %50 = OpLabel
+     OpBranch %80
+
+     %80 = OpLabel  ; bad target
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  fe.RegisterMerges();
+  fe.LabelControlFlowConstructs();
+  fe.FindSwitchCaseHeaders();
+  // Some further processing
+  EXPECT_THAT(p->error(), Eq("something"));
+}
+
+// TODO(dneto): Ok for a case target to branch directly to the merge
+// TODO(dneto): Ok for a case target to be a "break block", i.e. branch to exit
+// of enclosing loop.
+// TODO(dneto): Ok for a case target to be a "continue block", i.e. branch to
+// continue target of enclosing loop.
 
 }  // namespace
 }  // namespace spirv
