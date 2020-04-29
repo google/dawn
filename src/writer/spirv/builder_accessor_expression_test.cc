@@ -509,12 +509,24 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_Single) {
 )");
 }
 
-TEST_F(BuilderTest, DISABLED_MemberAccessor_Swizzle_Multiple) {
+TEST_F(BuilderTest, DISABLED_MemberAccessor_Swizzle_MultipleNames) {
   // vec.yx
 }
 
-TEST_F(BuilderTest, DISABLED_Accessor_Mixed) {
+TEST_F(BuilderTest, DISABLED_Accessor_Mixed_ArrayAndMember) {
   // a[0].foo[2].bar.baz.yx
+}
+
+TEST_F(BuilderTest, DISABLED_MemberAccessor_Swizzle_of_Swizzle) {
+  // vec.yxz.xz
+}
+
+TEST_F(BuilderTest, DISABLED_MemberAccessor_Member_of_Swizzle) {
+  // vec.yxz.x
+}
+
+TEST_F(BuilderTest, DISABLED_MemberAccessor_Array_of_Swizzle) {
+  // vec.yxz[1]
 }
 
 }  // namespace
