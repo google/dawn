@@ -21,6 +21,8 @@
 #include "dawn_native/metal/DeviceMTL.h"
 #include "dawn_native/metal/StagingBufferMTL.h"
 
+#include <CoreVideo/CVPixelBuffer.h>
+
 namespace dawn_native { namespace metal {
 
     namespace {
@@ -112,13 +114,13 @@ namespace dawn_native { namespace metal {
 
         ResultOrError<wgpu::TextureFormat> GetFormatEquivalentToIOSurfaceFormat(uint32_t format) {
             switch (format) {
-                case 'RGBA':
+                case kCVPixelFormatType_32RGBA:
                     return wgpu::TextureFormat::RGBA8Unorm;
-                case 'BGRA':
+                case kCVPixelFormatType_32BGRA:
                     return wgpu::TextureFormat::BGRA8Unorm;
-                case '2C08':
+                case kCVPixelFormatType_TwoComponent8:
                     return wgpu::TextureFormat::RG8Unorm;
-                case 'L008':
+                case kCVPixelFormatType_OneComponent8:
                     return wgpu::TextureFormat::R8Unorm;
                 default:
                     return DAWN_VALIDATION_ERROR("Unsupported IOSurface format");
