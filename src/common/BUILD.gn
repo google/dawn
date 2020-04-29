@@ -120,7 +120,6 @@ config("dawn_internal") {
       "-Wno-language-extension-token",
       "-Wno-microsoft-enum-value",
       "-Wno-nested-anon-types",
-      "-Wno-vla-extension",
     ]
   }
 }
