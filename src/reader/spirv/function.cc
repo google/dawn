@@ -879,7 +879,8 @@ bool FunctionEmitter::FindSwitchCaseHeaders() {
     for (uint32_t case_target_id : case_targets) {
       auto* case_block = GetBlockInfo(case_target_id);
 
-      case_block->case_values = std::make_unique<std::vector<uint64_t>>(std::move(block_to_values[case_target_id]));
+      case_block->case_values = std::make_unique<std::vector<uint64_t>>(
+          std::move(block_to_values[case_target_id]));
 
       // A case target can't be a back-edge.
       if (construct->begin_pos >= case_block->pos) {

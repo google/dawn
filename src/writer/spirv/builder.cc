@@ -661,89 +661,95 @@ uint32_t Builder::GenerateConstructorExpression(
     return GenerateLiteralIfNeeded(expr->AsScalarConstructor()->literal());
   }
   if (expr->IsTypeConstructor()) {
-    auto* init = expr->AsTypeConstructor();
-    auto type_id = GenerateTypeIfNeeded(init->type());
-    if (type_id == 0) {
-      return 0;
-    }
-
-    std::ostringstream out;
-    out << "__const";
-
-    std::vector<Operand> ops;
-    bool constructor_is_const = true;
-    for (const auto& e : init->values()) {
-      if (!e->IsConstructor()) {
-        if (is_global_init) {
-          error_ = "constructor must be a constant expression";
-          return 0;
-        }
-        constructor_is_const = false;
-      }
-    }
-
-    for (const auto& e : init->values()) {
-      uint32_t id = 0;
-      if (constructor_is_const) {
-        id = GenerateConstructorExpression(e->AsConstructor(), is_global_init);
-      } else {
-        id = GenerateExpression(e.get());
-        id = GenerateLoadIfNeeded(e->result_type(), id);
-      }
-      if (id == 0) {
-        return 0;
-      }
-
-      auto* result_type = e->result_type()->UnwrapPtrIfNeeded();
-
-      // If we're putting a vector into the constructed composite we need to
-      // extract each of the values and insert them individually
-      if (result_type->IsVector()) {
-        auto* vec = result_type->AsVector();
-        auto result_type_id = GenerateTypeIfNeeded(vec->type());
-        if (result_type_id == 0) {
-          return 0;
-        }
-
-        for (uint32_t i = 0; i < vec->size(); ++i) {
-          auto extract = result_op();
-          auto extract_id = extract.to_i();
-
-          push_function_inst(spv::Op::OpCompositeExtract,
-                             {Operand::Int(result_type_id), extract,
-                              Operand::Int(id), Operand::Int(i)});
-
-          out << "_" << extract_id;
-          ops.push_back(Operand::Int(extract_id));
-        }
-      } else {
-        out << "_" << id;
-        ops.push_back(Operand::Int(id));
-      }
-    }
-
-    auto str = out.str();
-    auto val = const_to_id_.find(str);
-    if (val != const_to_id_.end()) {
-      return val->second;
-    }
-
-    auto result = result_op();
-    ops.insert(ops.begin(), result);
-    ops.insert(ops.begin(), Operand::Int(type_id));
-
-    const_to_id_[str] = result.to_i();
-
-    if (constructor_is_const) {
-      push_type(spv::Op::OpConstantComposite, ops);
-    } else {
-      push_function_inst(spv::Op::OpCompositeConstruct, ops);
-    }
-    return result.to_i();
+    return GenerateTypeConstructorExpression(expr->AsTypeConstructor(),
+                                             is_global_init);
   }
 
   error_ = "unknown constructor expression";
   return 0;
+}
+
+uint32_t Builder::GenerateTypeConstructorExpression(
+    ast::TypeConstructorExpression* init,
+    bool is_global_init) {
+  auto type_id = GenerateTypeIfNeeded(init->type());
+  if (type_id == 0) {
+    return 0;
+  }
+
+  std::ostringstream out;
+  out << "__const";
+
+  std::vector<Operand> ops;
+  bool constructor_is_const = true;
+  for (const auto& e : init->values()) {
+    if (!e->IsConstructor()) {
+      if (is_global_init) {
+        error_ = "constructor must be a constant expression";
+        return 0;
+      }
+      constructor_is_const = false;
+    }
+  }
+
+  for (const auto& e : init->values()) {
+    uint32_t id = 0;
+    if (constructor_is_const) {
+      id = GenerateConstructorExpression(e->AsConstructor(), is_global_init);
+    } else {
+      id = GenerateExpression(e.get());
+      id = GenerateLoadIfNeeded(e->result_type(), id);
+    }
+    if (id == 0) {
+      return 0;
+    }
+
+    auto* result_type = e->result_type()->UnwrapPtrIfNeeded();
+
+    // If we're putting a vector into the constructed composite we need to
+    // extract each of the values and insert them individually
+    if (result_type->IsVector()) {
+      auto* vec = result_type->AsVector();
+      auto result_type_id = GenerateTypeIfNeeded(vec->type());
+      if (result_type_id == 0) {
+        return 0;
+      }
+
+      for (uint32_t i = 0; i < vec->size(); ++i) {
+        auto extract = result_op();
+        auto extract_id = extract.to_i();
+
+        push_function_inst(spv::Op::OpCompositeExtract,
+                           {Operand::Int(result_type_id), extract,
+                            Operand::Int(id), Operand::Int(i)});
+
+        out << "_" << extract_id;
+        ops.push_back(Operand::Int(extract_id));
+      }
+    } else {
+      out << "_" << id;
+      ops.push_back(Operand::Int(id));
+    }
+  }
+
+  auto str = out.str();
+  auto val = const_to_id_.find(str);
+  if (val != const_to_id_.end()) {
+    return val->second;
+  }
+
+  auto result = result_op();
+  ops.insert(ops.begin(), result);
+  ops.insert(ops.begin(), Operand::Int(type_id));
+
+  const_to_id_[str] = result.to_i();
+
+  if (constructor_is_const) {
+    push_type(spv::Op::OpConstantComposite, ops);
+  } else {
+    push_function_inst(spv::Op::OpCompositeConstruct, ops);
+  }
+  return result.to_i();
 }
 
 uint32_t Builder::GenerateLiteralIfNeeded(ast::Literal* lit) {

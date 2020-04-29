@@ -26,6 +26,7 @@
 #include "src/ast/literal.h"
 #include "src/ast/module.h"
 #include "src/ast/struct_member.h"
+#include "src/ast/type_constructor_expression.h"
 #include "src/scope_stack.h"
 #include "src/writer/spirv/function.h"
 #include "src/writer/spirv/instruction.h"
@@ -200,12 +201,19 @@ class Builder {
   /// Generates an import instruction
   /// @param imp the import
   void GenerateImport(ast::Import* imp);
-  /// Generates an constructor expression
+  /// Generates a constructor expression
   /// @param expr the expression to generate
   /// @param is_global_init set true if this is a global variable constructor
   /// @returns the ID of the expression or 0 on failure.
   uint32_t GenerateConstructorExpression(ast::ConstructorExpression* expr,
                                          bool is_global_init);
+  /// Generates a type constructor expression
+  /// @param init the expression to generate
+  /// @param is_global_init set true if this is a global variable constructor
+  /// @returns the ID of the expression or 0 on failure.
+  uint32_t GenerateTypeConstructorExpression(
+      ast::TypeConstructorExpression* init,
+      bool is_global_init);
   /// Generates a literal constant if needed
   /// @param lit the literal to generate
   /// @returns the ID on success or 0 on failure
