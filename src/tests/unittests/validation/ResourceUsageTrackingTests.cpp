@@ -29,7 +29,7 @@ namespace {
             return device.CreateBuffer(&descriptor);
         }
 
-        wgpu::Texture CreateTexture(wgpu::TextureUsage usage, wgpu::TextureFormat format) {
+        wgpu::Texture CreateTexture(wgpu::TextureUsage usage) {
             wgpu::TextureDescriptor descriptor;
             descriptor.dimension = wgpu::TextureDimension::e2D;
             descriptor.size = {1, 1, 1};
@@ -37,10 +37,12 @@ namespace {
             descriptor.sampleCount = 1;
             descriptor.mipLevelCount = 1;
             descriptor.usage = usage;
-            descriptor.format = format;
+            descriptor.format = kFormat;
 
             return device.CreateTexture(&descriptor);
         }
+
+        static constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
     };
 
     // Test that using a single buffer in multiple read usages in the same pass is allowed.
@@ -421,7 +423,67 @@ namespace {
             }
         }
 
-        // TODO (yunchao.he@intel.com) test compute pass
+        // test compute pass
+        {
+            // Create buffers that will be used as index and storage buffers
+            wgpu::Buffer buffer0 = CreateBuffer(512, wgpu::BufferUsage::Storage);
+            wgpu::Buffer buffer1 = CreateBuffer(4, wgpu::BufferUsage::Storage);
+
+            // Create the bind group to use the buffer as storage
+            wgpu::BindGroupLayout writeBGL = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer}});
+            wgpu::BindGroupLayout readBGL = utils::MakeBindGroupLayout(
+                device,
+                {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageBuffer}});
+            wgpu::BindGroup writeBG0 = utils::MakeBindGroup(device, writeBGL, {{0, buffer0, 0, 4}});
+            wgpu::BindGroup readBG0 = utils::MakeBindGroup(device, readBGL, {{0, buffer0, 256, 4}});
+            wgpu::BindGroup readBG1 = utils::MakeBindGroup(device, readBGL, {{0, buffer1, 0, 4}});
+
+            // Create a passthrough compute pipeline
+            wgpu::ShaderModule csModule =
+                utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
+                #version 450
+                void main() {
+                })");
+            wgpu::ComputePipelineDescriptor pipelineDescriptor;
+            pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &writeBGL);
+            pipelineDescriptor.computeStage.module = csModule;
+            pipelineDescriptor.computeStage.entryPoint = "main";
+            wgpu::ComputePipeline cp = device.CreateComputePipeline(&pipelineDescriptor);
+
+            // Set bind group against the same index twice. The second one overwrites the first one.
+            // Then no buffer is used as both read and write in the same pass. But the overwritten
+            // bind group still take effect.
+            {
+                wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+                wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+                pass.SetBindGroup(0, writeBG0);
+                pass.SetBindGroup(1, readBG0);
+                pass.SetBindGroup(1, readBG1);
+                pass.SetPipeline(cp);
+                pass.Dispatch(1);
+                pass.EndPass();
+                // TODO (yunchao.he@intel.com): add buffer usage tracking for compute
+                // ASSERT_DEVICE_ERROR(encoder.Finish());
+                encoder.Finish();
+            }
+
+            // Set bind group against the same index twice. The second one overwrites the first one.
+            // Then buffer0 is used as both read and write in the same pass
+            {
+                wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+                wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+                pass.SetBindGroup(0, writeBG0);
+                pass.SetBindGroup(1, readBG1);
+                pass.SetBindGroup(1, readBG0);
+                pass.SetPipeline(cp);
+                pass.Dispatch(1);
+                pass.EndPass();
+                // TODO (yunchao.he@intel.com): add buffer usage tracking for compute
+                // ASSERT_DEVICE_ERROR(encoder.Finish());
+                encoder.Finish();
+            }
+        }
     }
 
     // Test that it is invalid to have resource usage conflicts even when all bindings are not
@@ -653,8 +715,7 @@ namespace {
         {
             // Create a texture that will be used as both a sampled texture and a render target
             wgpu::Texture texture =
-                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment,
-                              wgpu::TextureFormat::RGBA8Unorm);
+                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment);
             wgpu::TextureView view = texture.CreateView();
 
             // Create the bind group to use the texture as sampled
@@ -684,12 +745,10 @@ namespace {
         {
             // Create a texture that will be used both as a sampled texture and a render target
             wgpu::Texture t0 =
-                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment,
-                              wgpu::TextureFormat::RGBA8Unorm);
+                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment);
             wgpu::TextureView v0 = t0.CreateView();
             wgpu::Texture t1 =
-                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment,
-                              wgpu::TextureFormat::RGBA8Unorm);
+                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment);
             wgpu::TextureView v1 = t1.CreateView();
 
             // Create the bind group to use the texture as sampled
@@ -731,12 +790,10 @@ namespace {
     // allowed.
     TEST_F(ResourceUsageTrackingTest, TextureCopyAndTextureUsageInPass) {
         // Create textures that will be used as both a sampled texture and a render target
-        wgpu::Texture texture0 =
-            CreateTexture(wgpu::TextureUsage::CopySrc, wgpu::TextureFormat::RGBA8Unorm);
+        wgpu::Texture texture0 = CreateTexture(wgpu::TextureUsage::CopySrc);
         wgpu::Texture texture1 =
             CreateTexture(wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled |
-                              wgpu::TextureUsage::OutputAttachment,
-                          wgpu::TextureFormat::RGBA8Unorm);
+                          wgpu::TextureUsage::OutputAttachment);
         wgpu::TextureView view0 = texture0.CreateView();
         wgpu::TextureView view1 = texture1.CreateView();
 
@@ -777,12 +834,10 @@ namespace {
         {
             // Create textures that will be used as both a sampled texture and a render target
             wgpu::Texture texture0 =
-                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment,
-                              wgpu::TextureFormat::RGBA8Unorm);
+                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment);
             wgpu::TextureView view0 = texture0.CreateView();
             wgpu::Texture texture1 =
-                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment,
-                              wgpu::TextureFormat::RGBA8Unorm);
+                CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment);
             wgpu::TextureView view1 = texture1.CreateView();
 
             // Create the bind group to use the texture as sampled
@@ -818,23 +873,87 @@ namespace {
             }
         }
 
-        // TODO (yunchao.he@intel.com) Test compute pass. Test code is ready, but it depends on
-        // writeonly storage buffer support.
+        // Test compute pass
+        {
+            // Create a texture that will be used both as storage texture
+            wgpu::Texture texture0 = CreateTexture(wgpu::TextureUsage::Storage);
+            wgpu::TextureView view0 = texture0.CreateView();
+            wgpu::Texture texture1 = CreateTexture(wgpu::TextureUsage::Storage);
+            wgpu::TextureView view1 = texture1.CreateView();
+
+            // Create the bind group to use the texture as readonly and writeonly bindings
+            wgpu::BindGroupLayout writeBGL = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::WriteonlyStorageTexture,
+                          false, false, wgpu::TextureViewDimension::Undefined,
+                          wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float,
+                          kFormat}});
+
+            wgpu::BindGroupLayout readBGL = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageTexture,
+                          false, false, wgpu::TextureViewDimension::Undefined,
+                          wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float,
+                          kFormat}});
+
+            wgpu::BindGroup writeBG0 = utils::MakeBindGroup(device, writeBGL, {{0, view0}});
+            wgpu::BindGroup readBG0 = utils::MakeBindGroup(device, readBGL, {{0, view0}});
+            wgpu::BindGroup readBG1 = utils::MakeBindGroup(device, readBGL, {{0, view1}});
+
+            // Create a passthrough compute pipeline
+            wgpu::ShaderModule csModule =
+                utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
+                #version 450
+                void main() {
+                })");
+            wgpu::ComputePipelineDescriptor pipelineDescriptor;
+            pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &writeBGL);
+            pipelineDescriptor.computeStage.module = csModule;
+            pipelineDescriptor.computeStage.entryPoint = "main";
+            wgpu::ComputePipeline cp = device.CreateComputePipeline(&pipelineDescriptor);
+
+            // Set bind group on the same index twice. The second one overwrites the first one.
+            // No texture is used as both readonly and writeonly storage in the same pass. But the
+            // overwritten texture still take effect during resource tracking.
+            {
+                wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+                wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+                pass.SetBindGroup(0, writeBG0);
+                pass.SetBindGroup(1, readBG0);
+                pass.SetBindGroup(1, readBG1);
+                pass.SetPipeline(cp);
+                pass.Dispatch(1);
+                pass.EndPass();
+                // TODO (yunchao.he@intel.com): add texture usage tracking for compute
+                // ASSERT_DEVICE_ERROR(encoder.Finish());
+                encoder.Finish();
+            }
+
+            // Set bind group on the same index twice. The second one overwrites the first one.
+            // texture0 is used as both writeonly and readonly storage in the same pass.
+            {
+                wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+                wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+                pass.SetBindGroup(0, writeBG0);
+                pass.SetBindGroup(1, readBG1);
+                pass.SetBindGroup(1, readBG0);
+                pass.SetPipeline(cp);
+                pass.Dispatch(1);
+                pass.EndPass();
+                // TODO (yunchao.he@intel.com): add texture usage tracking for compute
+                // ASSERT_DEVICE_ERROR(encoder.Finish());
+                encoder.Finish();
+            }
+        }
     }
 
     // TODO (yunchao.he@intel.com): Test that all unused bindings bindGroup still take effect for
     // resource tracking. Test code is ready, but it depends on writeonly storage buffer support
 
     // TODO (yunchao.he@intel.com):
-    // 1. Add tests for overritten tests:
-    //     1) multiple SetBindGroup on the same index
-    //     2) multiple SetVertexBuffer on the same index
-    //     3) multiple SetIndexBuffer
-    // 2. useless bindings in bind groups. For example, a bind group includes bindings for compute
+    // * useless bindings in bind groups. For example, a bind group includes bindings for compute
     // stage, but the bind group is used in render pass.
-    // 3. more read write tracking tests for texture which need readonly storage texture and
+    // * more read write tracking tests for texture which need readonly storage texture and
     // writeonly storage texture support
-    // 4. resource write and read dependency
+    // * resource write and read dependency
     //     1) across passes (render + render, compute + compute, compute and render mixed) is valid
     //     2) across draws/dispatches is invalid
 
