@@ -118,7 +118,6 @@ config("dawn_internal") {
       "-Wno-gnu-zero-variadic-macro-arguments",
       "-Wno-language-extension-token",
       "-Wno-microsoft-enum-value",
-      "-Wno-nested-anon-types",
     ]
   }
 }

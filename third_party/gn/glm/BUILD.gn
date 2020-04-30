@@ -18,6 +18,12 @@ assert(dawn_standalone)
 
 config("glm_public_config") {
   include_dirs = [ "${dawn_glm_dir}" ]
+
+  # GLM tries to suppress the warning for clang but gets confused by clang-cl
+  # and thinks it is MSVC.
+  if (is_win && is_clang) {
+    cflags = [ "-Wno-nested-anon-types" ]
+  }
 }
 source_set("glm") {
   configs -= [ "//build/config/compiler:chromium_code" ]

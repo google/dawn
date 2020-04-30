@@ -71,19 +71,23 @@ namespace dawn_native {
             // Track whether this block has been split or not.
             BlockState mState;
 
+            struct FreeLinks {
+                BuddyBlock* pPrev;
+                BuddyBlock* pNext;
+            };
+
+            struct SplitLink {
+                BuddyBlock* pLeft;
+            };
+
             union {
                 // Used upon allocation.
                 // Avoids searching for the next free block.
-                struct {
-                    BuddyBlock* pPrev;
-                    BuddyBlock* pNext;
-                } free;
+                FreeLinks free;
 
                 // Used upon de-allocation.
                 // Had this block split upon allocation, it and it's buddy is to be deleted.
-                struct {
-                    BuddyBlock* pLeft;
-                } split;
+                SplitLink split;
             };
         };
 
