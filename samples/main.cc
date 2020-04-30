@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "src/context.h"
@@ -54,20 +56,26 @@ struct Options {
   bool show_help = false;
 
   std::string input_filename;
-  std::string output_name = "";
-  std::string output_ext = "spv";
+  std::string output_file = "-";  // Default to stdout
 
   bool parse_only = false;
   bool dump_ast = false;
 
-  Format format = Format::kSpirv;
+  Format format = Format::kNone;
 };
 
 const char kUsage[] = R"(Usage: tint [options] SCRIPT [SCRIPTS...]
 
  options:
-  --format <spirv|spvasm|wgsl>  -- Output format
-  --output-name <name>      -- Name for the output file, without extension
+  --format <spirv|spvasm|wgsl>  -- Output format. 
+                               If not provided, will be inferred from output
+                               filename extension:
+                                   .spvasm -> spvasm
+                                   .spv -> spirv
+                                   .wgsl -> wgsl
+                               If none matches, then default to SPIR-V assembly.
+  --output-file <name>      -- Output file name.  Use "-" for standard output
+  -o <name>                 -- Output file name.  Use "-" for standard output
   --parse-only              -- Stop after parsing the input
   --dump-ast                -- Dump the generated AST to stdout
   -h                        -- This help text)";
@@ -92,6 +100,31 @@ Format parse_format(const std::string& fmt) {
   return Format::kNone;
 }
 
+/// @param input input string
+/// @param suffix potential suffix string
+/// @returns true if input ends with the given suffix.
+bool ends_with(const std::string& input, const std::string& suffix) {
+  const auto input_len = input.size();
+  const auto suffix_len = suffix.size();
+  // Avoid integer overflow.
+  return (input_len >= suffix_len) && (input_len - suffix_len == input.rfind(suffix));
+}
+
+/// @param filename the filename to inspect
+/// @returns the inferred format for the filename suffix
+Format infer_format(const std::string& filename) {
+  if (ends_with(filename, ".spv")) {
+    return Format::kSpirv;
+  }
+  if (ends_with(filename, ".spvasm")) {
+    return Format::kSpvAsm;
+  }
+  if (ends_with(filename, ".wgsl")) {
+    return Format::kWgsl;
+  }
+  return Format::kNone;
+}
+
 bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
   for (size_t i = 1; i < args.size(); ++i) {
     const std::string& arg = args[i];
@@ -107,19 +140,14 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
         std::cerr << "Unknown output format: " << args[i] << std::endl;
         return false;
       }
-
-      if (opts->format == Format::kSpvAsm)
-        opts->output_ext = "spvasm";
-      else if (opts->format == Format::kWgsl)
-        opts->output_ext = "wgsl";
     }
-    if (arg == "--output-name") {
+    if (arg == "-o" || arg == "--output-name") {
       ++i;
       if (i >= args.size()) {
-        std::cerr << "Missing value for --output_name argument." << std::endl;
+        std::cerr << "Missing value for " << arg << std::endl;
         return false;
       }
-      opts->output_name = args[i];
+      opts->output_file = args[i];
 
     } else if (arg == "-h" || arg == "--help") {
       opts->show_help = true;
@@ -192,6 +220,47 @@ bool ReadFile(const std::string& input_file, std::vector<T>* buffer) {
   return true;
 }
 
+/// Writes the given |buffer| into the file named as |output_file| using the
+/// given |mode|.  If |filename| is empty or "-", writes to standard output. If
+/// any error occurs, returns false and outputs error message to standard error.
+/// The ContainerT type must have data() and size() methods, like std::string
+/// and std::vector do.
+/// @returns true on success
+template <typename ContainerT>
+bool WriteFile(const std::string& output_file, const std::string mode, const ContainerT& buffer) {
+  const bool use_stdout = output_file.empty() || output_file == "-";
+  FILE* file = stdout;
+
+  if (!use_stdout) {
+#if defined(_MSC_VER)
+    fopen_s(&file, output_file.c_str(), mode.c_str());
+#else
+    file = fopen(output_file.c_str(), mode.c_str());
+#endif
+    if (!file) {
+      std::cerr << "Could not open file " << output_file << " for writing"
+                << std::endl;
+      return false;
+    }
+  }
+
+  size_t written = fwrite(buffer.data(), sizeof(typename ContainerT::value_type), buffer.size(), file);
+  if (buffer.size() != written) {
+    if (use_stdout) {
+      std::cerr << "Could not write all output to standard output" << std::endl;
+    } else {
+      std::cerr << "Could not write to file " << output_file << std::endl;
+      fclose(file);
+    }
+    return false;
+  }
+  if (!use_stdout) {
+    fclose(file);
+  }
+
+  return true;
+}
+
 #if TINT_BUILD_SPV_WRITER
 std::string Disassemble(const std::vector<uint32_t>& data) {
   std::string spv_errors;
@@ -248,10 +317,15 @@ int main(int argc, const char** argv) {
     std::cout << kUsage << std::endl;
     return 0;
   }
-  if (options.input_filename.empty()) {
-    std::cerr << "Input file missing" << std::endl;
-    std::cout << kUsage << std::endl;
-    return 1;
+
+  // Implement output format defaults.
+  if (options.format == Format::kNone) {
+    // Try inferring from filename.
+    options.format = infer_format(options.output_file);
+  }
+  if (options.format == Format::kNone) {
+    // Ultimately, default to SPIR-V assembly. That's nice for interactive use.
+    options.format = Format::kSpvAsm;
   }
 
   tint::Context ctx;
@@ -345,19 +419,24 @@ int main(int argc, const char** argv) {
   if (options.format == Format::kSpvAsm) {
     auto* w = static_cast<tint::writer::spirv::Generator*>(writer.get());
     auto str = Disassemble(w->result());
-    // TODO(dsinclair): Write to file if output_file given
-    std::cout << str << std::endl;
+    if (!WriteFile(options.output_file, "w", str)) {
+      return 1;
+    }
   }
   if (options.format == Format::kSpirv) {
-    // auto w = static_cast<tint::writer::spirv::Generator*>(writer.get());
-    // TODO(dsincliair): Write to to file
+    auto w = static_cast<tint::writer::spirv::Generator*>(writer.get());
+    if (!WriteFile(options.output_file, "wb", w->result())) {
+      return 1;
+    }
   }
 #endif  // TINT_BUILD_SPV_WRITER
 
 #if TINT_BUILD_WGSL_WRITER
   if (options.format == Format::kWgsl) {
     auto* w = static_cast<tint::writer::wgsl::Generator*>(writer.get());
-    std::cout << w->result() << std::endl;
+    if (!WriteFile(options.output_file, "w", w->result())) {
+      return 1;
+    }
   }
 #endif  // TINT_BUILD_WGSL_WRITER
 
