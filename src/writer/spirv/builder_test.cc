@@ -36,10 +36,11 @@ TEST_F(BuilderTest, InsertsPreambleWithImport) {
 
   Builder b(&m);
   ASSERT_TRUE(b.Build());
-  ASSERT_EQ(b.preamble().size(), 4u);
+  ASSERT_EQ(b.preamble().size(), 5u);
 
   EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
 OpCapability VulkanMemoryModel
+OpExtension "SPV_KHR_vulkan_memory_model"
 %1 = OpExtInstImport "GLSL.std.450"
 OpMemoryModel Logical Vulkan
 )");
@@ -51,6 +52,7 @@ TEST_F(BuilderTest, InsertsPreambleWithoutImport) {
   ASSERT_TRUE(b.Build());
   EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
 OpCapability VulkanMemoryModel
+OpExtension "SPV_KHR_vulkan_memory_model"
 OpMemoryModel Logical Vulkan
 )");
 }

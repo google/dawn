@@ -128,8 +128,12 @@ Builder::~Builder() = default;
 
 bool Builder::Build() {
   push_preamble(spv::Op::OpCapability, {Operand::Int(SpvCapabilityShader)});
+
+  // TODO(dneto): Stop using the Vulkan memory model. crbug.com/tint/63
   push_preamble(spv::Op::OpCapability,
                 {Operand::Int(SpvCapabilityVulkanMemoryModel)});
+  push_preamble(spv::Op::OpExtension,
+                {Operand::String("SPV_KHR_vulkan_memory_model")});
 
   for (const auto& imp : mod_->imports()) {
     GenerateImport(imp.get());
