@@ -100,7 +100,8 @@ namespace dawn_native { namespace d3d12 {
 
         void DeallocateMemory(ResourceHeapAllocation& allocation);
 
-        ShaderVisibleDescriptorAllocator* GetShaderVisibleDescriptorAllocator() const;
+        ShaderVisibleDescriptorAllocator* GetViewShaderVisibleDescriptorAllocator() const;
+        ShaderVisibleDescriptorAllocator* GetSamplerShaderVisibleDescriptorAllocator() const;
 
         // Returns nullptr when descriptor count is zero.
         StagingDescriptorAllocator* GetViewStagingDescriptorAllocator(
@@ -180,7 +181,6 @@ namespace dawn_native { namespace d3d12 {
         std::unique_ptr<MapRequestTracker> mMapRequestTracker;
         std::unique_ptr<ResourceAllocatorManager> mResourceAllocatorManager;
         std::unique_ptr<ResidencyManager> mResidencyManager;
-        std::unique_ptr<ShaderVisibleDescriptorAllocator> mShaderVisibleDescriptorAllocator;
 
         // Index corresponds to the descriptor count in the range [0, kMaxBindingsPerGroup].
         static constexpr uint32_t kNumOfStagingDescriptorAllocators = kMaxBindingsPerGroup + 1;
@@ -194,6 +194,10 @@ namespace dawn_native { namespace d3d12 {
         std::unique_ptr<StagingDescriptorAllocator> mRenderTargetViewAllocator;
 
         std::unique_ptr<StagingDescriptorAllocator> mDepthStencilViewAllocator;
+
+        std::unique_ptr<ShaderVisibleDescriptorAllocator> mViewShaderVisibleDescriptorAllocator;
+
+        std::unique_ptr<ShaderVisibleDescriptorAllocator> mSamplerShaderVisibleDescriptorAllocator;
     };
 
 }}  // namespace dawn_native::d3d12

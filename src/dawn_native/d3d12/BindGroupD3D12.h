@@ -19,6 +19,7 @@
 #include "common/Serial.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/d3d12/CPUDescriptorHeapAllocationD3D12.h"
+#include "dawn_native/d3d12/GPUDescriptorHeapAllocationD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
 
@@ -38,19 +39,23 @@ namespace dawn_native { namespace d3d12 {
                   const CPUDescriptorHeapAllocation& samplerAllocation);
 
         // Returns true if the BindGroup was successfully populated.
-        ResultOrError<bool> Populate(ShaderVisibleDescriptorAllocator* allocator);
+        bool PopulateViews(ShaderVisibleDescriptorAllocator* viewAllocator);
+        bool PopulateSamplers(ShaderVisibleDescriptorAllocator* samplerAllocator);
 
-        D3D12_GPU_DESCRIPTOR_HANDLE GetBaseCbvUavSrvDescriptor() const;
+        D3D12_GPU_DESCRIPTOR_HANDLE GetBaseViewDescriptor() const;
         D3D12_GPU_DESCRIPTOR_HANDLE GetBaseSamplerDescriptor() const;
 
       private:
+        bool Populate(ShaderVisibleDescriptorAllocator* allocator,
+                      uint32_t descriptorCount,
+                      D3D12_DESCRIPTOR_HEAP_TYPE heapType,
+                      const CPUDescriptorHeapAllocation& stagingAllocation,
+                      GPUDescriptorHeapAllocation* allocation);
+
         ~BindGroup() override;
 
-        Serial mLastUsageSerial = 0;
-        Serial mHeapSerial = 0;
-
-        D3D12_GPU_DESCRIPTOR_HANDLE mBaseViewDescriptor = {0};
-        D3D12_GPU_DESCRIPTOR_HANDLE mBaseSamplerDescriptor = {0};
+        GPUDescriptorHeapAllocation mGPUSamplerAllocation;
+        GPUDescriptorHeapAllocation mGPUViewAllocation;
 
         CPUDescriptorHeapAllocation mCPUSamplerAllocation;
         CPUDescriptorHeapAllocation mCPUViewAllocation;

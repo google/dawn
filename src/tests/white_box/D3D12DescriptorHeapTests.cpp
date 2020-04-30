@@ -75,11 +75,6 @@ class D3D12DescriptorHeapTests : public DawnTest {
         return utils::BasicRenderPass(width, height, color);
     }
 
-    uint32_t GetShaderVisibleHeapSize(D3D12_DESCRIPTOR_HEAP_TYPE heapType) const {
-        return mD3DDevice->GetShaderVisibleDescriptorAllocator()
-            ->GetShaderVisibleHeapSizeForTesting(heapType);
-    }
-
     std::array<float, 4> GetSolidColor(uint32_t n) const {
         ASSERT(n >> 24 == 0);
         float b = (n & 0xFF) / 255.0f;
@@ -119,8 +114,8 @@ class DummyStagingDescriptorAllocator {
     StagingDescriptorAllocator mAllocator;
 };
 
-// Verify the shader visible heaps switch over within a single submit.
-TEST_P(D3D12DescriptorHeapTests, SwitchOverHeaps) {
+// Verify the shader visible sampler heap switch within a single submit.
+TEST_P(D3D12DescriptorHeapTests, SwitchOverSamplerHeap) {
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
 
     // Fill in a sampler heap with "sampler only" bindgroups (1x sampler per group) by creating a
@@ -147,11 +142,11 @@ TEST_P(D3D12DescriptorHeapTests, SwitchOverHeaps) {
     wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
 
     Device* d3dDevice = reinterpret_cast<Device*>(device.Get());
-    ShaderVisibleDescriptorAllocator* allocator = d3dDevice->GetShaderVisibleDescriptorAllocator();
-    const uint64_t samplerHeapSize =
-        allocator->GetShaderVisibleHeapSizeForTesting(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+    ShaderVisibleDescriptorAllocator* allocator =
+        d3dDevice->GetSamplerShaderVisibleDescriptorAllocator();
+    const uint64_t samplerHeapSize = allocator->GetShaderVisibleHeapSizeForTesting();
 
-    const Serial heapSerial = allocator->GetShaderVisibleHeapsSerial();
+    const Serial heapSerial = allocator->GetShaderVisibleHeapSerialForTesting();
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
@@ -171,24 +166,22 @@ TEST_P(D3D12DescriptorHeapTests, SwitchOverHeaps) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_EQ(allocator->GetShaderVisibleHeapsSerial(), heapSerial + 1);
+    EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial + 1);
 }
 
 // Verify shader-visible heaps can be recycled for multiple submits.
 TEST_P(D3D12DescriptorHeapTests, PoolHeapsInMultipleSubmits) {
-    constexpr D3D12_DESCRIPTOR_HEAP_TYPE heapType = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
+    ShaderVisibleDescriptorAllocator* allocator =
+        mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
 
-    ShaderVisibleDescriptorAllocator* allocator = mD3DDevice->GetShaderVisibleDescriptorAllocator();
+    std::list<ComPtr<ID3D12DescriptorHeap>> heaps = {allocator->GetShaderVisibleHeap()};
 
-    std::list<ComPtr<ID3D12DescriptorHeap>> heaps = {
-        allocator->GetShaderVisibleHeapForTesting(heapType)};
-
-    EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(heapType), 0u);
+    EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(), 0u);
 
     // Allocate + Tick() up to |kFrameDepth| and ensure heaps are always unique.
     for (uint32_t i = 0; i < kFrameDepth; i++) {
-        EXPECT_TRUE(allocator->AllocateAndSwitchShaderVisibleHeaps().IsSuccess());
-        ComPtr<ID3D12DescriptorHeap> heap = allocator->GetShaderVisibleHeapForTesting(heapType);
+        EXPECT_TRUE(allocator->AllocateAndSwitchShaderVisibleHeap().IsSuccess());
+        ComPtr<ID3D12DescriptorHeap> heap = allocator->GetShaderVisibleHeap();
         EXPECT_TRUE(std::find(heaps.begin(), heaps.end(), heap) == heaps.end());
         heaps.push_back(heap);
         mD3DDevice->Tick();
@@ -198,68 +191,66 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInMultipleSubmits) {
     // (oldest heaps are recycled first). The "+ 1" is so we also include the very first heap in the
     // check.
     for (uint32_t i = 0; i < kFrameDepth + 1; i++) {
-        EXPECT_TRUE(allocator->AllocateAndSwitchShaderVisibleHeaps().IsSuccess());
-        ComPtr<ID3D12DescriptorHeap> heap = allocator->GetShaderVisibleHeapForTesting(heapType);
+        EXPECT_TRUE(allocator->AllocateAndSwitchShaderVisibleHeap().IsSuccess());
+        ComPtr<ID3D12DescriptorHeap> heap = allocator->GetShaderVisibleHeap();
         EXPECT_TRUE(heaps.front() == heap);
         heaps.pop_front();
         mD3DDevice->Tick();
     }
 
     EXPECT_TRUE(heaps.empty());
-    EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(heapType), kFrameDepth);
+    EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(), kFrameDepth);
 }
 
 // Verify shader-visible heaps do not recycle in a pending submit.
 TEST_P(D3D12DescriptorHeapTests, PoolHeapsInPendingSubmit) {
-    constexpr D3D12_DESCRIPTOR_HEAP_TYPE heapType = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
     constexpr uint32_t kNumOfSwitches = 5;
 
-    ShaderVisibleDescriptorAllocator* allocator = mD3DDevice->GetShaderVisibleDescriptorAllocator();
+    ShaderVisibleDescriptorAllocator* allocator =
+        mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
 
-    const Serial heapSerial = allocator->GetShaderVisibleHeapsSerial();
+    const Serial heapSerial = allocator->GetShaderVisibleHeapSerialForTesting();
 
-    std::set<ComPtr<ID3D12DescriptorHeap>> heaps = {
-        allocator->GetShaderVisibleHeapForTesting(heapType)};
+    std::set<ComPtr<ID3D12DescriptorHeap>> heaps = {allocator->GetShaderVisibleHeap()};
 
-    EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(heapType), 0u);
+    EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(), 0u);
 
     // Switch-over |kNumOfSwitches| and ensure heaps are always unique.
     for (uint32_t i = 0; i < kNumOfSwitches; i++) {
-        EXPECT_TRUE(allocator->AllocateAndSwitchShaderVisibleHeaps().IsSuccess());
-        ComPtr<ID3D12DescriptorHeap> heap = allocator->GetShaderVisibleHeapForTesting(heapType);
+        EXPECT_TRUE(allocator->AllocateAndSwitchShaderVisibleHeap().IsSuccess());
+        ComPtr<ID3D12DescriptorHeap> heap = allocator->GetShaderVisibleHeap();
         EXPECT_TRUE(std::find(heaps.begin(), heaps.end(), heap) == heaps.end());
         heaps.insert(heap);
     }
 
     // After |kNumOfSwitches|, no heaps are recycled.
-    EXPECT_EQ(allocator->GetShaderVisibleHeapsSerial(), heapSerial + kNumOfSwitches);
-    EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(heapType), kNumOfSwitches);
+    EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial + kNumOfSwitches);
+    EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(), kNumOfSwitches);
 }
 
 // Verify switching shader-visible heaps do not recycle in a pending submit but do so
 // once no longer pending.
 TEST_P(D3D12DescriptorHeapTests, PoolHeapsInPendingAndMultipleSubmits) {
-    constexpr D3D12_DESCRIPTOR_HEAP_TYPE heapType = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
     constexpr uint32_t kNumOfSwitches = 5;
 
-    ShaderVisibleDescriptorAllocator* allocator = mD3DDevice->GetShaderVisibleDescriptorAllocator();
-    const Serial heapSerial = allocator->GetShaderVisibleHeapsSerial();
+    ShaderVisibleDescriptorAllocator* allocator =
+        mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
+    const Serial heapSerial = allocator->GetShaderVisibleHeapSerialForTesting();
 
-    std::set<ComPtr<ID3D12DescriptorHeap>> heaps = {
-        allocator->GetShaderVisibleHeapForTesting(heapType)};
+    std::set<ComPtr<ID3D12DescriptorHeap>> heaps = {allocator->GetShaderVisibleHeap()};
 
-    EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(heapType), 0u);
+    EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(), 0u);
 
     // Switch-over |kNumOfSwitches| to create a pool of unique heaps.
     for (uint32_t i = 0; i < kNumOfSwitches; i++) {
-        EXPECT_TRUE(allocator->AllocateAndSwitchShaderVisibleHeaps().IsSuccess());
-        ComPtr<ID3D12DescriptorHeap> heap = allocator->GetShaderVisibleHeapForTesting(heapType);
+        EXPECT_TRUE(allocator->AllocateAndSwitchShaderVisibleHeap().IsSuccess());
+        ComPtr<ID3D12DescriptorHeap> heap = allocator->GetShaderVisibleHeap();
         EXPECT_TRUE(std::find(heaps.begin(), heaps.end(), heap) == heaps.end());
         heaps.insert(heap);
     }
 
-    EXPECT_EQ(allocator->GetShaderVisibleHeapsSerial(), heapSerial + kNumOfSwitches);
-    EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(heapType), kNumOfSwitches);
+    EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial + kNumOfSwitches);
+    EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(), kNumOfSwitches);
 
     // Ensure switched-over heaps can be recycled by advancing the GPU by at-least |kFrameDepth|.
     for (uint32_t i = 0; i < kFrameDepth; i++) {
@@ -268,15 +259,15 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInPendingAndMultipleSubmits) {
 
     // Switch-over |kNumOfSwitches| again reusing the same heaps.
     for (uint32_t i = 0; i < kNumOfSwitches; i++) {
-        EXPECT_TRUE(allocator->AllocateAndSwitchShaderVisibleHeaps().IsSuccess());
-        ComPtr<ID3D12DescriptorHeap> heap = allocator->GetShaderVisibleHeapForTesting(heapType);
+        EXPECT_TRUE(allocator->AllocateAndSwitchShaderVisibleHeap().IsSuccess());
+        ComPtr<ID3D12DescriptorHeap> heap = allocator->GetShaderVisibleHeap();
         EXPECT_TRUE(std::find(heaps.begin(), heaps.end(), heap) != heaps.end());
         heaps.erase(heap);
     }
 
     // After switching-over |kNumOfSwitches| x 2, ensure no additional heaps exist.
-    EXPECT_EQ(allocator->GetShaderVisibleHeapsSerial(), heapSerial + kNumOfSwitches * 2);
-    EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(heapType), kNumOfSwitches);
+    EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial + kNumOfSwitches * 2);
+    EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(), kNumOfSwitches);
 }
 
 // Verify encoding multiple heaps worth of bindgroups.
@@ -316,7 +307,8 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBO) {
 
     wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 
-    const uint32_t heapSize = GetShaderVisibleHeapSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    const uint32_t heapSize =
+        mD3DDevice->GetViewShaderVisibleDescriptorAllocator()->GetShaderVisibleHeapSizeForTesting();
 
     constexpr uint32_t kNumOfHeaps = 2;
 
@@ -398,7 +390,8 @@ TEST_P(D3D12DescriptorHeapTests, EncodeUBOOverflowMultipleSubmit) {
 
     // Encode a heap worth of descriptors.
     {
-        const uint32_t heapSize = GetShaderVisibleHeapSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+        const uint32_t heapSize = mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator()
+                                      ->GetShaderVisibleHeapSizeForTesting();
 
         std::vector<wgpu::BindGroup> bindGroups;
         for (uint32_t i = 0; i < heapSize - 1; i++) {
@@ -462,7 +455,8 @@ TEST_P(D3D12DescriptorHeapTests, EncodeReuseUBOOverflow) {
     std::vector<wgpu::BindGroup> bindGroups = {utils::MakeBindGroup(
         device, pipeline.GetBindGroupLayout(0), {{0, firstUniformBuffer, 0, sizeof(redColor)}})};
 
-    const uint32_t heapSize = GetShaderVisibleHeapSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    const uint32_t heapSize =
+        mD3DDevice->GetViewShaderVisibleDescriptorAllocator()->GetShaderVisibleHeapSizeForTesting();
 
     for (uint32_t i = 0; i < heapSize; i++) {
         const std::array<float, 4>& fillColor = GetSolidColor(i + 1);  // Avoid black
@@ -524,7 +518,8 @@ TEST_P(D3D12DescriptorHeapTests, EncodeReuseUBOMultipleSubmits) {
     std::vector<wgpu::BindGroup> bindGroups = {utils::MakeBindGroup(
         device, pipeline.GetBindGroupLayout(0), {{0, firstUniformBuffer, 0, sizeof(redColor)}})};
 
-    const uint32_t heapSize = GetShaderVisibleHeapSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    const uint32_t heapSize =
+        mD3DDevice->GetViewShaderVisibleDescriptorAllocator()->GetShaderVisibleHeapSizeForTesting();
 
     for (uint32_t i = 0; i < heapSize; i++) {
         std::array<float, 4> fillColor = GetSolidColor(i + 1);  // Avoid black
@@ -661,13 +656,16 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
         wgpu::SamplerDescriptor samplerDescriptor;
         wgpu::Sampler sampler = device.CreateSampler(&samplerDescriptor);
 
-        ShaderVisibleDescriptorAllocator* allocator =
-            mD3DDevice->GetShaderVisibleDescriptorAllocator();
+        ShaderVisibleDescriptorAllocator* viewAllocator =
+            mD3DDevice->GetViewShaderVisibleDescriptorAllocator();
 
-        const Serial heapSerial = allocator->GetShaderVisibleHeapsSerial();
+        ShaderVisibleDescriptorAllocator* samplerAllocator =
+            mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
 
-        const uint32_t viewHeapSize =
-            GetShaderVisibleHeapSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        const Serial viewHeapSerial = viewAllocator->GetShaderVisibleHeapSerialForTesting();
+        const Serial samplerHeapSerial = samplerAllocator->GetShaderVisibleHeapSerialForTesting();
+
+        const uint32_t viewHeapSize = viewAllocator->GetShaderVisibleHeapSizeForTesting();
 
         // "Small" view heap is always 2 x sampler heap size and encodes 3x the descriptors per
         // group. This means the count of heaps switches is determined by the total number of views
@@ -724,7 +722,17 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
         EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, 0, 0);
         EXPECT_PIXEL_RGBA8_EQ(notFilled, renderPass.color, kRTSize - 1, 0);
 
-        EXPECT_EQ(allocator->GetShaderVisibleHeapsSerial(), heapSerial + kNumOfViewHeaps);
+        EXPECT_EQ(viewAllocator->GetShaderVisiblePoolSizeForTesting(), kNumOfViewHeaps);
+        EXPECT_EQ(viewAllocator->GetShaderVisibleHeapSerialForTesting(),
+                  viewHeapSerial + kNumOfViewHeaps);
+
+        const uint32_t numOfSamplerHeaps =
+            numOfEncodedBindGroups /
+            samplerAllocator->GetShaderVisibleHeapSizeForTesting();  // 1 sampler per group.
+
+        EXPECT_EQ(samplerAllocator->GetShaderVisiblePoolSizeForTesting(), numOfSamplerHeaps);
+        EXPECT_EQ(samplerAllocator->GetShaderVisibleHeapSerialForTesting(),
+                  samplerHeapSerial + numOfSamplerHeaps);
     }
 }
 

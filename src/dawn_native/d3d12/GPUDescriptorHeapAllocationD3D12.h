@@ -12,32 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_D3D12_DESCRIPTORHEAPALLOCATIOND3D12_H_
-#define DAWNNATIVE_D3D12_DESCRIPTORHEAPALLOCATIOND3D12_H_
+#ifndef DAWNNATIVE_D3D12_GPUDESCRIPTORHEAPALLOCATION_H_
+#define DAWNNATIVE_D3D12_GPUDESCRIPTORHEAPALLOCATION_H_
 
+#include "common/Serial.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
-
-#include <cstdint>
 
 namespace dawn_native { namespace d3d12 {
 
     // Wrapper for a handle into a GPU-only descriptor heap.
-    class DescriptorHeapAllocation {
+    class GPUDescriptorHeapAllocation {
       public:
-        DescriptorHeapAllocation() = default;
-        DescriptorHeapAllocation(D3D12_CPU_DESCRIPTOR_HANDLE baseCPUDescriptorHandle,
-                                 D3D12_GPU_DESCRIPTOR_HANDLE baseGPUDescriptorHandle);
-        ~DescriptorHeapAllocation() = default;
+        GPUDescriptorHeapAllocation() = default;
+        GPUDescriptorHeapAllocation(D3D12_GPU_DESCRIPTOR_HANDLE baseDescriptor,
+                                    Serial lastUsageSerial,
+                                    Serial heapSerial);
 
-        D3D12_GPU_DESCRIPTOR_HANDLE GetBaseGPUDescriptor() const;
-        D3D12_CPU_DESCRIPTOR_HANDLE GetBaseCPUDescriptor() const;
-
-        bool IsInvalid() const;
+        D3D12_GPU_DESCRIPTOR_HANDLE GetBaseDescriptor() const;
+        Serial GetLastUsageSerial() const;
+        Serial GetHeapSerial() const;
 
       private:
-        D3D12_CPU_DESCRIPTOR_HANDLE mBaseCPUDescriptorHandle = {0};
-        D3D12_GPU_DESCRIPTOR_HANDLE mBaseGPUDescriptorHandle = {0};
+        D3D12_GPU_DESCRIPTOR_HANDLE mBaseDescriptor = {0};
+        Serial mLastUsageSerial = 0;
+        Serial mHeapSerial = 0;
     };
+
 }}  // namespace dawn_native::d3d12
 
-#endif  // DAWNNATIVE_D3D12_DESCRIPTORHEAPALLOCATIOND3D12_H_
+#endif  // DAWNNATIVE_D3D12_CPUDESCRIPTORHEAPALLOCATION_H_

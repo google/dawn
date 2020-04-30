@@ -17,39 +17,47 @@
 
 #include "dawn_native/Error.h"
 #include "dawn_native/RingBufferAllocator.h"
-#include "dawn_native/d3d12/DescriptorHeapAllocationD3D12.h"
+#include "dawn_native/d3d12/d3d12_platform.h"
 
-#include <array>
 #include <list>
 
+// |ShaderVisibleDescriptorAllocator| allocates a variable-sized block of descriptors from a GPU
+// descriptor heap pool.
+// Internally, it manages a list of heaps using a ringbuffer block allocator. The heap is in one
+// of two states: switched in or out. Only a switched in heap can be bound to the pipeline. If
+// the heap is full, the caller must switch-in a new heap before re-allocating and the old one
+// is returned to the pool.
 namespace dawn_native { namespace d3d12 {
 
     class Device;
+    class GPUDescriptorHeapAllocation;
 
-    // Manages descriptor heap allocators used by the device to create descriptors using allocation
-    // methods based on the heap type.
     class ShaderVisibleDescriptorAllocator {
       public:
-        ShaderVisibleDescriptorAllocator(Device* device);
-        MaybeError Initialize();
-
-        ResultOrError<DescriptorHeapAllocation> AllocateGPUDescriptors(
-            uint32_t descriptorCount,
-            Serial pendingSerial,
+        static ResultOrError<std::unique_ptr<ShaderVisibleDescriptorAllocator>> Create(
+            Device* device,
             D3D12_DESCRIPTOR_HEAP_TYPE heapType);
 
+        ShaderVisibleDescriptorAllocator(Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType);
+
+        // Returns true if the allocation was successful, when false is returned the current heap is
+        // full and AllocateAndSwitchShaderVisibleHeap() must be called.
+        bool AllocateGPUDescriptors(uint32_t descriptorCount,
+                                    Serial pendingSerial,
+                                    D3D12_CPU_DESCRIPTOR_HANDLE* baseCPUDescriptor,
+                                    GPUDescriptorHeapAllocation* allocation);
+
         void Tick(uint64_t completedSerial);
-        Serial GetShaderVisibleHeapsSerial() const;
 
-        std::array<ID3D12DescriptorHeap*, 2> GetShaderVisibleHeaps() const;
-        MaybeError AllocateAndSwitchShaderVisibleHeaps();
+        ID3D12DescriptorHeap* GetShaderVisibleHeap() const;
+        MaybeError AllocateAndSwitchShaderVisibleHeap();
 
-        uint64_t GetShaderVisibleHeapSizeForTesting(D3D12_DESCRIPTOR_HEAP_TYPE heapType) const;
-        ComPtr<ID3D12DescriptorHeap> GetShaderVisibleHeapForTesting(
-            D3D12_DESCRIPTOR_HEAP_TYPE heapType) const;
-        uint64_t GetShaderVisiblePoolSizeForTesting(D3D12_DESCRIPTOR_HEAP_TYPE heapType) const;
+        // For testing purposes only.
+        Serial GetShaderVisibleHeapSerialForTesting() const;
+        uint64_t GetShaderVisibleHeapSizeForTesting() const;
+        uint64_t GetShaderVisiblePoolSizeForTesting() const;
 
-        bool IsAllocationStillValid(Serial lastUsageSerial, Serial heapSerial) const;
+        bool IsAllocationStillValid(const GPUDescriptorHeapAllocation& allocation) const;
 
       private:
         struct SerialDescriptorHeap {
@@ -57,23 +65,19 @@ namespace dawn_native { namespace d3d12 {
             ComPtr<ID3D12DescriptorHeap> heap;
         };
 
-        struct ShaderVisibleBuffer {
-            ComPtr<ID3D12DescriptorHeap> heap;
-            RingBufferAllocator allocator;
-            std::list<SerialDescriptorHeap> pool;
-            D3D12_DESCRIPTOR_HEAP_TYPE heapType;
-        };
-
-        MaybeError AllocateGPUHeap(ShaderVisibleBuffer* shaderVisibleBuffer);
+        ComPtr<ID3D12DescriptorHeap> mHeap;
+        RingBufferAllocator mAllocator;
+        std::list<SerialDescriptorHeap> mPool;
+        D3D12_DESCRIPTOR_HEAP_TYPE mHeapType;
 
         Device* mDevice;
 
         // The serial value of 0 means the shader-visible heaps have not been allocated.
-        // This value is never returned by GetShaderVisibleHeapsSerial() after Initialize().
-        Serial mShaderVisibleHeapsSerial = 0;
+        // This value is never returned in the GPUDescriptorHeapAllocation after
+        // AllocateGPUDescriptors() is called.
+        Serial mHeapSerial = 0;
 
-        std::array<ShaderVisibleBuffer, 2> mShaderVisibleBuffers;
-        std::array<uint32_t, 2> mSizeIncrements;
+        uint32_t mSizeIncrement;
     };
 }}  // namespace dawn_native::d3d12
 
