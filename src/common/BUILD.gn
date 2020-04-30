@@ -114,7 +114,6 @@ config("dawn_internal") {
 
     # Flags for -pedantic warnings that haven't been fixed yet.
     cflags += [
-      "-Wno-gnu-anonymous-struct",
       "-Wno-gnu-zero-variadic-macro-arguments",
       "-Wno-language-extension-token",
       "-Wno-microsoft-enum-value",
