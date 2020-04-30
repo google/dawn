@@ -86,10 +86,11 @@ config("dawn_internal") {
   # Only internal Dawn targets can use this config, this means only targets in
   # this BUILD.gn file.
   visibility = [ ":*" ]
+  cflags = []
 
   # Enable more warnings that were found when using Dawn in other projects
   if (is_clang) {
-    cflags = [
+    cflags += [
       "-Wconditional-uninitialized",
       "-Wcstring-format-directive",
       "-Wc++11-narrowing",
@@ -122,6 +123,12 @@ config("dawn_internal") {
       "-Wno-gnu-zero-variadic-macro-arguments",
       "-Wno-microsoft-enum-value",
     ]
+  }
+
+  if (!is_clang && is_win) {
+    # Dawn extends wgpu enums with internal enums.
+    # MSVC considers these invalid switch values. crbug.com/dawn/397.
+    cflags += [ "/wd4063" ]
   }
 }
 
