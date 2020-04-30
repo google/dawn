@@ -148,11 +148,11 @@ namespace dawn_native { namespace d3d12 {
 
             if (mInCompute) {
                 for (uint32_t index : IterateBitSet(mBindGroupLayoutsMask)) {
-                    for (uint32_t binding : IterateBitSet(mBuffersNeedingBarrier[index])) {
+                    for (uint32_t binding : IterateBitSet(mBindingsNeedingBarrier[index])) {
                         wgpu::BindingType bindingType = mBindingTypes[index][binding];
                         switch (bindingType) {
                             case wgpu::BindingType::StorageBuffer:
-                                ToBackend(mBuffers[index][binding])
+                                static_cast<Buffer*>(mBindings[index][binding])
                                     ->TrackUsageAndTransitionNow(commandContext,
                                                                  wgpu::BufferUsage::Storage);
                                 break;

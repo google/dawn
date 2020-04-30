@@ -120,9 +120,11 @@ namespace dawn_native { namespace vulkan {
                 // combination of GENERAL and TRANSFER_SRC_OPTIMAL. This would be a problem, so we
                 // make CopySrc use GENERAL.
                 case wgpu::TextureUsage::CopySrc:
-                // Writable storage textures must use general. If we could know the texture is read
-                // only we could use SHADER_READ_ONLY_OPTIMAL
+                // Read-only and write-only storage textures must use general layout because load
+                // and store operations on storage images can only be done on the images in
+                // VK_IMAGE_LAYOUT_GENERAL layout.
                 case wgpu::TextureUsage::Storage:
+                case kReadonlyStorageTexture:
                     return VK_IMAGE_LAYOUT_GENERAL;
                 case wgpu::TextureUsage::OutputAttachment:
                     if (format.HasDepthOrStencil()) {
@@ -149,10 +151,14 @@ namespace dawn_native { namespace vulkan {
             if (usage & (wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst)) {
                 flags |= VK_PIPELINE_STAGE_TRANSFER_BIT;
             }
-            if (usage & (wgpu::TextureUsage::Sampled | wgpu::TextureUsage::Storage)) {
+            if (usage & (wgpu::TextureUsage::Sampled | kReadonlyStorageTexture)) {
                 flags |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT |
                          VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT |
                          VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+            }
+            if (usage & wgpu::TextureUsage::Storage) {
+                flags |=
+                    VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
             }
             if (usage & wgpu::TextureUsage::OutputAttachment) {
                 if (format.HasDepthOrStencil()) {
