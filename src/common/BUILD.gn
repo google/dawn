@@ -112,10 +112,14 @@ config("dawn_internal") {
       cflags += [ "-pedantic" ]
     }
 
+    # On Windows allow the use of __uuidof()
+    if (is_win) {
+      cflags += [ "-Wno-language-extension-token" ]
+    }
+
     # Flags for -pedantic warnings that haven't been fixed yet.
     cflags += [
       "-Wno-gnu-zero-variadic-macro-arguments",
-      "-Wno-language-extension-token",
       "-Wno-microsoft-enum-value",
     ]
   }
