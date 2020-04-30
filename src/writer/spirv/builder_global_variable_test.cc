@@ -162,7 +162,8 @@ TEST_F(BuilderTest, GlobalVar_WithLocation) {
   Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&dv)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
-OpDecorate %1 Location 5
+)");
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 Location 5
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Output %3
@@ -185,7 +186,8 @@ TEST_F(BuilderTest, GlobalVar_WithBindingAndSet) {
   Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&dv)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
-OpDecorate %1 Binding 2
+)");
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 Binding 2
 OpDecorate %1 DescriptorSet 3
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
@@ -209,7 +211,8 @@ TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
   Builder b(&mod);
   EXPECT_TRUE(b.GenerateGlobalVariable(&dv)) << b.error();
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
-OpDecorate %1 BuiltIn Position
+)");
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 BuiltIn Position
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Output %3

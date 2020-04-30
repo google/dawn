@@ -450,19 +450,19 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
   if (var->IsDecorated()) {
     for (const auto& deco : var->AsDecorated()->decorations()) {
       if (deco->IsBuiltin()) {
-        push_debug(spv::Op::OpDecorate,
+        push_annot(spv::Op::OpDecorate,
                    {Operand::Int(var_id), Operand::Int(SpvDecorationBuiltIn),
                     Operand::Int(ConvertBuiltin(deco->AsBuiltin()->value()))});
       } else if (deco->IsLocation()) {
-        push_debug(spv::Op::OpDecorate,
+        push_annot(spv::Op::OpDecorate,
                    {Operand::Int(var_id), Operand::Int(SpvDecorationLocation),
                     Operand::Int(deco->AsLocation()->value())});
       } else if (deco->IsBinding()) {
-        push_debug(spv::Op::OpDecorate,
+        push_annot(spv::Op::OpDecorate,
                    {Operand::Int(var_id), Operand::Int(SpvDecorationBinding),
                     Operand::Int(deco->AsBinding()->value())});
       } else if (deco->IsSet()) {
-        push_debug(
+        push_annot(
             spv::Op::OpDecorate,
             {Operand::Int(var_id), Operand::Int(SpvDecorationDescriptorSet),
              Operand::Int(deco->AsSet()->value())});
