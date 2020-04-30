@@ -94,6 +94,8 @@ bool LastIsTerminator(const ast::StatementList& stmts) {
   }
 
   auto* last = stmts.back().get();
+  // TODO(dneto): Conditional break and conditional continue should return
+  // false.
   return last->IsBreak() || last->IsContinue() || last->IsReturn() ||
          last->IsKill() || last->IsFallthrough();
 }
@@ -1027,9 +1029,10 @@ bool Builder::GenerateConditionalBlock(
   if (!GenerateStatementList(true_body)) {
     return false;
   }
-  // TODO(dsinclair): The branch should be optional based on how the
-  // StatementList ended ...
-  push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
+  // We only branch if the last element of the body didn't already branch.
+  if (!LastIsTerminator(true_body)) {
+    push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
+  }
 
   // Start the false block if needed
   if (false_block_id != merge_block_id) {
@@ -1041,14 +1044,13 @@ bool Builder::GenerateConditionalBlock(
       if (!GenerateStatementList(else_stmt->body())) {
         return false;
       }
-      // TODO(dsinclair): The branch should be optional based on how the
-      // StatementList ended ...
-      push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
     } else {
       if (!GenerateConditionalBlock(else_stmt->condition(), else_stmt->body(),
                                     cur_else_idx + 1, else_stmts)) {
         return false;
       }
+    }
+    if (!LastIsTerminator(else_stmt->body())) {
       push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
     }
   }
