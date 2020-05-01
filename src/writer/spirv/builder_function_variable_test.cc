@@ -107,8 +107,7 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
 )");
 }
 
-// DISABLED until we have BinaryExpression Output
-TEST_F(BuilderTest, DISABLED_FunctionVar_WithNonConstantConstructor) {
+TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructor) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 2);
 
@@ -127,30 +126,35 @@ TEST_F(BuilderTest, DISABLED_FunctionVar_WithNonConstantConstructor) {
   auto init =
       std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
 
-  ast::Variable v("var", ast::StorageClass::kOutput, &f32);
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
+
+  ast::Variable v("var", ast::StorageClass::kFunction, &vec);
   v.set_constructor(std::move(init));
 
-  ast::Module mod;
+  td.RegisterVariableForTesting(&v);
   Builder b(&mod);
   b.push_function(Function{});
   EXPECT_TRUE(b.GenerateFunctionVariable(&v)) << b.error();
   ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %6 "var"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %7 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 2
 %3 = OpConstant %2 1
 %4 = OpConstant %2 3
-%7 = OpTypePointer Output %2
+%8 = OpTypePointer Function %1
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%6 = OpVariable %7 Output %5
+            R"(%7 = OpVariable %8 Function
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%10 = OpIAdd %3 %3
-%9 = OpCompositeConstruct %1 %3 %10
-OpStore %6 %9
+            R"(%5 = OpFAdd %2 %4 %4
+%6 = OpCompositeConstruct %1 %3 %5
+OpStore %7 %6
 )");
 }
 
