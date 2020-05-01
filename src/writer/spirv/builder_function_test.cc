@@ -18,6 +18,7 @@
 #include "spirv/unified1/spirv.h"
 #include "spirv/unified1/spirv.hpp11"
 #include "src/ast/function.h"
+#include "src/ast/return_statement.h"
 #include "src/ast/type/void_type.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
@@ -51,7 +52,27 @@ TEST_F(BuilderTest, Function_Empty) {
 
 TEST_F(BuilderTest, DISABLED_Function_WithParams) {}
 
-TEST_F(BuilderTest, DISABLED_Function_WithBody) {}
+TEST_F(BuilderTest, Function_WithBody) {
+  ast::type::VoidType void_type;
+
+  ast::StatementList body;
+  body.push_back(std::make_unique<ast::ReturnStatement>());
+
+  ast::Function func("a_func", {}, &void_type);
+  func.set_body(std::move(body));
+
+  ast::Module mod;
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func));
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+OpReturn
+OpFunctionEnd
+)");
+}
 
 TEST_F(BuilderTest, FunctionType) {
   ast::type::VoidType void_type;
