@@ -19,14 +19,14 @@ import "GLSL.std.450" as std;
 [[location 0]] var<in> a_particlePos : vec2<f32>;
 [[location 1]] var<in> a_particleVel : vec2<f32>;
 [[location 2]] var<in> a_pos : vec2<f32>;
-[[builtin position]] var<in> gl_Position : vec4<f32>;
+[[builtin position]] var<out> gl_Position : vec4<f32>;
 
 fn vtx_main() -> void {
   var angle : f32 = -std::atan2(a_particleVel.x, a_particleVel.y);
   var pos : vec2<f32> = vec2<f32>(
       (a_pos.x * std::cos(angle)) - (a_pos.y * std::sin(angle)),
       (a_pos.x * std::sin(angle)) + (a_pos.y * std::cos(angle)));
-  gl_Position = vec4<f32>(pos + a_particlePos, 0, 1);
+  gl_Position = vec4<f32>(pos + a_particlePos, 0.0, 1.0);
   return;
 }
 entry_point vertex as "main" = vtx_main;
@@ -76,9 +76,9 @@ fn compute_main() -> void {
   var vPos : vec2<f32> = particlesA.particles[index].pos;
   var vVel : vec2<f32> = particlesA.particles[index].vel;
 
-  var cMass : vec2<f32> = vec2<f32>(0, 0);
-  var cVel : vec2<f32> = vec2<f32>(0, 0);
-  var colVel : vec2<f32> = vec2<f32>(0, 0);
+  var cMass : vec2<f32> = vec2<f32>(0.0, 0.0);
+  var cVel : vec2<f32> = vec2<f32>(0.0, 0.0);
+  var colVel : vec2<f32> = vec2<f32>(0.0, 0.0);
   var cMassCount : i32 = 0;
   var cVelCount : i32 = 0;
 
