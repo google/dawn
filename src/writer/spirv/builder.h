@@ -279,6 +279,10 @@ class Builder {
   /// @param expr the expression to generate
   /// @returns the expression ID on success or 0 otherwise
   uint32_t GenerateCallExpression(ast::CallExpression* expr);
+  /// Generates a cast expression
+  /// @param expr the expression to generate
+  /// @returns the expression ID on success or 0 otherwise
+  uint32_t GenerateCastExpression(ast::CastExpression* expr);
   /// Generates a loop statement
   /// @param stmt the statement to generate
   /// @returns true on successful generation

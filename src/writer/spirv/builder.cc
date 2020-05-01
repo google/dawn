@@ -25,6 +25,7 @@
 #include "src/ast/bool_literal.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/call_expression.h"
+#include "src/ast/cast_expression.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/else_statement.h"
@@ -296,6 +297,9 @@ uint32_t Builder::GenerateExpression(ast::Expression* expr) {
   }
   if (expr->IsCall()) {
     return GenerateCallExpression(expr->AsCall());
+  }
+  if (expr->IsCast()) {
+    return GenerateCastExpression(expr->AsCast());
   }
   if (expr->IsConstructor()) {
     return GenerateConstructorExpression(expr->AsConstructor(), false);
@@ -1141,6 +1145,44 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
   }
 
   push_function_inst(spv::Op::OpExtInst, std::move(ops));
+
+  return result_id;
+}
+
+uint32_t Builder::GenerateCastExpression(ast::CastExpression* cast) {
+  auto result = result_op();
+  auto result_id = result.to_i();
+
+  auto result_type_id = GenerateTypeIfNeeded(cast->result_type());
+  if (result_type_id == 0) {
+    return 0;
+  }
+
+  auto val_id = GenerateExpression(cast->expr());
+  if (val_id == 0) {
+    return 0;
+  }
+
+  auto* to_type = cast->result_type()->UnwrapPtrIfNeeded();
+  auto* from_type = cast->expr()->result_type()->UnwrapPtrIfNeeded();
+
+  spv::Op op = spv::Op::OpNop;
+  if (from_type->IsI32() && to_type->IsF32()) {
+    op = spv::Op::OpConvertSToF;
+  } else if (from_type->IsU32() && to_type->IsF32()) {
+    op = spv::Op::OpConvertUToF;
+  } else if (from_type->IsF32() && to_type->IsI32()) {
+    op = spv::Op::OpConvertFToS;
+  } else if (from_type->IsF32() && to_type->IsU32()) {
+    op = spv::Op::OpConvertFToU;
+  }
+  if (op == spv::Op::OpNop) {
+    error_ = "unable to determine conversion type for cast";
+    return 0;
+  }
+
+  push_function_inst(
+      op, {Operand::Int(result_type_id), result, Operand::Int(val_id)});
 
   return result_id;
 }

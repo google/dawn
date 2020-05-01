@@ -359,6 +359,10 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
 }
 
 bool TypeDeterminer::DetermineCast(ast::CastExpression* expr) {
+  if (!DetermineResultType(expr->expr())) {
+    return false;
+  }
+
   expr->set_result_type(expr->type());
   return true;
 }
