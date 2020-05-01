@@ -85,6 +85,54 @@ TEST_F(BuilderTest, ArrayAccessor) {
 )");
 }
 
+TEST_F(BuilderTest, Accessor_Array_LoadIndex) {
+  ast::type::I32Type i32;
+  ast::type::F32Type f32;
+  ast::type::VectorType vec3(&f32, 3);
+
+  // ary : vec3<f32>;
+  // idx : i32;
+  // ary[idx]  -> ptr<f32>
+
+  ast::Variable var("ary", ast::StorageClass::kFunction, &vec3);
+  ast::Variable idx("idx", ast::StorageClass::kFunction, &i32);
+
+  auto ary = std::make_unique<ast::IdentifierExpression>("ary");
+  auto idx_expr = std::make_unique<ast::IdentifierExpression>("idx");
+
+  ast::ArrayAccessorExpression expr(std::move(ary), std::move(idx_expr));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(&var);
+  td.RegisterVariableForTesting(&idx);
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(&idx)) << b.error();
+
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 10u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+%3 = OpTypeVector %4 3
+%2 = OpTypePointer Function %3
+%7 = OpTypeInt 32 1
+%6 = OpTypePointer Function %7
+%9 = OpTypePointer Function %4
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
+            R"(%1 = OpVariable %2 Function
+%5 = OpVariable %6 Function
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%8 = OpLoad %7 %5
+%10 = OpAccessChain %9 %1 %8
+)");
+}
+
 TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;

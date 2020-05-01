@@ -510,6 +510,7 @@ bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
   if (idx_id == 0) {
     return 0;
   }
+  idx_id = GenerateLoadIfNeeded(expr->idx_expr()->result_type(), idx_id);
 
   // If the source is a pointer we access chain into it.
   if (info->source_type->IsPointer()) {
