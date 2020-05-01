@@ -416,6 +416,7 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
   push_function_var(
       {Operand::Int(type_id), result, Operand::Int(ConvertStorageClass(sc))});
   if (var->has_constructor()) {
+    init_id = GenerateLoadIfNeeded(var->constructor()->result_type(), init_id);
     GenerateStore(var_id, init_id);
   }
 

@@ -158,6 +158,15 @@ OpStore %7 %6
 )");
 }
 
+TEST_F(BuilderTest,
+       DISABLED_FunctionVar_WithNonConstantConstructorLoadedFromVar) {
+  // fn main() -> void {
+  //   var v : f32 = 1.0;
+  //   var v2 : f32 = v; // Should generate the load automatically.
+  // }
+  FAIL();
+}
+
 TEST_F(BuilderTest, FunctionVar_Const) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
