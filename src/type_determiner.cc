@@ -275,6 +275,9 @@ bool TypeDeterminer::DetermineArrayAccessor(
   if (!DetermineResultType(expr->array())) {
     return false;
   }
+  if (!DetermineResultType(expr->idx_expr())) {
+    return false;
+  }
 
   auto* res = expr->array()->result_type();
   auto* parent_type = res->UnwrapPtrIfNeeded();
@@ -435,6 +438,12 @@ bool TypeDeterminer::DetermineMemberAccessor(
       set_error(expr->source(), "struct member " + name + " not found");
       return false;
     }
+
+    // If we're extracting from a pointer, we return a pointer.
+    if (res->IsPointer()) {
+      ret = ctx_.type_mgr().Get(std::make_unique<ast::type::PointerType>(
+          ret, res->AsPointer()->storage_class()));
+    }
   } else if (data_type->IsVector()) {
     auto* vec = data_type->AsVector();
 
@@ -442,6 +451,11 @@ bool TypeDeterminer::DetermineMemberAccessor(
     if (size == 1) {
       // A single element swizzle is just the type of the vector.
       ret = vec->type();
+      // If we're extracting from a pointer, we return a pointer.
+      if (res->IsPointer()) {
+        ret = ctx_.type_mgr().Get(std::make_unique<ast::type::PointerType>(
+            ret, res->AsPointer()->storage_class()));
+      }
     } else {
       // The vector will have a number of components equal to the length of the
       // swizzle. This assumes the validator will check that the swizzle
@@ -455,11 +469,6 @@ bool TypeDeterminer::DetermineMemberAccessor(
     return false;
   }
 
-  // If we're extracting from a pointer, we return a pointer.
-  if (res->IsPointer()) {
-    ret = ctx_.type_mgr().Get(std::make_unique<ast::type::PointerType>(
-        ret, res->AsPointer()->storage_class()));
-  }
   expr->set_result_type(ret);
 
   return true;

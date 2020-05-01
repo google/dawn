@@ -203,6 +203,12 @@ void Builder::iterate(std::function<void(const Instruction&)> cb) const {
   }
 }
 
+uint32_t Builder::GenerateU32Literal(uint32_t val) {
+  ast::type::U32Type u32;
+  ast::IntLiteral lit(&u32, val);
+  return GenerateLiteralIfNeeded(&lit);
+}
+
 bool Builder::GenerateAssignStatement(ast::AssignmentStatement* assign) {
   auto lhs_id = GenerateExpression(assign->lhs());
   if (lhs_id == 0) {
@@ -479,105 +485,229 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
   return true;
 }
 
-uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
-  assert(expr->IsArrayAccessor() || expr->IsMemberAccessor());
+bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
+                                    AccessorInfo* info) {
+  auto idx_id = GenerateExpression(expr->idx_expr());
+  if (idx_id == 0) {
+    return 0;
+  }
+
+  // If the source is a pointer we access chain into it.
+  if (info->source_type->IsPointer()) {
+    info->access_chain_indices.push_back(idx_id);
+    return true;
+  }
+
+  auto result_type_id = GenerateTypeIfNeeded(expr->result_type());
+  if (result_type_id == 0) {
+    return false;
+  }
+
+  // We don't have a pointer, so we have to extract value from the vector
+  auto extract = result_op();
+  auto extract_id = extract.to_i();
+
+  push_function_inst(spv::Op::OpVectorExtractDynamic,
+                     {Operand::Int(result_type_id), extract,
+                      Operand::Int(info->source_id), Operand::Int(idx_id)});
+
+  info->source_id = extract_id;
+  info->source_type = expr->result_type();
+  return true;
+}
+
+bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
+                                     AccessorInfo* info) {
+  auto* data_type = expr->structure()->result_type()->UnwrapPtrIfNeeded();
+  while (data_type->IsAlias()) {
+    data_type = data_type->AsAlias()->type();
+  }
+
+  // If the data_type is a structure we're accessing a member, if it's a
+  // vector we're accessing a swizzle.
+  if (data_type->IsStruct()) {
+    if (!info->source_type->IsPointer()) {
+      error_ =
+          "Attempting to access a struct member on a non-pointer. Something is "
+          "wrong";
+      return false;
+    }
+
+    auto* strct = data_type->AsStruct()->impl();
+    auto name = expr->member()->name();
+
+    uint32_t i = 0;
+    for (; i < strct->members().size(); ++i) {
+      const auto& member = strct->members()[i];
+      if (member->name() == name) {
+        break;
+      }
+    }
+
+    auto idx_id = GenerateU32Literal(i);
+    if (idx_id == 0) {
+      return 0;
+    }
+    info->access_chain_indices.push_back(idx_id);
+    info->source_type = expr->result_type();
+    return true;
+  }
+
+  if (!data_type->IsVector()) {
+    error_ = "Member accessor without a struct or vector. Something is wrong";
+    return false;
+  }
+
+  auto swiz = expr->member()->name();
+  // Single element swizzle is either an access chain or a composite extract
+  if (swiz.size() == 1) {
+    auto val = IndexFromName(swiz[0]);
+    if (val == std::numeric_limits<uint32_t>::max()) {
+      error_ = "invalid swizzle name: " + swiz;
+      return false;
+    }
+
+    if (info->source_type->IsPointer()) {
+      auto idx_id = GenerateU32Literal(val);
+      if (idx_id == 0) {
+        return 0;
+      }
+      info->access_chain_indices.push_back(idx_id);
+    } else {
+      auto result_type_id = GenerateTypeIfNeeded(expr->result_type());
+      if (result_type_id == 0) {
+        return 0;
+      }
+
+      auto extract = result_op();
+      auto extract_id = extract.to_i();
+      push_function_inst(spv::Op::OpCompositeExtract,
+                         {Operand::Int(result_type_id), extract,
+                          Operand::Int(info->source_id), Operand::Int(val)});
+
+      info->source_id = extract_id;
+      info->source_type = expr->result_type();
+    }
+    return true;
+  }
+
+  // Multi-item extract is a VectorShuffle. We have to emit any existing access
+  // chain data, then load the access chain and shuffle that.
+  if (!info->access_chain_indices.empty()) {
+    auto result_type_id = GenerateTypeIfNeeded(info->source_type);
+    if (result_type_id == 0) {
+      return 0;
+    }
+    auto extract = result_op();
+    auto extract_id = extract.to_i();
+
+    std::vector<Operand> ops = {Operand::Int(result_type_id), extract,
+                                Operand::Int(info->source_id)};
+    for (auto id : info->access_chain_indices) {
+      ops.push_back(Operand::Int(id));
+    }
+
+    push_function_inst(spv::Op::OpAccessChain, ops);
+
+    info->source_id = GenerateLoadIfNeeded(expr->result_type(), extract_id);
+    info->source_type = expr->result_type()->UnwrapPtrIfNeeded();
+    info->access_chain_indices.clear();
+  }
+
+  auto result_type_id = GenerateTypeIfNeeded(expr->result_type());
+  if (result_type_id == 0) {
+    return false;
+  }
+
+  auto vec_id = GenerateLoadIfNeeded(info->source_type, info->source_id);
 
   auto result = result_op();
   auto result_id = result.to_i();
 
-  std::vector<Operand> idx_list;
+  std::vector<Operand> ops = {Operand::Int(result_type_id), result,
+                              Operand::Int(vec_id), Operand::Int(vec_id)};
 
+  for (uint32_t i = 0; i < swiz.size(); ++i) {
+    auto val = IndexFromName(swiz[i]);
+    if (val == std::numeric_limits<uint32_t>::max()) {
+      error_ = "invalid swizzle name: " + swiz;
+      return false;
+    }
+
+    ops.push_back(Operand::Int(val));
+  }
+
+  push_function_inst(spv::Op::OpVectorShuffle, ops);
+  info->source_id = result_id;
+  info->source_type = expr->result_type();
+
+  return true;
+}
+
+uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
+  assert(expr->IsArrayAccessor() || expr->IsMemberAccessor());
+
+  // Gather a list of all the member and array accessors that are in this chain.
+  // The list is built in reverse order as that's the order we need to access
+  // the chain.
+  std::vector<ast::Expression*> accessors;
   ast::Expression* source = expr;
   while (true) {
     if (source->IsArrayAccessor()) {
-      auto* ary_accessor = source->AsArrayAccessor();
-      source = ary_accessor->array();
-
-      auto idx = GenerateExpression(ary_accessor->idx_expr());
-      if (idx == 0) {
-        return 0;
-      }
-      idx_list.insert(idx_list.begin(), Operand::Int(idx));
-
+      accessors.insert(accessors.begin(), source);
+      source = source->AsArrayAccessor()->array();
     } else if (source->IsMemberAccessor()) {
-      auto* mem_accessor = source->AsMemberAccessor();
-      source = mem_accessor->structure();
-
-      auto* data_type =
-          mem_accessor->structure()->result_type()->UnwrapPtrIfNeeded();
-
-      while (data_type->IsAlias()) {
-        data_type = data_type->AsAlias()->type();
-      }
-
-      if (data_type->IsStruct()) {
-        auto* strct = data_type->AsStruct()->impl();
-        auto name = mem_accessor->member()->name();
-
-        uint32_t i = 0;
-        for (; i < strct->members().size(); ++i) {
-          const auto& member = strct->members()[i];
-          if (member->name() == name) {
-            break;
-          }
-        }
-
-        ast::type::U32Type u32;
-        ast::IntLiteral idx(&u32, i);
-        auto idx_id = GenerateLiteralIfNeeded(&idx);
-        if (idx_id == 0) {
-          return false;
-        }
-        idx_list.insert(idx_list.begin(), Operand::Int(idx_id));
-
-      } else if (data_type->IsVector()) {
-        auto swiz = mem_accessor->member()->name();
-        if (swiz.size() == 1) {
-          // A single item swizzle is a simple access chain
-          auto val = IndexFromName(swiz[0]);
-          if (val == std::numeric_limits<uint32_t>::max()) {
-            error_ = "invalid swizzle name: " + swiz;
-            return false;
-          }
-
-          ast::type::U32Type u32;
-          ast::IntLiteral idx(&u32, val);
-          auto idx_id = GenerateLiteralIfNeeded(&idx);
-          if (idx_id == 0) {
-            return false;
-          }
-          idx_list.insert(idx_list.begin(), Operand::Int(idx_id));
-        } else {
-          // A multi-item swizzle means we need to generate the access chain
-          // to the current point and then pull values out of it
-          //
-          // TODO(dsinclair): Handle multi-item swizzle
-        }
-      } else {
-        error_ = "invalid type for member accessor: " + data_type->type_name();
-        return 0;
-      }
+      accessors.insert(accessors.begin(), source);
+      source = source->AsMemberAccessor()->structure();
     } else {
       break;
     }
   }
 
-  auto source_id = GenerateExpression(source);
-  if (source_id == 0) {
+  AccessorInfo info;
+  info.source_id = GenerateExpression(source);
+  if (info.source_id == 0) {
     return 0;
   }
+  info.source_type = source->result_type();
 
-  auto type_id = GenerateTypeIfNeeded(expr->result_type());
-  if (type_id == 0) {
-    return 0;
+  std::vector<uint32_t> access_chain_indices;
+  for (auto* accessor : accessors) {
+    if (accessor->IsArrayAccessor()) {
+      if (!GenerateArrayAccessor(accessor->AsArrayAccessor(), &info)) {
+        return 0;
+      }
+    } else if (accessor->IsMemberAccessor()) {
+      if (!GenerateMemberAccessor(accessor->AsMemberAccessor(), &info)) {
+        return 0;
+      }
+
+    } else {
+      error_ = "invalid accessor in list: " + accessor->str();
+      return 0;
+    }
   }
 
-  idx_list.insert(idx_list.begin(), Operand::Int(source_id));
-  idx_list.insert(idx_list.begin(), result);
-  idx_list.insert(idx_list.begin(), Operand::Int(type_id));
-  push_function_inst(spv::Op::OpAccessChain, idx_list);
+  if (!info.access_chain_indices.empty()) {
+    auto result_type_id = GenerateTypeIfNeeded(expr->result_type());
+    if (result_type_id == 0) {
+      return 0;
+    }
 
-  return result_id;
+    auto result = result_op();
+    auto result_id = result.to_i();
+
+    std::vector<Operand> ops = {Operand::Int(result_type_id), result,
+                                Operand::Int(info.source_id)};
+    for (auto id : info.access_chain_indices) {
+      ops.push_back(Operand::Int(id));
+    }
+
+    push_function_inst(spv::Op::OpAccessChain, ops);
+    info.source_id = result_id;
+  }
+
+  return info.source_id;
 }
 
 uint32_t Builder::GenerateIdentifierExpression(
@@ -1237,9 +1367,7 @@ bool Builder::GenerateArrayType(ast::type::ArrayType* ary,
   if (ary->IsRuntimeArray()) {
     push_type(spv::Op::OpTypeRuntimeArray, {result, Operand::Int(elem_type)});
   } else {
-    ast::type::U32Type u32;
-    ast::IntLiteral ary_size(&u32, ary->size());
-    auto len_id = GenerateLiteralIfNeeded(&ary_size);
+    auto len_id = GenerateU32Literal(ary->size());
     if (len_id == 0) {
       return false;
     }

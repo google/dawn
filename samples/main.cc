@@ -107,7 +107,8 @@ bool ends_with(const std::string& input, const std::string& suffix) {
   const auto input_len = input.size();
   const auto suffix_len = suffix.size();
   // Avoid integer overflow.
-  return (input_len >= suffix_len) && (input_len - suffix_len == input.rfind(suffix));
+  return (input_len >= suffix_len) &&
+         (input_len - suffix_len == input.rfind(suffix));
 }
 
 /// @param filename the filename to inspect
@@ -227,7 +228,9 @@ bool ReadFile(const std::string& input_file, std::vector<T>* buffer) {
 /// and std::vector do.
 /// @returns true on success
 template <typename ContainerT>
-bool WriteFile(const std::string& output_file, const std::string mode, const ContainerT& buffer) {
+bool WriteFile(const std::string& output_file,
+               const std::string mode,
+               const ContainerT& buffer) {
   const bool use_stdout = output_file.empty() || output_file == "-";
   FILE* file = stdout;
 
@@ -244,7 +247,9 @@ bool WriteFile(const std::string& output_file, const std::string mode, const Con
     }
   }
 
-  size_t written = fwrite(buffer.data(), sizeof(typename ContainerT::value_type), buffer.size(), file);
+  size_t written =
+      fwrite(buffer.data(), sizeof(typename ContainerT::value_type),
+             buffer.size(), file);
   if (buffer.size() != written) {
     if (use_stdout) {
       std::cerr << "Could not write all output to standard output" << std::endl;

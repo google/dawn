@@ -860,12 +860,9 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
   ast::MemberAccessorExpression mem(std::move(ident), std::move(swizzle));
   EXPECT_TRUE(td()->DetermineResultType(&mem)) << td()->error();
   ASSERT_NE(mem.result_type(), nullptr);
-  ASSERT_TRUE(mem.result_type()->IsPointer());
-
-  auto* ptr = mem.result_type()->AsPointer();
-  ASSERT_TRUE(ptr->type()->IsVector());
-  EXPECT_TRUE(ptr->type()->AsVector()->type()->IsF32());
-  EXPECT_EQ(ptr->type()->AsVector()->size(), 2u);
+  ASSERT_TRUE(mem.result_type()->IsVector());
+  EXPECT_TRUE(mem.result_type()->AsVector()->type()->IsF32());
+  EXPECT_EQ(mem.result_type()->AsVector()->size(), 2u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
@@ -968,12 +965,9 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
   EXPECT_TRUE(td()->DetermineResultType(&mem)) << td()->error();
 
   ASSERT_NE(mem.result_type(), nullptr);
-  ASSERT_TRUE(mem.result_type()->IsPointer());
-
-  auto* ptr = mem.result_type()->AsPointer();
-  ASSERT_TRUE(ptr->type()->IsVector());
-  EXPECT_TRUE(ptr->type()->AsVector()->type()->IsF32());
-  EXPECT_EQ(ptr->type()->AsVector()->size(), 2u);
+  ASSERT_TRUE(mem.result_type()->IsVector());
+  EXPECT_TRUE(mem.result_type()->AsVector()->type()->IsF32());
+  EXPECT_EQ(mem.result_type()->AsVector()->size(), 2u);
 }
 
 using Expr_Binary_BitwiseTest = TypeDeterminerTestWithParam<ast::BinaryOp>;

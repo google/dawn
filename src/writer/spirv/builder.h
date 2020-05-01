@@ -38,6 +38,22 @@ namespace spirv {
 /// Builder class to create SPIR-V instructions from a module.
 class Builder {
  public:
+  /// Contains information for generating accessor chains
+  struct AccessorInfo {
+    /// The ID of the current chain source. The chain source may change as we
+    /// evaluate the access chain. The chain source always points to the ID
+    /// which we will use to evaluate the current set of accessors. This maybe
+    /// the original variable, or maybe an intermediary if we had to evaulate
+    /// the access chain early (in the case of a swizzle of an access chain).
+    uint32_t source_id;
+    /// The type of the current chain source. This type matches the deduced
+    /// result_type of the current source defined above.
+    ast::type::Type* source_type;
+    /// A list of access chain indices to emit. Note, we _only_ have access
+    /// chain indices if the source is pointer.
+    std::vector<uint32_t> access_chain_indices;
+  };
+
   /// Constructor
   /// @param mod the module to generate from
   explicit Builder(ast::Module* mod);
@@ -146,6 +162,10 @@ class Builder {
   /// @returns the SPIR-V builtin or SpvBuiltInMax on error.
   SpvBuiltIn ConvertBuiltin(ast::Builtin builtin) const;
 
+  /// Generates a uint32_t literal.
+  /// @param val the value to generate
+  /// @returns the ID of the generated literal
+  uint32_t GenerateU32Literal(uint32_t val);
   /// Generates an assignment statement
   /// @param assign the statement to generate
   /// @returns true if the statement was successfully generated
@@ -164,7 +184,7 @@ class Builder {
   bool GenerateEntryPoint(ast::EntryPoint* ep);
   /// Generates an expression
   /// @param expr the expression to generate
-  /// @returns the resulting ID of the expression or 0 on error
+  /// @returns the resulting ID of the exp = {};ression or 0 on error
   uint32_t GenerateExpression(ast::Expression* expr);
   /// Generates the instructions for a function
   /// @param func the function to generate
@@ -182,10 +202,26 @@ class Builder {
   /// @param var the variable to generate
   /// @returns true if the variable is emited.
   bool GenerateGlobalVariable(ast::Variable* var);
-  /// Generates an array accessor expression
+  /// Generates an array accessor expression.
+  ///
+  /// For more information on accessors see the "Pointer evaluation" section of
+  /// the WGSL specification.
+  ///
   /// @param expr the expresssion to generate
   /// @returns the id of the expression or 0 on failure
   uint32_t GenerateAccessorExpression(ast::Expression* expr);
+  /// Generates an array accessor
+  /// @param expr the accessor to generate
+  /// @param info the current accessor information
+  /// @returns true if the accessor was generated successfully
+  bool GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
+                             AccessorInfo* info);
+  /// Generates a member accessor
+  /// @param expr the accessor to generate
+  /// @param info the current accessor information
+  /// @returns true if the accessor was generated successfully
+  bool GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
+                              AccessorInfo* info);
   /// Generates an identifier expression
   /// @param expr the expresssion to generate
   /// @returns the id of the expression or 0 on failure
