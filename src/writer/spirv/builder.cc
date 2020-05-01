@@ -162,6 +162,11 @@ bool Builder::Build() {
       return false;
     }
   }
+  for (const auto& ep : mod_->entry_points()) {
+    if (!GenerateExecutionModes(ep.get())) {
+      return false;
+    }
+  }
 
   return true;
 }
@@ -249,10 +254,8 @@ bool Builder::GenerateEntryPoint(ast::EntryPoint* ep) {
   if (name.empty()) {
     name = ep->function_name();
   }
-
-  auto id = id_for_func_name(ep->function_name());
+  const auto id = id_for_entry_point(ep);
   if (id == 0) {
-    error_ = "unable to find ID for function: " + ep->function_name();
     return false;
   }
 
@@ -264,6 +267,22 @@ bool Builder::GenerateEntryPoint(ast::EntryPoint* ep) {
 
   push_preamble(spv::Op::OpEntryPoint,
                 {Operand::Int(stage), Operand::Int(id), Operand::String(name)});
+
+  return true;
+}
+
+bool Builder::GenerateExecutionModes(ast::EntryPoint* ep) {
+  const auto id = id_for_entry_point(ep);
+  if (id == 0) {
+    return false;
+  }
+
+  // WGSL fragment shader origin is upper left
+  if (ep->stage() == ast::PipelineStage::kFragment) {
+    push_preamble(
+        spv::Op::OpExecutionMode,
+        {Operand::Int(id), Operand::Int(SpvExecutionModeOriginUpperLeft)});
+  }
 
   return true;
 }

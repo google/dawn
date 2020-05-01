@@ -106,6 +106,20 @@ INSTANTIATE_TEST_SUITE_P(
 // TODO(http://crbug.com/tint/28)
 TEST_F(BuilderTest, DISABLED_EntryPoint_WithInterfaceIds) {}
 
+TEST_F(BuilderTest, ExecutionModel_Fragment_OriginUpperLeft) {
+  ast::EntryPoint ep(ast::PipelineStage::kFragment, "main", "frag_main");
+
+  ast::Module mod;
+  Builder b(&mod);
+  b.set_func_name_to_id("frag_main", 2);
+  ASSERT_TRUE(b.GenerateExecutionModes(&ep));
+
+  auto preamble = b.preamble();
+  ASSERT_EQ(preamble.size(), 1u);
+  EXPECT_EQ(DumpInstruction(preamble[0]), R"(OpExecutionMode %2 OriginUpperLeft
+)");
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace writer

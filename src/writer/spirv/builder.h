@@ -98,6 +98,19 @@ class Builder {
     return func_name_to_id_[name];
   }
 
+  /// Retrieves the id for an entry point function, or 0 if not found.
+  /// Emits an error if not found.
+  /// @param ep the entry point
+  /// @returns 0 on error
+  uint32_t id_for_entry_point(ast::EntryPoint* ep) {
+    auto id = id_for_func_name(ep->function_name());
+    if (id == 0) {
+      error_ = "unable to find ID for function: " + ep->function_name();
+      return 0;
+    }
+    return id;
+  }
+
   /// Iterates over all the instructions in the correct order and calls the
   /// given callback
   /// @param cb the callback to execute
@@ -182,6 +195,10 @@ class Builder {
   /// @param ep the entry point
   /// @returns true if the instruction was generated, false otherwise
   bool GenerateEntryPoint(ast::EntryPoint* ep);
+  /// Generates execution modes for an entry point
+  /// @param ep the entry point
+  /// @returns false on failure
+  bool GenerateExecutionModes(ast::EntryPoint* ep);
   /// Generates an expression
   /// @param expr the expression to generate
   /// @returns the resulting ID of the exp = {};ression or 0 on error
