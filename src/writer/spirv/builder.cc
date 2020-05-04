@@ -1163,6 +1163,7 @@ uint32_t Builder::GenerateCastExpression(ast::CastExpression* cast) {
   if (val_id == 0) {
     return 0;
   }
+  val_id = GenerateLoadIfNeeded(cast->expr()->result_type(), val_id);
 
   auto* to_type = cast->result_type()->UnwrapPtrIfNeeded();
   auto* from_type = cast->expr()->result_type()->UnwrapPtrIfNeeded();
@@ -1178,7 +1179,8 @@ uint32_t Builder::GenerateCastExpression(ast::CastExpression* cast) {
     op = spv::Op::OpConvertFToU;
   }
   if (op == spv::Op::OpNop) {
-    error_ = "unable to determine conversion type for cast";
+    error_ = "unable to determine conversion type for cast, from: " +
+             from_type->type_name() + " to: " + to_type->type_name();
     return 0;
   }
 
