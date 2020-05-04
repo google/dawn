@@ -588,12 +588,11 @@ namespace dawn_native {
                     cmd->colorAttachments[i].clearColor =
                         descriptor->colorAttachments[i].clearColor;
 
-                    usageTracker.TextureUsedAs(view->GetTexture(),
-                                               wgpu::TextureUsage::OutputAttachment);
+                    usageTracker.TextureViewUsedAs(view, wgpu::TextureUsage::OutputAttachment);
 
                     if (resolveTarget != nullptr) {
-                        usageTracker.TextureUsedAs(resolveTarget->GetTexture(),
-                                                   wgpu::TextureUsage::OutputAttachment);
+                        usageTracker.TextureViewUsedAs(resolveTarget,
+                                                       wgpu::TextureUsage::OutputAttachment);
                     }
                 }
 
@@ -614,8 +613,7 @@ namespace dawn_native {
                     cmd->depthStencilAttachment.stencilStoreOp =
                         descriptor->depthStencilAttachment->stencilStoreOp;
 
-                    usageTracker.TextureUsedAs(view->GetTexture(),
-                                               wgpu::TextureUsage::OutputAttachment);
+                    usageTracker.TextureViewUsedAs(view, wgpu::TextureUsage::OutputAttachment);
                 }
 
                 cmd->width = width;

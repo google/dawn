@@ -381,12 +381,12 @@ namespace dawn_native { namespace vulkan {
                 // Clear textures that are not output attachments. Output attachments will be
                 // cleared in RecordBeginRenderPass by setting the loadop to clear when the
                 // texture subresource has not been initialized before the render pass.
-                if (!(usages.textureUsages[i] & wgpu::TextureUsage::OutputAttachment)) {
+                if (!(usages.textureUsages[i].usage & wgpu::TextureUsage::OutputAttachment)) {
                     texture->EnsureSubresourceContentInitialized(recordingContext, 0,
                                                                  texture->GetNumMipLevels(), 0,
                                                                  texture->GetArrayLayers());
                 }
-                texture->TransitionUsageNow(recordingContext, usages.textureUsages[i]);
+                texture->TransitionUsageNow(recordingContext, usages.textureUsages[i].usage);
             }
         };
         const std::vector<PassResourceUsage>& passResourceUsages = GetResourceUsages().perPass;

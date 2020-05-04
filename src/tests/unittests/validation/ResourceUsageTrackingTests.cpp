@@ -1121,10 +1121,15 @@ namespace {
     // TODO (yunchao.he@intel.com):
     // * useless bindings in bind groups. For example, a bind group includes bindings for compute
     // stage, but the bind group is used in render pass.
+    //
     // * more read write tracking tests for texture which need readonly storage texture and
     // writeonly storage texture support
+    //
     // * resource write and read dependency
     //     1) across passes (render + render, compute + compute, compute and render mixed) is valid
     //     2) across draws/dispatches is invalid
+    //
+    //	* Add tests for multiple encoders upon the same resource simultaneously. This situation fits
+    //	some cases like VR, multi-threading, etc.
 
 }  // anonymous namespace

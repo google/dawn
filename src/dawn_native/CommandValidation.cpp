@@ -306,23 +306,36 @@ namespace dawn_native {
         }
 
         // Textures can only be used as single-write or multiple read.
-        // TODO(cwallez@chromium.org): implement per-subresource tracking
         for (size_t i = 0; i < pass.textures.size(); ++i) {
             const TextureBase* texture = pass.textures[i];
-            wgpu::TextureUsage usage = pass.textureUsages[i];
+            const PassTextureUsage& textureUsage = pass.textureUsages[i];
+            wgpu::TextureUsage usage = textureUsage.usage;
 
             if (usage & ~texture->GetUsage()) {
                 return DAWN_VALIDATION_ERROR("Texture missing usage for the pass");
             }
 
+            // TODO (yunchao.he@intel.com): add read/write usage tracking for compute
+
+            // The usage variable for the whole texture is a fast path for texture usage tracking.
+            // Because in most cases a texture (with or without subresources) is used as
+            // single-write or multiple read, then we can skip iterating the subresources' usages.
             bool readOnly = (usage & kReadOnlyTextureUsages) == usage;
             bool singleUse = wgpu::HasZeroOrOneBits(usage);
-            if (pass.passType == PassType::Render && !readOnly && !singleUse) {
-                return DAWN_VALIDATION_ERROR(
-                    "Texture used as writable usage and another usage in render pass");
+            if (pass.passType != PassType::Render || readOnly || singleUse) {
+                continue;
+            }
+            // Inspect the subresources if the usage of the whole texture violates usage validation.
+            // Every single subresource can only be used as single-write or multiple read.
+            for (wgpu::TextureUsage subresourceUsage : textureUsage.subresourceUsages) {
+                bool readOnly = (subresourceUsage & kReadOnlyTextureUsages) == subresourceUsage;
+                bool singleUse = wgpu::HasZeroOrOneBits(subresourceUsage);
+                if (!readOnly && !singleUse) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Texture used as writable usage and another usage in render pass");
+                }
             }
         }
-
         return {};
     }
 
