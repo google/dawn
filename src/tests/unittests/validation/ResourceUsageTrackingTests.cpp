@@ -42,6 +42,38 @@ namespace {
             return device.CreateTexture(&descriptor);
         }
 
+        wgpu::RenderPipeline CreateNoOpRenderPipeline() {
+            wgpu::ShaderModule vsModule =
+                utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
+                #version 450
+                void main() {
+                })");
+
+            wgpu::ShaderModule fsModule =
+                utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
+                #version 450
+                void main() {
+                })");
+            utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
+            pipelineDescriptor.vertexStage.module = vsModule;
+            pipelineDescriptor.cFragmentStage.module = fsModule;
+            pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, nullptr);
+            return device.CreateRenderPipeline(&pipelineDescriptor);
+        }
+
+        wgpu::ComputePipeline CreateNoOpComputePipeline() {
+            wgpu::ShaderModule csModule =
+                utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
+                #version 450
+                void main() {
+                })");
+            wgpu::ComputePipelineDescriptor pipelineDescriptor;
+            pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, nullptr);
+            pipelineDescriptor.computeStage.module = csModule;
+            pipelineDescriptor.computeStage.entryPoint = "main";
+            return device.CreateComputePipeline(&pipelineDescriptor);
+        }
+
         static constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
     };
 
@@ -217,8 +249,9 @@ namespace {
         }
     }
 
-    // Test that using the same buffer as both readable and writable in the different draws is
-    // disallowed
+    // Test that it is invalid to use the same buffer as both readable and writable in different
+    // draws in a single render pass. But it is valid in different dispatches in a single compute
+    // pass.
     TEST_F(ResourceUsageTrackingTest, BufferWithReadAndWriteUsageInDifferentDrawsOrDispatches) {
         // Test render pass
         {
@@ -229,11 +262,16 @@ namespace {
                 device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::StorageBuffer}});
             wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, 4}});
 
+            // Create a no-op render pipeline. Note that bind groups can have more bindings
+            // than pipeline.
+            wgpu::RenderPipeline rp = CreateNoOpRenderPipeline();
+
             // It is not allowed to use the same buffer as both readable and writable in different
             // draws within the same render pass.
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             DummyRenderPass dummyRenderPass(device);
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            pass.SetPipeline(rp);
 
             pass.SetIndexBuffer(buffer);
             pass.Draw(3);
@@ -258,10 +296,15 @@ namespace {
             wgpu::BindGroup bg0 = utils::MakeBindGroup(device, bgl0, {{0, buffer, 0, 4}});
             wgpu::BindGroup bg1 = utils::MakeBindGroup(device, bgl1, {{0, buffer, 0, 4}});
 
-            // It is not allowed to use the same buffer as both readable and writable in different
+            // Create a no-op compute pipeline. Note that bind groups can have more bindings
+            // than pipeline.
+            wgpu::ComputePipeline cp = CreateNoOpComputePipeline();
+
+            // It is valid to use the same buffer as both readable and writable in different
             // dispatches within the same compute pass.
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+            pass.SetPipeline(cp);
 
             pass.SetBindGroup(0, bg0);
             pass.Dispatch(1);
@@ -270,7 +313,7 @@ namespace {
             pass.Dispatch(1);
 
             pass.EndPass();
-            ASSERT_DEVICE_ERROR(encoder.Finish());
+            encoder.Finish();
         }
     }
 
@@ -439,17 +482,9 @@ namespace {
             wgpu::BindGroup readBG0 = utils::MakeBindGroup(device, readBGL, {{0, buffer0, 256, 4}});
             wgpu::BindGroup readBG1 = utils::MakeBindGroup(device, readBGL, {{0, buffer1, 0, 4}});
 
-            // Create a passthrough compute pipeline
-            wgpu::ShaderModule csModule =
-                utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
-                #version 450
-                void main() {
-                })");
-            wgpu::ComputePipelineDescriptor pipelineDescriptor;
-            pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &writeBGL);
-            pipelineDescriptor.computeStage.module = csModule;
-            pipelineDescriptor.computeStage.entryPoint = "main";
-            wgpu::ComputePipeline cp = device.CreateComputePipeline(&pipelineDescriptor);
+            // Create a no-op compute pipeline. Note that bind groups can have more bindings
+            // than pipeline.
+            wgpu::ComputePipeline cp = CreateNoOpComputePipeline();
 
             // Set bind group against the same index twice. The second one overwrites the first one.
             // Then no buffer is used as both read and write in the same pass. But the overwritten
@@ -631,7 +666,7 @@ namespace {
             wgpu::BindGroup bg0 = utils::MakeBindGroup(device, bgl0, {{0, buffer}});
             wgpu::BindGroup bg1 = utils::MakeBindGroup(device, bgl1, {{0, buffer}});
 
-            // Create a passthrough render pipeline
+            // Create a passthrough render pipeline with a readonly buffer
             wgpu::ShaderModule vsModule =
                 utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
                 #version 450
@@ -678,7 +713,7 @@ namespace {
             wgpu::BindGroup bg0 = utils::MakeBindGroup(device, bgl0, {{0, buffer}});
             wgpu::BindGroup bg1 = utils::MakeBindGroup(device, bgl1, {{0, buffer}});
 
-            // Create a passthrough compute pipeline
+            // Create a passthrough compute pipeline with a readonly buffer
             wgpu::ShaderModule csModule =
                 utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
                 #version 450
@@ -898,17 +933,9 @@ namespace {
             wgpu::BindGroup readBG0 = utils::MakeBindGroup(device, readBGL, {{0, view0}});
             wgpu::BindGroup readBG1 = utils::MakeBindGroup(device, readBGL, {{0, view1}});
 
-            // Create a passthrough compute pipeline
-            wgpu::ShaderModule csModule =
-                utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
-                #version 450
-                void main() {
-                })");
-            wgpu::ComputePipelineDescriptor pipelineDescriptor;
-            pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &writeBGL);
-            pipelineDescriptor.computeStage.module = csModule;
-            pipelineDescriptor.computeStage.entryPoint = "main";
-            wgpu::ComputePipeline cp = device.CreateComputePipeline(&pipelineDescriptor);
+            // Create a no-op compute pipeline. Note that bind groups can have more bindings
+            // than pipeline.
+            wgpu::ComputePipeline cp = CreateNoOpComputePipeline();
 
             // Set bind group on the same index twice. The second one overwrites the first one.
             // No texture is used as both readonly and writeonly storage in the same pass. But the
