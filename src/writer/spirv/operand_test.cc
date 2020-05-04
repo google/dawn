@@ -26,7 +26,7 @@ using OperandTest = testing::Test;
 TEST_F(OperandTest, CreateFloat) {
   auto o = Operand::Float(1.2f);
   EXPECT_TRUE(o.IsFloat());
-  EXPECT_FLOAT_EQ(o.to_f(), 1.2);
+  EXPECT_FLOAT_EQ(o.to_f(), 1.2f);
 }
 
 TEST_F(OperandTest, CreateInt) {

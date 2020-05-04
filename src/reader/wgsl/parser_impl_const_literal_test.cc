@@ -49,7 +49,7 @@ TEST_F(ParserImplTest, ConstLiteral_Float) {
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(c, nullptr);
   ASSERT_TRUE(c->IsFloat());
-  EXPECT_FLOAT_EQ(c->AsFloat()->value(), 234e12);
+  EXPECT_FLOAT_EQ(c->AsFloat()->value(), 234e12f);
 }
 
 TEST_F(ParserImplTest, ConstLiteral_InvalidFloat) {

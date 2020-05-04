@@ -27,7 +27,7 @@ class Operand {
   /// The kind of the operand
   // Note, the `kInt` will cover most cases as things like IDs in SPIR-V are
   // just ints for the purpose of converting to binary.
-  enum Kind { kInt = 0, kFloat, kString };
+  enum class Kind { kInt = 0, kFloat, kString };
 
   /// Creates a float operand
   /// @param val the float value

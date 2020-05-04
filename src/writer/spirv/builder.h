@@ -45,10 +45,10 @@ class Builder {
     /// which we will use to evaluate the current set of accessors. This maybe
     /// the original variable, or maybe an intermediary if we had to evaulate
     /// the access chain early (in the case of a swizzle of an access chain).
-    uint32_t source_id;
+    uint32_t source_id = 0;
     /// The type of the current chain source. This type matches the deduced
     /// result_type of the current source defined above.
-    ast::type::Type* source_type;
+    ast::type::Type* source_type = nullptr;
     /// A list of access chain indices to emit. Note, we _only_ have access
     /// chain indices if the source is pointer.
     std::vector<uint32_t> access_chain_indices;

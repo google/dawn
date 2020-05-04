@@ -321,7 +321,7 @@ INSTANTIATE_TEST_SUITE_P(
                     SignedIntData{"2", 2},
                     SignedIntData{"123", 123},
                     SignedIntData{"2147483647", 2147483647},
-                    SignedIntData{"-2147483648", -2147483648}));
+                    SignedIntData{"-2147483648", -2147483648LL}));
 
 using IntegerTest_Invalid = testing::TestWithParam<const char*>;
 TEST_P(IntegerTest_Invalid, Parses) {

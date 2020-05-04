@@ -32,7 +32,7 @@ TEST_F(InstructionTest, Create) {
 
   const auto& ops = i.operands();
   EXPECT_TRUE(ops[0].IsFloat());
-  EXPECT_FLOAT_EQ(ops[0].to_f(), 1.2);
+  EXPECT_FLOAT_EQ(ops[0].to_f(), 1.2f);
 
   EXPECT_TRUE(ops[1].IsInt());
   EXPECT_EQ(ops[1].to_i(), 1u);

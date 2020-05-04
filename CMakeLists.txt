@@ -39,6 +39,14 @@ option(TINT_ENABLE_UBSAN "Enable undefined behaviour sanitizer" OFF)
 
 option(TINT_CHECK_CHROMIUM_STYLE "Check for [chromium-style] issues during build" OFF)
 
+if(WIN32)
+  # On Windows, CMake by default compiles with the shared CRT.
+  # Default it to the static CRT.
+  option(TINT_ENABLE_SHARED_CRT
+         "Tint: Use the shared CRT with MSVC instead of the static CRT"
+         ${TINT_ENABLE_SHARED_CRT})
+endif(WIN32)
+
 message(STATUS "Tint build docs: ${TINT_BUILD_DOCS}")
 message(STATUS "Tint build SPIR-V reader: ${TINT_BUILD_SPV_READER}")
 message(STATUS "Tint build WGSL reader: ${TINT_BUILD_WGSL_READER}")
@@ -79,6 +87,25 @@ if(DOXYGEN_FOUND)
       VERBATIM)
 else()
   message("Doxygen not found. Skipping documentation")
+endif()
+
+if(MSVC)
+  # We don't want to have to copy the C Runtime DLL everywhere the executable
+  # goes.  So by default compile code to assume the CRT is statically linked,
+  # i.e. use /MT* options.  For debug builds use /MTd, and for release builds
+  # use /MT.  If TINT_ENABLE_SHARED_CRT is ON, then use the shared C runtime.
+  # Modify the project-wide options variables. This is ugly, but seems to be
+  # the state of the art.
+  if(NOT ${TINT_ENABLE_SHARED_CRT})
+    message(STATUS "Tint: Static C runtime selected: replacing /MD* with /MT*")
+    foreach (flag_var
+       CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
+       CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
+       CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+       CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+      string(REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
+    endforeach()
+  endif()
 endif()
 
 function(tint_default_compile_options TARGET)
@@ -141,6 +168,8 @@ function(tint_default_compile_options TARGET)
       /W3
       /WX
       /wd4068
+      /wd4244
+      /wd4267
       /wd4514
       /wd4571
       /wd4625
@@ -151,6 +180,19 @@ function(tint_default_compile_options TARGET)
       /wd5026
       /wd5027
     )
+  endif()
+
+  if (NOT ${TINT_ENABLE_SHARED_CRT})
+    # For MinGW cross compile, statically link to the C++ runtime.
+    # But it still depends on MSVCRT.dll.
+    if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+      if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+        set_target_properties(${TARGET} PROPERTIES LINK_FLAGS
+          -static
+          -static-libgcc
+          -static-libstdc++)
+      endif()
+    endif()
   endif()
 endfunction()
 
