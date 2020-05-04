@@ -266,8 +266,26 @@ bool Builder::GenerateEntryPoint(ast::EntryPoint* ep) {
     return false;
   }
 
-  push_preamble(spv::Op::OpEntryPoint,
-                {Operand::Int(stage), Operand::Int(id), Operand::String(name)});
+  std::vector<Operand> operands = {Operand::Int(stage), Operand::Int(id),
+                                   Operand::String(name)};
+  // TODO(dsinclair): This could be made smarter by only listing the
+  // input/output variables which are used by the entry point instead of just
+  // listing all module scoped variables of type input/output.
+  for (const auto& var : mod_->global_variables()) {
+    if (var->storage_class() != ast::StorageClass::kInput &&
+        var->storage_class() != ast::StorageClass::kOutput) {
+      continue;
+    }
+
+    uint32_t var_id;
+    if (!scope_stack_.get(var->name(), &var_id)) {
+      error_ = "unable to find ID for global variable: " + var->name();
+      return false;
+    }
+
+    operands.push_back(Operand::Int(var_id));
+  }
+  push_preamble(spv::Op::OpEntryPoint, operands);
 
   return true;
 }
