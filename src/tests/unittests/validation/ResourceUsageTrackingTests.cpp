@@ -317,6 +317,71 @@ namespace {
         }
     }
 
+    // Test that it is invalid to use the same buffer as both readable and writable in a single
+    // draw or dispatch.
+    TEST_F(ResourceUsageTrackingTest, BufferWithReadAndWriteUsageInSingleDrawOrDispatch) {
+        // Test render pass
+        {
+            // Create a buffer and a bind group
+            wgpu::Buffer buffer =
+                CreateBuffer(4, wgpu::BufferUsage::Storage | wgpu::BufferUsage::Index);
+            wgpu::BindGroupLayout writeBGL = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::StorageBuffer}});
+            wgpu::BindGroup writeBG = utils::MakeBindGroup(device, writeBGL, {{0, buffer, 0, 4}});
+
+            // Create a no-op render pipeline. Note that bind groups can have more bindings
+            // than pipeline.
+            wgpu::RenderPipeline rp = CreateNoOpRenderPipeline();
+
+            // It is invalid to use the same buffer as both readable and writable usages in a single
+            // draw
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            DummyRenderPass dummyRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            pass.SetPipeline(rp);
+
+            pass.SetIndexBuffer(buffer);
+            pass.SetBindGroup(0, writeBG);
+            pass.Draw(3);
+
+            pass.EndPass();
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+
+        // test compute pass
+        {
+            // Create a buffer and bind groups
+            wgpu::Buffer buffer = CreateBuffer(4, wgpu::BufferUsage::Storage);
+
+            wgpu::BindGroupLayout readBGL = utils::MakeBindGroupLayout(
+                device,
+                {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageBuffer}});
+            wgpu::BindGroupLayout writeBGL = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer}});
+            wgpu::BindGroup readBG = utils::MakeBindGroup(device, readBGL, {{0, buffer, 0, 4}});
+            wgpu::BindGroup writeBG = utils::MakeBindGroup(device, writeBGL, {{0, buffer, 0, 4}});
+
+            // Create a no-op compute pipeline. Note that bind groups can have more bindings
+            // than pipeline.
+            wgpu::ComputePipeline cp = CreateNoOpComputePipeline();
+
+            // It is invalid to use the same buffer as both readable and writable usages in a single
+            // dispatch
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+            pass.SetPipeline(cp);
+
+            pass.SetBindGroup(0, readBG);
+            pass.SetBindGroup(1, writeBG);
+            pass.Dispatch(1);
+
+            pass.EndPass();
+            // TODO (yunchao.he@intel.com): add buffer usage tracking for compute
+            // ASSERT_DEVICE_ERROR(encoder.Finish());
+            encoder.Finish();
+        }
+    }
+
     // Test that using the same buffer as copy src/dst and writable/readable usage is allowed.
     TEST_F(ResourceUsageTrackingTest, BufferCopyAndBufferUsageInPass) {
         // Create buffers that will be used as both a copy src/dst buffer and a storage buffer
@@ -741,6 +806,84 @@ namespace {
             encoder.Finish();
             // TODO (yunchao.he@intel.com): add resource tracking per dispatch for compute pass
             // ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+    }
+
+    // Test that it is invalid to use the same texture as both readable and writable in a single
+    // draw or dispatch.
+    TEST_F(ResourceUsageTrackingTest, TextureWithReadAndWriteUsageInSingleDrawOrDispatch) {
+        // Create a texture that will be used both as a sampled texture and a storage texture
+        wgpu::Texture texture =
+            CreateTexture(wgpu::TextureUsage::Sampled | wgpu::TextureUsage::Storage);
+        wgpu::TextureView view = texture.CreateView();
+
+        // Test render pass
+        {
+            // Create the bind group to use the texture as sampled and writeonly storage bindings
+            wgpu::BindGroupLayout sampledBGL = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture}});
+            wgpu::BindGroupLayout writeBGL = utils::MakeBindGroupLayout(
+                device,
+                {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::WriteonlyStorageTexture, false,
+                  false, wgpu::TextureViewDimension::Undefined,
+                  wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float,
+                  kFormat}});
+            wgpu::BindGroup sampledBG = utils::MakeBindGroup(device, sampledBGL, {{0, view}});
+            wgpu::BindGroup writeBG = utils::MakeBindGroup(device, writeBGL, {{0, view}});
+
+            // Create a no-op render pipeline. Note that bind groups can have more bindings
+            // than pipeline.
+            wgpu::RenderPipeline rp = CreateNoOpRenderPipeline();
+
+            // It is invalid to use the same texture as both readable and writable usages in a
+            // single draw
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            DummyRenderPass dummyRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            pass.SetPipeline(rp);
+
+            pass.SetBindGroup(0, sampledBG);
+            pass.SetBindGroup(1, writeBG);
+            pass.Draw(3);
+
+            pass.EndPass();
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+
+        // Test compute pass
+        {
+            // Create the bind group to use the texture as readonly and writeonly storage bindings
+            wgpu::BindGroupLayout readBGL = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageTexture,
+                          false, false, wgpu::TextureViewDimension::Undefined,
+                          wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float,
+                          kFormat}});
+            wgpu::BindGroupLayout writeBGL = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::WriteonlyStorageTexture,
+                          false, false, wgpu::TextureViewDimension::Undefined,
+                          wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float,
+                          kFormat}});
+            wgpu::BindGroup readBG = utils::MakeBindGroup(device, readBGL, {{0, view}});
+            wgpu::BindGroup writeBG = utils::MakeBindGroup(device, writeBGL, {{0, view}});
+
+            // Create a no-op compute pipeline. Note that bind groups can have more bindings
+            // than pipeline.
+            wgpu::ComputePipeline cp = CreateNoOpComputePipeline();
+
+            // It is invalid to use the same texture as both readable and writable usages in a
+            // single dispatch
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+            pass.SetPipeline(cp);
+
+            pass.SetBindGroup(0, readBG);
+            pass.SetBindGroup(1, writeBG);
+            pass.Dispatch(1);
+
+            pass.EndPass();
+            // TODO (yunchao.he@intel.com): add texture usage tracking for compute
+            // ASSERT_DEVICE_ERROR(encoder.Finish());
+            encoder.Finish();
         }
     }
 
