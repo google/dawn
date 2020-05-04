@@ -31,7 +31,7 @@ std::string IntLiteral::to_str() const {
 }
 
 std::string IntLiteral::name() const {
-  return "__int" + std::to_string(value_);
+  return "__int" + type()->type_name() + "_" + std::to_string(value_);
 }
 
 }  // namespace ast

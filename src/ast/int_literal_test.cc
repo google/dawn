@@ -16,6 +16,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/type/i32_type.h"
+#include "src/ast/type/u32_type.h"
 
 namespace tint {
 namespace ast {
@@ -46,6 +47,17 @@ TEST_F(IntLiteralTest, ToStr) {
   EXPECT_EQ(i.to_str(), "-42");
 }
 
+TEST_F(IntLiteralTest, Name_I32) {
+  ast::type::I32Type i32;
+  IntLiteral i{&i32, 2};
+  EXPECT_EQ("__int__i32_2", i.name());
+}
+
+TEST_F(IntLiteralTest, Name_U32) {
+  ast::type::U32Type u32;
+  IntLiteral i{&u32, 2};
+  EXPECT_EQ("__int__u32_2", i.name());
+}
 }  // namespace
 }  // namespace ast
 }  // namespace tint
