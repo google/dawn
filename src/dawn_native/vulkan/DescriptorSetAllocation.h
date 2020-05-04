@@ -15,6 +15,8 @@
 #ifndef DAWNNATIVE_VULKAN_DESCRIPTORSETALLOCATION_H_
 #define DAWNNATIVE_VULKAN_DESCRIPTORSETALLOCATION_H_
 
+#include "common/vulkan_platform.h"
+
 namespace dawn_native { namespace vulkan {
 
     // Contains a descriptor set along with data necessary to track its allocation.
