@@ -74,7 +74,7 @@ namespace dawn_native {
     };
 
     struct DeviceBase::DeprecationWarnings {
-        std::unordered_set<const char*> emitted;
+        std::unordered_set<std::string> emitted;
         size_t count = 0;
     };
 
