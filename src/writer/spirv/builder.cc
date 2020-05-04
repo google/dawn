@@ -520,6 +520,7 @@ bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
   // If the source is a pointer we access chain into it.
   if (info->source_type->IsPointer()) {
     info->access_chain_indices.push_back(idx_id);
+    info->source_type = expr->result_type();
     return true;
   }
 
@@ -538,6 +539,7 @@ bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
 
   info->source_id = extract_id;
   info->source_type = expr->result_type();
+
   return true;
 }
 
@@ -616,6 +618,9 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
     return true;
   }
 
+  // Store the type away as it may change if we run the access chain
+  auto* incoming_type = info->source_type;
+
   // Multi-item extract is a VectorShuffle. We have to emit any existing access
   // chain data, then load the access chain and shuffle that.
   if (!info->access_chain_indices.empty()) {
@@ -644,7 +649,7 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
     return false;
   }
 
-  auto vec_id = GenerateLoadIfNeeded(info->source_type, info->source_id);
+  auto vec_id = GenerateLoadIfNeeded(incoming_type, info->source_id);
 
   auto result = result_op();
   auto result_id = result.to_i();

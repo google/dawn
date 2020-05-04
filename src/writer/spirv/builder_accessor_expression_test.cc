@@ -232,6 +232,56 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
 )");
 }
 
+TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
+  ast::type::I32Type i32;
+  ast::type::F32Type f32;
+  ast::type::VectorType vec3(&f32, 3);
+  ast::type::ArrayType ary4(&vec3, 4);
+
+  // var a : array<vec3<f32>, 4>;
+  // a[2].xy;
+
+  ast::Variable var("ary", ast::StorageClass::kFunction, &ary4);
+
+  ast::MemberAccessorExpression expr(
+      std::make_unique<ast::ArrayAccessorExpression>(
+          std::make_unique<ast::IdentifierExpression>("ary"),
+          std::make_unique<ast::ScalarConstructorExpression>(
+              std::make_unique<ast::IntLiteral>(&i32, 2))),
+      std::make_unique<ast::IdentifierExpression>("xy"));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(&var);
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 14u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
+%4 = OpTypeVector %5 3
+%6 = OpTypeInt 32 0
+%7 = OpConstant %6 4
+%3 = OpTypeArray %4 %7
+%2 = OpTypePointer Function %3
+%8 = OpTypeInt 32 1
+%9 = OpConstant %8 2
+%10 = OpTypePointer Function %4
+%12 = OpTypeVector %5 2
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
+            R"(%1 = OpVariable %2 Function
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%11 = OpAccessChain %10 %1 %9
+%13 = OpLoad %4 %11
+%14 = OpVectorShuffle %12 %13 %13 0 1
+)");
+}
+
 TEST_F(BuilderTest, MemberAccessor) {
   ast::type::F32Type f32;
 
@@ -847,7 +897,7 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 18u);
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 19u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%9 = OpTypeFloat 32
 %8 = OpTypeVector %9 3
@@ -870,7 +920,8 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             R"(%16 = OpAccessChain %15 %1 %14 %14 %12 %14 %14
-%18 = OpVectorShuffle %17 %16 %16 1 0
+%18 = OpLoad %8 %16
+%19 = OpVectorShuffle %17 %18 %18 1 0
 )");
 }
 
