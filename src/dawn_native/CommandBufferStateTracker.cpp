@@ -69,16 +69,11 @@ namespace dawn_native {
 
         // Generate an error immediately if a non-lazy aspect is missing as computing lazy aspects
         // requires the pipeline to be set.
-        if ((missingAspects & ~kLazyAspects).any()) {
-            return GenerateAspectError(missingAspects);
-        }
+        DAWN_TRY(CheckMissingAspects(missingAspects & ~kLazyAspects));
 
         RecomputeLazyAspects(missingAspects);
 
-        missingAspects = requiredAspects & ~mAspects;
-        if (missingAspects.any()) {
-            return GenerateAspectError(missingAspects);
-        }
+        DAWN_TRY(CheckMissingAspects(requiredAspects & ~mAspects));
 
         return {};
     }
@@ -114,8 +109,10 @@ namespace dawn_native {
         }
     }
 
-    MaybeError CommandBufferStateTracker::GenerateAspectError(ValidationAspects aspects) {
-        ASSERT(aspects.any());
+    MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspects) {
+        if (!aspects.any()) {
+            return {};
+        }
 
         if (aspects[VALIDATION_ASPECT_INDEX_BUFFER]) {
             return DAWN_VALIDATION_ERROR("Missing index buffer");
