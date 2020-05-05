@@ -432,6 +432,16 @@ namespace dawn_native { namespace vulkan {
         return texture.Detach();
     }
 
+    // static
+    Ref<Texture> Texture::CreateForSwapChain(Device* device,
+                                             const TextureDescriptor* descriptor,
+                                             VkImage nativeImage) {
+        Ref<Texture> texture =
+            AcquireRef(new Texture(device, descriptor, TextureState::OwnedExternal));
+        texture->InitializeForSwapChain(nativeImage);
+        return std::move(texture);
+    }
+
     MaybeError Texture::InitializeAsInternalTexture() {
         Device* device = ToBackend(GetDevice());
 
@@ -491,11 +501,6 @@ namespace dawn_native { namespace vulkan {
         return {};
     }
 
-    // With this constructor, the lifetime of the resource is externally managed.
-    Texture::Texture(Device* device, const TextureDescriptor* descriptor, VkImage nativeImage)
-        : TextureBase(device, descriptor, TextureState::OwnedExternal), mHandle(nativeImage) {
-    }
-
     // Internally managed, but imported from external handle
     MaybeError Texture::InitializeFromExternal(const ExternalImageDescriptor* descriptor,
                                                external_memory::Service* externalMemoryService) {
@@ -527,6 +532,10 @@ namespace dawn_native { namespace vulkan {
 
         DAWN_TRY_ASSIGN(mHandle, externalMemoryService->CreateImage(descriptor, baseCreateInfo));
         return {};
+    }
+
+    void Texture::InitializeForSwapChain(VkImage nativeImage) {
+        mHandle = nativeImage;
     }
 
     MaybeError Texture::BindExternalMemory(const ExternalImageDescriptor* descriptor,
