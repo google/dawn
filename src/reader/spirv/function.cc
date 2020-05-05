@@ -443,6 +443,11 @@ bool FunctionEmitter::EmitBody() {
   if (!FindSwitchCaseHeaders()) {
     return false;
   }
+  if (!ClassifyCFGEdges()) {
+    return false;
+  }
+  // TODO(dneto): FindIfSelectionHeaders
+  // TODO(dneto): FindInvalidNestingBetweenSelections
 
   if (!EmitFunctionVariables()) {
     return false;
@@ -912,6 +917,237 @@ bool FunctionEmitter::FindSwitchCaseHeaders() {
       case_block->case_head_for = construct.get();
     }
   }
+  return success();
+}
+
+BlockInfo* FunctionEmitter::HeaderForLoopOrContinue(const Construct* c) {
+  if (c->kind == Construct::kLoop) {
+    return GetBlockInfo(c->begin_id);
+  }
+  if (c->kind == Construct::kContinue) {
+    auto* continue_block = GetBlockInfo(c->begin_id);
+    return GetBlockInfo(continue_block->header_for_continue);
+  }
+  return nullptr;
+}
+
+bool FunctionEmitter::ClassifyCFGEdges() {
+  if (failed()) {
+    return false;
+  }
+
+  // Checks validity of CFG edges leaving each basic block.  This implicitly
+  // checks dominance rules for headers and continue constructs.
+  //
+  // For each branch encountered, classify each edge (S,T) as:
+  //    - a back-edge
+  //    - a structured exit (specific ways of branching to enclosing construct)
+  //    - a normal (forward) edge
+  //
+  // If more than one block is targeted by a normal edge, then S must be a
+  // structured header.
+  //
+  // Term: NEC(B) is the nearest enclosing construct for B.
+  //
+  // If edge (S,T) is a normal edge, and NEC(S) != NEC(T), then
+  //    T is the header block of its NEC(T), and
+  //    NEC(S) is the parent of NEC(T).
+
+  for (const auto src : block_order_) {
+    assert(src > 0);
+    auto* src_info = GetBlockInfo(src);
+    assert(src_info);
+    const auto src_pos = src_info->pos;
+    const auto& src_construct = *(src_info->construct);
+
+    // Compute the ordered list of unique successors.
+    std::vector<uint32_t> successors;
+    {
+      std::unordered_set<uint32_t> visited;
+      src_info->basic_block->ForEachSuccessorLabel(
+          [&successors, &visited](const uint32_t succ) {
+            if (visited.count(succ) == 0) {
+              successors.push_back(succ);
+              visited.insert(succ);
+            }
+          });
+    }
+
+    // There should only be one backedge per backedge block.
+    uint32_t num_backedges = 0;
+
+    // Track destinations for normal forward edges.
+    std::vector<uint32_t> normal_forward_edges;
+
+    if (successors.empty() && src_construct.enclosing_continue) {
+      // Kill and return are not allowed in a continue construct.
+      return Fail() << "Invalid function exit at block " << src
+                    << " from continue construct starting at "
+                    << src_construct.enclosing_continue->begin_id;
+    }
+
+    for (const auto dest : successors) {
+      const auto* dest_info = GetBlockInfo(dest);
+      // We've already checked terminators are sane.
+      assert(dest_info);
+      const auto dest_pos = dest_info->pos;
+
+      // Insert the edge kind entry and keep a handle to update
+      // its classification.
+      EdgeKind& edge_kind = src_info->succ_edge[dest];
+
+      if (src_pos >= dest_pos) {
+        // This is a backedge.
+        edge_kind = EdgeKind::kBack;
+        num_backedges++;
+        const auto* continue_construct = src_construct.enclosing_continue;
+        if (!continue_construct) {
+          return Fail() << "Invalid backedge (" << src << "->" << dest
+                        << "): " << src << " is not in a continue construct";
+        }
+        if (src_pos != continue_construct->end_pos - 1) {
+          return Fail() << "Invalid exit (" << src << "->" << dest
+                        << ") from continue construct: " << src
+                        << " is not the last block in the continue construct "
+                           "starting at "
+                        << src_construct.begin_id
+                        << " (violates post-dominance rule)";
+        }
+        const auto* ct_info = GetBlockInfo(continue_construct->begin_id);
+        assert(ct_info);
+        if (ct_info->header_for_continue != dest) {
+          return Fail()
+                 << "Invalid backedge (" << src << "->" << dest
+                 << "): does not branch to the corresponding loop header, "
+                    "expected "
+                 << ct_info->header_for_continue;
+        }
+      } else {
+        // This is a forward edge.
+        // For now, classify it that way, but we might update it.
+        edge_kind = EdgeKind::kForward;
+
+        // Exit from a continue construct can only be from the last block.
+        const auto* continue_construct = src_construct.enclosing_continue;
+        if (continue_construct != nullptr) {
+          if (continue_construct->ContainsPos(src_pos) &&
+              !continue_construct->ContainsPos(dest_pos) &&
+              (src_pos != continue_construct->end_pos - 1)) {
+            return Fail() << "Invalid exit (" << src << "->" << dest
+                          << ") from continue construct: " << src
+                          << " is not the last block in the continue construct "
+                             "starting at "
+                          << continue_construct->begin_id
+                          << " (violates post-dominance rule)";
+          }
+        }
+
+        // Check valid structured exit cases.
+
+        const auto& header_info = *GetBlockInfo(src_construct.begin_id);
+        if (dest == header_info.merge_for_header) {
+          // Branch to construct's merge block.
+          const bool src_is_loop_header = header_info.continue_for_header != 0;
+          const bool src_is_continue_header =
+              header_info.header_for_continue != 0;
+          edge_kind = (src_is_loop_header || src_is_continue_header)
+                          ? EdgeKind::kLoopBreak
+                          : EdgeKind::kToMerge;
+        } else {
+          const auto* loop_or_continue_construct =
+              src_construct.enclosing_loop_or_continue;
+          if (loop_or_continue_construct != nullptr) {
+            // Check for break block or continue block.
+            const auto* loop_header_info =
+                HeaderForLoopOrContinue(loop_or_continue_construct);
+            if (loop_header_info == nullptr) {
+              return Fail() << "internal error: invalid construction of loop "
+                               "related to block "
+                            << loop_or_continue_construct->begin_id;
+            }
+            if (dest == loop_header_info->merge_for_header) {
+              // It's a break block for the innermost loop.
+              edge_kind = EdgeKind::kLoopBreak;
+            } else if (dest == loop_header_info->continue_for_header) {
+              // It's a continue block for the innermost loop construct.
+              // In this case loop_or_continue_construct can't be a continue
+              // construct, because then the branch to the continue target is
+              // a backedge, and this code is only looking at forward edges.
+              edge_kind = EdgeKind::kLoopContinue;
+            }
+          }
+        }
+
+        // A forward edge into a case construct that comes from something
+        // other than the OpSwitch is actually a fallthrough.
+        if (edge_kind == EdgeKind::kForward) {
+          const auto* switch_construct =
+              (dest_info->case_head_for ? dest_info->case_head_for
+                                        : dest_info->default_head_for);
+          if (switch_construct != nullptr) {
+            if (src != switch_construct->begin_id) {
+              edge_kind = EdgeKind::kCaseFallThrough;
+            }
+          }
+        }
+
+        if ((edge_kind == EdgeKind::kForward) ||
+            (edge_kind == EdgeKind::kCaseFallThrough)) {
+          // Check for an invalid forward exit out of this construct.
+          if (dest_info->pos >= src_construct.end_pos) {
+            return Fail()
+                   << "Branch from block " << src << " to block " << dest
+                   << " is an invalid exit from construct starting at block "
+                   << src_construct.begin_id << "; branch bypasses block "
+                   << src_construct.end_id;
+          }
+
+          normal_forward_edges.push_back(dest);
+
+          // Check dominance.
+
+          //      Look for edges that violate the dominance condition: a branch
+          //      from X to Y where:
+          //        If Y is in a nearest enclosing continue construct headed by
+          //        CT:
+          //          Y is not CT, and
+          //          In the structured order, X appears before CT order or
+          //          after CT's backedge block.
+          //        Otherwise, if Y is in a nearest enclosing construct
+          //        headed by H:
+          //          Y is not H, and
+          //          In the structured order, X appears before H or after H's
+          //          merge block.
+
+          const auto& dest_construct = *(dest_info->construct);
+          if (dest != dest_construct.begin_id &&
+              !dest_construct.ContainsPos(src_pos)) {
+            return Fail() << "Branch from " << src << " to " << dest
+                          << " bypasses "
+                          << (dest_construct.kind == Construct::kContinue
+                                  ? "continue target "
+                                  : "header ")
+                          << dest_construct.begin_id
+                          << " (dominance rule violated)";
+          }
+        }
+      }  // end forward edge
+    }    // end successor
+
+    if (num_backedges > 1) {
+      return Fail() << "Block " << src
+                    << " has too many backedges: " << num_backedges;
+    }
+    if ((normal_forward_edges.size() > 1) &&
+        (src_info->merge_for_header == 0)) {
+      return Fail() << "Control flow diverges at block " << src << " (to "
+                    << normal_forward_edges[0] << ", "
+                    << normal_forward_edges[1]
+                    << ") but it is not a structured header (it has no merge "
+                       "instruction)";
+    }
+  }
+
   return success();
 }
 

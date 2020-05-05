@@ -61,6 +61,18 @@ std::string CommonTypes() {
   )";
 }
 
+/// Runs the necessary flow until and including classify CFG edges,
+/// @returns the result of classify CFG edges.
+bool FlowClassifyCFGEdges(FunctionEmitter* fe) {
+  fe->RegisterBasicBlocks();
+  fe->ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe->VerifyHeaderContinueMergeOrder()) << fe->parser()->error();
+  EXPECT_TRUE(fe->RegisterMerges()) << fe->parser()->error();
+  EXPECT_TRUE(fe->LabelControlFlowConstructs()) << fe->parser()->error();
+  EXPECT_TRUE(fe->FindSwitchCaseHeaders()) << fe->parser()->error();
+  return fe->ClassifyCFGEdges();
+}
+
 TEST_F(SpvParserTest, TerminatorsAreSane_SingleBlock) {
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
@@ -4153,11 +4165,1640 @@ TEST_F(SpvParserTest, DISABLED_BranchEscapesIfConstruct) {
   EXPECT_THAT(p->error(), Eq("something"));
 }
 
-// TODO(dneto): Ok for a case target to branch directly to the merge
-// TODO(dneto): Ok for a case target to be a "break block", i.e. branch to exit
-// of enclosing loop.
-// TODO(dneto): Ok for a case target to be a "continue block", i.e. branch to
-// continue target of enclosing loop.
+TEST_F(SpvParserTest, ClassifyCFGEdges_ReturnInContinueConstruct) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel ; body
+     OpBranch %50
+
+     %50 = OpLabel
+     OpReturn
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe)) << p->error();
+  EXPECT_THAT(p->error(), Eq("Invalid function exit at block 50 from continue "
+                             "construct starting at 50"));
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_KillInContinueConstruct) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel ; body
+     OpBranch %50
+
+     %50 = OpLabel
+     OpKill
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(p->error(), Eq("Invalid function exit at block 50 from continue "
+                             "construct starting at 50"));
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_UnreachableInContinueConstruct) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel ; body
+     OpBranch %50
+
+     %50 = OpLabel
+     OpUnreachable
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(p->error(), Eq("Invalid function exit at block 50 from continue "
+                             "construct starting at 50"));
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_BackEdge_NotInContinueConstruct) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel ; body
+     OpBranch %20  ; bad backedge
+
+     %50 = OpLabel ; continue target
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(
+      p->error(),
+      Eq("Invalid backedge (30->20): 30 is not in a continue construct"));
+}
+
+TEST_F(SpvParserTest,
+       ClassifyCFGEdges_BackEdge_NotInLastBlockOfContinueConstruct) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel ; body
+     OpBranch %50
+
+     %50 = OpLabel ; continue target
+     OpBranchConditional %cond %20 %60 ; bad branch to %20
+
+     %60 = OpLabel ; end of continue construct
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(p->error(),
+              Eq("Invalid exit (50->20) from continue construct: 50 is not the "
+                 "last block in the continue construct starting at 50 "
+                 "(violates post-dominance rule)"));
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_BackEdge_ToWrongHeader) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %99
+
+     %20 = OpLabel
+     OpLoopMerge %89 %50 None
+     OpBranchConditional %cond %30 %89
+
+     %30 = OpLabel ; loop body
+     OpBranch %50
+
+     %50 = OpLabel ; continue target
+     OpBranch %10
+
+     %89 = OpLabel ; inner merge
+     OpBranch %99
+
+     %99 = OpLabel ; outer merge
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(p->error(), Eq("Invalid backedge (50->10): does not branch to "
+                             "the corresponding loop header, expected 20"));
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_BackEdge_SingleBlockLoop) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %20 None
+     OpBranchConditional %cond %20 %99
+
+     %99 = OpLabel ; outer merge
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi20 = fe.GetBlockInfo(20);
+  ASSERT_NE(bi20, nullptr);
+  EXPECT_EQ(bi20->succ_edge.count(20), 1);
+  EXPECT_EQ(bi20->succ_edge[20], EdgeKind::kBack);
+}
+
+TEST_F(SpvParserTest,
+       ClassifyCFGEdges_BackEdge_MultiBlockLoop_SingleBlockContinueConstruct) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %40 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel ; continue target
+     OpBranch %20  ; good back edge
+
+     %99 = OpLabel ; outer merge
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi40 = fe.GetBlockInfo(40);
+  ASSERT_NE(bi40, nullptr);
+  EXPECT_EQ(bi40->succ_edge.count(20), 1);
+  EXPECT_EQ(bi40->succ_edge[20], EdgeKind::kBack);
+}
+
+TEST_F(SpvParserTest,
+       ClassifyCFGEdges_BackEdge_MultiBlockLoop_MultiBlockContinueConstruct) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %40 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel ; continue target
+     OpBranch %50
+
+     %50 = OpLabel
+     OpBranch %20  ; good back edge
+
+     %99 = OpLabel ; outer merge
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi50 = fe.GetBlockInfo(50);
+  ASSERT_NE(bi50, nullptr);
+  EXPECT_EQ(bi50->succ_edge.count(20), 1);
+  EXPECT_EQ(bi50->succ_edge[20], EdgeKind::kBack);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_PrematureExitFromContinueConstruct) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %40 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel ; continue construct
+     OpBranchConditional %cond2 %99 %50 ; invalid early exit
+
+     %50 = OpLabel
+     OpBranch %20  ; back edge
+
+     %99 = OpLabel ; outer merge
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(p->error(),
+              Eq("Invalid exit (40->99) from continue construct: 40 is not the "
+                 "last block in the continue construct starting at 40 "
+                 "(violates post-dominance rule)"));
+}
+
+TEST_F(SpvParserTest,
+       ClassifyCFGEdges_LoopBreak_FromLoopHeader_SingleBlockLoop) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel    ; single block loop
+     OpLoopMerge %99 %20 None
+     OpBranchConditional %cond %20 %99
+
+     %99 = OpLabel ; outer merge
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(20);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kLoopBreak);
+}
+
+TEST_F(SpvParserTest,
+       ClassifyCFGEdges_LoopBreak_FromLoopHeader_MultiBlockLoop) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %30 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(20);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kLoopBreak);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_LoopBreak_FromContinueConstructHeader) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %30 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel ; Single block continue construct
+     OpBranchConditional %cond2 %20 %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(30);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kLoopBreak);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_ToMerge_FromIfHeader) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %99
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(20);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kToMerge);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_ToMerge_FromIfThenElse) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %50
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %50 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  // Then clause
+  auto* bi20 = fe.GetBlockInfo(20);
+  ASSERT_NE(bi20, nullptr);
+  EXPECT_EQ(bi20->succ_edge.count(99), 1);
+  EXPECT_EQ(bi20->succ_edge[99], EdgeKind::kToMerge);
+
+  // Else clause
+  auto* bi50 = fe.GetBlockInfo(50);
+  ASSERT_NE(bi50, nullptr);
+  EXPECT_EQ(bi50->succ_edge.count(99), 1);
+  EXPECT_EQ(bi50->succ_edge[99], EdgeKind::kToMerge);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_ToMerge_FromSwitchCaseDirect) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %30 20 %99 ; directly to merge
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(10);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kToMerge);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_ToMerge_FromSwitchCaseBody) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %20
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(20);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kToMerge);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_ToMerge_FromSwitchDefaultBody) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %30 20 %20
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(30);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kToMerge);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_ToMerge_FromSwitchDefaultIsMerge) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %20
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(10);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kToMerge);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_LoopBreak_FromLoopBody) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranchConditional %cond2 %50 %99 ; break-unless
+
+     %50 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(30);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kLoopBreak);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_LoopBreak_FromContinueConstructTail) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel ; continue target
+     OpBranch %60
+
+     %60 = OpLabel ; continue construct tail
+     OpBranchConditional %cond2 %20 %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(60);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kLoopBreak);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_LoopBreak_FromLoopBodyDirect) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %99  ; unconditional break
+
+     %50 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(30);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kLoopBreak);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_LoopContinue_LoopBodyToContinue) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %80 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %80 ; a forward edge
+
+     %80 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(30);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(80), 1);
+  EXPECT_EQ(bi->succ_edge[80], EdgeKind::kLoopContinue);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_LoopContinue_FromNestedIf) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %80 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpSelectionMerge %79 None
+     OpBranchConditional %cond2 %40 %79
+
+     %40 = OpLabel
+     OpBranch %80 ; continue
+
+     %79 = OpLabel ; inner merge
+     OpBranch %80
+
+     %80 = OpLabel ; continue target
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(40);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(80), 1);
+  EXPECT_EQ(bi->succ_edge[80], EdgeKind::kLoopContinue);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_LoopContinue_ConditionalFromNestedIf) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %80 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpSelectionMerge %79 None
+     OpBranchConditional %cond2 %40 %79
+
+     %40 = OpLabel
+     OpBranchConditional %cond2 %80 %79 ; continue-if
+
+     %79 = OpLabel ; inner merge
+     OpBranch %80
+
+     %80 = OpLabel ; continue target
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(40);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(80), 1);
+  EXPECT_EQ(bi->succ_edge[80], EdgeKind::kLoopContinue);
+}
+
+TEST_F(SpvParserTest,
+       ClassifyCFGEdges_LoopContinue_FromNestedSwitchCaseBody_Unconditional) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %80 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpSelectionMerge %79 None
+     OpSwitch %selector %79 40 %40
+
+     %40 = OpLabel
+     OpBranch %80
+
+     %79 = OpLabel ; inner merge
+     OpBranch %80
+
+     %80 = OpLabel ; continue target
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(40);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(80), 1);
+  EXPECT_EQ(bi->succ_edge[80], EdgeKind::kLoopContinue);
+}
+
+TEST_F(SpvParserTest,
+       ClassifyCFGEdges_LoopContinue_FromNestedSwitchCaseDirect_Error) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %80 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpSelectionMerge %79 None
+     OpSwitch %selector %79 40 %80 ; continue here
+
+     %79 = OpLabel ; inner merge
+     OpBranch %80
+
+     %80 = OpLabel ; continue target
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  EXPECT_TRUE(fe.RegisterMerges());
+  EXPECT_TRUE(fe.LabelControlFlowConstructs());
+  EXPECT_FALSE(fe.FindSwitchCaseHeaders());
+  EXPECT_THAT(p->error(), Eq("Switch branch from block 30 to case target block "
+                             "80 escapes the selection construct"));
+}
+
+TEST_F(SpvParserTest,
+       ClassifyCFGEdges_LoopContinue_FromNestedSwitchDefaultDirect_Error) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %80 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpSelectionMerge %79 None
+     OpSwitch %selector %80 40 %79 ; continue here
+
+     %79 = OpLabel ; inner merge
+     OpBranch %80
+
+     %80 = OpLabel ; continue target
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  EXPECT_TRUE(fe.RegisterMerges());
+  EXPECT_TRUE(fe.LabelControlFlowConstructs());
+  EXPECT_FALSE(fe.FindSwitchCaseHeaders());
+  EXPECT_THAT(p->error(), Eq("Switch branch from block 30 to default block 80 "
+                             "escapes the selection construct"));
+}
+
+TEST_F(SpvParserTest,
+       ClassifyCFGEdges_LoopContinue_FromNestedSwitchDefaultBody_Conditional) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %80 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpSelectionMerge %79 None
+     OpSwitch %selector %40 79 %79
+
+     %40 = OpLabel
+     OpBranchConditional %cond2 %80 %79
+
+     %79 = OpLabel ; inner merge
+     OpBranch %80
+
+     %80 = OpLabel ; continue target
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(40);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(80), 1);
+  EXPECT_EQ(bi->succ_edge[80], EdgeKind::kLoopContinue);
+}
+
+TEST_F(
+    SpvParserTest,
+    ClassifyCFGEdges_LoopContinue_FromNestedSwitchDefaultBody_Unconditional) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %80 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpSelectionMerge %79 None
+     OpSwitch %selector %40 79 %79
+
+     %40 = OpLabel
+     OpBranch %80
+
+     %79 = OpLabel ; inner merge
+     OpBranch %80
+
+     %80 = OpLabel ; continue target
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(40);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(80), 1);
+  EXPECT_EQ(bi->succ_edge[80], EdgeKind::kLoopContinue);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_Fallthrough_CaseTailToCase) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %20 40 %40
+
+     %20 = OpLabel ; case 20
+     OpBranch %30
+
+     %30 = OpLabel
+     OpBranch %40 ; fallthrough
+
+     %40 = OpLabel ; case 40
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(30);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(40), 1);
+  EXPECT_EQ(bi->succ_edge[40], EdgeKind::kCaseFallThrough);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_Fallthrough_CaseTailToDefaultNotMerge) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %40 20 %20
+
+     %20 = OpLabel ; case 20
+     OpBranch %30
+
+     %30 = OpLabel
+     OpBranch %40 ; fallthrough
+
+     %40 = OpLabel ; case 40
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(30);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(40), 1);
+  EXPECT_EQ(bi->succ_edge[40], EdgeKind::kCaseFallThrough);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_Fallthrough_DefaultToCase) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %20 40 %40
+
+     %20 = OpLabel ; default
+     OpBranch %30
+
+     %30 = OpLabel
+     OpBranch %40 ; fallthrough
+
+     %40 = OpLabel ; case 40
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(30);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(40), 1);
+  EXPECT_EQ(bi->succ_edge[40], EdgeKind::kCaseFallThrough);
+}
+
+TEST_F(SpvParserTest,
+       ClassifyCFGEdges_Fallthrough_CaseNonTailToCase_TrueBranch) {
+  // This is an unusual one, and is an error. Structurally it looks like this:
+  //   switch (val) {
+  //   case 0: {
+  //        if (cond) {
+  //          fallthrough;
+  //        }
+  //        something = 1;
+  //      }
+  //   case 1: { }
+  //   }
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %20 50 %50
+
+     %20 = OpLabel
+     OpSelectionMerge %49 None
+     OpBranchConditional %cond %30 %49
+
+     %30 = OpLabel
+     OpBranch %50 ; attempt to fallthrough
+
+     %49 = OpLabel
+     OpBranch %99
+
+     %50 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(
+      p->error(),
+      Eq("Branch from 10 to 50 bypasses header 20 (dominance rule violated)"));
+}
+
+TEST_F(SpvParserTest,
+       ClassifyCFGEdges_Fallthrough_CaseNonTailToCase_FalseBranch) {
+  // Like previous test, but taking the false branch.
+
+  // This is an unusual one, and is an error. Structurally it looks like this:
+  //   switch (val) {
+  //   case 0: {
+  //        if (cond) {
+  //          fallthrough;
+  //        }
+  //        something = 1;
+  //      }
+  //   case 1: { }
+  //   }
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %20 50 %50
+
+     %20 = OpLabel
+     OpSelectionMerge %49 None
+     OpBranchConditional %cond %49 %30 ;; this is the difference
+
+     %30 = OpLabel
+     OpBranch %50 ; attempt to fallthrough
+
+     %49 = OpLabel
+     OpBranch %99
+
+     %50 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(
+      p->error(),
+      Eq("Branch from 10 to 50 bypasses header 20 (dominance rule violated)"));
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_Forward_IfToThen) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %99
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(10);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(20), 1);
+  EXPECT_EQ(bi->succ_edge[20], EdgeKind::kForward);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_Forward_IfToElse) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %99 %30
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(10);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(30), 1);
+  EXPECT_EQ(bi->succ_edge[30], EdgeKind::kForward);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_Forward_SwitchToCase) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %20
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(10);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(20), 1);
+  EXPECT_EQ(bi->succ_edge[20], EdgeKind::kForward);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_Forward_SwitchToDefaultNotMerge) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %30 20 %20
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(10);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(30), 1);
+  EXPECT_EQ(bi->succ_edge[30], EdgeKind::kForward);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_Forward_LoopHeadToBody) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %80 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %80
+
+     %80 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(20);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(30), 1);
+  EXPECT_EQ(bi->succ_edge[30], EdgeKind::kForward);
+}
+
+TEST_F(SpvParserTest, DISABLED_ClassifyCFGEdges_Forward_LoopToContinue) {
+  FAIL();
+}
+
+TEST_F(SpvParserTest,
+       ClassifyCFGEdges_DomViolation_BeforeIfToSelectionInterior) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %50 ;%50 is a bad branch
+
+     %20 = OpLabel
+     OpSelectionMerge %89 None
+     OpBranchConditional %cond %50 %89
+
+     %50 = OpLabel
+     OpBranch %89
+
+     %89 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(
+      p->error(),
+      Eq("Branch from 10 to 50 bypasses header 20 (dominance rule violated)"));
+}
+
+TEST_F(SpvParserTest,
+       ClassifyCFGEdges_DomViolation_BeforeSwitchToSelectionInterior) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %50 ;%50 is a bad branch
+
+     %20 = OpLabel
+     OpSelectionMerge %89 None
+     OpSwitch %selector %89 50 %50
+
+     %50 = OpLabel
+     OpBranch %89
+
+     %89 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(
+      p->error(),
+      Eq("Branch from 10 to 50 bypasses header 20 (dominance rule violated)"));
+}
+
+TEST_F(SpvParserTest,
+       ClassifyCFGEdges_DomViolation_BeforeLoopToLoopBodyInterior) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %50 ;%50 is a bad branch
+
+     %20 = OpLabel
+     OpLoopMerge %89 %80 None
+     OpBranchConditional %cond %50 %89
+
+     %50 = OpLabel
+     OpBranch %89
+
+     %80 = OpLabel
+     OpBranch %20
+
+     %89 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(p->error(),
+              // Weird error, but still we caught it.
+              // Preferred: Eq("Branch from 10 to 50 bypasses header 20
+              // (dominance rule violated)"))
+              Eq("Branch from 10 to 50 bypasses continue target 80 (dominance "
+                 "rule violated)"))
+      << Dump(fe.block_order());
+}
+
+TEST_F(SpvParserTest,
+       ClassifyCFGEdges_DomViolation_BeforeContinueToContinueInterior) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %60
+
+     %50 = OpLabel
+     OpBranch %60
+
+     %60 = OpLabel
+     OpBranch %20
+
+     %89 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(p->error(),
+              Eq("Branch from block 30 to block 60 is an invalid exit from "
+                 "construct starting at block 20; branch bypasses block 50"));
+}
+
+TEST_F(SpvParserTest,
+       ClassifyCFGEdges_DomViolation_AfterContinueToContinueInterior) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %80 %50 None
+     OpBranchConditional %cond %30 %80
+
+     %30 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel
+     OpBranch %60
+
+     %60 = OpLabel
+     OpBranch %20
+
+     %80 = OpLabel
+     OpBranch %60 ; bad branch
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(p->error(),
+              Eq("Branch from block 50 to block 60 is an invalid exit from "
+                 "construct starting at block 50; branch bypasses block 80"));
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_TooManyBackedges) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranchConditional %cond2 %20 %50
+
+     %50 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(
+      p->error(),
+      Eq("Invalid backedge (30->20): 30 is not in a continue construct"));
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_NeededMerge_BranchConditional) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %20 = OpLabel
+     OpBranchConditional %cond %30 %40
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %40 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(p->error(),
+              Eq("Control flow diverges at block 20 (to 30, 40) but it is not "
+                 "a structured header (it has no merge instruction)"));
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_NeededMerge_Switch) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSwitch %selector %99 20 %20 30 %30
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(p->error(),
+              Eq("Control flow diverges at block 10 (to 99, 20) but it is not "
+                 "a structured header (it has no merge instruction)"));
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_Pathological_Forward_LoopHeadSplitBody) {
+  // In this case the branch-conditional in the loop header is really also a
+  // selection header.
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %80 None
+     OpBranchConditional %cond %30 %50 ; what to make of this?
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %50 = OpLabel
+     OpBranch %99
+
+     %80 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(20);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(30), 1);
+  EXPECT_EQ(bi->succ_edge[30], EdgeKind::kForward);
+  EXPECT_EQ(bi->succ_edge.count(50), 1);
+  EXPECT_EQ(bi->succ_edge[50], EdgeKind::kForward);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_Pathological_Forward_Premerge) {
+  // Two arms of an if-selection converge early, before the merge block
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %30
+
+     %20 = OpLabel
+     OpBranch %50
+
+     %30 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel ; this is an early merge!
+     OpBranch %60
+
+     %60 = OpLabel ; still early merge
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi20 = fe.GetBlockInfo(20);
+  ASSERT_NE(bi20, nullptr);
+  EXPECT_EQ(bi20->succ_edge.count(50), 1);
+  EXPECT_EQ(bi20->succ_edge[50], EdgeKind::kForward);
+
+  auto* bi30 = fe.GetBlockInfo(30);
+  ASSERT_NE(bi30, nullptr);
+  EXPECT_EQ(bi30->succ_edge.count(50), 1);
+  EXPECT_EQ(bi30->succ_edge[50], EdgeKind::kForward);
+
+  auto* bi50 = fe.GetBlockInfo(50);
+  ASSERT_NE(bi50, nullptr);
+  EXPECT_EQ(bi50->succ_edge.count(60), 1);
+  EXPECT_EQ(bi50->succ_edge[60], EdgeKind::kForward);
+
+  auto* bi60 = fe.GetBlockInfo(60);
+  ASSERT_NE(bi60, nullptr);
+  EXPECT_EQ(bi60->succ_edge.count(99), 1);
+  EXPECT_EQ(bi60->succ_edge[99], EdgeKind::kToMerge);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_Pathological_Forward_Regardless) {
+  // Both arms of an OpBranchConditional go to the same target.
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %20 ; same target!
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi10 = fe.GetBlockInfo(10);
+  ASSERT_NE(bi10, nullptr);
+  EXPECT_EQ(bi10->succ_edge.count(20), 1);
+  EXPECT_EQ(bi10->succ_edge[20], EdgeKind::kForward);
+
+  auto* bi20 = fe.GetBlockInfo(20);
+  ASSERT_NE(bi20, nullptr);
+  EXPECT_EQ(bi20->succ_edge.count(99), 1);
+  EXPECT_EQ(bi20->succ_edge[99], EdgeKind::kToMerge);
+}
 
 }  // namespace
 }  // namespace spirv

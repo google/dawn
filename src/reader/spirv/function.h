@@ -38,6 +38,31 @@ namespace tint {
 namespace reader {
 namespace spirv {
 
+/// Kinds of CFG edges.
+enum class EdgeKind {
+  // A back-edge: An edge from a node to one of its ancestors in a depth-first
+  // search from the entry block.
+  kBack,
+  // An edge from a node to the merge block of the nearest enclosing structured
+  // construct.  We write "ToMerge" to make it clear the destination block is
+  // the merge block, not the source block.
+  kToMerge,
+  // An edge from a node to the merge block of the nearest enclosing loop.
+  // The source block is a "break block" as defined by SPIR-V.
+  kLoopBreak,
+  // An edge from a node in a loop body to the associated continue target, where
+  // there are no other intervening loops or switches.
+  // The source block is a "continue block" as defined by SPIR-V.
+  kLoopContinue,
+  // An edge from one switch case to the next sibling switch case.
+  kCaseFallThrough,
+  // None of the above. By structured control flow rules, there can be at most
+  // one forward edge leaving a basic block. Otherwise there must have been a
+  // merge instruction declaring the divergence and associated reconvergence
+  // point.
+  kForward
+};
+
 /// Bookkeeping info for a basic block.
 struct BlockInfo {
   /// Constructor
@@ -87,6 +112,9 @@ struct BlockInfo {
   bool default_is_merge = false;
   /// The list of switch values that cause a branch to this block.
   std::unique_ptr<std::vector<uint64_t>> case_values;
+
+  /// Maps the ID of a successor block (in the CFG) to its edge classification.
+  std::unordered_map<uint32_t, EdgeKind> succ_edge;
 };
 
 inline std::ostream& operator<<(std::ostream& o, const BlockInfo& bi) {
@@ -126,6 +154,9 @@ class FunctionEmitter {
   /// Records failure.
   /// @returns a FailStream on which to emit diagnostics.
   FailStream& Fail() { return fail_stream_.Fail(); }
+
+  /// @returns the parser implementation
+  ParserImpl* parser() { return &parser_impl_; }
 
   /// Emits the declaration, which comprises the name, parameters, and
   /// return type. The function AST node is appended to the module
@@ -183,6 +214,14 @@ class FunctionEmitter {
   /// as the default target.
   /// @returns false on failure
   bool FindSwitchCaseHeaders();
+
+  /// Classifies the successor CFG edges for the ordered basic blocks.
+  /// Also checks validity of each edge (populates the |succ_edge| field of
+  /// BlockInfo). Implicitly checks dominance rules for headers and continue
+  /// constructs. Assumes each block has been labeled with its control flow
+  /// construct.
+  /// @returns false on failure
+  bool ClassifyCFGEdges();
 
   /// Emits declarations of function variables.
   /// @returns false if emission failed.
@@ -242,6 +281,13 @@ class FunctionEmitter {
   /// null on failure.
   ast::type::Type* GetVariableStoreType(
       const spvtools::opt::Instruction& var_decl_inst);
+
+  /// Finds the loop header block for a loop construct or continue construct.
+  /// The loop header block is the block with the corresponding OpLoopMerge
+  /// instruction.
+  /// @param c the loop or continue construct
+  /// @returns the block info for the loop header.
+  BlockInfo* HeaderForLoopOrContinue(const Construct* c);
 
   ParserImpl& parser_impl_;
   ast::Module& ast_module_;
