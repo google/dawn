@@ -29,7 +29,7 @@ fn vtx_main() -> void {
   gl_Position = vec4<f32>(pos + a_particlePos, 0.0, 1.0);
   return;
 }
-entry_point vertex as "main" = vtx_main;
+entry_point vertex as "vert_main" = vtx_main;
 
 # fragment shader
 [[location 0]] var<out> fragColor : vec4<f32>;
@@ -38,7 +38,7 @@ fn frag_main() -> void {
   fragColor = vec4<f32>(1.0, 1.0, 1.0, 1.0);
   return;
 }
-entry_point fragment as "main" = frag_main;
+entry_point fragment as "frag_main" = frag_main;
 
 # compute shader
 type Particle = struct {
@@ -149,5 +149,5 @@ fn compute_main() -> void {
 
   return;
 }
-entry_point compute as "main" = compute_main;
+entry_point compute as "comp_main" = compute_main;
 
