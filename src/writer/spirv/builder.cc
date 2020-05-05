@@ -302,6 +302,11 @@ bool Builder::GenerateExecutionModes(ast::EntryPoint* ep) {
     push_preamble(
         spv::Op::OpExecutionMode,
         {Operand::Int(id), Operand::Int(SpvExecutionModeOriginUpperLeft)});
+  } else if (ep->stage() == ast::PipelineStage::kCompute) {
+    // TODO(dsinclair): Support LocalSize other then (1, 1, 1)
+    push_preamble(spv::Op::OpExecutionMode,
+                  {Operand::Int(id), Operand::Int(SpvExecutionModeLocalSize),
+                   Operand::Int(1), Operand::Int(1), Operand::Int(1)});
   }
 
   return true;

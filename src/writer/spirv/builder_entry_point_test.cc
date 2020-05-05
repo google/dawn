@@ -39,9 +39,7 @@ TEST_F(BuilderTest, EntryPoint) {
   b.set_func_name_to_id("frag_main", 2);
   ASSERT_TRUE(b.GenerateEntryPoint(&ep));
 
-  auto preamble = b.preamble();
-  ASSERT_EQ(preamble.size(), 1u);
-  EXPECT_EQ(DumpInstruction(preamble[0]), R"(OpEntryPoint Fragment %2 "main"
+  EXPECT_EQ(DumpInstructions(b.preamble()), R"(OpEntryPoint Fragment %2 "main"
 )");
 }
 
@@ -53,9 +51,7 @@ TEST_F(BuilderTest, EntryPoint_WithoutName) {
   b.set_func_name_to_id("compute_main", 3);
   ASSERT_TRUE(b.GenerateEntryPoint(&ep));
 
-  auto preamble = b.preamble();
-  ASSERT_EQ(preamble.size(), 1u);
-  EXPECT_EQ(DumpInstruction(preamble[0]),
+  EXPECT_EQ(DumpInstructions(b.preamble()),
             R"(OpEntryPoint GLCompute %3 "compute_main"
 )");
 }
@@ -153,9 +149,21 @@ TEST_F(BuilderTest, ExecutionModel_Fragment_OriginUpperLeft) {
   b.set_func_name_to_id("frag_main", 2);
   ASSERT_TRUE(b.GenerateExecutionModes(&ep));
 
-  auto preamble = b.preamble();
-  ASSERT_EQ(preamble.size(), 1u);
-  EXPECT_EQ(DumpInstruction(preamble[0]), R"(OpExecutionMode %2 OriginUpperLeft
+  EXPECT_EQ(DumpInstructions(b.preamble()),
+            R"(OpExecutionMode %2 OriginUpperLeft
+)");
+}
+
+TEST_F(BuilderTest, ExecutionModel_Compute_LocalSize) {
+  ast::EntryPoint ep(ast::PipelineStage::kCompute, "main", "main");
+
+  ast::Module mod;
+  Builder b(&mod);
+  b.set_func_name_to_id("main", 2);
+  ASSERT_TRUE(b.GenerateExecutionModes(&ep));
+
+  EXPECT_EQ(DumpInstructions(b.preamble()),
+            R"(OpExecutionMode %2 LocalSize 1 1 1
 )");
 }
 
