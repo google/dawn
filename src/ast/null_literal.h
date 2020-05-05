@@ -12,41 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/uint_literal.h"
+#ifndef SRC_AST_NULL_LITERAL_H_
+#define SRC_AST_NULL_LITERAL_H_
 
-#include "gtest/gtest.h"
-#include "src/ast/type/u32_type.h"
+#include <string>
+
+#include "src/ast/literal.h"
 
 namespace tint {
 namespace ast {
-namespace {
 
-using UintLiteralTest = testing::Test;
+/// A null literal
+class NullLiteral : public Literal {
+ public:
+  /// Constructor
+  /// @param type the type
+  NullLiteral(ast::type::Type* type);
+  ~NullLiteral() override;
 
-TEST_F(UintLiteralTest, Value) {
-  ast::type::U32Type u32;
-  UintLiteral u{&u32, 47};
-  ASSERT_TRUE(u.IsUint());
-  EXPECT_EQ(u.value(), 47u);
-}
+  /// @returns true if this is a null literal
+  bool IsNull() const override;
 
-TEST_F(UintLiteralTest, Is) {
-  ast::type::U32Type u32;
-  UintLiteral u{&u32, 42};
-  EXPECT_FALSE(u.IsBool());
-  EXPECT_FALSE(u.IsInt());
-  EXPECT_FALSE(u.IsFloat());
-  EXPECT_TRUE(u.IsUint());
-  EXPECT_FALSE(u.IsNull());
-}
+  /// @returns the name for this literal. This name is unique to this value.
+  std::string name() const override;
 
-TEST_F(UintLiteralTest, ToStr) {
-  ast::type::U32Type u32;
-  UintLiteral i{&u32, 42};
+  /// @returns the literal as a string
+  std::string to_str() const override;
+};
 
-  EXPECT_EQ(i.to_str(), "42");
-}
-
-}  // namespace
 }  // namespace ast
 }  // namespace tint
+
+#endif  // SRC_AST_NULL_LITERAL_H_

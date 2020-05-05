@@ -96,7 +96,8 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Output %3
-%1 = OpVariable %2 Output
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Output %4
 )");
 
   ast::IdentifierExpression expr("var");
@@ -161,10 +162,12 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Function %3
+%4 = OpConstantNull %3
 )");
 
   const auto& func = b.functions()[0];
-  EXPECT_EQ(DumpInstructions(func.variables()), R"(%1 = OpVariable %2 Function
+  EXPECT_EQ(DumpInstructions(func.variables()),
+            R"(%1 = OpVariable %2 Function %4
 )");
 
   ast::IdentifierExpression expr("var");
@@ -195,15 +198,16 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(&var)) << b.error();
 
-  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 6u) << b.error();
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 7u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Private %4
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%4 = OpLoad %3 %1
-%5 = OpLoad %3 %1
-%6 = OpIAdd %3 %4 %5
+            R"(%5 = OpLoad %3 %1
+%6 = OpLoad %3 %1
+%7 = OpIAdd %3 %5 %6
 )");
 }
 

@@ -12,39 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/uint_literal.h"
+#include "src/ast/null_literal.h"
 
 #include "gtest/gtest.h"
-#include "src/ast/type/u32_type.h"
+#include "src/ast/type/i32_type.h"
 
 namespace tint {
 namespace ast {
 namespace {
 
-using UintLiteralTest = testing::Test;
+using NullLiteralTest = testing::Test;
 
-TEST_F(UintLiteralTest, Value) {
-  ast::type::U32Type u32;
-  UintLiteral u{&u32, 47};
-  ASSERT_TRUE(u.IsUint());
-  EXPECT_EQ(u.value(), 47u);
+TEST_F(NullLiteralTest, Is) {
+  ast::type::I32Type i32;
+  NullLiteral i{&i32};
+  EXPECT_FALSE(i.IsBool());
+  EXPECT_FALSE(i.IsInt());
+  EXPECT_FALSE(i.IsFloat());
+  EXPECT_FALSE(i.IsUint());
+  EXPECT_TRUE(i.IsNull());
 }
 
-TEST_F(UintLiteralTest, Is) {
-  ast::type::U32Type u32;
-  UintLiteral u{&u32, 42};
-  EXPECT_FALSE(u.IsBool());
-  EXPECT_FALSE(u.IsInt());
-  EXPECT_FALSE(u.IsFloat());
-  EXPECT_TRUE(u.IsUint());
-  EXPECT_FALSE(u.IsNull());
+TEST_F(NullLiteralTest, ToStr) {
+  ast::type::I32Type i32;
+  NullLiteral i{&i32};
+
+  EXPECT_EQ(i.to_str(), "null __i32");
 }
 
-TEST_F(UintLiteralTest, ToStr) {
-  ast::type::U32Type u32;
-  UintLiteral i{&u32, 42};
-
-  EXPECT_EQ(i.to_str(), "42");
+TEST_F(NullLiteralTest, Name_I32) {
+  ast::type::I32Type i32;
+  NullLiteral i{&i32};
+  EXPECT_EQ("__null__i32", i.name());
 }
 
 }  // namespace

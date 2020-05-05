@@ -69,11 +69,12 @@ TEST_F(BuilderTest, Assign_Var) {
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Output %3
-%1 = OpVariable %2 Output
-%4 = OpConstant %3 1
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Output %4
+%5 = OpConstant %3 1
 )");
 
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpStore %1 %4
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpStore %1 %5
 )");
 }
 
@@ -180,13 +181,14 @@ TEST_F(BuilderTest, Assign_Vector) {
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Output %3
-%1 = OpVariable %2 Output
-%5 = OpConstant %4 1
-%6 = OpConstant %4 3
-%7 = OpConstantComposite %3 %5 %5 %6
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Output %5
+%6 = OpConstant %4 1
+%7 = OpConstant %4 3
+%8 = OpConstantComposite %3 %6 %6 %7
 )");
 
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpStore %1 %7
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpStore %1 %8
 )");
 }
 
@@ -224,16 +226,17 @@ TEST_F(BuilderTest, Assign_Vector_MemberByName) {
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Output %3
-%1 = OpVariable %2 Output
-%5 = OpTypeInt 32 0
-%6 = OpConstant %5 1
-%7 = OpTypePointer Output %4
-%9 = OpConstant %4 1
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Output %5
+%6 = OpTypeInt 32 0
+%7 = OpConstant %6 1
+%8 = OpTypePointer Output %4
+%10 = OpConstant %4 1
 )");
 
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%8 = OpAccessChain %7 %1 %6
-OpStore %8 %9
+            R"(%9 = OpAccessChain %8 %1 %7
+OpStore %9 %10
 )");
 }
 
@@ -273,16 +276,17 @@ TEST_F(BuilderTest, Assign_Vector_MemberByIndex) {
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Output %3
-%1 = OpVariable %2 Output
-%5 = OpTypeInt 32 1
-%6 = OpConstant %5 1
-%7 = OpTypePointer Output %4
-%9 = OpConstant %4 1
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Output %5
+%6 = OpTypeInt 32 1
+%7 = OpConstant %6 1
+%8 = OpTypePointer Output %4
+%10 = OpConstant %4 1
 )");
 
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%8 = OpAccessChain %7 %1 %6
-OpStore %8 %9
+            R"(%9 = OpAccessChain %8 %1 %7
+OpStore %9 %10
 )");
 }
 

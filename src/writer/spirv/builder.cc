@@ -36,6 +36,7 @@
 #include "src/ast/location_decoration.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
+#include "src/ast/null_literal.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
@@ -430,9 +431,15 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
 
   // TODO(dsinclair) We could detect if the constructor is fully const and emit
   // an initializer value for the variable instead of doing the OpLoad.
+  ast::NullLiteral nl(var->type()->UnwrapPtrIfNeeded());
+  auto null_id = GenerateLiteralIfNeeded(&nl);
+  if (null_id == 0) {
+    return 0;
+  }
+  push_function_var({Operand::Int(type_id), result,
+                     Operand::Int(ConvertStorageClass(sc)),
+                     Operand::Int(null_id)});
 
-  push_function_var(
-      {Operand::Int(type_id), result, Operand::Int(ConvertStorageClass(sc))});
   if (var->has_constructor()) {
     init_id = GenerateLoadIfNeeded(var->constructor()->result_type(), init_id);
     GenerateStore(var_id, init_id);
@@ -493,6 +500,19 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
                               Operand::Int(ConvertStorageClass(sc))};
   if (var->has_constructor()) {
     ops.push_back(Operand::Int(init_id));
+  } else {
+    // If we don't have a constructor and we're an Output or Private variable
+    // then WGSL requires an initializer.
+    if (var->storage_class() == ast::StorageClass::kPrivate ||
+        var->storage_class() == ast::StorageClass::kNone ||
+        var->storage_class() == ast::StorageClass::kOutput) {
+      ast::NullLiteral nl(var->type()->UnwrapPtrIfNeeded());
+      init_id = GenerateLiteralIfNeeded(&nl);
+      if (init_id == 0) {
+        return 0;
+      }
+      ops.push_back(Operand::Int(init_id));
+    }
   }
 
   push_type(spv::Op::OpVariable, std::move(ops));
@@ -965,6 +985,8 @@ uint32_t Builder::GenerateLiteralIfNeeded(ast::Literal* lit) {
   } else if (lit->IsFloat()) {
     push_type(spv::Op::OpConstant, {Operand::Int(type_id), result,
                                     Operand::Float(lit->AsFloat()->value())});
+  } else if (lit->IsNull()) {
+    push_type(spv::Op::OpConstantNull, {Operand::Int(type_id), result});
   } else {
     error_ = "unknown literal type";
     return 0;

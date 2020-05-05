@@ -94,20 +94,21 @@ TEST_F(BuilderTest, Loop_WithoutContinuing) {
   EXPECT_TRUE(b.GenerateLoopStatement(&expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
-%8 = OpConstant %3 2
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Private %4
+%9 = OpConstant %3 2
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpBranch %4
-%4 = OpLabel
-OpLoopMerge %5 %6 None
+            R"(OpBranch %5
+%5 = OpLabel
+OpLoopMerge %6 %7 None
+OpBranch %8
+%8 = OpLabel
+OpStore %1 %9
 OpBranch %7
 %7 = OpLabel
-OpStore %1 %8
-OpBranch %6
+OpBranch %5
 %6 = OpLabel
-OpBranch %4
-%5 = OpLabel
 )");
 }
 
@@ -149,22 +150,23 @@ TEST_F(BuilderTest, Loop_WithContinuing) {
   EXPECT_TRUE(b.GenerateLoopStatement(&expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
-%8 = OpConstant %3 2
-%9 = OpConstant %3 3
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Private %4
+%9 = OpConstant %3 2
+%10 = OpConstant %3 3
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpBranch %4
-%4 = OpLabel
-OpLoopMerge %5 %6 None
+            R"(OpBranch %5
+%5 = OpLabel
+OpLoopMerge %6 %7 None
+OpBranch %8
+%8 = OpLabel
+OpStore %1 %9
 OpBranch %7
 %7 = OpLabel
-OpStore %1 %8
-OpBranch %6
+OpStore %1 %10
+OpBranch %5
 %6 = OpLabel
-OpStore %1 %9
-OpBranch %4
-%5 = OpLabel
 )");
 }
 

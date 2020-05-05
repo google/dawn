@@ -68,20 +68,21 @@ TEST_F(BuilderTest, ArrayAccessor) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 8u);
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 9u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Function %3
-%5 = OpTypeInt 32 1
-%6 = OpConstant %5 1
-%7 = OpTypePointer Function %4
+%5 = OpConstantNull %3
+%6 = OpTypeInt 32 1
+%7 = OpConstant %6 1
+%8 = OpTypePointer Function %4
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%1 = OpVariable %2 Function
+            R"(%1 = OpVariable %2 Function %5
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%8 = OpAccessChain %7 %1 %6
+            R"(%9 = OpAccessChain %8 %1 %7
 )");
 }
 
@@ -114,22 +115,24 @@ TEST_F(BuilderTest, Accessor_Array_LoadIndex) {
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
   ASSERT_TRUE(b.GenerateFunctionVariable(&idx)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 10u);
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 12u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Function %3
-%7 = OpTypeInt 32 1
-%6 = OpTypePointer Function %7
-%9 = OpTypePointer Function %4
+%5 = OpConstantNull %3
+%8 = OpTypeInt 32 1
+%7 = OpTypePointer Function %8
+%9 = OpConstantNull %8
+%11 = OpTypePointer Function %4
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%1 = OpVariable %2 Function
-%5 = OpVariable %6 Function
+            R"(%1 = OpVariable %2 Function %5
+%6 = OpVariable %7 Function %9
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%8 = OpLoad %7 %5
-%10 = OpAccessChain %9 %1 %8
+            R"(%10 = OpLoad %8 %6
+%12 = OpAccessChain %11 %1 %10
 )");
 }
 
@@ -163,22 +166,23 @@ TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 10u);
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 11u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Function %3
-%5 = OpTypeInt 32 1
-%6 = OpConstant %5 1
-%7 = OpConstant %5 2
-%9 = OpTypePointer Function %4
+%5 = OpConstantNull %3
+%6 = OpTypeInt 32 1
+%7 = OpConstant %6 1
+%8 = OpConstant %6 2
+%10 = OpTypePointer Function %4
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%1 = OpVariable %2 Function
+            R"(%1 = OpVariable %2 Function %5
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%8 = OpIAdd %5 %6 %7
-%10 = OpAccessChain %9 %1 %8
+            R"(%9 = OpIAdd %6 %7 %8
+%11 = OpAccessChain %10 %1 %9
 )");
 }
 
@@ -211,7 +215,7 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 12u);
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 13u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
 %4 = OpTypeVector %5 3
@@ -219,16 +223,17 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
 %7 = OpConstant %6 4
 %3 = OpTypeArray %4 %7
 %2 = OpTypePointer Function %3
-%8 = OpTypeInt 32 1
-%9 = OpConstant %8 3
-%10 = OpConstant %8 2
-%11 = OpTypePointer Function %5
+%8 = OpConstantNull %3
+%9 = OpTypeInt 32 1
+%10 = OpConstant %9 3
+%11 = OpConstant %9 2
+%12 = OpTypePointer Function %5
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%1 = OpVariable %2 Function
+            R"(%1 = OpVariable %2 Function %8
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%12 = OpAccessChain %11 %1 %9 %10
+            R"(%13 = OpAccessChain %12 %1 %10 %11
 )");
 }
 
@@ -259,7 +264,7 @@ TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
   Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 14u);
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 15u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
 %4 = OpTypeVector %5 3
@@ -267,18 +272,19 @@ TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
 %7 = OpConstant %6 4
 %3 = OpTypeArray %4 %7
 %2 = OpTypePointer Function %3
-%8 = OpTypeInt 32 1
-%9 = OpConstant %8 2
-%10 = OpTypePointer Function %4
-%12 = OpTypeVector %5 2
+%8 = OpConstantNull %3
+%9 = OpTypeInt 32 1
+%10 = OpConstant %9 2
+%11 = OpTypePointer Function %4
+%13 = OpTypeVector %5 2
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%1 = OpVariable %2 Function
+            R"(%1 = OpVariable %2 Function %8
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%11 = OpAccessChain %10 %1 %9
-%13 = OpLoad %4 %11
-%14 = OpVectorShuffle %12 %13 %13 0 1
+            R"(%12 = OpAccessChain %11 %1 %10
+%14 = OpLoad %4 %12
+%15 = OpVectorShuffle %13 %14 %14 0 1
 )");
 }
 
@@ -320,20 +326,21 @@ TEST_F(BuilderTest, MemberAccessor) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 8u);
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 9u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeStruct %4 %4
 %2 = OpTypePointer Function %3
-%5 = OpTypeInt 32 0
-%6 = OpConstant %5 1
-%7 = OpTypePointer Function %4
+%5 = OpConstantNull %3
+%6 = OpTypeInt 32 0
+%7 = OpConstant %6 1
+%8 = OpTypePointer Function %4
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%1 = OpVariable %2 Function
+            R"(%1 = OpVariable %2 Function %5
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%8 = OpAccessChain %7 %1 %6
+            R"(%9 = OpAccessChain %8 %1 %7
 )");
 }
 
@@ -385,21 +392,22 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 9u);
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 10u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
 %4 = OpTypeStruct %5 %5
 %3 = OpTypeStruct %4
 %2 = OpTypePointer Function %3
-%6 = OpTypeInt 32 0
-%7 = OpConstant %6 0
-%8 = OpTypePointer Function %5
+%6 = OpConstantNull %3
+%7 = OpTypeInt 32 0
+%8 = OpConstant %7 0
+%9 = OpTypePointer Function %5
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%1 = OpVariable %2 Function
+            R"(%1 = OpVariable %2 Function %6
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%9 = OpAccessChain %8 %1 %7 %7
+            R"(%10 = OpAccessChain %9 %1 %8 %8
 )");
 }
 
@@ -454,21 +462,22 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 9u);
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 10u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeFloat 32
 %4 = OpTypeStruct %5 %5
 %3 = OpTypeStruct %4
 %2 = OpTypePointer Function %3
-%6 = OpTypeInt 32 0
-%7 = OpConstant %6 0
-%8 = OpTypePointer Function %5
+%6 = OpConstantNull %3
+%7 = OpTypeInt 32 0
+%8 = OpConstant %7 0
+%9 = OpTypePointer Function %5
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%1 = OpVariable %2 Function
+            R"(%1 = OpVariable %2 Function %6
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%9 = OpAccessChain %8 %1 %7 %7
+            R"(%10 = OpAccessChain %9 %1 %8 %8
 )");
 }
 
@@ -532,17 +541,18 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
 %4 = OpTypeStruct %5 %5
 %3 = OpTypeStruct %4
 %2 = OpTypePointer Function %3
-%6 = OpTypeInt 32 0
-%7 = OpConstant %6 0
-%8 = OpTypePointer Function %5
-%10 = OpConstant %5 2
+%6 = OpConstantNull %3
+%7 = OpTypeInt 32 0
+%8 = OpConstant %7 0
+%9 = OpTypePointer Function %5
+%11 = OpConstant %5 2
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%1 = OpVariable %2 Function
+            R"(%1 = OpVariable %2 Function %6
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%9 = OpAccessChain %8 %1 %7 %7
-OpStore %9 %10
+            R"(%10 = OpAccessChain %9 %1 %8 %8
+OpStore %10 %11
 )");
 }
 
@@ -608,18 +618,20 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
 %4 = OpTypeStruct %5 %5
 %3 = OpTypeStruct %4
 %2 = OpTypePointer Function %3
-%7 = OpTypePointer Function %5
-%8 = OpTypeInt 32 0
-%9 = OpConstant %8 0
+%6 = OpConstantNull %3
+%8 = OpTypePointer Function %5
+%9 = OpConstantNull %5
+%10 = OpTypeInt 32 0
+%11 = OpConstant %10 0
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%1 = OpVariable %2 Function
-%6 = OpVariable %7 Function
+            R"(%1 = OpVariable %2 Function %6
+%7 = OpVariable %8 Function %9
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%10 = OpAccessChain %7 %1 %9 %9
-%11 = OpLoad %5 %10
-OpStore %6 %11
+            R"(%12 = OpAccessChain %8 %1 %11 %11
+%13 = OpLoad %5 %12
+OpStore %7 %13
 )");
 }
 
@@ -645,20 +657,21 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_Single) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 8u);
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 9u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Function %3
-%5 = OpTypeInt 32 0
-%6 = OpConstant %5 1
-%7 = OpTypePointer Function %4
+%5 = OpConstantNull %3
+%6 = OpTypeInt 32 0
+%7 = OpConstant %6 1
+%8 = OpTypePointer Function %4
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%1 = OpVariable %2 Function
+            R"(%1 = OpVariable %2 Function %5
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%8 = OpAccessChain %7 %1 %6
+            R"(%9 = OpAccessChain %8 %1 %7
 )");
 }
 
@@ -684,19 +697,20 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_MultipleNames) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 7u);
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 8u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Function %3
-%5 = OpTypeVector %4 2
+%5 = OpConstantNull %3
+%6 = OpTypeVector %4 2
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%1 = OpVariable %2 Function
+            R"(%1 = OpVariable %2 Function %5
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%6 = OpLoad %3 %1
-%7 = OpVectorShuffle %5 %6 %6 1 0
+            R"(%7 = OpLoad %3 %1
+%8 = OpVectorShuffle %6 %7 %7 1 0
 )");
 }
 
@@ -724,20 +738,21 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_of_Swizzle) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 8u);
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 9u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Function %3
-%7 = OpTypeVector %4 2
+%5 = OpConstantNull %3
+%8 = OpTypeVector %4 2
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%1 = OpVariable %2 Function
+            R"(%1 = OpVariable %2 Function %5
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%5 = OpLoad %3 %1
-%6 = OpVectorShuffle %3 %5 %5 1 0 2
-%8 = OpVectorShuffle %7 %6 %6 0 2
+            R"(%6 = OpLoad %3 %1
+%7 = OpVectorShuffle %3 %6 %6 1 0 2
+%9 = OpVectorShuffle %8 %7 %7 0 2
 )");
 }
 
@@ -765,19 +780,20 @@ TEST_F(BuilderTest, MemberAccessor_Member_of_Swizzle) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 7u);
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 8u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Function %3
+%5 = OpConstantNull %3
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%1 = OpVariable %2 Function
+            R"(%1 = OpVariable %2 Function %5
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%5 = OpLoad %3 %1
-%6 = OpVectorShuffle %3 %5 %5 1 0 2
-%7 = OpCompositeExtract %4 %6 0
+            R"(%6 = OpLoad %3 %1
+%7 = OpVectorShuffle %3 %6 %6 1 0 2
+%8 = OpCompositeExtract %4 %7 0
 )");
 }
 
@@ -807,21 +823,22 @@ TEST_F(BuilderTest, MemberAccessor_Array_of_Swizzle) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 9u);
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 10u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Function %3
-%7 = OpTypeInt 32 1
-%8 = OpConstant %7 1
+%5 = OpConstantNull %3
+%8 = OpTypeInt 32 1
+%9 = OpConstant %8 1
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%1 = OpVariable %2 Function
+            R"(%1 = OpVariable %2 Function %5
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%5 = OpLoad %3 %1
-%6 = OpVectorShuffle %3 %5 %5 1 0 2
-%9 = OpVectorExtractDynamic %4 %6 %8
+            R"(%6 = OpLoad %3 %1
+%7 = OpVectorShuffle %3 %6 %6 1 0 2
+%10 = OpVectorExtractDynamic %4 %7 %9
 )");
 }
 
@@ -897,7 +914,7 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(&var)) << b.error();
 
-  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 21u);
+  EXPECT_EQ(b.GenerateAccessorExpression(&expr), 22u);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%9 = OpTypeFloat 32
 %8 = OpTypeVector %9 3
@@ -910,20 +927,21 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
 %12 = OpConstant %10 2
 %3 = OpTypeArray %4 %12
 %2 = OpTypePointer Function %3
-%13 = OpTypeInt 32 1
-%14 = OpConstant %13 0
-%15 = OpConstant %10 0
-%16 = OpConstant %13 2
-%17 = OpTypePointer Function %8
-%19 = OpTypeVector %9 2
+%13 = OpConstantNull %3
+%14 = OpTypeInt 32 1
+%15 = OpConstant %14 0
+%16 = OpConstant %10 0
+%17 = OpConstant %14 2
+%18 = OpTypePointer Function %8
+%20 = OpTypeVector %9 2
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%1 = OpVariable %2 Function
+            R"(%1 = OpVariable %2 Function %13
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%18 = OpAccessChain %17 %1 %14 %15 %16 %15 %15
-%20 = OpLoad %8 %18
-%21 = OpVectorShuffle %19 %20 %20 1 0
+            R"(%19 = OpAccessChain %18 %1 %15 %16 %17 %16 %16
+%21 = OpLoad %8 %19
+%22 = OpVectorShuffle %20 %21 %21 1 0
 )");
 }
 

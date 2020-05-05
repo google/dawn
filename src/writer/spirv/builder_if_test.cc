@@ -107,18 +107,19 @@ TEST_F(BuilderTest, If_WithStatements) {
   EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
-%4 = OpTypeBool
-%5 = OpConstantTrue %4
-%8 = OpConstant %3 2
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Private %4
+%5 = OpTypeBool
+%6 = OpConstantTrue %5
+%9 = OpConstant %3 2
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpSelectionMerge %6 None
-OpBranchConditional %5 %7 %6
+            R"(OpSelectionMerge %7 None
+OpBranchConditional %6 %8 %7
+%8 = OpLabel
+OpStore %1 %9
+OpBranch %7
 %7 = OpLabel
-OpStore %1 %8
-OpBranch %6
-%6 = OpLabel
 )");
 }
 
@@ -170,22 +171,23 @@ TEST_F(BuilderTest, If_WithElse) {
   EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
-%4 = OpTypeBool
-%5 = OpConstantTrue %4
-%9 = OpConstant %3 2
-%10 = OpConstant %3 3
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Private %4
+%5 = OpTypeBool
+%6 = OpConstantTrue %5
+%10 = OpConstant %3 2
+%11 = OpConstant %3 3
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpSelectionMerge %6 None
-OpBranchConditional %5 %7 %8
-%7 = OpLabel
-OpStore %1 %9
-OpBranch %6
+            R"(OpSelectionMerge %7 None
+OpBranchConditional %6 %8 %9
 %8 = OpLabel
 OpStore %1 %10
-OpBranch %6
-%6 = OpLabel
+OpBranch %7
+%9 = OpLabel
+OpStore %1 %11
+OpBranch %7
+%7 = OpLabel
 )");
 }
 
@@ -240,27 +242,28 @@ TEST_F(BuilderTest, If_WithElseIf) {
   EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
-%4 = OpTypeBool
-%5 = OpConstantTrue %4
-%9 = OpConstant %3 2
-%12 = OpConstant %3 3
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Private %4
+%5 = OpTypeBool
+%6 = OpConstantTrue %5
+%10 = OpConstant %3 2
+%13 = OpConstant %3 3
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpSelectionMerge %6 None
-OpBranchConditional %5 %7 %8
-%7 = OpLabel
-OpStore %1 %9
-OpBranch %6
+            R"(OpSelectionMerge %7 None
+OpBranchConditional %6 %8 %9
 %8 = OpLabel
-OpSelectionMerge %10 None
-OpBranchConditional %5 %11 %10
+OpStore %1 %10
+OpBranch %7
+%9 = OpLabel
+OpSelectionMerge %11 None
+OpBranchConditional %6 %12 %11
+%12 = OpLabel
+OpStore %1 %13
+OpBranch %11
 %11 = OpLabel
-OpStore %1 %12
-OpBranch %10
-%10 = OpLabel
-OpBranch %6
-%6 = OpLabel
+OpBranch %7
+%7 = OpLabel
 )");
 }
 
@@ -334,41 +337,42 @@ TEST_F(BuilderTest, If_WithMultiple) {
   EXPECT_TRUE(b.GenerateIfStatement(&expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
-%4 = OpTypeBool
-%5 = OpConstantTrue %4
-%9 = OpConstant %3 2
-%13 = OpConstant %3 3
-%14 = OpConstantFalse %4
-%18 = OpConstant %3 4
-%19 = OpConstant %3 5
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Private %4
+%5 = OpTypeBool
+%6 = OpConstantTrue %5
+%10 = OpConstant %3 2
+%14 = OpConstant %3 3
+%15 = OpConstantFalse %5
+%19 = OpConstant %3 4
+%20 = OpConstant %3 5
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpSelectionMerge %6 None
-OpBranchConditional %5 %7 %8
-%7 = OpLabel
-OpStore %1 %9
-OpBranch %6
+            R"(OpSelectionMerge %7 None
+OpBranchConditional %6 %8 %9
 %8 = OpLabel
-OpSelectionMerge %10 None
-OpBranchConditional %5 %11 %12
-%11 = OpLabel
-OpStore %1 %13
-OpBranch %10
+OpStore %1 %10
+OpBranch %7
+%9 = OpLabel
+OpSelectionMerge %11 None
+OpBranchConditional %6 %12 %13
 %12 = OpLabel
-OpSelectionMerge %15 None
-OpBranchConditional %14 %16 %17
-%16 = OpLabel
-OpStore %1 %18
-OpBranch %15
+OpStore %1 %14
+OpBranch %11
+%13 = OpLabel
+OpSelectionMerge %16 None
+OpBranchConditional %15 %17 %18
 %17 = OpLabel
 OpStore %1 %19
-OpBranch %15
-%15 = OpLabel
-OpBranch %10
-%10 = OpLabel
-OpBranch %6
-%6 = OpLabel
+OpBranch %16
+%18 = OpLabel
+OpStore %1 %20
+OpBranch %16
+%16 = OpLabel
+OpBranch %11
+%11 = OpLabel
+OpBranch %7
+%7 = OpLabel
 )");
 }
 

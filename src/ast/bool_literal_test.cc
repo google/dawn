@@ -46,6 +46,7 @@ TEST_F(BoolLiteralTest, Is) {
   EXPECT_FALSE(b.IsInt());
   EXPECT_FALSE(b.IsFloat());
   EXPECT_FALSE(b.IsUint());
+  EXPECT_FALSE(b.IsNull());
 }
 
 TEST_F(BoolLiteralTest, ToStr) {

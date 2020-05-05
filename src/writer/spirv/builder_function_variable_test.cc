@@ -54,10 +54,12 @@ TEST_F(BuilderTest, FunctionVar_NoStorageClass) {
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Function %3
+%4 = OpConstantNull %3
 )");
 
   const auto& func = b.functions()[0];
-  EXPECT_EQ(DumpInstructions(func.variables()), R"(%1 = OpVariable %2 Function
+  EXPECT_EQ(DumpInstructions(func.variables()),
+            R"(%1 = OpVariable %2 Function %4
 )");
 }
 
@@ -99,9 +101,10 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
 %4 = OpConstant %2 3
 %5 = OpConstantComposite %1 %3 %3 %4
 %7 = OpTypePointer Function %2
+%8 = OpConstantNull %2
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%6 = OpVariable %7 Function
+            R"(%6 = OpVariable %7 Function %8
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpStore %6 %5
 )");
@@ -147,9 +150,10 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructor) {
 %3 = OpConstant %2 1
 %4 = OpConstant %2 3
 %8 = OpTypePointer Function %1
+%9 = OpConstantNull %1
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%7 = OpVariable %8 Function
+            R"(%7 = OpVariable %8 Function %9
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             R"(%5 = OpFAdd %2 %4 %4

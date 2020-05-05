@@ -106,21 +106,22 @@ TEST_F(BuilderTest, Constructor_Type_NonConstructorParam) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var.get())) << b.error();
 
-  EXPECT_EQ(b.GenerateConstructorExpression(&t, false), 7u);
+  EXPECT_EQ(b.GenerateConstructorExpression(&t, false), 8u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Function %3
-%4 = OpTypeVector %3 2
-%5 = OpConstant %3 1
+%4 = OpConstantNull %3
+%5 = OpTypeVector %3 2
+%6 = OpConstant %3 1
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%1 = OpVariable %2 Function
+            R"(%1 = OpVariable %2 Function %4
 )");
 
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%6 = OpLoad %3 %1
-%7 = OpCompositeConstruct %4 %5 %6
+            R"(%7 = OpLoad %3 %1
+%8 = OpCompositeConstruct %5 %6 %7
 )");
 }
 
@@ -151,24 +152,25 @@ TEST_F(BuilderTest, Constructor_Type_NonConstVector) {
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var.get())) << b.error();
 
-  EXPECT_EQ(b.GenerateConstructorExpression(&t, false), 10u);
+  EXPECT_EQ(b.GenerateConstructorExpression(&t, false), 11u);
   ASSERT_FALSE(b.has_error()) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 2
 %2 = OpTypePointer Function %3
-%5 = OpTypeVector %4 4
-%6 = OpConstant %4 1
+%5 = OpConstantNull %3
+%6 = OpTypeVector %4 4
+%7 = OpConstant %4 1
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%1 = OpVariable %2 Function
+            R"(%1 = OpVariable %2 Function %5
 )");
 
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%7 = OpLoad %3 %1
-%8 = OpCompositeExtract %4 %7 0
-%9 = OpCompositeExtract %4 %7 1
-%10 = OpCompositeConstruct %5 %6 %6 %8 %9
+            R"(%8 = OpLoad %3 %1
+%9 = OpCompositeExtract %4 %8 0
+%10 = OpCompositeExtract %4 %8 1
+%11 = OpCompositeConstruct %6 %7 %7 %9 %10
 )");
 }
 

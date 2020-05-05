@@ -12,41 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/uint_literal.h"
-
-#include "gtest/gtest.h"
-#include "src/ast/type/u32_type.h"
+#include "src/ast/null_literal.h"
 
 namespace tint {
 namespace ast {
-namespace {
 
-using UintLiteralTest = testing::Test;
+NullLiteral::NullLiteral(ast::type::Type* type) : Literal(type) {}
 
-TEST_F(UintLiteralTest, Value) {
-  ast::type::U32Type u32;
-  UintLiteral u{&u32, 47};
-  ASSERT_TRUE(u.IsUint());
-  EXPECT_EQ(u.value(), 47u);
+NullLiteral::~NullLiteral() = default;
+
+bool NullLiteral::IsNull() const {
+  return true;
 }
 
-TEST_F(UintLiteralTest, Is) {
-  ast::type::U32Type u32;
-  UintLiteral u{&u32, 42};
-  EXPECT_FALSE(u.IsBool());
-  EXPECT_FALSE(u.IsInt());
-  EXPECT_FALSE(u.IsFloat());
-  EXPECT_TRUE(u.IsUint());
-  EXPECT_FALSE(u.IsNull());
+std::string NullLiteral::to_str() const {
+  return "null " + type()->type_name();
 }
 
-TEST_F(UintLiteralTest, ToStr) {
-  ast::type::U32Type u32;
-  UintLiteral i{&u32, 42};
-
-  EXPECT_EQ(i.to_str(), "42");
+std::string NullLiteral::name() const {
+  return "__null" + type()->type_name();
 }
 
-}  // namespace
 }  // namespace ast
 }  // namespace tint

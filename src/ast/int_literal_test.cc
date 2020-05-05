@@ -38,6 +38,7 @@ TEST_F(IntLiteralTest, Is) {
   EXPECT_TRUE(i.IsInt());
   EXPECT_FALSE(i.IsFloat());
   EXPECT_FALSE(i.IsUint());
+  EXPECT_FALSE(i.IsNull());
 }
 
 TEST_F(IntLiteralTest, ToStr) {

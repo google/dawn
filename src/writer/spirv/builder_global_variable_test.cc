@@ -52,7 +52,8 @@ TEST_F(BuilderTest, GlobalVar_NoStorageClass) {
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Private %4
 )");
 }
 
@@ -67,7 +68,23 @@ TEST_F(BuilderTest, GlobalVar_WithStorageClass) {
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Output %3
-%1 = OpVariable %2 Output
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Output %4
+)");
+}
+
+TEST_F(BuilderTest, GlobalVar_WithStorageClass_Input) {
+  ast::type::F32Type f32;
+  ast::Variable v("var", ast::StorageClass::kInput, &f32);
+
+  ast::Module mod;
+  Builder b(&mod);
+  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
+)");
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypePointer Input %3
+%1 = OpVariable %2 Input
 )");
 }
 
@@ -167,7 +184,8 @@ TEST_F(BuilderTest, GlobalVar_WithLocation) {
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Output %3
-%1 = OpVariable %2 Output
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Output %4
 )");
 }
 
@@ -192,7 +210,8 @@ OpDecorate %1 DescriptorSet 3
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Output %3
-%1 = OpVariable %2 Output
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Output %4
 )");
 }
 
@@ -216,7 +235,8 @@ TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Output %3
-%1 = OpVariable %2 Output
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Output %4
 )");
 }
 

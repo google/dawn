@@ -129,15 +129,16 @@ TEST_F(BuilderTest, EntryPoint_WithInterfaceIds) {
   ASSERT_TRUE(b.GenerateEntryPoint(&ep));
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "my_in"
 OpName %4 "my_out"
-OpName %6 "my_wg"
+OpName %7 "my_wg"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Input %3
 %1 = OpVariable %2 Input
 %5 = OpTypePointer Output %3
-%4 = OpVariable %5 Output
-%7 = OpTypePointer Workgroup %3
-%6 = OpVariable %7 Workgroup
+%6 = OpConstantNull %3
+%4 = OpVariable %5 Output %6
+%8 = OpTypePointer Workgroup %3
+%7 = OpVariable %8 Workgroup
 )");
   EXPECT_EQ(DumpInstructions(b.preamble()),
             R"(OpEntryPoint Vertex %3 "main" %1 %4

@@ -105,6 +105,8 @@ set(TINT_LIB_SRCS
   ast/node.h
   ast/nop_statement.cc
   ast/nop_statement.h
+  ast/null_literal.cc
+  ast/null_literal.h
   ast/pipeline_stage.cc
   ast/pipeline_stage.h
   ast/return_statement.cc
@@ -283,6 +285,7 @@ set(TINT_TEST_SRCS
   ast/member_accessor_expression_test.cc
   ast/module_test.cc
   ast/nop_statement_test.cc
+  ast/null_literal_test.cc
   ast/binary_expression_test.cc
   ast/return_statement_test.cc
   ast/scalar_constructor_expression_test.cc

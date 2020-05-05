@@ -86,16 +86,17 @@ TEST_F(BuilderTest, Cast_WithLoad) {
   Builder b(&mod);
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
-  EXPECT_EQ(b.GenerateCastExpression(&cast), 4u) << b.error();
+  EXPECT_EQ(b.GenerateCastExpression(&cast), 5u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
-%5 = OpTypeFloat 32
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Private %4
+%6 = OpTypeFloat 32
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%6 = OpLoad %3 %1
-%4 = OpConvertSToF %5 %6
+            R"(%7 = OpLoad %3 %1
+%5 = OpConvertSToF %6 %7
 )");
 }
 

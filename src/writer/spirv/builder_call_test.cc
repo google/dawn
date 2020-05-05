@@ -107,19 +107,20 @@ TEST_F(BuilderTest, Call_GLSLMethod_WithLoad) {
   ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
   ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(&expr), 9u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 10u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(%1 = OpExtInstImport "GLSL.std.450"
 OpName %2 "ident"
-OpName %7 "a_func"
+OpName %8 "a_func"
 %4 = OpTypeFloat 32
 %3 = OpTypePointer Private %4
-%2 = OpVariable %3 Private
-%6 = OpTypeVoid
-%5 = OpTypeFunction %6
-%7 = OpFunction %6 None %5
-%8 = OpLabel
-%10 = OpLoad %4 %2
-%9 = OpExtInst %4 %1 Round %10
+%5 = OpConstantNull %4
+%2 = OpVariable %3 Private %5
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
+%8 = OpFunction %7 None %6
+%9 = OpLabel
+%11 = OpLoad %4 %2
+%10 = OpExtInst %4 %1 Round %11
 OpFunctionEnd
 )");
 }
