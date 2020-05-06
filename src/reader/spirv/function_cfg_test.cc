@@ -2847,7 +2847,7 @@ TEST_F(SpvParserTest,
   EXPECT_EQ(constructs.size(), 2u);
   EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,4) begin_id:10 end_id:0 depth:0 parent:null }
-  Construct{ Selection [0,3) begin_id:10 end_id:99 depth:1 parent:Function@10 }
+  Construct{ IfSelection [0,3) begin_id:10 end_id:99 depth:1 parent:Function@10 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
   EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
@@ -2894,7 +2894,7 @@ TEST_F(
   EXPECT_EQ(constructs.size(), 2u);
   EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,6) begin_id:5 end_id:0 depth:0 parent:null }
-  Construct{ Selection [1,4) begin_id:10 end_id:99 depth:1 parent:Function@5 }
+  Construct{ IfSelection [1,4) begin_id:10 end_id:99 depth:1 parent:Function@5 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
   EXPECT_EQ(fe.GetBlockInfo(5)->construct, constructs[0].get());
@@ -2938,7 +2938,7 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_SwitchSelection) {
   EXPECT_EQ(constructs.size(), 2u);
   EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,5) begin_id:10 end_id:0 depth:0 parent:null }
-  Construct{ Selection [0,4) begin_id:10 end_id:99 depth:1 parent:Function@10 }
+  Construct{ SwitchSelection [0,4) begin_id:10 end_id:99 depth:1 parent:Function@10 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
   EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
@@ -3070,7 +3070,7 @@ TEST_F(SpvParserTest,
   // it.
   EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,4) begin_id:10 end_id:0 depth:0 parent:null }
-  Construct{ Selection [0,2) begin_id:10 end_id:50 depth:1 parent:Function@10 }
+  Construct{ IfSelection [0,2) begin_id:10 end_id:50 depth:1 parent:Function@10 }
   Construct{ Continue [2,3) begin_id:50 end_id:99 depth:1 parent:Function@10 in-c:Continue@50 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
@@ -3117,7 +3117,7 @@ TEST_F(SpvParserTest,
   EXPECT_EQ(constructs.size(), 4u);
   EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,5) begin_id:10 end_id:0 depth:0 parent:null }
-  Construct{ Selection [0,2) begin_id:10 end_id:50 depth:1 parent:Function@10 }
+  Construct{ IfSelection [0,2) begin_id:10 end_id:50 depth:1 parent:Function@10 }
   Construct{ Continue [3,4) begin_id:60 end_id:99 depth:1 parent:Function@10 in-c:Continue@60 }
   Construct{ Loop [2,3) begin_id:50 end_id:60 depth:1 parent:Function@10 in-c-l:Loop@50 }
 })")) << constructs;
@@ -3176,9 +3176,9 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_If_If) {
   EXPECT_EQ(constructs.size(), 4u);
   EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,9) begin_id:10 end_id:0 depth:0 parent:null }
-  Construct{ Selection [0,8) begin_id:10 end_id:99 depth:1 parent:Function@10 }
-  Construct{ Selection [1,3) begin_id:20 end_id:40 depth:2 parent:Selection@10 }
-  Construct{ Selection [5,7) begin_id:50 end_id:89 depth:2 parent:Selection@10 }
+  Construct{ IfSelection [0,8) begin_id:10 end_id:99 depth:1 parent:Function@10 }
+  Construct{ IfSelection [1,3) begin_id:20 end_id:40 depth:2 parent:IfSelection@10 }
+  Construct{ IfSelection [5,7) begin_id:50 end_id:89 depth:2 parent:IfSelection@10 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
   EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
@@ -3237,9 +3237,9 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_Switch_If) {
   // The ordering among siblings depends on the computed block order.
   EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,8) begin_id:10 end_id:0 depth:0 parent:null }
-  Construct{ Selection [0,7) begin_id:10 end_id:99 depth:1 parent:Function@10 }
-  Construct{ Selection [1,3) begin_id:50 end_id:89 depth:2 parent:Selection@10 }
-  Construct{ Selection [4,6) begin_id:20 end_id:49 depth:2 parent:Selection@10 }
+  Construct{ SwitchSelection [0,7) begin_id:10 end_id:99 depth:1 parent:Function@10 }
+  Construct{ IfSelection [1,3) begin_id:50 end_id:89 depth:2 parent:SwitchSelection@10 }
+  Construct{ IfSelection [4,6) begin_id:20 end_id:49 depth:2 parent:SwitchSelection@10 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
   EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
@@ -3286,8 +3286,8 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_If_Switch) {
   EXPECT_EQ(constructs.size(), 3u);
   EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,5) begin_id:10 end_id:0 depth:0 parent:null }
-  Construct{ Selection [0,4) begin_id:10 end_id:99 depth:1 parent:Function@10 }
-  Construct{ Selection [1,3) begin_id:20 end_id:89 depth:2 parent:Selection@10 }
+  Construct{ IfSelection [0,4) begin_id:10 end_id:99 depth:1 parent:Function@10 }
+  Construct{ SwitchSelection [1,3) begin_id:20 end_id:89 depth:2 parent:IfSelection@10 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
   EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
@@ -3397,7 +3397,7 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_Loop_If) {
   Construct{ Function [0,7) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ Continue [5,6) begin_id:80 end_id:99 depth:1 parent:Function@10 in-c:Continue@80 }
   Construct{ Loop [1,5) begin_id:20 end_id:80 depth:1 parent:Function@10 in-c-l:Loop@20 }
-  Construct{ Selection [2,4) begin_id:30 end_id:49 depth:2 parent:Loop@20 in-c-l:Loop@20 }
+  Construct{ IfSelection [2,4) begin_id:30 end_id:49 depth:2 parent:Loop@20 in-c-l:Loop@20 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
   EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[0].get());
@@ -3448,7 +3448,7 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_LoopContinue_If) {
   Construct{ Function [0,6) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ Continue [2,5) begin_id:30 end_id:99 depth:1 parent:Function@10 in-c:Continue@30 }
   Construct{ Loop [1,2) begin_id:20 end_id:30 depth:1 parent:Function@10 in-c-l:Loop@20 }
-  Construct{ Selection [2,4) begin_id:30 end_id:49 depth:2 parent:Continue@30 in-c:Continue@30 }
+  Construct{ IfSelection [2,4) begin_id:30 end_id:49 depth:2 parent:Continue@30 in-c:Continue@30 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
   EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[0].get());
@@ -3490,8 +3490,8 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_If_SingleBlockLoop) {
   EXPECT_EQ(constructs.size(), 3u);
   EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,4) begin_id:10 end_id:0 depth:0 parent:null }
-  Construct{ Selection [0,3) begin_id:10 end_id:99 depth:1 parent:Function@10 }
-  Construct{ Continue [1,2) begin_id:20 end_id:89 depth:2 parent:Selection@10 in-c:Continue@20 }
+  Construct{ IfSelection [0,3) begin_id:10 end_id:99 depth:1 parent:Function@10 }
+  Construct{ Continue [1,2) begin_id:20 end_id:89 depth:2 parent:IfSelection@10 in-c:Continue@20 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
   EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
@@ -3539,9 +3539,9 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_If_MultiBlockLoop) {
   EXPECT_EQ(constructs.size(), 4u);
   EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,7) begin_id:10 end_id:0 depth:0 parent:null }
-  Construct{ Selection [0,6) begin_id:10 end_id:99 depth:1 parent:Function@10 }
-  Construct{ Continue [3,5) begin_id:40 end_id:89 depth:2 parent:Selection@10 in-c:Continue@40 }
-  Construct{ Loop [1,3) begin_id:20 end_id:40 depth:2 parent:Selection@10 in-c-l:Loop@20 }
+  Construct{ IfSelection [0,6) begin_id:10 end_id:99 depth:1 parent:Function@10 }
+  Construct{ Continue [3,5) begin_id:40 end_id:89 depth:2 parent:IfSelection@10 in-c:Continue@40 }
+  Construct{ Loop [1,3) begin_id:20 end_id:40 depth:2 parent:IfSelection@10 in-c-l:Loop@20 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
   EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());

@@ -31,10 +31,16 @@ namespace spirv {
 struct Construct {
   /// Enumeration for the kinds of structured constructs.
   enum Kind {
-    kFunction,   // The whole function.
-    kSelection,  // A SPIR-V selection construct
-    kLoop,       // A SPIR-V loop construct
-    kContinue,   // A SPIR-V continue construct
+    /// The whole function.
+    kFunction,
+    /// A SPIR-V selection construct, header ending in OpBrancConditional
+    kIfSelection,
+    /// A SPIR-V selection construct, header ending in OpSwitch
+    kSwitchSelection,
+    /// A SPIR-V loop construct
+    kLoop,
+    /// A SPIR-V continue construct
+    kContinue,
   };
 
   /// Constructor
@@ -94,8 +100,10 @@ inline std::string ToString(Construct::Kind kind) {
   switch (kind) {
     case Construct::kFunction:
       return "Function";
-    case Construct::kSelection:
-      return "Selection";
+    case Construct::kIfSelection:
+      return "IfSelection";
+    case Construct::kSwitchSelection:
+      return "SwitchSelection";
     case Construct::kLoop:
       return "Loop";
     case Construct::kContinue:

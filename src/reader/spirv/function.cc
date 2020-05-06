@@ -791,7 +791,12 @@ bool FunctionEmitter::LabelControlFlowConstructs() {
         // From the interval rule, the selection construct consists of blocks
         // in the block order, starting at the header, until just before the
         // merge block.
-        top = push_construct(depth, Construct::kSelection, header, merge);
+        const auto branch_opcode =
+            header_info->basic_block->terminator()->opcode();
+        const auto kind = (branch_opcode == SpvOpBranchConditional)
+                              ? Construct::kIfSelection
+                              : Construct::kSwitchSelection;
+        top = push_construct(depth, kind, header, merge);
       }
     }
 
@@ -819,14 +824,11 @@ bool FunctionEmitter::FindSwitchCaseHeaders() {
     return false;
   }
   for (auto& construct : constructs_) {
-    if (construct->kind != Construct::kSelection) {
+    if (construct->kind != Construct::kSwitchSelection) {
       continue;
     }
     const auto* branch =
         GetBlockInfo(construct->begin_id)->basic_block->terminator();
-    if (branch->opcode() != SpvOpSwitch) {
-      continue;
-    }
 
     // Mark the default block
     const auto default_id = branch->GetSingleWordInOperand(1);

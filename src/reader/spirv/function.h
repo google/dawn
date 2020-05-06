@@ -43,17 +43,24 @@ enum class EdgeKind {
   // A back-edge: An edge from a node to one of its ancestors in a depth-first
   // search from the entry block.
   kBack,
-  // An edge from a node to the merge block of the nearest enclosing structured
-  // construct.  We write "ToMerge" to make it clear the destination block is
-  // the merge block, not the source block.
-  kToMerge,
-  // An edge from a node to the merge block of the nearest enclosing loop.
+  // An edge from a node to the merge block of the nearest enclosing switch,
+  // where there is no intervening loop.
+  kSwitchBreak,
+  // An edge from a node to the merge block of the nearest enclosing loop, where
+  // there is no intervening switch.
   // The source block is a "break block" as defined by SPIR-V.
   kLoopBreak,
   // An edge from a node in a loop body to the associated continue target, where
   // there are no other intervening loops or switches.
   // The source block is a "continue block" as defined by SPIR-V.
   kLoopContinue,
+  // An edge from a node to the merge block of the nearest enclosing structured
+  // construct, but which is neither a kSwitchBreak or a kLoopBreak.
+  // This can only occur for an "if" selection, i.e. where the selection
+  // header ends in OpBranchConditional.
+  // TODO(dneto): Rename this to kIfBreak after we correctly classify edges
+  // as kSwitchBreak.
+  kToMerge,
   // An edge from one switch case to the next sibling switch case.
   kCaseFallThrough,
   // None of the above. By structured control flow rules, there can be at most
