@@ -13,10 +13,24 @@
 // limitations under the License.
 
 #include "common/Assert.h"
-#include "common/Constants.h"
 #include "tests/DawnTest.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
+
+namespace {
+
+    constexpr wgpu::CompareFunction kCompareFunctions[] = {
+        wgpu::CompareFunction::Never,
+        wgpu::CompareFunction::Less,
+        wgpu::CompareFunction::LessEqual,
+        wgpu::CompareFunction::Greater,
+        wgpu::CompareFunction::GreaterEqual,
+        wgpu::CompareFunction::Equal,
+        wgpu::CompareFunction::NotEqual,
+        wgpu::CompareFunction::Always,
+    };
+
+}  // anonymous namespace
 
 class ComparisonSamplerTest : public DawnTest {
   protected:
@@ -135,33 +149,22 @@ class ComparisonSamplerTest : public DawnTest {
                     break;
             }
 
-            wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-
             // Set the input depth texture to the provided texture value
-            if (textureValue >= 0.0 && textureValue <= 1.0) {
-                // For valid loadOp values, use a loadOp.
-                utils::ComboRenderPassDescriptor passDescriptor({}, mInputTexture.CreateView());
-                passDescriptor.cDepthStencilAttachmentInfo.clearDepth = textureValue;
+            mTextureUploadBuffer.SetSubData(0, sizeof(float), &textureValue);
 
-                wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
-                pass.EndPass();
-            } else {
-                if (IsOpenGL()) {
-                    // TODO(enga): We don't support copying to depth textures yet on OpenGL.
-                    return;
-                }
-                mTextureUploadBuffer.SetSubData(0, sizeof(float), &textureValue);
-                wgpu::BufferCopyView bufferCopyView;
-                bufferCopyView.buffer = mTextureUploadBuffer;
-                bufferCopyView.offset = 0;
-                bufferCopyView.rowPitch = kTextureBytesPerRowAlignment;
-                bufferCopyView.imageHeight = 1;
-                wgpu::TextureCopyView textureCopyView;
-                textureCopyView.texture = mInputTexture;
-                textureCopyView.origin = {0, 0, 0};
-                wgpu::Extent3D copySize = {1, 1, 1};
-                commandEncoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
-            }
+            wgpu::BufferCopyView bufferCopyView = {};
+            bufferCopyView.buffer = mTextureUploadBuffer;
+            bufferCopyView.offset = 0;
+            bufferCopyView.bytesPerRow = kTextureBytesPerRowAlignment;
+
+            wgpu::TextureCopyView textureCopyView;
+            textureCopyView.texture = mInputTexture;
+            textureCopyView.origin = {0, 0, 0};
+
+            wgpu::Extent3D copySize = {1, 1, 1};
+
+            wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+            commandEncoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
 
             // Render into the output texture
             {
@@ -193,17 +196,26 @@ class ComparisonSamplerTest : public DawnTest {
 TEST_P(ComparisonSamplerTest, CompareFunctions) {
     // Test a "normal" ref value between 0 and 1; as well as negative and > 1 refs.
     for (float compareRef : {-0.1, 0.4, 1.2}) {
-        // Test negative, 0, below the ref, equal to, above the ref, 1, and above 1.
-        std::vector<float> values = {-0.2, 0.0, 0.3, 0.4, 0.5, 1.0, 1.3};
+        // Test 0, below the ref, equal to, above the ref, and 1.
+        for (wgpu::CompareFunction f : kCompareFunctions) {
+            DoCompareRefTest(compareRef, f, {0.0, 0.3, 0.4, 0.5, 1.0});
+        }
+    }
+}
 
-        DoCompareRefTest(compareRef, wgpu::CompareFunction::Never, values);
-        DoCompareRefTest(compareRef, wgpu::CompareFunction::Less, values);
-        DoCompareRefTest(compareRef, wgpu::CompareFunction::LessEqual, values);
-        DoCompareRefTest(compareRef, wgpu::CompareFunction::Greater, values);
-        DoCompareRefTest(compareRef, wgpu::CompareFunction::GreaterEqual, values);
-        DoCompareRefTest(compareRef, wgpu::CompareFunction::Equal, values);
-        DoCompareRefTest(compareRef, wgpu::CompareFunction::NotEqual, values);
-        DoCompareRefTest(compareRef, wgpu::CompareFunction::Always, values);
+// Test that sampling with all of the compare functions works, when the texture contents
+// are outside the 0-1 range.
+TEST_P(ComparisonSamplerTest, CompareFunctionsUnnormalizedContents) {
+    // TODO(enga): Copies to depth textures are clamped. Unless we reinterpret
+    // contents as R32F.
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+
+    // Test a "normal" ref value between 0 and 1; as well as negative and > 1 refs.
+    for (float compareRef : {-0.1, 0.4, 1.2}) {
+        // Test negative, and above 1.
+        for (wgpu::CompareFunction f : kCompareFunctions) {
+            DoCompareRefTest(compareRef, f, {-0.2, 1.3});
+        }
     }
 }
 
