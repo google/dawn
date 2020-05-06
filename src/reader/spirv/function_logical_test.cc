@@ -229,7 +229,7 @@ TEST_F(SpvUnaryLogicalTest, LogicalNot_Vector) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+  auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();

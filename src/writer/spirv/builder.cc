@@ -126,6 +126,10 @@ uint32_t IndexFromName(char name) {
 
 }  // namespace
 
+Builder::AccessorInfo::AccessorInfo() : source_id(0), source_type(nullptr) {}
+
+Builder::AccessorInfo::~AccessorInfo() {}
+
 Builder::Builder(ast::Module* mod) : mod_(mod), scope_stack_({}) {}
 
 Builder::~Builder() = default;

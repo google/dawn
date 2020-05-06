@@ -429,7 +429,7 @@ int main(int argc, const char** argv) {
     }
   }
   if (options.format == Format::kSpirv) {
-    auto w = static_cast<tint::writer::spirv::Generator*>(writer.get());
+    auto* w = static_cast<tint::writer::spirv::Generator*>(writer.get());
     if (!WriteFile(options.output_file, "wb", w->result())) {
       return 1;
     }

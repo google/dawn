@@ -74,8 +74,8 @@ enum class EdgeKind {
 struct BlockInfo {
   /// Constructor
   /// @param bb internal representation of the basic block
-  explicit BlockInfo(const spvtools::opt::BasicBlock& bb)
-      : basic_block(&bb), id(bb.id()) {}
+  explicit BlockInfo(const spvtools::opt::BasicBlock& bb);
+  ~BlockInfo();
 
   /// The internal representation of the basic block.
   const spvtools::opt::BasicBlock* basic_block;

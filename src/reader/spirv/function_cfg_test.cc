@@ -3944,7 +3944,7 @@ TEST_F(SpvParserTest, FindSwitchCaseHeaders_DefaultIsMerge) {
   ASSERT_NE(bi99, nullptr);
   EXPECT_EQ(bi99->case_head_for, nullptr);
   ASSERT_NE(bi99->default_head_for, nullptr);
-  EXPECT_EQ(bi99->default_head_for->begin_id, 10);
+  EXPECT_EQ(bi99->default_head_for->begin_id, 10u);
   EXPECT_TRUE(bi99->default_is_merge);
   EXPECT_EQ(bi99->case_values.get(), nullptr);
 }
@@ -3982,7 +3982,7 @@ TEST_F(SpvParserTest, FindSwitchCaseHeaders_DefaultIsNotMerge) {
   ASSERT_NE(bi30, nullptr);
   EXPECT_EQ(bi30->case_head_for, nullptr);
   ASSERT_NE(bi30->default_head_for, nullptr);
-  EXPECT_EQ(bi30->default_head_for->begin_id, 10);
+  EXPECT_EQ(bi30->default_head_for->begin_id, 10u);
   EXPECT_FALSE(bi30->default_is_merge);
   EXPECT_EQ(bi30->case_values.get(), nullptr);
 }
@@ -4019,7 +4019,7 @@ TEST_F(SpvParserTest, FindSwitchCaseHeaders_CaseIsNotDefault) {
   const auto* bi20 = fe.GetBlockInfo(20);
   ASSERT_NE(bi20, nullptr);
   ASSERT_NE(bi20->case_head_for, nullptr);
-  EXPECT_EQ(bi20->case_head_for->begin_id, 10);
+  EXPECT_EQ(bi20->case_head_for->begin_id, 10u);
   EXPECT_EQ(bi20->default_head_for, nullptr);
   EXPECT_FALSE(bi20->default_is_merge);
   EXPECT_THAT(*(bi20->case_values.get()), UnorderedElementsAre(200));
@@ -4054,7 +4054,7 @@ TEST_F(SpvParserTest, FindSwitchCaseHeaders_CaseIsDefault) {
   const auto* bi20 = fe.GetBlockInfo(20);
   ASSERT_NE(bi20, nullptr);
   ASSERT_NE(bi20->case_head_for, nullptr);
-  EXPECT_EQ(bi20->case_head_for->begin_id, 10);
+  EXPECT_EQ(bi20->case_head_for->begin_id, 10u);
   EXPECT_EQ(bi20->default_head_for, bi20->case_head_for);
   EXPECT_FALSE(bi20->default_is_merge);
   EXPECT_THAT(*(bi20->case_values.get()), UnorderedElementsAre(200));
@@ -4122,7 +4122,7 @@ TEST_F(SpvParserTest, FindSwitchCaseHeaders_ManyValuesWithSameCase) {
   const auto* bi20 = fe.GetBlockInfo(20);
   ASSERT_NE(bi20, nullptr);
   ASSERT_NE(bi20->case_head_for, nullptr);
-  EXPECT_EQ(bi20->case_head_for->begin_id, 10);
+  EXPECT_EQ(bi20->case_head_for->begin_id, 10u);
   EXPECT_EQ(bi20->default_head_for, nullptr);
   EXPECT_FALSE(bi20->default_is_merge);
   EXPECT_THAT(*(bi20->case_values.get()), UnorderedElementsAre(200, 300));
@@ -4365,7 +4365,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_BackEdge_SingleBlockLoop) {
 
   auto* bi20 = fe.GetBlockInfo(20);
   ASSERT_NE(bi20, nullptr);
-  EXPECT_EQ(bi20->succ_edge.count(20), 1);
+  EXPECT_EQ(bi20->succ_edge.count(20), 1u);
   EXPECT_EQ(bi20->succ_edge[20], EdgeKind::kBack);
 }
 
@@ -4397,7 +4397,7 @@ TEST_F(SpvParserTest,
 
   auto* bi40 = fe.GetBlockInfo(40);
   ASSERT_NE(bi40, nullptr);
-  EXPECT_EQ(bi40->succ_edge.count(20), 1);
+  EXPECT_EQ(bi40->succ_edge.count(20), 1u);
   EXPECT_EQ(bi40->succ_edge[20], EdgeKind::kBack);
 }
 
@@ -4432,7 +4432,7 @@ TEST_F(SpvParserTest,
 
   auto* bi50 = fe.GetBlockInfo(50);
   ASSERT_NE(bi50, nullptr);
-  EXPECT_EQ(bi50->succ_edge.count(20), 1);
+  EXPECT_EQ(bi50->succ_edge.count(20), 1u);
   EXPECT_EQ(bi50->succ_edge[20], EdgeKind::kBack);
 }
 
@@ -4491,7 +4491,7 @@ TEST_F(SpvParserTest,
 
   auto* bi = fe.GetBlockInfo(20);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge.count(99), 1u);
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kLoopBreak);
 }
 
@@ -4520,7 +4520,7 @@ TEST_F(SpvParserTest,
 
   auto* bi = fe.GetBlockInfo(20);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge.count(99), 1u);
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kLoopBreak);
 }
 
@@ -4548,7 +4548,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_LoopBreak_FromContinueConstructHeader) {
 
   auto* bi = fe.GetBlockInfo(30);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge.count(99), 1u);
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kLoopBreak);
 }
 
@@ -4573,7 +4573,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_ToMerge_FromIfHeader) {
 
   auto* bi = fe.GetBlockInfo(20);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge.count(99), 1u);
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kToMerge);
 }
 
@@ -4602,13 +4602,13 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_ToMerge_FromIfThenElse) {
   // Then clause
   auto* bi20 = fe.GetBlockInfo(20);
   ASSERT_NE(bi20, nullptr);
-  EXPECT_EQ(bi20->succ_edge.count(99), 1);
+  EXPECT_EQ(bi20->succ_edge.count(99), 1u);
   EXPECT_EQ(bi20->succ_edge[99], EdgeKind::kToMerge);
 
   // Else clause
   auto* bi50 = fe.GetBlockInfo(50);
   ASSERT_NE(bi50, nullptr);
-  EXPECT_EQ(bi50->succ_edge.count(99), 1);
+  EXPECT_EQ(bi50->succ_edge.count(99), 1u);
   EXPECT_EQ(bi50->succ_edge[99], EdgeKind::kToMerge);
 }
 
@@ -4633,7 +4633,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromSwitchCaseDirect) {
 
   auto* bi = fe.GetBlockInfo(10);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge.count(99), 1u);
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kSwitchBreak);
 }
 
@@ -4658,7 +4658,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromSwitchCaseBody) {
 
   auto* bi = fe.GetBlockInfo(20);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge.count(99), 1u);
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kSwitchBreak);
 }
 
@@ -4686,7 +4686,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromSwitchDefaultBody) {
 
   auto* bi = fe.GetBlockInfo(30);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge.count(99), 1u);
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kSwitchBreak);
 }
 
@@ -4711,7 +4711,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromSwitchDefaultIsMerge) {
 
   auto* bi = fe.GetBlockInfo(10);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge.count(99), 1u);
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kSwitchBreak);
 }
 
@@ -4742,7 +4742,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_LoopBreak_FromLoopBody) {
 
   auto* bi = fe.GetBlockInfo(30);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge.count(99), 1u);
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kLoopBreak);
 }
 
@@ -4776,7 +4776,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_LoopBreak_FromContinueConstructTail) {
 
   auto* bi = fe.GetBlockInfo(60);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge.count(99), 1u);
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kLoopBreak);
 }
 
@@ -4807,7 +4807,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_LoopBreak_FromLoopBodyDirect) {
 
   auto* bi = fe.GetBlockInfo(30);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge.count(99), 1u);
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kLoopBreak);
 }
 
@@ -4838,7 +4838,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_LoopContinue_LoopBodyToContinue) {
 
   auto* bi = fe.GetBlockInfo(30);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(80), 1);
+  EXPECT_EQ(bi->succ_edge.count(80), 1u);
   EXPECT_EQ(bi->succ_edge[80], EdgeKind::kLoopContinue);
 }
 
@@ -4876,7 +4876,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_LoopContinue_FromNestedIf) {
 
   auto* bi = fe.GetBlockInfo(40);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(80), 1);
+  EXPECT_EQ(bi->succ_edge.count(80), 1u);
   EXPECT_EQ(bi->succ_edge[80], EdgeKind::kLoopContinue);
 }
 
@@ -4914,7 +4914,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_LoopContinue_ConditionalFromNestedIf) {
 
   auto* bi = fe.GetBlockInfo(40);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(80), 1);
+  EXPECT_EQ(bi->succ_edge.count(80), 1u);
   EXPECT_EQ(bi->succ_edge[80], EdgeKind::kLoopContinue);
 }
 
@@ -4953,7 +4953,7 @@ TEST_F(SpvParserTest,
 
   auto* bi = fe.GetBlockInfo(40);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(80), 1);
+  EXPECT_EQ(bi->succ_edge.count(80), 1u);
   EXPECT_EQ(bi->succ_edge[80], EdgeKind::kLoopContinue);
 }
 
@@ -5068,7 +5068,7 @@ TEST_F(SpvParserTest,
 
   auto* bi = fe.GetBlockInfo(40);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(80), 1);
+  EXPECT_EQ(bi->succ_edge.count(80), 1u);
   EXPECT_EQ(bi->succ_edge[80], EdgeKind::kLoopContinue);
 }
 
@@ -5108,7 +5108,7 @@ TEST_F(
 
   auto* bi = fe.GetBlockInfo(40);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(80), 1);
+  EXPECT_EQ(bi->succ_edge.count(80), 1u);
   EXPECT_EQ(bi->succ_edge[80], EdgeKind::kLoopContinue);
 }
 
@@ -5139,7 +5139,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_Fallthrough_CaseTailToCase) {
 
   auto* bi = fe.GetBlockInfo(30);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(40), 1);
+  EXPECT_EQ(bi->succ_edge.count(40), 1u);
   EXPECT_EQ(bi->succ_edge[40], EdgeKind::kCaseFallThrough);
 }
 
@@ -5170,7 +5170,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_Fallthrough_CaseTailToDefaultNotMerge) {
 
   auto* bi = fe.GetBlockInfo(30);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(40), 1);
+  EXPECT_EQ(bi->succ_edge.count(40), 1u);
   EXPECT_EQ(bi->succ_edge[40], EdgeKind::kCaseFallThrough);
 }
 
@@ -5201,7 +5201,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_Fallthrough_DefaultToCase) {
 
   auto* bi = fe.GetBlockInfo(30);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(40), 1);
+  EXPECT_EQ(bi->succ_edge.count(40), 1u);
   EXPECT_EQ(bi->succ_edge[40], EdgeKind::kCaseFallThrough);
 }
 
@@ -5316,7 +5316,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_Forward_IfToThen) {
 
   auto* bi = fe.GetBlockInfo(10);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(20), 1);
+  EXPECT_EQ(bi->succ_edge.count(20), 1u);
   EXPECT_EQ(bi->succ_edge[20], EdgeKind::kForward);
 }
 
@@ -5341,7 +5341,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_Forward_IfToElse) {
 
   auto* bi = fe.GetBlockInfo(10);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(30), 1);
+  EXPECT_EQ(bi->succ_edge.count(30), 1u);
   EXPECT_EQ(bi->succ_edge[30], EdgeKind::kForward);
 }
 
@@ -5366,7 +5366,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_Forward_SwitchToCase) {
 
   auto* bi = fe.GetBlockInfo(10);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(20), 1);
+  EXPECT_EQ(bi->succ_edge.count(20), 1u);
   EXPECT_EQ(bi->succ_edge[20], EdgeKind::kForward);
 }
 
@@ -5394,7 +5394,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_Forward_SwitchToDefaultNotMerge) {
 
   auto* bi = fe.GetBlockInfo(10);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(30), 1);
+  EXPECT_EQ(bi->succ_edge.count(30), 1u);
   EXPECT_EQ(bi->succ_edge[30], EdgeKind::kForward);
 }
 
@@ -5425,7 +5425,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_Forward_LoopHeadToBody) {
 
   auto* bi = fe.GetBlockInfo(20);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(30), 1);
+  EXPECT_EQ(bi->succ_edge.count(30), 1u);
   EXPECT_EQ(bi->succ_edge[30], EdgeKind::kForward);
 }
 
@@ -5713,9 +5713,9 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_Pathological_Forward_LoopHeadSplitBody) {
 
   auto* bi = fe.GetBlockInfo(20);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(30), 1);
+  EXPECT_EQ(bi->succ_edge.count(30), 1u);
   EXPECT_EQ(bi->succ_edge[30], EdgeKind::kForward);
-  EXPECT_EQ(bi->succ_edge.count(50), 1);
+  EXPECT_EQ(bi->succ_edge.count(50), 1u);
   EXPECT_EQ(bi->succ_edge[50], EdgeKind::kForward);
 }
 
@@ -5750,22 +5750,22 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_Pathological_Forward_Premerge) {
 
   auto* bi20 = fe.GetBlockInfo(20);
   ASSERT_NE(bi20, nullptr);
-  EXPECT_EQ(bi20->succ_edge.count(50), 1);
+  EXPECT_EQ(bi20->succ_edge.count(50), 1u);
   EXPECT_EQ(bi20->succ_edge[50], EdgeKind::kForward);
 
   auto* bi30 = fe.GetBlockInfo(30);
   ASSERT_NE(bi30, nullptr);
-  EXPECT_EQ(bi30->succ_edge.count(50), 1);
+  EXPECT_EQ(bi30->succ_edge.count(50), 1u);
   EXPECT_EQ(bi30->succ_edge[50], EdgeKind::kForward);
 
   auto* bi50 = fe.GetBlockInfo(50);
   ASSERT_NE(bi50, nullptr);
-  EXPECT_EQ(bi50->succ_edge.count(60), 1);
+  EXPECT_EQ(bi50->succ_edge.count(60), 1u);
   EXPECT_EQ(bi50->succ_edge[60], EdgeKind::kForward);
 
   auto* bi60 = fe.GetBlockInfo(60);
   ASSERT_NE(bi60, nullptr);
-  EXPECT_EQ(bi60->succ_edge.count(99), 1);
+  EXPECT_EQ(bi60->succ_edge.count(99), 1u);
   EXPECT_EQ(bi60->succ_edge[99], EdgeKind::kToMerge);
 }
 
@@ -5791,12 +5791,12 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_Pathological_Forward_Regardless) {
 
   auto* bi10 = fe.GetBlockInfo(10);
   ASSERT_NE(bi10, nullptr);
-  EXPECT_EQ(bi10->succ_edge.count(20), 1);
+  EXPECT_EQ(bi10->succ_edge.count(20), 1u);
   EXPECT_EQ(bi10->succ_edge[20], EdgeKind::kForward);
 
   auto* bi20 = fe.GetBlockInfo(20);
   ASSERT_NE(bi20, nullptr);
-  EXPECT_EQ(bi20->succ_edge.count(99), 1);
+  EXPECT_EQ(bi20->succ_edge.count(99), 1u);
   EXPECT_EQ(bi20->succ_edge[99], EdgeKind::kToMerge);
 }
 

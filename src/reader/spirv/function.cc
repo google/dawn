@@ -325,6 +325,11 @@ class StructuredTraverser {
 
 }  // namespace
 
+BlockInfo::BlockInfo(const spvtools::opt::BasicBlock& bb)
+    : basic_block(&bb), id(bb.id()) {}
+
+BlockInfo::~BlockInfo() {}
+
 FunctionEmitter::FunctionEmitter(ParserImpl* pi,
                                  const spvtools::opt::Function& function)
     : parser_impl_(*pi),

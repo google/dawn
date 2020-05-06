@@ -40,15 +40,18 @@ class Builder {
  public:
   /// Contains information for generating accessor chains
   struct AccessorInfo {
+    AccessorInfo();
+    ~AccessorInfo();
+
     /// The ID of the current chain source. The chain source may change as we
     /// evaluate the access chain. The chain source always points to the ID
     /// which we will use to evaluate the current set of accessors. This maybe
     /// the original variable, or maybe an intermediary if we had to evaulate
     /// the access chain early (in the case of a swizzle of an access chain).
-    uint32_t source_id = 0;
+    uint32_t source_id;
     /// The type of the current chain source. This type matches the deduced
     /// result_type of the current source defined above.
-    ast::type::Type* source_type = nullptr;
+    ast::type::Type* source_type;
     /// A list of access chain indices to emit. Note, we _only_ have access
     /// chain indices if the source is pointer.
     std::vector<uint32_t> access_chain_indices;
