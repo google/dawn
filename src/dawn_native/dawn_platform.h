@@ -29,6 +29,12 @@ namespace dawn_native {
         static_cast<wgpu::BufferUsage>(0x80000000);
     static constexpr wgpu::TextureUsage kReadonlyStorageTexture =
         static_cast<wgpu::TextureUsage>(0x80000000);
+
+    // Add an extra texture usage for textures that will be presented, for use in backends
+    // that needs to transition to present usage.
+    // TODO(cwallez@chromium.org): It currently aliases wgpu::TextureUsage::Present, assign it
+    // some bit when wgpu::TextureUsage::Present is removed.
+    static constexpr wgpu::TextureUsage kPresentTextureUsage = wgpu::TextureUsage::Present;
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_DAWNPLATFORM_H_

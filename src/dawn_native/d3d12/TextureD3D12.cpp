@@ -35,8 +35,10 @@ namespace dawn_native { namespace d3d12 {
         D3D12_RESOURCE_STATES D3D12TextureUsage(wgpu::TextureUsage usage, const Format& format) {
             D3D12_RESOURCE_STATES resourceState = D3D12_RESOURCE_STATE_COMMON;
 
-            // Present is an exclusive flag.
-            if (usage & wgpu::TextureUsage::Present) {
+            if (usage & kPresentTextureUsage) {
+                // The present usage is only used internally by the swapchain and is never used in
+                // combination with other usages.
+                ASSERT(usage == kPresentTextureUsage);
                 return D3D12_RESOURCE_STATE_PRESENT;
             }
 

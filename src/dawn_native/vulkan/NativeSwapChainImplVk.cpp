@@ -155,31 +155,6 @@ namespace dawn_native { namespace vulkan {
             ASSERT(false);
         }
 
-        // Do the initial layout transition for all these images from an undefined layout to
-        // present so that it matches the "present" usage after the first GetNextTexture.
-        CommandRecordingContext* recordingContext = mDevice->GetPendingRecordingContext();
-        for (VkImage image : mSwapChainImages) {
-            VkImageMemoryBarrier barrier;
-            barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-            barrier.pNext = nullptr;
-            barrier.srcAccessMask = 0;
-            barrier.dstAccessMask = 0;
-            barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-            barrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-            barrier.srcQueueFamilyIndex = 0;
-            barrier.dstQueueFamilyIndex = 0;
-            barrier.image = *image;
-            barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            barrier.subresourceRange.baseMipLevel = 0;
-            barrier.subresourceRange.levelCount = 1;
-            barrier.subresourceRange.baseArrayLayer = 0;
-            barrier.subresourceRange.layerCount = 1;
-
-            mDevice->fn.CmdPipelineBarrier(
-                recordingContext->commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-                VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
-        }
-
         if (oldSwapchain != VK_NULL_HANDLE) {
             mDevice->GetFencedDeleter()->DeleteWhenUnused(oldSwapchain);
         }
