@@ -4612,7 +4612,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_ToMerge_FromIfThenElse) {
   EXPECT_EQ(bi50->succ_edge[99], EdgeKind::kToMerge);
 }
 
-TEST_F(SpvParserTest, ClassifyCFGEdges_ToMerge_FromSwitchCaseDirect) {
+TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromSwitchCaseDirect) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -4634,10 +4634,10 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_ToMerge_FromSwitchCaseDirect) {
   auto* bi = fe.GetBlockInfo(10);
   ASSERT_NE(bi, nullptr);
   EXPECT_EQ(bi->succ_edge.count(99), 1);
-  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kToMerge);
+  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kSwitchBreak);
 }
 
-TEST_F(SpvParserTest, ClassifyCFGEdges_ToMerge_FromSwitchCaseBody) {
+TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromSwitchCaseBody) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -4659,10 +4659,10 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_ToMerge_FromSwitchCaseBody) {
   auto* bi = fe.GetBlockInfo(20);
   ASSERT_NE(bi, nullptr);
   EXPECT_EQ(bi->succ_edge.count(99), 1);
-  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kToMerge);
+  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kSwitchBreak);
 }
 
-TEST_F(SpvParserTest, ClassifyCFGEdges_ToMerge_FromSwitchDefaultBody) {
+TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromSwitchDefaultBody) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -4687,10 +4687,10 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_ToMerge_FromSwitchDefaultBody) {
   auto* bi = fe.GetBlockInfo(30);
   ASSERT_NE(bi, nullptr);
   EXPECT_EQ(bi->succ_edge.count(99), 1);
-  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kToMerge);
+  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kSwitchBreak);
 }
 
-TEST_F(SpvParserTest, ClassifyCFGEdges_ToMerge_FromSwitchDefaultIsMerge) {
+TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromSwitchDefaultIsMerge) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -4712,7 +4712,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_ToMerge_FromSwitchDefaultIsMerge) {
   auto* bi = fe.GetBlockInfo(10);
   ASSERT_NE(bi, nullptr);
   EXPECT_EQ(bi->succ_edge.count(99), 1);
-  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kToMerge);
+  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kSwitchBreak);
 }
 
 TEST_F(SpvParserTest, ClassifyCFGEdges_LoopBreak_FromLoopBody) {

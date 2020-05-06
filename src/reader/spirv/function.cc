@@ -1052,9 +1052,13 @@ bool FunctionEmitter::ClassifyCFGEdges() {
           const bool src_is_loop_header = header_info.continue_for_header != 0;
           const bool src_is_continue_header =
               header_info.header_for_continue != 0;
-          edge_kind = (src_is_loop_header || src_is_continue_header)
-                          ? EdgeKind::kLoopBreak
-                          : EdgeKind::kToMerge;
+          if (src_is_loop_header || src_is_continue_header) {
+            edge_kind = EdgeKind::kLoopBreak;
+          } else if (src_construct.kind == Construct::kSwitchSelection) {
+            edge_kind = EdgeKind::kSwitchBreak;
+          } else {
+            edge_kind = EdgeKind::kToMerge;
+          }
         } else {
           const auto* loop_or_continue_construct =
               src_construct.enclosing_loop_or_continue;
