@@ -27,7 +27,8 @@ shaderc_dir="third_party/shaderc/"
 spirv_cross_dir="third_party/spirv-cross/"
 spirv_headers_dir="third_party/spirv-headers/"
 spirv_tools_dir="third_party/SPIRV-Tools/"
+tint_dir="third_party/tint/"
 
 cd "$repo_path"
 
-roll-dep "$@" "${glslang_dir}" "${shaderc_dir}" "${spirv_cross_dir}" "${spirv_headers_dir}" "${spirv_tools_dir}"
+roll-dep "$@" "${glslang_dir}" "${shaderc_dir}" "${spirv_cross_dir}" "${spirv_headers_dir}" "${spirv_tools_dir}" "${tint_dir}"

@@ -83,6 +83,12 @@ deps = {
     'condition': 'dawn_standalone',
   },
 
+  # WGSL support
+  'third_party/tint': {
+    'url': '{dawn_git}/tint@054927d7eb34803e2a05ab7993688e448a362948',
+    'condition': 'dawn_standalone',
+  },
+
   # GLFW for tests and samples
   'third_party/glfw': {
     'url': '{chromium_git}/external/github.com/glfw/glfw@d973acc123826666ecc9e6fd475682e3d84c54a6',
