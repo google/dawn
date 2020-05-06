@@ -51,10 +51,6 @@ std::ostream& operator<<(std::ostream& out, StorageClass sc) {
       out << "image";
       break;
     }
-    case StorageClass::kPushConstant: {
-      out << "push_constant";
-      break;
-    }
     case StorageClass::kPrivate: {
       out << "private";
       break;

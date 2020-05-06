@@ -252,8 +252,6 @@ class Token {
     kPrivate,
     /// A 'ptr'
     kPtr,
-    /// A 'push_constant'
-    kPushConstant,
     /// A 'regardless'
     kRegardless,
     /// A 'return'
@@ -565,8 +563,6 @@ class Token {
   bool IsPrivate() const { return type_ == Type::kPrivate; }
   /// @returns true if token is a 'ptr'
   bool IsPtr() const { return type_ == Type::kPtr; }
-  /// @returns true if token is a 'push_constant'
-  bool IsPushConstant() const { return type_ == Type::kPushConstant; }
   /// @returns true if token is a 'return'
   bool IsReturn() const { return type_ == Type::kReturn; }
   /// @returns true if token is a 'set'

@@ -602,8 +602,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kPrivate, source, "private"};
   if (str == "ptr")
     return {Token::Type::kPtr, source, "ptr"};
-  if (str == "push_constant")
-    return {Token::Type::kPushConstant, source, "push_constant"};
   if (str == "return")
     return {Token::Type::kReturn, source, "return"};
   if (str == "set")

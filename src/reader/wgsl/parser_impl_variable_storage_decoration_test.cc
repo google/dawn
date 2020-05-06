@@ -74,7 +74,6 @@ INSTANTIATE_TEST_SUITE_P(
         VariableStorageData{"storage_buffer",
                             ast::StorageClass::kStorageBuffer},
         VariableStorageData{"image", ast::StorageClass::kImage},
-        VariableStorageData{"push_constant", ast::StorageClass::kPushConstant},
         VariableStorageData{"private", ast::StorageClass::kPrivate},
         VariableStorageData{"function", ast::StorageClass::kFunction}));
 

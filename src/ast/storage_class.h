@@ -30,7 +30,6 @@ enum class StorageClass {
   kUniformConstant,
   kStorageBuffer,
   kImage,
-  kPushConstant,
   kPrivate,
   kFunction
 };

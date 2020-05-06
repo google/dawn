@@ -241,8 +241,6 @@ std::string Token::TypeToName(Type type) {
       return "private";
     case Token::Type::kPtr:
       return "ptr";
-    case Token::Type::kPushConstant:
-      return "push_constant";
     case Token::Type::kRegardless:
       return "regardless";
     case Token::Type::kReturn:

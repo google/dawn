@@ -498,7 +498,6 @@ INSTANTIATE_TEST_SUITE_P(
         PtrData{ast::StorageClass::kStorageBuffer,
                 SpvStorageClassStorageBuffer},
         PtrData{ast::StorageClass::kImage, SpvStorageClassImage},
-        PtrData{ast::StorageClass::kPushConstant, SpvStorageClassPushConstant},
         PtrData{ast::StorageClass::kPrivate, SpvStorageClassPrivate},
         PtrData{ast::StorageClass::kFunction, SpvStorageClassFunction}));
 

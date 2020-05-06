@@ -73,7 +73,6 @@ INSTANTIATE_TEST_SUITE_P(
                          ast::StorageClass::kUniformConstant},
         StorageClassData{"storage_buffer", ast::StorageClass::kStorageBuffer},
         StorageClassData{"image", ast::StorageClass::kImage},
-        StorageClassData{"push_constant", ast::StorageClass::kPushConstant},
         StorageClassData{"private", ast::StorageClass::kPrivate},
         StorageClassData{"function", ast::StorageClass::kFunction}));
 

@@ -476,7 +476,6 @@ INSTANTIATE_TEST_SUITE_P(
         TokenData{"position", Token::Type::kPosition},
         TokenData{"private", Token::Type::kPrivate},
         TokenData{"ptr", Token::Type::kPtr},
-        TokenData{"push_constant", Token::Type::kPushConstant},
         TokenData{"return", Token::Type::kReturn},
         TokenData{"set", Token::Type::kSet},
         TokenData{"storage_buffer", Token::Type::kStorageBuffer},

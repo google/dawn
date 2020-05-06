@@ -628,22 +628,6 @@ TEST_F(SpvParserTest, ConvertType_PointerImage) {
   EXPECT_TRUE(p->error().empty());
 }
 
-TEST_F(SpvParserTest, ConvertType_PointerPushConstant) {
-  auto* p = parser(test::Assemble(R"(
-  %float = OpTypeFloat 32
-  %3 = OpTypePointer PushConstant %float
-  )"));
-  EXPECT_TRUE(p->BuildInternalModule());
-
-  auto* type = p->ConvertType(3);
-  EXPECT_TRUE(type->IsPointer());
-  auto* ptr_ty = type->AsPointer();
-  EXPECT_NE(ptr_ty, nullptr);
-  EXPECT_TRUE(ptr_ty->type()->IsF32());
-  EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kPushConstant);
-  EXPECT_TRUE(p->error().empty());
-}
-
 TEST_F(SpvParserTest, ConvertType_PointerPrivate) {
   auto* p = parser(test::Assemble(R"(
   %float = OpTypeFloat 32

@@ -927,7 +927,6 @@ ast::type::Type* ParserImpl::type_decl_matrix(Token t) {
 //  | UNIFORM_CONSTANT
 //  | STORAGE_BUFFER
 //  | IMAGE
-//  | PUSH_CONSTANT
 //  | PRIVATE
 //  | FUNCTION
 ast::StorageClass ParserImpl::storage_class() {
@@ -959,10 +958,6 @@ ast::StorageClass ParserImpl::storage_class() {
   if (t.IsImage()) {
     next();  // consume the peek
     return ast::StorageClass::kImage;
-  }
-  if (t.IsPushConstant()) {
-    next();  // consume the peek
-    return ast::StorageClass::kPushConstant;
   }
   if (t.IsPrivate()) {
     next();  // consume the peek
