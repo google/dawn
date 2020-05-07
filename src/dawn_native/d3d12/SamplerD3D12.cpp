@@ -38,26 +38,38 @@ namespace dawn_native { namespace d3d12 {
         : SamplerBase(device, descriptor) {
         // https://msdn.microsoft.com/en-us/library/windows/desktop/dn770367(v=vs.85).aspx
         // hex value, decimal value, min linear, mag linear, mip linear
-        // D3D12_FILTER_MIN_MAG_MIP_POINT                       = 0       0     0 0 0
-        // D3D12_FILTER_MIN_MAG_POINT_MIP_LINEAR                = 0x1     1     0 0 1
-        // D3D12_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT          = 0x4     4     0 1 0
-        // D3D12_FILTER_MIN_POINT_MAG_MIP_LINEAR                = 0x5     5     0 1 1
-        // D3D12_FILTER_MIN_LINEAR_MAG_MIP_POINT                = 0x10   16     1 0 0
-        // D3D12_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR         = 0x11   17     1 0 1
-        // D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT                = 0x14   20     1 1 0
-        // D3D12_FILTER_MIN_MAG_MIP_LINEAR                      = 0x15   21     1 1 1
+        // D3D12_FILTER_MIN_MAG_MIP_POINT                          = 0        0     0 0 0
+        // D3D12_FILTER_MIN_MAG_POINT_MIP_LINEAR                   = 0x1      1     0 0 1
+        // D3D12_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT             = 0x4      4     0 1 0
+        // D3D12_FILTER_MIN_POINT_MAG_MIP_LINEAR                   = 0x5      5     0 1 1
+        // D3D12_FILTER_MIN_LINEAR_MAG_MIP_POINT                   = 0x10    16     1 0 0
+        // D3D12_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR            = 0x11    17     1 0 1
+        // D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT                   = 0x14    20     1 1 0
+        // D3D12_FILTER_MIN_MAG_MIP_LINEAR                         = 0x15    21     1 1 1
+        // D3D12_FILTER_COMPARISON_MIN_MAG_MIP_POINT,              = 0x80   128
+        // D3D12_FILTER_COMPARISON_MIN_MAG_POINT_MIP_LINEAR,       = 0x81   129
+        // D3D12_FILTER_COMPARISON_MIN_POINT_MAG_LINEAR_MIP_POINT, = 0x84   132
+        // D3D12_FILTER_COMPARISON_MIN_POINT_MAG_MIP_LINEAR,       = 0x85   133
+        // D3D12_FILTER_COMPARISON_MIN_LINEAR_MAG_MIP_POINT,       = 0x90   144
+        // D3D12_FILTER_COMPARISON_MIN_LINEAR_MAG_POINT_MIP_LINEAR,= 0x91   145
+        // D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT,       = 0x94   148
+        // D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR,             = 0x95   149
 
-        // if mip mode is linear, add 1
-        // if mag mode is linear, add 4
-        // if min mode is linear, add 16
+        // if mip mode is linear, add 0x1
+        // if mag mode is linear, add 0x4
+        // if min mode is linear, add 0x10
+        // if comparison, add 0x80
 
         uint8_t mode = 0;
+        if (descriptor->compare != wgpu::CompareFunction::Undefined) {
+            mode += 0x80;
+        }
 
         switch (descriptor->minFilter) {
             case wgpu::FilterMode::Nearest:
                 break;
             case wgpu::FilterMode::Linear:
-                mode += 16;
+                mode += 0x10;
                 break;
         }
 
@@ -65,7 +77,7 @@ namespace dawn_native { namespace d3d12 {
             case wgpu::FilterMode::Nearest:
                 break;
             case wgpu::FilterMode::Linear:
-                mode += 4;
+                mode += 0x4;
                 break;
         }
 
@@ -73,7 +85,7 @@ namespace dawn_native { namespace d3d12 {
             case wgpu::FilterMode::Nearest:
                 break;
             case wgpu::FilterMode::Linear:
-                mode += 1;
+                mode += 0x1;
                 break;
         }
 
