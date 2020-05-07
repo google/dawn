@@ -16,6 +16,7 @@
 
 #include "common/Assert.h"
 #include "dawn_native/DawnNative.h"
+#include "testing/libfuzzer/libfuzzer_exports.h"
 
 extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
     return DawnWireServerFuzzer::Initialize(argc, argv);
