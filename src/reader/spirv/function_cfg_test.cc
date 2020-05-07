@@ -73,6 +73,14 @@ bool FlowClassifyCFGEdges(FunctionEmitter* fe) {
   return fe->ClassifyCFGEdges();
 }
 
+/// Runs the necessary flow until and including finding if-selection
+/// internal headers.
+/// @returns the result of classify CFG edges.
+bool FlowFindIfSelectionInternalHeaders(FunctionEmitter* fe) {
+  EXPECT_TRUE(FlowClassifyCFGEdges(fe)) << fe->parser()->error();
+  return fe->FindIfSelectionInternalHeaders();
+}
+
 TEST_F(SpvParserTest, TerminatorsAreSane_SingleBlock) {
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
@@ -4571,7 +4579,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_FromIfHeader) {
 
   auto* bi = fe.GetBlockInfo(20);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge.count(99), 1u);
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kIfBreak);
 }
 
@@ -4600,13 +4608,13 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_FromIfThenElse) {
   // Then clause
   auto* bi20 = fe.GetBlockInfo(20);
   ASSERT_NE(bi20, nullptr);
-  EXPECT_EQ(bi20->succ_edge.count(99), 1);
+  EXPECT_EQ(bi20->succ_edge.count(99), 1u);
   EXPECT_EQ(bi20->succ_edge[99], EdgeKind::kIfBreak);
 
   // Else clause
   auto* bi50 = fe.GetBlockInfo(50);
   ASSERT_NE(bi50, nullptr);
-  EXPECT_EQ(bi50->succ_edge.count(99), 1);
+  EXPECT_EQ(bi50->succ_edge.count(99), 1u);
   EXPECT_EQ(bi50->succ_edge[99], EdgeKind::kIfBreak);
 }
 
@@ -4741,7 +4749,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromNestedIf_Unconditional) {
 
   auto* bi = fe.GetBlockInfo(30);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge.count(99), 1u);
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kSwitchBreak);
 }
 
@@ -4773,7 +4781,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromNestedIf_Conditional) {
 
   auto* bi = fe.GetBlockInfo(30);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge.count(99), 1u);
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kSwitchBreak);
 }
 
@@ -4973,7 +4981,7 @@ TEST_F(SpvParserTest,
 
   auto* bi = fe.GetBlockInfo(40);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge.count(99), 1u);
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kLoopBreak);
 }
 
@@ -5012,7 +5020,7 @@ TEST_F(SpvParserTest,
 
   auto* bi = fe.GetBlockInfo(40);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge.count(99), 1u);
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kLoopBreak);
 }
 
@@ -6011,7 +6019,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_Pathological_Forward_Premerge) {
 
   auto* bi60 = fe.GetBlockInfo(60);
   ASSERT_NE(bi60, nullptr);
-  EXPECT_EQ(bi60->succ_edge.count(99), 1);
+  EXPECT_EQ(bi60->succ_edge.count(99), 1u);
   EXPECT_EQ(bi60->succ_edge[99], EdgeKind::kIfBreak);
 }
 
@@ -6042,8 +6050,531 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_Pathological_Forward_Regardless) {
 
   auto* bi20 = fe.GetBlockInfo(20);
   ASSERT_NE(bi20, nullptr);
-  EXPECT_EQ(bi20->succ_edge.count(99), 1);
+  EXPECT_EQ(bi20->succ_edge.count(99), 1u);
   EXPECT_EQ(bi20->succ_edge[99], EdgeKind::kIfBreak);
+}
+
+TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_NoIf) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(10);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->true_head_for, nullptr);
+  EXPECT_EQ(bi->false_head_for, nullptr);
+  EXPECT_EQ(bi->premerge_head_for, nullptr);
+  EXPECT_EQ(bi->premerge_head_for, nullptr);
+  EXPECT_EQ(bi->exclusive_false_head_for, nullptr);
+}
+
+TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_ThenElse) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %30
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowFindIfSelectionInternalHeaders(&fe));
+
+  auto* bi20 = fe.GetBlockInfo(20);
+  ASSERT_NE(bi20, nullptr);
+  ASSERT_NE(bi20->true_head_for, nullptr);
+  EXPECT_EQ(bi20->true_head_for->begin_id, 10);
+  EXPECT_EQ(bi20->false_head_for, nullptr);
+  EXPECT_EQ(bi20->premerge_head_for, nullptr);
+  EXPECT_EQ(bi20->exclusive_false_head_for, nullptr);
+
+  auto* bi30 = fe.GetBlockInfo(30);
+  ASSERT_NE(bi30, nullptr);
+  EXPECT_EQ(bi30->true_head_for, nullptr);
+  ASSERT_NE(bi30->false_head_for, nullptr);
+  EXPECT_EQ(bi30->false_head_for->begin_id, 10);
+  EXPECT_EQ(bi30->premerge_head_for, nullptr);
+  EXPECT_EQ(bi30->exclusive_false_head_for, nullptr);
+}
+
+TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_IfOnly) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowFindIfSelectionInternalHeaders(&fe));
+
+  auto* bi30 = fe.GetBlockInfo(30);
+  ASSERT_NE(bi30, nullptr);
+  ASSERT_NE(bi30->true_head_for, nullptr);
+  EXPECT_EQ(bi30->true_head_for->begin_id, 10);
+  EXPECT_EQ(bi30->false_head_for, nullptr);
+  EXPECT_EQ(bi30->premerge_head_for, nullptr);
+  EXPECT_EQ(bi30->exclusive_false_head_for, nullptr);
+}
+
+TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_ElseOnly) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %99 %30
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowFindIfSelectionInternalHeaders(&fe));
+
+  auto* bi30 = fe.GetBlockInfo(30);
+  ASSERT_NE(bi30, nullptr);
+  EXPECT_EQ(bi30->true_head_for, nullptr);
+  ASSERT_NE(bi30->false_head_for, nullptr);
+  EXPECT_EQ(bi30->false_head_for->begin_id, 10);
+  EXPECT_EQ(bi30->premerge_head_for, nullptr);
+  ASSERT_NE(bi30->exclusive_false_head_for, nullptr);
+  EXPECT_EQ(bi30->exclusive_false_head_for->begin_id, 10);
+}
+
+TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_Regardless) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %20 ; same target
+
+     %20 = OpLabel
+     OpBranch %80
+
+     %80 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowFindIfSelectionInternalHeaders(&fe));
+
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 80, 99));
+
+  auto* bi20 = fe.GetBlockInfo(20);
+  ASSERT_NE(bi20, nullptr);
+  ASSERT_NE(bi20->true_head_for, nullptr);
+  EXPECT_EQ(bi20->true_head_for->begin_id, 10);
+  ASSERT_NE(bi20->false_head_for, nullptr);
+  EXPECT_EQ(bi20->false_head_for->begin_id, 10);
+  EXPECT_EQ(bi20->premerge_head_for, nullptr);
+  EXPECT_EQ(bi20->exclusive_false_head_for, nullptr);
+
+  auto* bi80 = fe.GetBlockInfo(80);
+  ASSERT_NE(bi80, nullptr);
+  EXPECT_EQ(bi80->true_head_for, nullptr);
+  EXPECT_EQ(bi80->false_head_for, nullptr);
+  EXPECT_EQ(bi80->premerge_head_for, nullptr);
+  EXPECT_EQ(bi80->exclusive_false_head_for, nullptr);
+}
+
+TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_Premerge_Simple) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %30
+
+     %20 = OpLabel
+     OpBranch %80
+
+     %30 = OpLabel
+     OpBranch %80
+
+     %80 = OpLabel ; premerge node
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowFindIfSelectionInternalHeaders(&fe));
+
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 80, 99));
+
+  auto* bi80 = fe.GetBlockInfo(80);
+  ASSERT_NE(bi80, nullptr);
+  EXPECT_EQ(bi80->true_head_for, nullptr);
+  EXPECT_EQ(bi80->false_head_for, nullptr);
+  ASSERT_NE(bi80->premerge_head_for, nullptr);
+  EXPECT_EQ(bi80->premerge_head_for->begin_id, 10);
+  EXPECT_EQ(bi80->exclusive_false_head_for, nullptr);
+}
+
+TEST_F(SpvParserTest,
+       FindIfSelectionInternalHeaders_Premerge_ThenDirectToElse) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %30
+
+     %20 = OpLabel
+     OpBranch %30
+
+     %30 = OpLabel
+     OpBranch %80
+
+     %80 = OpLabel ; premerge node
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowFindIfSelectionInternalHeaders(&fe));
+
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 80, 99));
+
+  auto* bi20 = fe.GetBlockInfo(20);
+  ASSERT_NE(bi20, nullptr);
+  ASSERT_NE(bi20->true_head_for, nullptr);
+  EXPECT_EQ(bi20->true_head_for->begin_id, 10);
+  EXPECT_EQ(bi20->false_head_for, nullptr);
+  EXPECT_EQ(bi20->premerge_head_for, nullptr);
+  EXPECT_EQ(bi20->exclusive_false_head_for, nullptr);
+
+  auto* bi30 = fe.GetBlockInfo(30);
+  ASSERT_NE(bi30, nullptr);
+  EXPECT_EQ(bi30->true_head_for, nullptr);
+  ASSERT_NE(bi30->false_head_for, nullptr);
+  EXPECT_EQ(bi30->false_head_for->begin_id, 10);
+  ASSERT_NE(bi30->premerge_head_for, nullptr);
+  EXPECT_EQ(bi30->premerge_head_for->begin_id, 10);
+  EXPECT_EQ(bi30->exclusive_false_head_for, nullptr);
+
+  auto* bi80 = fe.GetBlockInfo(80);
+  ASSERT_NE(bi80, nullptr);
+  EXPECT_EQ(bi80->true_head_for, nullptr);
+  EXPECT_EQ(bi80->false_head_for, nullptr);
+  EXPECT_EQ(bi80->premerge_head_for, nullptr);
+  EXPECT_EQ(bi80->exclusive_false_head_for, nullptr);
+}
+
+TEST_F(SpvParserTest,
+       FindIfSelectionInternalHeaders_Premerge_ElseDirectToThen) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %30
+
+     %20 = OpLabel
+     OpBranch %80 ; branches to premerge
+
+     %30 = OpLabel ; else
+     OpBranch %20  ; branches to then
+
+     %80 = OpLabel ; premerge node
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowFindIfSelectionInternalHeaders(&fe));
+
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 30, 20, 80, 99));
+
+  auto* bi20 = fe.GetBlockInfo(20);
+  ASSERT_NE(bi20, nullptr);
+  ASSERT_NE(bi20->true_head_for, nullptr);
+  EXPECT_EQ(bi20->true_head_for->begin_id, 10);
+  EXPECT_EQ(bi20->false_head_for, nullptr);
+  ASSERT_NE(bi20->premerge_head_for, nullptr);
+  EXPECT_EQ(bi20->premerge_head_for->begin_id, 10);
+  EXPECT_EQ(bi20->exclusive_false_head_for, nullptr);
+
+  auto* bi30 = fe.GetBlockInfo(30);
+  ASSERT_NE(bi30, nullptr);
+  EXPECT_EQ(bi30->true_head_for, nullptr);
+  ASSERT_NE(bi30->false_head_for, nullptr);
+  EXPECT_EQ(bi30->false_head_for->begin_id, 10);
+  EXPECT_EQ(bi30->premerge_head_for, nullptr);
+  EXPECT_EQ(bi30->exclusive_false_head_for, nullptr);
+
+  auto* bi80 = fe.GetBlockInfo(80);
+  ASSERT_NE(bi80, nullptr);
+  EXPECT_EQ(bi80->true_head_for, nullptr);
+  EXPECT_EQ(bi80->false_head_for, nullptr);
+  EXPECT_EQ(bi80->premerge_head_for, nullptr);
+  EXPECT_EQ(bi80->exclusive_false_head_for, nullptr);
+}
+
+TEST_F(SpvParserTest,
+       FindIfSelectionInternalHeaders_Premerge_MultiCandidate_Error) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %30
+
+     %20 = OpLabel
+     ; Try to force several branches down into "else" territory,
+     ; but we error out earlier in the flow due to lack of merge
+     ; instruction.
+     OpBranchConditional %cond2  %70 %80
+
+     %30 = OpLabel
+     OpBranch %70
+
+     %70 = OpLabel ; candidate premerge
+     OpBranch %80
+
+     %80 = OpLabel ; canddiate premerge
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  // Error out sooner in the flow
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(p->error(),
+              Eq("Control flow diverges at block 20 (to 70, 80) but it is not "
+                 "a structured header (it has no merge instruction)"));
+}
+
+TEST_F(SpvParserTest,
+       FindIfSelectionInternalHeaders_IfBreak_FromThen_ForwardWithinThen) {
+  // TODO(dneto): We can make this case work, if we injected
+  //    if (!cond2) { rest-of-then-body }
+  // at block 30
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %99
+
+     %20 = OpLabel
+     OpBranchConditional %cond2 %99 %80 ; break with forward edge
+
+     %80 = OpLabel ; still in then clause
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowFindIfSelectionInternalHeaders(&fe));
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 80, 99));
+
+  auto* bi20 = fe.GetBlockInfo(20);
+  ASSERT_NE(bi20, nullptr);
+  ASSERT_NE(bi20->true_head_for, nullptr);
+  EXPECT_EQ(bi20->true_head_for->begin_id, 10);
+  EXPECT_EQ(bi20->false_head_for, nullptr);
+  EXPECT_EQ(bi20->premerge_head_for, nullptr);
+  EXPECT_EQ(bi20->exclusive_false_head_for, nullptr);
+  EXPECT_EQ(bi20->succ_edge.count(80), 1u);
+  EXPECT_EQ(bi20->succ_edge[80], EdgeKind::kForward);
+  EXPECT_EQ(bi20->succ_edge.count(99), 1u);
+  EXPECT_EQ(bi20->succ_edge[99], EdgeKind::kIfBreak);
+
+  auto* bi80 = fe.GetBlockInfo(80);
+  ASSERT_NE(bi80, nullptr);
+  EXPECT_EQ(bi80->true_head_for, nullptr);
+  EXPECT_EQ(bi80->false_head_for, nullptr);
+  EXPECT_EQ(bi80->premerge_head_for, nullptr);
+  EXPECT_EQ(bi80->exclusive_false_head_for, nullptr);
+  EXPECT_EQ(bi80->succ_edge.count(99), 1u);
+  EXPECT_EQ(bi80->succ_edge[99], EdgeKind::kIfBreak);
+}
+
+TEST_F(SpvParserTest,
+       FindIfSelectionInternalHeaders_IfBreak_FromElse_ForwardWithinElse) {
+  // TODO(dneto): We can make this case work, if we injected
+  //    if (!cond2) { rest-of-else-body }
+  // at block 30
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %30
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %30 = OpLabel ; else clause
+     OpBranchConditional %cond2 %99 %80 ; break with forward edge
+
+     %80 = OpLabel ; still in then clause
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowFindIfSelectionInternalHeaders(&fe));
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 80, 99));
+
+  auto* bi30 = fe.GetBlockInfo(30);
+  ASSERT_NE(bi30, nullptr);
+  EXPECT_EQ(bi30->true_head_for, nullptr);
+  ASSERT_NE(bi30->false_head_for, nullptr);
+  EXPECT_EQ(bi30->false_head_for->begin_id, 10);
+  EXPECT_EQ(bi30->premerge_head_for, nullptr);
+  EXPECT_EQ(bi30->exclusive_false_head_for, nullptr);
+  EXPECT_EQ(bi30->succ_edge.count(80), 1u);
+  EXPECT_EQ(bi30->succ_edge[80], EdgeKind::kForward);
+  EXPECT_EQ(bi30->succ_edge.count(99), 1u);
+  EXPECT_EQ(bi30->succ_edge[99], EdgeKind::kIfBreak);
+
+  auto* bi80 = fe.GetBlockInfo(80);
+  ASSERT_NE(bi80, nullptr);
+  EXPECT_EQ(bi80->true_head_for, nullptr);
+  EXPECT_EQ(bi80->false_head_for, nullptr);
+  EXPECT_EQ(bi80->premerge_head_for, nullptr);
+  EXPECT_EQ(bi80->exclusive_false_head_for, nullptr);
+  EXPECT_EQ(bi80->succ_edge.count(99), 1u);
+  EXPECT_EQ(bi80->succ_edge[99], EdgeKind::kIfBreak);
+}
+
+TEST_F(SpvParserTest,
+       FindIfSelectionInternalHeaders_IfBreak_WithForwardToPremerge_Error) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %30
+
+     %20 = OpLabel ; then
+     OpBranchConditional %cond2 %99 %80 ; break with forward to premerge is error
+
+     %30 = OpLabel ; else
+     OpBranch %80
+
+     %80 = OpLabel ; premerge node
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  std::cout << assembly;
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowFindIfSelectionInternalHeaders(&fe));
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 80, 99));
+  EXPECT_THAT(
+      p->error(),
+      Eq("Block 20 in if-selection headed at block 10 branches to both the "
+         "merge block 99 and also to block 80 later in the selection"));
+}
+
+TEST_F(SpvParserTest, DISABLED_Codegen_IfBreak_FromThen_ForwardWithinThen) {
+  // TODO(dneto): We can make this case work, if we injected
+  //    if (!cond2) { rest-of-then-body }
+  // at block 30
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %99
+
+     %20 = OpLabel
+     OpBranchConditional %cond2 %99 %80 ; break with forward edge
+
+     %80 = OpLabel ; still in then clause
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+     OpFunctionEnd
+)";
+}
+
+TEST_F(SpvParserTest, DISABLED_Codegen_IfBreak_FromElse_ForwardWithinElse) {
+  // TODO(dneto): We can make this case work, if we injected
+  //    if (!cond2) { rest-of-else-body }
+  // at block 30
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %30
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %30 = OpLabel ; else clause
+     OpBranchConditional %cond2 %99 %80 ; break with forward edge
+
+     %80 = OpLabel ; still in then clause
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+     OpFunctionEnd
+)";
 }
 
 }  // namespace

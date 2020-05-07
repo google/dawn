@@ -451,7 +451,9 @@ bool FunctionEmitter::EmitBody() {
   if (!ClassifyCFGEdges()) {
     return false;
   }
-  // TODO(dneto): FindIfSelectionHeaders
+  if (!FindIfSelectionInternalHeaders()) {
+    return false;
+  }
   // TODO(dneto): FindInvalidNestingBetweenSelections
 
   if (!EmitFunctionVariables()) {
@@ -956,7 +958,8 @@ bool FunctionEmitter::ClassifyCFGEdges() {
   // For each branch encountered, classify each edge (S,T) as:
   //    - a back-edge
   //    - a structured exit (specific ways of branching to enclosing construct)
-  //    - a normal (forward) edge
+  //    - a normal (forward) edge, either natural control flow or a case
+  //    fallthrough
   //
   // If more than one block is targeted by a normal edge, then S must be a
   // structured header.
@@ -990,7 +993,8 @@ bool FunctionEmitter::ClassifyCFGEdges() {
     // There should only be one backedge per backedge block.
     uint32_t num_backedges = 0;
 
-    // Track destinations for normal forward edges.
+    // Track destinations for normal forward edges, either kForward
+    // or kCaseFallThrough
     std::vector<uint32_t> normal_forward_edges;
 
     if (successors.empty() && src_construct.enclosing_continue) {
@@ -1164,6 +1168,128 @@ bool FunctionEmitter::ClassifyCFGEdges() {
     }
   }
 
+  return success();
+}
+
+bool FunctionEmitter::FindIfSelectionInternalHeaders() {
+  if (failed()) {
+    return false;
+  }
+  for (auto& construct : constructs_) {
+    if (construct->kind != Construct::kIfSelection) {
+      continue;
+    }
+    const auto* branch =
+        GetBlockInfo(construct->begin_id)->basic_block->terminator();
+    const auto true_head = branch->GetSingleWordInOperand(1);
+    const auto false_head = branch->GetSingleWordInOperand(2);
+
+    auto* true_head_info = GetBlockInfo(true_head);
+    auto* false_head_info = GetBlockInfo(false_head);
+    const auto true_head_pos = true_head_info->pos;
+    const auto false_head_pos = false_head_info->pos;
+
+    const bool contains_true = construct->ContainsPos(true_head_pos);
+    const bool contains_false = construct->ContainsPos(false_head_pos);
+
+    if (contains_true) {
+      true_head_info->true_head_for = construct.get();
+    }
+    if (contains_false) {
+      false_head_info->false_head_for = construct.get();
+    }
+    if ((!contains_true) && contains_false) {
+      false_head_info->exclusive_false_head_for = construct.get();
+    }
+
+    if (contains_true && contains_false && (true_head_pos != false_head_pos)) {
+      // This construct has both a "then" clause and an "else" clause.
+      //
+      // We have this structure:
+      //
+      //   Option 1:
+      //
+      //     * condbranch
+      //        * true-head (start of then-clause)
+      //        ...
+      //        * end-then-clause
+      //        * false-head (start of else-clause)
+      //        ...
+      //        * end-false-clause
+      //        * premerge-head
+      //        ...
+      //     * selection merge
+      //
+      //   Option 2:
+      //
+      //     * condbranch
+      //        * true-head (start of then-clause)
+      //        ...
+      //        * end-then-clause
+      //        * false-head (start of else-clause) and also premerge-head
+      //        ...
+      //        * end-false-clause
+      //     * selection merge
+      //
+      //   Option 3:
+      //
+      //     * condbranch
+      //        * false-head (start of else-clause)
+      //        ...
+      //        * end-else-clause
+      //        * true-head (start of then-clause) and also premerge-head
+      //        ...
+      //        * end-then-clause
+      //     * selection merge
+      //
+      // The premerge-head exists if there is a kForward branch from the end
+      // of the first clause to a block within the surrounding selection.
+      // The first clause might be a then-clause or an else-clause.
+      const auto second_head = std::max(true_head_pos, false_head_pos);
+      const auto end_first_clause_pos = second_head - 1;
+      assert(end_first_clause_pos < block_order_.size());
+      const auto end_first_clause = block_order_[end_first_clause_pos];
+      uint32_t premerge_id = 0;
+      uint32_t if_break_id = 0;
+      for (auto& then_succ_iter : GetBlockInfo(end_first_clause)->succ_edge) {
+        const uint32_t dest_id = then_succ_iter.first;
+        const auto edge_kind = then_succ_iter.second;
+        switch (edge_kind) {
+          case EdgeKind::kIfBreak:
+            if_break_id = dest_id;
+            break;
+          case EdgeKind::kForward: {
+            if (construct->ContainsPos(GetBlockInfo(dest_id)->pos)) {
+              // It's a premerge.
+              if (premerge_id != 0) {
+                // TODO(dneto): I think this is impossible to trigger at this
+                // point in the flow. It would require a merge instruction to
+                // get past the check of "at-most-one-forward-edge".
+                return Fail()
+                       << "invalid structure: then-clause headed by block "
+                       << true_head << " ending at block " << end_first_clause
+                       << " has two forward edges to within selection"
+                       << " going to " << premerge_id << " and " << dest_id;
+              }
+              premerge_id = dest_id;
+              GetBlockInfo(dest_id)->premerge_head_for = construct.get();
+            }
+            break;
+          }
+          default:
+            break;
+        }
+      }
+      if (if_break_id != 0 && premerge_id != 0) {
+        return Fail() << "Block " << end_first_clause
+                      << " in if-selection headed at block "
+                      << construct->begin_id
+                      << " branches to both the merge block " << if_break_id
+                      << " and also to block " << premerge_id
+                      << " later in the selection";
+      }
+    }
+  }
   return success();
 }
 

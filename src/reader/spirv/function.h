@@ -101,6 +101,9 @@ struct BlockInfo {
   /// The immediately enclosing structured construct.
   const Construct* construct = nullptr;
 
+  /// Maps the ID of a successor block (in the CFG) to its edge classification.
+  std::unordered_map<uint32_t, EdgeKind> succ_edge;
+
   /// The following fields record relationships among blocks in a selection
   /// construct for an OpSwitch instruction.
 
@@ -118,8 +121,24 @@ struct BlockInfo {
   /// The list of switch values that cause a branch to this block.
   std::unique_ptr<std::vector<uint64_t>> case_values;
 
-  /// Maps the ID of a successor block (in the CFG) to its edge classification.
-  std::unordered_map<uint32_t, EdgeKind> succ_edge;
+  /// The following fields record relationships among blocks in a selection
+  /// construct for an OpBranchConditional instruction.
+
+  /// If not null, then the pointed-at construct is a selection for an
+  /// OpBranchConditional and this block is the "true" target for it.  We say
+  /// this block "heads" the true case.
+  const Construct* true_head_for = nullptr;
+  /// If not null, then the pointed-at construct is a selection for an
+  /// OpBranchConditional and this block is the "false" target for it.  We say
+  /// this block "heads" the false case.
+  const Construct* false_head_for = nullptr;
+  /// If not null, then the pointed-at construct is the first block at which
+  /// control reconverges between the "then" and "else" clauses, but before
+  /// the merge block for that selection.
+  const Construct* premerge_head_for = nullptr;
+  /// The construct for which this block is the false head, and that construct
+  /// does not have a true head.
+  const Construct* exclusive_false_head_for = nullptr;
 };
 
 inline std::ostream& operator<<(std::ostream& o, const BlockInfo& bi) {
@@ -227,6 +246,16 @@ class FunctionEmitter {
   /// construct.
   /// @returns false on failure
   bool ClassifyCFGEdges();
+
+  /// Marks the blocks within a selection construct that are the first blocks
+  /// in the "then" clause, the "else" clause, and the "premerge" clause.
+  /// The head of the premerge clause is the block, if it exists, at which
+  /// control flow reconverges from the "then" and "else" clauses, but before
+  /// before the merge block for that selection.   The existence of a premerge
+  /// should be an exceptional case, but is allowed by the structured control
+  /// flow rules.
+  /// @returns false if bad nesting has been detected.
+  bool FindIfSelectionInternalHeaders();
 
   /// Emits declarations of function variables.
   /// @returns false if emission failed.
