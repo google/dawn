@@ -2938,7 +2938,7 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_SwitchSelection) {
   EXPECT_EQ(constructs.size(), 2u);
   EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,5) begin_id:10 end_id:0 depth:0 parent:null }
-  Construct{ SwitchSelection [0,4) begin_id:10 end_id:99 depth:1 parent:Function@10 }
+  Construct{ SwitchSelection [0,4) begin_id:10 end_id:99 depth:1 parent:Function@10 in-c-l-s:SwitchSelection@10 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
   EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
@@ -3018,12 +3018,10 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_MultiBlockLoop) {
   fe.RegisterMerges();
   EXPECT_TRUE(fe.LabelControlFlowConstructs());
   const auto& constructs = fe.constructs();
-  // A single-block loop consists *only* of a continue target with one block in
-  // it.
   EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,6) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ Continue [3,5) begin_id:40 end_id:99 depth:1 parent:Function@10 in-c:Continue@40 }
-  Construct{ Loop [1,3) begin_id:20 end_id:40 depth:1 parent:Function@10 in-c-l:Loop@20 }
+  Construct{ Loop [1,3) begin_id:20 end_id:40 depth:1 parent:Function@10 in-l:Loop@20 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
   EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[0].get());
@@ -3119,7 +3117,7 @@ TEST_F(SpvParserTest,
   Construct{ Function [0,5) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ IfSelection [0,2) begin_id:10 end_id:50 depth:1 parent:Function@10 }
   Construct{ Continue [3,4) begin_id:60 end_id:99 depth:1 parent:Function@10 in-c:Continue@60 }
-  Construct{ Loop [2,3) begin_id:50 end_id:60 depth:1 parent:Function@10 in-c-l:Loop@50 }
+  Construct{ Loop [2,3) begin_id:50 end_id:60 depth:1 parent:Function@10 in-l:Loop@50 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
   EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
@@ -3237,9 +3235,9 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_Switch_If) {
   // The ordering among siblings depends on the computed block order.
   EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,8) begin_id:10 end_id:0 depth:0 parent:null }
-  Construct{ SwitchSelection [0,7) begin_id:10 end_id:99 depth:1 parent:Function@10 }
-  Construct{ IfSelection [1,3) begin_id:50 end_id:89 depth:2 parent:SwitchSelection@10 }
-  Construct{ IfSelection [4,6) begin_id:20 end_id:49 depth:2 parent:SwitchSelection@10 }
+  Construct{ SwitchSelection [0,7) begin_id:10 end_id:99 depth:1 parent:Function@10 in-c-l-s:SwitchSelection@10 }
+  Construct{ IfSelection [1,3) begin_id:50 end_id:89 depth:2 parent:SwitchSelection@10 in-c-l-s:SwitchSelection@10 }
+  Construct{ IfSelection [4,6) begin_id:20 end_id:49 depth:2 parent:SwitchSelection@10 in-c-l-s:SwitchSelection@10 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
   EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
@@ -3287,7 +3285,7 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_If_Switch) {
   EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,5) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ IfSelection [0,4) begin_id:10 end_id:99 depth:1 parent:Function@10 }
-  Construct{ SwitchSelection [1,3) begin_id:20 end_id:89 depth:2 parent:IfSelection@10 }
+  Construct{ SwitchSelection [1,3) begin_id:20 end_id:89 depth:2 parent:IfSelection@10 in-c-l-s:SwitchSelection@20 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
   EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
@@ -3341,8 +3339,8 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_Loop_Loop) {
   EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,8) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ Continue [4,6) begin_id:50 end_id:89 depth:1 parent:Function@10 in-c:Continue@50 }
-  Construct{ Loop [1,4) begin_id:20 end_id:50 depth:1 parent:Function@10 in-c-l:Loop@20 }
-  Construct{ Continue [2,3) begin_id:30 end_id:40 depth:2 parent:Loop@20 in-c:Continue@30 }
+  Construct{ Loop [1,4) begin_id:20 end_id:50 depth:1 parent:Function@10 in-l:Loop@20 }
+  Construct{ Continue [2,3) begin_id:30 end_id:40 depth:2 parent:Loop@20 in-l:Loop@20 in-c:Continue@30 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
   EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[0].get());
@@ -3396,8 +3394,8 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_Loop_If) {
   EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,7) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ Continue [5,6) begin_id:80 end_id:99 depth:1 parent:Function@10 in-c:Continue@80 }
-  Construct{ Loop [1,5) begin_id:20 end_id:80 depth:1 parent:Function@10 in-c-l:Loop@20 }
-  Construct{ IfSelection [2,4) begin_id:30 end_id:49 depth:2 parent:Loop@20 in-c-l:Loop@20 }
+  Construct{ Loop [1,5) begin_id:20 end_id:80 depth:1 parent:Function@10 in-l:Loop@20 }
+  Construct{ IfSelection [2,4) begin_id:30 end_id:49 depth:2 parent:Loop@20 in-l:Loop@20 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
   EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[0].get());
@@ -3447,7 +3445,7 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_LoopContinue_If) {
   EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,6) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ Continue [2,5) begin_id:30 end_id:99 depth:1 parent:Function@10 in-c:Continue@30 }
-  Construct{ Loop [1,2) begin_id:20 end_id:30 depth:1 parent:Function@10 in-c-l:Loop@20 }
+  Construct{ Loop [1,2) begin_id:20 end_id:30 depth:1 parent:Function@10 in-l:Loop@20 }
   Construct{ IfSelection [2,4) begin_id:30 end_id:49 depth:2 parent:Continue@30 in-c:Continue@30 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
@@ -3541,7 +3539,7 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_If_MultiBlockLoop) {
   Construct{ Function [0,7) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ IfSelection [0,6) begin_id:10 end_id:99 depth:1 parent:Function@10 }
   Construct{ Continue [3,5) begin_id:40 end_id:89 depth:2 parent:IfSelection@10 in-c:Continue@40 }
-  Construct{ Loop [1,3) begin_id:20 end_id:40 depth:2 parent:IfSelection@10 in-c-l:Loop@20 }
+  Construct{ Loop [1,3) begin_id:20 end_id:40 depth:2 parent:IfSelection@10 in-l:Loop@20 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
   EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
@@ -4715,6 +4713,135 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromSwitchDefaultIsMerge) {
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kSwitchBreak);
 }
 
+TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromNestedIf_Unconditional) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %20
+
+     %20 = OpLabel
+     OpSelectionMerge %80 None
+     OpBranchConditional %cond %30 %80
+
+     %30 = OpLabel
+     OpBranch %99
+
+     %80 = OpLabel ; inner merge
+     OpBranch %99
+
+     %99 = OpLabel ; outer merge
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(30);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kSwitchBreak);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromNestedIf_Conditional) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %20
+
+     %20 = OpLabel
+     OpSelectionMerge %80 None
+     OpBranchConditional %cond %30 %80
+
+     %30 = OpLabel
+     OpBranchConditional %cond2 %99 %80 ; break-if
+
+     %80 = OpLabel ; inner merge
+     OpBranch %99
+
+     %99 = OpLabel ; outer merge
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(30);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kSwitchBreak);
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromNestedLoop_IsError) {
+  // It's an error because the break can only go as far as the loop.
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %20
+
+     %20 = OpLabel
+     OpLoopMerge %80 %70 None
+     OpBranchConditional %cond %30 %80
+
+     %30 = OpLabel ; in loop construct
+     OpBranch %99 ; break
+
+     %70 = OpLabel
+     OpBranch %20
+
+     %80 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel ; outer merge
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(p->error(),
+              Eq("Branch from block 30 to block 99 is an invalid exit from "
+                 "construct starting at block 20; branch bypasses block 70"));
+}
+
+TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromNestedSwitch_IsError) {
+  // It's an error because the break can only go as far as inner switch
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %20
+
+     %20 = OpLabel
+     OpSelectionMerge %80 None
+     OpSwitch %selector %80 30 %30
+
+     %30 = OpLabel
+     OpBranch %99 ; break
+
+     %80 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel ; outer merge
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(p->error(),
+              Eq("Branch from block 30 to block 99 is an invalid exit from "
+                 "construct starting at block 20; branch bypasses block 80"));
+}
+
 TEST_F(SpvParserTest, ClassifyCFGEdges_LoopBreak_FromLoopBody) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
@@ -4809,6 +4936,125 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_LoopBreak_FromLoopBodyDirect) {
   ASSERT_NE(bi, nullptr);
   EXPECT_EQ(bi->succ_edge.count(99), 1u);
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kLoopBreak);
+}
+
+TEST_F(SpvParserTest,
+       ClassifyCFGEdges_LoopBreak_FromLoopBodyNestedSelection_Unconditional) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %80 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpSelectionMerge %50 None
+     OpBranchConditional %cond2 %40 %50
+
+     %40 = OpLabel
+     OpBranch %99 ; deeply nested break
+
+     %50 = OpLabel ; inner merge
+     OpBranch %80
+
+     %80 = OpLabel
+     OpBranch %20  ; backedge
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(40);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kLoopBreak);
+}
+
+TEST_F(SpvParserTest,
+       ClassifyCFGEdges_LoopBreak_FromLoopBodyNestedSelection_Conditional) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %80 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpSelectionMerge %50 None
+     OpBranchConditional %cond2 %40 %50
+
+     %40 = OpLabel
+     OpBranchConditional %cond3 %99 %50 ; break-if
+
+     %50 = OpLabel ; inner merge
+     OpBranch %80
+
+     %80 = OpLabel
+     OpBranch %20  ; backedge
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+
+  auto* bi = fe.GetBlockInfo(40);
+  ASSERT_NE(bi, nullptr);
+  EXPECT_EQ(bi->succ_edge.count(99), 1);
+  EXPECT_EQ(bi->succ_edge[99], EdgeKind::kLoopBreak);
+}
+
+TEST_F(SpvParserTest,
+       ClassifyCFGEdges_LoopBreak_FromContinueConstructNestedFlow_IsError) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %40 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel ; continue construct
+     OpSelectionMerge %79 None
+     OpBranchConditional %cond2 %50 %79
+
+     %50 = OpLabel
+     OpBranchConditional %cond3 %99 %79 ; attempt to break to 99 should fail
+
+     %79 = OpLabel
+     OpBranch %80  ; inner merge
+
+     %80 = OpLabel
+     OpBranch %20  ; backedge
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(p->error(),
+              Eq("Invalid exit (50->99) from continue construct: 50 is not the "
+                 "last block in the continue construct starting at 40 "
+                 "(violates post-dominance rule)"));
 }
 
 TEST_F(SpvParserTest, ClassifyCFGEdges_LoopContinue_LoopBodyToContinue) {
@@ -4949,7 +5195,7 @@ TEST_F(SpvParserTest,
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
-  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe)) << p->error();
 
   auto* bi = fe.GetBlockInfo(40);
   ASSERT_NE(bi, nullptr);
@@ -5064,7 +5310,7 @@ TEST_F(SpvParserTest,
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
-  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe)) << p->error();
 
   auto* bi = fe.GetBlockInfo(40);
   ASSERT_NE(bi, nullptr);

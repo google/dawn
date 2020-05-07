@@ -68,12 +68,18 @@ struct Construct {
   /// The nearest enclosing construct (other than itself), or nullptr if
   /// this construct represents the entire function.
   const Construct* const parent = nullptr;
-  /// The nearest continue construct, if one exists. A construct encloses
-  /// itself.
+  /// The nearest enclosing loop construct, if one exists. A construct
+  /// encloses itself.
+  const Construct* const enclosing_loop = nullptr;
+  /// The nearest enclosing continue construct, if one exists. A construct
+  /// encloses itself.
   const Construct* const enclosing_continue = nullptr;
-  /// The nearest enclosing loop or continue construct, if one exists.
+  /// The nearest enclosing loop construct or continue construct or
+  /// switch-selection construct, if one exists. The signficance is
+  /// that a high level language "break" will branch to the merge block
+  /// of such an enclosing construct.
   /// A construct encloses itself.
-  const Construct* const enclosing_loop_or_continue = nullptr;
+  const Construct* const enclosing_loop_or_continue_or_switch = nullptr;
 
   /// Control flow nesting depth. The entry block is at nesting depth 0.
   const int depth = 0;
@@ -136,12 +142,17 @@ inline std::ostream& operator<<(std::ostream& o, const Construct& c) {
 
   o << " parent:" << ToStringBrief(c.parent);
 
+  if (c.enclosing_loop) {
+    o << " in-l:" << ToStringBrief(c.enclosing_loop);
+  }
+
   if (c.enclosing_continue) {
     o << " in-c:" << ToStringBrief(c.enclosing_continue);
   }
 
-  if (c.enclosing_loop_or_continue != c.enclosing_continue) {
-    o << " in-c-l:" << ToStringBrief(c.enclosing_loop_or_continue);
+  if ((c.enclosing_loop_or_continue_or_switch != c.enclosing_loop) &&
+      (c.enclosing_loop_or_continue_or_switch != c.enclosing_continue)) {
+    o << " in-c-l-s:" << ToStringBrief(c.enclosing_loop_or_continue_or_switch);
   }
 
   o << " }";

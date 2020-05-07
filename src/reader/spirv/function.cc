@@ -927,13 +927,20 @@ bool FunctionEmitter::FindSwitchCaseHeaders() {
   return success();
 }
 
-BlockInfo* FunctionEmitter::HeaderForLoopOrContinue(const Construct* c) {
-  if (c->kind == Construct::kLoop) {
-    return GetBlockInfo(c->begin_id);
+BlockInfo* FunctionEmitter::HeaderIfBreakable(const Construct* c) {
+  if (c == nullptr) {
+    return nullptr;
   }
-  if (c->kind == Construct::kContinue) {
-    auto* continue_block = GetBlockInfo(c->begin_id);
-    return GetBlockInfo(continue_block->header_for_continue);
+  switch (c->kind) {
+    case Construct::kLoop:
+    case Construct::kSwitchSelection:
+      return GetBlockInfo(c->begin_id);
+    case Construct::kContinue: {
+      const auto* continue_target = GetBlockInfo(c->begin_id);
+      return GetBlockInfo(continue_target->header_for_continue);
+    }
+    default:
+      break;
   }
   return nullptr;
 }
@@ -1051,41 +1058,39 @@ bool FunctionEmitter::ClassifyCFGEdges() {
 
         // Check valid structured exit cases.
 
-        const auto& header_info = *GetBlockInfo(src_construct.begin_id);
-        if (dest == header_info.merge_for_header) {
-          // Branch to construct's merge block.
-          const bool src_is_loop_header = header_info.continue_for_header != 0;
-          const bool src_is_continue_header =
-              header_info.header_for_continue != 0;
-          if (src_is_loop_header || src_is_continue_header) {
-            edge_kind = EdgeKind::kLoopBreak;
-          } else if (src_construct.kind == Construct::kSwitchSelection) {
-            edge_kind = EdgeKind::kSwitchBreak;
-          } else {
-            edge_kind = EdgeKind::kToMerge;
-          }
-        } else {
-          const auto* loop_or_continue_construct =
-              src_construct.enclosing_loop_or_continue;
-          if (loop_or_continue_construct != nullptr) {
-            // Check for break block or continue block.
-            const auto* loop_header_info =
-                HeaderForLoopOrContinue(loop_or_continue_construct);
-            if (loop_header_info == nullptr) {
-              return Fail() << "internal error: invalid construction of loop "
-                               "related to block "
-                            << loop_or_continue_construct->begin_id;
+        if (edge_kind == EdgeKind::kForward) {
+          // Check for a 'break' from a loop or from a switch.
+          const auto* breakable_header = HeaderIfBreakable(
+              src_construct.enclosing_loop_or_continue_or_switch);
+          if (breakable_header != nullptr) {
+            if (dest == breakable_header->merge_for_header) {
+              // It's a break.
+              edge_kind = (breakable_header->construct->kind ==
+                           Construct::kSwitchSelection)
+                              ? EdgeKind::kSwitchBreak
+                              : EdgeKind::kLoopBreak;
             }
-            if (dest == loop_header_info->merge_for_header) {
-              // It's a break block for the innermost loop.
-              edge_kind = EdgeKind::kLoopBreak;
-            } else if (dest == loop_header_info->continue_for_header) {
-              // It's a continue block for the innermost loop construct.
-              // In this case loop_or_continue_construct can't be a continue
-              // construct, because then the branch to the continue target is
-              // a backedge, and this code is only looking at forward edges.
+          }
+        }
+
+        if (edge_kind == EdgeKind::kForward) {
+          // Check for a 'continue' from within a loop.
+          const auto* loop_header =
+              HeaderIfBreakable(src_construct.enclosing_loop);
+          if (loop_header != nullptr) {
+            if (dest == loop_header->continue_for_header) {
+              // It's a continue.
               edge_kind = EdgeKind::kLoopContinue;
             }
+          }
+        }
+
+        if (edge_kind == EdgeKind::kForward) {
+          const auto& header_info = *GetBlockInfo(src_construct.begin_id);
+          if (dest == header_info.merge_for_header) {
+            // Branch to construct's merge block.  The loop break and
+            // switch break cases have already been covered.
+            edge_kind = EdgeKind::kToMerge;
           }
         }
 

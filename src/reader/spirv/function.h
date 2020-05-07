@@ -289,12 +289,17 @@ class FunctionEmitter {
   ast::type::Type* GetVariableStoreType(
       const spvtools::opt::Instruction& var_decl_inst);
 
-  /// Finds the loop header block for a loop construct or continue construct.
-  /// The loop header block is the block with the corresponding OpLoopMerge
-  /// instruction.
-  /// @param c the loop or continue construct
-  /// @returns the block info for the loop header.
-  BlockInfo* HeaderForLoopOrContinue(const Construct* c);
+  /// Finds the header block for a structured construct that we can "break"
+  /// out from, from deeply nested control flow, if such a block exists.
+  /// If the construct is:
+  ///  - a switch selection: return the selection header (ending in OpSwitch)
+  ///  - a loop construct: return the loop header block
+  ///  - a continue construct: return the loop header block
+  /// Otherwise, return nullptr.
+  /// @param c a structured construct, or nullptr
+  /// @returns the block info for the structured header we can "break" from,
+  /// or nullptr
+  BlockInfo* HeaderIfBreakable(const Construct* c);
 
   ParserImpl& parser_impl_;
   ast::Module& ast_module_;
