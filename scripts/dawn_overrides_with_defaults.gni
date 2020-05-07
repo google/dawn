@@ -71,3 +71,8 @@ if (!defined(dawn_vulkan_validation_layers_dir)) {
   # Default to VVLs not being available.
   dawn_vulkan_validation_layers_dir = ""
 }
+
+if (!defined(dawn_tint_dir)) {
+  # Default to Tint not being available.
+  dawn_tint_dir = ""
+}

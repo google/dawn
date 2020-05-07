@@ -569,6 +569,11 @@ source_set("dawn_native_sources") {
       ]
     }
   }
+
+  if (dawn_enable_wgsl) {
+    deps += [ "${dawn_tint_dir}:libtint" ]
+    defines += [ "DAWN_ENABLE_WGSL" ]
+  }
 }
 
 # The static and shared libraries for dawn_native. Most of the files are

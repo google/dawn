@@ -59,7 +59,7 @@ declare_args() {
   # if performing reflection on systems that the platform language
   # shader is SPIR-V, since there isn't an instance of the
   # GLSL/HLSL/MSL compiler. This implicitly pulls in the GLSL
-  # compiler, since it is a sub-class of if.
+  # compiler, since it is a sub-class of it.
   dawn_enable_cross_reflection = false
 
   # Enables error injection for faking failures to native API calls
@@ -68,6 +68,10 @@ declare_args() {
 
   # Whether Dawn should enable X11 support.
   dawn_use_x11 = is_linux && !is_chromeos
+
+  # Enable support WGSL for shaders. Currently this is
+  # experimental, and requires dawn_tint_dir to be set.
+  dawn_enable_wgsl = false
 }
 
 # GN does not allow reading a variable defined in the same declare_args().
