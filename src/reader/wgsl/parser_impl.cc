@@ -987,7 +987,7 @@ std::unique_ptr<ast::type::StructType> ParserImpl::struct_decl() {
   }
 
   t = peek();
-  if (!t.IsBracketLeft()) {
+  if (!t.IsBraceLeft()) {
     set_error(t, "missing { for struct declaration");
     return nullptr;
   }
@@ -1042,13 +1042,13 @@ ast::StructDecoration ParserImpl::struct_decoration() {
 //   : BRACKET_LEFT struct_member* BRACKET_RIGHT
 ast::StructMemberList ParserImpl::struct_body_decl() {
   auto t = peek();
-  if (!t.IsBracketLeft())
+  if (!t.IsBraceLeft())
     return {};
 
   next();  // Consume the peek
 
   t = peek();
-  if (t.IsBracketRight())
+  if (t.IsBraceRight())
     return {};
 
   ast::StructMemberList members;
@@ -1064,12 +1064,12 @@ ast::StructMemberList ParserImpl::struct_body_decl() {
     members.push_back(std::move(mem));
 
     t = peek();
-    if (t.IsBracketRight() || t.IsEof())
+    if (t.IsBraceRight() || t.IsEof())
       break;
   }
 
   t = next();
-  if (!t.IsBracketRight()) {
+  if (!t.IsBraceRight()) {
     set_error(t, "missing } for struct declaration");
     return {};
   }
@@ -1376,7 +1376,7 @@ ast::PipelineStage ParserImpl::pipeline_stage() {
 //   : BRACKET_LEFT statements BRACKET_RIGHT
 ast::StatementList ParserImpl::body_stmt() {
   auto t = peek();
-  if (!t.IsBracketLeft())
+  if (!t.IsBraceLeft())
     return {};
 
   next();  // Consume the peek
@@ -1386,7 +1386,7 @@ ast::StatementList ParserImpl::body_stmt() {
     return {};
 
   t = next();
-  if (!t.IsBracketRight()) {
+  if (!t.IsBraceRight()) {
     set_error(t, "missing }");
     return {};
   }
@@ -1733,7 +1733,7 @@ std::unique_ptr<ast::IfStatement> ParserImpl::if_stmt() {
   }
 
   t = peek();
-  if (!t.IsBracketLeft()) {
+  if (!t.IsBraceLeft()) {
     set_error(t, "missing {");
     return nullptr;
   }
@@ -1781,7 +1781,7 @@ ast::ElseStatementList ParserImpl::elseif_stmt() {
     }
 
     t = peek();
-    if (!t.IsBracketLeft()) {
+    if (!t.IsBraceLeft()) {
       set_error(t, "missing {");
       return {};
     }
@@ -1812,7 +1812,7 @@ std::unique_ptr<ast::ElseStatement> ParserImpl::else_stmt() {
   next();  // Consume the peek
 
   t = peek();
-  if (!t.IsBracketLeft()) {
+  if (!t.IsBraceLeft()) {
     set_error(t, "missing {");
     return nullptr;
   }
@@ -1869,7 +1869,7 @@ std::unique_ptr<ast::SwitchStatement> ParserImpl::switch_stmt() {
   }
 
   t = next();
-  if (!t.IsBracketLeft()) {
+  if (!t.IsBraceLeft()) {
     set_error(t, "missing { for switch statement");
     return nullptr;
   }
@@ -1886,7 +1886,7 @@ std::unique_ptr<ast::SwitchStatement> ParserImpl::switch_stmt() {
   }
 
   t = next();
-  if (!t.IsBracketRight()) {
+  if (!t.IsBraceRight()) {
     set_error(t, "missing } for switch statement");
     return nullptr;
   }
@@ -1925,7 +1925,7 @@ std::unique_ptr<ast::CaseStatement> ParserImpl::switch_body() {
   }
 
   t = next();
-  if (!t.IsBracketLeft()) {
+  if (!t.IsBraceLeft()) {
     set_error(t, "missing { for case statement");
     return nullptr;
   }
@@ -1937,7 +1937,7 @@ std::unique_ptr<ast::CaseStatement> ParserImpl::switch_body() {
   stmt->set_body(std::move(body));
 
   t = next();
-  if (!t.IsBracketRight()) {
+  if (!t.IsBraceRight()) {
     set_error(t, "missing } for case statement");
     return nullptr;
   }
@@ -1990,7 +1990,7 @@ std::unique_ptr<ast::LoopStatement> ParserImpl::loop_stmt() {
   next();  // Consume the peek
 
   t = next();
-  if (!t.IsBracketLeft()) {
+  if (!t.IsBraceLeft()) {
     set_error(t, "missing { for loop");
     return nullptr;
   }
@@ -2004,7 +2004,7 @@ std::unique_ptr<ast::LoopStatement> ParserImpl::loop_stmt() {
     return nullptr;
 
   t = next();
-  if (!t.IsBracketRight()) {
+  if (!t.IsBraceRight()) {
     set_error(t, "missing } for loop");
     return nullptr;
   }
@@ -2298,7 +2298,7 @@ std::unique_ptr<ast::Expression> ParserImpl::postfix_expr(
 
   auto t = peek();
   auto source = t.source();
-  if (t.IsBraceLeft()) {
+  if (t.IsBracketLeft()) {
     next();  // Consume the peek
 
     auto param = logical_or_expression();
@@ -2310,7 +2310,7 @@ std::unique_ptr<ast::Expression> ParserImpl::postfix_expr(
     }
 
     t = next();
-    if (!t.IsBraceRight()) {
+    if (!t.IsBracketRight()) {
       set_error(t, "missing ] for array accessor");
       return nullptr;
     }

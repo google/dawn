@@ -54,13 +54,13 @@ std::string Token::TypeToName(Type type) {
       return "/";
     case Token::Type::kBang:
       return "!";
-    case Token::Type::kBraceLeft:
-      return "[";
-    case Token::Type::kBraceRight:
-      return "]";
     case Token::Type::kBracketLeft:
-      return "{";
+      return "[";
     case Token::Type::kBracketRight:
+      return "]";
+    case Token::Type::kBraceLeft:
+      return "{";
+    case Token::Type::kBraceRight:
       return "}";
     case Token::Type::kColon:
       return ":";

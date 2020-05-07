@@ -351,19 +351,19 @@ Token Lexer::try_punctuation() {
     pos_ += 1;
     column_ += 1;
   } else if (matches(pos_, "[")) {
-    type = Token::Type::kBraceLeft;
-    pos_ += 1;
-    column_ += 1;
-  } else if (matches(pos_, "]")) {
-    type = Token::Type::kBraceRight;
-    pos_ += 1;
-    column_ += 1;
-  } else if (matches(pos_, "{")) {
     type = Token::Type::kBracketLeft;
     pos_ += 1;
     column_ += 1;
-  } else if (matches(pos_, "}")) {
+  } else if (matches(pos_, "]")) {
     type = Token::Type::kBracketRight;
+    pos_ += 1;
+    column_ += 1;
+  } else if (matches(pos_, "{")) {
+    type = Token::Type::kBraceLeft;
+    pos_ += 1;
+    column_ += 1;
+  } else if (matches(pos_, "}")) {
+    type = Token::Type::kBraceRight;
     pos_ += 1;
     column_ += 1;
   } else if (matches(pos_, "&&")) {

@@ -66,13 +66,13 @@ class Token {
     /// A '!'
     kBang,
     /// A '['
-    kBraceLeft,
-    /// A ']'
-    kBraceRight,
-    /// A '{'
     kBracketLeft,
-    /// A '}'
+    /// A ']'
     kBracketRight,
+    /// A '{'
+    kBraceLeft,
+    /// A '}'
+    kBraceRight,
     /// A ':'
     kColon,
     /// A ','
@@ -375,13 +375,13 @@ class Token {
   /// @returns true if token is a '!'
   bool IsBang() const { return type_ == Type::kBang; }
   /// @returns true if token is a '['
-  bool IsBraceLeft() const { return type_ == Type::kBraceLeft; }
-  /// @returns true if token is a ']'
-  bool IsBraceRight() const { return type_ == Type::kBraceRight; }
-  /// @returns true if token is a '{'
   bool IsBracketLeft() const { return type_ == Type::kBracketLeft; }
-  /// @returns true if token is a '}'
+  /// @returns true if token is a ']'
   bool IsBracketRight() const { return type_ == Type::kBracketRight; }
+  /// @returns true if token is a '{'
+  bool IsBraceLeft() const { return type_ == Type::kBraceLeft; }
+  /// @returns true if token is a '}'
+  bool IsBraceRight() const { return type_ == Type::kBraceRight; }
   /// @returns true if token is a ':'
   bool IsColon() const { return type_ == Type::kColon; }
   /// @returns true if token is a ','
