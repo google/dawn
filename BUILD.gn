@@ -399,6 +399,7 @@ source_set("libtint_spv_reader_src") {
     ":tint_core_tables_unified1",
     ":tint_language_header_cldebuginfo100",
     ":tint_language_header_debuginfo",
+    "${tint_spirv_tools_dir}/:spvtools",
     "${tint_spirv_tools_dir}/:spvtools_opt",
     "${tint_spirv_tools_dir}/:spvtools_val",
   ]
@@ -883,6 +884,9 @@ test("tint_unittests") {
     ":gmock_and_gtest",
     ":libtint",
     ":tint_unittests_src",
+    "${tint_spirv_tools_dir}/:spvtools",
+    "${tint_spirv_tools_dir}/:spvtools_opt",
+    "${tint_spirv_tools_dir}/:spvtools_val",
   ]
 
   # TODO(rharrison): Use main() from chromium for chromium tree builds. This
@@ -919,6 +923,9 @@ if (build_with_chromium) {
     deps = [
       ":libtint",
       ":tint_wgsl_reader_fuzzer_src",
+      "${tint_spirv_tools_dir}/:spvtools",
+      "${tint_spirv_tools_dir}/:spvtools_opt",
+      "${tint_spirv_tools_dir}/:spvtools_val",
     ]
   }
 }
@@ -936,7 +943,12 @@ config("tint_exe_config") {
 
 executable("tint_exe") {
   sources = [ "samples/main.cc" ]
-  deps = [ ":libtint" ]
+  deps = [
+    ":libtint",
+    "${tint_spirv_tools_dir}/:spvtools",
+    "${tint_spirv_tools_dir}/:spvtools_opt",
+    "${tint_spirv_tools_dir}/:spvtools_val",
+  ]
 
   if (tint_build_spv_reader || tint_build_spv_writer) {
     deps += [ "${tint_spirv_headers_dir}/:spv_headers" ]
