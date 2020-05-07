@@ -237,8 +237,14 @@ TEST_P(StorageTextureTests, BindGroupLayoutWithStorageTextureBindingType) {
 
 // Test that read-only storage textures are supported in compute shader.
 TEST_P(StorageTextureTests, ReadonlyStorageTextureInComputeShader) {
-    // TODO(jiawei.shao@intel.com): support read-only storage texture on D3D12 and OpenGL.
-    DAWN_SKIP_TEST_IF(IsD3D12() || IsOpenGL());
+    // TODO(jiawei.shao@intel.com): support read-only storage texture on OpenGL.
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+
+    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
+    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
+    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
+    // bug in spvc parser is fixed.
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
 
     // Prepare the read-only storage texture and fill it with the expected data.
     // TODO(jiawei.shao@intel.com): test more texture formats.
@@ -292,8 +298,8 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInComputeShader) {
 
 // Test that read-only storage textures are supported in vertex shader.
 TEST_P(StorageTextureTests, ReadonlyStorageTextureInVertexShader) {
-    // TODO(jiawei.shao@intel.com): support read-only storage texture on D3D12 and OpenGL.
-    DAWN_SKIP_TEST_IF(IsD3D12() || IsOpenGL());
+    // TODO(jiawei.shao@intel.com): support read-only storage texture on OpenGL.
+    DAWN_SKIP_TEST_IF(IsOpenGL());
 
     // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
     // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
@@ -336,8 +342,8 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInVertexShader) {
 
 // Test that read-only storage textures are supported in fragment shader.
 TEST_P(StorageTextureTests, ReadonlyStorageTextureInFragmentShader) {
-    // TODO(jiawei.shao@intel.com): support read-only storage texture on D3D12 and OpenGL.
-    DAWN_SKIP_TEST_IF(IsD3D12() || IsOpenGL());
+    // TODO(jiawei.shao@intel.com): support read-only storage texture on OpenGL.
+    DAWN_SKIP_TEST_IF(IsOpenGL());
 
     // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
     // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
@@ -373,7 +379,13 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInFragmentShader) {
 // Test that write-only storage textures are supported in compute shader.
 TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
     // TODO(jiawei.shao@intel.com): support read-only storage texture on D3D12 and OpenGL.
-    DAWN_SKIP_TEST_IF(IsD3D12() || IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+
+    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
+    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
+    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
+    // bug in spvc parser is fixed.
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
 
     // Prepare the write-only storage texture.
     // TODO(jiawei.shao@intel.com): test more texture formats.
@@ -403,7 +415,13 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
 // Test that write-only storage textures are supported in fragment shader.
 TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
     // TODO(jiawei.shao@intel.com): support read-only storage texture on D3D12 and OpenGL.
-    DAWN_SKIP_TEST_IF(IsD3D12() || IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+
+    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
+    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
+    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
+    // bug in spvc parser is fixed.
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
 
     // Prepare the write-only storage texture.
     // TODO(jiawei.shao@intel.com): test more texture formats.

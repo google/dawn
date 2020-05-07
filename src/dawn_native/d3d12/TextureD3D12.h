@@ -116,6 +116,7 @@ namespace dawn_native { namespace d3d12 {
         const D3D12_SHADER_RESOURCE_VIEW_DESC& GetSRVDescriptor() const;
         D3D12_RENDER_TARGET_VIEW_DESC GetRTVDescriptor() const;
         D3D12_DEPTH_STENCIL_VIEW_DESC GetDSVDescriptor() const;
+        D3D12_UNORDERED_ACCESS_VIEW_DESC GetUAVDescriptor() const;
 
       private:
         D3D12_SHADER_RESOURCE_VIEW_DESC mSrvDesc;

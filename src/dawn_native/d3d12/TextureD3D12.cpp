@@ -48,7 +48,7 @@ namespace dawn_native { namespace d3d12 {
             if (usage & wgpu::TextureUsage::CopyDst) {
                 resourceState |= D3D12_RESOURCE_STATE_COPY_DEST;
             }
-            if (usage & wgpu::TextureUsage::Sampled) {
+            if (usage & (wgpu::TextureUsage::Sampled | kReadonlyStorageTexture)) {
                 resourceState |= (D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE |
                                   D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
             }
@@ -828,6 +828,19 @@ namespace dawn_native { namespace d3d12 {
         uint32_t mipLevel = GetBaseMipLevel();
         return ToBackend(GetTexture())
             ->GetDSVDescriptor(mipLevel, GetBaseArrayLayer(), GetLayerCount());
+    }
+
+    D3D12_UNORDERED_ACCESS_VIEW_DESC TextureView::GetUAVDescriptor() const {
+        D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc;
+        uavDesc.Format = GetD3D12Format();
+
+        ASSERT(!GetTexture()->IsMultisampledTexture());
+        uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
+        uavDesc.Texture2DArray.FirstArraySlice = GetBaseArrayLayer();
+        uavDesc.Texture2DArray.ArraySize = GetLayerCount();
+        uavDesc.Texture2DArray.MipSlice = GetBaseMipLevel();
+        uavDesc.Texture2DArray.PlaneSlice = 0;
+        return uavDesc;
     }
 
 }}  // namespace dawn_native::d3d12

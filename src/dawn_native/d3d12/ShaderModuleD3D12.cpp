@@ -51,6 +51,7 @@ namespace dawn_native { namespace d3d12 {
             // See https://github.com/gpuweb/gpuweb/issues/332
             options.SetHLSLPointCoordCompat(true);
             options.SetHLSLPointSizeCompat(true);
+            options.SetHLSLNonWritableUAVTextureAsSRV(true);
 
             DAWN_TRY(CheckSpvcSuccess(
                 mSpvcContext.InitializeForHlsl(spirv.data(), spirv.size(), options),
@@ -90,6 +91,7 @@ namespace dawn_native { namespace d3d12 {
             // See https://github.com/gpuweb/gpuweb/issues/332
             options_hlsl.point_coord_compat = true;
             options_hlsl.point_size_compat = true;
+            options_hlsl.nonwritable_uav_texture_as_srv = true;
 
             compilerImpl = std::make_unique<spirv_cross::CompilerHLSL>(spirv);
             compiler = compilerImpl.get();
