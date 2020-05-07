@@ -1090,7 +1090,7 @@ bool FunctionEmitter::ClassifyCFGEdges() {
           if (dest == header_info.merge_for_header) {
             // Branch to construct's merge block.  The loop break and
             // switch break cases have already been covered.
-            edge_kind = EdgeKind::kToMerge;
+            edge_kind = EdgeKind::kIfBreak;
           }
         }
 

@@ -58,9 +58,7 @@ enum class EdgeKind {
   // construct, but which is neither a kSwitchBreak or a kLoopBreak.
   // This can only occur for an "if" selection, i.e. where the selection
   // header ends in OpBranchConditional.
-  // TODO(dneto): Rename this to kIfBreak after we correctly classify edges
-  // as kSwitchBreak.
-  kToMerge,
+  kIfBreak,
   // An edge from one switch case to the next sibling switch case.
   kCaseFallThrough,
   // None of the above. By structured control flow rules, there can be at most

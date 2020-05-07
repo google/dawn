@@ -25,21 +25,61 @@ namespace tint {
 namespace reader {
 namespace spirv {
 
-/// A structured construct, consisting of a set of basic blocks.
+/// A structured control flow construct, consisting of a set of basic blocks.
 /// A construct is a span of blocks in the computed block order,
 /// and will appear contiguously in the WGSL source.
+///
+/// SPIR-V (2.11 Structured Control Flow) defines:
+///   - loop construct
+///   - continue construct
+///   - selection construct
+/// We also define a "function construct" consisting of all the basic blocks in
+/// the function.
+///
+/// The first block in a construct (by computed block order) is called a
+/// "header". For the constructs defined by SPIR-V, the header block is the
+/// basic block containing the merge instruction.  The header for the function
+/// construct is the entry block of the function.
+///
+/// Given two constructs A and B, we say "A encloses B" if B is a subset of A,
+/// i.e. if every basic block in B is also in A.  Note that a construct encloses
+/// itself.
+///
+/// In a valid SPIR-V module, constructs will nest, meaning given
+/// constructs A and B, either A encloses B, or B encloses A, or
+/// or they are disjoint (have no basic blocks in commont).
+///
+/// A loop in a high level language translates into either:
+//
+///  - a single-block loop, where the loop header branches back to itself.
+///     In this case this single-block loop consists only of the *continue
+///     construct*.  There is no "loop construct" for this case.
+//
+///  - a multi-block loop, where the loop back-edge is different from the loop
+///     header.
+///     This case has both a non-empty loop construct containing at least the
+///     loop header, and a non-empty continue construct, containing at least the
+///     back-edge block.
+///
+/// We care about two kinds of selection constructs:
+///
+///  - if-selection: where the header block ends in OpBranchConditional
+///
+///  - switch-selection: where the header block ends in OpSwitch
+///
 struct Construct {
   /// Enumeration for the kinds of structured constructs.
   enum Kind {
     /// The whole function.
     kFunction,
-    /// A SPIR-V selection construct, header ending in OpBrancConditional
+    /// A SPIR-V selection construct, header basic block ending in
+    /// OpBrancConditional.
     kIfSelection,
-    /// A SPIR-V selection construct, header ending in OpSwitch
+    /// A SPIR-V selection construct, header basic block ending in OpSwitch.
     kSwitchSelection,
-    /// A SPIR-V loop construct
+    /// A SPIR-V loop construct.
     kLoop,
-    /// A SPIR-V continue construct
+    /// A SPIR-V continue construct.
     kContinue,
   };
 
@@ -65,20 +105,20 @@ struct Construct {
     return begin_pos <= pos && pos < end_pos;
   }
 
-  /// The nearest enclosing construct (other than itself), or nullptr if
+  /// The nearest enclosing construct other than itself, or nullptr if
   /// this construct represents the entire function.
   const Construct* const parent = nullptr;
-  /// The nearest enclosing loop construct, if one exists. A construct
-  /// encloses itself.
+  /// The nearest enclosing loop construct, if one exists.  Points to |this|
+  /// when this is a loop construct.
   const Construct* const enclosing_loop = nullptr;
-  /// The nearest enclosing continue construct, if one exists. A construct
-  /// encloses itself.
+  /// The nearest enclosing continue construct, if one exists.  Points to
+  /// |this| when this is a contnue construct.
   const Construct* const enclosing_continue = nullptr;
   /// The nearest enclosing loop construct or continue construct or
   /// switch-selection construct, if one exists. The signficance is
   /// that a high level language "break" will branch to the merge block
-  /// of such an enclosing construct.
-  /// A construct encloses itself.
+  /// of such an enclosing construct.  Points to |this| when this is
+  /// a loop construct, a continue construct, or a switch-selection construct.
   const Construct* const enclosing_loop_or_continue_or_switch = nullptr;
 
   /// Control flow nesting depth. The entry block is at nesting depth 0.
