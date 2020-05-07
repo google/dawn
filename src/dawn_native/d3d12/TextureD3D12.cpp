@@ -772,11 +772,6 @@ namespace dawn_native { namespace d3d12 {
     TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor)
         : TextureViewBase(texture, descriptor) {
         mSrvDesc.Format = D3D12TextureFormat(descriptor->format);
-        if (descriptor->format == wgpu::TextureFormat::Depth32Float) {
-            // TODO(enga): This will need to be much more nuanced when WebGPU has
-            // texture view compatibility rules.
-            mSrvDesc.Format = DXGI_FORMAT_R32_FLOAT;
-        }
         mSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
         // Currently we always use D3D12_TEX2D_ARRAY_SRV because we cannot specify base array layer
