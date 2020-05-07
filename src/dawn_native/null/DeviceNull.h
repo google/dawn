@@ -91,9 +91,6 @@ namespace dawn_native { namespace null {
         CommandBufferBase* CreateCommandBuffer(CommandEncoder* encoder,
                                                const CommandBufferDescriptor* descriptor) override;
 
-        Serial GetCompletedCommandSerial() const final override;
-        Serial GetLastSubmittedCommandSerial() const final override;
-        Serial GetPendingCommandSerial() const override;
         MaybeError TickImpl() override;
 
         void AddPendingOperation(std::unique_ptr<PendingOperation> operation);
@@ -138,11 +135,11 @@ namespace dawn_native { namespace null {
             TextureBase* texture,
             const TextureViewDescriptor* descriptor) override;
 
+        Serial CheckAndUpdateCompletedSerials() override;
+
         void ShutDownImpl() override;
         MaybeError WaitForIdleForDestruction() override;
 
-        Serial mCompletedSerial = 0;
-        Serial mLastSubmittedSerial = 0;
         std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;
 
         static constexpr size_t kMaxMemoryUsage = 256 * 1024 * 1024;

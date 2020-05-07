@@ -63,7 +63,6 @@ namespace dawn_native { namespace vulkan {
         RenderPassCache* GetRenderPassCache() const;
 
         CommandRecordingContext* GetPendingRecordingContext();
-        Serial GetPendingCommandSerial() const override;
         MaybeError SubmitPendingCommands();
 
         void EnqueueDeferredDeallocation(BindGroupLayout* bindGroupLayout);
@@ -82,8 +81,6 @@ namespace dawn_native { namespace vulkan {
         CommandBufferBase* CreateCommandBuffer(CommandEncoder* encoder,
                                                const CommandBufferDescriptor* descriptor) override;
 
-        Serial GetCompletedCommandSerial() const final override;
-        Serial GetLastSubmittedCommandSerial() const final override;
         MaybeError TickImpl() override;
 
         ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) override;
@@ -158,7 +155,7 @@ namespace dawn_native { namespace vulkan {
         std::unique_ptr<external_semaphore::Service> mExternalSemaphoreService;
 
         ResultOrError<VkFence> GetUnusedFence();
-        void CheckPassedFences();
+        Serial CheckAndUpdateCompletedSerials() override;
 
         // We track which operations are in flight on the GPU with an increasing serial.
         // This works only because we have a single queue. Each submit to a queue is associated
@@ -167,8 +164,6 @@ namespace dawn_native { namespace vulkan {
         std::queue<std::pair<VkFence, Serial>> mFencesInFlight;
         // Fences in the unused list aren't reset yet.
         std::vector<VkFence> mUnusedFences;
-        Serial mCompletedSerial = 0;
-        Serial mLastSubmittedSerial = 0;
 
         MaybeError PrepareRecordingContext();
         void RecycleCompletedCommands();

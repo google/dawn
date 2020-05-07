@@ -124,6 +124,7 @@ namespace dawn_native {
                 // complete before proceeding with destruction.
                 // Assert that errors are device loss so that we can continue with destruction
                 AssertAndIgnoreDeviceLossError(WaitForIdleForDestruction());
+                ASSERT(mCompletedSerial == mLastSubmittedSerial);
                 break;
 
             case State::BeingDisconnected:
@@ -173,6 +174,7 @@ namespace dawn_native {
 
             // Assert that errors are device losses so that we can continue with destruction.
             AssertAndIgnoreDeviceLossError(WaitForIdleForDestruction());
+            ASSERT(mCompletedSerial == mLastSubmittedSerial);
             mState = State::Disconnected;
 
             // Now everything is as if the device was lost.
@@ -290,6 +292,45 @@ namespace dawn_native {
 
     FenceSignalTracker* DeviceBase::GetFenceSignalTracker() const {
         return mFenceSignalTracker.get();
+    }
+
+    Serial DeviceBase::GetCompletedCommandSerial() const {
+        return mCompletedSerial;
+    }
+
+    Serial DeviceBase::GetLastSubmittedCommandSerial() const {
+        return mLastSubmittedSerial;
+    }
+
+    void DeviceBase::IncrementLastSubmittedCommandSerial() {
+        mLastSubmittedSerial++;
+    }
+
+    void DeviceBase::ArtificiallyIncrementSerials() {
+        mCompletedSerial++;
+        mLastSubmittedSerial++;
+    }
+
+    void DeviceBase::AssumeCommandsComplete() {
+        mLastSubmittedSerial++;
+        mCompletedSerial = mLastSubmittedSerial;
+    }
+
+    Serial DeviceBase::GetPendingCommandSerial() const {
+        return mLastSubmittedSerial + 1;
+    }
+
+    void DeviceBase::CheckPassedSerials() {
+        Serial completedSerial = CheckAndUpdateCompletedSerials();
+
+        ASSERT(completedSerial <= mLastSubmittedSerial);
+        // completedSerial should not be less than mCompletedSerial unless it is 0.
+        // It can be 0 when there's no fences to check.
+        ASSERT(completedSerial >= mCompletedSerial || completedSerial == 0);
+
+        if (completedSerial > mCompletedSerial) {
+            mCompletedSerial = completedSerial;
+        }
     }
 
     ResultOrError<const Format*> DeviceBase::GetInternalFormat(wgpu::TextureFormat format) const {

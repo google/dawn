@@ -55,8 +55,6 @@ namespace dawn_native { namespace d3d12 {
         CommandBufferBase* CreateCommandBuffer(CommandEncoder* encoder,
                                                const CommandBufferDescriptor* descriptor) override;
 
-        Serial GetCompletedCommandSerial() const final override;
-        Serial GetLastSubmittedCommandSerial() const final override;
         MaybeError TickImpl() override;
 
         ID3D12Device* GetD3D12Device() const;
@@ -75,7 +73,6 @@ namespace dawn_native { namespace d3d12 {
         ComPtr<IDXGIFactory4> GetFactory() const;
 
         ResultOrError<CommandRecordingContext*> GetPendingCommandContext();
-        Serial GetPendingCommandSerial() const override;
 
         const D3D12DeviceInfo& GetDeviceInfo() const;
 
@@ -156,10 +153,9 @@ namespace dawn_native { namespace d3d12 {
         void ShutDownImpl() override;
         MaybeError WaitForIdleForDestruction() override;
 
-        Serial mCompletedSerial = 0;
-        Serial mLastSubmittedSerial = 0;
         ComPtr<ID3D12Fence> mFence;
         HANDLE mFenceEvent = nullptr;
+        Serial CheckAndUpdateCompletedSerials() override;
 
         ComPtr<ID3D12Device> mD3d12Device;  // Device is owned by adapter and will not be outlived.
         ComPtr<ID3D12CommandQueue> mCommandQueue;

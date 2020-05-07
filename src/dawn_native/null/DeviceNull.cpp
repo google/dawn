@@ -186,7 +186,7 @@ namespace dawn_native { namespace null {
 
     MaybeError Device::WaitForIdleForDestruction() {
         // Fake all commands being completed
-        mCompletedSerial = mLastSubmittedSerial;
+        AssumeCommandsComplete();
         return {};
     }
 
@@ -221,21 +221,13 @@ namespace dawn_native { namespace null {
         mMemoryUsage -= bytes;
     }
 
-    Serial Device::GetCompletedCommandSerial() const {
-        return mCompletedSerial;
-    }
-
-    Serial Device::GetLastSubmittedCommandSerial() const {
-        return mLastSubmittedSerial;
-    }
-
-    Serial Device::GetPendingCommandSerial() const {
-        return mLastSubmittedSerial + 1;
-    }
-
     MaybeError Device::TickImpl() {
         SubmitPendingOperations();
         return {};
+    }
+
+    Serial Device::CheckAndUpdateCompletedSerials() {
+        return GetLastSubmittedCommandSerial();
     }
 
     void Device::AddPendingOperation(std::unique_ptr<PendingOperation> operation) {
@@ -247,8 +239,8 @@ namespace dawn_native { namespace null {
         }
         mPendingOperations.clear();
 
-        mCompletedSerial = mLastSubmittedSerial;
-        mLastSubmittedSerial++;
+        CheckPassedSerials();
+        IncrementLastSubmittedCommandSerial();
     }
 
     // BindGroupDataHolder

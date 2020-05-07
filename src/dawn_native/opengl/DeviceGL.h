@@ -52,9 +52,6 @@ namespace dawn_native { namespace opengl {
         CommandBufferBase* CreateCommandBuffer(CommandEncoder* encoder,
                                                const CommandBufferDescriptor* descriptor) override;
 
-        Serial GetCompletedCommandSerial() const final override;
-        Serial GetLastSubmittedCommandSerial() const final override;
-        Serial GetPendingCommandSerial() const override;
         MaybeError TickImpl() override;
 
         ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) override;
@@ -96,12 +93,10 @@ namespace dawn_native { namespace opengl {
             const TextureViewDescriptor* descriptor) override;
 
         void InitTogglesFromDriver();
-        void CheckPassedFences();
+        Serial CheckAndUpdateCompletedSerials() override;
         void ShutDownImpl() override;
         MaybeError WaitForIdleForDestruction() override;
 
-        Serial mCompletedSerial = 0;
-        Serial mLastSubmittedSerial = 0;
         std::queue<std::pair<GLsync, Serial>> mFencesInFlight;
 
         GLFormatTable mFormatTable;

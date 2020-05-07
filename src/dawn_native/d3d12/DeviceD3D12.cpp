@@ -72,9 +72,10 @@ namespace dawn_native { namespace d3d12 {
         // value.
         mCommandQueue.As(&mD3d12SharingContract);
 
-        DAWN_TRY(CheckHRESULT(mD3d12Device->CreateFence(mLastSubmittedSerial, D3D12_FENCE_FLAG_NONE,
-                                                        IID_PPV_ARGS(&mFence)),
-                              "D3D12 create fence"));
+        DAWN_TRY(
+            CheckHRESULT(mD3d12Device->CreateFence(GetLastSubmittedCommandSerial(),
+                                                   D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mFence)),
+                         "D3D12 create fence"));
 
         mFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
         ASSERT(mFenceEvent != nullptr);
@@ -198,49 +199,44 @@ namespace dawn_native { namespace d3d12 {
         return &mPendingCommands;
     }
 
-    Serial Device::GetCompletedCommandSerial() const {
-        return mCompletedSerial;
-    }
-
-    Serial Device::GetLastSubmittedCommandSerial() const {
-        return mLastSubmittedSerial;
-    }
-
-    Serial Device::GetPendingCommandSerial() const {
-        return mLastSubmittedSerial + 1;
-    }
-
     MaybeError Device::TickImpl() {
-        // Perform cleanup operations to free unused objects
-        mCompletedSerial = mFence->GetCompletedValue();
+        CheckPassedSerials();
 
-        mResourceAllocatorManager->Tick(mCompletedSerial);
-        DAWN_TRY(mCommandAllocatorManager->Tick(mCompletedSerial));
-        mViewShaderVisibleDescriptorAllocator->Tick(mCompletedSerial);
-        mSamplerShaderVisibleDescriptorAllocator->Tick(mCompletedSerial);
-        mRenderTargetViewAllocator->Tick(mCompletedSerial);
-        mDepthStencilViewAllocator->Tick(mCompletedSerial);
-        mMapRequestTracker->Tick(mCompletedSerial);
-        mUsedComObjectRefs.ClearUpTo(mCompletedSerial);
+        // Perform cleanup operations to free unused objects
+        Serial completedSerial = GetCompletedCommandSerial();
+
+        mResourceAllocatorManager->Tick(completedSerial);
+        DAWN_TRY(mCommandAllocatorManager->Tick(completedSerial));
+        mViewShaderVisibleDescriptorAllocator->Tick(completedSerial);
+        mSamplerShaderVisibleDescriptorAllocator->Tick(completedSerial);
+        mRenderTargetViewAllocator->Tick(completedSerial);
+        mDepthStencilViewAllocator->Tick(completedSerial);
+        mMapRequestTracker->Tick(completedSerial);
+        mUsedComObjectRefs.ClearUpTo(completedSerial);
         DAWN_TRY(ExecutePendingCommandContext());
         DAWN_TRY(NextSerial());
         return {};
     }
 
     MaybeError Device::NextSerial() {
-        mLastSubmittedSerial++;
-        return CheckHRESULT(mCommandQueue->Signal(mFence.Get(), mLastSubmittedSerial),
+        IncrementLastSubmittedCommandSerial();
+
+        return CheckHRESULT(mCommandQueue->Signal(mFence.Get(), GetLastSubmittedCommandSerial()),
                             "D3D12 command queue signal fence");
     }
 
     MaybeError Device::WaitForSerial(uint64_t serial) {
-        mCompletedSerial = mFence->GetCompletedValue();
-        if (mCompletedSerial < serial) {
+        CheckPassedSerials();
+        if (GetCompletedCommandSerial() < serial) {
             DAWN_TRY(CheckHRESULT(mFence->SetEventOnCompletion(serial, mFenceEvent),
                                   "D3D12 set event on completion"));
             WaitForSingleObject(mFenceEvent, INFINITE);
         }
         return {};
+    }
+
+    Serial Device::CheckAndUpdateCompletedSerials() {
+        return mFence->GetCompletedValue();
     }
 
     void Device::ReferenceUntilUnused(ComPtr<IUnknown> object) {
@@ -447,11 +443,13 @@ namespace dawn_native { namespace d3d12 {
 
         DAWN_TRY(NextSerial());
         // Wait for all in-flight commands to finish executing
-        DAWN_TRY(WaitForSerial(mLastSubmittedSerial));
+        DAWN_TRY(WaitForSerial(GetLastSubmittedCommandSerial()));
 
         // Call tick one last time so resources are cleaned up.
         DAWN_TRY(TickImpl());
 
+        // Force all operations to look as if they were completed
+        AssumeCommandsComplete();
         return {};
     }
 
@@ -461,16 +459,16 @@ namespace dawn_native { namespace d3d12 {
         // Immediately forget about all pending commands
         mPendingCommands.Release();
 
-        // GPU is no longer executing commands. Existing objects do not get freed until the device
-        // is destroyed. To ensure objects are always released, force the completed serial to be
-        // MAX.
-        mCompletedSerial = std::numeric_limits<Serial>::max();
+        // Some operations might have been started since the last submit and waiting
+        // on a serial that doesn't have a corresponding fence enqueued. Force all
+        // operations to look as if they were completed (because they were).
+        AssumeCommandsComplete();
 
         if (mFenceEvent != nullptr) {
             ::CloseHandle(mFenceEvent);
         }
 
-        mUsedComObjectRefs.ClearUpTo(mCompletedSerial);
+        mUsedComObjectRefs.ClearUpTo(GetCompletedCommandSerial());
 
         ASSERT(mUsedComObjectRefs.Empty());
         ASSERT(!mPendingCommands.IsOpen());
