@@ -81,42 +81,61 @@ namespace dawn_native { namespace vulkan {
         return mGlobalInfo;
     }
 
-    MaybeError Backend::LoadVulkan() {
-#if defined(DAWN_ENABLE_VULKAN_VALIDATION_LAYERS)
-        if (GetInstance()->IsBackendValidationEnabled()) {
-            std::string vkDataDir = GetExecutableDirectory() + DAWN_VK_DATA_DIR;
-            if (!SetEnvironmentVar("VK_LAYER_PATH", vkDataDir.c_str())) {
-                return DAWN_INTERNAL_ERROR("Couldn't set VK_LAYER_PATH");
-            }
-        }
-#endif
-#if defined(DAWN_SWIFTSHADER_VK_ICD_JSON)
-        std::string fullSwiftshaderICDPath =
-            GetExecutableDirectory() + DAWN_SWIFTSHADER_VK_ICD_JSON;
-        if (!SetEnvironmentVar("VK_ICD_FILENAMES", fullSwiftshaderICDPath.c_str())) {
-            return DAWN_INTERNAL_ERROR("Couldn't set VK_ICD_FILENAMES");
-        }
-#endif
-
+    MaybeError Backend::LoadVulkan(bool useSwiftshader) {
+        // First try to load the system Vulkan driver, if that fails,
+        // try to load with Swiftshader. Note: The system driver could potentially be Swiftshader
+        // if it was installed.
         if (mVulkanLib.Open(kVulkanLibName)) {
             return {};
         }
         dawn::WarningLog() << std::string("Couldn't open ") + kVulkanLibName;
 
+        // If |useSwiftshader == true|, fallback and try to directly load the Swiftshader
+        // library.
+        if (useSwiftshader) {
 #if defined(DAWN_ENABLE_SWIFTSHADER)
-        if (strcmp(kVulkanLibName, kSwiftshaderLibName) != 0) {
             if (mVulkanLib.Open(kSwiftshaderLibName)) {
                 return {};
             }
             dawn::WarningLog() << std::string("Couldn't open ") + kSwiftshaderLibName;
+#else
+            UNREACHABLE();
+#endif  // defined(DAWN_ENABLE_SWIFTSHADER)
         }
-#endif
 
         return DAWN_INTERNAL_ERROR("Couldn't load Vulkan");
     }
 
-    MaybeError Backend::Initialize() {
-        DAWN_TRY(LoadVulkan());
+    MaybeError Backend::Initialize(bool useSwiftshader) {
+        DAWN_TRY(LoadVulkan(useSwiftshader));
+
+        // TODO(crbug.com/dawn/406): In order to not modify the environment variables of
+        // the rest of an application embedding Dawn, we should set these only
+        // in the scope of this function. See ANGLE's ScopedVkLoaderEnvironment
+        if (useSwiftshader) {
+#if defined(DAWN_SWIFTSHADER_VK_ICD_JSON)
+            std::string fullSwiftshaderICDPath =
+                GetExecutableDirectory() + DAWN_SWIFTSHADER_VK_ICD_JSON;
+            if (!SetEnvironmentVar("VK_ICD_FILENAMES", fullSwiftshaderICDPath.c_str())) {
+                return DAWN_INTERNAL_ERROR("Couldn't set VK_ICD_FILENAMES");
+            }
+#else
+            dawn::WarningLog() << "Swiftshader enabled but Dawn was not built with "
+                                  "DAWN_SWIFTSHADER_VK_ICD_JSON.";
+#endif
+        }
+
+        if (GetInstance()->IsBackendValidationEnabled()) {
+#if defined(DAWN_ENABLE_VULKAN_VALIDATION_LAYERS)
+            std::string vkDataDir = GetExecutableDirectory() + DAWN_VK_DATA_DIR;
+            if (!SetEnvironmentVar("VK_LAYER_PATH", vkDataDir.c_str())) {
+                return DAWN_INTERNAL_ERROR("Couldn't set VK_LAYER_PATH");
+            }
+#else
+            dawn::WarningLog() << "Backend validation enabled but Dawn was not built with "
+                                  "DAWN_ENABLE_VULKAN_VALIDATION_LAYERS.";
+#endif
+        }
 
         DAWN_TRY(mFunctions.LoadGlobalProcs(mVulkanLib));
 
@@ -300,10 +319,10 @@ namespace dawn_native { namespace vulkan {
         return VK_FALSE;
     }
 
-    BackendConnection* Connect(InstanceBase* instance) {
+    BackendConnection* Connect(InstanceBase* instance, bool useSwiftshader) {
         Backend* backend = new Backend(instance);
 
-        if (instance->ConsumedError(backend->Initialize())) {
+        if (instance->ConsumedError(backend->Initialize(useSwiftshader))) {
             delete backend;
             return nullptr;
         }

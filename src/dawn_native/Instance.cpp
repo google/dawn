@@ -45,7 +45,7 @@ namespace dawn_native {
 #endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)
     namespace vulkan {
-        BackendConnection* Connect(InstanceBase* instance);
+        BackendConnection* Connect(InstanceBase* instance, bool useSwiftshader);
     }
 #endif  // defined(DAWN_ENABLE_BACKEND_VULKAN)
 
@@ -136,7 +136,15 @@ namespace dawn_native {
         Register(metal::Connect(this), wgpu::BackendType::Metal);
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)
-        Register(vulkan::Connect(this), wgpu::BackendType::Vulkan);
+        // TODO(https://github.com/KhronosGroup/Vulkan-Loader/issues/287):
+        // When we can load SwiftShader in parallel with the system driver, we should create the
+        // backend only once and expose SwiftShader as an additional adapter. For now, we create two
+        // VkInstances, one from SwiftShader, and one from the system. Note: If the Vulkan driver
+        // *is* SwiftShader, then this would load SwiftShader twice.
+        Register(vulkan::Connect(this, false), wgpu::BackendType::Vulkan);
+#    if defined(DAWN_ENABLE_SWIFTSHADER)
+        Register(vulkan::Connect(this, true), wgpu::BackendType::Vulkan);
+#    endif  // defined(DAWN_ENABLE_SWIFTSHADER)
 #endif  // defined(DAWN_ENABLE_BACKEND_VULKAN)
 #if defined(DAWN_ENABLE_BACKEND_OPENGL)
         Register(opengl::Connect(this), wgpu::BackendType::OpenGL);
@@ -148,31 +156,29 @@ namespace dawn_native {
         mBackendsConnected = true;
     }
 
-    ResultOrError<BackendConnection*> InstanceBase::FindBackend(wgpu::BackendType type) {
-        for (std::unique_ptr<BackendConnection>& backend : mBackends) {
-            if (backend->GetType() == type) {
-                return backend.get();
-            }
-        }
-
-        return DAWN_VALIDATION_ERROR("Backend isn't present.");
-    }
-
     MaybeError InstanceBase::DiscoverAdaptersInternal(const AdapterDiscoveryOptionsBase* options) {
         EnsureBackendConnections();
 
-        BackendConnection* backend;
-        DAWN_TRY_ASSIGN(backend, FindBackend(static_cast<wgpu::BackendType>(options->backendType)));
+        bool foundBackend = false;
+        for (std::unique_ptr<BackendConnection>& backend : mBackends) {
+            if (backend->GetType() != static_cast<wgpu::BackendType>(options->backendType)) {
+                continue;
+            }
+            foundBackend = true;
 
-        std::vector<std::unique_ptr<AdapterBase>> newAdapters;
-        DAWN_TRY_ASSIGN(newAdapters, backend->DiscoverAdapters(options));
+            std::vector<std::unique_ptr<AdapterBase>> newAdapters;
+            DAWN_TRY_ASSIGN(newAdapters, backend->DiscoverAdapters(options));
 
-        for (std::unique_ptr<AdapterBase>& adapter : newAdapters) {
-            ASSERT(adapter->GetBackendType() == backend->GetType());
-            ASSERT(adapter->GetInstance() == this);
-            mAdapters.push_back(std::move(adapter));
+            for (std::unique_ptr<AdapterBase>& adapter : newAdapters) {
+                ASSERT(adapter->GetBackendType() == backend->GetType());
+                ASSERT(adapter->GetInstance() == this);
+                mAdapters.push_back(std::move(adapter));
+            }
         }
 
+        if (!foundBackend) {
+            return DAWN_VALIDATION_ERROR("Backend isn't present.");
+        }
         return {};
     }
 

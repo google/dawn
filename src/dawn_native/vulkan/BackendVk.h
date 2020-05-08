@@ -32,12 +32,12 @@ namespace dawn_native { namespace vulkan {
         VkInstance GetVkInstance() const;
         const VulkanGlobalInfo& GetGlobalInfo() const;
 
-        MaybeError Initialize();
+        MaybeError Initialize(bool useSwiftshader);
 
         std::vector<std::unique_ptr<AdapterBase>> DiscoverDefaultAdapters() override;
 
       private:
-        MaybeError LoadVulkan();
+        MaybeError LoadVulkan(bool useSwiftshader);
         ResultOrError<VulkanGlobalKnobs> CreateInstance();
 
         MaybeError RegisterDebugReport();
