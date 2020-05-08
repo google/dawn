@@ -108,3 +108,10 @@ TEST_F(ShaderModuleValidationTest, FragmentOutputLocationExceedsMaxColorAttachme
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment,
                                                   stream.str().c_str()));
 }
+
+// Test that it is invalid to create a shader module with no chained descriptor. (It must be
+// WGSL or SPIRV, not empty)
+TEST_F(ShaderModuleValidationTest, NoChainedDescriptor) {
+  wgpu::ShaderModuleDescriptor desc = {};
+  ASSERT_DEVICE_ERROR(device.CreateShaderModule(&desc));
+}

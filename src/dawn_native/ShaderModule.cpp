@@ -329,10 +329,14 @@ namespace dawn_native {
             return ValidateSpirv(device, descriptor->code, descriptor->codeSize);
         }
 
-        // For now only a single SPIRV or WGSL subdescriptor is allowed.
         const ChainedStruct* chainedDescriptor = descriptor->nextInChain;
+        if (chainedDescriptor == nullptr) {
+            return DAWN_VALIDATION_ERROR("Shader module descriptor missing chained descriptor");
+        }
+        // For now only a single SPIRV or WGSL subdescriptor is allowed.
         if (chainedDescriptor->nextInChain != nullptr) {
-            return DAWN_VALIDATION_ERROR("chained nextInChain must be nullptr");
+            return DAWN_VALIDATION_ERROR(
+                "Shader module descriptor chained nextInChain must be nullptr");
         }
 
         switch (chainedDescriptor->sType) {
