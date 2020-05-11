@@ -183,8 +183,7 @@ namespace {
         }
     }
 
-    // Test that it is invalid to use the same buffer as multiple writable usages in the same
-    // render pass. It is invalid in the same dispatch in compute pass.
+    // Test using multiple writable usages on the same buffer in a single pass/dispatch
     TEST_F(ResourceUsageTrackingTest, BufferWithMultipleWriteUsage) {
         // Create buffer and bind group
         wgpu::Buffer buffer = CreateBuffer(512, wgpu::BufferUsage::Storage);
@@ -199,14 +198,13 @@ namespace {
 
         // test render pass
         {
-            // It is invalid to use the buffer as multiple writeable usages in render pass
+            // It is valid to use multiple storage usages on the same buffer in render pass
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             DummyRenderPass dummyRenderPass(device);
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
-            pass.SetIndexBuffer(buffer);
             pass.SetBindGroup(0, bg);
             pass.EndPass();
-            ASSERT_DEVICE_ERROR(encoder.Finish());
+            encoder.Finish();
         }
 
         // test compute pass
@@ -967,8 +965,7 @@ namespace {
         }
     }
 
-    // Test that it is invalid to use the same texture as multiple writable usages in the same
-    // render pass. It is invalid in the same dispatch in compute pass.
+    // Test using multiple writable usages on the same texture in a single pass/dispatch
     TEST_F(ResourceUsageTrackingTest, TextureWithMultipleWriteUsage) {
         // Test render pass
         {
@@ -986,16 +983,31 @@ namespace {
                   kFormat}});
             wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, view}});
 
-            // Create a bind group to use the texture as render target
-            utils::ComboRenderPassDescriptor renderPass({view});
-
             // It is invalid to use the texture as both writeonly storage and render target in
             // the same pass
-            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
-            pass.SetBindGroup(0, bg);
-            pass.EndPass();
-            ASSERT_DEVICE_ERROR(encoder.Finish());
+            {
+                utils::ComboRenderPassDescriptor renderPass({view});
+
+                wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+                wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+                pass.SetBindGroup(0, bg);
+                pass.EndPass();
+                ASSERT_DEVICE_ERROR(encoder.Finish());
+            }
+
+            // It is valid to use multiple writeonly storage usages on the same texture in render
+            // pass
+            {
+                wgpu::BindGroup bg1 = utils::MakeBindGroup(device, bgl, {{0, view}});
+
+                wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+                DummyRenderPass dummyRenderPass(device);
+                wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+                pass.SetBindGroup(0, bg);
+                pass.SetBindGroup(1, bg1);
+                pass.EndPass();
+                encoder.Finish();
+            }
         }
 
         // Test compute pass
