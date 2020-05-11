@@ -44,16 +44,19 @@ namespace dawn_native {
         ErrorScope* GetParent();
 
         void HandleError(wgpu::ErrorType type, const char* message);
-
-        void Destroy();
+        void UnlinkForShutdown();
 
       private:
         ~ErrorScope() override;
         bool IsRoot() const;
+        void RunNonRootCallback();
+
         static void HandleErrorImpl(ErrorScope* scope, wgpu::ErrorType type, const char* message);
+        static void UnlinkForShutdownImpl(ErrorScope* scope);
 
         wgpu::ErrorFilter mErrorFilter = wgpu::ErrorFilter::None;
         Ref<ErrorScope> mParent = nullptr;
+        bool mIsRoot;
 
         wgpu::ErrorCallback mCallback = nullptr;
         void* mUserdata = nullptr;

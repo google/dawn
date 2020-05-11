@@ -152,6 +152,7 @@ namespace dawn_native {
         mState = State::Disconnected;
 
         mErrorScopeTracker = nullptr;
+        mCurrentErrorScope->UnlinkForShutdown();
         mFenceSignalTracker = nullptr;
         mDynamicUploader = nullptr;
 

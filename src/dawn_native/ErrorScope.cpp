@@ -18,18 +18,18 @@
 
 namespace dawn_native {
 
-    ErrorScope::ErrorScope() = default;
+    ErrorScope::ErrorScope() : mIsRoot(true) {
+    }
 
     ErrorScope::ErrorScope(wgpu::ErrorFilter errorFilter, ErrorScope* parent)
-        : RefCounted(), mErrorFilter(errorFilter), mParent(parent) {
+        : RefCounted(), mErrorFilter(errorFilter), mParent(parent), mIsRoot(false) {
         ASSERT(mParent.Get() != nullptr);
     }
 
     ErrorScope::~ErrorScope() {
-        if (mCallback == nullptr || IsRoot()) {
-            return;
+        if (!IsRoot()) {
+            RunNonRootCallback();
         }
-        mCallback(static_cast<WGPUErrorType>(mErrorType), mErrorMessage.c_str(), mUserdata);
     }
 
     void ErrorScope::SetCallback(wgpu::ErrorCallback callback, void* userdata) {
@@ -42,11 +42,25 @@ namespace dawn_native {
     }
 
     bool ErrorScope::IsRoot() const {
-        return mParent.Get() == nullptr;
+        return mIsRoot;
+    }
+
+    void ErrorScope::RunNonRootCallback() {
+        ASSERT(!IsRoot());
+
+        if (mCallback != nullptr) {
+            // For non-root error scopes, the callback can run at most once.
+            mCallback(static_cast<WGPUErrorType>(mErrorType), mErrorMessage.c_str(), mUserdata);
+            mCallback = nullptr;
+        }
     }
 
     void ErrorScope::HandleError(wgpu::ErrorType type, const char* message) {
         HandleErrorImpl(this, type, message);
+    }
+
+    void ErrorScope::UnlinkForShutdown() {
+        UnlinkForShutdownImpl(this);
     }
 
     // static
@@ -105,10 +119,24 @@ namespace dawn_native {
         }
     }
 
-    void ErrorScope::Destroy() {
-        if (!IsRoot()) {
-            mErrorType = wgpu::ErrorType::Unknown;
-            mErrorMessage = "Error scope destroyed";
+    // static
+    void ErrorScope::UnlinkForShutdownImpl(ErrorScope* scope) {
+        Ref<ErrorScope> currentScope = scope;
+        Ref<ErrorScope> parentScope = nullptr;
+        for (; !currentScope->IsRoot(); currentScope = parentScope.Get()) {
+            ASSERT(!currentScope->IsRoot());
+            ASSERT(currentScope.Get() != nullptr);
+            parentScope = std::move(currentScope->mParent);
+            ASSERT(parentScope.Get() != nullptr);
+
+            // On shutdown, error scopes that have yet to have a status get Unknown.
+            if (currentScope->mErrorType == wgpu::ErrorType::NoError) {
+                currentScope->mErrorType = wgpu::ErrorType::Unknown;
+                currentScope->mErrorMessage = "Error scope destroyed";
+            }
+
+            // Run the callback if it hasn't run already.
+            currentScope->RunNonRootCallback();
         }
     }
 

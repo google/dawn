@@ -196,3 +196,11 @@ TEST_F(ErrorScopeValidationTest, DeviceDestroyedBeforeCallback) {
     EXPECT_CALL(*mockDevicePopErrorScopeCallback, Call(WGPUErrorType_NoError, _, this)).Times(1);
     device = nullptr;
 }
+
+// Regression test that on device shutdown, we don't get a recursion in O(pushed error scope) that
+// would lead to a stack overflow
+TEST_F(ErrorScopeValidationTest, ShutdownStackOverflow) {
+    for (size_t i = 0; i < 1'000'000; i++) {
+        device.PushErrorScope(wgpu::ErrorFilter::Validation);
+    }
+}

@@ -30,7 +30,7 @@ namespace dawn_native {
         // with UNKNOWN.
         constexpr Serial maxSerial = std::numeric_limits<Serial>::max();
         for (Ref<ErrorScope>& scope : mScopesInFlight.IterateUpTo(maxSerial)) {
-            scope->Destroy();
+            scope->UnlinkForShutdown();
         }
         Tick(maxSerial);
     }
