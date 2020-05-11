@@ -17,13 +17,21 @@
 #include "common/Math.h"
 #include "dawn_native/metal/DeviceMTL.h"
 
+#include <limits>
+
 namespace dawn_native { namespace metal {
     // The size of uniform buffer and storage buffer need to be aligned to 16 bytes which is the
     // largest alignment of supported data types
     static constexpr uint32_t kMinUniformOrStorageBufferAlignment = 16u;
 
-    Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
-        : BufferBase(device, descriptor) {
+    // static
+    ResultOrError<Buffer*> Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
+        Ref<Buffer> buffer = AcquireRef(new Buffer(device, descriptor));
+        DAWN_TRY(buffer->Initialize());
+        return buffer.Detach();
+    }
+
+    MaybeError Buffer::Initialize() {
         MTLResourceOptions storageMode;
         if (GetUsage() & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) {
             storageMode = MTLResourceStorageModeShared;
@@ -31,7 +39,14 @@ namespace dawn_native { namespace metal {
             storageMode = MTLResourceStorageModePrivate;
         }
 
-        uint32_t currentSize = GetSize();
+        if (GetSize() >
+            std::numeric_limits<uint64_t>::max() - kMinUniformOrStorageBufferAlignment) {
+            return DAWN_OUT_OF_MEMORY_ERROR("Buffer allocation is too large");
+        }
+
+        // TODO(cwallez@chromium.org): Have a global "zero" buffer that can do everything instead
+        // of creating a new 4-byte buffer?
+        uint32_t currentSize = std::max(GetSize(), uint64_t(4u));
         // Metal validation layer requires the size of uniform buffer and storage buffer to be no
         // less than the size of the buffer block defined in shader, and the overall size of the
         // buffer must be aligned to the largest alignment of its members.
@@ -39,7 +54,9 @@ namespace dawn_native { namespace metal {
             currentSize = Align(currentSize, kMinUniformOrStorageBufferAlignment);
         }
 
-        mMtlBuffer = [device->GetMTLDevice() newBufferWithLength:currentSize options:storageMode];
+        mMtlBuffer = [ToBackend(GetDevice())->GetMTLDevice() newBufferWithLength:currentSize
+                                                                         options:storageMode];
+        return {};
     }
 
     Buffer::~Buffer() {

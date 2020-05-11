@@ -26,13 +26,14 @@ namespace dawn_native { namespace metal {
 
     class Buffer : public BufferBase {
       public:
-        Buffer(Device* device, const BufferDescriptor* descriptor);
-
+        static ResultOrError<Buffer*> Create(Device* device, const BufferDescriptor* descriptor);
         id<MTLBuffer> GetMTLBuffer() const;
 
         void OnMapCommandSerialFinished(uint32_t mapSerial, bool isWrite);
 
       private:
+        using BufferBase::BufferBase;
+        MaybeError Initialize();
         ~Buffer() override;
         // Dawn API
         MaybeError MapReadAsyncImpl(uint32_t serial) override;

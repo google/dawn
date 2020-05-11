@@ -581,3 +581,18 @@ DAWN_INSTANTIATE_TEST(CreateBufferMappedTests,
                       MetalBackend(),
                       OpenGLBackend(),
                       VulkanBackend());
+
+class BufferTests : public DawnTest {};
+
+TEST_P(BufferTests, ZeroSizedBuffer) {
+    wgpu::BufferDescriptor desc;
+    desc.size = 0;
+    desc.usage = wgpu::BufferUsage::CopyDst;
+    device.CreateBuffer(&desc);
+}
+
+DAWN_INSTANTIATE_TEST(BufferTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());
