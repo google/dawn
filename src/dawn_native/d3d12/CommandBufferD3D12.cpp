@@ -741,8 +741,8 @@ namespace dawn_native { namespace d3d12 {
                     ComputePipeline* pipeline = ToBackend(cmd->pipeline).Get();
                     PipelineLayout* layout = ToBackend(pipeline->GetLayout());
 
-                    commandList->SetComputeRootSignature(layout->GetRootSignature().Get());
-                    commandList->SetPipelineState(pipeline->GetPipelineState().Get());
+                    commandList->SetComputeRootSignature(layout->GetRootSignature());
+                    commandList->SetPipelineState(pipeline->GetPipelineState());
 
                     bindingTracker->OnSetPipeline(pipeline);
 
@@ -1105,8 +1105,8 @@ namespace dawn_native { namespace d3d12 {
                     RenderPipeline* pipeline = ToBackend(cmd->pipeline).Get();
                     PipelineLayout* layout = ToBackend(pipeline->GetLayout());
 
-                    commandList->SetGraphicsRootSignature(layout->GetRootSignature().Get());
-                    commandList->SetPipelineState(pipeline->GetPipelineState().Get());
+                    commandList->SetGraphicsRootSignature(layout->GetRootSignature());
+                    commandList->SetPipelineState(pipeline->GetPipelineState());
                     commandList->IASetPrimitiveTopology(pipeline->GetD3D12PrimitiveTopology());
 
                     bindingTracker->OnSetPipeline(pipeline);

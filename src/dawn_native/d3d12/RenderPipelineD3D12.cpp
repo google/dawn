@@ -359,7 +359,7 @@ namespace dawn_native { namespace d3d12 {
 
         PipelineLayout* layout = ToBackend(GetLayout());
 
-        descriptorD3D12.pRootSignature = layout->GetRootSignature().Get();
+        descriptorD3D12.pRootSignature = layout->GetRootSignature();
 
         // D3D12 logs warnings if any empty input state is used
         std::array<D3D12_INPUT_ELEMENT_DESC, kMaxVertexAttributes> inputElementDescriptors;
@@ -420,8 +420,8 @@ namespace dawn_native { namespace d3d12 {
         return mD3d12PrimitiveTopology;
     }
 
-    ComPtr<ID3D12PipelineState> RenderPipeline::GetPipelineState() {
-        return mPipelineState;
+    ID3D12PipelineState* RenderPipeline::GetPipelineState() const {
+        return mPipelineState.Get();
     }
 
     D3D12_INPUT_LAYOUT_DESC RenderPipeline::ComputeInputLayout(

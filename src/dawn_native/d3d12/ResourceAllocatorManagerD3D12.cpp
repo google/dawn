@@ -294,8 +294,8 @@ namespace dawn_native { namespace d3d12 {
         ComPtr<ID3D12Resource> placedResource;
         DAWN_TRY(CheckOutOfMemoryHRESULT(
             mDevice->GetD3D12Device()->CreatePlacedResource(
-                heap->GetD3D12Heap().Get(), allocation.GetOffset(), &resourceDescriptor,
-                initialUsage, nullptr, IID_PPV_ARGS(&placedResource)),
+                heap->GetD3D12Heap(), allocation.GetOffset(), &resourceDescriptor, initialUsage,
+                nullptr, IID_PPV_ARGS(&placedResource)),
             "ID3D12Device::CreatePlacedResource"));
 
         // After CreatePlacedResource has finished, the heap can be unlocked from residency. This

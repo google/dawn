@@ -186,8 +186,8 @@ namespace dawn_native { namespace d3d12 {
         return mSamplerRootParameterInfo[group];
     }
 
-    ComPtr<ID3D12RootSignature> PipelineLayout::GetRootSignature() const {
-        return mRootSignature;
+    ID3D12RootSignature* PipelineLayout::GetRootSignature() const {
+        return mRootSignature.Get();
     }
 
     uint32_t PipelineLayout::GetDynamicRootParameterIndex(uint32_t group,

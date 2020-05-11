@@ -56,7 +56,7 @@ namespace dawn_native { namespace d3d12 {
         }
 
         D3D12_COMPUTE_PIPELINE_STATE_DESC d3dDesc = {};
-        d3dDesc.pRootSignature = ToBackend(GetLayout())->GetRootSignature().Get();
+        d3dDesc.pRootSignature = ToBackend(GetLayout())->GetRootSignature();
         d3dDesc.CS.pShaderBytecode = compiledShader->GetBufferPointer();
         d3dDesc.CS.BytecodeLength = compiledShader->GetBufferSize();
 
@@ -69,8 +69,8 @@ namespace dawn_native { namespace d3d12 {
         ToBackend(GetDevice())->ReferenceUntilUnused(mPipelineState);
     }
 
-    ComPtr<ID3D12PipelineState> ComputePipeline::GetPipelineState() {
-        return mPipelineState;
+    ID3D12PipelineState* ComputePipeline::GetPipelineState() const {
+        return mPipelineState.Get();
     }
 
 }}  // namespace dawn_native::d3d12

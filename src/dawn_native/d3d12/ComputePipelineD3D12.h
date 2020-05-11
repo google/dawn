@@ -29,7 +29,7 @@ namespace dawn_native { namespace d3d12 {
                                                       const ComputePipelineDescriptor* descriptor);
         ComputePipeline() = delete;
 
-        ComPtr<ID3D12PipelineState> GetPipelineState();
+        ID3D12PipelineState* GetPipelineState() const;
 
       private:
         ~ComputePipeline() override;

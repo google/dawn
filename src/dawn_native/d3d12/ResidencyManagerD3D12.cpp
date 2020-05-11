@@ -39,7 +39,7 @@ namespace dawn_native { namespace d3d12 {
         if (!heap->IsInResidencyLRUCache() && !heap->IsResidencyLocked()) {
             DAWN_TRY(EnsureCanMakeResident(heap->GetSize(),
                                            GetMemorySegmentInfo(heap->GetMemorySegment())));
-            ID3D12Pageable* pageable = heap->GetD3D12Pageable().Get();
+            ID3D12Pageable* pageable = heap->GetD3D12Pageable();
             DAWN_TRY(CheckHRESULT(mDevice->GetD3D12Device()->MakeResident(1, &pageable),
                                   "Making a scheduled-to-be-used resource resident"));
         }
@@ -206,7 +206,7 @@ namespace dawn_native { namespace d3d12 {
             }
 
             sizeEvicted += heap->GetSize();
-            resourcesToEvict.push_back(heap->GetD3D12Pageable().Get());
+            resourcesToEvict.push_back(heap->GetD3D12Pageable());
         }
 
         if (resourcesToEvict.size() > 0) {
@@ -244,7 +244,7 @@ namespace dawn_native { namespace d3d12 {
                 // update its position in the LRU.
                 heap->RemoveFromList();
             } else {
-                heapsToMakeResident.push_back(heap->GetD3D12Pageable().Get());
+                heapsToMakeResident.push_back(heap->GetD3D12Pageable());
                 if (heap->GetMemorySegment() == MemorySegment::Local) {
                     localSizeToMakeResident += heap->GetSize();
                 } else {

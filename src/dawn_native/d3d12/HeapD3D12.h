@@ -35,8 +35,8 @@ namespace dawn_native { namespace d3d12 {
         Heap(ComPtr<ID3D12Pageable> d3d12Pageable, MemorySegment memorySegment, uint64_t size);
         ~Heap();
 
-        ComPtr<ID3D12Heap> GetD3D12Heap() const;
-        ComPtr<ID3D12Pageable> GetD3D12Pageable() const;
+        ID3D12Heap* GetD3D12Heap() const;
+        ID3D12Pageable* GetD3D12Pageable() const;
         MemorySegment GetMemorySegment() const;
 
         // We set mLastRecordingSerial to denote the serial this heap was last recorded to be used.

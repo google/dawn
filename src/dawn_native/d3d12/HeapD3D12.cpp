@@ -32,15 +32,15 @@ namespace dawn_native { namespace d3d12 {
     // ID3D12Pageable that was initially created as an ID3D12Heap (i.e. SubAllocation). If the
     // ID3D12Pageable was initially created as an ID3D12Resource (i.e. DirectAllocation), then
     // use GetD3D12Pageable().
-    ComPtr<ID3D12Heap> Heap::GetD3D12Heap() const {
+    ID3D12Heap* Heap::GetD3D12Heap() const {
         ComPtr<ID3D12Heap> heap;
         HRESULT result = mD3d12Pageable.As(&heap);
         ASSERT(SUCCEEDED(result));
-        return heap;
+        return heap.Get();
     }
 
-    ComPtr<ID3D12Pageable> Heap::GetD3D12Pageable() const {
-        return mD3d12Pageable;
+    ID3D12Pageable* Heap::GetD3D12Pageable() const {
+        return mD3d12Pageable.Get();
     }
 
     MemorySegment Heap::GetMemorySegment() const {

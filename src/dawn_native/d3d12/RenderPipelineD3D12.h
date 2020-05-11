@@ -30,7 +30,7 @@ namespace dawn_native { namespace d3d12 {
         RenderPipeline() = delete;
 
         D3D12_PRIMITIVE_TOPOLOGY GetD3D12PrimitiveTopology() const;
-        ComPtr<ID3D12PipelineState> GetPipelineState();
+        ID3D12PipelineState* GetPipelineState() const;
 
       private:
         ~RenderPipeline() override;

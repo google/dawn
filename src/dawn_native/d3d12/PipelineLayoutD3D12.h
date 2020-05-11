@@ -34,7 +34,7 @@ namespace dawn_native { namespace d3d12 {
         // Returns the index of the root parameter reserved for a dynamic buffer binding
         uint32_t GetDynamicRootParameterIndex(uint32_t group, BindingIndex bindingIndex) const;
 
-        ComPtr<ID3D12RootSignature> GetRootSignature() const;
+        ID3D12RootSignature* GetRootSignature() const;
 
       private:
         ~PipelineLayout() override = default;
