@@ -21,6 +21,7 @@
 #include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
 #include "dawn_wire/WireServer.h"
+#include "utils/SystemUtils.h"
 
 #include <fstream>
 #include <vector>
@@ -149,8 +150,17 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
 
     wireServer->HandleCommands(reinterpret_cast<const char*>(data), size);
 
-    // Fake waiting for all previous commands before destroying the server.
-    device.Tick();
+    // Wait for all previous commands before destroying the server.
+    // TODO(enga): Improve this when we improve/finalize how processing events happens.
+    {
+        wgpu::Queue queue = device.GetDefaultQueue();
+        wgpu::Fence fence = queue.CreateFence();
+        queue.Signal(fence, 1u);
+        while (fence.GetCompletedValue() != 1u) {
+            device.Tick();
+            utils::USleep(100);
+        }
+    }
 
     // Destroy the server before the device because it needs to free all objects.
     wireServer = nullptr;
