@@ -78,6 +78,12 @@ TEST_F(FenceValidationTest, CreationSuccess) {
     }
 }
 
+// Creation succeeds if no descriptor is provided
+TEST_F(FenceValidationTest, DefaultDescriptor) {
+    wgpu::Fence fence = queue.CreateFence();
+    EXPECT_EQ(fence.GetCompletedValue(), 0u);
+}
+
 TEST_F(FenceValidationTest, GetCompletedValue) {
     // Starts at initial value
     {

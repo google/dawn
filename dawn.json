@@ -909,7 +909,7 @@
                 "name": "create fence",
                 "returns": "fence",
                 "args": [
-                    {"name": "descriptor", "type": "fence descriptor", "annotation": "const*"}
+                    {"name": "descriptor", "type": "fence descriptor", "annotation": "const*", "optional": true}
                 ]
             }
         ]

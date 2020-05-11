@@ -97,9 +97,7 @@ TEST_P(FenceTests, SimpleSignal) {
 
 // Test callbacks are called in increasing order of fence completion value
 TEST_P(FenceTests, OnCompletionOrdering) {
-    wgpu::FenceDescriptor descriptor;
-    descriptor.initialValue = 0u;
-    wgpu::Fence fence = queue.CreateFence(&descriptor);
+    wgpu::Fence fence = queue.CreateFence();
 
     queue.Signal(fence, 4);
 
@@ -133,9 +131,7 @@ TEST_P(FenceTests, OnCompletionOrdering) {
 
 // Test callbacks still occur if Queue::Signal happens multiple times
 TEST_P(FenceTests, MultipleSignalOnCompletion) {
-    wgpu::FenceDescriptor descriptor;
-    descriptor.initialValue = 0u;
-    wgpu::Fence fence = queue.CreateFence(&descriptor);
+    wgpu::Fence fence = queue.CreateFence();
 
     queue.Signal(fence, 2);
     queue.Signal(fence, 4);
@@ -149,9 +145,7 @@ TEST_P(FenceTests, MultipleSignalOnCompletion) {
 
 // Test all callbacks are called if they are added for the same fence value
 TEST_P(FenceTests, OnCompletionMultipleCallbacks) {
-    wgpu::FenceDescriptor descriptor;
-    descriptor.initialValue = 0u;
-    wgpu::Fence fence = queue.CreateFence(&descriptor);
+    wgpu::Fence fence = queue.CreateFence();
 
     queue.Signal(fence, 4);
 
@@ -178,15 +172,11 @@ TEST_P(FenceTests, OnCompletionMultipleCallbacks) {
 // TODO(enga): Enable when fence is removed from fence signal tracker
 // Currently it holds a reference and is not destructed
 TEST_P(FenceTests, DISABLED_DestroyBeforeOnCompletionEnd) {
-    wgpu::FenceDescriptor descriptor;
-    descriptor.initialValue = 0u;
-    wgpu::Fence fence = queue.CreateFence(&descriptor);
+    wgpu::Fence fence = queue.CreateFence();
 
     // The fence in this block will be deleted when it goes out of scope
     {
-        wgpu::FenceDescriptor descriptor;
-        descriptor.initialValue = 0u;
-        wgpu::Fence testFence = queue.CreateFence(&descriptor);
+        wgpu::Fence testFence = queue.CreateFence();
 
         queue.Signal(testFence, 4);
 
@@ -220,9 +210,7 @@ TEST_P(FenceTests, DISABLED_DestroyBeforeOnCompletionEnd) {
 // Regression test that validation errors that are tracked client-side are captured
 // in error scopes.
 TEST_P(FenceTests, ClientValidationErrorInErrorScope) {
-    wgpu::FenceDescriptor descriptor;
-    descriptor.initialValue = 0u;
-    wgpu::Fence fence = queue.CreateFence(&descriptor);
+    wgpu::Fence fence = queue.CreateFence();
 
     queue.Signal(fence, 4);
 

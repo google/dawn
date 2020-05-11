@@ -84,6 +84,10 @@ namespace dawn_native {
             return Fence::MakeError(GetDevice());
         }
 
+        if (descriptor == nullptr) {
+            FenceDescriptor defaultDescriptor = {};
+            return new Fence(this, &defaultDescriptor);
+        }
         return new Fence(this, descriptor);
     }
 
@@ -135,7 +139,9 @@ namespace dawn_native {
     MaybeError QueueBase::ValidateCreateFence(const FenceDescriptor* descriptor) {
         DAWN_TRY(GetDevice()->ValidateIsAlive());
         DAWN_TRY(GetDevice()->ValidateObject(this));
-        DAWN_TRY(ValidateFenceDescriptor(descriptor));
+        if (descriptor != nullptr) {
+            DAWN_TRY(ValidateFenceDescriptor(descriptor));
+        }
 
         return {};
     }
