@@ -214,6 +214,12 @@ namespace dawn_native {
                 // Buffers have smaller type enums. They should be placed first.
                 return a.type < b.type;
             }
+            if (a.binding != b.binding) {
+                // Above we ensure that dynamic buffers are first. Now, ensure that bindings are in
+                // increasing order. This is because dynamic buffer offsets are applied in
+                // increasing order of binding number.
+                return a.binding < b.binding;
+            }
             if (a.visibility != b.visibility) {
                 return a.visibility < b.visibility;
             }

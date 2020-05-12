@@ -1009,6 +1009,97 @@ TEST_F(SetBindGroupValidationTest, BindingSizeOutOfBoundDynamicStorageBuffer) {
     TestComputePassBindGroup(bindGroup, offsets.data(), 3, false);
 }
 
+// Regression test for crbug.com/dawn/408 where dynamic offsets were applied in the wrong order.
+// Dynamic offsets should be applied in increasing order of binding number.
+TEST_F(SetBindGroupValidationTest, DynamicOffsetOrder) {
+    // Note: The order of the binding numbers of the bind group and bind group layout are
+    // intentionally different and not in increasing order.
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {
+                    {3, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageBuffer, true},
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageBuffer, true},
+                    {2, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageBuffer, true},
+                });
+
+    // Create buffers which are 3x, 2x, and 1x the size of the minimum buffer offset, plus 4 bytes
+    // to spare (to avoid zero-sized bindings). We will offset the bindings so they reach the very
+    // end of the buffer. Any mismatch applying too-large of an offset to a smaller buffer will hit the
+    // out-of-bounds condition during validation.
+    wgpu::Buffer buffer3x =
+        CreateBuffer(3 * kMinDynamicBufferOffsetAlignment + 4, wgpu::BufferUsage::Storage);
+    wgpu::Buffer buffer2x =
+        CreateBuffer(2 * kMinDynamicBufferOffsetAlignment + 4, wgpu::BufferUsage::Storage);
+    wgpu::Buffer buffer1x =
+        CreateBuffer(1 * kMinDynamicBufferOffsetAlignment + 4, wgpu::BufferUsage::Storage);
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, bgl,
+                                                     {
+                                                         {0, buffer3x, 0, 4},
+                                                         {3, buffer2x, 0, 4},
+                                                         {2, buffer1x, 0, 4},
+                                                     });
+
+    std::array<uint32_t, 3> offsets;
+    {
+        // Base case works.
+        offsets = {/* binding 0 */ 0,
+                   /* binding 2 */ 0,
+                   /* binding 3 */ 0};
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
+        computePassEncoder.SetBindGroup(0, bindGroup, offsets.size(), offsets.data());
+        computePassEncoder.EndPass();
+        commandEncoder.Finish();
+    }
+    {
+        // Offset the first binding to touch the end of the buffer. Should succeed.
+        // Will fail if the offset is applied to the first or second bindings since their buffers
+        // are too small.
+        offsets = {/* binding 0 */ 3 * kMinDynamicBufferOffsetAlignment,
+                   /* binding 2 */ 0,
+                   /* binding 3 */ 0};
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
+        computePassEncoder.SetBindGroup(0, bindGroup, offsets.size(), offsets.data());
+        computePassEncoder.EndPass();
+        commandEncoder.Finish();
+    }
+    {
+        // Offset the second binding to touch the end of the buffer. Should succeed.
+        offsets = {/* binding 0 */ 0,
+                   /* binding 2 */ 1 * kMinDynamicBufferOffsetAlignment,
+                   /* binding 3 */ 0};
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
+        computePassEncoder.SetBindGroup(0, bindGroup, offsets.size(), offsets.data());
+        computePassEncoder.EndPass();
+        commandEncoder.Finish();
+    }
+    {
+        // Offset the third binding to touch the end of the buffer. Should succeed.
+        // Will fail if the offset is applied to the second binding since its buffer
+        // is too small.
+        offsets = {/* binding 0 */ 0,
+                   /* binding 2 */ 0,
+                   /* binding 3 */ 2 * kMinDynamicBufferOffsetAlignment};
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
+        computePassEncoder.SetBindGroup(0, bindGroup, offsets.size(), offsets.data());
+        computePassEncoder.EndPass();
+        commandEncoder.Finish();
+    }
+    {
+        // Offset each binding to touch the end of their buffer. Should succeed.
+        offsets = {/* binding 0 */ 3 * kMinDynamicBufferOffsetAlignment,
+                   /* binding 2 */ 1 * kMinDynamicBufferOffsetAlignment,
+                   /* binding 3 */ 2 * kMinDynamicBufferOffsetAlignment};
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
+        computePassEncoder.SetBindGroup(0, bindGroup, offsets.size(), offsets.data());
+        computePassEncoder.EndPass();
+        commandEncoder.Finish();
+    }
+}
+
 // Test that an error is produced (and no ASSERTs fired) when using an error bindgroup in
 // SetBindGroup
 TEST_F(SetBindGroupValidationTest, ErrorBindGroup) {

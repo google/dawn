@@ -745,6 +745,89 @@ TEST_P(BindGroupTests, DrawThenChangePipelineAndBindGroup) {
     EXPECT_PIXEL_RGBA8_EQ(notFilled, renderPass.color, max, max);
 }
 
+// Regression test for crbug.com/dawn/408 where dynamic offsets were applied in the wrong order.
+// Dynamic offsets should be applied in increasing order of binding number.
+TEST_P(BindGroupTests, DynamicOffsetOrder) {
+    // We will put the following values and the respective offsets into a buffer.
+    // The test will ensure that the correct dynamic offset is applied to each buffer by reading the
+    // value from an offset binding.
+    std::array<uint32_t, 3> offsets = {3 * kMinDynamicBufferOffsetAlignment,
+                                       1 * kMinDynamicBufferOffsetAlignment,
+                                       2 * kMinDynamicBufferOffsetAlignment};
+    std::array<uint32_t, 3> values = {21, 67, 32};
+
+    // Create three buffers large enough to by offset by the largest offset.
+    wgpu::BufferDescriptor bufferDescriptor;
+    bufferDescriptor.size = 3 * kMinDynamicBufferOffsetAlignment + sizeof(uint32_t);
+    bufferDescriptor.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst;
+
+    wgpu::Buffer buffer0 = device.CreateBuffer(&bufferDescriptor);
+    wgpu::Buffer buffer2 = device.CreateBuffer(&bufferDescriptor);
+    wgpu::Buffer buffer3 = device.CreateBuffer(&bufferDescriptor);
+
+    // Populate the values
+    buffer0.SetSubData(offsets[0], sizeof(uint32_t), &values[0]);
+    buffer2.SetSubData(offsets[1], sizeof(uint32_t), &values[1]);
+    buffer3.SetSubData(offsets[2], sizeof(uint32_t), &values[2]);
+
+    wgpu::Buffer outputBuffer = utils::CreateBufferFromData(
+        device, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage, {0, 0, 0});
+
+    // Create the bind group and bind group layout.
+    // Note: The order of the binding numbers are intentionally different and not in increasing
+    // order.
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {
+                    {3, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageBuffer, true},
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageBuffer, true},
+                    {2, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageBuffer, true},
+                    {4, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
+                });
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, bgl,
+                                                     {
+                                                         {0, buffer0, 0, sizeof(uint32_t)},
+                                                         {3, buffer3, 0, sizeof(uint32_t)},
+                                                         {2, buffer2, 0, sizeof(uint32_t)},
+                                                         {4, outputBuffer, 0, 3 * sizeof(uint32_t)},
+                                                     });
+
+    wgpu::ComputePipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.computeStage.module =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
+        #version 450
+        layout(std430, set = 0, binding = 2) readonly buffer Buffer2 {
+            uint value2;
+        };
+        layout(std430, set = 0, binding = 3) readonly buffer Buffer3 {
+            uint value3;
+        };
+        layout(std430, set = 0, binding = 0) readonly buffer Buffer0 {
+            uint value0;
+        };
+        layout(std430, set = 0, binding = 4) buffer OutputBuffer {
+            uvec3 outputBuffer;
+        };
+        void main() {
+            outputBuffer = uvec3(value0, value2, value3);
+        }
+    )");
+    pipelineDescriptor.computeStage.entryPoint = "main";
+    pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDescriptor);
+
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
+    computePassEncoder.SetPipeline(pipeline);
+    computePassEncoder.SetBindGroup(0, bindGroup, offsets.size(), offsets.data());
+    computePassEncoder.Dispatch(1);
+    computePassEncoder.EndPass();
+
+    wgpu::CommandBuffer commands = commandEncoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_RANGE_EQ(values.data(), outputBuffer, 0, values.size());
+}
+
 // Test that visibility of bindings in BindGroupLayout can be none
 // This test passes by not asserting or crashing.
 TEST_P(BindGroupTests, BindGroupLayoutVisibilityCanBeNone) {
