@@ -266,6 +266,61 @@ TEST_F(CopyCommandTest_B2B, BuffersInErrorState) {
     }
 }
 
+// Test B2B copies within same buffer.
+TEST_F(CopyCommandTest_B2B, CopyWithinSameBuffer) {
+    constexpr uint32_t kBufferSize = 16u;
+    wgpu::Buffer buffer =
+        CreateBuffer(kBufferSize, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
+
+    // When srcOffset < dstOffset, and srcOffset + copySize > dstOffset, it is not allowed because
+    // the copy regions are overlapping.
+    {
+        constexpr uint32_t kSrcOffset = 0u;
+        constexpr uint32_t kDstOffset = 4u;
+        constexpr uint32_t kCopySize = 8u;
+        ASSERT(kDstOffset > kSrcOffset && kDstOffset < kSrcOffset + kCopySize);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(buffer, kSrcOffset, buffer, kDstOffset, kCopySize);
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // When srcOffset < dstOffset, and srcOffset + copySize == dstOffset, it is allowed
+    // because the copy regions are not overlapping.
+    {
+        constexpr uint32_t kSrcOffset = 0u;
+        constexpr uint32_t kDstOffset = 8u;
+        constexpr uint32_t kCopySize = kDstOffset - kSrcOffset;
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(buffer, kSrcOffset, buffer, kDstOffset, kCopySize);
+        encoder.Finish();
+    }
+
+    // When srcOffset > dstOffset, and srcOffset < dstOffset + copySize, it is not allowed because
+    // the copy regions are overlapping.
+    {
+        constexpr uint32_t kSrcOffset = 4u;
+        constexpr uint32_t kDstOffset = 0u;
+        constexpr uint32_t kCopySize = 8u;
+        ASSERT(kSrcOffset > kDstOffset && kSrcOffset < kDstOffset + kCopySize);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(buffer, kSrcOffset, buffer, kDstOffset, kCopySize);
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // When srcOffset > dstOffset, and srcOffset + copySize == dstOffset, it is allowed
+    // because the copy regions are not overlapping.
+    {
+        constexpr uint32_t kSrcOffset = 8u;
+        constexpr uint32_t kDstOffset = 0u;
+        constexpr uint32_t kCopySize = kSrcOffset - kDstOffset;
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(buffer, kSrcOffset, buffer, kDstOffset, kCopySize);
+        encoder.Finish();
+    }
+}
+
 class CopyCommandTest_B2T : public CopyCommandTest {};
 
 // Test a successfull B2T copy
