@@ -56,21 +56,6 @@ class DeprecationTests : public DawnTest {
         }                                                                        \
     } while (0)
 
-// Tests for Device::CreateQueue -> Device::GetDefaultQueue.
-
-// Test that using CreateQueue produces a deprecation warning
-TEST_P(DeprecationTests, CreateQueueIsDeprecated) {
-    EXPECT_DEPRECATION_WARNING(device.CreateQueue());
-}
-
-// Test that queues created from CreateQueue can be used for things
-TEST_P(DeprecationTests, CreateQueueReturnsFunctionalQueue) {
-    wgpu::Queue q;
-    EXPECT_DEPRECATION_WARNING(q = device.CreateQueue());
-
-    q.Submit(0, nullptr);
-}
-
 // Tests for ShaderModuleDescriptor.code/codeSize -> ShaderModuleSPIRVDescriptor
 
 static const char kEmptyShader[] = R"(#version 450

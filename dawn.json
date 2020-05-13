@@ -558,10 +558,6 @@
                 ]
             },
             {
-                "name": "create queue",
-                "returns": "queue"
-            },
-            {
                 "name": "create render bundle encoder",
                 "returns": "render bundle encoder",
                 "args": [
