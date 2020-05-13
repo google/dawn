@@ -877,9 +877,9 @@ TEST_F(StorageTextureValidationTests, StorageTextureInRenderPass) {
     for (wgpu::BindingType storageTextureType : kSupportedStorageTextureBindingTypes) {
         // Create a bind group that contains a storage texture.
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
-            device, {{0, wgpu::ShaderStage::Fragment, storageTextureType, false, false,
-                      wgpu::TextureViewDimension::Undefined, wgpu::TextureViewDimension::Undefined,
-                      wgpu::TextureComponentType::Float, kFormat}});
+            device,
+            {{0, wgpu::ShaderStage::Fragment, storageTextureType, false, false,
+              wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float, kFormat}});
 
         wgpu::BindGroup bindGroupWithStorageTexture =
             utils::MakeBindGroup(device, bindGroupLayout, {{0, storageTexture.CreateView()}});
@@ -912,11 +912,9 @@ TEST_F(StorageTextureValidationTests, StorageTextureAndSampledTextureInOneRender
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device,
             {{0, wgpu::ShaderStage::Fragment, storageTextureType, false, false,
-              wgpu::TextureViewDimension::Undefined, wgpu::TextureViewDimension::Undefined,
-              wgpu::TextureComponentType::Float, kFormat},
+              wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float, kFormat},
              {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, false,
-              wgpu::TextureViewDimension::Undefined, wgpu::TextureViewDimension::Undefined,
-              wgpu::TextureComponentType::Float, kFormat}});
+              wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float, kFormat}});
         wgpu::BindGroup bindGroup = utils::MakeBindGroup(
             device, bindGroupLayout,
             {{0, storageTexture.CreateView()}, {1, storageTexture.CreateView()}});
@@ -953,9 +951,9 @@ TEST_F(StorageTextureValidationTests, StorageTextureAndOutputAttachmentInOneRend
     for (wgpu::BindingType storageTextureType : kSupportedStorageTextureBindingTypes) {
         // Create a bind group that contains a storage texture.
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
-            device, {{0, wgpu::ShaderStage::Fragment, storageTextureType, false, false,
-                      wgpu::TextureViewDimension::Undefined, wgpu::TextureViewDimension::Undefined,
-                      wgpu::TextureComponentType::Float, kFormat}});
+            device,
+            {{0, wgpu::ShaderStage::Fragment, storageTextureType, false, false,
+              wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float, kFormat}});
         wgpu::BindGroup bindGroupWithStorageTexture =
             utils::MakeBindGroup(device, bindGroupLayout, {{0, storageTexture.CreateView()}});
 
@@ -980,11 +978,9 @@ TEST_F(StorageTextureValidationTests, ReadOnlyAndWriteOnlyStorageTextureInOneRen
     wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
         device,
         {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageTexture, false, false,
-          wgpu::TextureViewDimension::Undefined, wgpu::TextureViewDimension::Undefined,
-          wgpu::TextureComponentType::Float, kFormat},
+          wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float, kFormat},
          {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::WriteonlyStorageTexture, false, false,
-          wgpu::TextureViewDimension::Undefined, wgpu::TextureViewDimension::Undefined,
-          wgpu::TextureComponentType::Float, kFormat}});
+          wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float, kFormat}});
     wgpu::BindGroup bindGroup =
         utils::MakeBindGroup(device, bindGroupLayout,
                              {{0, storageTexture.CreateView()}, {1, storageTexture.CreateView()}});
@@ -1013,11 +1009,9 @@ TEST_F(StorageTextureValidationTests, StorageTextureAndSampledTextureInOneComput
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device,
             {{0, wgpu::ShaderStage::Compute, storageTextureType, false, false,
-              wgpu::TextureViewDimension::Undefined, wgpu::TextureViewDimension::Undefined,
-              wgpu::TextureComponentType::Float, kFormat},
+              wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float, kFormat},
              {1, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, false,
-              wgpu::TextureViewDimension::Undefined, wgpu::TextureViewDimension::Undefined,
-              wgpu::TextureComponentType::Float, kFormat}});
+              wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float, kFormat}});
         wgpu::BindGroup bindGroup = utils::MakeBindGroup(
             device, bindGroupLayout,
             {{0, storageTexture.CreateView()}, {1, storageTexture.CreateView()}});
@@ -1043,11 +1037,9 @@ TEST_F(StorageTextureValidationTests, ReadOnlyAndWriteOnlyStorageTextureInOneCom
     wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
         device,
         {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageTexture, false, false,
-          wgpu::TextureViewDimension::Undefined, wgpu::TextureViewDimension::Undefined,
-          wgpu::TextureComponentType::Float, kFormat},
+          wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float, kFormat},
          {1, wgpu::ShaderStage::Compute, wgpu::BindingType::WriteonlyStorageTexture, false, false,
-          wgpu::TextureViewDimension::Undefined, wgpu::TextureViewDimension::Undefined,
-          wgpu::TextureComponentType::Float, kFormat}});
+          wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float, kFormat}});
     wgpu::BindGroup bindGroup =
         utils::MakeBindGroup(device, bindGroupLayout,
                              {{0, storageTexture.CreateView()}, {1, storageTexture.CreateView()}});

@@ -310,7 +310,6 @@ TEST_F(BindGroupValidationTest, TextureComponentType) {
                                              wgpu::BindingType::SampledTexture,
                                              false,
                                              false,
-                                             {},
                                              wgpu::TextureViewDimension::e2D,
                                              wgpu::TextureComponentType::Float}});
 
@@ -333,7 +332,6 @@ TEST_F(BindGroupValidationTest, TextureDimension) {
                                              wgpu::BindingType::SampledTexture,
                                              false,
                                              false,
-                                             {},
                                              wgpu::TextureViewDimension::e2D,
                                              wgpu::TextureComponentType::Float}});
 

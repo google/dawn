@@ -54,7 +54,6 @@ TEST_P(ObjectCachingTest, BindGroupLayoutTextureComponentType) {
                                              wgpu::BindingType::SampledTexture,
                                              false,
                                              false,
-                                             {},
                                              wgpu::TextureViewDimension::e2D,
                                              wgpu::TextureComponentType::Float}});
     wgpu::BindGroupLayout sameBgl =
@@ -63,7 +62,6 @@ TEST_P(ObjectCachingTest, BindGroupLayoutTextureComponentType) {
                                              wgpu::BindingType::SampledTexture,
                                              false,
                                              false,
-                                             {},
                                              wgpu::TextureViewDimension::e2D,
                                              wgpu::TextureComponentType::Float}});
     wgpu::BindGroupLayout otherBgl =
@@ -72,7 +70,6 @@ TEST_P(ObjectCachingTest, BindGroupLayoutTextureComponentType) {
                                              wgpu::BindingType::SampledTexture,
                                              false,
                                              false,
-                                             {},
                                              wgpu::TextureViewDimension::e2D,
                                              wgpu::TextureComponentType::Uint}});
 
@@ -89,7 +86,6 @@ TEST_P(ObjectCachingTest, BindGroupLayoutViewDimension) {
                                              wgpu::BindingType::SampledTexture,
                                              false,
                                              false,
-                                             {},
                                              wgpu::TextureViewDimension::e2D,
                                              wgpu::TextureComponentType::Float}});
     wgpu::BindGroupLayout sameBgl =
@@ -98,7 +94,6 @@ TEST_P(ObjectCachingTest, BindGroupLayoutViewDimension) {
                                              wgpu::BindingType::SampledTexture,
                                              false,
                                              false,
-                                             {},
                                              wgpu::TextureViewDimension::e2D,
                                              wgpu::TextureComponentType::Float}});
     wgpu::BindGroupLayout otherBgl =
@@ -107,7 +102,6 @@ TEST_P(ObjectCachingTest, BindGroupLayoutViewDimension) {
                                              wgpu::BindingType::SampledTexture,
                                              false,
                                              false,
-                                             {},
                                              wgpu::TextureViewDimension::e2DArray,
                                              wgpu::TextureComponentType::Float}});
 

@@ -112,20 +112,6 @@ namespace dawn_native {
 
             if (entry.viewDimension != wgpu::TextureViewDimension::Undefined) {
                 DAWN_TRY(ValidateTextureViewDimension(entry.viewDimension));
-
-                // TODO(dawn:22): Remove this once users use viewDimension
-                if (entry.textureDimension != wgpu::TextureViewDimension::Undefined) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Cannot use both viewDimension and textureDimension");
-                }
-            } else {
-                // TODO(dawn:22): Remove this once users use viewDimension
-                if (entry.textureDimension != wgpu::TextureViewDimension::Undefined) {
-                    DAWN_TRY(ValidateTextureViewDimension(entry.textureDimension));
-                    device->EmitDeprecationWarning(
-                        "BindGroupLayoutEntry::textureDimension is deprecated, use viewDimension "
-                        "instead");
-                }
             }
 
             if (bindingsSet.count(bindingNumber) != 0) {
@@ -304,12 +290,7 @@ namespace dawn_native {
             }
 
             if (binding.viewDimension == wgpu::TextureViewDimension::Undefined) {
-                // TODO(dawn:22): Remove this once users use viewDimension
-                if (binding.textureDimension != wgpu::TextureViewDimension::Undefined) {
-                    mBindingInfo[i].viewDimension = binding.textureDimension;
-                } else {
                     mBindingInfo[i].viewDimension = wgpu::TextureViewDimension::e2D;
-                }
             } else {
                 mBindingInfo[i].viewDimension = binding.viewDimension;
             }

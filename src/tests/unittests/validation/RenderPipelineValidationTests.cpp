@@ -399,7 +399,6 @@ TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
                                                      wgpu::BindingType::SampledTexture,
                                                      false,
                                                      false,
-                                                     {},
                                                      wgpu::TextureViewDimension::e2D,
                                                      kTextureComponentTypes[j]}});
             descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
@@ -455,7 +454,6 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
                                                      wgpu::BindingType::SampledTexture,
                                                      false,
                                                      false,
-                                                     {},
                                                      kTextureViewDimensions[j],
                                                      wgpu::TextureComponentType::Float}});
             descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);

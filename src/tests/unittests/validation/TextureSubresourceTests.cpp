@@ -77,8 +77,7 @@ namespace {
                     device,
                     {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageTexture,
                       false, false, wgpu::TextureViewDimension::Undefined,
-                      wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float,
-                      kFormat}});
+                      wgpu::TextureComponentType::Float, kFormat}});
 
                 wgpu::BindGroup bindGroup1 = utils::MakeBindGroup(device, bgl1, {{0, samplerView}});
 
@@ -109,8 +108,7 @@ namespace {
                     device,
                     {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::WriteonlyStorageTexture,
                       false, false, wgpu::TextureViewDimension::Undefined,
-                      wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float,
-                      kFormat}});
+                      wgpu::TextureComponentType::Float, kFormat}});
                 wgpu::BindGroup bindGroup1 = utils::MakeBindGroup(device, bgl1, {{0, samplerView}});
 
                 wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
