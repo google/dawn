@@ -174,7 +174,7 @@ TEST_F(WireMultipleDeviceTests, DifferentDeviceObjectCreationIsError) {
 
     wireA.FlushClient();
 
-    std::array<WGPUBindGroupBinding, 2> entries = {};
+    std::array<WGPUBindGroupEntry, 2> entries = {};
 
     // Create a buffer on wire A.
     WGPUBufferDescriptor bufferDesc = {};

@@ -82,8 +82,6 @@ TEST_P(DeprecationTests, BGLEntryTextureDimensionIsDeprecated) {
     entryDesc.textureDimension = wgpu::TextureViewDimension::e2D;
 
     wgpu::BindGroupLayoutDescriptor bglDesc;
-    bglDesc.bindingCount = 0;
-    bglDesc.bindings = nullptr;
     bglDesc.entryCount = 1;
     bglDesc.entries = &entryDesc;
     EXPECT_DEPRECATION_WARNING(device.CreateBindGroupLayout(&bglDesc));
@@ -97,8 +95,6 @@ TEST_P(DeprecationTests, BGLEntryTextureDimensionAndViewUndefinedEmitsNoWarning)
     entryDesc.type = wgpu::BindingType::Sampler;
 
     wgpu::BindGroupLayoutDescriptor bglDesc;
-    bglDesc.bindingCount = 0;
-    bglDesc.bindings = nullptr;
     bglDesc.entryCount = 1;
     bglDesc.entries = &entryDesc;
     device.CreateBindGroupLayout(&bglDesc);
@@ -113,8 +109,6 @@ TEST_P(DeprecationTests, BGLEntryTextureAndViewDimensionIsInvalid) {
     entryDesc.viewDimension = wgpu::TextureViewDimension::e2D;
 
     wgpu::BindGroupLayoutDescriptor bglDesc;
-    bglDesc.bindingCount = 0;
-    bglDesc.bindings = nullptr;
     bglDesc.entryCount = 1;
     bglDesc.entries = &entryDesc;
     ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&bglDesc));
@@ -130,8 +124,6 @@ TEST_P(DeprecationTests, BGLEntryTextureDimensionStateTracking) {
     entryDesc.textureDimension = wgpu::TextureViewDimension::Cube;
 
     wgpu::BindGroupLayoutDescriptor bglDesc = {};
-    bglDesc.bindingCount = 0;
-    bglDesc.bindings = nullptr;
     bglDesc.entryCount = 1;
     bglDesc.entries = &entryDesc;
     wgpu::BindGroupLayout layout;
@@ -158,153 +150,6 @@ TEST_P(DeprecationTests, BGLEntryTextureDimensionStateTracking) {
     // valid.
     utils::MakeBindGroup(device, layout, {{0, cubeView}});
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, arrayView}}));
-}
-
-// Test for BindGroupLayout::bindings/bindingCount -> entries/entryCount
-
-// Test that creating a BGL with bindings emits a deprecation warning.
-TEST_P(DeprecationTests, BGLDescBindingIsDeprecated) {
-    wgpu::BindGroupLayoutEntry entryDesc;
-    entryDesc.binding = 0;
-    entryDesc.visibility = wgpu::ShaderStage::None;
-    entryDesc.type = wgpu::BindingType::Sampler;
-
-    wgpu::BindGroupLayoutDescriptor bglDesc;
-    bglDesc.bindingCount = 1;
-    bglDesc.bindings = &entryDesc;
-    bglDesc.entryCount = 0;
-    bglDesc.entries = nullptr;
-    EXPECT_DEPRECATION_WARNING(device.CreateBindGroupLayout(&bglDesc));
-}
-
-// Test that creating a BGL with both entries and bindings is an error
-TEST_P(DeprecationTests, BGLDescBindingAndEntriesIsInvalid) {
-    wgpu::BindGroupLayoutEntry entryDesc;
-    entryDesc.binding = 0;
-    entryDesc.visibility = wgpu::ShaderStage::None;
-    entryDesc.type = wgpu::BindingType::Sampler;
-
-    wgpu::BindGroupLayoutDescriptor bglDesc;
-    bglDesc.bindingCount = 1;
-    bglDesc.bindings = &entryDesc;
-    bglDesc.entryCount = 1;
-    bglDesc.entries = &entryDesc;
-    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&bglDesc));
-}
-
-// Test that creating a BGL with both entries and bindings to 0 doesn't emit warnings
-TEST_P(DeprecationTests, BGLDescBindingAndEntriesBothZeroEmitsNoWarning) {
-    wgpu::BindGroupLayoutDescriptor bglDesc;
-    bglDesc.bindingCount = 0;
-    bglDesc.bindings = nullptr;
-    bglDesc.entryCount = 0;
-    bglDesc.entries = nullptr;
-    device.CreateBindGroupLayout(&bglDesc);
-}
-
-// Test that creating a BGL with bindings still does correct state tracking
-TEST_P(DeprecationTests, BGLDescBindingStateTracking) {
-    wgpu::BindGroupLayoutEntry entryDesc;
-    entryDesc.binding = 0;
-    entryDesc.type = wgpu::BindingType::Sampler;
-    entryDesc.visibility = wgpu::ShaderStage::None;
-
-    wgpu::BindGroupLayoutDescriptor bglDesc;
-    bglDesc.bindingCount = 1;
-    bglDesc.bindings = &entryDesc;
-    bglDesc.entryCount = 0;
-    bglDesc.entries = nullptr;
-    wgpu::BindGroupLayout layout;
-    EXPECT_DEPRECATION_WARNING(layout = device.CreateBindGroupLayout(&bglDesc));
-
-    // Test a case where if |bindings| wasn't taken into account, no validation error would happen
-    // because the layout would be empty
-    wgpu::BindGroupDescriptor badBgDesc;
-    badBgDesc.layout = layout;
-    badBgDesc.bindingCount = 0;
-    badBgDesc.bindings = nullptr;
-    badBgDesc.entryCount = 0;
-    badBgDesc.entries = nullptr;
-    ASSERT_DEVICE_ERROR(device.CreateBindGroup(&badBgDesc));
-}
-
-// Test for BindGroup::bindings/bindingCount -> entries/entryCount
-
-// Test that creating a BG with bindings emits a deprecation warning.
-TEST_P(DeprecationTests, BGDescBindingIsDeprecated) {
-    wgpu::SamplerDescriptor samplerDesc = {};
-    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
-
-    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler}});
-
-    wgpu::BindGroupEntry entryDesc;
-    entryDesc.binding = 0;
-    entryDesc.sampler = sampler;
-
-    wgpu::BindGroupDescriptor bgDesc;
-    bgDesc.layout = layout;
-    bgDesc.bindingCount = 1;
-    bgDesc.bindings = &entryDesc;
-    bgDesc.entryCount = 0;
-    bgDesc.entries = nullptr;
-    EXPECT_DEPRECATION_WARNING(device.CreateBindGroup(&bgDesc));
-}
-
-// Test that creating a BG with both entries and bindings is an error
-TEST_P(DeprecationTests, BGDescBindingAndEntriesIsInvalid) {
-    wgpu::SamplerDescriptor samplerDesc = {};
-    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
-
-    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler}});
-
-    wgpu::BindGroupEntry entryDesc = {};
-    entryDesc.binding = 0;
-    entryDesc.sampler = sampler;
-
-    wgpu::BindGroupDescriptor bgDesc;
-    bgDesc.layout = layout;
-    bgDesc.bindingCount = 1;
-    bgDesc.bindings = &entryDesc;
-    bgDesc.entryCount = 1;
-    bgDesc.entries = &entryDesc;
-    ASSERT_DEVICE_ERROR(device.CreateBindGroup(&bgDesc));
-}
-
-// Test that creating a BG with both entries and bindings to 0 doesn't emit warnings
-TEST_P(DeprecationTests, BGDescBindingAndEntriesBothZeroEmitsNoWarning) {
-    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {});
-
-    wgpu::BindGroupDescriptor bgDesc;
-    bgDesc.layout = layout;
-    bgDesc.bindingCount = 0;
-    bgDesc.bindings = nullptr;
-    bgDesc.entryCount = 0;
-    bgDesc.entries = nullptr;
-    device.CreateBindGroup(&bgDesc);
-}
-
-// Test that creating a BG with bindings still does correct state tracking
-TEST_P(DeprecationTests, BGDescBindingStateTracking) {
-    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(device, {});
-
-    // Test a case where if |bindings| wasn't taken into account, no validation error would happen
-    // because it would match the empty layout.
-    wgpu::SamplerDescriptor samplerDesc = {};
-    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
-
-    wgpu::BindGroupEntry entryDesc = {};
-    entryDesc.binding = 0;
-    entryDesc.sampler = sampler;
-
-    wgpu::BindGroupDescriptor bgDesc;
-    bgDesc.layout = layout;
-    bgDesc.bindingCount = 1;
-    bgDesc.bindings = &entryDesc;
-    bgDesc.entryCount = 0;
-    bgDesc.entries = nullptr;
-    EXPECT_DEPRECATION_WARNING(ASSERT_DEVICE_ERROR(device.CreateBindGroup(&bgDesc)));
 }
 
 // Tests for ShaderModuleDescriptor.code/codeSize -> ShaderModuleSPIRVDescriptor

@@ -114,10 +114,6 @@ typedef struct WGPUChainedStruct {
 
 {% endfor %}
 
-// TODO(dawn:22): Remove this once users use the "Entry" version.
-typedef WGPUBindGroupEntry WGPUBindGroupBinding;
-typedef WGPUBindGroupLayoutEntry WGPUBindGroupLayoutBinding;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
