@@ -56,64 +56,6 @@ class DeprecationTests : public DawnTest {
         }                                                                        \
     } while (0)
 
-// Tests for ShaderModuleDescriptor.code/codeSize -> ShaderModuleSPIRVDescriptor
-
-static const char kEmptyShader[] = R"(#version 450
-void main() {
-})";
-
-// That creating a ShaderModule without the chained descriptor gives a warning.
-TEST_P(DeprecationTests, ShaderModuleNoSubDescriptorIsDeprecated) {
-    std::vector<uint32_t> spirv =
-        CompileGLSLToSpirv(utils::SingleShaderStage::Compute, kEmptyShader);
-
-    wgpu::ShaderModuleDescriptor descriptor;
-    descriptor.codeSize = static_cast<uint32_t>(spirv.size());
-    descriptor.code = spirv.data();
-    EXPECT_DEPRECATION_WARNING(device.CreateShaderModule(&descriptor));
-}
-
-// That creating a ShaderModule with both inline code and the chained descriptor is an error.
-TEST_P(DeprecationTests, ShaderModuleBothInlinedAndChainedIsInvalid) {
-    std::vector<uint32_t> spirv =
-        CompileGLSLToSpirv(utils::SingleShaderStage::Compute, kEmptyShader);
-
-    wgpu::ShaderModuleSPIRVDescriptor spirvDesc;
-    spirvDesc.codeSize = static_cast<uint32_t>(spirv.size());
-    spirvDesc.code = spirv.data();
-
-    wgpu::ShaderModuleDescriptor descriptor;
-    descriptor.nextInChain = &spirvDesc;
-    descriptor.codeSize = static_cast<uint32_t>(spirv.size());
-    descriptor.code = spirv.data();
-    ASSERT_DEVICE_ERROR(device.CreateShaderModule(&descriptor));
-}
-
-// That creating a ShaderModule with both inline code still does correct state tracking
-TEST_P(DeprecationTests, ShaderModuleInlinedCodeStateTracking) {
-    std::vector<uint32_t> spirv =
-        CompileGLSLToSpirv(utils::SingleShaderStage::Compute, kEmptyShader);
-
-    wgpu::ShaderModuleDescriptor descriptor;
-    descriptor.codeSize = static_cast<uint32_t>(spirv.size());
-    descriptor.code = spirv.data();
-    wgpu::ShaderModule module;
-    EXPECT_DEPRECATION_WARNING(module = device.CreateShaderModule(&descriptor));
-
-    // Creating a compute pipeline works, because it is a compute module.
-    wgpu::ComputePipelineDescriptor computePipelineDesc;
-    computePipelineDesc.layout = nullptr;
-    computePipelineDesc.computeStage.module = module;
-    computePipelineDesc.computeStage.entryPoint = "main";
-    device.CreateComputePipeline(&computePipelineDesc);
-
-    utils::ComboRenderPipelineDescriptor renderPipelineDesc(device);
-    renderPipelineDesc.vertexStage.module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, kEmptyShader);
-    renderPipelineDesc.cFragmentStage.module = module;
-    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&renderPipelineDesc));
-}
-
 // Tests for BufferCopyView.rowPitch/imageHeight -> bytesPerRow/rowsPerImage
 
 class BufferCopyViewDeprecationTests : public DeprecationTests {

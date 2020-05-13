@@ -1269,9 +1269,7 @@
         "category": "structure",
         "extensible": true,
         "members": [
-            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
-            {"name": "code size", "type": "uint32_t",  "default": 0},
-            {"name": "code", "type": "uint32_t", "annotation": "const*", "length": "code size", "optional": true}
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true}
         ]
     },
     "shader module SPIRV descriptor": {

@@ -318,17 +318,6 @@ namespace dawn_native {
 
     MaybeError ValidateShaderModuleDescriptor(DeviceBase* device,
                                               const ShaderModuleDescriptor* descriptor) {
-        if (descriptor->codeSize != 0) {
-            if (descriptor->nextInChain != nullptr) {
-                return DAWN_VALIDATION_ERROR("Cannot set both code/codeSize and nextInChain");
-            }
-
-            device->EmitDeprecationWarning(
-                "ShaderModuleDescriptor::code/codeSize is deprecated, chain "
-                "ShaderModuleSPIRVDescriptor instead.");
-            return ValidateSpirv(device, descriptor->code, descriptor->codeSize);
-        }
-
         const ChainedStruct* chainedDescriptor = descriptor->nextInChain;
         if (chainedDescriptor == nullptr) {
             return DAWN_VALIDATION_ERROR("Shader module descriptor missing chained descriptor");
@@ -363,17 +352,12 @@ namespace dawn_native {
 
     ShaderModuleBase::ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor)
         : CachedObject(device) {
-        // Extract the correct SPIRV from the descriptor.
-        if (descriptor->codeSize != 0) {
-            mSpirv.assign(descriptor->code, descriptor->code + descriptor->codeSize);
-        } else {
-            ASSERT(descriptor->nextInChain != nullptr);
-            ASSERT(descriptor->nextInChain->sType == wgpu::SType::ShaderModuleSPIRVDescriptor);
+        ASSERT(descriptor->nextInChain != nullptr);
+        ASSERT(descriptor->nextInChain->sType == wgpu::SType::ShaderModuleSPIRVDescriptor);
 
-            const ShaderModuleSPIRVDescriptor* spirvDesc =
-                static_cast<const ShaderModuleSPIRVDescriptor*>(descriptor->nextInChain);
-            mSpirv.assign(spirvDesc->code, spirvDesc->code + spirvDesc->codeSize);
-        }
+        const ShaderModuleSPIRVDescriptor* spirvDesc =
+            static_cast<const ShaderModuleSPIRVDescriptor*>(descriptor->nextInChain);
+        mSpirv.assign(spirvDesc->code, spirvDesc->code + spirvDesc->codeSize);
 
         mFragmentOutputFormatBaseTypes.fill(Format::Other);
         if (GetDevice()->IsToggleEnabled(Toggle::UseSpvcParser)) {
