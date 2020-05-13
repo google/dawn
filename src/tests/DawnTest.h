@@ -358,16 +358,19 @@ DawnTestWithParams<Params>::DawnTestWithParams() : DawnTestBase(this->GetParam()
 
 using DawnTest = DawnTestWithParams<>;
 
+// Helpers to get the first element of a __VA_ARGS__ without triggering empty __VA_ARGS__ warnings.
+#define DAWN_INTERNAL_PP_GET_HEAD(firstParam, ...) firstParam
+#define DAWN_PP_GET_HEAD(...) DAWN_INTERNAL_PP_GET_HEAD(__VA_ARGS__, dummyArg)
+
 // Instantiate the test once for each backend provided after the first argument. Use it like this:
 //     DAWN_INSTANTIATE_TEST(MyTestFixture, MetalBackend, OpenGLBackend)
-#define DAWN_INSTANTIATE_TEST(testName, firstParam, ...)                         \
-    const decltype(firstParam) testName##params[] = {firstParam, ##__VA_ARGS__}; \
-    INSTANTIATE_TEST_SUITE_P(                                                    \
-        , testName,                                                              \
-        testing::ValuesIn(::detail::FilterBackends(                              \
-            testName##params, sizeof(testName##params) / sizeof(firstParam))),   \
+#define DAWN_INSTANTIATE_TEST(testName, ...)                                            \
+    const decltype(DAWN_PP_GET_HEAD(__VA_ARGS__)) testName##params[] = {__VA_ARGS__};   \
+    INSTANTIATE_TEST_SUITE_P(                                                           \
+        , testName,                                                                     \
+        testing::ValuesIn(::detail::FilterBackends(                                     \
+            testName##params, sizeof(testName##params) / sizeof(testName##params[0]))), \
         testing::PrintToStringParamName())
-
 
 namespace detail {
     // Helper functions used for DAWN_INSTANTIATE_TEST

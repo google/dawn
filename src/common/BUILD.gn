@@ -106,23 +106,17 @@ config("dawn_internal") {
       "-Wtautological-unsigned-zero-compare",
     ]
 
-    # clang-cl doesn't know -pedantic, pass it explicitly to the clang driver on Windows
     if (is_win) {
-      cflags += [ "/clang:-pedantic" ]
+      cflags += [
+        # clang-cl doesn't know -pedantic, pass it explicitly to the clang driver
+        "/clang:-pedantic",
+
+        # Allow the use of __uuidof()
+        "-Wno-language-extension-token",
+      ]
     } else {
       cflags += [ "-pedantic" ]
     }
-
-    # On Windows allow the use of __uuidof()
-    if (is_win) {
-      cflags += [ "-Wno-language-extension-token" ]
-    }
-
-    # Flags for -pedantic warnings that haven't been fixed yet.
-    cflags += [
-      "-Wno-gnu-zero-variadic-macro-arguments",
-      "-Wno-microsoft-enum-value",
-    ]
   }
 
   if (!is_clang && is_win) {
