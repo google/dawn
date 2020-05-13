@@ -210,7 +210,13 @@ namespace dawn_native {
 
     void DeviceBase::ConsumeError(std::unique_ptr<ErrorData> error) {
         ASSERT(error != nullptr);
-        HandleError(error->GetType(), error->GetMessage().c_str());
+        std::ostringstream ss;
+        ss << error->GetMessage();
+        for (const auto& callsite : error->GetBacktrace()) {
+            ss << "\n    at " << callsite.function << " (" << callsite.file << ":" << callsite.line
+               << ")";
+        }
+        HandleError(error->GetType(), ss.str().c_str());
     }
 
     void DeviceBase::SetUncapturedErrorCallback(wgpu::ErrorCallback callback, void* userdata) {
