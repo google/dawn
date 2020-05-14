@@ -379,8 +379,8 @@ source_set("libtint_core_src") {
 
 source_set("libtint_spv_reader_src") {
   sources = [
-    "src/reader/spirv/construct.h",
     "src/reader/spirv/construct.cc",
+    "src/reader/spirv/construct.h",
     "src/reader/spirv/enum_converter.cc",
     "src/reader/spirv/enum_converter.h",
     "src/reader/spirv/fail_stream.h",
@@ -472,6 +472,10 @@ source_set("libtint_wgsl_writer_src") {
   }
 }
 
+config("libtint_public_config") {
+  include_dirs = [ "${tint_root_dir}/" ]
+}
+
 source_set("libtint") {
   deps = [ ":libtint_core_src" ]
 
@@ -492,6 +496,7 @@ source_set("libtint") {
   }
 
   configs += [ ":tint_common_config" ]
+  public_configs = [ ":libtint_public_config" ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
