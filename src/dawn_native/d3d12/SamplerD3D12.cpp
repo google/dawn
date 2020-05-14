@@ -36,48 +36,52 @@ namespace dawn_native { namespace d3d12 {
 
     Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
         : SamplerBase(device, descriptor) {
-        // https://msdn.microsoft.com/en-us/library/windows/desktop/dn770367(v=vs.85).aspx
-        // hex value, decimal value, min linear, mag linear, mip linear
-        // D3D12_FILTER_MIN_MAG_MIP_POINT                       = 0       0     0 0 0
-        // D3D12_FILTER_MIN_MAG_POINT_MIP_LINEAR                = 0x1     1     0 0 1
-        // D3D12_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT          = 0x4     4     0 1 0
-        // D3D12_FILTER_MIN_POINT_MAG_MIP_LINEAR                = 0x5     5     0 1 1
-        // D3D12_FILTER_MIN_LINEAR_MAG_MIP_POINT                = 0x10   16     1 0 0
-        // D3D12_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR         = 0x11   17     1 0 1
-        // D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT                = 0x14   20     1 1 0
-        // D3D12_FILTER_MIN_MAG_MIP_LINEAR                      = 0x15   21     1 1 1
-
-        // if mip mode is linear, add 1
-        // if mag mode is linear, add 4
-        // if min mode is linear, add 16
-
-        uint8_t mode = 0;
-
+        D3D12_FILTER_TYPE minFilter;
         switch (descriptor->minFilter) {
             case wgpu::FilterMode::Nearest:
+                minFilter = D3D12_FILTER_TYPE_POINT;
                 break;
             case wgpu::FilterMode::Linear:
-                mode += 16;
+                minFilter = D3D12_FILTER_TYPE_LINEAR;
+                break;
+            default:
+                UNREACHABLE();
                 break;
         }
 
+        D3D12_FILTER_TYPE magFilter;
         switch (descriptor->magFilter) {
             case wgpu::FilterMode::Nearest:
+                magFilter = D3D12_FILTER_TYPE_POINT;
                 break;
             case wgpu::FilterMode::Linear:
-                mode += 4;
+                magFilter = D3D12_FILTER_TYPE_LINEAR;
+                break;
+            default:
+                UNREACHABLE();
                 break;
         }
 
+        D3D12_FILTER_TYPE mipmapFilter;
         switch (descriptor->mipmapFilter) {
             case wgpu::FilterMode::Nearest:
+                mipmapFilter = D3D12_FILTER_TYPE_POINT;
                 break;
             case wgpu::FilterMode::Linear:
-                mode += 1;
+                mipmapFilter = D3D12_FILTER_TYPE_LINEAR;
+                break;
+            default:
+                UNREACHABLE();
                 break;
         }
 
-        mSamplerDesc.Filter = static_cast<D3D12_FILTER>(mode);
+        D3D12_FILTER_REDUCTION_TYPE reduction =
+            descriptor->compare == wgpu::CompareFunction::Undefined
+                ? D3D12_FILTER_REDUCTION_TYPE_STANDARD
+                : D3D12_FILTER_REDUCTION_TYPE_COMPARISON;
+
+        mSamplerDesc.Filter =
+            D3D12_ENCODE_BASIC_FILTER(minFilter, magFilter, mipmapFilter, reduction);
         mSamplerDesc.AddressU = AddressMode(descriptor->addressModeU);
         mSamplerDesc.AddressV = AddressMode(descriptor->addressModeV);
         mSamplerDesc.AddressW = AddressMode(descriptor->addressModeW);

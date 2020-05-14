@@ -505,7 +505,8 @@ TEST_P(DepthSamplingTest, CompareFunctionsNonNormalizedContentsCompute) {
     }
 }
 
-// TODO(crbug.com/dawn/367): Does not work on D3D12 because we need to reinterpret the texture view
-// as R32Float to sample it. See tables here:
-// https://docs.microsoft.com/en-us/windows/win32/direct3ddxgi/hardware-support-for-direct3d-12-1-formats
-DAWN_INSTANTIATE_TEST(DepthSamplingTest, MetalBackend(), OpenGLBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(DepthSamplingTest,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());

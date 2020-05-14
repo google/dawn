@@ -105,6 +105,108 @@ namespace dawn_native { namespace d3d12 {
                     UNREACHABLE();
             }
         }
+
+        DXGI_FORMAT D3D12TypelessTextureFormat(wgpu::TextureFormat format) {
+            switch (format) {
+                case wgpu::TextureFormat::R8Unorm:
+                case wgpu::TextureFormat::R8Snorm:
+                case wgpu::TextureFormat::R8Uint:
+                case wgpu::TextureFormat::R8Sint:
+                    return DXGI_FORMAT_R8_TYPELESS;
+
+                case wgpu::TextureFormat::R16Uint:
+                case wgpu::TextureFormat::R16Sint:
+                case wgpu::TextureFormat::R16Float:
+                    return DXGI_FORMAT_R16_TYPELESS;
+
+                case wgpu::TextureFormat::RG8Unorm:
+                case wgpu::TextureFormat::RG8Snorm:
+                case wgpu::TextureFormat::RG8Uint:
+                case wgpu::TextureFormat::RG8Sint:
+                    return DXGI_FORMAT_R8G8_TYPELESS;
+
+                case wgpu::TextureFormat::R32Uint:
+                case wgpu::TextureFormat::R32Sint:
+                case wgpu::TextureFormat::R32Float:
+                    return DXGI_FORMAT_R32_TYPELESS;
+
+                case wgpu::TextureFormat::RG16Uint:
+                case wgpu::TextureFormat::RG16Sint:
+                case wgpu::TextureFormat::RG16Float:
+                    return DXGI_FORMAT_R16G16_TYPELESS;
+
+                case wgpu::TextureFormat::RGBA8Unorm:
+                case wgpu::TextureFormat::RGBA8UnormSrgb:
+                case wgpu::TextureFormat::RGBA8Snorm:
+                case wgpu::TextureFormat::RGBA8Uint:
+                case wgpu::TextureFormat::RGBA8Sint:
+                    return DXGI_FORMAT_R8G8B8A8_TYPELESS;
+
+                case wgpu::TextureFormat::BGRA8Unorm:
+                case wgpu::TextureFormat::BGRA8UnormSrgb:
+                    return DXGI_FORMAT_B8G8R8A8_TYPELESS;
+
+                case wgpu::TextureFormat::RGB10A2Unorm:
+                    return DXGI_FORMAT_R10G10B10A2_TYPELESS;
+
+                case wgpu::TextureFormat::RG11B10Float:
+                    return DXGI_FORMAT_R11G11B10_FLOAT;
+
+                case wgpu::TextureFormat::RG32Uint:
+                case wgpu::TextureFormat::RG32Sint:
+                case wgpu::TextureFormat::RG32Float:
+                    return DXGI_FORMAT_R32G32_TYPELESS;
+
+                case wgpu::TextureFormat::RGBA16Uint:
+                case wgpu::TextureFormat::RGBA16Sint:
+                case wgpu::TextureFormat::RGBA16Float:
+                    return DXGI_FORMAT_R16G16B16A16_TYPELESS;
+
+                case wgpu::TextureFormat::RGBA32Uint:
+                case wgpu::TextureFormat::RGBA32Sint:
+                case wgpu::TextureFormat::RGBA32Float:
+                    return DXGI_FORMAT_R32G32B32A32_TYPELESS;
+
+                case wgpu::TextureFormat::Depth32Float:
+                case wgpu::TextureFormat::Depth24Plus:
+                    return DXGI_FORMAT_R32_TYPELESS;
+
+                case wgpu::TextureFormat::Depth24PlusStencil8:
+                    return DXGI_FORMAT_X32_TYPELESS_G8X24_UINT;
+
+                case wgpu::TextureFormat::BC1RGBAUnorm:
+                case wgpu::TextureFormat::BC1RGBAUnormSrgb:
+                    return DXGI_FORMAT_BC1_TYPELESS;
+
+                case wgpu::TextureFormat::BC2RGBAUnorm:
+                case wgpu::TextureFormat::BC2RGBAUnormSrgb:
+                    return DXGI_FORMAT_BC2_TYPELESS;
+
+                case wgpu::TextureFormat::BC3RGBAUnorm:
+                case wgpu::TextureFormat::BC3RGBAUnormSrgb:
+                    return DXGI_FORMAT_BC3_TYPELESS;
+
+                case wgpu::TextureFormat::BC4RSnorm:
+                case wgpu::TextureFormat::BC4RUnorm:
+                    return DXGI_FORMAT_BC4_TYPELESS;
+
+                case wgpu::TextureFormat::BC5RGSnorm:
+                case wgpu::TextureFormat::BC5RGUnorm:
+                    return DXGI_FORMAT_BC5_TYPELESS;
+
+                case wgpu::TextureFormat::BC6HRGBSfloat:
+                case wgpu::TextureFormat::BC6HRGBUfloat:
+                    return DXGI_FORMAT_BC6H_TYPELESS;
+
+                case wgpu::TextureFormat::BC7RGBAUnorm:
+                case wgpu::TextureFormat::BC7RGBAUnormSrgb:
+                    return DXGI_FORMAT_BC7_TYPELESS;
+
+                default:
+                    UNREACHABLE();
+            }
+        }
+
     }  // namespace
 
     DXGI_FORMAT D3D12TextureFormat(wgpu::TextureFormat format) {
@@ -347,9 +449,18 @@ namespace dawn_native { namespace d3d12 {
         resourceDescriptor.Width = size.width;
         resourceDescriptor.Height = size.height;
 
+        // This will need to be much more nuanced when WebGPU has
+        // texture view compatibility rules.
+        bool needsTypelessFormat = GetFormat().format == wgpu::TextureFormat::Depth32Float &&
+                                   (GetUsage() & wgpu::TextureUsage::Sampled) != 0;
+
+        DXGI_FORMAT dxgiFormat = needsTypelessFormat
+                                     ? D3D12TypelessTextureFormat(GetFormat().format)
+                                     : D3D12TextureFormat(GetFormat().format);
+
         resourceDescriptor.DepthOrArraySize = GetDepthOrArraySize();
         resourceDescriptor.MipLevels = static_cast<UINT16>(GetNumMipLevels());
-        resourceDescriptor.Format = D3D12TextureFormat(GetFormat().format);
+        resourceDescriptor.Format = dxgiFormat;
         resourceDescriptor.SampleDesc.Count = GetSampleCount();
         // TODO(bryan.bernhart@intel.com): investigate how to specify standard MSAA sample pattern.
         resourceDescriptor.SampleDesc.Quality = 0;
@@ -772,6 +883,11 @@ namespace dawn_native { namespace d3d12 {
     TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor)
         : TextureViewBase(texture, descriptor) {
         mSrvDesc.Format = D3D12TextureFormat(descriptor->format);
+        if (descriptor->format == wgpu::TextureFormat::Depth32Float) {
+            // TODO(enga): This will need to be much more nuanced when WebGPU has
+            // texture view compatibility rules.
+            mSrvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+        }
         mSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
         // Currently we always use D3D12_TEX2D_ARRAY_SRV because we cannot specify base array layer
