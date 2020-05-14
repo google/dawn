@@ -127,6 +127,9 @@ class D3D12ResidencyTests : public DawnTest {
 
 // Check that resources existing on suballocated heaps are made resident and evicted correctly.
 TEST_P(D3D12ResidencyTests, OvercommitSmallResources) {
+    // TODO(http://crbug.com/dawn/416): Tests fails on Intel HD 630 bot.
+    DAWN_SKIP_TEST_IF(IsIntel() && IsBackendValidationEnabled());
+
     // Create suballocated buffers to fill half the budget.
     std::vector<wgpu::Buffer> bufferSet1 = AllocateBuffers(
         kSuballocatedResourceSize, ((kRestrictedBudgetSize / 2) / kSuballocatedResourceSize),
