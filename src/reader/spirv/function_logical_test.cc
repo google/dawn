@@ -682,21 +682,434 @@ INSTANTIATE_TEST_SUITE_P(
                    "__vec_2__bool", AstFor("v2int_30_40"), "less_than_equal",
                    AstFor("cast_v2uint_20_10")}));
 
+using SpvFUnordTest = SpvParserTestBase<::testing::Test>;
+
+TEST_F(SpvFUnordTest, FUnordEqual_Scalar) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpFUnordEqual %bool %float_50 %float_60
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __bool
+    {
+      UnaryOp{
+        not
+        Binary{
+          ScalarConstructor{50.000000}
+          not_equal
+          ScalarConstructor{60.000000}
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvFUnordTest, FUnordEqual_Vector) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpFUnordEqual %bool %v2float_50_60 %v2float_60_50
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __bool
+    {
+      UnaryOp{
+        not
+        Binary{
+          TypeConstructor{
+            __vec_2__f32
+            ScalarConstructor{50.000000}
+            ScalarConstructor{60.000000}
+          }
+          not_equal
+          TypeConstructor{
+            __vec_2__f32
+            ScalarConstructor{60.000000}
+            ScalarConstructor{50.000000}
+          }
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvFUnordTest, FUnordNotEqual_Scalar) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpFUnordNotEqual %bool %float_50 %float_60
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __bool
+    {
+      UnaryOp{
+        not
+        Binary{
+          ScalarConstructor{50.000000}
+          equal
+          ScalarConstructor{60.000000}
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvFUnordTest, FUnordNotEqual_Vector) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpFUnordNotEqual %bool %v2float_50_60 %v2float_60_50
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __bool
+    {
+      UnaryOp{
+        not
+        Binary{
+          TypeConstructor{
+            __vec_2__f32
+            ScalarConstructor{50.000000}
+            ScalarConstructor{60.000000}
+          }
+          equal
+          TypeConstructor{
+            __vec_2__f32
+            ScalarConstructor{60.000000}
+            ScalarConstructor{50.000000}
+          }
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvFUnordTest, FUnordLessThan_Scalar) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpFUnordLessThan %bool %float_50 %float_60
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __bool
+    {
+      UnaryOp{
+        not
+        Binary{
+          ScalarConstructor{50.000000}
+          greater_than_equal
+          ScalarConstructor{60.000000}
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvFUnordTest, FUnordLessThan_Vector) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpFUnordLessThan %bool %v2float_50_60 %v2float_60_50
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __bool
+    {
+      UnaryOp{
+        not
+        Binary{
+          TypeConstructor{
+            __vec_2__f32
+            ScalarConstructor{50.000000}
+            ScalarConstructor{60.000000}
+          }
+          greater_than_equal
+          TypeConstructor{
+            __vec_2__f32
+            ScalarConstructor{60.000000}
+            ScalarConstructor{50.000000}
+          }
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvFUnordTest, FUnordLessThanEqual_Scalar) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpFUnordLessThanEqual %bool %float_50 %float_60
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __bool
+    {
+      UnaryOp{
+        not
+        Binary{
+          ScalarConstructor{50.000000}
+          greater_than
+          ScalarConstructor{60.000000}
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvFUnordTest, FUnordLessThanEqual_Vector) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpFUnordLessThanEqual %bool %v2float_50_60 %v2float_60_50
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __bool
+    {
+      UnaryOp{
+        not
+        Binary{
+          TypeConstructor{
+            __vec_2__f32
+            ScalarConstructor{50.000000}
+            ScalarConstructor{60.000000}
+          }
+          greater_than
+          TypeConstructor{
+            __vec_2__f32
+            ScalarConstructor{60.000000}
+            ScalarConstructor{50.000000}
+          }
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvFUnordTest, FUnordGreaterThan_Scalar) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpFUnordGreaterThan %bool %float_50 %float_60
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __bool
+    {
+      UnaryOp{
+        not
+        Binary{
+          ScalarConstructor{50.000000}
+          less_than_equal
+          ScalarConstructor{60.000000}
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvFUnordTest, FUnordGreaterThan_Vector) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpFUnordGreaterThan %bool %v2float_50_60 %v2float_60_50
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __bool
+    {
+      UnaryOp{
+        not
+        Binary{
+          TypeConstructor{
+            __vec_2__f32
+            ScalarConstructor{50.000000}
+            ScalarConstructor{60.000000}
+          }
+          less_than_equal
+          TypeConstructor{
+            __vec_2__f32
+            ScalarConstructor{60.000000}
+            ScalarConstructor{50.000000}
+          }
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Scalar) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpFUnordGreaterThanEqual %bool %float_50 %float_60
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __bool
+    {
+      UnaryOp{
+        not
+        Binary{
+          ScalarConstructor{50.000000}
+          less_than
+          ScalarConstructor{60.000000}
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Vector) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpFUnordGreaterThanEqual %bool %v2float_50_60 %v2float_60_50
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __bool
+    {
+      UnaryOp{
+        not
+        Binary{
+          TypeConstructor{
+            __vec_2__f32
+            ScalarConstructor{50.000000}
+            ScalarConstructor{60.000000}
+          }
+          less_than
+          TypeConstructor{
+            __vec_2__f32
+            ScalarConstructor{60.000000}
+            ScalarConstructor{50.000000}
+          }
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
 // TODO(dneto): OpAny  - likely builtin function TBD
 // TODO(dneto): OpAll  - likely builtin function TBD
 // TODO(dneto): OpIsNan - likely builtin function TBD
 // TODO(dneto): OpIsInf - likely builtin function TBD
 // TODO(dneto): Kernel-guarded instructions.
 // TODO(dneto): OpSelect - likely builtin function TBD
-//
-// Unordered float inequalities: blocked pending the resolution of
-// https://github.com/gpuweb/gpuweb/issues/706
-// TODO(dneto): OpFUnordEqual
-// TODO(dneto): OpFUnordNotEqual
-// TODO(dneto): OpFUnordLessThan
-// TODO(dneto): OpFUnordGreaterThan
-// TODO(dneto): OpFUnordLessThanEqual
-// TODO(dneto): OpFUnordGreaterThanEqual
 
 }  // namespace
 }  // namespace spirv

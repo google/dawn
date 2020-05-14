@@ -232,6 +232,31 @@ ast::BinaryOp ConvertBinaryOp(SpvOp opcode) {
   return ast::BinaryOp::kNone;
 }
 
+// If the given SPIR-V opcode is a floating point unordered comparison,
+// then returns the binary float comparison for which it is the negation.
+// Othewrise returns BinaryOp::kNone.
+// @param opcode SPIR-V opcode
+// @returns operation corresponding to negated version of the SPIR-V opcode
+ast::BinaryOp NegatedFloatCompare(SpvOp opcode) {
+  switch (opcode) {
+    case SpvOpFUnordEqual:
+      return ast::BinaryOp::kNotEqual;
+    case SpvOpFUnordNotEqual:
+      return ast::BinaryOp::kEqual;
+    case SpvOpFUnordLessThan:
+      return ast::BinaryOp::kGreaterThanEqual;
+    case SpvOpFUnordLessThanEqual:
+      return ast::BinaryOp::kGreaterThan;
+    case SpvOpFUnordGreaterThan:
+      return ast::BinaryOp::kLessThanEqual;
+    case SpvOpFUnordGreaterThanEqual:
+      return ast::BinaryOp::kLessThan;
+    default:
+      break;
+  }
+  return ast::BinaryOp::kNone;
+}
+
 // @returns the merge block ID for the given basic block, or 0 if there is none.
 uint32_t MergeFor(const spvtools::opt::BasicBlock& bb) {
   // Get the OpSelectionMerge or OpLoopMerge instruction, if any.
@@ -1500,6 +1525,17 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     auto* target_ty = parser_impl_.ConvertType(inst.type_id());
     return {target_ty,
             std::make_unique<ast::AsExpression>(target_ty, operand(0).expr)};
+  }
+
+  auto negated_op = NegatedFloatCompare(inst.opcode());
+  if (negated_op != ast::BinaryOp::kNone) {
+    auto arg0 = operand(0);
+    auto arg1 = operand(1);
+    auto binary_expr = std::make_unique<ast::BinaryExpression>(
+        negated_op, std::move(arg0.expr), std::move(arg1.expr));
+    auto negated_expr = std::make_unique<ast::UnaryOpExpression>(
+        ast::UnaryOp::kNot, std::move(binary_expr));
+    return {ast_type, std::move(negated_expr)};
   }
 
   // builtin readonly function
