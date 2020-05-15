@@ -22,8 +22,8 @@ constexpr static unsigned int kRTSize = 64;
 
 class DepthStencilStateTest : public DawnTest {
     protected:
-        void TestSetUp() override {
-            DawnTest::TestSetUp();
+        void SetUp() override {
+            DawnTest::SetUp();
 
             wgpu::TextureDescriptor renderTargetDescriptor;
             renderTargetDescriptor.dimension = wgpu::TextureDimension::e2D;

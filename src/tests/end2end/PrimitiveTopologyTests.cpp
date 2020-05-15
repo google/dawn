@@ -145,8 +145,8 @@ constexpr static float kVertices[] = {
 
 class PrimitiveTopologyTest : public DawnTest {
     protected:
-        void TestSetUp() override {
-            DawnTest::TestSetUp();
+        void SetUp() override {
+            DawnTest::SetUp();
 
             renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 

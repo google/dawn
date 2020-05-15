@@ -32,9 +32,9 @@
 
 class TextureZeroInitTest : public DawnTest {
   protected:
-    void TestSetUp() override {
+    void SetUp() override {
+        DawnTest::SetUp();
         DAWN_SKIP_TEST_IF(UsesWire());
-        DawnTest::TestSetUp();
     }
     wgpu::TextureDescriptor CreateTextureDescriptor(uint32_t mipLevelCount,
                                                     uint32_t arrayLayerCount,

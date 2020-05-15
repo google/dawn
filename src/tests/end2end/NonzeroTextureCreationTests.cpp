@@ -20,8 +20,8 @@
 
 class NonzeroTextureCreationTests : public DawnTest {
   protected:
-    void TestSetUp() override {
-        DawnTest::TestSetUp();
+    void SetUp() override {
+        DawnTest::SetUp();
     }
 
     constexpr static uint32_t kSize = 128;

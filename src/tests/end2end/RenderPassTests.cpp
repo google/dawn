@@ -22,8 +22,8 @@ constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
 
 class RenderPassTest : public DawnTest {
 protected:
-    void TestSetUp() override {
-        DawnTest::TestSetUp();
+    void SetUp() override {
+        DawnTest::SetUp();
 
         // Shaders to draw a bottom-left triangle in blue.
         mVSModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(

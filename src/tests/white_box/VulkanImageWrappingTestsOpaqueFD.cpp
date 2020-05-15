@@ -31,7 +31,8 @@ namespace dawn_native { namespace vulkan {
 
         class VulkanImageWrappingTestBase : public DawnTest {
           public:
-            void TestSetUp() override {
+            void SetUp() override {
+                DawnTest::SetUp();
                 if (UsesWire()) {
                     return;
                 }
@@ -200,8 +201,8 @@ namespace dawn_native { namespace vulkan {
 
     class VulkanImageWrappingValidationTests : public VulkanImageWrappingTestBase {
       public:
-        void TestSetUp() override {
-            VulkanImageWrappingTestBase::TestSetUp();
+        void SetUp() override {
+            VulkanImageWrappingTestBase::SetUp();
             if (UsesWire()) {
                 return;
             }
@@ -352,8 +353,8 @@ namespace dawn_native { namespace vulkan {
     // These tests are skipped if the harness is using the wire.
     class VulkanImageWrappingUsageTests : public VulkanImageWrappingTestBase {
       public:
-        void TestSetUp() override {
-            VulkanImageWrappingTestBase::TestSetUp();
+        void SetUp() override {
+            VulkanImageWrappingTestBase::SetUp();
             if (UsesWire()) {
                 return;
             }

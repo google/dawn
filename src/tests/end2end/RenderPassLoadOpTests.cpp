@@ -54,8 +54,8 @@ class DrawQuad {
 
 class RenderPassLoadOpTests : public DawnTest {
     protected:
-        void TestSetUp() override {
-            DawnTest::TestSetUp();
+        void SetUp() override {
+            DawnTest::SetUp();
 
             wgpu::TextureDescriptor descriptor;
             descriptor.dimension = wgpu::TextureDimension::e2D;

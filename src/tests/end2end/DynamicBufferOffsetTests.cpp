@@ -24,8 +24,8 @@ constexpr uint32_t kBindingSize = 8;
 
 class DynamicBufferOffsetTests : public DawnTest {
   protected:
-    void TestSetUp() override {
-        DawnTest::TestSetUp();
+    void SetUp() override {
+        DawnTest::SetUp();
 
         // Mix up dynamic and non dynamic resources in one bind group and using not continuous
         // binding number to cover more cases.

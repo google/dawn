@@ -92,7 +92,7 @@ class BufferUploadPerf : public DawnPerfTestWithParams<BufferUploadParams> {
     }
     ~BufferUploadPerf() override = default;
 
-    void TestSetUp() override;
+    void SetUp() override;
 
   private:
     void Step() override;
@@ -101,8 +101,8 @@ class BufferUploadPerf : public DawnPerfTestWithParams<BufferUploadParams> {
     std::vector<uint8_t> data;
 };
 
-void BufferUploadPerf::TestSetUp() {
-    DawnPerfTestWithParams<BufferUploadParams>::TestSetUp();
+void BufferUploadPerf::SetUp() {
+    DawnPerfTestWithParams<BufferUploadParams>::SetUp();
 
     wgpu::BufferDescriptor desc = {};
     desc.size = data.size();

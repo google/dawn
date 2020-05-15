@@ -24,7 +24,8 @@
 
 class SwapChainValidationTests : public DawnTest {
   public:
-    void TestSetUp() override {
+    void SetUp() override {
+        DawnTest::SetUp();
         DAWN_SKIP_TEST_IF(UsesWire());
         DAWN_SKIP_TEST_IF(IsDawnValidationSkipped());
 
@@ -59,6 +60,7 @@ class SwapChainValidationTests : public DawnTest {
         if (window != nullptr) {
             glfwDestroyWindow(window);
         }
+        DawnTest::TearDown();
     }
 
   protected:

@@ -29,8 +29,8 @@ namespace {
 
     class D3D12ResourceTestBase : public DawnTest {
       public:
-        void TestSetUp() override {
-            DawnTest::TestSetUp();
+        void SetUp() override {
+            DawnTest::SetUp();
             if (UsesWire()) {
                 return;
             }

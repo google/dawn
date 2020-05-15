@@ -78,8 +78,8 @@ protected:
         return static_cast<int>(level * 10) + static_cast<int>(layer + 1);
     }
 
-    void TestSetUp() override {
-        DawnTest::TestSetUp();
+    void SetUp() override {
+        DawnTest::SetUp();
 
         mRenderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 

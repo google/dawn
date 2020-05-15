@@ -20,8 +20,8 @@
 
 class OpArrayLengthTest : public DawnTest {
   protected:
-    void TestSetUp() {
-        DawnTest::TestSetUp();
+    void SetUp() {
+        DawnTest::SetUp();
 
         // Create buffers of various size to check the length() implementation
         wgpu::BufferDescriptor bufferDesc;

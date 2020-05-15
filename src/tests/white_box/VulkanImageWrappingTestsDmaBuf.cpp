@@ -34,7 +34,7 @@ namespace dawn_native { namespace vulkan {
 
         class VulkanImageWrappingTestBase : public DawnTest {
           public:
-            void TestSetUp() override {
+            void SetUp() override {
                 DAWN_SKIP_TEST_IF(UsesWire());
 
                 gbmDevice = CreateGbmDevice();
@@ -264,8 +264,8 @@ namespace dawn_native { namespace vulkan {
     // These tests are skipped if the harness is using the wire.
     class VulkanImageWrappingUsageTests : public VulkanImageWrappingTestBase {
       public:
-        void TestSetUp() override {
-            VulkanImageWrappingTestBase::TestSetUp();
+        void SetUp() override {
+            VulkanImageWrappingTestBase::SetUp();
             if (UsesWire()) {
                 return;
             }

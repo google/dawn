@@ -23,7 +23,8 @@
 
 class SwapChainTests : public DawnTest {
   public:
-    void TestSetUp() override {
+    void SetUp() override {
+        DawnTest::SetUp();
         DAWN_SKIP_TEST_IF(UsesWire());
 
         glfwSetErrorCallback([](int code, const char* message) {
@@ -58,6 +59,7 @@ class SwapChainTests : public DawnTest {
         if (window != nullptr) {
             glfwDestroyWindow(window);
         }
+        DawnTest::TearDown();
     }
 
     void ClearTexture(wgpu::TextureView view, wgpu::Color color) {

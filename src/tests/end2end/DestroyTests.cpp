@@ -21,8 +21,8 @@ constexpr uint32_t kRTSize = 4;
 
 class DestroyTest : public DawnTest {
   protected:
-    void TestSetUp() override {
-        DawnTest::TestSetUp();
+    void SetUp() override {
+        DawnTest::SetUp();
         DAWN_SKIP_TEST_IF(IsDawnValidationSkipped());
 
         renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);

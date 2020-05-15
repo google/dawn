@@ -46,8 +46,8 @@ std::vector<destType> BitCast(std::vector<srcType> data) {
 
 class VertexFormatTest : public DawnTest {
   protected:
-    void TestSetUp() override {
-        DawnTest::TestSetUp();
+    void SetUp() override {
+        DawnTest::SetUp();
 
         renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
     }

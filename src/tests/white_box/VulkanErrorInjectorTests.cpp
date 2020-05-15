@@ -25,7 +25,8 @@ namespace {
 
     class VulkanErrorInjectorTests : public DawnTest {
       public:
-        void TestSetUp() override {
+        void SetUp() override {
+            DawnTest::SetUp();
             DAWN_SKIP_TEST_IF(UsesWire());
 
             mDeviceVk = reinterpret_cast<dawn_native::vulkan::Device*>(device.Get());

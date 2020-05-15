@@ -56,16 +56,16 @@ static const int fakeUserData = 0;
 
 class DeviceLostTest : public DawnTest {
   protected:
-    void TestSetUp() override {
+    void SetUp() override {
+        DawnTest::SetUp();
         DAWN_SKIP_TEST_IF(UsesWire());
-        DawnTest::TestSetUp();
         mockDeviceLostCallback = std::make_unique<MockDeviceLostCallback>();
         mockFenceOnCompletionCallback = std::make_unique<MockFenceOnCompletionCallback>();
     }
 
     void TearDown() override {
-        DawnTest::TearDown();
         mockDeviceLostCallback = nullptr;
+        DawnTest::TearDown();
     }
 
     void SetCallbackAndLoseForTesting() {

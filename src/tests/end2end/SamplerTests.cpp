@@ -50,8 +50,8 @@ namespace {
 
 class SamplerTest : public DawnTest {
 protected:
-    void TestSetUp() override {
-        DawnTest::TestSetUp();
+    void SetUp() override {
+        DawnTest::SetUp();
         mRenderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
         auto vsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(

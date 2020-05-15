@@ -356,22 +356,12 @@ class DawnTestBase {
 
 template <typename Params = AdapterTestParam>
 class DawnTestWithParams : public DawnTestBase, public ::testing::TestWithParam<Params> {
-  private:
-    void SetUp() override final {
-        // DawnTestBase::SetUp() creates the device and wire.
-        // It was separate from TestSetUp() so we can skip tests completely if no adapter
-        // is available.
-        // TODO(enga): There is now always an available adapter otherwise we fail test environment
-        // SetUp. Consider removing the extra TestSetUp() overload.
-        DawnTestBase::SetUp();
-        TestSetUp();
-    }
-
   protected:
     DawnTestWithParams();
     ~DawnTestWithParams() override = default;
 
-    virtual void TestSetUp() {
+    void SetUp() override {
+        DawnTestBase::SetUp();
     }
 
     void TearDown() override {

@@ -33,7 +33,8 @@ using namespace dawn_native::d3d12;
 
 class D3D12DescriptorHeapTests : public DawnTest {
   protected:
-    void TestSetUp() override {
+    void SetUp() override {
+        DawnTest::SetUp();
         DAWN_SKIP_TEST_IF(UsesWire());
         mD3DDevice = reinterpret_cast<Device*>(device.Get());
 

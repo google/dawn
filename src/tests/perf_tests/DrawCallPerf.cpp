@@ -227,7 +227,7 @@ class DrawCallPerf : public DawnPerfTestWithParams<DrawCallParamForTest> {
     }
     ~DrawCallPerf() override = default;
 
-    void TestSetUp() override;
+    void SetUp() override;
 
   protected:
     DrawCallParam GetParam() const {
@@ -267,8 +267,8 @@ class DrawCallPerf : public DawnPerfTestWithParams<DrawCallParamForTest> {
     wgpu::RenderBundle mRenderBundle;
 };
 
-void DrawCallPerf::TestSetUp() {
-    DawnPerfTestWithParams::TestSetUp();
+void DrawCallPerf::SetUp() {
+    DawnPerfTestWithParams::SetUp();
 
     // Compute aligned uniform / vertex data sizes.
     mAlignedUniformSize = Align(kUniformSize, kMinDynamicBufferOffsetAlignment);

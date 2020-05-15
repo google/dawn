@@ -34,7 +34,8 @@ constexpr wgpu::BufferUsage kNonMappableBufferUsage = wgpu::BufferUsage::CopyDst
 
 class D3D12ResidencyTests : public DawnTest {
   protected:
-    void TestSetUp() override {
+    void SetUp() override {
+        DawnTest::SetUp();
         DAWN_SKIP_TEST_IF(UsesWire());
 
         // Restrict Dawn's budget to create an artificial budget.
