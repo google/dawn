@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iomanip>
+#include <regex>
 #include <sstream>
 #include <unordered_map>
 
@@ -90,42 +91,42 @@ const RGBA8 RGBA8::kBlue = RGBA8(0, 0, 255, 255);
 const RGBA8 RGBA8::kYellow = RGBA8(255, 255, 0, 255);
 const RGBA8 RGBA8::kWhite = RGBA8(255, 255, 255, 255);
 
-DawnTestParam::DawnTestParam(wgpu::BackendType backendType,
-                             std::initializer_list<const char*> forceEnabledWorkarounds,
-                             std::initializer_list<const char*> forceDisabledWorkarounds)
+BackendTestConfig::BackendTestConfig(wgpu::BackendType backendType,
+                                     std::initializer_list<const char*> forceEnabledWorkarounds,
+                                     std::initializer_list<const char*> forceDisabledWorkarounds)
     : backendType(backendType),
       forceEnabledWorkarounds(forceEnabledWorkarounds),
       forceDisabledWorkarounds(forceDisabledWorkarounds) {
 }
 
-DawnTestParam D3D12Backend(std::initializer_list<const char*> forceEnabledWorkarounds,
-                           std::initializer_list<const char*> forceDisabledWorkarounds) {
-    return DawnTestParam(wgpu::BackendType::D3D12, forceEnabledWorkarounds,
-                         forceDisabledWorkarounds);
+BackendTestConfig D3D12Backend(std::initializer_list<const char*> forceEnabledWorkarounds,
+                               std::initializer_list<const char*> forceDisabledWorkarounds) {
+    return BackendTestConfig(wgpu::BackendType::D3D12, forceEnabledWorkarounds,
+                             forceDisabledWorkarounds);
 }
 
-DawnTestParam MetalBackend(std::initializer_list<const char*> forceEnabledWorkarounds,
-                           std::initializer_list<const char*> forceDisabledWorkarounds) {
-    return DawnTestParam(wgpu::BackendType::Metal, forceEnabledWorkarounds,
-                         forceDisabledWorkarounds);
+BackendTestConfig MetalBackend(std::initializer_list<const char*> forceEnabledWorkarounds,
+                               std::initializer_list<const char*> forceDisabledWorkarounds) {
+    return BackendTestConfig(wgpu::BackendType::Metal, forceEnabledWorkarounds,
+                             forceDisabledWorkarounds);
 }
 
-DawnTestParam NullBackend(std::initializer_list<const char*> forceEnabledWorkarounds,
-                          std::initializer_list<const char*> forceDisabledWorkarounds) {
-    return DawnTestParam(wgpu::BackendType::Null, forceEnabledWorkarounds,
-                         forceDisabledWorkarounds);
+BackendTestConfig NullBackend(std::initializer_list<const char*> forceEnabledWorkarounds,
+                              std::initializer_list<const char*> forceDisabledWorkarounds) {
+    return BackendTestConfig(wgpu::BackendType::Null, forceEnabledWorkarounds,
+                             forceDisabledWorkarounds);
 }
 
-DawnTestParam OpenGLBackend(std::initializer_list<const char*> forceEnabledWorkarounds,
-                            std::initializer_list<const char*> forceDisabledWorkarounds) {
-    return DawnTestParam(wgpu::BackendType::OpenGL, forceEnabledWorkarounds,
-                         forceDisabledWorkarounds);
+BackendTestConfig OpenGLBackend(std::initializer_list<const char*> forceEnabledWorkarounds,
+                                std::initializer_list<const char*> forceDisabledWorkarounds) {
+    return BackendTestConfig(wgpu::BackendType::OpenGL, forceEnabledWorkarounds,
+                             forceDisabledWorkarounds);
 }
 
-DawnTestParam VulkanBackend(std::initializer_list<const char*> forceEnabledWorkarounds,
-                            std::initializer_list<const char*> forceDisabledWorkarounds) {
-    return DawnTestParam(wgpu::BackendType::Vulkan, forceEnabledWorkarounds,
-                         forceDisabledWorkarounds);
+BackendTestConfig VulkanBackend(std::initializer_list<const char*> forceEnabledWorkarounds,
+                                std::initializer_list<const char*> forceDisabledWorkarounds) {
+    return BackendTestConfig(wgpu::BackendType::Vulkan, forceEnabledWorkarounds,
+                             forceDisabledWorkarounds);
 }
 
 TestAdapterProperties::TestAdapterProperties(const wgpu::AdapterProperties& properties,
@@ -133,8 +134,24 @@ TestAdapterProperties::TestAdapterProperties(const wgpu::AdapterProperties& prop
     : wgpu::AdapterProperties(properties), adapterName(properties.name), selected(selected) {
 }
 
-std::ostream& operator<<(std::ostream& os, const DawnTestParam& param) {
-    os << ParamName(param.backendType);
+AdapterTestParam::AdapterTestParam(const BackendTestConfig& config,
+                                   const TestAdapterProperties& adapterProperties)
+    : adapterProperties(adapterProperties),
+      forceEnabledWorkarounds(config.forceEnabledWorkarounds),
+      forceDisabledWorkarounds(config.forceDisabledWorkarounds) {
+}
+
+std::ostream& operator<<(std::ostream& os, const AdapterTestParam& param) {
+    // Sanitize the adapter name for GoogleTest
+    std::string sanitizedName =
+        std::regex_replace(param.adapterProperties.adapterName, std::regex("[^a-zA-Z0-9]+"), "_");
+
+    // Strip trailing underscores, if any.
+    if (sanitizedName.back() == '_') {
+        sanitizedName.back() = '\0';
+    }
+
+    os << ParamName(param.adapterProperties.backendType) << "_" << sanitizedName.c_str();
     for (const char* forceEnabledWorkaround : param.forceEnabledWorkarounds) {
         os << "__e_" << forceEnabledWorkaround;
     }
@@ -159,15 +176,16 @@ void DawnTestEnvironment::SetEnvironment(DawnTestEnvironment* env) {
 DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
     ParseArgs(argc, argv);
 
-    // Create a temporary instance to gather adapter properties. This is done before
-    // test instantiation so FilterBackends can generate test parameterizations only on available
-    // backends. We drop the instance at the end of this function because the Vulkan validation
-    // layers use static global mutexes which behave badly when Chromium's test launcher forks the
-    // test process. The instance will be recreated on test environment setup.
+    // Create a temporary instance to select available and preferred adapters. This is done before
+    // test instantiation so GetAvailableAdapterTestParamsForBackends can generate test
+    // parameterizations all selected adapters. We drop the instance at the end of this function
+    // because the Vulkan validation layers use static global mutexes which behave badly when
+    // Chromium's test launcher forks the test process. The instance will be recreated on test
+    // environment setup.
     std::unique_ptr<dawn_native::Instance> instance = CreateInstanceAndDiscoverAdapters();
     ASSERT(instance);
 
-    GatherAdapterProperties(instance.get());
+    SelectPreferredAdapterProperties(instance.get());
     PrintTestConfigurationAndAdapterInfo();
 }
 
@@ -272,6 +290,29 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
             continue;
         }
 
+        constexpr const char kExclusiveDeviceTypePreferenceArg[] =
+            "--exclusive-device-type-preference=";
+        argLen = sizeof(kExclusiveDeviceTypePreferenceArg) - 1;
+        if (strncmp(argv[i], kExclusiveDeviceTypePreferenceArg, argLen) == 0) {
+            const char* preference = argv[i] + argLen;
+            if (preference[0] != '\0') {
+                std::istringstream ss(preference);
+                std::string type;
+                while (std::getline(ss, type, ',')) {
+                    if (strcmp(type.c_str(), "discrete") == 0) {
+                        mDevicePreferences.push_back(dawn_native::DeviceType::DiscreteGPU);
+                    } else if (strcmp(type.c_str(), "integrated") == 0) {
+                        mDevicePreferences.push_back(dawn_native::DeviceType::IntegratedGPU);
+                    } else if (strcmp(type.c_str(), "cpu") == 0) {
+                        mDevicePreferences.push_back(dawn_native::DeviceType::CPU);
+                    } else {
+                        dawn::ErrorLog() << "Invalid device type preference: " << type;
+                        UNREACHABLE();
+                    }
+                }
+            }
+        }
+
         constexpr const char kWireTraceDirArg[] = "--wire-trace-dir=";
         argLen = sizeof(kWireTraceDirArg) - 1;
         if (strncmp(argv[i], kWireTraceDirArg, argLen) == 0) {
@@ -289,7 +330,8 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
         if (strcmp("-h", argv[i]) == 0 || strcmp("--help", argv[i]) == 0) {
             dawn::InfoLog()
                 << "\n\nUsage: " << argv[0]
-                << " [GTEST_FLAGS...] [-w] [-d] [-c] [--adapter-vendor-id=x]\n"
+                << " [GTEST_FLAGS...] [-w] [-d] [-c] [--adapter-vendor-id=x]"
+                   " [--exclusive-device-type-preference=integrated,cpu,discrete]\n"
                    "  -w, --use-wire: Run the tests through the wire (defaults to no wire)\n"
                    "  -d, --enable-backend-validation: Enable backend validation (defaults"
                    " to disabled)\n"
@@ -303,7 +345,10 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
                    "  --no-use-spvc-parser: Do no use spvc's spir-v parsing insteads of "
                    "spirv-cross's\n"
                    "  --adapter-vendor-id: Select adapter by vendor id to run end2end tests"
-                   "on multi-GPU systems \n";
+                   "on multi-GPU systems \n"
+                   "  --exclusive-device-type-preference: Comma-delimited list of preferred device "
+                   "types. For each backend, tests will run only on adapters that match the first "
+                   "available device type\n";
             continue;
         }
     }
@@ -339,28 +384,77 @@ std::unique_ptr<dawn_native::Instance> DawnTestEnvironment::CreateInstanceAndDis
     return instance;
 }
 
-void DawnTestEnvironment::GatherAdapterProperties(const dawn_native::Instance* instance) {
+void DawnTestEnvironment::SelectPreferredAdapterProperties(const dawn_native::Instance* instance) {
+    // Get the first available preferred device type.
+    dawn_native::DeviceType preferredDeviceType = static_cast<dawn_native::DeviceType>(-1);
+    bool hasDevicePreference = false;
+    for (dawn_native::DeviceType devicePreference : mDevicePreferences) {
+        for (const dawn_native::Adapter& adapter : instance->GetAdapters()) {
+            wgpu::AdapterProperties properties;
+            adapter.GetProperties(&properties);
+
+            if (adapter.GetDeviceType() == devicePreference) {
+                preferredDeviceType = devicePreference;
+                hasDevicePreference = true;
+                break;
+            }
+        }
+        if (hasDevicePreference) {
+            break;
+        }
+    }
+
     for (const dawn_native::Adapter& adapter : instance->GetAdapters()) {
         wgpu::AdapterProperties properties;
         adapter.GetProperties(&properties);
 
-        mAdapterProperties.emplace_back(
-            properties, mHasVendorIdFilter && mVendorIdFilter == properties.vendorID);
+        // The adapter is selected if:
+        bool selected = false;
+        if (mHasVendorIdFilter) {
+            // It matches the vendor id, if present.
+            selected = mVendorIdFilter == properties.vendorID;
+
+            if (!mDevicePreferences.empty()) {
+                dawn::WarningLog() << "Vendor ID filter provided. Ignoring device type preference.";
+            }
+        } else if (hasDevicePreference) {
+            // There is a device preference and:
+            selected =
+                // The device type matches the first available preferred type for that backend, if
+                // present.
+                (adapter.GetDeviceType() == preferredDeviceType) ||
+                // Always select Unknown OpenGL adapters if we don't want a CPU adapter.
+                // OpenGL will usually be unknown because we can't query the device type.
+                // If we ever have Swiftshader GL (unlikely), we could set the DeviceType properly.
+                (preferredDeviceType != dawn_native::DeviceType::CPU &&
+                 adapter.GetDeviceType() == dawn_native::DeviceType::Unknown &&
+                 properties.backendType == wgpu::BackendType::OpenGL) ||
+                // Always select the Null backend. There are few tests on this backend, and they run
+                // quickly. This is temporary as to not lose coverage. We can group it with
+                // Swiftshader as a CPU adapter when we have Swiftshader tests.
+                (properties.backendType == wgpu::BackendType::Null);
+        } else {
+            // No vendor id or device preference was provided (select all).
+            selected = true;
+        }
+
+        mAdapterProperties.emplace_back(properties, selected);
     }
 }
 
-std::vector<DawnTestParam> DawnTestEnvironment::FilterBackends(const DawnTestParam* params,
-                                                               size_t numParams) const {
-    std::vector<DawnTestParam> backends;
+std::vector<AdapterTestParam> DawnTestEnvironment::GetAvailableAdapterTestParamsForBackends(
+    const BackendTestConfig* params,
+    size_t numParams) {
+    std::vector<AdapterTestParam> testParams;
     for (size_t i = 0; i < numParams; ++i) {
         for (const auto& adapterProperties : mAdapterProperties) {
-            if (params[i].backendType == adapterProperties.backendType) {
-                backends.push_back(params[i]);
-                break;
+            if (params[i].backendType == adapterProperties.backendType &&
+                adapterProperties.selected) {
+                testParams.push_back(AdapterTestParam(params[i], adapterProperties));
             }
         }
     }
-    return backends;
+    return testParams;
 }
 
 void DawnTestEnvironment::PrintTestConfigurationAndAdapterInfo() const {
@@ -476,7 +570,7 @@ class WireServerTraceLayer : public dawn_wire::CommandHandler {
 
 // Implementation of DawnTest
 
-DawnTestBase::DawnTestBase(const DawnTestParam& param) : mParam(param) {
+DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
 }
 
 DawnTestBase::~DawnTestBase() {
@@ -495,51 +589,52 @@ DawnTestBase::~DawnTestBase() {
 }
 
 bool DawnTestBase::IsD3D12() const {
-    return mParam.backendType == wgpu::BackendType::D3D12;
+    return mParam.adapterProperties.backendType == wgpu::BackendType::D3D12;
 }
 
 bool DawnTestBase::IsMetal() const {
-    return mParam.backendType == wgpu::BackendType::Metal;
+    return mParam.adapterProperties.backendType == wgpu::BackendType::Metal;
 }
 
 bool DawnTestBase::IsNull() const {
-    return mParam.backendType == wgpu::BackendType::Null;
+    return mParam.adapterProperties.backendType == wgpu::BackendType::Null;
 }
 
 bool DawnTestBase::IsOpenGL() const {
-    return mParam.backendType == wgpu::BackendType::OpenGL;
+    return mParam.adapterProperties.backendType == wgpu::BackendType::OpenGL;
 }
 
 bool DawnTestBase::IsVulkan() const {
-    return mParam.backendType == wgpu::BackendType::Vulkan;
+    return mParam.adapterProperties.backendType == wgpu::BackendType::Vulkan;
 }
 
 bool DawnTestBase::IsAMD() const {
-    return gpu_info::IsAMD(mAdapterProperties.vendorID);
+    return gpu_info::IsAMD(mParam.adapterProperties.vendorID);
 }
 
 bool DawnTestBase::IsARM() const {
-    return gpu_info::IsARM(mAdapterProperties.vendorID);
+    return gpu_info::IsARM(mParam.adapterProperties.vendorID);
 }
 
 bool DawnTestBase::IsImgTec() const {
-    return gpu_info::IsImgTec(mAdapterProperties.vendorID);
+    return gpu_info::IsImgTec(mParam.adapterProperties.vendorID);
 }
 
 bool DawnTestBase::IsIntel() const {
-    return gpu_info::IsIntel(mAdapterProperties.vendorID);
+    return gpu_info::IsIntel(mParam.adapterProperties.vendorID);
 }
 
 bool DawnTestBase::IsNvidia() const {
-    return gpu_info::IsNvidia(mAdapterProperties.vendorID);
+    return gpu_info::IsNvidia(mParam.adapterProperties.vendorID);
 }
 
 bool DawnTestBase::IsQualcomm() const {
-    return gpu_info::IsQualcomm(mAdapterProperties.vendorID);
+    return gpu_info::IsQualcomm(mParam.adapterProperties.vendorID);
 }
 
 bool DawnTestBase::IsSwiftshader() const {
-    return gpu_info::IsSwiftshader(mAdapterProperties.vendorID, mAdapterProperties.deviceID);
+    return gpu_info::IsSwiftshader(mParam.adapterProperties.vendorID,
+                                   mParam.adapterProperties.deviceID);
 }
 
 bool DawnTestBase::IsWindows() const {
@@ -607,14 +702,11 @@ std::vector<const char*> DawnTestBase::GetRequiredExtensions() {
 }
 
 const wgpu::AdapterProperties& DawnTestBase::GetAdapterProperties() const {
-    return mAdapterProperties;
+    return mParam.adapterProperties;
 }
 
-// This function can only be called after SetUp() because it requires mBackendAdapter to be
-// initialized.
 bool DawnTestBase::SupportsExtensions(const std::vector<const char*>& extensions) {
     ASSERT(mBackendAdapter);
-
     std::set<std::string> supportedExtensionsSet;
     for (const char* supportedExtensionName : mBackendAdapter.GetSupportedExtensions()) {
         supportedExtensionsSet.insert(supportedExtensionName);
@@ -630,69 +722,26 @@ bool DawnTestBase::SupportsExtensions(const std::vector<const char*>& extensions
 }
 
 void DawnTestBase::SetUp() {
-    // Initialize mBackendAdapter, and create the device.
-    const wgpu::BackendType backendType = mParam.backendType;
     {
-        dawn_native::Instance* instance = gTestEnv->GetInstance();
-        std::vector<dawn_native::Adapter> adapters = instance->GetAdapters();
+        // Find the adapter that exactly matches our adapter properties.
+        const auto& adapters = gTestEnv->GetInstance()->GetAdapters();
+        const auto& it = std::find_if(
+            adapters.begin(), adapters.end(), [&](const dawn_native::Adapter& adapter) {
+                wgpu::AdapterProperties properties;
+                adapter.GetProperties(&properties);
 
-        static constexpr size_t kInvalidIndex = std::numeric_limits<size_t>::max();
-        size_t discreteAdapterIndex = kInvalidIndex;
-        size_t integratedAdapterIndex = kInvalidIndex;
-        size_t cpuAdapterIndex = kInvalidIndex;
-        size_t unknownAdapterIndex = kInvalidIndex;
-
-        for (size_t i = 0; i < adapters.size(); ++i) {
-            const dawn_native::Adapter& adapter = adapters[i];
-
-            wgpu::AdapterProperties properties;
-            adapter.GetProperties(&properties);
-
-            if (properties.backendType == backendType) {
-                // If the vendor id doesn't match, skip this adapter.
-                if (HasVendorIdFilter() && properties.vendorID != GetVendorIdFilter()) {
-                    continue;
-                }
-
-                // Find the index of each type of adapter.
-                switch (adapter.GetDeviceType()) {
-                    case dawn_native::DeviceType::DiscreteGPU:
-                        discreteAdapterIndex = i;
-                        break;
-                    case dawn_native::DeviceType::IntegratedGPU:
-                        integratedAdapterIndex = i;
-                        break;
-                    case dawn_native::DeviceType::CPU:
-                        cpuAdapterIndex = i;
-                        break;
-                    case dawn_native::DeviceType::Unknown:
-                        unknownAdapterIndex = i;
-                        break;
-                    default:
-                        UNREACHABLE();
-                        break;
-                }
-            }
-        }
-
-        // Prefer, discrete, then integrated, then CPU, then unknown adapters.
-        if (discreteAdapterIndex != kInvalidIndex) {
-            mBackendAdapter = adapters[discreteAdapterIndex];
-        } else if (integratedAdapterIndex != kInvalidIndex) {
-            mBackendAdapter = adapters[integratedAdapterIndex];
-        } else if (cpuAdapterIndex != kInvalidIndex) {
-            mBackendAdapter = adapters[cpuAdapterIndex];
-        } else if (unknownAdapterIndex != kInvalidIndex) {
-            mBackendAdapter = adapters[unknownAdapterIndex];
-        }
-
-        if (!mBackendAdapter) {
-            return;
-        }
-
-        mBackendAdapter.GetProperties(&mAdapterProperties);
+                return (mParam.adapterProperties.selected &&
+                        properties.deviceID == mParam.adapterProperties.deviceID &&
+                        properties.vendorID == mParam.adapterProperties.vendorID &&
+                        properties.adapterType == mParam.adapterProperties.adapterType &&
+                        properties.backendType == mParam.adapterProperties.backendType &&
+                        strcmp(properties.name, mParam.adapterProperties.adapterName.c_str()) == 0);
+            });
+        ASSERT(it != adapters.end());
+        mBackendAdapter = *it;
     }
 
+    // Create the device from the adapter
     for (const char* forceEnabledWorkaround : mParam.forceEnabledWorkarounds) {
         ASSERT(gTestEnv->GetInstance()->GetToggleInfo(forceEnabledWorkaround) != nullptr);
     }
@@ -798,10 +847,6 @@ void DawnTestBase::TearDown() {
     for (size_t i = 0; i < mReadbackSlots.size(); ++i) {
         mReadbackSlots[i].buffer.Unmap();
     }
-}
-
-bool DawnTestBase::HasAdapter() const {
-    return !!mBackendAdapter;
 }
 
 void DawnTestBase::StartExpectDeviceError() {
@@ -1027,9 +1072,11 @@ std::ostream& operator<<(std::ostream& stream, const RGBA8& color) {
 }
 
 namespace detail {
-    std::vector<DawnTestParam> FilterBackends(const DawnTestParam* params, size_t numParams) {
+    std::vector<AdapterTestParam> GetAvailableAdapterTestParamsForBackends(
+        const BackendTestConfig* params,
+        size_t numParams) {
         ASSERT(gTestEnv != nullptr);
-        return gTestEnv->FilterBackends(params, numParams);
+        return gTestEnv->GetAvailableAdapterTestParamsForBackends(params, numParams);
     }
 
     // Helper classes to set expectations

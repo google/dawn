@@ -37,11 +37,11 @@ namespace {
         BufferSize_16MB = 16 * 1024 * 1024,
     };
 
-    struct BufferUploadParams : DawnTestParam {
-        BufferUploadParams(const DawnTestParam& param,
+    struct BufferUploadParams : AdapterTestParam {
+        BufferUploadParams(const AdapterTestParam& param,
                            UploadMethod uploadMethod,
                            UploadSize uploadSize)
-            : DawnTestParam(param), uploadMethod(uploadMethod), uploadSize(uploadSize) {
+            : AdapterTestParam(param), uploadMethod(uploadMethod), uploadSize(uploadSize) {
         }
 
         UploadMethod uploadMethod;
@@ -49,7 +49,7 @@ namespace {
     };
 
     std::ostream& operator<<(std::ostream& ostream, const BufferUploadParams& param) {
-        ostream << static_cast<const DawnTestParam&>(param);
+        ostream << static_cast<const AdapterTestParam&>(param);
 
         switch (param.uploadMethod) {
             case UploadMethod::SetSubData:

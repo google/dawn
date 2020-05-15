@@ -19,7 +19,7 @@
 #include <vector>
 
 // ParamStruct is a custom struct which ParamStruct will yield when iterating.
-// The types Params... should by the same as the types passed to the constructor
+// The types Params... should be the same as the types passed to the constructor
 // of ParamStruct.
 template <typename ParamStruct, typename... Params>
 class ParamGenerator {
@@ -27,19 +27,6 @@ class ParamGenerator {
     using Index = std::array<size_t, sizeof...(Params)>;
 
     static constexpr auto s_indexSequence = std::make_index_sequence<sizeof...(Params)>{};
-
-    // Default template that returns the same params.
-    template <typename P>
-    static std::vector<P> FilterBackends(std::vector<P> params) {
-        return params;
-    }
-
-    // Template specialization for DawnTestParam that filters the backends by
-    // those supported.
-    template <>
-    static std::vector<DawnTestParam> FilterBackends(std::vector<DawnTestParam> params) {
-        return ::detail::FilterBackends(params.data(), params.size());
-    }
 
     // Using an N-dimensional Index, extract params from ParamTuple and pass
     // them to the constructor of ParamStruct.
@@ -59,7 +46,7 @@ class ParamGenerator {
   public:
     using value_type = ParamStruct;
 
-    ParamGenerator(std::vector<Params>... params) : mParams(FilterBackends(params)...) {
+    ParamGenerator(std::vector<Params>... params) : mParams(params...) {
     }
 
     class Iterator : public std::iterator<std::forward_iterator_tag, ParamStruct, size_t> {
@@ -121,8 +108,10 @@ class ParamGenerator {
 };
 
 template <typename Param, typename... Params>
-auto MakeParamGenerator(std::initializer_list<Params>&&... params) {
-    return ParamGenerator<Param, Params...>(
+auto MakeParamGenerator(std::vector<BackendTestConfig>&& first,
+                        std::initializer_list<Params>&&... params) {
+    return ParamGenerator<Param, AdapterTestParam, Params...>(
+        ::detail::GetAvailableAdapterTestParamsForBackends(first.data(), first.size()),
         std::forward<std::initializer_list<Params>&&>(params)...);
 }
 

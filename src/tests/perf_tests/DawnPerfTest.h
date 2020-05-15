@@ -108,7 +108,7 @@ class DawnPerfTestBase {
     std::unique_ptr<utils::Timer> mTimer;
 };
 
-template <typename Params = DawnTestParam>
+template <typename Params = AdapterTestParam>
 class DawnPerfTestWithParams : public DawnTestWithParams<Params>, public DawnPerfTestBase {
   protected:
     DawnPerfTestWithParams(unsigned int iterationsPerStep, unsigned int maxStepsInFlight)

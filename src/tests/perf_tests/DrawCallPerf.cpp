@@ -136,15 +136,15 @@ namespace {
         };
     }
 
-    struct DrawCallParamForTest : DawnTestParam {
-        DrawCallParamForTest(const DawnTestParam& backendParam, DrawCallParam param)
-            : DawnTestParam(backendParam), param(param) {
+    struct DrawCallParamForTest : AdapterTestParam {
+        DrawCallParamForTest(const AdapterTestParam& backendParam, DrawCallParam param)
+            : AdapterTestParam(backendParam), param(param) {
         }
         DrawCallParam param;
     };
 
     std::ostream& operator<<(std::ostream& ostream, const DrawCallParamForTest& testParams) {
-        ostream << static_cast<const DawnTestParam&>(testParams);
+        ostream << static_cast<const AdapterTestParam&>(testParams);
 
         const DrawCallParam& param = testParams.param;
 
