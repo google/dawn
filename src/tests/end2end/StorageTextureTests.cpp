@@ -144,7 +144,80 @@ class StorageTextureTests : public DawnTest {
         EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, outputTexture, 0, 0);
     }
 
-    void CheckOutputStorageTexture(wgpu::Texture writeonlyStorageTexture, uint32_t texelSize) {
+    void CheckResultInStorageBuffer(wgpu::Texture readonlyStorageTexture,
+                                    const std::string& computeShader) {
+        wgpu::ComputePipeline pipeline = CreateComputePipeline(computeShader.c_str());
+
+        // Clear the content of the result buffer into 0.
+        constexpr uint32_t kInitialValue = 0;
+        wgpu::Buffer resultBuffer =
+            utils::CreateBufferFromData(device, &kInitialValue, sizeof(kInitialValue),
+                                        wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
+        wgpu::BindGroup bindGroup =
+            utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                 {{0, readonlyStorageTexture.CreateView()}, {1, resultBuffer}});
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder computeEncoder = encoder.BeginComputePass();
+        computeEncoder.SetBindGroup(0, bindGroup);
+        computeEncoder.SetPipeline(pipeline);
+        computeEncoder.Dispatch(1);
+        computeEncoder.EndPass();
+
+        wgpu::CommandBuffer commandBuffer = encoder.Finish();
+        queue.Submit(1, &commandBuffer);
+
+        // Check if the contents in the result buffer are what we expect.
+        constexpr uint32_t kExpectedValue = 1u;
+        EXPECT_BUFFER_U32_RANGE_EQ(&kExpectedValue, resultBuffer, 0, 1u);
+    }
+
+    void WriteIntoStorageTextureInRenderPass(wgpu::Texture writeonlyStorageTexture,
+                                             const char* kVertexShader,
+                                             const char* kFragmentShader) {
+        // Create a render pipeline that writes the expected pixel values into the storage texture
+        // without fragment shader outputs.
+        wgpu::RenderPipeline pipeline = CreateRenderPipeline(kVertexShader, kFragmentShader);
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(
+            device, pipeline.GetBindGroupLayout(0), {{0, writeonlyStorageTexture.CreateView()}});
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+        // TODO(jiawei.shao@intel.com): remove the output attachment when Dawn supports beginning a
+        // render pass with no attachments.
+        wgpu::Texture dummyOutputTexture =
+            CreateTexture(kOutputAttachmentFormat,
+                          wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc, 1, 1);
+        utils::ComboRenderPassDescriptor renderPassDescriptor({dummyOutputTexture.CreateView()});
+        wgpu::RenderPassEncoder renderPassEncoder = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPassEncoder.SetBindGroup(0, bindGroup);
+        renderPassEncoder.SetPipeline(pipeline);
+        renderPassEncoder.Draw(1);
+        renderPassEncoder.EndPass();
+        wgpu::CommandBuffer commandBuffer = encoder.Finish();
+        queue.Submit(1, &commandBuffer);
+    }
+
+    void WriteIntoStorageTextureInComputePass(wgpu::Texture writeonlyStorageTexture,
+                                              const char* computeShader) {
+        // Create a compute pipeline that writes the expected pixel values into the storage texture.
+        wgpu::ComputePipeline pipeline = CreateComputePipeline(computeShader);
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(
+            device, pipeline.GetBindGroupLayout(0), {{0, writeonlyStorageTexture.CreateView()}});
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder computePassEncoder = encoder.BeginComputePass();
+        computePassEncoder.SetBindGroup(0, bindGroup);
+        computePassEncoder.SetPipeline(pipeline);
+        computePassEncoder.Dispatch(1);
+        computePassEncoder.EndPass();
+        wgpu::CommandBuffer commandBuffer = encoder.Finish();
+        queue.Submit(1, &commandBuffer);
+    }
+
+    void CheckOutputStorageTexture(wgpu::Texture writeonlyStorageTexture,
+                                   uint32_t texelSize,
+                                   const std::vector<uint32_t>& expectedData) {
         // Copy the content from the write-only storage texture to the result buffer.
         wgpu::Buffer resultBuffer = CreateEmptyBufferForTextureCopy(texelSize);
         wgpu::BufferCopyView bufferCopyView =
@@ -160,10 +233,9 @@ class StorageTextureTests : public DawnTest {
         queue.Submit(1, &commandBuffer);
 
         // Check if the contents in the result buffer are what we expect.
-        const std::vector<uint32_t> kInitialTextureData = GetExpectedData();
         for (size_t y = 0; y < kHeight; ++y) {
             const size_t resultBufferOffset = kTextureBytesPerRowAlignment * y;
-            EXPECT_BUFFER_U32_RANGE_EQ(kInitialTextureData.data() + kWidth * y, resultBuffer,
+            EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data() + kWidth * y, resultBuffer,
                                        resultBufferOffset, kWidth);
         }
     }
@@ -270,30 +342,7 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInComputeShader) {
             }
         })";
 
-    wgpu::ComputePipeline pipeline = CreateComputePipeline(kComputeShader.c_str());
-
-    // Clear the content of the result buffer into 0.
-    constexpr uint32_t kInitialValue = 0;
-    wgpu::Buffer resultBuffer =
-        utils::CreateBufferFromData(device, &kInitialValue, sizeof(kInitialValue),
-                                    wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
-    wgpu::BindGroup bindGroup =
-        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
-                             {{0, readonlyStorageTexture.CreateView()}, {1, resultBuffer}});
-
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    wgpu::ComputePassEncoder computeEncoder = encoder.BeginComputePass();
-    computeEncoder.SetBindGroup(0, bindGroup);
-    computeEncoder.SetPipeline(pipeline);
-    computeEncoder.Dispatch(1);
-    computeEncoder.EndPass();
-
-    wgpu::CommandBuffer commandBuffer = encoder.Finish();
-    queue.Submit(1, &commandBuffer);
-
-    // Check if the contents in the result buffer are what we expect.
-    constexpr uint32_t kExpectedValue = 1u;
-    EXPECT_BUFFER_U32_RANGE_EQ(&kExpectedValue, resultBuffer, 0, 1u);
+    CheckResultInStorageBuffer(readonlyStorageTexture, kComputeShader);
 }
 
 // Test that read-only storage textures are supported in vertex shader.
@@ -359,7 +408,7 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInFragmentShader) {
         CreateTextureWithTestData(kInitialTextureData, kTexelSizeR32Uint);
 
     // Create a rendering pipeline that reads the pixels from the read-only storage texture and uses
-    // green as the output color, otherwise uses red instead.
+    // green as the output color if the pixel value is expected, otherwise uses red instead.
     const char* kVertexShader = kSimpleVertexShader;
     const std::string kFragmentShader = std::string(R"(
             #version 450
@@ -393,23 +442,9 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
     wgpu::Texture writeonlyStorageTexture = CreateTexture(
         wgpu::TextureFormat::R32Uint, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc);
 
-    // Create a compute shader that writes the expected pixel values into the storage texture.
-    const char* kComputeShader = kCommonWriteOnlyTestCode_uimage2D;
-
-    wgpu::ComputePipeline pipeline = CreateComputePipeline(kComputeShader);
-    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
-                                                     {{0, writeonlyStorageTexture.CreateView()}});
-
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    wgpu::ComputePassEncoder computePassEncoder = encoder.BeginComputePass();
-    computePassEncoder.SetBindGroup(0, bindGroup);
-    computePassEncoder.SetPipeline(pipeline);
-    computePassEncoder.Dispatch(1);
-    computePassEncoder.EndPass();
-    wgpu::CommandBuffer commandBuffer = encoder.Finish();
-    queue.Submit(1, &commandBuffer);
-
-    CheckOutputStorageTexture(writeonlyStorageTexture, kTexelSizeR32Uint);
+    WriteIntoStorageTextureInComputePass(writeonlyStorageTexture,
+                                         kCommonWriteOnlyTestCode_uimage2D);
+    CheckOutputStorageTexture(writeonlyStorageTexture, kTexelSizeR32Uint, GetExpectedData());
 }
 
 // Test that write-only storage textures are supported in fragment shader.
@@ -429,32 +464,9 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
     wgpu::Texture writeonlyStorageTexture = CreateTexture(
         wgpu::TextureFormat::R32Uint, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc);
 
-    // Create a render pipeline that writes the expected pixel values into the storage texture
-    // without fragment shader outputs.
-    const char* kVertexShader = kSimpleVertexShader;
-    const char* kFragmentShader = kCommonWriteOnlyTestCode_uimage2D;
-
-    wgpu::RenderPipeline pipeline = CreateRenderPipeline(kVertexShader, kFragmentShader);
-    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
-                                                     {{0, writeonlyStorageTexture.CreateView()}});
-
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-
-    // TODO(jiawei.shao@intel.com): remove the output attachment when Dawn supports beginning a
-    // render pass with no attachments.
-    wgpu::Texture dummyOutputTexture =
-        CreateTexture(kOutputAttachmentFormat,
-                      wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc, 1, 1);
-    utils::ComboRenderPassDescriptor renderPassDescriptor({dummyOutputTexture.CreateView()});
-    wgpu::RenderPassEncoder renderPassEncoder = encoder.BeginRenderPass(&renderPassDescriptor);
-    renderPassEncoder.SetBindGroup(0, bindGroup);
-    renderPassEncoder.SetPipeline(pipeline);
-    renderPassEncoder.Draw(1);
-    renderPassEncoder.EndPass();
-    wgpu::CommandBuffer commandBuffer = encoder.Finish();
-    queue.Submit(1, &commandBuffer);
-
-    CheckOutputStorageTexture(writeonlyStorageTexture, kTexelSizeR32Uint);
+    WriteIntoStorageTextureInRenderPass(writeonlyStorageTexture, kSimpleVertexShader,
+                                        kCommonWriteOnlyTestCode_uimage2D);
+    CheckOutputStorageTexture(writeonlyStorageTexture, kTexelSizeR32Uint, GetExpectedData());
 }
 
 DAWN_INSTANTIATE_TEST(StorageTextureTests,
@@ -462,3 +474,153 @@ DAWN_INSTANTIATE_TEST(StorageTextureTests,
                       MetalBackend(),
                       OpenGLBackend(),
                       VulkanBackend());
+
+class StorageTextureZeroInitTests : public StorageTextureTests {
+  public:
+    static std::vector<uint32_t> GetExpectedData() {
+        constexpr size_t kDataCount = kWidth * kHeight;
+        std::vector<uint32_t> outputData(kDataCount, 0);
+        outputData[0] = 1u;
+        return outputData;
+    }
+
+    const char* kCommonReadOnlyZeroInitTestCode = R"(
+        bool doTest() {
+            for (uint y = 0; y < 4; ++y) {
+                for (uint x = 0; x < 4; ++x) {
+                    uvec4 pixel = imageLoad(srcImage, ivec2(x, y));
+                    if (pixel != uvec4(0, 0, 0, 1u)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        })";
+
+    const char* kCommonWriteOnlyZeroInitTestCode = R"(
+        #version 450
+        layout(set = 0, binding = 0, r32ui) uniform writeonly uimage2D dstImage;
+        void main() {
+            imageStore(dstImage, ivec2(0, 0), uvec4(1u, 0, 0, 1u));
+        })";
+};
+
+// Verify that the texture is correctly cleared to 0 before its first usage as a read-only storage
+// texture in a render pass.
+TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInRenderPass) {
+    // TODO(jiawei.shao@intel.com): support read-only storage texture on OpenGL.
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+
+    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
+    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
+    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
+    // bug in spvc parser is fixed.
+    DAWN_SKIP_TEST_IF(IsSpvcParserBeingUsed());
+
+    wgpu::Texture readonlyStorageTexture =
+        CreateTexture(wgpu::TextureFormat::R32Uint, wgpu::TextureUsage::Storage);
+
+    // Create a rendering pipeline that reads the pixels from the read-only storage texture and uses
+    // green as the output color, otherwise uses red instead.
+    const char* kVertexShader = kSimpleVertexShader;
+    const std::string kFragmentShader = std::string(R"(
+            #version 450
+            layout(set = 0, binding = 0, r32ui) uniform readonly uimage2D srcImage;
+            layout(location = 0) out vec4 o_color;)") +
+                                        kCommonReadOnlyZeroInitTestCode +
+                                        R"(
+
+            void main() {
+                if (doTest()) {
+                    o_color = vec4(0.f, 1.f, 0.f, 1.f);
+                } else {
+                    o_color = vec4(1.f, 0.f, 0.f, 1.f);
+                }
+            })";
+    CheckDrawsGreen(kVertexShader, kFragmentShader.c_str(), readonlyStorageTexture);
+}
+
+// Verify that the texture is correctly cleared to 0 before its first usage as a read-only storage
+// texture in a compute pass.
+TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInComputePass) {
+    // TODO(jiawei.shao@intel.com): support read-only storage texture on OpenGL.
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+
+    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
+    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
+    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
+    // bug in spvc parser is fixed.
+    DAWN_SKIP_TEST_IF(IsSpvcParserBeingUsed());
+
+    wgpu::Texture readonlyStorageTexture =
+        CreateTexture(wgpu::TextureFormat::R32Uint, wgpu::TextureUsage::Storage);
+
+    // Create a compute shader that reads the pixels from the read-only storage texture and writes 1
+    // to DstBuffer if they all have to expected value.
+    const std::string kComputeShader = std::string(R"(
+        #version 450
+        layout (set = 0, binding = 0, r32ui) uniform readonly uimage2D srcImage;
+        layout (set = 0, binding = 1, std430) buffer DstBuffer {
+            uint result;
+        } dstBuffer;)") + kCommonReadOnlyZeroInitTestCode +
+                                       R"(
+
+        void main() {
+            if (doTest()) {
+                dstBuffer.result = 1;
+            } else {
+                dstBuffer.result = 0;
+            }
+        })";
+
+    CheckResultInStorageBuffer(readonlyStorageTexture, kComputeShader);
+}
+
+// Verify that the texture is correctly cleared to 0 before its first usage as a write-only storage
+// storage texture in a render pass.
+TEST_P(StorageTextureZeroInitTests, WriteonlyStorageTextureClearsToZeroInRenderPass) {
+    // TODO(jiawei.shao@intel.com): support read-only storage texture on D3D12 and OpenGL.
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+
+    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
+    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
+    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
+    // bug in spvc parser is fixed.
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
+
+    // Prepare the write-only storage texture.
+    constexpr uint32_t kTexelSizeR32Uint = 4u;
+    wgpu::Texture writeonlyStorageTexture = CreateTexture(
+        wgpu::TextureFormat::R32Uint, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc);
+
+    WriteIntoStorageTextureInRenderPass(writeonlyStorageTexture, kSimpleVertexShader,
+                                        kCommonWriteOnlyZeroInitTestCode);
+    CheckOutputStorageTexture(writeonlyStorageTexture, kTexelSizeR32Uint, GetExpectedData());
+}
+
+// Verify that the texture is correctly cleared to 0 before its first usage as a write-only storage
+// texture in a compute pass.
+TEST_P(StorageTextureZeroInitTests, WriteonlyStorageTextureClearsToZeroInComputePass) {
+    // TODO(jiawei.shao@intel.com): support read-only storage texture on D3D12 and OpenGL.
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+
+    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
+    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
+    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
+    // bug in spvc parser is fixed.
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
+
+    // Prepare the write-only storage texture.
+    constexpr uint32_t kTexelSizeR32Uint = 4u;
+    wgpu::Texture writeonlyStorageTexture = CreateTexture(
+        wgpu::TextureFormat::R32Uint, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc);
+
+    WriteIntoStorageTextureInComputePass(writeonlyStorageTexture, kCommonWriteOnlyZeroInitTestCode);
+    CheckOutputStorageTexture(writeonlyStorageTexture, kTexelSizeR32Uint, GetExpectedData());
+}
+
+DAWN_INSTANTIATE_TEST(StorageTextureZeroInitTests,
+                      D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}),
+                      OpenGLBackend({"nonzero_clear_resources_on_creation_for_testing"}),
+                      MetalBackend({"nonzero_clear_resources_on_creation_for_testing"}),
+                      VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"}));
