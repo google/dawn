@@ -15,7 +15,7 @@
 #include "tests/perf_tests/DawnPerfTest.h"
 
 int main(int argc, char** argv) {
-    testing::InitGoogleTest(&argc, argv);
     InitDawnPerfTestEnvironment(argc, argv);
+    testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

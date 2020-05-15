@@ -128,6 +128,11 @@ DawnTestParam VulkanBackend(std::initializer_list<const char*> forceEnabledWorka
                          forceDisabledWorkarounds);
 }
 
+TestAdapterProperties::TestAdapterProperties(const wgpu::AdapterProperties& properties,
+                                             bool selected)
+    : wgpu::AdapterProperties(properties), adapterName(properties.name), selected(selected) {
+}
+
 std::ostream& operator<<(std::ostream& os, const DawnTestParam& param) {
     os << ParamName(param.backendType);
     for (const char* forceEnabledWorkaround : param.forceEnabledWorkarounds) {
@@ -152,6 +157,21 @@ void DawnTestEnvironment::SetEnvironment(DawnTestEnvironment* env) {
 }
 
 DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
+    ParseArgs(argc, argv);
+
+    // Create a temporary instance to gather adapter properties. This is done before
+    // test instantiation so FilterBackends can generate test parameterizations only on available
+    // backends. We drop the instance at the end of this function because the Vulkan validation
+    // layers use static global mutexes which behave badly when Chromium's test launcher forks the
+    // test process. The instance will be recreated on test environment setup.
+    std::unique_ptr<dawn_native::Instance> instance = CreateInstanceAndDiscoverAdapters();
+    ASSERT(instance);
+
+    GatherAdapterProperties(instance.get());
+    PrintTestConfigurationAndAdapterInfo();
+}
+
+void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
     size_t argLen = 0;  // Set when parsing --arg=X arguments
     for (int i = 1; i < argc; ++i) {
         if (strcmp("-w", argv[i]) == 0 || strcmp("--use-wire", argv[i]) == 0) {
@@ -319,6 +339,30 @@ std::unique_ptr<dawn_native::Instance> DawnTestEnvironment::CreateInstanceAndDis
     return instance;
 }
 
+void DawnTestEnvironment::GatherAdapterProperties(const dawn_native::Instance* instance) {
+    for (const dawn_native::Adapter& adapter : instance->GetAdapters()) {
+        wgpu::AdapterProperties properties;
+        adapter.GetProperties(&properties);
+
+        mAdapterProperties.emplace_back(
+            properties, mHasVendorIdFilter && mVendorIdFilter == properties.vendorID);
+    }
+}
+
+std::vector<DawnTestParam> DawnTestEnvironment::FilterBackends(const DawnTestParam* params,
+                                                               size_t numParams) const {
+    std::vector<DawnTestParam> backends;
+    for (size_t i = 0; i < numParams; ++i) {
+        for (const auto& adapterProperties : mAdapterProperties) {
+            if (params[i].backendType == adapterProperties.backendType) {
+                backends.push_back(params[i]);
+                break;
+            }
+        }
+    }
+    return backends;
+}
+
 void DawnTestEnvironment::PrintTestConfigurationAndAdapterInfo() const {
     dawn::LogMessage log = dawn::InfoLog();
     log << "Testing configuration\n"
@@ -344,9 +388,7 @@ void DawnTestEnvironment::PrintTestConfigurationAndAdapterInfo() const {
            "\n"
         << "System adapters: \n";
 
-    for (const dawn_native::Adapter& adapter : mInstance->GetAdapters()) {
-        wgpu::AdapterProperties properties;
-        adapter.GetProperties(&properties);
+    for (const TestAdapterProperties& properties : mAdapterProperties) {
         std::ostringstream vendorId;
         std::ostringstream deviceId;
         vendorId << std::setfill('0') << std::uppercase << std::internal << std::hex << std::setw(4)
@@ -357,19 +399,17 @@ void DawnTestEnvironment::PrintTestConfigurationAndAdapterInfo() const {
         // Preparing for outputting hex numbers
         log << std::showbase << std::hex << std::setfill('0') << std::setw(4)
 
-            << " - \"" << properties.name << "\"\n"
+            << " - \"" << properties.adapterName << "\"\n"
             << "   type: " << AdapterTypeName(properties.adapterType)
             << ", backend: " << ParamName(properties.backendType) << "\n"
             << "   vendorId: 0x" << vendorId.str() << ", deviceId: 0x" << deviceId.str()
-            << (mHasVendorIdFilter && mVendorIdFilter == properties.vendorID ? " [Selected]" : "")
-            << "\n";
+            << (properties.selected ? " [Selected]" : "") << "\n";
     }
 }
 
 void DawnTestEnvironment::SetUp() {
     mInstance = CreateInstanceAndDiscoverAdapters();
     ASSERT(mInstance);
-    PrintTestConfigurationAndAdapterInfo();
 }
 
 void DawnTestEnvironment::TearDown() {
@@ -987,39 +1027,9 @@ std::ostream& operator<<(std::ostream& stream, const RGBA8& color) {
 }
 
 namespace detail {
-    bool IsBackendAvailable(wgpu::BackendType type) {
-        switch (type) {
-#if defined(DAWN_ENABLE_BACKEND_D3D12)
-            case wgpu::BackendType::D3D12:
-#endif
-#if defined(DAWN_ENABLE_BACKEND_METAL)
-            case wgpu::BackendType::Metal:
-#endif
-#if defined(DAWN_ENABLE_BACKEND_NULL)
-            case wgpu::BackendType::Null:
-#endif
-#if defined(DAWN_ENABLE_BACKEND_OPENGL)
-            case wgpu::BackendType::OpenGL:
-#endif
-#if defined(DAWN_ENABLE_BACKEND_VULKAN)
-            case wgpu::BackendType::Vulkan:
-#endif
-                return true;
-
-            default:
-                return false;
-        }
-    }
-
     std::vector<DawnTestParam> FilterBackends(const DawnTestParam* params, size_t numParams) {
-        std::vector<DawnTestParam> backends;
-
-        for (size_t i = 0; i < numParams; ++i) {
-            if (IsBackendAvailable(params[i].backendType)) {
-                backends.push_back(params[i]);
-            }
-        }
-        return backends;
+        ASSERT(gTestEnv != nullptr);
+        return gTestEnv->FilterBackends(params, numParams);
     }
 
     // Helper classes to set expectations

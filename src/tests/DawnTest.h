@@ -89,6 +89,16 @@ struct RGBA8 {
 };
 std::ostream& operator<<(std::ostream& stream, const RGBA8& color);
 
+struct TestAdapterProperties : wgpu::AdapterProperties {
+    TestAdapterProperties(const wgpu::AdapterProperties& properties, bool selected);
+    std::string adapterName;
+    bool selected;
+
+  private:
+    // This may be temporary, so it is copied into |adapterName| and made private.
+    using wgpu::AdapterProperties::name;
+};
+
 struct DawnTestParam {
     DawnTestParam(wgpu::BackendType backendType,
                   std::initializer_list<const char*> forceEnabledWorkarounds = {},
@@ -140,6 +150,8 @@ class DawnTestEnvironment : public testing::Environment {
 
     static void SetEnvironment(DawnTestEnvironment* env);
 
+    std::vector<DawnTestParam> FilterBackends(const DawnTestParam* params, size_t numParams) const;
+
     void SetUp() override;
     void TearDown() override;
 
@@ -157,7 +169,9 @@ class DawnTestEnvironment : public testing::Environment {
     std::unique_ptr<dawn_native::Instance> mInstance;
 
   private:
+    void ParseArgs(int argc, char** argv);
     std::unique_ptr<dawn_native::Instance> CreateInstanceAndDiscoverAdapters() const;
+    void GatherAdapterProperties(const dawn_native::Instance* instance);
     void PrintTestConfigurationAndAdapterInfo() const;
 
     bool mUseWire = false;
@@ -171,6 +185,7 @@ class DawnTestEnvironment : public testing::Environment {
     bool mHasVendorIdFilter = false;
     uint32_t mVendorIdFilter = 0;
     std::string mWireTraceDir;
+    std::vector<TestAdapterProperties> mAdapterProperties;
 };
 
 class DawnTestBase {
