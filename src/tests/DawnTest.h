@@ -157,7 +157,8 @@ class DawnTestEnvironment : public testing::Environment {
     std::unique_ptr<dawn_native::Instance> mInstance;
 
   private:
-    void DiscoverOpenGLAdapter();
+    std::unique_ptr<dawn_native::Instance> CreateInstanceAndDiscoverAdapters() const;
+    void PrintTestConfigurationAndAdapterInfo() const;
 
     bool mUseWire = false;
     bool mEnableBackendValidation = false;

@@ -146,7 +146,13 @@ void InitDawnEnd2EndTestEnvironment(int argc, char** argv) {
     testing::AddGlobalTestEnvironment(gTestEnv);
 }
 
+// static
+void DawnTestEnvironment::SetEnvironment(DawnTestEnvironment* env) {
+    gTestEnv = env;
+}
+
 DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
+    size_t argLen = 0;  // Set when parsing --arg=X arguments
     for (int i = 1; i < argc; ++i) {
         if (strcmp("-w", argv[i]) == 0 || strcmp("--use-wire", argv[i]) == 0) {
             mUseWire = true;
@@ -235,8 +241,9 @@ DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
         }
 
         constexpr const char kVendorIdFilterArg[] = "--adapter-vendor-id=";
-        if (strstr(argv[i], kVendorIdFilterArg) == argv[i]) {
-            const char* vendorIdFilter = argv[i] + strlen(kVendorIdFilterArg);
+        argLen = sizeof(kVendorIdFilterArg) - 1;
+        if (strncmp(argv[i], kVendorIdFilterArg, argLen) == 0) {
+            const char* vendorIdFilter = argv[i] + argLen;
             if (vendorIdFilter[0] != '\0') {
                 mVendorIdFilter = strtoul(vendorIdFilter, nullptr, 16);
                 // Set filter flag if vendor id is non-zero.
@@ -246,8 +253,9 @@ DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
         }
 
         constexpr const char kWireTraceDirArg[] = "--wire-trace-dir=";
-        if (strstr(argv[i], kWireTraceDirArg) == argv[i]) {
-            const char* wireTraceDir = argv[i] + strlen(kWireTraceDirArg);
+        argLen = sizeof(kWireTraceDirArg) - 1;
+        if (strncmp(argv[i], kWireTraceDirArg, argLen) == 0) {
+            const char* wireTraceDir = argv[i] + argLen;
             if (wireTraceDir[0] != '\0') {
                 const char* sep = GetPathSeparator();
                 mWireTraceDir = wireTraceDir;
@@ -281,45 +289,64 @@ DawnTestEnvironment::DawnTestEnvironment(int argc, char** argv) {
     }
 }
 
-// static
-void DawnTestEnvironment::SetEnvironment(DawnTestEnvironment* env) {
-    gTestEnv = env;
+std::unique_ptr<dawn_native::Instance> DawnTestEnvironment::CreateInstanceAndDiscoverAdapters()
+    const {
+    auto instance = std::make_unique<dawn_native::Instance>();
+    instance->EnableBackendValidation(mEnableBackendValidation);
+    instance->EnableBeginCaptureOnStartup(mBeginCaptureOnStartup);
+
+    instance->DiscoverDefaultAdapters();
+
+#ifdef DAWN_ENABLE_BACKEND_OPENGL
+    if (!glfwInit()) {
+        return instance;
+    }
+    glfwDefaultWindowHints();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    std::string windowName = "Dawn OpenGL test window";
+    GLFWwindow* window = glfwCreateWindow(400, 400, windowName.c_str(), nullptr, nullptr);
+
+    glfwMakeContextCurrent(window);
+    dawn_native::opengl::AdapterDiscoveryOptions adapterOptions;
+    adapterOptions.getProc = reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress);
+    instance->DiscoverAdapters(&adapterOptions);
+#endif  // DAWN_ENABLE_BACKEND_OPENGL
+
+    return instance;
 }
 
-void DawnTestEnvironment::SetUp() {
-    mInstance = std::make_unique<dawn_native::Instance>();
-    mInstance->EnableBackendValidation(mEnableBackendValidation);
-    mInstance->EnableBeginCaptureOnStartup(mBeginCaptureOnStartup);
+void DawnTestEnvironment::PrintTestConfigurationAndAdapterInfo() const {
+    dawn::LogMessage log = dawn::InfoLog();
+    log << "Testing configuration\n"
+           "---------------------\n"
+           "UseWire: "
+        << (mUseWire ? "true" : "false")
+        << "\n"
+           "EnableBackendValidation: "
+        << (mEnableBackendValidation ? "true" : "false")
+        << "\n"
+           "SkipDawnValidation: "
+        << (mSkipDawnValidation ? "true" : "false")
+        << "\n"
+           "UseSpvc: "
+        << (mUseSpvc ? "true" : "false")
+        << "\n"
+           "UseSpvcParser: "
+        << (mUseSpvcParser ? "true" : "false")
+        << "\n"
+           "BeginCaptureOnStartup: "
+        << (mBeginCaptureOnStartup ? "true" : "false")
+        << "\n"
+           "\n"
+        << "System adapters: \n";
 
-    mInstance.get()->DiscoverDefaultAdapters();
-    DiscoverOpenGLAdapter();
-
-    dawn::InfoLog() << "Testing configuration\n"
-                       "---------------------\n"
-                       "UseWire: "
-                    << (mUseWire ? "true" : "false")
-                    << "\n"
-                       "EnableBackendValidation: "
-                    << (mEnableBackendValidation ? "true" : "false")
-                    << "\n"
-                       "SkipDawnValidation: "
-                    << (mSkipDawnValidation ? "true" : "false")
-                    << "\n"
-                       "UseSpvc: "
-                    << (mUseSpvc ? "true" : "false")
-                    << "\n"
-                       "UseSpvcParser: "
-                    << (mUseSpvcParser ? "true" : "false")
-                    << "\n"
-                       "BeginCaptureOnStartup: "
-                    << (mBeginCaptureOnStartup ? "true" : "false")
-                    << "\n"
-                       "\n"
-                    << "System adapters: \n";
     for (const dawn_native::Adapter& adapter : mInstance->GetAdapters()) {
         wgpu::AdapterProperties properties;
         adapter.GetProperties(&properties);
-
         std::ostringstream vendorId;
         std::ostringstream deviceId;
         vendorId << std::setfill('0') << std::uppercase << std::internal << std::hex << std::setw(4)
@@ -328,17 +355,21 @@ void DawnTestEnvironment::SetUp() {
                  << properties.deviceID;
 
         // Preparing for outputting hex numbers
-        dawn::InfoLog() << std::showbase << std::hex << std::setfill('0') << std::setw(4)
+        log << std::showbase << std::hex << std::setfill('0') << std::setw(4)
 
-                        << " - \"" << properties.name << "\"\n"
-                        << "   type: " << AdapterTypeName(properties.adapterType)
-                        << ", backend: " << ParamName(properties.backendType) << "\n"
-                        << "   vendorId: 0x" << vendorId.str() << ", deviceId: 0x" << deviceId.str()
-                        << (mHasVendorIdFilter && mVendorIdFilter == properties.vendorID
-                                ? " [Selected]"
-                                : "")
-                        << "\n";
+            << " - \"" << properties.name << "\"\n"
+            << "   type: " << AdapterTypeName(properties.adapterType)
+            << ", backend: " << ParamName(properties.backendType) << "\n"
+            << "   vendorId: 0x" << vendorId.str() << ", deviceId: 0x" << deviceId.str()
+            << (mHasVendorIdFilter && mVendorIdFilter == properties.vendorID ? " [Selected]" : "")
+            << "\n";
     }
+}
+
+void DawnTestEnvironment::SetUp() {
+    mInstance = CreateInstanceAndDiscoverAdapters();
+    ASSERT(mInstance);
+    PrintTestConfigurationAndAdapterInfo();
 }
 
 void DawnTestEnvironment::TearDown() {
@@ -384,27 +415,6 @@ const char* DawnTestEnvironment::GetWireTraceDir() const {
         return nullptr;
     }
     return mWireTraceDir.c_str();
-}
-
-void DawnTestEnvironment::DiscoverOpenGLAdapter() {
-#ifdef DAWN_ENABLE_BACKEND_OPENGL
-    if (!glfwInit()) {
-        return;
-    }
-    glfwDefaultWindowHints();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    std::string windowName = "Dawn OpenGL test window";
-    GLFWwindow* window = glfwCreateWindow(400, 400, windowName.c_str(), nullptr, nullptr);
-
-    glfwMakeContextCurrent(window);
-    dawn_native::opengl::AdapterDiscoveryOptions adapterOptions;
-    adapterOptions.getProc = reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress);
-    mInstance->DiscoverAdapters(&adapterOptions);
-#endif  // DAWN_ENABLE_BACKEND_OPENGL
 }
 
 class WireServerTraceLayer : public dawn_wire::CommandHandler {

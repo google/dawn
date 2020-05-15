@@ -78,6 +78,7 @@ void InitDawnPerfTestEnvironment(int argc, char** argv) {
 
 DawnPerfTestEnvironment::DawnPerfTestEnvironment(int argc, char** argv)
     : DawnTestEnvironment(argc, argv) {
+    size_t argLen = 0;  // Set when parsing --arg=X arguments
     for (int i = 1; i < argc; ++i) {
         if (strcmp("--calibration", argv[i]) == 0) {
             mIsCalibrating = true;
@@ -85,8 +86,9 @@ DawnPerfTestEnvironment::DawnPerfTestEnvironment(int argc, char** argv)
         }
 
         constexpr const char kOverrideStepsArg[] = "--override-steps=";
-        if (strstr(argv[i], kOverrideStepsArg) == argv[i]) {
-            const char* overrideSteps = argv[i] + strlen(kOverrideStepsArg);
+        argLen = sizeof(kOverrideStepsArg) - 1;
+        if (strncmp(argv[i], kOverrideStepsArg, argLen) == 0) {
+            const char* overrideSteps = argv[i] + argLen;
             if (overrideSteps[0] != '\0') {
                 mOverrideStepsToRun = strtoul(overrideSteps, nullptr, 0);
             }
@@ -94,8 +96,9 @@ DawnPerfTestEnvironment::DawnPerfTestEnvironment(int argc, char** argv)
         }
 
         constexpr const char kTraceFileArg[] = "--trace-file=";
-        if (strstr(argv[i], kTraceFileArg) == argv[i]) {
-            const char* traceFile = argv[i] + strlen(kTraceFileArg);
+        argLen = sizeof(kTraceFileArg) - 1;
+        if (strncmp(argv[i], kTraceFileArg, argLen) == 0) {
+            const char* traceFile = argv[i] + argLen;
             if (traceFile[0] != '\0') {
                 mTraceFile = traceFile;
             }
