@@ -19,6 +19,7 @@
 #include "dawn_native/Device.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
+#include <algorithm>
 #include <functional>
 #include <set>
 

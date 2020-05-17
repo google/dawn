@@ -18,6 +18,7 @@
 #include "common/Assert.h"
 #include "common/Compiler.h"
 
+#include <limits>
 #include <memory>
 #include <vector>
 

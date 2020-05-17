@@ -22,6 +22,7 @@
 
 #include <cstring>
 #include <iomanip>
+#include <mutex>
 #include <sstream>
 
 namespace utils {
