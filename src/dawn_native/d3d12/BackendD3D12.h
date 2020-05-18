@@ -30,6 +30,8 @@ namespace dawn_native { namespace d3d12 {
         MaybeError Initialize();
 
         ComPtr<IDXGIFactory4> GetFactory() const;
+        ResultOrError<IDxcLibrary*> GetOrCreateDxcLibrary();
+        ResultOrError<IDxcCompiler*> GetOrCreateDxcCompiler();
         const PlatformFunctions* GetFunctions() const;
 
         std::vector<std::unique_ptr<AdapterBase>> DiscoverDefaultAdapters() override;
@@ -39,6 +41,8 @@ namespace dawn_native { namespace d3d12 {
         // the D3D12 DLLs are unloaded before we are done using them.
         std::unique_ptr<PlatformFunctions> mFunctions;
         ComPtr<IDXGIFactory4> mFactory;
+        ComPtr<IDxcLibrary> mDxcLibrary;
+        ComPtr<IDxcCompiler> mDxcCompiler;
     };
 
 }}  // namespace dawn_native::d3d12

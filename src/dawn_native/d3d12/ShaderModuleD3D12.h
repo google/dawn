@@ -17,6 +17,8 @@
 
 #include "dawn_native/ShaderModule.h"
 
+#include "dawn_native/d3d12/d3d12_platform.h"
+
 namespace dawn_native { namespace d3d12 {
 
     class Device;
@@ -28,6 +30,15 @@ namespace dawn_native { namespace d3d12 {
                                                    const ShaderModuleDescriptor* descriptor);
 
         ResultOrError<std::string> GetHLSLSource(PipelineLayout* layout);
+
+        ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(SingleShaderStage stage,
+                                                         const std::string& hlslSource,
+                                                         const char* entryPoint,
+                                                         uint32_t compileFlags);
+        ResultOrError<ComPtr<ID3DBlob>> CompileShaderFXC(SingleShaderStage stage,
+                                                         const std::string& hlslSource,
+                                                         const char* entryPoint,
+                                                         uint32_t compileFlags);
 
       private:
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);

@@ -16,13 +16,67 @@
 
 #include "common/Assert.h"
 #include "common/BitSetIterator.h"
+#include "common/Log.h"
 #include "dawn_native/d3d12/BindGroupLayoutD3D12.h"
+#include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/PipelineLayoutD3D12.h"
+#include "dawn_native/d3d12/PlatformFunctions.h"
+#include "dawn_native/d3d12/UtilsD3D12.h"
+
+#include <d3dcompiler.h>
 
 #include <spirv_hlsl.hpp>
 
 namespace dawn_native { namespace d3d12 {
+
+    namespace {
+        std::vector<const wchar_t*> GetDXCArguments(uint32_t compileFlags) {
+            std::vector<const wchar_t*> arguments;
+            if (compileFlags & D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY) {
+                arguments.push_back(L"/Gec");
+            }
+            if (compileFlags & D3DCOMPILE_IEEE_STRICTNESS) {
+                arguments.push_back(L"/Gis");
+            }
+            if (compileFlags & D3DCOMPILE_OPTIMIZATION_LEVEL2) {
+                switch (compileFlags & D3DCOMPILE_OPTIMIZATION_LEVEL2) {
+                    case D3DCOMPILE_OPTIMIZATION_LEVEL0:
+                        arguments.push_back(L"/O0");
+                        break;
+                    case D3DCOMPILE_OPTIMIZATION_LEVEL2:
+                        arguments.push_back(L"/O2");
+                        break;
+                    case D3DCOMPILE_OPTIMIZATION_LEVEL3:
+                        arguments.push_back(L"/O3");
+                        break;
+                }
+            }
+            if (compileFlags & D3DCOMPILE_DEBUG) {
+                arguments.push_back(L"/Zi");
+            }
+            if (compileFlags & D3DCOMPILE_PACK_MATRIX_ROW_MAJOR) {
+                arguments.push_back(L"/Zpr");
+            }
+            if (compileFlags & D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR) {
+                arguments.push_back(L"/Zpc");
+            }
+            if (compileFlags & D3DCOMPILE_AVOID_FLOW_CONTROL) {
+                arguments.push_back(L"/Gfa");
+            }
+            if (compileFlags & D3DCOMPILE_PREFER_FLOW_CONTROL) {
+                arguments.push_back(L"/Gfp");
+            }
+            if (compileFlags & D3DCOMPILE_RESOURCES_MAY_ALIAS) {
+                arguments.push_back(L"/res_may_alias");
+            }
+            // Enable FXC backward compatibility by setting the language version to 2016
+            arguments.push_back(L"-HV");
+            arguments.push_back(L"2016");
+            return arguments;
+        }
+
+    }  // anonymous namespace
 
     // static
     ResultOrError<ShaderModule*> ShaderModule::Create(Device* device,
@@ -132,6 +186,94 @@ namespace dawn_native { namespace d3d12 {
         } else {
             return compiler->compile();
         }
+    }
+
+    ResultOrError<ComPtr<IDxcBlob>> ShaderModule::CompileShaderDXC(SingleShaderStage stage,
+                                                                   const std::string& hlslSource,
+                                                                   const char* entryPoint,
+                                                                   uint32_t compileFlags) {
+        const wchar_t* targetProfile = nullptr;
+        switch (stage) {
+            case SingleShaderStage::Vertex:
+                targetProfile = L"vs_6_0";
+                break;
+            case SingleShaderStage::Fragment:
+                targetProfile = L"ps_6_0";
+                break;
+            case SingleShaderStage::Compute:
+                targetProfile = L"cs_6_0";
+                break;
+        }
+
+        IDxcLibrary* dxcLibrary;
+        DAWN_TRY_ASSIGN(dxcLibrary, ToBackend(GetDevice())->GetOrCreateDxcLibrary());
+
+        ComPtr<IDxcBlobEncoding> sourceBlob;
+        DAWN_TRY(CheckHRESULT(dxcLibrary->CreateBlobWithEncodingOnHeapCopy(
+                                  hlslSource.c_str(), hlslSource.length(), CP_UTF8, &sourceBlob),
+                              "DXC create blob"));
+
+        IDxcCompiler* dxcCompiler;
+        DAWN_TRY_ASSIGN(dxcCompiler, ToBackend(GetDevice())->GetOrCreateDxcCompiler());
+
+        std::wstring entryPointW;
+        DAWN_TRY_ASSIGN(entryPointW, ConvertStringToWstring(entryPoint));
+
+        std::vector<const wchar_t*> arguments = GetDXCArguments(compileFlags);
+
+        ComPtr<IDxcOperationResult> result;
+        DAWN_TRY(CheckHRESULT(
+            dxcCompiler->Compile(sourceBlob.Get(), nullptr, entryPointW.c_str(), targetProfile,
+                                 arguments.data(), arguments.size(), nullptr, 0, nullptr, &result),
+            "DXC compile"));
+
+        HRESULT hr;
+        DAWN_TRY(CheckHRESULT(result->GetStatus(&hr), "DXC get status"));
+
+        if (FAILED(hr)) {
+            ComPtr<IDxcBlobEncoding> errors;
+            DAWN_TRY(CheckHRESULT(result->GetErrorBuffer(&errors), "DXC get error buffer"));
+
+            std::string message = std::string("DXC compile failed with ") +
+                                  static_cast<char*>(errors->GetBufferPointer());
+            return DAWN_INTERNAL_ERROR(message);
+        }
+
+        ComPtr<IDxcBlob> compiledShader;
+        DAWN_TRY(CheckHRESULT(result->GetResult(&compiledShader), "DXC get result"));
+        return std::move(compiledShader);
+    }
+
+    ResultOrError<ComPtr<ID3DBlob>> ShaderModule::CompileShaderFXC(SingleShaderStage stage,
+                                                                   const std::string& hlslSource,
+                                                                   const char* entryPoint,
+                                                                   uint32_t compileFlags) {
+        const char* targetProfile = nullptr;
+        switch (stage) {
+            case SingleShaderStage::Vertex:
+                targetProfile = "vs_5_1";
+                break;
+            case SingleShaderStage::Fragment:
+                targetProfile = "ps_5_1";
+                break;
+            case SingleShaderStage::Compute:
+                targetProfile = "cs_5_1";
+                break;
+        }
+
+        ComPtr<ID3DBlob> compiledShader;
+        ComPtr<ID3DBlob> errors;
+
+        const PlatformFunctions* functions = ToBackend(GetDevice())->GetFunctions();
+        if (FAILED(functions->d3dCompile(hlslSource.c_str(), hlslSource.length(), nullptr, nullptr,
+                                         nullptr, entryPoint, targetProfile, compileFlags, 0,
+                                         &compiledShader, &errors))) {
+            std::string message = std::string("D3D compile failed with ") +
+                                  static_cast<char*>(errors->GetBufferPointer());
+            return DAWN_INTERNAL_ERROR(message);
+        }
+
+        return std::move(compiledShader);
     }
 
 }}  // namespace dawn_native::d3d12

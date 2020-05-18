@@ -16,7 +16,28 @@
 
 #include "common/Assert.h"
 
+#include <stringapiset.h>
+
 namespace dawn_native { namespace d3d12 {
+
+    ResultOrError<std::wstring> ConvertStringToWstring(const char* str) {
+        size_t len = strlen(str);
+        if (len == 0) {
+            return std::wstring();
+        }
+        int numChars = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, str, len, nullptr, 0);
+        if (numChars == 0) {
+            return DAWN_INTERNAL_ERROR("Failed to convert string to wide string");
+        }
+        std::wstring result;
+        result.resize(numChars);
+        int numConvertedChars =
+            MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, str, len, &result[0], numChars);
+        if (numConvertedChars != numChars) {
+            return DAWN_INTERNAL_ERROR("Failed to convert string to wide string");
+        }
+        return std::move(result);
+    }
 
     D3D12_COMPARISON_FUNC ToD3D12ComparisonFunc(wgpu::CompareFunction func) {
         switch (func) {

@@ -310,50 +310,41 @@ namespace dawn_native { namespace d3d12 {
 
         D3D12_GRAPHICS_PIPELINE_STATE_DESC descriptorD3D12 = {};
 
-        PerStage<ComPtr<ID3DBlob>> compiledShader;
-        ComPtr<ID3DBlob> errors;
+        PerStage<const char*> entryPoints;
+        entryPoints[SingleShaderStage::Vertex] = descriptor->vertexStage.entryPoint;
+        entryPoints[SingleShaderStage::Fragment] = descriptor->fragmentStage->entryPoint;
+
+        PerStage<ShaderModule*> modules;
+        modules[SingleShaderStage::Vertex] = ToBackend(descriptor->vertexStage.module);
+        modules[SingleShaderStage::Fragment] = ToBackend(descriptor->fragmentStage->module);
+
+        PerStage<D3D12_SHADER_BYTECODE*> shaders;
+        shaders[SingleShaderStage::Vertex] = &descriptorD3D12.VS;
+        shaders[SingleShaderStage::Fragment] = &descriptorD3D12.PS;
+
+        PerStage<ComPtr<ID3DBlob>> compiledFXCShader;
+        PerStage<ComPtr<IDxcBlob>> compiledDXCShader;
 
         wgpu::ShaderStage renderStages = wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment;
         for (auto stage : IterateStages(renderStages)) {
-            ShaderModule* module = nullptr;
-            const char* entryPoint = nullptr;
-            const char* compileTarget = nullptr;
-            D3D12_SHADER_BYTECODE* shader = nullptr;
-            switch (stage) {
-                case SingleShaderStage::Vertex:
-                    module = ToBackend(descriptor->vertexStage.module);
-                    entryPoint = descriptor->vertexStage.entryPoint;
-                    shader = &descriptorD3D12.VS;
-                    compileTarget = "vs_5_1";
-                    break;
-                case SingleShaderStage::Fragment:
-                    module = ToBackend(descriptor->fragmentStage->module);
-                    entryPoint = descriptor->fragmentStage->entryPoint;
-                    shader = &descriptorD3D12.PS;
-                    compileTarget = "ps_5_1";
-                    break;
-                default:
-                    UNREACHABLE();
-                    break;
-            }
 
             std::string hlslSource;
-            DAWN_TRY_ASSIGN(hlslSource, module->GetHLSLSource(ToBackend(GetLayout())));
+            DAWN_TRY_ASSIGN(hlslSource, modules[stage]->GetHLSLSource(ToBackend(GetLayout())));
 
-            const PlatformFunctions* functions = device->GetFunctions();
-            MaybeError error = CheckHRESULT(
-                functions->d3dCompile(hlslSource.c_str(), hlslSource.length(), nullptr, nullptr,
-                                      nullptr, entryPoint, compileTarget, compileFlags, 0,
-                                      &compiledShader[stage], &errors),
-                "D3DCompile");
-            if (error.IsError()) {
-                dawn::WarningLog() << reinterpret_cast<char*>(errors->GetBufferPointer());
-                DAWN_TRY(std::move(error));
-            }
+            if (device->IsToggleEnabled(Toggle::UseDXC)) {
+                DAWN_TRY_ASSIGN(compiledDXCShader[stage],
+                                modules[stage]->CompileShaderDXC(stage, hlslSource,
+                                                                 entryPoints[stage], compileFlags));
 
-            if (shader != nullptr) {
-                shader->pShaderBytecode = compiledShader[stage]->GetBufferPointer();
-                shader->BytecodeLength = compiledShader[stage]->GetBufferSize();
+                shaders[stage]->pShaderBytecode = compiledDXCShader[stage]->GetBufferPointer();
+                shaders[stage]->BytecodeLength = compiledDXCShader[stage]->GetBufferSize();
+            } else {
+                DAWN_TRY_ASSIGN(compiledFXCShader[stage],
+                                modules[stage]->CompileShaderFXC(stage, hlslSource,
+                                                                 entryPoints[stage], compileFlags));
+
+                shaders[stage]->pShaderBytecode = compiledFXCShader[stage]->GetBufferPointer();
+                shaders[stage]->BytecodeLength = compiledFXCShader[stage]->GetBufferSize();
             }
         }
 
