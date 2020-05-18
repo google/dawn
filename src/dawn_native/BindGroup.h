@@ -44,8 +44,9 @@ namespace dawn_native {
         static BindGroupBase* MakeError(DeviceBase* device);
 
         BindGroupLayoutBase* GetLayout();
+        const BindGroupLayoutBase* GetLayout() const;
         BufferBinding GetBindingAsBufferBinding(BindingIndex bindingIndex);
-        SamplerBase* GetBindingAsSampler(BindingIndex bindingIndex);
+        SamplerBase* GetBindingAsSampler(BindingIndex bindingIndex) const;
         TextureViewBase* GetBindingAsTextureView(BindingIndex bindingIndex);
 
       protected:

@@ -25,6 +25,7 @@ namespace dawn_native { namespace d3d12 {
     class BindGroup;
     class CPUDescriptorHeapAllocation;
     class Device;
+    class SamplerHeapCacheEntry;
     class StagingDescriptorAllocator;
 
     class BindGroupLayout final : public BindGroupLayoutBase {
@@ -33,9 +34,7 @@ namespace dawn_native { namespace d3d12 {
 
         ResultOrError<BindGroup*> AllocateBindGroup(Device* device,
                                                     const BindGroupDescriptor* descriptor);
-        void DeallocateBindGroup(BindGroup* bindGroup,
-                                 CPUDescriptorHeapAllocation* viewAllocation,
-                                 CPUDescriptorHeapAllocation* samplerAllocation);
+        void DeallocateBindGroup(BindGroup* bindGroup, CPUDescriptorHeapAllocation* viewAllocation);
 
         enum DescriptorType {
             CBV,

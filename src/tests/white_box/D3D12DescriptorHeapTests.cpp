@@ -115,12 +115,60 @@ class DummyStagingDescriptorAllocator {
     StagingDescriptorAllocator mAllocator;
 };
 
-// Verify the shader visible sampler heap switch within a single submit.
-TEST_P(D3D12DescriptorHeapTests, SwitchOverSamplerHeap) {
+// Verify the shader visible view heaps switch over within a single submit.
+TEST_P(D3D12DescriptorHeapTests, SwitchOverViewHeap) {
+    DAWN_SKIP_TEST_IF(!mD3DDevice->IsToggleEnabled(
+        dawn_native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
+
+    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
+
+    // Fill in a view heap with "view only" bindgroups (1x view per group) by creating a
+    // view bindgroup each draw. After HEAP_SIZE + 1 draws, the heaps must switch over.
+    renderPipelineDescriptor.vertexStage.module = mSimpleVSModule;
+    renderPipelineDescriptor.cFragmentStage.module = mSimpleFSModule;
+
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+
+    Device* d3dDevice = reinterpret_cast<Device*>(device.Get());
+    ShaderVisibleDescriptorAllocator* allocator =
+        d3dDevice->GetViewShaderVisibleDescriptorAllocator();
+    const uint64_t heapSize = allocator->GetShaderVisibleHeapSizeForTesting();
+
+    const Serial heapSerial = allocator->GetShaderVisibleHeapSerialForTesting();
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+
+        pass.SetPipeline(renderPipeline);
+
+        std::array<float, 4> redColor = {1, 0, 0, 1};
+        wgpu::Buffer uniformBuffer = utils::CreateBufferFromData(
+            device, &redColor, sizeof(redColor), wgpu::BufferUsage::Uniform);
+
+        for (uint32_t i = 0; i < heapSize + 1; ++i) {
+            pass.SetBindGroup(0, utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
+                                                      {{0, uniformBuffer, 0, sizeof(redColor)}}));
+            pass.Draw(3);
+        }
+
+        pass.EndPass();
+    }
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial + 1);
+}
+
+// Verify the shader visible sampler heaps does not switch over within a single submit.
+TEST_P(D3D12DescriptorHeapTests, NoSwitchOverSamplerHeap) {
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
 
     // Fill in a sampler heap with "sampler only" bindgroups (1x sampler per group) by creating a
-    // sampler bindgroup each draw. After HEAP_SIZE + 1 draws, the heaps must switch over.
+    // sampler bindgroup each draw. After HEAP_SIZE + 1 draws, the heaps WILL NOT switch over
+    // because the sampler heap allocations are de-duplicated.
     renderPipelineDescriptor.vertexStage.module =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
             #version 450
@@ -167,7 +215,7 @@ TEST_P(D3D12DescriptorHeapTests, SwitchOverSamplerHeap) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial + 1);
+    EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial);
 }
 
 // Verify shader-visible heaps can be recycled for multiple submits.
@@ -727,13 +775,8 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
         EXPECT_EQ(viewAllocator->GetShaderVisibleHeapSerialForTesting(),
                   viewHeapSerial + kNumOfViewHeaps);
 
-        const uint32_t numOfSamplerHeaps =
-            numOfEncodedBindGroups /
-            samplerAllocator->GetShaderVisibleHeapSizeForTesting();  // 1 sampler per group.
-
-        EXPECT_EQ(samplerAllocator->GetShaderVisiblePoolSizeForTesting(), numOfSamplerHeaps);
-        EXPECT_EQ(samplerAllocator->GetShaderVisibleHeapSerialForTesting(),
-                  samplerHeapSerial + numOfSamplerHeaps);
+        EXPECT_EQ(samplerAllocator->GetShaderVisiblePoolSizeForTesting(), 0u);
+        EXPECT_EQ(samplerAllocator->GetShaderVisibleHeapSerialForTesting(), samplerHeapSerial);
     }
 }
 

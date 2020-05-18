@@ -297,6 +297,11 @@ namespace dawn_native {
         return mLayout.Get();
     }
 
+    const BindGroupLayoutBase* BindGroupBase::GetLayout() const {
+        ASSERT(!IsError());
+        return mLayout.Get();
+    }
+
     BufferBinding BindGroupBase::GetBindingAsBufferBinding(BindingIndex bindingIndex) {
         ASSERT(!IsError());
         ASSERT(bindingIndex < mLayout->GetBindingCount());
@@ -309,7 +314,7 @@ namespace dawn_native {
                 mBindingData.bufferData[bindingIndex].size};
     }
 
-    SamplerBase* BindGroupBase::GetBindingAsSampler(BindingIndex bindingIndex) {
+    SamplerBase* BindGroupBase::GetBindingAsSampler(BindingIndex bindingIndex) const {
         ASSERT(!IsError());
         ASSERT(bindingIndex < mLayout->GetBindingCount());
         ASSERT(mLayout->GetBindingInfo(bindingIndex).type == wgpu::BindingType::Sampler ||

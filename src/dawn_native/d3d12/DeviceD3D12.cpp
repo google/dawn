@@ -33,6 +33,7 @@
 #include "dawn_native/d3d12/ResidencyManagerD3D12.h"
 #include "dawn_native/d3d12/ResourceAllocatorManagerD3D12.h"
 #include "dawn_native/d3d12/SamplerD3D12.h"
+#include "dawn_native/d3d12/SamplerHeapCacheD3D12.h"
 #include "dawn_native/d3d12/ShaderModuleD3D12.h"
 #include "dawn_native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.h"
 #include "dawn_native/d3d12/StagingBufferD3D12.h"
@@ -108,6 +109,8 @@ namespace dawn_native { namespace d3d12 {
 
         mDepthStencilViewAllocator = std::make_unique<StagingDescriptorAllocator>(
             this, 1, kAttachmentDescriptorHeapSize, D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+
+        mSamplerHeapCache = std::make_unique<SamplerHeapCache>(this);
 
         mMapRequestTracker = std::make_unique<MapRequestTracker>(this);
         mResidencyManager = std::make_unique<ResidencyManager>(this);
@@ -501,6 +504,10 @@ namespace dawn_native { namespace d3d12 {
 
     StagingDescriptorAllocator* Device::GetDepthStencilViewAllocator() const {
         return mDepthStencilViewAllocator.get();
+    }
+
+    SamplerHeapCache* Device::GetSamplerHeapCache() {
+        return mSamplerHeapCache.get();
     }
 
 }}  // namespace dawn_native::d3d12

@@ -30,6 +30,7 @@
 #include "dawn_native/d3d12/RenderPassBuilderD3D12.h"
 #include "dawn_native/d3d12/RenderPipelineD3D12.h"
 #include "dawn_native/d3d12/SamplerD3D12.h"
+#include "dawn_native/d3d12/SamplerHeapCacheD3D12.h"
 #include "dawn_native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.h"
 #include "dawn_native/d3d12/StagingDescriptorAllocatorD3D12.h"
 #include "dawn_native/d3d12/TextureCopySplitter.h"
@@ -95,6 +96,7 @@ namespace dawn_native { namespace d3d12 {
       public:
         BindGroupStateTracker(Device* device)
             : BindGroupAndStorageBarrierTrackerBase(),
+              mDevice(device),
               mViewAllocator(device->GetViewShaderVisibleDescriptorAllocator()),
               mSamplerAllocator(device->GetSamplerShaderVisibleDescriptorAllocator()) {
         }
@@ -117,7 +119,7 @@ namespace dawn_native { namespace d3d12 {
             for (uint32_t index : IterateBitSet(mDirtyBindGroups)) {
                 BindGroup* group = ToBackend(mBindGroups[index]);
                 didCreateBindGroupViews = group->PopulateViews(mViewAllocator);
-                didCreateBindGroupSamplers = group->PopulateSamplers(mSamplerAllocator);
+                didCreateBindGroupSamplers = group->PopulateSamplers(mDevice, mSamplerAllocator);
                 if (!didCreateBindGroupViews && !didCreateBindGroupSamplers) {
                     break;
                 }
@@ -143,7 +145,8 @@ namespace dawn_native { namespace d3d12 {
                 for (uint32_t index : IterateBitSet(mBindGroupLayoutsMask)) {
                     BindGroup* group = ToBackend(mBindGroups[index]);
                     didCreateBindGroupViews = group->PopulateViews(mViewAllocator);
-                    didCreateBindGroupSamplers = group->PopulateSamplers(mSamplerAllocator);
+                    didCreateBindGroupSamplers =
+                        group->PopulateSamplers(mDevice, mSamplerAllocator);
                     ASSERT(didCreateBindGroupViews);
                     ASSERT(didCreateBindGroupSamplers);
                 }
@@ -309,6 +312,8 @@ namespace dawn_native { namespace d3d12 {
                 }
             }
         }
+
+        Device* mDevice;
 
         bool mInCompute = false;
 

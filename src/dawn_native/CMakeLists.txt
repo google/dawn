@@ -209,6 +209,8 @@ if (DAWN_ENABLE_D3D12)
         "d3d12/ResourceHeapAllocationD3D12.h"
         "d3d12/SamplerD3D12.cpp"
         "d3d12/SamplerD3D12.h"
+        "d3d12/SamplerHeapCacheD3D12.cpp"
+        "d3d12/SamplerHeapCacheD3D12.h"
         "d3d12/ShaderModuleD3D12.cpp"
         "d3d12/ShaderModuleD3D12.h"
         "d3d12/ShaderVisibleDescriptorAllocatorD3D12.cpp"
