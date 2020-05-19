@@ -33,9 +33,8 @@ namespace dawn_native { namespace vulkan {
           public:
             void SetUp() override {
                 DawnTest::SetUp();
-                if (UsesWire()) {
-                    return;
-                }
+                DAWN_SKIP_TEST_IF(UsesWire());
+                DAWN_SKIP_TEST_IF(IsSwiftshader());
 
                 deviceVk = reinterpret_cast<dawn_native::vulkan::Device*>(device.Get());
             }
@@ -203,7 +202,7 @@ namespace dawn_native { namespace vulkan {
       public:
         void SetUp() override {
             VulkanImageWrappingTestBase::SetUp();
-            if (UsesWire()) {
+            if (UsesWire() || IsSwiftshader()) {
                 return;
             }
 
@@ -221,7 +220,7 @@ namespace dawn_native { namespace vulkan {
         }
 
         void TearDown() override {
-            if (UsesWire()) {
+            if (UsesWire() || IsSwiftshader()) {
                 VulkanImageWrappingTestBase::TearDown();
                 return;
             }
@@ -355,7 +354,7 @@ namespace dawn_native { namespace vulkan {
       public:
         void SetUp() override {
             VulkanImageWrappingTestBase::SetUp();
-            if (UsesWire()) {
+            if (UsesWire() || IsSwiftshader()) {
                 return;
             }
 
@@ -383,7 +382,7 @@ namespace dawn_native { namespace vulkan {
         }
 
         void TearDown() override {
-            if (UsesWire()) {
+            if (UsesWire() || IsSwiftshader()) {
                 VulkanImageWrappingTestBase::TearDown();
                 return;
             }
