@@ -50,6 +50,9 @@ std::string CommonTypes() {
     %int_m1 = OpConstant %int -1
     %uint_2 = OpConstant %uint 2
 
+    %v2bool = OpTypeVector %bool 2
+    %v2uint = OpTypeVector %uint 2
+    %v2int = OpTypeVector %int 2
     %v2float = OpTypeVector %float 2
     %m3v2float = OpTypeMatrix %v2float 3
 
@@ -300,6 +303,98 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorInitializer) {
   })"));
 }
 
+TEST_F(SpvParserTest, ModuleScopeVar_VectorBoolNullInitializer) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %ptr = OpTypePointer Private %v2bool
+     %const = OpConstantNull %v2bool
+     %200 = OpVariable %ptr Private %const
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
+    x_200
+    private
+    __vec_2__bool
+    {
+      TypeConstructor{
+        __vec_2__bool
+        ScalarConstructor{false}
+        ScalarConstructor{false}
+      }
+    }
+  })"));
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_VectorUintNullInitializer) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %ptr = OpTypePointer Private %v2uint
+     %const = OpConstantNull %v2uint
+     %200 = OpVariable %ptr Private %const
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
+    x_200
+    private
+    __vec_2__u32
+    {
+      TypeConstructor{
+        __vec_2__u32
+        ScalarConstructor{0}
+        ScalarConstructor{0}
+      }
+    }
+  })"));
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_VectorIntNullInitializer) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %ptr = OpTypePointer Private %v2int
+     %const = OpConstantNull %v2int
+     %200 = OpVariable %ptr Private %const
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
+    x_200
+    private
+    __vec_2__i32
+    {
+      TypeConstructor{
+        __vec_2__i32
+        ScalarConstructor{0}
+        ScalarConstructor{0}
+      }
+    }
+  })"));
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_VectorFloatNullInitializer) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %ptr = OpTypePointer Private %v2float
+     %const = OpConstantNull %v2float
+     %200 = OpVariable %ptr Private %const
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
+    x_200
+    private
+    __vec_2__f32
+    {
+      TypeConstructor{
+        __vec_2__f32
+        ScalarConstructor{0.000000}
+        ScalarConstructor{0.000000}
+      }
+    }
+  })"));
+}
+
 TEST_F(SpvParserTest, ModuleScopeVar_MatrixInitializer) {
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %m3v2float
@@ -342,6 +437,42 @@ TEST_F(SpvParserTest, ModuleScopeVar_MatrixInitializer) {
   })"));
 }
 
+TEST_F(SpvParserTest, ModuleScopeVar_MatrixNullInitializer) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %ptr = OpTypePointer Private %m3v2float
+     %const = OpConstantNull %m3v2float
+     %200 = OpVariable %ptr Private %const
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
+    x_200
+    private
+    __mat_2_3__f32
+    {
+      TypeConstructor{
+        __mat_2_3__f32
+        TypeConstructor{
+          __vec_2__f32
+          ScalarConstructor{0.000000}
+          ScalarConstructor{0.000000}
+        }
+        TypeConstructor{
+          __vec_2__f32
+          ScalarConstructor{0.000000}
+          ScalarConstructor{0.000000}
+        }
+        TypeConstructor{
+          __vec_2__f32
+          ScalarConstructor{0.000000}
+          ScalarConstructor{0.000000}
+        }
+      }
+    }
+  })"));
+}
+
 TEST_F(SpvParserTest, ModuleScopeVar_ArrayInitializer) {
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %ptr = OpTypePointer Private %arr2uint
@@ -361,6 +492,29 @@ TEST_F(SpvParserTest, ModuleScopeVar_ArrayInitializer) {
         __array__u32_2
         ScalarConstructor{1}
         ScalarConstructor{2}
+      }
+    }
+  })"));
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_ArrayNullInitializer) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %ptr = OpTypePointer Private %arr2uint
+     %const = OpConstantNull %arr2uint
+     %200 = OpVariable %ptr Private %const
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
+    x_200
+    private
+    __array__u32_2
+    {
+      TypeConstructor{
+        __array__u32_2
+        ScalarConstructor{0}
+        ScalarConstructor{0}
       }
     }
   })"));
@@ -390,6 +544,34 @@ TEST_F(SpvParserTest, ModuleScopeVar_StructInitializer) {
           __array__u32_2
           ScalarConstructor{1}
           ScalarConstructor{2}
+        }
+      }
+    }
+  })"));
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_StructNullInitializer) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %ptr = OpTypePointer Private %strct
+     %const = OpConstantNull %strct
+     %200 = OpVariable %ptr Private %const
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(Variable{
+    x_200
+    private
+    __struct_S
+    {
+      TypeConstructor{
+        __struct_S
+        ScalarConstructor{0}
+        ScalarConstructor{0.000000}
+        TypeConstructor{
+          __array__u32_2
+          ScalarConstructor{0}
+          ScalarConstructor{0}
         }
       }
     }

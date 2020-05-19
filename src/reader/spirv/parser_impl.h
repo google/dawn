@@ -244,8 +244,13 @@ class ParserImpl : Reader {
 
   /// Creates an AST expression node for a SPIR-V constant.
   /// @param id the SPIR-V ID of the constant
-  /// @returns a new Literal node
+  /// @returns a new expression
   TypedExpression MakeConstantExpression(uint32_t id);
+
+  /// Creates an AST expression node for the null value for the given type.
+  /// @param type the AST type
+  /// @returns a new expression
+  std::unique_ptr<ast::Expression> MakeNullValue(ast::type::Type* type);
 
   /// Converts a given expression to the signedness demanded for an operand
   /// of the given SPIR-V opcode, if required.  If the operation assumes
