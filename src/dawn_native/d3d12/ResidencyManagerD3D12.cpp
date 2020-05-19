@@ -144,12 +144,12 @@ namespace dawn_native { namespace d3d12 {
 
     // Removes a heap from the LRU and returns the least recently used heap when possible. Returns
     // nullptr when nothing further can be evicted.
-    ResultOrError<Heap*> ResidencyManager::RemoveSingleEntryFromLRU(
+    ResultOrError<Pageable*> ResidencyManager::RemoveSingleEntryFromLRU(
         MemorySegmentInfo* memorySegment) {
         ASSERT(!memorySegment->lruCache.empty());
-        Heap* heap = memorySegment->lruCache.head()->value();
+        Pageable* pageable = memorySegment->lruCache.head()->value();
 
-        Serial lastSubmissionSerial = heap->GetLastSubmission();
+        Serial lastSubmissionSerial = pageable->GetLastSubmission();
 
         // If the next candidate for eviction was inserted into the LRU during the current serial,
         // it is because more memory is being used in a single command list than is available.
@@ -164,8 +164,8 @@ namespace dawn_native { namespace d3d12 {
             DAWN_TRY(mDevice->WaitForSerial(lastSubmissionSerial));
         }
 
-        heap->RemoveFromList();
-        return heap;
+        pageable->RemoveFromList();
+        return pageable;
     }
 
     MaybeError ResidencyManager::EnsureCanAllocate(uint64_t allocationSize,
@@ -197,16 +197,16 @@ namespace dawn_native { namespace d3d12 {
         uint64_t sizeNeededToBeUnderBudget = memoryUsageAfterMakeResident - memorySegment->budget;
         uint64_t sizeEvicted = 0;
         while (sizeEvicted < sizeNeededToBeUnderBudget) {
-            Heap* heap;
-            DAWN_TRY_ASSIGN(heap, RemoveSingleEntryFromLRU(memorySegment));
+            Pageable* pageable;
+            DAWN_TRY_ASSIGN(pageable, RemoveSingleEntryFromLRU(memorySegment));
 
             // If no heap was returned, then nothing more can be evicted.
-            if (heap == nullptr) {
+            if (pageable == nullptr) {
                 break;
             }
 
-            sizeEvicted += heap->GetSize();
-            resourcesToEvict.push_back(heap->GetD3D12Pageable());
+            sizeEvicted += pageable->GetSize();
+            resourcesToEvict.push_back(pageable->GetD3D12Pageable());
         }
 
         if (resourcesToEvict.size() > 0) {
@@ -287,13 +287,13 @@ namespace dawn_native { namespace d3d12 {
 
     // Inserts a heap at the bottom of the LRU. The passed heap must be resident or scheduled to
     // become resident within the current serial.
-    void ResidencyManager::TrackResidentAllocation(Heap* heap) {
+    void ResidencyManager::TrackResidentAllocation(Pageable* pageable) {
         if (!mResidencyManagementEnabled) {
             return;
         }
 
-        ASSERT(heap->IsInList() == false);
-        GetMemorySegmentInfo(heap->GetMemorySegment())->lruCache.Append(heap);
+        ASSERT(pageable->IsInList() == false);
+        GetMemorySegmentInfo(pageable->GetMemorySegment())->lruCache.Append(pageable);
     }
 
     // Places an artifical cap on Dawn's budget so we can test in a predictable manner. If used,

@@ -27,6 +27,7 @@ namespace dawn_native { namespace d3d12 {
 
     class Device;
     class Heap;
+    class Pageable;
 
     class ResidencyManager {
       public:
@@ -41,14 +42,14 @@ namespace dawn_native { namespace d3d12 {
         uint64_t SetExternalMemoryReservation(MemorySegment segment,
                                               uint64_t requestedReservationSize);
 
-        void TrackResidentAllocation(Heap* heap);
+        void TrackResidentAllocation(Pageable* pageable);
 
         void RestrictBudgetForTesting(uint64_t artificialBudgetCap);
 
       private:
         struct MemorySegmentInfo {
             const DXGI_MEMORY_SEGMENT_GROUP dxgiSegment;
-            LinkedList<Heap> lruCache = {};
+            LinkedList<Pageable> lruCache = {};
             uint64_t budget = 0;
             uint64_t usage = 0;
             uint64_t externalReservation = 0;
@@ -62,7 +63,7 @@ namespace dawn_native { namespace d3d12 {
 
         MemorySegmentInfo* GetMemorySegmentInfo(MemorySegment memorySegment);
         MaybeError EnsureCanMakeResident(uint64_t allocationSize, MemorySegmentInfo* memorySegment);
-        ResultOrError<Heap*> RemoveSingleEntryFromLRU(MemorySegmentInfo* memorySegment);
+        ResultOrError<Pageable*> RemoveSingleEntryFromLRU(MemorySegmentInfo* memorySegment);
         void UpdateVideoMemoryInfo();
         void UpdateMemorySegmentInfo(MemorySegmentInfo* segmentInfo);
 

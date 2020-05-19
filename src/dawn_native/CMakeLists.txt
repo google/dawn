@@ -193,6 +193,8 @@ if (DAWN_ENABLE_D3D12)
         "d3d12/HeapD3D12.h"
         "d3d12/NativeSwapChainImplD3D12.cpp"
         "d3d12/NativeSwapChainImplD3D12.h"
+        "d3d12/PageableD3D12.cpp"
+        "d3d12/PageableD3D12.h"
         "d3d12/PipelineLayoutD3D12.cpp"
         "d3d12/PipelineLayoutD3D12.h"
         "d3d12/PlatformFunctions.cpp"

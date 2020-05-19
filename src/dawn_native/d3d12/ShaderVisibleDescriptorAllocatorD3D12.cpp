@@ -77,7 +77,7 @@ namespace dawn_native { namespace d3d12 {
             return false;
         }
 
-        ID3D12DescriptorHeap* descriptorHeap = mHeap.Get();
+        ID3D12DescriptorHeap* descriptorHeap = mHeap->GetD3D12DescriptorHeap();
 
         const uint64_t heapOffset = mSizeIncrement * startOffset;
 
@@ -99,7 +99,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     ID3D12DescriptorHeap* ShaderVisibleDescriptorAllocator::GetShaderVisibleHeap() const {
-        return mHeap.Get();
+        return mHeap->GetD3D12DescriptorHeap();
     }
 
     void ShaderVisibleDescriptorAllocator::Tick(uint64_t completedSerial) {
@@ -108,7 +108,7 @@ namespace dawn_native { namespace d3d12 {
 
     // Creates a GPU descriptor heap that manages descriptors in a FIFO queue.
     MaybeError ShaderVisibleDescriptorAllocator::AllocateAndSwitchShaderVisibleHeap() {
-        ComPtr<ID3D12DescriptorHeap> heap;
+        std::unique_ptr<ShaderVisibleDescriptorHeap> descriptorHeap;
         // Return the switched out heap to the pool and retrieve the oldest heap that is no longer
         // used by GPU. This maintains a heap buffer to avoid frequently re-creating heaps for heavy
         // users.
@@ -119,7 +119,7 @@ namespace dawn_native { namespace d3d12 {
 
         // Recycle existing heap if possible.
         if (!mPool.empty() && mPool.front().heapSerial <= mDevice->GetCompletedCommandSerial()) {
-            heap = std::move(mPool.front().heap);
+            descriptorHeap = std::move(mPool.front().heap);
             mPool.pop_front();
         }
 
@@ -129,19 +129,23 @@ namespace dawn_native { namespace d3d12 {
         const uint32_t descriptorCount = GetD3D12ShaderVisibleHeapSize(
             mHeapType, mDevice->IsToggleEnabled(Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
 
-        if (heap == nullptr) {
+        if (descriptorHeap == nullptr) {
+            ComPtr<ID3D12DescriptorHeap> d3d12DescriptorHeap;
             D3D12_DESCRIPTOR_HEAP_DESC heapDescriptor;
             heapDescriptor.Type = mHeapType;
             heapDescriptor.NumDescriptors = descriptorCount;
             heapDescriptor.Flags = GetD3D12HeapFlags(mHeapType);
             heapDescriptor.NodeMask = 0;
-            DAWN_TRY(CheckOutOfMemoryHRESULT(mDevice->GetD3D12Device()->CreateDescriptorHeap(
-                                                 &heapDescriptor, IID_PPV_ARGS(&heap)),
-                                             "ID3D12Device::CreateDescriptorHeap"));
+            DAWN_TRY(
+                CheckOutOfMemoryHRESULT(mDevice->GetD3D12Device()->CreateDescriptorHeap(
+                                            &heapDescriptor, IID_PPV_ARGS(&d3d12DescriptorHeap)),
+                                        "ID3D12Device::CreateDescriptorHeap"));
+            descriptorHeap = std::make_unique<ShaderVisibleDescriptorHeap>(
+                std::move(d3d12DescriptorHeap), mSizeIncrement * descriptorCount);
         }
 
         // Create a FIFO buffer from the recently created heap.
-        mHeap = std::move(heap);
+        mHeap = std::move(descriptorHeap);
         mAllocator = RingBufferAllocator(descriptorCount);
 
         // Invalidate all bindgroup allocations on previously bound heaps by incrementing the heap
@@ -170,5 +174,16 @@ namespace dawn_native { namespace d3d12 {
         // have not switched over.
         return (allocation.GetLastUsageSerial() > mDevice->GetCompletedCommandSerial() &&
                 allocation.GetHeapSerial() == mHeapSerial);
+    }
+
+    ShaderVisibleDescriptorHeap::ShaderVisibleDescriptorHeap(
+        ComPtr<ID3D12DescriptorHeap> d3d12DescriptorHeap,
+        uint64_t size)
+        : Pageable(d3d12DescriptorHeap, MemorySegment::Local, size),
+          mD3d12DescriptorHeap(std::move(d3d12DescriptorHeap)) {
+    }
+
+    ID3D12DescriptorHeap* ShaderVisibleDescriptorHeap::GetD3D12DescriptorHeap() const {
+        return mD3d12DescriptorHeap.Get();
     }
 }}  // namespace dawn_native::d3d12

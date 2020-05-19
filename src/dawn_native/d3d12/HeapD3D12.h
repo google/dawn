@@ -15,67 +15,25 @@
 #ifndef DAWNNATIVE_D3D12_HEAPD3D12_H_
 #define DAWNNATIVE_D3D12_HEAPD3D12_H_
 
-#include "common/LinkedList.h"
-#include "common/Serial.h"
-#include "dawn_native/D3D12Backend.h"
 #include "dawn_native/ResourceHeap.h"
+#include "dawn_native/d3d12/PageableD3D12.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 namespace dawn_native { namespace d3d12 {
 
     class Device;
 
-    // This class is used to represent heap allocations, but also serves as a node within the
-    // ResidencyManager's LRU cache. This node is inserted into the LRU-cache when it is first
-    // allocated, and any time it is scheduled to be used by the GPU. This node is removed from the
-    // LRU cache when it is evicted from resident memory due to budget constraints, or when the heap
-    // is destroyed.
-    class Heap : public ResourceHeapBase, public LinkNode<Heap> {
+    // This class is used to represent ID3D12Heap allocations, as well as an implicit heap
+    // representing a directly allocated resource. It inherits from Pageable because each Heap must
+    // be represented in the ResidencyManager.
+    class Heap : public ResourceHeapBase, public Pageable {
       public:
         Heap(ComPtr<ID3D12Pageable> d3d12Pageable, MemorySegment memorySegment, uint64_t size);
-        ~Heap();
 
         ID3D12Heap* GetD3D12Heap() const;
-        ID3D12Pageable* GetD3D12Pageable() const;
-        MemorySegment GetMemorySegment() const;
-
-        // We set mLastRecordingSerial to denote the serial this heap was last recorded to be used.
-        // We must check this serial against the current serial when recording heap usages to ensure
-        // we do not process residency for this heap multiple times.
-        Serial GetLastUsage() const;
-        void SetLastUsage(Serial serial);
-
-        // The residency manager must know the last serial that any portion of the heap was
-        // submitted to be used so that we can ensure this heap stays resident in memory at least
-        // until that serial has completed.
-        uint64_t GetLastSubmission() const;
-        void SetLastSubmission(Serial serial);
-
-        uint64_t GetSize() const;
-
-        bool IsInResidencyLRUCache() const;
-
-        // In some scenarios, such as async buffer mapping, we must lock residency to ensure the
-        // heap cannot be evicted. Because multiple buffers may be mapped in a single heap, we must
-        // track the number of resources currently locked.
-        void IncrementResidencyLock();
-        void DecrementResidencyLock();
-        bool IsResidencyLocked() const;
 
       private:
-        ComPtr<ID3D12Pageable> mD3d12Pageable;
-        MemorySegment mMemorySegment;
-        // mLastUsage denotes the last time this heap was recorded for use.
-        Serial mLastUsage = 0;
-        // mLastSubmission denotes the last time this heap was submitted to the GPU. Note that
-        // although this variable often contains the same value as mLastUsage, it can differ in some
-        // situations. When some asynchronous APIs (like SetSubData) are called, mLastUsage is
-        // updated upon the call, but the backend operation is deferred until the next submission
-        // to the GPU. This makes mLastSubmission unique from mLastUsage, and allows us to
-        // accurately identify when heaps are evictable.
-        Serial mLastSubmission = 0;
-        uint32_t mResidencyLockRefCount = 0;
-        uint64_t mSize = 0;
+        ComPtr<ID3D12Heap> mD3d12Heap;
     };
 }}  // namespace dawn_native::d3d12
 

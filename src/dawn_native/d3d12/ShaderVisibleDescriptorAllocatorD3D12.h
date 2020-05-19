@@ -17,6 +17,7 @@
 
 #include "dawn_native/Error.h"
 #include "dawn_native/RingBufferAllocator.h"
+#include "dawn_native/d3d12/PageableD3D12.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 #include <list>
@@ -31,6 +32,16 @@ namespace dawn_native { namespace d3d12 {
 
     class Device;
     class GPUDescriptorHeapAllocation;
+
+    class ShaderVisibleDescriptorHeap : public Pageable {
+      public:
+        ShaderVisibleDescriptorHeap(ComPtr<ID3D12DescriptorHeap> d3d12DescriptorHeap,
+                                    uint64_t size);
+        ID3D12DescriptorHeap* GetD3D12DescriptorHeap() const;
+
+      private:
+        ComPtr<ID3D12DescriptorHeap> mD3d12DescriptorHeap;
+    };
 
     class ShaderVisibleDescriptorAllocator {
       public:
@@ -62,10 +73,10 @@ namespace dawn_native { namespace d3d12 {
       private:
         struct SerialDescriptorHeap {
             Serial heapSerial;
-            ComPtr<ID3D12DescriptorHeap> heap;
+            std::unique_ptr<ShaderVisibleDescriptorHeap> heap;
         };
 
-        ComPtr<ID3D12DescriptorHeap> mHeap;
+        std::unique_ptr<ShaderVisibleDescriptorHeap> mHeap;
         RingBufferAllocator mAllocator;
         std::list<SerialDescriptorHeap> mPool;
         D3D12_DESCRIPTOR_HEAP_TYPE mHeapType;
