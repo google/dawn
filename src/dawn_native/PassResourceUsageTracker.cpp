@@ -44,15 +44,15 @@ namespace dawn_native {
         textureUsage.usage |= usage;
 
         // Set usages for subresources
-        uint32_t subresourceCount =
-            texture->GetSubresourceIndex(texture->GetNumMipLevels(), texture->GetArrayLayers());
+        uint32_t subresourceCount = texture->GetSubresourceCount();
         if (!textureUsage.subresourceUsages.size()) {
             textureUsage.subresourceUsages =
                 std::vector<wgpu::TextureUsage>(subresourceCount, wgpu::TextureUsage::None);
         }
-        for (uint32_t mipLevel = baseMipLevel; mipLevel < baseMipLevel + levelCount; ++mipLevel) {
-            for (uint32_t arrayLayer = baseArrayLayer; arrayLayer < baseArrayLayer + layerCount;
-                 ++arrayLayer) {
+        for (uint32_t arrayLayer = baseArrayLayer; arrayLayer < baseArrayLayer + layerCount;
+             ++arrayLayer) {
+            for (uint32_t mipLevel = baseMipLevel; mipLevel < baseMipLevel + levelCount;
+                 ++mipLevel) {
                 uint32_t subresourceIndex = texture->GetSubresourceIndex(mipLevel, arrayLayer);
                 textureUsage.subresourceUsages[subresourceIndex] |= usage;
             }
@@ -64,8 +64,7 @@ namespace dawn_native {
         PassTextureUsage& passTextureUsage = mTextureUsages[texture];
         passTextureUsage.usage |= textureUsage.usage;
 
-        uint32_t subresourceCount =
-            texture->GetSubresourceIndex(texture->GetNumMipLevels(), texture->GetArrayLayers());
+        uint32_t subresourceCount = texture->GetSubresourceCount();
         ASSERT(textureUsage.subresourceUsages.size() == subresourceCount);
         if (!passTextureUsage.subresourceUsages.size()) {
             passTextureUsage.subresourceUsages = textureUsage.subresourceUsages;

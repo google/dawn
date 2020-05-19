@@ -55,6 +55,7 @@ namespace dawn_native {
         uint32_t GetArrayLayers() const;
         uint32_t GetNumMipLevels() const;
         uint32_t GetSampleCount() const;
+        uint32_t GetSubresourceCount() const;
         wgpu::TextureUsage GetUsage() const;
         TextureState GetTextureState() const;
         uint32_t GetSubresourceIndex(uint32_t mipLevel, uint32_t arraySlice) const;

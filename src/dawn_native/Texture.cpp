@@ -351,8 +351,7 @@ namespace dawn_native {
           mSampleCount(descriptor->sampleCount),
           mUsage(descriptor->usage),
           mState(state) {
-        uint32_t subresourceCount =
-            GetSubresourceIndex(descriptor->mipLevelCount, descriptor->arrayLayerCount);
+        uint32_t subresourceCount = GetSubresourceCount();
         mIsSubresourceContentInitializedAtIndex = std::vector<bool>(subresourceCount, false);
 
         // Add readonly storage usage if the texture has a storage usage. The validation rules in
@@ -399,6 +398,10 @@ namespace dawn_native {
         ASSERT(!IsError());
         return mSampleCount;
     }
+    uint32_t TextureBase::GetSubresourceCount() const {
+        ASSERT(!IsError());
+        return mMipLevelCount * mArrayLayerCount;
+    }
     wgpu::TextureUsage TextureBase::GetUsage() const {
         ASSERT(!IsError());
         return mUsage;
@@ -423,9 +426,10 @@ namespace dawn_native {
                                                       uint32_t baseArrayLayer,
                                                       uint32_t layerCount) const {
         ASSERT(!IsError());
-        for (uint32_t mipLevel = baseMipLevel; mipLevel < baseMipLevel + levelCount; ++mipLevel) {
-            for (uint32_t arrayLayer = baseArrayLayer; arrayLayer < baseArrayLayer + layerCount;
-                 ++arrayLayer) {
+        for (uint32_t arrayLayer = baseArrayLayer; arrayLayer < baseArrayLayer + layerCount;
+             ++arrayLayer) {
+            for (uint32_t mipLevel = baseMipLevel; mipLevel < baseMipLevel + levelCount;
+                 ++mipLevel) {
                 uint32_t subresourceIndex = GetSubresourceIndex(mipLevel, arrayLayer);
                 ASSERT(subresourceIndex < mIsSubresourceContentInitializedAtIndex.size());
                 if (!mIsSubresourceContentInitializedAtIndex[subresourceIndex]) {
@@ -442,9 +446,10 @@ namespace dawn_native {
                                                          uint32_t baseArrayLayer,
                                                          uint32_t layerCount) {
         ASSERT(!IsError());
-        for (uint32_t mipLevel = baseMipLevel; mipLevel < baseMipLevel + levelCount; ++mipLevel) {
-            for (uint32_t arrayLayer = baseArrayLayer; arrayLayer < baseArrayLayer + layerCount;
-                 ++arrayLayer) {
+        for (uint32_t arrayLayer = baseArrayLayer; arrayLayer < baseArrayLayer + layerCount;
+             ++arrayLayer) {
+            for (uint32_t mipLevel = baseMipLevel; mipLevel < baseMipLevel + levelCount;
+                 ++mipLevel) {
                 uint32_t subresourceIndex = GetSubresourceIndex(mipLevel, arrayLayer);
                 ASSERT(subresourceIndex < mIsSubresourceContentInitializedAtIndex.size());
                 mIsSubresourceContentInitializedAtIndex[subresourceIndex] = isInitialized;
