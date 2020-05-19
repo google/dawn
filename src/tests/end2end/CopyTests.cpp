@@ -71,8 +71,6 @@ class CopyTests : public DawnTest {
         }
 };
 
-class CopyTests_B2B : public CopyTests {};
-
 class CopyTests_T2B : public CopyTests {
     protected:
 
@@ -400,57 +398,6 @@ class CopyTests_T2T : public CopyTests {
         }
     }
 };
-
-// Test that copying within the same buffer works
-TEST_P(CopyTests_B2B, CopyWithinSameBuffer) {
-    // Copy the first 2 uint32_t values to the 4th and 5th uint32_t values.
-    {
-        // Create a buffer with 6 uint32_t values.
-        wgpu::Buffer buffer = utils::CreateBufferFromData(
-            device, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst,
-            {1u, 2u, 3u, 4u, 5u, 6u});
-
-        constexpr uint32_t kSrcOffset = 0u;
-        constexpr uint32_t kDstOffset = 3u * sizeof(uint32_t);
-        constexpr uint32_t kSize = 2u * sizeof(uint32_t);
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyBufferToBuffer(buffer, kSrcOffset, buffer, kDstOffset, kSize);
-        wgpu::CommandBuffer commands = encoder.Finish();
-        queue.Submit(1, &commands);
-
-        // Verify the first two uint32_t values are correctly copied to the locations where the 4th
-        // and 5th uint32_t values are stored.
-        std::array<uint32_t, 6> kExpected = {{1u, 2u, 3u, 1u, 2u, 6u}};
-        EXPECT_BUFFER_U32_RANGE_EQ(kExpected.data(), buffer, 0, kExpected.size());
-    }
-
-    // Copy the 4th and 5th uint32_t values to the first two uint32_t values.
-    {
-        // Create a buffer with 6 uint32_t values.
-        wgpu::Buffer buffer = utils::CreateBufferFromData(
-            device, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst,
-            {1u, 2u, 3u, 4u, 5u, 6u});
-
-        constexpr uint32_t kSrcOffset = 3u * sizeof(uint32_t);
-        constexpr uint32_t kDstOffset = 0u;
-        constexpr uint32_t kSize = 2u * sizeof(uint32_t);
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyBufferToBuffer(buffer, kSrcOffset, buffer, kDstOffset, kSize);
-        wgpu::CommandBuffer commands = encoder.Finish();
-        queue.Submit(1, &commands);
-
-        // Verify the 4th and 5th uint32_t values are correctly copied to the locations where the
-        // first uint32_t values are stored.
-        std::array<uint32_t, 6> kExpected = {{4u, 5u, 3u, 4u, 5u, 6u}};
-        EXPECT_BUFFER_U32_RANGE_EQ(kExpected.data(), buffer, 0, kExpected.size());
-    }
-}
-
-DAWN_INSTANTIATE_TEST(CopyTests_B2B,
-                      D3D12Backend(),
-                      MetalBackend(),
-                      OpenGLBackend(),
-                      VulkanBackend());
 
 // Test that copying an entire texture with 256-byte aligned dimensions works
 TEST_P(CopyTests_T2B, FullTextureAligned) {

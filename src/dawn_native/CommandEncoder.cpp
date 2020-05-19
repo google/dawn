@@ -102,20 +102,6 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateB2BCopyWithinSameBuffer(uint64_t dataSize,
-                                                   uint64_t srcOffset,
-                                                   uint64_t dstOffset) {
-            uint64_t maxOffset = std::max(srcOffset, dstOffset);
-            uint64_t minOffset = std::min(srcOffset, dstOffset);
-
-            if (minOffset + dataSize > maxOffset) {
-                return DAWN_VALIDATION_ERROR(
-                    "Copy regions cannot overlap when copy within the same buffer");
-            }
-
-            return {};
-        }
-
         MaybeError ValidateTexelBufferOffset(const BufferCopyView& bufferCopy,
                                              const Format& format) {
             if (bufferCopy.offset % format.blockByteSize != 0) {
@@ -624,14 +610,14 @@ namespace dawn_native {
                 DAWN_TRY(GetDevice()->ValidateObject(source));
                 DAWN_TRY(GetDevice()->ValidateObject(destination));
 
+                if (source == destination) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Source and destination cannot be the same buffer.");
+                }
+
                 DAWN_TRY(ValidateCopySizeFitsInBuffer(source, sourceOffset, size));
                 DAWN_TRY(ValidateCopySizeFitsInBuffer(destination, destinationOffset, size));
                 DAWN_TRY(ValidateB2BCopyAlignment(size, sourceOffset, destinationOffset));
-
-                if (source == destination) {
-                    DAWN_TRY(
-                        ValidateB2BCopyWithinSameBuffer(size, sourceOffset, destinationOffset));
-                }
 
                 DAWN_TRY(ValidateCanUseAs(source, wgpu::BufferUsage::CopySrc));
                 DAWN_TRY(ValidateCanUseAs(destination, wgpu::BufferUsage::CopyDst));

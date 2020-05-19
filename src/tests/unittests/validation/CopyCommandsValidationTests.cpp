@@ -266,14 +266,13 @@ TEST_F(CopyCommandTest_B2B, BuffersInErrorState) {
     }
 }
 
-// Test B2B copies within same buffer.
+// Test it is not allowed to do B2B copies within same buffer.
 TEST_F(CopyCommandTest_B2B, CopyWithinSameBuffer) {
     constexpr uint32_t kBufferSize = 16u;
     wgpu::Buffer buffer =
         CreateBuffer(kBufferSize, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
 
-    // When srcOffset < dstOffset, and srcOffset + copySize > dstOffset, it is not allowed because
-    // the copy regions are overlapping.
+    // srcOffset < dstOffset, and srcOffset + copySize > dstOffset (overlapping)
     {
         constexpr uint32_t kSrcOffset = 0u;
         constexpr uint32_t kDstOffset = 4u;
@@ -285,19 +284,17 @@ TEST_F(CopyCommandTest_B2B, CopyWithinSameBuffer) {
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
-    // When srcOffset < dstOffset, and srcOffset + copySize == dstOffset, it is allowed
-    // because the copy regions are not overlapping.
+    // srcOffset < dstOffset, and srcOffset + copySize == dstOffset (not overlapping)
     {
         constexpr uint32_t kSrcOffset = 0u;
         constexpr uint32_t kDstOffset = 8u;
         constexpr uint32_t kCopySize = kDstOffset - kSrcOffset;
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyBufferToBuffer(buffer, kSrcOffset, buffer, kDstOffset, kCopySize);
-        encoder.Finish();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
-    // When srcOffset > dstOffset, and srcOffset < dstOffset + copySize, it is not allowed because
-    // the copy regions are overlapping.
+    // srcOffset > dstOffset, and srcOffset < dstOffset + copySize (overlapping)
     {
         constexpr uint32_t kSrcOffset = 4u;
         constexpr uint32_t kDstOffset = 0u;
@@ -309,15 +306,14 @@ TEST_F(CopyCommandTest_B2B, CopyWithinSameBuffer) {
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
-    // When srcOffset > dstOffset, and srcOffset + copySize == dstOffset, it is allowed
-    // because the copy regions are not overlapping.
+    // srcOffset > dstOffset, and srcOffset + copySize == dstOffset (not overlapping)
     {
         constexpr uint32_t kSrcOffset = 8u;
         constexpr uint32_t kDstOffset = 0u;
         constexpr uint32_t kCopySize = kSrcOffset - kDstOffset;
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyBufferToBuffer(buffer, kSrcOffset, buffer, kDstOffset, kCopySize);
-        encoder.Finish();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 }
 
