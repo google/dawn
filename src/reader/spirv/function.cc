@@ -479,7 +479,6 @@ bool FunctionEmitter::EmitBody() {
   if (!FindIfSelectionInternalHeaders()) {
     return false;
   }
-  // TODO(dneto): FindInvalidNestingBetweenSelections
 
   if (!EmitFunctionVariables()) {
     return false;
