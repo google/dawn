@@ -5683,10 +5683,6 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_Forward_LoopHeadToBody) {
   EXPECT_EQ(bi->succ_edge[30], EdgeKind::kForward);
 }
 
-TEST_F(SpvParserTest, DISABLED_ClassifyCFGEdges_Forward_LoopToContinue) {
-  FAIL();
-}
-
 TEST_F(SpvParserTest,
        ClassifyCFGEdges_DomViolation_BeforeIfToSelectionInterior) {
   auto assembly = CommonTypes() + R"(
