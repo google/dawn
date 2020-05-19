@@ -32,7 +32,7 @@ class SwapChainValidationTests : public DawnTest {
         glfwSetErrorCallback([](int code, const char* message) {
             dawn::ErrorLog() << "GLFW error " << code << " " << message;
         });
-        glfwInit();
+        DAWN_SKIP_TEST_IF(!glfwInit());
 
         // The SwapChainValidationTests don't create devices so we don't need to call
         // SetupGLFWWindowHintsForBackend. Set GLFW_NO_API anyway to avoid GLFW bringing up a GL
