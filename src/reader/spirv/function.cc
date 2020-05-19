@@ -1139,11 +1139,30 @@ bool FunctionEmitter::ClassifyCFGEdges() {
             (edge_kind == EdgeKind::kCaseFallThrough)) {
           // Check for an invalid forward exit out of this construct.
           if (dest_info->pos >= src_construct.end_pos) {
+            // In most cases we're bypassing the merge block for the source
+            // construct.
+            auto end_block = src_construct.end_id;
+            const char* end_block_desc = "merge block";
+            if (src_construct.kind == Construct::kLoop) {
+              // For a loop construct, we have two valid places to go: the
+              // continue target or the merge for the loop header, which is
+              // further down.
+              const auto loop_merge =
+                  GetBlockInfo(src_construct.begin_id)->merge_for_header;
+              if (dest_info->pos >= GetBlockInfo(loop_merge)->pos) {
+                // We're bypassing the loop's merge block.
+                end_block = loop_merge;
+              } else {
+                // We're bypassing the loop's continue target, and going into
+                // the middle of the continue construct.
+                end_block_desc = "continue target";
+              }
+            }
             return Fail()
                    << "Branch from block " << src << " to block " << dest
                    << " is an invalid exit from construct starting at block "
-                   << src_construct.begin_id << "; branch bypasses block "
-                   << src_construct.end_id;
+                   << src_construct.begin_id << "; branch bypasses "
+                   << end_block_desc << " " << end_block;
           }
 
           normal_forward_edges.push_back(dest);

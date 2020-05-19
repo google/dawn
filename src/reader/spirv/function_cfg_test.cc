@@ -4066,7 +4066,7 @@ TEST_F(SpvParserTest, FindSwitchCaseHeaders_CaseIsDefault) {
   EXPECT_THAT(*(bi20->case_values.get()), UnorderedElementsAre(200));
 }
 
-TEST_F(SpvParserTest, FindSwitchCaseHeaders_ManyCasesWithSameValue_Error) {
+TEST_F(SpvParserTest, FindSwitchCaseHeaders_ManyCasesWithSameValue_IsError) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -4618,6 +4618,32 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_FromIfThenElse) {
   EXPECT_EQ(bi50->succ_edge[99], EdgeKind::kIfBreak);
 }
 
+TEST_F(SpvParserTest, ClassifyCFGEdge_IfBreak_BypassesMerge_IsError) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %50 None
+     OpBranchConditional %cond %20 %50
+
+     %20 = OpLabel
+     OpBranch %99
+
+     %50 = OpLabel ; merge
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(p->error(),
+              Eq("Branch from block 20 to block 99 is an invalid exit from "
+                 "construct starting at block 10; branch bypasses merge block 50"));
+}
+
 TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromSwitchCaseDirect) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
@@ -4785,6 +4811,32 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromNestedIf_Conditional) {
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kSwitchBreak);
 }
 
+TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_BypassesMerge_IsError) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %50 None
+     OpSwitch %selector %50 20 %20
+
+     %20 = OpLabel
+     OpBranch %99 ; invalid exit
+
+     %50 = OpLabel ; switch merge
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(p->error(),
+              Eq("Branch from block 20 to block 99 is an invalid exit from "
+                 "construct starting at block 10; branch bypasses merge block 50"));
+}
+
 TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromNestedLoop_IsError) {
   // It's an error because the break can only go as far as the loop.
   auto assembly = CommonTypes() + R"(
@@ -4816,7 +4868,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromNestedLoop_IsError) {
   EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
   EXPECT_THAT(p->error(),
               Eq("Branch from block 30 to block 99 is an invalid exit from "
-                 "construct starting at block 20; branch bypasses block 70"));
+                 "construct starting at block 20; branch bypasses merge block 80"));
 }
 
 TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromNestedSwitch_IsError) {
@@ -4847,7 +4899,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromNestedSwitch_IsError) {
   EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
   EXPECT_THAT(p->error(),
               Eq("Branch from block 30 to block 99 is an invalid exit from "
-                 "construct starting at block 20; branch bypasses block 80"));
+                 "construct starting at block 20; branch bypasses merge block 80"));
 }
 
 TEST_F(SpvParserTest, ClassifyCFGEdges_LoopBreak_FromLoopBody) {
@@ -5065,6 +5117,75 @@ TEST_F(SpvParserTest,
                  "(violates post-dominance rule)"));
 }
 
+TEST_F(SpvParserTest,
+       ClassifyCFGEdges_LoopBreak_FromLoopBypassesMerge_IsError) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %50 %40 None
+     OpBranchConditional %cond %30 %50
+
+     %30 = OpLabel
+     OpBranch %99 ; bad exit
+
+     %40 = OpLabel ; continue construct
+     OpBranch %20
+
+     %50 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(p->error(),
+              Eq("Branch from block 30 to block 99 is an invalid exit from "
+                 "construct starting at block 20; branch bypasses merge block 50"));
+}
+
+TEST_F(SpvParserTest,
+       ClassifyCFGEdges_LoopBreak_FromContinueBypassesMerge_IsError) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %50 %40 None
+     OpBranchConditional %cond %30 %50
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel ; continue construct
+     OpBranch %45
+
+     %45 = OpLabel
+     OpBranchConditional %cond2 %20 %99 ; branch to %99 is bad exit
+
+     %50 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_THAT(p->error(),
+              Eq("Branch from block 45 to block 99 is an invalid exit from "
+                 "construct starting at block 40; branch bypasses merge block 50"));
+}
+
 TEST_F(SpvParserTest, ClassifyCFGEdges_LoopContinue_LoopBodyToContinue) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
@@ -5212,7 +5333,7 @@ TEST_F(SpvParserTest,
 }
 
 TEST_F(SpvParserTest,
-       ClassifyCFGEdges_LoopContinue_FromNestedSwitchCaseDirect_Error) {
+       ClassifyCFGEdges_LoopContinue_FromNestedSwitchCaseDirect_IsError) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -5250,7 +5371,7 @@ TEST_F(SpvParserTest,
 }
 
 TEST_F(SpvParserTest,
-       ClassifyCFGEdges_LoopContinue_FromNestedSwitchDefaultDirect_Error) {
+       ClassifyCFGEdges_LoopContinue_FromNestedSwitchDefaultDirect_IsError) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -5798,7 +5919,7 @@ TEST_F(SpvParserTest,
      %30 = OpLabel
      OpBranch %60
 
-     %50 = OpLabel
+     %50 = OpLabel ; continue target
      OpBranch %60
 
      %60 = OpLabel
@@ -5816,7 +5937,7 @@ TEST_F(SpvParserTest,
   EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
   EXPECT_THAT(p->error(),
               Eq("Branch from block 30 to block 60 is an invalid exit from "
-                 "construct starting at block 20; branch bypasses block 50"));
+                 "construct starting at block 20; branch bypasses continue target 50"));
 }
 
 TEST_F(SpvParserTest,
@@ -5849,7 +5970,7 @@ TEST_F(SpvParserTest,
   EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
   EXPECT_THAT(p->error(),
               Eq("Branch from block 50 to block 60 is an invalid exit from "
-                 "construct starting at block 50; branch bypasses block 80"));
+                 "construct starting at block 50; branch bypasses merge block 80"));
 }
 
 TEST_F(SpvParserTest, ClassifyCFGEdges_TooManyBackedges) {
@@ -6351,7 +6472,7 @@ TEST_F(SpvParserTest,
 }
 
 TEST_F(SpvParserTest,
-       FindIfSelectionInternalHeaders_Premerge_MultiCandidate_Error) {
+       FindIfSelectionInternalHeaders_Premerge_MultiCandidate_IsError) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -6491,7 +6612,7 @@ TEST_F(SpvParserTest,
 }
 
 TEST_F(SpvParserTest,
-       FindIfSelectionInternalHeaders_IfBreak_WithForwardToPremerge_Error) {
+       FindIfSelectionInternalHeaders_IfBreak_WithForwardToPremerge_IsError) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
