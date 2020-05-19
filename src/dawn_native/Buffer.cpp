@@ -18,6 +18,7 @@
 #include "dawn_native/Device.h"
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/ErrorData.h"
+#include "dawn_native/MapRequestTracker.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
 #include <cstdio>
@@ -72,6 +73,9 @@ namespace dawn_native {
             MaybeError MapWriteAsyncImpl(uint32_t serial) override {
                 UNREACHABLE();
                 return {};
+            }
+            void* GetMappedPointerImpl() override {
+                return mFakeMappedData.get();
             }
             void UnmapImpl() override {
                 UNREACHABLE();
@@ -267,8 +271,12 @@ namespace dawn_native {
         mState = BufferState::Mapped;
 
         if (GetDevice()->ConsumedError(MapReadAsyncImpl(mMapSerial))) {
+            // TODO(natlee@microsoft.com): if map op fails fire callback with DEVICE_LOST status
             return;
         }
+
+        MapRequestTracker* tracker = GetDevice()->GetMapRequestTracker();
+        tracker->Track(this, mMapSerial, false);
     }
 
     MaybeError BufferBase::SetSubDataImpl(uint32_t start, uint32_t count, const void* data) {
@@ -304,8 +312,12 @@ namespace dawn_native {
         mState = BufferState::Mapped;
 
         if (GetDevice()->ConsumedError(MapWriteAsyncImpl(mMapSerial))) {
+            // TODO(natlee@microsoft.com): if map op fails fire callback with DEVICE_LOST status
             return;
         }
+
+        MapRequestTracker* tracker = GetDevice()->GetMapRequestTracker();
+        tracker->Track(this, mMapSerial, true);
     }
 
     void BufferBase::Destroy() {
@@ -465,6 +477,15 @@ namespace dawn_native {
 
     bool BufferBase::IsMapped() const {
         return mState == BufferState::Mapped;
+    }
+
+    void BufferBase::OnMapCommandSerialFinished(uint32_t mapSerial, bool isWrite) {
+        void* data = GetMappedPointerImpl();
+        if (isWrite) {
+            CallMapWriteCallback(mapSerial, WGPUBufferMapAsyncStatus_Success, data, GetSize());
+        } else {
+            CallMapReadCallback(mapSerial, WGPUBufferMapAsyncStatus_Success, data, GetSize());
+        }
     }
 
 }  // namespace dawn_native

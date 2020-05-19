@@ -31,7 +31,6 @@ namespace dawn_native { namespace d3d12 {
 
     class CommandAllocatorManager;
     class DescriptorHeapAllocator;
-    class MapRequestTracker;
     class PlatformFunctions;
     class ResidencyManager;
     class ResourceAllocatorManager;
@@ -66,7 +65,6 @@ namespace dawn_native { namespace d3d12 {
         ComPtr<ID3D12CommandSignature> GetDrawIndirectSignature() const;
         ComPtr<ID3D12CommandSignature> GetDrawIndexedIndirectSignature() const;
 
-        MapRequestTracker* GetMapRequestTracker() const;
         CommandAllocatorManager* GetCommandAllocatorManager() const;
         ResidencyManager* GetResidencyManager() const;
 
@@ -179,7 +177,6 @@ namespace dawn_native { namespace d3d12 {
         SerialQueue<ComPtr<IUnknown>> mUsedComObjectRefs;
 
         std::unique_ptr<CommandAllocatorManager> mCommandAllocatorManager;
-        std::unique_ptr<MapRequestTracker> mMapRequestTracker;
         std::unique_ptr<ResourceAllocatorManager> mResourceAllocatorManager;
         std::unique_ptr<ResidencyManager> mResidencyManager;
 

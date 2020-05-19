@@ -266,7 +266,7 @@ namespace dawn_native { namespace null {
 
     struct BufferMapOperation : PendingOperation {
         virtual void Execute() {
-            buffer->MapOperationCompleted(serial, ptr, isWrite);
+            buffer->OnMapCommandSerialFinished(serial, isWrite);
         }
 
         Ref<Buffer> buffer;
@@ -294,14 +294,6 @@ namespace dawn_native { namespace null {
     MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {
         *mappedPointer = mBackingData.get();
         return {};
-    }
-
-    void Buffer::MapOperationCompleted(uint32_t serial, void* ptr, bool isWrite) {
-        if (isWrite) {
-            CallMapWriteCallback(serial, WGPUBufferMapAsyncStatus_Success, ptr, GetSize());
-        } else {
-            CallMapReadCallback(serial, WGPUBufferMapAsyncStatus_Success, ptr, GetSize());
-        }
     }
 
     void Buffer::CopyFromStaging(StagingBufferBase* staging,
@@ -339,6 +331,10 @@ namespace dawn_native { namespace null {
         operation->isWrite = isWrite;
 
         ToBackend(GetDevice())->AddPendingOperation(std::move(operation));
+    }
+
+    void* Buffer::GetMappedPointerImpl() {
+        return mBackingData.get();
     }
 
     void Buffer::UnmapImpl() {

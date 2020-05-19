@@ -51,7 +51,6 @@ namespace dawn_native { namespace metal {
                    const DeviceDescriptor* descriptor)
         : DeviceBase(adapter, descriptor),
           mMtlDevice([mtlDevice retain]),
-          mMapTracker(new MapRequestTracker(this)),
           mCompletedSerial(0) {
         [mMtlDevice retain];
     }
@@ -170,8 +169,6 @@ namespace dawn_native { namespace metal {
         CheckPassedSerials();
         Serial completedSerial = GetCompletedCommandSerial();
 
-        mMapTracker->Tick(completedSerial);
-
         if (mCommandContext.GetCommands() != nil) {
             SubmitPendingCommandBuffer();
         } else if (completedSerial == GetLastSubmittedCommandSerial()) {
@@ -243,10 +240,6 @@ namespace dawn_native { namespace metal {
                                  pendingSerial);
         [pendingCommands commit];
         [pendingCommands release];
-    }
-
-    MapRequestTracker* Device::GetMapTracker() const {
-        return mMapTracker.get();
     }
 
     ResultOrError<std::unique_ptr<StagingBufferBase>> Device::CreateStagingBuffer(size_t size) {
@@ -322,8 +315,6 @@ namespace dawn_native { namespace metal {
         ASSERT(GetState() == State::Disconnected);
 
         [mCommandContext.AcquireCommands() release];
-
-        mMapTracker = nullptr;
 
         [mCommandQueue release];
         mCommandQueue = nil;

@@ -236,12 +236,6 @@ namespace dawn_native { namespace vulkan {
 
         CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
         TransitionUsageNow(recordingContext, wgpu::BufferUsage::MapRead);
-
-        uint8_t* memory = mMemoryAllocation.GetMappedPointer();
-        ASSERT(memory != nullptr);
-
-        MapRequestTracker* tracker = device->GetMapRequestTracker();
-        tracker->Track(this, serial, memory, false);
         return {};
     }
 
@@ -250,17 +244,17 @@ namespace dawn_native { namespace vulkan {
 
         CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
         TransitionUsageNow(recordingContext, wgpu::BufferUsage::MapWrite);
-
-        uint8_t* memory = mMemoryAllocation.GetMappedPointer();
-        ASSERT(memory != nullptr);
-
-        MapRequestTracker* tracker = device->GetMapRequestTracker();
-        tracker->Track(this, serial, memory, true);
         return {};
     }
 
     void Buffer::UnmapImpl() {
         // No need to do anything, we keep CPU-visible memory mapped at all time.
+    }
+
+    void* Buffer::GetMappedPointerImpl() {
+        uint8_t* memory = mMemoryAllocation.GetMappedPointer();
+        ASSERT(memory != nullptr);
+        return memory;
     }
 
     void Buffer::DestroyImpl() {
@@ -270,36 +264,6 @@ namespace dawn_native { namespace vulkan {
             ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mHandle);
             mHandle = VK_NULL_HANDLE;
         }
-    }
-
-    // MapRequestTracker
-
-    MapRequestTracker::MapRequestTracker(Device* device) : mDevice(device) {
-    }
-
-    MapRequestTracker::~MapRequestTracker() {
-        ASSERT(mInflightRequests.Empty());
-    }
-
-    void MapRequestTracker::Track(Buffer* buffer, uint32_t mapSerial, void* data, bool isWrite) {
-        Request request;
-        request.buffer = buffer;
-        request.mapSerial = mapSerial;
-        request.data = data;
-        request.isWrite = isWrite;
-
-        mInflightRequests.Enqueue(std::move(request), mDevice->GetPendingCommandSerial());
-    }
-
-    void MapRequestTracker::Tick(Serial finishedSerial) {
-        for (auto& request : mInflightRequests.IterateUpTo(finishedSerial)) {
-            if (request.isWrite) {
-                request.buffer->OnMapWriteCommandSerialFinished(request.mapSerial, request.data);
-            } else {
-                request.buffer->OnMapReadCommandSerialFinished(request.mapSerial, request.data);
-            }
-        }
-        mInflightRequests.ClearUpTo(finishedSerial);
     }
 
 }}  // namespace dawn_native::vulkan

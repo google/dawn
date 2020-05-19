@@ -50,6 +50,7 @@ namespace dawn_native {
         wgpu::BufferUsage GetUsage() const;
 
         MaybeError MapAtCreation(uint8_t** mappedPointer);
+        void OnMapCommandSerialFinished(uint32_t mapSerial, bool isWrite);
 
         MaybeError ValidateCanUseInSubmitNow() const;
 
@@ -84,6 +85,7 @@ namespace dawn_native {
         virtual MaybeError MapWriteAsyncImpl(uint32_t serial) = 0;
         virtual void UnmapImpl() = 0;
         virtual void DestroyImpl() = 0;
+        virtual void* GetMappedPointerImpl() = 0;
 
         virtual bool IsMapWritable() const = 0;
         MaybeError CopyFromStagingBuffer();

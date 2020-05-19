@@ -215,6 +215,8 @@ source_set("dawn_native_sources") {
     "Forward.h",
     "Instance.cpp",
     "Instance.h",
+    "MapRequestTracker.cpp",
+    "MapRequestTracker.h",
     "ObjectBase.cpp",
     "ObjectBase.h",
     "PassResourceUsage.h",

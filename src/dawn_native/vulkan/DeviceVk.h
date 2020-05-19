@@ -37,7 +37,6 @@ namespace dawn_native { namespace vulkan {
     class BindGroupLayout;
     class BufferUploader;
     class FencedDeleter;
-    class MapRequestTracker;
     class RenderPassCache;
     class ResourceMemoryAllocator;
 
@@ -59,7 +58,6 @@ namespace dawn_native { namespace vulkan {
 
         BufferUploader* GetBufferUploader() const;
         FencedDeleter* GetFencedDeleter() const;
-        MapRequestTracker* GetMapRequestTracker() const;
         RenderPassCache* GetRenderPassCache() const;
 
         CommandRecordingContext* GetPendingRecordingContext();
@@ -147,7 +145,6 @@ namespace dawn_native { namespace vulkan {
 
         SerialQueue<Ref<BindGroupLayout>> mBindGroupLayoutsPendingDeallocation;
         std::unique_ptr<FencedDeleter> mDeleter;
-        std::unique_ptr<MapRequestTracker> mMapRequestTracker;
         std::unique_ptr<ResourceMemoryAllocator> mResourceMemoryAllocator;
         std::unique_ptr<RenderPassCache> mRenderPassCache;
 

@@ -45,8 +45,8 @@ namespace dawn_native { namespace opengl {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
 
         gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
-        void* data = gl.MapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-        *mappedPointer = reinterpret_cast<uint8_t*>(data);
+        mMappedData = gl.MapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+        *mappedPointer = reinterpret_cast<uint8_t*>(mMappedData);
         return {};
     }
 
@@ -64,8 +64,7 @@ namespace dawn_native { namespace opengl {
         // TODO(cwallez@chromium.org): this does GPU->CPU synchronization, we could require a high
         // version of OpenGL that would let us map the buffer unsynchronized.
         gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
-        void* data = gl.MapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
-        CallMapReadCallback(serial, WGPUBufferMapAsyncStatus_Success, data, GetSize());
+        mMappedData = gl.MapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
         return {};
     }
 
@@ -75,9 +74,12 @@ namespace dawn_native { namespace opengl {
         // TODO(cwallez@chromium.org): this does GPU->CPU synchronization, we could require a high
         // version of OpenGL that would let us map the buffer unsynchronized.
         gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
-        void* data = gl.MapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-        CallMapWriteCallback(serial, WGPUBufferMapAsyncStatus_Success, data, GetSize());
+        mMappedData = gl.MapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
         return {};
+    }
+
+    void* Buffer::GetMappedPointerImpl() {
+        return mMappedData;
     }
 
     void Buffer::UnmapImpl() {
@@ -85,6 +87,7 @@ namespace dawn_native { namespace opengl {
 
         gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
         gl.UnmapBuffer(GL_ARRAY_BUFFER);
+        mMappedData = nullptr;
     }
 
     void Buffer::DestroyImpl() {

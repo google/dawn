@@ -182,7 +182,6 @@ namespace dawn_native { namespace null {
       public:
         Buffer(Device* device, const BufferDescriptor* descriptor);
 
-        void MapOperationCompleted(uint32_t serial, void* ptr, bool isWrite);
         void CopyFromStaging(StagingBufferBase* staging,
                              uint64_t sourceOffset,
                              uint64_t destinationOffset,
@@ -201,6 +200,7 @@ namespace dawn_native { namespace null {
         bool IsMapWritable() const override;
         MaybeError MapAtCreationImpl(uint8_t** mappedPointer) override;
         void MapAsyncImplCommon(uint32_t serial, bool isWrite);
+        void* GetMappedPointerImpl() override;
 
         std::unique_ptr<uint8_t[]> mBackingData;
     };

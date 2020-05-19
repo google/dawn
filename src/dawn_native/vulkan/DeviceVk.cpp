@@ -82,7 +82,6 @@ namespace dawn_native { namespace vulkan {
             mDeleter = std::make_unique<FencedDeleter>(this);
         }
 
-        mMapRequestTracker = std::make_unique<MapRequestTracker>(this);
         mRenderPassCache = std::make_unique<RenderPassCache>(this);
         mResourceMemoryAllocator = std::make_unique<ResourceMemoryAllocator>(this);
 
@@ -167,7 +166,6 @@ namespace dawn_native { namespace vulkan {
         }
         mBindGroupLayoutsPendingDeallocation.ClearUpTo(completedSerial);
 
-        mMapRequestTracker->Tick(completedSerial);
         mResourceMemoryAllocator->Tick(completedSerial);
         mDeleter->Tick(completedSerial);
 
@@ -199,10 +197,6 @@ namespace dawn_native { namespace vulkan {
 
     VkQueue Device::GetQueue() const {
         return mQueue;
-    }
-
-    MapRequestTracker* Device::GetMapRequestTracker() const {
-        return mMapRequestTracker.get();
     }
 
     FencedDeleter* Device::GetFencedDeleter() const {
@@ -801,8 +795,6 @@ namespace dawn_native { namespace vulkan {
         // Releasing the uploader enqueues buffers to be released.
         // Call Tick() again to clear them before releasing the deleter.
         mDeleter->Tick(GetCompletedCommandSerial());
-
-        mMapRequestTracker = nullptr;
 
         // The VkRenderPasses in the cache can be destroyed immediately since all commands referring
         // to them are guaranteed to be finished executing.

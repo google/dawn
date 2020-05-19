@@ -233,14 +233,6 @@ namespace dawn_native { namespace d3d12 {
         return mResourceAllocation.GetGPUPointer();
     }
 
-    void Buffer::OnMapCommandSerialFinished(uint32_t mapSerial, void* data, bool isWrite) {
-        if (isWrite) {
-            CallMapWriteCallback(mapSerial, WGPUBufferMapAsyncStatus_Success, data, GetSize());
-        } else {
-            CallMapReadCallback(mapSerial, WGPUBufferMapAsyncStatus_Success, data, GetSize());
-        }
-    }
-
     bool Buffer::IsMapWritable() const {
         // TODO(enga): Handle CPU-visible memory on UMA
         return (GetUsage() & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) != 0;
@@ -256,6 +248,7 @@ namespace dawn_native { namespace d3d12 {
         DAWN_TRY(CheckHRESULT(GetD3D12Resource()->Map(0, &mWrittenMappedRange,
                                                       reinterpret_cast<void**>(mappedPointer)),
                               "D3D12 map at creation"));
+        mMappedData = reinterpret_cast<char*>(mappedPointer);
         return {};
     }
 
@@ -267,14 +260,11 @@ namespace dawn_native { namespace d3d12 {
 
         mWrittenMappedRange = {};
         D3D12_RANGE readRange = {0, static_cast<size_t>(GetSize())};
-        char* data = nullptr;
-        DAWN_TRY(
-            CheckHRESULT(GetD3D12Resource()->Map(0, &readRange, reinterpret_cast<void**>(&data)),
-                         "D3D12 map read async"));
+        DAWN_TRY(CheckHRESULT(
+            GetD3D12Resource()->Map(0, &readRange, reinterpret_cast<void**>(&mMappedData)),
+            "D3D12 map read async"));
         // There is no need to transition the resource to a new state: D3D12 seems to make the GPU
         // writes available when the fence is passed.
-        MapRequestTracker* tracker = ToBackend(GetDevice())->GetMapRequestTracker();
-        tracker->Track(this, serial, data, false);
         return {};
     }
 
@@ -285,14 +275,11 @@ namespace dawn_native { namespace d3d12 {
         DAWN_TRY(ToBackend(GetDevice())->GetResidencyManager()->LockHeap(heap));
 
         mWrittenMappedRange = {0, static_cast<size_t>(GetSize())};
-        char* data = nullptr;
-        DAWN_TRY(CheckHRESULT(
-            GetD3D12Resource()->Map(0, &mWrittenMappedRange, reinterpret_cast<void**>(&data)),
-            "D3D12 map write async"));
+        DAWN_TRY(CheckHRESULT(GetD3D12Resource()->Map(0, &mWrittenMappedRange,
+                                                      reinterpret_cast<void**>(&mMappedData)),
+                              "D3D12 map write async"));
         // There is no need to transition the resource to a new state: D3D12 seems to make the CPU
         // writes available on queue submission.
-        MapRequestTracker* tracker = ToBackend(GetDevice())->GetMapRequestTracker();
-        tracker->Track(this, serial, data, true);
         return {};
     }
 
@@ -303,6 +290,11 @@ namespace dawn_native { namespace d3d12 {
         Heap* heap = ToBackend(mResourceAllocation.GetResourceHeap());
         ToBackend(GetDevice())->GetResidencyManager()->UnlockHeap(heap);
         mWrittenMappedRange = {};
+        mMappedData = nullptr;
+    }
+
+    void* Buffer::GetMappedPointerImpl() {
+        return mMappedData;
     }
 
     void Buffer::DestroyImpl() {
@@ -323,31 +315,6 @@ namespace dawn_native { namespace d3d12 {
 
     bool Buffer::CheckAllocationMethodForTesting(AllocationMethod allocationMethod) const {
         return mResourceAllocation.GetInfo().mMethod == allocationMethod;
-    }
-
-    MapRequestTracker::MapRequestTracker(Device* device) : mDevice(device) {
-    }
-
-    MapRequestTracker::~MapRequestTracker() {
-        ASSERT(mInflightRequests.Empty());
-    }
-
-    void MapRequestTracker::Track(Buffer* buffer, uint32_t mapSerial, void* data, bool isWrite) {
-        Request request;
-        request.buffer = buffer;
-        request.mapSerial = mapSerial;
-        request.data = data;
-        request.isWrite = isWrite;
-
-        mInflightRequests.Enqueue(std::move(request), mDevice->GetPendingCommandSerial());
-    }
-
-    void MapRequestTracker::Tick(Serial finishedSerial) {
-        for (auto& request : mInflightRequests.IterateUpTo(finishedSerial)) {
-            request.buffer->OnMapCommandSerialFinished(request.mapSerial, request.data,
-                                                       request.isWrite);
-        }
-        mInflightRequests.ClearUpTo(finishedSerial);
     }
 
 }}  // namespace dawn_native::d3d12

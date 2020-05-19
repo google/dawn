@@ -153,6 +153,11 @@ namespace dawn_native { namespace opengl {
 
     MaybeError Device::TickImpl() {
         CheckPassedSerials();
+        if (GetCompletedCommandSerial() == GetLastSubmittedCommandSerial()) {
+            // If there's no GPU work in flight we still need to artificially increment the serial
+            // so that CPU operations waiting on GPU completion can know they don't have to wait.
+            ArtificiallyIncrementSerials();
+        }
         return {};
     }
 

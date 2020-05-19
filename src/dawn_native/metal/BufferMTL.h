@@ -29,8 +29,6 @@ namespace dawn_native { namespace metal {
         static ResultOrError<Buffer*> Create(Device* device, const BufferDescriptor* descriptor);
         id<MTLBuffer> GetMTLBuffer() const;
 
-        void OnMapCommandSerialFinished(uint32_t mapSerial, bool isWrite);
-
       private:
         using BufferBase::BufferBase;
         MaybeError Initialize();
@@ -40,30 +38,12 @@ namespace dawn_native { namespace metal {
         MaybeError MapWriteAsyncImpl(uint32_t serial) override;
         void UnmapImpl() override;
         void DestroyImpl() override;
+        void* GetMappedPointerImpl() override;
 
         bool IsMapWritable() const override;
         MaybeError MapAtCreationImpl(uint8_t** mappedPointer) override;
 
         id<MTLBuffer> mMtlBuffer = nil;
-    };
-
-    class MapRequestTracker {
-      public:
-        MapRequestTracker(Device* device);
-        ~MapRequestTracker();
-
-        void Track(Buffer* buffer, uint32_t mapSerial, bool isWrite);
-        void Tick(Serial finishedSerial);
-
-      private:
-        Device* mDevice;
-
-        struct Request {
-            Ref<Buffer> buffer;
-            uint32_t mapSerial;
-            bool isWrite;
-        };
-        SerialQueue<Request> mInflightRequests;
     };
 
 }}  // namespace dawn_native::metal

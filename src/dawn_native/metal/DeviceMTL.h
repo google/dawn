@@ -32,8 +32,6 @@
 
 namespace dawn_native { namespace metal {
 
-    class MapRequestTracker;
-
     class Device : public DeviceBase {
       public:
         static ResultOrError<Device*> Create(AdapterBase* adapter,
@@ -53,8 +51,6 @@ namespace dawn_native { namespace metal {
 
         CommandRecordingContext* GetPendingCommandContext();
         void SubmitPendingCommandBuffer();
-
-        MapRequestTracker* GetMapTracker() const;
 
         TextureBase* CreateTextureWrappingIOSurface(const ExternalImageDescriptor* descriptor,
                                                     IOSurfaceRef ioSurface,
@@ -104,7 +100,6 @@ namespace dawn_native { namespace metal {
 
         id<MTLDevice> mMtlDevice = nil;
         id<MTLCommandQueue> mCommandQueue = nil;
-        std::unique_ptr<MapRequestTracker> mMapTracker;
 
         CommandRecordingContext mCommandContext;
 

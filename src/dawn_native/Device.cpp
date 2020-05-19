@@ -30,6 +30,7 @@
 #include "dawn_native/Fence.h"
 #include "dawn_native/FenceSignalTracker.h"
 #include "dawn_native/Instance.h"
+#include "dawn_native/MapRequestTracker.h"
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/Queue.h"
 #include "dawn_native/RenderBundleEncoder.h"
@@ -102,6 +103,7 @@ namespace dawn_native {
         mCaches = std::make_unique<DeviceBase::Caches>();
         mErrorScopeTracker = std::make_unique<ErrorScopeTracker>(this);
         mFenceSignalTracker = std::make_unique<FenceSignalTracker>(this);
+        mMapRequestTracker = std::make_unique<MapRequestTracker>(this);
         mDynamicUploader = std::make_unique<DynamicUploader>(this);
         mDeprecationWarnings = std::make_unique<DeprecationWarnings>();
 
@@ -146,6 +148,7 @@ namespace dawn_native {
             // pending callbacks.
             mErrorScopeTracker->Tick(GetCompletedCommandSerial());
             mFenceSignalTracker->Tick(GetCompletedCommandSerial());
+            mMapRequestTracker->Tick(GetCompletedCommandSerial());
         }
 
         // At this point GPU operations are always finished, so we are in the disconnected state.
@@ -155,6 +158,7 @@ namespace dawn_native {
         mCurrentErrorScope->UnlinkForShutdown();
         mFenceSignalTracker = nullptr;
         mDynamicUploader = nullptr;
+        mMapRequestTracker = nullptr;
 
         // Tell the backend that it can free all the objects now that the GPU timeline is empty.
         ShutDownImpl();
@@ -299,6 +303,10 @@ namespace dawn_native {
 
     FenceSignalTracker* DeviceBase::GetFenceSignalTracker() const {
         return mFenceSignalTracker.get();
+    }
+
+    MapRequestTracker* DeviceBase::GetMapRequestTracker() const {
+        return mMapRequestTracker.get();
     }
 
     Serial DeviceBase::GetCompletedCommandSerial() const {
@@ -711,6 +719,7 @@ namespace dawn_native {
         mDynamicUploader->Deallocate(GetCompletedCommandSerial());
         mErrorScopeTracker->Tick(GetCompletedCommandSerial());
         mFenceSignalTracker->Tick(GetCompletedCommandSerial());
+        mMapRequestTracker->Tick(GetCompletedCommandSerial());
     }
 
     void DeviceBase::Reference() {
