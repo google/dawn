@@ -16,7 +16,9 @@
 #include "dawn_native/d3d12/BufferD3D12.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/ResidencyManagerD3D12.h"
+#include "dawn_native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.h"
 #include "tests/DawnTest.h"
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
 #include <vector>
@@ -32,7 +34,7 @@ constexpr wgpu::BufferUsage kMapWriteBufferUsage =
     wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
 constexpr wgpu::BufferUsage kNonMappableBufferUsage = wgpu::BufferUsage::CopyDst;
 
-class D3D12ResidencyTests : public DawnTest {
+class D3D12ResidencyTestBase : public DawnTest {
   protected:
     void SetUp() override {
         DawnTest::SetUp();
@@ -62,23 +64,6 @@ class D3D12ResidencyTests : public DawnTest {
         return buffers;
     }
 
-    bool CheckIfBufferIsResident(wgpu::Buffer buffer) const {
-        dawn_native::d3d12::Buffer* d3dBuffer =
-            reinterpret_cast<dawn_native::d3d12::Buffer*>(buffer.Get());
-        return d3dBuffer->CheckIsResidentForTesting();
-    }
-
-    bool CheckAllocationMethod(wgpu::Buffer buffer,
-                               dawn_native::AllocationMethod allocationMethod) const {
-        dawn_native::d3d12::Buffer* d3dBuffer =
-            reinterpret_cast<dawn_native::d3d12::Buffer*>(buffer.Get());
-        return d3dBuffer->CheckAllocationMethodForTesting(allocationMethod);
-    }
-
-    bool IsUMA() const {
-        return reinterpret_cast<dawn_native::d3d12::Device*>(device.Get())->GetDeviceInfo().isUMA;
-    }
-
     wgpu::Buffer CreateBuffer(uint32_t bufferSize, wgpu::BufferUsage usage) {
         wgpu::BufferDescriptor descriptor;
 
@@ -86,26 +71,6 @@ class D3D12ResidencyTests : public DawnTest {
         descriptor.usage = usage;
 
         return device.CreateBuffer(&descriptor);
-    }
-
-    static void MapReadCallback(WGPUBufferMapAsyncStatus status,
-                                const void* data,
-                                uint64_t,
-                                void* userdata) {
-        ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
-        ASSERT_NE(nullptr, data);
-
-        static_cast<D3D12ResidencyTests*>(userdata)->mMappedReadData = data;
-    }
-
-    static void MapWriteCallback(WGPUBufferMapAsyncStatus status,
-                                 void* data,
-                                 uint64_t,
-                                 void* userdata) {
-        ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
-        ASSERT_NE(nullptr, data);
-
-        static_cast<D3D12ResidencyTests*>(userdata)->mMappedWriteData = data;
     }
 
     void TouchBuffers(uint32_t beginIndex,
@@ -126,8 +91,50 @@ class D3D12ResidencyTests : public DawnTest {
     const void* mMappedReadData = nullptr;
 };
 
+class D3D12ResourceResidencyTests : public D3D12ResidencyTestBase {
+  protected:
+    bool CheckAllocationMethod(wgpu::Buffer buffer,
+                               dawn_native::AllocationMethod allocationMethod) const {
+        dawn_native::d3d12::Buffer* d3dBuffer =
+            reinterpret_cast<dawn_native::d3d12::Buffer*>(buffer.Get());
+        return d3dBuffer->CheckAllocationMethodForTesting(allocationMethod);
+    }
+
+    bool CheckIfBufferIsResident(wgpu::Buffer buffer) const {
+        dawn_native::d3d12::Buffer* d3dBuffer =
+            reinterpret_cast<dawn_native::d3d12::Buffer*>(buffer.Get());
+        return d3dBuffer->CheckIsResidentForTesting();
+    }
+
+    bool IsUMA() const {
+        return reinterpret_cast<dawn_native::d3d12::Device*>(device.Get())->GetDeviceInfo().isUMA;
+    }
+
+    static void MapReadCallback(WGPUBufferMapAsyncStatus status,
+                                const void* data,
+                                uint64_t,
+                                void* userdata) {
+        ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
+        ASSERT_NE(nullptr, data);
+
+        static_cast<D3D12ResourceResidencyTests*>(userdata)->mMappedReadData = data;
+    }
+
+    static void MapWriteCallback(WGPUBufferMapAsyncStatus status,
+                                 void* data,
+                                 uint64_t,
+                                 void* userdata) {
+        ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
+        ASSERT_NE(nullptr, data);
+
+        static_cast<D3D12ResourceResidencyTests*>(userdata)->mMappedWriteData = data;
+    }
+};
+
+class D3D12DescriptorResidencyTests : public D3D12ResidencyTestBase {};
+
 // Check that resources existing on suballocated heaps are made resident and evicted correctly.
-TEST_P(D3D12ResidencyTests, OvercommitSmallResources) {
+TEST_P(D3D12ResourceResidencyTests, OvercommitSmallResources) {
     // TODO(http://crbug.com/dawn/416): Tests fails on Intel HD 630 bot.
     DAWN_SKIP_TEST_IF(IsIntel() && IsBackendValidationEnabled());
 
@@ -169,7 +176,7 @@ TEST_P(D3D12ResidencyTests, OvercommitSmallResources) {
 
 // Check that resources existing on directly allocated heaps are made resident and evicted
 // correctly.
-TEST_P(D3D12ResidencyTests, OvercommitLargeResources) {
+TEST_P(D3D12ResourceResidencyTests, OvercommitLargeResources) {
     // Create directly-allocated buffers to fill half the budget.
     std::vector<wgpu::Buffer> bufferSet1 = AllocateBuffers(
         kDirectlyAllocatedResourceSize,
@@ -205,7 +212,7 @@ TEST_P(D3D12ResidencyTests, OvercommitLargeResources) {
 }
 
 // Check that calling MapReadAsync makes the buffer resident and keeps it locked resident.
-TEST_P(D3D12ResidencyTests, AsyncMappedBufferRead) {
+TEST_P(D3D12ResourceResidencyTests, AsyncMappedBufferRead) {
     // Create a mappable buffer.
     wgpu::Buffer buffer = CreateBuffer(4, kMapReadBufferUsage);
 
@@ -248,7 +255,7 @@ TEST_P(D3D12ResidencyTests, AsyncMappedBufferRead) {
 }
 
 // Check that calling MapWriteAsync makes the buffer resident and keeps it locked resident.
-TEST_P(D3D12ResidencyTests, AsyncMappedBufferWrite) {
+TEST_P(D3D12ResourceResidencyTests, AsyncMappedBufferWrite) {
     // Create a mappable buffer.
     wgpu::Buffer buffer = CreateBuffer(4, kMapWriteBufferUsage);
     // The mappable buffer should be resident.
@@ -287,7 +294,7 @@ TEST_P(D3D12ResidencyTests, AsyncMappedBufferWrite) {
 }
 
 // Check that overcommitting in a single submit works, then make sure the budget is enforced after.
-TEST_P(D3D12ResidencyTests, OvercommitInASingleSubmit) {
+TEST_P(D3D12ResourceResidencyTests, OvercommitInASingleSubmit) {
     // Create enough buffers to exceed the budget
     constexpr uint32_t numberOfBuffersToOvercommit = 5;
     std::vector<wgpu::Buffer> bufferSet1 = AllocateBuffers(
@@ -313,7 +320,7 @@ TEST_P(D3D12ResidencyTests, OvercommitInASingleSubmit) {
     }
 }
 
-TEST_P(D3D12ResidencyTests, SetExternalReservation) {
+TEST_P(D3D12ResourceResidencyTests, SetExternalReservation) {
     // Set an external reservation of 20% the budget. We should succesfully reserve the amount we
     // request.
     uint64_t amountReserved = dawn_native::d3d12::SetExternalMemoryReservation(
@@ -328,4 +335,89 @@ TEST_P(D3D12ResidencyTests, SetExternalReservation) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(D3D12ResidencyTests, D3D12Backend());
+// Checks that when a descriptor heap is bound, it is locked resident. Also checks that when a
+// previous descriptor heap becomes unbound, it is unlocked, placed in the LRU and can be evicted.
+TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
+    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
+
+    // Fill in a view heap with "view only" bindgroups (1x view per group) by creating a
+    // view bindgroup each draw. After HEAP_SIZE + 1 draws, the heaps must switch over.
+    renderPipelineDescriptor.vertexStage.module =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
+        #version 450
+        void main() {
+            const vec2 pos[3] = vec2[3](vec2(-1.f, 1.f), vec2(1.f, 1.f), vec2(-1.f, -1.f));
+            gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
+        })");
+
+    renderPipelineDescriptor.cFragmentStage.module =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
+        #version 450
+        layout (location = 0) out vec4 fragColor;
+        layout (set = 0, binding = 0) uniform colorBuffer {
+            vec4 color;
+        };
+        void main() {
+            fragColor = color;
+        })");
+
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
+    constexpr uint32_t kSize = 512;
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kSize, kSize);
+
+    wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
+    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
+
+    dawn_native::d3d12::Device* d3dDevice =
+        reinterpret_cast<dawn_native::d3d12::Device*>(device.Get());
+
+    dawn_native::d3d12::ShaderVisibleDescriptorAllocator* allocator =
+        d3dDevice->GetViewShaderVisibleDescriptorAllocator();
+    const uint64_t heapSize = allocator->GetShaderVisibleHeapSizeForTesting();
+
+    const Serial heapSerial = allocator->GetShaderVisibleHeapSerialForTesting();
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+
+        pass.SetPipeline(renderPipeline);
+
+        std::array<float, 4> redColor = {1, 0, 0, 1};
+        wgpu::Buffer uniformBuffer = utils::CreateBufferFromData(
+            device, &redColor, sizeof(redColor), wgpu::BufferUsage::Uniform);
+
+        for (uint32_t i = 0; i < heapSize + 1; ++i) {
+            pass.SetBindGroup(0, utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
+                                                      {{0, uniformBuffer, 0, sizeof(redColor)}}));
+            pass.Draw(3);
+        }
+
+        pass.EndPass();
+    }
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // Check the heap serial to ensure the heap has switched.
+    EXPECT_EQ(allocator->GetShaderVisibleHeapSerialForTesting(), heapSerial + 1);
+
+    // Check that currrently bound ShaderVisibleHeap is locked resident.
+    EXPECT_TRUE(allocator->IsShaderVisibleHeapLockedResidentForTesting());
+    // Check that the previously bound ShaderVisibleHeap was unlocked and was placed in the LRU
+    // cache.
+    EXPECT_TRUE(allocator->IsLastShaderVisibleHeapInLRUForTesting());
+    // Allocate enough buffers to exceed the budget, which will purge everything from the Residency
+    // LRU.
+    AllocateBuffers(kDirectlyAllocatedResourceSize,
+                    kRestrictedBudgetSize / kDirectlyAllocatedResourceSize,
+                    kNonMappableBufferUsage);
+    // Check that currrently bound ShaderVisibleHeap remained locked resident.
+    EXPECT_TRUE(allocator->IsShaderVisibleHeapLockedResidentForTesting());
+    // Check that the previously bound ShaderVisibleHeap has been evicted from the LRU cache.
+    EXPECT_FALSE(allocator->IsLastShaderVisibleHeapInLRUForTesting());
+}
+
+DAWN_INSTANTIATE_TEST(D3D12ResourceResidencyTests, D3D12Backend());
+DAWN_INSTANTIATE_TEST(D3D12DescriptorResidencyTests,
+                      D3D12Backend({"use_d3d12_small_shader_visible_heap"}));

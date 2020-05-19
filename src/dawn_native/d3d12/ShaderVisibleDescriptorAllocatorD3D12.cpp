@@ -16,6 +16,7 @@
 #include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/GPUDescriptorHeapAllocationD3D12.h"
+#include "dawn_native/d3d12/ResidencyManagerD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
 
@@ -114,6 +115,7 @@ namespace dawn_native { namespace d3d12 {
         // users.
         // TODO(dawn:256): Consider periodically triming to avoid OOM.
         if (mHeap != nullptr) {
+            mDevice->GetResidencyManager()->UnlockAllocation(mHeap.get());
             mPool.push_back({mDevice->GetPendingCommandSerial(), std::move(mHeap)});
         }
 
@@ -130,6 +132,14 @@ namespace dawn_native { namespace d3d12 {
             mHeapType, mDevice->IsToggleEnabled(Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
 
         if (descriptorHeap == nullptr) {
+            // The size in bytes of a descriptor heap is best calculated by the increment size
+            // multiplied by the number of descriptors. In practice, this is only an estimate and
+            // the actual size may vary depending on the driver.
+            const uint64_t kSize = mSizeIncrement * descriptorCount;
+
+            DAWN_TRY(
+                mDevice->GetResidencyManager()->EnsureCanAllocate(kSize, MemorySegment::Local));
+
             ComPtr<ID3D12DescriptorHeap> d3d12DescriptorHeap;
             D3D12_DESCRIPTOR_HEAP_DESC heapDescriptor;
             heapDescriptor.Type = mHeapType;
@@ -141,9 +151,10 @@ namespace dawn_native { namespace d3d12 {
                                             &heapDescriptor, IID_PPV_ARGS(&d3d12DescriptorHeap)),
                                         "ID3D12Device::CreateDescriptorHeap"));
             descriptorHeap = std::make_unique<ShaderVisibleDescriptorHeap>(
-                std::move(d3d12DescriptorHeap), mSizeIncrement * descriptorCount);
+                std::move(d3d12DescriptorHeap), kSize);
         }
 
+        DAWN_TRY(mDevice->GetResidencyManager()->LockAllocation(descriptorHeap.get()));
         // Create a FIFO buffer from the recently created heap.
         mHeap = std::move(descriptorHeap);
         mAllocator = RingBufferAllocator(descriptorCount);
@@ -166,6 +177,15 @@ namespace dawn_native { namespace d3d12 {
 
     uint64_t ShaderVisibleDescriptorAllocator::GetShaderVisiblePoolSizeForTesting() const {
         return mPool.size();
+    }
+
+    bool ShaderVisibleDescriptorAllocator::IsShaderVisibleHeapLockedResidentForTesting() const {
+        return mHeap->IsResidencyLocked();
+    }
+
+    bool ShaderVisibleDescriptorAllocator::IsLastShaderVisibleHeapInLRUForTesting() const {
+        ASSERT(!mPool.empty());
+        return mPool.back().heap->IsInResidencyLRUCache();
     }
 
     bool ShaderVisibleDescriptorAllocator::IsAllocationStillValid(

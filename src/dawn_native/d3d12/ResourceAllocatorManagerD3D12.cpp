@@ -282,7 +282,7 @@ namespace dawn_native { namespace d3d12 {
 
         // Before calling CreatePlacedResource, we must ensure the target heap is resident.
         // CreatePlacedResource will fail if it is not.
-        DAWN_TRY(mDevice->GetResidencyManager()->LockHeap(heap));
+        DAWN_TRY(mDevice->GetResidencyManager()->LockAllocation(heap));
 
         // With placed resources, a single heap can be reused.
         // The resource placed at an offset is only reclaimed
@@ -300,7 +300,7 @@ namespace dawn_native { namespace d3d12 {
 
         // After CreatePlacedResource has finished, the heap can be unlocked from residency. This
         // will insert it into the residency LRU.
-        mDevice->GetResidencyManager()->UnlockHeap(heap);
+        mDevice->GetResidencyManager()->UnlockAllocation(heap);
 
         return ResourceHeapAllocation{allocation.GetInfo(), allocation.GetOffset(),
                                       std::move(placedResource), heap};

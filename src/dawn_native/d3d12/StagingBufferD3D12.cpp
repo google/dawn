@@ -44,8 +44,8 @@ namespace dawn_native { namespace d3d12 {
 
         // The mapped buffer can be accessed at any time, so it must be locked to ensure it is never
         // evicted. This buffer should already have been made resident when it was created.
-        DAWN_TRY(
-            mDevice->GetResidencyManager()->LockHeap(ToBackend(mUploadHeap.GetResourceHeap())));
+        DAWN_TRY(mDevice->GetResidencyManager()->LockAllocation(
+            ToBackend(mUploadHeap.GetResourceHeap())));
 
         return CheckHRESULT(GetResource()->Map(0, nullptr, &mMappedPointer), "ID3D12Resource::Map");
     }
@@ -59,7 +59,7 @@ namespace dawn_native { namespace d3d12 {
 
         // The underlying heap was locked in residency upon creation. We must unlock it when this
         // buffer becomes unmapped.
-        mDevice->GetResidencyManager()->UnlockHeap(ToBackend(mUploadHeap.GetResourceHeap()));
+        mDevice->GetResidencyManager()->UnlockAllocation(ToBackend(mUploadHeap.GetResourceHeap()));
 
         // Invalidate the CPU virtual address & flush cache (if needed).
         GetResource()->Unmap(0, nullptr);

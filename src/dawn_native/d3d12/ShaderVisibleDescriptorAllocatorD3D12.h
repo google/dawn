@@ -67,6 +67,8 @@ namespace dawn_native { namespace d3d12 {
         Serial GetShaderVisibleHeapSerialForTesting() const;
         uint64_t GetShaderVisibleHeapSizeForTesting() const;
         uint64_t GetShaderVisiblePoolSizeForTesting() const;
+        bool IsShaderVisibleHeapLockedResidentForTesting() const;
+        bool IsLastShaderVisibleHeapInLRUForTesting() const;
 
         bool IsAllocationStillValid(const GPUDescriptorHeapAllocation& allocation) const;
 

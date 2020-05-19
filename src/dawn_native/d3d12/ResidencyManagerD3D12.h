@@ -33,8 +33,8 @@ namespace dawn_native { namespace d3d12 {
       public:
         ResidencyManager(Device* device);
 
-        MaybeError LockHeap(Heap* heap);
-        void UnlockHeap(Heap* heap);
+        MaybeError LockAllocation(Pageable* pageable);
+        void UnlockAllocation(Pageable* pageable);
 
         MaybeError EnsureCanAllocate(uint64_t allocationSize, MemorySegment memorySegment);
         MaybeError EnsureHeapsAreResident(Heap** heaps, size_t heapCount);
