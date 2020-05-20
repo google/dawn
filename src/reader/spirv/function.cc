@@ -23,10 +23,12 @@
 #include "source/opt/function.h"
 #include "source/opt/instruction.h"
 #include "source/opt/module.h"
+#include "src/ast/array_accessor_expression.h"
 #include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/member_accessor_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/uint_literal.h"
@@ -1492,32 +1494,31 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
   return Fail() << "unhandled instruction with opcode " << inst.opcode();
 }
 
+TypedExpression FunctionEmitter::MakeOperand(
+    const spvtools::opt::Instruction& inst,
+    uint32_t operand_index) {
+  auto expr = this->MakeExpression(inst.GetSingleWordInOperand(operand_index));
+  return parser_impl_.RectifyOperandSignedness(inst.opcode(), std::move(expr));
+}
+
 TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     const spvtools::opt::Instruction& inst) {
   if (inst.result_id() == 0) {
     return {};
   }
 
-  // TODO(dneto): Fill in the following cases.
-
-  auto operand = [this, &inst](uint32_t operand_index) {
-    auto expr =
-        this->MakeExpression(inst.GetSingleWordInOperand(operand_index));
-    return parser_impl_.RectifyOperandSignedness(inst.opcode(),
-                                                 std::move(expr));
-  };
+  const auto opcode = inst.opcode();
 
   ast::type::Type* ast_type =
       inst.type_id() != 0 ? parser_impl_.ConvertType(inst.type_id()) : nullptr;
 
-  auto binary_op = ConvertBinaryOp(inst.opcode());
+  auto binary_op = ConvertBinaryOp(opcode);
   if (binary_op != ast::BinaryOp::kNone) {
-    auto arg0 = operand(0);
-    auto arg1 = operand(1);
+    auto arg0 = MakeOperand(inst, 0);
+    auto arg1 = MakeOperand(inst, 1);
     auto binary_expr = std::make_unique<ast::BinaryExpression>(
         binary_op, std::move(arg0.expr), std::move(arg1.expr));
-    auto* forced_result_ty =
-        parser_impl_.ForcedResultType(inst.opcode(), arg0.type);
+    auto* forced_result_ty = parser_impl_.ForcedResultType(opcode, arg0.type);
     if (forced_result_ty && forced_result_ty != ast_type) {
       return {ast_type, std::make_unique<ast::AsExpression>(
                             ast_type, std::move(binary_expr))};
@@ -1526,12 +1527,11 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   }
 
   auto unary_op = ast::UnaryOp::kNegation;
-  if (GetUnaryOp(inst.opcode(), &unary_op)) {
-    auto arg0 = operand(0);
+  if (GetUnaryOp(opcode, &unary_op)) {
+    auto arg0 = MakeOperand(inst, 0);
     auto unary_expr = std::make_unique<ast::UnaryOpExpression>(
         unary_op, std::move(arg0.expr));
-    auto* forced_result_ty =
-        parser_impl_.ForcedResultType(inst.opcode(), arg0.type);
+    auto* forced_result_ty = parser_impl_.ForcedResultType(opcode, arg0.type);
     if (forced_result_ty && forced_result_ty != ast_type) {
       return {ast_type, std::make_unique<ast::AsExpression>(
                             ast_type, std::move(unary_expr))};
@@ -1539,16 +1539,19 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     return {ast_type, std::move(unary_expr)};
   }
 
-  if (inst.opcode() == SpvOpBitcast) {
-    auto* target_ty = parser_impl_.ConvertType(inst.type_id());
-    return {target_ty,
-            std::make_unique<ast::AsExpression>(target_ty, operand(0).expr)};
+  if (opcode == SpvOpAccessChain || opcode == SpvOpInBoundsAccessChain) {
+    return MakeAccessChain(inst);
   }
 
-  auto negated_op = NegatedFloatCompare(inst.opcode());
+  if (opcode == SpvOpBitcast) {
+    return {ast_type, std::make_unique<ast::AsExpression>(
+                          ast_type, MakeOperand(inst, 0).expr)};
+  }
+
+  auto negated_op = NegatedFloatCompare(opcode);
   if (negated_op != ast::BinaryOp::kNone) {
-    auto arg0 = operand(0);
-    auto arg1 = operand(1);
+    auto arg0 = MakeOperand(inst, 0);
+    auto arg1 = MakeOperand(inst, 1);
     auto binary_expr = std::make_unique<ast::BinaryExpression>(
         negated_op, std::move(arg0.expr), std::move(arg1.expr));
     auto negated_expr = std::make_unique<ast::UnaryOpExpression>(
@@ -1578,8 +1581,6 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   //    OpGenericCastToPtr // Not in Vulkan
   //    OpGenericCastToPtrExplicit // Not in Vulkan
   //
-  //    OpAccessChain
-  //    OpInBoundsAccessChain
   //    OpArrayLength
   //    OpVectorExtractDynamic
   //    OpVectorInsertDynamic
@@ -1587,6 +1588,130 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   //    OpCompositeInsert
 
   return {};
+}
+
+TypedExpression FunctionEmitter::MakeAccessChain(
+    const spvtools::opt::Instruction& inst) {
+  if (inst.NumInOperands() < 1) {
+    // Binary parsing will fail on this anyway.
+    Fail() << "invalid access chain: has no input operands";
+    return {};
+  }
+
+  // A SPIR-V access chain is a single instruction with multiple indices
+  // walking down into composites.  The Tint AST represents this as ever-deeper
+  // nested indexing expresions.
+  // Start off with an expression for the base, and then bury that inside
+  // nested indexing expressions.
+  TypedExpression current_expr(MakeOperand(inst, 0));
+
+  const auto constants = constant_mgr_->GetOperandConstants(&inst);
+  static const char* swizzles[] = {"x", "y", "z", "w"};
+
+  const auto base_id = inst.GetSingleWordInOperand(0);
+  const auto ptr_ty_id = def_use_mgr_->GetDef(base_id)->type_id();
+  const auto* ptr_type = type_mgr_->GetType(ptr_ty_id);
+  if (!ptr_type || !ptr_type->AsPointer()) {
+    Fail() << "Access chain %" << inst.result_id()
+                  << " base pointer is not of pointer type";
+    return {};
+  }
+  const auto* pointee_type = ptr_type->AsPointer()->pointee_type();
+  const auto num_in_operands = inst.NumInOperands();
+  for (uint32_t index = 1; index < num_in_operands; ++index) {
+    const auto* index_const =
+        constants[index] ? constants[index]->AsIntConstant() : nullptr;
+    const int64_t index_const_val =
+        index_const ? index_const->GetSignExtendedValue() : 0;
+    std::unique_ptr<ast::Expression> next_expr;
+    switch (pointee_type->kind()) {
+      case spvtools::opt::analysis::Type::kVector:
+        if (index_const) {
+          // Try generating a MemberAccessor expression.
+          if (index_const_val < 0 ||
+              pointee_type->AsVector()->element_count() <= index_const_val) {
+            Fail() << "Access chain %" << inst.result_id() << " index %"
+                          << inst.GetSingleWordInOperand(index) << " value "
+                          << index_const_val
+                          << " is out of bounds for vector of "
+                          << pointee_type->AsVector()->element_count()
+                          << " elements";
+            return {};
+          }
+          if (uint64_t(index_const_val) >=
+              sizeof(swizzles) / sizeof(swizzles[0])) {
+            Fail() << "internal error: swizzle index " << index_const_val
+                   << " is too big. Max handled index is "
+                   << ((sizeof(swizzles) / sizeof(swizzles[0])) - 1);
+          }
+          auto letter_index = std::make_unique<ast::IdentifierExpression>(
+              swizzles[index_const_val]);
+          next_expr = std::make_unique<ast::MemberAccessorExpression>(
+              std::move(current_expr.expr), std::move(letter_index));
+        } else {
+          // Non-constant index. Use array syntax
+          next_expr = std::make_unique<ast::ArrayAccessorExpression>(
+              std::move(current_expr.expr),
+              std::move(MakeOperand(inst, index).expr));
+        }
+        pointee_type = pointee_type->AsVector()->element_type();
+        break;
+      case spvtools::opt::analysis::Type::kMatrix:
+        // Use array syntax.
+        next_expr = std::make_unique<ast::ArrayAccessorExpression>(
+            std::move(current_expr.expr), std::move(MakeOperand(inst, index).expr));
+        pointee_type = pointee_type->AsMatrix()->element_type();
+        break;
+      case spvtools::opt::analysis::Type::kArray:
+        next_expr = std::make_unique<ast::ArrayAccessorExpression>(
+            std::move(current_expr.expr), std::move(MakeOperand(inst, index).expr));
+        pointee_type = pointee_type->AsArray()->element_type();
+        break;
+      case spvtools::opt::analysis::Type::kRuntimeArray:
+        next_expr = std::make_unique<ast::ArrayAccessorExpression>(
+            std::move(current_expr.expr), std::move(MakeOperand(inst, index).expr));
+        pointee_type = pointee_type->AsRuntimeArray()->element_type();
+        break;
+      case spvtools::opt::analysis::Type::kStruct: {
+        if (!index_const) {
+          Fail() << "Access chain %" << inst.result_id() << " index %"
+                        << inst.GetSingleWordInOperand(index)
+                        << " is a non-constant index into a structure %"
+                        << type_mgr_->GetId(pointee_type);
+          return {};
+        }
+        if ((index_const_val < 0) ||
+            pointee_type->AsStruct()->element_types().size() <=
+                uint64_t(index_const_val)) {
+          Fail() << "Access chain %" << inst.result_id()
+                        << " index value " << index_const_val
+                        << " is out of bounds for structure %"
+                        << type_mgr_->GetId(pointee_type) << " having "
+                        << pointee_type->AsStruct()->element_types().size()
+                        << " elements";
+          return {};
+        }
+        auto member_access =
+            std::make_unique<ast::IdentifierExpression>(namer_.GetMemberName(
+                type_mgr_->GetId(pointee_type), uint32_t(index_const_val)));
+
+        next_expr = std::make_unique<ast::MemberAccessorExpression>(
+            std::move(current_expr.expr), std::move(member_access));
+        pointee_type =
+            pointee_type->AsStruct()->element_types()[index_const_val];
+        break;
+     }
+      default:
+        Fail() << "Access chain with unknown pointee type %"
+                      << type_mgr_->GetId(pointee_type) << " "
+                      << pointee_type->str();
+        return {};
+    }
+    current_expr.reset(TypedExpression(
+          parser_impl_.ConvertType(type_mgr_->GetId(pointee_type)),
+          std::move(next_expr)));
+  }
+  return current_expr;
 }
 
 }  // namespace spirv

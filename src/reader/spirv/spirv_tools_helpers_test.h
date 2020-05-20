@@ -28,6 +28,10 @@ namespace test {
 /// are preserved.
 std::vector<uint32_t> Assemble(const std::string& spirv_assembly);
 
+/// Attempts to assemble given SPIR-V assembly text.  Expect it to fail.
+/// @returns the failure message.
+std::string AssembleFailure(const std::string& spirv_assembly);
+
 }  // namespace test
 }  // namespace spirv
 }  // namespace reader

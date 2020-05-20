@@ -316,6 +316,21 @@ class FunctionEmitter {
   ast::type::Type* GetVariableStoreType(
       const spvtools::opt::Instruction& var_decl_inst);
 
+  /// Returns an expression for an instruction operand. Signedness conversion is
+  /// performed to match the result type of the SPIR-V instruction.
+  /// @param inst the SPIR-V instruction
+  /// @param operand_index the index of the operand, counting 0 as the first
+  /// input operand
+  /// @returns a new expression node
+  TypedExpression MakeOperand(const spvtools::opt::Instruction& inst,
+                              uint32_t operand_index);
+
+  /// Returns an expression for a SPIR-V OpAccessChain or OpInBoundsAccessChain
+  /// instruction.
+  /// @param inst the SPIR-V instruction
+  /// @returns an expression
+  TypedExpression MakeAccessChain(const spvtools::opt::Instruction& inst);
+
   /// Finds the header block for a structured construct that we can "break"
   /// out from, from deeply nested control flow, if such a block exists.
   /// If the construct is:

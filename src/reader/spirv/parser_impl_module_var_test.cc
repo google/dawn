@@ -99,6 +99,20 @@ TEST_F(SpvParserTest, ModuleScopeVar_BadPointerType) {
                                     "AST type for SPIR-V type with ID: 3"));
 }
 
+TEST_F(SpvParserTest, ModuleScopeVar_NonPointerType) {
+  auto* p = parser(test::Assemble(R"(
+    %float = OpTypeFloat 32
+    %5 = OpTypeFunction %float
+    %3 = OpTypePointer Private %5
+    %52 = OpVariable %float Private
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+  EXPECT_FALSE(p->RegisterTypes());
+  EXPECT_THAT(
+      p->error(),
+      HasSubstr("SPIR-V pointer type with ID 3 has invalid pointee type 5"));
+}
+
 TEST_F(SpvParserTest, ModuleScopeVar_AnonWorkgroupVar) {
   auto* p = parser(test::Assemble(R"(
     %float = OpTypeFloat 32

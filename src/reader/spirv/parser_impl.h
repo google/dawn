@@ -65,6 +65,9 @@ struct TypedExpression {
   TypedExpression(TypedExpression&& other);
   /// Destructor
   ~TypedExpression();
+  /// Takes values from another typed expression.
+  /// @param other the other typed expression
+  void reset(TypedExpression&& other);
   /// The type
   ast::type::Type* type;
   /// The expression

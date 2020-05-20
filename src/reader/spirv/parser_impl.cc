@@ -183,6 +183,11 @@ TypedExpression::TypedExpression(TypedExpression&& other)
 
 TypedExpression::~TypedExpression() {}
 
+void TypedExpression::reset(TypedExpression&& other) {
+  type = other.type;
+  expr = std::move(other.expr);
+}
+
 ParserImpl::ParserImpl(Context* ctx, const std::vector<uint32_t>& spv_binary)
     : Reader(ctx),
       spv_binary_(spv_binary),
@@ -785,6 +790,10 @@ bool ParserImpl::EmitModuleScopeVariables() {
       return Fail() << "internal error: failed to register Tint AST type for "
                        "SPIR-V type with ID: "
                     << var.type_id();
+    }
+    if (!ast_type->IsPointer()) {
+      return Fail() << "variable with ID " << var.result_id()
+                    << " has non-pointer type " << var.type_id();
     }
     auto* ast_store_type = ast_type->AsPointer()->type();
     auto ast_var =
