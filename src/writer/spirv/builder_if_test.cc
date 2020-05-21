@@ -605,9 +605,68 @@ OpBranch %1
 TEST_F(BuilderTest, DISABLED_If_WithConditionalContinue) {
   FAIL();
 }
-TEST_F(BuilderTest, DISABLED_If_WithElseContinue) {
-  FAIL();
+
+TEST_F(BuilderTest, If_WithElseContinue) {
+  ast::type::BoolType bool_type;
+  // loop {
+  //   if (true) {
+  //   } else {
+  //     continue;
+  //   }
+  // }
+  auto cond = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::BoolLiteral>(&bool_type, true));
+
+  ast::StatementList if_body;
+  ast::StatementList else_body;
+  else_body.push_back(std::make_unique<ast::ContinueStatement>());
+
+  ast::ElseStatementList else_stmts;
+  else_stmts.push_back(
+      std::make_unique<ast::ElseStatement>(std::move(else_body)));
+
+  auto if_stmt =
+      std::make_unique<ast::IfStatement>(std::move(cond), std::move(if_body));
+  if_stmt->set_else_statements(std::move(else_stmts));
+
+  ast::StatementList loop_body;
+  loop_body.push_back(std::move(if_stmt));
+
+  ast::LoopStatement expr(std::move(loop_body), {});
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+
+  EXPECT_TRUE(b.GenerateLoopStatement(&expr)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
+%6 = OpConstantTrue %5
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpBranch %1
+%1 = OpLabel
+OpLoopMerge %2 %3 None
+OpBranch %4
+%4 = OpLabel
+OpSelectionMerge %7 None
+OpBranchConditional %6 %8 %9
+%8 = OpLabel
+OpBranch %7
+%9 = OpLabel
+OpBranch %3
+%7 = OpLabel
+OpBranch %3
+%3 = OpLabel
+OpBranch %1
+%2 = OpLabel
+)");
 }
+
 TEST_F(BuilderTest, DISABLED_If_WithElseConditionalContinue) {
   FAIL();
 }
