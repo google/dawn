@@ -37,6 +37,7 @@ namespace dawn_native { namespace vulkan {
     }
 
     MaybeError ShaderModule::Initialize() {
+        DAWN_TRY(InitializeBase());
         const std::vector<uint32_t>& spirv = GetSpirv();
 
         // Use SPIRV-Cross to extract info from the SPIRV even if Vulkan consumes SPIRV. We want to

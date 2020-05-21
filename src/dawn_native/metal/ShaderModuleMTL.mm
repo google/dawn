@@ -67,6 +67,7 @@ namespace dawn_native { namespace metal {
     }
 
     MaybeError ShaderModule::Initialize() {
+        DAWN_TRY(InitializeBase());
         const std::vector<uint32_t>& spirv = GetSpirv();
 
         if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {

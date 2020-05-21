@@ -43,6 +43,8 @@ namespace dawn_native {
 
     class ShaderModuleBase : public CachedObject {
       public:
+        enum class Type { Undefined, Spirv, Wgsl };
+
         ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModuleBase() override;
 
@@ -89,6 +91,7 @@ namespace dawn_native {
       protected:
         static MaybeError CheckSpvcSuccess(shaderc_spvc_status status, const char* error_msg);
         shaderc_spvc::CompileOptions GetCompileOptions() const;
+        MaybeError InitializeBase();
 
         shaderc_spvc::Context mSpvcContext;
 
@@ -102,7 +105,9 @@ namespace dawn_native {
         MaybeError ExtractSpirvInfoWithSpvc();
         MaybeError ExtractSpirvInfoWithSpirvCross(const spirv_cross::Compiler& compiler);
 
+        Type mType;
         std::vector<uint32_t> mSpirv;
+        std::string mWgsl;
 
         ModuleBindingInfo mBindingInfo;
         std::bitset<kMaxVertexAttributes> mUsedVertexAttributes;

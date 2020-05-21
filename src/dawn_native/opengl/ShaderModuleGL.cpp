@@ -68,6 +68,7 @@ namespace dawn_native { namespace opengl {
     }
 
     MaybeError ShaderModule::Initialize() {
+        DAWN_TRY(InitializeBase());
         const std::vector<uint32_t>& spirv = GetSpirv();
 
         std::unique_ptr<spirv_cross::CompilerGLSL> compilerImpl;
