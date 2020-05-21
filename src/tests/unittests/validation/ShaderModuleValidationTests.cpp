@@ -115,3 +115,16 @@ TEST_F(ShaderModuleValidationTest, NoChainedDescriptor) {
   wgpu::ShaderModuleDescriptor desc = {};
   ASSERT_DEVICE_ERROR(device.CreateShaderModule(&desc));
 }
+
+// Test that it is not allowed to use combined texture and sampler.
+// TODO(jiawei.shao@intel.com): support extracting  combined texture and sampler in spvc.
+TEST_F(ShaderModuleValidationTest, CombinedTextureAndSampler) {
+    const char* shader = R"(
+        #version 450
+        layout (set = 0, binding = 0) uniform sampler2D texture;
+        void main() {
+        })";
+
+    ASSERT_DEVICE_ERROR(
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, shader));
+}

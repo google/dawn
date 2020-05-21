@@ -572,6 +572,10 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Push constants aren't supported.");
         }
 
+        if (resources.sampled_images.size() > 0) {
+            return DAWN_VALIDATION_ERROR("Combined images and samplers aren't supported.");
+        }
+
         // Fill in bindingInfo with the SPIRV bindings
         auto ExtractResourcesBinding =
             [this](const spirv_cross::SmallVector<spirv_cross::Resource>& resources,
