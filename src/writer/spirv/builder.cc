@@ -1231,7 +1231,15 @@ uint32_t Builder::GenerateCastExpression(ast::CastExpression* cast) {
     op = spv::Op::OpConvertFToS;
   } else if (from_type->IsF32() && to_type->IsU32()) {
     op = spv::Op::OpConvertFToU;
+  } else if ((from_type->IsU32() && to_type->IsU32()) ||
+             (from_type->IsI32() && to_type->IsI32()) ||
+             (from_type->IsF32() && to_type->IsF32())) {
+    op = spv::Op::OpCopyObject;
+  } else if ((from_type->IsI32() && to_type->IsU32()) ||
+             (from_type->IsU32() && to_type->IsI32())) {
+    op = spv::Op::OpBitcast;
   }
+
   if (op == spv::Op::OpNop) {
     error_ = "unable to determine conversion type for cast, from: " +
              from_type->type_name() + " to: " + to_type->type_name();

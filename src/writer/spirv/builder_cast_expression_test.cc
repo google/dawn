@@ -21,6 +21,8 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
+#include "src/ast/type/u32_type.h"
+#include "src/ast/uint_literal.h"
 #include "src/context.h"
 #include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
@@ -33,9 +35,57 @@ namespace {
 
 using BuilderTest = testing::Test;
 
-TEST_F(BuilderTest, DISABLED_Cast_FloatToU32) {}
+TEST_F(BuilderTest, Cast_FloatToU32) {
+  ast::type::U32Type u32;
+  ast::type::F32Type f32;
 
-TEST_F(BuilderTest, DISABLED_Cast_FloatToI32) {}
+  ast::CastExpression cast(&u32,
+                           std::make_unique<ast::ScalarConstructorExpression>(
+                               std::make_unique<ast::FloatLiteral>(&f32, 2.4)));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateCastExpression(&cast), 1u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 0
+%3 = OpTypeFloat 32
+%4 = OpConstant %3 2.4000001
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%1 = OpConvertFToU %2 %4
+)");
+}
+
+TEST_F(BuilderTest, Cast_FloatToI32) {
+  ast::type::I32Type i32;
+  ast::type::F32Type f32;
+
+  ast::CastExpression cast(&i32,
+                           std::make_unique<ast::ScalarConstructorExpression>(
+                               std::make_unique<ast::FloatLiteral>(&f32, 2.4)));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateCastExpression(&cast), 1u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+%3 = OpTypeFloat 32
+%4 = OpConstant %3 2.4000001
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%1 = OpConvertFToS %2 %4
+)");
+}
 
 TEST_F(BuilderTest, Cast_I32ToFloat) {
   ast::type::I32Type i32;
@@ -63,7 +113,31 @@ TEST_F(BuilderTest, Cast_I32ToFloat) {
 )");
 }
 
-TEST_F(BuilderTest, DISABLED_Cast_U32ToFloat) {}
+TEST_F(BuilderTest, Cast_U32ToFloat) {
+  ast::type::U32Type u32;
+  ast::type::F32Type f32;
+
+  ast::CastExpression cast(&f32,
+                           std::make_unique<ast::ScalarConstructorExpression>(
+                               std::make_unique<ast::UintLiteral>(&u32, 2)));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateCastExpression(&cast), 1u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%3 = OpTypeInt 32 0
+%4 = OpConstant %3 2
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%1 = OpConvertUToF %2 %4
+)");
+}
 
 TEST_F(BuilderTest, Cast_WithLoad) {
   ast::type::F32Type f32;
@@ -100,9 +174,160 @@ TEST_F(BuilderTest, Cast_WithLoad) {
 )");
 }
 
-TEST_F(BuilderTest, DISABLED_Cast_WithAlias) {}
+TEST_F(BuilderTest, Cast_WithAlias) {
+  ast::type::I32Type i32;
+  ast::type::F32Type f32;
 
-// TODO(dsinclair): Are here i32 -> u32 and u32->i32 casts?
+  // type Int = i32
+  // cast<Int>(1.f)
+
+  ast::type::AliasType alias("Int", &i32);
+
+  ast::CastExpression cast(&alias,
+                           std::make_unique<ast::ScalarConstructorExpression>(
+                               std::make_unique<ast::FloatLiteral>(&f32, 2.3)));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateCastExpression(&cast), 1u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+%3 = OpTypeFloat 32
+%4 = OpConstant %3 2.29999995
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%1 = OpConvertFToS %2 %4
+)");
+}
+
+TEST_F(BuilderTest, Cast_I32ToU32) {
+  ast::type::U32Type u32;
+  ast::type::I32Type i32;
+
+  ast::CastExpression cast(&u32,
+                           std::make_unique<ast::ScalarConstructorExpression>(
+                               std::make_unique<ast::IntLiteral>(&i32, 2)));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateCastExpression(&cast), 1u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 0
+%3 = OpTypeInt 32 1
+%4 = OpConstant %3 2
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%1 = OpBitcast %2 %4
+)");
+}
+
+TEST_F(BuilderTest, Cast_U32ToI32) {
+  ast::type::U32Type u32;
+  ast::type::I32Type i32;
+
+  ast::CastExpression cast(&i32,
+                           std::make_unique<ast::ScalarConstructorExpression>(
+                               std::make_unique<ast::UintLiteral>(&u32, 2)));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateCastExpression(&cast), 1u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+%3 = OpTypeInt 32 0
+%4 = OpConstant %3 2
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%1 = OpBitcast %2 %4
+)");
+}
+
+TEST_F(BuilderTest, Cast_I32ToI32) {
+  ast::type::I32Type i32;
+
+  ast::CastExpression cast(&i32,
+                           std::make_unique<ast::ScalarConstructorExpression>(
+                               std::make_unique<ast::IntLiteral>(&i32, 2)));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateCastExpression(&cast), 1u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+%3 = OpConstant %2 2
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%1 = OpCopyObject %2 %3
+)");
+}
+
+TEST_F(BuilderTest, Cast_U32ToU32) {
+  ast::type::U32Type u32;
+
+  ast::CastExpression cast(&u32,
+                           std::make_unique<ast::ScalarConstructorExpression>(
+                               std::make_unique<ast::UintLiteral>(&u32, 2)));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateCastExpression(&cast), 1u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 0
+%3 = OpConstant %2 2
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%1 = OpCopyObject %2 %3
+)");
+}
+
+TEST_F(BuilderTest, Cast_F32ToF32) {
+  ast::type::F32Type f32;
+
+  ast::CastExpression cast(&f32,
+                           std::make_unique<ast::ScalarConstructorExpression>(
+                               std::make_unique<ast::FloatLiteral>(&f32, 2.0)));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateCastExpression(&cast), 1u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%3 = OpConstant %2 2
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%1 = OpCopyObject %2 %3
+)");
+}
 
 }  // namespace
 }  // namespace spirv

@@ -4639,9 +4639,10 @@ TEST_F(SpvParserTest, ClassifyCFGEdge_IfBreak_BypassesMerge_IsError) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
-  EXPECT_THAT(p->error(),
-              Eq("Branch from block 20 to block 99 is an invalid exit from "
-                 "construct starting at block 10; branch bypasses merge block 50"));
+  EXPECT_THAT(
+      p->error(),
+      Eq("Branch from block 20 to block 99 is an invalid exit from "
+         "construct starting at block 10; branch bypasses merge block 50"));
 }
 
 TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromSwitchCaseDirect) {
@@ -4832,9 +4833,10 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_BypassesMerge_IsError) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
-  EXPECT_THAT(p->error(),
-              Eq("Branch from block 20 to block 99 is an invalid exit from "
-                 "construct starting at block 10; branch bypasses merge block 50"));
+  EXPECT_THAT(
+      p->error(),
+      Eq("Branch from block 20 to block 99 is an invalid exit from "
+         "construct starting at block 10; branch bypasses merge block 50"));
 }
 
 TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromNestedLoop_IsError) {
@@ -4866,9 +4868,10 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromNestedLoop_IsError) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
-  EXPECT_THAT(p->error(),
-              Eq("Branch from block 30 to block 99 is an invalid exit from "
-                 "construct starting at block 20; branch bypasses merge block 80"));
+  EXPECT_THAT(
+      p->error(),
+      Eq("Branch from block 30 to block 99 is an invalid exit from "
+         "construct starting at block 20; branch bypasses merge block 80"));
 }
 
 TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromNestedSwitch_IsError) {
@@ -4897,9 +4900,10 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_SwitchBreak_FromNestedSwitch_IsError) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
-  EXPECT_THAT(p->error(),
-              Eq("Branch from block 30 to block 99 is an invalid exit from "
-                 "construct starting at block 20; branch bypasses merge block 80"));
+  EXPECT_THAT(
+      p->error(),
+      Eq("Branch from block 30 to block 99 is an invalid exit from "
+         "construct starting at block 20; branch bypasses merge block 80"));
 }
 
 TEST_F(SpvParserTest, ClassifyCFGEdges_LoopBreak_FromLoopBody) {
@@ -5145,9 +5149,10 @@ TEST_F(SpvParserTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
-  EXPECT_THAT(p->error(),
-              Eq("Branch from block 30 to block 99 is an invalid exit from "
-                 "construct starting at block 20; branch bypasses merge block 50"));
+  EXPECT_THAT(
+      p->error(),
+      Eq("Branch from block 30 to block 99 is an invalid exit from "
+         "construct starting at block 20; branch bypasses merge block 50"));
 }
 
 TEST_F(SpvParserTest,
@@ -5181,9 +5186,10 @@ TEST_F(SpvParserTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
-  EXPECT_THAT(p->error(),
-              Eq("Branch from block 45 to block 99 is an invalid exit from "
-                 "construct starting at block 40; branch bypasses merge block 50"));
+  EXPECT_THAT(
+      p->error(),
+      Eq("Branch from block 45 to block 99 is an invalid exit from "
+         "construct starting at block 40; branch bypasses merge block 50"));
 }
 
 TEST_F(SpvParserTest, ClassifyCFGEdges_LoopContinue_LoopBodyToContinue) {
@@ -5935,9 +5941,10 @@ TEST_F(SpvParserTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
-  EXPECT_THAT(p->error(),
-              Eq("Branch from block 30 to block 60 is an invalid exit from "
-                 "construct starting at block 20; branch bypasses continue target 50"));
+  EXPECT_THAT(
+      p->error(),
+      Eq("Branch from block 30 to block 60 is an invalid exit from "
+         "construct starting at block 20; branch bypasses continue target 50"));
 }
 
 TEST_F(SpvParserTest,
@@ -5968,9 +5975,10 @@ TEST_F(SpvParserTest,
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
-  EXPECT_THAT(p->error(),
-              Eq("Branch from block 50 to block 60 is an invalid exit from "
-                 "construct starting at block 50; branch bypasses merge block 80"));
+  EXPECT_THAT(
+      p->error(),
+      Eq("Branch from block 50 to block 60 is an invalid exit from "
+         "construct starting at block 50; branch bypasses merge block 80"));
 }
 
 TEST_F(SpvParserTest, ClassifyCFGEdges_TooManyBackedges) {
