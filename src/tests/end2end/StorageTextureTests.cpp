@@ -22,30 +22,33 @@
 class StorageTextureTests : public DawnTest {
   public:
     // TODO(jiawei.shao@intel.com): support all formats that can be used in storage textures.
-    static std::vector<uint32_t> GetExpectedData() {
-        constexpr size_t kDataCount = kWidth * kHeight;
-        std::vector<uint32_t> outputData(kDataCount);
-        for (size_t i = 0; i < kDataCount; ++i) {
-            outputData[i] = static_cast<uint32_t>(i + 1u);
+    static std::vector<uint32_t> GetExpectedData(uint32_t arrayLayerCount = 1) {
+        constexpr size_t kDataCountPerLayer = kWidth * kHeight;
+        std::vector<uint32_t> outputData(kDataCountPerLayer * arrayLayerCount);
+        for (uint32_t i = 0; i < outputData.size(); ++i) {
+            outputData[i] = i + 1u;
         }
+
         return outputData;
     }
 
     wgpu::Texture CreateTexture(wgpu::TextureFormat format,
                                 wgpu::TextureUsage usage,
                                 uint32_t width = kWidth,
-                                uint32_t height = kHeight) {
+                                uint32_t height = kHeight,
+                                uint32_t arrayLayerCount = 1) {
         wgpu::TextureDescriptor descriptor;
         descriptor.size = {width, height, 1};
         descriptor.format = format;
         descriptor.usage = usage;
+        descriptor.arrayLayerCount = arrayLayerCount;
         return device.CreateTexture(&descriptor);
     }
 
-    wgpu::Buffer CreateEmptyBufferForTextureCopy(uint32_t texelSize) {
+    wgpu::Buffer CreateEmptyBufferForTextureCopy(uint32_t texelSize, uint32_t arrayLayerCount = 1) {
         ASSERT(kWidth * texelSize <= kTextureBytesPerRowAlignment);
         const size_t uploadBufferSize =
-            kTextureBytesPerRowAlignment * (kHeight - 1) + kWidth * texelSize;
+            kTextureBytesPerRowAlignment * (kHeight * arrayLayerCount - 1) + kWidth * texelSize;
         wgpu::BufferDescriptor descriptor;
         descriptor.size = uploadBufferSize;
         descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
@@ -56,35 +59,50 @@ class StorageTextureTests : public DawnTest {
     wgpu::Texture CreateTextureWithTestData(const std::vector<uint32_t>& initialTextureData,
                                             uint32_t texelSize) {
         ASSERT(kWidth * texelSize <= kTextureBytesPerRowAlignment);
+
+        const uint32_t arrayLayerCount =
+            static_cast<uint32_t>(initialTextureData.size() / (kWidth * kHeight));
         const size_t uploadBufferSize =
-            kTextureBytesPerRowAlignment * (kHeight - 1) + kWidth * texelSize;
+            kTextureBytesPerRowAlignment * (kHeight * arrayLayerCount - 1) + kWidth * texelSize;
+
         std::vector<uint32_t> uploadBufferData(uploadBufferSize / texelSize);
-
         const size_t texelCountPerRow = kTextureBytesPerRowAlignment / texelSize;
-        for (size_t y = 0; y < kHeight; ++y) {
-            for (size_t x = 0; x < kWidth; ++x) {
-                uint32_t data = initialTextureData[kWidth * y + x];
-
-                size_t indexInUploadBuffer = y * texelCountPerRow + x;
-                uploadBufferData[indexInUploadBuffer] = data;
+        for (uint32_t layer = 0; layer < arrayLayerCount; ++layer) {
+            const size_t initialDataOffset = kWidth * kHeight * layer;
+            for (size_t y = 0; y < kHeight; ++y) {
+                for (size_t x = 0; x < kWidth; ++x) {
+                    uint32_t data = initialTextureData[initialDataOffset + kWidth * y + x];
+                    size_t indexInUploadBuffer = (kHeight * layer + y) * texelCountPerRow + x;
+                    uploadBufferData[indexInUploadBuffer] = data;
+                }
             }
         }
         wgpu::Buffer uploadBuffer =
             utils::CreateBufferFromData(device, uploadBufferData.data(), uploadBufferSize,
                                         wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
 
-        wgpu::Texture outputTexture =
-            CreateTexture(wgpu::TextureFormat::R32Uint,
-                          wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopyDst);
+        wgpu::Texture outputTexture = CreateTexture(
+            wgpu::TextureFormat::R32Uint, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopyDst,
+            kWidth, kHeight, arrayLayerCount);
 
-        wgpu::BufferCopyView bufferCopyView =
-            utils::CreateBufferCopyView(uploadBuffer, 0, kTextureBytesPerRowAlignment, 0);
-        wgpu::TextureCopyView textureCopyView;
-        textureCopyView.texture = outputTexture;
-        wgpu::Extent3D copyExtent = {kWidth, kHeight, 1};
+        const wgpu::Extent3D copyExtent = {kWidth, kHeight, 1};
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copyExtent);
+
+        // TODO(jiawei.shao@intel.com): copy multiple array layers in one CopyBufferToTexture() when
+        // it is supported.
+        for (uint32_t layer = 0; layer < arrayLayerCount; ++layer) {
+            wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(
+                uploadBuffer, kTextureBytesPerRowAlignment * kHeight * layer,
+                kTextureBytesPerRowAlignment, 0);
+
+            wgpu::TextureCopyView textureCopyView;
+            textureCopyView.texture = outputTexture;
+            textureCopyView.arrayLayer = layer;
+
+            encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copyExtent);
+        }
+
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);
 
@@ -219,24 +237,39 @@ class StorageTextureTests : public DawnTest {
                                    uint32_t texelSize,
                                    const std::vector<uint32_t>& expectedData) {
         // Copy the content from the write-only storage texture to the result buffer.
-        wgpu::Buffer resultBuffer = CreateEmptyBufferForTextureCopy(texelSize);
-        wgpu::BufferCopyView bufferCopyView =
-            utils::CreateBufferCopyView(resultBuffer, 0, kTextureBytesPerRowAlignment, 0);
-        wgpu::TextureCopyView textureCopyView;
-        textureCopyView.texture = writeonlyStorageTexture;
-        wgpu::Extent3D copyExtent = {kWidth, kHeight, 1};
+        const uint32_t arrayLayerCount =
+            static_cast<uint32_t>(expectedData.size() / (kWidth * kHeight));
+        wgpu::Buffer resultBuffer = CreateEmptyBufferForTextureCopy(texelSize, arrayLayerCount);
+
+        const wgpu::Extent3D copyExtent = {kWidth, kHeight, 1};
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copyExtent);
 
+        // TODO(jiawei.shao@intel.com): copy multiple array layers in one CopyTextureToBuffer() when
+        // it is supported.
+        for (uint32_t layer = 0; layer < arrayLayerCount; ++layer) {
+            wgpu::TextureCopyView textureCopyView;
+            textureCopyView.texture = writeonlyStorageTexture;
+            textureCopyView.arrayLayer = layer;
+
+            const uint64_t bufferOffset = kTextureBytesPerRowAlignment * kHeight * layer;
+            wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(
+                resultBuffer, bufferOffset, kTextureBytesPerRowAlignment, 0);
+
+            encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copyExtent);
+        }
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);
 
         // Check if the contents in the result buffer are what we expect.
-        for (size_t y = 0; y < kHeight; ++y) {
-            const size_t resultBufferOffset = kTextureBytesPerRowAlignment * y;
-            EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data() + kWidth * y, resultBuffer,
-                                       resultBufferOffset, kWidth);
+        for (size_t layer = 0; layer < arrayLayerCount; ++layer) {
+            for (size_t y = 0; y < kHeight; ++y) {
+                const size_t resultBufferOffset =
+                    kTextureBytesPerRowAlignment * (kHeight * layer + y);
+                const size_t expectedDataOffset = kWidth * (kHeight * layer + y);
+                EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data() + expectedDataOffset, resultBuffer,
+                                           resultBufferOffset, kWidth);
+            }
         }
     }
 
@@ -467,6 +500,98 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
     WriteIntoStorageTextureInRenderPass(writeonlyStorageTexture, kSimpleVertexShader,
                                         kCommonWriteOnlyTestCode_uimage2D);
     CheckOutputStorageTexture(writeonlyStorageTexture, kTexelSizeR32Uint, GetExpectedData());
+}
+
+// Verify 2D array read-only storage texture works correctly.
+TEST_P(StorageTextureTests, Readonly2DArrayStorageTexture) {
+    // TODO(jiawei.shao@intel.com): support read-only storage texture on OpenGL.
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+
+    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
+    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
+    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
+    // bug in spvc parser is fixed.
+    DAWN_SKIP_TEST_IF(IsSpvcParserBeingUsed());
+
+    constexpr uint32_t kArrayLayerCount = 3u;
+
+    constexpr uint32_t kTexelSizeR32Uint = 4u;
+    const std::vector<uint32_t> initialTextureData = GetExpectedData(kArrayLayerCount);
+    wgpu::Texture readonlyStorageTexture =
+        CreateTextureWithTestData(initialTextureData, kTexelSizeR32Uint);
+
+    // Create a compute shader that reads the pixels from the read-only storage texture and writes 1
+    // to DstBuffer if they all have to expected value.
+    const char* kComputeShader = R"(
+        #version 450
+        layout (set = 0, binding = 0, r32ui) uniform readonly uimage2DArray srcImage;
+        layout (set = 0, binding = 1, std430) buffer DstBuffer {
+            uint result;
+        } dstBuffer;
+        bool doTest() {
+            ivec3 size = imageSize(srcImage);
+            for (uint layer = 0; layer < size.z; ++layer) {
+                for (uint y = 0; y < size.y; ++y) {
+                    for (uint x = 0; x < size.x; ++x) {
+                        uint expected = 1u + x + size.x * (y + size.y * layer);
+                        uvec4 pixel = imageLoad(srcImage, ivec3(x, y, layer));
+                        if (pixel != uvec4(expected, 0, 0, 1u)) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+        void main() {
+            if (doTest()) {
+                dstBuffer.result = 1;
+            } else {
+                dstBuffer.result = 0;
+            }
+        })";
+
+    CheckResultInStorageBuffer(readonlyStorageTexture, kComputeShader);
+}
+
+// Verify 2D array write-only storage texture works correctly.
+TEST_P(StorageTextureTests, Writeonly2DArrayStorageTexture) {
+    // TODO(jiawei.shao@intel.com): support write-only storage texture on D3D12 and OpenGL.
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+
+    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
+    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
+    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
+    // bug in spvc parser is fixed.
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
+
+    // Prepare the write-only storage texture.
+    constexpr uint32_t kArrayLayerCount = 3u;
+    wgpu::Texture writeonlyStorageTexture = CreateTexture(
+        wgpu::TextureFormat::R32Uint, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc,
+        kWidth, kHeight, kArrayLayerCount);
+
+    const char* kComputeShader = R"(
+        #version 450
+        layout(set = 0, binding = 0, r32ui) uniform writeonly uimage2DArray dstImage;
+        void main() {
+            ivec3 size = imageSize(dstImage);
+            for (uint layer = 0; layer < size.z; ++layer) {
+                for (uint y = 0; y < size.y; ++y) {
+                    for (uint x = 0; x < size.x; ++x) {
+                        uint expected = 1u + x + size.x * (y + size.y * layer);
+                        uvec4 pixel = uvec4(expected, 0, 0, 1u);
+                        imageStore(dstImage, ivec3(x, y, layer), pixel);
+                    }
+                }
+            }
+        })";
+
+    WriteIntoStorageTextureInComputePass(writeonlyStorageTexture, kComputeShader);
+
+    constexpr uint32_t kTexelSizeR32Uint = 4u;
+    CheckOutputStorageTexture(writeonlyStorageTexture, kTexelSizeR32Uint,
+                              GetExpectedData(kArrayLayerCount));
 }
 
 DAWN_INSTANTIATE_TEST(StorageTextureTests,
