@@ -271,7 +271,7 @@ namespace dawn_native {
         mState = BufferState::Mapped;
 
         if (GetDevice()->ConsumedError(MapReadAsyncImpl(mMapSerial))) {
-            // TODO(natlee@microsoft.com): if map op fails fire callback with DEVICE_LOST status
+            CallMapReadCallback(mMapSerial, WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0);
             return;
         }
 
@@ -312,7 +312,7 @@ namespace dawn_native {
         mState = BufferState::Mapped;
 
         if (GetDevice()->ConsumedError(MapWriteAsyncImpl(mMapSerial))) {
-            // TODO(natlee@microsoft.com): if map op fails fire callback with DEVICE_LOST status
+            CallMapWriteCallback(mMapSerial, WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0);
             return;
         }
 
