@@ -586,8 +586,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kMat4x3, source, "mat4x3"};
   if (str == "mat4x4")
     return {Token::Type::kMat4x4, source, "mat4x4"};
-  if (str == "nop")
-    return {Token::Type::kNop, source, "nop"};
   if (str == "num_workgroups")
     return {Token::Type::kNumWorkgroups, source, "num_workgroups"};
   if (str == "offset")

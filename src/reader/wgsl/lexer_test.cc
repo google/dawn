@@ -468,7 +468,6 @@ INSTANTIATE_TEST_SUITE_P(
         TokenData{"mat4x2", Token::Type::kMat4x2},
         TokenData{"mat4x3", Token::Type::kMat4x3},
         TokenData{"mat4x4", Token::Type::kMat4x4},
-        TokenData{"nop", Token::Type::kNop},
         TokenData{"num_workgroups", Token::Type::kNumWorkgroups},
         TokenData{"offset", Token::Type::kOffset},
         TokenData{"out", Token::Type::kOut},

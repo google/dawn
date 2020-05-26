@@ -17,7 +17,7 @@
 #include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/nop_statement.h"
+#include "src/ast/kill_statement.h"
 
 namespace tint {
 namespace ast {
@@ -28,21 +28,21 @@ using UnlessStatementTest = testing::Test;
 TEST_F(UnlessStatementTest, Creation) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
   StatementList body;
-  body.push_back(std::make_unique<NopStatement>());
+  body.push_back(std::make_unique<KillStatement>());
 
   auto* ident_ptr = ident.get();
-  auto* nop_ptr = body[0].get();
+  auto* kill_ptr = body[0].get();
 
   UnlessStatement u(std::move(ident), std::move(body));
   EXPECT_EQ(u.condition(), ident_ptr);
   ASSERT_EQ(u.body().size(), 1u);
-  EXPECT_EQ(u.body()[0].get(), nop_ptr);
+  EXPECT_EQ(u.body()[0].get(), kill_ptr);
 }
 
 TEST_F(UnlessStatementTest, Creation_WithSource) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
   StatementList body;
-  body.push_back(std::make_unique<NopStatement>());
+  body.push_back(std::make_unique<KillStatement>());
 
   UnlessStatement u(Source{20, 2}, std::move(ident), std::move(body));
   auto src = u.source();
@@ -58,7 +58,7 @@ TEST_F(UnlessStatementTest, IsUnless) {
 TEST_F(UnlessStatementTest, IsValid) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
   StatementList body;
-  body.push_back(std::make_unique<NopStatement>());
+  body.push_back(std::make_unique<KillStatement>());
 
   UnlessStatement u(std::move(ident), std::move(body));
   EXPECT_TRUE(u.IsValid());
@@ -66,7 +66,7 @@ TEST_F(UnlessStatementTest, IsValid) {
 
 TEST_F(UnlessStatementTest, IsValid_NullCondition) {
   StatementList body;
-  body.push_back(std::make_unique<NopStatement>());
+  body.push_back(std::make_unique<KillStatement>());
 
   UnlessStatement u;
   u.set_body(std::move(body));
@@ -76,7 +76,7 @@ TEST_F(UnlessStatementTest, IsValid_NullCondition) {
 TEST_F(UnlessStatementTest, IsValid_InvalidCondition) {
   auto ident = std::make_unique<IdentifierExpression>("");
   StatementList body;
-  body.push_back(std::make_unique<NopStatement>());
+  body.push_back(std::make_unique<KillStatement>());
 
   UnlessStatement u(std::move(ident), std::move(body));
   EXPECT_FALSE(u.IsValid());
@@ -85,7 +85,7 @@ TEST_F(UnlessStatementTest, IsValid_InvalidCondition) {
 TEST_F(UnlessStatementTest, IsValid_NullBodyStatement) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
   StatementList body;
-  body.push_back(std::make_unique<NopStatement>());
+  body.push_back(std::make_unique<KillStatement>());
   body.push_back(nullptr);
 
   UnlessStatement u(std::move(ident), std::move(body));
@@ -95,7 +95,7 @@ TEST_F(UnlessStatementTest, IsValid_NullBodyStatement) {
 TEST_F(UnlessStatementTest, IsValid_InvalidBodyStatement) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
   StatementList body;
-  body.push_back(std::make_unique<NopStatement>());
+  body.push_back(std::make_unique<KillStatement>());
   body.push_back(std::make_unique<IfStatement>());
 
   UnlessStatement u(std::move(ident), std::move(body));
@@ -105,7 +105,7 @@ TEST_F(UnlessStatementTest, IsValid_InvalidBodyStatement) {
 TEST_F(UnlessStatementTest, ToStr) {
   auto ident = std::make_unique<IdentifierExpression>("ident");
   StatementList body;
-  body.push_back(std::make_unique<NopStatement>());
+  body.push_back(std::make_unique<KillStatement>());
 
   UnlessStatement u(std::move(ident), std::move(body));
   std::ostringstream out;
@@ -115,7 +115,7 @@ TEST_F(UnlessStatementTest, ToStr) {
       Identifier{ident}
     )
     {
-      Nop{}
+      Kill{}
     }
   }
 )");

@@ -20,7 +20,6 @@
 #include "gtest/gtest.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/kill_statement.h"
-#include "src/ast/nop_statement.h"
 
 namespace tint {
 namespace ast {
@@ -34,7 +33,7 @@ TEST_F(LoopStatementTest, Creation) {
   auto* b_ptr = body[0].get();
 
   StatementList continuing;
-  continuing.push_back(std::make_unique<NopStatement>());
+  continuing.push_back(std::make_unique<KillStatement>());
   auto* c_ptr = continuing[0].get();
 
   LoopStatement l(std::move(body), std::move(continuing));
@@ -49,7 +48,7 @@ TEST_F(LoopStatementTest, Creation_WithSource) {
   body.push_back(std::make_unique<KillStatement>());
 
   StatementList continuing;
-  continuing.push_back(std::make_unique<NopStatement>());
+  continuing.push_back(std::make_unique<KillStatement>());
 
   LoopStatement l(Source{20, 2}, std::move(body), std::move(continuing));
   auto src = l.source();
@@ -75,7 +74,7 @@ TEST_F(LoopStatementTest, HasContinuing_WithContinuing) {
   body.push_back(std::make_unique<KillStatement>());
 
   StatementList continuing;
-  continuing.push_back(std::make_unique<NopStatement>());
+  continuing.push_back(std::make_unique<KillStatement>());
 
   LoopStatement l(std::move(body), std::move(continuing));
   EXPECT_TRUE(l.has_continuing());
@@ -86,7 +85,7 @@ TEST_F(LoopStatementTest, IsValid) {
   body.push_back(std::make_unique<KillStatement>());
 
   StatementList continuing;
-  continuing.push_back(std::make_unique<NopStatement>());
+  continuing.push_back(std::make_unique<KillStatement>());
 
   LoopStatement l(std::move(body), std::move(continuing));
   EXPECT_TRUE(l.IsValid());
@@ -111,7 +110,7 @@ TEST_F(LoopStatementTest, IsValid_NullBodyStatement) {
   body.push_back(nullptr);
 
   StatementList continuing;
-  continuing.push_back(std::make_unique<NopStatement>());
+  continuing.push_back(std::make_unique<KillStatement>());
 
   LoopStatement l(std::move(body), std::move(continuing));
   EXPECT_FALSE(l.IsValid());
@@ -123,7 +122,7 @@ TEST_F(LoopStatementTest, IsValid_InvalidBodyStatement) {
   body.push_back(std::make_unique<IfStatement>());
 
   StatementList continuing;
-  continuing.push_back(std::make_unique<NopStatement>());
+  continuing.push_back(std::make_unique<KillStatement>());
 
   LoopStatement l(std::move(body), std::move(continuing));
   EXPECT_FALSE(l.IsValid());
@@ -134,7 +133,7 @@ TEST_F(LoopStatementTest, IsValid_NullContinuingStatement) {
   body.push_back(std::make_unique<KillStatement>());
 
   StatementList continuing;
-  continuing.push_back(std::make_unique<NopStatement>());
+  continuing.push_back(std::make_unique<KillStatement>());
   continuing.push_back(nullptr);
 
   LoopStatement l(std::move(body), std::move(continuing));
@@ -146,7 +145,7 @@ TEST_F(LoopStatementTest, IsValid_InvalidContinuingStatement) {
   body.push_back(std::make_unique<KillStatement>());
 
   StatementList continuing;
-  continuing.push_back(std::make_unique<NopStatement>());
+  continuing.push_back(std::make_unique<KillStatement>());
   continuing.push_back(std::make_unique<IfStatement>());
 
   LoopStatement l(std::move(body), std::move(continuing));
@@ -171,7 +170,7 @@ TEST_F(LoopStatementTest, ToStr_WithContinuing) {
   body.push_back(std::make_unique<KillStatement>());
 
   StatementList continuing;
-  continuing.push_back(std::make_unique<NopStatement>());
+  continuing.push_back(std::make_unique<KillStatement>());
 
   LoopStatement l(std::move(body), std::move(continuing));
   std::ostringstream out;
@@ -179,7 +178,7 @@ TEST_F(LoopStatementTest, ToStr_WithContinuing) {
   EXPECT_EQ(out.str(), R"(  Loop{
     Kill{}
     continuing {
-      Nop{}
+      Kill{}
     }
   }
 )");

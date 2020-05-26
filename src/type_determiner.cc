@@ -183,9 +183,6 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     return DetermineStatements(l->body()) &&
            DetermineStatements(l->continuing());
   }
-  if (stmt->IsNop()) {
-    return true;
-  }
   if (stmt->IsReturn()) {
     auto* r = stmt->AsReturn();
     return DetermineResultType(r->value());

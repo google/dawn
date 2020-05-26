@@ -736,9 +736,6 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsLoop()) {
     return EmitLoop(stmt->AsLoop());
   }
-  if (stmt->IsNop()) {
-    return EmitNop(stmt->AsNop());
-  }
   if (stmt->IsReturn()) {
     return EmitReturn(stmt->AsReturn());
   }
@@ -917,12 +914,6 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
   make_indent();
   out_ << "}" << std::endl;
 
-  return true;
-}
-
-bool GeneratorImpl::EmitNop(ast::NopStatement*) {
-  make_indent();
-  out_ << "nop;" << std::endl;
   return true;
 }
 

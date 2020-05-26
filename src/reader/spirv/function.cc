@@ -1613,7 +1613,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(
   const auto* ptr_type = type_mgr_->GetType(ptr_ty_id);
   if (!ptr_type || !ptr_type->AsPointer()) {
     Fail() << "Access chain %" << inst.result_id()
-                  << " base pointer is not of pointer type";
+           << " base pointer is not of pointer type";
     return {};
   }
   const auto* pointee_type = ptr_type->AsPointer()->pointee_type();
@@ -1631,11 +1631,9 @@ TypedExpression FunctionEmitter::MakeAccessChain(
           if (index_const_val < 0 ||
               pointee_type->AsVector()->element_count() <= index_const_val) {
             Fail() << "Access chain %" << inst.result_id() << " index %"
-                          << inst.GetSingleWordInOperand(index) << " value "
-                          << index_const_val
-                          << " is out of bounds for vector of "
-                          << pointee_type->AsVector()->element_count()
-                          << " elements";
+                   << inst.GetSingleWordInOperand(index) << " value "
+                   << index_const_val << " is out of bounds for vector of "
+                   << pointee_type->AsVector()->element_count() << " elements";
             return {};
           }
           if (uint64_t(index_const_val) >=
@@ -1659,36 +1657,38 @@ TypedExpression FunctionEmitter::MakeAccessChain(
       case spvtools::opt::analysis::Type::kMatrix:
         // Use array syntax.
         next_expr = std::make_unique<ast::ArrayAccessorExpression>(
-            std::move(current_expr.expr), std::move(MakeOperand(inst, index).expr));
+            std::move(current_expr.expr),
+            std::move(MakeOperand(inst, index).expr));
         pointee_type = pointee_type->AsMatrix()->element_type();
         break;
       case spvtools::opt::analysis::Type::kArray:
         next_expr = std::make_unique<ast::ArrayAccessorExpression>(
-            std::move(current_expr.expr), std::move(MakeOperand(inst, index).expr));
+            std::move(current_expr.expr),
+            std::move(MakeOperand(inst, index).expr));
         pointee_type = pointee_type->AsArray()->element_type();
         break;
       case spvtools::opt::analysis::Type::kRuntimeArray:
         next_expr = std::make_unique<ast::ArrayAccessorExpression>(
-            std::move(current_expr.expr), std::move(MakeOperand(inst, index).expr));
+            std::move(current_expr.expr),
+            std::move(MakeOperand(inst, index).expr));
         pointee_type = pointee_type->AsRuntimeArray()->element_type();
         break;
       case spvtools::opt::analysis::Type::kStruct: {
         if (!index_const) {
           Fail() << "Access chain %" << inst.result_id() << " index %"
-                        << inst.GetSingleWordInOperand(index)
-                        << " is a non-constant index into a structure %"
-                        << type_mgr_->GetId(pointee_type);
+                 << inst.GetSingleWordInOperand(index)
+                 << " is a non-constant index into a structure %"
+                 << type_mgr_->GetId(pointee_type);
           return {};
         }
         if ((index_const_val < 0) ||
             pointee_type->AsStruct()->element_types().size() <=
                 uint64_t(index_const_val)) {
-          Fail() << "Access chain %" << inst.result_id()
-                        << " index value " << index_const_val
-                        << " is out of bounds for structure %"
-                        << type_mgr_->GetId(pointee_type) << " having "
-                        << pointee_type->AsStruct()->element_types().size()
-                        << " elements";
+          Fail() << "Access chain %" << inst.result_id() << " index value "
+                 << index_const_val << " is out of bounds for structure %"
+                 << type_mgr_->GetId(pointee_type) << " having "
+                 << pointee_type->AsStruct()->element_types().size()
+                 << " elements";
           return {};
         }
         auto member_access =
@@ -1700,16 +1700,15 @@ TypedExpression FunctionEmitter::MakeAccessChain(
         pointee_type =
             pointee_type->AsStruct()->element_types()[index_const_val];
         break;
-     }
+      }
       default:
         Fail() << "Access chain with unknown pointee type %"
-                      << type_mgr_->GetId(pointee_type) << " "
-                      << pointee_type->str();
+               << type_mgr_->GetId(pointee_type) << " " << pointee_type->str();
         return {};
     }
     current_expr.reset(TypedExpression(
-          parser_impl_.ConvertType(type_mgr_->GetId(pointee_type)),
-          std::move(next_expr)));
+        parser_impl_.ConvertType(type_mgr_->GetId(pointee_type)),
+        std::move(next_expr)));
   }
   return current_expr;
 }

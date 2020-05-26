@@ -17,7 +17,7 @@
 #include "gtest/gtest.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/nop_statement.h"
+#include "src/ast/kill_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/bool_type.h"
 
@@ -32,15 +32,15 @@ TEST_F(ElseStatementTest, Creation) {
   auto cond = std::make_unique<ScalarConstructorExpression>(
       std::make_unique<BoolLiteral>(&bool_type, true));
   StatementList body;
-  body.push_back(std::make_unique<NopStatement>());
+  body.push_back(std::make_unique<KillStatement>());
 
   auto* cond_ptr = cond.get();
-  auto* nop_ptr = body[0].get();
+  auto* kill_ptr = body[0].get();
 
   ElseStatement e(std::move(cond), std::move(body));
   EXPECT_EQ(e.condition(), cond_ptr);
   ASSERT_EQ(e.body().size(), 1u);
-  EXPECT_EQ(e.body()[0].get(), nop_ptr);
+  EXPECT_EQ(e.body()[0].get(), kill_ptr);
 }
 
 TEST_F(ElseStatementTest, Creation_WithSource) {
@@ -75,7 +75,7 @@ TEST_F(ElseStatementTest, IsValid) {
 
 TEST_F(ElseStatementTest, IsValid_WithBody) {
   StatementList body;
-  body.push_back(std::make_unique<NopStatement>());
+  body.push_back(std::make_unique<KillStatement>());
 
   ElseStatement e(std::move(body));
   EXPECT_TRUE(e.IsValid());
@@ -83,7 +83,7 @@ TEST_F(ElseStatementTest, IsValid_WithBody) {
 
 TEST_F(ElseStatementTest, IsValid_WithNullBodyStatement) {
   StatementList body;
-  body.push_back(std::make_unique<NopStatement>());
+  body.push_back(std::make_unique<KillStatement>());
   body.push_back(nullptr);
 
   ElseStatement e(std::move(body));
@@ -109,7 +109,7 @@ TEST_F(ElseStatementTest, ToStr) {
   auto cond = std::make_unique<ScalarConstructorExpression>(
       std::make_unique<BoolLiteral>(&bool_type, true));
   StatementList body;
-  body.push_back(std::make_unique<NopStatement>());
+  body.push_back(std::make_unique<KillStatement>());
 
   ElseStatement e(std::move(cond), std::move(body));
   std::ostringstream out;
@@ -119,7 +119,7 @@ TEST_F(ElseStatementTest, ToStr) {
       ScalarConstructor{true}
     )
     {
-      Nop{}
+      Kill{}
     }
   }
 )");
@@ -127,14 +127,14 @@ TEST_F(ElseStatementTest, ToStr) {
 
 TEST_F(ElseStatementTest, ToStr_NoCondition) {
   StatementList body;
-  body.push_back(std::make_unique<NopStatement>());
+  body.push_back(std::make_unique<KillStatement>());
 
   ElseStatement e(std::move(body));
   std::ostringstream out;
   e.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Else{
     {
-      Nop{}
+      Kill{}
     }
   }
 )");

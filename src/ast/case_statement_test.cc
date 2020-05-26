@@ -17,7 +17,7 @@
 #include "gtest/gtest.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/nop_statement.h"
+#include "src/ast/kill_statement.h"
 #include "src/ast/type/bool_type.h"
 
 namespace tint {
@@ -30,22 +30,22 @@ TEST_F(CaseStatementTest, Creation) {
   ast::type::BoolType bool_type;
   auto b = std::make_unique<BoolLiteral>(&bool_type, true);
   StatementList stmts;
-  stmts.push_back(std::make_unique<NopStatement>());
+  stmts.push_back(std::make_unique<KillStatement>());
 
   auto* bool_ptr = b.get();
-  auto* nop_ptr = stmts[0].get();
+  auto* kill_ptr = stmts[0].get();
 
   CaseStatement c(std::move(b), std::move(stmts));
   EXPECT_EQ(c.condition(), bool_ptr);
   ASSERT_EQ(c.body().size(), 1u);
-  EXPECT_EQ(c.body()[0].get(), nop_ptr);
+  EXPECT_EQ(c.body()[0].get(), kill_ptr);
 }
 
 TEST_F(CaseStatementTest, Creation_WithSource) {
   ast::type::BoolType bool_type;
   auto b = std::make_unique<BoolLiteral>(&bool_type, true);
   StatementList stmts;
-  stmts.push_back(std::make_unique<NopStatement>());
+  stmts.push_back(std::make_unique<KillStatement>());
 
   CaseStatement c(Source{20, 2}, std::move(b), std::move(stmts));
   auto src = c.source();
@@ -55,7 +55,7 @@ TEST_F(CaseStatementTest, Creation_WithSource) {
 
 TEST_F(CaseStatementTest, IsDefault_WithoutCondition) {
   StatementList stmts;
-  stmts.push_back(std::make_unique<NopStatement>());
+  stmts.push_back(std::make_unique<KillStatement>());
 
   CaseStatement c;
   c.set_body(std::move(stmts));
@@ -84,7 +84,7 @@ TEST_F(CaseStatementTest, IsValid_NullBodyStatement) {
   ast::type::BoolType bool_type;
   auto b = std::make_unique<BoolLiteral>(&bool_type, true);
   StatementList stmts;
-  stmts.push_back(std::make_unique<NopStatement>());
+  stmts.push_back(std::make_unique<KillStatement>());
   stmts.push_back(nullptr);
 
   CaseStatement c(std::move(b), std::move(stmts));
@@ -105,26 +105,26 @@ TEST_F(CaseStatementTest, ToStr_WithCondition) {
   ast::type::BoolType bool_type;
   auto b = std::make_unique<BoolLiteral>(&bool_type, true);
   StatementList stmts;
-  stmts.push_back(std::make_unique<NopStatement>());
+  stmts.push_back(std::make_unique<KillStatement>());
   CaseStatement c(std::move(b), std::move(stmts));
 
   std::ostringstream out;
   c.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Case true{
-    Nop{}
+    Kill{}
   }
 )");
 }
 
 TEST_F(CaseStatementTest, ToStr_WithoutCondition) {
   StatementList stmts;
-  stmts.push_back(std::make_unique<NopStatement>());
+  stmts.push_back(std::make_unique<KillStatement>());
   CaseStatement c(nullptr, std::move(stmts));
 
   std::ostringstream out;
   c.to_str(out, 2);
   EXPECT_EQ(out.str(), R"(  Default{
-    Nop{}
+    Kill{}
   }
 )");
 }

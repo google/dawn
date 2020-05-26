@@ -234,8 +234,6 @@ class Token {
     kMat4x3,
     /// A 'mat4x4'
     kMat4x4,
-    /// A 'nop'
-    kNop,
     /// A 'num_workgroups'
     kNumWorkgroups,
     /// A 'offset'
@@ -547,8 +545,6 @@ class Token {
   bool IsMat4x3() const { return type_ == Type::kMat4x3; }
   /// @returns true if token is a 'mat4x4'
   bool IsMat4x4() const { return type_ == Type::kMat4x4; }
-  /// @returns true if token is a 'nop'
-  bool IsNop() const { return type_ == Type::kNop; }
   /// @returns true if token is a 'num_workgroups'
   bool IsNumWorkgroups() const { return type_ == Type::kNumWorkgroups; }
   /// @returns true if token is a 'offset'

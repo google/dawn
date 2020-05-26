@@ -223,8 +223,6 @@ std::string Token::TypeToName(Type type) {
       return "mat4x3";
     case Token::Type::kMat4x4:
       return "mat4x4";
-    case Token::Type::kNop:
-      return "nop";
     case Token::Type::kNumWorkgroups:
       return "num_workgroups";
     case Token::Type::kOffset:

@@ -32,7 +32,6 @@ class FallthroughStatement;
 class IfStatement;
 class KillStatement;
 class LoopStatement;
-class NopStatement;
 class ReturnStatement;
 class SwitchStatement;
 class UnlessStatement;
@@ -61,8 +60,6 @@ class Statement : public Node {
   virtual bool IsKill() const;
   /// @returns true if this is a loop statement
   virtual bool IsLoop() const;
-  /// @returns true if this is a nop statement
-  virtual bool IsNop() const;
   /// @returns true if this is a return statement
   virtual bool IsReturn() const;
   /// @returns true if this is a switch statement
@@ -90,8 +87,6 @@ class Statement : public Node {
   const KillStatement* AsKill() const;
   /// @returns the statement as a const loop statement
   const LoopStatement* AsLoop() const;
-  /// @returns the statement as a const nop statement
-  const NopStatement* AsNop() const;
   /// @returns the statement as a const return statement
   const ReturnStatement* AsReturn() const;
   /// @returns the statement as a const switch statement
@@ -119,8 +114,6 @@ class Statement : public Node {
   KillStatement* AsKill();
   /// @returns the statement as a loop statement
   LoopStatement* AsLoop();
-  /// @returns the statement as a nop statement
-  NopStatement* AsNop();
   /// @returns the statement as a return statement
   ReturnStatement* AsReturn();
   /// @returns the statement as a switch statement

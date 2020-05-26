@@ -17,7 +17,6 @@
 #include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/kill_statement.h"
-#include "src/ast/nop_statement.h"
 #include "src/ast/unless_statement.h"
 #include "src/writer/wgsl/generator_impl.h"
 
@@ -32,7 +31,7 @@ TEST_F(GeneratorImplTest, Emit_Unless) {
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
 
   ast::StatementList body;
-  body.push_back(std::make_unique<ast::NopStatement>());
+  body.push_back(std::make_unique<ast::KillStatement>());
   body.push_back(std::make_unique<ast::KillStatement>());
 
   ast::UnlessStatement u(std::move(cond), std::move(body));
@@ -42,7 +41,7 @@ TEST_F(GeneratorImplTest, Emit_Unless) {
 
   ASSERT_TRUE(g.EmitStatement(&u)) << g.error();
   EXPECT_EQ(g.result(), R"(  unless (cond) {
-    nop;
+    kill;
     kill;
   }
 )");

@@ -103,8 +103,6 @@ set(TINT_LIB_SRCS
   ast/module.h
   ast/node.cc
   ast/node.h
-  ast/nop_statement.cc
-  ast/nop_statement.h
   ast/null_literal.cc
   ast/null_literal.h
   ast/pipeline_stage.cc
@@ -284,7 +282,6 @@ set(TINT_TEST_SRCS
   ast/loop_statement_test.cc
   ast/member_accessor_expression_test.cc
   ast/module_test.cc
-  ast/nop_statement_test.cc
   ast/null_literal_test.cc
   ast/binary_expression_test.cc
   ast/return_statement_test.cc
@@ -478,7 +475,6 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_kill_test.cc
     writer/wgsl/generator_impl_loop_test.cc
     writer/wgsl/generator_impl_member_accessor_test.cc
-    writer/wgsl/generator_impl_nop_test.cc
     writer/wgsl/generator_impl_relational_test.cc
     writer/wgsl/generator_impl_return_test.cc
     writer/wgsl/generator_impl_switch_test.cc

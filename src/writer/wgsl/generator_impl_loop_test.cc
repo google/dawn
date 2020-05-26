@@ -17,7 +17,6 @@
 #include "gtest/gtest.h"
 #include "src/ast/kill_statement.h"
 #include "src/ast/loop_statement.h"
-#include "src/ast/nop_statement.h"
 #include "src/writer/wgsl/generator_impl.h"
 
 namespace tint {
@@ -48,7 +47,7 @@ TEST_F(GeneratorImplTest, Emit_LoopWithContinuing) {
   body.push_back(std::make_unique<ast::KillStatement>());
 
   ast::StatementList continuing;
-  continuing.push_back(std::make_unique<ast::NopStatement>());
+  continuing.push_back(std::make_unique<ast::KillStatement>());
 
   ast::LoopStatement l(std::move(body), std::move(continuing));
 
@@ -60,7 +59,7 @@ TEST_F(GeneratorImplTest, Emit_LoopWithContinuing) {
     kill;
 
     continuing {
-      nop;
+      kill;
     }
   }
 )");

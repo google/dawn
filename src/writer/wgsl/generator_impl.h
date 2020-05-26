@@ -162,10 +162,6 @@ class GeneratorImpl {
   /// @param expr the member accessor expression
   /// @returns true if the member accessor was emitted
   bool EmitMemberAccessor(ast::MemberAccessorExpression* expr);
-  /// Handles generating a nop statement
-  /// @param stmt the nop statement
-  /// @returns true if the statement was successfully emitted
-  bool EmitNop(ast::NopStatement* stmt);
   /// Handles return statements
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted

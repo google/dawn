@@ -22,25 +22,25 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, LoopStmt_BodyNoContinuing) {
-  auto* p = parser("loop { nop; }");
+  auto* p = parser("loop { kill; }");
   auto e = p->loop_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_EQ(e->body().size(), 1u);
-  EXPECT_TRUE(e->body()[0]->IsNop());
+  EXPECT_TRUE(e->body()[0]->IsKill());
 
   EXPECT_EQ(e->continuing().size(), 0u);
 }
 
 TEST_F(ParserImplTest, LoopStmt_BodyWithContinuing) {
-  auto* p = parser("loop { nop; continuing { kill; }}");
+  auto* p = parser("loop { kill; continuing { kill; }}");
   auto e = p->loop_stmt();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
 
   ASSERT_EQ(e->body().size(), 1u);
-  EXPECT_TRUE(e->body()[0]->IsNop());
+  EXPECT_TRUE(e->body()[0]->IsKill());
 
   EXPECT_EQ(e->continuing().size(), 1u);
   EXPECT_TRUE(e->continuing()[0]->IsKill());

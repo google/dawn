@@ -45,7 +45,7 @@ TEST_F(BinaryWriterTest, Preamble) {
 TEST_F(BinaryWriterTest, Float) {
   ast::Module mod;
   Builder b(&mod);
-  b.push_preamble(spv::Op::OpNop, {Operand::Float(2.4f)});
+  b.push_preamble(spv::Op::OpKill, {Operand::Float(2.4f)});
   BinaryWriter bw;
   bw.WriteBuilder(b);
 
@@ -59,7 +59,7 @@ TEST_F(BinaryWriterTest, Float) {
 TEST_F(BinaryWriterTest, Int) {
   ast::Module mod;
   Builder b(&mod);
-  b.push_preamble(spv::Op::OpNop, {Operand::Int(2)});
+  b.push_preamble(spv::Op::OpKill, {Operand::Int(2)});
   BinaryWriter bw;
   bw.WriteBuilder(b);
 
@@ -71,7 +71,7 @@ TEST_F(BinaryWriterTest, Int) {
 TEST_F(BinaryWriterTest, String) {
   ast::Module mod;
   Builder b(&mod);
-  b.push_preamble(spv::Op::OpNop, {Operand::String("my_string")});
+  b.push_preamble(spv::Op::OpKill, {Operand::String("my_string")});
   BinaryWriter bw;
   bw.WriteBuilder(b);
 
@@ -96,7 +96,7 @@ TEST_F(BinaryWriterTest, String) {
 TEST_F(BinaryWriterTest, String_Multiple4Length) {
   ast::Module mod;
   Builder b(&mod);
-  b.push_preamble(spv::Op::OpNop, {Operand::String("mystring")});
+  b.push_preamble(spv::Op::OpKill, {Operand::String("mystring")});
   BinaryWriter bw;
   bw.WriteBuilder(b);
 
@@ -119,8 +119,8 @@ TEST_F(BinaryWriterTest, String_Multiple4Length) {
 }
 
 TEST_F(BinaryWriterTest, TestInstructionWriter) {
-  Instruction i1{spv::Op::OpNop, {Operand::Int(2)}};
-  Instruction i2{spv::Op::OpNop, {Operand::Int(4)}};
+  Instruction i1{spv::Op::OpKill, {Operand::Int(2)}};
+  Instruction i2{spv::Op::OpKill, {Operand::Int(4)}};
 
   BinaryWriter bw;
   bw.WriteInstruction(i1);

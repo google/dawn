@@ -38,7 +38,6 @@
 #include "src/ast/kill_statement.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/member_accessor_expression.h"
-#include "src/ast/nop_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
@@ -1450,7 +1449,6 @@ ast::StatementList ParserImpl::statements() {
 //   | break_stmt SEMICOLON
 //   | continue_stmt SEMICOLON
 //   | KILL SEMICOLON
-//   | NOP SEMICOLON
 //   | assignment_expression SEMICOLON
 std::unique_ptr<ast::Statement> ParserImpl::statement() {
   auto t = peek();
@@ -1550,18 +1548,6 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
       return nullptr;
     }
     return std::make_unique<ast::KillStatement>(source);
-  }
-
-  if (t.IsNop()) {
-    auto source = t.source();
-    next();  // Consume the peek
-
-    t = next();
-    if (!t.IsSemicolon()) {
-      set_error(t, "missing ;");
-      return nullptr;
-    }
-    return std::make_unique<ast::NopStatement>(source);
   }
 
   auto assign = assignment_stmt();
