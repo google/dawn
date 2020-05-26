@@ -146,7 +146,14 @@ namespace dawn_native { namespace d3d12 {
     // nullptr when nothing further can be evicted.
     ResultOrError<Pageable*> ResidencyManager::RemoveSingleEntryFromLRU(
         MemorySegmentInfo* memorySegment) {
-        ASSERT(!memorySegment->lruCache.empty());
+        // If the LRU is empty, return nullptr to allow execution to continue. Note that fully
+        // emptying the LRU is undesirable, because it can mean either 1) the LRU is not accurately
+        // accounting for Dawn's GPU allocations, or 2) a component external to Dawn is using all of
+        // the process budget and starving Dawn, which will cause thrash.
+        if (memorySegment->lruCache.empty()) {
+            return nullptr;
+        }
+
         Pageable* pageable = memorySegment->lruCache.head()->value();
 
         Serial lastSubmissionSerial = pageable->GetLastSubmission();
