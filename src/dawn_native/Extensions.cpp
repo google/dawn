@@ -34,7 +34,12 @@ namespace dawn_native {
             {{Extension::TextureCompressionBC,
               {"texture_compression_bc", "Support Block Compressed (BC) texture formats",
                "https://bugs.chromium.org/p/dawn/issues/detail?id=42"},
-              &WGPUDeviceProperties::textureCompressionBC}}};
+              &WGPUDeviceProperties::textureCompressionBC},
+             {Extension::ShaderFloat16,
+              {"shader_float16",
+               "Support 16bit float arithmetic and declarations in uniform and storage buffers",
+               "https://bugs.chromium.org/p/dawn/issues/detail?id=426"},
+              &WGPUDeviceProperties::shaderFloat16}}};
 
     }  // anonymous namespace
 
