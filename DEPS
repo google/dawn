@@ -212,7 +212,7 @@ hooks = [
   {
     'name': 'binutils',
     'pattern': 'src/third_party/binutils',
-    'condition': 'host_os == "linux"',
+    'condition': 'host_os == "linux" and dawn_standalone',
     'action': [
         'python',
         'third_party/binutils/download.py',
