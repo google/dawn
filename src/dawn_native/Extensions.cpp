@@ -39,7 +39,15 @@ namespace dawn_native {
               {"shader_float16",
                "Support 16bit float arithmetic and declarations in uniform and storage buffers",
                "https://bugs.chromium.org/p/dawn/issues/detail?id=426"},
-              &WGPUDeviceProperties::shaderFloat16}}};
+              &WGPUDeviceProperties::shaderFloat16},
+             {Extension::PipelineStatisticsQuery,
+              {"pipeline_statistics_query", "Support Pipeline Statistics Query",
+               "https://bugs.chromium.org/p/dawn/issues/detail?id=434"},
+              &WGPUDeviceProperties::pipelineStatisticsQuery},
+             {Extension::TimestampQuery,
+              {"timestamp_query", "Support Timestamp Query",
+               "https://bugs.chromium.org/p/dawn/issues/detail?id=434"},
+              &WGPUDeviceProperties::timestampQuery}}};
 
     }  // anonymous namespace
 

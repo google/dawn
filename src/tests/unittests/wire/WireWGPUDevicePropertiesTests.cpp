@@ -23,6 +23,9 @@ class WireWGPUDevicePropertiesTests : public testing::Test {};
 TEST_F(WireWGPUDevicePropertiesTests, SerializeWGPUDeviceProperties) {
     WGPUDeviceProperties sentWGPUDeviceProperties;
     sentWGPUDeviceProperties.textureCompressionBC = true;
+    // Set false to test that the serialization can handle both true and false correctly.
+    sentWGPUDeviceProperties.pipelineStatisticsQuery = false;
+    sentWGPUDeviceProperties.timestampQuery = true;
 
     size_t sentWGPUDevicePropertiesSize =
         dawn_wire::SerializedWGPUDevicePropertiesSize(&sentWGPUDeviceProperties);
@@ -33,4 +36,6 @@ TEST_F(WireWGPUDevicePropertiesTests, SerializeWGPUDeviceProperties) {
     WGPUDeviceProperties receivedWGPUDeviceProperties;
     dawn_wire::DeserializeWGPUDeviceProperties(&receivedWGPUDeviceProperties, buffer.data());
     ASSERT_TRUE(receivedWGPUDeviceProperties.textureCompressionBC);
+    ASSERT_FALSE(receivedWGPUDeviceProperties.pipelineStatisticsQuery);
+    ASSERT_TRUE(receivedWGPUDeviceProperties.timestampQuery);
 }

@@ -80,6 +80,14 @@ namespace dawn_native { namespace vulkan {
             mDeviceInfo._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess == VK_TRUE) {
             mSupportedExtensions.EnableExtension(Extension::ShaderFloat16);
         }
+
+        if (mDeviceInfo.features.pipelineStatisticsQuery == VK_TRUE) {
+            mSupportedExtensions.EnableExtension(Extension::PipelineStatisticsQuery);
+        }
+
+        if (mDeviceInfo.properties.limits.timestampComputeAndGraphics == VK_TRUE) {
+            mSupportedExtensions.EnableExtension(Extension::TimestampQuery);
+        }
     }
 
     ResultOrError<DeviceBase*> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor) {

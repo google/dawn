@@ -26,6 +26,8 @@ namespace dawn_native {
     enum class Extension {
         TextureCompressionBC,
         ShaderFloat16,
+        PipelineStatisticsQuery,
+        TimestampQuery,
 
         EnumCount,
         InvalidEnum = EnumCount,
