@@ -150,11 +150,13 @@ namespace dawn_native { namespace vulkan {
 
                             case wgpu::BindingType::ReadonlyStorageTexture:
                             case wgpu::BindingType::WriteonlyStorageTexture:
+                                // TODO (yunchao.he@intel.com): Do the transition for texture's
+                                // subresource via its view.
                                 ToBackend(
                                     static_cast<TextureViewBase*>(mBindings[index][bindingIndex])
                                         ->GetTexture())
-                                    ->TransitionUsageNow(recordingContext,
-                                                         wgpu::TextureUsage::Storage);
+                                    ->TransitionFullUsage(recordingContext,
+                                                          wgpu::TextureUsage::Storage);
                                 break;
 
                             case wgpu::BindingType::StorageTexture:
@@ -386,7 +388,8 @@ namespace dawn_native { namespace vulkan {
                                                                  texture->GetNumMipLevels(), 0,
                                                                  texture->GetArrayLayers());
                 }
-                texture->TransitionUsageNow(recordingContext, usages.textureUsages[i].usage);
+                texture->TransitionUsageForPass(recordingContext,
+                                                usages.textureUsages[i].subresourceUsages);
             }
         };
         const std::vector<PassResourceUsage>& passResourceUsages = GetResourceUsages().perPass;
@@ -437,7 +440,9 @@ namespace dawn_native { namespace vulkan {
                     ToBackend(src.buffer)
                         ->TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopySrc);
                     ToBackend(dst.texture)
-                        ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst);
+                        ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst,
+                                             subresource.mipLevel, 1, subresource.baseArrayLayer,
+                                             1);
                     VkBuffer srcBuffer = ToBackend(src.buffer)->GetHandle();
                     VkImage dstImage = ToBackend(dst.texture)->GetHandle();
 
@@ -464,7 +469,9 @@ namespace dawn_native { namespace vulkan {
                                                               subresource.baseArrayLayer, 1);
 
                     ToBackend(src.texture)
-                        ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopySrc);
+                        ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopySrc,
+                                             subresource.mipLevel, 1, subresource.baseArrayLayer,
+                                             1);
                     ToBackend(dst.buffer)
                         ->TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopyDst);
 
@@ -497,9 +504,11 @@ namespace dawn_native { namespace vulkan {
                     }
 
                     ToBackend(src.texture)
-                        ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopySrc);
+                        ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopySrc,
+                                             src.mipLevel, 1, src.arrayLayer, 1);
                     ToBackend(dst.texture)
-                        ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst);
+                        ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst,
+                                             dst.mipLevel, 1, dst.arrayLayer, 1);
 
                     // In some situations we cannot do texture-to-texture copies with vkCmdCopyImage
                     // because as Vulkan SPEC always validates image copies with the virtual size of

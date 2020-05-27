@@ -63,8 +63,18 @@ namespace dawn_native { namespace vulkan {
         // Transitions the texture to be used as `usage`, recording any necessary barrier in
         // `commands`.
         // TODO(cwallez@chromium.org): coalesce barriers and do them early when possible.
+        void TransitionFullUsage(CommandRecordingContext* recordingContext,
+                                 wgpu::TextureUsage usage);
+
         void TransitionUsageNow(CommandRecordingContext* recordingContext,
-                                wgpu::TextureUsage usage);
+                                wgpu::TextureUsage usage,
+                                uint32_t baseMipLevel,
+                                uint32_t levelCount,
+                                uint32_t baseArrayLayer,
+                                uint32_t layerCount);
+        void TransitionUsageForPass(CommandRecordingContext* recordingContext,
+                                    const std::vector<wgpu::TextureUsage>& subresourceUsages);
+
         void EnsureSubresourceContentInitialized(CommandRecordingContext* recordingContext,
                                                  uint32_t baseMipLevel,
                                                  uint32_t levelCount,
@@ -96,6 +106,9 @@ namespace dawn_native { namespace vulkan {
                                 uint32_t layerCount,
                                 TextureBase::ClearValue);
 
+        void TweakTransitionForExternalUsage(CommandRecordingContext* recordingContext,
+                                             std::vector<VkImageMemoryBarrier>* barriers);
+
         VkImage mHandle = VK_NULL_HANDLE;
         ResourceMemoryAllocation mMemoryAllocation;
         VkDeviceMemory mExternalAllocation = VK_NULL_HANDLE;
@@ -115,7 +128,8 @@ namespace dawn_native { namespace vulkan {
 
         // A usage of none will make sure the texture is transitioned before its first use as
         // required by the Vulkan spec.
-        wgpu::TextureUsage mLastUsage = wgpu::TextureUsage::None;
+        std::vector<wgpu::TextureUsage> mLastSubresourceUsages =
+            std::vector<wgpu::TextureUsage>(GetSubresourceCount(), wgpu::TextureUsage::None);
     };
 
     class TextureView final : public TextureViewBase {
