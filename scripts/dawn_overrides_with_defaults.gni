@@ -41,6 +41,10 @@ if (!defined(dawn_glfw_dir)) {
   dawn_glfw_dir = "//third_party/glfw"
 }
 
+if (!defined(dawn_glm_dir)) {
+  dawn_glm_dir = "//third_party/glm"
+}
+
 if (!defined(dawn_googletest_dir)) {
   dawn_googletest_dir = "//third_party/googletest"
 }
