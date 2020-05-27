@@ -106,19 +106,15 @@ uint32_t IndexFromName(char name) {
   switch (name) {
     case 'x':
     case 'r':
-    case 's':
       return 0;
     case 'y':
     case 'g':
-    case 't':
       return 1;
     case 'z':
     case 'b':
-    case 'p':
       return 2;
     case 'w':
     case 'a':
-    case 'q':
       return 3;
   }
   return std::numeric_limits<uint32_t>::max();
