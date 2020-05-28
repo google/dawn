@@ -102,13 +102,14 @@ namespace dawn_native { namespace metal {
             if (renderPass->attachmentState->HasDepthStencilAttachment()) {
                 auto& attachmentInfo = renderPass->depthStencilAttachment;
 
-                // TODO(jiawei.shao@intel.com): support rendering into a layer of a texture.
                 id<MTLTexture> texture =
                     ToBackend(attachmentInfo.view->GetTexture())->GetMTLTexture();
                 const Format& format = attachmentInfo.view->GetTexture()->GetFormat();
 
                 if (format.HasDepth()) {
                     descriptor.depthAttachment.texture = texture;
+                    descriptor.depthAttachment.level = attachmentInfo.view->GetBaseMipLevel();
+                    descriptor.depthAttachment.slice = attachmentInfo.view->GetBaseArrayLayer();
 
                     switch (attachmentInfo.depthStoreOp) {
                         case wgpu::StoreOp::Store:
@@ -142,6 +143,8 @@ namespace dawn_native { namespace metal {
 
                 if (format.HasStencil()) {
                     descriptor.stencilAttachment.texture = texture;
+                    descriptor.stencilAttachment.level = attachmentInfo.view->GetBaseMipLevel();
+                    descriptor.stencilAttachment.slice = attachmentInfo.view->GetBaseArrayLayer();
 
                     switch (attachmentInfo.stencilStoreOp) {
                         case wgpu::StoreOp::Store:

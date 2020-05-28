@@ -939,11 +939,9 @@ namespace dawn_native { namespace d3d12 {
     }
 
     D3D12_DEPTH_STENCIL_VIEW_DESC TextureView::GetDSVDescriptor() const {
-        // TODO(jiawei.shao@intel.com): support rendering into a layer of a texture.
         ASSERT(GetLevelCount() == 1);
-        uint32_t mipLevel = GetBaseMipLevel();
         return ToBackend(GetTexture())
-            ->GetDSVDescriptor(mipLevel, GetBaseArrayLayer(), GetLayerCount());
+            ->GetDSVDescriptor(GetBaseMipLevel(), GetBaseArrayLayer(), GetLayerCount());
     }
 
     D3D12_UNORDERED_ACCESS_VIEW_DESC TextureView::GetUAVDescriptor() const {
