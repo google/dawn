@@ -14,6 +14,8 @@
 
 #include "common/SystemUtils.h"
 
+#include "common/Assert.h"
+
 #if defined(DAWN_PLATFORM_WINDOWS)
 #    include <Windows.h>
 #    include <vector>
@@ -114,4 +116,28 @@ std::string GetExecutableDirectory() {
     std::string exePath = GetExecutablePath();
     size_t lastPathSepLoc = exePath.find_last_of(GetPathSeparator());
     return lastPathSepLoc != std::string::npos ? exePath.substr(0, lastPathSepLoc + 1) : "";
+}
+
+// ScopedEnvironmentVar
+
+ScopedEnvironmentVar::ScopedEnvironmentVar(const char* variableName, const char* value)
+    : mName(variableName),
+      mOriginalValue(GetEnvironmentVar(variableName)),
+      mIsSet(SetEnvironmentVar(variableName, value)) {
+}
+
+ScopedEnvironmentVar::~ScopedEnvironmentVar() {
+    if (mIsSet) {
+        bool success = SetEnvironmentVar(mName.c_str(), mOriginalValue.c_str());
+        // If we set the environment variable in the constructor, we should never fail restoring it.
+        ASSERT(success);
+    }
+}
+
+bool ScopedEnvironmentVar::Set(const char* variableName, const char* value) {
+    ASSERT(!mIsSet);
+    mName = variableName;
+    mOriginalValue = GetEnvironmentVar(variableName);
+    mIsSet = SetEnvironmentVar(variableName, value);
+    return mIsSet;
 }

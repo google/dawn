@@ -39,3 +39,48 @@ TEST(SystemUtilsTests, GetExecutableDirectory) {
     // Test last charecter in path
     ASSERT_EQ(GetExecutableDirectory().back(), *GetPathSeparator());
 }
+
+// Tests for ScopedEnvironmentVar
+TEST(SystemUtilsTests, ScopedEnvironmentVar) {
+    SetEnvironmentVar("ScopedEnvironmentVarForTest", "original");
+
+    // Test empty environment variable doesn't crash
+    { ScopedEnvironmentVar var; }
+
+    // Test setting empty environment variable
+    {
+        ScopedEnvironmentVar var;
+        var.Set("ScopedEnvironmentVarForTest", "NewEnvironmentVarValue");
+        ASSERT_EQ(GetEnvironmentVar("ScopedEnvironmentVarForTest"), "NewEnvironmentVarValue");
+    }
+    ASSERT_EQ(GetEnvironmentVar("ScopedEnvironmentVarForTest"), "original");
+
+    // Test that the environment variable can be set, and it is unset at the end of the scope.
+    {
+        ScopedEnvironmentVar var("ScopedEnvironmentVarForTest", "NewEnvironmentVarValue");
+        ASSERT_EQ(GetEnvironmentVar("ScopedEnvironmentVarForTest"), "NewEnvironmentVarValue");
+    }
+    ASSERT_EQ(GetEnvironmentVar("ScopedEnvironmentVarForTest"), "original");
+
+    // Test nested scopes
+    {
+        ScopedEnvironmentVar outer("ScopedEnvironmentVarForTest", "outer");
+        ASSERT_EQ(GetEnvironmentVar("ScopedEnvironmentVarForTest"), "outer");
+        {
+            ScopedEnvironmentVar inner("ScopedEnvironmentVarForTest", "inner");
+            ASSERT_EQ(GetEnvironmentVar("ScopedEnvironmentVarForTest"), "inner");
+        }
+        ASSERT_EQ(GetEnvironmentVar("ScopedEnvironmentVarForTest"), "outer");
+    }
+    ASSERT_EQ(GetEnvironmentVar("ScopedEnvironmentVarForTest"), "original");
+
+    // Test redundantly setting scoped variables
+    {
+        ScopedEnvironmentVar var1("ScopedEnvironmentVarForTest", "var1");
+        ASSERT_EQ(GetEnvironmentVar("ScopedEnvironmentVarForTest"), "var1");
+
+        ScopedEnvironmentVar var2("ScopedEnvironmentVarForTest", "var2");
+        ASSERT_EQ(GetEnvironmentVar("ScopedEnvironmentVarForTest"), "var2");
+    }
+    ASSERT_EQ(GetEnvironmentVar("ScopedEnvironmentVarForTest"), "original");
+}
