@@ -94,6 +94,47 @@ namespace dawn_native {
         return {};
     }
 
+    MaybeError ValidateStorageTextureViewDimension(wgpu::BindingType bindingType,
+                                                   wgpu::TextureViewDimension dimension) {
+        switch (bindingType) {
+            case wgpu::BindingType::ReadonlyStorageTexture:
+            case wgpu::BindingType::WriteonlyStorageTexture: {
+                break;
+            }
+
+            case wgpu::BindingType::StorageBuffer:
+            case wgpu::BindingType::UniformBuffer:
+            case wgpu::BindingType::ReadonlyStorageBuffer:
+            case wgpu::BindingType::Sampler:
+            case wgpu::BindingType::ComparisonSampler:
+            case wgpu::BindingType::SampledTexture:
+                return {};
+
+            case wgpu::BindingType::StorageTexture:
+            default:
+                UNREACHABLE();
+                return {};
+        }
+
+        switch (dimension) {
+            case wgpu::TextureViewDimension::Cube:
+            case wgpu::TextureViewDimension::CubeArray:
+                return DAWN_VALIDATION_ERROR(
+                    "Cube map and cube map texture views cannot be used as storage textures");
+
+            case wgpu::TextureViewDimension::e1D:
+            case wgpu::TextureViewDimension::e2D:
+            case wgpu::TextureViewDimension::e2DArray:
+            case wgpu::TextureViewDimension::e3D:
+            case wgpu::TextureViewDimension::Undefined:
+                return {};
+
+            default:
+                UNREACHABLE();
+                return {};
+        }
+    }
+
     MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
                                                  const BindGroupLayoutDescriptor* descriptor) {
         if (descriptor->nextInChain != nullptr) {
@@ -122,6 +163,8 @@ namespace dawn_native {
             DAWN_TRY(ValidateBindingTypeWithShaderStageVisibility(entry.type, entry.visibility));
 
             DAWN_TRY(ValidateStorageTextureFormat(device, entry.type, entry.storageTextureFormat));
+
+            DAWN_TRY(ValidateStorageTextureViewDimension(entry.type, entry.viewDimension));
 
             switch (entry.type) {
                 case wgpu::BindingType::UniformBuffer:

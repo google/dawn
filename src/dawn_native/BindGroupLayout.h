@@ -42,6 +42,9 @@ namespace dawn_native {
                                             wgpu::BindingType bindingType,
                                             wgpu::TextureFormat storageTextureFormat);
 
+    MaybeError ValidateStorageTextureViewDimension(wgpu::BindingType bindingType,
+                                                   wgpu::TextureViewDimension dimension);
+
     // Bindings are specified as a |BindingNumber| in the BindGroupLayoutDescriptor.
     // These numbers may be arbitrary and sparse. Internally, Dawn packs these numbers
     // into a packed range of |BindingIndex| integers.

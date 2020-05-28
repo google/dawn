@@ -460,6 +460,47 @@ TEST_F(StorageTextureValidationTests, UnsupportedSPIRVStorageTextureFormat) {
     }
 }
 
+// Verify that declaring a storage texture dimension that is not supported in WebGPU in shader
+// causes validation error at the creation of PSO. WebGPU doesn't support using cube map texture
+// views and cube map array texture views as storage textures.
+TEST_F(StorageTextureValidationTests, UnsupportedTextureViewDimensionInShader) {
+    constexpr std::array<wgpu::TextureViewDimension, 2> kUnsupportedTextureViewDimensions = {
+        wgpu::TextureViewDimension::Cube, wgpu::TextureViewDimension::CubeArray};
+    constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::R32Float;
+
+    for (wgpu::BindingType bindingType : kSupportedStorageTextureBindingTypes) {
+        for (wgpu::TextureViewDimension dimension : kUnsupportedTextureViewDimensions) {
+            std::string computeShader =
+                CreateComputeShaderWithStorageTexture(bindingType, kFormat, dimension);
+            wgpu::ShaderModule csModule = utils::CreateShaderModule(
+                device, utils::SingleShaderStage::Compute, computeShader.c_str());
+
+            wgpu::ComputePipelineDescriptor computePipelineDescriptor;
+            computePipelineDescriptor.computeStage.module = csModule;
+            computePipelineDescriptor.computeStage.entryPoint = "main";
+            computePipelineDescriptor.layout = nullptr;
+            ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&computePipelineDescriptor));
+        }
+    }
+}
+
+// Verify that declaring a texture view dimension that is not supported to be used as storage
+// textures in WebGPU in bind group layout causes validation error. WebGPU doesn't support using
+// cube map texture views and cube map array texture views as storage textures.
+TEST_F(StorageTextureValidationTests, UnsupportedTextureViewDimensionInBindGroupLayout) {
+    constexpr std::array<wgpu::TextureViewDimension, 2> kUnsupportedTextureViewDimensions = {
+        wgpu::TextureViewDimension::Cube, wgpu::TextureViewDimension::CubeArray};
+    constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::R32Float;
+
+    for (wgpu::BindingType bindingType : kSupportedStorageTextureBindingTypes) {
+        for (wgpu::TextureViewDimension dimension : kUnsupportedTextureViewDimensions) {
+            ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, bindingType, false, false, dimension,
+                          wgpu::TextureComponentType::Float, kFormat}}));
+        }
+    }
+}
+
 // Verify when we create and use a bind group layout with storage textures in the creation of
 // render and compute pipeline, the binding type in the bind group layout must match the
 // declaration in the shader.
@@ -605,14 +646,13 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutStorageTextureFormatMatches
 // Verify the dimension of the bind group layout with storage textures must match the one declared
 // in shader.
 TEST_F(StorageTextureValidationTests, BindGroupLayoutViewDimensionMatchesShaderDeclaration) {
-    constexpr std::array<wgpu::TextureViewDimension, 6> kAllDimensions = {
-        wgpu::TextureViewDimension::e1D,       wgpu::TextureViewDimension::e2D,
-        wgpu::TextureViewDimension::e2DArray,  wgpu::TextureViewDimension::Cube,
-        wgpu::TextureViewDimension::CubeArray, wgpu::TextureViewDimension::e3D};
+    constexpr std::array<wgpu::TextureViewDimension, 4> kSupportedDimensions = {
+        wgpu::TextureViewDimension::e1D, wgpu::TextureViewDimension::e2D,
+        wgpu::TextureViewDimension::e2DArray, wgpu::TextureViewDimension::e3D};
     constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Float;
 
     for (wgpu::BindingType bindingType : kSupportedStorageTextureBindingTypes) {
-        for (wgpu::TextureViewDimension dimensionInShader : kAllDimensions) {
+        for (wgpu::TextureViewDimension dimensionInShader : kSupportedDimensions) {
             // Create the compute shader with the given texture view dimension.
             std::string computeShader = CreateComputeShaderWithStorageTexture(
                 bindingType, kStorageTextureFormat, dimensionInShader);
@@ -629,7 +669,7 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutViewDimensionMatchesShaderD
                                                                       bindingType};
             defaultBindGroupLayoutEntry.storageTextureFormat = kStorageTextureFormat;
 
-            for (wgpu::TextureViewDimension dimensionInBindGroupLayout : kAllDimensions) {
+            for (wgpu::TextureViewDimension dimensionInBindGroupLayout : kSupportedDimensions) {
                 // Create the bind group layout with the given texture view dimension.
                 wgpu::BindGroupLayoutEntry bindGroupLayoutBinding = defaultBindGroupLayoutEntry;
                 bindGroupLayoutBinding.viewDimension = dimensionInBindGroupLayout;
@@ -795,9 +835,8 @@ TEST_F(StorageTextureValidationTests, StorageTextureViewDimensionInBindGroup) {
     // Currently we only support creating 2D-compatible texture view dimensions.
     // TODO(jiawei.shao@intel.com): test the use of 1D and 3D texture view dimensions when they are
     // supported in Dawn.
-    constexpr std::array<wgpu::TextureViewDimension, 4> kSupportedDimensions = {
-        wgpu::TextureViewDimension::e2D, wgpu::TextureViewDimension::e2DArray,
-        wgpu::TextureViewDimension::Cube, wgpu::TextureViewDimension::CubeArray};
+    constexpr std::array<wgpu::TextureViewDimension, 2> kSupportedDimensions = {
+        wgpu::TextureViewDimension::e2D, wgpu::TextureViewDimension::e2DArray};
 
     wgpu::Texture texture =
         CreateTexture(wgpu::TextureUsage::Storage, kStorageTextureFormat, 1, kArrayLayerCount);
@@ -807,6 +846,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureViewDimensionInBindGroup) {
     kDefaultTextureViewDescriptor.baseMipLevel = 0;
     kDefaultTextureViewDescriptor.mipLevelCount = 1;
     kDefaultTextureViewDescriptor.baseArrayLayer = 0;
+    kDefaultTextureViewDescriptor.arrayLayerCount = 1u;
 
     for (wgpu::BindingType storageBindingType : kSupportedStorageTextureBindingTypes) {
         wgpu::BindGroupLayoutEntry defaultBindGroupLayoutEntry;
@@ -826,13 +866,6 @@ TEST_F(StorageTextureValidationTests, StorageTextureViewDimensionInBindGroup) {
                 // Create a texture view with given texture view dimension.
                 wgpu::TextureViewDescriptor textureViewDescriptor = kDefaultTextureViewDescriptor;
                 textureViewDescriptor.dimension = dimensionOfTextureView;
-
-                if (dimensionOfTextureView == wgpu::TextureViewDimension::Cube ||
-                    dimensionOfTextureView == wgpu::TextureViewDimension::CubeArray) {
-                    textureViewDescriptor.arrayLayerCount = 6u;
-                } else {
-                    textureViewDescriptor.arrayLayerCount = 1u;
-                }
                 wgpu::TextureView storageTextureView = texture.CreateView(&textureViewDescriptor);
 
                 // Verify that the dimension of the texture view used as storage texture in a bind

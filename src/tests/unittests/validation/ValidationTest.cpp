@@ -51,7 +51,7 @@ wgpu::Device ValidationTest::CreateDeviceFromAdapter(
     const std::vector<const char*>& requiredExtensions) {
     wgpu::Device deviceToTest;
 
-    // Always keep the code path to test creating a device without a device descriptor.
+    // Always keep this code path to test creating a device without a device descriptor.
     if (requiredExtensions.empty()) {
         deviceToTest = wgpu::Device::Acquire(adapterToTest.CreateDevice());
     } else {

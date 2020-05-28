@@ -155,6 +155,8 @@ namespace dawn_native {
                         bindingInfo.type, StageBit(module->GetExecutionModel())));
                     DAWN_TRY(ValidateStorageTextureFormat(device, bindingInfo.type,
                                                           bindingInfo.storageTextureFormat));
+                    DAWN_TRY(ValidateStorageTextureViewDimension(bindingInfo.type,
+                                                                 bindingInfo.viewDimension));
 
                     bindingSlot.visibility =
                         GetShaderStageVisibilityWithBindingType(bindingInfo.type);
