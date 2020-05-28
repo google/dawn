@@ -556,12 +556,13 @@ namespace dawn_native { namespace opengl {
                     auto& copySize = copy->copySize;
                     Texture* texture = ToBackend(src.texture.Get());
                     Buffer* buffer = ToBackend(dst.buffer.Get());
-                    const GLFormat& format = texture->GetGLFormat();
+                    const Format& format = texture->GetFormat();
+                    const GLFormat& glFormat = texture->GetGLFormat();
                     GLenum target = texture->GetGLTarget();
 
                     // TODO(jiawei.shao@intel.com): support texture-to-buffer copy with compressed
                     // texture formats.
-                    if (texture->GetFormat().isCompressed) {
+                    if (format.isCompressed) {
                         UNREACHABLE();
                     }
 
@@ -574,16 +575,35 @@ namespace dawn_native { namespace opengl {
                     GLuint readFBO = 0;
                     gl.GenFramebuffers(1, &readFBO);
                     gl.BindFramebuffer(GL_READ_FRAMEBUFFER, readFBO);
+
+                    GLenum glAttachment = 0;
+                    switch (format.aspect) {
+                        case Format::Aspect::Color:
+                            glAttachment = GL_COLOR_ATTACHMENT0;
+                            break;
+                        case Format::Aspect::Depth:
+                            glAttachment = GL_DEPTH_ATTACHMENT;
+                            break;
+                        case Format::Aspect::Stencil:
+                            glAttachment = GL_STENCIL_ATTACHMENT;
+                            break;
+                        case Format::Aspect::DepthStencil:
+                            glAttachment = GL_DEPTH_STENCIL_ATTACHMENT;
+                            break;
+                        default:
+                            UNREACHABLE();
+                            break;
+                    }
+
                     switch (texture->GetDimension()) {
                         case wgpu::TextureDimension::e2D:
                             if (texture->GetArrayLayers() > 1) {
-                                gl.FramebufferTextureLayer(
-                                    GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture->GetHandle(),
-                                    src.mipLevel, src.arrayLayer);
+                                gl.FramebufferTextureLayer(GL_READ_FRAMEBUFFER, glAttachment,
+                                                           texture->GetHandle(), src.mipLevel,
+                                                           src.arrayLayer);
                             } else {
-                                gl.FramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                                        GL_TEXTURE_2D, texture->GetHandle(),
-                                                        src.mipLevel);
+                                gl.FramebufferTexture2D(GL_READ_FRAMEBUFFER, glAttachment, target,
+                                                        texture->GetHandle(), src.mipLevel);
                             }
                             break;
 
@@ -592,13 +612,12 @@ namespace dawn_native { namespace opengl {
                     }
 
                     gl.BindBuffer(GL_PIXEL_PACK_BUFFER, buffer->GetHandle());
-                    gl.PixelStorei(GL_PACK_ROW_LENGTH,
-                                   dst.bytesPerRow / texture->GetFormat().blockByteSize);
+                    gl.PixelStorei(GL_PACK_ROW_LENGTH, dst.bytesPerRow / format.blockByteSize);
                     gl.PixelStorei(GL_PACK_IMAGE_HEIGHT, dst.rowsPerImage);
                     ASSERT(copySize.depth == 1 && src.origin.z == 0);
                     void* offset = reinterpret_cast<void*>(static_cast<uintptr_t>(dst.offset));
                     gl.ReadPixels(src.origin.x, src.origin.y, copySize.width, copySize.height,
-                                  format.format, format.type, offset);
+                                  glFormat.format, glFormat.type, offset);
                     gl.PixelStorei(GL_PACK_ROW_LENGTH, 0);
                     gl.PixelStorei(GL_PACK_IMAGE_HEIGHT, 0);
 
@@ -790,8 +809,15 @@ namespace dawn_native { namespace opengl {
                         break;
                 }
 
-                GLenum target = ToBackend(textureView->GetTexture())->GetGLTarget();
-                gl.FramebufferTexture2D(GL_DRAW_FRAMEBUFFER, glAttachment, target, texture, 0);
+                if (textureView->GetTexture()->GetArrayLayers() == 1) {
+                    GLenum target = ToBackend(textureView->GetTexture())->GetGLTarget();
+                    gl.FramebufferTexture2D(GL_DRAW_FRAMEBUFFER, glAttachment, target, texture,
+                                            textureView->GetBaseMipLevel());
+                } else {
+                    gl.FramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, glAttachment, texture,
+                                               textureView->GetBaseMipLevel(),
+                                               textureView->GetBaseArrayLayer());
+                }
             }
         }
 

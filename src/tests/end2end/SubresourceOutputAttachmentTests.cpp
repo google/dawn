@@ -155,9 +155,9 @@ TEST_P(SubresourceOutputAttachmentTest, DISABLED_StencilTexture) {
     DoTest(Type::Stencil);
 }
 
-// TODO(crbug.com/dawn/430): Not implemented on OpenGL
 DAWN_INSTANTIATE_TEST(SubresourceOutputAttachmentTest,
                       D3D12Backend(),
                       D3D12Backend({}, {"use_d3d12_render_pass"}),
                       MetalBackend(),
+                      OpenGLBackend(),
                       VulkanBackend());
