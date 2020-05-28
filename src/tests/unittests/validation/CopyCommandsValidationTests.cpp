@@ -990,9 +990,9 @@ class CopyCommandTest_T2T : public CopyCommandTest {};
 
 TEST_F(CopyCommandTest_T2T, Success) {
     wgpu::Texture source =
-        Create2DTexture(16, 16, 5, 2, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::CopySrc);
+        Create2DTexture(16, 16, 5, 4, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::CopySrc);
     wgpu::Texture destination =
-        Create2DTexture(16, 16, 5, 2, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::CopyDst);
+        Create2DTexture(16, 16, 5, 4, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::CopyDst);
 
     // Different copies, including some that touch the OOB condition
     {
@@ -1019,6 +1019,16 @@ TEST_F(CopyCommandTest_T2T, Success) {
         // Copy between slices
         TestT2TCopy(utils::Expectation::Success, source, 0, 1, {0, 0, 0}, destination, 0, 1,
                     {0, 0, 0}, {16, 16, 1});
+
+        // Copy multiple slices (srcTextureCopyView.arrayLayer + copySize.depth ==
+        // srcTextureCopyView.texture.arrayLayerCount)
+        TestT2TCopy(utils::Expectation::Success, source, 0, 2, {0, 0, 0}, destination, 0, 0,
+                    {0, 0, 0}, {16, 16, 2});
+
+        // Copy multiple slices (dstTextureCopyView.arrayLayer + copySize.depth ==
+        // dstTextureCopyView.texture.arrayLayerCount)
+        TestT2TCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0, 2,
+                    {0, 0, 0}, {16, 16, 2});
     }
 
     // Empty copies are valid
@@ -1058,9 +1068,9 @@ TEST_F(CopyCommandTest_T2T, IncorrectUsage) {
 
 TEST_F(CopyCommandTest_T2T, OutOfBounds) {
     wgpu::Texture source =
-        Create2DTexture(16, 16, 5, 2, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::CopySrc);
+        Create2DTexture(16, 16, 5, 4, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::CopySrc);
     wgpu::Texture destination =
-        Create2DTexture(16, 16, 5, 2, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::CopyDst);
+        Create2DTexture(16, 16, 5, 4, wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureUsage::CopyDst);
 
     // OOB on source
     {
@@ -1076,12 +1086,16 @@ TEST_F(CopyCommandTest_T2T, OutOfBounds) {
         TestT2TCopy(utils::Expectation::Failure, source, 1, 0, {0, 0, 0}, destination, 0, 0,
                     {0, 0, 0}, {9, 9, 1});
 
+        // arrayLayer + depth OOB
+        TestT2TCopy(utils::Expectation::Failure, source, 0, 3, {0, 0, 0}, destination, 0, 0,
+                    {0, 0, 0}, {16, 16, 2});
+
         // empty copy on non-existent mip fails
         TestT2TCopy(utils::Expectation::Failure, source, 6, 0, {0, 0, 0}, destination, 0, 0,
                     {0, 0, 0}, {0, 0, 1});
 
         // empty copy from non-existent slice fails
-        TestT2TCopy(utils::Expectation::Failure, source, 0, 2, {0, 0, 0}, destination, 0, 0,
+        TestT2TCopy(utils::Expectation::Failure, source, 0, 4, {0, 0, 0}, destination, 0, 0,
                     {0, 0, 0}, {0, 0, 1});
     }
 
@@ -1099,12 +1113,16 @@ TEST_F(CopyCommandTest_T2T, OutOfBounds) {
         TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 1, 0,
                     {0, 0, 0}, {9, 9, 1});
 
+        // arrayLayer + depth OOB
+        TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 3,
+                    {0, 0, 0}, {16, 16, 2});
+
         // empty copy on non-existent mip fails
         TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 6, 0,
                     {0, 0, 0}, {0, 0, 1});
 
         // empty copy on non-existent slice fails
-        TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 2,
+        TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 4,
                     {0, 0, 0}, {0, 0, 1});
     }
 }
@@ -1122,10 +1140,6 @@ TEST_F(CopyCommandTest_T2T, 2DTextureDepthConstraints) {
     // Empty copy on destination with z > 0 fails
     TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 0, {0, 0, 1},
                 {0, 0, 1});
-
-    // Empty copy with depth > 1 fails
-    TestT2TCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 0, {0, 0, 0},
-                {0, 0, 2});
 }
 
 TEST_F(CopyCommandTest_T2T, 2DTextureDepthStencil) {

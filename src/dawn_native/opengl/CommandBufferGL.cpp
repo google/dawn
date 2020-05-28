@@ -623,17 +623,17 @@ namespace dawn_native { namespace opengl {
                     srcTexture->EnsureSubresourceContentInitialized(src.mipLevel, 1, src.arrayLayer,
                                                                     1);
                     if (IsCompleteSubresourceCopiedTo(dstTexture, copySize, dst.mipLevel)) {
-                        dstTexture->SetIsSubresourceContentInitialized(true, dst.mipLevel, 1,
-                                                                       dst.arrayLayer, 1);
+                        dstTexture->SetIsSubresourceContentInitialized(
+                            true, dst.mipLevel, 1, dst.arrayLayer, copy->copySize.depth);
                     } else {
-                        dstTexture->EnsureSubresourceContentInitialized(dst.mipLevel, 1,
-                                                                        dst.arrayLayer, 1);
+                        dstTexture->EnsureSubresourceContentInitialized(
+                            dst.mipLevel, 1, dst.arrayLayer, copy->copySize.depth);
                     }
                     gl.CopyImageSubData(srcTexture->GetHandle(), srcTexture->GetGLTarget(),
                                         src.mipLevel, src.origin.x, src.origin.y, src.arrayLayer,
                                         dstTexture->GetHandle(), dstTexture->GetGLTarget(),
                                         dst.mipLevel, dst.origin.x, dst.origin.y, dst.arrayLayer,
-                                        copySize.width, copySize.height, 1);
+                                        copySize.width, copySize.height, copy->copySize.depth);
                     break;
                 }
 

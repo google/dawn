@@ -64,10 +64,13 @@ namespace dawn_native { namespace vulkan {
 
             VkImageCopy region;
 
+            // TODO(jiawei.shao@intel.com): support 1D and 3D textures
+            ASSERT(srcTexture->GetDimension() == wgpu::TextureDimension::e2D &&
+                   dstTexture->GetDimension() == wgpu::TextureDimension::e2D);
             region.srcSubresource.aspectMask = srcTexture->GetVkAspectMask();
             region.srcSubresource.mipLevel = srcCopy.mipLevel;
             region.srcSubresource.baseArrayLayer = srcCopy.arrayLayer;
-            region.srcSubresource.layerCount = 1;
+            region.srcSubresource.layerCount = copySize.depth;
 
             region.srcOffset.x = srcCopy.origin.x;
             region.srcOffset.y = srcCopy.origin.y;
@@ -76,7 +79,7 @@ namespace dawn_native { namespace vulkan {
             region.dstSubresource.aspectMask = dstTexture->GetVkAspectMask();
             region.dstSubresource.mipLevel = dstCopy.mipLevel;
             region.dstSubresource.baseArrayLayer = dstCopy.arrayLayer;
-            region.dstSubresource.layerCount = 1;
+            region.dstSubresource.layerCount = copySize.depth;
 
             region.dstOffset.x = dstCopy.origin.x;
             region.dstOffset.y = dstCopy.origin.y;
@@ -86,7 +89,7 @@ namespace dawn_native { namespace vulkan {
             Extent3D imageExtent = ComputeTextureCopyExtent(dstCopy, copySize);
             region.extent.width = imageExtent.width;
             region.extent.height = imageExtent.height;
-            region.extent.depth = imageExtent.depth;
+            region.extent.depth = 1;
 
             return region;
         }
@@ -495,20 +498,21 @@ namespace dawn_native { namespace vulkan {
                     if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), copy->copySize,
                                                       dst.mipLevel)) {
                         // Since destination texture has been overwritten, it has been "initialized"
-                        dst.texture->SetIsSubresourceContentInitialized(true, dst.mipLevel, 1,
-                                                                        dst.arrayLayer, 1);
+                        dst.texture->SetIsSubresourceContentInitialized(
+                            true, dst.mipLevel, 1, dst.arrayLayer, copy->copySize.depth);
                     } else {
                         ToBackend(dst.texture)
                             ->EnsureSubresourceContentInitialized(recordingContext, dst.mipLevel, 1,
-                                                                  dst.arrayLayer, 1);
+                                                                  dst.arrayLayer,
+                                                                  copy->copySize.depth);
                     }
 
                     ToBackend(src.texture)
                         ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopySrc,
-                                             src.mipLevel, 1, src.arrayLayer, 1);
+                                             src.mipLevel, 1, src.arrayLayer, copy->copySize.depth);
                     ToBackend(dst.texture)
                         ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst,
-                                             dst.mipLevel, 1, dst.arrayLayer, 1);
+                                             dst.mipLevel, 1, dst.arrayLayer, copy->copySize.depth);
 
                     // In some situations we cannot do texture-to-texture copies with vkCmdCopyImage
                     // because as Vulkan SPEC always validates image copies with the virtual size of

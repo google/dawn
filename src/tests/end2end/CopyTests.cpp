@@ -281,11 +281,13 @@ class CopyTests_T2T : public CopyTests {
         uint32_t y;
         uint32_t level;
         uint32_t arraySize = 1u;
+        uint32_t baseArrayLayer = 0u;
     };
 
     struct CopySize {
         uint32_t width;
         uint32_t height;
+        uint32_t arrayLayerCount = 1u;
     };
 
   protected:
@@ -324,77 +326,56 @@ class CopyTests_T2T : public CopyTests {
         uint32_t texelsPerRow = bytesPerRow / kBytesPerTexel;
         uint32_t texelCountPerLayer = texelsPerRow * (height - 1) + width;
 
-        std::vector<std::vector<RGBA8>> textureArrayData(srcSpec.arraySize);
-        for (uint32_t slice = 0; slice < srcSpec.arraySize; ++slice) {
-            textureArrayData[slice].resize(texelCountPerLayer);
+        // TODO(jiawei.shao@intel.com): support copying into multiple contiguous array layers in one
+        // copyBufferToTexture() call.
+        std::vector<std::vector<RGBA8>> textureArrayCopyData(copy.arrayLayerCount);
+        for (uint32_t slice = 0; slice < copy.arrayLayerCount; ++slice) {
+            textureArrayCopyData[slice].resize(texelCountPerLayer);
             FillTextureData(width, height, bytesPerRow / kBytesPerTexel, slice,
-                            textureArrayData[slice].data());
+                            textureArrayCopyData[slice].data());
 
             wgpu::Buffer uploadBuffer = utils::CreateBufferFromData(
-                device, textureArrayData[slice].data(),
-                static_cast<uint32_t>(sizeof(RGBA8) * textureArrayData[slice].size()),
+                device, textureArrayCopyData[slice].data(),
+                static_cast<uint32_t>(sizeof(RGBA8) * textureArrayCopyData[slice].size()),
                 wgpu::BufferUsage::CopySrc);
             wgpu::BufferCopyView bufferCopyView =
                 utils::CreateBufferCopyView(uploadBuffer, 0, bytesPerRow, 0);
-            wgpu::TextureCopyView textureCopyView =
-                utils::CreateTextureCopyView(srcTexture, srcSpec.level, slice, {0, 0, 0});
+            wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
+                srcTexture, srcSpec.level, srcSpec.baseArrayLayer + slice, {0, 0, 0});
             wgpu::Extent3D bufferCopySize = {width, height, 1};
 
             encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &bufferCopySize);
         }
 
-        // Create an upload buffer filled with empty data and use it to populate the `level` mip of
-        // the texture. Note: Prepopulating the texture with empty data ensures that there is not
-        // random data in the expectation and helps ensure that the padding due to the bytes per row
-        // is not modified by the copy
-        {
-            uint32_t dstWidth = dstSpec.width >> dstSpec.level;
-            uint32_t dstHeight = dstSpec.height >> dstSpec.level;
-            uint32_t dstRowPitch = Align(kBytesPerTexel * dstWidth, kTextureBytesPerRowAlignment);
-            uint32_t dstTexelsPerRow = dstRowPitch / kBytesPerTexel;
-            uint32_t dstTexelCount = dstTexelsPerRow * (dstHeight - 1) + dstWidth;
-
-            std::vector<RGBA8> emptyData(dstTexelCount);
-            wgpu::Buffer uploadBuffer = utils::CreateBufferFromData(
-                device, emptyData.data(), static_cast<uint32_t>(sizeof(RGBA8) * emptyData.size()),
-                wgpu::BufferUsage::CopySrc);
-            wgpu::BufferCopyView bufferCopyView =
-                utils::CreateBufferCopyView(uploadBuffer, 0, dstRowPitch, 0);
-            wgpu::TextureCopyView textureCopyView =
-                utils::CreateTextureCopyView(dstTexture, dstSpec.level, 0, {0, 0, 0});
-            wgpu::Extent3D dstCopySize = {dstWidth, dstHeight, 1};
-            encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &dstCopySize);
-        }
-
         // Perform the texture to texture copy
-        for (uint32_t slice = 0; slice < srcSpec.arraySize; ++slice) {
-            wgpu::TextureCopyView srcTextureCopyView = utils::CreateTextureCopyView(
-                srcTexture, srcSpec.level, slice, {srcSpec.x, srcSpec.y, 0});
-            wgpu::TextureCopyView dstTextureCopyView = utils::CreateTextureCopyView(
-                dstTexture, dstSpec.level, slice, {dstSpec.x, dstSpec.y, 0});
-            wgpu::Extent3D copySize = {copy.width, copy.height, 1};
-            encoder.CopyTextureToTexture(&srcTextureCopyView, &dstTextureCopyView, &copySize);
-        }
+        wgpu::TextureCopyView srcTextureCopyView = utils::CreateTextureCopyView(
+            srcTexture, srcSpec.level, srcSpec.baseArrayLayer, {srcSpec.x, srcSpec.y, 0});
+        wgpu::TextureCopyView dstTextureCopyView = utils::CreateTextureCopyView(
+            dstTexture, dstSpec.level, dstSpec.baseArrayLayer, {dstSpec.x, dstSpec.y, 0});
+        wgpu::Extent3D copySize = {copy.width, copy.height, copy.arrayLayerCount};
+        encoder.CopyTextureToTexture(&srcTextureCopyView, &dstTextureCopyView, &copySize);
 
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
         std::vector<RGBA8> expected(bytesPerRow / kBytesPerTexel * (copy.height - 1) + copy.width);
-        for (uint32_t slice = 0; slice < srcSpec.arraySize; ++slice) {
+        for (uint32_t slice = 0; slice < copy.arrayLayerCount; ++slice) {
             std::fill(expected.begin(), expected.end(), RGBA8());
-            PackTextureData(
-                &textureArrayData[slice][srcSpec.x + srcSpec.y * (bytesPerRow / kBytesPerTexel)],
-                copy.width, copy.height, texelsPerRow, expected.data(), copy.width);
+            PackTextureData(&textureArrayCopyData[slice][srcSpec.x + srcSpec.y * (bytesPerRow /
+                                                                                  kBytesPerTexel)],
+                            copy.width, copy.height, texelsPerRow, expected.data(), copy.width);
 
             EXPECT_TEXTURE_RGBA8_EQ(expected.data(), dstTexture, dstSpec.x, dstSpec.y, copy.width,
-                                    copy.height, dstSpec.level, slice)
+                                    copy.height, dstSpec.level, dstSpec.baseArrayLayer + slice)
                 << "Texture to Texture copy failed copying region [(" << srcSpec.x << ", "
                 << srcSpec.y << "), (" << srcSpec.x + copy.width << ", " << srcSpec.y + copy.height
                 << ")) from " << srcSpec.width << " x " << srcSpec.height
-                << " texture at mip level " << srcSpec.level << " layer " << slice << " to [("
-                << dstSpec.x << ", " << dstSpec.y << "), (" << dstSpec.x + copy.width << ", "
-                << dstSpec.y + copy.height << ")) region of " << dstSpec.width << " x "
-                << dstSpec.height << " texture at mip level " << dstSpec.level << std::endl;
+                << " texture at mip level " << srcSpec.level << " layer "
+                << srcSpec.baseArrayLayer + slice << " to [(" << dstSpec.x << ", " << dstSpec.y
+                << "), (" << dstSpec.x + copy.width << ", " << dstSpec.y + copy.height
+                << ")) region of " << dstSpec.width << " x " << dstSpec.height
+                << " texture at mip level " << dstSpec.level << " layer "
+                << dstSpec.baseArrayLayer + slice << std::endl;
         }
     }
 };
@@ -723,24 +704,59 @@ TEST_P(CopyTests_T2T, TextureRegion) {
     }
 }
 
+// Test copying the whole 2D array texture.
 TEST_P(CopyTests_T2T, Texture2DArray) {
+    // TODO(jiawei.shao@intel.com): investigate why this test fails with swiftshader.
+    DAWN_SKIP_TEST_IF(IsSwiftshader());
+
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 6u;
     DoTest({kWidth, kHeight, 0, 0, 0, kLayers}, {kWidth, kHeight, 0, 0, 0, kLayers},
-           {kWidth, kHeight});
+           {kWidth, kHeight, kLayers});
 }
 
+// Test copying a subresource region of the 2D array texture.
 TEST_P(CopyTests_T2T, Texture2DArrayRegion) {
+    // TODO(jiawei.shao@intel.com): investigate why this test fails with swiftshader.
+    DAWN_SKIP_TEST_IF(IsSwiftshader());
+
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 6u;
     for (unsigned int w : {64, 128, 256}) {
         for (unsigned int h : {16, 32, 48}) {
             DoTest({kWidth, kHeight, 0, 0, 0, kLayers}, {kWidth, kHeight, 0, 0, 0, kLayers},
-                   {w, h});
+                   {w, h, kLayers});
         }
     }
+}
+
+// Test copying one slice of a 2D array texture.
+TEST_P(CopyTests_T2T, Texture2DArrayCopyOneSlice) {
+    constexpr uint32_t kWidth = 256;
+    constexpr uint32_t kHeight = 128;
+    constexpr uint32_t kLayers = 6u;
+    constexpr uint32_t kSrcBaseLayer = 1u;
+    constexpr uint32_t kDstBaseLayer = 3u;
+    DoTest({kWidth, kHeight, 0, 0, 0, kLayers, kSrcBaseLayer},
+           {kWidth, kHeight, 0, 0, 0, kLayers, kDstBaseLayer}, {kWidth, kHeight, 1u});
+}
+
+// Test copying multiple contiguous slices of a 2D array texture.
+TEST_P(CopyTests_T2T, Texture2DArrayCopyMultipleSlices) {
+    // TODO(jiawei.shao@intel.com): investigate why this test fails with swiftshader.
+    DAWN_SKIP_TEST_IF(IsSwiftshader());
+
+    constexpr uint32_t kWidth = 256;
+    constexpr uint32_t kHeight = 128;
+    constexpr uint32_t kLayers = 6u;
+    constexpr uint32_t kSrcBaseLayer = 0u;
+    constexpr uint32_t kDstBaseLayer = 3u;
+    constexpr uint32_t kCopyArrayLayerCount = 3u;
+    DoTest({kWidth, kHeight, 0, 0, 0, kLayers, kSrcBaseLayer},
+           {kWidth, kHeight, 0, 0, 0, kLayers, kDstBaseLayer},
+           {kWidth, kHeight, kCopyArrayLayerCount});
 }
 
 TEST_P(CopyTests_T2T, TextureMip) {

@@ -660,15 +660,17 @@ namespace dawn_native { namespace d3d12 {
                     Texture* destination = ToBackend(copy->destination.texture.Get());
 
                     source->EnsureSubresourceContentInitialized(
-                        commandContext, copy->source.mipLevel, 1, copy->source.arrayLayer, 1);
+                        commandContext, copy->source.mipLevel, 1, copy->source.arrayLayer,
+                        copy->copySize.depth);
                     if (IsCompleteSubresourceCopiedTo(destination, copy->copySize,
                                                       copy->destination.mipLevel)) {
                         destination->SetIsSubresourceContentInitialized(
-                            true, copy->destination.mipLevel, 1, copy->destination.arrayLayer, 1);
+                            true, copy->destination.mipLevel, 1, copy->destination.arrayLayer,
+                            copy->copySize.depth);
                     } else {
                         destination->EnsureSubresourceContentInitialized(
                             commandContext, copy->destination.mipLevel, 1,
-                            copy->destination.arrayLayer, 1);
+                            copy->destination.arrayLayer, copy->copySize.depth);
                     }
                     source->TrackUsageAndTransitionNow(commandContext, wgpu::TextureUsage::CopySrc);
                     destination->TrackUsageAndTransitionNow(commandContext,
@@ -678,21 +680,29 @@ namespace dawn_native { namespace d3d12 {
                         commandList->CopyResource(destination->GetD3D12Resource(),
                                                   source->GetD3D12Resource());
                     } else {
-                        D3D12_TEXTURE_COPY_LOCATION srcLocation =
-                            ComputeTextureCopyLocationForTexture(source, copy->source.mipLevel,
-                                                                 copy->source.arrayLayer);
+                        // TODO(jiawei.shao@intel.com): support copying with 1D and 3D textures.
+                        ASSERT(source->GetDimension() == wgpu::TextureDimension::e2D &&
+                               destination->GetDimension() == wgpu::TextureDimension::e2D);
+                        const dawn_native::Extent3D copyExtentOneSlice = {
+                            copy->copySize.width, copy->copySize.height, 1u};
+                        for (uint32_t slice = 0; slice < copy->copySize.depth; ++slice) {
+                            D3D12_TEXTURE_COPY_LOCATION srcLocation =
+                                ComputeTextureCopyLocationForTexture(
+                                    source, copy->source.mipLevel, copy->source.arrayLayer + slice);
 
-                        D3D12_TEXTURE_COPY_LOCATION dstLocation =
-                            ComputeTextureCopyLocationForTexture(destination,
-                                                                 copy->destination.mipLevel,
-                                                                 copy->destination.arrayLayer);
+                            D3D12_TEXTURE_COPY_LOCATION dstLocation =
+                                ComputeTextureCopyLocationForTexture(
+                                    destination, copy->destination.mipLevel,
+                                    copy->destination.arrayLayer + slice);
 
-                        D3D12_BOX sourceRegion =
-                            ComputeD3D12BoxFromOffsetAndSize(copy->source.origin, copy->copySize);
+                            D3D12_BOX sourceRegion = ComputeD3D12BoxFromOffsetAndSize(
+                                copy->source.origin, copyExtentOneSlice);
 
-                        commandList->CopyTextureRegion(
-                            &dstLocation, copy->destination.origin.x, copy->destination.origin.y,
-                            copy->destination.origin.z, &srcLocation, &sourceRegion);
+                            commandList->CopyTextureRegion(&dstLocation, copy->destination.origin.x,
+                                                           copy->destination.origin.y,
+                                                           copy->destination.origin.z, &srcLocation,
+                                                           &sourceRegion);
+                        }
                     }
                     break;
                 }
