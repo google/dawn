@@ -312,9 +312,45 @@ namespace dawn_native { namespace opengl {
                             break;
                         }
 
-                        case wgpu::BindingType::StorageTexture:
                         case wgpu::BindingType::ReadonlyStorageTexture:
-                        case wgpu::BindingType::WriteonlyStorageTexture:
+                        case wgpu::BindingType::WriteonlyStorageTexture: {
+                            TextureView* view =
+                                ToBackend(group->GetBindingAsTextureView(bindingIndex));
+                            Texture* texture = ToBackend(view->GetTexture());
+                            GLuint handle = texture->GetHandle();
+                            GLuint imageIndex = indices[bindingIndex];
+
+                            GLenum access;
+                            switch (bindingInfo.type) {
+                                case wgpu::BindingType::ReadonlyStorageTexture:
+                                    access = GL_READ_ONLY;
+                                    break;
+                                case wgpu::BindingType::WriteonlyStorageTexture:
+                                    access = GL_WRITE_ONLY;
+                                    break;
+                                default:
+                                    UNREACHABLE();
+                                    break;
+                            }
+
+                            // OpenGL ES only supports either binding a layer or the entire texture
+                            // in glBindImageTexture().
+                            GLboolean isLayered;
+                            if (view->GetLayerCount() == 1) {
+                                isLayered = GL_FALSE;
+                            } else if (texture->GetArrayLayers() == view->GetLayerCount()) {
+                                isLayered = GL_TRUE;
+                            } else {
+                                UNREACHABLE();
+                            }
+
+                            gl.BindImageTexture(imageIndex, handle, view->GetBaseMipLevel(),
+                                                isLayered, view->GetBaseArrayLayer(), access,
+                                                texture->GetGLFormat().internalFormat);
+                            break;
+                        }
+
+                        case wgpu::BindingType::StorageTexture:
                             UNREACHABLE();
                             break;
 

@@ -142,9 +142,16 @@ namespace dawn_native { namespace opengl {
                         // emulation
                         break;
 
-                    case wgpu::BindingType::StorageTexture:
                     case wgpu::BindingType::ReadonlyStorageTexture:
-                    case wgpu::BindingType::WriteonlyStorageTexture:
+                    case wgpu::BindingType::WriteonlyStorageTexture: {
+                        GLint location = gl.GetUniformLocation(mProgram, name.c_str());
+                        if (location != -1) {
+                            gl.Uniform1i(location, indices[group][bindingIndex]);
+                        }
+                        break;
+                    }
+
+                    case wgpu::BindingType::StorageTexture:
                         UNREACHABLE();
                         break;
 

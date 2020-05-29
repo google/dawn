@@ -94,6 +94,7 @@ namespace dawn_native { namespace opengl {
 
     ResultOrError<BindGroupBase*> Device::CreateBindGroupImpl(
         const BindGroupDescriptor* descriptor) {
+        DAWN_TRY(ValidateGLBindGroupDescriptor(descriptor));
         return BindGroup::Create(this, descriptor);
     }
     ResultOrError<BindGroupLayoutBase*> Device::CreateBindGroupLayoutImpl(

@@ -26,6 +26,7 @@ namespace dawn_native { namespace opengl {
         GLuint samplerIndex = 0;
         GLuint sampledTextureIndex = 0;
         GLuint ssboIndex = 0;
+        GLuint storageTextureIndex = 0;
 
         for (uint32_t group : IterateBitSet(GetBindGroupLayoutsMask())) {
             const BindGroupLayoutBase* bgl = GetBindGroupLayout(group);
@@ -53,9 +54,13 @@ namespace dawn_native { namespace opengl {
                         ssboIndex++;
                         break;
 
-                    case wgpu::BindingType::StorageTexture:
                     case wgpu::BindingType::ReadonlyStorageTexture:
                     case wgpu::BindingType::WriteonlyStorageTexture:
+                        mIndexInfo[group][bindingIndex] = storageTextureIndex;
+                        storageTextureIndex++;
+                        break;
+
+                    case wgpu::BindingType::StorageTexture:
                         UNREACHABLE();
                         break;
 

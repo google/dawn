@@ -176,12 +176,26 @@ namespace dawn_native { namespace opengl {
                 BindingNumber bindingNumber = it.first;
                 const auto& info = it.second;
 
+                uint32_t resourceId;
+                switch (info.type) {
+                    // When the resource is a uniform or shader storage block, we should change the
+                    // block name instead of the instance name.
+                    case wgpu::BindingType::ReadonlyStorageBuffer:
+                    case wgpu::BindingType::StorageBuffer:
+                    case wgpu::BindingType::UniformBuffer:
+                        resourceId = info.base_type_id;
+                        break;
+                    default:
+                        resourceId = info.id;
+                        break;
+                }
+
                 if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
-                    mSpvcContext.SetName(info.base_type_id, GetBindingName(group, bindingNumber));
+                    mSpvcContext.SetName(resourceId, GetBindingName(group, bindingNumber));
                     mSpvcContext.UnsetDecoration(info.id, shaderc_spvc_decoration_binding);
                     mSpvcContext.UnsetDecoration(info.id, shaderc_spvc_decoration_descriptorset);
                 } else {
-                    compiler->set_name(info.base_type_id, GetBindingName(group, bindingNumber));
+                    compiler->set_name(resourceId, GetBindingName(group, bindingNumber));
                     compiler->unset_decoration(info.id, spv::DecorationBinding);
                     compiler->unset_decoration(info.id, spv::DecorationDescriptorSet);
                 }

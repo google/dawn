@@ -14,10 +14,53 @@
 
 #include "dawn_native/opengl/BindGroupGL.h"
 
+#include "dawn_native/Texture.h"
 #include "dawn_native/opengl/BindGroupLayoutGL.h"
 #include "dawn_native/opengl/DeviceGL.h"
 
 namespace dawn_native { namespace opengl {
+
+    MaybeError ValidateGLBindGroupDescriptor(const BindGroupDescriptor* descriptor) {
+        const BindGroupLayoutBase::BindingMap& bindingMap = descriptor->layout->GetBindingMap();
+        for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
+            const BindGroupEntry& entry = descriptor->entries[i];
+
+            const auto& it = bindingMap.find(BindingNumber(entry.binding));
+            BindingIndex bindingIndex = it->second;
+            ASSERT(bindingIndex < descriptor->layout->GetBindingCount());
+
+            const BindingInfo& bindingInfo = descriptor->layout->GetBindingInfo(bindingIndex);
+            switch (bindingInfo.type) {
+                case wgpu::BindingType::ReadonlyStorageTexture:
+                case wgpu::BindingType::WriteonlyStorageTexture: {
+                    ASSERT(entry.textureView != nullptr);
+                    const uint32_t textureViewLayerCount = entry.textureView->GetLayerCount();
+                    if (textureViewLayerCount != 1 &&
+                        textureViewLayerCount !=
+                            entry.textureView->GetTexture()->GetArrayLayers()) {
+                        return DAWN_VALIDATION_ERROR(
+                            "Currently the OpenGL backend only supports either binding a layer or "
+                            "the entire texture as storage texture.");
+                    }
+                } break;
+
+                case wgpu::BindingType::UniformBuffer:
+                case wgpu::BindingType::StorageBuffer:
+                case wgpu::BindingType::ReadonlyStorageBuffer:
+                case wgpu::BindingType::SampledTexture:
+                case wgpu::BindingType::Sampler:
+                case wgpu::BindingType::ComparisonSampler:
+                    break;
+
+                case wgpu::BindingType::StorageTexture:
+                default:
+                    UNREACHABLE();
+                    break;
+            }
+        }
+
+        return {};
+    }
 
     BindGroup::BindGroup(Device* device, const BindGroupDescriptor* descriptor)
         : BindGroupBase(this, device, descriptor) {
