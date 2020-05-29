@@ -15,7 +15,9 @@
 #include "dawn_native/d3d12/AdapterD3D12.h"
 
 #include "common/Constants.h"
+#include "dawn_native/Instance.h"
 #include "dawn_native/d3d12/BackendD3D12.h"
+#include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/PlatformFunctions.h"
 
@@ -38,6 +40,10 @@ namespace dawn_native { namespace d3d12 {
         : AdapterBase(backend->GetInstance(), wgpu::BackendType::D3D12),
           mHardwareAdapter(hardwareAdapter),
           mBackend(backend) {
+    }
+
+    Adapter::~Adapter() {
+        CleanUpDebugLayerFilters();
     }
 
     const D3D12DeviceInfo& Adapter::GetDeviceInfo() const {
@@ -65,6 +71,8 @@ namespace dawn_native { namespace d3d12 {
                                                 _uuidof(ID3D12Device), &mD3d12Device))) {
             return DAWN_INTERNAL_ERROR("D3D12CreateDevice failed");
         }
+
+        DAWN_TRY(InitializeDebugLayerFilters());
 
         DXGI_ADAPTER_DESC1 adapterDesc;
         mHardwareAdapter->GetDesc1(&adapterDesc);
@@ -94,6 +102,89 @@ namespace dawn_native { namespace d3d12 {
         mSupportedExtensions.EnableExtension(Extension::TextureCompressionBC);
         mSupportedExtensions.EnableExtension(Extension::PipelineStatisticsQuery);
         mSupportedExtensions.EnableExtension(Extension::TimestampQuery);
+    }
+
+    MaybeError Adapter::InitializeDebugLayerFilters() {
+        if (!GetInstance()->IsBackendValidationEnabled()) {
+            return {};
+        }
+        ComPtr<ID3D12InfoQueue> infoQueue;
+        ASSERT_SUCCESS(mD3d12Device.As(&infoQueue));
+        // We create storage filter with a deny list to deny specific messages from getting
+        // written to the queue. The filter will silence them in the debug output.
+        D3D12_INFO_QUEUE_FILTER storageFilter = {};
+
+        D3D12_MESSAGE_ID denyIds[] = {
+
+            //
+            // Permanent IDs: list of warnings that are not applicable
+            //
+
+            // Resource sub-allocation partially maps pre-allocated heaps. This means the
+            // entire physical addresses space may have no resources or have many resources
+            // assigned the same heap.
+            D3D12_MESSAGE_ID_HEAP_ADDRESS_RANGE_HAS_NO_RESOURCE,
+            D3D12_MESSAGE_ID_HEAP_ADDRESS_RANGE_INTERSECTS_MULTIPLE_BUFFERS,
+
+            // The debug layer validates pipeline objects when they are created. Dawn validates
+            // them when them when they are set. Therefore, since the issue is caught at a later
+            // time, we can silence this warnings.
+            D3D12_MESSAGE_ID_CREATEGRAPHICSPIPELINESTATE_RENDERTARGETVIEW_NOT_SET,
+
+            // Adding a clear color during resource creation would require heuristics or delayed
+            // creation.
+            // https://crbug.com/dawn/418
+            D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,
+            D3D12_MESSAGE_ID_CLEARDEPTHSTENCILVIEW_MISMATCHINGCLEARVALUE,
+
+            // Dawn enforces proper Unmaps at a later time.
+            // https://crbug.com/dawn/422
+            D3D12_MESSAGE_ID_EXECUTECOMMANDLISTS_GPU_WRITTEN_READBACK_RESOURCE_MAPPED,
+
+            //
+            // Temporary IDs: list of warnings that should be fixed or promoted
+            //
+
+            // Remove after warning have been addressed
+            // https://crbug.com/dawn/419
+            D3D12_MESSAGE_ID_UNMAP_RANGE_NOT_EMPTY,
+
+            // Remove after warning have been addressed
+            // https://crbug.com/dawn/421
+            D3D12_MESSAGE_ID_GPU_BASED_VALIDATION_INCOMPATIBLE_RESOURCE_STATE,
+        };
+
+        storageFilter.DenyList.NumIDs = ARRAYSIZE(denyIds);
+        storageFilter.DenyList.pIDList = denyIds;
+        DAWN_TRY(CheckHRESULT(infoQueue->PushStorageFilter(&storageFilter),
+                              "ID3D12InfoQueue::PushStorageFilter"));
+
+        // We create a retrieval filter with an allow list to select which messages we are
+        // allowed to be read back from the queue. If any messages are read back, they are
+        // converted to Dawn errors.
+        D3D12_INFO_QUEUE_FILTER retrievalFilter{};
+        // We will only create errors from warnings or worse. This ignores info and message.
+        D3D12_MESSAGE_SEVERITY severities[] = {
+            D3D12_MESSAGE_SEVERITY_ERROR,
+            D3D12_MESSAGE_SEVERITY_WARNING,
+            D3D12_MESSAGE_SEVERITY_CORRUPTION,
+        };
+        retrievalFilter.AllowList.NumSeverities = ARRAYSIZE(severities);
+        retrievalFilter.AllowList.pSeverityList = severities;
+        DAWN_TRY(CheckHRESULT(infoQueue->PushRetrievalFilter(&retrievalFilter),
+                              "ID3D12InfoQueue::PushRetrievalFilter"));
+
+        return {};
+    }
+
+    void Adapter::CleanUpDebugLayerFilters() {
+        if (!GetInstance()->IsBackendValidationEnabled()) {
+            return;
+        }
+        ComPtr<ID3D12InfoQueue> infoQueue;
+        ASSERT_SUCCESS(mD3d12Device.As(&infoQueue));
+        infoQueue->PopRetrievalFilter();
+        infoQueue->PopStorageFilter();
     }
 
     ResultOrError<DeviceBase*> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor) {

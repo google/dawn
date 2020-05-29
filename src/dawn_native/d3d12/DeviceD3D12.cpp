@@ -17,6 +17,7 @@
 #include "common/Assert.h"
 #include "dawn_native/BackendConnection.h"
 #include "dawn_native/ErrorData.h"
+#include "dawn_native/Instance.h"
 #include "dawn_native/d3d12/AdapterD3D12.h"
 #include "dawn_native/d3d12/BackendD3D12.h"
 #include "dawn_native/d3d12/BindGroupD3D12.h"
@@ -41,11 +42,15 @@
 #include "dawn_native/d3d12/SwapChainD3D12.h"
 #include "dawn_native/d3d12/TextureD3D12.h"
 
+#include <sstream>
+
 namespace dawn_native { namespace d3d12 {
 
     // TODO(dawn:155): Figure out these values.
     static constexpr uint16_t kShaderVisibleDescriptorHeapSize = 1024;
     static constexpr uint8_t kAttachmentDescriptorHeapSize = 64;
+
+    static constexpr uint64_t kMaxDebugMessagesToPrint = 5;
 
     // static
     ResultOrError<Device*> Device::Create(Adapter* adapter, const DeviceDescriptor* descriptor) {
@@ -221,6 +226,9 @@ namespace dawn_native { namespace d3d12 {
         mUsedComObjectRefs.ClearUpTo(completedSerial);
         DAWN_TRY(ExecutePendingCommandContext());
         DAWN_TRY(NextSerial());
+
+        DAWN_TRY(CheckDebugLayerAndGenerateErrors());
+
         return {};
     }
 
@@ -458,6 +466,51 @@ namespace dawn_native { namespace d3d12 {
         // Force all operations to look as if they were completed
         AssumeCommandsComplete();
         return {};
+    }
+
+    MaybeError Device::CheckDebugLayerAndGenerateErrors() {
+        if (!GetAdapter()->GetInstance()->IsBackendValidationEnabled()) {
+            return {};
+        }
+
+        ComPtr<ID3D12InfoQueue> infoQueue;
+        ASSERT_SUCCESS(mD3d12Device.As(&infoQueue));
+        uint64_t totalErrors = infoQueue->GetNumStoredMessagesAllowedByRetrievalFilter();
+
+        // Check if any errors have occurred otherwise we would be creating an empty error. Note
+        // that we use GetNumStoredMessagesAllowedByRetrievalFilter instead of GetNumStoredMessages
+        // because we only convert WARNINGS or higher messages to dawn errors.
+        if (totalErrors == 0) {
+            return {};
+        }
+
+        std::ostringstream messages;
+        uint64_t errorsToPrint = std::min(kMaxDebugMessagesToPrint, totalErrors);
+        for (uint64_t i = 0; i < errorsToPrint; ++i) {
+            SIZE_T messageLength = 0;
+            HRESULT hr = infoQueue->GetMessageW(i, nullptr, &messageLength);
+            if (FAILED(hr)) {
+                messages << " ID3D12InfoQueue::GetMessageW failed with " << hr << '\n';
+                continue;
+            }
+
+            std::unique_ptr<uint8_t[]> messageData(new uint8_t[messageLength]);
+            D3D12_MESSAGE* message = reinterpret_cast<D3D12_MESSAGE*>(messageData.get());
+            hr = infoQueue->GetMessageW(i, message, &messageLength);
+            if (FAILED(hr)) {
+                messages << " ID3D12InfoQueue::GetMessageW failed with " << hr << '\n';
+                continue;
+            }
+
+            messages << message->pDescription << " (" << message->ID << ")\n";
+        }
+        if (errorsToPrint < totalErrors) {
+            messages << (totalErrors - errorsToPrint) << " messages silenced\n";
+        }
+        // We only print up to the first kMaxDebugMessagesToPrint errors
+        infoQueue->ClearStoredMessages();
+
+        return DAWN_INTERNAL_ERROR(messages.str());
     }
 
     void Device::ShutDownImpl() {

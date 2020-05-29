@@ -156,6 +156,8 @@ namespace dawn_native { namespace d3d12 {
         void ShutDownImpl() override;
         MaybeError WaitForIdleForDestruction() override;
 
+        MaybeError CheckDebugLayerAndGenerateErrors();
+
         ComPtr<ID3D12Fence> mFence;
         HANDLE mFenceEvent = nullptr;
         Serial CheckAndUpdateCompletedSerials() override;
