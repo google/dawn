@@ -488,34 +488,6 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoSubRegion) {
     }
 }
 
-// Test using bytesPerRow == 0 in the copies with BC formats works correctly.
-TEST_P(CompressedTextureBCFormatTest, CopyWithZeroRowPitch) {
-    // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan
-    // bots.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
-
-    // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
-
-    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
-
-    CopyConfig config;
-    config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
-    config.textureDescriptor.size.height = 8;
-    config.textureDescriptor.size.depth = 1;
-
-    config.bytesPerRowAlignment = 0;
-
-    for (wgpu::TextureFormat format : kBCFormats) {
-        config.textureDescriptor.format = format;
-        config.textureDescriptor.size.width = kTextureBytesPerRowAlignment /
-                                              CompressedFormatBlockSizeInBytes(format) *
-                                              kBCBlockWidthInTexels;
-        config.copyExtent3D = config.textureDescriptor.size;
-        TestCopyRegionIntoBCFormatTextures(config);
-    }
-}
-
 // Test copying into the non-zero layer of a 2D array texture with BC formats works correctly.
 TEST_P(CompressedTextureBCFormatTest, CopyIntoNonZeroArrayLayer) {
     // TODO(jiawei.shao@intel.com): find out why this test is flaky on Windows Intel Vulkan

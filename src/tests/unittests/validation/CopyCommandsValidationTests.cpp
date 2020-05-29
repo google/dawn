@@ -83,15 +83,15 @@ class CopyCommandTest : public ValidationTest {
     void TestB2TCopy(utils::Expectation expectation,
                      wgpu::Buffer srcBuffer,
                      uint64_t srcOffset,
-                     uint32_t srcRowPitch,
-                     uint32_t srcImageHeight,
+                     uint32_t srcBytesPerRow,
+                     uint32_t srcRowsPerImage,
                      wgpu::Texture destTexture,
                      uint32_t destLevel,
                      uint32_t destSlice,
                      wgpu::Origin3D destOrigin,
                      wgpu::Extent3D extent3D) {
         wgpu::BufferCopyView bufferCopyView =
-            utils::CreateBufferCopyView(srcBuffer, srcOffset, srcRowPitch, srcImageHeight);
+            utils::CreateBufferCopyView(srcBuffer, srcOffset, srcBytesPerRow, srcRowsPerImage);
         wgpu::TextureCopyView textureCopyView =
             utils::CreateTextureCopyView(destTexture, destLevel, destSlice, destOrigin);
 
@@ -108,11 +108,11 @@ class CopyCommandTest : public ValidationTest {
                      wgpu::Origin3D srcOrigin,
                      wgpu::Buffer destBuffer,
                      uint64_t destOffset,
-                     uint32_t destRowPitch,
-                     uint32_t destImageHeight,
+                     uint32_t destBytesPerRow,
+                     uint32_t destRowsPerImage,
                      wgpu::Extent3D extent3D) {
         wgpu::BufferCopyView bufferCopyView =
-            utils::CreateBufferCopyView(destBuffer, destOffset, destRowPitch, destImageHeight);
+            utils::CreateBufferCopyView(destBuffer, destOffset, destBytesPerRow, destRowsPerImage);
         wgpu::TextureCopyView textureCopyView =
             utils::CreateTextureCopyView(srcTexture, srcLevel, srcSlice, srcOrigin);
 
@@ -465,15 +465,15 @@ TEST_F(CopyCommandTest_B2T, IncorrectUsage) {
                 {4, 4, 1});
 }
 
-TEST_F(CopyCommandTest_B2T, IncorrectRowPitch) {
+TEST_F(CopyCommandTest_B2T, IncorrectBytesPerRow) {
     uint64_t bufferSize = BufferSizeForTextureCopy(128, 16, 1);
     wgpu::Buffer source = CreateBuffer(bufferSize, wgpu::BufferUsage::CopySrc);
     wgpu::Texture destination = Create2DTexture(128, 16, 5, 1, wgpu::TextureFormat::RGBA8Unorm,
                                                 wgpu::TextureUsage::CopyDst);
 
-    // Default bytes per row is not 256-byte aligned
+    // bytes per row is 0
     TestB2TCopy(utils::Expectation::Failure, source, 0, 0, 0, destination, 0, 0, {0, 0, 0},
-                {3, 4, 1});
+                {64, 4, 1});
 
     // bytes per row is not 256-byte aligned
     TestB2TCopy(utils::Expectation::Failure, source, 0, 128, 0, destination, 0, 0, {0, 0, 0},
@@ -582,7 +582,7 @@ TEST_F(CopyCommandTest_B2T, BufferOrTextureInErrorState) {
 
 // Regression tests for a bug in the computation of texture copy buffer size in Dawn.
 TEST_F(CopyCommandTest_B2T, TextureCopyBufferSizeLastRowComputation) {
-    constexpr uint32_t kRowPitch = 256;
+    constexpr uint32_t kBytesPerRow = 256;
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
 
@@ -590,15 +590,15 @@ TEST_F(CopyCommandTest_B2T, TextureCopyBufferSizeLastRowComputation) {
                                                              wgpu::TextureFormat::RG8Unorm};
 
     {
-        // kRowPitch * (kHeight - 1) + kWidth is not large enough to be the valid buffer size in
+        // kBytesPerRow * (kHeight - 1) + kWidth is not large enough to be the valid buffer size in
         // this test because the buffer sizes in B2T copies are not in texels but in bytes.
-        constexpr uint32_t kInvalidBufferSize = kRowPitch * (kHeight - 1) + kWidth;
+        constexpr uint32_t kInvalidBufferSize = kBytesPerRow * (kHeight - 1) + kWidth;
 
         for (wgpu::TextureFormat format : kFormats) {
             wgpu::Buffer source = CreateBuffer(kInvalidBufferSize, wgpu::BufferUsage::CopySrc);
             wgpu::Texture destination =
                 Create2DTexture(kWidth, kHeight, 1, 1, format, wgpu::TextureUsage::CopyDst);
-            TestB2TCopy(utils::Expectation::Failure, source, 0, kRowPitch, 0, destination, 0, 0,
+            TestB2TCopy(utils::Expectation::Failure, source, 0, kBytesPerRow, 0, destination, 0, 0,
                         {0, 0, 0}, {kWidth, kHeight, 1});
         }
     }
@@ -614,14 +614,14 @@ TEST_F(CopyCommandTest_B2T, TextureCopyBufferSizeLastRowComputation) {
             {
                 uint32_t invalidBuffferSize = validBufferSize - 1;
                 wgpu::Buffer source = CreateBuffer(invalidBuffferSize, wgpu::BufferUsage::CopySrc);
-                TestB2TCopy(utils::Expectation::Failure, source, 0, kRowPitch, 0, destination, 0, 0,
-                            {0, 0, 0}, {kWidth, kHeight, 1});
+                TestB2TCopy(utils::Expectation::Failure, source, 0, kBytesPerRow, 0, destination, 0,
+                            0, {0, 0, 0}, {kWidth, kHeight, 1});
             }
 
             {
                 wgpu::Buffer source = CreateBuffer(validBufferSize, wgpu::BufferUsage::CopySrc);
-                TestB2TCopy(utils::Expectation::Success, source, 0, kRowPitch, 0, destination, 0, 0,
-                            {0, 0, 0}, {kWidth, kHeight, 1});
+                TestB2TCopy(utils::Expectation::Success, source, 0, kBytesPerRow, 0, destination, 0,
+                            0, {0, 0, 0}, {kWidth, kHeight, 1});
             }
         }
     }
@@ -798,15 +798,15 @@ TEST_F(CopyCommandTest_T2B, IncorrectUsage) {
     TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, vertex, 0, 256, 0, {4, 4, 1});
 }
 
-TEST_F(CopyCommandTest_T2B, IncorrectRowPitch) {
+TEST_F(CopyCommandTest_T2B, IncorrectBytesPerRow) {
     uint64_t bufferSize = BufferSizeForTextureCopy(128, 16, 1);
     wgpu::Texture source = Create2DTexture(128, 16, 5, 1, wgpu::TextureFormat::RGBA8Unorm,
                                            wgpu::TextureUsage::CopyDst);
     wgpu::Buffer destination = CreateBuffer(bufferSize, wgpu::BufferUsage::CopySrc);
 
-    // Default bytes per row is not 256-byte aligned
+    // bytes per row is 0
     TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 256, 0,
-                {3, 4, 1});
+                {64, 4, 1});
 
     // bytes per row is not 256-byte aligned
     TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0, 257, 0,
@@ -913,7 +913,7 @@ TEST_F(CopyCommandTest_T2B, BufferOrTextureInErrorState) {
 
 // Regression tests for a bug in the computation of texture copy buffer size in Dawn.
 TEST_F(CopyCommandTest_T2B, TextureCopyBufferSizeLastRowComputation) {
-    constexpr uint32_t kRowPitch = 256;
+    constexpr uint32_t kBytesPerRow = 256;
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
 
@@ -921,9 +921,9 @@ TEST_F(CopyCommandTest_T2B, TextureCopyBufferSizeLastRowComputation) {
                                                              wgpu::TextureFormat::RG8Unorm};
 
     {
-        // kRowPitch * (kHeight - 1) + kWidth is not large enough to be the valid buffer size in
+        // kBytesPerRow * (kHeight - 1) + kWidth is not large enough to be the valid buffer size in
         // this test because the buffer sizes in T2B copies are not in texels but in bytes.
-        constexpr uint32_t kInvalidBufferSize = kRowPitch * (kHeight - 1) + kWidth;
+        constexpr uint32_t kInvalidBufferSize = kBytesPerRow * (kHeight - 1) + kWidth;
 
         for (wgpu::TextureFormat format : kFormats) {
             wgpu::Texture source =
@@ -931,7 +931,7 @@ TEST_F(CopyCommandTest_T2B, TextureCopyBufferSizeLastRowComputation) {
 
             wgpu::Buffer destination = CreateBuffer(kInvalidBufferSize, wgpu::BufferUsage::CopySrc);
             TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0,
-                        kRowPitch, 0, {kWidth, kHeight, 1});
+                        kBytesPerRow, 0, {kWidth, kHeight, 1});
         }
     }
 
@@ -948,14 +948,14 @@ TEST_F(CopyCommandTest_T2B, TextureCopyBufferSizeLastRowComputation) {
                 wgpu::Buffer destination =
                     CreateBuffer(invalidBufferSize, wgpu::BufferUsage::CopyDst);
                 TestT2BCopy(utils::Expectation::Failure, source, 0, 0, {0, 0, 0}, destination, 0,
-                            kRowPitch, 0, {kWidth, kHeight, 1});
+                            kBytesPerRow, 0, {kWidth, kHeight, 1});
             }
 
             {
                 wgpu::Buffer destination =
                     CreateBuffer(validBufferSize, wgpu::BufferUsage::CopyDst);
                 TestT2BCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0,
-                            kRowPitch, 0, {kWidth, kHeight, 1});
+                            kBytesPerRow, 0, {kWidth, kHeight, 1});
             }
         }
     }
@@ -1263,17 +1263,17 @@ class CopyCommandTest_CompressedTextureFormats : public CopyCommandTest {
     void TestBothTBCopies(utils::Expectation expectation,
                           wgpu::Buffer buffer,
                           uint64_t bufferOffset,
-                          uint32_t bufferRowPitch,
+                          uint32_t bufferBytesPerRow,
                           uint32_t rowsPerImage,
                           wgpu::Texture texture,
                           uint32_t level,
                           uint32_t arraySlice,
                           wgpu::Origin3D origin,
                           wgpu::Extent3D extent3D) {
-        TestB2TCopy(expectation, buffer, bufferOffset, bufferRowPitch, rowsPerImage, texture, level,
-                    arraySlice, origin, extent3D);
+        TestB2TCopy(expectation, buffer, bufferOffset, bufferBytesPerRow, rowsPerImage, texture,
+                    level, arraySlice, origin, extent3D);
         TestT2BCopy(expectation, texture, level, arraySlice, origin, buffer, bufferOffset,
-                    bufferRowPitch, rowsPerImage, extent3D);
+                    bufferBytesPerRow, rowsPerImage, extent3D);
     }
 
     void TestBothT2TCopies(utils::Expectation expectation,
@@ -1330,12 +1330,10 @@ TEST_F(CopyCommandTest_CompressedTextureFormats, BufferOffset) {
     }
 }
 
-// Tests to verify that RowPitch must not be smaller than (width / blockWidth) * blockSizeInBytes
-// and it is valid to use 0 as RowPitch in buffer-to-texture or texture-to-buffer copies with
-// compressed texture formats.
-// Note that in Dawn we require RowPitch be a multiple of 256, which ensures RowPitch will always be
-// the multiple of compressed texture block width in bytes.
-TEST_F(CopyCommandTest_CompressedTextureFormats, RowPitch) {
+// Tests to verify that bytesPerRow must not be less than (width / blockWidth) * blockSizeInBytes.
+// Note that in Dawn we require bytesPerRow be a multiple of 256, which ensures bytesPerRow will
+// always be the multiple of compressed texture block width in bytes.
+TEST_F(CopyCommandTest_CompressedTextureFormats, BytesPerRow) {
     wgpu::Buffer buffer =
         CreateBuffer(1024, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
 
@@ -1343,60 +1341,36 @@ TEST_F(CopyCommandTest_CompressedTextureFormats, RowPitch) {
         constexpr uint32_t kTestWidth = 160;
         constexpr uint32_t kTestHeight = 160;
 
-        // Failures on the RowPitch that is not large enough.
+        // Failures on the BytesPerRow that is not large enough.
         {
-            constexpr uint32_t kSmallRowPitch = 256;
+            constexpr uint32_t kSmallBytesPerRow = 256;
             for (wgpu::TextureFormat bcFormat : kBCFormats) {
                 wgpu::Texture texture = Create2DTexture(bcFormat, 1, kTestWidth, kTestHeight);
-                TestBothTBCopies(utils::Expectation::Failure, buffer, 0, kSmallRowPitch, 4, texture,
-                                 0, 0, {0, 0, 0}, {kTestWidth, 4, 1});
+                TestBothTBCopies(utils::Expectation::Failure, buffer, 0, kSmallBytesPerRow, 4,
+                                 texture, 0, 0, {0, 0, 0}, {kTestWidth, 4, 1});
             }
         }
 
-        // Test it is not valid to use a RowPitch that is not a multiple of 256.
+        // Test it is not valid to use a BytesPerRow that is not a multiple of 256.
         {
             for (wgpu::TextureFormat bcFormat : kBCFormats) {
                 wgpu::Texture texture = Create2DTexture(bcFormat, 1, kTestWidth, kTestHeight);
-                uint32_t inValidRowPitch =
+                uint32_t inValidBytesPerRow =
                     kTestWidth / 4 * CompressedFormatBlockSizeInBytes(bcFormat);
-                ASSERT_NE(0u, inValidRowPitch % 256);
-                TestBothTBCopies(utils::Expectation::Failure, buffer, 0, inValidRowPitch, 4,
+                ASSERT_NE(0u, inValidBytesPerRow % 256);
+                TestBothTBCopies(utils::Expectation::Failure, buffer, 0, inValidBytesPerRow, 4,
                                  texture, 0, 0, {0, 0, 0}, {kTestWidth, 4, 1});
             }
         }
 
-        // Test the smallest valid RowPitch should work.
+        // Test the smallest valid BytesPerRow should work.
         {
             for (wgpu::TextureFormat bcFormat : kBCFormats) {
                 wgpu::Texture texture = Create2DTexture(bcFormat, 1, kTestWidth, kTestHeight);
-                uint32_t smallestValidRowPitch =
+                uint32_t smallestValidBytesPerRow =
                     Align(kTestWidth / 4 * CompressedFormatBlockSizeInBytes(bcFormat), 256);
-                TestBothTBCopies(utils::Expectation::Success, buffer, 0, smallestValidRowPitch, 4,
-                                 texture, 0, 0, {0, 0, 0}, {kTestWidth, 4, 1});
-            }
-        }
-    }
-
-    // Test RowPitch == 0.
-    {
-        constexpr uint32_t kZeroRowPitch = 0;
-        constexpr uint32_t kTestHeight = 128;
-
-        {
-            constexpr uint32_t kValidWidth = 128;
-            for (wgpu::TextureFormat bcFormat : kBCFormats) {
-                wgpu::Texture texture = Create2DTexture(bcFormat, 1, kValidWidth, kTestHeight);
-                TestBothTBCopies(utils::Expectation::Success, buffer, 0, kZeroRowPitch, 4, texture,
-                                 0, 0, {0, 0, 0}, {kValidWidth, 4, 1});
-            }
-        }
-
-        {
-            constexpr uint32_t kInValidWidth = 16;
-            for (wgpu::TextureFormat bcFormat : kBCFormats) {
-                wgpu::Texture texture = Create2DTexture(bcFormat, 1, kInValidWidth, kTestHeight);
-                TestBothTBCopies(utils::Expectation::Failure, buffer, 0, kZeroRowPitch, 4, texture,
-                                 0, 0, {0, 0, 0}, {kInValidWidth, 4, 1});
+                TestBothTBCopies(utils::Expectation::Success, buffer, 0, smallestValidBytesPerRow,
+                                 4, texture, 0, 0, {0, 0, 0}, {kTestWidth, 4, 1});
             }
         }
     }

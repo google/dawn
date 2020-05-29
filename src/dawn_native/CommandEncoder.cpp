@@ -204,10 +204,6 @@ namespace dawn_native {
             return {};
         }
 
-        uint32_t ComputeDefaultBytesPerRow(const Format& format, uint32_t width) {
-            return width / format.blockWidth * format.blockByteSize;
-        }
-
         MaybeError ValidateBytesPerRow(const Format& format,
                                        const Extent3D& copySize,
                                        uint32_t bytesPerRow) {
@@ -653,13 +649,7 @@ namespace dawn_native {
                 DAWN_TRY(GetDevice()->ValidateObject(destination->texture));
             }
 
-            // Compute default values for bytesPerRow/rowsPerImage
-            uint32_t defaultedBytesPerRow = source->bytesPerRow;
-            if (defaultedBytesPerRow == 0) {
-                defaultedBytesPerRow =
-                    ComputeDefaultBytesPerRow(destination->texture->GetFormat(), copySize->width);
-            }
-
+            // Compute default value for rowsPerImage
             uint32_t defaultedRowsPerImage = source->rowsPerImage;
             if (defaultedRowsPerImage == 0) {
                 defaultedRowsPerImage = copySize->height;
@@ -677,10 +667,10 @@ namespace dawn_native {
 
                 uint32_t bufferCopySize = 0;
                 DAWN_TRY(ValidateBytesPerRow(destination->texture->GetFormat(), *copySize,
-                                             defaultedBytesPerRow));
+                                             source->bytesPerRow));
 
                 DAWN_TRY(ComputeTextureCopyBufferSize(destination->texture->GetFormat(), *copySize,
-                                                      defaultedBytesPerRow, defaultedRowsPerImage,
+                                                      source->bytesPerRow, defaultedRowsPerImage,
                                                       &bufferCopySize));
 
                 DAWN_TRY(ValidateCopySizeFitsInTexture(*destination, *copySize));
@@ -699,7 +689,7 @@ namespace dawn_native {
                 allocator->Allocate<CopyBufferToTextureCmd>(Command::CopyBufferToTexture);
             copy->source.buffer = source->buffer;
             copy->source.offset = source->offset;
-            copy->source.bytesPerRow = defaultedBytesPerRow;
+            copy->source.bytesPerRow = source->bytesPerRow;
             copy->source.rowsPerImage = defaultedRowsPerImage;
             copy->destination.texture = destination->texture;
             copy->destination.origin = destination->origin;
@@ -721,13 +711,7 @@ namespace dawn_native {
                 DAWN_TRY(GetDevice()->ValidateObject(destination->buffer));
             }
 
-            // Compute default values for bytesPerRow/rowsPerImage
-            uint32_t defaultedBytesPerRow = destination->bytesPerRow;
-            if (defaultedBytesPerRow == 0) {
-                defaultedBytesPerRow =
-                    ComputeDefaultBytesPerRow(source->texture->GetFormat(), copySize->width);
-            }
-
+            // Compute default value for rowsPerImage
             uint32_t defaultedRowsPerImage = destination->rowsPerImage;
             if (defaultedRowsPerImage == 0) {
                 defaultedRowsPerImage = copySize->height;
@@ -744,10 +728,10 @@ namespace dawn_native {
 
                 uint32_t bufferCopySize = 0;
                 DAWN_TRY(ValidateBytesPerRow(source->texture->GetFormat(), *copySize,
-                                             defaultedBytesPerRow));
+                                             destination->bytesPerRow));
                 DAWN_TRY(ComputeTextureCopyBufferSize(source->texture->GetFormat(), *copySize,
-                                                      defaultedBytesPerRow, defaultedRowsPerImage,
-                                                      &bufferCopySize));
+                                                      destination->bytesPerRow,
+                                                      defaultedRowsPerImage, &bufferCopySize));
 
                 DAWN_TRY(ValidateCopySizeFitsInTexture(*source, *copySize));
                 DAWN_TRY(ValidateCopySizeFitsInBuffer(*destination, bufferCopySize));
@@ -770,7 +754,7 @@ namespace dawn_native {
             copy->source.arrayLayer = source->arrayLayer;
             copy->destination.buffer = destination->buffer;
             copy->destination.offset = destination->offset;
-            copy->destination.bytesPerRow = defaultedBytesPerRow;
+            copy->destination.bytesPerRow = destination->bytesPerRow;
             copy->destination.rowsPerImage = defaultedRowsPerImage;
 
             return {};
