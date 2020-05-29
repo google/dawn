@@ -233,22 +233,53 @@ namespace dawn_native {
                    a.storageTextureFormat != b.storageTextureFormat;
         }
 
+        bool IsBufferBinding(wgpu::BindingType bindingType) {
+            switch (bindingType) {
+                case wgpu::BindingType::UniformBuffer:
+                case wgpu::BindingType::StorageBuffer:
+                case wgpu::BindingType::ReadonlyStorageBuffer:
+                    return true;
+                case wgpu::BindingType::SampledTexture:
+                case wgpu::BindingType::Sampler:
+                case wgpu::BindingType::ComparisonSampler:
+                case wgpu::BindingType::StorageTexture:
+                case wgpu::BindingType::ReadonlyStorageTexture:
+                case wgpu::BindingType::WriteonlyStorageTexture:
+                    return false;
+                default:
+                    UNREACHABLE();
+                    return false;
+            }
+        }
+
         bool SortBindingsCompare(const BindGroupLayoutEntry& a, const BindGroupLayoutEntry& b) {
-            if (a.hasDynamicOffset != b.hasDynamicOffset) {
-                // Buffers with dynamic offsets should come before those without.
-                // This makes it easy to iterate over the dynamic buffer bindings
-                // [0, dynamicBufferCount) during validation.
-                return a.hasDynamicOffset > b.hasDynamicOffset;
-            }
-            if (a.type != b.type) {
-                // Buffers have smaller type enums. They should be placed first.
-                return a.type < b.type;
-            }
-            if (a.binding != b.binding) {
-                // Above we ensure that dynamic buffers are first. Now, ensure that bindings are in
-                // increasing order. This is because dynamic buffer offsets are applied in
-                // increasing order of binding number.
-                return a.binding < b.binding;
+            const bool aIsBuffer = IsBufferBinding(a.type);
+            const bool bIsBuffer = IsBufferBinding(b.type);
+            if (aIsBuffer != bIsBuffer) {
+                // Always place buffers first.
+                return aIsBuffer;
+            } else {
+                if (aIsBuffer) {
+                    ASSERT(bIsBuffer);
+                    if (a.hasDynamicOffset != b.hasDynamicOffset) {
+                        // Buffers with dynamic offsets should come before those without.
+                        // This makes it easy to iterate over the dynamic buffer bindings
+                        // [0, dynamicBufferCount) during validation.
+                        return a.hasDynamicOffset;
+                    }
+                    if (a.hasDynamicOffset) {
+                        ASSERT(b.hasDynamicOffset);
+                        ASSERT(a.binding != b.binding);
+                        // Above, we ensured that dynamic buffers are first. Now, ensure that
+                        // dynamic buffer bindings are in increasing order. This is because dynamic
+                        // buffer offsets are applied in increasing order of binding number.
+                        return a.binding < b.binding;
+                    }
+                }
+                // Otherwise, sort by type.
+                if (a.type != b.type) {
+                    return a.type < b.type;
+                }
             }
             if (a.visibility != b.visibility) {
                 return a.visibility < b.visibility;
@@ -276,23 +307,10 @@ namespace dawn_native {
             BindingIndex lastBufferIndex = 0;
             BindingIndex firstNonBufferIndex = std::numeric_limits<BindingIndex>::max();
             for (BindingIndex i = 0; i < count; ++i) {
-                switch (bindings[i].type) {
-                    case wgpu::BindingType::UniformBuffer:
-                    case wgpu::BindingType::StorageBuffer:
-                    case wgpu::BindingType::ReadonlyStorageBuffer:
-                        lastBufferIndex = std::max(i, lastBufferIndex);
-                        break;
-                    case wgpu::BindingType::SampledTexture:
-                    case wgpu::BindingType::Sampler:
-                    case wgpu::BindingType::ComparisonSampler:
-                    case wgpu::BindingType::StorageTexture:
-                    case wgpu::BindingType::ReadonlyStorageTexture:
-                    case wgpu::BindingType::WriteonlyStorageTexture:
-                        firstNonBufferIndex = std::min(i, firstNonBufferIndex);
-                        break;
-                    default:
-                        UNREACHABLE();
-                        break;
+                if (IsBufferBinding(bindings[i].type)) {
+                    lastBufferIndex = std::max(i, lastBufferIndex);
+                } else {
+                    firstNonBufferIndex = std::min(i, firstNonBufferIndex);
                 }
             }
 

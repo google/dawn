@@ -762,8 +762,12 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
     bufferDescriptor.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst;
 
     wgpu::Buffer buffer0 = device.CreateBuffer(&bufferDescriptor);
-    wgpu::Buffer buffer2 = device.CreateBuffer(&bufferDescriptor);
     wgpu::Buffer buffer3 = device.CreateBuffer(&bufferDescriptor);
+
+    // This test uses both storage and uniform buffers to ensure buffer bindings are sorted first by
+    // binding number before type.
+    bufferDescriptor.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer2 = device.CreateBuffer(&bufferDescriptor);
 
     // Populate the values
     buffer0.SetSubData(offsets[0], sizeof(uint32_t), &values[0]);
@@ -780,7 +784,7 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
         device, {
                     {3, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageBuffer, true},
                     {0, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageBuffer, true},
-                    {2, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageBuffer, true},
+                    {2, wgpu::ShaderStage::Compute, wgpu::BindingType::UniformBuffer, true},
                     {4, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer},
                 });
     wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, bgl,
@@ -795,7 +799,7 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
     pipelineDescriptor.computeStage.module =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
         #version 450
-        layout(std430, set = 0, binding = 2) readonly buffer Buffer2 {
+        layout(std140, set = 0, binding = 2) uniform Buffer2 {
             uint value2;
         };
         layout(std430, set = 0, binding = 3) readonly buffer Buffer3 {
