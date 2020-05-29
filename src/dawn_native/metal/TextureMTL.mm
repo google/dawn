@@ -421,12 +421,13 @@ namespace dawn_native { namespace metal {
                 }
             } else {
                 ASSERT(GetFormat().IsColor());
-                MTLRenderPassDescriptor* descriptor = nil;
-                uint32_t attachment = 0;
-
-                // Create multiple render passes with each subresource as a color attachment to
-                // clear them all.
                 for (uint32_t level = baseMipLevel; level < baseMipLevel + levelCount; ++level) {
+                    // Create multiple render passes with each subresource as a color attachment to
+                    // clear them all. Only do this for array layers to ensure all attachments have
+                    // the same size.
+                    MTLRenderPassDescriptor* descriptor = nil;
+                    uint32_t attachment = 0;
+
                     for (uint32_t arrayLayer = baseArrayLayer;
                          arrayLayer < baseArrayLayer + layerCount; arrayLayer++) {
                         if (clearValue == TextureBase::ClearValue::Zero &&
@@ -456,11 +457,11 @@ namespace dawn_native { namespace metal {
                             descriptor = nil;
                         }
                     }
-                }
 
-                if (descriptor != nil) {
-                    commandContext->BeginRender(descriptor);
-                    commandContext->EndRender();
+                    if (descriptor != nil) {
+                        commandContext->BeginRender(descriptor);
+                        commandContext->EndRender();
+                    }
                 }
             }
         } else {
