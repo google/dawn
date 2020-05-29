@@ -154,8 +154,11 @@ namespace dawn_native {
         // At this point GPU operations are always finished, so we are in the disconnected state.
         mState = State::Disconnected;
 
+        // mCurrentErrorScope can be null if we failed device initialization.
+        if (mCurrentErrorScope.Get() != nullptr) {
+            mCurrentErrorScope->UnlinkForShutdown();
+        }
         mErrorScopeTracker = nullptr;
-        mCurrentErrorScope->UnlinkForShutdown();
         mFenceSignalTracker = nullptr;
         mDynamicUploader = nullptr;
         mMapRequestTracker = nullptr;
