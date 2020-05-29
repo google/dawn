@@ -30,14 +30,6 @@
 // until the end of the test. Also expectations use a copy to a MapRead buffer to get the data
 // so resources should have the CopySrc allowed usage bit if you want to add expectations on
 // them.
-#define EXPECT_BUFFER_U16_EQ(expected, buffer, offset)                         \
-    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint16_t), \
-                         new ::detail::ExpectEq<uint16_t>(expected))
-
-#define EXPECT_BUFFER_U16_RANGE_EQ(expected, buffer, offset, count)                    \
-    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint16_t) * count, \
-                         new ::detail::ExpectEq<uint16_t>(expected, count))
-
 #define EXPECT_BUFFER_U32_EQ(expected, buffer, offset)                         \
     AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t), \
                          new ::detail::ExpectEq<uint32_t>(expected))
@@ -426,7 +418,6 @@ namespace detail {
         std::vector<T> mExpected;
     };
     extern template class ExpectEq<uint8_t>;
-    extern template class ExpectEq<int16_t>;
     extern template class ExpectEq<uint32_t>;
     extern template class ExpectEq<RGBA8>;
     extern template class ExpectEq<float>;
