@@ -25,6 +25,7 @@
 #include "src/ast/bool_literal.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/call_expression.h"
+#include "src/ast/case_statement.h"
 #include "src/ast/cast_expression.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/decorated_variable.h"
@@ -43,6 +44,7 @@
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
+#include "src/ast/switch_statement.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/matrix_type.h"
 #include "src/ast/type/pointer_type.h"
@@ -235,7 +237,7 @@ bool Builder::GenerateAssignStatement(ast::AssignmentStatement* assign) {
 
 bool Builder::GenerateBreakStatement(ast::BreakStatement*) {
   if (merge_stack_.empty()) {
-    error_ = "Attempted to break with a merge block";
+    error_ = "Attempted to break without a merge block";
     return false;
   }
   push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_stack_.back())});
@@ -244,7 +246,7 @@ bool Builder::GenerateBreakStatement(ast::BreakStatement*) {
 
 bool Builder::GenerateContinueStatement(ast::ContinueStatement*) {
   if (continue_stack_.empty()) {
-    error_ = "Attempted to continue with a continue block";
+    error_ = "Attempted to continue without a continue block";
     return false;
   }
   push_function_inst(spv::Op::OpBranch, {Operand::Int(continue_stack_.back())});
@@ -1330,6 +1332,85 @@ bool Builder::GenerateIfStatement(ast::IfStatement* stmt) {
   return true;
 }
 
+bool Builder::GenerateSwitchStatement(ast::SwitchStatement* stmt) {
+  auto merge_block = result_op();
+  auto merge_block_id = merge_block.to_i();
+
+  merge_stack_.push_back(merge_block_id);
+
+  auto cond_id = GenerateExpression(stmt->condition());
+  if (cond_id == 0) {
+    return false;
+  }
+  cond_id = GenerateLoadIfNeeded(stmt->condition()->result_type(), cond_id);
+
+  auto default_block = result_op();
+  auto default_block_id = default_block.to_i();
+
+  std::vector<Operand> params = {Operand::Int(cond_id),
+                                 Operand::Int(default_block_id)};
+
+  std::vector<uint32_t> case_ids;
+  for (const auto& item : stmt->body()) {
+    if (item->IsDefault()) {
+      case_ids.push_back(default_block_id);
+      continue;
+    }
+
+    auto block = result_op();
+    auto block_id = block.to_i();
+
+    case_ids.push_back(block_id);
+    for (const auto& selector : item->conditions()) {
+      if (!selector->IsInt()) {
+        error_ = "expected integer literal for switch case label";
+        return false;
+      }
+
+      params.push_back(Operand::Int(selector->AsInt()->value()));
+      params.push_back(Operand::Int(block_id));
+    }
+  }
+
+  push_function_inst(spv::Op::OpSelectionMerge,
+                     {Operand::Int(merge_block_id),
+                      Operand::Int(SpvSelectionControlMaskNone)});
+  push_function_inst(spv::Op::OpSwitch, params);
+
+  bool generated_default = false;
+  auto& body = stmt->body();
+  // We output the case statements in order they were entered in the original
+  // source. Each fallthrough goes to the next case entry, so is a forward
+  // branch, otherwise the branch is to the merge block which comes after
+  // the switch statement.
+  for (uint32_t i = 0; i < body.size(); i++) {
+    auto& item = body[i];
+
+    if (item->IsDefault()) {
+      generated_default = true;
+    }
+
+    push_function_inst(spv::Op::OpLabel, {Operand::Int(case_ids[i])});
+    if (!GenerateStatementList(item->body())) {
+      return false;
+    }
+
+    if (!LastIsTerminator(item->body())) {
+      push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
+    }
+  }
+
+  if (!generated_default) {
+    push_function_inst(spv::Op::OpLabel, {Operand::Int(default_block_id)});
+    push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
+  }
+
+  merge_stack_.pop_back();
+
+  push_function_inst(spv::Op::OpLabel, {Operand::Int(merge_block_id)});
+  return true;
+}
+
 bool Builder::GenerateReturnStatement(ast::ReturnStatement* stmt) {
   if (stmt->has_value()) {
     auto val_id = GenerateExpression(stmt->value());
@@ -1421,6 +1502,9 @@ bool Builder::GenerateStatement(ast::Statement* stmt) {
   }
   if (stmt->IsReturn()) {
     return GenerateReturnStatement(stmt->AsReturn());
+  }
+  if (stmt->IsSwitch()) {
+    return GenerateSwitchStatement(stmt->AsSwitch());
   }
   if (stmt->IsVariableDecl()) {
     return GenerateVariableDeclStatement(stmt->AsVariableDecl());

@@ -298,6 +298,10 @@ class Builder {
   /// @param stmt the statement to generate
   /// @returns true on success, false otherwise
   bool GenerateReturnStatement(ast::ReturnStatement* stmt);
+  /// Generates a switch statement
+  /// @param stmt the statement to generate
+  /// @returns ture on success, false otherwise
+  bool GenerateSwitchStatement(ast::SwitchStatement* stmt);
   /// Generates a conditional section merge block
   /// @param cond the condition
   /// @param true_body the statements making up the true block

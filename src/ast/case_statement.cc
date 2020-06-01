@@ -19,6 +19,9 @@ namespace ast {
 
 CaseStatement::CaseStatement() : Statement() {}
 
+CaseStatement::CaseStatement(StatementList body)
+    : Statement(), body_(std::move(body)) {}
+
 CaseStatement::CaseStatement(CaseSelectorList conditions, StatementList body)
     : Statement(), conditions_(std::move(conditions)), body_(std::move(body)) {}
 

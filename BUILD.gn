@@ -692,6 +692,7 @@ source_set("tint_unittests_spv_writer_src") {
     "src/writer/spirv/builder_literal_test.cc",
     "src/writer/spirv/builder_loop_test.cc",
     "src/writer/spirv/builder_return_test.cc",
+    "src/writer/spirv/builder_switch_test.cc",
     "src/writer/spirv/builder_test.cc",
     "src/writer/spirv/builder_type_test.cc",
     "src/writer/spirv/builder_unary_op_expression_test.cc",

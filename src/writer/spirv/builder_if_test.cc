@@ -97,7 +97,6 @@ TEST_F(BuilderTest, If_WithStatements) {
   ast::Module mod;
   TypeDeterminer td(&ctx, &mod);
   td.RegisterVariableForTesting(var.get());
-
   ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
 
   Builder b(&mod);

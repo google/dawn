@@ -36,6 +36,10 @@ class CaseStatement : public Statement {
   /// Constructor
   CaseStatement();
   /// Constructor
+  /// Creates a default case statement
+  /// @param body the case body
+  explicit CaseStatement(StatementList body);
+  /// Constructor
   /// @param conditions the case conditions
   /// @param body the case body
   CaseStatement(CaseSelectorList conditions, StatementList body);
