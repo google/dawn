@@ -67,15 +67,15 @@ deps = {
 
   # SPIRV compiler dependencies: SPIRV-Tools, SPIRV-headers, glslang and shaderc
   'third_party/SPIRV-Tools': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Tools@d3d89bb90cbd8786086e4f657076f3189fb1f667',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Tools@f050cca7ec474fc71873f4d68375d3916c969322',
     'condition': 'dawn_standalone',
   },
   'third_party/spirv-headers': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Headers@ac638f1815425403e946d0ab78bac71d2bdbf3be',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Headers@11d7637e7a43cd88cfd4e42c99581dcb682936aa',
     'condition': 'dawn_standalone',
   },
   'third_party/glslang': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/glslang@2b0eafb1de5b4a1b77cf123545ea269d44248885',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/glslang@d39b8afc47a1f700b5670463c0d1068878acee6f',
     'condition': 'dawn_standalone',
   },
   'third_party/shaderc': {
@@ -85,7 +85,7 @@ deps = {
 
   # WGSL support
   'third_party/tint': {
-    'url': '{dawn_git}/tint@537039009663418971b7104b0659a4e4525ba078',
+    'url': '{dawn_git}/tint@e2be4897566de2d654664373bc77601d0397ac1a',
     'condition': 'dawn_standalone',
   },
 
