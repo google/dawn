@@ -186,9 +186,12 @@ class ParserImpl {
   /// Parses a `statement` grammar element
   /// @returns the parsed statement or nullptr
   std::unique_ptr<ast::Statement> statement();
-  /// Parses a `break_stmt` gramamr element
+  /// Parses a `break_stmt` grammar element
   /// @returns the parsed statement or nullptr
   std::unique_ptr<ast::BreakStatement> break_stmt();
+  /// Parses a `return_stmt` grammar element
+  /// @returns the parsed statement or nullptr
+  std::unique_ptr<ast::ReturnStatement> return_stmt();
   /// Parses a `continue_stmt` grammar element
   /// @returns the parsed statement or nullptr
   std::unique_ptr<ast::ContinueStatement> continue_stmt();

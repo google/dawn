@@ -685,7 +685,7 @@ ast::type::AliasType* ParserImpl::type_alias() {
 //   | UINT32
 //   | VEC2 LESS_THAN type_decl GREATER_THAN
 //   | VEC3 LESS_THAN type_decl GREATER_THAN
-//   | VEC3 LESS_THAN type_decl GREATER_THAN
+//   | VEC4 LESS_THAN type_decl GREATER_THAN
 //   | PTR LESS_THAN storage_class, type_decl GREATER_THAN
 //   | ARRAY LESS_THAN type_decl COMMA INT_LITERAL GREATER_THAN
 //   | ARRAY LESS_THAN type_decl GREATER_THAN
@@ -1419,7 +1419,7 @@ ast::StatementList ParserImpl::statements() {
 
 // statement
 //   : SEMICOLON
-//   | RETURN logical_or_expression SEMICOLON
+//   | return_stmt SEMICOLON
 //   | if_stmt
 //   | unless_stmt
 //   | switch_stmt
@@ -1428,7 +1428,7 @@ ast::StatementList ParserImpl::statements() {
 //   | break_stmt SEMICOLON
 //   | continue_stmt SEMICOLON
 //   | KILL SEMICOLON
-//   | assignment_expression SEMICOLON
+//   | assignment_stmt SEMICOLON
 std::unique_ptr<ast::Statement> ParserImpl::statement() {
   auto t = peek();
   if (t.IsSemicolon()) {
@@ -1436,25 +1436,16 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
     return statement();
   }
 
-  if (t.IsReturn()) {
-    auto source = t.source();
-    next();  // Consume the peek
-
-    t = peek();
-
-    std::unique_ptr<ast::Expression> expr = nullptr;
-    if (!t.IsSemicolon()) {
-      expr = logical_or_expression();
-      if (has_error())
-        return nullptr;
-    }
-
+  auto ret_stmt = return_stmt();
+  if (has_error())
+    return nullptr;
+  if (ret_stmt != nullptr) {
     t = next();
     if (!t.IsSemicolon()) {
       set_error(t, "missing ;");
       return nullptr;
     }
-    return std::make_unique<ast::ReturnStatement>(source, std::move(expr));
+    return ret_stmt;
   }
 
   auto stmt_if = if_stmt();
@@ -1544,74 +1535,24 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
   return nullptr;
 }
 
-// break_stmt
-//   : BREAK ({IF | UNLESS} paren_rhs_stmt)?
-std::unique_ptr<ast::BreakStatement> ParserImpl::break_stmt() {
+// return_stmt
+//   : RETURN logical_or_expression?
+std::unique_ptr<ast::ReturnStatement> ParserImpl::return_stmt() {
   auto t = peek();
-  if (!t.IsBreak())
+  if (!t.IsReturn())
     return nullptr;
 
   auto source = t.source();
   next();  // Consume the peek
 
-  ast::StatementCondition condition = ast::StatementCondition::kNone;
-  std::unique_ptr<ast::Expression> conditional = nullptr;
-
+  std::unique_ptr<ast::Expression> expr = nullptr;
   t = peek();
-  if (t.IsIf() || t.IsUnless()) {
-    next();  // Consume the peek
-
-    if (t.IsIf())
-      condition = ast::StatementCondition::kIf;
-    else
-      condition = ast::StatementCondition::kUnless;
-
-    conditional = paren_rhs_stmt();
+  if (!t.IsSemicolon()) {
+    expr = logical_or_expression();
     if (has_error())
       return nullptr;
-    if (conditional == nullptr) {
-      set_error(peek(), "unable to parse conditional statement");
-      return nullptr;
-    }
   }
-
-  return std::make_unique<ast::BreakStatement>(source, condition,
-                                               std::move(conditional));
-}
-
-// continue_stmt
-//   : CONTINUE ({IF | UNLESS} paren_rhs_stmt)?
-std::unique_ptr<ast::ContinueStatement> ParserImpl::continue_stmt() {
-  auto t = peek();
-  if (!t.IsContinue())
-    return nullptr;
-
-  auto source = t.source();
-  next();  // Consume the peek
-
-  ast::StatementCondition condition = ast::StatementCondition::kNone;
-  std::unique_ptr<ast::Expression> conditional = nullptr;
-
-  t = peek();
-  if (t.IsIf() || t.IsUnless()) {
-    next();  // Consume the peek
-
-    if (t.IsIf())
-      condition = ast::StatementCondition::kIf;
-    else
-      condition = ast::StatementCondition::kUnless;
-
-    conditional = paren_rhs_stmt();
-    if (has_error())
-      return nullptr;
-    if (conditional == nullptr) {
-      set_error(peek(), "unable to parse conditional statement");
-      return nullptr;
-    }
-  }
-
-  return std::make_unique<ast::ContinueStatement>(source, condition,
-                                                  std::move(conditional));
+  return std::make_unique<ast::ReturnStatement>(source, std::move(expr));
 }
 
 // variable_stmt
@@ -1679,8 +1620,7 @@ std::unique_ptr<ast::VariableDeclStatement> ParserImpl::variable_stmt() {
 }
 
 // if_stmt
-//   : IF paren_rhs_stmt body_stmt
-//           {(elseif_stmt else_stmt?) | (else_stmt?)}
+//   : IF paren_rhs_stmt body_stmt elseif_stmt? else_stmt?
 std::unique_ptr<ast::IfStatement> ParserImpl::if_stmt() {
   auto t = peek();
   if (!t.IsIf())
@@ -1978,6 +1918,76 @@ std::unique_ptr<ast::LoopStatement> ParserImpl::loop_stmt() {
                                               std::move(continuing));
 }
 
+// break_stmt
+//   : BREAK ({IF | UNLESS} paren_rhs_stmt)?
+std::unique_ptr<ast::BreakStatement> ParserImpl::break_stmt() {
+  auto t = peek();
+  if (!t.IsBreak())
+    return nullptr;
+
+  auto source = t.source();
+  next();  // Consume the peek
+
+  ast::StatementCondition condition = ast::StatementCondition::kNone;
+  std::unique_ptr<ast::Expression> conditional = nullptr;
+
+  t = peek();
+  if (t.IsIf() || t.IsUnless()) {
+    next();  // Consume the peek
+
+    if (t.IsIf())
+      condition = ast::StatementCondition::kIf;
+    else
+      condition = ast::StatementCondition::kUnless;
+
+    conditional = paren_rhs_stmt();
+    if (has_error())
+      return nullptr;
+    if (conditional == nullptr) {
+      set_error(peek(), "unable to parse conditional statement");
+      return nullptr;
+    }
+  }
+
+  return std::make_unique<ast::BreakStatement>(source, condition,
+                                               std::move(conditional));
+}
+
+// continue_stmt
+//   : CONTINUE ({IF | UNLESS} paren_rhs_stmt)?
+std::unique_ptr<ast::ContinueStatement> ParserImpl::continue_stmt() {
+  auto t = peek();
+  if (!t.IsContinue())
+    return nullptr;
+
+  auto source = t.source();
+  next();  // Consume the peek
+
+  ast::StatementCondition condition = ast::StatementCondition::kNone;
+  std::unique_ptr<ast::Expression> conditional = nullptr;
+
+  t = peek();
+  if (t.IsIf() || t.IsUnless()) {
+    next();  // Consume the peek
+
+    if (t.IsIf())
+      condition = ast::StatementCondition::kIf;
+    else
+      condition = ast::StatementCondition::kUnless;
+
+    conditional = paren_rhs_stmt();
+    if (has_error())
+      return nullptr;
+    if (conditional == nullptr) {
+      set_error(peek(), "unable to parse conditional statement");
+      return nullptr;
+    }
+  }
+
+  return std::make_unique<ast::ContinueStatement>(source, condition,
+                                                  std::move(conditional));
+}
+
 // continuing_stmt
 //   : CONTINUING body_stmt
 ast::StatementList ParserImpl::continuing_stmt() {
@@ -1987,119 +1997,6 @@ ast::StatementList ParserImpl::continuing_stmt() {
 
   next();  // Consume the peek
   return body_stmt();
-}
-
-// const_literal
-//   : INT_LITERAL
-//   | UINT_LITERAL
-//   | FLOAT_LITERAL
-//   | TRUE
-//   | FALSE
-std::unique_ptr<ast::Literal> ParserImpl::const_literal() {
-  auto t = peek();
-  if (t.IsTrue()) {
-    next();  // Consume the peek
-
-    auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
-    if (!type) {
-      return nullptr;
-    }
-    return std::make_unique<ast::BoolLiteral>(type, true);
-  }
-  if (t.IsFalse()) {
-    next();  // Consume the peek
-    auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
-    if (!type) {
-      return nullptr;
-    }
-    return std::make_unique<ast::BoolLiteral>(type, false);
-  }
-  if (t.IsIntLiteral()) {
-    next();  // Consume the peek
-    auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::I32Type>());
-    if (!type) {
-      return nullptr;
-    }
-    return std::make_unique<ast::IntLiteral>(type, t.to_i32());
-  }
-  if (t.IsUintLiteral()) {
-    next();  // Consume the peek
-    auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::U32Type>());
-    if (!type) {
-      return nullptr;
-    }
-    return std::make_unique<ast::UintLiteral>(type, t.to_u32());
-  }
-  if (t.IsFloatLiteral()) {
-    next();  // Consume the peek
-    auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>());
-    if (!type) {
-      return nullptr;
-    }
-    return std::make_unique<ast::FloatLiteral>(type, t.to_f32());
-  }
-  return nullptr;
-}
-
-// const_expr
-//   : type_decl PAREN_LEFT (const_expr COMMA)? const_expr PAREN_RIGHT
-//   | const_literal
-std::unique_ptr<ast::ConstructorExpression> ParserImpl::const_expr() {
-  auto t = peek();
-  auto source = t.source();
-
-  auto* type = type_decl();
-  if (type != nullptr) {
-    t = next();
-    if (!t.IsParenLeft()) {
-      set_error(t, "missing ( for type constructor");
-      return nullptr;
-    }
-
-    ast::ExpressionList params;
-    auto param = const_expr();
-    if (has_error())
-      return nullptr;
-    if (param == nullptr) {
-      set_error(peek(), "unable to parse constant expression");
-      return nullptr;
-    }
-    params.push_back(std::move(param));
-    for (;;) {
-      t = peek();
-      if (!t.IsComma())
-        break;
-
-      next();  // Consume the peek
-
-      param = const_expr();
-      if (has_error())
-        return nullptr;
-      if (param == nullptr) {
-        set_error(peek(), "unable to parse constant expression");
-        return nullptr;
-      }
-      params.push_back(std::move(param));
-    }
-
-    t = next();
-    if (!t.IsParenRight()) {
-      set_error(t, "missing ) for type constructor");
-      return nullptr;
-    }
-    return std::make_unique<ast::TypeConstructorExpression>(source, type,
-                                                            std::move(params));
-  }
-
-  auto lit = const_literal();
-  if (has_error())
-    return nullptr;
-  if (lit == nullptr) {
-    set_error(peek(), "unable to parse const literal");
-    return nullptr;
-  }
-  return std::make_unique<ast::ScalarConstructorExpression>(source,
-                                                            std::move(lit));
 }
 
 // primary_expression
@@ -2219,39 +2116,6 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
   return nullptr;
 }
 
-// argument_expression_list
-//   : (logical_or_expression COMMA)* logical_or_expression
-ast::ExpressionList ParserImpl::argument_expression_list() {
-  auto arg = logical_or_expression();
-  if (has_error())
-    return {};
-  if (arg == nullptr) {
-    set_error(peek(), "unable to parse argument expression");
-    return {};
-  }
-
-  ast::ExpressionList ret;
-  ret.push_back(std::move(arg));
-
-  for (;;) {
-    auto t = peek();
-    if (!t.IsComma())
-      break;
-
-    next();  // Consume the peek
-
-    arg = logical_or_expression();
-    if (has_error())
-      return {};
-    if (arg == nullptr) {
-      set_error(peek(), "unable to parse argument expression after comma");
-      return {};
-    }
-    ret.push_back(std::move(arg));
-  }
-  return ret;
-}
-
 // postfix_expr
 //   :
 //   | BRACE_LEFT logical_or_expression BRACE_RIGHT postfix_expr
@@ -2328,6 +2192,39 @@ std::unique_ptr<ast::Expression> ParserImpl::postfix_expression() {
     return nullptr;
 
   return postfix_expr(std::move(prefix));
+}
+
+// argument_expression_list
+//   : (logical_or_expression COMMA)* logical_or_expression
+ast::ExpressionList ParserImpl::argument_expression_list() {
+  auto arg = logical_or_expression();
+  if (has_error())
+    return {};
+  if (arg == nullptr) {
+    set_error(peek(), "unable to parse argument expression");
+    return {};
+  }
+
+  ast::ExpressionList ret;
+  ret.push_back(std::move(arg));
+
+  for (;;) {
+    auto t = peek();
+    if (!t.IsComma())
+      break;
+
+    next();  // Consume the peek
+
+    arg = logical_or_expression();
+    if (has_error())
+      return {};
+    if (arg == nullptr) {
+      set_error(peek(), "unable to parse argument expression after comma");
+      return {};
+    }
+    ret.push_back(std::move(arg));
+  }
+  return ret;
 }
 
 // unary_expression
@@ -2799,6 +2696,119 @@ std::unique_ptr<ast::AssignmentStatement> ParserImpl::assignment_stmt() {
 
   return std::make_unique<ast::AssignmentStatement>(source, std::move(lhs),
                                                     std::move(rhs));
+}
+
+// const_literal
+//   : INT_LITERAL
+//   | UINT_LITERAL
+//   | FLOAT_LITERAL
+//   | TRUE
+//   | FALSE
+std::unique_ptr<ast::Literal> ParserImpl::const_literal() {
+  auto t = peek();
+  if (t.IsTrue()) {
+    next();  // Consume the peek
+
+    auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
+    if (!type) {
+      return nullptr;
+    }
+    return std::make_unique<ast::BoolLiteral>(type, true);
+  }
+  if (t.IsFalse()) {
+    next();  // Consume the peek
+    auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
+    if (!type) {
+      return nullptr;
+    }
+    return std::make_unique<ast::BoolLiteral>(type, false);
+  }
+  if (t.IsIntLiteral()) {
+    next();  // Consume the peek
+    auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::I32Type>());
+    if (!type) {
+      return nullptr;
+    }
+    return std::make_unique<ast::IntLiteral>(type, t.to_i32());
+  }
+  if (t.IsUintLiteral()) {
+    next();  // Consume the peek
+    auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::U32Type>());
+    if (!type) {
+      return nullptr;
+    }
+    return std::make_unique<ast::UintLiteral>(type, t.to_u32());
+  }
+  if (t.IsFloatLiteral()) {
+    next();  // Consume the peek
+    auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>());
+    if (!type) {
+      return nullptr;
+    }
+    return std::make_unique<ast::FloatLiteral>(type, t.to_f32());
+  }
+  return nullptr;
+}
+
+// const_expr
+//   : type_decl PAREN_LEFT (const_expr COMMA)? const_expr PAREN_RIGHT
+//   | const_literal
+std::unique_ptr<ast::ConstructorExpression> ParserImpl::const_expr() {
+  auto t = peek();
+  auto source = t.source();
+
+  auto* type = type_decl();
+  if (type != nullptr) {
+    t = next();
+    if (!t.IsParenLeft()) {
+      set_error(t, "missing ( for type constructor");
+      return nullptr;
+    }
+
+    ast::ExpressionList params;
+    auto param = const_expr();
+    if (has_error())
+      return nullptr;
+    if (param == nullptr) {
+      set_error(peek(), "unable to parse constant expression");
+      return nullptr;
+    }
+    params.push_back(std::move(param));
+    for (;;) {
+      t = peek();
+      if (!t.IsComma())
+        break;
+
+      next();  // Consume the peek
+
+      param = const_expr();
+      if (has_error())
+        return nullptr;
+      if (param == nullptr) {
+        set_error(peek(), "unable to parse constant expression");
+        return nullptr;
+      }
+      params.push_back(std::move(param));
+    }
+
+    t = next();
+    if (!t.IsParenRight()) {
+      set_error(t, "missing ) for type constructor");
+      return nullptr;
+    }
+    return std::make_unique<ast::TypeConstructorExpression>(source, type,
+                                                            std::move(params));
+  }
+
+  auto lit = const_literal();
+  if (has_error())
+    return nullptr;
+  if (lit == nullptr) {
+    set_error(peek(), "unable to parse const literal");
+    return nullptr;
+  }
+  return std::make_unique<ast::ScalarConstructorExpression>(source,
+                                                            std::move(lit));
 }
 
 }  // namespace wgsl
