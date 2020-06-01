@@ -490,7 +490,7 @@ namespace dawn_native { namespace d3d12 {
             SIZE_T messageLength = 0;
             HRESULT hr = infoQueue->GetMessage(i, nullptr, &messageLength);
             if (FAILED(hr)) {
-                messages << " ID3D12InfoQueue::GetMessagefailed with " << hr << '\n';
+                messages << " ID3D12InfoQueue::GetMessage failed with " << hr << '\n';
                 continue;
             }
 
