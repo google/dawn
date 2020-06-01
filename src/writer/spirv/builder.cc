@@ -89,6 +89,10 @@ uint32_t pipeline_stage_to_execution_model(ast::PipelineStage stage) {
   return model;
 }
 
+bool LastIsFallthrough(const ast::StatementList& stmts) {
+  return !stmts.empty() && stmts.back()->IsFallthrough();
+}
+
 // A terminator is anything which will case a SPIR-V terminator to be emitted.
 // This means things like breaks, fallthroughs and continues which all emit an
 // OpBranch or return for the OpReturn emission.
@@ -1395,7 +1399,13 @@ bool Builder::GenerateSwitchStatement(ast::SwitchStatement* stmt) {
       return false;
     }
 
-    if (!LastIsTerminator(item->body())) {
+    if (LastIsFallthrough(item->body())) {
+      if (i == (body.size() - 1)) {
+        error_ = "fallthrough of last case statement is disallowed";
+        return false;
+      }
+      push_function_inst(spv::Op::OpBranch, {Operand::Int(case_ids[i + 1])});
+    } else if (!LastIsTerminator(item->body())) {
       push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
     }
   }
@@ -1490,6 +1500,10 @@ bool Builder::GenerateStatement(ast::Statement* stmt) {
   }
   if (stmt->IsContinue()) {
     return GenerateContinueStatement(stmt->AsContinue());
+  }
+  if (stmt->IsFallthrough()) {
+    // Do nothing here, the fallthrough gets handled by the switch code.
+    return true;
   }
   if (stmt->IsIf()) {
     return GenerateIfStatement(stmt->AsIf());
