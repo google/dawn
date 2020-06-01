@@ -194,6 +194,10 @@ class Builder {
   /// @param stmt the statement to generate
   /// @returns true if the statement was successfully generated
   bool GenerateContinueStatement(ast::ContinueStatement* stmt);
+  /// Generates a kill statement
+  /// @param stmt the statement to generate
+  /// @returns true if the statement was successfully generated
+  bool GenerateKillStatement(ast::KillStatement* stmt);
   /// Generates an entry point instruction
   /// @param ep the entry point
   /// @returns true if the instruction was generated, false otherwise
