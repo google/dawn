@@ -104,10 +104,10 @@ TEST_F(BuilderTest, Switch_WithCase) {
   selector_2.push_back(std::make_unique<ast::IntLiteral>(&i32, 2));
 
   ast::CaseStatementList cases;
-  cases.push_back(
-      std::make_unique<ast::CaseStatement>(std::move(selector_1), std::move(case_1_body)));
-  cases.push_back(std::make_unique<ast::CaseStatement>(
-      std::move(selector_2), std::move(case_2_body)));
+  cases.push_back(std::make_unique<ast::CaseStatement>(std::move(selector_1),
+                                                       std::move(case_1_body)));
+  cases.push_back(std::make_unique<ast::CaseStatement>(std::move(selector_2),
+                                                       std::move(case_2_body)));
 
   ast::SwitchStatement expr(std::make_unique<ast::IdentifierExpression>("a"),
                             std::move(cases));
@@ -265,10 +265,10 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   selector_2.push_back(std::make_unique<ast::IntLiteral>(&i32, 3));
 
   ast::CaseStatementList cases;
-  cases.push_back(std::make_unique<ast::CaseStatement>(
-      std::move(selector_1), std::move(case_1_body)));
-  cases.push_back(std::make_unique<ast::CaseStatement>(
-      std::move(selector_2), std::move(case_2_body)));
+  cases.push_back(std::make_unique<ast::CaseStatement>(std::move(selector_1),
+                                                       std::move(case_1_body)));
+  cases.push_back(std::make_unique<ast::CaseStatement>(std::move(selector_2),
+                                                       std::move(case_2_body)));
   cases.push_back(
       std::make_unique<ast::CaseStatement>(std::move(default_body)));
 
@@ -359,11 +359,17 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
       std::make_unique<ast::ScalarConstructorExpression>(
           std::make_unique<ast::IntLiteral>(&i32, 3))));
 
+  ast::CaseSelectorList selector_1;
+  selector_1.push_back(std::make_unique<ast::IntLiteral>(&i32, 1));
+
+  ast::CaseSelectorList selector_2;
+  selector_2.push_back(std::make_unique<ast::IntLiteral>(&i32, 2));
+
   ast::CaseStatementList cases;
-  cases.push_back(std::make_unique<ast::CaseStatement>(
-      std::make_unique<ast::IntLiteral>(&i32, 1), std::move(case_1_body)));
-  cases.push_back(std::make_unique<ast::CaseStatement>(
-      std::make_unique<ast::IntLiteral>(&i32, 2), std::move(case_2_body)));
+  cases.push_back(std::make_unique<ast::CaseStatement>(std::move(selector_1),
+                                                       std::move(case_1_body)));
+  cases.push_back(std::make_unique<ast::CaseStatement>(std::move(selector_2),
+                                                       std::move(case_2_body)));
   cases.push_back(
       std::make_unique<ast::CaseStatement>(std::move(default_body)));
 
@@ -438,9 +444,12 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
           std::make_unique<ast::IntLiteral>(&i32, 1))));
   case_1_body.push_back(std::make_unique<ast::FallthroughStatement>());
 
+  ast::CaseSelectorList selector_1;
+  selector_1.push_back(std::make_unique<ast::IntLiteral>(&i32, 1));
+
   ast::CaseStatementList cases;
-  cases.push_back(std::make_unique<ast::CaseStatement>(
-      std::make_unique<ast::IntLiteral>(&i32, 1), std::move(case_1_body)));
+  cases.push_back(std::make_unique<ast::CaseStatement>(std::move(selector_1),
+                                                       std::move(case_1_body)));
 
   ast::SwitchStatement expr(std::make_unique<ast::IdentifierExpression>("a"),
                             std::move(cases));
@@ -508,8 +517,8 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   selector_1.push_back(std::make_unique<ast::IntLiteral>(&i32, 1));
 
   ast::CaseStatementList cases;
-  cases.push_back(std::make_unique<ast::CaseStatement>(
-      std::move(selector_1), std::move(case_1_body)));
+  cases.push_back(std::make_unique<ast::CaseStatement>(std::move(selector_1),
+                                                       std::move(case_1_body)));
 
   ast::SwitchStatement expr(std::make_unique<ast::IdentifierExpression>("a"),
                             std::move(cases));
