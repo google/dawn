@@ -51,8 +51,6 @@
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
-#include "src/ast/unary_derivative_expression.h"
-#include "src/ast/unary_method_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/unless_statement.h"
 #include "src/ast/variable_decl_statement.h"
@@ -1369,13 +1367,34 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Matrix) {
   EXPECT_EQ(mat->columns(), 4u);
 }
 
-using UnaryDerivativeExpressionTest =
-    TypeDeterminerTestWithParam<ast::UnaryDerivative>;
-TEST_P(UnaryDerivativeExpressionTest, Expr_UnaryDerivative) {
-  auto derivative = GetParam();
+using IntrinsicDerivativeTest = TypeDeterminerTestWithParam<std::string>;
+TEST_P(IntrinsicDerivativeTest, Scalar) {
+  auto name = GetParam();
 
   ast::type::F32Type f32;
 
+  auto var =
+      std::make_unique<ast::Variable>("ident", ast::StorageClass::kNone, &f32);
+  mod()->AddGlobalVariable(std::move(var));
+
+  // Register the global
+  EXPECT_TRUE(td()->Determine());
+
+  ast::ExpressionList call_params;
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("ident"));
+
+  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>(name),
+                           std::move(call_params));
+  EXPECT_TRUE(td()->DetermineResultType(&expr));
+
+  ASSERT_NE(expr.result_type(), nullptr);
+  ASSERT_TRUE(expr.result_type()->IsF32());
+}
+
+TEST_P(IntrinsicDerivativeTest, Vector) {
+  auto name = GetParam();
+
+  ast::type::F32Type f32;
   ast::type::VectorType vec4(&f32, 4);
 
   auto var =
@@ -1385,25 +1404,75 @@ TEST_P(UnaryDerivativeExpressionTest, Expr_UnaryDerivative) {
   // Register the global
   EXPECT_TRUE(td()->Determine());
 
-  ast::UnaryDerivativeExpression der(
-      derivative, ast::DerivativeModifier::kNone,
-      std::make_unique<ast::IdentifierExpression>("ident"));
-  EXPECT_TRUE(td()->DetermineResultType(&der));
-  ASSERT_NE(der.result_type(), nullptr);
-  ASSERT_TRUE(der.result_type()->IsVector());
-  EXPECT_TRUE(der.result_type()->AsVector()->type()->IsF32());
-  EXPECT_EQ(der.result_type()->AsVector()->size(), 4u);
+  ast::ExpressionList call_params;
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("ident"));
+
+  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>(name),
+                           std::move(call_params));
+  EXPECT_TRUE(td()->DetermineResultType(&expr));
+
+  ASSERT_NE(expr.result_type(), nullptr);
+  ASSERT_TRUE(expr.result_type()->IsVector());
+  EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
+  EXPECT_EQ(expr.result_type()->AsVector()->size(), 4u);
+}
+
+TEST_P(IntrinsicDerivativeTest, MissingParam) {
+  auto name = GetParam();
+
+  ast::type::F32Type f32;
+  ast::type::VectorType vec4(&f32, 4);
+
+  // Register the global
+  EXPECT_TRUE(td()->Determine());
+
+  ast::ExpressionList call_params;
+  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>(name),
+                           std::move(call_params));
+  EXPECT_FALSE(td()->DetermineResultType(&expr));
+  EXPECT_EQ(td()->error(), "incorrect number of parameters for " + name);
+}
+
+TEST_P(IntrinsicDerivativeTest, ToomManyParams) {
+  auto name = GetParam();
+
+  ast::type::F32Type f32;
+  ast::type::VectorType vec4(&f32, 4);
+
+  auto var1 = std::make_unique<ast::Variable>("ident1",
+                                              ast::StorageClass::kNone, &vec4);
+  auto var2 = std::make_unique<ast::Variable>("ident2",
+                                              ast::StorageClass::kNone, &vec4);
+  mod()->AddGlobalVariable(std::move(var1));
+  mod()->AddGlobalVariable(std::move(var2));
+
+  // Register the global
+  EXPECT_TRUE(td()->Determine());
+
+  ast::ExpressionList call_params;
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("ident1"));
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("ident2"));
+
+  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>(name),
+                           std::move(call_params));
+  EXPECT_FALSE(td()->DetermineResultType(&expr));
+  EXPECT_EQ(td()->error(), "incorrect number of parameters for " + name);
 }
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
-                         UnaryDerivativeExpressionTest,
-                         testing::Values(ast::UnaryDerivative::kDpdx,
-                                         ast::UnaryDerivative::kDpdy,
-                                         ast::UnaryDerivative::kFwidth));
+                         IntrinsicDerivativeTest,
+                         testing::Values("dpdx",
+                                         "dpdx_coarse",
+                                         "dpdx_fine",
+                                         "dpdy",
+                                         "dpdy_coarse",
+                                         "dpdy_fine",
+                                         "fwidth",
+                                         "fwidth_coarse",
+                                         "fwidth_fine"));
 
-using UnaryMethodExpressionBoolTest =
-    TypeDeterminerTestWithParam<ast::UnaryMethod>;
-TEST_P(UnaryMethodExpressionBoolTest, Expr_UnaryMethod_Any) {
-  auto op = GetParam();
+using Intrinsic = TypeDeterminerTestWithParam<std::string>;
+TEST_P(Intrinsic, Test) {
+  auto name = GetParam();
 
   ast::type::BoolType bool_type;
   ast::type::VectorType vec3(&bool_type, 3);
@@ -1412,27 +1481,26 @@ TEST_P(UnaryMethodExpressionBoolTest, Expr_UnaryMethod_Any) {
                                              &vec3);
   mod()->AddGlobalVariable(std::move(var));
 
-  ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("my_var"));
+  ast::ExpressionList call_params;
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("my_var"));
 
-  ast::UnaryMethodExpression exp(op, std::move(params));
+  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>(name),
+                           std::move(call_params));
 
   // Register the variable
   EXPECT_TRUE(td()->Determine());
 
-  EXPECT_TRUE(td()->DetermineResultType(&exp));
-  ASSERT_NE(exp.result_type(), nullptr);
-  EXPECT_TRUE(exp.result_type()->IsBool());
+  EXPECT_TRUE(td()->DetermineResultType(&expr));
+  ASSERT_NE(expr.result_type(), nullptr);
+  EXPECT_TRUE(expr.result_type()->IsBool());
 }
 INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
-                         UnaryMethodExpressionBoolTest,
-                         testing::Values(ast::UnaryMethod::kAny,
-                                         ast::UnaryMethod::kAll));
+                         Intrinsic,
+                         testing::Values("any", "all"));
 
-using UnaryMethodExpressionVecTest =
-    TypeDeterminerTestWithParam<ast::UnaryMethod>;
-TEST_P(UnaryMethodExpressionVecTest, Expr_UnaryMethod_Bool) {
-  auto op = GetParam();
+using Intrinsic_FloatMethod = TypeDeterminerTestWithParam<std::string>;
+TEST_P(Intrinsic_FloatMethod, Vector) {
+  auto name = GetParam();
 
   ast::type::F32Type f32;
   ast::type::VectorType vec3(&f32, 3);
@@ -1441,22 +1509,24 @@ TEST_P(UnaryMethodExpressionVecTest, Expr_UnaryMethod_Bool) {
                                              &vec3);
   mod()->AddGlobalVariable(std::move(var));
 
-  ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("my_var"));
+  ast::ExpressionList call_params;
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("my_var"));
 
-  ast::UnaryMethodExpression exp(op, std::move(params));
+  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>(name),
+                           std::move(call_params));
 
   // Register the variable
   EXPECT_TRUE(td()->Determine());
+  EXPECT_TRUE(td()->DetermineResultType(&expr));
 
-  EXPECT_TRUE(td()->DetermineResultType(&exp));
-  ASSERT_NE(exp.result_type(), nullptr);
-  ASSERT_TRUE(exp.result_type()->IsVector());
-  EXPECT_TRUE(exp.result_type()->AsVector()->type()->IsBool());
-  EXPECT_EQ(exp.result_type()->AsVector()->size(), 3u);
+  ASSERT_NE(expr.result_type(), nullptr);
+  ASSERT_TRUE(expr.result_type()->IsVector());
+  EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsBool());
+  EXPECT_EQ(expr.result_type()->AsVector()->size(), 3u);
 }
-TEST_P(UnaryMethodExpressionVecTest, Expr_UnaryMethod_Vec) {
-  auto op = GetParam();
+
+TEST_P(Intrinsic_FloatMethod, Scalar) {
+  auto name = GetParam();
 
   ast::type::F32Type f32;
 
@@ -1464,26 +1534,65 @@ TEST_P(UnaryMethodExpressionVecTest, Expr_UnaryMethod_Vec) {
       std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone, &f32);
   mod()->AddGlobalVariable(std::move(var));
 
-  ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("my_var"));
+  ast::ExpressionList call_params;
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("my_var"));
 
-  ast::UnaryMethodExpression exp(op, std::move(params));
+  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>(name),
+                           std::move(call_params));
 
   // Register the variable
   EXPECT_TRUE(td()->Determine());
-
-  EXPECT_TRUE(td()->DetermineResultType(&exp));
-  ASSERT_NE(exp.result_type(), nullptr);
-  EXPECT_TRUE(exp.result_type()->IsBool());
+  EXPECT_TRUE(td()->DetermineResultType(&expr));
+  ASSERT_NE(expr.result_type(), nullptr);
+  EXPECT_TRUE(expr.result_type()->IsBool());
 }
-INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
-                         UnaryMethodExpressionVecTest,
-                         testing::Values(ast::UnaryMethod::kIsInf,
-                                         ast::UnaryMethod::kIsNan,
-                                         ast::UnaryMethod::kIsFinite,
-                                         ast::UnaryMethod::kIsNormal));
 
-TEST_F(TypeDeterminerTest, Expr_UnaryMethod_Dot) {
+TEST_P(Intrinsic_FloatMethod, MissingParam) {
+  auto name = GetParam();
+
+  ast::type::F32Type f32;
+
+  auto var =
+      std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone, &f32);
+  mod()->AddGlobalVariable(std::move(var));
+
+  ast::ExpressionList call_params;
+  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>(name),
+                           std::move(call_params));
+
+  // Register the variable
+  EXPECT_TRUE(td()->Determine());
+  EXPECT_FALSE(td()->DetermineResultType(&expr));
+  EXPECT_EQ(td()->error(), "incorrect number of parameters for " + name);
+}
+
+TEST_P(Intrinsic_FloatMethod, TooManyParams) {
+  auto name = GetParam();
+
+  ast::type::F32Type f32;
+
+  auto var =
+      std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone, &f32);
+  mod()->AddGlobalVariable(std::move(var));
+
+  ast::ExpressionList call_params;
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("my_var"));
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("my_var"));
+
+  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>(name),
+                           std::move(call_params));
+
+  // Register the variable
+  EXPECT_TRUE(td()->Determine());
+  EXPECT_FALSE(td()->DetermineResultType(&expr));
+  EXPECT_EQ(td()->error(), "incorrect number of parameters for " + name);
+}
+INSTANTIATE_TEST_SUITE_P(
+    TypeDeterminerTest,
+    Intrinsic_FloatMethod,
+    testing::Values("is_inf", "is_nan", "is_finite", "is_normal"));
+
+TEST_F(TypeDeterminerTest, Intrinsic_Dot) {
   ast::type::F32Type f32;
   ast::type::VectorType vec3(&f32, 3);
 
@@ -1491,21 +1600,21 @@ TEST_F(TypeDeterminerTest, Expr_UnaryMethod_Dot) {
                                              &vec3);
   mod()->AddGlobalVariable(std::move(var));
 
-  ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("my_var"));
-  params.push_back(std::make_unique<ast::IdentifierExpression>("my_var"));
+  ast::ExpressionList call_params;
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("my_var"));
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("my_var"));
 
-  ast::UnaryMethodExpression exp(ast::UnaryMethod::kDot, std::move(params));
+  ast::CallExpression expr(std::make_unique<ast::IdentifierExpression>("dot"),
+                           std::move(call_params));
 
   // Register the variable
   EXPECT_TRUE(td()->Determine());
-
-  EXPECT_TRUE(td()->DetermineResultType(&exp));
-  ASSERT_NE(exp.result_type(), nullptr);
-  EXPECT_TRUE(exp.result_type()->IsF32());
+  EXPECT_TRUE(td()->DetermineResultType(&expr));
+  ASSERT_NE(expr.result_type(), nullptr);
+  EXPECT_TRUE(expr.result_type()->IsF32());
 }
 
-TEST_F(TypeDeterminerTest, Expr_UnaryMethod_OuterProduct) {
+TEST_F(TypeDeterminerTest, Intrinsic_OuterProduct) {
   ast::type::F32Type f32;
   ast::type::VectorType vec3(&f32, 3);
   ast::type::VectorType vec2(&f32, 2);
@@ -1517,23 +1626,71 @@ TEST_F(TypeDeterminerTest, Expr_UnaryMethod_OuterProduct) {
   mod()->AddGlobalVariable(std::move(var1));
   mod()->AddGlobalVariable(std::move(var2));
 
-  ast::ExpressionList params;
-  params.push_back(std::make_unique<ast::IdentifierExpression>("v3"));
-  params.push_back(std::make_unique<ast::IdentifierExpression>("v2"));
+  ast::ExpressionList call_params;
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("v3"));
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("v2"));
 
-  ast::UnaryMethodExpression exp(ast::UnaryMethod::kOuterProduct,
-                                 std::move(params));
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("outer_product"),
+      std::move(call_params));
 
   // Register the variable
   EXPECT_TRUE(td()->Determine());
+  EXPECT_TRUE(td()->DetermineResultType(&expr));
 
-  EXPECT_TRUE(td()->DetermineResultType(&exp));
-  ASSERT_NE(exp.result_type(), nullptr);
-  ASSERT_TRUE(exp.result_type()->IsMatrix());
-  auto* mat = exp.result_type()->AsMatrix();
+  ASSERT_NE(expr.result_type(), nullptr);
+  ASSERT_TRUE(expr.result_type()->IsMatrix());
+
+  auto* mat = expr.result_type()->AsMatrix();
   EXPECT_TRUE(mat->type()->IsF32());
   EXPECT_EQ(mat->rows(), 3u);
   EXPECT_EQ(mat->columns(), 2u);
+}
+
+TEST_F(TypeDeterminerTest, Intrinsic_OuterProduct_TooFewParams) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec3(&f32, 3);
+  ast::type::VectorType vec2(&f32, 2);
+
+  auto var2 =
+      std::make_unique<ast::Variable>("v2", ast::StorageClass::kNone, &vec2);
+  mod()->AddGlobalVariable(std::move(var2));
+
+  ast::ExpressionList call_params;
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("v2"));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("outer_product"),
+      std::move(call_params));
+
+  // Register the variable
+  EXPECT_TRUE(td()->Determine());
+  EXPECT_FALSE(td()->DetermineResultType(&expr));
+  EXPECT_EQ(td()->error(), "incorrect number of parameters for outer_product");
+}
+
+TEST_F(TypeDeterminerTest, Intrinsic_OuterProduct_TooManyParams) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec3(&f32, 3);
+  ast::type::VectorType vec2(&f32, 2);
+
+  auto var2 =
+      std::make_unique<ast::Variable>("v2", ast::StorageClass::kNone, &vec2);
+  mod()->AddGlobalVariable(std::move(var2));
+
+  ast::ExpressionList call_params;
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("v2"));
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("v2"));
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("v2"));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("outer_product"),
+      std::move(call_params));
+
+  // Register the variable
+  EXPECT_TRUE(td()->Determine());
+  EXPECT_FALSE(td()->DetermineResultType(&expr));
+  EXPECT_EQ(td()->error(), "incorrect number of parameters for outer_product");
 }
 
 using UnaryOpExpressionTest = TypeDeterminerTestWithParam<ast::UnaryOp>;

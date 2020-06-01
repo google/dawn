@@ -67,8 +67,6 @@ set(TINT_LIB_SRCS
   ast/continue_statement.h
   ast/decorated_variable.cc
   ast/decorated_variable.h
-  ast/derivative_modifier.cc
-  ast/derivative_modifier.h
   ast/else_statement.cc
   ast/else_statement.h
   ast/entry_point.cc
@@ -159,14 +157,6 @@ set(TINT_LIB_SRCS
   ast/type/void_type.h
   ast/uint_literal.cc
   ast/uint_literal.h
-  ast/unary_derivative.cc
-  ast/unary_derivative.h
-  ast/unary_derivative_expression.cc
-  ast/unary_derivative_expression.h
-  ast/unary_method.cc
-  ast/unary_method.h
-  ast/unary_method_expression.cc
-  ast/unary_method_expression.h
   ast/unary_op.cc
   ast/unary_op.h
   ast/unary_op_expression.cc
@@ -303,8 +293,6 @@ set(TINT_TEST_SRCS
   ast/type/vector_type_test.cc
   ast/type_constructor_expression_test.cc
   ast/uint_literal_test.cc
-  ast/unary_derivative_expression_test.cc
-  ast/unary_method_expression_test.cc
   ast/unary_op_expression_test.cc
   ast/unless_statement_test.cc
   ast/variable_decl_statement_test.cc
@@ -368,7 +356,6 @@ if(${TINT_BUILD_WGSL_READER})
     reader/wgsl/parser_impl_const_literal_test.cc
     reader/wgsl/parser_impl_continue_stmt_test.cc
     reader/wgsl/parser_impl_continuing_stmt_test.cc
-    reader/wgsl/parser_impl_derivative_modifier_test.cc
     reader/wgsl/parser_impl_else_stmt_test.cc
     reader/wgsl/parser_impl_elseif_stmt_test.cc
     reader/wgsl/parser_impl_entry_point_decl_test.cc
@@ -478,8 +465,6 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_return_test.cc
     writer/wgsl/generator_impl_switch_test.cc
     writer/wgsl/generator_impl_type_test.cc
-    writer/wgsl/generator_impl_unary_derivative_test.cc
-    writer/wgsl/generator_impl_unary_method_test.cc
     writer/wgsl/generator_impl_unary_op_test.cc
     writer/wgsl/generator_impl_unless_test.cc
     writer/wgsl/generator_impl_variable_decl_statement_test.cc

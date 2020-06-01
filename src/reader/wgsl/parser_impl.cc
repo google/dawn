@@ -57,10 +57,6 @@
 #include "src/ast/type/void_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
-#include "src/ast/unary_derivative.h"
-#include "src/ast/unary_derivative_expression.h"
-#include "src/ast/unary_method.h"
-#include "src/ast/unary_method_expression.h"
 #include "src/ast/unary_op.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
@@ -2338,30 +2334,6 @@ std::unique_ptr<ast::Expression> ParserImpl::postfix_expression() {
 //   : postfix_expression
 //   | MINUS unary_expression
 //   | BANG unary_expression
-//   | ANY PAREN_LEFT IDENT PAREN_RIGHT
-//   | ALL PAREN_LEFT IDENT PAREN_RIGHT
-//   | IS_NAN PAREN_LEFT IDENT PAREN_RIGHT
-//   | IS_INF PAREN_LEFT IDENT PAREN_RIGHT
-//   | IS_FINITE PAREN_LEFT IDENT PAREN_RIGHT
-//   | IS_NORMAL PAREN_LEFT IDENT PAREN_RIGHT
-//   | DOT PAREN_LEFT IDENT COMMA IDENT PAREN_RIGHT
-//   | OUTER_PRODUCT PAREN_LEFT IDENT COMMA IDENT PAREN_RIGHT
-//   | DPDX (LESS_THAN derivative_modifier GREATER_THAN)?
-//           PAREN_LEFT IDENT PAREN_RIGHT
-//   | DPDY (LESS_THAN derivative_modifier GREATER_THAN)?
-//           PAREN_LEFT IDENT PAREN_RIGHT
-//   | FWIDTH (LESS_THAN derivative_modifier GREATER_THAN)?
-//           PAREN_LEFT IDENT PAREN_RIGHT
-// # | unord_greater_than_equal(a, b)
-// # | unord_greater_than(a, b)
-// # | unord_less_than_equal(a, b)
-// # | unord_less_than(a, b)
-// # | unord_not_equal(a, b)
-// # | unord_equal(a, b)
-// # | signed_greater_than_equal(a, b)
-// # | signed_greater_than(a, b)
-// # | signed_less_than_equal(a, b)
-// # | signed_less_than(a, b)
 std::unique_ptr<ast::Expression> ParserImpl::unary_expression() {
   auto t = peek();
   auto source = t.source();
@@ -2385,156 +2357,7 @@ std::unique_ptr<ast::Expression> ParserImpl::unary_expression() {
     return std::make_unique<ast::UnaryOpExpression>(source, op,
                                                     std::move(expr));
   }
-  if (t.IsAny() || t.IsAll() || t.IsIsNan() || t.IsIsInf() || t.IsIsFinite() ||
-      t.IsIsNormal()) {
-    next();  // Consume the peek
-
-    auto op = ast::UnaryMethod::kAny;
-    if (t.IsAll())
-      op = ast::UnaryMethod::kAll;
-    else if (t.IsIsNan())
-      op = ast::UnaryMethod::kIsNan;
-    else if (t.IsIsInf())
-      op = ast::UnaryMethod::kIsInf;
-    else if (t.IsIsFinite())
-      op = ast::UnaryMethod::kIsFinite;
-    else if (t.IsIsNormal())
-      op = ast::UnaryMethod::kIsNormal;
-
-    t = next();
-    if (!t.IsParenLeft()) {
-      set_error(t, "missing ( for method call");
-      return nullptr;
-    }
-
-    t = next();
-    if (!t.IsIdentifier()) {
-      set_error(t, "missing identifier for method call");
-      return nullptr;
-    }
-    ast::ExpressionList ident;
-    ident.push_back(
-        std::make_unique<ast::IdentifierExpression>(source, t.to_str()));
-
-    t = next();
-    if (!t.IsParenRight()) {
-      set_error(t, "missing ) for method call");
-      return nullptr;
-    }
-    return std::make_unique<ast::UnaryMethodExpression>(source, op,
-                                                        std::move(ident));
-  }
-  if (t.IsDot() || t.IsOuterProduct()) {
-    next();  // Consume the peek
-
-    auto op = ast::UnaryMethod::kDot;
-    if (t.IsOuterProduct())
-      op = ast::UnaryMethod::kOuterProduct;
-
-    t = next();
-    if (!t.IsParenLeft()) {
-      set_error(t, "missing ( for method call");
-      return nullptr;
-    }
-
-    t = next();
-    if (!t.IsIdentifier()) {
-      set_error(t, "missing identifier for method call");
-      return nullptr;
-    }
-    ast::ExpressionList ident;
-    ident.push_back(
-        std::make_unique<ast::IdentifierExpression>(source, t.to_str()));
-
-    t = next();
-    if (!t.IsComma()) {
-      set_error(t, "missing , for method call");
-      return nullptr;
-    }
-
-    t = next();
-    if (!t.IsIdentifier()) {
-      set_error(t, "missing identifier for method call");
-      return nullptr;
-    }
-    ident.push_back(
-        std::make_unique<ast::IdentifierExpression>(source, t.to_str()));
-
-    t = next();
-    if (!t.IsParenRight()) {
-      set_error(t, "missing ) for method call");
-      return nullptr;
-    }
-
-    return std::make_unique<ast::UnaryMethodExpression>(source, op,
-                                                        std::move(ident));
-  }
-  if (t.IsDpdx() || t.IsDpdy() || t.IsFwidth()) {
-    next();  // Consume the peek
-
-    auto op = ast::UnaryDerivative::kDpdx;
-    if (t.IsDpdy())
-      op = ast::UnaryDerivative::kDpdy;
-    else if (t.IsFwidth())
-      op = ast::UnaryDerivative::kFwidth;
-
-    t = next();
-    auto mod = ast::DerivativeModifier::kNone;
-    if (t.IsLessThan()) {
-      mod = derivative_modifier();
-      if (has_error())
-        return nullptr;
-      if (mod == ast::DerivativeModifier::kNone) {
-        set_error(peek(), "unable to parse derivative modifier");
-        return nullptr;
-      }
-
-      t = next();
-      if (!t.IsGreaterThan()) {
-        set_error(t, "missing > for derivative modifier");
-        return nullptr;
-      }
-      t = next();
-    }
-    if (!t.IsParenLeft()) {
-      set_error(t, "missing ( for derivative method");
-      return nullptr;
-    }
-
-    t = next();
-    if (!t.IsIdentifier()) {
-      set_error(t, "missing identifier for derivative method");
-      return nullptr;
-    }
-    auto ident =
-        std::make_unique<ast::IdentifierExpression>(source, t.to_str());
-
-    t = next();
-    if (!t.IsParenRight()) {
-      set_error(t, "missing ) for derivative method");
-      return nullptr;
-    }
-
-    return std::make_unique<ast::UnaryDerivativeExpression>(source, op, mod,
-                                                            std::move(ident));
-  }
   return postfix_expression();
-}
-
-// derivative_modifier
-//   : FINE
-//   | COARSE
-ast::DerivativeModifier ParserImpl::derivative_modifier() {
-  auto t = peek();
-  if (t.IsFine()) {
-    next();  // Consume the peek
-    return ast::DerivativeModifier::kFine;
-  }
-  if (t.IsCoarse()) {
-    next();  // Consume the peek
-    return ast::DerivativeModifier::kCoarse;
-  }
-  return ast::DerivativeModifier::kNone;
 }
 
 // multiplicative_expr

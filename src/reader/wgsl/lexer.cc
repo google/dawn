@@ -468,10 +468,6 @@ Token Lexer::try_punctuation() {
 }
 
 Token Lexer::check_keyword(const Source& source, const std::string& str) {
-  if (str == "all")
-    return {Token::Type::kAll, source, "all"};
-  if (str == "any")
-    return {Token::Type::kAny, source, "any"};
   if (str == "array")
     return {Token::Type::kArray, source, "array"};
   if (str == "as")
@@ -498,16 +494,8 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kContinue, source, "continue"};
   if (str == "continuing")
     return {Token::Type::kContinuing, source, "continuing"};
-  if (str == "coarse")
-    return {Token::Type::kCoarse, source, "coarse"};
   if (str == "default")
     return {Token::Type::kDefault, source, "default"};
-  if (str == "dot")
-    return {Token::Type::kDot, source, "dot"};
-  if (str == "dpdx")
-    return {Token::Type::kDpdx, source, "dpdx"};
-  if (str == "dpdy")
-    return {Token::Type::kDpdy, source, "dpdy"};
   if (str == "else")
     return {Token::Type::kElse, source, "else"};
   if (str == "elseif")
@@ -520,16 +508,12 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kFallthrough, source, "fallthrough"};
   if (str == "false")
     return {Token::Type::kFalse, source, "false"};
-  if (str == "fine")
-    return {Token::Type::kFine, source, "fine"};
   if (str == "fn")
     return {Token::Type::kFn, source, "fn"};
   if (str == "fragment")
     return {Token::Type::kFragment, source, "fragment"};
   if (str == "function")
     return {Token::Type::kFunction, source, "function"};
-  if (str == "fwidth")
-    return {Token::Type::kFwidth, source, "fwidth"};
   if (str == "i32")
     return {Token::Type::kI32, source, "i32"};
   if (str == "if")
@@ -540,14 +524,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kImport, source, "import"};
   if (str == "in")
     return {Token::Type::kIn, source, "in"};
-  if (str == "is_nan")
-    return {Token::Type::kIsNan, source, "is_nan"};
-  if (str == "is_inf")
-    return {Token::Type::kIsInf, source, "is_inf"};
-  if (str == "is_finite")
-    return {Token::Type::kIsFinite, source, "is_finite"};
-  if (str == "is_normal")
-    return {Token::Type::kIsNormal, source, "is_normal"};
   if (str == "kill")
     return {Token::Type::kKill, source, "kill"};
   if (str == "location")
@@ -576,8 +552,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kOffset, source, "offset"};
   if (str == "out")
     return {Token::Type::kOut, source, "out"};
-  if (str == "outer_product")
-    return {Token::Type::kOuterProduct, source, "outer_product"};
   if (str == "private")
     return {Token::Type::kPrivate, source, "private"};
   if (str == "ptr")

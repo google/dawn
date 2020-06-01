@@ -32,8 +32,6 @@ class CastExpression;
 class IdentifierExpression;
 class ConstructorExpression;
 class MemberAccessorExpression;
-class UnaryDerivativeExpression;
-class UnaryMethodExpression;
 class UnaryOpExpression;
 
 /// Base expression class
@@ -63,10 +61,6 @@ class Expression : public Node {
   virtual bool IsMemberAccessor() const;
   /// @returns true if this is a binary expression
   virtual bool IsBinary() const;
-  /// @returns true if this is a unary derivative expression
-  virtual bool IsUnaryDerivative() const;
-  /// @returns true if this is a unary method expression
-  virtual bool IsUnaryMethod() const;
   /// @returns true if this is a unary op expression
   virtual bool IsUnaryOp() const;
 
@@ -86,10 +80,6 @@ class Expression : public Node {
   const MemberAccessorExpression* AsMemberAccessor() const;
   /// @returns the expression as a binary expression
   const BinaryExpression* AsBinary() const;
-  /// @returns the expression as a unary derivative expression
-  const UnaryDerivativeExpression* AsUnaryDerivative() const;
-  /// @returns the expression as a unary method expression
-  const UnaryMethodExpression* AsUnaryMethod() const;
   /// @returns the expression as a unary op expression
   const UnaryOpExpression* AsUnaryOp() const;
 
@@ -109,10 +99,6 @@ class Expression : public Node {
   MemberAccessorExpression* AsMemberAccessor();
   /// @returns the expression as a binary expression
   BinaryExpression* AsBinary();
-  /// @returns the expression as a unary derivative expression
-  UnaryDerivativeExpression* AsUnaryDerivative();
-  /// @returns the expression as a unary method expression
-  UnaryMethodExpression* AsUnaryMethod();
   /// @returns the expression as a unary op expression
   UnaryOpExpression* AsUnaryOp();
 

@@ -23,8 +23,6 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type_constructor_expression.h"
-#include "src/ast/unary_derivative_expression.h"
-#include "src/ast/unary_method_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"

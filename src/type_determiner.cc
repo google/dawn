@@ -42,13 +42,30 @@
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
-#include "src/ast/unary_derivative_expression.h"
-#include "src/ast/unary_method_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/unless_statement.h"
 #include "src/ast/variable_decl_statement.h"
 
 namespace tint {
+namespace {
+
+bool IsDerivative(const std::string& name) {
+  return name == "dpdx" || name == "dpdx_fine" || name == "dpdx_coarse" ||
+         name == "dpdy" || name == "dpdy_fine" || name == "dpdy_coarse" ||
+         name == "fwidth" || name == "fwidth_fine" || name == "fwidth_coarse";
+}
+
+bool IsFloatIntrinsic(const std::string& name) {
+  return name == "is_finite" || name == "is_inf" || name == "is_nan" ||
+         name == "is_normal";
+}
+
+bool IsIntrinsic(const std::string& name) {
+  return IsDerivative(name) || name == "all" || name == "any" ||
+         IsFloatIntrinsic(name) || name == "dot" || name == "outer_product";
+}
+
+}  // namespace
 
 TypeDeterminer::TypeDeterminer(Context* ctx, ast::Module* mod)
     : ctx_(*ctx), mod_(mod) {}
@@ -253,12 +270,6 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
   if (expr->IsMemberAccessor()) {
     return DetermineMemberAccessor(expr->AsMemberAccessor());
   }
-  if (expr->IsUnaryDerivative()) {
-    return DetermineUnaryDerivative(expr->AsUnaryDerivative());
-  }
-  if (expr->IsUnaryMethod()) {
-    return DetermineUnaryMethod(expr->AsUnaryMethod());
-  }
   if (expr->IsUnaryOp()) {
     return DetermineUnaryOp(expr->AsUnaryOp());
   }
@@ -318,7 +329,11 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
   if (expr->func()->IsIdentifier()) {
     auto* ident = expr->func()->AsIdentifier();
 
-    if (ident->has_path()) {
+    if (IsIntrinsic(ident->name())) {
+      if (!DetermineIntrinsic(ident->name(), expr))
+        return false;
+
+    } else if (ident->has_path()) {
       auto* imp = mod_->FindImportByName(ident->path());
       if (imp == nullptr) {
         set_error(expr->source(), "Unable to find import for " + ident->name());
@@ -353,6 +368,75 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
   }
   expr->set_result_type(expr->func()->result_type());
   return true;
+}
+
+bool TypeDeterminer::DetermineIntrinsic(const std::string& name,
+                                        ast::CallExpression* expr) {
+  if (IsDerivative(name)) {
+    if (expr->params().size() != 1) {
+      set_error(expr->source(), "incorrect number of parameters for " + name);
+      return false;
+    }
+
+    // The result type must be the same as the type of the parameter.
+    auto& param = expr->params()[0];
+    if (!DetermineResultType(param.get())) {
+      return false;
+    }
+    expr->func()->set_result_type(param->result_type()->UnwrapPtrIfNeeded());
+    return true;
+  }
+  if (name == "any" || name == "all") {
+    expr->func()->set_result_type(
+        ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>()));
+    return true;
+  }
+  if (IsFloatIntrinsic(name)) {
+    if (expr->params().size() != 1) {
+      set_error(expr->source(), "incorrect number of parameters for " + name);
+      return false;
+    }
+
+    auto* bool_type =
+        ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
+
+    auto* param_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
+    if (param_type->IsVector()) {
+      expr->func()->set_result_type(
+          ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
+              bool_type, param_type->AsVector()->size())));
+    } else {
+      expr->func()->set_result_type(bool_type);
+    }
+    return true;
+  }
+  if (name == "dot") {
+    expr->func()->set_result_type(
+        ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>()));
+    return true;
+  }
+  if (name == "outer_product") {
+    if (expr->params().size() != 2) {
+      set_error(expr->source(),
+                "incorrect number of parameters for outer_product");
+      return false;
+    }
+
+    auto* param0_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
+    auto* param1_type = expr->params()[1]->result_type()->UnwrapPtrIfNeeded();
+    if (!param0_type->IsVector() || !param1_type->IsVector()) {
+      set_error(expr->source(), "invalid parameter type for outer_product");
+      return false;
+    }
+
+    expr->func()->set_result_type(
+        ctx_.type_mgr().Get(std::make_unique<ast::type::MatrixType>(
+            ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>()),
+            param0_type->AsVector()->size(), param1_type->AsVector()->size())));
+    return true;
+  }
+
+  return false;
 }
 
 bool TypeDeterminer::DetermineCast(ast::CastExpression* expr) {
@@ -548,77 +632,6 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
 
   set_error(expr->source(), "Unknown binary expression");
   return false;
-}
-
-bool TypeDeterminer::DetermineUnaryDerivative(
-    ast::UnaryDerivativeExpression* expr) {
-  // The result type must be the same as the type of the parameter.
-  if (!DetermineResultType(expr->param())) {
-    return false;
-  }
-  expr->set_result_type(expr->param()->result_type()->UnwrapPtrIfNeeded());
-  return true;
-}
-
-bool TypeDeterminer::DetermineUnaryMethod(ast::UnaryMethodExpression* expr) {
-  if (!DetermineResultType(expr->params())) {
-    return false;
-  }
-
-  switch (expr->op()) {
-    case ast::UnaryMethod::kAny:
-    case ast::UnaryMethod::kAll: {
-      expr->set_result_type(
-          ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>()));
-      break;
-    }
-    case ast::UnaryMethod::kIsNan:
-    case ast::UnaryMethod::kIsInf:
-    case ast::UnaryMethod::kIsFinite:
-    case ast::UnaryMethod::kIsNormal: {
-      if (expr->params().empty()) {
-        set_error(expr->source(), "incorrect number of parameters");
-        return false;
-      }
-
-      auto* bool_type =
-          ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
-      auto* param_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
-      if (param_type->IsVector()) {
-        expr->set_result_type(
-            ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
-                bool_type, param_type->AsVector()->size())));
-      } else {
-        expr->set_result_type(bool_type);
-      }
-      break;
-    }
-    case ast::UnaryMethod::kDot: {
-      expr->set_result_type(
-          ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>()));
-      break;
-    }
-    case ast::UnaryMethod::kOuterProduct: {
-      if (expr->params().size() != 2) {
-        set_error(expr->source(),
-                  "incorrect number of parameters for outer product");
-        return false;
-      }
-      auto* param0_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
-      auto* param1_type = expr->params()[1]->result_type()->UnwrapPtrIfNeeded();
-      if (!param0_type->IsVector() || !param1_type->IsVector()) {
-        set_error(expr->source(), "invalid parameter type for outer product");
-        return false;
-      }
-      expr->set_result_type(
-          ctx_.type_mgr().Get(std::make_unique<ast::type::MatrixType>(
-              ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>()),
-              param0_type->AsVector()->size(),
-              param1_type->AsVector()->size())));
-      break;
-    }
-  }
-  return true;
 }
 
 bool TypeDeterminer::DetermineUnaryOp(ast::UnaryOpExpression* expr) {

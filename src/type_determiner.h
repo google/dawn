@@ -34,8 +34,6 @@ class ConstructorExpression;
 class Function;
 class IdentifierExpression;
 class MemberAccessorExpression;
-class UnaryDerivativeExpression;
-class UnaryMethodExpression;
 class UnaryOpExpression;
 class Variable;
 
@@ -114,9 +112,8 @@ class TypeDeterminer {
   bool DetermineCast(ast::CastExpression* expr);
   bool DetermineConstructor(ast::ConstructorExpression* expr);
   bool DetermineIdentifier(ast::IdentifierExpression* expr);
+  bool DetermineIntrinsic(const std::string& name, ast::CallExpression* expr);
   bool DetermineMemberAccessor(ast::MemberAccessorExpression* expr);
-  bool DetermineUnaryDerivative(ast::UnaryDerivativeExpression* expr);
-  bool DetermineUnaryMethod(ast::UnaryMethodExpression* expr);
   bool DetermineUnaryOp(ast::UnaryOpExpression* expr);
 
   Context& ctx_;

@@ -116,7 +116,6 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingValue) {
   EXPECT_EQ(p->error(), "1:8: expected identifier for builtin");
 }
 
-
 TEST_F(ParserImplTest, VariableDecoration_Builtin_InvalidValue) {
   auto* p = parser("builtin other_thingy");
   auto deco = p->variable_decoration();

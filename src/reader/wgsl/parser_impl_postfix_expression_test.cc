@@ -19,8 +19,6 @@
 #include "src/ast/int_literal.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
-#include "src/ast/unary_derivative_expression.h"
-#include "src/ast/unary_method_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"

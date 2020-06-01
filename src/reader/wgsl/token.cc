@@ -105,10 +105,6 @@ std::string Token::TypeToName(Type type) {
     case Token::Type::kXor:
       return "^";
 
-    case Token::Type::kAll:
-      return "all";
-    case Token::Type::kAny:
-      return "any";
     case Token::Type::kArray:
       return "array";
     case Token::Type::kAs:
@@ -135,16 +131,8 @@ std::string Token::TypeToName(Type type) {
       return "continue";
     case Token::Type::kContinuing:
       return "continuing";
-    case Token::Type::kCoarse:
-      return "coarse";
     case Token::Type::kDefault:
       return "default";
-    case Token::Type::kDot:
-      return "dot";
-    case Token::Type::kDpdx:
-      return "dpdx";
-    case Token::Type::kDpdy:
-      return "dpdy";
     case Token::Type::kElse:
       return "else";
     case Token::Type::kElseIf:
@@ -157,16 +145,12 @@ std::string Token::TypeToName(Type type) {
       return "fallthrough";
     case Token::Type::kFalse:
       return "false";
-    case Token::Type::kFine:
-      return "fine";
     case Token::Type::kFn:
       return "fn";
     case Token::Type::kFragment:
       return "fragment";
     case Token::Type::kFunction:
       return "function";
-    case Token::Type::kFwidth:
-      return "fwidth";
     case Token::Type::kI32:
       return "i32";
     case Token::Type::kIf:
@@ -177,14 +161,6 @@ std::string Token::TypeToName(Type type) {
       return "import";
     case Token::Type::kIn:
       return "in";
-    case Token::Type::kIsNan:
-      return "is_nan";
-    case Token::Type::kIsInf:
-      return "is_inf";
-    case Token::Type::kIsFinite:
-      return "is_finite";
-    case Token::Type::kIsNormal:
-      return "is_normal";
     case Token::Type::kKill:
       return "kill";
     case Token::Type::kLocation:
@@ -213,8 +189,6 @@ std::string Token::TypeToName(Type type) {
       return "offset";
     case Token::Type::kOut:
       return "out";
-    case Token::Type::kOuterProduct:
-      return "outer_product";
     case Token::Type::kPremerge:
       return "premerge";
     case Token::Type::kPrivate:

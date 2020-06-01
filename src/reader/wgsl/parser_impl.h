@@ -24,7 +24,6 @@
 #include "src/ast/assignment_statement.h"
 #include "src/ast/builtin.h"
 #include "src/ast/constructor_expression.h"
-#include "src/ast/derivative_modifier.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/entry_point.h"
 #include "src/ast/function.h"
@@ -246,9 +245,6 @@ class ParserImpl {
   /// Parses a `unary_expression` grammar element
   /// @returns the parsed expression or nullptr
   std::unique_ptr<ast::Expression> unary_expression();
-  /// Parses a `derivative_modifier` grammar element
-  /// @returns the modifier or DerivativeModifier::kNone if none matched
-  ast::DerivativeModifier derivative_modifier();
   /// Parses the recursive part of the `multiplicative_expression`
   /// @param lhs the left side of the expression
   /// @returns the parsed expression or nullptr

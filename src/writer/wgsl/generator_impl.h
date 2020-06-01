@@ -190,14 +190,6 @@ class GeneratorImpl {
   /// @param expr the type constructor expression
   /// @returns true if the constructor is emitted
   bool EmitTypeConstructor(ast::TypeConstructorExpression* expr);
-  /// Handles a unary derivative expression
-  /// @param expr the expression to emit
-  /// @returns true if the expression was emitted
-  bool EmitUnaryDerivative(ast::UnaryDerivativeExpression* expr);
-  /// Handles a unary method expression
-  /// @param expr the expression to emit
-  /// @returns true if the expression was emitted
-  bool EmitUnaryMethod(ast::UnaryMethodExpression* expr);
   /// Handles a unary op expression
   /// @param expr the expression to emit
   /// @returns true if the expression was emitted

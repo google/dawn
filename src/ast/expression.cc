@@ -25,8 +25,6 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/type/alias_type.h"
-#include "src/ast/unary_derivative_expression.h"
-#include "src/ast/unary_method_expression.h"
 #include "src/ast/unary_op_expression.h"
 
 namespace tint {
@@ -78,14 +76,6 @@ bool Expression::IsBinary() const {
   return false;
 }
 
-bool Expression::IsUnaryDerivative() const {
-  return false;
-}
-
-bool Expression::IsUnaryMethod() const {
-  return false;
-}
-
 bool Expression::IsUnaryOp() const {
   return false;
 }
@@ -127,16 +117,6 @@ const IdentifierExpression* Expression::AsIdentifier() const {
 const MemberAccessorExpression* Expression::AsMemberAccessor() const {
   assert(IsMemberAccessor());
   return static_cast<const MemberAccessorExpression*>(this);
-}
-
-const UnaryDerivativeExpression* Expression::AsUnaryDerivative() const {
-  assert(IsUnaryDerivative());
-  return static_cast<const UnaryDerivativeExpression*>(this);
-}
-
-const UnaryMethodExpression* Expression::AsUnaryMethod() const {
-  assert(IsUnaryMethod());
-  return static_cast<const UnaryMethodExpression*>(this);
 }
 
 const UnaryOpExpression* Expression::AsUnaryOp() const {
@@ -182,16 +162,6 @@ IdentifierExpression* Expression::AsIdentifier() {
 MemberAccessorExpression* Expression::AsMemberAccessor() {
   assert(IsMemberAccessor());
   return static_cast<MemberAccessorExpression*>(this);
-}
-
-UnaryDerivativeExpression* Expression::AsUnaryDerivative() {
-  assert(IsUnaryDerivative());
-  return static_cast<UnaryDerivativeExpression*>(this);
-}
-
-UnaryMethodExpression* Expression::AsUnaryMethod() {
-  assert(IsUnaryMethod());
-  return static_cast<UnaryMethodExpression*>(this);
 }
 
 UnaryOpExpression* Expression::AsUnaryOp() {

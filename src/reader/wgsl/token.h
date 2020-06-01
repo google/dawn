@@ -116,10 +116,6 @@ class Token {
     /// A '^'
     kXor,
 
-    /// A 'all'
-    kAll,
-    /// A 'any'
-    kAny,
     /// A 'array'
     kArray,
     /// A 'as'
@@ -146,16 +142,8 @@ class Token {
     kContinue,
     /// A 'continuing'
     kContinuing,
-    /// A 'coarse'
-    kCoarse,
     /// A 'default'
     kDefault,
-    /// A 'dot'
-    kDot,
-    /// A 'dpdx'
-    kDpdx,
-    /// A 'dpdy'
-    kDpdy,
     /// A 'else'
     kElse,
     /// A 'elseif'
@@ -168,16 +156,12 @@ class Token {
     kFallthrough,
     /// A 'false'
     kFalse,
-    /// A 'fine'
-    kFine,
     /// A 'fn'
     kFn,
     /// A 'fragment'
     kFragment,
     /// A 'function'
     kFunction,
-    /// A 'fwidth'
-    kFwidth,
     /// A 'i32'
     kI32,
     /// A 'if'
@@ -188,14 +172,6 @@ class Token {
     kImport,
     /// A 'in'
     kIn,
-    /// A 'is_nan'
-    kIsNan,
-    /// A 'is_inf'
-    kIsInf,
-    /// A 'is_finite'
-    kIsFinite,
-    /// A 'is_normal'
-    kIsNormal,
     /// A 'kill'
     kKill,
     /// A 'location'
@@ -224,8 +200,6 @@ class Token {
     kOffset,
     /// A 'out'
     kOut,
-    /// A 'outer_product'
-    kOuterProduct,
     /// A 'premerge'
     kPremerge,
     /// A 'private'
@@ -401,10 +375,6 @@ class Token {
   /// @returns true if token is a '^'
   bool IsXor() const { return type_ == Type::kXor; }
 
-  /// @returns true if token is a 'all'
-  bool IsAll() const { return type_ == Type::kAll; }
-  /// @returns true if token is a 'any'
-  bool IsAny() const { return type_ == Type::kAny; }
   /// @returns true if token is a 'array'
   bool IsArray() const { return type_ == Type::kArray; }
   /// @returns true if token is a 'as'
@@ -423,8 +393,6 @@ class Token {
   bool IsCase() const { return type_ == Type::kCase; }
   /// @returns true if token is a 'cast'
   bool IsCast() const { return type_ == Type::kCast; }
-  /// @returns true if token is 'coarse'
-  bool IsCoarse() const { return type_ == Type::kCoarse; }
   /// @returns true if token is a 'compute'
   bool IsCompute() const { return type_ == Type::kCompute; }
   /// @returns true if token is a 'const'
@@ -435,12 +403,6 @@ class Token {
   bool IsContinuing() const { return type_ == Type::kContinuing; }
   /// @returns true if token is a 'default'
   bool IsDefault() const { return type_ == Type::kDefault; }
-  /// @returns true if token is a 'dot'
-  bool IsDot() const { return type_ == Type::kDot; }
-  /// @returns true if token is a 'dpdx'
-  bool IsDpdx() const { return type_ == Type::kDpdx; }
-  /// @returns true if token is a 'dpdy'
-  bool IsDpdy() const { return type_ == Type::kDpdy; }
   /// @returns true if token is a 'else'
   bool IsElse() const { return type_ == Type::kElse; }
   /// @returns true if token is a 'elseif'
@@ -453,16 +415,12 @@ class Token {
   bool IsFallthrough() const { return type_ == Type::kFallthrough; }
   /// @returns true if token is a 'false'
   bool IsFalse() const { return type_ == Type::kFalse; }
-  /// @returns true if token is a 'fine'
-  bool IsFine() const { return type_ == Type::kFine; }
   /// @returns true if token is a 'fn'
   bool IsFn() const { return type_ == Type::kFn; }
   /// @returns true if token is a 'fragment'
   bool IsFragment() const { return type_ == Type::kFragment; }
   /// @returns true if token is a 'function'
   bool IsFunction() const { return type_ == Type::kFunction; }
-  /// @returns true if token is a 'fwidth'
-  bool IsFwidth() const { return type_ == Type::kFwidth; }
   /// @returns true if token is a 'i32'
   bool IsI32() const { return type_ == Type::kI32; }
   /// @returns true if token is a 'if'
@@ -473,14 +431,6 @@ class Token {
   bool IsImport() const { return type_ == Type::kImport; }
   /// @returns true if token is a 'in'
   bool IsIn() const { return type_ == Type::kIn; }
-  /// @returns true if token is a 'is_nan'
-  bool IsIsNan() const { return type_ == Type::kIsNan; }
-  /// @returns true if token is a 'is_inf'
-  bool IsIsInf() const { return type_ == Type::kIsInf; }
-  /// @returns true if token is a 'is_finite'
-  bool IsIsFinite() const { return type_ == Type::kIsFinite; }
-  /// @returns true if token is a 'is_normal'
-  bool IsIsNormal() const { return type_ == Type::kIsNormal; }
   /// @returns true if token is a 'kill'
   bool IsKill() const { return type_ == Type::kKill; }
   /// @returns true if token is a 'location'
@@ -509,8 +459,6 @@ class Token {
   bool IsOffset() const { return type_ == Type::kOffset; }
   /// @returns true if token is a 'out'
   bool IsOut() const { return type_ == Type::kOut; }
-  /// @returns true if token is a 'outer_product'
-  bool IsOuterProduct() const { return type_ == Type::kOuterProduct; }
   /// @returns true if token is a 'private'
   bool IsPrivate() const { return type_ == Type::kPrivate; }
   /// @returns true if token is a 'ptr'
