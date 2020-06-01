@@ -15,7 +15,7 @@
 #ifndef COMMON_WINDOWS_WITH_UNDEFS_H_
 #define COMMON_WINDOWS_WITH_UNDEFS_H_
 
-#include "common/Compiler.h"
+#include "common/Platform.h"
 
 #if !defined(DAWN_PLATFORM_WINDOWS)
 #    error "windows_with_undefs.h included on non-Windows"

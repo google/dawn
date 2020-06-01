@@ -488,17 +488,17 @@ namespace dawn_native { namespace d3d12 {
         uint64_t errorsToPrint = std::min(kMaxDebugMessagesToPrint, totalErrors);
         for (uint64_t i = 0; i < errorsToPrint; ++i) {
             SIZE_T messageLength = 0;
-            HRESULT hr = infoQueue->GetMessageW(i, nullptr, &messageLength);
+            HRESULT hr = infoQueue->GetMessage(i, nullptr, &messageLength);
             if (FAILED(hr)) {
-                messages << " ID3D12InfoQueue::GetMessageW failed with " << hr << '\n';
+                messages << " ID3D12InfoQueue::GetMessagefailed with " << hr << '\n';
                 continue;
             }
 
             std::unique_ptr<uint8_t[]> messageData(new uint8_t[messageLength]);
             D3D12_MESSAGE* message = reinterpret_cast<D3D12_MESSAGE*>(messageData.get());
-            hr = infoQueue->GetMessageW(i, message, &messageLength);
+            hr = infoQueue->GetMessage(i, message, &messageLength);
             if (FAILED(hr)) {
-                messages << " ID3D12InfoQueue::GetMessageW failed with " << hr << '\n';
+                messages << " ID3D12InfoQueue::GetMessage failed with " << hr << '\n';
                 continue;
             }
 
