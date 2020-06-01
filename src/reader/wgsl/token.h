@@ -172,20 +172,12 @@ class Token {
     kFine,
     /// A 'fn'
     kFn,
-    /// A 'frag_coord'
-    kFragCoord,
-    // A 'frag_depth'
-    kFragDepth,
     /// A 'fragment'
     kFragment,
-    /// A 'front_facing'
-    kFrontFacing,
     /// A 'function'
     kFunction,
     /// A 'fwidth'
     kFwidth,
-    /// A 'global_invocation_id'
-    kGlobalInvocationId,
     /// A 'i32'
     kI32,
     /// A 'if'
@@ -196,8 +188,6 @@ class Token {
     kImport,
     /// A 'in'
     kIn,
-    /// A 'instance_idx'
-    kInstanceIdx,
     /// A 'is_nan'
     kIsNan,
     /// A 'is_inf'
@@ -208,10 +198,6 @@ class Token {
     kIsNormal,
     /// A 'kill'
     kKill,
-    /// A 'local_invocation_id'
-    kLocalInvocationId,
-    /// A 'local_invocation_idx'
-    kLocalInvocationIdx,
     /// A 'location'
     kLocation,
     /// A 'loop'
@@ -234,16 +220,12 @@ class Token {
     kMat4x3,
     /// A 'mat4x4'
     kMat4x4,
-    /// A 'num_workgroups'
-    kNumWorkgroups,
     /// A 'offset'
     kOffset,
     /// A 'out'
     kOut,
     /// A 'outer_product'
     kOuterProduct,
-    /// A 'position'
-    kPosition,
     /// A 'premerge'
     kPremerge,
     /// A 'private'
@@ -284,14 +266,10 @@ class Token {
     kVec4,
     /// A 'vertex'
     kVertex,
-    /// A 'vertex_idx'
-    kVertexIdx,
     /// A 'void'
     kVoid,
     /// A 'workgroup'
-    kWorkgroup,
-    /// A 'workgroup_size'
-    kWorkgroupSize
+    kWorkgroup
   };
 
   /// Converts a token type to a name
@@ -479,22 +457,12 @@ class Token {
   bool IsFine() const { return type_ == Type::kFine; }
   /// @returns true if token is a 'fn'
   bool IsFn() const { return type_ == Type::kFn; }
-  /// @returns true if token is a 'frag_coord'
-  bool IsFragCoord() const { return type_ == Type::kFragCoord; }
-  /// @returns true if token is a 'frag_depth'
-  bool IsFragDepth() const { return type_ == Type::kFragDepth; }
   /// @returns true if token is a 'fragment'
   bool IsFragment() const { return type_ == Type::kFragment; }
-  /// @returns true if token is a 'front_facing'
-  bool IsFrontFacing() const { return type_ == Type::kFrontFacing; }
   /// @returns true if token is a 'function'
   bool IsFunction() const { return type_ == Type::kFunction; }
   /// @returns true if token is a 'fwidth'
   bool IsFwidth() const { return type_ == Type::kFwidth; }
-  /// @returns true if token is a 'global_invocation_id'
-  bool IsGlobalInvocationId() const {
-    return type_ == Type::kGlobalInvocationId;
-  }
   /// @returns true if token is a 'i32'
   bool IsI32() const { return type_ == Type::kI32; }
   /// @returns true if token is a 'if'
@@ -505,8 +473,6 @@ class Token {
   bool IsImport() const { return type_ == Type::kImport; }
   /// @returns true if token is a 'in'
   bool IsIn() const { return type_ == Type::kIn; }
-  /// @returns true if token is a 'instance_idx'
-  bool IsInstanceIdx() const { return type_ == Type::kInstanceIdx; }
   /// @returns true if token is a 'is_nan'
   bool IsIsNan() const { return type_ == Type::kIsNan; }
   /// @returns true if token is a 'is_inf'
@@ -517,12 +483,6 @@ class Token {
   bool IsIsNormal() const { return type_ == Type::kIsNormal; }
   /// @returns true if token is a 'kill'
   bool IsKill() const { return type_ == Type::kKill; }
-  /// @returns true if token is a 'local_invocation_id'
-  bool IsLocalInvocationId() const { return type_ == Type::kLocalInvocationId; }
-  /// @returns true if token is a 'local_invocation_idx'
-  bool IsLocalInvocationIdx() const {
-    return type_ == Type::kLocalInvocationIdx;
-  }
   /// @returns true if token is a 'location'
   bool IsLocation() const { return type_ == Type::kLocation; }
   /// @returns true if token is a 'loop'
@@ -545,16 +505,12 @@ class Token {
   bool IsMat4x3() const { return type_ == Type::kMat4x3; }
   /// @returns true if token is a 'mat4x4'
   bool IsMat4x4() const { return type_ == Type::kMat4x4; }
-  /// @returns true if token is a 'num_workgroups'
-  bool IsNumWorkgroups() const { return type_ == Type::kNumWorkgroups; }
   /// @returns true if token is a 'offset'
   bool IsOffset() const { return type_ == Type::kOffset; }
   /// @returns true if token is a 'out'
   bool IsOut() const { return type_ == Type::kOut; }
   /// @returns true if token is a 'outer_product'
   bool IsOuterProduct() const { return type_ == Type::kOuterProduct; }
-  /// @returns true if token is a 'position'
-  bool IsPosition() const { return type_ == Type::kPosition; }
   /// @returns true if token is a 'private'
   bool IsPrivate() const { return type_ == Type::kPrivate; }
   /// @returns true if token is a 'ptr'
@@ -591,14 +547,10 @@ class Token {
   bool IsVec4() const { return type_ == Type::kVec4; }
   /// @returns true if token is a 'vertex'
   bool IsVertex() const { return type_ == Type::kVertex; }
-  /// @returns true if token is a 'vertex_idx'
-  bool IsVertexIdx() const { return type_ == Type::kVertexIdx; }
   /// @returns true if token is a 'void'
   bool IsVoid() const { return type_ == Type::kVoid; }
   /// @returns true if token is a 'workgroup'
   bool IsWorkgroup() const { return type_ == Type::kWorkgroup; }
-  /// @returns true if token is a 'workgroup_size'
-  bool IsWorkgroupSize() const { return type_ == Type::kWorkgroupSize; }
 
   /// @returns the source line of the token
   size_t line() const { return source_.line; }

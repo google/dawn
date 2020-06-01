@@ -26,7 +26,7 @@ namespace {
 TEST_F(ParserImplTest, VariableDecorationList_Parses) {
   auto* p = parser(R"([[location 4, builtin position]])");
   auto decos = p->variable_decoration_list();
-  ASSERT_FALSE(p->has_error());
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(decos.size(), 2u);
   ASSERT_TRUE(decos[0]->IsLocation());
   EXPECT_EQ(decos[0]->AsLocation()->value(), 4u);

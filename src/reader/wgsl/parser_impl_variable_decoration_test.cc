@@ -52,23 +52,77 @@ TEST_F(ParserImplTest, VariableDecoration_Location_MissingInvalid) {
   EXPECT_EQ(p->error(), "1:10: invalid value for location decoration");
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Builtin) {
-  auto* p = parser("builtin frag_depth");
+struct BuiltinData {
+  const char* input;
+  ast::Builtin result;
+};
+inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
+  out << std::string(data.input);
+  return out;
+}
+class BuiltinTest : public testing::TestWithParam<BuiltinData> {
+ public:
+  BuiltinTest() = default;
+  ~BuiltinTest() override = default;
+
+  void SetUp() override { ctx_.Reset(); }
+
+  void TearDown() override { impl_ = nullptr; }
+
+  ParserImpl* parser(const std::string& str) {
+    impl_ = std::make_unique<ParserImpl>(&ctx_, str);
+    return impl_.get();
+  }
+
+ private:
+  std::unique_ptr<ParserImpl> impl_;
+  Context ctx_;
+};
+
+TEST_P(BuiltinTest, VariableDecoration_Builtin) {
+  auto params = GetParam();
+  auto* p = parser(std::string("builtin ") + params.input);
+
   auto deco = p->variable_decoration();
-  ASSERT_FALSE(p->has_error());
+  ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(deco, nullptr);
   ASSERT_TRUE(deco->IsBuiltin());
 
   auto* builtin = deco->AsBuiltin();
-  EXPECT_EQ(builtin->value(), ast::Builtin::kFragDepth);
+  EXPECT_EQ(builtin->value(), params.result);
 }
+INSTANTIATE_TEST_SUITE_P(
+    ParserImplTest,
+    BuiltinTest,
+    testing::Values(
+        BuiltinData{"position", ast::Builtin::kPosition},
+        BuiltinData{"vertex_idx", ast::Builtin::kVertexIdx},
+        BuiltinData{"instance_idx", ast::Builtin::kInstanceIdx},
+        BuiltinData{"front_facing", ast::Builtin::kFrontFacing},
+        BuiltinData{"frag_coord", ast::Builtin::kFragCoord},
+        BuiltinData{"frag_depth", ast::Builtin::kFragDepth},
+        BuiltinData{"num_workgroups", ast::Builtin::kNumWorkgroups},
+        BuiltinData{"workgroup_size", ast::Builtin::kWorkgroupSize},
+        BuiltinData{"local_invocation_id", ast::Builtin::kLocalInvocationId},
+        BuiltinData{"local_invocation_idx", ast::Builtin::kLocalInvocationIdx},
+        BuiltinData{"global_invocation_id",
+                    ast::Builtin::kGlobalInvocationId}));
 
 TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingValue) {
   auto* p = parser("builtin");
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:8: invalid value for builtin decoration");
+  EXPECT_EQ(p->error(), "1:8: expected identifier for builtin");
+}
+
+
+TEST_F(ParserImplTest, VariableDecoration_Builtin_InvalidValue) {
+  auto* p = parser("builtin other_thingy");
+  auto deco = p->variable_decoration();
+  ASSERT_EQ(deco, nullptr);
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:9: invalid value for builtin decoration");
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingInvalid) {
@@ -76,7 +130,7 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingInvalid) {
   auto deco = p->variable_decoration();
   ASSERT_EQ(deco, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:9: invalid value for builtin decoration");
+  EXPECT_EQ(p->error(), "1:9: expected identifier for builtin");
 }
 
 TEST_F(ParserImplTest, VariableDecoration_Binding) {

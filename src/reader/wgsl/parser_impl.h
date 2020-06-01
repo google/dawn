@@ -117,9 +117,6 @@ class ParserImpl {
   /// Parses a `variable_decoration` grammar element
   /// @returns the variable decoration or nullptr if an error is encountered
   std::unique_ptr<ast::VariableDecoration> variable_decoration();
-  /// Parses a `builtin_decoration` grammar element
-  /// @returns the builtin or Builtin::kNone if none matched
-  ast::Builtin builtin_decoration();
   /// Parses a `variable_decl` grammar element
   /// @returns the parsed variable or nullptr otherwise
   std::unique_ptr<ast::Variable> variable_decl();

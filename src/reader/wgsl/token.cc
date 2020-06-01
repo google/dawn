@@ -161,20 +161,12 @@ std::string Token::TypeToName(Type type) {
       return "fine";
     case Token::Type::kFn:
       return "fn";
-    case Token::Type::kFragCoord:
-      return "frag_coord";
-    case Token::Type::kFragDepth:
-      return "frag_depth";
     case Token::Type::kFragment:
       return "fragment";
-    case Token::Type::kFrontFacing:
-      return "front_facing";
     case Token::Type::kFunction:
       return "function";
     case Token::Type::kFwidth:
       return "fwidth";
-    case Token::Type::kGlobalInvocationId:
-      return "global_invocation_id";
     case Token::Type::kI32:
       return "i32";
     case Token::Type::kIf:
@@ -185,8 +177,6 @@ std::string Token::TypeToName(Type type) {
       return "import";
     case Token::Type::kIn:
       return "in";
-    case Token::Type::kInstanceIdx:
-      return "instance_idx";
     case Token::Type::kIsNan:
       return "is_nan";
     case Token::Type::kIsInf:
@@ -197,10 +187,6 @@ std::string Token::TypeToName(Type type) {
       return "is_normal";
     case Token::Type::kKill:
       return "kill";
-    case Token::Type::kLocalInvocationId:
-      return "local_invocation_id";
-    case Token::Type::kLocalInvocationIdx:
-      return "local_invocation_idx";
     case Token::Type::kLocation:
       return "location";
     case Token::Type::kLoop:
@@ -223,16 +209,12 @@ std::string Token::TypeToName(Type type) {
       return "mat4x3";
     case Token::Type::kMat4x4:
       return "mat4x4";
-    case Token::Type::kNumWorkgroups:
-      return "num_workgroups";
     case Token::Type::kOffset:
       return "offset";
     case Token::Type::kOut:
       return "out";
     case Token::Type::kOuterProduct:
       return "outer_product";
-    case Token::Type::kPosition:
-      return "position";
     case Token::Type::kPremerge:
       return "premerge";
     case Token::Type::kPrivate:
@@ -273,14 +255,10 @@ std::string Token::TypeToName(Type type) {
       return "vec4";
     case Token::Type::kVertex:
       return "vertex";
-    case Token::Type::kVertexIdx:
-      return "vertex_idx";
     case Token::Type::kVoid:
       return "void";
     case Token::Type::kWorkgroup:
       return "workgroup";
-    case Token::Type::kWorkgroupSize:
-      return "workgroup_size";
   }
 
   return "<unknown>";

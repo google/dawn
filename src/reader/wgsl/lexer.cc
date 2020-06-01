@@ -524,20 +524,12 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kFine, source, "fine"};
   if (str == "fn")
     return {Token::Type::kFn, source, "fn"};
-  if (str == "frag_coord")
-    return {Token::Type::kFragCoord, source, "frag_coord"};
-  if (str == "frag_depth")
-    return {Token::Type::kFragDepth, source, "frag_depth"};
   if (str == "fragment")
     return {Token::Type::kFragment, source, "fragment"};
-  if (str == "front_facing")
-    return {Token::Type::kFrontFacing, source, "front_facing"};
   if (str == "function")
     return {Token::Type::kFunction, source, "function"};
   if (str == "fwidth")
     return {Token::Type::kFwidth, source, "fwidth"};
-  if (str == "global_invocation_id")
-    return {Token::Type::kGlobalInvocationId, source, "global_invocation_id"};
   if (str == "i32")
     return {Token::Type::kI32, source, "i32"};
   if (str == "if")
@@ -548,8 +540,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kImport, source, "import"};
   if (str == "in")
     return {Token::Type::kIn, source, "in"};
-  if (str == "instance_idx")
-    return {Token::Type::kInstanceIdx, source, "instance_idx"};
   if (str == "is_nan")
     return {Token::Type::kIsNan, source, "is_nan"};
   if (str == "is_inf")
@@ -560,10 +550,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kIsNormal, source, "is_normal"};
   if (str == "kill")
     return {Token::Type::kKill, source, "kill"};
-  if (str == "local_invocation_id")
-    return {Token::Type::kLocalInvocationId, source, "local_invocation_id"};
-  if (str == "local_invocation_idx")
-    return {Token::Type::kLocalInvocationIdx, source, "local_invocation_idx"};
   if (str == "location")
     return {Token::Type::kLocation, source, "location"};
   if (str == "loop")
@@ -586,16 +572,12 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kMat4x3, source, "mat4x3"};
   if (str == "mat4x4")
     return {Token::Type::kMat4x4, source, "mat4x4"};
-  if (str == "num_workgroups")
-    return {Token::Type::kNumWorkgroups, source, "num_workgroups"};
   if (str == "offset")
     return {Token::Type::kOffset, source, "offset"};
   if (str == "out")
     return {Token::Type::kOut, source, "out"};
   if (str == "outer_product")
     return {Token::Type::kOuterProduct, source, "outer_product"};
-  if (str == "position")
-    return {Token::Type::kPosition, source, "position"};
   if (str == "private")
     return {Token::Type::kPrivate, source, "private"};
   if (str == "ptr")
@@ -632,14 +614,10 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kVec4, source, "vec4"};
   if (str == "vertex")
     return {Token::Type::kVertex, source, "vertex"};
-  if (str == "vertex_idx")
-    return {Token::Type::kVertexIdx, source, "vertex_idx"};
   if (str == "void")
     return {Token::Type::kVoid, source, "void"};
   if (str == "workgroup")
     return {Token::Type::kWorkgroup, source, "workgroup"};
-  if (str == "workgroup_size")
-    return {Token::Type::kWorkgroupSize, source, "workgroup_size"};
 
   return {};
 }

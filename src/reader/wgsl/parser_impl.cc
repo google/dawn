@@ -70,6 +70,46 @@
 namespace tint {
 namespace reader {
 namespace wgsl {
+namespace {
+
+ast::Builtin ident_to_builtin(const std::string& str) {
+  if (str == "position") {
+    return ast::Builtin::kPosition;
+  }
+  if (str == "vertex_idx") {
+    return ast::Builtin::kVertexIdx;
+  }
+  if (str == "instance_idx") {
+    return ast::Builtin::kInstanceIdx;
+  }
+  if (str == "front_facing") {
+    return ast::Builtin::kFrontFacing;
+  }
+  if (str == "frag_coord") {
+    return ast::Builtin::kFragCoord;
+  }
+  if (str == "frag_depth") {
+    return ast::Builtin::kFragDepth;
+  }
+  if (str == "num_workgroups") {
+    return ast::Builtin::kNumWorkgroups;
+  }
+  if (str == "workgroup_size") {
+    return ast::Builtin::kWorkgroupSize;
+  }
+  if (str == "local_invocation_id") {
+    return ast::Builtin::kLocalInvocationId;
+  }
+  if (str == "local_invocation_idx") {
+    return ast::Builtin::kLocalInvocationIdx;
+  }
+  if (str == "global_invocation_id") {
+    return ast::Builtin::kGlobalInvocationId;
+  }
+  return ast::Builtin::kNone;
+}
+
+}  // namespace
 
 ParserImpl::ParserImpl(Context* ctx, const std::string& input)
     : ctx_(*ctx), lexer_(std::make_unique<Lexer>(input)) {}
@@ -395,7 +435,7 @@ std::unique_ptr<ast::Variable> ParserImpl::global_constant_decl() {
 }
 
 // variable_decoration_list
-//  : ATTR_LEFT variable_decoration (COMMA variable_decoration)* ATTR_RIGHT
+//  : ATTR_LEFT (variable_decoration COMMA)* variable_decoration ATTR_RIGHT
 ast::VariableDecorationList ParserImpl::variable_decoration_list() {
   ast::VariableDecorationList decos;
 
@@ -452,7 +492,7 @@ ast::VariableDecorationList ParserImpl::variable_decoration_list() {
 
 // variable_decoration
 //  : LOCATION INT_LITERAL
-//  | BUILTIN builtin_decoration
+//  | BUILTIN IDENT
 //  | BINDING INT_LITERAL
 //  | SET INT_LITERAL
 std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
@@ -471,11 +511,15 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
   if (t.IsBuiltin()) {
     next();  // consume the peek
 
-    ast::Builtin builtin = builtin_decoration();
-    if (has_error())
+    t = next();
+    if (!t.IsIdentifier() || t.to_str().empty()) {
+      set_error(t, "expected identifier for builtin");
       return {};
+    }
+
+    ast::Builtin builtin = ident_to_builtin(t.to_str());
     if (builtin == ast::Builtin::kNone) {
-      set_error(peek(), "invalid value for builtin decoration");
+      set_error(t, "invalid value for builtin decoration");
       return {};
     }
 
@@ -505,67 +549,6 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
   }
 
   return nullptr;
-}
-
-// builtin_decoration
-//  : POSITION
-//  | VERTEX_IDX
-//  | INSTANCE_IDX
-//  | FRONT_FACING
-//  | FRAG_COORD
-//  | FRAG_DEPTH
-//  | NUM_WORKGROUPS
-//  | WORKGROUP_SIZE
-//  | LOCAL_INVOC_ID
-//  | LOCAL_INVOC_IDX
-//  | GLOBAL_INVOC_ID
-ast::Builtin ParserImpl::builtin_decoration() {
-  auto t = peek();
-  if (t.IsPosition()) {
-    next();  // consume the peek
-    return ast::Builtin::kPosition;
-  }
-  if (t.IsVertexIdx()) {
-    next();  // consume the peek
-    return ast::Builtin::kVertexIdx;
-  }
-  if (t.IsInstanceIdx()) {
-    next();  // consume the peek
-    return ast::Builtin::kInstanceIdx;
-  }
-  if (t.IsFrontFacing()) {
-    next();  // consume the peek
-    return ast::Builtin::kFrontFacing;
-  }
-  if (t.IsFragCoord()) {
-    next();  // consume the peek
-    return ast::Builtin::kFragCoord;
-  }
-  if (t.IsFragDepth()) {
-    next();  // consume the peek
-    return ast::Builtin::kFragDepth;
-  }
-  if (t.IsNumWorkgroups()) {
-    next();  // consume the peek
-    return ast::Builtin::kNumWorkgroups;
-  }
-  if (t.IsWorkgroupSize()) {
-    next();  // consume the peek
-    return ast::Builtin::kWorkgroupSize;
-  }
-  if (t.IsLocalInvocationId()) {
-    next();  // consume the peek
-    return ast::Builtin::kLocalInvocationId;
-  }
-  if (t.IsLocalInvocationIdx()) {
-    next();  // consume the peek
-    return ast::Builtin::kLocalInvocationIdx;
-  }
-  if (t.IsGlobalInvocationId()) {
-    next();  // consume the peek
-    return ast::Builtin::kGlobalInvocationId;
-  }
-  return ast::Builtin::kNone;
 }
 
 // variable_decl

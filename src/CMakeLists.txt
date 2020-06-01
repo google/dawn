@@ -363,7 +363,6 @@ if(${TINT_BUILD_WGSL_READER})
     reader/wgsl/parser_impl_assignment_stmt_test.cc
     reader/wgsl/parser_impl_body_stmt_test.cc
     reader/wgsl/parser_impl_break_stmt_test.cc
-    reader/wgsl/parser_impl_builtin_decoration_test.cc
     reader/wgsl/parser_impl_case_body_test.cc
     reader/wgsl/parser_impl_const_expr_test.cc
     reader/wgsl/parser_impl_const_literal_test.cc
