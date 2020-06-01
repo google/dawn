@@ -367,9 +367,21 @@ FunctionEmitter::FunctionEmitter(ParserImpl* pi,
       type_mgr_(ir_context_.get_type_mgr()),
       fail_stream_(pi->fail_stream()),
       namer_(pi->namer()),
-      function_(function) {}
+      function_(function) {
+  statements_stack_.emplace_back(ast::StatementList{});
+}
 
 FunctionEmitter::~FunctionEmitter() = default;
+
+const ast::StatementList& FunctionEmitter::ast_body() {
+  assert(!statements_stack_.empty());
+  return statements_stack_[0];
+}
+
+void FunctionEmitter::AddStatement(std::unique_ptr<ast::Statement> statement) {
+  assert(!statements_stack_.empty());
+  statements_stack_.back().emplace_back(std::move(statement));
+}
 
 bool FunctionEmitter::Emit() {
   if (failed()) {
@@ -389,7 +401,15 @@ bool FunctionEmitter::Emit() {
   }
 
   // Set the body of the AST function node.
-  parser_impl_.get_module().functions().back()->set_body(std::move(ast_body_));
+  if (statements_stack_.size() != 1) {
+    return Fail() << "internal error: statement-list stack should have 1 "
+                     "element but has "
+                  << statements_stack_.size();
+  }
+  ast::StatementList body(std::move(statements_stack_[0]));
+  parser_impl_.get_module().functions().back()->set_body(std::move(body));
+  // Maintain the invariant by repopulating the one and only element.
+  statements_stack_[0] = ast::StatementList{};
 
   return success();
 }
@@ -1363,7 +1383,7 @@ bool FunctionEmitter::EmitFunctionVariables() {
     // TODO(dneto): Add the initializer via Variable::set_constructor.
     auto var_decl_stmt =
         std::make_unique<ast::VariableDeclStatement>(std::move(var));
-    ast_body_.emplace_back(std::move(var_decl_stmt));
+    AddStatement(std::move(var_decl_stmt));
     // Save this as an already-named value.
     identifier_values_.insert(inst.result_id());
   }
@@ -1445,7 +1465,7 @@ bool FunctionEmitter::EmitConstDefinition(
   }
   ast_const->set_constructor(std::move(ast_expr.expr));
   ast_const->set_is_const(true);
-  ast_body_.emplace_back(
+  AddStatement(
       std::make_unique<ast::VariableDeclStatement>(std::move(ast_const)));
   // Save this as an already-named value.
   identifier_values_.insert(inst.result_id());
@@ -1476,7 +1496,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       // TODO(dneto): Order of evaluation?
       auto lhs = MakeExpression(inst.GetSingleWordInOperand(0));
       auto rhs = MakeExpression(inst.GetSingleWordInOperand(1));
-      ast_body_.emplace_back(std::make_unique<ast::AssignmentStatement>(
+      AddStatement(std::make_unique<ast::AssignmentStatement>(
           std::move(lhs.expr), std::move(rhs.expr)));
       return success();
     }

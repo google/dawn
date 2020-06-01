@@ -172,8 +172,10 @@ class FunctionEmitter {
   /// @returns true if emission has failed.
   bool failed() const { return !success(); }
 
+  /// Returns the body of the function.  It is the bottom of the statement
+  /// stack.
   /// @returns the body of the function.
-  const ast::StatementList& ast_body() { return ast_body_; }
+  const ast::StatementList& ast_body();
 
   /// Records failure.
   /// @returns a FailStream on which to emit diagnostics.
@@ -188,7 +190,8 @@ class FunctionEmitter {
   /// @returns true if emission has not yet failed.
   bool EmitFunctionDeclaration();
 
-  /// Emits the function body, populating |ast_body_|
+  /// Emits the function body, populating the bottom entry of the statements
+  /// stack.
   /// @returns false if emission failed.
   bool EmitBody();
 
@@ -343,6 +346,9 @@ class FunctionEmitter {
   /// or nullptr
   BlockInfo* HeaderIfBreakable(const Construct* c);
 
+  /// Appends a new statement to the top of the statement stack.
+  void AddStatement(std::unique_ptr<ast::Statement> statement);
+
   ParserImpl& parser_impl_;
   ast::Module& ast_module_;
   spvtools::opt::IRContext& ir_context_;
@@ -352,7 +358,12 @@ class FunctionEmitter {
   FailStream& fail_stream_;
   Namer& namer_;
   const spvtools::opt::Function& function_;
-  ast::StatementList ast_body_;
+
+  // A stack of statement lists. Each list is contained in a construct in
+  // the next deeper element of stack. The 0th entry represents the statements
+  // for the entire function.  This stack is never empty.
+  std::vector<ast::StatementList> statements_stack_;
+
   // The set of IDs that have already had an identifier name generated for it.
   std::unordered_set<uint32_t> identifier_values_;
   // Mapping from SPIR-V ID that is used at most once, to its AST expression.
