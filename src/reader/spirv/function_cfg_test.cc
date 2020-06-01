@@ -6702,6 +6702,33 @@ TEST_F(SpvParserTest, DISABLED_Codegen_IfBreak_FromElse_ForwardWithinElse) {
 )";
 }
 
+TEST_F(SpvParserTest, DISABLED_BlockIsContinueForMoreThanOneHeader) {
+  // This is valid SPIR-V for Vulkan, but breaks my assumption that a block
+  // could only be a continue target for at most one header.  Block 50
+  // is a single block loop but also the continue target for the outer loop.
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel ; outer loop
+     OpLoopMerge %99 %50 None
+     OpBranchConditional %cond %50 %99
+
+     %50 = OpLabel ; continue target, but also single-block loop
+     OpLoopMerge %80 %50 None
+     OpBranchConditional %cond2 %50 %80
+
+     %80 = OpLabel
+     OpBranch %20 ; backedge for outer loop
+
+     %99 = OpLabel
+     OpReturn
+     OpFunctionEnd
+)";
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader
