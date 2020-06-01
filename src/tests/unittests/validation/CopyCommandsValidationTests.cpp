@@ -1157,6 +1157,45 @@ TEST_F(CopyCommandTest_T2T, 2DTextureDepthStencil) {
                 {15, 15, 1});
 }
 
+TEST_F(CopyCommandTest_T2T, 2DTextureArrayDepthStencil) {
+    {
+        wgpu::Texture source = Create2DTexture(16, 16, 1, 3, wgpu::TextureFormat::Depth24PlusStencil8,
+                                           wgpu::TextureUsage::CopySrc);
+        wgpu::Texture destination = Create2DTexture(
+            16, 16, 1, 1, wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureUsage::CopyDst);
+
+        // Success when entire depth stencil subresource (layer) is the copy source
+        TestT2TCopy(utils::Expectation::Success, source, 0, 1, {0, 0, 0}, destination, 0, 0, {0, 0, 0},
+                    {16, 16, 1});
+    }
+
+    {
+        wgpu::Texture source = Create2DTexture(16, 16, 1, 1, wgpu::TextureFormat::Depth24PlusStencil8,
+                                           wgpu::TextureUsage::CopySrc);
+        wgpu::Texture destination = Create2DTexture(
+            16, 16, 1, 3, wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureUsage::CopyDst);
+
+        // Success when entire depth stencil subresource (layer) is the copy destination
+        TestT2TCopy(utils::Expectation::Success, source, 0, 0, {0, 0, 0}, destination, 0, 1, {0, 0, 0},
+                    {16, 16, 1});
+    }
+
+    {
+        wgpu::Texture source = Create2DTexture(16, 16, 1, 3, wgpu::TextureFormat::Depth24PlusStencil8,
+                                           wgpu::TextureUsage::CopySrc);
+        wgpu::Texture destination = Create2DTexture(
+            16, 16, 1, 3, wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureUsage::CopyDst);
+
+        // Success when src and dst are an entire depth stencil subresource (layer)
+        TestT2TCopy(utils::Expectation::Success, source, 0, 2, {0, 0, 0}, destination, 0, 1, {0, 0, 0},
+                    {16, 16, 1});
+
+        // Success when src and dst are an array of entire depth stencil subresources
+        TestT2TCopy(utils::Expectation::Success, source, 0, 1, {0, 0, 0}, destination, 0, 0, {0, 0, 0},
+                    {16, 16, 2});
+    }
+}
+
 TEST_F(CopyCommandTest_T2T, FormatsMismatch) {
     wgpu::Texture source =
         Create2DTexture(16, 16, 5, 2, wgpu::TextureFormat::RGBA8Uint, wgpu::TextureUsage::CopySrc);

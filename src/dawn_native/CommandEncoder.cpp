@@ -145,9 +145,10 @@ namespace dawn_native {
                                                    const Extent3D& copySize) {
             Extent3D srcSize = src.texture->GetSize();
 
+            ASSERT(src.texture->GetDimension() == wgpu::TextureDimension::e2D &&
+                   dst.texture->GetDimension() == wgpu::TextureDimension::e2D);
             if (dst.origin.x != 0 || dst.origin.y != 0 || dst.origin.z != 0 ||
-                srcSize.width != copySize.width || srcSize.height != copySize.height ||
-                srcSize.depth != copySize.depth) {
+                srcSize.width != copySize.width || srcSize.height != copySize.height) {
                 return DAWN_VALIDATION_ERROR(
                     "The entire subresource must be copied when using a depth/stencil texture or "
                     "when samples are greater than 1.");
