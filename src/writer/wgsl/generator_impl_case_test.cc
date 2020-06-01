@@ -31,18 +31,40 @@ using GeneratorImplTest = testing::Test;
 
 TEST_F(GeneratorImplTest, Emit_Case) {
   ast::type::I32Type i32;
-  auto cond = std::make_unique<ast::IntLiteral>(&i32, 5);
 
   ast::StatementList body;
   body.push_back(std::make_unique<ast::BreakStatement>());
 
-  ast::CaseStatement c(std::move(cond), std::move(body));
+  ast::CaseSelectorList lit;
+  lit.push_back(std::make_unique<ast::IntLiteral>(&i32, 5));
+  ast::CaseStatement c(std::move(lit), std::move(body));
 
   GeneratorImpl g;
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitCase(&c)) << g.error();
   EXPECT_EQ(g.result(), R"(  case 5: {
+    break;
+  }
+)");
+}
+
+TEST_F(GeneratorImplTest, Emit_Case_MultipleSelectors) {
+  ast::type::I32Type i32;
+
+  ast::StatementList body;
+  body.push_back(std::make_unique<ast::BreakStatement>());
+
+  ast::CaseSelectorList lit;
+  lit.push_back(std::make_unique<ast::IntLiteral>(&i32, 5));
+  lit.push_back(std::make_unique<ast::IntLiteral>(&i32, 6));
+  ast::CaseStatement c(std::move(lit), std::move(body));
+
+  GeneratorImpl g;
+  g.increment_indent();
+
+  ASSERT_TRUE(g.EmitCase(&c)) << g.error();
+  EXPECT_EQ(g.result(), R"(  case 5, 6: {
     break;
   }
 )");

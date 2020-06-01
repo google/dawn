@@ -19,15 +19,14 @@ namespace ast {
 
 CaseStatement::CaseStatement() : Statement() {}
 
-CaseStatement::CaseStatement(std::unique_ptr<Literal> condition,
-                             StatementList body)
-    : Statement(), condition_(std::move(condition)), body_(std::move(body)) {}
+CaseStatement::CaseStatement(CaseSelectorList conditions, StatementList body)
+    : Statement(), conditions_(std::move(conditions)), body_(std::move(body)) {}
 
 CaseStatement::CaseStatement(const Source& source,
-                             std::unique_ptr<Literal> condition,
+                             CaseSelectorList conditions,
                              StatementList body)
     : Statement(source),
-      condition_(std::move(condition)),
+      conditions_(std::move(conditions)),
       body_(std::move(body)) {}
 
 CaseStatement::CaseStatement(CaseStatement&&) = default;
@@ -52,7 +51,16 @@ void CaseStatement::to_str(std::ostream& out, size_t indent) const {
   if (IsDefault()) {
     out << "Default{" << std::endl;
   } else {
-    out << "Case " << condition_->to_str() << "{" << std::endl;
+    out << "Case ";
+    bool first = true;
+    for (const auto& lit : conditions_) {
+      if (!first)
+        out << ", ";
+
+      first = false;
+      out << lit->to_str();
+    }
+    out << "{" << std::endl;
   }
 
   for (const auto& stmt : body_)

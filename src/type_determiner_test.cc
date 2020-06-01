@@ -165,8 +165,9 @@ TEST_F(TypeDeterminerTest, Stmt_Case) {
   body.push_back(std::make_unique<ast::AssignmentStatement>(std::move(lhs),
                                                             std::move(rhs)));
 
-  ast::CaseStatement cse(std::make_unique<ast::IntLiteral>(&i32, 3),
-                         std::move(body));
+  ast::CaseSelectorList lit;
+  lit.push_back(std::make_unique<ast::IntLiteral>(&i32, 3));
+  ast::CaseStatement cse(std::move(lit), std::move(body));
 
   EXPECT_TRUE(td()->DetermineResultType(&cse));
   ASSERT_NE(lhs_ptr->result_type(), nullptr);
@@ -355,9 +356,12 @@ TEST_F(TypeDeterminerTest, Stmt_Switch) {
   body.push_back(std::make_unique<ast::AssignmentStatement>(std::move(lhs),
                                                             std::move(rhs)));
 
+  ast::CaseSelectorList lit;
+  lit.push_back(std::make_unique<ast::IntLiteral>(&i32, 3));
+
   ast::CaseStatementList cases;
-  cases.push_back(std::make_unique<ast::CaseStatement>(
-      std::make_unique<ast::IntLiteral>(&i32, 3), std::move(body)));
+  cases.push_back(
+      std::make_unique<ast::CaseStatement>(std::move(lit), std::move(body)));
 
   ast::SwitchStatement stmt(std::make_unique<ast::ScalarConstructorExpression>(
                                 std::make_unique<ast::IntLiteral>(&i32, 2)),

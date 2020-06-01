@@ -37,7 +37,9 @@ TEST_F(GeneratorImplTest, Emit_Switch) {
   def->set_body(std::move(def_body));
 
   ast::type::I32Type i32;
-  auto case_val = std::make_unique<ast::IntLiteral>(&i32, 5);
+  ast::CaseSelectorList case_val;
+  case_val.push_back(std::make_unique<ast::IntLiteral>(&i32, 5));
+
   ast::StatementList case_body;
   case_body.push_back(std::make_unique<ast::BreakStatement>());
 

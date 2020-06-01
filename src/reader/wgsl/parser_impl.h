@@ -23,6 +23,7 @@
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/builtin.h"
+#include "src/ast/case_statement.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/entry_point.h"
@@ -216,6 +217,9 @@ class ParserImpl {
   /// Parses a `switch_body` grammar element
   /// @returns the parsed statement or nullptr
   std::unique_ptr<ast::CaseStatement> switch_body();
+  /// Parses a `case_selectors` grammar element
+  /// @returns the list of literals
+  ast::CaseSelectorList case_selectors();
   /// Parses a `case_body` grammar element
   /// @returns the parsed statements
   ast::StatementList case_body();

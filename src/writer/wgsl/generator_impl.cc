@@ -724,9 +724,18 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
   } else {
     out_ << "case ";
 
-    if (!EmitLiteral(stmt->condition())) {
-      return false;
+    bool first = true;
+    for (const auto& lit : stmt->conditions()) {
+      if (!first) {
+        out_ << ", ";
+      }
+
+      first = false;
+      if (!EmitLiteral(lit.get())) {
+        return false;
+      }
     }
+
     out_ << ":";
   }
 

@@ -17,8 +17,10 @@
 #include "gtest/gtest.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/int_literal.h"
 #include "src/ast/kill_statement.h"
 #include "src/ast/type/bool_type.h"
+#include "src/ast/type/i32_type.h"
 
 namespace tint {
 namespace ast {
@@ -28,22 +30,28 @@ using CaseStatementTest = testing::Test;
 
 TEST_F(CaseStatementTest, Creation) {
   ast::type::BoolType bool_type;
-  auto b = std::make_unique<BoolLiteral>(&bool_type, true);
+
+  CaseSelectorList b;
+  b.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
+
   StatementList stmts;
   stmts.push_back(std::make_unique<KillStatement>());
 
-  auto* bool_ptr = b.get();
+  auto* bool_ptr = b.back().get();
   auto* kill_ptr = stmts[0].get();
 
   CaseStatement c(std::move(b), std::move(stmts));
-  EXPECT_EQ(c.condition(), bool_ptr);
+  ASSERT_EQ(c.conditions().size(), 1);
+  EXPECT_EQ(c.conditions()[0].get(), bool_ptr);
   ASSERT_EQ(c.body().size(), 1u);
   EXPECT_EQ(c.body()[0].get(), kill_ptr);
 }
 
 TEST_F(CaseStatementTest, Creation_WithSource) {
   ast::type::BoolType bool_type;
-  auto b = std::make_unique<BoolLiteral>(&bool_type, true);
+  CaseSelectorList b;
+  b.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
+
   StatementList stmts;
   stmts.push_back(std::make_unique<KillStatement>());
 
@@ -64,9 +72,11 @@ TEST_F(CaseStatementTest, IsDefault_WithoutCondition) {
 
 TEST_F(CaseStatementTest, IsDefault_WithCondition) {
   ast::type::BoolType bool_type;
-  auto b = std::make_unique<BoolLiteral>(&bool_type, true);
+  CaseSelectorList b;
+  b.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
+
   CaseStatement c;
-  c.set_condition(std::move(b));
+  c.set_conditions(std::move(b));
   EXPECT_FALSE(c.IsDefault());
 }
 
@@ -82,7 +92,9 @@ TEST_F(CaseStatementTest, IsValid) {
 
 TEST_F(CaseStatementTest, IsValid_NullBodyStatement) {
   ast::type::BoolType bool_type;
-  auto b = std::make_unique<BoolLiteral>(&bool_type, true);
+  CaseSelectorList b;
+  b.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
+
   StatementList stmts;
   stmts.push_back(std::make_unique<KillStatement>());
   stmts.push_back(nullptr);
@@ -93,20 +105,24 @@ TEST_F(CaseStatementTest, IsValid_NullBodyStatement) {
 
 TEST_F(CaseStatementTest, IsValid_InvalidBodyStatement) {
   ast::type::BoolType bool_type;
-  auto b = std::make_unique<BoolLiteral>(&bool_type, true);
+  CaseSelectorList b;
+  b.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
+
   StatementList stmts;
   stmts.push_back(std::make_unique<IfStatement>());
 
-  CaseStatement c(std::move(b), std::move(stmts));
+  CaseStatement c({std::move(b)}, std::move(stmts));
   EXPECT_FALSE(c.IsValid());
 }
 
 TEST_F(CaseStatementTest, ToStr_WithCondition) {
   ast::type::BoolType bool_type;
-  auto b = std::make_unique<BoolLiteral>(&bool_type, true);
+  CaseSelectorList b;
+  b.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
+
   StatementList stmts;
   stmts.push_back(std::make_unique<KillStatement>());
-  CaseStatement c(std::move(b), std::move(stmts));
+  CaseStatement c({std::move(b)}, std::move(stmts));
 
   std::ostringstream out;
   c.to_str(out, 2);
@@ -116,10 +132,28 @@ TEST_F(CaseStatementTest, ToStr_WithCondition) {
 )");
 }
 
+TEST_F(CaseStatementTest, ToStr_WithMultipleConditions) {
+  ast::type::I32Type i32;
+
+  CaseSelectorList b;
+  b.push_back(std::make_unique<IntLiteral>(&i32, 1));
+  b.push_back(std::make_unique<IntLiteral>(&i32, 2));
+  StatementList stmts;
+  stmts.push_back(std::make_unique<KillStatement>());
+  CaseStatement c(std::move(b), std::move(stmts));
+
+  std::ostringstream out;
+  c.to_str(out, 2);
+  EXPECT_EQ(out.str(), R"(  Case 1, 2{
+    Kill{}
+  }
+)");
+}
+
 TEST_F(CaseStatementTest, ToStr_WithoutCondition) {
   StatementList stmts;
   stmts.push_back(std::make_unique<KillStatement>());
-  CaseStatement c(nullptr, std::move(stmts));
+  CaseStatement c(CaseSelectorList{}, std::move(stmts));
 
   std::ostringstream out;
   c.to_str(out, 2);

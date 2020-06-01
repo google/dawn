@@ -1800,7 +1800,7 @@ std::unique_ptr<ast::SwitchStatement> ParserImpl::switch_stmt() {
 }
 
 // switch_body
-//   : CASE const_literal COLON BRACKET_LEFT case_body BRACKET_RIGHT
+//   : CASE case_selectors COLON BRACKET_LEFT case_body BRACKET_RIGHT
 //   | DEFAULT COLON BRACKET_LEFT case_body BRACKET_RIGHT
 std::unique_ptr<ast::CaseStatement> ParserImpl::switch_body() {
   auto t = peek();
@@ -1813,14 +1813,14 @@ std::unique_ptr<ast::CaseStatement> ParserImpl::switch_body() {
   auto stmt = std::make_unique<ast::CaseStatement>();
   stmt->set_source(source);
   if (t.IsCase()) {
-    auto cond = const_literal();
+    auto cond = case_selectors();
     if (has_error())
       return nullptr;
-    if (cond == nullptr) {
+    if (cond.empty()) {
       set_error(peek(), "unable to parse case conditional");
       return nullptr;
     }
-    stmt->set_condition(std::move(cond));
+    stmt->set_conditions(std::move(cond));
   }
 
   t = next();
@@ -1848,6 +1848,24 @@ std::unique_ptr<ast::CaseStatement> ParserImpl::switch_body() {
   }
 
   return stmt;
+}
+
+// case_selectors
+//   : const_literal (COMMA const_literal)*
+ast::CaseSelectorList ParserImpl::case_selectors() {
+  ast::CaseSelectorList selectors;
+
+  for (;;) {
+    auto cond = const_literal();
+    if (has_error())
+      return {};
+    if (cond == nullptr)
+      break;
+
+    selectors.push_back(std::move(cond));
+  }
+
+  return selectors;
 }
 
 // case_body

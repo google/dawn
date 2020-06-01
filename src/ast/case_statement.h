@@ -27,35 +27,38 @@
 namespace tint {
 namespace ast {
 
+/// A list of case literals
+using CaseSelectorList = std::vector<std::unique_ptr<ast::Literal>>;
+
 /// A case statement
 class CaseStatement : public Statement {
  public:
   /// Constructor
   CaseStatement();
   /// Constructor
-  /// @param condition the case condition
+  /// @param conditions the case conditions
   /// @param body the case body
-  CaseStatement(std::unique_ptr<Literal> condition, StatementList body);
+  CaseStatement(CaseSelectorList conditions, StatementList body);
   /// Constructor
   /// @param source the source information
-  /// @param condition the case condition
+  /// @param conditions the case conditions
   /// @param body the case body
   CaseStatement(const Source& source,
-                std::unique_ptr<Literal> condition,
+                CaseSelectorList conditions,
                 StatementList body);
   /// Move constructor
   CaseStatement(CaseStatement&&);
   ~CaseStatement() override;
 
-  /// Sets the condition for the case statement
-  /// @param condition the condition to set
-  void set_condition(std::unique_ptr<Literal> condition) {
-    condition_ = std::move(condition);
+  /// Sets the conditions for the case statement
+  /// @param conditions the conditions to set
+  void set_conditions(CaseSelectorList conditions) {
+    conditions_ = std::move(conditions);
   }
-  /// @returns the case condition or nullptr if none set
-  Literal* condition() const { return condition_.get(); }
+  /// @returns the case condition, empty if none set
+  const CaseSelectorList& conditions() const { return conditions_; }
   /// @returns true if this is a default statement
-  bool IsDefault() const { return condition_ == nullptr; }
+  bool IsDefault() const { return conditions_.empty(); }
 
   /// Sets the case body
   /// @param body the case body
@@ -77,7 +80,7 @@ class CaseStatement : public Statement {
  private:
   CaseStatement(const CaseStatement&) = delete;
 
-  std::unique_ptr<Literal> condition_;
+  CaseSelectorList conditions_;
   StatementList body_;
 };
 

@@ -30,7 +30,8 @@ using SwitchStatementTest = testing::Test;
 
 TEST_F(SwitchStatementTest, Creation) {
   ast::type::BoolType bool_type;
-  auto lit = std::make_unique<BoolLiteral>(&bool_type, true);
+  CaseSelectorList lit;
+  lit.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
   auto ident = std::make_unique<IdentifierExpression>("ident");
   CaseStatementList body;
   body.push_back(
@@ -61,7 +62,8 @@ TEST_F(SwitchStatementTest, IsSwitch) {
 
 TEST_F(SwitchStatementTest, IsValid) {
   ast::type::BoolType bool_type;
-  auto lit = std::make_unique<BoolLiteral>(&bool_type, true);
+  CaseSelectorList lit;
+  lit.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
   auto ident = std::make_unique<IdentifierExpression>("ident");
   CaseStatementList body;
   body.push_back(
@@ -73,7 +75,8 @@ TEST_F(SwitchStatementTest, IsValid) {
 
 TEST_F(SwitchStatementTest, IsValid_Null_Condition) {
   ast::type::BoolType bool_type;
-  auto lit = std::make_unique<BoolLiteral>(&bool_type, true);
+  CaseSelectorList lit;
+  lit.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
   CaseStatementList body;
   body.push_back(
       std::make_unique<CaseStatement>(std::move(lit), StatementList()));
@@ -85,7 +88,8 @@ TEST_F(SwitchStatementTest, IsValid_Null_Condition) {
 
 TEST_F(SwitchStatementTest, IsValid_Invalid_Condition) {
   ast::type::BoolType bool_type;
-  auto lit = std::make_unique<BoolLiteral>(&bool_type, true);
+  CaseSelectorList lit;
+  lit.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
   auto ident = std::make_unique<IdentifierExpression>("");
   CaseStatementList body;
   body.push_back(
@@ -97,7 +101,8 @@ TEST_F(SwitchStatementTest, IsValid_Invalid_Condition) {
 
 TEST_F(SwitchStatementTest, IsValid_Null_BodyStatement) {
   ast::type::BoolType bool_type;
-  auto lit = std::make_unique<BoolLiteral>(&bool_type, true);
+  CaseSelectorList lit;
+  lit.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
   auto ident = std::make_unique<IdentifierExpression>("ident");
   CaseStatementList body;
   body.push_back(
@@ -115,8 +120,8 @@ TEST_F(SwitchStatementTest, IsValid_Invalid_BodyStatement) {
   case_body.push_back(nullptr);
 
   CaseStatementList body;
-  body.push_back(
-      std::make_unique<CaseStatement>(nullptr, std::move(case_body)));
+  body.push_back(std::make_unique<CaseStatement>(CaseSelectorList{},
+                                                 std::move(case_body)));
 
   SwitchStatement stmt(std::move(ident), std::move(body));
   EXPECT_FALSE(stmt.IsValid());
@@ -138,7 +143,8 @@ TEST_F(SwitchStatementTest, ToStr_Empty) {
 
 TEST_F(SwitchStatementTest, ToStr) {
   ast::type::BoolType bool_type;
-  auto lit = std::make_unique<BoolLiteral>(&bool_type, true);
+  CaseSelectorList lit;
+  lit.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
   auto ident = std::make_unique<IdentifierExpression>("ident");
   CaseStatementList body;
   body.push_back(
