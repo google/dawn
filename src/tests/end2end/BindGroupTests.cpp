@@ -863,6 +863,38 @@ TEST_P(BindGroupTests, BindGroupLayoutVisibilityCanBeNone) {
     queue.Submit(1, &commands);
 }
 
+// Regression test for crbug.com/dawn/448 that dynamic buffer bindings can have None visibility.
+TEST_P(BindGroupTests, DynamicBindingNoneVisibility) {
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+
+    wgpu::BindGroupLayoutEntry entry = {0, wgpu::ShaderStage::None,
+                                        wgpu::BindingType::UniformBuffer, true};
+    wgpu::BindGroupLayoutDescriptor descriptor;
+    descriptor.entryCount = 1;
+    descriptor.entries = &entry;
+    wgpu::BindGroupLayout layout = device.CreateBindGroupLayout(&descriptor);
+
+    wgpu::RenderPipeline pipeline = MakeTestPipeline(renderPass, {}, {layout});
+
+    std::array<float, 4> color = {1, 0, 0, 1};
+    wgpu::Buffer uniformBuffer =
+        utils::CreateBufferFromData(device, &color, sizeof(color), wgpu::BufferUsage::Uniform);
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, layout, {{0, uniformBuffer, 0, sizeof(color)}});
+
+    uint32_t dynamicOffset = 0;
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bindGroup, 1, &dynamicOffset);
+    pass.Draw(3);
+    pass.EndPass();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+}
+
 // Test that bind group bindings may have unbounded and arbitrary binding numbers
 TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);

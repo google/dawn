@@ -230,6 +230,14 @@ namespace dawn_native { namespace d3d12 {
                 // Dynamic buffer bindings are packed at the beginning of the layout.
                 for (BindingIndex bindingIndex = 0; bindingIndex < dynamicOffsetCount;
                      ++bindingIndex) {
+                    const BindingInfo& bindingInfo =
+                        group->GetLayout()->GetBindingInfo(bindingIndex);
+                    if (bindingInfo.visibility == wgpu::ShaderStage::None) {
+                        // Skip dynamic buffers that are not visible. D3D12 does not have None
+                        // visibility.
+                        continue;
+                    }
+
                     uint32_t parameterIndex =
                         pipelineLayout->GetDynamicRootParameterIndex(index, bindingIndex);
                     BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
@@ -241,7 +249,7 @@ namespace dawn_native { namespace d3d12 {
                     D3D12_GPU_VIRTUAL_ADDRESS bufferLocation =
                         ToBackend(binding.buffer)->GetVA() + offset;
 
-                    switch (group->GetLayout()->GetBindingInfo(bindingIndex).type) {
+                    switch (bindingInfo.type) {
                         case wgpu::BindingType::UniformBuffer:
                             if (mInCompute) {
                                 commandList->SetComputeRootConstantBufferView(parameterIndex,
