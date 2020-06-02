@@ -32,6 +32,7 @@
 #include "src/ast/if_statement.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
+#include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/switch_statement.h"
@@ -1753,9 +1754,23 @@ bool FunctionEmitter::EmitContinuingStart(const Construct* construct) {
   return success();
 }
 
-bool FunctionEmitter::EmitNormalTerminator(const BlockInfo&) {
-  // TODO(dneto): emit fallthrough, break, continue, return, kill
-  return true;
+bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
+  const auto& terminator = *(block_info.basic_block->terminator());
+  switch (terminator.opcode()) {
+    case SpvOpReturn:
+      AddStatement(std::make_unique<ast::ReturnStatement>());
+      return true;
+    case SpvOpReturnValue: {
+      auto value = MakeExpression(terminator.GetSingleWordInOperand(0));
+      AddStatement(
+          std::make_unique<ast::ReturnStatement>(std::move(value.expr)));
+    }
+      return true;
+    default:
+      break;
+  }
+  // TODO(dneto): emit fallthrough, break, continue, kill
+  return success();
 }
 
 bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,

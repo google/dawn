@@ -107,18 +107,24 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_ast = p->module().to_str();
+  // TODO(dneto): This will need to be updated when function calls are
+  // supported. Otherwise, use more general matching instead of substring
+  // equality.
   EXPECT_THAT(module_ast, HasSubstr(R"(
   Function leaf -> __void
   ()
   {
+    Return{}
   }
   Function branch -> __void
   ()
   {
+    Return{}
   }
   Function root -> __void
   ()
   {
+    Return{}
   })"));
 }
 
@@ -138,7 +144,13 @@ TEST_F(SpvParserTest, EmitFunctions_NonVoidResultType) {
   Function ret_float -> __f32
   ()
   {
-  })"));
+    Return{
+      {
+        ScalarConstructor{0.000000}
+      }
+    }
+  })"))
+      << module_ast;
 }
 
 TEST_F(SpvParserTest, EmitFunctions_MixedParamTypes) {
@@ -177,6 +189,7 @@ TEST_F(SpvParserTest, EmitFunctions_MixedParamTypes) {
     }
   )
   {
+    Return{}
   })"));
 }
 
@@ -215,6 +228,7 @@ TEST_F(SpvParserTest, EmitFunctions_GenerateParamNames) {
     }
   )
   {
+    Return{}
   })"));
 }
 
