@@ -20,14 +20,14 @@
 #include <vector>
 
 #include "src/ast/expression.h"
-#include "src/ast/literal.h"
+#include "src/ast/int_literal.h"
 #include "src/ast/statement.h"
 
 namespace tint {
 namespace ast {
 
 /// A list of case literals
-using CaseSelectorList = std::vector<std::unique_ptr<ast::Literal>>;
+using CaseSelectorList = std::vector<std::unique_ptr<ast::IntLiteral>>;
 
 /// A case statement
 class CaseStatement : public Statement {

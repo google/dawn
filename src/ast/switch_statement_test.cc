@@ -17,10 +17,10 @@
 #include <sstream>
 
 #include "gtest/gtest.h"
-#include "src/ast/bool_literal.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/type/bool_type.h"
+#include "src/ast/sint_literal.h"
+#include "src/ast/type/i32_type.h"
 
 namespace tint {
 namespace ast {
@@ -29,9 +29,11 @@ namespace {
 using SwitchStatementTest = testing::Test;
 
 TEST_F(SwitchStatementTest, Creation) {
-  ast::type::BoolType bool_type;
+  ast::type::I32Type i32;
+
   CaseSelectorList lit;
-  lit.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
+  lit.push_back(std::make_unique<SintLiteral>(&i32, 1));
+
   auto ident = std::make_unique<IdentifierExpression>("ident");
   CaseStatementList body;
   body.push_back(
@@ -61,9 +63,11 @@ TEST_F(SwitchStatementTest, IsSwitch) {
 }
 
 TEST_F(SwitchStatementTest, IsValid) {
-  ast::type::BoolType bool_type;
+  ast::type::I32Type i32;
+
   CaseSelectorList lit;
-  lit.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
+  lit.push_back(std::make_unique<SintLiteral>(&i32, 2));
+
   auto ident = std::make_unique<IdentifierExpression>("ident");
   CaseStatementList body;
   body.push_back(
@@ -74,9 +78,11 @@ TEST_F(SwitchStatementTest, IsValid) {
 }
 
 TEST_F(SwitchStatementTest, IsValid_Null_Condition) {
-  ast::type::BoolType bool_type;
+  ast::type::I32Type i32;
+
   CaseSelectorList lit;
-  lit.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
+  lit.push_back(std::make_unique<SintLiteral>(&i32, 2));
+
   CaseStatementList body;
   body.push_back(
       std::make_unique<CaseStatement>(std::move(lit), StatementList()));
@@ -87,9 +93,11 @@ TEST_F(SwitchStatementTest, IsValid_Null_Condition) {
 }
 
 TEST_F(SwitchStatementTest, IsValid_Invalid_Condition) {
-  ast::type::BoolType bool_type;
+  ast::type::I32Type i32;
+
   CaseSelectorList lit;
-  lit.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
+  lit.push_back(std::make_unique<SintLiteral>(&i32, 2));
+
   auto ident = std::make_unique<IdentifierExpression>("");
   CaseStatementList body;
   body.push_back(
@@ -100,9 +108,11 @@ TEST_F(SwitchStatementTest, IsValid_Invalid_Condition) {
 }
 
 TEST_F(SwitchStatementTest, IsValid_Null_BodyStatement) {
-  ast::type::BoolType bool_type;
+  ast::type::I32Type i32;
+
   CaseSelectorList lit;
-  lit.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
+  lit.push_back(std::make_unique<SintLiteral>(&i32, 2));
+
   auto ident = std::make_unique<IdentifierExpression>("ident");
   CaseStatementList body;
   body.push_back(
@@ -142,9 +152,11 @@ TEST_F(SwitchStatementTest, ToStr_Empty) {
 }
 
 TEST_F(SwitchStatementTest, ToStr) {
-  ast::type::BoolType bool_type;
+  ast::type::I32Type i32;
+
   CaseSelectorList lit;
-  lit.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
+  lit.push_back(std::make_unique<SintLiteral>(&i32, 2));
+
   auto ident = std::make_unique<IdentifierExpression>("ident");
   CaseStatementList body;
   body.push_back(
@@ -156,7 +168,7 @@ TEST_F(SwitchStatementTest, ToStr) {
   EXPECT_EQ(out.str(), R"(  Switch{
     Identifier{ident}
     {
-      Case true{
+      Case 2{
       }
     }
   }

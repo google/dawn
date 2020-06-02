@@ -1856,13 +1856,19 @@ ast::CaseSelectorList ParserImpl::case_selectors() {
   ast::CaseSelectorList selectors;
 
   for (;;) {
+    auto t = peek();
     auto cond = const_literal();
     if (has_error())
       return {};
     if (cond == nullptr)
       break;
+    if (!cond->IsInt()) {
+      set_error(t, "invalid case selector must be an integer value");
+      return {};
+    }
 
-    selectors.push_back(std::move(cond));
+    std::unique_ptr<ast::IntLiteral> selector(cond.release()->AsInt());
+    selectors.push_back(std::move(selector));
   }
 
   return selectors;

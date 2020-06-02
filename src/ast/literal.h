@@ -26,6 +26,7 @@ class BoolLiteral;
 class FloatLiteral;
 class NullLiteral;
 class SintLiteral;
+class IntLiteral;
 class UintLiteral;
 
 /// Base class for a literal value
@@ -50,6 +51,8 @@ class Literal {
   BoolLiteral* AsBool();
   /// @returns the literal as a float literal
   FloatLiteral* AsFloat();
+  /// @returns the literal as an int literal
+  IntLiteral* AsInt();
   /// @returns the literal as a signed int literal
   SintLiteral* AsSint();
   /// @returns the literal as a null literal

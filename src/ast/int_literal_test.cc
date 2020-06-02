@@ -15,9 +15,9 @@
 #include "src/ast/int_literal.h"
 
 #include "gtest/gtest.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/u32_type.h"
-#include "src/ast/sint_literal.h"
 #include "src/ast/uint_literal.h"
 
 namespace tint {

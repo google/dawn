@@ -18,6 +18,7 @@
 
 #include "src/ast/bool_literal.h"
 #include "src/ast/float_literal.h"
+#include "src/ast/int_literal.h"
 #include "src/ast/null_literal.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/uint_literal.h"
@@ -61,6 +62,11 @@ BoolLiteral* Literal::AsBool() {
 FloatLiteral* Literal::AsFloat() {
   assert(IsFloat());
   return static_cast<FloatLiteral*>(this);
+}
+
+IntLiteral* Literal::AsInt() {
+  assert(IsInt());
+  return static_cast<IntLiteral*>(this);
 }
 
 SintLiteral* Literal::AsSint() {

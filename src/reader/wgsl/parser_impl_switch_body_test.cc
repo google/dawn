@@ -41,6 +41,14 @@ TEST_F(ParserImplTest, SwitchBody_Case_InvalidConstLiteral) {
   EXPECT_EQ(p->error(), "1:6: unable to parse case selectors");
 }
 
+TEST_F(ParserImplTest, SwitchBody_Case_InvalidSelector_bool) {
+  auto* p = parser("case true: { a = 4; }");
+  auto e = p->switch_body();
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(e, nullptr);
+  EXPECT_EQ(p->error(), "1:6: invalid case selector must be an integer value");
+}
+
 TEST_F(ParserImplTest, SwitchBody_Case_MissingConstLiteral) {
   auto* p = parser("case: { a = 4; }");
   auto e = p->switch_body();

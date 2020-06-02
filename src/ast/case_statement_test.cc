@@ -15,12 +15,12 @@
 #include "src/ast/case_statement.h"
 
 #include "gtest/gtest.h"
-#include "src/ast/bool_literal.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/kill_statement.h"
 #include "src/ast/sint_literal.h"
-#include "src/ast/type/bool_type.h"
 #include "src/ast/type/i32_type.h"
+#include "src/ast/type/u32_type.h"
+#include "src/ast/uint_literal.h"
 
 namespace tint {
 namespace ast {
@@ -28,29 +28,48 @@ namespace {
 
 using CaseStatementTest = testing::Test;
 
-TEST_F(CaseStatementTest, Creation) {
-  ast::type::BoolType bool_type;
+TEST_F(CaseStatementTest, Creation_i32) {
+  ast::type::I32Type i32;
 
   CaseSelectorList b;
-  b.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
+  b.push_back(std::make_unique<SintLiteral>(&i32, 2));
 
   StatementList stmts;
   stmts.push_back(std::make_unique<KillStatement>());
 
-  auto* bool_ptr = b.back().get();
+  auto* int_ptr = b.back().get();
   auto* kill_ptr = stmts[0].get();
 
   CaseStatement c(std::move(b), std::move(stmts));
   ASSERT_EQ(c.selectors().size(), 1);
-  EXPECT_EQ(c.selectors()[0].get(), bool_ptr);
+  EXPECT_EQ(c.selectors()[0].get(), int_ptr);
+  ASSERT_EQ(c.body().size(), 1u);
+  EXPECT_EQ(c.body()[0].get(), kill_ptr);
+}
+
+TEST_F(CaseStatementTest, Creation_u32) {
+  ast::type::U32Type u32;
+
+  CaseSelectorList b;
+  b.push_back(std::make_unique<UintLiteral>(&u32, 2));
+
+  StatementList stmts;
+  stmts.push_back(std::make_unique<KillStatement>());
+
+  auto* int_ptr = b.back().get();
+  auto* kill_ptr = stmts[0].get();
+
+  CaseStatement c(std::move(b), std::move(stmts));
+  ASSERT_EQ(c.selectors().size(), 1);
+  EXPECT_EQ(c.selectors()[0].get(), int_ptr);
   ASSERT_EQ(c.body().size(), 1u);
   EXPECT_EQ(c.body()[0].get(), kill_ptr);
 }
 
 TEST_F(CaseStatementTest, Creation_WithSource) {
-  ast::type::BoolType bool_type;
+  ast::type::I32Type i32;
   CaseSelectorList b;
-  b.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
+  b.push_back(std::make_unique<SintLiteral>(&i32, 2));
 
   StatementList stmts;
   stmts.push_back(std::make_unique<KillStatement>());
@@ -71,9 +90,9 @@ TEST_F(CaseStatementTest, IsDefault_WithoutSelectors) {
 }
 
 TEST_F(CaseStatementTest, IsDefault_WithSelectors) {
-  ast::type::BoolType bool_type;
+  ast::type::I32Type i32;
   CaseSelectorList b;
-  b.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
+  b.push_back(std::make_unique<SintLiteral>(&i32, 2));
 
   CaseStatement c;
   c.set_selectors(std::move(b));
@@ -91,9 +110,9 @@ TEST_F(CaseStatementTest, IsValid) {
 }
 
 TEST_F(CaseStatementTest, IsValid_NullBodyStatement) {
-  ast::type::BoolType bool_type;
+  ast::type::I32Type i32;
   CaseSelectorList b;
-  b.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
+  b.push_back(std::make_unique<SintLiteral>(&i32, 2));
 
   StatementList stmts;
   stmts.push_back(std::make_unique<KillStatement>());
@@ -104,9 +123,9 @@ TEST_F(CaseStatementTest, IsValid_NullBodyStatement) {
 }
 
 TEST_F(CaseStatementTest, IsValid_InvalidBodyStatement) {
-  ast::type::BoolType bool_type;
+  ast::type::I32Type i32;
   CaseSelectorList b;
-  b.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
+  b.push_back(std::make_unique<SintLiteral>(&i32, 2));
 
   StatementList stmts;
   stmts.push_back(std::make_unique<IfStatement>());
@@ -115,10 +134,10 @@ TEST_F(CaseStatementTest, IsValid_InvalidBodyStatement) {
   EXPECT_FALSE(c.IsValid());
 }
 
-TEST_F(CaseStatementTest, ToStr_WithSelectors) {
-  ast::type::BoolType bool_type;
+TEST_F(CaseStatementTest, ToStr_WithSelectors_i32) {
+  ast::type::I32Type i32;
   CaseSelectorList b;
-  b.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
+  b.push_back(std::make_unique<SintLiteral>(&i32, -2));
 
   StatementList stmts;
   stmts.push_back(std::make_unique<KillStatement>());
@@ -126,7 +145,24 @@ TEST_F(CaseStatementTest, ToStr_WithSelectors) {
 
   std::ostringstream out;
   c.to_str(out, 2);
-  EXPECT_EQ(out.str(), R"(  Case true{
+  EXPECT_EQ(out.str(), R"(  Case -2{
+    Kill{}
+  }
+)");
+}
+
+TEST_F(CaseStatementTest, ToStr_WithSelectors_u32) {
+  ast::type::U32Type u32;
+  CaseSelectorList b;
+  b.push_back(std::make_unique<UintLiteral>(&u32, 2));
+
+  StatementList stmts;
+  stmts.push_back(std::make_unique<KillStatement>());
+  CaseStatement c({std::move(b)}, std::move(stmts));
+
+  std::ostringstream out;
+  c.to_str(out, 2);
+  EXPECT_EQ(out.str(), R"(  Case 2{
     Kill{}
   }
 )");
