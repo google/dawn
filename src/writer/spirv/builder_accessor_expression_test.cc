@@ -18,10 +18,10 @@
 #include "src/ast/binary_expression.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/int_literal.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/type/array_type.h"
@@ -54,7 +54,7 @@ TEST_F(BuilderTest, ArrayAccessor) {
 
   auto ary = std::make_unique<ast::IdentifierExpression>("ary");
   auto idx_expr = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 1));
+      std::make_unique<ast::SintLiteral>(&i32, 1));
 
   ast::ArrayAccessorExpression expr(std::move(ary), std::move(idx_expr));
 
@@ -152,9 +152,9 @@ TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
       std::move(ary), std::make_unique<ast::BinaryExpression>(
                           ast::BinaryOp::kAdd,
                           std::make_unique<ast::ScalarConstructorExpression>(
-                              std::make_unique<ast::IntLiteral>(&i32, 1)),
+                              std::make_unique<ast::SintLiteral>(&i32, 1)),
                           std::make_unique<ast::ScalarConstructorExpression>(
-                              std::make_unique<ast::IntLiteral>(&i32, 2))));
+                              std::make_unique<ast::SintLiteral>(&i32, 2))));
 
   Context ctx;
   ast::Module mod;
@@ -201,9 +201,9 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
       std::make_unique<ast::ArrayAccessorExpression>(
           std::make_unique<ast::IdentifierExpression>("ary"),
           std::make_unique<ast::ScalarConstructorExpression>(
-              std::make_unique<ast::IntLiteral>(&i32, 3))),
+              std::make_unique<ast::SintLiteral>(&i32, 3))),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 2)));
+          std::make_unique<ast::SintLiteral>(&i32, 2)));
 
   Context ctx;
   ast::Module mod;
@@ -252,7 +252,7 @@ TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
       std::make_unique<ast::ArrayAccessorExpression>(
           std::make_unique<ast::IdentifierExpression>("ary"),
           std::make_unique<ast::ScalarConstructorExpression>(
-              std::make_unique<ast::IntLiteral>(&i32, 2))),
+              std::make_unique<ast::SintLiteral>(&i32, 2))),
       std::make_unique<ast::IdentifierExpression>("xy"));
 
   Context ctx;
@@ -811,7 +811,7 @@ TEST_F(BuilderTest, MemberAccessor_Array_of_Swizzle) {
           std::make_unique<ast::IdentifierExpression>("ident"),
           std::make_unique<ast::IdentifierExpression>("yxz")),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 1)));
+          std::make_unique<ast::SintLiteral>(&i32, 1)));
 
   Context ctx;
   ast::Module mod;
@@ -896,10 +896,10 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
                       std::make_unique<ast::ArrayAccessorExpression>(
                           std::make_unique<ast::IdentifierExpression>("index"),
                           std::make_unique<ast::ScalarConstructorExpression>(
-                              std::make_unique<ast::IntLiteral>(&i32, 0))),
+                              std::make_unique<ast::SintLiteral>(&i32, 0))),
                       std::make_unique<ast::IdentifierExpression>("foo")),
                   std::make_unique<ast::ScalarConstructorExpression>(
-                      std::make_unique<ast::IntLiteral>(&i32, 2))),
+                      std::make_unique<ast::SintLiteral>(&i32, 2))),
               std::make_unique<ast::IdentifierExpression>("bar")),
           std::make_unique<ast::IdentifierExpression>("baz")),
       std::make_unique<ast::IdentifierExpression>("yx"));

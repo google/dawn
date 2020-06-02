@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/int_literal.h"
+#include "src/ast/sint_literal.h"
 
 #include "gtest/gtest.h"
 #include "src/ast/type/i32_type.h"
@@ -22,42 +22,42 @@ namespace tint {
 namespace ast {
 namespace {
 
-using IntLiteralTest = testing::Test;
+using SintLiteralTest = testing::Test;
 
-TEST_F(IntLiteralTest, Value) {
+TEST_F(SintLiteralTest, Value) {
   ast::type::I32Type i32;
-  IntLiteral i{&i32, 47};
-  ASSERT_TRUE(i.IsInt());
+  SintLiteral i{&i32, 47};
+  ASSERT_TRUE(i.IsSint());
   EXPECT_EQ(i.value(), 47);
 }
 
-TEST_F(IntLiteralTest, Is) {
+TEST_F(SintLiteralTest, Is) {
   ast::type::I32Type i32;
-  IntLiteral i{&i32, 42};
+  SintLiteral i{&i32, 42};
   EXPECT_FALSE(i.IsBool());
-  EXPECT_TRUE(i.IsInt());
+  EXPECT_TRUE(i.IsSint());
   EXPECT_FALSE(i.IsFloat());
   EXPECT_FALSE(i.IsUint());
   EXPECT_FALSE(i.IsNull());
 }
 
-TEST_F(IntLiteralTest, ToStr) {
+TEST_F(SintLiteralTest, ToStr) {
   ast::type::I32Type i32;
-  IntLiteral i{&i32, -42};
+  SintLiteral i{&i32, -42};
 
   EXPECT_EQ(i.to_str(), "-42");
 }
 
-TEST_F(IntLiteralTest, Name_I32) {
+TEST_F(SintLiteralTest, Name_I32) {
   ast::type::I32Type i32;
-  IntLiteral i{&i32, 2};
-  EXPECT_EQ("__int__i32_2", i.name());
+  SintLiteral i{&i32, 2};
+  EXPECT_EQ("__sint__i32_2", i.name());
 }
 
-TEST_F(IntLiteralTest, Name_U32) {
+TEST_F(SintLiteralTest, Name_U32) {
   ast::type::U32Type u32;
-  IntLiteral i{&u32, 2};
-  EXPECT_EQ("__int__u32_2", i.name());
+  SintLiteral i{&u32, 2};
+  EXPECT_EQ("__sint__u32_2", i.name());
 }
 }  // namespace
 }  // namespace ast

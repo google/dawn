@@ -16,8 +16,8 @@
 #include "spirv/unified1/spirv.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/float_literal.h"
-#include "src/ast/int_literal.h"
 #include "src/ast/literal.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
@@ -84,7 +84,7 @@ TEST_F(BuilderTest, Literal_Bool_Dedup) {
 
 TEST_F(BuilderTest, Literal_I32) {
   ast::type::I32Type i32;
-  ast::IntLiteral i(&i32, -23);
+  ast::SintLiteral i(&i32, -23);
 
   ast::Module mod;
   Builder b(&mod);
@@ -99,8 +99,8 @@ TEST_F(BuilderTest, Literal_I32) {
 
 TEST_F(BuilderTest, Literal_I32_Dedup) {
   ast::type::I32Type i32;
-  ast::IntLiteral i1(&i32, -23);
-  ast::IntLiteral i2(&i32, -23);
+  ast::SintLiteral i1(&i32, -23);
+  ast::SintLiteral i2(&i32, -23);
 
   ast::Module mod;
   Builder b(&mod);

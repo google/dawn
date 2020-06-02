@@ -33,8 +33,8 @@ std::string Token::TypeToName(Type type) {
       return "kStringLiteral";
     case Token::Type::kFloatLiteral:
       return "kFloatLiteral";
-    case Token::Type::kIntLiteral:
-      return "kIntLiteral";
+    case Token::Type::kSintLiteral:
+      return "kSintLiteral";
     case Token::Type::kUintLiteral:
       return "kUintLiteral";
     case Token::Type::kUninitialized:
@@ -247,7 +247,7 @@ Token::Token(const Source& source, uint32_t val)
     : type_(Type::kUintLiteral), source_(source), val_uint_(val) {}
 
 Token::Token(const Source& source, int32_t val)
-    : type_(Type::kIntLiteral), source_(source), val_int_(val) {}
+    : type_(Type::kSintLiteral), source_(source), val_int_(val) {}
 
 Token::Token(const Source& source, float val)
     : type_(Type::kFloatLiteral), source_(source), val_float_(val) {}
@@ -266,7 +266,7 @@ std::string Token::to_str() const {
   if (type_ == Type::kFloatLiteral) {
     return std::to_string(val_float_);
   }
-  if (type_ == Type::kIntLiteral) {
+  if (type_ == Type::kSintLiteral) {
     return std::to_string(val_int_);
   }
   if (type_ == Type::kUintLiteral) {

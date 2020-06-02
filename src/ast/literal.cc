@@ -18,8 +18,8 @@
 
 #include "src/ast/bool_literal.h"
 #include "src/ast/float_literal.h"
-#include "src/ast/int_literal.h"
 #include "src/ast/null_literal.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/uint_literal.h"
 
 namespace tint {
@@ -37,7 +37,7 @@ bool Literal::IsFloat() const {
   return false;
 }
 
-bool Literal::IsInt() const {
+bool Literal::IsSint() const {
   return false;
 }
 
@@ -59,9 +59,9 @@ FloatLiteral* Literal::AsFloat() {
   return static_cast<FloatLiteral*>(this);
 }
 
-IntLiteral* Literal::AsInt() {
-  assert(IsInt());
-  return static_cast<IntLiteral*>(this);
+SintLiteral* Literal::AsSint() {
+  assert(IsSint());
+  return static_cast<SintLiteral*>(this);
 }
 
 NullLiteral* Literal::AsNull() {

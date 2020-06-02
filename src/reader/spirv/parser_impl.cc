@@ -39,8 +39,8 @@
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
-#include "src/ast/int_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_decoration.h"
 #include "src/ast/struct_member.h"
@@ -882,7 +882,7 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
   }
   if (ast_type->IsI32()) {
     return {ast_type, std::make_unique<ast::ScalarConstructorExpression>(
-                          std::make_unique<ast::IntLiteral>(
+                          std::make_unique<ast::SintLiteral>(
                               ast_type, spirv_const->GetS32()))};
   }
   if (ast_type->IsF32()) {
@@ -954,7 +954,7 @@ std::unique_ptr<ast::Expression> ParserImpl::MakeNullValue(
   }
   if (type->IsI32()) {
     return std::make_unique<ast::ScalarConstructorExpression>(
-        std::make_unique<ast::IntLiteral>(type, 0));
+        std::make_unique<ast::SintLiteral>(type, 0));
   }
   if (type->IsF32()) {
     return std::make_unique<ast::ScalarConstructorExpression>(

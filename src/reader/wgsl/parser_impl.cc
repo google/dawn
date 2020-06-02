@@ -34,13 +34,13 @@
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/int_literal.h"
 #include "src/ast/kill_statement.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/statement_condition.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/switch_statement.h"
@@ -497,7 +497,7 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
     next();  // consume the peek
 
     t = next();
-    if (!t.IsIntLiteral()) {
+    if (!t.IsSintLiteral()) {
       set_error(t, "invalid value for location decoration");
       return {};
     }
@@ -525,7 +525,7 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
     next();  // consume the peek
 
     t = next();
-    if (!t.IsIntLiteral()) {
+    if (!t.IsSintLiteral()) {
       set_error(t, "invalid value for binding decoration");
       return {};
     }
@@ -536,7 +536,7 @@ std::unique_ptr<ast::VariableDecoration> ParserImpl::variable_decoration() {
     next();  // consume the peek
 
     t = next();
-    if (!t.IsIntLiteral()) {
+    if (!t.IsSintLiteral()) {
       set_error(t, "invalid value for set decoration");
       return {};
     }
@@ -837,7 +837,7 @@ ast::type::Type* ParserImpl::type_decl_array(Token t) {
   uint32_t size = 0;
   if (t.IsComma()) {
     t = next();
-    if (!t.IsIntLiteral()) {
+    if (!t.IsSintLiteral()) {
       set_error(t, "missing size of array declaration");
       return nullptr;
     }
@@ -1143,7 +1143,7 @@ ParserImpl::struct_member_decoration() {
   next();  // Consume the peek
 
   t = next();
-  if (!t.IsIntLiteral()) {
+  if (!t.IsSintLiteral()) {
     set_error(t, "invalid value for offset decoration");
     return nullptr;
   }
@@ -2741,13 +2741,13 @@ std::unique_ptr<ast::Literal> ParserImpl::const_literal() {
     }
     return std::make_unique<ast::BoolLiteral>(type, false);
   }
-  if (t.IsIntLiteral()) {
+  if (t.IsSintLiteral()) {
     next();  // Consume the peek
     auto* type = ctx_.type_mgr().Get(std::make_unique<ast::type::I32Type>());
     if (!type) {
       return nullptr;
     }
-    return std::make_unique<ast::IntLiteral>(type, t.to_i32());
+    return std::make_unique<ast::SintLiteral>(type, t.to_i32());
   }
   if (t.IsUintLiteral()) {
     next();  // Consume the peek

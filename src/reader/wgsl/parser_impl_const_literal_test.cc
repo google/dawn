@@ -15,7 +15,7 @@
 #include "gtest/gtest.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/float_literal.h"
-#include "src/ast/int_literal.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/uint_literal.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
@@ -30,8 +30,8 @@ TEST_F(ParserImplTest, ConstLiteral_Int) {
   auto c = p->const_literal();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(c, nullptr);
-  ASSERT_TRUE(c->IsInt());
-  EXPECT_EQ(c->AsInt()->value(), -234);
+  ASSERT_TRUE(c->IsSint());
+  EXPECT_EQ(c->AsSint()->value(), -234);
 }
 
 TEST_F(ParserImplTest, ConstLiteral_Uint) {

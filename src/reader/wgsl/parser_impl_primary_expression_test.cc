@@ -18,8 +18,8 @@
 #include "src/ast/bool_literal.h"
 #include "src/ast/cast_expression.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/int_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type_constructor_expression.h"
@@ -76,26 +76,26 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl) {
   ASSERT_TRUE(val[0]->IsConstructor());
   ASSERT_TRUE(val[0]->AsConstructor()->IsScalarConstructor());
   auto* ident = val[0]->AsConstructor()->AsScalarConstructor();
-  ASSERT_TRUE(ident->literal()->IsInt());
-  EXPECT_EQ(ident->literal()->AsInt()->value(), 1);
+  ASSERT_TRUE(ident->literal()->IsSint());
+  EXPECT_EQ(ident->literal()->AsSint()->value(), 1);
 
   ASSERT_TRUE(val[1]->IsConstructor());
   ASSERT_TRUE(val[1]->AsConstructor()->IsScalarConstructor());
   ident = val[1]->AsConstructor()->AsScalarConstructor();
-  ASSERT_TRUE(ident->literal()->IsInt());
-  EXPECT_EQ(ident->literal()->AsInt()->value(), 2);
+  ASSERT_TRUE(ident->literal()->IsSint());
+  EXPECT_EQ(ident->literal()->AsSint()->value(), 2);
 
   ASSERT_TRUE(val[2]->IsConstructor());
   ASSERT_TRUE(val[2]->AsConstructor()->IsScalarConstructor());
   ident = val[2]->AsConstructor()->AsScalarConstructor();
-  ASSERT_TRUE(ident->literal()->IsInt());
-  EXPECT_EQ(ident->literal()->AsInt()->value(), 3);
+  ASSERT_TRUE(ident->literal()->IsSint());
+  EXPECT_EQ(ident->literal()->AsSint()->value(), 3);
 
   ASSERT_TRUE(val[3]->IsConstructor());
   ASSERT_TRUE(val[3]->AsConstructor()->IsScalarConstructor());
   ident = val[3]->AsConstructor()->AsScalarConstructor();
-  ASSERT_TRUE(ident->literal()->IsInt());
-  EXPECT_EQ(ident->literal()->AsInt()->value(), 4);
+  ASSERT_TRUE(ident->literal()->IsSint());
+  EXPECT_EQ(ident->literal()->AsSint()->value(), 4);
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidTypeDecl) {

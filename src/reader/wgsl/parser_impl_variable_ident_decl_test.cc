@@ -69,7 +69,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_InvalidIdent) {
   ASSERT_EQ(type, nullptr);
 
   auto t = p->next();
-  ASSERT_TRUE(t.IsIntLiteral());
+  ASSERT_TRUE(t.IsSintLiteral());
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_InvalidType) {

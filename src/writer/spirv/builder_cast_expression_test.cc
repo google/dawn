@@ -16,9 +16,9 @@
 #include "src/ast/cast_expression.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/int_literal.h"
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/u32_type.h"
@@ -93,7 +93,7 @@ TEST_F(BuilderTest, Cast_I32ToFloat) {
 
   ast::CastExpression cast(&f32,
                            std::make_unique<ast::ScalarConstructorExpression>(
-                               std::make_unique<ast::IntLiteral>(&i32, 2)));
+                               std::make_unique<ast::SintLiteral>(&i32, 2)));
 
   Context ctx;
   ast::Module mod;
@@ -211,7 +211,7 @@ TEST_F(BuilderTest, Cast_I32ToU32) {
 
   ast::CastExpression cast(&u32,
                            std::make_unique<ast::ScalarConstructorExpression>(
-                               std::make_unique<ast::IntLiteral>(&i32, 2)));
+                               std::make_unique<ast::SintLiteral>(&i32, 2)));
 
   Context ctx;
   ast::Module mod;
@@ -262,7 +262,7 @@ TEST_F(BuilderTest, Cast_I32ToI32) {
 
   ast::CastExpression cast(&i32,
                            std::make_unique<ast::ScalarConstructorExpression>(
-                               std::make_unique<ast::IntLiteral>(&i32, 2)));
+                               std::make_unique<ast::SintLiteral>(&i32, 2)));
 
   Context ctx;
   ast::Module mod;

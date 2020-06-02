@@ -17,8 +17,8 @@
 #include "gtest/gtest.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/int_literal.h"
 #include "src/ast/kill_statement.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/i32_type.h"
 
@@ -136,8 +136,8 @@ TEST_F(CaseStatementTest, ToStr_WithMultipleSelectors) {
   ast::type::I32Type i32;
 
   CaseSelectorList b;
-  b.push_back(std::make_unique<IntLiteral>(&i32, 1));
-  b.push_back(std::make_unique<IntLiteral>(&i32, 2));
+  b.push_back(std::make_unique<SintLiteral>(&i32, 1));
+  b.push_back(std::make_unique<SintLiteral>(&i32, 2));
   StatementList stmts;
   stmts.push_back(std::make_unique<KillStatement>());
   CaseStatement c(std::move(b), std::move(stmts));

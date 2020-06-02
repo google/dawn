@@ -33,7 +33,6 @@
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/int_literal.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
@@ -41,6 +40,7 @@
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_offset_decoration.h"
@@ -218,7 +218,7 @@ void Builder::iterate(std::function<void(const Instruction&)> cb) const {
 
 uint32_t Builder::GenerateU32Literal(uint32_t val) {
   ast::type::U32Type u32;
-  ast::IntLiteral lit(&u32, val);
+  ast::SintLiteral lit(&u32, val);
   return GenerateLiteralIfNeeded(&lit);
 }
 
@@ -995,9 +995,9 @@ uint32_t Builder::GenerateLiteralIfNeeded(ast::Literal* lit) {
     } else {
       push_type(spv::Op::OpConstantFalse, {Operand::Int(type_id), result});
     }
-  } else if (lit->IsInt()) {
+  } else if (lit->IsSint()) {
     push_type(spv::Op::OpConstant, {Operand::Int(type_id), result,
-                                    Operand::Int(lit->AsInt()->value())});
+                                    Operand::Int(lit->AsSint()->value())});
   } else if (lit->IsUint()) {
     push_type(spv::Op::OpConstant, {Operand::Int(type_id), result,
                                     Operand::Int(lit->AsUint()->value())});
@@ -1366,12 +1366,12 @@ bool Builder::GenerateSwitchStatement(ast::SwitchStatement* stmt) {
 
     case_ids.push_back(block_id);
     for (const auto& selector : item->selectors()) {
-      if (!selector->IsInt()) {
+      if (!selector->IsSint()) {
         error_ = "expected integer literal for switch case label";
         return false;
       }
 
-      params.push_back(Operand::Int(selector->AsInt()->value()));
+      params.push_back(Operand::Int(selector->AsSint()->value()));
       params.push_back(Operand::Int(block_id));
     }
   }

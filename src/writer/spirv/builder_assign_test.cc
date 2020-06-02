@@ -19,9 +19,9 @@
 #include "src/ast/assignment_statement.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/int_literal.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/type/f32_type.h"
@@ -252,7 +252,7 @@ TEST_F(BuilderTest, Assign_Vector_MemberByIndex) {
   auto ident = std::make_unique<ast::ArrayAccessorExpression>(
       std::make_unique<ast::IdentifierExpression>("var"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 1)));
+          std::make_unique<ast::SintLiteral>(&i32, 1)));
   auto val = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 1.0f));
 

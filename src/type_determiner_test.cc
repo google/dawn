@@ -33,11 +33,11 @@
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/int_literal.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/switch_statement.h"
@@ -112,7 +112,7 @@ TEST_F(TypeDeterminerTest, Stmt_Assign) {
   ast::type::I32Type i32;
 
   auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2));
+      std::make_unique<ast::SintLiteral>(&i32, 2));
   auto* lhs_ptr = lhs.get();
 
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
@@ -133,7 +133,7 @@ TEST_F(TypeDeterminerTest, Stmt_Break) {
   ast::type::I32Type i32;
 
   auto cond = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2));
+      std::make_unique<ast::SintLiteral>(&i32, 2));
   auto* cond_ptr = cond.get();
 
   ast::BreakStatement brk(ast::StatementCondition::kIf, std::move(cond));
@@ -154,7 +154,7 @@ TEST_F(TypeDeterminerTest, Stmt_Case) {
   ast::type::F32Type f32;
 
   auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2));
+      std::make_unique<ast::SintLiteral>(&i32, 2));
   auto* lhs_ptr = lhs.get();
 
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
@@ -166,7 +166,7 @@ TEST_F(TypeDeterminerTest, Stmt_Case) {
                                                             std::move(rhs)));
 
   ast::CaseSelectorList lit;
-  lit.push_back(std::make_unique<ast::IntLiteral>(&i32, 3));
+  lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 3));
   ast::CaseStatement cse(std::move(lit), std::move(body));
 
   EXPECT_TRUE(td()->DetermineResultType(&cse));
@@ -180,7 +180,7 @@ TEST_F(TypeDeterminerTest, Stmt_Continue) {
   ast::type::I32Type i32;
 
   auto cond = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2));
+      std::make_unique<ast::SintLiteral>(&i32, 2));
   auto* cond_ptr = cond.get();
 
   ast::ContinueStatement stmt(ast::StatementCondition::kIf, std::move(cond));
@@ -201,7 +201,7 @@ TEST_F(TypeDeterminerTest, Stmt_Else) {
   ast::type::F32Type f32;
 
   auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2));
+      std::make_unique<ast::SintLiteral>(&i32, 2));
   auto* lhs_ptr = lhs.get();
 
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
@@ -213,7 +213,7 @@ TEST_F(TypeDeterminerTest, Stmt_Else) {
                                                             std::move(rhs)));
 
   ast::ElseStatement stmt(std::make_unique<ast::ScalarConstructorExpression>(
-                              std::make_unique<ast::IntLiteral>(&i32, 3)),
+                              std::make_unique<ast::SintLiteral>(&i32, 3)),
                           std::move(body));
 
   EXPECT_TRUE(td()->DetermineResultType(&stmt));
@@ -230,7 +230,7 @@ TEST_F(TypeDeterminerTest, Stmt_If) {
   ast::type::F32Type f32;
 
   auto else_lhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2));
+      std::make_unique<ast::SintLiteral>(&i32, 2));
   auto* else_lhs_ptr = else_lhs.get();
 
   auto else_rhs = std::make_unique<ast::ScalarConstructorExpression>(
@@ -243,14 +243,14 @@ TEST_F(TypeDeterminerTest, Stmt_If) {
 
   auto else_stmt = std::make_unique<ast::ElseStatement>(
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 3)),
+          std::make_unique<ast::SintLiteral>(&i32, 3)),
       std::move(else_body));
 
   ast::ElseStatementList else_stmts;
   else_stmts.push_back(std::move(else_stmt));
 
   auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2));
+      std::make_unique<ast::SintLiteral>(&i32, 2));
   auto* lhs_ptr = lhs.get();
 
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
@@ -262,7 +262,7 @@ TEST_F(TypeDeterminerTest, Stmt_If) {
                                                             std::move(rhs)));
 
   ast::IfStatement stmt(std::make_unique<ast::ScalarConstructorExpression>(
-                            std::make_unique<ast::IntLiteral>(&i32, 3)),
+                            std::make_unique<ast::SintLiteral>(&i32, 3)),
                         std::move(body));
   stmt.set_else_statements(std::move(else_stmts));
 
@@ -284,7 +284,7 @@ TEST_F(TypeDeterminerTest, Stmt_Loop) {
   ast::type::F32Type f32;
 
   auto body_lhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2));
+      std::make_unique<ast::SintLiteral>(&i32, 2));
   auto* body_lhs_ptr = body_lhs.get();
 
   auto body_rhs = std::make_unique<ast::ScalarConstructorExpression>(
@@ -296,7 +296,7 @@ TEST_F(TypeDeterminerTest, Stmt_Loop) {
       std::move(body_lhs), std::move(body_rhs)));
 
   auto continuing_lhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2));
+      std::make_unique<ast::SintLiteral>(&i32, 2));
   auto* continuing_lhs_ptr = continuing_lhs.get();
 
   auto continuing_rhs = std::make_unique<ast::ScalarConstructorExpression>(
@@ -324,7 +324,7 @@ TEST_F(TypeDeterminerTest, Stmt_Return) {
   ast::type::I32Type i32;
 
   auto cond = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2));
+      std::make_unique<ast::SintLiteral>(&i32, 2));
   auto* cond_ptr = cond.get();
 
   ast::ReturnStatement ret(std::move(cond));
@@ -345,7 +345,7 @@ TEST_F(TypeDeterminerTest, Stmt_Switch) {
   ast::type::F32Type f32;
 
   auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2));
+      std::make_unique<ast::SintLiteral>(&i32, 2));
   auto* lhs_ptr = lhs.get();
 
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
@@ -357,14 +357,14 @@ TEST_F(TypeDeterminerTest, Stmt_Switch) {
                                                             std::move(rhs)));
 
   ast::CaseSelectorList lit;
-  lit.push_back(std::make_unique<ast::IntLiteral>(&i32, 3));
+  lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 3));
 
   ast::CaseStatementList cases;
   cases.push_back(
       std::make_unique<ast::CaseStatement>(std::move(lit), std::move(body)));
 
   ast::SwitchStatement stmt(std::make_unique<ast::ScalarConstructorExpression>(
-                                std::make_unique<ast::IntLiteral>(&i32, 2)),
+                                std::make_unique<ast::SintLiteral>(&i32, 2)),
                             std::move(cases));
 
   EXPECT_TRUE(td()->DetermineResultType(&stmt)) << td()->error();
@@ -382,7 +382,7 @@ TEST_F(TypeDeterminerTest, Stmt_Unless) {
   ast::type::F32Type f32;
 
   auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2));
+      std::make_unique<ast::SintLiteral>(&i32, 2));
   auto* lhs_ptr = lhs.get();
 
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
@@ -395,7 +395,7 @@ TEST_F(TypeDeterminerTest, Stmt_Unless) {
 
   ast::UnlessStatement unless(
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 3)),
+          std::make_unique<ast::SintLiteral>(&i32, 3)),
       std::move(body));
 
   EXPECT_TRUE(td()->DetermineResultType(&unless));
@@ -412,7 +412,7 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
   auto var =
       std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone, &i32);
   var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2)));
+      std::make_unique<ast::SintLiteral>(&i32, 2)));
   auto* init_ptr = var->constructor();
 
   ast::VariableDeclStatement decl(std::move(var));
@@ -436,7 +436,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
   ast::type::ArrayType ary(&f32, 3);
 
   auto idx = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2));
+      std::make_unique<ast::SintLiteral>(&i32, 2));
   auto var = std::make_unique<ast::Variable>(
       "my_var", ast::StorageClass::kFunction, &ary);
   mod()->AddGlobalVariable(std::move(var));
@@ -460,7 +460,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array_Constant) {
   ast::type::ArrayType ary(&f32, 3);
 
   auto idx = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2));
+      std::make_unique<ast::SintLiteral>(&i32, 2));
   auto var = std::make_unique<ast::Variable>(
       "my_var", ast::StorageClass::kFunction, &ary);
   var->set_is_const(true);
@@ -482,7 +482,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix) {
   ast::type::MatrixType mat(&f32, 3, 2);
 
   auto idx = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2));
+      std::make_unique<ast::SintLiteral>(&i32, 2));
   auto var =
       std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone, &mat);
   mod()->AddGlobalVariable(std::move(var));
@@ -507,9 +507,9 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
   ast::type::MatrixType mat(&f32, 3, 2);
 
   auto idx1 = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2));
+      std::make_unique<ast::SintLiteral>(&i32, 2));
   auto idx2 = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 1));
+      std::make_unique<ast::SintLiteral>(&i32, 1));
   auto var =
       std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone, &mat);
   mod()->AddGlobalVariable(std::move(var));
@@ -537,7 +537,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
   ast::type::VectorType vec(&f32, 3);
 
   auto idx = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2));
+      std::make_unique<ast::SintLiteral>(&i32, 2));
   auto var =
       std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone, &vec);
   mod()->AddGlobalVariable(std::move(var));
@@ -953,7 +953,7 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
   auto mem_ident = std::make_unique<ast::IdentifierExpression>("mem");
   auto foo_ident = std::make_unique<ast::IdentifierExpression>("foo");
   auto idx = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 0));
+      std::make_unique<ast::SintLiteral>(&i32, 0));
   auto swizzle = std::make_unique<ast::IdentifierExpression>("yx");
 
   ast::MemberAccessorExpression mem(
@@ -1851,7 +1851,7 @@ TEST_P(ImportData_SingleParamTest, Error_Integer) {
 
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 1)));
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
 
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
@@ -1978,7 +1978,7 @@ TEST_F(TypeDeterminerTest, ImportData_Length_Error_Integer) {
 
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 1)));
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
 
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
@@ -2090,9 +2090,9 @@ TEST_P(ImportData_TwoParamTest, Error_Integer) {
 
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 1)));
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2)));
+      std::make_unique<ast::SintLiteral>(&i32, 2)));
 
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
@@ -2295,9 +2295,9 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Error_Integer) {
 
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 1)));
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2)));
+      std::make_unique<ast::SintLiteral>(&i32, 2)));
 
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 
@@ -2498,11 +2498,11 @@ TEST_P(ImportData_ThreeParamTest, Error_Integer) {
 
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 1)));
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2)));
+      std::make_unique<ast::SintLiteral>(&i32, 2)));
   params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 3)));
+      std::make_unique<ast::SintLiteral>(&i32, 3)));
 
   ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
 

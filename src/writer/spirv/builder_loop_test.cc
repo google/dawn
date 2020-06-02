@@ -19,9 +19,9 @@
 #include "src/ast/break_statement.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/int_literal.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/type/i32_type.h"
 #include "src/context.h"
 #include "src/type_determiner.h"
@@ -76,7 +76,7 @@ TEST_F(BuilderTest, Loop_WithoutContinuing) {
   body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 2))));
+          std::make_unique<ast::SintLiteral>(&i32, 2))));
 
   ast::StatementList continuing;
   ast::LoopStatement expr(std::move(body), std::move(continuing));
@@ -128,13 +128,13 @@ TEST_F(BuilderTest, Loop_WithContinuing) {
   body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 2))));
+          std::make_unique<ast::SintLiteral>(&i32, 2))));
 
   ast::StatementList continuing;
   continuing.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 3))));
+          std::make_unique<ast::SintLiteral>(&i32, 3))));
   ast::LoopStatement expr(std::move(body), std::move(continuing));
 
   Context ctx;

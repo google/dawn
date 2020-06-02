@@ -17,8 +17,8 @@
 #include "gtest/gtest.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/int_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/unary_op_expression.h"
@@ -40,7 +40,7 @@ TEST_F(BuilderTest, UnaryOp_Negation_Integer) {
   ast::UnaryOpExpression expr(
       ast::UnaryOp::kNegation,
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 1)));
+          std::make_unique<ast::SintLiteral>(&i32, 1)));
 
   Context ctx;
   ast::Module mod;
@@ -89,7 +89,7 @@ TEST_F(BuilderTest, UnaryOp_Not) {
 
   ast::UnaryOpExpression expr(
       ast::UnaryOp::kNot, std::make_unique<ast::ScalarConstructorExpression>(
-                              std::make_unique<ast::IntLiteral>(&i32, 1)));
+                              std::make_unique<ast::SintLiteral>(&i32, 1)));
 
   Context ctx;
   ast::Module mod;

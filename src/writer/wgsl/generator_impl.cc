@@ -35,13 +35,13 @@
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/int_literal.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/statement.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
@@ -299,8 +299,8 @@ bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
 
     out_.precision(precision);
     out_.flags(flags);
-  } else if (lit->IsInt()) {
-    out_ << lit->AsInt()->value();
+  } else if (lit->IsSint()) {
+    out_ << lit->AsSint()->value();
   } else if (lit->IsUint()) {
     out_ << lit->AsUint()->value() << "u";
   } else {

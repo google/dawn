@@ -15,8 +15,8 @@
 #include "gtest/gtest.h"
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/int_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
@@ -41,8 +41,8 @@ TEST_F(ParserImplTest, UnaryExpression_Postix) {
   ASSERT_TRUE(ary->idx_expr()->IsConstructor());
   ASSERT_TRUE(ary->idx_expr()->AsConstructor()->IsScalarConstructor());
   auto* init = ary->idx_expr()->AsConstructor()->AsScalarConstructor();
-  ASSERT_TRUE(init->literal()->IsInt());
-  ASSERT_EQ(init->literal()->AsInt()->value(), 2);
+  ASSERT_TRUE(init->literal()->IsSint());
+  ASSERT_EQ(init->literal()->AsSint()->value(), 2);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Minus) {
@@ -59,8 +59,8 @@ TEST_F(ParserImplTest, UnaryExpression_Minus) {
   ASSERT_TRUE(u->expr()->AsConstructor()->IsScalarConstructor());
 
   auto* init = u->expr()->AsConstructor()->AsScalarConstructor();
-  ASSERT_TRUE(init->literal()->IsInt());
-  EXPECT_EQ(init->literal()->AsInt()->value(), 1);
+  ASSERT_TRUE(init->literal()->IsSint());
+  EXPECT_EQ(init->literal()->AsSint()->value(), 1);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Minus_InvalidRHS) {
@@ -85,8 +85,8 @@ TEST_F(ParserImplTest, UnaryExpression_Bang) {
   ASSERT_TRUE(u->expr()->AsConstructor()->IsScalarConstructor());
 
   auto* init = u->expr()->AsConstructor()->AsScalarConstructor();
-  ASSERT_TRUE(init->literal()->IsInt());
-  EXPECT_EQ(init->literal()->AsInt()->value(), 1);
+  ASSERT_TRUE(init->literal()->IsSint());
+  EXPECT_EQ(init->literal()->AsSint()->value(), 1);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Bang_InvalidRHS) {

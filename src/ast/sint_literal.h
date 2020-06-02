@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_AST_INT_LITERAL_H_
-#define SRC_AST_INT_LITERAL_H_
+#ifndef SRC_AST_SINT_LITERAL_H_
+#define SRC_AST_SINT_LITERAL_H_
 
 #include <string>
 
@@ -22,17 +22,17 @@
 namespace tint {
 namespace ast {
 
-/// A int literal
-class IntLiteral : public Literal {
+/// A signed int literal
+class SintLiteral : public Literal {
  public:
   /// Constructor
   /// @param type the type
-  /// @param value the int literals value
-  IntLiteral(ast::type::Type* type, int32_t value);
-  ~IntLiteral() override;
+  /// @param value the signed int literals value
+  SintLiteral(ast::type::Type* type, int32_t value);
+  ~SintLiteral() override;
 
-  /// @returns true if this is a int literal
-  bool IsInt() const override;
+  /// @returns true if this is a signed int literal
+  bool IsSint() const override;
 
   /// @returns the int literal value
   int32_t value() const { return value_; }
@@ -50,4 +50,4 @@ class IntLiteral : public Literal {
 }  // namespace ast
 }  // namespace tint
 
-#endif  // SRC_AST_INT_LITERAL_H_
+#endif  // SRC_AST_SINT_LITERAL_H_

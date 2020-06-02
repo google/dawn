@@ -15,8 +15,8 @@
 #include "gtest/gtest.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/float_literal.h"
-#include "src/ast/int_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
@@ -46,7 +46,7 @@ TEST_F(GeneratorImplTest, EmitConstructor_Bool) {
 
 TEST_F(GeneratorImplTest, EmitConstructor_Int) {
   ast::type::I32Type i32;
-  auto lit = std::make_unique<ast::IntLiteral>(&i32, -12345);
+  auto lit = std::make_unique<ast::SintLiteral>(&i32, -12345);
   ast::ScalarConstructorExpression expr(std::move(lit));
 
   GeneratorImpl g;
@@ -107,7 +107,7 @@ TEST_F(GeneratorImplTest, EmitConstructor_Type_Bool) {
 TEST_F(GeneratorImplTest, EmitConstructor_Type_Int) {
   ast::type::I32Type i32;
 
-  auto lit = std::make_unique<ast::IntLiteral>(&i32, -12345);
+  auto lit = std::make_unique<ast::SintLiteral>(&i32, -12345);
   ast::ExpressionList values;
   values.push_back(
       std::make_unique<ast::ScalarConstructorExpression>(std::move(lit)));

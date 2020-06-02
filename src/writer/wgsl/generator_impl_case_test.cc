@@ -18,7 +18,7 @@
 #include "src/ast/break_statement.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/int_literal.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/type/i32_type.h"
 #include "src/writer/wgsl/generator_impl.h"
 
@@ -36,7 +36,7 @@ TEST_F(GeneratorImplTest, Emit_Case) {
   body.push_back(std::make_unique<ast::BreakStatement>());
 
   ast::CaseSelectorList lit;
-  lit.push_back(std::make_unique<ast::IntLiteral>(&i32, 5));
+  lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
   ast::CaseStatement c(std::move(lit), std::move(body));
 
   GeneratorImpl g;
@@ -56,8 +56,8 @@ TEST_F(GeneratorImplTest, Emit_Case_MultipleSelectors) {
   body.push_back(std::make_unique<ast::BreakStatement>());
 
   ast::CaseSelectorList lit;
-  lit.push_back(std::make_unique<ast::IntLiteral>(&i32, 5));
-  lit.push_back(std::make_unique<ast::IntLiteral>(&i32, 6));
+  lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
+  lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 6));
   ast::CaseStatement c(std::move(lit), std::move(body));
 
   GeneratorImpl g;

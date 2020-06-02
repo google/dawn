@@ -22,10 +22,10 @@
 #include "src/ast/else_statement.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/int_literal.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/statement_condition.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/i32_type.h"
@@ -86,7 +86,7 @@ TEST_F(BuilderTest, If_WithStatements) {
   body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 2))));
+          std::make_unique<ast::SintLiteral>(&i32, 2))));
 
   auto cond = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::BoolLiteral>(&bool_type, true));
@@ -138,13 +138,13 @@ TEST_F(BuilderTest, If_WithElse) {
   body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 2))));
+          std::make_unique<ast::SintLiteral>(&i32, 2))));
 
   ast::StatementList else_body;
   else_body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 3))));
+          std::make_unique<ast::SintLiteral>(&i32, 3))));
 
   ast::ElseStatementList else_stmts;
   else_stmts.push_back(
@@ -206,13 +206,13 @@ TEST_F(BuilderTest, If_WithElseIf) {
   body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 2))));
+          std::make_unique<ast::SintLiteral>(&i32, 2))));
 
   ast::StatementList else_body;
   else_body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 3))));
+          std::make_unique<ast::SintLiteral>(&i32, 3))));
 
   auto else_cond = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::BoolLiteral>(&bool_type, true));
@@ -286,22 +286,22 @@ TEST_F(BuilderTest, If_WithMultiple) {
   body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 2))));
+          std::make_unique<ast::SintLiteral>(&i32, 2))));
   ast::StatementList elseif_1_body;
   elseif_1_body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 3))));
+          std::make_unique<ast::SintLiteral>(&i32, 3))));
   ast::StatementList elseif_2_body;
   elseif_2_body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 4))));
+          std::make_unique<ast::SintLiteral>(&i32, 4))));
   ast::StatementList else_body;
   else_body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 5))));
+          std::make_unique<ast::SintLiteral>(&i32, 5))));
 
   auto elseif_1_cond = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::BoolLiteral>(&bool_type, true));

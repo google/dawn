@@ -18,7 +18,7 @@
 #include "src/ast/break_statement.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/int_literal.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/i32_type.h"
 #include "src/writer/wgsl/generator_impl.h"
@@ -38,7 +38,7 @@ TEST_F(GeneratorImplTest, Emit_Switch) {
 
   ast::type::I32Type i32;
   ast::CaseSelectorList case_val;
-  case_val.push_back(std::make_unique<ast::IntLiteral>(&i32, 5));
+  case_val.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
 
   ast::StatementList case_body;
   case_body.push_back(std::make_unique<ast::BreakStatement>());

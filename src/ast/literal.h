@@ -24,8 +24,8 @@ namespace ast {
 
 class BoolLiteral;
 class FloatLiteral;
-class IntLiteral;
 class NullLiteral;
+class SintLiteral;
 class UintLiteral;
 
 /// Base class for a literal value
@@ -38,7 +38,7 @@ class Literal {
   /// @returns true if this is a float literal
   virtual bool IsFloat() const;
   /// @returns true if this is a signed int literal
-  virtual bool IsInt() const;
+  virtual bool IsSint() const;
   /// @returns true if this is a null literal
   virtual bool IsNull() const;
   /// @returns true if this is a unsigned int literal
@@ -48,8 +48,8 @@ class Literal {
   BoolLiteral* AsBool();
   /// @returns the literal as a float literal
   FloatLiteral* AsFloat();
-  /// @returns the literal as a int literal
-  IntLiteral* AsInt();
+  /// @returns the literal as a signed int literal
+  SintLiteral* AsSint();
   /// @returns the literal as a null literal
   NullLiteral* AsNull();
   /// @returns the literal as a unsigned int literal

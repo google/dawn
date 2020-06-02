@@ -34,7 +34,7 @@ TEST_F(FloatLiteralTest, Is) {
   ast::type::F32Type f32;
   FloatLiteral f{&f32, 42.f};
   EXPECT_FALSE(f.IsBool());
-  EXPECT_FALSE(f.IsInt());
+  EXPECT_FALSE(f.IsSint());
   EXPECT_TRUE(f.IsFloat());
   EXPECT_FALSE(f.IsUint());
   EXPECT_FALSE(f.IsNull());

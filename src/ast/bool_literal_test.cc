@@ -43,7 +43,7 @@ TEST_F(BoolLiteralTest, Is) {
   ast::type::BoolType bool_type;
   BoolLiteral b{&bool_type, false};
   EXPECT_TRUE(b.IsBool());
-  EXPECT_FALSE(b.IsInt());
+  EXPECT_FALSE(b.IsSint());
   EXPECT_FALSE(b.IsFloat());
   EXPECT_FALSE(b.IsUint());
   EXPECT_FALSE(b.IsNull());

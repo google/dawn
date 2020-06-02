@@ -16,10 +16,10 @@
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/int_literal.h"
 #include "src/ast/literal.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/sint_literal.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
@@ -47,8 +47,8 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
 
   auto* init = e->rhs()->AsConstructor()->AsScalarConstructor();
   ASSERT_NE(init->literal(), nullptr);
-  ASSERT_TRUE(init->literal()->IsInt());
-  EXPECT_EQ(init->literal()->AsInt()->value(), 123);
+  ASSERT_TRUE(init->literal()->IsSint());
+  EXPECT_EQ(init->literal()->AsSint()->value(), 123);
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
@@ -65,8 +65,8 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
   ASSERT_TRUE(e->rhs()->AsConstructor()->IsScalarConstructor());
   auto* init = e->rhs()->AsConstructor()->AsScalarConstructor();
   ASSERT_NE(init->literal(), nullptr);
-  ASSERT_TRUE(init->literal()->IsInt());
-  EXPECT_EQ(init->literal()->AsInt()->value(), 123);
+  ASSERT_TRUE(init->literal()->IsSint());
+  EXPECT_EQ(init->literal()->AsSint()->value(), 123);
 
   ASSERT_TRUE(e->lhs()->IsMemberAccessor());
   auto* mem = e->lhs()->AsMemberAccessor();
@@ -82,8 +82,8 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
   ASSERT_TRUE(ary->idx_expr()->AsConstructor()->IsScalarConstructor());
   init = ary->idx_expr()->AsConstructor()->AsScalarConstructor();
   ASSERT_NE(init->literal(), nullptr);
-  ASSERT_TRUE(init->literal()->IsInt());
-  EXPECT_EQ(init->literal()->AsInt()->value(), 2);
+  ASSERT_TRUE(init->literal()->IsSint());
+  EXPECT_EQ(init->literal()->AsSint()->value(), 2);
 
   ASSERT_TRUE(ary->array()->IsMemberAccessor());
   mem = ary->array()->AsMemberAccessor();

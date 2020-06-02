@@ -17,8 +17,8 @@
 #include "gtest/gtest.h"
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/int_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/type/i32_type.h"
 #include "src/writer/wgsl/generator_impl.h"
 
@@ -31,7 +31,7 @@ using GeneratorImplTest = testing::Test;
 
 TEST_F(GeneratorImplTest, EmitExpression_ArrayAccessor) {
   ast::type::I32Type i32;
-  auto lit = std::make_unique<ast::IntLiteral>(&i32, 5);
+  auto lit = std::make_unique<ast::SintLiteral>(&i32, 5);
   auto idx = std::make_unique<ast::ScalarConstructorExpression>(std::move(lit));
   auto ary = std::make_unique<ast::IdentifierExpression>("ary");
 

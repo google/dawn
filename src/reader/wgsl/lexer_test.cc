@@ -201,7 +201,7 @@ TEST_P(IntegerTest_HexSigned, Matches) {
   Lexer l(std::string(params.input));
 
   auto t = l.next();
-  EXPECT_TRUE(t.IsIntLiteral());
+  EXPECT_TRUE(t.IsSintLiteral());
   EXPECT_EQ(t.line(), 1u);
   EXPECT_EQ(t.column(), 1u);
   EXPECT_EQ(t.to_i32(), params.result);
@@ -308,7 +308,7 @@ TEST_P(IntegerTest_Signed, Matches) {
   Lexer l(params.input);
 
   auto t = l.next();
-  EXPECT_TRUE(t.IsIntLiteral());
+  EXPECT_TRUE(t.IsSintLiteral());
   EXPECT_EQ(t.to_i32(), params.result);
   EXPECT_EQ(1u, t.line());
   EXPECT_EQ(1u, t.column());
@@ -328,7 +328,7 @@ TEST_P(IntegerTest_Invalid, Parses) {
   Lexer l(GetParam());
 
   auto t = l.next();
-  EXPECT_FALSE(t.IsIntLiteral());
+  EXPECT_FALSE(t.IsSintLiteral());
   EXPECT_FALSE(t.IsUintLiteral());
 }
 INSTANTIATE_TEST_SUITE_P(LexerTest,

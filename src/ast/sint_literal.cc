@@ -12,26 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/int_literal.h"
+#include "src/ast/sint_literal.h"
 
 namespace tint {
 namespace ast {
 
-IntLiteral::IntLiteral(ast::type::Type* type, int32_t value)
+SintLiteral::SintLiteral(ast::type::Type* type, int32_t value)
     : Literal(type), value_(value) {}
 
-IntLiteral::~IntLiteral() = default;
+SintLiteral::~SintLiteral() = default;
 
-bool IntLiteral::IsInt() const {
+bool SintLiteral::IsSint() const {
   return true;
 }
 
-std::string IntLiteral::to_str() const {
+std::string SintLiteral::to_str() const {
   return std::to_string(value_);
 }
 
-std::string IntLiteral::name() const {
-  return "__int" + type()->type_name() + "_" + std::to_string(value_);
+std::string SintLiteral::name() const {
+  return "__sint" + type()->type_name() + "_" + std::to_string(value_);
 }
 
 }  // namespace ast

@@ -18,8 +18,8 @@
 #include "src/ast/binary_expression.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/int_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/vector_type.h"
@@ -220,7 +220,7 @@ TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
 
   ast::Variable var("var", ast::StorageClass::kNone, &i32);
   var.set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 2)));
+      std::make_unique<ast::SintLiteral>(&i32, 2)));
   var.set_is_const(true);
 
   td.RegisterVariableForTesting(&var);

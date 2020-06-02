@@ -22,8 +22,8 @@
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/int_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/i32_type.h"
@@ -45,7 +45,7 @@ TEST_F(BuilderTest, Switch_Empty) {
   // switch (1) {
   // }
   auto cond = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::IntLiteral>(&i32, 1));
+      std::make_unique<ast::SintLiteral>(&i32, 1));
 
   ast::SwitchStatement expr(std::move(cond), ast::CaseStatementList{});
 
@@ -89,19 +89,19 @@ TEST_F(BuilderTest, Switch_WithCase) {
   case_1_body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 1))));
+          std::make_unique<ast::SintLiteral>(&i32, 1))));
 
   ast::StatementList case_2_body;
   case_2_body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 2))));
+          std::make_unique<ast::SintLiteral>(&i32, 2))));
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(std::make_unique<ast::IntLiteral>(&i32, 1));
+  selector_1.push_back(std::make_unique<ast::SintLiteral>(&i32, 1));
 
   ast::CaseSelectorList selector_2;
-  selector_2.push_back(std::make_unique<ast::IntLiteral>(&i32, 2));
+  selector_2.push_back(std::make_unique<ast::SintLiteral>(&i32, 2));
 
   ast::CaseStatementList cases;
   cases.push_back(std::make_unique<ast::CaseStatement>(std::move(selector_1),
@@ -174,7 +174,7 @@ TEST_F(BuilderTest, Switch_WithDefault) {
   default_body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 1))));
+          std::make_unique<ast::SintLiteral>(&i32, 1))));
 
   ast::CaseStatementList cases;
   cases.push_back(
@@ -243,26 +243,26 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   case_1_body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 1))));
+          std::make_unique<ast::SintLiteral>(&i32, 1))));
 
   ast::StatementList case_2_body;
   case_2_body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 2))));
+          std::make_unique<ast::SintLiteral>(&i32, 2))));
 
   ast::StatementList default_body;
   default_body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 3))));
+          std::make_unique<ast::SintLiteral>(&i32, 3))));
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(std::make_unique<ast::IntLiteral>(&i32, 1));
+  selector_1.push_back(std::make_unique<ast::SintLiteral>(&i32, 1));
 
   ast::CaseSelectorList selector_2;
-  selector_2.push_back(std::make_unique<ast::IntLiteral>(&i32, 2));
-  selector_2.push_back(std::make_unique<ast::IntLiteral>(&i32, 3));
+  selector_2.push_back(std::make_unique<ast::SintLiteral>(&i32, 2));
+  selector_2.push_back(std::make_unique<ast::SintLiteral>(&i32, 3));
 
   ast::CaseStatementList cases;
   cases.push_back(std::make_unique<ast::CaseStatement>(std::move(selector_1),
@@ -344,26 +344,26 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   case_1_body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 1))));
+          std::make_unique<ast::SintLiteral>(&i32, 1))));
   case_1_body.push_back(std::make_unique<ast::FallthroughStatement>());
 
   ast::StatementList case_2_body;
   case_2_body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 2))));
+          std::make_unique<ast::SintLiteral>(&i32, 2))));
 
   ast::StatementList default_body;
   default_body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 3))));
+          std::make_unique<ast::SintLiteral>(&i32, 3))));
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(std::make_unique<ast::IntLiteral>(&i32, 1));
+  selector_1.push_back(std::make_unique<ast::SintLiteral>(&i32, 1));
 
   ast::CaseSelectorList selector_2;
-  selector_2.push_back(std::make_unique<ast::IntLiteral>(&i32, 2));
+  selector_2.push_back(std::make_unique<ast::SintLiteral>(&i32, 2));
 
   ast::CaseStatementList cases;
   cases.push_back(std::make_unique<ast::CaseStatement>(std::move(selector_1),
@@ -441,11 +441,11 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
   case_1_body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 1))));
+          std::make_unique<ast::SintLiteral>(&i32, 1))));
   case_1_body.push_back(std::make_unique<ast::FallthroughStatement>());
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(std::make_unique<ast::IntLiteral>(&i32, 1));
+  selector_1.push_back(std::make_unique<ast::SintLiteral>(&i32, 1));
 
   ast::CaseStatementList cases;
   cases.push_back(std::make_unique<ast::CaseStatement>(std::move(selector_1),
@@ -511,10 +511,10 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   case_1_body.push_back(std::make_unique<ast::AssignmentStatement>(
       std::make_unique<ast::IdentifierExpression>("v"),
       std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::IntLiteral>(&i32, 1))));
+          std::make_unique<ast::SintLiteral>(&i32, 1))));
 
   ast::CaseSelectorList selector_1;
-  selector_1.push_back(std::make_unique<ast::IntLiteral>(&i32, 1));
+  selector_1.push_back(std::make_unique<ast::SintLiteral>(&i32, 1));
 
   ast::CaseStatementList cases;
   cases.push_back(std::make_unique<ast::CaseStatement>(std::move(selector_1),

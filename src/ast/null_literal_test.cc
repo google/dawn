@@ -27,7 +27,7 @@ TEST_F(NullLiteralTest, Is) {
   ast::type::I32Type i32;
   NullLiteral i{&i32};
   EXPECT_FALSE(i.IsBool());
-  EXPECT_FALSE(i.IsInt());
+  EXPECT_FALSE(i.IsSint());
   EXPECT_FALSE(i.IsFloat());
   EXPECT_FALSE(i.IsUint());
   EXPECT_TRUE(i.IsNull());

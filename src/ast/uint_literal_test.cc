@@ -34,7 +34,7 @@ TEST_F(UintLiteralTest, Is) {
   ast::type::U32Type u32;
   UintLiteral u{&u32, 42};
   EXPECT_FALSE(u.IsBool());
-  EXPECT_FALSE(u.IsInt());
+  EXPECT_FALSE(u.IsSint());
   EXPECT_FALSE(u.IsFloat());
   EXPECT_TRUE(u.IsUint());
   EXPECT_FALSE(u.IsNull());

@@ -46,9 +46,9 @@ class Token {
     kStringLiteral,
     /// A float value
     kFloatLiteral,
-    /// An int value
-    kIntLiteral,
-    /// A uint value
+    /// An signed int value
+    kSintLiteral,
+    /// A unsigned int value
     kUintLiteral,
 
     /// A '&'
@@ -305,8 +305,8 @@ class Token {
   bool IsStringLiteral() const { return type_ == Type::kStringLiteral; }
   /// @returns true if the token is a float
   bool IsFloatLiteral() const { return type_ == Type::kFloatLiteral; }
-  /// @returns true if the token is an int
-  bool IsIntLiteral() const { return type_ == Type::kIntLiteral; }
+  /// @returns true if the token is an signed int
+  bool IsSintLiteral() const { return type_ == Type::kSintLiteral; }
   /// @returns true if the token is a unsigned int
   bool IsUintLiteral() const { return type_ == Type::kUintLiteral; }
 
