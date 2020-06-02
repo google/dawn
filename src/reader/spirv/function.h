@@ -15,6 +15,7 @@
 #ifndef SRC_READER_SPIRV_FUNCTION_H_
 #define SRC_READER_SPIRV_FUNCTION_H_
 
+#include <functional>
 #include <memory>
 #include <ostream>
 #include <unordered_map>
@@ -27,8 +28,10 @@
 #include "source/opt/instruction.h"
 #include "source/opt/ir_context.h"
 #include "source/opt/type_manager.h"
+#include "src/ast/case_statement.h"
 #include "src/ast/expression.h"
 #include "src/ast/module.h"
+#include "src/ast/statement.h"
 #include "src/reader/spirv/construct.h"
 #include "src/reader/spirv/fail_stream.h"
 #include "src/reader/spirv/namer.h"
@@ -138,7 +141,21 @@ struct BlockInfo {
   const Construct* premerge_head_for = nullptr;
   /// The construct for which this block is the false head, and that construct
   /// does not have a true head.
+  /// TODO(dneto): I think we can remove |exclusive_false_head_for|
   const Construct* exclusive_false_head_for = nullptr;
+  /// If not null, then this block is an if-selection header, and |true_head| is
+  /// the target of the true branch on the OpBranchConditional.
+  /// In particular, true_head->true_head_for == this
+  const BlockInfo* true_head = nullptr;
+  /// If not null, then this block is an if-selection header, and |false_head|
+  /// is the target of the false branch on the OpBranchConditional.
+  /// In particular, false_head->false_head_for == this
+  const BlockInfo* false_head = nullptr;
+  /// If not null, then this block is an if-selection header, and when following
+  /// the flow via the true and false branches, control first reconverges at
+  /// |premerge_head|, and |premerge_head| is still inside the if-selection.
+  /// In particular, premerge_head->premerge_head_for == this
+  const BlockInfo* premerge_head = nullptr;
 };
 
 inline std::ostream& operator<<(std::ostream& o, const BlockInfo& bi) {
@@ -268,10 +285,35 @@ class FunctionEmitter {
   /// @returns false if emission failed.
   bool EmitFunctionBodyStatements();
 
-  /// Emits a basic block
-  /// @param bb internal representation of the basic block
+  /// Emits a basic block.
+  /// @param block_info the block to emit
   /// @returns false if emission failed.
-  bool EmitStatementsInBasicBlock(const spvtools::opt::BasicBlock& bb);
+  bool EmitBasicBlock(const BlockInfo& block_info);
+
+  /// Emits an IfStatement, including its condition expression, and sets
+  /// up the statement stack to accumulate subsequent basic blocks into
+  /// the "then" and "else" clauses.
+  /// @param block_info the if-selection header block
+  /// @returns false if emission failed.
+  bool EmitIfStart(const BlockInfo& block_info);
+
+  /// Emits the non-control-flow parts of a basic block, but only once.
+  /// The |already_emitted| parameter indicates whether the code has already
+  /// been emitted, and is used to signal that this invocation actually emitted
+  /// it.
+  /// @param block_info the block to emit
+  /// @param already_emitted the block to emit
+  /// @returns false if the code had not yet been emitted, but emission failed
+  bool EmitStatementsInBasicBlock(const BlockInfo& block_info,
+                                  bool* already_emitted);
+
+  /// Emits code for terminators, but that aren't part of entering or
+  /// resolving structured control flow. That is, if the basic block
+  /// terminator calls for it, emit the fallthrough, break, continue, return,
+  /// or kill commands.
+  /// @param block_info the block with the terminator to emit (if any)
+  /// @returns false if emission failed
+  bool EmitNormalTerminator(const BlockInfo& block_info);
 
   /// Emits a normal instruction: not a terminator, label, or variable
   /// declaration.
@@ -347,7 +389,41 @@ class FunctionEmitter {
   BlockInfo* HeaderIfBreakable(const Construct* c);
 
   /// Appends a new statement to the top of the statement stack.
-  void AddStatement(std::unique_ptr<ast::Statement> statement);
+  /// @param statement the new statement
+  /// @returns a pointer to the statement.
+  ast::Statement* AddStatement(std::unique_ptr<ast::Statement> statement);
+
+  /// @returns the last statetment in the top of the statement stack.
+  ast::Statement* LastStatement();
+
+  struct StatementBlock;
+  using CompletionAction = std::function<void(StatementBlock*)>;
+
+  // A StatementBlock represents a braced-list of statements while it is being
+  // constructed.
+  struct StatementBlock {
+    // The construct to which this construct constributes.
+    const Construct* construct;
+    // The ID of the block at which the completion action should be triggerd
+    // and this statement block discarded. This is often the |end_id| of
+    // |construct| itself.
+    uint32_t end_id;
+    // The completion action finishes processing this statement block.
+    CompletionAction completion_action;
+
+    // Only one of |statements| or |cases| is active.
+
+    // The list of statements being built.
+    ast::StatementList statements;
+    // The list of cases being built, for a switch.
+    ast::CaseStatementList cases;
+  };
+
+  /// Pushes an empty statement block onto the statements stack.
+  /// @param action the completion action for this block
+  void PushNewStatementBlock(const Construct* construct,
+                             uint32_t end_id,
+                             CompletionAction action);
 
   ParserImpl& parser_impl_;
   ast::Module& ast_module_;
@@ -362,7 +438,9 @@ class FunctionEmitter {
   // A stack of statement lists. Each list is contained in a construct in
   // the next deeper element of stack. The 0th entry represents the statements
   // for the entire function.  This stack is never empty.
-  std::vector<ast::StatementList> statements_stack_;
+  // The |construct| member for the 0th element is only valid during the
+  // lifetime of the EmitFunctionBodyStatements method.
+  std::vector<StatementBlock> statements_stack_;
 
   // The set of IDs that have already had an identifier name generated for it.
   std::unordered_set<uint32_t> identifier_values_;

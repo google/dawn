@@ -27,15 +27,20 @@
 #include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
+#include "src/ast/else_statement.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/if_statement.h"
+#include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/storage_class.h"
+#include "src/ast/switch_statement.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/reader/spirv/construct.h"
 #include "src/reader/spirv/fail_stream.h"
 #include "src/reader/spirv/parser_impl.h"
 
@@ -368,19 +373,37 @@ FunctionEmitter::FunctionEmitter(ParserImpl* pi,
       fail_stream_(pi->fail_stream()),
       namer_(pi->namer()),
       function_(function) {
-  statements_stack_.emplace_back(ast::StatementList{});
+  PushNewStatementBlock(nullptr, 0, nullptr);
 }
 
 FunctionEmitter::~FunctionEmitter() = default;
 
-const ast::StatementList& FunctionEmitter::ast_body() {
-  assert(!statements_stack_.empty());
-  return statements_stack_[0];
+void FunctionEmitter::PushNewStatementBlock(const Construct* construct,
+                                            uint32_t end_id,
+                                            CompletionAction action) {
+  statements_stack_.emplace_back(StatementBlock{construct, end_id, action,
+                                                ast::StatementList{},
+                                                ast::CaseStatementList{}});
 }
 
-void FunctionEmitter::AddStatement(std::unique_ptr<ast::Statement> statement) {
+const ast::StatementList& FunctionEmitter::ast_body() {
   assert(!statements_stack_.empty());
-  statements_stack_.back().emplace_back(std::move(statement));
+  return statements_stack_[0].statements;
+}
+
+ast::Statement* FunctionEmitter::AddStatement(
+    std::unique_ptr<ast::Statement> statement) {
+  assert(!statements_stack_.empty());
+  auto* result = statement.get();
+  statements_stack_.back().statements.emplace_back(std::move(statement));
+  return result;
+}
+
+ast::Statement* FunctionEmitter::LastStatement() {
+  assert(!statements_stack_.empty());
+  const auto& statement_list = statements_stack_.back().statements;
+  assert(!statement_list.empty());
+  return statement_list.back().get();
 }
 
 bool FunctionEmitter::Emit() {
@@ -406,10 +429,11 @@ bool FunctionEmitter::Emit() {
                      "element but has "
                   << statements_stack_.size();
   }
-  ast::StatementList body(std::move(statements_stack_[0]));
+  ast::StatementList body(std::move(statements_stack_[0].statements));
   parser_impl_.get_module().functions().back()->set_body(std::move(body));
   // Maintain the invariant by repopulating the one and only element.
-  statements_stack_[0] = ast::StatementList{};
+  statements_stack_.clear();
+  PushNewStatementBlock(constructs_[0].get(), 0, nullptr);
 
   return success();
 }
@@ -501,6 +525,9 @@ bool FunctionEmitter::EmitBody() {
   if (!FindIfSelectionInternalHeaders()) {
     return false;
   }
+
+  // TODO(dneto): register phis
+  // TODO(dneto): register SSA values which need to be hoisted
 
   if (!EmitFunctionVariables()) {
     return false;
@@ -1244,8 +1271,8 @@ bool FunctionEmitter::FindIfSelectionInternalHeaders() {
     if (construct->kind != Construct::kIfSelection) {
       continue;
     }
-    const auto* branch =
-        GetBlockInfo(construct->begin_id)->basic_block->terminator();
+    auto* if_header_info = GetBlockInfo(construct->begin_id);
+    const auto* branch = if_header_info->basic_block->terminator();
     const auto true_head = branch->GetSingleWordInOperand(1);
     const auto false_head = branch->GetSingleWordInOperand(2);
 
@@ -1259,9 +1286,11 @@ bool FunctionEmitter::FindIfSelectionInternalHeaders() {
 
     if (contains_true) {
       true_head_info->true_head_for = construct.get();
+      if_header_info->true_head = true_head_info;
     }
     if (contains_false) {
       false_head_info->false_head_for = construct.get();
+      if_header_info->false_head = false_head_info;
     }
     if ((!contains_true) && contains_false) {
       false_head_info->exclusive_false_head_for = construct.get();
@@ -1337,7 +1366,9 @@ bool FunctionEmitter::FindIfSelectionInternalHeaders() {
                        << " going to " << premerge_id << " and " << dest_id;
               }
               premerge_id = dest_id;
-              GetBlockInfo(dest_id)->premerge_head_for = construct.get();
+              auto* dest_block_info = GetBlockInfo(dest_id);
+              dest_block_info->premerge_head_for = construct.get();
+              if_header_info->premerge_head = dest_block_info;
             }
             break;
           }
@@ -1427,14 +1458,269 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
 }
 
 bool FunctionEmitter::EmitFunctionBodyStatements() {
-  // TODO(dneto): For now, emit only regular statements in the entry block.
-  // We'll use assignments as markers in the tests, to be able to tell where
-  // code is placed in control flow. First prove that we can emit assignments.
-  return EmitStatementsInBasicBlock(*function_.entry());
+  // Dump the basic blocks in order, grouped by construct.
+
+  // We maintain a stack of StatementBlock objects, where new statements
+  // are always written to the topmost entry of the stack. By this point in
+  // processing, we have already recorded the interesting control flow
+  // boundaries in the BlockInfo and associated Construct objects. As we
+  // enter a new statement grouping, we push onto the stack, and also schedule
+  // the statement block's completion and removal at a future block's ID.
+
+  // Upon entry, the statement stack has one entry representing the whole
+  // function.
+  assert(!constructs_.empty());
+  Construct* function_construct = constructs_[0].get();
+  assert(function_construct != nullptr);
+  assert(function_construct->kind == Construct::kFunction);
+  // Make the first entry valid by filling in the construct field, which
+  // had not been computed at the time the entry was first created.
+  // TODO(dneto): refactor how the first construct is created vs.
+  // this statements stack entry is populated.
+  assert(statements_stack_.size() == 1);
+  statements_stack_[0].construct = function_construct;
+
+  for (auto block_id : block_order()) {
+    if (!EmitBasicBlock(*GetBlockInfo(block_id))) {
+      return false;
+    }
+  }
+  return success();
 }
 
-bool FunctionEmitter::EmitStatementsInBasicBlock(
-    const spvtools::opt::BasicBlock& bb) {
+bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
+  // Close off previous constructs.
+  while (!statements_stack_.empty() &&
+         (statements_stack_.back().end_id == block_info.id)) {
+    StatementBlock& sb = statements_stack_.back();
+    sb.completion_action(&sb);
+    statements_stack_.pop_back();
+  }
+  if (statements_stack_.empty()) {
+    return Fail() << "internal error: statements stack empty at block "
+                  << block_info.id;
+  }
+
+  // Enter new constructs.
+
+  std::vector<const Construct*> entering_constructs;  // inner most comes first
+  {
+    auto* here = block_info.construct;
+    auto* const top_construct = statements_stack_.back().construct;
+    while (here != top_construct) {
+      // Only enter a construct at its header block.
+      if (here->begin_id == block_info.id) {
+        entering_constructs.push_back(here);
+      }
+      here = here->parent;
+    }
+  }
+  // What constructs can we have entered?
+  // - It can't be kFunction, because there is only one of those, and it was
+  //   already on the stack at the outermost level.
+  // - We have at most one of kIfSelection, kSwitchSelection, or kLoop because
+  //   each of those is headed by a block with a merge instruction, and the
+  //   kIfSelection and kSwitchSelection header blocks end in different branch
+  //   instructions.
+  // - A kContinue can contain a kContinue
+  //   This is possible in Vulkan SPIR-V, but Tint disallows this by the rule
+  //   that a block can be continue target for at most one header block. See
+  //   test DISABLED_BlockIsContinueForMoreThanOneHeader. If we generalize this,
+  //   then by a dominance argument, the inner loop continue target can only be
+  //   a single-block loop.
+  //   TODO(dneto): Handle this case.
+  // - All that's left is a kContinue and one of kIfSelection, kSwitchSelection,
+  //   kLoop.
+  //
+  //   The kContinue can be the parent of the other.  For example, a selection
+  //   starting at the first block of a continue construct.
+  //
+  //   The kContinue can't be the child of the other because either:
+  //     - Either it would be a single block loop but in that case there is no
+  //       kLoop construct for it, by construction.
+  //     - The kContinue is in a loop that is not single-block; and the
+  //       selection contains the kContinue block but not the loop block. That
+  //       breaks dominance rules. That is, the continue target is dominated by
+  //       that loop header, and so gets found on the outside before the
+  //       selection is found. The selection is inside the outer loop.
+  //
+  // So we fall into one of the following cases:
+  //  - We are entering 0 or 1 constructs, or
+  //  - We are entering 2 constructs, with the outer one being a kContinue, the
+  //    inner one is not a continue.
+  if (entering_constructs.size() > 2) {
+    return Fail() << "internal error: bad construct nesting found";
+  }
+  if (entering_constructs.size() == 2) {
+    auto inner_kind = entering_constructs[0]->kind;
+    auto outer_kind = entering_constructs[1]->kind;
+    if (outer_kind != Construct::kContinue) {
+      return Fail() << "internal error: bad construct nesting. Only Continue "
+                       "construct can be outer construct on same block";
+    }
+    if (inner_kind == Construct::kContinue) {
+      return Fail() << "internal error: unsupported construct nesting: "
+                       "Continue around Continue";
+    }
+    if (inner_kind != Construct::kIfSelection &&
+        inner_kind != Construct::kSwitchSelection &&
+        inner_kind != Construct::kLoop) {
+      return Fail() << "internal error: bad construct nesting. Continue around "
+                       "something other than if, switch, or loop";
+    }
+  }
+
+  // Enter constructs from outermost to innermost.
+  // kLoop and kContinue push a new statement-block onto the stack before
+  // emitting statements in the block.
+  // kIfSelection and kSwitchSelection emit statements in the block and then
+  // emit push a new statement-block. Only emit the statements in the block
+  // once.
+
+  // Have we emitted the statements for this block?
+  bool emitted = false;
+  for (auto iter = entering_constructs.rbegin();
+       iter != entering_constructs.rend(); ++iter) {
+    const Construct* construct = *iter;
+
+    switch (construct->kind) {
+      case Construct::kFunction:
+        return Fail() << "internal error: nested function construct";
+
+      case Construct::kLoop:
+        return Fail() << "unhandled: loop construct";
+
+      case Construct::kContinue:
+        return Fail() << "unhandled: continue construct";
+
+      case Construct::kIfSelection:
+        if (!EmitStatementsInBasicBlock(block_info, &emitted)) {
+          return false;
+        }
+        if (!EmitIfStart(block_info)) {
+          return false;
+        }
+        break;
+
+      case Construct::kSwitchSelection:
+        return Fail() << "unhandled: switch construct";
+    }
+  }
+
+  // If we aren't starting or transitioning, then emit the normal
+  // statements now.
+  if (!EmitStatementsInBasicBlock(block_info, &emitted)) {
+    return false;
+  }
+
+  if (!EmitNormalTerminator(block_info)) {
+    return false;
+  }
+  return success();
+}
+
+bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
+  // The block is the if-header block.  So its construct is the if construct.
+  auto* construct = block_info.construct;
+  assert(construct->kind == Construct::kIfSelection);
+  assert(construct->begin_id == block_info.id);
+
+  const auto* const false_head = block_info.false_head;
+  const auto* const premerge_head = block_info.premerge_head;
+
+  auto* const if_stmt =
+      AddStatement(std::make_unique<ast::IfStatement>())->AsIf();
+  const auto condition_id =
+      block_info.basic_block->terminator()->GetSingleWordInOperand(0);
+  // Generate the code for the condition.
+  if_stmt->set_condition(std::move(MakeExpression(condition_id).expr));
+
+  // Compute the block IDs that should end the then-clause and the else-clause.
+
+  // We need to know where the *emitted* selection should end, i.e. the intended
+  // merge block id.  That should be the current premerge block, if it exists,
+  // or otherwise the declared merge block.
+  //
+  // This is another way to think about it:
+  //   If there is a premerge, then there are three cases:
+  //    - premerge_head is different from the true_head and false_head:
+  //      - Premerge comes last. In effect, move the selection merge up
+  //        to where the premerge begins.
+  //    - premerge_head is the same as the false_head
+  //      - This is really an if-then without an else clause.
+  //        Move the merge up to where the premerge is.
+  //    - premerge_head is the same as the true_head
+  //      - This is really an if-else without an then clause.
+  //        Emit it as:   if (cond) {} else {....}
+  //        Move the merge up to where the premerge is.
+  const uint32_t intended_merge =
+      premerge_head ? premerge_head->id : construct->end_id;
+
+  // then-clause:
+  //   If true_head exists:
+  //     spans from true head to the earlier of the false head (if it exists)
+  //     or the selection merge.
+  //   Otherwise:
+  //     ends at from the false head (if it exists), otherwise the selection
+  //     end.
+  const uint32_t then_end = false_head ? false_head->id : intended_merge;
+
+  // else-clause:
+  //   ends at the premerge head (if it exists) or at the selection end.
+  const uint32_t else_end = premerge_head ? premerge_head->id : intended_merge;
+
+  // Push statement blocks for the then-clause and the else-clause.
+  // But make sure we do it in the right order.
+
+  auto push_then = [this, if_stmt, then_end, construct]() {
+    // Push the then clause onto the stack.
+    PushNewStatementBlock(construct, then_end, [if_stmt](StatementBlock* s) {
+      // The "then" consists of the statement list
+      // from the top of statments stack, without an
+      // elseif condition.
+      if_stmt->set_body(std::move(s->statements));
+    });
+  };
+
+  auto push_else = [this, if_stmt, else_end, construct]() {
+    // Push the else clause onto the stack first.
+    PushNewStatementBlock(construct, else_end, [if_stmt](StatementBlock* s) {
+      // The "else" consists of the statement list from the top of statments
+      // stack, without an elseif condition.
+      ast::ElseStatementList else_stmts;
+      else_stmts.emplace_back(std::make_unique<ast::ElseStatement>(
+          nullptr, std::move(s->statements)));
+      if_stmt->set_else_statements(std::move(else_stmts));
+    });
+  };
+
+  if (GetBlockInfo(else_end)->pos < GetBlockInfo(then_end)->pos) {
+    // Process the else-clause first.  The then-clause will be empty so avoid
+    // pushing onto the stack at all.
+    push_else();
+  } else {
+    // Blocks for the then-clause appear before blocks for the else-clause.
+    // So push the else-clause handling onto the stack first. The else-clause
+    // might be empty, but this works anyway.
+    push_else();
+    push_then();
+  }
+
+  return success();
+}
+
+bool FunctionEmitter::EmitNormalTerminator(const BlockInfo&) {
+  // TODO(dneto): emit fallthrough, break, continue, return, kill
+  return true;
+}
+
+bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
+                                                 bool* already_emitted) {
+  if (*already_emitted) {
+    // Only emit this part of the basic block once.
+    return true;
+  }
+  const spvtools::opt::BasicBlock& bb = *(block_info.basic_block);
   const auto* terminator = bb.terminator();
   const auto* merge = bb.GetMergeInst();  // Might be nullptr
   // Emit regular statements.
@@ -1447,7 +1733,7 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(
       return false;
     }
   }
-  // TODO(dneto): Handle the terminator
+  *already_emitted = true;
   return true;
 }
 

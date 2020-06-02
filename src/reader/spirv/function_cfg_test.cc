@@ -27,6 +27,9 @@ namespace reader {
 namespace spirv {
 namespace {
 
+using ::testing::Eq;
+using ::testing::HasSubstr;
+
 std::string Dump(const std::vector<uint32_t>& v) {
   std::ostringstream o;
   o << "{";
@@ -46,16 +49,29 @@ std::string CommonTypes() {
     OpCapability Shader
     OpMemoryModel Logical Simple
 
+    OpName %var "var"
+
     %void = OpTypeVoid
     %voidfn = OpTypeFunction %void
 
     %bool = OpTypeBool
-    %cond = OpUndef %bool
-    %cond2 = OpUndef %bool
-    %cond3 = OpUndef %bool
+    %cond = OpConstantNull %bool
+    %cond2 = OpConstantTrue %bool
+    %cond3 = OpConstantFalse %bool
 
     %uint = OpTypeInt 32 0
-    %selector = OpUndef %uint
+    %selector = OpConstant %uint 42
+
+    %uint_0 = OpConstant %uint 0
+    %uint_1 = OpConstant %uint 1
+    %uint_2 = OpConstant %uint 2
+    %uint_3 = OpConstant %uint 3
+    %uint_4 = OpConstant %uint 4
+    %uint_5 = OpConstant %uint 5
+    %uint_6 = OpConstant %uint 6
+
+    %ptr_Private_uint = OpTypePointer Private %uint
+    %var = OpVariable %ptr_Private_uint Private
 
     %999 = OpConstant %uint 999
   )";
@@ -677,7 +693,7 @@ TEST_F(SpvParserTest, RegisterMerges_BadMergeBlock) {
   fe.RegisterBasicBlocks();
   EXPECT_FALSE(fe.RegisterMerges());
   EXPECT_THAT(p->error(),
-              Eq("Structured header block 10 declares invalid merge block 1"));
+              Eq("Structured header block 10 declares invalid merge block 2"));
 }
 
 TEST_F(SpvParserTest, RegisterMerges_HeaderIsItsOwnMerge) {
@@ -6642,7 +6658,6 @@ TEST_F(SpvParserTest,
      OpFunctionEnd
 )";
   auto* p = parser(test::Assemble(assembly));
-  std::cout << assembly;
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_FALSE(FlowFindIfSelectionInternalHeaders(&fe));
@@ -6727,6 +6742,488 @@ TEST_F(SpvParserTest, DISABLED_BlockIsContinueForMoreThanOneHeader) {
      OpReturn
      OpFunctionEnd
 )";
+}
+
+TEST_F(SpvParserTest, EmitBody_If_Empty) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %99 %99
+
+     %99 = OpLabel
+     OpReturn
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(If{
+  (
+    ScalarConstructor{false}
+  )
+  {
+  }
+}
+Else{
+  {
+  }
+}
+)"));
+}
+
+TEST_F(SpvParserTest, EmitBody_If_Then_NoElse) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_0
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %30 %99
+
+     %99 = OpLabel
+     OpStore %var %999
+     OpReturn
+
+     %30 = OpLabel
+     OpStore %var %uint_1
+     OpBranch %99
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{0}
+}
+If{
+  (
+    ScalarConstructor{false}
+  )
+  {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{1}
+    }
+  }
+}
+Else{
+  {
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{999}
+}
+)"));
+}
+
+TEST_F(SpvParserTest, EmitBody_If_NoThen_Else) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_0
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %99 %30
+
+     %99 = OpLabel
+     OpStore %var %999
+     OpReturn
+
+     %30 = OpLabel
+     OpStore %var %uint_1
+     OpBranch %99
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{0}
+}
+If{
+  (
+    ScalarConstructor{false}
+  )
+  {
+  }
+}
+Else{
+  {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{1}
+    }
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{999}
+}
+)"));
+}
+
+TEST_F(SpvParserTest, EmitBody_If_Then_Else) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_0
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %30 %40
+
+     %99 = OpLabel
+     OpStore %var %999
+     OpReturn
+
+     %30 = OpLabel
+     OpStore %var %uint_1
+     OpBranch %99
+
+     %40 = OpLabel
+     OpStore %var %uint_2
+     OpBranch %99
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{0}
+}
+If{
+  (
+    ScalarConstructor{false}
+  )
+  {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{1}
+    }
+  }
+}
+Else{
+  {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{2}
+    }
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{999}
+}
+)"));
+}
+
+TEST_F(SpvParserTest, EmitBody_If_Then_Else_Premerge) {
+  // TODO(dneto): This should get an extra if(true) around
+  // the premerge code.
+  // See https://bugs.chromium.org/p/tint/issues/detail?id=82
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_0
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %30 %40
+
+     %80 = OpLabel ; premerge
+     OpStore %var %uint_3
+     OpBranch %99
+
+     %99 = OpLabel
+     OpStore %var %999
+     OpReturn
+
+     %30 = OpLabel
+     OpStore %var %uint_1
+     OpBranch %80
+
+     %40 = OpLabel
+     OpStore %var %uint_2
+     OpBranch %80
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{0}
+}
+If{
+  (
+    ScalarConstructor{false}
+  )
+  {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{1}
+    }
+  }
+}
+Else{
+  {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{2}
+    }
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{3}
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{999}
+}
+)"));
+}
+
+TEST_F(SpvParserTest, EmitBody_If_Then_Premerge) {
+  // The premerge *is* the else.
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_0
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %30 %80
+
+     %80 = OpLabel ; premerge
+     OpStore %var %uint_3
+     OpBranch %99
+
+     %99 = OpLabel
+     OpStore %var %999
+     OpReturn
+
+     %30 = OpLabel
+     OpStore %var %uint_1
+     OpBranch %80
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{0}
+}
+If{
+  (
+    ScalarConstructor{false}
+  )
+  {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{1}
+    }
+  }
+}
+Else{
+  {
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{3}
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{999}
+}
+)"));
+}
+
+TEST_F(SpvParserTest, EmitBody_If_Else_Premerge) {
+  // The premerge *is* the then-clause.
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_0
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %80 %30
+
+     %80 = OpLabel ; premerge
+     OpStore %var %uint_3
+     OpBranch %99
+
+     %99 = OpLabel
+     OpStore %var %999
+     OpReturn
+
+     %30 = OpLabel
+     OpStore %var %uint_1
+     OpBranch %80
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{0}
+}
+If{
+  (
+    ScalarConstructor{false}
+  )
+  {
+  }
+}
+Else{
+  {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{1}
+    }
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{3}
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{999}
+}
+)"));
+}
+
+TEST_F(SpvParserTest, EmitBody_If_Nest_If) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_0
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %30 %40
+
+     %30 = OpLabel ;; inner if #1
+     OpStore %var %uint_1
+     OpSelectionMerge %39 None
+     OpBranchConditional %cond2 %33 %39
+
+     %33 = OpLabel
+     OpStore %var %uint_2
+     OpBranch %39
+
+     %39 = OpLabel ;; inner merge
+     OpStore %var %uint_3
+     OpBranch %99
+
+     %40 = OpLabel ;; inner if #2
+     OpStore %var %uint_4
+     OpSelectionMerge %49 None
+     OpBranchConditional %cond2 %49 %43
+
+     %43 = OpLabel
+     OpStore %var %uint_5
+     OpBranch %49
+
+     %49 = OpLabel ;; 2nd inner merge
+     OpStore %var %uint_6
+     OpBranch %99
+
+     %99 = OpLabel
+     OpStore %var %999
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{0}
+}
+If{
+  (
+    ScalarConstructor{false}
+  )
+  {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{1}
+    }
+    If{
+      (
+        ScalarConstructor{true}
+      )
+      {
+        Assignment{
+          Identifier{var}
+          ScalarConstructor{2}
+        }
+      }
+    }
+    Else{
+      {
+      }
+    }
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{3}
+    }
+  }
+}
+Else{
+  {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{4}
+    }
+    If{
+      (
+        ScalarConstructor{true}
+      )
+      {
+      }
+    }
+    Else{
+      {
+        Assignment{
+          Identifier{var}
+          ScalarConstructor{5}
+        }
+      }
+    }
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{6}
+    }
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{999}
+}
+)"));
 }
 
 }  // namespace
