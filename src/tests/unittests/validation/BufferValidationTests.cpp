@@ -74,13 +74,6 @@ class BufferValidationTest : public ValidationTest {
 
           return device.CreateBuffer(&descriptor);
       }
-      wgpu::Buffer CreateSetSubDataBuffer(uint64_t size) {
-          wgpu::BufferDescriptor descriptor;
-          descriptor.size = size;
-          descriptor.usage = wgpu::BufferUsage::CopyDst;
-
-          return device.CreateBuffer(&descriptor);
-      }
 
       wgpu::CreateBufferMappedResult CreateBufferMapped(uint64_t size, wgpu::BufferUsage usage) {
           wgpu::BufferDescriptor descriptor;
@@ -429,72 +422,6 @@ TEST_F(BufferValidationTest, DestroyInsideMapWriteCallback) {
     queue.Submit(0, nullptr);
 }
 
-// Test the success case for Buffer::SetSubData
-TEST_F(BufferValidationTest, SetSubDataSuccess) {
-    wgpu::Buffer buf = CreateSetSubDataBuffer(4);
-
-    uint32_t foo = 0x01020304;
-    buf.SetSubData(0, sizeof(foo), &foo);
-}
-
-// Test error case for SetSubData out of bounds
-TEST_F(BufferValidationTest, SetSubDataOutOfBounds) {
-    wgpu::Buffer buf = CreateSetSubDataBuffer(1);
-
-    uint8_t foo[2] = {0, 0};
-    ASSERT_DEVICE_ERROR(buf.SetSubData(0, 2, foo));
-}
-
-// Test error case for SetSubData out of bounds with an overflow
-TEST_F(BufferValidationTest, SetSubDataOutOfBoundsOverflow) {
-    wgpu::Buffer buf = CreateSetSubDataBuffer(1000);
-
-    uint8_t foo[2] = {0, 0};
-
-    // An offset that when added to "2" would overflow to be zero and pass validation without
-    // overflow checks.
-    uint64_t offset = uint64_t(int64_t(0) - int64_t(2));
-
-    ASSERT_DEVICE_ERROR(buf.SetSubData(offset, 2, foo));
-}
-
-// Test error case for SetSubData with the wrong usage
-TEST_F(BufferValidationTest, SetSubDataWrongUsage) {
-    wgpu::BufferDescriptor descriptor;
-    descriptor.size = 4;
-    descriptor.usage = wgpu::BufferUsage::Vertex;
-
-    wgpu::Buffer buf = device.CreateBuffer(&descriptor);
-
-    uint8_t foo = 0;
-    ASSERT_DEVICE_ERROR(buf.SetSubData(0, sizeof(foo), &foo));
-}
-
-// Test SetSubData with unaligned size
-TEST_F(BufferValidationTest, SetSubDataWithUnalignedSize) {
-    wgpu::BufferDescriptor descriptor;
-    descriptor.size = 4;
-    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
-
-    wgpu::Buffer buf = device.CreateBuffer(&descriptor);
-
-    uint8_t value = 123;
-    ASSERT_DEVICE_ERROR(buf.SetSubData(0, sizeof(value), &value));
-}
-
-// Test SetSubData with unaligned offset
-TEST_F(BufferValidationTest, SetSubDataWithUnalignedOffset) {
-    wgpu::BufferDescriptor descriptor;
-    descriptor.size = 4000;
-    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
-
-    wgpu::Buffer buf = device.CreateBuffer(&descriptor);
-
-    uint64_t kOffset = 2999;
-    uint32_t value = 0x01020304;
-    ASSERT_DEVICE_ERROR(buf.SetSubData(kOffset, sizeof(value), &value));
-}
-
 // Test that it is valid to destroy an unmapped buffer
 TEST_F(BufferValidationTest, DestroyUnmappedBuffer) {
     {
@@ -547,7 +474,7 @@ TEST_F(BufferValidationTest, DestroyMappedBufferCausesImplicitUnmap) {
 
 // Test that it is valid to Destroy a destroyed buffer
 TEST_F(BufferValidationTest, DestroyDestroyedBuffer) {
-    wgpu::Buffer buf = CreateSetSubDataBuffer(4);
+    wgpu::Buffer buf = CreateMapWriteBuffer(4);
     buf.Destroy();
     buf.Destroy();
 }
@@ -580,14 +507,6 @@ TEST_F(BufferValidationTest, MapDestroyedBuffer) {
     }
 }
 
-// Test that it is invalid to call SetSubData on a destroyed buffer
-TEST_F(BufferValidationTest, SetSubDataDestroyedBuffer) {
-    wgpu::Buffer buf = CreateSetSubDataBuffer(4);
-    buf.Destroy();
-    uint8_t foo = 0;
-    ASSERT_DEVICE_ERROR(buf.SetSubData(0, sizeof(foo), &foo));
-}
-
 // Test that is is invalid to Map a mapped buffer
 TEST_F(BufferValidationTest, MapMappedBuffer) {
     {
@@ -614,24 +533,6 @@ TEST_F(BufferValidationTest, MapCreateBufferMappedBuffer) {
     {
         wgpu::Buffer buf = CreateBufferMapped(4, wgpu::BufferUsage::MapWrite).buffer;
         ASSERT_DEVICE_ERROR(buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr));
-        queue.Submit(0, nullptr);
-    }
-}
-
-// Test that it is invalid to call SetSubData on a mapped buffer
-TEST_F(BufferValidationTest, SetSubDataMappedBuffer) {
-    {
-        wgpu::Buffer buf = CreateMapReadBuffer(4);
-        buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
-        uint8_t foo = 0;
-        ASSERT_DEVICE_ERROR(buf.SetSubData(0, sizeof(foo), &foo));
-        queue.Submit(0, nullptr);
-    }
-    {
-        wgpu::Buffer buf = CreateMapWriteBuffer(4);
-        buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
-        uint8_t foo = 0;
-        ASSERT_DEVICE_ERROR(buf.SetSubData(0, sizeof(foo), &foo));
         queue.Submit(0, nullptr);
     }
 }
@@ -732,7 +633,11 @@ TEST_F(BufferValidationTest, SubmitDestroyedBuffer) {
 
 // Test that a map usage is required to call Unmap
 TEST_F(BufferValidationTest, UnmapWithoutMapUsage) {
-    wgpu::Buffer buf = CreateSetSubDataBuffer(4);
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buf = device.CreateBuffer(&descriptor);
+
     ASSERT_DEVICE_ERROR(buf.Unmap());
 }
 

@@ -55,7 +55,7 @@ TEST_P(BufferMapReadTests, SmallReadAtZero) {
     wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
     uint32_t myData = 0x01020304;
-    buffer.SetSubData(0, sizeof(myData), &myData);
+    queue.WriteBuffer(buffer, 0, &myData, sizeof(myData));
 
     const void* mappedData = MapReadAsyncAndWait(buffer);
     ASSERT_EQ(myData, *reinterpret_cast<const uint32_t*>(mappedData));
@@ -71,7 +71,7 @@ TEST_P(BufferMapReadTests, MapTwice) {
     wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
     uint32_t myData = 0x01020304;
-    buffer.SetSubData(0, sizeof(myData), &myData);
+    queue.WriteBuffer(buffer, 0, &myData, sizeof(myData));
 
     const void* mappedData = MapReadAsyncAndWait(buffer);
     EXPECT_EQ(myData, *reinterpret_cast<const uint32_t*>(mappedData));
@@ -79,7 +79,7 @@ TEST_P(BufferMapReadTests, MapTwice) {
     UnmapBuffer(buffer);
 
     myData = 0x05060708;
-    buffer.SetSubData(0, sizeof(myData), &myData);
+    queue.WriteBuffer(buffer, 0, &myData, sizeof(myData));
 
     const void* mappedData1 = MapReadAsyncAndWait(buffer);
     EXPECT_EQ(myData, *reinterpret_cast<const uint32_t*>(mappedData1));
@@ -100,7 +100,7 @@ TEST_P(BufferMapReadTests, LargeRead) {
     descriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
     wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
-    buffer.SetSubData(0, kDataSize * sizeof(uint32_t), myData.data());
+    queue.WriteBuffer(buffer, 0, myData.data(), kDataSize * sizeof(uint32_t));
 
     const void* mappedData = MapReadAsyncAndWait(buffer);
     ASSERT_EQ(0, memcmp(mappedData, myData.data(), kDataSize * sizeof(uint32_t)));
@@ -232,144 +232,6 @@ TEST_P(BufferMapWriteTests, ManyWrites) {
 }
 
 DAWN_INSTANTIATE_TEST(BufferMapWriteTests, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
-
-class BufferSetSubDataTests : public DawnTest {
-};
-
-// Test the simplest set sub data: setting one u32 at offset 0.
-TEST_P(BufferSetSubDataTests, SmallDataAtZero) {
-    wgpu::BufferDescriptor descriptor;
-    descriptor.size = 4;
-    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
-    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
-
-    uint32_t value = 0x01020304;
-    buffer.SetSubData(0, sizeof(value), &value);
-
-    EXPECT_BUFFER_U32_EQ(value, buffer, 0);
-}
-
-// Test the simplest set sub data: setting nothing
-TEST_P(BufferSetSubDataTests, ZeroSized) {
-    wgpu::BufferDescriptor descriptor;
-    descriptor.size = 4;
-    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
-    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
-
-    uint32_t initialValue = 0x42;
-    buffer.SetSubData(0, sizeof(initialValue), &initialValue);
-
-    buffer.SetSubData(0, 0, nullptr);
-
-    // The content of the buffer isn't changed
-    EXPECT_BUFFER_U32_EQ(initialValue, buffer, 0);
-}
-
-// Call SetSubData at offset 0 via a u32 twice. Test that data is updated accoordingly.
-TEST_P(BufferSetSubDataTests, SetTwice) {
-    wgpu::BufferDescriptor descriptor;
-    descriptor.size = 4;
-    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
-    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
-
-    uint32_t value = 0x01020304;
-    buffer.SetSubData(0, sizeof(value), &value);
-
-    EXPECT_BUFFER_U32_EQ(value, buffer, 0);
-
-    value = 0x05060708;
-    buffer.SetSubData(0, sizeof(value), &value);
-
-    EXPECT_BUFFER_U32_EQ(value, buffer, 0);
-}
-
-// Test that SetSubData offset works.
-TEST_P(BufferSetSubDataTests, SmallDataAtOffset) {
-    wgpu::BufferDescriptor descriptor;
-    descriptor.size = 4000;
-    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
-    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
-
-    constexpr uint64_t kOffset = 2000;
-    uint32_t value = 0x01020304;
-    buffer.SetSubData(kOffset, sizeof(value), &value);
-
-    EXPECT_BUFFER_U32_EQ(value, buffer, kOffset);
-}
-
-// Stress test for many calls to SetSubData
-TEST_P(BufferSetSubDataTests, ManySetSubData) {
-    // Note: Increasing the size of the buffer will likely cause timeout issues.
-    // In D3D12, timeout detection occurs when the GPU scheduler tries but cannot preempt the task
-    // executing these commands in-flight. If this takes longer than ~2s, a device reset occurs and
-    // fails the test. Since GPUs may or may not complete by then, this test must be disabled OR
-    // modified to be well-below the timeout limit.
-
-    // TODO (jiawei.shao@intel.com): find out why this test fails on Intel Vulkan Linux bots.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsVulkan() && IsLinux());
-    // TODO(https://bugs.chromium.org/p/dawn/issues/detail?id=228): Re-enable
-    // once the issue with Metal on 10.14.6 is fixed.
-    DAWN_SKIP_TEST_IF(IsMacOS() && IsIntel() && IsMetal());
-
-    constexpr uint64_t kSize = 4000 * 1000;
-    constexpr uint32_t kElements = 500 * 500;
-    wgpu::BufferDescriptor descriptor;
-    descriptor.size = kSize;
-    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
-    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
-
-    std::vector<uint32_t> expectedData;
-    for (uint32_t i = 0; i < kElements; ++i) {
-        buffer.SetSubData(i * sizeof(uint32_t), sizeof(i), &i);
-        expectedData.push_back(i);
-    }
-
-    EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), buffer, 0, kElements);
-}
-
-// Test using SetSubData for lots of data
-TEST_P(BufferSetSubDataTests, LargeSetSubData) {
-    constexpr uint64_t kSize = 4000 * 1000;
-    constexpr uint32_t kElements = 1000 * 1000;
-    wgpu::BufferDescriptor descriptor;
-    descriptor.size = kSize;
-    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
-    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
-
-    std::vector<uint32_t> expectedData;
-    for (uint32_t i = 0; i < kElements; ++i) {
-        expectedData.push_back(i);
-    }
-
-    buffer.SetSubData(0, kElements * sizeof(uint32_t), expectedData.data());
-
-    EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), buffer, 0, kElements);
-}
-
-// Test using SetSubData for super large data block
-TEST_P(BufferSetSubDataTests, SuperLargeSetSubData) {
-    constexpr uint64_t kSize = 12000 * 1000;
-    constexpr uint64_t kElements = 3000 * 1000;
-    wgpu::BufferDescriptor descriptor;
-    descriptor.size = kSize;
-    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
-    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
-
-    std::vector<uint32_t> expectedData;
-    for (uint32_t i = 0; i < kElements; ++i) {
-        expectedData.push_back(i);
-    }
-
-    buffer.SetSubData(0, kElements * sizeof(uint32_t), expectedData.data());
-
-    EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), buffer, 0, kElements);
-}
-
-DAWN_INSTANTIATE_TEST(BufferSetSubDataTests,
-                     D3D12Backend(),
-                     MetalBackend(),
-                     OpenGLBackend(),
-                     VulkanBackend());
 
 // TODO(enga): These tests should use the testing toggle to initialize resources to 1.
 class CreateBufferMappedTests : public DawnTest {

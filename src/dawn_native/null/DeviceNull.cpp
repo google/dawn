@@ -304,11 +304,10 @@ namespace dawn_native { namespace null {
         memcpy(mBackingData.get() + destinationOffset, ptr + sourceOffset, size);
     }
 
-    MaybeError Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const void* data) {
-        ASSERT(start + count <= GetSize());
+    void Buffer::DoWriteBuffer(uint64_t bufferOffset, const void* data, size_t size) {
+        ASSERT(bufferOffset + size <= GetSize());
         ASSERT(mBackingData);
-        memcpy(mBackingData.get() + start, data, count);
-        return {};
+        memcpy(mBackingData.get() + bufferOffset, data, size);
     }
 
     MaybeError Buffer::MapReadAsyncImpl(uint32_t serial) {
@@ -363,6 +362,14 @@ namespace dawn_native { namespace null {
 
     MaybeError Queue::SubmitImpl(uint32_t, CommandBufferBase* const*) {
         ToBackend(GetDevice())->SubmitPendingOperations();
+        return {};
+    }
+
+    MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
+                                      uint64_t bufferOffset,
+                                      const void* data,
+                                      size_t size) {
+        ToBackend(buffer)->DoWriteBuffer(bufferOffset, data, size);
         return {};
     }
 

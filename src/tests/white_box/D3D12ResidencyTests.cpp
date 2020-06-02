@@ -217,7 +217,7 @@ TEST_P(D3D12ResourceResidencyTests, AsyncMappedBufferRead) {
     wgpu::Buffer buffer = CreateBuffer(4, kMapReadBufferUsage);
 
     uint32_t data = 12345;
-    buffer.SetSubData(0, sizeof(uint32_t), &data);
+    queue.WriteBuffer(buffer, 0, &data, sizeof(uint32_t));
 
     // The mappable buffer should be resident.
     EXPECT_TRUE(CheckIfBufferIsResident(buffer));

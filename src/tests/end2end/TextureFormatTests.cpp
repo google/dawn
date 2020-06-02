@@ -224,7 +224,7 @@ class TextureFormatTest : public DawnTest {
         ASSERT(sampleDataSize % sampleFormatInfo.texelByteSize == 0);
         uint32_t width = sampleDataSize / sampleFormatInfo.texelByteSize;
 
-        // The input data must be a multiple of 4 byte in length for setSubData
+        // The input data must be a multiple of 4 byte in length for WriteBuffer
         ASSERT(sampleDataSize % 4 == 0);
         ASSERT(expectedRenderDataSize % 4 == 0);
 

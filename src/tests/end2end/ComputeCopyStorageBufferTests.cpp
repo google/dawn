@@ -48,7 +48,7 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
     for (uint32_t i = 0; i < kNumUints; ++i) {
         expected[i] = (i + 1u) * 0x11111111u;
     }
-    src.SetSubData(0, sizeof(expected), expected.data());
+    queue.WriteBuffer(src, 0, expected.data(), sizeof(expected));
     EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), src, 0, kNumUints);
 
     // Set up dst storage buffer
@@ -59,7 +59,7 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
     wgpu::Buffer dst = device.CreateBuffer(&dstDesc);
 
     std::array<uint32_t, kNumUints> zero{};
-    dst.SetSubData(0, sizeof(zero), zero.data());
+    queue.WriteBuffer(dst, 0, zero.data(), sizeof(zero));
 
     // Set up bind group and issue dispatch
     wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),

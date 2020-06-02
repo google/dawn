@@ -366,6 +366,27 @@ namespace dawn_wire { namespace client {
         cmd.Serialize(allocatedBuffer, *fence->device->GetClient());
     }
 
+    void ClientHandwrittenQueueWriteBuffer(WGPUQueue cQueue,
+                                           WGPUBuffer cBuffer,
+                                           uint64_t bufferOffset,
+                                           const void* data,
+                                           size_t size) {
+        Queue* queue = reinterpret_cast<Queue*>(cQueue);
+        Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
+
+        QueueWriteBufferInternalCmd cmd;
+        cmd.queueId = queue->id;
+        cmd.bufferId = buffer->id;
+        cmd.bufferOffset = bufferOffset;
+        cmd.data = static_cast<const uint8_t*>(data);
+        cmd.size = size;
+
+        Client* wireClient = buffer->device->GetClient();
+        size_t requiredSize = cmd.GetRequiredSize();
+        char* allocatedBuffer = static_cast<char*>(wireClient->GetCmdSpace(requiredSize));
+        cmd.Serialize(allocatedBuffer);
+    }
+
     void ClientDeviceReference(WGPUDevice) {
     }
 

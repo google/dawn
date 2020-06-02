@@ -66,7 +66,7 @@ namespace dawn_native { namespace d3d12 {
         Serial mLastUsage = 0;
         // mLastSubmission denotes the last time this pageable was submitted to the GPU. Note that
         // although this variable often contains the same value as mLastUsage, it can differ in some
-        // situations. When some asynchronous APIs (like SetSubData) are called, mLastUsage is
+        // situations. When some asynchronous APIs (like WriteBuffer) are called, mLastUsage is
         // updated upon the call, but the backend operation is deferred until the next submission
         // to the GPU. This makes mLastSubmission unique from mLastUsage, and allows us to
         // accurately identify when a pageable can be evicted.

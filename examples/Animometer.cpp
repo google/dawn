@@ -150,7 +150,7 @@ void frame() {
     for (auto& data : shaderData) {
         data.time = f / 60.0f;
     }
-    ubo.SetSubData(0, kNumTriangles * sizeof(ShaderData), shaderData.data());
+    queue.WriteBuffer(ubo, 0, shaderData.data(), kNumTriangles * sizeof(ShaderData));
 
     utils::ComboRenderPassDescriptor renderPass({backbufferView});
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();

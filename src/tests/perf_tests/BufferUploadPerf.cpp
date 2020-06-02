@@ -22,7 +22,7 @@ namespace {
     constexpr unsigned int kNumIterations = 50;
 
     enum class UploadMethod {
-        SetSubData,
+        WriteBuffer,
         CreateBufferMapped,
     };
 
@@ -52,8 +52,8 @@ namespace {
         ostream << static_cast<const AdapterTestParam&>(param);
 
         switch (param.uploadMethod) {
-            case UploadMethod::SetSubData:
-                ostream << "_SetSubData";
+            case UploadMethod::WriteBuffer:
+                ostream << "_WriteBuffer";
                 break;
             case UploadMethod::CreateBufferMapped:
                 ostream << "_CreateBufferMapped";
@@ -113,11 +113,11 @@ void BufferUploadPerf::SetUp() {
 
 void BufferUploadPerf::Step() {
     switch (GetParam().uploadMethod) {
-        case UploadMethod::SetSubData: {
+        case UploadMethod::WriteBuffer: {
             for (unsigned int i = 0; i < kNumIterations; ++i) {
-                dst.SetSubData(0, data.size(), data.data());
+                queue.WriteBuffer(dst, 0, data.data(), data.size());
             }
-            // Make sure all SetSubData's are flushed.
+            // Make sure all WriteBuffer's are flushed.
             queue.Submit(0, nullptr);
             break;
         }
@@ -150,7 +150,7 @@ TEST_P(BufferUploadPerf, Run) {
 DAWN_INSTANTIATE_PERF_TEST_SUITE_P(BufferUploadPerf,
                                    {D3D12Backend(), MetalBackend(), OpenGLBackend(),
                                     VulkanBackend()},
-                                   {UploadMethod::SetSubData, UploadMethod::CreateBufferMapped},
+                                   {UploadMethod::WriteBuffer, UploadMethod::CreateBufferMapped},
                                    {UploadSize::BufferSize_1KB, UploadSize::BufferSize_64KB,
                                     UploadSize::BufferSize_1MB, UploadSize::BufferSize_4MB,
                                     UploadSize::BufferSize_16MB});

@@ -42,7 +42,7 @@ void ComputeSharedMemoryTests::BasicTest(const char* shader) {
     wgpu::Buffer dst = device.CreateBuffer(&dstDesc);
 
     const uint32_t zero = 0;
-    dst.SetSubData(0, sizeof(zero), &zero);
+    queue.WriteBuffer(dst, 0, &zero, sizeof(zero));
 
     // Set up bind group and issue dispatch
     wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),

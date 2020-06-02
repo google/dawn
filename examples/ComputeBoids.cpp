@@ -89,9 +89,9 @@ void initBuffers() {
             wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Storage;
         particleBuffers[i] = device.CreateBuffer(&descriptor);
 
-        particleBuffers[i].SetSubData(0,
-            sizeof(Particle) * kNumParticles,
-            reinterpret_cast<uint8_t*>(initialParticles.data()));
+        queue.WriteBuffer(particleBuffers[i], 0,
+                          reinterpret_cast<uint8_t*>(initialParticles.data()),
+                          sizeof(Particle) * kNumParticles);
     }
 }
 

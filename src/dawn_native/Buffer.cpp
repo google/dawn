@@ -19,6 +19,7 @@
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/MapRequestTracker.h"
+#include "dawn_native/Queue.h"
 #include "dawn_native/ValidationUtils_autogen.h"
 
 #include <cstdio>
@@ -62,10 +63,6 @@ namespace dawn_native {
                 return {};
             }
 
-            MaybeError SetSubDataImpl(uint32_t start, uint32_t count, const void* data) override {
-                UNREACHABLE();
-                return {};
-            }
             MaybeError MapReadAsyncImpl(uint32_t serial) override {
                 UNREACHABLE();
                 return {};
@@ -186,7 +183,7 @@ namespace dawn_native {
         return {};
     }
 
-    MaybeError BufferBase::ValidateCanUseInSubmitNow() const {
+    MaybeError BufferBase::ValidateCanUseOnQueueNow() const {
         ASSERT(!IsError());
 
         switch (mState) {
@@ -244,14 +241,10 @@ namespace dawn_native {
     }
 
     void BufferBase::SetSubData(uint32_t start, uint32_t count, const void* data) {
-        if (GetDevice()->ConsumedError(ValidateSetSubData(start, count))) {
-            return;
-        }
-        ASSERT(!IsError());
-
-        if (GetDevice()->ConsumedError(SetSubDataImpl(start, count, data))) {
-            return;
-        }
+        Ref<QueueBase> queue = AcquireRef(GetDevice()->GetDefaultQueue());
+        GetDevice()->EmitDeprecationWarning(
+            "Buffer::SetSubData is deprecated, use Queue::WriteBuffer instead");
+        queue->WriteBuffer(this, start, data, count);
     }
 
     void BufferBase::MapReadAsync(WGPUBufferMapReadCallback callback, void* userdata) {
@@ -277,22 +270,6 @@ namespace dawn_native {
 
         MapRequestTracker* tracker = GetDevice()->GetMapRequestTracker();
         tracker->Track(this, mMapSerial, false);
-    }
-
-    MaybeError BufferBase::SetSubDataImpl(uint32_t start, uint32_t count, const void* data) {
-        DynamicUploader* uploader = GetDevice()->GetDynamicUploader();
-
-        UploadHandle uploadHandle;
-        DAWN_TRY_ASSIGN(uploadHandle,
-                        uploader->Allocate(count, GetDevice()->GetPendingCommandSerial()));
-        ASSERT(uploadHandle.mappedBuffer != nullptr);
-
-        memcpy(uploadHandle.mappedBuffer, data, count);
-
-        DAWN_TRY(GetDevice()->CopyFromStagingToBuffer(
-            uploadHandle.stagingBuffer, uploadHandle.startOffset, this, start, count));
-
-        return {};
     }
 
     void BufferBase::MapWriteAsync(WGPUBufferMapWriteCallback callback, void* userdata) {
@@ -376,45 +353,6 @@ namespace dawn_native {
         mMapReadCallback = nullptr;
         mMapWriteCallback = nullptr;
         mMapUserdata = 0;
-    }
-
-    MaybeError BufferBase::ValidateSetSubData(uint32_t start, uint32_t count) const {
-        DAWN_TRY(GetDevice()->ValidateIsAlive());
-        DAWN_TRY(GetDevice()->ValidateObject(this));
-
-        switch (mState) {
-            case BufferState::Mapped:
-                return DAWN_VALIDATION_ERROR("Buffer is mapped");
-            case BufferState::Destroyed:
-                return DAWN_VALIDATION_ERROR("Buffer is destroyed");
-            case BufferState::Unmapped:
-                break;
-        }
-
-        if (count > GetSize()) {
-            return DAWN_VALIDATION_ERROR("Buffer subdata with too much data");
-        }
-
-        // Metal requests buffer to buffer copy size must be a multiple of 4 bytes on macOS
-        if (count % 4 != 0) {
-            return DAWN_VALIDATION_ERROR("Buffer subdata size must be a multiple of 4 bytes");
-        }
-
-        // Metal requests offset of buffer to buffer copy must be a multiple of 4 bytes on macOS
-        if (start % 4 != 0) {
-            return DAWN_VALIDATION_ERROR("Start position must be a multiple of 4 bytes");
-        }
-
-        // Note that no overflow can happen because we already checked for GetSize() >= count
-        if (start > GetSize() - count) {
-            return DAWN_VALIDATION_ERROR("Buffer subdata out of range");
-        }
-
-        if (!(mUsage & wgpu::BufferUsage::CopyDst)) {
-            return DAWN_VALIDATION_ERROR("Buffer needs the CopyDst usage bit");
-        }
-
-        return {};
     }
 
     MaybeError BufferBase::ValidateMap(wgpu::BufferUsage requiredUsage,

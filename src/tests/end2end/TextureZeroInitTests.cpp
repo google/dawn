@@ -586,7 +586,7 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
     wgpu::Buffer bufferTex = device.CreateBuffer(&bufferDescriptor);
     // Add data to buffer to ensure it is initialized
     uint32_t data = 100;
-    bufferTex.SetSubData(0, sizeof(data), &data);
+    queue.WriteBuffer(bufferTex, 0, &data, sizeof(data));
 
     wgpu::SamplerDescriptor samplerDesc = utils::GetDefaultSamplerDescriptor();
     wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);

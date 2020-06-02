@@ -205,7 +205,7 @@ class DepthSamplingTest : public DawnTest {
     }
 
     void UpdateInputTexture(wgpu::CommandEncoder commandEncoder, float textureValue) {
-        mTextureUploadBuffer.SetSubData(0, sizeof(float), &textureValue);
+        queue.WriteBuffer(mTextureUploadBuffer, 0, &textureValue, sizeof(float));
 
         wgpu::BufferCopyView bufferCopyView = {};
         bufferCopyView.buffer = mTextureUploadBuffer;
@@ -315,7 +315,7 @@ class DepthSamplingTest : public DawnTest {
                           float compareRef,
                           wgpu::CompareFunction compare,
                           std::vector<float> textureValues) {
-        mUniformBuffer.SetSubData(0, sizeof(float), &compareRef);
+        queue.WriteBuffer(mUniformBuffer, 0, &compareRef, sizeof(float));
 
         wgpu::SamplerDescriptor samplerDesc;
         samplerDesc.compare = compare;
@@ -357,7 +357,7 @@ class DepthSamplingTest : public DawnTest {
                           float compareRef,
                           wgpu::CompareFunction compare,
                           std::vector<float> textureValues) {
-        mUniformBuffer.SetSubData(0, sizeof(float), &compareRef);
+        queue.WriteBuffer(mUniformBuffer, 0, &compareRef, sizeof(float));
 
         wgpu::SamplerDescriptor samplerDesc;
         samplerDesc.compare = compare;

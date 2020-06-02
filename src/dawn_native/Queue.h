@@ -33,15 +33,28 @@ namespace dawn_native {
         void Submit(uint32_t commandCount, CommandBufferBase* const* commands);
         void Signal(Fence* fence, uint64_t signalValue);
         Fence* CreateFence(const FenceDescriptor* descriptor);
+        void WriteBuffer(BufferBase* buffer, uint64_t bufferOffset, const void* data, size_t size);
 
       private:
         QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
-        virtual MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands);
+        MaybeError WriteBufferInternal(BufferBase* buffer,
+                                       uint64_t bufferOffset,
+                                       const void* data,
+                                       size_t size);
 
-        MaybeError ValidateSubmit(uint32_t commandCount, CommandBufferBase* const* commands);
-        MaybeError ValidateSignal(const Fence* fence, uint64_t signalValue);
-        MaybeError ValidateCreateFence(const FenceDescriptor* descriptor);
+        virtual MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands);
+        virtual MaybeError WriteBufferImpl(BufferBase* buffer,
+                                           uint64_t bufferOffset,
+                                           const void* data,
+                                           size_t size);
+
+        MaybeError ValidateSubmit(uint32_t commandCount, CommandBufferBase* const* commands) const;
+        MaybeError ValidateSignal(const Fence* fence, uint64_t signalValue) const;
+        MaybeError ValidateCreateFence(const FenceDescriptor* descriptor) const;
+        MaybeError ValidateWriteBuffer(const BufferBase* buffer,
+                                       uint64_t bufferOffset,
+                                       size_t size) const;
     };
 
 }  // namespace dawn_native

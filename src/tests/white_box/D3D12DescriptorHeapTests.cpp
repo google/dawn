@@ -601,7 +601,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeReuseUBOMultipleSubmits) {
     // Re-encode the first bindgroup again.
     {
         std::array<float, 4> greenColor = {0, 1, 0, 1};
-        firstUniformBuffer.SetSubData(0, sizeof(greenColor), &greenColor);
+        queue.WriteBuffer(firstUniformBuffer, 0, &greenColor, sizeof(greenColor));
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         {

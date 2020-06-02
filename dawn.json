@@ -902,6 +902,15 @@
                 "args": [
                     {"name": "descriptor", "type": "fence descriptor", "annotation": "const*", "optional": true}
                 ]
+            },
+            {
+                "name": "write buffer",
+                "args": [
+                    {"name": "buffer", "type": "buffer"},
+                    {"name": "buffer offset", "type": "uint64_t"},
+                    {"name": "data", "type": "void", "annotation": "const*", "length": "size"},
+                    {"name": "size", "type": "size_t"}
+                ]
             }
         ]
     },
@@ -1634,6 +1643,9 @@
         "category": "native"
     },
     "int32_t": {
+        "category": "native"
+    },
+    "size_t": {
         "category": "native"
     },
     "uint64_t": {

@@ -320,8 +320,8 @@ TEST_P(DeviceLostTest, BufferMapReadAsyncBeforeLossFails) {
     SetCallbackAndLoseForTesting();
 }
 
-// Test that SetSubData fails after device is lost
-TEST_P(DeviceLostTest, SetSubDataFails) {
+// Test that WriteBuffer fails after device is lost
+TEST_P(DeviceLostTest, WriteBufferFails) {
     wgpu::BufferDescriptor bufferDescriptor;
     bufferDescriptor.size = sizeof(float);
     bufferDescriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
@@ -329,8 +329,8 @@ TEST_P(DeviceLostTest, SetSubDataFails) {
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
     SetCallbackAndLoseForTesting();
-    std::array<float, 1> data = {12};
-    ASSERT_DEVICE_ERROR(buffer.SetSubData(0, sizeof(float), data.data()));
+    float data = 12.0f;
+    ASSERT_DEVICE_ERROR(queue.WriteBuffer(buffer, 0, &data, sizeof(data)));
 }
 
 // Test that Command Encoder Finish fails when device lost

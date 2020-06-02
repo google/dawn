@@ -52,7 +52,7 @@ scripts/perf_test_runner.py DrawCallPerf.Run/Vulkan__e_skip_validation
 
 **BufferUploadPerf**
 
-Tests repetitively uploading data to the GPU using either `SetSubData` or `CreateBufferMapped`.
+Tests repetitively uploading data to the GPU using either `WriteBuffer` or `CreateBufferMapped`.
 
 **DrawCallPerf**
 

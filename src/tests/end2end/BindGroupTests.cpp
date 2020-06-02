@@ -770,9 +770,9 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
     wgpu::Buffer buffer2 = device.CreateBuffer(&bufferDescriptor);
 
     // Populate the values
-    buffer0.SetSubData(offsets[0], sizeof(uint32_t), &values[0]);
-    buffer2.SetSubData(offsets[1], sizeof(uint32_t), &values[1]);
-    buffer3.SetSubData(offsets[2], sizeof(uint32_t), &values[2]);
+    queue.WriteBuffer(buffer0, offsets[0], &values[0], sizeof(uint32_t));
+    queue.WriteBuffer(buffer2, offsets[1], &values[1], sizeof(uint32_t));
+    queue.WriteBuffer(buffer3, offsets[2], &values[2], sizeof(uint32_t));
 
     wgpu::Buffer outputBuffer = utils::CreateBufferFromData(
         device, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage, {0, 0, 0});

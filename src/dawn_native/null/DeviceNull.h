@@ -187,11 +187,12 @@ namespace dawn_native { namespace null {
                              uint64_t destinationOffset,
                              uint64_t size);
 
+        void DoWriteBuffer(uint64_t bufferOffset, const void* data, size_t size);
+
       private:
         ~Buffer() override;
 
         // Dawn API
-        MaybeError SetSubDataImpl(uint32_t start, uint32_t count, const void* data) override;
         MaybeError MapReadAsyncImpl(uint32_t serial) override;
         MaybeError MapWriteAsyncImpl(uint32_t serial) override;
         void UnmapImpl() override;
@@ -222,6 +223,10 @@ namespace dawn_native { namespace null {
       private:
         ~Queue() override;
         MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
+        MaybeError WriteBufferImpl(BufferBase* buffer,
+                                   uint64_t bufferOffset,
+                                   const void* data,
+                                   size_t size) override;
     };
 
     class SwapChain final : public NewSwapChainBase {

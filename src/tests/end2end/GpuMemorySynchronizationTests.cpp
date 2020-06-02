@@ -29,7 +29,7 @@ class GpuMemorySyncTests : public DawnTest {
         wgpu::Buffer buffer = device.CreateBuffer(&srcDesc);
 
         int myData = 0;
-        buffer.SetSubData(0, sizeof(myData), &myData);
+        queue.WriteBuffer(buffer, 0, &myData, sizeof(myData));
         return buffer;
     }
 
@@ -432,7 +432,7 @@ class MultipleWriteThenMultipleReadTests : public DawnTest {
         wgpu::Buffer buffer = device.CreateBuffer(&srcDesc);
 
         std::vector<uint8_t> zeros(size, 0);
-        buffer.SetSubData(0, size, zeros.data());
+        queue.WriteBuffer(buffer, 0, zeros.data(), size);
 
         return buffer;
     }

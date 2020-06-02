@@ -568,18 +568,20 @@ void DrawCallPerf::Step() {
         switch (GetParam().bindGroupType) {
             case BindGroup::NoChange:
             case BindGroup::Redundant:
-                mUniformBuffers[0].SetSubData(0, 3 * sizeof(float), mUniformBufferData.data());
+                queue.WriteBuffer(mUniformBuffers[0], 0, mUniformBufferData.data(),
+                                  3 * sizeof(float));
                 break;
             case BindGroup::NoReuse:
             case BindGroup::Multiple:
                 for (uint32_t i = 0; i < kNumDraws; ++i) {
-                    mUniformBuffers[i].SetSubData(
-                        0, 3 * sizeof(float), mUniformBufferData.data() + i * mNumUniformFloats);
+                    queue.WriteBuffer(mUniformBuffers[i], 0,
+                                      mUniformBufferData.data() + i * mNumUniformFloats,
+                                      3 * sizeof(float));
                 }
                 break;
             case BindGroup::Dynamic:
-                mUniformBuffers[0].SetSubData(0, mUniformBufferData.size() * sizeof(float),
-                                              mUniformBufferData.data());
+                queue.WriteBuffer(mUniformBuffers[0], 0, mUniformBufferData.data(),
+                                  mUniformBufferData.size() * sizeof(float));
                 break;
         }
     }

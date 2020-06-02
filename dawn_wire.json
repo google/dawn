@@ -47,6 +47,13 @@
         "destroy object": [
             { "name": "object type", "type": "ObjectType" },
             { "name": "object id", "type": "ObjectId" }
+        ],
+        "queue write buffer internal": [
+            {"name": "queue id", "type": "ObjectId" },
+            {"name": "buffer id", "type": "ObjectId" },
+            {"name": "buffer offset", "type": "uint64_t"},
+            {"name": "data", "type": "uint8_t", "annotation": "const*", "length": "size"},
+            {"name": "size", "type": "size_t"}
         ]
     },
     "return commands": {
@@ -94,7 +101,8 @@
             "DeviceSetDeviceLostCallback",
             "DeviceSetUncapturedErrorCallback",
             "FenceGetCompletedValue",
-            "FenceOnCompletion"
+            "FenceOnCompletion",
+            "QueueWriteBuffer"
         ],
         "client_handwritten_commands": [
             "BufferDestroy",

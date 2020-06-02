@@ -50,14 +50,6 @@ namespace dawn_native { namespace opengl {
         return {};
     }
 
-    MaybeError Buffer::SetSubDataImpl(uint32_t start, uint32_t count, const void* data) {
-        const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
-
-        gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
-        gl.BufferSubData(GL_ARRAY_BUFFER, start, count, data);
-        return {};
-    }
-
     MaybeError Buffer::MapReadAsyncImpl(uint32_t serial) {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
 

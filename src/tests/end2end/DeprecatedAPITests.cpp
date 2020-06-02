@@ -58,6 +58,30 @@ class DeprecationTests : public DawnTest {
         }                                                                        \
     } while (0)
 
+// Test that using SetSubData emits a deprecation warning.
+TEST_P(DeprecationTests, SetSubDataDeprecated) {
+    wgpu::BufferDescriptor descriptor;
+    descriptor.usage = wgpu::BufferUsage::CopyDst;
+    descriptor.size = 4;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    EXPECT_DEPRECATION_WARNING(buffer.SetSubData(0, 0, nullptr));
+}
+
+// Test that using SetSubData works
+TEST_P(DeprecationTests, SetSubDataStillWorks) {
+    DAWN_SKIP_TEST_IF(IsNull());
+
+    wgpu::BufferDescriptor descriptor;
+    descriptor.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
+    descriptor.size = 4;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    uint32_t data = 2020;
+    EXPECT_DEPRECATION_WARNING(buffer.SetSubData(0, 4, &data));
+    EXPECT_BUFFER_U32_EQ(data, buffer, 0);
+}
+
 DAWN_INSTANTIATE_TEST(DeprecationTests,
                       D3D12Backend(),
                       MetalBackend(),

@@ -124,8 +124,8 @@ class CopyTests_T2B : public CopyTests {
             bufDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
             wgpu::Buffer buffer = device.CreateBuffer(&bufDescriptor);
             std::vector<RGBA8> emptyData(bufferSpec.size / kBytesPerTexel * textureSpec.arraySize);
-            buffer.SetSubData(0, static_cast<uint32_t>(emptyData.size() * sizeof(RGBA8)),
-                              emptyData.data());
+            queue.WriteBuffer(buffer, 0, emptyData.data(),
+                              static_cast<uint32_t>(emptyData.size() * sizeof(RGBA8)));
 
             uint64_t bufferOffset = bufferSpec.offset;
             for (uint32_t slice = 0; slice < textureSpec.arraySize; ++slice) {
@@ -195,8 +195,8 @@ protected:
 
         std::vector<RGBA8> bufferData(bufferSpec.size / kBytesPerTexel);
         FillBufferData(bufferData.data(), bufferData.size());
-        buffer.SetSubData(0, static_cast<uint32_t>(bufferData.size() * sizeof(RGBA8)),
-                          bufferData.data());
+        queue.WriteBuffer(buffer, 0, bufferData.data(),
+                          static_cast<uint32_t>(bufferData.size() * sizeof(RGBA8)));
 
         // Create a texture that is `width` x `height` with (`level` + 1) mip levels.
         wgpu::TextureDescriptor descriptor;

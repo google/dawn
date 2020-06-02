@@ -262,7 +262,7 @@ void frame() {
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
 
-    cameraBuffer.SetSubData(0, sizeof(CameraData), &cameraData);
+    queue.WriteBuffer(cameraBuffer, 0, &cameraData, sizeof(CameraData));
 
     wgpu::TextureView backbufferView = swapchain.GetCurrentTextureView();
     utils::ComboRenderPassDescriptor renderPass({backbufferView}, depthStencilView);

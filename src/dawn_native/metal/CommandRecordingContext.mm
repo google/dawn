@@ -47,7 +47,7 @@ namespace dawn_native { namespace metal {
             return nil;
         }
 
-        // A blit encoder can be left open from SetSubData, make sure we close it.
+        // A blit encoder can be left open from WriteBuffer, make sure we close it.
         EndBlit();
 
         ASSERT(!mInEncoder);
