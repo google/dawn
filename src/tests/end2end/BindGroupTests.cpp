@@ -1038,4 +1038,58 @@ TEST_P(BindGroupTests, EmptyLayout) {
     queue.Submit(1, &commands);
 }
 
+// Test creating a BGL with a storage buffer binding but declared readonly in the shader works.
+// This is a regression test for crbug.com/dawn/410 which tests that it can successfully compile and
+// execute the shader.
+TEST_P(BindGroupTests, ReadonlyStorage) {
+    utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
+
+    pipelineDescriptor.vertexStage.module =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
+            #version 450
+            void main() {
+                const vec2 pos[3] = vec2[3](vec2(-1.f, 1.f), vec2(1.f, 1.f), vec2(-1.f, -1.f));
+                gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
+            })");
+
+    pipelineDescriptor.cFragmentStage.module =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
+            #version 450
+            layout(set = 0, binding = 0) readonly buffer buffer0 {
+                vec4 color;
+            };
+            layout(location = 0) out vec4 fragColor;
+            void main() {
+                fragColor = color;
+            })");
+
+    constexpr uint32_t kRTSize = 4;
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+    pipelineDescriptor.cColorStates[0].format = renderPass.colorFormat;
+
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::StorageBuffer}});
+
+    pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
+
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+
+    std::array<float, 4> greenColor = {0, 1, 0, 1};
+    wgpu::Buffer storageBuffer = utils::CreateBufferFromData(
+        device, &greenColor, sizeof(greenColor), wgpu::BufferUsage::Storage);
+
+    pass.SetPipeline(renderPipeline);
+    pass.SetBindGroup(0, utils::MakeBindGroup(device, bgl, {{0, storageBuffer}}));
+    pass.Draw(3);
+    pass.EndPass();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 0, 0);
+}
+
 DAWN_INSTANTIATE_TEST(BindGroupTests, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());

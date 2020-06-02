@@ -164,6 +164,13 @@ namespace dawn_native { namespace d3d12 {
                 BindingNumber bindingNumber = it.first;
                 BindingIndex bindingIndex = bgl->GetBindingIndex(bindingNumber);
 
+                // Declaring a read-only storage buffer in HLSL but specifying a storage buffer in
+                // the BGL produces the wrong output. Force read-only storage buffer bindings to
+                // be treated as UAV instead of SRV.
+                const bool forceStorageBufferAsUAV =
+                    (bindingInfo.type == wgpu::BindingType::ReadonlyStorageBuffer &&
+                     bgl->GetBindingInfo(bindingIndex).type == wgpu::BindingType::StorageBuffer);
+
                 uint32_t bindingOffset = bindingOffsets[bindingIndex];
                 if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
                     DAWN_TRY(CheckSpvcSuccess(
@@ -171,8 +178,16 @@ namespace dawn_native { namespace d3d12 {
                                                    bindingOffset),
                         "Unable to set decorating binding before generating HLSL shader w/ "
                         "spvc"));
+                    if (forceStorageBufferAsUAV) {
+                        DAWN_TRY(CheckSpvcSuccess(
+                            mSpvcContext.SetHLSLForceStorageBufferAsUAV(group, bindingNumber),
+                            "Unable to force read-only storage buffer as UAV w/ spvc"));
+                    }
                 } else {
                     compiler->set_decoration(bindingInfo.id, spv::DecorationBinding, bindingOffset);
+                    if (forceStorageBufferAsUAV) {
+                        compiler->set_hlsl_force_storage_buffer_as_uav(group, bindingNumber);
+                    }
                 }
             }
         }
