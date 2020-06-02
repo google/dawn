@@ -59,18 +59,18 @@ typedef struct {
 } DawnSwapChainImplementation;
 
 #if defined(DAWN_ENABLE_BACKEND_D3D12) && defined(__cplusplus)
-typedef struct {
+struct DawnWSIContextD3D12 {
     WGPUDevice device = nullptr;
-} DawnWSIContextD3D12;
+};
 #endif
 
 #if defined(DAWN_ENABLE_BACKEND_METAL) && defined(__OBJC__)
 #    import <Metal/Metal.h>
 
-typedef struct {
+struct DawnWSIContextMetal {
     id<MTLDevice> device = nil;
     id<MTLCommandQueue> queue = nil;
-} DawnWSIContextMetal;
+};
 #endif
 
 #ifdef DAWN_ENABLE_BACKEND_OPENGL

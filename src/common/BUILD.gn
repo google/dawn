@@ -104,6 +104,7 @@ config("dawn_internal") {
       "-Wshadow-field",
       "-Wstrict-prototypes",
       "-Wtautological-unsigned-zero-compare",
+      "-Wnon-c-typedef-for-linkage",
     ]
 
     if (is_win) {
