@@ -614,3 +614,23 @@ TEST_P(TextureViewRenderingTest, Texture2DArrayViewOnALayerOf2DArrayTextureAsCol
 DAWN_INSTANTIATE_TEST(TextureViewSamplingTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
 
 DAWN_INSTANTIATE_TEST(TextureViewRenderingTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
+
+class TextureViewTest : public DawnTest {};
+
+// This is a regression test for crbug.com/dawn/399 where creating a texture view with only copy
+// usage would cause the Vulkan validation layers to warn
+TEST_P(TextureViewTest, OnlyCopySrcDst) {
+    wgpu::TextureDescriptor descriptor;
+    descriptor.size = {4, 4, 1};
+    descriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+    descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
+    wgpu::TextureView view = texture.CreateView();
+}
+
+DAWN_INSTANTIATE_TEST(TextureViewTest,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());

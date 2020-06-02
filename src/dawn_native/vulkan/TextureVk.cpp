@@ -946,6 +946,14 @@ namespace dawn_native { namespace vulkan {
     }
 
     MaybeError TextureView::Initialize(const TextureViewDescriptor* descriptor) {
+        if ((GetTexture()->GetUsage() &
+             ~(wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst)) == 0) {
+            // If the texture view has no other usage than CopySrc and CopyDst, then it can't
+            // actually be used as a render pass attachment or sampled/storage texture. The Vulkan
+            // validation errors warn if you create such a vkImageView, so return early.
+            return {};
+        }
+
         Device* device = ToBackend(GetTexture()->GetDevice());
 
         VkImageViewCreateInfo createInfo;
