@@ -12,26 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/uint_literal.h"
+#include "src/ast/int_literal.h"
 
 namespace tint {
 namespace ast {
 
-UintLiteral::UintLiteral(ast::type::Type* type, uint32_t value)
-    : IntLiteral(type), value_(value) {}
+IntLiteral::IntLiteral(ast::type::Type* type) : Literal(type) {}
 
-UintLiteral::~UintLiteral() = default;
+IntLiteral::~IntLiteral() = default;
 
-bool UintLiteral::IsUint() const {
+bool IntLiteral::IsInt() const {
   return true;
-}
-
-std::string UintLiteral::to_str() const {
-  return std::to_string(value_);
-}
-
-std::string UintLiteral::name() const {
-  return "__uint" + std::to_string(value_);
 }
 
 }  // namespace ast

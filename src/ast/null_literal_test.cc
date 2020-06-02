@@ -30,6 +30,7 @@ TEST_F(NullLiteralTest, Is) {
   EXPECT_FALSE(i.IsSint());
   EXPECT_FALSE(i.IsFloat());
   EXPECT_FALSE(i.IsUint());
+  EXPECT_FALSE(i.IsInt());
   EXPECT_TRUE(i.IsNull());
 }
 

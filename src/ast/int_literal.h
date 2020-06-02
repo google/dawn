@@ -12,27 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/uint_literal.h"
+#ifndef SRC_AST_INT_LITERAL_H_
+#define SRC_AST_INT_LITERAL_H_
+
+#include <string>
+
+#include "src/ast/literal.h"
 
 namespace tint {
 namespace ast {
 
-UintLiteral::UintLiteral(ast::type::Type* type, uint32_t value)
-    : IntLiteral(type), value_(value) {}
+/// An integer literal. This could be either signed or unsigned.
+class IntLiteral : public Literal {
+ public:
+  ~IntLiteral() override;
 
-UintLiteral::~UintLiteral() = default;
+  /// @returns true if this is a signed or unsigned integer.
+  bool IsInt() const override;
 
-bool UintLiteral::IsUint() const {
-  return true;
-}
-
-std::string UintLiteral::to_str() const {
-  return std::to_string(value_);
-}
-
-std::string UintLiteral::name() const {
-  return "__uint" + std::to_string(value_);
-}
+ protected:
+  /// Constructor
+  /// @param type the type of the literal
+  explicit IntLiteral(ast::type::Type* type);
+};
 
 }  // namespace ast
 }  // namespace tint
+
+#endif  // SRC_AST_INT_LITERAL_H_

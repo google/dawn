@@ -35,6 +35,7 @@ TEST_F(FloatLiteralTest, Is) {
   FloatLiteral f{&f32, 42.f};
   EXPECT_FALSE(f.IsBool());
   EXPECT_FALSE(f.IsSint());
+  EXPECT_FALSE(f.IsInt());
   EXPECT_TRUE(f.IsFloat());
   EXPECT_FALSE(f.IsUint());
   EXPECT_FALSE(f.IsNull());

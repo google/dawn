@@ -85,6 +85,8 @@ set(TINT_LIB_SRCS
   ast/if_statement.h
   ast/import.cc
   ast/import.h
+  ast/int_literal.cc
+  ast/int_literal.h
   ast/kill_statement.cc
   ast/kill_statement.h
   ast/literal.h
@@ -266,6 +268,7 @@ set(TINT_TEST_SRCS
   ast/identifier_expression_test.cc
   ast/if_statement_test.cc
   ast/import_test.cc
+  ast/int_literal_test.cc
   ast/kill_statement_test.cc
   ast/location_decoration_test.cc
   ast/loop_statement_test.cc

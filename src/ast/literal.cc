@@ -37,6 +37,10 @@ bool Literal::IsFloat() const {
   return false;
 }
 
+bool Literal::IsInt() const {
+  return false;
+}
+
 bool Literal::IsSint() const {
   return false;
 }

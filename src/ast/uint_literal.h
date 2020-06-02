@@ -17,13 +17,13 @@
 
 #include <string>
 
-#include "src/ast/literal.h"
+#include "src/ast/int_literal.h"
 
 namespace tint {
 namespace ast {
 
 /// A uint literal
-class UintLiteral : public Literal {
+class UintLiteral : public IntLiteral {
  public:
   /// Constructor
   /// @param type the type of the literal

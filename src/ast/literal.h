@@ -37,6 +37,8 @@ class Literal {
   virtual bool IsBool() const;
   /// @returns true if this is a float literal
   virtual bool IsFloat() const;
+  /// @returns thre if this is an int literal (either sint or uint)
+  virtual bool IsInt() const;
   /// @returns true if this is a signed int literal
   virtual bool IsSint() const;
   /// @returns true if this is a null literal

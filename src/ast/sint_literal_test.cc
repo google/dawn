@@ -59,6 +59,7 @@ TEST_F(SintLiteralTest, Name_U32) {
   SintLiteral i{&u32, 2};
   EXPECT_EQ("__sint__u32_2", i.name());
 }
+
 }  // namespace
 }  // namespace ast
 }  // namespace tint

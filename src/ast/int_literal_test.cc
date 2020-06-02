@@ -12,27 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/ast/int_literal.h"
+
+#include "gtest/gtest.h"
+#include "src/ast/type/i32_type.h"
+#include "src/ast/type/u32_type.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/uint_literal.h"
 
 namespace tint {
 namespace ast {
+namespace {
 
-UintLiteral::UintLiteral(ast::type::Type* type, uint32_t value)
-    : IntLiteral(type), value_(value) {}
+using IntLiteralTest = testing::Test;
 
-UintLiteral::~UintLiteral() = default;
-
-bool UintLiteral::IsUint() const {
-  return true;
+TEST_F(IntLiteralTest, Sint_IsInt) {
+  ast::type::I32Type i32;
+  SintLiteral i{&i32, 47};
+  ASSERT_TRUE(i.IsInt());
 }
 
-std::string UintLiteral::to_str() const {
-  return std::to_string(value_);
+TEST_F(IntLiteralTest, Uint_IsInt) {
+  ast::type::I32Type i32;
+  UintLiteral i{&i32, 42};
+  EXPECT_TRUE(i.IsInt());
 }
 
-std::string UintLiteral::name() const {
-  return "__uint" + std::to_string(value_);
-}
-
+}  // namespace
 }  // namespace ast
 }  // namespace tint
