@@ -146,7 +146,7 @@ TEST_F(ParserImplTest, Statement_Switch_Invalid) {
   auto e = p->statement();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:18: unable to parse case conditional");
+  EXPECT_EQ(p->error(), "1:18: unable to parse case selectors");
 }
 
 TEST_F(ParserImplTest, Statement_Loop) {

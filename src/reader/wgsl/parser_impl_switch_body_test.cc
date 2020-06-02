@@ -38,7 +38,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_InvalidConstLiteral) {
   auto e = p->switch_body();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:6: unable to parse case conditional");
+  EXPECT_EQ(p->error(), "1:6: unable to parse case selectors");
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_MissingConstLiteral) {
@@ -46,7 +46,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_MissingConstLiteral) {
   auto e = p->switch_body();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:5: unable to parse case conditional");
+  EXPECT_EQ(p->error(), "1:5: unable to parse case selectors");
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_MissingColon) {

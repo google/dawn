@@ -41,8 +41,8 @@ TEST_F(CaseStatementTest, Creation) {
   auto* kill_ptr = stmts[0].get();
 
   CaseStatement c(std::move(b), std::move(stmts));
-  ASSERT_EQ(c.conditions().size(), 1);
-  EXPECT_EQ(c.conditions()[0].get(), bool_ptr);
+  ASSERT_EQ(c.selectors().size(), 1);
+  EXPECT_EQ(c.selectors()[0].get(), bool_ptr);
   ASSERT_EQ(c.body().size(), 1u);
   EXPECT_EQ(c.body()[0].get(), kill_ptr);
 }
@@ -61,7 +61,7 @@ TEST_F(CaseStatementTest, Creation_WithSource) {
   EXPECT_EQ(src.column, 2u);
 }
 
-TEST_F(CaseStatementTest, IsDefault_WithoutCondition) {
+TEST_F(CaseStatementTest, IsDefault_WithoutSelectors) {
   StatementList stmts;
   stmts.push_back(std::make_unique<KillStatement>());
 
@@ -70,13 +70,13 @@ TEST_F(CaseStatementTest, IsDefault_WithoutCondition) {
   EXPECT_TRUE(c.IsDefault());
 }
 
-TEST_F(CaseStatementTest, IsDefault_WithCondition) {
+TEST_F(CaseStatementTest, IsDefault_WithSelectors) {
   ast::type::BoolType bool_type;
   CaseSelectorList b;
   b.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
 
   CaseStatement c;
-  c.set_conditions(std::move(b));
+  c.set_selectors(std::move(b));
   EXPECT_FALSE(c.IsDefault());
 }
 
@@ -115,7 +115,7 @@ TEST_F(CaseStatementTest, IsValid_InvalidBodyStatement) {
   EXPECT_FALSE(c.IsValid());
 }
 
-TEST_F(CaseStatementTest, ToStr_WithCondition) {
+TEST_F(CaseStatementTest, ToStr_WithSelectors) {
   ast::type::BoolType bool_type;
   CaseSelectorList b;
   b.push_back(std::make_unique<BoolLiteral>(&bool_type, true));
@@ -132,7 +132,7 @@ TEST_F(CaseStatementTest, ToStr_WithCondition) {
 )");
 }
 
-TEST_F(CaseStatementTest, ToStr_WithMultipleConditions) {
+TEST_F(CaseStatementTest, ToStr_WithMultipleSelectors) {
   ast::type::I32Type i32;
 
   CaseSelectorList b;
@@ -150,7 +150,7 @@ TEST_F(CaseStatementTest, ToStr_WithMultipleConditions) {
 )");
 }
 
-TEST_F(CaseStatementTest, ToStr_WithoutCondition) {
+TEST_F(CaseStatementTest, ToStr_WithoutSelectors) {
   StatementList stmts;
   stmts.push_back(std::make_unique<KillStatement>());
   CaseStatement c(CaseSelectorList{}, std::move(stmts));

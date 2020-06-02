@@ -725,13 +725,13 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
     out_ << "case ";
 
     bool first = true;
-    for (const auto& lit : stmt->conditions()) {
+    for (const auto& selector : stmt->selectors()) {
       if (!first) {
         out_ << ", ";
       }
 
       first = false;
-      if (!EmitLiteral(lit.get())) {
+      if (!EmitLiteral(selector.get())) {
         return false;
       }
     }

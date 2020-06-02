@@ -22,7 +22,6 @@
 #include "src/ast/expression.h"
 #include "src/ast/literal.h"
 #include "src/ast/statement.h"
-#include "src/ast/statement_condition.h"
 
 namespace tint {
 namespace ast {
@@ -40,29 +39,29 @@ class CaseStatement : public Statement {
   /// @param body the case body
   explicit CaseStatement(StatementList body);
   /// Constructor
-  /// @param conditions the case conditions
+  /// @param selectors the case selectors
   /// @param body the case body
-  CaseStatement(CaseSelectorList conditions, StatementList body);
+  CaseStatement(CaseSelectorList selectors, StatementList body);
   /// Constructor
   /// @param source the source information
-  /// @param conditions the case conditions
+  /// @param selectors the case selectors
   /// @param body the case body
   CaseStatement(const Source& source,
-                CaseSelectorList conditions,
+                CaseSelectorList selectors,
                 StatementList body);
   /// Move constructor
   CaseStatement(CaseStatement&&);
   ~CaseStatement() override;
 
-  /// Sets the conditions for the case statement
-  /// @param conditions the conditions to set
-  void set_conditions(CaseSelectorList conditions) {
-    conditions_ = std::move(conditions);
+  /// Sets the selectors for the case statement
+  /// @param selectors the selectors to set
+  void set_selectors(CaseSelectorList selectors) {
+    selectors_ = std::move(selectors);
   }
-  /// @returns the case condition, empty if none set
-  const CaseSelectorList& conditions() const { return conditions_; }
+  /// @returns the case selectors, empty if none set
+  const CaseSelectorList& selectors() const { return selectors_; }
   /// @returns true if this is a default statement
-  bool IsDefault() const { return conditions_.empty(); }
+  bool IsDefault() const { return selectors_.empty(); }
 
   /// Sets the case body
   /// @param body the case body
@@ -84,7 +83,7 @@ class CaseStatement : public Statement {
  private:
   CaseStatement(const CaseStatement&) = delete;
 
-  CaseSelectorList conditions_;
+  CaseSelectorList selectors_;
   StatementList body_;
 };
 

@@ -102,7 +102,7 @@ TEST_F(ParserImplTest, SwitchStmt_InvalidBody) {
   auto e = p->switch_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "2:7: unable to parse case conditional");
+  EXPECT_EQ(p->error(), "2:7: unable to parse case selectors");
 }
 
 }  // namespace

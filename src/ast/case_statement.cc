@@ -22,14 +22,14 @@ CaseStatement::CaseStatement() : Statement() {}
 CaseStatement::CaseStatement(StatementList body)
     : Statement(), body_(std::move(body)) {}
 
-CaseStatement::CaseStatement(CaseSelectorList conditions, StatementList body)
-    : Statement(), conditions_(std::move(conditions)), body_(std::move(body)) {}
+CaseStatement::CaseStatement(CaseSelectorList selectors, StatementList body)
+    : Statement(), selectors_(std::move(selectors)), body_(std::move(body)) {}
 
 CaseStatement::CaseStatement(const Source& source,
-                             CaseSelectorList conditions,
+                             CaseSelectorList selectors,
                              StatementList body)
     : Statement(source),
-      conditions_(std::move(conditions)),
+      selectors_(std::move(selectors)),
       body_(std::move(body)) {}
 
 CaseStatement::CaseStatement(CaseStatement&&) = default;
@@ -56,12 +56,12 @@ void CaseStatement::to_str(std::ostream& out, size_t indent) const {
   } else {
     out << "Case ";
     bool first = true;
-    for (const auto& lit : conditions_) {
+    for (const auto& selector : selectors_) {
       if (!first)
         out << ", ";
 
       first = false;
-      out << lit->to_str();
+      out << selector->to_str();
     }
     out << "{" << std::endl;
   }

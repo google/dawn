@@ -1365,7 +1365,7 @@ bool Builder::GenerateSwitchStatement(ast::SwitchStatement* stmt) {
     auto block_id = block.to_i();
 
     case_ids.push_back(block_id);
-    for (const auto& selector : item->conditions()) {
+    for (const auto& selector : item->selectors()) {
       if (!selector->IsInt()) {
         error_ = "expected integer literal for switch case label";
         return false;

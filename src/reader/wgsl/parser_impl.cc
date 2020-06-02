@@ -1813,14 +1813,14 @@ std::unique_ptr<ast::CaseStatement> ParserImpl::switch_body() {
   auto stmt = std::make_unique<ast::CaseStatement>();
   stmt->set_source(source);
   if (t.IsCase()) {
-    auto cond = case_selectors();
+    auto selectors = case_selectors();
     if (has_error())
       return nullptr;
-    if (cond.empty()) {
-      set_error(peek(), "unable to parse case conditional");
+    if (selectors.empty()) {
+      set_error(peek(), "unable to parse case selectors");
       return nullptr;
     }
-    stmt->set_conditions(std::move(cond));
+    stmt->set_selectors(std::move(selectors));
   }
 
   t = next();
