@@ -30,6 +30,7 @@
 #include "src/ast/else_statement.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/kill_statement.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
@@ -1765,6 +1766,11 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
       AddStatement(
           std::make_unique<ast::ReturnStatement>(std::move(value.expr)));
     }
+      return true;
+    case SpvOpKill:
+      // For now, assume SPIR-V OpKill has same semantics as WGSL kill.
+      // TODO(dneto): https://github.com/gpuweb/gpuweb/issues/676
+      AddStatement(std::make_unique<ast::KillStatement>());
       return true;
     default:
       break;
