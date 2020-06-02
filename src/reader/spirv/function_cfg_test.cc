@@ -7226,6 +7226,406 @@ Assignment{
 )"));
 }
 
+TEST_F(SpvParserTest, EmitBody_Loop_SingleBlock_TrueBackedge) {
+  // TODO(dneto): emit conditional break
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_0
+     OpBranch %20
+
+     %20 = OpLabel
+     OpStore %var %uint_1
+     OpLoopMerge %99 %20 None
+     OpBranchConditional %cond %20 %99
+
+     %99 = OpLabel
+     OpStore %var %999
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{0}
+}
+Loop{
+  Assignment{
+    Identifier{var}
+    ScalarConstructor{1}
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{999}
+}
+)"));
+}
+
+TEST_F(SpvParserTest, DISABLED_EmitBody_Loop_SingleBlock_FalseBackedge) {
+  // TODO(dneto): emit conditional break
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_0
+     OpBranch %20
+
+     %20 = OpLabel
+     OpStore %var %uint_1
+     OpLoopMerge %99 %20 None
+     OpBranchConditional %cond %99 %20
+
+     %99 = OpLabel
+     OpStore %var %999
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{0}
+}
+Loop{
+  Assignment{
+    Identifier{var}
+    ScalarConstructor{1}
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{999}
+}
+)"));
+}
+
+TEST_F(SpvParserTest, EmitBody_Loop_SingleBlock_BothBackedge) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_0
+     OpBranch %20
+
+     %20 = OpLabel
+     OpStore %var %uint_1
+     OpLoopMerge %99 %20 None
+     OpBranchConditional %cond %20 %20
+
+     %99 = OpLabel
+     OpStore %var %999
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{0}
+}
+Loop{
+  Assignment{
+    Identifier{var}
+    ScalarConstructor{1}
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{999}
+}
+)"));
+}
+
+TEST_F(SpvParserTest, EmitBody_Loop_SingleBlock_UnconditionalBackege) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_0
+     OpBranch %20
+
+     %20 = OpLabel
+     OpStore %var %uint_1
+     OpLoopMerge %99 %20 None
+     OpBranch %20
+
+     %99 = OpLabel
+     OpStore %var %999
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{0}
+}
+Loop{
+  Assignment{
+    Identifier{var}
+    ScalarConstructor{1}
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{999}
+}
+)"));
+}
+
+TEST_F(SpvParserTest, EmitBody_Loop_Unconditional_Body_SingleBlockContinue) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_0
+     OpBranch %20
+
+     %20 = OpLabel
+     OpStore %var %uint_1
+     OpLoopMerge %99 %50 None
+     OpBranch %30
+
+     %30 = OpLabel
+     OpStore %var %uint_2
+     OpBranch %50
+
+     %50 = OpLabel
+     OpStore %var %uint_3
+     OpBranch %20
+
+     %99 = OpLabel
+     OpStore %var %999
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{0}
+}
+Loop{
+  Assignment{
+    Identifier{var}
+    ScalarConstructor{1}
+  }
+  Assignment{
+    Identifier{var}
+    ScalarConstructor{2}
+  }
+  continuing {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{3}
+    }
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{999}
+}
+)")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest, EmitBody_Loop_Unconditional_Body_MultiBlockContinue) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_0
+     OpBranch %20
+
+     %20 = OpLabel
+     OpStore %var %uint_1
+     OpLoopMerge %99 %50 None
+     OpBranch %30
+
+     %30 = OpLabel
+     OpStore %var %uint_2
+     OpBranch %50
+
+     %50 = OpLabel
+     OpStore %var %uint_3
+     OpBranch %60
+
+     %60 = OpLabel
+     OpStore %var %uint_4
+     OpBranch %20
+
+     %99 = OpLabel
+     OpStore %var %999
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{0}
+}
+Loop{
+  Assignment{
+    Identifier{var}
+    ScalarConstructor{1}
+  }
+  Assignment{
+    Identifier{var}
+    ScalarConstructor{2}
+  }
+  continuing {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{3}
+    }
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{4}
+    }
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{999}
+}
+)")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest, EmitBody_Loop_Unconditional_Body_ContinueNestIf) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_0
+     OpBranch %20
+
+     %20 = OpLabel
+     OpStore %var %uint_1
+     OpLoopMerge %99 %50 None
+     OpBranch %30
+
+     %30 = OpLabel
+     OpStore %var %uint_2
+     OpBranch %50
+
+     %50 = OpLabel ; continue target; also if-header
+     OpStore %var %uint_3
+     OpSelectionMerge %80 None
+     OpBranchConditional %cond2 %60 %80
+
+     %60 = OpLabel
+     OpStore %var %uint_4
+     OpBranch %80
+
+     %80 = OpLabel
+     OpStore %var %uint_5
+     OpBranch %20
+
+     %99 = OpLabel
+     OpStore %var %999
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{0}
+}
+Loop{
+  Assignment{
+    Identifier{var}
+    ScalarConstructor{1}
+  }
+  Assignment{
+    Identifier{var}
+    ScalarConstructor{2}
+  }
+  continuing {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{3}
+    }
+    If{
+      (
+        ScalarConstructor{true}
+      )
+      {
+        Assignment{
+          Identifier{var}
+          ScalarConstructor{4}
+        }
+      }
+    }
+    Else{
+      {
+      }
+    }
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{5}
+    }
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{999}
+}
+)")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest, DISABLED_EmitBody_Loop_Never) {
+  // Test case where both branches exit. e.g both go to merge.
+}
+
+TEST_F(SpvParserTest, DISABLED_EmitBody_Loop_HeaderBreakAndContinue) {
+  // Header block branches to merge, and to an outer continue.
+}
+
+TEST_F(SpvParserTest, DISABLED_EmitBody_Loop_TrueToBody) {
+  // TODO(dneto): Needs break-unless
+}
+
+TEST_F(SpvParserTest, DISABLED_EmitBody_Loop_FalseToBody) {
+  // TODO(dneto): Needs break-if
+}
+
+TEST_F(SpvParserTest, DISABLED_EmitBody_Loop_NestedIfContinue) {
+  // TODO(dneto): Needs "continue" terminator support
+}
+
+TEST_F(SpvParserTest, DISABLED_EmitBody_Loop_BodyAlwaysBreaks) {
+  // TODO(dneto): Needs "continue" terminator support
+}
+
+TEST_F(SpvParserTest, DISABLED_EmitBody_Loop_BodyConditionallyBreaks) {
+  // TODO(dneto): Needs "break" support
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

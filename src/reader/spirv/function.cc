@@ -1556,7 +1556,9 @@ bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
     auto outer_kind = entering_constructs[1]->kind;
     if (outer_kind != Construct::kContinue) {
       return Fail() << "internal error: bad construct nesting. Only Continue "
-                       "construct can be outer construct on same block";
+                       "construct can be outer construct on same block.  Got "
+                       "outer kind "
+                    << int(outer_kind) << " inner kind " << int(inner_kind);
     }
     if (inner_kind == Construct::kContinue) {
       return Fail() << "internal error: unsupported construct nesting: "
@@ -1588,10 +1590,28 @@ bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
         return Fail() << "internal error: nested function construct";
 
       case Construct::kLoop:
-        return Fail() << "unhandled: loop construct";
+        if (!EmitLoopStart(construct)) {
+          return false;
+        }
+        if (!EmitStatementsInBasicBlock(block_info, &emitted)) {
+          return false;
+        }
+        break;
 
       case Construct::kContinue:
-        return Fail() << "unhandled: continue construct";
+        if (block_info.is_single_block_loop) {
+          if (!EmitLoopStart(construct)) {
+            return false;
+          }
+          if (!EmitStatementsInBasicBlock(block_info, &emitted)) {
+            return false;
+          }
+        } else {
+          if (!EmitContinuingStart(construct)) {
+            return false;
+          }
+        }
+        break;
 
       case Construct::kIfSelection:
         if (!EmitStatementsInBasicBlock(block_info, &emitted)) {
@@ -1706,6 +1726,30 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
     push_then();
   }
 
+  return success();
+}
+
+bool FunctionEmitter::EmitLoopStart(const Construct* construct) {
+  auto* loop = AddStatement(std::make_unique<ast::LoopStatement>())->AsLoop();
+  PushNewStatementBlock(
+      construct, construct->end_id,
+      [loop](StatementBlock* s) { loop->set_body(std::move(s->statements)); });
+  return success();
+}
+
+bool FunctionEmitter::EmitContinuingStart(const Construct* construct) {
+  // A continue construct has the same depth as its associated loop
+  // construct. Start a continue construct.
+  auto* loop_candidate = LastStatement();
+  if (!loop_candidate->IsLoop()) {
+    return Fail() << "internal error: starting continue construct, "
+                     "expected loop on top of stack";
+  }
+  auto* loop = loop_candidate->AsLoop();
+  PushNewStatementBlock(construct, construct->end_id,
+                        [loop](StatementBlock* s) {
+                          loop->set_continuing(std::move(s->statements));
+                        });
   return success();
 }
 

@@ -297,6 +297,20 @@ class FunctionEmitter {
   /// @returns false if emission failed.
   bool EmitIfStart(const BlockInfo& block_info);
 
+  /// Emits a LoopStatement, and pushes a new StatementBlock to accumulate
+  /// the remaining instructions in the current block and subsequent blocks
+  /// in the loop.
+  /// @param construct the loop construct
+  /// @returns false if emission failed.
+  bool EmitLoopStart(const Construct* construct);
+
+  /// Emits a ContinuingStatement, and pushes a new StatementBlock to accumulate
+  /// the remaining instructions in the current block and subsequent blocks
+  /// in the continue construct.
+  /// @param construct the continue construct
+  /// @returns false if emission failed.
+  bool EmitContinuingStart(const Construct* construct);
+
   /// Emits the non-control-flow parts of a basic block, but only once.
   /// The |already_emitted| parameter indicates whether the code has already
   /// been emitted, and is used to signal that this invocation actually emitted
