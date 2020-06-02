@@ -1772,10 +1772,24 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
       // TODO(dneto): https://github.com/gpuweb/gpuweb/issues/676
       AddStatement(std::make_unique<ast::KillStatement>());
       return true;
+    case SpvOpUnreachable:
+      // Translate as if it's a return. This avoids the problem where WGSL
+      // requires a return statement at the end of the function body.
+      {
+        const auto* result_type = type_mgr_->GetType(function_.type_id());
+        if (result_type->AsVoid() != nullptr) {
+          AddStatement(std::make_unique<ast::ReturnStatement>());
+        } else {
+          auto* ast_type = parser_impl_.ConvertType(function_.type_id());
+          AddStatement(std::make_unique<ast::ReturnStatement>(
+              parser_impl_.MakeNullValue(ast_type)));
+        }
+      }
+      return true;
     default:
       break;
   }
-  // TODO(dneto): emit fallthrough, break, continue, kill
+  // TODO(dneto): emit fallthrough, break, continue
   return success();
 }
 
