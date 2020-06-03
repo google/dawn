@@ -19,7 +19,7 @@ for more details about the presubmit API built into depot_tools.
 
 def _LicenseHeader(input_api):
     """Returns the license header regexp."""
-    # Accept any year number from 2003 to the current year
+    # Accept any year number from 2019 to the current year
     current_year = int(input_api.time.strftime('%Y'))
     allowed_years = (str(s) for s in reversed(xrange(2019, current_year + 1)))
     years_re = '(' + '|'.join(allowed_years) + ')'
