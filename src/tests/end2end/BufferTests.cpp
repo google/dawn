@@ -429,7 +429,7 @@ TEST_P(CreateBufferMappedTests, CreateThenMapBeforeUnmapFailure) {
 // Test that creating a very large buffers fails gracefully.
 TEST_P(CreateBufferMappedTests, LargeBufferFails) {
     // TODO(http://crbug.com/dawn/27): Missing support.
-    DAWN_SKIP_TEST_IF(IsMetal() || IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsOpenGL());
 
     wgpu::BufferDescriptor descriptor;
     descriptor.size = std::numeric_limits<uint64_t>::max();
