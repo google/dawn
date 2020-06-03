@@ -34,7 +34,6 @@ class KillStatement;
 class LoopStatement;
 class ReturnStatement;
 class SwitchStatement;
-class UnlessStatement;
 class VariableDeclStatement;
 
 /// Base statement class
@@ -64,8 +63,6 @@ class Statement : public Node {
   virtual bool IsReturn() const;
   /// @returns true if this is a switch statement
   virtual bool IsSwitch() const;
-  /// @returns true if this is an unless statement
-  virtual bool IsUnless() const;
   /// @returns true if this is an variable statement
   virtual bool IsVariableDecl() const;
 
@@ -91,8 +88,6 @@ class Statement : public Node {
   const ReturnStatement* AsReturn() const;
   /// @returns the statement as a const switch statement
   const SwitchStatement* AsSwitch() const;
-  /// @returns the statement as a const unless statement
-  const UnlessStatement* AsUnless() const;
   /// @returns the statement as a const variable statement
   const VariableDeclStatement* AsVariableDecl() const;
 
@@ -118,8 +113,6 @@ class Statement : public Node {
   ReturnStatement* AsReturn();
   /// @returns the statement as a switch statement
   SwitchStatement* AsSwitch();
-  /// @returns the statement as an unless statement
-  UnlessStatement* AsUnless();
   /// @returns the statement as an variable statement
   VariableDeclStatement* AsVariableDecl();
 

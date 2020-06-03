@@ -161,8 +161,6 @@ set(TINT_LIB_SRCS
   ast/unary_op.h
   ast/unary_op_expression.cc
   ast/unary_op_expression.h
-  ast/unless_statement.cc
-  ast/unless_statement.h
   ast/variable.cc
   ast/variable.h
   ast/variable_decoration.cc
@@ -295,7 +293,6 @@ set(TINT_TEST_SRCS
   ast/type_constructor_expression_test.cc
   ast/uint_literal_test.cc
   ast/unary_op_expression_test.cc
-  ast/unless_statement_test.cc
   ast/variable_decl_statement_test.cc
   ast/variable_test.cc
   scope_stack_test.cc
@@ -400,7 +397,6 @@ if(${TINT_BUILD_WGSL_READER})
     reader/wgsl/parser_impl_type_alias_test.cc
     reader/wgsl/parser_impl_type_decl_test.cc
     reader/wgsl/parser_impl_unary_expression_test.cc
-    reader/wgsl/parser_impl_unless_stmt_test.cc
     reader/wgsl/parser_impl_variable_decl_test.cc
     reader/wgsl/parser_impl_variable_decoration_list_test.cc
     reader/wgsl/parser_impl_variable_decoration_test.cc
@@ -469,7 +465,6 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_switch_test.cc
     writer/wgsl/generator_impl_type_test.cc
     writer/wgsl/generator_impl_unary_op_test.cc
-    writer/wgsl/generator_impl_unless_test.cc
     writer/wgsl/generator_impl_variable_decl_statement_test.cc
     writer/wgsl/generator_impl_variable_test.cc
   )

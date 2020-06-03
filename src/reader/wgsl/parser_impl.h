@@ -40,7 +40,6 @@
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
 #include "src/ast/type/type.h"
-#include "src/ast/unless_statement.h"
 #include "src/ast/variable.h"
 #include "src/ast/variable_decoration.h"
 #include "src/context.h"
@@ -208,9 +207,6 @@ class ParserImpl {
   /// Parses a `else_stmt` grammar element
   /// @returns the parsed statement or nullptr
   std::unique_ptr<ast::ElseStatement> else_stmt();
-  /// Parses a `unless_stmt` grammar element
-  /// @returns the parsed element or nullptr
-  std::unique_ptr<ast::UnlessStatement> unless_stmt();
   /// Parses a `switch_stmt` grammar element
   /// @returns the parsed statement or nullptr
   std::unique_ptr<ast::SwitchStatement> switch_stmt();

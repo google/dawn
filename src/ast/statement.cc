@@ -27,7 +27,6 @@
 #include "src/ast/loop_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/switch_statement.h"
-#include "src/ast/unless_statement.h"
 #include "src/ast/variable_decl_statement.h"
 
 namespace tint {
@@ -82,10 +81,6 @@ bool Statement::IsReturn() const {
 }
 
 bool Statement::IsSwitch() const {
-  return false;
-}
-
-bool Statement::IsUnless() const {
   return false;
 }
 
@@ -148,11 +143,6 @@ const SwitchStatement* Statement::AsSwitch() const {
   return static_cast<const SwitchStatement*>(this);
 }
 
-const UnlessStatement* Statement::AsUnless() const {
-  assert(IsUnless());
-  return static_cast<const UnlessStatement*>(this);
-}
-
 const VariableDeclStatement* Statement::AsVariableDecl() const {
   assert(IsVariableDecl());
   return static_cast<const VariableDeclStatement*>(this);
@@ -211,11 +201,6 @@ ReturnStatement* Statement::AsReturn() {
 SwitchStatement* Statement::AsSwitch() {
   assert(IsSwitch());
   return static_cast<SwitchStatement*>(this);
-}
-
-UnlessStatement* Statement::AsUnless() {
-  assert(IsUnless());
-  return static_cast<UnlessStatement*>(this);
 }
 
 VariableDeclStatement* Statement::AsVariableDecl() {

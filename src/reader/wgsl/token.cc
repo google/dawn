@@ -189,14 +189,10 @@ std::string Token::TypeToName(Type type) {
       return "offset";
     case Token::Type::kOut:
       return "out";
-    case Token::Type::kPremerge:
-      return "premerge";
     case Token::Type::kPrivate:
       return "private";
     case Token::Type::kPtr:
       return "ptr";
-    case Token::Type::kRegardless:
-      return "regardless";
     case Token::Type::kReturn:
       return "return";
     case Token::Type::kSet:
@@ -217,8 +213,6 @@ std::string Token::TypeToName(Type type) {
       return "uniform";
     case Token::Type::kUniformConstant:
       return "uniform_constant";
-    case Token::Type::kUnless:
-      return "unless";
     case Token::Type::kVar:
       return "var";
     case Token::Type::kVec2:

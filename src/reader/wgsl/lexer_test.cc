@@ -463,7 +463,6 @@ INSTANTIATE_TEST_SUITE_P(
                     TokenData{"uniform", Token::Type::kUniform},
                     TokenData{"uniform_constant",
                               Token::Type::kUniformConstant},
-                    TokenData{"unless", Token::Type::kUnless},
                     TokenData{"var", Token::Type::kVar},
                     TokenData{"vec2", Token::Type::kVec2},
                     TokenData{"vec3", Token::Type::kVec3},
@@ -499,6 +498,7 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                                          "u8",
                                          "u16",
                                          "u64",
+                                         "unless",
                                          "regardless"));
 
 }  // namespace

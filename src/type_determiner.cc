@@ -43,7 +43,6 @@
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
-#include "src/ast/unless_statement.h"
 #include "src/ast/variable_decl_statement.h"
 
 namespace tint {
@@ -213,11 +212,6 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
       }
     }
     return true;
-  }
-  if (stmt->IsUnless()) {
-    auto* u = stmt->AsUnless();
-    return DetermineResultType(u->condition()) &&
-           DetermineStatements(u->body());
   }
   if (stmt->IsVariableDecl()) {
     auto* v = stmt->AsVariableDecl();

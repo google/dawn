@@ -55,7 +55,6 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
-#include "src/ast/unless_statement.h"
 #include "src/ast/variable_decl_statement.h"
 
 namespace tint {
@@ -665,9 +664,6 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsVariableDecl()) {
     return EmitVariable(stmt->AsVariableDecl()->variable());
   }
-  if (stmt->IsUnless()) {
-    return EmitUnless(stmt->AsUnless());
-  }
 
   error_ = "unknown statement type";
   return false;
@@ -844,18 +840,6 @@ bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
   out_ << "}" << std::endl;
 
   return true;
-}
-
-bool GeneratorImpl::EmitUnless(ast::UnlessStatement* stmt) {
-  make_indent();
-
-  out_ << "unless (";
-  if (!EmitExpression(stmt->condition())) {
-    return false;
-  }
-  out_ << ")";
-
-  return EmitStatementBlockAndNewline(stmt->body());
 }
 
 }  // namespace wgsl

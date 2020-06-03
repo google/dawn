@@ -194,10 +194,6 @@ class GeneratorImpl {
   /// @param expr the expression to emit
   /// @returns true if the expression was emitted
   bool EmitUnaryOp(ast::UnaryOpExpression* expr);
-  /// Handles generating an unless statement
-  /// @param stmt the statement to generate
-  /// @returns true if the statement was successfully emitted
-  bool EmitUnless(ast::UnlessStatement* stmt);
   /// Handles generating a variable
   /// @param var the variable to generate
   /// @returns true if the variable was emitted

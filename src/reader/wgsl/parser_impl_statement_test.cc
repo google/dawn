@@ -93,22 +93,6 @@ TEST_F(ParserImplTest, Statement_If_Invalid) {
   EXPECT_EQ(p->error(), "1:10: missing }");
 }
 
-TEST_F(ParserImplTest, Statement_Unless) {
-  auto* p = parser("unless (a) {}");
-  auto e = p->statement();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsUnless());
-}
-
-TEST_F(ParserImplTest, Statement_Unless_Invalid) {
-  auto* p = parser("unless () {}");
-  auto e = p->statement();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:9: unable to parse expression");
-}
-
 TEST_F(ParserImplTest, Statement_Variable) {
   auto* p = parser("var a : i32 = 1;");
   auto e = p->statement();

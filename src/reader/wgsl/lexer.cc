@@ -576,8 +576,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kUniform, source, "uniform"};
   if (str == "uniform_constant")
     return {Token::Type::kUniformConstant, source, "uniform_constant"};
-  if (str == "unless")
-    return {Token::Type::kUnless, source, "unless"};
   if (str == "var")
     return {Token::Type::kVar, source, "var"};
   if (str == "vec2")
@@ -621,6 +619,8 @@ Token Lexer::check_reserved(const Source& source, const std::string& str) {
     return {Token::Type::kReservedKeyword, source, "let"};
   if (str == "premerge")
     return {Token::Type::kReservedKeyword, source, "premerge"};
+  if (str == "regardless")
+    return {Token::Type::kReservedKeyword, source, "regardless"};
   if (str == "typedef")
     return {Token::Type::kReservedKeyword, source, "typedef"};
   if (str == "u8")
@@ -629,8 +629,8 @@ Token Lexer::check_reserved(const Source& source, const std::string& str) {
     return {Token::Type::kReservedKeyword, source, "u16"};
   if (str == "u64")
     return {Token::Type::kReservedKeyword, source, "u64"};
-  if (str == "regardless")
-    return {Token::Type::kReservedKeyword, source, "regardless"};
+  if (str == "unless")
+    return {Token::Type::kReservedKeyword, source, "unless"};
   return {};
 }
 

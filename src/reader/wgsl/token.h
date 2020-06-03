@@ -200,14 +200,10 @@ class Token {
     kOffset,
     /// A 'out'
     kOut,
-    /// A 'premerge'
-    kPremerge,
     /// A 'private'
     kPrivate,
     /// A 'ptr'
     kPtr,
-    /// A 'regardless'
-    kRegardless,
     /// A 'return'
     kReturn,
     /// A 'set'
@@ -228,8 +224,6 @@ class Token {
     kUniform,
     /// A 'uniform_constant'
     kUniformConstant,
-    /// A 'unless'
-    kUnless,
     /// A 'var'
     kVar,
     /// A 'vec2'
@@ -483,8 +477,6 @@ class Token {
   bool IsUniform() const { return type_ == Type::kUniform; }
   /// @returns true if token is a 'uniform_constant'
   bool IsUniformConstant() const { return type_ == Type::kUniformConstant; }
-  /// @returns true if token is a 'unless'
-  bool IsUnless() const { return type_ == Type::kUnless; }
   /// @returns true if token is a 'var'
   bool IsVar() const { return type_ == Type::kVar; }
   /// @returns true if token is a 'vec2'

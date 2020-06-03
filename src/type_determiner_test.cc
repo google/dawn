@@ -52,7 +52,6 @@
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
-#include "src/ast/unless_statement.h"
 #include "src/ast/variable_decl_statement.h"
 
 namespace tint {
@@ -333,36 +332,6 @@ TEST_F(TypeDeterminerTest, Stmt_Switch) {
   ASSERT_NE(rhs_ptr->result_type(), nullptr);
 
   EXPECT_TRUE(stmt.condition()->result_type()->IsI32());
-  EXPECT_TRUE(lhs_ptr->result_type()->IsI32());
-  EXPECT_TRUE(rhs_ptr->result_type()->IsF32());
-}
-
-TEST_F(TypeDeterminerTest, Stmt_Unless) {
-  ast::type::I32Type i32;
-  ast::type::F32Type f32;
-
-  auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 2));
-  auto* lhs_ptr = lhs.get();
-
-  auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
-  auto* rhs_ptr = rhs.get();
-
-  ast::StatementList body;
-  body.push_back(std::make_unique<ast::AssignmentStatement>(std::move(lhs),
-                                                            std::move(rhs)));
-
-  ast::UnlessStatement unless(
-      std::make_unique<ast::ScalarConstructorExpression>(
-          std::make_unique<ast::SintLiteral>(&i32, 3)),
-      std::move(body));
-
-  EXPECT_TRUE(td()->DetermineResultType(&unless));
-  ASSERT_NE(unless.condition()->result_type(), nullptr);
-  ASSERT_NE(lhs_ptr->result_type(), nullptr);
-  ASSERT_NE(rhs_ptr->result_type(), nullptr);
-  EXPECT_TRUE(unless.condition()->result_type()->IsI32());
   EXPECT_TRUE(lhs_ptr->result_type()->IsI32());
   EXPECT_TRUE(rhs_ptr->result_type()->IsF32());
 }
