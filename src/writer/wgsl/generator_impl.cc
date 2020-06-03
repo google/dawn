@@ -554,9 +554,6 @@ bool GeneratorImpl::EmitBinary(ast::BinaryExpression* expr) {
     case ast::BinaryOp::kShiftRight:
       out_ << ">>";
       break;
-    case ast::BinaryOp::kShiftRightArith:
-      out_ << ">>>";
-      break;
     case ast::BinaryOp::kAdd:
       out_ << "+";
       break;

@@ -246,36 +246,36 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // Both uint
         BinaryData{"uint", "uint_10", "OpShiftRightArithmetic", "uint_20",
-                   "__u32", "ScalarConstructor{10}", "shift_right_arith",
+                   "__u32", "ScalarConstructor{10}", "shift_right",
                    "ScalarConstructor{20}"},
         // Both int
         BinaryData{"int", "int_30", "OpShiftRightArithmetic", "int_40", "__i32",
-                   "ScalarConstructor{30}", "shift_right_arith",
+                   "ScalarConstructor{30}", "shift_right",
                    "ScalarConstructor{40}"},
         // Mixed, returning uint
         BinaryData{"uint", "int_30", "OpShiftRightArithmetic", "uint_10",
-                   "__u32", "ScalarConstructor{30}", "shift_right_arith",
+                   "__u32", "ScalarConstructor{30}", "shift_right",
                    "ScalarConstructor{10}"},
         // Mixed, returning int
         BinaryData{"int", "int_30", "OpShiftRightArithmetic", "uint_10",
-                   "__i32", "ScalarConstructor{30}", "shift_right_arith",
+                   "__i32", "ScalarConstructor{30}", "shift_right",
                    "ScalarConstructor{10}"},
         // Both v2uint
         BinaryData{"v2uint", "v2uint_10_20", "OpShiftRightArithmetic",
                    "v2uint_20_10", "__vec_2__u32", AstFor("v2uint_10_20"),
-                   "shift_right_arith", AstFor("v2uint_20_10")},
+                   "shift_right", AstFor("v2uint_20_10")},
         // Both v2int
         BinaryData{"v2int", "v2int_30_40", "OpShiftRightArithmetic",
                    "v2int_40_30", "__vec_2__i32", AstFor("v2int_30_40"),
-                   "shift_right_arith", AstFor("v2int_40_30")},
+                   "shift_right", AstFor("v2int_40_30")},
         // Mixed, returning v2uint
         BinaryData{"v2uint", "v2int_30_40", "OpShiftRightArithmetic",
                    "v2uint_10_20", "__vec_2__u32", AstFor("v2int_30_40"),
-                   "shift_right_arith", AstFor("v2uint_10_20")},
+                   "shift_right", AstFor("v2uint_10_20")},
         // Mixed, returning v2int
         BinaryData{"v2int", "v2int_40_30", "OpShiftRightArithmetic",
                    "v2uint_20_10", "__vec_2__i32", AstFor("v2int_40_30"),
-                   "shift_right_arith", AstFor("v2uint_20_10")}));
+                   "shift_right", AstFor("v2uint_20_10")}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_BitwiseAnd,

@@ -2291,13 +2291,11 @@ std::unique_ptr<ast::Expression> ParserImpl::additive_expression() {
 //   :
 //   | LESS_THAN LESS_THAN additive_expression shift_expr
 //   | GREATER_THAN GREATER_THAN additive_expression shift_expr
-//   | GREATER_THAN GREATER_THAN GREATER_THAN additive_expression shift_expr
 std::unique_ptr<ast::Expression> ParserImpl::shift_expr(
     std::unique_ptr<ast::Expression> lhs) {
   auto t = peek();
   auto source = t.source();
   auto t2 = peek(1);
-  auto t3 = peek(2);
 
   auto* name = "";
   ast::BinaryOp op = ast::BinaryOp::kNone;
@@ -2306,12 +2304,6 @@ std::unique_ptr<ast::Expression> ParserImpl::shift_expr(
     next();  // Consume the t2 peek
     op = ast::BinaryOp::kShiftLeft;
     name = "<<";
-  } else if (t.IsGreaterThan() && t2.IsGreaterThan() && t3.IsGreaterThan()) {
-    next();  // Consume the t peek
-    next();  // Consume the t2 peek
-    next();  // Consume the t3 peek
-    op = ast::BinaryOp::kShiftRightArith;
-    name = ">>>";
   } else if (t.IsGreaterThan() && t2.IsGreaterThan()) {
     next();  // Consume the t peek
     next();  // Consume the t2 peek

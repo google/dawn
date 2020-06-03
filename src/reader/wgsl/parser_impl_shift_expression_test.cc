@@ -67,27 +67,6 @@ TEST_F(ParserImplTest, ShiftExpression_Parses_ShiftRight) {
   ASSERT_TRUE(init->literal()->AsBool()->IsTrue());
 }
 
-TEST_F(ParserImplTest, ShiftExpression_Parses_ShiftRightArith) {
-  auto* p = parser("a >>> true");
-  auto e = p->shift_expression();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-
-  ASSERT_TRUE(e->IsBinary());
-  auto* rel = e->AsBinary();
-  EXPECT_EQ(ast::BinaryOp::kShiftRightArith, rel->op());
-
-  ASSERT_TRUE(rel->lhs()->IsIdentifier());
-  auto* ident = rel->lhs()->AsIdentifier();
-  EXPECT_EQ(ident->name(), "a");
-
-  ASSERT_TRUE(rel->rhs()->IsConstructor());
-  ASSERT_TRUE(rel->rhs()->AsConstructor()->IsScalarConstructor());
-  auto* init = rel->rhs()->AsConstructor()->AsScalarConstructor();
-  ASSERT_TRUE(init->literal()->IsBool());
-  ASSERT_TRUE(init->literal()->AsBool()->IsTrue());
-}
-
 TEST_F(ParserImplTest, ShiftExpression_InvalidLHS) {
   auto* p = parser("if (a) {} << true");
   auto e = p->shift_expression();

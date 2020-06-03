@@ -62,7 +62,6 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"(left >= right)", ast::BinaryOp::kGreaterThanEqual},
         BinaryData{"(left << right)", ast::BinaryOp::kShiftLeft},
         BinaryData{"(left >> right)", ast::BinaryOp::kShiftRight},
-        BinaryData{"(left >>> right)", ast::BinaryOp::kShiftRightArith},
         BinaryData{"(left + right)", ast::BinaryOp::kAdd},
         BinaryData{"(left - right)", ast::BinaryOp::kSubtract},
         BinaryData{"(left * right)", ast::BinaryOp::kMultiply},

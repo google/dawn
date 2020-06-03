@@ -558,8 +558,8 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
 
   // Result type matches first parameter type
   if (expr->IsAnd() || expr->IsOr() || expr->IsXor() || expr->IsShiftLeft() ||
-      expr->IsShiftRight() || expr->IsShiftRightArith() || expr->IsAdd() ||
-      expr->IsSubtract() || expr->IsDivide() || expr->IsModulo()) {
+      expr->IsShiftRight() || expr->IsAdd() || expr->IsSubtract() ||
+      expr->IsDivide() || expr->IsModulo()) {
     expr->set_result_type(expr->lhs()->result_type()->UnwrapPtrIfNeeded());
     return true;
   }

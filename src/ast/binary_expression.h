@@ -40,7 +40,6 @@ enum class BinaryOp {
   kGreaterThanEqual,
   kShiftLeft,
   kShiftRight,
-  kShiftRightArith,
   kAdd,
   kSubtract,
   kMultiply,
@@ -105,8 +104,6 @@ class BinaryExpression : public Expression {
   bool IsShiftLeft() const { return op_ == BinaryOp::kShiftLeft; }
   /// @returns true if the op is shift right
   bool IsShiftRight() const { return op_ == BinaryOp::kShiftRight; }
-  /// @returns true if the op is shift right arith
-  bool IsShiftRightArith() const { return op_ == BinaryOp::kShiftRightArith; }
   /// @returns true if the op is add
   bool IsAdd() const { return op_ == BinaryOp::kAdd; }
   /// @returns true if the op is subtract
@@ -192,9 +189,6 @@ inline std::ostream& operator<<(std::ostream& out, BinaryOp op) {
       break;
     case BinaryOp::kShiftRight:
       out << "shift_right";
-      break;
-    case BinaryOp::kShiftRightArith:
-      out << "shift_right_arith";
       break;
     case BinaryOp::kAdd:
       out << "add";
