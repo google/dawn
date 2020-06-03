@@ -15,6 +15,7 @@
 #include "tests/DawnTest.h"
 
 #include "common/Assert.h"
+#include "common/Math.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
@@ -519,6 +520,83 @@ TEST_P(VertexStateTest, LastAllowedVertexBuffer) {
 
     wgpu::Buffer buffer0 = MakeVertexBuffer<float>({0, 1, 2, 3, 1, 2, 3, 4, 2, 3, 4, 5});
     DoTestDraw(pipeline, 1, 1, {DrawVertexBuffer{kMaxVertexBuffers - 1, &buffer0}});
+}
+
+// Test that overlapping vertex attributes are permitted and load data correctly
+TEST_P(VertexStateTest, OverlappingVertexAttributes) {
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 3, 3);
+
+    utils::ComboVertexStateDescriptor vertexState =
+        MakeVertexState({{16,
+                          InputStepMode::Vertex,
+                          {
+                              // "****" represents the bytes we'll actually read in the shader.
+                              {0, 0 /* offset */, VertexFormat::Float4},  // |****|----|----|----|
+                              {1, 4 /* offset */, VertexFormat::UInt2},   //      |****|****|
+                              {2, 8 /* offset */, VertexFormat::Half4},   //           |-----****|
+                              {3, 0 /* offset */, VertexFormat::Float},   // |****|
+                          }}});
+
+    struct Data {
+        float fvalue;
+        uint32_t uints[2];
+        uint16_t halfs[2];
+    };
+    static_assert(sizeof(Data) == 16, "");
+    Data data {1.f, {2u, 3u}, {Float32ToFloat16(4.f), Float32ToFloat16(5.f)}};
+
+    wgpu::Buffer vertexBuffer =
+        utils::CreateBufferFromData(device, &data, sizeof(data), wgpu::BufferUsage::Vertex);
+
+    utils::ComboRenderPipelineDescriptor pipelineDesc(device);
+    pipelineDesc.vertexStage.module =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
+                #version 450
+                layout(location = 0) in vec4 attr0;
+                layout(location = 1) in uvec2 attr1;
+                layout(location = 2) in vec4 attr2;
+                layout(location = 3) in float attr3;
+
+                layout(location = 0) out vec4 color;
+
+                void main() {
+                    gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+                    gl_PointSize = 1.0;
+
+                    bool success = (
+                        attr0.x == 1.0f &&
+                        attr1.x == 2u &&
+                        attr1.y == 3u &&
+                        attr2.z == 4.0f &&
+                        attr2.w == 5.0f &&
+                        attr3 == 1.0f
+                    );
+                    color = success ? vec4(0.0, 1.0, 0.0, 1.0) : vec4(1.0, 0.0, 0.0, 1.0);
+                })");
+    pipelineDesc.cFragmentStage.module =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
+                #version 450
+                layout(location = 0) in vec4 color;
+                layout(location = 0) out vec4 fragColor;
+                void main() {
+                    fragColor = color;
+                })");
+    pipelineDesc.vertexState = &vertexState;
+    pipelineDesc.cColorStates[0].format = renderPass.colorFormat;
+    pipelineDesc.primitiveTopology = wgpu::PrimitiveTopology::PointList;
+
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.SetVertexBuffer(0, vertexBuffer);
+    pass.Draw(1);
+    pass.EndPass();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 1, 1);
 }
 
 DAWN_INSTANTIATE_TEST(VertexStateTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
