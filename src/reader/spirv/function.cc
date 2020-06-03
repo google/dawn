@@ -27,7 +27,10 @@
 #include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
+#include "src/ast/break_statement.h"
+#include "src/ast/continue_statement.h"
 #include "src/ast/else_statement.h"
+#include "src/ast/fallthrough_statement.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/kill_statement.h"
@@ -1786,6 +1789,39 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
         }
       }
       return true;
+    case SpvOpBranch: {
+      const auto dest = terminator.GetSingleWordInOperand(0);
+      const auto kind = block_info.succ_edge.find(dest)->second;
+      switch (kind) {
+        case EdgeKind::kBack:
+          // Nothing to do. The loop backedge is implicit.
+          return true;
+        case EdgeKind::kSwitchBreak:
+        case EdgeKind::kLoopBreak:
+          AddStatement(std::make_unique<ast::BreakStatement>());
+          return true;
+        case EdgeKind::kLoopContinue:
+          // An unconditional continue to the next block is redundant and ugly.
+          // Skip it in that case.
+          if (GetBlockInfo(dest)->pos == 1 + block_info.pos) {
+            return true;
+          }
+          // Otherwise, emit a regular continue statement.
+          AddStatement(std::make_unique<ast::ContinueStatement>());
+          return true;
+        case EdgeKind::kIfBreak:
+          // For an unconditional branch, the break out to an if-selection
+          // merge block is implicit.
+          return true;
+        case EdgeKind::kCaseFallThrough:
+          AddStatement(std::make_unique<ast::FallthroughStatement>());
+          return true;
+        case EdgeKind::kForward:
+          // Unconditional forward branch is implicit.
+          return true;
+      }
+      break;
+    }
     default:
       break;
   }
@@ -1842,8 +1878,8 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
   auto combinatorial_expr = MaybeEmitCombinatorialValue(inst);
   if (combinatorial_expr.expr != nullptr) {
     if (def_use_mgr_->NumUses(&inst) == 1) {
-      // If it's used once, then defer emitting the expression until it's used.
-      // Any supporting statements have already been emitted.
+      // If it's used once, then defer emitting the expression until it's
+      // used. Any supporting statements have already been emitted.
       singly_used_values_.insert(
           std::make_pair(inst.result_id(), std::move(combinatorial_expr)));
       return success();
@@ -1984,10 +2020,9 @@ TypedExpression FunctionEmitter::MakeAccessChain(
   }
 
   // A SPIR-V access chain is a single instruction with multiple indices
-  // walking down into composites.  The Tint AST represents this as ever-deeper
-  // nested indexing expresions.
-  // Start off with an expression for the base, and then bury that inside
-  // nested indexing expressions.
+  // walking down into composites.  The Tint AST represents this as
+  // ever-deeper nested indexing expresions. Start off with an expression
+  // for the base, and then bury that inside nested indexing expressions.
   TypedExpression current_expr(MakeOperand(inst, 0));
 
   const auto constants = constant_mgr_->GetOperandConstants(&inst);
