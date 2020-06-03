@@ -691,28 +691,9 @@ bool GeneratorImpl::EmitAssign(ast::AssignmentStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitBreak(ast::BreakStatement* stmt) {
+bool GeneratorImpl::EmitBreak(ast::BreakStatement*) {
   make_indent();
-
-  out_ << "break";
-
-  if (stmt->condition() != ast::StatementCondition::kNone) {
-    out_ << " ";
-    if (stmt->condition() == ast::StatementCondition::kIf) {
-      out_ << "if";
-    } else {
-      out_ << "unless";
-    }
-
-    out_ << " (";
-    if (!EmitExpression(stmt->conditional())) {
-      return false;
-    }
-    out_ << ")";
-  }
-
-  out_ << ";" << std::endl;
-
+  out_ << "break;" << std::endl;
   return true;
 }
 
@@ -742,28 +723,9 @@ bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
   return EmitStatementBlockAndNewline(stmt->body());
 }
 
-bool GeneratorImpl::EmitContinue(ast::ContinueStatement* stmt) {
+bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
   make_indent();
-
-  out_ << "continue";
-
-  if (stmt->condition() != ast::StatementCondition::kNone) {
-    out_ << " ";
-    if (stmt->condition() == ast::StatementCondition::kIf) {
-      out_ << "if";
-    } else {
-      out_ << "unless";
-    }
-
-    out_ << " (";
-    if (!EmitExpression(stmt->conditional())) {
-      return false;
-    }
-    out_ << ")";
-  }
-
-  out_ << ";" << std::endl;
-
+  out_ << "continue;" << std::endl;
   return true;
 }
 

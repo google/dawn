@@ -14,8 +14,6 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/continue_statement.h"
-#include "src/ast/return_statement.h"
-#include "src/ast/statement.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
@@ -30,46 +28,6 @@ TEST_F(ParserImplTest, ContinueStmt) {
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsContinue());
-  EXPECT_EQ(e->condition(), ast::StatementCondition::kNone);
-  EXPECT_EQ(e->conditional(), nullptr);
-}
-
-TEST_F(ParserImplTest, ContinueStmt_WithIf) {
-  auto* p = parser("continue if (a == b)");
-  auto e = p->continue_stmt();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsContinue());
-  EXPECT_EQ(e->condition(), ast::StatementCondition::kIf);
-  ASSERT_NE(e->conditional(), nullptr);
-  EXPECT_TRUE(e->conditional()->IsBinary());
-}
-
-TEST_F(ParserImplTest, ContinueStmt_WithUnless) {
-  auto* p = parser("continue unless (a == b)");
-  auto e = p->continue_stmt();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsContinue());
-  EXPECT_EQ(e->condition(), ast::StatementCondition::kUnless);
-  ASSERT_NE(e->conditional(), nullptr);
-  EXPECT_TRUE(e->conditional()->IsBinary());
-}
-
-TEST_F(ParserImplTest, ContinueStmt_InvalidRHS) {
-  auto* p = parser("continue if (a = b)");
-  auto e = p->continue_stmt();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:16: expected )");
-}
-
-TEST_F(ParserImplTest, ContinueStmt_MissingRHS) {
-  auto* p = parser("continue if");
-  auto e = p->continue_stmt();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:12: expected (");
 }
 
 }  // namespace

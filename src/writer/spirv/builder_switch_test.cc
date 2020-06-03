@@ -472,16 +472,6 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
   EXPECT_EQ(b.error(), "fallthrough of last case statement is disallowed");
 }
 
-// TODO(dsinclair): Implement when parsing is handled for multi-value
-// case labels.
-TEST_F(BuilderTest, DISABLED_Switch_CaseWithMulitpleLabels) {
-  // switch (a) {
-  //   case 1, 2, 3:
-  //     v = 1;
-  // }
-  FAIL();
-}
-
 TEST_F(BuilderTest, Switch_WithNestedBreak) {
   ast::type::I32Type i32;
   ast::type::BoolType bool_type;

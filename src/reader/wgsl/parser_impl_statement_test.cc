@@ -197,20 +197,12 @@ TEST_F(ParserImplTest, Statement_Break) {
   EXPECT_TRUE(e->IsBreak());
 }
 
-TEST_F(ParserImplTest, Statement_Break_Invalid) {
-  auto* p = parser("break if (a = b);");
-  auto e = p->statement();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:13: expected )");
-}
-
 TEST_F(ParserImplTest, Statement_Break_MissingSemicolon) {
-  auto* p = parser("break if (a == b)");
+  auto* p = parser("break");
   auto e = p->statement();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:18: missing ;");
+  EXPECT_EQ(p->error(), "1:6: missing ;");
 }
 
 TEST_F(ParserImplTest, Statement_Continue) {
@@ -221,20 +213,12 @@ TEST_F(ParserImplTest, Statement_Continue) {
   EXPECT_TRUE(e->IsContinue());
 }
 
-TEST_F(ParserImplTest, Statement_Continue_Invalid) {
-  auto* p = parser("continue if (a = b);");
-  auto e = p->statement();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:16: expected )");
-}
-
 TEST_F(ParserImplTest, Statement_Continue_MissingSemicolon) {
-  auto* p = parser("continue if (a == b)");
+  auto* p = parser("continue");
   auto e = p->statement();
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:21: missing ;");
+  EXPECT_EQ(p->error(), "1:9: missing ;");
 }
 
 TEST_F(ParserImplTest, Statement_Kill) {

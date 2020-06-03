@@ -159,16 +159,14 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     return DetermineResultType(a->lhs()) && DetermineResultType(a->rhs());
   }
   if (stmt->IsBreak()) {
-    auto* b = stmt->AsBreak();
-    return DetermineResultType(b->conditional());
+    return true;
   }
   if (stmt->IsCase()) {
     auto* c = stmt->AsCase();
     return DetermineStatements(c->body());
   }
   if (stmt->IsContinue()) {
-    auto* c = stmt->AsContinue();
-    return DetermineResultType(c->conditional());
+    return true;
   }
   if (stmt->IsElse()) {
     auto* e = stmt->AsElse();

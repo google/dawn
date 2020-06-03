@@ -22,7 +22,6 @@
 #include "src/ast/expression.h"
 #include "src/ast/literal.h"
 #include "src/ast/statement.h"
-#include "src/ast/statement_condition.h"
 
 namespace tint {
 namespace ast {

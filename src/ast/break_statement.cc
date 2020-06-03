@@ -21,19 +21,6 @@ BreakStatement::BreakStatement() : Statement() {}
 
 BreakStatement::BreakStatement(const Source& source) : Statement(source) {}
 
-BreakStatement::BreakStatement(StatementCondition condition,
-                               std::unique_ptr<Expression> conditional)
-    : Statement(),
-      condition_(condition),
-      conditional_(std::move(conditional)) {}
-
-BreakStatement::BreakStatement(const Source& source,
-                               StatementCondition condition,
-                               std::unique_ptr<Expression> conditional)
-    : Statement(source),
-      condition_(condition),
-      conditional_(std::move(conditional)) {}
-
 BreakStatement::BreakStatement(BreakStatement&&) = default;
 
 BreakStatement::~BreakStatement() = default;
@@ -43,26 +30,12 @@ bool BreakStatement::IsBreak() const {
 }
 
 bool BreakStatement::IsValid() const {
-  if (condition_ == StatementCondition::kNone)
-    return conditional_ == nullptr;
-
-  return conditional_ != nullptr && conditional_->IsValid();
+  return true;
 }
 
 void BreakStatement::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "Break{";
-
-  if (condition_ != StatementCondition::kNone) {
-    out << std::endl;
-
-    make_indent(out, indent + 2);
-    out << condition_ << std::endl;
-    conditional_->to_str(out, indent + 2);
-
-    make_indent(out, indent);
-  }
-  out << "}" << std::endl;
+  out << "Break{}" << std::endl;
 }
 
 }  // namespace ast

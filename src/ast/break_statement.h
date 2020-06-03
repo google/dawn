@@ -15,12 +15,7 @@
 #ifndef SRC_AST_BREAK_STATEMENT_H_
 #define SRC_AST_BREAK_STATEMENT_H_
 
-#include <memory>
-#include <utility>
-
-#include "src/ast/expression.h"
 #include "src/ast/statement.h"
-#include "src/ast/statement_condition.h"
 
 namespace tint {
 namespace ast {
@@ -33,35 +28,9 @@ class BreakStatement : public Statement {
   /// Constructor
   /// @param source the break statement source
   explicit BreakStatement(const Source& source);
-  /// Constructor
-  /// @param condition the condition type
-  /// @param conditional the condition expression
-  BreakStatement(StatementCondition condition,
-                 std::unique_ptr<Expression> conditional);
-  /// Constructor
-  /// @param source the break statement source
-  /// @param condition the condition type
-  /// @param conditional the condition expression
-  BreakStatement(const Source& source,
-                 StatementCondition condition,
-                 std::unique_ptr<Expression> conditional);
   /// Move constructor
   BreakStatement(BreakStatement&&);
   ~BreakStatement() override;
-
-  /// Sets the condition type
-  /// @param condition the condition type
-  void set_condition(StatementCondition condition) { condition_ = condition; }
-  /// @returns the condition type
-  StatementCondition condition() const { return condition_; }
-
-  /// Sets the conditional expression
-  /// @param conditional the conditional expression
-  void set_conditional(std::unique_ptr<Expression> conditional) {
-    conditional_ = std::move(conditional);
-  }
-  /// @returns the conditional expression
-  Expression* conditional() const { return conditional_.get(); }
 
   /// @returns true if this is an break statement
   bool IsBreak() const override;
@@ -76,9 +45,6 @@ class BreakStatement : public Statement {
 
  private:
   BreakStatement(const BreakStatement&) = delete;
-
-  StatementCondition condition_ = StatementCondition::kNone;
-  std::unique_ptr<Expression> conditional_;
 };
 
 }  // namespace ast

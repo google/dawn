@@ -18,9 +18,7 @@
 #include <memory>
 #include <utility>
 
-#include "src/ast/expression.h"
 #include "src/ast/statement.h"
-#include "src/ast/statement_condition.h"
 
 namespace tint {
 namespace ast {
@@ -33,35 +31,9 @@ class ContinueStatement : public Statement {
   /// Constructor
   /// @param source the continue statement source
   explicit ContinueStatement(const Source& source);
-  /// Constructor
-  /// @param condition the condition type
-  /// @param conditional the condition expression
-  ContinueStatement(StatementCondition condition,
-                    std::unique_ptr<Expression> conditional);
-  /// Constructor
-  /// @param source the continue statement source
-  /// @param condition the condition type
-  /// @param conditional the condition expression
-  ContinueStatement(const Source& source,
-                    StatementCondition condition,
-                    std::unique_ptr<Expression> conditional);
   /// Move constructor
   ContinueStatement(ContinueStatement&&);
   ~ContinueStatement() override;
-
-  /// Sets the condition type
-  /// @param condition the condition type
-  void set_condition(StatementCondition condition) { condition_ = condition; }
-  /// @returns the condition type
-  StatementCondition condition() const { return condition_; }
-
-  /// Sets the conditional expression
-  /// @param conditional the conditional expression
-  void set_conditional(std::unique_ptr<Expression> conditional) {
-    conditional_ = std::move(conditional);
-  }
-  /// @returns the conditional expression
-  Expression* conditional() const { return conditional_.get(); }
 
   /// @returns true if this is an continue statement
   bool IsContinue() const override;
@@ -76,9 +48,6 @@ class ContinueStatement : public Statement {
 
  private:
   ContinueStatement(const ContinueStatement&) = delete;
-
-  StatementCondition condition_ = StatementCondition::kNone;
-  std::unique_ptr<Expression> conditional_;
 };
 
 }  // namespace ast

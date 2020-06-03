@@ -278,8 +278,6 @@ source_set("libtint_core_src") {
     "src/ast/sint_literal.h",
     "src/ast/statement.cc",
     "src/ast/statement.h",
-    "src/ast/statement_condition.cc",
-    "src/ast/statement_condition.h",
     "src/ast/storage_class.cc",
     "src/ast/storage_class.h",
     "src/ast/struct.cc",

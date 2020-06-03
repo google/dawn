@@ -22,19 +22,6 @@ ContinueStatement::ContinueStatement() : Statement() {}
 ContinueStatement::ContinueStatement(const Source& source)
     : Statement(source) {}
 
-ContinueStatement::ContinueStatement(StatementCondition condition,
-                                     std::unique_ptr<Expression> conditional)
-    : Statement(),
-      condition_(condition),
-      conditional_(std::move(conditional)) {}
-
-ContinueStatement::ContinueStatement(const Source& source,
-                                     StatementCondition condition,
-                                     std::unique_ptr<Expression> conditional)
-    : Statement(source),
-      condition_(condition),
-      conditional_(std::move(conditional)) {}
-
 ContinueStatement::ContinueStatement(ContinueStatement&&) = default;
 
 ContinueStatement::~ContinueStatement() = default;
@@ -44,26 +31,12 @@ bool ContinueStatement::IsContinue() const {
 }
 
 bool ContinueStatement::IsValid() const {
-  if (condition_ == StatementCondition::kNone)
-    return conditional_ == nullptr;
-
-  return conditional_ && conditional_->IsValid();
+  return true;
 }
 
 void ContinueStatement::to_str(std::ostream& out, size_t indent) const {
   make_indent(out, indent);
-  out << "Continue{";
-
-  if (condition_ != StatementCondition::kNone) {
-    out << std::endl;
-
-    make_indent(out, indent + 2);
-    out << condition_ << std::endl;
-    conditional_->to_str(out, indent + 2);
-
-    make_indent(out, indent);
-  }
-  out << "}" << std::endl;
+  out << "Continue{}" << std::endl;
 }
 
 }  // namespace ast

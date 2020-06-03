@@ -115,8 +115,6 @@ set(TINT_LIB_SRCS
   ast/sint_literal.h
   ast/statement.cc
   ast/statement.h
-  ast/statement_condition.cc
-  ast/statement_condition.h
   ast/storage_class.cc
   ast/storage_class.h
   ast/struct_decoration.cc

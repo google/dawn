@@ -26,7 +26,6 @@
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
-#include "src/ast/statement_condition.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/context.h"
@@ -488,67 +487,6 @@ OpBranch %1
 )");
 }
 
-// This is blocked on implementing conditional break
-TEST_F(BuilderTest, DISABLED_If_WithConditionalBreak) {
-  ast::type::BoolType bool_type;
-  // loop {
-  //   if (true) {
-  //     break if (false);
-  //   }
-  // }
-  auto cond_true = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::BoolLiteral>(&bool_type, true));
-  auto cond_false = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::BoolLiteral>(&bool_type, false));
-
-  ast::StatementList if_body;
-  if_body.push_back(std::make_unique<ast::BreakStatement>(
-      ast::StatementCondition::kIf, std::move(cond_false)));
-
-  auto if_stmt = std::make_unique<ast::IfStatement>(std::move(cond_true),
-                                                    std::move(if_body));
-
-  ast::StatementList loop_body;
-  loop_body.push_back(std::move(if_stmt));
-
-  ast::LoopStatement expr(std::move(loop_body), {});
-
-  Context ctx;
-  ast::Module mod;
-  TypeDeterminer td(&ctx, &mod);
-
-  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
-
-  Builder b(&mod);
-  b.push_function(Function{});
-
-  EXPECT_TRUE(b.GenerateLoopStatement(&expr)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
-%6 = OpConstantTrue %5
-%7 = OpConstantFalse %5
-)");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpBranch %1
-%1 = OpLabel
-OpLoopMerge %2 %3 None
-OpBranch %4
-%4 = OpLabel
-OpSelectionMerge %8 None
-OpBranchConditional %6 %9 %8
-%9 = OpLabel
-OpBranchConditional %7 %2 %8
-%8 = OpLabel
-OpBranch %3
-%3 = OpLabel
-OpBranch %1
-%2 = OpLabel
-)");
-}
-
-TEST_F(BuilderTest, DISABLED_If_WithElseConditionalBreak) {
-  FAIL();
-}
-
 TEST_F(BuilderTest, If_WithContinue) {
   ast::type::BoolType bool_type;
   // loop {
@@ -599,10 +537,6 @@ OpBranch %3
 OpBranch %1
 %2 = OpLabel
 )");
-}
-
-TEST_F(BuilderTest, DISABLED_If_WithConditionalContinue) {
-  FAIL();
 }
 
 TEST_F(BuilderTest, If_WithElseContinue) {
@@ -664,10 +598,6 @@ OpBranch %3
 OpBranch %1
 %2 = OpLabel
 )");
-}
-
-TEST_F(BuilderTest, DISABLED_If_WithElseConditionalContinue) {
-  FAIL();
 }
 
 TEST_F(BuilderTest, If_WithReturn) {

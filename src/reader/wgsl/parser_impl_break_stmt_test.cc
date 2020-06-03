@@ -14,8 +14,6 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/break_statement.h"
-#include "src/ast/return_statement.h"
-#include "src/ast/statement.h"
 #include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
@@ -30,46 +28,6 @@ TEST_F(ParserImplTest, BreakStmt) {
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e, nullptr);
   ASSERT_TRUE(e->IsBreak());
-  EXPECT_EQ(e->condition(), ast::StatementCondition::kNone);
-  EXPECT_EQ(e->conditional(), nullptr);
-}
-
-TEST_F(ParserImplTest, BreakStmt_WithIf) {
-  auto* p = parser("break if (a == b)");
-  auto e = p->break_stmt();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsBreak());
-  EXPECT_EQ(e->condition(), ast::StatementCondition::kIf);
-  ASSERT_NE(e->conditional(), nullptr);
-  EXPECT_TRUE(e->conditional()->IsBinary());
-}
-
-TEST_F(ParserImplTest, BreakStmt_WithUnless) {
-  auto* p = parser("break unless (a == b)");
-  auto e = p->break_stmt();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e, nullptr);
-  ASSERT_TRUE(e->IsBreak());
-  EXPECT_EQ(e->condition(), ast::StatementCondition::kUnless);
-  ASSERT_NE(e->conditional(), nullptr);
-  EXPECT_TRUE(e->conditional()->IsBinary());
-}
-
-TEST_F(ParserImplTest, BreakStmt_InvalidRHS) {
-  auto* p = parser("break if (a = b)");
-  auto e = p->break_stmt();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:13: expected )");
-}
-
-TEST_F(ParserImplTest, BreakStmt_MissingRHS) {
-  auto* p = parser("break if");
-  auto e = p->break_stmt();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(e, nullptr);
-  EXPECT_EQ(p->error(), "1:9: expected (");
 }
 
 }  // namespace

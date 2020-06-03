@@ -41,7 +41,6 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/set_decoration.h"
 #include "src/ast/sint_literal.h"
-#include "src/ast/statement_condition.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/alias_type.h"
@@ -1943,73 +1942,25 @@ std::unique_ptr<ast::LoopStatement> ParserImpl::loop_stmt() {
 }
 
 // break_stmt
-//   : BREAK ({IF | UNLESS} paren_rhs_stmt)?
+//   : BREAK
 std::unique_ptr<ast::BreakStatement> ParserImpl::break_stmt() {
   auto t = peek();
   if (!t.IsBreak())
     return nullptr;
 
-  auto source = t.source();
   next();  // Consume the peek
-
-  ast::StatementCondition condition = ast::StatementCondition::kNone;
-  std::unique_ptr<ast::Expression> conditional = nullptr;
-
-  t = peek();
-  if (t.IsIf() || t.IsUnless()) {
-    next();  // Consume the peek
-
-    if (t.IsIf())
-      condition = ast::StatementCondition::kIf;
-    else
-      condition = ast::StatementCondition::kUnless;
-
-    conditional = paren_rhs_stmt();
-    if (has_error())
-      return nullptr;
-    if (conditional == nullptr) {
-      set_error(peek(), "unable to parse conditional statement");
-      return nullptr;
-    }
-  }
-
-  return std::make_unique<ast::BreakStatement>(source, condition,
-                                               std::move(conditional));
+  return std::make_unique<ast::BreakStatement>(t.source());
 }
 
 // continue_stmt
-//   : CONTINUE ({IF | UNLESS} paren_rhs_stmt)?
+//   : CONTINUE
 std::unique_ptr<ast::ContinueStatement> ParserImpl::continue_stmt() {
   auto t = peek();
   if (!t.IsContinue())
     return nullptr;
 
-  auto source = t.source();
   next();  // Consume the peek
-
-  ast::StatementCondition condition = ast::StatementCondition::kNone;
-  std::unique_ptr<ast::Expression> conditional = nullptr;
-
-  t = peek();
-  if (t.IsIf() || t.IsUnless()) {
-    next();  // Consume the peek
-
-    if (t.IsIf())
-      condition = ast::StatementCondition::kIf;
-    else
-      condition = ast::StatementCondition::kUnless;
-
-    conditional = paren_rhs_stmt();
-    if (has_error())
-      return nullptr;
-    if (conditional == nullptr) {
-      set_error(peek(), "unable to parse conditional statement");
-      return nullptr;
-    }
-  }
-
-  return std::make_unique<ast::ContinueStatement>(source, condition,
-                                                  std::move(conditional));
+  return std::make_unique<ast::ContinueStatement>(t.source());
 }
 
 // continuing_stmt

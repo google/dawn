@@ -17,7 +17,6 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/continue_statement.h"
-#include "src/ast/identifier_expression.h"
 #include "src/writer/wgsl/generator_impl.h"
 
 namespace tint {
@@ -35,28 +34,6 @@ TEST_F(GeneratorImplTest, Emit_Continue) {
 
   ASSERT_TRUE(g.EmitStatement(&c)) << g.error();
   EXPECT_EQ(g.result(), "  continue;\n");
-}
-
-TEST_F(GeneratorImplTest, Emit_ContinueWithIf) {
-  auto expr = std::make_unique<ast::IdentifierExpression>("expr");
-  ast::ContinueStatement c(ast::StatementCondition::kIf, std::move(expr));
-
-  GeneratorImpl g;
-  g.increment_indent();
-
-  ASSERT_TRUE(g.EmitStatement(&c)) << g.error();
-  EXPECT_EQ(g.result(), "  continue if (expr);\n");
-}
-
-TEST_F(GeneratorImplTest, Emit_ContinueWithUnless) {
-  auto expr = std::make_unique<ast::IdentifierExpression>("expr");
-  ast::ContinueStatement c(ast::StatementCondition::kUnless, std::move(expr));
-
-  GeneratorImpl g;
-  g.increment_indent();
-
-  ASSERT_TRUE(g.EmitStatement(&c)) << g.error();
-  EXPECT_EQ(g.result(), "  continue unless (expr);\n");
 }
 
 }  // namespace

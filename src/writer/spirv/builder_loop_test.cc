@@ -202,8 +202,6 @@ OpBranch %1
 )");
 }
 
-TEST_F(BuilderTest, DISABLED_Loop_WithConditionalContinue) {}
-
 TEST_F(BuilderTest, Loop_WithBreak) {
   // loop {
   //   break;
@@ -235,8 +233,6 @@ OpBranch %1
 %2 = OpLabel
 )");
 }
-
-TEST_F(BuilderTest, DISABLED_Loop_WithConditionalBreak) {}
 
 }  // namespace
 }  // namespace spirv

@@ -129,26 +129,6 @@ TEST_F(TypeDeterminerTest, Stmt_Assign) {
   EXPECT_TRUE(rhs_ptr->result_type()->IsF32());
 }
 
-TEST_F(TypeDeterminerTest, Stmt_Break) {
-  ast::type::I32Type i32;
-
-  auto cond = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 2));
-  auto* cond_ptr = cond.get();
-
-  ast::BreakStatement brk(ast::StatementCondition::kIf, std::move(cond));
-
-  EXPECT_TRUE(td()->DetermineResultType(&brk));
-  ASSERT_NE(cond_ptr->result_type(), nullptr);
-  EXPECT_TRUE(cond_ptr->result_type()->IsI32());
-}
-
-TEST_F(TypeDeterminerTest, Stmt_Break_WithoutCondition) {
-  ast::type::I32Type i32;
-  ast::BreakStatement brk;
-  EXPECT_TRUE(td()->DetermineResultType(&brk));
-}
-
 TEST_F(TypeDeterminerTest, Stmt_Case) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;
@@ -174,26 +154,6 @@ TEST_F(TypeDeterminerTest, Stmt_Case) {
   ASSERT_NE(rhs_ptr->result_type(), nullptr);
   EXPECT_TRUE(lhs_ptr->result_type()->IsI32());
   EXPECT_TRUE(rhs_ptr->result_type()->IsF32());
-}
-
-TEST_F(TypeDeterminerTest, Stmt_Continue) {
-  ast::type::I32Type i32;
-
-  auto cond = std::make_unique<ast::ScalarConstructorExpression>(
-      std::make_unique<ast::SintLiteral>(&i32, 2));
-  auto* cond_ptr = cond.get();
-
-  ast::ContinueStatement stmt(ast::StatementCondition::kIf, std::move(cond));
-
-  EXPECT_TRUE(td()->DetermineResultType(&stmt));
-  ASSERT_NE(cond_ptr->result_type(), nullptr);
-  EXPECT_TRUE(cond_ptr->result_type()->IsI32());
-}
-
-TEST_F(TypeDeterminerTest, Stmt_Continue_WithoutStatement) {
-  ast::type::I32Type i32;
-  ast::ContinueStatement stmt;
-  EXPECT_TRUE(td()->DetermineResultType(&stmt));
 }
 
 TEST_F(TypeDeterminerTest, Stmt_Else) {
