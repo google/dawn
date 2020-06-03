@@ -62,8 +62,13 @@ namespace dawn_native { namespace d3d12 {
         };
 
         MemorySegmentInfo* GetMemorySegmentInfo(MemorySegment memorySegment);
-        MaybeError EnsureCanMakeResident(uint64_t allocationSize, MemorySegmentInfo* memorySegment);
+        ResultOrError<uint64_t> EnsureCanMakeResident(uint64_t allocationSize,
+                                                      MemorySegmentInfo* memorySegment);
         ResultOrError<Pageable*> RemoveSingleEntryFromLRU(MemorySegmentInfo* memorySegment);
+        MaybeError MakeAllocationsResident(MemorySegmentInfo* segment,
+                                           uint64_t sizeToMakeResident,
+                                           uint64_t numberOfObjectsToMakeResident,
+                                           ID3D12Pageable** allocations);
         void UpdateVideoMemoryInfo();
         void UpdateMemorySegmentInfo(MemorySegmentInfo* segmentInfo);
 
