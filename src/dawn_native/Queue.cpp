@@ -26,6 +26,8 @@
 #include "dawn_platform/DawnPlatform.h"
 #include "dawn_platform/tracing/TraceEvent.h"
 
+#include <cstring>
+
 namespace dawn_native {
 
     // QueueBase
