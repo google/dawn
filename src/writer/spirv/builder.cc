@@ -1250,10 +1250,12 @@ uint32_t Builder::GenerateIntrinsic(const std::string& name,
     op = spv::Op::OpAny;
   } else if (name == "all") {
     op = spv::Op::OpAll;
-  } else if (name == "is_nan") {
-    op = spv::Op::OpIsNan;
+  } else if (name == "dot") {
+    op = spv::Op::OpDot;
   } else if (name == "is_inf") {
     op = spv::Op::OpIsInf;
+  } else if (name == "is_nan") {
+    op = spv::Op::OpIsNan;
   }
   if (op == spv::Op::OpNop) {
     error_ = "unable to determine operator for: " + name;
