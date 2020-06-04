@@ -153,12 +153,6 @@ namespace dawn_native { namespace opengl {
     }
 
     MaybeError Device::TickImpl() {
-        CheckPassedSerials();
-        if (GetCompletedCommandSerial() == GetLastSubmittedCommandSerial()) {
-            // If there's no GPU work in flight we still need to artificially increment the serial
-            // so that CPU operations waiting on GPU completion can know they don't have to wait.
-            ArtificiallyIncrementSerials();
-        }
         return {};
     }
 
@@ -200,11 +194,6 @@ namespace dawn_native { namespace opengl {
 
     void Device::ShutDownImpl() {
         ASSERT(GetState() == State::Disconnected);
-
-        // Some operations might have been started since the last submit and waiting
-        // on a serial that doesn't have a corresponding fence enqueued. Force all
-        // operations to look as if they were completed (because they were).
-        AssumeCommandsComplete();
     }
 
     MaybeError Device::WaitForIdleForDestruction() {
@@ -213,8 +202,6 @@ namespace dawn_native { namespace opengl {
         ASSERT(mFencesInFlight.empty());
         Tick();
 
-        // Force all operations to look as if they were completed
-        AssumeCommandsComplete();
         return {};
     }
 

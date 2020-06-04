@@ -212,8 +212,6 @@ namespace dawn_native { namespace d3d12 {
     }
 
     MaybeError Device::TickImpl() {
-        CheckPassedSerials();
-
         // Perform cleanup operations to free unused objects
         Serial completedSerial = GetCompletedCommandSerial();
 
@@ -245,6 +243,7 @@ namespace dawn_native { namespace d3d12 {
             DAWN_TRY(CheckHRESULT(mFence->SetEventOnCompletion(serial, mFenceEvent),
                                   "D3D12 set event on completion"));
             WaitForSingleObject(mFenceEvent, INFINITE);
+            CheckPassedSerials();
         }
         return {};
     }
@@ -462,9 +461,6 @@ namespace dawn_native { namespace d3d12 {
 
         // Call tick one last time so resources are cleaned up.
         DAWN_TRY(TickImpl());
-
-        // Force all operations to look as if they were completed
-        AssumeCommandsComplete();
         return {};
     }
 
@@ -518,11 +514,6 @@ namespace dawn_native { namespace d3d12 {
 
         // Immediately forget about all pending commands
         mPendingCommands.Release();
-
-        // Some operations might have been started since the last submit and waiting
-        // on a serial that doesn't have a corresponding fence enqueued. Force all
-        // operations to look as if they were completed (because they were).
-        AssumeCommandsComplete();
 
         if (mFenceEvent != nullptr) {
             ::CloseHandle(mFenceEvent);

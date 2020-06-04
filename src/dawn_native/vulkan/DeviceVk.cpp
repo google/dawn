@@ -155,7 +155,6 @@ namespace dawn_native { namespace vulkan {
     }
 
     MaybeError Device::TickImpl() {
-        CheckPassedSerials();
         RecycleCompletedCommands();
 
         Serial completedSerial = GetCompletedCommandSerial();
@@ -171,10 +170,6 @@ namespace dawn_native { namespace vulkan {
 
         if (mRecordingContext.used) {
             DAWN_TRY(SubmitPendingCommands());
-        } else if (completedSerial == GetLastSubmittedCommandSerial()) {
-            // If there's no GPU work in flight we still need to artificially increment the serial
-            // so that CPU operations waiting on GPU completion can know they don't have to wait.
-            ArtificiallyIncrementSerials();
         }
 
         return {};
@@ -731,9 +726,6 @@ namespace dawn_native { namespace vulkan {
 
             mFencesInFlight.pop();
         }
-
-        // Force all operations to look as if they were completed
-        AssumeCommandsComplete();
         return {};
     }
 
@@ -772,11 +764,6 @@ namespace dawn_native { namespace vulkan {
             fn.DestroySemaphore(mVkDevice, semaphore, nullptr);
         }
         mRecordingContext.signalSemaphores.clear();
-
-        // Some operations might have been started since the last submit and waiting
-        // on a serial that doesn't have a corresponding fence enqueued. Force all
-        // operations to look as if they were completed (because they were).
-        AssumeCommandsComplete();
 
         // Assert that errors are device loss so that we can continue with destruction
         AssertAndIgnoreDeviceLossError(TickImpl());

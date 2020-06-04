@@ -143,6 +143,43 @@ TEST_P(FenceTests, MultipleSignalOnCompletion) {
     WaitForCompletedValue(fence, 4);
 }
 
+// Test callbacks still occur if Queue::Signal and fence::OnCompletion happens multiple times
+TEST_P(FenceTests, SignalOnCompletionWait) {
+    wgpu::Fence fence = queue.CreateFence();
+
+    queue.Signal(fence, 2);
+    queue.Signal(fence, 6);
+
+    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_Success, this + 2))
+        .Times(1);
+    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_Success, this + 6))
+        .Times(1);
+
+    fence.OnCompletion(1u, ToMockFenceOnCompletionCallback, this + 2);
+    fence.OnCompletion(5u, ToMockFenceOnCompletionCallback, this + 6);
+
+    WaitForCompletedValue(fence, 6);
+}
+
+// Test callbacks still occur if Queue::Signal and fence::OnCompletion happens multiple times
+TEST_P(FenceTests, SignalOnCompletionWaitStaggered) {
+    wgpu::Fence fence = queue.CreateFence();
+
+    queue.Signal(fence, 2);
+
+    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_Success, this + 2))
+        .Times(1);
+    fence.OnCompletion(1u, ToMockFenceOnCompletionCallback, this + 2);
+
+    queue.Signal(fence, 4);
+
+    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_Success, this + 4))
+        .Times(1);
+    fence.OnCompletion(3u, ToMockFenceOnCompletionCallback, this + 4);
+
+    WaitForCompletedValue(fence, 4);
+}
+
 // Test all callbacks are called if they are added for the same fence value
 TEST_P(FenceTests, OnCompletionMultipleCallbacks) {
     wgpu::Fence fence = queue.CreateFence();

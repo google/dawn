@@ -90,6 +90,7 @@ namespace dawn_native {
 
         Serial GetCompletedCommandSerial() const;
         Serial GetLastSubmittedCommandSerial() const;
+        Serial GetFutureCallbackSerial() const;
         Serial GetPendingCommandSerial() const;
         virtual MaybeError TickImpl() = 0;
 
@@ -214,6 +215,7 @@ namespace dawn_native {
         size_t GetDeprecationWarningCountForTesting();
         void EmitDeprecationWarning(const char* warning);
         void LoseForTesting();
+        void AddFutureCallbackSerial(Serial serial);
 
       protected:
         void SetToggle(Toggle toggle, bool isEnabled);
@@ -224,13 +226,6 @@ namespace dawn_native {
 
         // Incrememt mLastSubmittedSerial when we submit the next serial
         void IncrementLastSubmittedCommandSerial();
-        // If there's no GPU work in flight we still need to artificially increment the serial
-        // so that CPU operations waiting on GPU completion can know they don't have to wait.
-        void ArtificiallyIncrementSerials();
-        // During shut down of device, some operations might have been started since the last submit
-        // and waiting on a serial that doesn't have a corresponding fence enqueued. Fake serials to
-        // make all commands look completed.
-        void AssumeCommandsComplete();
         // Check for passed fences and set the new completed serial
         void CheckPassedSerials();
 
@@ -298,14 +293,21 @@ namespace dawn_native {
         // Each backend should implement to check their passed fences if there are any and return a
         // completed serial. Return 0 should indicate no fences to check.
         virtual Serial CheckAndUpdateCompletedSerials() = 0;
+        // During shut down of device, some operations might have been started since the last submit
+        // and waiting on a serial that doesn't have a corresponding fence enqueued. Fake serials to
+        // make all commands look completed.
+        void AssumeCommandsComplete();
         // mCompletedSerial tracks the last completed command serial that the fence has returned.
         // mLastSubmittedSerial tracks the last submitted command serial.
         // During device removal, the serials could be artificially incremented
         // to make it appear as if commands have been compeleted. They can also be artificially
         // incremented when no work is being done in the GPU so CPU operations don't have to wait on
         // stale serials.
+        // mFutureCallbackSerial tracks the largest serial we need to tick to for the callbacks to
+        // fire
         Serial mCompletedSerial = 0;
         Serial mLastSubmittedSerial = 0;
+        Serial mFutureCallbackSerial = 0;
 
         // ShutDownImpl is used to clean up and release resources used by device, does not wait for
         // GPU or check errors.
