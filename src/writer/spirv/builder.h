@@ -286,6 +286,12 @@ class Builder {
   /// @param expr the expression to generate
   /// @returns the expression ID on success or 0 otherwise
   uint32_t GenerateCallExpression(ast::CallExpression* expr);
+  /// Generates an intrinsic call
+  /// @param name the intrinsic name
+  /// @param call the call expression
+  /// @returns the expression ID on success or 0 otherwise
+  uint32_t GenerateIntrinsic(const std::string& name,
+                             ast::CallExpression* call);
   /// Generates a cast expression
   /// @param expr the expression to generate
   /// @returns the expression ID on success or 0 otherwise

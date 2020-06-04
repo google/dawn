@@ -33,6 +33,7 @@
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/intrinsic.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
@@ -1163,14 +1164,22 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
 }
 
 uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
-  // TODO(dsinclair): Support regular function calls
-  if (!expr->func()->IsIdentifier() ||
-      !expr->func()->AsIdentifier()->has_path()) {
-    error_ = "function calls not supported yet.";
+  if (!expr->func()->IsIdentifier()) {
+    error_ = "invalid function name";
     return 0;
   }
 
   auto* ident = expr->func()->AsIdentifier();
+
+  if (!ident->has_path() && ast::intrinsic::IsIntrinsic(ident->name())) {
+    return GenerateIntrinsic(ident->name(), expr);
+  }
+
+  // TODO(dsinclair): Support regular function calls
+  if (!ident->has_path()) {
+    error_ = "function calls not supported yet.";
+    return 0;
+  }
 
   auto type_id = GenerateTypeIfNeeded(expr->func()->result_type());
   if (type_id == 0) {
@@ -1211,6 +1220,40 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
   }
 
   push_function_inst(spv::Op::OpExtInst, std::move(ops));
+
+  return result_id;
+}
+
+uint32_t Builder::GenerateIntrinsic(const std::string& name,
+                                    ast::CallExpression* call) {
+  auto result = result_op();
+  auto result_id = result.to_i();
+
+  auto result_type_id = GenerateTypeIfNeeded(call->result_type());
+  if (result_type_id == 0) {
+    return 0;
+  }
+
+  std::vector<Operand> params = {Operand::Int(result_type_id), result};
+  for (const auto& p : call->params()) {
+    auto val_id = GenerateExpression(p.get());
+    if (val_id == 0) {
+      return 0;
+    }
+    val_id = GenerateLoadIfNeeded(p->result_type(), val_id);
+
+    params.push_back(Operand::Int(val_id));
+  }
+
+  spv::Op op = spv::Op::OpNop;
+  if (name == "any") {
+    op = spv::Op::OpAny;
+  }
+  if (op == spv::Op::OpNop) {
+    error_ = "unable to determine operator for: " + name;
+    return 0;
+  }
+  push_function_inst(op, params);
 
   return result_id;
 }

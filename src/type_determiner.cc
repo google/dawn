@@ -29,6 +29,7 @@
 #include "src/ast/else_statement.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/intrinsic.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
@@ -46,25 +47,6 @@
 #include "src/ast/variable_decl_statement.h"
 
 namespace tint {
-namespace {
-
-bool IsDerivative(const std::string& name) {
-  return name == "dpdx" || name == "dpdx_fine" || name == "dpdx_coarse" ||
-         name == "dpdy" || name == "dpdy_fine" || name == "dpdy_coarse" ||
-         name == "fwidth" || name == "fwidth_fine" || name == "fwidth_coarse";
-}
-
-bool IsFloatIntrinsic(const std::string& name) {
-  return name == "is_finite" || name == "is_inf" || name == "is_nan" ||
-         name == "is_normal";
-}
-
-bool IsIntrinsic(const std::string& name) {
-  return IsDerivative(name) || name == "all" || name == "any" ||
-         IsFloatIntrinsic(name) || name == "dot" || name == "outer_product";
-}
-
-}  // namespace
 
 TypeDeterminer::TypeDeterminer(Context* ctx, ast::Module* mod)
     : ctx_(*ctx), mod_(mod) {}
@@ -321,7 +303,7 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
   if (expr->func()->IsIdentifier()) {
     auto* ident = expr->func()->AsIdentifier();
 
-    if (IsIntrinsic(ident->name())) {
+    if (ast::intrinsic::IsIntrinsic(ident->name())) {
       if (!DetermineIntrinsic(ident->name(), expr))
         return false;
 
@@ -364,7 +346,7 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
 
 bool TypeDeterminer::DetermineIntrinsic(const std::string& name,
                                         ast::CallExpression* expr) {
-  if (IsDerivative(name)) {
+  if (ast::intrinsic::IsDerivative(name)) {
     if (expr->params().size() != 1) {
       set_error(expr->source(), "incorrect number of parameters for " + name);
       return false;
@@ -383,7 +365,7 @@ bool TypeDeterminer::DetermineIntrinsic(const std::string& name,
         ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>()));
     return true;
   }
-  if (IsFloatIntrinsic(name)) {
+  if (ast::intrinsic::IsFloatClassificationIntrinsic(name)) {
     if (expr->params().size() != 1) {
       set_error(expr->source(), "incorrect number of parameters for " + name);
       return false;

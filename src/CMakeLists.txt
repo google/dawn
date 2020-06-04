@@ -87,6 +87,8 @@ set(TINT_LIB_SRCS
   ast/import.h
   ast/int_literal.cc
   ast/int_literal.h
+  ast/intrinsic.cc
+  ast/intrinsic.h
   ast/kill_statement.cc
   ast/kill_statement.h
   ast/literal.h
@@ -422,6 +424,7 @@ if(${TINT_BUILD_SPV_WRITER})
     writer/spirv/builder_global_variable_test.cc
     writer/spirv/builder_ident_expression_test.cc
     writer/spirv/builder_if_test.cc
+    writer/spirv/builder_intrinsic_test.cc
     writer/spirv/builder_kill_test.cc
     writer/spirv/builder_literal_test.cc
     writer/spirv/builder_loop_test.cc
