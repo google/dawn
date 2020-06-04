@@ -18,10 +18,18 @@ namespace tint {
 namespace ast {
 namespace intrinsic {
 
+bool IsCoarseDerivative(const std::string& name) {
+  return name == "dpdx_coarse" || name == "dpdy_coarse" ||
+         name == "fwidth_coarse";
+}
+
+bool IsFineDerivative(const std::string& name) {
+  return name == "dpdx_fine" || name == "dpdy_fine" || name == "fwidth_fine";
+}
+
 bool IsDerivative(const std::string& name) {
-  return name == "dpdx" || name == "dpdx_fine" || name == "dpdx_coarse" ||
-         name == "dpdy" || name == "dpdy_fine" || name == "dpdy_coarse" ||
-         name == "fwidth" || name == "fwidth_fine" || name == "fwidth_coarse";
+  return name == "dpdx" || name == "dpdy" || name == "fwidth" ||
+         IsCoarseDerivative(name) || IsFineDerivative(name);
 }
 
 bool IsFloatClassificationIntrinsic(const std::string& name) {

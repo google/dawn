@@ -119,6 +119,14 @@ class Builder {
   /// @param cb the callback to execute
   void iterate(std::function<void(const Instruction&)> cb) const;
 
+  /// Adds an instruction to the list of capabilities
+  /// @param op the op to set
+  /// @param operands the operands for the instruction
+  void push_capability(spv::Op op, const std::vector<Operand>& operands) {
+    capabilities_.push_back(Instruction{op, operands});
+  }
+  /// @returns the capabilities
+  const std::vector<Instruction>& capabilities() const { return capabilities_; }
   /// Adds an instruction to the preamble
   /// @param op the op to set
   /// @param operands the operands for the instruction
@@ -386,6 +394,7 @@ class Builder {
   ast::Module* mod_;
   std::string error_;
   uint32_t next_id_ = 1;
+  std::vector<Instruction> capabilities_;
   std::vector<Instruction> preamble_;
   std::vector<Instruction> debug_;
   std::vector<Instruction> types_;

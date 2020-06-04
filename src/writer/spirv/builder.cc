@@ -138,11 +138,11 @@ Builder::Builder(ast::Module* mod) : mod_(mod), scope_stack_({}) {}
 Builder::~Builder() = default;
 
 bool Builder::Build() {
-  push_preamble(spv::Op::OpCapability, {Operand::Int(SpvCapabilityShader)});
+  push_capability(spv::Op::OpCapability, {Operand::Int(SpvCapabilityShader)});
 
   // TODO(dneto): Stop using the Vulkan memory model. crbug.com/tint/63
-  push_preamble(spv::Op::OpCapability,
-                {Operand::Int(SpvCapabilityVulkanMemoryModel)});
+  push_capability(spv::Op::OpCapability,
+                  {Operand::Int(SpvCapabilityVulkanMemoryModel)});
   push_preamble(spv::Op::OpExtension,
                 {Operand::String("SPV_KHR_vulkan_memory_model")});
 
@@ -188,6 +188,7 @@ uint32_t Builder::total_size() const {
   // The 5 covers the magic, version, generator, id bound and reserved.
   uint32_t size = 5;
 
+  size += size_of(capabilities_);
   size += size_of(preamble_);
   size += size_of(debug_);
   size += size_of(annotations_);
@@ -200,6 +201,9 @@ uint32_t Builder::total_size() const {
 }
 
 void Builder::iterate(std::function<void(const Instruction&)> cb) const {
+  for (const auto& inst : capabilities_) {
+    cb(inst);
+  }
   for (const auto& inst : preamble_) {
     cb(inst);
   }
@@ -1245,6 +1249,12 @@ uint32_t Builder::GenerateIntrinsic(const std::string& name,
     params.push_back(Operand::Int(val_id));
   }
 
+  if (ast::intrinsic::IsFineDerivative(name) ||
+      ast::intrinsic::IsCoarseDerivative(name)) {
+    push_capability(spv::Op::OpCapability,
+                    {Operand::Int(SpvCapabilityDerivativeControl)});
+  }
+
   spv::Op op = spv::Op::OpNop;
   if (name == "any") {
     op = spv::Op::OpAny;
@@ -1252,6 +1262,24 @@ uint32_t Builder::GenerateIntrinsic(const std::string& name,
     op = spv::Op::OpAll;
   } else if (name == "dot") {
     op = spv::Op::OpDot;
+  } else if (name == "dpdx") {
+    op = spv::Op::OpDPdx;
+  } else if (name == "dpdx_coarse") {
+    op = spv::Op::OpDPdxCoarse;
+  } else if (name == "dpdx_fine") {
+    op = spv::Op::OpDPdxFine;
+  } else if (name == "dpdy") {
+    op = spv::Op::OpDPdy;
+  } else if (name == "dpdy_coarse") {
+    op = spv::Op::OpDPdyCoarse;
+  } else if (name == "dpdy_fine") {
+    op = spv::Op::OpDPdyFine;
+  } else if (name == "fwidth") {
+    op = spv::Op::OpFwidth;
+  } else if (name == "fwidth_coarse") {
+    op = spv::Op::OpFwidthCoarse;
+  } else if (name == "fwidth_fine") {
+    op = spv::Op::OpFwidthFine;
   } else if (name == "is_inf") {
     op = spv::Op::OpIsInf;
   } else if (name == "is_nan") {

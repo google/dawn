@@ -21,7 +21,17 @@ namespace tint {
 namespace ast {
 namespace intrinsic {
 
-/// Determine if the given |name | is a derivative intrinsic
+/// Determines if the given |name| is a coarse derivative
+/// @param name the name to check
+/// @returns true if the given derivative is coarse.
+bool IsCoarseDerivative(const std::string& name);
+
+/// Determines if the given |name| is a fine derivative
+/// @param name the name to check
+/// @returns true if the given derivative is fine.
+bool IsFineDerivative(const std::string& name);
+
+/// Determine if the given |name| is a derivative intrinsic
 /// @param name the name to check
 /// @returns true if the given |name| is a derivative intrinsic
 bool IsDerivative(const std::string& name);

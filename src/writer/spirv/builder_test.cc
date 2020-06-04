@@ -36,7 +36,8 @@ TEST_F(BuilderTest, InsertsPreambleWithImport) {
 
   Builder b(&m);
   ASSERT_TRUE(b.Build());
-  ASSERT_EQ(b.preamble().size(), 5u);
+  ASSERT_EQ(b.capabilities().size(), 2u);
+  ASSERT_EQ(b.preamble().size(), 3u);
 
   EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
 OpCapability VulkanMemoryModel
