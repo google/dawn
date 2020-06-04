@@ -138,11 +138,10 @@ Builder::Builder(ast::Module* mod) : mod_(mod), scope_stack_({}) {}
 Builder::~Builder() = default;
 
 bool Builder::Build() {
-  push_capability(spv::Op::OpCapability, {Operand::Int(SpvCapabilityShader)});
+  push_capability(SpvCapabilityShader);
 
   // TODO(dneto): Stop using the Vulkan memory model. crbug.com/tint/63
-  push_capability(spv::Op::OpCapability,
-                  {Operand::Int(SpvCapabilityVulkanMemoryModel)});
+  push_capability(SpvCapabilityVulkanMemoryModel);
   push_preamble(spv::Op::OpExtension,
                 {Operand::String("SPV_KHR_vulkan_memory_model")});
 
@@ -219,6 +218,11 @@ void Builder::iterate(std::function<void(const Instruction&)> cb) const {
   for (const auto& func : functions_) {
     func.iterate(cb);
   }
+}
+
+void Builder::push_capability(uint32_t cap) {
+  capabilities_.push_back(
+      Instruction{spv::Op::OpCapability, {Operand::Int(cap)}});
 }
 
 uint32_t Builder::GenerateU32Literal(uint32_t val) {
@@ -1251,8 +1255,7 @@ uint32_t Builder::GenerateIntrinsic(const std::string& name,
 
   if (ast::intrinsic::IsFineDerivative(name) ||
       ast::intrinsic::IsCoarseDerivative(name)) {
-    push_capability(spv::Op::OpCapability,
-                    {Operand::Int(SpvCapabilityDerivativeControl)});
+    push_capability(SpvCapabilityDerivativeControl);
   }
 
   spv::Op op = spv::Op::OpNop;

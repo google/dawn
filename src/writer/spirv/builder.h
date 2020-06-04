@@ -120,11 +120,8 @@ class Builder {
   void iterate(std::function<void(const Instruction&)> cb) const;
 
   /// Adds an instruction to the list of capabilities
-  /// @param op the op to set
-  /// @param operands the operands for the instruction
-  void push_capability(spv::Op op, const std::vector<Operand>& operands) {
-    capabilities_.push_back(Instruction{op, operands});
-  }
+  /// @param cap the capability to set
+  void push_capability(uint32_t cap);
   /// @returns the capabilities
   const std::vector<Instruction>& capabilities() const { return capabilities_; }
   /// Adds an instruction to the preamble
