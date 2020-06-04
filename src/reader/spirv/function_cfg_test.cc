@@ -4152,7 +4152,7 @@ TEST_F(SpvParserTest, FindSwitchCaseHeaders_ManyValuesWithSameCase) {
   EXPECT_THAT(*(bi20->case_values.get()), UnorderedElementsAre(200, 300));
 }
 
-TEST_F(SpvParserTest, DISABLED_BranchEscapesIfConstruct) {
+TEST_F(SpvParserTest, ClassifyCFGEdges_BranchEscapesIfConstruct) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -4179,14 +4179,9 @@ TEST_F(SpvParserTest, DISABLED_BranchEscapesIfConstruct) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
-  fe.RegisterBasicBlocks();
-  fe.ComputeBlockOrderAndPositions();
-  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
-  fe.RegisterMerges();
-  fe.LabelControlFlowConstructs();
-  fe.FindSwitchCaseHeaders();
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe)) << p->error();
   // Some further processing
-  EXPECT_THAT(p->error(), Eq("something"));
+  EXPECT_THAT(p->error(), Eq("Branch from block 30 to block 80 is an invalid exit from construct starting at block 20; branch bypasses merge block 50"));
 }
 
 TEST_F(SpvParserTest, ClassifyCFGEdges_ReturnInContinueConstruct) {
