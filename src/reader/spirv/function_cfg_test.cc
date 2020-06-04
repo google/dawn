@@ -6714,10 +6714,10 @@ TEST_F(SpvParserTest, DISABLED_Codegen_IfBreak_FromElse_ForwardWithinElse) {
 )";
 }
 
-TEST_F(SpvParserTest, DISABLED_BlockIsContinueForMoreThanOneHeader) {
-  // This is valid SPIR-V for Vulkan, but breaks my assumption that a block
-  // could only be a continue target for at most one header.  Block 50
-  // is a single block loop but also the continue target for the outer loop.
+TEST_F(SpvParserTest, BlockIsContinueForMoreThanOneHeader) {
+  // This is disallowed by the rule:
+  //    "a continue block is valid only for the innermost loop it is nested
+  //    inside of"
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -6739,6 +6739,15 @@ TEST_F(SpvParserTest, DISABLED_BlockIsContinueForMoreThanOneHeader) {
      OpReturn
      OpFunctionEnd
 )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  EXPECT_FALSE(fe.RegisterMerges());
+  EXPECT_THAT(p->error(), Eq("Block 50 declared as continue target for more "
+                             "than one header: 20, 50"));
 }
 
 TEST_F(SpvParserTest, EmitBody_If_Empty) {
