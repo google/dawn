@@ -399,7 +399,9 @@ ast::Statement* FunctionEmitter::AddStatement(
     std::unique_ptr<ast::Statement> statement) {
   assert(!statements_stack_.empty());
   auto* result = statement.get();
-  statements_stack_.back().statements.emplace_back(std::move(statement));
+  if (result != nullptr) {
+    statements_stack_.back().statements.emplace_back(std::move(statement));
+  }
   return result;
 }
 
@@ -1789,43 +1791,47 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
       }
       return true;
     case SpvOpBranch: {
-      const auto dest = terminator.GetSingleWordInOperand(0);
-      const auto kind = block_info.succ_edge.find(dest)->second;
-      switch (kind) {
-        case EdgeKind::kBack:
-          // Nothing to do. The loop backedge is implicit.
-          return true;
-        case EdgeKind::kSwitchBreak:
-        case EdgeKind::kLoopBreak:
-          AddStatement(std::make_unique<ast::BreakStatement>());
-          return true;
-        case EdgeKind::kLoopContinue:
-          // An unconditional continue to the next block is redundant and ugly.
-          // Skip it in that case.
-          if (GetBlockInfo(dest)->pos == 1 + block_info.pos) {
-            return true;
-          }
-          // Otherwise, emit a regular continue statement.
-          AddStatement(std::make_unique<ast::ContinueStatement>());
-          return true;
-        case EdgeKind::kIfBreak:
-          // For an unconditional branch, the break out to an if-selection
-          // merge block is implicit.
-          return true;
-        case EdgeKind::kCaseFallThrough:
-          AddStatement(std::make_unique<ast::FallthroughStatement>());
-          return true;
-        case EdgeKind::kForward:
-          // Unconditional forward branch is implicit.
-          return true;
-      }
-      break;
+      const auto dest_id = terminator.GetSingleWordInOperand(0);
+      AddStatement(MakeBranch(block_info, *GetBlockInfo(dest_id)));
+      return true;
     }
     default:
       break;
   }
   // TODO(dneto): emit fallthrough, break, continue
   return success();
+}
+
+std::unique_ptr<ast::Statement> FunctionEmitter::MakeBranch(
+    const BlockInfo& src_info,
+    const BlockInfo& dest_info) const {
+  auto kind = src_info.succ_edge.find(dest_info.id)->second;
+  switch (kind) {
+    case EdgeKind::kBack:
+      // Nothing to do. The loop backedge is implicit.
+      break;
+    case EdgeKind::kSwitchBreak:
+    case EdgeKind::kLoopBreak:
+      return std::make_unique<ast::BreakStatement>();
+    case EdgeKind::kLoopContinue:
+      // An unconditional continue to the next block is redundant and ugly.
+      // Skip it in that case.
+      if (dest_info.pos == 1 + src_info.pos) {
+        break;
+      }
+      // Otherwise, emit a regular continue statement.
+      return std::make_unique<ast::ContinueStatement>();
+    case EdgeKind::kIfBreak:
+      // For an unconditional branch, the break out to an if-selection
+      // merge block is implicit.
+      break;
+    case EdgeKind::kCaseFallThrough:
+      return std::make_unique<ast::FallthroughStatement>();
+    case EdgeKind::kForward:
+      // Unconditional forward branch is implicit.
+      break;
+  }
+  return {nullptr};
 }
 
 bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,

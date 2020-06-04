@@ -329,6 +329,14 @@ class FunctionEmitter {
   /// @returns false if emission failed
   bool EmitNormalTerminator(const BlockInfo& block_info);
 
+  /// Returns a new statement to represent the given branch representing a
+  /// "normal" terminator, as in the sense of EmitNormalTerminator.  If no
+  /// WGSL statement is required, the statement will nullptr.
+  /// @param src_info the source block
+  /// @param dest_info the destination block
+  std::unique_ptr<ast::Statement> MakeBranch(const BlockInfo& src_info,
+                                             const BlockInfo& dest_info) const;
+
   /// Emits a normal instruction: not a terminator, label, or variable
   /// declaration.
   /// @param inst the instruction
@@ -403,6 +411,7 @@ class FunctionEmitter {
   BlockInfo* HeaderIfBreakable(const Construct* c);
 
   /// Appends a new statement to the top of the statement stack.
+  /// Does nothing if the statement is null.
   /// @param statement the new statement
   /// @returns a pointer to the statement.
   ast::Statement* AddStatement(std::unique_ptr<ast::Statement> statement);
