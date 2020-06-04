@@ -167,7 +167,8 @@ TEST_P(IntrinsicFloatTest, Call_Float_Vector) {
 }
 INSTANTIATE_TEST_SUITE_P(BuilderTest,
                          IntrinsicFloatTest,
-                         testing::Values(IntrinsicData{"is_nan", "OpIsNan"}));
+                         testing::Values(IntrinsicData{"is_nan", "OpIsNan"},
+                                         IntrinsicData{"is_inf", "OpIsInf"}));
 
 }  // namespace
 }  // namespace spirv
