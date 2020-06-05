@@ -319,6 +319,10 @@ namespace dawn_native {
 
     MaybeError BufferBase::CopyFromStagingBuffer() {
         ASSERT(mStagingBuffer);
+        if (GetSize() == 0) {
+            return {};
+        }
+
         DAWN_TRY(GetDevice()->CopyFromStagingToBuffer(mStagingBuffer.get(), 0, this, 0, GetSize()));
 
         DynamicUploader* uploader = GetDevice()->GetDynamicUploader();

@@ -541,12 +541,9 @@ namespace dawn_native { namespace vulkan {
                                                BufferBase* destination,
                                                uint64_t destinationOffset,
                                                uint64_t size) {
-        // It is a validation error to do a 0-sized copy in Vulkan skip it since it is a noop.
-        if (size == 0) {
-            return {};
-        }
-
-        CommandRecordingContext* recordingContext = GetPendingRecordingContext();
+        // It is a validation error to do a 0-sized copy in Vulkan, check it is skipped prior to
+        // calling this function.
+        ASSERT(size != 0);
 
         // Insert memory barrier to ensure host write operations are made visible before
         // copying from the staging buffer. However, this barrier can be removed (see note below).
@@ -557,6 +554,7 @@ namespace dawn_native { namespace vulkan {
 
         // Insert pipeline barrier to ensure correct ordering with previous memory operations on the
         // buffer.
+        CommandRecordingContext* recordingContext = GetPendingRecordingContext();
         ToBackend(destination)->TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopyDst);
 
         VkBufferCopy copy;

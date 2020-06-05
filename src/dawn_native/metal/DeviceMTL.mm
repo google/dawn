@@ -247,10 +247,9 @@ namespace dawn_native { namespace metal {
                                                BufferBase* destination,
                                                uint64_t destinationOffset,
                                                uint64_t size) {
-        // Metal validation layers forbid  0-sized copies, skip it since it is a noop.
-        if (size == 0) {
-            return {};
-        }
+        // Metal validation layers forbid  0-sized copies, assert it is skipped prior to calling
+        // this function.
+        ASSERT(size != 0);
 
         id<MTLBuffer> uploadBuffer = ToBackend(source)->GetBufferHandle();
         id<MTLBuffer> buffer = ToBackend(destination)->GetMTLBuffer();
