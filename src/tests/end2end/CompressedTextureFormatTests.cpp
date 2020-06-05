@@ -18,6 +18,7 @@
 #include "common/Constants.h"
 #include "common/Math.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
+#include "utils/TextureFormatUtils.h"
 #include "utils/WGPUHelpers.h"
 
 // The helper struct to configure the copies between buffers and textures.
@@ -66,7 +67,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
         } else {
             bufferRowPitchInBytes =
                 copyWidthInBlockAtLevel *
-                CompressedFormatBlockSizeInBytes(copyConfig.textureDescriptor.format);
+                utils::GetTexelBlockSizeInBytes(copyConfig.textureDescriptor.format);
         }
         uint32_t uploadBufferSize =
             copyConfig.bufferOffset + bufferRowPitchInBytes * copyHeightInBlockAtLevel;
@@ -257,31 +258,6 @@ class CompressedTextureBCFormatTest : public DawnTest {
         queue.Submit(1, &copy);
 
         return dstTexture;
-    }
-
-    // Return the BC block size in bytes.
-    static uint32_t CompressedFormatBlockSizeInBytes(wgpu::TextureFormat format) {
-        switch (format) {
-            case wgpu::TextureFormat::BC1RGBAUnorm:
-            case wgpu::TextureFormat::BC1RGBAUnormSrgb:
-            case wgpu::TextureFormat::BC4RSnorm:
-            case wgpu::TextureFormat::BC4RUnorm:
-                return 8;
-            case wgpu::TextureFormat::BC2RGBAUnorm:
-            case wgpu::TextureFormat::BC2RGBAUnormSrgb:
-            case wgpu::TextureFormat::BC3RGBAUnorm:
-            case wgpu::TextureFormat::BC3RGBAUnormSrgb:
-            case wgpu::TextureFormat::BC5RGSnorm:
-            case wgpu::TextureFormat::BC5RGUnorm:
-            case wgpu::TextureFormat::BC6HRGBSfloat:
-            case wgpu::TextureFormat::BC6HRGBUfloat:
-            case wgpu::TextureFormat::BC7RGBAUnorm:
-            case wgpu::TextureFormat::BC7RGBAUnormSrgb:
-                return 16;
-            default:
-                UNREACHABLE();
-                return 0;
-        }
     }
 
     // Return the pre-prepared one-block BC texture data.
@@ -841,7 +817,7 @@ TEST_P(CompressedTextureBCFormatTest, BufferOffsetAndExtentFitRowPitch) {
     for (wgpu::TextureFormat format : kBCFormats) {
         config.textureDescriptor.format = format;
 
-        const uint32_t blockSizeInBytes = CompressedFormatBlockSizeInBytes(format);
+        const uint32_t blockSizeInBytes = utils::GetTexelBlockSizeInBytes(format);
         const uint32_t blockCountPerRowPitch = config.bytesPerRowAlignment / blockSizeInBytes;
 
         config.bufferOffset = (blockCountPerRowPitch - blockCountPerRow) * blockSizeInBytes;
@@ -877,7 +853,7 @@ TEST_P(CompressedTextureBCFormatTest, BufferOffsetExceedsSlicePitch) {
     for (wgpu::TextureFormat format : kBCFormats) {
         config.textureDescriptor.format = format;
 
-        const uint32_t blockSizeInBytes = CompressedFormatBlockSizeInBytes(format);
+        const uint32_t blockSizeInBytes = utils::GetTexelBlockSizeInBytes(format);
         const uint32_t blockCountPerRowPitch = config.bytesPerRowAlignment / blockSizeInBytes;
 
         config.bufferOffset = (blockCountPerRowPitch - blockCountPerRow) * blockSizeInBytes +
@@ -911,7 +887,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyWithBufferOffsetAndExtentExceedRowPitc
     for (wgpu::TextureFormat format : kBCFormats) {
         config.textureDescriptor.format = format;
 
-        const uint32_t blockSizeInBytes = CompressedFormatBlockSizeInBytes(format);
+        const uint32_t blockSizeInBytes = utils::GetTexelBlockSizeInBytes(format);
         const uint32_t blockCountPerRowPitch = config.bytesPerRowAlignment / blockSizeInBytes;
         config.bufferOffset =
             (blockCountPerRowPitch - blockCountPerRow + kExceedRowBlockCount) * blockSizeInBytes;
@@ -941,7 +917,7 @@ TEST_P(CompressedTextureBCFormatTest, RowPitchEqualToSlicePitch) {
     for (wgpu::TextureFormat format : kBCFormats) {
         config.textureDescriptor.format = format;
 
-        const uint32_t blockSizeInBytes = CompressedFormatBlockSizeInBytes(format);
+        const uint32_t blockSizeInBytes = utils::GetTexelBlockSizeInBytes(format);
         const uint32_t blockCountPerRowPitch = config.bytesPerRowAlignment / blockSizeInBytes;
 
         config.bufferOffset =

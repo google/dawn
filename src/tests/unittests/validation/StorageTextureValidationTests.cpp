@@ -20,78 +20,6 @@
 
 class StorageTextureValidationTests : public ValidationTest {
   protected:
-    static const char* GetGLSLImageFormatQualifier(wgpu::TextureFormat textureFormat) {
-        switch (textureFormat) {
-            case wgpu::TextureFormat::R8Unorm:
-                return "r8";
-            case wgpu::TextureFormat::R8Snorm:
-                return "r8_snorm";
-            case wgpu::TextureFormat::R8Uint:
-                return "r8ui";
-            case wgpu::TextureFormat::R8Sint:
-                return "r8i";
-            case wgpu::TextureFormat::R16Uint:
-                return "r16ui";
-            case wgpu::TextureFormat::R16Sint:
-                return "r16i";
-            case wgpu::TextureFormat::R16Float:
-                return "r16f";
-            case wgpu::TextureFormat::RG8Unorm:
-                return "rg8";
-            case wgpu::TextureFormat::RG8Snorm:
-                return "rg8_snorm";
-            case wgpu::TextureFormat::RG8Uint:
-                return "rg8ui";
-            case wgpu::TextureFormat::RG8Sint:
-                return "rg8i";
-            case wgpu::TextureFormat::R32Float:
-                return "r32f";
-            case wgpu::TextureFormat::R32Uint:
-                return "r32ui";
-            case wgpu::TextureFormat::R32Sint:
-                return "r32i";
-            case wgpu::TextureFormat::RG16Uint:
-                return "rg16ui";
-            case wgpu::TextureFormat::RG16Sint:
-                return "rg16i";
-            case wgpu::TextureFormat::RG16Float:
-                return "rg16f";
-            case wgpu::TextureFormat::RGBA8Unorm:
-                return "rgba8";
-            case wgpu::TextureFormat::RGBA8Snorm:
-                return "rgba8_snorm";
-            case wgpu::TextureFormat::RGBA8Uint:
-                return "rgba8ui";
-            case wgpu::TextureFormat::RGBA8Sint:
-                return "rgba8i";
-            case wgpu::TextureFormat::RGB10A2Unorm:
-                return "rgb10_a2";
-            case wgpu::TextureFormat::RG11B10Float:
-                return "r11f_g11f_b10f";
-            case wgpu::TextureFormat::RG32Float:
-                return "rg32f";
-            case wgpu::TextureFormat::RG32Uint:
-                return "rg32ui";
-            case wgpu::TextureFormat::RG32Sint:
-                return "rg32i";
-            case wgpu::TextureFormat::RGBA16Uint:
-                return "rgba16ui";
-            case wgpu::TextureFormat::RGBA16Sint:
-                return "rgba16i";
-            case wgpu::TextureFormat::RGBA16Float:
-                return "rgba16f";
-            case wgpu::TextureFormat::RGBA32Float:
-                return "rgba32f";
-            case wgpu::TextureFormat::RGBA32Uint:
-                return "rgba32ui";
-            case wgpu::TextureFormat::RGBA32Sint:
-                return "rgba32i";
-            default:
-                UNREACHABLE();
-                return "";
-        }
-    }
-
     static const char* GetGLSLFloatImageTypeDeclaration(wgpu::TextureViewDimension dimension) {
         switch (dimension) {
             case wgpu::TextureViewDimension::e1D:
@@ -117,7 +45,7 @@ class StorageTextureValidationTests : public ValidationTest {
         wgpu::BindingType storageTextureBindingType,
         wgpu::TextureFormat textureFormat,
         wgpu::TextureViewDimension textureViewDimension = wgpu::TextureViewDimension::e2D) {
-        const char* glslImageFormatQualifier = GetGLSLImageFormatQualifier(textureFormat);
+        const char* glslImageFormatQualifier = utils::GetGLSLImageFormatQualifier(textureFormat);
         const char* textureComponentTypePrefix =
             utils::GetColorTextureComponentTypePrefix(textureFormat);
         return CreateComputeShaderWithStorageTexture(
