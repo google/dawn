@@ -285,8 +285,8 @@ class StorageTextureTests : public DawnTest {
         ostream << R"(for (uint layer = 0; layer < layerCount; ++layer) {
                           for (uint y = 0; y < size.y; ++y) {
                               for (uint x = 0; x < size.x; ++x) {
-                                  uint value = 1 + x + size.x * (y + size.y * layer);
-                     )"
+                                  uint value = )"
+                << kComputeExpectedValueGLSL << ";\n"
                 << prefix << "vec4 expected = " << GetExpectedPixelValue(format) << ";\n"
                 << prefix << R"(vec4 pixel = imageLoad(storageImage, )";
         if (is2DArray) {
@@ -303,6 +303,48 @@ class StorageTextureTests : public DawnTest {
                       }
                       return true;
                    })";
+
+        return ostream.str();
+    }
+
+    std::string CommonWriteOnlyTestCode(wgpu::TextureFormat format, bool is2DArray = false) {
+        std::ostringstream ostream;
+
+        const char* prefix = utils::GetColorTextureComponentTypePrefix(format);
+
+        ostream << R"(
+            #version 450
+        )" << GetGLSLImageDeclaration(format, "writeonly", is2DArray)
+                << R"(
+            void main() {
+        )";
+        if (is2DArray) {
+            ostream << R"(ivec3 size = imageSize(storageImage);
+                          const uint layerCount = size.z;
+            )";
+        } else {
+            ostream << R"(ivec2 size = imageSize(storageImage);
+                          const uint layerCount = 1;
+            )";
+        }
+
+        ostream << R"(for (uint layer = 0; layer < layerCount; ++layer) {
+                          for (uint y = 0; y < size.y; ++y) {
+                              for (uint x = 0; x < size.x; ++x) {
+                                  uint value = )"
+                << kComputeExpectedValueGLSL << ";\n"
+                << prefix << "vec4 expected = " << GetExpectedPixelValue(format) << ";\n";
+        if (is2DArray) {
+            ostream << "ivec3 texcoord = ivec3(x, y, layer);\n";
+        } else {
+            ostream << "ivec2 texcoord = ivec2(x, y);\n";
+        }
+
+        ostream << R"(           imageStore(storageImage, texcoord, expected);
+                             }
+                         }
+                     }
+                 })";
 
         return ostream.str();
     }
@@ -529,6 +571,14 @@ class StorageTextureTests : public DawnTest {
     }
 
     void CheckOutputStorageTexture(wgpu::Texture writeonlyStorageTexture,
+                                   wgpu::TextureFormat format,
+                                   uint32_t arrayLayerCount = 1) {
+        const uint32_t texelSize = utils::GetTexelBlockSizeInBytes(format);
+        const std::vector<uint8_t>& expectedData = GetExpectedData(format, arrayLayerCount);
+        CheckOutputStorageTexture(writeonlyStorageTexture, texelSize, expectedData);
+    }
+
+    void CheckOutputStorageTexture(wgpu::Texture writeonlyStorageTexture,
                                    uint32_t texelSize,
                                    const std::vector<uint8_t>& expectedData) {
         // Copy the content from the write-only storage texture to the result buffer.
@@ -580,17 +630,7 @@ class StorageTextureTests : public DawnTest {
             gl_PointSize = 1.0f;
         })";
 
-    const char* kCommonWriteOnlyTestCode_uimage2D = R"(
-        #version 450
-        layout(set = 0, binding = 0, r32ui) uniform writeonly uimage2D dstImage;
-        void main() {
-            for (uint y = 0; y < 4; ++y) {
-                for (uint x = 0; x < 4; ++x) {
-                    uvec4 pixel = uvec4(1u + x + y * 4u, 0, 0, 1u);
-                    imageStore(dstImage, ivec2(x, y), pixel);
-                }
-            }
-        })";
+    const char* kComputeExpectedValueGLSL = "1 + x + size.x * (y + size.y * layer)";
 };
 
 // Test that using read-only storage texture and write-only storage texture in BindGroupLayout is
@@ -754,16 +794,28 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
     // bug in spvc parser is fixed.
     DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
 
-    // Prepare the write-only storage texture.
-    // TODO(jiawei.shao@intel.com): test more texture formats.
-    constexpr uint32_t kTexelSizeR32Uint = 4u;
-    wgpu::Texture writeonlyStorageTexture = CreateTexture(
-        wgpu::TextureFormat::R32Uint, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc);
+    for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
+        if (!utils::TextureFormatSupportsStorageTexture(format)) {
+            continue;
+        }
 
-    WriteIntoStorageTextureInComputePass(writeonlyStorageTexture,
-                                         kCommonWriteOnlyTestCode_uimage2D);
-    CheckOutputStorageTexture(writeonlyStorageTexture, kTexelSizeR32Uint,
-                              GetExpectedData(wgpu::TextureFormat::R32Uint));
+        // TODO(jiawei.shao@intel.com): investigate why this test fails with RGBA8Snorm on Linux
+        // Intel OpenGL driver.
+        if (format == wgpu::TextureFormat::RGBA8Snorm && IsIntel() && IsOpenGL() && IsLinux()) {
+            continue;
+        }
+
+        // Prepare the write-only storage texture.
+        wgpu::Texture writeonlyStorageTexture =
+            CreateTexture(format, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc);
+
+        // Write the expected pixel values into the write-only storage texture.
+        const std::string computeShader = CommonWriteOnlyTestCode(format);
+        WriteIntoStorageTextureInComputePass(writeonlyStorageTexture, computeShader.c_str());
+
+        // Verify the pixel data in the write-only storage texture is expected.
+        CheckOutputStorageTexture(writeonlyStorageTexture, format);
+    }
 }
 
 // Test that write-only storage textures are supported in fragment shader.
@@ -774,16 +826,29 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
     // bug in spvc parser is fixed.
     DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
 
-    // Prepare the write-only storage texture.
-    // TODO(jiawei.shao@intel.com): test more texture formats.
-    constexpr uint32_t kTexelSizeR32Uint = 4u;
-    wgpu::Texture writeonlyStorageTexture = CreateTexture(
-        wgpu::TextureFormat::R32Uint, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc);
+    for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
+        if (!utils::TextureFormatSupportsStorageTexture(format)) {
+            continue;
+        }
 
-    WriteIntoStorageTextureInRenderPass(writeonlyStorageTexture, kSimpleVertexShader,
-                                        kCommonWriteOnlyTestCode_uimage2D);
-    CheckOutputStorageTexture(writeonlyStorageTexture, kTexelSizeR32Uint,
-                              GetExpectedData(wgpu::TextureFormat::R32Uint));
+        // TODO(jiawei.shao@intel.com): investigate why this test fails with RGBA8Snorm on Linux
+        // Intel OpenGL driver.
+        if (format == wgpu::TextureFormat::RGBA8Snorm && IsIntel() && IsOpenGL() && IsLinux()) {
+            continue;
+        }
+
+        // Prepare the write-only storage texture.
+        wgpu::Texture writeonlyStorageTexture =
+            CreateTexture(format, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc);
+
+        // Write the expected pixel values into the write-only storage texture.
+        const std::string fragmentShader = CommonWriteOnlyTestCode(format);
+        WriteIntoStorageTextureInRenderPass(writeonlyStorageTexture, kSimpleVertexShader,
+                                            fragmentShader.c_str());
+
+        // Verify the pixel data in the write-only storage texture is expected.
+        CheckOutputStorageTexture(writeonlyStorageTexture, format);
+    }
 }
 
 // Verify 2D array read-only storage texture works correctly.
@@ -832,33 +897,21 @@ TEST_P(StorageTextureTests, Writeonly2DArrayStorageTexture) {
     // bug in spvc parser is fixed.
     DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
 
-    // Prepare the write-only storage texture.
     constexpr uint32_t kArrayLayerCount = 3u;
-    wgpu::Texture writeonlyStorageTexture = CreateTexture(
-        wgpu::TextureFormat::R32Uint, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc,
-        kWidth, kHeight, kArrayLayerCount);
 
-    const char* kComputeShader = R"(
-        #version 450
-        layout(set = 0, binding = 0, r32ui) uniform writeonly uimage2DArray dstImage;
-        void main() {
-            ivec3 size = imageSize(dstImage);
-            for (uint layer = 0; layer < size.z; ++layer) {
-                for (uint y = 0; y < size.y; ++y) {
-                    for (uint x = 0; x < size.x; ++x) {
-                        uint expected = 1u + x + size.x * (y + size.y * layer);
-                        uvec4 pixel = uvec4(expected, 0, 0, 1u);
-                        imageStore(dstImage, ivec3(x, y, layer), pixel);
-                    }
-                }
-            }
-        })";
+    constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::R32Uint;
 
-    WriteIntoStorageTextureInComputePass(writeonlyStorageTexture, kComputeShader);
+    // Prepare the write-only storage texture.
+    wgpu::Texture writeonlyStorageTexture =
+        CreateTexture(kTextureFormat, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc,
+                      kWidth, kHeight, kArrayLayerCount);
 
-    constexpr uint32_t kTexelSizeR32Uint = 4u;
-    CheckOutputStorageTexture(writeonlyStorageTexture, kTexelSizeR32Uint,
-                              GetExpectedData(wgpu::TextureFormat::R32Uint, kArrayLayerCount));
+    // Write the expected pixel values into the write-only storage texture.
+    const std::string computeShader = CommonWriteOnlyTestCode(kTextureFormat, true);
+    WriteIntoStorageTextureInComputePass(writeonlyStorageTexture, computeShader.c_str());
+
+    // Verify the pixel data in the write-only storage texture is expected.
+    CheckOutputStorageTexture(writeonlyStorageTexture, kTextureFormat, kArrayLayerCount);
 }
 
 DAWN_INSTANTIATE_TEST(StorageTextureTests,
