@@ -676,10 +676,12 @@ constexpr const GlslData kGlslData[] = {
     {"reflect", 2, GLSLstd450Reflect, GlslDataType::kFloatScalarOrVector},
     {"round", 1, GLSLstd450Round, GlslDataType::kFloatScalarOrVector},
     {"roundeven", 1, GLSLstd450RoundEven, GlslDataType::kFloatScalarOrVector},
+    {"sabs", 1, GLSLstd450SAbs, GlslDataType::kIntScalarOrVector},
     {"sin", 1, GLSLstd450Sin, GlslDataType::kFloatScalarOrVector},
     {"sinh", 1, GLSLstd450Sinh, GlslDataType::kFloatScalarOrVector},
     {"smoothstep", 3, GLSLstd450SmoothStep, GlslDataType::kFloatScalarOrVector},
     {"sqrt", 1, GLSLstd450Sqrt, GlslDataType::kFloatScalarOrVector},
+    {"ssign", 1, GLSLstd450SSign, GlslDataType::kIntScalarOrVector},
     {"step", 2, GLSLstd450Step, GlslDataType::kFloatScalarOrVector},
     {"tan", 1, GLSLstd450Tan, GlslDataType::kFloatScalarOrVector},
     {"tanh", 1, GLSLstd450Tanh, GlslDataType::kFloatScalarOrVector},
@@ -729,6 +731,12 @@ ast::type::Type* TypeDeterminer::GetImportData(
 
         break;
       case GlslDataType::kIntScalarOrVector:
+        if (!result_types.back()->is_integer_scalar_or_vector()) {
+          set_error(source,
+                    "incorrect type for " + name + ". " +
+                        "Requires integer scalar or integer vector values");
+          return nullptr;
+        }
         break;
     }
   }

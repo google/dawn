@@ -2606,5 +2606,114 @@ INSTANTIATE_TEST_SUITE_P(
                     GLSLData{"fma", GLSLstd450Fma},
                     GLSLData{"faceforward", GLSLstd450FaceForward},
                     GLSLData{"nclamp", GLSLstd450NClamp}));
+
+using ImportData_Int_SingleParamTest = TypeDeterminerTestWithParam<GLSLData>;
+TEST_P(ImportData_Int_SingleParamTest, Scalar) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
+  ASSERT_NE(type, nullptr);
+  EXPECT_TRUE(type->is_integer_scalar());
+  EXPECT_EQ(id, param.value);
+}
+
+TEST_P(ImportData_Int_SingleParamTest, Vector) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+  ast::type::VectorType vec(&i32, 3);
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 3)));
+
+  ast::ExpressionList params;
+  params.push_back(
+      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
+  ASSERT_NE(type, nullptr);
+  EXPECT_TRUE(type->is_integer_vector());
+  EXPECT_EQ(type->AsVector()->size(), 3u);
+  EXPECT_EQ(id, param.value);
+}
+
+TEST_P(ImportData_Int_SingleParamTest, Error_Float) {
+  auto param = GetParam();
+
+  ast::type::F32Type f32;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(),
+            std::string("incorrect type for ") + param.name +
+                ". Requires integer scalar or integer vector values");
+}
+
+TEST_P(ImportData_Int_SingleParamTest, Error_NoParams) {
+  auto param = GetParam();
+
+  ast::ExpressionList params;
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
+                               param.name + ". Expected 1 got 0");
+}
+
+TEST_P(ImportData_Int_SingleParamTest, Error_MultipleParams) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
+                               param.name + ". Expected 1 got 3");
+}
+
+INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
+                         ImportData_Int_SingleParamTest,
+                         testing::Values(GLSLData{"sabs", GLSLstd450SAbs},
+                                         GLSLData{"ssign", GLSLstd450SSign}));
+
 }  // namespace
 }  // namespace tint

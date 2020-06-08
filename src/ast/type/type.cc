@@ -103,6 +103,17 @@ bool Type::is_float_scalar_or_vector() {
   return is_float_scalar() || is_float_vector();
 }
 
+bool Type::is_integer_scalar() {
+  return IsU32() || IsI32();
+}
+
+bool Type::is_integer_vector() {
+  if (!IsVector()) {
+    return false;
+  }
+  return AsVector()->type()->IsU32() || AsVector()->type()->IsI32();
+}
+
 bool Type::is_unsigned_scalar_or_vector() {
   return IsU32() || (IsVector() && AsVector()->type()->IsU32());
 }
