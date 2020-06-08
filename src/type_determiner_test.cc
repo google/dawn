@@ -1859,7 +1859,9 @@ INSTANTIATE_TEST_SUITE_P(
                     GLSLData{"log2", GLSLstd450Log2},
                     GLSLData{"sqrt", GLSLstd450Sqrt},
                     GLSLData{"inversesqrt", GLSLstd450InverseSqrt},
-                    GLSLData{"normalize", GLSLstd450Normalize}));
+                    GLSLData{"normalize", GLSLstd450Normalize},
+                    GLSLData{"interpolateatcentroid",
+                             GLSLstd450InterpolateAtCentroid}));
 
 TEST_F(TypeDeterminerTest, ImportData_Length_Scalar) {
   ast::type::F32Type f32;
@@ -2890,10 +2892,14 @@ TEST_P(ImportData_Int_SingleParamTest, Error_MultipleParams) {
                                param.name + ". Expected 1 got 3");
 }
 
-INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
-                         ImportData_Int_SingleParamTest,
-                         testing::Values(GLSLData{"sabs", GLSLstd450SAbs},
-                                         GLSLData{"ssign", GLSLstd450SSign}));
+INSTANTIATE_TEST_SUITE_P(
+    TypeDeterminerTest,
+    ImportData_Int_SingleParamTest,
+    testing::Values(GLSLData{"sabs", GLSLstd450SAbs},
+                    GLSLData{"ssign", GLSLstd450SSign},
+                    GLSLData{"findilsb", GLSLstd450FindILsb},
+                    GLSLData{"findumsb", GLSLstd450FindUMsb},
+                    GLSLData{"findsmsb", GLSLstd450FindSMsb}));
 
 using ImportData_Int_TwoParamTest = TypeDeterminerTestWithParam<GLSLData>;
 TEST_P(ImportData_Int_TwoParamTest, Scalar_Signed) {
