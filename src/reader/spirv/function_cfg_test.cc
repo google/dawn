@@ -8794,6 +8794,28 @@ Return{}
 )")) << ToString(fe.ast_body());
 }
 
+// For normal terminator that is OpBranchConditional, the kBack, kForward,
+// kIfBreak are all invalid proven in earlier tests.
+TEST_F(SpvParserTest, DISABLED_EmitBody_BranchConditional_Fallthrough_Fallthrough_Same) {
+  // Can only be to the same target.
+  // TODO(dneto): needs switch support
+}
+TEST_F(SpvParserTest,
+       DISABLED_EmitBody_BranchConditional_Fallthrough_Fallthrough_Different_IsError) {
+  // TODO(dneto): needs switch support
+}
+TEST_F(SpvParserTest, DISABLED_EmitBody_BranchConditional_Fallthrough_LoopBreak) {
+  // TODO(dneto): needs switch support
+}
+TEST_F(SpvParserTest, DISABLED_EmitBody_BranchConditional_Fallthrough_SwitchBreak) {
+  // TODO(dneto): needs switch support
+}
+TEST_F(SpvParserTest, DISABLED_EmitBody_BranchConditional_Fallthrough_LoopContinue) {
+  // TODO(dneto): needs switch support
+}
+
+// TODO(dneto): test normal OpBranchConditional with other than Fallthrough
+
 TEST_F(SpvParserTest,
        DISABLED_Switch_NotAsSelectionHeader_NonDefaultBranchesAreContinue) {
   // Adapted from SPIRV-Tools test MissingMergeOneUnseenTargetSwitchGood
