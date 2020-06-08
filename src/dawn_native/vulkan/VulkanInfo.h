@@ -52,6 +52,8 @@ namespace dawn_native { namespace vulkan {
     extern const char kExtensionNameKhrXlibSurface[];
     extern const char kExtensionNameFuchsiaImagePipeSurface[];
     extern const char kExtensionNameKhrMaintenance1[];
+    extern const char kExtensionNameKhrShaderFloat16Int8[];
+    extern const char kExtensionNameKhr16BitStorage[];
 
     // Global information - gathered before the instance is created
     struct VulkanGlobalKnobs {
@@ -85,6 +87,8 @@ namespace dawn_native { namespace vulkan {
     // Device information - gathered before the device is created.
     struct VulkanDeviceKnobs {
         VkPhysicalDeviceFeatures features;
+        VkPhysicalDeviceShaderFloat16Int8FeaturesKHR shaderFloat16Int8Features;
+        VkPhysicalDevice16BitStorageFeaturesKHR _16BitStorageFeatures;
 
         // Extensions, promoted extensions are set to true if their core version is supported.
         bool debugMarker = false;
@@ -98,6 +102,8 @@ namespace dawn_native { namespace vulkan {
         bool externalSemaphoreZirconHandle = false;
         bool swapchain = false;
         bool maintenance1 = false;
+        bool shaderFloat16Int8 = false;
+        bool _16BitStorage = false;
     };
 
     struct VulkanDeviceInfo : VulkanDeviceKnobs {

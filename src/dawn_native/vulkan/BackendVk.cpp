@@ -253,19 +253,28 @@ namespace dawn_native { namespace vulkan {
             usedKnobs.getPhysicalDeviceProperties2 = true;
             usedKnobs.externalMemoryCapabilities = true;
             usedKnobs.externalSemaphoreCapabilities = true;
-        } else {
-            if (mGlobalInfo.externalMemoryCapabilities) {
-                extensionsToRequest.push_back(kExtensionNameKhrExternalMemoryCapabilities);
-                usedKnobs.externalMemoryCapabilities = true;
-            }
-            if (mGlobalInfo.externalSemaphoreCapabilities) {
-                extensionsToRequest.push_back(kExtensionNameKhrExternalSemaphoreCapabilities);
-                usedKnobs.externalSemaphoreCapabilities = true;
-            }
-            if (mGlobalInfo.getPhysicalDeviceProperties2) {
-                extensionsToRequest.push_back(kExtensionNameKhrGetPhysicalDeviceProperties2);
-                usedKnobs.getPhysicalDeviceProperties2 = true;
-            }
+        }
+
+        // The Vulkan-Loader has emulation of VkPhysicalDevices functions such as
+        // vkGetPhysicalDeviceProperties2 when the ICD doesn't support the extension. However the
+        // loader has a bug where if the instance is created with Vulkan 1.1 and not the promoted
+        // extensions, it will skip emulation and if the ICD doesn't support Vulkan 1.1 nor the
+        // extensions, we will crash on nullptr function pointer when the loader tries to call the
+        // ICD's vkGetPhysicalDeviceProperties2. See
+        // https://github.com/KhronosGroup/Vulkan-Loader/issues/412. We work around this by
+        // specifying we want to enable the promoted extensions, even when we create a Vulkan 1.1
+        // instance.
+        if (mGlobalInfo.externalMemoryCapabilities) {
+            extensionsToRequest.push_back(kExtensionNameKhrExternalMemoryCapabilities);
+            usedKnobs.externalMemoryCapabilities = true;
+        }
+        if (mGlobalInfo.externalSemaphoreCapabilities) {
+            extensionsToRequest.push_back(kExtensionNameKhrExternalSemaphoreCapabilities);
+            usedKnobs.externalSemaphoreCapabilities = true;
+        }
+        if (mGlobalInfo.getPhysicalDeviceProperties2) {
+            extensionsToRequest.push_back(kExtensionNameKhrGetPhysicalDeviceProperties2);
+            usedKnobs.getPhysicalDeviceProperties2 = true;
         }
 
         VkApplicationInfo appInfo;

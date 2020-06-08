@@ -651,6 +651,7 @@
         "extensible": false,
         "members": [
             {"name": "texture compression BC", "type": "bool", "default": "false"},
+            {"name": "shader float16", "type": "bool", "default": "false"},
             {"name": "pipeline statistics query", "type": "bool", "default": "false"},
             {"name": "timestamp query", "type": "bool", "default": "false"}
         ]
