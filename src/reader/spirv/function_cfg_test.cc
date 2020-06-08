@@ -8589,6 +8589,74 @@ Return{}
 )")) << ToString(fe.ast_body());
 }
 
+TEST_F(SpvParserTest,
+       DISABLED_Switch_NotAsSelectionHeader_NonDefaultBranchesAreContinue) {
+  // Adapted from SPIRV-Tools test MissingMergeOneUnseenTargetSwitchGood
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+ %100 = OpFunction %void None %voidfn
+ %entry = OpLabel
+ OpBranch %loop
+ %loop = OpLabel
+ OpLoopMerge %merge %cont None
+ OpBranchConditional %cond %merge %b1
+
+ ; Here an OpSwitch is used with only one "unseen-so-far" target
+ ; so it doesn't need an OpSelectionMerge.
+ ; The %cont target can be implemented via "continue". So we can
+ ; generate:
+ ;    if ((selector != 1) && (selector != 3)) { continue; }
+ %b1 = OpLabel
+ OpSwitch %selector %b2 0 %b2 1 %cont 2 %b2 3 %cont
+
+ %b2 = OpLabel ; the one unseen target
+ OpBranch %cont
+ %cont = OpLabel
+ OpBranchConditional %cond2 %merge %loop
+ %merge = OpLabel
+ OpReturn
+ OpFunctionEnd
+   )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(unhandled case)"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest,
+       DISABLED_Switch_NotAsSelectionHeader_DefaultBranchIsContinue) {
+  // Adapted from SPIRV-Tools test MissingMergeOneUnseenTargetSwitchGood
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+ %100 = OpFunction %void None %voidfn
+ %entry = OpLabel
+ OpBranch %loop
+ %loop = OpLabel
+ OpLoopMerge %merge %cont None
+ OpBranchConditional %cond %merge %b1
+
+ ; Here an OpSwitch is used with only one "unseen-so-far" target
+ ; so it doesn't need an OpSelectionMerge.
+ ; The %cont target can be implemented via "continue". So we can
+ ; generate:
+ ;    if (!(selector == 0 || selector == 2)) {continue;}
+ %b1 = OpLabel
+ OpSwitch %selector %cont 0 %b2 1 %cont 2 %b2
+
+ %b2 = OpLabel ; the one unseen target
+ OpBranch %cont
+ %cont = OpLabel
+ OpBranchConditional %cond2 %merge %loop
+ %merge = OpLabel
+ OpReturn
+ OpFunctionEnd
+   )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(unhandled case)"))
+      << ToString(fe.ast_body());
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader
