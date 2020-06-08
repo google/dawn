@@ -1787,8 +1787,9 @@ TEST_P(ImportData_SingleParamTest, Error_Integer) {
   auto* type =
       td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
   ASSERT_EQ(type, nullptr);
-  EXPECT_EQ(td()->error(), std::string("incorrect type for ") + param.name +
-                               ". Requires a float scalar or a float vector");
+  EXPECT_EQ(td()->error(),
+            std::string("incorrect type for ") + param.name +
+                ". Requires float scalar or float vector values");
 }
 
 TEST_P(ImportData_SingleParamTest, Error_NoParams) {
@@ -1914,9 +1915,9 @@ TEST_F(TypeDeterminerTest, ImportData_Length_Error_Integer) {
   auto* type =
       td()->GetImportData({0, 0}, "GLSL.std.450", "length", params, &id);
   ASSERT_EQ(type, nullptr);
-  EXPECT_EQ(
-      td()->error(),
-      "incorrect type for length. Requires a float scalar or a float vector");
+  EXPECT_EQ(td()->error(),
+            "incorrect type for length. Requires float scalar or float vector "
+            "values");
 }
 
 TEST_F(TypeDeterminerTest, ImportData_Length_Error_NoParams) {
@@ -2030,7 +2031,7 @@ TEST_P(ImportData_TwoParamTest, Error_Integer) {
   ASSERT_EQ(type, nullptr);
   EXPECT_EQ(td()->error(),
             std::string("incorrect type for ") + param.name +
-                ". Requires float scalar or a float vector values");
+                ". Requires float scalar or float vector values");
 }
 
 TEST_P(ImportData_TwoParamTest, Error_NoParams) {
@@ -2234,7 +2235,7 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Error_Integer) {
       td()->GetImportData({0, 0}, "GLSL.std.450", "distance", params, &id);
   ASSERT_EQ(type, nullptr);
   EXPECT_EQ(td()->error(),
-            "incorrect type for distance. Requires float scalar or a float "
+            "incorrect type for distance. Requires float scalar or float "
             "vector values");
 }
 
@@ -2440,7 +2441,7 @@ TEST_P(ImportData_ThreeParamTest, Error_Integer) {
   ASSERT_EQ(type, nullptr);
   EXPECT_EQ(td()->error(),
             std::string("incorrect type for ") + param.name +
-                ". Requires float scalar or a float vector values");
+                ". Requires float scalar or float vector values");
 }
 
 TEST_P(ImportData_ThreeParamTest, Error_NoParams) {
