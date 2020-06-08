@@ -79,8 +79,10 @@ class Type {
   bool is_float_scalar_or_vector();
   /// @returns ture if this type is an integer scalar
   bool is_integer_scalar();
-  /// @returns ture if this type is an integer vector
-  bool is_integer_vector();
+  /// @returns true if this type is a signed integer vector
+  bool is_signed_integer_vector();
+  /// @returns true if this type is an unsigned vector
+  bool is_unsigned_integer_vector();
   /// @returns true if this type is an unsigned scalar or vector
   bool is_unsigned_scalar_or_vector();
   /// @returns true if this type is a signed scalar or vector

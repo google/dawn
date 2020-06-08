@@ -107,11 +107,12 @@ bool Type::is_integer_scalar() {
   return IsU32() || IsI32();
 }
 
-bool Type::is_integer_vector() {
-  if (!IsVector()) {
-    return false;
-  }
-  return AsVector()->type()->IsU32() || AsVector()->type()->IsI32();
+bool Type::is_unsigned_integer_vector() {
+  return IsVector() && AsVector()->type()->IsU32();
+}
+
+bool Type::is_signed_integer_vector() {
+  return IsVector() && AsVector()->type()->IsI32();
 }
 
 bool Type::is_unsigned_scalar_or_vector() {

@@ -679,6 +679,8 @@ constexpr const GlslData kGlslData[] = {
     {"sabs", 1, GLSLstd450SAbs, GlslDataType::kIntScalarOrVector},
     {"sin", 1, GLSLstd450Sin, GlslDataType::kFloatScalarOrVector},
     {"sinh", 1, GLSLstd450Sinh, GlslDataType::kFloatScalarOrVector},
+    {"smax", 2, GLSLstd450SMax, GlslDataType::kIntScalarOrVector},
+    {"smin", 2, GLSLstd450SMin, GlslDataType::kIntScalarOrVector},
     {"smoothstep", 3, GLSLstd450SmoothStep, GlslDataType::kFloatScalarOrVector},
     {"sqrt", 1, GLSLstd450Sqrt, GlslDataType::kFloatScalarOrVector},
     {"ssign", 1, GLSLstd450SSign, GlslDataType::kIntScalarOrVector},
@@ -686,6 +688,8 @@ constexpr const GlslData kGlslData[] = {
     {"tan", 1, GLSLstd450Tan, GlslDataType::kFloatScalarOrVector},
     {"tanh", 1, GLSLstd450Tanh, GlslDataType::kFloatScalarOrVector},
     {"trunc", 1, GLSLstd450Trunc, GlslDataType::kFloatScalarOrVector},
+    {"umax", 2, GLSLstd450UMax, GlslDataType::kIntScalarOrVector},
+    {"umin", 2, GLSLstd450UMin, GlslDataType::kIntScalarOrVector},
 };
 constexpr const uint32_t kGlslDataCount = sizeof(kGlslData) / sizeof(GlslData);
 
