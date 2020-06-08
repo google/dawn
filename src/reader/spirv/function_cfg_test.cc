@@ -4682,7 +4682,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_FromIfThenElse) {
   EXPECT_EQ(bi50->succ_edge[99], EdgeKind::kIfBreak);
 }
 
-TEST_F(SpvParserTest, ClassifyCFGEdge_IfBreak_BypassesMerge_IsError) {
+TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_BypassesMerge_IsError) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
