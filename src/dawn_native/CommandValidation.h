@@ -36,6 +36,8 @@ namespace dawn_native {
 
     MaybeError ValidatePassResourceUsage(const PassResourceUsage& usage);
 
+    bool IsRangeOverlapped(uint32_t startA, uint32_t startB, uint32_t length);
+
 }  // namespace dawn_native
 
 #endif  // DAWNNATIVE_COMMANDVALIDATION_H_

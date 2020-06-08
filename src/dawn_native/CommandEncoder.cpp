@@ -183,6 +183,16 @@ namespace dawn_native {
                 DAWN_TRY(ValidateEntireSubresourceCopied(src, dst, copySize));
             }
 
+            if (src.texture == dst.texture && src.mipLevel == dst.mipLevel) {
+                ASSERT(src.texture->GetDimension() == wgpu::TextureDimension::e2D &&
+                       dst.texture->GetDimension() == wgpu::TextureDimension::e2D);
+                if (IsRangeOverlapped(src.arrayLayer, dst.arrayLayer, copySize.depth)) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Copy subresources cannot be overlapped when copying within the same "
+                        "texture.");
+                }
+            }
+
             return {};
         }
 

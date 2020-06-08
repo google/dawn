@@ -16,6 +16,7 @@
 
 #include "dawn_native/BindGroupAndStorageBarrierTracker.h"
 #include "dawn_native/CommandEncoder.h"
+#include "dawn_native/CommandValidation.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/RenderBundle.h"
 #include "dawn_native/vulkan/BindGroupVk.h"
@@ -505,6 +506,15 @@ namespace dawn_native { namespace vulkan {
                             ->EnsureSubresourceContentInitialized(recordingContext, dst.mipLevel, 1,
                                                                   dst.arrayLayer,
                                                                   copy->copySize.depth);
+                    }
+
+                    if (src.texture.Get() == dst.texture.Get() && src.mipLevel == dst.mipLevel) {
+                        // When there are overlapped subresources, the layout of the overlapped
+                        // subresources should all be GENERAL instead of what we set now. Currently
+                        // it is not allowed to copy with overlapped subresources, but we still
+                        // add the ASSERT here as a reminder for possible changes in the future.
+                        ASSERT(!IsRangeOverlapped(src.arrayLayer, dst.arrayLayer,
+                                                  copy->copySize.depth));
                     }
 
                     ToBackend(src.texture)

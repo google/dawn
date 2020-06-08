@@ -339,4 +339,11 @@ namespace dawn_native {
         return {};
     }
 
+    bool IsRangeOverlapped(uint32_t startA, uint32_t startB, uint32_t length) {
+        uint32_t maxStart = std::max(startA, startB);
+        uint32_t minStart = std::min(startA, startB);
+        return static_cast<uint64_t>(minStart) + static_cast<uint64_t>(length) >
+               static_cast<uint64_t>(maxStart);
+    }
+
 }  // namespace dawn_native

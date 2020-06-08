@@ -1257,6 +1257,117 @@ TEST_F(CopyCommandTest_T2T, CopyToMipmapOfNonSquareTexture) {
                 maxMipmapLevel - 2, 0, {0, 0, 0}, {2, 1, 1});
 }
 
+// Test copy within the same texture
+TEST_F(CopyCommandTest_T2T, CopyWithinSameTexture) {
+    wgpu::Texture texture =
+        Create2DTexture(32, 32, 2, 4, wgpu::TextureFormat::RGBA8Unorm,
+                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst);
+
+    // The base array layer of the copy source being equal to that of the copy destination is not
+    // allowed.
+    {
+        constexpr uint32_t kBaseArrayLayer = 0;
+
+        // copyExtent.z == 1
+        {
+            constexpr uint32_t kCopyArrayLayerCount = 1;
+            TestT2TCopy(utils::Expectation::Failure, texture, 0, kBaseArrayLayer, {0, 0, 0},
+                        texture, 0, kBaseArrayLayer, {2, 2, 0}, {1, 1, kCopyArrayLayerCount});
+        }
+
+        // copyExtent.z > 1
+        {
+            constexpr uint32_t kCopyArrayLayerCount = 2;
+            TestT2TCopy(utils::Expectation::Failure, texture, 0, kBaseArrayLayer, {0, 0, 0},
+                        texture, 0, kBaseArrayLayer, {2, 2, 0}, {1, 1, kCopyArrayLayerCount});
+        }
+    }
+
+    // The array slices of the source involved in the copy have no overlap with those of the
+    // destination is allowed.
+    {
+        constexpr uint32_t kCopyArrayLayerCount = 2;
+
+        // srcBaseArrayLayer < dstBaseArrayLayer
+        {
+            constexpr uint32_t kSrcBaseArrayLayer = 0;
+            constexpr uint32_t kDstBaseArrayLayer = kSrcBaseArrayLayer + kCopyArrayLayerCount;
+
+            TestT2TCopy(utils::Expectation::Success, texture, 0, kSrcBaseArrayLayer, {0, 0, 0},
+                        texture, 0, kDstBaseArrayLayer, {0, 0, 0}, {1, 1, kCopyArrayLayerCount});
+        }
+
+        // srcBaseArrayLayer > dstBaseArrayLayer
+        {
+            constexpr uint32_t kSrcBaseArrayLayer = 2;
+            constexpr uint32_t kDstBaseArrayLayer = kSrcBaseArrayLayer - kCopyArrayLayerCount;
+            TestT2TCopy(utils::Expectation::Success, texture, 0, kSrcBaseArrayLayer, {0, 0, 0},
+                        texture, 0, kDstBaseArrayLayer, {0, 0, 0}, {1, 1, kCopyArrayLayerCount});
+        }
+    }
+
+    // Copy between different mipmap levels is allowed.
+    {
+        constexpr uint32_t kSrcMipLevel = 0;
+        constexpr uint32_t kDstMipLevel = 1;
+
+        // Copy one slice
+        {
+            constexpr uint32_t kCopyArrayLayerCount = 1;
+            TestT2TCopy(utils::Expectation::Success, texture, kSrcMipLevel, 0, {0, 0, 0}, texture,
+                        kDstMipLevel, 0, {1, 1, 0}, {1, 1, kCopyArrayLayerCount});
+        }
+
+        // The base array layer of the copy source is equal to that of the copy destination.
+        {
+            constexpr uint32_t kCopyArrayLayerCount = 2;
+            constexpr uint32_t kBaseArrayLayer = 0;
+
+            TestT2TCopy(utils::Expectation::Success, texture, kSrcMipLevel, kBaseArrayLayer,
+                        {0, 0, 0}, texture, kDstMipLevel, kBaseArrayLayer, {1, 1, 0},
+                        {1, 1, kCopyArrayLayerCount});
+        }
+
+        // The array slices of the source involved in the copy have overlaps with those of the
+        // destination, and the copy areas have overlaps.
+        {
+            constexpr uint32_t kCopyArrayLayerCount = 2;
+
+            constexpr uint32_t kSrcBaseArrayLayer = 0;
+            constexpr uint32_t kDstBaseArrayLayer = 1;
+            ASSERT(kSrcBaseArrayLayer + kCopyArrayLayerCount > kDstBaseArrayLayer);
+
+            constexpr wgpu::Origin3D kCopyOrigin = {0, 0, 0};
+            constexpr wgpu::Extent3D kCopyExtent = {1, 1, kCopyArrayLayerCount};
+
+            TestT2TCopy(utils::Expectation::Success, texture, kSrcMipLevel, kSrcBaseArrayLayer,
+                        kCopyOrigin, texture, kDstMipLevel, kDstBaseArrayLayer, kCopyOrigin,
+                        kCopyExtent);
+        }
+    }
+
+    // The array slices of the source involved in the copy have overlaps with those of the
+    // destination is not allowed.
+    {
+        constexpr uint32_t kMipmapLevel = 0;
+        constexpr uint32_t kMinBaseArrayLayer = 0;
+        constexpr uint32_t kMaxBaseArrayLayer = 1;
+        constexpr uint32_t kCopyArrayLayerCount = 3;
+        ASSERT(kMinBaseArrayLayer + kCopyArrayLayerCount > kMaxBaseArrayLayer);
+
+        constexpr wgpu::Extent3D kCopyExtent = {4, 4, kCopyArrayLayerCount};
+
+        const wgpu::Origin3D srcOrigin = {0, 0, 0};
+        const wgpu::Origin3D dstOrigin = {4, 4, 0};
+        TestT2TCopy(utils::Expectation::Failure, texture, kMipmapLevel, kMinBaseArrayLayer,
+                    srcOrigin, texture, kMipmapLevel, kMaxBaseArrayLayer, dstOrigin, kCopyExtent);
+    }
+
+    // Copy between different mipmap levels and array slices is allowed.
+    TestT2TCopy(utils::Expectation::Success, texture, 0, 1, {0, 0, 0}, texture, 1, 0, {1, 1, 0},
+                {1, 1, 1});
+}
+
 class CopyCommandTest_CompressedTextureFormats : public CopyCommandTest {
   public:
     CopyCommandTest_CompressedTextureFormats() : CopyCommandTest() {

@@ -291,7 +291,10 @@ class CopyTests_T2T : public CopyTests {
     };
 
   protected:
-    void DoTest(const TextureSpec& srcSpec, const TextureSpec& dstSpec, const CopySize& copy) {
+    void DoTest(const TextureSpec& srcSpec,
+                const TextureSpec& dstSpec,
+                const CopySize& copy,
+                bool copyWithinSameTexture = false) {
         wgpu::TextureDescriptor srcDescriptor;
         srcDescriptor.dimension = wgpu::TextureDimension::e2D;
         srcDescriptor.size.width = srcSpec.width;
@@ -304,17 +307,22 @@ class CopyTests_T2T : public CopyTests {
         srcDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
         wgpu::Texture srcTexture = device.CreateTexture(&srcDescriptor);
 
-        wgpu::TextureDescriptor dstDescriptor;
-        dstDescriptor.dimension = wgpu::TextureDimension::e2D;
-        dstDescriptor.size.width = dstSpec.width;
-        dstDescriptor.size.height = dstSpec.height;
-        dstDescriptor.size.depth = 1;
-        dstDescriptor.arrayLayerCount = dstSpec.arraySize;
-        dstDescriptor.sampleCount = 1;
-        dstDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
-        dstDescriptor.mipLevelCount = dstSpec.level + 1;
-        dstDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
-        wgpu::Texture dstTexture = device.CreateTexture(&dstDescriptor);
+        wgpu::Texture dstTexture;
+        if (copyWithinSameTexture) {
+            dstTexture = srcTexture;
+        } else {
+            wgpu::TextureDescriptor dstDescriptor;
+            dstDescriptor.dimension = wgpu::TextureDimension::e2D;
+            dstDescriptor.size.width = dstSpec.width;
+            dstDescriptor.size.height = dstSpec.height;
+            dstDescriptor.size.depth = 1;
+            dstDescriptor.arrayLayerCount = dstSpec.arraySize;
+            dstDescriptor.sampleCount = 1;
+            dstDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+            dstDescriptor.mipLevelCount = dstSpec.level + 1;
+            dstDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+            dstTexture = device.CreateTexture(&dstDescriptor);
+        }
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
@@ -757,6 +765,42 @@ TEST_P(CopyTests_T2T, Texture2DArrayCopyMultipleSlices) {
     DoTest({kWidth, kHeight, 0, 0, 0, kLayers, kSrcBaseLayer},
            {kWidth, kHeight, 0, 0, 0, kLayers, kDstBaseLayer},
            {kWidth, kHeight, kCopyArrayLayerCount});
+}
+
+// Test copying one texture slice within the same texture.
+TEST_P(CopyTests_T2T, CopyWithinSameTextureOneSlice) {
+    // TODO(jiawei.shao@intel.com): support texture-to-texture copy within same texture on D3D12
+    // after D3D12 subresource tracking is implemented.
+    DAWN_SKIP_TEST_IF(IsD3D12());
+
+    constexpr uint32_t kWidth = 256u;
+    constexpr uint32_t kHeight = 128u;
+    constexpr uint32_t kLayers = 6u;
+    constexpr uint32_t kSrcBaseLayer = 0u;
+    constexpr uint32_t kDstBaseLayer = 3u;
+    constexpr uint32_t kCopyArrayLayerCount = 1u;
+    DoTest({kWidth, kHeight, 0, 0, 0, kLayers, kSrcBaseLayer},
+           {kWidth, kHeight, 0, 0, 0, kLayers, kDstBaseLayer},
+           {kWidth, kHeight, kCopyArrayLayerCount}, true);
+}
+
+// Test copying multiple contiguous texture slices within the same texture with non-overlapped
+// slices.
+TEST_P(CopyTests_T2T, CopyWithinSameTextureNonOverlappedSlices) {
+    // TODO(jiawei.shao@intel.com): investigate why this test fails with swiftshader.
+    // TODO(jiawei.shao@intel.com): support texture-to-texture copy within same texture on D3D12
+    // after D3D12 subresource tracking is implemented.
+    DAWN_SKIP_TEST_IF(IsSwiftshader() || IsD3D12());
+
+    constexpr uint32_t kWidth = 256u;
+    constexpr uint32_t kHeight = 128u;
+    constexpr uint32_t kLayers = 6u;
+    constexpr uint32_t kSrcBaseLayer = 0u;
+    constexpr uint32_t kDstBaseLayer = 3u;
+    constexpr uint32_t kCopyArrayLayerCount = 3u;
+    DoTest({kWidth, kHeight, 0, 0, 0, kLayers, kSrcBaseLayer},
+           {kWidth, kHeight, 0, 0, 0, kLayers, kDstBaseLayer},
+           {kWidth, kHeight, kCopyArrayLayerCount}, true);
 }
 
 TEST_P(CopyTests_T2T, TextureMip) {
