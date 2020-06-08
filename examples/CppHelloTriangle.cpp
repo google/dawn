@@ -74,7 +74,8 @@ void initTextures() {
 
     wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(
         device, data.data(), static_cast<uint32_t>(data.size()), wgpu::BufferUsage::CopySrc);
-    wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(stagingBuffer, 0, 0, 0);
+    wgpu::BufferCopyView bufferCopyView =
+        utils::CreateBufferCopyView(stagingBuffer, 0, 4 * 1024, 0);
     wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
     wgpu::Extent3D copySize = {1024, 1024, 1};
 
