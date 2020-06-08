@@ -6529,8 +6529,9 @@ TEST_F(SpvParserTest,
                  "a structured header (it has no merge instruction)"));
 }
 
-TEST_F(SpvParserTest,
-       FindIfSelectionInternalHeaders_IfBreak_FromThen_ForwardWithinThen) {
+TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_FromThen_ForwardWithinThen) {
+  // Arguably SPIR-V allows this configuration. We're debating whether to ban
+  // it.
   // TODO(dneto): We can make this case work, if we injected
   //    if (!cond2) { rest-of-then-body }
   // at block 30
@@ -6554,33 +6555,24 @@ TEST_F(SpvParserTest,
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
-  EXPECT_TRUE(FlowFindIfSelectionInternalHeaders(&fe));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 80, 99));
 
   auto* bi20 = fe.GetBlockInfo(20);
   ASSERT_NE(bi20, nullptr);
-  ASSERT_NE(bi20->true_head_for, nullptr);
-  EXPECT_EQ(bi20->true_head_for->begin_id, 10u);
-  EXPECT_EQ(bi20->false_head_for, nullptr);
-  EXPECT_EQ(bi20->premerge_head_for, nullptr);
-  EXPECT_EQ(bi20->exclusive_false_head_for, nullptr);
   EXPECT_EQ(bi20->succ_edge.count(80), 1u);
   EXPECT_EQ(bi20->succ_edge[80], EdgeKind::kForward);
   EXPECT_EQ(bi20->succ_edge.count(99), 1u);
   EXPECT_EQ(bi20->succ_edge[99], EdgeKind::kIfBreak);
 
-  auto* bi80 = fe.GetBlockInfo(80);
-  ASSERT_NE(bi80, nullptr);
-  EXPECT_EQ(bi80->true_head_for, nullptr);
-  EXPECT_EQ(bi80->false_head_for, nullptr);
-  EXPECT_EQ(bi80->premerge_head_for, nullptr);
-  EXPECT_EQ(bi80->exclusive_false_head_for, nullptr);
-  EXPECT_EQ(bi80->succ_edge.count(99), 1u);
-  EXPECT_EQ(bi80->succ_edge[99], EdgeKind::kIfBreak);
+  EXPECT_THAT(p->error(),
+              Eq("Control flow diverges at block 20 (to 99, 80) but it is not "
+                 "a structured header (it has no merge instruction)"));
 }
 
-TEST_F(SpvParserTest,
-       FindIfSelectionInternalHeaders_IfBreak_FromElse_ForwardWithinElse) {
+TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_FromElse_ForwardWithinElse) {
+  // Arguably SPIR-V allows this configuration. We're debating whether to ban
+  // it.
   // TODO(dneto): We can make this case work, if we injected
   //    if (!cond2) { rest-of-else-body }
   // at block 30
@@ -6607,33 +6599,22 @@ TEST_F(SpvParserTest,
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
-  EXPECT_TRUE(FlowFindIfSelectionInternalHeaders(&fe));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 80, 99));
 
   auto* bi30 = fe.GetBlockInfo(30);
   ASSERT_NE(bi30, nullptr);
-  EXPECT_EQ(bi30->true_head_for, nullptr);
-  ASSERT_NE(bi30->false_head_for, nullptr);
-  EXPECT_EQ(bi30->false_head_for->begin_id, 10u);
-  EXPECT_EQ(bi30->premerge_head_for, nullptr);
-  EXPECT_EQ(bi30->exclusive_false_head_for, nullptr);
   EXPECT_EQ(bi30->succ_edge.count(80), 1u);
   EXPECT_EQ(bi30->succ_edge[80], EdgeKind::kForward);
   EXPECT_EQ(bi30->succ_edge.count(99), 1u);
   EXPECT_EQ(bi30->succ_edge[99], EdgeKind::kIfBreak);
 
-  auto* bi80 = fe.GetBlockInfo(80);
-  ASSERT_NE(bi80, nullptr);
-  EXPECT_EQ(bi80->true_head_for, nullptr);
-  EXPECT_EQ(bi80->false_head_for, nullptr);
-  EXPECT_EQ(bi80->premerge_head_for, nullptr);
-  EXPECT_EQ(bi80->exclusive_false_head_for, nullptr);
-  EXPECT_EQ(bi80->succ_edge.count(99), 1u);
-  EXPECT_EQ(bi80->succ_edge[99], EdgeKind::kIfBreak);
+  EXPECT_THAT(p->error(),
+              Eq("Control flow diverges at block 30 (to 99, 80) but it is not "
+                 "a structured header (it has no merge instruction)"));
 }
 
-TEST_F(SpvParserTest,
-       FindIfSelectionInternalHeaders_IfBreak_WithForwardToPremerge_IsError) {
+TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_WithForwardToPremerge_IsError) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -6657,12 +6638,19 @@ TEST_F(SpvParserTest,
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
-  EXPECT_FALSE(FlowFindIfSelectionInternalHeaders(&fe));
+  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 80, 99));
-  EXPECT_THAT(
-      p->error(),
-      Eq("Block 20 in if-selection headed at block 10 branches to both the "
-         "merge block 99 and also to block 80 later in the selection"));
+
+  auto* bi20 = fe.GetBlockInfo(20);
+  ASSERT_NE(bi20, nullptr);
+  EXPECT_EQ(bi20->succ_edge.count(80), 1u);
+  EXPECT_EQ(bi20->succ_edge[80], EdgeKind::kForward);
+  EXPECT_EQ(bi20->succ_edge.count(99), 1u);
+  EXPECT_EQ(bi20->succ_edge[99], EdgeKind::kIfBreak);
+
+  EXPECT_THAT(p->error(),
+              Eq("Control flow diverges at block 20 (to 99, 80) but it is not "
+                 "a structured header (it has no merge instruction)"));
 }
 
 TEST_F(SpvParserTest, DISABLED_Codegen_IfBreak_FromThen_ForwardWithinThen) {

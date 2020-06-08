@@ -1072,8 +1072,9 @@ bool FunctionEmitter::ClassifyCFGEdges() {
     // There should only be one backedge per backedge block.
     uint32_t num_backedges = 0;
 
-    // Track destinations for normal forward edges, either kForward
-    // or kCaseFallThrough
+    // Track destinations for normal forward edges, either kForward,
+    // kCaseFallThrough, or kIfBreak. These count toward the need
+    // to have a merge instruction.
     std::vector<uint32_t> normal_forward_edges;
 
     if (successors.empty() && src_construct.enclosing_continue) {
@@ -1190,6 +1191,14 @@ bool FunctionEmitter::ClassifyCFGEdges() {
           }
         }
 
+        // The edge-kind has been finalized.
+
+        if ((edge_kind == EdgeKind::kForward) ||
+            (edge_kind == EdgeKind::kCaseFallThrough) ||
+            (edge_kind == EdgeKind::kIfBreak)) {
+          normal_forward_edges.push_back(dest);
+        }
+
         if ((edge_kind == EdgeKind::kForward) ||
             (edge_kind == EdgeKind::kCaseFallThrough)) {
           // Check for an invalid forward exit out of this construct.
@@ -1219,8 +1228,6 @@ bool FunctionEmitter::ClassifyCFGEdges() {
                    << src_construct.begin_id << "; branch bypasses "
                    << end_block_desc << " " << end_block;
           }
-
-          normal_forward_edges.push_back(dest);
 
           // Check dominance.
 

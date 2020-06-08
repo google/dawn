@@ -42,6 +42,19 @@ namespace reader {
 namespace spirv {
 
 /// Kinds of CFG edges.
+//
+// The edge kinds are used in many ways.
+//
+// For example, consider the edges leaving a basic block and going to distinct
+// targets. If the total number of kForward + kIfBreak + kCaseFallThrough edges
+// is more than 1, then the block must be a structured header, i.e. it needs
+// a merge instruction to declare the control flow divergence and associated
+// reconvergence point.  Those those edge kinds count toward divergence
+// because SPIR-v is designed to easily map back to structured control flow
+// in GLSL (and C).  In GLSL and C, those forward-flow edges don't have a
+// special statement to express them.  The other forward edges: kSwitchBreak,
+// kLoopBreak, and kLoopContinue directly map to 'break', 'break', and
+// 'continue', respectively.
 enum class EdgeKind {
   // A back-edge: An edge from a node to one of its ancestors in a depth-first
   // search from the entry block.
@@ -64,10 +77,7 @@ enum class EdgeKind {
   kIfBreak,
   // An edge from one switch case to the next sibling switch case.
   kCaseFallThrough,
-  // None of the above. By structured control flow rules, there can be at most
-  // one forward edge leaving a basic block. Otherwise there must have been a
-  // merge instruction declaring the divergence and associated reconvergence
-  // point.
+  // None of the above.
   kForward
 };
 
