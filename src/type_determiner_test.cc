@@ -2348,8 +2348,186 @@ TEST_F(TypeDeterminerTest, ImportData_Distance_Error_TooManyParams) {
             "incorrect number of parameters for distance. Expected 2 got 3");
 }
 
-using ImportData_ThreeParamTest = TypeDeterminerTestWithParam<GLSLData>;
+TEST_F(TypeDeterminerTest, ImportData_Cross) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
 
+  ast::ExpressionList vals_1;
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+
+  ast::ExpressionList vals_2;
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_1)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_2)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "cross", params, &id);
+  ASSERT_NE(type, nullptr);
+  EXPECT_TRUE(type->is_float_vector());
+  EXPECT_EQ(type->AsVector()->size(), 3u);
+  EXPECT_EQ(id, GLSLstd450Cross);
+}
+
+TEST_F(TypeDeterminerTest, ImportData_Cross_Error_Scalar) {
+  ast::type::F32Type f32;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "cross", params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(),
+            "incorrect type for cross. Requires float vector values");
+}
+
+TEST_F(TypeDeterminerTest, ImportData_Cross_Error_IntType) {
+  ast::type::I32Type i32;
+  ast::type::VectorType vec(&i32, 3);
+
+  ast::ExpressionList vals_1;
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 3)));
+
+  ast::ExpressionList vals_2;
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 3)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_1)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_2)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "cross", params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(),
+            "incorrect type for cross. Requires float vector values");
+}
+
+TEST_F(TypeDeterminerTest, ImportData_Cross_Error_MissingParams) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+
+  ast::ExpressionList params;
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "cross", params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(),
+            "incorrect number of parameters for cross. Expected 2 got 0");
+}
+
+TEST_F(TypeDeterminerTest, ImportData_Cross_Error_TooFewParams) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+
+  ast::ExpressionList vals_1;
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_1)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "cross", params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(),
+            "incorrect number of parameters for cross. Expected 2 got 1");
+}
+
+TEST_F(TypeDeterminerTest, ImportData_Cross_Error_TooManyParams) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+
+  ast::ExpressionList vals_1;
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+
+  ast::ExpressionList vals_2;
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+
+  ast::ExpressionList vals_3;
+  vals_3.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals_3.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals_3.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_1)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_2)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_3)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "cross", params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(),
+            "incorrect number of parameters for cross. Expected 2 got 3");
+}
+
+using ImportData_ThreeParamTest = TypeDeterminerTestWithParam<GLSLData>;
 TEST_P(ImportData_ThreeParamTest, Scalar) {
   auto param = GetParam();
 
