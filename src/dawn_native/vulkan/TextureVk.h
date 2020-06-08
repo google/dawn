@@ -73,7 +73,10 @@ namespace dawn_native { namespace vulkan {
                                 uint32_t baseArrayLayer,
                                 uint32_t layerCount);
         void TransitionUsageForPass(CommandRecordingContext* recordingContext,
-                                    const std::vector<wgpu::TextureUsage>& subresourceUsages);
+                                    const std::vector<wgpu::TextureUsage>& subresourceUsages,
+                                    std::vector<VkImageMemoryBarrier>* imageBarriers,
+                                    VkPipelineStageFlags* srcStages,
+                                    VkPipelineStageFlags* dstStages);
 
         void EnsureSubresourceContentInitialized(CommandRecordingContext* recordingContext,
                                                  uint32_t baseMipLevel,
@@ -107,7 +110,8 @@ namespace dawn_native { namespace vulkan {
                                 TextureBase::ClearValue);
 
         void TweakTransitionForExternalUsage(CommandRecordingContext* recordingContext,
-                                             std::vector<VkImageMemoryBarrier>* barriers);
+                                             std::vector<VkImageMemoryBarrier>* barriers,
+                                             size_t transitionBarrierStart);
 
         VkImage mHandle = VK_NULL_HANDLE;
         ResourceMemoryAllocation mMemoryAllocation;

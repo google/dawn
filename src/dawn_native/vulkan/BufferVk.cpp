@@ -186,6 +186,25 @@ namespace dawn_native { namespace vulkan {
 
     void Buffer::TransitionUsageNow(CommandRecordingContext* recordingContext,
                                     wgpu::BufferUsage usage) {
+        std::vector<VkBufferMemoryBarrier> barriers;
+        VkPipelineStageFlags srcStages = 0;
+        VkPipelineStageFlags dstStages = 0;
+
+        TransitionUsageNow(recordingContext, usage, &barriers, &srcStages, &dstStages);
+
+        if (barriers.size() > 0) {
+            ASSERT(barriers.size() == 1);
+            ToBackend(GetDevice())
+                ->fn.CmdPipelineBarrier(recordingContext->commandBuffer, srcStages, dstStages, 0, 0,
+                                        nullptr, barriers.size(), barriers.data(), 0, nullptr);
+        }
+    }
+
+    void Buffer::TransitionUsageNow(CommandRecordingContext* recordingContext,
+                                    wgpu::BufferUsage usage,
+                                    std::vector<VkBufferMemoryBarrier>* bufferBarriers,
+                                    VkPipelineStageFlags* srcStages,
+                                    VkPipelineStageFlags* dstStages) {
         bool lastIncludesTarget = (mLastUsage & usage) == usage;
         bool lastReadOnly = (mLastUsage & kReadOnlyBufferUsages) == mLastUsage;
 
@@ -200,8 +219,8 @@ namespace dawn_native { namespace vulkan {
             return;
         }
 
-        VkPipelineStageFlags srcStages = VulkanPipelineStage(mLastUsage);
-        VkPipelineStageFlags dstStages = VulkanPipelineStage(usage);
+        *srcStages |= VulkanPipelineStage(mLastUsage);
+        *dstStages |= VulkanPipelineStage(usage);
 
         VkBufferMemoryBarrier barrier;
         barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
@@ -214,9 +233,7 @@ namespace dawn_native { namespace vulkan {
         barrier.offset = 0;
         barrier.size = GetSize();
 
-        ToBackend(GetDevice())
-            ->fn.CmdPipelineBarrier(recordingContext->commandBuffer, srcStages, dstStages, 0, 0,
-                                    nullptr, 1, &barrier, 0, nullptr);
+        bufferBarriers->push_back(barrier);
 
         mLastUsage = usage;
     }
