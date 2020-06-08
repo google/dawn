@@ -1034,6 +1034,42 @@ TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
     EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(sampleTexture.Get(), 0, 1, 0, 2));
 }
 
+// This is a regression test for crbug.com/dawn/451 where the lazy texture
+// init path on D3D12 had a divide-by-zero exception in the copy split logic.
+TEST_P(TextureZeroInitTest, CopyTextureToBufferNonRenderableUnaligned) {
+    wgpu::TextureDescriptor descriptor;
+    descriptor.size.width = kUnalignedSize;
+    descriptor.size.height = kUnalignedSize;
+    descriptor.size.depth = 1;
+    descriptor.format = wgpu::TextureFormat::R8Snorm;
+    descriptor.usage = wgpu::TextureUsage::CopySrc;
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
+
+    {
+        uint32_t bytesPerRow = Align(kUnalignedSize, kTextureBytesPerRowAlignment);
+
+        wgpu::BufferDescriptor bufferDesc;
+        bufferDesc.size = kUnalignedSize * bytesPerRow;
+        bufferDesc.usage = wgpu::BufferUsage::CopyDst;
+        wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+
+        wgpu::TextureCopyView textureCopyView =
+            utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
+        wgpu::BufferCopyView bufferCopyView =
+            utils::CreateBufferCopyView(buffer, 0, bytesPerRow, 0);
+        wgpu::Extent3D copySize = {kUnalignedSize, kUnalignedSize, 1};
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copySize);
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commands));
+    }
+
+    // Expect texture subresource initialized to be true
+    EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(texture.Get(), 0, 1, 0, 1));
+}
+
 DAWN_INSTANTIATE_TEST(
     TextureZeroInitTest,
     D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}),

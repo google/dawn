@@ -25,6 +25,8 @@ namespace dawn_native { namespace d3d12 {
                                      uint32_t offset,
                                      uint32_t bytesPerRow,
                                      uint32_t slicePitch) {
+            ASSERT(bytesPerRow != 0);
+            ASSERT(slicePitch != 0);
             uint32_t byteOffsetX = offset % bytesPerRow;
             offset -= byteOffsetX;
             uint32_t byteOffsetY = offset % slicePitch;
