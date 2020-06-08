@@ -1656,6 +1656,12 @@ bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
 
   // Have we emitted the statements for this block?
   bool emitted = false;
+
+  // When entering an if-selection or switch-selection, we will emit the WGSL
+  // construct to cause the divergent branching.  But otherwise, we will
+  // emit a "normal" block terminator, which occurs at the end of this method.
+  bool has_normal_terminator = true;
+
   for (auto iter = entering_constructs.rbegin();
        iter != entering_constructs.rend(); ++iter) {
     const Construct* construct = *iter;
@@ -1695,9 +1701,11 @@ bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
         if (!EmitIfStart(block_info)) {
           return false;
         }
+        has_normal_terminator = false;
         break;
 
       case Construct::kSwitchSelection:
+        has_normal_terminator = false;
         return Fail() << "unhandled: switch construct";
     }
   }
@@ -1708,8 +1716,10 @@ bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
     return false;
   }
 
-  if (!EmitNormalTerminator(block_info)) {
-    return false;
+  if (has_normal_terminator) {
+    if (!EmitNormalTerminator(block_info)) {
+      return false;
+    }
   }
   return success();
 }
@@ -1864,10 +1874,54 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
       AddStatement(MakeBranch(block_info, *GetBlockInfo(dest_id)));
       return true;
     }
+    case SpvOpBranchConditional: {
+      // If both destinations are the same, then do the same as we would
+      // for an unconditional branch (OpBranch).
+      const auto true_dest = terminator.GetSingleWordInOperand(1);
+      const auto false_dest = terminator.GetSingleWordInOperand(2);
+      if (true_dest == false_dest) {
+        // This is like an uncondtional branch.
+        AddStatement(MakeBranch(block_info, *GetBlockInfo(true_dest)));
+        return true;
+      }
+
+      const EdgeKind true_kind = block_info.succ_edge.find(true_dest)->second;
+      const EdgeKind false_kind = block_info.succ_edge.find(false_dest)->second;
+      auto* const true_info = GetBlockInfo(true_dest);
+      auto* const false_info = GetBlockInfo(false_dest);
+      auto cond = MakeExpression(terminator.GetSingleWordInOperand(0)).expr;
+
+      // We have two distinct destinations. But we only get here if this
+      // is a normal terminator; in particular the source block is *not* the
+      // start of an if-selection or a switch-selection.  So at most one branch
+      // is a kForward, kCaseFallThrough, or kIfBreak.
+
+      // The fallthrough case is special because WGSL requires the fallthrough
+      // statement to be last in the case clause.
+      if (true_kind == EdgeKind::kCaseFallThrough ||
+          false_kind == EdgeKind::kCaseFallThrough) {
+        return Fail() << "fallthrough is unhandled";
+      }
+
+      // At this point, at most one edge is kForward or kIfBreak.
+
+      // Emit an 'if' statement to express the *other* branch as a conditional
+      // break or continue.  Either or both of these could be nullptr.
+      // (A nullptr is generated for kIfBreak, kForward, or kBack.)
+      auto true_branch = MakeBranch(block_info, *true_info);
+      auto false_branch = MakeBranch(block_info, *false_info);
+
+      AddStatement(MakeSimpleIf(std::move(cond), std::move(true_branch),
+                                std::move(false_branch)));
+      return true;
+    }
+    case SpvOpSwitch:
+      // TODO(dneto)
+      break;
     default:
       break;
   }
-  // TODO(dneto): emit fallthrough, break, continue
+  // TODO(dneto): emit fallthrough
   return success();
 }
 
@@ -1901,6 +1955,31 @@ std::unique_ptr<ast::Statement> FunctionEmitter::MakeBranch(
       break;
   }
   return {nullptr};
+}
+
+std::unique_ptr<ast::Statement> FunctionEmitter::MakeSimpleIf(
+    std::unique_ptr<ast::Expression> condition,
+    std::unique_ptr<ast::Statement> then_stmt,
+    std::unique_ptr<ast::Statement> else_stmt) const {
+  if ((then_stmt == nullptr) && (else_stmt == nullptr)) {
+    return nullptr;
+  }
+  auto if_stmt = std::make_unique<ast::IfStatement>();
+  if_stmt->set_condition(std::move(condition));
+  if (then_stmt != nullptr) {
+    ast::StatementList stmts;
+    stmts.emplace_back(std::move(then_stmt));
+    if_stmt->set_body(std::move(stmts));
+  }
+  if (else_stmt != nullptr) {
+    ast::StatementList stmts;
+    stmts.emplace_back(std::move(else_stmt));
+    ast::ElseStatementList else_stmts;
+    else_stmts.emplace_back(
+        std::make_unique<ast::ElseStatement>(nullptr, std::move(stmts)));
+    if_stmt->set_else_statements(std::move(else_stmts));
+  }
+  return if_stmt;
 }
 
 bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,

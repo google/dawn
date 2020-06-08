@@ -341,11 +341,24 @@ class FunctionEmitter {
 
   /// Returns a new statement to represent the given branch representing a
   /// "normal" terminator, as in the sense of EmitNormalTerminator.  If no
-  /// WGSL statement is required, the statement will nullptr.
+  /// WGSL statement is required, the statement will be nullptr.
   /// @param src_info the source block
   /// @param dest_info the destination block
+  /// @returns the new statement, or a null statement
   std::unique_ptr<ast::Statement> MakeBranch(const BlockInfo& src_info,
                                              const BlockInfo& dest_info) const;
+
+  /// Returns a new if statement with the given statements as the then-clause
+  /// and the else-clause.  Either or both clauses might be nullptr. If both
+  /// are nullptr, then don't make a new statement and instead return nullptr.
+  /// @param condition the branching condition
+  /// @param then_stmt the statement for the then clause of the if, or nullptr
+  /// @param else_stmt the statement for the else clause of the if, or nullptr
+  /// @returns the new statement, or nullptr
+  std::unique_ptr<ast::Statement> MakeSimpleIf(
+      std::unique_ptr<ast::Expression> condition,
+      std::unique_ptr<ast::Statement> then_stmt,
+      std::unique_ptr<ast::Statement> else_stmt) const;
 
   /// Emits a normal instruction: not a terminator, label, or variable
   /// declaration.
