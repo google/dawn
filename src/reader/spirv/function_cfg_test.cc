@@ -79,15 +79,22 @@ std::string CommonTypes() {
   )";
 }
 
+/// Runs the necessary flow until and including finding switch case
+/// headers.
+/// @returns the result of finding switch case headers.
+bool FlowFindSwitchCaseHeaders(FunctionEmitter* fe) {
+  fe->RegisterBasicBlocks();
+  EXPECT_TRUE(fe->RegisterMerges()) << fe->parser()->error();
+  fe->ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe->VerifyHeaderContinueMergeOrder()) << fe->parser()->error();
+  EXPECT_TRUE(fe->LabelControlFlowConstructs()) << fe->parser()->error();
+  return fe->FindSwitchCaseHeaders();
+}
+
 /// Runs the necessary flow until and including classify CFG edges,
 /// @returns the result of classify CFG edges.
 bool FlowClassifyCFGEdges(FunctionEmitter* fe) {
-  fe->RegisterBasicBlocks();
-  fe->ComputeBlockOrderAndPositions();
-  EXPECT_TRUE(fe->VerifyHeaderContinueMergeOrder()) << fe->parser()->error();
-  EXPECT_TRUE(fe->RegisterMerges()) << fe->parser()->error();
-  EXPECT_TRUE(fe->LabelControlFlowConstructs()) << fe->parser()->error();
-  EXPECT_TRUE(fe->FindSwitchCaseHeaders()) << fe->parser()->error();
+  EXPECT_TRUE(FlowFindSwitchCaseHeaders(fe)) << fe->parser()->error();
   return fe->ClassifyCFGEdges();
 }
 
@@ -3676,7 +3683,7 @@ TEST_F(SpvParserTest, FindSwitchCaseHeaders_DefaultCantEscapeSwitch) {
                              "escapes the selection construct"));
 }
 
-TEST_F(SpvParserTest, FindSwitchCaseHeaders_DefaultForTwoSwitches) {
+TEST_F(SpvParserTest, FindSwitchCaseHeaders_DefaultForTwoSwitches_AsMerge) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -3711,7 +3718,51 @@ TEST_F(SpvParserTest, FindSwitchCaseHeaders_DefaultForTwoSwitches) {
   fe.RegisterMerges();
   fe.LabelControlFlowConstructs();
   EXPECT_FALSE(fe.FindSwitchCaseHeaders());
-  EXPECT_THAT(p->error(), Eq("Block 89 is declared as the default target for "
+  EXPECT_THAT(p->error(),
+              Eq("Block 89 is the default block for switch-selection header 10 "
+                 "and also the merge block for 50 (violates dominance rule)"));
+}
+
+TEST_F(SpvParserTest,
+       FindSwitchCaseHeaders_DefaultForTwoSwitches_AsCaseClause) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %80 20 %20
+
+     %20 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel
+     OpSelectionMerge %89 None
+     OpSwitch %selector %80 60 %60
+
+     %60 = OpLabel
+     OpBranch %89 ; fallthrough
+
+     %80 = OpLabel ; default for both switches
+     OpBranch %89
+
+     %89 = OpLabel ; inner selection merge
+     OpBranch %99
+
+     %99 = OpLabel ; outer selection mege
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  fe.RegisterBasicBlocks();
+  fe.ComputeBlockOrderAndPositions();
+  EXPECT_TRUE(fe.VerifyHeaderContinueMergeOrder());
+  fe.RegisterMerges();
+  fe.LabelControlFlowConstructs();
+  EXPECT_FALSE(fe.FindSwitchCaseHeaders());
+  EXPECT_THAT(p->error(), Eq("Block 80 is declared as the default target for "
                              "two OpSwitch instructions, at blocks 10 and 50"));
 }
 
@@ -5994,6 +6045,70 @@ TEST_F(SpvParserTest,
          "construct starting at block 50; branch bypasses merge block 80"));
 }
 
+TEST_F(
+    SpvParserTest,
+    FindSwitchCaseHeaders_DomViolation_SwitchCase_CantBeMergeForOtherConstruct) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %20 50 %50
+
+     %20 = OpLabel
+     OpSelectionMerge %50 None
+     OpBranchConditional %cond %30 %50
+
+     %30 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel ; case and merge block. Error
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowFindSwitchCaseHeaders(&fe));
+  EXPECT_THAT(p->error(),
+              Eq("Block 50 is a case block for switch-selection header 10 and "
+                 "also the merge block for 20 (violates dominance rule)"));
+}
+
+TEST_F(
+    SpvParserTest,
+    ClassifyCFGEdges_DomViolation_SwitchDefault_CantBeMergeForOtherConstruct) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %50 20 %20
+
+     %20 = OpLabel
+     OpSelectionMerge %50 None
+     OpBranchConditional %cond %30 %50
+
+     %30 = OpLabel
+     OpBranch %50
+
+     %50 = OpLabel ; default-case and merge block. Error
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowFindSwitchCaseHeaders(&fe));
+  EXPECT_THAT(p->error(),
+              Eq("Block 50 is the default block for switch-selection header 10 "
+                 "and also the merge block for 20 (violates dominance rule)"));
+}
+
 TEST_F(SpvParserTest, ClassifyCFGEdges_TooManyBackedges) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
@@ -6651,6 +6766,96 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_WithForwardToPremerge_IsError) {
   EXPECT_THAT(p->error(),
               Eq("Control flow diverges at block 20 (to 99, 80) but it is not "
                  "a structured header (it has no merge instruction)"));
+}
+
+TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_DomViolation_Merge_CantBeTrueHeader) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %40 %20
+
+     %20 = OpLabel
+     OpSelectionMerge %40 None
+     OpBranchConditional %cond2 %30 %40
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel ; inner merge, and true-head for outer if-selection
+     OpBranch %99
+
+     %99 = OpLabel ; outer merge
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowFindIfSelectionInternalHeaders(&fe));
+  EXPECT_THAT(p->error(), Eq("Block 40 is the true branch for if-selection header 10 and also the merge block for header block 20 (violates dominance rule)"));
+}
+
+TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_DomViolation_Merge_CantBeFalseHeader) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %40
+
+     %20 = OpLabel
+     OpSelectionMerge %40 None
+     OpBranchConditional %cond %30 %40
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel ; inner merge, and true-head for outer if-selection
+     OpBranch %99
+
+     %99 = OpLabel ; outer merge
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowFindIfSelectionInternalHeaders(&fe));
+  EXPECT_THAT(p->error(), Eq("Block 40 is the false branch for if-selection header 10 and also the merge block for header block 20 (violates dominance rule)"));
+}
+
+TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_DomViolation_Merge_CantBePremerge) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel ; outer if-header
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %50
+
+     %20 = OpLabel
+     OpBranch %70
+
+     %50 = OpLabel ; inner if-header
+     OpSelectionMerge %70 None
+     OpBranchConditional %cond %60 %70
+
+     %60 = OpLabel
+     OpBranch %70
+
+     %70 = OpLabel ; inner merge, and premerge for outer if-selection
+     OpBranch %80
+
+     %80 = OpLabel
+     OpBranch %99
+
+     %99 = OpLabel ; outer merge
+     OpReturn
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(FlowFindIfSelectionInternalHeaders(&fe));
+  EXPECT_THAT(p->error(), Eq("Block 70 is the merge block for 50 but has alternate paths reaching it, starting from blocks 20 and 50 which are the true and false branches for the if-selection header block 10 (violates dominance rule)"));
 }
 
 TEST_F(SpvParserTest, DISABLED_Codegen_IfBreak_FromThen_ForwardWithinThen) {

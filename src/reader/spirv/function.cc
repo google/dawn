@@ -943,6 +943,17 @@ bool FunctionEmitter::FindSwitchCaseHeaders() {
                     << default_block->default_head_for->begin_id << " and "
                     << construct->begin_id;
     }
+    if ((default_block->header_for_merge != 0) &&
+        (default_block->header_for_merge != construct->begin_id)) {
+      // The switch instruction for this default block is an alternate path to
+      // the merge block, and hence the merge block is not dominated by its own
+      // (different) header.
+      return Fail() << "Block " << default_block->id
+                    << " is the default block for switch-selection header "
+                    << construct->begin_id << " and also the merge block for "
+                    << default_block->header_for_merge
+                    << " (violates dominance rule)";
+    }
 
     default_block->default_head_for = construct.get();
     default_block->default_is_merge = default_block->pos == construct->end_pos;
@@ -990,6 +1001,17 @@ bool FunctionEmitter::FindSwitchCaseHeaders() {
         return Fail() << "Switch branch from block " << construct->begin_id
                       << " to case target block " << case_target_id
                       << " escapes the selection construct";
+      }
+      if (case_block->header_for_merge != 0 &&
+          case_block->header_for_merge != construct->begin_id) {
+        // The switch instruction for this case block is an alternate path to
+        // the merge block, and hence the merge block is not dominated by its
+        // own (different) header.
+        return Fail() << "Block " << case_block->id
+                      << " is a case block for switch-selection header "
+                      << construct->begin_id << " and also the merge block for "
+                      << case_block->header_for_merge
+                      << " (violates dominance rule)";
       }
 
       // Mark the target as a case target.
@@ -1309,6 +1331,29 @@ bool FunctionEmitter::FindIfSelectionInternalHeaders() {
       false_head_info->exclusive_false_head_for = construct.get();
     }
 
+    if ((true_head_info->header_for_merge != 0) &&
+        (true_head_info->header_for_merge != construct->begin_id)) {
+      // The OpBranchConditional instruction for the true head block is an
+      // alternate path to the merge block, and hence the merge block is not
+      // dominated by its own (different) header.
+      return Fail() << "Block " << true_head
+                    << " is the true branch for if-selection header "
+                    << construct->begin_id << " and also the merge block for header block "
+                    << true_head_info->header_for_merge
+                    << " (violates dominance rule)";
+    }
+    if ((false_head_info->header_for_merge != 0) &&
+        (false_head_info->header_for_merge != construct->begin_id)) {
+      // The OpBranchConditional instruction for the false head block is an
+      // alternate path to the merge block, and hence the merge block is not
+      // dominated by its own (different) header.
+      return Fail() << "Block " << false_head
+                    << " is the false branch for if-selection header "
+                    << construct->begin_id << " and also the merge block for header block "
+                    << false_head_info->header_for_merge
+                    << " (violates dominance rule)";
+    }
+
     if (contains_true && contains_false && (true_head_pos != false_head_pos)) {
       // This construct has both a "then" clause and an "else" clause.
       //
@@ -1382,6 +1427,23 @@ bool FunctionEmitter::FindIfSelectionInternalHeaders() {
               auto* dest_block_info = GetBlockInfo(dest_id);
               dest_block_info->premerge_head_for = construct.get();
               if_header_info->premerge_head = dest_block_info;
+              if (dest_block_info->header_for_merge != 0) {
+                // Premerge has two edges coming into it, from the then-clause
+                // and the else-clause. It's also, by construction, not the
+                // merge block of the if-selection.  So it must not be a merge
+                // block itself. The OpBranchConditional instruction for the
+                // false head block is an alternate path to the merge block, and
+                // hence the merge block is not dominated by its own (different)
+                // header.
+                return Fail()
+                       << "Block " << premerge_id
+                       << " is the merge block for " << dest_block_info->header_for_merge
+                       << " but has alternate paths reaching it, starting from"
+                       << " blocks " << true_head << " and " << false_head
+                       << " which are the true and false branches for the"
+                       << " if-selection header block " << construct->begin_id
+                       << " (violates dominance rule)";
+              }
             }
             break;
           }
