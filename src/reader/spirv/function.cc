@@ -1790,12 +1790,15 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
   auto push_else = [this, if_stmt, else_end, construct]() {
     // Push the else clause onto the stack first.
     PushNewStatementBlock(construct, else_end, [if_stmt](StatementBlock* s) {
-      // The "else" consists of the statement list from the top of statments
-      // stack, without an elseif condition.
-      ast::ElseStatementList else_stmts;
-      else_stmts.emplace_back(std::make_unique<ast::ElseStatement>(
-          nullptr, std::move(s->statements)));
-      if_stmt->set_else_statements(std::move(else_stmts));
+      // Only set the else-clause if there are statements to fill it.
+      if (!s->statements.empty()) {
+        // The "else" consists of the statement list from the top of statments
+        // stack, without an elseif condition.
+        ast::ElseStatementList else_stmts;
+        else_stmts.emplace_back(std::make_unique<ast::ElseStatement>(
+            nullptr, std::move(s->statements)));
+        if_stmt->set_else_statements(std::move(else_stmts));
+      }
     });
   };
 

@@ -7406,10 +7406,6 @@ TEST_F(SpvParserTest, EmitBody_If_Empty) {
   {
   }
 }
-Else{
-  {
-  }
-}
 Return{}
 )"));
 }
@@ -7450,10 +7446,6 @@ If{
       Identifier{var}
       ScalarConstructor{1}
     }
-  }
-}
-Else{
-  {
   }
 }
 Assignment{
@@ -7684,10 +7676,6 @@ If{
     }
   }
 }
-Else{
-  {
-  }
-}
 Assignment{
   Identifier{var}
   ScalarConstructor{3}
@@ -7826,10 +7814,6 @@ If{
           Identifier{var}
           ScalarConstructor{2}
         }
-      }
-    }
-    Else{
-      {
       }
     }
     Assignment{
@@ -8252,10 +8236,6 @@ Loop{
         }
       }
     }
-    Else{
-      {
-      }
-    }
     Assignment{
       Identifier{var}
       ScalarConstructor{5}
@@ -8502,10 +8482,6 @@ TEST_F(SpvParserTest, EmitBody_Loop_NestedIfContinue) {
         ScalarConstructor{1}
       }
       Continue{}
-    }
-  }
-  Else{
-    {
     }
   }
   Assignment{
@@ -8849,10 +8825,6 @@ TEST_F(SpvParserTest, EmitBody_Return_InsideIf) {
     Return{}
   }
 }
-Else{
-  {
-  }
-}
 Return{}
 )")) << ToString(fe.ast_body());
 }
@@ -8960,10 +8932,6 @@ TEST_F(SpvParserTest, EmitBody_ReturnValue_InsideIf) {
     }
   }
 }
-Else{
-  {
-  }
-}
 Return{
   {
     ScalarConstructor{3}
@@ -9067,10 +9035,6 @@ TEST_F(SpvParserTest, EmitBody_Kill_InsideIf) {
     Kill{}
   }
 }
-Else{
-  {
-  }
-}
 Kill{}
 )")) << ToString(fe.ast_body());
 }
@@ -9151,10 +9115,6 @@ TEST_F(SpvParserTest, EmitBody_Unreachable_InsideIf) {
   )
   {
     Return{}
-  }
-}
-Else{
-  {
   }
 }
 Return{}
@@ -9507,10 +9467,6 @@ TEST_F(SpvParserTest, EmitBody_Branch_LoopContinue_BeforeLast) {
       Continue{}
     }
   }
-  Else{
-    {
-    }
-  }
   Assignment{
     Identifier{var}
     ScalarConstructor{2}
@@ -9557,10 +9513,6 @@ TEST_F(SpvParserTest, EmitBody_Branch_IfBreak_FromThen) {
       Identifier{var}
       ScalarConstructor{1}
     }
-  }
-}
-Else{
-  {
   }
 }
 Assignment{
@@ -10188,10 +10140,6 @@ Loop{
       }
     }
   }
-  Else{
-    {
-    }
-  }
   Assignment{
     Identifier{var}
     ScalarConstructor{3}
@@ -10284,10 +10232,6 @@ Loop{
           Continue{}
         }
       }
-    }
-  }
-  Else{
-    {
     }
   }
   Assignment{
@@ -10648,10 +10592,6 @@ Loop{
       Continue{}
     }
   }
-  Else{
-    {
-    }
-  }
   Assignment{
     Identifier{var}
     ScalarConstructor{4}
@@ -10661,6 +10601,86 @@ Loop{
       Identifier{var}
       ScalarConstructor{5}
     }
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{6}
+}
+Return{}
+)")) << ToString(fe.ast_body());
+}
+
+TEST_F(
+    SpvParserTest,
+    EmitBody_BranchConditional_Continue_Continue_AfterHeader_Conditional_EmptyContinuing) {
+  // Like the previous tests, but with an empty continuing clause.
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_0
+     OpBranch %20
+
+     %20 = OpLabel
+     OpStore %var %uint_1
+     OpLoopMerge %99 %80 None
+     OpBranch %30
+
+     %30 = OpLabel
+     OpStore %var %uint_2
+     OpSelectionMerge %50 None
+     OpBranchConditional %cond2 %40 %50
+
+     %40 = OpLabel
+     OpStore %var %uint_3
+     OpBranchConditional %cond3 %80 %80 ; to continue
+
+     %50 = OpLabel ; merge for selection
+     OpStore %var %uint_4
+     OpBranch %80
+
+     %80 = OpLabel ; continue target
+     ; no statements here.
+     OpBranch %20
+
+     %99 = OpLabel
+     OpStore %var %uint_6
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{0}
+}
+Loop{
+  Assignment{
+    Identifier{var}
+    ScalarConstructor{1}
+  }
+  Assignment{
+    Identifier{var}
+    ScalarConstructor{2}
+  }
+  If{
+    (
+      ScalarConstructor{true}
+    )
+    {
+      Assignment{
+        Identifier{var}
+        ScalarConstructor{3}
+      }
+      Continue{}
+    }
+  }
+  Assignment{
+    Identifier{var}
+    ScalarConstructor{4}
   }
 }
 Assignment{
@@ -10745,10 +10765,6 @@ Loop{
           Continue{}
         }
       }
-    }
-  }
-  Else{
-    {
     }
   }
   Assignment{
@@ -10840,10 +10856,6 @@ Loop{
           Continue{}
         }
       }
-    }
-  }
-  Else{
-    {
     }
   }
   Assignment{
@@ -11058,10 +11070,6 @@ If{
   (
     ScalarConstructor{false}
   )
-  {
-  }
-}
-Else{
   {
   }
 }
