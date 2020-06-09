@@ -61,7 +61,7 @@ namespace dawn_native { namespace d3d12 {
             // common state right before command list submission. TransitionUsageNow itself ensures
             // no unnecessary transitions happen if the resources is already in the common state.
             for (Texture* texture : mSharedTextures) {
-                texture->TrackUsageAndTransitionNow(this, D3D12_RESOURCE_STATE_COMMON);
+                texture->TrackAllUsageAndTransitionNow(this, D3D12_RESOURCE_STATE_COMMON);
             }
 
             MaybeError error =

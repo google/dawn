@@ -196,4 +196,8 @@ TEST_P(TextureSubresourceTest, ArrayLayersTest) {
 //
 // * add tests for clear operation upon texture subresource if needed
 
-DAWN_INSTANTIATE_TEST(TextureSubresourceTest, MetalBackend(), OpenGLBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(TextureSubresourceTest,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());
