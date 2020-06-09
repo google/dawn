@@ -39,6 +39,8 @@ namespace dawn_native {
         };
 
       public:
+        enum class ClearValue { Zero, NonZero };
+
         BufferBase(DeviceBase* device, const BufferDescriptor* descriptor);
 
         static BufferBase* MakeError(DeviceBase* device);

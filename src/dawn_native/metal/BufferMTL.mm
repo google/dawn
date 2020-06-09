@@ -71,6 +71,10 @@ namespace dawn_native { namespace metal {
             return DAWN_OUT_OF_MEMORY_ERROR("Buffer allocation failed");
         }
 
+        if (GetDevice()->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
+            ClearBuffer(BufferBase::ClearValue::NonZero);
+        }
+
         return {};
     }
 
@@ -111,6 +115,18 @@ namespace dawn_native { namespace metal {
     void Buffer::DestroyImpl() {
         [mMtlBuffer release];
         mMtlBuffer = nil;
+    }
+
+    void Buffer::ClearBuffer(BufferBase::ClearValue clearValue) {
+        // TODO(jiawei.shao@intel.com): support buffer lazy-initialization to 0.
+        ASSERT(clearValue == BufferBase::ClearValue::NonZero);
+        const uint8_t clearBufferValue = 1;
+
+        Device* device = ToBackend(GetDevice());
+        CommandRecordingContext* commandContext = device->GetPendingCommandContext();
+        [commandContext->EnsureBlit() fillBuffer:mMtlBuffer
+                                           range:NSMakeRange(0, GetSize())
+                                           value:clearBufferValue];
     }
 
 }}  // namespace dawn_native::metal

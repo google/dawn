@@ -277,6 +277,7 @@ source_set("dawn_end2end_tests_sources") {
     "end2end/GpuMemorySynchronizationTests.cpp",
     "end2end/IndexFormatTests.cpp",
     "end2end/MultisampledRenderingTests.cpp",
+    "end2end/NonzeroBufferCreationTests.cpp",
     "end2end/NonzeroTextureCreationTests.cpp",
     "end2end/ObjectCachingTests.cpp",
     "end2end/OpArrayLengthTests.cpp",
