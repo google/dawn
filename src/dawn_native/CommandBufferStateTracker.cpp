@@ -144,6 +144,7 @@ namespace dawn_native {
 
     void CommandBufferStateTracker::SetBindGroup(uint32_t index, BindGroupBase* bindgroup) {
         mBindgroups[index] = bindgroup;
+        mAspects.reset(VALIDATION_ASPECT_BIND_GROUPS);
     }
 
     void CommandBufferStateTracker::SetIndexBuffer() {

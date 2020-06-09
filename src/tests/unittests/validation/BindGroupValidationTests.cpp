@@ -883,6 +883,55 @@ TEST_F(SetBindGroupValidationTest, Basic) {
     TestComputePassBindGroup(bindGroup, offsets.data(), 3, true);
 }
 
+// Setting bind group after a draw / dispatch should re-verify the layout is compatible
+TEST_F(SetBindGroupValidationTest, VerifyGroupIfChangedAfterAction) {
+    // Set up the bind group
+    wgpu::Buffer uniformBuffer = CreateBuffer(kBufferSize, wgpu::BufferUsage::Uniform);
+    wgpu::Buffer storageBuffer = CreateBuffer(kBufferSize, wgpu::BufferUsage::Storage);
+    wgpu::Buffer readonlyStorageBuffer = CreateBuffer(kBufferSize, wgpu::BufferUsage::Storage);
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, mBindGroupLayout,
+                                                     {{0, uniformBuffer, 0, kBindingSize},
+                                                      {1, uniformBuffer, 0, kBindingSize},
+                                                      {2, storageBuffer, 0, kBindingSize},
+                                                      {3, readonlyStorageBuffer, 0, kBindingSize}});
+
+    std::array<uint32_t, 3> offsets = {512, 256, 0};
+
+    // Set up bind group that is incompatible
+    wgpu::BindGroupLayout invalidLayout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
+                  wgpu::BindingType::StorageBuffer}});
+    wgpu::BindGroup invalidGroup =
+        utils::MakeBindGroup(device, invalidLayout, {{0, storageBuffer, 0, kBindingSize}});
+
+    {
+        wgpu::ComputePipeline computePipeline = CreateComputePipeline();
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
+        computePassEncoder.SetPipeline(computePipeline);
+        computePassEncoder.SetBindGroup(0, bindGroup, 3, offsets.data());
+        computePassEncoder.Dispatch(1);
+        computePassEncoder.SetBindGroup(0, invalidGroup, 0, nullptr);
+        computePassEncoder.Dispatch(1);
+        computePassEncoder.EndPass();
+        ASSERT_DEVICE_ERROR(commandEncoder.Finish());
+    }
+    {
+        wgpu::RenderPipeline renderPipeline = CreateRenderPipeline();
+        DummyRenderPass renderPass(device);
+
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
+        renderPassEncoder.SetPipeline(renderPipeline);
+        renderPassEncoder.SetBindGroup(0, bindGroup, 3, offsets.data());
+        renderPassEncoder.Draw(3);
+        renderPassEncoder.SetBindGroup(0, invalidGroup, 0, nullptr);
+        renderPassEncoder.Draw(3);
+        renderPassEncoder.EndPass();
+        ASSERT_DEVICE_ERROR(commandEncoder.Finish());
+    }
+}
+
 // Test cases that test dynamic offsets count mismatch with bind group layout.
 TEST_F(SetBindGroupValidationTest, DynamicOffsetsMismatch) {
     // Set up bind group.
