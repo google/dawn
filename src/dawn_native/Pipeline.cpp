@@ -33,8 +33,8 @@ namespace dawn_native {
         if (descriptor->module->GetExecutionModel() != stage) {
             return DAWN_VALIDATION_ERROR("Setting module with wrong stages");
         }
-        if (layout != nullptr && !descriptor->module->IsCompatibleWithPipelineLayout(layout)) {
-            return DAWN_VALIDATION_ERROR("Stage not compatible with layout");
+        if (layout != nullptr) {
+            DAWN_TRY(descriptor->module->ValidateCompatibilityWithPipelineLayout(layout));
         }
         return {};
     }

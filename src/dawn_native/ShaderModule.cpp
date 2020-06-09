@@ -292,6 +292,12 @@ namespace dawn_native {
                     return wgpu::TextureFormat::Undefined;
             }
         }
+
+        std::string GetShaderDeclarationString(size_t group, uint32_t binding) {
+            std::ostringstream ostream;
+            ostream << "the shader module declaration at set " << group << " binding " << binding;
+            return ostream.str();
+        }
     }  // anonymous namespace
 
     MaybeError ValidateSpirv(DeviceBase*, const uint32_t* code, uint32_t codeSize) {
@@ -864,25 +870,28 @@ namespace dawn_native {
         return mExecutionModel;
     }
 
-    bool ShaderModuleBase::IsCompatibleWithPipelineLayout(const PipelineLayoutBase* layout) const {
+    MaybeError ShaderModuleBase::ValidateCompatibilityWithPipelineLayout(
+        const PipelineLayoutBase* layout) const {
         ASSERT(!IsError());
 
         for (uint32_t group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
-            if (!IsCompatibleWithBindGroupLayout(group, layout->GetBindGroupLayout(group))) {
-                return false;
-            }
+            DAWN_TRY(
+                ValidateCompatibilityWithBindGroupLayout(group, layout->GetBindGroupLayout(group)));
         }
 
         for (uint32_t group : IterateBitSet(~layout->GetBindGroupLayoutsMask())) {
             if (mBindingInfo[group].size() > 0) {
-                return false;
+                std::ostringstream ostream;
+                ostream << "No bind group layout entry matches the declaration set " << group
+                        << " in the shader module";
+                return DAWN_VALIDATION_ERROR(ostream.str());
             }
         }
 
-        return true;
+        return {};
     }
 
-    bool ShaderModuleBase::IsCompatibleWithBindGroupLayout(
+    MaybeError ShaderModuleBase::ValidateCompatibilityWithBindGroupLayout(
         size_t group,
         const BindGroupLayoutBase* layout) const {
         ASSERT(!IsError());
@@ -897,7 +906,8 @@ namespace dawn_native {
 
             const auto& bindingIt = bindingMap.find(bindingNumber);
             if (bindingIt == bindingMap.end()) {
-                return false;
+                return DAWN_VALIDATION_ERROR("Missing bind group layout entry for " +
+                                             GetShaderDeclarationString(group, bindingNumber));
             }
             BindingIndex bindingIndex(bindingIt->second);
 
@@ -922,22 +932,32 @@ namespace dawn_native {
                      moduleInfo.type == wgpu::BindingType::Sampler);
 
                 if (!validBindingConversion) {
-                    return false;
+                    return DAWN_VALIDATION_ERROR(
+                        "The binding type of the bind group layout entry conflicts " +
+                        GetShaderDeclarationString(group, bindingNumber));
                 }
             }
 
             if ((bindingInfo.visibility & StageBit(mExecutionModel)) == 0) {
-                return false;
+                return DAWN_VALIDATION_ERROR("The bind group layout entry for " +
+                                             GetShaderDeclarationString(group, bindingNumber) +
+                                             " is not visible for the shader stage");
             }
 
             switch (bindingInfo.type) {
                 case wgpu::BindingType::SampledTexture: {
                     if (bindingInfo.textureComponentType != moduleInfo.textureComponentType) {
-                        return false;
+                        return DAWN_VALIDATION_ERROR(
+                            "The textureComponentType of the bind group layout entry is different "
+                            "from " +
+                            GetShaderDeclarationString(group, bindingNumber));
                     }
 
                     if (bindingInfo.viewDimension != moduleInfo.viewDimension) {
-                        return false;
+                        return DAWN_VALIDATION_ERROR(
+                            "The viewDimension of the bind group layout entry is different "
+                            "from " +
+                            GetShaderDeclarationString(group, bindingNumber));
                     }
                     break;
                 }
@@ -947,10 +967,16 @@ namespace dawn_native {
                     ASSERT(bindingInfo.storageTextureFormat != wgpu::TextureFormat::Undefined);
                     ASSERT(moduleInfo.storageTextureFormat != wgpu::TextureFormat::Undefined);
                     if (bindingInfo.storageTextureFormat != moduleInfo.storageTextureFormat) {
-                        return false;
+                        return DAWN_VALIDATION_ERROR(
+                            "The storageTextureFormat of the bind group layout entry is different "
+                            "from " +
+                            GetShaderDeclarationString(group, bindingNumber));
                     }
                     if (bindingInfo.viewDimension != moduleInfo.viewDimension) {
-                        return false;
+                        return DAWN_VALIDATION_ERROR(
+                            "The viewDimension of the bind group layout entry is different "
+                            "from " +
+                            GetShaderDeclarationString(group, bindingNumber));
                     }
                     break;
                 }
@@ -965,11 +991,11 @@ namespace dawn_native {
                 case wgpu::BindingType::StorageTexture:
                 default:
                     UNREACHABLE();
-                    return false;
+                    return DAWN_VALIDATION_ERROR("Unsupported binding type");
             }
         }
 
-        return true;
+        return {};
     }
 
     size_t ShaderModuleBase::HashFunc::operator()(const ShaderModuleBase* module) const {

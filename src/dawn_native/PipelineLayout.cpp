@@ -221,7 +221,9 @@ namespace dawn_native {
         }
 
         for (uint32_t moduleIndex = 0; moduleIndex < count; ++moduleIndex) {
-            ASSERT(modules[moduleIndex]->IsCompatibleWithPipelineLayout(pipelineLayout));
+            ASSERT(modules[moduleIndex]
+                       ->ValidateCompatibilityWithPipelineLayout(pipelineLayout)
+                       .IsSuccess());
         }
 
         return pipelineLayout;

@@ -75,7 +75,7 @@ namespace dawn_native {
         using FragmentOutputBaseTypes = std::array<Format::Type, kMaxColorAttachments>;
         const FragmentOutputBaseTypes& GetFragmentOutputBaseTypes() const;
 
-        bool IsCompatibleWithPipelineLayout(const PipelineLayoutBase* layout) const;
+        MaybeError ValidateCompatibilityWithPipelineLayout(const PipelineLayoutBase* layout) const;
 
         // Functors necessary for the unordered_set<ShaderModuleBase*>-based cache.
         struct HashFunc {
@@ -98,7 +98,9 @@ namespace dawn_native {
       private:
         ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
-        bool IsCompatibleWithBindGroupLayout(size_t group, const BindGroupLayoutBase* layout) const;
+        MaybeError ValidateCompatibilityWithBindGroupLayout(
+            size_t group,
+            const BindGroupLayoutBase* layout) const;
 
         // Different implementations reflection into the shader depending on
         // whether using spvc, or directly accessing spirv-cross.
