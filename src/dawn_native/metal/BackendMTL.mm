@@ -220,6 +220,8 @@ namespace dawn_native { namespace metal {
                 mSupportedExtensions.EnableExtension(Extension::TimestampQuery);
             }
 #endif
+
+            mSupportedExtensions.EnableExtension(Extension::ShaderFloat16);
         }
 
         id<MTLDevice> mDevice = nil;

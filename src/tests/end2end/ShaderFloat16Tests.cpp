@@ -108,4 +108,4 @@ TEST_P(ShaderFloat16Tests, Basic16BitFloatFeaturesTest) {
     EXPECT_BUFFER_U16_RANGE_EQ(expected, bufferOut, 0, 2);
 }
 
-DAWN_INSTANTIATE_TEST(ShaderFloat16Tests, VulkanBackend());
+DAWN_INSTANTIATE_TEST(ShaderFloat16Tests, MetalBackend(), VulkanBackend());
