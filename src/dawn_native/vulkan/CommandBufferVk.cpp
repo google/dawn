@@ -528,7 +528,7 @@ namespace dawn_native { namespace vulkan {
                         // When there are overlapped subresources, the layout of the overlapped
                         // subresources should all be GENERAL instead of what we set now. Currently
                         // it is not allowed to copy with overlapped subresources, but we still
-                        // add the ASSERT here as a reminder for possible changes in the future.
+                        // add the ASSERT here as a reminder for this possible misuse.
                         ASSERT(!IsRangeOverlapped(src.arrayLayer, dst.arrayLayer,
                                                   copy->copySize.depth));
                     }

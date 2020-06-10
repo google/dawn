@@ -769,10 +769,6 @@ TEST_P(CopyTests_T2T, Texture2DArrayCopyMultipleSlices) {
 
 // Test copying one texture slice within the same texture.
 TEST_P(CopyTests_T2T, CopyWithinSameTextureOneSlice) {
-    // TODO(jiawei.shao@intel.com): support texture-to-texture copy within same texture on D3D12
-    // after D3D12 subresource tracking is implemented.
-    DAWN_SKIP_TEST_IF(IsD3D12());
-
     constexpr uint32_t kWidth = 256u;
     constexpr uint32_t kHeight = 128u;
     constexpr uint32_t kLayers = 6u;
@@ -788,9 +784,7 @@ TEST_P(CopyTests_T2T, CopyWithinSameTextureOneSlice) {
 // slices.
 TEST_P(CopyTests_T2T, CopyWithinSameTextureNonOverlappedSlices) {
     // TODO(jiawei.shao@intel.com): investigate why this test fails with swiftshader.
-    // TODO(jiawei.shao@intel.com): support texture-to-texture copy within same texture on D3D12
-    // after D3D12 subresource tracking is implemented.
-    DAWN_SKIP_TEST_IF(IsSwiftshader() || IsD3D12());
+    DAWN_SKIP_TEST_IF(IsSwiftshader());
 
     constexpr uint32_t kWidth = 256u;
     constexpr uint32_t kHeight = 128u;

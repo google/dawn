@@ -17,6 +17,7 @@
 #include "common/Assert.h"
 #include "dawn_native/BindGroupAndStorageBarrierTracker.h"
 #include "dawn_native/CommandEncoder.h"
+#include "dawn_native/CommandValidation.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/RenderBundle.h"
 #include "dawn_native/d3d12/BindGroupD3D12.h"
@@ -688,6 +689,17 @@ namespace dawn_native { namespace d3d12 {
                         destination->EnsureSubresourceContentInitialized(
                             commandContext, copy->destination.mipLevel, 1,
                             copy->destination.arrayLayer, copy->copySize.depth);
+                    }
+
+                    if (copy->source.texture.Get() == copy->destination.texture.Get() &&
+                        copy->source.mipLevel == copy->destination.mipLevel) {
+                        // When there are overlapped subresources, the layout of the overlapped
+                        // subresources should all be COMMON instead of what we set now. Currently
+                        // it is not allowed to copy with overlapped subresources, but we still
+                        // add the ASSERT here as a reminder for this possible misuse.
+                        ASSERT(!IsRangeOverlapped(copy->source.arrayLayer,
+                                                  copy->destination.arrayLayer,
+                                                  copy->copySize.depth));
                     }
                     source->TrackUsageAndTransitionNow(
                         commandContext, wgpu::TextureUsage::CopySrc, copy->source.mipLevel, 1,
