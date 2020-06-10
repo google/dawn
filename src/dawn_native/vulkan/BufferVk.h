@@ -49,6 +49,7 @@ namespace dawn_native { namespace vulkan {
         ~Buffer() override;
         using BufferBase::BufferBase;
         MaybeError Initialize();
+        void ClearBuffer(CommandRecordingContext* recordingContext, ClearValue clearValue);
 
         // Dawn API
         MaybeError MapReadAsyncImpl(uint32_t serial) override;
