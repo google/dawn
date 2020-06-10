@@ -382,17 +382,33 @@ FunctionEmitter::FunctionEmitter(ParserImpl* pi,
 
 FunctionEmitter::~FunctionEmitter() = default;
 
+FunctionEmitter::StatementBlock::StatementBlock(
+    const Construct* construct,
+    uint32_t end_id,
+    CompletionAction completion_action,
+    ast::StatementList statements,
+    ast::CaseStatementList cases)
+    : construct_(construct),
+      end_id_(end_id),
+      completion_action_(completion_action),
+      statements_(std::move(statements)),
+      cases_(std::move(cases)) {}
+
+FunctionEmitter::StatementBlock::StatementBlock(StatementBlock&&) = default;
+
+FunctionEmitter::StatementBlock::~StatementBlock() = default;
+
 void FunctionEmitter::PushNewStatementBlock(const Construct* construct,
                                             uint32_t end_id,
                                             CompletionAction action) {
-  statements_stack_.emplace_back(StatementBlock{construct, end_id, action,
+  statements_stack_.emplace_back(StatementBlock(construct, end_id, action,
                                                 ast::StatementList{},
-                                                ast::CaseStatementList{}});
+                                                ast::CaseStatementList{}));
 }
 
 const ast::StatementList& FunctionEmitter::ast_body() {
   assert(!statements_stack_.empty());
-  return statements_stack_[0].statements;
+  return statements_stack_[0].statements_;
 }
 
 ast::Statement* FunctionEmitter::AddStatement(
@@ -400,14 +416,14 @@ ast::Statement* FunctionEmitter::AddStatement(
   assert(!statements_stack_.empty());
   auto* result = statement.get();
   if (result != nullptr) {
-    statements_stack_.back().statements.emplace_back(std::move(statement));
+    statements_stack_.back().statements_.emplace_back(std::move(statement));
   }
   return result;
 }
 
 ast::Statement* FunctionEmitter::LastStatement() {
   assert(!statements_stack_.empty());
-  const auto& statement_list = statements_stack_.back().statements;
+  const auto& statement_list = statements_stack_.back().statements_;
   assert(!statement_list.empty());
   return statement_list.back().get();
 }
@@ -435,7 +451,7 @@ bool FunctionEmitter::Emit() {
                      "element but has "
                   << statements_stack_.size();
   }
-  ast::StatementList body(std::move(statements_stack_[0].statements));
+  ast::StatementList body(std::move(statements_stack_[0].statements_));
   parser_impl_.get_module().functions().back()->set_body(std::move(body));
   // Maintain the invariant by repopulating the one and only element.
   statements_stack_.clear();
@@ -1553,7 +1569,7 @@ bool FunctionEmitter::EmitFunctionBodyStatements() {
   // TODO(dneto): refactor how the first construct is created vs.
   // this statements stack entry is populated.
   assert(statements_stack_.size() == 1);
-  statements_stack_[0].construct = function_construct;
+  statements_stack_[0].construct_ = function_construct;
 
   for (auto block_id : block_order()) {
     if (!EmitBasicBlock(*GetBlockInfo(block_id))) {
@@ -1566,9 +1582,9 @@ bool FunctionEmitter::EmitFunctionBodyStatements() {
 bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
   // Close off previous constructs.
   while (!statements_stack_.empty() &&
-         (statements_stack_.back().end_id == block_info.id)) {
+         (statements_stack_.back().end_id_ == block_info.id)) {
     StatementBlock& sb = statements_stack_.back();
-    sb.completion_action(&sb);
+    sb.completion_action_(&sb);
     statements_stack_.pop_back();
   }
   if (statements_stack_.empty()) {
@@ -1581,7 +1597,7 @@ bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
   std::vector<const Construct*> entering_constructs;  // inner most comes first
   {
     auto* here = block_info.construct;
-    auto* const top_construct = statements_stack_.back().construct;
+    auto* const top_construct = statements_stack_.back().construct_;
     while (here != top_construct) {
       // Only enter a construct at its header block.
       if (here->begin_id == block_info.id) {
@@ -1783,7 +1799,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
       // The "then" consists of the statement list
       // from the top of statments stack, without an
       // elseif condition.
-      if_stmt->set_body(std::move(s->statements));
+      if_stmt->set_body(std::move(s->statements_));
     });
   };
 
@@ -1791,12 +1807,12 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
     // Push the else clause onto the stack first.
     PushNewStatementBlock(construct, else_end, [if_stmt](StatementBlock* s) {
       // Only set the else-clause if there are statements to fill it.
-      if (!s->statements.empty()) {
+      if (!s->statements_.empty()) {
         // The "else" consists of the statement list from the top of statments
         // stack, without an elseif condition.
         ast::ElseStatementList else_stmts;
         else_stmts.emplace_back(std::make_unique<ast::ElseStatement>(
-            nullptr, std::move(s->statements)));
+            nullptr, std::move(s->statements_)));
         if_stmt->set_else_statements(std::move(else_stmts));
       }
     });
@@ -1821,7 +1837,7 @@ bool FunctionEmitter::EmitLoopStart(const Construct* construct) {
   auto* loop = AddStatement(std::make_unique<ast::LoopStatement>())->AsLoop();
   PushNewStatementBlock(
       construct, construct->end_id,
-      [loop](StatementBlock* s) { loop->set_body(std::move(s->statements)); });
+      [loop](StatementBlock* s) { loop->set_body(std::move(s->statements_)); });
   return success();
 }
 
@@ -1836,7 +1852,7 @@ bool FunctionEmitter::EmitContinuingStart(const Construct* construct) {
   auto* loop = loop_candidate->AsLoop();
   PushNewStatementBlock(construct, construct->end_id,
                         [loop](StatementBlock* s) {
-                          loop->set_continuing(std::move(s->statements));
+                          loop->set_continuing(std::move(s->statements_));
                         });
   return success();
 }

@@ -41,7 +41,7 @@ TEST_F(CaseStatementTest, Creation_i32) {
   auto* kill_ptr = stmts[0].get();
 
   CaseStatement c(std::move(b), std::move(stmts));
-  ASSERT_EQ(c.selectors().size(), 1);
+  ASSERT_EQ(c.selectors().size(), 1u);
   EXPECT_EQ(c.selectors()[0].get(), int_ptr);
   ASSERT_EQ(c.body().size(), 1u);
   EXPECT_EQ(c.body()[0].get(), kill_ptr);
@@ -60,7 +60,7 @@ TEST_F(CaseStatementTest, Creation_u32) {
   auto* kill_ptr = stmts[0].get();
 
   CaseStatement c(std::move(b), std::move(stmts));
-  ASSERT_EQ(c.selectors().size(), 1);
+  ASSERT_EQ(c.selectors().size(), 1u);
   EXPECT_EQ(c.selectors()[0].get(), int_ptr);
   ASSERT_EQ(c.body().size(), 1u);
   EXPECT_EQ(c.body()[0].get(), kill_ptr);

@@ -448,21 +448,29 @@ class FunctionEmitter {
   // A StatementBlock represents a braced-list of statements while it is being
   // constructed.
   struct StatementBlock {
+    StatementBlock(const Construct* construct,
+                   uint32_t end_id,
+                   CompletionAction completion_action,
+                   ast::StatementList statements,
+                   ast::CaseStatementList cases);
+    StatementBlock(StatementBlock&&);
+    ~StatementBlock();
+
     // The construct to which this construct constributes.
-    const Construct* construct;
+    const Construct* construct_;
     // The ID of the block at which the completion action should be triggerd
     // and this statement block discarded. This is often the |end_id| of
     // |construct| itself.
-    uint32_t end_id;
+    uint32_t end_id_;
     // The completion action finishes processing this statement block.
-    CompletionAction completion_action;
+    CompletionAction completion_action_;
 
     // Only one of |statements| or |cases| is active.
 
     // The list of statements being built.
-    ast::StatementList statements;
+    ast::StatementList statements_;
     // The list of cases being built, for a switch.
-    ast::CaseStatementList cases;
+    ast::CaseStatementList cases_;
   };
 
   /// Pushes an empty statement block onto the statements stack.

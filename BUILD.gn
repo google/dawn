@@ -819,7 +819,6 @@ source_set("tint_unittests_wgsl_writer_src") {
     "src/writer/wgsl/generator_impl_switch_test.cc",
     "src/writer/wgsl/generator_impl_test.cc",
     "src/writer/wgsl/generator_impl_type_test.cc",
-    "src/writer/wgsl/generator_impl_unary_method_test.cc",
     "src/writer/wgsl/generator_impl_unary_op_test.cc",
     "src/writer/wgsl/generator_impl_variable_decl_statement_test.cc",
     "src/writer/wgsl/generator_impl_variable_test.cc",
