@@ -281,6 +281,7 @@ source_set("dawn_end2end_tests_sources") {
     "end2end/NonzeroTextureCreationTests.cpp",
     "end2end/ObjectCachingTests.cpp",
     "end2end/OpArrayLengthTests.cpp",
+    "end2end/PipelineLayoutTests.cpp",
     "end2end/PrimitiveTopologyTests.cpp",
     "end2end/QueueTests.cpp",
     "end2end/RenderBundleTests.cpp",

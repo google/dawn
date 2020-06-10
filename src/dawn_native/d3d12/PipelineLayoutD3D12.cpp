@@ -69,22 +69,14 @@ namespace dawn_native { namespace d3d12 {
 
     MaybeError PipelineLayout::Initialize() {
         Device* device = ToBackend(GetDevice());
-        D3D12_ROOT_PARAMETER rootParameters[kMaxBindGroups * 2 + kMaxDynamicBufferCount];
-
-        // A root parameter is one of these types
-        union {
-            D3D12_ROOT_DESCRIPTOR_TABLE DescriptorTable;
-            D3D12_ROOT_CONSTANTS Constants;
-            D3D12_ROOT_DESCRIPTOR Descriptor;
-        } rootParameterValues[kMaxBindGroups * 2];
-        // samplers must be in a separate descriptor table so we need at most twice as many tables
-        // as bind groups
+        // Parameters are D3D12_ROOT_PARAMETER_TYPE which is either a root table, constant, or
+        // descriptor.
+        std::vector<D3D12_ROOT_PARAMETER> rootParameters;
 
         // Ranges are D3D12_DESCRIPTOR_RANGE_TYPE_(SRV|UAV|CBV|SAMPLER)
         // They are grouped together so each bind group has at most 4 ranges
         D3D12_DESCRIPTOR_RANGE ranges[kMaxBindGroups * 4];
 
-        uint32_t parameterIndex = 0;
         uint32_t rangeIndex = 0;
 
         for (uint32_t group : IterateBitSet(GetBindGroupLayoutsMask())) {
@@ -99,9 +91,8 @@ namespace dawn_native { namespace d3d12 {
                     return false;
                 }
 
-                auto& rootParameter = rootParameters[parameterIndex];
+                D3D12_ROOT_PARAMETER rootParameter = {};
                 rootParameter.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-                rootParameter.DescriptorTable = rootParameterValues[parameterIndex].DescriptorTable;
                 rootParameter.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
                 rootParameter.DescriptorTable.NumDescriptorRanges = rangeCount;
                 rootParameter.DescriptorTable.pDescriptorRanges = &ranges[rangeIndex];
@@ -112,17 +103,19 @@ namespace dawn_native { namespace d3d12 {
                     rangeIndex++;
                 }
 
+                rootParameters.emplace_back(rootParameter);
+
                 return true;
             };
 
             if (SetRootDescriptorTable(bindGroupLayout->GetCbvUavSrvDescriptorTableSize(),
                                        bindGroupLayout->GetCbvUavSrvDescriptorRanges())) {
-                mCbvUavSrvRootParameterInfo[group] = parameterIndex++;
+                mCbvUavSrvRootParameterInfo[group] = rootParameters.size() - 1;
             }
 
             if (SetRootDescriptorTable(bindGroupLayout->GetSamplerDescriptorTableSize(),
                                        bindGroupLayout->GetSamplerDescriptorRanges())) {
-                mSamplerRootParameterInfo[group] = parameterIndex++;
+                mSamplerRootParameterInfo[group] = rootParameters.size() - 1;
             }
 
             // Get calculated shader register for root descriptors
@@ -142,7 +135,7 @@ namespace dawn_native { namespace d3d12 {
                     continue;
                 }
 
-                D3D12_ROOT_PARAMETER* rootParameter = &rootParameters[parameterIndex];
+                D3D12_ROOT_PARAMETER rootParameter = {};
 
                 // Setup root descriptor.
                 D3D12_ROOT_DESCRIPTOR rootDescriptor;
@@ -150,20 +143,22 @@ namespace dawn_native { namespace d3d12 {
                 rootDescriptor.RegisterSpace = group;
 
                 // Set root descriptors in root signatures.
-                rootParameter->Descriptor = rootDescriptor;
-                mDynamicRootParameterIndices[group][dynamicBindingIndex] = parameterIndex++;
+                rootParameter.Descriptor = rootDescriptor;
+                mDynamicRootParameterIndices[group][dynamicBindingIndex] = rootParameters.size();
 
                 // Set parameter types according to bind group layout descriptor.
-                rootParameter->ParameterType = RootParameterType(bindingInfo.type);
+                rootParameter.ParameterType = RootParameterType(bindingInfo.type);
 
                 // Set visibilities according to bind group layout descriptor.
-                rootParameter->ShaderVisibility = ShaderVisibilityType(bindingInfo.visibility);
+                rootParameter.ShaderVisibility = ShaderVisibilityType(bindingInfo.visibility);
+
+                rootParameters.emplace_back(rootParameter);
             }
         }
 
         D3D12_ROOT_SIGNATURE_DESC rootSignatureDescriptor;
-        rootSignatureDescriptor.NumParameters = parameterIndex;
-        rootSignatureDescriptor.pParameters = rootParameters;
+        rootSignatureDescriptor.NumParameters = rootParameters.size();
+        rootSignatureDescriptor.pParameters = rootParameters.data();
         rootSignatureDescriptor.NumStaticSamplers = 0;
         rootSignatureDescriptor.pStaticSamplers = nullptr;
         rootSignatureDescriptor.Flags =
