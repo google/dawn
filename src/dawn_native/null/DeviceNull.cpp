@@ -185,6 +185,7 @@ namespace dawn_native { namespace null {
     }
 
     MaybeError Device::WaitForIdleForDestruction() {
+        mPendingOperations.clear();
         return {};
     }
 

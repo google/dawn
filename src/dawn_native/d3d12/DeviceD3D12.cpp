@@ -459,8 +459,6 @@ namespace dawn_native { namespace d3d12 {
         // Wait for all in-flight commands to finish executing
         DAWN_TRY(WaitForSerial(GetLastSubmittedCommandSerial()));
 
-        // Call tick one last time so resources are cleaned up.
-        DAWN_TRY(TickImpl());
         return {};
     }
 
@@ -512,13 +510,15 @@ namespace dawn_native { namespace d3d12 {
     void Device::ShutDownImpl() {
         ASSERT(GetState() == State::Disconnected);
 
-        // Immediately forget about all pending commands
+        // Immediately forget about all pending commands for the case where device is lost on its
+        // own and WaitForIdleForDestruction isn't called.
         mPendingCommands.Release();
 
         if (mFenceEvent != nullptr) {
             ::CloseHandle(mFenceEvent);
         }
 
+        // We need to handle clearing up com object refs that were enqeued after TickImpl
         mUsedComObjectRefs.ClearUpTo(GetCompletedCommandSerial());
 
         ASSERT(mUsedComObjectRefs.Empty());

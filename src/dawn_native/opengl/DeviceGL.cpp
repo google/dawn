@@ -200,7 +200,6 @@ namespace dawn_native { namespace opengl {
         gl.Finish();
         CheckPassedSerials();
         ASSERT(mFencesInFlight.empty());
-        Tick();
 
         return {};
     }

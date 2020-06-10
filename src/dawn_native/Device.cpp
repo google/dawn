@@ -165,6 +165,9 @@ namespace dawn_native {
         mDynamicUploader = nullptr;
         mMapRequestTracker = nullptr;
 
+        // call TickImpl once last time to clean up resources
+        // assert the errors are device loss so we can continue with destruction
+        AssertAndIgnoreDeviceLossError(TickImpl());
         AssumeCommandsComplete();
         // Tell the backend that it can free all the objects now that the GPU timeline is empty.
         ShutDownImpl();
@@ -186,6 +189,7 @@ namespace dawn_native {
             // Assert that errors are device losses so that we can continue with destruction.
             // Assume all commands are complete after WaitForIdleForDestruction (because they were)
             AssertAndIgnoreDeviceLossError(WaitForIdleForDestruction());
+            AssertAndIgnoreDeviceLossError(TickImpl());
             AssumeCommandsComplete();
             ASSERT(mFutureCallbackSerial <= mCompletedSerial);
             mState = State::Disconnected;

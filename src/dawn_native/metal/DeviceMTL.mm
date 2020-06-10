@@ -292,8 +292,6 @@ namespace dawn_native { namespace metal {
             CheckPassedSerials();
         }
 
-        DAWN_TRY(TickImpl());
-
         return {};
     }
 

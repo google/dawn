@@ -718,6 +718,16 @@ namespace dawn_native { namespace vulkan {
     }
 
     MaybeError Device::WaitForIdleForDestruction() {
+        // Immediately tag the recording context as unused so we don't try to submit it in Tick.
+        // Move the mRecordingContext.used to mUnusedCommands so it can be cleaned up in
+        // ShutDownImpl
+        if (mRecordingContext.used) {
+            CommandPoolAndBuffer commands = {mRecordingContext.commandPool,
+                                             mRecordingContext.commandBuffer};
+            mUnusedCommands.push_back(commands);
+            mRecordingContext = CommandRecordingContext();
+        }
+
         VkResult waitIdleResult = VkResult::WrapUnsafe(fn.QueueWaitIdle(mQueue));
         // Ignore the result of QueueWaitIdle: it can return OOM which we can't really do anything
         // about, Device lost, which means workloads running on the GPU are no longer accessible
@@ -781,9 +791,6 @@ namespace dawn_native { namespace vulkan {
             fn.DestroySemaphore(mVkDevice, semaphore, nullptr);
         }
         mRecordingContext.signalSemaphores.clear();
-
-        // Assert that errors are device loss so that we can continue with destruction
-        AssertAndIgnoreDeviceLossError(TickImpl());
 
         ASSERT(mCommandsInFlight.Empty());
         for (const CommandPoolAndBuffer& commands : mUnusedCommands) {
