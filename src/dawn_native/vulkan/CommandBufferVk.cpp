@@ -665,7 +665,7 @@ namespace dawn_native { namespace vulkan {
                 }
 
                 case Command::InsertDebugMarker: {
-                    if (device->GetDeviceInfo().debugMarker) {
+                    if (device->GetDeviceInfo().HasExt(DeviceExt::DebugMarker)) {
                         InsertDebugMarkerCmd* cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
                         const char* label = mCommands.NextData<char>(cmd->length + 1);
                         VkDebugMarkerMarkerInfoEXT markerInfo;
@@ -685,7 +685,7 @@ namespace dawn_native { namespace vulkan {
                 }
 
                 case Command::PopDebugGroup: {
-                    if (device->GetDeviceInfo().debugMarker) {
+                    if (device->GetDeviceInfo().HasExt(DeviceExt::DebugMarker)) {
                         mCommands.NextCommand<PopDebugGroupCmd>();
                         device->fn.CmdDebugMarkerEndEXT(commands);
                     } else {
@@ -695,7 +695,7 @@ namespace dawn_native { namespace vulkan {
                 }
 
                 case Command::PushDebugGroup: {
-                    if (device->GetDeviceInfo().debugMarker) {
+                    if (device->GetDeviceInfo().HasExt(DeviceExt::DebugMarker)) {
                         PushDebugGroupCmd* cmd = mCommands.NextCommand<PushDebugGroupCmd>();
                         const char* label = mCommands.NextData<char>(cmd->length + 1);
                         VkDebugMarkerMarkerInfoEXT markerInfo;
@@ -812,7 +812,7 @@ namespace dawn_native { namespace vulkan {
                 }
 
                 case Command::InsertDebugMarker: {
-                    if (device->GetDeviceInfo().debugMarker) {
+                    if (device->GetDeviceInfo().HasExt(DeviceExt::DebugMarker)) {
                         InsertDebugMarkerCmd* cmd = iter->NextCommand<InsertDebugMarkerCmd>();
                         const char* label = iter->NextData<char>(cmd->length + 1);
                         VkDebugMarkerMarkerInfoEXT markerInfo;
@@ -832,7 +832,7 @@ namespace dawn_native { namespace vulkan {
                 }
 
                 case Command::PopDebugGroup: {
-                    if (device->GetDeviceInfo().debugMarker) {
+                    if (device->GetDeviceInfo().HasExt(DeviceExt::DebugMarker)) {
                         iter->NextCommand<PopDebugGroupCmd>();
                         device->fn.CmdDebugMarkerEndEXT(commands);
                     } else {
@@ -842,7 +842,7 @@ namespace dawn_native { namespace vulkan {
                 }
 
                 case Command::PushDebugGroup: {
-                    if (device->GetDeviceInfo().debugMarker) {
+                    if (device->GetDeviceInfo().HasExt(DeviceExt::DebugMarker)) {
                         PushDebugGroupCmd* cmd = iter->NextCommand<PushDebugGroupCmd>();
                         const char* label = iter->NextData<char>(cmd->length + 1);
                         VkDebugMarkerMarkerInfoEXT markerInfo;

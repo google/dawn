@@ -28,10 +28,6 @@ namespace dawn_native { namespace vulkan {
             return strncmp(layer.layerName, name, VK_MAX_EXTENSION_NAME_SIZE) == 0;
         }
 
-        bool IsExtensionName(const VkExtensionProperties& extension, const char* name) {
-            return strncmp(extension.extensionName, name, VK_MAX_EXTENSION_NAME_SIZE) == 0;
-        }
-
         bool EnumerateInstanceExtensions(const char* layerName,
                                          const dawn_native::vulkan::VulkanFunctions& vkFunctions,
                                          std::vector<VkExtensionProperties>* extensions) {
@@ -54,27 +50,11 @@ namespace dawn_native { namespace vulkan {
     const char kLayerNameRenderDocCapture[] = "VK_LAYER_RENDERDOC_Capture";
     const char kLayerNameFuchsiaImagePipeSwapchain[] = "VK_LAYER_FUCHSIA_imagepipe_swapchain";
 
-    const char kExtensionNameExtDebugMarker[] = "VK_EXT_debug_marker";
-    const char kExtensionNameKhrExternalMemory[] = "VK_KHR_external_memory";
-    const char kExtensionNameKhrExternalMemoryCapabilities[] =
-        "VK_KHR_external_memory_capabilities";
-    const char kExtensionNameKhrExternalMemoryFD[] = "VK_KHR_external_memory_fd";
-    const char kExtensionNameExtExternalMemoryDmaBuf[] = "VK_EXT_external_memory_dma_buf";
-    const char kExtensionNameExtImageDrmFormatModifier[] = "VK_EXT_image_drm_format_modifier";
-    const char kExtensionNameFuchsiaExternalMemory[] = "VK_FUCHSIA_external_memory";
-    const char kExtensionNameKhrExternalSemaphore[] = "VK_KHR_external_semaphore";
-    const char kExtensionNameKhrExternalSemaphoreCapabilities[] =
-        "VK_KHR_external_semaphore_capabilities";
-    const char kExtensionNameKhrExternalSemaphoreFD[] = "VK_KHR_external_semaphore_fd";
-    const char kExtensionNameFuchsiaExternalSemaphore[] = "VK_FUCHSIA_external_semaphore";
-    const char kExtensionNameKhrGetPhysicalDeviceProperties2[] =
-        "VK_KHR_get_physical_device_properties2";
-    const char kExtensionNameKhrSwapchain[] = "VK_KHR_swapchain";
-    const char kExtensionNameKhrMaintenance1[] = "VK_KHR_maintenance1";
-    const char kExtensionNameKhrShaderFloat16Int8[] = "VK_KHR_shader_float16_int8";
-    const char kExtensionNameKhr16BitStorage[] = "VK_KHR_16bit_storage";
-
     bool VulkanGlobalKnobs::HasExt(InstanceExt ext) const {
+        return extensions.Has(ext);
+    }
+
+    bool VulkanDeviceKnobs::HasExt(DeviceExt ext) const {
         return extensions.Has(ext);
     }
 
@@ -248,82 +228,47 @@ namespace dawn_native { namespace vulkan {
                 return DAWN_INTERNAL_ERROR("vkEnumerateDeviceExtensionProperties");
             }
 
-            info.extensions.resize(count);
-            DAWN_TRY(CheckVkSuccess(vkFunctions.EnumerateDeviceExtensionProperties(
-                                        physicalDevice, nullptr, &count, info.extensions.data()),
-                                    "vkEnumerateDeviceExtensionProperties"));
+            std::vector<VkExtensionProperties> extensionsProperties;
+            extensionsProperties.resize(count);
+            DAWN_TRY(
+                CheckVkSuccess(vkFunctions.EnumerateDeviceExtensionProperties(
+                                   physicalDevice, nullptr, &count, extensionsProperties.data()),
+                               "vkEnumerateDeviceExtensionProperties"));
 
-            for (const auto& extension : info.extensions) {
-                if (IsExtensionName(extension, kExtensionNameExtDebugMarker)) {
-                    info.debugMarker = true;
-                }
-                if (IsExtensionName(extension, kExtensionNameKhrExternalMemory)) {
-                    info.externalMemory = true;
-                }
-                if (IsExtensionName(extension, kExtensionNameKhrExternalMemoryFD)) {
-                    info.externalMemoryFD = true;
-                }
-                if (IsExtensionName(extension, kExtensionNameExtExternalMemoryDmaBuf)) {
-                    info.externalMemoryDmaBuf = true;
-                }
-                if (IsExtensionName(extension, kExtensionNameExtImageDrmFormatModifier)) {
-                    info.imageDrmFormatModifier = true;
-                }
-                if (IsExtensionName(extension, kExtensionNameFuchsiaExternalMemory)) {
-                    info.externalMemoryZirconHandle = true;
-                }
-                if (IsExtensionName(extension, kExtensionNameKhrExternalSemaphore)) {
-                    info.externalSemaphore = true;
-                }
-                if (IsExtensionName(extension, kExtensionNameKhrExternalSemaphoreFD)) {
-                    info.externalSemaphoreFD = true;
-                }
-                if (IsExtensionName(extension, kExtensionNameFuchsiaExternalSemaphore)) {
-                    info.externalSemaphoreZirconHandle = true;
-                }
-                if (IsExtensionName(extension, kExtensionNameKhrSwapchain)) {
-                    info.swapchain = true;
-                }
-                if (IsExtensionName(extension, kExtensionNameKhrMaintenance1)) {
-                    info.maintenance1 = true;
-                }
-                if (IsExtensionName(extension, kExtensionNameKhrShaderFloat16Int8) &&
-                    globalInfo.HasExt(InstanceExt::GetPhysicalDeviceProperties2)) {
-                    info.shaderFloat16Int8 = true;
-                    info.shaderFloat16Int8Features.sType =
-                        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES_KHR;
+            std::unordered_map<std::string, DeviceExt> knownExts = CreateDeviceExtNameMap();
 
-                    VkPhysicalDeviceFeatures2KHR physicalDeviceFeatures2 = {};
-                    physicalDeviceFeatures2.sType =
-                        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
-                    physicalDeviceFeatures2.pNext = &info.shaderFloat16Int8Features;
-                    vkFunctions.GetPhysicalDeviceFeatures2(physicalDevice,
-                                                           &physicalDeviceFeatures2);
-                }
-                if (IsExtensionName(extension, kExtensionNameKhr16BitStorage) &&
-                    globalInfo.HasExt(InstanceExt::GetPhysicalDeviceProperties2)) {
-                    info._16BitStorage = true;
+            for (const VkExtensionProperties& extension : extensionsProperties) {
+                auto it = knownExts.find(extension.extensionName);
+                if (it != knownExts.end()) {
+                    info.extensions.Set(it->second, true);
                 }
             }
+
+            MarkPromotedExtensions(&info.extensions, info.properties.apiVersion);
+            info.extensions = EnsureDependencies(info.extensions, globalInfo.extensions);
         }
 
-        // Mark the extensions promoted to Vulkan 1.1 as available.
-        if (info.properties.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
-            info.maintenance1 = true;
-        }
+        // Gather additional information for some of the extensions
+        {
+            if (info.extensions.Has(DeviceExt::ShaderFloat16Int8)) {
+                info.shaderFloat16Int8Features.sType =
+                    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES_KHR;
 
-        // VK_KHR_16bit_storage is promoted to Vulkan 1.1, so gather information if either is
-        // present, and mark the extension as available.
-        if (info._16BitStorage || info.properties.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
-            ASSERT(globalInfo.HasExt(InstanceExt::GetPhysicalDeviceProperties2));
-            info._16BitStorage = true;
-            info._16BitStorageFeatures.sType =
-                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES;
+                VkPhysicalDeviceFeatures2KHR physicalDeviceFeatures2 = {};
+                physicalDeviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
+                physicalDeviceFeatures2.pNext = &info.shaderFloat16Int8Features;
+                vkFunctions.GetPhysicalDeviceFeatures2(physicalDevice, &physicalDeviceFeatures2);
+            }
 
-            VkPhysicalDeviceFeatures2 physicalDeviceFeatures2 = {};
-            physicalDeviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-            physicalDeviceFeatures2.pNext = &info._16BitStorageFeatures;
-            vkFunctions.GetPhysicalDeviceFeatures2(physicalDevice, &physicalDeviceFeatures2);
+            if (info.extensions.Has(DeviceExt::_16BitStorage)) {
+                info._16BitStorageFeatures.sType =
+                    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES;
+
+                VkPhysicalDeviceFeatures2 physicalDeviceFeatures2 = {};
+                physicalDeviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+                physicalDeviceFeatures2.pNext = &info._16BitStorageFeatures;
+                vkFunctions.GetPhysicalDeviceFeatures2(physicalDevice, &physicalDeviceFeatures2);
+            }
         }
 
         // TODO(cwallez@chromium.org): gather info about formats

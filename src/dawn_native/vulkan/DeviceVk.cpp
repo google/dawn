@@ -268,54 +268,17 @@ namespace dawn_native { namespace vulkan {
     ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice physicalDevice) {
         VulkanDeviceKnobs usedKnobs = {};
 
-        float zero = 0.0f;
-        std::vector<const char*> layersToRequest;
-        std::vector<const char*> extensionsToRequest;
-        std::vector<VkDeviceQueueCreateInfo> queuesToRequest;
+        // Default to asking for all avilable known extensions.
+        usedKnobs.extensions = mDeviceInfo.extensions;
 
-        if (mDeviceInfo.debugMarker) {
-            extensionsToRequest.push_back(kExtensionNameExtDebugMarker);
-            usedKnobs.debugMarker = true;
-        }
-        if (mDeviceInfo.externalMemory) {
-            extensionsToRequest.push_back(kExtensionNameKhrExternalMemory);
-            usedKnobs.externalMemory = true;
-        }
-        if (mDeviceInfo.externalMemoryFD) {
-            extensionsToRequest.push_back(kExtensionNameKhrExternalMemoryFD);
-            usedKnobs.externalMemoryFD = true;
-        }
-        if (mDeviceInfo.externalMemoryDmaBuf) {
-            extensionsToRequest.push_back(kExtensionNameExtExternalMemoryDmaBuf);
-            usedKnobs.externalMemoryDmaBuf = true;
-        }
-        if (mDeviceInfo.imageDrmFormatModifier) {
-            extensionsToRequest.push_back(kExtensionNameExtImageDrmFormatModifier);
-            usedKnobs.imageDrmFormatModifier = true;
-        }
-        if (mDeviceInfo.externalMemoryZirconHandle) {
-            extensionsToRequest.push_back(kExtensionNameFuchsiaExternalMemory);
-            usedKnobs.externalMemoryZirconHandle = true;
-        }
-        if (mDeviceInfo.externalSemaphore) {
-            extensionsToRequest.push_back(kExtensionNameKhrExternalSemaphore);
-            usedKnobs.externalSemaphore = true;
-        }
-        if (mDeviceInfo.externalSemaphoreFD) {
-            extensionsToRequest.push_back(kExtensionNameKhrExternalSemaphoreFD);
-            usedKnobs.externalSemaphoreFD = true;
-        }
-        if (mDeviceInfo.externalSemaphoreZirconHandle) {
-            extensionsToRequest.push_back(kExtensionNameFuchsiaExternalSemaphore);
-            usedKnobs.externalSemaphoreZirconHandle = true;
-        }
-        if (mDeviceInfo.swapchain) {
-            extensionsToRequest.push_back(kExtensionNameKhrSwapchain);
-            usedKnobs.swapchain = true;
-        }
-        if (mDeviceInfo.maintenance1) {
-            extensionsToRequest.push_back(kExtensionNameKhrMaintenance1);
-            usedKnobs.maintenance1 = true;
+        // However only request the extensions that haven't been promoted in the device's apiVersion
+        std::vector<const char*> extensionNames;
+        for (uint32_t ext : IterateBitSet(usedKnobs.extensions.extensionBitSet)) {
+            const DeviceExtInfo& info = GetDeviceExtInfo(static_cast<DeviceExt>(ext));
+
+            if (info.versionPromoted > mDeviceInfo.properties.apiVersion) {
+                extensionNames.push_back(info.name);
+            }
         }
 
         // Always require independentBlend because it is a core Dawn feature
@@ -333,21 +296,13 @@ namespace dawn_native { namespace vulkan {
 
         if (IsExtensionEnabled(Extension::ShaderFloat16)) {
             const VulkanDeviceInfo& deviceInfo = ToBackend(GetAdapter())->GetDeviceInfo();
-            ASSERT(deviceInfo.shaderFloat16Int8 &&
+            ASSERT(deviceInfo.HasExt(DeviceExt::ShaderFloat16Int8) &&
                    deviceInfo.shaderFloat16Int8Features.shaderFloat16 == VK_TRUE &&
-                   deviceInfo._16BitStorage &&
+                   deviceInfo.HasExt(DeviceExt::_16BitStorage) &&
                    deviceInfo._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess == VK_TRUE);
 
-            usedKnobs.shaderFloat16Int8 = true;
             usedKnobs.shaderFloat16Int8Features.shaderFloat16 = VK_TRUE;
-            extensionsToRequest.push_back(kExtensionNameKhrShaderFloat16Int8);
-
-            usedKnobs._16BitStorage = true;
             usedKnobs._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess = VK_TRUE;
-            // VK_KHR_16bit_storage is promoted to Vulkan 1.1.
-            if (deviceInfo.properties.apiVersion < VK_MAKE_VERSION(1, 1, 0)) {
-                extensionsToRequest.push_back(kExtensionNameKhr16BitStorage);
-            }
         }
 
         // Find a universal queue family
@@ -370,6 +325,8 @@ namespace dawn_native { namespace vulkan {
         }
 
         // Choose to create a single universal queue
+        std::vector<VkDeviceQueueCreateInfo> queuesToRequest;
+        float zero = 0.0f;
         {
             VkDeviceQueueCreateInfo queueCreateInfo;
             queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
@@ -388,10 +345,10 @@ namespace dawn_native { namespace vulkan {
         createInfo.flags = 0;
         createInfo.queueCreateInfoCount = static_cast<uint32_t>(queuesToRequest.size());
         createInfo.pQueueCreateInfos = queuesToRequest.data();
-        createInfo.enabledLayerCount = static_cast<uint32_t>(layersToRequest.size());
-        createInfo.ppEnabledLayerNames = layersToRequest.data();
-        createInfo.enabledExtensionCount = static_cast<uint32_t>(extensionsToRequest.size());
-        createInfo.ppEnabledExtensionNames = extensionsToRequest.data();
+        createInfo.enabledLayerCount = 0;
+        createInfo.ppEnabledLayerNames = nullptr;
+        createInfo.enabledExtensionCount = static_cast<uint32_t>(extensionNames.size());
+        createInfo.ppEnabledExtensionNames = extensionNames.data();
         createInfo.pEnabledFeatures = &usedKnobs.features;
 
         DAWN_TRY(CheckVkSuccess(fn.CreateDevice(physicalDevice, &createInfo, nullptr, &mVkDevice),

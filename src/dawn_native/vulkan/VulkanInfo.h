@@ -31,23 +31,6 @@ namespace dawn_native { namespace vulkan {
     extern const char kLayerNameRenderDocCapture[];
     extern const char kLayerNameFuchsiaImagePipeSwapchain[];
 
-    extern const char kExtensionNameExtDebugMarker[];
-    extern const char kExtensionNameKhrExternalMemory[];
-    extern const char kExtensionNameKhrExternalMemoryCapabilities[];
-    extern const char kExtensionNameKhrExternalMemoryFD[];
-    extern const char kExtensionNameExtExternalMemoryDmaBuf[];
-    extern const char kExtensionNameExtImageDrmFormatModifier[];
-    extern const char kExtensionNameFuchsiaExternalMemory[];
-    extern const char kExtensionNameKhrExternalSemaphore[];
-    extern const char kExtensionNameKhrExternalSemaphoreCapabilities[];
-    extern const char kExtensionNameKhrExternalSemaphoreFD[];
-    extern const char kExtensionNameFuchsiaExternalSemaphore[];
-    extern const char kExtensionNameKhrGetPhysicalDeviceProperties2[];
-    extern const char kExtensionNameKhrSwapchain[];
-    extern const char kExtensionNameKhrMaintenance1[];
-    extern const char kExtensionNameKhrShaderFloat16Int8[];
-    extern const char kExtensionNameKhr16BitStorage[];
-
     // Global information - gathered before the instance is created
     struct VulkanGlobalKnobs {
         // Layers
@@ -72,20 +55,8 @@ namespace dawn_native { namespace vulkan {
         VkPhysicalDeviceShaderFloat16Int8FeaturesKHR shaderFloat16Int8Features;
         VkPhysicalDevice16BitStorageFeaturesKHR _16BitStorageFeatures;
 
-        // Extensions, promoted extensions are set to true if their core version is supported.
-        bool debugMarker = false;
-        bool externalMemory = false;
-        bool externalMemoryFD = false;
-        bool externalMemoryDmaBuf = false;
-        bool imageDrmFormatModifier = false;
-        bool externalMemoryZirconHandle = false;
-        bool externalSemaphore = false;
-        bool externalSemaphoreFD = false;
-        bool externalSemaphoreZirconHandle = false;
-        bool swapchain = false;
-        bool maintenance1 = false;
-        bool shaderFloat16Int8 = false;
-        bool _16BitStorage = false;
+        bool HasExt(DeviceExt ext) const;
+        DeviceExtSet extensions;
     };
 
     struct VulkanDeviceInfo : VulkanDeviceKnobs {
@@ -96,7 +67,6 @@ namespace dawn_native { namespace vulkan {
         std::vector<VkMemoryHeap> memoryHeaps;
 
         std::vector<VkLayerProperties> layers;
-        std::vector<VkExtensionProperties> extensions;
         // TODO(cwallez@chromium.org): layer instance extensions
     };
 

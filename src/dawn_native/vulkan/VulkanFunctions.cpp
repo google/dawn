@@ -278,35 +278,35 @@ namespace dawn_native { namespace vulkan {
         GET_DEVICE_PROC(UpdateDescriptorSets);
         GET_DEVICE_PROC(WaitForFences);
 
-        if (deviceInfo.debugMarker) {
+        if (deviceInfo.HasExt(DeviceExt::DebugMarker)) {
             GET_DEVICE_PROC(CmdDebugMarkerBeginEXT);
             GET_DEVICE_PROC(CmdDebugMarkerEndEXT);
             GET_DEVICE_PROC(CmdDebugMarkerInsertEXT);
         }
 
-        if (deviceInfo.externalMemoryFD) {
+        if (deviceInfo.HasExt(DeviceExt::ExternalMemoryFD)) {
             GET_DEVICE_PROC(GetMemoryFdKHR);
             GET_DEVICE_PROC(GetMemoryFdPropertiesKHR);
         }
 
-        if (deviceInfo.externalSemaphoreFD) {
+        if (deviceInfo.HasExt(DeviceExt::ExternalSemaphoreFD)) {
             GET_DEVICE_PROC(ImportSemaphoreFdKHR);
             GET_DEVICE_PROC(GetSemaphoreFdKHR);
         }
 
 #if VK_USE_PLATFORM_FUCHSIA
-        if (deviceInfo.externalMemoryZirconHandle) {
+        if (deviceInfo.HasExt(DeviceExt::ExternalMemoryZirconHandle)) {
             GET_DEVICE_PROC(GetMemoryZirconHandleFUCHSIA);
             GET_DEVICE_PROC(GetMemoryZirconHandlePropertiesFUCHSIA);
         }
 
-        if (deviceInfo.externalSemaphoreZirconHandle) {
+        if (deviceInfo.HasExt(DeviceExt::ExternalSemaphoreZirconHandle)) {
             GET_DEVICE_PROC(ImportSemaphoreZirconHandleFUCHSIA);
             GET_DEVICE_PROC(GetSemaphoreZirconHandleFUCHSIA);
         }
 #endif
 
-        if (deviceInfo.swapchain) {
+        if (deviceInfo.HasExt(DeviceExt::Swapchain)) {
             GET_DEVICE_PROC(CreateSwapchainKHR);
             GET_DEVICE_PROC(DestroySwapchainKHR);
             GET_DEVICE_PROC(GetSwapchainImagesKHR);

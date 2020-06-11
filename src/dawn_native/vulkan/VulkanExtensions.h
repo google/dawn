@@ -70,6 +70,62 @@ namespace dawn_native { namespace vulkan {
     // extensions that don't have all their transitive dependencies in advertisedExts.
     InstanceExtSet EnsureDependencies(const InstanceExtSet& advertisedExts);
 
+    // The list of known device extensions. They must be in dependency order (this is checked
+    // inside EnsureDependencies)
+    enum class DeviceExt {
+        // Promoted to 1.1
+        Maintenance1,
+        ExternalMemory,
+        ExternalSemaphore,
+        _16BitStorage,
+
+        // Promoted to 1.2
+        ShaderFloat16Int8,
+
+        // External* extensions
+        ExternalMemoryFD,
+        ExternalMemoryDmaBuf,
+        ExternalMemoryZirconHandle,
+        ExternalSemaphoreFD,
+        ExternalSemaphoreZirconHandle,
+
+        // Others
+        DebugMarker,
+        ImageDrmFormatModifier,
+        Swapchain,
+
+        EnumCount,
+    };
+
+    // A bitset wrapper that is indexed with DeviceExt.
+    struct DeviceExtSet {
+        std::bitset<static_cast<size_t>(DeviceExt::EnumCount)> extensionBitSet;
+        void Set(DeviceExt extension, bool enabled);
+        bool Has(DeviceExt extension) const;
+    };
+
+    // A bitset wrapper that is indexed with DeviceExt.
+    struct DeviceExtInfo {
+        DeviceExt index;
+        const char* name;
+        // The version in which this extension was promoted as built with VK_MAKE_VERSION,
+        // or NeverPromoted if it was never promoted.
+        uint32_t versionPromoted;
+    };
+
+    // Returns the information about a known DeviceExt
+    const DeviceExtInfo& GetDeviceExtInfo(DeviceExt ext);
+    // Returns a map that maps a Vulkan extension name to its DeviceExt.
+    std::unordered_map<std::string, DeviceExt> CreateDeviceExtNameMap();
+
+    // Sets entries in `extensions` to true if that entry was promoted in Vulkan version `version`
+    void MarkPromotedExtensions(DeviceExtSet* extensions, uint32_t version);
+    // From a set of extensions advertised as supported by the device (or promoted), remove all
+    // extensions that don't have all their transitive dependencies in advertisedExts or in
+    // instanceExts.
+    DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
+                                    const InstanceExtSet& instanceExts);
+
 }}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKAN_VULKANEXTENSIONS_H_

@@ -39,7 +39,7 @@ namespace dawn_native { namespace vulkan {
 
     MaybeError Adapter::Initialize() {
         DAWN_TRY_ASSIGN(mDeviceInfo, GatherDeviceInfo(*this));
-        if (!mDeviceInfo.maintenance1) {
+        if (!mDeviceInfo.HasExt(DeviceExt::Maintenance1)) {
             return DAWN_INTERNAL_ERROR(
                 "Dawn requires Vulkan 1.1 or Vulkan 1.0 with KHR_Maintenance1 in order to support "
                 "viewport flipY");
@@ -74,9 +74,9 @@ namespace dawn_native { namespace vulkan {
             mSupportedExtensions.EnableExtension(Extension::TextureCompressionBC);
         }
 
-        if (mDeviceInfo.shaderFloat16Int8 &&
+        if (mDeviceInfo.HasExt(DeviceExt::ShaderFloat16Int8) &&
             mDeviceInfo.shaderFloat16Int8Features.shaderFloat16 == VK_TRUE &&
-            mDeviceInfo._16BitStorage &&
+            mDeviceInfo.HasExt(DeviceExt::_16BitStorage) &&
             mDeviceInfo._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess == VK_TRUE) {
             mSupportedExtensions.EnableExtension(Extension::ShaderFloat16);
         }
