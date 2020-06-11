@@ -40,11 +40,12 @@ namespace dawn_native {
         // TODO (yunchao.he@intel.com): optimize this
         PassTextureUsage& textureUsage = mTextureUsages[texture];
 
-        // Set usage for the whole texture
+        // Set parameters for the whole texture
         textureUsage.usage |= usage;
+        uint32_t subresourceCount = texture->GetSubresourceCount();
+        textureUsage.sameUsagesAcrossSubresources = levelCount * layerCount == subresourceCount;
 
         // Set usages for subresources
-        uint32_t subresourceCount = texture->GetSubresourceCount();
         if (!textureUsage.subresourceUsages.size()) {
             textureUsage.subresourceUsages =
                 std::vector<wgpu::TextureUsage>(subresourceCount, wgpu::TextureUsage::None);
@@ -63,6 +64,7 @@ namespace dawn_native {
                                                    const PassTextureUsage& textureUsage) {
         PassTextureUsage& passTextureUsage = mTextureUsages[texture];
         passTextureUsage.usage |= textureUsage.usage;
+        passTextureUsage.sameUsagesAcrossSubresources &= textureUsage.sameUsagesAcrossSubresources;
 
         uint32_t subresourceCount = texture->GetSubresourceCount();
         ASSERT(textureUsage.subresourceUsages.size() == subresourceCount);

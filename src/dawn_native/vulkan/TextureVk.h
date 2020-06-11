@@ -18,6 +18,7 @@
 #include "dawn_native/Texture.h"
 
 #include "common/vulkan_platform.h"
+#include "dawn_native/PassResourceUsage.h"
 #include "dawn_native/ResourceMemoryAllocation.h"
 #include "dawn_native/vulkan/ExternalHandle.h"
 #include "dawn_native/vulkan/external_memory/MemoryService.h"
@@ -73,7 +74,7 @@ namespace dawn_native { namespace vulkan {
                                 uint32_t baseArrayLayer,
                                 uint32_t layerCount);
         void TransitionUsageForPass(CommandRecordingContext* recordingContext,
-                                    const std::vector<wgpu::TextureUsage>& subresourceUsages,
+                                    const PassTextureUsage& textureUsages,
                                     std::vector<VkImageMemoryBarrier>* imageBarriers,
                                     VkPipelineStageFlags* srcStages,
                                     VkPipelineStageFlags* dstStages);
@@ -112,6 +113,7 @@ namespace dawn_native { namespace vulkan {
         void TweakTransitionForExternalUsage(CommandRecordingContext* recordingContext,
                                              std::vector<VkImageMemoryBarrier>* barriers,
                                              size_t transitionBarrierStart);
+        bool CanReuseWithoutBarrier(wgpu::TextureUsage lastUsage, wgpu::TextureUsage usage);
 
         VkImage mHandle = VK_NULL_HANDLE;
         ResourceMemoryAllocation mMemoryAllocation;
@@ -130,9 +132,11 @@ namespace dawn_native { namespace vulkan {
         VkSemaphore mSignalSemaphore = VK_NULL_HANDLE;
         std::vector<VkSemaphore> mWaitRequirements;
 
+        bool mSameLastUsagesAcrossSubresources = true;
+
         // A usage of none will make sure the texture is transitioned before its first use as
         // required by the Vulkan spec.
-        std::vector<wgpu::TextureUsage> mLastSubresourceUsages =
+        std::vector<wgpu::TextureUsage> mSubresourceLastUsages =
             std::vector<wgpu::TextureUsage>(GetSubresourceCount(), wgpu::TextureUsage::None);
     };
 
