@@ -154,15 +154,16 @@ class StorageTextureTests : public DawnTest {
 
     std::string GetGLSLImageDeclaration(wgpu::TextureFormat format,
                                         std::string accessQualifier,
-                                        bool is2DArray) {
+                                        bool is2DArray,
+                                        uint32_t binding) {
         std::ostringstream ostream;
-        ostream << "layout(set = 0, binding = 0, " << utils::GetGLSLImageFormatQualifier(format)
-                << ") uniform " << accessQualifier << " "
-                << utils::GetColorTextureComponentTypePrefix(format) << "image2D";
+        ostream << "layout(set = 0, binding = " << binding << ", "
+                << utils::GetGLSLImageFormatQualifier(format) << ") uniform " << accessQualifier
+                << " " << utils::GetColorTextureComponentTypePrefix(format) << "image2D";
         if (is2DArray) {
             ostream << "Array";
         }
-        ostream << " storageImage;";
+        ostream << " storageImage" << binding << ";";
         return ostream.str();
     }
 
@@ -273,13 +274,13 @@ class StorageTextureTests : public DawnTest {
 
         const char* prefix = utils::GetColorTextureComponentTypePrefix(format);
 
-        ostream << GetGLSLImageDeclaration(format, "readonly", is2DArray) << "\n"
+        ostream << GetGLSLImageDeclaration(format, "readonly", is2DArray, 0) << "\n"
                 << GetGLSLComparisonFunction(format) << "bool doTest() {\n";
         if (is2DArray) {
-            ostream << R"(ivec3 size = imageSize(storageImage);
+            ostream << R"(ivec3 size = imageSize(storageImage0);
                           const uint layerCount = size.z;)";
         } else {
-            ostream << R"(ivec2 size = imageSize(storageImage);
+            ostream << R"(ivec2 size = imageSize(storageImage0);
                           const uint layerCount = 1;)";
         }
         ostream << R"(for (uint layer = 0; layer < layerCount; ++layer) {
@@ -288,7 +289,7 @@ class StorageTextureTests : public DawnTest {
                                   uint value = )"
                 << kComputeExpectedValueGLSL << ";\n"
                 << prefix << "vec4 expected = " << GetExpectedPixelValue(format) << ";\n"
-                << prefix << R"(vec4 pixel = imageLoad(storageImage, )";
+                << prefix << R"(vec4 pixel = imageLoad(storageImage0, )";
         if (is2DArray) {
             ostream << "ivec3(x, y, layer));";
         } else {
@@ -314,16 +315,16 @@ class StorageTextureTests : public DawnTest {
 
         ostream << R"(
             #version 450
-        )" << GetGLSLImageDeclaration(format, "writeonly", is2DArray)
+        )" << GetGLSLImageDeclaration(format, "writeonly", is2DArray, 0)
                 << R"(
             void main() {
         )";
         if (is2DArray) {
-            ostream << R"(ivec3 size = imageSize(storageImage);
+            ostream << R"(ivec3 size = imageSize(storageImage0);
                           const uint layerCount = size.z;
             )";
         } else {
-            ostream << R"(ivec2 size = imageSize(storageImage);
+            ostream << R"(ivec2 size = imageSize(storageImage0);
                           const uint layerCount = 1;
             )";
         }
@@ -340,12 +341,50 @@ class StorageTextureTests : public DawnTest {
             ostream << "ivec2 texcoord = ivec2(x, y);\n";
         }
 
-        ostream << R"(           imageStore(storageImage, texcoord, expected);
+        ostream << R"(           imageStore(storageImage0, texcoord, expected);
                              }
                          }
                      }
                  })";
 
+        return ostream.str();
+    }
+
+    std::string CommonReadWriteTestCode(wgpu::TextureFormat format, bool is2DArray = false) {
+        std::ostringstream ostream;
+
+        ostream << R"(
+        #version 450
+        )" << GetGLSLImageDeclaration(format, "writeonly", is2DArray, 0)
+                << GetGLSLImageDeclaration(format, "readonly", is2DArray, 1) << R"(
+            void main() {
+        )";
+        if (is2DArray) {
+            ostream << R"(ivec3 size = imageSize(storageImage0);
+                          const uint layerCount = size.z;
+            )";
+        } else {
+            ostream << R"(ivec2 size = imageSize(storageImage0);
+                          const uint layerCount = 1;
+            )";
+        }
+
+        ostream << R"(for (uint layer = 0; layer < layerCount; ++layer) {
+                          for (uint y = 0; y < size.y; ++y) {
+                              for (uint x = 0; x < size.x; ++x) {)"
+                   "\n";
+        if (is2DArray) {
+            ostream << "ivec3 texcoord = ivec3(x, y, layer);\n";
+        } else {
+            ostream << "ivec2 texcoord = ivec2(x, y);\n";
+        }
+
+        ostream
+            << R"(           imageStore(storageImage0, texcoord, imageLoad(storageImage1, texcoord));
+                             }
+                         }
+                     }
+                 })";
         return ostream.str();
     }
 
@@ -559,6 +598,25 @@ class StorageTextureTests : public DawnTest {
         wgpu::ComputePipeline pipeline = CreateComputePipeline(computeShader);
         wgpu::BindGroup bindGroup = utils::MakeBindGroup(
             device, pipeline.GetBindGroupLayout(0), {{0, writeonlyStorageTexture.CreateView()}});
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder computePassEncoder = encoder.BeginComputePass();
+        computePassEncoder.SetBindGroup(0, bindGroup);
+        computePassEncoder.SetPipeline(pipeline);
+        computePassEncoder.Dispatch(1);
+        computePassEncoder.EndPass();
+        wgpu::CommandBuffer commandBuffer = encoder.Finish();
+        queue.Submit(1, &commandBuffer);
+    }
+
+    void ReadWriteIntoStorageTextureInComputePass(wgpu::Texture readonlyStorageTexture,
+                                                  wgpu::Texture writeonlyStorageTexture,
+                                                  const char* computeShader) {
+        // Create a compute pipeline that writes the expected pixel values into the storage texture.
+        wgpu::ComputePipeline pipeline = CreateComputePipeline(computeShader);
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(
+            device, pipeline.GetBindGroupLayout(0),
+            {{0, writeonlyStorageTexture.CreateView()}, {1, readonlyStorageTexture.CreateView()}});
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder computePassEncoder = encoder.BeginComputePass();
@@ -812,6 +870,45 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
         // Write the expected pixel values into the write-only storage texture.
         const std::string computeShader = CommonWriteOnlyTestCode(format);
         WriteIntoStorageTextureInComputePass(writeonlyStorageTexture, computeShader.c_str());
+
+        // Verify the pixel data in the write-only storage texture is expected.
+        CheckOutputStorageTexture(writeonlyStorageTexture, format);
+    }
+}
+
+// Test that reading from one read-only storage texture then writing into another write-only storage
+// texture in one dispatch are supported in compute shader.
+TEST_P(StorageTextureTests, ReadWriteDifferentStorageTextureInOneDispatchInComputeShader) {
+    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
+    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
+    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
+    // bug in spvc parser is fixed.
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
+
+    for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
+        if (!utils::TextureFormatSupportsStorageTexture(format)) {
+            continue;
+        }
+
+        // TODO(jiawei.shao@intel.com): investigate why this test fails with RGBA8Snorm on Linux
+        // Intel OpenGL driver.
+        if (format == wgpu::TextureFormat::RGBA8Snorm && IsIntel() && IsOpenGL() && IsLinux()) {
+            continue;
+        }
+
+        // Prepare the read-only storage texture.
+        const std::vector<uint8_t> kInitialTextureData = GetExpectedData(format);
+        wgpu::Texture readonlyStorageTexture =
+            CreateTextureWithTestData(kInitialTextureData, format);
+
+        // Prepare the write-only storage texture.
+        wgpu::Texture writeonlyStorageTexture =
+            CreateTexture(format, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc);
+
+        // Write the expected pixel values into the write-only storage texture.
+        const std::string computeShader = CommonReadWriteTestCode(format);
+        ReadWriteIntoStorageTextureInComputePass(readonlyStorageTexture, writeonlyStorageTexture,
+                                                 computeShader.c_str());
 
         // Verify the pixel data in the write-only storage texture is expected.
         CheckOutputStorageTexture(writeonlyStorageTexture, format);
