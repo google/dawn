@@ -137,31 +137,17 @@ struct BlockInfo {
   /// The following fields record relationships among blocks in a selection
   /// construct for an OpBranchConditional instruction.
 
-  /// If not null, then the pointed-at construct is a selection for an
-  /// OpBranchConditional and this block is the "true" target for it.  We say
-  /// this block "heads" the true case.
-  const Construct* true_head_for = nullptr;
-  /// If not null, then the pointed-at construct is a selection for an
-  /// OpBranchConditional and this block is the "false" target for it.  We say
-  /// this block "heads" the false case.
-  const Construct* false_head_for = nullptr;
-  /// If not null, then the pointed-at construct is the first block at which
-  /// control reconverges between the "then" and "else" clauses, but before
-  /// the merge block for that selection.
-  const Construct* premerge_head_for = nullptr;
-  /// If not null, then this block is an if-selection header, and |true_head| is
-  /// the target of the true branch on the OpBranchConditional.
-  /// In particular, true_head->true_head_for == this
-  const BlockInfo* true_head = nullptr;
-  /// If not null, then this block is an if-selection header, and |false_head|
-  /// is the target of the false branch on the OpBranchConditional.
-  /// In particular, false_head->false_head_for == this
-  const BlockInfo* false_head = nullptr;
-  /// If not null, then this block is an if-selection header, and when following
+  /// If not 0, then this block is an if-selection header, and |true_head| is
+  /// the target id of the true branch on the OpBranchConditional.
+  uint32_t true_head = 0;
+  /// If not 0, then this block is an if-selection header, and |false_head|
+  /// is the target id of the false branch on the OpBranchConditional.
+  uint32_t false_head = 0;
+  /// If not 0, then this block is an if-selection header, and when following
   /// the flow via the true and false branches, control first reconverges at
-  /// |premerge_head|, and |premerge_head| is still inside the if-selection.
-  /// In particular, premerge_head->premerge_head_for == this
-  const BlockInfo* premerge_head = nullptr;
+  /// the block with ID |premerge_head|, and |premerge_head| is still inside
+  /// the if-selection.
+  uint32_t premerge_head = 0;
 };
 
 inline std::ostream& operator<<(std::ostream& o, const BlockInfo& bi) {

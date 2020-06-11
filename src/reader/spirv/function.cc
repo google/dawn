@@ -1336,12 +1336,10 @@ bool FunctionEmitter::FindIfSelectionInternalHeaders() {
     const bool contains_false = construct->ContainsPos(false_head_pos);
 
     if (contains_true) {
-      true_head_info->true_head_for = construct.get();
-      if_header_info->true_head = true_head_info;
+      if_header_info->true_head = true_head;
     }
     if (contains_false) {
-      false_head_info->false_head_for = construct.get();
-      if_header_info->false_head = false_head_info;
+      if_header_info->false_head = false_head;
     }
 
     if ((true_head_info->header_for_merge != 0) &&
@@ -1438,8 +1436,7 @@ bool FunctionEmitter::FindIfSelectionInternalHeaders() {
               }
               premerge_id = dest_id;
               auto* dest_block_info = GetBlockInfo(dest_id);
-              dest_block_info->premerge_head_for = construct.get();
-              if_header_info->premerge_head = dest_block_info;
+              if_header_info->premerge_head = dest_id;
               if (dest_block_info->header_for_merge != 0) {
                 // Premerge has two edges coming into it, from the then-clause
                 // and the else-clause. It's also, by construction, not the
@@ -1743,8 +1740,8 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
   assert(construct->kind == Construct::kIfSelection);
   assert(construct->begin_id == block_info.id);
 
-  const auto* const false_head = block_info.false_head;
-  const auto* const premerge_head = block_info.premerge_head;
+  const uint32_t false_head = block_info.false_head;
+  const uint32_t premerge_head = block_info.premerge_head;
 
   auto* const if_stmt =
       AddStatement(std::make_unique<ast::IfStatement>())->AsIf();
@@ -1772,7 +1769,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
   //        Emit it as:   if (cond) {} else {....}
   //        Move the merge up to where the premerge is.
   const uint32_t intended_merge =
-      premerge_head ? premerge_head->id : construct->end_id;
+      premerge_head ? premerge_head : construct->end_id;
 
   // then-clause:
   //   If true_head exists:
@@ -1781,11 +1778,11 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
   //   Otherwise:
   //     ends at from the false head (if it exists), otherwise the selection
   //     end.
-  const uint32_t then_end = false_head ? false_head->id : intended_merge;
+  const uint32_t then_end = false_head ? false_head : intended_merge;
 
   // else-clause:
   //   ends at the premerge head (if it exists) or at the selection end.
-  const uint32_t else_end = premerge_head ? premerge_head->id : intended_merge;
+  const uint32_t else_end = premerge_head ? premerge_head : intended_merge;
 
   // Push statement blocks for the then-clause and the else-clause.
   // But make sure we do it in the right order.

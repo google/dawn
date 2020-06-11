@@ -6683,10 +6683,9 @@ TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_NoIf) {
 
   auto* bi = fe.GetBlockInfo(10);
   ASSERT_NE(bi, nullptr);
-  EXPECT_EQ(bi->true_head_for, nullptr);
-  EXPECT_EQ(bi->false_head_for, nullptr);
-  EXPECT_EQ(bi->premerge_head_for, nullptr);
-  EXPECT_EQ(bi->premerge_head_for, nullptr);
+  EXPECT_EQ(bi->true_head, 0u);
+  EXPECT_EQ(bi->false_head, 0u);
+  EXPECT_EQ(bi->premerge_head, 0u);
 }
 
 TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_ThenElse) {
@@ -6711,19 +6710,29 @@ TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_ThenElse) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(FlowFindIfSelectionInternalHeaders(&fe));
 
+  auto* bi10 = fe.GetBlockInfo(10);
+  ASSERT_NE(bi10, nullptr);
+  EXPECT_EQ(bi10->true_head, 20u);
+  EXPECT_EQ(bi10->false_head, 30u);
+  EXPECT_EQ(bi10->premerge_head, 0u);
+
   auto* bi20 = fe.GetBlockInfo(20);
   ASSERT_NE(bi20, nullptr);
-  ASSERT_NE(bi20->true_head_for, nullptr);
-  EXPECT_EQ(bi20->true_head_for->begin_id, 10u);
-  EXPECT_EQ(bi20->false_head_for, nullptr);
-  EXPECT_EQ(bi20->premerge_head_for, nullptr);
+  EXPECT_EQ(bi20->true_head, 0u);
+  EXPECT_EQ(bi20->false_head, 0u);
+  EXPECT_EQ(bi20->premerge_head, 0u);
 
   auto* bi30 = fe.GetBlockInfo(30);
   ASSERT_NE(bi30, nullptr);
-  EXPECT_EQ(bi30->true_head_for, nullptr);
-  ASSERT_NE(bi30->false_head_for, nullptr);
-  EXPECT_EQ(bi30->false_head_for->begin_id, 10u);
-  EXPECT_EQ(bi30->premerge_head_for, nullptr);
+  EXPECT_EQ(bi30->true_head, 0u);
+  EXPECT_EQ(bi30->false_head, 0u);
+  EXPECT_EQ(bi30->premerge_head, 0u);
+
+  auto* bi99 = fe.GetBlockInfo(99);
+  ASSERT_NE(bi99, nullptr);
+  EXPECT_EQ(bi99->true_head, 0u);
+  EXPECT_EQ(bi99->false_head, 0u);
+  EXPECT_EQ(bi99->premerge_head, 0u);
 }
 
 TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_IfOnly) {
@@ -6745,12 +6754,23 @@ TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_IfOnly) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(FlowFindIfSelectionInternalHeaders(&fe));
 
+  auto* bi10 = fe.GetBlockInfo(10);
+  ASSERT_NE(bi10, nullptr);
+  EXPECT_EQ(bi10->true_head, 30u);
+  EXPECT_EQ(bi10->false_head, 0u);
+  EXPECT_EQ(bi10->premerge_head, 0u);
+
   auto* bi30 = fe.GetBlockInfo(30);
   ASSERT_NE(bi30, nullptr);
-  ASSERT_NE(bi30->true_head_for, nullptr);
-  EXPECT_EQ(bi30->true_head_for->begin_id, 10u);
-  EXPECT_EQ(bi30->false_head_for, nullptr);
-  EXPECT_EQ(bi30->premerge_head_for, nullptr);
+  EXPECT_EQ(bi30->true_head, 0u);
+  EXPECT_EQ(bi30->false_head, 0u);
+  EXPECT_EQ(bi30->premerge_head, 0u);
+
+  auto* bi99 = fe.GetBlockInfo(99);
+  ASSERT_NE(bi99, nullptr);
+  EXPECT_EQ(bi99->true_head, 0u);
+  EXPECT_EQ(bi99->false_head, 0u);
+  EXPECT_EQ(bi99->premerge_head, 0u);
 }
 
 TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_ElseOnly) {
@@ -6772,12 +6792,23 @@ TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_ElseOnly) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(FlowFindIfSelectionInternalHeaders(&fe));
 
+  auto* bi10 = fe.GetBlockInfo(10);
+  ASSERT_NE(bi10, nullptr);
+  EXPECT_EQ(bi10->true_head, 0u);
+  EXPECT_EQ(bi10->false_head, 30u);
+  EXPECT_EQ(bi10->premerge_head, 0u);
+
   auto* bi30 = fe.GetBlockInfo(30);
   ASSERT_NE(bi30, nullptr);
-  EXPECT_EQ(bi30->true_head_for, nullptr);
-  ASSERT_NE(bi30->false_head_for, nullptr);
-  EXPECT_EQ(bi30->false_head_for->begin_id, 10u);
-  EXPECT_EQ(bi30->premerge_head_for, nullptr);
+  EXPECT_EQ(bi30->true_head, 0u);
+  EXPECT_EQ(bi30->false_head, 0u);
+  EXPECT_EQ(bi30->premerge_head, 0u);
+
+  auto* bi99 = fe.GetBlockInfo(99);
+  ASSERT_NE(bi99, nullptr);
+  EXPECT_EQ(bi99->true_head, 0u);
+  EXPECT_EQ(bi99->false_head, 0u);
+  EXPECT_EQ(bi99->premerge_head, 0u);
 }
 
 TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_Regardless) {
@@ -6804,19 +6835,11 @@ TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_Regardless) {
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 80, 99));
 
-  auto* bi20 = fe.GetBlockInfo(20);
-  ASSERT_NE(bi20, nullptr);
-  ASSERT_NE(bi20->true_head_for, nullptr);
-  EXPECT_EQ(bi20->true_head_for->begin_id, 10u);
-  ASSERT_NE(bi20->false_head_for, nullptr);
-  EXPECT_EQ(bi20->false_head_for->begin_id, 10u);
-  EXPECT_EQ(bi20->premerge_head_for, nullptr);
-
-  auto* bi80 = fe.GetBlockInfo(80);
-  ASSERT_NE(bi80, nullptr);
-  EXPECT_EQ(bi80->true_head_for, nullptr);
-  EXPECT_EQ(bi80->false_head_for, nullptr);
-  EXPECT_EQ(bi80->premerge_head_for, nullptr);
+  auto* bi10 = fe.GetBlockInfo(10);
+  ASSERT_NE(bi10, nullptr);
+  EXPECT_EQ(bi10->true_head, 20u);
+  EXPECT_EQ(bi10->false_head, 20u);
+  EXPECT_EQ(bi10->premerge_head, 0u);
 }
 
 TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_Premerge_Simple) {
@@ -6846,12 +6869,11 @@ TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_Premerge_Simple) {
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 80, 99));
 
-  auto* bi80 = fe.GetBlockInfo(80);
-  ASSERT_NE(bi80, nullptr);
-  EXPECT_EQ(bi80->true_head_for, nullptr);
-  EXPECT_EQ(bi80->false_head_for, nullptr);
-  ASSERT_NE(bi80->premerge_head_for, nullptr);
-  EXPECT_EQ(bi80->premerge_head_for->begin_id, 10u);
+  auto* bi10 = fe.GetBlockInfo(10);
+  ASSERT_NE(bi10, nullptr);
+  EXPECT_EQ(bi10->true_head, 20u);
+  EXPECT_EQ(bi10->false_head, 30u);
+  EXPECT_EQ(bi10->premerge_head, 80u);
 }
 
 TEST_F(SpvParserTest,
@@ -6882,26 +6904,11 @@ TEST_F(SpvParserTest,
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 80, 99));
 
-  auto* bi20 = fe.GetBlockInfo(20);
-  ASSERT_NE(bi20, nullptr);
-  ASSERT_NE(bi20->true_head_for, nullptr);
-  EXPECT_EQ(bi20->true_head_for->begin_id, 10u);
-  EXPECT_EQ(bi20->false_head_for, nullptr);
-  EXPECT_EQ(bi20->premerge_head_for, nullptr);
-
-  auto* bi30 = fe.GetBlockInfo(30);
-  ASSERT_NE(bi30, nullptr);
-  EXPECT_EQ(bi30->true_head_for, nullptr);
-  ASSERT_NE(bi30->false_head_for, nullptr);
-  EXPECT_EQ(bi30->false_head_for->begin_id, 10u);
-  ASSERT_NE(bi30->premerge_head_for, nullptr);
-  EXPECT_EQ(bi30->premerge_head_for->begin_id, 10u);
-
-  auto* bi80 = fe.GetBlockInfo(80);
-  ASSERT_NE(bi80, nullptr);
-  EXPECT_EQ(bi80->true_head_for, nullptr);
-  EXPECT_EQ(bi80->false_head_for, nullptr);
-  EXPECT_EQ(bi80->premerge_head_for, nullptr);
+  auto* bi10 = fe.GetBlockInfo(10);
+  ASSERT_NE(bi10, nullptr);
+  EXPECT_EQ(bi10->true_head, 20u);
+  EXPECT_EQ(bi10->false_head, 30u);
+  EXPECT_EQ(bi10->premerge_head, 30u);
 }
 
 TEST_F(SpvParserTest,
@@ -6932,26 +6939,11 @@ TEST_F(SpvParserTest,
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 30, 20, 80, 99));
 
-  auto* bi20 = fe.GetBlockInfo(20);
-  ASSERT_NE(bi20, nullptr);
-  ASSERT_NE(bi20->true_head_for, nullptr);
-  EXPECT_EQ(bi20->true_head_for->begin_id, 10u);
-  EXPECT_EQ(bi20->false_head_for, nullptr);
-  ASSERT_NE(bi20->premerge_head_for, nullptr);
-  EXPECT_EQ(bi20->premerge_head_for->begin_id, 10u);
-
-  auto* bi30 = fe.GetBlockInfo(30);
-  ASSERT_NE(bi30, nullptr);
-  EXPECT_EQ(bi30->true_head_for, nullptr);
-  ASSERT_NE(bi30->false_head_for, nullptr);
-  EXPECT_EQ(bi30->false_head_for->begin_id, 10u);
-  EXPECT_EQ(bi30->premerge_head_for, nullptr);
-
-  auto* bi80 = fe.GetBlockInfo(80);
-  ASSERT_NE(bi80, nullptr);
-  EXPECT_EQ(bi80->true_head_for, nullptr);
-  EXPECT_EQ(bi80->false_head_for, nullptr);
-  EXPECT_EQ(bi80->premerge_head_for, nullptr);
+  auto* bi10 = fe.GetBlockInfo(10);
+  ASSERT_NE(bi10, nullptr);
+  EXPECT_EQ(bi10->true_head, 20u);
+  EXPECT_EQ(bi10->false_head, 30u);
+  EXPECT_EQ(bi10->premerge_head, 20u);
 }
 
 TEST_F(SpvParserTest,
