@@ -19,29 +19,7 @@
 #include <string>
 #include <vector>
 
-#include "src/context.h"
-#include "src/reader/reader.h"
-#include "src/type_determiner.h"
-#include "src/type_manager.h"
-#include "src/validator.h"
-#include "src/writer/writer.h"
-
-#if TINT_BUILD_SPV_READER
-#include "src/reader/spirv/parser.h"
-#endif  // TINT_BUILD_SPV_READER
-
-#if TINT_BUILD_WGSL_READER
-#include "src/reader/wgsl/parser.h"
-#endif  // TINT_BUILD_WGSL_READER
-
-#if TINT_BUILD_SPV_WRITER
-#include "spirv-tools/libspirv.hpp"
-#include "src/writer/spirv/generator.h"
-#endif  // TINT_BUILD_SPV_WRITER
-
-#if TINT_BUILD_WGSL_WRITER
-#include "src/writer/wgsl/generator.h"
-#endif  // TINT_BUILD_WGSL_WRITER
+#include "tint/tint.h"
 
 namespace {
 
@@ -67,7 +45,7 @@ struct Options {
 const char kUsage[] = R"(Usage: tint [options] SCRIPT [SCRIPTS...]
 
  options:
-  --format <spirv|spvasm|wgsl>  -- Output format. 
+  --format <spirv|spvasm|wgsl>  -- Output format.
                                If not provided, will be inferred from output
                                filename extension:
                                    .spvasm -> spvasm

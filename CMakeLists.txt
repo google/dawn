@@ -70,6 +70,7 @@ if (${TINT_BUILD_SPV_READER})
 endif()
 
 include_directories("${PROJECT_SOURCE_DIR}/third_party/spirv-headers/include")
+include_directories("${PROJECT_SOURCE_DIR}/include")
 
 if(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") OR
     ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang") OR

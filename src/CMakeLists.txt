@@ -37,6 +37,7 @@ function(tint_spvtools_compile_options TARGET)
 endfunction()
 
 set(TINT_LIB_SRCS
+  ../include/tint/tint.h
   ast/array_accessor_expression.cc
   ast/array_accessor_expression.h
   ast/as_expression.cc

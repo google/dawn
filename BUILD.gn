@@ -461,7 +461,10 @@ source_set("libtint_wgsl_writer_src") {
 }
 
 config("libtint_public_config") {
-  include_dirs = [ "${tint_root_dir}/" ]
+  include_dirs = [
+    "${tint_root_dir}/",
+    "${tint_root_dir}/include/",
+  ]
 }
 
 source_set("libtint") {
