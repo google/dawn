@@ -28,6 +28,7 @@ namespace dawn_native { namespace metal {
     class Device;
     class Framebuffer;
     class PipelineLayout;
+    class QuerySet;
     class Queue;
     class RenderPipeline;
     class Sampler;
@@ -46,6 +47,7 @@ namespace dawn_native { namespace metal {
         using ComputePipelineType = ComputePipeline;
         using DeviceType = Device;
         using PipelineLayoutType = PipelineLayout;
+        using QuerySetType = QuerySet;
         using QueueType = Queue;
         using RenderPipelineType = RenderPipeline;
         using SamplerType = Sampler;

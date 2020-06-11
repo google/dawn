@@ -146,6 +146,7 @@ namespace dawn_native {
         CommandEncoder* CreateCommandEncoder(const CommandEncoderDescriptor* descriptor);
         ComputePipelineBase* CreateComputePipeline(const ComputePipelineDescriptor* descriptor);
         PipelineLayoutBase* CreatePipelineLayout(const PipelineLayoutDescriptor* descriptor);
+        QuerySetBase* CreateQuerySet(const QuerySetDescriptor* descriptor);
         QueueBase* CreateQueue();
         RenderBundleEncoder* CreateRenderBundleEncoder(
             const RenderBundleEncoderDescriptor* descriptor);
@@ -239,6 +240,8 @@ namespace dawn_native {
             const ComputePipelineDescriptor* descriptor) = 0;
         virtual ResultOrError<PipelineLayoutBase*> CreatePipelineLayoutImpl(
             const PipelineLayoutDescriptor* descriptor) = 0;
+        virtual ResultOrError<QuerySetBase*> CreateQuerySetImpl(
+            const QuerySetDescriptor* descriptor) = 0;
         virtual ResultOrError<RenderPipelineBase*> CreateRenderPipelineImpl(
             const RenderPipelineDescriptor* descriptor) = 0;
         virtual ResultOrError<SamplerBase*> CreateSamplerImpl(
@@ -267,6 +270,8 @@ namespace dawn_native {
                                                  const ComputePipelineDescriptor* descriptor);
         MaybeError CreatePipelineLayoutInternal(PipelineLayoutBase** result,
                                                 const PipelineLayoutDescriptor* descriptor);
+        MaybeError CreateQuerySetInternal(QuerySetBase** result,
+                                          const QuerySetDescriptor* descriptor);
         MaybeError CreateRenderBundleEncoderInternal(
             RenderBundleEncoder** result,
             const RenderBundleEncoderDescriptor* descriptor);

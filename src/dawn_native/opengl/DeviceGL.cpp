@@ -24,6 +24,7 @@
 #include "dawn_native/opengl/CommandBufferGL.h"
 #include "dawn_native/opengl/ComputePipelineGL.h"
 #include "dawn_native/opengl/PipelineLayoutGL.h"
+#include "dawn_native/opengl/QuerySetGL.h"
 #include "dawn_native/opengl/QueueGL.h"
 #include "dawn_native/opengl/RenderPipelineGL.h"
 #include "dawn_native/opengl/SamplerGL.h"
@@ -115,6 +116,9 @@ namespace dawn_native { namespace opengl {
     ResultOrError<PipelineLayoutBase*> Device::CreatePipelineLayoutImpl(
         const PipelineLayoutDescriptor* descriptor) {
         return new PipelineLayout(this, descriptor);
+    }
+    ResultOrError<QuerySetBase*> Device::CreateQuerySetImpl(const QuerySetDescriptor* descriptor) {
+        return new QuerySet(this, descriptor);
     }
     ResultOrError<RenderPipelineBase*> Device::CreateRenderPipelineImpl(
         const RenderPipelineDescriptor* descriptor) {

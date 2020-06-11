@@ -124,6 +124,9 @@ namespace dawn_native { namespace vulkan {
         const PipelineLayoutDescriptor* descriptor) {
         return PipelineLayout::Create(this, descriptor);
     }
+    ResultOrError<QuerySetBase*> Device::CreateQuerySetImpl(const QuerySetDescriptor* descriptor) {
+        return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation");
+    }
     ResultOrError<RenderPipelineBase*> Device::CreateRenderPipelineImpl(
         const RenderPipelineDescriptor* descriptor) {
         return RenderPipeline::Create(this, descriptor);

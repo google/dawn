@@ -24,6 +24,7 @@
 #include "dawn_native/ComputePipeline.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/PipelineLayout.h"
+#include "dawn_native/QuerySet.h"
 #include "dawn_native/Queue.h"
 #include "dawn_native/RenderPipeline.h"
 #include "dawn_native/RingBufferAllocator.h"
@@ -45,6 +46,7 @@ namespace dawn_native { namespace null {
     using ComputePipeline = ComputePipelineBase;
     class Device;
     using PipelineLayout = PipelineLayoutBase;
+    class QuerySet;
     class Queue;
     using RenderPipeline = RenderPipelineBase;
     using Sampler = SamplerBase;
@@ -62,6 +64,7 @@ namespace dawn_native { namespace null {
         using ComputePipelineType = ComputePipeline;
         using DeviceType = Device;
         using PipelineLayoutType = PipelineLayout;
+        using QuerySetType = QuerySet;
         using QueueType = Queue;
         using RenderPipelineType = RenderPipeline;
         using SamplerType = Sampler;
@@ -118,6 +121,8 @@ namespace dawn_native { namespace null {
             const ComputePipelineDescriptor* descriptor) override;
         ResultOrError<PipelineLayoutBase*> CreatePipelineLayoutImpl(
             const PipelineLayoutDescriptor* descriptor) override;
+        ResultOrError<QuerySetBase*> CreateQuerySetImpl(
+            const QuerySetDescriptor* descriptor) override;
         ResultOrError<RenderPipelineBase*> CreateRenderPipelineImpl(
             const RenderPipelineDescriptor* descriptor) override;
         ResultOrError<SamplerBase*> CreateSamplerImpl(const SamplerDescriptor* descriptor) override;
@@ -214,6 +219,16 @@ namespace dawn_native { namespace null {
         ~CommandBuffer() override;
 
         CommandIterator mCommands;
+    };
+
+    class QuerySet final : public QuerySetBase {
+      public:
+        QuerySet(Device* device, const QuerySetDescriptor* descriptor);
+
+      private:
+        ~QuerySet() override;
+
+        void DestroyImpl() override;
     };
 
     class Queue final : public QueueBase {

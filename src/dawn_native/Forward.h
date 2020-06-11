@@ -34,6 +34,7 @@ namespace dawn_native {
     class InstanceBase;
     class PipelineBase;
     class PipelineLayoutBase;
+    class QuerySetBase;
     class QueueBase;
     class RenderBundleBase;
     class RenderBundleEncoder;

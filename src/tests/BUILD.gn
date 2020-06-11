@@ -185,6 +185,7 @@ test("dawn_unittests") {
     "unittests/validation/FenceValidationTests.cpp",
     "unittests/validation/GetBindGroupLayoutValidationTests.cpp",
     "unittests/validation/IndexBufferValidationTests.cpp",
+    "unittests/validation/QuerySetValidationTests.cpp",
     "unittests/validation/QueueSubmitValidationTests.cpp",
     "unittests/validation/RenderBundleValidationTests.cpp",
     "unittests/validation/RenderPassDescriptorValidationTests.cpp",

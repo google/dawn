@@ -64,6 +64,11 @@ namespace dawn_native {
     };
 
     template <typename BackendTraits>
+    struct ToBackendTraits<QuerySetBase, BackendTraits> {
+        using BackendType = typename BackendTraits::QuerySetType;
+    };
+
+    template <typename BackendTraits>
     struct ToBackendTraits<QueueBase, BackendTraits> {
         using BackendType = typename BackendTraits::QueueType;
     };

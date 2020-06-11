@@ -32,6 +32,7 @@
 #include "dawn_native/Instance.h"
 #include "dawn_native/MapRequestTracker.h"
 #include "dawn_native/PipelineLayout.h"
+#include "dawn_native/QuerySet.h"
 #include "dawn_native/Queue.h"
 #include "dawn_native/RenderBundleEncoder.h"
 #include "dawn_native/RenderPipeline.h"
@@ -647,6 +648,15 @@ namespace dawn_native {
 
         return result;
     }
+    QuerySetBase* DeviceBase::CreateQuerySet(const QuerySetDescriptor* descriptor) {
+        QuerySetBase* result = nullptr;
+
+        if (ConsumedError(CreateQuerySetInternal(&result, descriptor))) {
+            return QuerySetBase::MakeError(this);
+        }
+
+        return result;
+    }
     QueueBase* DeviceBase::CreateQueue() {
         // TODO(dawn:22): Remove this once users use GetDefaultQueue
         EmitDeprecationWarning(
@@ -881,6 +891,16 @@ namespace dawn_native {
             DAWN_TRY(ValidatePipelineLayoutDescriptor(this, descriptor));
         }
         DAWN_TRY_ASSIGN(*result, GetOrCreatePipelineLayout(descriptor));
+        return {};
+    }
+
+    MaybeError DeviceBase::CreateQuerySetInternal(QuerySetBase** result,
+                                                  const QuerySetDescriptor* descriptor) {
+        DAWN_TRY(ValidateIsAlive());
+        if (IsValidationEnabled()) {
+            DAWN_TRY(ValidateQuerySetDescriptor(this, descriptor));
+        }
+        DAWN_TRY_ASSIGN(*result, CreateQuerySetImpl(descriptor));
         return {};
     }
 
