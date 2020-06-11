@@ -412,6 +412,8 @@ if (DAWN_ENABLE_VULKAN)
         "vulkan/UtilsVulkan.h"
         "vulkan/VulkanError.cpp"
         "vulkan/VulkanError.h"
+        "vulkan/VulkanExtensions.cpp"
+        "vulkan/VulkanExtensions.h"
         "vulkan/VulkanFunctions.cpp"
         "vulkan/VulkanFunctions.h"
         "vulkan/VulkanInfo.cpp"

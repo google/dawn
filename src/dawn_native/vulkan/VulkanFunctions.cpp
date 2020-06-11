@@ -74,7 +74,7 @@ namespace dawn_native { namespace vulkan {
         GET_INSTANCE_PROC(GetPhysicalDeviceQueueFamilyProperties);
         GET_INSTANCE_PROC(GetPhysicalDeviceSparseImageFormatProperties);
 
-        if (globalInfo.debugReport) {
+        if (globalInfo.HasExt(InstanceExt::DebugReport)) {
             GET_INSTANCE_PROC(CreateDebugReportCallbackEXT);
             GET_INSTANCE_PROC(DebugReportMessageEXT);
             GET_INSTANCE_PROC(DestroyDebugReportCallbackEXT);
@@ -84,13 +84,13 @@ namespace dawn_native { namespace vulkan {
         // support the vendor entrypoint in GetProcAddress.
         if (globalInfo.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
             GET_INSTANCE_PROC(GetPhysicalDeviceExternalBufferProperties);
-        } else if (globalInfo.externalMemoryCapabilities) {
+        } else if (globalInfo.HasExt(InstanceExt::ExternalMemoryCapabilities)) {
             GET_INSTANCE_PROC_VENDOR(GetPhysicalDeviceExternalBufferProperties, KHR);
         }
 
         if (globalInfo.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
             GET_INSTANCE_PROC(GetPhysicalDeviceExternalSemaphoreProperties);
-        } else if (globalInfo.externalSemaphoreCapabilities) {
+        } else if (globalInfo.HasExt(InstanceExt::ExternalSemaphoreCapabilities)) {
             GET_INSTANCE_PROC_VENDOR(GetPhysicalDeviceExternalSemaphoreProperties, KHR);
         }
 
@@ -102,7 +102,7 @@ namespace dawn_native { namespace vulkan {
             GET_INSTANCE_PROC(GetPhysicalDeviceQueueFamilyProperties2);
             GET_INSTANCE_PROC(GetPhysicalDeviceMemoryProperties2);
             GET_INSTANCE_PROC(GetPhysicalDeviceSparseImageFormatProperties2);
-        } else if (globalInfo.getPhysicalDeviceProperties2) {
+        } else if (globalInfo.HasExt(InstanceExt::GetPhysicalDeviceProperties2)) {
             GET_INSTANCE_PROC_VENDOR(GetPhysicalDeviceFeatures2, KHR);
             GET_INSTANCE_PROC_VENDOR(GetPhysicalDeviceProperties2, KHR);
             GET_INSTANCE_PROC_VENDOR(GetPhysicalDeviceFormatProperties2, KHR);
@@ -112,7 +112,7 @@ namespace dawn_native { namespace vulkan {
             GET_INSTANCE_PROC_VENDOR(GetPhysicalDeviceSparseImageFormatProperties2, KHR);
         }
 
-        if (globalInfo.surface) {
+        if (globalInfo.HasExt(InstanceExt::Surface)) {
             GET_INSTANCE_PROC(DestroySurfaceKHR);
             GET_INSTANCE_PROC(GetPhysicalDeviceSurfaceSupportKHR);
             GET_INSTANCE_PROC(GetPhysicalDeviceSurfaceCapabilitiesKHR);
@@ -121,26 +121,26 @@ namespace dawn_native { namespace vulkan {
         }
 
 #if defined(VK_USE_PLATFORM_FUCHSIA)
-        if (globalInfo.fuchsiaImagePipeSurface) {
+        if (globalInfo.HasExt(InstanceExt::FuchsiaImagePipeSurface)) {
             GET_INSTANCE_PROC(CreateImagePipeSurfaceFUCHSIA);
         }
 #endif  // defined(VK_USE_PLATFORM_FUCHSIA)
 
 #if defined(DAWN_ENABLE_BACKEND_METAL)
-        if (globalInfo.metalSurface) {
+        if (globalInfo.HasExt(InstanceExt::MetalSurface)) {
             GET_INSTANCE_PROC(CreateMetalSurfaceEXT);
         }
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 
 #if defined(DAWN_PLATFORM_WINDOWS)
-        if (globalInfo.win32Surface) {
+        if (globalInfo.HasExt(InstanceExt::Win32Surface)) {
             GET_INSTANCE_PROC(CreateWin32SurfaceKHR);
             GET_INSTANCE_PROC(GetPhysicalDeviceWin32PresentationSupportKHR);
         }
 #endif  // defined(DAWN_PLATFORM_WINDOWS)
 
 #if defined(DAWN_USE_X11)
-        if (globalInfo.xlibSurface) {
+        if (globalInfo.HasExt(InstanceExt::XlibSurface)) {
             GET_INSTANCE_PROC(CreateXlibSurfaceKHR);
             GET_INSTANCE_PROC(GetPhysicalDeviceXlibPresentationSupportKHR);
         }

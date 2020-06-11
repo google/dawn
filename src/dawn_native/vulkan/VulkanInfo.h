@@ -17,6 +17,7 @@
 
 #include "common/vulkan_platform.h"
 #include "dawn_native/Error.h"
+#include "dawn_native/vulkan/VulkanExtensions.h"
 
 #include <vector>
 
@@ -31,8 +32,6 @@ namespace dawn_native { namespace vulkan {
     extern const char kLayerNameFuchsiaImagePipeSwapchain[];
 
     extern const char kExtensionNameExtDebugMarker[];
-    extern const char kExtensionNameExtDebugReport[];
-    extern const char kExtensionNameExtMetalSurface[];
     extern const char kExtensionNameKhrExternalMemory[];
     extern const char kExtensionNameKhrExternalMemoryCapabilities[];
     extern const char kExtensionNameKhrExternalMemoryFD[];
@@ -44,13 +43,7 @@ namespace dawn_native { namespace vulkan {
     extern const char kExtensionNameKhrExternalSemaphoreFD[];
     extern const char kExtensionNameFuchsiaExternalSemaphore[];
     extern const char kExtensionNameKhrGetPhysicalDeviceProperties2[];
-    extern const char kExtensionNameKhrSurface[];
     extern const char kExtensionNameKhrSwapchain[];
-    extern const char kExtensionNameKhrWaylandSurface[];
-    extern const char kExtensionNameKhrWin32Surface[];
-    extern const char kExtensionNameKhrXcbSurface[];
-    extern const char kExtensionNameKhrXlibSurface[];
-    extern const char kExtensionNameFuchsiaImagePipeSurface[];
     extern const char kExtensionNameKhrMaintenance1[];
     extern const char kExtensionNameKhrShaderFloat16Int8[];
     extern const char kExtensionNameKhr16BitStorage[];
@@ -63,23 +56,12 @@ namespace dawn_native { namespace vulkan {
         bool renderDocCapture = false;
         bool fuchsiaImagePipeSwapchain = false;
 
-        // Extensions
-        bool debugReport = false;
-        bool externalMemoryCapabilities = false;
-        bool externalSemaphoreCapabilities = false;
-        bool getPhysicalDeviceProperties2 = false;
-        bool metalSurface = false;
-        bool surface = false;
-        bool waylandSurface = false;
-        bool win32Surface = false;
-        bool xcbSurface = false;
-        bool xlibSurface = false;
-        bool fuchsiaImagePipeSurface = false;
+        bool HasExt(InstanceExt ext) const;
+        InstanceExtSet extensions;
     };
 
     struct VulkanGlobalInfo : VulkanGlobalKnobs {
         std::vector<VkLayerProperties> layers;
-        std::vector<VkExtensionProperties> extensions;
         uint32_t apiVersion;
         // TODO(cwallez@chromium.org): layer instance extensions
     };

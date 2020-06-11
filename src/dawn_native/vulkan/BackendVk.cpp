@@ -14,6 +14,7 @@
 
 #include "dawn_native/vulkan/BackendVk.h"
 
+#include "common/BitSetIterator.h"
 #include "common/Log.h"
 #include "common/SystemUtils.h"
 #include "dawn_native/Instance.h"
@@ -149,7 +150,7 @@ namespace dawn_native { namespace vulkan {
 
         DAWN_TRY(mFunctions.LoadInstanceProcs(mInstance, mGlobalInfo));
 
-        if (usedGlobalKnobs.debugReport) {
+        if (usedGlobalKnobs.HasExt(InstanceExt::DebugReport)) {
             DAWN_TRY(RegisterDebugReport());
         }
 
@@ -176,9 +177,7 @@ namespace dawn_native { namespace vulkan {
 
     ResultOrError<VulkanGlobalKnobs> Backend::CreateInstance() {
         VulkanGlobalKnobs usedKnobs = {};
-
-        std::vector<const char*> layersToRequest;
-        std::vector<const char*> extensionsToRequest;
+        std::vector<const char*> layerNames;
 
         // vktrace works by instering a layer, but we hide it behind a macro due to the vktrace
         // layer crashes when used without vktrace server started. See this vktrace issue:
@@ -187,7 +186,7 @@ namespace dawn_native { namespace vulkan {
         // by other layers.
 #if defined(DAWN_USE_VKTRACE)
         if (mGlobalInfo.vktrace) {
-            layersToRequest.push_back(kLayerNameLunargVKTrace);
+            layerNames.push_back(kLayerNameLunargVKTrace);
             usedKnobs.vktrace = true;
         }
 #endif
@@ -195,86 +194,38 @@ namespace dawn_native { namespace vulkan {
         // it unless we are debugging in RenderDoc so we hide it behind a macro.
 #if defined(DAWN_USE_RENDERDOC)
         if (mGlobalInfo.renderDocCapture) {
-            layersToRequest.push_back(kLayerNameRenderDocCapture);
+            layerNames.push_back(kLayerNameRenderDocCapture);
             usedKnobs.renderDocCapture = true;
         }
 #endif
 
         if (GetInstance()->IsBackendValidationEnabled()) {
             if (mGlobalInfo.validation) {
-                layersToRequest.push_back(kLayerNameKhronosValidation);
+                layerNames.push_back(kLayerNameKhronosValidation);
                 usedKnobs.validation = true;
             }
-            if (mGlobalInfo.debugReport) {
-                extensionsToRequest.push_back(kExtensionNameExtDebugReport);
-                usedKnobs.debugReport = true;
-            }
         }
 
-        // Always request all extensions used to create VkSurfaceKHR objects so that they are
-        // always available for embedders looking to create VkSurfaceKHR on our VkInstance.
-        if (mGlobalInfo.fuchsiaImagePipeSwapchain) {
-            layersToRequest.push_back(kLayerNameFuchsiaImagePipeSwapchain);
-            usedKnobs.fuchsiaImagePipeSwapchain = true;
-        }
-        if (mGlobalInfo.metalSurface) {
-            extensionsToRequest.push_back(kExtensionNameExtMetalSurface);
-            usedKnobs.metalSurface = true;
-        }
-        if (mGlobalInfo.surface) {
-            extensionsToRequest.push_back(kExtensionNameKhrSurface);
-            usedKnobs.surface = true;
-        }
-        if (mGlobalInfo.waylandSurface) {
-            extensionsToRequest.push_back(kExtensionNameKhrWaylandSurface);
-            usedKnobs.waylandSurface = true;
-        }
-        if (mGlobalInfo.win32Surface) {
-            extensionsToRequest.push_back(kExtensionNameKhrWin32Surface);
-            usedKnobs.win32Surface = true;
-        }
-        if (mGlobalInfo.xcbSurface) {
-            extensionsToRequest.push_back(kExtensionNameKhrXcbSurface);
-            usedKnobs.xcbSurface = true;
-        }
-        if (mGlobalInfo.xlibSurface) {
-            extensionsToRequest.push_back(kExtensionNameKhrXlibSurface);
-            usedKnobs.xlibSurface = true;
-        }
-        if (mGlobalInfo.fuchsiaImagePipeSurface) {
-            extensionsToRequest.push_back(kExtensionNameFuchsiaImagePipeSurface);
-            usedKnobs.fuchsiaImagePipeSurface = true;
+        // Available and known instance extensions default to being requested, but some special
+        // cases are removed.
+        InstanceExtSet extensionsToRequest = mGlobalInfo.extensions;
+
+        // TODO(cwallez@chromium.org): don't request extensions that have been promoted to Vulkan
+        // 1.1. This can only happen when we correctly detect and handle VkPhysicalDevice instance
+        // extensions that are promoted to be "device" extensions in the core Vulkan. If we don't
+        // do this there is a crash because a Vulkan 1.1 loader instance will not emulate the call
+        // on a Vulkan 1.0 ICD (and call nullptr).
+        // See https://github.com/KhronosGroup/Vulkan-Loader/issues/412.
+
+        if (!GetInstance()->IsBackendValidationEnabled()) {
+            extensionsToRequest.Set(InstanceExt::DebugReport, false);
         }
 
-        // Mark the promoted extensions as present if the core version in which they were promoted
-        // is used. This allows having a single boolean that checks if the functionality from that
-        // extension is available (instead of checking extension || coreVersion).
-        if (mGlobalInfo.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
-            usedKnobs.getPhysicalDeviceProperties2 = true;
-            usedKnobs.externalMemoryCapabilities = true;
-            usedKnobs.externalSemaphoreCapabilities = true;
-        }
+        usedKnobs.extensions = extensionsToRequest;
 
-        // The Vulkan-Loader has emulation of VkPhysicalDevices functions such as
-        // vkGetPhysicalDeviceProperties2 when the ICD doesn't support the extension. However the
-        // loader has a bug where if the instance is created with Vulkan 1.1 and not the promoted
-        // extensions, it will skip emulation and if the ICD doesn't support Vulkan 1.1 nor the
-        // extensions, we will crash on nullptr function pointer when the loader tries to call the
-        // ICD's vkGetPhysicalDeviceProperties2. See
-        // https://github.com/KhronosGroup/Vulkan-Loader/issues/412. We work around this by
-        // specifying we want to enable the promoted extensions, even when we create a Vulkan 1.1
-        // instance.
-        if (mGlobalInfo.externalMemoryCapabilities) {
-            extensionsToRequest.push_back(kExtensionNameKhrExternalMemoryCapabilities);
-            usedKnobs.externalMemoryCapabilities = true;
-        }
-        if (mGlobalInfo.externalSemaphoreCapabilities) {
-            extensionsToRequest.push_back(kExtensionNameKhrExternalSemaphoreCapabilities);
-            usedKnobs.externalSemaphoreCapabilities = true;
-        }
-        if (mGlobalInfo.getPhysicalDeviceProperties2) {
-            extensionsToRequest.push_back(kExtensionNameKhrGetPhysicalDeviceProperties2);
-            usedKnobs.getPhysicalDeviceProperties2 = true;
+        std::vector<const char*> extensionNames;
+        for (uint32_t ext : IterateBitSet(extensionsToRequest.extensionBitSet)) {
+            extensionNames.push_back(GetInstanceExtInfo(static_cast<InstanceExt>(ext)).name);
         }
 
         VkApplicationInfo appInfo;
@@ -291,10 +242,10 @@ namespace dawn_native { namespace vulkan {
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
         createInfo.pApplicationInfo = &appInfo;
-        createInfo.enabledLayerCount = static_cast<uint32_t>(layersToRequest.size());
-        createInfo.ppEnabledLayerNames = layersToRequest.data();
-        createInfo.enabledExtensionCount = static_cast<uint32_t>(extensionsToRequest.size());
-        createInfo.ppEnabledExtensionNames = extensionsToRequest.data();
+        createInfo.enabledLayerCount = static_cast<uint32_t>(layerNames.size());
+        createInfo.ppEnabledLayerNames = layerNames.data();
+        createInfo.enabledExtensionCount = static_cast<uint32_t>(extensionNames.size());
+        createInfo.ppEnabledExtensionNames = extensionNames.data();
 
         DAWN_TRY(CheckVkSuccess(mFunctions.CreateInstance(&createInfo, nullptr, &mInstance),
                                 "vkCreateInstance"));
