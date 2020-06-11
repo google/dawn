@@ -289,6 +289,13 @@ class FunctionEmitter {
   /// @returns false if emission failed.
   bool EmitIfStart(const BlockInfo& block_info);
 
+  /// Emits a SwitchStatement, including its condition expression, and sets
+  /// up the statement stack to accumulate subsequent basic blocks into
+  /// the default clause and case clauses.
+  /// @param block_info the switch-selection header block
+  /// @returns false if emission failed.
+  bool EmitSwitchStart(const BlockInfo& block_info);
+
   /// Emits a LoopStatement, and pushes a new StatementBlock to accumulate
   /// the remaining instructions in the current block and subsequent blocks
   /// in the loop.
@@ -375,7 +382,7 @@ class FunctionEmitter {
   /// Gets the block info for a block ID, if any exists
   /// @param id the SPIR-V ID of the OpLabel instruction starting the block
   /// @returns the block info for the given ID, if it exists, or nullptr
-  BlockInfo* GetBlockInfo(uint32_t id) {
+  BlockInfo* GetBlockInfo(uint32_t id) const {
     auto where = block_info_.find(id);
     if (where == block_info_.end())
       return nullptr;
@@ -434,7 +441,7 @@ class FunctionEmitter {
                    uint32_t end_id,
                    CompletionAction completion_action,
                    ast::StatementList statements,
-                   ast::CaseStatementList cases);
+                   std::unique_ptr<ast::CaseStatementList> cases);
     StatementBlock(StatementBlock&&);
     ~StatementBlock();
 
@@ -449,10 +456,13 @@ class FunctionEmitter {
 
     // Only one of |statements| or |cases| is active.
 
-    // The list of statements being built.
+    // The list of statements being built, if this construct is not a switch.
     ast::StatementList statements_;
-    // The list of cases being built, for a switch.
-    ast::CaseStatementList cases_;
+    // The list of switch cases being built, if this construct is a switch.
+    // The algorithm will cache a pointer to the vector.  We want that pointer
+    // to be stable no matter how |statements_stack_| is resized.  That's
+    // why we make this a unique_ptr rather than just a plain vector.
+    std::unique_ptr<ast::CaseStatementList> cases_;
   };
 
   /// Pushes an empty statement block onto the statements stack.
