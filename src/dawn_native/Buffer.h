@@ -35,6 +35,7 @@ namespace dawn_native {
         enum class BufferState {
             Unmapped,
             Mapped,
+            MappedAtCreation,
             Destroyed,
         };
 

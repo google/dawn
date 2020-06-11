@@ -22,9 +22,13 @@ namespace dawn_native { namespace opengl {
 
     Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
         : BufferBase(device, descriptor) {
+        // TODO(cwallez@chromium.org): Have a global "zero" buffer instead of creating a new 4-byte
+        // buffer?
+        uint64_t size = std::max(GetSize(), uint64_t(4u));
+
         device->gl.GenBuffers(1, &mBuffer);
         device->gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
-        device->gl.BufferData(GL_ARRAY_BUFFER, GetSize(), nullptr, GL_STATIC_DRAW);
+        device->gl.BufferData(GL_ARRAY_BUFFER, size, nullptr, GL_STATIC_DRAW);
     }
 
     Buffer::~Buffer() {

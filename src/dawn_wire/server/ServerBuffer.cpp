@@ -202,6 +202,7 @@ namespace dawn_wire { namespace server {
             // to Unmap and attempt to update mapped data of an error buffer.
             return false;
         }
+
         // Deserialize the flush info and flush updated data from the handle into the target
         // of the handle. The target is set via WriteHandle::SetTarget.
         return buffer->writeHandle->DeserializeFlush(writeFlushInfo,
