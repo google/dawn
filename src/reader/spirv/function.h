@@ -330,12 +330,42 @@ class FunctionEmitter {
 
   /// Returns a new statement to represent the given branch representing a
   /// "normal" terminator, as in the sense of EmitNormalTerminator.  If no
-  /// WGSL statement is required, the statement will be nullptr.
+  /// WGSL statement is required, the statement will be nullptr. This method
+  /// tries to avoid emitting a 'break' statement when that would be redundant
+  /// in WGSL due to implicit breaking out of a switch.
   /// @param src_info the source block
   /// @param dest_info the destination block
   /// @returns the new statement, or a null statement
   std::unique_ptr<ast::Statement> MakeBranch(const BlockInfo& src_info,
-                                             const BlockInfo& dest_info) const;
+                                             const BlockInfo& dest_info) const {
+    return MakeBranchInternal(src_info, dest_info, false);
+  }
+
+  /// Returns a new statement to represent the given branch representing a
+  /// "normal" terminator, as in the sense of EmitNormalTerminator.  If no
+  /// WGSL statement is required, the statement will be nullptr.
+  /// @param src_info the source block
+  /// @param dest_info the destination block
+  /// @returns the new statement, or a null statement
+  std::unique_ptr<ast::Statement> MakeForcedBranch(
+      const BlockInfo& src_info,
+      const BlockInfo& dest_info) const {
+    return MakeBranchInternal(src_info, dest_info, true);
+  }
+
+  /// Returns a new statement to represent the given branch representing a
+  /// "normal" terminator, as in the sense of EmitNormalTerminator.  If no
+  /// WGSL statement is required, the statement will be nullptr. When |forced|
+  /// is false, this method tries to avoid emitting a 'break' statement when
+  /// that would be redundant in WGSL due to implicit breaking out of a switch.
+  /// When |forced| is true, the method won't try to avoid emitting that break.
+  /// @param src_info the source block
+  /// @param dest_info the destination block
+  /// @param forced if true, always emit the branch (if it exists in WGSL)
+  /// @returns the new statement, or a null statement
+  std::unique_ptr<ast::Statement> MakeBranchInternal(const BlockInfo& src_info,
+                                                     const BlockInfo& dest_info,
+                                                     bool forced) const;
 
   /// Returns a new if statement with the given statements as the then-clause
   /// and the else-clause.  Either or both clauses might be nullptr. If both
@@ -348,6 +378,24 @@ class FunctionEmitter {
       std::unique_ptr<ast::Expression> condition,
       std::unique_ptr<ast::Statement> then_stmt,
       std::unique_ptr<ast::Statement> else_stmt) const;
+
+  /// Emits the statements for an normal-terminator OpBranchConditional
+  /// where one branch is a case fall through (the true branch if and only
+  /// if |fall_through_is_true_branch| is true), and the other branch is
+  /// goes to a different destination, named by |other_dest|.
+  /// @param src_info the basic block from which we're branching
+  /// @param cond the branching condition
+  /// @param other_edge_kind the edge kind from the source block to the other
+  /// destination
+  /// @param other_dest the other branching destination
+  /// @param fall_through_is_true_branch true when the fall-through is the true
+  /// branch
+  /// @returns the false if emission fails
+  bool EmitConditionalCaseFallThrough(const BlockInfo& src_info,
+                                      std::unique_ptr<ast::Expression> cond,
+                                      EdgeKind other_edge_kind,
+                                      const BlockInfo& other_dest,
+                                      bool fall_through_is_true_branch);
 
   /// Emits a normal instruction: not a terminator, label, or variable
   /// declaration.

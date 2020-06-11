@@ -2040,9 +2040,12 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
 
       // The fallthrough case is special because WGSL requires the fallthrough
       // statement to be last in the case clause.
-      if (true_kind == EdgeKind::kCaseFallThrough ||
-          false_kind == EdgeKind::kCaseFallThrough) {
-        return Fail() << "fallthrough is unhandled";
+      if (true_kind == EdgeKind::kCaseFallThrough) {
+        return EmitConditionalCaseFallThrough(block_info, std::move(cond),
+                                              false_kind, *false_info, true);
+      } else if (false_kind == EdgeKind::kCaseFallThrough) {
+        return EmitConditionalCaseFallThrough(block_info, std::move(cond),
+                                              true_kind, *true_info, false);
       }
 
       // At this point, at most one edge is kForward or kIfBreak.
@@ -2067,16 +2070,21 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
   return success();
 }
 
-std::unique_ptr<ast::Statement> FunctionEmitter::MakeBranch(
+std::unique_ptr<ast::Statement> FunctionEmitter::MakeBranchInternal(
     const BlockInfo& src_info,
-    const BlockInfo& dest_info) const {
+    const BlockInfo& dest_info,
+    bool forced) const {
   auto kind = src_info.succ_edge.find(dest_info.id)->second;
   switch (kind) {
     case EdgeKind::kBack:
       // Nothing to do. The loop backedge is implicit.
       break;
     case EdgeKind::kSwitchBreak: {
-      // Don't bother with a break at the end of a case.
+      if (forced) {
+        return std::make_unique<ast::BreakStatement>();
+      }
+      // Unless forced, don't bother with a break at the end of a case/default
+      // clause.
       const auto header = dest_info.header_for_merge;
       assert(header != 0);
       const auto* exiting_construct = GetBlockInfo(header)->construct;
@@ -2146,6 +2154,52 @@ std::unique_ptr<ast::Statement> FunctionEmitter::MakeSimpleIf(
     if_stmt->set_else_statements(std::move(else_stmts));
   }
   return if_stmt;
+}
+
+bool FunctionEmitter::EmitConditionalCaseFallThrough(
+    const BlockInfo& src_info,
+    std::unique_ptr<ast::Expression> cond,
+    EdgeKind other_edge_kind,
+    const BlockInfo& other_dest,
+    bool fall_through_is_true_branch) {
+  // In WGSL, the fallthrough statement must come last in the case clause.
+  // So we'll emit an if statement for the other branch, and then emit
+  // the fallthrough.
+
+  // We have two distinct destinations. But we only get here if this
+  // is a normal terminator; in particular the source block is *not* the
+  // start of an if-selection.  So at most one branch is a kForward or
+  // kCaseFallThrough.
+  if (other_edge_kind == EdgeKind::kForward) {
+    return Fail()
+           << "internal error: normal terminator OpBranchConditional has "
+              "both forward and fallthrough edges";
+  }
+  if (other_edge_kind == EdgeKind::kIfBreak) {
+    return Fail()
+           << "internal error: normal terminator OpBranchConditional has "
+              "both IfBreak and fallthrough edges.  Violates nesting rule";
+  }
+  if (other_edge_kind == EdgeKind::kBack) {
+    return Fail()
+           << "internal error: normal terminator OpBranchConditional has "
+              "both backedge and fallthrough edges.  Violates nesting rule";
+  }
+  auto other_branch = MakeForcedBranch(src_info, other_dest);
+  if (other_branch == nullptr) {
+    return Fail() << "internal error: expected a branch for edge-kind "
+                  << int(other_edge_kind);
+  }
+  if (fall_through_is_true_branch) {
+    AddStatement(
+        MakeSimpleIf(std::move(cond), nullptr, std::move(other_branch)));
+  } else {
+    AddStatement(
+        MakeSimpleIf(std::move(cond), std::move(other_branch), nullptr));
+  }
+  AddStatement(std::make_unique<ast::FallthroughStatement>());
+
+  return success();
 }
 
 bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,

@@ -10237,8 +10237,63 @@ Return{}
 )")) << ToString(fe.ast_body());
 }
 
-TEST_F(SpvParserTest, DISABLED_EmitBody_Branch_Fallthrough) {
-  // TODO(dneto): support fallthrough first.
+TEST_F(SpvParserTest, EmitBody_Branch_Fallthrough) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_1
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %20 30 %30
+
+     %20 = OpLabel
+     OpStore %var %uint_20
+     OpBranch %30 ; uncondtional fallthrough
+
+     %30 = OpLabel
+     OpStore %var %uint_30
+     OpBranch %99
+
+     %99 = OpLabel
+     OpStore %var %uint_7
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{1}
+}
+Switch{
+  ScalarConstructor{42}
+  {
+    Case 20{
+      Assignment{
+        Identifier{var}
+        ScalarConstructor{20}
+      }
+      Fallthrough{}
+    }
+    Case 30{
+      Assignment{
+        Identifier{var}
+        ScalarConstructor{30}
+      }
+    }
+    Default{
+    }
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{7}
+}
+Return{}
+)")) << ToString(fe.ast_body());
 }
 
 TEST_F(SpvParserTest, EmitBody_Branch_Forward) {
@@ -10299,8 +10354,8 @@ Return{}
 //      kLoopBreak: dup general case
 //      kLoopContinue: TESTED
 //      kIfBreak: invalid: switch and if must have distinct merge blocks
-//      kCaseFallThrough: TODO(dneto)
-//      kForward: TESTED
+//      kCaseFallThrough: not possible, because switch break conflicts with loop
+//      break kForward: TESTED
 //
 //    kLoopContinue with:
 //      kBack : symmetry
@@ -11039,13 +11094,143 @@ Return{}
 }
 
 TEST_F(SpvParserTest,
-       DISABLED_EmitBody_BranchConditional_SwitchBreak_Fallthrough_OnTrue) {
-  // TODO(dneto): needs fallthrough support
+       EmitBody_BranchConditional_SwitchBreak_Fallthrough_OnTrue) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_1
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %20 30 %30
+
+     %20 = OpLabel
+     OpStore %var %uint_20
+     OpBranchConditional %cond %30 %99; fallthrough on true
+
+     %30 = OpLabel
+     OpStore %var %uint_30
+     OpBranch %99
+
+     %99 = OpLabel
+     OpStore %var %uint_7
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{1}
+}
+Switch{
+  ScalarConstructor{42}
+  {
+    Case 20{
+      Assignment{
+        Identifier{var}
+        ScalarConstructor{20}
+      }
+      If{
+        (
+          ScalarConstructor{false}
+        )
+        {
+        }
+      }
+      Else{
+        {
+          Break{}
+        }
+      }
+      Fallthrough{}
+    }
+    Case 30{
+      Assignment{
+        Identifier{var}
+        ScalarConstructor{30}
+      }
+    }
+    Default{
+    }
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{7}
+}
+Return{}
+)")) << ToString(fe.ast_body());
 }
 
 TEST_F(SpvParserTest,
-       DISABLED_EmitBody_BranchConditional_SwitchBreak_Fallthrough_OnFalse) {
-  // TODO(dneto): needs fallthrough support
+       EmitBody_BranchConditional_SwitchBreak_Fallthrough_OnFalse) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_1
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %20 30 %30
+
+     %20 = OpLabel
+     OpStore %var %uint_20
+     OpBranchConditional %cond %99 %30; fallthrough on false
+
+     %30 = OpLabel
+     OpStore %var %uint_30
+     OpBranch %99
+
+     %99 = OpLabel
+     OpStore %var %uint_7
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{1}
+}
+Switch{
+  ScalarConstructor{42}
+  {
+    Case 20{
+      Assignment{
+        Identifier{var}
+        ScalarConstructor{20}
+      }
+      If{
+        (
+          ScalarConstructor{false}
+        )
+        {
+          Break{}
+        }
+      }
+      Fallthrough{}
+    }
+    Case 30{
+      Assignment{
+        Identifier{var}
+        ScalarConstructor{30}
+      }
+    }
+    Default{
+    }
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{7}
+}
+Return{}
+)")) << ToString(fe.ast_body());
 }
 
 TEST_F(SpvParserTest,
@@ -11349,12 +11534,53 @@ Return{}
 }
 
 TEST_F(SpvParserTest,
-       DISABLED_EmitBody_BranchConditional_LoopBreak_Fallthrough_OnTrue) {
-  // TODO(dneto): needs fallthrough support
-}
-TEST_F(SpvParserTest,
-       DISABLED_EmitBody_BranchConditional_LoopBreak_Fallthrough_OnFalse) {
-  // TODO(dneto): needs fallthrough support
+       EmitBody_BranchConditional_LoopBreak_Fallthrough_IsError) {
+  // It's an error because switch break conflicts with loop break.
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_0
+     OpBranch %20
+
+     %20 = OpLabel
+     OpStore %var %uint_1
+     OpLoopMerge %99 %80 None
+     OpBranch %30
+
+     %30 = OpLabel
+     OpSelectionMerge %79 None
+     OpSwitch %selector %79 40 %40 50 %50
+
+     %40 = OpLabel
+     OpStore %var %uint_40
+     ; error: branch to 99 bypasses switch's merge
+     OpBranchConditional %cond %99 %50 ; loop break; fall through
+
+     %50 = OpLabel
+     OpStore %var %uint_50
+     OpBranch %79
+
+     %79 = OpLabel ; switch merge
+     OpBranch %80
+
+     %80 = OpLabel ; continue target
+     OpStore %var %uint_4
+     OpBranch %20
+
+     %99 = OpLabel
+     OpStore %var %uint_5
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(
+      p->error(),
+      Eq("Branch from block 40 to block 99 is an invalid exit from construct "
+         "starting at block 30; branch bypasses merge block 79"));
 }
 
 TEST_F(SpvParserTest, EmitBody_BranchConditional_LoopBreak_Forward_OnTrue) {
@@ -12057,13 +12283,214 @@ Return{}
 )")) << ToString(fe.ast_body());
 }
 
-TEST_F(SpvParserTest,
-       DISABLED_EmitBody_BranchConditional_Continue_Fallthrough_OnTrue) {
-  // TODO(dneto): needs fallthrough support
+TEST_F(SpvParserTest, EmitBody_BranchConditional_Continue_Fallthrough_OnTrue) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_0
+     OpBranch %20
+
+     %20 = OpLabel
+     OpStore %var %uint_1
+     OpLoopMerge %99 %80 None
+     OpBranch %30
+
+     %30 = OpLabel
+     OpStore %var %uint_2
+     OpSelectionMerge %79 None
+     OpSwitch %selector %79 40 %40 50 %50
+
+     %40 = OpLabel
+     OpStore %var %uint_40
+     OpBranchConditional %cond %50 %80 ; loop continue; fall through on true
+
+     %50 = OpLabel
+     OpStore %var %uint_50
+     OpBranch %79
+
+     %79 = OpLabel ; switch merge
+     OpStore %var %uint_3
+     OpBranch %80
+
+     %80 = OpLabel ; continue target
+     OpStore %var %uint_4
+     OpBranch %20
+
+     %99 = OpLabel
+     OpStore %var %uint_5
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{0}
 }
-TEST_F(SpvParserTest,
-       DISABLED_EmitBody_BranchConditional_Continue_Fallthrough_OnFalse) {
-  // TODO(dneto): needs fallthrough support
+Loop{
+  Assignment{
+    Identifier{var}
+    ScalarConstructor{1}
+  }
+  Assignment{
+    Identifier{var}
+    ScalarConstructor{2}
+  }
+  Switch{
+    ScalarConstructor{42}
+    {
+      Case 40{
+        Assignment{
+          Identifier{var}
+          ScalarConstructor{40}
+        }
+        If{
+          (
+            ScalarConstructor{false}
+          )
+          {
+          }
+        }
+        Else{
+          {
+            Continue{}
+          }
+        }
+        Fallthrough{}
+      }
+      Case 50{
+        Assignment{
+          Identifier{var}
+          ScalarConstructor{50}
+        }
+      }
+      Default{
+      }
+    }
+  }
+  Assignment{
+    Identifier{var}
+    ScalarConstructor{3}
+  }
+  continuing {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{4}
+    }
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{5}
+}
+Return{}
+)")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest, EmitBody_BranchConditional_Continue_Fallthrough_OnFalse) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_0
+     OpBranch %20
+
+     %20 = OpLabel
+     OpStore %var %uint_1
+     OpLoopMerge %99 %80 None
+     OpBranch %30
+
+     %30 = OpLabel
+     OpStore %var %uint_2
+     OpSelectionMerge %79 None
+     OpSwitch %selector %79 40 %40 50 %50
+
+     %40 = OpLabel
+     OpStore %var %uint_40
+     OpBranchConditional %cond %80 %50 ; loop continue; fall through on false
+
+     %50 = OpLabel
+     OpStore %var %uint_50
+     OpBranch %79
+
+     %79 = OpLabel ; switch merge
+     OpStore %var %uint_3
+     OpBranch %80
+
+     %80 = OpLabel ; continue target
+     OpStore %var %uint_4
+     OpBranch %20
+
+     %99 = OpLabel
+     OpStore %var %uint_5
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{0}
+}
+Loop{
+  Assignment{
+    Identifier{var}
+    ScalarConstructor{1}
+  }
+  Assignment{
+    Identifier{var}
+    ScalarConstructor{2}
+  }
+  Switch{
+    ScalarConstructor{42}
+    {
+      Case 40{
+        Assignment{
+          Identifier{var}
+          ScalarConstructor{40}
+        }
+        If{
+          (
+            ScalarConstructor{false}
+          )
+          {
+            Continue{}
+          }
+        }
+        Fallthrough{}
+      }
+      Case 50{
+        Assignment{
+          Identifier{var}
+          ScalarConstructor{50}
+        }
+      }
+      Default{
+      }
+    }
+  }
+  Assignment{
+    Identifier{var}
+    ScalarConstructor{3}
+  }
+  continuing {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{4}
+    }
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{5}
+}
+Return{}
+)")) << ToString(fe.ast_body());
 }
 
 TEST_F(SpvParserTest, EmitBody_BranchConditional_Continue_Forward_OnTrue) {
@@ -12298,16 +12725,103 @@ TEST_F(SpvParserTest,
          "starting at block 20; branch bypasses merge block 89"));
 }
 
-TEST_F(SpvParserTest,
-       DISABLED_EmitBody_BranchConditional_Fallthrough_Fallthrough_Same) {
-  // Can only be to the same target.
-  // TODO(dneto): needs fallthrough support
+TEST_F(SpvParserTest, EmitBody_BranchConditional_Fallthrough_Fallthrough_Same) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpStore %var %uint_1
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %20 30 %30
+
+     %20 = OpLabel
+     OpStore %var %uint_20
+     OpBranchConditional %cond %30 %30 ; fallthrough fallthrough
+
+     %30 = OpLabel
+     OpStore %var %uint_30
+     OpBranch %99
+
+     %99 = OpLabel
+     OpStore %var %uint_7
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{1}
+}
+Switch{
+  ScalarConstructor{42}
+  {
+    Case 20{
+      Assignment{
+        Identifier{var}
+        ScalarConstructor{20}
+      }
+      Fallthrough{}
+    }
+    Case 30{
+      Assignment{
+        Identifier{var}
+        ScalarConstructor{30}
+      }
+    }
+    Default{
+    }
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{7}
+}
+Return{}
+)")) << ToString(fe.ast_body());
 }
 
-TEST_F(
-    SpvParserTest,
-    DISABLED_EmitBody_BranchConditional_Fallthrough_Fallthrough_Different_IsError) {
-  // TODO(dneto): needs fallthrough support
+TEST_F(SpvParserTest,
+       EmitBody_BranchConditional_Fallthrough_NotLastInCase_IsError) {
+  // See also
+  // ClassifyCFGEdges_Fallthrough_BranchConditionalWith_Forward_IsError.
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %selector %99 20 %20 40 %40
+
+     %20 = OpLabel ; case 30
+     OpSelectionMerge %39 None
+     OpBranchConditional %cond %40 %30 ; fallthrough and forward
+
+     %30 = OpLabel
+     OpBranch %39
+
+     %39 = OpLabel
+     OpBranch %99
+
+     %40 = OpLabel  ; case 40
+     OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(fe.EmitBody());
+  // The weird forward branch pulls in 40 as part of the selection rather than
+  // as a case.
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 40, 30, 39, 99));
+  EXPECT_THAT(
+      p->error(),
+      Eq("Branch from 10 to 40 bypasses header 20 (dominance rule violated)"));
 }
 
 TEST_F(SpvParserTest, EmitBody_BranchConditional_Forward_Forward_Same) {
