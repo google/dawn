@@ -1343,9 +1343,6 @@ bool FunctionEmitter::FindIfSelectionInternalHeaders() {
       false_head_info->false_head_for = construct.get();
       if_header_info->false_head = false_head_info;
     }
-    if ((!contains_true) && contains_false) {
-      false_head_info->exclusive_false_head_for = construct.get();
-    }
 
     if ((true_head_info->header_for_merge != 0) &&
         (true_head_info->header_for_merge != construct->begin_id)) {

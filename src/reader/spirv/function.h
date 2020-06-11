@@ -149,10 +149,6 @@ struct BlockInfo {
   /// control reconverges between the "then" and "else" clauses, but before
   /// the merge block for that selection.
   const Construct* premerge_head_for = nullptr;
-  /// The construct for which this block is the false head, and that construct
-  /// does not have a true head.
-  /// TODO(dneto): I think we can remove |exclusive_false_head_for|
-  const Construct* exclusive_false_head_for = nullptr;
   /// If not null, then this block is an if-selection header, and |true_head| is
   /// the target of the true branch on the OpBranchConditional.
   /// In particular, true_head->true_head_for == this
