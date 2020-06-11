@@ -388,6 +388,49 @@ class CopyTests_T2T : public CopyTests {
     }
 };
 
+class CopyTests_B2B : public DawnTest {
+  protected:
+    // This is the same signature as CopyBufferToBuffer except that the buffers are replaced by
+    // only their size.
+    void DoTest(uint64_t sourceSize,
+                uint64_t sourceOffset,
+                uint64_t destinationSize,
+                uint64_t destinationOffset,
+                uint64_t copySize) {
+        ASSERT(sourceSize % 4 == 0);
+        ASSERT(destinationSize % 4 == 0);
+
+        // Create our two test buffers, destination filled with zeros, source filled with non-zeroes
+        std::vector<uint32_t> zeroes(static_cast<size_t>(destinationSize / sizeof(uint32_t)));
+        wgpu::Buffer destination =
+            utils::CreateBufferFromData(device, zeroes.data(), zeroes.size() * sizeof(uint32_t),
+                                        wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc);
+
+        std::vector<uint32_t> sourceData(static_cast<size_t>(sourceSize / sizeof(uint32_t)));
+        for (size_t i = 0; i < sourceData.size(); i++) {
+            sourceData[i] = i + 1;
+        }
+        wgpu::Buffer source = utils::CreateBufferFromData(device, sourceData.data(),
+                                                          sourceData.size() * sizeof(uint32_t),
+                                                          wgpu::BufferUsage::CopySrc);
+
+        // Submit the copy
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(source, sourceOffset, destination, destinationOffset, copySize);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        // Check destination is exactly the expected content.
+        EXPECT_BUFFER_U32_RANGE_EQ(zeroes.data(), destination, 0,
+                                   destinationOffset / sizeof(uint32_t));
+        EXPECT_BUFFER_U32_RANGE_EQ(sourceData.data() + sourceOffset / sizeof(uint32_t), destination,
+                                   destinationOffset, copySize / sizeof(uint32_t));
+        uint64_t copyEnd = destinationOffset + copySize;
+        EXPECT_BUFFER_U32_RANGE_EQ(zeroes.data(), destination, copyEnd,
+                                   (destinationSize - copyEnd) / sizeof(uint32_t));
+    }
+};
+
 // Test that copying an entire texture with 256-byte aligned dimensions works
 TEST_P(CopyTests_T2B, FullTextureAligned) {
     constexpr uint32_t kWidth = 256;
@@ -823,6 +866,36 @@ TEST_P(CopyTests_T2T, MultipleMipSrcSingleMipDst) {
     }
 }
 
-// TODO(brandon1.jones@intel.com) Add test for ensuring blitCommandEncoder on Metal.
-
 DAWN_INSTANTIATE_TEST(CopyTests_T2T, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
+
+static constexpr uint64_t kSmallBufferSize = 4;
+static constexpr uint64_t kLargeBufferSize = 1 << 16;
+
+// Test copying full buffers
+TEST_P(CopyTests_B2B, FullCopy) {
+    DoTest(kSmallBufferSize, 0, kSmallBufferSize, 0, kSmallBufferSize);
+    DoTest(kLargeBufferSize, 0, kLargeBufferSize, 0, kLargeBufferSize);
+}
+
+// Test copying small pieces of a buffer at different corner case offsets
+TEST_P(CopyTests_B2B, SmallCopyInBigBuffer) {
+    constexpr uint64_t kEndOffset = kLargeBufferSize - kSmallBufferSize;
+    DoTest(kLargeBufferSize, 0, kLargeBufferSize, 0, kSmallBufferSize);
+    DoTest(kLargeBufferSize, kEndOffset, kLargeBufferSize, 0, kSmallBufferSize);
+    DoTest(kLargeBufferSize, 0, kLargeBufferSize, kEndOffset, kSmallBufferSize);
+    DoTest(kLargeBufferSize, kEndOffset, kLargeBufferSize, kEndOffset, kSmallBufferSize);
+}
+
+// Test zero-size copies
+TEST_P(CopyTests_B2B, ZeroSizedCopy) {
+    DoTest(kLargeBufferSize, 0, kLargeBufferSize, 0, 0);
+    DoTest(kLargeBufferSize, 0, kLargeBufferSize, kLargeBufferSize, 0);
+    DoTest(kLargeBufferSize, kLargeBufferSize, kLargeBufferSize, 0, 0);
+    DoTest(kLargeBufferSize, kLargeBufferSize, kLargeBufferSize, kLargeBufferSize, 0);
+}
+
+DAWN_INSTANTIATE_TEST(CopyTests_B2B,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());

@@ -638,13 +638,16 @@ namespace dawn_native {
                 mTopLevelBuffers.insert(destination);
             }
 
-            CopyBufferToBufferCmd* copy =
-                allocator->Allocate<CopyBufferToBufferCmd>(Command::CopyBufferToBuffer);
-            copy->source = source;
-            copy->sourceOffset = sourceOffset;
-            copy->destination = destination;
-            copy->destinationOffset = destinationOffset;
-            copy->size = size;
+            // Skip noop copies. Some backends validation rules disallow them.
+            if (size != 0) {
+                CopyBufferToBufferCmd* copy =
+                    allocator->Allocate<CopyBufferToBufferCmd>(Command::CopyBufferToBuffer);
+                copy->source = source;
+                copy->sourceOffset = sourceOffset;
+                copy->destination = destination;
+                copy->destinationOffset = destinationOffset;
+                copy->size = size;
+            }
 
             return {};
         });
