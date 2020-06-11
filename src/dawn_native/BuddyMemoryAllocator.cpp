@@ -45,6 +45,11 @@ namespace dawn_native {
             return std::move(invalidAllocation);
         }
 
+        // Check the unaligned size to avoid overflowing NextPowerOfTwo.
+        if (allocationSize > mMemoryBlockSize) {
+            return std::move(invalidAllocation);
+        }
+
         // Round allocation size to nearest power-of-two.
         allocationSize = NextPowerOfTwo(allocationSize);
 

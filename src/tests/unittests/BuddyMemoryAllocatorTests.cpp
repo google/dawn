@@ -345,3 +345,14 @@ TEST(BuddyMemoryAllocatorTests, VariousSizeSameAlignment) {
 
     ASSERT_EQ(allocator.ComputeTotalNumOfHeapsForTesting(), 3u);
 }
+
+// Verify allocating a very large resource does not overflow.
+TEST(BuddyMemoryAllocatorTests, AllocationOverflow) {
+    constexpr uint64_t heapSize = 128;
+    constexpr uint64_t maxBlockSize = 512;
+    DummyBuddyResourceAllocator allocator(maxBlockSize, heapSize);
+
+    constexpr uint64_t largeBlock = (1ull << 63) + 1;
+    ResourceMemoryAllocation invalidAllocation = allocator.Allocate(largeBlock);
+    ASSERT_EQ(invalidAllocation.GetInfo().mMethod, AllocationMethod::kInvalid);
+}
