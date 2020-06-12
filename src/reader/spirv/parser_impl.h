@@ -128,6 +128,9 @@ class ParserImpl : Reader {
     return glsl_std_450_imports_;
   }
 
+  /// @returns the import prefix to use for the GLSL.std.450 import.
+  std::string GlslStd450Prefix() const { return "std::glsl"; }
+
   /// Converts a SPIR-V type to a Tint type, and saves it for fast lookup.
   /// On failure, logs an error and returns null.  This should only be called
   /// after the internal representation of the module has been built.

@@ -646,6 +646,7 @@ source_set("tint_unittests_spv_reader_src") {
     "src/reader/spirv/function_cfg_test.cc",
     "src/reader/spirv/function_conversion_test.cc",
     "src/reader/spirv/function_decl_test.cc",
+    "src/reader/spirv/function_glsl_std_450_test.cc",
     "src/reader/spirv/function_logical_test.cc",
     "src/reader/spirv/function_memory_test.cc",
     "src/reader/spirv/function_var_test.cc",

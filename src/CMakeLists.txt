@@ -322,6 +322,7 @@ if(${TINT_BUILD_SPV_READER})
     reader/spirv/function_cfg_test.cc
     reader/spirv/function_conversion_test.cc
     reader/spirv/function_decl_test.cc
+    reader/spirv/function_glsl_std_450_test.cc
     reader/spirv/function_logical_test.cc
     reader/spirv/function_var_test.cc
     reader/spirv/function_memory_test.cc

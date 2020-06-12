@@ -427,6 +427,12 @@ class FunctionEmitter {
   TypedExpression MaybeEmitCombinatorialValue(
       const spvtools::opt::Instruction& inst);
 
+  /// Creates an expression and supporting statements for the a GLSL.std.450
+  /// extended instruction.
+  /// @param inst a SPIR-V OpExtInst instruction from GLSL.std.450
+  /// @returns an AST expression for the instruction, or nullptr.
+  TypedExpression EmitGlslStd450ExtInst(const spvtools::opt::Instruction& inst);
+
   /// Gets the block info for a block ID, if any exists
   /// @param id the SPIR-V ID of the OpLabel instruction starting the block
   /// @returns the block info for the given ID, if it exists, or nullptr

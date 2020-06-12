@@ -454,7 +454,7 @@ bool ParserImpl::RegisterExtendedInstructionImports() {
       // This is a canonicalization.
       if (glsl_std_450_imports_.empty()) {
         auto ast_import =
-            std::make_unique<tint::ast::Import>(name, "std::glsl");
+            std::make_unique<tint::ast::Import>(name, GlslStd450Prefix());
         import_map_[import.result_id()] = ast_import.get();
         ast_module_.AddImport(std::move(ast_import));
       }

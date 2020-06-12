@@ -24,11 +24,13 @@
 #include "source/opt/function.h"
 #include "source/opt/instruction.h"
 #include "source/opt/module.h"
+#include "spirv/unified1/GLSL.std.450.h"
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/break_statement.h"
+#include "src/ast/call_expression.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/else_statement.h"
@@ -269,6 +271,32 @@ ast::BinaryOp NegatedFloatCompare(SpvOp opcode) {
       break;
   }
   return ast::BinaryOp::kNone;
+}
+
+// Returns the WGSL standard library function for the given
+// GLSL.std.450 extended instruction operation code.  Unknown
+// and invalid opcodes map to the empty string.
+// @returns the WGSL standard function name, or an empty string.
+std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
+  switch (ext_opcode) {
+    case GLSLstd450Atan2:
+      return "atan2";
+    case GLSLstd450Cos:
+      return "cos";
+    case GLSLstd450Sin:
+      return "sin";
+    case GLSLstd450Distance:
+      return "distance";
+    case GLSLstd450Normalize:
+      return "normalize";
+    case GLSLstd450FClamp:
+      return "fclamp";
+    case GLSLstd450Length:
+      return "length";
+    default:
+      break;
+  }
+  return "";
 }
 
 // @returns the merge block ID for the given basic block, or 0 if there is none.
@@ -2353,6 +2381,15 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     return {ast_type, std::move(negated_expr)};
   }
 
+  if (opcode == SpvOpExtInst) {
+    const auto import = inst.GetSingleWordInOperand(0);
+    if (parser_impl_.glsl_std_450_imports().count(import) == 0) {
+      Fail() << "unhandled extended instruction import with ID " << import;
+      return {};
+    }
+    return EmitGlslStd450ExtInst(inst);
+  }
+
   // builtin readonly function
   // glsl.std.450 readonly function
 
@@ -2382,6 +2419,27 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   //    OpCompositeInsert
 
   return {};
+}
+
+TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(
+    const spvtools::opt::Instruction& inst) {
+  const auto ext_opcode = inst.GetSingleWordInOperand(1);
+  const auto name = GetGlslStd450FuncName(ext_opcode);
+  if (name.empty()) {
+    Fail() << "unhandled GLSL.std.450 instruction " << ext_opcode;
+    return {};
+  }
+  auto func = std::make_unique<ast::IdentifierExpression>(
+      std::vector<std::string>{parser_impl_.GlslStd450Prefix(), name});
+  ast::ExpressionList operands;
+  // All parameters to GLSL.std.450 extended instructions are IDs.
+  for (uint32_t iarg = 2; iarg < inst.NumInOperands(); ++iarg) {
+    operands.emplace_back(MakeOperand(inst, iarg).expr);
+  }
+  auto* ast_type = parser_impl_.ConvertType(inst.type_id());
+  auto call = std::make_unique<ast::CallExpression>(std::move(func),
+                                                    std::move(operands));
+  return {ast_type, std::move(call)};
 }
 
 TypedExpression FunctionEmitter::MakeAccessChain(
