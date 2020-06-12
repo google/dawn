@@ -142,12 +142,14 @@ dawn_fuzzer_test("dawn_wire_server_and_frontend_fuzzer") {
   additional_configs = [ "${dawn_root}/src/common:dawn_internal" ]
 }
 
-dawn_fuzzer_test("dawn_wire_server_and_d3d12_backend_fuzzer") {
-  sources = [ "DawnWireServerAndD3D12BackendFuzzer.cpp" ]
+if (is_win) {
+  dawn_fuzzer_test("dawn_wire_server_and_d3d12_backend_fuzzer") {
+    sources = [ "DawnWireServerAndD3D12BackendFuzzer.cpp" ]
 
-  deps = [ ":dawn_wire_server_fuzzer_common" ]
+    deps = [ ":dawn_wire_server_fuzzer_common" ]
 
-  additional_configs = [ "${dawn_root}/src/common:dawn_internal" ]
+    additional_configs = [ "${dawn_root}/src/common:dawn_internal" ]
+  }
 }
 
 dawn_fuzzer_test("dawn_wire_server_and_vulkan_backend_fuzzer") {
@@ -168,8 +170,11 @@ group("dawn_fuzzers") {
     ":dawn_spvc_glsl_fast_fuzzer",
     ":dawn_spvc_hlsl_fast_fuzzer",
     ":dawn_spvc_msl_fast_fuzzer",
-    ":dawn_wire_server_and_d3d12_backend_fuzzer",
     ":dawn_wire_server_and_frontend_fuzzer",
     ":dawn_wire_server_and_vulkan_backend_fuzzer",
   ]
+
+  if (is_win) {
+    deps += [":dawn_wire_server_and_d3d12_backend_fuzzer"]
+  }
 }
