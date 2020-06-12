@@ -333,7 +333,10 @@ namespace dawn_native { namespace d3d12 {
     }
 
     // Inserts a heap at the bottom of the LRU. The passed heap must be resident or scheduled to
-    // become resident within the current serial.
+    // become resident within the current serial. Failing to call this function when an allocation
+    // is implicitly made resident will cause the residency manager to view the allocation as
+    // non-resident and call MakeResident - which will make D3D12's internal residency refcount on
+    // the allocation out of sync with Dawn.
     void ResidencyManager::TrackResidentAllocation(Pageable* pageable) {
         if (!mResidencyManagementEnabled) {
             return;

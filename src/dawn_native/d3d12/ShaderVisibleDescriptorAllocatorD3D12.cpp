@@ -152,6 +152,9 @@ namespace dawn_native { namespace d3d12 {
                                         "ID3D12Device::CreateDescriptorHeap"));
             descriptorHeap = std::make_unique<ShaderVisibleDescriptorHeap>(
                 std::move(d3d12DescriptorHeap), kSize);
+            // We must track the allocation in the LRU when it is created, otherwise the residency
+            // manager will see the allocation as non-resident in the later call to LockAllocation.
+            mDevice->GetResidencyManager()->TrackResidentAllocation(descriptorHeap.get());
         }
 
         DAWN_TRY(mDevice->GetResidencyManager()->LockAllocation(descriptorHeap.get()));
