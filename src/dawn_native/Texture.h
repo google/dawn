@@ -47,9 +47,7 @@ namespace dawn_native {
         uint32_t baseArrayLayer;
         uint32_t layerCount;
 
-        static SubresourceRange SingleSubresource(uint32_t baseMipLevel, uint32_t baseArrayLayer) {
-            return {baseMipLevel, 1, baseArrayLayer, 1};
-        }
+        static SubresourceRange SingleSubresource(uint32_t baseMipLevel, uint32_t baseArrayLayer);
     };
 
     class TextureBase : public ObjectBase {
@@ -65,7 +63,7 @@ namespace dawn_native {
         const Extent3D& GetSize() const;
         uint32_t GetArrayLayers() const;
         uint32_t GetNumMipLevels() const;
-        const SubresourceRange& GetAllSubresources() const;
+        SubresourceRange GetAllSubresources() const;
         uint32_t GetSampleCount() const;
         uint32_t GetSubresourceCount() const;
         wgpu::TextureUsage GetUsage() const;
@@ -102,7 +100,8 @@ namespace dawn_native {
         // TODO(cwallez@chromium.org): This should be deduplicated in the Device
         const Format& mFormat;
         Extent3D mSize;
-        SubresourceRange mRange;
+        uint32_t mArrayLayerCount;
+        uint32_t mMipLevelCount;
         uint32_t mSampleCount;
         wgpu::TextureUsage mUsage = wgpu::TextureUsage::None;
         TextureState mState;
