@@ -807,22 +807,41 @@ namespace dawn_native { namespace vulkan {
         const Format& format = GetFormat();
 
         wgpu::TextureUsage allLastUsages = wgpu::TextureUsage::None;
+        uint32_t subresourceCount = GetSubresourceCount();
 
         // This transitions assume it is a 2D texture
         ASSERT(GetDimension() == wgpu::TextureDimension::e2D);
 
-        for (uint32_t layer = baseArrayLayer; layer < baseArrayLayer + layerCount; ++layer) {
-            for (uint32_t level = baseMipLevel; level < baseMipLevel + levelCount; ++level) {
-                uint32_t index = GetSubresourceIndex(level, layer);
+        // If the usages transitions can cover all subresources, and old usages of all subresources
+        // are the same, then we can use one barrier to do state transition for all subresources.
+        // Note that if the texture has only one mip level and one array slice, it will fall into
+        // this category.
+        bool isAllSubresourcesCovered = levelCount * layerCount == subresourceCount;
+        if (mSameLastUsagesAcrossSubresources && isAllSubresourcesCovered) {
+            ASSERT(baseMipLevel == 0 && baseArrayLayer == 0);
+            if (CanReuseWithoutBarrier(mSubresourceLastUsages[0], usage)) {
+                return;
+            }
+            barriers.push_back(BuildMemoryBarrier(format, mHandle, mSubresourceLastUsages[0], usage,
+                                                  0, levelCount, 0, layerCount));
+            allLastUsages = mSubresourceLastUsages[0];
+            for (uint32_t i = 0; i < subresourceCount; ++i) {
+                mSubresourceLastUsages[i] = usage;
+            }
+        } else {
+            for (uint32_t layer = baseArrayLayer; layer < baseArrayLayer + layerCount; ++layer) {
+                for (uint32_t level = baseMipLevel; level < baseMipLevel + levelCount; ++level) {
+                    uint32_t index = GetSubresourceIndex(level, layer);
 
-                if (CanReuseWithoutBarrier(mSubresourceLastUsages[index], usage)) {
-                    continue;
+                    if (CanReuseWithoutBarrier(mSubresourceLastUsages[index], usage)) {
+                        continue;
+                    }
+
+                    barriers.push_back(BuildMemoryBarrier(
+                        format, mHandle, mSubresourceLastUsages[index], usage, level, 1, layer, 1));
+                    allLastUsages |= mSubresourceLastUsages[index];
+                    mSubresourceLastUsages[index] = usage;
                 }
-
-                barriers.push_back(BuildMemoryBarrier(
-                    format, mHandle, mSubresourceLastUsages[index], usage, level, 1, layer, 1));
-                allLastUsages |= mSubresourceLastUsages[index];
-                mSubresourceLastUsages[index] = usage;
             }
         }
 
@@ -836,9 +855,7 @@ namespace dawn_native { namespace vulkan {
             ->fn.CmdPipelineBarrier(recordingContext->commandBuffer, srcStages, dstStages, 0, 0,
                                     nullptr, 0, nullptr, barriers.size(), barriers.data());
 
-        // TODO(yunchao.he@intel.com): do the optimization to combine all barriers into a single one
-        // for a texture if possible.
-        mSameLastUsagesAcrossSubresources = levelCount * layerCount == GetSubresourceCount();
+        mSameLastUsagesAcrossSubresources = isAllSubresourcesCovered;
     }
 
     MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
