@@ -45,6 +45,7 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/switch_statement.h"
+#include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op.h"
 #include "src/ast/unary_op_expression.h"
@@ -2388,6 +2389,15 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
       return {};
     }
     return EmitGlslStd450ExtInst(inst);
+  }
+
+  if (opcode == SpvOpCompositeConstruct) {
+    ast::ExpressionList operands;
+    for (uint32_t iarg = 0; iarg < inst.NumInOperands(); ++iarg) {
+      operands.emplace_back(MakeOperand(inst, iarg).expr);
+    }
+    return {ast_type, std::make_unique<ast::TypeConstructorExpression>(
+                          ast_type, std::move(operands))};
   }
 
   // builtin readonly function

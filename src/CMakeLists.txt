@@ -320,6 +320,7 @@ if(${TINT_BUILD_SPV_READER})
     reader/spirv/function_arithmetic_test.cc
     reader/spirv/function_bit_test.cc
     reader/spirv/function_cfg_test.cc
+    reader/spirv/function_composite_test.cc
     reader/spirv/function_conversion_test.cc
     reader/spirv/function_decl_test.cc
     reader/spirv/function_glsl_std_450_test.cc
