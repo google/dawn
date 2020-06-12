@@ -152,6 +152,9 @@ namespace dawn_native {
             mErrorScopeTracker->Tick(GetCompletedCommandSerial());
             mFenceSignalTracker->Tick(GetCompletedCommandSerial());
             mMapRequestTracker->Tick(GetCompletedCommandSerial());
+            // call TickImpl once last time to clean up resources
+            // assert the errors are device loss so we can continue with destruction
+            AssertAndIgnoreDeviceLossError(TickImpl());
         }
 
         // At this point GPU operations are always finished, so we are in the disconnected state.
@@ -166,9 +169,6 @@ namespace dawn_native {
         mDynamicUploader = nullptr;
         mMapRequestTracker = nullptr;
 
-        // call TickImpl once last time to clean up resources
-        // assert the errors are device loss so we can continue with destruction
-        AssertAndIgnoreDeviceLossError(TickImpl());
         AssumeCommandsComplete();
         // Tell the backend that it can free all the objects now that the GPU timeline is empty.
         ShutDownImpl();
