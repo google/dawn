@@ -59,11 +59,11 @@ namespace dawn_native {
 
             ASSERT(view->GetLayerCount() == 1);
             ASSERT(view->GetLevelCount() == 1);
+            SubresourceRange range = view->GetSubresourceRange();
 
             // If the loadOp is Load, but the subresource is not initialized, use Clear instead.
             if (attachmentInfo.loadOp == wgpu::LoadOp::Load &&
-                !view->GetTexture()->IsSubresourceContentInitialized(
-                    view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1)) {
+                !view->GetTexture()->IsSubresourceContentInitialized(range)) {
                 attachmentInfo.loadOp = wgpu::LoadOp::Clear;
                 attachmentInfo.clearColor = {0.f, 0.f, 0.f, 0.f};
             }
@@ -73,20 +73,19 @@ namespace dawn_native {
                 // cleared later in the pipeline. The texture will be resolved from the
                 // source color attachment, which will be correctly initialized.
                 TextureViewBase* resolveView = attachmentInfo.resolveTarget.Get();
+                ASSERT(resolveView->GetLayerCount() == 1);
+                ASSERT(resolveView->GetLevelCount() == 1);
                 resolveView->GetTexture()->SetIsSubresourceContentInitialized(
-                    true, resolveView->GetBaseMipLevel(), resolveView->GetLevelCount(),
-                    resolveView->GetBaseArrayLayer(), resolveView->GetLayerCount());
+                    true, resolveView->GetSubresourceRange());
             }
 
             switch (attachmentInfo.storeOp) {
                 case wgpu::StoreOp::Store:
-                    view->GetTexture()->SetIsSubresourceContentInitialized(
-                        true, view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1);
+                    view->GetTexture()->SetIsSubresourceContentInitialized(true, range);
                     break;
 
                 case wgpu::StoreOp::Clear:
-                    view->GetTexture()->SetIsSubresourceContentInitialized(
-                        false, view->GetBaseMipLevel(), 1, view->GetBaseArrayLayer(), 1);
+                    view->GetTexture()->SetIsSubresourceContentInitialized(false, range);
                     break;
 
                 default:
@@ -98,12 +97,13 @@ namespace dawn_native {
         if (renderPass->attachmentState->HasDepthStencilAttachment()) {
             auto& attachmentInfo = renderPass->depthStencilAttachment;
             TextureViewBase* view = attachmentInfo.view.Get();
+            ASSERT(view->GetLayerCount() == 1);
+            ASSERT(view->GetLevelCount() == 1);
+            SubresourceRange range = view->GetSubresourceRange();
 
             // If the depth stencil texture has not been initialized, we want to use loadop
             // clear to init the contents to 0's
-            if (!view->GetTexture()->IsSubresourceContentInitialized(
-                    view->GetBaseMipLevel(), view->GetLevelCount(), view->GetBaseArrayLayer(),
-                    view->GetLayerCount())) {
+            if (!view->GetTexture()->IsSubresourceContentInitialized(range)) {
                 if (view->GetTexture()->GetFormat().HasDepth() &&
                     attachmentInfo.depthLoadOp == wgpu::LoadOp::Load) {
                     attachmentInfo.clearDepth = 0.0f;
@@ -125,15 +125,11 @@ namespace dawn_native {
 
             if (attachmentInfo.depthStoreOp == wgpu::StoreOp::Store &&
                 attachmentInfo.stencilStoreOp == wgpu::StoreOp::Store) {
-                view->GetTexture()->SetIsSubresourceContentInitialized(
-                    true, view->GetBaseMipLevel(), view->GetLevelCount(), view->GetBaseArrayLayer(),
-                    view->GetLayerCount());
+                view->GetTexture()->SetIsSubresourceContentInitialized(true, range);
             } else {
                 ASSERT(attachmentInfo.depthStoreOp == wgpu::StoreOp::Clear &&
                        attachmentInfo.stencilStoreOp == wgpu::StoreOp::Clear);
-                view->GetTexture()->SetIsSubresourceContentInitialized(
-                    false, view->GetBaseMipLevel(), view->GetLevelCount(),
-                    view->GetBaseArrayLayer(), view->GetLayerCount());
+                view->GetTexture()->SetIsSubresourceContentInitialized(false, range);
             }
         }
     }

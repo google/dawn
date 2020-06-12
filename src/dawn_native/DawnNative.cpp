@@ -178,8 +178,8 @@ namespace dawn_native {
                                          uint32_t layerCount) {
         dawn_native::TextureBase* textureBase =
             reinterpret_cast<dawn_native::TextureBase*>(texture);
-        return textureBase->IsSubresourceContentInitialized(baseMipLevel, levelCount,
-                                                            baseArrayLayer, layerCount);
+        SubresourceRange range = {baseMipLevel, levelCount, baseArrayLayer, layerCount};
+        return textureBase->IsSubresourceContentInitialized(range);
     }
 
     std::vector<const char*> GetProcMapNamesForTestingInternal();

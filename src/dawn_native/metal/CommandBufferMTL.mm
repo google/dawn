@@ -444,19 +444,18 @@ namespace dawn_native { namespace metal {
         void EnsureSourceTextureInitialized(Texture* texture,
                                             const Extent3D& size,
                                             const TextureCopy& src) {
-            texture->EnsureSubresourceContentInitialized(src.mipLevel, 1, src.arrayLayer,
-                                                         size.depth);
+            texture->EnsureSubresourceContentInitialized(
+                {src.mipLevel, 1, src.arrayLayer, size.depth});
         }
 
         void EnsureDestinationTextureInitialized(Texture* texture,
                                                  const Extent3D& size,
                                                  const TextureCopy& dst) {
+            SubresourceRange range = {dst.mipLevel, 1, dst.arrayLayer, size.depth};
             if (IsCompleteSubresourceCopiedTo(texture, size, dst.mipLevel)) {
-                texture->SetIsSubresourceContentInitialized(true, dst.mipLevel, 1, dst.arrayLayer,
-                                                            size.depth);
+                texture->SetIsSubresourceContentInitialized(true, range);
             } else {
-                texture->EnsureSubresourceContentInitialized(dst.mipLevel, 1, dst.arrayLayer,
-                                                             size.depth);
+                texture->EnsureSubresourceContentInitialized(range);
             }
         }
 
@@ -691,8 +690,7 @@ namespace dawn_native { namespace metal {
                 // cleared in CreateMTLRenderPassDescriptor by setting the loadop to clear when the
                 // texture subresource has not been initialized before the render pass.
                 if (!(usages.textureUsages[i].usage & wgpu::TextureUsage::OutputAttachment)) {
-                    texture->EnsureSubresourceContentInitialized(0, texture->GetNumMipLevels(), 0,
-                                                                 texture->GetArrayLayers());
+                    texture->EnsureSubresourceContentInitialized(texture->GetAllSubresources());
                 }
             }
         };

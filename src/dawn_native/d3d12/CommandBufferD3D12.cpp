@@ -512,9 +512,8 @@ namespace dawn_native { namespace d3d12 {
                 // cleared during record render pass if the texture subresource has not been
                 // initialized before the render pass.
                 if (!(usages.textureUsages[i].usage & wgpu::TextureUsage::OutputAttachment)) {
-                    texture->EnsureSubresourceContentInitialized(commandContext, 0,
-                                                                 texture->GetNumMipLevels(), 0,
-                                                                 texture->GetArrayLayers());
+                    texture->EnsureSubresourceContentInitialized(commandContext,
+                                                                 texture->GetAllSubresources());
                 }
             }
 
@@ -590,14 +589,15 @@ namespace dawn_native { namespace d3d12 {
                     Buffer* buffer = ToBackend(copy->source.buffer.Get());
                     Texture* texture = ToBackend(copy->destination.texture.Get());
 
+                    ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
+                    ASSERT(copy->copySize.depth == 1);
+                    SubresourceRange subresource = SubresourceRange::SingleSubresource(
+                        copy->destination.mipLevel, copy->destination.arrayLayer);
                     if (IsCompleteSubresourceCopiedTo(texture, copy->copySize,
                                                       copy->destination.mipLevel)) {
-                        texture->SetIsSubresourceContentInitialized(
-                            true, copy->destination.mipLevel, 1, copy->destination.arrayLayer, 1);
+                        texture->SetIsSubresourceContentInitialized(true, subresource);
                     } else {
-                        texture->EnsureSubresourceContentInitialized(
-                            commandContext, copy->destination.mipLevel, 1,
-                            copy->destination.arrayLayer, 1);
+                        texture->EnsureSubresourceContentInitialized(commandContext, subresource);
                     }
 
                     buffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopySrc);
@@ -635,8 +635,11 @@ namespace dawn_native { namespace d3d12 {
                     Texture* texture = ToBackend(copy->source.texture.Get());
                     Buffer* buffer = ToBackend(copy->destination.buffer.Get());
 
+                    ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
+                    ASSERT(copy->copySize.depth == 1);
                     texture->EnsureSubresourceContentInitialized(
-                        commandContext, copy->source.mipLevel, 1, copy->source.arrayLayer, 1);
+                        commandContext, SubresourceRange::SingleSubresource(
+                                            copy->source.mipLevel, copy->source.arrayLayer));
 
                     texture->TrackUsageAndTransitionNow(commandContext, wgpu::TextureUsage::CopySrc,
                                                         copy->source.mipLevel, 1,
@@ -676,19 +679,18 @@ namespace dawn_native { namespace d3d12 {
 
                     Texture* source = ToBackend(copy->source.texture.Get());
                     Texture* destination = ToBackend(copy->destination.texture.Get());
+                    SubresourceRange srcRange = {copy->source.mipLevel, 1, copy->source.arrayLayer,
+                                                 copy->copySize.depth};
+                    SubresourceRange dstRange = {copy->destination.mipLevel, 1,
+                                                 copy->destination.arrayLayer,
+                                                 copy->copySize.depth};
 
-                    source->EnsureSubresourceContentInitialized(
-                        commandContext, copy->source.mipLevel, 1, copy->source.arrayLayer,
-                        copy->copySize.depth);
+                    source->EnsureSubresourceContentInitialized(commandContext, srcRange);
                     if (IsCompleteSubresourceCopiedTo(destination, copy->copySize,
                                                       copy->destination.mipLevel)) {
-                        destination->SetIsSubresourceContentInitialized(
-                            true, copy->destination.mipLevel, 1, copy->destination.arrayLayer,
-                            copy->copySize.depth);
+                        destination->SetIsSubresourceContentInitialized(true, dstRange);
                     } else {
-                        destination->EnsureSubresourceContentInitialized(
-                            commandContext, copy->destination.mipLevel, 1,
-                            copy->destination.arrayLayer, copy->copySize.depth);
+                        destination->EnsureSubresourceContentInitialized(commandContext, dstRange);
                     }
 
                     if (copy->source.texture.Get() == copy->destination.texture.Get() &&

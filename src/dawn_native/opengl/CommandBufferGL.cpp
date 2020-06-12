@@ -458,8 +458,7 @@ namespace dawn_native { namespace opengl {
                 // cleared in BeginRenderPass by setting the loadop to clear when the
                 // texture subresource has not been initialized before the render pass.
                 if (!(usages.textureUsages[i].usage & wgpu::TextureUsage::OutputAttachment)) {
-                    texture->EnsureSubresourceContentInitialized(0, texture->GetNumMipLevels(), 0,
-                                                                 texture->GetArrayLayers());
+                    texture->EnsureSubresourceContentInitialized(texture->GetAllSubresources());
                 }
             }
         };
@@ -513,12 +512,15 @@ namespace dawn_native { namespace opengl {
                     Texture* texture = ToBackend(dst.texture.Get());
                     GLenum target = texture->GetGLTarget();
                     const GLFormat& format = texture->GetGLFormat();
+
+                    ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
+                    ASSERT(copy->copySize.depth == 1);
+                    SubresourceRange subresource =
+                        SubresourceRange::SingleSubresource(dst.mipLevel, dst.arrayLayer);
                     if (IsCompleteSubresourceCopiedTo(texture, copySize, dst.mipLevel)) {
-                        texture->SetIsSubresourceContentInitialized(true, dst.mipLevel, 1,
-                                                                    dst.arrayLayer, 1);
+                        texture->SetIsSubresourceContentInitialized(true, subresource);
                     } else {
-                        texture->EnsureSubresourceContentInitialized(dst.mipLevel, 1,
-                                                                     dst.arrayLayer, 1);
+                        texture->EnsureSubresourceContentInitialized(subresource);
                     }
 
                     gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->GetHandle());
@@ -602,8 +604,10 @@ namespace dawn_native { namespace opengl {
                         UNREACHABLE();
                     }
 
-                    texture->EnsureSubresourceContentInitialized(src.mipLevel, 1, src.arrayLayer,
-                                                                 1);
+                    ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
+                    ASSERT(copy->copySize.depth == 1);
+                    texture->EnsureSubresourceContentInitialized(
+                        SubresourceRange::SingleSubresource(src.mipLevel, src.arrayLayer));
                     // The only way to move data from a texture to a buffer in GL is via
                     // glReadPixels with a pack buffer. Create a temporary FBO for the copy.
                     gl.BindTexture(target, texture->GetHandle());
@@ -675,14 +679,16 @@ namespace dawn_native { namespace opengl {
                     Extent3D copySize = ComputeTextureCopyExtent(dst, copy->copySize);
                     Texture* srcTexture = ToBackend(src.texture.Get());
                     Texture* dstTexture = ToBackend(dst.texture.Get());
-                    srcTexture->EnsureSubresourceContentInitialized(src.mipLevel, 1, src.arrayLayer,
-                                                                    1);
+                    SubresourceRange srcRange = {src.mipLevel, 1, src.arrayLayer,
+                                                 copy->copySize.depth};
+                    SubresourceRange dstRange = {dst.mipLevel, 1, dst.arrayLayer,
+                                                 copy->copySize.depth};
+
+                    srcTexture->EnsureSubresourceContentInitialized(srcRange);
                     if (IsCompleteSubresourceCopiedTo(dstTexture, copySize, dst.mipLevel)) {
-                        dstTexture->SetIsSubresourceContentInitialized(
-                            true, dst.mipLevel, 1, dst.arrayLayer, copy->copySize.depth);
+                        dstTexture->SetIsSubresourceContentInitialized(true, dstRange);
                     } else {
-                        dstTexture->EnsureSubresourceContentInitialized(
-                            dst.mipLevel, 1, dst.arrayLayer, copy->copySize.depth);
+                        dstTexture->EnsureSubresourceContentInitialized(dstRange);
                     }
                     gl.CopyImageSubData(srcTexture->GetHandle(), srcTexture->GetGLTarget(),
                                         src.mipLevel, src.origin.x, src.origin.y, src.arrayLayer,

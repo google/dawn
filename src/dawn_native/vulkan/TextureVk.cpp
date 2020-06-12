@@ -539,9 +539,8 @@ namespace dawn_native { namespace vulkan {
             "BindImageMemory"));
 
         if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
-            DAWN_TRY(ClearTexture(ToBackend(GetDevice())->GetPendingRecordingContext(), 0,
-                                  GetNumMipLevels(), 0, GetArrayLayers(),
-                                  TextureBase::ClearValue::NonZero));
+            DAWN_TRY(ClearTexture(ToBackend(GetDevice())->GetPendingRecordingContext(),
+                                  GetAllSubresources(), TextureBase::ClearValue::NonZero));
         }
 
         return {};
@@ -595,7 +594,7 @@ namespace dawn_native { namespace vulkan {
 
         // Don't clear imported texture if already cleared
         if (descriptor->isCleared) {
-            SetIsSubresourceContentInitialized(true, 0, 1, 0, 1);
+            SetIsSubresourceContentInitialized(true, {0, 1, 0, 1});
         }
 
         // Success, acquire all the external objects.
@@ -843,50 +842,49 @@ namespace dawn_native { namespace vulkan {
     }
 
     MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
-                                     uint32_t baseMipLevel,
-                                     uint32_t levelCount,
-                                     uint32_t baseArrayLayer,
-                                     uint32_t layerCount,
+                                     const SubresourceRange& range,
                                      TextureBase::ClearValue clearValue) {
         Device* device = ToBackend(GetDevice());
 
         uint8_t clearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0 : 1;
         float fClearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0.f : 1.f;
 
-        TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst, baseMipLevel, levelCount,
-                           baseArrayLayer, layerCount);
+        TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst, range.baseMipLevel,
+                           range.levelCount, range.baseArrayLayer, range.layerCount);
         if (GetFormat().isRenderable) {
-            VkImageSubresourceRange range = {};
-            range.aspectMask = GetVkAspectMask();
-            range.levelCount = 1;
-            range.layerCount = 1;
+            VkImageSubresourceRange imageRange = {};
+            imageRange.aspectMask = GetVkAspectMask();
+            imageRange.levelCount = 1;
+            imageRange.layerCount = 1;
 
-            for (uint32_t level = baseMipLevel; level < baseMipLevel + levelCount; ++level) {
-                range.baseMipLevel = level;
-                for (uint32_t layer = baseArrayLayer; layer < baseArrayLayer + layerCount;
-                     ++layer) {
+            for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
+                 ++level) {
+                imageRange.baseMipLevel = level;
+                for (uint32_t layer = range.baseArrayLayer;
+                     layer < range.baseArrayLayer + range.layerCount; ++layer) {
                     if (clearValue == TextureBase::ClearValue::Zero &&
-                        IsSubresourceContentInitialized(level, 1, layer, 1)) {
+                        IsSubresourceContentInitialized(
+                            SubresourceRange::SingleSubresource(level, layer))) {
                         // Skip lazy clears if already initialized.
                         continue;
                     }
 
-                    range.baseArrayLayer = layer;
+                    imageRange.baseArrayLayer = layer;
 
                     if (GetFormat().HasDepthOrStencil()) {
                         VkClearDepthStencilValue clearDepthStencilValue[1];
                         clearDepthStencilValue[0].depth = fClearColor;
                         clearDepthStencilValue[0].stencil = clearColor;
-                        device->fn.CmdClearDepthStencilImage(recordingContext->commandBuffer,
-                                                             GetHandle(),
-                                                             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                                             clearDepthStencilValue, 1, &range);
+                        device->fn.CmdClearDepthStencilImage(
+                            recordingContext->commandBuffer, GetHandle(),
+                            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, clearDepthStencilValue, 1,
+                            &imageRange);
                     } else {
                         VkClearColorValue clearColorValue = {
                             {fClearColor, fClearColor, fClearColor, fClearColor}};
                         device->fn.CmdClearColorImage(recordingContext->commandBuffer, GetHandle(),
                                                       VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                                      &clearColorValue, 1, &range);
+                                                      &clearColorValue, 1, &imageRange);
                     }
                 }
             }
@@ -913,13 +911,15 @@ namespace dawn_native { namespace vulkan {
             bufferCopy.offset = uploadHandle.startOffset;
             bufferCopy.bytesPerRow = bytesPerRow;
 
-            for (uint32_t level = baseMipLevel; level < baseMipLevel + levelCount; ++level) {
+            for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
+                 ++level) {
                 Extent3D copySize = GetMipLevelVirtualSize(level);
 
-                for (uint32_t layer = baseArrayLayer; layer < baseArrayLayer + layerCount;
-                     ++layer) {
+                for (uint32_t layer = range.baseArrayLayer;
+                     layer < range.baseArrayLayer + range.layerCount; ++layer) {
                     if (clearValue == TextureBase::ClearValue::Zero &&
-                        IsSubresourceContentInitialized(level, 1, layer, 1)) {
+                        IsSubresourceContentInitialized(
+                            SubresourceRange::SingleSubresource(level, layer))) {
                         // Skip lazy clears if already initialized.
                         continue;
                     }
@@ -942,23 +942,18 @@ namespace dawn_native { namespace vulkan {
             }
         }
         if (clearValue == TextureBase::ClearValue::Zero) {
-            SetIsSubresourceContentInitialized(true, baseMipLevel, levelCount, baseArrayLayer,
-                                               layerCount);
+            SetIsSubresourceContentInitialized(true, range);
             device->IncrementLazyClearCountForTesting();
         }
         return {};
     }
 
     void Texture::EnsureSubresourceContentInitialized(CommandRecordingContext* recordingContext,
-                                                      uint32_t baseMipLevel,
-                                                      uint32_t levelCount,
-                                                      uint32_t baseArrayLayer,
-                                                      uint32_t layerCount) {
+                                                      const SubresourceRange& range) {
         if (!GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
             return;
         }
-        if (!IsSubresourceContentInitialized(baseMipLevel, levelCount, baseArrayLayer,
-                                             layerCount)) {
+        if (!IsSubresourceContentInitialized(range)) {
             // TODO(jiawei.shao@intel.com): initialize textures in BC formats with Buffer-to-Texture
             // copies.
             if (GetFormat().isCompressed) {
@@ -967,9 +962,8 @@ namespace dawn_native { namespace vulkan {
 
             // If subresource has not been initialized, clear it to black as it could contain dirty
             // bits from recycled memory
-            GetDevice()->ConsumedError(ClearTexture(recordingContext, baseMipLevel, levelCount,
-                                                    baseArrayLayer, layerCount,
-                                                    TextureBase::ClearValue::Zero));
+            GetDevice()->ConsumedError(
+                ClearTexture(recordingContext, range, TextureBase::ClearValue::Zero));
         }
     }
 

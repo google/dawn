@@ -55,10 +55,7 @@ namespace dawn_native { namespace d3d12 {
                                                        uint32_t baseArrayLayer,
                                                        uint32_t layerCount) const;
         void EnsureSubresourceContentInitialized(CommandRecordingContext* commandContext,
-                                                 uint32_t baseMipLevel,
-                                                 uint32_t levelCount,
-                                                 uint32_t baseArrayLayer,
-                                                 uint32_t layerCount);
+                                                 const SubresourceRange& range);
 
         void TrackUsageAndGetResourceBarrierForPass(
             CommandRecordingContext* commandContext,
@@ -95,10 +92,7 @@ namespace dawn_native { namespace d3d12 {
         // Dawn API
         void DestroyImpl() override;
         MaybeError ClearTexture(CommandRecordingContext* commandContext,
-                                uint32_t baseMipLevel,
-                                uint32_t levelCount,
-                                uint32_t baseArrayLayer,
-                                uint32_t layerCount,
+                                const SubresourceRange& range,
                                 TextureBase::ClearValue clearValue);
 
         UINT16 GetDepthOrArraySize();

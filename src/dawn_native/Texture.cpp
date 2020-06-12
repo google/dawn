@@ -346,8 +346,7 @@ namespace dawn_native {
           mDimension(descriptor->dimension),
           mFormat(device->GetValidInternalFormat(descriptor->format)),
           mSize(descriptor->size),
-          mArrayLayerCount(descriptor->arrayLayerCount),
-          mMipLevelCount(descriptor->mipLevelCount),
+          mRange({0, descriptor->mipLevelCount, 0, descriptor->arrayLayerCount}),
           mSampleCount(descriptor->sampleCount),
           mUsage(descriptor->usage),
           mState(state) {
@@ -388,11 +387,15 @@ namespace dawn_native {
     }
     uint32_t TextureBase::GetArrayLayers() const {
         ASSERT(!IsError());
-        return mArrayLayerCount;
+        return mRange.layerCount;
     }
     uint32_t TextureBase::GetNumMipLevels() const {
         ASSERT(!IsError());
-        return mMipLevelCount;
+        return mRange.levelCount;
+    }
+    const SubresourceRange& TextureBase::GetAllSubresources() const {
+        ASSERT(!IsError());
+        return mRange;
     }
     uint32_t TextureBase::GetSampleCount() const {
         ASSERT(!IsError());
@@ -400,7 +403,7 @@ namespace dawn_native {
     }
     uint32_t TextureBase::GetSubresourceCount() const {
         ASSERT(!IsError());
-        return mMipLevelCount * mArrayLayerCount;
+        return mRange.levelCount * mRange.layerCount;
     }
     wgpu::TextureUsage TextureBase::GetUsage() const {
         ASSERT(!IsError());
@@ -421,15 +424,12 @@ namespace dawn_native {
         return GetNumMipLevels() * arraySlice + mipLevel;
     }
 
-    bool TextureBase::IsSubresourceContentInitialized(uint32_t baseMipLevel,
-                                                      uint32_t levelCount,
-                                                      uint32_t baseArrayLayer,
-                                                      uint32_t layerCount) const {
+    bool TextureBase::IsSubresourceContentInitialized(const SubresourceRange& range) const {
         ASSERT(!IsError());
-        for (uint32_t arrayLayer = baseArrayLayer; arrayLayer < baseArrayLayer + layerCount;
-             ++arrayLayer) {
-            for (uint32_t mipLevel = baseMipLevel; mipLevel < baseMipLevel + levelCount;
-                 ++mipLevel) {
+        for (uint32_t arrayLayer = range.baseArrayLayer;
+             arrayLayer < range.baseArrayLayer + range.layerCount; ++arrayLayer) {
+            for (uint32_t mipLevel = range.baseMipLevel;
+                 mipLevel < range.baseMipLevel + range.levelCount; ++mipLevel) {
                 uint32_t subresourceIndex = GetSubresourceIndex(mipLevel, arrayLayer);
                 ASSERT(subresourceIndex < mIsSubresourceContentInitializedAtIndex.size());
                 if (!mIsSubresourceContentInitializedAtIndex[subresourceIndex]) {
@@ -441,15 +441,12 @@ namespace dawn_native {
     }
 
     void TextureBase::SetIsSubresourceContentInitialized(bool isInitialized,
-                                                         uint32_t baseMipLevel,
-                                                         uint32_t levelCount,
-                                                         uint32_t baseArrayLayer,
-                                                         uint32_t layerCount) {
+                                                         const SubresourceRange& range) {
         ASSERT(!IsError());
-        for (uint32_t arrayLayer = baseArrayLayer; arrayLayer < baseArrayLayer + layerCount;
-             ++arrayLayer) {
-            for (uint32_t mipLevel = baseMipLevel; mipLevel < baseMipLevel + levelCount;
-                 ++mipLevel) {
+        for (uint32_t arrayLayer = range.baseArrayLayer;
+             arrayLayer < range.baseArrayLayer + range.layerCount; ++arrayLayer) {
+            for (uint32_t mipLevel = range.baseMipLevel;
+                 mipLevel < range.baseMipLevel + range.levelCount; ++mipLevel) {
                 uint32_t subresourceIndex = GetSubresourceIndex(mipLevel, arrayLayer);
                 ASSERT(subresourceIndex < mIsSubresourceContentInitializedAtIndex.size());
                 mIsSubresourceContentInitializedAtIndex[subresourceIndex] = isInitialized;
@@ -526,10 +523,8 @@ namespace dawn_native {
           mTexture(texture),
           mFormat(GetDevice()->GetValidInternalFormat(descriptor->format)),
           mDimension(descriptor->dimension),
-          mBaseMipLevel(descriptor->baseMipLevel),
-          mMipLevelCount(descriptor->mipLevelCount),
-          mBaseArrayLayer(descriptor->baseArrayLayer),
-          mArrayLayerCount(descriptor->arrayLayerCount) {
+          mRange({descriptor->baseMipLevel, descriptor->mipLevelCount, descriptor->baseArrayLayer,
+                  descriptor->arrayLayerCount}) {
     }
 
     TextureViewBase::TextureViewBase(DeviceBase* device, ObjectBase::ErrorTag tag)
@@ -563,21 +558,26 @@ namespace dawn_native {
 
     uint32_t TextureViewBase::GetBaseMipLevel() const {
         ASSERT(!IsError());
-        return mBaseMipLevel;
+        return mRange.baseMipLevel;
     }
 
     uint32_t TextureViewBase::GetLevelCount() const {
         ASSERT(!IsError());
-        return mMipLevelCount;
+        return mRange.levelCount;
     }
 
     uint32_t TextureViewBase::GetBaseArrayLayer() const {
         ASSERT(!IsError());
-        return mBaseArrayLayer;
+        return mRange.baseArrayLayer;
     }
 
     uint32_t TextureViewBase::GetLayerCount() const {
         ASSERT(!IsError());
-        return mArrayLayerCount;
+        return mRange.layerCount;
+    }
+
+    const SubresourceRange& TextureViewBase::GetSubresourceRange() const {
+        ASSERT(!IsError());
+        return mRange;
     }
 }  // namespace dawn_native

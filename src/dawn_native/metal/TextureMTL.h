@@ -42,21 +42,14 @@ namespace dawn_native { namespace metal {
 
         id<MTLTexture> GetMTLTexture();
 
-        void EnsureSubresourceContentInitialized(uint32_t baseMipLevel,
-                                                 uint32_t levelCount,
-                                                 uint32_t baseArrayLayer,
-                                                 uint32_t layerCount);
+        void EnsureSubresourceContentInitialized(const SubresourceRange& range);
 
       private:
         ~Texture() override;
 
         void DestroyImpl() override;
 
-        MaybeError ClearTexture(uint32_t baseMipLevel,
-                                uint32_t levelCount,
-                                uint32_t baseArrayLayer,
-                                uint32_t layerCount,
-                                TextureBase::ClearValue clearValue);
+        MaybeError ClearTexture(const SubresourceRange& range, TextureBase::ClearValue clearValue);
 
         id<MTLTexture> mMtlTexture = nil;
     };
