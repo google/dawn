@@ -74,12 +74,20 @@ namespace dawn_native { namespace vulkan {
     // inside EnsureDependencies)
     enum class DeviceExt {
         // Promoted to 1.1
+        BindMemory2,
         Maintenance1,
+        StorageBufferStorageClass,
+        GetPhysicalDeviceProperties2,
+        GetMemoryRequirements2,
+        ExternalMemoryCapabilities,
+        ExternalSemaphoreCapabilities,
         ExternalMemory,
         ExternalSemaphore,
         _16BitStorage,
+        SamplerYCbCrConversion,
 
         // Promoted to 1.2
+        ImageFormatList,
         ShaderFloat16Int8,
 
         // External* extensions

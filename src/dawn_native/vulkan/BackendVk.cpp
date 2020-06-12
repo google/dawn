@@ -210,22 +210,18 @@ namespace dawn_native { namespace vulkan {
         // cases are removed.
         InstanceExtSet extensionsToRequest = mGlobalInfo.extensions;
 
-        // TODO(cwallez@chromium.org): don't request extensions that have been promoted to Vulkan
-        // 1.1. This can only happen when we correctly detect and handle VkPhysicalDevice instance
-        // extensions that are promoted to be "device" extensions in the core Vulkan. If we don't
-        // do this there is a crash because a Vulkan 1.1 loader instance will not emulate the call
-        // on a Vulkan 1.0 ICD (and call nullptr).
-        // See https://github.com/KhronosGroup/Vulkan-Loader/issues/412.
-
         if (!GetInstance()->IsBackendValidationEnabled()) {
             extensionsToRequest.Set(InstanceExt::DebugReport, false);
         }
-
         usedKnobs.extensions = extensionsToRequest;
 
         std::vector<const char*> extensionNames;
         for (uint32_t ext : IterateBitSet(extensionsToRequest.extensionBitSet)) {
-            extensionNames.push_back(GetInstanceExtInfo(static_cast<InstanceExt>(ext)).name);
+            const InstanceExtInfo& info = GetInstanceExtInfo(static_cast<InstanceExt>(ext));
+
+            if (info.versionPromoted > mGlobalInfo.apiVersion) {
+                extensionNames.push_back(info.name);
+            }
         }
 
         VkApplicationInfo appInfo;
