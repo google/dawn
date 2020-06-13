@@ -35,8 +35,8 @@ TEST_P(NonzeroBufferCreationTests, BufferCreationWithCopyDstUsage) {
 }
 
 // Verify that each byte of the buffer has all been initialized to 1 with the toggle enabled when it
-// is created without CopyDst usage.
-TEST_P(NonzeroBufferCreationTests, BufferCreationWithoutCopyDstUsage) {
+// is created with MapWrite without CopyDst usage.
+TEST_P(NonzeroBufferCreationTests, BufferCreationWithMapWriteWithoutCopyDstUsage) {
     constexpr uint32_t kSize = 32u;
 
     wgpu::BufferDescriptor descriptor;
@@ -51,5 +51,6 @@ TEST_P(NonzeroBufferCreationTests, BufferCreationWithoutCopyDstUsage) {
 }
 
 DAWN_INSTANTIATE_TEST(NonzeroBufferCreationTests,
+                      D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}),
                       MetalBackend({"nonzero_clear_resources_on_creation_for_testing"}),
                       VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"}));
