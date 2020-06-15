@@ -55,8 +55,7 @@ wgpu::Texture CreateTexture(wgpu::Device& device,
     descriptor.dimension = dimension;
     descriptor.size.width = width;
     descriptor.size.height = height;
-    descriptor.size.depth = 1;
-    descriptor.arrayLayerCount = arrayLayerCount;
+    descriptor.size.depth = arrayLayerCount;
     descriptor.sampleCount = sampleCount;
     descriptor.format = format;
     descriptor.mipLevelCount = mipLevelCount;

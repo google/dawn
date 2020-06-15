@@ -28,7 +28,7 @@ namespace dawn_native { namespace opengl {
         GLenum TargetForTexture(const TextureDescriptor* descriptor) {
             switch (descriptor->dimension) {
                 case wgpu::TextureDimension::e2D:
-                    if (descriptor->arrayLayerCount > 1) {
+                    if (descriptor->size.depth > 1) {
                         ASSERT(descriptor->sampleCount == 1);
                         return GL_TEXTURE_2D_ARRAY;
                     } else {

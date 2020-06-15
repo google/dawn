@@ -336,8 +336,8 @@ namespace dawn_native { namespace d3d12 {
             return DAWN_VALIDATION_ERROR("Mip level count must be 1");
         }
 
-        if (descriptor->arrayLayerCount != 1) {
-            return DAWN_VALIDATION_ERROR("Array layer count must be 1");
+        if (descriptor->size.depth != 1) {
+            return DAWN_VALIDATION_ERROR("Depth must be 1");
         }
 
         if (descriptor->sampleCount != 1) {
@@ -392,6 +392,12 @@ namespace dawn_native { namespace d3d12 {
                                                     bool isSwapChainTexture) {
         const TextureDescriptor* textureDescriptor =
             reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor);
+
+        // TODO(dawn:22): Remove once migration from GPUTextureDescriptor.arrayLayerCount to
+        // GPUTextureDescriptor.size.depth is done.
+        TextureDescriptor fixedDescriptor;
+        DAWN_TRY_ASSIGN(fixedDescriptor, FixTextureDescriptor(device, textureDescriptor));
+        textureDescriptor = &fixedDescriptor;
 
         Ref<Texture> dawnTexture =
             AcquireRef(new Texture(device, textureDescriptor, TextureState::OwnedExternal));

@@ -31,8 +31,7 @@ class TextureValidationTest : public ValidationTest {
         wgpu::TextureDescriptor descriptor;
         descriptor.size.width = kWidth;
         descriptor.size.height = kHeight;
-        descriptor.size.depth = 1;
-        descriptor.arrayLayerCount = kDefaultArraySize;
+        descriptor.size.depth = kDefaultDepth;
         descriptor.mipLevelCount = kDefaultMipLevels;
         descriptor.sampleCount = kDefaultSampleCount;
         descriptor.dimension = wgpu::TextureDimension::e2D;
@@ -46,7 +45,7 @@ class TextureValidationTest : public ValidationTest {
   private:
     static constexpr uint32_t kWidth = 32;
     static constexpr uint32_t kHeight = 32;
-    static constexpr uint32_t kDefaultArraySize = 1;
+    static constexpr uint32_t kDefaultDepth = 1;
     static constexpr uint32_t kDefaultMipLevels = 1;
     static constexpr uint32_t kDefaultSampleCount = 1;
 
@@ -94,7 +93,7 @@ TEST_F(TextureValidationTest, SampleCount) {
     {
         wgpu::TextureDescriptor descriptor = defaultDescriptor;
         descriptor.sampleCount = 4;
-        descriptor.arrayLayerCount = 2;
+        descriptor.size.depth = 2;
 
         ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
     }
@@ -204,7 +203,7 @@ TEST_F(TextureValidationTest, ArrayLayerCount) {
     // Array layer count exceeding kMaxTexture2DArrayLayers is not allowed
     {
         wgpu::TextureDescriptor descriptor = defaultDescriptor;
-        descriptor.arrayLayerCount = kMaxTexture2DArrayLayers + 1u;
+        descriptor.size.depth = kMaxTexture2DArrayLayers + 1u;
 
         ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
     }
@@ -212,7 +211,7 @@ TEST_F(TextureValidationTest, ArrayLayerCount) {
     // Array layer count less than kMaxTexture2DArrayLayers is allowed;
     {
         wgpu::TextureDescriptor descriptor = defaultDescriptor;
-        descriptor.arrayLayerCount = kMaxTexture2DArrayLayers >> 1;
+        descriptor.size.depth = kMaxTexture2DArrayLayers >> 1;
 
         device.CreateTexture(&descriptor);
     }
@@ -220,7 +219,7 @@ TEST_F(TextureValidationTest, ArrayLayerCount) {
     // Array layer count equal to kMaxTexture2DArrayLayers is allowed;
     {
         wgpu::TextureDescriptor descriptor = defaultDescriptor;
-        descriptor.arrayLayerCount = kMaxTexture2DArrayLayers;
+        descriptor.size.depth = kMaxTexture2DArrayLayers;
 
         device.CreateTexture(&descriptor);
     }
@@ -487,7 +486,7 @@ TEST_F(CompressedTextureFormatsValidationTests, 2DArrayTexture) {
     for (wgpu::TextureFormat format : kBCFormats) {
         wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
         descriptor.format = format;
-        descriptor.arrayLayerCount = 6;
+        descriptor.size.depth = 6;
         device.CreateTexture(&descriptor);
     }
 }

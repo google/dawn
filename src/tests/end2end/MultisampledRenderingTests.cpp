@@ -90,8 +90,7 @@ class MultisampledRenderingTest : public DawnTest {
         descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size.width = kWidth << (mipLevelCount - 1);
         descriptor.size.height = kHeight << (mipLevelCount - 1);
-        descriptor.size.depth = 1;
-        descriptor.arrayLayerCount = arrayLayerCount;
+        descriptor.size.depth = arrayLayerCount;
         descriptor.sampleCount = sampleCount;
         descriptor.format = format;
         descriptor.mipLevelCount = mipLevelCount;

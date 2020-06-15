@@ -411,10 +411,9 @@ class StorageTextureTests : public DawnTest {
                                 uint32_t height = kHeight,
                                 uint32_t arrayLayerCount = 1) {
         wgpu::TextureDescriptor descriptor;
-        descriptor.size = {width, height, 1};
+        descriptor.size = {width, height, arrayLayerCount};
         descriptor.format = format;
         descriptor.usage = usage;
-        descriptor.arrayLayerCount = arrayLayerCount;
         return device.CreateTexture(&descriptor);
     }
 

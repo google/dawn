@@ -481,7 +481,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoNonZeroArrayLayer) {
     config.copyExtent3D = config.textureDescriptor.size;
 
     constexpr uint32_t kArrayLayerCount = 3;
-    config.textureDescriptor.arrayLayerCount = kArrayLayerCount;
+    config.textureDescriptor.size.depth = kArrayLayerCount;
     config.viewArrayLayer = kArrayLayerCount - 1;
 
     for (wgpu::TextureFormat format : kBCFormats) {

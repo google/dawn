@@ -44,8 +44,7 @@ class TextureZeroInitTest : public DawnTest {
         descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size.width = kSize;
         descriptor.size.height = kSize;
-        descriptor.size.depth = 1;
-        descriptor.arrayLayerCount = arrayLayerCount;
+        descriptor.size.depth = arrayLayerCount;
         descriptor.sampleCount = 1;
         descriptor.format = format;
         descriptor.mipLevelCount = mipLevelCount;

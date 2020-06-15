@@ -62,7 +62,6 @@ class RenderPassLoadOpTests : public DawnTest {
             descriptor.size.width = kRTSize;
             descriptor.size.height = kRTSize;
             descriptor.size.depth = 1;
-            descriptor.arrayLayerCount = 1;
             descriptor.sampleCount = 1;
             descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
             descriptor.mipLevelCount = 1;

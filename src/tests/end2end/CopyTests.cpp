@@ -80,8 +80,7 @@ class CopyTests_T2B : public CopyTests {
             descriptor.dimension = wgpu::TextureDimension::e2D;
             descriptor.size.width = textureSpec.width;
             descriptor.size.height = textureSpec.height;
-            descriptor.size.depth = 1;
-            descriptor.arrayLayerCount = textureSpec.arraySize;
+            descriptor.size.depth = textureSpec.arraySize;
             descriptor.sampleCount = 1;
             descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
             descriptor.mipLevelCount = textureSpec.level + 1;
@@ -204,7 +203,6 @@ protected:
         descriptor.size.width = textureSpec.width;
         descriptor.size.height = textureSpec.height;
         descriptor.size.depth = 1;
-        descriptor.arrayLayerCount = 1;
         descriptor.sampleCount = 1;
         descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
         descriptor.mipLevelCount = textureSpec.level + 1;
@@ -299,8 +297,7 @@ class CopyTests_T2T : public CopyTests {
         srcDescriptor.dimension = wgpu::TextureDimension::e2D;
         srcDescriptor.size.width = srcSpec.width;
         srcDescriptor.size.height = srcSpec.height;
-        srcDescriptor.size.depth = 1;
-        srcDescriptor.arrayLayerCount = srcSpec.arraySize;
+        srcDescriptor.size.depth = srcSpec.arraySize;
         srcDescriptor.sampleCount = 1;
         srcDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
         srcDescriptor.mipLevelCount = srcSpec.level + 1;
@@ -315,8 +312,7 @@ class CopyTests_T2T : public CopyTests {
             dstDescriptor.dimension = wgpu::TextureDimension::e2D;
             dstDescriptor.size.width = dstSpec.width;
             dstDescriptor.size.height = dstSpec.height;
-            dstDescriptor.size.depth = 1;
-            dstDescriptor.arrayLayerCount = dstSpec.arraySize;
+            dstDescriptor.size.depth = dstSpec.arraySize;
             dstDescriptor.sampleCount = 1;
             dstDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
             dstDescriptor.mipLevelCount = dstSpec.level + 1;

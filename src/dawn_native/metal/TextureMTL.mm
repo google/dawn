@@ -275,7 +275,7 @@ namespace dawn_native { namespace metal {
             return DAWN_VALIDATION_ERROR("IOSurface mip level count must be 1");
         }
 
-        if (descriptor->arrayLayerCount != 1) {
+        if (descriptor->size.depth != 1) {
             return DAWN_VALIDATION_ERROR("IOSurface array layer count must be 1");
         }
 
@@ -301,17 +301,18 @@ namespace dawn_native { namespace metal {
 
     MTLTextureDescriptor* CreateMetalTextureDescriptor(const TextureDescriptor* descriptor) {
         MTLTextureDescriptor* mtlDesc = [MTLTextureDescriptor new];
-        mtlDesc.textureType = MetalTextureType(descriptor->dimension, descriptor->arrayLayerCount,
+        mtlDesc.textureType = MetalTextureType(descriptor->dimension, descriptor->size.depth,
                                                descriptor->sampleCount);
         mtlDesc.usage = MetalTextureUsage(descriptor->usage);
         mtlDesc.pixelFormat = MetalPixelFormat(descriptor->format);
 
         mtlDesc.width = descriptor->size.width;
         mtlDesc.height = descriptor->size.height;
-        mtlDesc.depth = descriptor->size.depth;
+        ASSERT(descriptor->dimension == wgpu::TextureDimension::e2D);
+        mtlDesc.depth = 1;
 
         mtlDesc.mipmapLevelCount = descriptor->mipLevelCount;
-        mtlDesc.arrayLength = descriptor->arrayLayerCount;
+        mtlDesc.arrayLength = descriptor->size.depth;
         mtlDesc.storageMode = MTLStorageModePrivate;
 
         mtlDesc.sampleCount = descriptor->sampleCount;

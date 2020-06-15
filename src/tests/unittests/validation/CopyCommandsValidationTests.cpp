@@ -39,8 +39,7 @@ class CopyCommandTest : public ValidationTest {
         descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size.width = width;
         descriptor.size.height = height;
-        descriptor.size.depth = 1;
-        descriptor.arrayLayerCount = arrayLayerCount;
+        descriptor.size.depth = arrayLayerCount;
         descriptor.sampleCount = sampleCount;
         descriptor.format = format;
         descriptor.mipLevelCount = mipLevelCount;
@@ -548,7 +547,7 @@ TEST_F(CopyCommandTest_B2T, BufferOrTextureInErrorState) {
     ASSERT_DEVICE_ERROR(wgpu::Buffer errorBuffer = device.CreateBuffer(&errorBufferDescriptor));
 
     wgpu::TextureDescriptor errorTextureDescriptor;
-    errorTextureDescriptor.arrayLayerCount = 0;
+    errorTextureDescriptor.size.depth = 0;
     ASSERT_DEVICE_ERROR(wgpu::Texture errorTexture = device.CreateTexture(&errorTextureDescriptor));
 
     wgpu::BufferCopyView errorBufferCopyView = utils::CreateBufferCopyView(errorBuffer, 0, 0, 0);
@@ -879,7 +878,7 @@ TEST_F(CopyCommandTest_T2B, BufferOrTextureInErrorState) {
     ASSERT_DEVICE_ERROR(wgpu::Buffer errorBuffer = device.CreateBuffer(&errorBufferDescriptor));
 
     wgpu::TextureDescriptor errorTextureDescriptor;
-    errorTextureDescriptor.arrayLayerCount = 0;
+    errorTextureDescriptor.size.depth = 0;
     ASSERT_DEVICE_ERROR(wgpu::Texture errorTexture = device.CreateTexture(&errorTextureDescriptor));
 
     wgpu::BufferCopyView errorBufferCopyView = utils::CreateBufferCopyView(errorBuffer, 0, 0, 0);

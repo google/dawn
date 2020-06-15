@@ -212,7 +212,6 @@ namespace dawn_native { namespace vulkan {
             defaultDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
             defaultDescriptor.size = {1, 1, 1};
             defaultDescriptor.sampleCount = 1;
-            defaultDescriptor.arrayLayerCount = 1;
             defaultDescriptor.mipLevelCount = 1;
             defaultDescriptor.usage = wgpu::TextureUsage::OutputAttachment |
                                       wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
@@ -291,10 +290,10 @@ namespace dawn_native { namespace vulkan {
         EXPECT_EQ(texture.Get(), nullptr);
     }
 
-    // Test an error occurs if the descriptor array layer count isn't 1
-    TEST_P(VulkanImageWrappingValidationTests, InvalidArrayLayerCount) {
+    // Test an error occurs if the descriptor depth isn't 1
+    TEST_P(VulkanImageWrappingValidationTests, InvalidDepth) {
         DAWN_SKIP_TEST_IF(UsesWire());
-        defaultDescriptor.arrayLayerCount = 2;
+        defaultDescriptor.size.depth = 2;
 
         ASSERT_DEVICE_ERROR(wgpu::Texture texture = WrapVulkanImage(
                                 device, &defaultDescriptor, defaultFd, defaultAllocationSize,

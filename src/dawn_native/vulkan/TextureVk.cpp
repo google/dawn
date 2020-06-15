@@ -430,7 +430,7 @@ namespace dawn_native { namespace vulkan {
             return DAWN_VALIDATION_ERROR("Mip level count must be 1");
         }
 
-        if (descriptor->arrayLayerCount != 1) {
+        if (descriptor->size.depth != 1) {
             return DAWN_VALIDATION_ERROR("Array layer count must be 1");
         }
 

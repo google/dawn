@@ -252,7 +252,6 @@ namespace utils {
         descriptor.size.width = width;
         descriptor.size.height = height;
         descriptor.size.depth = 1;
-        descriptor.arrayLayerCount = 1;
         descriptor.sampleCount = 1;
         descriptor.format = BasicRenderPass::kDefaultColorFormat;
         descriptor.mipLevelCount = 1;

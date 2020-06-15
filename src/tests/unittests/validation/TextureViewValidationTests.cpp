@@ -35,8 +35,7 @@ wgpu::Texture Create2DArrayTexture(wgpu::Device& device,
     descriptor.dimension = wgpu::TextureDimension::e2D;
     descriptor.size.width = width;
     descriptor.size.height = height;
-    descriptor.size.depth = 1;
-    descriptor.arrayLayerCount = arrayLayerCount;
+    descriptor.size.depth = arrayLayerCount;
     descriptor.sampleCount = sampleCount;
     descriptor.format = kDefaultTextureFormat;
     descriptor.mipLevelCount = mipLevelCount;

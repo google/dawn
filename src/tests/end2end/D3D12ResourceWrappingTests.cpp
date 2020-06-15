@@ -63,7 +63,6 @@ namespace {
             baseDawnDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
             baseDawnDescriptor.size = {kTestWidth, kTestHeight, 1};
             baseDawnDescriptor.sampleCount = 1;
-            baseDawnDescriptor.arrayLayerCount = 1;
             baseDawnDescriptor.mipLevelCount = 1;
             baseDawnDescriptor.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::CopySrc |
                                        wgpu::TextureUsage::OutputAttachment |
@@ -173,10 +172,10 @@ TEST_P(D3D12SharedHandleValidation, InvalidMipLevelCount) {
     ASSERT_EQ(texture.Get(), nullptr);
 }
 
-// Test an error occurs if the descriptor array layer count isn't 1
-TEST_P(D3D12SharedHandleValidation, InvalidArrayLayerCount) {
+// Test an error occurs if the descriptor depth isn't 1
+TEST_P(D3D12SharedHandleValidation, InvalidDepth) {
     DAWN_SKIP_TEST_IF(UsesWire());
-    baseDawnDescriptor.arrayLayerCount = 2;
+    baseDawnDescriptor.size.depth = 2;
 
     wgpu::Texture texture;
     ComPtr<ID3D11Texture2D> d3d11Texture;

@@ -28,8 +28,7 @@ namespace {
                                     wgpu::TextureUsage usage) {
             wgpu::TextureDescriptor texDesc;
             texDesc.dimension = wgpu::TextureDimension::e2D;
-            texDesc.size = {kSize, kSize, 1};
-            texDesc.arrayLayerCount = arrayLayerCount;
+            texDesc.size = {kSize, kSize, arrayLayerCount};
             texDesc.sampleCount = 1;
             texDesc.mipLevelCount = mipLevelCount;
             texDesc.usage = usage;

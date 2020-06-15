@@ -82,6 +82,56 @@ TEST_P(DeprecationTests, SetSubDataStillWorks) {
     EXPECT_BUFFER_U32_EQ(data, buffer, 0);
 }
 
+// Test that using TextureDescriptor::arrayLayerCount emits a warning.
+TEST_P(DeprecationTests, TextureDescriptorArrayLayerCountDeprecated) {
+    wgpu::TextureDescriptor desc;
+    desc.usage = wgpu::TextureUsage::Sampled;
+    desc.dimension = wgpu::TextureDimension::e2D;
+    desc.size = {1, 1, 1};
+    desc.arrayLayerCount = 2;
+    desc.format = wgpu::TextureFormat::RGBA8Unorm;
+    desc.mipLevelCount = 1;
+    desc.sampleCount = 1;
+
+    EXPECT_DEPRECATION_WARNING(device.CreateTexture(&desc));
+}
+
+// Test that using both TextureDescriptor::arrayLayerCount and size.depth triggers an error.
+TEST_P(DeprecationTests, TextureDescriptorArrayLayerCountAndDepthSizeIsError) {
+    wgpu::TextureDescriptor desc;
+    desc.usage = wgpu::TextureUsage::Sampled;
+    desc.dimension = wgpu::TextureDimension::e2D;
+    desc.size = {1, 1, 2};
+    desc.arrayLayerCount = 2;
+    desc.format = wgpu::TextureFormat::RGBA8Unorm;
+    desc.mipLevelCount = 1;
+    desc.sampleCount = 1;
+
+    ASSERT_DEVICE_ERROR(device.CreateTexture(&desc));
+}
+
+// Test that TextureDescriptor::arrayLayerCount does correct state tracking.
+TEST_P(DeprecationTests, TextureDescriptorArrayLayerCountStateTracking) {
+    wgpu::TextureDescriptor desc;
+    desc.usage = wgpu::TextureUsage::Sampled;
+    desc.dimension = wgpu::TextureDimension::e2D;
+    desc.size = {1, 1, 1};
+    desc.arrayLayerCount = 2;
+    desc.format = wgpu::TextureFormat::RGBA8Unorm;
+    desc.mipLevelCount = 1;
+    desc.sampleCount = 1;
+
+    wgpu::Texture texture;
+    EXPECT_DEPRECATION_WARNING(texture = device.CreateTexture(&desc));
+
+    wgpu::TextureViewDescriptor viewDesc;
+    viewDesc.dimension = wgpu::TextureViewDimension::e2DArray;
+    viewDesc.arrayLayerCount = 2;
+    texture.CreateView(&viewDesc);
+    viewDesc.arrayLayerCount = 3;
+    ASSERT_DEVICE_ERROR(texture.CreateView(&viewDesc));
+}
+
 DAWN_INSTANTIATE_TEST(DeprecationTests,
                       D3D12Backend(),
                       MetalBackend(),

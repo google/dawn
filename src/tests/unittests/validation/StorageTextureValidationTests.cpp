@@ -89,8 +89,7 @@ class StorageTextureValidationTests : public ValidationTest {
                                 uint32_t arrayLayerCount = 1) {
         wgpu::TextureDescriptor descriptor;
         descriptor.dimension = wgpu::TextureDimension::e2D;
-        descriptor.size = {16, 16, 1};
-        descriptor.arrayLayerCount = arrayLayerCount;
+        descriptor.size = {16, 16, arrayLayerCount};
         descriptor.sampleCount = sampleCount;
         descriptor.format = format;
         descriptor.mipLevelCount = 1;

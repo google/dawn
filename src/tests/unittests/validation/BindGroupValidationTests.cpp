@@ -26,12 +26,11 @@ class BindGroupValidationTest : public ValidationTest {
                                 uint32_t layerCount) {
         wgpu::TextureDescriptor descriptor;
         descriptor.dimension = wgpu::TextureDimension::e2D;
-        descriptor.size = {16, 16, 1};
+        descriptor.size = {16, 16, layerCount};
         descriptor.sampleCount = 1;
         descriptor.mipLevelCount = 1;
         descriptor.usage = usage;
         descriptor.format = format;
-        descriptor.arrayLayerCount = layerCount;
 
         return device.CreateTexture(&descriptor);
     }

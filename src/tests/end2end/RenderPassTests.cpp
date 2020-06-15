@@ -57,7 +57,6 @@ protected:
         descriptor.size.width = kRTSize;
         descriptor.size.height = kRTSize;
         descriptor.size.depth = 1;
-        descriptor.arrayLayerCount = 1;
         descriptor.sampleCount = 1;
         descriptor.format = kFormat;
         descriptor.mipLevelCount = 1;

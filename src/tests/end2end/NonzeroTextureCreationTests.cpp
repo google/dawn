@@ -34,7 +34,6 @@ TEST_P(NonzeroTextureCreationTests, TextureCreationClears) {
     descriptor.size.width = kSize;
     descriptor.size.height = kSize;
     descriptor.size.depth = 1;
-    descriptor.arrayLayerCount = 1;
     descriptor.sampleCount = 1;
     descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = 1;
@@ -58,7 +57,6 @@ TEST_P(NonzeroTextureCreationTests, Depth32TextureCreationDepthClears) {
     descriptor.size.width = kSize;
     descriptor.size.height = kSize;
     descriptor.size.depth = 1;
-    descriptor.arrayLayerCount = 1;
     descriptor.sampleCount = 1;
     descriptor.mipLevelCount = 1;
     descriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
@@ -80,7 +78,6 @@ TEST_P(NonzeroTextureCreationTests, MipMapClears) {
     descriptor.size.width = kSize;
     descriptor.size.height = kSize;
     descriptor.size.depth = 1;
-    descriptor.arrayLayerCount = 1;
     descriptor.sampleCount = 1;
     descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = mipLevels;
@@ -104,8 +101,7 @@ TEST_P(NonzeroTextureCreationTests, ArrayLayerClears) {
     descriptor.dimension = wgpu::TextureDimension::e2D;
     descriptor.size.width = kSize;
     descriptor.size.height = kSize;
-    descriptor.size.depth = 1;
-    descriptor.arrayLayerCount = arrayLayers;
+    descriptor.size.depth = arrayLayers;
     descriptor.sampleCount = 1;
     descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = 1;
@@ -128,7 +124,6 @@ TEST_P(NonzeroTextureCreationTests, NonrenderableTextureFormat) {
     descriptor.size.width = kSize;
     descriptor.size.height = kSize;
     descriptor.size.depth = 1;
-    descriptor.arrayLayerCount = 1;
     descriptor.sampleCount = 1;
     descriptor.format = wgpu::TextureFormat::RGBA8Snorm;
     descriptor.mipLevelCount = 1;
@@ -161,8 +156,7 @@ TEST_P(NonzeroTextureCreationTests, NonRenderableTextureClearWithMultiArrayLayer
     descriptor.dimension = wgpu::TextureDimension::e2D;
     descriptor.size.width = kSize;
     descriptor.size.height = kSize;
-    descriptor.size.depth = 1;
-    descriptor.arrayLayerCount = 2;
+    descriptor.size.depth = 2;
     descriptor.sampleCount = 1;
     descriptor.format = wgpu::TextureFormat::RGBA8Snorm;
     descriptor.mipLevelCount = 1;
@@ -198,7 +192,6 @@ TEST_P(NonzeroTextureCreationTests, AllSubresourcesFilled) {
     baseDescriptor.sampleCount = 1;
     baseDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
     baseDescriptor.mipLevelCount = 1;
-    baseDescriptor.arrayLayerCount = 1;
     baseDescriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
 
     RGBA8 filled(255, 255, 255, 255);
@@ -207,10 +200,10 @@ TEST_P(NonzeroTextureCreationTests, AllSubresourcesFilled) {
         wgpu::TextureDescriptor descriptor = baseDescriptor;
         // Some textures may be cleared with render pass load/store ops.
         // Test above the max attachment count.
-        descriptor.arrayLayerCount = kMaxColorAttachments + 1;
+        descriptor.size.depth = kMaxColorAttachments + 1;
         wgpu::Texture texture = device.CreateTexture(&descriptor);
 
-        for (uint32_t i = 0; i < descriptor.arrayLayerCount; ++i) {
+        for (uint32_t i = 0; i < descriptor.size.depth; ++i) {
             EXPECT_TEXTURE_RGBA8_EQ(&filled, texture, 0, 0, 1, 1, 0, i);
         }
     }
@@ -229,11 +222,11 @@ TEST_P(NonzeroTextureCreationTests, AllSubresourcesFilled) {
         wgpu::TextureDescriptor descriptor = baseDescriptor;
         // Some textures may be cleared with render pass load/store ops.
         // Test above the max attachment count.
-        descriptor.arrayLayerCount = kMaxColorAttachments + 1;
+        descriptor.size.depth = kMaxColorAttachments + 1;
         descriptor.mipLevelCount = 3;
         wgpu::Texture texture = device.CreateTexture(&descriptor);
 
-        for (uint32_t i = 0; i < descriptor.arrayLayerCount; ++i) {
+        for (uint32_t i = 0; i < descriptor.size.depth; ++i) {
             for (uint32_t j = 0; j < descriptor.mipLevelCount; ++j) {
                 EXPECT_TEXTURE_RGBA8_EQ(&filled, texture, 0, 0, 1, 1, j, i);
             }
@@ -251,7 +244,6 @@ TEST_P(NonzeroTextureCreationTests, NonRenderableAllSubresourcesFilled) {
     baseDescriptor.sampleCount = 1;
     baseDescriptor.format = wgpu::TextureFormat::RGBA8Snorm;
     baseDescriptor.mipLevelCount = 1;
-    baseDescriptor.arrayLayerCount = 1;
     baseDescriptor.usage = wgpu::TextureUsage::CopySrc;
 
     RGBA8 filled(1, 1, 1, 1);
@@ -260,10 +252,10 @@ TEST_P(NonzeroTextureCreationTests, NonRenderableAllSubresourcesFilled) {
         wgpu::TextureDescriptor descriptor = baseDescriptor;
         // Some textures may be cleared with render pass load/store ops.
         // Test above the max attachment count.
-        descriptor.arrayLayerCount = kMaxColorAttachments + 1;
+        descriptor.size.depth = kMaxColorAttachments + 1;
         wgpu::Texture texture = device.CreateTexture(&descriptor);
 
-        for (uint32_t i = 0; i < descriptor.arrayLayerCount; ++i) {
+        for (uint32_t i = 0; i < descriptor.size.depth; ++i) {
             EXPECT_TEXTURE_RGBA8_EQ(&filled, texture, 0, 0, 1, 1, 0, i);
         }
     }
@@ -282,11 +274,11 @@ TEST_P(NonzeroTextureCreationTests, NonRenderableAllSubresourcesFilled) {
         wgpu::TextureDescriptor descriptor = baseDescriptor;
         // Some textures may be cleared with render pass load/store ops.
         // Test above the max attachment count.
-        descriptor.arrayLayerCount = kMaxColorAttachments + 1;
+        descriptor.size.depth = kMaxColorAttachments + 1;
         descriptor.mipLevelCount = 3;
         wgpu::Texture texture = device.CreateTexture(&descriptor);
 
-        for (uint32_t i = 0; i < descriptor.arrayLayerCount; ++i) {
+        for (uint32_t i = 0; i < descriptor.size.depth; ++i) {
             for (uint32_t j = 0; j < descriptor.mipLevelCount; ++j) {
                 EXPECT_TEXTURE_RGBA8_EQ(&filled, texture, 0, 0, 1, 1, j, i);
             }

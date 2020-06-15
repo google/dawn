@@ -101,8 +101,9 @@ namespace dawn_native {
 
                 // Multisampled 2D array texture is not supported because on Metal it requires the
                 // version of macOS be greater than 10.14.
-                if (descriptor->arrayLayerCount > 1) {
-                    return DAWN_VALIDATION_ERROR("Multisampled 2D array texture is not supported.");
+                if (descriptor->size.depth > 1) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Multisampled textures with depth > 1 are not supported.");
                 }
 
                 if (format->isCompressed) {
@@ -163,7 +164,8 @@ namespace dawn_native {
                     "The size of the texture is incompatible with the texture format");
             }
 
-            if (descriptor->arrayLayerCount > kMaxTexture2DArrayLayers) {
+            if (descriptor->dimension == wgpu::TextureDimension::e2D &&
+                descriptor->size.depth > kMaxTexture2DArrayLayers) {
                 return DAWN_VALIDATION_ERROR("Texture 2D array layer count exceeded");
             }
             if (descriptor->mipLevelCount > kMaxTexture2DMipLevels) {
@@ -218,8 +220,7 @@ namespace dawn_native {
 
         // TODO(jiawei.shao@intel.com): check stuff based on the dimension
         if (descriptor->size.width == 0 || descriptor->size.height == 0 ||
-            descriptor->size.depth == 0 || descriptor->arrayLayerCount == 0 ||
-            descriptor->mipLevelCount == 0) {
+            descriptor->size.depth == 0 || descriptor->mipLevelCount == 0) {
             return DAWN_VALIDATION_ERROR("Cannot create an empty texture");
         }
 
@@ -326,6 +327,25 @@ namespace dawn_native {
         return desc;
     }
 
+    ResultOrError<TextureDescriptor> FixTextureDescriptor(DeviceBase* device,
+                                                          const TextureDescriptor* desc) {
+        TextureDescriptor fixedDesc = *desc;
+
+        if (desc->arrayLayerCount != 1) {
+            if (desc->size.depth != 1) {
+                return DAWN_VALIDATION_ERROR("arrayLayerCount and size.depth cannot both be != 1");
+            } else {
+                fixedDesc.size.depth = fixedDesc.arrayLayerCount;
+                fixedDesc.arrayLayerCount = 1;
+                device->EmitDeprecationWarning(
+                    "wgpu::TextureDescriptor::arrayLayerCount is deprecated in favor of "
+                    "::size::depth");
+            }
+        }
+
+        return {std::move(fixedDesc)};
+    }
+
     bool IsValidSampleCount(uint32_t sampleCount) {
         switch (sampleCount) {
             case 1:
@@ -352,11 +372,17 @@ namespace dawn_native {
           mDimension(descriptor->dimension),
           mFormat(device->GetValidInternalFormat(descriptor->format)),
           mSize(descriptor->size),
-          mArrayLayerCount(descriptor->arrayLayerCount),
+          mArrayLayerCount(descriptor->size.depth),
           mMipLevelCount(descriptor->mipLevelCount),
           mSampleCount(descriptor->sampleCount),
           mUsage(descriptor->usage),
           mState(state) {
+        // TODO(cwallez@chromium.org): Store the array layers in size.depth instead if extracting it
+        // in mArrayLayerCount.
+        ASSERT(mDimension == wgpu::TextureDimension::e2D);
+        mArrayLayerCount = mSize.depth;
+        mSize.depth = 1;
+
         uint32_t subresourceCount = GetSubresourceCount();
         mIsSubresourceContentInitializedAtIndex = std::vector<bool>(subresourceCount, false);
 

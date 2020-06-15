@@ -60,7 +60,6 @@ class ClipSpaceTest : public DawnTest {
         textureDescriptor.format = format;
         textureDescriptor.usage =
             wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
-        textureDescriptor.arrayLayerCount = 1;
         textureDescriptor.mipLevelCount = 1;
         textureDescriptor.sampleCount = 1;
         textureDescriptor.size = {kSize, kSize, 1};

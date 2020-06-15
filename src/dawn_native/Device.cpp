@@ -1001,6 +1001,13 @@ namespace dawn_native {
     ResultOrError<Ref<TextureBase>> DeviceBase::CreateTextureInternal(
         const TextureDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
+
+        // TODO(dawn:22): Remove once migration from GPUTextureDescriptor.arrayLayerCount to
+        // GPUTextureDescriptor.size.depth is done.
+        TextureDescriptor fixedDescriptor;
+        DAWN_TRY_ASSIGN(fixedDescriptor, FixTextureDescriptor(this, descriptor));
+        descriptor = &fixedDescriptor;
+
         if (IsValidationEnabled()) {
             DAWN_TRY(ValidateTextureDescriptor(this, descriptor));
         }

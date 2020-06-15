@@ -33,7 +33,6 @@ namespace {
             wgpu::TextureDescriptor descriptor;
             descriptor.dimension = wgpu::TextureDimension::e2D;
             descriptor.size = {1, 1, 1};
-            descriptor.arrayLayerCount = 1;
             descriptor.sampleCount = 1;
             descriptor.mipLevelCount = 1;
             descriptor.usage = usage;

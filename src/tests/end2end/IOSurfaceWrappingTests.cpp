@@ -122,7 +122,6 @@ class IOSurfaceValidationTests : public IOSurfaceTestBase {
         descriptor.format = wgpu::TextureFormat::BGRA8Unorm;
         descriptor.size = {10, 10, 1};
         descriptor.sampleCount = 1;
-        descriptor.arrayLayerCount = 1;
         descriptor.mipLevelCount = 1;
         descriptor.usage = wgpu::TextureUsage::OutputAttachment;
     }
@@ -180,10 +179,10 @@ TEST_P(IOSurfaceValidationTests, InvalidMipLevelCount) {
     ASSERT_EQ(texture.Get(), nullptr);
 }
 
-// Test an error occurs if the descriptor array layer count isn't 1
-TEST_P(IOSurfaceValidationTests, InvalidArrayLayerCount) {
+// Test an error occurs if the descriptor depth isn't 1
+TEST_P(IOSurfaceValidationTests, InvalidDepth) {
     DAWN_SKIP_TEST_IF(UsesWire());
-    descriptor.arrayLayerCount = 2;
+    descriptor.size.depth = 2;
 
     ASSERT_DEVICE_ERROR(wgpu::Texture texture =
                             WrapIOSurface(&descriptor, defaultIOSurface.get(), 0));
@@ -298,7 +297,6 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
             textureDescriptor.format = format;
             textureDescriptor.size = {1, 1, 1};
             textureDescriptor.sampleCount = 1;
-            textureDescriptor.arrayLayerCount = 1;
             textureDescriptor.mipLevelCount = 1;
             textureDescriptor.usage = wgpu::TextureUsage::Sampled;
             wgpu::Texture wrappingTexture = WrapIOSurface(&textureDescriptor, ioSurface, 0);
@@ -340,7 +338,6 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
         textureDescriptor.format = format;
         textureDescriptor.size = {1, 1, 1};
         textureDescriptor.sampleCount = 1;
-        textureDescriptor.arrayLayerCount = 1;
         textureDescriptor.mipLevelCount = 1;
         textureDescriptor.usage = wgpu::TextureUsage::OutputAttachment;
         wgpu::Texture ioSurfaceTexture = WrapIOSurface(&textureDescriptor, ioSurface, 0);
@@ -461,7 +458,6 @@ TEST_P(IOSurfaceUsageTests, UnclearedTextureIsCleared) {
     textureDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
     textureDescriptor.size = {1, 1, 1};
     textureDescriptor.sampleCount = 1;
-    textureDescriptor.arrayLayerCount = 1;
     textureDescriptor.mipLevelCount = 1;
     textureDescriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
 

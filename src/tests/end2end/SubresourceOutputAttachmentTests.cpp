@@ -121,8 +121,7 @@ class SubresourceOutputAttachmentTest : public DawnTest {
         renderTargetDesc.dimension = wgpu::TextureDimension::e2D;
         renderTargetDesc.size.width = kTextureSize;
         renderTargetDesc.size.height = kTextureSize;
-        renderTargetDesc.size.depth = 1;
-        renderTargetDesc.arrayLayerCount = kArrayLayerCount;
+        renderTargetDesc.size.depth = kArrayLayerCount;
         renderTargetDesc.sampleCount = 1;
         renderTargetDesc.format = format;
         renderTargetDesc.mipLevelCount = kMipLevelCount;
