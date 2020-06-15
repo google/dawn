@@ -63,16 +63,10 @@ namespace dawn_native { namespace d3d12 {
             const std::vector<wgpu::TextureUsage>& subresourceUsages);
         void TrackUsageAndTransitionNow(CommandRecordingContext* commandContext,
                                         wgpu::TextureUsage usage,
-                                        uint32_t baseMipLevel,
-                                        uint32_t levelCount,
-                                        uint32_t baseArrayLayer,
-                                        uint32_t layerCount);
+                                        const SubresourceRange& range);
         void TrackUsageAndTransitionNow(CommandRecordingContext* commandContext,
                                         D3D12_RESOURCE_STATES newState,
-                                        uint32_t baseMipLevel,
-                                        uint32_t levelCount,
-                                        uint32_t baseArrayLayer,
-                                        uint32_t layerCount);
+                                        const SubresourceRange& range);
         void TrackAllUsageAndTransitionNow(CommandRecordingContext* commandContext,
                                            wgpu::TextureUsage usage);
         void TrackAllUsageAndTransitionNow(CommandRecordingContext* commandContext,
@@ -98,10 +92,7 @@ namespace dawn_native { namespace d3d12 {
         void TransitionUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
                                                   std::vector<D3D12_RESOURCE_BARRIER>* barrier,
                                                   D3D12_RESOURCE_STATES newState,
-                                                  uint32_t baseMipLevel,
-                                                  uint32_t levelCount,
-                                                  uint32_t baseArrayLayer,
-                                                  uint32_t layerCount);
+                                                  const SubresourceRange& range);
 
         void TransitionSingleSubresource(std::vector<D3D12_RESOURCE_BARRIER>* barriers,
                                          D3D12_RESOURCE_STATES subresourceNewState,

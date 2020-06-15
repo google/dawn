@@ -549,32 +549,24 @@ namespace dawn_native { namespace d3d12 {
 
     void Texture::TrackUsageAndTransitionNow(CommandRecordingContext* commandContext,
                                              wgpu::TextureUsage usage,
-                                             uint32_t mipLevel,
-                                             uint32_t levelCount,
-                                             uint32_t arrayLayer,
-                                             uint32_t layerCount) {
-        TrackUsageAndTransitionNow(commandContext, D3D12TextureUsage(usage, GetFormat()), mipLevel,
-                                   levelCount, arrayLayer, layerCount);
+                                             const SubresourceRange& range) {
+        TrackUsageAndTransitionNow(commandContext, D3D12TextureUsage(usage, GetFormat()), range);
     }
 
     void Texture::TrackAllUsageAndTransitionNow(CommandRecordingContext* commandContext,
                                                 wgpu::TextureUsage usage) {
-        TrackUsageAndTransitionNow(commandContext, D3D12TextureUsage(usage, GetFormat()), 0,
-                                   GetNumMipLevels(), 0, GetArrayLayers());
+        TrackUsageAndTransitionNow(commandContext, D3D12TextureUsage(usage, GetFormat()),
+                                   GetAllSubresources());
     }
 
     void Texture::TrackAllUsageAndTransitionNow(CommandRecordingContext* commandContext,
                                                 D3D12_RESOURCE_STATES newState) {
-        TrackUsageAndTransitionNow(commandContext, newState, 0, GetNumMipLevels(), 0,
-                                   GetArrayLayers());
+        TrackUsageAndTransitionNow(commandContext, newState, GetAllSubresources());
     }
 
     void Texture::TrackUsageAndTransitionNow(CommandRecordingContext* commandContext,
                                              D3D12_RESOURCE_STATES newState,
-                                             uint32_t baseMipLevel,
-                                             uint32_t levelCount,
-                                             uint32_t baseArrayLayer,
-                                             uint32_t layerCount) {
+                                             const SubresourceRange& range) {
         if (mResourceAllocation.GetInfo().mMethod != AllocationMethod::kExternal) {
             // Track the underlying heap to ensure residency.
             Heap* heap = ToBackend(mResourceAllocation.GetResourceHeap());
@@ -582,10 +574,9 @@ namespace dawn_native { namespace d3d12 {
         }
 
         std::vector<D3D12_RESOURCE_BARRIER> barriers;
-        barriers.reserve(levelCount * layerCount);
+        barriers.reserve(range.levelCount * range.layerCount);
 
-        TransitionUsageAndGetResourceBarrier(commandContext, &barriers, newState, baseMipLevel,
-                                             levelCount, baseArrayLayer, layerCount);
+        TransitionUsageAndGetResourceBarrier(commandContext, &barriers, newState, range);
         if (barriers.size()) {
             commandContext->GetCommandList()->ResourceBarrier(barriers.size(), barriers.data());
         }
@@ -687,17 +678,14 @@ namespace dawn_native { namespace d3d12 {
         CommandRecordingContext* commandContext,
         std::vector<D3D12_RESOURCE_BARRIER>* barriers,
         D3D12_RESOURCE_STATES newState,
-        uint32_t baseMipLevel,
-        uint32_t levelCount,
-        uint32_t baseArrayLayer,
-        uint32_t layerCount) {
+        const SubresourceRange& range) {
         HandleTransitionSpecialCases(commandContext);
 
         const Serial pendingCommandSerial = ToBackend(GetDevice())->GetPendingCommandSerial();
-        for (uint32_t arrayLayer = 0; arrayLayer < layerCount; ++arrayLayer) {
-            for (uint32_t mipLevel = 0; mipLevel < levelCount; ++mipLevel) {
-                uint32_t index =
-                    GetSubresourceIndex(baseMipLevel + mipLevel, baseArrayLayer + arrayLayer);
+        for (uint32_t arrayLayer = 0; arrayLayer < range.layerCount; ++arrayLayer) {
+            for (uint32_t mipLevel = 0; mipLevel < range.levelCount; ++mipLevel) {
+                uint32_t index = GetSubresourceIndex(range.baseMipLevel + mipLevel,
+                                                     range.baseArrayLayer + arrayLayer);
 
                 TransitionSingleSubresource(barriers, newState, index, pendingCommandSerial);
             }
@@ -797,9 +785,7 @@ namespace dawn_native { namespace d3d12 {
 
         if (GetFormat().isRenderable) {
             if (GetFormat().HasDepthOrStencil()) {
-                TrackUsageAndTransitionNow(commandContext, D3D12_RESOURCE_STATE_DEPTH_WRITE,
-                                           range.baseMipLevel, range.levelCount,
-                                           range.baseArrayLayer, range.layerCount);
+                TrackUsageAndTransitionNow(commandContext, D3D12_RESOURCE_STATE_DEPTH_WRITE, range);
 
                 D3D12_CLEAR_FLAGS clearFlags = {};
 
@@ -836,8 +822,7 @@ namespace dawn_native { namespace d3d12 {
                 }
             } else {
                 TrackUsageAndTransitionNow(commandContext, D3D12_RESOURCE_STATE_RENDER_TARGET,
-                                           range.baseMipLevel, range.levelCount,
-                                           range.baseArrayLayer, range.layerCount);
+                                           range);
 
                 const float clearColorRGBA[4] = {fClearColor, fClearColor, fClearColor,
                                                  fClearColor};
@@ -882,9 +867,7 @@ namespace dawn_native { namespace d3d12 {
                             uploader->Allocate(bufferSize, device->GetPendingCommandSerial()));
             memset(uploadHandle.mappedBuffer, clearColor, bufferSize);
 
-            TrackUsageAndTransitionNow(commandContext, D3D12_RESOURCE_STATE_COPY_DEST,
-                                       range.baseMipLevel, range.levelCount, range.baseArrayLayer,
-                                       range.layerCount);
+            TrackUsageAndTransitionNow(commandContext, D3D12_RESOURCE_STATE_COPY_DEST, range);
 
             for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
                  ++level) {

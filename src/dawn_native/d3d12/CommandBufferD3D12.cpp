@@ -163,20 +163,18 @@ namespace dawn_native { namespace d3d12 {
                                 TextureViewBase* view =
                                     static_cast<TextureViewBase*>(mBindings[index][binding]);
                                 ToBackend(view->GetTexture())
-                                    ->TrackUsageAndTransitionNow(
-                                        commandContext, kReadonlyStorageTexture,
-                                        view->GetBaseMipLevel(), view->GetLevelCount(),
-                                        view->GetBaseArrayLayer(), view->GetLayerCount());
+                                    ->TrackUsageAndTransitionNow(commandContext,
+                                                                 kReadonlyStorageTexture,
+                                                                 view->GetSubresourceRange());
                                 break;
                             }
                             case wgpu::BindingType::WriteonlyStorageTexture: {
                                 TextureViewBase* view =
                                     static_cast<TextureViewBase*>(mBindings[index][binding]);
                                 ToBackend(view->GetTexture())
-                                    ->TrackUsageAndTransitionNow(
-                                        commandContext, wgpu::TextureUsage::Storage,
-                                        view->GetBaseMipLevel(), view->GetLevelCount(),
-                                        view->GetBaseArrayLayer(), view->GetLayerCount());
+                                    ->TrackUsageAndTransitionNow(commandContext,
+                                                                 wgpu::TextureUsage::Storage,
+                                                                 view->GetSubresourceRange());
                                 break;
                             }
                             case wgpu::BindingType::StorageTexture:
@@ -435,14 +433,12 @@ namespace dawn_native { namespace d3d12 {
                 Texture* resolveTexture = ToBackend(resolveTarget->GetTexture());
 
                 // Transition the usages of the color attachment and resolve target.
-                colorTexture->TrackUsageAndTransitionNow(
-                    commandContext, D3D12_RESOURCE_STATE_RESOLVE_SOURCE,
-                    colorView->GetBaseMipLevel(), colorView->GetLevelCount(),
-                    colorView->GetBaseArrayLayer(), colorView->GetLayerCount());
-                resolveTexture->TrackUsageAndTransitionNow(
-                    commandContext, D3D12_RESOURCE_STATE_RESOLVE_DEST,
-                    resolveTarget->GetBaseMipLevel(), resolveTarget->GetLevelCount(),
-                    resolveTarget->GetBaseArrayLayer(), resolveTarget->GetLayerCount());
+                colorTexture->TrackUsageAndTransitionNow(commandContext,
+                                                         D3D12_RESOURCE_STATE_RESOLVE_SOURCE,
+                                                         colorView->GetSubresourceRange());
+                resolveTexture->TrackUsageAndTransitionNow(commandContext,
+                                                           D3D12_RESOURCE_STATE_RESOLVE_DEST,
+                                                           resolveTarget->GetSubresourceRange());
 
                 // Do MSAA resolve with ResolveSubResource().
                 ID3D12Resource* colorTextureHandle = colorTexture->GetD3D12Resource();
@@ -591,8 +587,7 @@ namespace dawn_native { namespace d3d12 {
 
                     buffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopySrc);
                     texture->TrackUsageAndTransitionNow(commandContext, wgpu::TextureUsage::CopyDst,
-                                                        copy->destination.mipLevel, 1,
-                                                        copy->destination.arrayLayer, 1);
+                                                        subresource);
 
                     auto copySplit = ComputeTextureCopySplit(
                         copy->destination.origin, copy->copySize, texture->GetFormat(),
@@ -626,13 +621,12 @@ namespace dawn_native { namespace d3d12 {
 
                     ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
                     ASSERT(copy->copySize.depth == 1);
-                    texture->EnsureSubresourceContentInitialized(
-                        commandContext, SubresourceRange::SingleSubresource(
-                                            copy->source.mipLevel, copy->source.arrayLayer));
+                    SubresourceRange subresource = SubresourceRange::SingleSubresource(
+                        copy->source.mipLevel, copy->source.arrayLayer);
+                    texture->EnsureSubresourceContentInitialized(commandContext, subresource);
 
                     texture->TrackUsageAndTransitionNow(commandContext, wgpu::TextureUsage::CopySrc,
-                                                        copy->source.mipLevel, 1,
-                                                        copy->source.arrayLayer, 1);
+                                                        subresource);
                     buffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopyDst);
 
                     TextureCopySplit copySplit = ComputeTextureCopySplit(
@@ -692,12 +686,10 @@ namespace dawn_native { namespace d3d12 {
                                                   copy->destination.arrayLayer,
                                                   copy->copySize.depth));
                     }
-                    source->TrackUsageAndTransitionNow(
-                        commandContext, wgpu::TextureUsage::CopySrc, copy->source.mipLevel, 1,
-                        copy->source.arrayLayer, copy->copySize.depth);
-                    destination->TrackUsageAndTransitionNow(
-                        commandContext, wgpu::TextureUsage::CopyDst, copy->destination.mipLevel, 1,
-                        copy->destination.arrayLayer, copy->copySize.depth);
+                    source->TrackUsageAndTransitionNow(commandContext, wgpu::TextureUsage::CopySrc,
+                                                       srcRange);
+                    destination->TrackUsageAndTransitionNow(commandContext,
+                                                            wgpu::TextureUsage::CopyDst, dstRange);
 
                     if (CanUseCopyResource(source, destination, copy->copySize)) {
                         commandList->CopyResource(destination->GetD3D12Resource(),
@@ -886,10 +878,7 @@ namespace dawn_native { namespace d3d12 {
 
                 resolveDestinationTexture->TrackUsageAndTransitionNow(
                     commandContext, D3D12_RESOURCE_STATE_RESOLVE_DEST,
-                    resolveDestinationView->GetBaseMipLevel(),
-                    resolveDestinationView->GetLevelCount(),
-                    resolveDestinationView->GetBaseArrayLayer(),
-                    resolveDestinationView->GetLayerCount());
+                    resolveDestinationView->GetSubresourceRange());
 
                 renderPassBuilder->SetRenderTargetEndingAccessResolve(i, attachmentInfo.storeOp,
                                                                       view, resolveDestinationView);

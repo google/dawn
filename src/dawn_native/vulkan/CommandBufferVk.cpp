@@ -460,9 +460,7 @@ namespace dawn_native { namespace vulkan {
                     ToBackend(src.buffer)
                         ->TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopySrc);
                     ToBackend(dst.texture)
-                        ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst,
-                                             subresource.mipLevel, 1, subresource.baseArrayLayer,
-                                             1);
+                        ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst, range);
                     VkBuffer srcBuffer = ToBackend(src.buffer)->GetHandle();
                     VkImage dstImage = ToBackend(dst.texture)->GetHandle();
 
@@ -485,16 +483,13 @@ namespace dawn_native { namespace vulkan {
 
                     ASSERT(src.texture->GetDimension() == wgpu::TextureDimension::e2D);
                     ASSERT(copy->copySize.depth == 1);
+                    SubresourceRange range = SubresourceRange::SingleSubresource(
+                        subresource.mipLevel, subresource.baseArrayLayer);
                     ToBackend(src.texture)
-                        ->EnsureSubresourceContentInitialized(
-                            recordingContext,
-                            SubresourceRange::SingleSubresource(subresource.mipLevel,
-                                                                subresource.baseArrayLayer));
+                        ->EnsureSubresourceContentInitialized(recordingContext, range);
 
                     ToBackend(src.texture)
-                        ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopySrc,
-                                             subresource.mipLevel, 1, subresource.baseArrayLayer,
-                                             1);
+                        ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopySrc, range);
                     ToBackend(dst.buffer)
                         ->TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopyDst);
 
@@ -538,10 +533,10 @@ namespace dawn_native { namespace vulkan {
 
                     ToBackend(src.texture)
                         ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopySrc,
-                                             src.mipLevel, 1, src.arrayLayer, copy->copySize.depth);
+                                             srcRange);
                     ToBackend(dst.texture)
                         ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst,
-                                             dst.mipLevel, 1, dst.arrayLayer, copy->copySize.depth);
+                                             dstRange);
 
                     // In some situations we cannot do texture-to-texture copies with vkCmdCopyImage
                     // because as Vulkan SPEC always validates image copies with the virtual size of
