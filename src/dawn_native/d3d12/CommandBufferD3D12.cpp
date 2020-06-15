@@ -506,8 +506,8 @@ namespace dawn_native { namespace d3d12 {
 
             for (size_t i = 0; i < usages.textures.size(); ++i) {
                 ToBackend(usages.textures[i])
-                    ->TrackUsageAndGetResourceBarrierForPass(
-                        commandContext, &barriers, usages.textureUsages[i].subresourceUsages);
+                    ->TrackUsageAndGetResourceBarrierForPass(commandContext, &barriers,
+                                                             usages.textureUsages[i]);
                 textureUsages |= usages.textureUsages[i].usage;
             }
 

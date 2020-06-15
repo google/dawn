@@ -19,6 +19,7 @@
 #include "dawn_native/Texture.h"
 
 #include "dawn_native/DawnNative.h"
+#include "dawn_native/PassResourceUsage.h"
 #include "dawn_native/d3d12/ResourceHeapAllocationD3D12.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
@@ -57,10 +58,9 @@ namespace dawn_native { namespace d3d12 {
         void EnsureSubresourceContentInitialized(CommandRecordingContext* commandContext,
                                                  const SubresourceRange& range);
 
-        void TrackUsageAndGetResourceBarrierForPass(
-            CommandRecordingContext* commandContext,
-            std::vector<D3D12_RESOURCE_BARRIER>* barrier,
-            const std::vector<wgpu::TextureUsage>& subresourceUsages);
+        void TrackUsageAndGetResourceBarrierForPass(CommandRecordingContext* commandContext,
+                                                    std::vector<D3D12_RESOURCE_BARRIER>* barrier,
+                                                    const PassTextureUsage& textureUsages);
         void TrackUsageAndTransitionNow(CommandRecordingContext* commandContext,
                                         wgpu::TextureUsage usage,
                                         const SubresourceRange& range);
@@ -94,11 +94,14 @@ namespace dawn_native { namespace d3d12 {
                                                   D3D12_RESOURCE_STATES newState,
                                                   const SubresourceRange& range);
 
-        void TransitionSingleSubresource(std::vector<D3D12_RESOURCE_BARRIER>* barriers,
-                                         D3D12_RESOURCE_STATES subresourceNewState,
-                                         uint32_t index,
-                                         const Serial pendingCommandSerial);
+        void TransitionSingleOrAllSubresources(std::vector<D3D12_RESOURCE_BARRIER>* barriers,
+                                               uint32_t index,
+                                               D3D12_RESOURCE_STATES subresourceNewState,
+                                               const Serial pendingCommandSerial,
+                                               bool allSubresources);
         void HandleTransitionSpecialCases(CommandRecordingContext* commandContext);
+
+        bool mSameLastUsagesAcrossSubresources = true;
 
         struct StateAndDecay {
             D3D12_RESOURCE_STATES lastState;

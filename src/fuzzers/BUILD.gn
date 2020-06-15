@@ -175,6 +175,6 @@ group("dawn_fuzzers") {
   ]
 
   if (is_win) {
-    deps += [":dawn_wire_server_and_d3d12_backend_fuzzer"]
+    deps += [ ":dawn_wire_server_and_d3d12_backend_fuzzer" ]
   }
 }
