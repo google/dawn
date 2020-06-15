@@ -153,16 +153,15 @@ namespace dawn_native { namespace vulkan {
                                 break;
 
                             case wgpu::BindingType::ReadonlyStorageTexture:
-                            case wgpu::BindingType::WriteonlyStorageTexture:
-                                // TODO (yunchao.he@intel.com): Do the transition for texture's
-                                // subresource via its view.
-                                ToBackend(
-                                    static_cast<TextureViewBase*>(mBindings[index][bindingIndex])
-                                        ->GetTexture())
-                                    ->TransitionFullUsage(recordingContext,
-                                                          wgpu::TextureUsage::Storage);
+                            case wgpu::BindingType::WriteonlyStorageTexture: {
+                                TextureViewBase* view =
+                                    static_cast<TextureViewBase*>(mBindings[index][bindingIndex]);
+                                ToBackend(view->GetTexture())
+                                    ->TransitionUsageNow(recordingContext,
+                                                         wgpu::TextureUsage::Storage,
+                                                         view->GetSubresourceRange());
                                 break;
-
+                            }
                             case wgpu::BindingType::StorageTexture:
                                 // Not implemented.
 

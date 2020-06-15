@@ -32,7 +32,7 @@ namespace dawn_native { namespace vulkan {
         ~SwapChain() override;
 
         TextureBase* GetNextTextureImpl(const TextureDescriptor* descriptor) override;
-        MaybeError OnBeforePresent(TextureBase* texture) override;
+        MaybeError OnBeforePresent(TextureViewBase* view) override;
 
       private:
         wgpu::TextureUsage mTextureUsage;

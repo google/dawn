@@ -268,7 +268,7 @@ namespace dawn_native { namespace null {
       protected:
         ~OldSwapChain() override;
         TextureBase* GetNextTextureImpl(const TextureDescriptor* descriptor) override;
-        MaybeError OnBeforePresent(TextureBase*) override;
+        MaybeError OnBeforePresent(TextureViewBase*) override;
     };
 
     class NativeSwapChainImpl {
