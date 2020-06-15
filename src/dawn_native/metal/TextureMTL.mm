@@ -54,22 +54,6 @@ namespace dawn_native { namespace metal {
             return result;
         }
 
-        MTLTextureType MetalTextureType(wgpu::TextureDimension dimension,
-                                        unsigned int arrayLayers,
-                                        unsigned int sampleCount) {
-            switch (dimension) {
-                case wgpu::TextureDimension::e2D:
-                    if (sampleCount > 1) {
-                        ASSERT(arrayLayers == 1);
-                        return MTLTextureType2DMultisample;
-                    } else {
-                        return (arrayLayers > 1) ? MTLTextureType2DArray : MTLTextureType2D;
-                    }
-                default:
-                    UNREACHABLE();
-            }
-        }
-
         MTLTextureType MetalTextureViewType(wgpu::TextureViewDimension dimension,
                                             unsigned int sampleCount) {
             switch (dimension) {
@@ -301,21 +285,38 @@ namespace dawn_native { namespace metal {
 
     MTLTextureDescriptor* CreateMetalTextureDescriptor(const TextureDescriptor* descriptor) {
         MTLTextureDescriptor* mtlDesc = [MTLTextureDescriptor new];
-        mtlDesc.textureType = MetalTextureType(descriptor->dimension, descriptor->size.depth,
-                                               descriptor->sampleCount);
-        mtlDesc.usage = MetalTextureUsage(descriptor->usage);
-        mtlDesc.pixelFormat = MetalPixelFormat(descriptor->format);
 
         mtlDesc.width = descriptor->size.width;
         mtlDesc.height = descriptor->size.height;
-        ASSERT(descriptor->dimension == wgpu::TextureDimension::e2D);
-        mtlDesc.depth = 1;
-
+        mtlDesc.sampleCount = descriptor->sampleCount;
+        mtlDesc.usage = MetalTextureUsage(descriptor->usage);
+        mtlDesc.pixelFormat = MetalPixelFormat(descriptor->format);
         mtlDesc.mipmapLevelCount = descriptor->mipLevelCount;
-        mtlDesc.arrayLength = descriptor->size.depth;
         mtlDesc.storageMode = MTLStorageModePrivate;
 
-        mtlDesc.sampleCount = descriptor->sampleCount;
+        // Choose the correct MTLTextureType and paper over differences in how the array layer count
+        // is specified.
+        mtlDesc.depth = descriptor->size.depth;
+        mtlDesc.arrayLength = 1;
+        switch (descriptor->dimension) {
+            case wgpu::TextureDimension::e2D:
+                if (mtlDesc.depth > 1) {
+                    ASSERT(mtlDesc.sampleCount == 1);
+                    mtlDesc.textureType = MTLTextureType2DArray;
+                    mtlDesc.arrayLength = mtlDesc.depth;
+                    mtlDesc.depth = 1;
+                } else {
+                    if (mtlDesc.sampleCount > 1) {
+                        mtlDesc.textureType = MTLTextureType2DMultisample;
+                    } else {
+                        mtlDesc.textureType = MTLTextureType2D;
+                    }
+                }
+                break;
+
+            default:
+                UNREACHABLE();
+        }
 
         return mtlDesc;
     }

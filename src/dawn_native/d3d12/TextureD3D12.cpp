@@ -452,6 +452,7 @@ namespace dawn_native { namespace d3d12 {
         const Extent3D& size = GetSize();
         resourceDescriptor.Width = size.width;
         resourceDescriptor.Height = size.height;
+        resourceDescriptor.DepthOrArraySize = size.depth;
 
         // This will need to be much more nuanced when WebGPU has
         // texture view compatibility rules.
@@ -462,7 +463,6 @@ namespace dawn_native { namespace d3d12 {
                                      ? D3D12TypelessTextureFormat(GetFormat().format)
                                      : D3D12TextureFormat(GetFormat().format);
 
-        resourceDescriptor.DepthOrArraySize = GetDepthOrArraySize();
         resourceDescriptor.MipLevels = static_cast<UINT16>(GetNumMipLevels());
         resourceDescriptor.Format = dxgiFormat;
         resourceDescriptor.SampleDesc.Count = GetSampleCount();
@@ -545,15 +545,6 @@ namespace dawn_native { namespace d3d12 {
 
     ID3D12Resource* Texture::GetD3D12Resource() const {
         return mResourceAllocation.GetD3D12Resource().Get();
-    }
-
-    UINT16 Texture::GetDepthOrArraySize() {
-        switch (GetDimension()) {
-            case wgpu::TextureDimension::e2D:
-                return static_cast<UINT16>(GetArrayLayers());
-            default:
-                UNREACHABLE();
-        }
     }
 
     void Texture::TrackUsageAndTransitionNow(CommandRecordingContext* commandContext,
@@ -878,9 +869,9 @@ namespace dawn_native { namespace d3d12 {
             // TODO(natlee@microsoft.com): test compressed textures are cleared
             // create temp buffer with clear color to copy to the texture image
             uint32_t bytesPerRow =
-                Align((GetSize().width / GetFormat().blockWidth) * GetFormat().blockByteSize,
+                Align((GetWidth() / GetFormat().blockWidth) * GetFormat().blockByteSize,
                       kTextureBytesPerRowAlignment);
-            uint64_t bufferSize64 = bytesPerRow * (GetSize().height / GetFormat().blockHeight);
+            uint64_t bufferSize64 = bytesPerRow * (GetHeight() / GetFormat().blockHeight);
             if (bufferSize64 > std::numeric_limits<uint32_t>::max()) {
                 return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate buffer.");
             }
@@ -900,7 +891,7 @@ namespace dawn_native { namespace d3d12 {
                 // compute d3d12 texture copy locations for texture and buffer
                 Extent3D copySize = GetMipLevelVirtualSize(level);
 
-                uint32_t rowsPerImage = GetSize().height;
+                uint32_t rowsPerImage = GetHeight();
                 TextureCopySplit copySplit =
                     ComputeTextureCopySplit({0, 0, 0}, copySize, GetFormat(),
                                             uploadHandle.startOffset, bytesPerRow, rowsPerImage);

@@ -63,17 +63,6 @@ namespace dawn_native { namespace d3d12 {
             const Extent3D& srcSize = src->GetSize();
             const Extent3D& dstSize = dst->GetSize();
 
-            auto GetCopyDepth = [](const Texture* texture) {
-                switch (texture->GetDimension()) {
-                    case wgpu::TextureDimension::e1D:
-                        return 1u;
-                    case wgpu::TextureDimension::e2D:
-                        return texture->GetArrayLayers();
-                    case wgpu::TextureDimension::e3D:
-                        return texture->GetSize().depth;
-                }
-            };
-
             // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-copyresource
             // In order to use D3D12's copy resource, the textures must be the same dimensions, and
             // the copy must be of the entire resource.
@@ -85,10 +74,10 @@ namespace dawn_native { namespace d3d12 {
                                                        // cannot use CopyResource.
                    copySize.width == dstSize.width &&  //
                    copySize.width == srcSize.width &&  //
-                   copySize.height == dstSize.height &&    //
-                   copySize.height == srcSize.height &&    //
-                   copySize.depth == GetCopyDepth(src) &&  //
-                   copySize.depth == GetCopyDepth(dst);
+                   copySize.height == dstSize.height &&  //
+                   copySize.height == srcSize.height &&  //
+                   copySize.depth == dstSize.depth &&    //
+                   copySize.depth == srcSize.depth;
         }
 
     }  // anonymous namespace

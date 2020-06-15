@@ -108,8 +108,8 @@ namespace dawn_native { namespace opengl {
         : Texture(device, descriptor, GenTexture(device->gl), TextureState::OwnedInternal) {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
 
-        uint32_t width = GetSize().width;
-        uint32_t height = GetSize().height;
+        uint32_t width = GetWidth();
+        uint32_t height = GetHeight();
         uint32_t levels = GetNumMipLevels();
         uint32_t arrayLayers = GetArrayLayers();
         uint32_t sampleCount = GetSampleCount();
@@ -292,15 +292,15 @@ namespace dawn_native { namespace opengl {
             // create temp buffer with clear color to copy to the texture image
             ASSERT(kTextureBytesPerRowAlignment % GetFormat().blockByteSize == 0);
             uint32_t bytesPerRow =
-                Align((GetSize().width / GetFormat().blockWidth) * GetFormat().blockByteSize,
+                Align((GetWidth() / GetFormat().blockWidth) * GetFormat().blockByteSize,
                       kTextureBytesPerRowAlignment);
 
             // Make sure that we are not rounding
             ASSERT(bytesPerRow % GetFormat().blockByteSize == 0);
-            ASSERT(GetSize().height % GetFormat().blockHeight == 0);
+            ASSERT(GetHeight() % GetFormat().blockHeight == 0);
 
             dawn_native::BufferDescriptor descriptor;
-            descriptor.size = bytesPerRow * (GetSize().height / GetFormat().blockHeight);
+            descriptor.size = bytesPerRow * (GetHeight() / GetFormat().blockHeight);
             if (descriptor.size > std::numeric_limits<uint32_t>::max()) {
                 return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate buffer.");
             }

@@ -66,6 +66,9 @@ namespace dawn_native {
         wgpu::TextureDimension GetDimension() const;
         const Format& GetFormat() const;
         const Extent3D& GetSize() const;
+        uint32_t GetWidth() const;
+        uint32_t GetHeight() const;
+        uint32_t GetDepth() const;
         uint32_t GetArrayLayers() const;
         uint32_t GetNumMipLevels() const;
         SubresourceRange GetAllSubresources() const;
@@ -105,7 +108,6 @@ namespace dawn_native {
         // TODO(cwallez@chromium.org): This should be deduplicated in the Device
         const Format& mFormat;
         Extent3D mSize;
-        uint32_t mArrayLayerCount;
         uint32_t mMipLevelCount;
         uint32_t mSampleCount;
         wgpu::TextureUsage mUsage = wgpu::TextureUsage::None;

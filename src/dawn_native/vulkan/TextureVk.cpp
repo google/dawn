@@ -32,18 +32,6 @@
 namespace dawn_native { namespace vulkan {
 
     namespace {
-        // Converts an Dawn texture dimension to a Vulkan image type.
-        // Note that in Vulkan dimensionality is only 1D, 2D, 3D. Arrays and cube maps are expressed
-        // via the array size and a "cubemap compatible" flag.
-        VkImageType VulkanImageType(wgpu::TextureDimension dimension) {
-            switch (dimension) {
-                case wgpu::TextureDimension::e2D:
-                    return VK_IMAGE_TYPE_2D;
-                default:
-                    UNREACHABLE();
-            }
-        }
-
         // Converts an Dawn texture dimension to a Vulkan image view type.
         // Contrary to image types, image view types include arrayness and cubemapness
         VkImageViewType VulkanImageViewType(wgpu::TextureViewDimension dimension) {
@@ -221,10 +209,6 @@ namespace dawn_native { namespace vulkan {
             }
         }
 
-        VkExtent3D VulkanExtent3D(const Extent3D& extent) {
-            return {extent.width, extent.height, extent.depth};
-        }
-
         VkImageMemoryBarrier BuildMemoryBarrier(const Format& format,
                                                 const VkImage& image,
                                                 wgpu::TextureUsage lastUsage,
@@ -250,6 +234,27 @@ namespace dawn_native { namespace vulkan {
             barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
             barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
             return barrier;
+        }
+
+        void FillVulkanCreateInfoSizesAndType(const Texture& texture, VkImageCreateInfo* info) {
+            const Extent3D& size = texture.GetSize();
+
+            info->mipLevels = texture.GetNumMipLevels();
+            info->samples = VulkanSampleCount(texture.GetSampleCount());
+
+            // Fill in the image type, and paper over differences in how the array layer count is
+            // specified between WebGPU and Vulkan.
+            switch (texture.GetDimension()) {
+                case wgpu::TextureDimension::e2D:
+                    info->imageType = VK_IMAGE_TYPE_2D;
+                    info->extent = {size.width, size.height, 1};
+                    info->arrayLayers = size.depth;
+                    break;
+
+                default:
+                    UNREACHABLE();
+                    break;
+            }
         }
 
     }  // namespace
@@ -495,15 +500,12 @@ namespace dawn_native { namespace vulkan {
         // combination of sample, usage etc. because validation should have been done in the Dawn
         // frontend already based on the minimum supported formats in the Vulkan spec
         VkImageCreateInfo createInfo = {};
+        FillVulkanCreateInfoSizesAndType(*this, &createInfo);
+
         createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
-        createInfo.imageType = VulkanImageType(GetDimension());
         createInfo.format = VulkanImageFormat(device, GetFormat().format);
-        createInfo.extent = VulkanExtent3D(GetSize());
-        createInfo.mipLevels = GetNumMipLevels();
-        createInfo.arrayLayers = GetArrayLayers();
-        createInfo.samples = VulkanSampleCount(GetSampleCount());
         createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
         createInfo.usage = VulkanImageUsage(GetUsage(), GetFormat());
         createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -513,7 +515,7 @@ namespace dawn_native { namespace vulkan {
 
         ASSERT(IsSampleCountSupported(device, createInfo));
 
-        if (GetArrayLayers() >= 6 && GetSize().width == GetSize().height) {
+        if (GetArrayLayers() >= 6 && GetWidth() == GetHeight()) {
             createInfo.flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
         }
 
@@ -556,15 +558,13 @@ namespace dawn_native { namespace vulkan {
         }
 
         mExternalState = ExternalState::PendingAcquire;
+
         VkImageCreateInfo baseCreateInfo = {};
+        FillVulkanCreateInfoSizesAndType(*this, &baseCreateInfo);
+
         baseCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         baseCreateInfo.pNext = nullptr;
-        baseCreateInfo.imageType = VulkanImageType(GetDimension());
         baseCreateInfo.format = format;
-        baseCreateInfo.extent = VulkanExtent3D(GetSize());
-        baseCreateInfo.mipLevels = GetNumMipLevels();
-        baseCreateInfo.arrayLayers = GetArrayLayers();
-        baseCreateInfo.samples = VulkanSampleCount(GetSampleCount());
         baseCreateInfo.usage = usage;
         baseCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         baseCreateInfo.queueFamilyIndexCount = 0;
@@ -909,9 +909,9 @@ namespace dawn_native { namespace vulkan {
             // TODO(natlee@microsoft.com): test compressed textures are cleared
             // create temp buffer with clear color to copy to the texture image
             uint32_t bytesPerRow =
-                Align((GetSize().width / GetFormat().blockWidth) * GetFormat().blockByteSize,
+                Align((GetWidth() / GetFormat().blockWidth) * GetFormat().blockByteSize,
                       kTextureBytesPerRowAlignment);
-            uint64_t bufferSize64 = bytesPerRow * (GetSize().height / GetFormat().blockHeight);
+            uint64_t bufferSize64 = bytesPerRow * (GetHeight() / GetFormat().blockHeight);
             if (bufferSize64 > std::numeric_limits<uint32_t>::max()) {
                 return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate buffer.");
             }

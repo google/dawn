@@ -95,8 +95,6 @@ namespace dawn_native { namespace d3d12 {
                                 const SubresourceRange& range,
                                 TextureBase::ClearValue clearValue);
 
-        UINT16 GetDepthOrArraySize();
-
         void TransitionUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
                                                   std::vector<D3D12_RESOURCE_BARRIER>* barrier,
                                                   D3D12_RESOURCE_STATES newState,

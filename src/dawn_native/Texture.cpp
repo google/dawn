@@ -372,17 +372,10 @@ namespace dawn_native {
           mDimension(descriptor->dimension),
           mFormat(device->GetValidInternalFormat(descriptor->format)),
           mSize(descriptor->size),
-          mArrayLayerCount(descriptor->size.depth),
           mMipLevelCount(descriptor->mipLevelCount),
           mSampleCount(descriptor->sampleCount),
           mUsage(descriptor->usage),
           mState(state) {
-        // TODO(cwallez@chromium.org): Store the array layers in size.depth instead if extracting it
-        // in mArrayLayerCount.
-        ASSERT(mDimension == wgpu::TextureDimension::e2D);
-        mArrayLayerCount = mSize.depth;
-        mSize.depth = 1;
-
         uint32_t subresourceCount = GetSubresourceCount();
         mIsSubresourceContentInitializedAtIndex = std::vector<bool>(subresourceCount, false);
 
@@ -418,9 +411,26 @@ namespace dawn_native {
         ASSERT(!IsError());
         return mSize;
     }
+    uint32_t TextureBase::GetWidth() const {
+        ASSERT(!IsError());
+        return mSize.width;
+    }
+    uint32_t TextureBase::GetHeight() const {
+        ASSERT(!IsError());
+        ASSERT(mDimension == wgpu::TextureDimension::e2D ||
+               mDimension == wgpu::TextureDimension::e3D);
+        return mSize.height;
+    }
+    uint32_t TextureBase::GetDepth() const {
+        ASSERT(!IsError());
+        ASSERT(mDimension == wgpu::TextureDimension::e3D);
+        return mSize.depth;
+    }
     uint32_t TextureBase::GetArrayLayers() const {
         ASSERT(!IsError());
-        return mArrayLayerCount;
+        // TODO(cwallez@chromium.org): Update for 1D / 3D textures when they are supported.
+        ASSERT(mDimension == wgpu::TextureDimension::e2D);
+        return mSize.depth;
     }
     uint32_t TextureBase::GetNumMipLevels() const {
         ASSERT(!IsError());
@@ -428,7 +438,7 @@ namespace dawn_native {
     }
     SubresourceRange TextureBase::GetAllSubresources() const {
         ASSERT(!IsError());
-        return {0, mMipLevelCount, 0, mArrayLayerCount};
+        return {0, mMipLevelCount, 0, GetArrayLayers()};
     }
     uint32_t TextureBase::GetSampleCount() const {
         ASSERT(!IsError());
@@ -436,7 +446,7 @@ namespace dawn_native {
     }
     uint32_t TextureBase::GetSubresourceCount() const {
         ASSERT(!IsError());
-        return mMipLevelCount * mArrayLayerCount;
+        return mMipLevelCount * mSize.depth;
     }
     wgpu::TextureUsage TextureBase::GetUsage() const {
         ASSERT(!IsError());
@@ -501,9 +511,16 @@ namespace dawn_native {
     }
 
     Extent3D TextureBase::GetMipLevelVirtualSize(uint32_t level) const {
-        Extent3D extent;
-        extent.width = std::max(mSize.width >> level, 1u);
+        Extent3D extent = {std::max(mSize.width >> level, 1u), 1u, 1u};
+        if (mDimension == wgpu::TextureDimension::e1D) {
+            return extent;
+        }
+
         extent.height = std::max(mSize.height >> level, 1u);
+        if (mDimension == wgpu::TextureDimension::e2D) {
+            return extent;
+        }
+
         extent.depth = std::max(mSize.depth >> level, 1u);
         return extent;
     }
