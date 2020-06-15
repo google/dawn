@@ -353,6 +353,21 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
   EXPECT_TRUE(init_ptr->result_type()->IsI32());
 }
 
+TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScope) {
+  ast::type::I32Type i32;
+  auto var =
+      std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone, &i32);
+  var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 2)));
+  auto* init_ptr = var->constructor();
+
+  mod()->AddGlobalVariable(std::move(var));
+
+  EXPECT_TRUE(td()->Determine());
+  ASSERT_NE(init_ptr->result_type(), nullptr);
+  EXPECT_TRUE(init_ptr->result_type()->IsI32());
+}
+
 TEST_F(TypeDeterminerTest, Expr_Error_Unknown) {
   FakeExpr e;
   e.set_source(Source{2, 30});

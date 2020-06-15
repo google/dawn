@@ -65,6 +65,12 @@ void TypeDeterminer::set_error(const Source& src, const std::string& msg) {
 bool TypeDeterminer::Determine() {
   for (const auto& var : mod_->global_variables()) {
     variable_stack_.set_global(var->name(), var.get());
+
+    if (var->has_constructor()) {
+      if (!DetermineResultType(var->constructor())) {
+        return false;
+      }
+    }
   }
 
   for (const auto& func : mod_->functions()) {
