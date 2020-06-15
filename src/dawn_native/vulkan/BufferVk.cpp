@@ -148,7 +148,7 @@ namespace dawn_native { namespace vulkan {
         createInfo.pQueueFamilyIndices = 0;
 
         Device* device = ToBackend(GetDevice());
-        DAWN_TRY(CheckVkSuccess(
+        DAWN_TRY(CheckVkOOMThenSuccess(
             device->fn.CreateBuffer(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
             "vkCreateBuffer"));
 

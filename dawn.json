@@ -521,6 +521,11 @@
                 ]
             },
             {
+                "name": "create error buffer",
+                "returns": "buffer",
+                "TODO": "enga@: Make this part of a dawn_wire extension"
+            },
+            {
                 "name": "create buffer mapped",
                 "returns": "create buffer mapped result",
                 "args": [

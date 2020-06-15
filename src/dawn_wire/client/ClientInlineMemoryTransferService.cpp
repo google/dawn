@@ -43,7 +43,10 @@ namespace dawn_wire { namespace client {
                     return false;
                 }
 
-                mStagingData = std::unique_ptr<uint8_t[]>(new uint8_t[mSize]);
+                mStagingData = std::unique_ptr<uint8_t[]>(new (std::nothrow) uint8_t[mSize]);
+                if (!mStagingData) {
+                    return false;
+                }
                 memcpy(mStagingData.get(), deserializePointer, mSize);
 
                 ASSERT(data != nullptr);
@@ -74,7 +77,10 @@ namespace dawn_wire { namespace client {
             }
 
             std::pair<void*, size_t> Open() override {
-                mStagingData = std::unique_ptr<uint8_t[]>(new uint8_t[mSize]);
+                mStagingData = std::unique_ptr<uint8_t[]>(new (std::nothrow) uint8_t[mSize]);
+                if (!mStagingData) {
+                    return std::make_pair(nullptr, 0);
+                }
                 memset(mStagingData.get(), 0, mSize);
                 return std::make_pair(mStagingData.get(), mSize);
             }

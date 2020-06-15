@@ -14,6 +14,7 @@
 
 #include "dawn_native/vulkan/ResourceMemoryAllocatorVk.h"
 
+#include "common/Math.h"
 #include "dawn_native/BuddyMemoryAllocator.h"
 #include "dawn_native/ResourceHeapAllocator.h"
 #include "dawn_native/vulkan/DeviceVk.h"
@@ -28,8 +29,7 @@ namespace dawn_native { namespace vulkan {
         // TODO(cwallez@chromium.org): This is a hardcoded heurstic to choose when to
         // suballocate but it should ideally depend on the size of the memory heaps and other
         // factors.
-        constexpr uint64_t kMaxBuddySystemSize = 32ull * 1024ull * 1024ull * 1024ull;  // 32GB
-        constexpr uint64_t kMaxSizeForSubAllocation = 4ull * 1024ull * 1024ull;        // 4MB
+        constexpr uint64_t kMaxSizeForSubAllocation = 4ull * 1024ull * 1024ull;  // 4MiB
 
         // Have each bucket of the buddy system allocate at least some resource of the maximum
         // size
@@ -42,10 +42,18 @@ namespace dawn_native { namespace vulkan {
 
     class ResourceMemoryAllocator::SingleTypeAllocator : public ResourceHeapAllocator {
       public:
-        SingleTypeAllocator(Device* device, size_t memoryTypeIndex)
+        SingleTypeAllocator(Device* device, size_t memoryTypeIndex, VkDeviceSize memoryHeapSize)
             : mDevice(device),
               mMemoryTypeIndex(memoryTypeIndex),
-              mBuddySystem(kMaxBuddySystemSize, kBuddyHeapsSize, this) {
+              mMemoryHeapSize(memoryHeapSize),
+              mBuddySystem(
+                  // Round down to a power of 2 that's <= mMemoryHeapSize. This will always
+                  // be a multiple of kBuddyHeapsSize because kBuddyHeapsSize is a power of 2.
+                  uint64_t(1) << Log2(mMemoryHeapSize),
+                  // Take the min in the very unlikely case the memory heap is tiny.
+                  std::min(uint64_t(1) << Log2(mMemoryHeapSize), kBuddyHeapsSize),
+                  this) {
+            ASSERT(IsPowerOfTwo(kBuddyHeapsSize));
         }
         ~SingleTypeAllocator() override = default;
 
@@ -62,6 +70,10 @@ namespace dawn_native { namespace vulkan {
 
         ResultOrError<std::unique_ptr<ResourceHeapBase>> AllocateResourceHeap(
             uint64_t size) override {
+            if (size > mMemoryHeapSize) {
+                return DAWN_OUT_OF_MEMORY_ERROR("Allocation size too large");
+            }
+
             VkMemoryAllocateInfo allocateInfo;
             allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
             allocateInfo.pNext = nullptr;
@@ -87,6 +99,7 @@ namespace dawn_native { namespace vulkan {
       private:
         Device* mDevice;
         size_t mMemoryTypeIndex;
+        VkDeviceSize mMemoryHeapSize;
         BuddyMemoryAllocator mBuddySystem;
     };
 
@@ -97,7 +110,8 @@ namespace dawn_native { namespace vulkan {
         mAllocatorsPerType.reserve(info.memoryTypes.size());
 
         for (size_t i = 0; i < info.memoryTypes.size(); i++) {
-            mAllocatorsPerType.emplace_back(std::make_unique<SingleTypeAllocator>(mDevice, i));
+            mAllocatorsPerType.emplace_back(std::make_unique<SingleTypeAllocator>(
+                mDevice, i, info.memoryHeaps[info.memoryTypes[i].heapIndex].size));
         }
     }
 

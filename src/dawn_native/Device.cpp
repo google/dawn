@@ -731,6 +731,12 @@ namespace dawn_native {
         return result;
     }
 
+    // For Dawn Wire
+
+    BufferBase* DeviceBase::CreateErrorBuffer() {
+        return BufferBase::MakeError(this);
+    }
+
     // Other Device API methods
 
     void DeviceBase::Tick() {

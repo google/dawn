@@ -54,12 +54,25 @@ namespace dawn_wire { namespace client {
         uint32_t serial = buffer->requestSerial++;
         ASSERT(buffer->requests.find(serial) == buffer->requests.end());
 
+        if (buffer->size > std::numeric_limits<size_t>::max()) {
+            // On buffer creation, we check that mappable buffers do not exceed this size.
+            // So this buffer must not have mappable usage. Inject a validation error.
+            ClientDeviceInjectError(reinterpret_cast<WGPUDevice>(buffer->device),
+                                    WGPUErrorType_Validation,
+                                    "Buffer needs the correct map usage bit");
+            callback(WGPUBufferMapAsyncStatus_Error, nullptr, 0, userdata);
+            return;
+        }
+
         // Create a ReadHandle for the map request. This is the client's intent to read GPU
         // memory.
         MemoryTransferService::ReadHandle* readHandle =
-            buffer->device->GetClient()->GetMemoryTransferService()->CreateReadHandle(buffer->size);
+            buffer->device->GetClient()->GetMemoryTransferService()->CreateReadHandle(
+                static_cast<size_t>(buffer->size));
         if (readHandle == nullptr) {
-            callback(WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0, userdata);
+            ClientDeviceInjectError(reinterpret_cast<WGPUDevice>(buffer->device),
+                                    WGPUErrorType_OutOfMemory, "Failed to create buffer mapping");
+            callback(WGPUBufferMapAsyncStatus_Error, nullptr, 0, userdata);
             return;
         }
 
@@ -84,13 +97,25 @@ namespace dawn_wire { namespace client {
         uint32_t serial = buffer->requestSerial++;
         ASSERT(buffer->requests.find(serial) == buffer->requests.end());
 
+        if (buffer->size > std::numeric_limits<size_t>::max()) {
+            // On buffer creation, we check that mappable buffers do not exceed this size.
+            // So this buffer must not have mappable usage. Inject a validation error.
+            ClientDeviceInjectError(reinterpret_cast<WGPUDevice>(buffer->device),
+                                    WGPUErrorType_Validation,
+                                    "Buffer needs the correct map usage bit");
+            callback(WGPUBufferMapAsyncStatus_Error, nullptr, 0, userdata);
+            return;
+        }
+
         // Create a WriteHandle for the map request. This is the client's intent to write GPU
         // memory.
         MemoryTransferService::WriteHandle* writeHandle =
             buffer->device->GetClient()->GetMemoryTransferService()->CreateWriteHandle(
-                buffer->size);
+                static_cast<size_t>(buffer->size));
         if (writeHandle == nullptr) {
-            callback(WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0, userdata);
+            ClientDeviceInjectError(reinterpret_cast<WGPUDevice>(buffer->device),
+                                    WGPUErrorType_OutOfMemory, "Failed to create buffer mapping");
+            callback(WGPUBufferMapAsyncStatus_Error, nullptr, 0, userdata);
             return;
         }
 
@@ -111,6 +136,13 @@ namespace dawn_wire { namespace client {
                                                    const WGPUBufferDescriptor* descriptor) {
         Device* device = reinterpret_cast<Device*>(cDevice);
         Client* wireClient = device->GetClient();
+
+        if ((descriptor->usage & (WGPUBufferUsage_MapRead | WGPUBufferUsage_MapWrite)) != 0 &&
+            descriptor->size > std::numeric_limits<size_t>::max()) {
+            ClientDeviceInjectError(cDevice, WGPUErrorType_OutOfMemory,
+                                    "Buffer is too large for map usage");
+            return ClientDeviceCreateErrorBuffer(cDevice);
+        }
 
         auto* bufferObjectAndSerial = wireClient->BufferAllocator().New(device);
         Buffer* buffer = bufferObjectAndSerial->object.get();
@@ -136,14 +168,17 @@ namespace dawn_wire { namespace client {
         Device* device = reinterpret_cast<Device*>(cDevice);
         Client* wireClient = device->GetClient();
 
-        auto* bufferObjectAndSerial = wireClient->BufferAllocator().New(device);
-        Buffer* buffer = bufferObjectAndSerial->object.get();
-        buffer->size = descriptor->size;
-
         WGPUCreateBufferMappedResult result;
-        result.buffer = reinterpret_cast<WGPUBuffer>(buffer);
         result.data = nullptr;
         result.dataLength = 0;
+
+        // This buffer is too large to be mapped and to make a WriteHandle for.
+        if (descriptor->size > std::numeric_limits<size_t>::max()) {
+            ClientDeviceInjectError(cDevice, WGPUErrorType_OutOfMemory,
+                                    "Buffer is too large for mapping");
+            result.buffer = ClientDeviceCreateErrorBuffer(cDevice);
+            return result;
+        }
 
         // Create a WriteHandle for the map request. This is the client's intent to write GPU
         // memory.
@@ -152,7 +187,9 @@ namespace dawn_wire { namespace client {
                 wireClient->GetMemoryTransferService()->CreateWriteHandle(descriptor->size));
 
         if (writeHandle == nullptr) {
-            // TODO(enga): Support context lost generated by the client.
+            ClientDeviceInjectError(cDevice, WGPUErrorType_OutOfMemory,
+                                    "Buffer mapping allocation failed");
+            result.buffer = ClientDeviceCreateErrorBuffer(cDevice);
             return result;
         }
 
@@ -161,14 +198,20 @@ namespace dawn_wire { namespace client {
         // Open the WriteHandle. This returns a pointer and size of mapped memory.
         // |result.data| may be null on error.
         std::tie(result.data, result.dataLength) = writeHandle->Open();
-
         if (result.data == nullptr) {
-            // TODO(enga): Support context lost generated by the client.
+            ClientDeviceInjectError(cDevice, WGPUErrorType_OutOfMemory,
+                                    "Buffer mapping allocation failed");
+            result.buffer = ClientDeviceCreateErrorBuffer(cDevice);
             return result;
         }
 
+        auto* bufferObjectAndSerial = wireClient->BufferAllocator().New(device);
+        Buffer* buffer = bufferObjectAndSerial->object.get();
+        buffer->size = descriptor->size;
         // Successfully created staging memory. The buffer now owns the WriteHandle.
         buffer->writeHandle = std::move(writeHandle);
+
+        result.buffer = reinterpret_cast<WGPUBuffer>(buffer);
 
         // Get the serialization size of the WriteHandle.
         size_t handleCreateInfoLength = buffer->writeHandle->SerializeCreateSize();

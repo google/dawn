@@ -158,6 +158,9 @@ namespace dawn_native {
         TextureViewBase* CreateTextureView(TextureBase* texture,
                                            const TextureViewDescriptor* descriptor);
 
+        // For Dawn Wire
+        BufferBase* CreateErrorBuffer();
+
         QueueBase* GetDefaultQueue();
 
         void InjectError(wgpu::ErrorType type, const char* message);

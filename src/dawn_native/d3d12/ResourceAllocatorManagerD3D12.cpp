@@ -185,8 +185,12 @@ namespace dawn_native { namespace d3d12 {
         ResourceHeapAllocation directAllocation;
         DAWN_TRY_ASSIGN(directAllocation,
                         CreateCommittedResource(heapType, resourceDescriptor, initialUsage));
+        if (directAllocation.GetInfo().mMethod != AllocationMethod::kInvalid) {
+            return std::move(directAllocation);
+        }
 
-        return std::move(directAllocation);
+        // If direct allocation fails, the system is probably out of memory.
+        return DAWN_OUT_OF_MEMORY_ERROR("Allocation failed");
     }
 
     void ResourceAllocatorManager::Tick(Serial completedSerial) {

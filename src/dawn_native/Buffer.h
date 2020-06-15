@@ -71,11 +71,11 @@ namespace dawn_native {
         void CallMapReadCallback(uint32_t serial,
                                  WGPUBufferMapAsyncStatus status,
                                  const void* pointer,
-                                 uint32_t dataLength);
+                                 uint64_t dataLength);
         void CallMapWriteCallback(uint32_t serial,
                                   WGPUBufferMapAsyncStatus status,
                                   void* pointer,
-                                  uint32_t dataLength);
+                                  uint64_t dataLength);
 
         void DestroyInternal();
 
