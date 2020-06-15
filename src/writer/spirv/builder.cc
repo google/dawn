@@ -1681,6 +1681,7 @@ bool Builder::GenerateArrayType(ast::type::ArrayType* ary,
     return false;
   }
 
+  auto result_id = result.to_i();
   if (ary->IsRuntimeArray()) {
     push_type(spv::Op::OpTypeRuntimeArray, {result, Operand::Int(elem_type)});
   } else {
@@ -1691,6 +1692,17 @@ bool Builder::GenerateArrayType(ast::type::ArrayType* ary,
 
     push_type(spv::Op::OpTypeArray,
               {result, Operand::Int(elem_type), Operand::Int(len_id)});
+  }
+
+  // SPIR-V explicitly requires no array stride if the array contains a struct
+  // which has a Block decoration.
+  if (ary->type()->IsStruct() && ary->type()->AsStruct()->IsBlockDecorated()) {
+    return true;
+  }
+  if (ary->has_array_stride()) {
+    push_annot(spv::Op::OpDecorate,
+               {Operand::Int(result_id), Operand::Int(SpvDecorationArrayStride),
+                Operand::Int(ary->array_stride())});
   }
   return true;
 }

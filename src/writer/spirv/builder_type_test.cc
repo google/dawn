@@ -118,6 +118,27 @@ TEST_F(BuilderTest_Type, GenerateArray) {
 )");
 }
 
+TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
+  ast::type::I32Type i32;
+  ast::type::ArrayType ary(&i32, 4);
+  ary.set_array_stride(16u);
+
+  ast::Module mod;
+  Builder b(&mod);
+  auto id = b.GenerateTypeIfNeeded(&ary);
+  ASSERT_FALSE(b.has_error()) << b.error();
+  EXPECT_EQ(1u, id);
+
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 ArrayStride 16
+)");
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+%3 = OpTypeInt 32 0
+%4 = OpConstant %3 4
+%1 = OpTypeArray %2 %4
+)");
+}
+
 TEST_F(BuilderTest_Type, ReturnsGeneratedArray) {
   ast::type::I32Type i32;
   ast::type::ArrayType ary(&i32, 4);

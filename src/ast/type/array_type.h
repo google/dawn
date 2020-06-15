@@ -45,6 +45,14 @@ class ArrayType : public Type {
   /// i.e. the size is determined at runtime
   bool IsRuntimeArray() const { return size_ == 0; }
 
+  /// Sets the array stride
+  /// @param stride the stride to set
+  void set_array_stride(uint32_t stride) { array_stride_ = stride; }
+  /// @returns the array stride or 0 if none set.
+  uint32_t array_stride() const { return array_stride_; }
+  /// @returns true if the array has a stride set
+  bool has_array_stride() const { return array_stride_ != 0; }
+
   /// @returns the array type
   Type* type() const { return subtype_; }
   /// @returns the array size. Size is 0 for a runtime array
@@ -56,6 +64,7 @@ class ArrayType : public Type {
  private:
   Type* subtype_ = nullptr;
   uint32_t size_ = 0;
+  uint32_t array_stride_ = 0;
 };
 
 }  // namespace type

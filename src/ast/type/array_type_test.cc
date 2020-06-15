@@ -61,8 +61,21 @@ TEST_F(ArrayTypeTest, Is) {
 
 TEST_F(ArrayTypeTest, TypeName) {
   I32Type i32;
+  ArrayType arr{&i32};
+  EXPECT_EQ(arr.type_name(), "__array__i32");
+}
+
+TEST_F(ArrayTypeTest, TypeName_RuntimeArray) {
+  I32Type i32;
   ArrayType arr{&i32, 3};
   EXPECT_EQ(arr.type_name(), "__array__i32_3");
+}
+
+TEST_F(ArrayTypeTest, TypeName_WithStride) {
+  I32Type i32;
+  ArrayType arr{&i32, 3};
+  arr.set_array_stride(16);
+  EXPECT_EQ(arr.type_name(), "__array__i32_3_16");
 }
 
 }  // namespace
