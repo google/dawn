@@ -27,6 +27,7 @@ namespace reader {
 namespace spirv {
 namespace {
 
+using ::testing::Eq;
 using ::testing::HasSubstr;
 
 std::string Preamble() {
@@ -54,6 +55,7 @@ std::string Preamble() {
   %v2float = OpTypeVector %float 2
 
   %m3v2float = OpTypeMatrix %v2float 3
+  %m3v2float_0 = OpConstantNull %m3v2float
 
   %s_v2f_u_i = OpTypeStruct %v2float %uint %int
   %a_u_5 = OpTypeArray %uint %uint_5
@@ -223,6 +225,283 @@ TEST_F(SpvParserTest_Composite_Construct, Struct) {
         }
         ScalarConstructor{5}
         ScalarConstructor{30}
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+using SpvParserTest_CompositeExtract = SpvParserTest;
+
+TEST_F(SpvParserTest_CompositeExtract, Vector) {
+  const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpCompositeExtract %float %v2float_50_60 1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_1
+    none
+    __f32
+    {
+      MemberAccessor{
+        TypeConstructor{
+          __vec_2__f32
+          ScalarConstructor{50.000000}
+          ScalarConstructor{60.000000}
+        }
+        Identifier{y}
+      }
+    }
+  })")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest_CompositeExtract, Vector_IndexTooBigError) {
+  const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpCompositeExtract %float %v2float_50_60 900
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(fe.EmitBody());
+  EXPECT_THAT(p->error(), Eq("CompositeExtract %1 index value 900 is out of "
+                             "bounds for vector of 2 elements"));
+}
+
+TEST_F(SpvParserTest_CompositeExtract, Matrix) {
+  const auto assembly = Preamble() + R"(
+     %ptr = OpTypePointer Function %m3v2float
+     %var = OpVariable %ptr Function
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpLoad %m3v2float %var
+     %2 = OpCompositeExtract %v2float %1 2
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_2
+    none
+    __vec_2__f32
+    {
+      ArrayAccessor{
+        Identifier{x_1}
+        ScalarConstructor{2}
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest_CompositeExtract, Matrix_IndexTooBigError) {
+  const auto assembly = Preamble() + R"(
+     %ptr = OpTypePointer Function %m3v2float
+     %var = OpVariable %ptr Function
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpLoad %m3v2float %var
+     %2 = OpCompositeExtract %v2float %1 3
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(p->error(), Eq("CompositeExtract %2 index value 3 is out of "
+                             "bounds for matrix of 3 elements"));
+}
+
+TEST_F(SpvParserTest_CompositeExtract, Matrix_Vector) {
+  const auto assembly = Preamble() + R"(
+     %ptr = OpTypePointer Function %m3v2float
+     %var = OpVariable %ptr Function
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpLoad %m3v2float %var
+     %2 = OpCompositeExtract %float %1 2 1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_2
+    none
+    __f32
+    {
+      MemberAccessor{
+        ArrayAccessor{
+          Identifier{x_1}
+          ScalarConstructor{2}
+        }
+        Identifier{y}
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest_CompositeExtract, Array) {
+  const auto assembly = Preamble() + R"(
+     %ptr = OpTypePointer Function %a_u_5
+     %var = OpVariable %ptr Function
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpLoad %a_u_5 %var
+     %2 = OpCompositeExtract %uint %1 3
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_2
+    none
+    __u32
+    {
+      ArrayAccessor{
+        Identifier{x_1}
+        ScalarConstructor{3}
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest_CompositeExtract, RuntimeArray_IsError) {
+  const auto assembly = Preamble() + R"(
+     %rtarr = OpTypeRuntimeArray %uint
+     %ptr = OpTypePointer Function %rtarr
+     %var = OpVariable %ptr Function
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpLoad %rtarr %var
+     %2 = OpCompositeExtract %uint %1 3
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(p->error(), Eq("can't do OpCompositeExtract on a runtime array"));
+}
+
+TEST_F(SpvParserTest_CompositeExtract, Struct) {
+  const auto assembly = Preamble() + R"(
+     %ptr = OpTypePointer Function %s_v2f_u_i
+     %var = OpVariable %ptr Function
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpLoad %s_v2f_u_i %var
+     %2 = OpCompositeExtract %int %1 2
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_2
+    none
+    __i32
+    {
+      MemberAccessor{
+        Identifier{x_1}
+        Identifier{field2}
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest_CompositeExtract, Struct_IndexTooBigError) {
+  const auto assembly = Preamble() + R"(
+     %ptr = OpTypePointer Function %s_v2f_u_i
+     %var = OpVariable %ptr Function
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpLoad %s_v2f_u_i %var
+     %2 = OpCompositeExtract %int %1 40
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(fe.EmitBody());
+  EXPECT_THAT(p->error(), Eq("CompositeExtract %2 index value 40 is out of "
+                             "bounds for structure %23 having 3 elements"));
+}
+
+TEST_F(SpvParserTest_CompositeExtract, Struct_Array_Matrix_Vector) {
+  const auto assembly = Preamble() + R"(
+     %a_mat = OpTypeArray %m3v2float %uint_3
+     %s = OpTypeStruct %uint %a_mat
+     %ptr = OpTypePointer Function %s
+     %var = OpVariable %ptr Function
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpLoad %s %var
+     %2 = OpCompositeExtract %float %1 1 2 0 1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(
+  Variable{
+    x_2
+    none
+    __f32
+    {
+      MemberAccessor{
+        ArrayAccessor{
+          ArrayAccessor{
+            MemberAccessor{
+              Identifier{x_1}
+              Identifier{field1}
+            }
+            ScalarConstructor{2}
+          }
+          ScalarConstructor{0}
+        }
+        Identifier{y}
       }
     }
   })"))

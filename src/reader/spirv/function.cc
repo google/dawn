@@ -45,6 +45,7 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/switch_statement.h"
+#include "src/ast/type/u32_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op.h"
@@ -2400,6 +2401,10 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
                           ast_type, std::move(operands))};
   }
 
+  if (opcode == SpvOpCompositeExtract) {
+    return MakeCompositeExtract(inst);
+  }
+
   // builtin readonly function
   // glsl.std.450 readonly function
 
@@ -2462,7 +2467,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(
 
   // A SPIR-V access chain is a single instruction with multiple indices
   // walking down into composites.  The Tint AST represents this as
-  // ever-deeper nested indexing expresions. Start off with an expression
+  // ever-deeper nested indexing expressions. Start off with an expression
   // for the base, and then bury that inside nested indexing expressions.
   TypedExpression current_expr(MakeOperand(inst, 0));
 
@@ -2569,6 +2574,113 @@ TypedExpression FunctionEmitter::MakeAccessChain(
     }
     current_expr.reset(TypedExpression(
         parser_impl_.ConvertType(type_mgr_->GetId(pointee_type)),
+        std::move(next_expr)));
+  }
+  return current_expr;
+}
+
+TypedExpression FunctionEmitter::MakeCompositeExtract(
+    const spvtools::opt::Instruction& inst) {
+  // This is structurally similar to creating an access chain, but
+  // the SPIR-V instruction has literal indices instead of IDs for indices.
+
+  // A SPIR-V composite extract is a single instruction with multiple
+  // literal indices walking down into composites. The Tint AST represents
+  // this as ever-deeper nested indexing expressions. Start off with an
+  // expression for the composite, and then bury that inside nested indexing
+  // expressions.
+  TypedExpression current_expr(MakeOperand(inst, 0));
+
+  auto make_index = [](uint32_t literal) {
+    ast::type::U32Type u32;
+    return std::make_unique<ast::ScalarConstructorExpression>(
+        std::make_unique<ast::UintLiteral>(&u32, literal));
+  };
+  static const char* swizzles[] = {"x", "y", "z", "w"};
+
+  const auto composite = inst.GetSingleWordInOperand(0);
+  const auto composite_type_id = def_use_mgr_->GetDef(composite)->type_id();
+  const auto* current_type = type_mgr_->GetType(composite_type_id);
+  const auto num_in_operands = inst.NumInOperands();
+  for (uint32_t index = 1; index < num_in_operands; ++index) {
+    const uint32_t index_val = inst.GetSingleWordInOperand(index);
+    std::unique_ptr<ast::Expression> next_expr;
+    switch (current_type->kind()) {
+      case spvtools::opt::analysis::Type::kVector: {
+        // Try generating a MemberAccessor expression. That result in something
+        // like  "foo.z", which is more idiomatic than "foo[2]".
+        if (current_type->AsVector()->element_count() <= index_val) {
+          Fail() << "CompositeExtract %" << inst.result_id() << " index value "
+                 << index_val << " is out of bounds for vector of "
+                 << current_type->AsVector()->element_count() << " elements";
+          return {};
+        }
+        if (index_val >= sizeof(swizzles) / sizeof(swizzles[0])) {
+          Fail() << "internal error: swizzle index " << index_val
+                 << " is too big. Max handled index is "
+                 << ((sizeof(swizzles) / sizeof(swizzles[0])) - 1);
+        }
+        auto letter_index =
+            std::make_unique<ast::IdentifierExpression>(swizzles[index_val]);
+        next_expr = std::make_unique<ast::MemberAccessorExpression>(
+            std::move(current_expr.expr), std::move(letter_index));
+        current_type = current_type->AsVector()->element_type();
+        break;
+      }
+      case spvtools::opt::analysis::Type::kMatrix:
+        // Check bounds
+        if (current_type->AsMatrix()->element_count() <= index_val) {
+          Fail() << "CompositeExtract %" << inst.result_id() << " index value "
+                 << index_val << " is out of bounds for matrix of "
+                 << current_type->AsMatrix()->element_count() << " elements";
+          return {};
+        }
+        if (index_val >= sizeof(swizzles) / sizeof(swizzles[0])) {
+          Fail() << "internal error: swizzle index " << index_val
+                 << " is too big. Max handled index is "
+                 << ((sizeof(swizzles) / sizeof(swizzles[0])) - 1);
+        }
+        // Use array syntax.
+        next_expr = std::make_unique<ast::ArrayAccessorExpression>(
+            std::move(current_expr.expr), make_index(index_val));
+        current_type = current_type->AsMatrix()->element_type();
+        break;
+      case spvtools::opt::analysis::Type::kArray:
+        // The array size could be a spec constant, and so it's not always
+        // statically checkable.  Instead, rely on a runtime index clamp
+        // or runtime check to keep this safe.
+        next_expr = std::make_unique<ast::ArrayAccessorExpression>(
+            std::move(current_expr.expr), make_index(index_val));
+        current_type = current_type->AsArray()->element_type();
+        break;
+      case spvtools::opt::analysis::Type::kRuntimeArray:
+        Fail() << "can't do OpCompositeExtract on a runtime array";
+        return {};
+      case spvtools::opt::analysis::Type::kStruct: {
+        if (current_type->AsStruct()->element_types().size() <= index_val) {
+          Fail() << "CompositeExtract %" << inst.result_id() << " index value "
+                 << index_val << " is out of bounds for structure %"
+                 << type_mgr_->GetId(current_type) << " having "
+                 << current_type->AsStruct()->element_types().size()
+                 << " elements";
+          return {};
+        }
+        auto member_access =
+            std::make_unique<ast::IdentifierExpression>(namer_.GetMemberName(
+                type_mgr_->GetId(current_type), uint32_t(index_val)));
+
+        next_expr = std::make_unique<ast::MemberAccessorExpression>(
+            std::move(current_expr.expr), std::move(member_access));
+        current_type = current_type->AsStruct()->element_types()[index_val];
+        break;
+      }
+      default:
+        Fail() << "CompositeExtract with bad type %"
+               << type_mgr_->GetId(current_type) << " " << current_type->str();
+        return {};
+    }
+    current_expr.reset(TypedExpression(
+        parser_impl_.ConvertType(type_mgr_->GetId(current_type)),
         std::move(next_expr)));
   }
   return current_expr;
