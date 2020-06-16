@@ -164,6 +164,7 @@ namespace dawn_native { namespace vulkan {
         {DeviceExt::DebugMarker, "VK_EXT_debug_marker", NeverPromoted},
         {DeviceExt::ImageDrmFormatModifier, "VK_EXT_image_drm_format_modifier", NeverPromoted},
         {DeviceExt::Swapchain, "VK_KHR_swapchain", NeverPromoted},
+        {DeviceExt::SubgroupSizeControl, "VK_EXT_subgroup_size_control", NeverPromoted},
         //
     }};
 
@@ -191,7 +192,8 @@ namespace dawn_native { namespace vulkan {
     }
 
     DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
-                                    const InstanceExtSet& instanceExts) {
+                                    const InstanceExtSet& instanceExts,
+                                    uint32_t icdVersion) {
         // This is very similar to EnsureDependencies for instanceExtSet. See comment there for
         // an explanation of what happens.
         DeviceExtSet visitedSet;
@@ -286,6 +288,13 @@ namespace dawn_native { namespace vulkan {
                 case DeviceExt::_16BitStorage:
                     hasDependencies = HasDep(DeviceExt::GetPhysicalDeviceProperties2) &&
                                       HasDep(DeviceExt::StorageBufferStorageClass);
+                    break;
+
+                case DeviceExt::SubgroupSizeControl:
+                    // Using the extension requires DeviceExt::GetPhysicalDeviceProperties2, but we
+                    // don't need to check for it as it also requires Vulkan 1.1 in which
+                    // VK_KHR_get_physical_device_properties2 was promoted.
+                    hasDependencies = icdVersion >= VulkanVersion_1_1;
                     break;
 
                 default:

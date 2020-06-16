@@ -101,6 +101,7 @@ namespace dawn_native { namespace vulkan {
         DebugMarker,
         ImageDrmFormatModifier,
         Swapchain,
+        SubgroupSizeControl,
 
         EnumCount,
     };
@@ -132,7 +133,8 @@ namespace dawn_native { namespace vulkan {
     // extensions that don't have all their transitive dependencies in advertisedExts or in
     // instanceExts.
     DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
-                                    const InstanceExtSet& instanceExts);
+                                    const InstanceExtSet& instanceExts,
+                                    uint32_t icdVersion);
 
 }}  // namespace dawn_native::vulkan
 

@@ -17,6 +17,7 @@
 #include "common/Log.h"
 #include "dawn_native/vulkan/AdapterVk.h"
 #include "dawn_native/vulkan/BackendVk.h"
+#include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
 #include <cstring>
@@ -179,9 +180,8 @@ namespace dawn_native { namespace vulkan {
         const VulkanGlobalInfo& globalInfo = adapter.GetBackend()->GetGlobalInfo();
         const VulkanFunctions& vkFunctions = adapter.GetBackend()->GetFunctions();
 
-        // Gather general info about the device
+        // Query the device properties first to get the ICD's `apiVersion`
         vkFunctions.GetPhysicalDeviceProperties(physicalDevice, &info.properties);
-        vkFunctions.GetPhysicalDeviceFeatures(physicalDevice, &info.features);
 
         // Gather info about device memory.
         {
@@ -245,30 +245,54 @@ namespace dawn_native { namespace vulkan {
             }
 
             MarkPromotedExtensions(&info.extensions, info.properties.apiVersion);
-            info.extensions = EnsureDependencies(info.extensions, globalInfo.extensions);
+            info.extensions = EnsureDependencies(info.extensions, globalInfo.extensions,
+                                                 info.properties.apiVersion);
         }
 
-        // Gather additional information for some of the extensions
-        {
-            if (info.extensions.Has(DeviceExt::ShaderFloat16Int8)) {
-                info.shaderFloat16Int8Features.sType =
-                    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES_KHR;
+        // Gather general and extension features and properties
+        //
+        // Use vkGetPhysicalDevice{Features,Properties}2 if required to gather information about
+        // the extensions. DeviceExt::GetPhysicalDeviceProperties2 is guaranteed to be available
+        // because these extensions (transitively) depend on it in `EnsureDependencies`
+        VkPhysicalDeviceFeatures2 features2 = {};
+        features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+        PNextChainBuilder featuresChain(&features2);
 
-                VkPhysicalDeviceFeatures2KHR physicalDeviceFeatures2 = {};
-                physicalDeviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
-                physicalDeviceFeatures2.pNext = &info.shaderFloat16Int8Features;
-                vkFunctions.GetPhysicalDeviceFeatures2(physicalDevice, &physicalDeviceFeatures2);
-            }
+        VkPhysicalDeviceProperties2 properties2 = {};
+        properties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+        PNextChainBuilder propertiesChain(&properties2);
 
-            if (info.extensions.Has(DeviceExt::_16BitStorage)) {
-                info._16BitStorageFeatures.sType =
-                    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES;
+        if (info.extensions.Has(DeviceExt::ShaderFloat16Int8)) {
+            featuresChain.Add(&info.shaderFloat16Int8Features,
+                              VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES_KHR);
+        }
 
-                VkPhysicalDeviceFeatures2 physicalDeviceFeatures2 = {};
-                physicalDeviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-                physicalDeviceFeatures2.pNext = &info._16BitStorageFeatures;
-                vkFunctions.GetPhysicalDeviceFeatures2(physicalDevice, &physicalDeviceFeatures2);
-            }
+        if (info.extensions.Has(DeviceExt::_16BitStorage)) {
+            featuresChain.Add(&info._16BitStorageFeatures,
+                              VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES);
+        }
+
+        if (info.extensions.Has(DeviceExt::SubgroupSizeControl)) {
+            featuresChain.Add(&info.subgroupSizeControlFeatures,
+                              VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_FEATURES_EXT);
+            propertiesChain.Add(
+                &info.subgroupSizeControlProperties,
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_PROPERTIES_EXT);
+        }
+
+        // If we have DeviceExt::GetPhysicalDeviceProperties2, use features2 and properties2 so
+        // that features no covered by VkPhysicalDevice{Features,Properties} can be queried.
+        //
+        // Note that info.properties has already been filled at the start of this function to get
+        // `apiVersion`.
+        ASSERT(info.properties.apiVersion != 0);
+        if (info.extensions.Has(DeviceExt::GetPhysicalDeviceProperties2)) {
+            vkFunctions.GetPhysicalDeviceProperties2(physicalDevice, &properties2);
+            vkFunctions.GetPhysicalDeviceFeatures2(physicalDevice, &features2);
+            info.features = features2.features;
+        } else {
+            ASSERT(features2.pNext == nullptr && properties2.pNext == nullptr);
+            vkFunctions.GetPhysicalDeviceFeatures(physicalDevice, &info.features);
         }
 
         // TODO(cwallez@chromium.org): gather info about formats

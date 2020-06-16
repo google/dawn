@@ -38,6 +38,7 @@
 #include "dawn_native/vulkan/StagingBufferVk.h"
 #include "dawn_native/vulkan/SwapChainVk.h"
 #include "dawn_native/vulkan/TextureVk.h"
+#include "dawn_native/vulkan/UtilsVulkan.h"
 #include "dawn_native/vulkan/VulkanError.h"
 
 namespace dawn_native { namespace vulkan {
@@ -281,12 +282,30 @@ namespace dawn_native { namespace vulkan {
             }
         }
 
+        // Some device features can only be enabled using a VkPhysicalDeviceFeatures2 struct, which
+        // is supported by the VK_EXT_get_physical_properties2 instance extension, which was
+        // promoted as a core API in Vulkan 1.1.
+        //
+        // Prepare a VkPhysicalDeviceFeatures2 struct for this use case, it will only be populated
+        // if HasExt(DeviceExt::GetPhysicalDeviceProperties2) is true.
+        VkPhysicalDeviceFeatures2 features2 = {};
+        features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+        PNextChainBuilder featuresChain(&features2);
+
         // Always require independentBlend because it is a core Dawn feature
         usedKnobs.features.independentBlend = VK_TRUE;
         // Always require imageCubeArray because it is a core Dawn feature
         usedKnobs.features.imageCubeArray = VK_TRUE;
         // Always require fragmentStoresAndAtomics because it is required by end2end tests.
         usedKnobs.features.fragmentStoresAndAtomics = VK_TRUE;
+
+        if (mDeviceInfo.HasExt(DeviceExt::SubgroupSizeControl)) {
+            ASSERT(usedKnobs.HasExt(DeviceExt::SubgroupSizeControl));
+
+            // Always request all the features from VK_EXT_subgroup_size_control when available.
+            usedKnobs.subgroupSizeControlFeatures = mDeviceInfo.subgroupSizeControlFeatures;
+            featuresChain.Add(&usedKnobs.subgroupSizeControlFeatures);
+        }
 
         if (IsExtensionEnabled(Extension::TextureCompressionBC)) {
             ASSERT(ToBackend(GetAdapter())->GetDeviceInfo().features.textureCompressionBC ==
@@ -349,7 +368,17 @@ namespace dawn_native { namespace vulkan {
         createInfo.ppEnabledLayerNames = nullptr;
         createInfo.enabledExtensionCount = static_cast<uint32_t>(extensionNames.size());
         createInfo.ppEnabledExtensionNames = extensionNames.data();
-        createInfo.pEnabledFeatures = &usedKnobs.features;
+
+        // When we have DeviceExt::GetPhysicalDeviceProperties2, use features2 so that features not
+        // covered by VkPhysicalDeviceFeatures can be enabled.
+        if (mDeviceInfo.HasExt(DeviceExt::GetPhysicalDeviceProperties2)) {
+            features2.features = usedKnobs.features;
+            createInfo.pNext = &features2;
+            createInfo.pEnabledFeatures = nullptr;
+        } else {
+            ASSERT(features2.pNext == nullptr);
+            createInfo.pEnabledFeatures = &usedKnobs.features;
+        }
 
         DAWN_TRY(CheckVkSuccess(fn.CreateDevice(physicalDevice, &createInfo, nullptr, &mVkDevice),
                                 "vkCreateDevice"));

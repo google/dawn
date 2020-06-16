@@ -54,6 +54,7 @@ namespace dawn_native { namespace vulkan {
         VkPhysicalDeviceFeatures features;
         VkPhysicalDeviceShaderFloat16Int8FeaturesKHR shaderFloat16Int8Features;
         VkPhysicalDevice16BitStorageFeaturesKHR _16BitStorageFeatures;
+        VkPhysicalDeviceSubgroupSizeControlFeaturesEXT subgroupSizeControlFeatures;
 
         bool HasExt(DeviceExt ext) const;
         DeviceExtSet extensions;
@@ -61,6 +62,8 @@ namespace dawn_native { namespace vulkan {
 
     struct VulkanDeviceInfo : VulkanDeviceKnobs {
         VkPhysicalDeviceProperties properties;
+        VkPhysicalDeviceSubgroupSizeControlPropertiesEXT subgroupSizeControlProperties;
+
         std::vector<VkQueueFamilyProperties> queueFamilies;
 
         std::vector<VkMemoryType> memoryTypes;
