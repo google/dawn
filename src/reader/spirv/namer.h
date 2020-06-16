@@ -89,6 +89,13 @@ class Namer {
   /// @returns a new name
   std::string FindUnusedDerivedName(const std::string& base_name) const;
 
+  /// Returns a newly registered name based on a given base name.
+  /// In the internal table |name_to_id_|, it is mapped to the invalid
+  /// SPIR-V ID 0.  It does not have an entry in |id_to_name_|.
+  /// @param base_name the base name
+  /// @returns a new name
+  std::string MakeDerivedName(const std::string& base_name);
+
   /// Records a mapping from the given ID to a name. Emits a failure
   /// if the ID already has a registered name.
   /// @param id the SPIR-V ID

@@ -80,6 +80,13 @@ std::string Namer::FindUnusedDerivedName(const std::string& base_name) const {
   return derived_name;
 }
 
+std::string Namer::MakeDerivedName(const std::string& base_name) {
+  auto result = FindUnusedDerivedName(base_name);
+  // Register it.
+  name_to_id_[result] = 0;
+  return result;
+}
+
 bool Namer::SaveName(uint32_t id, const std::string& name) {
   if (HasName(id)) {
     return Fail() << "internal error: ID " << id

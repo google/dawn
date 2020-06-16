@@ -86,6 +86,8 @@ TEST_F(SpvNamerTest, NoNameRecorded) {
 TEST_F(SpvNamerTest, FindUnusedDerivedName_NoRecordedName) {
   Namer namer(fail_stream_);
   EXPECT_THAT(namer.FindUnusedDerivedName("eleanor"), Eq("eleanor"));
+  // Prove that it wasn't registered when first found.
+  EXPECT_THAT(namer.FindUnusedDerivedName("eleanor"), Eq("eleanor"));
 }
 
 TEST_F(SpvNamerTest, FindUnusedDerivedName_HasRecordedName) {
@@ -101,6 +103,28 @@ TEST_F(SpvNamerTest, FindUnusedDerivedName_HasMultipleConflicts) {
   namer.SaveName(14, "rigby_3");
   // It picks the first non-conflicting suffix.
   EXPECT_THAT(namer.FindUnusedDerivedName("rigby"), Eq("rigby_2"));
+}
+
+TEST_F(SpvNamerTest, MakeDerivedName_NoRecordedName) {
+  Namer namer(fail_stream_);
+  EXPECT_THAT(namer.MakeDerivedName("eleanor"), Eq("eleanor"));
+  // Prove that it was registered when first found.
+  EXPECT_THAT(namer.MakeDerivedName("eleanor"), Eq("eleanor_1"));
+}
+
+TEST_F(SpvNamerTest, MakeDerivedName_HasRecordedName) {
+  Namer namer(fail_stream_);
+  namer.SaveName(12, "rigby");
+  EXPECT_THAT(namer.MakeDerivedName("rigby"), Eq("rigby_1"));
+}
+
+TEST_F(SpvNamerTest, MakeDerivedName_HasMultipleConflicts) {
+  Namer namer(fail_stream_);
+  namer.SaveName(12, "rigby");
+  namer.SaveName(13, "rigby_1");
+  namer.SaveName(14, "rigby_3");
+  // It picks the first non-conflicting suffix.
+  EXPECT_THAT(namer.MakeDerivedName("rigby"), Eq("rigby_2"));
 }
 
 TEST_F(SpvNamerTest, SaveNameOnce) {
