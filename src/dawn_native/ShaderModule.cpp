@@ -24,14 +24,10 @@
 #include <spirv_cross.hpp>
 
 #ifdef DAWN_ENABLE_WGSL
-// Tint includes must be after spirv_cross.hpp, because spirv-cross has its own
+// Tint include must be after spirv_cross.hpp, because spirv-cross has its own
 // version of spirv_headers.
 // clang-format off
-#include "tint/src/reader/wgsl/parser.h"
-#include "tint/src/type_determiner.h"
-#include "tint/src/validator.h"
-#include "tint/src/writer/spirv/generator.h"
-#include "tint/src/writer/writer.h"
+#include <tint/tint.h>
 // clang-format on
 #endif  // DAWN_ENABLE_WGSL
 
