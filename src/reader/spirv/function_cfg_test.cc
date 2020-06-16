@@ -10343,10 +10343,10 @@ Return{}
 //      kBack : symmetry
 //      kSwitchBreak: dup general case
 //      kLoopBreak: invalid; only one kind of break allowed
-//      kLoopContinue: TODO(dneto)
+//      kLoopContinue: TESTED
 //      kIfBreak: invalid: switch and if must have distinct merge blocks
-//      kCaseFallThrough: TODO(dneto)
-//      kForward: TODO(dneto)
+//      kCaseFallThrough: TESTED
+//      kForward: TESTED
 //
 //    kLoopBreak with:
 //      kBack : symmetry
@@ -10362,8 +10362,8 @@ Return{}
 //      kSwitchBreak: symmetry
 //      kLoopBreak: symmetry
 //      kLoopContinue: dup general case
-//      kIfBreak: TODO(dneto)
-//      kCaseFallThrough: TODO(dneto)
+//      kIfBreak: TESTED
+//      kCaseFallThrough: TESTED
 //      kForward: TESTED
 //
 //    kIfBreak with:
