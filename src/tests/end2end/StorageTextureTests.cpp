@@ -473,7 +473,7 @@ class StorageTextureTests : public DawnTest {
 
             wgpu::TextureCopyView textureCopyView;
             textureCopyView.texture = outputTexture;
-            textureCopyView.arrayLayer = layer;
+            textureCopyView.origin.z = layer;
 
             encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copyExtent);
         }
@@ -652,7 +652,7 @@ class StorageTextureTests : public DawnTest {
         for (uint32_t layer = 0; layer < arrayLayerCount; ++layer) {
             wgpu::TextureCopyView textureCopyView;
             textureCopyView.texture = writeonlyStorageTexture;
-            textureCopyView.arrayLayer = layer;
+            textureCopyView.origin.z = layer;
 
             const uint64_t bufferOffset = kTextureBytesPerRowAlignment * kHeight * layer;
             wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(

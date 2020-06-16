@@ -986,7 +986,7 @@ namespace dawn_native { namespace vulkan {
             wgpu::BufferCopyView copySrc =
                 utils::CreateBufferCopyView(copySrcBuffer, 0, bytesPerRow, 0);
             wgpu::TextureCopyView copyDst =
-                utils::CreateTextureCopyView(wrappedTexture, 0, 0, {0, 0, 0});
+                utils::CreateTextureCopyView(wrappedTexture, 0, {0, 0, 0});
             wgpu::Extent3D copySize = {width, height, 1};
 
             wgpu::CommandEncoder encoder = secondDevice.CreateCommandEncoder();
@@ -1010,7 +1010,7 @@ namespace dawn_native { namespace vulkan {
         wgpu::Buffer copyDstBuffer = device.CreateBuffer(&copyDesc);
         {
             wgpu::TextureCopyView copySrc =
-                utils::CreateTextureCopyView(nextWrappedTexture, 0, 0, {0, 0, 0});
+                utils::CreateTextureCopyView(nextWrappedTexture, 0, {0, 0, 0});
             wgpu::BufferCopyView copyDst =
                 utils::CreateBufferCopyView(copyDstBuffer, 0, bytesPerRow, 0);
 

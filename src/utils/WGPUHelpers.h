@@ -53,7 +53,6 @@ namespace utils {
                                               uint32_t rowsPerImage);
     wgpu::TextureCopyView CreateTextureCopyView(wgpu::Texture texture,
                                                 uint32_t level,
-                                                uint32_t slice,
                                                 wgpu::Origin3D origin);
 
     struct ComboRenderPassDescriptor : public wgpu::RenderPassDescriptor {

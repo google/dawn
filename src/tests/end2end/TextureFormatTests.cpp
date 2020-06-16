@@ -269,7 +269,7 @@ class TextureFormatTest : public DawnTest {
         {
             wgpu::BufferCopyView bufferView = utils::CreateBufferCopyView(uploadBuffer, 0, 256, 0);
             wgpu::TextureCopyView textureView =
-                utils::CreateTextureCopyView(sampleTexture, 0, 0, {0, 0, 0});
+                utils::CreateTextureCopyView(sampleTexture, 0, {0, 0, 0});
             wgpu::Extent3D extent{width, 1, 1};
             encoder.CopyBufferToTexture(&bufferView, &textureView, &extent);
         }
@@ -285,7 +285,7 @@ class TextureFormatTest : public DawnTest {
             wgpu::BufferCopyView bufferView =
                 utils::CreateBufferCopyView(readbackBuffer, 0, 256, 0);
             wgpu::TextureCopyView textureView =
-                utils::CreateTextureCopyView(renderTarget, 0, 0, {0, 0, 0});
+                utils::CreateTextureCopyView(renderTarget, 0, {0, 0, 0});
             wgpu::Extent3D extent{width, 1, 1};
             encoder.CopyTextureToBuffer(&textureView, &bufferView, &extent);
         }

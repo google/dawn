@@ -305,7 +305,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::BufferCopyView bufferCopyView =
         utils::CreateBufferCopyView(stagingBuffer, 0, widthInBytes, 0);
-    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
+    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
     wgpu::Extent3D copySize = {width, height, 1};
     encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);

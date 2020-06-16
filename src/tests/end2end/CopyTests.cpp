@@ -109,7 +109,7 @@ class CopyTests_T2B : public CopyTests {
                 wgpu::BufferCopyView bufferCopyView =
                     utils::CreateBufferCopyView(uploadBuffer, 0, bytesPerRow, 0);
                 wgpu::TextureCopyView textureCopyView =
-                    utils::CreateTextureCopyView(texture, textureSpec.level, slice, {0, 0, 0});
+                    utils::CreateTextureCopyView(texture, textureSpec.level, {0, 0, slice});
                 wgpu::Extent3D copySize = {width, height, 1};
                 encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
             }
@@ -131,7 +131,7 @@ class CopyTests_T2B : public CopyTests {
                 // Copy the region [(`x`, `y`), (`x + copyWidth, `y + copyWidth`)] from the `level`
                 // mip into the buffer at `offset + bufferSpec.size * slice` and `bytesPerRow`
                 wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
-                    texture, textureSpec.level, slice, {textureSpec.x, textureSpec.y, 0});
+                    texture, textureSpec.level, {textureSpec.x, textureSpec.y, slice});
                 wgpu::BufferCopyView bufferCopyView =
                     utils::CreateBufferCopyView(buffer, bufferOffset, bufferSpec.bytesPerRow, 0);
                 wgpu::Extent3D copySize = {textureSpec.copyWidth, textureSpec.copyHeight, 1};
@@ -229,7 +229,7 @@ protected:
             wgpu::BufferCopyView bufferCopyView =
                 utils::CreateBufferCopyView(uploadBuffer, 0, bytesPerRow, 0);
             wgpu::TextureCopyView textureCopyView =
-                utils::CreateTextureCopyView(texture, textureSpec.level, 0, {0, 0, 0});
+                utils::CreateTextureCopyView(texture, textureSpec.level, {0, 0, 0});
             wgpu::Extent3D copySize = {width, height, 1};
             encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
         }
@@ -240,7 +240,7 @@ protected:
             wgpu::BufferCopyView bufferCopyView =
                 utils::CreateBufferCopyView(buffer, bufferSpec.offset, bufferSpec.bytesPerRow, 0);
             wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
-                texture, textureSpec.level, 0, {textureSpec.x, textureSpec.y, 0});
+                texture, textureSpec.level, {textureSpec.x, textureSpec.y, 0});
             wgpu::Extent3D copySize = {textureSpec.copyWidth, textureSpec.copyHeight, 1};
             encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
         }
@@ -345,7 +345,7 @@ class CopyTests_T2T : public CopyTests {
             wgpu::BufferCopyView bufferCopyView =
                 utils::CreateBufferCopyView(uploadBuffer, 0, bytesPerRow, 0);
             wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
-                srcTexture, srcSpec.level, srcSpec.baseArrayLayer + slice, {0, 0, 0});
+                srcTexture, srcSpec.level, {0, 0, srcSpec.baseArrayLayer + slice});
             wgpu::Extent3D bufferCopySize = {width, height, 1};
 
             encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &bufferCopySize);
@@ -353,9 +353,9 @@ class CopyTests_T2T : public CopyTests {
 
         // Perform the texture to texture copy
         wgpu::TextureCopyView srcTextureCopyView = utils::CreateTextureCopyView(
-            srcTexture, srcSpec.level, srcSpec.baseArrayLayer, {srcSpec.x, srcSpec.y, 0});
+            srcTexture, srcSpec.level, {srcSpec.x, srcSpec.y, srcSpec.baseArrayLayer});
         wgpu::TextureCopyView dstTextureCopyView = utils::CreateTextureCopyView(
-            dstTexture, dstSpec.level, dstSpec.baseArrayLayer, {dstSpec.x, dstSpec.y, 0});
+            dstTexture, dstSpec.level, {dstSpec.x, dstSpec.y, dstSpec.baseArrayLayer});
         wgpu::Extent3D copySize = {copy.width, copy.height, copy.arrayLayerCount};
         encoder.CopyTextureToTexture(&srcTextureCopyView, &dstTextureCopyView, &copySize);
 

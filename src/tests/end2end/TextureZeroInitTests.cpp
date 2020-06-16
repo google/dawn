@@ -232,7 +232,7 @@ TEST_P(TextureZeroInitTest, CopyBufferToTexture) {
 
     wgpu::BufferCopyView bufferCopyView =
         utils::CreateBufferCopyView(stagingBuffer, 0, kSize * sizeof(uint32_t), 0);
-    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
+    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
     wgpu::Extent3D copySize = {kSize, kSize, 1};
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -263,7 +263,7 @@ TEST_P(TextureZeroInitTest, CopyBufferToTextureHalf) {
 
     wgpu::BufferCopyView bufferCopyView =
         utils::CreateBufferCopyView(stagingBuffer, 0, kSize * sizeof(uint16_t), 0);
-    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
+    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
     wgpu::Extent3D copySize = {kSize / 2, kSize, 1};
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -289,7 +289,7 @@ TEST_P(TextureZeroInitTest, CopyTextureToTexture) {
     wgpu::Texture srcTexture = device.CreateTexture(&srcDescriptor);
 
     wgpu::TextureCopyView srcTextureCopyView =
-        utils::CreateTextureCopyView(srcTexture, 0, 0, {0, 0, 0});
+        utils::CreateTextureCopyView(srcTexture, 0, {0, 0, 0});
 
     wgpu::TextureDescriptor dstDescriptor =
         CreateTextureDescriptor(1, 1,
@@ -299,7 +299,7 @@ TEST_P(TextureZeroInitTest, CopyTextureToTexture) {
     wgpu::Texture dstTexture = device.CreateTexture(&dstDescriptor);
 
     wgpu::TextureCopyView dstTextureCopyView =
-        utils::CreateTextureCopyView(dstTexture, 0, 0, {0, 0, 0});
+        utils::CreateTextureCopyView(dstTexture, 0, {0, 0, 0});
 
     wgpu::Extent3D copySize = {kSize, kSize, 1};
 
@@ -335,7 +335,7 @@ TEST_P(TextureZeroInitTest, CopyTextureToTextureHalf) {
         wgpu::BufferCopyView bufferCopyView =
             utils::CreateBufferCopyView(stagingBuffer, 0, kSize * kFormatBlockByteSize, 0);
         wgpu::TextureCopyView textureCopyView =
-            utils::CreateTextureCopyView(srcTexture, 0, 0, {0, 0, 0});
+            utils::CreateTextureCopyView(srcTexture, 0, {0, 0, 0});
         wgpu::Extent3D copySize = {kSize, kSize, 1};
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
@@ -344,7 +344,7 @@ TEST_P(TextureZeroInitTest, CopyTextureToTextureHalf) {
     }
 
     wgpu::TextureCopyView srcTextureCopyView =
-        utils::CreateTextureCopyView(srcTexture, 0, 0, {0, 0, 0});
+        utils::CreateTextureCopyView(srcTexture, 0, {0, 0, 0});
 
     wgpu::TextureDescriptor dstDescriptor =
         CreateTextureDescriptor(1, 1,
@@ -354,7 +354,7 @@ TEST_P(TextureZeroInitTest, CopyTextureToTextureHalf) {
     wgpu::Texture dstTexture = device.CreateTexture(&dstDescriptor);
 
     wgpu::TextureCopyView dstTextureCopyView =
-        utils::CreateTextureCopyView(dstTexture, 0, 0, {0, 0, 0});
+        utils::CreateTextureCopyView(dstTexture, 0, {0, 0, 0});
     wgpu::Extent3D copySize = {kSize / 2, kSize, 1};
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -647,7 +647,7 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClear) {
         device, data.data(), static_cast<uint32_t>(data.size()), wgpu::BufferUsage::CopySrc);
 
     wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(bufferDst, 0, bytesPerRow, 0);
-    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
+    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
     wgpu::Extent3D copySize = {kSize, kSize, 1};
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -678,7 +678,7 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClearUnalignedSize) {
     wgpu::Buffer bufferDst = utils::CreateBufferFromData(
         device, data.data(), static_cast<uint32_t>(data.size()), wgpu::BufferUsage::CopySrc);
     wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(bufferDst, 0, bytesPerRow, 0);
-    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
+    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
     wgpu::Extent3D copySize = {kUnalignedSize, kUnalignedSize, 1};
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -708,7 +708,7 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClearWithMultiArrayLayers) {
 
     wgpu::BufferCopyView bufferCopyView =
         utils::CreateBufferCopyView(bufferDst, 0, kSize * kFormatBlockByteSize, 0);
-    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 1, {0, 0, 0});
+    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 1});
     wgpu::Extent3D copySize = {kSize, kSize, 1};
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -746,7 +746,7 @@ TEST_P(TextureZeroInitTest, RenderPassStoreOpClear) {
         device, data.data(), static_cast<uint32_t>(data.size()), wgpu::BufferUsage::CopySrc);
     wgpu::BufferCopyView bufferCopyView =
         utils::CreateBufferCopyView(stagingBuffer, 0, kSize * kFormatBlockByteSize, 0);
-    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
+    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
     wgpu::Extent3D copySize = {kSize, kSize, 1};
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
@@ -895,7 +895,7 @@ TEST_P(TextureZeroInitTest, PreservesInitializedMip) {
     wgpu::BufferCopyView bufferCopyView =
         utils::CreateBufferCopyView(stagingBuffer, 0, mipSize * kFormatBlockByteSize, 0);
     wgpu::TextureCopyView textureCopyView =
-        utils::CreateTextureCopyView(sampleTexture, 1, 0, {0, 0, 0});
+        utils::CreateTextureCopyView(sampleTexture, 1, {0, 0, 0});
     wgpu::Extent3D copySize = {mipSize, mipSize, 1};
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
@@ -973,7 +973,7 @@ TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
     wgpu::BufferCopyView bufferCopyView =
         utils::CreateBufferCopyView(stagingBuffer, 0, kSize * kFormatBlockByteSize, 0);
     wgpu::TextureCopyView textureCopyView =
-        utils::CreateTextureCopyView(sampleTexture, 0, 1, {0, 0, 0});
+        utils::CreateTextureCopyView(sampleTexture, 0, {0, 0, 1});
     wgpu::Extent3D copySize = {kSize, kSize, 1};
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
@@ -1052,8 +1052,7 @@ TEST_P(TextureZeroInitTest, CopyTextureToBufferNonRenderableUnaligned) {
         bufferDesc.usage = wgpu::BufferUsage::CopyDst;
         wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
 
-        wgpu::TextureCopyView textureCopyView =
-            utils::CreateTextureCopyView(texture, 0, 0, {0, 0, 0});
+        wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
         wgpu::BufferCopyView bufferCopyView =
             utils::CreateBufferCopyView(buffer, 0, bytesPerRow, 0);
         wgpu::Extent3D copySize = {kUnalignedSize, kUnalignedSize, 1};

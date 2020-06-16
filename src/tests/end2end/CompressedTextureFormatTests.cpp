@@ -91,9 +91,12 @@ class CompressedTextureBCFormatTest : public DawnTest {
         wgpu::BufferCopyView bufferCopyView =
             utils::CreateBufferCopyView(stagingBuffer, copyConfig.bufferOffset,
                                         copyConfig.bytesPerRowAlignment, copyConfig.rowsPerImage);
-        wgpu::TextureCopyView textureCopyView =
-            utils::CreateTextureCopyView(bcCompressedTexture, copyConfig.viewMipmapLevel,
-                                         copyConfig.viewArrayLayer, copyConfig.copyOrigin3D);
+
+        ASSERT(copyConfig.copyOrigin3D.z == 0);
+        wgpu::Origin3D copyOrigin = copyConfig.copyOrigin3D;
+        copyOrigin.z = copyConfig.viewArrayLayer;
+        wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
+            bcCompressedTexture, copyConfig.viewMipmapLevel, copyOrigin);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copyConfig.copyExtent3D);
@@ -237,12 +240,17 @@ class CompressedTextureBCFormatTest : public DawnTest {
                                     wgpu::Texture dstTexture,
                                     CopyConfig srcConfig,
                                     CopyConfig dstConfig) {
+        ASSERT(srcConfig.copyOrigin3D.z == 0);
+        wgpu::Origin3D srcCopyOrigin = srcConfig.copyOrigin3D;
+        srcCopyOrigin.z = srcConfig.viewArrayLayer;
         wgpu::TextureCopyView textureCopyViewSrc =
-            utils::CreateTextureCopyView(srcTexture, srcConfig.viewMipmapLevel,
-                                         srcConfig.viewArrayLayer, srcConfig.copyOrigin3D);
+            utils::CreateTextureCopyView(srcTexture, srcConfig.viewMipmapLevel, srcCopyOrigin);
+
+        ASSERT(dstConfig.copyOrigin3D.z == 0);
+        wgpu::Origin3D dstCopyOrigin = dstConfig.copyOrigin3D;
+        dstCopyOrigin.z = dstConfig.viewArrayLayer;
         wgpu::TextureCopyView textureCopyViewDst =
-            utils::CreateTextureCopyView(dstTexture, dstConfig.viewMipmapLevel,
-                                         dstConfig.viewArrayLayer, dstConfig.copyOrigin3D);
+            utils::CreateTextureCopyView(dstTexture, dstConfig.viewMipmapLevel, dstCopyOrigin);
         encoder.CopyTextureToTexture(&textureCopyViewSrc, &textureCopyViewDst,
                                      &dstConfig.copyExtent3D);
     }
@@ -631,9 +639,8 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoSubresourceWithPhysicalSizeNotEqua
         srcConfig.textureDescriptor.usage =
             wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
         wgpu::Texture bcTextureSrc = CreateTextureWithCompressedData(srcConfig);
-        wgpu::TextureCopyView textureCopyViewSrc =
-            utils::CreateTextureCopyView(bcTextureSrc, srcConfig.viewMipmapLevel,
-                                         srcConfig.viewArrayLayer, srcConfig.copyOrigin3D);
+        wgpu::TextureCopyView textureCopyViewSrc = utils::CreateTextureCopyView(
+            bcTextureSrc, srcConfig.viewMipmapLevel, srcConfig.copyOrigin3D);
 
         // Create bcTexture and copy from the content in bcTextureSrc into it.
         dstConfig.textureDescriptor.format = format;

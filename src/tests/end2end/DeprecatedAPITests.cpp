@@ -138,3 +138,116 @@ DAWN_INSTANTIATE_TEST(DeprecationTests,
                       NullBackend(),
                       OpenGLBackend(),
                       VulkanBackend());
+
+class TextureCopyViewArrayLayerDeprecationTests : public DeprecationTests {
+  protected:
+    wgpu::TextureCopyView MakeOldTextureCopyView() {
+        wgpu::TextureDescriptor desc;
+        desc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+        desc.dimension = wgpu::TextureDimension::e2D;
+        desc.size = {1, 1, 2};
+        desc.format = wgpu::TextureFormat::RGBA8Unorm;
+
+        wgpu::TextureCopyView copy;
+        copy.texture = device.CreateTexture(&desc);
+        copy.arrayLayer = 1;
+        copy.origin = {0, 0, 0};
+        return copy;
+    }
+
+    wgpu::TextureCopyView MakeNewTextureCopyView() {
+        wgpu::TextureCopyView copy = MakeOldTextureCopyView();
+        copy.arrayLayer = 0;
+        copy.origin.z = 1;
+        return copy;
+    }
+
+    wgpu::TextureCopyView MakeErrorTextureCopyView() {
+        wgpu::TextureCopyView copy = MakeOldTextureCopyView();
+        copy.origin.z = 1;
+        return copy;
+    }
+
+    wgpu::BufferCopyView MakeBufferCopyView() const {
+        wgpu::BufferDescriptor desc;
+        desc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+        desc.size = 4;
+
+        wgpu::BufferCopyView copy;
+        copy.buffer = device.CreateBuffer(&desc);
+        copy.bytesPerRow = kTextureBytesPerRowAlignment;
+        return copy;
+    }
+
+    wgpu::Extent3D copySize = {1, 1, 1};
+};
+
+// Test that using TextureCopyView::arrayLayer emits a warning.
+TEST_P(TextureCopyViewArrayLayerDeprecationTests, DeprecationWarning) {
+    wgpu::TextureCopyView texOldCopy = MakeOldTextureCopyView();
+    wgpu::TextureCopyView texNewCopy = MakeNewTextureCopyView();
+    wgpu::BufferCopyView bufCopy = MakeBufferCopyView();
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    EXPECT_DEPRECATION_WARNING(encoder.CopyBufferToTexture(&bufCopy, &texOldCopy, &copySize));
+    EXPECT_DEPRECATION_WARNING(encoder.CopyTextureToTexture(&texNewCopy, &texOldCopy, &copySize));
+    EXPECT_DEPRECATION_WARNING(encoder.CopyTextureToBuffer(&texOldCopy, &bufCopy, &copySize));
+    EXPECT_DEPRECATION_WARNING(encoder.CopyTextureToTexture(&texOldCopy, &texNewCopy, &copySize));
+    wgpu::CommandBuffer command = encoder.Finish();
+
+    queue.Submit(1, &command);
+}
+
+// Test that using both TextureCopyView::arrayLayer and origin.z is an error.
+TEST_P(TextureCopyViewArrayLayerDeprecationTests, BothArrayLayerAndOriginZIsError) {
+    wgpu::TextureCopyView texErrorCopy = MakeErrorTextureCopyView();
+    wgpu::TextureCopyView texNewCopy = MakeNewTextureCopyView();
+    wgpu::BufferCopyView bufCopy = MakeBufferCopyView();
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyBufferToTexture(&bufCopy, &texErrorCopy, &copySize);
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+
+    encoder = device.CreateCommandEncoder();
+    encoder.CopyTextureToTexture(&texNewCopy, &texErrorCopy, &copySize);
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+
+    encoder = device.CreateCommandEncoder();
+    encoder.CopyTextureToBuffer(&texErrorCopy, &bufCopy, &copySize);
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+
+    encoder = device.CreateCommandEncoder();
+    encoder.CopyTextureToTexture(&texErrorCopy, &texNewCopy, &copySize);
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
+// Test that using TextureCopyView::arrayLayer is correctly taken into account
+TEST_P(TextureCopyViewArrayLayerDeprecationTests, StateTracking) {
+    wgpu::TextureCopyView texOOBCopy = MakeErrorTextureCopyView();
+    texOOBCopy.arrayLayer = 2;  // Oh no, it is OOB!
+    wgpu::TextureCopyView texNewCopy = MakeNewTextureCopyView();
+    wgpu::BufferCopyView bufCopy = MakeBufferCopyView();
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyBufferToTexture(&bufCopy, &texOOBCopy, &copySize);
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+
+    encoder = device.CreateCommandEncoder();
+    encoder.CopyTextureToTexture(&texNewCopy, &texOOBCopy, &copySize);
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+
+    encoder = device.CreateCommandEncoder();
+    encoder.CopyTextureToBuffer(&texOOBCopy, &bufCopy, &copySize);
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+
+    encoder = device.CreateCommandEncoder();
+    encoder.CopyTextureToTexture(&texOOBCopy, &texNewCopy, &copySize);
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
+DAWN_INSTANTIATE_TEST(TextureCopyViewArrayLayerDeprecationTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      NullBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());

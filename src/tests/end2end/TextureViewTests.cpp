@@ -136,7 +136,7 @@ protected:
                 wgpu::BufferCopyView bufferCopyView =
                     utils::CreateBufferCopyView(stagingBuffer, 0, kTextureBytesPerRowAlignment, 0);
                 wgpu::TextureCopyView textureCopyView =
-                    utils::CreateTextureCopyView(mTexture, level, layer, {0, 0, 0});
+                    utils::CreateTextureCopyView(mTexture, level, {0, 0, layer});
                 wgpu::Extent3D copySize = {texWidth, texHeight, 1};
                 encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
             }
