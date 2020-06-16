@@ -280,6 +280,9 @@ class ParserImpl : Reader {
   ast::type::Type* ForcedResultType(SpvOp op,
                                     ast::type::Type* first_operand_type);
 
+  /// @returns the registered boolean type.
+  ast::type::Type* BoolType() const { return bool_type_; }
+
  private:
   /// Converts a specific SPIR-V type to a Tint type. Integer case
   ast::type::Type* ConvertType(const spvtools::opt::analysis::Integer* int_ty);
@@ -312,6 +315,9 @@ class ParserImpl : Reader {
   std::stringstream errors_;
   FailStream fail_stream_;
   spvtools::MessageConsumer message_consumer_;
+
+  // The registered boolean type.
+  ast::type::Type* bool_type_;
 
   // An object used to store and generate names for SPIR-V objects.
   Namer namer_;

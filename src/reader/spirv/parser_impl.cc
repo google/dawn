@@ -192,6 +192,7 @@ ParserImpl::ParserImpl(Context* ctx, const std::vector<uint32_t>& spv_binary)
     : Reader(ctx),
       spv_binary_(spv_binary),
       fail_stream_(&success_, &errors_),
+      bool_type_(ctx->type_mgr().Get(std::make_unique<ast::type::BoolType>())),
       namer_(fail_stream_),
       enum_converter_(fail_stream_),
       tools_context_(kTargetEnv),
@@ -282,7 +283,7 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
     case spvtools::opt::analysis::Type::kVoid:
       return save(ctx_.type_mgr().Get(std::make_unique<ast::type::VoidType>()));
     case spvtools::opt::analysis::Type::kBool:
-      return save(ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>()));
+      return save(bool_type_);
     case spvtools::opt::analysis::Type::kInteger:
       return save(ConvertType(spirv_type->AsInteger()));
     case spvtools::opt::analysis::Type::kFloat:

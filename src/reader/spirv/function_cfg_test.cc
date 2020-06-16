@@ -6991,11 +6991,7 @@ TEST_F(SpvParserTest,
 }
 
 TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_FromThen_ForwardWithinThen) {
-  // Arguably SPIR-V allows this configuration. We're debating whether to ban
-  // it.
-  // TODO(dneto): We can make this case work, if we injected
-  //    if (!cond2) { rest-of-then-body }
-  // at block 30
+  // SPIR-V allows this unusual configuration.
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -7016,7 +7012,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_FromThen_ForwardWithinThen) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
-  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 80, 99));
 
   auto* bi20 = fe.GetBlockInfo(20);
@@ -7026,17 +7022,11 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_FromThen_ForwardWithinThen) {
   EXPECT_EQ(bi20->succ_edge.count(99), 1u);
   EXPECT_EQ(bi20->succ_edge[99], EdgeKind::kIfBreak);
 
-  EXPECT_THAT(p->error(),
-              Eq("Control flow diverges at block 20 (to 99, 80) but it is not "
-                 "a structured header (it has no merge instruction)"));
+  EXPECT_THAT(p->error(), Eq(""));
 }
 
 TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_FromElse_ForwardWithinElse) {
-  // Arguably SPIR-V allows this configuration. We're debating whether to ban
-  // it.
-  // TODO(dneto): We can make this case work, if we injected
-  //    if (!cond2) { rest-of-else-body }
-  // at block 30
+  // SPIR-V allows this unusual configuration.
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -7060,7 +7050,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_FromElse_ForwardWithinElse) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
-  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 80, 99));
 
   auto* bi30 = fe.GetBlockInfo(30);
@@ -7070,12 +7060,10 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_FromElse_ForwardWithinElse) {
   EXPECT_EQ(bi30->succ_edge.count(99), 1u);
   EXPECT_EQ(bi30->succ_edge[99], EdgeKind::kIfBreak);
 
-  EXPECT_THAT(p->error(),
-              Eq("Control flow diverges at block 30 (to 99, 80) but it is not "
-                 "a structured header (it has no merge instruction)"));
+  EXPECT_THAT(p->error(), Eq(""));
 }
 
-TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_WithForwardToPremerge_IsError) {
+TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_WithForwardToPremerge) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -7084,7 +7072,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_WithForwardToPremerge_IsError) {
      OpBranchConditional %cond %20 %30
 
      %20 = OpLabel ; then
-     OpBranchConditional %cond2 %99 %80 ; break with forward to premerge is error
+     OpBranchConditional %cond2 %99 %80 ; break with forward to premerge
 
      %30 = OpLabel ; else
      OpBranch %80
@@ -7099,7 +7087,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_WithForwardToPremerge_IsError) {
   auto* p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
-  EXPECT_FALSE(FlowClassifyCFGEdges(&fe));
+  EXPECT_TRUE(FlowClassifyCFGEdges(&fe));
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 80, 99));
 
   auto* bi20 = fe.GetBlockInfo(20);
@@ -7109,9 +7097,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_WithForwardToPremerge_IsError) {
   EXPECT_EQ(bi20->succ_edge.count(99), 1u);
   EXPECT_EQ(bi20->succ_edge[99], EdgeKind::kIfBreak);
 
-  EXPECT_THAT(p->error(),
-              Eq("Control flow diverges at block 20 (to 99, 80) but it is not "
-                 "a structured header (it has no merge instruction)"));
+  EXPECT_THAT(p->error(), Eq(""));
 }
 
 TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_DomViolation_Merge_CantBeTrueHeader) {
@@ -7204,10 +7190,9 @@ TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_DomViolation_Merge_CantBePr
   EXPECT_THAT(p->error(), Eq("Block 70 is the merge block for 50 but has alternate paths reaching it, starting from blocks 20 and 50 which are the true and false branches for the if-selection header block 10 (violates dominance rule)"));
 }
 
-TEST_F(SpvParserTest, DISABLED_Codegen_IfBreak_FromThen_ForwardWithinThen) {
-  // TODO(dneto): We can make this case work, if we injected
-  //    if (!cond2) { rest-of-then-body }
-  // at block 30
+TEST_F(SpvParserTest, EmitBody_IfBreak_FromThen_ForwardWithinThen) {
+  // Exercises the hard case where we a single OpBranchConditional has both
+  // IfBreak and Forward edges, within the true-branch clause.
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -7237,15 +7222,87 @@ TEST_F(SpvParserTest, DISABLED_Codegen_IfBreak_FromThen_ForwardWithinThen) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(something
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{1}
+}
+VariableDeclStatement{
+  Variable{
+    guard10
+    function
+    __bool
+    {
+      ScalarConstructor{true}
+    }
+  }
+}
+If{
+  (
+    ScalarConstructor{false}
+  )
+  {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{2}
+    }
+    If{
+      (
+        ScalarConstructor{true}
+      )
+      {
+        Assignment{
+          Identifier{guard10}
+          ScalarConstructor{false}
+        }
+      }
+    }
+    If{
+      (
+        Identifier{guard10}
+      )
+      {
+        Assignment{
+          Identifier{var}
+          ScalarConstructor{3}
+        }
+        Assignment{
+          Identifier{guard10}
+          ScalarConstructor{false}
+        }
+      }
+    }
+  }
+}
+Else{
+  {
+    If{
+      (
+        Identifier{guard10}
+      )
+      {
+        Assignment{
+          Identifier{var}
+          ScalarConstructor{4}
+        }
+        Assignment{
+          Identifier{guard10}
+          ScalarConstructor{false}
+        }
+      }
+    }
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{5}
+}
 Return{}
 )")) << ToString(fe.ast_body());
 }
 
-TEST_F(SpvParserTest, DISABLED_Codegen_IfBreak_FromElse_ForwardWithinElse) {
-  // TODO(dneto): We can make this case work, if we injected
-  //    if (!cond2) { rest-of-else-body }
-  // at block 80
+TEST_F(SpvParserTest, EmitBody_IfBreak_FromElse_ForwardWithinElse) {
+  // Exercises the hard case where we a single OpBranchConditional has both
+  // IfBreak and Forward edges, within the false-branch clause.
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -7275,16 +7332,90 @@ TEST_F(SpvParserTest, DISABLED_Codegen_IfBreak_FromElse_ForwardWithinElse) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(something
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{1}
+}
+VariableDeclStatement{
+  Variable{
+    guard10
+    function
+    __bool
+    {
+      ScalarConstructor{true}
+    }
+  }
+}
+If{
+  (
+    ScalarConstructor{false}
+  )
+  {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{2}
+    }
+    Assignment{
+      Identifier{guard10}
+      ScalarConstructor{false}
+    }
+  }
+}
+Else{
+  {
+    If{
+      (
+        Identifier{guard10}
+      )
+      {
+        Assignment{
+          Identifier{var}
+          ScalarConstructor{3}
+        }
+        If{
+          (
+            ScalarConstructor{true}
+          )
+          {
+            Assignment{
+              Identifier{guard10}
+              ScalarConstructor{false}
+            }
+          }
+        }
+        If{
+          (
+            Identifier{guard10}
+          )
+          {
+            Assignment{
+              Identifier{var}
+              ScalarConstructor{4}
+            }
+            Assignment{
+              Identifier{guard10}
+              ScalarConstructor{false}
+            }
+          }
+        }
+      }
+    }
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{5}
+}
 Return{}
 )")) << ToString(fe.ast_body());
 }
 
-TEST_F(
-    SpvParserTest,
-    DISABLED_Codegen_IfBreak_FromThenWithForward_FromElseWithForward_AlsoPremerge) {
-  // This is a combination of the previous two, but also adding a premrge and
-  //
+TEST_F(SpvParserTest,
+       EmitBody_IfBreak_FromThenWithForward_FromElseWithForward_AlsoPremerge) {
+  // This is a combination of the previous two, but also adding a premerge.
+  // We have IfBreak and Forward edges from the same OpBranchConditional, and
+  // this occurs in the true-branch clause, the false-branch clause, and within
+  // the premerge clause.  Flow guards have to be sprinkled in lots of places.
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -7298,27 +7429,27 @@ TEST_F(
      OpBranchConditional %cond2 %21 %99 ; kForward and kIfBreak
 
      %21 = OpLabel ; still in then clause
-     OpStore %var %uint_2
+     OpStore %var %uint_3
      OpBranch %80 ; to premerge
 
      %50 = OpLabel ; else clause
-     OpStore %var %uint_3
+     OpStore %var %uint_4
      OpBranchConditional %cond2 %99 %51 ; kIfBreak with kForward
 
      %51 = OpLabel ; still in else clause
-     OpStore %var %uint_4
+     OpStore %var %uint_5
      OpBranch %80 ; to premerge
 
      %80 = OpLabel ; premerge
-     OpStore %var %uint_5
+     OpStore %var %uint_6
      OpBranchConditional %cond3 %81 %99
 
      %81 = OpLabel ; premerge
-     OpStore %var %uint_6
+     OpStore %var %uint_7
      OpBranch %99
 
      %99 = OpLabel
-     OpStore %var %uint_7
+     OpStore %var %uint_8
      OpReturn
      OpFunctionEnd
 )";
@@ -7326,7 +7457,139 @@ TEST_F(
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_TRUE(fe.EmitBody()) << p->error() << assembly;
-  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(something
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{var}
+  ScalarConstructor{1}
+}
+VariableDeclStatement{
+  Variable{
+    guard10
+    function
+    __bool
+    {
+      ScalarConstructor{true}
+    }
+  }
+}
+If{
+  (
+    ScalarConstructor{false}
+  )
+  {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{2}
+    }
+    If{
+      (
+        ScalarConstructor{true}
+      )
+      {
+      }
+    }
+    Else{
+      {
+        Assignment{
+          Identifier{guard10}
+          ScalarConstructor{false}
+        }
+      }
+    }
+    If{
+      (
+        Identifier{guard10}
+      )
+      {
+        Assignment{
+          Identifier{var}
+          ScalarConstructor{3}
+        }
+      }
+    }
+  }
+}
+Else{
+  {
+    If{
+      (
+        Identifier{guard10}
+      )
+      {
+        Assignment{
+          Identifier{var}
+          ScalarConstructor{4}
+        }
+        If{
+          (
+            ScalarConstructor{true}
+          )
+          {
+            Assignment{
+              Identifier{guard10}
+              ScalarConstructor{false}
+            }
+          }
+        }
+        If{
+          (
+            Identifier{guard10}
+          )
+          {
+            Assignment{
+              Identifier{var}
+              ScalarConstructor{5}
+            }
+          }
+        }
+      }
+    }
+  }
+}
+If{
+  (
+    Identifier{guard10}
+  )
+  {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{6}
+    }
+    If{
+      (
+        ScalarConstructor{false}
+      )
+      {
+      }
+    }
+    Else{
+      {
+        Assignment{
+          Identifier{guard10}
+          ScalarConstructor{false}
+        }
+      }
+    }
+    If{
+      (
+        Identifier{guard10}
+      )
+      {
+        Assignment{
+          Identifier{var}
+          ScalarConstructor{7}
+        }
+        Assignment{
+          Identifier{guard10}
+          ScalarConstructor{false}
+        }
+      }
+    }
+  }
+}
+Assignment{
+  Identifier{var}
+  ScalarConstructor{8}
+}
 Return{}
 )")) << ToString(fe.ast_body());
 }
@@ -7605,16 +7868,23 @@ Else{
     }
   }
 }
-Assignment{
-  Identifier{var}
-  ScalarConstructor{3}
+If{
+  (
+    ScalarConstructor{true}
+  )
+  {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{3}
+    }
+  }
 }
 Assignment{
   Identifier{var}
   ScalarConstructor{999}
 }
 Return{}
-)"));
+)")) << ToString(fe.ast_body());
 }
 
 TEST_F(SpvParserTest, EmitBody_If_Then_Premerge) {
@@ -7660,16 +7930,23 @@ If{
     }
   }
 }
-Assignment{
-  Identifier{var}
-  ScalarConstructor{3}
+If{
+  (
+    ScalarConstructor{true}
+  )
+  {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{3}
+    }
+  }
 }
 Assignment{
   Identifier{var}
   ScalarConstructor{999}
 }
 Return{}
-)"));
+)")) << ToString(fe.ast_body());
 }
 
 TEST_F(SpvParserTest, EmitBody_If_Else_Premerge) {
@@ -7719,16 +7996,23 @@ Else{
     }
   }
 }
-Assignment{
-  Identifier{var}
-  ScalarConstructor{3}
+If{
+  (
+    ScalarConstructor{true}
+  )
+  {
+    Assignment{
+      Identifier{var}
+      ScalarConstructor{3}
+    }
+  }
 }
 Assignment{
   Identifier{var}
   ScalarConstructor{999}
 }
 Return{}
-)"));
+)")) << ToString(fe.ast_body());
 }
 
 TEST_F(SpvParserTest, EmitBody_If_Nest_If) {

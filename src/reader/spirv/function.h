@@ -138,16 +138,23 @@ struct BlockInfo {
   /// construct for an OpBranchConditional instruction.
 
   /// If not 0, then this block is an if-selection header, and |true_head| is
-  /// the target id of the true branch on the OpBranchConditional.
+  /// the target id of the true branch on the OpBranchConditional, and that
+  /// target is inside the if-selection.
   uint32_t true_head = 0;
   /// If not 0, then this block is an if-selection header, and |false_head|
-  /// is the target id of the false branch on the OpBranchConditional.
+  /// is the target id of the false branch on the OpBranchConditional, and
+  /// that target is inside the if-selection.
   uint32_t false_head = 0;
   /// If not 0, then this block is an if-selection header, and when following
   /// the flow via the true and false branches, control first reconverges at
   /// the block with ID |premerge_head|, and |premerge_head| is still inside
   /// the if-selection.
   uint32_t premerge_head = 0;
+  /// If non-empty, then this block is an if-selection header, and control flow
+  /// in the body must be guarded by a boolean flow variable with this name.
+  /// This occurs when a block in this selection has both an if-break edge, and
+  /// also a different normal forward edge but without a merge instruction.
+  std::string flow_guard_name = "";
 };
 
 inline std::ostream& operator<<(std::ostream& o, const BlockInfo& bi) {
@@ -155,7 +162,6 @@ inline std::ostream& operator<<(std::ostream& o, const BlockInfo& bi) {
     << " id: " << bi.id << " pos: " << bi.pos
     << " merge_for_header: " << bi.merge_for_header
     << " continue_for_header: " << bi.continue_for_header
-    << " header_for_merge: " << bi.header_for_merge
     << " header_for_merge: " << bi.header_for_merge
     << " single_block_loop: " << int(bi.is_single_block_loop) << "}";
   return o;
@@ -338,7 +344,7 @@ class FunctionEmitter {
   /// @returns the new statement, or a null statement
   std::unique_ptr<ast::Statement> MakeBranch(const BlockInfo& src_info,
                                              const BlockInfo& dest_info) const {
-    return MakeBranchInternal(src_info, dest_info, false);
+    return MakeBranchDetailed(src_info, dest_info, false, nullptr);
   }
 
   /// Returns a new statement to represent the given branch representing a
@@ -350,7 +356,7 @@ class FunctionEmitter {
   std::unique_ptr<ast::Statement> MakeForcedBranch(
       const BlockInfo& src_info,
       const BlockInfo& dest_info) const {
-    return MakeBranchInternal(src_info, dest_info, true);
+    return MakeBranchDetailed(src_info, dest_info, true, nullptr);
   }
 
   /// Returns a new statement to represent the given branch representing a
@@ -359,13 +365,19 @@ class FunctionEmitter {
   /// is false, this method tries to avoid emitting a 'break' statement when
   /// that would be redundant in WGSL due to implicit breaking out of a switch.
   /// When |forced| is true, the method won't try to avoid emitting that break.
+  /// If the control flow edge is an if-break for an if-selection with a
+  /// control flow guard, then return that guard name via |flow_guard_name_ptr|
+  /// when that parameter is not null.
   /// @param src_info the source block
   /// @param dest_info the destination block
   /// @param forced if true, always emit the branch (if it exists in WGSL)
+  /// @param flow_guard_name_ptr return parameter for control flow guard name
   /// @returns the new statement, or a null statement
-  std::unique_ptr<ast::Statement> MakeBranchInternal(const BlockInfo& src_info,
-                                                     const BlockInfo& dest_info,
-                                                     bool forced) const;
+  std::unique_ptr<ast::Statement> MakeBranchDetailed(
+      const BlockInfo& src_info,
+      const BlockInfo& dest_info,
+      bool forced,
+      std::string* flow_guard_name_ptr) const;
 
   /// Returns a new if statement with the given statements as the then-clause
   /// and the else-clause.  Either or both clauses might be nullptr. If both
@@ -529,6 +541,25 @@ class FunctionEmitter {
   void PushNewStatementBlock(const Construct* construct,
                              uint32_t end_id,
                              CompletionAction action);
+
+  /// Emits an if-statement whose condition is the given flow guard
+  /// variable, and pushes onto the statement stack the corresponding
+  /// statement block ending (and not including) the given block.
+  /// @param flow_guard name of the flow guard variable
+  /// @param end_id first block after the if construct.
+  void PushGuard(const std::string& flow_guard, uint32_t end_id);
+
+  /// Emits an if-statement with 'true' condition, and pushes onto the
+  /// statement stack the corresponding statement block ending (and not
+  /// including) the given block.
+  /// @param end_id first block after the if construct.
+  void PushTrueGuard(uint32_t end_id);
+
+  /// @returns a boolean true expression.
+  std::unique_ptr<ast::Expression> MakeTrue() const;
+
+  /// @returns a boolean false expression.
+  std::unique_ptr<ast::Expression> MakeFalse() const;
 
   ParserImpl& parser_impl_;
   ast::Module& ast_module_;

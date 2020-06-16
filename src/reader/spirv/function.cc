@@ -15,6 +15,7 @@
 #include "src/reader/spirv/function.h"
 
 #include <algorithm>
+#include <sstream>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -29,6 +30,7 @@
 #include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
+#include "src/ast/bool_literal.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/case_statement.h"
@@ -45,6 +47,7 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/switch_statement.h"
+#include "src/ast/type/bool_type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
@@ -436,6 +439,36 @@ void FunctionEmitter::PushNewStatementBlock(const Construct* construct,
                                             CompletionAction action) {
   statements_stack_.emplace_back(
       StatementBlock{construct, end_id, action, ast::StatementList{}, nullptr});
+}
+
+void FunctionEmitter::PushGuard(const std::string& guard_name,
+                                uint32_t end_id) {
+  assert(!statements_stack_.empty());
+  assert(!guard_name.empty());
+  // Guard control flow by the guard variable.  Introduce a new
+  // if-selection with a then-clause ending at the same block
+  // as the statement block at the top of the stack.
+  const auto& top = statements_stack_.back();
+  auto* const guard_stmt =
+      AddStatement(std::make_unique<ast::IfStatement>())->AsIf();
+  guard_stmt->set_condition(
+      std::make_unique<ast::IdentifierExpression>(guard_name));
+  PushNewStatementBlock(top.construct_, end_id,
+                        [guard_stmt](StatementBlock* s) {
+                          guard_stmt->set_body(std::move(s->statements_));
+                        });
+}
+
+void FunctionEmitter::PushTrueGuard(uint32_t end_id) {
+  assert(!statements_stack_.empty());
+  const auto& top = statements_stack_.back();
+  auto* const guard_stmt =
+      AddStatement(std::make_unique<ast::IfStatement>())->AsIf();
+  guard_stmt->set_condition(MakeTrue());
+  PushNewStatementBlock(top.construct_, end_id,
+                        [guard_stmt](StatementBlock* s) {
+                          guard_stmt->set_body(std::move(s->statements_));
+                        });
 }
 
 const ast::StatementList& FunctionEmitter::ast_body() {
@@ -1141,10 +1174,13 @@ bool FunctionEmitter::ClassifyCFGEdges() {
     // There should only be one backedge per backedge block.
     uint32_t num_backedges = 0;
 
-    // Track destinations for normal forward edges, either kForward,
-    // kCaseFallThrough, or kIfBreak. These count toward the need
-    // to have a merge instruction.
+    // Track destinations for normal forward edges, either kForward
+    // or kCaseFallThroughkIfBreak. These count toward the need
+    // to have a merge instruction.  We also track kIfBreak edges
+    // because when used with normal forward edges, we'll need
+    // to generate a flow guard variable.
     std::vector<uint32_t> normal_forward_edges;
+    std::vector<uint32_t> if_break_edges;
 
     if (successors.empty() && src_construct.enclosing_continue) {
       // Kill and return are not allowed in a continue construct.
@@ -1263,9 +1299,11 @@ bool FunctionEmitter::ClassifyCFGEdges() {
         // The edge-kind has been finalized.
 
         if ((edge_kind == EdgeKind::kForward) ||
-            (edge_kind == EdgeKind::kCaseFallThrough) ||
-            (edge_kind == EdgeKind::kIfBreak)) {
+            (edge_kind == EdgeKind::kCaseFallThrough)) {
           normal_forward_edges.push_back(dest);
+        }
+        if (edge_kind == EdgeKind::kIfBreak) {
+          if_break_edges.push_back(dest);
         }
 
         if ((edge_kind == EdgeKind::kForward) ||
@@ -1339,6 +1377,21 @@ bool FunctionEmitter::ClassifyCFGEdges() {
                     << normal_forward_edges[1]
                     << ") but it is not a structured header (it has no merge "
                        "instruction)";
+    }
+    if ((normal_forward_edges.size() + if_break_edges.size() > 1) &&
+        (src_info->merge_for_header == 0)) {
+      // There is a branch to the merge of an if-selection combined
+      // with an other normal forward branch.  Control within the
+      // if-selection needs to be gated by a flow predicate.
+      for (auto if_break_dest : if_break_edges) {
+        auto* head_info =
+            GetBlockInfo(GetBlockInfo(if_break_dest)->header_for_merge);
+        // Generate a guard name, but only once.
+        if (head_info->flow_guard_name.empty()) {
+          const std::string guard = "guard" + std::to_string(head_info->id);
+          head_info->flow_guard_name = namer_.MakeDerivedName(guard);
+        }
+      }
     }
   }
 
@@ -1777,8 +1830,20 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
   assert(construct->kind == Construct::kIfSelection);
   assert(construct->begin_id == block_info.id);
 
+  const uint32_t true_head = block_info.true_head;
   const uint32_t false_head = block_info.false_head;
   const uint32_t premerge_head = block_info.premerge_head;
+
+  const std::string guard_name = block_info.flow_guard_name;
+  if (!guard_name.empty()) {
+    // Declare the guard variable just before the "if", initialized to true.
+    auto guard_var = std::make_unique<ast::Variable>(
+        guard_name, ast::StorageClass::kFunction, parser_impl_.BoolType());
+    guard_var->set_constructor(MakeTrue());
+    auto guard_decl =
+        std::make_unique<ast::VariableDeclStatement>(std::move(guard_var));
+    AddStatement(std::move(guard_decl));
+  }
 
   auto* const if_stmt =
       AddStatement(std::make_unique<ast::IfStatement>())->AsIf();
@@ -1857,7 +1922,30 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
     // Blocks for the then-clause appear before blocks for the else-clause.
     // So push the else-clause handling onto the stack first. The else-clause
     // might be empty, but this works anyway.
+
+    // Handle the premerge, if it exists.
+    if (premerge_head) {
+      // The top of the stack is the statement block that is the parent of the
+      // if-statement. Adding statements now will place them after that 'if'.
+      if (guard_name.empty()) {
+        // We won't have a flow guard for the premerge.
+        // Insert a trivial if(true) { ... } around the blocks from the
+        // premerge head until the end of the if-selection.  This is needed
+        // to ensure uniform reconvergence occurs at the end of the if-selection
+        // just like in the original SPIR-V.
+        PushTrueGuard(construct->end_id);
+      } else {
+        // Add a flow guard around the blocks in the premrege area.
+        PushGuard(guard_name, construct->end_id);
+      }
+    }
+
     push_else();
+    if (true_head && false_head && !guard_name.empty()) {
+      // There are non-trivial then and else clauses.
+      // We have to guard the start of the else.
+      PushGuard(guard_name, else_end);
+    }
     push_then();
   }
 
@@ -2083,11 +2171,20 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
       // Emit an 'if' statement to express the *other* branch as a conditional
       // break or continue.  Either or both of these could be nullptr.
       // (A nullptr is generated for kIfBreak, kForward, or kBack.)
-      auto true_branch = MakeBranch(block_info, *true_info);
-      auto false_branch = MakeBranch(block_info, *false_info);
+      // Also if one of the branches is an if-break out of an if-selection
+      // requiring a flow guard, then get that flow guard name too.  It will
+      // come from at most one of these two branches.
+      std::string flow_guard;
+      auto true_branch =
+          MakeBranchDetailed(block_info, *true_info, false, &flow_guard);
+      auto false_branch =
+          MakeBranchDetailed(block_info, *false_info, false, &flow_guard);
 
       AddStatement(MakeSimpleIf(std::move(cond), std::move(true_branch),
                                 std::move(false_branch)));
+      if (!flow_guard.empty()) {
+        PushGuard(flow_guard, statements_stack_.back().end_id_);
+      }
       return true;
     }
     case SpvOpSwitch:
@@ -2100,10 +2197,11 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
   return success();
 }
 
-std::unique_ptr<ast::Statement> FunctionEmitter::MakeBranchInternal(
+std::unique_ptr<ast::Statement> FunctionEmitter::MakeBranchDetailed(
     const BlockInfo& src_info,
     const BlockInfo& dest_info,
-    bool forced) const {
+    bool forced,
+    std::string* flow_guard_name_ptr) const {
   auto kind = src_info.succ_edge.find(dest_info.id)->second;
   switch (kind) {
     case EdgeKind::kBack:
@@ -2148,10 +2246,23 @@ std::unique_ptr<ast::Statement> FunctionEmitter::MakeBranchInternal(
       }
       // Otherwise, emit a regular continue statement.
       return std::make_unique<ast::ContinueStatement>();
-    case EdgeKind::kIfBreak:
+    case EdgeKind::kIfBreak: {
+      const auto& flow_guard =
+          GetBlockInfo(dest_info.header_for_merge)->flow_guard_name;
+      if (!flow_guard.empty()) {
+        if (flow_guard_name_ptr != nullptr) {
+          *flow_guard_name_ptr = flow_guard;
+        }
+        // Signal an exit from the branch.
+        return std::make_unique<ast::AssignmentStatement>(
+            std::make_unique<ast::IdentifierExpression>(flow_guard),
+            MakeFalse());
+      }
+
       // For an unconditional branch, the break out to an if-selection
       // merge block is implicit.
       break;
+    }
     case EdgeKind::kCaseFallThrough:
       return std::make_unique<ast::FallthroughStatement>();
     case EdgeKind::kForward:
@@ -2684,6 +2795,17 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(
         std::move(next_expr)));
   }
   return current_expr;
+}
+
+std::unique_ptr<ast::Expression> FunctionEmitter::MakeTrue() const {
+  return std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::BoolLiteral>(parser_impl_.BoolType(), true));
+}
+
+std::unique_ptr<ast::Expression> FunctionEmitter::MakeFalse() const {
+  ast::type::BoolType bool_type;
+  return std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::BoolLiteral>(parser_impl_.BoolType(), false));
 }
 
 }  // namespace spirv
