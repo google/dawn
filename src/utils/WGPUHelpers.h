@@ -129,6 +129,28 @@ namespace utils {
         const wgpu::BindGroupLayout& layout,
         std::initializer_list<BindingInitializationHelper> entriesInitializer);
 
+    struct BufferTextureCopyLayout {
+        uint64_t byteLength;
+        uint64_t texelBlockCount;
+        uint32_t bytesPerRow;
+        uint32_t texelBlocksPerRow;
+        uint32_t bytesPerImage;
+        uint32_t texelBlocksPerImage;
+        wgpu::Extent3D mipSize;
+    };
+
+    uint32_t GetMinimumBytesPerRow(wgpu::TextureFormat format, uint32_t width);
+    uint32_t GetBytesInBufferTextureCopy(wgpu::TextureFormat format,
+                                         uint32_t width,
+                                         uint32_t bytesPerRow,
+                                         uint32_t rowsPerImage,
+                                         uint32_t copyArrayLayerCount);
+    BufferTextureCopyLayout GetBufferTextureCopyLayoutForTexture2DAtLevel(
+        wgpu::TextureFormat format,
+        wgpu::Extent3D textureSizeAtLevel0,
+        uint32_t mipmapLevel,
+        uint32_t rowsPerImage);
+
 }  // namespace utils
 
 #endif  // UTILS_DAWNHELPERS_H_

@@ -17,6 +17,8 @@
 #include "common/Assert.h"
 #include "common/Constants.h"
 #include "common/Log.h"
+#include "common/Math.h"
+#include "utils/TextureFormatUtils.h"
 
 #include <shaderc/shaderc.hpp>
 
@@ -372,4 +374,44 @@ namespace utils {
         return device.CreateBindGroup(&descriptor);
     }
 
+    uint32_t GetMinimumBytesPerRow(wgpu::TextureFormat format, uint32_t width) {
+        const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(format);
+        return Align(bytesPerTexel * width, kTextureBytesPerRowAlignment);
+    }
+
+    uint32_t GetBytesInBufferTextureCopy(wgpu::TextureFormat format,
+                                         uint32_t width,
+                                         uint32_t bytesPerRow,
+                                         uint32_t rowsPerImage,
+                                         uint32_t copyArrayLayerCount) {
+        const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(format);
+        const uint32_t bytesAtLastImage = bytesPerRow * (rowsPerImage - 1) + bytesPerTexel * width;
+        return bytesPerRow * rowsPerImage * (copyArrayLayerCount - 1) + bytesAtLastImage;
+    }
+
+    // TODO(jiawei.shao@intel.com): support compressed texture formats
+    BufferTextureCopyLayout GetBufferTextureCopyLayoutForTexture2DAtLevel(
+        wgpu::TextureFormat format,
+        wgpu::Extent3D textureSizeAtLevel0,
+        uint32_t mipmapLevel,
+        uint32_t rowsPerImage) {
+        BufferTextureCopyLayout layout;
+
+        layout.mipSize = {textureSizeAtLevel0.width >> mipmapLevel,
+                          textureSizeAtLevel0.height >> mipmapLevel, textureSizeAtLevel0.depth};
+
+        layout.bytesPerRow = GetMinimumBytesPerRow(format, layout.mipSize.width);
+        layout.bytesPerImage = layout.bytesPerRow * rowsPerImage;
+
+        layout.byteLength =
+            GetBytesInBufferTextureCopy(format, layout.mipSize.width, layout.bytesPerRow,
+                                        layout.mipSize.height, textureSizeAtLevel0.depth);
+
+        const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(format);
+        layout.texelBlocksPerRow = layout.bytesPerRow / bytesPerTexel;
+        layout.texelBlocksPerImage = layout.bytesPerImage / bytesPerTexel;
+        layout.texelBlockCount = layout.byteLength / bytesPerTexel;
+
+        return layout;
+    }
 }  // namespace utils
