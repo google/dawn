@@ -21,6 +21,16 @@ import("tint_overrides_with_defaults.gni")
 ###############################################################################
 
 config("tint_common_config") {
+  include_dirs = [
+    "${target_gen_dir}",
+    "${tint_root_dir}/",
+    "${tint_spirv_headers_dir}/include",
+    "${tint_spirv_tools_dir}/",
+    "${tint_spirv_tools_dir}/include",
+  ]
+}
+
+config("tint_public_config") {
   defines = []
   if (tint_build_spv_reader) {
     defines += [ "TINT_BUILD_SPV_READER=1" ]
@@ -47,11 +57,8 @@ config("tint_common_config") {
   }
 
   include_dirs = [
-    "${target_gen_dir}",
     "${tint_root_dir}/",
-    "${tint_spirv_headers_dir}/include",
-    "${tint_spirv_tools_dir}/",
-    "${tint_spirv_tools_dir}/include",
+    "${tint_root_dir}/include/",
   ]
 }
 
@@ -358,6 +365,7 @@ source_set("libtint_core_src") {
   ]
 
   configs += [ ":tint_common_config" ]
+  public_configs = [ ":tint_public_config" ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
@@ -393,6 +401,7 @@ source_set("libtint_spv_reader_src") {
   ]
 
   configs += [ ":tint_common_config" ]
+  public_configs = [ ":tint_public_config" ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
@@ -417,6 +426,7 @@ source_set("libtint_spv_writer_src") {
   ]
 
   configs += [ ":tint_common_config" ]
+  public_configs = [ ":tint_public_config" ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
@@ -437,6 +447,7 @@ source_set("libtint_wgsl_reader_src") {
   ]
 
   configs += [ ":tint_common_config" ]
+  public_configs = [ ":tint_public_config" ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
@@ -453,18 +464,12 @@ source_set("libtint_wgsl_writer_src") {
   ]
 
   configs += [ ":tint_common_config" ]
+  public_configs = [ ":tint_public_config" ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
   }
-}
-
-config("libtint_public_config") {
-  include_dirs = [
-    "${tint_root_dir}/",
-    "${tint_root_dir}/include/",
-  ]
 }
 
 source_set("libtint") {
@@ -487,7 +492,7 @@ source_set("libtint") {
   }
 
   configs += [ ":tint_common_config" ]
-  public_configs = [ ":libtint_public_config" ]
+  public_configs = [ ":tint_public_config" ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
@@ -630,6 +635,7 @@ source_set("tint_unittests_core_src") {
     ":tint_common_config",
     ":tint_unittests_config",
   ]
+  public_configs = [ ":tint_public_config" ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
@@ -671,6 +677,7 @@ source_set("tint_unittests_spv_reader_src") {
     ":tint_common_config",
     ":tint_unittests_config",
   ]
+  public_configs = [ ":tint_public_config" ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
@@ -712,6 +719,7 @@ source_set("tint_unittests_spv_writer_src") {
     ":tint_common_config",
     ":tint_unittests_config",
   ]
+  public_configs = [ ":tint_public_config" ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
@@ -790,6 +798,7 @@ source_set("tint_unittests_wgsl_reader_src") {
     ":tint_common_config",
     ":tint_unittests_config",
   ]
+  public_configs = [ ":tint_public_config" ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
@@ -833,6 +842,7 @@ source_set("tint_unittests_wgsl_writer_src") {
     ":tint_common_config",
     ":tint_unittests_config",
   ]
+  public_configs = [ ":tint_public_config" ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
@@ -863,6 +873,7 @@ source_set("tint_unittests_src") {
     ":tint_common_config",
     ":tint_unittests_config",
   ]
+  public_configs = [ ":tint_public_config" ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
@@ -887,6 +898,7 @@ test("tint_unittests") {
     ":tint_common_config",
     ":tint_unittests_config",
   ]
+  public_configs = [ ":tint_public_config" ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
@@ -907,6 +919,7 @@ if (build_with_chromium) {
   source_set("tint_wgsl_reader_fuzzer_src") {
     sources = [ "fuzzers/tint_wgsl_reader_fuzzer.cc" ]
     configs += [ ":tint_common_config" ]
+    public_configs = [ ":tint_public_config" ]
   }
 
   fuzzer_test("tint_wgsl_reader_fuzzer") {
@@ -949,6 +962,7 @@ executable("tint_exe") {
     ":tint_common_config",
     ":tint_exe_config",
   ]
+  public_configs = [ ":tint_public_config" ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]
