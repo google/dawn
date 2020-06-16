@@ -589,18 +589,19 @@ ast::type::Type* ParserImpl::ConvertType(
 
 ast::type::Type* ParserImpl::ConvertType(
     const spvtools::opt::analysis::RuntimeArray* rtarr_ty) {
-  // TODO(dneto): Handle ArrayStride. Blocked by crbug.com/tint/30
   auto* ast_elem_ty = ConvertType(type_mgr_->GetId(rtarr_ty->element_type()));
   if (ast_elem_ty == nullptr) {
     return nullptr;
   }
-  return ctx_.type_mgr().Get(
-      std::make_unique<ast::type::ArrayType>(ast_elem_ty));
+  auto ast_type = std::make_unique<ast::type::ArrayType>(ast_elem_ty);
+  if (!ApplyArrayDecorations(rtarr_ty, ast_type.get())) {
+    return nullptr;
+  }
+  return ctx_.type_mgr().Get(std::move(ast_type));
 }
 
 ast::type::Type* ParserImpl::ConvertType(
     const spvtools::opt::analysis::Array* arr_ty) {
-  // TODO(dneto): Handle ArrayStride. Blocked by crbug.com/tint/30
   auto* ast_elem_ty = ConvertType(type_mgr_->GetId(arr_ty->element_type()));
   if (ast_elem_ty == nullptr) {
     return nullptr;
@@ -632,8 +633,39 @@ ast::type::Type* ParserImpl::ConvertType(
            << num_elem;
     return nullptr;
   }
-  return ctx_.type_mgr().Get(std::make_unique<ast::type::ArrayType>(
-      ast_elem_ty, static_cast<uint32_t>(num_elem)));
+  auto ast_type = std::make_unique<ast::type::ArrayType>(
+      ast_elem_ty, static_cast<uint32_t>(num_elem));
+  if (!ApplyArrayDecorations(arr_ty, ast_type.get())) {
+    return nullptr;
+  }
+  return ctx_.type_mgr().Get(std::move(ast_type));
+}
+
+bool ParserImpl::ApplyArrayDecorations(
+    const spvtools::opt::analysis::Type* spv_type,
+    ast::type::ArrayType* ast_type) {
+  const auto type_id = type_mgr_->GetId(spv_type);
+  for (auto& decoration : this->GetDecorationsFor(type_id)) {
+    if (decoration.size() == 2 && decoration[0] == SpvDecorationArrayStride) {
+      const auto stride = decoration[1];
+      if (stride == 0) {
+        return Fail() << "invalid array type ID " << type_id
+                      << ": ArrayStride can't be 0";
+      }
+      if (ast_type->has_array_stride()) {
+        return Fail() << "invalid array type ID " << type_id
+                      << ": multiple ArrayStride decorations";
+      }
+      ast_type->set_array_stride(stride);
+    } else {
+      return Fail() << "invalid array type ID " << type_id
+                    << ": unknown decoration "
+                    << (decoration.empty() ? "(empty)"
+                                           : std::to_string(decoration[0]))
+                    << " with " << decoration.size() << " total words";
+    }
+  }
+  return true;
 }
 
 ast::type::Type* ParserImpl::ConvertType(

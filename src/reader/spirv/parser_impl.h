@@ -303,6 +303,13 @@ class ParserImpl : Reader {
   /// Converts a specific SPIR-V type to a Tint type. Pointer case
   ast::type::Type* ConvertType(const spvtools::opt::analysis::Pointer* ptr_ty);
 
+  /// Applies SPIR-V decorations to the given array or runtime-array type.
+  /// @param spv_type the SPIR-V aray or runtime-array type.
+  /// @param ast_type non-null; the AST type to apply decorations to
+  /// @returns true on success.
+  bool ApplyArrayDecorations(const spvtools::opt::analysis::Type* spv_type,
+                             ast::type::ArrayType* ast_type);
+
   // The SPIR-V binary we're parsing
   std::vector<uint32_t> spv_binary_;
 

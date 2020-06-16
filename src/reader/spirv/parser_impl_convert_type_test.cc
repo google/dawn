@@ -342,11 +342,72 @@ TEST_F(SpvParserTest, ConvertType_RuntimeArray) {
   auto* arr_type = type->AsArray();
   EXPECT_TRUE(arr_type->IsRuntimeArray());
   ASSERT_NE(arr_type, nullptr);
-  ASSERT_EQ(arr_type->size(), 0u);
+  EXPECT_EQ(arr_type->size(), 0u);
+  EXPECT_EQ(arr_type->array_stride(), 0u);
+  EXPECT_FALSE(arr_type->has_array_stride());
   auto* elem_type = arr_type->type();
   ASSERT_NE(elem_type, nullptr);
   EXPECT_TRUE(elem_type->IsU32());
   EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, ConvertType_RuntimeArray_InvalidDecoration) {
+  auto* p = parser(test::Assemble(R"(
+    OpDecorate %10 Block
+    %uint = OpTypeInt 32 0
+    %10 = OpTypeRuntimeArray %uint
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+  auto* type = p->ConvertType(10);
+  EXPECT_EQ(type, nullptr);
+  EXPECT_THAT(
+      p->error(),
+      Eq("invalid array type ID 10: unknown decoration 2 with 1 total words"));
+}
+
+TEST_F(SpvParserTest, ConvertType_RuntimeArray_ArrayStride_Valid) {
+  auto* p = parser(test::Assemble(R"(
+    OpDecorate %10 ArrayStride 64
+    %uint = OpTypeInt 32 0
+    %10 = OpTypeRuntimeArray %uint
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+  auto* type = p->ConvertType(10);
+  ASSERT_NE(type, nullptr);
+  auto* arr_type = type->AsArray();
+  EXPECT_TRUE(arr_type->IsRuntimeArray());
+  ASSERT_NE(arr_type, nullptr);
+  EXPECT_EQ(arr_type->array_stride(), 64u);
+  EXPECT_TRUE(arr_type->has_array_stride());
+  EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, ConvertType_RuntimeArray_ArrayStride_ZeroIsError) {
+  auto* p = parser(test::Assemble(R"(
+    OpDecorate %10 ArrayStride 0
+    %uint = OpTypeInt 32 0
+    %10 = OpTypeRuntimeArray %uint
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+  auto* type = p->ConvertType(10);
+  EXPECT_EQ(type, nullptr);
+  EXPECT_THAT(p->error(),
+              Eq("invalid array type ID 10: ArrayStride can't be 0"));
+}
+
+TEST_F(SpvParserTest,
+       ConvertType_RuntimeArray_ArrayStride_SpecifiedTwiceIsError) {
+  auto* p = parser(test::Assemble(R"(
+    OpDecorate %10 ArrayStride 64
+    OpDecorate %10 ArrayStride 64
+    %uint = OpTypeInt 32 0
+    %10 = OpTypeRuntimeArray %uint
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+  auto* type = p->ConvertType(10);
+  EXPECT_EQ(type, nullptr);
+  EXPECT_THAT(p->error(),
+              Eq("invalid array type ID 10: multiple ArrayStride decorations"));
 }
 
 TEST_F(SpvParserTest, ConvertType_Array) {
@@ -363,7 +424,9 @@ TEST_F(SpvParserTest, ConvertType_Array) {
   auto* arr_type = type->AsArray();
   EXPECT_FALSE(arr_type->IsRuntimeArray());
   ASSERT_NE(arr_type, nullptr);
-  ASSERT_EQ(arr_type->size(), 42u);
+  EXPECT_EQ(arr_type->size(), 42u);
+  EXPECT_EQ(arr_type->array_stride(), 0u);
+  EXPECT_FALSE(arr_type->has_array_stride());
   auto* elem_type = arr_type->type();
   ASSERT_NE(elem_type, nullptr);
   EXPECT_TRUE(elem_type->IsU32());
@@ -417,6 +480,71 @@ TEST_F(SpvParserTest, ConvertType_ArrayBadTooBig) {
   // TODO(dneto): Right now it's rejected earlier in the flow because
   // we can't even utter the uint64 type.
   EXPECT_THAT(p->error(), Eq("unhandled integer width: 64"));
+}
+
+TEST_F(SpvParserTest, ConvertType_Array_InvalidDecoration) {
+  auto* p = parser(test::Assemble(R"(
+    OpDecorate %10 Block
+    %uint = OpTypeInt 32 0
+    %uint_5 = OpConstant %uint 5
+    %10 = OpTypeArray %uint %uint_5
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+  auto* type = p->ConvertType(10);
+  EXPECT_EQ(type, nullptr);
+  EXPECT_THAT(
+      p->error(),
+      Eq("invalid array type ID 10: unknown decoration 2 with 1 total words"));
+}
+
+TEST_F(SpvParserTest, ConvertType_ArrayStride_Valid) {
+  auto* p = parser(test::Assemble(R"(
+    OpDecorate %10 ArrayStride 8
+    %uint = OpTypeInt 32 0
+    %uint_5 = OpConstant %uint 5
+    %10 = OpTypeArray %uint %uint_5
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+
+  auto* type = p->ConvertType(10);
+  ASSERT_NE(type, nullptr);
+  EXPECT_TRUE(type->IsArray());
+  auto* arr_type = type->AsArray();
+  ASSERT_NE(arr_type, nullptr);
+  ASSERT_EQ(arr_type->array_stride(), 8u);
+  EXPECT_TRUE(arr_type->has_array_stride());
+  EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, ConvertType_ArrayStride_ZeroIsError) {
+  auto* p = parser(test::Assemble(R"(
+    OpDecorate %10 ArrayStride 0
+    %uint = OpTypeInt 32 0
+    %uint_5 = OpConstant %uint 5
+    %10 = OpTypeArray %uint %uint_5
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+
+  auto* type = p->ConvertType(10);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_THAT(p->error(),
+              Eq("invalid array type ID 10: ArrayStride can't be 0"));
+}
+
+TEST_F(SpvParserTest, ConvertType_ArrayStride_SpecifiedTwiceIsError) {
+  auto* p = parser(test::Assemble(R"(
+    OpDecorate %10 ArrayStride 4
+    OpDecorate %10 ArrayStride 4
+    %uint = OpTypeInt 32 0
+    %uint_5 = OpConstant %uint 5
+    %10 = OpTypeArray %uint %uint_5
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+
+  auto* type = p->ConvertType(10);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_THAT(p->error(),
+              Eq("invalid array type ID 10: multiple ArrayStride decorations"));
 }
 
 TEST_F(SpvParserTest, ConvertType_StructTwoMembers) {
