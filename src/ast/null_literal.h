@@ -27,7 +27,7 @@ class NullLiteral : public Literal {
  public:
   /// Constructor
   /// @param type the type
-  NullLiteral(ast::type::Type* type);
+  explicit NullLiteral(ast::type::Type* type);
   ~NullLiteral() override;
 
   /// @returns true if this is a null literal

@@ -260,7 +260,8 @@ TEST_F(SpvParserTest_CompositeExtract, Vector) {
         Identifier{y}
       }
     }
-  })")) << ToString(fe.ast_body());
+  })"))
+      << ToString(fe.ast_body());
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Vector_IndexTooBigError) {

@@ -52,7 +52,7 @@ namespace spirv {
 using Decoration = std::vector<uint32_t>;
 using DecorationList = std::vector<Decoration>;
 
-// An AST expression with its type.
+/// An AST expression with its type.
 struct TypedExpression {
   /// Dummy constructor
   TypedExpression();

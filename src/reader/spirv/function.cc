@@ -896,8 +896,9 @@ bool FunctionEmitter::LabelControlFlowConstructs() {
       assert(parent->kind == Construct::kContinue);
       parent = parent->parent;
     }
-    constructs_.push_back(std::make_unique<Construct>(
-        parent, int(depth), k, begin_id, end_id, begin_pos, end_pos));
+    constructs_.push_back(
+        std::make_unique<Construct>(parent, static_cast<int>(depth), k,
+                                    begin_id, end_id, begin_pos, end_pos));
     Construct* result = constructs_.back().get();
     enclosing.push_back(result);
     return result;
@@ -1433,7 +1434,8 @@ bool FunctionEmitter::FindIfSelectionInternalHeaders() {
       // dominated by its own (different) header.
       return Fail() << "Block " << true_head
                     << " is the true branch for if-selection header "
-                    << construct->begin_id << " and also the merge block for header block "
+                    << construct->begin_id
+                    << " and also the merge block for header block "
                     << true_head_info->header_for_merge
                     << " (violates dominance rule)";
     }
@@ -1444,7 +1446,8 @@ bool FunctionEmitter::FindIfSelectionInternalHeaders() {
       // dominated by its own (different) header.
       return Fail() << "Block " << false_head
                     << " is the false branch for if-selection header "
-                    << construct->begin_id << " and also the merge block for header block "
+                    << construct->begin_id
+                    << " and also the merge block for header block "
                     << false_head_info->header_for_merge
                     << " (violates dominance rule)";
     }
@@ -1530,8 +1533,8 @@ bool FunctionEmitter::FindIfSelectionInternalHeaders() {
                 // hence the merge block is not dominated by its own (different)
                 // header.
                 return Fail()
-                       << "Block " << premerge_id
-                       << " is the merge block for " << dest_block_info->header_for_merge
+                       << "Block " << premerge_id << " is the merge block for "
+                       << dest_block_info->header_for_merge
                        << " but has alternate paths reaching it, starting from"
                        << " blocks " << true_head << " and " << false_head
                        << " which are the true and false branches for the"
@@ -1697,7 +1700,7 @@ bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
   //   test DISABLED_BlockIsContinueForMoreThanOneHeader. If we generalize this,
   //   then by a dominance argument, the inner loop continue target can only be
   //   a single-block loop.
-  //   TODO(dneto): Handle this case.
+  // TODO(dneto): Handle this case.
   // - All that's left is a kContinue and one of kIfSelection, kSwitchSelection,
   //   kLoop.
   //

@@ -2733,7 +2733,7 @@ TEST_F(SpvParserTest,
 
 TEST_F(
     SpvParserTest,
-    VerifyHeaderContinueMergeOrder_HeaderDoesNotStrictlyDominateContinueTarget) {
+    VerifyHeaderContinueMergeOrder_HeaderDoesNotStrictlyDominateContinueTarget) {  // NOLINT
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -4240,7 +4240,10 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_BranchEscapesIfConstruct) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_FALSE(FlowClassifyCFGEdges(&fe)) << p->error();
   // Some further processing
-  EXPECT_THAT(p->error(), Eq("Branch from block 30 to block 80 is an invalid exit from construct starting at block 20; branch bypasses merge block 50"));
+  EXPECT_THAT(
+      p->error(),
+      Eq("Branch from block 30 to block 80 is an invalid exit from construct "
+         "starting at block 20; branch bypasses merge block 50"));
 }
 
 TEST_F(SpvParserTest, ClassifyCFGEdges_ReturnInContinueConstruct) {
@@ -5852,7 +5855,7 @@ TEST_F(SpvParserTest,
 
 TEST_F(
     SpvParserTest,
-    ClassifyCFGEdges_Fallthrough_BranchConditionalWith_Back_LoopOnOutside_IsError) {
+    ClassifyCFGEdges_Fallthrough_BranchConditionalWith_Back_LoopOnOutside_IsError) {  // NOLINT
   // Code generation assumes OpBranchConditional can't have kCaseFallThrough
   // with kBack.
   //
@@ -5899,7 +5902,7 @@ TEST_F(
 
 TEST_F(
     SpvParserTest,
-    FindSwitchCaseSelectionHeaders_Fallthrough_BranchConditionalWith_Back_LoopOnInside_FallthroughIsMerge_IsError) {
+    FindSwitchCaseSelectionHeaders_Fallthrough_BranchConditionalWith_Back_LoopOnInside_FallthroughIsMerge_IsError) {  // NOLINT
   // Code generation assumes OpBranchConditional can't have kCaseFallThrough
   // with kBack.
   //
@@ -5938,7 +5941,7 @@ TEST_F(
 
 TEST_F(
     SpvParserTest,
-    ClassifyCFGEdges_Fallthrough_BranchConditionalWith_Back_LoopOnInside_FallthroughIsNotMerge_IsError) {
+    ClassifyCFGEdges_Fallthrough_BranchConditionalWith_Back_LoopOnInside_FallthroughIsNotMerge_IsError) {  // NOLINT
   // Code generation assumes OpBranchConditional can't have kCaseFallThrough
   // with kBack.
   //
@@ -5979,7 +5982,7 @@ TEST_F(
 
 TEST_F(
     SpvParserTest,
-    ClassifyCFGEdges_Fallthrough_BranchConditionalWith_Back_LoopOnInside_NestedMerge_IsError) {
+    ClassifyCFGEdges_Fallthrough_BranchConditionalWith_Back_LoopOnInside_NestedMerge_IsError) {  // NOLINT
   // Code generation assumes OpBranchConditional can't have kCaseFallThrough
   // with kBack.
   //
@@ -6416,7 +6419,7 @@ TEST_F(SpvParserTest,
 
 TEST_F(
     SpvParserTest,
-    FindSwitchCaseHeaders_DomViolation_SwitchCase_CantBeMergeForOtherConstruct) {
+    FindSwitchCaseHeaders_DomViolation_SwitchCase_CantBeMergeForOtherConstruct) {  // NOLINT
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -7100,7 +7103,8 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_WithForwardToPremerge) {
   EXPECT_THAT(p->error(), Eq(""));
 }
 
-TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_DomViolation_Merge_CantBeTrueHeader) {
+TEST_F(SpvParserTest,
+       FindIfSelectionInternalHeaders_DomViolation_Merge_CantBeTrueHeader) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -7125,10 +7129,14 @@ TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_DomViolation_Merge_CantBeTr
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_FALSE(FlowFindIfSelectionInternalHeaders(&fe));
-  EXPECT_THAT(p->error(), Eq("Block 40 is the true branch for if-selection header 10 and also the merge block for header block 20 (violates dominance rule)"));
+  EXPECT_THAT(
+      p->error(),
+      Eq("Block 40 is the true branch for if-selection header 10 and also the "
+         "merge block for header block 20 (violates dominance rule)"));
 }
 
-TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_DomViolation_Merge_CantBeFalseHeader) {
+TEST_F(SpvParserTest,
+       FindIfSelectionInternalHeaders_DomViolation_Merge_CantBeFalseHeader) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -7153,10 +7161,14 @@ TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_DomViolation_Merge_CantBeFa
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_FALSE(FlowFindIfSelectionInternalHeaders(&fe));
-  EXPECT_THAT(p->error(), Eq("Block 40 is the false branch for if-selection header 10 and also the merge block for header block 20 (violates dominance rule)"));
+  EXPECT_THAT(
+      p->error(),
+      Eq("Block 40 is the false branch for if-selection header 10 and also the "
+         "merge block for header block 20 (violates dominance rule)"));
 }
 
-TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_DomViolation_Merge_CantBePremerge) {
+TEST_F(SpvParserTest,
+       FindIfSelectionInternalHeaders_DomViolation_Merge_CantBePremerge) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -7187,7 +7199,11 @@ TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_DomViolation_Merge_CantBePr
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_FALSE(FlowFindIfSelectionInternalHeaders(&fe));
-  EXPECT_THAT(p->error(), Eq("Block 70 is the merge block for 50 but has alternate paths reaching it, starting from blocks 20 and 50 which are the true and false branches for the if-selection header block 10 (violates dominance rule)"));
+  EXPECT_THAT(p->error(),
+              Eq("Block 70 is the merge block for 50 but has alternate paths "
+                 "reaching it, starting from blocks 20 and 50 which are the "
+                 "true and false branches for the if-selection header block 10 "
+                 "(violates dominance rule)"));
 }
 
 TEST_F(SpvParserTest, EmitBody_IfBreak_FromThen_ForwardWithinThen) {
@@ -12218,7 +12234,7 @@ Return{}
 
 TEST_F(
     SpvParserTest,
-    EmitBody_BranchConditional_Continue_Continue_AfterHeader_Conditional_EmptyContinuing) {
+    EmitBody_BranchConditional_Continue_Continue_AfterHeader_Conditional_EmptyContinuing) {  // NOLINT
   // Like the previous tests, but with an empty continuing clause.
   auto* p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn

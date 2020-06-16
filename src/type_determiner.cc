@@ -15,6 +15,7 @@
 #include "src/type_determiner.h"
 
 #include <memory>
+#include <vector>
 
 #include "spirv/unified1/GLSL.std.450.h"
 #include "src/ast/array_accessor_expression.h"
@@ -47,6 +48,99 @@
 #include "src/ast/variable_decl_statement.h"
 
 namespace tint {
+namespace {
+
+// Most of these are floating-point general except the below which are only
+// FP16 and FP32. We only have FP32 at this point so the below works, if we
+// get FP64 support or otherwise we'll need to differentiate.
+//   * radians
+//   * degrees
+//   * sin, cos, tan
+//   * asin, acos, atan
+//   * sinh, cosh, tanh
+//   * asinh, acosh, atanh
+//   * exp, exp2
+//   * log, log2
+enum class GlslDataType {
+  kFloatScalarOrVector,
+  kIntScalarOrVector,
+  kFloatVector
+};
+struct GlslData {
+  const char* name;
+  uint8_t param_count;
+  uint32_t op_id;
+  GlslDataType type;
+  uint8_t vector_count;
+};
+
+constexpr const GlslData kGlslData[] = {
+    {"acos", 1, GLSLstd450Acos, GlslDataType::kFloatScalarOrVector, 0},
+    {"acosh", 1, GLSLstd450Acosh, GlslDataType::kFloatScalarOrVector, 0},
+    {"asin", 1, GLSLstd450Asin, GlslDataType::kFloatScalarOrVector, 0},
+    {"asinh", 1, GLSLstd450Asinh, GlslDataType::kFloatScalarOrVector, 0},
+    {"atan", 1, GLSLstd450Atan, GlslDataType::kFloatScalarOrVector, 0},
+    {"atan2", 2, GLSLstd450Atan2, GlslDataType::kFloatScalarOrVector, 0},
+    {"atanh", 1, GLSLstd450Atanh, GlslDataType::kFloatScalarOrVector, 0},
+    {"ceil", 1, GLSLstd450Ceil, GlslDataType::kFloatScalarOrVector, 0},
+    {"cos", 1, GLSLstd450Cos, GlslDataType::kFloatScalarOrVector, 0},
+    {"cosh", 1, GLSLstd450Cosh, GlslDataType::kFloatScalarOrVector, 0},
+    {"cross", 2, GLSLstd450Cross, GlslDataType::kFloatVector, 3},
+    {"degrees", 1, GLSLstd450Degrees, GlslDataType::kFloatScalarOrVector, 0},
+    {"distance", 2, GLSLstd450Distance, GlslDataType::kFloatScalarOrVector, 0},
+    {"exp", 1, GLSLstd450Exp, GlslDataType::kFloatScalarOrVector, 0},
+    {"exp2", 1, GLSLstd450Exp2, GlslDataType::kFloatScalarOrVector, 0},
+    {"fabs", 1, GLSLstd450FAbs, GlslDataType::kFloatScalarOrVector, 0},
+    {"faceforward", 3, GLSLstd450FaceForward,
+     GlslDataType::kFloatScalarOrVector, 0},
+    {"fclamp", 3, GLSLstd450FClamp, GlslDataType::kFloatScalarOrVector, 0},
+    {"findilsb", 1, GLSLstd450FindILsb, GlslDataType::kIntScalarOrVector, 0},
+    {"findumsb", 1, GLSLstd450FindUMsb, GlslDataType::kIntScalarOrVector, 0},
+    {"findsmsb", 1, GLSLstd450FindSMsb, GlslDataType::kIntScalarOrVector, 0},
+    {"floor", 1, GLSLstd450Floor, GlslDataType::kFloatScalarOrVector, 0},
+    {"fma", 3, GLSLstd450Fma, GlslDataType::kFloatScalarOrVector, 0},
+    {"fmax", 2, GLSLstd450FMax, GlslDataType::kFloatScalarOrVector, 0},
+    {"fmin", 2, GLSLstd450FMin, GlslDataType::kFloatScalarOrVector, 0},
+    {"fmix", 3, GLSLstd450FMix, GlslDataType::kFloatScalarOrVector, 0},
+    {"fract", 1, GLSLstd450Fract, GlslDataType::kFloatScalarOrVector, 0},
+    {"fsign", 1, GLSLstd450FSign, GlslDataType::kFloatScalarOrVector, 0},
+    {"interpolateatcentroid", 1, GLSLstd450InterpolateAtCentroid,
+     GlslDataType::kFloatScalarOrVector, 0},
+    {"inversesqrt", 1, GLSLstd450InverseSqrt,
+     GlslDataType::kFloatScalarOrVector, 0},
+    {"length", 1, GLSLstd450Length, GlslDataType::kFloatScalarOrVector, 0},
+    {"log", 1, GLSLstd450Log, GlslDataType::kFloatScalarOrVector, 0},
+    {"log2", 1, GLSLstd450Log2, GlslDataType::kFloatScalarOrVector, 0},
+    {"nclamp", 3, GLSLstd450NClamp, GlslDataType::kFloatScalarOrVector, 0},
+    {"nmax", 2, GLSLstd450NMax, GlslDataType::kFloatScalarOrVector, 0},
+    {"nmin", 2, GLSLstd450NMin, GlslDataType::kFloatScalarOrVector, 0},
+    {"normalize", 1, GLSLstd450Normalize, GlslDataType::kFloatScalarOrVector,
+     0},
+    {"pow", 2, GLSLstd450Pow, GlslDataType::kFloatScalarOrVector, 0},
+    {"radians", 1, GLSLstd450Radians, GlslDataType::kFloatScalarOrVector, 0},
+    {"reflect", 2, GLSLstd450Reflect, GlslDataType::kFloatScalarOrVector, 0},
+    {"round", 1, GLSLstd450Round, GlslDataType::kFloatScalarOrVector, 0},
+    {"roundeven", 1, GLSLstd450RoundEven, GlslDataType::kFloatScalarOrVector,
+     0},
+    {"sabs", 1, GLSLstd450SAbs, GlslDataType::kIntScalarOrVector, 0},
+    {"sin", 1, GLSLstd450Sin, GlslDataType::kFloatScalarOrVector, 0},
+    {"sinh", 1, GLSLstd450Sinh, GlslDataType::kFloatScalarOrVector, 0},
+    {"smax", 2, GLSLstd450SMax, GlslDataType::kIntScalarOrVector, 0},
+    {"smin", 2, GLSLstd450SMin, GlslDataType::kIntScalarOrVector, 0},
+    {"smoothstep", 3, GLSLstd450SmoothStep, GlslDataType::kFloatScalarOrVector,
+     0},
+    {"sqrt", 1, GLSLstd450Sqrt, GlslDataType::kFloatScalarOrVector, 0},
+    {"ssign", 1, GLSLstd450SSign, GlslDataType::kIntScalarOrVector, 0},
+    {"step", 2, GLSLstd450Step, GlslDataType::kFloatScalarOrVector, 0},
+    {"tan", 1, GLSLstd450Tan, GlslDataType::kFloatScalarOrVector, 0},
+    {"tanh", 1, GLSLstd450Tanh, GlslDataType::kFloatScalarOrVector, 0},
+    {"trunc", 1, GLSLstd450Trunc, GlslDataType::kFloatScalarOrVector, 0},
+    {"umax", 2, GLSLstd450UMax, GlslDataType::kIntScalarOrVector, 0},
+    {"umin", 2, GLSLstd450UMin, GlslDataType::kIntScalarOrVector, 0},
+};
+constexpr const uint32_t kGlslDataCount = sizeof(kGlslData) / sizeof(GlslData);
+
+}  // namespace
 
 TypeDeterminer::TypeDeterminer(Context* ctx, ast::Module* mod)
     : ctx_(*ctx), mod_(mod) {}
@@ -622,96 +716,6 @@ bool TypeDeterminer::DetermineUnaryOp(ast::UnaryOpExpression* expr) {
   expr->set_result_type(expr->expr()->result_type()->UnwrapPtrIfNeeded());
   return true;
 }
-
-// Most of these are floating-point general except the below which are only
-// FP16 and FP32. We only have FP32 at this point so the below works, if we
-// get FP64 support or otherwise we'll need to differentiate.
-//   * radians
-//   * degrees
-//   * sin, cos, tan
-//   * asin, acos, atan
-//   * sinh, cosh, tanh
-//   * asinh, acosh, atanh
-//   * exp, exp2
-//   * log, log2
-enum class GlslDataType {
-  kFloatScalarOrVector,
-  kIntScalarOrVector,
-  kFloatVector
-};
-struct GlslData {
-  const char* name;
-  uint8_t param_count;
-  uint32_t op_id;
-  GlslDataType type;
-  uint8_t vector_count;
-};
-
-constexpr const GlslData kGlslData[] = {
-    {"acos", 1, GLSLstd450Acos, GlslDataType::kFloatScalarOrVector, 0},
-    {"acosh", 1, GLSLstd450Acosh, GlslDataType::kFloatScalarOrVector, 0},
-    {"asin", 1, GLSLstd450Asin, GlslDataType::kFloatScalarOrVector, 0},
-    {"asinh", 1, GLSLstd450Asinh, GlslDataType::kFloatScalarOrVector, 0},
-    {"atan", 1, GLSLstd450Atan, GlslDataType::kFloatScalarOrVector, 0},
-    {"atan2", 2, GLSLstd450Atan2, GlslDataType::kFloatScalarOrVector, 0},
-    {"atanh", 1, GLSLstd450Atanh, GlslDataType::kFloatScalarOrVector, 0},
-    {"ceil", 1, GLSLstd450Ceil, GlslDataType::kFloatScalarOrVector, 0},
-    {"cos", 1, GLSLstd450Cos, GlslDataType::kFloatScalarOrVector, 0},
-    {"cosh", 1, GLSLstd450Cosh, GlslDataType::kFloatScalarOrVector, 0},
-    {"cross", 2, GLSLstd450Cross, GlslDataType::kFloatVector, 3},
-    {"degrees", 1, GLSLstd450Degrees, GlslDataType::kFloatScalarOrVector, 0},
-    {"distance", 2, GLSLstd450Distance, GlslDataType::kFloatScalarOrVector, 0},
-    {"exp", 1, GLSLstd450Exp, GlslDataType::kFloatScalarOrVector, 0},
-    {"exp2", 1, GLSLstd450Exp2, GlslDataType::kFloatScalarOrVector, 0},
-    {"fabs", 1, GLSLstd450FAbs, GlslDataType::kFloatScalarOrVector, 0},
-    {"faceforward", 3, GLSLstd450FaceForward,
-     GlslDataType::kFloatScalarOrVector, 0},
-    {"fclamp", 3, GLSLstd450FClamp, GlslDataType::kFloatScalarOrVector, 0},
-    {"findilsb", 1, GLSLstd450FindILsb, GlslDataType::kIntScalarOrVector, 0},
-    {"findumsb", 1, GLSLstd450FindUMsb, GlslDataType::kIntScalarOrVector, 0},
-    {"findsmsb", 1, GLSLstd450FindSMsb, GlslDataType::kIntScalarOrVector, 0},
-    {"floor", 1, GLSLstd450Floor, GlslDataType::kFloatScalarOrVector, 0},
-    {"fma", 3, GLSLstd450Fma, GlslDataType::kFloatScalarOrVector, 0},
-    {"fmax", 2, GLSLstd450FMax, GlslDataType::kFloatScalarOrVector, 0},
-    {"fmin", 2, GLSLstd450FMin, GlslDataType::kFloatScalarOrVector, 0},
-    {"fmix", 3, GLSLstd450FMix, GlslDataType::kFloatScalarOrVector, 0},
-    {"fract", 1, GLSLstd450Fract, GlslDataType::kFloatScalarOrVector, 0},
-    {"fsign", 1, GLSLstd450FSign, GlslDataType::kFloatScalarOrVector, 0},
-    {"interpolateatcentroid", 1, GLSLstd450InterpolateAtCentroid,
-     GlslDataType::kFloatScalarOrVector, 0},
-    {"inversesqrt", 1, GLSLstd450InverseSqrt,
-     GlslDataType::kFloatScalarOrVector, 0},
-    {"length", 1, GLSLstd450Length, GlslDataType::kFloatScalarOrVector, 0},
-    {"log", 1, GLSLstd450Log, GlslDataType::kFloatScalarOrVector, 0},
-    {"log2", 1, GLSLstd450Log2, GlslDataType::kFloatScalarOrVector, 0},
-    {"nclamp", 3, GLSLstd450NClamp, GlslDataType::kFloatScalarOrVector, 0},
-    {"nmax", 2, GLSLstd450NMax, GlslDataType::kFloatScalarOrVector, 0},
-    {"nmin", 2, GLSLstd450NMin, GlslDataType::kFloatScalarOrVector, 0},
-    {"normalize", 1, GLSLstd450Normalize, GlslDataType::kFloatScalarOrVector,
-     0},
-    {"pow", 2, GLSLstd450Pow, GlslDataType::kFloatScalarOrVector, 0},
-    {"radians", 1, GLSLstd450Radians, GlslDataType::kFloatScalarOrVector, 0},
-    {"reflect", 2, GLSLstd450Reflect, GlslDataType::kFloatScalarOrVector, 0},
-    {"round", 1, GLSLstd450Round, GlslDataType::kFloatScalarOrVector, 0},
-    {"roundeven", 1, GLSLstd450RoundEven, GlslDataType::kFloatScalarOrVector,
-     0},
-    {"sabs", 1, GLSLstd450SAbs, GlslDataType::kIntScalarOrVector, 0},
-    {"sin", 1, GLSLstd450Sin, GlslDataType::kFloatScalarOrVector, 0},
-    {"sinh", 1, GLSLstd450Sinh, GlslDataType::kFloatScalarOrVector, 0},
-    {"smax", 2, GLSLstd450SMax, GlslDataType::kIntScalarOrVector, 0},
-    {"smin", 2, GLSLstd450SMin, GlslDataType::kIntScalarOrVector, 0},
-    {"smoothstep", 3, GLSLstd450SmoothStep, GlslDataType::kFloatScalarOrVector,
-     0},
-    {"sqrt", 1, GLSLstd450Sqrt, GlslDataType::kFloatScalarOrVector, 0},
-    {"ssign", 1, GLSLstd450SSign, GlslDataType::kIntScalarOrVector, 0},
-    {"step", 2, GLSLstd450Step, GlslDataType::kFloatScalarOrVector, 0},
-    {"tan", 1, GLSLstd450Tan, GlslDataType::kFloatScalarOrVector, 0},
-    {"tanh", 1, GLSLstd450Tanh, GlslDataType::kFloatScalarOrVector, 0},
-    {"trunc", 1, GLSLstd450Trunc, GlslDataType::kFloatScalarOrVector, 0},
-    {"umax", 2, GLSLstd450UMax, GlslDataType::kIntScalarOrVector, 0},
-    {"umin", 2, GLSLstd450UMin, GlslDataType::kIntScalarOrVector, 0},
-};
-constexpr const uint32_t kGlslDataCount = sizeof(kGlslData) / sizeof(GlslData);
 
 ast::type::Type* TypeDeterminer::GetImportData(
     const Source& source,
