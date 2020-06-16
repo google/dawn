@@ -108,11 +108,6 @@ namespace dawn_native { namespace d3d12 {
         if (!GetInstance()->IsBackendValidationEnabled()) {
             return {};
         }
-        ComPtr<ID3D12InfoQueue> infoQueue;
-        ASSERT_SUCCESS(mD3d12Device.As(&infoQueue));
-        // We create storage filter with a deny list to deny specific messages from getting
-        // written to the queue. The filter will silence them in the debug output.
-        D3D12_INFO_QUEUE_FILTER storageFilter = {};
 
         D3D12_MESSAGE_ID denyIds[] = {
 
@@ -154,24 +149,23 @@ namespace dawn_native { namespace d3d12 {
             D3D12_MESSAGE_ID_GPU_BASED_VALIDATION_INCOMPATIBLE_RESOURCE_STATE,
         };
 
-        storageFilter.DenyList.NumIDs = ARRAYSIZE(denyIds);
-        storageFilter.DenyList.pIDList = denyIds;
-        DAWN_TRY(CheckHRESULT(infoQueue->PushStorageFilter(&storageFilter),
-                              "ID3D12InfoQueue::PushStorageFilter"));
-
-        // We create a retrieval filter with an allow list to select which messages we are
-        // allowed to be read back from the queue. If any messages are read back, they are
-        // converted to Dawn errors.
-        D3D12_INFO_QUEUE_FILTER retrievalFilter{};
-        // We will only create errors from warnings or worse. This ignores info and message.
+        // Create a retrieval filter with a deny list to suppress messages.
+        // Any messages remaining will be converted to Dawn errors.
+        D3D12_INFO_QUEUE_FILTER filter{};
+        // Filter out info/message and only create errors from warnings or worse.
         D3D12_MESSAGE_SEVERITY severities[] = {
-            D3D12_MESSAGE_SEVERITY_ERROR,
-            D3D12_MESSAGE_SEVERITY_WARNING,
-            D3D12_MESSAGE_SEVERITY_CORRUPTION,
+            D3D12_MESSAGE_SEVERITY_INFO,
+            D3D12_MESSAGE_SEVERITY_MESSAGE,
         };
-        retrievalFilter.AllowList.NumSeverities = ARRAYSIZE(severities);
-        retrievalFilter.AllowList.pSeverityList = severities;
-        DAWN_TRY(CheckHRESULT(infoQueue->PushRetrievalFilter(&retrievalFilter),
+        filter.DenyList.NumSeverities = ARRAYSIZE(severities);
+        filter.DenyList.pSeverityList = severities;
+        filter.DenyList.NumIDs = ARRAYSIZE(denyIds);
+        filter.DenyList.pIDList = denyIds;
+
+        ComPtr<ID3D12InfoQueue> infoQueue;
+        ASSERT_SUCCESS(mD3d12Device.As(&infoQueue));
+
+        DAWN_TRY(CheckHRESULT(infoQueue->PushRetrievalFilter(&filter),
                               "ID3D12InfoQueue::PushRetrievalFilter"));
 
         return {};
@@ -184,7 +178,6 @@ namespace dawn_native { namespace d3d12 {
         ComPtr<ID3D12InfoQueue> infoQueue;
         ASSERT_SUCCESS(mD3d12Device.As(&infoQueue));
         infoQueue->PopRetrievalFilter();
-        infoQueue->PopStorageFilter();
     }
 
     ResultOrError<DeviceBase*> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor) {
