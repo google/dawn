@@ -114,7 +114,7 @@ namespace dawn_native {
     break
 
     // Assert that errors are device loss so that we can continue with destruction
-    void AssertAndIgnoreDeviceLossError(MaybeError maybeError);
+    void IgnoreErrors(MaybeError maybeError);
 
     wgpu::ErrorType ToWGPUErrorType(InternalErrorType type);
     InternalErrorType FromWGPUErrorType(wgpu::ErrorType type);

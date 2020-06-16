@@ -125,8 +125,8 @@ namespace dawn_native {
             case State::Alive:
                 // Alive is the only state which can have GPU work happening. Wait for all of it to
                 // complete before proceeding with destruction.
-                // Assert that errors are device loss so that we can continue with destruction
-                AssertAndIgnoreDeviceLossError(WaitForIdleForDestruction());
+                // Ignore errors so that we can continue with destruction
+                IgnoreErrors(WaitForIdleForDestruction());
                 AssumeCommandsComplete();
                 break;
 
@@ -153,8 +153,8 @@ namespace dawn_native {
             mFenceSignalTracker->Tick(GetCompletedCommandSerial());
             mMapRequestTracker->Tick(GetCompletedCommandSerial());
             // call TickImpl once last time to clean up resources
-            // assert the errors are device loss so we can continue with destruction
-            AssertAndIgnoreDeviceLossError(TickImpl());
+            // Ignore errors so that we can continue with destruction
+            IgnoreErrors(TickImpl());
         }
 
         // At this point GPU operations are always finished, so we are in the disconnected state.
@@ -187,10 +187,10 @@ namespace dawn_native {
             // threads in a multithreaded scenario?
             mState = State::BeingDisconnected;
 
-            // Assert that errors are device losses so that we can continue with destruction.
+            // Ignore errors so that we can continue with destruction
             // Assume all commands are complete after WaitForIdleForDestruction (because they were)
-            AssertAndIgnoreDeviceLossError(WaitForIdleForDestruction());
-            AssertAndIgnoreDeviceLossError(TickImpl());
+            IgnoreErrors(WaitForIdleForDestruction());
+            IgnoreErrors(TickImpl());
             AssumeCommandsComplete();
             ASSERT(mFutureCallbackSerial <= mCompletedSerial);
             mState = State::Disconnected;

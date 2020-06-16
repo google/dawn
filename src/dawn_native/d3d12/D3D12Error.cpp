@@ -14,6 +14,8 @@
 
 #include "dawn_native/d3d12/D3D12Error.h"
 
+#include <iomanip>
+#include <sstream>
 #include <string>
 
 namespace dawn_native { namespace d3d12 {
@@ -22,12 +24,19 @@ namespace dawn_native { namespace d3d12 {
             return {};
         }
 
-        std::string message = std::string(context) + " failed with " + std::to_string(result);
+        std::ostringstream messageStream;
+        messageStream << context << " failed with ";
+        if (result == E_FAKE_ERROR_FOR_TESTING) {
+            messageStream << "E_FAKE_ERROR_FOR_TESTING";
+        } else {
+            messageStream << "0x" << std::uppercase << std::setfill('0') << std::setw(8) << std::hex
+                          << result;
+        }
 
         if (result == DXGI_ERROR_DEVICE_REMOVED) {
-            return DAWN_DEVICE_LOST_ERROR(message);
+            return DAWN_DEVICE_LOST_ERROR(messageStream.str());
         } else {
-            return DAWN_INTERNAL_ERROR(message);
+            return DAWN_INTERNAL_ERROR(messageStream.str());
         }
     }
 
