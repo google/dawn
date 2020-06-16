@@ -121,8 +121,6 @@ namespace dawn_native { namespace d3d12 {
             mViewShaderVisibleDescriptorAllocator,
             ShaderVisibleDescriptorAllocator::Create(this, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 
-        DAWN_TRY(NextSerial());
-
         // Initialize indirect commands
         D3D12_INDIRECT_ARGUMENT_DESC argumentDesc = {};
         argumentDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH;
@@ -147,7 +145,11 @@ namespace dawn_native { namespace d3d12 {
         GetD3D12Device()->CreateCommandSignature(&programDesc, NULL,
                                                  IID_PPV_ARGS(&mDrawIndexedIndirectSignature));
 
-        return DeviceBase::Initialize(new Queue(this));
+        DAWN_TRY(DeviceBase::Initialize(new Queue(this)));
+        // Device shouldn't be used until after DeviceBase::Initialize so we must wait until after
+        // device initialization to call NextSerial
+        DAWN_TRY(NextSerial());
+        return {};
     }
 
     Device::~Device() {
