@@ -133,6 +133,7 @@ bool AssumesSignedOperands(SpvOp opcode) {
     case SpvOpSLessThanEqual:
     case SpvOpSGreaterThan:
     case SpvOpSGreaterThanEqual:
+    case SpvOpConvertSToF:
       return true;
     default:
       break;
@@ -149,6 +150,7 @@ bool AssumesUnsignedOperands(SpvOp opcode) {
     case SpvOpULessThanEqual:
     case SpvOpUGreaterThan:
     case SpvOpUGreaterThanEqual:
+    case SpvOpConvertUToF:
       return true;
     default:
       break;

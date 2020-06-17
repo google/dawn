@@ -35,6 +35,7 @@
 #include "src/ast/break_statement.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/case_statement.h"
+#include "src/ast/cast_expression.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/fallthrough_statement.h"
@@ -2533,6 +2534,9 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   if (opcode == SpvOpVectorShuffle) {
     return MakeVectorShuffle(inst);
   }
+  if (opcode == SpvOpConvertSToF || opcode == SpvOpConvertUToF) {
+    return MakeNumericConversion(inst);
+  }
 
   // builtin readonly function
   // glsl.std.450 readonly function
@@ -2545,8 +2549,6 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   //    OpSatConvertUToS
   //    OpConvertFToS
   //    OpConvertFToU
-  //    OpConvertSToF
-  //    OpConvertUToF
   //    OpUConvert // Only needed when multiple widths supported
   //    OpSConvert // Only needed when multiple widths supported
   //    OpFConvert // Only needed when multiple widths supported
@@ -2891,6 +2893,15 @@ void FunctionEmitter::RegisterValuesNeedingNamedDefinition() {
       }
     }
   }
+}
+
+TypedExpression FunctionEmitter::MakeNumericConversion(
+    const spvtools::opt::Instruction& inst) {
+  auto* result_type = parser_impl_.ConvertType(inst.type_id());
+  auto arg_expr = MakeOperand(inst, 0);
+
+  return {result_type, std::make_unique<ast::CastExpression>(
+                           result_type, std::move(arg_expr.expr))};
 }
 
 }  // namespace spirv

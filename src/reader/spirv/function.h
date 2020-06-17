@@ -463,6 +463,11 @@ class FunctionEmitter {
   /// @returns an AST expression for the instruction, or nullptr.
   TypedExpression MakeVectorShuffle(const spvtools::opt::Instruction& inst);
 
+  /// Creates an expression for a numeric conversion.
+  /// @param inst a numeric conversion instruction
+  /// @returns an AST expression for the instruction, or nullptr.
+  TypedExpression MakeNumericConversion(const spvtools::opt::Instruction& inst);
+
   /// Gets the block info for a block ID, if any exists
   /// @param id the SPIR-V ID of the OpLabel instruction starting the block
   /// @returns the block info for the given ID, if it exists, or nullptr

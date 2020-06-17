@@ -119,10 +119,224 @@ TEST_F(SpvUnaryConversionTest, Bitcast_Vector) {
       << ToString(fe.ast_body());
 }
 
+TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromSigned) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %30 = OpCopyObject %int %int_30
+     %1 = OpConvertSToF %float %30
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Variable{
+    x_1
+    none
+    __f32
+    {
+      Cast<__f32>(
+        Identifier{x_30}
+      )
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromUnsigned) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %30 = OpCopyObject %uint %uint_10
+     %1 = OpConvertSToF %float %30
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Variable{
+    x_1
+    none
+    __f32
+    {
+      Cast<__f32>(
+        As<__i32>{
+          Identifier{x_30}
+        }
+      )
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromSigned) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %30 = OpCopyObject %v2int %v2int_30_40
+     %1 = OpConvertSToF %v2float %30
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Variable{
+    x_1
+    none
+    __vec_2__f32
+    {
+      Cast<__vec_2__f32>(
+        Identifier{x_30}
+      )
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromUnsigned) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %30 = OpCopyObject %v2uint %v2uint_10_20
+     %1 = OpConvertSToF %v2float %30
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Variable{
+    x_1
+    none
+    __vec_2__f32
+    {
+      Cast<__vec_2__f32>(
+        As<__vec_2__i32>{
+          Identifier{x_30}
+        }
+      )
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromSigned) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %30 = OpCopyObject %int %int_30
+     %1 = OpConvertUToF %float %30
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Variable{
+    x_1
+    none
+    __f32
+    {
+      Cast<__f32>(
+        As<__u32>{
+          Identifier{x_30}
+        }
+      )
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromUnsigned) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %30 = OpCopyObject %uint %uint_10
+     %1 = OpConvertUToF %float %30
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Variable{
+    x_1
+    none
+    __f32
+    {
+      Cast<__f32>(
+        Identifier{x_30}
+      )
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromSigned) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %30 = OpCopyObject %v2int %v2int_30_40
+     %1 = OpConvertUToF %v2float %30
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Variable{
+    x_1
+    none
+    __vec_2__f32
+    {
+      Cast<__vec_2__f32>(
+        As<__vec_2__u32>{
+          Identifier{x_30}
+        }
+      )
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromUnsigned) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %30 = OpCopyObject %v2uint %v2uint_10_20
+     %1 = OpConvertUToF %v2float %30
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Variable{
+    x_1
+    none
+    __vec_2__f32
+    {
+      Cast<__vec_2__f32>(
+        Identifier{x_30}
+      )
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
 // TODO(dneto): OpConvertFToU
 // TODO(dneto): OpConvertFToS
-// TODO(dneto): OpConvertUToF
-// TODO(dneto): OpConvertSToF
 // TODO(dneto): OpSConvert // only if multiple widths
 // TODO(dneto): OpUConvert // only if multiple widths
 // TODO(dneto): OpFConvert // only if multiple widths
