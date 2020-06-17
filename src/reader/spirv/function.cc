@@ -200,6 +200,11 @@ ast::BinaryOp ConvertBinaryOp(SpvOp opcode) {
       return ast::BinaryOp::kSubtract;
     case SpvOpIMul:
     case SpvOpFMul:
+    case SpvOpVectorTimesScalar:
+    case SpvOpMatrixTimesScalar:
+    case SpvOpVectorTimesMatrix:
+    case SpvOpMatrixTimesVector:
+    case SpvOpMatrixTimesMatrix:
       return ast::BinaryOp::kMultiply;
     case SpvOpUDiv:
     case SpvOpSDiv:
