@@ -144,7 +144,8 @@ namespace dawn_native { namespace vulkan {
                                     mDynamicOffsetCounts, mDynamicOffsets);
 
                 for (uint32_t index : IterateBitSet(mBindGroupLayoutsMask)) {
-                    for (uint32_t bindingIndex : IterateBitSet(mBindingsNeedingBarrier[index])) {
+                    for (BindingIndex bindingIndex :
+                         IterateBitSet(mBindingsNeedingBarrier[index])) {
                         switch (mBindingTypes[index][bindingIndex]) {
                             case wgpu::BindingType::StorageBuffer:
                                 static_cast<Buffer*>(mBindings[index][bindingIndex])

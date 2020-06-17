@@ -304,12 +304,12 @@ namespace dawn_native {
 
         // This is a utility function to help ASSERT that the BGL-binding comparator places buffers
         // first.
-        bool CheckBufferBindingsFirst(const BindingInfo* bindings, BindingIndex count) {
-            ASSERT(count <= kMaxBindingsPerGroup);
+        bool CheckBufferBindingsFirst(ityp::span<BindingIndex, const BindingInfo> bindings) {
+            ASSERT(bindings.size() <= BindingIndex(kMaxBindingsPerGroup));
 
-            BindingIndex lastBufferIndex = 0;
+            BindingIndex lastBufferIndex{0};
             BindingIndex firstNonBufferIndex = std::numeric_limits<BindingIndex>::max();
-            for (BindingIndex i = 0; i < count; ++i) {
+            for (BindingIndex i{0}; i < bindings.size(); ++i) {
                 if (IsBufferBinding(bindings[i].type)) {
                     lastBufferIndex = std::max(i, lastBufferIndex);
                 } else {
@@ -334,8 +334,8 @@ namespace dawn_native {
 
         std::sort(sortedBindings.begin(), sortedBindings.end(), SortBindingsCompare);
 
-        for (BindingIndex i = 0; i < mBindingCount; ++i) {
-            const BindGroupLayoutEntry& binding = sortedBindings[i];
+        for (BindingIndex i{0}; i < mBindingCount; ++i) {
+            const BindGroupLayoutEntry& binding = sortedBindings[static_cast<uint32_t>(i)];
             mBindingInfo[i].type = binding.type;
             mBindingInfo[i].visibility = binding.visibility;
             mBindingInfo[i].textureComponentType =
@@ -385,7 +385,7 @@ namespace dawn_native {
             const auto& it = mBindingMap.emplace(BindingNumber(binding.binding), i);
             ASSERT(it.second);
         }
-        ASSERT(CheckBufferBindingsFirst(mBindingInfo.data(), mBindingCount));
+        ASSERT(CheckBufferBindingsFirst({mBindingInfo.data(), mBindingCount}));
     }
 
     BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag)
@@ -432,7 +432,7 @@ namespace dawn_native {
         if (a->GetBindingCount() != b->GetBindingCount()) {
             return false;
         }
-        for (BindingIndex i = 0; i < a->GetBindingCount(); ++i) {
+        for (BindingIndex i{0}; i < a->GetBindingCount(); ++i) {
             if (a->mBindingInfo[i] != b->mBindingInfo[i]) {
                 return false;
             }
@@ -445,7 +445,9 @@ namespace dawn_native {
     }
 
     BindingIndex BindGroupLayoutBase::GetDynamicBufferCount() const {
-        return mDynamicStorageBufferCount + mDynamicUniformBufferCount;
+        // This is a binding index because dynamic buffers are packed at the front of the binding
+        // info.
+        return static_cast<BindingIndex>(mDynamicStorageBufferCount + mDynamicUniformBufferCount);
     }
 
     uint32_t BindGroupLayoutBase::GetDynamicUniformBufferCount() const {
@@ -459,20 +461,21 @@ namespace dawn_native {
     size_t BindGroupLayoutBase::GetBindingDataSize() const {
         // | ------ buffer-specific ----------| ------------ object pointers -------------|
         // | --- offsets + sizes -------------| --------------- Ref<ObjectBase> ----------|
-        size_t objectPointerStart = mBufferCount * sizeof(BufferBindingData);
+        size_t objectPointerStart = static_cast<uint32_t>(mBufferCount) * sizeof(BufferBindingData);
         ASSERT(IsAligned(objectPointerStart, alignof(Ref<ObjectBase>)));
-        return objectPointerStart + mBindingCount * sizeof(Ref<ObjectBase>);
+        return objectPointerStart + static_cast<uint32_t>(mBindingCount) * sizeof(Ref<ObjectBase>);
     }
 
     BindGroupLayoutBase::BindingDataPointers BindGroupLayoutBase::ComputeBindingDataPointers(
         void* dataStart) const {
         BufferBindingData* bufferData = reinterpret_cast<BufferBindingData*>(dataStart);
-        auto bindings = reinterpret_cast<Ref<ObjectBase>*>(bufferData + mBufferCount);
+        auto bindings =
+            reinterpret_cast<Ref<ObjectBase>*>(bufferData + static_cast<uint32_t>(mBufferCount));
 
         ASSERT(IsPtrAligned(bufferData, alignof(BufferBindingData)));
         ASSERT(IsPtrAligned(bindings, alignof(Ref<ObjectBase>)));
 
-        return {bufferData, bindings};
+        return {{bufferData, mBufferCount}, {bindings, mBindingCount}};
     }
 
 }  // namespace dawn_native

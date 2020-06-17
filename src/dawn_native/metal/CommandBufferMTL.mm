@@ -496,7 +496,7 @@ namespace dawn_native { namespace metal {
                 // TODO(kainino@chromium.org): Maintain buffers and offsets arrays in BindGroup
                 // so that we only have to do one setVertexBuffers and one setFragmentBuffers
                 // call here.
-                for (BindingIndex bindingIndex = 0;
+                for (BindingIndex bindingIndex{0};
                      bindingIndex < group->GetLayout()->GetBindingCount(); ++bindingIndex) {
                     const BindingInfo& bindingInfo =
                         group->GetLayout()->GetBindingInfo(bindingIndex);

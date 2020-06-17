@@ -15,6 +15,7 @@
 #include "dawn_native/ProgrammablePassEncoder.h"
 
 #include "common/BitSetIterator.h"
+#include "common/ityp_array.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandBuffer.h"
@@ -29,8 +30,8 @@ namespace dawn_native {
     namespace {
         void TrackBindGroupResourceUsage(PassResourceUsageTracker* usageTracker,
                                          BindGroupBase* group) {
-            for (BindingIndex bindingIndex = 0;
-                 bindingIndex < group->GetLayout()->GetBindingCount(); ++bindingIndex) {
+            for (BindingIndex bindingIndex{0}; bindingIndex < group->GetLayout()->GetBindingCount();
+                 ++bindingIndex) {
                 wgpu::BindingType type = group->GetLayout()->GetBindingInfo(bindingIndex).type;
 
                 switch (type) {
@@ -131,8 +132,8 @@ namespace dawn_native {
 
     void ProgrammablePassEncoder::SetBindGroup(uint32_t groupIndex,
                                                BindGroupBase* group,
-                                               uint32_t dynamicOffsetCount,
-                                               const uint32_t* dynamicOffsets) {
+                                               uint32_t dynamicOffsetCountIn,
+                                               const uint32_t* dynamicOffsetsIn) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(group));
@@ -141,13 +142,16 @@ namespace dawn_native {
                     return DAWN_VALIDATION_ERROR("Setting bind group over the max");
                 }
 
+                ityp::span<BindingIndex, const uint32_t> dynamicOffsets(
+                    dynamicOffsetsIn, BindingIndex(dynamicOffsetCountIn));
+
                 // Dynamic offsets count must match the number required by the layout perfectly.
                 const BindGroupLayoutBase* layout = group->GetLayout();
-                if (layout->GetDynamicBufferCount() != dynamicOffsetCount) {
+                if (layout->GetDynamicBufferCount() != dynamicOffsets.size()) {
                     return DAWN_VALIDATION_ERROR("dynamicOffset count mismatch");
                 }
 
-                for (BindingIndex i = 0; i < dynamicOffsetCount; ++i) {
+                for (BindingIndex i{0}; i < dynamicOffsets.size(); ++i) {
                     const BindingInfo& bindingInfo = layout->GetBindingInfo(i);
 
                     // BGL creation sorts bindings such that the dynamic buffer bindings are first.
@@ -185,10 +189,10 @@ namespace dawn_native {
             SetBindGroupCmd* cmd = allocator->Allocate<SetBindGroupCmd>(Command::SetBindGroup);
             cmd->index = groupIndex;
             cmd->group = group;
-            cmd->dynamicOffsetCount = dynamicOffsetCount;
-            if (dynamicOffsetCount > 0) {
+            cmd->dynamicOffsetCount = dynamicOffsetCountIn;
+            if (dynamicOffsetCountIn > 0) {
                 uint32_t* offsets = allocator->AllocateData<uint32_t>(cmd->dynamicOffsetCount);
-                memcpy(offsets, dynamicOffsets, dynamicOffsetCount * sizeof(uint32_t));
+                memcpy(offsets, dynamicOffsetsIn, dynamicOffsetCountIn * sizeof(uint32_t));
             }
 
             TrackBindGroupResourceUsage(&mUsageTracker, group);

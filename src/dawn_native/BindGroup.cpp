@@ -16,6 +16,7 @@
 
 #include "common/Assert.h"
 #include "common/Math.h"
+#include "common/ityp_bitset.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/Device.h"
@@ -153,13 +154,14 @@ namespace dawn_native {
         }
 
         DAWN_TRY(device->ValidateObject(descriptor->layout));
-        if (descriptor->entryCount != descriptor->layout->GetBindingCount()) {
+
+        if (BindingIndex(descriptor->entryCount) != descriptor->layout->GetBindingCount()) {
             return DAWN_VALIDATION_ERROR("numBindings mismatch");
         }
 
         const BindGroupLayoutBase::BindingMap& bindingMap = descriptor->layout->GetBindingMap();
 
-        std::bitset<kMaxBindingsPerGroup> bindingsSet;
+        ityp::bitset<BindingIndex, kMaxBindingsPerGroup> bindingsSet;
         for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
             const BindGroupEntry& entry = descriptor->entries[i];
 
@@ -223,7 +225,7 @@ namespace dawn_native {
         : ObjectBase(device),
           mLayout(descriptor->layout),
           mBindingData(mLayout->ComputeBindingDataPointers(bindingDataStart)) {
-        for (BindingIndex i = 0; i < mLayout->GetBindingCount(); ++i) {
+        for (BindingIndex i{0}; i < mLayout->GetBindingCount(); ++i) {
             // TODO(enga): Shouldn't be needed when bindings are tightly packed.
             // This is to fill Ref<ObjectBase> holes with nullptrs.
             new (&mBindingData.bindings[i]) Ref<ObjectBase>();
@@ -267,7 +269,7 @@ namespace dawn_native {
     BindGroupBase::~BindGroupBase() {
         if (mLayout) {
             ASSERT(!IsError());
-            for (BindingIndex i = 0; i < mLayout->GetBindingCount(); ++i) {
+            for (BindingIndex i{0}; i < mLayout->GetBindingCount(); ++i) {
                 mBindingData.bindings[i].~Ref<ObjectBase>();
             }
         }

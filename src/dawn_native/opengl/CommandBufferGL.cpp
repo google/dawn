@@ -241,7 +241,7 @@ namespace dawn_native { namespace opengl {
                 const auto& indices = ToBackend(mPipelineLayout)->GetBindingIndexInfo()[index];
                 uint32_t currentDynamicOffsetIndex = 0;
 
-                for (BindingIndex bindingIndex = 0;
+                for (BindingIndex bindingIndex{0};
                      bindingIndex < group->GetLayout()->GetBindingCount(); ++bindingIndex) {
                     const BindingInfo& bindingInfo =
                         group->GetLayout()->GetBindingInfo(bindingIndex);

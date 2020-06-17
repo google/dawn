@@ -125,14 +125,15 @@ namespace dawn_native {
         ASSERT(count > 0);
 
         // Data which BindGroupLayoutDescriptor will point to for creation
-        std::array<std::array<BindGroupLayoutEntry, kMaxBindingsPerGroup>, kMaxBindGroups>
+        std::array<ityp::array<BindingIndex, BindGroupLayoutEntry, kMaxBindingsPerGroup>,
+                   kMaxBindGroups>
             entryData = {};
 
         // A map of bindings to the index in |entryData|
         std::array<std::map<BindingNumber, BindingIndex>, kMaxBindGroups> usedBindingsMap = {};
 
         // A counter of how many bindings we've populated in |entryData|
-        std::array<uint32_t, kMaxBindGroups> entryCounts = {};
+        std::array<BindingIndex, kMaxBindGroups> entryCounts = {};
 
         uint32_t bindGroupLayoutCount = 0;
         for (uint32_t moduleIndex = 0; moduleIndex < count; ++moduleIndex) {
@@ -149,7 +150,7 @@ namespace dawn_native {
                     }
 
                     BindGroupLayoutEntry bindingSlot;
-                    bindingSlot.binding = bindingNumber;
+                    bindingSlot.binding = static_cast<uint32_t>(bindingNumber);
 
                     DAWN_TRY(ValidateBindingTypeWithShaderStageVisibility(
                         bindingInfo.type, StageBit(module->GetExecutionModel())));
@@ -183,7 +184,7 @@ namespace dawn_native {
                         }
                     }
 
-                    uint32_t currentBindingCount = entryCounts[group];
+                    BindingIndex currentBindingCount = entryCounts[group];
                     entryData[group][currentBindingCount] = bindingSlot;
 
                     usedBindingsMap[group][bindingNumber] = currentBindingCount;
@@ -199,7 +200,7 @@ namespace dawn_native {
         for (uint32_t group = 0; group < bindGroupLayoutCount; ++group) {
             BindGroupLayoutDescriptor desc = {};
             desc.entries = entryData[group].data();
-            desc.entryCount = entryCounts[group];
+            desc.entryCount = static_cast<uint32_t>(entryCounts[group]);
 
             // We should never produce a bad descriptor.
             ASSERT(!ValidateBindGroupLayoutDescriptor(device, &desc).IsError());

@@ -123,7 +123,7 @@ namespace dawn_native { namespace d3d12 {
 
             // Init root descriptors in root signatures for dynamic buffer bindings.
             // These are packed at the beginning of the layout binding info.
-            for (BindingIndex dynamicBindingIndex = 0;
+            for (BindingIndex dynamicBindingIndex{0};
                  dynamicBindingIndex < bindGroupLayout->GetDynamicBufferCount();
                  ++dynamicBindingIndex) {
                 const BindingInfo& bindingInfo =
@@ -194,7 +194,7 @@ namespace dawn_native { namespace d3d12 {
     uint32_t PipelineLayout::GetDynamicRootParameterIndex(uint32_t group,
                                                           BindingIndex bindingIndex) const {
         ASSERT(group < kMaxBindGroups);
-        ASSERT(bindingIndex < kMaxBindingsPerGroup);
+        ASSERT(bindingIndex < kMaxBindingsPerGroupTyped);
         ASSERT(GetBindGroupLayout(group)->GetBindingInfo(bindingIndex).hasDynamicOffset);
         ASSERT(GetBindGroupLayout(group)->GetBindingInfo(bindingIndex).visibility !=
                wgpu::ShaderStage::None);

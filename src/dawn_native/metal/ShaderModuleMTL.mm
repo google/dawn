@@ -149,7 +149,7 @@ namespace dawn_native { namespace metal {
                         shaderc_spvc_msl_resource_binding mslBinding;
                         mslBinding.stage = ToSpvcExecutionModel(stage);
                         mslBinding.desc_set = group;
-                        mslBinding.binding = bindingNumber;
+                        mslBinding.binding = static_cast<uint32_t>(bindingNumber);
                         mslBinding.msl_buffer = mslBinding.msl_texture = mslBinding.msl_sampler =
                             shaderIndex;
                         DAWN_TRY(CheckSpvcSuccess(mSpvcContext.AddMSLResourceBinding(mslBinding),
@@ -158,7 +158,7 @@ namespace dawn_native { namespace metal {
                         spirv_cross::MSLResourceBinding mslBinding;
                         mslBinding.stage = SpirvExecutionModelForStage(stage);
                         mslBinding.desc_set = group;
-                        mslBinding.binding = bindingNumber;
+                        mslBinding.binding = static_cast<uint32_t>(bindingNumber);
                         mslBinding.msl_buffer = mslBinding.msl_texture = mslBinding.msl_sampler =
                             shaderIndex;
 

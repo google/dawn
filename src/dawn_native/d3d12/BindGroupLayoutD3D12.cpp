@@ -103,7 +103,7 @@ namespace dawn_native { namespace d3d12 {
                            D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER);
         descriptorOffsets[Sampler] = 0;
 
-        for (BindingIndex bindingIndex = 0; bindingIndex < GetBindingCount(); ++bindingIndex) {
+        for (BindingIndex bindingIndex{0}; bindingIndex < GetBindingCount(); ++bindingIndex) {
             const BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
 
             if (bindingInfo.hasDynamicOffset) {
@@ -170,7 +170,8 @@ namespace dawn_native { namespace d3d12 {
         mBindGroupAllocator.Deallocate(bindGroup);
     }
 
-    const std::array<uint32_t, kMaxBindingsPerGroup>& BindGroupLayout::GetBindingOffsets() const {
+    const ityp::array<BindingIndex, uint32_t, kMaxBindingsPerGroup>&
+    BindGroupLayout::GetBindingOffsets() const {
         return mBindingOffsets;
     }
 

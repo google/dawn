@@ -17,6 +17,7 @@
 
 #include "common/Assert.h"
 #include "common/Math.h"
+#include "common/UnderlyingType.h"
 
 #include <bitset>
 #include <limits>
@@ -44,8 +45,11 @@ class BitSetIterator final {
 
         bool operator==(const Iterator& other) const;
         bool operator!=(const Iterator& other) const;
+
         T operator*() const {
-            return static_cast<T>(mCurrentBit);
+            using U = UnderlyingType<T>;
+            ASSERT(mCurrentBit <= std::numeric_limits<U>::max());
+            return static_cast<T>(static_cast<U>(mCurrentBit));
         }
 
       private:

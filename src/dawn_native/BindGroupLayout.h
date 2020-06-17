@@ -18,6 +18,8 @@
 #include "common/Constants.h"
 #include "common/Math.h"
 #include "common/SlabAllocator.h"
+#include "common/ityp_array.h"
+#include "common/ityp_span.h"
 #include "dawn_native/BindingInfo.h"
 #include "dawn_native/CachedObject.h"
 #include "dawn_native/Error.h"
@@ -25,7 +27,6 @@
 
 #include "dawn_native/dawn_platform.h"
 
-#include <array>
 #include <bitset>
 #include <map>
 
@@ -60,7 +61,7 @@ namespace dawn_native {
 
         const BindingInfo& GetBindingInfo(BindingIndex bindingIndex) const {
             ASSERT(!IsError());
-            ASSERT(bindingIndex < kMaxBindingsPerGroup);
+            ASSERT(bindingIndex < BindingIndex(kMaxBindingsPerGroup));
             return mBindingInfo[bindingIndex];
         }
         const BindingMap& GetBindingMap() const;
@@ -86,8 +87,8 @@ namespace dawn_native {
         };
 
         struct BindingDataPointers {
-            BufferBindingData* const bufferData = nullptr;
-            Ref<ObjectBase>* const bindings = nullptr;
+            ityp::span<BindingIndex, BufferBindingData> const bufferData = {};
+            ityp::span<BindingIndex, Ref<ObjectBase>> const bindings = {};
         };
 
         // Compute the amount of space / alignment required to store bindings for a bind group of
@@ -114,11 +115,11 @@ namespace dawn_native {
         BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
         BindingIndex mBindingCount;
-        BindingIndex mBufferCount = 0;  // |BindingIndex| because buffers are packed at the front.
+        BindingIndex mBufferCount{0};  // |BindingIndex| because buffers are packed at the front.
         uint32_t mDynamicUniformBufferCount = 0;
         uint32_t mDynamicStorageBufferCount = 0;
 
-        std::array<BindingInfo, kMaxBindingsPerGroup> mBindingInfo;
+        ityp::array<BindingIndex, BindingInfo, kMaxBindingsPerGroup> mBindingInfo;
 
         // Map from BindGroupLayoutEntry.binding to packed indices.
         BindingMap mBindingMap;

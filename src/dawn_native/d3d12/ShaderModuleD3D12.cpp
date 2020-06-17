@@ -180,13 +180,15 @@ namespace dawn_native { namespace d3d12 {
                         "spvc"));
                     if (forceStorageBufferAsUAV) {
                         DAWN_TRY(CheckSpvcSuccess(
-                            mSpvcContext.SetHLSLForceStorageBufferAsUAV(group, bindingNumber),
+                            mSpvcContext.SetHLSLForceStorageBufferAsUAV(
+                                group, static_cast<uint32_t>(bindingNumber)),
                             "Unable to force read-only storage buffer as UAV w/ spvc"));
                     }
                 } else {
                     compiler->set_decoration(bindingInfo.id, spv::DecorationBinding, bindingOffset);
                     if (forceStorageBufferAsUAV) {
-                        compiler->set_hlsl_force_storage_buffer_as_uav(group, bindingNumber);
+                        compiler->set_hlsl_force_storage_buffer_as_uav(
+                            group, static_cast<uint32_t>(bindingNumber));
                     }
                 }
             }

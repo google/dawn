@@ -52,7 +52,7 @@ namespace dawn_native { namespace vulkan {
             write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             write.pNext = nullptr;
             write.dstSet = GetHandle();
-            write.dstBinding = bindingNumber;
+            write.dstBinding = static_cast<uint32_t>(bindingNumber);
             write.dstArrayElement = 0;
             write.descriptorCount = 1;
             write.descriptorType =

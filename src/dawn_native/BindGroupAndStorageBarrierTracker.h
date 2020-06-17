@@ -15,6 +15,7 @@
 #ifndef DAWNNATIVE_BINDGROUPANDSTORAGEBARRIERTRACKER_H_
 #define DAWNNATIVE_BINDGROUPANDSTORAGEBARRIERTRACKER_H_
 
+#include "common/ityp_bitset.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/BindGroupTracker.h"
 #include "dawn_native/Buffer.h"
@@ -41,7 +42,7 @@ namespace dawn_native {
 
                 const BindGroupLayoutBase* layout = bindGroup->GetLayout();
 
-                for (BindingIndex bindingIndex = 0; bindingIndex < layout->GetBindingCount();
+                for (BindingIndex bindingIndex{0}; bindingIndex < layout->GetBindingCount();
                      ++bindingIndex) {
                     const BindingInfo& bindingInfo = layout->GetBindingInfo(bindingIndex);
 
@@ -88,10 +89,13 @@ namespace dawn_native {
         }
 
       protected:
-        std::array<std::bitset<kMaxBindingsPerGroup>, kMaxBindGroups> mBindingsNeedingBarrier = {};
-        std::array<std::array<wgpu::BindingType, kMaxBindingsPerGroup>, kMaxBindGroups>
+        std::array<ityp::bitset<BindingIndex, kMaxBindingsPerGroup>, kMaxBindGroups>
+            mBindingsNeedingBarrier = {};
+        std::array<ityp::array<BindingIndex, wgpu::BindingType, kMaxBindingsPerGroup>,
+                   kMaxBindGroups>
             mBindingTypes = {};
-        std::array<std::array<ObjectBase*, kMaxBindingsPerGroup>, kMaxBindGroups> mBindings = {};
+        std::array<ityp::array<BindingIndex, ObjectBase*, kMaxBindingsPerGroup>, kMaxBindGroups>
+            mBindings = {};
     };
 
 }  // namespace dawn_native

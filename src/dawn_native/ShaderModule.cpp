@@ -289,9 +289,10 @@ namespace dawn_native {
             }
         }
 
-        std::string GetShaderDeclarationString(size_t group, uint32_t binding) {
+        std::string GetShaderDeclarationString(size_t group, BindingNumber binding) {
             std::ostringstream ostream;
-            ostream << "the shader module declaration at set " << group << " binding " << binding;
+            ostream << "the shader module declaration at set " << group << " binding "
+                    << static_cast<uint32_t>(binding);
             return ostream.str();
         }
     }  // anonymous namespace

@@ -31,7 +31,7 @@ namespace dawn_native { namespace opengl {
         for (uint32_t group : IterateBitSet(GetBindGroupLayoutsMask())) {
             const BindGroupLayoutBase* bgl = GetBindGroupLayout(group);
 
-            for (BindingIndex bindingIndex = 0; bindingIndex < bgl->GetBindingCount();
+            for (BindingIndex bindingIndex{0}; bindingIndex < bgl->GetBindingCount();
                  ++bindingIndex) {
                 switch (bgl->GetBindingInfo(bindingIndex).type) {
                     case wgpu::BindingType::UniformBuffer:

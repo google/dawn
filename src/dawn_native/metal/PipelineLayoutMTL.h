@@ -15,6 +15,8 @@
 #ifndef DAWNNATIVE_METAL_PIPELINELAYOUTMTL_H_
 #define DAWNNATIVE_METAL_PIPELINELAYOUTMTL_H_
 
+#include "common/ityp_array.h"
+#include "dawn_native/BindingInfo.h"
 #include "dawn_native/PipelineLayout.h"
 
 #include "dawn_native/PerStage.h"
@@ -41,7 +43,7 @@ namespace dawn_native { namespace metal {
         PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor);
 
         using BindingIndexInfo =
-            std::array<std::array<uint32_t, kMaxBindingsPerGroup>, kMaxBindGroups>;
+            std::array<ityp::array<BindingIndex, uint32_t, kMaxBindingsPerGroup>, kMaxBindGroups>;
         const BindingIndexInfo& GetBindingIndexInfo(SingleShaderStage stage) const;
 
         // The number of Metal vertex stage buffers used for the whole pipeline layout.

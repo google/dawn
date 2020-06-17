@@ -150,7 +150,7 @@ namespace dawn_native { namespace d3d12 {
 
             if (mInCompute) {
                 for (uint32_t index : IterateBitSet(mBindGroupLayoutsMask)) {
-                    for (uint32_t binding : IterateBitSet(mBindingsNeedingBarrier[index])) {
+                    for (BindingIndex binding : IterateBitSet(mBindingsNeedingBarrier[index])) {
                         wgpu::BindingType bindingType = mBindingTypes[index][binding];
                         switch (bindingType) {
                             case wgpu::BindingType::StorageBuffer:
@@ -213,16 +213,18 @@ namespace dawn_native { namespace d3d12 {
                             const PipelineLayout* pipelineLayout,
                             uint32_t index,
                             BindGroup* group,
-                            uint32_t dynamicOffsetCount,
-                            const uint64_t* dynamicOffsets) {
-            ASSERT(dynamicOffsetCount == group->GetLayout()->GetDynamicBufferCount());
+                            uint32_t dynamicOffsetCountIn,
+                            const uint64_t* dynamicOffsetsIn) {
+            ityp::span<BindingIndex, const uint64_t> dynamicOffsets(
+                dynamicOffsetsIn, BindingIndex(dynamicOffsetCountIn));
+            ASSERT(dynamicOffsets.size() == group->GetLayout()->GetDynamicBufferCount());
 
             // Usually, the application won't set the same offsets many times,
             // so always try to apply dynamic offsets even if the offsets stay the same
-            if (dynamicOffsetCount != 0) {
+            if (dynamicOffsets.size() != BindingIndex(0)) {
                 // Update dynamic offsets.
                 // Dynamic buffer bindings are packed at the beginning of the layout.
-                for (BindingIndex bindingIndex = 0; bindingIndex < dynamicOffsetCount;
+                for (BindingIndex bindingIndex{0}; bindingIndex < dynamicOffsets.size();
                      ++bindingIndex) {
                     const BindingInfo& bindingInfo =
                         group->GetLayout()->GetBindingInfo(bindingIndex);
