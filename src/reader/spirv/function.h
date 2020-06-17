@@ -276,6 +276,13 @@ class FunctionEmitter {
   /// @returns false if bad nesting has been detected.
   bool FindIfSelectionInternalHeaders();
 
+  /// Record the SPIR-V IDs of non-constants that should get a 'const'
+  /// definition in WGSL. This occurs when a SPIR-V instruction might use the
+  /// dynamically computed value only once, but the WGSL code might reference
+  /// it multiple times. For example, this occurs for the vector operands of
+  /// OpVectorShuffle.  Populates |needs_named_const_def_|
+  void RegisterValuesNeedingNamedDefinition();
+
   /// Emits declarations of function variables.
   /// @returns false if emission failed.
   bool EmitFunctionVariables();
@@ -451,6 +458,11 @@ class FunctionEmitter {
   /// @returns an AST expression for the instruction, or nullptr.
   TypedExpression MakeCompositeExtract(const spvtools::opt::Instruction& inst);
 
+  /// Creates an expression for OpVectorShuffle
+  /// @param inst an OpVectorShuffle instruction.
+  /// @returns an AST expression for the instruction, or nullptr.
+  TypedExpression MakeVectorShuffle(const spvtools::opt::Instruction& inst);
+
   /// Gets the block info for a block ID, if any exists
   /// @param id the SPIR-V ID of the OpLabel instruction starting the block
   /// @returns the block info for the given ID, if it exists, or nullptr
@@ -583,6 +595,8 @@ class FunctionEmitter {
   std::unordered_set<uint32_t> identifier_values_;
   // Mapping from SPIR-V ID that is used at most once, to its AST expression.
   std::unordered_map<uint32_t, TypedExpression> singly_used_values_;
+  // Set of SPIR-V IDs which should get a named const definition.
+  std::unordered_set<uint32_t> needs_named_const_def_;
 
   // The IDs of basic blocks, in reverse structured post-order (RSPO).
   // This is the output order for the basic blocks.

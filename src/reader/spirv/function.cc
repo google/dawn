@@ -15,6 +15,7 @@
 #include "src/reader/spirv/function.h"
 
 #include <algorithm>
+#include <array>
 #include <sstream>
 #include <unordered_map>
 #include <unordered_set>
@@ -49,6 +50,7 @@
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/bool_type.h"
 #include "src/ast/type/u32_type.h"
+#include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op.h"
@@ -615,6 +617,7 @@ bool FunctionEmitter::EmitBody() {
 
   // TODO(dneto): register phis
   // TODO(dneto): register SSA values which need to be hoisted
+  RegisterValuesNeedingNamedDefinition();
 
   if (!EmitFunctionVariables()) {
     return false;
@@ -2394,9 +2397,11 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
   // Handle combinatorial instructions first.
   auto combinatorial_expr = MaybeEmitCombinatorialValue(inst);
   if (combinatorial_expr.expr != nullptr) {
-    if (def_use_mgr_->NumUses(&inst) == 1) {
-      // If it's used once, then defer emitting the expression until it's
-      // used. Any supporting statements have already been emitted.
+    if ((needs_named_const_def_.count(inst.result_id()) == 0) &&
+        (def_use_mgr_->NumUses(&inst) == 1)) {
+      // If it's used once, and doesn't need a named constant definition,
+      // then defer emitting the expression until it's used. Any supporting
+      // statements have already been emitted.
       singly_used_values_.insert(
           std::make_pair(inst.result_id(), std::move(combinatorial_expr)));
       return success();
@@ -2523,6 +2528,10 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
 
   if (opcode == SpvOpCompositeExtract) {
     return MakeCompositeExtract(inst);
+  }
+
+  if (opcode == SpvOpVectorShuffle) {
+    return MakeVectorShuffle(inst);
   }
 
   // builtin readonly function
@@ -2815,6 +2824,73 @@ std::unique_ptr<ast::Expression> FunctionEmitter::MakeFalse() const {
   ast::type::BoolType bool_type;
   return std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::BoolLiteral>(parser_impl_.BoolType(), false));
+}
+
+TypedExpression FunctionEmitter::MakeVectorShuffle(
+    const spvtools::opt::Instruction& inst) {
+  const auto vec0_id = inst.GetSingleWordInOperand(0);
+  const auto vec1_id = inst.GetSingleWordInOperand(1);
+  const spvtools::opt::Instruction& vec0 = *(def_use_mgr_->GetDef(vec0_id));
+  const spvtools::opt::Instruction& vec1 = *(def_use_mgr_->GetDef(vec1_id));
+  const auto vec0_len =
+      type_mgr_->GetType(vec0.type_id())->AsVector()->element_count();
+  const auto vec1_len =
+      type_mgr_->GetType(vec1.type_id())->AsVector()->element_count();
+
+  // Idiomatic vector accessors.
+  const char* swizzles[] = {"x", "y", "z", "w"};
+
+  // Generate an ast::TypeConstructor expression.
+  // Assume the literal indices are valid, and there is a valid number of them.
+  ast::type::VectorType* result_type =
+      parser_impl_.ConvertType(inst.type_id())->AsVector();
+  ast::ExpressionList values;
+  for (uint32_t i = 2; i < inst.NumInOperands(); ++i) {
+    const auto index = inst.GetSingleWordInOperand(i);
+    if (index < vec0_len) {
+      assert(index < sizeof(swizzles) / sizeof(swizzles[0]));
+      values.emplace_back(std::make_unique<ast::MemberAccessorExpression>(
+          MakeExpression(vec0_id).expr,
+          std::make_unique<ast::IdentifierExpression>(swizzles[index])));
+    } else if (index < vec0_len + vec1_len) {
+      const auto sub_index = index - vec0_len;
+      assert(sub_index < sizeof(swizzles) / sizeof(swizzles[0]));
+      values.emplace_back(std::make_unique<ast::MemberAccessorExpression>(
+          MakeExpression(vec1_id).expr,
+          std::make_unique<ast::IdentifierExpression>(swizzles[sub_index])));
+    } else if (index == 0xFFFFFFFF) {
+      // By rule, this maps to OpUndef.  Instead, make it zero.
+      values.emplace_back(parser_impl_.MakeNullValue(result_type->type()));
+    } else {
+      Fail() << "invalid vectorshuffle ID %" << inst.result_id()
+             << ": index too large: " << index;
+      return {};
+    }
+  }
+  return {result_type, std::make_unique<ast::TypeConstructorExpression>(
+                           result_type, std::move(values))};
+}
+
+void FunctionEmitter::RegisterValuesNeedingNamedDefinition() {
+  for (auto& block : function_) {
+    for (const auto& inst : block) {
+      if (inst.opcode() == SpvOpVectorShuffle) {
+        // We might access the vector operands multiple times. Make sure they
+        // are evaluated only once.
+        for (auto index : std::array<uint32_t, 2>{0, 1}) {
+          auto id = inst.GetSingleWordInOperand(index);
+          if (constant_mgr_->FindDeclaredConstant(id)) {
+            // If it's constant, then avoid making a const definition
+            // in the wrong place; it would be wrong if it didn't
+            // dominate its uses.
+            continue;
+          }
+          // Othewrise, register it.
+          needs_named_const_def_.insert(id);
+        }
+      }
+    }
+  }
 }
 
 }  // namespace spirv

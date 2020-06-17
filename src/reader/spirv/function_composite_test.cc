@@ -51,6 +51,8 @@ std::string Preamble() {
   %float_70 = OpConstant %float 70
 
   %v2uint = OpTypeVector %uint 2
+  %v3uint = OpTypeVector %uint 3
+  %v4uint = OpTypeVector %uint 4
   %v2int = OpTypeVector %int 2
   %v2float = OpTypeVector %float 2
 
@@ -60,6 +62,8 @@ std::string Preamble() {
   %s_v2f_u_i = OpTypeStruct %v2float %uint %int
   %a_u_5 = OpTypeArray %uint %uint_5
 
+  %v2uint_3_4 = OpConstantComposite %v2uint %uint_3 %uint_4
+  %v2uint_4_3 = OpConstantComposite %v2uint %uint_4 %uint_3
   %v2float_50_60 = OpConstantComposite %v2float %float_50 %float_60
   %v2float_60_50 = OpConstantComposite %v2float %float_60 %float_50
   %v2float_70_70 = OpConstantComposite %v2float %float_70 %float_70
@@ -464,7 +468,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_IndexTooBigError) {
   FunctionEmitter fe(p, *spirv_function(100));
   EXPECT_FALSE(fe.EmitBody());
   EXPECT_THAT(p->error(), Eq("CompositeExtract %2 index value 40 is out of "
-                             "bounds for structure %23 having 3 elements"));
+                             "bounds for structure %25 having 3 elements"));
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Struct_Array_Matrix_Vector) {
@@ -582,6 +586,160 @@ VariableDeclStatement{
     }
   }
 })")) << ToString(fe.ast_body());
+}
+
+using SpvParserTest_VectorShuffle = SpvParserTest;
+
+TEST_F(SpvParserTest_VectorShuffle, FunctionScopeOperands_UseBoth) {
+  // Note that variables are generated for the vector operands.
+  const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpCopyObject %v2uint %v2uint_3_4
+     %2 = OpIAdd %v2uint %v2uint_4_3 %v2uint_3_4
+     %10 = OpVectorShuffle %v4uint %1 %2 3 2 1 0
+     OpReturn
+     OpFunctionEnd
+)";
+
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Variable{
+    x_10
+    none
+    __vec_4__u32
+    {
+      TypeConstructor{
+        __vec_4__u32
+        MemberAccessor{
+          Identifier{x_2}
+          Identifier{y}
+        }
+        MemberAccessor{
+          Identifier{x_2}
+          Identifier{x}
+        }
+        MemberAccessor{
+          Identifier{x_1}
+          Identifier{y}
+        }
+        MemberAccessor{
+          Identifier{x_1}
+          Identifier{x}
+        }
+      }
+    }
+  }
+})")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_UseBoth) {
+  const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %10 = OpVectorShuffle %v4uint %v2uint_3_4 %v2uint_4_3 3 2 1 0
+     OpReturn
+     OpFunctionEnd
+)";
+
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Variable{
+    x_10
+    none
+    __vec_4__u32
+    {
+      TypeConstructor{
+        __vec_4__u32
+        MemberAccessor{
+          TypeConstructor{
+            __vec_2__u32
+            ScalarConstructor{4}
+            ScalarConstructor{3}
+          }
+          Identifier{y}
+        }
+        MemberAccessor{
+          TypeConstructor{
+            __vec_2__u32
+            ScalarConstructor{4}
+            ScalarConstructor{3}
+          }
+          Identifier{x}
+        }
+        MemberAccessor{
+          TypeConstructor{
+            __vec_2__u32
+            ScalarConstructor{3}
+            ScalarConstructor{4}
+          }
+          Identifier{y}
+        }
+        MemberAccessor{
+          TypeConstructor{
+            __vec_2__u32
+            ScalarConstructor{3}
+            ScalarConstructor{4}
+          }
+          Identifier{x}
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_AllOnesMapToNull) {
+  const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpCopyObject %v2uint %v2uint_4_3
+     %10 = OpVectorShuffle %v2uint %1 %1 0xFFFFFFFF 1
+     OpReturn
+     OpFunctionEnd
+)";
+
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Variable{
+    x_10
+    none
+    __vec_2__u32
+    {
+      TypeConstructor{
+        __vec_2__u32
+        ScalarConstructor{0}
+        MemberAccessor{
+          Identifier{x_1}
+          Identifier{y}
+        }
+      }
+    }
+  })"))
+      << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest_VectorShuffle, IndexTooBig_IsError) {
+  const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %10 = OpVectorShuffle %v4uint %v2uint_3_4 %v2uint_4_3 9 2 1 0
+     OpReturn
+     OpFunctionEnd
+)";
+
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_FALSE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(p->error(),
+              Eq("invalid vectorshuffle ID %10: index too large: 9"));
 }
 
 }  // namespace
