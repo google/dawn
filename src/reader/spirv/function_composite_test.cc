@@ -509,6 +509,81 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_Array_Matrix_Vector) {
       << ToString(fe.ast_body());
 }
 
+using SpvParserTest_CopyObject = SpvParserTest;
+
+TEST_F(SpvParserTest_CopyObject, Scalar) {
+  const auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpCopyObject %uint %uint_3
+     %2 = OpCopyObject %uint %1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_1
+    none
+    __u32
+    {
+      ScalarConstructor{3}
+    }
+  }
+}
+VariableDeclStatement{
+  Variable{
+    x_2
+    none
+    __u32
+    {
+      Identifier{x_1}
+    }
+  }
+})")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest_CopyObject, Pointer) {
+  const auto assembly = Preamble() + R"(
+     %ptr = OpTypePointer Function %uint
+     %10 = OpVariable %ptr Function
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpCopyObject %ptr %10
+     %2 = OpCopyObject %ptr %1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_1
+    none
+    __ptr_function__u32
+    {
+      Identifier{x_10}
+    }
+  }
+}
+VariableDeclStatement{
+  Variable{
+    x_2
+    none
+    __ptr_function__u32
+    {
+      Identifier{x_1}
+    }
+  }
+})")) << ToString(fe.ast_body());
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

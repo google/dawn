@@ -2423,6 +2423,12 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       // So represent a load by a new const definition.
       return EmitConstDefinition(
           inst, MakeExpression(inst.GetSingleWordInOperand(0)));
+    case SpvOpCopyObject:
+      // Arguably, OpCopyObject is purely combinatorial. On the other hand,
+      // it exists to make a new name for something. So we choose to make
+      // a new named constant definition.
+      return EmitConstDefinition(
+          inst, MakeExpression(inst.GetSingleWordInOperand(0)));
     case SpvOpFunctionCall:
       // TODO(dneto): Fill this out.  Make this pass, for existing tests
       return success();
