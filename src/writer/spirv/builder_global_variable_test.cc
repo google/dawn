@@ -165,6 +165,123 @@ TEST_F(BuilderTest, GlobalVar_Const) {
 )");
 }
 
+TEST_F(BuilderTest, GlobalVar_Complex_Constructor) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec3(&f32, 3);
+  ast::type::VectorType vec(&vec3, 3);
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0f)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+  auto first =
+      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0f)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  auto second =
+      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0f)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+  auto third =
+      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+
+  vals.push_back(std::move(first));
+  vals.push_back(std::move(second));
+  vals.push_back(std::move(third));
+
+  auto init =
+      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
+
+  ast::Variable v("var", ast::StorageClass::kOutput, &f32);
+  v.set_constructor(std::move(init));
+  v.set_is_const(true);
+  td.RegisterVariableForTesting(&v);
+
+  Builder b(&mod);
+  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  ASSERT_FALSE(b.has_error()) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypeVector %3 3
+%1 = OpTypeVector %2 3
+%4 = OpConstant %3 1
+%5 = OpConstant %3 2
+%6 = OpConstant %3 3
+%7 = OpConstantComposite %2 %4 %5 %6
+%8 = OpConstantComposite %2 %6 %5 %4
+%9 = OpConstantComposite %2 %5 %4 %6
+%10 = OpConstantComposite %1 %7 %8 %9
+)");
+}
+
+TEST_F(BuilderTest, GlobalVar_Complex_ConstructorWithExtract) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec3(&f32, 3);
+  ast::type::VectorType vec2(&f32, 2);
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.0f)));
+  auto first =
+      std::make_unique<ast::TypeConstructorExpression>(&vec2, std::move(vals));
+
+  vals.push_back(std::move(first));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.0f)));
+
+  auto init =
+      std::make_unique<ast::TypeConstructorExpression>(&vec3, std::move(vals));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  EXPECT_TRUE(td.DetermineResultType(init.get())) << td.error();
+
+  ast::Variable v("var", ast::StorageClass::kOutput, &f32);
+  v.set_constructor(std::move(init));
+  v.set_is_const(true);
+  td.RegisterVariableForTesting(&v);
+
+  Builder b(&mod);
+  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  ASSERT_FALSE(b.has_error()) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeVector %2 3
+%3 = OpTypeVector %2 2
+%4 = OpConstant %2 1
+%5 = OpConstant %2 2
+%6 = OpConstantComposite %3 %4 %5
+%8 = OpTypeInt 32 0
+%9 = OpConstant %8 0
+%7 = OpSpecConstantOp %2 CompositeExtract %6 9
+%11 = OpConstant %8 1
+%10 = OpSpecConstantOp %2 CompositeExtract %6 11
+%12 = OpConstant %2 3
+%13 = OpSpecConstantComposite %1 %7 %10 %12
+)");
+}
+
 TEST_F(BuilderTest, GlobalVar_WithLocation) {
   ast::type::F32Type f32;
   auto v =

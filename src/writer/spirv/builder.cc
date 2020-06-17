@@ -909,6 +909,15 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     return 0;
   }
 
+  auto* result_type = init->type()->UnwrapPtrIfNeeded();
+  if (result_type->IsVector()) {
+    result_type = result_type->AsVector()->type();
+  } else if (result_type->IsArray()) {
+    result_type = result_type->AsArray()->type();
+  } else if (result_type->IsMatrix()) {
+    result_type = result_type->AsMatrix()->type();
+  }
+
   std::ostringstream out;
   out << "__const";
 
@@ -924,6 +933,8 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     }
   }
 
+  bool result_is_constant_composite = constructor_is_const;
+  bool result_is_spec_composite = false;
   for (const auto& e : init->values()) {
     uint32_t id = 0;
     if (constructor_is_const) {
@@ -936,27 +947,69 @@ uint32_t Builder::GenerateTypeConstructorExpression(
       return 0;
     }
 
-    auto* result_type = e->result_type()->UnwrapPtrIfNeeded();
+    auto* value_type = e->result_type()->UnwrapPtrIfNeeded();
 
-    // If we're putting a vector into the constructed composite we need to
-    // extract each of the values and insert them individually
-    if (result_type->IsVector()) {
-      auto* vec = result_type->AsVector();
-      auto result_type_id = GenerateTypeIfNeeded(vec->type());
-      if (result_type_id == 0) {
-        return 0;
-      }
+    // When handling vectors as the values there a few cases to take into
+    // consideration:
+    //  1. Module scoped vec3<f32>(vec2<f32>(1, 2), 3)  -> OpSpecConstantOp
+    //  2. Function scoped vec3<f32>(vec2<f32>(1, 2), 3) -> OpCompositeExtract
+    //  3. Either array<vec3<f32>, 1>(vec3<f32>(1, 2, 3))  -> use the ID.
+    if (value_type->IsVector()) {
+      auto* vec = value_type->AsVector();
+      auto* vec_type = vec->type();
 
-      for (uint32_t i = 0; i < vec->size(); ++i) {
-        auto extract = result_op();
-        auto extract_id = extract.to_i();
+      // If the value we want is the same as what we have, use it directly.
+      // This maps to case 3.
+      if (result_type == value_type) {
+        out << "_" << id;
+        ops.push_back(Operand::Int(id));
+      } else if (!is_global_init) {
+        // A non-global initializer. Case 2.
+        auto value_type_id = GenerateTypeIfNeeded(vec_type);
+        if (value_type_id == 0) {
+          return 0;
+        }
 
-        push_function_inst(spv::Op::OpCompositeExtract,
-                           {Operand::Int(result_type_id), extract,
-                            Operand::Int(id), Operand::Int(i)});
+        for (uint32_t i = 0; i < vec->size(); ++i) {
+          auto extract = result_op();
+          auto extract_id = extract.to_i();
 
-        out << "_" << extract_id;
-        ops.push_back(Operand::Int(extract_id));
+          push_function_inst(spv::Op::OpCompositeExtract,
+                             {Operand::Int(value_type_id), extract,
+                              Operand::Int(id), Operand::Int(i)});
+
+          out << "_" << extract_id;
+          ops.push_back(Operand::Int(extract_id));
+
+          // We no longer have a constant composite, but have to do a
+          // composite construction as these calls are inside a function.
+          result_is_constant_composite = false;
+        }
+      } else {
+        // A global initializer, must use OpSpecConstantOp. Case 1.
+        auto value_type_id = GenerateTypeIfNeeded(vec_type);
+        if (value_type_id == 0) {
+          return 0;
+        }
+
+        for (uint32_t i = 0; i < vec->size(); ++i) {
+          auto extract = result_op();
+          auto extract_id = extract.to_i();
+
+          auto idx_id = GenerateU32Literal(i);
+          if (idx_id == 0) {
+            return 0;
+          }
+          push_type(spv::Op::OpSpecConstantOp,
+                    {Operand::Int(value_type_id), extract,
+                     Operand::Int(SpvOpCompositeExtract), Operand::Int(id),
+                     Operand::Int(idx_id)});
+
+          out << "_" << extract_id;
+          ops.push_back(Operand::Int(extract_id));
+
+          result_is_spec_composite = true;
+        }
       }
     } else {
       out << "_" << id;
@@ -976,7 +1029,9 @@ uint32_t Builder::GenerateTypeConstructorExpression(
 
   const_to_id_[str] = result.to_i();
 
-  if (constructor_is_const) {
+  if (result_is_spec_composite) {
+    push_type(spv::Op::OpSpecConstantComposite, ops);
+  } else if (result_is_constant_composite) {
     push_type(spv::Op::OpConstantComposite, ops);
   } else {
     push_function_inst(spv::Op::OpCompositeConstruct, ops);
