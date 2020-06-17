@@ -64,7 +64,8 @@ namespace {
 enum class GlslDataType {
   kFloatScalarOrVector,
   kIntScalarOrVector,
-  kFloatVector
+  kFloatVector,
+  kMatrix
 };
 struct GlslData {
   const char* name;
@@ -87,6 +88,7 @@ constexpr const GlslData kGlslData[] = {
     {"cosh", 1, GLSLstd450Cosh, GlslDataType::kFloatScalarOrVector, 0},
     {"cross", 2, GLSLstd450Cross, GlslDataType::kFloatVector, 3},
     {"degrees", 1, GLSLstd450Degrees, GlslDataType::kFloatScalarOrVector, 0},
+    {"determinant", 1, GLSLstd450Determinant, GlslDataType::kMatrix, 0},
     {"distance", 2, GLSLstd450Distance, GlslDataType::kFloatScalarOrVector, 0},
     {"exp", 1, GLSLstd450Exp, GlslDataType::kFloatScalarOrVector, 0},
     {"exp2", 1, GLSLstd450Exp2, GlslDataType::kFloatScalarOrVector, 0},
@@ -780,6 +782,13 @@ ast::type::Type* TypeDeterminer::GetImportData(
           return nullptr;
         }
         break;
+      case GlslDataType::kMatrix:
+        if (!result_types.back()->IsMatrix()) {
+          set_error(source,
+                    "incorrect type for " + name + ". Requires matrix value");
+          return nullptr;
+        }
+        break;
     }
   }
 
@@ -798,6 +807,10 @@ ast::type::Type* TypeDeterminer::GetImportData(
     return result_types[0]->is_float_scalar()
                ? result_types[0]
                : result_types[0]->AsVector()->type();
+  }
+  // The determinant returns the component type of the columns
+  if (name == "determinant") {
+    return result_types[0]->AsMatrix()->type();
   }
   return result_types[0];
 }

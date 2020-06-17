@@ -3185,5 +3185,88 @@ INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                                          GLSLData{"umax", GLSLstd450UMax},
                                          GLSLData{"smax", GLSLstd450SMax}));
 
+TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant_Matrix) {
+  ast::type::F32Type f32;
+  ast::type::MatrixType mat(&f32, 3, 3);
+
+  auto var = std::make_unique<ast::Variable>(
+      "var", ast::StorageClass::kFunction, &mat);
+  mod()->AddGlobalVariable(std::move(var));
+
+  // Register the global
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("var"));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "determinant", params, &id);
+  ASSERT_NE(type, nullptr);
+  EXPECT_TRUE(type->IsF32());
+  EXPECT_EQ(id, GLSLstd450Determinant);
+}
+
+TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant_Error_Float) {
+  ast::type::F32Type f32;
+
+  auto var = std::make_unique<ast::Variable>(
+      "var", ast::StorageClass::kFunction, &f32);
+  mod()->AddGlobalVariable(std::move(var));
+
+  // Register the global
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("var"));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "determinant", params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(),
+            "incorrect type for determinant. Requires matrix value");
+}
+
+TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant_Error_NoParams) {
+  ast::ExpressionList params;
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "determinant", params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(),
+            "incorrect number of parameters for determinant. Expected 1 got 0");
+}
+
+TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant_Error_TooManyParams) {
+  ast::type::F32Type f32;
+  ast::type::MatrixType mat(&f32, 3, 3);
+
+  auto var = std::make_unique<ast::Variable>(
+      "var", ast::StorageClass::kFunction, &mat);
+  mod()->AddGlobalVariable(std::move(var));
+
+  // Register the global
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("var"));
+  params.push_back(std::make_unique<ast::IdentifierExpression>("var"));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "determinant", params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(),
+            "incorrect number of parameters for determinant. Expected 1 got 2");
+}
+
 }  // namespace
 }  // namespace tint
