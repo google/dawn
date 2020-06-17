@@ -113,6 +113,7 @@ constexpr const GlslData kGlslData[] = {
     {"length", 1, GLSLstd450Length, GlslDataType::kFloatScalarOrVector, 0},
     {"log", 1, GLSLstd450Log, GlslDataType::kFloatScalarOrVector, 0},
     {"log2", 1, GLSLstd450Log2, GlslDataType::kFloatScalarOrVector, 0},
+    {"matrixinverse", 1, GLSLstd450MatrixInverse, GlslDataType::kMatrix, 0},
     {"nclamp", 3, GLSLstd450NClamp, GlslDataType::kFloatScalarOrVector, 0},
     {"nmax", 2, GLSLstd450NMax, GlslDataType::kFloatScalarOrVector, 0},
     {"nmin", 2, GLSLstd450NMin, GlslDataType::kFloatScalarOrVector, 0},

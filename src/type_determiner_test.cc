@@ -3185,7 +3185,7 @@ INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                                          GLSLData{"umax", GLSLstd450UMax},
                                          GLSLData{"smax", GLSLstd450SMax}));
 
-TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant_Matrix) {
+TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant) {
   ast::type::F32Type f32;
   ast::type::MatrixType mat(&f32, 3, 3);
 
@@ -3209,7 +3209,37 @@ TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant_Matrix) {
   EXPECT_EQ(id, GLSLstd450Determinant);
 }
 
-TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant_Error_Float) {
+TEST_F(TypeDeterminerTest, ImportData_GLSL_MatrixInverse) {
+  ast::type::F32Type f32;
+  ast::type::MatrixType mat(&f32, 3, 3);
+
+  auto var = std::make_unique<ast::Variable>(
+      "var", ast::StorageClass::kFunction, &mat);
+  mod()->AddGlobalVariable(std::move(var));
+
+  // Register the global
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("var"));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", "matrixinverse", params, &id);
+  ASSERT_NE(type, nullptr);
+  EXPECT_TRUE(type->IsMatrix());
+  EXPECT_TRUE(type->AsMatrix()->type()->IsF32());
+  EXPECT_EQ(type->AsMatrix()->rows(), 3u);
+  EXPECT_EQ(type->AsMatrix()->columns(), 3u);
+  EXPECT_EQ(id, GLSLstd450MatrixInverse);
+}
+
+using ImportData_Matrix_OneParam_Test = TypeDeterminerTestWithParam<GLSLData>;
+TEST_P(ImportData_Matrix_OneParam_Test, Error_Float) {
+  auto param = GetParam();
+
   ast::type::F32Type f32;
 
   auto var = std::make_unique<ast::Variable>(
@@ -3226,24 +3256,28 @@ TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant_Error_Float) {
 
   uint32_t id = 0;
   auto* type =
-      td()->GetImportData({0, 0}, "GLSL.std.450", "determinant", params, &id);
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
   ASSERT_EQ(type, nullptr);
-  EXPECT_EQ(td()->error(),
-            "incorrect type for determinant. Requires matrix value");
+  EXPECT_EQ(td()->error(), std::string("incorrect type for ") + param.name +
+                               ". Requires matrix value");
 }
 
-TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant_Error_NoParams) {
+TEST_P(ImportData_Matrix_OneParam_Test, NoParams) {
+  auto param = GetParam();
+
   ast::ExpressionList params;
 
   uint32_t id = 0;
   auto* type =
-      td()->GetImportData({0, 0}, "GLSL.std.450", "determinant", params, &id);
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
   ASSERT_EQ(type, nullptr);
-  EXPECT_EQ(td()->error(),
-            "incorrect number of parameters for determinant. Expected 1 got 0");
+  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
+                               param.name + ". Expected 1 got 0");
 }
 
-TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant_Error_TooManyParams) {
+TEST_P(ImportData_Matrix_OneParam_Test, TooManyParams) {
+  auto param = GetParam();
+
   ast::type::F32Type f32;
   ast::type::MatrixType mat(&f32, 3, 3);
 
@@ -3262,11 +3296,16 @@ TEST_F(TypeDeterminerTest, ImportData_GLSL_Determinant_Error_TooManyParams) {
 
   uint32_t id = 0;
   auto* type =
-      td()->GetImportData({0, 0}, "GLSL.std.450", "determinant", params, &id);
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
   ASSERT_EQ(type, nullptr);
-  EXPECT_EQ(td()->error(),
-            "incorrect number of parameters for determinant. Expected 1 got 2");
+  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
+                               param.name + ". Expected 1 got 2");
 }
+INSTANTIATE_TEST_SUITE_P(
+    TypeDeterminerTest,
+    ImportData_Matrix_OneParam_Test,
+    testing::Values(GLSLData{"determinant", GLSLstd450Determinant},
+                    GLSLData{"matrixinverse", GLSLstd450MatrixInverse}));
 
 }  // namespace
 }  // namespace tint
