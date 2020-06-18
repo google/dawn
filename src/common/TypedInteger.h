@@ -193,6 +193,7 @@ namespace detail {
 }  // namespace detail
 
 namespace std {
+
     template <typename Tag, typename T>
     class numeric_limits<detail::TypedIntegerImpl<Tag, T>> : public numeric_limits<T> {
       public:
@@ -201,14 +202,6 @@ namespace std {
         }
         static detail::TypedIntegerImpl<Tag, T> min() noexcept {
             return detail::TypedIntegerImpl<Tag, T>(std::numeric_limits<T>::min());
-        }
-    };
-
-    template <typename Tag, typename T>
-    class hash<detail::TypedIntegerImpl<Tag, T>> : private hash<T> {
-      public:
-        size_t operator()(detail::TypedIntegerImpl<Tag, T> value) const {
-            return hash<T>::operator()(static_cast<T>(value));
         }
     };
 

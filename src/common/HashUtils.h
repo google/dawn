@@ -16,6 +16,7 @@
 #define COMMON_HASHUTILS_H_
 
 #include "common/Platform.h"
+#include "common/TypedInteger.h"
 
 #include <bitset>
 #include <functional>
@@ -25,6 +26,12 @@
 template <typename T>
 size_t Hash(const T& value) {
     return std::hash<T>()(value);
+}
+
+// Add hashing of TypedIntegers
+template <typename Tag, typename T>
+size_t Hash(const TypedInteger<Tag, T>& value) {
+    return Hash(static_cast<T>(value));
 }
 
 // When hashing sparse structures we want to iteratively build a hash value with only parts of the
