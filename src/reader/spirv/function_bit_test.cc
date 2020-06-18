@@ -621,24 +621,6 @@ TEST_F(SpvUnaryBitTest, Not_UnsignedVec_UnsignedVec) {
 // TODO(dneto): OpBitReverse
 // TODO(dneto): OpBitCount
 
-// TODO(dneto): OpSRem. Missing from WGSL
-// https://github.com/gpuweb/gpuweb/issues/702
-
-// TODO(dneto): OpFRem. Missing from WGSL
-// https://github.com/gpuweb/gpuweb/issues/702
-
-// TODO(dneto): OpVectorTimesScalar
-// TODO(dneto): OpMatrixTimesScalar
-// TODO(dneto): OpVectorTimesMatrix
-// TODO(dneto): OpMatrixTimesVector
-// TODO(dneto): OpMatrixTimesMatrix
-// TODO(dneto): OpOuterProduct
-// TODO(dneto): OpDot
-// TODO(dneto): OpIAddCarry
-// TODO(dneto): OpISubBorrow
-// TODO(dneto): OpIMulExtended
-// TODO(dneto): OpSMulExtended
-
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

@@ -2206,7 +2206,6 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
     default:
       break;
   }
-  // TODO(dneto): emit fallthrough
   return success();
 }
 
