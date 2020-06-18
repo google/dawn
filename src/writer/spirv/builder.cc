@@ -19,6 +19,7 @@
 
 #include "spirv/unified1/spirv.h"
 #include "src/ast/array_accessor_expression.h"
+#include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/binding_decoration.h"
@@ -338,6 +339,9 @@ bool Builder::GenerateExecutionModes(ast::EntryPoint* ep) {
 uint32_t Builder::GenerateExpression(ast::Expression* expr) {
   if (expr->IsArrayAccessor()) {
     return GenerateAccessorExpression(expr->AsArrayAccessor());
+  }
+  if (expr->IsAs()) {
+    return GenerateAsExpression(expr->AsAs());
   }
   if (expr->IsBinary()) {
     return GenerateBinaryExpression(expr->AsBinary());
@@ -1350,6 +1354,36 @@ uint32_t Builder::GenerateIntrinsic(const std::string& name,
     return 0;
   }
   push_function_inst(op, params);
+
+  return result_id;
+}
+
+uint32_t Builder::GenerateAsExpression(ast::AsExpression* as) {
+  auto result = result_op();
+  auto result_id = result.to_i();
+
+  auto result_type_id = GenerateTypeIfNeeded(as->result_type());
+  if (result_type_id == 0) {
+    return 0;
+  }
+
+  auto val_id = GenerateExpression(as->expr());
+  if (val_id == 0) {
+    return 0;
+  }
+  val_id = GenerateLoadIfNeeded(as->expr()->result_type(), val_id);
+
+  // Bitcast does not allow same types, just emit a CopyObject
+  auto* to_type = as->result_type()->UnwrapPtrIfNeeded();
+  auto* from_type = as->expr()->result_type()->UnwrapPtrIfNeeded();
+  if (to_type->type_name() == from_type->type_name()) {
+    push_function_inst(spv::Op::OpCopyObject, {Operand::Int(result_type_id),
+                                               result, Operand::Int(val_id)});
+    return result_id;
+  }
+
+  push_function_inst(spv::Op::OpBitcast, {Operand::Int(result_type_id), result,
+                                          Operand::Int(val_id)});
 
   return result_id;
 }

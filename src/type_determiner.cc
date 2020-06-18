@@ -391,6 +391,10 @@ bool TypeDeterminer::DetermineArrayAccessor(
 }
 
 bool TypeDeterminer::DetermineAs(ast::AsExpression* expr) {
+  if (!DetermineResultType(expr->expr())) {
+    return false;
+  }
+
   expr->set_result_type(expr->type());
   return true;
 }
