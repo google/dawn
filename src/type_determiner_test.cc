@@ -3307,5 +3307,332 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(GLSLData{"determinant", GLSLstd450Determinant},
                     GLSLData{"matrixinverse", GLSLstd450MatrixInverse}));
 
+using ImportData_IntThreeParamTest = TypeDeterminerTestWithParam<GLSLData>;
+TEST_P(ImportData_IntThreeParamTest, Scalar_Signed) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
+  ASSERT_NE(type, nullptr);
+  EXPECT_TRUE(type->IsI32());
+  EXPECT_EQ(id, param.value);
+}
+
+TEST_P(ImportData_IntThreeParamTest, Scalar_Unsigned) {
+  auto param = GetParam();
+
+  ast::type::U32Type u32;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1u)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1u)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1u)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
+  ASSERT_NE(type, nullptr);
+  EXPECT_TRUE(type->IsU32());
+  EXPECT_EQ(id, param.value);
+}
+
+TEST_P(ImportData_IntThreeParamTest, Vector_Signed) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+  ast::type::VectorType vec(&i32, 3);
+
+  ast::ExpressionList vals_1;
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 3)));
+
+  ast::ExpressionList vals_2;
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 3)));
+
+  ast::ExpressionList vals_3;
+  vals_3.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals_3.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals_3.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 3)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_1)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_2)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_3)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
+  ASSERT_NE(type, nullptr);
+  EXPECT_TRUE(type->is_signed_integer_vector());
+  EXPECT_EQ(type->AsVector()->size(), 3u);
+  EXPECT_EQ(id, param.value);
+}
+
+TEST_P(ImportData_IntThreeParamTest, Vector_Unsigned) {
+  auto param = GetParam();
+
+  ast::type::U32Type u32;
+  ast::type::VectorType vec(&u32, 3);
+
+  ast::ExpressionList vals_1;
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1u)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1u)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 3u)));
+
+  ast::ExpressionList vals_2;
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1u)));
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1u)));
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 3u)));
+
+  ast::ExpressionList vals_3;
+  vals_3.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1u)));
+  vals_3.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 1u)));
+  vals_3.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::UintLiteral>(&u32, 3u)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_1)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_2)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec, std::move(vals_3)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
+  ASSERT_NE(type, nullptr);
+  EXPECT_TRUE(type->is_unsigned_integer_vector());
+  EXPECT_EQ(type->AsVector()->size(), 3u);
+  EXPECT_EQ(id, param.value);
+}
+
+TEST_P(ImportData_IntThreeParamTest, Error_Float) {
+  auto param = GetParam();
+
+  ast::type::F32Type f32;
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 2.f)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 3.f)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(),
+            std::string("incorrect type for ") + param.name +
+                ". Requires integer scalar or integer vector values");
+}
+
+TEST_P(ImportData_IntThreeParamTest, Error_NoParams) {
+  auto param = GetParam();
+
+  ast::ExpressionList params;
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
+                               param.name + ". Expected 3 got 0");
+}
+
+TEST_P(ImportData_IntThreeParamTest, Error_OneParam) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
+                               param.name + ". Expected 3 got 1");
+}
+
+TEST_P(ImportData_IntThreeParamTest, Error_TwoParams) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
+                               param.name + ". Expected 3 got 2");
+}
+
+TEST_P(ImportData_IntThreeParamTest, Error_MismatchedParamCount) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+  ast::type::VectorType vec2(&i32, 2);
+  ast::type::VectorType vec3(&i32, 3);
+
+  ast::ExpressionList vals_1;
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals_1.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+
+  ast::ExpressionList vals_2;
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals_2.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 3)));
+
+  ast::ExpressionList vals_3;
+  vals_3.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals_3.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals_3.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 3)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec2, std::move(vals_1)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec3, std::move(vals_2)));
+  params.push_back(std::make_unique<ast::TypeConstructorExpression>(
+      &vec3, std::move(vals_3)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(),
+            std::string("mismatched parameter types for ") + param.name);
+}
+
+TEST_P(ImportData_IntThreeParamTest, Error_MismatchedParamType) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+  ast::type::VectorType vec(&i32, 3);
+
+  ast::ExpressionList vals;
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  vals.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 3)));
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  params.push_back(
+      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(),
+            std::string("mismatched parameter types for ") + param.name);
+}
+
+TEST_P(ImportData_IntThreeParamTest, Error_TooManyParams) {
+  auto param = GetParam();
+
+  ast::type::I32Type i32;
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+
+  ASSERT_TRUE(td()->DetermineResultType(params)) << td()->error();
+
+  uint32_t id = 0;
+  auto* type =
+      td()->GetImportData({0, 0}, "GLSL.std.450", param.name, params, &id);
+  ASSERT_EQ(type, nullptr);
+  EXPECT_EQ(td()->error(), std::string("incorrect number of parameters for ") +
+                               param.name + ". Expected 3 got 4");
+}
+
+INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
+                         ImportData_IntThreeParamTest,
+                         testing::Values(GLSLData{"sclamp", GLSLstd450SClamp},
+                                         GLSLData{"uclamp", GLSLstd450UClamp}));
+
 }  // namespace
 }  // namespace tint

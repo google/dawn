@@ -126,6 +126,7 @@ constexpr const GlslData kGlslData[] = {
     {"roundeven", 1, GLSLstd450RoundEven, GlslDataType::kFloatScalarOrVector,
      0},
     {"sabs", 1, GLSLstd450SAbs, GlslDataType::kIntScalarOrVector, 0},
+    {"sclamp", 3, GLSLstd450SClamp, GlslDataType::kIntScalarOrVector, 0},
     {"sin", 1, GLSLstd450Sin, GlslDataType::kFloatScalarOrVector, 0},
     {"sinh", 1, GLSLstd450Sinh, GlslDataType::kFloatScalarOrVector, 0},
     {"smax", 2, GLSLstd450SMax, GlslDataType::kIntScalarOrVector, 0},
@@ -138,6 +139,7 @@ constexpr const GlslData kGlslData[] = {
     {"tan", 1, GLSLstd450Tan, GlslDataType::kFloatScalarOrVector, 0},
     {"tanh", 1, GLSLstd450Tanh, GlslDataType::kFloatScalarOrVector, 0},
     {"trunc", 1, GLSLstd450Trunc, GlslDataType::kFloatScalarOrVector, 0},
+    {"uclamp", 3, GLSLstd450UClamp, GlslDataType::kIntScalarOrVector, 0},
     {"umax", 2, GLSLstd450UMax, GlslDataType::kIntScalarOrVector, 0},
     {"umin", 2, GLSLstd450UMin, GlslDataType::kIntScalarOrVector, 0},
 };
