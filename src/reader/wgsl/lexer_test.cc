@@ -249,6 +249,9 @@ TEST_P(IntegerTest_HexUnsigned, Matches) {
   EXPECT_EQ(t.line(), 1u);
   EXPECT_EQ(t.column(), 1u);
   EXPECT_EQ(t.to_u32(), params.result);
+
+  t = l.next();
+  EXPECT_TRUE(t.IsEof());
 }
 INSTANTIATE_TEST_SUITE_P(
     LexerTest,

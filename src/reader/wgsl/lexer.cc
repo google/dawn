@@ -216,6 +216,7 @@ Token Lexer::build_token_from_int_if_possible(const Source& source,
       return {Token::Type::kError, source,
               "u32 (" + input_.substr(start, end - start) + ") too large"};
     }
+    pos_ += 1;
     return {source, static_cast<uint32_t>(res)};
   }
 
