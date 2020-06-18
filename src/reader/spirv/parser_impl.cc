@@ -1087,6 +1087,54 @@ ast::type::Type* ParserImpl::ForcedResultType(
   return nullptr;
 }
 
+ast::type::Type* ParserImpl::GetSignedIntMatchingShape(ast::type::Type* other) {
+  if (other == nullptr) {
+    Fail() << "no type provided";
+  }
+  auto* i32 = ctx_.type_mgr().Get(std::make_unique<ast::type::I32Type>());
+  if (other->IsF32() || other->IsU32() || other->IsI32()) {
+    return i32;
+  }
+  auto* vec_ty = other->AsVector();
+  if (vec_ty) {
+    return ctx_.type_mgr().Get(
+        std::make_unique<ast::type::VectorType>(i32, vec_ty->size()));
+  }
+  Fail() << "required numeric scalar or vector, but got " << other->type_name();
+  return nullptr;
+}
+
+ast::type::Type* ParserImpl::GetUnsignedIntMatchingShape(
+    ast::type::Type* other) {
+  if (other == nullptr) {
+    Fail() << "no type provided";
+    return nullptr;
+  }
+  auto* u32 = ctx_.type_mgr().Get(std::make_unique<ast::type::U32Type>());
+  if (other->IsF32() || other->IsU32() || other->IsI32()) {
+    return u32;
+  }
+  auto* vec_ty = other->AsVector();
+  if (vec_ty) {
+    return ctx_.type_mgr().Get(
+        std::make_unique<ast::type::VectorType>(u32, vec_ty->size()));
+  }
+  Fail() << "required numeric scalar or vector, but got " << other->type_name();
+  return nullptr;
+}
+
+TypedExpression ParserImpl::RectifyForcedResultType(
+    TypedExpression expr,
+    SpvOp op,
+    ast::type::Type* first_operand_type) {
+  auto* forced_result_ty = ForcedResultType(op, first_operand_type);
+  if ((forced_result_ty == nullptr) || (forced_result_ty == expr.type)) {
+    return expr;
+  }
+  return {expr.type,
+          std::make_unique<ast::AsExpression>(expr.type, std::move(expr.expr))};
+}
+
 bool ParserImpl::EmitFunctions() {
   if (!success_) {
     return false;

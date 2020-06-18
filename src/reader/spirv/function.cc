@@ -50,6 +50,7 @@
 #include "src/ast/storage_class.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/bool_type.h"
+#include "src/ast/type/type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
@@ -2473,12 +2474,9 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     auto arg1 = MakeOperand(inst, 1);
     auto binary_expr = std::make_unique<ast::BinaryExpression>(
         binary_op, std::move(arg0.expr), std::move(arg1.expr));
-    auto* forced_result_ty = parser_impl_.ForcedResultType(opcode, arg0.type);
-    if (forced_result_ty && forced_result_ty != ast_type) {
-      return {ast_type, std::make_unique<ast::AsExpression>(
-                            ast_type, std::move(binary_expr))};
-    }
-    return {ast_type, std::move(binary_expr)};
+    TypedExpression result(ast_type, std::move(binary_expr));
+    return parser_impl_.RectifyForcedResultType(std::move(result), opcode,
+                                                arg0.type);
   }
 
   auto unary_op = ast::UnaryOp::kNegation;
@@ -2486,12 +2484,9 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     auto arg0 = MakeOperand(inst, 0);
     auto unary_expr = std::make_unique<ast::UnaryOpExpression>(
         unary_op, std::move(arg0.expr));
-    auto* forced_result_ty = parser_impl_.ForcedResultType(opcode, arg0.type);
-    if (forced_result_ty && forced_result_ty != ast_type) {
-      return {ast_type, std::make_unique<ast::AsExpression>(
-                            ast_type, std::move(unary_expr))};
-    }
-    return {ast_type, std::move(unary_expr)};
+    TypedExpression result(ast_type, std::move(unary_expr));
+    return parser_impl_.RectifyForcedResultType(std::move(result), opcode,
+                                                arg0.type);
   }
 
   if (opcode == SpvOpAccessChain || opcode == SpvOpInBoundsAccessChain) {
@@ -2539,7 +2534,8 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   if (opcode == SpvOpVectorShuffle) {
     return MakeVectorShuffle(inst);
   }
-  if (opcode == SpvOpConvertSToF || opcode == SpvOpConvertUToF) {
+  if (opcode == SpvOpConvertSToF || opcode == SpvOpConvertUToF ||
+      opcode == SpvOpConvertFToS || opcode == SpvOpConvertFToU) {
     return MakeNumericConversion(inst);
   }
 
@@ -2547,13 +2543,9 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   // glsl.std.450 readonly function
 
   // Instructions:
-  //    OpCopyObject
   //    OpUndef
-  //    OpBitcast
-  //    OpSatConvertSToU
-  //    OpSatConvertUToS
-  //    OpConvertFToS
-  //    OpConvertFToU
+  //    OpSatConvertSToU // Only in Kernel (OpenCL), not in WebGPU
+  //    OpSatConvertUToS // Only in Kernel (OpenCL), not in WebGPU
   //    OpUConvert // Only needed when multiple widths supported
   //    OpSConvert // Only needed when multiple widths supported
   //    OpFConvert // Only needed when multiple widths supported
@@ -2902,11 +2894,52 @@ void FunctionEmitter::RegisterValuesNeedingNamedDefinition() {
 
 TypedExpression FunctionEmitter::MakeNumericConversion(
     const spvtools::opt::Instruction& inst) {
-  auto* result_type = parser_impl_.ConvertType(inst.type_id());
+  const auto opcode = inst.opcode();
+  auto* requested_type = parser_impl_.ConvertType(inst.type_id());
   auto arg_expr = MakeOperand(inst, 0);
+  if (!arg_expr.expr || !arg_expr.type) {
+    return {};
+  }
 
-  return {result_type, std::make_unique<ast::CastExpression>(
-                           result_type, std::move(arg_expr.expr))};
+  ast::type::Type* expr_type = nullptr;
+  if ((opcode == SpvOpConvertSToF) || (opcode == SpvOpConvertUToF)) {
+    if (arg_expr.type->is_integer_scalar_or_vector()) {
+      expr_type = requested_type;
+    } else {
+      Fail() << "operand for conversion to floating point must be integral "
+                "scalar or vector, but got: "
+             << arg_expr.type->type_name();
+    }
+  } else if (inst.opcode() == SpvOpConvertFToU) {
+    if (arg_expr.type->is_float_scalar_or_vector()) {
+      expr_type = parser_impl_.GetUnsignedIntMatchingShape(arg_expr.type);
+    } else {
+      Fail() << "operand for conversion to unsigned integer must be floating "
+                "point scalar or vector, but got: "
+             << arg_expr.type->type_name();
+    }
+  } else if (inst.opcode() == SpvOpConvertFToS) {
+    if (arg_expr.type->is_float_scalar_or_vector()) {
+      expr_type = parser_impl_.GetSignedIntMatchingShape(arg_expr.type);
+    } else {
+      Fail() << "operand for conversion to signed integer must be floating "
+                "point scalar or vector, but got: "
+             << arg_expr.type->type_name();
+    }
+  }
+  if (expr_type == nullptr) {
+    // The diagnostic has already been emitted.
+    return {};
+  }
+
+  TypedExpression result(expr_type, std::make_unique<ast::CastExpression>(
+                                        expr_type, std::move(arg_expr.expr)));
+
+  if (requested_type == expr_type) {
+    return result;
+  }
+  return {requested_type, std::make_unique<ast::AsExpression>(
+                              requested_type, std::move(result.expr))};
 }
 
 }  // namespace spirv

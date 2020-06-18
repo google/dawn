@@ -280,6 +280,34 @@ class ParserImpl : Reader {
   ast::type::Type* ForcedResultType(SpvOp op,
                                     ast::type::Type* first_operand_type);
 
+  /// Returns a signed integer scalar or vector type matching the shape (scalar,
+  /// vector, and component bit width) of another type, which itself is a
+  /// numeric scalar or vector. Returns null if the other type does not meet the
+  /// requirement.
+  /// @param other the type whose shape must be matched
+  /// @returns the signed scalar or vector type
+  ast::type::Type* GetSignedIntMatchingShape(ast::type::Type* other);
+
+  /// Returns a signed integer scalar or vector type matching the shape (scalar,
+  /// vector, and component bit width) of another type, which itself is a
+  /// numeric scalar or vector. Returns null if the other type does not meet the
+  /// requirement.
+  /// @param other the type whose shape must be matched
+  /// @returns the unsigned scalar or vector type
+  ast::type::Type* GetUnsignedIntMatchingShape(ast::type::Type* other);
+
+  /// Wraps the given expression in an as-cast to the given expression's type,
+  /// when the underlying operation produces a forced result type different
+  /// from the expression's result type. Otherwise, returns the given expression
+  /// unchanged.
+  /// @param expr the expression to pass through or to wrap
+  /// @param op the SPIR-V opcode
+  /// @param first_operand_type the AST type for the first operand.
+  /// @returns the forced AST result type, or nullptr if no forcing is required.
+  TypedExpression RectifyForcedResultType(TypedExpression expr,
+                                          SpvOp op,
+                                          ast::type::Type* first_operand_type);
+
   /// @returns the registered boolean type.
   ast::type::Type* BoolType() const { return bool_type_; }
 
