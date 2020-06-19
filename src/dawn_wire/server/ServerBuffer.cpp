@@ -252,14 +252,11 @@ namespace dawn_wire { namespace server {
         cmd.initialDataInfoLength = initialDataInfoLength;
         cmd.initialDataInfo = nullptr;
 
-        size_t commandSize = cmd.GetRequiredSize();
-        size_t requiredSize = commandSize + initialDataInfoLength;
-        char* allocatedBuffer = static_cast<char*>(GetCmdSpace(requiredSize));
-        cmd.Serialize(allocatedBuffer);
+        char* readHandleSpace = SerializeCommand(cmd, initialDataInfoLength);
 
         if (status == WGPUBufferMapAsyncStatus_Success) {
             // Serialize the initialization message into the space after the command.
-            data->readHandle->SerializeInitialData(ptr, dataLength, allocatedBuffer + commandSize);
+            data->readHandle->SerializeInitialData(ptr, dataLength, readHandleSpace);
 
             // The in-flight map request returned successfully.
             // Move the ReadHandle so it is owned by the buffer.
@@ -284,9 +281,7 @@ namespace dawn_wire { namespace server {
         cmd.requestSerial = data->requestSerial;
         cmd.status = status;
 
-        size_t requiredSize = cmd.GetRequiredSize();
-        char* allocatedBuffer = static_cast<char*>(GetCmdSpace(requiredSize));
-        cmd.Serialize(allocatedBuffer);
+        SerializeCommand(cmd);
 
         if (status == WGPUBufferMapAsyncStatus_Success) {
             // The in-flight map request returned successfully.

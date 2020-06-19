@@ -196,9 +196,7 @@ namespace dawn_wire { namespace client {
                     {% endfor %}
 
                     //* Allocate space to send the command and copy the value args over.
-                    size_t requiredSize = cmd.GetRequiredSize();
-                    char* allocatedBuffer = static_cast<char*>(device->GetClient()->GetCmdSpace(requiredSize));
-                    cmd.Serialize(allocatedBuffer, *device->GetClient());
+                    device->GetClient()->SerializeCommand(cmd);
 
                     {% if method.return_type.category == "object" %}
                         return reinterpret_cast<{{as_cType(method.return_type.name)}}>(allocation->object.get());
@@ -226,10 +224,7 @@ namespace dawn_wire { namespace client {
                 cmd.objectType = ObjectType::{{type.name.CamelCase()}};
                 cmd.objectId = obj->id;
 
-                size_t requiredSize = cmd.GetRequiredSize();
-                char* allocatedBuffer = static_cast<char*>(obj->device->GetClient()->GetCmdSpace(requiredSize));
-                cmd.Serialize(allocatedBuffer);
-
+                obj->device->GetClient()->SerializeCommand(cmd);
                 obj->device->GetClient()->{{type.name.CamelCase()}}Allocator().Free(obj);
             }
 

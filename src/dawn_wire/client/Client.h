@@ -42,12 +42,21 @@ namespace dawn_wire { namespace client {
         const volatile char* HandleCommands(const volatile char* commands, size_t size);
         ReservedTexture ReserveTexture(WGPUDevice device);
 
-        void* GetCmdSpace(size_t size);
+        template <typename Cmd>
+        char* SerializeCommand(const Cmd& cmd, size_t extraSize = 0) {
+            size_t requiredSize = cmd.GetRequiredSize();
+            // TODO(cwallez@chromium.org): Check for overflows and allocation success?
+            char* allocatedBuffer = GetCmdSpace(requiredSize + extraSize);
+            cmd.Serialize(allocatedBuffer, *this);
+            return allocatedBuffer + requiredSize;
+        }
 
         void Disconnect();
 
       private:
 #include "dawn_wire/client/ClientPrototypes_autogen.inc"
+
+        char* GetCmdSpace(size_t size);
 
         Device* mDevice = nullptr;
         CommandSerializer* mSerializer = nullptr;

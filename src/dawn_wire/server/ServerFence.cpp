@@ -35,9 +35,7 @@ namespace dawn_wire { namespace server {
         cmd.fence = data->fence;
         cmd.value = data->value;
 
-        size_t requiredSize = cmd.GetRequiredSize();
-        char* allocatedBuffer = static_cast<char*>(GetCmdSpace(requiredSize));
-        cmd.Serialize(allocatedBuffer);
+        SerializeCommand(cmd);
     }
 
 }}  // namespace dawn_wire::server

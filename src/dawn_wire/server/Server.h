@@ -58,7 +58,15 @@ namespace dawn_wire { namespace server {
         bool InjectTexture(WGPUTexture texture, uint32_t id, uint32_t generation);
 
       private:
-        void* GetCmdSpace(size_t size);
+        template <typename Cmd>
+        char* SerializeCommand(const Cmd& cmd, size_t extraSize = 0) {
+            size_t requiredSize = cmd.GetRequiredSize();
+            // TODO(cwallez@chromium.org): Check for overflows and allocation success?
+            char* allocatedBuffer = GetCmdSpace(requiredSize + extraSize);
+            cmd.Serialize(allocatedBuffer);
+            return allocatedBuffer + requiredSize;
+        }
+        char* GetCmdSpace(size_t size);
 
         // Forwarding callbacks
         static void ForwardUncapturedError(WGPUErrorType type, const char* message, void* userdata);

@@ -34,9 +34,7 @@ namespace dawn_wire { namespace client {
         cmd.self = reinterpret_cast<WGPUDevice>(this);
         cmd.result = ObjectHandle{allocation->object->id, allocation->generation};
 
-        size_t requiredSize = cmd.GetRequiredSize();
-        char* allocatedBuffer = static_cast<char*>(mClient->GetCmdSpace(requiredSize));
-        cmd.Serialize(allocatedBuffer, *mClient);
+        mClient->SerializeCommand(cmd);
     }
 
     Device::~Device() {
@@ -51,9 +49,7 @@ namespace dawn_wire { namespace client {
         cmd.objectType = ObjectType::Queue;
         cmd.objectId = mDefaultQueue->id;
 
-        size_t requiredSize = cmd.GetRequiredSize();
-        char* allocatedBuffer = static_cast<char*>(mClient->GetCmdSpace(requiredSize));
-        cmd.Serialize(allocatedBuffer);
+        mClient->SerializeCommand(cmd);
 
         mClient->QueueAllocator().Free(mDefaultQueue);
     }
@@ -92,10 +88,7 @@ namespace dawn_wire { namespace client {
         cmd.self = reinterpret_cast<WGPUDevice>(this);
         cmd.filter = filter;
 
-        Client* wireClient = GetClient();
-        size_t requiredSize = cmd.GetRequiredSize();
-        char* allocatedBuffer = static_cast<char*>(wireClient->GetCmdSpace(requiredSize));
-        cmd.Serialize(allocatedBuffer, *wireClient);
+        mClient->SerializeCommand(cmd);
     }
 
     bool Device::RequestPopErrorScope(WGPUErrorCallback callback, void* userdata) {
@@ -113,10 +106,7 @@ namespace dawn_wire { namespace client {
         cmd.device = reinterpret_cast<WGPUDevice>(this);
         cmd.requestSerial = serial;
 
-        Client* wireClient = GetClient();
-        size_t requiredSize = cmd.GetRequiredSize();
-        char* allocatedBuffer = static_cast<char*>(wireClient->GetCmdSpace(requiredSize));
-        cmd.Serialize(allocatedBuffer, *wireClient);
+        mClient->SerializeCommand(cmd);
 
         return true;
     }

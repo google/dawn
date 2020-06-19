@@ -102,7 +102,7 @@ namespace dawn_wire {
         //* Serialize the structure and everything it points to into serializeBuffer which must be
         //* big enough to contain all the data (as queried from GetRequiredSize).
         void Serialize(char* serializeBuffer
-            {%- if command.may_have_dawn_object -%}
+            {%- if not is_return_command -%}
                 , const ObjectIdProvider& objectIdProvider
             {%- endif -%}
         ) const;

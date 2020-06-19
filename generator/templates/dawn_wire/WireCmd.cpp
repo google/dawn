@@ -380,7 +380,7 @@ namespace {
     }
 
     void {{Cmd}}::Serialize(char* buffer
-        {%- if command.may_have_dawn_object -%}
+        {%- if not is_return -%}
             , const ObjectIdProvider& objectIdProvider
         {%- endif -%}
     ) const {

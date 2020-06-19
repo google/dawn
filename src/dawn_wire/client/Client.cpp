@@ -54,14 +54,14 @@ namespace dawn_wire { namespace client {
         return result;
     }
 
-    void* Client::GetCmdSpace(size_t size) {
+    char* Client::GetCmdSpace(size_t size) {
         if (DAWN_UNLIKELY(mIsDisconnected)) {
             if (size > mDummyCmdSpace.size()) {
                 mDummyCmdSpace.resize(size);
             }
             return mDummyCmdSpace.data();
         }
-        return mSerializer->GetCmdSpace(size);
+        return static_cast<char*>(mSerializer->GetCmdSpace(size));
     }
 
     void Client::Disconnect() {

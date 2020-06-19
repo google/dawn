@@ -31,18 +31,14 @@ namespace dawn_wire { namespace server {
         cmd.type = type;
         cmd.message = message;
 
-        size_t requiredSize = cmd.GetRequiredSize();
-        char* allocatedBuffer = static_cast<char*>(GetCmdSpace(requiredSize));
-        cmd.Serialize(allocatedBuffer);
+        SerializeCommand(cmd);
     }
 
     void Server::OnDeviceLost(const char* message) {
         ReturnDeviceLostCallbackCmd cmd;
         cmd.message = message;
 
-        size_t requiredSize = cmd.GetRequiredSize();
-        char* allocatedBuffer = static_cast<char*>(GetCmdSpace(requiredSize));
-        cmd.Serialize(allocatedBuffer);
+        SerializeCommand(cmd);
     }
 
     bool Server::DoDevicePopErrorScope(WGPUDevice cDevice, uint64_t requestSerial) {
@@ -73,9 +69,7 @@ namespace dawn_wire { namespace server {
         cmd.type = type;
         cmd.message = message;
 
-        size_t requiredSize = cmd.GetRequiredSize();
-        char* allocatedBuffer = static_cast<char*>(GetCmdSpace(requiredSize));
-        cmd.Serialize(allocatedBuffer);
+        SerializeCommand(cmd);
     }
 
 }}  // namespace dawn_wire::server
