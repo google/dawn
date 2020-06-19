@@ -324,6 +324,11 @@ namespace dawn_native { namespace vulkan {
 
             usedKnobs.shaderFloat16Int8Features.shaderFloat16 = VK_TRUE;
             usedKnobs._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess = VK_TRUE;
+
+            featuresChain.Add(&usedKnobs.shaderFloat16Int8Features,
+                              VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES_KHR);
+            featuresChain.Add(&usedKnobs._16BitStorageFeatures,
+                              VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES);
         }
 
         // Find a universal queue family
