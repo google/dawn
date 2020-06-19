@@ -226,6 +226,11 @@ void Builder::push_capability(uint32_t cap) {
       Instruction{spv::Op::OpCapability, {Operand::Int(cap)}});
 }
 
+void Builder::GenerateLabel(uint32_t id) {
+  push_function_inst(spv::Op::OpLabel, {Operand::Int(id)});
+  current_label_id_ = id;
+}
+
 uint32_t Builder::GenerateU32Literal(uint32_t val) {
   ast::type::U32Type u32;
   ast::SintLiteral lit(&u32, val);
@@ -1083,7 +1088,72 @@ uint32_t Builder::GenerateLiteralIfNeeded(ast::Literal* lit) {
   return result_id;
 }
 
+uint32_t Builder::GenerateShortCircuitBinaryExpression(
+    ast::BinaryExpression* expr) {
+  auto lhs_id = GenerateExpression(expr->lhs());
+  if (lhs_id == 0) {
+    return false;
+  }
+  lhs_id = GenerateLoadIfNeeded(expr->lhs()->result_type(), lhs_id);
+
+  auto original_label_id = current_label_id_;
+
+  auto type_id = GenerateTypeIfNeeded(expr->result_type());
+  if (type_id == 0) {
+    return 0;
+  }
+
+  auto merge_block = result_op();
+  auto merge_block_id = merge_block.to_i();
+
+  auto block = result_op();
+  auto block_id = block.to_i();
+
+  auto true_block_id = block_id;
+  auto false_block_id = merge_block_id;
+
+  // For a logical or we want to only check the RHS if the LHS is failed.
+  if (expr->IsLogicalOr()) {
+    std::swap(true_block_id, false_block_id);
+  }
+
+  push_function_inst(spv::Op::OpSelectionMerge,
+                     {Operand::Int(merge_block_id),
+                      Operand::Int(SpvSelectionControlMaskNone)});
+  push_function_inst(spv::Op::OpBranchConditional,
+                     {Operand::Int(lhs_id), Operand::Int(true_block_id),
+                      Operand::Int(false_block_id)});
+
+  // Output block to check the RHS
+  GenerateLabel(block_id);
+  auto rhs_id = GenerateExpression(expr->rhs());
+  if (rhs_id == 0) {
+    return 0;
+  }
+  rhs_id = GenerateLoadIfNeeded(expr->rhs()->result_type(), rhs_id);
+
+  push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
+
+  // Output the merge block
+  GenerateLabel(merge_block_id);
+
+  auto result = result_op();
+  auto result_id = result.to_i();
+
+  push_function_inst(spv::Op::OpPhi,
+                     {Operand::Int(type_id), result, Operand::Int(lhs_id),
+                      Operand::Int(original_label_id), Operand::Int(rhs_id),
+                      Operand::Int(block_id)});
+
+  return result_id;
+}
+
 uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
+  // There is special logic for short circuiting operators.
+  if (expr->IsLogicalAnd() || expr->IsLogicalOr()) {
+    return GenerateShortCircuitBinaryExpression(expr);
+  }
+
   auto lhs_id = GenerateExpression(expr->lhs());
   if (lhs_id == 0) {
     return 0;
@@ -1466,7 +1536,7 @@ bool Builder::GenerateConditionalBlock(
                       Operand::Int(false_block_id)});
 
   // Output true block
-  push_function_inst(spv::Op::OpLabel, {true_block});
+  GenerateLabel(true_block_id);
   if (!GenerateStatementList(true_body)) {
     return false;
   }
@@ -1477,7 +1547,7 @@ bool Builder::GenerateConditionalBlock(
 
   // Start the false block if needed
   if (false_block_id != merge_block_id) {
-    push_function_inst(spv::Op::OpLabel, {Operand::Int(false_block_id)});
+    GenerateLabel(false_block_id);
 
     auto* else_stmt = else_stmts[cur_else_idx].get();
     // Handle the else case by just outputting the statements.
@@ -1497,7 +1567,7 @@ bool Builder::GenerateConditionalBlock(
   }
 
   // Output the merge block
-  push_function_inst(spv::Op::OpLabel, {merge_block});
+  GenerateLabel(merge_block_id);
 
   return true;
 }
@@ -1568,7 +1638,7 @@ bool Builder::GenerateSwitchStatement(ast::SwitchStatement* stmt) {
       generated_default = true;
     }
 
-    push_function_inst(spv::Op::OpLabel, {Operand::Int(case_ids[i])});
+    GenerateLabel(case_ids[i]);
     if (!GenerateStatementList(item->body())) {
       return false;
     }
@@ -1585,13 +1655,13 @@ bool Builder::GenerateSwitchStatement(ast::SwitchStatement* stmt) {
   }
 
   if (!generated_default) {
-    push_function_inst(spv::Op::OpLabel, {Operand::Int(default_block_id)});
+    GenerateLabel(default_block_id);
     push_function_inst(spv::Op::OpBranch, {Operand::Int(merge_block_id)});
   }
 
   merge_stack_.pop_back();
 
-  push_function_inst(spv::Op::OpLabel, {Operand::Int(merge_block_id)});
+  GenerateLabel(merge_block_id);
   return true;
 }
 
@@ -1613,7 +1683,7 @@ bool Builder::GenerateLoopStatement(ast::LoopStatement* stmt) {
   auto loop_header = result_op();
   auto loop_header_id = loop_header.to_i();
   push_function_inst(spv::Op::OpBranch, {Operand::Int(loop_header_id)});
-  push_function_inst(spv::Op::OpLabel, {loop_header});
+  GenerateLabel(loop_header_id);
 
   auto merge_block = result_op();
   auto merge_block_id = merge_block.to_i();
@@ -1632,7 +1702,7 @@ bool Builder::GenerateLoopStatement(ast::LoopStatement* stmt) {
   merge_stack_.push_back(merge_block_id);
 
   push_function_inst(spv::Op::OpBranch, {Operand::Int(body_block_id)});
-  push_function_inst(spv::Op::OpLabel, {body_block});
+  GenerateLabel(body_block_id);
   if (!GenerateStatementList(stmt->body())) {
     return false;
   }
@@ -1642,7 +1712,7 @@ bool Builder::GenerateLoopStatement(ast::LoopStatement* stmt) {
     push_function_inst(spv::Op::OpBranch, {Operand::Int(continue_block_id)});
   }
 
-  push_function_inst(spv::Op::OpLabel, {continue_block});
+  GenerateLabel(continue_block_id);
   if (!GenerateStatementList(stmt->continuing())) {
     return false;
   }
@@ -1651,7 +1721,7 @@ bool Builder::GenerateLoopStatement(ast::LoopStatement* stmt) {
   merge_stack_.pop_back();
   continue_stack_.pop_back();
 
-  push_function_inst(spv::Op::OpLabel, {merge_block});
+  GenerateLabel(merge_block_id);
 
   return true;
 }

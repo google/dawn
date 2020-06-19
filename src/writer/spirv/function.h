@@ -52,6 +52,9 @@ class Function {
   /// @returns the declaration
   const Instruction& declaration() const { return declaration_; }
 
+  /// @returns the function label id
+  uint32_t label_id() const { return label_op_.to_i(); }
+
   /// Adds an instruction to the instruction list
   /// @param op the op to set
   /// @param operands the operands for the instruction

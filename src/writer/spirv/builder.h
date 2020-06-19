@@ -159,7 +159,10 @@ class Builder {
 
   /// Adds a function to the builder
   /// @param func the function to add
-  void push_function(const Function& func) { functions_.push_back(func); }
+  void push_function(const Function& func) {
+    functions_.push_back(func);
+    current_label_id_ = func.label_id();
+  }
   /// @returns the functions
   const std::vector<Function>& functions() const { return functions_; }
   /// Pushes an instruction to the current function
@@ -183,6 +186,9 @@ class Builder {
   /// @returns the SPIR-V builtin or SpvBuiltInMax on error.
   SpvBuiltIn ConvertBuiltin(ast::Builtin builtin) const;
 
+  /// Generates a label for the given id
+  /// @param id the id to use for the label
+  void GenerateLabel(uint32_t id);
   /// Generates a uint32_t literal.
   /// @param val the value to generate
   /// @returns the ID of the generated literal
@@ -291,6 +297,10 @@ class Builder {
   /// @param expr the expression to generate
   /// @returns the expression ID on success or 0 otherwise
   uint32_t GenerateBinaryExpression(ast::BinaryExpression* expr);
+  /// Generates a short circuting binary expression
+  /// @param expr the expression to generate
+  /// @returns teh expression ID on success or 0 otherwise
+  uint32_t GenerateShortCircuitBinaryExpression(ast::BinaryExpression* expr);
   /// Generates a call expression
   /// @param expr the expression to generate
   /// @returns the expression ID on success or 0 otherwise
@@ -395,6 +405,7 @@ class Builder {
   ast::Module* mod_;
   std::string error_;
   uint32_t next_id_ = 1;
+  uint32_t current_label_id_ = 0;
   std::vector<Instruction> capabilities_;
   std::vector<Instruction> preamble_;
   std::vector<Instruction> debug_;

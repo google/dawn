@@ -16,10 +16,12 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/binary_expression.h"
+#include "src/ast/bool_literal.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/type/bool_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/matrix_type.h"
@@ -863,6 +865,216 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix) {
             R"(%6 = OpLoad %3 %1
 %7 = OpLoad %3 %1
 %8 = OpMatrixTimesMatrix %3 %6 %7
+)");
+}
+
+TEST_F(BuilderTest, Binary_LogicalAnd) {
+  ast::type::I32Type i32;
+
+  auto lhs = std::make_unique<ast::BinaryExpression>(
+      ast::BinaryOp::kEqual,
+      std::make_unique<ast::ScalarConstructorExpression>(
+          std::make_unique<ast::SintLiteral>(&i32, 1)),
+      std::make_unique<ast::ScalarConstructorExpression>(
+          std::make_unique<ast::SintLiteral>(&i32, 2)));
+
+  auto rhs = std::make_unique<ast::BinaryExpression>(
+      ast::BinaryOp::kEqual,
+      std::make_unique<ast::ScalarConstructorExpression>(
+          std::make_unique<ast::SintLiteral>(&i32, 3)),
+      std::make_unique<ast::ScalarConstructorExpression>(
+          std::make_unique<ast::SintLiteral>(&i32, 4)));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ast::BinaryExpression expr(ast::BinaryOp::kLogicalAnd, std::move(lhs),
+                             std::move(rhs));
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  b.GenerateLabel(b.next_id());
+
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 12u) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+%3 = OpConstant %2 1
+%4 = OpConstant %2 2
+%6 = OpTypeBool
+%9 = OpConstant %2 3
+%10 = OpConstant %2 4
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%1 = OpLabel
+%5 = OpIEqual %6 %3 %4
+OpSelectionMerge %7 None
+OpBranchConditional %5 %8 %7
+%8 = OpLabel
+%11 = OpIEqual %6 %9 %10
+OpBranch %7
+%7 = OpLabel
+%12 = OpPhi %6 %5 %1 %11 %8
+)");
+}
+
+TEST_F(BuilderTest, Binary_LogicalAnd_WithLoads) {
+  ast::type::BoolType bool_type;
+
+  auto a_var = std::make_unique<ast::Variable>(
+      "a", ast::StorageClass::kFunction, &bool_type);
+  a_var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::BoolLiteral>(&bool_type, true)));
+  auto b_var = std::make_unique<ast::Variable>(
+      "b", ast::StorageClass::kFunction, &bool_type);
+  b_var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::BoolLiteral>(&bool_type, false)));
+
+  auto lhs = std::make_unique<ast::IdentifierExpression>("a");
+  auto rhs = std::make_unique<ast::IdentifierExpression>("b");
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(a_var.get());
+  td.RegisterVariableForTesting(b_var.get());
+
+  ast::BinaryExpression expr(ast::BinaryOp::kLogicalAnd, std::move(lhs),
+                             std::move(rhs));
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  b.GenerateLabel(b.next_id());
+
+  ASSERT_TRUE(b.GenerateGlobalVariable(a_var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(b_var.get())) << b.error();
+
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 12u) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
+%3 = OpConstantTrue %2
+%5 = OpTypePointer Function %2
+%4 = OpVariable %5 Function %3
+%6 = OpConstantFalse %2
+%7 = OpVariable %5 Function %6
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%1 = OpLabel
+%8 = OpLoad %2 %4
+OpSelectionMerge %9 None
+OpBranchConditional %8 %10 %9
+%10 = OpLabel
+%11 = OpLoad %2 %7
+OpBranch %9
+%9 = OpLabel
+%12 = OpPhi %2 %8 %1 %11 %10
+)");
+}
+
+TEST_F(BuilderTest, Binary_LogicalOr) {
+  ast::type::I32Type i32;
+
+  auto lhs = std::make_unique<ast::BinaryExpression>(
+      ast::BinaryOp::kEqual,
+      std::make_unique<ast::ScalarConstructorExpression>(
+          std::make_unique<ast::SintLiteral>(&i32, 1)),
+      std::make_unique<ast::ScalarConstructorExpression>(
+          std::make_unique<ast::SintLiteral>(&i32, 2)));
+
+  auto rhs = std::make_unique<ast::BinaryExpression>(
+      ast::BinaryOp::kEqual,
+      std::make_unique<ast::ScalarConstructorExpression>(
+          std::make_unique<ast::SintLiteral>(&i32, 3)),
+      std::make_unique<ast::ScalarConstructorExpression>(
+          std::make_unique<ast::SintLiteral>(&i32, 4)));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+
+  ast::BinaryExpression expr(ast::BinaryOp::kLogicalOr, std::move(lhs),
+                             std::move(rhs));
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  b.GenerateLabel(b.next_id());
+
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 12u) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+%3 = OpConstant %2 1
+%4 = OpConstant %2 2
+%6 = OpTypeBool
+%9 = OpConstant %2 3
+%10 = OpConstant %2 4
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%1 = OpLabel
+%5 = OpIEqual %6 %3 %4
+OpSelectionMerge %7 None
+OpBranchConditional %5 %7 %8
+%8 = OpLabel
+%11 = OpIEqual %6 %9 %10
+OpBranch %7
+%7 = OpLabel
+%12 = OpPhi %6 %5 %1 %11 %8
+)");
+}
+
+TEST_F(BuilderTest, Binary_LogicalOr_WithLoads) {
+  ast::type::BoolType bool_type;
+
+  auto a_var = std::make_unique<ast::Variable>(
+      "a", ast::StorageClass::kFunction, &bool_type);
+  a_var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::BoolLiteral>(&bool_type, true)));
+  auto b_var = std::make_unique<ast::Variable>(
+      "b", ast::StorageClass::kFunction, &bool_type);
+  b_var->set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::BoolLiteral>(&bool_type, false)));
+
+  auto lhs = std::make_unique<ast::IdentifierExpression>("a");
+  auto rhs = std::make_unique<ast::IdentifierExpression>("b");
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(a_var.get());
+  td.RegisterVariableForTesting(b_var.get());
+
+  ast::BinaryExpression expr(ast::BinaryOp::kLogicalOr, std::move(lhs),
+                             std::move(rhs));
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  b.GenerateLabel(b.next_id());
+
+  ASSERT_TRUE(b.GenerateGlobalVariable(a_var.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(b_var.get())) << b.error();
+
+  EXPECT_EQ(b.GenerateBinaryExpression(&expr), 12u) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
+%3 = OpConstantTrue %2
+%5 = OpTypePointer Function %2
+%4 = OpVariable %5 Function %3
+%6 = OpConstantFalse %2
+%7 = OpVariable %5 Function %6
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%1 = OpLabel
+%8 = OpLoad %2 %4
+OpSelectionMerge %9 None
+OpBranchConditional %8 %9 %10
+%10 = OpLabel
+%11 = OpLoad %2 %7
+OpBranch %9
+%9 = OpLabel
+%12 = OpPhi %2 %8 %1 %11 %10
 )");
 }
 
