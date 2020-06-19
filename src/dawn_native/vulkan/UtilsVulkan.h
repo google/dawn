@@ -53,10 +53,10 @@ namespace dawn_native { namespace vulkan {
         // which is why the VkBaseOutStructure* casts below are necessary.
         template <typename VK_STRUCT_TYPE>
         explicit PNextChainBuilder(VK_STRUCT_TYPE* head)
-            : mTailPtr(&reinterpret_cast<VkBaseOutStructure*>(head)->pNext) {
+            : mCurrent(reinterpret_cast<VkBaseOutStructure*>(head)) {
             // Find the end of the current chain.
-            while (*mTailPtr) {
-                mTailPtr = &(*mTailPtr)->pNext;
+            while (mCurrent->pNext != nullptr) {
+                mCurrent = mCurrent->pNext;
             }
         }
 
@@ -70,8 +70,9 @@ namespace dawn_native { namespace vulkan {
                     offsetof(VK_STRUCT_TYPE, pNext) == offsetof(VkBaseOutStructure, pNext),
                 "Argument type is not a proper Vulkan structure type");
             vkStruct->pNext = nullptr;
-            *mTailPtr = reinterpret_cast<VkBaseOutStructure*>(vkStruct);
-            mTailPtr = &(*mTailPtr)->pNext;
+
+            mCurrent->pNext = reinterpret_cast<VkBaseOutStructure*>(vkStruct);
+            mCurrent = mCurrent->pNext;
         }
 
         // A variant of Add() above that also initializes the |sType| field in |vk_struct|.
@@ -82,7 +83,7 @@ namespace dawn_native { namespace vulkan {
         }
 
       private:
-        VkBaseOutStructure** mTailPtr;
+        VkBaseOutStructure* mCurrent;
     };
 
     VkCompareOp ToVulkanCompareOp(wgpu::CompareFunction op);
