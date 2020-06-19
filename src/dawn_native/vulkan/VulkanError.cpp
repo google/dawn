@@ -90,7 +90,8 @@ namespace dawn_native { namespace vulkan {
 
         std::string message = std::string(context) + " failed with " + VkResultAsString(result);
 
-        if (result == VK_ERROR_OUT_OF_DEVICE_MEMORY || result == VK_FAKE_DEVICE_OOM_FOR_TESTING) {
+        if (result == VK_ERROR_OUT_OF_DEVICE_MEMORY || result == VK_ERROR_OUT_OF_HOST_MEMORY ||
+            result == VK_FAKE_DEVICE_OOM_FOR_TESTING) {
             return DAWN_OUT_OF_MEMORY_ERROR(message);
         } else if (result == VK_ERROR_DEVICE_LOST) {
             return DAWN_DEVICE_LOST_ERROR(message);
