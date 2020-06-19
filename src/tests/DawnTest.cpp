@@ -691,6 +691,14 @@ bool DawnTestBase::IsSpvcParserBeingUsed() const {
     return gTestEnv->IsSpvcParserBeingUsed();
 }
 
+bool DawnTestBase::IsAsan() const {
+#if defined(ADDRESS_SANITIZER)
+    return true;
+#else
+    return false;
+#endif
+}
+
 bool DawnTestBase::HasVendorIdFilter() const {
     return gTestEnv->HasVendorIdFilter();
 }

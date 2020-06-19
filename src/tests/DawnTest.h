@@ -250,6 +250,8 @@ class DawnTestBase {
     bool IsSpvcBeingUsed() const;
     bool IsSpvcParserBeingUsed() const;
 
+    bool IsAsan() const;
+
     void StartExpectDeviceError();
     bool EndExpectDeviceError();
 

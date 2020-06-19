@@ -526,6 +526,7 @@ TEST_P(BufferTests, ZeroSizedBuffer) {
 TEST_P(BufferTests, CreateBufferOOM) {
     // TODO(http://crbug.com/dawn/27): Missing support.
     DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsAsan());
 
     wgpu::BufferDescriptor descriptor;
     descriptor.usage = wgpu::BufferUsage::CopyDst;
@@ -545,6 +546,7 @@ TEST_P(BufferTests, CreateBufferOOM) {
 TEST_P(BufferTests, CreateBufferMappedOOM) {
     // TODO(http://crbug.com/dawn/27): Missing support.
     DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsAsan());
 
     // Test non-mappable buffer
     {
@@ -592,6 +594,7 @@ TEST_P(BufferTests, CreateBufferMappedOOM) {
 TEST_P(BufferTests, CreateBufferOOMMapReadAsync) {
     // TODO(http://crbug.com/dawn/27): Missing support.
     DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsAsan());
 
     auto RunTest = [this](const wgpu::BufferDescriptor& descriptor) {
         wgpu::Buffer buffer;
@@ -632,6 +635,7 @@ TEST_P(BufferTests, CreateBufferOOMMapReadAsync) {
 TEST_P(BufferTests, CreateBufferOOMMapWriteAsync) {
     // TODO(http://crbug.com/dawn/27): Missing support.
     DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsAsan());
 
     auto RunTest = [this](const wgpu::BufferDescriptor& descriptor) {
         wgpu::Buffer buffer;
