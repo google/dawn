@@ -46,11 +46,15 @@ namespace dawn_native { namespace opengl {
         }
 
         GLenum TargetForTextureViewDimension(wgpu::TextureViewDimension dimension,
+                                             uint32_t arrayLayerCount,
                                              uint32_t sampleCount) {
             switch (dimension) {
                 case wgpu::TextureViewDimension::e2D:
                     return (sampleCount > 1) ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
                 case wgpu::TextureViewDimension::e2DArray:
+                    if (arrayLayerCount == 1) {
+                        return (sampleCount > 1) ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
+                    }
                     ASSERT(sampleCount == 1);
                     return GL_TEXTURE_2D_ARRAY;
                 case wgpu::TextureViewDimension::Cube:
@@ -387,7 +391,8 @@ namespace dawn_native { namespace opengl {
 
     TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor)
         : TextureViewBase(texture, descriptor), mOwnsHandle(false) {
-        mTarget = TargetForTextureViewDimension(descriptor->dimension, texture->GetSampleCount());
+        mTarget = TargetForTextureViewDimension(descriptor->dimension, descriptor->arrayLayerCount,
+                                                texture->GetSampleCount());
 
         if (!UsageNeedsTextureView(texture->GetUsage())) {
             mHandle = 0;

@@ -256,9 +256,6 @@ TEST_F(GetBindGroupLayoutTests, Multisampled) {
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
 
-    // TODO: Support multisampling
-    GTEST_SKIP() << "Multisampling unimplemented";
-#if 0
     {
         binding.multisampled = true;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
@@ -268,7 +265,6 @@ TEST_F(GetBindGroupLayoutTests, Multisampled) {
         void main() {})");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
-#endif
 }
 
 // Test that texture view dimension matches the shader.

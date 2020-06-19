@@ -107,4 +107,10 @@ extern void __cdecl __debugbreak(void);
 #    define DAWN_FORCE_INLINE inline
 #endif
 
+#if defined(__clang__)
+#    define DAWN_FALLTHROUGH [[clang::fallthrough]]
+#else
+#    define DAWN_FALLTHROUGH
+#endif
+
 #endif  // COMMON_COMPILER_H_

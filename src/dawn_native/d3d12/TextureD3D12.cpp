@@ -992,35 +992,50 @@ namespace dawn_native { namespace d3d12 {
         // Currently we always use D3D12_TEX2D_ARRAY_SRV because we cannot specify base array layer
         // and layer count in D3D12_TEX2D_SRV. For 2D texture views, we treat them as 1-layer 2D
         // array textures.
+        // Multisampled textures may only be one array layer, so we use
+        // D3D12_SRV_DIMENSION_TEXTURE2DMS.
         // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_srv
         // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_array_srv
         // TODO(jiawei.shao@intel.com): support more texture view dimensions.
-        // TODO(jiawei.shao@intel.com): support creating SRV on multisampled textures.
-        switch (descriptor->dimension) {
-            case wgpu::TextureViewDimension::e2D:
-            case wgpu::TextureViewDimension::e2DArray:
-                ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
-                mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
-                mSrvDesc.Texture2DArray.ArraySize = descriptor->arrayLayerCount;
-                mSrvDesc.Texture2DArray.FirstArraySlice = descriptor->baseArrayLayer;
-                mSrvDesc.Texture2DArray.MipLevels = descriptor->mipLevelCount;
-                mSrvDesc.Texture2DArray.MostDetailedMip = descriptor->baseMipLevel;
-                mSrvDesc.Texture2DArray.PlaneSlice = 0;
-                mSrvDesc.Texture2DArray.ResourceMinLODClamp = 0;
-                break;
-            case wgpu::TextureViewDimension::Cube:
-            case wgpu::TextureViewDimension::CubeArray:
-                ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
-                ASSERT(descriptor->arrayLayerCount % 6 == 0);
-                mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBEARRAY;
-                mSrvDesc.TextureCubeArray.First2DArrayFace = descriptor->baseArrayLayer;
-                mSrvDesc.TextureCubeArray.NumCubes = descriptor->arrayLayerCount / 6;
-                mSrvDesc.TextureCubeArray.MostDetailedMip = descriptor->baseMipLevel;
-                mSrvDesc.TextureCubeArray.MipLevels = descriptor->mipLevelCount;
-                mSrvDesc.TextureCubeArray.ResourceMinLODClamp = 0;
-                break;
-            default:
-                UNREACHABLE();
+        if (GetTexture()->IsMultisampledTexture()) {
+            switch (descriptor->dimension) {
+                case wgpu::TextureViewDimension::e2DArray:
+                    ASSERT(texture->GetArrayLayers() == 1);
+                    DAWN_FALLTHROUGH;
+                case wgpu::TextureViewDimension::e2D:
+                    ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
+                    mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DMS;
+                    break;
+                default:
+                    UNREACHABLE();
+            }
+        } else {
+            switch (descriptor->dimension) {
+                case wgpu::TextureViewDimension::e2D:
+                case wgpu::TextureViewDimension::e2DArray:
+                    ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
+                    mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+                    mSrvDesc.Texture2DArray.ArraySize = descriptor->arrayLayerCount;
+                    mSrvDesc.Texture2DArray.FirstArraySlice = descriptor->baseArrayLayer;
+                    mSrvDesc.Texture2DArray.MipLevels = descriptor->mipLevelCount;
+                    mSrvDesc.Texture2DArray.MostDetailedMip = descriptor->baseMipLevel;
+                    mSrvDesc.Texture2DArray.PlaneSlice = 0;
+                    mSrvDesc.Texture2DArray.ResourceMinLODClamp = 0;
+                    break;
+                case wgpu::TextureViewDimension::Cube:
+                case wgpu::TextureViewDimension::CubeArray:
+                    ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
+                    ASSERT(descriptor->arrayLayerCount % 6 == 0);
+                    mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBEARRAY;
+                    mSrvDesc.TextureCubeArray.First2DArrayFace = descriptor->baseArrayLayer;
+                    mSrvDesc.TextureCubeArray.NumCubes = descriptor->arrayLayerCount / 6;
+                    mSrvDesc.TextureCubeArray.MostDetailedMip = descriptor->baseMipLevel;
+                    mSrvDesc.TextureCubeArray.MipLevels = descriptor->mipLevelCount;
+                    mSrvDesc.TextureCubeArray.ResourceMinLODClamp = 0;
+                    break;
+                default:
+                    UNREACHABLE();
+            }
         }
     }
 

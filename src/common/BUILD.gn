@@ -96,15 +96,16 @@ config("dawn_internal") {
       "-Wc++11-narrowing",
       "-Wdeprecated-copy",
       "-Wextra-semi-stmt",
+      "-Wimplicit-fallthrough",
       "-Winconsistent-missing-destructor-override",
       "-Winvalid-offsetof",
       "-Wmissing-field-initializers",
+      "-Wnon-c-typedef-for-linkage",
       "-Wpessimizing-move",
       "-Wreturn-std-move-in-c++11",
       "-Wshadow-field",
       "-Wstrict-prototypes",
       "-Wtautological-unsigned-zero-compare",
-      "-Wnon-c-typedef-for-linkage",
     ]
 
     if (is_win) {

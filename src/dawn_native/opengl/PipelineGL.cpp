@@ -219,7 +219,7 @@ namespace dawn_native { namespace opengl {
     }
 
     const std::vector<GLuint>& PipelineGL::GetTextureUnitsForTextureView(GLuint index) const {
-        ASSERT(index < mUnitsForSamplers.size());
+        ASSERT(index < mUnitsForTextures.size());
         return mUnitsForTextures[index];
     }
 

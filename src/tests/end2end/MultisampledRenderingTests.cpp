@@ -27,8 +27,8 @@ class MultisampledRenderingTest : public DawnTest {
     }
 
     void InitTexturesForTest() {
-        mMultisampledColorView =
-            CreateTextureForOutputAttachment(kColorFormat, kSampleCount).CreateView();
+        mMultisampledColorTexture = CreateTextureForOutputAttachment(kColorFormat, kSampleCount);
+        mMultisampledColorView = mMultisampledColorTexture.CreateView();
         mResolveTexture = CreateTextureForOutputAttachment(kColorFormat, 1);
         mResolveView = mResolveTexture.CreateView();
 
@@ -173,6 +173,7 @@ class MultisampledRenderingTest : public DawnTest {
     constexpr static wgpu::TextureFormat kDepthStencilFormat =
         wgpu::TextureFormat::Depth24PlusStencil8;
 
+    wgpu::Texture mMultisampledColorTexture;
     wgpu::TextureView mMultisampledColorView;
     wgpu::Texture mResolveTexture;
     wgpu::TextureView mResolveView;
@@ -232,6 +233,34 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTexture) {
         utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
             {mMultisampledColorView}, {mResolveView}, wgpu::LoadOp::Clear, wgpu::LoadOp::Clear,
             kTestDepth);
+
+        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, &kGreen.r, kSize);
+    }
+
+    wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    VerifyResolveTarget(kGreen, mResolveTexture);
+}
+
+// Test that a single-layer multisampled texture view can be created and resolved from.
+TEST_P(MultisampledRenderingTest, ResolveFromSingleLayerArrayInto2DTexture) {
+    constexpr bool kTestDepth = false;
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(kTestDepth);
+
+    constexpr wgpu::Color kGreen = {0.0f, 0.8f, 0.0f, 0.8f};
+    constexpr uint32_t kSize = sizeof(kGreen);
+
+    // Draw a green triangle.
+    {
+        wgpu::TextureViewDescriptor desc = {};
+        desc.dimension = wgpu::TextureViewDimension::e2DArray;
+        desc.arrayLayerCount = 1;
+
+        utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+            {mMultisampledColorTexture.CreateView(&desc)}, {mResolveView}, wgpu::LoadOp::Clear,
+            wgpu::LoadOp::Clear, kTestDepth);
 
         EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, &kGreen.r, kSize);
     }
