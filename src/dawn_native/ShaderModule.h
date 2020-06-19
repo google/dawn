@@ -63,8 +63,8 @@ namespace dawn_native {
             using BindingInfo::visibility;
         };
 
-        using ModuleBindingInfo =
-            std::array<std::map<BindingNumber, ShaderBindingInfo>, kMaxBindGroups>;
+        using BindingInfoMap = std::map<BindingNumber, ShaderBindingInfo>;
+        using ModuleBindingInfo = std::array<BindingInfoMap, kMaxBindGroups>;
 
         const ModuleBindingInfo& GetBindingInfo() const;
         const std::bitset<kMaxVertexAttributes>& GetUsedVertexAttributes() const;
@@ -76,6 +76,9 @@ namespace dawn_native {
         const FragmentOutputBaseTypes& GetFragmentOutputBaseTypes() const;
 
         MaybeError ValidateCompatibilityWithPipelineLayout(const PipelineLayoutBase* layout) const;
+
+        RequiredBufferSizes ComputeRequiredBufferSizesForLayout(
+            const PipelineLayoutBase* layout) const;
 
         // Functors necessary for the unordered_set<ShaderModuleBase*>-based cache.
         struct HashFunc {
@@ -99,8 +102,11 @@ namespace dawn_native {
         ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
         MaybeError ValidateCompatibilityWithBindGroupLayout(
-            size_t group,
+            uint32_t group,
             const BindGroupLayoutBase* layout) const;
+
+        std::vector<uint64_t> GetBindGroupMinBufferSizes(const BindingInfoMap& shaderMap,
+                                                         const BindGroupLayoutBase* layout) const;
 
         // Different implementations reflection into the shader depending on
         // whether using spvc, or directly accessing spirv-cross.

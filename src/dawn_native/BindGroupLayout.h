@@ -79,10 +79,12 @@ namespace dawn_native {
         };
 
         BindingIndex GetBindingCount() const;
+        BindingIndex GetBufferCount() const;
         // Returns |BindingIndex| because dynamic buffers are packed at the front.
         BindingIndex GetDynamicBufferCount() const;
         uint32_t GetDynamicUniformBufferCount() const;
         uint32_t GetDynamicStorageBufferCount() const;
+        uint32_t GetUnverifiedBufferCount() const;
 
         struct BufferBindingData {
             uint64_t offset;
@@ -92,6 +94,7 @@ namespace dawn_native {
         struct BindingDataPointers {
             ityp::span<BindingIndex, BufferBindingData> const bufferData = {};
             ityp::span<BindingIndex, Ref<ObjectBase>> const bindings = {};
+            ityp::span<uint32_t, uint64_t> const unverifiedBufferSizes = {};
         };
 
         // Compute the amount of space / alignment required to store bindings for a bind group of
@@ -119,6 +122,7 @@ namespace dawn_native {
 
         BindingIndex mBindingCount;
         BindingIndex mBufferCount{0};  // |BindingIndex| because buffers are packed at the front.
+        uint32_t mUnverifiedBufferCount = 0;  // Buffers with minimum buffer size unspecified
         uint32_t mDynamicUniformBufferCount = 0;
         uint32_t mDynamicStorageBufferCount = 0;
 

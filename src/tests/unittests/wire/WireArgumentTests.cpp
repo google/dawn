@@ -315,7 +315,8 @@ TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
          false,
          WGPUTextureViewDimension_2D,
          WGPUTextureComponentType_Float,
-         WGPUTextureFormat_RGBA8Unorm},
+         WGPUTextureFormat_RGBA8Unorm,
+         0},
         {1,
          WGPUShaderStage_Vertex,
          WGPUBindingType_SampledTexture,
@@ -323,7 +324,8 @@ TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
          false,
          WGPUTextureViewDimension_2D,
          WGPUTextureComponentType_Float,
-         WGPUTextureFormat_RGBA8Unorm},
+         WGPUTextureFormat_RGBA8Unorm,
+         0},
         {2,
          static_cast<WGPUShaderStage>(WGPUShaderStage_Vertex | WGPUShaderStage_Fragment),
          WGPUBindingType_UniformBuffer,
@@ -331,7 +333,8 @@ TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
          false,
          WGPUTextureViewDimension_2D,
          WGPUTextureComponentType_Float,
-         WGPUTextureFormat_RGBA8Unorm},
+         WGPUTextureFormat_RGBA8Unorm,
+         0},
     };
     WGPUBindGroupLayoutDescriptor bglDescriptor = {};
     bglDescriptor.entryCount = NUM_BINDINGS;

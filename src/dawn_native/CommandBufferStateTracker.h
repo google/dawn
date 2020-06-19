@@ -16,6 +16,7 @@
 #define DAWNNATIVE_COMMANDBUFFERSTATETRACKER_H
 
 #include "common/Constants.h"
+#include "dawn_native/BindingInfo.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
 
@@ -57,6 +58,8 @@ namespace dawn_native {
 
         PipelineLayoutBase* mLastPipelineLayout = nullptr;
         RenderPipelineBase* mLastRenderPipeline = nullptr;
+
+        const RequiredBufferSizes* mMinimumBufferSizes = nullptr;
     };
 
 }  // namespace dawn_native

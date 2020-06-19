@@ -183,6 +183,29 @@ namespace dawn_native {
             return {};
         }
 
+        RequiredBufferSizes ComputeMinBufferSizes(const RenderPipelineDescriptor* descriptor) {
+            RequiredBufferSizes bufferSizes =
+                descriptor->vertexStage.module->ComputeRequiredBufferSizesForLayout(
+                    descriptor->layout);
+
+            // Merge the two buffer size requirements by taking the larger element from each
+            if (descriptor->fragmentStage != nullptr) {
+                RequiredBufferSizes fragmentSizes =
+                    descriptor->fragmentStage->module->ComputeRequiredBufferSizesForLayout(
+                        descriptor->layout);
+
+                for (uint32_t group = 0; group < bufferSizes.size(); ++group) {
+                    ASSERT(bufferSizes[group].size() == fragmentSizes[group].size());
+                    for (size_t i = 0; i < bufferSizes[group].size(); ++i) {
+                        bufferSizes[group][i] =
+                            std::max(bufferSizes[group][i], fragmentSizes[group][i]);
+                    }
+                }
+            }
+
+            return bufferSizes;
+        }
+
     }  // anonymous namespace
 
     // Helper functions
@@ -380,7 +403,8 @@ namespace dawn_native {
                                            const RenderPipelineDescriptor* descriptor)
         : PipelineBase(device,
                        descriptor->layout,
-                       wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment),
+                       wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment,
+                       ComputeMinBufferSizes(descriptor)),
           mAttachmentState(device->GetOrCreateAttachmentState(descriptor)),
           mPrimitiveTopology(descriptor->primitiveTopology),
           mSampleMask(descriptor->sampleMask),

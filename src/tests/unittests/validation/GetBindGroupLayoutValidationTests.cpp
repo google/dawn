@@ -106,6 +106,7 @@ TEST_F(GetBindGroupLayoutTests, DefaultShaderStageAndDynamicOffsets) {
     binding.binding = 0;
     binding.type = wgpu::BindingType::UniformBuffer;
     binding.multisampled = false;
+    binding.minBufferBindingSize = 4 * sizeof(float);
 
     wgpu::BindGroupLayoutDescriptor desc = {};
     desc.entryCount = 1;
@@ -155,6 +156,7 @@ TEST_F(GetBindGroupLayoutTests, ComputePipeline) {
     binding.type = wgpu::BindingType::UniformBuffer;
     binding.visibility = kVisibilityAll;
     binding.hasDynamicOffset = false;
+    binding.minBufferBindingSize = 4 * sizeof(float);
 
     wgpu::BindGroupLayoutDescriptor desc = {};
     desc.entryCount = 1;
@@ -169,6 +171,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
     binding.binding = 0;
     binding.hasDynamicOffset = false;
     binding.multisampled = false;
+    binding.minBufferBindingSize = 4 * sizeof(float);
 
     wgpu::BindGroupLayoutDescriptor desc = {};
     desc.entryCount = 1;
@@ -213,6 +216,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
 
+    binding.minBufferBindingSize = 0;
     {
         binding.type = wgpu::BindingType::SampledTexture;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
@@ -392,6 +396,7 @@ TEST_F(GetBindGroupLayoutTests, BindingIndices) {
     binding.visibility = kVisibilityAll;
     binding.hasDynamicOffset = false;
     binding.multisampled = false;
+    binding.minBufferBindingSize = 4 * sizeof(float);
 
     wgpu::BindGroupLayoutDescriptor desc = {};
     desc.entryCount = 1;

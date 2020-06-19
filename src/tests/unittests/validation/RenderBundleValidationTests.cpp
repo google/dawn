@@ -66,8 +66,8 @@ namespace {
             InitializeRenderPipelineDescriptor(&descriptor);
             pipeline = device.CreateRenderPipeline(&descriptor);
 
-            float data[4];
-            wgpu::Buffer buffer = utils::CreateBufferFromData(device, data, 4 * sizeof(float),
+            float data[8];
+            wgpu::Buffer buffer = utils::CreateBufferFromData(device, data, 8 * sizeof(float),
                                                               wgpu::BufferUsage::Uniform);
 
             constexpr static float kVertices[] = {-1.f, 1.f, 1.f, -1.f, -1.f, 1.f};
@@ -84,13 +84,13 @@ namespace {
                 utils::CreateBufferFromData(device, kVertices, sizeof(kVertices),
                                             wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Storage);
 
-            bg0 = utils::MakeBindGroup(device, bgls[0], {{0, buffer, 0, 4 * sizeof(float)}});
+            bg0 = utils::MakeBindGroup(device, bgls[0], {{0, buffer, 0, 8 * sizeof(float)}});
             bg1 = utils::MakeBindGroup(
                 device, bgls[1],
                 {{0, buffer, 0, 4 * sizeof(float)}, {1, storageBuffer, 0, sizeof(kVertices)}});
 
             bg1Vertex = utils::MakeBindGroup(device, bgls[1],
-                                             {{0, buffer, 0, 4 * sizeof(float)},
+                                             {{0, buffer, 0, 8 * sizeof(float)},
                                               {1, vertexStorageBuffer, 0, sizeof(kVertices)}});
         }
 

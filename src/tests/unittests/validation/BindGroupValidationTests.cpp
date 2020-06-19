@@ -877,7 +877,9 @@ class SetBindGroupValidationTest : public ValidationTest {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
         renderPassEncoder.SetPipeline(renderPipeline);
-        renderPassEncoder.SetBindGroup(0, bindGroup, count, offsets);
+        if (bindGroup != nullptr) {
+            renderPassEncoder.SetBindGroup(0, bindGroup, count, offsets);
+        }
         renderPassEncoder.Draw(3);
         renderPassEncoder.EndPass();
         if (!expectation) {
@@ -896,7 +898,9 @@ class SetBindGroupValidationTest : public ValidationTest {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
         computePassEncoder.SetPipeline(computePipeline);
-        computePassEncoder.SetBindGroup(0, bindGroup, count, offsets);
+        if (bindGroup != nullptr) {
+            computePassEncoder.SetBindGroup(0, bindGroup, count, offsets);
+        }
         computePassEncoder.Dispatch(1);
         computePassEncoder.EndPass();
         if (!expectation) {
@@ -924,6 +928,12 @@ TEST_F(SetBindGroupValidationTest, Basic) {
     TestRenderPassBindGroup(bindGroup, offsets.data(), 3, true);
 
     TestComputePassBindGroup(bindGroup, offsets.data(), 3, true);
+}
+
+// Draw/dispatch with a bind group missing is invalid
+TEST_F(SetBindGroupValidationTest, MissingBindGroup) {
+    TestRenderPassBindGroup(nullptr, nullptr, 0, false);
+    TestComputePassBindGroup(nullptr, nullptr, 0, false);
 }
 
 // Setting bind group after a draw / dispatch should re-verify the layout is compatible

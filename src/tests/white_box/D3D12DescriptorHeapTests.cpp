@@ -732,12 +732,11 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
             wgpu::Buffer uniformBuffer = utils::CreateBufferFromData(
                 device, &fillColor, sizeof(fillColor), wgpu::BufferUsage::Uniform);
 
-            bindGroups.push_back(
-                utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
-                                     {{0, transformBuffer, 0, sizeof(transformBuffer)},
-                                      {1, sampler},
-                                      {2, textureView},
-                                      {3, uniformBuffer, 0, sizeof(fillColor)}}));
+            bindGroups.push_back(utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                      {{0, transformBuffer, 0, sizeof(transform)},
+                                                       {1, sampler},
+                                                       {2, textureView},
+                                                       {3, uniformBuffer, 0, sizeof(fillColor)}}));
         }
 
         std::array<float, 4> redColor = {1, 0, 0, 1};

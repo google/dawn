@@ -95,7 +95,8 @@
             {"name": "multisampled", "type": "bool", "default": "false"},
             {"name": "view dimension", "type": "texture view dimension", "default": "undefined"},
             {"name": "texture component type", "type": "texture component type", "default": "float"},
-            {"name": "storage texture format", "type": "texture format", "default": "undefined"}
+            {"name": "storage texture format", "type": "texture format", "default": "undefined"},
+            {"name": "min buffer binding size", "type": "uint64_t", "default": "0"}
         ]
     },
     "bind group layout descriptor": {

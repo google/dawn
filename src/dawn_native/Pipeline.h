@@ -39,9 +39,13 @@ namespace dawn_native {
         PipelineLayoutBase* GetLayout();
         const PipelineLayoutBase* GetLayout() const;
         BindGroupLayoutBase* GetBindGroupLayout(uint32_t groupIndex);
+        const RequiredBufferSizes& GetMinimumBufferSizes() const;
 
       protected:
-        PipelineBase(DeviceBase* device, PipelineLayoutBase* layout, wgpu::ShaderStage stages);
+        PipelineBase(DeviceBase* device,
+                     PipelineLayoutBase* layout,
+                     wgpu::ShaderStage stages,
+                     RequiredBufferSizes bufferSizes);
         PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
       private:
@@ -49,6 +53,7 @@ namespace dawn_native {
 
         wgpu::ShaderStage mStageMask;
         Ref<PipelineLayoutBase> mLayout;
+        RequiredBufferSizes mMinimumBufferSizes;
     };
 
 }  // namespace dawn_native

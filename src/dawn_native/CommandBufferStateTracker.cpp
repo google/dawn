@@ -24,6 +24,21 @@
 
 namespace dawn_native {
 
+    namespace {
+        bool BufferSizesAtLeastAsBig(const ityp::span<uint32_t, uint64_t> unverifiedBufferSizes,
+                                     const std::vector<uint64_t>& pipelineMinimumBufferSizes) {
+            ASSERT(unverifiedBufferSizes.size() == pipelineMinimumBufferSizes.size());
+
+            for (uint32_t i = 0; i < unverifiedBufferSizes.size(); ++i) {
+                if (unverifiedBufferSizes[i] < pipelineMinimumBufferSizes[i]) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }  // namespace
+
     enum ValidationAspect {
         VALIDATION_ASPECT_PIPELINE,
         VALIDATION_ASPECT_BIND_GROUPS,
@@ -87,7 +102,9 @@ namespace dawn_native {
 
             for (uint32_t i : IterateBitSet(mLastPipelineLayout->GetBindGroupLayoutsMask())) {
                 if (mBindgroups[i] == nullptr ||
-                    mLastPipelineLayout->GetBindGroupLayout(i) != mBindgroups[i]->GetLayout()) {
+                    mLastPipelineLayout->GetBindGroupLayout(i) != mBindgroups[i]->GetLayout() ||
+                    !BufferSizesAtLeastAsBig(mBindgroups[i]->GetUnverifiedBufferSizes(),
+                                             (*mMinimumBufferSizes)[i])) {
                     matches = false;
                     break;
                 }
@@ -123,7 +140,27 @@ namespace dawn_native {
         }
 
         if (aspects[VALIDATION_ASPECT_BIND_GROUPS]) {
-            return DAWN_VALIDATION_ERROR("Missing bind group");
+            for (uint32_t i : IterateBitSet(mLastPipelineLayout->GetBindGroupLayoutsMask())) {
+                if (mBindgroups[i] == nullptr) {
+                    return DAWN_VALIDATION_ERROR("Missing bind group " + std::to_string(i));
+                } else if (mLastPipelineLayout->GetBindGroupLayout(i) !=
+                           mBindgroups[i]->GetLayout()) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Pipeline and bind group layout doesn't match for bind group " +
+                        std::to_string(i));
+                } else if (!BufferSizesAtLeastAsBig(mBindgroups[i]->GetUnverifiedBufferSizes(),
+                                                    (*mMinimumBufferSizes)[i])) {
+                    return DAWN_VALIDATION_ERROR("Binding sizes too small for bind group " +
+                                                 std::to_string(i));
+                }
+            }
+
+            // The chunk of code above should be similar to the one in |RecomputeLazyAspects|.
+            // It returns the first invalid state found. We shouldn't be able to reach this line
+            // because to have invalid aspects one of the above conditions must have failed earlier.
+            // If this is reached, make sure lazy aspects and the error checks above are consistent.
+            UNREACHABLE();
+            return DAWN_VALIDATION_ERROR("Bind groups invalid");
         }
 
         if (aspects[VALIDATION_ASPECT_PIPELINE]) {
@@ -157,6 +194,7 @@ namespace dawn_native {
 
     void CommandBufferStateTracker::SetPipelineCommon(PipelineBase* pipeline) {
         mLastPipelineLayout = pipeline->GetLayout();
+        mMinimumBufferSizes = &pipeline->GetMinimumBufferSizes();
 
         mAspects.set(VALIDATION_ASPECT_PIPELINE);
 

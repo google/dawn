@@ -25,7 +25,9 @@ namespace dawn_native {
 
     namespace {
 
-        bool operator==(const BindGroupLayoutEntry& lhs, const BindGroupLayoutEntry& rhs) {
+        bool InferredBindGroupLayoutEntriesCompatible(const BindGroupLayoutEntry& lhs,
+                                                      const BindGroupLayoutEntry& rhs) {
+            // Minimum buffer binding size excluded because we take the maximum seen across stages
             return lhs.binding == rhs.binding && lhs.visibility == rhs.visibility &&
                    lhs.type == rhs.type && lhs.hasDynamicOffset == rhs.hasDynamicOffset &&
                    lhs.multisampled == rhs.multisampled && lhs.viewDimension == rhs.viewDimension &&
@@ -170,18 +172,29 @@ namespace dawn_native {
                     bindingSlot.textureComponentType =
                         Format::FormatTypeToTextureComponentType(bindingInfo.textureComponentType);
                     bindingSlot.storageTextureFormat = bindingInfo.storageTextureFormat;
+                    bindingSlot.minBufferBindingSize = bindingInfo.minBufferBindingSize;
 
                     {
                         const auto& it = usedBindingsMap[group].find(bindingNumber);
                         if (it != usedBindingsMap[group].end()) {
-                            if (bindingSlot == entryData[group][it->second]) {
-                                // Already used and the data is the same. Continue.
-                                continue;
-                            } else {
+                            BindGroupLayoutEntry* existingEntry = &entryData[group][it->second];
+
+                            // Check if any properties are incompatible with existing entry
+                            // If compatible, we will merge some properties
+                            if (!InferredBindGroupLayoutEntriesCompatible(*existingEntry,
+                                                                          bindingSlot)) {
                                 return DAWN_VALIDATION_ERROR(
                                     "Duplicate binding in default pipeline layout initialization "
                                     "not compatible with previous declaration");
                             }
+
+                            // Use the max |minBufferBindingSize| we find
+                            existingEntry->minBufferBindingSize =
+                                std::max(existingEntry->minBufferBindingSize,
+                                         bindingSlot.minBufferBindingSize);
+
+                            // Already used slot, continue
+                            continue;
                         }
                     }
 
