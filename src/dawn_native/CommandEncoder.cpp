@@ -198,14 +198,23 @@ namespace dawn_native {
                                                 uint32_t rowsPerImage,
                                                 uint32_t* bufferSize) {
             ASSERT(rowsPerImage >= copySize.height);
+            if (copySize.width == 0 || copySize.height == 0 || copySize.depth == 0) {
+                *bufferSize = 0;
+                return {};
+            }
+
             uint32_t blockByteSize = textureFormat.blockByteSize;
             uint32_t blockWidth = textureFormat.blockWidth;
             uint32_t blockHeight = textureFormat.blockHeight;
 
             // TODO(cwallez@chromium.org): check for overflows
             uint32_t slicePitch = bytesPerRow * rowsPerImage / blockWidth;
+
+            ASSERT(copySize.height >= 1);
             uint32_t sliceSize = bytesPerRow * (copySize.height / blockHeight - 1) +
                                  (copySize.width / blockWidth) * blockByteSize;
+
+            ASSERT(copySize.depth >= 1);
             *bufferSize = (slicePitch * (copySize.depth - 1)) + sliceSize;
 
             return {};

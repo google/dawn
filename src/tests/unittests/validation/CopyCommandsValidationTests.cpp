@@ -364,6 +364,12 @@ TEST_F(CopyCommandTest_B2T, Success) {
         // An empty copy touching the side of the texture
         TestB2TCopy(utils::Expectation::Success, source, 0, 0, 0, destination, 0, {16, 16, 0},
                     {0, 0, 1});
+        // An empty copy with depth = 1 and bytesPerRow > 0
+        TestB2TCopy(utils::Expectation::Success, source, 0, kTextureBytesPerRowAlignment, 0,
+                    destination, 0, {0, 0, 0}, {0, 0, 1});
+        // An empty copy with height > 0, depth = 0, bytesPerRow > 0 and rowsPerImage > 0
+        TestB2TCopy(utils::Expectation::Success, source, 0, kTextureBytesPerRowAlignment, 16,
+                    destination, 0, {0, 0, 0}, {0, 1, 0});
     }
 }
 
