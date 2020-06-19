@@ -535,11 +535,8 @@ TEST_P(BufferTests, CreateBufferOOM) {
     ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
 
     // UINT64_MAX may be special cased. Test a smaller, but really large buffer also fails
-    // This hangs on the Metal AMD driver
-    if (!(IsMetal() && IsAMD())) {
-        descriptor.size = 1ull << 50;
-        ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
-    }
+    descriptor.size = 1ull << 50;
+    ASSERT_DEVICE_ERROR(device.CreateBuffer(&descriptor));
 }
 
 // Test that a very large CreateBufferMapped fails gracefully.
@@ -562,11 +559,8 @@ TEST_P(BufferTests, CreateBufferMappedOOM) {
         ASSERT_DEVICE_ERROR(device.CreateBufferMapped(&descriptor));
 
         // UINT64_MAX may be special cased. Test a smaller, but really large buffer also fails
-        // This hangs on the Metal AMD driver
-        if (!(IsMetal() && IsAMD())) {
-            descriptor.size = 1ull << 50;
-            ASSERT_DEVICE_ERROR(device.CreateBufferMapped(&descriptor));
-        }
+        descriptor.size = 1ull << 50;
+        ASSERT_DEVICE_ERROR(device.CreateBufferMapped(&descriptor));
     }
 
     // Test mappable buffer
@@ -582,11 +576,9 @@ TEST_P(BufferTests, CreateBufferMappedOOM) {
         descriptor.size = std::numeric_limits<uint64_t>::max();
         ASSERT_DEVICE_ERROR(device.CreateBufferMapped(&descriptor));
 
-        if (!(IsMetal() && IsAMD())) {
-            // UINT64_MAX may be special cased. Test a smaller, but really large buffer also fails
-            descriptor.size = 1ull << 50;
-            ASSERT_DEVICE_ERROR(device.CreateBufferMapped(&descriptor));
-        }
+        // UINT64_MAX may be special cased. Test a smaller, but really large buffer also fails
+        descriptor.size = 1ull << 50;
+        ASSERT_DEVICE_ERROR(device.CreateBufferMapped(&descriptor));
     }
 }
 
@@ -624,11 +616,8 @@ TEST_P(BufferTests, CreateBufferOOMMapReadAsync) {
     RunTest(descriptor);
 
     // UINT64_MAX may be special cased. Test a smaller, but really large buffer also fails
-    // This hangs on the Metal AMD driver
-    if (!(IsMetal() && IsAMD())) {
-        descriptor.size = 1ull << 50;
-        RunTest(descriptor);
-    }
+    descriptor.size = 1ull << 50;
+    RunTest(descriptor);
 }
 
 // Test that mapping an OOM buffer for reading fails gracefully
@@ -664,11 +653,8 @@ TEST_P(BufferTests, CreateBufferOOMMapWriteAsync) {
     RunTest(descriptor);
 
     // UINT64_MAX may be special cased. Test a smaller, but really large buffer also fails
-    // This hangs on the Metal AMD driver
-    if (!(IsMetal() && IsAMD())) {
-        descriptor.size = 1ull << 50;
-        RunTest(descriptor);
-    }
+    descriptor.size = 1ull << 50;
+    RunTest(descriptor);
 }
 
 DAWN_INSTANTIATE_TEST(BufferTests,

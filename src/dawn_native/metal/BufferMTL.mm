@@ -24,6 +24,10 @@ namespace dawn_native { namespace metal {
     // largest alignment of supported data types
     static constexpr uint32_t kMinUniformOrStorageBufferAlignment = 16u;
 
+    // The maximum buffer size if querying the maximum buffer size or recommended working set size
+    // is not available. This is a somewhat arbitrary limit of 1 GiB.
+    static constexpr uint32_t kMaxBufferSizeFallback = 1024u * 1024u * 1024u;
+
     // static
     ResultOrError<Buffer*> Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
         Ref<Buffer> buffer = AcquireRef(new Buffer(device, descriptor));
@@ -63,6 +67,17 @@ namespace dawn_native { namespace metal {
             if (currentSize > maxBufferSize) {
                 return DAWN_OUT_OF_MEMORY_ERROR("Buffer allocation is too large");
             }
+        } else if (@available(macOS 10.12, *)) {
+            // |maxBufferLength| isn't always available on older systems. If available, use
+            // |recommendedMaxWorkingSetSize| instead. We can probably allocate more than this,
+            // but don't have a way to discover a better limit. MoltenVK also uses this heuristic.
+            uint64_t maxWorkingSetSize =
+                [ToBackend(GetDevice())->GetMTLDevice() recommendedMaxWorkingSetSize];
+            if (currentSize > maxWorkingSetSize) {
+                return DAWN_OUT_OF_MEMORY_ERROR("Buffer allocation is too large");
+            }
+        } else if (currentSize > kMaxBufferSizeFallback) {
+            return DAWN_OUT_OF_MEMORY_ERROR("Buffer allocation is too large");
         }
 
         mMtlBuffer = [ToBackend(GetDevice())->GetMTLDevice() newBufferWithLength:currentSize
