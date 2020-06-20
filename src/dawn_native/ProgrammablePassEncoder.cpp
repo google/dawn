@@ -130,15 +130,17 @@ namespace dawn_native {
         });
     }
 
-    void ProgrammablePassEncoder::SetBindGroup(uint32_t groupIndex,
+    void ProgrammablePassEncoder::SetBindGroup(uint32_t groupIndexIn,
                                                BindGroupBase* group,
                                                uint32_t dynamicOffsetCountIn,
                                                const uint32_t* dynamicOffsetsIn) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+            BindGroupIndex groupIndex(groupIndexIn);
+
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(group));
 
-                if (groupIndex >= kMaxBindGroups) {
+                if (groupIndex >= kMaxBindGroupsTyped) {
                     return DAWN_VALIDATION_ERROR("Setting bind group over the max");
                 }
 

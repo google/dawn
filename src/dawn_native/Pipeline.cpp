@@ -85,11 +85,12 @@ namespace dawn_native {
         return {};
     }
 
-    BindGroupLayoutBase* PipelineBase::GetBindGroupLayout(uint32_t groupIndex) {
-        if (GetDevice()->ConsumedError(ValidateGetBindGroupLayout(groupIndex))) {
+    BindGroupLayoutBase* PipelineBase::GetBindGroupLayout(uint32_t groupIndexIn) {
+        if (GetDevice()->ConsumedError(ValidateGetBindGroupLayout(groupIndexIn))) {
             return BindGroupLayoutBase::MakeError(GetDevice());
         }
 
+        BindGroupIndex groupIndex(groupIndexIn);
         if (!mLayout->GetBindGroupLayoutsMask()[groupIndex]) {
             // Get or create an empty bind group layout.
             // TODO(enga): Consider caching this object on the Device and reusing it.

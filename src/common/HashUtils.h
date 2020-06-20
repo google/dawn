@@ -17,6 +17,7 @@
 
 #include "common/Platform.h"
 #include "common/TypedInteger.h"
+#include "common/ityp_bitset.h"
 
 #include <bitset>
 #include <functional>
@@ -86,5 +87,15 @@ size_t Hash(const std::bitset<N>& value) {
     return hash;
 }
 #endif
+
+namespace std {
+    template <typename Index, size_t N>
+    class hash<ityp::bitset<Index, N>> {
+      public:
+        size_t operator()(const ityp::bitset<Index, N>& value) const {
+            return Hash(static_cast<const std::bitset<N>&>(value));
+        }
+    };
+}  // namespace std
 
 #endif  // COMMON_HASHUTILS_H_

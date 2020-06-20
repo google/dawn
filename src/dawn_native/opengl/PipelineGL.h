@@ -36,8 +36,9 @@ namespace dawn_native { namespace opengl {
                         const PipelineLayout* layout,
                         const PerStage<const ShaderModule*>& modules);
 
-        using BindingLocations =
-            std::array<std::array<GLint, kMaxBindingsPerGroup>, kMaxBindGroups>;
+        using BindingLocations = ityp::array<BindGroupIndex,
+                                             ityp::array<BindingIndex, GLint, kMaxBindingsPerGroup>,
+                                             kMaxBindGroups>;
 
         // For each unit a sampler is bound to we need to know if we should use filtering or not
         // because int and uint texture are only complete without filtering.

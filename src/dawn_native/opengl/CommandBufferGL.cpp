@@ -225,7 +225,8 @@ namespace dawn_native { namespace opengl {
             }
 
             void Apply(const OpenGLFunctions& gl) {
-                for (uint32_t index : IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
+                for (BindGroupIndex index :
+                     IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
                     ApplyBindGroup(gl, index, mBindGroups[index], mDynamicOffsetCounts[index],
                                    mDynamicOffsets[index].data());
                 }
@@ -234,7 +235,7 @@ namespace dawn_native { namespace opengl {
 
           private:
             void ApplyBindGroup(const OpenGLFunctions& gl,
-                                uint32_t index,
+                                BindGroupIndex index,
                                 BindGroupBase* group,
                                 uint32_t dynamicOffsetCount,
                                 uint64_t* dynamicOffsets) {

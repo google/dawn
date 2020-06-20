@@ -24,9 +24,10 @@
 
 namespace dawn_native { namespace opengl {
 
-    std::string GetBindingName(uint32_t group, BindingNumber bindingNumber) {
+    std::string GetBindingName(BindGroupIndex group, BindingNumber bindingNumber) {
         std::ostringstream o;
-        o << "dawn_binding_" << group << "_" << static_cast<uint32_t>(bindingNumber);
+        o << "dawn_binding_" << static_cast<uint32_t>(group) << "_"
+          << static_cast<uint32_t>(bindingNumber);
         return o.str();
     }
 
@@ -42,8 +43,9 @@ namespace dawn_native { namespace opengl {
     std::string CombinedSampler::GetName() const {
         std::ostringstream o;
         o << "dawn_combined";
-        o << "_" << samplerLocation.group << "_" << static_cast<uint32_t>(samplerLocation.binding);
-        o << "_with_" << textureLocation.group << "_"
+        o << "_" << static_cast<uint32_t>(samplerLocation.group) << "_"
+          << static_cast<uint32_t>(samplerLocation.binding);
+        o << "_with_" << static_cast<uint32_t>(textureLocation.group) << "_"
           << static_cast<uint32_t>(textureLocation.binding);
         return o.str();
     }
@@ -141,16 +143,20 @@ namespace dawn_native { namespace opengl {
                 mCombinedInfo.emplace_back();
                 auto& info = mCombinedInfo.back();
 
+                uint32_t samplerGroup;
                 mSpvcContext.GetDecoration(sampler.sampler_id,
-                                           shaderc_spvc_decoration_descriptorset,
-                                           &info.samplerLocation.group);
+                                           shaderc_spvc_decoration_descriptorset, &samplerGroup);
+                info.samplerLocation.group = BindGroupIndex(samplerGroup);
+
                 uint32_t samplerBinding;
                 mSpvcContext.GetDecoration(sampler.sampler_id, shaderc_spvc_decoration_binding,
                                            &samplerBinding);
                 info.samplerLocation.binding = BindingNumber(samplerBinding);
 
+                uint32_t textureGroup;
                 mSpvcContext.GetDecoration(sampler.image_id, shaderc_spvc_decoration_descriptorset,
-                                           &info.textureLocation.group);
+                                           &textureGroup);
+                info.textureLocation.group = BindGroupIndex(textureGroup);
 
                 uint32_t textureBinding;
                 mSpvcContext.GetDecoration(sampler.image_id, shaderc_spvc_decoration_binding,
@@ -164,12 +170,12 @@ namespace dawn_native { namespace opengl {
                 mCombinedInfo.emplace_back();
 
                 auto& info = mCombinedInfo.back();
-                info.samplerLocation.group =
-                    compiler->get_decoration(combined.sampler_id, spv::DecorationDescriptorSet);
+                info.samplerLocation.group = BindGroupIndex(
+                    compiler->get_decoration(combined.sampler_id, spv::DecorationDescriptorSet));
                 info.samplerLocation.binding = BindingNumber(
                     compiler->get_decoration(combined.sampler_id, spv::DecorationBinding));
-                info.textureLocation.group =
-                    compiler->get_decoration(combined.image_id, spv::DecorationDescriptorSet);
+                info.textureLocation.group = BindGroupIndex(
+                    compiler->get_decoration(combined.image_id, spv::DecorationDescriptorSet));
                 info.textureLocation.binding = BindingNumber(
                     compiler->get_decoration(combined.image_id, spv::DecorationBinding));
                 compiler->set_name(combined.combined_id, info.GetName());
@@ -179,7 +185,7 @@ namespace dawn_native { namespace opengl {
         // Change binding names to be "dawn_binding_<group>_<binding>".
         // Also unsets the SPIRV "Binding" decoration as it outputs "layout(binding=)" which
         // isn't supported on OSX's OpenGL.
-        for (uint32_t group = 0; group < kMaxBindGroups; ++group) {
+        for (BindGroupIndex group(0); group < kMaxBindGroupsTyped; ++group) {
             for (const auto& it : bindingInfo[group]) {
                 BindingNumber bindingNumber = it.first;
                 const auto& info = it.second;

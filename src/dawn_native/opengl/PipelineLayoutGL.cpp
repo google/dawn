@@ -28,7 +28,7 @@ namespace dawn_native { namespace opengl {
         GLuint ssboIndex = 0;
         GLuint storageTextureIndex = 0;
 
-        for (uint32_t group : IterateBitSet(GetBindGroupLayoutsMask())) {
+        for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
             const BindGroupLayoutBase* bgl = GetBindGroupLayout(group);
 
             for (BindingIndex bindingIndex{0}; bindingIndex < bgl->GetBindingCount();

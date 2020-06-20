@@ -289,10 +289,10 @@ namespace dawn_native {
             }
         }
 
-        std::string GetShaderDeclarationString(size_t group, BindingNumber binding) {
+        std::string GetShaderDeclarationString(BindGroupIndex group, BindingNumber binding) {
             std::ostringstream ostream;
-            ostream << "the shader module declaration at set " << group << " binding "
-                    << static_cast<uint32_t>(binding);
+            ostream << "the shader module declaration at set " << static_cast<uint32_t>(group)
+                    << " binding " << static_cast<uint32_t>(binding);
             return ostream.str();
         }
     }  // anonymous namespace
@@ -515,12 +515,14 @@ namespace dawn_native {
         auto ExtractResourcesBinding =
             [this](std::vector<shaderc_spvc_binding_info> bindings) -> MaybeError {
             for (const auto& binding : bindings) {
-                if (binding.set >= kMaxBindGroups) {
+                BindGroupIndex bindGroupIndex(binding.set);
+
+                if (bindGroupIndex >= kMaxBindGroupsTyped) {
                     return DAWN_VALIDATION_ERROR("Bind group index over limits in the SPIRV");
                 }
 
-                const auto& it = mBindingInfo[binding.set].emplace(BindingNumber(binding.binding),
-                                                                   ShaderBindingInfo{});
+                const auto& it = mBindingInfo[bindGroupIndex].emplace(
+                    BindingNumber(binding.binding), ShaderBindingInfo{});
                 if (!it.second) {
                     return DAWN_VALIDATION_ERROR("Shader has duplicate bindings");
                 }
@@ -702,13 +704,15 @@ namespace dawn_native {
 
                 BindingNumber bindingNumber(
                     compiler.get_decoration(resource.id, spv::DecorationBinding));
-                uint32_t set = compiler.get_decoration(resource.id, spv::DecorationDescriptorSet);
+                BindGroupIndex bindGroupIndex(
+                    compiler.get_decoration(resource.id, spv::DecorationDescriptorSet));
 
-                if (set >= kMaxBindGroups) {
+                if (bindGroupIndex >= kMaxBindGroupsTyped) {
                     return DAWN_VALIDATION_ERROR("Bind group index over limits in the SPIRV");
                 }
 
-                const auto& it = mBindingInfo[set].emplace(bindingNumber, ShaderBindingInfo{});
+                const auto& it =
+                    mBindingInfo[bindGroupIndex].emplace(bindingNumber, ShaderBindingInfo{});
                 if (!it.second) {
                     return DAWN_VALIDATION_ERROR("Shader has duplicate bindings");
                 }
@@ -884,7 +888,7 @@ namespace dawn_native {
     RequiredBufferSizes ShaderModuleBase::ComputeRequiredBufferSizesForLayout(
         const PipelineLayoutBase* layout) const {
         RequiredBufferSizes bufferSizes;
-        for (uint32_t group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
+        for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
             bufferSizes[group] =
                 GetBindGroupMinBufferSizes(mBindingInfo[group], layout->GetBindGroupLayout(group));
         }
@@ -926,16 +930,16 @@ namespace dawn_native {
         const PipelineLayoutBase* layout) const {
         ASSERT(!IsError());
 
-        for (uint32_t group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
+        for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
             DAWN_TRY(
                 ValidateCompatibilityWithBindGroupLayout(group, layout->GetBindGroupLayout(group)));
         }
 
-        for (uint32_t group : IterateBitSet(~layout->GetBindGroupLayoutsMask())) {
+        for (BindGroupIndex group : IterateBitSet(~layout->GetBindGroupLayoutsMask())) {
             if (mBindingInfo[group].size() > 0) {
                 std::ostringstream ostream;
-                ostream << "No bind group layout entry matches the declaration set " << group
-                        << " in the shader module";
+                ostream << "No bind group layout entry matches the declaration set "
+                        << static_cast<uint32_t>(group) << " in the shader module";
                 return DAWN_VALIDATION_ERROR(ostream.str());
             }
         }
@@ -944,7 +948,7 @@ namespace dawn_native {
     }
 
     MaybeError ShaderModuleBase::ValidateCompatibilityWithBindGroupLayout(
-        uint32_t group,
+        BindGroupIndex group,
         const BindGroupLayoutBase* layout) const {
         ASSERT(!IsError());
 

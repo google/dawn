@@ -32,11 +32,11 @@ namespace dawn_native {
     template <bool CanInheritBindGroups, typename DynamicOffset>
     class BindGroupTrackerBase {
       public:
-        void OnSetBindGroup(uint32_t index,
+        void OnSetBindGroup(BindGroupIndex index,
                             BindGroupBase* bindGroup,
                             uint32_t dynamicOffsetCount,
                             uint32_t* dynamicOffsets) {
-            ASSERT(index < kMaxBindGroups);
+            ASSERT(index < kMaxBindGroupsTyped);
 
             if (mBindGroupLayoutsMask[index]) {
                 // It is okay to only dirty bind groups that are used by the current pipeline
@@ -73,7 +73,7 @@ namespace dawn_native {
             // the first |k| matching bind groups may be inherited.
             if (CanInheritBindGroups && mLastAppliedPipelineLayout != nullptr) {
                 // Dirty bind groups that cannot be inherited.
-                std::bitset<kMaxBindGroups> dirtiedGroups =
+                BindGroupLayoutMask dirtiedGroups =
                     ~mPipelineLayout->InheritedGroupsMask(mLastAppliedPipelineLayout);
 
                 mDirtyBindGroups |= dirtiedGroups;
@@ -98,12 +98,12 @@ namespace dawn_native {
             mLastAppliedPipelineLayout = mPipelineLayout;
         }
 
-        std::bitset<kMaxBindGroups> mDirtyBindGroups = 0;
-        std::bitset<kMaxBindGroups> mDirtyBindGroupsObjectChangedOrIsDynamic = 0;
-        std::bitset<kMaxBindGroups> mBindGroupLayoutsMask = 0;
-        std::array<BindGroupBase*, kMaxBindGroups> mBindGroups = {};
-        std::array<uint32_t, kMaxBindGroups> mDynamicOffsetCounts = {};
-        std::array<std::array<DynamicOffset, kMaxBindingsPerGroup>, kMaxBindGroups>
+        BindGroupLayoutMask mDirtyBindGroups = 0;
+        BindGroupLayoutMask mDirtyBindGroupsObjectChangedOrIsDynamic = 0;
+        BindGroupLayoutMask mBindGroupLayoutsMask = 0;
+        ityp::array<BindGroupIndex, BindGroupBase*, kMaxBindGroups> mBindGroups = {};
+        ityp::array<BindGroupIndex, uint32_t, kMaxBindGroups> mDynamicOffsetCounts = {};
+        ityp::array<BindGroupIndex, std::array<DynamicOffset, kMaxBindingsPerGroup>, kMaxBindGroups>
             mDynamicOffsets = {};
 
         // |mPipelineLayout| is the current pipeline layout set on the command buffer.

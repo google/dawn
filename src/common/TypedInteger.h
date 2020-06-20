@@ -62,12 +62,14 @@ using TypedInteger = T;
 
 namespace detail {
     template <typename Tag, typename T>
-    class TypedIntegerImpl {
+    class alignas(T) TypedIntegerImpl {
         static_assert(std::is_integral<T>::value, "TypedInteger must be integral");
         T mValue;
 
       public:
         constexpr TypedIntegerImpl() : mValue(0) {
+            static_assert(alignof(TypedIntegerImpl) == alignof(T), "");
+            static_assert(sizeof(TypedIntegerImpl) == sizeof(T), "");
         }
 
         // Construction from non-narrowing integral types.

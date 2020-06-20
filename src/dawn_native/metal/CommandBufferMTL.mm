@@ -471,7 +471,8 @@ namespace dawn_native { namespace metal {
 
             template <typename Encoder>
             void Apply(Encoder encoder) {
-                for (uint32_t index : IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
+                for (BindGroupIndex index :
+                     IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
                     ApplyBindGroup(encoder, index, ToBackend(mBindGroups[index]),
                                    mDynamicOffsetCounts[index], mDynamicOffsets[index].data(),
                                    ToBackend(mPipelineLayout));
@@ -486,7 +487,7 @@ namespace dawn_native { namespace metal {
             // two encoder types.
             void ApplyBindGroupImpl(id<MTLRenderCommandEncoder> render,
                                     id<MTLComputeCommandEncoder> compute,
-                                    uint32_t index,
+                                    BindGroupIndex index,
                                     BindGroup* group,
                                     uint32_t dynamicOffsetCount,
                                     uint64_t* dynamicOffsets,

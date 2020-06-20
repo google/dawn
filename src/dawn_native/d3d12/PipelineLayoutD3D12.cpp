@@ -79,7 +79,7 @@ namespace dawn_native { namespace d3d12 {
 
         uint32_t rangeIndex = 0;
 
-        for (uint32_t group : IterateBitSet(GetBindGroupLayoutsMask())) {
+        for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
             const BindGroupLayout* bindGroupLayout = ToBackend(GetBindGroupLayout(group));
 
             // Set the root descriptor table parameter and copy ranges. Ranges are offset by the
@@ -99,7 +99,7 @@ namespace dawn_native { namespace d3d12 {
 
                 for (uint32_t i = 0; i < rangeCount; ++i) {
                     ranges[rangeIndex] = descriptorRanges[i];
-                    ranges[rangeIndex].RegisterSpace = group;
+                    ranges[rangeIndex].RegisterSpace = static_cast<uint32_t>(group);
                     rangeIndex++;
                 }
 
@@ -140,7 +140,7 @@ namespace dawn_native { namespace d3d12 {
                 // Setup root descriptor.
                 D3D12_ROOT_DESCRIPTOR rootDescriptor;
                 rootDescriptor.ShaderRegister = shaderRegisters[dynamicBindingIndex];
-                rootDescriptor.RegisterSpace = group;
+                rootDescriptor.RegisterSpace = static_cast<uint32_t>(group);
 
                 // Set root descriptors in root signatures.
                 rootParameter.Descriptor = rootDescriptor;
@@ -177,13 +177,13 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-    uint32_t PipelineLayout::GetCbvUavSrvRootParameterIndex(uint32_t group) const {
-        ASSERT(group < kMaxBindGroups);
+    uint32_t PipelineLayout::GetCbvUavSrvRootParameterIndex(BindGroupIndex group) const {
+        ASSERT(group < kMaxBindGroupsTyped);
         return mCbvUavSrvRootParameterInfo[group];
     }
 
-    uint32_t PipelineLayout::GetSamplerRootParameterIndex(uint32_t group) const {
-        ASSERT(group < kMaxBindGroups);
+    uint32_t PipelineLayout::GetSamplerRootParameterIndex(BindGroupIndex group) const {
+        ASSERT(group < kMaxBindGroupsTyped);
         return mSamplerRootParameterInfo[group];
     }
 
@@ -191,9 +191,9 @@ namespace dawn_native { namespace d3d12 {
         return mRootSignature.Get();
     }
 
-    uint32_t PipelineLayout::GetDynamicRootParameterIndex(uint32_t group,
+    uint32_t PipelineLayout::GetDynamicRootParameterIndex(BindGroupIndex group,
                                                           BindingIndex bindingIndex) const {
-        ASSERT(group < kMaxBindGroups);
+        ASSERT(group < kMaxBindGroupsTyped);
         ASSERT(bindingIndex < kMaxBindingsPerGroupTyped);
         ASSERT(GetBindGroupLayout(group)->GetBindingInfo(bindingIndex).hasDynamicOffset);
         ASSERT(GetBindGroupLayout(group)->GetBindingInfo(bindingIndex).visibility !=

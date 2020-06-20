@@ -16,6 +16,7 @@
 #define DAWNNATIVE_SHADERMODULE_H_
 
 #include "common/Constants.h"
+#include "common/ityp_array.h"
 #include "dawn_native/BindingInfo.h"
 #include "dawn_native/CachedObject.h"
 #include "dawn_native/Error.h"
@@ -27,7 +28,6 @@
 
 #include "spvc/spvc.hpp"
 
-#include <array>
 #include <bitset>
 #include <map>
 #include <vector>
@@ -64,7 +64,7 @@ namespace dawn_native {
         };
 
         using BindingInfoMap = std::map<BindingNumber, ShaderBindingInfo>;
-        using ModuleBindingInfo = std::array<BindingInfoMap, kMaxBindGroups>;
+        using ModuleBindingInfo = ityp::array<BindGroupIndex, BindingInfoMap, kMaxBindGroups>;
 
         const ModuleBindingInfo& GetBindingInfo() const;
         const std::bitset<kMaxVertexAttributes>& GetUsedVertexAttributes() const;
@@ -102,7 +102,7 @@ namespace dawn_native {
         ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
         MaybeError ValidateCompatibilityWithBindGroupLayout(
-            uint32_t group,
+            BindGroupIndex group,
             const BindGroupLayoutBase* layout) const;
 
         std::vector<uint64_t> GetBindGroupMinBufferSizes(const BindingInfoMap& shaderMap,

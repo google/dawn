@@ -16,11 +16,11 @@
 #define DAWNNATIVE_COMMANDBUFFERSTATETRACKER_H
 
 #include "common/Constants.h"
+#include "common/ityp_array.h"
 #include "dawn_native/BindingInfo.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Forward.h"
 
-#include <array>
 #include <bitset>
 #include <map>
 #include <set>
@@ -37,7 +37,7 @@ namespace dawn_native {
         // State-modifying methods
         void SetComputePipeline(ComputePipelineBase* pipeline);
         void SetRenderPipeline(RenderPipelineBase* pipeline);
-        void SetBindGroup(uint32_t index, BindGroupBase* bindgroup);
+        void SetBindGroup(BindGroupIndex index, BindGroupBase* bindgroup);
         void SetIndexBuffer();
         void SetVertexBuffer(uint32_t slot);
 
@@ -53,7 +53,7 @@ namespace dawn_native {
 
         ValidationAspects mAspects;
 
-        std::array<BindGroupBase*, kMaxBindGroups> mBindgroups = {};
+        ityp::array<BindGroupIndex, BindGroupBase*, kMaxBindGroups> mBindgroups = {};
         std::bitset<kMaxVertexBuffers> mVertexBufferSlotsUsed;
 
         PipelineLayoutBase* mLastPipelineLayout = nullptr;

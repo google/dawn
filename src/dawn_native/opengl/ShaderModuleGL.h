@@ -23,10 +23,10 @@ namespace dawn_native { namespace opengl {
 
     class Device;
 
-    std::string GetBindingName(uint32_t group, BindingNumber bindingNumber);
+    std::string GetBindingName(BindGroupIndex group, BindingNumber bindingNumber);
 
     struct BindingLocation {
-        uint32_t group;
+        BindGroupIndex group;
         BindingNumber binding;
     };
     bool operator<(const BindingLocation& a, const BindingLocation& b);

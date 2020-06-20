@@ -132,7 +132,7 @@ namespace dawn_native { namespace metal {
         // a table of MSLResourceBinding to give to SPIRV-Cross.
 
         // Create one resource binding entry per stage per binding.
-        for (uint32_t group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
+        for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
             const BindGroupLayoutBase::BindingMap& bindingMap =
                 layout->GetBindGroupLayout(group)->GetBindingMap();
 
@@ -148,7 +148,7 @@ namespace dawn_native { namespace metal {
                     if (GetDevice()->IsToggleEnabled(Toggle::UseSpvc)) {
                         shaderc_spvc_msl_resource_binding mslBinding;
                         mslBinding.stage = ToSpvcExecutionModel(stage);
-                        mslBinding.desc_set = group;
+                        mslBinding.desc_set = static_cast<uint32_t>(group);
                         mslBinding.binding = static_cast<uint32_t>(bindingNumber);
                         mslBinding.msl_buffer = mslBinding.msl_texture = mslBinding.msl_sampler =
                             shaderIndex;
@@ -157,7 +157,7 @@ namespace dawn_native { namespace metal {
                     } else {
                         spirv_cross::MSLResourceBinding mslBinding;
                         mslBinding.stage = SpirvExecutionModelForStage(stage);
-                        mslBinding.desc_set = group;
+                        mslBinding.desc_set = static_cast<uint32_t>(group);
                         mslBinding.binding = static_cast<uint32_t>(bindingNumber);
                         mslBinding.msl_buffer = mslBinding.msl_texture = mslBinding.msl_sampler =
                             shaderIndex;

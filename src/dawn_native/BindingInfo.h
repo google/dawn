@@ -17,6 +17,7 @@
 
 #include "common/Constants.h"
 #include "common/TypedInteger.h"
+#include "common/ityp_array.h"
 #include "dawn_native/Format.h"
 #include "dawn_native/dawn_platform.h"
 
@@ -30,7 +31,10 @@ namespace dawn_native {
     // Binding numbers get mapped to a packed range of indices
     using BindingIndex = TypedInteger<struct BindingIndexT, uint32_t>;
 
+    using BindGroupIndex = TypedInteger<struct BindGroupIndexT, uint32_t>;
+
     static constexpr BindingIndex kMaxBindingsPerGroupTyped = BindingIndex(kMaxBindingsPerGroup);
+    static constexpr BindGroupIndex kMaxBindGroupsTyped = BindGroupIndex(kMaxBindGroups);
 
     struct BindingInfo {
         BindingNumber binding;
@@ -45,7 +49,7 @@ namespace dawn_native {
     };
 
     // For buffer size validation
-    using RequiredBufferSizes = std::array<std::vector<uint64_t>, kMaxBindGroups>;
+    using RequiredBufferSizes = ityp::array<BindGroupIndex, std::vector<uint64_t>, kMaxBindGroups>;
 
 }  // namespace dawn_native
 

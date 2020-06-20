@@ -106,7 +106,7 @@ namespace dawn_native { namespace d3d12 {
             // TODO(bryan.bernhart@intel.com): Consider further optimization.
             bool didCreateBindGroupViews = true;
             bool didCreateBindGroupSamplers = true;
-            for (uint32_t index : IterateBitSet(mDirtyBindGroups)) {
+            for (BindGroupIndex index : IterateBitSet(mDirtyBindGroups)) {
                 BindGroup* group = ToBackend(mBindGroups[index]);
                 didCreateBindGroupViews = group->PopulateViews(mViewAllocator);
                 didCreateBindGroupSamplers = group->PopulateSamplers(mDevice, mSamplerAllocator);
@@ -132,7 +132,7 @@ namespace dawn_native { namespace d3d12 {
                 // Must be called before applying the bindgroups.
                 SetID3D12DescriptorHeaps(commandList);
 
-                for (uint32_t index : IterateBitSet(mBindGroupLayoutsMask)) {
+                for (BindGroupIndex index : IterateBitSet(mBindGroupLayoutsMask)) {
                     BindGroup* group = ToBackend(mBindGroups[index]);
                     didCreateBindGroupViews = group->PopulateViews(mViewAllocator);
                     didCreateBindGroupSamplers =
@@ -142,14 +142,14 @@ namespace dawn_native { namespace d3d12 {
                 }
             }
 
-            for (uint32_t index : IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
+            for (BindGroupIndex index : IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
                 BindGroup* group = ToBackend(mBindGroups[index]);
                 ApplyBindGroup(commandList, ToBackend(mPipelineLayout), index, group,
                                mDynamicOffsetCounts[index], mDynamicOffsets[index].data());
             }
 
             if (mInCompute) {
-                for (uint32_t index : IterateBitSet(mBindGroupLayoutsMask)) {
+                for (BindGroupIndex index : IterateBitSet(mBindGroupLayoutsMask)) {
                     for (BindingIndex binding : IterateBitSet(mBindingsNeedingBarrier[index])) {
                         wgpu::BindingType bindingType = mBindingTypes[index][binding];
                         switch (bindingType) {
@@ -211,7 +211,7 @@ namespace dawn_native { namespace d3d12 {
       private:
         void ApplyBindGroup(ID3D12GraphicsCommandList* commandList,
                             const PipelineLayout* pipelineLayout,
-                            uint32_t index,
+                            BindGroupIndex index,
                             BindGroup* group,
                             uint32_t dynamicOffsetCountIn,
                             const uint64_t* dynamicOffsetsIn) {

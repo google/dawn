@@ -18,6 +18,7 @@
 #include "common/Constants.h"
 
 #include "dawn_native/AttachmentState.h"
+#include "dawn_native/BindingInfo.h"
 #include "dawn_native/Texture.h"
 
 #include "dawn_native/dawn_platform.h"
@@ -210,7 +211,7 @@ namespace dawn_native {
     };
 
     struct SetBindGroupCmd {
-        uint32_t index;
+        BindGroupIndex index;
         Ref<BindGroupBase> group;
         uint32_t dynamicOffsetCount;
     };

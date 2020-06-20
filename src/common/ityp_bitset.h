@@ -58,6 +58,14 @@ namespace ityp {
         using Base::none;
         using Base::size;
 
+        bool operator==(const bitset& other) const noexcept {
+            return Base::operator==(static_cast<const Base&>(other));
+        }
+
+        bool operator!=(const bitset& other) const noexcept {
+            return Base::operator!=(static_cast<const Base&>(other));
+        }
+
         bitset& operator&=(const bitset& other) noexcept {
             return static_cast<bitset&>(Base::operator&=(static_cast<const Base&>(other)));
         }
@@ -117,6 +125,8 @@ namespace ityp {
         friend BitSetIterator<N, Index> IterateBitSet(const bitset& bitset) {
             return BitSetIterator<N, Index>(static_cast<const Base&>(bitset));
         }
+
+        friend class std::hash<bitset>;
     };
 
 }  // namespace ityp

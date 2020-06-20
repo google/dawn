@@ -29,11 +29,12 @@ namespace dawn_native { namespace d3d12 {
         static ResultOrError<PipelineLayout*> Create(Device* device,
                                                      const PipelineLayoutDescriptor* descriptor);
 
-        uint32_t GetCbvUavSrvRootParameterIndex(uint32_t group) const;
-        uint32_t GetSamplerRootParameterIndex(uint32_t group) const;
+        uint32_t GetCbvUavSrvRootParameterIndex(BindGroupIndex group) const;
+        uint32_t GetSamplerRootParameterIndex(BindGroupIndex group) const;
 
         // Returns the index of the root parameter reserved for a dynamic buffer binding
-        uint32_t GetDynamicRootParameterIndex(uint32_t group, BindingIndex bindingIndex) const;
+        uint32_t GetDynamicRootParameterIndex(BindGroupIndex group,
+                                              BindingIndex bindingIndex) const;
 
         ID3D12RootSignature* GetRootSignature() const;
 
@@ -41,9 +42,11 @@ namespace dawn_native { namespace d3d12 {
         ~PipelineLayout() override = default;
         using PipelineLayoutBase::PipelineLayoutBase;
         MaybeError Initialize();
-        std::array<uint32_t, kMaxBindGroups> mCbvUavSrvRootParameterInfo;
-        std::array<uint32_t, kMaxBindGroups> mSamplerRootParameterInfo;
-        std::array<ityp::array<BindingIndex, uint32_t, kMaxBindingsPerGroup>, kMaxBindGroups>
+        ityp::array<BindGroupIndex, uint32_t, kMaxBindGroups> mCbvUavSrvRootParameterInfo;
+        ityp::array<BindGroupIndex, uint32_t, kMaxBindGroups> mSamplerRootParameterInfo;
+        ityp::array<BindGroupIndex,
+                    ityp::array<BindingIndex, uint32_t, kMaxBindingsPerGroup>,
+                    kMaxBindGroups>
             mDynamicRootParameterIndices;
         ComPtr<ID3D12RootSignature> mRootSignature;
     };

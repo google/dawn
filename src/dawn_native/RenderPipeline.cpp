@@ -194,7 +194,7 @@ namespace dawn_native {
                     descriptor->fragmentStage->module->ComputeRequiredBufferSizesForLayout(
                         descriptor->layout);
 
-                for (uint32_t group = 0; group < bufferSizes.size(); ++group) {
+                for (BindGroupIndex group(0); group < bufferSizes.size(); ++group) {
                     ASSERT(bufferSizes[group].size() == fragmentSizes[group].size());
                     for (size_t i = 0; i < bufferSizes[group].size(); ++i) {
                         bufferSizes[group][i] =

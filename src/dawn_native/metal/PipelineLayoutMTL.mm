@@ -28,7 +28,7 @@ namespace dawn_native { namespace metal {
             uint32_t samplerIndex = 0;
             uint32_t textureIndex = 0;
 
-            for (uint32_t group : IterateBitSet(GetBindGroupLayoutsMask())) {
+            for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
                 for (BindingIndex bindingIndex{0};
                      bindingIndex < GetBindGroupLayout(group)->GetBindingCount(); ++bindingIndex) {
                     const BindingInfo& bindingInfo =

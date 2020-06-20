@@ -32,10 +32,12 @@ namespace dawn_native {
       public:
         BindGroupAndStorageBarrierTrackerBase() = default;
 
-        void OnSetBindGroup(uint32_t index,
+        void OnSetBindGroup(BindGroupIndex index,
                             BindGroupBase* bindGroup,
                             uint32_t dynamicOffsetCount,
                             uint32_t* dynamicOffsets) {
+            ASSERT(index < kMaxBindGroupsTyped);
+
             if (this->mBindGroups[index] != bindGroup) {
                 mBindings[index] = {};
                 mBindingsNeedingBarrier[index] = {};
@@ -89,12 +91,16 @@ namespace dawn_native {
         }
 
       protected:
-        std::array<ityp::bitset<BindingIndex, kMaxBindingsPerGroup>, kMaxBindGroups>
-            mBindingsNeedingBarrier = {};
-        std::array<ityp::array<BindingIndex, wgpu::BindingType, kMaxBindingsPerGroup>,
-                   kMaxBindGroups>
+        ityp::
+            array<BindGroupIndex, ityp::bitset<BindingIndex, kMaxBindingsPerGroup>, kMaxBindGroups>
+                mBindingsNeedingBarrier = {};
+        ityp::array<BindGroupIndex,
+                    ityp::array<BindingIndex, wgpu::BindingType, kMaxBindingsPerGroup>,
+                    kMaxBindGroups>
             mBindingTypes = {};
-        std::array<ityp::array<BindingIndex, ObjectBase*, kMaxBindingsPerGroup>, kMaxBindGroups>
+        ityp::array<BindGroupIndex,
+                    ityp::array<BindingIndex, ObjectBase*, kMaxBindingsPerGroup>,
+                    kMaxBindGroups>
             mBindings = {};
     };
 

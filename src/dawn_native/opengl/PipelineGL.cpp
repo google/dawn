@@ -106,7 +106,7 @@ namespace dawn_native { namespace opengl {
         // etc.
         const auto& indices = layout->GetBindingIndexInfo();
 
-        for (uint32_t group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
+        for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
             const BindGroupLayoutBase* bgl = layout->GetBindGroupLayout(group);
 
             for (const auto& it : bgl->GetBindingMap()) {

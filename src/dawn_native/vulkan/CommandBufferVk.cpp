@@ -95,23 +95,25 @@ namespace dawn_native { namespace vulkan {
             return region;
         }
 
-        void ApplyDescriptorSets(Device* device,
-                                 VkCommandBuffer commands,
-                                 VkPipelineBindPoint bindPoint,
-                                 VkPipelineLayout pipelineLayout,
-                                 const std::bitset<kMaxBindGroups>& bindGroupsToApply,
-                                 const std::array<BindGroupBase*, kMaxBindGroups>& bindGroups,
-                                 const std::array<uint32_t, kMaxBindGroups>& dynamicOffsetCounts,
-                                 const std::array<std::array<uint32_t, kMaxBindingsPerGroup>,
-                                                  kMaxBindGroups>& dynamicOffsets) {
-            for (uint32_t dirtyIndex : IterateBitSet(bindGroupsToApply)) {
+        void ApplyDescriptorSets(
+            Device* device,
+            VkCommandBuffer commands,
+            VkPipelineBindPoint bindPoint,
+            VkPipelineLayout pipelineLayout,
+            const BindGroupLayoutMask& bindGroupsToApply,
+            const ityp::array<BindGroupIndex, BindGroupBase*, kMaxBindGroups>& bindGroups,
+            const ityp::array<BindGroupIndex, uint32_t, kMaxBindGroups>& dynamicOffsetCounts,
+            const ityp::array<BindGroupIndex,
+                              std::array<uint32_t, kMaxBindingsPerGroup>,
+                              kMaxBindGroups>& dynamicOffsets) {
+            for (BindGroupIndex dirtyIndex : IterateBitSet(bindGroupsToApply)) {
                 VkDescriptorSet set = ToBackend(bindGroups[dirtyIndex])->GetHandle();
                 const uint32_t* dynamicOffset = dynamicOffsetCounts[dirtyIndex] > 0
                                                     ? dynamicOffsets[dirtyIndex].data()
                                                     : nullptr;
-                device->fn.CmdBindDescriptorSets(commands, bindPoint, pipelineLayout, dirtyIndex, 1,
-                                                 &*set, dynamicOffsetCounts[dirtyIndex],
-                                                 dynamicOffset);
+                device->fn.CmdBindDescriptorSets(commands, bindPoint, pipelineLayout,
+                                                 static_cast<uint32_t>(dirtyIndex), 1, &*set,
+                                                 dynamicOffsetCounts[dirtyIndex], dynamicOffset);
             }
         }
 
@@ -143,7 +145,7 @@ namespace dawn_native { namespace vulkan {
                                     mDirtyBindGroupsObjectChangedOrIsDynamic, mBindGroups,
                                     mDynamicOffsetCounts, mDynamicOffsets);
 
-                for (uint32_t index : IterateBitSet(mBindGroupLayoutsMask)) {
+                for (BindGroupIndex index : IterateBitSet(mBindGroupLayoutsMask)) {
                     for (BindingIndex bindingIndex :
                          IterateBitSet(mBindingsNeedingBarrier[index])) {
                         switch (mBindingTypes[index][bindingIndex]) {

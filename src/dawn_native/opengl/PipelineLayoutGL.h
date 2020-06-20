@@ -30,7 +30,9 @@ namespace dawn_native { namespace opengl {
         PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor);
 
         using BindingIndexInfo =
-            std::array<ityp::array<BindingIndex, GLuint, kMaxBindingsPerGroup>, kMaxBindGroups>;
+            ityp::array<BindGroupIndex,
+                        ityp::array<BindingIndex, GLuint, kMaxBindingsPerGroup>,
+                        kMaxBindGroups>;
         const BindingIndexInfo& GetBindingIndexInfo() const;
 
         GLuint GetTextureUnitsUsed() const;

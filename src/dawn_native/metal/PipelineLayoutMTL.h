@@ -43,7 +43,9 @@ namespace dawn_native { namespace metal {
         PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor);
 
         using BindingIndexInfo =
-            std::array<ityp::array<BindingIndex, uint32_t, kMaxBindingsPerGroup>, kMaxBindGroups>;
+            ityp::array<BindGroupIndex,
+                        ityp::array<BindingIndex, uint32_t, kMaxBindingsPerGroup>,
+                        kMaxBindGroups>;
         const BindingIndexInfo& GetBindingIndexInfo(SingleShaderStage stage) const;
 
         // The number of Metal vertex stage buffers used for the whole pipeline layout.
