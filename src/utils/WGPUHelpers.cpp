@@ -384,6 +384,7 @@ namespace utils {
                                          uint32_t bytesPerRow,
                                          uint32_t rowsPerImage,
                                          uint32_t copyArrayLayerCount) {
+        ASSERT(rowsPerImage > 0);
         const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(format);
         const uint32_t bytesAtLastImage = bytesPerRow * (rowsPerImage - 1) + bytesPerTexel * width;
         return bytesPerRow * rowsPerImage * (copyArrayLayerCount - 1) + bytesAtLastImage;
@@ -401,11 +402,13 @@ namespace utils {
                           textureSizeAtLevel0.height >> mipmapLevel, textureSizeAtLevel0.depth};
 
         layout.bytesPerRow = GetMinimumBytesPerRow(format, layout.mipSize.width);
-        layout.bytesPerImage = layout.bytesPerRow * rowsPerImage;
+
+        uint32_t appliedRowsPerImage = rowsPerImage > 0 ? rowsPerImage : layout.mipSize.height;
+        layout.bytesPerImage = layout.bytesPerRow * appliedRowsPerImage;
 
         layout.byteLength =
             GetBytesInBufferTextureCopy(format, layout.mipSize.width, layout.bytesPerRow,
-                                        layout.mipSize.height, textureSizeAtLevel0.depth);
+                                        appliedRowsPerImage, textureSizeAtLevel0.depth);
 
         const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(format);
         layout.texelBlocksPerRow = layout.bytesPerRow / bytesPerTexel;

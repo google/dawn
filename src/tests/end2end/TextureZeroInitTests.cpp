@@ -130,6 +130,49 @@ TEST_P(TextureZeroInitTest, CopyTextureToBufferSource) {
     EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(texture.Get(), 0, 1, 0, 1));
 }
 
+// This tests that the code path of CopyTextureToBuffer with multiple texture array layers clears
+// correctly to Zero after first usage
+TEST_P(TextureZeroInitTest, CopyMultipleTextureArrayLayersToBufferSource) {
+    // TODO(jiawei.shao@intel.com): investigate why copies with multiple texture array layers fail
+    // with swiftshader.
+    DAWN_SKIP_TEST_IF(IsSwiftshader());
+
+    constexpr uint32_t kArrayLayers = 6u;
+
+    const wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
+        1, kArrayLayers, wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc,
+        kColorFormat);
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
+
+    const uint32_t bytesPerRow = utils::GetMinimumBytesPerRow(kColorFormat, kSize);
+    wgpu::BufferDescriptor bufferDescriptor;
+    bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    bufferDescriptor.size =
+        utils::GetBytesInBufferTextureCopy(kColorFormat, kSize, bytesPerRow, kSize, kArrayLayers);
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
+
+    const wgpu::BufferCopyView bufferCopyView =
+        utils::CreateBufferCopyView(buffer, 0, bytesPerRow, 0);
+    const wgpu::TextureCopyView textureCopyView =
+        utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
+    const wgpu::Extent3D copySize = {kSize, kSize, kArrayLayers};
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copySize);
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+
+    // Expect texture to be lazy initialized.
+    EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
+
+    // Expect texture subresource initialized to be true
+    EXPECT_TRUE(dawn_native::IsTextureSubresourceInitialized(texture.Get(), 0, 1, 0, kArrayLayers));
+
+    const std::vector<RGBA8> kExpectedAllZero(kSize * kSize, {0, 0, 0, 0});
+    for (uint32_t layer = 0; layer < kArrayLayers; ++layer) {
+        EXPECT_TEXTURE_RGBA8_EQ(kExpectedAllZero.data(), texture, 0, 0, kSize, kSize, 0, layer);
+    }
+}
+
 // Test that non-zero mip level clears subresource to Zero after first use
 // This goes through the BeginRenderPass's code path
 TEST_P(TextureZeroInitTest, RenderingMipMapClearsToZero) {
@@ -280,6 +323,47 @@ TEST_P(TextureZeroInitTest, CopyBufferToTextureHalf) {
 
     // Expect texture subresource initialized to be true
     EXPECT_EQ(true, dawn_native::IsTextureSubresourceInitialized(texture.Get(), 0, 1, 0, 1));
+}
+
+// This tests CopyBufferToTexture fully overwrites a range of subresources, so lazy initialization
+// is needed for neither the subresources involved in the copy nor the other subresources.
+TEST_P(TextureZeroInitTest, CopyBufferToTextureMultipleArrayLayers) {
+    // TODO(jiawei.shao@intel.com): investigate why copies with multiple texture array layers fail
+    // with swiftshader.
+    DAWN_SKIP_TEST_IF(IsSwiftshader());
+
+    wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
+        1, 6, wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc, kColorFormat);
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
+
+    constexpr uint32_t kBaseArrayLayer = 2u;
+    constexpr uint32_t kCopyLayerCount = 3u;
+    std::vector<uint8_t> data(kFormatBlockByteSize * kSize * kSize * kCopyLayerCount, 100);
+    wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(
+        device, data.data(), static_cast<uint32_t>(data.size()), wgpu::BufferUsage::CopySrc);
+
+    const wgpu::BufferCopyView bufferCopyView =
+        utils::CreateBufferCopyView(stagingBuffer, 0, kSize * kFormatBlockByteSize, 0);
+    const wgpu::TextureCopyView textureCopyView =
+        utils::CreateTextureCopyView(texture, 0, {0, 0, kBaseArrayLayer});
+    const wgpu::Extent3D copySize = {kSize, kSize, kCopyLayerCount};
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
+    wgpu::CommandBuffer commands = encoder.Finish();
+
+    // The copy overwrites the whole subresources su we don't need to do lazy initialization on
+    // them.
+    EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commands));
+
+    // Expect texture subresource initialized to be true
+    EXPECT_TRUE(dawn_native::IsTextureSubresourceInitialized(texture.Get(), 0, 1, kBaseArrayLayer,
+                                                             kCopyLayerCount));
+
+    const std::vector<RGBA8> expected100(kSize * kSize, {100, 100, 100, 100});
+    for (uint32_t layer = kBaseArrayLayer; layer < kBaseArrayLayer + kCopyLayerCount; ++layer) {
+        EXPECT_TEXTURE_RGBA8_EQ(expected100.data(), texture, 0, 0, kSize, kSize, 0, layer);
+    }
 }
 
 // This tests CopyTextureToTexture fully overwrites copy so lazy init is not needed.

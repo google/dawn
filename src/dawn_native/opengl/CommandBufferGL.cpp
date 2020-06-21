@@ -515,13 +515,15 @@ namespace dawn_native { namespace opengl {
                     const GLFormat& format = texture->GetGLFormat();
 
                     ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
-                    ASSERT(copy->copySize.depth == 1);
-                    SubresourceRange subresource =
-                        SubresourceRange::SingleSubresource(dst.mipLevel, dst.arrayLayer);
+                    // TODO(jiawei.shao@intel.com): use copy->destination.origin.z instead of
+                    // copy->destination.arrayLayer once GPUTextureCopyView.arrayLayer to
+                    // GPUTextureCopyView.origin.z is done.
+                    SubresourceRange subresources = {dst.mipLevel, 1, dst.arrayLayer,
+                                                     copy->copySize.depth};
                     if (IsCompleteSubresourceCopiedTo(texture, copySize, dst.mipLevel)) {
-                        texture->SetIsSubresourceContentInitialized(true, subresource);
+                        texture->SetIsSubresourceContentInitialized(true, subresources);
                     } else {
-                        texture->EnsureSubresourceContentInitialized(subresource);
+                        texture->EnsureSubresourceContentInitialized(subresources);
                     }
 
                     gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->GetHandle());
@@ -549,8 +551,8 @@ namespace dawn_native { namespace opengl {
                         if (texture->GetArrayLayers() > 1) {
                             gl.CompressedTexSubImage3D(
                                 target, dst.mipLevel, dst.origin.x, dst.origin.y, dst.arrayLayer,
-                                copyExtent.width, copyExtent.height, 1, format.internalFormat,
-                                copyDataSize,
+                                copyExtent.width, copyExtent.height, copyExtent.depth,
+                                format.internalFormat, copyDataSize,
                                 reinterpret_cast<void*>(static_cast<uintptr_t>(src.offset)));
                         } else {
                             gl.CompressedTexSubImage2D(
@@ -564,7 +566,8 @@ namespace dawn_native { namespace opengl {
                                 if (texture->GetArrayLayers() > 1) {
                                     gl.TexSubImage3D(target, dst.mipLevel, dst.origin.x,
                                                      dst.origin.y, dst.arrayLayer, copySize.width,
-                                                     copySize.height, 1, format.format, format.type,
+                                                     copySize.height, copySize.depth, format.format,
+                                                     format.type,
                                                      reinterpret_cast<void*>(
                                                          static_cast<uintptr_t>(src.offset)));
                                 } else {
@@ -606,9 +609,9 @@ namespace dawn_native { namespace opengl {
                     }
 
                     ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
-                    ASSERT(copy->copySize.depth == 1);
-                    texture->EnsureSubresourceContentInitialized(
-                        SubresourceRange::SingleSubresource(src.mipLevel, src.arrayLayer));
+                    SubresourceRange subresources = {src.mipLevel, 1, src.arrayLayer,
+                                                     copy->copySize.depth};
+                    texture->EnsureSubresourceContentInitialized(subresources);
                     // The only way to move data from a texture to a buffer in GL is via
                     // glReadPixels with a pack buffer. Create a temporary FBO for the copy.
                     gl.BindTexture(target, texture->GetHandle());
@@ -636,29 +639,42 @@ namespace dawn_native { namespace opengl {
                             break;
                     }
 
+                    gl.BindBuffer(GL_PIXEL_PACK_BUFFER, buffer->GetHandle());
+                    gl.PixelStorei(GL_PACK_ROW_LENGTH, dst.bytesPerRow / format.blockByteSize);
+                    gl.PixelStorei(GL_PACK_IMAGE_HEIGHT, dst.rowsPerImage);
+
+                    uint8_t* offset =
+                        reinterpret_cast<uint8_t*>(static_cast<uintptr_t>(dst.offset));
                     switch (texture->GetDimension()) {
-                        case wgpu::TextureDimension::e2D:
-                            if (texture->GetArrayLayers() > 1) {
-                                gl.FramebufferTextureLayer(GL_READ_FRAMEBUFFER, glAttachment,
-                                                           texture->GetHandle(), src.mipLevel,
-                                                           src.arrayLayer);
-                            } else {
+                        case wgpu::TextureDimension::e2D: {
+                            if (texture->GetArrayLayers() == 1) {
                                 gl.FramebufferTexture2D(GL_READ_FRAMEBUFFER, glAttachment, target,
                                                         texture->GetHandle(), src.mipLevel);
+                                gl.ReadPixels(src.origin.x, src.origin.y, copySize.width,
+                                              copySize.height, glFormat.format, glFormat.type,
+                                              offset);
+                                break;
                             }
+
+                            const uint64_t bytesPerImage = dst.bytesPerRow * dst.rowsPerImage;
+                            for (uint32_t layer = 0; layer < copySize.depth; ++layer) {
+                                gl.FramebufferTextureLayer(GL_READ_FRAMEBUFFER, glAttachment,
+                                                           texture->GetHandle(), src.mipLevel,
+                                                           src.arrayLayer + layer);
+                                gl.ReadPixels(src.origin.x, src.origin.y, copySize.width,
+                                              copySize.height, glFormat.format, glFormat.type,
+                                              offset);
+
+                                offset += bytesPerImage;
+                            }
+
                             break;
+                        }
 
                         default:
                             UNREACHABLE();
                     }
 
-                    gl.BindBuffer(GL_PIXEL_PACK_BUFFER, buffer->GetHandle());
-                    gl.PixelStorei(GL_PACK_ROW_LENGTH, dst.bytesPerRow / format.blockByteSize);
-                    gl.PixelStorei(GL_PACK_IMAGE_HEIGHT, dst.rowsPerImage);
-                    ASSERT(copySize.depth == 1 && src.origin.z == 0);
-                    void* offset = reinterpret_cast<void*>(static_cast<uintptr_t>(dst.offset));
-                    gl.ReadPixels(src.origin.x, src.origin.y, copySize.width, copySize.height,
-                                  glFormat.format, glFormat.type, offset);
                     gl.PixelStorei(GL_PACK_ROW_LENGTH, 0);
                     gl.PixelStorei(GL_PACK_IMAGE_HEIGHT, 0);
 

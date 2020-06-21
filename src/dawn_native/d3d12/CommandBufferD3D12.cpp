@@ -577,41 +577,59 @@ namespace dawn_native { namespace d3d12 {
                     Texture* texture = ToBackend(copy->destination.texture.Get());
 
                     ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
-                    ASSERT(copy->copySize.depth == 1);
-                    SubresourceRange subresource = SubresourceRange::SingleSubresource(
-                        copy->destination.mipLevel, copy->destination.arrayLayer);
+                    // TODO(jiawei.shao@intel.com): use copy->destination.origin.z instead of
+                    // copy->destination.arrayLayer once GPUTextureCopyView.arrayLayer to
+                    // GPUTextureCopyView.origin.z is done.
+                    SubresourceRange subresources = {copy->destination.mipLevel, 1,
+                                                     copy->destination.arrayLayer,
+                                                     copy->copySize.depth};
                     if (IsCompleteSubresourceCopiedTo(texture, copy->copySize,
                                                       copy->destination.mipLevel)) {
-                        texture->SetIsSubresourceContentInitialized(true, subresource);
+                        texture->SetIsSubresourceContentInitialized(true, subresources);
                     } else {
-                        texture->EnsureSubresourceContentInitialized(commandContext, subresource);
+                        texture->EnsureSubresourceContentInitialized(commandContext, subresources);
                     }
 
                     buffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopySrc);
                     texture->TrackUsageAndTransitionNow(commandContext, wgpu::TextureUsage::CopyDst,
-                                                        subresource);
+                                                        subresources);
 
-                    auto copySplit = ComputeTextureCopySplit(
-                        copy->destination.origin, copy->copySize, texture->GetFormat(),
-                        copy->source.offset, copy->source.bytesPerRow, copy->source.rowsPerImage);
+                    const uint64_t bytesPerSlice =
+                        copy->source.bytesPerRow * copy->source.rowsPerImage;
 
-                    D3D12_TEXTURE_COPY_LOCATION textureLocation =
-                        ComputeTextureCopyLocationForTexture(texture, copy->destination.mipLevel,
-                                                             copy->destination.arrayLayer);
+                    const dawn_native::Extent3D copyOneLayerSize = {copy->copySize.width,
+                                                                    copy->copySize.height, 1};
+                    uint64_t bufferOffsetForNextSlice = 0;
+                    for (uint32_t copySlice = copy->destination.arrayLayer;
+                         copySlice < copy->destination.arrayLayer + copy->copySize.depth;
+                         ++copySlice) {
+                        // TODO(jiawei.shao@intel.com): compute copySplit once for all texture array
+                        // layers when possible.
+                        auto copySplit = ComputeTextureCopySplit(
+                            copy->destination.origin, copyOneLayerSize, texture->GetFormat(),
+                            bufferOffsetForNextSlice + copy->source.offset,
+                            copy->source.bytesPerRow, copy->source.rowsPerImage);
 
-                    for (uint32_t i = 0; i < copySplit.count; ++i) {
-                        TextureCopySplit::CopyInfo& info = copySplit.copies[i];
+                        D3D12_TEXTURE_COPY_LOCATION textureLocation =
+                            ComputeTextureCopyLocationForTexture(
+                                texture, copy->destination.mipLevel, copySlice);
 
-                        D3D12_TEXTURE_COPY_LOCATION bufferLocation =
-                            ComputeBufferLocationForCopyTextureRegion(
-                                texture, buffer->GetD3D12Resource().Get(), info.bufferSize,
-                                copySplit.offset, copy->source.bytesPerRow);
-                        D3D12_BOX sourceRegion =
-                            ComputeD3D12BoxFromOffsetAndSize(info.bufferOffset, info.copySize);
+                        for (uint32_t i = 0; i < copySplit.count; ++i) {
+                            const TextureCopySplit::CopyInfo& info = copySplit.copies[i];
 
-                        commandList->CopyTextureRegion(&textureLocation, info.textureOffset.x,
-                                                       info.textureOffset.y, info.textureOffset.z,
-                                                       &bufferLocation, &sourceRegion);
+                            D3D12_TEXTURE_COPY_LOCATION bufferLocation =
+                                ComputeBufferLocationForCopyTextureRegion(
+                                    texture, buffer->GetD3D12Resource().Get(), info.bufferSize,
+                                    copySplit.offset, copy->source.bytesPerRow);
+                            D3D12_BOX sourceRegion =
+                                ComputeD3D12BoxFromOffsetAndSize(info.bufferOffset, info.copySize);
+
+                            commandList->CopyTextureRegion(
+                                &textureLocation, info.textureOffset.x, info.textureOffset.y,
+                                info.textureOffset.z, &bufferLocation, &sourceRegion);
+                        }
+
+                        bufferOffsetForNextSlice += bytesPerSlice;
                     }
                     break;
                 }
@@ -622,38 +640,53 @@ namespace dawn_native { namespace d3d12 {
                     Buffer* buffer = ToBackend(copy->destination.buffer.Get());
 
                     ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
-                    ASSERT(copy->copySize.depth == 1);
-                    SubresourceRange subresource = SubresourceRange::SingleSubresource(
-                        copy->source.mipLevel, copy->source.arrayLayer);
-                    texture->EnsureSubresourceContentInitialized(commandContext, subresource);
+                    // TODO(jiawei.shao@intel.com): use copy->destination.origin.z instead of
+                    // copy->destination.arrayLayer once GPUTextureCopyView.arrayLayer to
+                    // GPUTextureCopyView.origin.z is done.
+                    SubresourceRange subresources = {copy->source.mipLevel, 1,
+                                                     copy->source.arrayLayer, copy->copySize.depth};
+                    texture->EnsureSubresourceContentInitialized(commandContext, subresources);
 
                     texture->TrackUsageAndTransitionNow(commandContext, wgpu::TextureUsage::CopySrc,
-                                                        subresource);
+                                                        subresources);
                     buffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopyDst);
 
-                    TextureCopySplit copySplit = ComputeTextureCopySplit(
-                        copy->source.origin, copy->copySize, texture->GetFormat(),
-                        copy->destination.offset, copy->destination.bytesPerRow,
-                        copy->destination.rowsPerImage);
+                    const uint64_t bytesPerSlice =
+                        copy->destination.bytesPerRow * copy->destination.rowsPerImage;
 
-                    D3D12_TEXTURE_COPY_LOCATION textureLocation =
-                        ComputeTextureCopyLocationForTexture(texture, copy->source.mipLevel,
-                                                             copy->source.arrayLayer);
+                    const dawn_native::Extent3D copyOneLayerSize = {copy->copySize.width,
+                                                                    copy->copySize.height, 1};
+                    uint64_t bufferOffsetForNextSlice = 0;
+                    for (uint32_t copySlice = copy->source.arrayLayer;
+                         copySlice < copy->source.arrayLayer + copy->copySize.depth; ++copySlice) {
+                        // TODO(jiawei.shao@intel.com): compute copySplit once for all texture array
+                        // layers when possible.
+                        TextureCopySplit copySplit = ComputeTextureCopySplit(
+                            copy->source.origin, copyOneLayerSize, texture->GetFormat(),
+                            bufferOffsetForNextSlice + copy->destination.offset,
+                            copy->destination.bytesPerRow, copy->destination.rowsPerImage);
 
-                    for (uint32_t i = 0; i < copySplit.count; ++i) {
-                        TextureCopySplit::CopyInfo& info = copySplit.copies[i];
+                        D3D12_TEXTURE_COPY_LOCATION textureLocation =
+                            ComputeTextureCopyLocationForTexture(texture, copy->source.mipLevel,
+                                                                 copySlice);
 
-                        D3D12_TEXTURE_COPY_LOCATION bufferLocation =
-                            ComputeBufferLocationForCopyTextureRegion(
-                                texture, buffer->GetD3D12Resource().Get(), info.bufferSize,
-                                copySplit.offset, copy->destination.bytesPerRow);
+                        for (uint32_t i = 0; i < copySplit.count; ++i) {
+                            const TextureCopySplit::CopyInfo& info = copySplit.copies[i];
 
-                        D3D12_BOX sourceRegion =
-                            ComputeD3D12BoxFromOffsetAndSize(info.textureOffset, info.copySize);
+                            D3D12_TEXTURE_COPY_LOCATION bufferLocation =
+                                ComputeBufferLocationForCopyTextureRegion(
+                                    texture, buffer->GetD3D12Resource().Get(), info.bufferSize,
+                                    copySplit.offset, copy->destination.bytesPerRow);
 
-                        commandList->CopyTextureRegion(&bufferLocation, info.bufferOffset.x,
-                                                       info.bufferOffset.y, info.bufferOffset.z,
-                                                       &textureLocation, &sourceRegion);
+                            D3D12_BOX sourceRegion =
+                                ComputeD3D12BoxFromOffsetAndSize(info.textureOffset, info.copySize);
+
+                            commandList->CopyTextureRegion(&bufferLocation, info.bufferOffset.x,
+                                                           info.bufferOffset.y, info.bufferOffset.z,
+                                                           &textureLocation, &sourceRegion);
+                        }
+
+                        bufferOffsetForNextSlice += bytesPerSlice;
                     }
                     break;
                 }
