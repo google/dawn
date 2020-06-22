@@ -369,7 +369,7 @@ bool TypeDeterminer::DetermineArrayAccessor(
   }
 
   auto* res = expr->array()->result_type();
-  auto* parent_type = res->UnwrapPtrIfNeeded();
+  auto* parent_type = res->UnwrapAliasPtrAlias();
   ast::type::Type* ret = nullptr;
   if (parent_type->IsArray()) {
     ret = parent_type->AsArray()->type();

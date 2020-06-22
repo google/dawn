@@ -400,6 +400,31 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
   EXPECT_TRUE(ptr->type()->IsF32());
 }
 
+TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
+  ast::type::I32Type i32;
+  ast::type::F32Type f32;
+  ast::type::ArrayType ary(&f32, 3);
+  ast::type::AliasType aary("myarrty", &ary);
+
+  auto idx = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 2));
+  auto var = std::make_unique<ast::Variable>(
+      "my_var", ast::StorageClass::kFunction, &aary);
+  mod()->AddGlobalVariable(std::move(var));
+
+  // Register the global
+  EXPECT_TRUE(td()->Determine());
+
+  ast::ArrayAccessorExpression acc(
+      std::make_unique<ast::IdentifierExpression>("my_var"), std::move(idx));
+  EXPECT_TRUE(td()->DetermineResultType(&acc));
+  ASSERT_NE(acc.result_type(), nullptr);
+  ASSERT_TRUE(acc.result_type()->IsPointer());
+
+  auto* ptr = acc.result_type()->AsPointer();
+  EXPECT_TRUE(ptr->type()->IsF32());
+}
+
 TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array_Constant) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;
