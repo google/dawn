@@ -743,6 +743,93 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function) {
   EXPECT_TRUE(ident.result_type()->IsF32());
 }
 
+TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
+  ast::type::F32Type f32;
+
+  auto in_var = std::make_unique<ast::Variable>(
+      "in_var", ast::StorageClass::kInput, &f32);
+  auto out_var = std::make_unique<ast::Variable>(
+      "out_var", ast::StorageClass::kOutput, &f32);
+  auto sb_var = std::make_unique<ast::Variable>(
+      "sb_var", ast::StorageClass::kStorageBuffer, &f32);
+  auto wg_var = std::make_unique<ast::Variable>(
+      "wg_var", ast::StorageClass::kWorkgroup, &f32);
+  auto priv_var = std::make_unique<ast::Variable>(
+      "priv_var", ast::StorageClass::kPrivate, &f32);
+
+  auto in_ptr = in_var.get();
+  auto out_ptr = out_var.get();
+  auto sb_ptr = sb_var.get();
+  auto wg_ptr = wg_var.get();
+  auto priv_ptr = priv_var.get();
+
+  mod()->AddGlobalVariable(std::move(in_var));
+  mod()->AddGlobalVariable(std::move(out_var));
+  mod()->AddGlobalVariable(std::move(sb_var));
+  mod()->AddGlobalVariable(std::move(wg_var));
+  mod()->AddGlobalVariable(std::move(priv_var));
+
+  ast::VariableList params;
+  auto func =
+      std::make_unique<ast::Function>("my_func", std::move(params), &f32);
+  auto func_ptr = func.get();
+
+  ast::StatementList body;
+  body.push_back(std::make_unique<ast::AssignmentStatement>(
+      std::make_unique<ast::IdentifierExpression>("out_var"),
+      std::make_unique<ast::IdentifierExpression>("in_var")));
+  body.push_back(std::make_unique<ast::AssignmentStatement>(
+      std::make_unique<ast::IdentifierExpression>("wg_var"),
+      std::make_unique<ast::IdentifierExpression>("wg_var")));
+  body.push_back(std::make_unique<ast::AssignmentStatement>(
+      std::make_unique<ast::IdentifierExpression>("sb_var"),
+      std::make_unique<ast::IdentifierExpression>("sb_var")));
+  body.push_back(std::make_unique<ast::AssignmentStatement>(
+      std::make_unique<ast::IdentifierExpression>("priv_var"),
+      std::make_unique<ast::IdentifierExpression>("priv_var")));
+  func->set_body(std::move(body));
+
+  mod()->AddFunction(std::move(func));
+
+  // Register the function
+  EXPECT_TRUE(td()->Determine());
+
+  const auto& vars = func_ptr->referenced_module_variables();
+  ASSERT_EQ(vars.size(), 5);
+  EXPECT_EQ(vars[0], out_ptr);
+  EXPECT_EQ(vars[1], in_ptr);
+  EXPECT_EQ(vars[2], wg_ptr);
+  EXPECT_EQ(vars[3], sb_ptr);
+  EXPECT_EQ(vars[4], priv_ptr);
+}
+
+TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
+  ast::type::F32Type f32;
+
+  auto var = std::make_unique<ast::Variable>(
+      "in_var", ast::StorageClass::kFunction, &f32);
+
+  ast::VariableList params;
+  auto func =
+      std::make_unique<ast::Function>("my_func", std::move(params), &f32);
+  auto func_ptr = func.get();
+
+  ast::StatementList body;
+  body.push_back(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+  body.push_back(std::make_unique<ast::AssignmentStatement>(
+      std::make_unique<ast::IdentifierExpression>("var"),
+      std::make_unique<ast::ScalarConstructorExpression>(
+          std::make_unique<ast::FloatLiteral>(&f32, 1.f))));
+  func->set_body(std::move(body));
+
+  mod()->AddFunction(std::move(func));
+
+  // Register the function
+  EXPECT_TRUE(td()->Determine());
+
+  EXPECT_EQ(func_ptr->referenced_module_variables().size(), 0);
+}
+
 TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;

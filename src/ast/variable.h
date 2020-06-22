@@ -105,7 +105,7 @@ class Variable : public Node {
   /// @param name the name to set
   void set_name(const std::string& name) { name_ = name; }
   /// @returns the variable name
-  const std::string& name() { return name_; }
+  const std::string& name() const { return name_; }
 
   /// Sets the value type if a const or formal parameter, or the
   /// store type if a var.

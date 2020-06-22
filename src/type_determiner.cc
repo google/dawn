@@ -161,6 +161,19 @@ void TypeDeterminer::set_error(const Source& src, const std::string& msg) {
   error_ += msg;
 }
 
+void TypeDeterminer::set_referenced_from_function_if_needed(
+    ast::Variable* var) {
+  if (current_function_ == nullptr) {
+    return;
+  }
+  if (var->storage_class() == ast::StorageClass::kNone ||
+      var->storage_class() == ast::StorageClass::kFunction) {
+    return;
+  }
+
+  current_function_->add_referenced_module_variable(var);
+}
+
 bool TypeDeterminer::Determine() {
   for (const auto& var : mod_->global_variables()) {
     variable_stack_.set_global(var->name(), var.get());
@@ -190,6 +203,8 @@ bool TypeDeterminer::DetermineFunctions(const ast::FunctionList& funcs) {
 bool TypeDeterminer::DetermineFunction(ast::Function* func) {
   name_to_function_[func->name()] = func;
 
+  current_function_ = func;
+
   variable_stack_.push_scope();
   for (const auto& param : func->params()) {
     variable_stack_.set(param->name(), param.get());
@@ -199,6 +214,8 @@ bool TypeDeterminer::DetermineFunction(ast::Function* func) {
     return false;
   }
   variable_stack_.pop_scope();
+
+  current_function_ = nullptr;
 
   return true;
 }
@@ -567,6 +584,8 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
           ctx_.type_mgr().Get(std::make_unique<ast::type::PointerType>(
               var->type(), var->storage_class())));
     }
+
+    set_referenced_from_function_if_needed(var);
     return true;
   }
 

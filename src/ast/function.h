@@ -68,6 +68,15 @@ class Function : public Node {
   /// @returns the function params
   const VariableList& params() const { return params_; }
 
+  /// Adds the given variable to the list of referenced module variables if it
+  /// is not already included.
+  /// @param var the module variable to add
+  void add_referenced_module_variable(Variable* var);
+  /// @returns the referenced module variables
+  const std::vector<Variable*>& referenced_module_variables() const {
+    return referenced_module_vars_;
+  }
+
   /// Sets the return type of the function
   /// @param type the return type
   void set_return_type(type::Type* type) { return_type_ = type; }
@@ -98,6 +107,7 @@ class Function : public Node {
   VariableList params_;
   type::Type* return_type_ = nullptr;
   StatementList body_;
+  std::vector<Variable*> referenced_module_vars_;
 };
 
 /// A list of unique functions

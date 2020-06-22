@@ -104,6 +104,7 @@ class TypeDeterminer {
 
  private:
   void set_error(const Source& src, const std::string& msg);
+  void set_referenced_from_function_if_needed(ast::Variable* var);
 
   bool DetermineArrayAccessor(ast::ArrayAccessorExpression* expr);
   bool DetermineAs(ast::AsExpression* expr);
@@ -121,6 +122,7 @@ class TypeDeterminer {
   std::string error_;
   ScopeStack<ast::Variable*> variable_stack_;
   std::unordered_map<std::string, ast::Function*> name_to_function_;
+  ast::Function* current_function_ = nullptr;
 };
 
 }  // namespace tint

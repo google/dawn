@@ -57,6 +57,26 @@ TEST_F(FunctionTest, Creation_WithSource) {
   EXPECT_EQ(src.column, 2u);
 }
 
+TEST_F(FunctionTest, AddDuplicateReferencedVariables) {
+  type::VoidType void_type;
+  type::I32Type i32;
+
+  Variable v("var", StorageClass::kInput, &i32);
+  Function f("func", VariableList{}, &void_type);
+
+  f.add_referenced_module_variable(&v);
+  ASSERT_EQ(f.referenced_module_variables().size(), 1u);
+  EXPECT_EQ(f.referenced_module_variables()[0], &v);
+
+  f.add_referenced_module_variable(&v);
+  ASSERT_EQ(f.referenced_module_variables().size(), 1u);
+
+  Variable v2("var2", StorageClass::kOutput, &i32);
+  f.add_referenced_module_variable(&v2);
+  ASSERT_EQ(f.referenced_module_variables().size(), 2u);
+  EXPECT_EQ(f.referenced_module_variables()[1], &v2);
+}
+
 TEST_F(FunctionTest, IsValid) {
   type::VoidType void_type;
   type::I32Type i32;

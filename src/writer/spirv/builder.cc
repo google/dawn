@@ -164,6 +164,8 @@ bool Builder::Build() {
     }
   }
 
+  // Note, the entry points must be generated after the functions as they need
+  // to be able to lookup the function information based on the name.
   for (const auto& ep : mod_->entry_points()) {
     if (!GenerateEntryPoint(ep.get())) {
       return false;
@@ -296,10 +298,16 @@ bool Builder::GenerateEntryPoint(ast::EntryPoint* ep) {
 
   OperandList operands = {Operand::Int(stage), Operand::Int(id),
                           Operand::String(name)};
-  // TODO(dsinclair): This could be made smarter by only listing the
-  // input/output variables which are used by the entry point instead of just
-  // listing all module scoped variables of type input/output.
-  for (const auto& var : mod_->global_variables()) {
+
+  auto* func = func_name_to_func_[ep->function_name()];
+  if (func == nullptr) {
+    error_ = "processing an entry point when the function has not been seen.";
+    return false;
+  }
+
+  for (const auto* var : func->referenced_module_variables()) {
+    // For SPIR-V 1.3 we only output Input/output variables. If we update to
+    // SPIR-V 1.4 or later this should be all variables.
     if (var->storage_class() != ast::StorageClass::kInput &&
         var->storage_class() != ast::StorageClass::kOutput) {
       continue;
@@ -425,6 +433,7 @@ bool Builder::GenerateFunction(ast::Function* func) {
   scope_stack_.pop_scope();
 
   func_name_to_id_[func->name()] = func_id;
+  func_name_to_func_[func->name()] = func;
   return true;
 }
 

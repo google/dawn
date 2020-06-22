@@ -42,6 +42,15 @@ Function::Function(Function&&) = default;
 
 Function::~Function() = default;
 
+void Function::add_referenced_module_variable(Variable* var) {
+  for (const auto* v : referenced_module_vars_) {
+    if (v->name() == var->name()) {
+      return;
+    }
+  }
+  referenced_module_vars_.push_back(var);
+}
+
 bool Function::IsValid() const {
   for (const auto& param : params_) {
     if (param == nullptr || !param->IsValid())

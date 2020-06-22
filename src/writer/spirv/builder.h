@@ -84,36 +84,6 @@ class Builder {
     return id;
   }
 
-  /// Sets the id for a given function name
-  /// @param name the name to set
-  /// @param id the id to set
-  void set_func_name_to_id(const std::string& name, uint32_t id) {
-    func_name_to_id_[name] = id;
-  }
-
-  /// Retrives the id for the given function name
-  /// @param name the function name to search for
-  /// @returns the id for the given name or 0 on failure
-  uint32_t id_for_func_name(const std::string& name) {
-    if (func_name_to_id_.count(name) == 0) {
-      return 0;
-    }
-    return func_name_to_id_[name];
-  }
-
-  /// Retrieves the id for an entry point function, or 0 if not found.
-  /// Emits an error if not found.
-  /// @param ep the entry point
-  /// @returns 0 on error
-  uint32_t id_for_entry_point(ast::EntryPoint* ep) {
-    auto id = id_for_func_name(ep->function_name());
-    if (id == 0) {
-      error_ = "unable to find ID for function: " + ep->function_name();
-      return 0;
-    }
-    return id;
-  }
-
   /// Iterates over all the instructions in the correct order and calls the
   /// given callback
   /// @param cb the callback to execute
@@ -402,6 +372,29 @@ class Builder {
   /// automatically.
   Operand result_op();
 
+  /// Retrives the id for the given function name
+  /// @param name the function name to search for
+  /// @returns the id for the given name or 0 on failure
+  uint32_t id_for_func_name(const std::string& name) {
+    if (func_name_to_id_.count(name) == 0) {
+      return 0;
+    }
+    return func_name_to_id_[name];
+  }
+
+  /// Retrieves the id for an entry point function, or 0 if not found.
+  /// Emits an error if not found.
+  /// @param ep the entry point
+  /// @returns 0 on error
+  uint32_t id_for_entry_point(ast::EntryPoint* ep) {
+    auto id = id_for_func_name(ep->function_name());
+    if (id == 0) {
+      error_ = "unable to find ID for function: " + ep->function_name();
+      return 0;
+    }
+    return id;
+  }
+
   ast::Module* mod_;
   std::string error_;
   uint32_t next_id_ = 1;
@@ -415,6 +408,7 @@ class Builder {
 
   std::unordered_map<std::string, uint32_t> import_name_to_id_;
   std::unordered_map<std::string, uint32_t> func_name_to_id_;
+  std::unordered_map<std::string, ast::Function*> func_name_to_func_;
   std::unordered_map<std::string, uint32_t> type_name_to_id_;
   std::unordered_map<std::string, uint32_t> const_to_id_;
   ScopeStack<uint32_t> scope_stack_;
