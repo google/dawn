@@ -172,10 +172,6 @@ bool TypeDeterminer::Determine() {
     }
   }
 
-  for (const auto& func : mod_->functions()) {
-    name_to_function_[func->name()] = func.get();
-  }
-
   if (!DetermineFunctions(mod_->functions())) {
     return false;
   }
@@ -192,7 +188,13 @@ bool TypeDeterminer::DetermineFunctions(const ast::FunctionList& funcs) {
 }
 
 bool TypeDeterminer::DetermineFunction(ast::Function* func) {
+  name_to_function_[func->name()] = func;
+
   variable_stack_.push_scope();
+  for (const auto& param : func->params()) {
+    variable_stack_.set(param->name(), param.get());
+  }
+
   if (!DetermineStatements(func->body())) {
     return false;
   }

@@ -15,11 +15,15 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "src/ast/binary_expression.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/type/f32_type.h"
+#include "src/ast/type/i32_type.h"
 #include "src/ast/type/void_type.h"
 #include "src/context.h"
 #include "src/type_determiner.h"
@@ -121,6 +125,74 @@ OpName %8 "a_func"
 %9 = OpLabel
 %11 = OpLoad %4 %2
 %10 = OpExtInst %4 %1 Round %11
+OpFunctionEnd
+)");
+}
+
+TEST_F(BuilderTest, Call) {
+  ast::type::F32Type f32;
+  ast::type::VoidType void_type;
+
+  ast::VariableList func_params;
+  func_params.push_back(
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &f32));
+  func_params.push_back(
+      std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction, &f32));
+
+  ast::Function a_func("a_func", std::move(func_params), &f32);
+
+  ast::StatementList body;
+  body.push_back(std::make_unique<ast::ReturnStatement>(
+      std::make_unique<ast::BinaryExpression>(
+          ast::BinaryOp::kAdd, std::make_unique<ast::IdentifierExpression>("a"),
+          std::make_unique<ast::IdentifierExpression>("b"))));
+  a_func.set_body(std::move(body));
+
+  ast::Function func("main", {}, &void_type);
+
+  ast::ExpressionList call_params;
+  call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+  call_params.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.f)));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("a_func"),
+      std::move(call_params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  ASSERT_TRUE(td.DetermineFunction(&func)) << td.error();
+  ASSERT_TRUE(td.DetermineFunction(&a_func)) << td.error();
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&a_func)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(&func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 14u) << b.error();
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
+OpName %4 "a"
+OpName %5 "b"
+OpName %12 "main"
+%2 = OpTypeFloat 32
+%1 = OpTypeFunction %2 %2 %2
+%11 = OpTypeVoid
+%10 = OpTypeFunction %11
+%15 = OpConstant %2 1
+%3 = OpFunction %2 None %1
+%4 = OpFunctionParameter %2
+%5 = OpFunctionParameter %2
+%6 = OpLabel
+%7 = OpLoad %2 %4
+%8 = OpLoad %2 %5
+%9 = OpFAdd %2 %7 %8
+OpReturnValue %9
+OpFunctionEnd
+%12 = OpFunction %11 None %10
+%13 = OpLabel
+%14 = OpFunctionCall %2 %3 %15 %15
 OpFunctionEnd
 )");
 }

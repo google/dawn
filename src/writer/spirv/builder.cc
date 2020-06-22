@@ -1334,51 +1334,64 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
     return GenerateIntrinsic(ident->name(), expr);
   }
 
-  // TODO(dsinclair): Support regular function calls
-  if (!ident->has_path()) {
-    error_ = "function calls not supported yet.";
-    return 0;
-  }
-
   auto type_id = GenerateTypeIfNeeded(expr->func()->result_type());
   if (type_id == 0) {
-    return 0;
-  }
-
-  auto set_iter = import_name_to_id_.find(ident->path());
-  if (set_iter == import_name_to_id_.end()) {
-    error_ = "unknown import " + ident->path();
-    return 0;
-  }
-  auto set_id = set_iter->second;
-
-  auto* imp = mod_->FindImportByName(ident->path());
-  if (imp == nullptr) {
-    error_ = "unknown import " + ident->path();
-    return 0;
-  }
-
-  auto inst_id = imp->GetIdForMethod(ident->name());
-  if (inst_id == 0) {
-    error_ = "unknown method " + ident->name();
     return 0;
   }
 
   auto result = result_op();
   auto result_id = result.to_i();
 
-  std::vector<Operand> ops{Operand::Int(type_id), result, Operand::Int(set_id),
-                           Operand::Int(inst_id)};
+  spv::Op op = spv::Op::OpNop;
+  std::vector<Operand> ops = {Operand::Int(type_id), result};
+
+  // Handle regular function calls
+  if (!ident->has_path()) {
+    auto func_id = func_name_to_id_[ident->name()];
+    if (func_id == 0) {
+      error_ = "unable to find called function: " + ident->name();
+      return 0;
+    }
+    ops.push_back(Operand::Int(func_id));
+
+    op = spv::Op::OpFunctionCall;
+  } else {
+    // Imported function call
+    auto set_iter = import_name_to_id_.find(ident->path());
+    if (set_iter == import_name_to_id_.end()) {
+      error_ = "unknown import " + ident->path();
+      return 0;
+    }
+    auto set_id = set_iter->second;
+
+    auto* imp = mod_->FindImportByName(ident->path());
+    if (imp == nullptr) {
+      error_ = "unknown import " + ident->path();
+      return 0;
+    }
+
+    auto inst_id = imp->GetIdForMethod(ident->name());
+    if (inst_id == 0) {
+      error_ = "unknown method " + ident->name();
+      return 0;
+    }
+
+    ops.push_back(Operand::Int(set_id));
+    ops.push_back(Operand::Int(inst_id));
+
+    op = spv::Op::OpExtInst;
+  }
 
   for (const auto& param : expr->params()) {
     auto id = GenerateExpression(param.get());
     if (id == 0) {
       return 0;
     }
-    ops.push_back(Operand::Int(GenerateLoadIfNeeded(param->result_type(), id)));
+    id = GenerateLoadIfNeeded(param->result_type(), id);
+    ops.push_back(Operand::Int(id));
   }
 
-  push_function_inst(spv::Op::OpExtInst, std::move(ops));
+  push_function_inst(op, std::move(ops));
 
   return result_id;
 }
