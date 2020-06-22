@@ -104,8 +104,6 @@ bool LastIsTerminator(const ast::StatementList& stmts) {
   }
 
   auto* last = stmts.back().get();
-  // TODO(dneto): Conditional break and conditional continue should return
-  // false.
   return last->IsBreak() || last->IsContinue() || last->IsReturn() ||
          last->IsKill() || last->IsFallthrough();
 }
@@ -391,16 +389,32 @@ bool Builder::GenerateFunction(ast::Function* func) {
     return false;
   }
 
-  // TODO(dsinclair): Handle parameters
+  scope_stack_.push_scope();
 
   auto definition_inst = Instruction{
       spv::Op::OpFunction,
       {Operand::Int(ret_id), func_op, Operand::Int(SpvFunctionControlMaskNone),
        Operand::Int(func_type_id)}};
-  std::vector<Instruction> params;
-  push_function(Function{definition_inst, result_op(), std::move(params)});
 
-  scope_stack_.push_scope();
+  std::vector<Instruction> params;
+  for (const auto& param : func->params()) {
+    auto param_op = result_op();
+    auto param_id = param_op.to_i();
+
+    auto param_type_id = GenerateTypeIfNeeded(param->type());
+    if (param_type_id == 0) {
+      return false;
+    }
+
+    push_debug(spv::Op::OpName,
+               {Operand::Int(param_id), Operand::String(param->name())});
+    params.push_back(Instruction{spv::Op::OpFunctionParameter,
+                                 {Operand::Int(param_type_id), param_op}});
+
+    scope_stack_.set(param->name(), param_id);
+  }
+
+  push_function(Function{definition_inst, result_op(), std::move(params)});
 
   for (const auto& stmt : func->body()) {
     if (!GenerateStatement(stmt.get())) {
@@ -428,8 +442,16 @@ uint32_t Builder::GenerateFunctionTypeIfNeeded(ast::Function* func) {
     return 0;
   }
 
-  // TODO(dsinclair): Handle parameters
-  push_type(spv::Op::OpTypeFunction, {func_op, Operand::Int(ret_id)});
+  std::vector<Operand> ops = {func_op, Operand::Int(ret_id)};
+  for (const auto& param : func->params()) {
+    auto param_type_id = GenerateTypeIfNeeded(param->type());
+    if (param_type_id == 0) {
+      return 0;
+    }
+    ops.push_back(Operand::Int(param_type_id));
+  }
+
+  push_type(spv::Op::OpTypeFunction, std::move(ops));
 
   type_name_to_id_[func->type_name()] = func_type_id;
   return func_type_id;

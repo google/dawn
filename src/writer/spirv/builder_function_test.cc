@@ -18,8 +18,12 @@
 #include "spirv/unified1/spirv.h"
 #include "spirv/unified1/spirv.hpp11"
 #include "src/ast/function.h"
+#include "src/ast/identifier_expression.h"
 #include "src/ast/return_statement.h"
+#include "src/ast/type/f32_type.h"
+#include "src/ast/type/i32_type.h"
 #include "src/ast/type/void_type.h"
+#include "src/ast/variable.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
 
@@ -50,7 +54,41 @@ TEST_F(BuilderTest, Function_Empty) {
 )");
 }
 
-TEST_F(BuilderTest, DISABLED_Function_WithParams) {}
+TEST_F(BuilderTest, Function_WithParams) {
+  ast::type::VoidType void_type;
+  ast::type::F32Type f32;
+  ast::type::I32Type i32;
+
+  ast::VariableList params;
+  params.push_back(
+      std::make_unique<ast::Variable>("a", ast::StorageClass::kFunction, &f32));
+  params.push_back(
+      std::make_unique<ast::Variable>("b", ast::StorageClass::kFunction, &i32));
+
+  ast::Function func("a_func", std::move(params), &f32);
+
+  ast::StatementList body;
+  body.push_back(std::make_unique<ast::ReturnStatement>(
+      std::make_unique<ast::IdentifierExpression>("a")));
+  func.set_body(std::move(body));
+
+  ast::Module mod;
+  Builder b(&mod);
+  ASSERT_TRUE(b.GenerateFunction(&func));
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %4 "a_func"
+OpName %5 "a"
+OpName %6 "b"
+%2 = OpTypeFloat 32
+%3 = OpTypeInt 32 1
+%1 = OpTypeFunction %2 %2 %3
+%4 = OpFunction %2 None %1
+%5 = OpFunctionParameter %2
+%6 = OpFunctionParameter %3
+%7 = OpLabel
+OpReturnValue %5
+OpFunctionEnd
+)");
+}
 
 TEST_F(BuilderTest, Function_WithBody) {
   ast::type::VoidType void_type;
