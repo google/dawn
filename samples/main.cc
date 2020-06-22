@@ -19,6 +19,10 @@
 #include <string>
 #include <vector>
 
+#if TINT_BUILD_SPV_READER
+#include "spirv-tools/libspirv.hpp"
+#endif  // TINT_BUILD_SPV_READER
+
 #include "tint/tint.h"
 
 namespace {
@@ -42,7 +46,7 @@ struct Options {
   Format format = Format::kNone;
 };
 
-const char kUsage[] = R"(Usage: tint [options] SCRIPT [SCRIPTS...]
+const char kUsage[] = R"(Usage: tint [options] <input-file>
 
  options:
   --format <spirv|spvasm|wgsl>  -- Output format.
@@ -328,11 +332,36 @@ int main(int argc, const char** argv) {
 #endif  // TINT_BUILD_WGSL_READER
 
 #if TINT_BUILD_SPV_READER
+  // Handle SPIR-V binary input, in files ending with .spv
   if (options.input_filename.size() > 4 &&
       options.input_filename.substr(options.input_filename.size() - 4) ==
           ".spv") {
     std::vector<uint32_t> data;
     if (!ReadFile<uint32_t>(options.input_filename, &data)) {
+      return 1;
+    }
+    reader = std::make_unique<tint::reader::spirv::Parser>(&ctx, data);
+  }
+  // Handle SPIR-V assembly input, in files ending with .spvasm
+  if (options.input_filename.size() > 7 &&
+      options.input_filename.substr(options.input_filename.size() - 7) ==
+          ".spvasm") {
+    std::vector<char> text;
+    if (!ReadFile<char>(options.input_filename, &text)) {
+      return 1;
+    }
+    // By default, use SPIR-V 1.3, the original proposal for SPIR-V binary
+    // input for WebGPU.  This lines up with the SPIRV-Tools validation
+    // for the SPV_ENV_WEBGPU0 environment.
+    spvtools::SpirvTools tools(SPV_ENV_UNIVERSAL_1_3);
+    tools.SetMessageConsumer([](spv_message_level_t, const char*,
+                                const spv_position_t& pos, const char* msg) {
+      std::cerr << (pos.line + 1) << ":" << (pos.column + 1) << ": " << msg
+                << std::endl;
+    });
+    std::vector<uint32_t> data;
+    if (!tools.Assemble(text.data(), text.size(), &data,
+                        SPV_TEXT_TO_BINARY_OPTION_PRESERVE_NUMERIC_IDS)) {
       return 1;
     }
     reader = std::make_unique<tint::reader::spirv::Parser>(&ctx, data);
