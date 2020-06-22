@@ -2421,6 +2421,9 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
   }
 
   switch (inst.opcode()) {
+    case SpvOpNop:
+      return true;
+
     case SpvOpStore: {
       // TODO(dneto): Order of evaluation?
       auto lhs = MakeExpression(inst.GetSingleWordInOperand(0));

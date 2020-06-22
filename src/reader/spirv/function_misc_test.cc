@@ -26,6 +26,7 @@ namespace reader {
 namespace spirv {
 namespace {
 
+using ::testing::Eq;
 using ::testing::HasSubstr;
 
 std::string CommonTypes() {
@@ -277,7 +278,24 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Struct) {
 })")) << ToString(fe.ast_body());
 }
 
-// TODO(dneto): OpNop
+TEST_F(SpvParserTestMiscInstruction, OpNop) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     OpNop
+     OpReturn
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Return{}
+)"))
+      << ToString(fe.ast_body());
+}
+
 // TODO(dneto): OpSizeof : requires Kernel (OpenCL)
 
 }  // namespace
