@@ -24,7 +24,7 @@ Function::Function()
 
 Function::Function(const Instruction& declaration,
                    const Operand& label_op,
-                   const std::vector<Instruction>& params)
+                   const InstructionList& params)
     : declaration_(declaration), label_op_(label_op), params_(params) {}
 
 Function::Function(const Function& other) = default;

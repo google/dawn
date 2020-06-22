@@ -63,7 +63,7 @@ namespace writer {
 namespace spirv {
 namespace {
 
-uint32_t size_of(const std::vector<Instruction>& instructions) {
+uint32_t size_of(const InstructionList& instructions) {
   uint32_t size = 0;
   for (const auto& inst : instructions)
     size += inst.word_length();
@@ -294,8 +294,8 @@ bool Builder::GenerateEntryPoint(ast::EntryPoint* ep) {
     return false;
   }
 
-  std::vector<Operand> operands = {Operand::Int(stage), Operand::Int(id),
-                                   Operand::String(name)};
+  OperandList operands = {Operand::Int(stage), Operand::Int(id),
+                          Operand::String(name)};
   // TODO(dsinclair): This could be made smarter by only listing the
   // input/output variables which are used by the entry point instead of just
   // listing all module scoped variables of type input/output.
@@ -396,7 +396,7 @@ bool Builder::GenerateFunction(ast::Function* func) {
       {Operand::Int(ret_id), func_op, Operand::Int(SpvFunctionControlMaskNone),
        Operand::Int(func_type_id)}};
 
-  std::vector<Instruction> params;
+  InstructionList params;
   for (const auto& param : func->params()) {
     auto param_op = result_op();
     auto param_id = param_op.to_i();
@@ -442,7 +442,7 @@ uint32_t Builder::GenerateFunctionTypeIfNeeded(ast::Function* func) {
     return 0;
   }
 
-  std::vector<Operand> ops = {func_op, Operand::Int(ret_id)};
+  OperandList ops = {func_op, Operand::Int(ret_id)};
   for (const auto& param : func->params()) {
     auto param_type_id = GenerateTypeIfNeeded(param->type());
     if (param_type_id == 0) {
@@ -555,8 +555,8 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
   push_debug(spv::Op::OpName,
              {Operand::Int(var_id), Operand::String(var->name())});
 
-  std::vector<Operand> ops = {Operand::Int(type_id), result,
-                              Operand::Int(ConvertStorageClass(sc))};
+  OperandList ops = {Operand::Int(type_id), result,
+                     Operand::Int(ConvertStorageClass(sc))};
   if (var->has_constructor()) {
     ops.push_back(Operand::Int(init_id));
   } else {
@@ -728,8 +728,8 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
     auto extract = result_op();
     auto extract_id = extract.to_i();
 
-    std::vector<Operand> ops = {Operand::Int(result_type_id), extract,
-                                Operand::Int(info->source_id)};
+    OperandList ops = {Operand::Int(result_type_id), extract,
+                       Operand::Int(info->source_id)};
     for (auto id : info->access_chain_indices) {
       ops.push_back(Operand::Int(id));
     }
@@ -751,8 +751,8 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
   auto result = result_op();
   auto result_id = result.to_i();
 
-  std::vector<Operand> ops = {Operand::Int(result_type_id), result,
-                              Operand::Int(vec_id), Operand::Int(vec_id)};
+  OperandList ops = {Operand::Int(result_type_id), result, Operand::Int(vec_id),
+                     Operand::Int(vec_id)};
 
   for (uint32_t i = 0; i < swiz.size(); ++i) {
     auto val = IndexFromName(swiz[i]);
@@ -824,8 +824,8 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
     auto result = result_op();
     auto result_id = result.to_i();
 
-    std::vector<Operand> ops = {Operand::Int(result_type_id), result,
-                                Operand::Int(info.source_id)};
+    OperandList ops = {Operand::Int(result_type_id), result,
+                       Operand::Int(info.source_id)};
     for (auto id : info.access_chain_indices) {
       ops.push_back(Operand::Int(id));
     }
@@ -952,7 +952,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   std::ostringstream out;
   out << "__const";
 
-  std::vector<Operand> ops;
+  OperandList ops;
   bool constructor_is_const = true;
   for (const auto& e : init->values()) {
     if (!e->IsConstructor()) {
@@ -1343,7 +1343,7 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
   auto result_id = result.to_i();
 
   spv::Op op = spv::Op::OpNop;
-  std::vector<Operand> ops = {Operand::Int(type_id), result};
+  OperandList ops = {Operand::Int(type_id), result};
 
   // Handle regular function calls
   if (!ident->has_path()) {
@@ -1406,7 +1406,7 @@ uint32_t Builder::GenerateIntrinsic(const std::string& name,
     return 0;
   }
 
-  std::vector<Operand> params = {Operand::Int(result_type_id), result};
+  OperandList params = {Operand::Int(result_type_id), result};
   for (const auto& p : call->params()) {
     auto val_id = GenerateExpression(p.get());
     if (val_id == 0) {
@@ -1630,8 +1630,7 @@ bool Builder::GenerateSwitchStatement(ast::SwitchStatement* stmt) {
   auto default_block = result_op();
   auto default_block_id = default_block.to_i();
 
-  std::vector<Operand> params = {Operand::Int(cond_id),
-                                 Operand::Int(default_block_id)};
+  OperandList params = {Operand::Int(cond_id), Operand::Int(default_block_id)};
 
   std::vector<uint32_t> case_ids;
   for (const auto& item : stmt->body()) {
@@ -1943,7 +1942,7 @@ bool Builder::GenerateStructType(ast::type::StructType* struct_type,
                {Operand::Int(struct_id), Operand::String(struct_type->name())});
   }
 
-  std::vector<Operand> ops;
+  OperandList ops;
   ops.push_back(result);
 
   if (impl->decoration() == ast::StructDecoration::kBlock) {

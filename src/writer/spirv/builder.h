@@ -123,39 +123,39 @@ class Builder {
   /// @param cap the capability to set
   void push_capability(uint32_t cap);
   /// @returns the capabilities
-  const std::vector<Instruction>& capabilities() const { return capabilities_; }
+  const InstructionList& capabilities() const { return capabilities_; }
   /// Adds an instruction to the preamble
   /// @param op the op to set
   /// @param operands the operands for the instruction
-  void push_preamble(spv::Op op, const std::vector<Operand>& operands) {
+  void push_preamble(spv::Op op, const OperandList& operands) {
     preamble_.push_back(Instruction{op, operands});
   }
   /// @returns the preamble
-  const std::vector<Instruction>& preamble() const { return preamble_; }
+  const InstructionList& preamble() const { return preamble_; }
   /// Adds an instruction to the debug
   /// @param op the op to set
   /// @param operands the operands for the instruction
-  void push_debug(spv::Op op, const std::vector<Operand>& operands) {
+  void push_debug(spv::Op op, const OperandList& operands) {
     debug_.push_back(Instruction{op, operands});
   }
   /// @returns the debug instructions
-  const std::vector<Instruction>& debug() const { return debug_; }
+  const InstructionList& debug() const { return debug_; }
   /// Adds an instruction to the types
   /// @param op the op to set
   /// @param operands the operands for the instruction
-  void push_type(spv::Op op, const std::vector<Operand>& operands) {
+  void push_type(spv::Op op, const OperandList& operands) {
     types_.push_back(Instruction{op, operands});
   }
   /// @returns the type instructions
-  const std::vector<Instruction>& types() const { return types_; }
+  const InstructionList& types() const { return types_; }
   /// Adds an instruction to the annotations
   /// @param op the op to set
   /// @param operands the operands for the instruction
-  void push_annot(spv::Op op, const std::vector<Operand>& operands) {
+  void push_annot(spv::Op op, const OperandList& operands) {
     annotations_.push_back(Instruction{op, operands});
   }
   /// @returns the annotations
-  const std::vector<Instruction>& annots() const { return annotations_; }
+  const InstructionList& annots() const { return annotations_; }
 
   /// Adds a function to the builder
   /// @param func the function to add
@@ -168,12 +168,12 @@ class Builder {
   /// Pushes an instruction to the current function
   /// @param op the operation
   /// @param operands the operands
-  void push_function_inst(spv::Op op, const std::vector<Operand>& operands) {
+  void push_function_inst(spv::Op op, const OperandList& operands) {
     functions_.back().push_inst(op, operands);
   }
   /// Pushes a variable to the current function
   /// @param operands the variable operands
-  void push_function_var(const std::vector<Operand>& operands) {
+  void push_function_var(const OperandList& operands) {
     functions_.back().push_var(operands);
   }
 
@@ -406,11 +406,11 @@ class Builder {
   std::string error_;
   uint32_t next_id_ = 1;
   uint32_t current_label_id_ = 0;
-  std::vector<Instruction> capabilities_;
-  std::vector<Instruction> preamble_;
-  std::vector<Instruction> debug_;
-  std::vector<Instruction> types_;
-  std::vector<Instruction> annotations_;
+  InstructionList capabilities_;
+  InstructionList preamble_;
+  InstructionList debug_;
+  InstructionList types_;
+  InstructionList annotations_;
   std::vector<Function> functions_;
 
   std::unordered_map<std::string, uint32_t> import_name_to_id_;

@@ -39,7 +39,7 @@ class Function {
   /// @param params the function parameters
   Function(const Instruction& declaration,
            const Operand& label_op,
-           const std::vector<Instruction>& params);
+           const InstructionList& params);
   /// Copy constructor
   /// @param other the function to copy
   Function(const Function& other);
@@ -58,19 +58,19 @@ class Function {
   /// Adds an instruction to the instruction list
   /// @param op the op to set
   /// @param operands the operands for the instruction
-  void push_inst(spv::Op op, const std::vector<Operand>& operands) {
+  void push_inst(spv::Op op, const OperandList& operands) {
     instructions_.push_back(Instruction{op, operands});
   }
   /// @returns the instruction list
-  const std::vector<Instruction>& instructions() const { return instructions_; }
+  const InstructionList& instructions() const { return instructions_; }
 
   /// Adds a variable to the variable list
   /// @param operands the operands for the variable
-  void push_var(const std::vector<Operand>& operands) {
+  void push_var(const OperandList& operands) {
     vars_.push_back(Instruction{spv::Op::OpVariable, operands});
   }
   /// @returns the variable list
-  const std::vector<Instruction>& variables() const { return vars_; }
+  const InstructionList& variables() const { return vars_; }
 
   /// @returns the word length of the function
   uint32_t word_length() const {
@@ -92,9 +92,9 @@ class Function {
  private:
   Instruction declaration_;
   Operand label_op_;
-  std::vector<Instruction> params_;
-  std::vector<Instruction> vars_;
-  std::vector<Instruction> instructions_;
+  InstructionList params_;
+  InstructionList vars_;
+  InstructionList instructions_;
 };
 
 }  // namespace spirv

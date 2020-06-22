@@ -75,7 +75,7 @@ std::string DumpInstruction(const Instruction& inst) {
   return Disassemble(writer.result());
 }
 
-std::string DumpInstructions(const std::vector<Instruction>& insts) {
+std::string DumpInstructions(const InstructionList& insts) {
   BinaryWriter writer;
   writer.WriteHeader(kDefaultMaxIdBound);
   for (const auto& inst : insts) {

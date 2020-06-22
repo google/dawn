@@ -20,7 +20,7 @@ namespace tint {
 namespace writer {
 namespace spirv {
 
-Instruction::Instruction(spv::Op op, std::vector<Operand> operands)
+Instruction::Instruction(spv::Op op, OperandList operands)
     : op_(op), operands_(std::move(operands)) {}
 
 Instruction::Instruction(const Instruction&) = default;

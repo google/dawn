@@ -16,6 +16,7 @@
 #define SRC_WRITER_SPIRV_OPERAND_H_
 
 #include <string>
+#include <vector>
 
 namespace tint {
 namespace writer {
@@ -87,6 +88,9 @@ class Operand {
   uint32_t int_val_ = 0;
   std::string str_val_;
 };
+
+/// A list of operands
+using OperandList = std::vector<Operand>;
 
 }  // namespace spirv
 }  // namespace writer

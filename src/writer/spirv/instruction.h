@@ -30,7 +30,7 @@ class Instruction {
   /// Constructor
   /// @param op the op to generate
   /// @param operands the operand values for the instruction
-  Instruction(spv::Op op, std::vector<Operand> operands);
+  Instruction(spv::Op op, OperandList operands);
   /// Copy Constructor
   Instruction(const Instruction&);
   ~Instruction();
@@ -39,15 +39,18 @@ class Instruction {
   spv::Op opcode() const { return op_; }
 
   /// @returns the instructions operands
-  const std::vector<Operand>& operands() const { return operands_; }
+  const OperandList& operands() const { return operands_; }
 
   /// @returns the number of uint32_t's needed to hold the instruction
   uint32_t word_length() const;
 
  private:
   spv::Op op_ = spv::Op::OpNop;
-  std::vector<Operand> operands_;
+  OperandList operands_;
 };
+
+/// A list of instructions
+using InstructionList = std::vector<Instruction>;
 
 }  // namespace spirv
 }  // namespace writer
