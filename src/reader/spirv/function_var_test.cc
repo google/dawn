@@ -492,8 +492,6 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Null) {
     {
       TypeConstructor{
         __array__u32_2
-        ScalarConstructor{0}
-        ScalarConstructor{0}
       }
     }
   }
@@ -526,8 +524,6 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_AliasType_Null) {
     {
       TypeConstructor{
         __alias_Arr__array__u32_2_16
-        ScalarConstructor{0}
-        ScalarConstructor{0}
       }
     }
   }
@@ -599,13 +595,6 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer_Null) {
     {
       TypeConstructor{
         __alias_S__struct_S
-        ScalarConstructor{0}
-        ScalarConstructor{0.000000}
-        TypeConstructor{
-          __array__u32_2
-          ScalarConstructor{0}
-          ScalarConstructor{0}
-        }
       }
     }
   }

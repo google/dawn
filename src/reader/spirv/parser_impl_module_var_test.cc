@@ -382,8 +382,6 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorBoolNullInitializer) {
     {
       TypeConstructor{
         __vec_2__bool
-        ScalarConstructor{false}
-        ScalarConstructor{false}
       }
     }
   })"));
@@ -405,8 +403,6 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorBoolUndefInitializer) {
     {
       TypeConstructor{
         __vec_2__bool
-        ScalarConstructor{false}
-        ScalarConstructor{false}
       }
     }
   })"));
@@ -428,8 +424,6 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorUintNullInitializer) {
     {
       TypeConstructor{
         __vec_2__u32
-        ScalarConstructor{0}
-        ScalarConstructor{0}
       }
     }
   })"));
@@ -451,8 +445,6 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorUintUndefInitializer) {
     {
       TypeConstructor{
         __vec_2__u32
-        ScalarConstructor{0}
-        ScalarConstructor{0}
       }
     }
   })"));
@@ -474,8 +466,6 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorIntNullInitializer) {
     {
       TypeConstructor{
         __vec_2__i32
-        ScalarConstructor{0}
-        ScalarConstructor{0}
       }
     }
   })"));
@@ -497,8 +487,6 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorIntUndefInitializer) {
     {
       TypeConstructor{
         __vec_2__i32
-        ScalarConstructor{0}
-        ScalarConstructor{0}
       }
     }
   })"));
@@ -520,8 +508,6 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorFloatNullInitializer) {
     {
       TypeConstructor{
         __vec_2__f32
-        ScalarConstructor{0.000000}
-        ScalarConstructor{0.000000}
       }
     }
   })"));
@@ -543,8 +529,6 @@ TEST_F(SpvParserTest, ModuleScopeVar_VectorFloatUndefInitializer) {
     {
       TypeConstructor{
         __vec_2__f32
-        ScalarConstructor{0.000000}
-        ScalarConstructor{0.000000}
       }
     }
   })"));
@@ -608,21 +592,6 @@ TEST_F(SpvParserTest, ModuleScopeVar_MatrixNullInitializer) {
     {
       TypeConstructor{
         __mat_2_3__f32
-        TypeConstructor{
-          __vec_2__f32
-          ScalarConstructor{0.000000}
-          ScalarConstructor{0.000000}
-        }
-        TypeConstructor{
-          __vec_2__f32
-          ScalarConstructor{0.000000}
-          ScalarConstructor{0.000000}
-        }
-        TypeConstructor{
-          __vec_2__f32
-          ScalarConstructor{0.000000}
-          ScalarConstructor{0.000000}
-        }
       }
     }
   })"));
@@ -644,21 +613,6 @@ TEST_F(SpvParserTest, ModuleScopeVar_MatrixUndefInitializer) {
     {
       TypeConstructor{
         __mat_2_3__f32
-        TypeConstructor{
-          __vec_2__f32
-          ScalarConstructor{0.000000}
-          ScalarConstructor{0.000000}
-        }
-        TypeConstructor{
-          __vec_2__f32
-          ScalarConstructor{0.000000}
-          ScalarConstructor{0.000000}
-        }
-        TypeConstructor{
-          __vec_2__f32
-          ScalarConstructor{0.000000}
-          ScalarConstructor{0.000000}
-        }
       }
     }
   })"));
@@ -704,8 +658,6 @@ TEST_F(SpvParserTest, ModuleScopeVar_ArrayNullInitializer) {
     {
       TypeConstructor{
         __array__u32_2
-        ScalarConstructor{0}
-        ScalarConstructor{0}
       }
     }
   })"));
@@ -727,8 +679,6 @@ TEST_F(SpvParserTest, ModuleScopeVar_ArrayUndefInitializer) {
     {
       TypeConstructor{
         __array__u32_2
-        ScalarConstructor{0}
-        ScalarConstructor{0}
       }
     }
   })"));
@@ -781,13 +731,6 @@ TEST_F(SpvParserTest, ModuleScopeVar_StructNullInitializer) {
     {
       TypeConstructor{
         __alias_S__struct_S
-        ScalarConstructor{0}
-        ScalarConstructor{0.000000}
-        TypeConstructor{
-          __array__u32_2
-          ScalarConstructor{0}
-          ScalarConstructor{0}
-        }
       }
     }
   })"))
@@ -810,13 +753,6 @@ TEST_F(SpvParserTest, ModuleScopeVar_StructUndefInitializer) {
     {
       TypeConstructor{
         __alias_S__struct_S
-        ScalarConstructor{0}
-        ScalarConstructor{0.000000}
-        TypeConstructor{
-          __array__u32_2
-          ScalarConstructor{0}
-          ScalarConstructor{0}
-        }
       }
     }
   })"))

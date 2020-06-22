@@ -38,6 +38,7 @@
 #include "src/ast/bool_literal.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/decorated_variable.h"
+#include "src/ast/expression.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
@@ -969,10 +970,6 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
 
 std::unique_ptr<ast::Expression> ParserImpl::MakeNullValue(
     ast::type::Type* type) {
-  // TODO(dneto): Use the no-operands constructor syntax when it becomes
-  // available in Tint.
-  // https://github.com/gpuweb/gpuweb/issues/685
-  // https://bugs.chromium.org/p/tint/issues/detail?id=34
 
   if (!type) {
     Fail() << "trying to create null value for a null type";
@@ -998,45 +995,10 @@ std::unique_ptr<ast::Expression> ParserImpl::MakeNullValue(
     return std::make_unique<ast::ScalarConstructorExpression>(
         std::make_unique<ast::FloatLiteral>(type, 0.0f));
   }
-  if (type->IsVector()) {
-    const auto* vec_ty = type->AsVector();
-    ast::ExpressionList ast_components;
-    for (size_t i = 0; i < vec_ty->size(); ++i) {
-      ast_components.emplace_back(MakeNullValue(vec_ty->type()));
-    }
+  if (type->IsVector() || type->IsMatrix() || type->IsArray() ||
+      type->IsStruct()) {
     return std::make_unique<ast::TypeConstructorExpression>(
-        type, std::move(ast_components));
-  }
-  if (type->IsMatrix()) {
-    const auto* mat_ty = type->AsMatrix();
-    // Matrix components are columns
-    auto* column_ty =
-        ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
-            mat_ty->type(), mat_ty->rows()));
-    ast::ExpressionList ast_components;
-    for (size_t i = 0; i < mat_ty->columns(); ++i) {
-      ast_components.emplace_back(MakeNullValue(column_ty));
-    }
-    return std::make_unique<ast::TypeConstructorExpression>(
-        type, std::move(ast_components));
-  }
-  if (type->IsArray()) {
-    auto* arr_ty = type->AsArray();
-    ast::ExpressionList ast_components;
-    for (size_t i = 0; i < arr_ty->size(); ++i) {
-      ast_components.emplace_back(MakeNullValue(arr_ty->type()));
-    }
-    return std::make_unique<ast::TypeConstructorExpression>(
-        original_type, std::move(ast_components));
-  }
-  if (type->IsStruct()) {
-    auto* struct_ty = type->AsStruct();
-    ast::ExpressionList ast_components;
-    for (auto& member : struct_ty->impl()->members()) {
-      ast_components.emplace_back(MakeNullValue(member->type()));
-    }
-    return std::make_unique<ast::TypeConstructorExpression>(
-        original_type, std::move(ast_components));
+        original_type, ast::ExpressionList{});
   }
   Fail() << "can't make null value for type: " << type->type_name();
   return nullptr;
