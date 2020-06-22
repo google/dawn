@@ -2533,16 +2533,21 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   if (opcode == SpvOpVectorShuffle) {
     return MakeVectorShuffle(inst);
   }
+
   if (opcode == SpvOpConvertSToF || opcode == SpvOpConvertUToF ||
       opcode == SpvOpConvertFToS || opcode == SpvOpConvertFToU) {
     return MakeNumericConversion(inst);
+  }
+
+  if (opcode == SpvOpUndef) {
+    // Replace undef with the null value.
+    return {ast_type, parser_impl_.MakeNullValue(ast_type)};
   }
 
   // builtin readonly function
   // glsl.std.450 readonly function
 
   // Instructions:
-  //    OpUndef
   //    OpSatConvertSToU // Only in Kernel (OpenCL), not in WebGPU
   //    OpSatConvertUToS // Only in Kernel (OpenCL), not in WebGPU
   //    OpUConvert // Only needed when multiple widths supported
@@ -2557,7 +2562,6 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   //    OpArrayLength
   //    OpVectorExtractDynamic
   //    OpVectorInsertDynamic
-  //    OpCompositeExtract
   //    OpCompositeInsert
 
   return {};

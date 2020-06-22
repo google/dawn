@@ -890,6 +890,12 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
   if (original_ast_type == nullptr) {
     return {};
   }
+
+  if (inst->opcode() == SpvOpUndef) {
+    // Remap undef to null.
+    return {original_ast_type, MakeNullValue(original_ast_type)};
+  }
+
   // TODO(dneto): Handle spec constants too?
   const auto* spirv_const = constant_mgr_->FindDeclaredConstant(id);
   if (spirv_const == nullptr) {
