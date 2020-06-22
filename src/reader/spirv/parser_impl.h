@@ -35,6 +35,7 @@
 #include "src/ast/import.h"
 #include "src/ast/module.h"
 #include "src/ast/struct_member_decoration.h"
+#include "src/ast/type/alias_type.h"
 #include "src/ast/type/type.h"
 #include "src/reader/reader.h"
 #include "src/reader/spirv/enum_converter.h"
@@ -138,6 +139,16 @@ class ParserImpl : Reader {
   /// @returns a Tint type, or nullptr
   ast::type::Type* ConvertType(uint32_t type_id);
 
+  /// Emits an alias type declaration for the given type, if necessary, and
+  /// also updates the mapping of the SPIR-V type ID to the alias type.
+  /// Do so for the types requiring user-specified names:
+  /// - struct types
+  /// - decorated arrays and runtime arrays
+  /// TODO(dneto): I expect images and samplers to require names as well.
+  /// This is a no-op if the parser has already failed.
+  /// @param type the type that might get an alias
+  void MaybeGenerateAlias(const spvtools::opt::analysis::Type* type);
+
   /// @returns the fail stream object
   FailStream& fail_stream() { return fail_stream_; }
   /// @returns the namer object
@@ -209,18 +220,10 @@ class ParserImpl : Reader {
   /// @returns true if parser is still successful.
   bool EmitEntryPoints();
 
-  /// Register Tint AST types for SPIR-V types.
-  /// This is a no-op if the parser has already failed.
+  /// Register Tint AST types for SPIR-V types, including type aliases as
+  /// needed.  This is a no-op if the parser has already failed.
   /// @returns true if parser is still successful.
   bool RegisterTypes();
-
-  /// Emit type alias declarations for types requiring user-specified names:
-  /// - struct types
-  /// - decorated arrays and runtime arrays
-  /// TODO(dneto): I expect images and samplers to require names as well.
-  /// This is a no-op if the parser has already failed.
-  /// @returns true if parser is still successful.
-  bool EmitAliasTypes();
 
   /// Emits module-scope variables.
   /// This is a no-op if the parser has already failed.
@@ -377,7 +380,7 @@ class ParserImpl : Reader {
   // sets.
   std::unordered_set<uint32_t> glsl_std_450_imports_;
 
-  // Maps a SPIR-V type ID to a Tint type.
+  // Maps a SPIR-V type ID to the corresponding Tint type.
   std::unordered_map<uint32_t, ast::type::Type*> id_to_type_;
 
   // Maps an unsigned type corresponding to the given signed type.

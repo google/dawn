@@ -274,10 +274,11 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
     return nullptr;
   }
 
-  auto save = [this, type_id](ast::type::Type* type) {
+  auto save = [this, type_id, spirv_type](ast::type::Type* type) {
     if (type != nullptr) {
       id_to_type_[type_id] = type;
     }
+    MaybeGenerateAlias(spirv_type);
     return type;
   };
 
@@ -436,9 +437,6 @@ bool ParserImpl::ParseInternalModuleExceptFunctions() {
     return false;
   }
   if (!RegisterTypes()) {
-    return false;
-  }
-  if (!EmitAliasTypes()) {
     return false;
   }
   if (!EmitModuleScopeVariables()) {
@@ -757,52 +755,46 @@ bool ParserImpl::RegisterTypes() {
   return success_;
 }
 
-bool ParserImpl::EmitAliasTypes() {
+void ParserImpl::MaybeGenerateAlias(const spvtools::opt::analysis::Type* type) {
   if (!success_) {
-    return false;
+    return;
   }
-  // The algorithm here emits type definitions in the order presented in
-  // the SPIR-V module.  This is valid because:
-  //
-  // - There are no back-references.  OpTypeForwarddPointer is not supported
-  //   by the WebGPU shader programming model.
-  // - Arrays are always sized by an OpConstant of scalar integral type.
-  //   WGSL currently doesn't have specialization constants.
-  //   crbug.com/32 tracks implementation in case they are added.
-  for (auto& type_or_const : module_->types_values()) {
-    const auto type_id = type_or_const.result_id();
-    // We only care about struct, arrays, and runtime arrays.
-    switch (type_or_const.opcode()) {
-      case SpvOpTypeStruct:
-        // The struct already got a name when the type was first registered.
-        break;
-      case SpvOpTypeRuntimeArray:
-        // Runtime arrays are always decorated with ArrayStride so always get a
-        // type alias.
-        namer_.SuggestSanitizedName(type_id, "RTArr");
-        break;
-      case SpvOpTypeArray:
-        // Only make a type aliase for arrays with decorations.
-        if (GetDecorationsFor(type_id).empty()) {
-          continue;
-        }
-        namer_.SuggestSanitizedName(type_id, "Arr");
-        break;
-      default:
-        // Ignore constants, and any other types.
-        continue;
-    }
-    auto* ast_underlying_type = id_to_type_[type_id];
-    if (ast_underlying_type == nullptr) {
-      Fail() << "internal error: no type registered for SPIR-V ID: " << type_id;
-      return false;
-    }
-    const auto name = namer_.GetName(type_id);
-    auto* ast_type = ctx_.type_mgr().Get(
-        std::make_unique<ast::type::AliasType>(name, ast_underlying_type));
-    ast_module_.AddAliasType(ast_type->AsAlias());
+  const auto type_id = type_mgr_->GetId(type);
+
+  // We only care about struct, arrays, and runtime arrays.
+  switch (type->kind()) {
+    case spvtools::opt::analysis::Type::kStruct:
+      // The struct already got a name when the type was first registered.
+      break;
+    case spvtools::opt::analysis::Type::kRuntimeArray:
+      // Runtime arrays are always decorated with ArrayStride so always get a
+      // type alias.
+      namer_.SuggestSanitizedName(type_id, "RTArr");
+      break;
+    case spvtools::opt::analysis::Type::kArray:
+      // Only make a type aliase for arrays with decorations.
+      if (GetDecorationsFor(type_id).empty()) {
+        return;
+      }
+      namer_.SuggestSanitizedName(type_id, "Arr");
+      break;
+    default:
+      // Ignore constants, and any other types.
+      return;
   }
-  return success_;
+  auto* ast_underlying_type = id_to_type_[type_id];
+  if (ast_underlying_type == nullptr) {
+    Fail() << "internal error: no type registered for SPIR-V ID: " << type_id;
+    return;
+  }
+  const auto name = namer_.GetName(type_id);
+  auto* ast_alias_type = ctx_.type_mgr()
+                             .Get(std::make_unique<ast::type::AliasType>(
+                                 name, ast_underlying_type))
+                             ->AsAlias();
+  // Record this new alias as the AST type for this SPIR-V ID.
+  id_to_type_[type_id] = ast_alias_type;
+  ast_module_.AddAliasType(ast_alias_type);
 }
 
 bool ParserImpl::EmitModuleScopeVariables() {
@@ -853,7 +845,6 @@ std::unique_ptr<ast::Variable> ParserImpl::MakeVariable(uint32_t id,
     Fail() << "internal error: can't make ast::Variable for null type";
     return nullptr;
   }
-
   auto ast_var = std::make_unique<ast::Variable>(namer_.Name(id), sc, type);
 
   ast::VariableDecorationList ast_decorations;
@@ -895,8 +886,8 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
     Fail() << "ID " << id << " is not a registered instruction";
     return {};
   }
-  auto* ast_type = ConvertType(inst->type_id());
-  if (ast_type == nullptr) {
+  auto* original_ast_type = ConvertType(inst->type_id());
+  if (original_ast_type == nullptr) {
     return {};
   }
   // TODO(dneto): Handle spec constants too?
@@ -905,6 +896,8 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
     Fail() << "ID " << id << " is not a constant";
     return {};
   }
+
+  auto* ast_type = original_ast_type->UnwrapAliasesIfNeeded();
 
   // TODO(dneto): Note: NullConstant for int, uint, float map to a regular 0.
   // So canonicalization should map that way too.
@@ -955,12 +948,13 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
       }
       ast_components.emplace_back(std::move(ast_component.expr));
     }
-    return {ast_type, std::make_unique<ast::TypeConstructorExpression>(
-                          ast_type, std::move(ast_components))};
+    return {original_ast_type,
+            std::make_unique<ast::TypeConstructorExpression>(
+                original_ast_type, std::move(ast_components))};
   }
   auto* spirv_null_const = spirv_const->AsNullConstant();
   if (spirv_null_const != nullptr) {
-    return {ast_type, MakeNullValue(ast_type)};
+    return {original_ast_type, MakeNullValue(original_ast_type)};
   }
   Fail() << "Unhandled constant type " << inst->type_id() << " for value ID "
          << id;
@@ -978,6 +972,9 @@ std::unique_ptr<ast::Expression> ParserImpl::MakeNullValue(
     Fail() << "trying to create null value for a null type";
     return nullptr;
   }
+
+  auto* original_type = type;
+  type = type->UnwrapAliasesIfNeeded();
 
   if (type->IsBool()) {
     return std::make_unique<ast::ScalarConstructorExpression>(
@@ -1024,7 +1021,7 @@ std::unique_ptr<ast::Expression> ParserImpl::MakeNullValue(
       ast_components.emplace_back(MakeNullValue(arr_ty->type()));
     }
     return std::make_unique<ast::TypeConstructorExpression>(
-        type, std::move(ast_components));
+        original_type, std::move(ast_components));
   }
   if (type->IsStruct()) {
     auto* struct_ty = type->AsStruct();
@@ -1033,7 +1030,7 @@ std::unique_ptr<ast::Expression> ParserImpl::MakeNullValue(
       ast_components.emplace_back(MakeNullValue(member->type()));
     }
     return std::make_unique<ast::TypeConstructorExpression>(
-        type, std::move(ast_components));
+        original_type, std::move(ast_components));
   }
   Fail() << "can't make null value for type: " << type->type_name();
   return nullptr;

@@ -548,10 +548,10 @@ TEST_F(SpvParserTest, ModuleScopeVar_StructInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
-    __struct_S
+    __alias_S__struct_S
     {
       TypeConstructor{
-        __struct_S
+        __alias_S__struct_S
         ScalarConstructor{1}
         ScalarConstructor{1.500000}
         TypeConstructor{
@@ -561,7 +561,8 @@ TEST_F(SpvParserTest, ModuleScopeVar_StructInitializer) {
         }
       }
     }
-  })"));
+  })"))
+      << module_str;
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_StructNullInitializer) {
@@ -570,16 +571,16 @@ TEST_F(SpvParserTest, ModuleScopeVar_StructNullInitializer) {
      %const = OpConstantNull %strct
      %200 = OpVariable %ptr Private %const
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->module().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
-    __struct_S
+    __alias_S__struct_S
     {
       TypeConstructor{
-        __struct_S
+        __alias_S__struct_S
         ScalarConstructor{0}
         ScalarConstructor{0.000000}
         TypeConstructor{
@@ -589,7 +590,8 @@ TEST_F(SpvParserTest, ModuleScopeVar_StructNullInitializer) {
         }
       }
     }
-  })"));
+  })"))
+      << module_str;
 }
 
 }  // namespace

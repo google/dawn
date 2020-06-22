@@ -431,7 +431,108 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer) {
     }
   }
 }
-)"));
+)")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_AliasType) {
+  auto* p = parser(test::Assemble(
+      std::string("OpDecorate %arr2uint ArrayStride 16\n") + CommonTypes() + R"(
+     %ptr = OpTypePointer Function %arr2uint
+     %two = OpConstant %uint 2
+     %const = OpConstantComposite %arr2uint %uint_1 %two
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %200 = OpVariable %ptr Function %const
+     OpReturn
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitFunctionVariables());
+
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_200
+    function
+    __alias_Arr__array__u32_2_16
+    {
+      TypeConstructor{
+        __alias_Arr__array__u32_2_16
+        ScalarConstructor{1}
+        ScalarConstructor{2}
+      }
+    }
+  }
+}
+)")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Null) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %ptr = OpTypePointer Function %arr2uint
+     %two = OpConstant %uint 2
+     %const = OpConstantNull %arr2uint
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %200 = OpVariable %ptr Function %const
+     OpReturn
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitFunctionVariables());
+
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_200
+    function
+    __array__u32_2
+    {
+      TypeConstructor{
+        __array__u32_2
+        ScalarConstructor{0}
+        ScalarConstructor{0}
+      }
+    }
+  }
+}
+)")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_AliasType_Null) {
+  auto* p = parser(test::Assemble(
+      std::string("OpDecorate %arr2uint ArrayStride 16\n") + CommonTypes() + R"(
+     %ptr = OpTypePointer Function %arr2uint
+     %two = OpConstant %uint 2
+     %const = OpConstantNull %arr2uint
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %200 = OpVariable %ptr Function %const
+     OpReturn
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitFunctionVariables());
+
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_200
+    function
+    __alias_Arr__array__u32_2_16
+    {
+      TypeConstructor{
+        __alias_Arr__array__u32_2_16
+        ScalarConstructor{0}
+        ScalarConstructor{0}
+      }
+    }
+  }
+}
+)")) << ToString(fe.ast_body());
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer) {
@@ -455,10 +556,10 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer) {
   Variable{
     x_200
     function
-    __struct_S
+    __alias_S__struct_S
     {
       TypeConstructor{
-        __struct_S
+        __alias_S__struct_S
         ScalarConstructor{1}
         ScalarConstructor{1.500000}
         TypeConstructor{
@@ -470,7 +571,46 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer) {
     }
   }
 }
-)"));
+)")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer_Null) {
+  auto* p = parser(test::Assemble(CommonTypes() + R"(
+     %ptr = OpTypePointer Function %strct
+     %two = OpConstant %uint 2
+     %arrconst = OpConstantComposite %arr2uint %uint_1 %two
+     %const = OpConstantNull %strct
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %200 = OpVariable %ptr Function %const
+     OpReturn
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitFunctionVariables());
+
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_200
+    function
+    __alias_S__struct_S
+    {
+      TypeConstructor{
+        __alias_S__struct_S
+        ScalarConstructor{0}
+        ScalarConstructor{0.000000}
+        TypeConstructor{
+          __array__u32_2
+          ScalarConstructor{0}
+          ScalarConstructor{0}
+        }
+      }
+    }
+  }
+}
+)")) << ToString(fe.ast_body());
 }
 
 }  // namespace

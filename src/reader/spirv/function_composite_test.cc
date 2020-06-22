@@ -218,10 +218,10 @@ TEST_F(SpvParserTest_Composite_Construct, Struct) {
   Variable{
     x_1
     none
-    __struct_S
+    __alias_S__struct_S
     {
       TypeConstructor{
-        __struct_S
+        __alias_S__struct_S
         TypeConstructor{
           __vec_2__f32
           ScalarConstructor{50.000000}
