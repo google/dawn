@@ -78,6 +78,45 @@ TEST_F(BuilderTest, Assign_Var) {
 )");
 }
 
+TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+
+  ast::Variable v("var", ast::StorageClass::kOutput, &vec);
+
+  auto ident = std::make_unique<ast::IdentifierExpression>("var");
+  ast::ExpressionList vals;
+  auto val =
+      std::make_unique<ast::TypeConstructorExpression>(&vec, std::move(vals));
+
+  ast::AssignmentStatement assign(std::move(ident), std::move(val));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(&v);
+
+  ASSERT_TRUE(td.DetermineResultType(&assign)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  EXPECT_TRUE(b.GenerateGlobalVariable(&v)) << b.error();
+  ASSERT_FALSE(b.has_error()) << b.error();
+
+  EXPECT_TRUE(b.GenerateAssignStatement(&assign)) << b.error();
+  EXPECT_FALSE(b.has_error());
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+%3 = OpTypeVector %4 3
+%2 = OpTypePointer Output %3
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Output %5
+)");
+
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpStore %1 %5
+)");
+}
+
 TEST_F(BuilderTest, Assign_Var_Complex_ConstructorWithExtract) {
   ast::type::F32Type f32;
   ast::type::VectorType vec3(&f32, 3);

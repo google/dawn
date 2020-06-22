@@ -40,7 +40,7 @@ bool TypeConstructorExpression::IsTypeConstructor() const {
 
 bool TypeConstructorExpression::IsValid() const {
   if (values_.empty()) {
-    return false;
+    return true;
   }
   if (type_ == nullptr) {
     return false;

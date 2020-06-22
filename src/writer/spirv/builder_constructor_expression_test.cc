@@ -82,6 +82,30 @@ TEST_F(BuilderTest, Constructor_Type) {
 )");
 }
 
+TEST_F(BuilderTest, Constructor_Type_ZeroInit) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 2);
+
+  ast::ExpressionList vals;
+  ast::TypeConstructorExpression t(&vec, std::move(vals));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  EXPECT_TRUE(td.DetermineResultType(&t)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+
+  EXPECT_EQ(b.GenerateConstructorExpression(&t, false), 3u);
+  ASSERT_FALSE(b.has_error()) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeVector %2 2
+%3 = OpConstantNull %1
+)");
+}
+
 TEST_F(BuilderTest, Constructor_Type_NonConstructorParam) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 2);

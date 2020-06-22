@@ -66,6 +66,14 @@ TEST_F(TypeConstructorExpressionTest, IsValid) {
   EXPECT_TRUE(t.IsValid());
 }
 
+TEST_F(TypeConstructorExpressionTest, IsValid_EmptyValue) {
+  type::F32Type f32;
+  ExpressionList expr;
+
+  TypeConstructorExpression t(&f32, std::move(expr));
+  EXPECT_TRUE(t.IsValid());
+}
+
 TEST_F(TypeConstructorExpressionTest, IsValid_NullType) {
   ExpressionList expr;
   expr.push_back(std::make_unique<IdentifierExpression>("expr"));
@@ -89,14 +97,6 @@ TEST_F(TypeConstructorExpressionTest, IsValid_InvalidValue) {
   type::F32Type f32;
   ExpressionList expr;
   expr.push_back(std::make_unique<IdentifierExpression>(""));
-
-  TypeConstructorExpression t(&f32, std::move(expr));
-  EXPECT_FALSE(t.IsValid());
-}
-
-TEST_F(TypeConstructorExpressionTest, IsValid_EmptyValue) {
-  type::F32Type f32;
-  ExpressionList expr;
 
   TypeConstructorExpression t(&f32, std::move(expr));
   EXPECT_FALSE(t.IsValid());

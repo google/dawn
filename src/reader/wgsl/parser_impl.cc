@@ -1943,7 +1943,7 @@ ast::StatementList ParserImpl::continuing_stmt() {
 
 // primary_expression
 //   : (IDENT NAMESPACE)* IDENT
-//   | type_decl PAREN_LEFT argument_expression_list PAREN_RIGHT
+//   | type_decl PAREN_LEFT argument_expression_list* PAREN_RIGHT
 //   | const_literal
 //   | paren_rhs_stmt
 //   | CAST LESS_THAN type_decl GREATER_THAN paren_rhs_stmt
@@ -2043,9 +2043,13 @@ std::unique_ptr<ast::Expression> ParserImpl::primary_expression() {
       return nullptr;
     }
 
-    auto params = argument_expression_list();
-    if (has_error())
-      return nullptr;
+    t = peek();
+    ast::ExpressionList params;
+    if (!t.IsParenRight() && !t.IsEof()) {
+      params = argument_expression_list();
+      if (has_error())
+        return nullptr;
+    }
 
     t = next();
     if (!t.IsParenRight()) {

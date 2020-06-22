@@ -98,6 +98,18 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl) {
   EXPECT_EQ(ident->literal()->AsSint()->value(), 4);
 }
 
+TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_ZeroConstructor) {
+  auto* p = parser("vec4<i32>()");
+  auto e = p->primary_expression();
+  ASSERT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e, nullptr);
+  ASSERT_TRUE(e->IsConstructor());
+  ASSERT_TRUE(e->AsConstructor()->IsTypeConstructor());
+  auto* ty = e->AsConstructor()->AsTypeConstructor();
+
+  ASSERT_EQ(ty->values().size(), 0u);
+}
+
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidTypeDecl) {
   auto* p = parser("vec4<if>(2., 3., 4., 5.)");
   auto e = p->primary_expression();

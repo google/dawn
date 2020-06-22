@@ -940,6 +940,12 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     return 0;
   }
 
+  // Generate the zero initializer if there are no values provided.
+  if (init->values().empty()) {
+    ast::NullLiteral nl(init->type()->UnwrapPtrIfNeeded());
+    return GenerateLiteralIfNeeded(&nl);
+  }
+
   auto* result_type = init->type()->UnwrapPtrIfNeeded();
   if (result_type->IsVector()) {
     result_type = result_type->AsVector()->type();
