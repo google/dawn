@@ -586,11 +586,7 @@ bool TypeDeterminer::DetermineMemberAccessor(
   }
 
   auto* res = expr->structure()->result_type();
-  auto* data_type = res->UnwrapPtrIfNeeded();
-
-  while (data_type->IsAlias()) {
-    data_type = data_type->AsAlias()->type();
-  }
+  auto* data_type = res->UnwrapPtrIfNeeded()->UnwrapAliasesIfNeeded();
 
   ast::type::Type* ret = nullptr;
   if (data_type->IsStruct()) {

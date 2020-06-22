@@ -43,6 +43,18 @@ Type* Type::UnwrapPtrIfNeeded() {
   return this;
 }
 
+Type* Type::UnwrapAliasesIfNeeded() {
+  auto* where = this;
+  while (where->IsAlias()) {
+    where = where->AsAlias()->type();
+  }
+  return where;
+}
+
+Type* Type::UnwrapAliasPtrAlias() {
+  return UnwrapAliasesIfNeeded()->UnwrapPtrIfNeeded()->UnwrapAliasesIfNeeded();
+}
+
 bool Type::IsAlias() const {
   return false;
 }

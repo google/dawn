@@ -69,6 +69,21 @@ class Type {
   /// @returns the pointee type if this is a pointer, |this| otherwise
   Type* UnwrapPtrIfNeeded();
 
+  /// Removes all levels of aliasing, if this is an alias type.  Otherwise
+  /// returns |this|.  This is just enough to assist with WGSL translation
+  /// in that you want see through one level of pointer to get from an
+  /// identifier-like expression as an l-value to its corresponding r-value,
+  /// plus see through the aliases on either side.
+  /// @returns the completely unaliased type.
+  Type* UnwrapAliasesIfNeeded();
+
+  /// Returns the type found after:
+  /// - removing all layers of aliasing if they exist, then
+  /// - removing the pointer, if it exists, then
+  /// - removing all further layers of aliasing, if they exist
+  /// @returns the unwrapped type
+  Type* UnwrapAliasPtrAlias();
+
   /// @returns true if this type is a float scalar
   bool is_float_scalar();
   /// @returns true if this type is a float matrix

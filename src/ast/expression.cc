@@ -38,10 +38,7 @@ Expression::~Expression() = default;
 
 void Expression::set_result_type(type::Type* type) {
   // The expression result should never be an alias type
-  while (type->IsAlias()) {
-    type = type->AsAlias()->type();
-  }
-  result_type_ = type;
+  result_type_ = type->UnwrapAliasesIfNeeded();
 }
 
 bool Expression::IsArrayAccessor() const {

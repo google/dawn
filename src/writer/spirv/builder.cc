@@ -642,10 +642,10 @@ bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
 
 bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
                                      AccessorInfo* info) {
-  auto* data_type = expr->structure()->result_type()->UnwrapPtrIfNeeded();
-  while (data_type->IsAlias()) {
-    data_type = data_type->AsAlias()->type();
-  }
+  auto* data_type = expr->structure()
+                        ->result_type()
+                        ->UnwrapPtrIfNeeded()
+                        ->UnwrapAliasesIfNeeded();
 
   // If the data_type is a structure we're accessing a member, if it's a
   // vector we're accessing a swizzle.

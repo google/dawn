@@ -15,7 +15,9 @@
 #include "src/ast/type/alias_type.h"
 
 #include "gtest/gtest.h"
+#include "src/ast/storage_class.h"
 #include "src/ast/type/i32_type.h"
+#include "src/ast/type/pointer_type.h"
 #include "src/ast/type/u32_type.h"
 
 namespace tint {
@@ -52,6 +54,61 @@ TEST_F(AliasTypeTest, TypeName) {
   I32Type i32;
   AliasType at{"Particle", &i32};
   EXPECT_EQ(at.type_name(), "__alias_Particle__i32");
+}
+
+TEST_F(AliasTypeTest, UnwrapAliasesIfNeeded) {
+  U32Type u32;
+  AliasType a{"a_type", &u32};
+  EXPECT_EQ(a.name(), "a_type");
+  EXPECT_EQ(a.type(), &u32);
+  EXPECT_EQ(a.UnwrapAliasesIfNeeded(), &u32);
+  EXPECT_EQ(u32.UnwrapAliasesIfNeeded(), &u32);
+}
+
+TEST_F(AliasTypeTest, UnwrapAliasesIfNeeded_MultiLevel) {
+  U32Type u32;
+  AliasType a{"a_type", &u32};
+  AliasType aa{"aa_type", &a};
+  EXPECT_EQ(aa.name(), "aa_type");
+  EXPECT_EQ(aa.type(), &a);
+  EXPECT_EQ(aa.UnwrapAliasesIfNeeded(), &u32);
+}
+
+TEST_F(AliasTypeTest, UnwrapAliasPtrAlias_TwiceAliasPointerTwiceAlias) {
+  U32Type u32;
+  AliasType a{"a_type", &u32};
+  AliasType aa{"aa_type", &a};
+  PointerType paa{&aa, StorageClass::kUniform};
+  AliasType apaa{"paa_type", &paa};
+  AliasType aapaa{"aapaa_type", &apaa};
+  EXPECT_EQ(aapaa.name(), "aapaa_type");
+  EXPECT_EQ(aapaa.type(), &apaa);
+  EXPECT_EQ(aapaa.UnwrapAliasPtrAlias(), &u32);
+  EXPECT_EQ(u32.UnwrapAliasPtrAlias(), &u32);
+}
+
+TEST_F(AliasTypeTest,
+       UnwrapAliasPtrAlias_SecondConsecutivePointerBlocksWUnrapping) {
+  U32Type u32;
+  AliasType a{"a_type", &u32};
+  AliasType aa{"aa_type", &a};
+  PointerType paa{&aa, StorageClass::kUniform};
+  PointerType ppaa{&paa, StorageClass::kUniform};
+  AliasType appaa{"appaa_type", &ppaa};
+  EXPECT_EQ(appaa.UnwrapAliasPtrAlias(), &paa);
+}
+
+TEST_F(AliasTypeTest,
+       UnwrapAliasPtrAlias_SecondNonConsecutivePointerBlocksWUnrapping) {
+  U32Type u32;
+  AliasType a{"a_type", &u32};
+  AliasType aa{"aa_type", &a};
+  PointerType paa{&aa, StorageClass::kUniform};
+  AliasType apaa{"apaa_type", &paa};
+  AliasType aapaa{"aapaa_type", &apaa};
+  PointerType paapaa{&aapaa, StorageClass::kUniform};
+  AliasType apaapaa{"apaapaa_type", &paapaa};
+  EXPECT_EQ(apaapaa.UnwrapAliasPtrAlias(), &paa);
 }
 
 }  // namespace
