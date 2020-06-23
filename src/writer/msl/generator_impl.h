@@ -76,6 +76,9 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the scalar constructor expression
   /// @returns true if the scalar constructor is emitted
   bool EmitScalarConstructor(ast::ScalarConstructorExpression* expr);
+  /// Handles emitting a pipeline stage name
+  /// @param stage the stage to emit
+  void EmitStage(ast::PipelineStage stage);
   /// Handles a brace-enclosed list of statements.
   /// @param statements the statements to output
   /// @returns true if the statements were emitted
@@ -97,6 +100,9 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the type constructor expression
   /// @returns true if the constructor is emitted
   bool EmitTypeConstructor(ast::TypeConstructorExpression* expr);
+
+ private:
+  const ast::Module* module_ = nullptr;
 };
 
 }  // namespace msl

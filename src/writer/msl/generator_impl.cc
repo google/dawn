@@ -44,12 +44,16 @@ GeneratorImpl::GeneratorImpl() = default;
 GeneratorImpl::~GeneratorImpl() = default;
 
 bool GeneratorImpl::Generate(const ast::Module& module) {
+  module_ = &module;
+
   for (const auto& func : module.functions()) {
     if (!EmitFunction(func.get())) {
       return false;
     }
     out_ << std::endl;
   }
+
+  module_ = nullptr;
   return true;
 }
 
@@ -227,14 +231,51 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   return false;
 }
 
+void GeneratorImpl::EmitStage(ast::PipelineStage stage) {
+  switch (stage) {
+    case ast::PipelineStage::kFragment:
+      out_ << "fragment";
+      break;
+    case ast::PipelineStage::kVertex:
+      out_ << "vertex";
+      break;
+    case ast::PipelineStage::kCompute:
+      out_ << "kernel";
+      break;
+    case ast::PipelineStage::kNone:
+      break;
+  }
+  return;
+}
+
 bool GeneratorImpl::EmitFunction(ast::Function* func) {
   make_indent();
+
+  // TODO(dsinclair): Technically this is wrong as you could, in theory, have
+  // multiple entry points pointing at the same function. I'm ignoring that for
+  // now. It will either go away with the entry_point changes in the spec
+  // or we'll have to figure out how to deal with it.
+
+  auto name = func->name();
+
+  for (const auto& ep : module_->entry_points()) {
+    if (ep->function_name() == name) {
+      EmitStage(ep->stage());
+      out_ << " ";
+
+      if (!ep->name().empty()) {
+        name = ep->name();
+      }
+
+      break;
+    }
+  }
 
   if (!EmitType(func->return_type(), "")) {
     return false;
   }
 
-  out_ << " " << func->name() << "(";
+  out_ << " " << name << "(";
 
   bool first = true;
   for (const auto& v : func->params()) {
