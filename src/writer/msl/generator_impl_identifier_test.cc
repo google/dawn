@@ -12,12 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>
-#include <vector>
-
 #include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
-#include "src/ast/return_statement.h"
 #include "src/writer/msl/generator_impl.h"
 
 namespace tint {
@@ -27,25 +23,29 @@ namespace {
 
 using MslGeneratorImplTest = testing::Test;
 
-TEST_F(MslGeneratorImplTest, Emit_Return) {
-  ast::ReturnStatement r;
+TEST_F(MslGeneratorImplTest, DISABLED_EmitExpression_Identifier) {
+  ast::IdentifierExpression i(std::vector<std::string>{"std", "glsl"});
 
   GeneratorImpl g;
-  g.increment_indent();
-
-  ASSERT_TRUE(g.EmitStatement(&r)) << g.error();
-  EXPECT_EQ(g.result(), "  return;\n");
+  ASSERT_TRUE(g.EmitExpression(&i)) << g.error();
+  EXPECT_EQ(g.result(), "std::glsl");
 }
 
-TEST_F(MslGeneratorImplTest, Emit_ReturnWithValue) {
-  auto expr = std::make_unique<ast::IdentifierExpression>("expr");
-  ast::ReturnStatement r(std::move(expr));
+TEST_F(MslGeneratorImplTest, EmitIdentifierExpression_Single) {
+  ast::IdentifierExpression i("foo");
 
   GeneratorImpl g;
-  g.increment_indent();
+  ASSERT_TRUE(g.EmitExpression(&i)) << g.error();
+  EXPECT_EQ(g.result(), "foo");
+}
 
-  ASSERT_TRUE(g.EmitStatement(&r)) << g.error();
-  EXPECT_EQ(g.result(), "  return expr;\n");
+// TODO(dsinclair): Handle import names
+TEST_F(MslGeneratorImplTest, DISABLED_EmitIdentifierExpression_MultipleNames) {
+  ast::IdentifierExpression i({"std", "glsl", "init"});
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitExpression(&i)) << g.error();
+  EXPECT_EQ(g.result(), "std::glsl::init");
 }
 
 }  // namespace

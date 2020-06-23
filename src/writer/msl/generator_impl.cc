@@ -14,6 +14,7 @@
 
 #include "src/writer/msl/generator_impl.h"
 
+#include "src/ast/identifier_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
@@ -39,9 +40,24 @@ bool GeneratorImpl::Generate(const ast::Module&) {
   return true;
 }
 
-bool GeneratorImpl::EmitExpression(ast::Expression*) {
+bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
+  if (expr->IsIdentifier()) {
+    return EmitIdentifier(expr->AsIdentifier());
+  }
+
   error_ = "unknown expression type";
   return false;
+}
+
+bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
+  auto* ident = expr->AsIdentifier();
+  if (ident->has_path()) {
+    // TODO(dsinclair): Handle identifier with path
+    error_ = "Identifier paths not handled yet.";
+    return false;
+  }
+  out_ << ident->name();
+  return true;
 }
 
 bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {

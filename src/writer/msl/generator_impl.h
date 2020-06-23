@@ -41,6 +41,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the expression
   /// @returns true if the expression was emitted
   bool EmitExpression(ast::Expression* expr);
+  /// Handles generating an identifier expression
+  /// @param expr the identifier expression
+  /// @returns true if the identifeir was emitted
+  bool EmitIdentifier(ast::IdentifierExpression* expr);
   /// Handles return statements
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
