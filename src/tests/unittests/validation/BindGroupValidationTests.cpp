@@ -727,6 +727,7 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
     }
 }
 
+// Test that multisampled textures must be 2D sampled textures
 TEST_F(BindGroupLayoutValidationTest, MultisampledTextures) {
     // Multisampled 2D texture works.
     utils::MakeBindGroupLayout(
@@ -741,6 +742,13 @@ TEST_F(BindGroupLayoutValidationTest, MultisampledTextures) {
                     {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, true,
                      wgpu::TextureViewDimension::Undefined},
                 });
+
+    // Multisampled 2D storage texture is invalid.
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageTexture,
+                     false, true, wgpu::TextureViewDimension::e2D},
+                }));
 
     // Multisampled 2D array texture is invalid.
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
@@ -768,6 +776,34 @@ TEST_F(BindGroupLayoutValidationTest, MultisampledTextures) {
         device, {
                     {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, true,
                      wgpu::TextureViewDimension::e3D},
+                }));
+}
+
+// Test that it is an error to pass multisampled=true for non-texture bindings
+TEST_F(BindGroupLayoutValidationTest, MultisampledMustBeTexture) {
+    // Base: Multisampled 2D texture works.
+    utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, true,
+                     wgpu::TextureViewDimension::e2D},
+                });
+
+    // Multisampled uniform buffer binding is invalid
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::UniformBuffer, false, true},
+                }));
+
+    // Multisampled storage buffer binding is invalid
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer, false, true},
+                }));
+
+    // Multisampled sampler binding is invalid
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::Sampler, false, true},
                 }));
 }
 

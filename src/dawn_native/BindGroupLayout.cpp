@@ -141,18 +141,22 @@ namespace dawn_native {
     MaybeError ValidateBindingCanBeMultisampled(wgpu::BindingType bindingType,
                                                 wgpu::TextureViewDimension viewDimension) {
         switch (bindingType) {
-            case wgpu::BindingType::ReadonlyStorageTexture:
-            case wgpu::BindingType::WriteonlyStorageTexture:
-                return DAWN_VALIDATION_ERROR("Storage textures may not be multisampled");
-
             case wgpu::BindingType::SampledTexture:
                 break;
+
+            case wgpu::BindingType::ReadonlyStorageTexture:
+            case wgpu::BindingType::WriteonlyStorageTexture:
+                return DAWN_VALIDATION_ERROR("Storage texture bindings may not be multisampled");
 
             case wgpu::BindingType::StorageBuffer:
             case wgpu::BindingType::UniformBuffer:
             case wgpu::BindingType::ReadonlyStorageBuffer:
+                return DAWN_VALIDATION_ERROR("Buffer bindings may not be multisampled");
+
             case wgpu::BindingType::Sampler:
             case wgpu::BindingType::ComparisonSampler:
+                return DAWN_VALIDATION_ERROR("Sampler bindings may not be multisampled");
+
             case wgpu::BindingType::StorageTexture:
             default:
                 UNREACHABLE();
@@ -164,14 +168,14 @@ namespace dawn_native {
                 break;
 
             case wgpu::TextureViewDimension::e2DArray:
-                return DAWN_VALIDATION_ERROR("2D array textures may not be multisampled");
+                return DAWN_VALIDATION_ERROR("2D array texture bindings may not be multisampled");
 
             case wgpu::TextureViewDimension::Cube:
             case wgpu::TextureViewDimension::CubeArray:
-                return DAWN_VALIDATION_ERROR("Cube textures may not be multisampled");
+                return DAWN_VALIDATION_ERROR("Cube texture bindings may not be multisampled");
 
             case wgpu::TextureViewDimension::e3D:
-                return DAWN_VALIDATION_ERROR("3D textures may not be multisampled");
+                return DAWN_VALIDATION_ERROR("3D texture bindings may not be multisampled");
 
             case wgpu::TextureViewDimension::e1D:
             case wgpu::TextureViewDimension::Undefined:
