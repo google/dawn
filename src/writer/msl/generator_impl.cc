@@ -16,9 +16,12 @@
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
+#include "src/ast/bool_literal.h"
+#include "src/ast/float_literal.h"
 #include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/return_statement.h"
+#include "src/ast/sint_literal.h"
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
@@ -30,6 +33,7 @@
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
+#include "src/ast/uint_literal.h"
 
 namespace tint {
 namespace writer {
@@ -148,9 +152,72 @@ bool GeneratorImpl::EmitBinary(ast::BinaryExpression* expr) {
   return true;
 }
 
+bool GeneratorImpl::EmitConstructor(ast::ConstructorExpression* expr) {
+  if (expr->IsScalarConstructor()) {
+    return EmitScalarConstructor(expr->AsScalarConstructor());
+  }
+  return EmitTypeConstructor(expr->AsTypeConstructor());
+}
+
+bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
+  if (!EmitType(expr->type(), "")) {
+    return false;
+  }
+
+  out_ << "(";
+
+  bool first = true;
+  for (const auto& e : expr->values()) {
+    if (!first) {
+      out_ << ", ";
+    }
+    first = false;
+
+    if (!EmitExpression(e.get())) {
+      return false;
+    }
+  }
+
+  out_ << ")";
+  return true;
+}
+
+bool GeneratorImpl::EmitScalarConstructor(
+    ast::ScalarConstructorExpression* expr) {
+  return EmitLiteral(expr->literal());
+}
+
+bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
+  if (lit->IsBool()) {
+    out_ << (lit->AsBool()->IsTrue() ? "true" : "false");
+  } else if (lit->IsFloat()) {
+    auto flags = out_.flags();
+    auto precision = out_.precision();
+
+    out_.flags(flags | std::ios_base::showpoint);
+    out_.precision(std::numeric_limits<float>::max_digits10);
+
+    out_ << lit->AsFloat()->value() << "f";
+
+    out_.precision(precision);
+    out_.flags(flags);
+  } else if (lit->IsSint()) {
+    out_ << lit->AsSint()->value();
+  } else if (lit->IsUint()) {
+    out_ << lit->AsUint()->value() << "u";
+  } else {
+    error_ = "unknown literal type";
+    return false;
+  }
+  return true;
+}
+
 bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   if (expr->IsBinary()) {
     return EmitBinary(expr->AsBinary());
+  }
+  if (expr->IsConstructor()) {
+    return EmitConstructor(expr->AsConstructor());
   }
   if (expr->IsIdentifier()) {
     return EmitIdentifier(expr->AsIdentifier());

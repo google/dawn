@@ -18,7 +18,10 @@
 #include <sstream>
 #include <string>
 
+#include "src/ast/literal.h"
 #include "src/ast/module.h"
+#include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/type_constructor_expression.h"
 #include "src/writer/text_generator.h"
 
 namespace tint {
@@ -45,6 +48,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the binary expression
   /// @returns true if the expression was emitted, false otherwise
   bool EmitBinary(ast::BinaryExpression* expr);
+  /// Handles generating constructor expressions
+  /// @param expr the constructor expression
+  /// @returns true if the expression was emitted
+  bool EmitConstructor(ast::ConstructorExpression* expr);
   /// Handles generate an Expression
   /// @param expr the expression
   /// @returns true if the expression was emitted
@@ -57,10 +64,18 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the identifier expression
   /// @returns true if the identifeir was emitted
   bool EmitIdentifier(ast::IdentifierExpression* expr);
+  /// Handles a literal
+  /// @param lit the literal to emit
+  /// @returns true if the literal was successfully emitted
+  bool EmitLiteral(ast::Literal* lit);
   /// Handles return statements
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
   bool EmitReturn(ast::ReturnStatement* stmt);
+  /// Handles generating a scalar constructor
+  /// @param expr the scalar constructor expression
+  /// @returns true if the scalar constructor is emitted
+  bool EmitScalarConstructor(ast::ScalarConstructorExpression* expr);
   /// Handles a brace-enclosed list of statements.
   /// @param statements the statements to output
   /// @returns true if the statements were emitted
@@ -78,6 +93,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param name the name of the variable, only used for array emission
   /// @returns true if the type is emitted
   bool EmitType(ast::type::Type* type, const std::string& name);
+  /// Handles emitting a type constructor
+  /// @param expr the type constructor expression
+  /// @returns true if the constructor is emitted
+  bool EmitTypeConstructor(ast::TypeConstructorExpression* expr);
 };
 
 }  // namespace msl

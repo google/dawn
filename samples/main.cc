@@ -452,7 +452,7 @@ int main(int argc, const char** argv) {
   }
 
   if (!writer->Generate()) {
-    std::cerr << "Failed to generate SPIR-V: " << writer->error() << std::endl;
+    std::cerr << "Failed to generate: " << writer->error() << std::endl;
     return 1;
   }
 
