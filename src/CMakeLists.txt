@@ -493,6 +493,7 @@ endif()
 
 if(${TINT_BUILD_MSL_WRITER})
   list(APPEND TINT_TEST_SRCS
+    writer/msl/generator_impl_assign_test.cc
     writer/msl/generator_impl_function_test.cc
     writer/msl/generator_impl_identifier_test.cc
     writer/msl/generator_impl_return_test.cc

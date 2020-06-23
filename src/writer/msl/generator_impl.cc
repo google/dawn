@@ -14,6 +14,7 @@
 
 #include "src/writer/msl/generator_impl.h"
 
+#include "src/ast/assignment_statement.h"
 #include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/return_statement.h"
@@ -44,6 +45,24 @@ bool GeneratorImpl::Generate(const ast::Module& module) {
     }
     out_ << std::endl;
   }
+  return true;
+}
+
+bool GeneratorImpl::EmitAssign(ast::AssignmentStatement* stmt) {
+  make_indent();
+
+  if (!EmitExpression(stmt->lhs())) {
+    return false;
+  }
+
+  out_ << " = ";
+
+  if (!EmitExpression(stmt->rhs())) {
+    return false;
+  }
+
+  out_ << ";" << std::endl;
+
   return true;
 }
 
@@ -138,6 +157,9 @@ bool GeneratorImpl::EmitStatementBlockAndNewline(
 }
 
 bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
+  if (stmt->IsAssign()) {
+    return EmitAssign(stmt->AsAssign());
+  }
   if (stmt->IsReturn()) {
     return EmitReturn(stmt->AsReturn());
   }
