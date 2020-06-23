@@ -36,6 +36,12 @@ class GeneratorImpl : public TextGenerator {
   /// @param module the module to generate
   /// @returns true on successful generation; false otherwise
   bool Generate(const ast::Module& module);
+
+  /// Handles generating type
+  /// @param type the type to generate
+  /// @param name the name of the variable, only used for array emission
+  /// @returns true if the type is emitted
+  bool EmitType(ast::type::Type* type, const std::string& name);
 };
 
 }  // namespace msl

@@ -494,6 +494,7 @@ endif()
 if(${TINT_BUILD_MSL_WRITER})
   list(APPEND TINT_TEST_SRCS
     writer/msl/generator_impl_test.cc
+    writer/msl/generator_impl_type_test.cc
   )
 endif()
 
