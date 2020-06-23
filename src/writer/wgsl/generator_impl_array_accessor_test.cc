@@ -27,9 +27,9 @@ namespace writer {
 namespace wgsl {
 namespace {
 
-using GeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, EmitExpression_ArrayAccessor) {
+TEST_F(WgslGeneratorImplTest, EmitExpression_ArrayAccessor) {
   ast::type::I32Type i32;
   auto lit = std::make_unique<ast::SintLiteral>(&i32, 5);
   auto idx = std::make_unique<ast::ScalarConstructorExpression>(std::move(lit));
@@ -42,7 +42,7 @@ TEST_F(GeneratorImplTest, EmitExpression_ArrayAccessor) {
   EXPECT_EQ(g.result(), "ary[5]");
 }
 
-TEST_F(GeneratorImplTest, EmitArrayAccessor) {
+TEST_F(WgslGeneratorImplTest, EmitArrayAccessor) {
   auto ary = std::make_unique<ast::IdentifierExpression>("ary");
   auto idx = std::make_unique<ast::IdentifierExpression>("idx");
 

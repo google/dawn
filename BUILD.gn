@@ -56,6 +56,12 @@ config("tint_public_config") {
     defines += [ "TINT_BUILD_WGSL_WRITER=0" ]
   }
 
+  if (tint_build_msl_writer) {
+    defines += [ "TINT_BUILD_MSL_WRITER=1" ]
+  } else {
+    defines += [ "TINT_BUILD_MSL_WRITER=0" ]
+  }
+
   include_dirs = [
     "${tint_root_dir}/",
     "${tint_root_dir}/include/",
@@ -353,6 +359,10 @@ source_set("libtint_core_src") {
     "src/validator.h",
     "src/validator_impl.cc",
     "src/validator_impl.h",
+    "src/writer/text.cc",
+    "src/writer/text.h",
+    "src/writer/text_generator.cc",
+    "src/writer/text_generator.h",
     "src/writer/writer.cc",
     "src/writer/writer.h",
   ]
@@ -472,6 +482,23 @@ source_set("libtint_wgsl_writer_src") {
   }
 }
 
+source_set("libtint_msl_writer_src") {
+  sources = [
+    "src/writer/msl/generator.cc",
+    "src/writer/msl/generator.h",
+    "src/writer/msl/generator_impl.cc",
+    "src/wrtier/msl/generator_impl.h",
+  ]
+
+  configs += [ ":tint_common_config" ]
+  public_configs += [ ":tint_public_config" ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+}
+
 source_set("libtint") {
   deps = [ ":libtint_core_src" ]
 
@@ -489,6 +516,10 @@ source_set("libtint") {
 
   if (tint_build_wgsl_writer) {
     deps += [ ":libtint_wgsl_writer_src" ]
+  }
+
+  if (tint_build_msl_writer) {
+    deps += [ ":libtint_msl_writer_src" ]
   }
 
   configs += [ ":tint_common_config" ]
@@ -852,6 +883,21 @@ source_set("tint_unittests_wgsl_writer_src") {
   }
 }
 
+source_set("tint_unittests_msl_writer_src") {
+  sources = [ "src/writer/msl/generator_impl_test.cc" ]
+
+  configs += [
+    ":tint_common_config",
+    ":tint_unittests_config",
+  ]
+  public_configs = [ ":tint_public_config" ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+}
+
 source_set("tint_unittests_src") {
   deps = [ ":tint_unittests_core_src" ]
 
@@ -869,6 +915,10 @@ source_set("tint_unittests_src") {
 
   if (tint_build_wgsl_writer) {
     deps += [ ":tint_unittests_wgsl_writer_src" ]
+  }
+
+  if (tint_build_msl_writer) {
+    deps += [ ":tint_unittests_msl_writer_src" ]
   }
 
   configs += [

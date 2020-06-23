@@ -12,43 +12,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/writer/msl/generator_impl.h"
+
 #include <memory>
-#include <vector>
 
 #include "gtest/gtest.h"
-#include "src/ast/identifier_expression.h"
-#include "src/ast/return_statement.h"
-#include "src/writer/wgsl/generator_impl.h"
+#include "src/ast/entry_point.h"
+#include "src/ast/function.h"
+#include "src/ast/module.h"
+#include "src/ast/pipeline_stage.h"
+#include "src/ast/type/void_type.h"
 
 namespace tint {
 namespace writer {
-namespace wgsl {
+namespace msl {
 namespace {
 
-using WgslGeneratorImplTest = testing::Test;
+using MslGeneratorImplTest = testing::Test;
 
-TEST_F(WgslGeneratorImplTest, Emit_Return) {
-  ast::ReturnStatement r;
+TEST_F(MslGeneratorImplTest, DISABLED_Generate) {
+  ast::type::VoidType void_type;
+  ast::Module m;
+  m.AddFunction(std::make_unique<ast::Function>("my_func", ast::VariableList{},
+                                                &void_type));
+  m.AddEntryPoint(std::make_unique<ast::EntryPoint>(
+      ast::PipelineStage::kCompute, "my_func", ""));
 
   GeneratorImpl g;
-  g.increment_indent();
 
-  ASSERT_TRUE(g.EmitStatement(&r)) << g.error();
-  EXPECT_EQ(g.result(), "  return;\n");
+  ASSERT_TRUE(g.Generate(m)) << g.error();
+  EXPECT_EQ(g.result(), R"(#import <metal_lib>
+
+compute void my_func() {
 }
-
-TEST_F(WgslGeneratorImplTest, Emit_ReturnWithValue) {
-  auto expr = std::make_unique<ast::IdentifierExpression>("expr");
-  ast::ReturnStatement r(std::move(expr));
-
-  GeneratorImpl g;
-  g.increment_indent();
-
-  ASSERT_TRUE(g.EmitStatement(&r)) << g.error();
-  EXPECT_EQ(g.result(), "  return expr;\n");
+)");
 }
 
 }  // namespace
-}  // namespace wgsl
+}  // namespace msl
 }  // namespace writer
 }  // namespace tint

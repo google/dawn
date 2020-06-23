@@ -46,7 +46,7 @@ TEST_P(BinaryTest, Emit) {
   EXPECT_EQ(g.result(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
-    GeneratorImplTest,
+    WgslGeneratorImplTest,
     BinaryTest,
     testing::Values(
         BinaryData{"(left & right)", ast::BinaryOp::kAnd},

@@ -25,9 +25,9 @@ namespace writer {
 namespace wgsl {
 namespace {
 
-using GeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, Emit_Assign) {
+TEST_F(WgslGeneratorImplTest, Emit_Assign) {
   auto lhs = std::make_unique<ast::IdentifierExpression>("lhs");
   auto rhs = std::make_unique<ast::IdentifierExpression>("rhs");
   ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));

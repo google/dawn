@@ -135,6 +135,8 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Vector) {
     {
       TypeConstructor{
         __vec_2__u32
+        ScalarConstructor{0}
+        ScalarConstructor{0}
       }
     }
   }
@@ -147,6 +149,8 @@ VariableDeclStatement{
     {
       TypeConstructor{
         __vec_2__i32
+        ScalarConstructor{0}
+        ScalarConstructor{0}
       }
     }
   }
@@ -159,6 +163,8 @@ VariableDeclStatement{
     {
       TypeConstructor{
         __vec_2__f32
+        ScalarConstructor{0.000000}
+        ScalarConstructor{0.000000}
       }
     }
   }
@@ -189,6 +195,16 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Matrix) {
     {
       TypeConstructor{
         __mat_2_2__f32
+        TypeConstructor{
+          __vec_2__f32
+          ScalarConstructor{0.000000}
+          ScalarConstructor{0.000000}
+        }
+        TypeConstructor{
+          __vec_2__f32
+          ScalarConstructor{0.000000}
+          ScalarConstructor{0.000000}
+        }
       }
     }
   }
@@ -220,6 +236,8 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Array) {
     {
       TypeConstructor{
         __array__u32_2
+        ScalarConstructor{0}
+        ScalarConstructor{0}
       }
     }
   }
@@ -250,6 +268,10 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Struct) {
     {
       TypeConstructor{
         __alias_S__struct_S
+        ScalarConstructor{false}
+        ScalarConstructor{0}
+        ScalarConstructor{0}
+        ScalarConstructor{0.000000}
       }
     }
   }

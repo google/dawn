@@ -29,9 +29,9 @@ namespace writer {
 namespace wgsl {
 namespace {
 
-using GeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, EmitVariable) {
+TEST_F(WgslGeneratorImplTest, EmitVariable) {
   ast::type::F32Type f32;
   ast::Variable v("a", ast::StorageClass::kNone, &f32);
 
@@ -41,7 +41,7 @@ TEST_F(GeneratorImplTest, EmitVariable) {
 )");
 }
 
-TEST_F(GeneratorImplTest, EmitVariable_StorageClass) {
+TEST_F(WgslGeneratorImplTest, EmitVariable_StorageClass) {
   ast::type::F32Type f32;
   ast::Variable v("a", ast::StorageClass::kInput, &f32);
 
@@ -51,7 +51,7 @@ TEST_F(GeneratorImplTest, EmitVariable_StorageClass) {
 )");
 }
 
-TEST_F(GeneratorImplTest, EmitVariable_Decorated) {
+TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
   ast::type::F32Type f32;
 
   ast::VariableDecorationList decos;
@@ -68,7 +68,7 @@ TEST_F(GeneratorImplTest, EmitVariable_Decorated) {
 )");
 }
 
-TEST_F(GeneratorImplTest, EmitVariable_Decorated_Multiple) {
+TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
   ast::type::F32Type f32;
 
   ast::VariableDecorationList decos;
@@ -90,7 +90,7 @@ TEST_F(GeneratorImplTest, EmitVariable_Decorated_Multiple) {
 )");
 }
 
-TEST_F(GeneratorImplTest, EmitVariable_Constructor) {
+TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
   auto ident = std::make_unique<ast::IdentifierExpression>("initializer");
 
   ast::type::F32Type f32;
@@ -103,7 +103,7 @@ TEST_F(GeneratorImplTest, EmitVariable_Constructor) {
 )");
 }
 
-TEST_F(GeneratorImplTest, EmitVariable_Const) {
+TEST_F(WgslGeneratorImplTest, EmitVariable_Const) {
   auto ident = std::make_unique<ast::IdentifierExpression>("initializer");
 
   ast::type::F32Type f32;

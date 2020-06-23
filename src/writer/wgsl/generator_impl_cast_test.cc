@@ -25,9 +25,9 @@ namespace writer {
 namespace wgsl {
 namespace {
 
-using GeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, EmitExpression_Cast) {
+TEST_F(WgslGeneratorImplTest, EmitExpression_Cast) {
   ast::type::F32Type f32;
   auto id = std::make_unique<ast::IdentifierExpression>("id");
   ast::CastExpression cast(&f32, std::move(id));

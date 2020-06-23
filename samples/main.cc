@@ -32,6 +32,7 @@ enum class Format {
   kSpirv,
   kSpvAsm,
   kWgsl,
+  kMsl,
 };
 
 struct Options {
@@ -49,12 +50,13 @@ struct Options {
 const char kUsage[] = R"(Usage: tint [options] <input-file>
 
  options:
-  --format <spirv|spvasm|wgsl>  -- Output format.
+  --format <spirv|spvasm|wgsl|msl>  -- Output format.
                                If not provided, will be inferred from output
                                filename extension:
                                    .spvasm -> spvasm
                                    .spv -> spirv
                                    .wgsl -> wgsl
+                                   .metal -> msl
                                If none matches, then default to SPIR-V assembly.
   --output-file <name>      -- Output file name.  Use "-" for standard output
   -o <name>                 -- Output file name.  Use "-" for standard output
@@ -79,6 +81,11 @@ Format parse_format(const std::string& fmt) {
     return Format::kWgsl;
 #endif  // TINT_BUILD_WGSL_WRITER
 
+#if TINT_BUILD_MSL_WRITER
+  if (fmt == "msl")
+    return Format::kMsl;
+#endif  // TINT_BUILD_MSL_WRITER
+
   return Format::kNone;
 }
 
@@ -95,16 +102,32 @@ bool ends_with(const std::string& input, const std::string& suffix) {
 
 /// @param filename the filename to inspect
 /// @returns the inferred format for the filename suffix
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
 Format infer_format(const std::string& filename) {
+#pragma clang diagnostic pop
+
+#if TINT_BUILD_SPV_WRITER
   if (ends_with(filename, ".spv")) {
     return Format::kSpirv;
   }
   if (ends_with(filename, ".spvasm")) {
     return Format::kSpvAsm;
   }
+#endif  // TINT_BUILD_SPV_WRITER
+
+#if TINT_BUILD_WGSL_WRITER
   if (ends_with(filename, ".wgsl")) {
     return Format::kWgsl;
   }
+#endif  // TINT_BUILD_WGSL_WRITER
+
+#if TINT_BUILD_MSL_WRITER
+  if (ends_with(filename, ".metal")) {
+    return Format::kMsl;
+  }
+#endif  // TINT_BUILD_WGSL_WRITER
+
   return Format::kNone;
 }
 
@@ -417,6 +440,12 @@ int main(int argc, const char** argv) {
   }
 #endif  // TINT_BUILD_WGSL_WRITER
 
+#if TINT_BUILD_MSL_WRITER
+  if (options.format == Format::kMsl) {
+    writer = std::make_unique<tint::writer::msl::Generator>(std::move(mod));
+  }
+#endif  // TINT_BUILDER_MSL_WRITER
+
   if (!writer) {
     std::cerr << "Unknown output format specified" << std::endl;
     return 1;
@@ -443,14 +472,14 @@ int main(int argc, const char** argv) {
   }
 #endif  // TINT_BUILD_SPV_WRITER
 
-#if TINT_BUILD_WGSL_WRITER
-  if (options.format == Format::kWgsl) {
-    auto* w = static_cast<tint::writer::wgsl::Generator*>(writer.get());
+#if TINT_BUILD_WGSL_WRITER || TINT_BUILD_MSL_WRITER
+  if (options.format == Format::kWgsl || options.format == Format::kMsl) {
+    auto* w = static_cast<tint::writer::Text*>(writer.get());
     if (!WriteFile(options.output_file, "w", w->result())) {
       return 1;
     }
   }
-#endif  // TINT_BUILD_WGSL_WRITER
+#endif  // TINT_BUILD_WGSL_WRITER || TINT_BUILD_MSL_WRITER
 
   return 0;
 }

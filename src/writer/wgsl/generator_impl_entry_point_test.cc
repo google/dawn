@@ -20,9 +20,9 @@ namespace writer {
 namespace wgsl {
 namespace {
 
-using GeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, EmitEntryPoint_NoName) {
+TEST_F(WgslGeneratorImplTest, EmitEntryPoint_NoName) {
   ast::EntryPoint ep(ast::PipelineStage::kFragment, "", "frag_main");
 
   GeneratorImpl g;
@@ -31,7 +31,7 @@ TEST_F(GeneratorImplTest, EmitEntryPoint_NoName) {
 )");
 }
 
-TEST_F(GeneratorImplTest, EmitEntryPoint_WithName) {
+TEST_F(WgslGeneratorImplTest, EmitEntryPoint_WithName) {
   ast::EntryPoint ep(ast::PipelineStage::kFragment, "main", "frag_main");
 
   GeneratorImpl g;

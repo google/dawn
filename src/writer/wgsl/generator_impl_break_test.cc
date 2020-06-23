@@ -24,9 +24,9 @@ namespace writer {
 namespace wgsl {
 namespace {
 
-using GeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, Emit_Break) {
+TEST_F(WgslGeneratorImplTest, Emit_Break) {
   ast::BreakStatement b;
 
   GeneratorImpl g;

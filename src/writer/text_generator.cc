@@ -12,26 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest.h"
-#include "src/writer/wgsl/generator_impl.h"
+#include "src/writer/text_generator.h"
+
+#include <utility>
 
 namespace tint {
 namespace writer {
-namespace wgsl {
-namespace {
 
-using WgslGeneratorImplTest = testing::Test;
+TextGenerator::TextGenerator() = default;
 
-TEST_F(WgslGeneratorImplTest, EmitImport) {
-  ast::Import import("GLSL.std.450", "std::glsl");
+TextGenerator::~TextGenerator() = default;
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitImport(&import)) << g.error();
-  EXPECT_EQ(g.result(), R"(import "GLSL.std.450" as std::glsl;
-)");
+void TextGenerator::make_indent() {
+  for (size_t i = 0; i < indent_; i++) {
+    out_ << " ";
+  }
 }
 
-}  // namespace
-}  // namespace wgsl
 }  // namespace writer
 }  // namespace tint

@@ -32,9 +32,9 @@ namespace writer {
 namespace wgsl {
 namespace {
 
-using GeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, EmitConstructor_Bool) {
+TEST_F(WgslGeneratorImplTest, EmitConstructor_Bool) {
   ast::type::BoolType bool_type;
   auto lit = std::make_unique<ast::BoolLiteral>(&bool_type, false);
   ast::ScalarConstructorExpression expr(std::move(lit));
@@ -44,7 +44,7 @@ TEST_F(GeneratorImplTest, EmitConstructor_Bool) {
   EXPECT_EQ(g.result(), "false");
 }
 
-TEST_F(GeneratorImplTest, EmitConstructor_Int) {
+TEST_F(WgslGeneratorImplTest, EmitConstructor_Int) {
   ast::type::I32Type i32;
   auto lit = std::make_unique<ast::SintLiteral>(&i32, -12345);
   ast::ScalarConstructorExpression expr(std::move(lit));
@@ -54,7 +54,7 @@ TEST_F(GeneratorImplTest, EmitConstructor_Int) {
   EXPECT_EQ(g.result(), "-12345");
 }
 
-TEST_F(GeneratorImplTest, EmitConstructor_UInt) {
+TEST_F(WgslGeneratorImplTest, EmitConstructor_UInt) {
   ast::type::U32Type u32;
   auto lit = std::make_unique<ast::UintLiteral>(&u32, 56779);
   ast::ScalarConstructorExpression expr(std::move(lit));
@@ -64,7 +64,7 @@ TEST_F(GeneratorImplTest, EmitConstructor_UInt) {
   EXPECT_EQ(g.result(), "56779u");
 }
 
-TEST_F(GeneratorImplTest, EmitConstructor_Float) {
+TEST_F(WgslGeneratorImplTest, EmitConstructor_Float) {
   ast::type::F32Type f32;
   auto lit = std::make_unique<ast::FloatLiteral>(&f32, 1.5e27);
   ast::ScalarConstructorExpression expr(std::move(lit));
@@ -74,7 +74,7 @@ TEST_F(GeneratorImplTest, EmitConstructor_Float) {
   EXPECT_EQ(g.result(), "1.49999995e+27");
 }
 
-TEST_F(GeneratorImplTest, EmitConstructor_Type_Float) {
+TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Float) {
   ast::type::F32Type f32;
 
   auto lit = std::make_unique<ast::FloatLiteral>(&f32, -1.2e-5);
@@ -89,7 +89,7 @@ TEST_F(GeneratorImplTest, EmitConstructor_Type_Float) {
   EXPECT_EQ(g.result(), "f32(-1.20000004e-05)");
 }
 
-TEST_F(GeneratorImplTest, EmitConstructor_Type_Bool) {
+TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Bool) {
   ast::type::BoolType b;
 
   auto lit = std::make_unique<ast::BoolLiteral>(&b, true);
@@ -104,7 +104,7 @@ TEST_F(GeneratorImplTest, EmitConstructor_Type_Bool) {
   EXPECT_EQ(g.result(), "bool(true)");
 }
 
-TEST_F(GeneratorImplTest, EmitConstructor_Type_Int) {
+TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Int) {
   ast::type::I32Type i32;
 
   auto lit = std::make_unique<ast::SintLiteral>(&i32, -12345);
@@ -119,7 +119,7 @@ TEST_F(GeneratorImplTest, EmitConstructor_Type_Int) {
   EXPECT_EQ(g.result(), "i32(-12345)");
 }
 
-TEST_F(GeneratorImplTest, EmitConstructor_Type_Uint) {
+TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Uint) {
   ast::type::U32Type u32;
 
   auto lit = std::make_unique<ast::UintLiteral>(&u32, 12345);
@@ -134,7 +134,7 @@ TEST_F(GeneratorImplTest, EmitConstructor_Type_Uint) {
   EXPECT_EQ(g.result(), "u32(12345u)");
 }
 
-TEST_F(GeneratorImplTest, EmitConstructor_Type_Vec) {
+TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Vec) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
 
@@ -156,7 +156,7 @@ TEST_F(GeneratorImplTest, EmitConstructor_Type_Vec) {
   EXPECT_EQ(g.result(), "vec3<f32>(1.00000000, 2.00000000, 3.00000000)");
 }
 
-TEST_F(GeneratorImplTest, EmitConstructor_Type_Mat) {
+TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Mat) {
   ast::type::F32Type f32;
   ast::type::MatrixType mat(&f32, 3, 2);
 
@@ -190,7 +190,7 @@ TEST_F(GeneratorImplTest, EmitConstructor_Type_Mat) {
                 "vec2<f32>(5.00000000, 6.00000000))");
 }
 
-TEST_F(GeneratorImplTest, EmitConstructor_Type_Array) {
+TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Array) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
   ast::type::ArrayType ary(&vec, 3);

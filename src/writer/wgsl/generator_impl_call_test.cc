@@ -24,9 +24,9 @@ namespace writer {
 namespace wgsl {
 namespace {
 
-using GeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, EmitExpression_Call_WithoutParams) {
+TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
   auto id = std::make_unique<ast::IdentifierExpression>("my_func");
   ast::CallExpression call(std::move(id), {});
 
@@ -35,7 +35,7 @@ TEST_F(GeneratorImplTest, EmitExpression_Call_WithoutParams) {
   EXPECT_EQ(g.result(), "my_func()");
 }
 
-TEST_F(GeneratorImplTest, EmitExpression_Call_WithParams) {
+TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithParams) {
   auto id = std::make_unique<ast::IdentifierExpression>("my_func");
   ast::ExpressionList params;
   params.push_back(std::make_unique<ast::IdentifierExpression>("param1"));

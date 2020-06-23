@@ -184,6 +184,10 @@ set(TINT_LIB_SRCS
   validator.h
   validator_impl.cc
   validator_impl.h
+  writer/text.cc
+  writer/text.h
+  writer/text_generator.cc
+  writer/text_generator.h
   writer/writer.cc
   writer/writer.h
 )
@@ -242,6 +246,15 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator.h
     writer/wgsl/generator_impl.cc
     writer/wgsl/generator_impl.h
+  )
+endif()
+
+if(${TINT_BUILD_MSL_WRITER})
+  list(APPEND TINT_LIB_SRCS
+    writer/msl/generator.cc
+    writer/msl/generator.h
+    writer/msl/generator_impl.cc
+    writer/msl/generator_impl.h
   )
 endif()
 
@@ -477,6 +490,13 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_variable_test.cc
   )
 endif()
+
+if(${TINT_BUILD_MSL_WRITER})
+  list(APPEND TINT_TEST_SRCS
+    writer/msl/generator_impl_test.cc
+  )
+endif()
+
 add_executable(tint_unittests ${TINT_TEST_SRCS})
 
 if(NOT MSVC)

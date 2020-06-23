@@ -23,9 +23,9 @@ namespace writer {
 namespace wgsl {
 namespace {
 
-using GeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, Generate) {
+TEST_F(WgslGeneratorImplTest, Generate) {
   ast::Module m;
   m.AddImport(std::make_unique<ast::Import>("GLSL.std.430", "a"));
 

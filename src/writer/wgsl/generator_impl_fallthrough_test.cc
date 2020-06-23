@@ -21,9 +21,9 @@ namespace writer {
 namespace wgsl {
 namespace {
 
-using GeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, Emit_Fallthrough) {
+TEST_F(WgslGeneratorImplTest, Emit_Fallthrough) {
   ast::FallthroughStatement f;
 
   GeneratorImpl g;

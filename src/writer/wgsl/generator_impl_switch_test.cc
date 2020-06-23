@@ -28,9 +28,9 @@ namespace writer {
 namespace wgsl {
 namespace {
 
-using GeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, Emit_Switch) {
+TEST_F(WgslGeneratorImplTest, Emit_Switch) {
   auto def = std::make_unique<ast::CaseStatement>();
   ast::StatementList def_body;
   def_body.push_back(std::make_unique<ast::BreakStatement>());

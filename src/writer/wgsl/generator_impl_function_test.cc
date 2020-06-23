@@ -27,9 +27,9 @@ namespace writer {
 namespace wgsl {
 namespace {
 
-using GeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, Emit_Function) {
+TEST_F(WgslGeneratorImplTest, Emit_Function) {
   ast::StatementList body;
   body.push_back(std::make_unique<ast::KillStatement>());
   body.push_back(std::make_unique<ast::ReturnStatement>());
@@ -49,7 +49,7 @@ TEST_F(GeneratorImplTest, Emit_Function) {
 )");
 }
 
-TEST_F(GeneratorImplTest, Emit_Function_WithParams) {
+TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
   ast::StatementList body;
   body.push_back(std::make_unique<ast::KillStatement>());
   body.push_back(std::make_unique<ast::ReturnStatement>());

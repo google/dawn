@@ -20,9 +20,9 @@ namespace writer {
 namespace wgsl {
 namespace {
 
-using GeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, EmitExpression_Identifier) {
+TEST_F(WgslGeneratorImplTest, EmitExpression_Identifier) {
   ast::IdentifierExpression i(std::vector<std::string>{"std", "glsl"});
 
   GeneratorImpl g;
@@ -30,7 +30,7 @@ TEST_F(GeneratorImplTest, EmitExpression_Identifier) {
   EXPECT_EQ(g.result(), "std::glsl");
 }
 
-TEST_F(GeneratorImplTest, EmitIdentifierExpression_Single) {
+TEST_F(WgslGeneratorImplTest, EmitIdentifierExpression_Single) {
   ast::IdentifierExpression i("glsl");
 
   GeneratorImpl g;
@@ -38,7 +38,7 @@ TEST_F(GeneratorImplTest, EmitIdentifierExpression_Single) {
   EXPECT_EQ(g.result(), "glsl");
 }
 
-TEST_F(GeneratorImplTest, EmitIdentifierExpression_MultipleNames) {
+TEST_F(WgslGeneratorImplTest, EmitIdentifierExpression_MultipleNames) {
   ast::IdentifierExpression i({"std", "glsl", "init"});
 
   GeneratorImpl g;

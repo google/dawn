@@ -42,4 +42,8 @@
 #include "src/writer/wgsl/generator.h"
 #endif  // TINT_BUILD_WGSL_WRITER
 
+#if TINT_BUILD_MSL_WRITER
+#include "src/writer/msl/generator.h"
+#endif  // TINT_BUILD_MSL_WRITER
+
 #endif  // INCLUDE_TINT_TINT_H_

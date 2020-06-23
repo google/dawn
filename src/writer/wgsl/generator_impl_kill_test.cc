@@ -21,9 +21,9 @@ namespace writer {
 namespace wgsl {
 namespace {
 
-using GeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, Emit_kill) {
+TEST_F(WgslGeneratorImplTest, Emit_kill) {
   ast::KillStatement k;
 
   GeneratorImpl g;

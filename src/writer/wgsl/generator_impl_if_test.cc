@@ -24,9 +24,9 @@ namespace writer {
 namespace wgsl {
 namespace {
 
-using GeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, Emit_If) {
+TEST_F(WgslGeneratorImplTest, Emit_If) {
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
   ast::StatementList body;
   body.push_back(std::make_unique<ast::KillStatement>());
@@ -43,7 +43,7 @@ TEST_F(GeneratorImplTest, Emit_If) {
 )");
 }
 
-TEST_F(GeneratorImplTest, Emit_IfWithElseIf) {
+TEST_F(WgslGeneratorImplTest, Emit_IfWithElseIf) {
   auto else_cond = std::make_unique<ast::IdentifierExpression>("else_cond");
 
   ast::StatementList else_body;
@@ -72,7 +72,7 @@ TEST_F(GeneratorImplTest, Emit_IfWithElseIf) {
 )");
 }
 
-TEST_F(GeneratorImplTest, Emit_IfWithElse) {
+TEST_F(WgslGeneratorImplTest, Emit_IfWithElse) {
   ast::StatementList else_body;
   else_body.push_back(std::make_unique<ast::KillStatement>());
 
@@ -98,7 +98,7 @@ TEST_F(GeneratorImplTest, Emit_IfWithElse) {
 )");
 }
 
-TEST_F(GeneratorImplTest, Emit_IfWithMultiple) {
+TEST_F(WgslGeneratorImplTest, Emit_IfWithMultiple) {
   auto else_cond = std::make_unique<ast::IdentifierExpression>("else_cond");
 
   ast::StatementList else_body;

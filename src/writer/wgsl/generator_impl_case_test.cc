@@ -27,9 +27,9 @@ namespace writer {
 namespace wgsl {
 namespace {
 
-using GeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, Emit_Case) {
+TEST_F(WgslGeneratorImplTest, Emit_Case) {
   ast::type::I32Type i32;
 
   ast::StatementList body;
@@ -49,7 +49,7 @@ TEST_F(GeneratorImplTest, Emit_Case) {
 )");
 }
 
-TEST_F(GeneratorImplTest, Emit_Case_MultipleSelectors) {
+TEST_F(WgslGeneratorImplTest, Emit_Case_MultipleSelectors) {
   ast::type::I32Type i32;
 
   ast::StatementList body;
@@ -70,7 +70,7 @@ TEST_F(GeneratorImplTest, Emit_Case_MultipleSelectors) {
 )");
 }
 
-TEST_F(GeneratorImplTest, Emit_Case_Default) {
+TEST_F(WgslGeneratorImplTest, Emit_Case_Default) {
   ast::CaseStatement c;
 
   ast::StatementList body;

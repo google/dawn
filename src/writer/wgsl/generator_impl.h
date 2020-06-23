@@ -29,13 +29,14 @@
 #include "src/ast/type/type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/variable.h"
+#include "src/writer/text_generator.h"
 
 namespace tint {
 namespace writer {
 namespace wgsl {
 
 /// Implementation class for WGSL generator
-class GeneratorImpl {
+class GeneratorImpl : public TextGenerator {
  public:
   /// Constructor
   GeneratorImpl();
@@ -45,26 +46,6 @@ class GeneratorImpl {
   /// @param module the module to generate
   /// @returns true on successful generation; false otherwise
   bool Generate(const ast::Module& module);
-
-  /// @returns the result data
-  std::string result() const { return out_.str(); }
-
-  /// @returns the error from the generator
-  std::string error() const { return error_; }
-
-  /// Increment the emitter indent level
-  void increment_indent() { indent_ += 2; }
-  /// Decrement the emiter indent level
-  void decrement_indent() {
-    if (indent_ < 2) {
-      indent_ = 0;
-      return;
-    }
-    indent_ -= 2;
-  }
-
-  /// Writes the current indent to the output stream
-  void make_indent();
 
   /// Handles generating an alias
   /// @param alias the alias to generate
@@ -202,11 +183,6 @@ class GeneratorImpl {
   /// @param var the decorated variable
   /// @returns true if the variable decoration was emitted
   bool EmitVariableDecorations(ast::DecoratedVariable* var);
-
- private:
-  size_t indent_ = 0;
-  std::ostringstream out_;
-  std::string error_;
 };
 
 }  // namespace wgsl

@@ -35,9 +35,9 @@ namespace writer {
 namespace wgsl {
 namespace {
 
-using GeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, EmitType_Alias) {
+TEST_F(WgslGeneratorImplTest, EmitType_Alias) {
   ast::type::F32Type f32;
   ast::type::AliasType alias("alias", &f32);
 
@@ -46,7 +46,7 @@ TEST_F(GeneratorImplTest, EmitType_Alias) {
   EXPECT_EQ(g.result(), "alias");
 }
 
-TEST_F(GeneratorImplTest, EmitType_Array) {
+TEST_F(WgslGeneratorImplTest, EmitType_Array) {
   ast::type::BoolType b;
   ast::type::ArrayType a(&b, 4);
 
@@ -55,7 +55,7 @@ TEST_F(GeneratorImplTest, EmitType_Array) {
   EXPECT_EQ(g.result(), "array<bool, 4>");
 }
 
-TEST_F(GeneratorImplTest, EmitType_RuntimeArray) {
+TEST_F(WgslGeneratorImplTest, EmitType_RuntimeArray) {
   ast::type::BoolType b;
   ast::type::ArrayType a(&b);
 
@@ -64,7 +64,7 @@ TEST_F(GeneratorImplTest, EmitType_RuntimeArray) {
   EXPECT_EQ(g.result(), "array<bool>");
 }
 
-TEST_F(GeneratorImplTest, EmitType_Bool) {
+TEST_F(WgslGeneratorImplTest, EmitType_Bool) {
   ast::type::BoolType b;
 
   GeneratorImpl g;
@@ -72,7 +72,7 @@ TEST_F(GeneratorImplTest, EmitType_Bool) {
   EXPECT_EQ(g.result(), "bool");
 }
 
-TEST_F(GeneratorImplTest, EmitType_F32) {
+TEST_F(WgslGeneratorImplTest, EmitType_F32) {
   ast::type::F32Type f32;
 
   GeneratorImpl g;
@@ -80,7 +80,7 @@ TEST_F(GeneratorImplTest, EmitType_F32) {
   EXPECT_EQ(g.result(), "f32");
 }
 
-TEST_F(GeneratorImplTest, EmitType_I32) {
+TEST_F(WgslGeneratorImplTest, EmitType_I32) {
   ast::type::I32Type i32;
 
   GeneratorImpl g;
@@ -88,7 +88,7 @@ TEST_F(GeneratorImplTest, EmitType_I32) {
   EXPECT_EQ(g.result(), "i32");
 }
 
-TEST_F(GeneratorImplTest, EmitType_Matrix) {
+TEST_F(WgslGeneratorImplTest, EmitType_Matrix) {
   ast::type::F32Type f32;
   ast::type::MatrixType m(&f32, 3, 2);
 
@@ -97,7 +97,7 @@ TEST_F(GeneratorImplTest, EmitType_Matrix) {
   EXPECT_EQ(g.result(), "mat2x3<f32>");
 }
 
-TEST_F(GeneratorImplTest, EmitType_Pointer) {
+TEST_F(WgslGeneratorImplTest, EmitType_Pointer) {
   ast::type::F32Type f32;
   ast::type::PointerType p(&f32, ast::StorageClass::kWorkgroup);
 
@@ -106,7 +106,7 @@ TEST_F(GeneratorImplTest, EmitType_Pointer) {
   EXPECT_EQ(g.result(), "ptr<workgroup, f32>");
 }
 
-TEST_F(GeneratorImplTest, EmitType_Struct) {
+TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;
 
@@ -132,7 +132,7 @@ TEST_F(GeneratorImplTest, EmitType_Struct) {
 })");
 }
 
-TEST_F(GeneratorImplTest, EmitType_Struct_WithDecoration) {
+TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithDecoration) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;
 
@@ -159,7 +159,7 @@ TEST_F(GeneratorImplTest, EmitType_Struct_WithDecoration) {
 })");
 }
 
-TEST_F(GeneratorImplTest, EmitType_U32) {
+TEST_F(WgslGeneratorImplTest, EmitType_U32) {
   ast::type::U32Type u32;
 
   GeneratorImpl g;
@@ -167,7 +167,7 @@ TEST_F(GeneratorImplTest, EmitType_U32) {
   EXPECT_EQ(g.result(), "u32");
 }
 
-TEST_F(GeneratorImplTest, EmitType_Vector) {
+TEST_F(WgslGeneratorImplTest, EmitType_Vector) {
   ast::type::F32Type f32;
   ast::type::VectorType v(&f32, 3);
 
@@ -176,7 +176,7 @@ TEST_F(GeneratorImplTest, EmitType_Vector) {
   EXPECT_EQ(g.result(), "vec3<f32>");
 }
 
-TEST_F(GeneratorImplTest, EmitType_Void) {
+TEST_F(WgslGeneratorImplTest, EmitType_Void) {
   ast::type::VoidType v;
 
   GeneratorImpl g;

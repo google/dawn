@@ -26,9 +26,9 @@ namespace writer {
 namespace wgsl {
 namespace {
 
-using GeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, Emit_VariableDeclStatement) {
+TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement) {
   ast::type::F32Type f32;
   auto var =
       std::make_unique<ast::Variable>("a", ast::StorageClass::kNone, &f32);
@@ -42,7 +42,7 @@ TEST_F(GeneratorImplTest, Emit_VariableDeclStatement) {
   EXPECT_EQ(g.result(), "  var a : f32;\n");
 }
 
-TEST_F(GeneratorImplTest, Emit_VariableDeclStatement_Function) {
+TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Function) {
   // Variable declarations with Function storage class don't mention their
   // storage class.  Rely on defaulting.
   // https://github.com/gpuweb/gpuweb/issues/654
@@ -59,7 +59,7 @@ TEST_F(GeneratorImplTest, Emit_VariableDeclStatement_Function) {
   EXPECT_EQ(g.result(), "  var a : f32;\n");
 }
 
-TEST_F(GeneratorImplTest, Emit_VariableDeclStatement_Private) {
+TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
   ast::type::F32Type f32;
   auto var =
       std::make_unique<ast::Variable>("a", ast::StorageClass::kPrivate, &f32);

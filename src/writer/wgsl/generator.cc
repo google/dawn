@@ -20,7 +20,7 @@ namespace tint {
 namespace writer {
 namespace wgsl {
 
-Generator::Generator(ast::Module module) : writer::Writer(std::move(module)) {}
+Generator::Generator(ast::Module module) : Text(std::move(module)) {}
 
 Generator::~Generator() = default;
 

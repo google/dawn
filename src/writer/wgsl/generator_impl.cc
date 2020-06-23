@@ -110,12 +110,6 @@ bool GeneratorImpl::Generate(const ast::Module& module) {
   return true;
 }
 
-void GeneratorImpl::make_indent() {
-  for (size_t i = 0; i < indent_; i++) {
-    out_ << " ";
-  }
-}
-
 bool GeneratorImpl::EmitAliasType(const ast::type::AliasType* alias) {
   make_indent();
   out_ << "type " << alias->name() << " = ";

@@ -12,17 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_WRITER_WGSL_GENERATOR_H_
-#define SRC_WRITER_WGSL_GENERATOR_H_
+#ifndef SRC_WRITER_MSL_GENERATOR_H_
+#define SRC_WRITER_MSL_GENERATOR_H_
 
 #include <string>
 
+#include "src/writer/msl/generator_impl.h"
 #include "src/writer/text.h"
-#include "src/writer/wgsl/generator_impl.h"
 
 namespace tint {
 namespace writer {
-namespace wgsl {
+namespace msl {
 
 /// Class to generate WGSL source from a WGSL module
 class Generator : public Text {
@@ -46,8 +46,8 @@ class Generator : public Text {
   GeneratorImpl impl_;
 };
 
-}  // namespace wgsl
+}  // namespace msl
 }  // namespace writer
 }  // namespace tint
 
-#endif  // SRC_WRITER_WGSL_GENERATOR_H_
+#endif  // SRC_WRITER_MSL_GENERATOR_H_

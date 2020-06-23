@@ -12,26 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest.h"
-#include "src/writer/wgsl/generator_impl.h"
+#ifndef SRC_WRITER_TEXT_H_
+#define SRC_WRITER_TEXT_H_
+
+#include <string>
+
+#include "src/writer/writer.h"
 
 namespace tint {
 namespace writer {
-namespace wgsl {
-namespace {
 
-using WgslGeneratorImplTest = testing::Test;
+/// Class to generate text source
+class Text : public Writer {
+ public:
+  /// Constructor
+  /// @param module the module to convert
+  explicit Text(ast::Module module);
+  ~Text() override;
 
-TEST_F(WgslGeneratorImplTest, EmitImport) {
-  ast::Import import("GLSL.std.450", "std::glsl");
+  /// @returns the result data
+  virtual std::string result() const = 0;
+};
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitImport(&import)) << g.error();
-  EXPECT_EQ(g.result(), R"(import "GLSL.std.450" as std::glsl;
-)");
-}
-
-}  // namespace
-}  // namespace wgsl
 }  // namespace writer
 }  // namespace tint
+
+#endif  // SRC_WRITER_TEXT_H_

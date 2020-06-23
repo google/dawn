@@ -44,7 +44,7 @@ TEST_P(UnaryOpTest, Emit) {
   ASSERT_TRUE(g.EmitExpression(&op)) << g.error();
   EXPECT_EQ(g.result(), std::string(params.name) + "(expr)");
 }
-INSTANTIATE_TEST_SUITE_P(GeneratorImplTest,
+INSTANTIATE_TEST_SUITE_P(WgslGeneratorImplTest,
                          UnaryOpTest,
                          testing::Values(UnaryOpData{"!", ast::UnaryOp::kNot},
                                          UnaryOpData{"-",

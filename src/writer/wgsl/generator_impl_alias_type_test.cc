@@ -27,9 +27,9 @@ namespace writer {
 namespace wgsl {
 namespace {
 
-using GeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, EmitAliasType_F32) {
+TEST_F(WgslGeneratorImplTest, EmitAliasType_F32) {
   ast::type::F32Type f32;
   ast::type::AliasType alias("a", &f32);
 
@@ -39,7 +39,7 @@ TEST_F(GeneratorImplTest, EmitAliasType_F32) {
 )");
 }
 
-TEST_F(GeneratorImplTest, EmitAliasType_Struct) {
+TEST_F(WgslGeneratorImplTest, EmitAliasType_Struct) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;
 

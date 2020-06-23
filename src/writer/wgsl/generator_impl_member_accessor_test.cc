@@ -24,9 +24,9 @@ namespace writer {
 namespace wgsl {
 namespace {
 
-using GeneratorImplTest = testing::Test;
+using WgslGeneratorImplTest = testing::Test;
 
-TEST_F(GeneratorImplTest, EmitExpression_MemberAccessor) {
+TEST_F(WgslGeneratorImplTest, EmitExpression_MemberAccessor) {
   auto str = std::make_unique<ast::IdentifierExpression>("str");
   auto mem = std::make_unique<ast::IdentifierExpression>("mem");
 

@@ -56,4 +56,9 @@ declare_args() {
   if (!defined(tint_build_wgsl_writer)) {
     tint_build_wgsl_writer = false
   }
+
+  # Build the MSL output writer
+  if (!defined(tint_build_msl_writer)) {
+    tint_build_msl_writer = false
+  }
 }

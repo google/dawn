@@ -12,26 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest.h"
-#include "src/writer/wgsl/generator_impl.h"
+#include "src/writer/msl/generator_impl.h"
 
 namespace tint {
 namespace writer {
-namespace wgsl {
-namespace {
+namespace msl {
 
-using WgslGeneratorImplTest = testing::Test;
+GeneratorImpl::GeneratorImpl() = default;
 
-TEST_F(WgslGeneratorImplTest, EmitImport) {
-  ast::Import import("GLSL.std.450", "std::glsl");
+GeneratorImpl::~GeneratorImpl() = default;
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.EmitImport(&import)) << g.error();
-  EXPECT_EQ(g.result(), R"(import "GLSL.std.450" as std::glsl;
-)");
+bool GeneratorImpl::Generate(const ast::Module&) {
+  return true;
 }
 
-}  // namespace
-}  // namespace wgsl
+}  // namespace msl
 }  // namespace writer
 }  // namespace tint
