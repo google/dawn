@@ -14,6 +14,7 @@
 
 #include "src/writer/msl/generator_impl.h"
 
+#include "src/ast/return_statement.h"
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
@@ -36,6 +37,61 @@ GeneratorImpl::~GeneratorImpl() = default;
 
 bool GeneratorImpl::Generate(const ast::Module&) {
   return true;
+}
+
+bool GeneratorImpl::EmitExpression(ast::Expression*) {
+  error_ = "unknown expression type";
+  return false;
+}
+
+bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
+  make_indent();
+
+  out_ << "return";
+  if (stmt->has_value()) {
+    out_ << " ";
+    if (!EmitExpression(stmt->value())) {
+      return false;
+    }
+  }
+  out_ << ";" << std::endl;
+  return true;
+}
+
+bool GeneratorImpl::EmitStatementBlock(const ast::StatementList& statements) {
+  out_ << " {" << std::endl;
+
+  increment_indent();
+
+  for (const auto& s : statements) {
+    if (!EmitStatement(s.get())) {
+      return false;
+    }
+  }
+
+  decrement_indent();
+  make_indent();
+  out_ << "}";
+
+  return true;
+}
+
+bool GeneratorImpl::EmitStatementBlockAndNewline(
+    const ast::StatementList& statements) {
+  const bool result = EmitStatementBlock(statements);
+  if (result) {
+    out_ << std::endl;
+  }
+  return result;
+}
+
+bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
+  if (stmt->IsReturn()) {
+    return EmitReturn(stmt->AsReturn());
+  }
+
+  error_ = "unknown statement type";
+  return false;
 }
 
 bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {

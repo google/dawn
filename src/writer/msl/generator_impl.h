@@ -37,6 +37,26 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true on successful generation; false otherwise
   bool Generate(const ast::Module& module);
 
+  /// Handles generate an Expression
+  /// @param expr the expression
+  /// @returns true if the expression was emitted
+  bool EmitExpression(ast::Expression* expr);
+  /// Handles return statements
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was successfully emitted
+  bool EmitReturn(ast::ReturnStatement* stmt);
+  /// Handles a brace-enclosed list of statements.
+  /// @param statements the statements to output
+  /// @returns true if the statements were emitted
+  bool EmitStatementBlock(const ast::StatementList& statements);
+  /// Handles a brace-enclosed list of statements and trailing newline.
+  /// @param statements the statements to output
+  /// @returns true if the statements were emitted
+  bool EmitStatementBlockAndNewline(const ast::StatementList& statements);
+  /// Handles statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted
+  bool EmitStatement(ast::Statement* stmt);
   /// Handles generating type
   /// @param type the type to generate
   /// @param name the name of the variable, only used for array emission
