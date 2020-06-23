@@ -757,11 +757,11 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
   auto priv_var = std::make_unique<ast::Variable>(
       "priv_var", ast::StorageClass::kPrivate, &f32);
 
-  auto in_ptr = in_var.get();
-  auto out_ptr = out_var.get();
-  auto sb_ptr = sb_var.get();
-  auto wg_ptr = wg_var.get();
-  auto priv_ptr = priv_var.get();
+  auto* in_ptr = in_var.get();
+  auto* out_ptr = out_var.get();
+  auto* sb_ptr = sb_var.get();
+  auto* wg_ptr = wg_var.get();
+  auto* priv_ptr = priv_var.get();
 
   mod()->AddGlobalVariable(std::move(in_var));
   mod()->AddGlobalVariable(std::move(out_var));
@@ -772,7 +772,7 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
   ast::VariableList params;
   auto func =
       std::make_unique<ast::Function>("my_func", std::move(params), &f32);
-  auto func_ptr = func.get();
+  auto* func_ptr = func.get();
 
   ast::StatementList body;
   body.push_back(std::make_unique<ast::AssignmentStatement>(
@@ -795,7 +795,7 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
   EXPECT_TRUE(td()->Determine());
 
   const auto& vars = func_ptr->referenced_module_variables();
-  ASSERT_EQ(vars.size(), 5);
+  ASSERT_EQ(vars.size(), 5u);
   EXPECT_EQ(vars[0], out_ptr);
   EXPECT_EQ(vars[1], in_ptr);
   EXPECT_EQ(vars[2], wg_ptr);
@@ -812,7 +812,7 @@ TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
   ast::VariableList params;
   auto func =
       std::make_unique<ast::Function>("my_func", std::move(params), &f32);
-  auto func_ptr = func.get();
+  auto* func_ptr = func.get();
 
   ast::StatementList body;
   body.push_back(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
@@ -827,7 +827,7 @@ TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
   // Register the function
   EXPECT_TRUE(td()->Determine());
 
-  EXPECT_EQ(func_ptr->referenced_module_variables().size(), 0);
+  EXPECT_EQ(func_ptr->referenced_module_variables().size(), 0u);
 }
 
 TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
