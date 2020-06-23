@@ -14,6 +14,7 @@
 
 #include "src/writer/msl/generator_impl.h"
 
+#include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/type/alias_type.h"
@@ -36,7 +37,13 @@ GeneratorImpl::GeneratorImpl() = default;
 
 GeneratorImpl::~GeneratorImpl() = default;
 
-bool GeneratorImpl::Generate(const ast::Module&) {
+bool GeneratorImpl::Generate(const ast::Module& module) {
+  for (const auto& func : module.functions()) {
+    if (!EmitFunction(func.get())) {
+      return false;
+    }
+    out_ << std::endl;
+  }
   return true;
 }
 
@@ -47,6 +54,35 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
 
   error_ = "unknown expression type";
   return false;
+}
+
+bool GeneratorImpl::EmitFunction(ast::Function* func) {
+  make_indent();
+
+  if (!EmitType(func->return_type(), "")) {
+    return false;
+  }
+
+  out_ << " " << func->name() << "(";
+
+  bool first = true;
+  for (const auto& v : func->params()) {
+    if (!first) {
+      out_ << ", ";
+    }
+    first = false;
+
+    if (!EmitType(v->type(), v->name())) {
+      return false;
+    }
+    // Array name is output as part of the type
+    if (!v->type()->IsArray()) {
+      out_ << " " << v->name();
+    }
+  }
+  out_ << ")";
+
+  return EmitStatementBlockAndNewline(func->body());
 }
 
 bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
