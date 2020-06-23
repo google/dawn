@@ -465,6 +465,7 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_array_accessor_test.cc
     writer/wgsl/generator_impl_as_test.cc
     writer/wgsl/generator_impl_assign_test.cc
+    writer/wgsl/generator_impl_binary_test.cc
     writer/wgsl/generator_impl_break_test.cc
     writer/wgsl/generator_impl_call_test.cc
     writer/wgsl/generator_impl_case_test.cc
@@ -481,7 +482,6 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_kill_test.cc
     writer/wgsl/generator_impl_loop_test.cc
     writer/wgsl/generator_impl_member_accessor_test.cc
-    writer/wgsl/generator_impl_relational_test.cc
     writer/wgsl/generator_impl_return_test.cc
     writer/wgsl/generator_impl_switch_test.cc
     writer/wgsl/generator_impl_type_test.cc
@@ -494,6 +494,7 @@ endif()
 if(${TINT_BUILD_MSL_WRITER})
   list(APPEND TINT_TEST_SRCS
     writer/msl/generator_impl_assign_test.cc
+    writer/msl/generator_impl_binary_test.cc
     writer/msl/generator_impl_function_test.cc
     writer/msl/generator_impl_identifier_test.cc
     writer/msl/generator_impl_return_test.cc

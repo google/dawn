@@ -15,6 +15,7 @@
 #include "src/writer/msl/generator_impl.h"
 
 #include "src/ast/assignment_statement.h"
+#include "src/ast/binary_expression.h"
 #include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/return_statement.h"
@@ -66,7 +67,91 @@ bool GeneratorImpl::EmitAssign(ast::AssignmentStatement* stmt) {
   return true;
 }
 
+bool GeneratorImpl::EmitBinary(ast::BinaryExpression* expr) {
+  out_ << "(";
+
+  if (!EmitExpression(expr->lhs())) {
+    return false;
+  }
+  out_ << " ";
+
+  switch (expr->op()) {
+    case ast::BinaryOp::kAnd:
+      out_ << "&";
+      break;
+    case ast::BinaryOp::kOr:
+      out_ << "|";
+      break;
+    case ast::BinaryOp::kXor:
+      out_ << "^";
+      break;
+    case ast::BinaryOp::kLogicalAnd:
+      out_ << "&&";
+      break;
+    case ast::BinaryOp::kLogicalOr:
+      out_ << "||";
+      break;
+    case ast::BinaryOp::kEqual:
+      out_ << "==";
+      break;
+    case ast::BinaryOp::kNotEqual:
+      out_ << "!=";
+      break;
+    case ast::BinaryOp::kLessThan:
+      out_ << "<";
+      break;
+    case ast::BinaryOp::kGreaterThan:
+      out_ << ">";
+      break;
+    case ast::BinaryOp::kLessThanEqual:
+      out_ << "<=";
+      break;
+    case ast::BinaryOp::kGreaterThanEqual:
+      out_ << ">=";
+      break;
+    case ast::BinaryOp::kShiftLeft:
+      out_ << "<<";
+      break;
+    case ast::BinaryOp::kShiftRight:
+      // TODO(dsinclair): MSL is based on C++14, and >> in C++14 has
+      // implementation-defined behaviour for negative LHS.  We may have to
+      // generate extra code to implement WGSL-specified behaviour for negative
+      // LHS.
+      out_ << ">>";
+      break;
+    case ast::BinaryOp::kAdd:
+      out_ << "+";
+      break;
+    case ast::BinaryOp::kSubtract:
+      out_ << "-";
+      break;
+    case ast::BinaryOp::kMultiply:
+      out_ << "*";
+      break;
+    case ast::BinaryOp::kDivide:
+      out_ << "/";
+      break;
+    case ast::BinaryOp::kModulo:
+      out_ << "%";
+      break;
+    case ast::BinaryOp::kNone:
+      error_ = "missing binary operation type";
+      return false;
+  }
+  out_ << " ";
+
+  if (!EmitExpression(expr->rhs())) {
+    return false;
+  }
+
+  out_ << ")";
+  return true;
+}
+
 bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
+  if (expr->IsBinary()) {
+    return EmitBinary(expr->AsBinary());
+  }
   if (expr->IsIdentifier()) {
     return EmitIdentifier(expr->AsIdentifier());
   }

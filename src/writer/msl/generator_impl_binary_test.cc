@@ -17,11 +17,11 @@
 #include "gtest/gtest.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/identifier_expression.h"
-#include "src/writer/wgsl/generator_impl.h"
+#include "src/writer/msl/generator_impl.h"
 
 namespace tint {
 namespace writer {
-namespace wgsl {
+namespace msl {
 namespace {
 
 struct BinaryData {
@@ -32,8 +32,8 @@ inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
   out << data.op;
   return out;
 }
-using BinaryTest = testing::TestWithParam<BinaryData>;
-TEST_P(BinaryTest, Emit) {
+using MslBinaryTest = testing::TestWithParam<BinaryData>;
+TEST_P(MslBinaryTest, Emit) {
   auto params = GetParam();
 
   auto left = std::make_unique<ast::IdentifierExpression>("left");
@@ -46,8 +46,8 @@ TEST_P(BinaryTest, Emit) {
   EXPECT_EQ(g.result(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
-    WgslGeneratorImplTest,
-    BinaryTest,
+    MslGeneratorImplTest,
+    MslBinaryTest,
     testing::Values(
         BinaryData{"(left & right)", ast::BinaryOp::kAnd},
         BinaryData{"(left | right)", ast::BinaryOp::kOr},
@@ -69,6 +69,6 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"(left % right)", ast::BinaryOp::kModulo}));
 
 }  // namespace
-}  // namespace wgsl
+}  // namespace msl
 }  // namespace writer
 }  // namespace tint
