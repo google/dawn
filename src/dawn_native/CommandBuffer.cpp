@@ -51,6 +51,17 @@ namespace dawn_native {
         return false;
     }
 
+    SubresourceRange GetSubresourcesAffectedByCopy(const TextureCopy& copy,
+                                                   const Extent3D& copySize) {
+        switch (copy.texture->GetDimension()) {
+            case wgpu::TextureDimension::e2D:
+                return {copy.mipLevel, 1, copy.origin.z, copySize.depth};
+            default:
+                UNREACHABLE();
+                return {};
+        }
+    }
+
     void LazyClearRenderPassAttachments(BeginRenderPassCmd* renderPass) {
         for (uint32_t i : IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
             auto& attachmentInfo = renderPass->colorAttachments[i];

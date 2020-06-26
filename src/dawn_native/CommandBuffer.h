@@ -20,10 +20,12 @@
 #include "dawn_native/Forward.h"
 #include "dawn_native/ObjectBase.h"
 #include "dawn_native/PassResourceUsage.h"
+#include "dawn_native/Texture.h"
 
 namespace dawn_native {
 
     struct BeginRenderPassCmd;
+    struct TextureCopy;
 
     class CommandBufferBase : public ObjectBase {
       public:
@@ -37,9 +39,12 @@ namespace dawn_native {
 
         CommandBufferResourceUsage mResourceUsages;
     };
+
     bool IsCompleteSubresourceCopiedTo(const TextureBase* texture,
                                        const Extent3D copySize,
                                        const uint32_t mipLevel);
+    SubresourceRange GetSubresourcesAffectedByCopy(const TextureCopy& copy,
+                                                   const Extent3D& copySize);
 
     void LazyClearRenderPassAttachments(BeginRenderPassCmd* renderPass);
 

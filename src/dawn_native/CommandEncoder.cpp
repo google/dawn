@@ -737,13 +737,8 @@ namespace dawn_native {
             copy->source.rowsPerImage = defaultedRowsPerImage;
             copy->destination.texture = destination->texture;
             copy->destination.origin = destination->origin;
-            copy->copySize = *copySize;
             copy->destination.mipLevel = destination->mipLevel;
-            copy->destination.arrayLayer = destination->arrayLayer;
-
-            // TODO(cwallez@chromium.org): Make backends use origin.z instead of arrayLayer
-            copy->destination.arrayLayer = copy->destination.origin.z;
-            copy->destination.origin.z = 0;
+            copy->copySize = *copySize;
 
             return {};
         });
@@ -803,17 +798,12 @@ namespace dawn_native {
                 allocator->Allocate<CopyTextureToBufferCmd>(Command::CopyTextureToBuffer);
             copy->source.texture = source->texture;
             copy->source.origin = source->origin;
-            copy->copySize = *copySize;
             copy->source.mipLevel = source->mipLevel;
-            copy->source.arrayLayer = source->arrayLayer;
             copy->destination.buffer = destination->buffer;
             copy->destination.offset = destination->offset;
             copy->destination.bytesPerRow = destination->bytesPerRow;
             copy->destination.rowsPerImage = defaultedRowsPerImage;
-
-            // TODO(cwallez@chromium.org): Make backends use origin.z instead of arrayLayer
-            copy->source.arrayLayer = copy->source.origin.z;
-            copy->source.origin.z = 0;
+            copy->copySize = *copySize;
 
             return {};
         });
@@ -860,18 +850,10 @@ namespace dawn_native {
             copy->source.texture = source->texture;
             copy->source.origin = source->origin;
             copy->source.mipLevel = source->mipLevel;
-            copy->source.arrayLayer = source->arrayLayer;
             copy->destination.texture = destination->texture;
             copy->destination.origin = destination->origin;
             copy->destination.mipLevel = destination->mipLevel;
-            copy->destination.arrayLayer = destination->arrayLayer;
             copy->copySize = *copySize;
-
-            // TODO(cwallez@chromium.org): Make backends use origin.z instead of arrayLayer
-            copy->source.arrayLayer = copy->source.origin.z;
-            copy->source.origin.z = 0;
-            copy->destination.arrayLayer = copy->destination.origin.z;
-            copy->destination.origin.z = 0;
 
             return {};
         });

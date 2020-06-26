@@ -70,21 +70,21 @@ namespace dawn_native { namespace vulkan {
                    dstTexture->GetDimension() == wgpu::TextureDimension::e2D);
             region.srcSubresource.aspectMask = srcTexture->GetVkAspectMask();
             region.srcSubresource.mipLevel = srcCopy.mipLevel;
-            region.srcSubresource.baseArrayLayer = srcCopy.arrayLayer;
+            region.srcSubresource.baseArrayLayer = srcCopy.origin.z;
             region.srcSubresource.layerCount = copySize.depth;
 
             region.srcOffset.x = srcCopy.origin.x;
             region.srcOffset.y = srcCopy.origin.y;
-            region.srcOffset.z = srcCopy.origin.z;
+            region.srcOffset.z = 0;
 
             region.dstSubresource.aspectMask = dstTexture->GetVkAspectMask();
             region.dstSubresource.mipLevel = dstCopy.mipLevel;
-            region.dstSubresource.baseArrayLayer = dstCopy.arrayLayer;
+            region.dstSubresource.baseArrayLayer = dstCopy.origin.z;
             region.dstSubresource.layerCount = copySize.depth;
 
             region.dstOffset.x = dstCopy.origin.x;
             region.dstOffset.y = dstCopy.origin.y;
-            region.dstOffset.z = dstCopy.origin.z;
+            region.dstOffset.z = 0;
 
             ASSERT(HasSameTextureCopyExtent(srcCopy, dstCopy, copySize));
             Extent3D imageExtent = ComputeTextureCopyExtent(dstCopy, copySize);
@@ -507,10 +507,8 @@ namespace dawn_native { namespace vulkan {
                         mCommands.NextCommand<CopyTextureToTextureCmd>();
                     TextureCopy& src = copy->source;
                     TextureCopy& dst = copy->destination;
-                    SubresourceRange srcRange = {src.mipLevel, 1, src.arrayLayer,
-                                                 copy->copySize.depth};
-                    SubresourceRange dstRange = {dst.mipLevel, 1, dst.arrayLayer,
-                                                 copy->copySize.depth};
+                    SubresourceRange srcRange = GetSubresourcesAffectedByCopy(src, copy->copySize);
+                    SubresourceRange dstRange = GetSubresourcesAffectedByCopy(dst, copy->copySize);
 
                     ToBackend(src.texture)
                         ->EnsureSubresourceContentInitialized(recordingContext, srcRange);
@@ -528,10 +526,11 @@ namespace dawn_native { namespace vulkan {
                         // subresources should all be GENERAL instead of what we set now. Currently
                         // it is not allowed to copy with overlapped subresources, but we still
                         // add the ASSERT here as a reminder for this possible misuse.
-                        ASSERT(!IsRangeOverlapped(src.arrayLayer, dst.arrayLayer,
-                                                  copy->copySize.depth));
+                        ASSERT(
+                            !IsRangeOverlapped(src.origin.z, dst.origin.z, copy->copySize.depth));
                     }
 
+                    // TODO after Yunchao's CL
                     ToBackend(src.texture)
                         ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopySrc,
                                              srcRange);

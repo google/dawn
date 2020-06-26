@@ -669,10 +669,6 @@ TEST_P(CopyTests_T2B, RowPitchUnaligned) {
 
 // Test that copying whole texture 2D array layers in one texture-to-buffer-copy works.
 TEST_P(CopyTests_T2B, Texture2DArrayRegion) {
-    // TODO(jiawei.shao@intel.com): investigate why copies with multiple texture array layer fail
-    // with swiftshader.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 6u;
@@ -687,10 +683,6 @@ TEST_P(CopyTests_T2B, Texture2DArrayRegion) {
 
 // Test that copying a range of texture 2D array layers in one texture-to-buffer-copy works.
 TEST_P(CopyTests_T2B, Texture2DArraySubRegion) {
-    // TODO(jiawei.shao@intel.com): investigate why copies with multiple texture array layer fail
-    // with swiftshader.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 6u;
@@ -1044,10 +1036,6 @@ TEST_P(CopyTests_B2T, RowPitchUnaligned) {
 
 // Test that copying whole texture 2D array layers in one texture-to-buffer-copy works.
 TEST_P(CopyTests_B2T, Texture2DArrayRegion) {
-    // TODO(jiawei.shao@intel.com): investigate why copies with multiple texture array layers fail
-    // with swiftshader.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 6u;
@@ -1062,10 +1050,6 @@ TEST_P(CopyTests_B2T, Texture2DArrayRegion) {
 
 // Test that copying a range of texture 2D array layers in one texture-to-buffer-copy works.
 TEST_P(CopyTests_B2T, Texture2DArraySubRegion) {
-    // TODO(jiawei.shao@intel.com): investigate why copies with multiple texture array layers fail
-    // with swiftshader.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 6u;

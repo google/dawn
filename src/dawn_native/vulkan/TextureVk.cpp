@@ -939,9 +939,8 @@ namespace dawn_native { namespace vulkan {
 
                     dawn_native::TextureCopy textureCopy;
                     textureCopy.texture = this;
-                    textureCopy.origin = {0, 0, 0};
+                    textureCopy.origin = {0, 0, layer};
                     textureCopy.mipLevel = level;
-                    textureCopy.arrayLayer = layer;
 
                     VkBufferImageCopy region =
                         ComputeBufferImageCopyRegion(bufferCopy, textureCopy, copySize);
