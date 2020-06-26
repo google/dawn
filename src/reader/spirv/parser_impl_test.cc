@@ -45,7 +45,79 @@ TEST_F(SpvParserTest, Impl_InvalidModuleFails) {
   EXPECT_THAT(p->error(), HasSubstr("OpTypeInt 3 0"));
 }
 
-// TODO(dneto): uint32 vec, valid SPIR-V
+TEST_F(SpvParserTest, Impl_GenericVulkanShader_SimpleMemoryModel) {
+  auto spv = test::Assemble(R"(
+  OpCapability Shader
+  OpMemoryModel Logical Simple
+  OpEntryPoint GLCompute %main "main"
+  OpExecutionMode %main LocalSize 1 1 1
+  %void = OpTypeVoid
+  %voidfn = OpTypeFunction %void
+  %main = OpFunction %void None %voidfn
+  %entry = OpLabel
+  OpReturn
+  OpFunctionEnd
+)");
+  auto* p = parser(spv);
+  EXPECT_TRUE(p->Parse());
+  EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, Impl_GenericVulkanShader_GLSL450MemoryModel) {
+  auto spv = test::Assemble(R"(
+  OpCapability Shader
+  OpMemoryModel Logical GLSL450
+  OpEntryPoint GLCompute %main "main"
+  OpExecutionMode %main LocalSize 1 1 1
+  %void = OpTypeVoid
+  %voidfn = OpTypeFunction %void
+  %main = OpFunction %void None %voidfn
+  %entry = OpLabel
+  OpReturn
+  OpFunctionEnd
+)");
+  auto* p = parser(spv);
+  EXPECT_TRUE(p->Parse());
+  EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, Impl_GenericVulkanShader_VulkanMemoryModel) {
+  auto spv = test::Assemble(R"(
+  OpCapability Shader
+  OpCapability VulkanMemoryModelKHR
+  OpExtension "SPV_KHR_vulkan_memory_model"
+  OpMemoryModel Logical VulkanKHR
+  OpEntryPoint GLCompute %main "main"
+  OpExecutionMode %main LocalSize 1 1 1
+  %void = OpTypeVoid
+  %voidfn = OpTypeFunction %void
+  %main = OpFunction %void None %voidfn
+  %entry = OpLabel
+  OpReturn
+  OpFunctionEnd
+)");
+  auto* p = parser(spv);
+  EXPECT_TRUE(p->Parse());
+  EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpvParserTest, Impl_OpenCLKernel_Fails) {
+  auto spv = test::Assemble(R"(
+  OpCapability Kernel
+  OpCapability Addresses
+  OpMemoryModel Physical32 OpenCL
+  OpEntryPoint Kernel %main "main"
+  %void = OpTypeVoid
+  %voidfn = OpTypeFunction %void
+  %main = OpFunction %void None %voidfn
+  %entry = OpLabel
+  OpReturn
+  OpFunctionEnd
+)");
+  auto* p = parser(spv);
+  EXPECT_FALSE(p->Parse());
+  EXPECT_THAT(p->error(), HasSubstr("Capability Kernel is not allowed"));
+}
 
 }  // namespace
 }  // namespace spirv

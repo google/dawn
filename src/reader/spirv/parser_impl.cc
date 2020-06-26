@@ -73,7 +73,11 @@ namespace spirv {
 
 namespace {
 
-const spv_target_env kTargetEnv = SPV_ENV_WEBGPU_0;
+// Input SPIR-V needs only to conform to Vulkan 1.0 requirements.
+// The combination of the SPIR-V reader and the semantics of WGSL
+// tighten up the code so that the output of the SPIR-V *writer*
+// will satisfy SPV_ENV_WEBGPU_0 validation.
+const spv_target_env kInputEnv = SPV_ENV_VULKAN_1_0;
 
 // A FunctionTraverser is used to compute an ordering of functions in the
 // module such that callees precede callers.
@@ -197,8 +201,7 @@ ParserImpl::ParserImpl(Context* ctx, const std::vector<uint32_t>& spv_binary)
       bool_type_(ctx->type_mgr().Get(std::make_unique<ast::type::BoolType>())),
       namer_(fail_stream_),
       enum_converter_(fail_stream_),
-      tools_context_(kTargetEnv),
-      tools_(kTargetEnv) {
+      tools_context_(kInputEnv) {
   // Create a message consumer to propagate error messages from SPIRV-Tools
   // out as our own failures.
   message_consumer_ = [this](spv_message_level_t level, const char* /*source*/,
@@ -222,7 +225,7 @@ ParserImpl::~ParserImpl() = default;
 
 bool ParserImpl::Parse() {
   // Set up use of SPIRV-Tools utilities.
-  spvtools::SpirvTools spv_tools(kTargetEnv);
+  spvtools::SpirvTools spv_tools(kInputEnv);
 
   // Error messages from SPIRV-Tools are forwarded as failures, including
   // setting |success_| to false.
@@ -232,8 +235,8 @@ bool ParserImpl::Parse() {
     return false;
   }
 
-  // Only consider valid modules.  On failure, the message consumer
-  // will set the error status.
+  // Only consider modules valid for Vulkan 1.0.  On failure, the message
+  // consumer will set the error status.
   if (!spv_tools.Validate(spv_binary_)) {
     return false;
   }
@@ -380,7 +383,6 @@ bool ParserImpl::BuildInternalModule() {
   if (!success_) {
     return false;
   }
-  tools_.SetMessageConsumer(message_consumer_);
 
   const spv_context& context = tools_context_.CContext();
   ir_context_ = spvtools::BuildModule(context->target_env, context->consumer,

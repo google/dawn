@@ -364,7 +364,6 @@ class ParserImpl : Reader {
 
   // The internal representation of the SPIR-V module and its context.
   spvtools::Context tools_context_;
-  spvtools::SpirvTools tools_;
   // All the state is owned by ir_context_.
   std::unique_ptr<spvtools::opt::IRContext> ir_context_;
   // The following are borrowed pointers to the internal state of ir_context_.
