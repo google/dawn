@@ -12,10 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/googletest EXCLUDE_FROM_ALL)
+if (NOT TARGET gmock)
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/googletest EXCLUDE_FROM_ALL)
+endif()
 
 if(${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
-  set(SPIRV-Headers_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/spirv-headers CACHE STRING "")
-  set(SPIRV_SKIP_TESTS ON CACHE BOOL ON)
-  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/spirv-tools)
+  if (NOT IS_DIRECTORY "${SPIRV-Headers_SOURCE_DIR}")
+    set(SPIRV-Headers_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/spirv-headers CACHE STRING "")
+  endif()
+
+  if (NOT TARGET SPIRV-Tools)
+    set(SPIRV_SKIP_TESTS ON CACHE BOOL ON)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/spirv-tools)
+  endif()
 endif()
