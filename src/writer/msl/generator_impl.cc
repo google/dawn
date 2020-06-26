@@ -14,6 +14,7 @@
 
 #include "src/writer/msl/generator_impl.h"
 
+#include "src/ast/array_accessor_expression.h"
 #include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
@@ -59,6 +60,20 @@ bool GeneratorImpl::Generate(const ast::Module& module) {
   }
 
   module_ = nullptr;
+  return true;
+}
+
+bool GeneratorImpl::EmitArrayAccessor(ast::ArrayAccessorExpression* expr) {
+  if (!EmitExpression(expr->array())) {
+    return false;
+  }
+  out_ << "[";
+
+  if (!EmitExpression(expr->idx_expr())) {
+    return false;
+  }
+  out_ << "]";
+
   return true;
 }
 
@@ -251,6 +266,9 @@ bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
 }
 
 bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
+  if (expr->IsArrayAccessor()) {
+    return EmitArrayAccessor(expr->AsArrayAccessor());
+  }
   if (expr->IsAs()) {
     return EmitAs(expr->AsAs());
   }

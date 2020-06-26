@@ -40,6 +40,10 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true on successful generation; false otherwise
   bool Generate(const ast::Module& module);
 
+  /// Handles an array accessor expression
+  /// @param expr the expression to emit
+  /// @returns true if the array accessor was emitted
+  bool EmitArrayAccessor(ast::ArrayAccessorExpression* expr);
   /// Handles generating an as expression
   /// @param expr the as expression
   /// @returns true if the as was emitted
