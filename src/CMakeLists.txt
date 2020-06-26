@@ -504,6 +504,7 @@ if(${TINT_BUILD_MSL_WRITER})
     writer/msl/generator_impl_return_test.cc
     writer/msl/generator_impl_test.cc
     writer/msl/generator_impl_type_test.cc
+    writer/msl/generator_impl_unary_op_test.cc
   )
 endif()
 

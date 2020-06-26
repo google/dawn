@@ -120,6 +120,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the type constructor expression
   /// @returns true if the constructor is emitted
   bool EmitTypeConstructor(ast::TypeConstructorExpression* expr);
+  /// Handles a unary op expression
+  /// @param expr the expression to emit
+  /// @returns true if the expression was emitted
+  bool EmitUnaryOp(ast::UnaryOpExpression* expr);
 
  private:
   const ast::Module* module_ = nullptr;

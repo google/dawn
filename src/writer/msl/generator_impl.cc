@@ -38,6 +38,7 @@
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type/void_type.h"
 #include "src/ast/uint_literal.h"
+#include "src/ast/unary_op_expression.h"
 
 namespace tint {
 namespace writer {
@@ -264,6 +265,9 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   }
   if (expr->IsIdentifier()) {
     return EmitIdentifier(expr->AsIdentifier());
+  }
+  if (expr->IsUnaryOp()) {
+    return EmitUnaryOp(expr->AsUnaryOp());
   }
 
   error_ = "unknown expression type";
@@ -531,6 +535,26 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
     error_ = "unknown type in EmitType";
     return false;
   }
+
+  return true;
+}
+
+bool GeneratorImpl::EmitUnaryOp(ast::UnaryOpExpression* expr) {
+  switch (expr->op()) {
+    case ast::UnaryOp::kNot:
+      out_ << "!";
+      break;
+    case ast::UnaryOp::kNegation:
+      out_ << "-";
+      break;
+  }
+  out_ << "(";
+
+  if (!EmitExpression(expr->expr())) {
+    return false;
+  }
+
+  out_ << ")";
 
   return true;
 }

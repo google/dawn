@@ -18,11 +18,11 @@
 #include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/unary_op_expression.h"
-#include "src/writer/wgsl/generator_impl.h"
+#include "src/writer/msl/generator_impl.h"
 
 namespace tint {
 namespace writer {
-namespace wgsl {
+namespace msl {
 namespace {
 
 struct UnaryOpData {
@@ -33,8 +33,8 @@ inline std::ostream& operator<<(std::ostream& out, UnaryOpData data) {
   out << data.op;
   return out;
 }
-using WgslUnaryOpTest = testing::TestWithParam<UnaryOpData>;
-TEST_P(WgslUnaryOpTest, Emit) {
+using MslUnaryOpTest = testing::TestWithParam<UnaryOpData>;
+TEST_P(MslUnaryOpTest, Emit) {
   auto params = GetParam();
 
   auto expr = std::make_unique<ast::IdentifierExpression>("expr");
@@ -44,13 +44,13 @@ TEST_P(WgslUnaryOpTest, Emit) {
   ASSERT_TRUE(g.EmitExpression(&op)) << g.error();
   EXPECT_EQ(g.result(), std::string(params.name) + "(expr)");
 }
-INSTANTIATE_TEST_SUITE_P(WgslGeneratorImplTest,
-                         WgslUnaryOpTest,
+INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
+                         MslUnaryOpTest,
                          testing::Values(UnaryOpData{"!", ast::UnaryOp::kNot},
                                          UnaryOpData{"-",
                                                      ast::UnaryOp::kNegation}));
 
 }  // namespace
-}  // namespace wgsl
+}  // namespace msl
 }  // namespace writer
 }  // namespace tint
