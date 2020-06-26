@@ -347,6 +347,14 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
   return true;
 }
 
+bool GeneratorImpl::EmitKill(ast::KillStatement*) {
+  make_indent();
+  // TODO(dsinclair): Verify this is correct when the kill semantics are defined
+  // for WGSL (https://github.com/gpuweb/gpuweb/issues/361)
+  out_ << "discard_fragment();" << std::endl;
+  return true;
+}
+
 bool GeneratorImpl::EmitElse(ast::ElseStatement* stmt) {
   if (stmt->HasCondition()) {
     out_ << " else if (";
@@ -430,6 +438,9 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   }
   if (stmt->IsIf()) {
     return EmitIf(stmt->AsIf());
+  }
+  if (stmt->IsKill()) {
+    return EmitKill(stmt->AsKill());
   }
   if (stmt->IsReturn()) {
     return EmitReturn(stmt->AsReturn());

@@ -80,6 +80,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
   bool EmitIf(ast::IfStatement* stmt);
+  /// Handles generating a kill statement
+  /// @param stmt the kill statement
+  /// @returns true if the statement was successfully emitted
+  bool EmitKill(ast::KillStatement* stmt);
   /// Handles a literal
   /// @param lit the literal to emit
   /// @returns true if the literal was successfully emitted
