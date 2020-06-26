@@ -19,9 +19,11 @@
 #include "src/ast/binary_expression.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/cast_expression.h"
+#include "src/ast/else_statement.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/if_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/type/alias_type.h"
@@ -345,6 +347,42 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
   return true;
 }
 
+bool GeneratorImpl::EmitElse(ast::ElseStatement* stmt) {
+  if (stmt->HasCondition()) {
+    out_ << " else if (";
+    if (!EmitExpression(stmt->condition())) {
+      return false;
+    }
+    out_ << ")";
+  } else {
+    out_ << " else";
+  }
+
+  return EmitStatementBlock(stmt->body());
+}
+
+bool GeneratorImpl::EmitIf(ast::IfStatement* stmt) {
+  make_indent();
+
+  out_ << "if (";
+  if (!EmitExpression(stmt->condition())) {
+    return false;
+  }
+  out_ << ")";
+
+  if (!EmitStatementBlock(stmt->body())) {
+    return false;
+  }
+
+  for (const auto& e : stmt->else_statements()) {
+    if (!EmitElse(e.get())) {
+      return false;
+    }
+  }
+  out_ << std::endl;
+
+  return true;
+}
 bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
   make_indent();
 
@@ -389,6 +427,9 @@ bool GeneratorImpl::EmitStatementBlockAndNewline(
 bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsAssign()) {
     return EmitAssign(stmt->AsAssign());
+  }
+  if (stmt->IsIf()) {
+    return EmitIf(stmt->AsIf());
   }
   if (stmt->IsReturn()) {
     return EmitReturn(stmt->AsReturn());

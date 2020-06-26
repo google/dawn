@@ -472,7 +472,6 @@ if(${TINT_BUILD_WGSL_WRITER})
     writer/wgsl/generator_impl_cast_test.cc
     writer/wgsl/generator_impl_constructor_test.cc
     writer/wgsl/generator_impl_continue_test.cc
-    writer/wgsl/generator_impl_else_test.cc
     writer/wgsl/generator_impl_entry_point_test.cc
     writer/wgsl/generator_impl_fallthrough_test.cc
     writer/wgsl/generator_impl_function_test.cc
@@ -500,6 +499,7 @@ if(${TINT_BUILD_MSL_WRITER})
     writer/msl/generator_impl_constructor_test.cc
     writer/msl/generator_impl_function_test.cc
     writer/msl/generator_impl_identifier_test.cc
+    writer/msl/generator_impl_if_test.cc
     writer/msl/generator_impl_return_test.cc
     writer/msl/generator_impl_test.cc
     writer/msl/generator_impl_type_test.cc
