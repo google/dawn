@@ -52,6 +52,15 @@ GeneratorImpl::~GeneratorImpl() = default;
 bool GeneratorImpl::Generate(const ast::Module& module) {
   module_ = &module;
 
+  for (auto* const alias : module.alias_types()) {
+    if (!EmitAliasType(alias)) {
+      return false;
+    }
+  }
+  if (!module.alias_types().empty()) {
+    out_ << std::endl;
+  }
+
   for (const auto& func : module.functions()) {
     if (!EmitFunction(func.get())) {
       return false;
@@ -60,6 +69,17 @@ bool GeneratorImpl::Generate(const ast::Module& module) {
   }
 
   module_ = nullptr;
+  return true;
+}
+
+bool GeneratorImpl::EmitAliasType(const ast::type::AliasType* alias) {
+  make_indent();
+  out_ << "typedef ";
+  if (!EmitType(alias->type(), "")) {
+    return false;
+  }
+  out_ << " " << alias->name() << ";" << std::endl;
+
   return true;
 }
 
@@ -531,7 +551,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
       }
       // Array member name will be output with the type
       if (!mem->type()->IsArray()) {
-        out_ << mem->name();
+        out_ << " " << mem->name();
       }
       out_ << ";" << std::endl;
     }
