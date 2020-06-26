@@ -18,6 +18,7 @@
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/bool_literal.h"
+#include "src/ast/cast_expression.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
@@ -141,8 +142,9 @@ bool GeneratorImpl::EmitBinary(ast::BinaryExpression* expr) {
       // implementation-defined behaviour for negative LHS.  We may have to
       // generate extra code to implement WGSL-specified behaviour for negative
       // LHS.
-      out_ << ">>";
+      out_ << R"(>>)";
       break;
+
     case ast::BinaryOp::kAdd:
       out_ << "+";
       break;
@@ -168,6 +170,19 @@ bool GeneratorImpl::EmitBinary(ast::BinaryExpression* expr) {
     return false;
   }
 
+  out_ << ")";
+  return true;
+}
+
+bool GeneratorImpl::EmitCast(ast::CastExpression* expr) {
+  if (!EmitType(expr->type(), "")) {
+    return false;
+  }
+
+  out_ << "(";
+  if (!EmitExpression(expr->expr())) {
+    return false;
+  }
   out_ << ")";
   return true;
 }
@@ -238,6 +253,9 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   }
   if (expr->IsBinary()) {
     return EmitBinary(expr->AsBinary());
+  }
+  if (expr->IsCast()) {
+    return EmitCast(expr->AsCast());
   }
   if (expr->IsConstructor()) {
     return EmitConstructor(expr->AsConstructor());

@@ -52,6 +52,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the binary expression
   /// @returns true if the expression was emitted, false otherwise
   bool EmitBinary(ast::BinaryExpression* expr);
+  /// Handles generating a cast expression
+  /// @param expr the cast expression
+  /// @returns true if the cast was emitted
+  bool EmitCast(ast::CastExpression* expr);
   /// Handles generating constructor expressions
   /// @param expr the constructor expression
   /// @returns true if the expression was emitted

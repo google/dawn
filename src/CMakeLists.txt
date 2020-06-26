@@ -496,6 +496,7 @@ if(${TINT_BUILD_MSL_WRITER})
     writer/msl/generator_impl_as_test.cc
     writer/msl/generator_impl_assign_test.cc
     writer/msl/generator_impl_binary_test.cc
+    writer/msl/generator_impl_cast_test.cc
     writer/msl/generator_impl_constructor_test.cc
     writer/msl/generator_impl_function_test.cc
     writer/msl/generator_impl_identifier_test.cc
