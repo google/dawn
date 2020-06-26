@@ -14,6 +14,7 @@
 
 #include "src/writer/msl/generator_impl.h"
 
+#include "src/ast/as_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/bool_literal.h"
@@ -54,6 +55,21 @@ bool GeneratorImpl::Generate(const ast::Module& module) {
   }
 
   module_ = nullptr;
+  return true;
+}
+
+bool GeneratorImpl::EmitAs(ast::AsExpression* expr) {
+  out_ << "as_type<";
+  if (!EmitType(expr->type(), "")) {
+    return false;
+  }
+
+  out_ << ">(";
+  if (!EmitExpression(expr->expr())) {
+    return false;
+  }
+
+  out_ << ")";
   return true;
 }
 
@@ -217,6 +233,9 @@ bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
 }
 
 bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
+  if (expr->IsAs()) {
+    return EmitAs(expr->AsAs());
+  }
   if (expr->IsBinary()) {
     return EmitBinary(expr->AsBinary());
   }

@@ -40,6 +40,10 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true on successful generation; false otherwise
   bool Generate(const ast::Module& module);
 
+  /// Handles generating an as expression
+  /// @param expr the as expression
+  /// @returns true if the as was emitted
+  bool EmitAs(ast::AsExpression* expr);
   /// Handles an assignment statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully

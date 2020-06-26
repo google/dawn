@@ -885,6 +885,7 @@ source_set("tint_unittests_wgsl_writer_src") {
 
 source_set("tint_unittests_msl_writer_src") {
   sources = [
+    "src/writer/msl/generator_impl_as_test.cc",
     "src/writer/msl/generator_impl_assign_test.cc",
     "src/writer/msl/generator_impl_binary_test.cc",
     "src/writer/msl/generator_impl_constructor_test.cc",
