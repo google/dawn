@@ -25,6 +25,7 @@
 #include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/type/alias_type.h"
@@ -304,6 +305,9 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   if (expr->IsIdentifier()) {
     return EmitIdentifier(expr->AsIdentifier());
   }
+  if (expr->IsMemberAccessor()) {
+    return EmitMemberAccessor(expr->AsMemberAccessor());
+  }
   if (expr->IsUnaryOp()) {
     return EmitUnaryOp(expr->AsUnaryOp());
   }
@@ -433,6 +437,17 @@ bool GeneratorImpl::EmitIf(ast::IfStatement* stmt) {
 
   return true;
 }
+
+bool GeneratorImpl::EmitMemberAccessor(ast::MemberAccessorExpression* expr) {
+  if (!EmitExpression(expr->structure())) {
+    return false;
+  }
+
+  out_ << ".";
+
+  return EmitExpression(expr->member());
+}
+
 bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
   make_indent();
 
