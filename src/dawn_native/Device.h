@@ -112,6 +112,8 @@ namespace dawn_native {
             const BindGroupLayoutDescriptor* descriptor);
         void UncacheBindGroupLayout(BindGroupLayoutBase* obj);
 
+        ResultOrError<BindGroupLayoutBase*> GetOrCreateEmptyBindGroupLayout();
+
         ResultOrError<ComputePipelineBase*> GetOrCreateComputePipeline(
             const ComputePipelineDescriptor* descriptor);
         void UncacheComputePipeline(ComputePipelineBase* obj);
@@ -339,6 +341,8 @@ namespace dawn_native {
         // additional includes.
         struct Caches;
         std::unique_ptr<Caches> mCaches;
+
+        Ref<BindGroupLayoutBase> mEmptyBindGroupLayout;
 
         std::unique_ptr<DynamicUploader> mDynamicUploader;
         std::unique_ptr<ErrorScopeTracker> mErrorScopeTracker;

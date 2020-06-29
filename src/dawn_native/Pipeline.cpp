@@ -91,19 +91,10 @@ namespace dawn_native {
         }
 
         BindGroupIndex groupIndex(groupIndexIn);
-        if (!mLayout->GetBindGroupLayoutsMask()[groupIndex]) {
-            // Get or create an empty bind group layout.
-            // TODO(enga): Consider caching this object on the Device and reusing it.
-            // Today, this can't be done correctly because of the order of Device destruction.
-            // For example, vulkan::~Device will be called before ~DeviceBase. If DeviceBase owns
-            // a Ref<BindGroupLayoutBase>, then the VkDevice will be destroyed before the
-            // VkDescriptorSetLayout.
-            BindGroupLayoutDescriptor desc = {};
-            desc.entryCount = 0;
-            desc.entries = nullptr;
 
+        if (!mLayout->GetBindGroupLayoutsMask()[groupIndex]) {
             BindGroupLayoutBase* bgl = nullptr;
-            if (GetDevice()->ConsumedError(GetDevice()->GetOrCreateBindGroupLayout(&desc), &bgl)) {
+            if (GetDevice()->ConsumedError(GetDevice()->GetOrCreateEmptyBindGroupLayout(), &bgl)) {
                 return BindGroupLayoutBase::MakeError(GetDevice());
             }
             return bgl;

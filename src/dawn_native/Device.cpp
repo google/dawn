@@ -169,6 +169,8 @@ namespace dawn_native {
         mDynamicUploader = nullptr;
         mMapRequestTracker = nullptr;
 
+        mEmptyBindGroupLayout = nullptr;
+
         AssumeCommandsComplete();
         // Tell the backend that it can free all the objects now that the GPU timeline is empty.
         ShutDownImpl();
@@ -409,6 +411,24 @@ namespace dawn_native {
         ASSERT(obj->IsCachedReference());
         size_t removedCount = mCaches->bindGroupLayouts.erase(obj);
         ASSERT(removedCount == 1);
+    }
+
+    ResultOrError<BindGroupLayoutBase*> DeviceBase::GetOrCreateEmptyBindGroupLayout() {
+        if (!mEmptyBindGroupLayout) {
+            BindGroupLayoutDescriptor desc = {};
+            desc.entryCount = 0;
+            desc.entries = nullptr;
+
+            BindGroupLayoutBase* bgl = nullptr;
+            if (ConsumedError(GetOrCreateBindGroupLayout(&desc), &bgl)) {
+                return BindGroupLayoutBase::MakeError(this);
+            }
+            mEmptyBindGroupLayout = bgl;
+            return bgl;
+        } else {
+            mEmptyBindGroupLayout->Reference();
+            return mEmptyBindGroupLayout.Get();
+        }
     }
 
     ResultOrError<ComputePipelineBase*> DeviceBase::GetOrCreateComputePipeline(
