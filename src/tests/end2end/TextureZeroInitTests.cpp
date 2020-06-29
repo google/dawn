@@ -133,10 +133,6 @@ TEST_P(TextureZeroInitTest, CopyTextureToBufferSource) {
 // This tests that the code path of CopyTextureToBuffer with multiple texture array layers clears
 // correctly to Zero after first usage
 TEST_P(TextureZeroInitTest, CopyMultipleTextureArrayLayersToBufferSource) {
-    // TODO(jiawei.shao@intel.com): investigate why copies with multiple texture array layers fail
-    // with swiftshader.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-
     constexpr uint32_t kArrayLayers = 6u;
 
     const wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
@@ -328,10 +324,6 @@ TEST_P(TextureZeroInitTest, CopyBufferToTextureHalf) {
 // This tests CopyBufferToTexture fully overwrites a range of subresources, so lazy initialization
 // is needed for neither the subresources involved in the copy nor the other subresources.
 TEST_P(TextureZeroInitTest, CopyBufferToTextureMultipleArrayLayers) {
-    // TODO(jiawei.shao@intel.com): investigate why copies with multiple texture array layers fail
-    // with swiftshader.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-
     wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
         1, 6, wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc, kColorFormat);
     wgpu::Texture texture = device.CreateTexture(&descriptor);
