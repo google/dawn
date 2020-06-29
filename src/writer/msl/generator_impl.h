@@ -60,6 +60,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the binary expression
   /// @returns true if the expression was emitted, false otherwise
   bool EmitBinary(ast::BinaryExpression* expr);
+  /// Handles a break statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted successfully
+  bool EmitBreak(ast::BreakStatement* stmt);
   /// Handles generating a cast expression
   /// @param expr the cast expression
   /// @returns true if the cast was emitted
@@ -68,6 +72,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the constructor expression
   /// @returns true if the expression was emitted
   bool EmitConstructor(ast::ConstructorExpression* expr);
+  /// Handles a continue statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted successfully
+  bool EmitContinue(ast::ContinueStatement* stmt);
   /// Handles generating an else statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted

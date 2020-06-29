@@ -19,7 +19,9 @@
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/bool_literal.h"
+#include "src/ast/break_statement.h"
 #include "src/ast/cast_expression.h"
+#include "src/ast/continue_statement.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/function.h"
@@ -213,6 +215,12 @@ bool GeneratorImpl::EmitBinary(ast::BinaryExpression* expr) {
   return true;
 }
 
+bool GeneratorImpl::EmitBreak(ast::BreakStatement*) {
+  make_indent();
+  out_ << "break;" << std::endl;
+  return true;
+}
+
 bool GeneratorImpl::EmitCast(ast::CastExpression* expr) {
   if (!EmitType(expr->type(), "")) {
     return false;
@@ -231,6 +239,12 @@ bool GeneratorImpl::EmitConstructor(ast::ConstructorExpression* expr) {
     return EmitScalarConstructor(expr->AsScalarConstructor());
   }
   return EmitTypeConstructor(expr->AsTypeConstructor());
+}
+
+bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
+  make_indent();
+  out_ << "continue;" << std::endl;
+  return true;
 }
 
 bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
@@ -492,6 +506,12 @@ bool GeneratorImpl::EmitStatementBlockAndNewline(
 bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsAssign()) {
     return EmitAssign(stmt->AsAssign());
+  }
+  if (stmt->IsBreak()) {
+    return EmitBreak(stmt->AsBreak());
+  }
+  if (stmt->IsContinue()) {
+    return EmitContinue(stmt->AsContinue());
   }
   if (stmt->IsIf()) {
     return EmitIf(stmt->AsIf());
