@@ -209,8 +209,8 @@ namespace dawn_native { namespace null {
         return {};
     }
 
-    MaybeError Device::IncrementMemoryUsage(size_t bytes) {
-        static_assert(kMaxMemoryUsage <= std::numeric_limits<size_t>::max() / 2, "");
+    MaybeError Device::IncrementMemoryUsage(uint64_t bytes) {
+        static_assert(kMaxMemoryUsage <= std::numeric_limits<size_t>::max(), "");
         if (bytes > kMaxMemoryUsage || mMemoryUsage + bytes > kMaxMemoryUsage) {
             return DAWN_OUT_OF_MEMORY_ERROR("Out of memory.");
         }
@@ -218,7 +218,7 @@ namespace dawn_native { namespace null {
         return {};
     }
 
-    void Device::DecrementMemoryUsage(size_t bytes) {
+    void Device::DecrementMemoryUsage(uint64_t bytes) {
         ASSERT(mMemoryUsage >= bytes);
         mMemoryUsage -= bytes;
     }

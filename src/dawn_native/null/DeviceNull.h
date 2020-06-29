@@ -106,8 +106,8 @@ namespace dawn_native { namespace null {
                                            uint64_t destinationOffset,
                                            uint64_t size) override;
 
-        MaybeError IncrementMemoryUsage(size_t bytes);
-        void DecrementMemoryUsage(size_t bytes);
+        MaybeError IncrementMemoryUsage(uint64_t bytes);
+        void DecrementMemoryUsage(uint64_t bytes);
 
       private:
         using DeviceBase::DeviceBase;
@@ -147,7 +147,7 @@ namespace dawn_native { namespace null {
 
         std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;
 
-        static constexpr size_t kMaxMemoryUsage = 256 * 1024 * 1024;
+        static constexpr uint64_t kMaxMemoryUsage = 256 * 1024 * 1024;
         size_t mMemoryUsage = 0;
     };
 
