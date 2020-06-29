@@ -22,6 +22,7 @@
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/u32_type.h"
+#include "src/ast/type/vector_type.h"
 #include "src/ast/uint_literal.h"
 #include "src/context.h"
 #include "src/type_determiner.h"
@@ -326,6 +327,224 @@ TEST_F(BuilderTest, Cast_F32ToF32) {
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             R"(%1 = OpCopyObject %2 %3
+)");
+}
+
+TEST_F(BuilderTest, Cast_Vectors_I32_to_F32) {
+  ast::type::I32Type i32;
+  ast::type::VectorType ivec3(&i32, 3);
+  ast::type::F32Type f32;
+  ast::type::VectorType fvec3(&f32, 3);
+
+  auto var =
+      std::make_unique<ast::Variable>("i", ast::StorageClass::kPrivate, &ivec3);
+
+  ast::CastExpression cast(&fvec3,
+                           std::make_unique<ast::IdentifierExpression>("i"));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(var.get());
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  EXPECT_EQ(b.GenerateCastExpression(&cast), 6u) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
+%3 = OpTypeVector %4 3
+%2 = OpTypePointer Private %3
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Private %5
+%8 = OpTypeFloat 32
+%7 = OpTypeVector %8 3
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%9 = OpLoad %3 %1
+%6 = OpConvertSToF %7 %9
+)");
+}
+
+TEST_F(BuilderTest, Cast_Vectors_U32_to_F32) {
+  ast::type::U32Type u32;
+  ast::type::VectorType uvec3(&u32, 3);
+  ast::type::F32Type f32;
+  ast::type::VectorType fvec3(&f32, 3);
+
+  auto var =
+      std::make_unique<ast::Variable>("i", ast::StorageClass::kPrivate, &uvec3);
+
+  ast::CastExpression cast(&fvec3,
+                           std::make_unique<ast::IdentifierExpression>("i"));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(var.get());
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  EXPECT_EQ(b.GenerateCastExpression(&cast), 6u) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
+%3 = OpTypeVector %4 3
+%2 = OpTypePointer Private %3
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Private %5
+%8 = OpTypeFloat 32
+%7 = OpTypeVector %8 3
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%9 = OpLoad %3 %1
+%6 = OpConvertUToF %7 %9
+)");
+}
+
+TEST_F(BuilderTest, Cast_Vectors_F32_to_I32) {
+  ast::type::I32Type i32;
+  ast::type::VectorType ivec3(&i32, 3);
+  ast::type::F32Type f32;
+  ast::type::VectorType fvec3(&f32, 3);
+
+  auto var =
+      std::make_unique<ast::Variable>("i", ast::StorageClass::kPrivate, &fvec3);
+
+  ast::CastExpression cast(&ivec3,
+                           std::make_unique<ast::IdentifierExpression>("i"));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(var.get());
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  EXPECT_EQ(b.GenerateCastExpression(&cast), 6u) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+%3 = OpTypeVector %4 3
+%2 = OpTypePointer Private %3
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Private %5
+%8 = OpTypeInt 32 1
+%7 = OpTypeVector %8 3
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%9 = OpLoad %3 %1
+%6 = OpConvertFToS %7 %9
+)");
+}
+
+TEST_F(BuilderTest, Cast_Vectors_F32_to_U32) {
+  ast::type::U32Type u32;
+  ast::type::VectorType uvec3(&u32, 3);
+  ast::type::F32Type f32;
+  ast::type::VectorType fvec3(&f32, 3);
+
+  auto var =
+      std::make_unique<ast::Variable>("i", ast::StorageClass::kPrivate, &fvec3);
+
+  ast::CastExpression cast(&uvec3,
+                           std::make_unique<ast::IdentifierExpression>("i"));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(var.get());
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  EXPECT_EQ(b.GenerateCastExpression(&cast), 6u) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+%3 = OpTypeVector %4 3
+%2 = OpTypePointer Private %3
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Private %5
+%8 = OpTypeInt 32 0
+%7 = OpTypeVector %8 3
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%9 = OpLoad %3 %1
+%6 = OpConvertFToU %7 %9
+)");
+}
+
+TEST_F(BuilderTest, Cast_Vectors_U32_to_U32) {
+  ast::type::U32Type u32;
+  ast::type::VectorType uvec3(&u32, 3);
+
+  auto var =
+      std::make_unique<ast::Variable>("i", ast::StorageClass::kPrivate, &uvec3);
+
+  ast::CastExpression cast(&uvec3,
+                           std::make_unique<ast::IdentifierExpression>("i"));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(var.get());
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  EXPECT_EQ(b.GenerateCastExpression(&cast), 6u) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
+%3 = OpTypeVector %4 3
+%2 = OpTypePointer Private %3
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Private %5
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%7 = OpLoad %3 %1
+%6 = OpCopyObject %3 %7
+)");
+}
+
+TEST_F(BuilderTest, Cast_Vectors_I32_to_U32) {
+  ast::type::U32Type u32;
+  ast::type::VectorType uvec3(&u32, 3);
+  ast::type::I32Type i32;
+  ast::type::VectorType ivec3(&i32, 3);
+
+  auto var =
+      std::make_unique<ast::Variable>("i", ast::StorageClass::kPrivate, &ivec3);
+
+  ast::CastExpression cast(&uvec3,
+                           std::make_unique<ast::IdentifierExpression>("i"));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(var.get());
+  ASSERT_TRUE(td.DetermineResultType(&cast)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(var.get())) << b.error();
+  EXPECT_EQ(b.GenerateCastExpression(&cast), 6u) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
+%3 = OpTypeVector %4 3
+%2 = OpTypePointer Private %3
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Private %5
+%8 = OpTypeInt 32 0
+%7 = OpTypeVector %8 3
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%9 = OpLoad %3 %1
+%6 = OpBitcast %7 %9
 )");
 }
 

@@ -1527,20 +1527,36 @@ uint32_t Builder::GenerateCastExpression(ast::CastExpression* cast) {
   auto* from_type = cast->expr()->result_type()->UnwrapPtrIfNeeded();
 
   spv::Op op = spv::Op::OpNop;
-  if (from_type->IsI32() && to_type->IsF32()) {
+  if ((from_type->IsI32() && to_type->IsF32()) ||
+      (from_type->is_signed_integer_vector() && to_type->is_float_vector())) {
     op = spv::Op::OpConvertSToF;
-  } else if (from_type->IsU32() && to_type->IsF32()) {
+  } else if ((from_type->IsU32() && to_type->IsF32()) ||
+             (from_type->is_unsigned_integer_vector() &&
+              to_type->is_float_vector())) {
     op = spv::Op::OpConvertUToF;
-  } else if (from_type->IsF32() && to_type->IsI32()) {
+  } else if ((from_type->IsF32() && to_type->IsI32()) ||
+             (from_type->is_float_vector() &&
+              to_type->is_signed_integer_vector())) {
     op = spv::Op::OpConvertFToS;
-  } else if (from_type->IsF32() && to_type->IsU32()) {
+  } else if ((from_type->IsF32() && to_type->IsU32()) ||
+             (from_type->is_float_vector() &&
+              to_type->is_unsigned_integer_vector())) {
     op = spv::Op::OpConvertFToU;
   } else if ((from_type->IsU32() && to_type->IsU32()) ||
              (from_type->IsI32() && to_type->IsI32()) ||
-             (from_type->IsF32() && to_type->IsF32())) {
+             (from_type->IsF32() && to_type->IsF32()) ||
+             (from_type->is_unsigned_integer_vector() &&
+              to_type->is_unsigned_integer_vector()) ||
+             (from_type->is_signed_integer_vector() &&
+              to_type->is_signed_integer_vector()) ||
+             (from_type->is_float_vector() && to_type->is_float_vector())) {
     op = spv::Op::OpCopyObject;
   } else if ((from_type->IsI32() && to_type->IsU32()) ||
-             (from_type->IsU32() && to_type->IsI32())) {
+             (from_type->IsU32() && to_type->IsI32()) ||
+             (from_type->is_signed_integer_vector() &&
+              to_type->is_unsigned_integer_vector()) ||
+             (from_type->is_unsigned_integer_vector() &&
+              to_type->is_integer_scalar_or_vector())) {
     op = spv::Op::OpBitcast;
   }
 
