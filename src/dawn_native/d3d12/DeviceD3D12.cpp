@@ -340,7 +340,7 @@ namespace dawn_native { namespace d3d12 {
         dstBuffer->TrackUsageAndTransitionNow(commandRecordingContext, wgpu::BufferUsage::CopyDst);
 
         commandRecordingContext->GetCommandList()->CopyBufferRegion(
-            dstBuffer->GetD3D12Resource().Get(), destinationOffset, srcBuffer->GetResource(),
+            dstBuffer->GetD3D12Resource(), destinationOffset, srcBuffer->GetResource(),
             sourceOffset, size);
 
         return {};

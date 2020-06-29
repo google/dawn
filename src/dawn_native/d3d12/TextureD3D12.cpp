@@ -527,7 +527,7 @@ namespace dawn_native { namespace d3d12 {
         if (mSwapChainTexture) {
             ID3D12SharingContract* d3dSharingContract = device->GetSharingContract();
             if (d3dSharingContract != nullptr) {
-                d3dSharingContract->Present(mResourceAllocation.GetD3D12Resource().Get(), 0, 0);
+                d3dSharingContract->Present(mResourceAllocation.GetD3D12Resource(), 0, 0);
             }
         }
 
@@ -544,7 +544,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     ID3D12Resource* Texture::GetD3D12Resource() const {
-        return mResourceAllocation.GetD3D12Resource().Get();
+        return mResourceAllocation.GetD3D12Resource();
     }
 
     void Texture::TrackUsageAndTransitionNow(CommandRecordingContext* commandContext,

@@ -32,8 +32,8 @@ namespace dawn_native { namespace d3d12 {
         mResource.Reset();
     }
 
-    ComPtr<ID3D12Resource> ResourceHeapAllocation::GetD3D12Resource() const {
-        return mResource;
+    ID3D12Resource* ResourceHeapAllocation::GetD3D12Resource() const {
+        return mResource.Get();
     }
 
     D3D12_GPU_VIRTUAL_ADDRESS ResourceHeapAllocation::GetGPUPointer() const {

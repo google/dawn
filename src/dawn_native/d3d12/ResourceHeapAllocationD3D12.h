@@ -33,7 +33,7 @@ namespace dawn_native { namespace d3d12 {
 
         void Invalidate() override;
 
-        ComPtr<ID3D12Resource> GetD3D12Resource() const;
+        ID3D12Resource* GetD3D12Resource() const;
         D3D12_GPU_VIRTUAL_ADDRESS GetGPUPointer() const;
 
       private:

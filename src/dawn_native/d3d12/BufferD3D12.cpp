@@ -133,7 +133,7 @@ namespace dawn_native { namespace d3d12 {
         DestroyInternal();
     }
 
-    ComPtr<ID3D12Resource> Buffer::GetD3D12Resource() const {
+    ID3D12Resource* Buffer::GetD3D12Resource() const {
         return mResourceAllocation.GetD3D12Resource();
     }
 
@@ -183,7 +183,7 @@ namespace dawn_native { namespace d3d12 {
         if (needsUAVBarrier) {
             barrier->Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
             barrier->Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-            barrier->UAV.pResource = GetD3D12Resource().Get();
+            barrier->UAV.pResource = GetD3D12Resource();
 
             mLastUsage = newUsage;
             return true;
@@ -227,7 +227,7 @@ namespace dawn_native { namespace d3d12 {
 
         barrier->Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
         barrier->Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-        barrier->Transition.pResource = GetD3D12Resource().Get();
+        barrier->Transition.pResource = GetD3D12Resource();
         barrier->Transition.StateBefore = lastState;
         barrier->Transition.StateAfter = newState;
         barrier->Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;

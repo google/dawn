@@ -566,8 +566,8 @@ namespace dawn_native { namespace d3d12 {
                                                           wgpu::BufferUsage::CopyDst);
 
                     commandList->CopyBufferRegion(
-                        dstBuffer->GetD3D12Resource().Get(), copy->destinationOffset,
-                        srcBuffer->GetD3D12Resource().Get(), copy->sourceOffset, copy->size);
+                        dstBuffer->GetD3D12Resource(), copy->destinationOffset,
+                        srcBuffer->GetD3D12Resource(), copy->sourceOffset, copy->size);
                     break;
                 }
 
@@ -618,7 +618,7 @@ namespace dawn_native { namespace d3d12 {
 
                             D3D12_TEXTURE_COPY_LOCATION bufferLocation =
                                 ComputeBufferLocationForCopyTextureRegion(
-                                    texture, buffer->GetD3D12Resource().Get(), info.bufferSize,
+                                    texture, buffer->GetD3D12Resource(), info.bufferSize,
                                     copySplit.offset, copy->source.bytesPerRow);
                             D3D12_BOX sourceRegion =
                                 ComputeD3D12BoxFromOffsetAndSize(info.bufferOffset, info.copySize);
@@ -673,7 +673,7 @@ namespace dawn_native { namespace d3d12 {
 
                             D3D12_TEXTURE_COPY_LOCATION bufferLocation =
                                 ComputeBufferLocationForCopyTextureRegion(
-                                    texture, buffer->GetD3D12Resource().Get(), info.bufferSize,
+                                    texture, buffer->GetD3D12Resource(), info.bufferSize,
                                     copySplit.offset, copy->destination.bytesPerRow);
 
                             D3D12_BOX sourceRegion =
@@ -787,8 +787,7 @@ namespace dawn_native { namespace d3d12 {
                     Buffer* buffer = ToBackend(dispatch->indirectBuffer.Get());
                     ComPtr<ID3D12CommandSignature> signature =
                         ToBackend(GetDevice())->GetDispatchIndirectSignature();
-                    commandList->ExecuteIndirect(signature.Get(), 1,
-                                                 buffer->GetD3D12Resource().Get(),
+                    commandList->ExecuteIndirect(signature.Get(), 1, buffer->GetD3D12Resource(),
                                                  dispatch->indirectOffset, nullptr, 0);
                     break;
                 }
@@ -1103,8 +1102,7 @@ namespace dawn_native { namespace d3d12 {
                     Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
                     ComPtr<ID3D12CommandSignature> signature =
                         ToBackend(GetDevice())->GetDrawIndirectSignature();
-                    commandList->ExecuteIndirect(signature.Get(), 1,
-                                                 buffer->GetD3D12Resource().Get(),
+                    commandList->ExecuteIndirect(signature.Get(), 1, buffer->GetD3D12Resource(),
                                                  draw->indirectOffset, nullptr, 0);
                     break;
                 }
@@ -1118,8 +1116,7 @@ namespace dawn_native { namespace d3d12 {
                     Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
                     ComPtr<ID3D12CommandSignature> signature =
                         ToBackend(GetDevice())->GetDrawIndexedIndirectSignature();
-                    commandList->ExecuteIndirect(signature.Get(), 1,
-                                                 buffer->GetD3D12Resource().Get(),
+                    commandList->ExecuteIndirect(signature.Get(), 1, buffer->GetD3D12Resource(),
                                                  draw->indirectOffset, nullptr, 0);
                     break;
                 }
