@@ -45,8 +45,8 @@ namespace dawn_native {
     // the vector to record every single subresource's Usages. The texture usage is enough. And we
     // can decompress texture usage to a vector if necessary.
     struct PassTextureUsage {
-        wgpu::TextureUsage usage;
-        bool sameUsagesAcrossSubresources;
+        wgpu::TextureUsage usage = wgpu::TextureUsage::None;
+        bool sameUsagesAcrossSubresources = true;
         std::vector<wgpu::TextureUsage> subresourceUsages;
     };
 

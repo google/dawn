@@ -43,7 +43,7 @@ namespace dawn_native {
         // Set parameters for the whole texture
         textureUsage.usage |= usage;
         uint32_t subresourceCount = texture->GetSubresourceCount();
-        textureUsage.sameUsagesAcrossSubresources = levelCount * layerCount == subresourceCount;
+        textureUsage.sameUsagesAcrossSubresources &= levelCount * layerCount == subresourceCount;
 
         // Set usages for subresources
         if (!textureUsage.subresourceUsages.size()) {
