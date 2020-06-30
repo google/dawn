@@ -14,7 +14,7 @@
 
 #include "dawn_wire/client/Fence.h"
 
-#include "dawn_wire/client/ApiProcs_autogen.h"
+#include "dawn_wire/client/Device.h"
 
 namespace dawn_wire { namespace client {
 
@@ -46,8 +46,8 @@ namespace dawn_wire { namespace client {
                              WGPUFenceOnCompletionCallback callback,
                              void* userdata) {
         if (value > mSignaledValue) {
-            ClientDeviceInjectError(reinterpret_cast<WGPUDevice>(device), WGPUErrorType_Validation,
-                                    "Value greater than fence signaled value");
+            device->InjectError(WGPUErrorType_Validation,
+                                "Value greater than fence signaled value");
             callback(WGPUFenceCompletionStatus_Error, userdata);
             return;
         }

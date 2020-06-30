@@ -14,7 +14,6 @@
 
 #include "dawn_wire/client/Buffer.h"
 
-#include "dawn_wire/client/ApiProcs_autogen.h"
 #include "dawn_wire/client/Client.h"
 #include "dawn_wire/client/Device.h"
 
@@ -53,9 +52,8 @@ namespace dawn_wire { namespace client {
 
         if ((descriptor->usage & (WGPUBufferUsage_MapRead | WGPUBufferUsage_MapWrite)) != 0 &&
             descriptor->size > std::numeric_limits<size_t>::max()) {
-            ClientDeviceInjectError(cDevice, WGPUErrorType_OutOfMemory,
-                                    "Buffer is too large for map usage");
-            return ClientDeviceCreateErrorBuffer(cDevice);
+            device_->InjectError(WGPUErrorType_OutOfMemory, "Buffer is too large for map usage");
+            return device_->CreateErrorBuffer();
         }
 
         auto* bufferObjectAndSerial = wireClient->BufferAllocator().New(device_);
@@ -86,9 +84,8 @@ namespace dawn_wire { namespace client {
 
         // This buffer is too large to be mapped and to make a WriteHandle for.
         if (descriptor->size > std::numeric_limits<size_t>::max()) {
-            ClientDeviceInjectError(cDevice, WGPUErrorType_OutOfMemory,
-                                    "Buffer is too large for mapping");
-            result.buffer = ClientDeviceCreateErrorBuffer(cDevice);
+            device_->InjectError(WGPUErrorType_OutOfMemory, "Buffer is too large for mapping");
+            result.buffer = device_->CreateErrorBuffer();
             return result;
         }
 
@@ -99,9 +96,8 @@ namespace dawn_wire { namespace client {
                 wireClient->GetMemoryTransferService()->CreateWriteHandle(descriptor->size));
 
         if (writeHandle == nullptr) {
-            ClientDeviceInjectError(cDevice, WGPUErrorType_OutOfMemory,
-                                    "Buffer mapping allocation failed");
-            result.buffer = ClientDeviceCreateErrorBuffer(cDevice);
+            device_->InjectError(WGPUErrorType_OutOfMemory, "Buffer mapping allocation failed");
+            result.buffer = device_->CreateErrorBuffer();
             return result;
         }
 
@@ -111,9 +107,8 @@ namespace dawn_wire { namespace client {
         // |result.data| may be null on error.
         std::tie(result.data, result.dataLength) = writeHandle->Open();
         if (result.data == nullptr) {
-            ClientDeviceInjectError(cDevice, WGPUErrorType_OutOfMemory,
-                                    "Buffer mapping allocation failed");
-            result.buffer = ClientDeviceCreateErrorBuffer(cDevice);
+            device_->InjectError(WGPUErrorType_OutOfMemory, "Buffer mapping allocation failed");
+            result.buffer = device_->CreateErrorBuffer();
             return result;
         }
 
@@ -145,6 +140,18 @@ namespace dawn_wire { namespace client {
         return result;
     }
 
+    // static
+    WGPUBuffer Buffer::CreateError(Device* device_) {
+        auto* allocation = device_->GetClient()->BufferAllocator().New(device_);
+
+        DeviceCreateErrorBufferCmd cmd;
+        cmd.self = reinterpret_cast<WGPUDevice>(device_);
+        cmd.result = ObjectHandle{allocation->object->id, allocation->generation};
+        device_->GetClient()->SerializeCommand(cmd);
+
+        return reinterpret_cast<WGPUBuffer>(allocation->object.get());
+    }
+
     Buffer::~Buffer() {
         // Callbacks need to be fired in all cases, as they can handle freeing resources
         // so we call them with "Unknown" status.
@@ -169,8 +176,7 @@ namespace dawn_wire { namespace client {
         if (mSize > std::numeric_limits<size_t>::max()) {
             // On buffer creation, we check that mappable buffers do not exceed this size.
             // So this buffer must not have mappable usage. Inject a validation error.
-            ClientDeviceInjectError(reinterpret_cast<WGPUDevice>(device), WGPUErrorType_Validation,
-                                    "Buffer needs the correct map usage bit");
+            device->InjectError(WGPUErrorType_Validation, "Buffer needs the correct map usage bit");
             callback(WGPUBufferMapAsyncStatus_Error, nullptr, 0, userdata);
             return;
         }
@@ -181,8 +187,7 @@ namespace dawn_wire { namespace client {
             device->GetClient()->GetMemoryTransferService()->CreateReadHandle(
                 static_cast<size_t>(mSize));
         if (readHandle == nullptr) {
-            ClientDeviceInjectError(reinterpret_cast<WGPUDevice>(device), WGPUErrorType_OutOfMemory,
-                                    "Failed to create buffer mapping");
+            device->InjectError(WGPUErrorType_OutOfMemory, "Failed to create buffer mapping");
             callback(WGPUBufferMapAsyncStatus_Error, nullptr, 0, userdata);
             return;
         }
@@ -207,8 +212,7 @@ namespace dawn_wire { namespace client {
         if (mSize > std::numeric_limits<size_t>::max()) {
             // On buffer creation, we check that mappable buffers do not exceed this size.
             // So this buffer must not have mappable usage. Inject a validation error.
-            ClientDeviceInjectError(reinterpret_cast<WGPUDevice>(device), WGPUErrorType_Validation,
-                                    "Buffer needs the correct map usage bit");
+            device->InjectError(WGPUErrorType_Validation, "Buffer needs the correct map usage bit");
             callback(WGPUBufferMapAsyncStatus_Error, nullptr, 0, userdata);
             return;
         }
@@ -219,8 +223,7 @@ namespace dawn_wire { namespace client {
             device->GetClient()->GetMemoryTransferService()->CreateWriteHandle(
                 static_cast<size_t>(mSize));
         if (writeHandle == nullptr) {
-            ClientDeviceInjectError(reinterpret_cast<WGPUDevice>(device), WGPUErrorType_OutOfMemory,
-                                    "Failed to create buffer mapping");
+            device->InjectError(WGPUErrorType_OutOfMemory, "Failed to create buffer mapping");
             callback(WGPUBufferMapAsyncStatus_Error, nullptr, 0, userdata);
             return;
         }
@@ -366,8 +369,7 @@ namespace dawn_wire { namespace client {
 
     void* Buffer::GetMappedRange() {
         if (!IsMappedForWriting()) {
-            ClientDeviceInjectError(reinterpret_cast<WGPUDevice>(device), WGPUErrorType_Validation,
-                                    "Buffer needs to be mapped for writing");
+            device->InjectError(WGPUErrorType_Validation, "Buffer needs to be mapped for writing");
             return nullptr;
         }
         return mMappedData;
@@ -375,8 +377,7 @@ namespace dawn_wire { namespace client {
 
     const void* Buffer::GetConstMappedRange() {
         if (!IsMappedForWriting() && !IsMappedForReading()) {
-            ClientDeviceInjectError(reinterpret_cast<WGPUDevice>(device), WGPUErrorType_Validation,
-                                    "Buffer needs to be mapped");
+            device->InjectError(WGPUErrorType_Validation, "Buffer needs to be mapped");
             return nullptr;
         }
         return mMappedData;

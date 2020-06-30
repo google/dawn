@@ -37,7 +37,6 @@ dawn_json_generator("dawn_wire_gen") {
     "src/dawn_wire/WireCmd_autogen.cpp",
     "src/dawn_wire/client/ApiObjects_autogen.h",
     "src/dawn_wire/client/ApiProcs_autogen.cpp",
-    "src/dawn_wire/client/ApiProcs_autogen.h",
     "src/dawn_wire/client/ClientBase_autogen.h",
     "src/dawn_wire/client/ClientHandlers_autogen.cpp",
     "src/dawn_wire/client/ClientPrototypes_autogen.inc",

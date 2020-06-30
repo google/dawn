@@ -31,6 +31,7 @@ namespace dawn_wire { namespace client {
         static WGPUBuffer Create(Device* device, const WGPUBufferDescriptor* descriptor);
         static WGPUCreateBufferMappedResult CreateMapped(Device* device,
                                                          const WGPUBufferDescriptor* descriptor);
+        static WGPUBuffer CreateError(Device* device);
 
         ~Buffer();
         void ClearMapRequests(WGPUBufferMapAsyncStatus status);

@@ -111,7 +111,9 @@
             "BufferUnmap",
             "DeviceCreateBuffer",
             "DeviceCreateBufferMapped",
+            "DeviceCreateErrorBuffer",
             "DeviceGetDefaultQueue",
+            "DeviceInjectError",
             "DevicePushErrorScope",
             "QueueCreateFence",
             "QueueSignal"

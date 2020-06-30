@@ -14,7 +14,6 @@
 
 #include "dawn_wire/client/Queue.h"
 
-#include "dawn_wire/client/ApiProcs_autogen.h"
 #include "dawn_wire/client/Client.h"
 #include "dawn_wire/client/Device.h"
 
@@ -37,15 +36,13 @@ namespace dawn_wire { namespace client {
     void Queue::Signal(WGPUFence cFence, uint64_t signalValue) {
         Fence* fence = reinterpret_cast<Fence*>(cFence);
         if (fence->GetQueue() != this) {
-            ClientDeviceInjectError(reinterpret_cast<WGPUDevice>(fence->device),
-                                    WGPUErrorType_Validation,
-                                    "Fence must be signaled on the queue on which it was created.");
+            device->InjectError(WGPUErrorType_Validation,
+                                "Fence must be signaled on the queue on which it was created.");
             return;
         }
         if (signalValue <= fence->GetSignaledValue()) {
-            ClientDeviceInjectError(reinterpret_cast<WGPUDevice>(fence->device),
-                                    WGPUErrorType_Validation,
-                                    "Fence value less than or equal to signaled value");
+            device->InjectError(WGPUErrorType_Validation,
+                                "Fence value less than or equal to signaled value");
             return;
         }
 

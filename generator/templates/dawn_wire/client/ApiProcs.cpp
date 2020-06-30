@@ -14,7 +14,6 @@
 
 #include "common/Log.h"
 #include "dawn_wire/client/ApiObjects.h"
-#include "dawn_wire/client/ApiProcs_autogen.h"
 #include "dawn_wire/client/Client.h"
 
 #include <algorithm>
@@ -23,7 +22,6 @@
 #include <vector>
 
 namespace dawn_wire { namespace client {
-
     namespace {
 
         //* Outputs an rvalue that's the number of elements a pointer member points to.
@@ -158,9 +156,8 @@ namespace dawn_wire { namespace client {
                         } while (false);
 
                         if (DAWN_UNLIKELY(!sameDevice)) {
-                            ClientDeviceInjectError(reinterpret_cast<WGPUDevice>(device),
-                                                    WGPUErrorType_Validation,
-                                                    "All objects must be from the same device.");
+                            device->InjectError(WGPUErrorType_Validation,
+                                                "All objects must be from the same device.");
                             {% if method.return_type.category == "object" %}
                                 // Allocate an object without registering it on the server. This is backed by a real allocation on
                                 // the client so commands can be sent with it. But because it's not allocated on the server, it will
@@ -236,16 +233,16 @@ namespace dawn_wire { namespace client {
         {% endif %}
     {% endfor %}
 
-    void ClientDeviceReference(WGPUDevice) {
-    }
-
-    void ClientDeviceRelease(WGPUDevice) {
-    }
-
     namespace {
         WGPUInstance ClientCreateInstance(WGPUInstanceDescriptor const* descriptor) {
             UNREACHABLE();
             return nullptr;
+        }
+
+        void ClientDeviceReference(WGPUDevice) {
+        }
+
+        void ClientDeviceRelease(WGPUDevice) {
         }
 
         struct ProcEntry {

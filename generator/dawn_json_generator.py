@@ -627,7 +627,6 @@ class MultiGeneratorFromDawnJSON(Generator):
             renders.append(FileRender('dawn_wire/WireCmd.cpp', 'src/dawn_wire/WireCmd_autogen.cpp', wire_params))
             renders.append(FileRender('dawn_wire/client/ApiObjects.h', 'src/dawn_wire/client/ApiObjects_autogen.h', wire_params))
             renders.append(FileRender('dawn_wire/client/ApiProcs.cpp', 'src/dawn_wire/client/ApiProcs_autogen.cpp', wire_params))
-            renders.append(FileRender('dawn_wire/client/ApiProcs.h', 'src/dawn_wire/client/ApiProcs_autogen.h', wire_params))
             renders.append(FileRender('dawn_wire/client/ClientBase.h', 'src/dawn_wire/client/ClientBase_autogen.h', wire_params))
             renders.append(FileRender('dawn_wire/client/ClientHandlers.cpp', 'src/dawn_wire/client/ClientHandlers_autogen.cpp', wire_params))
             renders.append(FileRender('dawn_wire/client/ClientPrototypes.inc', 'src/dawn_wire/client/ClientPrototypes_autogen.inc', wire_params))

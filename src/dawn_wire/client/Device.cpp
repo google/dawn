@@ -137,6 +137,14 @@ namespace dawn_wire { namespace client {
         return true;
     }
 
+    void Device::InjectError(WGPUErrorType type, const char* message) {
+        DeviceInjectErrorCmd cmd;
+        cmd.self = reinterpret_cast<WGPUDevice>(this);
+        cmd.type = type;
+        cmd.message = message;
+        mClient->SerializeCommand(cmd);
+    }
+
     WGPUBuffer Device::CreateBuffer(const WGPUBufferDescriptor* descriptor) {
         return Buffer::Create(this, descriptor);
     }
@@ -144,6 +152,10 @@ namespace dawn_wire { namespace client {
     WGPUCreateBufferMappedResult Device::CreateBufferMapped(
         const WGPUBufferDescriptor* descriptor) {
         return Buffer::CreateMapped(this, descriptor);
+    }
+
+    WGPUBuffer Device::CreateErrorBuffer() {
+        return Buffer::CreateError(this);
     }
 
     WGPUQueue Device::GetDefaultQueue() {
