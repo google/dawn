@@ -26,6 +26,7 @@ namespace reader {
 namespace spirv {
 namespace {
 
+using ::testing::Eq;
 using ::testing::HasSubstr;
 
 /// @returns a SPIR-V assembly segment which assigns debug names
@@ -38,8 +39,11 @@ std::string Names(std::vector<std::string> ids) {
   return outs.str();
 }
 
-std::string CommonTypes() {
+std::string Preamble() {
   return R"(
+    OpCapability Shader
+    OpMemoryModel Logical Simple
+
     %void = OpTypeVoid
     %voidfn = OpTypeFunction %void
 
@@ -70,7 +74,7 @@ std::string CommonTypes() {
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_AnonymousVars) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto* p = parser(test::Assemble(Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpVariable %ptr_uint Function
@@ -108,7 +112,7 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_NamedVars) {
-  auto* p = parser(test::Assemble(Names({"a", "b", "c"}) + CommonTypes() + R"(
+  auto* p = parser(test::Assemble(Names({"a", "b", "c"}) + Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %a = OpVariable %ptr_uint Function
@@ -146,7 +150,7 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_MixedTypes) {
-  auto* p = parser(test::Assemble(Names({"a", "b", "c"}) + CommonTypes() + R"(
+  auto* p = parser(test::Assemble(Names({"a", "b", "c"}) + Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %a = OpVariable %ptr_uint Function
@@ -184,8 +188,8 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_ScalarInitializers) {
-  auto* p = parser(
-      test::Assemble(Names({"a", "b", "c", "d", "e"}) + CommonTypes() + R"(
+  auto* p =
+      parser(test::Assemble(Names({"a", "b", "c", "d", "e"}) + Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %a = OpVariable %ptr_bool Function %true
@@ -254,8 +258,7 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_ScalarNullInitializers) {
-  auto* p =
-      parser(test::Assemble(Names({"a", "b", "c", "d"}) + CommonTypes() + R"(
+  auto* p = parser(test::Assemble(Names({"a", "b", "c", "d"}) + Preamble() + R"(
      %null_bool = OpConstantNull %bool
      %null_int = OpConstantNull %int
      %null_uint = OpConstantNull %uint
@@ -318,7 +321,7 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_VectorInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto* p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %v2float
      %two = OpConstant %float 2.0
      %const = OpConstantComposite %v2float %float_1p5 %two
@@ -351,7 +354,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_VectorInitializer) {
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_MatrixInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto* p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %m3v2float
      %two = OpConstant %float 2.0
      %three = OpConstant %float 3.0
@@ -402,7 +405,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_MatrixInitializer) {
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto* p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %arr2uint
      %two = OpConstant %uint 2
      %const = OpConstantComposite %arr2uint %uint_1 %two
@@ -436,7 +439,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer) {
 
 TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_AliasType) {
   auto* p = parser(test::Assemble(
-      std::string("OpDecorate %arr2uint ArrayStride 16\n") + CommonTypes() + R"(
+      std::string("OpDecorate %arr2uint ArrayStride 16\n") + Preamble() + R"(
      %ptr = OpTypePointer Function %arr2uint
      %two = OpConstant %uint 2
      %const = OpConstantComposite %arr2uint %uint_1 %two
@@ -469,7 +472,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_AliasType) {
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Null) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto* p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %arr2uint
      %two = OpConstant %uint 2
      %const = OpConstantNull %arr2uint
@@ -503,7 +506,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Null) {
 
 TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_AliasType_Null) {
   auto* p = parser(test::Assemble(
-      std::string("OpDecorate %arr2uint ArrayStride 16\n") + CommonTypes() + R"(
+      std::string("OpDecorate %arr2uint ArrayStride 16\n") + Preamble() + R"(
      %ptr = OpTypePointer Function %arr2uint
      %two = OpConstant %uint 2
      %const = OpConstantNull %arr2uint
@@ -536,7 +539,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_AliasType_Null) {
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto* p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %strct
      %two = OpConstant %uint 2
      %arrconst = OpConstantComposite %arr2uint %uint_1 %two
@@ -575,7 +578,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer) {
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer_Null) {
-  auto* p = parser(test::Assemble(CommonTypes() + R"(
+  auto* p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %strct
      %two = OpConstant %uint 2
      %arrconst = OpConstantComposite %arr2uint %uint_1 %two
@@ -610,6 +613,184 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer_Null) {
     }
   }
 }
+)")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest,
+       EmitStatement_CombinatorialValue_Defer_UsedOnceSameConstruct) {
+  auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     %25 = OpVariable %ptr_uint Function
+     %2 = OpIAdd %uint %uint_1 %uint_1
+     OpStore %25 %uint_1 ; Do initial store to mark source location
+     OpBranch %20
+
+     %20 = OpLabel
+     OpStore %25 %2 ; defer emission of the addition until here.
+     OpReturn
+
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(VariableDeclStatement{
+  Variable{
+    x_25
+    function
+    __u32
+  }
+}
+Assignment{
+  Identifier{x_25}
+  ScalarConstructor{1}
+}
+Assignment{
+  Identifier{x_25}
+  Binary{
+    ScalarConstructor{1}
+    add
+    ScalarConstructor{1}
+  }
+}
+Return{}
+)")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest, EmitStatement_CombinatorialValue_Immediate_UsedTwice) {
+  auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     %25 = OpVariable %ptr_uint Function
+     %2 = OpIAdd %uint %uint_1 %uint_1
+     OpStore %25 %uint_1 ; Do initial store to mark source location
+     OpBranch %20
+
+     %20 = OpLabel
+     OpStore %25 %2
+     OpStore %25 %2
+     OpReturn
+
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(VariableDeclStatement{
+  Variable{
+    x_25
+    function
+    __u32
+  }
+}
+VariableDeclStatement{
+  Variable{
+    x_2
+    none
+    __u32
+    {
+      Binary{
+        ScalarConstructor{1}
+        add
+        ScalarConstructor{1}
+      }
+    }
+  }
+}
+Assignment{
+  Identifier{x_25}
+  ScalarConstructor{1}
+}
+Assignment{
+  Identifier{x_25}
+  Identifier{x_2}
+}
+Assignment{
+  Identifier{x_25}
+  Identifier{x_2}
+}
+Return{}
+)")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest,
+       EmitStatement_CombinatorialValue_Immediate_UsedOnceDifferentConstruct) {
+  // Translation should not sink expensive operations into or out of control
+  // flow. As a simple heuristic, don't move *any* combinatorial operation
+  // across any constrol flow.
+  auto assembly = Preamble() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     %25 = OpVariable %ptr_uint Function
+     %2 = OpIAdd %uint %uint_1 %uint_1
+     OpStore %25 %uint_1 ; Do initial store to mark source location
+     OpBranch %20
+
+     %20 = OpLabel  ; Introduce a new construct
+     OpLoopMerge %99 %80 None
+     OpBranch %80
+
+     %80 = OpLabel
+     OpStore %25 %2  ; store combinatorial value %2, inside the loop
+     OpBranch %20
+
+     %99 = OpLabel ; merge block
+     OpStore %25 %uint_2
+     OpReturn
+
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(VariableDeclStatement{
+  Variable{
+    x_25
+    function
+    __u32
+  }
+}
+VariableDeclStatement{
+  Variable{
+    x_2
+    none
+    __u32
+    {
+      Binary{
+        ScalarConstructor{1}
+        add
+        ScalarConstructor{1}
+      }
+    }
+  }
+}
+Assignment{
+  Identifier{x_25}
+  ScalarConstructor{1}
+}
+Loop{
+  continuing {
+    Assignment{
+      Identifier{x_25}
+      Identifier{x_2}
+    }
+  }
+}
+Assignment{
+  Identifier{x_25}
+  ScalarConstructor{2}
+}
+Return{}
 )")) << ToString(fe.ast_body());
 }
 

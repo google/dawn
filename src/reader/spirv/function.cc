@@ -2877,8 +2877,30 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(
 }
 
 void FunctionEmitter::RegisterValuesNeedingNamedDefinition() {
-  for (auto& block : function_) {
-    for (const auto& inst : block) {
+  // Maps a result ID to the block position where it is last used.
+  std::unordered_map<uint32_t, uint32_t> id_to_last_use_pos;
+  // List of pairs of (result id, block position of the definition).
+  std::vector<std::pair<uint32_t, uint32_t>> id_def_pos;
+
+  for (auto block_id : block_order_) {
+    const auto* block_info = GetBlockInfo(block_id);
+    const auto block_pos = block_info->pos;
+
+    for (const auto& inst : *(block_info->basic_block)) {
+      const auto result_id = inst.result_id();
+      if (result_id != 0) {
+        id_def_pos.emplace_back(
+            std::pair<uint32_t, uint32_t>{result_id, block_pos});
+      }
+      inst.ForEachInId(
+          [&id_to_last_use_pos, block_pos](const uint32_t* id_ptr) {
+            // If the id is not in the map already, this will create
+            // an entry with value 0.
+            auto& pos = id_to_last_use_pos[*id_ptr];
+            // Update the entry.
+            pos = std::max(pos, block_pos);
+          });
+
       if (inst.opcode() == SpvOpVectorShuffle) {
         // We might access the vector operands multiple times. Make sure they
         // are evaluated only once.
@@ -2893,6 +2915,27 @@ void FunctionEmitter::RegisterValuesNeedingNamedDefinition() {
           // Othewrise, register it.
           needs_named_const_def_.insert(id);
         }
+      }
+    }
+  }
+
+  // For an ID defined in this function, if it is used in a different construct
+  // than its definition, then it needs a named constant definition.  Otherwise
+  // we might sink an expensive computation into control flow, and hence change
+  // performance.
+  for (const auto& id_and_pos : id_def_pos) {
+    const auto id = id_and_pos.first;
+    const auto def_pos = id_and_pos.second;
+
+    auto last_use_where = id_to_last_use_pos.find(id);
+    if (last_use_where != id_to_last_use_pos.end()) {
+      const auto last_use_pos = last_use_where->second;
+      const auto* def_in_construct =
+          GetBlockInfo(block_order_[def_pos])->construct;
+      const auto* last_use_in_construct =
+          GetBlockInfo(block_order_[last_use_pos])->construct;
+      if (def_in_construct != last_use_in_construct) {
+        needs_named_const_def_.insert(id);
       }
     }
   }

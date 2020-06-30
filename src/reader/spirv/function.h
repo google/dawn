@@ -112,7 +112,8 @@ struct BlockInfo {
   /// as its own continue target, and has branch to itself.
   bool is_single_block_loop = false;
 
-  /// The immediately enclosing structured construct.
+  /// The immediately enclosing structured construct. If this block is not
+  /// in the block order at all, then this is still nullptr.
   const Construct* construct = nullptr;
 
   /// Maps the ID of a successor block (in the CFG) to its edge classification.
