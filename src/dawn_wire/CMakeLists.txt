@@ -42,6 +42,8 @@ target_sources(dawn_wire PRIVATE
     "client/Fence.cpp"
     "client/Fence.h"
     "client/ObjectAllocator.h"
+    "client/Queue.cpp"
+    "client/Queue.h"
     "server/ObjectStorage.h"
     "server/Server.cpp"
     "server/Server.h"

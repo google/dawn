@@ -86,8 +86,8 @@ namespace dawn_wire { namespace client {
     }
 
     uint64_t ClientHandwrittenFenceGetCompletedValue(WGPUFence cSelf) {
-        auto fence = reinterpret_cast<Fence*>(cSelf);
-        return fence->completedValue;
+        Fence* fence = reinterpret_cast<Fence*>(cSelf);
+        return fence->GetCompletedValue();
     }
 
     void ClientHandwrittenFenceOnCompletion(WGPUFence cFence,
@@ -95,72 +95,18 @@ namespace dawn_wire { namespace client {
                                             WGPUFenceOnCompletionCallback callback,
                                             void* userdata) {
         Fence* fence = reinterpret_cast<Fence*>(cFence);
-        if (value > fence->signaledValue) {
-            ClientDeviceInjectError(reinterpret_cast<WGPUDevice>(fence->device),
-                                    WGPUErrorType_Validation,
-                                    "Value greater than fence signaled value");
-            callback(WGPUFenceCompletionStatus_Error, userdata);
-            return;
-        }
-
-        if (value <= fence->completedValue) {
-            callback(WGPUFenceCompletionStatus_Success, userdata);
-            return;
-        }
-
-        Fence::OnCompletionData request;
-        request.completionCallback = callback;
-        request.userdata = userdata;
-        fence->requests.Enqueue(std::move(request), value);
+        fence->OnCompletion(value, callback, userdata);
     }
 
     WGPUFence ClientHandwrittenQueueCreateFence(WGPUQueue cSelf,
                                                 WGPUFenceDescriptor const* descriptor) {
         Queue* queue = reinterpret_cast<Queue*>(cSelf);
-        Device* device = queue->device;
-
-        QueueCreateFenceCmd cmd;
-        cmd.self = cSelf;
-        auto* allocation = device->GetClient()->FenceAllocator().New(device);
-        cmd.result = ObjectHandle{allocation->object->id, allocation->generation};
-        cmd.descriptor = descriptor;
-
-        device->GetClient()->SerializeCommand(cmd);
-
-        WGPUFence cFence = reinterpret_cast<WGPUFence>(allocation->object.get());
-
-        Fence* fence = reinterpret_cast<Fence*>(cFence);
-        fence->queue = queue;
-
-        uint64_t initialValue = descriptor != nullptr ? descriptor->initialValue : 0u;
-        fence->signaledValue = initialValue;
-        fence->completedValue = initialValue;
-        return cFence;
+        return queue->CreateFence(descriptor);
     }
 
     void ClientHandwrittenQueueSignal(WGPUQueue cQueue, WGPUFence cFence, uint64_t signalValue) {
-        Fence* fence = reinterpret_cast<Fence*>(cFence);
         Queue* queue = reinterpret_cast<Queue*>(cQueue);
-        if (fence->queue != queue) {
-            ClientDeviceInjectError(reinterpret_cast<WGPUDevice>(fence->device),
-                                    WGPUErrorType_Validation,
-                                    "Fence must be signaled on the queue on which it was created.");
-            return;
-        }
-        if (signalValue <= fence->signaledValue) {
-            ClientDeviceInjectError(reinterpret_cast<WGPUDevice>(fence->device),
-                                    WGPUErrorType_Validation,
-                                    "Fence value less than or equal to signaled value");
-            return;
-        }
-        fence->signaledValue = signalValue;
-
-        QueueSignalCmd cmd;
-        cmd.self = cQueue;
-        cmd.fence = cFence;
-        cmd.signalValue = signalValue;
-
-        queue->device->GetClient()->SerializeCommand(cmd);
+        queue->Signal(cFence, signalValue);
     }
 
     void ClientHandwrittenQueueWriteBuffer(WGPUQueue cQueue,
@@ -169,16 +115,7 @@ namespace dawn_wire { namespace client {
                                            const void* data,
                                            size_t size) {
         Queue* queue = reinterpret_cast<Queue*>(cQueue);
-        Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
-
-        QueueWriteBufferInternalCmd cmd;
-        cmd.queueId = queue->id;
-        cmd.bufferId = buffer->id;
-        cmd.bufferOffset = bufferOffset;
-        cmd.data = static_cast<const uint8_t*>(data);
-        cmd.size = size;
-
-        queue->device->GetClient()->SerializeCommand(cmd);
+        queue->WriteBuffer(cBuffer, bufferOffset, data, size);
     }
 
     void ClientDeviceReference(WGPUDevice) {

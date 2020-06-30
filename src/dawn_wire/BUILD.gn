@@ -20,9 +20,7 @@ import("${dawn_root}/scripts/dawn_component.gni")
 # Public dawn_wire headers so they can be publically visible for
 # dependencies of dawn_wire
 source_set("dawn_wire_headers") {
-  public_deps = [
-    "${dawn_root}/src/dawn:dawn_headers",
-  ]
+  public_deps = [ "${dawn_root}/src/dawn:dawn_headers" ]
   all_dependent_configs = [ "${dawn_root}/src/common:dawn_public_include_dirs" ]
   sources = [
     "${dawn_root}/src/include/dawn_wire/Wire.h",
@@ -78,6 +76,8 @@ dawn_component("dawn_wire") {
     "client/Fence.cpp",
     "client/Fence.h",
     "client/ObjectAllocator.h",
+    "client/Queue.cpp",
+    "client/Queue.h",
     "server/ObjectStorage.h",
     "server/Server.cpp",
     "server/Server.h",
@@ -89,7 +89,5 @@ dawn_component("dawn_wire") {
   ]
 
   # Make headers publicly visible
-  public_deps = [
-    ":dawn_wire_headers",
-  ]
+  public_deps = [ ":dawn_wire_headers" ]
 }

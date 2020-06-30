@@ -24,7 +24,7 @@
 namespace dawn_wire { namespace client {
 
     class Client;
-    struct Queue;
+    class Queue;
 
     class Device : public ObjectBase {
       public:

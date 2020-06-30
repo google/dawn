@@ -77,8 +77,7 @@ namespace dawn_wire { namespace client {
             return true;
         }
 
-        fence->completedValue = value;
-        fence->CheckPassedFences();
+        fence->OnUpdateCompletedValueCallback(value);
         return true;
     }
 
