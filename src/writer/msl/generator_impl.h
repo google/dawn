@@ -104,6 +104,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param lit the literal to emit
   /// @returns true if the literal was successfully emitted
   bool EmitLiteral(ast::Literal* lit);
+  /// Handles a loop statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emtited
+  bool EmitLoop(ast::LoopStatement* stmt);
   /// Handles a member accessor expression
   /// @param expr the member accessor expression
   /// @returns true if the member accessor was emitted
@@ -147,6 +151,7 @@ class GeneratorImpl : public TextGenerator {
 
  private:
   const ast::Module* module_ = nullptr;
+  uint32_t loop_emission_counter_ = 0;
 };
 
 }  // namespace msl

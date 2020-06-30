@@ -27,6 +27,7 @@
 #include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/sint_literal.h"
@@ -407,6 +408,59 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
   return true;
 }
 
+bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
+  loop_emission_counter_++;
+
+  if (stmt->has_continuing()) {
+    make_indent();
+
+    // Continuing variables get their own scope.
+    out_ << "{" << std::endl;
+    increment_indent();
+
+    make_indent();
+    out_ << "bool tint_msl_is_first_" << loop_emission_counter_ << " = true;"
+         << std::endl;
+  }
+
+  make_indent();
+  out_ << "for(;;) {" << std::endl;
+  increment_indent();
+
+  if (stmt->has_continuing()) {
+    make_indent();
+    out_ << "if (!tint_msl_is_first_" << loop_emission_counter_ << ")";
+
+    if (!EmitStatementBlockAndNewline(stmt->continuing())) {
+      return false;
+    }
+
+    make_indent();
+    out_ << "tint_msl_is_first_" << loop_emission_counter_ << " = false;"
+         << std::endl;
+    out_ << std::endl;
+  }
+
+  for (const auto& s : stmt->body()) {
+    if (!EmitStatement(s.get())) {
+      return false;
+    }
+  }
+
+  decrement_indent();
+  make_indent();
+  out_ << "}" << std::endl;
+
+  // Close the scope for any continuing variables.
+  if (stmt->has_continuing()) {
+    decrement_indent();
+    make_indent();
+    out_ << "}" << std::endl;
+  }
+
+  return true;
+}
+
 bool GeneratorImpl::EmitKill(ast::KillStatement*) {
   make_indent();
   // TODO(dsinclair): Verify this is correct when the kill semantics are defined
@@ -518,6 +572,9 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   }
   if (stmt->IsKill()) {
     return EmitKill(stmt->AsKill());
+  }
+  if (stmt->IsLoop()) {
+    return EmitLoop(stmt->AsLoop());
   }
   if (stmt->IsReturn()) {
     return EmitReturn(stmt->AsReturn());
