@@ -163,15 +163,14 @@ namespace dawn_native {
         ASSERT(!IsError());
         ASSERT(mappedPointer != nullptr);
 
+        mState = BufferState::MappedAtCreation;
+
         // Mappable buffers don't use a staging buffer and are just as if mapped through MapAsync.
         if (IsMapWritable()) {
             DAWN_TRY(MapAtCreationImpl(mappedPointer));
-            mState = BufferState::Mapped;
             ASSERT(*mappedPointer != nullptr);
             return {};
         }
-
-        mState = BufferState::MappedAtCreation;
 
         // 0-sized buffers are not supposed to be written to, Return back any non-null pointer.
         if (mSize == 0) {
@@ -322,8 +321,9 @@ namespace dawn_native {
         } else if (mState == BufferState::MappedAtCreation) {
             if (mStagingBuffer != nullptr) {
                 mStagingBuffer.reset();
-            } else {
-                ASSERT(mSize == 0);
+            } else if (mSize != 0) {
+                ASSERT(IsMapWritable());
+                Unmap();
             }
         }
 
@@ -371,8 +371,9 @@ namespace dawn_native {
         } else if (mState == BufferState::MappedAtCreation) {
             if (mStagingBuffer != nullptr) {
                 GetDevice()->ConsumedError(CopyFromStagingBuffer());
-            } else {
-                ASSERT(mSize == 0);
+            } else if (mSize != 0) {
+                ASSERT(IsMapWritable());
+                UnmapImpl();
             }
         }
 
