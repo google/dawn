@@ -244,21 +244,40 @@ namespace dawn_native { namespace d3d12 {
         return (GetUsage() & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) != 0;
     }
 
-    MaybeError Buffer::MapBufferInternal(D3D12_RANGE mappedRange,
-                                         void** mappedPointer,
-                                         const char* contextInfo) {
+    MaybeError Buffer::MapInternal(bool isWrite, const char* contextInfo) {
         // The mapped buffer can be accessed at any time, so it must be locked to ensure it is never
         // evicted. This buffer should already have been made resident when it was created.
         Heap* heap = ToBackend(mResourceAllocation.GetResourceHeap());
         DAWN_TRY(ToBackend(GetDevice())->GetResidencyManager()->LockAllocation(heap));
 
-        DAWN_TRY(
-            CheckHRESULT(GetD3D12Resource()->Map(0, &mappedRange, mappedPointer), contextInfo));
+        D3D12_RANGE range = {0, size_t(GetSize())};
+        DAWN_TRY(CheckHRESULT(GetD3D12Resource()->Map(0, &range, &mMappedData), contextInfo));
+
+        if (isWrite) {
+            mWrittenMappedRange = range;
+        }
+
         return {};
     }
 
-    void Buffer::UnmapBufferInternal(D3D12_RANGE mappedRange) {
-        GetD3D12Resource()->Unmap(0, &mappedRange);
+    MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {
+        DAWN_TRY(MapInternal(true, "D3D12 map at creation"));
+        *mappedPointer = static_cast<uint8_t*>(mMappedData);
+        return {};
+    }
+
+    MaybeError Buffer::MapReadAsyncImpl(uint32_t serial) {
+        return MapInternal(false, "D3D12 map read async");
+    }
+
+    MaybeError Buffer::MapWriteAsyncImpl(uint32_t serial) {
+        return MapInternal(true, "D3D12 map write async");
+    }
+
+    void Buffer::UnmapImpl() {
+        GetD3D12Resource()->Unmap(0, &mWrittenMappedRange);
+        mMappedData = nullptr;
+        mWrittenMappedRange = {0, 0};
 
         // When buffers are mapped, they are locked to keep them in resident memory. We must unlock
         // them when they are unmapped.
@@ -266,52 +285,17 @@ namespace dawn_native { namespace d3d12 {
         ToBackend(GetDevice())->GetResidencyManager()->UnlockAllocation(heap);
     }
 
-    MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {
-        mWrittenMappedRange = {0, static_cast<size_t>(GetSize())};
-        DAWN_TRY(MapBufferInternal(mWrittenMappedRange, reinterpret_cast<void**>(mappedPointer),
-                                   "D3D12 map at creation"));
-        mMappedData = reinterpret_cast<char*>(mappedPointer);
-        return {};
-    }
-
-    MaybeError Buffer::MapReadAsyncImpl(uint32_t serial) {
-        mWrittenMappedRange = {};
-        D3D12_RANGE readRange = {0, static_cast<size_t>(GetSize())};
-        DAWN_TRY(MapBufferInternal(readRange, reinterpret_cast<void**>(&mMappedData),
-                                   "D3D12 map read async"));
-
-        // There is no need to transition the resource to a new state: D3D12 seems to make the GPU
-        // writes available when the fence is passed.
-        return {};
-    }
-
-    MaybeError Buffer::MapWriteAsyncImpl(uint32_t serial) {
-        mWrittenMappedRange = {0, static_cast<size_t>(GetSize())};
-        DAWN_TRY(MapBufferInternal(mWrittenMappedRange, reinterpret_cast<void**>(&mMappedData),
-                                   "D3D12 map write async"));
-
-        // There is no need to transition the resource to a new state: D3D12 seems to make the CPU
-        // writes available on queue submission.
-        return {};
-    }
-
-    void Buffer::UnmapImpl() {
-        UnmapBufferInternal(mWrittenMappedRange);
-
-        mWrittenMappedRange = {};
-        mMappedData = nullptr;
-    }
-
     void* Buffer::GetMappedPointerImpl() {
         return mMappedData;
     }
 
     void Buffer::DestroyImpl() {
-        // We must ensure that if a mapped buffer is destroyed, it does not leave a dangling lock
-        // reference on its heap.
-        if (IsMapped()) {
-            Heap* heap = ToBackend(mResourceAllocation.GetResourceHeap());
-            ToBackend(GetDevice())->GetResidencyManager()->UnlockAllocation(heap);
+        if (mMappedData != nullptr) {
+            // If the buffer is currently mapped, unmap without flushing the writes to the GPU
+            // since the buffer cannot be used anymore. UnmapImpl checks mWrittenRange to know
+            // which parts to flush, so we set it to an empty range to prevent flushes.
+            mWrittenMappedRange = {0, 0};
+            UnmapImpl();
         }
 
         ToBackend(GetDevice())->DeallocateMemory(mResourceAllocation);
@@ -336,15 +320,9 @@ namespace dawn_native { namespace d3d12 {
         // The state of the buffers on UPLOAD heap must always be GENERIC_READ and cannot be
         // changed away, so we can only clear such buffer with buffer mapping.
         if (D3D12HeapType(GetUsage()) == D3D12_HEAP_TYPE_UPLOAD) {
-            uint8_t* mappedData = nullptr;
-            D3D12_RANGE writeRange = {0, static_cast<size_t>(GetSize())};
-            DAWN_TRY(MapBufferInternal(writeRange, reinterpret_cast<void**>(&mappedData),
-                                       "D3D12 map at clear buffer"));
-
-            memset(mappedData, kClearBufferValue, GetSize());
-
-            UnmapBufferInternal(writeRange);
-            mappedData = nullptr;
+            DAWN_TRY(MapInternal(true, "D3D12 map at clear buffer"));
+            memset(mMappedData, kClearBufferValue, GetSize());
+            UnmapImpl();
         } else {
             // TODO(jiawei.shao@intel.com): use ClearUnorderedAccessView*() when the buffer usage
             // includes STORAGE.

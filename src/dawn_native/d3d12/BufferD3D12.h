@@ -55,10 +55,7 @@ namespace dawn_native { namespace d3d12 {
         bool IsMapWritable() const override;
         virtual MaybeError MapAtCreationImpl(uint8_t** mappedPointer) override;
         void* GetMappedPointerImpl() override;
-        MaybeError MapBufferInternal(D3D12_RANGE mappedRange,
-                                     void** mappedPointer,
-                                     const char* contextInfo);
-        void UnmapBufferInternal(D3D12_RANGE mappedRange);
+        MaybeError MapInternal(bool isWrite, const char* contextInfo);
 
         bool TransitionUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
                                                   D3D12_RESOURCE_BARRIER* barrier,
@@ -70,8 +67,9 @@ namespace dawn_native { namespace d3d12 {
         bool mFixedResourceState = false;
         wgpu::BufferUsage mLastUsage = wgpu::BufferUsage::None;
         Serial mLastUsedSerial = UINT64_MAX;
-        D3D12_RANGE mWrittenMappedRange;
-        char* mMappedData = nullptr;
+
+        D3D12_RANGE mWrittenMappedRange = {0, 0};
+        void* mMappedData = nullptr;
     };
 
 }}  // namespace dawn_native::d3d12

@@ -81,8 +81,6 @@ namespace dawn_native {
 
         void DestroyInternal();
 
-        bool IsMapped() const;
-
       private:
         virtual MaybeError MapAtCreationImpl(uint8_t** mappedPointer) = 0;
         virtual MaybeError MapReadAsyncImpl(uint32_t serial) = 0;

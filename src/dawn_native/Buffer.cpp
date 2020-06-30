@@ -165,16 +165,17 @@ namespace dawn_native {
 
         mState = BufferState::MappedAtCreation;
 
+        // 0-sized buffers are not supposed to be written to, Return back any non-null pointer.
+        // Handle 0-sized buffers first so we don't try to map them in the backend.
+        if (mSize == 0) {
+            *mappedPointer = reinterpret_cast<uint8_t*>(intptr_t(0xCAFED00D));
+            return {};
+        }
+
         // Mappable buffers don't use a staging buffer and are just as if mapped through MapAsync.
         if (IsMapWritable()) {
             DAWN_TRY(MapAtCreationImpl(mappedPointer));
             ASSERT(*mappedPointer != nullptr);
-            return {};
-        }
-
-        // 0-sized buffers are not supposed to be written to, Return back any non-null pointer.
-        if (mSize == 0) {
-            *mappedPointer = reinterpret_cast<uint8_t*>(intptr_t(0xCAFED00D));
             return {};
         }
 
@@ -481,10 +482,6 @@ namespace dawn_native {
             DestroyImpl();
         }
         mState = BufferState::Destroyed;
-    }
-
-    bool BufferBase::IsMapped() const {
-        return mState == BufferState::Mapped;
     }
 
     void BufferBase::OnMapCommandSerialFinished(uint32_t mapSerial, bool isWrite) {
