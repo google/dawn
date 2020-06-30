@@ -23,18 +23,18 @@ namespace dawn_wire { namespace client {
         auto* allocation = device->GetClient()->FenceAllocator().New(device);
 
         QueueCreateFenceCmd cmd;
-        cmd.self = reinterpret_cast<WGPUQueue>(this);
+        cmd.self = ToAPI(this);
         cmd.result = ObjectHandle{allocation->object->id, allocation->generation};
         cmd.descriptor = descriptor;
         device->GetClient()->SerializeCommand(cmd);
 
         Fence* fence = allocation->object.get();
         fence->Initialize(this, descriptor);
-        return reinterpret_cast<WGPUFence>(fence);
+        return ToAPI(fence);
     }
 
     void Queue::Signal(WGPUFence cFence, uint64_t signalValue) {
-        Fence* fence = reinterpret_cast<Fence*>(cFence);
+        Fence* fence = FromAPI(cFence);
         if (fence->GetQueue() != this) {
             device->InjectError(WGPUErrorType_Validation,
                                 "Fence must be signaled on the queue on which it was created.");
@@ -49,7 +49,7 @@ namespace dawn_wire { namespace client {
         fence->SetSignaledValue(signalValue);
 
         QueueSignalCmd cmd;
-        cmd.self = reinterpret_cast<WGPUQueue>(this);
+        cmd.self = ToAPI(this);
         cmd.fence = cFence;
         cmd.signalValue = signalValue;
 
@@ -60,7 +60,7 @@ namespace dawn_wire { namespace client {
                             uint64_t bufferOffset,
                             const void* data,
                             size_t size) {
-        Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
+        Buffer* buffer = FromAPI(cBuffer);
 
         QueueWriteBufferInternalCmd cmd;
         cmd.queueId = id;

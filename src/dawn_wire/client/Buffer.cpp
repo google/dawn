@@ -47,7 +47,6 @@ namespace dawn_wire { namespace client {
 
     // static
     WGPUBuffer Buffer::Create(Device* device_, const WGPUBufferDescriptor* descriptor) {
-        WGPUDevice cDevice = reinterpret_cast<WGPUDevice>(device_);
         Client* wireClient = device_->GetClient();
 
         if ((descriptor->usage & (WGPUBufferUsage_MapRead | WGPUBufferUsage_MapWrite)) != 0 &&
@@ -63,19 +62,18 @@ namespace dawn_wire { namespace client {
         buffer->mSize = descriptor->size;
 
         DeviceCreateBufferCmd cmd;
-        cmd.self = cDevice;
+        cmd.self = ToAPI(device_);
         cmd.descriptor = descriptor;
         cmd.result = ObjectHandle{buffer->id, bufferObjectAndSerial->generation};
 
         wireClient->SerializeCommand(cmd);
 
-        return reinterpret_cast<WGPUBuffer>(buffer);
+        return ToAPI(buffer);
     }
 
     // static
     WGPUCreateBufferMappedResult Buffer::CreateMapped(Device* device_,
                                                       const WGPUBufferDescriptor* descriptor) {
-        WGPUDevice cDevice = reinterpret_cast<WGPUDevice>(device_);
         Client* wireClient = device_->GetClient();
 
         WGPUCreateBufferMappedResult result;
@@ -119,13 +117,13 @@ namespace dawn_wire { namespace client {
         buffer->mWriteHandle = std::move(writeHandle);
         buffer->mMappedData = result.data;
 
-        result.buffer = reinterpret_cast<WGPUBuffer>(buffer);
+        result.buffer = ToAPI(buffer);
 
         // Get the serialization size of the WriteHandle.
         size_t handleCreateInfoLength = buffer->mWriteHandle->SerializeCreateSize();
 
         DeviceCreateBufferMappedCmd cmd;
-        cmd.device = cDevice;
+        cmd.device = ToAPI(device_);
         cmd.descriptor = descriptor;
         cmd.result = ObjectHandle{buffer->id, bufferObjectAndSerial->generation};
         cmd.handleCreateInfoLength = handleCreateInfoLength;
@@ -145,11 +143,11 @@ namespace dawn_wire { namespace client {
         auto* allocation = device_->GetClient()->BufferAllocator().New(device_);
 
         DeviceCreateErrorBufferCmd cmd;
-        cmd.self = reinterpret_cast<WGPUDevice>(device_);
+        cmd.self = ToAPI(device_);
         cmd.result = ObjectHandle{allocation->object->id, allocation->generation};
         device_->GetClient()->SerializeCommand(cmd);
 
-        return reinterpret_cast<WGPUBuffer>(allocation->object.get());
+        return ToAPI(allocation->object.get());
     }
 
     Buffer::~Buffer() {
@@ -420,7 +418,7 @@ namespace dawn_wire { namespace client {
         ClearMapRequests(WGPUBufferMapAsyncStatus_Unknown);
 
         BufferUnmapCmd cmd;
-        cmd.self = reinterpret_cast<WGPUBuffer>(this);
+        cmd.self = ToAPI(this);
         device->GetClient()->SerializeCommand(cmd);
     }
 
@@ -432,7 +430,7 @@ namespace dawn_wire { namespace client {
         ClearMapRequests(WGPUBufferMapAsyncStatus_Unknown);
 
         BufferDestroyCmd cmd;
-        cmd.self = reinterpret_cast<WGPUBuffer>(this);
+        cmd.self = ToAPI(this);
         device->GetClient()->SerializeCommand(cmd);
     }
 

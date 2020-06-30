@@ -31,7 +31,7 @@ namespace dawn_wire { namespace client {
         mDefaultQueue = allocation->object.get();
 
         DeviceGetDefaultQueueCmd cmd;
-        cmd.self = reinterpret_cast<WGPUDevice>(this);
+        cmd.self = ToAPI(this);
         cmd.result = ObjectHandle{allocation->object->id, allocation->generation};
 
         mClient->SerializeCommand(cmd);
@@ -85,7 +85,7 @@ namespace dawn_wire { namespace client {
         mErrorScopeStackSize++;
 
         DevicePushErrorScopeCmd cmd;
-        cmd.self = reinterpret_cast<WGPUDevice>(this);
+        cmd.self = ToAPI(this);
         cmd.filter = filter;
 
         mClient->SerializeCommand(cmd);
@@ -103,7 +103,7 @@ namespace dawn_wire { namespace client {
         mErrorScopes[serial] = {callback, userdata};
 
         DevicePopErrorScopeCmd cmd;
-        cmd.device = reinterpret_cast<WGPUDevice>(this);
+        cmd.device = ToAPI(this);
         cmd.requestSerial = serial;
 
         mClient->SerializeCommand(cmd);
@@ -139,7 +139,7 @@ namespace dawn_wire { namespace client {
 
     void Device::InjectError(WGPUErrorType type, const char* message) {
         DeviceInjectErrorCmd cmd;
-        cmd.self = reinterpret_cast<WGPUDevice>(this);
+        cmd.self = ToAPI(this);
         cmd.type = type;
         cmd.message = message;
         mClient->SerializeCommand(cmd);
@@ -160,7 +160,7 @@ namespace dawn_wire { namespace client {
 
     WGPUQueue Device::GetDefaultQueue() {
         mDefaultQueue->refcount++;
-        return reinterpret_cast<WGPUQueue>(mDefaultQueue);
+        return ToAPI(mDefaultQueue);
     }
 
 }}  // namespace dawn_wire::client
