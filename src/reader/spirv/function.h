@@ -157,6 +157,11 @@ struct BlockInfo {
   /// This occurs when a block in this selection has both an if-break edge, and
   /// also a different normal forward edge but without a merge instruction.
   std::string flow_guard_name = "";
+
+  /// The result IDs that this block is responsible for declaring as a
+  /// hoisted variable.  See the |needs_hoisted_def_| member of
+  /// FunctionEmitter for an explanation.
+  std::vector<uint32_t> hoisted_ids;
 };
 
 inline std::ostream& operator<<(std::ostream& o, const BlockInfo& bi) {
@@ -278,11 +283,18 @@ class FunctionEmitter {
   bool FindIfSelectionInternalHeaders();
 
   /// Record the SPIR-V IDs of non-constants that should get a 'const'
-  /// definition in WGSL. This occurs when a SPIR-V instruction might use the
-  /// dynamically computed value only once, but the WGSL code might reference
-  /// it multiple times. For example, this occurs for the vector operands of
-  /// OpVectorShuffle.  Populates |needs_named_const_def_|
-  void RegisterValuesNeedingNamedDefinition();
+  /// definition in WGSL, or a 'var' definition at an outer scope.
+  /// This occurs in several cases:
+  ///  - When a SPIR-V instruction might use the dynamically computed value
+  ///    only once, but the WGSL code might reference it multiple times.
+  ///    For example, this occurs for the vector operands of OpVectorShuffle.
+  ///    In this case the definition is added to |needs_named_const_def_|.
+  ///  - When a definition and at least one of its uses are not in the
+  ///    same structured construct.
+  ///    In this case the definition is added to |needs_named_const_def_|.
+  ///  - When a definition is in a construct that does not enclose all the
+  ///    uses.  In this case the definition is added to |needs_hoisted_def_|.
+  void RegisterValuesNeedingNamedOrHoistedDefinition();
 
   /// Emits declarations of function variables.
   /// @returns false if emission failed.
@@ -430,6 +442,15 @@ class FunctionEmitter {
   /// @returns false if emission failed.
   bool EmitConstDefinition(const spvtools::opt::Instruction& inst,
                            TypedExpression ast_expr);
+
+  /// Emits a write to a hoisted variable for the given SPIR-V id,
+  /// if that ID has a hoisted declaration. Otherwise, emits a const
+  /// definition instead.
+  /// @param inst the SPIR-V instruction defining the value
+  /// @param ast_expr the already-computed AST expression for the value
+  /// @returns false if emission failed.
+  bool EmitConstDefOrWriteToHoistedVar(const spvtools::opt::Instruction& inst,
+                                       TypedExpression ast_expr);
 
   /// Makes an expression
   /// @param id the SPIR-V ID of the value
@@ -603,6 +624,19 @@ class FunctionEmitter {
   std::unordered_map<uint32_t, TypedExpression> singly_used_values_;
   // Set of SPIR-V IDs which should get a named const definition.
   std::unordered_set<uint32_t> needs_named_const_def_;
+  // The SPIR-V IDs that must be declared in WGSL before the corresponding
+  // location in SPIR-V. This compensates for the difference between dominance
+  // and scoping. An SSA definition can dominate all its uses, but the construct
+  // where it is defined does not enclose all the uses, and so if it were
+  // declared as a WGSL constant definition at the point of its SPIR-V
+  // definition, then the WGSL name would go out of scope too early. Fix that by
+  // creating a variable at the top of the smallest construct that encloses both
+  // the definition and all its uses. Then the original SPIR-V definition maps
+  // to a WGSL assignment to that variable, and each SPIR-V use becomes a WGSL
+  // read from the variable.
+  // TODO(dneto): This works for constants of storable type, but not, for
+  // example, pointers.
+  std::unordered_set<uint32_t> needs_hoisted_def_;
 
   // The IDs of basic blocks, in reverse structured post-order (RSPO).
   // This is the output order for the basic blocks.

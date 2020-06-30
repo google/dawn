@@ -624,7 +624,7 @@ bool FunctionEmitter::EmitBody() {
 
   // TODO(dneto): register phis
   // TODO(dneto): register SSA values which need to be hoisted
-  RegisterValuesNeedingNamedDefinition();
+  RegisterValuesNeedingNamedOrHoistedDefinition();
 
   if (!EmitFunctionVariables()) {
     return false;
@@ -2361,6 +2361,19 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     // Only emit this part of the basic block once.
     return true;
   }
+
+  // Emit declarations of hoisted variables.
+  for (auto id : block_info.hoisted_ids) {
+    const auto* def_inst = def_use_mgr_->GetDef(id);
+    assert(def_inst);
+    AddStatement(
+        std::make_unique<ast::VariableDeclStatement>(parser_impl_.MakeVariable(
+            id, ast::StorageClass::kFunction,
+            parser_impl_.ConvertType(def_inst->type_id()))));
+    // Save this as an already-named value.
+    identifier_values_.insert(id);
+  }
+
   const spvtools::opt::BasicBlock& bb = *(block_info.basic_block);
   const auto* terminator = bb.terminator();
   const auto* merge = bb.GetMergeInst();  // Might be nullptr
@@ -2399,22 +2412,38 @@ bool FunctionEmitter::EmitConstDefinition(
   return success();
 }
 
+bool FunctionEmitter::EmitConstDefOrWriteToHoistedVar(
+    const spvtools::opt::Instruction& inst,
+    TypedExpression ast_expr) {
+  const auto result_id = inst.result_id();
+  if (needs_hoisted_def_.count(result_id) != 0) {
+    // Emit an assignment of the expression to the hoisted variable.
+    AddStatement(std::make_unique<ast::AssignmentStatement>(
+        std::make_unique<ast::IdentifierExpression>(namer_.Name(result_id)),
+        std::move(ast_expr.expr)));
+    return true;
+  }
+  return EmitConstDefinition(inst, std::move(ast_expr));
+}
+
 bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
-  // Handle combinatorial instructions first.
+  const auto result_id = inst.result_id();
+  // Handle combinatorial instructions.
   auto combinatorial_expr = MaybeEmitCombinatorialValue(inst);
   if (combinatorial_expr.expr != nullptr) {
-    if ((needs_named_const_def_.count(inst.result_id()) == 0) &&
+    if ((needs_hoisted_def_.count(result_id) == 0) &&
+        (needs_named_const_def_.count(result_id) == 0) &&
         (def_use_mgr_->NumUses(&inst) == 1)) {
       // If it's used once, and doesn't need a named constant definition,
       // then defer emitting the expression until it's used. Any supporting
       // statements have already been emitted.
       singly_used_values_.insert(
-          std::make_pair(inst.result_id(), std::move(combinatorial_expr)));
+          std::make_pair(result_id, std::move(combinatorial_expr)));
       return success();
     }
     // Otherwise, generate a const definition for it now and later use
     // the const's name at the uses of the value.
-    return EmitConstDefinition(inst, std::move(combinatorial_expr));
+    return EmitConstDefOrWriteToHoistedVar(inst, std::move(combinatorial_expr));
   }
   if (failed()) {
     return false;
@@ -2435,13 +2464,13 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
     case SpvOpLoad:
       // Memory accesses must be issued in SPIR-V program order.
       // So represent a load by a new const definition.
-      return EmitConstDefinition(
+      return EmitConstDefOrWriteToHoistedVar(
           inst, MakeExpression(inst.GetSingleWordInOperand(0)));
     case SpvOpCopyObject:
       // Arguably, OpCopyObject is purely combinatorial. On the other hand,
       // it exists to make a new name for something. So we choose to make
       // a new named constant definition.
-      return EmitConstDefinition(
+      return EmitConstDefOrWriteToHoistedVar(
           inst, MakeExpression(inst.GetSingleWordInOperand(0)));
     case SpvOpFunctionCall:
       // TODO(dneto): Fill this out.  Make this pass, for existing tests
@@ -2876,7 +2905,7 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(
                            result_type, std::move(values))};
 }
 
-void FunctionEmitter::RegisterValuesNeedingNamedDefinition() {
+void FunctionEmitter::RegisterValuesNeedingNamedOrHoistedDefinition() {
   // Maps a result ID to the block position where it is last used.
   std::unordered_map<uint32_t, uint32_t> id_to_last_use_pos;
   // List of pairs of (result id, block position of the definition).
@@ -2930,12 +2959,32 @@ void FunctionEmitter::RegisterValuesNeedingNamedDefinition() {
     auto last_use_where = id_to_last_use_pos.find(id);
     if (last_use_where != id_to_last_use_pos.end()) {
       const auto last_use_pos = last_use_where->second;
-      const auto* def_in_construct =
+      const auto* const def_in_construct =
           GetBlockInfo(block_order_[def_pos])->construct;
-      const auto* last_use_in_construct =
+      const auto* const construct_with_last_use =
           GetBlockInfo(block_order_[last_use_pos])->construct;
-      if (def_in_construct != last_use_in_construct) {
-        needs_named_const_def_.insert(id);
+
+      // Find the smallest structured construct that encloses the definition
+      // and all its uses.
+      const auto* enclosing_construct = def_in_construct;
+      while (enclosing_construct &&
+             !enclosing_construct->ContainsPos(last_use_pos)) {
+        enclosing_construct = enclosing_construct->parent;
+      }
+      // At worst, we go all the way out to the function construct.
+      assert(enclosing_construct != nullptr);
+
+      if (def_in_construct != construct_with_last_use) {
+        if (enclosing_construct == def_in_construct) {
+          // We can use a plain 'const' definition.
+          needs_named_const_def_.insert(id);
+        } else {
+          // We need to make a hoisted variable definition.
+          // TODO(dneto): Handle non-storable types, particularly pointers.
+          needs_hoisted_def_.insert(id);
+          auto* hoist_to_block = GetBlockInfo(enclosing_construct->begin_id);
+          hoist_to_block->hoisted_ids.push_back(id);
+        }
       }
     }
   }

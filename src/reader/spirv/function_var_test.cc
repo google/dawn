@@ -61,9 +61,13 @@ std::string Preamble() {
     %false = OpConstantFalse %bool
     %float_0 = OpConstant %float 0.0
     %float_1p5 = OpConstant %float 1.5
+    %uint_0 = OpConstant %uint 0
     %uint_1 = OpConstant %uint 1
     %int_m1 = OpConstant %int -1
     %uint_2 = OpConstant %uint 2
+    %uint_3 = OpConstant %uint 3
+    %uint_4 = OpConstant %uint 4
+    %uint_5 = OpConstant %uint 5
 
     %v2float = OpTypeVector %float 2
     %m3v2float = OpTypeMatrix %v2float 3
@@ -789,6 +793,137 @@ Loop{
 Assignment{
   Identifier{x_25}
   ScalarConstructor{2}
+}
+Return{}
+)")) << ToString(fe.ast_body());
+}
+
+TEST_F(
+    SpvParserTest,
+    EmitStatement_CombinatorialNonPointer_DefConstruct_DoesNotEncloseAllUses) {
+  // Compensate for the difference between dominance and scoping.
+  // Exercise hoisting of the constant definition to before its natural
+  // location.
+  //
+  // The definition of %2 should be hoisted
+  auto assembly = Preamble() + R"(
+     %pty = OpTypePointer Private %uint
+     %1 = OpVariable %pty Private
+
+     %100 = OpFunction %void None %voidfn
+
+     %3 = OpLabel
+     OpStore %1 %uint_0
+     OpBranch %5
+
+     %5 = OpLabel
+     OpStore %1 %uint_1
+     OpLoopMerge  %99 %80 None
+     OpBranchConditional %false %99 %20
+
+     %20 = OpLabel
+     OpStore %1 %uint_3
+     OpSelectionMerge %50 None
+     OpBranchConditional %true %30 %40
+
+     %30 = OpLabel
+     ; This combinatorial definition in nested control flow dominates
+     ; the use in the merge block in %50
+     %2 = OpIAdd %uint %uint_1 %uint_1
+     OpBranch %50
+
+     %40 = OpLabel
+     OpReturn
+
+     %50 = OpLabel ; merge block for if-selection
+     OpStore %1 %2
+     OpBranch %80
+
+     %80 = OpLabel ; merge block
+     OpStore %1 %uint_4
+     OpBranchConditional %false %99 %5 ; loop backedge
+
+     %99 = OpLabel
+     OpStore %1 %uint_5
+     OpReturn
+
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Assignment{
+  Identifier{x_1}
+  ScalarConstructor{0}
+}
+Loop{
+  VariableDeclStatement{
+    Variable{
+      x_2
+      function
+      __u32
+    }
+  }
+  Assignment{
+    Identifier{x_1}
+    ScalarConstructor{1}
+  }
+  If{
+    (
+      ScalarConstructor{false}
+    )
+    {
+      Break{}
+    }
+  }
+  Assignment{
+    Identifier{x_1}
+    ScalarConstructor{3}
+  }
+  If{
+    (
+      ScalarConstructor{true}
+    )
+    {
+      Assignment{
+        Identifier{x_2}
+        Binary{
+          ScalarConstructor{1}
+          add
+          ScalarConstructor{1}
+        }
+      }
+    }
+  }
+  Else{
+    {
+      Return{}
+    }
+  }
+  Assignment{
+    Identifier{x_1}
+    Identifier{x_2}
+  }
+  continuing {
+    Assignment{
+      Identifier{x_1}
+      ScalarConstructor{4}
+    }
+    If{
+      (
+        ScalarConstructor{false}
+      )
+      {
+        Break{}
+      }
+    }
+  }
+}
+Assignment{
+  Identifier{x_1}
+  ScalarConstructor{5}
 }
 Return{}
 )")) << ToString(fe.ast_body());
