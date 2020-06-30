@@ -23,6 +23,7 @@
 #include <vector>
 
 namespace dawn_wire { namespace client {
+
     namespace {
 
         //* Outputs an rvalue that's the number of elements a pointer member points to.
@@ -176,8 +177,8 @@ namespace dawn_wire { namespace client {
                     }
                 {% endif %}
 
+                auto self = reinterpret_cast<{{as_wireType(type)}}>(cSelf);
                 {% if Suffix not in client_handwritten_commands %}
-                    auto self = reinterpret_cast<{{as_wireType(type)}}>(cSelf);
                     Device* device = self->device;
                     {{Suffix}}Cmd cmd;
 
@@ -202,9 +203,9 @@ namespace dawn_wire { namespace client {
                         return reinterpret_cast<{{as_cType(method.return_type.name)}}>(allocation->object.get());
                     {% endif %}
                 {% else %}
-                    return ClientHandwritten{{Suffix}}(cSelf
+                    return self->{{method.name.CamelCase()}}(
                         {%- for arg in method.arguments -%}
-                            , {{as_varName(arg.name)}}
+                            {%if not loop.first %}, {% endif %} {{as_varName(arg.name)}}
                         {%- endfor -%});
                 {% endif %}
             }
@@ -234,6 +235,12 @@ namespace dawn_wire { namespace client {
             }
         {% endif %}
     {% endfor %}
+
+    void ClientDeviceReference(WGPUDevice) {
+    }
+
+    void ClientDeviceRelease(WGPUDevice) {
+    }
 
     namespace {
         WGPUInstance ClientCreateInstance(WGPUInstanceDescriptor const* descriptor) {

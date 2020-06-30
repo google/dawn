@@ -32,14 +32,18 @@ namespace dawn_wire { namespace client {
         ~Device();
 
         Client* GetClient();
-        void HandleError(WGPUErrorType errorType, const char* message);
-        void HandleDeviceLost(const char* message);
         void SetUncapturedErrorCallback(WGPUErrorCallback errorCallback, void* errorUserdata);
         void SetDeviceLostCallback(WGPUDeviceLostCallback errorCallback, void* errorUserdata);
-
         void PushErrorScope(WGPUErrorFilter filter);
-        bool RequestPopErrorScope(WGPUErrorCallback callback, void* userdata);
-        bool PopErrorScope(uint64_t requestSerial, WGPUErrorType type, const char* message);
+        bool PopErrorScope(WGPUErrorCallback callback, void* userdata);
+        WGPUBuffer CreateBuffer(const WGPUBufferDescriptor* descriptor);
+        WGPUCreateBufferMappedResult CreateBufferMapped(const WGPUBufferDescriptor* descriptor);
+
+        void HandleError(WGPUErrorType errorType, const char* message);
+        void HandleDeviceLost(const char* message);
+        bool OnPopErrorScopeCallback(uint64_t requestSerial,
+                                     WGPUErrorType type,
+                                     const char* message);
 
         WGPUQueue GetDefaultQueue();
 

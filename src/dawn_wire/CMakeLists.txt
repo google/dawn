@@ -30,7 +30,6 @@ target_sources(dawn_wire PRIVATE
     "WireDeserializeAllocator.h"
     "WireServer.cpp"
     "client/ApiObjects.h"
-    "client/ApiProcs.cpp"
     "client/Buffer.cpp"
     "client/Buffer.h"
     "client/Client.cpp"

@@ -64,7 +64,6 @@ dawn_component("dawn_wire") {
     "WireDeserializeAllocator.h",
     "WireServer.cpp",
     "client/ApiObjects.h",
-    "client/ApiProcs.cpp",
     "client/Buffer.cpp",
     "client/Buffer.h",
     "client/Client.cpp",

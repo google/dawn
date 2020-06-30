@@ -43,7 +43,7 @@ namespace dawn_wire { namespace client {
     bool Client::DoDevicePopErrorScopeCallback(uint64_t requestSerial,
                                                WGPUErrorType errorType,
                                                const char* message) {
-        return mDevice->PopErrorScope(requestSerial, errorType, message);
+        return mDevice->OnPopErrorScopeCallback(requestSerial, errorType, message);
     }
 
     bool Client::DoBufferMapReadAsyncCallback(Buffer* buffer,

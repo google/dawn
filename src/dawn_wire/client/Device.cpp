@@ -91,7 +91,7 @@ namespace dawn_wire { namespace client {
         mClient->SerializeCommand(cmd);
     }
 
-    bool Device::RequestPopErrorScope(WGPUErrorCallback callback, void* userdata) {
+    bool Device::PopErrorScope(WGPUErrorCallback callback, void* userdata) {
         if (mErrorScopeStackSize == 0) {
             return false;
         }
@@ -111,7 +111,9 @@ namespace dawn_wire { namespace client {
         return true;
     }
 
-    bool Device::PopErrorScope(uint64_t requestSerial, WGPUErrorType type, const char* message) {
+    bool Device::OnPopErrorScopeCallback(uint64_t requestSerial,
+                                         WGPUErrorType type,
+                                         const char* message) {
         switch (type) {
             case WGPUErrorType_NoError:
             case WGPUErrorType_Validation:
@@ -133,6 +135,15 @@ namespace dawn_wire { namespace client {
         mErrorScopes.erase(requestIt);
         request.callback(type, message, request.userdata);
         return true;
+    }
+
+    WGPUBuffer Device::CreateBuffer(const WGPUBufferDescriptor* descriptor) {
+        return Buffer::Create(this, descriptor);
+    }
+
+    WGPUCreateBufferMappedResult Device::CreateBufferMapped(
+        const WGPUBufferDescriptor* descriptor) {
+        return Buffer::CreateMapped(this, descriptor);
     }
 
     WGPUQueue Device::GetDefaultQueue() {
