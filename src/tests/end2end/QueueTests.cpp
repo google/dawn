@@ -113,7 +113,7 @@ TEST_P(QueueWriteBufferTests, ManyWriteBuffer) {
     DAWN_SKIP_TEST_IF(IsMacOS() && IsIntel() && IsMetal());
 
     constexpr uint64_t kSize = 4000 * 1000;
-    constexpr uint32_t kElements = 500 * 500;
+    constexpr uint32_t kElements = 250 * 250;
     wgpu::BufferDescriptor descriptor;
     descriptor.size = kSize;
     descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
