@@ -58,7 +58,7 @@ namespace dawn_native {
         MaybeError ValidateCanUseOnQueueNow() const;
 
         // Dawn API
-        void SetSubData(uint32_t start, uint32_t count, const void* data);
+        void SetSubData(uint64_t start, uint64_t count, const void* data);
         void MapReadAsync(WGPUBufferMapReadCallback callback, void* userdata);
         void MapWriteAsync(WGPUBufferMapWriteCallback callback, void* userdata);
         void* GetMappedRange();

@@ -249,11 +249,15 @@ namespace dawn_native {
         }
     }
 
-    void BufferBase::SetSubData(uint32_t start, uint32_t count, const void* data) {
+    void BufferBase::SetSubData(uint64_t start, uint64_t count, const void* data) {
+        if (count > uint64_t(std::numeric_limits<size_t>::max())) {
+            GetDevice()->HandleError(InternalErrorType::Validation, "count too big");
+        }
+
         Ref<QueueBase> queue = AcquireRef(GetDevice()->GetDefaultQueue());
         GetDevice()->EmitDeprecationWarning(
             "Buffer::SetSubData is deprecated, use Queue::WriteBuffer instead");
-        queue->WriteBuffer(this, start, data, count);
+        queue->WriteBuffer(this, start, data, static_cast<size_t>(count));
     }
 
     void BufferBase::MapReadAsync(WGPUBufferMapReadCallback callback, void* userdata) {
