@@ -64,6 +64,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
   bool EmitBreak(ast::BreakStatement* stmt);
+  /// Handles a case statement
+  /// @param stmt the statement
+  /// @returns true if the statment was emitted successfully
+  bool EmitCase(ast::CaseStatement* stmt);
   /// Handles generating a cast expression
   /// @param expr the cast expression
   /// @returns true if the cast was emitted
@@ -135,6 +139,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
   bool EmitStatement(ast::Statement* stmt);
+  /// Handles generating a switch statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted
+  bool EmitSwitch(ast::SwitchStatement* stmt);
   /// Handles generating type
   /// @param type the type to generate
   /// @param name the name of the variable, only used for array emission

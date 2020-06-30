@@ -498,6 +498,7 @@ if(${TINT_BUILD_MSL_WRITER})
     writer/msl/generator_impl_assign_test.cc
     writer/msl/generator_impl_binary_test.cc
     writer/msl/generator_impl_break_test.cc
+    writer/msl/generator_impl_case_test.cc
     writer/msl/generator_impl_cast_test.cc
     writer/msl/generator_impl_constructor_test.cc
     writer/msl/generator_impl_continue_test.cc
@@ -508,6 +509,7 @@ if(${TINT_BUILD_MSL_WRITER})
     writer/msl/generator_impl_loop_test.cc
     writer/msl/generator_impl_member_accessor_test.cc
     writer/msl/generator_impl_return_test.cc
+    writer/msl/generator_impl_switch_test.cc
     writer/msl/generator_impl_test.cc
     writer/msl/generator_impl_type_test.cc
     writer/msl/generator_impl_unary_op_test.cc

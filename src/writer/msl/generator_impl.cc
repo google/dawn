@@ -20,6 +20,7 @@
 #include "src/ast/binary_expression.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/break_statement.h"
+#include "src/ast/case_statement.h"
 #include "src/ast/cast_expression.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/else_statement.h"
@@ -31,6 +32,7 @@
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/switch_statement.h"
 #include "src/ast/type/alias_type.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/bool_type.h"
@@ -48,6 +50,17 @@
 namespace tint {
 namespace writer {
 namespace msl {
+namespace {
+
+bool last_is_break_or_fallthrough(const ast::StatementList& stmts) {
+  if (stmts.empty()) {
+    return false;
+  }
+
+  return stmts.back()->IsBreak() || stmts.back()->IsFallthrough();
+}
+
+}  // namespace
 
 GeneratorImpl::GeneratorImpl() = default;
 
@@ -219,6 +232,50 @@ bool GeneratorImpl::EmitBinary(ast::BinaryExpression* expr) {
 bool GeneratorImpl::EmitBreak(ast::BreakStatement*) {
   make_indent();
   out_ << "break;" << std::endl;
+  return true;
+}
+
+bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
+  make_indent();
+
+  if (stmt->IsDefault()) {
+    out_ << "default:";
+  } else {
+    bool first = true;
+    for (const auto& selector : stmt->selectors()) {
+      if (!first) {
+        out_ << std::endl;
+        make_indent();
+      }
+      first = false;
+
+      out_ << "case ";
+      if (!EmitLiteral(selector.get())) {
+        return false;
+      }
+      out_ << ":";
+    }
+  }
+
+  out_ << " {" << std::endl;
+
+  increment_indent();
+
+  for (const auto& s : stmt->body()) {
+    if (!EmitStatement(s.get())) {
+      return false;
+    }
+  }
+
+  if (!last_is_break_or_fallthrough(stmt->body())) {
+    make_indent();
+    out_ << "break;" << std::endl;
+  }
+
+  decrement_indent();
+  make_indent();
+  out_ << "}" << std::endl;
+
   return true;
 }
 
@@ -567,6 +624,11 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsContinue()) {
     return EmitContinue(stmt->AsContinue());
   }
+  if (stmt->IsFallthrough()) {
+    make_indent();
+    out_ << "/* fallthrough */" << std::endl;
+    return true;
+  }
   if (stmt->IsIf()) {
     return EmitIf(stmt->AsIf());
   }
@@ -579,9 +641,36 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsReturn()) {
     return EmitReturn(stmt->AsReturn());
   }
+  if (stmt->IsSwitch()) {
+    return EmitSwitch(stmt->AsSwitch());
+  }
 
   error_ = "unknown statement type";
   return false;
+}
+
+bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
+  make_indent();
+
+  out_ << "switch(";
+  if (!EmitExpression(stmt->condition())) {
+    return false;
+  }
+  out_ << ") {" << std::endl;
+
+  increment_indent();
+
+  for (const auto& s : stmt->body()) {
+    if (!EmitCase(s.get())) {
+      return false;
+    }
+  }
+
+  decrement_indent();
+  make_indent();
+  out_ << "}" << std::endl;
+
+  return true;
 }
 
 bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
