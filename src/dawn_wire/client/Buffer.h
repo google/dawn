@@ -24,12 +24,31 @@
 
 namespace dawn_wire { namespace client {
 
-    struct Buffer : ObjectBase {
+    class Buffer : public ObjectBase {
+      public:
         using ObjectBase::ObjectBase;
+
+        static WGPUBuffer Create(Device* device, const WGPUBufferDescriptor* descriptor);
+        static WGPUCreateBufferMappedResult CreateMapped(Device* device,
+                                                         const WGPUBufferDescriptor* descriptor);
 
         ~Buffer();
         void ClearMapRequests(WGPUBufferMapAsyncStatus status);
 
+        void MapReadAsync(WGPUBufferMapReadCallback callback, void* userdata);
+        void MapWriteAsync(WGPUBufferMapWriteCallback callback, void* userdata);
+        bool OnMapReadAsyncCallback(uint32_t requestSerial,
+                                    uint32_t status,
+                                    uint64_t initialDataInfoLength,
+                                    const uint8_t* initialDataInfo);
+        bool OnMapWriteAsyncCallback(uint32_t requestSerial, uint32_t status);
+        void Unmap();
+
+        void Destroy();
+
+        void SetSubData(uint64_t start, uint64_t count, const void* data);
+
+      private:
         // We want to defer all the validation to the server, which means we could have multiple
         // map request in flight at a single time and need to track them separately.
         // On well-behaved applications, only one request should exist at a single time.
@@ -42,15 +61,15 @@ namespace dawn_wire { namespace client {
             std::unique_ptr<MemoryTransferService::ReadHandle> readHandle = nullptr;
             std::unique_ptr<MemoryTransferService::WriteHandle> writeHandle = nullptr;
         };
-        std::map<uint32_t, MapRequestData> requests;
-        uint32_t requestSerial = 0;
-        uint64_t size = 0;
+        std::map<uint32_t, MapRequestData> mRequests;
+        uint32_t mRequestSerial = 0;
+        uint64_t mSize = 0;
 
         // Only one mapped pointer can be active at a time because Unmap clears all the in-flight
         // requests.
         // TODO(enga): Use a tagged pointer to save space.
-        std::unique_ptr<MemoryTransferService::ReadHandle> readHandle = nullptr;
-        std::unique_ptr<MemoryTransferService::WriteHandle> writeHandle = nullptr;
+        std::unique_ptr<MemoryTransferService::ReadHandle> mReadHandle = nullptr;
+        std::unique_ptr<MemoryTransferService::WriteHandle> mWriteHandle = nullptr;
     };
 
 }}  // namespace dawn_wire::client
