@@ -159,8 +159,8 @@ struct BlockInfo {
   std::string flow_guard_name = "";
 
   /// The result IDs that this block is responsible for declaring as a
-  /// hoisted variable.  See the |needs_hoisted_def_| member of
-  /// FunctionEmitter for an explanation.
+  /// hoisted variable.  See the |requires_hoisted_def| member of
+  /// DefInfo for an explanation.
   std::vector<uint32_t> hoisted_ids;
 };
 
@@ -171,6 +171,62 @@ inline std::ostream& operator<<(std::ostream& o, const BlockInfo& bi) {
     << " continue_for_header: " << bi.continue_for_header
     << " header_for_merge: " << bi.header_for_merge
     << " single_block_loop: " << int(bi.is_single_block_loop) << "}";
+  return o;
+}
+
+/// Bookkeeping info for a SPIR-V ID defined in the function.
+/// This will be valid for result IDs for:
+/// - instructions that are not OpLabel, OpVariable, and OpFunctionParameter
+/// - are defined in a basic block visited in the block-order for the function.
+struct DefInfo {
+  /// Constructor.
+  /// @param def_inst the SPIR-V instruction defining the ID
+  /// @param block_pos the position of the basic block where the ID is defined.
+  DefInfo(const spvtools::opt::Instruction& def_inst, uint32_t block_pos);
+  /// Destructor.
+  ~DefInfo();
+
+  /// The SPIR-V instruction that defines the ID.
+  const spvtools::opt::Instruction& inst;
+  /// The position of the block that defines this ID, in the function block
+  /// order.  See method |FunctionEmitter::ComputeBlockOrderAndPositions|
+  const uint32_t block_pos = 0;
+
+  /// The number of uses of this ID.
+  uint32_t num_uses = 0;
+
+  /// The block position of the last use of this ID, or 0 if it is not used
+  /// at all.  The "last" ordering is determined by the function block order.
+  uint32_t last_use_pos = 0;
+
+  /// True if this ID requires a WGSL 'const' definition, due to context. It
+  /// might get one anyway (so this is *not* an if-and-only-if condition).
+  bool requires_named_const_def = false;
+
+  /// True if this ID must map to a WGSL variable declaration before the
+  /// corresponding position of the ID definition in SPIR-V.  This compensates
+  /// for the difference between dominance and scoping. An SSA definition can
+  /// dominate all its uses, but the construct where it is defined does not
+  /// enclose all the uses, and so if it were declared as a WGSL constant
+  /// definition at the point of its SPIR-V definition, then the WGSL name
+  /// would go out of scope too early. Fix that by creating a variable at the
+  /// top of the smallest construct that encloses both the definition and all
+  /// its uses. Then the original SPIR-V definition maps to a WGSL assignment
+  /// to that variable, and each SPIR-V use becomes a WGSL read from the
+  /// variable.
+  /// TODO(dneto): This works for constants of storable type, but not, for
+  /// example, pointers.
+  bool requires_hoisted_def = false;
+};
+
+inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
+  o << "DefInfo{"
+    << " inst.result_id: " << di.inst.result_id()
+    << " block_pos: " << di.block_pos << " num_uses: " << di.num_uses
+    << " last_use_pos: " << di.last_use_pos << " requires_named_const_def: "
+    << (di.requires_named_const_def ? "true" : "false")
+    << " requires_hoisted_def: " << (di.requires_hoisted_def ? "true" : "false")
+    << "}";
   return o;
 }
 
@@ -288,12 +344,16 @@ class FunctionEmitter {
   ///  - When a SPIR-V instruction might use the dynamically computed value
   ///    only once, but the WGSL code might reference it multiple times.
   ///    For example, this occurs for the vector operands of OpVectorShuffle.
-  ///    In this case the definition is added to |needs_named_const_def_|.
+  ///    In this case the definition's |requires_named_const_def| property is
+  ///    set to true.
   ///  - When a definition and at least one of its uses are not in the
   ///    same structured construct.
-  ///    In this case the definition is added to |needs_named_const_def_|.
+  ///    In this case the definition's |requires_named_const_def| property is
+  ///    set to true.
   ///  - When a definition is in a construct that does not enclose all the
-  ///    uses.  In this case the definition is added to |needs_hoisted_def_|.
+  ///    uses.  In this case the definition's |requires_hoisted_def| property
+  ///    is set to true.
+  /// Populates the |def_info_| mapping.
   void RegisterValuesNeedingNamedOrHoistedDefinition();
 
   /// Emits declarations of function variables.
@@ -495,8 +555,20 @@ class FunctionEmitter {
   /// @returns the block info for the given ID, if it exists, or nullptr
   BlockInfo* GetBlockInfo(uint32_t id) const {
     auto where = block_info_.find(id);
-    if (where == block_info_.end())
+    if (where == block_info_.end()) {
       return nullptr;
+    }
+    return where->second.get();
+  }
+
+  /// Gets the local definition info for a result ID.
+  /// @param id the SPIR-V ID of local definition.
+  /// @returns the definition info for the given ID, if it exists, or nullptr
+  DefInfo* GetDefInfo(uint32_t id) const {
+    auto where = def_info_.find(id);
+    if (where == def_info_.end()) {
+      return nullptr;
+    }
     return where->second.get();
   }
 
@@ -622,21 +694,6 @@ class FunctionEmitter {
   std::unordered_set<uint32_t> identifier_values_;
   // Mapping from SPIR-V ID that is used at most once, to its AST expression.
   std::unordered_map<uint32_t, TypedExpression> singly_used_values_;
-  // Set of SPIR-V IDs which should get a named const definition.
-  std::unordered_set<uint32_t> needs_named_const_def_;
-  // The SPIR-V IDs that must be declared in WGSL before the corresponding
-  // location in SPIR-V. This compensates for the difference between dominance
-  // and scoping. An SSA definition can dominate all its uses, but the construct
-  // where it is defined does not enclose all the uses, and so if it were
-  // declared as a WGSL constant definition at the point of its SPIR-V
-  // definition, then the WGSL name would go out of scope too early. Fix that by
-  // creating a variable at the top of the smallest construct that encloses both
-  // the definition and all its uses. Then the original SPIR-V definition maps
-  // to a WGSL assignment to that variable, and each SPIR-V use becomes a WGSL
-  // read from the variable.
-  // TODO(dneto): This works for constants of storable type, but not, for
-  // example, pointers.
-  std::unordered_set<uint32_t> needs_hoisted_def_;
 
   // The IDs of basic blocks, in reverse structured post-order (RSPO).
   // This is the output order for the basic blocks.
@@ -644,6 +701,9 @@ class FunctionEmitter {
 
   // Mapping from block ID to its bookkeeping info.
   std::unordered_map<uint32_t, std::unique_ptr<BlockInfo>> block_info_;
+
+  // Mapping from a locally-defined result ID to its bookkeeping info.
+  std::unordered_map<uint32_t, std::unique_ptr<DefInfo>> def_info_;
 
   // Structured constructs, where enclosing constructs precede their children.
   ConstructList constructs_;

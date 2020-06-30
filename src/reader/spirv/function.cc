@@ -409,7 +409,13 @@ class StructuredTraverser {
 BlockInfo::BlockInfo(const spvtools::opt::BasicBlock& bb)
     : basic_block(&bb), id(bb.id()) {}
 
-BlockInfo::~BlockInfo() {}
+BlockInfo::~BlockInfo() = default;
+
+DefInfo::DefInfo(const spvtools::opt::Instruction& def_inst,
+                 uint32_t the_block_pos)
+    : inst(def_inst), block_pos(the_block_pos) {}
+
+DefInfo::~DefInfo() = default;
 
 FunctionEmitter::FunctionEmitter(ParserImpl* pi,
                                  const spvtools::opt::Function& function)
@@ -623,7 +629,6 @@ bool FunctionEmitter::EmitBody() {
   }
 
   // TODO(dneto): register phis
-  // TODO(dneto): register SSA values which need to be hoisted
   RegisterValuesNeedingNamedOrHoistedDefinition();
 
   if (!EmitFunctionVariables()) {
@@ -2416,7 +2421,8 @@ bool FunctionEmitter::EmitConstDefOrWriteToHoistedVar(
     const spvtools::opt::Instruction& inst,
     TypedExpression ast_expr) {
   const auto result_id = inst.result_id();
-  if (needs_hoisted_def_.count(result_id) != 0) {
+  const auto* def_info = GetDefInfo(result_id);
+  if (def_info && def_info->requires_hoisted_def) {
     // Emit an assignment of the expression to the hoisted variable.
     AddStatement(std::make_unique<ast::AssignmentStatement>(
         std::make_unique<ast::IdentifierExpression>(namer_.Name(result_id)),
@@ -2430,20 +2436,24 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
   const auto result_id = inst.result_id();
   // Handle combinatorial instructions.
   auto combinatorial_expr = MaybeEmitCombinatorialValue(inst);
+  const auto* def_info = GetDefInfo(result_id);
   if (combinatorial_expr.expr != nullptr) {
-    if ((needs_hoisted_def_.count(result_id) == 0) &&
-        (needs_named_const_def_.count(result_id) == 0) &&
-        (def_use_mgr_->NumUses(&inst) == 1)) {
-      // If it's used once, and doesn't need a named constant definition,
-      // then defer emitting the expression until it's used. Any supporting
-      // statements have already been emitted.
-      singly_used_values_.insert(
-          std::make_pair(result_id, std::move(combinatorial_expr)));
-      return success();
+    if (def_info == nullptr) {
+      return Fail() << "internal error: result ID %" << result_id
+                    << " is missing a def_info";
     }
-    // Otherwise, generate a const definition for it now and later use
-    // the const's name at the uses of the value.
-    return EmitConstDefOrWriteToHoistedVar(inst, std::move(combinatorial_expr));
+    if (def_info->requires_hoisted_def || def_info->requires_named_const_def ||
+        def_info->num_uses != 1) {
+      // Generate a const definition or an assignment to a hoisted definition
+      // now and later use the const or variable name at the uses of this value.
+      return EmitConstDefOrWriteToHoistedVar(inst,
+                                             std::move(combinatorial_expr));
+    }
+    // It is harmless to defer emitting the expression until it's used.
+    // Any supporting statements have already been emitted.
+    singly_used_values_.insert(
+        std::make_pair(result_id, std::move(combinatorial_expr)));
+    return success();
   }
   if (failed()) {
     return false;
@@ -2906,45 +2916,50 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(
 }
 
 void FunctionEmitter::RegisterValuesNeedingNamedOrHoistedDefinition() {
-  // Maps a result ID to the block position where it is last used.
-  std::unordered_map<uint32_t, uint32_t> id_to_last_use_pos;
-  // List of pairs of (result id, block position of the definition).
-  std::vector<std::pair<uint32_t, uint32_t>> id_def_pos;
-
+  // Create a DefInfo for each value definition in this function.
   for (auto block_id : block_order_) {
     const auto* block_info = GetBlockInfo(block_id);
     const auto block_pos = block_info->pos;
-
     for (const auto& inst : *(block_info->basic_block)) {
       const auto result_id = inst.result_id();
-      if (result_id != 0) {
-        id_def_pos.emplace_back(
-            std::pair<uint32_t, uint32_t>{result_id, block_pos});
+      if ((result_id == 0) || inst.opcode() == SpvOpLabel) {
+        continue;
       }
-      inst.ForEachInId(
-          [&id_to_last_use_pos, block_pos](const uint32_t* id_ptr) {
-            // If the id is not in the map already, this will create
-            // an entry with value 0.
-            auto& pos = id_to_last_use_pos[*id_ptr];
-            // Update the entry.
-            pos = std::max(pos, block_pos);
-          });
+      def_info_[result_id] = std::make_unique<DefInfo>(inst, block_pos);
+    }
+  }
 
-      if (inst.opcode() == SpvOpVectorShuffle) {
-        // We might access the vector operands multiple times. Make sure they
-        // are evaluated only once.
-        for (auto index : std::array<uint32_t, 2>{0, 1}) {
-          auto id = inst.GetSingleWordInOperand(index);
-          if (constant_mgr_->FindDeclaredConstant(id)) {
-            // If it's constant, then avoid making a const definition
-            // in the wrong place; it would be wrong if it didn't
-            // dominate its uses.
-            continue;
-          }
-          // Othewrise, register it.
-          needs_named_const_def_.insert(id);
+  // Mark vector operands of OpVectorShuffle as needing a named definition,
+  // but only if they are defined in this function as well.
+  for (auto& id_def_info_pair : def_info_) {
+    const auto& inst = id_def_info_pair.second->inst;
+    if (inst.opcode() == SpvOpVectorShuffle) {
+      // We might access the vector operands multiple times. Make sure they
+      // are evaluated only once.
+      for (auto index : std::array<uint32_t, 2>{0, 1}) {
+        auto id = inst.GetSingleWordInOperand(index);
+        auto* operand_def = GetDefInfo(id);
+        if (operand_def) {
+          operand_def->requires_named_const_def = true;
         }
       }
+    }
+  }
+
+  // Scan uses of locally defined IDs, to determine the block position
+  // of its last use.
+  for (auto block_id : block_order_) {
+    const auto* block_info = GetBlockInfo(block_id);
+    const auto block_pos = block_info->pos;
+    for (const auto& inst : *(block_info->basic_block)) {
+      // Update the usage span for IDs used by this instruction.
+      inst.ForEachInId([this, block_pos](const uint32_t* id_ptr) {
+        auto* def_info = GetDefInfo(*id_ptr);
+        if (def_info) {
+          def_info->num_uses++;
+          def_info->last_use_pos = std::max(def_info->last_use_pos, block_pos);
+        }
+      });
     }
   }
 
@@ -2952,39 +2967,40 @@ void FunctionEmitter::RegisterValuesNeedingNamedOrHoistedDefinition() {
   // than its definition, then it needs a named constant definition.  Otherwise
   // we might sink an expensive computation into control flow, and hence change
   // performance.
-  for (const auto& id_and_pos : id_def_pos) {
-    const auto id = id_and_pos.first;
-    const auto def_pos = id_and_pos.second;
+  for (auto& id_def_info_pair : def_info_) {
+    const auto def_id = id_def_info_pair.first;
+    auto* def_info = id_def_info_pair.second.get();
+    if (def_info->num_uses == 0) {
+      // There is no need to adjust the location of the declaration.
+      continue;
+    }
+    const auto last_use_pos = def_info->last_use_pos;
 
-    auto last_use_where = id_to_last_use_pos.find(id);
-    if (last_use_where != id_to_last_use_pos.end()) {
-      const auto last_use_pos = last_use_where->second;
-      const auto* const def_in_construct =
-          GetBlockInfo(block_order_[def_pos])->construct;
-      const auto* const construct_with_last_use =
-          GetBlockInfo(block_order_[last_use_pos])->construct;
+    const auto* const def_in_construct =
+        GetBlockInfo(block_order_[def_info->block_pos])->construct;
+    const auto* const construct_with_last_use =
+        GetBlockInfo(block_order_[last_use_pos])->construct;
 
-      // Find the smallest structured construct that encloses the definition
-      // and all its uses.
-      const auto* enclosing_construct = def_in_construct;
-      while (enclosing_construct &&
-             !enclosing_construct->ContainsPos(last_use_pos)) {
-        enclosing_construct = enclosing_construct->parent;
-      }
-      // At worst, we go all the way out to the function construct.
-      assert(enclosing_construct != nullptr);
+    // Find the smallest structured construct that encloses the definition
+    // and all its uses.
+    const auto* enclosing_construct = def_in_construct;
+    while (enclosing_construct &&
+           !enclosing_construct->ContainsPos(last_use_pos)) {
+      enclosing_construct = enclosing_construct->parent;
+    }
+    // At worst, we go all the way out to the function construct.
+    assert(enclosing_construct != nullptr);
 
-      if (def_in_construct != construct_with_last_use) {
-        if (enclosing_construct == def_in_construct) {
-          // We can use a plain 'const' definition.
-          needs_named_const_def_.insert(id);
-        } else {
-          // We need to make a hoisted variable definition.
-          // TODO(dneto): Handle non-storable types, particularly pointers.
-          needs_hoisted_def_.insert(id);
-          auto* hoist_to_block = GetBlockInfo(enclosing_construct->begin_id);
-          hoist_to_block->hoisted_ids.push_back(id);
-        }
+    if (def_in_construct != construct_with_last_use) {
+      if (enclosing_construct == def_in_construct) {
+        // We can use a plain 'const' definition.
+        def_info->requires_named_const_def = true;
+      } else {
+        // We need to make a hoisted variable definition.
+        // TODO(dneto): Handle non-storable types, particularly pointers.
+        def_info->requires_hoisted_def = true;
+        auto* hoist_to_block = GetBlockInfo(enclosing_construct->begin_id);
+        hoist_to_block->hoisted_ids.push_back(def_id);
       }
     }
   }
