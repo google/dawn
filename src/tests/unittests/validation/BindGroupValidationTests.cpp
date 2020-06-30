@@ -441,6 +441,44 @@ TEST_F(BindGroupValidationTest, BufferBindingOOB) {
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 256, uint32_t(0) - uint32_t(256)}}));
 }
 
+// Tests constraints to be sure the uniform buffer binding isn't too large
+TEST_F(BindGroupValidationTest, MaxUniformBufferBindingSize) {
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 2 * kMaxUniformBufferBindingSize;
+    descriptor.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    wgpu::BindGroupLayout uniformLayout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Vertex, wgpu::BindingType::UniformBuffer}});
+
+    // Success case, this is exactly the limit
+    utils::MakeBindGroup(device, uniformLayout, {{0, buffer, 0, kMaxUniformBufferBindingSize}});
+
+    wgpu::BindGroupLayout doubleUniformLayout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Vertex, wgpu::BindingType::UniformBuffer},
+                 {1, wgpu::ShaderStage::Vertex, wgpu::BindingType::UniformBuffer}});
+
+    // Success case, individual bindings don't exceed the limit
+    utils::MakeBindGroup(device, doubleUniformLayout,
+                         {{0, buffer, 0, kMaxUniformBufferBindingSize},
+                          {1, buffer, kMaxUniformBufferBindingSize, kMaxUniformBufferBindingSize}});
+
+    // Error case, this is above the limit
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, uniformLayout,
+                                             {{0, buffer, 0, kMaxUniformBufferBindingSize + 1}}));
+
+    // Making sure the constraint doesn't apply to storage buffers
+    wgpu::BindGroupLayout readonlyStorageLayout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageBuffer}});
+    wgpu::BindGroupLayout storageLayout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::StorageBuffer}});
+
+    // Success case, storage buffer can still be created.
+    utils::MakeBindGroup(device, readonlyStorageLayout,
+                         {{0, buffer, 0, 2 * kMaxUniformBufferBindingSize}});
+    utils::MakeBindGroup(device, storageLayout, {{0, buffer, 0, 2 * kMaxUniformBufferBindingSize}});
+}
+
 // Test what happens when the layout is an error.
 TEST_F(BindGroupValidationTest, ErrorLayout) {
     wgpu::BindGroupLayout goodLayout = utils::MakeBindGroupLayout(

@@ -32,7 +32,8 @@ namespace dawn_native {
         MaybeError ValidateBufferBinding(const DeviceBase* device,
                                          const BindGroupEntry& entry,
                                          wgpu::BufferUsage requiredUsage,
-                                         const BindingInfo& bindingInfo) {
+                                         const BindingInfo& bindingInfo,
+                                         const uint64_t maxBindingSize) {
             if (entry.buffer == nullptr || entry.sampler != nullptr ||
                 entry.textureView != nullptr) {
                 return DAWN_VALIDATION_ERROR("expected buffer binding");
@@ -76,6 +77,14 @@ namespace dawn_native {
                     "Binding size smaller than minimum buffer size: binding " +
                     std::to_string(entry.binding) + " given " + std::to_string(bindingSize) +
                     " bytes, required " + std::to_string(bindingInfo.minBufferBindingSize) +
+                    " bytes");
+            }
+
+            if (bindingSize > maxBindingSize) {
+                return DAWN_VALIDATION_ERROR(
+                    "Binding size bigger than maximum uniform buffer binding size: binding " +
+                    std::to_string(entry.binding) + " given " + std::to_string(bindingSize) +
+                    " bytes, maximum is " + std::to_string(kMaxUniformBufferBindingSize) +
                     " bytes");
             }
 
@@ -192,12 +201,13 @@ namespace dawn_native {
             switch (bindingInfo.type) {
                 case wgpu::BindingType::UniformBuffer:
                     DAWN_TRY(ValidateBufferBinding(device, entry, wgpu::BufferUsage::Uniform,
-                                                   bindingInfo));
+                                                   bindingInfo, kMaxUniformBufferBindingSize));
                     break;
                 case wgpu::BindingType::StorageBuffer:
                 case wgpu::BindingType::ReadonlyStorageBuffer:
                     DAWN_TRY(ValidateBufferBinding(device, entry, wgpu::BufferUsage::Storage,
-                                                   bindingInfo));
+                                                   bindingInfo,
+                                                   std::numeric_limits<uint64_t>::max()));
                     break;
                 case wgpu::BindingType::SampledTexture:
                     DAWN_TRY(ValidateTextureBinding(device, entry, wgpu::TextureUsage::Sampled,

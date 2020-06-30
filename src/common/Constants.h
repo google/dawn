@@ -42,6 +42,8 @@ static constexpr uint32_t kMaxDynamicStorageBufferCount = 4u;
 // Max numbers of dynamic buffers
 static constexpr uint32_t kMaxDynamicBufferCount =
     kMaxDynamicUniformBufferCount + kMaxDynamicStorageBufferCount;
+// Max size of uniform buffer binding
+static constexpr uint64_t kMaxUniformBufferBindingSize = 16384u;
 // Indirect command sizes
 static constexpr uint64_t kDispatchIndirectSize = 3 * sizeof(uint32_t);
 static constexpr uint64_t kDrawIndirectSize = 4 * sizeof(uint32_t);
