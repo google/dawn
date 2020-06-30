@@ -97,6 +97,8 @@
             "BufferMapReadAsync",
             "BufferMapWriteAsync",
             "BufferSetSubData",
+            "BufferGetConstMappedRange",
+            "BufferGetMappedRange",
             "DevicePopErrorScope",
             "DeviceSetDeviceLostCallback",
             "DeviceSetUncapturedErrorCallback",

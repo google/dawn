@@ -119,6 +119,18 @@ TEST_P(BufferMapReadTests, ZeroSized) {
     UnmapBuffer(buffer);
 }
 
+// Test the result of GetMappedRange when mapped for reading.
+TEST_P(BufferMapReadTests, GetMappedRange) {
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    const void* mappedData = MapReadAsyncAndWait(buffer);
+    ASSERT_EQ(mappedData, buffer.GetConstMappedRange());
+    UnmapBuffer(buffer);
+}
+
 DAWN_INSTANTIATE_TEST(BufferMapReadTests, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
 
 class BufferMapWriteTests : public DawnTest {
@@ -251,6 +263,19 @@ TEST_P(BufferMapWriteTests, ManyWrites) {
     for (uint32_t i = 0; i < kBuffers; ++i) {
         EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), buffers[i], 0, kDataSize);
     }
+}
+
+// Test the result of GetMappedRange when mapped for writing.
+TEST_P(BufferMapWriteTests, GetMappedRange) {
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    void* mappedData = MapWriteAsyncAndWait(buffer);
+    ASSERT_EQ(mappedData, buffer.GetMappedRange());
+    ASSERT_EQ(mappedData, buffer.GetConstMappedRange());
+    UnmapBuffer(buffer);
 }
 
 DAWN_INSTANTIATE_TEST(BufferMapWriteTests, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
@@ -503,6 +528,19 @@ TEST_P(CreateBufferMappedTests, ZeroSizedErrorBuffer) {
 
     ASSERT_EQ(0u, result.dataLength);
     ASSERT_NE(nullptr, result.data);
+}
+
+// Test the result of GetMappedRange when mapped at creation.
+TEST_P(CreateBufferMappedTests, GetMappedRange) {
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = wgpu::BufferUsage::CopyDst;
+    wgpu::CreateBufferMappedResult result;
+    result = device.CreateBufferMapped(&descriptor);
+
+    ASSERT_EQ(result.data, result.buffer.GetMappedRange());
+    ASSERT_EQ(result.data, result.buffer.GetConstMappedRange());
+    result.buffer.Unmap();
 }
 
 DAWN_INSTANTIATE_TEST(CreateBufferMappedTests,

@@ -61,6 +61,8 @@ namespace dawn_native {
         void SetSubData(uint32_t start, uint32_t count, const void* data);
         void MapReadAsync(WGPUBufferMapReadCallback callback, void* userdata);
         void MapWriteAsync(WGPUBufferMapWriteCallback callback, void* userdata);
+        void* GetMappedRange();
+        const void* GetConstMappedRange();
         void Unmap();
         void Destroy();
 
@@ -94,6 +96,7 @@ namespace dawn_native {
 
         MaybeError ValidateMap(wgpu::BufferUsage requiredUsage,
                                WGPUBufferMapAsyncStatus* status) const;
+        MaybeError ValidateGetMappedRange(bool writable) const;
         MaybeError ValidateUnmap() const;
         MaybeError ValidateDestroy() const;
 

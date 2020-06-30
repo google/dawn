@@ -42,11 +42,16 @@ namespace dawn_wire { namespace client {
                                     uint64_t initialDataInfoLength,
                                     const uint8_t* initialDataInfo);
         bool OnMapWriteAsyncCallback(uint32_t requestSerial, uint32_t status);
+        void* GetMappedRange();
+        const void* GetConstMappedRange();
         void Unmap();
 
         void Destroy();
 
         void SetSubData(uint64_t start, uint64_t count, const void* data);
+
+        bool IsMappedForReading() const;
+        bool IsMappedForWriting() const;
 
       private:
         // We want to defer all the validation to the server, which means we could have multiple
@@ -70,6 +75,7 @@ namespace dawn_wire { namespace client {
         // TODO(enga): Use a tagged pointer to save space.
         std::unique_ptr<MemoryTransferService::ReadHandle> mReadHandle = nullptr;
         std::unique_ptr<MemoryTransferService::WriteHandle> mWriteHandle = nullptr;
+        void* mMappedData = nullptr;
     };
 
 }}  // namespace dawn_wire::client

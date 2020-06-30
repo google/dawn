@@ -40,6 +40,16 @@ namespace dawn_wire { namespace client {
         buffer->SetSubData(start, count, data);
     }
 
+    void* ClientHandwrittenBufferGetMappedRange(WGPUBuffer cBuffer) {
+        Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
+        return buffer->GetMappedRange();
+    }
+
+    const void* ClientHandwrittenBufferGetConstMappedRange(WGPUBuffer cBuffer) {
+        Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
+        return buffer->GetConstMappedRange();
+    }
+
     void ClientHandwrittenBufferUnmap(WGPUBuffer cBuffer) {
         Buffer* buffer = reinterpret_cast<Buffer*>(cBuffer);
         buffer->Unmap();

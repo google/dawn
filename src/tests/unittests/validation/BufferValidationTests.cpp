@@ -662,3 +662,166 @@ TEST_F(BufferValidationTest, UnmapUnmappedBuffer) {
         buf.Unmap();
     }
 }
+
+// Test that it is invalid to call GetMappedRange on an unmapped buffer.
+TEST_F(BufferValidationTest, GetMappedRangeOnUnmappedBuffer) {
+    // Unmapped at creation case.
+    {
+        wgpu::BufferDescriptor desc;
+        desc.size = 4;
+        desc.usage = wgpu::BufferUsage::CopySrc;
+        wgpu::Buffer buf = device.CreateBuffer(&desc);
+
+        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetMappedRange()));
+        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetConstMappedRange()));
+    }
+
+    // Unmapped after CreateBufferMapped case.
+    {
+        wgpu::Buffer buf = CreateBufferMapped(4, wgpu::BufferUsage::CopySrc).buffer;
+        buf.Unmap();
+
+        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetMappedRange()));
+        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetConstMappedRange()));
+    }
+
+    // Unmapped after MapReadAsync case.
+    {
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
+
+        buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
+        EXPECT_CALL(*mockBufferMapReadCallback,
+                    Call(WGPUBufferMapAsyncStatus_Success, Ne(nullptr), 4u, _))
+            .Times(1);
+        queue.Submit(0, nullptr);
+        buf.Unmap();
+
+        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetMappedRange()));
+        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetConstMappedRange()));
+    }
+
+    // Unmapped after MapWriteAsync case.
+    {
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
+        buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
+        EXPECT_CALL(*mockBufferMapWriteCallback,
+                    Call(WGPUBufferMapAsyncStatus_Success, Ne(nullptr), 4u, _))
+            .Times(1);
+        queue.Submit(0, nullptr);
+        buf.Unmap();
+
+        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetMappedRange()));
+        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetConstMappedRange()));
+    }
+}
+
+// Test that it is invalid to call GetMappedRange on a destroyed buffer.
+TEST_F(BufferValidationTest, GetMappedRangeOnDestroyedBuffer) {
+    // Destroyed after creation case.
+    {
+        wgpu::BufferDescriptor desc;
+        desc.size = 4;
+        desc.usage = wgpu::BufferUsage::CopySrc;
+        wgpu::Buffer buf = device.CreateBuffer(&desc);
+        buf.Destroy();
+
+        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetMappedRange()));
+        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetConstMappedRange()));
+    }
+
+    // Destroyed after CreateBufferMapped case.
+    {
+        wgpu::Buffer buf = CreateBufferMapped(4, wgpu::BufferUsage::CopySrc).buffer;
+        buf.Destroy();
+
+        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetMappedRange()));
+        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetConstMappedRange()));
+    }
+
+    // Destroyed after MapReadAsync case.
+    {
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
+
+        buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
+        EXPECT_CALL(*mockBufferMapReadCallback,
+                    Call(WGPUBufferMapAsyncStatus_Success, Ne(nullptr), 4u, _))
+            .Times(1);
+        queue.Submit(0, nullptr);
+        buf.Destroy();
+
+        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetMappedRange()));
+        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetConstMappedRange()));
+    }
+
+    // Destroyed after MapWriteAsync case.
+    {
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
+        buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
+        EXPECT_CALL(*mockBufferMapWriteCallback,
+                    Call(WGPUBufferMapAsyncStatus_Success, Ne(nullptr), 4u, _))
+            .Times(1);
+        queue.Submit(0, nullptr);
+        buf.Destroy();
+
+        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetMappedRange()));
+        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetConstMappedRange()));
+    }
+}
+
+// Test that it is invalid to call GetMappedRange on a buffer afterMapReadAsync
+TEST_F(BufferValidationTest, GetMappedRangeOnMappedForReading) {
+    wgpu::Buffer buf = CreateMapReadBuffer(4);
+
+    buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
+    EXPECT_CALL(*mockBufferMapReadCallback,
+                Call(WGPUBufferMapAsyncStatus_Success, Ne(nullptr), 4u, _))
+        .Times(1);
+    queue.Submit(0, nullptr);
+
+    ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetMappedRange()));
+}
+
+// Test valid cases to call GetMappedRange on a buffer.
+TEST_F(BufferValidationTest, GetMappedRangeValidCases) {
+    // GetMappedRange after CreateBufferMapped case.
+    {
+        wgpu::CreateBufferMappedResult result = CreateBufferMapped(4, wgpu::BufferUsage::CopySrc);
+        ASSERT_NE(result.buffer.GetConstMappedRange(), nullptr);
+        ASSERT_EQ(result.buffer.GetConstMappedRange(), result.buffer.GetMappedRange());
+        ASSERT_EQ(result.buffer.GetConstMappedRange(), result.data);
+    }
+
+    // GetMappedRange after MapReadAsync case.
+    {
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
+
+        buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
+
+        const void* mappedPointer = nullptr;
+        EXPECT_CALL(*mockBufferMapReadCallback,
+                    Call(WGPUBufferMapAsyncStatus_Success, Ne(nullptr), 4u, _))
+            .WillOnce(SaveArg<1>(&mappedPointer));
+
+        queue.Submit(0, nullptr);
+
+        ASSERT_NE(buf.GetConstMappedRange(), nullptr);
+        ASSERT_EQ(buf.GetConstMappedRange(), mappedPointer);
+    }
+
+    // GetMappedRange after MapWriteAsync case.
+    {
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
+        buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
+
+        const void* mappedPointer = nullptr;
+        EXPECT_CALL(*mockBufferMapWriteCallback,
+                    Call(WGPUBufferMapAsyncStatus_Success, Ne(nullptr), 4u, _))
+            .WillOnce(SaveArg<1>(&mappedPointer));
+
+        queue.Submit(0, nullptr);
+
+        ASSERT_NE(buf.GetConstMappedRange(), nullptr);
+        ASSERT_EQ(buf.GetConstMappedRange(), buf.GetMappedRange());
+        ASSERT_EQ(buf.GetConstMappedRange(), mappedPointer);
+    }
+}

@@ -120,7 +120,7 @@ namespace dawn_native { namespace metal {
     }
 
     void* Buffer::GetMappedPointerImpl() {
-        return reinterpret_cast<uint8_t*>([mMtlBuffer contents]);
+        return [mMtlBuffer contents];
     }
 
     void Buffer::UnmapImpl() {

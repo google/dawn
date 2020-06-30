@@ -198,6 +198,14 @@
                 ]
             },
             {
+                "name": "get mapped range",
+                "returns": "void *"
+            },
+            {
+                "name": "get const mapped range",
+                "returns": "void const *"
+            },
+            {
                 "name": "unmap"
             },
             {
@@ -1688,6 +1696,12 @@
       "category": "native"
     },
     "void": {
+        "category": "native"
+    },
+    "void *": {
+        "category": "native"
+    },
+    "void const *": {
         "category": "native"
     },
     "uint32_t": {

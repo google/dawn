@@ -122,6 +122,7 @@ namespace dawn_wire { namespace client {
         buffer->mSize = descriptor->size;
         // Successfully created staging memory. The buffer now owns the WriteHandle.
         buffer->mWriteHandle = std::move(writeHandle);
+        buffer->mMappedData = result.data;
 
         result.buffer = reinterpret_cast<WGPUBuffer>(buffer);
 
@@ -252,8 +253,8 @@ namespace dawn_wire { namespace client {
         // second time. If, for example, buffer.Unmap() is called inside the callback.
         mRequests.erase(requestIt);
 
-        const void* mappedData = nullptr;
         size_t mappedDataLength = 0;
+        const void* mappedData = nullptr;
 
         auto GetMappedData = [&]() -> bool {
             // It is an error for the server to call the read callback when we asked for a map write
@@ -298,7 +299,8 @@ namespace dawn_wire { namespace client {
             request.readCallback(WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0, request.userdata);
             return false;
         } else {
-            request.readCallback(static_cast<WGPUBufferMapAsyncStatus>(status), mappedData,
+            mMappedData = const_cast<void*>(mappedData);
+            request.readCallback(static_cast<WGPUBufferMapAsyncStatus>(status), mMappedData,
                                  static_cast<uint64_t>(mappedDataLength), request.userdata);
             return true;
         }
@@ -316,8 +318,8 @@ namespace dawn_wire { namespace client {
         // second time. If, for example, buffer.Unmap() is called inside the callback.
         mRequests.erase(requestIt);
 
-        void* mappedData = nullptr;
         size_t mappedDataLength = 0;
+        void* mappedData = nullptr;
 
         auto GetMappedData = [&]() -> bool {
             // It is an error for the server to call the write callback when we asked for a map read
@@ -355,10 +357,29 @@ namespace dawn_wire { namespace client {
                                   request.userdata);
             return false;
         } else {
+            mMappedData = mappedData;
             request.writeCallback(static_cast<WGPUBufferMapAsyncStatus>(status), mappedData,
                                   static_cast<uint64_t>(mappedDataLength), request.userdata);
             return true;
         }
+    }
+
+    void* Buffer::GetMappedRange() {
+        if (!IsMappedForWriting()) {
+            ClientDeviceInjectError(reinterpret_cast<WGPUDevice>(device), WGPUErrorType_Validation,
+                                    "Buffer needs to be mapped for writing");
+            return nullptr;
+        }
+        return mMappedData;
+    }
+
+    const void* Buffer::GetConstMappedRange() {
+        if (!IsMappedForWriting() && !IsMappedForReading()) {
+            ClientDeviceInjectError(reinterpret_cast<WGPUDevice>(device), WGPUErrorType_Validation,
+                                    "Buffer needs to be mapped");
+            return nullptr;
+        }
+        return mMappedData;
     }
 
     void Buffer::Unmap() {
@@ -394,6 +415,7 @@ namespace dawn_wire { namespace client {
         } else if (mReadHandle) {
             mReadHandle = nullptr;
         }
+        mMappedData = nullptr;
         ClearMapRequests(WGPUBufferMapAsyncStatus_Unknown);
 
         BufferUnmapCmd cmd;
@@ -405,6 +427,7 @@ namespace dawn_wire { namespace client {
         // Cancel or remove all mappings
         mWriteHandle = nullptr;
         mReadHandle = nullptr;
+        mMappedData = nullptr;
         ClearMapRequests(WGPUBufferMapAsyncStatus_Unknown);
 
         BufferDestroyCmd cmd;
@@ -420,6 +443,14 @@ namespace dawn_wire { namespace client {
         cmd.data = static_cast<const uint8_t*>(data);
 
         device->GetClient()->SerializeCommand(cmd);
+    }
+
+    bool Buffer::IsMappedForReading() const {
+        return mReadHandle != nullptr;
+    }
+
+    bool Buffer::IsMappedForWriting() const {
+        return mWriteHandle != nullptr;
     }
 
 }}  // namespace dawn_wire::client
