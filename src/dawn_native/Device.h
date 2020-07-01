@@ -108,11 +108,11 @@ namespace dawn_native {
         // the created object will be, the "blueprint". The blueprint is just a FooBase object
         // instead of a backend Foo object. If the blueprint doesn't match an object in the
         // cache, then the descriptor is used to make a new object.
-        ResultOrError<BindGroupLayoutBase*> GetOrCreateBindGroupLayout(
+        ResultOrError<Ref<BindGroupLayoutBase>> GetOrCreateBindGroupLayout(
             const BindGroupLayoutDescriptor* descriptor);
         void UncacheBindGroupLayout(BindGroupLayoutBase* obj);
 
-        ResultOrError<BindGroupLayoutBase*> GetOrCreateEmptyBindGroupLayout();
+        BindGroupLayoutBase* GetEmptyBindGroupLayout();
 
         ResultOrError<ComputePipelineBase*> GetOrCreateComputePipeline(
             const ComputePipelineDescriptor* descriptor);
@@ -265,6 +265,8 @@ namespace dawn_native {
         virtual ResultOrError<TextureViewBase*> CreateTextureViewImpl(
             TextureBase* texture,
             const TextureViewDescriptor* descriptor) = 0;
+
+        ResultOrError<Ref<BindGroupLayoutBase>> CreateEmptyBindGroupLayout();
 
         MaybeError CreateBindGroupInternal(BindGroupBase** result,
                                            const BindGroupDescriptor* descriptor);

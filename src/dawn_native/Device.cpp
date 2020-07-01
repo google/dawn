@@ -112,6 +112,8 @@ namespace dawn_native {
         // alive.
         mState = State::Alive;
 
+        DAWN_TRY_ASSIGN(mEmptyBindGroupLayout, CreateEmptyBindGroupLayout());
+
         return {};
     }
 
@@ -390,21 +392,22 @@ namespace dawn_native {
         return mFormatTable[index];
     }
 
-    ResultOrError<BindGroupLayoutBase*> DeviceBase::GetOrCreateBindGroupLayout(
+    ResultOrError<Ref<BindGroupLayoutBase>> DeviceBase::GetOrCreateBindGroupLayout(
         const BindGroupLayoutDescriptor* descriptor) {
         BindGroupLayoutBase blueprint(this, descriptor);
 
+        Ref<BindGroupLayoutBase> result = nullptr;
         auto iter = mCaches->bindGroupLayouts.find(&blueprint);
         if (iter != mCaches->bindGroupLayouts.end()) {
-            (*iter)->Reference();
-            return *iter;
+            result = *iter;
+        } else {
+            BindGroupLayoutBase* backendObj;
+            DAWN_TRY_ASSIGN(backendObj, CreateBindGroupLayoutImpl(descriptor));
+            backendObj->SetIsCachedReference();
+            mCaches->bindGroupLayouts.insert(backendObj);
+            result = AcquireRef(backendObj);
         }
-
-        BindGroupLayoutBase* backendObj;
-        DAWN_TRY_ASSIGN(backendObj, CreateBindGroupLayoutImpl(descriptor));
-        backendObj->SetIsCachedReference();
-        mCaches->bindGroupLayouts.insert(backendObj);
-        return backendObj;
+        return std::move(result);
     }
 
     void DeviceBase::UncacheBindGroupLayout(BindGroupLayoutBase* obj) {
@@ -413,22 +416,18 @@ namespace dawn_native {
         ASSERT(removedCount == 1);
     }
 
-    ResultOrError<BindGroupLayoutBase*> DeviceBase::GetOrCreateEmptyBindGroupLayout() {
-        if (!mEmptyBindGroupLayout) {
-            BindGroupLayoutDescriptor desc = {};
-            desc.entryCount = 0;
-            desc.entries = nullptr;
+    // Private function used at initialization
+    ResultOrError<Ref<BindGroupLayoutBase>> DeviceBase::CreateEmptyBindGroupLayout() {
+        BindGroupLayoutDescriptor desc = {};
+        desc.entryCount = 0;
+        desc.entries = nullptr;
 
-            BindGroupLayoutBase* bgl = nullptr;
-            if (ConsumedError(GetOrCreateBindGroupLayout(&desc), &bgl)) {
-                return BindGroupLayoutBase::MakeError(this);
-            }
-            mEmptyBindGroupLayout = bgl;
-            return bgl;
-        } else {
-            mEmptyBindGroupLayout->Reference();
-            return mEmptyBindGroupLayout.Get();
-        }
+        return GetOrCreateBindGroupLayout(&desc);
+    }
+
+    BindGroupLayoutBase* DeviceBase::GetEmptyBindGroupLayout() {
+        ASSERT(mEmptyBindGroupLayout);
+        return mEmptyBindGroupLayout.Get();
     }
 
     ResultOrError<ComputePipelineBase*> DeviceBase::GetOrCreateComputePipeline(
@@ -871,7 +870,9 @@ namespace dawn_native {
         if (IsValidationEnabled()) {
             DAWN_TRY(ValidateBindGroupLayoutDescriptor(this, descriptor));
         }
-        DAWN_TRY_ASSIGN(*result, GetOrCreateBindGroupLayout(descriptor));
+        Ref<BindGroupLayoutBase> bgl;
+        DAWN_TRY_ASSIGN(bgl, GetOrCreateBindGroupLayout(descriptor));
+        *result = bgl.Detach();
         return {};
     }
 
