@@ -131,6 +131,8 @@ namespace dawn_native {
             {Toggle::UseDXC,
              {"use_dxc", "Use DXC instead of FXC for compiling HLSL",
               "https://crbug.com/dawn/402"}},
+            {Toggle::DisableRobustness,
+             {"disable_robustness", "Disable robust buffer access", "https://crbug.com/dawn/480"}},
         }};
 
     }  // anonymous namespace

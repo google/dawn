@@ -216,6 +216,7 @@ namespace dawn_native {
         bool IsExtensionEnabled(Extension extension) const;
         bool IsToggleEnabled(Toggle toggle) const;
         bool IsValidationEnabled() const;
+        bool IsRobustnessEnabled() const;
         size_t GetLazyClearCountForTesting();
         void IncrementLazyClearCountForTesting();
         size_t GetDeprecationWarningCountForTesting();

@@ -299,6 +299,10 @@ namespace dawn_native { namespace vulkan {
         // Always require fragmentStoresAndAtomics because it is required by end2end tests.
         usedKnobs.features.fragmentStoresAndAtomics = VK_TRUE;
 
+        if (IsRobustnessEnabled()) {
+            usedKnobs.features.robustBufferAccess = VK_TRUE;
+        }
+
         if (mDeviceInfo.HasExt(DeviceExt::SubgroupSizeControl)) {
             ASSERT(usedKnobs.HasExt(DeviceExt::SubgroupSizeControl));
 
