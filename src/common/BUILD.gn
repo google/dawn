@@ -115,6 +115,13 @@ config("dawn_internal") {
 
         # Allow the use of __uuidof()
         "-Wno-language-extension-token",
+
+        # Allow comparison against type limits that might be tautological on
+        # 32bit or 64bit systems. Without this the following produces an error
+        # on 64bit:
+        #
+        #   if (myUint64 > std::numeric_limits<size_t>::max()) {...}
+        "-Wno-tautological-type-limit-compare",
       ]
     } else {
       cflags += [ "-pedantic" ]
