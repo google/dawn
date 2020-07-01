@@ -222,6 +222,7 @@ hooks = [
   {
     'name': 'lastchange',
     'pattern': '.',
+    'condition': 'dawn_standalone',
     'action': ['python', 'build/util/lastchange.py',
                '-o', 'build/util/LASTCHANGE'],
   },
