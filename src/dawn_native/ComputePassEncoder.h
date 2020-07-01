@@ -36,6 +36,8 @@ namespace dawn_native {
         void DispatchIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset);
         void SetPipeline(ComputePipelineBase* pipeline);
 
+        void WriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex);
+
       protected:
         ComputePassEncoder(DeviceBase* device,
                            CommandEncoder* commandEncoder,

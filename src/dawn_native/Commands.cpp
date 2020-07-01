@@ -18,6 +18,7 @@
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandAllocator.h"
 #include "dawn_native/ComputePipeline.h"
+#include "dawn_native/QuerySet.h"
 #include "dawn_native/RenderBundle.h"
 #include "dawn_native/RenderPipeline.h"
 #include "dawn_native/Texture.h"
@@ -175,6 +176,11 @@ namespace dawn_native {
                     cmd->~SetVertexBufferCmd();
                     break;
                 }
+                case Command::WriteTimestamp: {
+                    WriteTimestampCmd* cmd = commands->NextCommand<WriteTimestampCmd>();
+                    cmd->~WriteTimestampCmd();
+                    break;
+                }
             }
         }
         commands->DataWasDestroyed();
@@ -298,6 +304,11 @@ namespace dawn_native {
 
             case Command::SetVertexBuffer: {
                 commands->NextCommand<SetVertexBufferCmd>();
+                break;
+            }
+
+            case Command::WriteTimestamp: {
+                commands->NextCommand<WriteTimestampCmd>();
                 break;
             }
         }

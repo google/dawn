@@ -391,6 +391,13 @@
                 "args": [
                     {"name": "group label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
+            },
+            {
+                "name": "write timestamp",
+                "args": [
+                    {"name": "query set", "type": "query set"},
+                    {"name": "query index", "type": "uint32_t"}
+                ]
             }
         ]
     },
@@ -454,6 +461,13 @@
                     {"name": "group", "type": "bind group"},
                     {"name": "dynamic offset count", "type": "uint32_t", "default": "0"},
                     {"name": "dynamic offsets", "type": "uint32_t", "annotation": "const*", "length": "dynamic offset count", "optional": true}
+                ]
+            },
+            {
+                "name": "write timestamp",
+                "args": [
+                    {"name": "query set", "type": "query set"},
+                    {"name": "query index", "type": "uint32_t"}
                 ]
             },
             {
@@ -1259,6 +1273,13 @@
                     {"name": "buffer", "type": "buffer"},
                     {"name": "offset", "type": "uint64_t", "default": "0"},
                     {"name": "size", "type": "uint64_t", "default": "0"}
+                ]
+            },
+            {
+                "name": "write timestamp",
+                "args": [
+                    {"name": "query set", "type": "query set"},
+                    {"name": "query index", "type": "uint32_t"}
                 ]
             },
             {

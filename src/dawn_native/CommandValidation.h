@@ -23,6 +23,7 @@
 namespace dawn_native {
 
     class AttachmentState;
+    class QuerySetBase;
     struct BeginRenderPassCmd;
     struct PassResourceUsage;
 
@@ -35,6 +36,8 @@ namespace dawn_native {
     MaybeError ValidateComputePass(CommandIterator* commands);
 
     MaybeError ValidatePassResourceUsage(const PassResourceUsage& usage);
+
+    MaybeError ValidateTimestampQuery(QuerySetBase* querySet, uint32_t queryIndex);
 
     bool IsRangeOverlapped(uint32_t startA, uint32_t startB, uint32_t length);
 

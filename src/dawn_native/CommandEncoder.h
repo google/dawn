@@ -35,6 +35,8 @@ namespace dawn_native {
         CommandIterator AcquireCommands();
         CommandBufferResourceUsage AcquireResourceUsages();
 
+        void TrackUsedQuerySet(QuerySetBase* querySet);
+
         // Dawn API
         ComputePassEncoder* BeginComputePass(const ComputePassDescriptor* descriptor);
         RenderPassEncoder* BeginRenderPass(const RenderPassDescriptor* descriptor);
@@ -58,6 +60,8 @@ namespace dawn_native {
         void PopDebugGroup();
         void PushDebugGroup(const char* groupLabel);
 
+        void WriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex);
+
         CommandBufferBase* Finish(const CommandBufferDescriptor* descriptor);
 
       private:
@@ -67,6 +71,7 @@ namespace dawn_native {
         EncodingContext mEncodingContext;
         std::set<BufferBase*> mTopLevelBuffers;
         std::set<TextureBase*> mTopLevelTextures;
+        std::set<QuerySetBase*> mUsedQuerySets;
     };
 
 }  // namespace dawn_native

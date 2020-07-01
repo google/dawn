@@ -46,6 +46,8 @@ namespace dawn_native {
         void SetScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
         void ExecuteBundles(uint32_t count, RenderBundleBase* const* renderBundles);
 
+        void WriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex);
+
       protected:
         RenderPassEncoder(DeviceBase* device,
                           CommandEncoder* commandEncoder,

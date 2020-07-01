@@ -35,6 +35,8 @@ namespace dawn_native {
         uint32_t GetQueryCount() const;
         const std::vector<wgpu::PipelineStatisticsName>& GetPipelineStatistics() const;
 
+        MaybeError ValidateCanUseInSubmitNow() const;
+
         void Destroy();
 
       protected:

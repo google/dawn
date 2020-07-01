@@ -589,10 +589,14 @@ namespace dawn_native { namespace vulkan {
                     mCommands.NextCommand<BeginComputePassCmd>();
 
                     TransitionForPass(device, recordingContext, passResourceUsages[nextPassNumber]);
-                    RecordComputePass(recordingContext);
+                    DAWN_TRY(RecordComputePass(recordingContext));
 
                     nextPassNumber++;
                     break;
+                }
+
+                case Command::WriteTimestamp: {
+                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
                 }
 
                 default: {
@@ -605,7 +609,7 @@ namespace dawn_native { namespace vulkan {
         return {};
     }
 
-    void CommandBuffer::RecordComputePass(CommandRecordingContext* recordingContext) {
+    MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingContext) {
         Device* device = ToBackend(GetDevice());
         VkCommandBuffer commands = recordingContext->commandBuffer;
 
@@ -616,7 +620,7 @@ namespace dawn_native { namespace vulkan {
             switch (type) {
                 case Command::EndComputePass: {
                     mCommands.NextCommand<EndComputePassCmd>();
-                    return;
+                    return {};
                 }
 
                 case Command::Dispatch: {
@@ -710,6 +714,10 @@ namespace dawn_native { namespace vulkan {
                         SkipCommand(&mCommands, Command::PushDebugGroup);
                     }
                     break;
+                }
+
+                case Command::WriteTimestamp: {
+                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
                 }
 
                 default: {
@@ -979,6 +987,10 @@ namespace dawn_native { namespace vulkan {
                         }
                     }
                     break;
+                }
+
+                case Command::WriteTimestamp: {
+                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
                 }
 
                 default: {

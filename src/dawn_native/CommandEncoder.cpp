@@ -24,6 +24,7 @@
 #include "dawn_native/ComputePassEncoder.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/ErrorData.h"
+#include "dawn_native/QuerySet.h"
 #include "dawn_native/RenderPassEncoder.h"
 #include "dawn_native/RenderPipeline.h"
 #include "dawn_native/ValidationUtils_autogen.h"
@@ -529,12 +530,16 @@ namespace dawn_native {
 
     CommandBufferResourceUsage CommandEncoder::AcquireResourceUsages() {
         return CommandBufferResourceUsage{mEncodingContext.AcquirePassUsages(),
-                                          std::move(mTopLevelBuffers),
-                                          std::move(mTopLevelTextures)};
+                                          std::move(mTopLevelBuffers), std::move(mTopLevelTextures),
+                                          std::move(mUsedQuerySets)};
     }
 
     CommandIterator CommandEncoder::AcquireCommands() {
         return mEncodingContext.AcquireCommands();
+    }
+
+    void CommandEncoder::TrackUsedQuerySet(QuerySetBase* querySet) {
+        mUsedQuerySets.insert(querySet);
     }
 
     // Implementation of the API's command recording methods
@@ -893,6 +898,23 @@ namespace dawn_native {
         });
     }
 
+    void CommandEncoder::WriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex) {
+        mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+            if (GetDevice()->IsValidationEnabled()) {
+                DAWN_TRY(GetDevice()->ValidateObject(querySet));
+                DAWN_TRY(ValidateTimestampQuery(querySet, queryIndex));
+                TrackUsedQuerySet(querySet);
+            }
+
+            WriteTimestampCmd* cmd =
+                allocator->Allocate<WriteTimestampCmd>(Command::WriteTimestamp);
+            cmd->querySet = querySet;
+            cmd->queryIndex = queryIndex;
+
+            return {};
+        });
+    }
+
     CommandBufferBase* CommandEncoder::Finish(const CommandBufferDescriptor* descriptor) {
         DeviceBase* device = GetDevice();
         // Even if mEncodingContext.Finish() validation fails, calling it will mutate the internal
@@ -974,6 +996,11 @@ namespace dawn_native {
                     const PushDebugGroupCmd* cmd = commands->NextCommand<PushDebugGroupCmd>();
                     commands->NextData<char>(cmd->length + 1);
                     debugGroupStackSize++;
+                    break;
+                }
+
+                case Command::WriteTimestamp: {
+                    commands->NextCommand<WriteTimestampCmd>();
                     break;
                 }
                 default:

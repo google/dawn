@@ -23,6 +23,7 @@
 namespace dawn_native {
 
     class BufferBase;
+    class QuerySetBase;
     class TextureBase;
 
     enum class PassType { Render, Compute };
@@ -68,6 +69,7 @@ namespace dawn_native {
         PerPassUsages perPass;
         std::set<BufferBase*> topLevelBuffers;
         std::set<TextureBase*> topLevelTextures;
+        std::set<QuerySetBase*> usedQuerySets;
     };
 
 }  // namespace dawn_native

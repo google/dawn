@@ -712,6 +712,12 @@ namespace dawn_native { namespace opengl {
                     break;
                 }
 
+                case Command::WriteTimestamp: {
+                    // WriteTimestamp is not supported on OpenGL
+                    UNREACHABLE();
+                    break;
+                }
+
                 default: {
                     UNREACHABLE();
                     break;
@@ -783,6 +789,12 @@ namespace dawn_native { namespace opengl {
                     // Due to lack of linux driver support for GL_EXT_debug_marker
                     // extension these functions are skipped.
                     SkipCommand(&mCommands, type);
+                    break;
+                }
+
+                case Command::WriteTimestamp: {
+                    // WriteTimestamp is not supported on OpenGL
+                    UNREACHABLE();
                     break;
                 }
 
@@ -1134,6 +1146,12 @@ namespace dawn_native { namespace opengl {
                             DoRenderBundleCommand(iter, type);
                         }
                     }
+                    break;
+                }
+
+                case Command::WriteTimestamp: {
+                    // WriteTimestamp is not supported on OpenGL
+                    UNREACHABLE();
                     break;
                 }
 

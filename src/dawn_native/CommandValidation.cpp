@@ -20,6 +20,7 @@
 #include "dawn_native/CommandBufferStateTracker.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/PassResourceUsage.h"
+#include "dawn_native/QuerySet.h"
 #include "dawn_native/RenderBundle.h"
 #include "dawn_native/RenderPipeline.h"
 
@@ -202,6 +203,11 @@ namespace dawn_native {
                     break;
                 }
 
+                case Command::WriteTimestamp: {
+                    commands->NextCommand<WriteTimestampCmd>();
+                    break;
+                }
+
                 default:
                     DAWN_TRY(ValidateRenderBundleCommand(
                         commands, type, &commandBufferState, renderPass->attachmentState.Get(),
@@ -274,6 +280,11 @@ namespace dawn_native {
                     break;
                 }
 
+                case Command::WriteTimestamp: {
+                    commands->NextCommand<WriteTimestampCmd>();
+                    break;
+                }
+
                 default:
                     return DAWN_VALIDATION_ERROR("Command disallowed inside a compute pass");
             }
@@ -336,6 +347,18 @@ namespace dawn_native {
                 }
             }
         }
+        return {};
+    }
+
+    MaybeError ValidateTimestampQuery(QuerySetBase* querySet, uint32_t queryIndex) {
+        if (querySet->GetQueryType() != wgpu::QueryType::Timestamp) {
+            return DAWN_VALIDATION_ERROR("The query type of query set must be Timestamp");
+        }
+
+        if (queryIndex >= querySet->GetQueryCount()) {
+            return DAWN_VALIDATION_ERROR("Query index exceeds the number of queries in query set");
+        }
+
         return {};
     }
 

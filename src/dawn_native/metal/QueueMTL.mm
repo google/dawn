@@ -31,7 +31,7 @@ namespace dawn_native { namespace metal {
 
         TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording, "CommandBufferMTL::FillCommands");
         for (uint32_t i = 0; i < commandCount; ++i) {
-            ToBackend(commands[i])->FillCommands(commandContext);
+            DAWN_TRY(ToBackend(commands[i])->FillCommands(commandContext));
         }
         TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferMTL::FillCommands");
 

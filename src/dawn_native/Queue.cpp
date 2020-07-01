@@ -22,6 +22,7 @@
 #include "dawn_native/ErrorScopeTracker.h"
 #include "dawn_native/Fence.h"
 #include "dawn_native/FenceSignalTracker.h"
+#include "dawn_native/QuerySet.h"
 #include "dawn_native/Texture.h"
 #include "dawn_platform/DawnPlatform.h"
 #include "dawn_platform/tracing/TraceEvent.h"
@@ -154,6 +155,9 @@ namespace dawn_native {
             }
             for (const TextureBase* texture : usages.topLevelTextures) {
                 DAWN_TRY(texture->ValidateCanUseInSubmitNow());
+            }
+            for (const QuerySetBase* querySet : usages.usedQuerySets) {
+                DAWN_TRY(querySet->ValidateCanUseInSubmitNow());
             }
         }
 

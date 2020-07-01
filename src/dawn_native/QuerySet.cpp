@@ -131,6 +131,14 @@ namespace dawn_native {
         return mPipelineStatistics;
     }
 
+    MaybeError QuerySetBase::ValidateCanUseInSubmitNow() const {
+        ASSERT(!IsError());
+        if (mState == QuerySetState::Destroyed) {
+            return DAWN_VALIDATION_ERROR("Destroyed query set used in a submit");
+        }
+        return {};
+    }
+
     void QuerySetBase::Destroy() {
         if (GetDevice()->ConsumedError(ValidateDestroy())) {
             return;

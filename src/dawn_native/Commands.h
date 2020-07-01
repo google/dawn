@@ -60,6 +60,7 @@ namespace dawn_native {
         SetBindGroup,
         SetIndexBuffer,
         SetVertexBuffer,
+        WriteTimestamp,
     };
 
     struct BeginComputePassCmd {};
@@ -226,6 +227,11 @@ namespace dawn_native {
         Ref<BufferBase> buffer;
         uint64_t offset;
         uint64_t size;
+    };
+
+    struct WriteTimestampCmd {
+        Ref<QuerySetBase> querySet;
+        uint32_t queryIndex;
     };
 
     // This needs to be called before the CommandIterator is freed so that the Ref<> present in
