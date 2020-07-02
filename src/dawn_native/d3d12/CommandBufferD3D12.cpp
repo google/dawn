@@ -592,7 +592,8 @@ namespace dawn_native { namespace d3d12 {
                                                         subresources);
 
                     const uint64_t bytesPerSlice =
-                        copy->source.bytesPerRow * copy->source.rowsPerImage;
+                        copy->source.bytesPerRow *
+                        (copy->source.rowsPerImage / texture->GetFormat().blockHeight);
 
                     const dawn_native::Extent3D copyOneLayerSize = {copy->copySize.width,
                                                                     copy->copySize.height, 1};
@@ -648,7 +649,8 @@ namespace dawn_native { namespace d3d12 {
                     buffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopyDst);
 
                     const uint64_t bytesPerSlice =
-                        copy->destination.bytesPerRow * copy->destination.rowsPerImage;
+                        copy->destination.bytesPerRow *
+                        (copy->destination.rowsPerImage / texture->GetFormat().blockHeight);
 
                     const dawn_native::Extent3D copyOneLayerSize = {copy->copySize.width,
                                                                     copy->copySize.height, 1};

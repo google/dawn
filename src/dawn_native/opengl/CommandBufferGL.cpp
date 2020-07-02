@@ -542,7 +542,7 @@ namespace dawn_native { namespace opengl {
                         ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
                         uint64_t copyDataSize = (copySize.width / formatInfo.blockWidth) *
                                                 (copySize.height / formatInfo.blockHeight) *
-                                                formatInfo.blockByteSize;
+                                                formatInfo.blockByteSize * copySize.depth;
                         Extent3D copyExtent = ComputeTextureCopyExtent(dst, copySize);
 
                         if (texture->GetArrayLayers() > 1) {
