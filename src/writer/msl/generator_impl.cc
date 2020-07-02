@@ -69,6 +69,8 @@ GeneratorImpl::~GeneratorImpl() = default;
 bool GeneratorImpl::Generate(const ast::Module& module) {
   module_ = &module;
 
+  out_ << "#include <metal_stdlib>" << std::endl << std::endl;
+
   for (auto* const alias : module.alias_types()) {
     if (!EmitAliasType(alias)) {
       return false;
