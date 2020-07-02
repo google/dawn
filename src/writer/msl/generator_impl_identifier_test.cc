@@ -39,6 +39,14 @@ TEST_F(MslGeneratorImplTest, EmitIdentifierExpression_Single) {
   EXPECT_EQ(g.result(), "foo");
 }
 
+TEST_F(MslGeneratorImplTest, EmitIdentifierExpression_Single_WithCollision) {
+  ast::IdentifierExpression i("virtual");
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitExpression(&i)) << g.error();
+  EXPECT_EQ(g.result(), "virtual_tint_0");
+}
+
 // TODO(dsinclair): Handle import names
 TEST_F(MslGeneratorImplTest, DISABLED_EmitIdentifierExpression_MultipleNames) {
   ast::IdentifierExpression i({"std", "glsl", "init"});

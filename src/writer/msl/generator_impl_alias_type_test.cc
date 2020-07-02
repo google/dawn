@@ -39,6 +39,16 @@ TEST_F(MslGeneratorImplTest, EmitAliasType_F32) {
 )");
 }
 
+TEST_F(MslGeneratorImplTest, EmitAliasType_NameCollision) {
+  ast::type::F32Type f32;
+  ast::type::AliasType alias("float", &f32);
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitAliasType(&alias)) << g.error();
+  EXPECT_EQ(g.result(), R"(typedef float float_tint_0;
+)");
+}
+
 TEST_F(MslGeneratorImplTest, EmitAliasType_Struct) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;

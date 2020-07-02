@@ -46,6 +46,15 @@ TEST_F(MslGeneratorImplTest, EmitType_Alias) {
   EXPECT_EQ(g.result(), "alias");
 }
 
+TEST_F(MslGeneratorImplTest, EmitType_Alias_NameCollision) {
+  ast::type::F32Type f32;
+  ast::type::AliasType alias("bool", &f32);
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitType(&alias, "")) << g.error();
+  EXPECT_EQ(g.result(), "bool_tint_0");
+}
+
 TEST_F(MslGeneratorImplTest, EmitType_Array) {
   ast::type::BoolType b;
   ast::type::ArrayType a(&b, 4);
@@ -53,6 +62,15 @@ TEST_F(MslGeneratorImplTest, EmitType_Array) {
   GeneratorImpl g;
   ASSERT_TRUE(g.EmitType(&a, "ary")) << g.error();
   EXPECT_EQ(g.result(), "bool ary[4]");
+}
+
+TEST_F(MslGeneratorImplTest, EmitType_Array_NameCollision) {
+  ast::type::BoolType b;
+  ast::type::ArrayType a(&b, 4);
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitType(&a, "bool")) << g.error();
+  EXPECT_EQ(g.result(), "bool bool_tint_0[4]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Array_WithoutName) {
@@ -71,6 +89,15 @@ TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
   GeneratorImpl g;
   ASSERT_TRUE(g.EmitType(&a, "ary")) << g.error();
   EXPECT_EQ(g.result(), "bool ary[1]");
+}
+
+TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray_NameCollision) {
+  ast::type::BoolType b;
+  ast::type::ArrayType a(&b);
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitType(&a, "discard_fragment")) << g.error();
+  EXPECT_EQ(g.result(), "bool discard_fragment_tint_0[1]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Bool) {
@@ -140,6 +167,31 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct) {
   EXPECT_EQ(g.result(), R"(struct {
   int a;
   float b;
+})");
+}
+
+TEST_F(MslGeneratorImplTest, EmitType_Struct_NameCollision) {
+  ast::type::I32Type i32;
+  ast::type::F32Type f32;
+
+  ast::StructMemberList members;
+  members.push_back(std::make_unique<ast::StructMember>(
+      "main", &i32, ast::StructMemberDecorationList{}));
+
+  ast::StructMemberDecorationList b_deco;
+  members.push_back(
+      std::make_unique<ast::StructMember>("float", &f32, std::move(b_deco)));
+
+  auto str = std::make_unique<ast::Struct>();
+  str->set_members(std::move(members));
+
+  ast::type::StructType s(std::move(str));
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitType(&s, "")) << g.error();
+  EXPECT_EQ(g.result(), R"(struct {
+  int main_tint_0;
+  float float_tint_0;
 })");
 }
 

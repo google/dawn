@@ -54,6 +54,30 @@ TEST_F(MslGeneratorImplTest, Emit_Function) {
 )");
 }
 
+TEST_F(MslGeneratorImplTest, Emit_Function_Name_Collision) {
+  ast::type::VoidType void_type;
+
+  auto func =
+      std::make_unique<ast::Function>("main", ast::VariableList{}, &void_type);
+
+  ast::StatementList body;
+  body.push_back(std::make_unique<ast::ReturnStatement>());
+  func->set_body(std::move(body));
+
+  ast::Module m;
+  m.AddFunction(std::move(func));
+
+  GeneratorImpl g;
+  g.increment_indent();
+
+  ASSERT_TRUE(g.Generate(m)) << g.error();
+  EXPECT_EQ(g.result(), R"(  void main_tint_0() {
+    return;
+  }
+
+)");
+}
+
 TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
   ast::type::F32Type f32;
   ast::type::I32Type i32;
@@ -112,6 +136,26 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPoint_WithName) {
   auto func = std::make_unique<ast::Function>("comp_main", ast::VariableList{},
                                               &void_type);
   auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kCompute,
+                                              "my_main", "comp_main");
+
+  ast::Module m;
+  m.AddFunction(std::move(func));
+  m.AddEntryPoint(std::move(ep));
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.Generate(m)) << g.error();
+  EXPECT_EQ(g.result(), R"(kernel void my_main() {
+}
+
+)");
+}
+
+TEST_F(MslGeneratorImplTest, Emit_Function_EntryPoint_WithNameCollision) {
+  ast::type::VoidType void_type;
+
+  auto func = std::make_unique<ast::Function>("comp_main", ast::VariableList{},
+                                              &void_type);
+  auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kCompute,
                                               "main", "comp_main");
 
   ast::Module m;
@@ -120,7 +164,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPoint_WithName) {
 
   GeneratorImpl g;
   ASSERT_TRUE(g.Generate(m)) << g.error();
-  EXPECT_EQ(g.result(), R"(kernel void main() {
+  EXPECT_EQ(g.result(), R"(kernel void main_tint_0() {
 }
 
 )");

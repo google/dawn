@@ -22,6 +22,7 @@
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/writer/msl/namer.h"
 #include "src/writer/text_generator.h"
 
 namespace tint {
@@ -158,6 +159,7 @@ class GeneratorImpl : public TextGenerator {
   bool EmitUnaryOp(ast::UnaryOpExpression* expr);
 
  private:
+  Namer namer_;
   const ast::Module* module_ = nullptr;
   uint32_t loop_emission_counter_ = 0;
 };

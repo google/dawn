@@ -95,7 +95,7 @@ bool GeneratorImpl::EmitAliasType(const ast::type::AliasType* alias) {
   if (!EmitType(alias->type(), "")) {
     return false;
   }
-  out_ << " " << alias->name() << ";" << std::endl;
+  out_ << " " << namer_.NameFor(alias->name()) << ";" << std::endl;
 
   return true;
 }
@@ -432,7 +432,7 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
     return false;
   }
 
-  out_ << " " << name << "(";
+  out_ << " " << namer_.NameFor(name) << "(";
 
   bool first = true;
   for (const auto& v : func->params()) {
@@ -461,12 +461,15 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
     error_ = "Identifier paths not handled yet.";
     return false;
   }
-  out_ << ident->name();
+  out_ << namer_.NameFor(ident->name());
   return true;
 }
 
 bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
   loop_emission_counter_++;
+
+  std::string guard = namer_.NameFor("tint_msl_is_first_" +
+                                     std::to_string(loop_emission_counter_));
 
   if (stmt->has_continuing()) {
     make_indent();
@@ -476,8 +479,7 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
     increment_indent();
 
     make_indent();
-    out_ << "bool tint_msl_is_first_" << loop_emission_counter_ << " = true;"
-         << std::endl;
+    out_ << "bool " << guard << " = true;" << std::endl;
   }
 
   make_indent();
@@ -486,15 +488,14 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
 
   if (stmt->has_continuing()) {
     make_indent();
-    out_ << "if (!tint_msl_is_first_" << loop_emission_counter_ << ")";
+    out_ << "if (!" << guard << ")";
 
     if (!EmitStatementBlockAndNewline(stmt->continuing())) {
       return false;
     }
 
     make_indent();
-    out_ << "tint_msl_is_first_" << loop_emission_counter_ << " = false;"
-         << std::endl;
+    out_ << guard << " = false;" << std::endl;
     out_ << std::endl;
   }
 
@@ -676,7 +677,7 @@ bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
 bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
   if (type->IsAlias()) {
     auto* alias = type->AsAlias();
-    out_ << alias->name();
+    out_ << namer_.NameFor(alias->name());
   } else if (type->IsArray()) {
     auto* ary = type->AsArray();
 
@@ -684,7 +685,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
       return false;
     }
     if (!name.empty()) {
-      out_ << " " << name;
+      out_ << " " << namer_.NameFor(name);
     }
     out_ << "[";
     if (ary->IsRuntimeArray()) {
@@ -732,7 +733,7 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
       }
       // Array member name will be output with the type
       if (!mem->type()->IsArray()) {
-        out_ << " " << mem->name();
+        out_ << " " << namer_.NameFor(mem->name());
       }
       out_ << ";" << std::endl;
     }

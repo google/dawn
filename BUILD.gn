@@ -487,7 +487,9 @@ source_set("libtint_msl_writer_src") {
     "src/writer/msl/generator.cc",
     "src/writer/msl/generator.h",
     "src/writer/msl/generator_impl.cc",
-    "src/wrtier/msl/generator_impl.h",
+    "src/writer/msl/generator_impl.h",
+    "src/writer/msl/namer.cc",
+    "src/writer/msl/namer.h",
   ]
 
   configs += [ ":tint_common_config" ]
@@ -905,6 +907,7 @@ source_set("tint_unittests_msl_writer_src") {
     "src/writer/msl/generator_impl_test.cc",
     "src/writer/msl/generator_impl_type_test.cc",
     "src/writer/msl/generator_impl_unary_op_test.cc",
+    "src/writer/msl/namer_test.cc",
   ]
 
   configs += [
