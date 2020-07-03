@@ -470,10 +470,11 @@ test("dawn_perf_tests") {
 
   libs = []
 
-  # When building inside Chromium, use their gtest main function because it is
-  # needed to run in swarming correctly.
+  # When building inside Chromium, use their gtest main function and the
+  # other perf test scaffolding in order to run in swarming correctly.
   if (build_with_chromium) {
     deps += [ ":dawn_perf_tests_main" ]
+    data_deps = [ "//testing:run_perf_test" ]
   } else {
     sources += [ "PerfTestsMain.cpp" ]
   }
