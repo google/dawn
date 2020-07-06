@@ -117,9 +117,9 @@
             {"value": 3, "name": "sampler"},
             {"value": 4, "name": "comparison sampler"},
             {"value": 5, "name": "sampled texture"},
-            {"value": 6, "name": "storage texture"},
-            {"value": 7, "name": "readonly storage texture"},
-            {"value": 8, "name": "writeonly storage texture"}
+            {"value": 6, "name": "readonly storage texture"},
+            {"value": 7, "name": "writeonly storage texture"},
+            {"value": 8, "name": "storage texture"}
         ]
     },
     "blend descriptor": {
@@ -570,13 +570,6 @@
                 ]
             },
             {
-                "name": "create render pipeline",
-                "returns": "render pipeline",
-                "args": [
-                    {"name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"}
-                ]
-            },
-            {
                 "name": "create pipeline layout",
                 "returns": "pipeline layout",
                 "args": [
@@ -584,10 +577,24 @@
                 ]
             },
             {
+                "name": "create query set",
+                "returns": "query set",
+                "args": [
+                    {"name": "descriptor", "type": "query set descriptor", "annotation": "const*"}
+                ]
+            },
+            {
                 "name": "create render bundle encoder",
                 "returns": "render bundle encoder",
                 "args": [
                     {"name": "descriptor", "type": "render bundle encoder descriptor", "annotation": "const*"}
+                ]
+            },
+            {
+                "name": "create render pipeline",
+                "returns": "render pipeline",
+                "args": [
+                    {"name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"}
                 ]
             },
             {
@@ -663,13 +670,6 @@
                 "args": [
                     {"name": "callback", "type": "error callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
-                ]
-            },
-            {
-                "name": "create query set",
-                "returns": "query set",
-                "args": [
-                    {"name": "descriptor", "type": "query set descriptor", "annotation": "const*"}
                 ]
             }
         ]
@@ -940,8 +940,8 @@
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "type", "type": "query type"},
             {"name": "count", "type": "uint32_t"},
-            {"name": "pipeline statistics count", "type": "uint32_t", "default": "0"},
-            {"name": "pipeline statistics", "type": "pipeline statistics name", "annotation": "const*", "length": "pipeline statistics count"}
+            {"name": "pipeline statistics", "type": "pipeline statistics name", "annotation": "const*", "length": "pipeline statistics count"},
+            {"name": "pipeline statistics count", "type": "uint32_t", "default": "0"}
         ]
     },
     "query type": {
@@ -1418,11 +1418,11 @@
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true}
         ]
     },
-    "surface descriptor from HTML canvas id": {
+    "surface descriptor from canvas HTML selector": {
         "category": "structure",
         "chained": true,
         "members": [
-            {"name": "id", "type": "char", "annotation": "const*", "length": "strlen"}
+            {"name": "selector", "type": "char", "annotation": "const*", "length": "strlen"}
         ]
     },
     "surface descriptor from metal layer": {
@@ -1488,7 +1488,7 @@
             {"value": 1, "name": "surface descriptor from metal layer"},
             {"value": 2, "name": "surface descriptor from windows HWND"},
             {"value": 3, "name": "surface descriptor from xlib"},
-            {"value": 4, "name": "surface descriptor from HTML canvas id"},
+            {"value": 4, "name": "surface descriptor from canvas HTML selector"},
             {"value": 5, "name": "shader module SPIRV descriptor"},
             {"value": 6, "name": "shader module WGSL descriptor"},
             {"value": 7, "name": "sampler descriptor dummy anisotropic filtering"},
