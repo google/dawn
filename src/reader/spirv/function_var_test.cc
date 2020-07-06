@@ -929,6 +929,539 @@ Return{}
 )")) << ToString(fe.ast_body());
 }
 
+TEST_F(SpvParserTest, EmitStatement_Phi_SingleBlockLoopIndex) {
+  auto assembly = Preamble() + R"(
+     %pty = OpTypePointer Private %uint
+     %1 = OpVariable %pty Private
+     %boolpty = OpTypePointer Private %bool
+     %7 = OpVariable %boolpty Private
+     %8 = OpVariable %boolpty Private
+
+     %100 = OpFunction %void None %voidfn
+
+     %5 = OpLabel
+     OpBranch %10
+
+     ; Use an outer loop to show we put the new variable in the
+     ; smallest enclosing scope.
+     %10 = OpLabel
+     %101 = OpLoad %bool %7
+     %102 = OpLoad %bool %8
+     OpLoopMerge %99 %89 None
+     OpBranchConditional %101 %99 %20
+
+     %20 = OpLabel
+     %2 = OpPhi %uint %uint_0 %10 %4 %20  ; gets computed value
+     %3 = OpPhi %uint %uint_1 %10 %3 %20  ; gets itself
+     %4 = OpIAdd %uint %2 %uint_1
+     OpLoopMerge %89 %20 None
+     OpBranchConditional %102 %89 %20
+
+     %89 = OpLabel
+     OpBranch %10
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Loop{
+  VariableDeclStatement{
+    Variable{
+      x_2_phi
+      function
+      __u32
+    }
+  }
+  VariableDeclStatement{
+    Variable{
+      x_3_phi
+      function
+      __u32
+    }
+  }
+  VariableDeclStatement{
+    Variable{
+      x_101
+      none
+      __bool
+      {
+        Identifier{x_7}
+      }
+    }
+  }
+  VariableDeclStatement{
+    Variable{
+      x_102
+      none
+      __bool
+      {
+        Identifier{x_8}
+      }
+    }
+  }
+  Assignment{
+    Identifier{x_2_phi}
+    ScalarConstructor{0}
+  }
+  Assignment{
+    Identifier{x_3_phi}
+    ScalarConstructor{1}
+  }
+  If{
+    (
+      Identifier{x_101}
+    )
+    {
+      Break{}
+    }
+  }
+  Loop{
+    VariableDeclStatement{
+      Variable{
+        x_2
+        none
+        __u32
+        {
+          Identifier{x_2_phi}
+        }
+      }
+    }
+    VariableDeclStatement{
+      Variable{
+        x_3
+        none
+        __u32
+        {
+          Identifier{x_3_phi}
+        }
+      }
+    }
+    Assignment{
+      Identifier{x_2_phi}
+      Binary{
+        Identifier{x_2}
+        add
+        ScalarConstructor{1}
+      }
+    }
+    Assignment{
+      Identifier{x_3_phi}
+      Identifier{x_3}
+    }
+    If{
+      (
+        Identifier{x_102}
+      )
+      {
+        Break{}
+      }
+    }
+  }
+}
+Return{}
+)")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
+  auto assembly = Preamble() + R"(
+     %pty = OpTypePointer Private %uint
+     %1 = OpVariable %pty Private
+     %boolpty = OpTypePointer Private %bool
+     %7 = OpVariable %boolpty Private
+     %8 = OpVariable %boolpty Private
+
+     %100 = OpFunction %void None %voidfn
+
+     %5 = OpLabel
+     OpBranch %10
+
+     ; Use an outer loop to show we put the new variable in the
+     ; smallest enclosing scope.
+     %10 = OpLabel
+     %101 = OpLoad %bool %7
+     %102 = OpLoad %bool %8
+     OpLoopMerge %99 %89 None
+     OpBranchConditional %101 %99 %20
+
+     %20 = OpLabel
+     %2 = OpPhi %uint %uint_0 %10 %4 %30  ; gets computed value
+     %3 = OpPhi %uint %uint_1 %10 %3 %30  ; gets itself
+     OpLoopMerge %89 %30 None
+     OpBranchConditional %102 %89 %30
+
+     %30 = OpLabel
+     %4 = OpIAdd %uint %2 %uint_1
+     OpBranch %20
+
+     %89 = OpLabel
+     OpBranch %10
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Loop{
+  VariableDeclStatement{
+    Variable{
+      x_2
+      function
+      __u32
+    }
+  }
+  VariableDeclStatement{
+    Variable{
+      x_4
+      function
+      __u32
+    }
+  }
+  VariableDeclStatement{
+    Variable{
+      x_2_phi
+      function
+      __u32
+    }
+  }
+  VariableDeclStatement{
+    Variable{
+      x_3_phi
+      function
+      __u32
+    }
+  }
+  VariableDeclStatement{
+    Variable{
+      x_101
+      none
+      __bool
+      {
+        Identifier{x_7}
+      }
+    }
+  }
+  VariableDeclStatement{
+    Variable{
+      x_102
+      none
+      __bool
+      {
+        Identifier{x_8}
+      }
+    }
+  }
+  Assignment{
+    Identifier{x_2_phi}
+    ScalarConstructor{0}
+  }
+  Assignment{
+    Identifier{x_3_phi}
+    ScalarConstructor{1}
+  }
+  If{
+    (
+      Identifier{x_101}
+    )
+    {
+      Break{}
+    }
+  }
+  Loop{
+    Assignment{
+      Identifier{x_2}
+      Identifier{x_2_phi}
+    }
+    VariableDeclStatement{
+      Variable{
+        x_3
+        none
+        __u32
+        {
+          Identifier{x_3_phi}
+        }
+      }
+    }
+    If{
+      (
+        Identifier{x_102}
+      )
+      {
+        Break{}
+      }
+    }
+    continuing {
+      Assignment{
+        Identifier{x_4}
+        Binary{
+          Identifier{x_2}
+          add
+          ScalarConstructor{1}
+        }
+      }
+      Assignment{
+        Identifier{x_2_phi}
+        Identifier{x_4}
+      }
+      Assignment{
+        Identifier{x_3_phi}
+        Identifier{x_3}
+      }
+    }
+  }
+}
+Return{}
+)")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest, EmitStatement_Phi_FromElseAndThen) {
+  auto assembly = Preamble() + R"(
+     %pty = OpTypePointer Private %uint
+     %1 = OpVariable %pty Private
+     %boolpty = OpTypePointer Private %bool
+     %7 = OpVariable %boolpty Private
+     %8 = OpVariable %boolpty Private
+
+     %100 = OpFunction %void None %voidfn
+
+     %5 = OpLabel
+     %101 = OpLoad %bool %7
+     %102 = OpLoad %bool %8
+     OpBranch %10
+
+     ; Use an outer loop to show we put the new variable in the
+     ; smallest enclosing scope.
+     %10 = OpLabel
+     OpLoopMerge %99 %89 None
+     OpBranchConditional %101 %99 %20
+
+     %20 = OpLabel ; if seleciton
+     OpSelectionMerge %89 None
+     OpBranchConditional %102 %30 %40
+
+     %30 = OpLabel
+     OpBranch %89
+
+     %40 = OpLabel
+     OpBranch %89
+
+     %89 = OpLabel
+     %2 = OpPhi %uint %uint_0 %30 %uint_1 %40
+     OpStore %1 %2
+     OpBranch %10
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(VariableDeclStatement{
+  Variable{
+    x_101
+    none
+    __bool
+    {
+      Identifier{x_7}
+    }
+  }
+}
+VariableDeclStatement{
+  Variable{
+    x_102
+    none
+    __bool
+    {
+      Identifier{x_8}
+    }
+  }
+}
+Loop{
+  If{
+    (
+      Identifier{x_101}
+    )
+    {
+      Break{}
+    }
+  }
+  VariableDeclStatement{
+    Variable{
+      x_2_phi
+      function
+      __u32
+    }
+  }
+  If{
+    (
+      Identifier{x_102}
+    )
+    {
+      Assignment{
+        Identifier{x_2_phi}
+        ScalarConstructor{0}
+      }
+      Continue{}
+    }
+  }
+  Else{
+    {
+      Assignment{
+        Identifier{x_2_phi}
+        ScalarConstructor{1}
+      }
+    }
+  }
+  continuing {
+    VariableDeclStatement{
+      Variable{
+        x_2
+        none
+        __u32
+        {
+          Identifier{x_2_phi}
+        }
+      }
+    }
+    Assignment{
+      Identifier{x_1}
+      Identifier{x_2}
+    }
+  }
+}
+Return{}
+)")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest, EmitStatement_Phi_FromHeaderAndThen) {
+  auto assembly = Preamble() + R"(
+     %pty = OpTypePointer Private %uint
+     %1 = OpVariable %pty Private
+     %boolpty = OpTypePointer Private %bool
+     %7 = OpVariable %boolpty Private
+     %8 = OpVariable %boolpty Private
+
+     %100 = OpFunction %void None %voidfn
+
+     %5 = OpLabel
+     %101 = OpLoad %bool %7
+     %102 = OpLoad %bool %8
+     OpBranch %10
+
+     ; Use an outer loop to show we put the new variable in the
+     ; smallest enclosing scope.
+     %10 = OpLabel
+     OpLoopMerge %99 %89 None
+     OpBranchConditional %101 %99 %20
+
+     %20 = OpLabel ; if seleciton
+     OpSelectionMerge %89 None
+     OpBranchConditional %102 %30 %89
+
+     %30 = OpLabel
+     OpBranch %89
+
+     %89 = OpLabel
+     %2 = OpPhi %uint %uint_0 %20 %uint_1 %30
+     OpStore %1 %2
+     OpBranch %10
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(VariableDeclStatement{
+  Variable{
+    x_101
+    none
+    __bool
+    {
+      Identifier{x_7}
+    }
+  }
+}
+VariableDeclStatement{
+  Variable{
+    x_102
+    none
+    __bool
+    {
+      Identifier{x_8}
+    }
+  }
+}
+Loop{
+  If{
+    (
+      Identifier{x_101}
+    )
+    {
+      Break{}
+    }
+  }
+  VariableDeclStatement{
+    Variable{
+      x_2_phi
+      function
+      __u32
+    }
+  }
+  Assignment{
+    Identifier{x_2_phi}
+    ScalarConstructor{0}
+  }
+  If{
+    (
+      Identifier{x_102}
+    )
+    {
+      Assignment{
+        Identifier{x_2_phi}
+        ScalarConstructor{1}
+      }
+    }
+  }
+  continuing {
+    VariableDeclStatement{
+      Variable{
+        x_2
+        none
+        __u32
+        {
+          Identifier{x_2_phi}
+        }
+      }
+    }
+    Assignment{
+      Identifier{x_1}
+      Identifier{x_2}
+    }
+  }
+}
+Return{}
+)")) << ToString(fe.ast_body());
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

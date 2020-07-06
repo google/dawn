@@ -162,6 +162,21 @@ struct BlockInfo {
   /// hoisted variable.  See the |requires_hoisted_def| member of
   /// DefInfo for an explanation.
   std::vector<uint32_t> hoisted_ids;
+
+  /// A PhiAssignment represents the assignment of a value to the state
+  /// variable associated with an OpPhi in a successor block.
+  struct PhiAssignment {
+    /// The ID of an OpPhi receiving a value from this basic block.
+    uint32_t phi_id;
+    /// The the value carried to the given OpPhi.
+    uint32_t value;
+  };
+  /// If this basic block branches to a visited basic block containing phis,
+  /// then this is the list of writes to the variables associated those phis.
+  std::vector<PhiAssignment> phi_assignments;
+  /// The IDs of OpPhi instructions which require their associated state
+  /// variable to be declared in this basic block.
+  std::vector<uint32_t> phis_needing_state_vars;
 };
 
 inline std::ostream& operator<<(std::ostream& o, const BlockInfo& bi) {
@@ -182,7 +197,10 @@ struct DefInfo {
   /// Constructor.
   /// @param def_inst the SPIR-V instruction defining the ID
   /// @param block_pos the position of the basic block where the ID is defined.
-  DefInfo(const spvtools::opt::Instruction& def_inst, uint32_t block_pos);
+  /// @param index an ordering index for this local definition
+  DefInfo(const spvtools::opt::Instruction& def_inst,
+          uint32_t block_pos,
+          size_t index);
   /// Destructor.
   ~DefInfo();
 
@@ -191,6 +209,10 @@ struct DefInfo {
   /// The position of the block that defines this ID, in the function block
   /// order.  See method |FunctionEmitter::ComputeBlockOrderAndPositions|
   const uint32_t block_pos = 0;
+
+  /// An index for uniquely and deterministically ordering all DefInfo records
+  /// in a function.
+  const size_t index = 0;
 
   /// The number of uses of this ID.
   uint32_t num_uses = 0;
@@ -217,6 +239,11 @@ struct DefInfo {
   /// TODO(dneto): This works for constants of storable type, but not, for
   /// example, pointers.
   bool requires_hoisted_def = false;
+
+  /// If the definition is an OpPhi, then |phi_var| is the name of the
+  /// variable that stores the value carried from parent basic blocks into
+  // the basic block containing the OpPhi. Otherwise this is the empty string.
+  std::string phi_var;
 };
 
 inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
@@ -226,6 +253,7 @@ inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
     << " last_use_pos: " << di.last_use_pos << " requires_named_const_def: "
     << (di.requires_named_const_def ? "true" : "false")
     << " requires_hoisted_def: " << (di.requires_hoisted_def ? "true" : "false")
+    << " phi_var: '" << di.phi_var << "'"
     << "}";
   return o;
 }
@@ -571,6 +599,15 @@ class FunctionEmitter {
     }
     return where->second.get();
   }
+
+  /// Returns the most deeply nested structured construct which encloses
+  /// both block positions. Each position must be a valid index into the
+  /// function block order array.
+  /// @param first_pos the first block position
+  /// @param last_pos the last block position
+  /// @returns the smallest construct containing both positions
+  const Construct* GetSmallestEnclosingConstruct(uint32_t first_pos,
+                                                 uint32_t last_pos) const;
 
  private:
   /// @returns the store type for the OpVariable instruction, or

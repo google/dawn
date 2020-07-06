@@ -412,8 +412,9 @@ BlockInfo::BlockInfo(const spvtools::opt::BasicBlock& bb)
 BlockInfo::~BlockInfo() = default;
 
 DefInfo::DefInfo(const spvtools::opt::Instruction& def_inst,
-                 uint32_t the_block_pos)
-    : inst(def_inst), block_pos(the_block_pos) {}
+                 uint32_t the_block_pos,
+                 size_t the_index)
+    : inst(def_inst), block_pos(the_block_pos), index(the_index) {}
 
 DefInfo::~DefInfo() = default;
 
@@ -628,7 +629,6 @@ bool FunctionEmitter::EmitBody() {
     return false;
   }
 
-  // TODO(dneto): register phis
   RegisterValuesNeedingNamedOrHoistedDefinition();
 
   if (!EmitFunctionVariables()) {
@@ -2367,8 +2367,18 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     return true;
   }
 
-  // Emit declarations of hoisted variables.
-  for (auto id : block_info.hoisted_ids) {
+  // Returns the given list of local definition IDs, sorted by their index.
+  auto sorted_by_index = [this](const std::vector<uint32_t>& ids) {
+    auto sorted = ids;
+    std::stable_sort(sorted.begin(), sorted.end(),
+                     [this](const uint32_t lhs, const uint32_t rhs) {
+                       return GetDefInfo(lhs)->index < GetDefInfo(rhs)->index;
+                     });
+    return sorted;
+  };
+
+  // Emit declarations of hoisted variables, in index order.
+  for (auto id : sorted_by_index(block_info.hoisted_ids)) {
     const auto* def_inst = def_use_mgr_->GetDef(id);
     assert(def_inst);
     AddStatement(
@@ -2378,11 +2388,22 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     // Save this as an already-named value.
     identifier_values_.insert(id);
   }
+  // Emit declarations of phi state variables, in index order.
+  for (auto id : sorted_by_index(block_info.phis_needing_state_vars)) {
+    const auto* def_inst = def_use_mgr_->GetDef(id);
+    assert(def_inst);
+    const auto phi_var_name = GetDefInfo(id)->phi_var;
+    assert(!phi_var_name.empty());
+    auto var = std::make_unique<ast::Variable>(
+        phi_var_name, ast::StorageClass::kFunction,
+        parser_impl_.ConvertType(def_inst->type_id()));
+    AddStatement(std::make_unique<ast::VariableDeclStatement>(std::move(var)));
+  }
 
+  // Emit regular statements.
   const spvtools::opt::BasicBlock& bb = *(block_info.basic_block);
   const auto* terminator = bb.terminator();
   const auto* merge = bb.GetMergeInst();  // Might be nullptr
-  // Emit regular statements.
   for (auto& inst : bb) {
     if (&inst == terminator || &inst == merge || inst.opcode() == SpvOpLabel ||
         inst.opcode() == SpvOpVariable) {
@@ -2392,6 +2413,26 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
       return false;
     }
   }
+
+  // Emit assignments to carry values to phi nodes in potential destinations.
+  // Do it in index order.
+  if (!block_info.phi_assignments.empty()) {
+    auto sorted = block_info.phi_assignments;
+    std::stable_sort(sorted.begin(), sorted.end(),
+                     [this](const BlockInfo::PhiAssignment& lhs,
+                            const BlockInfo::PhiAssignment& rhs) {
+                       return GetDefInfo(lhs.phi_id)->index <
+                              GetDefInfo(rhs.phi_id)->index;
+                     });
+    for (auto assignment : block_info.phi_assignments) {
+      const auto var_name = GetDefInfo(assignment.phi_id)->phi_var;
+      auto expr = MakeExpression(assignment.value);
+      AddStatement(std::make_unique<ast::AssignmentStatement>(
+          std::make_unique<ast::IdentifierExpression>(var_name),
+          std::move(expr.expr)));
+    }
+  }
+
   *already_emitted = true;
   return true;
 }
@@ -2482,6 +2523,13 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       // a new named constant definition.
       return EmitConstDefOrWriteToHoistedVar(
           inst, MakeExpression(inst.GetSingleWordInOperand(0)));
+    case SpvOpPhi: {
+      // Emit a read from the associated state variable.
+      auto expr = TypedExpression(
+          parser_impl_.ConvertType(inst.type_id()),
+          std::make_unique<ast::IdentifierExpression>(def_info->phi_var));
+      return EmitConstDefOrWriteToHoistedVar(inst, std::move(expr));
+    }
     case SpvOpFunctionCall:
       // TODO(dneto): Fill this out.  Make this pass, for existing tests
       return success();
@@ -2917,6 +2965,7 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(
 
 void FunctionEmitter::RegisterValuesNeedingNamedOrHoistedDefinition() {
   // Create a DefInfo for each value definition in this function.
+  size_t index = 0;
   for (auto block_id : block_order_) {
     const auto* block_info = GetBlockInfo(block_id);
     const auto block_pos = block_info->pos;
@@ -2925,7 +2974,8 @@ void FunctionEmitter::RegisterValuesNeedingNamedOrHoistedDefinition() {
       if ((result_id == 0) || inst.opcode() == SpvOpLabel) {
         continue;
       }
-      def_info_[result_id] = std::make_unique<DefInfo>(inst, block_pos);
+      def_info_[result_id] = std::make_unique<DefInfo>(inst, block_pos, index);
+      index++;
     }
   }
 
@@ -2936,8 +2986,8 @@ void FunctionEmitter::RegisterValuesNeedingNamedOrHoistedDefinition() {
     if (inst.opcode() == SpvOpVectorShuffle) {
       // We might access the vector operands multiple times. Make sure they
       // are evaluated only once.
-      for (auto index : std::array<uint32_t, 2>{0, 1}) {
-        auto id = inst.GetSingleWordInOperand(index);
+      for (auto vector_arg : std::array<uint32_t, 2>{0, 1}) {
+        auto id = inst.GetSingleWordInOperand(vector_arg);
         auto* operand_def = GetDefInfo(id);
         if (operand_def) {
           operand_def->requires_named_const_def = true;
@@ -2946,8 +2996,7 @@ void FunctionEmitter::RegisterValuesNeedingNamedOrHoistedDefinition() {
     }
   }
 
-  // Scan uses of locally defined IDs, to determine the block position
-  // of its last use.
+  // Scan uses of locally defined IDs, in function block order.
   for (auto block_id : block_order_) {
     const auto* block_info = GetBlockInfo(block_id);
     const auto block_pos = block_info->pos;
@@ -2960,13 +3009,55 @@ void FunctionEmitter::RegisterValuesNeedingNamedOrHoistedDefinition() {
           def_info->last_use_pos = std::max(def_info->last_use_pos, block_pos);
         }
       });
+
+      if (inst.opcode() == SpvOpPhi) {
+        // Declare a name for the variable used to carry values to a phi.
+        const auto phi_id = inst.result_id();
+        auto* phi_def_info = GetDefInfo(phi_id);
+        phi_def_info->phi_var =
+            namer_.MakeDerivedName(namer_.Name(phi_id) + "_phi");
+        // Track all the places where we need to mention the variable,
+        // so we can place its declaration.  First, record the location of
+        // the read from the variable.
+        uint32_t first_pos = block_pos;
+        uint32_t last_pos = block_pos;
+        // Record the assignments that will propagate values from predecessor
+        // blocks.
+        for (uint32_t i = 0; i + 1 < inst.NumInOperands(); i += 2) {
+          const uint32_t value_id = inst.GetSingleWordInOperand(i);
+          const uint32_t pred_block_id = inst.GetSingleWordInOperand(i + 1);
+          auto* pred_block_info = GetBlockInfo(pred_block_id);
+          // The predecessor might not be in the block order at all, so we
+          // need this guard.
+          if (pred_block_info) {
+            // Record the assignment that needs to occur at the end
+            // of the predecessor block.
+            pred_block_info->phi_assignments.push_back({phi_id, value_id});
+            first_pos = std::min(first_pos, pred_block_info->pos);
+            last_pos = std::min(last_pos, pred_block_info->pos);
+          }
+        }
+
+        // Schedule the declaration of the state variable.
+        const auto* enclosing_construct =
+            GetSmallestEnclosingConstruct(first_pos, last_pos);
+        GetBlockInfo(enclosing_construct->begin_id)
+            ->phis_needing_state_vars.push_back(phi_id);
+      }
     }
   }
 
-  // For an ID defined in this function, if it is used in a different construct
-  // than its definition, then it needs a named constant definition.  Otherwise
-  // we might sink an expensive computation into control flow, and hence change
-  // performance.
+  // For an ID defined in this function, determine if its evaluation and
+  // potential declaration needs special handling:
+  // - Compensate for the fact that dominance does not map directly to scope.
+  //   A definition could dominate its use, but a named definition in WGSL
+  //   at the location of the definition could go out of scope by the time
+  //   you reach the use.  In that case, we hoist the definition to a basic
+  //   block at the smallest scope enclosing both the definition and all
+  //   its uses.
+  // - If value is used in a different construct than its definition, then it
+  //   needs a named constant definition.  Otherwise we might sink an
+  //   expensive computation into control flow, and hence change performance.
   for (auto& id_def_info_pair : def_info_) {
     const auto def_id = id_def_info_pair.first;
     auto* def_info = id_def_info_pair.second.get();
@@ -2974,24 +3065,19 @@ void FunctionEmitter::RegisterValuesNeedingNamedOrHoistedDefinition() {
       // There is no need to adjust the location of the declaration.
       continue;
     }
+    // The first use must be the at the SSA definition, because block order
+    // respects dominance.
+    const auto first_pos = def_info->block_pos;
     const auto last_use_pos = def_info->last_use_pos;
 
     const auto* const def_in_construct =
-        GetBlockInfo(block_order_[def_info->block_pos])->construct;
+        GetBlockInfo(block_order_[first_pos])->construct;
     const auto* const construct_with_last_use =
         GetBlockInfo(block_order_[last_use_pos])->construct;
 
-    // Find the smallest structured construct that encloses the definition
-    // and all its uses.
-    const auto* enclosing_construct = def_in_construct;
-    while (enclosing_construct &&
-           !enclosing_construct->ContainsPos(last_use_pos)) {
-      enclosing_construct = enclosing_construct->parent;
-    }
-    // At worst, we go all the way out to the function construct.
-    assert(enclosing_construct != nullptr);
-
     if (def_in_construct != construct_with_last_use) {
+      const auto* enclosing_construct =
+          GetSmallestEnclosingConstruct(first_pos, last_use_pos);
       if (enclosing_construct == def_in_construct) {
         // We can use a plain 'const' definition.
         def_info->requires_named_const_def = true;
@@ -3004,6 +3090,21 @@ void FunctionEmitter::RegisterValuesNeedingNamedOrHoistedDefinition() {
       }
     }
   }
+}
+
+const Construct* FunctionEmitter::GetSmallestEnclosingConstruct(
+    uint32_t first_pos,
+    uint32_t last_pos) const {
+  const auto* enclosing_construct =
+      GetBlockInfo(block_order_[first_pos])->construct;
+  assert(enclosing_construct != nullptr);
+  // Constructs are strictly nesting, so follow parent pointers
+  while (enclosing_construct && !enclosing_construct->ContainsPos(last_pos)) {
+    enclosing_construct = enclosing_construct->parent;
+  }
+  // At worst, we go all the way out to the function construct.
+  assert(enclosing_construct != nullptr);
+  return enclosing_construct;
 }
 
 TypedExpression FunctionEmitter::MakeNumericConversion(
