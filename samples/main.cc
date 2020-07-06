@@ -162,6 +162,16 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
     } else if (arg == "--dump-ast") {
       opts->dump_ast = true;
     } else if (!arg.empty()) {
+      if (arg[0] == '-') {
+        std::cerr << "Unrecognized option: " << arg << std::endl;
+        return false;
+      }
+      if (!opts->input_filename.empty()) {
+        std::cerr << "More than one input file specified: '"
+                  << opts->input_filename << "' and '" << arg << "'"
+                  << std::endl;
+        return false;
+      }
       opts->input_filename = arg;
     }
   }
