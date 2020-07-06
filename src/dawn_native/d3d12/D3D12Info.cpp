@@ -59,6 +59,63 @@ namespace dawn_native { namespace d3d12 {
             }
         }
 
-        return info;
+        D3D12_FEATURE_DATA_SHADER_MODEL knownShaderModels[] = {{D3D_SHADER_MODEL_6_2},
+                                                               {D3D_SHADER_MODEL_6_1},
+                                                               {D3D_SHADER_MODEL_6_0},
+                                                               {D3D_SHADER_MODEL_5_1}};
+        for (D3D12_FEATURE_DATA_SHADER_MODEL shaderModel : knownShaderModels) {
+            if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
+                    D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel)))) {
+                if (shaderModel.HighestShaderModel < D3D_SHADER_MODEL_5_1) {
+                    return DAWN_INTERNAL_ERROR(
+                        "Driver could not support Shader Model 5.1 or higher");
+                }
+
+                switch (shaderModel.HighestShaderModel) {
+                    case D3D_SHADER_MODEL_6_2: {
+                        info.shaderModel = 62;
+                        info.shaderProfiles[SingleShaderStage::Vertex] = L"vs_6_2";
+                        info.shaderProfiles[SingleShaderStage::Fragment] = L"ps_6_2";
+                        info.shaderProfiles[SingleShaderStage::Compute] = L"cs_6_2";
+
+                        D3D12_FEATURE_DATA_D3D12_OPTIONS4 featureData4 = {};
+                        if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
+                                D3D12_FEATURE_D3D12_OPTIONS4, &featureData4,
+                                sizeof(featureData4)))) {
+                            info.supportsShaderFloat16 =
+                                shaderModel.HighestShaderModel >= D3D_SHADER_MODEL_6_2 &&
+                                featureData4.Native16BitShaderOpsSupported;
+                        }
+                        break;
+                    }
+                    case D3D_SHADER_MODEL_6_1: {
+                        info.shaderModel = 61;
+                        info.shaderProfiles[SingleShaderStage::Vertex] = L"vs_6_1";
+                        info.shaderProfiles[SingleShaderStage::Fragment] = L"ps_6_1";
+                        info.shaderProfiles[SingleShaderStage::Compute] = L"cs_6_1";
+                        break;
+                    }
+                    case D3D_SHADER_MODEL_6_0: {
+                        info.shaderModel = 60;
+                        info.shaderProfiles[SingleShaderStage::Vertex] = L"vs_6_0";
+                        info.shaderProfiles[SingleShaderStage::Fragment] = L"ps_6_0";
+                        info.shaderProfiles[SingleShaderStage::Compute] = L"cs_6_0";
+                        break;
+                    }
+                    default: {
+                        info.shaderModel = 51;
+                        info.shaderProfiles[SingleShaderStage::Vertex] = L"vs_5_1";
+                        info.shaderProfiles[SingleShaderStage::Fragment] = L"ps_5_1";
+                        info.shaderProfiles[SingleShaderStage::Compute] = L"cs_5_1";
+                        break;
+                    }
+                }
+
+                // Successfully find the maximum supported shader model.
+                break;
+            }
+        }
+
+        return std::move(info);
     }
 }}  // namespace dawn_native::d3d12
