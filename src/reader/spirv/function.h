@@ -601,14 +601,23 @@ class FunctionEmitter {
     return where->second.get();
   }
 
-  /// Returns the most deeply nested structured construct which encloses
-  /// both block positions. Each position must be a valid index into the
-  /// function block order array.
+  /// Returns the most deeply nested structured construct which encloses the
+  /// WGSL scopes of names declared in both block positions. Each position must
+  /// be a valid index into the function block order array.
   /// @param first_pos the first block position
   /// @param last_pos the last block position
   /// @returns the smallest construct containing both positions
-  const Construct* GetSmallestEnclosingConstruct(uint32_t first_pos,
-                                                 uint32_t last_pos) const;
+  const Construct* GetEnclosingScope(uint32_t first_pos,
+                                     uint32_t last_pos) const;
+
+  /// Finds loop construct associated with a continue construct, if it exists.
+  /// Returns nullptr if:
+  ///  - the given construct is not a continue construct
+  ///  - the continue construct does not have an associated loop construct
+  ///    (the continue target is also the loop header block)
+  /// @param c the continue construct
+  /// @returns the associated loop construct, or nullptr
+  const Construct* SiblingLoopConstruct(const Construct* c) const;
 
  private:
   /// @returns the store type for the OpVariable instruction, or

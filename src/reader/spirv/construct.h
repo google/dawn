@@ -218,6 +218,13 @@ inline std::string ToString(const Construct& c) {
   return ss.str();
 }
 
+/// Converts a construct to a string.
+/// @param c the construct
+/// @returns the string representation
+inline std::string ToString(const Construct* c) {
+  return c ? ToString(*c) : ToStringBrief(c);
+}
+
 /// Converts a unique pointer to a construct to a string.
 /// @param c the construct
 /// @returns the string representation

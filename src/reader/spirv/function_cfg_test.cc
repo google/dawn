@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "gmock/gmock.h"
+#include "src/reader/spirv/construct.h"
 #include "src/reader/spirv/function.h"
 #include "src/reader/spirv/parser_impl.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
@@ -87,15 +88,22 @@ std::string CommonTypes() {
   )";
 }
 
-/// Runs the necessary flow until and including finding switch case
-/// headers.
-/// @returns the result of finding switch case headers.
-bool FlowFindSwitchCaseHeaders(FunctionEmitter* fe) {
+/// Runs the necessary flow until and including labeling control
+/// flow constructs.
+/// @returns the result of labeling control flow constructs.
+bool FlowLabelControlFlowConstructs(FunctionEmitter* fe) {
   fe->RegisterBasicBlocks();
   EXPECT_TRUE(fe->RegisterMerges()) << fe->parser()->error();
   fe->ComputeBlockOrderAndPositions();
   EXPECT_TRUE(fe->VerifyHeaderContinueMergeOrder()) << fe->parser()->error();
-  EXPECT_TRUE(fe->LabelControlFlowConstructs()) << fe->parser()->error();
+  return fe->LabelControlFlowConstructs();
+}
+
+/// Runs the necessary flow until and including finding switch case
+/// headers.
+/// @returns the result of finding switch case headers.
+bool FlowFindSwitchCaseHeaders(FunctionEmitter* fe) {
+  EXPECT_TRUE(FlowLabelControlFlowConstructs(fe)) << fe->parser()->error();
   return fe->FindSwitchCaseHeaders();
 }
 
@@ -13416,6 +13424,121 @@ TEST_F(SpvParserTest,
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(unhandled case)"))
       << ToString(fe.ast_body());
+}
+
+TEST_F(SpvParserTest, SiblingLoopConstruct_Null) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %10 = OpLabel
+     OpReturn
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_EQ(fe.SiblingLoopConstruct(nullptr), nullptr);
+}
+
+TEST_F(SpvParserTest, SiblingLoopConstruct_NotAContinue) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  ASSERT_TRUE(FlowLabelControlFlowConstructs(&fe)) << p->error();
+  const Construct* c = fe.GetBlockInfo(10)->construct;
+  EXPECT_NE(c, nullptr);
+  EXPECT_EQ(fe.SiblingLoopConstruct(c), nullptr);
+}
+
+TEST_F(SpvParserTest, SiblingLoopConstruct_SingleBlockLoop) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %20 None
+     OpBranchConditional %cond %20 %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  ASSERT_TRUE(FlowLabelControlFlowConstructs(&fe)) << p->error();
+  const Construct* c = fe.GetBlockInfo(20)->construct;
+  EXPECT_EQ(c->kind, Construct::kContinue);
+  EXPECT_EQ(fe.SiblingLoopConstruct(c), nullptr);
+}
+
+TEST_F(SpvParserTest, SiblingLoopConstruct_ContinueIsWholeMultiBlockLoop) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %20 None ; continue target is also loop header
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << assembly;
+  FunctionEmitter fe(p, *spirv_function(100));
+  ASSERT_TRUE(FlowLabelControlFlowConstructs(&fe)) << p->error();
+  const Construct* c = fe.GetBlockInfo(20)->construct;
+  EXPECT_EQ(c->kind, Construct::kContinue);
+  EXPECT_EQ(fe.SiblingLoopConstruct(c), nullptr);
+}
+
+TEST_F(SpvParserTest, SiblingLoopConstruct_HasSiblingLoop) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %30 None
+     OpBranchConditional %cond %30 %99
+
+     %30 = OpLabel ; continue target
+     OpBranch %20
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  ASSERT_TRUE(FlowLabelControlFlowConstructs(&fe)) << p->error();
+  const Construct* c = fe.GetBlockInfo(30)->construct;
+  EXPECT_EQ(c->kind, Construct::kContinue);
+  EXPECT_THAT(ToString(fe.SiblingLoopConstruct(c)),
+              Eq("Construct{ Loop [1,2) begin_id:20 end_id:30 depth:1 "
+                 "parent:Function@10 in-l:Loop@20 }"));
 }
 
 }  // namespace

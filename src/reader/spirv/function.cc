@@ -1145,6 +1145,30 @@ BlockInfo* FunctionEmitter::HeaderIfBreakable(const Construct* c) {
   return nullptr;
 }
 
+const Construct* FunctionEmitter::SiblingLoopConstruct(
+    const Construct* c) const {
+  if (c == nullptr || c->kind != Construct::kContinue) {
+    return nullptr;
+  }
+  const uint32_t continue_target_id = c->begin_id;
+  const auto* continue_target = GetBlockInfo(continue_target_id);
+  const uint32_t header_id = continue_target->header_for_continue;
+  if (continue_target_id == header_id) {
+    // The continue target is the whole loop.
+    return nullptr;
+  }
+  const auto* candidate = GetBlockInfo(header_id)->construct;
+  // Walk up the construct tree until we hit the loop.  In future
+  // we might handle the corner case where the same block is both a
+  // loop header and a selection header. For example, where the
+  // loop header block has a conditional branch going to distinct
+  // targets inside the loop body.
+  while (candidate && candidate->kind != Construct::kLoop) {
+    candidate = candidate->parent;
+  }
+  return candidate;
+}
+
 bool FunctionEmitter::ClassifyCFGEdges() {
   if (failed()) {
     return false;
@@ -3013,13 +3037,17 @@ void FunctionEmitter::RegisterValuesNeedingNamedOrHoistedDefinition() {
     const auto block_pos = block_info->pos;
     for (const auto& inst : *(block_info->basic_block)) {
       // Update the usage span for IDs used by this instruction.
-      inst.ForEachInId([this, block_pos](const uint32_t* id_ptr) {
-        auto* def_info = GetDefInfo(*id_ptr);
-        if (def_info) {
-          def_info->num_uses++;
-          def_info->last_use_pos = std::max(def_info->last_use_pos, block_pos);
-        }
-      });
+      // But skip uses in OpPhi because they are handled differently.
+      if (inst.opcode() != SpvOpPhi) {
+        inst.ForEachInId([this, block_pos](const uint32_t* id_ptr) {
+          auto* def_info = GetDefInfo(*id_ptr);
+          if (def_info) {
+            def_info->num_uses++;
+            def_info->last_use_pos =
+                std::max(def_info->last_use_pos, block_pos);
+          }
+        });
+      }
 
       if (inst.opcode() == SpvOpPhi) {
         // Declare a name for the variable used to carry values to a phi.
@@ -3051,7 +3079,7 @@ void FunctionEmitter::RegisterValuesNeedingNamedOrHoistedDefinition() {
 
         // Schedule the declaration of the state variable.
         const auto* enclosing_construct =
-            GetSmallestEnclosingConstruct(first_pos, last_pos);
+            GetEnclosingScope(first_pos, last_pos);
         GetBlockInfo(enclosing_construct->begin_id)
             ->phis_needing_state_vars.push_back(phi_id);
       }
@@ -3088,7 +3116,7 @@ void FunctionEmitter::RegisterValuesNeedingNamedOrHoistedDefinition() {
 
     if (def_in_construct != construct_with_last_use) {
       const auto* enclosing_construct =
-          GetSmallestEnclosingConstruct(first_pos, last_use_pos);
+          GetEnclosingScope(first_pos, last_use_pos);
       if (enclosing_construct == def_in_construct) {
         // We can use a plain 'const' definition.
         def_info->requires_named_const_def = true;
@@ -3103,15 +3131,19 @@ void FunctionEmitter::RegisterValuesNeedingNamedOrHoistedDefinition() {
   }
 }
 
-const Construct* FunctionEmitter::GetSmallestEnclosingConstruct(
-    uint32_t first_pos,
-    uint32_t last_pos) const {
+const Construct* FunctionEmitter::GetEnclosingScope(uint32_t first_pos,
+                                                    uint32_t last_pos) const {
   const auto* enclosing_construct =
       GetBlockInfo(block_order_[first_pos])->construct;
   assert(enclosing_construct != nullptr);
   // Constructs are strictly nesting, so follow parent pointers
   while (enclosing_construct && !enclosing_construct->ContainsPos(last_pos)) {
-    enclosing_construct = enclosing_construct->parent;
+    // The scope of a continue construct is enclosed in its associated loop
+    // construct, but they are siblings in our construct tree.
+    const auto* sibling_loop = SiblingLoopConstruct(enclosing_construct);
+    // Go to the sibling loop if it exists, otherwise walk up to the parent.
+    enclosing_construct =
+        sibling_loop ? sibling_loop : enclosing_construct->parent;
   }
   // At worst, we go all the way out to the function construct.
   assert(enclosing_construct != nullptr);
