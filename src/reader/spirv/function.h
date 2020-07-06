@@ -108,9 +108,10 @@ struct BlockInfo {
   /// If this block is a continue target, then this is the ID of the loop
   /// header.
   uint32_t header_for_continue = 0;
-  /// Is this block a single-block loop: A loop header that declares itself
-  /// as its own continue target, and has branch to itself.
-  bool is_single_block_loop = false;
+  /// Is this block a continue target which is its own loop header block?
+  /// In this case the continue construct is the entire loop.  The associated
+  /// "loop construct" is empty, and not represented.
+  bool is_continue_entire_loop = false;
 
   /// The immediately enclosing structured construct. If this block is not
   /// in the block order at all, then this is still nullptr.
@@ -185,7 +186,7 @@ inline std::ostream& operator<<(std::ostream& o, const BlockInfo& bi) {
     << " merge_for_header: " << bi.merge_for_header
     << " continue_for_header: " << bi.continue_for_header
     << " header_for_merge: " << bi.header_for_merge
-    << " single_block_loop: " << int(bi.is_single_block_loop) << "}";
+    << " is_continue_entire_loop: " << int(bi.is_continue_entire_loop) << "}";
   return o;
 }
 
@@ -310,9 +311,9 @@ class FunctionEmitter {
   /// @returns true if terminators are sane
   bool TerminatorsAreSane();
 
-  /// Populates merge-header cross-links and the |is_single_block_loop| member
-  /// of BlockInfo.  Also verifies that merge instructions go to blocks in
-  /// the same function.  Assumes basic blocks have been registered, and
+  /// Populates merge-header cross-links and the |is_continue_entire_loop|
+  /// member of BlockInfo.  Also verifies that merge instructions go to blocks
+  /// in the same function.  Assumes basic blocks have been registered, and
   /// terminators are sane.
   /// @returns false if registration fails
   bool RegisterMerges();

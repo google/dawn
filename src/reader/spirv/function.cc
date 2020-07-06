@@ -118,7 +118,7 @@
 //
 //      If CT(H) exists, then:
 //
-//         Pos(H) <= Pos(CT(H)), with equality exactly for single-block loops
+//         Pos(H) <= Pos(CT(H))
 //         Pos(CT(H)) < Pos(M)
 //
 //    This gives us the fundamental ordering of blocks in relation to a
@@ -140,15 +140,16 @@
 //           where H and d-e-f: blocks in the selection construct
 //           where M(H) and n-o-p...: blocks after the selection construct
 //
-//      Schematically, for a single-block loop construct headed by H, there are
-//      blocks in order from left to right:
+//      Schematically, for a loop construct headed by H that is its own
+//      continue construct, the blocks in order from left to right:
 //
-//                 ...a-b-c H M(H) n-o-p...
+//                 ...a-b-c H=CT(H) d-e-f M(H) n-o-p...
 //
 //           where ...a-b-c: blocks before the loop
 //           where H is the continue construct; CT(H)=H, and the loop construct
-//           is *empty* where M(H) and n-o-p...: blocks after the loop and
-//           continue constructs
+//           is *empty*
+//           where d-e-f... are other blocks in the continue construct
+//           where M(H) and n-o-p...: blocks after the continue construct
 //
 //      Schematically, for a multi-block loop construct headed by H, there are
 //      blocks in order from left to right:
@@ -767,16 +768,14 @@ bool FunctionEmitter::RegisterMerges() {
           if (block_id == succ)
             is_single_block_loop = true;
         });
-    block_info->is_single_block_loop = is_single_block_loop;
     const auto ct = block_info->continue_for_header;
-    if (is_single_block_loop && ct != block_id) {
+    block_info->is_continue_entire_loop = ct == block_id;
+    if (is_single_block_loop && !block_info->is_continue_entire_loop) {
       return Fail() << "Block " << block_id
                     << " branches to itself but is not its own continue target";
-    } else if (!is_single_block_loop && ct == block_id) {
-      return Fail() << "Loop header block " << block_id
-                    << " declares itself as its own continue target, but "
-                       "does not branch to itself";
     }
+    // It's valid for a the header of a multi-block loop header to declare
+    // itself as its own continue target.
   }
   return success();
 }
@@ -799,7 +798,7 @@ bool FunctionEmitter::VerifyHeaderContinueMergeOrder() {
   //      Pos(H) < Pos(M(H))
   //
   //      If CT(H) exists, then:
-  //         Pos(H) <= Pos(CT(H)), with equality exactly for single-block loops
+  //         Pos(H) <= Pos(CT(H))
   //         Pos(CT(H)) < Pos(M)
   //
   for (auto block_id : block_order_) {
@@ -830,12 +829,8 @@ bool FunctionEmitter::VerifyHeaderContinueMergeOrder() {
     // Furthermore, this is a loop header.
     const auto* ct_info = GetBlockInfo(ct);
     const auto ct_pos = ct_info->pos;
-    // Pos(H) <= Pos(CT(H)), with equality only for single-block loops.
-    if (header_info->is_single_block_loop && ct_pos != header_pos) {
-      Fail() << "Internal error: Single block loop.  CT pos is not the "
-                "header pos. Should have already checked this";
-    }
-    if (!header_info->is_single_block_loop && (ct_pos <= header_pos)) {
+    // Pos(H) <= Pos(CT(H))
+    if (ct_pos < header_pos) {
       Fail() << "Loop header " << header
              << " does not dominate its continue target " << ct;
     }
@@ -867,20 +862,24 @@ bool FunctionEmitter::LabelControlFlowConstructs() {
   //           be the associated header. Pop it off.
   //        b. When you reach a header, push it on the stack.
   //        c. When you reach a continue target, push it on the stack.
-  //           (A block can be both a header and a continue target, in the case
-  //           of a single-block loop, in which case it should also be its
-  //           own backedge block.)
+  //           (A block can be both a header and a continue target.)
   //        c. When you reach a block with an edge branching backward (in the
   //           structured order) to block T:
   //            T should be a loop header, and the top of the stack should be a
   //            continue target associated with T.
   //            This is the end of the continue construct. Pop the continue
   //            target off the stack.
-  //       (Note: We pop the merge off first because a merge block that marks
+  //
+  //       Note: A loop header can declare itself as its own continue target.
+  //
+  //       Note: For a single-block loop, that block is a header, its own
+  //       continue target, and its own backedge block.
+  //
+  //       Note: We pop the merge off first because a merge block that marks
   //       the end of one construct can be a single-block loop.  So that block
   //       is a merge, a header, a continue target, and a backedge block.
   //       But we want to finish processing of the merge before dealing with
-  //       the loop.)
+  //       the loop.
   //
   //      In the same scan, mark each basic block with the nearest enclosing
   //      header: the most recent header for which we haven't reached its merge
@@ -963,8 +962,10 @@ bool FunctionEmitter::LabelControlFlowConstructs() {
         // in the block order, starting at the continue target, until just
         // before the merge block.
         top = push_construct(depth, Construct::kContinue, ct, merge);
-        // A single block loop has an empty loop construct.
-        if (!header_info->is_single_block_loop) {
+        // A loop header that is its own continue target will have an
+        // empty loop construct. Only create a loop construct when
+        // the continue target is *not* the same as the loop header.
+        if (header != ct) {
           // From the interval rule, the loop construct consists of blocks
           // in the block order, starting at the header, until just
           // before the continue target.
@@ -1706,9 +1707,9 @@ bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
   // - It can't be kFunction, because there is only one of those, and it was
   //   already on the stack at the outermost level.
   // - We have at most one of kIfSelection, kSwitchSelection, or kLoop because
-  //   each of those is headed by a block with a merge instruction, and the
-  //   kIfSelection and kSwitchSelection header blocks end in different branch
-  //   instructions.
+  //   each of those is headed by a block with a merge instruction (OpLoopMerge
+  //   for kLoop, and OpSelectionMerge for the others), and the kIfSelection and
+  //   kSwitchSelection header blocks end in different branch instructions.
   // - A kContinue can contain a kContinue
   //   This is possible in Vulkan SPIR-V, but Tint disallows this by the rule
   //   that a block can be continue target for at most one header block. See
@@ -1723,13 +1724,23 @@ bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
   //   starting at the first block of a continue construct.
   //
   //   The kContinue can't be the child of the other because either:
-  //     - Either it would be a single block loop but in that case there is no
-  //       kLoop construct for it, by construction.
-  //     - The kContinue is in a loop that is not single-block; and the
-  //       selection contains the kContinue block but not the loop block. That
-  //       breaks dominance rules. That is, the continue target is dominated by
-  //       that loop header, and so gets found on the outside before the
-  //       selection is found. The selection is inside the outer loop.
+  //     - The other can't be kLoop because:
+  //        - If the kLoop is for a different loop then the kContinue, then
+  //          the kContinue must be its own loop header, and so the same
+  //          block is two different loops. That's a contradiction.
+  //        - If the kLoop is for a the same loop, then this is a contradiction
+  //          because a kContinue and its kLoop have disjoint block sets.
+  //     - The other construct can't be a selection because:
+  //       - The kContinue construct is the entire loop, i.e. the continue
+  //         target is its own loop header block.  But then the continue target
+  //         has an OpLoopMerge instruction, which contradicts this block being
+  //         a selection header.
+  //       - The kContinue is in a multi-block loop that is has a non-empty
+  //         kLoop; and the selection contains the kContinue block but not the
+  //         loop block. That breaks dominance rules. That is, the continue
+  //         target is dominated by that loop header, and so gets found by the
+  //         block traversal on the outside before the selection is found. The
+  //         selection is inside the outer loop.
   //
   // So we fall into one of the following cases:
   //  - We are entering 0 or 1 constructs, or
@@ -1792,7 +1803,7 @@ bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
         break;
 
       case Construct::kContinue:
-        if (block_info.is_single_block_loop) {
+        if (block_info.is_continue_entire_loop) {
           if (!EmitLoopStart(construct)) {
             return false;
           }
