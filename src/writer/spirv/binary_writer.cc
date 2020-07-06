@@ -21,9 +21,7 @@ namespace writer {
 namespace spirv {
 namespace {
 
-// TODO(dsinclair): Reserve a generator ID for Tint.
-// https://github.com/KhronosGroup/SPIRV-Headers/blob/master/include/spirv/spir-v.xml#L75
-const uint32_t kGeneratorId = 0;
+const uint32_t kGeneratorId = 23u << 16;
 
 }  // namespace
 

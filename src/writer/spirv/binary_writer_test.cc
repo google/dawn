@@ -37,7 +37,7 @@ TEST_F(BinaryWriterTest, Preamble) {
   ASSERT_EQ(res.size(), 5u);
   EXPECT_EQ(res[0], spv::MagicNumber);
   EXPECT_EQ(res[1], 0x00010300u);  // SPIR-V 1.3
-  EXPECT_EQ(res[2], 0u);           // Generator ID
+  EXPECT_EQ(res[2], 23u << 16);    // Generator ID
   EXPECT_EQ(res[3], 5u);           // ID Bound
   EXPECT_EQ(res[4], 0u);           // Reserved
 }

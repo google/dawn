@@ -10,7 +10,7 @@ vars = {
   'clang_revision': 'b49c12a8f3fb25181855d0ea641bbcc2b2e95213',
   'cpplint_revision': '305ac8725a166ed42e3f5dd3f80d6de2cf840ef1',
   'googletest_revision': '356f2d264a485db2fcc50ec1c672e0d37b6cb39b',
-  'spirv_headers_revision': '11d7637e7a43cd88cfd4e42c99581dcb682936aa',
+  'spirv_headers_revision': '308bd07424350a6000f35a77b5f85cd4f3da319e',
   'spirv_tools_revision': 'bd2a9ea85210d3bb474bc5adb9ff4b0bb536b4fc',
   'testing_revision': 'a711b1132571869bdd7084c86083698671b290a6',
 }
