@@ -22,12 +22,15 @@
 
 namespace dawn_native { namespace metal {
 
+    class CommandRecordingContext;
     class Device;
 
     class Buffer : public BufferBase {
       public:
         static ResultOrError<Buffer*> Create(Device* device, const BufferDescriptor* descriptor);
         id<MTLBuffer> GetMTLBuffer() const;
+
+        void ClearBufferContentsToZero(CommandRecordingContext* commandContext);
 
       private:
         using BufferBase::BufferBase;
@@ -43,7 +46,7 @@ namespace dawn_native { namespace metal {
         bool IsMapWritable() const override;
         MaybeError MapAtCreationImpl(uint8_t** mappedPointer) override;
 
-        void ClearBuffer(BufferBase::ClearValue clearValue);
+        void ClearBuffer(CommandRecordingContext* commandContext, uint8_t clearValue);
 
         id<MTLBuffer> mMtlBuffer = nil;
     };

@@ -488,6 +488,10 @@ namespace dawn_native {
         mState = BufferState::Destroyed;
     }
 
+    bool BufferBase::IsMapped() const {
+        return mState == BufferState::Mapped;
+    }
+
     void BufferBase::OnMapCommandSerialFinished(uint32_t mapSerial, bool isWrite) {
         void* data = GetMappedPointerImpl();
         if (isWrite) {
@@ -495,6 +499,18 @@ namespace dawn_native {
         } else {
             CallMapReadCallback(mapSerial, WGPUBufferMapAsyncStatus_Success, data, GetSize());
         }
+    }
+
+    bool BufferBase::IsDataInitialized() const {
+        return mIsDataInitialized;
+    }
+
+    void BufferBase::SetIsDataInitialized() {
+        mIsDataInitialized = true;
+    }
+
+    bool BufferBase::IsFullBufferRange(uint64_t offset, uint64_t size) const {
+        return offset == 0 && size == GetSize();
     }
 
 }  // namespace dawn_native

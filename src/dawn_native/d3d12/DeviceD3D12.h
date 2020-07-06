@@ -91,6 +91,13 @@ namespace dawn_native { namespace d3d12 {
                                            uint64_t destinationOffset,
                                            uint64_t size) override;
 
+        void CopyFromStagingToBufferImpl(CommandRecordingContext* commandContext,
+                                         StagingBufferBase* source,
+                                         uint64_t sourceOffset,
+                                         BufferBase* destination,
+                                         uint64_t destinationOffset,
+                                         uint64_t size);
+
         ResultOrError<ResourceHeapAllocation> AllocateMemory(
             D3D12_HEAP_TYPE heapType,
             const D3D12_RESOURCE_DESC& resourceDescriptor,

@@ -336,14 +336,37 @@ namespace dawn_native { namespace d3d12 {
         DAWN_TRY_ASSIGN(commandRecordingContext, GetPendingCommandContext());
 
         Buffer* dstBuffer = ToBackend(destination);
-        StagingBuffer* srcBuffer = ToBackend(source);
-        dstBuffer->TrackUsageAndTransitionNow(commandRecordingContext, wgpu::BufferUsage::CopyDst);
 
-        commandRecordingContext->GetCommandList()->CopyBufferRegion(
-            dstBuffer->GetD3D12Resource(), destinationOffset, srcBuffer->GetResource(),
-            sourceOffset, size);
+        // TODO(jiawei.shao@intel.com): use Toggle::LazyClearResourceOnFirstUse when the support of
+        // buffer lazy initialization is completed.
+        if (IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse) && !dstBuffer->IsDataInitialized()) {
+            if (dstBuffer->IsFullBufferRange(destinationOffset, size)) {
+                dstBuffer->SetIsDataInitialized();
+            } else {
+                DAWN_TRY(dstBuffer->ClearBufferContentsToZero(commandRecordingContext));
+            }
+        }
+
+        CopyFromStagingToBufferImpl(commandRecordingContext, source, sourceOffset, destination,
+                                    destinationOffset, size);
 
         return {};
+    }
+
+    void Device::CopyFromStagingToBufferImpl(CommandRecordingContext* commandContext,
+                                             StagingBufferBase* source,
+                                             uint64_t sourceOffset,
+                                             BufferBase* destination,
+                                             uint64_t destinationOffset,
+                                             uint64_t size) {
+        ASSERT(commandContext != nullptr);
+        Buffer* dstBuffer = ToBackend(destination);
+        StagingBuffer* srcBuffer = ToBackend(source);
+        dstBuffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopyDst);
+
+        commandContext->GetCommandList()->CopyBufferRegion(
+            dstBuffer->GetD3D12Resource(), destinationOffset, srcBuffer->GetResource(),
+            sourceOffset, size);
     }
 
     void Device::DeallocateMemory(ResourceHeapAllocation& allocation) {

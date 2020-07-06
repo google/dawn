@@ -29,6 +29,8 @@ namespace dawn_native { namespace opengl {
 
         GLuint GetHandle() const;
 
+        void ClearBufferContentsToZero();
+
       private:
         ~Buffer() override;
         // Dawn API
@@ -40,6 +42,7 @@ namespace dawn_native { namespace opengl {
         bool IsMapWritable() const override;
         MaybeError MapAtCreationImpl(uint8_t** mappedPointer) override;
         void* GetMappedPointerImpl() override;
+        uint64_t GetAppliedSize() const;
 
         GLuint mBuffer = 0;
         void* mMappedData = nullptr;

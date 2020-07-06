@@ -44,6 +44,17 @@ namespace dawn_native { namespace opengl {
                                       size_t size) {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
 
+        // TODO(jiawei.shao@intel.com): use Toggle::LazyClearResourceOnFirstUse when the support of
+        // buffer lazy initialization is completed.
+        if (GetDevice()->IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse) &&
+            !buffer->IsDataInitialized()) {
+            if (buffer->IsFullBufferRange(bufferOffset, size)) {
+                buffer->SetIsDataInitialized();
+            } else {
+                ToBackend(buffer)->ClearBufferContentsToZero();
+            }
+        }
+
         gl.BindBuffer(GL_ARRAY_BUFFER, ToBackend(buffer)->GetHandle());
         gl.BufferSubData(GL_ARRAY_BUFFER, bufferOffset, size, data);
         return {};

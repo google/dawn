@@ -197,6 +197,10 @@ namespace dawn_native { namespace null {
                                                BufferBase* destination,
                                                uint64_t destinationOffset,
                                                uint64_t size) {
+        if (IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse)) {
+            destination->SetIsDataInitialized();
+        }
+
         auto operation = std::make_unique<CopyFromStagingToBufferOperation>();
         operation->staging = source;
         operation->destination = ToBackend(destination);
