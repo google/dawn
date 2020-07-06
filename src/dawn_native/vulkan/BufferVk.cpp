@@ -176,14 +176,6 @@ namespace dawn_native { namespace vulkan {
         DestroyInternal();
     }
 
-    void Buffer::OnMapReadCommandSerialFinished(uint32_t mapSerial, const void* data) {
-        CallMapReadCallback(mapSerial, WGPUBufferMapAsyncStatus_Success, data, GetSize());
-    }
-
-    void Buffer::OnMapWriteCommandSerialFinished(uint32_t mapSerial, void* data) {
-        CallMapWriteCallback(mapSerial, WGPUBufferMapAsyncStatus_Success, data, GetSize());
-    }
-
     VkBuffer Buffer::GetHandle() const {
         return mHandle;
     }

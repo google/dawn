@@ -853,6 +853,7 @@ namespace dawn_native { namespace vulkan {
 
         // Releasing the uploader enqueues buffers to be released.
         // Call Tick() again to clear them before releasing the deleter.
+        mResourceMemoryAllocator->Tick(GetCompletedCommandSerial());
         mDeleter->Tick(GetCompletedCommandSerial());
 
         // The VkRenderPasses in the cache can be destroyed immediately since all commands referring

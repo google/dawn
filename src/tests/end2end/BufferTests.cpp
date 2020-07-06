@@ -127,7 +127,21 @@ TEST_P(BufferMapReadTests, GetMappedRange) {
     wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
     const void* mappedData = MapReadAsyncAndWait(buffer);
-    ASSERT_EQ(mappedData, buffer.GetConstMappedRange());
+    ASSERT_EQ(buffer.GetConstMappedRange(), mappedData);
+    ASSERT_NE(buffer.GetConstMappedRange(), nullptr);
+    UnmapBuffer(buffer);
+}
+
+// Test the result of GetMappedRange when mapped for reading for a zero-sized buffer.
+TEST_P(BufferMapReadTests, GetMappedRangeZeroSized) {
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 0;
+    descriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    const void* mappedData = MapReadAsyncAndWait(buffer);
+    ASSERT_EQ(buffer.GetConstMappedRange(), mappedData);
+    ASSERT_NE(buffer.GetConstMappedRange(), nullptr);
     UnmapBuffer(buffer);
 }
 
@@ -273,8 +287,23 @@ TEST_P(BufferMapWriteTests, GetMappedRange) {
     wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
     void* mappedData = MapWriteAsyncAndWait(buffer);
-    ASSERT_EQ(mappedData, buffer.GetMappedRange());
-    ASSERT_EQ(mappedData, buffer.GetConstMappedRange());
+    ASSERT_EQ(buffer.GetMappedRange(), mappedData);
+    ASSERT_EQ(buffer.GetMappedRange(), buffer.GetConstMappedRange());
+    ASSERT_NE(buffer.GetMappedRange(), nullptr);
+    UnmapBuffer(buffer);
+}
+
+// Test the result of GetMappedRange when mapped for writing for a zero-sized buffer.
+TEST_P(BufferMapWriteTests, GetMappedRangeZeroSized) {
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 0;
+    descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    void* mappedData = MapWriteAsyncAndWait(buffer);
+    ASSERT_EQ(buffer.GetMappedRange(), mappedData);
+    ASSERT_EQ(buffer.GetMappedRange(), buffer.GetConstMappedRange());
+    ASSERT_NE(buffer.GetMappedRange(), nullptr);
     UnmapBuffer(buffer);
 }
 
@@ -538,8 +567,23 @@ TEST_P(CreateBufferMappedTests, GetMappedRange) {
     wgpu::CreateBufferMappedResult result;
     result = device.CreateBufferMapped(&descriptor);
 
-    ASSERT_EQ(result.data, result.buffer.GetMappedRange());
-    ASSERT_EQ(result.data, result.buffer.GetConstMappedRange());
+    ASSERT_EQ(result.buffer.GetMappedRange(), result.data);
+    ASSERT_EQ(result.buffer.GetMappedRange(), result.buffer.GetConstMappedRange());
+    ASSERT_NE(result.buffer.GetMappedRange(), nullptr);
+    result.buffer.Unmap();
+}
+
+// Test the result of GetMappedRange when mapped at creation for a zero-sized buffer.
+TEST_P(CreateBufferMappedTests, GetMappedRangeZeroSized) {
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 0;
+    descriptor.usage = wgpu::BufferUsage::CopyDst;
+    wgpu::CreateBufferMappedResult result;
+    result = device.CreateBufferMapped(&descriptor);
+
+    ASSERT_EQ(result.buffer.GetMappedRange(), result.data);
+    ASSERT_EQ(result.buffer.GetMappedRange(), result.buffer.GetConstMappedRange());
+    ASSERT_NE(result.buffer.GetMappedRange(), nullptr);
     result.buffer.Unmap();
 }
 

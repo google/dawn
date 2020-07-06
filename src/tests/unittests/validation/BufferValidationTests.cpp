@@ -672,8 +672,8 @@ TEST_F(BufferValidationTest, GetMappedRangeOnUnmappedBuffer) {
         desc.usage = wgpu::BufferUsage::CopySrc;
         wgpu::Buffer buf = device.CreateBuffer(&desc);
 
-        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetMappedRange()));
-        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetConstMappedRange()));
+        ASSERT_EQ(nullptr, buf.GetMappedRange());
+        ASSERT_EQ(nullptr, buf.GetConstMappedRange());
     }
 
     // Unmapped after CreateBufferMapped case.
@@ -681,8 +681,8 @@ TEST_F(BufferValidationTest, GetMappedRangeOnUnmappedBuffer) {
         wgpu::Buffer buf = CreateBufferMapped(4, wgpu::BufferUsage::CopySrc).buffer;
         buf.Unmap();
 
-        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetMappedRange()));
-        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetConstMappedRange()));
+        ASSERT_EQ(nullptr, buf.GetMappedRange());
+        ASSERT_EQ(nullptr, buf.GetConstMappedRange());
     }
 
     // Unmapped after MapReadAsync case.
@@ -696,8 +696,8 @@ TEST_F(BufferValidationTest, GetMappedRangeOnUnmappedBuffer) {
         queue.Submit(0, nullptr);
         buf.Unmap();
 
-        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetMappedRange()));
-        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetConstMappedRange()));
+        ASSERT_EQ(nullptr, buf.GetMappedRange());
+        ASSERT_EQ(nullptr, buf.GetConstMappedRange());
     }
 
     // Unmapped after MapWriteAsync case.
@@ -710,8 +710,8 @@ TEST_F(BufferValidationTest, GetMappedRangeOnUnmappedBuffer) {
         queue.Submit(0, nullptr);
         buf.Unmap();
 
-        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetMappedRange()));
-        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetConstMappedRange()));
+        ASSERT_EQ(nullptr, buf.GetMappedRange());
+        ASSERT_EQ(nullptr, buf.GetConstMappedRange());
     }
 }
 
@@ -725,8 +725,8 @@ TEST_F(BufferValidationTest, GetMappedRangeOnDestroyedBuffer) {
         wgpu::Buffer buf = device.CreateBuffer(&desc);
         buf.Destroy();
 
-        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetMappedRange()));
-        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetConstMappedRange()));
+        ASSERT_EQ(nullptr, buf.GetMappedRange());
+        ASSERT_EQ(nullptr, buf.GetConstMappedRange());
     }
 
     // Destroyed after CreateBufferMapped case.
@@ -734,8 +734,8 @@ TEST_F(BufferValidationTest, GetMappedRangeOnDestroyedBuffer) {
         wgpu::Buffer buf = CreateBufferMapped(4, wgpu::BufferUsage::CopySrc).buffer;
         buf.Destroy();
 
-        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetMappedRange()));
-        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetConstMappedRange()));
+        ASSERT_EQ(nullptr, buf.GetMappedRange());
+        ASSERT_EQ(nullptr, buf.GetConstMappedRange());
     }
 
     // Destroyed after MapReadAsync case.
@@ -749,8 +749,8 @@ TEST_F(BufferValidationTest, GetMappedRangeOnDestroyedBuffer) {
         queue.Submit(0, nullptr);
         buf.Destroy();
 
-        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetMappedRange()));
-        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetConstMappedRange()));
+        ASSERT_EQ(nullptr, buf.GetMappedRange());
+        ASSERT_EQ(nullptr, buf.GetConstMappedRange());
     }
 
     // Destroyed after MapWriteAsync case.
@@ -763,8 +763,8 @@ TEST_F(BufferValidationTest, GetMappedRangeOnDestroyedBuffer) {
         queue.Submit(0, nullptr);
         buf.Destroy();
 
-        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetMappedRange()));
-        ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetConstMappedRange()));
+        ASSERT_EQ(nullptr, buf.GetMappedRange());
+        ASSERT_EQ(nullptr, buf.GetConstMappedRange());
     }
 }
 
@@ -778,7 +778,7 @@ TEST_F(BufferValidationTest, GetMappedRangeOnMappedForReading) {
         .Times(1);
     queue.Submit(0, nullptr);
 
-    ASSERT_DEVICE_ERROR(ASSERT_EQ(nullptr, buf.GetMappedRange()));
+    ASSERT_EQ(nullptr, buf.GetMappedRange());
 }
 
 // Test valid cases to call GetMappedRange on a buffer.
@@ -823,5 +823,36 @@ TEST_F(BufferValidationTest, GetMappedRangeValidCases) {
         ASSERT_NE(buf.GetConstMappedRange(), nullptr);
         ASSERT_EQ(buf.GetConstMappedRange(), buf.GetMappedRange());
         ASSERT_EQ(buf.GetConstMappedRange(), mappedPointer);
+    }
+}
+
+// Test valid cases to call GetMappedRange on an error buffer.
+// TODO(cwallez@chromium.org): enable after CreateBufferMapped is implemented in terms of
+// mappedAtCreation.
+TEST_F(BufferValidationTest, DISABLED_GetMappedRangeOnErrorBuffer) {
+    wgpu::BufferDescriptor desc;
+    desc.size = 4;
+    desc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::MapRead;
+
+    // GetMappedRange after CreateBufferMapped non-OOM returns a non-nullptr.
+    {
+        wgpu::CreateBufferMappedResult result;
+        ASSERT_DEVICE_ERROR(result = CreateBufferMapped(
+                                4, wgpu::BufferUsage::Storage | wgpu::BufferUsage::MapRead));
+
+        ASSERT_NE(result.buffer.GetConstMappedRange(), nullptr);
+        ASSERT_EQ(result.buffer.GetConstMappedRange(), result.buffer.GetMappedRange());
+        ASSERT_EQ(result.buffer.GetConstMappedRange(), result.data);
+    }
+
+    // GetMappedRange after CreateBufferMapped OOM case returns nullptr.
+    {
+        wgpu::CreateBufferMappedResult result;
+        ASSERT_DEVICE_ERROR(result = CreateBufferMapped(
+                                1 << 31, wgpu::BufferUsage::Storage | wgpu::BufferUsage::MapRead));
+
+        ASSERT_EQ(result.buffer.GetConstMappedRange(), nullptr);
+        ASSERT_EQ(result.buffer.GetConstMappedRange(), result.buffer.GetMappedRange());
+        ASSERT_EQ(result.buffer.GetConstMappedRange(), result.data);
     }
 }

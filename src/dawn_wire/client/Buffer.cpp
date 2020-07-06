@@ -367,7 +367,6 @@ namespace dawn_wire { namespace client {
 
     void* Buffer::GetMappedRange() {
         if (!IsMappedForWriting()) {
-            device->InjectError(WGPUErrorType_Validation, "Buffer needs to be mapped for writing");
             return nullptr;
         }
         return mMappedData;
@@ -375,7 +374,6 @@ namespace dawn_wire { namespace client {
 
     const void* Buffer::GetConstMappedRange() {
         if (!IsMappedForWriting() && !IsMappedForReading()) {
-            device->InjectError(WGPUErrorType_Validation, "Buffer needs to be mapped");
             return nullptr;
         }
         return mMappedData;

@@ -30,9 +30,6 @@ namespace dawn_native { namespace vulkan {
       public:
         static ResultOrError<Buffer*> Create(Device* device, const BufferDescriptor* descriptor);
 
-        void OnMapReadCommandSerialFinished(uint32_t mapSerial, const void* data);
-        void OnMapWriteCommandSerialFinished(uint32_t mapSerial, void* data);
-
         VkBuffer GetHandle() const;
 
         // Transitions the buffer to be used as `usage`, recording any necessary barrier in
