@@ -5,14 +5,14 @@ vars = {
   'github': '/external/github.com',
 
   'binutils_revision': '2566778206fdacdff455b2d96df3d52a18d439d4',
-  'build_revision': '6f820da2549470aecc97f7febc66cc2dcb6aabcb',
-  'buildtools_revision': '204a35a2a64f7179f8b76d7a0385653690839e21',
-  'clang_revision': '54f2e0def1265895a776a92697a20b26b2c30140',
+  'build_revision': '1a541c15828e268c005eb956adc09816af2b01a5',
+  'buildtools_revision': '6b951673d17662ea2510995700922657d30f3542',
+  'clang_revision': 'b49c12a8f3fb25181855d0ea641bbcc2b2e95213',
   'cpplint_revision': '305ac8725a166ed42e3f5dd3f80d6de2cf840ef1',
-  'googletest_revision': 'a09ea700d32bab83325aff9ff34d0582e50e3997',
-  'spirv_headers_revision': 'c0df742ec0b8178ad58c68cff3437ad4b6a06e26',
-  'spirv_tools_revision': 'c8590c18bd0c70dcd1caa7d43c5f2d020439b012',
-  'testing_revision': '46f9803f0ca37b59c006a757182b054acbd64015',
+  'googletest_revision': '356f2d264a485db2fcc50ec1c672e0d37b6cb39b',
+  'spirv_headers_revision': '11d7637e7a43cd88cfd4e42c99581dcb682936aa',
+  'spirv_tools_revision': 'bd2a9ea85210d3bb474bc5adb9ff4b0bb536b4fc',
+  'testing_revision': 'a711b1132571869bdd7084c86083698671b290a6',
 }
 
 deps = {
