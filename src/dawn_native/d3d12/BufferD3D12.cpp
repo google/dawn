@@ -264,9 +264,8 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-    MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {
+    MaybeError Buffer::MapAtCreationImpl() {
         DAWN_TRY(MapInternal(true, "D3D12 map at creation"));
-        *mappedPointer = static_cast<uint8_t*>(mMappedData);
         return {};
     }
 

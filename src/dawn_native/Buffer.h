@@ -42,15 +42,12 @@ namespace dawn_native {
       public:
         BufferBase(DeviceBase* device, const BufferDescriptor* descriptor);
 
-        static BufferBase* MakeError(DeviceBase* device);
-        static BufferBase* MakeErrorMapped(DeviceBase* device,
-                                           uint64_t size,
-                                           uint8_t** mappedPointer);
+        static BufferBase* MakeError(DeviceBase* device, const BufferDescriptor* descriptor);
 
         uint64_t GetSize() const;
         wgpu::BufferUsage GetUsage() const;
 
-        MaybeError MapAtCreation(uint8_t** mappedPointer);
+        MaybeError MapAtCreation();
         void OnMapCommandSerialFinished(uint32_t mapSerial, bool isWrite);
 
         MaybeError ValidateCanUseOnQueueNow() const;
@@ -69,7 +66,9 @@ namespace dawn_native {
         void Destroy();
 
       protected:
-        BufferBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+        BufferBase(DeviceBase* device,
+                   const BufferDescriptor* descriptor,
+                   ObjectBase::ErrorTag tag);
         ~BufferBase() override;
 
         void DestroyInternal();
@@ -77,7 +76,7 @@ namespace dawn_native {
         bool IsMapped() const;
 
       private:
-        virtual MaybeError MapAtCreationImpl(uint8_t** mappedPointer) = 0;
+        virtual MaybeError MapAtCreationImpl() = 0;
         virtual MaybeError MapReadAsyncImpl(uint32_t serial) = 0;
         virtual MaybeError MapWriteAsyncImpl(uint32_t serial) = 0;
         virtual void UnmapImpl() = 0;

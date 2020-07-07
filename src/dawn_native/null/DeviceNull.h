@@ -204,7 +204,7 @@ namespace dawn_native { namespace null {
         void DestroyImpl() override;
 
         bool IsMapWritable() const override;
-        MaybeError MapAtCreationImpl(uint8_t** mappedPointer) override;
+        MaybeError MapAtCreationImpl() override;
         void MapAsyncImplCommon(uint32_t serial, bool isWrite);
         void* GetMappedPointerImpl() override;
 

@@ -229,7 +229,8 @@
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "usage", "type": "buffer usage"},
-            {"name": "size", "type": "uint64_t"}
+            {"name": "size", "type": "uint64_t"},
+            {"name": "mapped at creation", "type": "bool", "default": "false"}
         ]
     },
     "buffer map read callback": {

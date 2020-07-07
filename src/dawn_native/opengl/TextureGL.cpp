@@ -303,24 +303,19 @@ namespace dawn_native { namespace opengl {
             ASSERT(bytesPerRow % GetFormat().blockByteSize == 0);
             ASSERT(GetHeight() % GetFormat().blockHeight == 0);
 
-            dawn_native::BufferDescriptor descriptor;
+            dawn_native::BufferDescriptor descriptor = {};
+            descriptor.mappedAtCreation = true;
+            descriptor.usage = wgpu::BufferUsage::CopySrc;
             descriptor.size = bytesPerRow * (GetHeight() / GetFormat().blockHeight);
             if (descriptor.size > std::numeric_limits<uint32_t>::max()) {
                 return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate buffer.");
             }
-            descriptor.nextInChain = nullptr;
-            descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
+
             // TODO(natlee@microsoft.com): use Dynamic Uplaoder here for temp buffer
-            Ref<Buffer> srcBuffer = ToBackend(device->CreateBuffer(&descriptor));
-            // Call release here to prevent memory leak since CreateBuffer will up the ref count to
-            // 1, then assigning to Ref<Buffer> ups the ref count to 2. Release will reduce the ref
-            // count and ensure it to reach 0 when out of use.
-            srcBuffer->Release();
+            Ref<Buffer> srcBuffer = AcquireRef(ToBackend(device->CreateBuffer(&descriptor)));
 
             // Fill the buffer with clear color
-            uint8_t* clearBuffer = nullptr;
-            DAWN_TRY(srcBuffer->MapAtCreation(&clearBuffer));
-            memset(clearBuffer, clearColor, descriptor.size);
+            memset(srcBuffer->GetMappedRange(), clearColor, descriptor.size);
             srcBuffer->Unmap();
 
             // Bind buffer and texture, and make the buffer to texture copy

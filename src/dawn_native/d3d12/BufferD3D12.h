@@ -55,7 +55,7 @@ namespace dawn_native { namespace d3d12 {
         void DestroyImpl() override;
 
         bool IsMapWritable() const override;
-        virtual MaybeError MapAtCreationImpl(uint8_t** mappedPointer) override;
+        virtual MaybeError MapAtCreationImpl() override;
         void* GetMappedPointerImpl() override;
         MaybeError MapInternal(bool isWrite, const char* contextInfo);
 

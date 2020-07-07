@@ -297,8 +297,7 @@ namespace dawn_native { namespace null {
         return (GetUsage() & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) != 0;
     }
 
-    MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {
-        *mappedPointer = mBackingData.get();
+    MaybeError Buffer::MapAtCreationImpl() {
         return {};
     }
 

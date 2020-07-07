@@ -295,6 +295,17 @@ TEST_P(DeviceLostTest, CreateBufferMappedFails) {
     ASSERT_DEVICE_ERROR(device.CreateBufferMapped(&bufferDescriptor));
 }
 
+// Test that mappedAtCreation fails after device is lost
+TEST_P(DeviceLostTest, CreateBufferMappedAtCreationFails) {
+    wgpu::BufferDescriptor bufferDescriptor;
+    bufferDescriptor.size = sizeof(float);
+    bufferDescriptor.usage = wgpu::BufferUsage::MapWrite;
+    bufferDescriptor.mappedAtCreation = true;
+
+    SetCallbackAndLoseForTesting();
+    ASSERT_DEVICE_ERROR(device.CreateBuffer(&bufferDescriptor));
+}
+
 // Test that BufferMapReadAsync fails after device is lost
 TEST_P(DeviceLostTest, BufferMapReadAsyncFails) {
     wgpu::BufferDescriptor bufferDescriptor;
@@ -333,9 +344,7 @@ TEST_P(DeviceLostTest, WriteBufferFails) {
 }
 
 // Test it's possible to GetMappedRange on a buffer created mapped after device loss
-// TODO(cwallez@chromium.org): enable after CreateBufferMapped is implemented in terms of
-// mappedAtCreation.
-TEST_P(DeviceLostTest, DISABLED_GetMappedRange_CreateBufferMappedAfterLoss) {
+TEST_P(DeviceLostTest, GetMappedRange_CreateBufferMappedAfterLoss) {
     SetCallbackAndLoseForTesting();
 
     wgpu::BufferDescriptor desc;
@@ -360,6 +369,34 @@ TEST_P(DeviceLostTest, GetMappedRange_CreateBufferMappedBeforeLoss) {
     ASSERT_NE(result.buffer.GetMappedRange(), nullptr);
     ASSERT_EQ(result.buffer.GetMappedRange(), rangeBeforeLoss);
     ASSERT_EQ(result.buffer.GetMappedRange(), result.data);
+}
+
+// Test it's possible to GetMappedRange on a buffer created mapped after device loss
+TEST_P(DeviceLostTest, GetMappedRange_CreateBufferMappedAtCreationAfterLoss) {
+    SetCallbackAndLoseForTesting();
+
+    wgpu::BufferDescriptor desc;
+    desc.size = 4;
+    desc.usage = wgpu::BufferUsage::CopySrc;
+    desc.mappedAtCreation = true;
+    ASSERT_DEVICE_ERROR(wgpu::Buffer buffer = device.CreateBuffer(&desc));
+
+    ASSERT_NE(buffer.GetMappedRange(), nullptr);
+}
+
+// Test that device loss doesn't change the result of GetMappedRange, mappedAtCreation version.
+TEST_P(DeviceLostTest, GetMappedRange_CreateBufferMappedAtCreationBeforeLoss) {
+    wgpu::BufferDescriptor desc;
+    desc.size = 4;
+    desc.usage = wgpu::BufferUsage::CopySrc;
+    desc.mappedAtCreation = true;
+    wgpu::Buffer buffer = device.CreateBuffer(&desc);
+
+    void* rangeBeforeLoss = buffer.GetMappedRange();
+    SetCallbackAndLoseForTesting();
+
+    ASSERT_NE(buffer.GetMappedRange(), nullptr);
+    ASSERT_EQ(buffer.GetMappedRange(), rangeBeforeLoss);
 }
 
 // Test that device loss doesn't change the result of GetMappedRange, mapReadAsync version.

@@ -162,6 +162,18 @@ TEST_F(QueueWriteBufferValidationTest, MappedBuffer) {
         ASSERT_DEVICE_ERROR(queue.WriteBuffer(result.buffer, 0, &value, sizeof(value)));
     }
 
+    // mappedAtCreation
+    {
+        wgpu::BufferDescriptor descriptor;
+        descriptor.size = 4;
+        descriptor.usage = wgpu::BufferUsage::CopyDst;
+        descriptor.mappedAtCreation = true;
+        wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+        uint32_t value = 0;
+        ASSERT_DEVICE_ERROR(queue.WriteBuffer(buffer, 0, &value, sizeof(value)));
+    }
+
     // MapReadAsync
     {
         wgpu::BufferDescriptor descriptor;

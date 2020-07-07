@@ -607,40 +607,29 @@ namespace dawn_native {
         BufferBase* result = nullptr;
         if (ConsumedError(CreateBufferInternal(descriptor), &result)) {
             ASSERT(result == nullptr);
-            return BufferBase::MakeError(this);
+            return BufferBase::MakeError(this, descriptor);
         }
 
         return result;
     }
     WGPUCreateBufferMappedResult DeviceBase::CreateBufferMapped(
         const BufferDescriptor* descriptor) {
-        BufferBase* buffer = nullptr;
-        uint8_t* data = nullptr;
+        EmitDeprecationWarning(
+            "CreateBufferMapped is deprecated, use wgpu::BufferDescriptor::mappedAtCreation and "
+            "wgpu::Buffer::GetMappedRange instead");
 
-        uint64_t size = descriptor->size;
-        if (ConsumedError(CreateBufferInternal(descriptor), &buffer) ||
-            ConsumedError(buffer->MapAtCreation(&data))) {
-            // Map failed. Replace the buffer with an error buffer.
-            if (buffer != nullptr) {
-                buffer->Release();
-            }
-            buffer = BufferBase::MakeErrorMapped(this, size, &data);
-        }
-
-        ASSERT(buffer != nullptr);
-        if (data == nullptr) {
-            // |data| may be nullptr if there was an OOM in MakeErrorMapped.
-            // Non-zero dataLength and nullptr data is used to indicate there should be
-            // mapped data but the allocation failed.
-            ASSERT(buffer->IsError());
-        } else {
-            memset(data, 0, size);
-        }
+        BufferDescriptor fixedDesc = *descriptor;
+        fixedDesc.mappedAtCreation = true;
+        BufferBase* buffer = CreateBuffer(&fixedDesc);
 
         WGPUCreateBufferMappedResult result = {};
         result.buffer = reinterpret_cast<WGPUBuffer>(buffer);
-        result.data = data;
-        result.dataLength = size;
+        result.data = buffer->GetMappedRange();
+        result.dataLength = descriptor->size;
+
+        if (result.data != nullptr) {
+            memset(result.data, 0, result.dataLength);
+        }
 
         return result;
     }
@@ -753,7 +742,8 @@ namespace dawn_native {
     // For Dawn Wire
 
     BufferBase* DeviceBase::CreateErrorBuffer() {
-        return BufferBase::MakeError(this);
+        BufferDescriptor desc = {};
+        return BufferBase::MakeError(this, &desc);
     }
 
     // Other Device API methods
@@ -886,7 +876,15 @@ namespace dawn_native {
         if (IsValidationEnabled()) {
             DAWN_TRY(ValidateBufferDescriptor(this, descriptor));
         }
-        return CreateBufferImpl(descriptor);
+
+        BufferBase* buffer = nullptr;
+        DAWN_TRY_ASSIGN(buffer, CreateBufferImpl(descriptor));
+
+        if (descriptor->mappedAtCreation) {
+            DAWN_TRY(buffer->MapAtCreation());
+        }
+
+        return buffer;
     }
 
     MaybeError DeviceBase::CreateComputePipelineInternal(

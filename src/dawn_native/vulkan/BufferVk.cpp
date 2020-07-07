@@ -239,8 +239,7 @@ namespace dawn_native { namespace vulkan {
         return mMemoryAllocation.GetMappedPointer() != nullptr;
     }
 
-    MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {
-        *mappedPointer = mMemoryAllocation.GetMappedPointer();
+    MaybeError Buffer::MapAtCreationImpl() {
         return {};
     }
 

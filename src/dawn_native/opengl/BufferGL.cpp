@@ -72,12 +72,10 @@ namespace dawn_native { namespace opengl {
         return true;
     }
 
-    MaybeError Buffer::MapAtCreationImpl(uint8_t** mappedPointer) {
+    MaybeError Buffer::MapAtCreationImpl() {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
-
         gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
         mMappedData = gl.MapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-        *mappedPointer = reinterpret_cast<uint8_t*>(mMappedData);
         return {};
     }
 

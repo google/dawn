@@ -83,6 +83,15 @@ class BufferValidationTest : public ValidationTest {
           return device.CreateBufferMapped(&descriptor);
       }
 
+      wgpu::Buffer BufferMappedAtCreation(uint64_t size, wgpu::BufferUsage usage) {
+          wgpu::BufferDescriptor descriptor;
+          descriptor.size = size;
+          descriptor.usage = usage;
+          descriptor.mappedAtCreation = true;
+
+          return device.CreateBuffer(&descriptor);
+      }
+
       wgpu::Queue queue;
 
     private:
@@ -196,6 +205,21 @@ TEST_F(BufferValidationTest, NonMappableCreateBufferMappedSuccess) {
     ASSERT_NE(result.data, nullptr);
     ASSERT_EQ(result.dataLength, 4u);
     result.buffer.Unmap();
+}
+
+// Test the success case for mappedAtCreation
+TEST_F(BufferValidationTest, MappedAtCreationSuccess) {
+    BufferMappedAtCreation(4, wgpu::BufferUsage::MapWrite);
+}
+
+// Test the success case for mappedAtCreation for a non-mappable usage
+TEST_F(BufferValidationTest, NonMappableMappedAtCreationSuccess) {
+    BufferMappedAtCreation(4, wgpu::BufferUsage::CopySrc);
+}
+
+// Test there is an error when mappedAtCreation is set but the size isn't aligned to 4.
+TEST_F(BufferValidationTest, MappedAtCreationSizeAlignment) {
+    ASSERT_DEVICE_ERROR(BufferMappedAtCreation(2, wgpu::BufferUsage::MapWrite));
 }
 
 // Test map reading a buffer with wrong current usage
@@ -537,6 +561,20 @@ TEST_F(BufferValidationTest, MapCreateBufferMappedBuffer) {
     }
 }
 
+// Test that is is invalid to Map a buffer mapped at creation.
+TEST_F(BufferValidationTest, MapBufferMappedAtCreation) {
+    {
+        wgpu::Buffer buf = BufferMappedAtCreation(4, wgpu::BufferUsage::MapRead);
+        ASSERT_DEVICE_ERROR(buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr));
+        queue.Submit(0, nullptr);
+    }
+    {
+        wgpu::Buffer buf = BufferMappedAtCreation(4, wgpu::BufferUsage::MapWrite);
+        ASSERT_DEVICE_ERROR(buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr));
+        queue.Submit(0, nullptr);
+    }
+}
+
 // Test that it is valid to submit a buffer in a queue with a map usage if it is unmapped
 TEST_F(BufferValidationTest, SubmitBufferWithMapUsage) {
     wgpu::BufferDescriptor descriptorA;
@@ -602,6 +640,30 @@ TEST_F(BufferValidationTest, SubmitMappedBuffer) {
     {
         wgpu::Buffer bufA = device.CreateBuffer(&descriptorA);
         wgpu::Buffer bufB = device.CreateBufferMapped(&descriptorB).buffer;
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(bufA, 0, bufB, 0, 4);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+        queue.Submit(0, nullptr);
+    }
+    {
+        wgpu::BufferDescriptor mappedBufferDesc = descriptorA;
+        mappedBufferDesc.mappedAtCreation = true;
+        wgpu::Buffer bufA = device.CreateBuffer(&mappedBufferDesc);
+        wgpu::Buffer bufB = device.CreateBuffer(&descriptorB);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(bufA, 0, bufB, 0, 4);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+        queue.Submit(0, nullptr);
+    }
+    {
+        wgpu::BufferDescriptor mappedBufferDesc = descriptorB;
+        mappedBufferDesc.mappedAtCreation = true;
+        wgpu::Buffer bufA = device.CreateBuffer(&descriptorA);
+        wgpu::Buffer bufB = device.CreateBuffer(&mappedBufferDesc);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         encoder.CopyBufferToBuffer(bufA, 0, bufB, 0, 4);
@@ -685,6 +747,15 @@ TEST_F(BufferValidationTest, GetMappedRangeOnUnmappedBuffer) {
         ASSERT_EQ(nullptr, buf.GetConstMappedRange());
     }
 
+    // Unmapped after mappedAtCreation case.
+    {
+        wgpu::Buffer buf = BufferMappedAtCreation(4, wgpu::BufferUsage::CopySrc);
+        buf.Unmap();
+
+        ASSERT_EQ(nullptr, buf.GetMappedRange());
+        ASSERT_EQ(nullptr, buf.GetConstMappedRange());
+    }
+
     // Unmapped after MapReadAsync case.
     {
         wgpu::Buffer buf = CreateMapReadBuffer(4);
@@ -732,6 +803,15 @@ TEST_F(BufferValidationTest, GetMappedRangeOnDestroyedBuffer) {
     // Destroyed after CreateBufferMapped case.
     {
         wgpu::Buffer buf = CreateBufferMapped(4, wgpu::BufferUsage::CopySrc).buffer;
+        buf.Destroy();
+
+        ASSERT_EQ(nullptr, buf.GetMappedRange());
+        ASSERT_EQ(nullptr, buf.GetConstMappedRange());
+    }
+
+    // Destroyed after mappedAtCreation case.
+    {
+        wgpu::Buffer buf = BufferMappedAtCreation(4, wgpu::BufferUsage::CopySrc);
         buf.Destroy();
 
         ASSERT_EQ(nullptr, buf.GetMappedRange());
@@ -791,6 +871,13 @@ TEST_F(BufferValidationTest, GetMappedRangeValidCases) {
         ASSERT_EQ(result.buffer.GetConstMappedRange(), result.data);
     }
 
+    // GetMappedRange after mappedAtCreation case.
+    {
+        wgpu::Buffer buffer = BufferMappedAtCreation(4, wgpu::BufferUsage::CopySrc);
+        ASSERT_NE(buffer.GetConstMappedRange(), nullptr);
+        ASSERT_EQ(buffer.GetConstMappedRange(), buffer.GetMappedRange());
+    }
+
     // GetMappedRange after MapReadAsync case.
     {
         wgpu::Buffer buf = CreateMapReadBuffer(4);
@@ -827,12 +914,24 @@ TEST_F(BufferValidationTest, GetMappedRangeValidCases) {
 }
 
 // Test valid cases to call GetMappedRange on an error buffer.
-// TODO(cwallez@chromium.org): enable after CreateBufferMapped is implemented in terms of
-// mappedAtCreation.
-TEST_F(BufferValidationTest, DISABLED_GetMappedRangeOnErrorBuffer) {
+TEST_F(BufferValidationTest, GetMappedRangeOnErrorBuffer) {
     wgpu::BufferDescriptor desc;
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::MapRead;
+
+    uint64_t kStupidLarge = uint64_t(1) << uint64_t(63);
+
+    // GetMappedRange after CreateBufferMapped a zero-sized buffer returns a non-nullptr.
+    // This is to check we don't do a malloc(0).
+    {
+        wgpu::CreateBufferMappedResult result;
+        ASSERT_DEVICE_ERROR(result = CreateBufferMapped(
+                                0, wgpu::BufferUsage::Storage | wgpu::BufferUsage::MapRead));
+
+        ASSERT_NE(result.buffer.GetConstMappedRange(), nullptr);
+        ASSERT_EQ(result.buffer.GetConstMappedRange(), result.buffer.GetMappedRange());
+        ASSERT_EQ(result.buffer.GetConstMappedRange(), result.data);
+    }
 
     // GetMappedRange after CreateBufferMapped non-OOM returns a non-nullptr.
     {
@@ -848,11 +947,44 @@ TEST_F(BufferValidationTest, DISABLED_GetMappedRangeOnErrorBuffer) {
     // GetMappedRange after CreateBufferMapped OOM case returns nullptr.
     {
         wgpu::CreateBufferMappedResult result;
-        ASSERT_DEVICE_ERROR(result = CreateBufferMapped(
-                                1 << 31, wgpu::BufferUsage::Storage | wgpu::BufferUsage::MapRead));
+        ASSERT_DEVICE_ERROR(result =
+                                CreateBufferMapped(kStupidLarge, wgpu::BufferUsage::Storage |
+                                                                     wgpu::BufferUsage::MapRead));
 
         ASSERT_EQ(result.buffer.GetConstMappedRange(), nullptr);
         ASSERT_EQ(result.buffer.GetConstMappedRange(), result.buffer.GetMappedRange());
         ASSERT_EQ(result.buffer.GetConstMappedRange(), result.data);
+    }
+
+    // GetMappedRange after mappedAtCreation a zero-sized buffer returns a non-nullptr.
+    // This is to check we don't do a malloc(0).
+    {
+        wgpu::Buffer buffer;
+        ASSERT_DEVICE_ERROR(buffer = BufferMappedAtCreation(
+                                0, wgpu::BufferUsage::Storage | wgpu::BufferUsage::MapRead));
+
+        ASSERT_NE(buffer.GetConstMappedRange(), nullptr);
+        ASSERT_EQ(buffer.GetConstMappedRange(), buffer.GetMappedRange());
+    }
+
+    // GetMappedRange after mappedAtCreation non-OOM returns a non-nullptr.
+    {
+        wgpu::Buffer buffer;
+        ASSERT_DEVICE_ERROR(buffer = BufferMappedAtCreation(
+                                4, wgpu::BufferUsage::Storage | wgpu::BufferUsage::MapRead));
+
+        ASSERT_NE(buffer.GetConstMappedRange(), nullptr);
+        ASSERT_EQ(buffer.GetConstMappedRange(), buffer.GetMappedRange());
+    }
+
+    // GetMappedRange after mappedAtCreation OOM case returns nullptr.
+    {
+        wgpu::Buffer buffer;
+        ASSERT_DEVICE_ERROR(
+            buffer = BufferMappedAtCreation(
+                kStupidLarge, wgpu::BufferUsage::Storage | wgpu::BufferUsage::MapRead));
+
+        ASSERT_EQ(buffer.GetConstMappedRange(), nullptr);
+        ASSERT_EQ(buffer.GetConstMappedRange(), buffer.GetMappedRange());
     }
 }
