@@ -1536,6 +1536,15 @@
             {"name": "origin", "type": "origin 3D"}
         ]
     },
+    "texture data layout": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "offset", "type": "uint64_t", "default": 0},
+            {"name": "bytes per row", "type": "uint32_t"},
+            {"name": "rows per image", "type": "uint32_t", "default": 0}
+        ]
+    },
     "texture descriptor": {
         "category": "structure",
         "extensible": true,

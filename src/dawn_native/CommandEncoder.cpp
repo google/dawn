@@ -38,55 +38,6 @@ namespace dawn_native {
 
     namespace {
 
-        // TODO(jiawei.shao@intel.com): add validations on the texture-to-texture copies within the
-        // same texture.
-        MaybeError ValidateCopySizeFitsInTexture(const TextureCopyView& textureCopy,
-                                                 const Extent3D& copySize) {
-            const TextureBase* texture = textureCopy.texture;
-            if (textureCopy.mipLevel >= texture->GetNumMipLevels()) {
-                return DAWN_VALIDATION_ERROR("Copy mipLevel out of range");
-            }
-
-            Extent3D mipSize = texture->GetMipLevelPhysicalSize(textureCopy.mipLevel);
-            // For 2D textures, include the array layer as depth so it can be checked with other
-            // dimensions.
-            ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
-            mipSize.depth = texture->GetArrayLayers();
-
-            // All texture dimensions are in uint32_t so by doing checks in uint64_t we avoid
-            // overflows.
-            if (static_cast<uint64_t>(textureCopy.origin.x) +
-                        static_cast<uint64_t>(copySize.width) >
-                    static_cast<uint64_t>(mipSize.width) ||
-                static_cast<uint64_t>(textureCopy.origin.y) +
-                        static_cast<uint64_t>(copySize.height) >
-                    static_cast<uint64_t>(mipSize.height) ||
-                static_cast<uint64_t>(textureCopy.origin.z) +
-                        static_cast<uint64_t>(copySize.depth) >
-                    static_cast<uint64_t>(mipSize.depth)) {
-                return DAWN_VALIDATION_ERROR("Copy would touch outside of the texture");
-            }
-
-            return {};
-        }
-
-        MaybeError ValidateCopySizeFitsInBuffer(const Ref<BufferBase>& buffer,
-                                                uint64_t offset,
-                                                uint64_t size) {
-            uint64_t bufferSize = buffer->GetSize();
-            bool fitsInBuffer = offset <= bufferSize && (size <= (bufferSize - offset));
-            if (!fitsInBuffer) {
-                return DAWN_VALIDATION_ERROR("Copy would overflow the buffer");
-            }
-
-            return {};
-        }
-
-        MaybeError ValidateCopySizeFitsInBuffer(const BufferCopyView& bufferCopy,
-                                                uint64_t dataSize) {
-            return ValidateCopySizeFitsInBuffer(bufferCopy.buffer, bufferCopy.offset, dataSize);
-        }
-
         MaybeError ValidateB2BCopyAlignment(uint64_t dataSize,
                                             uint64_t srcOffset,
                                             uint64_t dstOffset) {
@@ -99,31 +50,6 @@ namespace dawn_native {
             if (srcOffset % 4 != 0 || dstOffset % 4 != 0) {
                 return DAWN_VALIDATION_ERROR(
                     "Source offset and destination offset must be multiples of 4 bytes");
-            }
-
-            return {};
-        }
-
-        MaybeError ValidateTexelBufferOffset(const BufferCopyView& bufferCopy,
-                                             const Format& format) {
-            if (bufferCopy.offset % format.blockByteSize != 0) {
-                return DAWN_VALIDATION_ERROR(
-                    "Buffer offset must be a multiple of the texel or block size");
-            }
-
-            return {};
-        }
-
-        MaybeError ValidateRowsPerImage(const Format& format,
-                                        uint32_t rowsPerImage,
-                                        uint32_t copyHeight) {
-            if (rowsPerImage < copyHeight) {
-                return DAWN_VALIDATION_ERROR("rowsPerImage must not be less than the copy height.");
-            }
-
-            if (rowsPerImage % format.blockHeight != 0) {
-                return DAWN_VALIDATION_ERROR(
-                    "rowsPerImage must be a multiple of compressed texture format block height");
             }
 
             return {};
@@ -188,77 +114,6 @@ namespace dawn_native {
                         "Copy subresources cannot be overlapped when copying within the same "
                         "texture.");
                 }
-            }
-
-            return {};
-        }
-
-        MaybeError ComputeTextureCopyBufferSize(const Format& textureFormat,
-                                                const Extent3D& copySize,
-                                                uint32_t bytesPerRow,
-                                                uint32_t rowsPerImage,
-                                                uint32_t* bufferSize) {
-            ASSERT(rowsPerImage >= copySize.height);
-            if (copySize.width == 0 || copySize.height == 0 || copySize.depth == 0) {
-                *bufferSize = 0;
-                return {};
-            }
-
-            uint32_t blockByteSize = textureFormat.blockByteSize;
-            uint32_t blockWidth = textureFormat.blockWidth;
-            uint32_t blockHeight = textureFormat.blockHeight;
-
-            // TODO(cwallez@chromium.org): check for overflows
-            uint32_t slicePitch = bytesPerRow * rowsPerImage / blockWidth;
-
-            ASSERT(copySize.height >= 1);
-            uint32_t sliceSize = bytesPerRow * (copySize.height / blockHeight - 1) +
-                                 (copySize.width / blockWidth) * blockByteSize;
-
-            ASSERT(copySize.depth >= 1);
-            *bufferSize = (slicePitch * (copySize.depth - 1)) + sliceSize;
-
-            return {};
-        }
-
-        MaybeError ValidateBytesPerRow(const Format& format,
-                                       const Extent3D& copySize,
-                                       uint32_t bytesPerRow) {
-            if (bytesPerRow % kTextureBytesPerRowAlignment != 0) {
-                return DAWN_VALIDATION_ERROR("bytesPerRow must be a multiple of 256");
-            }
-
-            if (bytesPerRow < copySize.width / format.blockWidth * format.blockByteSize) {
-                return DAWN_VALIDATION_ERROR(
-                    "bytesPerRow must not be less than the number of bytes per row");
-            }
-
-            return {};
-        }
-
-        MaybeError ValidateImageOrigin(const Format& format, const Origin3D& offset) {
-            if (offset.x % format.blockWidth != 0) {
-                return DAWN_VALIDATION_ERROR(
-                    "Offset.x must be a multiple of compressed texture format block width");
-            }
-
-            if (offset.y % format.blockHeight != 0) {
-                return DAWN_VALIDATION_ERROR(
-                    "Offset.y must be a multiple of compressed texture format block height");
-            }
-
-            return {};
-        }
-
-        MaybeError ValidateImageCopySize(const Format& format, const Extent3D& extent) {
-            if (extent.width % format.blockWidth != 0) {
-                return DAWN_VALIDATION_ERROR(
-                    "Extent.width must be a multiple of compressed texture format block width");
-            }
-
-            if (extent.height % format.blockHeight != 0) {
-                return DAWN_VALIDATION_ERROR(
-                    "Extent.height must be a multiple of compressed texture format block height");
             }
 
             return {};
@@ -692,45 +547,32 @@ namespace dawn_native {
             DAWN_TRY_ASSIGN(fixedDest, FixTextureCopyView(GetDevice(), destination));
             destination = &fixedDest;
 
-            // Validate objects before doing the defaulting.
             if (GetDevice()->IsValidationEnabled()) {
-                DAWN_TRY(GetDevice()->ValidateObject(source->buffer));
-                DAWN_TRY(GetDevice()->ValidateObject(destination->texture));
+                DAWN_TRY(ValidateBufferCopyView(GetDevice(), *source));
+                DAWN_TRY(ValidateCanUseAs(source->buffer, wgpu::BufferUsage::CopySrc));
+
+                DAWN_TRY(ValidateTextureCopyView(GetDevice(), *destination));
+                DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst));
+                DAWN_TRY(ValidateTextureSampleCountInCopyCommands(destination->texture));
+
+                TextureDataLayout sourceAsTextureDataLayout;
+                sourceAsTextureDataLayout.offset = source->offset;
+                sourceAsTextureDataLayout.bytesPerRow = source->bytesPerRow;
+                sourceAsTextureDataLayout.rowsPerImage = source->rowsPerImage;
+
+                DAWN_TRY(ValidateLinearTextureData(sourceAsTextureDataLayout,
+                                                   source->buffer->GetSize(),
+                                                   destination->texture->GetFormat(), *copySize));
+                DAWN_TRY(ValidateTextureCopyRange(*destination, *copySize));
+
+                mTopLevelBuffers.insert(source->buffer);
+                mTopLevelTextures.insert(destination->texture);
             }
 
             // Compute default value for rowsPerImage
             uint32_t defaultedRowsPerImage = source->rowsPerImage;
             if (defaultedRowsPerImage == 0) {
                 defaultedRowsPerImage = copySize->height;
-            }
-
-            // Perform the rest of the validation using the default values.
-            if (GetDevice()->IsValidationEnabled()) {
-                DAWN_TRY(ValidateTextureSampleCountInCopyCommands(destination->texture));
-
-                DAWN_TRY(ValidateRowsPerImage(destination->texture->GetFormat(),
-                                              defaultedRowsPerImage, copySize->height));
-                DAWN_TRY(
-                    ValidateImageOrigin(destination->texture->GetFormat(), destination->origin));
-                DAWN_TRY(ValidateImageCopySize(destination->texture->GetFormat(), *copySize));
-
-                uint32_t bufferCopySize = 0;
-                DAWN_TRY(ValidateBytesPerRow(destination->texture->GetFormat(), *copySize,
-                                             source->bytesPerRow));
-
-                DAWN_TRY(ComputeTextureCopyBufferSize(destination->texture->GetFormat(), *copySize,
-                                                      source->bytesPerRow, defaultedRowsPerImage,
-                                                      &bufferCopySize));
-
-                DAWN_TRY(ValidateCopySizeFitsInTexture(*destination, *copySize));
-                DAWN_TRY(ValidateCopySizeFitsInBuffer(*source, bufferCopySize));
-                DAWN_TRY(ValidateTexelBufferOffset(*source, destination->texture->GetFormat()));
-
-                DAWN_TRY(ValidateCanUseAs(source->buffer, wgpu::BufferUsage::CopySrc));
-                DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst));
-
-                mTopLevelBuffers.insert(source->buffer);
-                mTopLevelTextures.insert(destination->texture);
             }
 
             // Record the copy command.
@@ -759,43 +601,32 @@ namespace dawn_native {
             DAWN_TRY_ASSIGN(fixedSrc, FixTextureCopyView(GetDevice(), source));
             source = &fixedSrc;
 
-            // Validate objects before doing the defaulting.
             if (GetDevice()->IsValidationEnabled()) {
-                DAWN_TRY(GetDevice()->ValidateObject(source->texture));
-                DAWN_TRY(GetDevice()->ValidateObject(destination->buffer));
+                DAWN_TRY(ValidateTextureCopyView(GetDevice(), *source));
+                DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc));
+                DAWN_TRY(ValidateTextureSampleCountInCopyCommands(source->texture));
+
+                DAWN_TRY(ValidateBufferCopyView(GetDevice(), *destination));
+                DAWN_TRY(ValidateCanUseAs(destination->buffer, wgpu::BufferUsage::CopyDst));
+
+                TextureDataLayout dstAsTextureDataLayout;
+                dstAsTextureDataLayout.offset = destination->offset;
+                dstAsTextureDataLayout.bytesPerRow = destination->bytesPerRow;
+                dstAsTextureDataLayout.rowsPerImage = destination->rowsPerImage;
+
+                DAWN_TRY(ValidateLinearTextureData(dstAsTextureDataLayout,
+                                                   destination->buffer->GetSize(),
+                                                   source->texture->GetFormat(), *copySize));
+                DAWN_TRY(ValidateTextureCopyRange(*source, *copySize));
+
+                mTopLevelTextures.insert(source->texture);
+                mTopLevelBuffers.insert(destination->buffer);
             }
 
             // Compute default value for rowsPerImage
             uint32_t defaultedRowsPerImage = destination->rowsPerImage;
             if (defaultedRowsPerImage == 0) {
                 defaultedRowsPerImage = copySize->height;
-            }
-
-            // Perform the rest of the validation using the default values.
-            if (GetDevice()->IsValidationEnabled()) {
-                DAWN_TRY(ValidateTextureSampleCountInCopyCommands(source->texture));
-
-                DAWN_TRY(ValidateRowsPerImage(source->texture->GetFormat(), defaultedRowsPerImage,
-                                              copySize->height));
-                DAWN_TRY(ValidateImageOrigin(source->texture->GetFormat(), source->origin));
-                DAWN_TRY(ValidateImageCopySize(source->texture->GetFormat(), *copySize));
-
-                uint32_t bufferCopySize = 0;
-                DAWN_TRY(ValidateBytesPerRow(source->texture->GetFormat(), *copySize,
-                                             destination->bytesPerRow));
-                DAWN_TRY(ComputeTextureCopyBufferSize(source->texture->GetFormat(), *copySize,
-                                                      destination->bytesPerRow,
-                                                      defaultedRowsPerImage, &bufferCopySize));
-
-                DAWN_TRY(ValidateCopySizeFitsInTexture(*source, *copySize));
-                DAWN_TRY(ValidateCopySizeFitsInBuffer(*destination, bufferCopySize));
-                DAWN_TRY(ValidateTexelBufferOffset(*destination, source->texture->GetFormat()));
-
-                DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc));
-                DAWN_TRY(ValidateCanUseAs(destination->buffer, wgpu::BufferUsage::CopyDst));
-
-                mTopLevelTextures.insert(source->texture);
-                mTopLevelBuffers.insert(destination->buffer);
             }
 
             // Record the copy command.
@@ -834,14 +665,11 @@ namespace dawn_native {
                 DAWN_TRY(
                     ValidateTextureToTextureCopyRestrictions(*source, *destination, *copySize));
 
-                DAWN_TRY(ValidateImageOrigin(source->texture->GetFormat(), source->origin));
-                DAWN_TRY(ValidateImageCopySize(source->texture->GetFormat(), *copySize));
-                DAWN_TRY(
-                    ValidateImageOrigin(destination->texture->GetFormat(), destination->origin));
-                DAWN_TRY(ValidateImageCopySize(destination->texture->GetFormat(), *copySize));
+                DAWN_TRY(ValidateTextureCopyRange(*source, *copySize));
+                DAWN_TRY(ValidateTextureCopyRange(*destination, *copySize));
 
-                DAWN_TRY(ValidateCopySizeFitsInTexture(*source, *copySize));
-                DAWN_TRY(ValidateCopySizeFitsInTexture(*destination, *copySize));
+                DAWN_TRY(ValidateTextureCopyView(GetDevice(), *source));
+                DAWN_TRY(ValidateTextureCopyView(GetDevice(), *destination));
 
                 DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc));
                 DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst));
