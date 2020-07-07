@@ -493,7 +493,7 @@ source_set("libtint_msl_writer_src") {
   ]
 
   configs += [ ":tint_common_config" ]
-  public_configs += [ ":tint_public_config" ]
+  public_configs = [ ":tint_public_config" ]
 
   if (build_with_chromium) {
     configs -= [ "//build/config/compiler:chromium_code" ]

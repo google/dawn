@@ -37,10 +37,10 @@ class Generator : public Text {
   bool Generate() override;
 
   /// @returns the result data
-  std::string result() const override { return impl_.result(); }
+  std::string result() const override;
 
   /// @returns the error
-  std::string error() const { return impl_.error(); }
+  std::string error() const;
 
  private:
   GeneratorImpl impl_;

@@ -32,6 +32,14 @@ bool Generator::Generate() {
   return ret;
 }
 
+std::string Generator::result() const {
+  return impl_.result();
+}
+
+std::string Generator::error() const {
+  return impl_.error();
+}
+
 }  // namespace msl
 }  // namespace writer
 }  // namespace tint
