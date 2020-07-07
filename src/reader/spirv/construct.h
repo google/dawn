@@ -92,18 +92,30 @@ struct Construct {
   /// @param the_end_id block id of the first block after the construct, or 0
   /// @param the_begin_pos block order position of the_begin_id
   /// @param the_end_pos block order position of the_end_id or a too-large value
+  /// @param the_scope_end_pos block position of the first block past the end of
+  /// the WGSL scope
   Construct(const Construct* the_parent,
             int the_depth,
             Kind the_kind,
             uint32_t the_begin_id,
             uint32_t the_end_id,
             uint32_t the_begin_pos,
-            uint32_t the_end_pos);
+            uint32_t the_end_pos,
+            uint32_t the_scope_end_pos);
 
   /// @param pos a block position
   /// @returns true if the given block position is inside this construct.
   bool ContainsPos(uint32_t pos) const {
     return begin_pos <= pos && pos < end_pos;
+  }
+  /// Returns true if the given block position is inside the WGSL scope
+  /// corresponding to this construct. A loop construct's WGSL scope encloses
+  /// the associated continue construct. Otherwise the WGSL scope extent is the
+  /// same as the block extent.
+  /// @param pos a block position
+  /// @returns true if the given block position is inside the WGSL scope.
+  bool ScopeContainsPos(uint32_t pos) const {
+    return begin_pos <= pos && pos < scope_end_pos;
   }
 
   /// The nearest enclosing construct other than itself, or nullptr if
@@ -136,6 +148,9 @@ struct Construct {
   /// The position of block |end_id| in the block order, or the number of
   /// block order elements if |end_id| is 0.
   const uint32_t end_pos = 0;
+  /// The position of the first block after the WGSL scope corresponding to
+  /// this construct.
+  const uint32_t scope_end_pos = 0;
 };
 
 using ConstructList = std::vector<std::unique_ptr<Construct>>;
@@ -182,6 +197,10 @@ inline std::ostream& operator<<(std::ostream& o, const Construct& c) {
     << " depth:" << c.depth;
 
   o << " parent:" << ToStringBrief(c.parent);
+
+  if (c.scope_end_pos != c.end_pos) {
+    o << " scope:[" << c.begin_pos << "," << c.scope_end_pos << ")";
+  }
 
   if (c.enclosing_loop) {
     o << " in-l:" << ToStringBrief(c.enclosing_loop);

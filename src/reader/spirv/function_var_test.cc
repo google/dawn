@@ -1125,13 +1125,6 @@ TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
   EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(Loop{
   VariableDeclStatement{
     Variable{
-      x_2
-      function
-      __u32
-    }
-  }
-  VariableDeclStatement{
-    Variable{
       x_2_phi
       function
       __u32
@@ -1181,9 +1174,15 @@ TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
     }
   }
   Loop{
-    Assignment{
-      Identifier{x_2}
-      Identifier{x_2_phi}
+    VariableDeclStatement{
+      Variable{
+        x_2
+        none
+        __u32
+        {
+          Identifier{x_2_phi}
+        }
+      }
     }
     VariableDeclStatement{
       Variable{
@@ -1291,20 +1290,6 @@ TEST_F(SpvParserTest, EmitStatement_Phi_ValueFromLoopBodyAndContinuing) {
 Loop{
   VariableDeclStatement{
     Variable{
-      x_4
-      function
-      __u32
-    }
-  }
-  VariableDeclStatement{
-    Variable{
-      x_6
-      function
-      __u32
-    }
-  }
-  VariableDeclStatement{
-    Variable{
       x_2_phi
       function
       __u32
@@ -1346,20 +1331,32 @@ Loop{
         }
       }
     }
-    Assignment{
-      Identifier{x_4}
-      Binary{
-        Identifier{x_2}
-        add
-        ScalarConstructor{1}
+    VariableDeclStatement{
+      Variable{
+        x_4
+        none
+        __u32
+        {
+          Binary{
+            Identifier{x_2}
+            add
+            ScalarConstructor{1}
+          }
+        }
       }
     }
-    Assignment{
-      Identifier{x_6}
-      Binary{
-        Identifier{x_4}
-        add
-        ScalarConstructor{1}
+    VariableDeclStatement{
+      Variable{
+        x_6
+        none
+        __u32
+        {
+          Binary{
+            Identifier{x_4}
+            add
+            ScalarConstructor{1}
+          }
+        }
       }
     }
     If{

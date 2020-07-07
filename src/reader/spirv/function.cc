@@ -903,16 +903,18 @@ bool FunctionEmitter::LabelControlFlowConstructs() {
     const auto end_pos =
         end_id == 0 ? uint32_t(block_order_.size()) : GetBlockInfo(end_id)->pos;
     const auto* parent = enclosing.empty() ? nullptr : enclosing.back();
+    auto scope_end_pos = end_pos;
     // A loop construct is added right after its associated continue construct.
     // In that case, adjust the parent up.
     if (k == Construct::kLoop) {
       assert(parent);
       assert(parent->kind == Construct::kContinue);
+      scope_end_pos = parent->end_pos;
       parent = parent->parent;
     }
-    constructs_.push_back(
-        std::make_unique<Construct>(parent, static_cast<int>(depth), k,
-                                    begin_id, end_id, begin_pos, end_pos));
+    constructs_.push_back(std::make_unique<Construct>(
+        parent, static_cast<int>(depth), k, begin_id, end_id, begin_pos,
+        end_pos, scope_end_pos));
     Construct* result = constructs_.back().get();
     enclosing.push_back(result);
     return result;
@@ -3137,7 +3139,8 @@ const Construct* FunctionEmitter::GetEnclosingScope(uint32_t first_pos,
       GetBlockInfo(block_order_[first_pos])->construct;
   assert(enclosing_construct != nullptr);
   // Constructs are strictly nesting, so follow parent pointers
-  while (enclosing_construct && !enclosing_construct->ContainsPos(last_pos)) {
+  while (enclosing_construct &&
+         !enclosing_construct->ScopeContainsPos(last_pos)) {
     // The scope of a continue construct is enclosed in its associated loop
     // construct, but they are siblings in our construct tree.
     const auto* sibling_loop = SiblingLoopConstruct(enclosing_construct);

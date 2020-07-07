@@ -3100,7 +3100,7 @@ TEST_F(SpvParserTest,
   EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,6) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ Continue [3,5) begin_id:40 end_id:99 depth:1 parent:Function@10 in-c:Continue@40 }
-  Construct{ Loop [1,3) begin_id:20 end_id:40 depth:1 parent:Function@10 in-l:Loop@20 }
+  Construct{ Loop [1,3) begin_id:20 end_id:40 depth:1 parent:Function@10 scope:[1,5) in-l:Loop@20 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
   EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[0].get());
@@ -3244,7 +3244,7 @@ TEST_F(SpvParserTest,
   Construct{ Function [0,5) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ IfSelection [0,2) begin_id:10 end_id:50 depth:1 parent:Function@10 }
   Construct{ Continue [3,4) begin_id:60 end_id:99 depth:1 parent:Function@10 in-c:Continue@60 }
-  Construct{ Loop [2,3) begin_id:50 end_id:60 depth:1 parent:Function@10 in-l:Loop@50 }
+  Construct{ Loop [2,3) begin_id:50 end_id:60 depth:1 parent:Function@10 scope:[2,4) in-l:Loop@50 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
   EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
@@ -3466,7 +3466,7 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_Loop_Loop) {
   EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,8) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ Continue [4,6) begin_id:50 end_id:89 depth:1 parent:Function@10 in-c:Continue@50 }
-  Construct{ Loop [1,4) begin_id:20 end_id:50 depth:1 parent:Function@10 in-l:Loop@20 }
+  Construct{ Loop [1,4) begin_id:20 end_id:50 depth:1 parent:Function@10 scope:[1,6) in-l:Loop@20 }
   Construct{ Continue [2,3) begin_id:30 end_id:40 depth:2 parent:Loop@20 in-l:Loop@20 in-c:Continue@30 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
@@ -3521,7 +3521,7 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_Loop_If) {
   EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,7) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ Continue [5,6) begin_id:80 end_id:99 depth:1 parent:Function@10 in-c:Continue@80 }
-  Construct{ Loop [1,5) begin_id:20 end_id:80 depth:1 parent:Function@10 in-l:Loop@20 }
+  Construct{ Loop [1,5) begin_id:20 end_id:80 depth:1 parent:Function@10 scope:[1,6) in-l:Loop@20 }
   Construct{ IfSelection [2,4) begin_id:30 end_id:49 depth:2 parent:Loop@20 in-l:Loop@20 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
@@ -3572,7 +3572,7 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_LoopContinue_If) {
   EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,6) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ Continue [2,5) begin_id:30 end_id:99 depth:1 parent:Function@10 in-c:Continue@30 }
-  Construct{ Loop [1,2) begin_id:20 end_id:30 depth:1 parent:Function@10 in-l:Loop@20 }
+  Construct{ Loop [1,2) begin_id:20 end_id:30 depth:1 parent:Function@10 scope:[1,5) in-l:Loop@20 }
   Construct{ IfSelection [2,4) begin_id:30 end_id:49 depth:2 parent:Continue@30 in-c:Continue@30 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
@@ -3666,7 +3666,7 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_If_MultiBlockLoop) {
   Construct{ Function [0,7) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ IfSelection [0,6) begin_id:10 end_id:99 depth:1 parent:Function@10 }
   Construct{ Continue [3,5) begin_id:40 end_id:89 depth:2 parent:IfSelection@10 in-c:Continue@40 }
-  Construct{ Loop [1,3) begin_id:20 end_id:40 depth:2 parent:IfSelection@10 in-l:Loop@20 }
+  Construct{ Loop [1,3) begin_id:20 end_id:40 depth:2 parent:IfSelection@10 scope:[1,5) in-l:Loop@20 }
 })")) << constructs;
   // The block records the nearest enclosing construct.
   EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[1].get());
@@ -13538,7 +13538,7 @@ TEST_F(SpvParserTest, SiblingLoopConstruct_HasSiblingLoop) {
   EXPECT_EQ(c->kind, Construct::kContinue);
   EXPECT_THAT(ToString(fe.SiblingLoopConstruct(c)),
               Eq("Construct{ Loop [1,2) begin_id:20 end_id:30 depth:1 "
-                 "parent:Function@10 in-l:Loop@20 }"));
+                 "parent:Function@10 scope:[1,3) in-l:Loop@20 }"));
 }
 
 }  // namespace

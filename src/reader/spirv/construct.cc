@@ -24,7 +24,8 @@ Construct::Construct(const Construct* the_parent,
                      uint32_t the_begin_id,
                      uint32_t the_end_id,
                      uint32_t the_begin_pos,
-                     uint32_t the_end_pos)
+                     uint32_t the_end_pos,
+                     uint32_t the_scope_end_pos)
     : parent(the_parent),
       enclosing_loop(
           // Compute the enclosing loop construct. Doing this in the
@@ -61,7 +62,8 @@ Construct::Construct(const Construct* the_parent,
       begin_id(the_begin_id),
       end_id(the_end_id),
       begin_pos(the_begin_pos),
-      end_pos(the_end_pos) {}
+      end_pos(the_end_pos),
+      scope_end_pos(the_scope_end_pos) {}
 
 }  // namespace spirv
 }  // namespace reader
