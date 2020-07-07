@@ -83,6 +83,8 @@ namespace dawn_native { namespace d3d12 {
     }  // anonymous namespace
 
     class BindGroupStateTracker : public BindGroupAndStorageBarrierTrackerBase<false, uint64_t> {
+        using Base = BindGroupAndStorageBarrierTrackerBase;
+
       public:
         BindGroupStateTracker(Device* device)
             : BindGroupAndStorageBarrierTrackerBase(),
@@ -93,6 +95,17 @@ namespace dawn_native { namespace d3d12 {
 
         void SetInComputePass(bool inCompute_) {
             mInCompute = inCompute_;
+        }
+
+        void OnSetPipeline(PipelineBase* pipeline) {
+            // Invalidate the root sampler tables previously set in the root signature.
+            // This is because changing the pipeline layout also changes the root signature.
+            const PipelineLayout* pipelineLayout = ToBackend(pipeline->GetLayout());
+            if (mLastAppliedPipelineLayout != pipelineLayout) {
+                mBoundRootSamplerTables = {};
+            }
+
+            Base::OnSetPipeline(pipeline);
         }
 
         MaybeError Apply(CommandRecordingContext* commandContext) {
@@ -309,10 +322,16 @@ namespace dawn_native { namespace d3d12 {
                 uint32_t parameterIndex = pipelineLayout->GetSamplerRootParameterIndex(index);
                 const D3D12_GPU_DESCRIPTOR_HANDLE baseDescriptor =
                     group->GetBaseSamplerDescriptor();
-                if (mInCompute) {
-                    commandList->SetComputeRootDescriptorTable(parameterIndex, baseDescriptor);
-                } else {
-                    commandList->SetGraphicsRootDescriptorTable(parameterIndex, baseDescriptor);
+                // Check if the group requires its sampler table to be set in the pipeline.
+                // This because sampler heap allocations could be cached and use the same table.
+                if (mBoundRootSamplerTables[index].ptr != baseDescriptor.ptr) {
+                    if (mInCompute) {
+                        commandList->SetComputeRootDescriptorTable(parameterIndex, baseDescriptor);
+                    } else {
+                        commandList->SetGraphicsRootDescriptorTable(parameterIndex, baseDescriptor);
+                    }
+
+                    mBoundRootSamplerTables[index] = baseDescriptor;
                 }
             }
         }
@@ -320,6 +339,9 @@ namespace dawn_native { namespace d3d12 {
         Device* mDevice;
 
         bool mInCompute = false;
+
+        ityp::array<BindGroupIndex, D3D12_GPU_DESCRIPTOR_HANDLE, kMaxBindGroups>
+            mBoundRootSamplerTables = {};
 
         ShaderVisibleDescriptorAllocator* mViewAllocator;
         ShaderVisibleDescriptorAllocator* mSamplerAllocator;
