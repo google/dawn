@@ -386,7 +386,7 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
     return EmitUnaryOp(expr->AsUnaryOp());
   }
 
-  error_ = "unknown expression type";
+  error_ = "unknown expression type: " + expr->str();
   return false;
 }
 
@@ -648,7 +648,7 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
     return EmitSwitch(stmt->AsSwitch());
   }
 
-  error_ = "unknown statement type";
+  error_ = "unknown statement type: " + stmt->str();
   return false;
 }
 
