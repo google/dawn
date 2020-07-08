@@ -146,8 +146,7 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
         std::cerr << "Unknown output format: " << args[i] << std::endl;
         return false;
       }
-    }
-    if (arg == "-o" || arg == "--output-name") {
+    } else if (arg == "-o" || arg == "--output-name") {
       ++i;
       if (i >= args.size()) {
         std::cerr << "Missing value for " << arg << std::endl;
