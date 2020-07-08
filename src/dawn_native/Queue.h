@@ -34,6 +34,11 @@ namespace dawn_native {
         void Signal(Fence* fence, uint64_t signalValue);
         Fence* CreateFence(const FenceDescriptor* descriptor);
         void WriteBuffer(BufferBase* buffer, uint64_t bufferOffset, const void* data, size_t size);
+        void WriteTexture(const TextureCopyView* destination,
+                          const void* data,
+                          size_t dataSize,
+                          const TextureDataLayout* dataLayout,
+                          const Extent3D* writeSize);
 
       private:
         QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag);
@@ -42,12 +47,22 @@ namespace dawn_native {
                                        uint64_t bufferOffset,
                                        const void* data,
                                        size_t size);
+        MaybeError WriteTextureInternal(const TextureCopyView* destination,
+                                        const void* data,
+                                        size_t dataSize,
+                                        const TextureDataLayout* dataLayout,
+                                        const Extent3D* writeSize);
 
         virtual MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands);
         virtual MaybeError WriteBufferImpl(BufferBase* buffer,
                                            uint64_t bufferOffset,
                                            const void* data,
                                            size_t size);
+        virtual MaybeError WriteTextureImpl(const TextureCopyView* destination,
+                                            const void* data,
+                                            size_t dataSize,
+                                            const TextureDataLayout* dataLayout,
+                                            const Extent3D* writeSize);
 
         MaybeError ValidateSubmit(uint32_t commandCount, CommandBufferBase* const* commands) const;
         MaybeError ValidateSignal(const Fence* fence, uint64_t signalValue) const;
@@ -55,6 +70,10 @@ namespace dawn_native {
         MaybeError ValidateWriteBuffer(const BufferBase* buffer,
                                        uint64_t bufferOffset,
                                        size_t size) const;
+        MaybeError ValidateWriteTexture(const TextureCopyView* destination,
+                                        size_t dataSize,
+                                        const TextureDataLayout* dataLayout,
+                                        const Extent3D* writeSize) const;
     };
 
 }  // namespace dawn_native

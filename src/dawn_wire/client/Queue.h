@@ -31,6 +31,11 @@ namespace dawn_wire { namespace client {
         WGPUFence CreateFence(const WGPUFenceDescriptor* descriptor);
         void Signal(WGPUFence fence, uint64_t signalValue);
         void WriteBuffer(WGPUBuffer cBuffer, uint64_t bufferOffset, const void* data, size_t size);
+        void WriteTexture(const WGPUTextureCopyView* destination,
+                          const void* data,
+                          size_t dataSize,
+                          const WGPUTextureDataLayout* dataLayout,
+                          const WGPUExtent3D* writeSize);
     };
 
 }}  // namespace dawn_wire::client

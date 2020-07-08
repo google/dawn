@@ -151,6 +151,10 @@ namespace utils {
         uint32_t mipmapLevel,
         uint32_t rowsPerImage);
 
+    uint32_t TextureFormatPixelSize(wgpu::TextureFormat format);
+    extern const std::array<wgpu::TextureFormat, 14> kBCFormats;
+    uint32_t CompressedFormatBlockSizeInBytes(wgpu::TextureFormat format);
+
 }  // namespace utils
 
 #endif  // UTILS_DAWNHELPERS_H_

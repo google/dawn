@@ -985,6 +985,16 @@
                     {"name": "data", "type": "void", "annotation": "const*", "length": "size"},
                     {"name": "size", "type": "size_t"}
                 ]
+            },
+            {
+                "name": "write texture",
+                "args": [
+                    {"name": "destinaton", "type": "texture copy view", "annotation": "const*"},
+                    {"name": "data", "type": "void", "annotation": "const*"},
+                    {"name": "data size", "type": "size_t"},
+                    {"name": "data layout", "type": "texture data layout", "annotation": "const*"},
+                    {"name": "writeSize", "type": "extent 3D", "annotation": "const*"}
+                ]
             }
         ]
     },

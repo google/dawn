@@ -72,4 +72,19 @@ namespace dawn_wire { namespace client {
         device->GetClient()->SerializeCommand(cmd);
     }
 
+    void Queue::WriteTexture(const WGPUTextureCopyView* destination,
+                             const void* data,
+                             size_t dataSize,
+                             const WGPUTextureDataLayout* dataLayout,
+                             const WGPUExtent3D* writeSize) {
+        QueueWriteTextureInternalCmd cmd;
+        cmd.queueId = id;
+        cmd.destination = destination;
+        cmd.dataSize = dataSize;
+        cmd.dataLayout = dataLayout;
+        cmd.writeSize = writeSize;
+
+        device->GetClient()->SerializeCommand(cmd);
+    }
+
 }}  // namespace dawn_wire::client

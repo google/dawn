@@ -16,6 +16,7 @@
 
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandBuffer.h"
+#include "dawn_native/CommandValidation.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/ErrorScope.h"
@@ -131,6 +132,33 @@ namespace dawn_native {
                                                buffer, bufferOffset, size);
     }
 
+    void QueueBase::WriteTexture(const TextureCopyView* destination,
+                                 const void* data,
+                                 size_t dataSize,
+                                 const TextureDataLayout* dataLayout,
+                                 const Extent3D* writeSize) {
+        GetDevice()->ConsumedError(
+            WriteTextureInternal(destination, data, dataSize, dataLayout, writeSize));
+    }
+
+    MaybeError QueueBase::WriteTextureInternal(const TextureCopyView* destination,
+                                               const void* data,
+                                               size_t dataSize,
+                                               const TextureDataLayout* dataLayout,
+                                               const Extent3D* writeSize) {
+        DAWN_TRY(ValidateWriteTexture(destination, dataSize, dataLayout, writeSize));
+        return WriteTextureImpl(destination, data, dataSize, dataLayout, writeSize);
+    }
+
+    MaybeError QueueBase::WriteTextureImpl(const TextureCopyView* destination,
+                                           const void* data,
+                                           size_t dataSize,
+                                           const TextureDataLayout* dataLayout,
+                                           const Extent3D* writeSize) {
+        // TODO(tommek@google.com): This should be implemented.
+        return {};
+    }
+
     MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
                                          CommandBufferBase* const* commands) const {
         TRACE_EVENT0(GetDevice()->GetPlatform(), Validation, "Queue::ValidateSubmit");
@@ -213,6 +241,35 @@ namespace dawn_native {
         }
 
         return buffer->ValidateCanUseOnQueueNow();
+    }
+
+    MaybeError QueueBase::ValidateWriteTexture(const TextureCopyView* destination,
+                                               size_t dataSize,
+                                               const TextureDataLayout* dataLayout,
+                                               const Extent3D* writeSize) const {
+        DAWN_TRY(GetDevice()->ValidateIsAlive());
+        DAWN_TRY(GetDevice()->ValidateObject(this));
+        DAWN_TRY(GetDevice()->ValidateObject(destination->texture));
+
+        DAWN_TRY(ValidateTextureCopyView(GetDevice(), *destination));
+
+        if (dataLayout->offset > dataSize) {
+            return DAWN_VALIDATION_ERROR("Queue::WriteTexture out of range");
+        }
+
+        if (!(destination->texture->GetUsage() & wgpu::TextureUsage::CopyDst)) {
+            return DAWN_VALIDATION_ERROR("Texture needs the CopyDst usage bit");
+        }
+
+        if (destination->texture->GetSampleCount() > 1) {
+            return DAWN_VALIDATION_ERROR("The sample count of textures must be 1");
+        }
+
+        DAWN_TRY(ValidateLinearTextureData(*dataLayout, dataSize, destination->texture->GetFormat(),
+                                           *writeSize));
+        DAWN_TRY(ValidateTextureCopyRange(*destination, *writeSize));
+
+        return {};
     }
 
 }  // namespace dawn_native

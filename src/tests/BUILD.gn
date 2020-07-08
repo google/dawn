@@ -192,6 +192,7 @@ test("dawn_unittests") {
     "unittests/validation/MinimumBufferSizeValidationTests.cpp",
     "unittests/validation/QuerySetValidationTests.cpp",
     "unittests/validation/QueueSubmitValidationTests.cpp",
+    "unittests/validation/QueueWriteTextureValidationTests.cpp",
     "unittests/validation/RenderBundleValidationTests.cpp",
     "unittests/validation/RenderPassDescriptorValidationTests.cpp",
     "unittests/validation/RenderPipelineValidationTests.cpp",
