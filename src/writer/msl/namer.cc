@@ -14,6 +14,8 @@
 
 #include "src/writer/msl/namer.h"
 
+#include <algorithm>
+
 namespace tint {
 namespace writer {
 namespace msl {
