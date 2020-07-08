@@ -19,6 +19,7 @@
 #include "dawn_native/d3d12/HeapAllocatorD3D12.h"
 #include "dawn_native/d3d12/HeapD3D12.h"
 #include "dawn_native/d3d12/ResidencyManagerD3D12.h"
+#include "dawn_native/d3d12/UtilsD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
     namespace {
@@ -148,6 +149,17 @@ namespace dawn_native { namespace d3d12 {
             }
         }
 
+        bool IsClearValueOptimizable(const D3D12_RESOURCE_DESC& resourceDescriptor) {
+            // Optimized clear color cannot be set on buffers, non-render-target/depth-stencil
+            // textures, or typeless resources
+            // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12device-createcommittedresource
+            // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12device-createplacedresource
+            return !IsTypeless(resourceDescriptor.Format) &&
+                   resourceDescriptor.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER &&
+                   (resourceDescriptor.Flags & (D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET |
+                                                D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL)) != 0;
+        }
+
     }  // namespace
 
     ResourceAllocatorManager::ResourceAllocatorManager(Device* device) : mDevice(device) {
@@ -169,14 +181,25 @@ namespace dawn_native { namespace d3d12 {
         D3D12_HEAP_TYPE heapType,
         const D3D12_RESOURCE_DESC& resourceDescriptor,
         D3D12_RESOURCE_STATES initialUsage) {
+        // In order to suppress a warning in the D3D12 debug layer, we need to specify an
+        // optimized clear value. As there are no negative consequences when picking a mismatched
+        // clear value, we use zero as the optimized clear value. This also enables fast clears on
+        // some architectures.
+        D3D12_CLEAR_VALUE zero{};
+        D3D12_CLEAR_VALUE* optimizedClearValue = nullptr;
+        if (IsClearValueOptimizable(resourceDescriptor)) {
+            zero.Format = resourceDescriptor.Format;
+            optimizedClearValue = &zero;
+        }
+
         // TODO(bryan.bernhart@intel.com): Conditionally disable sub-allocation.
         // For very large resources, there is no benefit to suballocate.
         // For very small resources, it is inefficent to suballocate given the min. heap
         // size could be much larger then the resource allocation.
         // Attempt to satisfy the request using sub-allocation (placed resource in a heap).
         ResourceHeapAllocation subAllocation;
-        DAWN_TRY_ASSIGN(subAllocation,
-                        CreatePlacedResource(heapType, resourceDescriptor, initialUsage));
+        DAWN_TRY_ASSIGN(subAllocation, CreatePlacedResource(heapType, resourceDescriptor,
+                                                            optimizedClearValue, initialUsage));
         if (subAllocation.GetInfo().mMethod != AllocationMethod::kInvalid) {
             return std::move(subAllocation);
         }
@@ -184,7 +207,8 @@ namespace dawn_native { namespace d3d12 {
         // If sub-allocation fails, fall-back to direct allocation (committed resource).
         ResourceHeapAllocation directAllocation;
         DAWN_TRY_ASSIGN(directAllocation,
-                        CreateCommittedResource(heapType, resourceDescriptor, initialUsage));
+                        CreateCommittedResource(heapType, resourceDescriptor, optimizedClearValue,
+                                                initialUsage));
         if (directAllocation.GetInfo().mMethod != AllocationMethod::kInvalid) {
             return std::move(directAllocation);
         }
@@ -242,6 +266,7 @@ namespace dawn_native { namespace d3d12 {
     ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::CreatePlacedResource(
         D3D12_HEAP_TYPE heapType,
         const D3D12_RESOURCE_DESC& requestedResourceDescriptor,
+        const D3D12_CLEAR_VALUE* optimizedClearValue,
         D3D12_RESOURCE_STATES initialUsage) {
         const ResourceHeapKind resourceHeapKind =
             GetResourceHeapKind(requestedResourceDescriptor.Dimension, heapType,
@@ -299,7 +324,7 @@ namespace dawn_native { namespace d3d12 {
         DAWN_TRY(CheckOutOfMemoryHRESULT(
             mDevice->GetD3D12Device()->CreatePlacedResource(
                 heap->GetD3D12Heap(), allocation.GetOffset(), &resourceDescriptor, initialUsage,
-                nullptr, IID_PPV_ARGS(&placedResource)),
+                optimizedClearValue, IID_PPV_ARGS(&placedResource)),
             "ID3D12Device::CreatePlacedResource"));
 
         // After CreatePlacedResource has finished, the heap can be unlocked from residency. This
@@ -313,6 +338,7 @@ namespace dawn_native { namespace d3d12 {
     ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::CreateCommittedResource(
         D3D12_HEAP_TYPE heapType,
         const D3D12_RESOURCE_DESC& resourceDescriptor,
+        const D3D12_CLEAR_VALUE* optimizedClearValue,
         D3D12_RESOURCE_STATES initialUsage) {
         D3D12_HEAP_PROPERTIES heapProperties;
         heapProperties.Type = heapType;
@@ -345,11 +371,11 @@ namespace dawn_native { namespace d3d12 {
         // Note: Heap flags are inferred by the resource descriptor and do not need to be explicitly
         // provided to CreateCommittedResource.
         ComPtr<ID3D12Resource> committedResource;
-        DAWN_TRY(
-            CheckOutOfMemoryHRESULT(mDevice->GetD3D12Device()->CreateCommittedResource(
-                                        &heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDescriptor,
-                                        initialUsage, nullptr, IID_PPV_ARGS(&committedResource)),
-                                    "ID3D12Device::CreateCommittedResource"));
+        DAWN_TRY(CheckOutOfMemoryHRESULT(
+            mDevice->GetD3D12Device()->CreateCommittedResource(
+                &heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDescriptor, initialUsage,
+                optimizedClearValue, IID_PPV_ARGS(&committedResource)),
+            "ID3D12Device::CreateCommittedResource"));
 
         // When using CreateCommittedResource, D3D12 creates an implicit heap that contains the
         // resource allocation. Because Dawn's memory residency management occurs at the resource

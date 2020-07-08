@@ -39,6 +39,8 @@ namespace dawn_native { namespace d3d12 {
         const uint32_t rowPitch);
     D3D12_BOX ComputeD3D12BoxFromOffsetAndSize(const Origin3D& offset, const Extent3D& copySize);
 
+    bool IsTypeless(DXGI_FORMAT format);
+
 }}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_UTILSD3D12_H_
