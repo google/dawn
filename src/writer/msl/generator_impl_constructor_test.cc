@@ -157,6 +157,18 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec) {
   EXPECT_EQ(g.result(), "float3(1.00000000f, 2.00000000f, 3.00000000f)");
 }
 
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_Empty) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec(&f32, 3);
+
+  ast::ExpressionList values;
+  ast::TypeConstructorExpression expr(&vec, std::move(values));
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
+  EXPECT_EQ(g.result(), "float3(0.0f)");
+}
+
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat) {
   ast::type::F32Type f32;
   ast::type::MatrixType mat(&f32, 3, 2);

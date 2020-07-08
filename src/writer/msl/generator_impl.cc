@@ -46,6 +46,7 @@
 #include "src/ast/type/void_type.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
+#include "src/ast/variable_decl_statement.h"
 
 namespace tint {
 namespace writer {
@@ -314,19 +315,45 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
 
   out_ << "(";
 
-  bool first = true;
-  for (const auto& e : expr->values()) {
-    if (!first) {
-      out_ << ", ";
-    }
-    first = false;
-
-    if (!EmitExpression(e.get())) {
+  // If the type constructor is empty then we need to construct with the zero
+  // value for all components.
+  if (expr->values().empty()) {
+    if (!EmitZeroValue(expr->type())) {
       return false;
+    }
+  } else {
+    bool first = true;
+    for (const auto& e : expr->values()) {
+      if (!first) {
+        out_ << ", ";
+      }
+      first = false;
+
+      if (!EmitExpression(e.get())) {
+        return false;
+      }
     }
   }
 
   out_ << ")";
+  return true;
+}
+
+bool GeneratorImpl::EmitZeroValue(ast::type::Type* type) {
+  if (type->IsBool()) {
+    out_ << "false";
+  } else if (type->IsF32()) {
+    out_ << "0.0f";
+  } else if (type->IsI32()) {
+    out_ << "0";
+  } else if (type->IsU32()) {
+    out_ << "0u";
+  } else if (type->IsVector()) {
+    return EmitZeroValue(type->AsVector()->type());
+  } else {
+    error_ = "Invalid type for zero emission: " + type->type_name();
+    return false;
+  }
   return true;
 }
 
@@ -647,6 +674,9 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsSwitch()) {
     return EmitSwitch(stmt->AsSwitch());
   }
+  if (stmt->IsVariableDecl()) {
+    return EmitVariable(stmt->AsVariableDecl()->variable());
+  }
 
   error_ = "unknown statement type: " + stmt->str();
   return false;
@@ -777,6 +807,36 @@ bool GeneratorImpl::EmitUnaryOp(ast::UnaryOpExpression* expr) {
   }
 
   out_ << ")";
+
+  return true;
+}
+
+bool GeneratorImpl::EmitVariable(ast::Variable* var) {
+  make_indent();
+
+  // TODO(dsinclair): Handle variable decorations
+  if (var->IsDecorated()) {
+    error_ = "Variable decorations are not handled yet";
+    return false;
+  }
+
+  if (var->is_const()) {
+    out_ << "const ";
+  }
+  if (!EmitType(var->type(), var->name())) {
+    return false;
+  }
+  if (!var->type()->IsArray()) {
+    out_ << " " << var->name();
+  }
+
+  if (var->constructor() != nullptr) {
+    out_ << " = ";
+    if (!EmitExpression(var->constructor())) {
+      return false;
+    }
+  }
+  out_ << ";" << std::endl;
 
   return true;
 }

@@ -157,6 +157,14 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the expression to emit
   /// @returns true if the expression was emitted
   bool EmitUnaryOp(ast::UnaryOpExpression* expr);
+  /// Handles generating a variable
+  /// @param var the variable to generate
+  /// @returns true if the variable was emitted
+  bool EmitVariable(ast::Variable* var);
+  /// Emits the zero value for the given type
+  /// @param type the type to emit the value for
+  /// @returns true if the zero value was successfully emitted.
+  bool EmitZeroValue(ast::type::Type* type);
 
  private:
   Namer namer_;
