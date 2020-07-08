@@ -122,6 +122,14 @@ class Ref {
         mPointee = nullptr;
     }
 
+    bool operator==(const T* other) const {
+        return mPointee == other;
+    }
+
+    bool operator!=(const T* other) const {
+        return mPointee != other;
+    }
+
     operator bool() {
         return mPointee != nullptr;
     }

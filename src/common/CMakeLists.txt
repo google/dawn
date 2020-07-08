@@ -49,6 +49,7 @@ target_sources(dawn_common PRIVATE
     "ityp_array.h"
     "ityp_bitset.h"
     "ityp_span.h"
+    "ityp_stack_vec.h"
     "vulkan_platform.h"
     "windows_with_undefs.h"
     "xlib_with_undefs.h"
