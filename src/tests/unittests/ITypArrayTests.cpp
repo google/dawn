@@ -79,16 +79,12 @@ TEST_F(ITypArrayTest, BeginEndFrontBackData) {
     Array arr;
 
     // non-const versions
-    ASSERT_EQ(arr.begin(), &arr[Key(0)]);
-    ASSERT_EQ(arr.end(), &arr[Key(0)] + static_cast<uint32_t>(arr.size()));
     ASSERT_EQ(&arr.front(), &arr[Key(0)]);
     ASSERT_EQ(&arr.back(), &arr[Key(9)]);
     ASSERT_EQ(arr.data(), &arr[Key(0)]);
 
     // const versions
     const Array& constArr = arr;
-    ASSERT_EQ(constArr.begin(), &constArr[Key(0)]);
-    ASSERT_EQ(constArr.end(), &constArr[Key(0)] + static_cast<uint32_t>(constArr.size()));
     ASSERT_EQ(&constArr.front(), &constArr[Key(0)]);
     ASSERT_EQ(&constArr.back(), &constArr[Key(9)]);
     ASSERT_EQ(constArr.data(), &constArr[Key(0)]);

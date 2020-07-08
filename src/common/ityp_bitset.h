@@ -126,7 +126,7 @@ namespace ityp {
             return BitSetIterator<N, Index>(static_cast<const Base&>(bitset));
         }
 
-        friend class std::hash<bitset>;
+        friend struct std::hash<bitset>;
     };
 
 }  // namespace ityp

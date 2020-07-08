@@ -65,19 +65,19 @@ namespace ityp {
             return Base::at(index);
         }
 
-        Value* begin() noexcept {
+        typename Base::iterator begin() noexcept {
             return Base::begin();
         }
 
-        const Value* begin() const noexcept {
+        typename Base::const_iterator begin() const noexcept {
             return Base::begin();
         }
 
-        Value* end() noexcept {
+        typename Base::iterator end() noexcept {
             return Base::end();
         }
 
-        const Value* end() const noexcept {
+        typename Base::const_iterator end() const noexcept {
             return Base::end();
         }
 

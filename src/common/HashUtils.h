@@ -90,7 +90,7 @@ size_t Hash(const std::bitset<N>& value) {
 
 namespace std {
     template <typename Index, size_t N>
-    class hash<ityp::bitset<Index, N>> {
+    struct hash<ityp::bitset<Index, N>> {
       public:
         size_t operator()(const ityp::bitset<Index, N>& value) const {
             return Hash(static_cast<const std::bitset<N>&>(value));
