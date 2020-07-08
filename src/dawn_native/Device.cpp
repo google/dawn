@@ -604,13 +604,13 @@ namespace dawn_native {
         return result;
     }
     BufferBase* DeviceBase::CreateBuffer(const BufferDescriptor* descriptor) {
-        BufferBase* result = nullptr;
+        Ref<BufferBase> result = nullptr;
         if (ConsumedError(CreateBufferInternal(descriptor), &result)) {
-            ASSERT(result == nullptr);
+            ASSERT(result.Get() == nullptr);
             return BufferBase::MakeError(this, descriptor);
         }
 
-        return result;
+        return result.Detach();
     }
     WGPUCreateBufferMappedResult DeviceBase::CreateBufferMapped(
         const BufferDescriptor* descriptor) {
@@ -870,21 +870,21 @@ namespace dawn_native {
         return {};
     }
 
-    ResultOrError<BufferBase*> DeviceBase::CreateBufferInternal(
+    ResultOrError<Ref<BufferBase>> DeviceBase::CreateBufferInternal(
         const BufferDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
         if (IsValidationEnabled()) {
             DAWN_TRY(ValidateBufferDescriptor(this, descriptor));
         }
 
-        BufferBase* buffer = nullptr;
+        Ref<BufferBase> buffer;
         DAWN_TRY_ASSIGN(buffer, CreateBufferImpl(descriptor));
 
         if (descriptor->mappedAtCreation) {
             DAWN_TRY(buffer->MapAtCreation());
         }
 
-        return buffer;
+        return std::move(buffer);
     }
 
     MaybeError DeviceBase::CreateComputePipelineInternal(

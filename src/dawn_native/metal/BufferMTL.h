@@ -27,7 +27,8 @@ namespace dawn_native { namespace metal {
 
     class Buffer : public BufferBase {
       public:
-        static ResultOrError<Buffer*> Create(Device* device, const BufferDescriptor* descriptor);
+        static ResultOrError<Ref<Buffer>> Create(Device* device,
+                                                 const BufferDescriptor* descriptor);
         id<MTLBuffer> GetMTLBuffer() const;
 
         void ClearBufferContentsToZero(CommandRecordingContext* commandContext);

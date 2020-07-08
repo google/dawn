@@ -28,7 +28,8 @@ namespace dawn_native { namespace vulkan {
 
     class Buffer final : public BufferBase {
       public:
-        static ResultOrError<Buffer*> Create(Device* device, const BufferDescriptor* descriptor);
+        static ResultOrError<Ref<Buffer>> Create(Device* device,
+                                                 const BufferDescriptor* descriptor);
 
         VkBuffer GetHandle() const;
 

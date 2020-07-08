@@ -30,10 +30,10 @@ namespace dawn_native { namespace metal {
     static constexpr uint32_t kMaxBufferSizeFallback = 1024u * 1024u * 1024u;
 
     // static
-    ResultOrError<Buffer*> Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
+    ResultOrError<Ref<Buffer>> Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
         Ref<Buffer> buffer = AcquireRef(new Buffer(device, descriptor));
         DAWN_TRY(buffer->Initialize());
-        return buffer.Detach();
+        return std::move(buffer);
     }
 
     MaybeError Buffer::Initialize() {
