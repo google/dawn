@@ -17,6 +17,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace tint {
 namespace writer {
@@ -37,6 +38,8 @@ class Namer {
  private:
   /// Map of original name to new name. The two names may be the same.
   std::unordered_map<std::string, std::string> name_map_;
+  // The list of names taken by the remapper
+  std::unordered_set<std::string> remapped_names_;
 };
 
 }  // namespace msl

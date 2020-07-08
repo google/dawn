@@ -267,7 +267,7 @@ Namer::Namer() = default;
 Namer::~Namer() = default;
 
 std::string Namer::NameFor(const std::string& name) {
-  // If it's in the name make we can just return it. There are no shadow names
+  // If it's in the name map we can just return it. There are no shadow names
   // in WGSL so this has to be unique in the WGSL names, and we've already
   // checked the name collisions with MSL.
   auto it = name_map_.find(name);
@@ -288,6 +288,19 @@ std::string Namer::NameFor(const std::string& name) {
       }
       i++;
     }
+    remapped_names_.insert(ret_name);
+  } else {
+    uint32_t i = 0;
+    // Make sure the ident name wasn't assigned by a remapping.
+    while (true) {
+      auto remap_it = remapped_names_.find(ret_name);
+      if (remap_it == remapped_names_.end()) {
+        break;
+      }
+      ret_name = name + "_" + std::to_string(i);
+      i++;
+    }
+    remapped_names_.insert(ret_name);
   }
 
   name_map_[name] = ret_name;

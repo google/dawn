@@ -28,11 +28,19 @@ TEST_F(MslNamerTest, ReturnsName) {
   EXPECT_EQ("my_name", n.NameFor("my_name"));
 }
 
-TEST_F(MslNamerTest, HandlesConflictWithRenamedReservedWord) {
+TEST_F(MslNamerTest, HandlesConflictWithRenamedReservedWordAfterIdentSeen) {
   Namer n;
   EXPECT_EQ("float_tint_0", n.NameFor("float_tint_0"));
   EXPECT_EQ("float_tint_1", n.NameFor("float"));
   EXPECT_EQ("float_tint_0", n.NameFor("float_tint_0"));
+}
+
+TEST_F(MslNamerTest, HandlesConflictWithRenamedReservedWordBeforeIdentSeen) {
+  Namer n;
+  EXPECT_EQ("float_tint_0", n.NameFor("float"));
+  EXPECT_EQ("float_tint_0_0", n.NameFor("float_tint_0"));
+  EXPECT_EQ("float_tint_0_0_0", n.NameFor("float_tint_0_0"));
+  EXPECT_EQ("float_tint_0_0", n.NameFor("float_tint_0"));
 }
 
 using MslReservedNameTest = testing::TestWithParam<std::string>;
