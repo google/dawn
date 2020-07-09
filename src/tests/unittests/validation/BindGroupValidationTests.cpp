@@ -303,14 +303,9 @@ TEST_F(BindGroupValidationTest, TextureUsage) {
 
 // Check that a texture must have the correct component type
 TEST_F(BindGroupValidationTest, TextureComponentType) {
-    wgpu::BindGroupLayout layout =
-        utils::MakeBindGroupLayout(device, {{0,
-                                             wgpu::ShaderStage::Fragment,
-                                             wgpu::BindingType::SampledTexture,
-                                             false,
-                                             false,
-                                             wgpu::TextureViewDimension::e2D,
-                                             wgpu::TextureComponentType::Float}});
+    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, 0,
+                  false, wgpu::TextureViewDimension::e2D, wgpu::TextureComponentType::Float}});
 
     // Control case: setting a Float typed texture view works.
     utils::MakeBindGroup(device, layout, {{0, mSampledTextureView}});
@@ -325,14 +320,9 @@ TEST_F(BindGroupValidationTest, TextureComponentType) {
 
 // Check that a texture must have the correct dimension
 TEST_F(BindGroupValidationTest, TextureDimension) {
-    wgpu::BindGroupLayout layout =
-        utils::MakeBindGroupLayout(device, {{0,
-                                             wgpu::ShaderStage::Fragment,
-                                             wgpu::BindingType::SampledTexture,
-                                             false,
-                                             false,
-                                             wgpu::TextureViewDimension::e2D,
-                                             wgpu::TextureComponentType::Float}});
+    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, 0,
+                  false, wgpu::TextureViewDimension::e2D, wgpu::TextureComponentType::Float}});
 
     // Control case: setting a 2D texture view works.
     utils::MakeBindGroup(device, layout, {{0, mSampledTextureView}});
@@ -770,50 +760,50 @@ TEST_F(BindGroupLayoutValidationTest, MultisampledTextures) {
     // Multisampled 2D texture works.
     utils::MakeBindGroupLayout(
         device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, true,
-                     wgpu::TextureViewDimension::e2D},
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
+                     true, wgpu::TextureViewDimension::e2D},
                 });
 
     // Multisampled 2D (defaulted) texture works.
     utils::MakeBindGroupLayout(
         device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, true,
-                     wgpu::TextureViewDimension::Undefined},
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
+                     true, wgpu::TextureViewDimension::Undefined},
                 });
 
     // Multisampled 2D storage texture is invalid.
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
         device, {
                     {0, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageTexture,
-                     false, true, wgpu::TextureViewDimension::e2D},
+                     false, 0, true, wgpu::TextureViewDimension::e2D},
                 }));
 
     // Multisampled 2D array texture is invalid.
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
         device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, true,
-                     wgpu::TextureViewDimension::e2DArray},
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
+                     true, wgpu::TextureViewDimension::e2DArray},
                 }));
 
     // Multisampled cube texture is invalid.
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
         device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, true,
-                     wgpu::TextureViewDimension::Cube},
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
+                     true, wgpu::TextureViewDimension::Cube},
                 }));
 
     // Multisampled cube array texture is invalid.
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
         device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, true,
-                     wgpu::TextureViewDimension::CubeArray},
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
+                     true, wgpu::TextureViewDimension::CubeArray},
                 }));
 
     // Multisampled 3D texture is invalid.
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
         device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, true,
-                     wgpu::TextureViewDimension::e3D},
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
+                     true, wgpu::TextureViewDimension::e3D},
                 }));
 }
 
@@ -822,26 +812,28 @@ TEST_F(BindGroupLayoutValidationTest, MultisampledMustBeTexture) {
     // Base: Multisampled 2D texture works.
     utils::MakeBindGroupLayout(
         device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, true,
-                     wgpu::TextureViewDimension::e2D},
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
+                     true, wgpu::TextureViewDimension::e2D},
                 });
 
     // Multisampled uniform buffer binding is invalid
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
-        device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::UniformBuffer, false, true},
-                }));
+        device,
+        {
+            {0, wgpu::ShaderStage::Compute, wgpu::BindingType::UniformBuffer, false, 0, true},
+        }));
 
     // Multisampled storage buffer binding is invalid
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
-        device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer, false, true},
-                }));
+        device,
+        {
+            {0, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer, false, 0, true},
+        }));
 
     // Multisampled sampler binding is invalid
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
         device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::Sampler, false, true},
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::Sampler, false, 0, true},
                 }));
 }
 
@@ -1613,28 +1605,28 @@ TEST_F(BindGroupLayoutCompatibilityTest, TextureViewDimension) {
     CreateFSRenderPipeline(
         kTexture2DShader,
         {utils::MakeBindGroupLayout(
-            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false,
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, 0,
                       false, wgpu::TextureViewDimension::e2D}})});
 
     // Render: Test that 2D texture with 2D array view dimension is invalid
     ASSERT_DEVICE_ERROR(CreateFSRenderPipeline(
         kTexture2DShader,
         {utils::MakeBindGroupLayout(
-            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false,
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, 0,
                       false, wgpu::TextureViewDimension::e2DArray}})}));
 
     // Compute: Test that 2D texture with 2D view dimension works
     CreateComputePipeline(
         kTexture2DShader,
         {utils::MakeBindGroupLayout(
-            device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false,
+            device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
                       false, wgpu::TextureViewDimension::e2D}})});
 
     // Compute: Test that 2D texture with 2D array view dimension is invalid
     ASSERT_DEVICE_ERROR(CreateComputePipeline(
         kTexture2DShader,
         {utils::MakeBindGroupLayout(
-            device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false,
+            device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
                       false, wgpu::TextureViewDimension::e2DArray}})}));
 
     constexpr char kTexture2DArrayShader[] = R"(
@@ -1647,28 +1639,28 @@ TEST_F(BindGroupLayoutCompatibilityTest, TextureViewDimension) {
     CreateFSRenderPipeline(
         kTexture2DArrayShader,
         {utils::MakeBindGroupLayout(
-            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false,
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, 0,
                       false, wgpu::TextureViewDimension::e2DArray}})});
 
     // Render: Test that 2D texture array with 2D view dimension is invalid
     ASSERT_DEVICE_ERROR(CreateFSRenderPipeline(
         kTexture2DArrayShader,
         {utils::MakeBindGroupLayout(
-            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false,
+            device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, 0,
                       false, wgpu::TextureViewDimension::e2D}})}));
 
     // Compute: Test that 2D texture array with 2D array view dimension works
     CreateComputePipeline(
         kTexture2DArrayShader,
         {utils::MakeBindGroupLayout(
-            device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false,
+            device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
                       false, wgpu::TextureViewDimension::e2DArray}})});
 
     // Compute: Test that 2D texture array with 2D view dimension is invalid
     ASSERT_DEVICE_ERROR(CreateComputePipeline(
         kTexture2DArrayShader,
         {utils::MakeBindGroupLayout(
-            device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false,
+            device, {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
                       false, wgpu::TextureViewDimension::e2D}})}));
 }
 

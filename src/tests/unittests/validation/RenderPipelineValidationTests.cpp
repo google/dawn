@@ -392,14 +392,9 @@ TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
             descriptor.cFragmentStage.module = utils::CreateShaderModule(
                 device, utils::SingleShaderStage::Fragment, stream.str().c_str());
 
-            wgpu::BindGroupLayout bgl =
-                utils::MakeBindGroupLayout(device, {{0,
-                                                     wgpu::ShaderStage::Fragment,
-                                                     wgpu::BindingType::SampledTexture,
-                                                     false,
-                                                     false,
-                                                     wgpu::TextureViewDimension::e2D,
-                                                     kTextureComponentTypes[j]}});
+            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false,
+                          0, false, wgpu::TextureViewDimension::e2D, kTextureComponentTypes[j]}});
             descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
 
             if (i == j) {
@@ -447,14 +442,9 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
             descriptor.cFragmentStage.module = utils::CreateShaderModule(
                 device, utils::SingleShaderStage::Fragment, stream.str().c_str());
 
-            wgpu::BindGroupLayout bgl =
-                utils::MakeBindGroupLayout(device, {{0,
-                                                     wgpu::ShaderStage::Fragment,
-                                                     wgpu::BindingType::SampledTexture,
-                                                     false,
-                                                     false,
-                                                     kTextureViewDimensions[j],
-                                                     wgpu::TextureComponentType::Float}});
+            wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false,
+                          0, false, kTextureViewDimensions[j], wgpu::TextureComponentType::Float}});
             descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
 
             if (i == j) {

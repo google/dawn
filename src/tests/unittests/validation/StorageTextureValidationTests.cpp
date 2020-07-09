@@ -422,7 +422,7 @@ TEST_F(StorageTextureValidationTests, UnsupportedTextureViewDimensionInBindGroup
     for (wgpu::BindingType bindingType : kSupportedStorageTextureBindingTypes) {
         for (wgpu::TextureViewDimension dimension : kUnsupportedTextureViewDimensions) {
             ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
-                device, {{0, wgpu::ShaderStage::Compute, bindingType, false, false, dimension,
+                device, {{0, wgpu::ShaderStage::Compute, bindingType, false, 0, false, dimension,
                           wgpu::TextureComponentType::Float, kFormat}}));
         }
     }
@@ -838,7 +838,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureInRenderPass) {
         // Create a bind group that contains a storage texture.
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device,
-            {{0, wgpu::ShaderStage::Fragment, storageTextureType, false, false,
+            {{0, wgpu::ShaderStage::Fragment, storageTextureType, false, 0, false,
               wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float, kFormat}});
 
         wgpu::BindGroup bindGroupWithStorageTexture =
@@ -871,9 +871,9 @@ TEST_F(StorageTextureValidationTests, StorageTextureAndSampledTextureInOneRender
         // texture.
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device,
-            {{0, wgpu::ShaderStage::Fragment, storageTextureType, false, false,
+            {{0, wgpu::ShaderStage::Fragment, storageTextureType, false, 0, false,
               wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float, kFormat},
-             {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, false,
+             {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, 0, false,
               wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float, kFormat}});
         wgpu::BindGroup bindGroup = utils::MakeBindGroup(
             device, bindGroupLayout,
@@ -912,7 +912,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureAndOutputAttachmentInOneRend
         // Create a bind group that contains a storage texture.
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device,
-            {{0, wgpu::ShaderStage::Fragment, storageTextureType, false, false,
+            {{0, wgpu::ShaderStage::Fragment, storageTextureType, false, 0, false,
               wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float, kFormat}});
         wgpu::BindGroup bindGroupWithStorageTexture =
             utils::MakeBindGroup(device, bindGroupLayout, {{0, storageTexture.CreateView()}});
@@ -937,10 +937,11 @@ TEST_F(StorageTextureValidationTests, ReadOnlyAndWriteOnlyStorageTextureInOneRen
     // texture.
     wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
         device,
-        {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageTexture, false, false,
-          wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float, kFormat},
-         {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::WriteonlyStorageTexture, false, false,
-          wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float, kFormat}});
+        {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageTexture, false, 0,
+          false, wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float, kFormat},
+         {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::WriteonlyStorageTexture, false, 0,
+          false, wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float,
+          kFormat}});
     wgpu::BindGroup bindGroup =
         utils::MakeBindGroup(device, bindGroupLayout,
                              {{0, storageTexture.CreateView()}, {1, storageTexture.CreateView()}});
@@ -968,9 +969,9 @@ TEST_F(StorageTextureValidationTests, StorageTextureAndSampledTextureInOneComput
         // texture.
         wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
             device,
-            {{0, wgpu::ShaderStage::Compute, storageTextureType, false, false,
+            {{0, wgpu::ShaderStage::Compute, storageTextureType, false, 0, false,
               wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float, kFormat},
-             {1, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, false,
+             {1, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0, false,
               wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float, kFormat}});
         wgpu::BindGroup bindGroup = utils::MakeBindGroup(
             device, bindGroupLayout,
@@ -996,10 +997,11 @@ TEST_F(StorageTextureValidationTests, ReadOnlyAndWriteOnlyStorageTextureInOneCom
     // texture.
     wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
         device,
-        {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageTexture, false, false,
+        {{0, wgpu::ShaderStage::Compute, wgpu::BindingType::ReadonlyStorageTexture, false, 0, false,
           wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float, kFormat},
-         {1, wgpu::ShaderStage::Compute, wgpu::BindingType::WriteonlyStorageTexture, false, false,
-          wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float, kFormat}});
+         {1, wgpu::ShaderStage::Compute, wgpu::BindingType::WriteonlyStorageTexture, false, 0,
+          false, wgpu::TextureViewDimension::Undefined, wgpu::TextureComponentType::Float,
+          kFormat}});
     wgpu::BindGroup bindGroup =
         utils::MakeBindGroup(device, bindGroupLayout,
                              {{0, storageTexture.CreateView()}, {1, storageTexture.CreateView()}});

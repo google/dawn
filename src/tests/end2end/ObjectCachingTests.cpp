@@ -48,30 +48,15 @@ TEST_P(ObjectCachingTest, BindGroupLayoutDynamic) {
 // Test that two similar bind group layouts won't refer to the same one if they differ by
 // textureComponentType
 TEST_P(ObjectCachingTest, BindGroupLayoutTextureComponentType) {
-    wgpu::BindGroupLayout bgl =
-        utils::MakeBindGroupLayout(device, {{1,
-                                             wgpu::ShaderStage::Fragment,
-                                             wgpu::BindingType::SampledTexture,
-                                             false,
-                                             false,
-                                             wgpu::TextureViewDimension::e2D,
-                                             wgpu::TextureComponentType::Float}});
-    wgpu::BindGroupLayout sameBgl =
-        utils::MakeBindGroupLayout(device, {{1,
-                                             wgpu::ShaderStage::Fragment,
-                                             wgpu::BindingType::SampledTexture,
-                                             false,
-                                             false,
-                                             wgpu::TextureViewDimension::e2D,
-                                             wgpu::TextureComponentType::Float}});
-    wgpu::BindGroupLayout otherBgl =
-        utils::MakeBindGroupLayout(device, {{1,
-                                             wgpu::ShaderStage::Fragment,
-                                             wgpu::BindingType::SampledTexture,
-                                             false,
-                                             false,
-                                             wgpu::TextureViewDimension::e2D,
-                                             wgpu::TextureComponentType::Uint}});
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, 0,
+                  false, wgpu::TextureViewDimension::e2D, wgpu::TextureComponentType::Float}});
+    wgpu::BindGroupLayout sameBgl = utils::MakeBindGroupLayout(
+        device, {{1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, 0,
+                  false, wgpu::TextureViewDimension::e2D, wgpu::TextureComponentType::Float}});
+    wgpu::BindGroupLayout otherBgl = utils::MakeBindGroupLayout(
+        device, {{1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, 0,
+                  false, wgpu::TextureViewDimension::e2D, wgpu::TextureComponentType::Uint}});
 
     EXPECT_NE(bgl.Get(), otherBgl.Get());
     EXPECT_EQ(bgl.Get() == sameBgl.Get(), !UsesWire());
@@ -80,30 +65,15 @@ TEST_P(ObjectCachingTest, BindGroupLayoutTextureComponentType) {
 // Test that two similar bind group layouts won't refer to the same one if they differ by
 // viewDimension
 TEST_P(ObjectCachingTest, BindGroupLayoutViewDimension) {
-    wgpu::BindGroupLayout bgl =
-        utils::MakeBindGroupLayout(device, {{1,
-                                             wgpu::ShaderStage::Fragment,
-                                             wgpu::BindingType::SampledTexture,
-                                             false,
-                                             false,
-                                             wgpu::TextureViewDimension::e2D,
-                                             wgpu::TextureComponentType::Float}});
-    wgpu::BindGroupLayout sameBgl =
-        utils::MakeBindGroupLayout(device, {{1,
-                                             wgpu::ShaderStage::Fragment,
-                                             wgpu::BindingType::SampledTexture,
-                                             false,
-                                             false,
-                                             wgpu::TextureViewDimension::e2D,
-                                             wgpu::TextureComponentType::Float}});
-    wgpu::BindGroupLayout otherBgl =
-        utils::MakeBindGroupLayout(device, {{1,
-                                             wgpu::ShaderStage::Fragment,
-                                             wgpu::BindingType::SampledTexture,
-                                             false,
-                                             false,
-                                             wgpu::TextureViewDimension::e2DArray,
-                                             wgpu::TextureComponentType::Float}});
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, 0,
+                  false, wgpu::TextureViewDimension::e2D, wgpu::TextureComponentType::Float}});
+    wgpu::BindGroupLayout sameBgl = utils::MakeBindGroupLayout(
+        device, {{1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, 0,
+                  false, wgpu::TextureViewDimension::e2D, wgpu::TextureComponentType::Float}});
+    wgpu::BindGroupLayout otherBgl = utils::MakeBindGroupLayout(
+        device, {{1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture, false, 0,
+                  false, wgpu::TextureViewDimension::e2DArray, wgpu::TextureComponentType::Float}});
 
     EXPECT_NE(bgl.Get(), otherBgl.Get());
     EXPECT_EQ(bgl.Get() == sameBgl.Get(), !UsesWire());

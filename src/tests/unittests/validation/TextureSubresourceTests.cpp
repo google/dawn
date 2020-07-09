@@ -75,7 +75,7 @@ namespace {
                 wgpu::BindGroupLayout bgl1 = utils::MakeBindGroupLayout(
                     device,
                     {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageTexture,
-                      false, false, wgpu::TextureViewDimension::Undefined,
+                      false, 0, false, wgpu::TextureViewDimension::Undefined,
                       wgpu::TextureComponentType::Float, kFormat}});
 
                 wgpu::BindGroup bindGroup1 = utils::MakeBindGroup(device, bgl1, {{0, samplerView}});
@@ -106,7 +106,7 @@ namespace {
                 wgpu::BindGroupLayout bgl1 = utils::MakeBindGroupLayout(
                     device,
                     {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::WriteonlyStorageTexture,
-                      false, false, wgpu::TextureViewDimension::Undefined,
+                      false, 0, false, wgpu::TextureViewDimension::Undefined,
                       wgpu::TextureComponentType::Float, kFormat}});
                 wgpu::BindGroup bindGroup1 = utils::MakeBindGroup(device, bgl1, {{0, samplerView}});
 
