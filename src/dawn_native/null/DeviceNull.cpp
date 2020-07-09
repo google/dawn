@@ -270,17 +270,6 @@ namespace dawn_native { namespace null {
 
     // Buffer
 
-    struct BufferMapOperation : PendingOperation {
-        virtual void Execute() {
-            buffer->OnMapCommandSerialFinished(serial, isWrite);
-        }
-
-        Ref<Buffer> buffer;
-        void* ptr;
-        uint32_t serial;
-        bool isWrite;
-    };
-
     Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
         : BufferBase(device, descriptor) {
         mBackingData = std::unique_ptr<uint8_t[]>(new uint8_t[GetSize()]);
@@ -315,26 +304,12 @@ namespace dawn_native { namespace null {
         memcpy(mBackingData.get() + bufferOffset, data, size);
     }
 
-    MaybeError Buffer::MapReadAsyncImpl(uint32_t serial) {
-        MapAsyncImplCommon(serial, false);
+    MaybeError Buffer::MapReadAsyncImpl() {
         return {};
     }
 
-    MaybeError Buffer::MapWriteAsyncImpl(uint32_t serial) {
-        MapAsyncImplCommon(serial, true);
+    MaybeError Buffer::MapWriteAsyncImpl() {
         return {};
-    }
-
-    void Buffer::MapAsyncImplCommon(uint32_t serial, bool isWrite) {
-        ASSERT(mBackingData);
-
-        auto operation = std::make_unique<BufferMapOperation>();
-        operation->buffer = this;
-        operation->ptr = mBackingData.get();
-        operation->serial = serial;
-        operation->isWrite = isWrite;
-
-        ToBackend(GetDevice())->AddPendingOperation(std::move(operation));
     }
 
     void* Buffer::GetMappedPointerImpl() {

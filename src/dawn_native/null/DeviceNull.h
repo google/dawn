@@ -199,14 +199,13 @@ namespace dawn_native { namespace null {
         ~Buffer() override;
 
         // Dawn API
-        MaybeError MapReadAsyncImpl(uint32_t serial) override;
-        MaybeError MapWriteAsyncImpl(uint32_t serial) override;
+        MaybeError MapReadAsyncImpl() override;
+        MaybeError MapWriteAsyncImpl() override;
         void UnmapImpl() override;
         void DestroyImpl() override;
 
         bool IsMapWritable() const override;
         MaybeError MapAtCreationImpl() override;
-        void MapAsyncImplCommon(uint32_t serial, bool isWrite);
         void* GetMappedPointerImpl() override;
 
         std::unique_ptr<uint8_t[]> mBackingData;

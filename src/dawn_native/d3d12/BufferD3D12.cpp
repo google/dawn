@@ -269,11 +269,11 @@ namespace dawn_native { namespace d3d12 {
         return {};
     }
 
-    MaybeError Buffer::MapReadAsyncImpl(uint32_t serial) {
+    MaybeError Buffer::MapReadAsyncImpl() {
         return MapInternal(false, "D3D12 map read async");
     }
 
-    MaybeError Buffer::MapWriteAsyncImpl(uint32_t serial) {
+    MaybeError Buffer::MapWriteAsyncImpl() {
         return MapInternal(true, "D3D12 map write async");
     }
 

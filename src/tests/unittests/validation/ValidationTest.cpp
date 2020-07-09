@@ -87,6 +87,21 @@ std::string ValidationTest::GetLastDeviceErrorMessage() const {
     return mDeviceErrorMessage;
 }
 
+void ValidationTest::WaitForAllOperations(const wgpu::Device& device) const {
+    wgpu::Queue queue = device.GetDefaultQueue();
+    wgpu::Fence fence = queue.CreateFence();
+
+    // Force the currently submitted operations to completed.
+    queue.Signal(fence, 1);
+    while (fence.GetCompletedValue() < 1) {
+        device.Tick();
+    }
+
+    // TODO(cwallez@chromium.org): It's not clear why we need this additional tick. Investigate it
+    // once WebGPU has defined the ordering of callbacks firing.
+    device.Tick();
+}
+
 // static
 void ValidationTest::OnDeviceError(WGPUErrorType type, const char* message, void* userdata) {
     ASSERT(type != WGPUErrorType_NoError);

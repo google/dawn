@@ -113,11 +113,11 @@ namespace dawn_native { namespace metal {
         return {};
     }
 
-    MaybeError Buffer::MapReadAsyncImpl(uint32_t serial) {
+    MaybeError Buffer::MapReadAsyncImpl() {
         return {};
     }
 
-    MaybeError Buffer::MapWriteAsyncImpl(uint32_t serial) {
+    MaybeError Buffer::MapWriteAsyncImpl() {
         return {};
     }
 

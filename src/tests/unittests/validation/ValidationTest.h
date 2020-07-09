@@ -42,6 +42,8 @@ class ValidationTest : public testing::Test {
     bool EndExpectDeviceError();
     std::string GetLastDeviceErrorMessage() const;
 
+    void WaitForAllOperations(const wgpu::Device& device) const;
+
     // Helper functions to create objects to test validation.
 
     struct DummyRenderPass : public wgpu::RenderPassDescriptor {

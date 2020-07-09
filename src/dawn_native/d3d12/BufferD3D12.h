@@ -49,8 +49,8 @@ namespace dawn_native { namespace d3d12 {
       private:
         ~Buffer() override;
         // Dawn API
-        MaybeError MapReadAsyncImpl(uint32_t serial) override;
-        MaybeError MapWriteAsyncImpl(uint32_t serial) override;
+        MaybeError MapReadAsyncImpl() override;
+        MaybeError MapWriteAsyncImpl() override;
         void UnmapImpl() override;
         void DestroyImpl() override;
 

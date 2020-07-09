@@ -21,13 +21,6 @@ namespace {
 class QueueSubmitValidationTest : public ValidationTest {
 };
 
-static void StoreTrueMapWriteCallback(WGPUBufferMapAsyncStatus status,
-                                      void*,
-                                      uint64_t,
-                                      void* userdata) {
-    *static_cast<bool*>(userdata) = true;
-}
-
 // Test submitting with a mapped buffer is disallowed
 TEST_F(QueueSubmitValidationTest, SubmitWithMappedBuffer) {
     // Create a map-write buffer.
@@ -54,11 +47,14 @@ TEST_F(QueueSubmitValidationTest, SubmitWithMappedBuffer) {
     queue.Submit(1, &commands);
 
     // Map the buffer, submitting when the buffer is mapped should fail
-    bool mapWriteFinished = false;
-    buffer.MapWriteAsync(StoreTrueMapWriteCallback, &mapWriteFinished);
-    queue.Submit(0, nullptr);
-    ASSERT_TRUE(mapWriteFinished);
+    buffer.MapWriteAsync(nullptr, nullptr);
 
+    // Try submitting before the callback is fired.
+    ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+
+    WaitForAllOperations(device);
+
+    // Try submitting after the callback is fired.
     ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
 
     // Unmap the buffer, queue submit should succeed
@@ -190,10 +186,10 @@ TEST_F(QueueWriteBufferValidationTest, MappedBuffer) {
     {
         wgpu::BufferDescriptor descriptor;
         descriptor.size = 4;
-        descriptor.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::MapRead;
+        descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
         wgpu::Buffer buf = device.CreateBuffer(&descriptor);
 
-        buf.MapReadAsync(nullptr, nullptr);
+        buf.MapWriteAsync(nullptr, nullptr);
         uint32_t value = 0;
         ASSERT_DEVICE_ERROR(queue.WriteBuffer(buf, 0, &value, sizeof(value)));
     }

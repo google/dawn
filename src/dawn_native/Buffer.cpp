@@ -64,11 +64,11 @@ namespace dawn_native {
                 return {};
             }
 
-            MaybeError MapReadAsyncImpl(uint32_t serial) override {
+            MaybeError MapReadAsyncImpl() override {
                 UNREACHABLE();
                 return {};
             }
-            MaybeError MapWriteAsyncImpl(uint32_t serial) override {
+            MaybeError MapWriteAsyncImpl() override {
                 UNREACHABLE();
                 return {};
             }
@@ -272,7 +272,7 @@ namespace dawn_native {
         mMapUserdata = userdata;
         mState = BufferState::Mapped;
 
-        if (GetDevice()->ConsumedError(MapReadAsyncImpl(mMapSerial))) {
+        if (GetDevice()->ConsumedError(MapReadAsyncImpl())) {
             CallMapReadCallback(mMapSerial, WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0);
             return;
         }
@@ -297,7 +297,7 @@ namespace dawn_native {
         mMapUserdata = userdata;
         mState = BufferState::Mapped;
 
-        if (GetDevice()->ConsumedError(MapWriteAsyncImpl(mMapSerial))) {
+        if (GetDevice()->ConsumedError(MapWriteAsyncImpl())) {
             CallMapWriteCallback(mMapSerial, WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0);
             return;
         }

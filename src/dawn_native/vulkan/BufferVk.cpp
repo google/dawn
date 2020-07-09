@@ -243,7 +243,7 @@ namespace dawn_native { namespace vulkan {
         return {};
     }
 
-    MaybeError Buffer::MapReadAsyncImpl(uint32_t serial) {
+    MaybeError Buffer::MapReadAsyncImpl() {
         Device* device = ToBackend(GetDevice());
 
         CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
@@ -251,7 +251,7 @@ namespace dawn_native { namespace vulkan {
         return {};
     }
 
-    MaybeError Buffer::MapWriteAsyncImpl(uint32_t serial) {
+    MaybeError Buffer::MapWriteAsyncImpl() {
         Device* device = ToBackend(GetDevice());
 
         CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
