@@ -418,19 +418,6 @@ namespace utils {
         return layout;
     }
 
-    // TODO(jiawei.shao@intel.com): support more pixel formats
-    uint32_t TextureFormatPixelSize(wgpu::TextureFormat format) {
-        switch (format) {
-            case wgpu::TextureFormat::RG8Unorm:
-                return 2;
-            case wgpu::TextureFormat::RGBA8Unorm:
-                return 4;
-            default:
-                UNREACHABLE();
-                return 0;
-        }
-    }
-
     const std::array<wgpu::TextureFormat, 14> kBCFormats = {
         wgpu::TextureFormat::BC1RGBAUnorm,  wgpu::TextureFormat::BC1RGBAUnormSrgb,
         wgpu::TextureFormat::BC2RGBAUnorm,  wgpu::TextureFormat::BC2RGBAUnormSrgb,
@@ -440,27 +427,22 @@ namespace utils {
         wgpu::TextureFormat::BC6HRGBUfloat, wgpu::TextureFormat::BC6HRGBSfloat,
         wgpu::TextureFormat::BC7RGBAUnorm,  wgpu::TextureFormat::BC7RGBAUnormSrgb};
 
-    uint32_t CompressedFormatBlockSizeInBytes(wgpu::TextureFormat format) {
-        switch (format) {
-            case wgpu::TextureFormat::BC1RGBAUnorm:
-            case wgpu::TextureFormat::BC1RGBAUnormSrgb:
-            case wgpu::TextureFormat::BC4RSnorm:
-            case wgpu::TextureFormat::BC4RUnorm:
-                return 8;
-            case wgpu::TextureFormat::BC2RGBAUnorm:
-            case wgpu::TextureFormat::BC2RGBAUnormSrgb:
-            case wgpu::TextureFormat::BC3RGBAUnorm:
-            case wgpu::TextureFormat::BC3RGBAUnormSrgb:
-            case wgpu::TextureFormat::BC5RGSnorm:
-            case wgpu::TextureFormat::BC5RGUnorm:
-            case wgpu::TextureFormat::BC6HRGBSfloat:
-            case wgpu::TextureFormat::BC6HRGBUfloat:
-            case wgpu::TextureFormat::BC7RGBAUnorm:
-            case wgpu::TextureFormat::BC7RGBAUnormSrgb:
-                return 16;
-            default:
-                UNREACHABLE();
-                return 0;
+    uint64_t RequiredBytesInCopy(uint64_t bytesPerRow,
+                                 uint64_t rowsPerImage,
+                                 wgpu::Extent3D copyExtent,
+                                 wgpu::TextureFormat textureFormat) {
+        if (copyExtent.width == 0 || copyExtent.height == 0 || copyExtent.depth == 0) {
+            return 0;
+        } else {
+            uint32_t blockSize = utils::GetTexelBlockSizeInBytes(textureFormat);
+            uint32_t blockWidth = utils::GetTextureFormatBlockWidth(textureFormat);
+            uint32_t blockHeight = utils::GetTextureFormatBlockHeight(textureFormat);
+
+            uint64_t texelBlockRowsPerImage = rowsPerImage / blockHeight;
+            uint64_t bytesPerImage = bytesPerRow * texelBlockRowsPerImage;
+            uint64_t bytesInLastSlice = bytesPerRow * (copyExtent.height / blockHeight - 1) +
+                                        (copyExtent.width / blockWidth * blockSize);
+            return bytesPerImage * (copyExtent.depth - 1) + bytesInLastSlice;
         }
     }
 

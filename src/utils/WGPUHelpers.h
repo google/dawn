@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "common/Constants.h"
+#include "utils/TextureFormatUtils.h"
 
 namespace utils {
 
@@ -151,9 +152,12 @@ namespace utils {
         uint32_t mipmapLevel,
         uint32_t rowsPerImage);
 
-    uint32_t TextureFormatPixelSize(wgpu::TextureFormat format);
     extern const std::array<wgpu::TextureFormat, 14> kBCFormats;
-    uint32_t CompressedFormatBlockSizeInBytes(wgpu::TextureFormat format);
+
+    uint64_t RequiredBytesInCopy(uint64_t bytesPerRow,
+                                 uint64_t rowsPerImage,
+                                 wgpu::Extent3D copyExtent,
+                                 wgpu::TextureFormat textureFormat);
 
 }  // namespace utils
 

@@ -55,6 +55,8 @@ namespace utils {
     bool TextureFormatSupportsStorageTexture(wgpu::TextureFormat format);
 
     uint32_t GetTexelBlockSizeInBytes(wgpu::TextureFormat textureFormat);
+    uint32_t GetTextureFormatBlockWidth(wgpu::TextureFormat textureFormat);
+    uint32_t GetTextureFormatBlockHeight(wgpu::TextureFormat textureFormat);
     const char* GetGLSLImageFormatQualifier(wgpu::TextureFormat textureFormat);
 }  // namespace utils
 
