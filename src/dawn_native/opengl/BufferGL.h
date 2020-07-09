@@ -29,7 +29,8 @@ namespace dawn_native { namespace opengl {
 
         GLuint GetHandle() const;
 
-        void ClearBufferContentsToZero();
+        void EnsureDataInitialized();
+        void EnsureDataInitializedAsDestination(uint64_t offset, uint64_t size);
 
       private:
         ~Buffer() override;
@@ -43,6 +44,8 @@ namespace dawn_native { namespace opengl {
         MaybeError MapAtCreationImpl() override;
         void* GetMappedPointerImpl() override;
         uint64_t GetAppliedSize() const;
+
+        void InitializeToZero();
 
         GLuint mBuffer = 0;
         void* mMappedData = nullptr;

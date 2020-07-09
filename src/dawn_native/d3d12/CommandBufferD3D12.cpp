@@ -582,6 +582,10 @@ namespace dawn_native { namespace d3d12 {
                     Buffer* srcBuffer = ToBackend(copy->source.Get());
                     Buffer* dstBuffer = ToBackend(copy->destination.Get());
 
+                    DAWN_TRY(srcBuffer->EnsureDataInitialized(commandContext));
+                    DAWN_TRY(dstBuffer->EnsureDataInitializedAsDestination(
+                        commandContext, copy->destinationOffset, copy->size));
+
                     srcBuffer->TrackUsageAndTransitionNow(commandContext,
                                                           wgpu::BufferUsage::CopySrc);
                     dstBuffer->TrackUsageAndTransitionNow(commandContext,

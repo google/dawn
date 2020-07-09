@@ -43,12 +43,16 @@ namespace dawn_native { namespace vulkan {
                                 VkPipelineStageFlags* srcStages,
                                 VkPipelineStageFlags* dstStages);
 
-        void ClearBufferContentsToZero(CommandRecordingContext* recordingContext);
+        void EnsureDataInitialized(CommandRecordingContext* recordingContext);
+        void EnsureDataInitializedAsDestination(CommandRecordingContext* recordingContext,
+                                                uint64_t offset,
+                                                uint64_t size);
 
       private:
         ~Buffer() override;
         using BufferBase::BufferBase;
         MaybeError Initialize();
+        void InitializeToZero(CommandRecordingContext* recordingContext);
         void ClearBuffer(CommandRecordingContext* recordingContext, uint32_t clearValue);
 
         // Dawn API

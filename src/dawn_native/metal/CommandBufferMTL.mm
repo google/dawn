@@ -721,6 +721,11 @@ namespace dawn_native { namespace metal {
                 case Command::CopyBufferToBuffer: {
                     CopyBufferToBufferCmd* copy = mCommands.NextCommand<CopyBufferToBufferCmd>();
 
+                    ToBackend(copy->source)->EnsureDataInitialized(commandContext);
+                    ToBackend(copy->destination)
+                        ->EnsureDataInitializedAsDestination(commandContext,
+                                                             copy->destinationOffset, copy->size);
+
                     [commandContext->EnsureBlit()
                            copyFromBuffer:ToBackend(copy->source)->GetMTLBuffer()
                              sourceOffset:copy->sourceOffset

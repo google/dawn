@@ -337,15 +337,8 @@ namespace dawn_native { namespace d3d12 {
 
         Buffer* dstBuffer = ToBackend(destination);
 
-        // TODO(jiawei.shao@intel.com): use Toggle::LazyClearResourceOnFirstUse when the support of
-        // buffer lazy initialization is completed.
-        if (IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse) && !dstBuffer->IsDataInitialized()) {
-            if (dstBuffer->IsFullBufferRange(destinationOffset, size)) {
-                dstBuffer->SetIsDataInitialized();
-            } else {
-                DAWN_TRY(dstBuffer->ClearBufferContentsToZero(commandRecordingContext));
-            }
-        }
+        DAWN_TRY(dstBuffer->EnsureDataInitializedAsDestination(commandRecordingContext,
+                                                               destinationOffset, size));
 
         CopyFromStagingToBufferImpl(commandRecordingContext, source, sourceOffset, destination,
                                     destinationOffset, size);

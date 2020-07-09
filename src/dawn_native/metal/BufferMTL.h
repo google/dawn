@@ -31,7 +31,10 @@ namespace dawn_native { namespace metal {
                                                  const BufferDescriptor* descriptor);
         id<MTLBuffer> GetMTLBuffer() const;
 
-        void ClearBufferContentsToZero(CommandRecordingContext* commandContext);
+        void EnsureDataInitialized(CommandRecordingContext* commandContext);
+        void EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
+                                                uint64_t offset,
+                                                uint64_t size);
 
       private:
         using BufferBase::BufferBase;
@@ -47,6 +50,7 @@ namespace dawn_native { namespace metal {
         bool IsMapWritable() const override;
         MaybeError MapAtCreationImpl() override;
 
+        void InitializeToZero(CommandRecordingContext* commandContext);
         void ClearBuffer(CommandRecordingContext* commandContext, uint8_t clearValue);
 
         id<MTLBuffer> mMtlBuffer = nil;

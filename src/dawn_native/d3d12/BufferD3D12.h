@@ -44,7 +44,10 @@ namespace dawn_native { namespace d3d12 {
         bool CheckAllocationMethodForTesting(AllocationMethod allocationMethod) const;
         bool CheckIsResidentForTesting() const;
 
-        MaybeError ClearBufferContentsToZero(CommandRecordingContext* commandContext);
+        MaybeError EnsureDataInitialized(CommandRecordingContext* commandContext);
+        MaybeError EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
+                                                      uint64_t offset,
+                                                      uint64_t size);
 
       private:
         ~Buffer() override;
@@ -63,6 +66,7 @@ namespace dawn_native { namespace d3d12 {
                                                   D3D12_RESOURCE_BARRIER* barrier,
                                                   wgpu::BufferUsage newUsage);
 
+        MaybeError InitializeToZero(CommandRecordingContext* commandContext);
         MaybeError ClearBuffer(CommandRecordingContext* commandContext, uint8_t clearValue);
 
         ResourceHeapAllocation mResourceAllocation;

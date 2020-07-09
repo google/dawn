@@ -424,6 +424,10 @@ namespace dawn_native { namespace vulkan {
                     Buffer* srcBuffer = ToBackend(copy->source.Get());
                     Buffer* dstBuffer = ToBackend(copy->destination.Get());
 
+                    srcBuffer->EnsureDataInitialized(recordingContext);
+                    dstBuffer->EnsureDataInitializedAsDestination(
+                        recordingContext, copy->destinationOffset, copy->size);
+
                     srcBuffer->TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopySrc);
                     dstBuffer->TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopyDst);
 

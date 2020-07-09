@@ -278,14 +278,41 @@ namespace dawn_native { namespace vulkan {
         }
     }
 
-    void Buffer::ClearBufferContentsToZero(CommandRecordingContext* recordingContext) {
+    void Buffer::EnsureDataInitialized(CommandRecordingContext* recordingContext) {
+        // TODO(jiawei.shao@intel.com): check Toggle::LazyClearResourceOnFirstUse
+        // instead when buffer lazy initialization is completely supported.
+        if (IsDataInitialized() ||
+            !GetDevice()->IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse)) {
+            return;
+        }
+
+        InitializeToZero(recordingContext);
+    }
+
+    void Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* recordingContext,
+                                                    uint64_t offset,
+                                                    uint64_t size) {
+        // TODO(jiawei.shao@intel.com): check Toggle::LazyClearResourceOnFirstUse
+        // instead when buffer lazy initialization is completely supported.
+        if (IsDataInitialized() ||
+            !GetDevice()->IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse)) {
+            return;
+        }
+
+        if (IsFullBufferRange(offset, size)) {
+            SetIsDataInitialized();
+        } else {
+            InitializeToZero(recordingContext);
+        }
+    }
+
+    void Buffer::InitializeToZero(CommandRecordingContext* recordingContext) {
         ASSERT(GetDevice()->IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse));
         ASSERT(!IsDataInitialized());
 
         ClearBuffer(recordingContext, 0u);
-
-        SetIsDataInitialized();
         GetDevice()->IncrementLazyClearCountForTesting();
+        SetIsDataInitialized();
     }
 
     void Buffer::ClearBuffer(CommandRecordingContext* recordingContext, uint32_t clearValue) {

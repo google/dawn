@@ -592,16 +592,8 @@ namespace dawn_native { namespace vulkan {
 
         CommandRecordingContext* recordingContext = GetPendingRecordingContext();
 
-        // TODO(jiawei.shao@intel.com): use Toggle::LazyClearResourceOnFirstUse when the support of
-        // buffer lazy initialization is completed.
-        if (IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse) &&
-            !destination->IsDataInitialized()) {
-            if (destination->IsFullBufferRange(destinationOffset, size)) {
-                destination->SetIsDataInitialized();
-            } else {
-                ToBackend(destination)->ClearBufferContentsToZero(recordingContext);
-            }
-        }
+        ToBackend(destination)
+            ->EnsureDataInitializedAsDestination(recordingContext, destinationOffset, size);
 
         // Insert memory barrier to ensure host write operations are made visible before
         // copying from the staging buffer. However, this barrier can be removed (see note below).

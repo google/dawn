@@ -493,6 +493,10 @@ namespace dawn_native { namespace opengl {
                 case Command::CopyBufferToBuffer: {
                     CopyBufferToBufferCmd* copy = mCommands.NextCommand<CopyBufferToBufferCmd>();
 
+                    ToBackend(copy->source)->EnsureDataInitialized();
+                    ToBackend(copy->destination)
+                        ->EnsureDataInitializedAsDestination(copy->destinationOffset, copy->size);
+
                     gl.BindBuffer(GL_PIXEL_PACK_BUFFER, ToBackend(copy->source)->GetHandle());
                     gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER,
                                   ToBackend(copy->destination)->GetHandle());

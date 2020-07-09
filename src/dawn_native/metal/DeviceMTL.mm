@@ -254,16 +254,9 @@ namespace dawn_native { namespace metal {
         // this function.
         ASSERT(size != 0);
 
-        // TODO(jiawei.shao@intel.com): use Toggle::LazyClearResourceOnFirstUse when the support of
-        // buffer lazy initialization is completed.
-        if (IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse) &&
-            !destination->IsDataInitialized()) {
-            if (destination->IsFullBufferRange(destinationOffset, size)) {
-                destination->SetIsDataInitialized();
-            } else {
-                ToBackend(destination)->ClearBufferContentsToZero(GetPendingCommandContext());
-            }
-        }
+        ToBackend(destination)
+            ->EnsureDataInitializedAsDestination(GetPendingCommandContext(), destinationOffset,
+                                                 size);
 
         id<MTLBuffer> uploadBuffer = ToBackend(source)->GetBufferHandle();
         id<MTLBuffer> buffer = ToBackend(destination)->GetMTLBuffer();

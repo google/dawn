@@ -313,10 +313,44 @@ namespace dawn_native { namespace d3d12 {
         return mResourceAllocation.GetInfo().mMethod == allocationMethod;
     }
 
-    MaybeError Buffer::ClearBufferContentsToZero(CommandRecordingContext* commandContext) {
+    MaybeError Buffer::EnsureDataInitialized(CommandRecordingContext* commandContext) {
+        // TODO(jiawei.shao@intel.com): check Toggle::LazyClearResourceOnFirstUse
+        // instead when buffer lazy initialization is completely supported.
+        if (IsDataInitialized() ||
+            !GetDevice()->IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse)) {
+            return {};
+        }
+
+        DAWN_TRY(InitializeToZero(commandContext));
+
+        return {};
+    }
+
+    MaybeError Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
+                                                          uint64_t offset,
+                                                          uint64_t size) {
+        // TODO(jiawei.shao@intel.com): check Toggle::LazyClearResourceOnFirstUse
+        // instead when buffer lazy initialization is completely supported.
+        if (IsDataInitialized() ||
+            !GetDevice()->IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse)) {
+            return {};
+        }
+
+        if (IsFullBufferRange(offset, size)) {
+            SetIsDataInitialized();
+        } else {
+            DAWN_TRY(InitializeToZero(commandContext));
+        }
+
+        return {};
+    }
+
+    MaybeError Buffer::InitializeToZero(CommandRecordingContext* commandContext) {
         ASSERT(GetDevice()->IsToggleEnabled(Toggle::LazyClearBufferOnFirstUse));
         ASSERT(!IsDataInitialized());
 
+        // TODO(jiawei.shao@intel.com): skip initializing the buffer when it is created on a heap
+        // that has already been zero initialized.
         DAWN_TRY(ClearBuffer(commandContext, uint8_t(0u)));
         SetIsDataInitialized();
         GetDevice()->IncrementLazyClearCountForTesting();
