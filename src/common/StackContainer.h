@@ -172,13 +172,11 @@ class StackContainer {
         return &container_;
     }
 
-#ifdef UNIT_TEST
     // Retrieves the stack source so that that unit tests can verify that the
     // buffer is being used properly.
     const typename Allocator::Source& stack_data() const {
         return stack_data_;
     }
-#endif
 
   protected:
     typename Allocator::Source stack_data_;

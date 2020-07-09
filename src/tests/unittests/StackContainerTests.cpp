@@ -6,8 +6,6 @@
 
 #include <gtest/gtest.h>
 
-#define UNIT_TEST
-
 #include "common/RefCounted.h"
 #include "common/StackContainer.h"
 
