@@ -265,7 +265,9 @@ namespace dawn_native { namespace d3d12 {
     }
 
     MaybeError Buffer::MapAtCreationImpl() {
-        DAWN_TRY(MapInternal(true, "D3D12 map at creation"));
+        // Setting isMapWrite to false on MapRead buffers to silence D3D12 debug layer warning.
+        bool isMapWrite = (GetUsage() & wgpu::BufferUsage::MapWrite) != 0;
+        DAWN_TRY(MapInternal(isMapWrite, "D3D12 map at creation"));
         return {};
     }
 

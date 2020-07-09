@@ -144,10 +144,6 @@ namespace dawn_native { namespace d3d12 {
             //
 
             // Remove after warning have been addressed
-            // https://crbug.com/dawn/419
-            D3D12_MESSAGE_ID_UNMAP_RANGE_NOT_EMPTY,
-
-            // Remove after warning have been addressed
             // https://crbug.com/dawn/421
             D3D12_MESSAGE_ID_GPU_BASED_VALIDATION_INCOMPATIBLE_RESOURCE_STATE,
         };
