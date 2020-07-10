@@ -25,9 +25,7 @@ import("${dawn_root}/scripts/dawn_features.gni")
 # use the real library from third_party/.
 if (dawn_supports_glfw_for_windowing) {
   group("dawn_glfw") {
-    public_deps = [
-      "${dawn_root}/third_party/gn/glfw",
-    ]
+    public_deps = [ "${dawn_root}/third_party/gn/glfw" ]
   }
 } else if (is_fuchsia) {
   # The mock implementation of GLFW on Fuchsia
@@ -52,9 +50,7 @@ if (dawn_supports_glfw_for_windowing) {
       "Glfw3Fuchsia.cpp",
     ]
     public_configs = [ ":dawn_glfw_public_config" ]
-    deps = [
-      "${dawn_root}/src/common",
-    ]
+    deps = [ "${dawn_root}/src/common" ]
   }
 } else {
   # Just skip GLFW on other systems
@@ -118,9 +114,7 @@ static_library("dawn_utils") {
     }
   }
 
-  public_deps = [
-    "${dawn_root}/src/dawn:dawncpp_headers",
-  ]
+  public_deps = [ "${dawn_root}/src/dawn:dawncpp_headers" ]
 }
 
 ###############################################################################
@@ -137,9 +131,7 @@ if (dawn_standalone) {
       "BackendBinding.h",
     ]
 
-    public_deps = [
-      "${dawn_root}/src/dawn:dawn_headers",
-    ]
+    public_deps = [ "${dawn_root}/src/dawn:dawn_headers" ]
 
     deps = [
       ":dawn_glfw",

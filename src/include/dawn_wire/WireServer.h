@@ -26,7 +26,7 @@ namespace dawn_wire {
     namespace server {
         class Server;
         class MemoryTransferService;
-    }
+    }  // namespace server
 
     struct DAWN_WIRE_EXPORT WireServerDescriptor {
         WGPUDevice device;

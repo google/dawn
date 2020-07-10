@@ -26,7 +26,7 @@ namespace dawn_wire {
     namespace client {
         class Client;
         class MemoryTransferService;
-    }
+    }  // namespace client
 
     struct ReservedTexture {
         WGPUTexture texture;

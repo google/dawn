@@ -415,7 +415,7 @@ namespace dawn_native {
             }
 
             if (binding.viewDimension == wgpu::TextureViewDimension::Undefined) {
-                    mBindingInfo[i].viewDimension = wgpu::TextureViewDimension::e2D;
+                mBindingInfo[i].viewDimension = wgpu::TextureViewDimension::e2D;
             } else {
                 mBindingInfo[i].viewDimension = binding.viewDimension;
             }

@@ -49,9 +49,7 @@ namespace dawn_native { namespace metal {
     Device::Device(AdapterBase* adapter,
                    id<MTLDevice> mtlDevice,
                    const DeviceDescriptor* descriptor)
-        : DeviceBase(adapter, descriptor),
-          mMtlDevice([mtlDevice retain]),
-          mCompletedSerial(0) {
+        : DeviceBase(adapter, descriptor), mMtlDevice([mtlDevice retain]), mCompletedSerial(0) {
         [mMtlDevice retain];
     }
 

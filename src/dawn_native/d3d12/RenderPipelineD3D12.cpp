@@ -327,7 +327,6 @@ namespace dawn_native { namespace d3d12 {
 
         wgpu::ShaderStage renderStages = wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment;
         for (auto stage : IterateStages(renderStages)) {
-
             std::string hlslSource;
             DAWN_TRY_ASSIGN(hlslSource, modules[stage]->GetHLSLSource(ToBackend(GetLayout())));
 

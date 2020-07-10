@@ -23,6 +23,7 @@
 #include <vector>
 
 namespace dawn_native { namespace vulkan {
+
     DAWN_NATIVE_EXPORT VkInstance GetInstance(WGPUDevice device);
 
     DAWN_NATIVE_EXPORT PFN_vkVoidFunction GetInstanceProcAddr(WGPUDevice device, const char* pName);
@@ -75,6 +76,7 @@ namespace dawn_native { namespace vulkan {
         DAWN_NATIVE_EXPORT WGPUTexture WrapVulkanImage(WGPUDevice cDevice,
                                                        const ExternalImageDescriptor* descriptor);
 #endif  // __linux__
+
 }}  // namespace dawn_native::vulkan
 
 #endif  // DAWNNATIVE_VULKANBACKEND_H_

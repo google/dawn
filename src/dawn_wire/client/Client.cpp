@@ -20,9 +20,7 @@
 namespace dawn_wire { namespace client {
 
     Client::Client(CommandSerializer* serializer, MemoryTransferService* memoryTransferService)
-        : ClientBase(),
-          mSerializer(serializer),
-          mMemoryTransferService(memoryTransferService) {
+        : ClientBase(), mSerializer(serializer), mMemoryTransferService(memoryTransferService) {
         if (mMemoryTransferService == nullptr) {
             // If a MemoryTransferService is not provided, fall back to inline memory.
             mOwnedMemoryTransferService = CreateInlineMemoryTransferService();

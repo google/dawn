@@ -24,7 +24,5 @@ source_set("dawn_platform") {
     "tracing/TraceEvent.h",
   ]
 
-  deps = [
-    "${dawn_root}/src/common",
-  ]
+  deps = [ "${dawn_root}/src/common" ]
 }
