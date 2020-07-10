@@ -1147,9 +1147,11 @@
             {"name": "depth load op", "type": "load op"},
             {"name": "depth store op", "type": "store op"},
             {"name": "clear depth", "type": "float"},
+            {"name": "depth read only", "type": "bool", "default": "false"},
             {"name": "stencil load op", "type": "load op"},
             {"name": "stencil store op", "type": "store op"},
-            {"name": "clear stencil", "type": "uint32_t", "default": "0"}
+            {"name": "clear stencil", "type": "uint32_t", "default": "0"},
+            {"name": "stencil read only", "type": "bool", "default": "false"}
         ]
     },
 

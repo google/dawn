@@ -571,6 +571,7 @@ namespace dawn_native {
     TextureViewBase::TextureViewBase(TextureBase* texture, const TextureViewDescriptor* descriptor)
         : ObjectBase(texture->GetDevice()),
           mTexture(texture),
+          mAspect(descriptor->aspect),
           mFormat(GetDevice()->GetValidInternalFormat(descriptor->format)),
           mDimension(descriptor->dimension),
           mRange({descriptor->baseMipLevel, descriptor->mipLevelCount, descriptor->baseArrayLayer,
@@ -594,6 +595,11 @@ namespace dawn_native {
     TextureBase* TextureViewBase::GetTexture() {
         ASSERT(!IsError());
         return mTexture.Get();
+    }
+
+    wgpu::TextureAspect TextureViewBase::GetAspect() const {
+        ASSERT(!IsError());
+        return mAspect;
     }
 
     const Format& TextureViewBase::GetFormat() const {

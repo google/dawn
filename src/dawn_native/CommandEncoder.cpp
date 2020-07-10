@@ -298,6 +298,31 @@ namespace dawn_native {
             DAWN_TRY(ValidateStoreOp(depthStencilAttachment->depthStoreOp));
             DAWN_TRY(ValidateStoreOp(depthStencilAttachment->stencilStoreOp));
 
+            if (attachment->GetAspect() == wgpu::TextureAspect::All &&
+                attachment->GetFormat().HasStencil() &&
+                depthStencilAttachment->depthReadOnly != depthStencilAttachment->stencilReadOnly) {
+                return DAWN_VALIDATION_ERROR(
+                    "depthReadOnly and stencilReadOnly must be the same when texture aspect is "
+                    "'all'");
+            }
+
+            if (depthStencilAttachment->depthReadOnly &&
+                (depthStencilAttachment->depthLoadOp != wgpu::LoadOp::Load ||
+                 depthStencilAttachment->depthStoreOp != wgpu::StoreOp::Store)) {
+                return DAWN_VALIDATION_ERROR(
+                    "depthLoadOp must be load and depthStoreOp must be store when depthReadOnly "
+                    "is true.");
+            }
+
+            if (depthStencilAttachment->stencilReadOnly &&
+                (depthStencilAttachment->stencilLoadOp != wgpu::LoadOp::Load ||
+                 depthStencilAttachment->stencilStoreOp != wgpu::StoreOp::Store)) {
+                return DAWN_VALIDATION_ERROR(
+                    "stencilLoadOp must be load and stencilStoreOp must be store when "
+                    "stencilReadOnly "
+                    "is true.");
+            }
+
             if (depthStencilAttachment->depthLoadOp == wgpu::LoadOp::Clear &&
                 std::isnan(depthStencilAttachment->clearDepth)) {
                 return DAWN_VALIDATION_ERROR("Depth clear value cannot be NaN");
