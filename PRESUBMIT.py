@@ -17,8 +17,13 @@ import platform
 import subprocess
 
 def _DoClangFormat(input_api, output_api):
-    # Our binary clang-format is a linux binary compiled for x64
-    if platform.system() != 'Linux' or platform.architecture()[0] != '64bit':
+    if platform.system() == 'Linux' and platform.architecture()[0] == '64bit':
+        clang_format_path = 'buildtools/linux64/clang-format'
+    elif platform.system() == 'Mac':
+        clang_format_path = 'buildtools/mac/clang-format'
+    elif platform.system() == 'Windows':
+        clang_format_path = 'buildtools/win/clang-format.exe'
+    else:
         return [output_api.PresubmitNotifyResult('Skipping clang-format')]
 
     # We need to know which commit to diff against. It doesn't seem to be exposed anywhere
@@ -30,27 +35,13 @@ def _DoClangFormat(input_api, output_api):
 
     lint_cmd = [
         'scripts/lint_clang_format.sh',
-        'third_party/clang-format/clang-format',
+        clang_format_path,
         upstream_commit
     ]
 
-    # Make clang-format use our linux x64 sysroot because it is compiled with a version of
-    # stdlibc++ that's incompatible with the old libraries present on the bots.
-    env = {
-        'LD_LIBRARY_PATH': os.path.join(
-            os.getcwd(),
-            'build',
-            'linux',
-            'debian_sid_amd64-sysroot',
-            'usr',
-            'lib',
-            'x86_64-linux-gnu'
-        )
-    }
-
     # Call the linting script and forward the output as a notification or as an error
     try:
-        output = subprocess.check_output(lint_cmd, env=env);
+        output = subprocess.check_output(lint_cmd)
         return [output_api.PresubmitNotifyResult(output)]
     except subprocess.CalledProcessError as e:
         return [output_api.PresubmitError(e.output)]

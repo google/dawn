@@ -101,12 +101,6 @@ deps = {
     'condition': 'dawn_standalone',
   },
 
-  # Our own pre-compiled Linux clang-format 7.0 for presubmit
-  'third_party/clang-format': {
-    'url': '{dawn_git}/clang-format@2451c56cd368676cdb230fd5ad11731ab859f1a3',
-    'condition': 'dawn_standalone and checkout_linux',
-  },
-
   # Khronos Vulkan headers, validation layers and loader.
   'third_party/vulkan-headers': {
     'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Headers@4c079bf40c2587220dbf157d825d3185c9adc896',
