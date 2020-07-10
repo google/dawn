@@ -713,20 +713,25 @@ bool GeneratorImpl::EmitType(ast::type::Type* type, const std::string& name) {
   } else if (type->IsArray()) {
     auto* ary = type->AsArray();
 
-    if (!EmitType(ary->type(), "")) {
+    ast::type::Type* base_type = ary;
+    std::vector<uint32_t> sizes;
+    while (base_type->IsArray()) {
+      if (base_type->AsArray()->IsRuntimeArray()) {
+        sizes.push_back(1);
+      } else {
+        sizes.push_back(base_type->AsArray()->size());
+      }
+      base_type = base_type->AsArray()->type();
+    }
+    if (!EmitType(base_type, "")) {
       return false;
     }
     if (!name.empty()) {
       out_ << " " << namer_.NameFor(name);
     }
-    out_ << "[";
-    if (ary->IsRuntimeArray()) {
-      out_ << "1";
-    } else {
-      out_ << std::to_string(ary->size());
+    for (uint32_t size : sizes) {
+      out_ << "[" << size << "]";
     }
-
-    out_ << "]";
   } else if (type->IsBool()) {
     out_ << "bool";
   } else if (type->IsF32()) {

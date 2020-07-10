@@ -64,6 +64,39 @@ TEST_F(MslGeneratorImplTest, EmitType_Array) {
   EXPECT_EQ(g.result(), "bool ary[4]");
 }
 
+TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArray) {
+  ast::type::BoolType b;
+  ast::type::ArrayType a(&b, 4);
+  ast::type::ArrayType c(&a, 5);
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitType(&c, "ary")) << g.error();
+  EXPECT_EQ(g.result(), "bool ary[5][4]");
+}
+
+// TODO(dsinclair): Is this possible? What order should it output in?
+TEST_F(MslGeneratorImplTest, DISABLED_EmitType_ArrayOfArrayOfRuntimeArray) {
+  ast::type::BoolType b;
+  ast::type::ArrayType a(&b, 4);
+  ast::type::ArrayType c(&a, 5);
+  ast::type::ArrayType d(&c);
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitType(&c, "ary")) << g.error();
+  EXPECT_EQ(g.result(), "bool ary[5][4][1]");
+}
+
+TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
+  ast::type::BoolType b;
+  ast::type::ArrayType a(&b, 4);
+  ast::type::ArrayType c(&a, 5);
+  ast::type::ArrayType d(&c, 6);
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitType(&d, "ary")) << g.error();
+  EXPECT_EQ(g.result(), "bool ary[6][5][4]");
+}
+
 TEST_F(MslGeneratorImplTest, EmitType_Array_NameCollision) {
   ast::type::BoolType b;
   ast::type::ArrayType a(&b, 4);
