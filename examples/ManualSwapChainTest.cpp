@@ -150,7 +150,8 @@ void DoRender(WindowData* data) {
 
         utils::ComboRenderPassDescriptor desc({view});
         desc.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
-        desc.cColorAttachments[0].clearColor = {data->clearCycle, 1.0f - data->clearCycle, 0.0f, 1.0f};
+        desc.cColorAttachments[0].clearColor = {data->clearCycle, 1.0f - data->clearCycle, 0.0f,
+                                                1.0f};
 
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&desc);
         pass.EndPass();

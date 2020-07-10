@@ -40,8 +40,9 @@ TEST_F(WireExtensionTests, ChainedStruct) {
         .WillOnce(Invoke([&](Unused, const WGPUSamplerDescriptor* serverDesc) -> WGPUSampler {
             EXPECT_STREQ(serverDesc->label, clientDesc.label);
 
-            const auto* ext = reinterpret_cast<const WGPUSamplerDescriptorDummyAnisotropicFiltering*>(
-                serverDesc->nextInChain);
+            const auto* ext =
+                reinterpret_cast<const WGPUSamplerDescriptorDummyAnisotropicFiltering*>(
+                    serverDesc->nextInChain);
             EXPECT_EQ(ext->chain.sType, clientExt.chain.sType);
             EXPECT_EQ(ext->maxAnisotropy, clientExt.maxAnisotropy);
 
@@ -73,13 +74,15 @@ TEST_F(WireExtensionTests, MutlipleChainedStructs) {
         .WillOnce(Invoke([&](Unused, const WGPUSamplerDescriptor* serverDesc) -> WGPUSampler {
             EXPECT_STREQ(serverDesc->label, clientDesc.label);
 
-            const auto* ext1 = reinterpret_cast<const WGPUSamplerDescriptorDummyAnisotropicFiltering*>(
-                serverDesc->nextInChain);
+            const auto* ext1 =
+                reinterpret_cast<const WGPUSamplerDescriptorDummyAnisotropicFiltering*>(
+                    serverDesc->nextInChain);
             EXPECT_EQ(ext1->chain.sType, clientExt1.chain.sType);
             EXPECT_EQ(ext1->maxAnisotropy, clientExt1.maxAnisotropy);
 
-            const auto* ext2 = reinterpret_cast<const WGPUSamplerDescriptorDummyAnisotropicFiltering*>(
-                ext1->chain.next);
+            const auto* ext2 =
+                reinterpret_cast<const WGPUSamplerDescriptorDummyAnisotropicFiltering*>(
+                    ext1->chain.next);
             EXPECT_EQ(ext2->chain.sType, clientExt2.chain.sType);
             EXPECT_EQ(ext2->maxAnisotropy, clientExt2.maxAnisotropy);
 
@@ -99,13 +102,15 @@ TEST_F(WireExtensionTests, MutlipleChainedStructs) {
         .WillOnce(Invoke([&](Unused, const WGPUSamplerDescriptor* serverDesc) -> WGPUSampler {
             EXPECT_STREQ(serverDesc->label, clientDesc.label);
 
-            const auto* ext2 = reinterpret_cast<const WGPUSamplerDescriptorDummyAnisotropicFiltering*>(
-                serverDesc->nextInChain);
+            const auto* ext2 =
+                reinterpret_cast<const WGPUSamplerDescriptorDummyAnisotropicFiltering*>(
+                    serverDesc->nextInChain);
             EXPECT_EQ(ext2->chain.sType, clientExt2.chain.sType);
             EXPECT_EQ(ext2->maxAnisotropy, clientExt2.maxAnisotropy);
 
-            const auto* ext1 = reinterpret_cast<const WGPUSamplerDescriptorDummyAnisotropicFiltering*>(
-                ext2->chain.next);
+            const auto* ext1 =
+                reinterpret_cast<const WGPUSamplerDescriptorDummyAnisotropicFiltering*>(
+                    ext2->chain.next);
             EXPECT_EQ(ext1->chain.sType, clientExt1.chain.sType);
             EXPECT_EQ(ext1->maxAnisotropy, clientExt1.maxAnisotropy);
 

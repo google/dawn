@@ -22,26 +22,26 @@
 #include <sstream>
 
 class RenderPipelineValidationTest : public ValidationTest {
-    protected:
-        void SetUp() override {
-            ValidationTest::SetUp();
+  protected:
+    void SetUp() override {
+        ValidationTest::SetUp();
 
-            vsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
+        vsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
                 #version 450
                 void main() {
                     gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
                 })");
 
-            fsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
+        fsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) out vec4 fragColor;
                 void main() {
                     fragColor = vec4(0.0, 1.0, 0.0, 1.0);
                 })");
-        }
+    }
 
-        wgpu::ShaderModule vsModule;
-        wgpu::ShaderModule fsModule;
+    wgpu::ShaderModule vsModule;
+    wgpu::ShaderModule fsModule;
 };
 
 // Test cases where creation should succeed

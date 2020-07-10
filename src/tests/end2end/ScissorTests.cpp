@@ -17,7 +17,7 @@
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
-class ScissorTest: public DawnTest {
+class ScissorTest : public DawnTest {
   protected:
     wgpu::RenderPipeline CreateQuadPipeline(wgpu::TextureFormat format) {
         wgpu::ShaderModule vsModule =
@@ -152,4 +152,8 @@ TEST_P(ScissorTest, NoInheritanceBetweenRenderPass) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 99, 99);
 }
 
-DAWN_INSTANTIATE_TEST(ScissorTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(ScissorTest,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());

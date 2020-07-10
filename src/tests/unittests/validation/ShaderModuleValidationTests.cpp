@@ -20,8 +20,7 @@
 
 #include <sstream>
 
-class ShaderModuleValidationTest : public ValidationTest {
-};
+class ShaderModuleValidationTest : public ValidationTest {};
 
 // Test case with a simpler shader that should successfully be created
 TEST_F(ShaderModuleValidationTest, CreationSuccess) {
@@ -112,8 +111,8 @@ TEST_F(ShaderModuleValidationTest, FragmentOutputLocationExceedsMaxColorAttachme
 // Test that it is invalid to create a shader module with no chained descriptor. (It must be
 // WGSL or SPIRV, not empty)
 TEST_F(ShaderModuleValidationTest, NoChainedDescriptor) {
-  wgpu::ShaderModuleDescriptor desc = {};
-  ASSERT_DEVICE_ERROR(device.CreateShaderModule(&desc));
+    wgpu::ShaderModuleDescriptor desc = {};
+    ASSERT_DEVICE_ERROR(device.CreateShaderModule(&desc));
 }
 
 // Test that it is not allowed to use combined texture and sampler.

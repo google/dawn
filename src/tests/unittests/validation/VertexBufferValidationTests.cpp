@@ -21,68 +21,68 @@
 #include "utils/WGPUHelpers.h"
 
 class VertexBufferValidationTest : public ValidationTest {
-    protected:
-        void SetUp() override {
-            ValidationTest::SetUp();
+  protected:
+    void SetUp() override {
+        ValidationTest::SetUp();
 
-            fsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
+        fsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) out vec4 fragColor;
                 void main() {
                     fragColor = vec4(0.0, 1.0, 0.0, 1.0);
                 })");
+    }
+
+    wgpu::Buffer MakeVertexBuffer() {
+        wgpu::BufferDescriptor descriptor;
+        descriptor.size = 256;
+        descriptor.usage = wgpu::BufferUsage::Vertex;
+
+        return device.CreateBuffer(&descriptor);
+    }
+
+    wgpu::ShaderModule MakeVertexShader(unsigned int bufferCount) {
+        std::ostringstream vs;
+        vs << "#version 450\n";
+        for (unsigned int i = 0; i < bufferCount; ++i) {
+            vs << "layout(location = " << i << ") in vec3 a_position" << i << ";\n";
         }
+        vs << "void main() {\n";
 
-        wgpu::Buffer MakeVertexBuffer() {
-            wgpu::BufferDescriptor descriptor;
-            descriptor.size = 256;
-            descriptor.usage = wgpu::BufferUsage::Vertex;
-
-            return device.CreateBuffer(&descriptor);
-        }
-
-        wgpu::ShaderModule MakeVertexShader(unsigned int bufferCount) {
-            std::ostringstream vs;
-            vs << "#version 450\n";
-            for (unsigned int i = 0; i < bufferCount; ++i) {
-                vs << "layout(location = " << i << ") in vec3 a_position" << i << ";\n";
+        vs << "gl_Position = vec4(";
+        for (unsigned int i = 0; i < bufferCount; ++i) {
+            vs << "a_position" << i;
+            if (i != bufferCount - 1) {
+                vs << " + ";
             }
-            vs << "void main() {\n";
-
-            vs << "gl_Position = vec4(";
-            for (unsigned int i = 0; i < bufferCount; ++i) {
-                vs << "a_position" << i;
-                if (i != bufferCount - 1) {
-                    vs << " + ";
-                }
-            }
-            vs << ", 1.0);";
-
-            vs << "}\n";
-
-            return utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex,
-                                             vs.str().c_str());
         }
+        vs << ", 1.0);";
 
-        wgpu::RenderPipeline MakeRenderPipeline(const wgpu::ShaderModule& vsModule,
-                                                unsigned int bufferCount) {
-            utils::ComboRenderPipelineDescriptor descriptor(device);
-            descriptor.vertexStage.module = vsModule;
-            descriptor.cFragmentStage.module = fsModule;
+        vs << "}\n";
 
-            for (unsigned int i = 0; i < bufferCount; ++i) {
-                descriptor.cVertexState.cVertexBuffers[i].attributeCount = 1;
-                descriptor.cVertexState.cVertexBuffers[i].attributes =
-                    &descriptor.cVertexState.cAttributes[i];
-                descriptor.cVertexState.cAttributes[i].shaderLocation = i;
-                descriptor.cVertexState.cAttributes[i].format = wgpu::VertexFormat::Float3;
-            }
-            descriptor.cVertexState.vertexBufferCount = bufferCount;
+        return utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex,
+                                         vs.str().c_str());
+    }
 
-            return device.CreateRenderPipeline(&descriptor);
+    wgpu::RenderPipeline MakeRenderPipeline(const wgpu::ShaderModule& vsModule,
+                                            unsigned int bufferCount) {
+        utils::ComboRenderPipelineDescriptor descriptor(device);
+        descriptor.vertexStage.module = vsModule;
+        descriptor.cFragmentStage.module = fsModule;
+
+        for (unsigned int i = 0; i < bufferCount; ++i) {
+            descriptor.cVertexState.cVertexBuffers[i].attributeCount = 1;
+            descriptor.cVertexState.cVertexBuffers[i].attributes =
+                &descriptor.cVertexState.cAttributes[i];
+            descriptor.cVertexState.cAttributes[i].shaderLocation = i;
+            descriptor.cVertexState.cAttributes[i].format = wgpu::VertexFormat::Float3;
         }
+        descriptor.cVertexState.vertexBufferCount = bufferCount;
 
-        wgpu::ShaderModule fsModule;
+        return device.CreateRenderPipeline(&descriptor);
+    }
+
+    wgpu::ShaderModule fsModule;
 };
 
 TEST_F(VertexBufferValidationTest, VertexBuffersInheritedBetweenPipelines) {

@@ -185,7 +185,6 @@ TEST_F(WireArgumentTests, CStringArgument) {
     FlushClient();
 }
 
-
 // Test that the wire is able to send objects as value arguments
 TEST_F(WireArgumentTests, ObjectAsValueArgument) {
     WGPUCommandEncoder cmdBufEncoder = wgpuDeviceCreateCommandEncoder(device, nullptr);

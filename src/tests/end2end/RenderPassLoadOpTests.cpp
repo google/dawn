@@ -22,62 +22,61 @@
 constexpr static unsigned int kRTSize = 16;
 
 class DrawQuad {
-    public:
-        DrawQuad() {}
-        DrawQuad(wgpu::Device device, const char* vsSource, const char* fsSource) : device(device) {
-            vsModule =
-                utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vsSource);
-            fsModule =
-                utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fsSource);
+  public:
+    DrawQuad() {
+    }
+    DrawQuad(wgpu::Device device, const char* vsSource, const char* fsSource) : device(device) {
+        vsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vsSource);
+        fsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fsSource);
 
-            pipelineLayout = utils::MakeBasicPipelineLayout(device, nullptr);
-        }
+        pipelineLayout = utils::MakeBasicPipelineLayout(device, nullptr);
+    }
 
-        void Draw(wgpu::RenderPassEncoder* pass) {
-            utils::ComboRenderPipelineDescriptor descriptor(device);
-            descriptor.layout = pipelineLayout;
-            descriptor.vertexStage.module = vsModule;
-            descriptor.cFragmentStage.module = fsModule;
+    void Draw(wgpu::RenderPassEncoder* pass) {
+        utils::ComboRenderPipelineDescriptor descriptor(device);
+        descriptor.layout = pipelineLayout;
+        descriptor.vertexStage.module = vsModule;
+        descriptor.cFragmentStage.module = fsModule;
 
-            auto renderPipeline = device.CreateRenderPipeline(&descriptor);
+        auto renderPipeline = device.CreateRenderPipeline(&descriptor);
 
-            pass->SetPipeline(renderPipeline);
-            pass->Draw(6, 1, 0, 0);
-        }
+        pass->SetPipeline(renderPipeline);
+        pass->Draw(6, 1, 0, 0);
+    }
 
-    private:
-      wgpu::Device device;
-      wgpu::ShaderModule vsModule = {};
-      wgpu::ShaderModule fsModule = {};
-      wgpu::PipelineLayout pipelineLayout = {};
+  private:
+    wgpu::Device device;
+    wgpu::ShaderModule vsModule = {};
+    wgpu::ShaderModule fsModule = {};
+    wgpu::PipelineLayout pipelineLayout = {};
 };
 
 class RenderPassLoadOpTests : public DawnTest {
-    protected:
-        void SetUp() override {
-            DawnTest::SetUp();
+  protected:
+    void SetUp() override {
+        DawnTest::SetUp();
 
-            wgpu::TextureDescriptor descriptor;
-            descriptor.dimension = wgpu::TextureDimension::e2D;
-            descriptor.size.width = kRTSize;
-            descriptor.size.height = kRTSize;
-            descriptor.size.depth = 1;
-            descriptor.sampleCount = 1;
-            descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
-            descriptor.mipLevelCount = 1;
-            descriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
-            renderTarget = device.CreateTexture(&descriptor);
+        wgpu::TextureDescriptor descriptor;
+        descriptor.dimension = wgpu::TextureDimension::e2D;
+        descriptor.size.width = kRTSize;
+        descriptor.size.height = kRTSize;
+        descriptor.size.depth = 1;
+        descriptor.sampleCount = 1;
+        descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+        descriptor.mipLevelCount = 1;
+        descriptor.usage = wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+        renderTarget = device.CreateTexture(&descriptor);
 
-            renderTargetView = renderTarget.CreateView();
+        renderTargetView = renderTarget.CreateView();
 
-            std::fill(expectZero.begin(), expectZero.end(), RGBA8::kZero);
+        std::fill(expectZero.begin(), expectZero.end(), RGBA8::kZero);
 
-            std::fill(expectGreen.begin(), expectGreen.end(), RGBA8::kGreen);
+        std::fill(expectGreen.begin(), expectGreen.end(), RGBA8::kGreen);
 
-            std::fill(expectBlue.begin(), expectBlue.end(), RGBA8::kBlue);
+        std::fill(expectBlue.begin(), expectBlue.end(), RGBA8::kBlue);
 
-            // draws a blue quad on the right half of the screen
-            const char* vsSource = R"(
+        // draws a blue quad on the right half of the screen
+        const char* vsSource = R"(
                 #version 450
                 void main() {
                     const vec2 pos[6] = vec2[6](
@@ -86,24 +85,24 @@ class RenderPassLoadOpTests : public DawnTest {
                     gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
                 }
                 )";
-            const char* fsSource = R"(
+        const char* fsSource = R"(
                 #version 450
                 layout(location = 0) out vec4 color;
                 void main() {
                     color = vec4(0.f, 0.f, 1.f, 1.f);
                 }
                 )";
-            blueQuad = DrawQuad(device, vsSource, fsSource);
-        }
+        blueQuad = DrawQuad(device, vsSource, fsSource);
+    }
 
-        wgpu::Texture renderTarget;
-        wgpu::TextureView renderTargetView;
+    wgpu::Texture renderTarget;
+    wgpu::TextureView renderTargetView;
 
-        std::array<RGBA8, kRTSize * kRTSize> expectZero;
-        std::array<RGBA8, kRTSize * kRTSize> expectGreen;
-        std::array<RGBA8, kRTSize * kRTSize> expectBlue;
+    std::array<RGBA8, kRTSize * kRTSize> expectZero;
+    std::array<RGBA8, kRTSize * kRTSize> expectGreen;
+    std::array<RGBA8, kRTSize * kRTSize> expectBlue;
 
-        DrawQuad blueQuad = {};
+    DrawQuad blueQuad = {};
 };
 
 // Tests clearing, loading, and drawing into color attachments
@@ -144,7 +143,12 @@ TEST_P(RenderPassLoadOpTests, ColorClearThenLoadAndDraw) {
     // Left half should still be green
     EXPECT_TEXTURE_RGBA8_EQ(expectGreen.data(), renderTarget, 0, 0, kRTSize / 2, kRTSize, 0, 0);
     // Right half should now be blue
-    EXPECT_TEXTURE_RGBA8_EQ(expectBlue.data(), renderTarget, kRTSize / 2, 0, kRTSize / 2, kRTSize, 0, 0);
+    EXPECT_TEXTURE_RGBA8_EQ(expectBlue.data(), renderTarget, kRTSize / 2, 0, kRTSize / 2, kRTSize,
+                            0, 0);
 }
 
-DAWN_INSTANTIATE_TEST(RenderPassLoadOpTests, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(RenderPassLoadOpTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());

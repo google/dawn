@@ -21,38 +21,38 @@
 constexpr static unsigned int kRTSize = 64;
 
 class DepthStencilStateTest : public DawnTest {
-    protected:
-        void SetUp() override {
-            DawnTest::SetUp();
+  protected:
+    void SetUp() override {
+        DawnTest::SetUp();
 
-            wgpu::TextureDescriptor renderTargetDescriptor;
-            renderTargetDescriptor.dimension = wgpu::TextureDimension::e2D;
-            renderTargetDescriptor.size.width = kRTSize;
-            renderTargetDescriptor.size.height = kRTSize;
-            renderTargetDescriptor.size.depth = 1;
-            renderTargetDescriptor.sampleCount = 1;
-            renderTargetDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
-            renderTargetDescriptor.mipLevelCount = 1;
-            renderTargetDescriptor.usage =
-                wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
-            renderTarget = device.CreateTexture(&renderTargetDescriptor);
+        wgpu::TextureDescriptor renderTargetDescriptor;
+        renderTargetDescriptor.dimension = wgpu::TextureDimension::e2D;
+        renderTargetDescriptor.size.width = kRTSize;
+        renderTargetDescriptor.size.height = kRTSize;
+        renderTargetDescriptor.size.depth = 1;
+        renderTargetDescriptor.sampleCount = 1;
+        renderTargetDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+        renderTargetDescriptor.mipLevelCount = 1;
+        renderTargetDescriptor.usage =
+            wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+        renderTarget = device.CreateTexture(&renderTargetDescriptor);
 
-            renderTargetView = renderTarget.CreateView();
+        renderTargetView = renderTarget.CreateView();
 
-            wgpu::TextureDescriptor depthDescriptor;
-            depthDescriptor.dimension = wgpu::TextureDimension::e2D;
-            depthDescriptor.size.width = kRTSize;
-            depthDescriptor.size.height = kRTSize;
-            depthDescriptor.size.depth = 1;
-            depthDescriptor.sampleCount = 1;
-            depthDescriptor.format = wgpu::TextureFormat::Depth24PlusStencil8;
-            depthDescriptor.mipLevelCount = 1;
-            depthDescriptor.usage = wgpu::TextureUsage::OutputAttachment;
-            depthTexture = device.CreateTexture(&depthDescriptor);
+        wgpu::TextureDescriptor depthDescriptor;
+        depthDescriptor.dimension = wgpu::TextureDimension::e2D;
+        depthDescriptor.size.width = kRTSize;
+        depthDescriptor.size.height = kRTSize;
+        depthDescriptor.size.depth = 1;
+        depthDescriptor.sampleCount = 1;
+        depthDescriptor.format = wgpu::TextureFormat::Depth24PlusStencil8;
+        depthDescriptor.mipLevelCount = 1;
+        depthDescriptor.usage = wgpu::TextureUsage::OutputAttachment;
+        depthTexture = device.CreateTexture(&depthDescriptor);
 
-            depthTextureView = depthTexture.CreateView();
+        depthTextureView = depthTexture.CreateView();
 
-            vsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
+        vsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
                 #version 450
                 layout(set = 0, binding = 0) uniform myBlock {
                     vec3 color;
@@ -67,7 +67,7 @@ class DepthStencilStateTest : public DawnTest {
                 }
             )");
 
-            fsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
+        fsModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
                 #version 450
                 layout(set = 0, binding = 0) uniform myBlock {
                     vec3 color;
@@ -78,235 +78,251 @@ class DepthStencilStateTest : public DawnTest {
                     fragColor = vec4(myUbo.color, 1.f);
                 }
             )");
-        }
+    }
 
-        struct TestSpec {
-            const wgpu::DepthStencilStateDescriptor& depthStencilState;
-            RGBA8 color;
-            float depth;
-            uint32_t stencil;
-        };
+    struct TestSpec {
+        const wgpu::DepthStencilStateDescriptor& depthStencilState;
+        RGBA8 color;
+        float depth;
+        uint32_t stencil;
+    };
 
-        // Check whether a depth comparison function works as expected
-        // The less, equal, greater booleans denote wether the respective triangle should be visible based on the comparison function
-        void CheckDepthCompareFunction(wgpu::CompareFunction compareFunction,
-                                       bool less,
-                                       bool equal,
-                                       bool greater) {
-            wgpu::StencilStateFaceDescriptor stencilFace;
-            stencilFace.compare = wgpu::CompareFunction::Always;
-            stencilFace.failOp = wgpu::StencilOperation::Keep;
-            stencilFace.depthFailOp = wgpu::StencilOperation::Keep;
-            stencilFace.passOp = wgpu::StencilOperation::Keep;
+    // Check whether a depth comparison function works as expected
+    // The less, equal, greater booleans denote wether the respective triangle should be visible
+    // based on the comparison function
+    void CheckDepthCompareFunction(wgpu::CompareFunction compareFunction,
+                                   bool less,
+                                   bool equal,
+                                   bool greater) {
+        wgpu::StencilStateFaceDescriptor stencilFace;
+        stencilFace.compare = wgpu::CompareFunction::Always;
+        stencilFace.failOp = wgpu::StencilOperation::Keep;
+        stencilFace.depthFailOp = wgpu::StencilOperation::Keep;
+        stencilFace.passOp = wgpu::StencilOperation::Keep;
 
-            wgpu::DepthStencilStateDescriptor baseState;
-            baseState.depthWriteEnabled = true;
-            baseState.depthCompare = wgpu::CompareFunction::Always;
-            baseState.stencilBack = stencilFace;
-            baseState.stencilFront = stencilFace;
-            baseState.stencilReadMask = 0xff;
-            baseState.stencilWriteMask = 0xff;
+        wgpu::DepthStencilStateDescriptor baseState;
+        baseState.depthWriteEnabled = true;
+        baseState.depthCompare = wgpu::CompareFunction::Always;
+        baseState.stencilBack = stencilFace;
+        baseState.stencilFront = stencilFace;
+        baseState.stencilReadMask = 0xff;
+        baseState.stencilWriteMask = 0xff;
 
-            wgpu::DepthStencilStateDescriptor state;
-            state.depthWriteEnabled = true;
-            state.depthCompare = compareFunction;
-            state.stencilBack = stencilFace;
-            state.stencilFront = stencilFace;
-            state.stencilReadMask = 0xff;
-            state.stencilWriteMask = 0xff;
+        wgpu::DepthStencilStateDescriptor state;
+        state.depthWriteEnabled = true;
+        state.depthCompare = compareFunction;
+        state.stencilBack = stencilFace;
+        state.stencilFront = stencilFace;
+        state.stencilReadMask = 0xff;
+        state.stencilWriteMask = 0xff;
 
-            RGBA8 baseColor = RGBA8(255, 255, 255, 255);
-            RGBA8 lessColor = RGBA8(255, 0, 0, 255);
-            RGBA8 equalColor = RGBA8(0, 255, 0, 255);
-            RGBA8 greaterColor = RGBA8(0, 0, 255, 255);
+        RGBA8 baseColor = RGBA8(255, 255, 255, 255);
+        RGBA8 lessColor = RGBA8(255, 0, 0, 255);
+        RGBA8 equalColor = RGBA8(0, 255, 0, 255);
+        RGBA8 greaterColor = RGBA8(0, 0, 255, 255);
 
-            // Base triangle at depth 0.5, depth always, depth write enabled
-            TestSpec base = { baseState, baseColor, 0.5f, 0u };
+        // Base triangle at depth 0.5, depth always, depth write enabled
+        TestSpec base = {baseState, baseColor, 0.5f, 0u};
 
-            // Draw the base triangle, then a triangle in stencilFront of the base triangle with the
-            // given depth comparison function
-            DoTest({ base, { state, lessColor, 0.f, 0u } }, less ? lessColor : baseColor);
+        // Draw the base triangle, then a triangle in stencilFront of the base triangle with the
+        // given depth comparison function
+        DoTest({base, {state, lessColor, 0.f, 0u}}, less ? lessColor : baseColor);
 
-            // Draw the base triangle, then a triangle in at the same depth as the base triangle with the given depth comparison function
-            DoTest({ base, { state, equalColor, 0.5f, 0u } }, equal ? equalColor : baseColor);
+        // Draw the base triangle, then a triangle in at the same depth as the base triangle with
+        // the given depth comparison function
+        DoTest({base, {state, equalColor, 0.5f, 0u}}, equal ? equalColor : baseColor);
 
-            // Draw the base triangle, then a triangle behind the base triangle with the given depth comparison function
-            DoTest({ base, { state, greaterColor, 1.0f, 0u } }, greater ? greaterColor :  baseColor);
-        }
+        // Draw the base triangle, then a triangle behind the base triangle with the given depth
+        // comparison function
+        DoTest({base, {state, greaterColor, 1.0f, 0u}}, greater ? greaterColor : baseColor);
+    }
 
-        // Check whether a stencil comparison function works as expected
-        // The less, equal, greater booleans denote wether the respective triangle should be visible based on the comparison function
-        void CheckStencilCompareFunction(wgpu::CompareFunction compareFunction,
-                                         bool less,
-                                         bool equal,
-                                         bool greater) {
-            wgpu::StencilStateFaceDescriptor baseStencilFaceDescriptor;
-            baseStencilFaceDescriptor.compare = wgpu::CompareFunction::Always;
-            baseStencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
-            baseStencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
-            baseStencilFaceDescriptor.passOp = wgpu::StencilOperation::Replace;
-            wgpu::DepthStencilStateDescriptor baseState;
-            baseState.depthWriteEnabled = false;
-            baseState.depthCompare = wgpu::CompareFunction::Always;
-            baseState.stencilBack = baseStencilFaceDescriptor;
-            baseState.stencilFront = baseStencilFaceDescriptor;
-            baseState.stencilReadMask = 0xff;
-            baseState.stencilWriteMask = 0xff;
+    // Check whether a stencil comparison function works as expected
+    // The less, equal, greater booleans denote wether the respective triangle should be visible
+    // based on the comparison function
+    void CheckStencilCompareFunction(wgpu::CompareFunction compareFunction,
+                                     bool less,
+                                     bool equal,
+                                     bool greater) {
+        wgpu::StencilStateFaceDescriptor baseStencilFaceDescriptor;
+        baseStencilFaceDescriptor.compare = wgpu::CompareFunction::Always;
+        baseStencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
+        baseStencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
+        baseStencilFaceDescriptor.passOp = wgpu::StencilOperation::Replace;
+        wgpu::DepthStencilStateDescriptor baseState;
+        baseState.depthWriteEnabled = false;
+        baseState.depthCompare = wgpu::CompareFunction::Always;
+        baseState.stencilBack = baseStencilFaceDescriptor;
+        baseState.stencilFront = baseStencilFaceDescriptor;
+        baseState.stencilReadMask = 0xff;
+        baseState.stencilWriteMask = 0xff;
 
-            wgpu::StencilStateFaceDescriptor stencilFaceDescriptor;
-            stencilFaceDescriptor.compare = compareFunction;
-            stencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
-            stencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
-            stencilFaceDescriptor.passOp = wgpu::StencilOperation::Keep;
-            wgpu::DepthStencilStateDescriptor state;
-            state.depthWriteEnabled = false;
-            state.depthCompare = wgpu::CompareFunction::Always;
-            state.stencilBack = stencilFaceDescriptor;
-            state.stencilFront = stencilFaceDescriptor;
-            state.stencilReadMask = 0xff;
-            state.stencilWriteMask = 0xff;
+        wgpu::StencilStateFaceDescriptor stencilFaceDescriptor;
+        stencilFaceDescriptor.compare = compareFunction;
+        stencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
+        stencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
+        stencilFaceDescriptor.passOp = wgpu::StencilOperation::Keep;
+        wgpu::DepthStencilStateDescriptor state;
+        state.depthWriteEnabled = false;
+        state.depthCompare = wgpu::CompareFunction::Always;
+        state.stencilBack = stencilFaceDescriptor;
+        state.stencilFront = stencilFaceDescriptor;
+        state.stencilReadMask = 0xff;
+        state.stencilWriteMask = 0xff;
 
-            RGBA8 baseColor = RGBA8(255, 255, 255, 255);
-            RGBA8 lessColor = RGBA8(255, 0, 0, 255);
-            RGBA8 equalColor = RGBA8(0, 255, 0, 255);
-            RGBA8 greaterColor = RGBA8(0, 0, 255, 255);
+        RGBA8 baseColor = RGBA8(255, 255, 255, 255);
+        RGBA8 lessColor = RGBA8(255, 0, 0, 255);
+        RGBA8 equalColor = RGBA8(0, 255, 0, 255);
+        RGBA8 greaterColor = RGBA8(0, 0, 255, 255);
 
-            // Base triangle with stencil reference 1
-            TestSpec base = { baseState, baseColor, 0.0f, 1u };
+        // Base triangle with stencil reference 1
+        TestSpec base = {baseState, baseColor, 0.0f, 1u};
 
-            // Draw the base triangle, then a triangle with stencil reference 0 with the given stencil comparison function
-            DoTest({ base, { state, lessColor, 0.f, 0u } }, less ? lessColor : baseColor);
+        // Draw the base triangle, then a triangle with stencil reference 0 with the given stencil
+        // comparison function
+        DoTest({base, {state, lessColor, 0.f, 0u}}, less ? lessColor : baseColor);
 
-            // Draw the base triangle, then a triangle with stencil reference 1 with the given stencil comparison function
-            DoTest({ base, { state, equalColor, 0.f, 1u } }, equal ? equalColor : baseColor);
+        // Draw the base triangle, then a triangle with stencil reference 1 with the given stencil
+        // comparison function
+        DoTest({base, {state, equalColor, 0.f, 1u}}, equal ? equalColor : baseColor);
 
-            // Draw the base triangle, then a triangle with stencil reference 2 with the given stencil comparison function
-            DoTest({ base, { state, greaterColor, 0.f, 2u } }, greater ? greaterColor : baseColor);
-        }
+        // Draw the base triangle, then a triangle with stencil reference 2 with the given stencil
+        // comparison function
+        DoTest({base, {state, greaterColor, 0.f, 2u}}, greater ? greaterColor : baseColor);
+    }
 
-        // Given the provided `initialStencil` and `reference`, check that applying the `stencilOperation` produces the `expectedStencil`
-        void CheckStencilOperation(wgpu::StencilOperation stencilOperation,
-                                   uint32_t initialStencil,
-                                   uint32_t reference,
-                                   uint32_t expectedStencil) {
-            wgpu::StencilStateFaceDescriptor baseStencilFaceDescriptor;
-            baseStencilFaceDescriptor.compare = wgpu::CompareFunction::Always;
-            baseStencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
-            baseStencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
-            baseStencilFaceDescriptor.passOp = wgpu::StencilOperation::Replace;
-            wgpu::DepthStencilStateDescriptor baseState;
-            baseState.depthWriteEnabled = false;
-            baseState.depthCompare = wgpu::CompareFunction::Always;
-            baseState.stencilBack = baseStencilFaceDescriptor;
-            baseState.stencilFront = baseStencilFaceDescriptor;
-            baseState.stencilReadMask = 0xff;
-            baseState.stencilWriteMask = 0xff;
+    // Given the provided `initialStencil` and `reference`, check that applying the
+    // `stencilOperation` produces the `expectedStencil`
+    void CheckStencilOperation(wgpu::StencilOperation stencilOperation,
+                               uint32_t initialStencil,
+                               uint32_t reference,
+                               uint32_t expectedStencil) {
+        wgpu::StencilStateFaceDescriptor baseStencilFaceDescriptor;
+        baseStencilFaceDescriptor.compare = wgpu::CompareFunction::Always;
+        baseStencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
+        baseStencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
+        baseStencilFaceDescriptor.passOp = wgpu::StencilOperation::Replace;
+        wgpu::DepthStencilStateDescriptor baseState;
+        baseState.depthWriteEnabled = false;
+        baseState.depthCompare = wgpu::CompareFunction::Always;
+        baseState.stencilBack = baseStencilFaceDescriptor;
+        baseState.stencilFront = baseStencilFaceDescriptor;
+        baseState.stencilReadMask = 0xff;
+        baseState.stencilWriteMask = 0xff;
 
-            wgpu::StencilStateFaceDescriptor stencilFaceDescriptor;
-            stencilFaceDescriptor.compare = wgpu::CompareFunction::Always;
-            stencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
-            stencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
-            stencilFaceDescriptor.passOp = stencilOperation;
-            wgpu::DepthStencilStateDescriptor state;
-            state.depthWriteEnabled = false;
-            state.depthCompare = wgpu::CompareFunction::Always;
-            state.stencilBack = stencilFaceDescriptor;
-            state.stencilFront = stencilFaceDescriptor;
-            state.stencilReadMask = 0xff;
-            state.stencilWriteMask = 0xff;
+        wgpu::StencilStateFaceDescriptor stencilFaceDescriptor;
+        stencilFaceDescriptor.compare = wgpu::CompareFunction::Always;
+        stencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
+        stencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
+        stencilFaceDescriptor.passOp = stencilOperation;
+        wgpu::DepthStencilStateDescriptor state;
+        state.depthWriteEnabled = false;
+        state.depthCompare = wgpu::CompareFunction::Always;
+        state.stencilBack = stencilFaceDescriptor;
+        state.stencilFront = stencilFaceDescriptor;
+        state.stencilReadMask = 0xff;
+        state.stencilWriteMask = 0xff;
 
-            CheckStencil({
+        CheckStencil(
+            {
                 // Wipe the stencil buffer with the initialStencil value
-                { baseState, RGBA8(255, 255, 255, 255), 0.f, initialStencil },
+                {baseState, RGBA8(255, 255, 255, 255), 0.f, initialStencil},
 
                 // Draw a triangle with the provided stencil operation and reference
-                { state, RGBA8(255, 0, 0, 255), 0.f, reference },
-            }, expectedStencil);
-        }
+                {state, RGBA8(255, 0, 0, 255), 0.f, reference},
+            },
+            expectedStencil);
+    }
 
-        // Draw a list of test specs, and check if the stencil value is equal to the expected value
-        void CheckStencil(std::vector<TestSpec> testParams, uint32_t expectedStencil) {
-            wgpu::StencilStateFaceDescriptor stencilFaceDescriptor;
-            stencilFaceDescriptor.compare = wgpu::CompareFunction::Equal;
-            stencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
-            stencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
-            stencilFaceDescriptor.passOp = wgpu::StencilOperation::Keep;
-            wgpu::DepthStencilStateDescriptor state;
-            state.depthWriteEnabled = false;
-            state.depthCompare = wgpu::CompareFunction::Always;
-            state.stencilBack = stencilFaceDescriptor;
-            state.stencilFront = stencilFaceDescriptor;
-            state.stencilReadMask = 0xff;
-            state.stencilWriteMask = 0xff;
+    // Draw a list of test specs, and check if the stencil value is equal to the expected value
+    void CheckStencil(std::vector<TestSpec> testParams, uint32_t expectedStencil) {
+        wgpu::StencilStateFaceDescriptor stencilFaceDescriptor;
+        stencilFaceDescriptor.compare = wgpu::CompareFunction::Equal;
+        stencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
+        stencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
+        stencilFaceDescriptor.passOp = wgpu::StencilOperation::Keep;
+        wgpu::DepthStencilStateDescriptor state;
+        state.depthWriteEnabled = false;
+        state.depthCompare = wgpu::CompareFunction::Always;
+        state.stencilBack = stencilFaceDescriptor;
+        state.stencilFront = stencilFaceDescriptor;
+        state.stencilReadMask = 0xff;
+        state.stencilWriteMask = 0xff;
 
-            testParams.push_back({ state, RGBA8(0, 255, 0, 255), 0, expectedStencil });
-            DoTest(testParams, RGBA8(0, 255, 0, 255));
-        }
+        testParams.push_back({state, RGBA8(0, 255, 0, 255), 0, expectedStencil});
+        DoTest(testParams, RGBA8(0, 255, 0, 255));
+    }
 
-        // Each test param represents a pair of triangles with a color, depth, stencil value, and depthStencil state, one frontfacing, one backfacing
-        // Draw the triangles in order and check the expected colors for the frontfaces and backfaces
-        void DoTest(const std::vector<TestSpec> &testParams, const RGBA8& expectedFront, const RGBA8& expectedBack) {
-            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    // Each test param represents a pair of triangles with a color, depth, stencil value, and
+    // depthStencil state, one frontfacing, one backfacing Draw the triangles in order and check the
+    // expected colors for the frontfaces and backfaces
+    void DoTest(const std::vector<TestSpec>& testParams,
+                const RGBA8& expectedFront,
+                const RGBA8& expectedBack) {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
-            struct TriangleData {
-                float color[3];
-                float depth;
+        struct TriangleData {
+            float color[3];
+            float depth;
+        };
+
+        utils::ComboRenderPassDescriptor renderPass({renderTargetView}, depthTextureView);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+
+        for (size_t i = 0; i < testParams.size(); ++i) {
+            const TestSpec& test = testParams[i];
+
+            TriangleData data = {
+                {static_cast<float>(test.color.r) / 255.f, static_cast<float>(test.color.g) / 255.f,
+                 static_cast<float>(test.color.b) / 255.f},
+                test.depth,
             };
+            // Upload a buffer for each triangle's depth and color data
+            wgpu::Buffer buffer = utils::CreateBufferFromData(device, &data, sizeof(TriangleData),
+                                                              wgpu::BufferUsage::Uniform);
 
-            utils::ComboRenderPassDescriptor renderPass({renderTargetView}, depthTextureView);
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+            // Create a pipeline for the triangles with the test spec's depth stencil state
 
-            for (size_t i = 0; i < testParams.size(); ++i) {
-                const TestSpec& test = testParams[i];
+            utils::ComboRenderPipelineDescriptor descriptor(device);
+            descriptor.vertexStage.module = vsModule;
+            descriptor.cFragmentStage.module = fsModule;
+            descriptor.cDepthStencilState = test.depthStencilState;
+            descriptor.cDepthStencilState.format = wgpu::TextureFormat::Depth24PlusStencil8;
+            descriptor.depthStencilState = &descriptor.cDepthStencilState;
 
-                TriangleData data = {
-                    {  static_cast<float>(test.color.r) / 255.f, static_cast<float>(test.color.g) / 255.f, static_cast<float>(test.color.b) / 255.f },
-                    test.depth,
-                };
-                // Upload a buffer for each triangle's depth and color data
-                wgpu::Buffer buffer = utils::CreateBufferFromData(
-                    device, &data, sizeof(TriangleData), wgpu::BufferUsage::Uniform);
+            wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
-                // Create a pipeline for the triangles with the test spec's depth stencil state
+            // Create a bind group for the data
+            wgpu::BindGroup bindGroup = utils::MakeBindGroup(
+                device, pipeline.GetBindGroupLayout(0), {{0, buffer, 0, sizeof(TriangleData)}});
 
-                utils::ComboRenderPipelineDescriptor descriptor(device);
-                descriptor.vertexStage.module = vsModule;
-                descriptor.cFragmentStage.module = fsModule;
-                descriptor.cDepthStencilState = test.depthStencilState;
-                descriptor.cDepthStencilState.format = wgpu::TextureFormat::Depth24PlusStencil8;
-                descriptor.depthStencilState = &descriptor.cDepthStencilState;
-
-                wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
-
-                // Create a bind group for the data
-                wgpu::BindGroup bindGroup = utils::MakeBindGroup(
-                    device, pipeline.GetBindGroupLayout(0), {{0, buffer, 0, sizeof(TriangleData)}});
-
-                pass.SetPipeline(pipeline);
-                pass.SetStencilReference(test.stencil);  // Set the stencil reference
-                pass.SetBindGroup(
-                    0, bindGroup);  // Set the bind group which contains color and depth data
-                pass.Draw(6);
-            }
-            pass.EndPass();
-
-            wgpu::CommandBuffer commands = encoder.Finish();
-            queue.Submit(1, &commands);
-
-            EXPECT_PIXEL_RGBA8_EQ(expectedFront, renderTarget, kRTSize / 4, kRTSize / 2) << "Front face check failed";
-            EXPECT_PIXEL_RGBA8_EQ(expectedBack, renderTarget, 3 * kRTSize / 4, kRTSize / 2) << "Back face check failed";
+            pass.SetPipeline(pipeline);
+            pass.SetStencilReference(test.stencil);  // Set the stencil reference
+            pass.SetBindGroup(0,
+                              bindGroup);  // Set the bind group which contains color and depth data
+            pass.Draw(6);
         }
+        pass.EndPass();
 
-        void DoTest(const std::vector<TestSpec> &testParams, const RGBA8& expected) {
-            DoTest(testParams, expected, expected);
-        }
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
 
-        wgpu::Texture renderTarget;
-        wgpu::Texture depthTexture;
-        wgpu::TextureView renderTargetView;
-        wgpu::TextureView depthTextureView;
-        wgpu::ShaderModule vsModule;
-        wgpu::ShaderModule fsModule;
+        EXPECT_PIXEL_RGBA8_EQ(expectedFront, renderTarget, kRTSize / 4, kRTSize / 2)
+            << "Front face check failed";
+        EXPECT_PIXEL_RGBA8_EQ(expectedBack, renderTarget, 3 * kRTSize / 4, kRTSize / 2)
+            << "Back face check failed";
+    }
+
+    void DoTest(const std::vector<TestSpec>& testParams, const RGBA8& expected) {
+        DoTest(testParams, expected, expected);
+    }
+
+    wgpu::Texture renderTarget;
+    wgpu::Texture depthTexture;
+    wgpu::TextureView renderTargetView;
+    wgpu::TextureView depthTextureView;
+    wgpu::ShaderModule vsModule;
+    wgpu::ShaderModule fsModule;
 };
 
 // Test compilation and usage of the fixture
@@ -325,9 +341,11 @@ TEST_P(DepthStencilStateTest, Basic) {
     state.stencilReadMask = 0xff;
     state.stencilWriteMask = 0xff;
 
-    DoTest({
-        { state, RGBA8(0, 255, 0, 255), 0.5f, 0u },
-    }, RGBA8(0, 255, 0, 255));
+    DoTest(
+        {
+            {state, RGBA8(0, 255, 0, 255), 0.5f, 0u},
+        },
+        RGBA8(0, 255, 0, 255));
 }
 
 // Test defaults: depth and stencil tests disabled
@@ -347,9 +365,9 @@ TEST_P(DepthStencilStateTest, DepthStencilDisabled) {
     state.stencilWriteMask = 0xff;
 
     TestSpec specs[3] = {
-        { state, RGBA8(255, 0, 0, 255), 0.0f, 0u },
-        { state, RGBA8(0, 255, 0, 255), 0.5f, 0u },
-        { state, RGBA8(0, 0, 255, 255), 1.0f, 0u },
+        {state, RGBA8(255, 0, 0, 255), 0.0f, 0u},
+        {state, RGBA8(0, 255, 0, 255), 0.5f, 0u},
+        {state, RGBA8(0, 0, 255, 255), 1.0f, 0u},
     };
 
     // Test that for all combinations, the last triangle drawn is the one visible
@@ -357,8 +375,8 @@ TEST_P(DepthStencilStateTest, DepthStencilDisabled) {
     for (uint32_t last = 0; last < 3; ++last) {
         uint32_t i = (last + 1) % 3;
         uint32_t j = (last + 2) % 3;
-        DoTest({ specs[i], specs[j], specs[last] }, specs[last].color);
-        DoTest({ specs[j], specs[i], specs[last] }, specs[last].color);
+        DoTest({specs[i], specs[j], specs[last]}, specs[last].color);
+        DoTest({specs[j], specs[i], specs[last]}, specs[last].color);
     }
 }
 
@@ -427,11 +445,17 @@ TEST_P(DepthStencilStateTest, DepthWriteDisabled) {
     checkState.stencilReadMask = 0xff;
     checkState.stencilWriteMask = 0xff;
 
-    DoTest({
-        { baseState, RGBA8(255, 255, 255, 255), 1.f, 0u }, // Draw a base triangle with depth enabled
-        { noDepthWrite, RGBA8(0, 0, 0, 255), 0.f, 0u }, // Draw a second triangle without depth enabled
-        { checkState, RGBA8(0, 255, 0, 255), 1.f, 0u }, // Draw a third triangle which should occlude the second even though it is behind it
-    }, RGBA8(0, 255, 0, 255));
+    DoTest(
+        {
+            {baseState, RGBA8(255, 255, 255, 255), 1.f,
+             0u},  // Draw a base triangle with depth enabled
+            {noDepthWrite, RGBA8(0, 0, 0, 255), 0.f,
+             0u},  // Draw a second triangle without depth enabled
+            {checkState, RGBA8(0, 255, 0, 255), 1.f,
+             0u},  // Draw a third triangle which should occlude the second even though it is behind
+                   // it
+        },
+        RGBA8(0, 255, 0, 255));
 }
 
 // The following tests check that each stencil comparison function works
@@ -536,9 +560,11 @@ TEST_P(DepthStencilStateTest, StencilReadMask) {
     RGBA8 red = RGBA8(255, 0, 0, 255);
     RGBA8 green = RGBA8(0, 255, 0, 255);
 
-    TestSpec base = { baseState, baseColor, 0.5f, 3u };     // Base triangle to set the stencil to 3
-    DoTest({ base, { state, red, 0.f, 1u } }, baseColor);   // Triangle with stencil reference 1 and read mask 2 does not draw because (3 & 2 != 1)
-    DoTest({ base, { state, green, 0.f, 2u } }, green);     // Triangle with stencil reference 2 and read mask 2 draws because (3 & 2 == 2)
+    TestSpec base = {baseState, baseColor, 0.5f, 3u};  // Base triangle to set the stencil to 3
+    DoTest({base, {state, red, 0.f, 1u}}, baseColor);  // Triangle with stencil reference 1 and read
+                                                       // mask 2 does not draw because (3 & 2 != 1)
+    DoTest({base, {state, green, 0.f, 2u}},
+           green);  // Triangle with stencil reference 2 and read mask 2 draws because (3 & 2 == 2)
 }
 
 // Check that setting a stencil write mask works
@@ -572,9 +598,12 @@ TEST_P(DepthStencilStateTest, StencilWriteMask) {
     RGBA8 baseColor = RGBA8(255, 255, 255, 255);
     RGBA8 green = RGBA8(0, 255, 0, 255);
 
-    TestSpec base = { baseState, baseColor, 0.5f, 3u };         // Base triangle with stencil reference 3 and mask 1 to set the stencil 1
-    DoTest({ base, { state, green, 0.f, 2u } }, baseColor);     // Triangle with stencil reference 2 does not draw because 2 != (3 & 1)
-    DoTest({ base, { state, green, 0.f, 1u } }, green);         // Triangle with stencil reference 1 draws because 1 == (3 & 1)
+    TestSpec base = {baseState, baseColor, 0.5f,
+                     3u};  // Base triangle with stencil reference 3 and mask 1 to set the stencil 1
+    DoTest({base, {state, green, 0.f, 2u}},
+           baseColor);  // Triangle with stencil reference 2 does not draw because 2 != (3 & 1)
+    DoTest({base, {state, green, 0.f, 1u}},
+           green);  // Triangle with stencil reference 1 draws because 1 == (3 & 1)
 }
 
 // Test that the stencil operation is executed on stencil fail
@@ -605,10 +634,13 @@ TEST_P(DepthStencilStateTest, StencilFail) {
     state.stencilReadMask = 0xff;
     state.stencilWriteMask = 0xff;
 
-    CheckStencil({
-        { baseState, RGBA8(255, 255, 255, 255), 1.f, 1 },   // Triangle to set stencil value to 1
-        { state, RGBA8(0, 0, 0, 255), 0.f, 2 }              // Triangle with stencil reference 2 fails the Less comparison function
-    }, 2);                                                  // Replace the stencil on failure, so it should be 2
+    CheckStencil(
+        {
+            {baseState, RGBA8(255, 255, 255, 255), 1.f, 1},  // Triangle to set stencil value to 1
+            {state, RGBA8(0, 0, 0, 255), 0.f,
+             2}  // Triangle with stencil reference 2 fails the Less comparison function
+        },
+        2);  // Replace the stencil on failure, so it should be 2
 }
 
 // Test that the stencil operation is executed on stencil pass, depth fail
@@ -639,10 +671,12 @@ TEST_P(DepthStencilStateTest, StencilDepthFail) {
     state.stencilReadMask = 0xff;
     state.stencilWriteMask = 0xff;
 
-    CheckStencil({
-        { baseState, RGBA8(255, 255, 255, 255), 0.f, 1 },   // Triangle to set stencil value to 1. Depth is 0
-        { state, RGBA8(0, 0, 0, 255), 1.f, 2 } },           // Triangle with stencil reference 2 passes the Greater comparison function. At depth 1, it fails the Less depth test
-    2);                                                     // Replace the stencil on stencil pass, depth failure, so it should be 2
+    CheckStencil({{baseState, RGBA8(255, 255, 255, 255), 0.f,
+                   1},  // Triangle to set stencil value to 1. Depth is 0
+                  {state, RGBA8(0, 0, 0, 255), 1.f,
+                   2}},  // Triangle with stencil reference 2 passes the Greater comparison
+                         // function. At depth 1, it fails the Less depth test
+                 2);     // Replace the stencil on stencil pass, depth failure, so it should be 2
 }
 
 // Test that the stencil operation is executed on stencil pass, depth pass
@@ -673,10 +707,12 @@ TEST_P(DepthStencilStateTest, StencilDepthPass) {
     state.stencilReadMask = 0xff;
     state.stencilWriteMask = 0xff;
 
-    CheckStencil({
-        { baseState, RGBA8(255, 255, 255, 255), 1.f, 1 },   // Triangle to set stencil value to 1. Depth is 0
-        { state, RGBA8(0, 0, 0, 255), 0.f, 2 } },           // Triangle with stencil reference 2 passes the Greater comparison function. At depth 0, it pass the Less depth test
-2);                                                         // Replace the stencil on stencil pass, depth pass, so it should be 2
+    CheckStencil({{baseState, RGBA8(255, 255, 255, 255), 1.f,
+                   1},  // Triangle to set stencil value to 1. Depth is 0
+                  {state, RGBA8(0, 0, 0, 255), 0.f,
+                   2}},  // Triangle with stencil reference 2 passes the Greater comparison
+                         // function. At depth 0, it pass the Less depth test
+                 2);     // Replace the stencil on stencil pass, depth pass, so it should be 2
 }
 
 // Test that creating a render pipeline works with for all depth and combined formats

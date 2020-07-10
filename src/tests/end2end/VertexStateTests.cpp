@@ -543,7 +543,7 @@ TEST_P(VertexStateTest, OverlappingVertexAttributes) {
         uint16_t halfs[2];
     };
     static_assert(sizeof(Data) == 16, "");
-    Data data {1.f, {2u, 3u}, {Float32ToFloat16(4.f), Float32ToFloat16(5.f)}};
+    Data data{1.f, {2u, 3u}, {Float32ToFloat16(4.f), Float32ToFloat16(5.f)}};
 
     wgpu::Buffer vertexBuffer =
         utils::CreateBufferFromData(device, &data, sizeof(data), wgpu::BufferUsage::Vertex);
@@ -599,7 +599,11 @@ TEST_P(VertexStateTest, OverlappingVertexAttributes) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 1, 1);
 }
 
-DAWN_INSTANTIATE_TEST(VertexStateTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(VertexStateTest,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());
 
 // TODO for the input state:
 //  - Add more vertex formats

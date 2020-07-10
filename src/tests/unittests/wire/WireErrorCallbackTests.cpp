@@ -64,7 +64,8 @@ class WireErrorCallbackTests : public WireTest {
         WireTest::SetUp();
 
         mockDeviceErrorCallback = std::make_unique<StrictMock<MockDeviceErrorCallback>>();
-        mockDevicePopErrorScopeCallback = std::make_unique<StrictMock<MockDevicePopErrorScopeCallback>>();
+        mockDevicePopErrorScopeCallback =
+            std::make_unique<StrictMock<MockDevicePopErrorScopeCallback>>();
         mockDeviceLostCallback = std::make_unique<StrictMock<MockDeviceLostCallback>>();
     }
 
@@ -206,8 +207,7 @@ TEST_F(WireErrorCallbackTests, PopErrorScopeDeviceDestroyed) {
 
     EXPECT_TRUE(wgpuDevicePopErrorScope(device, ToMockDevicePopErrorScopeCallback, this));
 
-    EXPECT_CALL(api, OnDevicePopErrorScopeCallback(apiDevice, _, _))
-        .WillOnce(Return(true));
+    EXPECT_CALL(api, OnDevicePopErrorScopeCallback(apiDevice, _, _)).WillOnce(Return(true));
     FlushClient();
 
     // Incomplete callback called in Device destructor.

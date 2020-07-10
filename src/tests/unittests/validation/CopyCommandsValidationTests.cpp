@@ -1168,8 +1168,8 @@ TEST_F(CopyCommandTest_T2T, 2DTextureDepthStencil) {
 
 TEST_F(CopyCommandTest_T2T, 2DTextureArrayDepthStencil) {
     {
-        wgpu::Texture source = Create2DTexture(16, 16, 1, 3, wgpu::TextureFormat::Depth24PlusStencil8,
-                                           wgpu::TextureUsage::CopySrc);
+        wgpu::Texture source = Create2DTexture(
+            16, 16, 1, 3, wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureUsage::CopySrc);
         wgpu::Texture destination = Create2DTexture(
             16, 16, 1, 1, wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureUsage::CopyDst);
 
@@ -1179,8 +1179,8 @@ TEST_F(CopyCommandTest_T2T, 2DTextureArrayDepthStencil) {
     }
 
     {
-        wgpu::Texture source = Create2DTexture(16, 16, 1, 1, wgpu::TextureFormat::Depth24PlusStencil8,
-                                           wgpu::TextureUsage::CopySrc);
+        wgpu::Texture source = Create2DTexture(
+            16, 16, 1, 1, wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureUsage::CopySrc);
         wgpu::Texture destination = Create2DTexture(
             16, 16, 1, 3, wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureUsage::CopyDst);
 
@@ -1190,8 +1190,8 @@ TEST_F(CopyCommandTest_T2T, 2DTextureArrayDepthStencil) {
     }
 
     {
-        wgpu::Texture source = Create2DTexture(16, 16, 1, 3, wgpu::TextureFormat::Depth24PlusStencil8,
-                                           wgpu::TextureUsage::CopySrc);
+        wgpu::Texture source = Create2DTexture(
+            16, 16, 1, 3, wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureUsage::CopySrc);
         wgpu::Texture destination = Create2DTexture(
             16, 16, 1, 3, wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureUsage::CopyDst);
 

@@ -20,14 +20,10 @@
 namespace {
 
     constexpr wgpu::CompareFunction kCompareFunctions[] = {
-        wgpu::CompareFunction::Never,
-        wgpu::CompareFunction::Less,
-        wgpu::CompareFunction::LessEqual,
-        wgpu::CompareFunction::Greater,
-        wgpu::CompareFunction::GreaterEqual,
-        wgpu::CompareFunction::Equal,
-        wgpu::CompareFunction::NotEqual,
-        wgpu::CompareFunction::Always,
+        wgpu::CompareFunction::Never,        wgpu::CompareFunction::Less,
+        wgpu::CompareFunction::LessEqual,    wgpu::CompareFunction::Greater,
+        wgpu::CompareFunction::GreaterEqual, wgpu::CompareFunction::Equal,
+        wgpu::CompareFunction::NotEqual,     wgpu::CompareFunction::Always,
     };
 
     // Test a "normal" ref value between 0 and 1; as well as negative and > 1 refs.
@@ -225,12 +221,11 @@ class DepthSamplingTest : public DawnTest {
         wgpu::SamplerDescriptor samplerDesc;
         wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
 
-        wgpu::BindGroup bindGroup =
-            utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
-                                 {
-                                     {0, sampler},
-                                     {1, mInputTexture.CreateView()},
-                                 });
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                         {
+                                                             {0, sampler},
+                                                             {1, mInputTexture.CreateView()},
+                                                         });
 
         for (float textureValue : textureValues) {
             // Set the input depth texture to the provided texture value
@@ -258,12 +253,9 @@ class DepthSamplingTest : public DawnTest {
         wgpu::SamplerDescriptor samplerDesc;
         wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
 
-        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
-                                                         {
-                                                             {0, sampler},
-                                                             {1, mInputTexture.CreateView()},
-                                                             {2, mOutputBuffer}
-                                                         });
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(
+            device, pipeline.GetBindGroupLayout(0),
+            {{0, sampler}, {1, mInputTexture.CreateView()}, {2, mOutputBuffer}});
 
         for (float textureValue : textureValues) {
             // Set the input depth texture to the provided texture value
@@ -321,13 +313,12 @@ class DepthSamplingTest : public DawnTest {
         samplerDesc.compare = compare;
         wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
 
-        wgpu::BindGroup bindGroup =
-            utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
-                                 {
-                                     {0, sampler},
-                                     {1, mInputTexture.CreateView()},
-                                     {2, mUniformBuffer},
-                                 });
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                         {
+                                                             {0, sampler},
+                                                             {1, mInputTexture.CreateView()},
+                                                             {2, mUniformBuffer},
+                                                         });
 
         for (float textureValue : textureValues) {
             // Set the input depth texture to the provided texture value
@@ -364,12 +355,10 @@ class DepthSamplingTest : public DawnTest {
         wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
 
         wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
-                                                         {
-                                                             {0, sampler},
-                                                             {1, mInputTexture.CreateView()},
-                                                             {2, mUniformBuffer},
-                                                             {3, mOutputBuffer}
-                                                         });
+                                                         {{0, sampler},
+                                                          {1, mInputTexture.CreateView()},
+                                                          {2, mUniformBuffer},
+                                                          {3, mOutputBuffer}});
 
         for (float textureValue : textureValues) {
             // Set the input depth texture to the provided texture value

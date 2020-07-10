@@ -180,9 +180,7 @@ class WireMemoryTransferServiceTests : public WireTest {
         ClientReadHandle* handle = clientMemoryTransferService.NewReadHandle();
 
         EXPECT_CALL(clientMemoryTransferService, OnCreateReadHandle(sizeof(mBufferContent)))
-            .WillOnce(InvokeWithoutArgs([=]() {
-                return handle;
-            }));
+            .WillOnce(InvokeWithoutArgs([=]() { return handle; }));
 
         return handle;
     }
@@ -259,9 +257,7 @@ class WireMemoryTransferServiceTests : public WireTest {
         ClientWriteHandle* handle = clientMemoryTransferService.NewWriteHandle();
 
         EXPECT_CALL(clientMemoryTransferService, OnCreateWriteHandle(sizeof(mBufferContent)))
-            .WillOnce(InvokeWithoutArgs([=]() {
-                return handle;
-            }));
+            .WillOnce(InvokeWithoutArgs([=]() { return handle; }));
 
         return handle;
     }
@@ -300,22 +296,18 @@ class WireMemoryTransferServiceTests : public WireTest {
         EXPECT_CALL(serverMemoryTransferService,
                     OnDeserializeWriteHandle(Pointee(Eq(mSerializeCreateInfo)),
                                              sizeof(mSerializeCreateInfo), _))
-            .WillOnce(InvokeWithoutArgs([&]() {
-                return false;
-            }));
+            .WillOnce(InvokeWithoutArgs([&]() { return false; }));
     }
 
     void ExpectClientWriteHandleOpen(ClientWriteHandle* handle, uint32_t* mappedData) {
         EXPECT_CALL(clientMemoryTransferService, OnWriteHandleOpen(handle))
-            .WillOnce(InvokeWithoutArgs([=]() {
-                return std::make_pair(mappedData, sizeof(*mappedData));
-            }));
+            .WillOnce(InvokeWithoutArgs(
+                [=]() { return std::make_pair(mappedData, sizeof(*mappedData)); }));
     }
 
     void MockClientWriteHandleOpenFailure(ClientWriteHandle* handle) {
         EXPECT_CALL(clientMemoryTransferService, OnWriteHandleOpen(handle))
-            .WillOnce(InvokeWithoutArgs(
-                [&]() { return std::make_pair(nullptr, 0); }));
+            .WillOnce(InvokeWithoutArgs([&]() { return std::make_pair(nullptr, 0); }));
     }
 
     void ExpectClientWriteHandleSerializeFlush(ClientWriteHandle* handle) {
@@ -348,8 +340,8 @@ class WireMemoryTransferServiceTests : public WireTest {
 
     // Arbitrary values used within tests to check if serialized data is correctly passed
     // between the client and server. The static data changes between runs of the tests and
-    // test expectations will check that serialized values are passed to the respective deserialization
-    // function.
+    // test expectations will check that serialized values are passed to the respective
+    // deserialization function.
     static uint32_t mSerializeCreateInfo;
     static uint32_t mSerializeInitialDataInfo;
     static uint32_t mSerializeFlushInfo;
@@ -360,8 +352,9 @@ class WireMemoryTransferServiceTests : public WireTest {
     // The client's zero-initialized buffer for writing.
     uint32_t mMappedBufferContent = 0;
 
-    // |mMappedBufferContent| should be set equal to |mUpdatedBufferContent| when the client performs a write.
-    // Test expectations should check that |mBufferContent == mUpdatedBufferContent| after all writes are flushed.
+    // |mMappedBufferContent| should be set equal to |mUpdatedBufferContent| when the client
+    // performs a write. Test expectations should check that |mBufferContent ==
+    // mUpdatedBufferContent| after all writes are flushed.
     static uint32_t mUpdatedBufferContent;
 
     testing::StrictMock<dawn_wire::server::MockMemoryTransferService> serverMemoryTransferService;

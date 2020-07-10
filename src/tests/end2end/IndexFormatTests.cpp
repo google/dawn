@@ -21,45 +21,45 @@
 constexpr uint32_t kRTSize = 400;
 
 class IndexFormatTest : public DawnTest {
-    protected:
-        void SetUp() override {
-            DawnTest::SetUp();
+  protected:
+    void SetUp() override {
+        DawnTest::SetUp();
 
-            renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
-        }
+        renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+    }
 
-        utils::BasicRenderPass renderPass;
+    utils::BasicRenderPass renderPass;
 
-        wgpu::RenderPipeline MakeTestPipeline(wgpu::IndexFormat format) {
-            wgpu::ShaderModule vsModule =
-                utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
+    wgpu::RenderPipeline MakeTestPipeline(wgpu::IndexFormat format) {
+        wgpu::ShaderModule vsModule =
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
                 #version 450
                 layout(location = 0) in vec4 pos;
                 void main() {
                     gl_Position = pos;
                 })");
 
-            wgpu::ShaderModule fsModule =
-                utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
+        wgpu::ShaderModule fsModule =
+            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
                 #version 450
                 layout(location = 0) out vec4 fragColor;
                 void main() {
                     fragColor = vec4(0.0, 1.0, 0.0, 1.0);
                 })");
 
-            utils::ComboRenderPipelineDescriptor descriptor(device);
-            descriptor.vertexStage.module = vsModule;
-            descriptor.cFragmentStage.module = fsModule;
-            descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
-            descriptor.cVertexState.indexFormat = format;
-            descriptor.cVertexState.vertexBufferCount = 1;
-            descriptor.cVertexState.cVertexBuffers[0].arrayStride = 4 * sizeof(float);
-            descriptor.cVertexState.cVertexBuffers[0].attributeCount = 1;
-            descriptor.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float4;
-            descriptor.cColorStates[0].format = renderPass.colorFormat;
+        utils::ComboRenderPipelineDescriptor descriptor(device);
+        descriptor.vertexStage.module = vsModule;
+        descriptor.cFragmentStage.module = fsModule;
+        descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
+        descriptor.cVertexState.indexFormat = format;
+        descriptor.cVertexState.vertexBufferCount = 1;
+        descriptor.cVertexState.cVertexBuffers[0].arrayStride = 4 * sizeof(float);
+        descriptor.cVertexState.cVertexBuffers[0].attributeCount = 1;
+        descriptor.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float4;
+        descriptor.cColorStates[0].format = renderPass.colorFormat;
 
-            return device.CreateRenderPipeline(&descriptor);
-        }
+        return device.CreateRenderPipeline(&descriptor);
+    }
 };
 
 // Test that the Uint32 index format is correctly interpreted
@@ -275,4 +275,8 @@ TEST_P(IndexFormatTest, DISABLED_SetIndexBufferBeforeSetPipeline) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);
 }
 
-DAWN_INSTANTIATE_TEST(IndexFormatTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(IndexFormatTest,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());

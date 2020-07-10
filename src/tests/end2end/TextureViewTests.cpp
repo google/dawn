@@ -70,7 +70,7 @@ namespace {
 }  // anonymous namespace
 
 class TextureViewSamplingTest : public DawnTest {
-protected:
+  protected:
     // Generates an arbitrary pixel value per-layer-per-level, used for the "actual" uploaded
     // textures and the "expected" results.
     static int GenerateTestPixelValue(uint32_t layer, uint32_t level) {
@@ -104,8 +104,8 @@ protected:
         const uint32_t textureHeightLevel0 = 1 << mipLevelCount;
         constexpr wgpu::TextureUsage kUsage =
             wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled;
-        mTexture = Create2DTexture(
-            device, textureWidthLevel0, textureHeightLevel0, arrayLayerCount, mipLevelCount, kUsage);
+        mTexture = Create2DTexture(device, textureWidthLevel0, textureHeightLevel0, arrayLayerCount,
+                                   mipLevelCount, kUsage);
 
         mDefaultTextureViewDescriptor.dimension = wgpu::TextureViewDimension::e2DArray;
         mDefaultTextureViewDescriptor.format = kDefaultFormat;
@@ -145,10 +145,7 @@ protected:
         queue.Submit(1, &copy);
     }
 
-    void Verify(const wgpu::TextureView& textureView,
-                const char* fragmentShader,
-                int expected) {
-
+    void Verify(const wgpu::TextureView& textureView, const char* fragmentShader, int expected) {
         wgpu::ShaderModule fsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fragmentShader);
 
@@ -176,8 +173,8 @@ protected:
 
         RGBA8 expectedPixel(0, 0, 0, expected);
         EXPECT_PIXEL_RGBA8_EQ(expectedPixel, mRenderPass.color, 0, 0);
-        EXPECT_PIXEL_RGBA8_EQ(
-            expectedPixel, mRenderPass.color, mRenderPass.width - 1, mRenderPass.height - 1);
+        EXPECT_PIXEL_RGBA8_EQ(expectedPixel, mRenderPass.color, mRenderPass.width - 1,
+                              mRenderPass.height - 1);
         // TODO(jiawei.shao@intel.com): add tests for 3D textures once Dawn supports 3D textures
     }
 
@@ -262,13 +259,13 @@ protected:
     std::string CreateFragmentShaderForCubeMapFace(uint32_t layer, bool isCubeMapArray) {
         // Reference: https://en.wikipedia.org/wiki/Cube_mapping
         const std::array<std::string, 6> kCoordsToCubeMapFace = {{
-             " 1.f,   tc,  -sc",  // Positive X
-             "-1.f,   tc,   sc",  // Negative X
-             "  sc,  1.f,  -tc",  // Positive Y
-             "  sc, -1.f,   tc",  // Negative Y
-             "  sc,   tc,  1.f",  // Positive Z
-             " -sc,   tc, -1.f",  // Negative Z
-            }};
+            " 1.f,   tc,  -sc",  // Positive X
+            "-1.f,   tc,   sc",  // Negative X
+            "  sc,  1.f,  -tc",  // Positive Y
+            "  sc, -1.f,   tc",  // Negative Y
+            "  sc,   tc,  1.f",  // Positive Z
+            " -sc,   tc, -1.f",  // Negative Z
+        }};
 
         const std::string textureType = isCubeMapArray ? "textureCubeArray" : "textureCube";
         const std::string samplerType = isCubeMapArray ? "samplerCubeArray" : "samplerCube";
@@ -279,13 +276,15 @@ protected:
         stream << R"(
             #version 450
             layout(set = 0, binding = 0) uniform sampler sampler0;
-            layout(set = 0, binding = 1) uniform )" << textureType << R"( texture0;
+            layout(set = 0, binding = 1) uniform )"
+               << textureType << R"( texture0;
             layout(location = 0) in vec2 texCoord;
             layout(location = 0) out vec4 fragColor;
             void main() {
                 float sc = 2.f * texCoord.x - 1.f;
                 float tc = 2.f * texCoord.y - 1.f;
-                fragColor = texture()" << samplerType << "(texture0, sampler0), ";
+                fragColor = texture()"
+               << samplerType << "(texture0, sampler0), ";
 
         if (isCubeMapArray) {
             stream << "vec4(" << coordToCubeMapFace << ", " << cubeMapArrayIndex;
@@ -321,7 +320,7 @@ protected:
 
         // Check the data in the every face of the cube map (array) texture view.
         for (uint32_t layer = 0; layer < textureViewLayerCount; ++layer) {
-            const std::string &fragmentShader =
+            const std::string& fragmentShader =
                 CreateFragmentShaderForCubeMapFace(layer, isCubeMapArray);
 
             int expected = GenerateTestPixelValue(textureViewBaseLayer + layer, 0);
@@ -362,8 +361,8 @@ TEST_P(TextureViewSamplingTest, Default2DArrayTexture) {
             }
         )";
 
-    const int expected = GenerateTestPixelValue(0, 0) + GenerateTestPixelValue(1, 0) +
-                         GenerateTestPixelValue(2, 0);
+    const int expected =
+        GenerateTestPixelValue(0, 0) + GenerateTestPixelValue(1, 0) + GenerateTestPixelValue(2, 0);
     Verify(textureView, fragmentShader, expected);
 }
 
@@ -427,7 +426,8 @@ TEST_P(TextureViewSamplingTest, TextureCubeMapArrayViewOnPartOfTexture) {
     TextureCubeMapTest(20, 3, 12, true);
 }
 
-// Test sampling from a cube map texture array view that covers the last layer of a 2D array texture.
+// Test sampling from a cube map texture array view that covers the last layer of a 2D array
+// texture.
 TEST_P(TextureViewSamplingTest, TextureCubeMapArrayViewCoveringLastLayer) {
     // Test failing on the GPU FYI Mac Pro (AMD), see
     // https://bugs.chromium.org/p/dawn/issues/detail?id=58
@@ -519,9 +519,8 @@ class TextureViewRenderingTest : public DawnTest {
             bytesPerRow / kBytesPerTexel * (textureWidthLevel0 - 1) + textureHeightLevel0;
         constexpr RGBA8 kExpectedPixel(0, 255, 0, 255);
         std::vector<RGBA8> expected(expectedDataSize, kExpectedPixel);
-        EXPECT_TEXTURE_RGBA8_EQ(
-            expected.data(), texture, 0, 0, textureViewWidth, textureViewHeight,
-            textureViewBaseLevel, textureViewBaseLayer);
+        EXPECT_TEXTURE_RGBA8_EQ(expected.data(), texture, 0, 0, textureViewWidth, textureViewHeight,
+                                textureViewBaseLevel, textureViewBaseLayer);
     }
 };
 
@@ -565,7 +564,6 @@ TEST_P(TextureViewRenderingTest, Texture2DViewOnALayerOf2DArrayTextureAsColorAtt
         TextureLayerAsColorAttachmentTest(wgpu::TextureViewDimension::e2D, kLayers, kMipLevels,
                                           kBaseLayer, kBaseLevel);
     }
-
 }
 
 // Test rendering into a 1-layer 2D array texture view created on a mipmap level of a 2D texture.
@@ -610,9 +608,17 @@ TEST_P(TextureViewRenderingTest, Texture2DArrayViewOnALayerOf2DArrayTextureAsCol
     }
 }
 
-DAWN_INSTANTIATE_TEST(TextureViewSamplingTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(TextureViewSamplingTest,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());
 
-DAWN_INSTANTIATE_TEST(TextureViewRenderingTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(TextureViewRenderingTest,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());
 
 class TextureViewTest : public DawnTest {};
 

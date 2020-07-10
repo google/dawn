@@ -49,9 +49,7 @@ static_library("dawn_sample_utils") {
 # Template for samples to avoid listing dawn_sample_utils as a dep every time
 template("dawn_sample") {
   executable(target_name) {
-    deps = [
-      ":dawn_sample_utils",
-    ]
+    deps = [ ":dawn_sample_utils" ]
     forward_variables_from(invoker, "*", [ "deps" ])
 
     if (defined(invoker.deps)) {
@@ -61,43 +59,27 @@ template("dawn_sample") {
 }
 
 dawn_sample("CppHelloTriangle") {
-  sources = [
-    "CppHelloTriangle.cpp",
-  ]
+  sources = [ "CppHelloTriangle.cpp" ]
 }
 
 dawn_sample("CHelloTriangle") {
-  sources = [
-    "CHelloTriangle.cpp",
-  ]
+  sources = [ "CHelloTriangle.cpp" ]
 }
 
 dawn_sample("ComputeBoids") {
-  sources = [
-    "ComputeBoids.cpp",
-  ]
-  deps = [
-    "${dawn_root}/third_party/gn/glm",
-  ]
+  sources = [ "ComputeBoids.cpp" ]
+  deps = [ "${dawn_root}/third_party/gn/glm" ]
 }
 
 dawn_sample("Animometer") {
-  sources = [
-    "Animometer.cpp",
-  ]
+  sources = [ "Animometer.cpp" ]
 }
 
 dawn_sample("CubeReflection") {
-  sources = [
-    "CubeReflection.cpp",
-  ]
-  deps = [
-    "${dawn_root}/third_party/gn/glm",
-  ]
+  sources = [ "CubeReflection.cpp" ]
+  deps = [ "${dawn_root}/third_party/gn/glm" ]
 }
 
 dawn_sample("ManualSwapChainTest") {
-  sources = [
-    "ManualSwapChainTest.cpp",
-  ]
+  sources = [ "ManualSwapChainTest.cpp" ]
 }

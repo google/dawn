@@ -70,4 +70,4 @@ class ValidationTest : public testing::Test {
     bool mError = false;
 };
 
-#endif // TESTS_UNITTESTS_VALIDATIONTEST_H_
+#endif  // TESTS_UNITTESTS_VALIDATIONTEST_H_

@@ -16,8 +16,7 @@
 
 #include "utils/WGPUHelpers.h"
 
-class BasicTests : public DawnTest {
-};
+class BasicTests : public DawnTest {};
 
 // Test adapter filter by vendor id.
 TEST_P(BasicTests, VendorIdFilter) {

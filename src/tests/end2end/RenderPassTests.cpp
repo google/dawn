@@ -21,7 +21,7 @@ constexpr uint32_t kRTSize = 16;
 constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
 
 class RenderPassTest : public DawnTest {
-protected:
+  protected:
     void SetUp() override {
         DawnTest::SetUp();
 
@@ -71,9 +71,9 @@ protected:
 // Test using two different render passes in one commandBuffer works correctly.
 TEST_P(RenderPassTest, TwoRenderPassesInOneCommandBuffer) {
     if (IsOpenGL() || IsMetal()) {
-      // crbug.com/950768
-      // This test is consistently failing on OpenGL and flaky on Metal.
-      return;
+        // crbug.com/950768
+        // This test is consistently failing on OpenGL and flaky on Metal.
+        return;
     }
 
     wgpu::Texture renderTarget1 = CreateDefault2DTexture();

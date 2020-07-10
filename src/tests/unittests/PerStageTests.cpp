@@ -48,7 +48,7 @@ TEST(PerStage, IterateAllStages) {
     counts[SingleShaderStage::Compute] = 0;
 
     for (auto stage : IterateStages(kAllStages)) {
-        counts[stage] ++;
+        counts[stage]++;
     }
 
     ASSERT_EQ(counts[wgpu::ShaderStage::Vertex], 1);
@@ -64,7 +64,7 @@ TEST(PerStage, IterateOneStage) {
     counts[SingleShaderStage::Compute] = 0;
 
     for (auto stage : IterateStages(wgpu::ShaderStage::Fragment)) {
-        counts[stage] ++;
+        counts[stage]++;
     }
 
     ASSERT_EQ(counts[wgpu::ShaderStage::Vertex], 0);
@@ -80,7 +80,7 @@ TEST(PerStage, IterateNoStages) {
     counts[SingleShaderStage::Compute] = 0;
 
     for (auto stage : IterateStages(wgpu::ShaderStage::Fragment & wgpu::ShaderStage::Vertex)) {
-        counts[stage] ++;
+        counts[stage]++;
     }
 
     ASSERT_EQ(counts[wgpu::ShaderStage::Vertex], 0);

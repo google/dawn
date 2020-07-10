@@ -21,13 +21,13 @@
 using namespace testing;
 
 class MockBufferMapReadCallback {
-    public:
-      MOCK_METHOD(void,
-                  Call,
-                  (WGPUBufferMapAsyncStatus status,
-                   const uint32_t* ptr,
-                   uint64_t dataLength,
-                   void* userdata));
+  public:
+    MOCK_METHOD(void,
+                Call,
+                (WGPUBufferMapAsyncStatus status,
+                 const uint32_t* ptr,
+                 uint64_t dataLength,
+                 void* userdata));
 };
 
 static std::unique_ptr<MockBufferMapReadCallback> mockBufferMapReadCallback;
@@ -41,11 +41,11 @@ static void ToMockBufferMapReadCallback(WGPUBufferMapAsyncStatus status,
 }
 
 class MockBufferMapWriteCallback {
-    public:
-      MOCK_METHOD(
-          void,
-          Call,
-          (WGPUBufferMapAsyncStatus status, uint32_t* ptr, uint64_t dataLength, void* userdata));
+  public:
+    MOCK_METHOD(
+        void,
+        Call,
+        (WGPUBufferMapAsyncStatus status, uint32_t* ptr, uint64_t dataLength, void* userdata));
 };
 
 static std::unique_ptr<MockBufferMapWriteCallback> mockBufferMapWriteCallback;
@@ -59,57 +59,57 @@ static void ToMockBufferMapWriteCallback(WGPUBufferMapAsyncStatus status,
 }
 
 class BufferValidationTest : public ValidationTest {
-    protected:
-      wgpu::Buffer CreateMapReadBuffer(uint64_t size) {
-          wgpu::BufferDescriptor descriptor;
-          descriptor.size = size;
-          descriptor.usage = wgpu::BufferUsage::MapRead;
+  protected:
+    wgpu::Buffer CreateMapReadBuffer(uint64_t size) {
+        wgpu::BufferDescriptor descriptor;
+        descriptor.size = size;
+        descriptor.usage = wgpu::BufferUsage::MapRead;
 
-          return device.CreateBuffer(&descriptor);
-      }
-      wgpu::Buffer CreateMapWriteBuffer(uint64_t size) {
-          wgpu::BufferDescriptor descriptor;
-          descriptor.size = size;
-          descriptor.usage = wgpu::BufferUsage::MapWrite;
+        return device.CreateBuffer(&descriptor);
+    }
+    wgpu::Buffer CreateMapWriteBuffer(uint64_t size) {
+        wgpu::BufferDescriptor descriptor;
+        descriptor.size = size;
+        descriptor.usage = wgpu::BufferUsage::MapWrite;
 
-          return device.CreateBuffer(&descriptor);
-      }
+        return device.CreateBuffer(&descriptor);
+    }
 
-      wgpu::CreateBufferMappedResult CreateBufferMapped(uint64_t size, wgpu::BufferUsage usage) {
-          wgpu::BufferDescriptor descriptor;
-          descriptor.size = size;
-          descriptor.usage = usage;
+    wgpu::CreateBufferMappedResult CreateBufferMapped(uint64_t size, wgpu::BufferUsage usage) {
+        wgpu::BufferDescriptor descriptor;
+        descriptor.size = size;
+        descriptor.usage = usage;
 
-          return device.CreateBufferMapped(&descriptor);
-      }
+        return device.CreateBufferMapped(&descriptor);
+    }
 
-      wgpu::Buffer BufferMappedAtCreation(uint64_t size, wgpu::BufferUsage usage) {
-          wgpu::BufferDescriptor descriptor;
-          descriptor.size = size;
-          descriptor.usage = usage;
-          descriptor.mappedAtCreation = true;
+    wgpu::Buffer BufferMappedAtCreation(uint64_t size, wgpu::BufferUsage usage) {
+        wgpu::BufferDescriptor descriptor;
+        descriptor.size = size;
+        descriptor.usage = usage;
+        descriptor.mappedAtCreation = true;
 
-          return device.CreateBuffer(&descriptor);
-      }
+        return device.CreateBuffer(&descriptor);
+    }
 
-      wgpu::Queue queue;
+    wgpu::Queue queue;
 
-    private:
-        void SetUp() override {
-            ValidationTest::SetUp();
+  private:
+    void SetUp() override {
+        ValidationTest::SetUp();
 
-            mockBufferMapReadCallback = std::make_unique<MockBufferMapReadCallback>();
-            mockBufferMapWriteCallback = std::make_unique<MockBufferMapWriteCallback>();
-            queue = device.GetDefaultQueue();
-        }
+        mockBufferMapReadCallback = std::make_unique<MockBufferMapReadCallback>();
+        mockBufferMapWriteCallback = std::make_unique<MockBufferMapWriteCallback>();
+        queue = device.GetDefaultQueue();
+    }
 
-        void TearDown() override {
-            // Delete mocks so that expectations are checked
-            mockBufferMapReadCallback = nullptr;
-            mockBufferMapWriteCallback = nullptr;
+    void TearDown() override {
+        // Delete mocks so that expectations are checked
+        mockBufferMapReadCallback = nullptr;
+        mockBufferMapWriteCallback = nullptr;
 
-            ValidationTest::TearDown();
-        }
+        ValidationTest::TearDown();
+    }
 };
 
 // Test case where creation should succeed
@@ -416,7 +416,8 @@ TEST_F(BufferValidationTest, UnmapInsideMapWriteCallback) {
     WaitForAllOperations(device);
 }
 
-// Test that the MapReadCallback isn't fired twice the buffer external refcount reaches 0 in the callback
+// Test that the MapReadCallback isn't fired twice the buffer external refcount reaches 0 in the
+// callback
 TEST_F(BufferValidationTest, DestroyInsideMapReadCallback) {
     wgpu::Buffer buf = CreateMapReadBuffer(4);
 
@@ -429,7 +430,8 @@ TEST_F(BufferValidationTest, DestroyInsideMapReadCallback) {
     WaitForAllOperations(device);
 }
 
-// Test that the MapWriteCallback isn't fired twice the buffer external refcount reaches 0 in the callback
+// Test that the MapWriteCallback isn't fired twice the buffer external refcount reaches 0 in the
+// callback
 TEST_F(BufferValidationTest, DestroyInsideMapWriteCallback) {
     wgpu::Buffer buf = CreateMapWriteBuffer(4);
 

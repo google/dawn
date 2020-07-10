@@ -196,4 +196,8 @@ TEST_P(RenderBundleTest, BundleAndRenderPassCommands) {
     EXPECT_PIXEL_RGBA8_EQ(kColors[1], renderPass.color, 3, 1);
 }
 
-DAWN_INSTANTIATE_TEST(RenderBundleTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(RenderBundleTest,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());

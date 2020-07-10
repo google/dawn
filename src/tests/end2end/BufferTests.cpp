@@ -17,34 +17,34 @@
 #include <cstring>
 
 class BufferMapReadTests : public DawnTest {
-    protected:
-      static void MapReadCallback(WGPUBufferMapAsyncStatus status,
-                                  const void* data,
-                                  uint64_t,
-                                  void* userdata) {
-          ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
-          ASSERT_NE(nullptr, data);
+  protected:
+    static void MapReadCallback(WGPUBufferMapAsyncStatus status,
+                                const void* data,
+                                uint64_t,
+                                void* userdata) {
+        ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
+        ASSERT_NE(nullptr, data);
 
-          static_cast<BufferMapReadTests*>(userdata)->mappedData = data;
-      }
+        static_cast<BufferMapReadTests*>(userdata)->mappedData = data;
+    }
 
-      const void* MapReadAsyncAndWait(const wgpu::Buffer& buffer) {
-          buffer.MapReadAsync(MapReadCallback, this);
+    const void* MapReadAsyncAndWait(const wgpu::Buffer& buffer) {
+        buffer.MapReadAsync(MapReadCallback, this);
 
-          while (mappedData == nullptr) {
-              WaitABit();
-          }
+        while (mappedData == nullptr) {
+            WaitABit();
+        }
 
-          return mappedData;
-      }
+        return mappedData;
+    }
 
-      void UnmapBuffer(const wgpu::Buffer& buffer) {
-          buffer.Unmap();
-          mappedData = nullptr;
-      }
+    void UnmapBuffer(const wgpu::Buffer& buffer) {
+        buffer.Unmap();
+        mappedData = nullptr;
+    }
 
-    private:
-        const void* mappedData = nullptr;
+  private:
+    const void* mappedData = nullptr;
 };
 
 // Test that the simplest map read works.
@@ -145,41 +145,45 @@ TEST_P(BufferMapReadTests, GetMappedRangeZeroSized) {
     UnmapBuffer(buffer);
 }
 
-DAWN_INSTANTIATE_TEST(BufferMapReadTests, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(BufferMapReadTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());
 
 class BufferMapWriteTests : public DawnTest {
-    protected:
-      static void MapWriteCallback(WGPUBufferMapAsyncStatus status,
-                                   void* data,
-                                   uint64_t,
-                                   void* userdata) {
-          ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
-          ASSERT_NE(nullptr, data);
+  protected:
+    static void MapWriteCallback(WGPUBufferMapAsyncStatus status,
+                                 void* data,
+                                 uint64_t,
+                                 void* userdata) {
+        ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
+        ASSERT_NE(nullptr, data);
 
-          static_cast<BufferMapWriteTests*>(userdata)->mappedData = data;
-      }
+        static_cast<BufferMapWriteTests*>(userdata)->mappedData = data;
+    }
 
-      void* MapWriteAsyncAndWait(const wgpu::Buffer& buffer) {
-          buffer.MapWriteAsync(MapWriteCallback, this);
+    void* MapWriteAsyncAndWait(const wgpu::Buffer& buffer) {
+        buffer.MapWriteAsync(MapWriteCallback, this);
 
-          while (mappedData == nullptr) {
-              WaitABit();
-          }
+        while (mappedData == nullptr) {
+            WaitABit();
+        }
 
-          // Ensure the prior write's status is updated.
-          void* resultPointer = mappedData;
-          mappedData = nullptr;
+        // Ensure the prior write's status is updated.
+        void* resultPointer = mappedData;
+        mappedData = nullptr;
 
-          return resultPointer;
-      }
+        return resultPointer;
+    }
 
-      void UnmapBuffer(const wgpu::Buffer& buffer) {
-          buffer.Unmap();
-          mappedData = nullptr;
-      }
+    void UnmapBuffer(const wgpu::Buffer& buffer) {
+        buffer.Unmap();
+        mappedData = nullptr;
+    }
 
-    private:
-        void* mappedData = nullptr;
+  private:
+    void* mappedData = nullptr;
 };
 
 // Test that the simplest map write works.
@@ -307,64 +311,68 @@ TEST_P(BufferMapWriteTests, GetMappedRangeZeroSized) {
     UnmapBuffer(buffer);
 }
 
-DAWN_INSTANTIATE_TEST(BufferMapWriteTests, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(BufferMapWriteTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());
 
 class CreateBufferMappedTests : public DawnTest {
-    protected:
-      static void MapReadCallback(WGPUBufferMapAsyncStatus status,
-                                  const void* data,
-                                  uint64_t,
-                                  void* userdata) {
-          ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
-          ASSERT_NE(nullptr, data);
+  protected:
+    static void MapReadCallback(WGPUBufferMapAsyncStatus status,
+                                const void* data,
+                                uint64_t,
+                                void* userdata) {
+        ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
+        ASSERT_NE(nullptr, data);
 
-          static_cast<CreateBufferMappedTests*>(userdata)->mappedData = data;
-      }
+        static_cast<CreateBufferMappedTests*>(userdata)->mappedData = data;
+    }
 
-      const void* MapReadAsyncAndWait(const wgpu::Buffer& buffer) {
-          buffer.MapReadAsync(MapReadCallback, this);
+    const void* MapReadAsyncAndWait(const wgpu::Buffer& buffer) {
+        buffer.MapReadAsync(MapReadCallback, this);
 
-          while (mappedData == nullptr) {
-              WaitABit();
-          }
+        while (mappedData == nullptr) {
+            WaitABit();
+        }
 
-          return mappedData;
-      }
+        return mappedData;
+    }
 
-      void UnmapBuffer(const wgpu::Buffer& buffer) {
-          buffer.Unmap();
-          mappedData = nullptr;
-      }
+    void UnmapBuffer(const wgpu::Buffer& buffer) {
+        buffer.Unmap();
+        mappedData = nullptr;
+    }
 
-      void CheckResultStartsZeroed(const wgpu::CreateBufferMappedResult& result, uint64_t size) {
-          ASSERT_EQ(result.dataLength, size);
-          for (uint64_t i = 0; i < result.dataLength; ++i) {
-              uint8_t value = *(reinterpret_cast<uint8_t*>(result.data) + i);
-              ASSERT_EQ(value, 0u);
-          }
-      }
+    void CheckResultStartsZeroed(const wgpu::CreateBufferMappedResult& result, uint64_t size) {
+        ASSERT_EQ(result.dataLength, size);
+        for (uint64_t i = 0; i < result.dataLength; ++i) {
+            uint8_t value = *(reinterpret_cast<uint8_t*>(result.data) + i);
+            ASSERT_EQ(value, 0u);
+        }
+    }
 
-      wgpu::CreateBufferMappedResult CreateBufferMapped(wgpu::BufferUsage usage, uint64_t size) {
-          wgpu::BufferDescriptor descriptor = {};
-          descriptor.size = size;
-          descriptor.usage = usage;
+    wgpu::CreateBufferMappedResult CreateBufferMapped(wgpu::BufferUsage usage, uint64_t size) {
+        wgpu::BufferDescriptor descriptor = {};
+        descriptor.size = size;
+        descriptor.usage = usage;
 
-          wgpu::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
-          CheckResultStartsZeroed(result, size);
-          return result;
-      }
+        wgpu::CreateBufferMappedResult result = device.CreateBufferMapped(&descriptor);
+        CheckResultStartsZeroed(result, size);
+        return result;
+    }
 
-      wgpu::CreateBufferMappedResult CreateBufferMappedWithData(wgpu::BufferUsage usage,
-                                                                const std::vector<uint32_t>& data) {
-          size_t byteLength = data.size() * sizeof(uint32_t);
-          wgpu::CreateBufferMappedResult result = CreateBufferMapped(usage, byteLength);
-          memcpy(result.data, data.data(), byteLength);
+    wgpu::CreateBufferMappedResult CreateBufferMappedWithData(wgpu::BufferUsage usage,
+                                                              const std::vector<uint32_t>& data) {
+        size_t byteLength = data.size() * sizeof(uint32_t);
+        wgpu::CreateBufferMappedResult result = CreateBufferMapped(usage, byteLength);
+        memcpy(result.data, data.data(), byteLength);
 
-          return result;
-      }
+        return result;
+    }
 
-    private:
-        const void* mappedData = nullptr;
+  private:
+    const void* mappedData = nullptr;
 };
 
 // Test that the simplest CreateBufferMapped works for MapWrite buffers.

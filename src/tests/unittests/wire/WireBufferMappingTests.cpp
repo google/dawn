@@ -613,4 +613,3 @@ TEST_F(WireBufferMappingTests, CreateBufferMappedThenMapFailure) {
 
     FlushClient();
 }
-

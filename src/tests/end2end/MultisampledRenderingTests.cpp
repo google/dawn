@@ -61,7 +61,6 @@ class MultisampledRenderingTest : public DawnTest {
 
         const char* fs = testDepth ? kFsOneOutputWithDepth : kFsOneOutputWithoutDepth;
 
-
         return CreateRenderPipelineForTest(fs, 1, testDepth);
     }
 
@@ -285,8 +284,8 @@ TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTest) {
         utils::ComboRenderPassDescriptor renderPass =
             CreateComboRenderPassDescriptorForTest({mMultisampledColorView}, {mResolveView},
                                                    wgpu::LoadOp::Clear, wgpu::LoadOp::Clear, true);
-        std::array<float, 5> kUniformData = {kGreen.r, kGreen.g, kGreen.b, kGreen.a, // Color
-                                             0.2f};                                  // depth
+        std::array<float, 5> kUniformData = {kGreen.r, kGreen.g, kGreen.b, kGreen.a,  // Color
+                                             0.2f};                                   // depth
         constexpr uint32_t kSize = sizeof(kUniformData);
         EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kUniformData.data(), kSize);
     }
@@ -299,8 +298,8 @@ TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTest) {
             {mMultisampledColorView}, {mResolveView}, wgpu::LoadOp::Load, wgpu::LoadOp::Load,
             kTestDepth);
 
-        std::array<float, 8> kUniformData = {kRed.r, kRed.g, kRed.b, kRed.a, // color
-                                             0.5f};                          // depth
+        std::array<float, 8> kUniformData = {kRed.r, kRed.g, kRed.b, kRed.a,  // color
+                                             0.5f};                           // depth
         constexpr uint32_t kSize = sizeof(kUniformData);
         EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kUniformData.data(), kSize);
     }
@@ -369,8 +368,8 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargets) {
             {mMultisampledColorView, multisampledColorView2}, {mResolveView, resolveView2},
             wgpu::LoadOp::Clear, wgpu::LoadOp::Clear, kTestDepth);
 
-        std::array<float, 8> kUniformData = {kRed.r, kRed.g, kRed.b, kRed.a,          // color1
-                                             kGreen.r, kGreen.g, kGreen.b, kGreen.a}; // color2
+        std::array<float, 8> kUniformData = {kRed.r,   kRed.g,   kRed.b,   kRed.a,     // color1
+                                             kGreen.r, kGreen.g, kGreen.b, kGreen.a};  // color2
         constexpr uint32_t kSize = sizeof(kUniformData);
         EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kUniformData.data(), kSize);
     }
@@ -503,8 +502,8 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DArrayTexture) {
             {mMultisampledColorView, multisampledColorView2}, {resolveView1, resolveView2},
             wgpu::LoadOp::Clear, wgpu::LoadOp::Clear, kTestDepth);
 
-        std::array<float, 8> kUniformData = {kRed.r, kRed.g, kRed.b, kRed.a,          // color1
-                                             kGreen.r, kGreen.g, kGreen.b, kGreen.a}; // color2
+        std::array<float, 8> kUniformData = {kRed.r,   kRed.g,   kRed.b,   kRed.a,     // color1
+                                             kGreen.r, kGreen.g, kGreen.b, kGreen.a};  // color2
         constexpr uint32_t kSize = sizeof(kUniformData);
         EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kUniformData.data(), kSize);
     }

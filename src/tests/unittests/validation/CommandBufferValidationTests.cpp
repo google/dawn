@@ -16,8 +16,7 @@
 
 #include "utils/WGPUHelpers.h"
 
-class CommandBufferValidationTest : public ValidationTest {
-};
+class CommandBufferValidationTest : public ValidationTest {};
 
 // Test for an empty command buffer
 TEST_F(CommandBufferValidationTest, Empty) {

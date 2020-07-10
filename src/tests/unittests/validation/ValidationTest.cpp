@@ -27,7 +27,7 @@ ValidationTest::ValidationTest() {
 
     // Validation tests run against the null backend, find the corresponding adapter
     bool foundNullAdapter = false;
-    for (auto &currentAdapter : adapters) {
+    for (auto& currentAdapter : adapters) {
         wgpu::AdapterProperties adapterProperties;
         currentAdapter.GetProperties(&adapterProperties);
 
@@ -129,7 +129,7 @@ ValidationTest::DummyRenderPass::DummyRenderPass(const wgpu::Device& device)
     wgpu::TextureView view = attachment.CreateView();
     mColorAttachment.attachment = view;
     mColorAttachment.resolveTarget = nullptr;
-    mColorAttachment.clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+    mColorAttachment.clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
     mColorAttachment.loadOp = wgpu::LoadOp::Clear;
     mColorAttachment.storeOp = wgpu::StoreOp::Store;
 

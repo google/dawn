@@ -292,6 +292,6 @@ DAWN_INSTANTIATE_TEST(NonzeroTextureCreationTests,
                       MetalBackend({"nonzero_clear_resources_on_creation_for_testing"},
                                    {"lazy_clear_resource_on_first_use"}),
                       OpenGLBackend({"nonzero_clear_resources_on_creation_for_testing"},
-                                   {"lazy_clear_resource_on_first_use"}),
+                                    {"lazy_clear_resource_on_first_use"}),
                       VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"},
-                                   {"lazy_clear_resource_on_first_use"}));
+                                    {"lazy_clear_resource_on_first_use"}));

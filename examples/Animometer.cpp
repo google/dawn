@@ -18,8 +18,8 @@
 #include "utils/SystemUtils.h"
 #include "utils/WGPUHelpers.h"
 
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
 #include <vector>
 
 wgpu::Device device;
@@ -138,8 +138,7 @@ void init() {
     bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform;
     ubo = device.CreateBuffer(&bufferDesc);
 
-    bindGroup =
-        utils::MakeBindGroup(device, bgl, {{0, ubo, 0, sizeof(ShaderData)}});
+    bindGroup = utils::MakeBindGroup(device, bgl, {{0, ubo, 0, sizeof(ShaderData)}});
 }
 
 void frame() {

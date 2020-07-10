@@ -231,7 +231,11 @@ TEST_P(GpuMemorySyncTests, ComputePassToRenderPass) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(2, 0, 0, 255), renderPass.color, 0, 0);
 }
 
-DAWN_INSTANTIATE_TEST(GpuMemorySyncTests, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(GpuMemorySyncTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());
 
 class StorageToUniformSyncTests : public DawnTest {
   protected:

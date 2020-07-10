@@ -262,4 +262,8 @@ TEST_P(OpArrayLengthTest, Vertex) {
     EXPECT_PIXEL_RGBA8_EQ(expectedColor, renderPass.color, 0, 0);
 }
 
-DAWN_INSTANTIATE_TEST(OpArrayLengthTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(OpArrayLengthTest,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());

@@ -157,4 +157,8 @@ TEST_P(DestroyTest, TextureSubmitDestroySubmit) {
     ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
 }
 
-DAWN_INSTANTIATE_TEST(DestroyTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(DestroyTest,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());

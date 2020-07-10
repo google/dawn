@@ -25,7 +25,7 @@ namespace wgpu {
         A = 8,
     };
 
-    template<>
+    template <>
     struct IsDawnBitmask<Color> {
         static constexpr bool enable = true;
     };

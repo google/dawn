@@ -130,8 +130,7 @@ namespace {
 
 // A small fixture used to initialize default data for the D3D12Resource validation tests.
 // These tests are skipped if the harness is using the wire.
-class D3D12SharedHandleValidation : public D3D12ResourceTestBase {
-};
+class D3D12SharedHandleValidation : public D3D12ResourceTestBase {};
 
 // Test a successful wrapping of an D3D12Resource in a texture
 TEST_P(D3D12SharedHandleValidation, Success) {

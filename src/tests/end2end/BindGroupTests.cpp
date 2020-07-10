@@ -22,102 +22,102 @@
 constexpr static uint32_t kRTSize = 8;
 
 class BindGroupTests : public DawnTest {
-protected:
-  wgpu::CommandBuffer CreateSimpleComputeCommandBuffer(const wgpu::ComputePipeline& pipeline,
-                                                       const wgpu::BindGroup& bindGroup) {
-      wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-      wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
-      pass.SetPipeline(pipeline);
-      pass.SetBindGroup(0, bindGroup);
-      pass.Dispatch(1);
-      pass.EndPass();
-      return encoder.Finish();
-  }
+  protected:
+    wgpu::CommandBuffer CreateSimpleComputeCommandBuffer(const wgpu::ComputePipeline& pipeline,
+                                                         const wgpu::BindGroup& bindGroup) {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.Dispatch(1);
+        pass.EndPass();
+        return encoder.Finish();
+    }
 
-  wgpu::PipelineLayout MakeBasicPipelineLayout(
-      std::vector<wgpu::BindGroupLayout> bindingInitializer) const {
-      wgpu::PipelineLayoutDescriptor descriptor;
+    wgpu::PipelineLayout MakeBasicPipelineLayout(
+        std::vector<wgpu::BindGroupLayout> bindingInitializer) const {
+        wgpu::PipelineLayoutDescriptor descriptor;
 
-      descriptor.bindGroupLayoutCount = bindingInitializer.size();
-      descriptor.bindGroupLayouts = bindingInitializer.data();
+        descriptor.bindGroupLayoutCount = bindingInitializer.size();
+        descriptor.bindGroupLayouts = bindingInitializer.data();
 
-      return device.CreatePipelineLayout(&descriptor);
-  }
+        return device.CreatePipelineLayout(&descriptor);
+    }
 
-  wgpu::ShaderModule MakeSimpleVSModule() const {
-      return utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
+    wgpu::ShaderModule MakeSimpleVSModule() const {
+        return utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
         #version 450
         void main() {
             const vec2 pos[3] = vec2[3](vec2(-1.f, 1.f), vec2(1.f, 1.f), vec2(-1.f, -1.f));
             gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
         })");
-  }
+    }
 
-  wgpu::ShaderModule MakeFSModule(std::vector<wgpu::BindingType> bindingTypes) const {
-      ASSERT(bindingTypes.size() <= kMaxBindGroups);
+    wgpu::ShaderModule MakeFSModule(std::vector<wgpu::BindingType> bindingTypes) const {
+        ASSERT(bindingTypes.size() <= kMaxBindGroups);
 
-      std::ostringstream fs;
-      fs << R"(
+        std::ostringstream fs;
+        fs << R"(
         #version 450
         layout(location = 0) out vec4 fragColor;
         )";
 
-      for (size_t i = 0; i < bindingTypes.size(); ++i) {
-          switch (bindingTypes[i]) {
-              case wgpu::BindingType::UniformBuffer:
-                  fs << "layout (std140, set = " << i << ", binding = 0) uniform UniformBuffer" << i
-                     << R"( {
+        for (size_t i = 0; i < bindingTypes.size(); ++i) {
+            switch (bindingTypes[i]) {
+                case wgpu::BindingType::UniformBuffer:
+                    fs << "layout (std140, set = " << i << ", binding = 0) uniform UniformBuffer"
+                       << i << R"( {
                         vec4 color;
                     } buffer)"
-                     << i << ";\n";
-                  break;
-              case wgpu::BindingType::StorageBuffer:
-                  fs << "layout (std430, set = " << i << ", binding = 0) buffer StorageBuffer" << i
-                     << R"( {
+                       << i << ";\n";
+                    break;
+                case wgpu::BindingType::StorageBuffer:
+                    fs << "layout (std430, set = " << i << ", binding = 0) buffer StorageBuffer"
+                       << i << R"( {
                         vec4 color;
                     } buffer)"
-                     << i << ";\n";
-                  break;
-              default:
-                  UNREACHABLE();
-          }
-      }
+                       << i << ";\n";
+                    break;
+                default:
+                    UNREACHABLE();
+            }
+        }
 
-      fs << R"(
+        fs << R"(
         void main() {
             fragColor = vec4(0.0);
         )";
-      for (size_t i = 0; i < bindingTypes.size(); ++i) {
-          fs << "fragColor += buffer" << i << ".color;\n";
-      }
-      fs << "}\n";
+        for (size_t i = 0; i < bindingTypes.size(); ++i) {
+            fs << "fragColor += buffer" << i << ".color;\n";
+        }
+        fs << "}\n";
 
-      return utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment,
-                                       fs.str().c_str());
-  }
+        return utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment,
+                                         fs.str().c_str());
+    }
 
-  wgpu::RenderPipeline MakeTestPipeline(const utils::BasicRenderPass& renderPass,
-                                        std::vector<wgpu::BindingType> bindingTypes,
-                                        std::vector<wgpu::BindGroupLayout> bindGroupLayouts) {
-      wgpu::ShaderModule vsModule = MakeSimpleVSModule();
-      wgpu::ShaderModule fsModule = MakeFSModule(bindingTypes);
+    wgpu::RenderPipeline MakeTestPipeline(const utils::BasicRenderPass& renderPass,
+                                          std::vector<wgpu::BindingType> bindingTypes,
+                                          std::vector<wgpu::BindGroupLayout> bindGroupLayouts) {
+        wgpu::ShaderModule vsModule = MakeSimpleVSModule();
+        wgpu::ShaderModule fsModule = MakeFSModule(bindingTypes);
 
-      wgpu::PipelineLayout pipelineLayout = MakeBasicPipelineLayout(bindGroupLayouts);
+        wgpu::PipelineLayout pipelineLayout = MakeBasicPipelineLayout(bindGroupLayouts);
 
-      utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
-      pipelineDescriptor.layout = pipelineLayout;
-      pipelineDescriptor.vertexStage.module = vsModule;
-      pipelineDescriptor.cFragmentStage.module = fsModule;
-      pipelineDescriptor.cColorStates[0].format = renderPass.colorFormat;
-      pipelineDescriptor.cColorStates[0].colorBlend.operation = wgpu::BlendOperation::Add;
-      pipelineDescriptor.cColorStates[0].colorBlend.srcFactor = wgpu::BlendFactor::One;
-      pipelineDescriptor.cColorStates[0].colorBlend.dstFactor = wgpu::BlendFactor::One;
-      pipelineDescriptor.cColorStates[0].alphaBlend.operation = wgpu::BlendOperation::Add;
-      pipelineDescriptor.cColorStates[0].alphaBlend.srcFactor = wgpu::BlendFactor::One;
-      pipelineDescriptor.cColorStates[0].alphaBlend.dstFactor = wgpu::BlendFactor::One;
+        utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
+        pipelineDescriptor.layout = pipelineLayout;
+        pipelineDescriptor.vertexStage.module = vsModule;
+        pipelineDescriptor.cFragmentStage.module = fsModule;
+        pipelineDescriptor.cColorStates[0].format = renderPass.colorFormat;
+        pipelineDescriptor.cColorStates[0].colorBlend.operation = wgpu::BlendOperation::Add;
+        pipelineDescriptor.cColorStates[0].colorBlend.srcFactor = wgpu::BlendFactor::One;
+        pipelineDescriptor.cColorStates[0].colorBlend.dstFactor = wgpu::BlendFactor::One;
+        pipelineDescriptor.cColorStates[0].alphaBlend.operation = wgpu::BlendOperation::Add;
+        pipelineDescriptor.cColorStates[0].alphaBlend.srcFactor = wgpu::BlendFactor::One;
+        pipelineDescriptor.cColorStates[0].alphaBlend.dstFactor = wgpu::BlendFactor::One;
 
-      return device.CreateRenderPipeline(&pipelineDescriptor);
-  }
+        return device.CreateRenderPipeline(&pipelineDescriptor);
+    }
 };
 
 // Test a bindgroup reused in two command buffers in the same call to queue.Submit().
@@ -195,10 +195,10 @@ TEST_P(BindGroupTests, ReusedUBO) {
     };
     ASSERT(offsetof(Data, color) == 256);
     constexpr float dummy = 0.0f;
-    Data data {
-        { 1.f, 0.f, dummy, dummy, 0.f, 1.0f, dummy, dummy },
-        { 0 },
-        { 0.f, 1.f, 0.f, 1.f },
+    Data data{
+        {1.f, 0.f, dummy, dummy, 0.f, 1.0f, dummy, dummy},
+        {0},
+        {0.f, 1.f, 0.f, 1.f},
     };
     wgpu::Buffer buffer =
         utils::CreateBufferFromData(device, &data, sizeof(data), wgpu::BufferUsage::Uniform);
@@ -219,15 +219,15 @@ TEST_P(BindGroupTests, ReusedUBO) {
     RGBA8 filled(0, 255, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);
     uint32_t min = 1, max = kRTSize - 3;
-    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color,    min, min);
-    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color,    max, min);
-    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color,    min, max);
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, min);
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, max, min);
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, max);
     EXPECT_PIXEL_RGBA8_EQ(notFilled, renderPass.color, max, max);
 }
 
-// Test a bindgroup containing a UBO in the vertex shader and a sampler and texture in the fragment shader.
-// In D3D12 for example, these different types of bindings end up in different namespaces, but the register
-// offsets used must match between the shader module and descriptor range.
+// Test a bindgroup containing a UBO in the vertex shader and a sampler and texture in the fragment
+// shader. In D3D12 for example, these different types of bindings end up in different namespaces,
+// but the register offsets used must match between the shader module and descriptor range.
 TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
@@ -260,7 +260,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 
     constexpr float dummy = 0.0f;
-    constexpr float transform[] = { 1.f, 0.f, dummy, dummy, 0.f, 1.f, dummy, dummy };
+    constexpr float transform[] = {1.f, 0.f, dummy, dummy, 0.f, 1.f, dummy, dummy};
     wgpu::Buffer buffer = utils::CreateBufferFromData(device, &transform, sizeof(transform),
                                                       wgpu::BufferUsage::Uniform);
 
@@ -320,9 +320,9 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     RGBA8 filled(0, 255, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);
     uint32_t min = 1, max = kRTSize - 3;
-    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color,    min, min);
-    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color,    max, min);
-    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color,    min, max);
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, min);
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, max, min);
+    EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, min, max);
     EXPECT_PIXEL_RGBA8_EQ(notFilled, renderPass.color, max, max);
 }
 
@@ -1091,4 +1091,8 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 0, 0);
 }
 
-DAWN_INSTANTIATE_TEST(BindGroupTests, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(BindGroupTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());

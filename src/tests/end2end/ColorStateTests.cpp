@@ -758,8 +758,8 @@ TEST_P(ColorStateTest, IndependentColorState) {
         renderTargetViews[i] = renderTargets[i].CreateView();
     }
 
-    utils::ComboRenderPassDescriptor renderPass({renderTargetViews[0], renderTargetViews[1],
-                                                renderTargetViews[2], renderTargetViews[3]});
+    utils::ComboRenderPassDescriptor renderPass(
+        {renderTargetViews[0], renderTargetViews[1], renderTargetViews[2], renderTargetViews[3]});
 
     wgpu::ShaderModule fsModule =
         utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
@@ -1047,4 +1047,8 @@ TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
     EXPECT_PIXEL_RGBA8_EQ(expected, renderPass.color, kRTSize / 2, kRTSize / 2);
 }
 
-DAWN_INSTANTIATE_TEST(ColorStateTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(ColorStateTest,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());

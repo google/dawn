@@ -194,4 +194,3 @@ TEST(ObjectBase, AssignNullptr) {
     obj = nullptr;
     ASSERT_EQ(refcount, 1);
 }
-

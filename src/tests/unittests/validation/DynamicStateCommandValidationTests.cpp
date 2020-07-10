@@ -223,8 +223,7 @@ TEST_F(SetViewportTest, MinDepthEqualOrGreaterThanMaxDepth) {
     }
 }
 
-class SetScissorRectTest : public ValidationTest {
-};
+class SetScissorRectTest : public ValidationTest {};
 
 // Test to check basic use of SetScissor
 TEST_F(SetScissorRectTest, Success) {
@@ -284,8 +283,7 @@ TEST_F(SetScissorRectTest, ScissorLargerThanFramebuffer) {
     encoder.Finish();
 }
 
-class SetBlendColorTest : public ValidationTest {
-};
+class SetBlendColorTest : public ValidationTest {};
 
 // Test to check basic use of SetBlendColor
 TEST_F(SetBlendColorTest, Success) {
@@ -315,8 +313,7 @@ TEST_F(SetBlendColorTest, AnyValueAllowed) {
     encoder.Finish();
 }
 
-class SetStencilReferenceTest : public ValidationTest {
-};
+class SetStencilReferenceTest : public ValidationTest {};
 
 // Test to check basic use of SetStencilReferenceTest
 TEST_F(SetStencilReferenceTest, Success) {

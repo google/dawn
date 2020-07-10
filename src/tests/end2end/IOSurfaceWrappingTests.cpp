@@ -369,7 +369,8 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
 // Test sampling from a R8 IOSurface
 TEST_P(IOSurfaceUsageTests, SampleFromR8IOSurface) {
     DAWN_SKIP_TEST_IF(UsesWire());
-    ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_OneComponent8, 1);
+    ScopedIOSurfaceRef ioSurface =
+        CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_OneComponent8, 1);
 
     uint8_t data = 0x01;
     DoSampleTest(ioSurface.get(), wgpu::TextureFormat::R8Unorm, &data, sizeof(data),
@@ -379,7 +380,8 @@ TEST_P(IOSurfaceUsageTests, SampleFromR8IOSurface) {
 // Test clearing a R8 IOSurface
 TEST_P(IOSurfaceUsageTests, ClearR8IOSurface) {
     DAWN_SKIP_TEST_IF(UsesWire());
-    ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_OneComponent8, 1);
+    ScopedIOSurfaceRef ioSurface =
+        CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_OneComponent8, 1);
 
     uint8_t data = 0x01;
     DoClearTest(ioSurface.get(), wgpu::TextureFormat::R8Unorm, &data, sizeof(data));
@@ -388,7 +390,8 @@ TEST_P(IOSurfaceUsageTests, ClearR8IOSurface) {
 // Test sampling from a RG8 IOSurface
 TEST_P(IOSurfaceUsageTests, SampleFromRG8IOSurface) {
     DAWN_SKIP_TEST_IF(UsesWire());
-    ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_TwoComponent8, 2);
+    ScopedIOSurfaceRef ioSurface =
+        CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_TwoComponent8, 2);
 
     uint16_t data = 0x0102;  // Stored as (G, R)
     DoSampleTest(ioSurface.get(), wgpu::TextureFormat::RG8Unorm, &data, sizeof(data),
@@ -398,7 +401,8 @@ TEST_P(IOSurfaceUsageTests, SampleFromRG8IOSurface) {
 // Test clearing a RG8 IOSurface
 TEST_P(IOSurfaceUsageTests, ClearRG8IOSurface) {
     DAWN_SKIP_TEST_IF(UsesWire());
-    ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_TwoComponent8, 2);
+    ScopedIOSurfaceRef ioSurface =
+        CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_TwoComponent8, 2);
 
     uint16_t data = 0x0201;
     DoClearTest(ioSurface.get(), wgpu::TextureFormat::RG8Unorm, &data, sizeof(data));

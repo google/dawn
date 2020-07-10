@@ -46,10 +46,10 @@ namespace {
             255,
         },
     };
-}
+}  // namespace
 
 class SamplerTest : public DawnTest {
-protected:
+  protected:
     void SetUp() override {
         DawnTest::SetUp();
         mRenderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
@@ -177,4 +177,8 @@ TEST_P(SamplerTest, AddressMode) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(SamplerTest, D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(SamplerTest,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());

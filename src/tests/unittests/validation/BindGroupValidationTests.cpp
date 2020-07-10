@@ -121,16 +121,10 @@ TEST_F(BindGroupValidationTest, BindingSetTwice) {
                  {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler}});
 
     // Control case: check that different bindings work
-    utils::MakeBindGroup(device, layout, {
-        {0, mSampler},
-        {1, mSampler}
-    });
+    utils::MakeBindGroup(device, layout, {{0, mSampler}, {1, mSampler}});
 
     // Check that setting the same binding twice is invalid
-    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {
-        {0, mSampler},
-        {0, mSampler}
-    }));
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, mSampler}, {0, mSampler}}));
 }
 
 // Check that a sampler binding must contain exactly one sampler
@@ -406,7 +400,7 @@ TEST_F(BindGroupValidationTest, BufferBindingOOB) {
     utils::MakeBindGroup(device, layout, {{0, buffer, 0, 256}});
 
     // Success case, touching the end of the buffer works
-    utils::MakeBindGroup(device, layout, {{0, buffer, 3*256, 256}});
+    utils::MakeBindGroup(device, layout, {{0, buffer, 3 * 256, 256}});
 
     // Error case, zero size is invalid.
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 1024, 0}}));
@@ -419,16 +413,17 @@ TEST_F(BindGroupValidationTest, BufferBindingOOB) {
     utils::MakeBindGroup(device, layout, {{0, buffer, 256, wgpu::kWholeSize}});
 
     // Error case, offset is OOB
-    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 256*5, 0}}));
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 256 * 5, 0}}));
 
     // Error case, size is OOB
-    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 0, 256*5}}));
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 0, 256 * 5}}));
 
     // Error case, offset+size is OOB
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 1024, 256}}));
 
     // Error case, offset+size overflows to be 0
-    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, 256, uint32_t(0) - uint32_t(256)}}));
+    ASSERT_DEVICE_ERROR(
+        utils::MakeBindGroup(device, layout, {{0, buffer, 256, uint32_t(0) - uint32_t(256)}}));
 }
 
 // Tests constraints to be sure the uniform buffer binding isn't too large
@@ -1191,8 +1186,8 @@ TEST_F(SetBindGroupValidationTest, DynamicOffsetOrder) {
 
     // Create buffers which are 3x, 2x, and 1x the size of the minimum buffer offset, plus 4 bytes
     // to spare (to avoid zero-sized bindings). We will offset the bindings so they reach the very
-    // end of the buffer. Any mismatch applying too-large of an offset to a smaller buffer will hit the
-    // out-of-bounds condition during validation.
+    // end of the buffer. Any mismatch applying too-large of an offset to a smaller buffer will hit
+    // the out-of-bounds condition during validation.
     wgpu::Buffer buffer3x =
         CreateBuffer(3 * kMinDynamicBufferOffsetAlignment + 4, wgpu::BufferUsage::Storage);
     wgpu::Buffer buffer2x =
@@ -1487,7 +1482,6 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
     wgpu::RenderPipeline CreateFSRenderPipeline(
         const char* fsShader,
         std::vector<wgpu::BindGroupLayout> bindGroupLayout) {
-
         wgpu::ShaderModule vsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
                 #version 450
@@ -1520,7 +1514,7 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
                 layout(location = 0) out vec4 fragColor;
                 void main() {
                 })",
-                std::move(bindGroupLayout));
+                                      std::move(bindGroupLayout));
     }
 
     wgpu::ComputePipeline CreateComputePipeline(
@@ -1558,7 +1552,7 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
                 } rdst;
                 void main() {
                 })",
-                std::move(bindGroupLayout));
+                                     std::move(bindGroupLayout));
     }
 };
 
