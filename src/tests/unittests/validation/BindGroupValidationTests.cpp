@@ -109,9 +109,6 @@ TEST_F(BindGroupValidationTest, WrongBindings) {
 
     // Check that binding must be present in the layout
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{1, mSampler}}));
-
-    // Check that binding >= kMaxBindingsPerGroup fails.
-    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{kMaxBindingsPerGroup, mSampler}}));
 }
 
 // Check that the same binding cannot be set twice
