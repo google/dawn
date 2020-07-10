@@ -29,8 +29,10 @@ namespace gpu_info {
     static constexpr PCIVendorID kVendorID_Nvidia = 0x10DE;
     static constexpr PCIVendorID kVendorID_Qualcomm = 0x5143;
     static constexpr PCIVendorID kVendorID_Google = 0x1AE0;
+    static constexpr PCIVendorID kVendorID_Microsoft = 0x1414;
 
     static constexpr PCIDeviceID kDeviceID_Swiftshader = 0xC0DE;
+    static constexpr PCIDeviceID kDeviceID_WARP = 0x8c;
 
     bool IsAMD(PCIVendorID vendorId);
     bool IsARM(PCIVendorID vendorId);
@@ -39,6 +41,7 @@ namespace gpu_info {
     bool IsNvidia(PCIVendorID vendorId);
     bool IsQualcomm(PCIVendorID vendorId);
     bool IsSwiftshader(PCIVendorID vendorId, PCIDeviceID deviceId);
+    bool IsWARP(PCIVendorID vendorId, PCIDeviceID deviceId);
 
 }  // namespace gpu_info
 #endif  // COMMON_GPUINFO_H

@@ -647,6 +647,10 @@ bool DawnTestBase::IsSwiftshader() const {
                                    mParam.adapterProperties.deviceID);
 }
 
+bool DawnTestBase::IsWARP() const {
+    return gpu_info::IsWARP(mParam.adapterProperties.vendorID, mParam.adapterProperties.deviceID);
+}
+
 bool DawnTestBase::IsWindows() const {
 #ifdef DAWN_PLATFORM_WINDOWS
     return true;
