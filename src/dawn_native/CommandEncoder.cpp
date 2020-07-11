@@ -370,6 +370,10 @@ namespace dawn_native {
                     device, descriptor->depthStencilAttachment, width, height, sampleCount));
             }
 
+            if (descriptor->occlusionQuerySet != nullptr) {
+                return DAWN_VALIDATION_ERROR("occlusionQuerySet not implemented");
+            }
+
             if (descriptor->colorAttachmentCount == 0 &&
                 descriptor->depthStencilAttachment == nullptr) {
                 return DAWN_VALIDATION_ERROR("Cannot use render pass with no attachments.");

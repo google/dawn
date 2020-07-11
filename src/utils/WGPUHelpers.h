@@ -67,7 +67,7 @@ namespace utils {
 
         std::array<wgpu::RenderPassColorAttachmentDescriptor, kMaxColorAttachments>
             cColorAttachments;
-        wgpu::RenderPassDepthStencilAttachmentDescriptor cDepthStencilAttachmentInfo;
+        wgpu::RenderPassDepthStencilAttachmentDescriptor cDepthStencilAttachmentInfo = {};
     };
 
     struct BasicRenderPass {
