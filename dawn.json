@@ -380,7 +380,7 @@
             {
                 "name": "insert debug marker",
                 "args": [
-                    {"name": "group label", "type": "char", "annotation": "const*", "length": "strlen"}
+                    {"name": "marker label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
             },
             {
@@ -436,7 +436,7 @@
             {
                 "name": "insert debug marker",
                 "args": [
-                    {"name": "group label", "type": "char", "annotation": "const*", "length": "strlen"}
+                    {"name": "marker label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
             },
             {
@@ -1069,7 +1069,7 @@
             {
                 "name": "insert debug marker",
                 "args": [
-                    {"name": "group label", "type": "char", "annotation": "const*", "length": "strlen"}
+                    {"name": "marker label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
             },
             {
@@ -1227,7 +1227,7 @@
             {
                 "name": "insert debug marker",
                 "args": [
-                    {"name": "group label", "type": "char", "annotation": "const*", "length": "strlen"}
+                    {"name": "marker label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
             },
             {
