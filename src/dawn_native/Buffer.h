@@ -83,7 +83,7 @@ namespace dawn_native {
         virtual void DestroyImpl() = 0;
         virtual void* GetMappedPointerImpl() = 0;
 
-        virtual bool IsMapWritable() const = 0;
+        virtual bool IsMappableAtCreation() const = 0;
         MaybeError CopyFromStagingBuffer();
         void* GetMappedRangeInternal(bool writable);
         void CallMapReadCallback(uint32_t serial,

@@ -54,7 +54,7 @@ namespace dawn_native {
             }
 
           private:
-            bool IsMapWritable() const override {
+            bool IsMappableAtCreation() const override {
                 UNREACHABLE();
                 return false;
             }
@@ -173,7 +173,7 @@ namespace dawn_native {
         }
 
         // Mappable buffers don't use a staging buffer and are just as if mapped through MapAsync.
-        if (IsMapWritable()) {
+        if (IsMappableAtCreation()) {
             DAWN_TRY(MapAtCreationImpl());
             return {};
         }
@@ -348,7 +348,7 @@ namespace dawn_native {
             if (mStagingBuffer != nullptr) {
                 mStagingBuffer.reset();
             } else if (mSize != 0) {
-                ASSERT(IsMapWritable());
+                ASSERT(IsMappableAtCreation());
                 Unmap();
             }
         }
@@ -399,7 +399,7 @@ namespace dawn_native {
             if (mStagingBuffer != nullptr) {
                 GetDevice()->ConsumedError(CopyFromStagingBuffer());
             } else if (mSize != 0) {
-                ASSERT(IsMapWritable());
+                ASSERT(IsMappableAtCreation());
                 UnmapImpl();
             }
         }

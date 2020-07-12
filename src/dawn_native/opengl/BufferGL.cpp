@@ -92,7 +92,7 @@ namespace dawn_native { namespace opengl {
         SetIsDataInitialized();
     }
 
-    bool Buffer::IsMapWritable() const {
+    bool Buffer::IsMappableAtCreation() const {
         // TODO(enga): All buffers in GL can be mapped. Investigate if mapping them will cause the
         // driver to migrate it to shared memory.
         return true;

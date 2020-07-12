@@ -40,7 +40,7 @@ namespace dawn_native { namespace opengl {
         void UnmapImpl() override;
         void DestroyImpl() override;
 
-        bool IsMapWritable() const override;
+        bool IsMappableAtCreation() const override;
         MaybeError MapAtCreationImpl() override;
         void* GetMappedPointerImpl() override;
         uint64_t GetAppliedSize() const;

@@ -234,7 +234,7 @@ namespace dawn_native { namespace vulkan {
         mLastUsage = usage;
     }
 
-    bool Buffer::IsMapWritable() const {
+    bool Buffer::IsMappableAtCreation() const {
         // TODO(enga): Handle CPU-visible memory on UMA
         return mMemoryAllocation.GetMappedPointer() != nullptr;
     }
