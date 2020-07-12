@@ -19,7 +19,7 @@ import subprocess
 def _DoClangFormat(input_api, output_api):
     if platform.system() == 'Linux' and platform.architecture()[0] == '64bit':
         clang_format_path = 'buildtools/linux64/clang-format'
-    elif platform.system() == 'Mac':
+    elif platform.system() == 'Darwin':
         clang_format_path = 'buildtools/mac/clang-format'
     elif platform.system() == 'Windows':
         clang_format_path = 'buildtools/win/clang-format.exe'
