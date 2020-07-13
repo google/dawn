@@ -48,7 +48,7 @@ namespace dawn_native {
                                         const Extent3D& copySize);
 
     MaybeError ValidateBufferCopyView(DeviceBase const* device,
-                                      const BufferCopyView& bufferCopyView);
+                                      const BufferCopyView& bufferCopyViewt);
     MaybeError ValidateTextureCopyView(DeviceBase const* device,
                                        const TextureCopyView& textureCopyView);
 

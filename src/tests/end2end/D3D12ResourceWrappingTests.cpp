@@ -266,17 +266,8 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
   protected:
     // Submits a 1x1x1 copy from source to destination
     void SimpleCopyTextureToTexture(wgpu::Texture source, wgpu::Texture destination) {
-        wgpu::TextureCopyView copySrc;
-        copySrc.texture = source;
-        copySrc.mipLevel = 0;
-        copySrc.arrayLayer = 0;
-        copySrc.origin = {0, 0, 0};
-
-        wgpu::TextureCopyView copyDst;
-        copyDst.texture = destination;
-        copyDst.mipLevel = 0;
-        copyDst.arrayLayer = 0;
-        copyDst.origin = {0, 0, 0};
+        wgpu::TextureCopyView copySrc = utils::CreateTextureCopyView(source, 0, {0, 0, 0});
+        wgpu::TextureCopyView copyDst = utils::CreateTextureCopyView(destination, 0, {0, 0, 0});
 
         wgpu::Extent3D copySize = {1, 1, 1};
 

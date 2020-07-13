@@ -267,11 +267,11 @@ namespace utils {
                                               uint64_t offset,
                                               uint32_t bytesPerRow,
                                               uint32_t rowsPerImage) {
-        wgpu::BufferCopyView bufferCopyView;
+        wgpu::BufferCopyView bufferCopyView = {};
         bufferCopyView.buffer = buffer;
-        bufferCopyView.offset = offset;
-        bufferCopyView.bytesPerRow = bytesPerRow;
-        bufferCopyView.rowsPerImage = rowsPerImage;
+        bufferCopyView.layout.offset = offset;
+        bufferCopyView.layout.bytesPerRow = bytesPerRow;
+        bufferCopyView.layout.rowsPerImage = rowsPerImage;
 
         return bufferCopyView;
     }

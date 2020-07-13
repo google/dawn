@@ -217,6 +217,7 @@
         "category": "structure",
         "extensible": true,
         "members": [
+            {"name": "layout", "type": "texture data layout"},
             {"name": "buffer", "type": "buffer"},
             {"name": "offset", "type": "uint64_t", "default": 0},
             {"name": "bytes per row", "type": "uint32_t"},

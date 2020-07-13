@@ -173,9 +173,9 @@ class TextureCopyViewArrayLayerDeprecationTests : public DeprecationTests {
         desc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
         desc.size = 4;
 
-        wgpu::BufferCopyView copy;
+        wgpu::BufferCopyView copy = {};
         copy.buffer = device.CreateBuffer(&desc);
-        copy.bytesPerRow = kTextureBytesPerRowAlignment;
+        copy.layout.bytesPerRow = kTextureBytesPerRowAlignment;
         return copy;
     }
 
@@ -246,6 +246,118 @@ TEST_P(TextureCopyViewArrayLayerDeprecationTests, StateTracking) {
 }
 
 DAWN_INSTANTIATE_TEST(TextureCopyViewArrayLayerDeprecationTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      NullBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());
+
+class BufferCopyViewDeprecationTests : public DeprecationTests {
+  protected:
+    wgpu::TextureCopyView MakeTextureCopyView() {
+        wgpu::TextureDescriptor desc = {};
+        desc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+        desc.dimension = wgpu::TextureDimension::e2D;
+        desc.size = {1, 1, 2};
+        desc.format = wgpu::TextureFormat::RGBA8Unorm;
+
+        wgpu::TextureCopyView copy;
+        copy.texture = device.CreateTexture(&desc);
+        copy.arrayLayer = 0;
+        copy.origin = {0, 0, 1};
+        return copy;
+    }
+
+    wgpu::Extent3D copySize = {1, 1, 1};
+};
+
+// Test that using BufferCopyView::{offset,bytesPerRow,rowsPerImage} emits a warning.
+TEST_P(BufferCopyViewDeprecationTests, DeprecationWarning) {
+    wgpu::BufferDescriptor desc;
+    desc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    desc.size = 8;
+    wgpu::Buffer buffer = device.CreateBuffer(&desc);
+
+    wgpu::TextureCopyView texCopy = MakeTextureCopyView();
+
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::BufferCopyView bufCopy = {};
+        bufCopy.buffer = buffer;
+        bufCopy.offset = 4;
+        EXPECT_DEPRECATION_WARNING(encoder.CopyBufferToTexture(&bufCopy, &texCopy, &copySize));
+        EXPECT_DEPRECATION_WARNING(encoder.CopyTextureToBuffer(&texCopy, &bufCopy, &copySize));
+        // Since bytesPerRow is 0
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::BufferCopyView bufCopy = {};
+        bufCopy.buffer = buffer;
+        bufCopy.bytesPerRow = kTextureBytesPerRowAlignment;
+        EXPECT_DEPRECATION_WARNING(encoder.CopyBufferToTexture(&bufCopy, &texCopy, &copySize));
+        EXPECT_DEPRECATION_WARNING(encoder.CopyTextureToBuffer(&texCopy, &bufCopy, &copySize));
+        wgpu::CommandBuffer command = encoder.Finish();
+        queue.Submit(1, &command);
+    }
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::BufferCopyView bufCopy = {};
+        bufCopy.buffer = buffer;
+        bufCopy.rowsPerImage = 1;
+        EXPECT_DEPRECATION_WARNING(encoder.CopyBufferToTexture(&bufCopy, &texCopy, &copySize));
+        EXPECT_DEPRECATION_WARNING(encoder.CopyTextureToBuffer(&texCopy, &bufCopy, &copySize));
+        // Since bytesPerRow is 0
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
+
+// Test that using both any old field and any new field is an error
+TEST_P(BufferCopyViewDeprecationTests, BothOldAndNew) {
+    wgpu::BufferDescriptor desc;
+    desc.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    desc.size = 8;
+    wgpu::Buffer buffer = device.CreateBuffer(&desc);
+
+    wgpu::TextureCopyView texCopy = MakeTextureCopyView();
+
+    auto testOne = [=](const wgpu::BufferCopyView& bufCopy) {
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            encoder.CopyBufferToTexture(&bufCopy, &texCopy, &copySize);
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            encoder.CopyTextureToBuffer(&texCopy, &bufCopy, &copySize);
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+    };
+
+    {
+        wgpu::BufferCopyView bufCopy = {};
+        bufCopy.buffer = buffer;
+        bufCopy.layout.bytesPerRow = kTextureBytesPerRowAlignment;
+        {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            encoder.CopyBufferToTexture(&bufCopy, &texCopy, &copySize);
+            encoder.CopyTextureToBuffer(&texCopy, &bufCopy, &copySize);
+            wgpu::CommandBuffer command = encoder.Finish();
+            queue.Submit(1, &command);
+        }
+
+        bufCopy.offset = 4;
+        testOne(bufCopy);
+        bufCopy.offset = 0;
+        bufCopy.bytesPerRow = kTextureBytesPerRowAlignment;
+        testOne(bufCopy);
+        bufCopy.bytesPerRow = 0;
+        bufCopy.rowsPerImage = 1;
+        testOne(bufCopy);
+    }
+}
+
+DAWN_INSTANTIATE_TEST(BufferCopyViewDeprecationTests,
                       D3D12Backend(),
                       MetalBackend(),
                       NullBackend(),

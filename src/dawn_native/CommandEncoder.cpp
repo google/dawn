@@ -406,6 +406,35 @@ namespace dawn_native {
             return fixedView;
         }
 
+        ResultOrError<BufferCopyView> FixBufferCopyView(DeviceBase* device,
+                                                        const BufferCopyView* view) {
+            BufferCopyView fixedView = *view;
+
+            TextureDataLayout& layout = fixedView.layout;
+            if (layout.offset != 0 || layout.bytesPerRow != 0 || layout.rowsPerImage != 0) {
+                // Using non-deprecated path
+                if (fixedView.offset != 0 || fixedView.bytesPerRow != 0 ||
+                    fixedView.rowsPerImage != 0) {
+                    return DAWN_VALIDATION_ERROR(
+                        "WGPUBufferCopyView.offset/bytesPerRow/rowsPerImage is deprecated; use "
+                        "only WGPUBufferCopyView.layout");
+                }
+            } else if (fixedView.offset != 0 || fixedView.bytesPerRow != 0 ||
+                       fixedView.rowsPerImage != 0) {
+                device->EmitDeprecationWarning(
+                    "WGPUBufferCopyView.offset/bytesPerRow/rowsPerImage is deprecated; use "
+                    "WGPUBufferCopyView.layout");
+
+                layout.offset = fixedView.offset;
+                layout.bytesPerRow = fixedView.bytesPerRow;
+                layout.rowsPerImage = fixedView.rowsPerImage;
+                fixedView.offset = 0;
+                fixedView.bytesPerRow = 0;
+                fixedView.rowsPerImage = 0;
+            }
+            return fixedView;
+        }
+
     }  // namespace
 
     CommandEncoder::CommandEncoder(DeviceBase* device, const CommandEncoderDescriptor*)
@@ -570,11 +599,16 @@ namespace dawn_native {
                                              const TextureCopyView* destination,
                                              const Extent3D* copySize) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            // TODO(dawn:22): Remove once migration from GPUTextureCopyView.arrayLayer to
+            // TODO(crbug.com/dawn/22): Remove once migration from GPUTextureCopyView.arrayLayer to
             // GPUTextureCopyView.origin.z is done.
             TextureCopyView fixedDest;
             DAWN_TRY_ASSIGN(fixedDest, FixTextureCopyView(GetDevice(), destination));
             destination = &fixedDest;
+
+            // TODO(crbug.com/dawn/22): Remove once migration to .layout is done.
+            BufferCopyView fixedSource;
+            DAWN_TRY_ASSIGN(fixedSource, FixBufferCopyView(GetDevice(), source));
+            source = &fixedSource;
 
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(ValidateBufferCopyView(GetDevice(), *source));
@@ -584,13 +618,7 @@ namespace dawn_native {
                 DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst));
                 DAWN_TRY(ValidateTextureSampleCountInCopyCommands(destination->texture));
 
-                TextureDataLayout sourceAsTextureDataLayout;
-                sourceAsTextureDataLayout.offset = source->offset;
-                sourceAsTextureDataLayout.bytesPerRow = source->bytesPerRow;
-                sourceAsTextureDataLayout.rowsPerImage = source->rowsPerImage;
-
-                DAWN_TRY(ValidateLinearTextureData(sourceAsTextureDataLayout,
-                                                   source->buffer->GetSize(),
+                DAWN_TRY(ValidateLinearTextureData(source->layout, source->buffer->GetSize(),
                                                    destination->texture->GetFormat(), *copySize));
                 DAWN_TRY(ValidateTextureCopyRange(*destination, *copySize));
 
@@ -599,7 +627,7 @@ namespace dawn_native {
             }
 
             // Compute default value for rowsPerImage
-            uint32_t defaultedRowsPerImage = source->rowsPerImage;
+            uint32_t defaultedRowsPerImage = source->layout.rowsPerImage;
             if (defaultedRowsPerImage == 0) {
                 defaultedRowsPerImage = copySize->height;
             }
@@ -608,8 +636,8 @@ namespace dawn_native {
             CopyBufferToTextureCmd* copy =
                 allocator->Allocate<CopyBufferToTextureCmd>(Command::CopyBufferToTexture);
             copy->source.buffer = source->buffer;
-            copy->source.offset = source->offset;
-            copy->source.bytesPerRow = source->bytesPerRow;
+            copy->source.offset = source->layout.offset;
+            copy->source.bytesPerRow = source->layout.bytesPerRow;
             copy->source.rowsPerImage = defaultedRowsPerImage;
             copy->destination.texture = destination->texture;
             copy->destination.origin = destination->origin;
@@ -624,11 +652,16 @@ namespace dawn_native {
                                              const BufferCopyView* destination,
                                              const Extent3D* copySize) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            // TODO(dawn:22): Remove once migration from GPUTextureCopyView.arrayLayer to
+            // TODO(crbug.com/dawn/22): Remove once migration from GPUTextureCopyView.arrayLayer to
             // GPUTextureCopyView.origin.z is done.
             TextureCopyView fixedSrc;
             DAWN_TRY_ASSIGN(fixedSrc, FixTextureCopyView(GetDevice(), source));
             source = &fixedSrc;
+
+            // TODO(crbug.com/dawn/22): Remove once migration to .layout is done.
+            BufferCopyView fixedDst;
+            DAWN_TRY_ASSIGN(fixedDst, FixBufferCopyView(GetDevice(), destination));
+            destination = &fixedDst;
 
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(ValidateTextureCopyView(GetDevice(), *source));
@@ -638,12 +671,7 @@ namespace dawn_native {
                 DAWN_TRY(ValidateBufferCopyView(GetDevice(), *destination));
                 DAWN_TRY(ValidateCanUseAs(destination->buffer, wgpu::BufferUsage::CopyDst));
 
-                TextureDataLayout dstAsTextureDataLayout;
-                dstAsTextureDataLayout.offset = destination->offset;
-                dstAsTextureDataLayout.bytesPerRow = destination->bytesPerRow;
-                dstAsTextureDataLayout.rowsPerImage = destination->rowsPerImage;
-
-                DAWN_TRY(ValidateLinearTextureData(dstAsTextureDataLayout,
+                DAWN_TRY(ValidateLinearTextureData(destination->layout,
                                                    destination->buffer->GetSize(),
                                                    source->texture->GetFormat(), *copySize));
                 DAWN_TRY(ValidateTextureCopyRange(*source, *copySize));
@@ -653,7 +681,7 @@ namespace dawn_native {
             }
 
             // Compute default value for rowsPerImage
-            uint32_t defaultedRowsPerImage = destination->rowsPerImage;
+            uint32_t defaultedRowsPerImage = destination->layout.rowsPerImage;
             if (defaultedRowsPerImage == 0) {
                 defaultedRowsPerImage = copySize->height;
             }
@@ -665,8 +693,8 @@ namespace dawn_native {
             copy->source.origin = source->origin;
             copy->source.mipLevel = source->mipLevel;
             copy->destination.buffer = destination->buffer;
-            copy->destination.offset = destination->offset;
-            copy->destination.bytesPerRow = destination->bytesPerRow;
+            copy->destination.offset = destination->layout.offset;
+            copy->destination.bytesPerRow = destination->layout.bytesPerRow;
             copy->destination.rowsPerImage = defaultedRowsPerImage;
             copy->copySize = *copySize;
 
@@ -678,7 +706,7 @@ namespace dawn_native {
                                               const TextureCopyView* destination,
                                               const Extent3D* copySize) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            // TODO(dawn:22): Remove once migration from GPUTextureCopyView.arrayLayer to
+            // TODO(crbug.com/dawn/22): Remove once migration from GPUTextureCopyView.arrayLayer to
             // GPUTextureCopyView.origin.z is done.
             TextureCopyView fixedSrc;
             DAWN_TRY_ASSIGN(fixedSrc, FixTextureCopyView(GetDevice(), source));
