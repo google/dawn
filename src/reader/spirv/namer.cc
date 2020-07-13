@@ -22,7 +22,97 @@ namespace tint {
 namespace reader {
 namespace spirv {
 
-Namer::Namer(const FailStream& fail_stream) : fail_stream_(fail_stream) {}
+namespace {
+
+const char* kWGSLReservedWords[] = {
+    // Please keep this list sorted
+    "array",
+    "as",
+    "asm",
+    "bf16",
+    "binding",
+    "block",
+    "bool",
+    "break",
+    "builtin",
+    "case",
+    "cast",
+    "compute",
+    "const",
+    "constant_id",
+    "continue",
+    "default",
+    "do",
+    "else",
+    "elseif",
+    "entry_point",
+    "enum",
+    "f16",
+    "f32",
+    "fallthrough",
+    "false",
+    "fn",
+    "for",
+    "fragment",
+    "i16",
+    "i32",
+    "i64",
+    "i8",
+    "if",
+    "image",
+    "import",
+    "in",
+    "kill",
+    "let",
+    "location",
+    "loop",
+    "mat2x2",
+    "mat2x3",
+    "mat2x4",
+    "mat3x2",
+    "mat3x3",
+    "mat3x4",
+    "mat4x2",
+    "mat4x3",
+    "mat4x4",
+    "offset",
+    "out",
+    "premerge",
+    "private",
+    "ptr",
+    "regardless",
+    "return",
+    "set",
+    "storage_buffer",
+    "struct",
+    "switch",
+    "true",
+    "type",
+    "typedef",
+    "u16",
+    "u32",
+    "u64",
+    "u8",
+    "uniform",
+    "uniform_constant",
+    "unless",
+    "using",
+    "var",
+    "vec2",
+    "vec3",
+    "vec4",
+    "vertex",
+    "void",
+    "while",
+    "workgroup",
+};
+}
+
+Namer::Namer(const FailStream& fail_stream) : fail_stream_(fail_stream) {
+  for (const auto* reserved : kWGSLReservedWords) {
+    name_to_id_[std::string(reserved)] = 0;
+  }
+}
 
 Namer::~Namer() = default;
 

@@ -308,6 +308,103 @@ TEST_F(SpvNamerTest,
   EXPECT_THAT(namer.GetMemberName(2, 3), Eq(""));
 }
 
+using SpvNamerReservedWordTest = ::testing::TestWithParam<std::string>;
+
+TEST_P(SpvNamerReservedWordTest, ReservedWordsAreUsed) {
+  bool success;
+  std::stringstream errors;
+  FailStream fail_stream(&success, &errors);
+  Namer namer(fail_stream);
+  const std::string reserved = GetParam();
+  // Since it's reserved, it's marked as used, and we can't register an ID
+  EXPECT_THAT(namer.FindUnusedDerivedName(reserved), Eq(reserved + "_1"));
+}
+
+INSTANTIATE_TEST_SUITE_P(SpvParserTest_ReservedWords,
+                         SpvNamerReservedWordTest,
+                         ::testing::ValuesIn(std::vector<std::string>{
+                             // Please keep this list sorted.
+                             "array",
+                             "as",
+                             "asm",
+                             "bf16",
+                             "binding",
+                             "block",
+                             "bool",
+                             "break",
+                             "builtin",
+                             "case",
+                             "cast",
+                             "compute",
+                             "const",
+                             "constant_id",
+                             "continue",
+                             "default",
+                             "do",
+                             "else",
+                             "elseif",
+                             "entry_point",
+                             "enum",
+                             "f16",
+                             "f32",
+                             "fallthrough",
+                             "false",
+                             "fn",
+                             "for",
+                             "fragment",
+                             "i16",
+                             "i32",
+                             "i64",
+                             "i8",
+                             "if",
+                             "image",
+                             "import",
+                             "in",
+                             "kill",
+                             "let",
+                             "location",
+                             "loop",
+                             "mat2x2",
+                             "mat2x3",
+                             "mat2x4",
+                             "mat3x2",
+                             "mat3x3",
+                             "mat3x4",
+                             "mat4x2",
+                             "mat4x3",
+                             "mat4x4",
+                             "offset",
+                             "out",
+                             "premerge",
+                             "private",
+                             "ptr",
+                             "regardless",
+                             "return",
+                             "set",
+                             "storage_buffer",
+                             "struct",
+                             "switch",
+                             "true",
+                             "type",
+                             "typedef",
+                             "u16",
+                             "u32",
+                             "u64",
+                             "u8",
+                             "uniform",
+                             "uniform_constant",
+                             "unless",
+                             "using",
+                             "var",
+                             "vec2",
+                             "vec3",
+                             "vec4",
+                             "vertex",
+                             "void",
+                             "while",
+                             "workgroup",
+                         }));
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader
