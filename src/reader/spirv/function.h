@@ -525,16 +525,17 @@ class FunctionEmitter {
   /// @returns false if emission failed.
   bool EmitStatement(const spvtools::opt::Instruction& inst);
 
-  /// Emits a const definition for a SPIR-V value.
+  /// Emits a const definition for the typed value in |ast_expr|, and
+  /// records it as the translation for the result ID from |inst|.
   /// @param inst the SPIR-V instruction defining the value
   /// @param ast_expr the already-computed AST expression for the value
   /// @returns false if emission failed.
   bool EmitConstDefinition(const spvtools::opt::Instruction& inst,
                            TypedExpression ast_expr);
 
-  /// Emits a write to a hoisted variable for the given SPIR-V id,
-  /// if that ID has a hoisted declaration. Otherwise, emits a const
-  /// definition instead.
+  /// Emits a write of the typed value in |ast_expr| to a hoisted variable
+  /// for the given SPIR-V ID, if that ID has a hoisted declaration. Otherwise,
+  /// emits a const definition instead.
   /// @param inst the SPIR-V instruction defining the value
   /// @param ast_expr the already-computed AST expression for the value
   /// @returns false if emission failed.

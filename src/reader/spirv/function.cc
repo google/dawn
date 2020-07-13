@@ -50,6 +50,7 @@
 #include "src/ast/storage_class.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/bool_type.h"
+#include "src/ast/type/pointer_type.h"
 #include "src/ast/type/type.h"
 #include "src/ast/type/u32_type.h"
 #include "src/ast/type/vector_type.h"
@@ -2480,9 +2481,8 @@ bool FunctionEmitter::EmitConstDefinition(
   if (!ast_expr.expr) {
     return false;
   }
-  auto ast_const =
-      parser_impl_.MakeVariable(inst.result_id(), ast::StorageClass::kNone,
-                                parser_impl_.ConvertType(inst.type_id()));
+  auto ast_const = parser_impl_.MakeVariable(
+      inst.result_id(), ast::StorageClass::kNone, ast_expr.type);
   if (!ast_const) {
     return false;
   }
@@ -2549,11 +2549,15 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
           std::move(lhs.expr), std::move(rhs.expr)));
       return success();
     }
-    case SpvOpLoad:
+    case SpvOpLoad: {
       // Memory accesses must be issued in SPIR-V program order.
       // So represent a load by a new const definition.
-      return EmitConstDefOrWriteToHoistedVar(
-          inst, MakeExpression(inst.GetSingleWordInOperand(0)));
+      auto expr = MakeExpression(inst.GetSingleWordInOperand(0));
+      // The load result type is the pointee type of its operand.
+      assert(expr.type->IsPointer());
+      expr.type = expr.type->AsPointer()->type();
+      return EmitConstDefOrWriteToHoistedVar(inst, std::move(expr));
+    }
     case SpvOpCopyObject:
       // Arguably, OpCopyObject is purely combinatorial. On the other hand,
       // it exists to make a new name for something. So we choose to make
