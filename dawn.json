@@ -891,7 +891,7 @@
             {"name": "bind group layouts", "type": "bind group layout", "annotation": "const*", "length": "bind group layout count"}
         ]
     },
-    "pipeline statistics name": {
+    "pipeline statistic name": {
         "category": "enum",
         "values": [
             {"value": 0, "name": "vertex shader invocations"},
@@ -942,7 +942,7 @@
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "type", "type": "query type"},
             {"name": "count", "type": "uint32_t"},
-            {"name": "pipeline statistics", "type": "pipeline statistics name", "annotation": "const*", "length": "pipeline statistics count"},
+            {"name": "pipeline statistics", "type": "pipeline statistic name", "annotation": "const*", "length": "pipeline statistics count"},
             {"name": "pipeline statistics count", "type": "uint32_t", "default": "0"}
         ]
     },
