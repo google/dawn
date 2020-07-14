@@ -18,7 +18,10 @@
 #include "common/Constants.h"
 #include "common/TypedInteger.h"
 #include "common/ityp_array.h"
+#include "dawn_native/Error.h"
 #include "dawn_native/Format.h"
+#include "dawn_native/PerStage.h"
+
 #include "dawn_native/dawn_platform.h"
 
 #include <cstdint>
@@ -47,6 +50,27 @@ namespace dawn_native {
         bool multisampled = false;
         uint64_t minBufferBindingSize = 0;
     };
+
+    struct PerStageBindingCounts {
+        uint32_t sampledTextureCount;
+        uint32_t samplerCount;
+        uint32_t storageBufferCount;
+        uint32_t storageTextureCount;
+        uint32_t uniformBufferCount;
+    };
+
+    struct BindingCounts {
+        uint32_t totalCount;
+        uint32_t bufferCount;
+        uint32_t unverifiedBufferCount;  // Buffers with minimum buffer size unspecified
+        uint32_t dynamicUniformBufferCount;
+        uint32_t dynamicStorageBufferCount;
+        PerStage<PerStageBindingCounts> perStage;
+    };
+
+    void IncrementBindingCounts(BindingCounts* bindingCounts, const BindGroupLayoutEntry& entry);
+    void AccumulateBindingCounts(BindingCounts* bindingCounts, const BindingCounts& rhs);
+    MaybeError ValidateBindingCounts(const BindingCounts& bindingCounts);
 
     // For buffer size validation
     using RequiredBufferSizes = ityp::array<BindGroupIndex, std::vector<uint64_t>, kMaxBindGroups>;

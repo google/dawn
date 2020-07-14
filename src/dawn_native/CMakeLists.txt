@@ -35,6 +35,7 @@ target_sources(dawn_native PRIVATE
     "BindGroupLayout.cpp"
     "BindGroupLayout.h"
     "BindGroupTracker.h"
+    "BindingInfo.cpp"
     "BindingInfo.h"
     "BuddyAllocator.cpp"
     "BuddyAllocator.h"

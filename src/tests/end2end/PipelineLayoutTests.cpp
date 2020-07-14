@@ -28,7 +28,7 @@ TEST_P(PipelineLayoutTests, DynamicBuffersOverflow) {
     wgpu::BindGroupLayout bglA;
     {
         std::vector<wgpu::BindGroupLayoutEntry> entries;
-        for (uint32_t i = 0; i < kMaxDynamicStorageBufferCount; i++) {
+        for (uint32_t i = 0; i < kMaxDynamicStorageBuffersPerPipelineLayout; i++) {
             entries.push_back(
                 {i, wgpu::ShaderStage::Compute, wgpu::BindingType::StorageBuffer, true});
         }
@@ -40,10 +40,11 @@ TEST_P(PipelineLayoutTests, DynamicBuffersOverflow) {
     }
 
     // Create the second bind group layout that has one non-dynamic buffer binding.
+    // It is in the fragment stage to avoid the max per-stage storage buffer limit.
     wgpu::BindGroupLayout bglB;
     {
         wgpu::BindGroupLayoutDescriptor descriptor;
-        wgpu::BindGroupLayoutEntry entry = {0, wgpu::ShaderStage::Compute,
+        wgpu::BindGroupLayoutEntry entry = {0, wgpu::ShaderStage::Fragment,
                                             wgpu::BindingType::StorageBuffer, false};
         descriptor.entryCount = 1;
         descriptor.entries = &entry;

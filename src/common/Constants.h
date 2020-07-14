@@ -19,7 +19,7 @@
 
 static constexpr uint32_t kMaxBindGroups = 4u;
 // TODO(cwallez@chromium.org): investigate bindgroup limits
-static constexpr uint32_t kMaxBindingsPerGroup = 16u;
+static constexpr uint32_t kMaxBindingsPerGroup = 24u;
 static constexpr uint32_t kMaxVertexAttributes = 16u;
 // Vulkan has a standalone limit named maxVertexInputAttributeOffset (2047u at least) for vertex
 // attribute offset. The limit might be meaningless because Vulkan has another limit named
@@ -35,15 +35,21 @@ static constexpr uint32_t kMaxColorAttachments = 4u;
 static constexpr uint32_t kTextureBytesPerRowAlignment = 256u;
 // Dynamic buffer offsets require offset to be divisible by 256
 static constexpr uint64_t kMinDynamicBufferOffsetAlignment = 256u;
-// Max numbers of dynamic uniform buffers
-static constexpr uint32_t kMaxDynamicUniformBufferCount = 8u;
-// Max numbers of dynamic storage buffers
-static constexpr uint32_t kMaxDynamicStorageBufferCount = 4u;
-// Max numbers of dynamic buffers
-static constexpr uint32_t kMaxDynamicBufferCount =
-    kMaxDynamicUniformBufferCount + kMaxDynamicStorageBufferCount;
+
+// Per stage limits
+static constexpr uint32_t kMaxSampledTexturesPerShaderStage = 16;
+static constexpr uint32_t kMaxSamplersPerShaderStage = 16;
+static constexpr uint32_t kMaxStorageBuffersPerShaderStage = 4;
+static constexpr uint32_t kMaxStorageTexturesPerShaderStage = 4;
+static constexpr uint32_t kMaxUniformBuffersPerShaderStage = 12;
+
+// Per pipeline layout limits
+static constexpr uint32_t kMaxDynamicUniformBuffersPerPipelineLayout = 8u;
+static constexpr uint32_t kMaxDynamicStorageBuffersPerPipelineLayout = 4u;
+
 // Max size of uniform buffer binding
 static constexpr uint64_t kMaxUniformBufferBindingSize = 16384u;
+
 // Indirect command sizes
 static constexpr uint64_t kDispatchIndirectSize = 3 * sizeof(uint32_t);
 static constexpr uint64_t kDrawIndirectSize = 4 * sizeof(uint32_t);

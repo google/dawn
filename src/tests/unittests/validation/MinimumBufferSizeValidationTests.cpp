@@ -521,20 +521,18 @@ class MinBufferSizeDefaultLayoutTests : public MinBufferSizeTestsBase {
 
 // Various bindings in std140 have correct minimum size reflection
 TEST_F(MinBufferSizeDefaultLayoutTests, std140Inferred) {
-    CheckShaderBindingSizeReflection("std140", {{{0, 0, "float a", 4},
-                                                 {0, 1, "float b[]", 16},
-                                                 {0, 2, "mat2 c", 32},
-                                                 {0, 3, "int d; float e[]", 32},
+    CheckShaderBindingSizeReflection(
+        "std140", {{{0, 0, "float a", 4}, {0, 1, "float b[]", 16}, {0, 2, "mat2 c", 32}}});
+    CheckShaderBindingSizeReflection("std140", {{{0, 3, "int d; float e[]", 32},
                                                  {0, 4, "ThreeFloats f", 12},
                                                  {0, 5, "ThreeFloats g[]", 16}}});
 }
 
 // Various bindings in std430 have correct minimum size reflection
 TEST_F(MinBufferSizeDefaultLayoutTests, std430Inferred) {
-    CheckShaderBindingSizeReflection("std430", {{{0, 0, "float a", 4},
-                                                 {0, 1, "float b[]", 4},
-                                                 {0, 2, "mat2 c", 16},
-                                                 {0, 3, "int d; float e[]", 8},
+    CheckShaderBindingSizeReflection(
+        "std430", {{{0, 0, "float a", 4}, {0, 1, "float b[]", 4}, {0, 2, "mat2 c", 16}}});
+    CheckShaderBindingSizeReflection("std430", {{{0, 3, "int d; float e[]", 8},
                                                  {0, 4, "ThreeFloats f", 12},
                                                  {0, 5, "ThreeFloats g[]", 12}}});
 }
@@ -558,18 +556,20 @@ TEST_F(MinBufferSizeDefaultLayoutTests, std430BindingTypes) {
 TEST_F(MinBufferSizeDefaultLayoutTests, std140MultipleBindGroups) {
     CheckShaderBindingSizeReflection("std140",
                                      {{{0, 0, "float a", 4}, {0, 1, "float b[]", 16}},
-                                      {{1, 2, "mat2 c", 32}, {1, 3, "int d; float e[]", 32}},
-                                      {{2, 4, "ThreeFloats f", 12}},
-                                      {{3, 5, "ThreeFloats g[]", 16}}});
+                                      {{1, 2, "mat2 c", 32}, {1, 3, "int d; float e[]", 32}}});
+    CheckShaderBindingSizeReflection(
+        "std140", {{{0, 4, "ThreeFloats f", 12}, {0, 1, "float b[]", 16}},
+                   {{1, 5, "ThreeFloats g[]", 16}, {1, 3, "int d; float e[]", 32}}});
 }
 
 // Various bindings have correct size across multiple groups
 TEST_F(MinBufferSizeDefaultLayoutTests, std430MultipleBindGroups) {
     CheckShaderBindingSizeReflection("std430",
                                      {{{0, 0, "float a", 4}, {0, 1, "float b[]", 4}},
-                                      {{1, 2, "mat2 c", 16}, {1, 3, "int d; float e[]", 8}},
-                                      {{2, 4, "ThreeFloats f", 12}},
-                                      {{3, 5, "ThreeFloats g[]", 12}}});
+                                      {{1, 2, "mat2 c", 16}, {1, 3, "int d; float e[]", 8}}});
+    CheckShaderBindingSizeReflection(
+        "std430", {{{0, 4, "ThreeFloats f", 12}, {0, 1, "float b[]", 4}},
+                   {{1, 5, "ThreeFloats g[]", 12}, {1, 3, "int d; float e[]", 8}}});
 }
 
 // Minimum size should be the max requirement of both vertex and fragment stages

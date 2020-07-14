@@ -163,6 +163,7 @@ source_set("dawn_native_sources") {
     "BindGroupLayout.cpp",
     "BindGroupLayout.h",
     "BindGroupTracker.h",
+    "BindingInfo.cpp",
     "BindingInfo.h",
     "BuddyAllocator.cpp",
     "BuddyAllocator.h",
