@@ -477,6 +477,18 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
     } else {
       if (current_function_) {
         caller_to_callee_[current_function_->name()].push_back(ident->name());
+
+        auto* callee_func = mod_->FindFunctionByName(ident->name());
+        if (callee_func == nullptr) {
+          set_error(expr->source(),
+                    "unable to find called function: " + ident->name());
+          return false;
+        }
+
+        // We inherit any referenced variables from the callee.
+        for (auto* var : callee_func->referenced_module_variables()) {
+          set_referenced_from_function_if_needed(var);
+        }
       }
 
       // An identifier with a single name is a function call, not an import
