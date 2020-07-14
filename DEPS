@@ -1,6 +1,11 @@
 use_relative_paths = True
 use_relative_hooks = True
 
+gclient_gn_args_file = 'build/config/gclient_args.gni'
+gclient_gn_args = [
+  'mac_xcode_version',
+]
+
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'dawn_git': 'https://dawn.googlesource.com',
@@ -8,24 +13,25 @@ vars = {
   'swiftshader_git': 'https://swiftshader.googlesource.com',
 
   'dawn_standalone': True,
+
+  # This can be overridden, e.g. with custom_vars, to download a nonstandard
+  # Xcode version in build/mac_toolchain.py instead of downloading the
+  # prebuilt pinned revision.
+  'mac_xcode_version': 'default',
 }
 
 deps = {
   # Dependencies required to use GN/Clang in standalone
   'build': {
-    'url': '{chromium_git}/chromium/src/build@896323eeda1bd1b01156b70625d5e14de225ebc3',
+    'url': '{chromium_git}/chromium/src/build@b8f14c09b76ae3bd6edabe45105527a97e1e16bd',
     'condition': 'dawn_standalone',
   },
   'buildtools': {
-    'url': '{chromium_git}/chromium/src/buildtools@2c41dfb19abe40908834803b6fed797b0f341fe1',
+    'url': '{chromium_git}/chromium/src/buildtools@eb3987ec709b39469423100c1e77f0446890e059',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-    'url': '{chromium_git}/chromium/src/tools/clang@698732d5db36040c07d5cc5f9137fcc943494c11',
-    'condition': 'dawn_standalone',
-  },
-  'third_party/binutils': {
-    'url': '{chromium_git}/chromium/src/third_party/binutils@f9ce777698a819dff4d6a033b31122d91a49b62e',
+    'url': '{chromium_git}/chromium/src/tools/clang@d027d75e8dd91140115a4cc9c7c3598c44bbf634',
     'condition': 'dawn_standalone',
   },
   'tools/clang/dsymutil': {
@@ -200,16 +206,6 @@ hooks = [
                 '--no_auth',
                 '--bucket', 'chromium-browser-clang/rc',
                 '-s', 'build/toolchain/win/rc/win/rc.exe.sha1',
-    ],
-  },
-  # Pull binutils for linux hermetic builds
-  {
-    'name': 'binutils',
-    'pattern': 'src/third_party/binutils',
-    'condition': 'host_os == "linux" and dawn_standalone',
-    'action': [
-        'python',
-        'third_party/binutils/download.py',
     ],
   },
   # Update build/util/LASTCHANGE.
