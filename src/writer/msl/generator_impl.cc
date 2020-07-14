@@ -20,6 +20,7 @@
 #include "src/ast/binary_expression.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/break_statement.h"
+#include "src/ast/call_expression.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/cast_expression.h"
 #include "src/ast/continue_statement.h"
@@ -29,6 +30,7 @@
 #include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/intrinsic.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
@@ -263,6 +265,48 @@ bool GeneratorImpl::EmitBinary(ast::BinaryExpression* expr) {
 bool GeneratorImpl::EmitBreak(ast::BreakStatement*) {
   make_indent();
   out_ << "break;" << std::endl;
+  return true;
+}
+
+bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
+  if (!expr->func()->IsIdentifier()) {
+    error_ = "invalid function name";
+    return 0;
+  }
+
+  auto* ident = expr->func()->AsIdentifier();
+
+  if (!ident->has_path() && ast::intrinsic::IsIntrinsic(ident->name())) {
+    // TODO(dsinclair): Generate intrinsic
+    error_ = "intrinsics not generated yet";
+    return false;
+  }
+
+  if (!ident->has_path()) {
+    if (!EmitExpression(expr->func())) {
+      return false;
+    }
+    out_ << "(";
+
+    bool first = true;
+    const auto& params = expr->params();
+    for (const auto& param : params) {
+      if (!first) {
+        out_ << ", ";
+      }
+      first = false;
+
+      if (!EmitExpression(param.get())) {
+        return false;
+      }
+    }
+
+    out_ << ")";
+  } else {
+    // TODO(dsinclair): Handle imported function
+    error_ = "imported calls not handled yet";
+    return false;
+  }
   return true;
 }
 
@@ -527,6 +571,9 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   }
   if (expr->IsBinary()) {
     return EmitBinary(expr->AsBinary());
+  }
+  if (expr->IsCall()) {
+    return EmitCall(expr->AsCall());
   }
   if (expr->IsCast()) {
     return EmitCast(expr->AsCast());

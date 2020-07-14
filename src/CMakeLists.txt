@@ -500,6 +500,7 @@ if(${TINT_BUILD_MSL_WRITER})
     writer/msl/generator_impl_assign_test.cc
     writer/msl/generator_impl_binary_test.cc
     writer/msl/generator_impl_break_test.cc
+    writer/msl/generator_impl_call_test.cc
     writer/msl/generator_impl_case_test.cc
     writer/msl/generator_impl_cast_test.cc
     writer/msl/generator_impl_constructor_test.cc

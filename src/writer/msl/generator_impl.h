@@ -66,6 +66,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
   bool EmitBreak(ast::BreakStatement* stmt);
+  /// Handles generating a call expression
+  /// @param expr the call expression
+  /// @returns true if the call expression is emitted
+  bool EmitCall(ast::CallExpression* expr);
   /// Handles a case statement
   /// @param stmt the statement
   /// @returns true if the statment was emitted successfully
