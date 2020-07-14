@@ -77,6 +77,14 @@ class Function : public Node {
     return referenced_module_vars_;
   }
 
+  /// Adds an ancestor entry point
+  /// @param ep the entry point ancestor
+  void add_ancestor_entry_point(const std::string& ep);
+  /// @returns the ancestor entry points
+  const std::vector<std::string>& ancestor_entry_points() const {
+    return ancestor_entry_points_;
+  }
+
   /// Sets the return type of the function
   /// @param type the return type
   void set_return_type(type::Type* type) { return_type_ = type; }
@@ -108,6 +116,7 @@ class Function : public Node {
   type::Type* return_type_ = nullptr;
   StatementList body_;
   std::vector<Variable*> referenced_module_vars_;
+  std::vector<std::string> ancestor_entry_points_;
 };
 
 /// A list of unique functions

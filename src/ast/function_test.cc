@@ -16,6 +16,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/kill_statement.h"
+#include "src/ast/pipeline_stage.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
 #include "src/ast/type/void_type.h"
@@ -75,6 +76,19 @@ TEST_F(FunctionTest, AddDuplicateReferencedVariables) {
   f.add_referenced_module_variable(&v2);
   ASSERT_EQ(f.referenced_module_variables().size(), 2u);
   EXPECT_EQ(f.referenced_module_variables()[1], &v2);
+}
+
+TEST_F(FunctionTest, AddDuplicateEntryPoints) {
+  ast::type::VoidType void_type;
+  Function f("func", VariableList{}, &void_type);
+
+  f.add_ancestor_entry_point("main");
+  ASSERT_EQ(1u, f.ancestor_entry_points().size());
+  EXPECT_EQ("main", f.ancestor_entry_points()[0]);
+
+  f.add_ancestor_entry_point("main");
+  ASSERT_EQ(1u, f.ancestor_entry_points().size());
+  EXPECT_EQ("main", f.ancestor_entry_points()[0]);
 }
 
 TEST_F(FunctionTest, IsValid) {

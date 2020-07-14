@@ -51,6 +51,15 @@ void Function::add_referenced_module_variable(Variable* var) {
   referenced_module_vars_.push_back(var);
 }
 
+void Function::add_ancestor_entry_point(const std::string& ep) {
+  for (const auto& point : ancestor_entry_points_) {
+    if (point == ep) {
+      return;
+    }
+  }
+  ancestor_entry_points_.push_back(ep);
+}
+
 bool Function::IsValid() const {
   for (const auto& param : params_) {
     if (param == nullptr || !param->IsValid())

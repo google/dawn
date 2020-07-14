@@ -188,7 +188,25 @@ bool TypeDeterminer::Determine() {
   if (!DetermineFunctions(mod_->functions())) {
     return false;
   }
+
+  // Walk over the caller to callee information and update functions with which
+  // entry points call those functions.
+  for (const auto& ep : mod_->entry_points()) {
+    for (const auto& callee : caller_to_callee_[ep->function_name()]) {
+      set_entry_points(callee, ep->name());
+    }
+  }
+
   return true;
+}
+
+void TypeDeterminer::set_entry_points(const std::string& fn_name,
+                                      const std::string& ep_name) {
+  name_to_function_[fn_name]->add_ancestor_entry_point(ep_name);
+
+  for (const auto& callee : caller_to_callee_[fn_name]) {
+    set_entry_points(callee, ep_name);
+  }
 }
 
 bool TypeDeterminer::DetermineFunctions(const ast::FunctionList& funcs) {
@@ -457,6 +475,10 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* expr) {
       imp->AddMethodId(ident->name(), ext_id);
       expr->func()->set_result_type(result_type);
     } else {
+      if (current_function_) {
+        caller_to_callee_[current_function_->name()].push_back(ident->name());
+      }
+
       // An identifier with a single name is a function call, not an import
       // lookup which we can handle with the regular identifier lookup.
       if (!DetermineResultType(ident)) {
