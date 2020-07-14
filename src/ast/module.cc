@@ -25,10 +25,20 @@ Module::Module(Module&&) = default;
 
 Module::~Module() = default;
 
-Import* Module::FindImportByName(const std::string& name) {
+Import* Module::FindImportByName(const std::string& name) const {
   for (const auto& import : imports_) {
-    if (import->name() == name)
+    if (import->name() == name) {
       return import.get();
+    }
+  }
+  return nullptr;
+}
+
+Function* Module::FindFunctionByName(const std::string& name) const {
+  for (const auto& func : functions_) {
+    if (func->name() == name) {
+      return func.get();
+    }
   }
   return nullptr;
 }

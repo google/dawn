@@ -23,11 +23,13 @@
 #include "src/ast/case_statement.h"
 #include "src/ast/cast_expression.h"
 #include "src/ast/continue_statement.h"
+#include "src/ast/decorated_variable.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/location_decoration.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
@@ -53,6 +55,9 @@ namespace writer {
 namespace msl {
 namespace {
 
+const char kInStructNameSuffix[] = "in";
+const char kOutStructNameSuffix[] = "out";
+
 bool last_is_break_or_fallthrough(const ast::StatementList& stmts) {
   if (stmts.empty()) {
     return false;
@@ -67,6 +72,23 @@ GeneratorImpl::GeneratorImpl() = default;
 
 GeneratorImpl::~GeneratorImpl() = default;
 
+void GeneratorImpl::set_module_for_testing(ast::Module* mod) {
+  module_ = mod;
+}
+
+std::string GeneratorImpl::generate_struct_name(ast::EntryPoint* ep,
+                                                const std::string& type) {
+  std::string base_name = ep->function_name() + "_" + type;
+  std::string name = base_name;
+  uint32_t i = 0;
+  while (namer_.IsMapped(name)) {
+    name = base_name + "_" + std::to_string(i);
+    ++i;
+  }
+  namer_.RegisterRemappedName(name);
+  return name;
+}
+
 bool GeneratorImpl::Generate(const ast::Module& module) {
   module_ = &module;
 
@@ -79,6 +101,12 @@ bool GeneratorImpl::Generate(const ast::Module& module) {
   }
   if (!module.alias_types().empty()) {
     out_ << std::endl;
+  }
+
+  for (const auto& ep : module.entry_points()) {
+    if (!EmitEntryPoint(ep.get())) {
+      return false;
+    }
   }
 
   for (const auto& func : module.functions()) {
@@ -384,6 +412,109 @@ bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
     error_ = "unknown literal type";
     return false;
   }
+  return true;
+}
+
+bool GeneratorImpl::EmitEntryPoint(ast::EntryPoint* ep) {
+  auto* func = module_->FindFunctionByName(ep->function_name());
+  if (func == nullptr) {
+    error_ = "Unable to find entry point function: " + ep->function_name();
+    return false;
+  }
+
+  std::vector<std::pair<ast::Variable*, uint32_t>> in_locations;
+  std::vector<std::pair<ast::Variable*, uint32_t>> out_locations;
+  for (auto* var : func->referenced_module_variables()) {
+    if (!var->IsDecorated()) {
+      continue;
+    }
+    auto* decorated = var->AsDecorated();
+    ast::LocationDecoration* locn_deco = nullptr;
+    for (auto& deco : decorated->decorations()) {
+      if (deco->IsLocation()) {
+        locn_deco = deco.get()->AsLocation();
+        break;
+      }
+    }
+    if (locn_deco == nullptr) {
+      continue;
+    }
+
+    if (var->storage_class() == ast::StorageClass::kInput) {
+      in_locations.push_back({var, locn_deco->value()});
+    } else if (var->storage_class() == ast::StorageClass::kOutput) {
+      out_locations.push_back({var, locn_deco->value()});
+    }
+  }
+
+  if (!in_locations.empty()) {
+    auto in_struct_name = generate_struct_name(ep, kInStructNameSuffix);
+    ep_name_to_in_struct_[ep->name()] = in_struct_name;
+
+    make_indent();
+    out_ << "struct " << in_struct_name << " {" << std::endl;
+
+    increment_indent();
+
+    for (auto& data : in_locations) {
+      auto* var = data.first;
+      uint32_t loc = data.second;
+
+      make_indent();
+      if (!EmitType(var->type(), var->name())) {
+        return false;
+      }
+
+      out_ << " " << var->name() << " [[";
+      if (ep->stage() == ast::PipelineStage::kVertex) {
+        out_ << "attribute(" << loc << ")";
+      } else if (ep->stage() == ast::PipelineStage::kFragment) {
+        out_ << "user(locn" << loc << ")";
+      } else {
+        error_ = "invalid location variable for pipeline stage";
+        return false;
+      }
+      out_ << "]];" << std::endl;
+    }
+    decrement_indent();
+    make_indent();
+
+    out_ << "};" << std::endl << std::endl;
+  }
+
+  if (!out_locations.empty()) {
+    auto out_struct_name = generate_struct_name(ep, kOutStructNameSuffix);
+    ep_name_to_out_struct_[ep->name()] = out_struct_name;
+
+    make_indent();
+    out_ << "struct " << out_struct_name << " {" << std::endl;
+
+    increment_indent();
+    for (auto& data : out_locations) {
+      auto* var = data.first;
+      uint32_t loc = data.second;
+
+      make_indent();
+      if (!EmitType(var->type(), var->name())) {
+        return false;
+      }
+
+      out_ << " " << var->name() << " [[";
+      if (ep->stage() == ast::PipelineStage::kVertex) {
+        out_ << "user(locn" << loc << ")";
+      } else if (ep->stage() == ast::PipelineStage::kFragment) {
+        out_ << "color(" << loc << ")";
+      } else {
+        error_ = "invalid location variable for pipeline stage";
+        return false;
+      }
+      out_ << "]];" << std::endl;
+    }
+    decrement_indent();
+    make_indent();
+    out_ << "};" << std::endl << std::endl;
+  }
+
   return true;
 }
 

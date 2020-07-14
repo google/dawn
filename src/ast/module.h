@@ -47,7 +47,7 @@ class Module {
   /// Find the import of the given name
   /// @param name The import name to search for
   /// @returns the import with the given name if found, nullptr otherwise.
-  Import* FindImportByName(const std::string& name);
+  Import* FindImportByName(const std::string& name) const;
 
   /// Add a global variable to the module
   /// @param var the variable to add
@@ -80,6 +80,10 @@ class Module {
   }
   /// @returns the modules functions
   const FunctionList& functions() const { return functions_; }
+  /// Returns the function with the given name
+  /// @param name the name to search for
+  /// @returns the associated function or nullptr if none exists
+  Function* FindFunctionByName(const std::string& name) const;
 
   /// @returns true if all required fields in the AST are present.
   bool IsValid() const;

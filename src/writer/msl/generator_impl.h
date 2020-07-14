@@ -17,6 +17,7 @@
 
 #include <sstream>
 #include <string>
+#include <unordered_map>
 
 #include "src/ast/literal.h"
 #include "src/ast/module.h"
@@ -85,6 +86,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
   bool EmitElse(ast::ElseStatement* stmt);
+  /// Handles emitting information for an entry point
+  /// @param ep the entry point
+  /// @returns true if the entry point data was emitted
+  bool EmitEntryPoint(ast::EntryPoint* ep);
   /// Handles generate an Expression
   /// @param expr the expression
   /// @returns true if the expression was emitted
@@ -166,10 +171,26 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true if the zero value was successfully emitted.
   bool EmitZeroValue(ast::type::Type* type);
 
+  /// Sets the module for testing purposes
+  /// @param mod the module to set.
+  void set_module_for_testing(ast::Module* mod);
+
+  /// Generates a name for the input struct
+  /// @param ep the entry point to generate for
+  /// @param type the type of struct to generate
+  /// @returns the input struct name
+  std::string generate_struct_name(ast::EntryPoint* ep,
+                                   const std::string& type);
+
+  /// @returns the namer for testing
+  Namer* namer_for_testing() { return &namer_; }
+
  private:
   Namer namer_;
   const ast::Module* module_ = nullptr;
   uint32_t loop_emission_counter_ = 0;
+  std::unordered_map<std::string, std::string> ep_name_to_in_struct_;
+  std::unordered_map<std::string, std::string> ep_name_to_out_struct_;
 };
 
 }  // namespace msl

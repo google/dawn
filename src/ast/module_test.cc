@@ -81,6 +81,21 @@ TEST_F(ModuleTest, LookupImportMissing) {
   EXPECT_EQ(nullptr, m.FindImportByName("Missing"));
 }
 
+TEST_F(ModuleTest, LookupFunction) {
+  type::F32Type f32;
+  Module m;
+
+  auto func = std::make_unique<Function>("main", VariableList{}, &f32);
+  auto* func_ptr = func.get();
+  m.AddFunction(std::move(func));
+  EXPECT_EQ(func_ptr, m.FindFunctionByName("main"));
+}
+
+TEST_F(ModuleTest, LookupFunctionMissing) {
+  Module m;
+  EXPECT_EQ(nullptr, m.FindFunctionByName("Missing"));
+}
+
 TEST_F(ModuleTest, IsValid_Empty) {
   Module m;
   EXPECT_TRUE(m.IsValid());

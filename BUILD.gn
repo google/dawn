@@ -896,6 +896,7 @@ source_set("tint_unittests_msl_writer_src") {
     "src/writer/msl/generator_impl_cast_test.cc",
     "src/writer/msl/generator_impl_constructor_test.cc",
     "src/writer/msl/generator_impl_continue_test.cc",
+    "src/writer/msl/generator_impl_entry_point_test.cc",
     "src/writer/msl/generator_impl_function_test.cc",
     "src/writer/msl/generator_impl_identifier_test.cc",
     "src/writer/msl/generator_impl_if_test.cc",

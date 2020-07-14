@@ -290,7 +290,7 @@ std::string Namer::NameFor(const std::string& name) {
       }
       i++;
     }
-    remapped_names_.insert(ret_name);
+    RegisterRemappedName(ret_name);
   } else {
     uint32_t i = 0;
     // Make sure the ident name wasn't assigned by a remapping.
@@ -302,11 +302,20 @@ std::string Namer::NameFor(const std::string& name) {
       ret_name = name + "_" + std::to_string(i);
       i++;
     }
-    remapped_names_.insert(ret_name);
+    RegisterRemappedName(ret_name);
   }
 
   name_map_[name] = ret_name;
   return ret_name;
+}
+
+bool Namer::IsMapped(const std::string& name) {
+  auto it = name_map_.find(name);
+  return it != name_map_.end();
+}
+
+void Namer::RegisterRemappedName(const std::string& name) {
+  remapped_names_.insert(name);
 }
 
 }  // namespace msl
