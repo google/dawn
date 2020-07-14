@@ -21,8 +21,6 @@ def _DoClangFormat(input_api, output_api):
         clang_format_path = 'buildtools/linux64/clang-format'
     elif platform.system() == 'Darwin':
         clang_format_path = 'buildtools/mac/clang-format'
-    elif platform.system() == 'Windows':
-        clang_format_path = 'buildtools/win/clang-format.exe'
     else:
         return [output_api.PresubmitNotifyResult('Skipping clang-format')]
 
