@@ -58,6 +58,16 @@ static void ToMockBufferMapWriteCallback(WGPUBufferMapAsyncStatus status,
                                      userdata);
 }
 
+class MockBufferMapAsyncCallback {
+  public:
+    MOCK_METHOD(void, Call, (WGPUBufferMapAsyncStatus status, void* userdata));
+};
+
+static std::unique_ptr<MockBufferMapAsyncCallback> mockBufferMapAsyncCallback;
+static void ToMockBufferMapAsyncCallback(WGPUBufferMapAsyncStatus status, void* userdata) {
+    mockBufferMapAsyncCallback->Call(status, userdata);
+}
+
 class BufferValidationTest : public ValidationTest {
   protected:
     wgpu::Buffer CreateMapReadBuffer(uint64_t size) {
@@ -67,6 +77,7 @@ class BufferValidationTest : public ValidationTest {
 
         return device.CreateBuffer(&descriptor);
     }
+
     wgpu::Buffer CreateMapWriteBuffer(uint64_t size) {
         wgpu::BufferDescriptor descriptor;
         descriptor.size = size;
@@ -92,6 +103,13 @@ class BufferValidationTest : public ValidationTest {
         return device.CreateBuffer(&descriptor);
     }
 
+    void AssertMapAsyncError(wgpu::Buffer buffer, wgpu::MapMode mode, size_t offset, size_t size) {
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Error, _)).Times(1);
+
+        ASSERT_DEVICE_ERROR(
+            buffer.MapAsync(mode, offset, size, ToMockBufferMapAsyncCallback, nullptr));
+    }
+
     wgpu::Queue queue;
 
   private:
@@ -100,6 +118,7 @@ class BufferValidationTest : public ValidationTest {
 
         mockBufferMapReadCallback = std::make_unique<MockBufferMapReadCallback>();
         mockBufferMapWriteCallback = std::make_unique<MockBufferMapWriteCallback>();
+        mockBufferMapAsyncCallback = std::make_unique<MockBufferMapAsyncCallback>();
         queue = device.GetDefaultQueue();
     }
 
@@ -107,6 +126,7 @@ class BufferValidationTest : public ValidationTest {
         // Delete mocks so that expectations are checked
         mockBufferMapReadCallback = nullptr;
         mockBufferMapWriteCallback = nullptr;
+        mockBufferMapAsyncCallback = nullptr;
 
         ValidationTest::TearDown();
     }
@@ -164,7 +184,272 @@ TEST_F(BufferValidationTest, CreationMapUsageRestrictions) {
 }
 
 // Test the success case for mapping buffer for reading
-TEST_F(BufferValidationTest, MapReadSuccess) {
+TEST_F(BufferValidationTest, MapAsync_ReadSuccess) {
+    wgpu::Buffer buf = CreateMapReadBuffer(4);
+
+    buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+
+    EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _)).Times(1);
+    WaitForAllOperations(device);
+
+    buf.Unmap();
+}
+
+// Test the success case for mapping buffer for writing
+TEST_F(BufferValidationTest, MapAsync_WriteSuccess) {
+    wgpu::Buffer buf = CreateMapWriteBuffer(4);
+
+    buf.MapAsync(wgpu::MapMode::Write, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+
+    EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _)).Times(1);
+    WaitForAllOperations(device);
+
+    buf.Unmap();
+}
+
+// Test map async with a buffer that's an error
+TEST_F(BufferValidationTest, MapAsync_ErrorBuffer) {
+    wgpu::BufferDescriptor desc;
+    desc.size = 4;
+    desc.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite;
+    wgpu::Buffer buffer;
+    ASSERT_DEVICE_ERROR(buffer = device.CreateBuffer(&desc));
+
+    AssertMapAsyncError(buffer, wgpu::MapMode::Read, 0, 4);
+    AssertMapAsyncError(buffer, wgpu::MapMode::Write, 0, 4);
+}
+
+// Test map async with an invalid offset and size alignment.
+TEST_F(BufferValidationTest, MapAsync_OffsetSizeAlignment) {
+    // Control case, both aligned to 4 is ok.
+    {
+        wgpu::Buffer buffer = CreateMapReadBuffer(8);
+        buffer.MapAsync(wgpu::MapMode::Read, 4, 4, nullptr, nullptr);
+    }
+    {
+        wgpu::Buffer buffer = CreateMapWriteBuffer(8);
+        buffer.MapAsync(wgpu::MapMode::Write, 4, 4, nullptr, nullptr);
+    }
+
+    // Error case, offset aligned to 2 is an error.
+    {
+        wgpu::Buffer buffer = CreateMapReadBuffer(8);
+        AssertMapAsyncError(buffer, wgpu::MapMode::Read, 2, 4);
+    }
+    {
+        wgpu::Buffer buffer = CreateMapWriteBuffer(8);
+        AssertMapAsyncError(buffer, wgpu::MapMode::Write, 2, 4);
+    }
+
+    // Error case, size aligned to 2 is an error.
+    {
+        wgpu::Buffer buffer = CreateMapReadBuffer(8);
+        AssertMapAsyncError(buffer, wgpu::MapMode::Read, 0, 6);
+    }
+    {
+        wgpu::Buffer buffer = CreateMapWriteBuffer(8);
+        AssertMapAsyncError(buffer, wgpu::MapMode::Write, 0, 6);
+    }
+}
+
+// Test map async with a buffer that has the wrong usage
+TEST_F(BufferValidationTest, MapAsync_WrongUsage) {
+    {
+        wgpu::BufferDescriptor desc;
+        desc.usage = wgpu::BufferUsage::Vertex;
+        desc.size = 4;
+        wgpu::Buffer buffer = device.CreateBuffer(&desc);
+
+        AssertMapAsyncError(buffer, wgpu::MapMode::Read, 0, 4);
+        AssertMapAsyncError(buffer, wgpu::MapMode::Write, 0, 4);
+    }
+    {
+        wgpu::Buffer buffer = CreateMapReadBuffer(4);
+        AssertMapAsyncError(buffer, wgpu::MapMode::Write, 0, 4);
+    }
+    {
+        wgpu::Buffer buffer = CreateMapWriteBuffer(4);
+        AssertMapAsyncError(buffer, wgpu::MapMode::Read, 0, 4);
+    }
+}
+
+// Test map async with a wrong mode
+TEST_F(BufferValidationTest, MapAsync_WrongMode) {
+    {
+        wgpu::Buffer buffer = CreateMapReadBuffer(4);
+        AssertMapAsyncError(buffer, wgpu::MapMode::None, 0, 4);
+    }
+    {
+        wgpu::Buffer buffer = CreateMapReadBuffer(4);
+        AssertMapAsyncError(buffer, wgpu::MapMode::Read | wgpu::MapMode::Write, 0, 4);
+    }
+}
+
+// Test map async with a buffer that's already mapped
+TEST_F(BufferValidationTest, MapAsync_AlreadyMapped) {
+    {
+        wgpu::Buffer buffer = CreateMapReadBuffer(4);
+        buffer.MapAsync(wgpu::MapMode::Read, 0, 4, nullptr, nullptr);
+        AssertMapAsyncError(buffer, wgpu::MapMode::Read, 0, 4);
+    }
+    {
+        wgpu::Buffer buffer = BufferMappedAtCreation(4, wgpu::BufferUsage::MapRead);
+        AssertMapAsyncError(buffer, wgpu::MapMode::Read, 0, 4);
+    }
+    {
+        wgpu::Buffer buffer = CreateMapWriteBuffer(4);
+        buffer.MapAsync(wgpu::MapMode::Write, 0, 4, nullptr, nullptr);
+        AssertMapAsyncError(buffer, wgpu::MapMode::Write, 0, 4);
+    }
+    {
+        wgpu::Buffer buffer = BufferMappedAtCreation(4, wgpu::BufferUsage::MapWrite);
+        AssertMapAsyncError(buffer, wgpu::MapMode::Write, 0, 4);
+    }
+}
+
+// Test map async with a buffer that's destroyed
+TEST_F(BufferValidationTest, MapAsync_Destroy) {
+    {
+        wgpu::Buffer buffer = CreateMapReadBuffer(4);
+        buffer.Destroy();
+        AssertMapAsyncError(buffer, wgpu::MapMode::Read, 0, 4);
+    }
+    {
+        wgpu::Buffer buffer = CreateMapWriteBuffer(4);
+        buffer.Destroy();
+        AssertMapAsyncError(buffer, wgpu::MapMode::Write, 0, 4);
+    }
+}
+
+// Test map async but unmapping before the result is ready.
+TEST_F(BufferValidationTest, MapAsync_UnmapBeforeResult) {
+    {
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
+        buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Unknown, _))
+            .Times(1);
+        buf.Unmap();
+
+        // The callback shouldn't be called again.
+        WaitForAllOperations(device);
+    }
+    {
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
+        buf.MapAsync(wgpu::MapMode::Write, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Unknown, _))
+            .Times(1);
+        buf.Unmap();
+
+        // The callback shouldn't be called again.
+        WaitForAllOperations(device);
+    }
+}
+
+// When a MapAsync is cancelled with Unmap it might still be in flight, test doing a new request
+// works as expected and we don't get the cancelled request's data.
+TEST_F(BufferValidationTest, MapAsync_UnmapBeforeResultAndMapAgain) {
+    {
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
+        buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, this + 0);
+
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Unknown, this + 0))
+            .Times(1);
+        buf.Unmap();
+
+        buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, this + 1);
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, this + 1))
+            .Times(1);
+        WaitForAllOperations(device);
+    }
+    {
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
+        buf.MapAsync(wgpu::MapMode::Write, 0, 4, ToMockBufferMapAsyncCallback, this + 0);
+
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Unknown, this + 0))
+            .Times(1);
+        buf.Unmap();
+
+        buf.MapAsync(wgpu::MapMode::Write, 0, 4, ToMockBufferMapAsyncCallback, this + 1);
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, this + 1))
+            .Times(1);
+        WaitForAllOperations(device);
+    }
+}
+
+// Test map async but destroying before the result is ready.
+TEST_F(BufferValidationTest, MapAsync_DestroyBeforeResult) {
+    {
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
+        buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Unknown, _))
+            .Times(1);
+        buf.Destroy();
+
+        // The callback shouldn't be called again.
+        WaitForAllOperations(device);
+    }
+    {
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
+        buf.MapAsync(wgpu::MapMode::Write, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Unknown, _))
+            .Times(1);
+        buf.Destroy();
+
+        // The callback shouldn't be called again.
+        WaitForAllOperations(device);
+    }
+}
+
+// Test that the MapCallback isn't fired twice when unmap() is called inside the callback
+TEST_F(BufferValidationTest, MapAsync_UnmapCalledInCallback) {
+    {
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
+        buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _))
+            .WillOnce(InvokeWithoutArgs([&]() { buf.Unmap(); }));
+
+        WaitForAllOperations(device);
+    }
+    {
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
+        buf.MapAsync(wgpu::MapMode::Write, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _))
+            .WillOnce(InvokeWithoutArgs([&]() { buf.Unmap(); }));
+
+        WaitForAllOperations(device);
+    }
+}
+
+// Test that the MapCallback isn't fired twice when destroy() is called inside the callback
+TEST_F(BufferValidationTest, MapAsync_DestroyCalledInCallback) {
+    {
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
+        buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _))
+            .WillOnce(InvokeWithoutArgs([&]() { buf.Destroy(); }));
+
+        WaitForAllOperations(device);
+    }
+    {
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
+        buf.MapAsync(wgpu::MapMode::Write, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _))
+            .WillOnce(InvokeWithoutArgs([&]() { buf.Destroy(); }));
+
+        WaitForAllOperations(device);
+    }
+}
+
+// Test the success case for mapping buffer for reading
+TEST_F(BufferValidationTest, MapReadAsyncSuccess) {
     wgpu::Buffer buf = CreateMapReadBuffer(4);
 
     buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
@@ -178,7 +463,7 @@ TEST_F(BufferValidationTest, MapReadSuccess) {
 }
 
 // Test the success case for mapping buffer for writing
-TEST_F(BufferValidationTest, MapWriteSuccess) {
+TEST_F(BufferValidationTest, MapWriteAsyncSuccess) {
     wgpu::Buffer buf = CreateMapWriteBuffer(4);
 
     buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
@@ -605,6 +890,30 @@ TEST_F(BufferValidationTest, SubmitMappedBuffer) {
         wgpu::Buffer bufA = device.CreateBuffer(&descriptorA);
         wgpu::Buffer bufB = device.CreateBuffer(&descriptorB);
 
+        bufA.MapAsync(wgpu::MapMode::Write, 0, 4, nullptr, nullptr);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(bufA, 0, bufB, 0, 4);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+        WaitForAllOperations(device);
+    }
+    {
+        wgpu::Buffer bufA = device.CreateBuffer(&descriptorA);
+        wgpu::Buffer bufB = device.CreateBuffer(&descriptorB);
+
+        bufB.MapAsync(wgpu::MapMode::Read, 0, 4, nullptr, nullptr);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(bufA, 0, bufB, 0, 4);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+        WaitForAllOperations(device);
+    }
+    {
+        wgpu::Buffer bufA = device.CreateBuffer(&descriptorA);
+        wgpu::Buffer bufB = device.CreateBuffer(&descriptorB);
+
         bufA.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -721,6 +1030,24 @@ TEST_F(BufferValidationTest, UnmapUnmappedBuffer) {
         buf.Unmap();
         buf.Unmap();
     }
+    {
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
+        // Buffer starts unmapped. Unmap should succeed.
+        buf.Unmap();
+        buf.MapAsync(wgpu::MapMode::Read, 0, 4, nullptr, nullptr);
+        buf.Unmap();
+        // Unmapping twice should succeed
+        buf.Unmap();
+    }
+    {
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
+        // Buffer starts unmapped. Unmap should succeed.
+        buf.Unmap();
+        buf.MapAsync(wgpu::MapMode::Write, 0, 4, nullptr, nullptr);
+        // Unmapping twice should succeed
+        buf.Unmap();
+        buf.Unmap();
+    }
 }
 
 // Test that it is invalid to call GetMappedRange on an unmapped buffer.
@@ -775,6 +1102,32 @@ TEST_F(BufferValidationTest, GetMappedRangeOnUnmappedBuffer) {
         buf.MapWriteAsync(ToMockBufferMapWriteCallback, nullptr);
         EXPECT_CALL(*mockBufferMapWriteCallback,
                     Call(WGPUBufferMapAsyncStatus_Success, Ne(nullptr), 4u, _))
+            .Times(1);
+        WaitForAllOperations(device);
+        buf.Unmap();
+
+        ASSERT_EQ(nullptr, buf.GetMappedRange());
+        ASSERT_EQ(nullptr, buf.GetConstMappedRange());
+    }
+    // Unmapped after MapAsync read case.
+    {
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
+
+        buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _))
+            .Times(1);
+        WaitForAllOperations(device);
+        buf.Unmap();
+
+        ASSERT_EQ(nullptr, buf.GetMappedRange());
+        ASSERT_EQ(nullptr, buf.GetConstMappedRange());
+    }
+
+    // Unmapped after MapAsync write case.
+    {
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
+        buf.MapAsync(wgpu::MapMode::Write, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _))
             .Times(1);
         WaitForAllOperations(device);
         buf.Unmap();
@@ -844,19 +1197,57 @@ TEST_F(BufferValidationTest, GetMappedRangeOnDestroyedBuffer) {
         ASSERT_EQ(nullptr, buf.GetMappedRange());
         ASSERT_EQ(nullptr, buf.GetConstMappedRange());
     }
+    // Destroyed after MapAsync read case.
+    {
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
+
+        buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _))
+            .Times(1);
+        WaitForAllOperations(device);
+        buf.Destroy();
+
+        ASSERT_EQ(nullptr, buf.GetMappedRange());
+        ASSERT_EQ(nullptr, buf.GetConstMappedRange());
+    }
+
+    // Destroyed after MapAsync write case.
+    {
+        wgpu::Buffer buf = CreateMapWriteBuffer(4);
+        buf.MapAsync(wgpu::MapMode::Write, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _))
+            .Times(1);
+        WaitForAllOperations(device);
+        buf.Destroy();
+
+        ASSERT_EQ(nullptr, buf.GetMappedRange());
+        ASSERT_EQ(nullptr, buf.GetConstMappedRange());
+    }
 }
 
 // Test that it is invalid to call GetMappedRange on a buffer afterMapReadAsync
 TEST_F(BufferValidationTest, GetMappedRangeOnMappedForReading) {
-    wgpu::Buffer buf = CreateMapReadBuffer(4);
+    {
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
 
-    buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
-    EXPECT_CALL(*mockBufferMapReadCallback,
-                Call(WGPUBufferMapAsyncStatus_Success, Ne(nullptr), 4u, _))
-        .Times(1);
-    WaitForAllOperations(device);
+        buf.MapReadAsync(ToMockBufferMapReadCallback, nullptr);
+        EXPECT_CALL(*mockBufferMapReadCallback,
+                    Call(WGPUBufferMapAsyncStatus_Success, Ne(nullptr), 4u, _))
+            .Times(1);
+        WaitForAllOperations(device);
 
-    ASSERT_EQ(nullptr, buf.GetMappedRange());
+        ASSERT_EQ(nullptr, buf.GetMappedRange());
+    }
+    {
+        wgpu::Buffer buf = CreateMapReadBuffer(4);
+
+        buf.MapAsync(wgpu::MapMode::Read, 0, 4, ToMockBufferMapAsyncCallback, nullptr);
+        EXPECT_CALL(*mockBufferMapAsyncCallback, Call(WGPUBufferMapAsyncStatus_Success, _))
+            .Times(1);
+        WaitForAllOperations(device);
+
+        ASSERT_EQ(nullptr, buf.GetMappedRange());
+    }
 }
 
 // Test valid cases to call GetMappedRange on a buffer.

@@ -25,6 +25,8 @@
 
 namespace dawn_native {
 
+    enum class MapType : uint32_t;
+
     MaybeError ValidateBufferDescriptor(DeviceBase* device, const BufferDescriptor* descriptor);
 
     static constexpr wgpu::BufferUsage kReadOnlyBufferUsages =
@@ -48,7 +50,7 @@ namespace dawn_native {
         wgpu::BufferUsage GetUsage() const;
 
         MaybeError MapAtCreation();
-        void OnMapCommandSerialFinished(uint32_t mapSerial, bool isWrite);
+        void OnMapCommandSerialFinished(uint32_t mapSerial, MapType type);
 
         MaybeError ValidateCanUseOnQueueNow() const;
 
@@ -60,6 +62,11 @@ namespace dawn_native {
         void SetSubData(uint64_t start, uint64_t count, const void* data);
         void MapReadAsync(WGPUBufferMapReadCallback callback, void* userdata);
         void MapWriteAsync(WGPUBufferMapWriteCallback callback, void* userdata);
+        void MapAsync(wgpu::MapMode mode,
+                      size_t offset,
+                      size_t size,
+                      WGPUBufferMapCallback callback,
+                      void* userdata);
         void* GetMappedRange();
         const void* GetConstMappedRange();
         void Unmap();
@@ -79,6 +86,7 @@ namespace dawn_native {
         virtual MaybeError MapAtCreationImpl() = 0;
         virtual MaybeError MapReadAsyncImpl() = 0;
         virtual MaybeError MapWriteAsyncImpl() = 0;
+        virtual MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) = 0;
         virtual void UnmapImpl() = 0;
         virtual void DestroyImpl() = 0;
         virtual void* GetMappedPointerImpl() = 0;
@@ -94,26 +102,32 @@ namespace dawn_native {
                                   WGPUBufferMapAsyncStatus status,
                                   void* pointer,
                                   uint64_t dataLength);
+        void CallMapCallback(uint32_t serial, WGPUBufferMapAsyncStatus status);
 
         MaybeError ValidateMap(wgpu::BufferUsage requiredUsage,
                                WGPUBufferMapAsyncStatus* status) const;
+        MaybeError ValidateMapAsync(wgpu::MapMode mode,
+                                    size_t offset,
+                                    size_t size,
+                                    WGPUBufferMapAsyncStatus* status) const;
         MaybeError ValidateUnmap() const;
         MaybeError ValidateDestroy() const;
         bool CanGetMappedRange(bool writable) const;
 
         uint64_t mSize = 0;
         wgpu::BufferUsage mUsage = wgpu::BufferUsage::None;
-
-        WGPUBufferMapReadCallback mMapReadCallback = nullptr;
-        WGPUBufferMapWriteCallback mMapWriteCallback = nullptr;
-        void* mMapUserdata = 0;
-        uint32_t mMapSerial = 0;
+        BufferState mState;
+        bool mIsDataInitialized = false;
 
         std::unique_ptr<StagingBufferBase> mStagingBuffer;
 
-        BufferState mState;
-
-        bool mIsDataInitialized = false;
+        WGPUBufferMapReadCallback mMapReadCallback = nullptr;
+        WGPUBufferMapWriteCallback mMapWriteCallback = nullptr;
+        WGPUBufferMapCallback mMapCallback = nullptr;
+        void* mMapUserdata = 0;
+        uint32_t mMapSerial = 0;
+        wgpu::MapMode mMapMode = wgpu::MapMode::None;
+        size_t mMapOffset = 0;
     };
 
 }  // namespace dawn_native

@@ -259,6 +259,19 @@ namespace dawn_native { namespace vulkan {
         return {};
     }
 
+    MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
+        Device* device = ToBackend(GetDevice());
+
+        CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
+        if (mode & wgpu::MapMode::Read) {
+            TransitionUsageNow(recordingContext, wgpu::BufferUsage::MapRead);
+        } else {
+            ASSERT(mode & wgpu::MapMode::Write);
+            TransitionUsageNow(recordingContext, wgpu::BufferUsage::MapWrite);
+        }
+        return {};
+    }
+
     void Buffer::UnmapImpl() {
         // No need to do anything, we keep CPU-visible memory mapped at all time.
     }

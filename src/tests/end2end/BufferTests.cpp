@@ -317,6 +317,216 @@ DAWN_INSTANTIATE_TEST(BufferMapWriteTests,
                       OpenGLBackend(),
                       VulkanBackend());
 
+class BufferMappingTests : public DawnTest {
+  protected:
+    void MapAsyncAndWait(const wgpu::Buffer& buffer,
+                         wgpu::MapMode mode,
+                         size_t offset,
+                         size_t size) {
+        bool done = false;
+        buffer.MapAsync(
+            mode, offset, size,
+            [](WGPUBufferMapAsyncStatus status, void* userdata) {
+                ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
+                *static_cast<bool*>(userdata) = true;
+            },
+            &done);
+
+        while (!done) {
+            WaitABit();
+        }
+    }
+
+    wgpu::Buffer CreateMapReadBuffer(uint64_t size) {
+        wgpu::BufferDescriptor descriptor;
+        descriptor.size = size;
+        descriptor.usage = wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
+        return device.CreateBuffer(&descriptor);
+    }
+
+    wgpu::Buffer CreateMapWriteBuffer(uint64_t size) {
+        wgpu::BufferDescriptor descriptor;
+        descriptor.size = size;
+        descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+        return device.CreateBuffer(&descriptor);
+    }
+};
+
+// Test that the simplest map read works
+TEST_P(BufferMappingTests, MapRead_Basic) {
+    wgpu::Buffer buffer = CreateMapReadBuffer(4);
+
+    uint32_t myData = 0x01020304;
+    queue.WriteBuffer(buffer, 0, &myData, sizeof(myData));
+
+    MapAsyncAndWait(buffer, wgpu::MapMode::Read, 0, 4);
+    ASSERT_NE(nullptr, buffer.GetConstMappedRange());
+    ASSERT_EQ(myData, *static_cast<const uint32_t*>(buffer.GetConstMappedRange()));
+    buffer.Unmap();
+}
+
+// Test map-reading a zero-sized buffer.
+TEST_P(BufferMappingTests, MapRead_ZeroSized) {
+    wgpu::Buffer buffer = CreateMapReadBuffer(0);
+
+    MapAsyncAndWait(buffer, wgpu::MapMode::Read, 0, 0);
+    ASSERT_NE(buffer.GetConstMappedRange(), nullptr);
+    buffer.Unmap();
+}
+
+// Test map-reading with a non-zero offset
+TEST_P(BufferMappingTests, MapRead_NonZeroOffset) {
+    wgpu::Buffer buffer = CreateMapReadBuffer(8);
+
+    uint32_t myData[2] = {0x01020304, 0x05060708};
+    queue.WriteBuffer(buffer, 0, &myData, sizeof(myData));
+
+    MapAsyncAndWait(buffer, wgpu::MapMode::Read, 4, 4);
+    ASSERT_EQ(myData[1], *static_cast<const uint32_t*>(buffer.GetConstMappedRange()));
+    buffer.Unmap();
+}
+
+// Map read and unmap twice. Test that both of these two iterations work.
+TEST_P(BufferMappingTests, MapRead_Twice) {
+    wgpu::Buffer buffer = CreateMapReadBuffer(4);
+
+    uint32_t myData = 0x01020304;
+    queue.WriteBuffer(buffer, 0, &myData, sizeof(myData));
+
+    MapAsyncAndWait(buffer, wgpu::MapMode::Read, 0, 4);
+    ASSERT_EQ(myData, *static_cast<const uint32_t*>(buffer.GetConstMappedRange()));
+    buffer.Unmap();
+
+    myData = 0x05060708;
+    queue.WriteBuffer(buffer, 0, &myData, sizeof(myData));
+
+    MapAsyncAndWait(buffer, wgpu::MapMode::Read, 0, 4);
+    ASSERT_EQ(myData, *static_cast<const uint32_t*>(buffer.GetConstMappedRange()));
+    buffer.Unmap();
+}
+
+// Test map-reading a large buffer.
+TEST_P(BufferMappingTests, MapRead_Large) {
+    constexpr uint32_t kDataSize = 1000 * 1000;
+    wgpu::Buffer buffer = CreateMapReadBuffer(kDataSize * sizeof(uint32_t));
+
+    std::vector<uint32_t> myData;
+    for (uint32_t i = 0; i < kDataSize; ++i) {
+        myData.push_back(i);
+    }
+    queue.WriteBuffer(buffer, 0, myData.data(), kDataSize * sizeof(uint32_t));
+
+    MapAsyncAndWait(buffer, wgpu::MapMode::Read, 0, 4);
+    ASSERT_EQ(0, memcmp(buffer.GetConstMappedRange(), myData.data(), kDataSize * sizeof(uint32_t)));
+    buffer.Unmap();
+}
+
+// Test that the simplest map write works.
+TEST_P(BufferMappingTests, MapWrite_Basic) {
+    wgpu::Buffer buffer = CreateMapWriteBuffer(4);
+
+    uint32_t myData = 2934875;
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, 4);
+    ASSERT_NE(nullptr, buffer.GetMappedRange());
+    ASSERT_NE(nullptr, buffer.GetConstMappedRange());
+    memcpy(buffer.GetMappedRange(), &myData, sizeof(myData));
+    buffer.Unmap();
+
+    EXPECT_BUFFER_U32_EQ(myData, buffer, 0);
+}
+
+// Test map-writing a zero-sized buffer.
+TEST_P(BufferMappingTests, MapWrite_ZeroSized) {
+    wgpu::Buffer buffer = CreateMapWriteBuffer(0);
+
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, 0);
+    ASSERT_NE(buffer.GetConstMappedRange(), nullptr);
+    ASSERT_NE(buffer.GetMappedRange(), nullptr);
+    buffer.Unmap();
+}
+
+// Test map-writing with a non-zero offset.
+TEST_P(BufferMappingTests, MapWrite_NonZeroOffset) {
+    wgpu::Buffer buffer = CreateMapWriteBuffer(8);
+
+    uint32_t myData = 2934875;
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 4, 4);
+    memcpy(buffer.GetMappedRange(), &myData, sizeof(myData));
+    buffer.Unmap();
+
+    EXPECT_BUFFER_U32_EQ(myData, buffer, 4);
+}
+
+// Map, write and unmap twice. Test that both of these two iterations work.
+TEST_P(BufferMappingTests, MapWrite_Twice) {
+    wgpu::Buffer buffer = CreateMapWriteBuffer(4);
+
+    uint32_t myData = 2934875;
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, 4);
+    memcpy(buffer.GetMappedRange(), &myData, sizeof(myData));
+    buffer.Unmap();
+
+    EXPECT_BUFFER_U32_EQ(myData, buffer, 0);
+
+    myData = 9999999;
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, 4);
+    memcpy(buffer.GetMappedRange(), &myData, sizeof(myData));
+    buffer.Unmap();
+
+    EXPECT_BUFFER_U32_EQ(myData, buffer, 0);
+}
+
+// Test mapping a large buffer.
+TEST_P(BufferMappingTests, MapWrite_Large) {
+    constexpr uint32_t kDataSize = 1000 * 1000;
+    wgpu::Buffer buffer = CreateMapWriteBuffer(kDataSize * sizeof(uint32_t));
+
+    std::vector<uint32_t> myData;
+    for (uint32_t i = 0; i < kDataSize; ++i) {
+        myData.push_back(i);
+    }
+
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, 4);
+    memcpy(buffer.GetMappedRange(), myData.data(), kDataSize * sizeof(uint32_t));
+    buffer.Unmap();
+
+    EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), buffer, 0, kDataSize);
+}
+
+// Test that the map offset isn't updated when the call is an error.
+TEST_P(BufferMappingTests, OffsetNotUpdatedOnError) {
+    uint32_t data[3] = {0xCA7, 0xB0A7, 0xBA7};
+    wgpu::Buffer buffer = CreateMapReadBuffer(sizeof(data));
+    queue.WriteBuffer(buffer, 0, data, sizeof(data));
+
+    // Map the buffer but do not wait on the result yet.
+    bool done = false;
+    buffer.MapAsync(
+        wgpu::MapMode::Read, 4, 4,
+        [](WGPUBufferMapAsyncStatus status, void* userdata) {
+            ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
+            *static_cast<bool*>(userdata) = true;
+        },
+        &done);
+
+    // Call MapAsync another time, it is an error because the buffer is already being mapped so
+    // mMapOffset is not updated.
+    ASSERT_DEVICE_ERROR(buffer.MapAsync(wgpu::MapMode::Read, 8, 4, nullptr, nullptr));
+
+    while (!done) {
+        WaitABit();
+    }
+
+    // mMapOffset has not been updated so it should still be 4, which is data[1]
+    ASSERT_EQ(0, memcmp(buffer.GetConstMappedRange(), &data[1], sizeof(uint32_t)));
+}
+
+DAWN_INSTANTIATE_TEST(BufferMappingTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      VulkanBackend());
+
 class CreateBufferMappedTests : public DawnTest {
   protected:
     static void MapReadCallback(WGPUBufferMapAsyncStatus status,
@@ -1037,6 +1247,42 @@ TEST_P(BufferTests, CreateBufferOOMMapWriteAsync) {
                 EXPECT_EQ(status, WGPUBufferMapAsyncStatus_Error);
                 EXPECT_EQ(ptr, nullptr);
                 EXPECT_EQ(dataLength, 0u);
+                *static_cast<bool*>(userdata) = true;
+            },
+            &done));
+
+        while (!done) {
+            WaitABit();
+        }
+    };
+
+    wgpu::BufferDescriptor descriptor;
+    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
+
+    // Test an enormous buffer
+    descriptor.size = std::numeric_limits<uint64_t>::max();
+    RunTest(descriptor);
+
+    // UINT64_MAX may be special cased. Test a smaller, but really large buffer also fails
+    descriptor.size = 1ull << 50;
+    RunTest(descriptor);
+}
+
+// Test that mapping an OOM buffer fails gracefully
+TEST_P(BufferTests, CreateBufferOOMMapAsync) {
+    // TODO(http://crbug.com/dawn/27): Missing support.
+    DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_SKIP_TEST_IF(IsAsan());
+
+    auto RunTest = [this](const wgpu::BufferDescriptor& descriptor) {
+        wgpu::Buffer buffer;
+        ASSERT_DEVICE_ERROR(buffer = device.CreateBuffer(&descriptor));
+
+        bool done = false;
+        ASSERT_DEVICE_ERROR(buffer.MapAsync(
+            wgpu::MapMode::Write, 0, 4,
+            [](WGPUBufferMapAsyncStatus status, void* userdata) {
+                EXPECT_EQ(status, WGPUBufferMapAsyncStatus_Error);
                 *static_cast<bool*>(userdata) = true;
             },
             &done));

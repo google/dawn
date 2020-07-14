@@ -248,13 +248,23 @@ namespace dawn_native { namespace d3d12 {
         return (GetUsage() & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) != 0;
     }
 
-    MaybeError Buffer::MapInternal(bool isWrite, const char* contextInfo) {
+    MaybeError Buffer::MapInternal(bool isWrite,
+                                   size_t offset,
+                                   size_t size,
+                                   const char* contextInfo) {
         // The mapped buffer can be accessed at any time, so it must be locked to ensure it is never
         // evicted. This buffer should already have been made resident when it was created.
         Heap* heap = ToBackend(mResourceAllocation.GetResourceHeap());
         DAWN_TRY(ToBackend(GetDevice())->GetResidencyManager()->LockAllocation(heap));
 
-        D3D12_RANGE range = {0, size_t(GetSize())};
+        D3D12_RANGE range = {offset, offset + size};
+        // mMappedData is the pointer to the start of the resource, irrespective of offset.
+        // MSDN says (note the weird use of "never"):
+        //
+        //   When ppData is not NULL, the pointer returned is never offset by any values in
+        //   pReadRange.
+        //
+        // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12resource-map
         DAWN_TRY(CheckHRESULT(GetD3D12Resource()->Map(0, &range, &mMappedData), contextInfo));
 
         if (isWrite) {
@@ -267,16 +277,20 @@ namespace dawn_native { namespace d3d12 {
     MaybeError Buffer::MapAtCreationImpl() {
         // Setting isMapWrite to false on MapRead buffers to silence D3D12 debug layer warning.
         bool isMapWrite = (GetUsage() & wgpu::BufferUsage::MapWrite) != 0;
-        DAWN_TRY(MapInternal(isMapWrite, "D3D12 map at creation"));
+        DAWN_TRY(MapInternal(isMapWrite, 0, size_t(GetSize()), "D3D12 map at creation"));
         return {};
     }
 
     MaybeError Buffer::MapReadAsyncImpl() {
-        return MapInternal(false, "D3D12 map read async");
+        return MapInternal(false, 0, size_t(GetSize()), "D3D12 map read async");
     }
 
     MaybeError Buffer::MapWriteAsyncImpl() {
-        return MapInternal(true, "D3D12 map write async");
+        return MapInternal(true, 0, size_t(GetSize()), "D3D12 map write async");
+    }
+
+    MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
+        return MapInternal(mode & wgpu::MapMode::Write, offset, size, "D3D12 map async");
     }
 
     void Buffer::UnmapImpl() {
@@ -291,6 +305,8 @@ namespace dawn_native { namespace d3d12 {
     }
 
     void* Buffer::GetMappedPointerImpl() {
+        // The frontend asks that the pointer returned is from the start of the resource
+        // irrespective of the offset passed in MapAsyncImpl, which is what mMappedData is.
         return mMappedData;
     }
 
@@ -366,7 +382,7 @@ namespace dawn_native { namespace d3d12 {
         // The state of the buffers on UPLOAD heap must always be GENERIC_READ and cannot be
         // changed away, so we can only clear such buffer with buffer mapping.
         if (D3D12HeapType(GetUsage()) == D3D12_HEAP_TYPE_UPLOAD) {
-            DAWN_TRY(MapInternal(true, "D3D12 map at clear buffer"));
+            DAWN_TRY(MapInternal(true, 0, size_t(GetSize()), "D3D12 map at clear buffer"));
             memset(mMappedData, clearValue, GetSize());
             UnmapImpl();
         } else {

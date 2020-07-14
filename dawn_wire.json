@@ -102,6 +102,7 @@
             "SurfaceDescriptorFromXlib"
         ],
         "client_side_commands": [
+            "BufferMapAsync",
             "BufferMapReadAsync",
             "BufferMapWriteAsync",
             "BufferSetSubData",

@@ -20,12 +20,15 @@
 
 namespace dawn_native {
 
+    // TODO(dawn:22) remove this enum once MapReadAsync/MapWriteAsync are removed.
+    enum class MapType : uint32_t { Read, Write, Async };
+
     class MapRequestTracker {
       public:
         MapRequestTracker(DeviceBase* device);
         ~MapRequestTracker();
 
-        void Track(BufferBase* buffer, uint32_t mapSerial, bool isWrite);
+        void Track(BufferBase* buffer, uint32_t mapSerial, MapType type);
         void Tick(Serial finishedSerial);
 
       private:
@@ -34,7 +37,7 @@ namespace dawn_native {
         struct Request {
             Ref<BufferBase> buffer;
             uint32_t mapSerial;
-            bool isWrite;
+            MapType type;
         };
         SerialQueue<Request> mInflightRequests;
     };

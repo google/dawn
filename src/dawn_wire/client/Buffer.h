@@ -43,6 +43,11 @@ namespace dawn_wire { namespace client {
                                     uint64_t initialDataInfoLength,
                                     const uint8_t* initialDataInfo);
         bool OnMapWriteAsyncCallback(uint32_t requestSerial, uint32_t status);
+        void MapAsync(WGPUMapModeFlags mode,
+                      size_t offset,
+                      size_t size,
+                      WGPUBufferMapCallback callback,
+                      void* userdata);
         void* GetMappedRange();
         const void* GetConstMappedRange();
         void Unmap();
@@ -77,6 +82,7 @@ namespace dawn_wire { namespace client {
         std::unique_ptr<MemoryTransferService::ReadHandle> mReadHandle = nullptr;
         std::unique_ptr<MemoryTransferService::WriteHandle> mWriteHandle = nullptr;
         void* mMappedData = nullptr;
+        size_t mMapOffset = 0;
     };
 
 }}  // namespace dawn_wire::client

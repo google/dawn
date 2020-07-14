@@ -54,13 +54,14 @@ namespace dawn_native { namespace d3d12 {
         // Dawn API
         MaybeError MapReadAsyncImpl() override;
         MaybeError MapWriteAsyncImpl() override;
+        MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
         void UnmapImpl() override;
         void DestroyImpl() override;
 
         bool IsMappableAtCreation() const override;
         virtual MaybeError MapAtCreationImpl() override;
         void* GetMappedPointerImpl() override;
-        MaybeError MapInternal(bool isWrite, const char* contextInfo);
+        MaybeError MapInternal(bool isWrite, size_t start, size_t end, const char* contextInfo);
 
         bool TransitionUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
                                                   D3D12_RESOURCE_BARRIER* barrier,

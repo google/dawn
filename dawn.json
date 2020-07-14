@@ -198,6 +198,16 @@
                 ]
             },
             {
+                "name": "map async",
+                "args": [
+                    {"name": "flags", "type": "map mode"},
+                    {"name": "offset", "type": "size_t"},
+                    {"name": "size", "type": "size_t"},
+                    {"name": "callback", "type": "buffer map callback"},
+                    {"name": "userdata", "type": "void", "annotation": "*"}
+                ]
+            },
+            {
                 "name": "get mapped range",
                 "returns": "void *"
             },
@@ -232,6 +242,13 @@
             {"name": "usage", "type": "buffer usage"},
             {"name": "size", "type": "uint64_t"},
             {"name": "mapped at creation", "type": "bool", "default": "false"}
+        ]
+    },
+    "buffer map callback": {
+        "category": "callback",
+        "args": [
+            {"name": "status", "type": "buffer map async status"},
+            {"name": "userdata", "type": "void", "annotation": "*"}
         ]
     },
     "buffer map read callback": {
@@ -862,6 +879,14 @@
         "values": [
             {"value": 0, "name": "clear"},
             {"value": 1, "name": "load"}
+        ]
+    },
+    "map mode": {
+        "category": "bitmask",
+        "values": [
+            {"value": 0, "name": "none"},
+            {"value": 1, "name": "read"},
+            {"value": 2, "name": "write"}
         ]
     },
     "store op": {

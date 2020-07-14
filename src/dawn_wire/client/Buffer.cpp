@@ -239,6 +239,72 @@ namespace dawn_wire { namespace client {
         SerializeBufferMapAsync(this, serial, writeHandle);
     }
 
+    void Buffer::MapAsync(WGPUMapModeFlags mode,
+                          size_t offset,
+                          size_t size,
+                          WGPUBufferMapCallback callback,
+                          void* userdata) {
+        // Do early validation for mode because it needs to be correct for the proxying to
+        // MapReadAsync or MapWriteAsync to work.
+        bool isReadMode = mode & WGPUMapMode_Read;
+        bool isWriteMode = mode & WGPUMapMode_Write;
+        bool modeOk = isReadMode ^ isWriteMode;
+        // Do early validation of offset and size because it isn't checked by MapReadAsync /
+        // MapWriteAsync.
+        bool offsetOk = (uint64_t(offset) <= mSize) && offset % 4 == 0;
+        bool sizeOk = (uint64_t(size) <= mSize - uint64_t(offset)) && size % 4 == 0;
+
+        if (!(modeOk && offsetOk && sizeOk)) {
+            device->InjectError(WGPUErrorType_Validation, "MapAsync error (you figure out :P)");
+            if (callback != nullptr) {
+                callback(WGPUBufferMapAsyncStatus_Error, userdata);
+            }
+            return;
+        }
+
+        // The structure to keep arguments so we can forward the MapReadAsync and MapWriteAsync to
+        // `callback`
+        struct ProxyData {
+            WGPUBufferMapCallback callback;
+            void* userdata;
+            size_t mapOffset;
+            Buffer* self;
+        };
+        ProxyData* proxy = new ProxyData;
+        proxy->callback = callback;
+        proxy->userdata = userdata;
+        proxy->mapOffset = offset;
+        proxy->self = this;
+        // Note technically we should keep the buffer alive until the callback is fired but the
+        // client doesn't have good facilities to do that yet.
+
+        // Call MapReadAsync or MapWriteAsync and forward the callback.
+        if (mode & WGPUMapMode_Read) {
+            MapReadAsync(
+                [](WGPUBufferMapAsyncStatus status, const void*, uint64_t, void* userdata) {
+                    ProxyData* proxy = static_cast<ProxyData*>(userdata);
+                    if (proxy->callback) {
+                        proxy->callback(status, proxy->userdata);
+                    }
+                    proxy->self->mMapOffset = proxy->mapOffset;
+                    delete proxy;
+                },
+                proxy);
+        } else {
+            ASSERT(mode & WGPUMapMode_Write);
+            MapWriteAsync(
+                [](WGPUBufferMapAsyncStatus status, void*, uint64_t, void* userdata) {
+                    ProxyData* proxy = static_cast<ProxyData*>(userdata);
+                    if (proxy->callback) {
+                        proxy->callback(status, proxy->userdata);
+                    }
+                    proxy->self->mMapOffset = proxy->mapOffset;
+                    delete proxy;
+                },
+                proxy);
+        }
+    }
+
     bool Buffer::OnMapReadAsyncCallback(uint32_t requestSerial,
                                         uint32_t status,
                                         uint64_t initialDataInfoLength,
@@ -369,14 +435,14 @@ namespace dawn_wire { namespace client {
         if (!IsMappedForWriting()) {
             return nullptr;
         }
-        return mMappedData;
+        return static_cast<uint8_t*>(mMappedData) + mMapOffset;
     }
 
     const void* Buffer::GetConstMappedRange() {
         if (!IsMappedForWriting() && !IsMappedForReading()) {
             return nullptr;
         }
-        return mMappedData;
+        return static_cast<uint8_t*>(mMappedData) + mMapOffset;
     }
 
     void Buffer::Unmap() {
@@ -413,6 +479,7 @@ namespace dawn_wire { namespace client {
             mReadHandle = nullptr;
         }
         mMappedData = nullptr;
+        mMapOffset = 0;
         ClearMapRequests(WGPUBufferMapAsyncStatus_Unknown);
 
         BufferUnmapCmd cmd;

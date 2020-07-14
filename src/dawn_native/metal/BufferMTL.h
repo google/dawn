@@ -43,6 +43,7 @@ namespace dawn_native { namespace metal {
         // Dawn API
         MaybeError MapReadAsyncImpl() override;
         MaybeError MapWriteAsyncImpl() override;
+        MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
         void UnmapImpl() override;
         void DestroyImpl() override;
         void* GetMappedPointerImpl() override;

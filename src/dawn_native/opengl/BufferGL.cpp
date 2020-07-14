@@ -125,7 +125,37 @@ namespace dawn_native { namespace opengl {
         return {};
     }
 
+    MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
+        const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+
+        // It is an error to map an empty range in OpenGL. We always have at least a 4-byte buffer
+        // so we extend the range to be 4 bytes.
+        if (size == 0) {
+            if (offset != 0) {
+                offset -= 4;
+            }
+            size = 4;
+        }
+
+        // TODO(cwallez@chromium.org): this does GPU->CPU synchronization, we could require a high
+        // version of OpenGL that would let us map the buffer unsynchronized.
+        gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
+        void* mappedData = nullptr;
+        if (mode & wgpu::MapMode::Read) {
+            mappedData = gl.MapBufferRange(GL_ARRAY_BUFFER, offset, size, GL_MAP_READ_BIT);
+        } else {
+            ASSERT(mode & wgpu::MapMode::Write);
+            mappedData = gl.MapBufferRange(GL_ARRAY_BUFFER, offset, size, GL_MAP_WRITE_BIT);
+        }
+
+        // The frontend asks that the pointer returned by GetMappedPointerImpl is from the start of
+        // the resource but OpenGL gives us the pointer at offset. Remove the offset.
+        mMappedData = static_cast<uint8_t*>(mappedData) - offset;
+        return {};
+    }
+
     void* Buffer::GetMappedPointerImpl() {
+        // The mapping offset has already been removed.
         return mMappedData;
     }
 

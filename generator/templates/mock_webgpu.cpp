@@ -96,6 +96,19 @@ void ProcTableAsClass::BufferMapWriteAsync(WGPUBuffer self,
     OnBufferMapWriteAsyncCallback(self, callback, userdata);
 }
 
+void ProcTableAsClass::BufferMapAsync(WGPUBuffer self,
+                                      WGPUMapModeFlags mode,
+                                      size_t offset,
+                                      size_t size,
+                                      WGPUBufferMapCallback callback,
+                                      void* userdata) {
+    auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
+    object->mapAsyncCallback = callback;
+    object->userdata = userdata;
+
+    OnBufferMapAsyncCallback(self, callback, userdata);
+}
+
 void ProcTableAsClass::FenceOnCompletion(WGPUFence self,
                                          uint64_t value,
                                          WGPUFenceOnCompletionCallback callback,
@@ -133,6 +146,11 @@ void ProcTableAsClass::CallMapWriteCallback(WGPUBuffer buffer,
                                             uint64_t dataLength) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(buffer);
     object->mapWriteCallback(status, data, dataLength, object->userdata);
+}
+
+void ProcTableAsClass::CallMapAsyncCallback(WGPUBuffer buffer, WGPUBufferMapAsyncStatus status) {
+    auto object = reinterpret_cast<ProcTableAsClass::Object*>(buffer);
+    object->mapAsyncCallback(status, object->userdata);
 }
 
 void ProcTableAsClass::CallFenceOnCompletionCallback(WGPUFence fence,
