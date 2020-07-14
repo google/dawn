@@ -1130,9 +1130,6 @@ TEST_P(CopyTests_T2T, TextureRegion) {
 
 // Test copying the whole 2D array texture.
 TEST_P(CopyTests_T2T, Texture2DArray) {
-    // TODO(jiawei.shao@intel.com): investigate why this test fails with swiftshader.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 6u;
@@ -1147,9 +1144,6 @@ TEST_P(CopyTests_T2T, Texture2DArray) {
 
 // Test copying a subresource region of the 2D array texture.
 TEST_P(CopyTests_T2T, Texture2DArrayRegion) {
-    // TODO(jiawei.shao@intel.com): investigate why this test fails with swiftshader.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 6u;
@@ -1191,9 +1185,6 @@ TEST_P(CopyTests_T2T, Texture2DArrayCopyOneSlice) {
 
 // Test copying multiple contiguous slices of a 2D array texture.
 TEST_P(CopyTests_T2T, Texture2DArrayCopyMultipleSlices) {
-    // TODO(jiawei.shao@intel.com): investigate why this test fails with swiftshader.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 6u;
@@ -1239,9 +1230,6 @@ TEST_P(CopyTests_T2T, CopyWithinSameTextureOneSlice) {
 // Test copying multiple contiguous texture slices within the same texture with non-overlapped
 // slices.
 TEST_P(CopyTests_T2T, CopyWithinSameTextureNonOverlappedSlices) {
-    // TODO(jiawei.shao@intel.com): investigate why this test fails with swiftshader.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-
     constexpr uint32_t kWidth = 256u;
     constexpr uint32_t kHeight = 128u;
     constexpr uint32_t kLayers = 6u;
