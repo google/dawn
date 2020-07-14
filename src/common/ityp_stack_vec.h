@@ -21,10 +21,11 @@
 
 namespace ityp {
 
-    template <typename Index, typename Value, size_t StaticCapacity = 0>
+    template <typename Index, typename Value, size_t StaticCapacity>
     class stack_vec : private StackVector<Value, StaticCapacity> {
         using I = UnderlyingType<Index>;
         using Base = StackVector<Value, StaticCapacity>;
+        using VectorBase = std::vector<Value, StackAllocator<Value, StaticCapacity>>;
         static_assert(StaticCapacity <= std::numeric_limits<I>::max(), "");
 
       public:
@@ -60,35 +61,35 @@ namespace ityp {
             return this->container().data();
         }
 
-        Value* begin() noexcept {
+        typename VectorBase::iterator begin() noexcept {
             return this->container().begin();
         }
 
-        const Value* begin() const noexcept {
+        typename VectorBase::const_iterator begin() const noexcept {
             return this->container().begin();
         }
 
-        Value* end() noexcept {
+        typename VectorBase::iterator end() noexcept {
             return this->container().end();
         }
 
-        const Value* end() const noexcept {
+        typename VectorBase::const_iterator end() const noexcept {
             return this->container().end();
         }
 
-        Value& front() {
+        typename VectorBase::reference front() {
             return this->container().front();
         }
 
-        const Value& front() const {
+        typename VectorBase::const_reference front() const {
             return this->container().front();
         }
 
-        Value& back() {
+        typename VectorBase::reference back() {
             return this->container().back();
         }
 
-        const Value& back() const {
+        typename VectorBase::const_reference back() const {
             return this->container().back();
         }
 
