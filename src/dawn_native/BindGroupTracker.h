@@ -103,7 +103,9 @@ namespace dawn_native {
         BindGroupLayoutMask mBindGroupLayoutsMask = 0;
         ityp::array<BindGroupIndex, BindGroupBase*, kMaxBindGroups> mBindGroups = {};
         ityp::array<BindGroupIndex, uint32_t, kMaxBindGroups> mDynamicOffsetCounts = {};
-        ityp::array<BindGroupIndex, std::array<DynamicOffset, kMaxBindingsPerGroup>, kMaxBindGroups>
+        ityp::array<BindGroupIndex,
+                    std::array<DynamicOffset, kMaxDynamicBuffersPerPipelineLayout>,
+                    kMaxBindGroups>
             mDynamicOffsets = {};
 
         // |mPipelineLayout| is the current pipeline layout set on the command buffer.

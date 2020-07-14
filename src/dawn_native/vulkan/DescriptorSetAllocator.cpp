@@ -38,7 +38,6 @@ namespace dawn_native { namespace vulkan {
             totalDescriptorCount += it.second;
             mPoolSizes.push_back(VkDescriptorPoolSize{it.first, it.second});
         }
-        ASSERT(totalDescriptorCount <= kMaxBindingsPerGroup);
 
         if (totalDescriptorCount == 0) {
             // Vulkan requires that valid usage of vkCreateDescriptorPool must have a non-zero
@@ -49,6 +48,9 @@ namespace dawn_native { namespace vulkan {
             mPoolSizes.push_back(VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1});
             mMaxSets = kMaxDescriptorsPerPool;
         } else {
+            ASSERT(totalDescriptorCount <= kMaxBindingsPerPipelineLayout);
+            static_assert(kMaxBindingsPerPipelineLayout <= kMaxDescriptorsPerPool, "");
+
             // Compute the total number of descriptors sets that fits given the max.
             mMaxSets = kMaxDescriptorsPerPool / totalDescriptorCount;
             ASSERT(mMaxSets > 0);

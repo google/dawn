@@ -104,7 +104,7 @@ namespace dawn_native { namespace vulkan {
             const ityp::array<BindGroupIndex, BindGroupBase*, kMaxBindGroups>& bindGroups,
             const ityp::array<BindGroupIndex, uint32_t, kMaxBindGroups>& dynamicOffsetCounts,
             const ityp::array<BindGroupIndex,
-                              std::array<uint32_t, kMaxBindingsPerGroup>,
+                              std::array<uint32_t, kMaxDynamicBuffersPerPipelineLayout>,
                               kMaxBindGroups>& dynamicOffsets) {
             for (BindGroupIndex dirtyIndex : IterateBitSet(bindGroupsToApply)) {
                 VkDescriptorSet set = ToBackend(bindGroups[dirtyIndex])->GetHandle();

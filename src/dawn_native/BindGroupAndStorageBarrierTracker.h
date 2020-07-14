@@ -16,6 +16,7 @@
 #define DAWNNATIVE_BINDGROUPANDSTORAGEBARRIERTRACKER_H_
 
 #include "common/ityp_bitset.h"
+#include "common/ityp_stack_vec.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/BindGroupTracker.h"
 #include "dawn_native/Buffer.h"
@@ -39,10 +40,11 @@ namespace dawn_native {
             ASSERT(index < kMaxBindGroupsTyped);
 
             if (this->mBindGroups[index] != bindGroup) {
-                mBindings[index] = {};
-                mBindingsNeedingBarrier[index] = {};
-
                 const BindGroupLayoutBase* layout = bindGroup->GetLayout();
+
+                mBindings[index].resize(layout->GetBindingCount());
+                mBindingTypes[index].resize(layout->GetBindingCount());
+                mBindingsNeedingBarrier[index] = {};
 
                 for (BindingIndex bindingIndex{0}; bindingIndex < layout->GetBindingCount();
                      ++bindingIndex) {
@@ -91,15 +93,16 @@ namespace dawn_native {
         }
 
       protected:
-        ityp::
-            array<BindGroupIndex, ityp::bitset<BindingIndex, kMaxBindingsPerGroup>, kMaxBindGroups>
-                mBindingsNeedingBarrier = {};
         ityp::array<BindGroupIndex,
-                    ityp::array<BindingIndex, wgpu::BindingType, kMaxBindingsPerGroup>,
+                    ityp::bitset<BindingIndex, kMaxBindingsPerPipelineLayout>,
+                    kMaxBindGroups>
+            mBindingsNeedingBarrier = {};
+        ityp::array<BindGroupIndex,
+                    ityp::stack_vec<BindingIndex, wgpu::BindingType, kMaxOptimalBindingsPerGroup>,
                     kMaxBindGroups>
             mBindingTypes = {};
         ityp::array<BindGroupIndex,
-                    ityp::array<BindingIndex, ObjectBase*, kMaxBindingsPerGroup>,
+                    ityp::stack_vec<BindingIndex, ObjectBase*, kMaxOptimalBindingsPerGroup>,
                     kMaxBindGroups>
             mBindings = {};
     };

@@ -178,8 +178,9 @@ namespace dawn_native {
         }
 
         const BindGroupLayoutBase::BindingMap& bindingMap = descriptor->layout->GetBindingMap();
+        ASSERT(bindingMap.size() <= kMaxBindingsPerPipelineLayout);
 
-        ityp::bitset<BindingIndex, kMaxBindingsPerGroup> bindingsSet;
+        ityp::bitset<BindingIndex, kMaxBindingsPerPipelineLayout> bindingsSet;
         for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
             const BindGroupEntry& entry = descriptor->entries[i];
 

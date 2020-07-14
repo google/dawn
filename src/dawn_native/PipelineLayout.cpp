@@ -17,6 +17,7 @@
 #include "common/Assert.h"
 #include "common/BitSetIterator.h"
 #include "common/HashUtils.h"
+#include "common/ityp_stack_vec.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/ShaderModule.h"
@@ -118,9 +119,10 @@ namespace dawn_native {
         ASSERT(count > 0);
 
         // Data which BindGroupLayoutDescriptor will point to for creation
-        ityp::array<BindGroupIndex,
-                    ityp::array<BindingIndex, BindGroupLayoutEntry, kMaxBindingsPerGroup>,
-                    kMaxBindGroups>
+        ityp::array<
+            BindGroupIndex,
+            ityp::stack_vec<BindingIndex, BindGroupLayoutEntry, kMaxOptimalBindingsPerGroup>,
+            kMaxBindGroups>
             entryData = {};
 
         // A map of bindings to the index in |entryData|
@@ -194,6 +196,7 @@ namespace dawn_native {
 
                     IncrementBindingCounts(&bindingCounts, bindingSlot);
                     BindingIndex currentBindingCount = entryCounts[group];
+                    entryData[group].resize(currentBindingCount + BindingIndex(1));
                     entryData[group][currentBindingCount] = bindingSlot;
 
                     usedBindingsMap[group][bindingNumber] = currentBindingCount;

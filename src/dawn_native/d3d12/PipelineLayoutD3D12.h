@@ -45,7 +45,7 @@ namespace dawn_native { namespace d3d12 {
         ityp::array<BindGroupIndex, uint32_t, kMaxBindGroups> mCbvUavSrvRootParameterInfo;
         ityp::array<BindGroupIndex, uint32_t, kMaxBindGroups> mSamplerRootParameterInfo;
         ityp::array<BindGroupIndex,
-                    ityp::array<BindingIndex, uint32_t, kMaxBindingsPerGroup>,
+                    ityp::array<BindingIndex, uint32_t, kMaxDynamicBuffersPerPipelineLayout>,
                     kMaxBindGroups>
             mDynamicRootParameterIndices;
         ComPtr<ID3D12RootSignature> mRootSignature;

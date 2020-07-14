@@ -15,6 +15,7 @@
 #include "dawn_native/vulkan/BindGroupLayoutVk.h"
 
 #include "common/BitSetIterator.h"
+#include "common/ityp_vector.h"
 #include "dawn_native/vulkan/BindGroupVk.h"
 #include "dawn_native/vulkan/DescriptorSetAllocator.h"
 #include "dawn_native/vulkan/DeviceVk.h"
@@ -85,29 +86,30 @@ namespace dawn_native { namespace vulkan {
         // Compute the bindings that will be chained in the DescriptorSetLayout create info. We add
         // one entry per binding set. This might be optimized by computing continuous ranges of
         // bindings of the same type.
-        uint32_t numBindings = 0;
-        std::array<VkDescriptorSetLayoutBinding, kMaxBindingsPerGroup> bindings;
+        ityp::vector<BindingIndex, VkDescriptorSetLayoutBinding> bindings;
+        bindings.reserve(GetBindingCount());
+
         for (const auto& it : GetBindingMap()) {
             BindingNumber bindingNumber = it.first;
             BindingIndex bindingIndex = it.second;
             const BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
 
-            VkDescriptorSetLayoutBinding* vkBinding = &bindings[numBindings];
-            vkBinding->binding = static_cast<uint32_t>(bindingNumber);
-            vkBinding->descriptorType =
+            VkDescriptorSetLayoutBinding vkBinding;
+            vkBinding.binding = static_cast<uint32_t>(bindingNumber);
+            vkBinding.descriptorType =
                 VulkanDescriptorType(bindingInfo.type, bindingInfo.hasDynamicOffset);
-            vkBinding->descriptorCount = 1;
-            vkBinding->stageFlags = VulkanShaderStageFlags(bindingInfo.visibility);
-            vkBinding->pImmutableSamplers = nullptr;
+            vkBinding.descriptorCount = 1;
+            vkBinding.stageFlags = VulkanShaderStageFlags(bindingInfo.visibility);
+            vkBinding.pImmutableSamplers = nullptr;
 
-            numBindings++;
+            bindings.emplace_back(vkBinding);
         }
 
         VkDescriptorSetLayoutCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
         createInfo.pNext = nullptr;
         createInfo.flags = 0;
-        createInfo.bindingCount = numBindings;
+        createInfo.bindingCount = static_cast<uint32_t>(bindings.size());
         createInfo.pBindings = bindings.data();
 
         Device* device = ToBackend(GetDevice());

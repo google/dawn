@@ -1091,6 +1091,149 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 0, 0);
 }
 
+// Test that creating a large bind group, with each binding type at the max count, works and can be
+// used correctly. The test loads a different value from each binding, and writes 1 to a storage
+// buffer if all values are correct.
+TEST_P(BindGroupTests, ReallyLargeBindGroup) {
+    // When we run dawn_end2end_tests with "--use-spvc-parser", extracting the binding type of a
+    // read-only image will always return shaderc_spvc_binding_type_writeonly_storage_texture.
+    // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
+    // bug in spvc parser is fixed.
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
+
+    std::string interface = "#version 450\n";
+    std::string body;
+    uint32_t binding = 0;
+    uint32_t expectedValue = 42;
+
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+
+    auto CreateTextureWithRedData = [&](uint32_t value, wgpu::TextureUsage usage) {
+        wgpu::TextureDescriptor textureDesc = {};
+        textureDesc.usage = wgpu::TextureUsage::CopyDst | usage;
+        textureDesc.size = {1, 1, 1};
+        textureDesc.format = wgpu::TextureFormat::R32Uint;
+        wgpu::Texture texture = device.CreateTexture(&textureDesc);
+
+        wgpu::Buffer textureData =
+            utils::CreateBufferFromData(device, wgpu::BufferUsage::CopySrc, {expectedValue});
+        wgpu::BufferCopyView bufferCopyView = {};
+        bufferCopyView.buffer = textureData;
+        bufferCopyView.bytesPerRow = 256;
+
+        wgpu::TextureCopyView textureCopyView = {};
+        textureCopyView.texture = texture;
+
+        wgpu::Extent3D copySize = {1, 1, 1};
+
+        commandEncoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
+        return texture;
+    };
+
+    std::vector<wgpu::BindGroupEntry> bgEntries;
+    static_assert(kMaxSampledTexturesPerShaderStage == kMaxSamplersPerShaderStage,
+                  "Please update this test");
+    body += "result = 0;\n";
+    for (uint32_t i = 0; i < kMaxSampledTexturesPerShaderStage; ++i) {
+        wgpu::Texture texture =
+            CreateTextureWithRedData(expectedValue, wgpu::TextureUsage::Sampled);
+        bgEntries.push_back({binding, nullptr, 0, 0, nullptr, texture.CreateView()});
+
+        interface += "layout(set = 0, binding = " + std::to_string(binding++) +
+                     ") uniform utexture2D tex" + std::to_string(i) + ";\n";
+
+        wgpu::SamplerDescriptor samplerDesc = {};
+        bgEntries.push_back({binding, nullptr, 0, 0, device.CreateSampler(&samplerDesc), nullptr});
+
+        interface += "layout(set = 0, binding = " + std::to_string(binding++) +
+                     ") uniform sampler samp" + std::to_string(i) + ";\n";
+
+        body += "if (texelFetch(usampler2D(tex" + std::to_string(i) + ", samp" + std::to_string(i) +
+                "), ivec2(0, 0), 0).r != " + std::to_string(expectedValue++) + ") {\n";
+        body += "    return;\n";
+        body += "}\n";
+    }
+    for (uint32_t i = 0; i < kMaxStorageTexturesPerShaderStage; ++i) {
+        wgpu::Texture texture =
+            CreateTextureWithRedData(expectedValue, wgpu::TextureUsage::Storage);
+        bgEntries.push_back({binding, nullptr, 0, 0, nullptr, texture.CreateView()});
+
+        interface += "layout(set = 0, binding = " + std::to_string(binding++) +
+                     ", r32ui) uniform readonly uimage2D image" + std::to_string(i) + ";\n";
+
+        body += "if (imageLoad(image" + std::to_string(i) +
+                ", ivec2(0, 0)).r != " + std::to_string(expectedValue++) + ") {\n";
+        body += "    return;\n";
+        body += "}\n";
+    }
+    for (uint32_t i = 0; i < kMaxUniformBuffersPerShaderStage; ++i) {
+        wgpu::Buffer buffer = utils::CreateBufferFromData<uint32_t>(
+            device, wgpu::BufferUsage::Uniform, {expectedValue, 0, 0, 0});
+        bgEntries.push_back({binding, buffer, 0, 4 * sizeof(uint32_t), nullptr, nullptr});
+
+        interface += "layout(std140, set = 0, binding = " + std::to_string(binding++) +
+                     ") uniform UBuf" + std::to_string(i) + " {\n";
+        interface += "    uint ubuf" + std::to_string(i) + ";\n";
+        interface += "};\n";
+
+        body += "if (ubuf" + std::to_string(i) + " != " + std::to_string(expectedValue++) + ") {\n";
+        body += "    return;\n";
+        body += "}\n";
+    }
+    // Save one storage buffer for writing the result
+    for (uint32_t i = 0; i < kMaxStorageBuffersPerShaderStage - 1; ++i) {
+        wgpu::Buffer buffer = utils::CreateBufferFromData<uint32_t>(
+            device, wgpu::BufferUsage::Storage, {expectedValue});
+        bgEntries.push_back({binding, buffer, 0, sizeof(uint32_t), nullptr, nullptr});
+
+        interface += "layout(std430, set = 0, binding = " + std::to_string(binding++) +
+                     ") readonly buffer SBuf" + std::to_string(i) + " {\n";
+        interface += "    uint sbuf" + std::to_string(i) + ";\n";
+        interface += "};\n";
+
+        body += "if (sbuf" + std::to_string(i) + " != " + std::to_string(expectedValue++) + ") {\n";
+        body += "    return;\n";
+        body += "}\n";
+    }
+
+    wgpu::Buffer result = utils::CreateBufferFromData<uint32_t>(
+        device, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc, {0});
+    bgEntries.push_back({binding, result, 0, sizeof(uint32_t), nullptr, nullptr});
+
+    interface += "layout(std430, set = 0, binding = " + std::to_string(binding++) +
+                 ") writeonly buffer Result {\n";
+    interface += "    uint result;\n";
+    interface += "};\n";
+
+    body += "result = 1;\n";
+
+    std::string shader = interface + "void main() {\n" + body + "}\n";
+
+    wgpu::ComputePipelineDescriptor cpDesc;
+    cpDesc.computeStage.module =
+        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, shader.c_str());
+    cpDesc.computeStage.entryPoint = "main";
+    wgpu::ComputePipeline cp = device.CreateComputePipeline(&cpDesc);
+
+    wgpu::BindGroupDescriptor bgDesc = {};
+    bgDesc.layout = cp.GetBindGroupLayout(0);
+    bgDesc.entryCount = static_cast<uint32_t>(bgEntries.size());
+    bgDesc.entries = bgEntries.data();
+
+    wgpu::BindGroup bg = device.CreateBindGroup(&bgDesc);
+
+    wgpu::ComputePassEncoder pass = commandEncoder.BeginComputePass();
+    pass.SetPipeline(cp);
+    pass.SetBindGroup(0, bg);
+    pass.Dispatch(1, 1, 1);
+    pass.EndPass();
+
+    wgpu::CommandBuffer commands = commandEncoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_EQ(1, result, 0);
+}
+
 DAWN_INSTANTIATE_TEST(BindGroupTests,
                       D3D12Backend(),
                       MetalBackend(),

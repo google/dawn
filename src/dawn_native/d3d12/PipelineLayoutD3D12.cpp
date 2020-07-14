@@ -194,7 +194,7 @@ namespace dawn_native { namespace d3d12 {
     uint32_t PipelineLayout::GetDynamicRootParameterIndex(BindGroupIndex group,
                                                           BindingIndex bindingIndex) const {
         ASSERT(group < kMaxBindGroupsTyped);
-        ASSERT(bindingIndex < kMaxBindingsPerGroupTyped);
+        ASSERT(bindingIndex < kMaxDynamicBuffersPerPipelineLayoutTyped);
         ASSERT(GetBindGroupLayout(group)->GetBindingInfo(bindingIndex).hasDynamicOffset);
         ASSERT(GetBindGroupLayout(group)->GetBindingInfo(bindingIndex).visibility !=
                wgpu::ShaderStage::None);

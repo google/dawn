@@ -90,12 +90,14 @@ namespace dawn_native { namespace d3d12 {
         mCommandAllocatorManager = std::make_unique<CommandAllocatorManager>(this);
 
         // Zero sized allocator is never requested and does not need to exist.
-        for (uint32_t countIndex = 1; countIndex < kNumOfStagingDescriptorAllocators;
-             countIndex++) {
+        for (uint32_t countIndex = 1; countIndex <= kMaxViewDescriptorsPerBindGroup; countIndex++) {
             mViewAllocators[countIndex] = std::make_unique<StagingDescriptorAllocator>(
                 this, countIndex, kShaderVisibleDescriptorHeapSize,
                 D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        }
 
+        for (uint32_t countIndex = 1; countIndex <= kMaxSamplerDescriptorsPerBindGroup;
+             countIndex++) {
             mSamplerAllocators[countIndex] = std::make_unique<StagingDescriptorAllocator>(
                 this, countIndex, kShaderVisibleDescriptorHeapSize,
                 D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
@@ -556,13 +558,13 @@ namespace dawn_native { namespace d3d12 {
 
     StagingDescriptorAllocator* Device::GetViewStagingDescriptorAllocator(
         uint32_t descriptorCount) const {
-        ASSERT(descriptorCount < kNumOfStagingDescriptorAllocators);
+        ASSERT(descriptorCount <= kMaxViewDescriptorsPerBindGroup);
         return mViewAllocators[descriptorCount].get();
     }
 
     StagingDescriptorAllocator* Device::GetSamplerStagingDescriptorAllocator(
         uint32_t descriptorCount) const {
-        ASSERT(descriptorCount < kNumOfStagingDescriptorAllocators);
+        ASSERT(descriptorCount <= kMaxSamplerDescriptorsPerBindGroup);
         return mSamplerAllocators[descriptorCount].get();
     }
 

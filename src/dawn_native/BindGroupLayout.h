@@ -18,8 +18,8 @@
 #include "common/Constants.h"
 #include "common/Math.h"
 #include "common/SlabAllocator.h"
-#include "common/ityp_array.h"
 #include "common/ityp_span.h"
+#include "common/ityp_vector.h"
 #include "dawn_native/BindingInfo.h"
 #include "dawn_native/CachedObject.h"
 #include "dawn_native/Error.h"
@@ -64,7 +64,7 @@ namespace dawn_native {
 
         const BindingInfo& GetBindingInfo(BindingIndex bindingIndex) const {
             ASSERT(!IsError());
-            ASSERT(bindingIndex < BindingIndex(kMaxBindingsPerGroup));
+            ASSERT(bindingIndex < mBindingInfo.size());
             return mBindingInfo[bindingIndex];
         }
         const BindingMap& GetBindingMap() const;
@@ -124,7 +124,7 @@ namespace dawn_native {
         BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
         BindingCounts mBindingCounts = {};
-        ityp::array<BindingIndex, BindingInfo, kMaxBindingsPerGroup> mBindingInfo;
+        ityp::vector<BindingIndex, BindingInfo> mBindingInfo;
 
         // Map from BindGroupLayoutEntry.binding to packed indices.
         BindingMap mBindingMap;

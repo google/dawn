@@ -18,6 +18,7 @@
 #include "dawn_native/BindGroupLayout.h"
 
 #include "common/SlabAllocator.h"
+#include "common/ityp_stack_vec.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 namespace dawn_native { namespace d3d12 {
@@ -44,7 +45,7 @@ namespace dawn_native { namespace d3d12 {
             Count,
         };
 
-        const ityp::array<BindingIndex, uint32_t, kMaxBindingsPerGroup>& GetBindingOffsets() const;
+        ityp::span<BindingIndex, const uint32_t> GetBindingOffsets() const;
         uint32_t GetCbvUavSrvDescriptorTableSize() const;
         uint32_t GetSamplerDescriptorTableSize() const;
         uint32_t GetCbvUavSrvDescriptorCount() const;
@@ -54,7 +55,7 @@ namespace dawn_native { namespace d3d12 {
 
       private:
         ~BindGroupLayout() override = default;
-        ityp::array<BindingIndex, uint32_t, kMaxBindingsPerGroup> mBindingOffsets;
+        ityp::stack_vec<BindingIndex, uint32_t, kMaxOptimalBindingsPerGroup> mBindingOffsets;
         std::array<uint32_t, DescriptorType::Count> mDescriptorCounts;
         D3D12_DESCRIPTOR_RANGE mRanges[DescriptorType::Count];
 

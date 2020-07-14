@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_METAL_PIPELINELAYOUTMTL_H_
 #define DAWNNATIVE_METAL_PIPELINELAYOUTMTL_H_
 
-#include "common/ityp_array.h"
+#include "common/ityp_stack_vec.h"
 #include "dawn_native/BindingInfo.h"
 #include "dawn_native/PipelineLayout.h"
 
@@ -44,7 +44,7 @@ namespace dawn_native { namespace metal {
 
         using BindingIndexInfo =
             ityp::array<BindGroupIndex,
-                        ityp::array<BindingIndex, uint32_t, kMaxBindingsPerGroup>,
+                        ityp::stack_vec<BindingIndex, uint32_t, kMaxOptimalBindingsPerGroup>,
                         kMaxBindGroups>;
         const BindingIndexInfo& GetBindingIndexInfo(SingleShaderStage stage) const;
 

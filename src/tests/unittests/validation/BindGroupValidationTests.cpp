@@ -537,43 +537,12 @@ TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutStorageBindingsInVertexShad
         device, {{0, wgpu::ShaderStage::Fragment, wgpu::BindingType::ReadonlyStorageBuffer}});
 }
 
-// Tests setting that bind group layout bindings numbers may be >= kMaxBindingsPerGroup.
-TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutEntryUnbounded) {
-    // Checks that kMaxBindingsPerGroup is valid.
-    utils::MakeBindGroupLayout(device, {{kMaxBindingsPerGroup, wgpu::ShaderStage::Vertex,
-                                         wgpu::BindingType::UniformBuffer}});
-
-    // Checks that kMaxBindingsPerGroup + 1 is valid.
-    utils::MakeBindGroupLayout(device, {{kMaxBindingsPerGroup + 1, wgpu::ShaderStage::Vertex,
-                                         wgpu::BindingType::UniformBuffer}});
-}
-
-// Test that there can't be more than kMaxBindingPerGroup bindings per group
-TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutMaxBindings) {
-    wgpu::BindGroupLayoutEntry entries[kMaxBindingsPerGroup + 1];
-
-    wgpu::BindingType bindingsTypes[3] = {wgpu::BindingType::UniformBuffer,
-                                          wgpu::BindingType::SampledTexture,
-                                          wgpu::BindingType::Sampler};
-    for (uint32_t i = 0; i < kMaxBindingsPerGroup + 1; i++) {
-        // Alternate between uniform/sampled tex/sampler to avoid per-stage limits.
-        // Note: This is a temporary test and will be removed once the kMaxBindingsPerGroup
-        // limit is lifted.
-        entries[i].type = bindingsTypes[i % 3];
-        entries[i].binding = i;
-        entries[i].visibility = wgpu::ShaderStage::Compute;
-    }
-
-    wgpu::BindGroupLayoutDescriptor desc;
-    desc.entries = entries;
-
-    // Control case: kMaxBindingsPerGroup bindings is allowed.
-    desc.entryCount = kMaxBindingsPerGroup;
-    device.CreateBindGroupLayout(&desc);
-
-    // Error case: kMaxBindingsPerGroup + 1 bindings is not allowed.
-    desc.entryCount = kMaxBindingsPerGroup + 1;
-    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&desc));
+// Tests setting that bind group layout bindings numbers may be very large.
+TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutEntryNumberLarge) {
+    // Checks that uint32_t max is valid.
+    utils::MakeBindGroupLayout(device,
+                               {{std::numeric_limits<uint32_t>::max(), wgpu::ShaderStage::Vertex,
+                                 wgpu::BindingType::UniformBuffer}});
 }
 
 // This test verifies that the BindGroupLayout bindings are correctly validated, even if the
