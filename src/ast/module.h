@@ -65,6 +65,11 @@ class Module {
   /// @returns the entry points in the module
   const EntryPointList& entry_points() const { return entry_points_; }
 
+  /// Checks if the given function name is an entry point function
+  /// @param name the function name
+  /// @returns true if name is an entry point function
+  bool IsFunctionEntryPoint(const std::string& name) const;
+
   /// Adds a type alias to the module
   /// @param type the alias to add
   void AddAliasType(type::AliasType* type) { alias_types_.push_back(type); }

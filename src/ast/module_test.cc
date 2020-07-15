@@ -91,6 +91,19 @@ TEST_F(ModuleTest, LookupFunction) {
   EXPECT_EQ(func_ptr, m.FindFunctionByName("main"));
 }
 
+TEST_F(ModuleTest, IsEntryPoint) {
+  type::F32Type f32;
+  Module m;
+
+  auto func = std::make_unique<Function>("other_func", VariableList{}, &f32);
+  m.AddFunction(std::move(func));
+
+  m.AddEntryPoint(
+      std::make_unique<EntryPoint>(PipelineStage::kVertex, "main", "vtx_main"));
+  EXPECT_TRUE(m.IsFunctionEntryPoint("vtx_main"));
+  EXPECT_FALSE(m.IsFunctionEntryPoint("other_func"));
+}
+
 TEST_F(ModuleTest, LookupFunctionMissing) {
   Module m;
   EXPECT_EQ(nullptr, m.FindFunctionByName("Missing"));

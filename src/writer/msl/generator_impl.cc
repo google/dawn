@@ -59,6 +59,8 @@ namespace {
 
 const char kInStructNameSuffix[] = "in";
 const char kOutStructNameSuffix[] = "out";
+const char kTintStructInVarPrefix[] = "tint_in";
+const char kTintStructOutVarPrefix[] = "tint_out";
 
 bool last_is_break_or_fallthrough(const ast::StatementList& stmts) {
   if (stmts.empty()) {
@@ -78,13 +80,11 @@ void GeneratorImpl::set_module_for_testing(ast::Module* mod) {
   module_ = mod;
 }
 
-std::string GeneratorImpl::generate_struct_name(ast::EntryPoint* ep,
-                                                const std::string& type) {
-  std::string base_name = ep->function_name() + "_" + type;
-  std::string name = base_name;
+std::string GeneratorImpl::generate_name(const std::string& prefix) {
+  std::string name = prefix;
   uint32_t i = 0;
   while (namer_.IsMapped(name)) {
-    name = base_name + "_" + std::to_string(i);
+    name = prefix + "_" + std::to_string(i);
     ++i;
   }
   namer_.RegisterRemappedName(name);
@@ -96,6 +96,10 @@ bool GeneratorImpl::Generate(const ast::Module& module) {
 
   out_ << "#include <metal_stdlib>" << std::endl << std::endl;
 
+  for (const auto& global : module.global_variables()) {
+    global_variables_.set(global->name(), global.get());
+  }
+
   for (auto* const alias : module.alias_types()) {
     if (!EmitAliasType(alias)) {
       return false;
@@ -106,13 +110,19 @@ bool GeneratorImpl::Generate(const ast::Module& module) {
   }
 
   for (const auto& ep : module.entry_points()) {
-    if (!EmitEntryPoint(ep.get())) {
+    if (!EmitEntryPointData(ep.get())) {
       return false;
     }
   }
 
   for (const auto& func : module.functions()) {
     if (!EmitFunction(func.get())) {
+      return false;
+    }
+  }
+
+  for (const auto& ep : module.entry_points()) {
+    if (!EmitEntryPointFunction(ep.get())) {
       return false;
     }
     out_ << std::endl;
@@ -283,12 +293,32 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
   }
 
   if (!ident->has_path()) {
-    if (!EmitExpression(expr->func())) {
-      return false;
+    auto name = ident->name();
+    auto it = ep_func_name_remapped_.find(current_ep_name_ + "_" + name);
+    if (it != ep_func_name_remapped_.end()) {
+      name = it->second;
     }
-    out_ << "(";
+    out_ << name << "(";
 
     bool first = true;
+
+    auto in_it = ep_name_to_in_data_.find(current_ep_name_);
+    if (in_it != ep_name_to_in_data_.end()) {
+      out_ << in_it->second.var_name;
+      first = false;
+    }
+
+    auto out_it = ep_name_to_out_data_.find(current_ep_name_);
+    if (out_it != ep_name_to_out_data_.end()) {
+      if (!first) {
+        out_ << ", ";
+      }
+      out_ << out_it->second.var_name;
+      first = false;
+    }
+
+    // TODO(dsinclair): Emit builtins
+
     const auto& params = expr->params();
     for (const auto& param : params) {
       if (!first) {
@@ -459,7 +489,7 @@ bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
   return true;
 }
 
-bool GeneratorImpl::EmitEntryPoint(ast::EntryPoint* ep) {
+bool GeneratorImpl::EmitEntryPointData(ast::EntryPoint* ep) {
   auto* func = module_->FindFunctionByName(ep->function_name());
   if (func == nullptr) {
     error_ = "Unable to find entry point function: " + ep->function_name();
@@ -491,9 +521,20 @@ bool GeneratorImpl::EmitEntryPoint(ast::EntryPoint* ep) {
     }
   }
 
+  auto ep_name = ep->name();
+  if (ep_name.empty()) {
+    ep_name = ep->function_name();
+  }
+
+  // TODO(dsinclair): There is a potential bug here. Entry points can have the
+  // same name in WGSL if they have different pipeline stages. This does not
+  // take that into account and will emit duplicate struct names. I'm ignoring
+  // this until https://github.com/gpuweb/gpuweb/issues/662 is resolved as it
+  // may remove this issue and entry point names will need to be unique.
   if (!in_locations.empty()) {
-    auto in_struct_name = generate_struct_name(ep, kInStructNameSuffix);
-    ep_name_to_in_struct_[ep->name()] = in_struct_name;
+    auto in_struct_name = generate_name(ep_name + "_" + kInStructNameSuffix);
+    auto in_var_name = generate_name(kTintStructInVarPrefix);
+    ep_name_to_in_data_[ep_name] = {in_struct_name, in_var_name};
 
     make_indent();
     out_ << "struct " << in_struct_name << " {" << std::endl;
@@ -527,8 +568,9 @@ bool GeneratorImpl::EmitEntryPoint(ast::EntryPoint* ep) {
   }
 
   if (!out_locations.empty()) {
-    auto out_struct_name = generate_struct_name(ep, kOutStructNameSuffix);
-    ep_name_to_out_struct_[ep->name()] = out_struct_name;
+    auto out_struct_name = generate_name(ep_name + "_" + kOutStructNameSuffix);
+    auto out_var_name = generate_name(kTintStructOutVarPrefix);
+    ep_name_to_out_data_[ep_name] = {out_struct_name, out_var_name};
 
     make_indent();
     out_ << "struct " << out_struct_name << " {" << std::endl;
@@ -615,33 +657,82 @@ void GeneratorImpl::EmitStage(ast::PipelineStage stage) {
 bool GeneratorImpl::EmitFunction(ast::Function* func) {
   make_indent();
 
-  // TODO(dsinclair): Technically this is wrong as you could, in theory, have
-  // multiple entry points pointing at the same function. I'm ignoring that for
-  // now. It will either go away with the entry_point changes in the spec
-  // or we'll have to figure out how to deal with it.
-
-  auto name = func->name();
-
-  for (const auto& ep : module_->entry_points()) {
-    if (ep->function_name() == name) {
-      EmitStage(ep->stage());
-      out_ << " ";
-
-      if (!ep->name().empty()) {
-        name = ep->name();
-      }
-
-      break;
-    }
+  // Entry points will be emitted later, skip for now.
+  if (module_->IsFunctionEntryPoint(func->name())) {
+    return true;
   }
+
+  // TODO(dsinclair): This could be smarter. If the input/outputs for multiple
+  // entry points are the same we could generate a single struct and then have
+  // this determine it's the same struct and just emit once.
+  bool emit_duplicate_functions =
+      func->ancestor_entry_points().size() > 0 &&
+      func->referenced_module_variables().size() > 0;
+
+  if (emit_duplicate_functions) {
+    for (const auto& ep_name : func->ancestor_entry_points()) {
+      if (!EmitFunctionInternal(func, emit_duplicate_functions, ep_name)) {
+        return false;
+      }
+      out_ << std::endl;
+    }
+  } else {
+    // Emit as non-duplicated
+    if (!EmitFunctionInternal(func, false, "")) {
+      return false;
+    }
+    out_ << std::endl;
+  }
+
+  return true;
+}
+
+bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
+                                         bool emit_duplicate_functions,
+                                         const std::string& ep_name) {
+  auto name = func->name();
 
   if (!EmitType(func->return_type(), "")) {
     return false;
   }
 
-  out_ << " " << namer_.NameFor(name) << "(";
+  out_ << " ";
+
+  if (emit_duplicate_functions) {
+    name = generate_name(name + "_" + ep_name);
+    ep_func_name_remapped_[ep_name + "_" + func->name()] = name;
+  } else {
+    name = namer_.NameFor(name);
+  }
+  out_ << name << "(";
 
   bool first = true;
+
+  // If we're emitting duplicate functions that means the function takes
+  // the stage_in or stage_out value from the entry point, emit them.
+  //
+  // We emit both of them if they're there regardless of if they're both used.
+  if (emit_duplicate_functions) {
+    auto in_it = ep_name_to_in_data_.find(ep_name);
+    if (in_it != ep_name_to_in_data_.end()) {
+      out_ << "thread " << in_it->second.struct_name << "& "
+           << in_it->second.var_name;
+      first = false;
+    }
+
+    auto out_it = ep_name_to_out_data_.find(ep_name);
+    if (out_it != ep_name_to_out_data_.end()) {
+      if (!first) {
+        out_ << ", ";
+      }
+      out_ << "thread " << out_it->second.struct_name << "& "
+           << out_it->second.var_name;
+      first = false;
+    }
+  }
+
+  // TODO(dsinclair): Handle any entry point builtin params used here
+
   for (const auto& v : func->params()) {
     if (!first) {
       out_ << ", ";
@@ -656,9 +747,79 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
       out_ << " " << v->name();
     }
   }
+
   out_ << ")";
 
-  return EmitStatementBlockAndNewline(func->body());
+  current_ep_name_ = ep_name;
+
+  if (!EmitStatementBlockAndNewline(func->body())) {
+    return false;
+  }
+
+  current_ep_name_ = "";
+
+  return true;
+}
+
+bool GeneratorImpl::EmitEntryPointFunction(ast::EntryPoint* ep) {
+  make_indent();
+
+  current_ep_name_ = ep->name();
+  if (current_ep_name_.empty()) {
+    current_ep_name_ = ep->function_name();
+  }
+
+  auto* func = module_->FindFunctionByName(ep->function_name());
+  if (func == nullptr) {
+    error_ = "unable to find function for entry point: " + ep->function_name();
+    return false;
+  }
+
+  EmitStage(ep->stage());
+  out_ << " ";
+
+  // This is an entry point, the return type is the entry point output structure
+  // if one exists, or void otherwise.
+  auto out_data = ep_name_to_out_data_.find(current_ep_name_);
+  bool has_out_data = out_data != ep_name_to_out_data_.end();
+  if (has_out_data) {
+    out_ << out_data->second.struct_name;
+  } else {
+    out_ << "void";
+  }
+  out_ << " " << namer_.NameFor(current_ep_name_) << "(";
+
+  auto in_data = ep_name_to_in_data_.find(current_ep_name_);
+  if (in_data != ep_name_to_in_data_.end()) {
+    out_ << in_data->second.struct_name << " " << in_data->second.var_name
+         << " [[stage_in]]";
+  }
+
+  // TODO(dsinclair): Output other builtin inputs
+  out_ << ") {" << std::endl;
+
+  increment_indent();
+
+  if (has_out_data) {
+    make_indent();
+    out_ << out_data->second.struct_name << " " << out_data->second.var_name
+         << " = {};" << std::endl;
+  }
+
+  generating_entry_point_ = true;
+  for (const auto& s : func->body()) {
+    if (!EmitStatement(s.get())) {
+      return false;
+    }
+  }
+  generating_entry_point_ = false;
+
+  decrement_indent();
+  make_indent();
+  out_ << "}" << std::endl;
+
+  current_ep_name_ = "";
+  return true;
 }
 
 bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
@@ -668,7 +829,30 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
     error_ = "Identifier paths not handled yet.";
     return false;
   }
+
+  ast::Variable* var = nullptr;
+  if (global_variables_.get(ident->name(), &var)) {
+    if (var->storage_class() == ast::StorageClass::kInput &&
+        var->IsDecorated() && var->AsDecorated()->HasLocationDecoration()) {
+      auto it = ep_name_to_in_data_.find(current_ep_name_);
+      if (it == ep_name_to_in_data_.end()) {
+        error_ = "unable to find entry point data for input";
+        return false;
+      }
+      out_ << it->second.var_name << ".";
+    } else if (var->storage_class() == ast::StorageClass::kOutput &&
+               var->IsDecorated() &&
+               var->AsDecorated()->HasLocationDecoration()) {
+      auto it = ep_name_to_out_data_.find(current_ep_name_);
+      if (it == ep_name_to_out_data_.end()) {
+        error_ = "unable to find entry point data for output";
+        return false;
+      }
+      out_ << it->second.var_name << ".";
+    }
+  }
   out_ << namer_.NameFor(ident->name());
+
   return true;
 }
 
@@ -785,7 +969,13 @@ bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
   make_indent();
 
   out_ << "return";
-  if (stmt->has_value()) {
+
+  if (generating_entry_point_) {
+    auto out_data = ep_name_to_out_data_.find(current_ep_name_);
+    if (out_data != ep_name_to_out_data_.end()) {
+      out_ << " " << out_data->second.var_name;
+    }
+  } else if (stmt->has_value()) {
     out_ << " ";
     if (!EmitExpression(stmt->value())) {
       return false;

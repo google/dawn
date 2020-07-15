@@ -43,6 +43,14 @@ Function* Module::FindFunctionByName(const std::string& name) const {
   return nullptr;
 }
 
+bool Module::IsFunctionEntryPoint(const std::string& name) const {
+  for (const auto& ep : entry_points_) {
+    if (ep->function_name() == name)
+      return true;
+  }
+  return false;
+}
+
 bool Module::IsValid() const {
   for (const auto& import : imports_) {
     if (import == nullptr || !import->IsValid()) {

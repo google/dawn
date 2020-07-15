@@ -51,29 +51,23 @@ compute void my_func() {
 }
 
 TEST_F(MslGeneratorImplTest, InputStructName) {
-  ast::EntryPoint ep(ast::PipelineStage::kVertex, "main", "func_main");
-
   GeneratorImpl g;
-  ASSERT_EQ(g.generate_struct_name(&ep, "in"), "func_main_in");
+  ASSERT_EQ(g.generate_name("func_main_in"), "func_main_in");
 }
 
 TEST_F(MslGeneratorImplTest, InputStructName_ConflictWithExisting) {
-  ast::EntryPoint ep(ast::PipelineStage::kVertex, "main", "func_main");
-
   GeneratorImpl g;
 
   // Register the struct name as existing.
   auto* namer = g.namer_for_testing();
   namer->NameFor("func_main_out");
 
-  ASSERT_EQ(g.generate_struct_name(&ep, "out"), "func_main_out_0");
+  ASSERT_EQ(g.generate_name("func_main_out"), "func_main_out_0");
 }
 
 TEST_F(MslGeneratorImplTest, NameConflictWith_InputStructName) {
-  ast::EntryPoint ep(ast::PipelineStage::kVertex, "main", "func_main");
-
   GeneratorImpl g;
-  ASSERT_EQ(g.generate_struct_name(&ep, "in"), "func_main_in");
+  ASSERT_EQ(g.generate_name("func_main_in"), "func_main_in");
 
   ast::IdentifierExpression ident("func_main_in");
   ASSERT_TRUE(g.EmitIdentifier(&ident));

@@ -33,7 +33,7 @@ namespace {
 
 using MslGeneratorImplTest = testing::Test;
 
-TEST_F(MslGeneratorImplTest, EmitEntryPoint_Vertex_Input) {
+TEST_F(MslGeneratorImplTest, EmitEntryPointData_Vertex_Input) {
   // [[location 0]] var<in> foo : f32;
   // [[location 1]] var<in> bar : i32;
   //
@@ -81,8 +81,8 @@ TEST_F(MslGeneratorImplTest, EmitEntryPoint_Vertex_Input) {
 
   mod.AddFunction(std::move(func));
 
-  auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kVertex,
-                                              "main", "vtx_main");
+  auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kVertex, "",
+                                              "vtx_main");
   auto* ep_ptr = ep.get();
 
   mod.AddEntryPoint(std::move(ep));
@@ -91,7 +91,7 @@ TEST_F(MslGeneratorImplTest, EmitEntryPoint_Vertex_Input) {
 
   GeneratorImpl g;
   g.set_module_for_testing(&mod);
-  ASSERT_TRUE(g.EmitEntryPoint(ep_ptr)) << g.error();
+  ASSERT_TRUE(g.EmitEntryPointData(ep_ptr)) << g.error();
   EXPECT_EQ(g.result(), R"(struct vtx_main_in {
   float foo [[attribute(0)]];
   int bar [[attribute(1)]];
@@ -100,7 +100,7 @@ TEST_F(MslGeneratorImplTest, EmitEntryPoint_Vertex_Input) {
 )");
 }
 
-TEST_F(MslGeneratorImplTest, EmitEntryPoint_Vertex_Output) {
+TEST_F(MslGeneratorImplTest, EmitEntryPointData_Vertex_Output) {
   // [[location 0]] var<out> foo : f32;
   // [[location 1]] var<out> bar : i32;
   //
@@ -148,8 +148,8 @@ TEST_F(MslGeneratorImplTest, EmitEntryPoint_Vertex_Output) {
 
   mod.AddFunction(std::move(func));
 
-  auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kVertex,
-                                              "main", "vtx_main");
+  auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kVertex, "",
+                                              "vtx_main");
   auto* ep_ptr = ep.get();
 
   mod.AddEntryPoint(std::move(ep));
@@ -158,7 +158,7 @@ TEST_F(MslGeneratorImplTest, EmitEntryPoint_Vertex_Output) {
 
   GeneratorImpl g;
   g.set_module_for_testing(&mod);
-  ASSERT_TRUE(g.EmitEntryPoint(ep_ptr)) << g.error();
+  ASSERT_TRUE(g.EmitEntryPointData(ep_ptr)) << g.error();
   EXPECT_EQ(g.result(), R"(struct vtx_main_out {
   float foo [[user(locn0)]];
   int bar [[user(locn1)]];
@@ -167,7 +167,7 @@ TEST_F(MslGeneratorImplTest, EmitEntryPoint_Vertex_Output) {
 )");
 }
 
-TEST_F(MslGeneratorImplTest, EmitEntryPoint_Fragment_Input) {
+TEST_F(MslGeneratorImplTest, EmitEntryPointData_Fragment_Input) {
   // [[location 0]] var<in> foo : f32;
   // [[location 1]] var<in> bar : i32;
   //
@@ -225,8 +225,8 @@ TEST_F(MslGeneratorImplTest, EmitEntryPoint_Fragment_Input) {
 
   GeneratorImpl g;
   g.set_module_for_testing(&mod);
-  ASSERT_TRUE(g.EmitEntryPoint(ep_ptr)) << g.error();
-  EXPECT_EQ(g.result(), R"(struct frag_main_in {
+  ASSERT_TRUE(g.EmitEntryPointData(ep_ptr)) << g.error();
+  EXPECT_EQ(g.result(), R"(struct main_in {
   float foo [[user(locn0)]];
   int bar [[user(locn1)]];
 };
@@ -234,7 +234,7 @@ TEST_F(MslGeneratorImplTest, EmitEntryPoint_Fragment_Input) {
 )");
 }
 
-TEST_F(MslGeneratorImplTest, EmitEntryPoint_Fragment_Output) {
+TEST_F(MslGeneratorImplTest, EmitEntryPointData_Fragment_Output) {
   // [[location 0]] var<out> foo : f32;
   // [[location 1]] var<out> bar : i32;
   //
@@ -292,8 +292,8 @@ TEST_F(MslGeneratorImplTest, EmitEntryPoint_Fragment_Output) {
 
   GeneratorImpl g;
   g.set_module_for_testing(&mod);
-  ASSERT_TRUE(g.EmitEntryPoint(ep_ptr)) << g.error();
-  EXPECT_EQ(g.result(), R"(struct frag_main_out {
+  ASSERT_TRUE(g.EmitEntryPointData(ep_ptr)) << g.error();
+  EXPECT_EQ(g.result(), R"(struct main_out {
   float foo [[color(0)]];
   int bar [[color(1)]];
 };
@@ -301,7 +301,7 @@ TEST_F(MslGeneratorImplTest, EmitEntryPoint_Fragment_Output) {
 )");
 }
 
-TEST_F(MslGeneratorImplTest, EmitEntryPoint_Compute_Input) {
+TEST_F(MslGeneratorImplTest, EmitEntryPointData_Compute_Input) {
   // [[location 0]] var<in> foo : f32;
   // [[location 1]] var<in> bar : i32;
   //
@@ -356,11 +356,11 @@ TEST_F(MslGeneratorImplTest, EmitEntryPoint_Compute_Input) {
 
   GeneratorImpl g;
   g.set_module_for_testing(&mod);
-  ASSERT_FALSE(g.EmitEntryPoint(ep_ptr)) << g.error();
+  ASSERT_FALSE(g.EmitEntryPointData(ep_ptr)) << g.error();
   EXPECT_EQ(g.error(), R"(invalid location variable for pipeline stage)");
 }
 
-TEST_F(MslGeneratorImplTest, EmitEntryPoint_Compute_Output) {
+TEST_F(MslGeneratorImplTest, EmitEntryPointData_Compute_Output) {
   // [[location 0]] var<out> foo : f32;
   // [[location 1]] var<out> bar : i32;
   //
@@ -415,7 +415,7 @@ TEST_F(MslGeneratorImplTest, EmitEntryPoint_Compute_Output) {
 
   GeneratorImpl g;
   g.set_module_for_testing(&mod);
-  ASSERT_FALSE(g.EmitEntryPoint(ep_ptr)) << g.error();
+  ASSERT_FALSE(g.EmitEntryPointData(ep_ptr)) << g.error();
   EXPECT_EQ(g.error(), R"(invalid location variable for pipeline stage)");
 }
 

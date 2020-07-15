@@ -23,6 +23,7 @@
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/scope_stack.h"
 #include "src/writer/msl/namer.h"
 #include "src/writer/text_generator.h"
 
@@ -93,7 +94,11 @@ class GeneratorImpl : public TextGenerator {
   /// Handles emitting information for an entry point
   /// @param ep the entry point
   /// @returns true if the entry point data was emitted
-  bool EmitEntryPoint(ast::EntryPoint* ep);
+  bool EmitEntryPointData(ast::EntryPoint* ep);
+  /// Handles emitting the entry point function
+  /// @param ep the entry point
+  /// @returns true if the entry point function was emitted
+  bool EmitEntryPointFunction(ast::EntryPoint* ep);
   /// Handles generate an Expression
   /// @param expr the expression
   /// @returns true if the expression was emitted
@@ -102,6 +107,15 @@ class GeneratorImpl : public TextGenerator {
   /// @param func the function to generate
   /// @returns true if the function was emitted
   bool EmitFunction(ast::Function* func);
+  /// Internal helper for emitting functions
+  /// @param func the function to emit
+  /// @param emit_duplicate_functions set true if we need to duplicate per entry
+  /// point
+  /// @param ep_name the current entry point or blank if none set
+  /// @returns true if the function was emitted.
+  bool EmitFunctionInternal(ast::Function* func,
+                            bool emit_duplicate_functions,
+                            const std::string& ep_name);
   /// Handles generating an identifier expression
   /// @param expr the identifier expression
   /// @returns true if the identifeir was emitted
@@ -179,22 +193,33 @@ class GeneratorImpl : public TextGenerator {
   /// @param mod the module to set.
   void set_module_for_testing(ast::Module* mod);
 
-  /// Generates a name for the input struct
-  /// @param ep the entry point to generate for
-  /// @param type the type of struct to generate
-  /// @returns the input struct name
-  std::string generate_struct_name(ast::EntryPoint* ep,
-                                   const std::string& type);
+  /// Generates a name for the prefix
+  /// @param prefix the prefix of the name to generate
+  /// @returns the name
+  std::string generate_name(const std::string& prefix);
 
   /// @returns the namer for testing
   Namer* namer_for_testing() { return &namer_; }
 
  private:
   Namer namer_;
+  ScopeStack<ast::Variable*> global_variables_;
+  std::string current_ep_name_;
+  bool generating_entry_point_ = false;
   const ast::Module* module_ = nullptr;
   uint32_t loop_emission_counter_ = 0;
-  std::unordered_map<std::string, std::string> ep_name_to_in_struct_;
-  std::unordered_map<std::string, std::string> ep_name_to_out_struct_;
+
+  struct EntryPointData {
+    std::string struct_name;
+    std::string var_name;
+  };
+  std::unordered_map<std::string, EntryPointData> ep_name_to_in_data_;
+  std::unordered_map<std::string, EntryPointData> ep_name_to_out_data_;
+
+  // This maps an input of "<entry_point_name>_<function_name>" to a remapped
+  // function name. If there is no entry for a given key then function did
+  // not need to be remapped for the entry point and can be emitted directly.
+  std::unordered_map<std::string, std::string> ep_func_name_remapped_;
 };
 
 }  // namespace msl

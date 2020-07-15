@@ -26,6 +26,15 @@ DecoratedVariable::DecoratedVariable(DecoratedVariable&&) = default;
 
 DecoratedVariable::~DecoratedVariable() = default;
 
+bool DecoratedVariable::HasLocationDecoration() const {
+  for (const auto& deco : decorations_) {
+    if (deco->IsLocation()) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool DecoratedVariable::IsDecorated() const {
   return true;
 }

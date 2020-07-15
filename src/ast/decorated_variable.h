@@ -45,6 +45,9 @@ class DecoratedVariable : public Variable {
   /// @returns the decorations attached to this variable
   const VariableDecorationList& decorations() const { return decorations_; }
 
+  /// @returns true if the decorations include a LocationDecoration
+  bool HasLocationDecoration() const;
+
   /// @returns true if this is a decorated variable
   bool IsDecorated() const override;
 
