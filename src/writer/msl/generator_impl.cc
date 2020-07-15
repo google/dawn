@@ -518,21 +518,9 @@ bool GeneratorImpl::EmitEntryPointData(ast::EntryPoint* ep) {
 
   std::vector<std::pair<ast::Variable*, uint32_t>> in_locations;
   std::vector<std::pair<ast::Variable*, uint32_t>> out_locations;
-  for (auto* var : func->referenced_module_variables()) {
-    if (!var->IsDecorated()) {
-      continue;
-    }
-    auto* decorated = var->AsDecorated();
-    ast::LocationDecoration* locn_deco = nullptr;
-    for (auto& deco : decorated->decorations()) {
-      if (deco->IsLocation()) {
-        locn_deco = deco.get()->AsLocation();
-        break;
-      }
-    }
-    if (locn_deco == nullptr) {
-      continue;
-    }
+  for (auto data : func->referenced_location_variables()) {
+    auto var = data.first;
+    auto locn_deco = data.second;
 
     if (var->storage_class() == ast::StorageClass::kInput) {
       in_locations.push_back({var, locn_deco->value()});
@@ -753,6 +741,8 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
 
   // TODO(dsinclair): Handle any entry point builtin params used here
 
+  // TODO(dsinclair): Binding/Set inputs
+
   for (const auto& v : func->params()) {
     if (!first) {
       out_ << ", ";
@@ -816,6 +806,9 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::EntryPoint* ep) {
   }
 
   // TODO(dsinclair): Output other builtin inputs
+
+  // TODO(dsinclair): Binding/Set inputs
+
   out_ << ") {" << std::endl;
 
   increment_indent();

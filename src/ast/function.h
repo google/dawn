@@ -21,7 +21,9 @@
 #include <utility>
 #include <vector>
 
+#include "src/ast/builtin_decoration.h"
 #include "src/ast/expression.h"
+#include "src/ast/location_decoration.h"
 #include "src/ast/node.h"
 #include "src/ast/statement.h"
 #include "src/ast/type/type.h"
@@ -76,6 +78,14 @@ class Function : public Node {
   const std::vector<Variable*>& referenced_module_variables() const {
     return referenced_module_vars_;
   }
+  /// Retrieves any referenced location variables
+  /// @returns the <variable, decoration> pair.
+  const std::vector<std::pair<Variable*, LocationDecoration*>>
+  referenced_location_variables() const;
+  /// Retrieves any referenced builtin variables
+  /// @returns the <variable, decoration> pair.
+  const std::vector<std::pair<Variable*, BuiltinDecoration*>>
+  referenced_builtin_variables() const;
 
   /// Adds an ancestor entry point
   /// @param ep the entry point ancestor

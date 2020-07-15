@@ -15,7 +15,10 @@
 #include "src/ast/function.h"
 
 #include "gtest/gtest.h"
+#include "src/ast/builtin_decoration.h"
+#include "src/ast/decorated_variable.h"
 #include "src/ast/kill_statement.h"
+#include "src/ast/location_decoration.h"
 #include "src/ast/pipeline_stage.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
@@ -76,6 +79,92 @@ TEST_F(FunctionTest, AddDuplicateReferencedVariables) {
   f.add_referenced_module_variable(&v2);
   ASSERT_EQ(f.referenced_module_variables().size(), 2u);
   EXPECT_EQ(f.referenced_module_variables()[1], &v2);
+}
+
+TEST_F(FunctionTest, GetReferenceLocations) {
+  type::VoidType void_type;
+  type::I32Type i32;
+
+  VariableDecorationList decos;
+  DecoratedVariable loc1(
+      std::make_unique<ast::Variable>("loc1", StorageClass::kInput, &i32));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(0));
+  loc1.set_decorations(std::move(decos));
+
+  DecoratedVariable loc2(
+      std::make_unique<ast::Variable>("loc2", StorageClass::kInput, &i32));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(1));
+  loc2.set_decorations(std::move(decos));
+
+  DecoratedVariable builtin1(
+      std::make_unique<ast::Variable>("builtin1", StorageClass::kInput, &i32));
+  decos.push_back(
+      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kPosition));
+  builtin1.set_decorations(std::move(decos));
+
+  DecoratedVariable builtin2(
+      std::make_unique<ast::Variable>("builtin2", StorageClass::kInput, &i32));
+  decos.push_back(
+      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kFragDepth));
+  builtin2.set_decorations(std::move(decos));
+
+  Function f("func", VariableList{}, &void_type);
+
+  f.add_referenced_module_variable(&loc1);
+  f.add_referenced_module_variable(&builtin1);
+  f.add_referenced_module_variable(&loc2);
+  f.add_referenced_module_variable(&builtin2);
+  ASSERT_EQ(f.referenced_module_variables().size(), 4u);
+
+  auto ref_locs = f.referenced_location_variables();
+  ASSERT_EQ(ref_locs.size(), 2u);
+  EXPECT_EQ(ref_locs[0].first, &loc1);
+  EXPECT_EQ(ref_locs[0].second->value(), 0);
+  EXPECT_EQ(ref_locs[1].first, &loc2);
+  EXPECT_EQ(ref_locs[1].second->value(), 1);
+}
+
+TEST_F(FunctionTest, GetReferenceBuiltins) {
+  type::VoidType void_type;
+  type::I32Type i32;
+
+  VariableDecorationList decos;
+  DecoratedVariable loc1(
+      std::make_unique<ast::Variable>("loc1", StorageClass::kInput, &i32));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(0));
+  loc1.set_decorations(std::move(decos));
+
+  DecoratedVariable loc2(
+      std::make_unique<ast::Variable>("loc2", StorageClass::kInput, &i32));
+  decos.push_back(std::make_unique<ast::LocationDecoration>(1));
+  loc2.set_decorations(std::move(decos));
+
+  DecoratedVariable builtin1(
+      std::make_unique<ast::Variable>("builtin1", StorageClass::kInput, &i32));
+  decos.push_back(
+      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kPosition));
+  builtin1.set_decorations(std::move(decos));
+
+  DecoratedVariable builtin2(
+      std::make_unique<ast::Variable>("builtin2", StorageClass::kInput, &i32));
+  decos.push_back(
+      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kFragDepth));
+  builtin2.set_decorations(std::move(decos));
+
+  Function f("func", VariableList{}, &void_type);
+
+  f.add_referenced_module_variable(&loc1);
+  f.add_referenced_module_variable(&builtin1);
+  f.add_referenced_module_variable(&loc2);
+  f.add_referenced_module_variable(&builtin2);
+  ASSERT_EQ(f.referenced_module_variables().size(), 4u);
+
+  auto ref_locs = f.referenced_builtin_variables();
+  ASSERT_EQ(ref_locs.size(), 2u);
+  EXPECT_EQ(ref_locs[0].first, &builtin1);
+  EXPECT_EQ(ref_locs[0].second->value(), ast::Builtin::kPosition);
+  EXPECT_EQ(ref_locs[1].first, &builtin2);
+  EXPECT_EQ(ref_locs[1].second->value(), ast::Builtin::kFragDepth);
 }
 
 TEST_F(FunctionTest, AddDuplicateEntryPoints) {

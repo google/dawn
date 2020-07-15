@@ -16,6 +16,8 @@
 
 #include <sstream>
 
+#include "src/ast/decorated_variable.h"
+
 namespace tint {
 namespace ast {
 
@@ -49,6 +51,42 @@ void Function::add_referenced_module_variable(Variable* var) {
     }
   }
   referenced_module_vars_.push_back(var);
+}
+
+const std::vector<std::pair<Variable*, LocationDecoration*>>
+Function::referenced_location_variables() const {
+  std::vector<std::pair<Variable*, LocationDecoration*>> ret;
+
+  for (auto* var : referenced_module_variables()) {
+    if (!var->IsDecorated()) {
+      continue;
+    }
+    for (auto& deco : var->AsDecorated()->decorations()) {
+      if (deco->IsLocation()) {
+        ret.push_back({var, deco.get()->AsLocation()});
+        break;
+      }
+    }
+  }
+  return ret;
+}
+
+const std::vector<std::pair<Variable*, BuiltinDecoration*>>
+Function::referenced_builtin_variables() const {
+  std::vector<std::pair<Variable*, BuiltinDecoration*>> ret;
+
+  for (auto* var : referenced_module_variables()) {
+    if (!var->IsDecorated()) {
+      continue;
+    }
+    for (auto& deco : var->AsDecorated()->decorations()) {
+      if (deco->IsBuiltin()) {
+        ret.push_back({var, deco.get()->AsBuiltin()});
+        break;
+      }
+    }
+  }
+  return ret;
 }
 
 void Function::add_ancestor_entry_point(const std::string& ep) {
