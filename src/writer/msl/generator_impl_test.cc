@@ -74,6 +74,40 @@ TEST_F(MslGeneratorImplTest, NameConflictWith_InputStructName) {
   EXPECT_EQ(g.result(), "func_main_in_0");
 }
 
+struct MslBuiltinData {
+  ast::Builtin builtin;
+  const char* attribute_name;
+};
+inline std::ostream& operator<<(std::ostream& out, MslBuiltinData data) {
+  out << data.builtin;
+  return out;
+}
+using MslBuiltinConversionTest = testing::TestWithParam<MslBuiltinData>;
+TEST_P(MslBuiltinConversionTest, Emit) {
+  auto params = GetParam();
+
+  GeneratorImpl g;
+  EXPECT_EQ(g.builtin_to_attribute(params.builtin),
+            std::string(params.attribute_name));
+}
+INSTANTIATE_TEST_SUITE_P(
+    MslGeneratorImplTest,
+    MslBuiltinConversionTest,
+    testing::Values(MslBuiltinData{ast::Builtin::kPosition, "position"},
+                    MslBuiltinData{ast::Builtin::kVertexIdx, "vertex_id"},
+                    MslBuiltinData{ast::Builtin::kInstanceIdx, "instance_id"},
+                    MslBuiltinData{ast::Builtin::kFrontFacing, "front_facing"},
+                    MslBuiltinData{ast::Builtin::kFragCoord, "position"},
+                    MslBuiltinData{ast::Builtin::kFragDepth, "depth(any)"},
+                    MslBuiltinData{ast::Builtin::kNumWorkgroups, ""},
+                    MslBuiltinData{ast::Builtin::kWorkgroupSize, ""},
+                    MslBuiltinData{ast::Builtin::kLocalInvocationId,
+                                   "thread_position_in_threadgroup"},
+                    MslBuiltinData{ast::Builtin::kLocalInvocationIdx,
+                                   "thread_index_in_threadgroup"},
+                    MslBuiltinData{ast::Builtin::kGlobalInvocationId,
+                                   "thread_position_in_grid"}));
+
 }  // namespace
 }  // namespace msl
 }  // namespace writer

@@ -18,9 +18,12 @@
 #include "src/ast/entry_point.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/location_decoration.h"
+#include "src/ast/member_accessor_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/i32_type.h"
+#include "src/ast/type/vector_type.h"
+#include "src/ast/type/void_type.h"
 #include "src/ast/variable.h"
 #include "src/context.h"
 #include "src/type_determiner.h"
@@ -417,6 +420,78 @@ TEST_F(MslGeneratorImplTest, EmitEntryPointData_Compute_Output) {
   g.set_module_for_testing(&mod);
   ASSERT_FALSE(g.EmitEntryPointData(ep_ptr)) << g.error();
   EXPECT_EQ(g.error(), R"(invalid location variable for pipeline stage)");
+}
+
+TEST_F(MslGeneratorImplTest, EmitEntryPointData_Builtins) {
+  // Output builtins go in the output struct, input builtins will be passed
+  // as input parameters to the entry point function.
+
+  // [[builtin frag_coord]] var<in> coord : vec4<f32>;
+  // [[builtin frag_depth]] var<out> depth : f32;
+  //
+  // struct main_out {
+  //   float depth [[depth(any)]];
+  // };
+
+  ast::type::F32Type f32;
+  ast::type::VoidType void_type;
+  ast::type::VectorType vec4(&f32, 4);
+
+  auto coord_var =
+      std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
+          "coord", ast::StorageClass::kInput, &vec4));
+
+  ast::VariableDecorationList decos;
+  decos.push_back(
+      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kFragCoord));
+  coord_var->set_decorations(std::move(decos));
+
+  auto depth_var =
+      std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
+          "depth", ast::StorageClass::kOutput, &f32));
+  decos.push_back(
+      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kFragDepth));
+  depth_var->set_decorations(std::move(decos));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(coord_var.get());
+  td.RegisterVariableForTesting(depth_var.get());
+
+  mod.AddGlobalVariable(std::move(coord_var));
+  mod.AddGlobalVariable(std::move(depth_var));
+
+  ast::VariableList params;
+  auto func = std::make_unique<ast::Function>("frag_main", std::move(params),
+                                              &void_type);
+
+  ast::StatementList body;
+  body.push_back(std::make_unique<ast::AssignmentStatement>(
+      std::make_unique<ast::IdentifierExpression>("depth"),
+      std::make_unique<ast::MemberAccessorExpression>(
+          std::make_unique<ast::IdentifierExpression>("coord"),
+          std::make_unique<ast::IdentifierExpression>("x"))));
+  func->set_body(std::move(body));
+
+  mod.AddFunction(std::move(func));
+
+  auto ep = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment,
+                                              "main", "frag_main");
+  auto* ep_ptr = ep.get();
+
+  mod.AddEntryPoint(std::move(ep));
+
+  ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl g;
+  g.set_module_for_testing(&mod);
+  ASSERT_TRUE(g.EmitEntryPointData(ep_ptr)) << g.error();
+  EXPECT_EQ(g.result(), R"(struct main_out {
+  float depth [[depth(any)]];
+};
+
+)");
 }
 
 }  // namespace

@@ -333,11 +333,26 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
       if (!first) {
         out_ << ", ";
       }
-      out_ << var_name;
       first = false;
+      out_ << var_name;
     }
 
-    // TODO(dsinclair): Emit builtins
+    auto* func = module_->FindFunctionByName(ident->name());
+    if (func == nullptr) {
+      error_ = "Unable to find function: " + name;
+      return false;
+    }
+    for (const auto& data : func->referenced_builtin_variables()) {
+      auto* var = data.first;
+      if (var->storage_class() != ast::StorageClass::kInput) {
+        continue;
+      }
+      if (!first) {
+        out_ << ", ";
+      }
+      first = false;
+      out_ << var->name();
+    }
 
     const auto& params = expr->params();
     for (const auto& param : params) {
@@ -517,15 +532,25 @@ bool GeneratorImpl::EmitEntryPointData(ast::EntryPoint* ep) {
   }
 
   std::vector<std::pair<ast::Variable*, uint32_t>> in_locations;
-  std::vector<std::pair<ast::Variable*, uint32_t>> out_locations;
+  std::vector<std::pair<ast::Variable*, ast::VariableDecoration*>>
+      out_variables;
   for (auto data : func->referenced_location_variables()) {
     auto var = data.first;
-    auto locn_deco = data.second;
+    auto deco = data.second;
 
     if (var->storage_class() == ast::StorageClass::kInput) {
-      in_locations.push_back({var, locn_deco->value()});
+      in_locations.push_back({var, deco->value()});
     } else if (var->storage_class() == ast::StorageClass::kOutput) {
-      out_locations.push_back({var, locn_deco->value()});
+      out_variables.push_back({var, deco});
+    }
+  }
+
+  for (auto data : func->referenced_builtin_variables()) {
+    auto var = data.first;
+    auto deco = data.second;
+
+    if (var->storage_class() == ast::StorageClass::kOutput) {
+      out_variables.push_back({var, deco});
     }
   }
 
@@ -575,7 +600,7 @@ bool GeneratorImpl::EmitEntryPointData(ast::EntryPoint* ep) {
     out_ << "};" << std::endl << std::endl;
   }
 
-  if (!out_locations.empty()) {
+  if (!out_variables.empty()) {
     auto out_struct_name = generate_name(ep_name + "_" + kOutStructNameSuffix);
     auto out_var_name = generate_name(kTintStructOutVarPrefix);
     ep_name_to_out_data_[ep_name] = {out_struct_name, out_var_name};
@@ -584,9 +609,9 @@ bool GeneratorImpl::EmitEntryPointData(ast::EntryPoint* ep) {
     out_ << "struct " << out_struct_name << " {" << std::endl;
 
     increment_indent();
-    for (auto& data : out_locations) {
+    for (auto& data : out_variables) {
       auto* var = data.first;
-      uint32_t loc = data.second;
+      auto* deco = data.second;
 
       make_indent();
       if (!EmitType(var->type(), var->name())) {
@@ -594,12 +619,26 @@ bool GeneratorImpl::EmitEntryPointData(ast::EntryPoint* ep) {
       }
 
       out_ << " " << var->name() << " [[";
-      if (ep->stage() == ast::PipelineStage::kVertex) {
-        out_ << "user(locn" << loc << ")";
-      } else if (ep->stage() == ast::PipelineStage::kFragment) {
-        out_ << "color(" << loc << ")";
+
+      if (deco->IsLocation()) {
+        auto loc = deco->AsLocation()->value();
+        if (ep->stage() == ast::PipelineStage::kVertex) {
+          out_ << "user(locn" << loc << ")";
+        } else if (ep->stage() == ast::PipelineStage::kFragment) {
+          out_ << "color(" << loc << ")";
+        } else {
+          error_ = "invalid location variable for pipeline stage";
+          return false;
+        }
+      } else if (deco->IsBuiltin()) {
+        auto attr = builtin_to_attribute(deco->AsBuiltin()->value());
+        if (attr.empty()) {
+          error_ = "unsupported builtin";
+          return false;
+        }
+        out_ << attr;
       } else {
-        error_ = "invalid location variable for pipeline stage";
+        error_ = "unsupported variable decoration for entry point output";
         return false;
       }
       out_ << "]];" << std::endl;
@@ -739,7 +778,22 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     }
   }
 
-  // TODO(dsinclair): Handle any entry point builtin params used here
+  for (const auto& data : func->referenced_builtin_variables()) {
+    auto* var = data.first;
+    if (var->storage_class() != ast::StorageClass::kInput) {
+      continue;
+    }
+    if (!first) {
+      out_ << ", ";
+    }
+    first = false;
+
+    out_ << "thread ";
+    if (!EmitType(var->type(), "")) {
+      return false;
+    }
+    out_ << "& " << var->name();
+  }
 
   // TODO(dsinclair): Binding/Set inputs
 
@@ -771,6 +825,41 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
   return true;
 }
 
+std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
+  switch (builtin) {
+    case ast::Builtin::kPosition:
+      return "position";
+    case ast::Builtin::kVertexIdx:
+      return "vertex_id";
+    case ast::Builtin::kInstanceIdx:
+      return "instance_id";
+    case ast::Builtin::kFrontFacing:
+      return "front_facing";
+    case ast::Builtin::kFragCoord:
+      return "position";
+    case ast::Builtin::kFragDepth:
+      return "depth(any)";
+    // TODO(dsinclair): Ignore for now, I believe it will be removed from WGSL
+    // https://github.com/gpuweb/gpuweb/issues/920
+    case ast::Builtin::kNumWorkgroups:
+      return "";
+    // TODO(dsinclair): Ignore for now. This has been removed as a builtin
+    // in the spec. Need to update Tint to match.
+    // https://github.com/gpuweb/gpuweb/pull/824
+    case ast::Builtin::kWorkgroupSize:
+      return "";
+    case ast::Builtin::kLocalInvocationId:
+      return "thread_position_in_threadgroup";
+    case ast::Builtin::kLocalInvocationIdx:
+      return "thread_index_in_threadgroup";
+    case ast::Builtin::kGlobalInvocationId:
+      return "thread_position_in_grid";
+    default:
+      break;
+  }
+  return "";
+}
+
 bool GeneratorImpl::EmitEntryPointFunction(ast::EntryPoint* ep) {
   make_indent();
 
@@ -799,13 +888,38 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::EntryPoint* ep) {
   }
   out_ << " " << namer_.NameFor(current_ep_name_) << "(";
 
+  bool first = true;
   auto in_data = ep_name_to_in_data_.find(current_ep_name_);
   if (in_data != ep_name_to_in_data_.end()) {
     out_ << in_data->second.struct_name << " " << in_data->second.var_name
          << " [[stage_in]]";
+    first = false;
   }
 
-  // TODO(dsinclair): Output other builtin inputs
+  for (auto data : func->referenced_builtin_variables()) {
+    auto* var = data.first;
+    if (var->storage_class() != ast::StorageClass::kInput) {
+      continue;
+    }
+
+    if (!first) {
+      out_ << ", ";
+    }
+    first = false;
+
+    auto* builtin = data.second;
+
+    if (!EmitType(var->type(), "")) {
+      return false;
+    }
+
+    auto attr = builtin_to_attribute(builtin->value());
+    if (attr.empty()) {
+      error_ = "unknown builtin";
+      return false;
+    }
+    out_ << " " << var->name() << " [[" << attr << "]]";
+  }
 
   // TODO(dsinclair): Binding/Set inputs
 
@@ -845,9 +959,14 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
 
   ast::Variable* var = nullptr;
   if (global_variables_.get(ident->name(), &var)) {
-    if (var->IsDecorated() && var->AsDecorated()->HasLocationDecoration() &&
+    bool in_or_out_struct_has_location =
+        var->IsDecorated() && var->AsDecorated()->HasLocationDecoration() &&
         (var->storage_class() == ast::StorageClass::kInput ||
-         var->storage_class() == ast::StorageClass::kOutput)) {
+         var->storage_class() == ast::StorageClass::kOutput);
+    bool in_struct_has_builtin =
+        var->IsDecorated() && var->AsDecorated()->HasBuiltinDecoration() &&
+        var->storage_class() == ast::StorageClass::kOutput;
+    if (in_or_out_struct_has_location || in_struct_has_builtin) {
       auto var_type = var->storage_class() == ast::StorageClass::kInput
                           ? VarType::kIn
                           : VarType::kOut;

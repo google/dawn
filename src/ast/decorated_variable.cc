@@ -35,6 +35,15 @@ bool DecoratedVariable::HasLocationDecoration() const {
   return false;
 }
 
+bool DecoratedVariable::HasBuiltinDecoration() const {
+  for (const auto& deco : decorations_) {
+    if (deco->IsBuiltin()) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool DecoratedVariable::IsDecorated() const {
   return true;
 }

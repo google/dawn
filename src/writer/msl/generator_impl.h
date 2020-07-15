@@ -198,6 +198,11 @@ class GeneratorImpl : public TextGenerator {
   /// @returns the name
   std::string generate_name(const std::string& prefix);
 
+  /// Converts a builtin to an attribute name
+  /// @param builtin the builtin to convert
+  /// @returns the string name of the builtin or blank on error
+  std::string builtin_to_attribute(ast::Builtin builtin) const;
+
   /// @returns the namer for testing
   Namer* namer_for_testing() { return &namer_; }
 
