@@ -278,6 +278,27 @@ bool GeneratorImpl::EmitBreak(ast::BreakStatement*) {
   return true;
 }
 
+std::string GeneratorImpl::current_ep_var_name(VarType type) {
+  std::string name = "";
+  switch (type) {
+    case VarType::kIn: {
+      auto in_it = ep_name_to_in_data_.find(current_ep_name_);
+      if (in_it != ep_name_to_in_data_.end()) {
+        name = in_it->second.var_name;
+      }
+      break;
+    }
+    case VarType::kOut: {
+      auto out_it = ep_name_to_out_data_.find(current_ep_name_);
+      if (out_it != ep_name_to_out_data_.end()) {
+        name = out_it->second.var_name;
+      }
+      break;
+    }
+  }
+  return name;
+}
+
 bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
   if (!expr->func()->IsIdentifier()) {
     error_ = "invalid function name";
@@ -301,19 +322,18 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
     out_ << name << "(";
 
     bool first = true;
-
-    auto in_it = ep_name_to_in_data_.find(current_ep_name_);
-    if (in_it != ep_name_to_in_data_.end()) {
-      out_ << in_it->second.var_name;
+    auto var_name = current_ep_var_name(VarType::kIn);
+    if (!var_name.empty()) {
+      out_ << var_name;
       first = false;
     }
 
-    auto out_it = ep_name_to_out_data_.find(current_ep_name_);
-    if (out_it != ep_name_to_out_data_.end()) {
+    var_name = current_ep_var_name(VarType::kOut);
+    if (!var_name.empty()) {
       if (!first) {
         out_ << ", ";
       }
-      out_ << out_it->second.var_name;
+      out_ << var_name;
       first = false;
     }
 
@@ -832,23 +852,18 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
 
   ast::Variable* var = nullptr;
   if (global_variables_.get(ident->name(), &var)) {
-    if (var->storage_class() == ast::StorageClass::kInput &&
-        var->IsDecorated() && var->AsDecorated()->HasLocationDecoration()) {
-      auto it = ep_name_to_in_data_.find(current_ep_name_);
-      if (it == ep_name_to_in_data_.end()) {
-        error_ = "unable to find entry point data for input";
+    if (var->IsDecorated() && var->AsDecorated()->HasLocationDecoration() &&
+        (var->storage_class() == ast::StorageClass::kInput ||
+         var->storage_class() == ast::StorageClass::kOutput)) {
+      auto var_type = var->storage_class() == ast::StorageClass::kInput
+                          ? VarType::kIn
+                          : VarType::kOut;
+      auto name = current_ep_var_name(var_type);
+      if (name.empty()) {
+        error_ = "unable to find entry point data for variable";
         return false;
       }
-      out_ << it->second.var_name << ".";
-    } else if (var->storage_class() == ast::StorageClass::kOutput &&
-               var->IsDecorated() &&
-               var->AsDecorated()->HasLocationDecoration()) {
-      auto it = ep_name_to_out_data_.find(current_ep_name_);
-      if (it == ep_name_to_out_data_.end()) {
-        error_ = "unable to find entry point data for output";
-        return false;
-      }
-      out_ << it->second.var_name << ".";
+      out_ << name << ".";
     }
   }
   out_ << namer_.NameFor(ident->name());

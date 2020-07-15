@@ -202,6 +202,9 @@ class GeneratorImpl : public TextGenerator {
   Namer* namer_for_testing() { return &namer_; }
 
  private:
+  enum class VarType { kIn, kOut };
+  std::string current_ep_var_name(VarType type);
+
   Namer namer_;
   ScopeStack<ast::Variable*> global_variables_;
   std::string current_ep_name_;
