@@ -147,6 +147,11 @@ namespace dawn_native {
                                                const TextureDataLayout* dataLayout,
                                                const Extent3D* writeSize) {
         DAWN_TRY(ValidateWriteTexture(destination, dataSize, dataLayout, writeSize));
+
+        if (writeSize->width == 0 || writeSize->height == 0 || writeSize->depth == 0) {
+            return {};
+        }
+
         return WriteTextureImpl(destination, data, dataSize, dataLayout, writeSize);
     }
 

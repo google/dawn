@@ -80,6 +80,7 @@ namespace dawn_wire { namespace client {
         QueueWriteTextureInternalCmd cmd;
         cmd.queueId = id;
         cmd.destination = destination;
+        cmd.data = static_cast<const uint8_t*>(data);
         cmd.dataSize = dataSize;
         cmd.dataLayout = dataLayout;
         cmd.writeSize = writeSize;

@@ -47,51 +47,54 @@ class CompressedTextureBCFormatTest : public DawnTest {
         return mIsBCFormatSupported;
     }
 
-    // Copy the compressed texture data into the destination texture as is specified in copyConfig.
-    void InitializeDataInCompressedTexture(wgpu::Texture bcCompressedTexture,
-                                           const CopyConfig& copyConfig) {
-        ASSERT(IsBCFormatSupported());
-
-        // Compute the upload buffer size with bytesPerRowAlignment and the copy region.
-        const wgpu::Extent3D textureSize = copyConfig.textureDescriptor.size;
-        uint32_t actualWidthAtLevel = textureSize.width >> copyConfig.viewMipmapLevel;
-        uint32_t actualHeightAtLevel = textureSize.height >> copyConfig.viewMipmapLevel;
-        uint32_t copyWidthInBlockAtLevel =
-            (actualWidthAtLevel + kBCBlockWidthInTexels - 1) / kBCBlockWidthInTexels;
-        uint32_t copyHeightInBlockAtLevel =
-            (actualHeightAtLevel + kBCBlockHeightInTexels - 1) / kBCBlockHeightInTexels;
-        uint32_t bufferRowPitchInBytes = 0;
+    // Compute the upload data for the copyConfig.
+    std::vector<uint8_t> UploadData(const CopyConfig& copyConfig) {
+        uint32_t copyWidthInBlock = copyConfig.copyExtent3D.width / kBCBlockWidthInTexels;
+        uint32_t copyHeightInBlock = copyConfig.copyExtent3D.height / kBCBlockHeightInTexels;
+        uint32_t rowPitchInBytes = 0;
         if (copyConfig.bytesPerRowAlignment != 0) {
-            bufferRowPitchInBytes = copyConfig.bytesPerRowAlignment;
+            rowPitchInBytes = copyConfig.bytesPerRowAlignment;
         } else {
-            bufferRowPitchInBytes =
-                copyWidthInBlockAtLevel *
-                utils::GetTexelBlockSizeInBytes(copyConfig.textureDescriptor.format);
+            rowPitchInBytes = copyWidthInBlock *
+                              utils::GetTexelBlockSizeInBytes(copyConfig.textureDescriptor.format);
         }
-        uint32_t copyBytesPerImage = bufferRowPitchInBytes * copyHeightInBlockAtLevel;
+        uint32_t copyRowsPerImageInBlock = copyConfig.rowsPerImage / kBCBlockHeightInTexels;
+        if (copyRowsPerImageInBlock == 0) {
+            copyRowsPerImageInBlock = copyHeightInBlock;
+        }
+        uint32_t copyBytesPerImage = rowPitchInBytes * copyRowsPerImageInBlock;
         uint32_t uploadBufferSize =
             copyConfig.bufferOffset + copyBytesPerImage * copyConfig.copyExtent3D.depth;
 
-        // Fill uploadData with the pre-prepared one-block compressed texture data.
-        std::vector<uint8_t> uploadData(uploadBufferSize, 0);
+        // Fill data with the pre-prepared one-block compressed texture data.
+        std::vector<uint8_t> data(uploadBufferSize, 0);
         std::vector<uint8_t> oneBlockCompressedTextureData =
             GetOneBlockBCFormatTextureData(copyConfig.textureDescriptor.format);
         for (uint32_t layer = 0; layer < copyConfig.copyExtent3D.depth; ++layer) {
-            for (uint32_t h = 0; h < copyHeightInBlockAtLevel; ++h) {
-                for (uint32_t w = 0; w < copyWidthInBlockAtLevel; ++w) {
-                    uint32_t uploadBufferOffset =
-                        copyConfig.bufferOffset + copyBytesPerImage * layer +
-                        bufferRowPitchInBytes * h + oneBlockCompressedTextureData.size() * w;
-                    std::memcpy(&uploadData[uploadBufferOffset],
-                                oneBlockCompressedTextureData.data(),
+            for (uint32_t h = 0; h < copyHeightInBlock; ++h) {
+                for (uint32_t w = 0; w < copyWidthInBlock; ++w) {
+                    uint32_t uploadBufferOffset = copyConfig.bufferOffset +
+                                                  copyBytesPerImage * layer + rowPitchInBytes * h +
+                                                  oneBlockCompressedTextureData.size() * w;
+                    std::memcpy(&data[uploadBufferOffset], oneBlockCompressedTextureData.data(),
                                 oneBlockCompressedTextureData.size() * sizeof(uint8_t));
                 }
             }
         }
 
+        return data;
+    }
+
+    // Copy the compressed texture data into the destination texture as is specified in copyConfig.
+    void InitializeDataInCompressedTexture(wgpu::Texture bcCompressedTexture,
+                                           const CopyConfig& copyConfig) {
+        ASSERT(IsBCFormatSupported());
+
+        std::vector<uint8_t> data = UploadData(copyConfig);
+
         // Copy texture data from a staging buffer to the destination texture.
-        wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(
-            device, uploadData.data(), uploadBufferSize, wgpu::BufferUsage::CopySrc);
+        wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(device, data.data(), data.size(),
+                                                                 wgpu::BufferUsage::CopySrc);
         wgpu::BufferCopyView bufferCopyView =
             utils::CreateBufferCopyView(stagingBuffer, copyConfig.bufferOffset,
                                         copyConfig.bytesPerRowAlignment, copyConfig.rowsPerImage);
@@ -176,7 +179,6 @@ class CompressedTextureBCFormatTest : public DawnTest {
                                             const std::vector<RGBA8>& expected) {
         ASSERT(IsBCFormatSupported());
 
-        ASSERT(expected.size() == renderTargetSize.width * renderTargetSize.height);
         utils::BasicRenderPass renderPass =
             utils::CreateBasicRenderPass(device, renderTargetSize.width, renderTargetSize.height);
 
@@ -204,6 +206,10 @@ class CompressedTextureBCFormatTest : public DawnTest {
 
         wgpu::Texture bcTexture = CreateTextureWithCompressedData(config);
 
+        VerifyBCTexture(config, bcTexture);
+    }
+
+    void VerifyBCTexture(const CopyConfig& config, wgpu::Texture bcTexture) {
         wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest();
 
         wgpu::Extent3D virtualSizeAtLevel = GetVirtualSizeAtLevel(config);
@@ -221,7 +227,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
         noPaddingExtent3D.depth = 1u;
 
         std::vector<RGBA8> expectedData =
-            GetExpectedData(config.textureDescriptor.format, virtualSizeAtLevel);
+            GetExpectedData(config.textureDescriptor.format, noPaddingExtent3D);
 
         wgpu::Origin3D firstLayerCopyOrigin = {config.copyOrigin3D.x, config.copyOrigin3D.y, 0};
         for (uint32_t layer = config.copyOrigin3D.z;
@@ -1067,3 +1073,102 @@ DAWN_INSTANTIATE_TEST(CompressedTextureBCFormatTest,
                       OpenGLBackend(),
                       VulkanBackend(),
                       VulkanBackend({"use_temporary_buffer_in_texture_to_texture_copy"}));
+
+class CompressedTextureWriteTextureTest : public CompressedTextureBCFormatTest {
+  protected:
+    void SetUp() override {
+        CompressedTextureBCFormatTest::SetUp();
+        DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+    }
+
+    // Write the compressed texture data into the destination texture as is specified in copyConfig.
+    void WriteToCompressedTexture(wgpu::Texture bcCompressedTexture, const CopyConfig& copyConfig) {
+        ASSERT(IsBCFormatSupported());
+
+        std::vector<uint8_t> data = UploadData(copyConfig);
+
+        wgpu::TextureDataLayout textureDataLayout = utils::CreateTextureDataLayout(
+            copyConfig.bufferOffset, copyConfig.bytesPerRowAlignment, copyConfig.rowsPerImage);
+
+        wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
+            bcCompressedTexture, copyConfig.viewMipmapLevel, copyConfig.copyOrigin3D);
+
+        queue.WriteTexture(&textureCopyView, data.data(), data.size(), &textureDataLayout,
+                           &copyConfig.copyExtent3D);
+    }
+
+    // Run the tests that write pre-prepared BC format data into a BC texture and verifies if we
+    // can render correctly with the pixel values sampled from the BC texture.
+    void TestWriteRegionIntoBCFormatTextures(const CopyConfig& config) {
+        ASSERT(IsBCFormatSupported());
+
+        wgpu::Texture bcTexture = device.CreateTexture(&config.textureDescriptor);
+        WriteToCompressedTexture(bcTexture, config);
+
+        VerifyBCTexture(config, bcTexture);
+    }
+};
+
+// Test WriteTexture to a 2D texture with all parameters non-default
+// with BC formats.
+TEST_P(CompressedTextureWriteTextureTest, Basic) {
+    CopyConfig config;
+    config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
+    config.textureDescriptor.size = {20, 24, 1};
+
+    config.copyOrigin3D = {4, 8, 0};
+    config.copyExtent3D = {12, 16, 1};
+    config.bytesPerRowAlignment = 511;
+    config.rowsPerImage = 20;
+
+    for (wgpu::TextureFormat format : kBCFormats) {
+        config.textureDescriptor.format = format;
+        TestWriteRegionIntoBCFormatTextures(config);
+    }
+}
+
+// Test writing to multiple 2D texture array layers with BC formats.
+TEST_P(CompressedTextureWriteTextureTest, WriteMultiple2DArrayLayers) {
+    CopyConfig config;
+    config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
+    config.textureDescriptor.size = {20, 24, 9};
+
+    config.copyOrigin3D = {4, 8, 3};
+    config.copyExtent3D = {12, 16, 6};
+    config.bytesPerRowAlignment = 511;
+    config.rowsPerImage = 20;
+
+    for (wgpu::TextureFormat format : kBCFormats) {
+        config.textureDescriptor.format = format;
+        TestWriteRegionIntoBCFormatTextures(config);
+    }
+}
+
+// Test BC format write textures where the physical size of the destination
+// subresource is different from its virtual size.
+TEST_P(CompressedTextureWriteTextureTest,
+       WriteIntoSubresourceWithPhysicalSizeNotEqualToVirtualSize) {
+    // Texture virtual size at mipLevel 2 will be {15, 15, 1} while the physical
+    // size will be {16, 16, 1}.
+    // Setting copyExtent.width or copyExtent.height to 16 fits in
+    // the texture physical size, but doesn't fit in the virtual size.
+    for (unsigned int w : {12, 16}) {
+        for (unsigned int h : {12, 16}) {
+            for (wgpu::TextureFormat format : kBCFormats) {
+                CopyConfig config;
+                config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
+                config.textureDescriptor.size = {60, 60, 1};
+                config.textureDescriptor.mipLevelCount = 4;
+                config.viewMipmapLevel = 2;
+
+                config.copyOrigin3D = {0, 0, 0};
+                config.copyExtent3D = {w, h, 1};
+                config.bytesPerRowAlignment = 256;
+                config.textureDescriptor.format = format;
+                TestWriteRegionIntoBCFormatTextures(config);
+            }
+        }
+    }
+}
+
+DAWN_INSTANTIATE_TEST(CompressedTextureWriteTextureTest, MetalBackend());

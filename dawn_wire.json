@@ -58,7 +58,7 @@
         "queue write texture internal": [
             {"name": "queue id", "type": "ObjectId" },
             {"name": "destination", "type": "texture copy view", "annotation": "const*"},
-            {"name": "data", "type": "uint8_t", "annotation": "const*"},
+            {"name": "data", "type": "uint8_t", "annotation": "const*", "length": "data size"},
             {"name": "data size", "type": "size_t"},
             {"name": "data layout", "type": "texture data layout", "annotation": "const*"},
             {"name": "writeSize", "type": "extent 3D", "annotation": "const*"}

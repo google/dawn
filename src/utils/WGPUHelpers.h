@@ -55,6 +55,9 @@ namespace utils {
     wgpu::TextureCopyView CreateTextureCopyView(wgpu::Texture texture,
                                                 uint32_t level,
                                                 wgpu::Origin3D origin);
+    wgpu::TextureDataLayout CreateTextureDataLayout(uint64_t offset,
+                                                    uint32_t bytesPerRow,
+                                                    uint32_t rowsPerImage);
 
     struct ComboRenderPassDescriptor : public wgpu::RenderPassDescriptor {
       public:
@@ -130,7 +133,7 @@ namespace utils {
         const wgpu::BindGroupLayout& layout,
         std::initializer_list<BindingInitializationHelper> entriesInitializer);
 
-    struct BufferTextureCopyLayout {
+    struct TextureDataCopyLayout {
         uint64_t byteLength;
         uint64_t texelBlockCount;
         uint32_t bytesPerRow;
@@ -146,7 +149,7 @@ namespace utils {
                                          uint32_t bytesPerRow,
                                          uint32_t rowsPerImage,
                                          uint32_t copyArrayLayerCount);
-    BufferTextureCopyLayout GetBufferTextureCopyLayoutForTexture2DAtLevel(
+    TextureDataCopyLayout GetTextureDataCopyLayoutForTexture2DAtLevel(
         wgpu::TextureFormat format,
         wgpu::Extent3D textureSizeAtLevel0,
         uint32_t mipmapLevel,

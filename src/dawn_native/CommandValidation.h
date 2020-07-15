@@ -40,6 +40,11 @@ namespace dawn_native {
 
     MaybeError ValidateTimestampQuery(QuerySetBase* querySet, uint32_t queryIndex);
 
+    uint32_t ComputeRequiredBytesInCopy(const Format& textureFormat,
+                                        const Extent3D& copySize,
+                                        uint32_t bytesPerRow,
+                                        uint32_t rowsPerImage);
+
     MaybeError ValidateLinearTextureData(const TextureDataLayout& layout,
                                          uint64_t byteSize,
                                          const Format& format,

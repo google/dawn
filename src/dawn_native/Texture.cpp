@@ -541,6 +541,19 @@ namespace dawn_native {
         return extent;
     }
 
+    Extent3D TextureBase::ClampToMipLevelVirtualSize(uint32_t level,
+                                                     const Origin3D& origin,
+                                                     const Extent3D& extent) const {
+        const Extent3D virtualSizeAtLevel = GetMipLevelVirtualSize(level);
+        uint32_t clampedCopyExtentWidth = (origin.x + extent.width > virtualSizeAtLevel.width)
+                                              ? (virtualSizeAtLevel.width - origin.x)
+                                              : extent.width;
+        uint32_t clampedCopyExtentHeight = (origin.y + extent.height > virtualSizeAtLevel.height)
+                                               ? (virtualSizeAtLevel.height - origin.y)
+                                               : extent.height;
+        return {clampedCopyExtentWidth, clampedCopyExtentHeight, extent.depth};
+    }
+
     TextureViewBase* TextureBase::CreateView(const TextureViewDescriptor* descriptor) {
         return GetDevice()->CreateTextureView(this, descriptor);
     }

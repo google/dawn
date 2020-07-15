@@ -26,6 +26,7 @@
 #include "dawn_native/metal/RenderPipelineMTL.h"
 #include "dawn_native/metal/SamplerMTL.h"
 #include "dawn_native/metal/TextureMTL.h"
+#include "dawn_native/metal/UtilsMetal.h"
 
 namespace dawn_native { namespace metal {
 
@@ -308,149 +309,6 @@ namespace dawn_native { namespace metal {
                 dirtyStages ^= wgpu::ShaderStage::Compute;
             }
         };
-
-        struct TextureBufferCopySplit {
-            static constexpr uint32_t kMaxTextureBufferCopyRegions = 3;
-
-            struct CopyInfo {
-                NSUInteger bufferOffset;
-                NSUInteger bytesPerRow;
-                NSUInteger bytesPerImage;
-                Origin3D textureOrigin;
-                Extent3D copyExtent;
-            };
-
-            uint32_t count = 0;
-            std::array<CopyInfo, kMaxTextureBufferCopyRegions> copies;
-        };
-
-        TextureBufferCopySplit ComputeTextureBufferCopySplit(wgpu::TextureDimension dimension,
-                                                             Origin3D origin,
-                                                             Extent3D copyExtent,
-                                                             Format textureFormat,
-                                                             Extent3D virtualSizeAtLevel,
-                                                             uint64_t bufferSize,
-                                                             uint64_t bufferOffset,
-                                                             uint32_t bytesPerRow,
-                                                             uint32_t rowsPerImage) {
-            TextureBufferCopySplit copy;
-
-            // When copying textures from/to an unpacked buffer, the Metal validation layer doesn't
-            // compute the correct range when checking if the buffer is big enough to contain the
-            // data for the whole copy. Instead of looking at the position of the last texel in the
-            // buffer, it computes the volume of the 3D box with bytesPerRow * (rowsPerImage /
-            // format.blockHeight) * copySize.depth. For example considering the pixel buffer below
-            // where in memory, each row data (D) of the texture is followed by some padding data
-            // (P):
-            //     |DDDDDDD|PP|
-            //     |DDDDDDD|PP|
-            //     |DDDDDDD|PP|
-            //     |DDDDDDD|PP|
-            //     |DDDDDDA|PP|
-            // The last pixel read will be A, but the driver will think it is the whole last padding
-            // row, causing it to generate an error when the pixel buffer is just big enough.
-
-            // We work around this limitation by detecting when Metal would complain and copy the
-            // last image and row separately using tight sourceBytesPerRow or sourceBytesPerImage.
-            uint32_t dataRowsPerImage = rowsPerImage / textureFormat.blockHeight;
-            uint32_t bytesPerImage = bytesPerRow * dataRowsPerImage;
-
-            // Metal validation layer requires that if the texture's pixel format is a compressed
-            // format, the sourceSize must be a multiple of the pixel format's block size or be
-            // clamped to the edge of the texture if the block extends outside the bounds of a
-            // texture.
-            uint32_t clampedCopyExtentWidth =
-                (origin.x + copyExtent.width > virtualSizeAtLevel.width)
-                    ? (virtualSizeAtLevel.width - origin.x)
-                    : copyExtent.width;
-            uint32_t clampedCopyExtentHeight =
-                (origin.y + copyExtent.height > virtualSizeAtLevel.height)
-                    ? (virtualSizeAtLevel.height - origin.y)
-                    : copyExtent.height;
-
-            ASSERT(dimension == wgpu::TextureDimension::e2D);
-
-            // Check whether buffer size is big enough.
-            bool needWorkaround = bufferSize - bufferOffset < bytesPerImage * copyExtent.depth;
-            if (!needWorkaround) {
-                copy.count = 1;
-                copy.copies[0].bufferOffset = bufferOffset;
-                copy.copies[0].bytesPerRow = bytesPerRow;
-                copy.copies[0].bytesPerImage = bytesPerImage;
-                copy.copies[0].textureOrigin = origin;
-                copy.copies[0].copyExtent = {clampedCopyExtentWidth, clampedCopyExtentHeight,
-                                             copyExtent.depth};
-                return copy;
-            }
-
-            uint64_t currentOffset = bufferOffset;
-
-            // Doing all the copy except the last image.
-            if (copyExtent.depth > 1) {
-                copy.copies[copy.count].bufferOffset = currentOffset;
-                copy.copies[copy.count].bytesPerRow = bytesPerRow;
-                copy.copies[copy.count].bytesPerImage = bytesPerImage;
-                copy.copies[copy.count].textureOrigin = origin;
-                copy.copies[copy.count].copyExtent = {
-                    clampedCopyExtentWidth, clampedCopyExtentHeight, copyExtent.depth - 1};
-
-                ++copy.count;
-
-                // Update offset to copy to the last image.
-                currentOffset += (copyExtent.depth - 1) * bytesPerImage;
-            }
-
-            // Doing all the copy in last image except the last row.
-            uint32_t copyBlockRowCount = copyExtent.height / textureFormat.blockHeight;
-            if (copyBlockRowCount > 1) {
-                copy.copies[copy.count].bufferOffset = currentOffset;
-                copy.copies[copy.count].bytesPerRow = bytesPerRow;
-                copy.copies[copy.count].bytesPerImage = bytesPerRow * (copyBlockRowCount - 1);
-                copy.copies[copy.count].textureOrigin = {origin.x, origin.y,
-                                                         origin.z + copyExtent.depth - 1};
-
-                ASSERT(copyExtent.height - textureFormat.blockHeight < virtualSizeAtLevel.height);
-                copy.copies[copy.count].copyExtent = {
-                    clampedCopyExtentWidth, copyExtent.height - textureFormat.blockHeight, 1};
-
-                ++copy.count;
-
-                // Update offset to copy to the last row.
-                currentOffset += (copyBlockRowCount - 1) * bytesPerRow;
-            }
-
-            // Doing the last row copy with the exact number of bytes in last row.
-            // Workaround this issue in a way just like the copy to a 1D texture.
-            uint32_t lastRowDataSize =
-                (copyExtent.width / textureFormat.blockWidth) * textureFormat.blockByteSize;
-            uint32_t lastRowCopyExtentHeight =
-                textureFormat.blockHeight + clampedCopyExtentHeight - copyExtent.height;
-            ASSERT(lastRowCopyExtentHeight <= textureFormat.blockHeight);
-
-            copy.copies[copy.count].bufferOffset = currentOffset;
-            copy.copies[copy.count].bytesPerRow = lastRowDataSize;
-            copy.copies[copy.count].bytesPerImage = lastRowDataSize;
-            copy.copies[copy.count].textureOrigin = {
-                origin.x, origin.y + copyExtent.height - textureFormat.blockHeight,
-                origin.z + copyExtent.depth - 1};
-            copy.copies[copy.count].copyExtent = {clampedCopyExtentWidth, lastRowCopyExtentHeight,
-                                                  1};
-            ++copy.count;
-
-            return copy;
-        }
-
-        void EnsureDestinationTextureInitialized(Texture* texture,
-                                                 const TextureCopy& dst,
-                                                 const Extent3D& size) {
-            ASSERT(texture == dst.texture.Get());
-            SubresourceRange range = GetSubresourcesAffectedByCopy(dst, size);
-            if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), size, dst.mipLevel)) {
-                texture->SetIsSubresourceContentInitialized(true, range);
-            } else {
-                texture->EnsureSubresourceContentInitialized(range);
-            }
-        }
 
         // Keeps track of the dirty bind groups so they can be lazily applied when we know the
         // pipeline state.
@@ -745,13 +603,9 @@ namespace dawn_native { namespace metal {
 
                     EnsureDestinationTextureInitialized(texture, copy->destination, copy->copySize);
 
-                    const Extent3D virtualSizeAtLevel =
-                        texture->GetMipLevelVirtualSize(dst.mipLevel);
-
                     TextureBufferCopySplit splitCopies = ComputeTextureBufferCopySplit(
-                        texture->GetDimension(), dst.origin, copySize, texture->GetFormat(),
-                        virtualSizeAtLevel, buffer->GetSize(), src.offset, src.bytesPerRow,
-                        src.rowsPerImage);
+                        texture, dst.mipLevel, dst.origin, copySize, buffer->GetSize(), src.offset,
+                        src.bytesPerRow, src.rowsPerImage);
 
                     for (uint32_t i = 0; i < splitCopies.count; ++i) {
                         const TextureBufferCopySplit::CopyInfo& copyInfo = splitCopies.copies[i];
@@ -793,11 +647,9 @@ namespace dawn_native { namespace metal {
                     texture->EnsureSubresourceContentInitialized(
                         GetSubresourcesAffectedByCopy(src, copySize));
 
-                    Extent3D virtualSizeAtLevel = texture->GetMipLevelVirtualSize(src.mipLevel);
                     TextureBufferCopySplit splitCopies = ComputeTextureBufferCopySplit(
-                        texture->GetDimension(), src.origin, copySize, texture->GetFormat(),
-                        virtualSizeAtLevel, buffer->GetSize(), dst.offset, dst.bytesPerRow,
-                        dst.rowsPerImage);
+                        texture, src.mipLevel, src.origin, copySize, buffer->GetSize(), dst.offset,
+                        dst.bytesPerRow, dst.rowsPerImage);
 
                     for (uint32_t i = 0; i < splitCopies.count; ++i) {
                         const TextureBufferCopySplit::CopyInfo& copyInfo = splitCopies.copies[i];

@@ -269,9 +269,7 @@ namespace utils {
                                               uint32_t rowsPerImage) {
         wgpu::BufferCopyView bufferCopyView = {};
         bufferCopyView.buffer = buffer;
-        bufferCopyView.layout.offset = offset;
-        bufferCopyView.layout.bytesPerRow = bytesPerRow;
-        bufferCopyView.layout.rowsPerImage = rowsPerImage;
+        bufferCopyView.layout = CreateTextureDataLayout(offset, bytesPerRow, rowsPerImage);
 
         return bufferCopyView;
     }
@@ -285,6 +283,17 @@ namespace utils {
         textureCopyView.origin = origin;
 
         return textureCopyView;
+    }
+
+    wgpu::TextureDataLayout CreateTextureDataLayout(uint64_t offset,
+                                                    uint32_t bytesPerRow,
+                                                    uint32_t rowsPerImage) {
+        wgpu::TextureDataLayout textureDataLayout;
+        textureDataLayout.offset = offset;
+        textureDataLayout.bytesPerRow = bytesPerRow;
+        textureDataLayout.rowsPerImage = rowsPerImage;
+
+        return textureDataLayout;
     }
 
     wgpu::SamplerDescriptor GetDefaultSamplerDescriptor() {
@@ -391,12 +400,12 @@ namespace utils {
     }
 
     // TODO(jiawei.shao@intel.com): support compressed texture formats
-    BufferTextureCopyLayout GetBufferTextureCopyLayoutForTexture2DAtLevel(
+    TextureDataCopyLayout GetTextureDataCopyLayoutForTexture2DAtLevel(
         wgpu::TextureFormat format,
         wgpu::Extent3D textureSizeAtLevel0,
         uint32_t mipmapLevel,
         uint32_t rowsPerImage) {
-        BufferTextureCopyLayout layout;
+        TextureDataCopyLayout layout;
 
         layout.mipSize = {textureSizeAtLevel0.width >> mipmapLevel,
                           textureSizeAtLevel0.height >> mipmapLevel, textureSizeAtLevel0.depth};

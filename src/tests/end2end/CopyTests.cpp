@@ -37,7 +37,7 @@ class CopyTests : public DawnTest {
         uint32_t rowsPerImage;
     };
 
-    static std::vector<RGBA8> GetExpectedTextureData(const utils::BufferTextureCopyLayout& layout) {
+    static std::vector<RGBA8> GetExpectedTextureData(const utils::TextureDataCopyLayout& layout) {
         std::vector<RGBA8> textureData(layout.texelBlockCount);
         for (uint32_t layer = 0; layer < layout.mipSize.depth; ++layer) {
             const uint32_t texelIndexOffsetPerSlice = layout.texelBlocksPerImage * layer;
@@ -97,8 +97,8 @@ class CopyTests_T2B : public CopyTests {
         descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
         wgpu::Texture texture = device.CreateTexture(&descriptor);
 
-        const utils::BufferTextureCopyLayout copyLayout =
-            utils::GetBufferTextureCopyLayoutForTexture2DAtLevel(
+        const utils::TextureDataCopyLayout copyLayout =
+            utils::GetTextureDataCopyLayoutForTexture2DAtLevel(
                 kTextureFormat, textureSpec.textureSize, textureSpec.level,
                 bufferSpec.rowsPerImage);
 
@@ -205,8 +205,8 @@ class CopyTests_B2T : public CopyTests {
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
-        const utils::BufferTextureCopyLayout copyLayout =
-            utils::GetBufferTextureCopyLayoutForTexture2DAtLevel(
+        const utils::TextureDataCopyLayout copyLayout =
+            utils::GetTextureDataCopyLayoutForTexture2DAtLevel(
                 kTextureFormat, textureSpec.textureSize, textureSpec.level,
                 bufferSpec.rowsPerImage);
 
@@ -281,8 +281,8 @@ class CopyTests_T2T : public CopyTests {
 
         // Create an upload buffer and use it to populate the current slice of the texture in
         // `level` mip level
-        const utils::BufferTextureCopyLayout copyLayout =
-            utils::GetBufferTextureCopyLayoutForTexture2DAtLevel(
+        const utils::TextureDataCopyLayout copyLayout =
+            utils::GetTextureDataCopyLayoutForTexture2DAtLevel(
                 kTextureFormat,
                 {srcSpec.textureSize.width, srcSpec.textureSize.height, copySize.depth},
                 srcSpec.level, 0);

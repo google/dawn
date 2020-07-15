@@ -91,6 +91,9 @@ namespace dawn_native {
         // required to be a multiple of the block size and used in texture sampling.
         Extent3D GetMipLevelPhysicalSize(uint32_t level) const;
         Extent3D GetMipLevelVirtualSize(uint32_t level) const;
+        Extent3D ClampToMipLevelVirtualSize(uint32_t level,
+                                            const Origin3D& origin,
+                                            const Extent3D& extent) const;
 
         // Dawn API
         TextureViewBase* CreateView(const TextureViewDescriptor* descriptor);
