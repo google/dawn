@@ -331,7 +331,7 @@ source_set("dawn_end2end_tests_sources") {
 
   if (dawn_enable_metal) {
     sources += [ "end2end/IOSurfaceWrappingTests.cpp" ]
-    libs += [ "IOSurface.framework" ]
+    frameworks = [ "IOSurface.framework" ]
   }
 
   if (dawn_enable_opengl) {
@@ -484,7 +484,7 @@ test("dawn_perf_tests") {
   }
 
   if (dawn_enable_metal) {
-    libs += [ "IOSurface.framework" ]
+    frameworks = [ "IOSurface.framework" ]
   }
 
   if (dawn_enable_opengl) {

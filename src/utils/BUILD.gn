@@ -87,6 +87,7 @@ static_library("dawn_utils") {
     "${dawn_shaderc_dir}:libshaderc",
   ]
   libs = []
+  frameworks = []
 
   if (is_win) {
     sources += [ "WindowsTimer.cpp" ]
@@ -96,7 +97,7 @@ static_library("dawn_utils") {
       "ObjCUtils.h",
       "ObjCUtils.mm",
     ]
-    libs += [ "QuartzCore.framework" ]
+    frameworks += [ "QuartzCore.framework" ]
   } else {
     sources += [ "PosixTimer.cpp" ]
   }
@@ -110,7 +111,7 @@ static_library("dawn_utils") {
 
     if (dawn_enable_metal) {
       sources += [ "GLFWUtils_metal.mm" ]
-      libs += [ "Metal.framework" ]
+      frameworks += [ "Metal.framework" ]
     }
   }
 
@@ -139,6 +140,7 @@ if (dawn_standalone) {
       "${dawn_root}/src/dawn_native",
     ]
     libs = []
+    frameworks = []
 
     if (dawn_enable_d3d12) {
       sources += [ "D3D12Binding.cpp" ]
@@ -146,7 +148,7 @@ if (dawn_standalone) {
 
     if (dawn_enable_metal) {
       sources += [ "MetalBinding.mm" ]
-      libs += [
+      frameworks += [
         "Metal.framework",
         "QuartzCore.framework",
       ]

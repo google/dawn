@@ -70,10 +70,7 @@ config("dawn_native_internal") {
 
 config("dawn_native_weak_framework") {
   if (is_mac && dawn_enable_metal) {
-    ldflags = [
-      "-weak_framework",
-      "Metal",
-    ]
+    weak_frameworks = [ "Metal.framework" ]
   }
 }
 
@@ -358,7 +355,7 @@ source_set("dawn_native_sources") {
   }
 
   if (dawn_enable_metal) {
-    libs += [
+    frameworks = [
       "Cocoa.framework",
       "IOKit.framework",
       "IOSurface.framework",

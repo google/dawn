@@ -134,7 +134,7 @@ static_library("glfw") {
       "${glfw_dir}/src/nsgl_context.h",
       "${glfw_dir}/src/nsgl_context.m",
     ]
-    libs += [
+    frameworks = [
       "Cocoa.framework",
       "IOKit.framework",
       "CoreFoundation.framework",
