@@ -23,14 +23,13 @@
         "defines": [],
         "structs": {
             "WGPUChainedStruct": [
-                "nextInChain",
+                "next",
                 "sType"
             ],
             {% for type in by_category["structure"] if type.javascript %}
                 "{{as_cType(type.name)}}": [
                     {% if type.chained %}
-                        "nextInChain",
-                        "sType"
+                        "chain"
                     {%- elif type.extensible %}
                         "nextInChain"
                     {%- endif %}
