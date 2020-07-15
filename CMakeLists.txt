@@ -92,7 +92,7 @@ if(${TINT_BUILD_DOCS})
   else()
     message("Doxygen not found. Skipping documentation")
   endif(DOXYGEN_FOUND)
-endif(TINT_BUILD_DOCS)
+endif()
 
 if(MSVC)
   # We don't want to have to copy the C Runtime DLL everywhere the executable

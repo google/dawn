@@ -22,6 +22,7 @@
 #include "src/ast/literal.h"
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/type/struct_type.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/scope_stack.h"
 #include "src/writer/msl/namer.h"
@@ -42,6 +43,16 @@ class GeneratorImpl : public TextGenerator {
   /// @param module the module to generate
   /// @returns true on successful generation; false otherwise
   bool Generate(const ast::Module& module);
+
+  /// Calculates the alignment size of the given |type|. This returns 0
+  /// for pointers as the size is unknown.
+  /// @param type the type to calculate the alignment size for
+  /// @returns the number of bytes used to align |type| or 0 on error
+  uint32_t calculate_alignment_size(ast::type::Type* type);
+  /// Calculates the largest alignment seen within a struct
+  /// @param type the struct to calculate
+  /// @returns the largest alignment value
+  uint32_t calculate_largest_alignment(ast::type::StructType* type);
 
   /// Handles generating an alias
   /// @param alias the alias to generate

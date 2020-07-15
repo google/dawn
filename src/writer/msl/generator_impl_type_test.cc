@@ -176,8 +176,7 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Pointer) {
   EXPECT_EQ(g.result(), "float*");
 }
 
-// TODO(dsinclair): How to translate offsets?
-TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct) {
+TEST_F(MslGeneratorImplTest, EmitType_Struct) {
   ast::type::I32Type i32;
   ast::type::F32Type f32;
 
@@ -200,6 +199,42 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct) {
   EXPECT_EQ(g.result(), R"(struct {
   int a;
   float b;
+})");
+}
+
+TEST_F(MslGeneratorImplTest, EmitType_Struct_InjectPadding) {
+  ast::type::I32Type i32;
+  ast::type::F32Type f32;
+
+  ast::StructMemberDecorationList decos;
+  decos.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(4));
+
+  ast::StructMemberList members;
+  members.push_back(
+      std::make_unique<ast::StructMember>("a", &i32, std::move(decos)));
+
+  decos.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(32));
+  members.push_back(
+      std::make_unique<ast::StructMember>("b", &f32, std::move(decos)));
+
+  decos.push_back(std::make_unique<ast::StructMemberOffsetDecoration>(128));
+  members.push_back(
+      std::make_unique<ast::StructMember>("c", &f32, std::move(decos)));
+
+  auto str = std::make_unique<ast::Struct>();
+  str->set_members(std::move(members));
+
+  ast::type::StructType s(std::move(str));
+
+  GeneratorImpl g;
+  ASSERT_TRUE(g.EmitType(&s, "")) << g.error();
+  EXPECT_EQ(g.result(), R"(struct {
+  int8_t pad_0[4];
+  int a;
+  int8_t pad_1[24];
+  float b;
+  int8_t pad_2[92];
+  float c;
 })");
 }
 
