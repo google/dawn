@@ -69,4 +69,7 @@ namespace dawn_native { namespace d3d12 {
         return reinterpret_cast<WGPUTexture>(texture.Detach());
     }
 
+    AdapterDiscoveryOptions::AdapterDiscoveryOptions(ComPtr<IDXGIAdapter> adapter)
+        : AdapterDiscoveryOptionsBase(WGPUBackendType_D3D12), dxgiAdapter(std::move(adapter)) {
+    }
 }}  // namespace dawn_native::d3d12

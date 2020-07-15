@@ -18,6 +18,7 @@
 #include <dawn/dawn_wsi.h>
 #include <dawn_native/DawnNative.h>
 
+#include <DXGI1_4.h>
 #include <windows.h>
 #include <wrl/client.h>
 
@@ -51,6 +52,12 @@ namespace dawn_native { namespace d3d12 {
     // Note: SharedHandle must be a handle to a texture object.
     DAWN_NATIVE_EXPORT WGPUTexture
     WrapSharedHandle(WGPUDevice device, const ExternalImageDescriptorDXGISharedHandle* descriptor);
+
+    struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptions : public AdapterDiscoveryOptionsBase {
+        AdapterDiscoveryOptions(Microsoft::WRL::ComPtr<IDXGIAdapter> adapter);
+
+        Microsoft::WRL::ComPtr<IDXGIAdapter> dxgiAdapter;
+    };
 
 }}  // namespace dawn_native::d3d12
 
