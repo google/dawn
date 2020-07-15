@@ -926,7 +926,7 @@ namespace dawn_native { namespace d3d12 {
                 Extent3D copySize = GetMipLevelVirtualSize(level);
 
                 uint32_t rowsPerImage = GetHeight();
-                TextureCopySplit copySplit =
+                Texture2DCopySplit copySplit =
                     ComputeTextureCopySplit({0, 0, 0}, copySize, GetFormat(),
                                             uploadHandle.startOffset, bytesPerRow, rowsPerImage);
 
@@ -942,7 +942,7 @@ namespace dawn_native { namespace d3d12 {
                     D3D12_TEXTURE_COPY_LOCATION textureLocation =
                         ComputeTextureCopyLocationForTexture(this, level, layer);
                     for (uint32_t i = 0; i < copySplit.count; ++i) {
-                        TextureCopySplit::CopyInfo& info = copySplit.copies[i];
+                        Texture2DCopySplit::CopyInfo& info = copySplit.copies[i];
 
                         D3D12_TEXTURE_COPY_LOCATION bufferLocation =
                             ComputeBufferLocationForCopyTextureRegion(
