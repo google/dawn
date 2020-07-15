@@ -41,9 +41,7 @@ config("khronos_headers_public") {
 }
 
 source_set("khronos_platform") {
-  sources = [
-    "KHR/khrplatform.h",
-  ]
+  sources = [ "KHR/khrplatform.h" ]
 
   public_configs = [ ":khronos_headers_public" ]
 }

@@ -135,9 +135,7 @@ template("generator_lib_action") {
   # outputs are what's expected and write a depfile for Ninja.
   action(_json_tarball_target) {
     script = invoker.script
-    outputs = [
-      _json_tarball,
-    ]
+    outputs = [ _json_tarball ]
     depfile = _json_tarball_depfile
     args = _generator_args
     if (defined(invoker.deps)) {
@@ -153,12 +151,8 @@ template("generator_lib_action") {
       rebase_path(_gen_dir, root_build_dir),
     ]
 
-    deps = [
-      ":${_json_tarball_target}",
-    ]
-    inputs = [
-      _json_tarball,
-    ]
+    deps = [ ":${_json_tarball_target}" ]
+    inputs = [ _json_tarball ]
 
     # The expected output list is relative to the gen_dir but action
     # target outputs are from the root dir so we need to rebase them.

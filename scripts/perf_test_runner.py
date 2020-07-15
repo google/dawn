@@ -22,7 +22,8 @@ import sys
 import os
 import re
 
-base_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+base_path = os.path.abspath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
 # Look for a [Rr]elease build.
 perftests_paths = glob.glob('out/*elease*')
@@ -34,6 +35,7 @@ if sys.platform == 'win32':
     binary_name += '.exe'
 
 scores = []
+
 
 def mean(data):
     """Return the sample arithmetic mean of data."""
@@ -102,6 +104,7 @@ if len(sys.argv) >= 2:
 print('Using test executable: ' + perftests_path)
 print('Test name: ' + test_name)
 
+
 def get_results(metric, extra_args=[]):
     process = subprocess.Popen(
         [perftests_path, '--gtest_filter=' + test_name] + extra_args,
@@ -139,11 +142,14 @@ for experiment in range(max_experiments):
 
         if (len(scores) > 1):
             sys.stdout.write(", mean: %.2f" % mean(scores))
-            sys.stdout.write(", variation: %.2f%%" % (coefficient_of_variation(scores) * 100.0))
+            sys.stdout.write(", variation: %.2f%%" %
+                             (coefficient_of_variation(scores) * 100.0))
 
         if (len(scores) > 7):
             truncation_n = len(scores) >> 3
-            sys.stdout.write(", truncated mean: %.2f" % truncated_mean(scores, truncation_n))
-            sys.stdout.write(", variation: %.2f%%" % (truncated_cov(scores, truncation_n) * 100.0))
+            sys.stdout.write(", truncated mean: %.2f" %
+                             truncated_mean(scores, truncation_n))
+            sys.stdout.write(", variation: %.2f%%" %
+                             (truncated_cov(scores, truncation_n) * 100.0))
 
         print("")
