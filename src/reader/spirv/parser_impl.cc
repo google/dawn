@@ -487,16 +487,22 @@ bool ParserImpl::RegisterUserAndStructMemberNames() {
   // Register names from OpName and OpMemberName
   for (const auto& inst : module_->debugs2()) {
     switch (inst.opcode()) {
-      case SpvOpName:
-        namer_.SuggestSanitizedName(inst.GetSingleWordInOperand(0),
-                                    inst.GetInOperand(1).AsString());
-
+      case SpvOpName: {
+        const auto name = inst.GetInOperand(1).AsString();
+        if (!name.empty()) {
+          namer_.SuggestSanitizedName(inst.GetSingleWordInOperand(0), name);
+        }
         break;
-      case SpvOpMemberName:
-        namer_.SuggestSanitizedMemberName(inst.GetSingleWordInOperand(0),
-                                          inst.GetSingleWordInOperand(1),
-                                          inst.GetInOperand(2).AsString());
+      }
+      case SpvOpMemberName: {
+        const auto name = inst.GetInOperand(2).AsString();
+        if (!name.empty()) {
+          namer_.SuggestSanitizedMemberName(inst.GetSingleWordInOperand(0),
+                                            inst.GetSingleWordInOperand(1),
+                                            name);
+        }
         break;
+      }
       default:
         break;
     }

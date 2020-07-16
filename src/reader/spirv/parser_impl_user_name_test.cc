@@ -36,6 +36,15 @@ TEST_F(SpvParserTest, UserName_RespectOpName) {
   EXPECT_THAT(p->namer().GetName(1), Eq("the_void_type"));
 }
 
+TEST_F(SpvParserTest, UserName_IgnoreEmptyName) {
+  auto* p = parser(test::Assemble(R"(
+     OpName %1 ""
+     %1 = OpTypeVoid
+  )"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_FALSE(p->namer().HasName(1));
+}
+
 TEST_F(SpvParserTest, UserName_DistinguishDuplicateSuggestion) {
   auto* p = parser(test::Assemble(R"(
      OpName %1 "vanilla"
@@ -60,6 +69,16 @@ TEST_F(SpvParserTest, UserName_RespectOpMemberName) {
   EXPECT_THAT(p->namer().GetMemberName(3, 0), Eq("strawberry"));
   EXPECT_THAT(p->namer().GetMemberName(3, 1), Eq("vanilla"));
   EXPECT_THAT(p->namer().GetMemberName(3, 2), Eq("chocolate"));
+}
+
+TEST_F(SpvParserTest, UserName_IgnoreEmptyMemberName) {
+  auto* p = parser(test::Assemble(R"(
+     OpMemberName %3 0 ""
+     %2 = OpTypeInt 32 0
+     %3 = OpTypeStruct %2
+  )"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_THAT(p->namer().GetMemberName(3, 0), Eq("field0"));
 }
 
 TEST_F(SpvParserTest, UserName_SynthesizeMemberNames) {
