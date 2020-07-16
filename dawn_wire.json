@@ -14,11 +14,16 @@
         "See the License for the specific language governing permissions and",
         "limitations under the License."
     ],
+    "_todos": [
+        "Remove usage of size_t because it is not network transparent"
+    ],
     "commands": {
         "buffer map async": [
             { "name": "buffer id", "type": "ObjectId" },
             { "name": "request serial", "type": "uint32_t" },
-            { "name": "is write", "type": "bool" },
+            { "name": "mode", "type": "map mode" },
+            { "name": "offset", "type": "size_t"},
+            { "name": "size", "type": "size_t"},
             { "name": "handle create info length", "type": "uint64_t" },
             { "name": "handle create info", "type": "uint8_t", "annotation": "const*", "length": "handle create info length", "skip_serialize": true}
         ],

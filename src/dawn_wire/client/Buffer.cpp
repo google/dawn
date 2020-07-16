@@ -21,7 +21,10 @@ namespace dawn_wire { namespace client {
 
     namespace {
         template <typename Handle>
-        void SerializeBufferMapAsync(const Buffer* buffer, uint32_t serial, Handle* handle) {
+        void SerializeBufferMapAsync(const Buffer* buffer,
+                                     uint32_t serial,
+                                     Handle* handle,
+                                     size_t size) {
             // TODO(enga): Remove the template when Read/Write handles are combined in a tagged
             // pointer.
             constexpr bool isWrite =
@@ -33,9 +36,11 @@ namespace dawn_wire { namespace client {
             BufferMapAsyncCmd cmd;
             cmd.bufferId = buffer->id;
             cmd.requestSerial = serial;
-            cmd.isWrite = isWrite;
+            cmd.mode = isWrite ? WGPUMapMode_Write : WGPUMapMode_Read;
             cmd.handleCreateInfoLength = handleCreateInfoLength;
             cmd.handleCreateInfo = nullptr;
+            cmd.offset = 0;
+            cmd.size = size;
 
             char* writeHandleSpace =
                 buffer->device->GetClient()->SerializeCommand(cmd, handleCreateInfoLength);
@@ -200,7 +205,7 @@ namespace dawn_wire { namespace client {
         // operations are returned by the server so multiple requests may be in flight.
         mRequests[serial] = std::move(request);
 
-        SerializeBufferMapAsync(this, serial, readHandle);
+        SerializeBufferMapAsync(this, serial, readHandle, mSize);
     }
 
     void Buffer::MapWriteAsync(WGPUBufferMapWriteCallback callback, void* userdata) {
@@ -236,7 +241,7 @@ namespace dawn_wire { namespace client {
         // operations are returned by the server so multiple requests may be in flight.
         mRequests[serial] = std::move(request);
 
-        SerializeBufferMapAsync(this, serial, writeHandle);
+        SerializeBufferMapAsync(this, serial, writeHandle, mSize);
     }
 
     void Buffer::MapAsync(WGPUMapModeFlags mode,
