@@ -328,10 +328,7 @@ class DawnTestBase {
 
     // Maps all the buffers and fill ReadbackSlot::mappedData
     void MapSlotsSynchronously();
-    static void SlotMapReadCallback(WGPUBufferMapAsyncStatus status,
-                                    const void* data,
-                                    uint64_t dataLength,
-                                    void* userdata);
+    static void SlotMapCallback(WGPUBufferMapAsyncStatus status, void* userdata);
     size_t mNumPendingMapOperations = 0;
 
     // Reserve space where the data for an expectation can be copied

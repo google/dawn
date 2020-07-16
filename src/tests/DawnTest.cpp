@@ -1015,8 +1015,8 @@ void DawnTestBase::MapSlotsSynchronously() {
     for (size_t i = 0; i < mReadbackSlots.size(); ++i) {
         MapReadUserdata* userdata = new MapReadUserdata{this, i};
 
-        auto& slot = mReadbackSlots[i];
-        slot.buffer.MapReadAsync(SlotMapReadCallback, userdata);
+        const ReadbackSlot& slot = mReadbackSlots[i];
+        slot.buffer.MapAsync(wgpu::MapMode::Read, 0, 0, SlotMapCallback, userdata);
     }
 
     // Busy wait until all map operations are done.
@@ -1026,17 +1026,15 @@ void DawnTestBase::MapSlotsSynchronously() {
 }
 
 // static
-void DawnTestBase::SlotMapReadCallback(WGPUBufferMapAsyncStatus status,
-                                       const void* data,
-                                       uint64_t,
-                                       void* userdata_) {
+void DawnTestBase::SlotMapCallback(WGPUBufferMapAsyncStatus status, void* userdata_) {
     DAWN_ASSERT(status == WGPUBufferMapAsyncStatus_Success);
 
-    auto userdata = static_cast<MapReadUserdata*>(userdata_);
-    userdata->test->mReadbackSlots[userdata->slot].mappedData = data;
-    userdata->test->mNumPendingMapOperations--;
+    std::unique_ptr<MapReadUserdata> userdata(static_cast<MapReadUserdata*>(userdata_));
+    DawnTestBase* test = userdata->test;
+    ReadbackSlot* slot = &test->mReadbackSlots[userdata->slot];
 
-    delete userdata;
+    slot->mappedData = slot->buffer.GetConstMappedRange();
+    test->mNumPendingMapOperations--;
 }
 
 void DawnTestBase::ResolveExpectations() {
