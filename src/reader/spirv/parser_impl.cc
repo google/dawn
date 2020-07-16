@@ -36,6 +36,7 @@
 #include "src/ast/as_expression.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/bool_literal.h"
+#include "src/ast/builtin.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
@@ -280,8 +281,8 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
   auto save = [this, type_id, spirv_type](ast::type::Type* type) {
     if (type != nullptr) {
       id_to_type_[type_id] = type;
+      MaybeGenerateAlias(type_id, spirv_type);
     }
-    MaybeGenerateAlias(type_id, spirv_type);
     return type;
   };
 
@@ -305,7 +306,7 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
     case spvtools::opt::analysis::Type::kStruct:
       return save(ConvertType(type_id, spirv_type->AsStruct()));
     case spvtools::opt::analysis::Type::kPointer:
-      return save(ConvertType(spirv_type->AsPointer()));
+      return save(ConvertType(type_id, spirv_type->AsPointer()));
     case spvtools::opt::analysis::Type::kFunction:
       // Tint doesn't have a Function type.
       // We need to convert the result type and parameter types.
@@ -489,6 +490,7 @@ bool ParserImpl::RegisterUserAndStructMemberNames() {
       case SpvOpName:
         namer_.SuggestSanitizedName(inst.GetSingleWordInOperand(0),
                                     inst.GetInOperand(1).AsString());
+
         break;
       case SpvOpMemberName:
         namer_.SuggestSanitizedMemberName(inst.GetSingleWordInOperand(0),
@@ -690,19 +692,43 @@ ast::type::Type* ParserImpl::ConvertType(
   const auto members = struct_ty->element_types();
   for (uint32_t member_index = 0; member_index < members.size();
        ++member_index) {
-    auto* ast_member_ty = ConvertType(type_mgr_->GetId(members[member_index]));
+    const auto member_type_id = type_mgr_->GetId(members[member_index]);
+    auto* ast_member_ty = ConvertType(member_type_id);
     if (ast_member_ty == nullptr) {
       // Already emitted diagnostics.
       return nullptr;
     }
     ast::StructMemberDecorationList ast_member_decorations;
-    for (auto& deco : GetDecorationsForMember(type_id, member_index)) {
-      auto ast_member_decoration = ConvertMemberDecoration(deco);
-      if (ast_member_decoration == nullptr) {
-        // Already emitted diagnostics.
+    for (auto& decoration : GetDecorationsForMember(type_id, member_index)) {
+      if (decoration.empty()) {
+        Fail() << "malformed SPIR-V decoration: it's empty";
         return nullptr;
       }
-      ast_member_decorations.push_back(std::move(ast_member_decoration));
+      if ((decoration[0] == SpvDecorationBuiltIn) && (decoration.size() > 1)) {
+        switch (decoration[1]) {
+          case SpvBuiltInPosition:
+            // Record this built-in variable specially.
+            builtin_position_.struct_type_id = type_id;
+            builtin_position_.member_index = member_index;
+            builtin_position_.member_type_id = member_type_id;
+            // Don't map the struct type.  But this is not an error either.
+            return nullptr;
+          case SpvBuiltInPointSize:     // not supported in WGSL
+          case SpvBuiltInCullDistance:  // not supported in WGSL
+          case SpvBuiltInClipDistance:  // not supported in WGSL
+          default:
+            break;
+        }
+        Fail() << "unrecognized builtin " << decoration[1];
+        return nullptr;
+      } else {
+        auto ast_member_decoration = ConvertMemberDecoration(decoration);
+        if (ast_member_decoration == nullptr) {
+          // Already emitted diagnostics.
+          return nullptr;
+        }
+        ast_member_decorations.push_back(std::move(ast_member_decoration));
+      }
     }
     const auto member_name = namer_.GetMemberName(type_id, member_index);
     auto ast_struct_member = std::make_unique<ast::StructMember>(
@@ -723,20 +749,27 @@ ast::type::Type* ParserImpl::ConvertType(
 }
 
 ast::type::Type* ParserImpl::ConvertType(
-    const spvtools::opt::analysis::Pointer* ptr_ty) {
-  auto* ast_elem_ty = ConvertType(type_mgr_->GetId(ptr_ty->pointee_type()));
-  if (ast_elem_ty == nullptr) {
-    Fail() << "SPIR-V pointer type with ID " << type_mgr_->GetId(ptr_ty)
-           << " has invalid pointee type "
-           << type_mgr_->GetId(ptr_ty->pointee_type());
+    uint32_t type_id,
+    const spvtools::opt::analysis::Pointer*) {
+  const auto* inst = def_use_mgr_->GetDef(type_id);
+  const auto pointee_ty_id = inst->GetSingleWordInOperand(1);
+  const auto storage_class = SpvStorageClass(inst->GetSingleWordInOperand(0));
+  if (pointee_ty_id == builtin_position_.struct_type_id) {
+    builtin_position_.pointer_type_id = type_id;
+    builtin_position_.storage_class = storage_class;
     return nullptr;
   }
-  auto ast_storage_class =
-      enum_converter_.ToStorageClass(ptr_ty->storage_class());
+  auto* ast_elem_ty = ConvertType(pointee_ty_id);
+  if (ast_elem_ty == nullptr) {
+    Fail() << "SPIR-V pointer type with ID " << type_id
+           << " has invalid pointee type " << pointee_ty_id;
+    return nullptr;
+  }
+  auto ast_storage_class = enum_converter_.ToStorageClass(storage_class);
   if (ast_storage_class == ast::StorageClass::kNone) {
-    Fail() << "SPIR-V pointer type with ID " << type_mgr_->GetId(ptr_ty)
+    Fail() << "SPIR-V pointer type with ID " << type_id
            << " has invalid storage class "
-           << static_cast<uint32_t>(ptr_ty->storage_class());
+           << static_cast<uint32_t>(storage_class);
     return nullptr;
   }
   return ctx_.type_mgr().Get(
@@ -753,6 +786,13 @@ bool ParserImpl::RegisterTypes() {
       continue;
     }
     ConvertType(type_or_const.result_id());
+  }
+  // Manufacture a type for the gl_Position varible if we have to.
+  if ((builtin_position_.struct_type_id != 0) &&
+      (builtin_position_.member_pointer_type_id == 0)) {
+    builtin_position_.member_pointer_type_id = type_mgr_->FindPointerToType(
+        builtin_position_.member_type_id, builtin_position_.storage_class);
+    ConvertType(builtin_position_.member_pointer_type_id);
   }
   return success_;
 }
@@ -809,12 +849,22 @@ bool ParserImpl::EmitModuleScopeVariables() {
     }
     const auto& var = type_or_value;
     const auto spirv_storage_class = var.GetSingleWordInOperand(0);
+
+    uint32_t type_id = var.type_id();
+    if ((type_id == builtin_position_.pointer_type_id) &&
+        ((spirv_storage_class == SpvStorageClassInput) ||
+         (spirv_storage_class == SpvStorageClassOutput))) {
+      // Skip emitting gl_PerVertex.
+      builtin_position_.per_vertex_var_id = var.result_id();
+      continue;
+    }
+
     auto ast_storage_class = enum_converter_.ToStorageClass(
         static_cast<SpvStorageClass>(spirv_storage_class));
     if (!success_) {
       return false;
     }
-    auto* ast_type = id_to_type_[var.type_id()];
+    auto* ast_type = id_to_type_[type_id];
     if (ast_type == nullptr) {
       return Fail() << "internal error: failed to register Tint AST type for "
                        "SPIR-V type with ID: "
@@ -836,6 +886,23 @@ bool ParserImpl::EmitModuleScopeVariables() {
     }
     // TODO(dneto): initializers (a.k.a. constructor expression)
     ast_module_.AddGlobalVariable(std::move(ast_var));
+  }
+
+  // Emit gl_Position instead of gl_PerVertex
+  if (builtin_position_.per_vertex_var_id) {
+    // Make sure the variable has a name.
+    namer_.SuggestSanitizedName(builtin_position_.per_vertex_var_id,
+                                "gl_Position");
+    auto var = std::make_unique<ast::DecoratedVariable>(MakeVariable(
+        builtin_position_.per_vertex_var_id,
+        enum_converter_.ToStorageClass(builtin_position_.storage_class),
+        ConvertType(builtin_position_.member_type_id)));
+    ast::VariableDecorationList decos;
+    decos.push_back(
+        std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kPosition));
+    var->set_decorations(std::move(decos));
+
+    ast_module_.AddGlobalVariable(std::move(var));
   }
   return success_;
 }

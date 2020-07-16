@@ -133,6 +133,8 @@ class ParserImpl : Reader {
   std::string GlslStd450Prefix() const { return "std::glsl"; }
 
   /// Converts a SPIR-V type to a Tint type, and saves it for fast lookup.
+  /// If the type is only used for builtins, then register that specially,
+  /// and return null.
   /// On failure, logs an error and returns null.  This should only be called
   /// after the internal representation of the module has been built.
   /// @param type_id the SPIR-V ID of a type.
@@ -316,6 +318,30 @@ class ParserImpl : Reader {
   /// @returns the registered boolean type.
   ast::type::Type* BoolType() const { return bool_type_; }
 
+  /// Bookkeeping used for tracking the "position" builtin variable.
+  struct BuiltInPositionInfo {
+    /// The ID for the gl_PerVertex struct containing the Position builtin.
+    uint32_t struct_type_id = 0;
+    /// The member index for the Position builtin within the struct.
+    uint32_t member_index = 0;
+    /// The ID for the member type, which should map to vec4<f32>.
+    uint32_t member_type_id = 0;
+    /// The ID of the type of a pointer to the struct in the Output storage
+    /// class class.
+    uint32_t pointer_type_id = 0;
+    /// The SPIR-V storage class.
+    SpvStorageClass storage_class = SpvStorageClassOutput;
+    /// The ID of the type of a pointer to the Position member.
+    uint32_t member_pointer_type_id = 0;
+    /// The ID of the gl_PerVertex variable, if it was declared.
+    /// We'll use this for the gl_Position variable instead.
+    uint32_t per_vertex_var_id = 0;
+  };
+  /// @returns info about the gl_Position builtin variable.
+  const BuiltInPositionInfo& GetBuiltInPositionInfo() {
+    return builtin_position_;
+  }
+
  private:
   /// Converts a specific SPIR-V type to a Tint type. Integer case
   ast::type::Type* ConvertType(const spvtools::opt::analysis::Integer* int_ty);
@@ -347,8 +373,12 @@ class ParserImpl : Reader {
       uint32_t type_id,
       const spvtools::opt::analysis::Struct* struct_ty);
   /// Converts a specific SPIR-V type to a Tint type. Pointer case
+  /// The pointer to gl_PerVertex maps to nullptr, and instead is recorded
+  /// in member |builtin_position_|.
+  /// @param type_id the SPIR-V ID for the type.
   /// @param ptr_ty the Tint type
-  ast::type::Type* ConvertType(const spvtools::opt::analysis::Pointer* ptr_ty);
+  ast::type::Type* ConvertType(uint32_t type_id,
+                               const spvtools::opt::analysis::Pointer* ptr_ty);
 
   /// Applies SPIR-V decorations to the given array or runtime-array type.
   /// @param spv_type the SPIR-V aray or runtime-array type.
@@ -402,6 +432,13 @@ class ParserImpl : Reader {
   std::unordered_map<ast::type::Type*, ast::type::Type*> signed_type_for_;
   // Maps an signed type corresponding to the given unsigned type.
   std::unordered_map<ast::type::Type*, ast::type::Type*> unsigned_type_for_;
+
+  // Bookkeeping for the gl_Position builtin.
+  // In Vulkan SPIR-V, it's the 0 member of the gl_PerVertex structure.
+  // But in WGSL we make a module-scope variable:
+  //    [[position]] var<in> gl_Position : vec4<f32>;
+  // The builtin variable was detected if and only if the struct_id is non-zero.
+  BuiltInPositionInfo builtin_position_;
 };
 
 }  // namespace spirv

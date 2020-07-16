@@ -2512,9 +2512,21 @@ bool FunctionEmitter::EmitConstDefOrWriteToHoistedVar(
 
 bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
   const auto result_id = inst.result_id();
+  const auto type_id = inst.type_id();
+
+  if (type_id != 0) {
+    const auto& builtin_position_info = parser_impl_.GetBuiltInPositionInfo();
+    if ((type_id == builtin_position_info.struct_type_id) ||
+        (type_id == builtin_position_info.pointer_type_id)) {
+      return Fail() << "operations producing a per-vertex structure are not "
+                       "supported: "
+                    << inst.PrettyPrint();
+    }
+  }
+
   // Handle combinatorial instructions.
-  auto combinatorial_expr = MaybeEmitCombinatorialValue(inst);
   const auto* def_info = GetDefInfo(result_id);
+  auto combinatorial_expr = MaybeEmitCombinatorialValue(inst);
   if (combinatorial_expr.expr != nullptr) {
     if (def_info == nullptr) {
       return Fail() << "internal error: result ID %" << result_id
@@ -2542,9 +2554,19 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       return true;
 
     case SpvOpStore: {
+      const auto ptr_id = inst.GetSingleWordInOperand(0);
+      const auto value_id = inst.GetSingleWordInOperand(1);
+      const auto ptr_type_id = def_use_mgr_->GetDef(ptr_id)->type_id();
+      const auto& builtin_position_info = parser_impl_.GetBuiltInPositionInfo();
+      if (ptr_type_id == builtin_position_info.pointer_type_id) {
+        return Fail()
+               << "storing to the whole per-vertex structure is not supported: "
+               << inst.PrettyPrint();
+      }
+
       // TODO(dneto): Order of evaluation?
-      auto lhs = MakeExpression(inst.GetSingleWordInOperand(0));
-      auto rhs = MakeExpression(inst.GetSingleWordInOperand(1));
+      auto lhs = MakeExpression(ptr_id);
+      auto rhs = MakeExpression(value_id);
       AddStatement(std::make_unique<ast::AssignmentStatement>(
           std::move(lhs.expr), std::move(rhs.expr)));
       return success();
@@ -2737,7 +2759,56 @@ TypedExpression FunctionEmitter::MakeAccessChain(
   static const char* swizzles[] = {"x", "y", "z", "w"};
 
   const auto base_id = inst.GetSingleWordInOperand(0);
-  const auto ptr_ty_id = def_use_mgr_->GetDef(base_id)->type_id();
+  auto ptr_ty_id = def_use_mgr_->GetDef(base_id)->type_id();
+  uint32_t first_index = 1;
+  const auto num_in_operands = inst.NumInOperands();
+
+  // If the variable was originally gl_PerVertex, then in the AST we
+  // have instead emitted a gl_Position variable.
+  {
+    const auto& builtin_position_info = parser_impl_.GetBuiltInPositionInfo();
+    if (base_id == builtin_position_info.per_vertex_var_id) {
+      // We only support the Position member.
+      const auto* member_index_inst =
+          def_use_mgr_->GetDef(inst.GetSingleWordInOperand(first_index));
+      if (member_index_inst == nullptr) {
+        Fail()
+            << "first index of access chain does not reference an instruction: "
+            << inst.PrettyPrint();
+        return {};
+      }
+      const auto* member_index_const =
+          constant_mgr_->GetConstantFromInst(member_index_inst);
+      if (member_index_const == nullptr) {
+        Fail() << "first index of access chain into per-vertex structure is "
+                  "not a constant: "
+               << inst.PrettyPrint();
+        return {};
+      }
+      const auto* member_index_const_int = member_index_const->AsIntConstant();
+      if (member_index_const_int == nullptr) {
+        Fail() << "first index of access chain into per-vertex structure is "
+                  "not a constant integer: "
+               << inst.PrettyPrint();
+        return {};
+      }
+      const auto member_index_value =
+          member_index_const_int->GetZeroExtendedValue();
+      if (member_index_value != builtin_position_info.member_index) {
+        Fail() << "accessing per-vertex member " << member_index_value
+               << " is not supported. Only Position is supported";
+        return {};
+      }
+
+      // Skip past the member index that gets us to Position.
+      first_index = first_index + 1;
+      // Replace the gl_PerVertex reference with the gl_Position reference
+      current_expr.expr =
+          std::make_unique<ast::IdentifierExpression>(namer_.Name(base_id));
+      ptr_ty_id = builtin_position_info.member_pointer_type_id;
+    }
+  }
+
   const auto* ptr_type = type_mgr_->GetType(ptr_ty_id);
   if (!ptr_type || !ptr_type->AsPointer()) {
     Fail() << "Access chain %" << inst.result_id()
@@ -2745,8 +2816,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(
     return {};
   }
   const auto* pointee_type = ptr_type->AsPointer()->pointee_type();
-  const auto num_in_operands = inst.NumInOperands();
-  for (uint32_t index = 1; index < num_in_operands; ++index) {
+  for (uint32_t index = first_index; index < num_in_operands; ++index) {
     const auto* index_const =
         constants[index] ? constants[index]->AsIntConstant() : nullptr;
     const int64_t index_const_val =
