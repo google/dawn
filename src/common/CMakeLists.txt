@@ -41,6 +41,7 @@ target_sources(dawn_common PRIVATE
     "SerialStorage.h"
     "SlabAllocator.cpp"
     "SlabAllocator.h"
+    "StackContainer.h"
     "SwapChainUtils.h"
     "SystemUtils.cpp"
     "SystemUtils.h"
