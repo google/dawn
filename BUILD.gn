@@ -367,11 +367,13 @@ source_set("libtint_core_src") {
     "src/writer/writer.h",
   ]
 
-  deps = [
+  public_deps = [
     ":tint_core_enums_unified1",
     ":tint_core_tables_unified1",
     ":tint_language_header_cldebuginfo100",
     ":tint_language_header_debuginfo",
+    "${tint_spirv_headers_dir}:spv_headers",
+    "${tint_spirv_tools_dir}:spvtools_headers",
   ]
 
   configs += [ ":tint_common_config" ]
@@ -417,6 +419,8 @@ source_set("libtint_spv_reader_src") {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
   }
+
+  public_deps = [ ":libtint_core_src" ]
 }
 
 source_set("libtint_spv_writer_src") {
@@ -442,6 +446,8 @@ source_set("libtint_spv_writer_src") {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
   }
+
+  public_deps = [ ":libtint_core_src" ]
 }
 
 source_set("libtint_wgsl_reader_src") {
@@ -463,6 +469,8 @@ source_set("libtint_wgsl_reader_src") {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
   }
+
+  public_deps = [ ":libtint_core_src" ]
 }
 
 source_set("libtint_wgsl_writer_src") {
@@ -480,6 +488,8 @@ source_set("libtint_wgsl_writer_src") {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
   }
+
+  public_deps = [ ":libtint_core_src" ]
 }
 
 source_set("libtint_msl_writer_src") {
@@ -499,6 +509,8 @@ source_set("libtint_msl_writer_src") {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
   }
+
+  public_deps = [ ":libtint_core_src" ]
 }
 
 source_set("libtint") {
@@ -590,6 +602,7 @@ if (!build_with_chromium) {
       "//base/test:test_support",
       "//testing/gmock",
       "//testing/gtest",
+      "//third_party/googletest:gmock",
     ]
   }
 }
@@ -674,6 +687,13 @@ source_set("tint_unittests_core_src") {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
   }
+
+  testonly = true
+
+  deps = [
+    ":gmock_and_gtest",
+    ":libtint_core_src",
+  ]
 }
 
 source_set("tint_unittests_spv_reader_src") {
@@ -717,6 +737,13 @@ source_set("tint_unittests_spv_reader_src") {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
   }
+
+  testonly = true
+
+  deps = [
+    ":gmock_and_gtest",
+    ":libtint_spv_reader_src",
+  ]
 }
 
 source_set("tint_unittests_spv_writer_src") {
@@ -760,6 +787,13 @@ source_set("tint_unittests_spv_writer_src") {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
   }
+
+  testonly = true
+
+  deps = [
+    ":gmock_and_gtest",
+    ":libtint_spv_writer_src",
+  ]
 }
 
 source_set("tint_unittests_wgsl_reader_src") {
@@ -839,6 +873,13 @@ source_set("tint_unittests_wgsl_reader_src") {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
   }
+
+  testonly = true
+
+  deps = [
+    ":gmock_and_gtest",
+    ":libtint_wgsl_reader_src",
+  ]
 }
 
 source_set("tint_unittests_wgsl_writer_src") {
@@ -883,6 +924,13 @@ source_set("tint_unittests_wgsl_writer_src") {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
   }
+
+  testonly = true
+
+  deps = [
+    ":gmock_and_gtest",
+    ":libtint_wgsl_writer_src",
+  ]
 }
 
 source_set("tint_unittests_msl_writer_src") {
@@ -924,9 +972,18 @@ source_set("tint_unittests_msl_writer_src") {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
   }
+
+  testonly = true
+
+  deps = [
+    ":gmock_and_gtest",
+    ":libtint_msl_writer_src",
+  ]
 }
 
 source_set("tint_unittests_src") {
+  testonly = true
+
   deps = [ ":tint_unittests_core_src" ]
 
   if (tint_build_spv_reader) {
@@ -964,7 +1021,6 @@ source_set("tint_unittests_src") {
 test("tint_unittests") {
   deps = [
     ":gmock_and_gtest",
-    ":libtint",
     ":tint_unittests_src",
     "${tint_spirv_tools_dir}/:spvtools",
     "${tint_spirv_tools_dir}/:spvtools_opt",
@@ -1000,17 +1056,12 @@ if (build_with_chromium) {
     sources = [ "fuzzers/tint_wgsl_reader_fuzzer.cc" ]
     configs += [ ":tint_common_config" ]
     public_configs = [ ":tint_public_config" ]
+    deps = [ ":libtint_wgsl_reader_src" ]
   }
 
   fuzzer_test("tint_wgsl_reader_fuzzer") {
     sources = []
-    deps = [
-      ":libtint",
-      ":tint_wgsl_reader_fuzzer_src",
-      "${tint_spirv_tools_dir}/:spvtools",
-      "${tint_spirv_tools_dir}/:spvtools_opt",
-      "${tint_spirv_tools_dir}/:spvtools_val",
-    ]
+    deps = [ ":tint_wgsl_reader_fuzzer_src" ]
   }
 }
 
@@ -1033,10 +1084,6 @@ executable("tint_exe") {
     "${tint_spirv_tools_dir}/:spvtools_opt",
     "${tint_spirv_tools_dir}/:spvtools_val",
   ]
-
-  if (tint_build_spv_reader || tint_build_spv_writer) {
-    deps += [ "${tint_spirv_headers_dir}/:spv_headers" ]
-  }
 
   configs += [
     ":tint_common_config",
