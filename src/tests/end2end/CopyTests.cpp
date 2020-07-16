@@ -700,10 +700,6 @@ TEST_P(CopyTests_T2B, Texture2DArraySubRegion) {
 
 // Test that copying texture 2D array mips with 256-byte aligned sizes works
 TEST_P(CopyTests_T2B, Texture2DArrayMip) {
-    // TODO(jiawei.shao@intel.com): investigate why copies with multiple texture array layers fail
-    // with swiftshader.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 6u;
@@ -724,10 +720,6 @@ TEST_P(CopyTests_T2B, Texture2DArrayMip) {
 // Test that copying from a range of texture 2D array layers in one texture-to-buffer-copy when
 // RowsPerImage is not equal to the height of the texture works.
 TEST_P(CopyTests_T2B, Texture2DArrayRegionNonzeroRowsPerImage) {
-    // TODO(jiawei.shao@intel.com): investigate why copies with multiple texture array layers fail
-    // with swiftshader.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 6u;
@@ -749,10 +741,6 @@ TEST_P(CopyTests_T2B, Texture2DArrayRegionNonzeroRowsPerImage) {
 // Test a special code path in the D3D12 backends when (BytesPerRow * RowsPerImage) is not a
 // multiple of 512.
 TEST_P(CopyTests_T2B, Texture2DArrayRegionWithOffsetOddRowsPerImage) {
-    // TODO(jiawei.shao@intel.com): investigate why copies with multiple texture array layers fail
-    // with swiftshader.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-
     constexpr uint32_t kWidth = 64;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 8u;
@@ -776,10 +764,6 @@ TEST_P(CopyTests_T2B, Texture2DArrayRegionWithOffsetOddRowsPerImage) {
 // Test a special code path in the D3D12 backends when (BytesPerRow * RowsPerImage) is a multiple
 // of 512.
 TEST_P(CopyTests_T2B, Texture2DArrayRegionWithOffsetEvenRowsPerImage) {
-    // TODO(jiawei.shao@intel.com): investigate why copies with multiple texture array layers fail
-    // with swiftshader.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-
     constexpr uint32_t kWidth = 64;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 8u;
@@ -1126,10 +1110,6 @@ TEST_P(CopyTests_B2T, Texture2DArraySubRegion) {
 // Test that copying into a range of texture 2D array layers in one texture-to-buffer-copy when
 // RowsPerImage is not equal to the height of the texture works.
 TEST_P(CopyTests_B2T, Texture2DArrayRegionNonzeroRowsPerImage) {
-    // TODO(jiawei.shao@intel.com): investigate why copies with multiple texture array layers fail
-    // with swiftshader.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 6u;
@@ -1151,10 +1131,6 @@ TEST_P(CopyTests_B2T, Texture2DArrayRegionNonzeroRowsPerImage) {
 // Test a special code path in the D3D12 backends when (BytesPerRow * RowsPerImage) is not a
 // multiple of 512.
 TEST_P(CopyTests_B2T, Texture2DArrayRegionWithOffsetOddRowsPerImage) {
-    // TODO(jiawei.shao@intel.com): investigate why copies with multiple texture array layers fail
-    // with swiftshader.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-
     constexpr uint32_t kWidth = 64;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 8u;
@@ -1178,10 +1154,6 @@ TEST_P(CopyTests_B2T, Texture2DArrayRegionWithOffsetOddRowsPerImage) {
 // Test a special code path in the D3D12 backends when (BytesPerRow * RowsPerImage) is a multiple
 // of 512.
 TEST_P(CopyTests_B2T, Texture2DArrayRegionWithOffsetEvenRowsPerImage) {
-    // TODO(jiawei.shao@intel.com): investigate why copies with multiple texture array layers fail
-    // with swiftshader.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-
     constexpr uint32_t kWidth = 64;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 8u;

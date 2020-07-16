@@ -937,10 +937,6 @@ TEST_P(StorageTextureTests, Readonly2DArrayStorageTexture) {
     // bug in spvc parser is fixed.
     DAWN_SKIP_TEST_IF(IsSpvcParserBeingUsed());
 
-    // TODO(jiawei.shao@intel.com): investigate why copies with multiple texture array layer fail
-    // with swiftshader.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
-
     constexpr uint32_t kArrayLayerCount = 3u;
 
     constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::R32Uint;
@@ -978,10 +974,6 @@ TEST_P(StorageTextureTests, Writeonly2DArrayStorageTexture) {
     // TODO(jiawei.shao@intel.com): enable this test when we specify "--use-spvc-parser" after the
     // bug in spvc parser is fixed.
     DAWN_SKIP_TEST_IF(IsD3D12() && IsSpvcParserBeingUsed());
-
-    // TODO(jiawei.shao@intel.com): investigate why copies with multiple texture array layer fail
-    // with swiftshader.
-    DAWN_SKIP_TEST_IF(IsSwiftshader());
 
     constexpr uint32_t kArrayLayerCount = 3u;
 
