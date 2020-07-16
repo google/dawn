@@ -75,7 +75,7 @@ TEST_F(ArrayTypeTest, TypeName_WithStride) {
   I32Type i32;
   ArrayType arr{&i32, 3};
   arr.set_array_stride(16);
-  EXPECT_EQ(arr.type_name(), "__array__i32_3_16");
+  EXPECT_EQ(arr.type_name(), "__array__i32_3_stride_16");
 }
 
 }  // namespace

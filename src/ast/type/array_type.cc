@@ -38,7 +38,7 @@ std::string ArrayType::type_name() const {
   if (!IsRuntimeArray())
     type_name += "_" + std::to_string(size_);
   if (has_array_stride())
-    type_name += "_" + std::to_string(array_stride_);
+    type_name += "_stride_" + std::to_string(array_stride_);
 
   return type_name;
 }

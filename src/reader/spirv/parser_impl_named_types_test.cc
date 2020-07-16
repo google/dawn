@@ -75,9 +75,8 @@ TEST_F(SpvParserTest, NamedTypes_AnonRTArrayWithDecoration) {
     %arr = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  // TODO(dneto): this is a string collision with array<u32,8>
-  // https://bugs.chromium.org/p/tint/issues/detail?id=102
-  EXPECT_THAT(p->module().to_str(), HasSubstr("RTArr -> __array__u32_8\n"));
+  EXPECT_THAT(p->module().to_str(),
+              HasSubstr("RTArr -> __array__u32_stride_8\n"));
 }
 
 TEST_F(SpvParserTest, NamedTypes_AnonRTArray_Dup_EmitBoth) {
@@ -89,9 +88,9 @@ TEST_F(SpvParserTest, NamedTypes_AnonRTArray_Dup_EmitBoth) {
     %arr2 = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(
-      p->module().to_str(),
-      HasSubstr("RTArr -> __array__u32_8\nRTArr_1 -> __array__u32_8\n"));
+  EXPECT_THAT(p->module().to_str(),
+              HasSubstr("RTArr -> __array__u32_stride_8\nRTArr_1 -> "
+                        "__array__u32_stride_8\n"));
 }
 
 TEST_F(SpvParserTest, NamedTypes_NamedRTArray) {
@@ -102,7 +101,8 @@ TEST_F(SpvParserTest, NamedTypes_NamedRTArray) {
     %arr = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->module().to_str(), HasSubstr("myrtarr -> __array__u32_8\n"));
+  EXPECT_THAT(p->module().to_str(),
+              HasSubstr("myrtarr -> __array__u32_stride_8\n"));
 }
 
 TEST_F(SpvParserTest, NamedTypes_NamedArray) {
@@ -115,7 +115,8 @@ TEST_F(SpvParserTest, NamedTypes_NamedArray) {
     %arr2 = OpTypeArray %uint %uint_5
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->module().to_str(), HasSubstr("myarr -> __array__u32_5_8"));
+  EXPECT_THAT(p->module().to_str(),
+              HasSubstr("myarr -> __array__u32_5_stride_8"));
 }
 
 TEST_F(SpvParserTest, NamedTypes_AnonArray_Dup_EmitBoth) {
@@ -128,8 +129,10 @@ TEST_F(SpvParserTest, NamedTypes_AnonArray_Dup_EmitBoth) {
     %arr2 = OpTypeArray %uint %uint_5
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->module().to_str(),
-              HasSubstr("Arr -> __array__u32_5_8\nArr_1 -> __array__u32_5_8"));
+  EXPECT_THAT(
+      p->module().to_str(),
+      HasSubstr(
+          "Arr -> __array__u32_5_stride_8\nArr_1 -> __array__u32_5_stride_"));
 }
 
 // TODO(dneto): Handle arrays sized by a spec constant.

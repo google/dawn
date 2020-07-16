@@ -462,10 +462,10 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_AliasType) {
   Variable{
     x_200
     function
-    __alias_Arr__array__u32_2_16
+    __alias_Arr__array__u32_2_stride_16
     {
       TypeConstructor{
-        __alias_Arr__array__u32_2_16
+        __alias_Arr__array__u32_2_stride_16
         ScalarConstructor{1}
         ScalarConstructor{2}
       }
@@ -529,10 +529,10 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_AliasType_Null) {
   Variable{
     x_200
     function
-    __alias_Arr__array__u32_2_16
+    __alias_Arr__array__u32_2_stride_16
     {
       TypeConstructor{
-        __alias_Arr__array__u32_2_16
+        __alias_Arr__array__u32_2_stride_16
         ScalarConstructor{0}
         ScalarConstructor{0}
       }
