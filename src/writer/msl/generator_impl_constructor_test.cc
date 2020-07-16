@@ -171,23 +171,29 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_Empty) {
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat) {
   ast::type::F32Type f32;
-  ast::type::MatrixType mat(&f32, 3, 2);
+  ast::type::MatrixType mat(&f32, 3, 2);  // 3 ROWS, 2 COLUMNS
+  ast::type::VectorType vec(&f32, 3);
 
-  ast::type::VectorType vec(&f32, 2);
+  // WGSL matrix is mat2x3 (it flips for AST, sigh). With a type constructor
+  // of <vec3, vec3>
 
   ast::ExpressionList mat_values;
 
-  for (size_t i = 0; i < 3; i++) {
+  for (size_t i = 0; i < 2; i++) {
     auto lit1 = std::make_unique<ast::FloatLiteral>(
         &f32, static_cast<float>(1 + (i * 2)));
     auto lit2 = std::make_unique<ast::FloatLiteral>(
         &f32, static_cast<float>(2 + (i * 2)));
+    auto lit3 = std::make_unique<ast::FloatLiteral>(
+        &f32, static_cast<float>(3 + (i * 2)));
 
     ast::ExpressionList values;
     values.push_back(
         std::make_unique<ast::ScalarConstructorExpression>(std::move(lit1)));
     values.push_back(
         std::make_unique<ast::ScalarConstructorExpression>(std::move(lit2)));
+    values.push_back(
+        std::make_unique<ast::ScalarConstructorExpression>(std::move(lit3)));
 
     mat_values.push_back(std::make_unique<ast::TypeConstructorExpression>(
         &vec, std::move(values)));
@@ -197,14 +203,16 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat) {
 
   GeneratorImpl g;
   ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(),
-            std::string("float2x3(float2(1.00000000f, 2.00000000f), ") +
-                "float2(3.00000000f, 4.00000000f), " +
-                "float2(5.00000000f, 6.00000000f))");
+
+  // A matrix of type T with n columns and m rows can also be constructed from
+  // n vectors of type T with m components.
+  EXPECT_EQ(
+      g.result(),
+      std::string("float2x3(float3(1.00000000f, 2.00000000f, 3.00000000f), ") +
+          "float3(3.00000000f, 4.00000000f, 5.00000000f))");
 }
 
-// TODO(dsinclair): Verify
-TEST_F(MslGeneratorImplTest, DISABLED_EmitConstructor_Type_Array) {
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Array) {
   ast::type::F32Type f32;
   ast::type::VectorType vec(&f32, 3);
   ast::type::ArrayType ary(&vec, 3);
@@ -235,10 +243,10 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitConstructor_Type_Array) {
 
   GeneratorImpl g;
   ASSERT_TRUE(g.EmitConstructor(&expr)) << g.error();
-  EXPECT_EQ(g.result(), std::string("float3[3](") +
+  EXPECT_EQ(g.result(), std::string("{") +
                             "float3(1.00000000f, 2.00000000f, 3.00000000f), " +
                             "float3(4.00000000f, 5.00000000f, 6.00000000f), " +
-                            "float3(7.00000000f, 8.00000000f, 9.00000000f))");
+                            "float3(7.00000000f, 8.00000000f, 9.00000000f)}");
 }
 
 // TODO(dsinclair): Add struct constructor test.

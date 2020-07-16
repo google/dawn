@@ -543,11 +543,14 @@ bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
 }
 
 bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
-  if (!EmitType(expr->type(), "")) {
-    return false;
+  if (expr->type()->IsArray()) {
+    out_ << "{";
+  } else {
+    if (!EmitType(expr->type(), "")) {
+      return false;
+    }
+    out_ << "(";
   }
-
-  out_ << "(";
 
   // If the type constructor is empty then we need to construct with the zero
   // value for all components.
@@ -569,7 +572,11 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
     }
   }
 
-  out_ << ")";
+  if (expr->type()->IsArray()) {
+    out_ << "}";
+  } else {
+    out_ << ")";
+  }
   return true;
 }
 
