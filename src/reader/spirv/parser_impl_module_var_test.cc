@@ -1117,6 +1117,57 @@ TEST_F(SpvParserTest, ModuleScopeVar_StructUndefInitializer) {
       << module_str;
 }
 
+TEST_F(SpvParserTest, ModuleScopeVar_LocationDecoration_Valid) {
+  auto* p = parser(test::Assemble(R"(
+     OpName %myvar "myvar"
+     OpDecorate %myvar Location 3
+)" + CommonTypes() + R"(
+     %ptr = OpTypePointer Input %uint
+     %myvar = OpVariable %ptr Input
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  DecoratedVariable{
+    Decorations{
+      LocationDecoration{3}
+    }
+    myvar
+    in
+    __u32
+  })"))
+      << module_str;
+}
+
+TEST_F(SpvParserTest,
+       ModuleScopeVar_LocationDecoration_MissingOperandWontAssemble) {
+  const auto assembly = R"(
+     OpName %myvar "myvar"
+     OpDecorate %myvar Location
+)" + CommonTypes() + R"(
+     %ptr = OpTypePointer Input %uint
+     %myvar = OpVariable %ptr Input
+  )";
+  EXPECT_THAT(test::AssembleFailure(assembly),
+              Eq("4:4: Expected operand, found next instruction instead."));
+}
+
+TEST_F(SpvParserTest,
+       ModuleScopeVar_LocationDecoration_TwoOperandsWontAssemble) {
+  const auto assembly = R"(
+     OpName %myvar "myvar"
+     OpDecorate %myvar Location 3 4
+)" + CommonTypes() + R"(
+     %ptr = OpTypePointer Input %uint
+     %myvar = OpVariable %ptr Input
+  )";
+  EXPECT_THAT(
+      test::AssembleFailure(assembly),
+      Eq("2:34: Expected <opcode> or <result-id> at the beginning of an "
+         "instruction, found '4'."));
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

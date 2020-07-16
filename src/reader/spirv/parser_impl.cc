@@ -942,6 +942,15 @@ std::unique_ptr<ast::Variable> ParserImpl::MakeVariable(uint32_t id,
       ast_decorations.emplace_back(
           std::make_unique<ast::BuiltinDecoration>(ast_builtin));
     }
+    if (deco[0] == SpvDecorationLocation) {
+      if (deco.size() != 2) {
+        Fail() << "malformed Location decoration on ID " << id
+               << ": requires one literal operand";
+        return nullptr;
+      }
+      ast_decorations.emplace_back(
+          std::make_unique<ast::LocationDecoration>(deco[1]));
+    }
   }
   if (!ast_decorations.empty()) {
     auto decorated_var =
