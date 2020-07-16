@@ -68,16 +68,26 @@ namespace dawn_native { namespace vulkan {
     VkBufferImageCopy ComputeBufferImageCopyRegion(const BufferCopy& bufferCopy,
                                                    const TextureCopy& textureCopy,
                                                    const Extent3D& copySize) {
+        TextureDataLayout passDataLayout;
+        passDataLayout.offset = bufferCopy.offset;
+        passDataLayout.rowsPerImage = bufferCopy.rowsPerImage;
+        passDataLayout.bytesPerRow = bufferCopy.bytesPerRow;
+        return ComputeBufferImageCopyRegion(passDataLayout, textureCopy, copySize);
+    }
+
+    VkBufferImageCopy ComputeBufferImageCopyRegion(const TextureDataLayout& dataLayout,
+                                                   const TextureCopy& textureCopy,
+                                                   const Extent3D& copySize) {
         const Texture* texture = ToBackend(textureCopy.texture.Get());
 
         VkBufferImageCopy region;
 
-        region.bufferOffset = bufferCopy.offset;
+        region.bufferOffset = dataLayout.offset;
         // In Vulkan the row length is in texels while it is in bytes for Dawn
         const Format& format = texture->GetFormat();
-        ASSERT(bufferCopy.bytesPerRow % format.blockByteSize == 0);
-        region.bufferRowLength = bufferCopy.bytesPerRow / format.blockByteSize * format.blockWidth;
-        region.bufferImageHeight = bufferCopy.rowsPerImage;
+        ASSERT(dataLayout.bytesPerRow % format.blockByteSize == 0);
+        region.bufferRowLength = dataLayout.bytesPerRow / format.blockByteSize * format.blockWidth;
+        region.bufferImageHeight = dataLayout.rowsPerImage;
 
         region.imageSubresource.aspectMask = texture->GetVkAspectMask();
         region.imageSubresource.mipLevel = textureCopy.mipLevel;

@@ -16,7 +16,6 @@
 
 #include "common/Platform.h"
 #include "dawn_native/BackendConnection.h"
-#include "dawn_native/Commands.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/VulkanBackend.h"
@@ -595,12 +594,9 @@ namespace dawn_native { namespace vulkan {
         ToBackend(destination)
             ->EnsureDataInitializedAsDestination(recordingContext, destinationOffset, size);
 
-        // Insert memory barrier to ensure host write operations are made visible before
-        // copying from the staging buffer. However, this barrier can be removed (see note below).
-        //
-        // Note: Depending on the spec understanding, an explicit barrier may not be required when
-        // used with HOST_COHERENT as vkQueueSubmit does an implicit barrier between host and
-        // device. See "Availability, Visibility, and Domain Operations" in Vulkan spec for details.
+        // There is no need of a barrier to make host writes available and visible to the copy
+        // operation for HOST_COHERENT memory. The Vulkan spec for vkQueueSubmit describes that it
+        // does an implicit availability, visibility and domain operation.
 
         // Insert pipeline barrier to ensure correct ordering with previous memory operations on the
         // buffer.
@@ -615,6 +611,42 @@ namespace dawn_native { namespace vulkan {
                                ToBackend(source)->GetBufferHandle(),
                                ToBackend(destination)->GetHandle(), 1, &copy);
 
+        return {};
+    }
+
+    MaybeError Device::CopyFromStagingToTexture(StagingBufferBase* source,
+                                                const TextureDataLayout& src,
+                                                TextureCopy* dst,
+                                                const Extent3D copySize) {
+        // There is no need of a barrier to make host writes available and visible to the copy
+        // operation for HOST_COHERENT memory. The Vulkan spec for vkQueueSubmit describes that it
+        // does an implicit availability, visibility and domain operation.
+
+        CommandRecordingContext* recordingContext = GetPendingRecordingContext();
+
+        VkBufferImageCopy region = ComputeBufferImageCopyRegion(src, *dst, copySize);
+        VkImageSubresourceLayers subresource = region.imageSubresource;
+
+        ASSERT(dst->texture->GetDimension() == wgpu::TextureDimension::e2D);
+        SubresourceRange range = {subresource.mipLevel, 1, subresource.baseArrayLayer,
+                                  subresource.layerCount};
+        if (IsCompleteSubresourceCopiedTo(dst->texture.Get(), copySize, subresource.mipLevel)) {
+            // Since texture has been overwritten, it has been "initialized"
+            dst->texture->SetIsSubresourceContentInitialized(true, range);
+        } else {
+            ToBackend(dst->texture)->EnsureSubresourceContentInitialized(recordingContext, range);
+        }
+        // Insert pipeline barrier to ensure correct ordering with previous memory operations on the
+        // texture.
+        ToBackend(dst->texture)
+            ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst, range);
+        VkImage dstImage = ToBackend(dst->texture)->GetHandle();
+
+        // Dawn guarantees dstImage be in the TRANSFER_DST_OPTIMAL layout after the
+        // copy command.
+        this->fn.CmdCopyBufferToImage(recordingContext->commandBuffer,
+                                      ToBackend(source)->GetBufferHandle(), dstImage,
+                                      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
         return {};
     }
 

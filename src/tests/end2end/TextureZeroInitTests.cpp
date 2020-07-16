@@ -1147,7 +1147,7 @@ TEST_P(TextureZeroInitTest, CopyTextureToBufferNonRenderableUnaligned) {
 // In this test WriteTexture fully overwrites a texture
 TEST_P(TextureZeroInitTest, WriteWholeTexture) {
     // TODO(dawn:483): Remove this condition after implementing WriteTexture in those backends.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsVulkan() || IsD3D12());
+    DAWN_SKIP_TEST_IF(IsOpenGL() || IsD3D12());
 
     wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
         1, 1, wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc, kColorFormat);
@@ -1182,7 +1182,7 @@ TEST_P(TextureZeroInitTest, WriteWholeTexture) {
 // half.
 TEST_P(TextureZeroInitTest, WriteTextureHalf) {
     // TODO(dawn:483): Remove this condition after implementing WriteTexture in those backends.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsVulkan() || IsD3D12());
+    DAWN_SKIP_TEST_IF(IsOpenGL() || IsD3D12());
 
     wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
         4, 1,
@@ -1222,7 +1222,7 @@ TEST_P(TextureZeroInitTest, WriteTextureHalf) {
 // is needed for neither the subresources involved in the write nor the other subresources.
 TEST_P(TextureZeroInitTest, WriteWholeTextureArray) {
     // TODO(dawn:483): Remove this condition after implementing WriteTexture in those backends.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsVulkan() || IsD3D12());
+    DAWN_SKIP_TEST_IF(IsOpenGL() || IsD3D12());
 
     wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
         1, 6, wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc, kColorFormat);
@@ -1265,7 +1265,7 @@ TEST_P(TextureZeroInitTest, WriteWholeTextureArray) {
 // half.
 TEST_P(TextureZeroInitTest, WriteTextureArrayHalf) {
     // TODO(dawn:483): Remove this condition after implementing WriteTexture in those backends.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsVulkan() || IsD3D12());
+    DAWN_SKIP_TEST_IF(IsOpenGL() || IsD3D12());
 
     wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
         4, 6,
@@ -1312,7 +1312,7 @@ TEST_P(TextureZeroInitTest, WriteTextureArrayHalf) {
 // In this test WriteTexture fully overwrites a texture at mip level.
 TEST_P(TextureZeroInitTest, WriteWholeTextureAtMipLevel) {
     // TODO(dawn:483): Remove this condition after implementing WriteTexture in those backends.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsVulkan() || IsD3D12());
+    DAWN_SKIP_TEST_IF(IsOpenGL() || IsD3D12());
 
     wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
         4, 1, wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc, kColorFormat);
@@ -1351,7 +1351,7 @@ TEST_P(TextureZeroInitTest, WriteWholeTextureAtMipLevel) {
 // other half.
 TEST_P(TextureZeroInitTest, WriteTextureHalfAtMipLevel) {
     // TODO(dawn:483): Remove this condition after implementing WriteTexture in those backends.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsVulkan() || IsD3D12());
+    DAWN_SKIP_TEST_IF(IsOpenGL() || IsD3D12());
 
     wgpu::TextureDescriptor descriptor = CreateTextureDescriptor(
         4, 1,

@@ -1171,4 +1171,4 @@ TEST_P(CompressedTextureWriteTextureTest,
     }
 }
 
-DAWN_INSTANTIATE_TEST(CompressedTextureWriteTextureTest, MetalBackend());
+DAWN_INSTANTIATE_TEST(CompressedTextureWriteTextureTest, MetalBackend(), VulkanBackend());

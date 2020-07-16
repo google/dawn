@@ -89,7 +89,11 @@ namespace dawn_native { namespace vulkan {
     VkCompareOp ToVulkanCompareOp(wgpu::CompareFunction op);
 
     Extent3D ComputeTextureCopyExtent(const TextureCopy& textureCopy, const Extent3D& copySize);
+
     VkBufferImageCopy ComputeBufferImageCopyRegion(const BufferCopy& bufferCopy,
+                                                   const TextureCopy& textureCopy,
+                                                   const Extent3D& copySize);
+    VkBufferImageCopy ComputeBufferImageCopyRegion(const TextureDataLayout& dataLayout,
                                                    const TextureCopy& textureCopy,
                                                    const Extent3D& copySize);
 

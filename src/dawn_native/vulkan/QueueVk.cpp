@@ -14,6 +14,11 @@
 
 #include "dawn_native/vulkan/QueueVk.h"
 
+#include "common/Math.h"
+#include "dawn_native/Buffer.h"
+#include "dawn_native/CommandValidation.h"
+#include "dawn_native/Commands.h"
+#include "dawn_native/DynamicUploader.h"
 #include "dawn_native/vulkan/CommandBufferVk.h"
 #include "dawn_native/vulkan/CommandRecordingContext.h"
 #include "dawn_native/vulkan/DeviceVk.h"
@@ -21,6 +26,52 @@
 #include "dawn_platform/tracing/TraceEvent.h"
 
 namespace dawn_native { namespace vulkan {
+
+    namespace {
+        ResultOrError<UploadHandle> UploadTextureDataAligningBytesPerRow(
+            DeviceBase* device,
+            const void* data,
+            size_t dataSize,
+            uint32_t alignedBytesPerRow,
+            uint32_t alignedRowsPerImage,
+            const TextureDataLayout* dataLayout,
+            const Format& textureFormat,
+            const Extent3D* writeSize) {
+            uint32_t newDataSize = ComputeRequiredBytesInCopy(
+                textureFormat, *writeSize, alignedBytesPerRow, alignedRowsPerImage);
+
+            UploadHandle uploadHandle;
+            DAWN_TRY_ASSIGN(uploadHandle, device->GetDynamicUploader()->Allocate(
+                                              newDataSize, device->GetPendingCommandSerial()));
+            ASSERT(uploadHandle.mappedBuffer != nullptr);
+
+            // TODO(tommek@google.com): Add an optimization to do a single memcpy if the data
+            // is already correctly packed.
+            uint8_t* dstPointer = static_cast<uint8_t*>(uploadHandle.mappedBuffer);
+            const uint8_t* srcPointer = static_cast<const uint8_t*>(data);
+            srcPointer += dataLayout->offset;
+
+            uint32_t alignedRowsPerImageInBlock = alignedRowsPerImage / textureFormat.blockHeight;
+            uint32_t dataRowsPerImageInBlock = dataLayout->rowsPerImage / textureFormat.blockHeight;
+            if (dataRowsPerImageInBlock == 0) {
+                dataRowsPerImageInBlock = writeSize->height / textureFormat.blockHeight;
+            }
+
+            ASSERT(dataRowsPerImageInBlock >= alignedRowsPerImageInBlock);
+            uint64_t imageAdditionalStride =
+                dataLayout->bytesPerRow * (dataRowsPerImageInBlock - alignedRowsPerImageInBlock);
+            for (uint32_t d = 0; d < writeSize->depth; ++d) {
+                for (uint32_t h = 0; h < alignedRowsPerImageInBlock; ++h) {
+                    memcpy(dstPointer, srcPointer, alignedBytesPerRow);
+                    dstPointer += alignedBytesPerRow;
+                    srcPointer += dataLayout->bytesPerRow;
+                }
+                srcPointer += imageAdditionalStride;
+            }
+
+            return uploadHandle;
+        }
+    }  // namespace
 
     // static
     Queue* Queue::Create(Device* device) {
@@ -48,4 +99,39 @@ namespace dawn_native { namespace vulkan {
         return {};
     }
 
+    MaybeError Queue::WriteTextureImpl(const TextureCopyView* destination,
+                                       const void* data,
+                                       size_t dataSize,
+                                       const TextureDataLayout* dataLayout,
+                                       const Extent3D* writeSize) {
+        uint32_t blockSize = destination->texture->GetFormat().blockByteSize;
+        uint32_t blockWidth = destination->texture->GetFormat().blockWidth;
+        // We are only copying the part of the data that will appear in the texture.
+        // Note that validating texture copy range ensures that writeSize->width and
+        // writeSize->height are multiples of blockWidth and blockHeight respectively.
+        // TODO(tommek@google.com): Add an optimization to align bytesPerRow to
+        // VkPhysicalDeviceLimits::optimalBufferCopyRowPitch.
+        uint32_t alignedBytesPerRow = (writeSize->width) / blockWidth * blockSize;
+        uint32_t alignedRowsPerImage = writeSize->height;
+
+        UploadHandle uploadHandle;
+        DAWN_TRY_ASSIGN(uploadHandle,
+                        UploadTextureDataAligningBytesPerRow(
+                            GetDevice(), data, dataSize, alignedBytesPerRow, alignedRowsPerImage,
+                            dataLayout, destination->texture->GetFormat(), writeSize));
+
+        TextureDataLayout passDataLayout = *dataLayout;
+        passDataLayout.offset = uploadHandle.startOffset;
+        passDataLayout.bytesPerRow = alignedBytesPerRow;
+        passDataLayout.rowsPerImage = alignedRowsPerImage;
+
+        TextureCopy textureCopy;
+        textureCopy.texture = destination->texture;
+        textureCopy.mipLevel = destination->mipLevel;
+        textureCopy.origin = destination->origin;
+
+        return ToBackend(GetDevice())
+            ->CopyFromStagingToTexture(uploadHandle.stagingBuffer, passDataLayout, &textureCopy,
+                                       *writeSize);
+    }
 }}  // namespace dawn_native::vulkan
