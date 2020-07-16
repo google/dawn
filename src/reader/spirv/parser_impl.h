@@ -146,8 +146,10 @@ class ParserImpl : Reader {
   /// - decorated arrays and runtime arrays
   /// TODO(dneto): I expect images and samplers to require names as well.
   /// This is a no-op if the parser has already failed.
+  /// @param type_id the SPIR-V ID for the type
   /// @param type the type that might get an alias
-  void MaybeGenerateAlias(const spvtools::opt::analysis::Type* type);
+  void MaybeGenerateAlias(uint32_t type_id,
+                          const spvtools::opt::analysis::Type* type);
 
   /// @returns the fail stream object
   FailStream& fail_stream() { return fail_stream_; }
@@ -324,14 +326,28 @@ class ParserImpl : Reader {
   /// Converts a specific SPIR-V type to a Tint type. Matrix case
   ast::type::Type* ConvertType(const spvtools::opt::analysis::Matrix* mat_ty);
   /// Converts a specific SPIR-V type to a Tint type. RuntimeArray case
+  /// @param rtarr_ty the Tint type
   ast::type::Type* ConvertType(
       const spvtools::opt::analysis::RuntimeArray* rtarr_ty);
   /// Converts a specific SPIR-V type to a Tint type. Array case
+  /// @param arr_ty the Tint type
   ast::type::Type* ConvertType(const spvtools::opt::analysis::Array* arr_ty);
-  /// Converts a specific SPIR-V type to a Tint type. Struct case
+  /// Converts a specific SPIR-V type to a Tint type. Struct case.
+  /// SPIR-V allows distinct struct type definitions for two OpTypeStruct
+  /// that otherwise have the same set of members (and struct and member
+  /// decorations).  However, the SPIRV-Tools always produces a unique
+  /// |spvtools::opt::analysis::Struct| object in these cases. For this type
+  /// conversion, we need to have the original SPIR-V ID because we can't always
+  /// recover it from the optimizer's struct type object. This also lets us
+  /// preserve member names, which are given by OpMemberName which is normally
+  /// not significant to the optimizer's module representation.
+  /// @param type_id the SPIR-V ID for the type.
+  /// @param struct_ty the Tint type
   ast::type::Type* ConvertType(
+      uint32_t type_id,
       const spvtools::opt::analysis::Struct* struct_ty);
   /// Converts a specific SPIR-V type to a Tint type. Pointer case
+  /// @param ptr_ty the Tint type
   ast::type::Type* ConvertType(const spvtools::opt::analysis::Pointer* ptr_ty);
 
   /// Applies SPIR-V decorations to the given array or runtime-array type.

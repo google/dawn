@@ -53,38 +53,83 @@ TEST_F(SpvParserTest, NamedTypes_NamedStruct) {
   EXPECT_THAT(p->module().to_str(), HasSubstr("mystruct -> __struct_"));
 }
 
-// TODO(dneto): Enable this when array types can have ArrayStride
-TEST_F(SpvParserTest, DISABLED_NamedTypes_AnonArrayWithDecoration) {
+TEST_F(SpvParserTest, NamedTypes_Dup_EmitBoth) {
   auto* p = parser(test::Assemble(R"(
-    OpDecorate %arr ArrayStride 16
     %uint = OpTypeInt 32 0
-    %uint_3 = OpConstant %uint 3
-    %arr = OpTypeArray %uint %uint_3
+    %s = OpTypeStruct %uint %uint
+    %s2 = OpTypeStruct %uint %uint
   )"));
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->module().to_str(), HasSubstr("Arr -> __array__u32"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
+  EXPECT_THAT(p->module().to_str(),
+              HasSubstr("S -> __struct_S\nS_1 -> __struct_S_1"));
 }
 
 // TODO(dneto): Should we make an alias for an un-decoratrd array with
 // an OpName?
 
-TEST_F(SpvParserTest, NamedTypes_AnonRTArray) {
+TEST_F(SpvParserTest, NamedTypes_AnonRTArrayWithDecoration) {
+  // Runtime arrays are always in SSBO, and those are always laid out.
   auto* p = parser(test::Assemble(R"(
+    OpDecorate %arr ArrayStride 8
     %uint = OpTypeInt 32 0
     %arr = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->module().to_str(), HasSubstr("RTArr -> __array__u32"));
+  // TODO(dneto): this is a string collision with array<u32,8>
+  // https://bugs.chromium.org/p/tint/issues/detail?id=102
+  EXPECT_THAT(p->module().to_str(), HasSubstr("RTArr -> __array__u32_8\n"));
+}
+
+TEST_F(SpvParserTest, NamedTypes_AnonRTArray_Dup_EmitBoth) {
+  auto* p = parser(test::Assemble(R"(
+    OpDecorate %arr ArrayStride 8
+    OpDecorate %arr2 ArrayStride 8
+    %uint = OpTypeInt 32 0
+    %arr = OpTypeRuntimeArray %uint
+    %arr2 = OpTypeRuntimeArray %uint
+  )"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_THAT(
+      p->module().to_str(),
+      HasSubstr("RTArr -> __array__u32_8\nRTArr_1 -> __array__u32_8\n"));
 }
 
 TEST_F(SpvParserTest, NamedTypes_NamedRTArray) {
   auto* p = parser(test::Assemble(R"(
     OpName %arr "myrtarr"
+    OpDecorate %arr ArrayStride 8
     %uint = OpTypeInt 32 0
     %arr = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->module().to_str(), HasSubstr("myrtarr -> __array__u32"));
+  EXPECT_THAT(p->module().to_str(), HasSubstr("myrtarr -> __array__u32_8\n"));
+}
+
+TEST_F(SpvParserTest, NamedTypes_NamedArray) {
+  auto* p = parser(test::Assemble(R"(
+    OpName %arr "myarr"
+    OpDecorate %arr ArrayStride 8
+    %uint = OpTypeInt 32 0
+    %uint_5 = OpConstant %uint 5
+    %arr = OpTypeArray %uint %uint_5
+    %arr2 = OpTypeArray %uint %uint_5
+  )"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_THAT(p->module().to_str(), HasSubstr("myarr -> __array__u32_5_8"));
+}
+
+TEST_F(SpvParserTest, NamedTypes_AnonArray_Dup_EmitBoth) {
+  auto* p = parser(test::Assemble(R"(
+    OpDecorate %arr ArrayStride 8
+    OpDecorate %arr2 ArrayStride 8
+    %uint = OpTypeInt 32 0
+    %uint_5 = OpConstant %uint 5
+    %arr = OpTypeArray %uint %uint_5
+    %arr2 = OpTypeArray %uint %uint_5
+  )"));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_THAT(p->module().to_str(),
+              HasSubstr("Arr -> __array__u32_5_8\nArr_1 -> __array__u32_5_8"));
 }
 
 // TODO(dneto): Handle arrays sized by a spec constant.

@@ -281,7 +281,7 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
     if (type != nullptr) {
       id_to_type_[type_id] = type;
     }
-    MaybeGenerateAlias(spirv_type);
+    MaybeGenerateAlias(type_id, spirv_type);
     return type;
   };
 
@@ -303,7 +303,7 @@ ast::type::Type* ParserImpl::ConvertType(uint32_t type_id) {
     case spvtools::opt::analysis::Type::kArray:
       return save(ConvertType(spirv_type->AsArray()));
     case spvtools::opt::analysis::Type::kStruct:
-      return save(ConvertType(spirv_type->AsStruct()));
+      return save(ConvertType(type_id, spirv_type->AsStruct()));
     case spvtools::opt::analysis::Type::kPointer:
       return save(ConvertType(spirv_type->AsPointer()));
     case spvtools::opt::analysis::Type::kFunction:
@@ -671,8 +671,8 @@ bool ParserImpl::ApplyArrayDecorations(
 }
 
 ast::type::Type* ParserImpl::ConvertType(
+    uint32_t type_id,
     const spvtools::opt::analysis::Struct* struct_ty) {
-  const auto type_id = type_mgr_->GetId(struct_ty);
   // Compute the struct decoration.
   auto struct_decorations = this->GetDecorationsFor(type_id);
   auto ast_struct_decoration = ast::StructDecoration::kNone;
@@ -757,11 +757,11 @@ bool ParserImpl::RegisterTypes() {
   return success_;
 }
 
-void ParserImpl::MaybeGenerateAlias(const spvtools::opt::analysis::Type* type) {
+void ParserImpl::MaybeGenerateAlias(uint32_t type_id,
+                                    const spvtools::opt::analysis::Type* type) {
   if (!success_) {
     return;
   }
-  const auto type_id = type_mgr_->GetId(type);
 
   // We only care about struct, arrays, and runtime arrays.
   switch (type->kind()) {
