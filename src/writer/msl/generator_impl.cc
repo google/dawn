@@ -118,6 +118,15 @@ bool GeneratorImpl::Generate(const ast::Module& module) {
     out_ << std::endl;
   }
 
+  for (const auto& var : module.global_variables()) {
+    if (!var->is_const()) {
+      continue;
+    }
+    if (!EmitProgramConstVariable(var.get())) {
+      return false;
+    }
+  }
+
   for (const auto& ep : module.entry_points()) {
     if (!EmitEntryPointData(ep.get())) {
       return false;
@@ -1449,6 +1458,37 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
   if (var->is_const()) {
     out_ << "const ";
   }
+  if (!EmitType(var->type(), var->name())) {
+    return false;
+  }
+  if (!var->type()->IsArray()) {
+    out_ << " " << var->name();
+  }
+
+  if (var->constructor() != nullptr) {
+    out_ << " = ";
+    if (!EmitExpression(var->constructor())) {
+      return false;
+    }
+  }
+  out_ << ";" << std::endl;
+
+  return true;
+}
+
+bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
+  make_indent();
+
+  if (var->IsDecorated()) {
+    error_ = "Decorated const values not valid";
+    return false;
+  }
+  if (!var->is_const()) {
+    error_ = "Expected a const value";
+    return false;
+  }
+
+  out_ << "constant ";
   if (!EmitType(var->type(), var->name())) {
     return false;
   }

@@ -512,6 +512,7 @@ if(${TINT_BUILD_MSL_WRITER})
     writer/msl/generator_impl_kill_test.cc
     writer/msl/generator_impl_loop_test.cc
     writer/msl/generator_impl_member_accessor_test.cc
+    writer/msl/generator_impl_module_constant_test.cc
     writer/msl/generator_impl_return_test.cc
     writer/msl/generator_impl_switch_test.cc
     writer/msl/generator_impl_test.cc

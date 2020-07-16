@@ -195,6 +195,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param var the variable to generate
   /// @returns true if the variable was emitted
   bool EmitVariable(ast::Variable* var);
+  /// Handles generating a program scope constant variable
+  /// @param var the variable to emit
+  /// @returns true if the variable was emitted
+  bool EmitProgramConstVariable(const ast::Variable* var);
   /// Emits the zero value for the given type
   /// @param type the type to emit the value for
   /// @returns true if the zero value was successfully emitted.
