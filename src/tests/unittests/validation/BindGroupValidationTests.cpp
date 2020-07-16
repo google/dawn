@@ -872,6 +872,13 @@ TEST_F(BindGroupLayoutValidationTest, MultisampledTextures) {
                     {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
                      true, wgpu::TextureViewDimension::e3D},
                 }));
+
+    // Multisampled 1D texture is invalid.
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Compute, wgpu::BindingType::SampledTexture, false, 0,
+                     true, wgpu::TextureViewDimension::e1D},
+                }));
 }
 
 // Test that it is an error to pass multisampled=true for non-texture bindings

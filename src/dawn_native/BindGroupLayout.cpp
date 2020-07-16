@@ -179,6 +179,8 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("3D texture bindings may not be multisampled");
 
             case wgpu::TextureViewDimension::e1D:
+                return DAWN_VALIDATION_ERROR("1D texture bindings may not be multisampled");
+
             case wgpu::TextureViewDimension::Undefined:
             default:
                 UNREACHABLE();
