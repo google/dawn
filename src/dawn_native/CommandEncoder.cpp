@@ -656,9 +656,13 @@ namespace dawn_native {
                 DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst));
                 DAWN_TRY(ValidateTextureSampleCountInCopyCommands(destination->texture));
 
+                // We validate texture copy range before validating linear texture data,
+                // because in the latter we divide copyExtent.width by blockWidth and
+                // copyExtent.height by blockHeight while the divisibility conditions are
+                // checked in validating texture copy range.
+                DAWN_TRY(ValidateTextureCopyRange(*destination, *copySize));
                 DAWN_TRY(ValidateLinearTextureData(source->layout, source->buffer->GetSize(),
                                                    destination->texture->GetFormat(), *copySize));
-                DAWN_TRY(ValidateTextureCopyRange(*destination, *copySize));
 
                 mTopLevelBuffers.insert(source->buffer);
                 mTopLevelTextures.insert(destination->texture);
@@ -709,10 +713,14 @@ namespace dawn_native {
                 DAWN_TRY(ValidateBufferCopyView(GetDevice(), *destination));
                 DAWN_TRY(ValidateCanUseAs(destination->buffer, wgpu::BufferUsage::CopyDst));
 
+                // We validate texture copy range before validating linear texture data,
+                // because in the latter we divide copyExtent.width by blockWidth and
+                // copyExtent.height by blockHeight while the divisibility conditions are
+                // checked in validating texture copy range.
+                DAWN_TRY(ValidateTextureCopyRange(*source, *copySize));
                 DAWN_TRY(ValidateLinearTextureData(destination->layout,
                                                    destination->buffer->GetSize(),
                                                    source->texture->GetFormat(), *copySize));
-                DAWN_TRY(ValidateTextureCopyRange(*source, *copySize));
 
                 mTopLevelTextures.insert(source->texture);
                 mTopLevelBuffers.insert(destination->buffer);

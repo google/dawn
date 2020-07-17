@@ -410,11 +410,23 @@ namespace dawn_native {
                                          uint64_t byteSize,
                                          const Format& format,
                                          const Extent3D& copyExtent) {
+        // Validation for the texel block alignments:
+        if (layout.rowsPerImage % format.blockHeight != 0) {
+            return DAWN_VALIDATION_ERROR(
+                "rowsPerImage must be a multiple of compressed texture format block height");
+        }
+
+        if (layout.offset % format.blockByteSize != 0) {
+            return DAWN_VALIDATION_ERROR("Offset must be a multiple of the texel or block size");
+        }
+
         // Validation for the copy being in-bounds:
         if (layout.rowsPerImage != 0 && layout.rowsPerImage < copyExtent.height) {
             return DAWN_VALIDATION_ERROR("rowsPerImage must not be less than the copy height.");
         }
 
+        // We compute required bytes in copy after validating texel block alignments
+        // because the divisibility conditions are necessary for the algorithm to be valid.
         // TODO(tommek@google.com): to match the spec this should only be checked when
         // copyExtent.depth > 1.
         uint32_t requiredBytesInCopy =
@@ -425,16 +437,6 @@ namespace dawn_native {
         if (!fitsInData) {
             return DAWN_VALIDATION_ERROR(
                 "Required size for texture data layout exceeds the given size");
-        }
-
-        // Validation for the texel block alignments:
-        if (layout.rowsPerImage % format.blockHeight != 0) {
-            return DAWN_VALIDATION_ERROR(
-                "rowsPerImage must be a multiple of compressed texture format block height");
-        }
-
-        if (layout.offset % format.blockByteSize != 0) {
-            return DAWN_VALIDATION_ERROR("Offset must be a multiple of the texel or block size");
         }
 
         // Validation for other members in layout:
