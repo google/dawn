@@ -41,9 +41,15 @@ namespace dawn_native { namespace vulkan {
             uint32_t newDataSize = ComputeRequiredBytesInCopy(
                 textureFormat, *writeSize, optimallyAlignedBytesPerRow, alignedRowsPerImage);
 
+            uint64_t optimalOffsetAlignment =
+                ToBackend(device)
+                    ->GetDeviceInfo()
+                    .properties.limits.optimalBufferCopyOffsetAlignment;
+
             UploadHandle uploadHandle;
             DAWN_TRY_ASSIGN(uploadHandle, device->GetDynamicUploader()->Allocate(
-                                              newDataSize, device->GetPendingCommandSerial()));
+                                              newDataSize + optimalOffsetAlignment - 1,
+                                              device->GetPendingCommandSerial()));
             ASSERT(uploadHandle.mappedBuffer != nullptr);
 
             // TODO(tommek@google.com): Add an optimization to do a single memcpy if the data
@@ -57,6 +63,11 @@ namespace dawn_native { namespace vulkan {
             if (dataRowsPerImageInBlock == 0) {
                 dataRowsPerImageInBlock = writeSize->height / textureFormat.blockHeight;
             }
+
+            uint64_t additionalOffset =
+                Align(uploadHandle.startOffset, optimalOffsetAlignment) - uploadHandle.startOffset;
+            uploadHandle.startOffset += additionalOffset;
+            dstPointer += additionalOffset;
 
             ASSERT(dataRowsPerImageInBlock >= alignedRowsPerImageInBlock);
             uint64_t imageAdditionalStride =
