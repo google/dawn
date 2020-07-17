@@ -33,12 +33,13 @@ namespace dawn_native { namespace vulkan {
             const void* data,
             size_t dataSize,
             uint32_t alignedBytesPerRow,
+            uint32_t optimallyAlignedBytesPerRow,
             uint32_t alignedRowsPerImage,
             const TextureDataLayout* dataLayout,
             const Format& textureFormat,
             const Extent3D* writeSize) {
             uint32_t newDataSize = ComputeRequiredBytesInCopy(
-                textureFormat, *writeSize, alignedBytesPerRow, alignedRowsPerImage);
+                textureFormat, *writeSize, optimallyAlignedBytesPerRow, alignedRowsPerImage);
 
             UploadHandle uploadHandle;
             DAWN_TRY_ASSIGN(uploadHandle, device->GetDynamicUploader()->Allocate(
@@ -63,7 +64,7 @@ namespace dawn_native { namespace vulkan {
             for (uint32_t d = 0; d < writeSize->depth; ++d) {
                 for (uint32_t h = 0; h < alignedRowsPerImageInBlock; ++h) {
                     memcpy(dstPointer, srcPointer, alignedBytesPerRow);
-                    dstPointer += alignedBytesPerRow;
+                    dstPointer += optimallyAlignedBytesPerRow;
                     srcPointer += dataLayout->bytesPerRow;
                 }
                 srcPointer += imageAdditionalStride;
@@ -109,20 +110,26 @@ namespace dawn_native { namespace vulkan {
         // We are only copying the part of the data that will appear in the texture.
         // Note that validating texture copy range ensures that writeSize->width and
         // writeSize->height are multiples of blockWidth and blockHeight respectively.
-        // TODO(tommek@google.com): Add an optimization to align bytesPerRow to
-        // VkPhysicalDeviceLimits::optimalBufferCopyRowPitch.
         uint32_t alignedBytesPerRow = (writeSize->width) / blockWidth * blockSize;
         uint32_t alignedRowsPerImage = writeSize->height;
 
+        uint32_t optimalBytesPerRowAlignment =
+            ToBackend(GetDevice())
+                ->GetDeviceInfo()
+                .properties.limits.optimalBufferCopyRowPitchAlignment;
+        uint32_t optimallyAlignedBytesPerRow =
+            Align(alignedBytesPerRow, optimalBytesPerRowAlignment);
+
         UploadHandle uploadHandle;
-        DAWN_TRY_ASSIGN(uploadHandle,
-                        UploadTextureDataAligningBytesPerRow(
-                            GetDevice(), data, dataSize, alignedBytesPerRow, alignedRowsPerImage,
-                            dataLayout, destination->texture->GetFormat(), writeSize));
+        DAWN_TRY_ASSIGN(
+            uploadHandle,
+            UploadTextureDataAligningBytesPerRow(
+                GetDevice(), data, dataSize, alignedBytesPerRow, optimallyAlignedBytesPerRow,
+                alignedRowsPerImage, dataLayout, destination->texture->GetFormat(), writeSize));
 
         TextureDataLayout passDataLayout = *dataLayout;
         passDataLayout.offset = uploadHandle.startOffset;
-        passDataLayout.bytesPerRow = alignedBytesPerRow;
+        passDataLayout.bytesPerRow = optimallyAlignedBytesPerRow;
         passDataLayout.rowsPerImage = alignedRowsPerImage;
 
         TextureCopy textureCopy;
