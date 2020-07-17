@@ -382,7 +382,7 @@ TEST_P(BufferMappingTests, MapRead_NonZeroOffset) {
     queue.WriteBuffer(buffer, 0, &myData, sizeof(myData));
 
     MapAsyncAndWait(buffer, wgpu::MapMode::Read, 4, 4);
-    ASSERT_EQ(myData[1], *static_cast<const uint32_t*>(buffer.GetConstMappedRange()));
+    ASSERT_EQ(myData[1], *static_cast<const uint32_t*>(buffer.GetConstMappedRange(4)));
     buffer.Unmap();
 }
 
@@ -451,7 +451,7 @@ TEST_P(BufferMappingTests, MapWrite_NonZeroOffset) {
 
     uint32_t myData = 2934875;
     MapAsyncAndWait(buffer, wgpu::MapMode::Write, 4, 4);
-    memcpy(buffer.GetMappedRange(), &myData, sizeof(myData));
+    memcpy(buffer.GetMappedRange(4), &myData, sizeof(myData));
     buffer.Unmap();
 
     EXPECT_BUFFER_U32_EQ(myData, buffer, 4);
@@ -518,7 +518,7 @@ TEST_P(BufferMappingTests, OffsetNotUpdatedOnError) {
     }
 
     // mMapOffset has not been updated so it should still be 4, which is data[1]
-    ASSERT_EQ(0, memcmp(buffer.GetConstMappedRange(), &data[1], sizeof(uint32_t)));
+    ASSERT_EQ(0, memcmp(buffer.GetConstMappedRange(4), &data[1], sizeof(uint32_t)));
 }
 
 DAWN_INSTANTIATE_TEST(BufferMappingTests,

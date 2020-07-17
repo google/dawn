@@ -315,7 +315,7 @@ namespace dawn_native { namespace opengl {
             Ref<Buffer> srcBuffer = AcquireRef(ToBackend(device->CreateBuffer(&descriptor)));
 
             // Fill the buffer with clear color
-            memset(srcBuffer->GetMappedRange(), clearColor, descriptor.size);
+            memset(srcBuffer->GetMappedRange(0, descriptor.size), clearColor, descriptor.size);
             srcBuffer->Unmap();
 
             // Bind buffer and texture, and make the buffer to texture copy

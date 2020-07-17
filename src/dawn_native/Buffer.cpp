@@ -140,6 +140,8 @@ namespace dawn_native {
         : ObjectBase(device, tag), mSize(descriptor->size), mState(BufferState::Unmapped) {
         if (descriptor->mappedAtCreation) {
             mState = BufferState::MappedAtCreation;
+            mMapOffset = 0;
+            mMapSize = mSize;
         }
     }
 
@@ -169,6 +171,8 @@ namespace dawn_native {
     MaybeError BufferBase::MapAtCreation() {
         ASSERT(!IsError());
         mState = BufferState::MappedAtCreation;
+        mMapOffset = 0;
+        mMapSize = mSize;
 
         // 0-sized buffers are not supposed to be written to, Return back any non-null pointer.
         // Handle 0-sized buffers first so we don't try to map them in the backend.
@@ -294,6 +298,7 @@ namespace dawn_native {
         mMapReadCallback = callback;
         mMapUserdata = userdata;
         mMapOffset = 0;
+        mMapSize = mSize;
         mState = BufferState::Mapped;
 
         if (GetDevice()->ConsumedError(MapReadAsyncImpl())) {
@@ -323,6 +328,7 @@ namespace dawn_native {
         mMapWriteCallback = callback;
         mMapUserdata = userdata;
         mMapOffset = 0;
+        mMapSize = mSize;
         mState = BufferState::Mapped;
 
         if (GetDevice()->ConsumedError(MapWriteAsyncImpl())) {
@@ -359,6 +365,7 @@ namespace dawn_native {
         mMapSerial++;
         mMapMode = mode;
         mMapOffset = offset;
+        mMapSize = size;
         mMapCallback = callback;
         mMapUserdata = userdata;
         mState = BufferState::Mapped;
@@ -372,28 +379,28 @@ namespace dawn_native {
         tracker->Track(this, mMapSerial, MapType::Async);
     }
 
-    void* BufferBase::GetMappedRange() {
-        return GetMappedRangeInternal(true);
+    void* BufferBase::GetMappedRange(size_t offset, size_t size) {
+        return GetMappedRangeInternal(true, offset, size);
     }
 
-    const void* BufferBase::GetConstMappedRange() {
-        return GetMappedRangeInternal(false);
+    const void* BufferBase::GetConstMappedRange(size_t offset, size_t size) {
+        return GetMappedRangeInternal(false, offset, size);
     }
 
     // TODO(dawn:445): When CreateBufferMapped is removed, make GetMappedRangeInternal also take
     // care of the validation of GetMappedRange.
-    void* BufferBase::GetMappedRangeInternal(bool writable) {
-        if (!CanGetMappedRange(writable)) {
+    void* BufferBase::GetMappedRangeInternal(bool writable, size_t offset, size_t size) {
+        if (!CanGetMappedRange(writable, offset, size)) {
             return nullptr;
         }
 
         if (mStagingBuffer != nullptr) {
-            return static_cast<uint8_t*>(mStagingBuffer->GetMappedPointer()) + mMapOffset;
+            return static_cast<uint8_t*>(mStagingBuffer->GetMappedPointer()) + offset;
         }
         if (mSize == 0) {
             return reinterpret_cast<uint8_t*>(intptr_t(0xCAFED00D));
         }
-        return static_cast<uint8_t*>(GetMappedPointerImpl()) + mMapOffset;
+        return static_cast<uint8_t*>(GetMappedPointerImpl()) + offset;
     }
 
     void BufferBase::Destroy() {
@@ -554,7 +561,16 @@ namespace dawn_native {
         return {};
     }
 
-    bool BufferBase::CanGetMappedRange(bool writable) const {
+    bool BufferBase::CanGetMappedRange(bool writable, size_t offset, size_t size) const {
+        if (size > mMapSize || offset < mMapOffset) {
+            return false;
+        }
+
+        size_t offsetInMappedRange = offset - mMapOffset;
+        if (offsetInMappedRange > mMapSize - size) {
+            return false;
+        }
+
         // Note that:
         //
         //   - We don't check that the device is alive because the application can ask for the
@@ -622,11 +638,11 @@ namespace dawn_native {
         switch (type) {
             case MapType::Read:
                 CallMapReadCallback(mapSerial, WGPUBufferMapAsyncStatus_Success,
-                                    GetMappedRangeInternal(false), GetSize());
+                                    GetMappedRangeInternal(false, 0, mSize), GetSize());
                 break;
             case MapType::Write:
                 CallMapWriteCallback(mapSerial, WGPUBufferMapAsyncStatus_Success,
-                                     GetMappedRangeInternal(true), GetSize());
+                                     GetMappedRangeInternal(true, 0, mSize), GetSize());
                 break;
             case MapType::Async:
                 CallMapCallback(mapSerial, WGPUBufferMapAsyncStatus_Success);

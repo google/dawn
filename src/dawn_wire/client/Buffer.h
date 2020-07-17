@@ -47,18 +47,19 @@ namespace dawn_wire { namespace client {
                       size_t size,
                       WGPUBufferMapCallback callback,
                       void* userdata);
-        void* GetMappedRange();
-        const void* GetConstMappedRange();
+        void* GetMappedRange(size_t offset, size_t size);
+        const void* GetConstMappedRange(size_t offset, size_t size);
         void Unmap();
 
         void Destroy();
 
         void SetSubData(uint64_t start, uint64_t count, const void* data);
 
+      private:
         bool IsMappedForReading() const;
         bool IsMappedForWriting() const;
+        bool CheckGetMappedRangeOffsetSize(size_t offset, size_t size) const;
 
-      private:
         // We want to defer all the validation to the server, which means we could have multiple
         // map request in flight at a single time and need to track them separately.
         // On well-behaved applications, only one request should exist at a single time.
@@ -82,6 +83,7 @@ namespace dawn_wire { namespace client {
         std::unique_ptr<MemoryTransferService::WriteHandle> mWriteHandle = nullptr;
         void* mMappedData = nullptr;
         size_t mMapOffset = 0;
+        size_t mMapSize = 0;
     };
 
 }}  // namespace dawn_wire::client

@@ -143,7 +143,7 @@ class WireMemoryTransferServiceTests : public WireTest {
 
     std::pair<WGPUBuffer, WGPUBuffer> CreateBuffer() {
         WGPUBufferDescriptor descriptor = {};
-        descriptor.size = sizeof(mBufferContent);
+        descriptor.size = kBufferSize;
 
         WGPUBuffer apiBuffer = api.GetNewBuffer();
         WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
@@ -349,6 +349,8 @@ class WireMemoryTransferServiceTests : public WireTest {
     // Represents the buffer contents for the test.
     static uint32_t mBufferContent;
 
+    static constexpr size_t kBufferSize = sizeof(mBufferContent);
+
     // The client's zero-initialized buffer for writing.
     uint32_t mMappedBufferContent = 0;
 
@@ -389,7 +391,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadSuccess) {
     EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
         api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
     }));
-    EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer)).WillOnce(Return(&mBufferContent));
+    EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
+        .WillOnce(Return(&mBufferContent));
 
     FlushClient();
 
@@ -521,7 +524,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDeserializeInitialDataFailur
     EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
         api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
     }));
-    EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer)).WillOnce(Return(&mBufferContent));
+    EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
+        .WillOnce(Return(&mBufferContent));
 
     FlushClient();
 
@@ -565,7 +569,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDestroyBeforeUnmap) {
     EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
         api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
     }));
-    EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer)).WillOnce(Return(&mBufferContent));
+    EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
+        .WillOnce(Return(&mBufferContent));
 
     FlushClient();
 
@@ -616,7 +621,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteSuccess) {
     EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
         api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
     }));
-    EXPECT_CALL(api, BufferGetMappedRange(apiBuffer)).WillOnce(Return(&mMappedBufferContent));
+    EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))
+        .WillOnce(Return(&mMappedBufferContent));
 
     FlushClient();
 
@@ -755,7 +761,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteHandleOpenFailure) {
     EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
         api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
     }));
-    EXPECT_CALL(api, BufferGetMappedRange(apiBuffer)).WillOnce(Return(&mMappedBufferContent));
+    EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))
+        .WillOnce(Return(&mMappedBufferContent));
 
     FlushClient();
 
@@ -795,7 +802,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDeserializeFlushFailure) {
     EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
         api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
     }));
-    EXPECT_CALL(api, BufferGetMappedRange(apiBuffer)).WillOnce(Return(&mMappedBufferContent));
+    EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))
+        .WillOnce(Return(&mMappedBufferContent));
 
     FlushClient();
 
@@ -846,7 +854,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDestroyBeforeUnmap) {
     EXPECT_CALL(api, OnBufferMapAsyncCallback(apiBuffer, _, _)).WillOnce(InvokeWithoutArgs([&]() {
         api.CallMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
     }));
-    EXPECT_CALL(api, BufferGetMappedRange(apiBuffer)).WillOnce(Return(&mMappedBufferContent));
+    EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, kBufferSize))
+        .WillOnce(Return(&mMappedBufferContent));
 
     FlushClient();
 

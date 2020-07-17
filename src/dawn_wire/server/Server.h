@@ -27,6 +27,7 @@ namespace dawn_wire { namespace server {
         ObjectHandle buffer;
         WGPUBuffer bufferObj;
         uint32_t requestSerial;
+        uint64_t offset;
         uint64_t size;
         WGPUMapModeFlags mode;
         // TODO(enga): Use a tagged pointer to save space.

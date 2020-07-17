@@ -252,6 +252,46 @@ TEST_F(BufferValidationTest, MapAsync_OffsetSizeAlignment) {
     }
 }
 
+// Test map async with an invalid offset and size OOB checks
+TEST_F(BufferValidationTest, MapAsync_OffsetSizeOOB) {
+    // Valid case: full buffer is ok.
+    {
+        wgpu::Buffer buffer = CreateMapReadBuffer(8);
+        buffer.MapAsync(wgpu::MapMode::Read, 0, 8, nullptr, nullptr);
+    }
+
+    // Valid case: range in the middle of the buffer is ok.
+    {
+        wgpu::Buffer buffer = CreateMapReadBuffer(12);
+        buffer.MapAsync(wgpu::MapMode::Read, 4, 4, nullptr, nullptr);
+    }
+
+    // Valid case: empty range at the end of the buffer is ok.
+    {
+        wgpu::Buffer buffer = CreateMapReadBuffer(8);
+        buffer.MapAsync(wgpu::MapMode::Read, 8, 0, nullptr, nullptr);
+    }
+
+    // Error case, offset is larger than the buffer size (even if size is 0).
+    {
+        wgpu::Buffer buffer = CreateMapReadBuffer(8);
+        AssertMapAsyncError(buffer, wgpu::MapMode::Read, 12, 0);
+    }
+
+    // Error case, offset + size is larger than the buffer
+    {
+        wgpu::Buffer buffer = CreateMapReadBuffer(12);
+        AssertMapAsyncError(buffer, wgpu::MapMode::Read, 8, 8);
+    }
+
+    // Error case, offset + size is larger than the buffer, overflow case.
+    {
+        wgpu::Buffer buffer = CreateMapReadBuffer(12);
+        AssertMapAsyncError(buffer, wgpu::MapMode::Read, 4,
+                            std::numeric_limits<size_t>::max() & ~size_t(3));
+    }
+}
+
 // Test map async with a buffer that has the wrong usage
 TEST_F(BufferValidationTest, MapAsync_WrongUsage) {
     {
@@ -1051,7 +1091,7 @@ TEST_F(BufferValidationTest, UnmapUnmappedBuffer) {
 }
 
 // Test that it is invalid to call GetMappedRange on an unmapped buffer.
-TEST_F(BufferValidationTest, GetMappedRangeOnUnmappedBuffer) {
+TEST_F(BufferValidationTest, GetMappedRange_OnUnmappedBuffer) {
     // Unmapped at creation case.
     {
         wgpu::BufferDescriptor desc;
@@ -1138,7 +1178,7 @@ TEST_F(BufferValidationTest, GetMappedRangeOnUnmappedBuffer) {
 }
 
 // Test that it is invalid to call GetMappedRange on a destroyed buffer.
-TEST_F(BufferValidationTest, GetMappedRangeOnDestroyedBuffer) {
+TEST_F(BufferValidationTest, GetMappedRange_OnDestroyedBuffer) {
     // Destroyed after creation case.
     {
         wgpu::BufferDescriptor desc;
@@ -1225,8 +1265,8 @@ TEST_F(BufferValidationTest, GetMappedRangeOnDestroyedBuffer) {
     }
 }
 
-// Test that it is invalid to call GetMappedRange on a buffer afterMapReadAsync
-TEST_F(BufferValidationTest, GetMappedRangeOnMappedForReading) {
+// Test that it is invalid to call GetMappedRange on a buffer after MapReadAsync
+TEST_F(BufferValidationTest, GetMappedRange_OnMappedForReading) {
     {
         wgpu::Buffer buf = CreateMapReadBuffer(4);
 
@@ -1251,7 +1291,7 @@ TEST_F(BufferValidationTest, GetMappedRangeOnMappedForReading) {
 }
 
 // Test valid cases to call GetMappedRange on a buffer.
-TEST_F(BufferValidationTest, GetMappedRangeValidCases) {
+TEST_F(BufferValidationTest, GetMappedRange_ValidBufferStateCases) {
     // GetMappedRange after CreateBufferMapped case.
     {
         wgpu::CreateBufferMappedResult result = CreateBufferMapped(4, wgpu::BufferUsage::CopySrc);
@@ -1303,7 +1343,7 @@ TEST_F(BufferValidationTest, GetMappedRangeValidCases) {
 }
 
 // Test valid cases to call GetMappedRange on an error buffer.
-TEST_F(BufferValidationTest, GetMappedRangeOnErrorBuffer) {
+TEST_F(BufferValidationTest, GetMappedRange_OnErrorBuffer) {
     wgpu::BufferDescriptor desc;
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::MapRead;
@@ -1375,5 +1415,64 @@ TEST_F(BufferValidationTest, GetMappedRangeOnErrorBuffer) {
 
         ASSERT_EQ(buffer.GetConstMappedRange(), nullptr);
         ASSERT_EQ(buffer.GetConstMappedRange(), buffer.GetMappedRange());
+    }
+}
+
+// Test validation of the GetMappedRange parameters
+TEST_F(BufferValidationTest, GetMappedRange_OffsetSizeOOB) {
+    // Valid case: full range is ok
+    {
+        wgpu::Buffer buffer = CreateMapWriteBuffer(8);
+        buffer.MapAsync(wgpu::MapMode::Write, 0, 8, nullptr, nullptr);
+        EXPECT_NE(buffer.GetMappedRange(0, 8), nullptr);
+    }
+
+    // Valid case: full range is ok with defaulted MapAsync size
+    {
+        wgpu::Buffer buffer = CreateMapWriteBuffer(8);
+        buffer.MapAsync(wgpu::MapMode::Write, 0, 0, nullptr, nullptr);
+        EXPECT_NE(buffer.GetMappedRange(0, 8), nullptr);
+    }
+
+    // Valid case: empty range at the end is ok
+    {
+        wgpu::Buffer buffer = CreateMapWriteBuffer(8);
+        buffer.MapAsync(wgpu::MapMode::Write, 0, 8, nullptr, nullptr);
+        EXPECT_NE(buffer.GetMappedRange(8, 0), nullptr);
+    }
+
+    // Valid case: range in the middle is ok.
+    {
+        wgpu::Buffer buffer = CreateMapWriteBuffer(12);
+        buffer.MapAsync(wgpu::MapMode::Write, 0, 12, nullptr, nullptr);
+        EXPECT_NE(buffer.GetMappedRange(4, 4), nullptr);
+    }
+
+    // Error case: offset is larger than the mapped range (even with size = 0)
+    {
+        wgpu::Buffer buffer = CreateMapWriteBuffer(8);
+        buffer.MapAsync(wgpu::MapMode::Write, 0, 8, nullptr, nullptr);
+        EXPECT_EQ(buffer.GetMappedRange(9, 0), nullptr);
+    }
+
+    // Error case: offset + size is larger than the mapped range
+    {
+        wgpu::Buffer buffer = CreateMapWriteBuffer(12);
+        buffer.MapAsync(wgpu::MapMode::Write, 0, 12, nullptr, nullptr);
+        EXPECT_EQ(buffer.GetMappedRange(8, 5), nullptr);
+    }
+
+    // Error case: offset + size is larger than the mapped range, overflow case
+    {
+        wgpu::Buffer buffer = CreateMapWriteBuffer(12);
+        buffer.MapAsync(wgpu::MapMode::Write, 0, 12, nullptr, nullptr);
+        EXPECT_EQ(buffer.GetMappedRange(8, std::numeric_limits<size_t>::max()), nullptr);
+    }
+
+    // Error case: offset is before the start of the range
+    {
+        wgpu::Buffer buffer = CreateMapWriteBuffer(12);
+        buffer.MapAsync(wgpu::MapMode::Write, 4, 4, nullptr, nullptr);
+        EXPECT_EQ(buffer.GetMappedRange(3, 4), nullptr);
     }
 }

@@ -67,8 +67,8 @@ namespace dawn_native {
                       size_t size,
                       WGPUBufferMapCallback callback,
                       void* userdata);
-        void* GetMappedRange();
-        const void* GetConstMappedRange();
+        void* GetMappedRange(size_t offset, size_t size);
+        const void* GetConstMappedRange(size_t offset, size_t size);
         void Unmap();
         void Destroy();
 
@@ -93,7 +93,7 @@ namespace dawn_native {
 
         virtual bool IsMappableAtCreation() const = 0;
         MaybeError CopyFromStagingBuffer();
-        void* GetMappedRangeInternal(bool writable);
+        void* GetMappedRangeInternal(bool writable, size_t offset, size_t size);
         void CallMapReadCallback(uint32_t serial,
                                  WGPUBufferMapAsyncStatus status,
                                  const void* pointer,
@@ -112,7 +112,7 @@ namespace dawn_native {
                                     WGPUBufferMapAsyncStatus* status) const;
         MaybeError ValidateUnmap() const;
         MaybeError ValidateDestroy() const;
-        bool CanGetMappedRange(bool writable) const;
+        bool CanGetMappedRange(bool writable, size_t offset, size_t size) const;
 
         uint64_t mSize = 0;
         wgpu::BufferUsage mUsage = wgpu::BufferUsage::None;
@@ -128,6 +128,7 @@ namespace dawn_native {
         uint32_t mMapSerial = 0;
         wgpu::MapMode mMapMode = wgpu::MapMode::None;
         size_t mMapOffset = 0;
+        size_t mMapSize = 0;
     };
 
 }  // namespace dawn_native

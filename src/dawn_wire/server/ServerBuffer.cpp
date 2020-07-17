@@ -82,6 +82,7 @@ namespace dawn_wire { namespace server {
         userdata->buffer = ObjectHandle{bufferId, buffer->generation};
         userdata->bufferObj = buffer->handle;
         userdata->requestSerial = requestSerial;
+        userdata->offset = offset;
         userdata->size = size;
         userdata->mode = mode;
 
@@ -248,7 +249,7 @@ namespace dawn_wire { namespace server {
         const void* readData = nullptr;
         if (isSuccess && isRead) {
             // Get the serialization size of the message to initialize ReadHandle data.
-            readData = mProcs.bufferGetConstMappedRange(data->bufferObj);
+            readData = mProcs.bufferGetConstMappedRange(data->bufferObj, data->offset, data->size);
             cmd.readInitialDataInfoLength =
                 data->readHandle->SerializeInitialDataSize(readData, data->size);
         }
@@ -268,8 +269,9 @@ namespace dawn_wire { namespace server {
                 bufferData->writeHandle = std::move(data->writeHandle);
                 bufferData->mapWriteState = BufferMapWriteState::Mapped;
                 // Set the target of the WriteHandle to the mapped buffer data.
-                bufferData->writeHandle->SetTarget(mProcs.bufferGetMappedRange(data->bufferObj),
-                                                   data->size);
+                bufferData->writeHandle->SetTarget(
+                    mProcs.bufferGetMappedRange(data->bufferObj, data->offset, data->size),
+                    data->size);
             }
         }
     }

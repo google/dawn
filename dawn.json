@@ -209,11 +209,19 @@
             },
             {
                 "name": "get mapped range",
-                "returns": "void *"
+                "returns": "void *",
+                "args": [
+                    {"name": "offset", "type": "size_t", "default": 0},
+                    {"name": "size", "type": "size_t", "default": 0}
+                ]
             },
             {
                 "name": "get const mapped range",
-                "returns": "void const *"
+                "returns": "void const *",
+                "args": [
+                    {"name": "offset", "type": "size_t", "default": 0},
+                    {"name": "size", "type": "size_t", "default": 0}
+                ]
             },
             {
                 "name": "unmap"
