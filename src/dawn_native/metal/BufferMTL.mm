@@ -110,6 +110,10 @@ namespace dawn_native { namespace metal {
     }
 
     MaybeError Buffer::MapAtCreationImpl() {
+        CommandRecordingContext* commandContext =
+            ToBackend(GetDevice())->GetPendingCommandContext();
+        EnsureDataInitialized(commandContext);
+
         return {};
     }
 
@@ -122,6 +126,10 @@ namespace dawn_native { namespace metal {
     }
 
     MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
+        CommandRecordingContext* commandContext =
+            ToBackend(GetDevice())->GetPendingCommandContext();
+        EnsureDataInitialized(commandContext);
+
         return {};
     }
 

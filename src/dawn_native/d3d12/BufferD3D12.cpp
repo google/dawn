@@ -275,6 +275,10 @@ namespace dawn_native { namespace d3d12 {
     }
 
     MaybeError Buffer::MapAtCreationImpl() {
+        CommandRecordingContext* commandContext;
+        DAWN_TRY_ASSIGN(commandContext, ToBackend(GetDevice())->GetPendingCommandContext());
+        DAWN_TRY(EnsureDataInitialized(commandContext));
+
         // Setting isMapWrite to false on MapRead buffers to silence D3D12 debug layer warning.
         bool isMapWrite = (GetUsage() & wgpu::BufferUsage::MapWrite) != 0;
         DAWN_TRY(MapInternal(isMapWrite, 0, size_t(GetSize()), "D3D12 map at creation"));
@@ -290,6 +294,10 @@ namespace dawn_native { namespace d3d12 {
     }
 
     MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
+        CommandRecordingContext* commandContext;
+        DAWN_TRY_ASSIGN(commandContext, ToBackend(GetDevice())->GetPendingCommandContext());
+        DAWN_TRY(EnsureDataInitialized(commandContext));
+
         return MapInternal(mode & wgpu::MapMode::Write, offset, size, "D3D12 map async");
     }
 

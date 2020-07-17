@@ -99,6 +99,8 @@ namespace dawn_native { namespace opengl {
     }
 
     MaybeError Buffer::MapAtCreationImpl() {
+        EnsureDataInitialized();
+
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
         gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
         mMappedData = gl.MapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
@@ -136,6 +138,8 @@ namespace dawn_native { namespace opengl {
             }
             size = 4;
         }
+
+        EnsureDataInitialized();
 
         // TODO(cwallez@chromium.org): this does GPU->CPU synchronization, we could require a high
         // version of OpenGL that would let us map the buffer unsynchronized.

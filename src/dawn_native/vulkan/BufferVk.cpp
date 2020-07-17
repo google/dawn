@@ -240,6 +240,12 @@ namespace dawn_native { namespace vulkan {
     }
 
     MaybeError Buffer::MapAtCreationImpl() {
+        CommandRecordingContext* recordingContext =
+            ToBackend(GetDevice())->GetPendingRecordingContext();
+
+        // TODO(jiawei.shao@intel.com): initialize mapped buffer in CPU side.
+        EnsureDataInitialized(recordingContext);
+
         return {};
     }
 
@@ -263,6 +269,10 @@ namespace dawn_native { namespace vulkan {
         Device* device = ToBackend(GetDevice());
 
         CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
+
+        // TODO(jiawei.shao@intel.com): initialize mapped buffer in CPU side.
+        EnsureDataInitialized(recordingContext);
+
         if (mode & wgpu::MapMode::Read) {
             TransitionUsageNow(recordingContext, wgpu::BufferUsage::MapRead);
         } else {

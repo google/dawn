@@ -30,11 +30,34 @@
 
 class BufferZeroInitTest : public DawnTest {
   public:
-    wgpu::Buffer CreateBuffer(uint64_t size, wgpu::BufferUsage usage) {
+    wgpu::Buffer CreateBuffer(uint64_t size,
+                              wgpu::BufferUsage usage,
+                              bool mappedAtCreation = false) {
         wgpu::BufferDescriptor descriptor;
         descriptor.size = size;
         descriptor.usage = usage;
+        descriptor.mappedAtCreation = mappedAtCreation;
         return device.CreateBuffer(&descriptor);
+    }
+
+    void MapAsyncAndWait(wgpu::Buffer buffer,
+                         wgpu::MapMode mapMode,
+                         uint64_t offset,
+                         uint64_t size) {
+        ASSERT(mapMode == wgpu::MapMode::Read || mapMode == wgpu::MapMode::Write);
+
+        bool done = false;
+        buffer.MapAsync(
+            mapMode, offset, size,
+            [](WGPUBufferMapAsyncStatus status, void* userdata) {
+                ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
+                *static_cast<bool*>(userdata) = true;
+            },
+            &done);
+
+        while (!done) {
+            WaitABit();
+        }
     }
 };
 
@@ -258,6 +281,101 @@ TEST_P(BufferZeroInitTest, CopyBufferToBufferDestination) {
         EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<uint32_t*>(expectedData.data()), dstBuffer, 0,
                                    kBufferSize / sizeof(uint32_t));
     }
+}
+
+// Test that the code path of readable buffer mapping clears the buffer correctly when it is the
+// first use of the buffer.
+TEST_P(BufferZeroInitTest, MapReadAsync) {
+    constexpr uint32_t kBufferSize = 16u;
+    constexpr wgpu::BufferUsage kBufferUsage =
+        wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
+
+    constexpr wgpu::MapMode kMapMode = wgpu::MapMode::Read;
+
+    // Map the whole buffer
+    {
+        wgpu::Buffer buffer = CreateBuffer(kBufferSize, kBufferUsage);
+        EXPECT_LAZY_CLEAR(1u, MapAsyncAndWait(buffer, kMapMode, 0, kBufferSize));
+
+        const uint32_t* mappedDataUint = static_cast<const uint32_t*>(buffer.GetConstMappedRange());
+        for (uint32_t i = 0; i < kBufferSize / sizeof(uint32_t); ++i) {
+            EXPECT_EQ(0u, mappedDataUint[i]);
+        }
+        buffer.Unmap();
+    }
+
+    // Map a range of a buffer
+    {
+        wgpu::Buffer buffer = CreateBuffer(kBufferSize, kBufferUsage);
+
+        constexpr uint64_t kOffset = 4u;
+        constexpr uint64_t kSize = 8u;
+        EXPECT_LAZY_CLEAR(1u, MapAsyncAndWait(buffer, kMapMode, kOffset, kSize));
+
+        const uint32_t* mappedDataUint = static_cast<const uint32_t*>(buffer.GetConstMappedRange());
+        for (uint32_t i = 0; i < kSize / sizeof(uint32_t); ++i) {
+            EXPECT_EQ(0u, mappedDataUint[i]);
+        }
+        buffer.Unmap();
+
+        EXPECT_LAZY_CLEAR(0u, MapAsyncAndWait(buffer, kMapMode, 0, kBufferSize));
+        mappedDataUint = static_cast<const uint32_t*>(buffer.GetConstMappedRange());
+        for (uint32_t i = 0; i < kBufferSize / sizeof(uint32_t); ++i) {
+            EXPECT_EQ(0u, mappedDataUint[i]);
+        }
+        buffer.Unmap();
+    }
+}
+
+// Test that the code path of writable buffer mapping clears the buffer correctly when it is the
+// first use of the buffer.
+TEST_P(BufferZeroInitTest, MapWriteAsync) {
+    constexpr uint32_t kBufferSize = 16u;
+    constexpr wgpu::BufferUsage kBufferUsage =
+        wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+
+    constexpr wgpu::MapMode kMapMode = wgpu::MapMode::Write;
+
+    constexpr std::array<uint32_t, kBufferSize / sizeof(uint32_t)> kExpectedData = {{0, 0, 0, 0}};
+
+    // Map the whole buffer
+    {
+        wgpu::Buffer buffer = CreateBuffer(kBufferSize, kBufferUsage);
+        EXPECT_LAZY_CLEAR(1u, MapAsyncAndWait(buffer, kMapMode, 0, kBufferSize));
+        buffer.Unmap();
+
+        EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<const uint32_t*>(kExpectedData.data()), buffer,
+                                   0, kExpectedData.size());
+    }
+
+    // Map a range of a buffer
+    {
+        wgpu::Buffer buffer = CreateBuffer(kBufferSize, kBufferUsage);
+
+        constexpr uint64_t kOffset = 4u;
+        constexpr uint64_t kSize = 8u;
+        EXPECT_LAZY_CLEAR(1u, MapAsyncAndWait(buffer, kMapMode, kOffset, kSize));
+        buffer.Unmap();
+
+        EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<const uint32_t*>(kExpectedData.data()), buffer,
+                                   0, kExpectedData.size());
+    }
+}
+
+// Test that the code path of creating a buffer with BufferDescriptor.mappedAtCreation == true
+// clears the buffer correctly at the creation of the buffer.
+TEST_P(BufferZeroInitTest, MapAtCreation) {
+    constexpr uint32_t kBufferSize = 16u;
+    constexpr wgpu::BufferUsage kBufferUsage =
+        wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+
+    wgpu::Buffer buffer;
+    EXPECT_LAZY_CLEAR(1u, buffer = CreateBuffer(kBufferSize, kBufferUsage, true));
+    buffer.Unmap();
+
+    constexpr std::array<uint32_t, kBufferSize / sizeof(uint32_t)> kExpectedData = {{0, 0, 0, 0}};
+    EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<const uint32_t*>(kExpectedData.data()), buffer, 0,
+                               kExpectedData.size());
 }
 
 DAWN_INSTANTIATE_TEST(BufferZeroInitTest,
