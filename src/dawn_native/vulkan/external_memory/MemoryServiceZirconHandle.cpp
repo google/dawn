@@ -131,7 +131,14 @@ namespace dawn_native { namespace vulkan { namespace external_memory {
 
     ResultOrError<VkImage> Service::CreateImage(const ExternalImageDescriptor* descriptor,
                                                 const VkImageCreateInfo& baseCreateInfo) {
+        VkExternalMemoryImageCreateInfo externalMemoryImageCreateInfo;
+        externalMemoryImageCreateInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO;
+        externalMemoryImageCreateInfo.pNext = nullptr;
+        externalMemoryImageCreateInfo.handleTypes =
+            VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA;
+
         VkImageCreateInfo createInfo = baseCreateInfo;
+        createInfo.pNext = &externalMemoryImageCreateInfo;
         createInfo.flags = VK_IMAGE_CREATE_ALIAS_BIT_KHR;
         createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
         createInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
