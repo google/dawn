@@ -46,29 +46,18 @@ namespace dawn_wire { namespace client {
         return mDevice->OnPopErrorScopeCallback(requestSerial, errorType, message);
     }
 
-    bool Client::DoBufferMapReadAsyncCallback(Buffer* buffer,
-                                              uint32_t requestSerial,
-                                              uint32_t status,
-                                              uint64_t initialDataInfoLength,
-                                              const uint8_t* initialDataInfo) {
+    bool Client::DoBufferMapAsyncCallback(Buffer* buffer,
+                                          uint32_t requestSerial,
+                                          uint32_t status,
+                                          uint64_t readInitialDataInfoLength,
+                                          const uint8_t* readInitialDataInfo) {
         // The buffer might have been deleted or recreated so this isn't an error.
         if (buffer == nullptr) {
             return true;
         }
 
-        return buffer->OnMapReadAsyncCallback(requestSerial, status, initialDataInfoLength,
-                                              initialDataInfo);
-    }
-
-    bool Client::DoBufferMapWriteAsyncCallback(Buffer* buffer,
-                                               uint32_t requestSerial,
-                                               uint32_t status) {
-        // The buffer might have been deleted or recreated so this isn't an error.
-        if (buffer == nullptr) {
-            return true;
-        }
-
-        return buffer->OnMapWriteAsyncCallback(requestSerial, status);
+        return buffer->OnMapAsyncCallback(requestSerial, status, readInitialDataInfoLength,
+                                          readInitialDataInfo);
     }
 
     bool Client::DoFenceUpdateCompletedValue(Fence* fence, uint64_t value) {

@@ -235,15 +235,34 @@ namespace dawn_wire { namespace server {
             return;
         }
 
-        if (data->mode & WGPUMapMode_Write) {
-            ReturnBufferMapWriteAsyncCallbackCmd cmd;
-            cmd.buffer = data->buffer;
-            cmd.requestSerial = data->requestSerial;
-            cmd.status = status;
+        bool isRead = data->mode & WGPUMapMode_Read;
+        bool isSuccess = status == WGPUBufferMapAsyncStatus_Success;
 
-            SerializeCommand(cmd);
+        ReturnBufferMapAsyncCallbackCmd cmd;
+        cmd.buffer = data->buffer;
+        cmd.requestSerial = data->requestSerial;
+        cmd.status = status;
+        cmd.readInitialDataInfoLength = 0;
+        cmd.readInitialDataInfo = nullptr;
 
-            if (status == WGPUBufferMapAsyncStatus_Success) {
+        const void* readData = nullptr;
+        if (isSuccess && isRead) {
+            // Get the serialization size of the message to initialize ReadHandle data.
+            readData = mProcs.bufferGetConstMappedRange(data->bufferObj);
+            cmd.readInitialDataInfoLength =
+                data->readHandle->SerializeInitialDataSize(readData, data->size);
+        }
+
+        char* readHandleSpace = SerializeCommand(cmd, cmd.readInitialDataInfoLength);
+
+        if (isSuccess) {
+            if (isRead) {
+                // Serialize the initialization message into the space after the command.
+                data->readHandle->SerializeInitialData(readData, data->size, readHandleSpace);
+                // The in-flight map request returned successfully.
+                // Move the ReadHandle so it is owned by the buffer.
+                bufferData->readHandle = std::move(data->readHandle);
+            } else {
                 // The in-flight map request returned successfully.
                 // Move the WriteHandle so it is owned by the buffer.
                 bufferData->writeHandle = std::move(data->writeHandle);
@@ -251,38 +270,6 @@ namespace dawn_wire { namespace server {
                 // Set the target of the WriteHandle to the mapped buffer data.
                 bufferData->writeHandle->SetTarget(mProcs.bufferGetMappedRange(data->bufferObj),
                                                    data->size);
-            }
-        } else {
-            ASSERT(data->mode & WGPUMapMode_Read);
-
-            size_t initialDataInfoLength = 0;
-            size_t mappedDataLength = 0;
-            const void* mappedData = nullptr;
-            if (status == WGPUBufferMapAsyncStatus_Success) {
-                // Get the serialization size of the message to initialize ReadHandle data.
-                mappedDataLength = data->size;
-                mappedData = mProcs.bufferGetConstMappedRange(data->bufferObj);
-                initialDataInfoLength =
-                    data->readHandle->SerializeInitialDataSize(mappedData, mappedDataLength);
-            }
-
-            ReturnBufferMapReadAsyncCallbackCmd cmd;
-            cmd.buffer = data->buffer;
-            cmd.requestSerial = data->requestSerial;
-            cmd.status = status;
-            cmd.initialDataInfoLength = initialDataInfoLength;
-            cmd.initialDataInfo = nullptr;
-
-            char* readHandleSpace = SerializeCommand(cmd, initialDataInfoLength);
-
-            if (status == WGPUBufferMapAsyncStatus_Success) {
-                // Serialize the initialization message into the space after the command.
-                data->readHandle->SerializeInitialData(mappedData, mappedDataLength,
-                                                       readHandleSpace);
-
-                // The in-flight map request returned successfully.
-                // Move the ReadHandle so it is owned by the buffer.
-                bufferData->readHandle = std::move(data->readHandle);
             }
         }
     }

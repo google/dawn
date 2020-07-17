@@ -38,11 +38,10 @@ namespace dawn_wire { namespace client {
 
         void MapReadAsync(WGPUBufferMapReadCallback callback, void* userdata);
         void MapWriteAsync(WGPUBufferMapWriteCallback callback, void* userdata);
-        bool OnMapReadAsyncCallback(uint32_t requestSerial,
-                                    uint32_t status,
-                                    uint64_t initialDataInfoLength,
-                                    const uint8_t* initialDataInfo);
-        bool OnMapWriteAsyncCallback(uint32_t requestSerial, uint32_t status);
+        bool OnMapAsyncCallback(uint32_t requestSerial,
+                                uint32_t status,
+                                uint64_t readInitialDataInfoLength,
+                                const uint8_t* readInitialDataInfo);
         void MapAsync(WGPUMapModeFlags mode,
                       size_t offset,
                       size_t size,

@@ -310,10 +310,10 @@ namespace dawn_wire { namespace client {
         }
     }
 
-    bool Buffer::OnMapReadAsyncCallback(uint32_t requestSerial,
-                                        uint32_t status,
-                                        uint64_t initialDataInfoLength,
-                                        const uint8_t* initialDataInfo) {
+    bool Buffer::OnMapAsyncCallback(uint32_t requestSerial,
+                                    uint32_t status,
+                                    uint64_t readInitialDataInfoLength,
+                                    const uint8_t* readInitialDataInfo) {
         // The requests can have been deleted via an Unmap so this isn't an error.
         auto requestIt = mRequests.find(requestSerial);
         if (requestIt == mRequests.end()) {
@@ -325,115 +325,75 @@ namespace dawn_wire { namespace client {
         // second time. If, for example, buffer.Unmap() is called inside the callback.
         mRequests.erase(requestIt);
 
+        auto FailRequest = [&request]() -> bool {
+            if (request.readCallback != nullptr) {
+                request.readCallback(WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0,
+                                     request.userdata);
+            }
+            if (request.writeCallback != nullptr) {
+                request.writeCallback(WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0,
+                                      request.userdata);
+            }
+            return false;
+        };
+
+        bool isRead = request.readHandle != nullptr;
+        bool isWrite = request.writeHandle != nullptr;
+        ASSERT(isRead != isWrite);
+
         size_t mappedDataLength = 0;
         const void* mappedData = nullptr;
-
-        auto GetMappedData = [&]() -> bool {
-            // It is an error for the server to call the read callback when we asked for a map write
-            if (request.writeHandle) {
-                return false;
+        if (status == WGPUBufferMapAsyncStatus_Success) {
+            if (mReadHandle || mWriteHandle) {
+                // Buffer is already mapped.
+                return FailRequest();
             }
 
-            if (status == WGPUBufferMapAsyncStatus_Success) {
-                if (mReadHandle || mWriteHandle) {
-                    // Buffer is already mapped.
-                    return false;
-                }
-                if (initialDataInfoLength > std::numeric_limits<size_t>::max()) {
+            if (isRead) {
+                if (readInitialDataInfoLength > std::numeric_limits<size_t>::max()) {
                     // This is the size of data deserialized from the command stream, which must be
                     // CPU-addressable.
-                    return false;
+                    return FailRequest();
                 }
-                ASSERT(request.readHandle != nullptr);
 
                 // The server serializes metadata to initialize the contents of the ReadHandle.
                 // Deserialize the message and return a pointer and size of the mapped data for
                 // reading.
                 if (!request.readHandle->DeserializeInitialData(
-                        initialDataInfo, static_cast<size_t>(initialDataInfoLength), &mappedData,
-                        &mappedDataLength)) {
+                        readInitialDataInfo, static_cast<size_t>(readInitialDataInfoLength),
+                        &mappedData, &mappedDataLength)) {
                     // Deserialization shouldn't fail. This is a fatal error.
-                    return false;
+                    return FailRequest();
                 }
                 ASSERT(mappedData != nullptr);
 
-                // The MapRead request was successful. The buffer now owns the ReadHandle until
-                // Unmap().
-                mReadHandle = std::move(request.readHandle);
-            }
-
-            return true;
-        };
-
-        if (!GetMappedData()) {
-            // Dawn promises that all callbacks are called in finite time. Even if a fatal error
-            // occurs, the callback is called.
-            request.readCallback(WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0, request.userdata);
-            return false;
-        } else {
-            mMappedData = const_cast<void*>(mappedData);
-            request.readCallback(static_cast<WGPUBufferMapAsyncStatus>(status), mMappedData,
-                                 static_cast<uint64_t>(mappedDataLength), request.userdata);
-            return true;
-        }
-    }
-
-    bool Buffer::OnMapWriteAsyncCallback(uint32_t requestSerial, uint32_t status) {
-        // The requests can have been deleted via an Unmap so this isn't an error.
-        auto requestIt = mRequests.find(requestSerial);
-        if (requestIt == mRequests.end()) {
-            return true;
-        }
-
-        auto request = std::move(requestIt->second);
-        // Delete the request before calling the callback otherwise the callback could be fired a
-        // second time. If, for example, buffer.Unmap() is called inside the callback.
-        mRequests.erase(requestIt);
-
-        size_t mappedDataLength = 0;
-        void* mappedData = nullptr;
-
-        auto GetMappedData = [&]() -> bool {
-            // It is an error for the server to call the write callback when we asked for a map read
-            if (request.readHandle) {
-                return false;
-            }
-
-            if (status == WGPUBufferMapAsyncStatus_Success) {
-                if (mReadHandle || mWriteHandle) {
-                    // Buffer is already mapped.
-                    return false;
-                }
-                ASSERT(request.writeHandle != nullptr);
-
+            } else {
                 // Open the WriteHandle. This returns a pointer and size of mapped memory.
                 // On failure, |mappedData| may be null.
                 std::tie(mappedData, mappedDataLength) = request.writeHandle->Open();
 
                 if (mappedData == nullptr) {
-                    return false;
+                    return FailRequest();
                 }
-
-                // The MapWrite request was successful. The buffer now owns the WriteHandle until
-                // Unmap().
-                mWriteHandle = std::move(request.writeHandle);
             }
 
-            return true;
-        };
-
-        if (!GetMappedData()) {
-            // Dawn promises that all callbacks are called in finite time. Even if a fatal error
-            // occurs, the callback is called.
-            request.writeCallback(WGPUBufferMapAsyncStatus_DeviceLost, nullptr, 0,
-                                  request.userdata);
-            return false;
-        } else {
-            mMappedData = mappedData;
-            request.writeCallback(static_cast<WGPUBufferMapAsyncStatus>(status), mappedData,
-                                  static_cast<uint64_t>(mappedDataLength), request.userdata);
-            return true;
+            // The MapAsync request was successful. The buffer now owns the Read/Write handles
+            // until Unmap().
+            mReadHandle = std::move(request.readHandle);
+            mWriteHandle = std::move(request.writeHandle);
         }
+
+        mMappedData = const_cast<void*>(mappedData);
+
+        if (isRead) {
+            request.readCallback(static_cast<WGPUBufferMapAsyncStatus>(status), mMappedData,
+                                 static_cast<uint64_t>(mappedDataLength), request.userdata);
+        } else {
+            request.writeCallback(static_cast<WGPUBufferMapAsyncStatus>(status), mMappedData,
+                                  static_cast<uint64_t>(mappedDataLength), request.userdata);
+        }
+
+        return true;
     }
 
     void* Buffer::GetMappedRange() {
@@ -483,6 +443,7 @@ namespace dawn_wire { namespace client {
         } else if (mReadHandle) {
             mReadHandle = nullptr;
         }
+
         mMappedData = nullptr;
         mMapOffset = 0;
         ClearMapRequests(WGPUBufferMapAsyncStatus_Unknown);

@@ -70,17 +70,12 @@
         ]
     },
     "return commands": {
-        "buffer map read async callback": [
+        "buffer map async callback": [
             { "name": "buffer", "type": "ObjectHandle", "handle_type": "buffer" },
             { "name": "request serial", "type": "uint32_t" },
             { "name": "status", "type": "uint32_t" },
-            { "name": "initial data info length", "type": "uint64_t" },
-            { "name": "initial data info", "type": "uint8_t", "annotation": "const*", "length": "initial data info length", "skip_serialize": true }
-        ],
-        "buffer map write async callback": [
-            { "name": "buffer", "type": "ObjectHandle", "handle_type": "buffer" },
-            { "name": "request serial", "type": "uint32_t" },
-            { "name": "status", "type": "uint32_t" }
+            { "name": "read initial data info length", "type": "uint64_t" },
+            { "name": "read initial data info", "type": "uint8_t", "annotation": "const*", "length": "read initial data info length", "skip_serialize": true }
         ],
         "device uncaptured error callback": [
             { "name": "type", "type": "error type"},
