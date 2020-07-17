@@ -41,6 +41,10 @@
 #    define DAWN_PLATFORM_FUCHSIA 1
 #    define DAWN_PLATFORM_POSIX 1
 
+#elif defined(__EMSCRIPTEN__)
+#    define DAWN_PLATFORM_EMSCRIPTEN 1
+#    define DAWN_PLATFORM_POSIX 1
+
 #else
 #    error "Unsupported platform."
 #endif
@@ -60,7 +64,7 @@
 #    define DAWN_PLATFORM_64_BIT 1
 static_assert(sizeof(sizeof(char)) == 8, "Expect sizeof(size_t) == 8");
 #elif defined(_WIN32) || defined(__arm__) || defined(__i386__) || defined(__mips32__) || \
-    defined(__s390__)
+    defined(__s390__) || defined(__EMSCRIPTEN__)
 #    define DAWN_PLATFORM_32_BIT 1
 static_assert(sizeof(sizeof(char)) == 4, "Expect sizeof(size_t) == 4");
 #else

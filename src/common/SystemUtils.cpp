@@ -108,6 +108,11 @@ std::string GetExecutablePath() {
     // TODO: Implement on Fuchsia
     return "";
 }
+#elif defined(DAWN_PLATFORM_EMSCRIPTEN)
+std::string GetExecutablePath() {
+    UNREACHABLE();
+    return "";
+}
 #else
 #    error "Implement GetExecutablePath for your platform."
 #endif
