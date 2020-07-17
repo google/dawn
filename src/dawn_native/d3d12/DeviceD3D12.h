@@ -193,21 +193,24 @@ namespace dawn_native { namespace d3d12 {
         std::unique_ptr<ResourceAllocatorManager> mResourceAllocatorManager;
         std::unique_ptr<ResidencyManager> mResidencyManager;
 
-        // TODO(enga): Consider bucketing these if the count is too many.
         static constexpr uint32_t kMaxSamplerDescriptorsPerBindGroup =
             3 * kMaxSamplersPerShaderStage;
         static constexpr uint32_t kMaxViewDescriptorsPerBindGroup =
             kMaxBindingsPerPipelineLayout - kMaxSamplerDescriptorsPerBindGroup;
 
-        // Index corresponds to the descriptor count in the range [0,
-        // kMaxSamplerDescriptorsPerBindGroup].
-        std::array<std::unique_ptr<StagingDescriptorAllocator>,
-                   kMaxSamplerDescriptorsPerBindGroup + 1>
+        static constexpr uint32_t kNumSamplerDescriptorAllocators =
+            ConstexprLog2Ceil(kMaxSamplerDescriptorsPerBindGroup) + 1;
+        static constexpr uint32_t kNumViewDescriptorAllocators =
+            ConstexprLog2Ceil(kMaxViewDescriptorsPerBindGroup) + 1;
+
+        // Index corresponds to Log2Ceil(descriptorCount) where descriptorCount is in
+        // the range [0, kMaxSamplerDescriptorsPerBindGroup].
+        std::array<std::unique_ptr<StagingDescriptorAllocator>, kNumViewDescriptorAllocators + 1>
             mViewAllocators;
 
-        // Index corresponds to the descriptor count in the range [0,
-        // kMaxViewDescriptorsPerBindGroup].
-        std::array<std::unique_ptr<StagingDescriptorAllocator>, kMaxViewDescriptorsPerBindGroup + 1>
+        // Index corresponds to Log2Ceil(descriptorCount) where descriptorCount is in
+        // the range [0, kMaxViewDescriptorsPerBindGroup].
+        std::array<std::unique_ptr<StagingDescriptorAllocator>, kNumSamplerDescriptorAllocators + 1>
             mSamplerAllocators;
 
         std::unique_ptr<StagingDescriptorAllocator> mRenderTargetViewAllocator;

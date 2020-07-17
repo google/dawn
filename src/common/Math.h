@@ -31,6 +31,22 @@ uint32_t Log2(uint64_t value);
 bool IsPowerOfTwo(uint64_t n);
 uint64_t RoundUp(uint64_t n, uint64_t m);
 
+constexpr uint32_t ConstexprLog2(uint64_t v) {
+    return v <= 1 ? 0 : 1 + ConstexprLog2(v / 2);
+}
+
+constexpr uint32_t ConstexprLog2Ceil(uint64_t v) {
+    return v <= 1 ? 0 : ConstexprLog2(v - 1) + 1;
+}
+
+inline uint32_t Log2Ceil(uint32_t v) {
+    return v <= 1 ? 0 : Log2(v - 1) + 1;
+}
+
+inline uint32_t Log2Ceil(uint64_t v) {
+    return v <= 1 ? 0 : Log2(v - 1) + 1;
+}
+
 uint64_t NextPowerOfTwo(uint64_t n);
 bool IsPtrAligned(const void* ptr, size_t alignment);
 void* AlignVoidPtr(void* ptr, size_t alignment);

@@ -37,14 +37,61 @@ TEST(Math, Log2) {
     ASSERT_EQ(Log2(0xFFFFFFFFu), 31u);
     ASSERT_EQ(Log2(static_cast<uint64_t>(0xFFFFFFFFFFFFFFFF)), 63u);
 
+    static_assert(ConstexprLog2(1u) == 0u, "");
+    static_assert(ConstexprLog2(0xFFFFFFFFu) == 31u, "");
+    static_assert(ConstexprLog2(static_cast<uint64_t>(0xFFFFFFFFFFFFFFFF)) == 63u, "");
+
     // Test boundary between two logs
     ASSERT_EQ(Log2(0x80000000u), 31u);
     ASSERT_EQ(Log2(0x7FFFFFFFu), 30u);
     ASSERT_EQ(Log2(static_cast<uint64_t>(0x8000000000000000)), 63u);
     ASSERT_EQ(Log2(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFF)), 62u);
 
+    static_assert(ConstexprLog2(0x80000000u) == 31u, "");
+    static_assert(ConstexprLog2(0x7FFFFFFFu) == 30u, "");
+    static_assert(ConstexprLog2(static_cast<uint64_t>(0x8000000000000000)) == 63u, "");
+    static_assert(ConstexprLog2(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFF)) == 62u, "");
+
     ASSERT_EQ(Log2(16u), 4u);
     ASSERT_EQ(Log2(15u), 3u);
+
+    static_assert(ConstexprLog2(16u) == 4u, "");
+    static_assert(ConstexprLog2(15u) == 3u, "");
+}
+
+// Tests for Log2Ceil
+TEST(Math, Log2Ceil) {
+    // Test extrema
+    ASSERT_EQ(Log2Ceil(1u), 0u);
+    ASSERT_EQ(Log2Ceil(0xFFFFFFFFu), 32u);
+    ASSERT_EQ(Log2Ceil(static_cast<uint64_t>(0xFFFFFFFFFFFFFFFF)), 64u);
+
+    static_assert(ConstexprLog2Ceil(1u) == 0u, "");
+    static_assert(ConstexprLog2Ceil(0xFFFFFFFFu) == 32u, "");
+    static_assert(ConstexprLog2Ceil(static_cast<uint64_t>(0xFFFFFFFFFFFFFFFF)) == 64u, "");
+
+    // Test boundary between two logs
+    ASSERT_EQ(Log2Ceil(0x80000001u), 32u);
+    ASSERT_EQ(Log2Ceil(0x80000000u), 31u);
+    ASSERT_EQ(Log2Ceil(0x7FFFFFFFu), 31u);
+    ASSERT_EQ(Log2Ceil(static_cast<uint64_t>(0x8000000000000001)), 64u);
+    ASSERT_EQ(Log2Ceil(static_cast<uint64_t>(0x8000000000000000)), 63u);
+    ASSERT_EQ(Log2Ceil(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFF)), 63u);
+
+    static_assert(ConstexprLog2Ceil(0x80000001u) == 32u, "");
+    static_assert(ConstexprLog2Ceil(0x80000000u) == 31u, "");
+    static_assert(ConstexprLog2Ceil(0x7FFFFFFFu) == 31u, "");
+    static_assert(ConstexprLog2Ceil(static_cast<uint64_t>(0x8000000000000001)) == 64u, "");
+    static_assert(ConstexprLog2Ceil(static_cast<uint64_t>(0x8000000000000000)) == 63u, "");
+    static_assert(ConstexprLog2Ceil(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFF)) == 63u, "");
+
+    ASSERT_EQ(Log2Ceil(17u), 5u);
+    ASSERT_EQ(Log2Ceil(16u), 4u);
+    ASSERT_EQ(Log2Ceil(15u), 4u);
+
+    static_assert(ConstexprLog2Ceil(17u) == 5u, "");
+    static_assert(ConstexprLog2Ceil(16u) == 4u, "");
+    static_assert(ConstexprLog2Ceil(15u) == 4u, "");
 }
 
 // Tests for IsPowerOfTwo
