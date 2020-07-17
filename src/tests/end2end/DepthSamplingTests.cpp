@@ -31,7 +31,6 @@ namespace {
 
     // Test 0, below the ref, equal to, above the ref, and 1.
     const std::vector<float> kNormalizedTextureValues = {0.0, 0.3, 0.4, 0.5, 1.0};
-    const std::vector<float> kNonNormalizedTextureValues = {-0.2, -0.1, 1.2, 1.3};
 
 }  // anonymous namespace
 
@@ -51,8 +50,7 @@ class DepthSamplingTest : public DawnTest {
         mTextureUploadBuffer = device.CreateBuffer(&textureUploadDesc);
 
         wgpu::TextureDescriptor inputTextureDesc;
-        inputTextureDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled |
-                                 wgpu::TextureUsage::OutputAttachment;
+        inputTextureDesc.usage = wgpu::TextureUsage::Sampled | wgpu::TextureUsage::OutputAttachment;
         inputTextureDesc.size = {1, 1, 1};
         inputTextureDesc.format = wgpu::TextureFormat::Depth32Float;
         mInputTexture = device.CreateTexture(&inputTextureDesc);
@@ -201,20 +199,11 @@ class DepthSamplingTest : public DawnTest {
     }
 
     void UpdateInputTexture(wgpu::CommandEncoder commandEncoder, float textureValue) {
-        queue.WriteBuffer(mTextureUploadBuffer, 0, &textureValue, sizeof(float));
+        utils::ComboRenderPassDescriptor passDescriptor({}, mInputTexture.CreateView());
+        passDescriptor.cDepthStencilAttachmentInfo.clearDepth = textureValue;
 
-        wgpu::BufferCopyView bufferCopyView = {};
-        bufferCopyView.buffer = mTextureUploadBuffer;
-        bufferCopyView.offset = 0;
-        bufferCopyView.bytesPerRow = kTextureBytesPerRowAlignment;
-
-        wgpu::TextureCopyView textureCopyView;
-        textureCopyView.texture = mInputTexture;
-        textureCopyView.origin = {0, 0, 0};
-
-        wgpu::Extent3D copySize = {1, 1, 1};
-
-        commandEncoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
+        wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&passDescriptor);
+        pass.EndPass();
     }
 
     void DoSamplingTest(wgpu::RenderPipeline pipeline, std::vector<float> textureValues) {
@@ -339,7 +328,7 @@ class DepthSamplingTest : public DawnTest {
             queue.Submit(1, &commands);
 
             EXPECT_PIXEL_FLOAT_EQ(
-                CompareFunctionPasses(compareRef, compare, textureValue) ? 1.0 : 0.0,
+                CompareFunctionPasses(compareRef, compare, textureValue) ? 1.f : 0.f,
                 mOutputTexture, 0, 0);
         }
     }
@@ -406,30 +395,11 @@ TEST_P(DepthSamplingTest, SampleCompute) {
     DoSamplingTest(CreateSamplingComputePipeline(), kNormalizedTextureValues);
 }
 
-// Test that sampling a depth texture with a render pipeline works,
-// when the texture contents are outside the 0-1 range.
-TEST_P(DepthSamplingTest, SampleNonNormalizedContentsRender) {
-    // TODO(enga): Sampling depth textures is clamped. Unless we reinterpret
-    // contents as R32F.
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-
-    // Test values not between [0, 1]
-    DoSamplingTest(CreateSamplingRenderPipeline(), kNonNormalizedTextureValues);
-}
-
-// Test that sampling a depth texture with a render pipeline works,
-// when the texture contents are outside the 0-1 range.
-TEST_P(DepthSamplingTest, SampleNonNormalizedContentsCompute) {
-    // TODO(enga): Sampling depth textures is clamped. Unless we reinterpret
-    // contents as R32F.
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-
-    // Test values not between [0, 1]
-    DoSamplingTest(CreateSamplingComputePipeline(), kNonNormalizedTextureValues);
-}
-
 // Test that sampling in a render pipeline with all of the compare functions works.
 TEST_P(DepthSamplingTest, CompareFunctionsRender) {
+    // Initialization via renderPass loadOp doesn't work on Mac Intel.
+    DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
+
     wgpu::RenderPipeline pipeline = CreateComparisonRenderPipeline();
 
     // Test a "normal" ref value between 0 and 1; as well as negative and > 1 refs.
@@ -443,7 +413,7 @@ TEST_P(DepthSamplingTest, CompareFunctionsRender) {
 
 // Test that sampling in a render pipeline with all of the compare functions works.
 TEST_P(DepthSamplingTest, CompareFunctionsCompute) {
-    // Comparison is always 0 on Mac Intel when using compute.
+    // Initialization via renderPass loadOp doesn't work on Mac Intel.
     DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
 
     wgpu::ComputePipeline pipeline = CreateComparisonComputePipeline();
@@ -451,43 +421,6 @@ TEST_P(DepthSamplingTest, CompareFunctionsCompute) {
     // Test a "normal" ref value between 0 and 1; as well as negative and > 1 refs.
     for (float compareRef : kCompareRefs) {
         // Test 0, below the ref, equal to, above the ref, and 1.
-        for (wgpu::CompareFunction f : kCompareFunctions) {
-            DoCompareRefTest(pipeline, compareRef, f, kNormalizedTextureValues);
-        }
-    }
-}
-
-// Test that sampling in a render pipeline with all of the compare functions works,
-// when the texture contents are outside the 0-1 range.
-TEST_P(DepthSamplingTest, CompareFunctionsNonNormalizedContentsRender) {
-    // TODO(enga): Sampling depth textures is clamped. Unless we reinterpret
-    // contents as R32F.
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-    wgpu::RenderPipeline pipeline = CreateComparisonRenderPipeline();
-
-    // Test a "normal" ref value between 0 and 1; as well as negative and > 1 refs.
-    for (float compareRef : kCompareRefs) {
-        // Test negative, and above 1.
-        for (wgpu::CompareFunction f : kCompareFunctions) {
-            DoCompareRefTest(pipeline, compareRef, f, kNonNormalizedTextureValues);
-        }
-    }
-}
-
-// Test that sampling in a compute pipeline with all of the compare functions works,
-// when the texture contents are outside the 0-1 range.
-TEST_P(DepthSamplingTest, CompareFunctionsNonNormalizedContentsCompute) {
-    // Comparison is always 0 on Mac Intel when using compute.
-    DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
-
-    // TODO(enga): Sampling depth textures is clamped. Unless we reinterpret
-    // contents as R32F.
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-    wgpu::ComputePipeline pipeline = CreateComparisonComputePipeline();
-
-    // Test a "normal" ref value between 0 and 1; as well as negative and > 1 refs.
-    for (float compareRef : kCompareRefs) {
-        // Test negative, and above 1.
         for (wgpu::CompareFunction f : kCompareFunctions) {
             DoCompareRefTest(pipeline, compareRef, f, kNormalizedTextureValues);
         }
