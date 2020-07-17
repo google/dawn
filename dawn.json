@@ -290,7 +290,8 @@
             {"value": 32, "name": "vertex"},
             {"value": 64, "name": "uniform"},
             {"value": 128, "name": "storage"},
-            {"value": 256, "name": "indirect"}
+            {"value": 256, "name": "indirect"},
+            {"value": 512, "name": "query resolve"}
         ]
     },
     "char": {
@@ -409,6 +410,16 @@
                 "name": "push debug group",
                 "args": [
                     {"name": "group label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "resolve query set",
+                "args": [
+                    {"name": "query set", "type": "query set"},
+                    {"name": "first query", "type": "uint32_t"},
+                    {"name": "query count", "type": "uint32_t"},
+                    {"name": "destination", "type": "buffer"},
+                    {"name": "destination offset", "type": "uint64_t"}
                 ]
             },
             {

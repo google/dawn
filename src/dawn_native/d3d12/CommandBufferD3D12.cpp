@@ -836,6 +836,10 @@ namespace dawn_native { namespace d3d12 {
                     break;
                 }
 
+                case Command::ResolveQuerySet: {
+                    return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
+                }
+
                 case Command::WriteTimestamp: {
                     return DAWN_UNIMPLEMENTED_ERROR("Waiting for implementation.");
                 }

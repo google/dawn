@@ -51,6 +51,7 @@ namespace dawn_native {
         InsertDebugMarker,
         PopDebugGroup,
         PushDebugGroup,
+        ResolveQuerySet,
         SetComputePipeline,
         SetRenderPipeline,
         SetStencilReference,
@@ -184,6 +185,14 @@ namespace dawn_native {
 
     struct PushDebugGroupCmd {
         uint32_t length;
+    };
+
+    struct ResolveQuerySetCmd {
+        Ref<QuerySetBase> querySet;
+        uint32_t firstQuery;
+        uint32_t queryCount;
+        Ref<BufferBase> destination;
+        uint64_t destinationOffset;
     };
 
     struct SetComputePipelineCmd {

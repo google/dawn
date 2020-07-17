@@ -60,6 +60,11 @@ namespace dawn_native {
         void PopDebugGroup();
         void PushDebugGroup(const char* groupLabel);
 
+        void ResolveQuerySet(QuerySetBase* querySet,
+                             uint32_t firstQuery,
+                             uint32_t queryCount,
+                             BufferBase* destination,
+                             uint64_t destinationOffset);
         void WriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex);
 
         CommandBufferBase* Finish(const CommandBufferDescriptor* descriptor);

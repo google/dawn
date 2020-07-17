@@ -128,6 +128,11 @@ namespace dawn_native {
                     cmd->~PushDebugGroupCmd();
                     break;
                 }
+                case Command::ResolveQuerySet: {
+                    ResolveQuerySetCmd* cmd = commands->NextCommand<ResolveQuerySetCmd>();
+                    cmd->~ResolveQuerySetCmd();
+                    break;
+                }
                 case Command::SetComputePipeline: {
                     SetComputePipelineCmd* cmd = commands->NextCommand<SetComputePipelineCmd>();
                     cmd->~SetComputePipelineCmd();
@@ -263,6 +268,11 @@ namespace dawn_native {
             case Command::PushDebugGroup: {
                 PushDebugGroupCmd* cmd = commands->NextCommand<PushDebugGroupCmd>();
                 commands->NextData<char>(cmd->length + 1);
+                break;
+            }
+
+            case Command::ResolveQuerySet: {
+                commands->NextCommand<ResolveQuerySetCmd>();
                 break;
             }
 

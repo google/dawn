@@ -716,6 +716,12 @@ namespace dawn_native { namespace opengl {
                     break;
                 }
 
+                case Command::ResolveQuerySet: {
+                    // TODO(hao.x.li@intel.com): Resolve non-precise occlusion query.
+                    SkipCommand(&mCommands, type);
+                    break;
+                }
+
                 case Command::WriteTimestamp: {
                     // WriteTimestamp is not supported on OpenGL
                     UNREACHABLE();
