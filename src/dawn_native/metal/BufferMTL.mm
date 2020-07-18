@@ -68,6 +68,7 @@ namespace dawn_native { namespace metal {
             if (currentSize > maxBufferSize) {
                 return DAWN_OUT_OF_MEMORY_ERROR("Buffer allocation is too large");
             }
+#if defined(DAWN_PLATFORM_MACOS)
         } else if (@available(macOS 10.12, *)) {
             // |maxBufferLength| isn't always available on older systems. If available, use
             // |recommendedMaxWorkingSetSize| instead. We can probably allocate more than this,
@@ -77,6 +78,7 @@ namespace dawn_native { namespace metal {
             if (currentSize > maxWorkingSetSize) {
                 return DAWN_OUT_OF_MEMORY_ERROR("Buffer allocation is too large");
             }
+#endif
         } else if (currentSize > kMaxBufferSizeFallback) {
             return DAWN_OUT_OF_MEMORY_ERROR("Buffer allocation is too large");
         }
