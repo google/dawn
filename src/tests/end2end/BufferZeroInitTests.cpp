@@ -312,7 +312,8 @@ TEST_P(BufferZeroInitTest, MapReadAsync) {
         constexpr uint64_t kSize = 8u;
         EXPECT_LAZY_CLEAR(1u, MapAsyncAndWait(buffer, kMapMode, kOffset, kSize));
 
-        const uint32_t* mappedDataUint = static_cast<const uint32_t*>(buffer.GetConstMappedRange());
+        const uint32_t* mappedDataUint =
+            static_cast<const uint32_t*>(buffer.GetConstMappedRange(kOffset));
         for (uint32_t i = 0; i < kSize / sizeof(uint32_t); ++i) {
             EXPECT_EQ(0u, mappedDataUint[i]);
         }
