@@ -385,6 +385,7 @@ class FunctionEmitter {
 
   /// Returns the Tint storage class for the given SPIR-V ID that is a
   /// pointer value.
+  /// @param id a SPIR-V ID for a pointer value
   /// @returns the storage class
   ast::StorageClass GetStorageClassForPointerValue(uint32_t id);
 
@@ -393,6 +394,7 @@ class FunctionEmitter {
   /// already matches, then the result is a copy of the |type| argument.
   /// @param type the AST type
   /// @param result_id the SPIR-V ID for the locally defined value
+  /// @returns an possibly updated type
   ast::type::Type* RemapStorageClass(ast::type::Type* type, uint32_t result_id);
 
   /// Marks locally defined values when they should get a 'const'
