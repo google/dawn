@@ -569,6 +569,8 @@ bool FunctionEmitter::EmitFunctionDeclaration() {
         if (ast_type != nullptr) {
           ast_params.emplace_back(parser_impl_.MakeVariable(
               param->result_id(), ast::StorageClass::kNone, ast_type));
+          // The value is accessible by name.
+          identifier_values_.insert(param->result_id());
         } else {
           // We've already logged an error and emitted a diagnostic. Do nothing
           // here.
@@ -2599,8 +2601,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       return EmitConstDefOrWriteToHoistedVar(inst, std::move(expr));
     }
     case SpvOpFunctionCall:
-      // TODO(dneto): Fill this out.  Make this pass, for existing tests
-      return success();
+      return EmitFunctionCall(inst);
     default:
       break;
   }
@@ -3348,6 +3349,30 @@ TypedExpression FunctionEmitter::MakeNumericConversion(
   }
   return {requested_type, std::make_unique<ast::AsExpression>(
                               requested_type, std::move(result.expr))};
+}
+
+bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
+  // We ignore function attributes such as Inline, DontInline, Pure, Const.
+  auto function = std::make_unique<ast::IdentifierExpression>(
+      namer_.Name(inst.GetSingleWordInOperand(0)));
+
+  ast::ExpressionList params;
+  for (uint32_t iarg = 1; iarg < inst.NumInOperands(); ++iarg) {
+    params.emplace_back(MakeOperand(inst, iarg).expr);
+  }
+  TypedExpression expr{parser_impl_.ConvertType(inst.type_id()),
+                       std::make_unique<ast::CallExpression>(
+                           std::move(function), std::move(params))};
+
+  if (expr.type->IsVoid()) {
+    // TODO(dneto): Tint AST needs support for function call as a statement
+    // https://bugs.chromium.org/p/tint/issues/detail?id=45
+    return Fail() << "missing support for function call as a statement: can't "
+                     "generate code for function call returning void: "
+                  << inst.PrettyPrint();
+  }
+
+  return EmitConstDefOrWriteToHoistedVar(inst, std::move(expr));
 }
 
 }  // namespace spirv

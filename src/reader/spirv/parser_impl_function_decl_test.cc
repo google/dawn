@@ -85,47 +85,85 @@ TEST_F(SpvParserTest, EmitFunctions_VoidFunctionWithoutParams) {
 }
 
 TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
-  auto* p = parser(
-      test::Assemble(Names({"root", "branch", "leaf"}) + CommonTypes() + R"(
+  auto* p = parser(test::Assemble(
+      Names({"root", "branch", "leaf", "leaf_result", "branch_result"}) +
+      CommonTypes() + R"(
+     %uintfn = OpTypeFunction %uint
+     %uint_0 = OpConstant %uint 0
+
      %root = OpFunction %void None %voidfn
      %root_entry = OpLabel
-     %branch_result = OpFunctionCall %void %branch
+     %branch_result = OpFunctionCall %uint %branch
      OpReturn
      OpFunctionEnd
 
-     %branch = OpFunction %void None %voidfn
+     %branch = OpFunction %uint None %uintfn
      %branch_entry = OpLabel
-     %leaf_result = OpFunctionCall %void %leaf
-     OpReturn
+     %leaf_result = OpFunctionCall %uint %leaf
+     OpReturnValue %leaf_result
      OpFunctionEnd
 
-     %leaf = OpFunction %void None %voidfn
+     %leaf = OpFunction %uint None %uintfn
      %leaf_entry = OpLabel
-     OpReturn
+     OpReturnValue %uint_0
      OpFunctionEnd
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto module_ast = p->module().to_str();
-  // TODO(dneto): This will need to be updated when function calls are
-  // supported. Otherwise, use more general matching instead of substring
-  // equality.
   EXPECT_THAT(module_ast, HasSubstr(R"(
-  Function leaf -> __void
+  Function leaf -> __u32
   ()
   {
-    Return{}
+    Return{
+      {
+        ScalarConstructor{0}
+      }
+    }
   }
-  Function branch -> __void
+  Function branch -> __u32
   ()
   {
-    Return{}
+    VariableDeclStatement{
+      Variable{
+        leaf_result
+        none
+        __u32
+        {
+          Call{
+            Identifier{leaf}
+            (
+            )
+          }
+        }
+      }
+    }
+    Return{
+      {
+        Identifier{leaf_result}
+      }
+    }
   }
   Function root -> __void
   ()
   {
+    VariableDeclStatement{
+      Variable{
+        branch_result
+        none
+        __u32
+        {
+          Call{
+            Identifier{branch}
+            (
+            )
+          }
+        }
+      }
+    }
     Return{}
-  })"));
+  }
+})")) << module_ast;
 }
 
 TEST_F(SpvParserTest, EmitFunctions_NonVoidResultType) {
@@ -229,7 +267,8 @@ TEST_F(SpvParserTest, EmitFunctions_GenerateParamNames) {
   )
   {
     Return{}
-  })"));
+  })"))
+      << module_ast;
 }
 
 }  // namespace

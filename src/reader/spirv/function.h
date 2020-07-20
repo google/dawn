@@ -669,6 +669,11 @@ class FunctionEmitter {
   /// @returns an expression
   TypedExpression MakeAccessChain(const spvtools::opt::Instruction& inst);
 
+  /// Emits a function call.  On failure, emits a diagnostic and returns false.
+  /// @param inst the SPIR-V function call instruction
+  /// @returns false if emission failed
+  bool EmitFunctionCall(const spvtools::opt::Instruction& inst);
+
   /// Finds the header block for a structured construct that we can "break"
   /// out from, from deeply nested control flow, if such a block exists.
   /// If the construct is:

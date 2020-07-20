@@ -344,6 +344,7 @@ if(${TINT_BUILD_SPV_READER})
     reader/spirv/function_arithmetic_test.cc
     reader/spirv/function_bit_test.cc
     reader/spirv/function_cfg_test.cc
+    reader/spirv/function_call_test.cc
     reader/spirv/function_composite_test.cc
     reader/spirv/function_conversion_test.cc
     reader/spirv/function_decl_test.cc
@@ -361,8 +362,8 @@ if(${TINT_BUILD_SPV_READER})
     reader/spirv/parser_impl_import_test.cc
     reader/spirv/parser_impl_module_var_test.cc
     reader/spirv/parser_impl_named_types_test.cc
-    reader/spirv/parser_impl_user_name_test.cc
     reader/spirv/parser_impl_test.cc
+    reader/spirv/parser_impl_user_name_test.cc
     reader/spirv/parser_test.cc
     reader/spirv/spirv_tools_helpers_test.cc
     reader/spirv/spirv_tools_helpers_test.h
