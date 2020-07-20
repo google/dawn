@@ -21,10 +21,12 @@
 #include <utility>
 #include <vector>
 
+#include "src/ast/binding_decoration.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/expression.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/node.h"
+#include "src/ast/set_decoration.h"
 #include "src/ast/statement.h"
 #include "src/ast/type/type.h"
 #include "src/ast/variable.h"
@@ -35,6 +37,14 @@ namespace ast {
 /// A Function statement.
 class Function : public Node {
  public:
+  /// Information about a binding
+  struct BindingInfo {
+    /// The binding decoration
+    BindingDecoration* binding = nullptr;
+    /// The set decoration
+    SetDecoration* set = nullptr;
+  };
+
   /// Create a new empty function statement
   Function();
   /// Create a function
@@ -86,6 +96,11 @@ class Function : public Node {
   /// @returns the <variable, decoration> pair.
   const std::vector<std::pair<Variable*, BuiltinDecoration*>>
   referenced_builtin_variables() const;
+  /// Retrieves any referenced uniform variables. Note, the uniform must be
+  /// decorated with both binding and set decorations.
+  /// @returns the referenced uniforms
+  const std::vector<std::pair<Variable*, Function::BindingInfo>>
+  referenced_uniform_variables() const;
 
   /// Adds an ancestor entry point
   /// @param ep the entry point ancestor

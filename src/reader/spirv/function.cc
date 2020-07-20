@@ -2915,7 +2915,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(
         type_mgr_->FindPointerToType(pointee_type_id, storage_class);
     auto* ast_pointer_type = parser_impl_.ConvertType(pointer_type_id);
     assert(ast_pointer_type);
-    assert(ast_pointer_type->IsPointer);
+    assert(ast_pointer_type->IsPointer());
     current_expr.reset(TypedExpression(ast_pointer_type, std::move(next_expr)));
   }
   return current_expr;

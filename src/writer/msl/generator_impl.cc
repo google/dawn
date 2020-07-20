@@ -448,11 +448,21 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
       error_ = "Unable to find function: " + name;
       return false;
     }
+
     for (const auto& data : func->referenced_builtin_variables()) {
       auto* var = data.first;
       if (var->storage_class() != ast::StorageClass::kInput) {
         continue;
       }
+      if (!first) {
+        out_ << ", ";
+      }
+      first = false;
+      out_ << var->name();
+    }
+
+    for (const auto& data : func->referenced_uniform_variables()) {
+      auto* var = data.first;
       if (!first) {
         out_ << ", ";
       }
@@ -814,6 +824,25 @@ void GeneratorImpl::EmitStage(ast::PipelineStage stage) {
   return;
 }
 
+bool GeneratorImpl::has_referenced_var_needing_struct(ast::Function* func) {
+  for (auto data : func->referenced_location_variables()) {
+    auto var = data.first;
+    if (var->storage_class() == ast::StorageClass::kInput ||
+        var->storage_class() == ast::StorageClass::kOutput) {
+      return true;
+    }
+  }
+
+  for (auto data : func->referenced_builtin_variables()) {
+    auto var = data.first;
+    if (var->storage_class() == ast::StorageClass::kOutput) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 bool GeneratorImpl::EmitFunction(ast::Function* func) {
   make_indent();
 
@@ -825,9 +854,8 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
   // TODO(dsinclair): This could be smarter. If the input/outputs for multiple
   // entry points are the same we could generate a single struct and then have
   // this determine it's the same struct and just emit once.
-  bool emit_duplicate_functions =
-      func->ancestor_entry_points().size() > 0 &&
-      func->referenced_module_variables().size() > 0;
+  bool emit_duplicate_functions = func->ancestor_entry_points().size() > 0 &&
+                                  has_referenced_var_needing_struct(func);
 
   if (emit_duplicate_functions) {
     for (const auto& ep_name : func->ancestor_entry_points()) {
@@ -857,7 +885,6 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
   }
 
   out_ << " ";
-
   if (emit_duplicate_functions) {
     name = generate_name(name + "_" + ep_name);
     ep_func_name_remapped_[ep_name + "_" + func->name()] = name;
@@ -902,6 +929,21 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     first = false;
 
     out_ << "thread ";
+    if (!EmitType(var->type(), "")) {
+      return false;
+    }
+    out_ << "& " << var->name();
+  }
+
+  for (const auto& data : func->referenced_uniform_variables()) {
+    auto* var = data.first;
+    if (!first) {
+      out_ << ", ";
+    }
+    first = false;
+
+    out_ << "constant ";
+    // TODO(dsinclair): Can arrays be uniform? If so, fix this ...
     if (!EmitType(var->type(), "")) {
       return false;
     }
@@ -1032,6 +1074,28 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::EntryPoint* ep) {
       return false;
     }
     out_ << " " << var->name() << " [[" << attr << "]]";
+  }
+
+  for (auto data : func->referenced_uniform_variables()) {
+    if (!first) {
+      out_ << ", ";
+    }
+    first = false;
+
+    auto* var = data.first;
+    // TODO(dsinclair): We're using the binding to make up the buffer number but
+    // we should instead be using a provided mapping that uses both buffer and
+    // set. https://bugs.chromium.org/p/tint/issues/detail?id=104
+    auto* binding = data.second.binding;
+    // auto* set = data.second.set;
+
+    out_ << "constant ";
+    // TODO(dsinclair): Can you have a uniform array? If so, this needs to be
+    // updated to handle arrays property.
+    if (!EmitType(var->type(), "")) {
+      return false;
+    }
+    out_ << "& " << var->name() << " [[buffer(" << binding->value() << ")]]";
   }
 
   // TODO(dsinclair): Binding/Set inputs

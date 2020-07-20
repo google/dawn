@@ -71,6 +71,34 @@ Function::referenced_location_variables() const {
   return ret;
 }
 
+const std::vector<std::pair<Variable*, Function::BindingInfo>>
+Function::referenced_uniform_variables() const {
+  std::vector<std::pair<Variable*, Function::BindingInfo>> ret;
+
+  for (auto* var : referenced_module_variables()) {
+    if (!var->IsDecorated() ||
+        var->storage_class() != ast::StorageClass::kUniform) {
+      continue;
+    }
+
+    BindingDecoration* binding = nullptr;
+    SetDecoration* set = nullptr;
+    for (const auto& deco : var->AsDecorated()->decorations()) {
+      if (deco->IsBinding()) {
+        binding = deco->AsBinding();
+      } else if (deco->IsSet()) {
+        set = deco->AsSet();
+      }
+    }
+    if (binding == nullptr || set == nullptr) {
+      continue;
+    }
+
+    ret.push_back({var, BindingInfo{binding, set}});
+  }
+  return ret;
+}
+
 const std::vector<std::pair<Variable*, BuiltinDecoration*>>
 Function::referenced_builtin_variables() const {
   std::vector<std::pair<Variable*, BuiltinDecoration*>> ret;

@@ -208,6 +208,11 @@ class GeneratorImpl : public TextGenerator {
   /// @param mod the module to set.
   void set_module_for_testing(ast::Module* mod);
 
+  /// Determines if any used module variable requires an input or output struct.
+  /// @param func the function to check
+  /// @returns true if an input or output struct is required.
+  bool has_referenced_var_needing_struct(ast::Function* func);
+
   /// Generates a name for the prefix
   /// @param prefix the prefix of the name to generate
   /// @returns the name
