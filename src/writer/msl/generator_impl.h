@@ -83,7 +83,7 @@ class GeneratorImpl : public TextGenerator {
   bool EmitCall(ast::CallExpression* expr);
   /// Handles a case statement
   /// @param stmt the statement
-  /// @returns true if the statment was emitted successfully
+  /// @returns true if the statement was emitted successfully
   bool EmitCase(ast::CaseStatement* stmt);
   /// Handles generating a cast expression
   /// @param expr the cast expression
@@ -128,12 +128,16 @@ class GeneratorImpl : public TextGenerator {
                             const std::string& ep_name);
   /// Handles generating an identifier expression
   /// @param expr the identifier expression
-  /// @returns true if the identifeir was emitted
+  /// @returns true if the identifier was emitted
   bool EmitIdentifier(ast::IdentifierExpression* expr);
   /// Handles an if statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
   bool EmitIf(ast::IfStatement* stmt);
+  /// Handles genreating an import expression
+  /// @param expr the expression
+  /// @returns true if the expression was successfully emitted.
+  bool EmitImportFunction(ast::CallExpression* expr);
   /// Handles generating a kill statement
   /// @param stmt the kill statement
   /// @returns true if the statement was successfully emitted
@@ -144,7 +148,7 @@ class GeneratorImpl : public TextGenerator {
   bool EmitLiteral(ast::Literal* lit);
   /// Handles a loop statement
   /// @param stmt the statement to emit
-  /// @returns true if the statement was emtited
+  /// @returns true if the statement was emitted
   bool EmitLoop(ast::LoopStatement* stmt);
   /// Handles a member accessor expression
   /// @param expr the member accessor expression
