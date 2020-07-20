@@ -182,8 +182,9 @@ class ParserImpl : Reader {
   DecorationList GetDecorationsForMember(uint32_t id,
                                          uint32_t member_index) const;
 
-  /// Converts a SPIR-V decoration.  On failure, emits a diagnostic and returns
-  /// nullptr.
+  /// Converts a SPIR-V decoration. If the decoration is recognized but
+  /// deliberately dropped, then returns nullptr without a diagnostic.
+  /// On failure, emits a diagnostic and returns nullptr.
   /// @param decoration an encoded SPIR-V Decoration
   /// @returns the corresponding ast::StructuMemberDecoration
   std::unique_ptr<ast::StructMemberDecoration> ConvertMemberDecoration(

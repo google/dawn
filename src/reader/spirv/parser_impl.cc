@@ -375,6 +375,11 @@ ParserImpl::ConvertMemberDecoration(const Decoration& decoration) {
         return nullptr;
       }
       return std::make_unique<ast::StructMemberOffsetDecoration>(decoration[1]);
+    case SpvDecorationNonReadable:
+    case SpvDecorationNonWritable:
+      // TODO(dneto): Drop these for now.
+      // https://github.com/gpuweb/gpuweb/issues/935
+      return nullptr;
     default:
       // TODO(dneto): Support the remaining member decorations.
       break;
@@ -744,11 +749,12 @@ ast::type::Type* ParserImpl::ConvertType(
         return nullptr;
       } else {
         auto ast_member_decoration = ConvertMemberDecoration(decoration);
-        if (ast_member_decoration == nullptr) {
-          // Already emitted diagnostics.
+        if (!success_) {
           return nullptr;
         }
-        ast_member_decorations.push_back(std::move(ast_member_decoration));
+        if (ast_member_decoration) {
+          ast_member_decorations.push_back(std::move(ast_member_decoration));
+        }
       }
     }
     const auto member_name = namer_.GetMemberName(type_id, member_index);

@@ -1292,6 +1292,50 @@ TEST_F(SpvParserTest,
          "instruction, found '4'."));
 }
 
+TEST_F(SpvParserTest, ModuleScopeVar_NonReadableDecoration_DroppedForNow) {
+  auto* p = parser(test::Assemble(R"(
+     OpName %myvar "myvar"
+     OpDecorate %strct Block
+     OpMemberDecorate %strct 0 NonReadable
+)" + CommonTypes() + R"(
+     %ptr_sb_strct = OpTypePointer StorageBuffer %strct
+     %myvar = OpVariable %ptr_sb_strct StorageBuffer
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  Variable{
+    myvar
+    storage_buffer
+    __alias_S__struct_S
+  }
+S -> __struct_S
+})")) << module_str;
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_NonWritableDecoration_DroppedForNow) {
+  auto* p = parser(test::Assemble(R"(
+     OpName %myvar "myvar"
+     OpDecorate %strct Block
+     OpMemberDecorate %strct 0 NonWritable
+)" + CommonTypes() + R"(
+     %ptr_sb_strct = OpTypePointer StorageBuffer %strct
+     %myvar = OpVariable %ptr_sb_strct StorageBuffer
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  Variable{
+    myvar
+    storage_buffer
+    __alias_S__struct_S
+  }
+S -> __struct_S
+})")) << module_str;
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader
