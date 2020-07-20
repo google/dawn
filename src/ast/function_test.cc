@@ -119,9 +119,9 @@ TEST_F(FunctionTest, GetReferenceLocations) {
   auto ref_locs = f.referenced_location_variables();
   ASSERT_EQ(ref_locs.size(), 2u);
   EXPECT_EQ(ref_locs[0].first, &loc1);
-  EXPECT_EQ(ref_locs[0].second->value(), 0);
+  EXPECT_EQ(ref_locs[0].second->value(), 0u);
   EXPECT_EQ(ref_locs[1].first, &loc2);
-  EXPECT_EQ(ref_locs[1].second->value(), 1);
+  EXPECT_EQ(ref_locs[1].second->value(), 1u);
 }
 
 TEST_F(FunctionTest, GetReferenceBuiltins) {

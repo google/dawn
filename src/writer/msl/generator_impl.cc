@@ -651,8 +651,8 @@ bool GeneratorImpl::EmitEntryPointData(ast::EntryPoint* ep) {
   std::vector<std::pair<ast::Variable*, ast::VariableDecoration*>>
       out_variables;
   for (auto data : func->referenced_location_variables()) {
-    auto var = data.first;
-    auto deco = data.second;
+    auto* var = data.first;
+    auto* deco = data.second;
 
     if (var->storage_class() == ast::StorageClass::kInput) {
       in_locations.push_back({var, deco->value()});
@@ -662,8 +662,8 @@ bool GeneratorImpl::EmitEntryPointData(ast::EntryPoint* ep) {
   }
 
   for (auto data : func->referenced_builtin_variables()) {
-    auto var = data.first;
-    auto deco = data.second;
+    auto* var = data.first;
+    auto* deco = data.second;
 
     if (var->storage_class() == ast::StorageClass::kOutput) {
       out_variables.push_back({var, deco});
@@ -819,7 +819,7 @@ void GeneratorImpl::EmitStage(ast::PipelineStage stage) {
 
 bool GeneratorImpl::has_referenced_var_needing_struct(ast::Function* func) {
   for (auto data : func->referenced_location_variables()) {
-    auto var = data.first;
+    auto* var = data.first;
     if (var->storage_class() == ast::StorageClass::kInput ||
         var->storage_class() == ast::StorageClass::kOutput) {
       return true;
@@ -827,7 +827,7 @@ bool GeneratorImpl::has_referenced_var_needing_struct(ast::Function* func) {
   }
 
   for (auto data : func->referenced_builtin_variables()) {
-    auto var = data.first;
+    auto* var = data.first;
     if (var->storage_class() == ast::StorageClass::kOutput) {
       return true;
     }
