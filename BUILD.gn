@@ -62,6 +62,12 @@ config("tint_public_config") {
     defines += [ "TINT_BUILD_MSL_WRITER=0" ]
   }
 
+  if (tint_build_hlsl_writer) {
+    defines += [ "TINT_BUILD_HLSL_WRITER=1" ]
+  } else {
+    defines += [ "TINT_BUILD_HLSL_WRITER=0" ]
+  }
+
   include_dirs = [
     "${tint_root_dir}/",
     "${tint_root_dir}/include/",
@@ -513,6 +519,23 @@ source_set("libtint_msl_writer_src") {
   public_deps = [ ":libtint_core_src" ]
 }
 
+source_set("libtint_hlsl_writer_src") {
+  sources = [
+    "src/writer/hlsl/generator.cc",
+    "src/writer/hlsl/generator.h",
+    "src/writer/hlsl/generator_impl.cc",
+    "src/writer/hlsl/generator_impl.h",
+  ]
+
+  configs += [ ":tint_common_config" ]
+  public_configs = [ ":tint_public_config" ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+}
+
 source_set("libtint") {
   deps = [ ":libtint_core_src" ]
 
@@ -534,6 +557,10 @@ source_set("libtint") {
 
   if (tint_build_msl_writer) {
     deps += [ ":libtint_msl_writer_src" ]
+  }
+
+  if (tint_build_hlsl_writer) {
+    deps += [ ":libtint_hlsl_writer_src" ]
   }
 
   configs += [ ":tint_common_config" ]
@@ -980,6 +1007,21 @@ source_set("tint_unittests_msl_writer_src") {
     ":gmock_and_gtest",
     ":libtint_msl_writer_src",
   ]
+}
+
+source_set("tint_unittests_hlsl_writer_src") {
+  sources = [ "src/writer/hlsl/generator_impl_test.cc" ]
+
+  configs += [
+    ":tint_common_config",
+    ":tint_unittests_config",
+  ]
+  public_configs = [ ":tint_public_config" ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
 }
 
 source_set("tint_unittests_src") {

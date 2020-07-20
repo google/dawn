@@ -46,4 +46,8 @@
 #include "src/writer/msl/generator.h"
 #endif  // TINT_BUILD_MSL_WRITER
 
+#if TINT_BUILD_HLSL_WRITER
+#include "src/writer/hlsl/generator.h"
+#endif  // TINT_BUILD_HLSL_WRITER
+
 #endif  // INCLUDE_TINT_TINT_H_

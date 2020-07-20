@@ -12,42 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_WRITER_WGSL_GENERATOR_H_
-#define SRC_WRITER_WGSL_GENERATOR_H_
+#ifndef SRC_WRITER_HLSL_GENERATOR_IMPL_H_
+#define SRC_WRITER_HLSL_GENERATOR_IMPL_H_
 
-#include <string>
-
-#include "src/writer/text.h"
-#include "src/writer/wgsl/generator_impl.h"
+#include "src/ast/module.h"
+#include "src/writer/text_generator.h"
 
 namespace tint {
 namespace writer {
-namespace wgsl {
+namespace hlsl {
 
-/// Class to generate WGSL source
-class Generator : public Text {
+/// Implementation class for HLSL generator
+class GeneratorImpl : public TextGenerator {
  public:
   /// Constructor
-  /// @param module the module to convert
-  explicit Generator(ast::Module module);
-  ~Generator() override;
+  GeneratorImpl();
+  ~GeneratorImpl();
 
   /// Generates the result data
+  /// @param module the module to generate
   /// @returns true on successful generation; false otherwise
-  bool Generate() override;
-
-  /// @returns the result data
-  std::string result() const override;
-
-  /// @returns the error
-  std::string error() const;
-
- private:
-  GeneratorImpl impl_;
+  bool Generate(const ast::Module& module);
 };
 
-}  // namespace wgsl
+}  // namespace hlsl
 }  // namespace writer
 }  // namespace tint
 
-#endif  // SRC_WRITER_WGSL_GENERATOR_H_
+#endif  // SRC_WRITER_HLSL_GENERATOR_IMPL_H_

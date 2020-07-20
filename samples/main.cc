@@ -33,6 +33,7 @@ enum class Format {
   kSpvAsm,
   kWgsl,
   kMsl,
+  kHlsl,
 };
 
 struct Options {
@@ -50,13 +51,14 @@ struct Options {
 const char kUsage[] = R"(Usage: tint [options] <input-file>
 
  options:
-  --format <spirv|spvasm|wgsl|msl>  -- Output format.
+  --format <spirv|spvasm|wgsl|msl|hlsl>  -- Output format.
                                If not provided, will be inferred from output
                                filename extension:
                                    .spvasm -> spvasm
-                                   .spv -> spirv
-                                   .wgsl -> wgsl
-                                   .metal -> msl
+                                   .spv    -> spirv
+                                   .wgsl   -> wgsl
+                                   .metal  -> msl
+                                   .hlsl   -> hlsl
                                If none matches, then default to SPIR-V assembly.
   --output-file <name>      -- Output file name.  Use "-" for standard output
   -o <name>                 -- Output file name.  Use "-" for standard output
@@ -85,6 +87,11 @@ Format parse_format(const std::string& fmt) {
   if (fmt == "msl")
     return Format::kMsl;
 #endif  // TINT_BUILD_MSL_WRITER
+
+#if TINT_BUILD_HLSL_WRITER
+  if (fmt == "hlsl")
+    return Format::kHlsl;
+#endif  // TINT_BUILD_HLSL_WRITER
 
   return Format::kNone;
 }
@@ -453,7 +460,13 @@ int main(int argc, const char** argv) {
   if (options.format == Format::kMsl) {
     writer = std::make_unique<tint::writer::msl::Generator>(std::move(mod));
   }
-#endif  // TINT_BUILDER_MSL_WRITER
+#endif  // TINT_BUILD_MSL_WRITER
+
+#if TINT_BUILD_HLSL_WRITER
+  if (options.format == Format::kHlsl) {
+    writer = std::make_unique<tint::writer::hlsl::Generator>(std::move(mod));
+  }
+#endif  // TINT_BUILD_HLSL_WRITER
 
   if (!writer) {
     std::cerr << "Unknown output format specified" << std::endl;

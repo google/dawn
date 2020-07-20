@@ -32,7 +32,7 @@ namespace tint {
 namespace writer {
 namespace msl {
 
-/// Implementation class for WGSL generator
+/// Implementation class for MSL generator
 class GeneratorImpl : public TextGenerator {
  public:
   /// Constructor

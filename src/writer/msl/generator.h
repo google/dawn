@@ -24,7 +24,7 @@ namespace tint {
 namespace writer {
 namespace msl {
 
-/// Class to generate WGSL source from a WGSL module
+/// Class to generate MSL source
 class Generator : public Text {
  public:
   /// Constructor

@@ -260,6 +260,15 @@ if(${TINT_BUILD_MSL_WRITER})
   )
 endif()
 
+if(${TINT_BUILD_HLSL_WRITER})
+  list(APPEND TINT_LIB_SRCS
+    writer/hlsl/generator.cc
+    writer/hlsl/generator.h
+    writer/hlsl/generator_impl.cc
+    writer/hlsl/generator_impl.h
+  )
+endif()
+
 set(TINT_TEST_SRCS
   ast/array_accessor_expression_test.cc
   ast/as_expression_test.cc
@@ -521,6 +530,12 @@ if(${TINT_BUILD_MSL_WRITER})
     writer/msl/generator_impl_unary_op_test.cc
     writer/msl/generator_impl_variable_decl_statement_test.cc
     writer/msl/namer_test.cc
+  )
+endif()
+
+if (${TINT_BUILD_HLSL_WRITER})
+  list(APPEND TINT_TEST_SRCS
+    writer/hlsl/generator_impl_test.cc
   )
 endif()
 
