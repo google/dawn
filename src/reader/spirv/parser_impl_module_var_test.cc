@@ -1184,6 +1184,114 @@ TEST_F(SpvParserTest,
          "instruction, found '4'."));
 }
 
+TEST_F(SpvParserTest, ModuleScopeVar_DescriptorSetDecoration_Valid) {
+  auto* p = parser(test::Assemble(R"(
+     OpName %myvar "myvar"
+     OpDecorate %myvar DescriptorSet 3
+     OpDecorate %strct Block
+)" + CommonTypes() + R"(
+     %ptr_sb_strct = OpTypePointer StorageBuffer %strct
+     %myvar = OpVariable %ptr_sb_strct StorageBuffer
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  DecoratedVariable{
+    Decorations{
+      SetDecoration{3}
+    }
+    myvar
+    storage_buffer
+    __alias_S__struct_S
+  })"))
+      << module_str;
+}
+
+TEST_F(SpvParserTest,
+       ModuleScopeVar_DescriptorSetDecoration_MissingOperandWontAssemble) {
+  const auto assembly = R"(
+     OpName %myvar "myvar"
+     OpDecorate %myvar DescriptorSet
+     OpDecorate %strct Block
+)" + CommonTypes() + R"(
+     %ptr_sb_strct = OpTypePointer StorageBuffer %strct
+     %myvar = OpVariable %ptr_sb_strct StorageBuffer
+  )";
+  EXPECT_THAT(test::AssembleFailure(assembly),
+              Eq("3:5: Expected operand, found next instruction instead."));
+}
+
+TEST_F(SpvParserTest,
+       ModuleScopeVar_DescriptorSetDecoration_TwoOperandsWontAssemble) {
+  const auto assembly = R"(
+     OpName %myvar "myvar"
+     OpDecorate %myvar DescriptorSet 3 4
+     OpDecorate %strct Block
+)" + CommonTypes() + R"(
+     %ptr_sb_strct = OpTypePointer StorageBuffer %strct
+     %myvar = OpVariable %ptr_sb_strct StorageBuffer
+  )";
+  EXPECT_THAT(
+      test::AssembleFailure(assembly),
+      Eq("2:39: Expected <opcode> or <result-id> at the beginning of an "
+         "instruction, found '4'."));
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_BindingDecoration_Valid) {
+  auto* p = parser(test::Assemble(R"(
+     OpName %myvar "myvar"
+     OpDecorate %myvar Binding 3
+     OpDecorate %strct Block
+)" + CommonTypes() + R"(
+     %ptr_sb_strct = OpTypePointer StorageBuffer %strct
+     %myvar = OpVariable %ptr_sb_strct StorageBuffer
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  EXPECT_TRUE(p->error().empty());
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  DecoratedVariable{
+    Decorations{
+      BindingDecoration{3}
+    }
+    myvar
+    storage_buffer
+    __alias_S__struct_S
+  })"))
+      << module_str;
+}
+
+TEST_F(SpvParserTest,
+       ModuleScopeVar_BindingDecoration_MissingOperandWontAssemble) {
+  const auto assembly = R"(
+     OpName %myvar "myvar"
+     OpDecorate %myvar Binding
+     OpDecorate %strct Block
+)" + CommonTypes() + R"(
+     %ptr_sb_strct = OpTypePointer StorageBuffer %strct
+     %myvar = OpVariable %ptr_sb_strct StorageBuffer
+  )";
+  EXPECT_THAT(test::AssembleFailure(assembly),
+              Eq("3:5: Expected operand, found next instruction instead."));
+}
+
+TEST_F(SpvParserTest,
+       ModuleScopeVar_BindingDecoration_TwoOperandsWontAssemble) {
+  const auto assembly = R"(
+     OpName %myvar "myvar"
+     OpDecorate %myvar Binding 3 4
+     OpDecorate %strct Block
+)" + CommonTypes() + R"(
+     %ptr_sb_strct = OpTypePointer StorageBuffer %strct
+     %myvar = OpVariable %ptr_sb_strct StorageBuffer
+  )";
+  EXPECT_THAT(
+      test::AssembleFailure(assembly),
+      Eq("2:33: Expected <opcode> or <result-id> at the beginning of an "
+         "instruction, found '4'."));
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

@@ -35,12 +35,14 @@
 #include "spirv-tools/libspirv.hpp"
 #include "src/ast/as_expression.h"
 #include "src/ast/binary_expression.h"
+#include "src/ast/binding_decoration.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/builtin.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/decorated_variable.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
+#include "src/ast/set_decoration.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_decoration.h"
@@ -984,6 +986,24 @@ std::unique_ptr<ast::Variable> ParserImpl::MakeVariable(uint32_t id,
       }
       ast_decorations.emplace_back(
           std::make_unique<ast::LocationDecoration>(deco[1]));
+    }
+    if (deco[0] == SpvDecorationDescriptorSet) {
+      if (deco.size() == 1) {
+        Fail() << "malformed DescriptorSet decoration on ID " << id
+               << ": has no operand";
+        return nullptr;
+      }
+      ast_decorations.emplace_back(
+          std::make_unique<ast::SetDecoration>(deco[1]));
+    }
+    if (deco[0] == SpvDecorationBinding) {
+      if (deco.size() == 1) {
+        Fail() << "malformed Binding decoration on ID " << id
+               << ": has no operand";
+        return nullptr;
+      }
+      ast_decorations.emplace_back(
+          std::make_unique<ast::BindingDecoration>(deco[1]));
     }
   }
   if (!ast_decorations.empty()) {
