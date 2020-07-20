@@ -464,6 +464,15 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
       out_ << var->name();
     }
 
+    for (const auto& data : func->referenced_storagebuffer_variables()) {
+      auto* var = data.first;
+      if (!first) {
+        out_ << ", ";
+      }
+      first = false;
+      out_ << var->name();
+    }
+
     const auto& params = expr->params();
     for (const auto& param : params) {
       if (!first) {
@@ -1061,7 +1070,20 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     out_ << "& " << var->name();
   }
 
-  // TODO(dsinclair): Binding/Set inputs
+  for (const auto& data : func->referenced_storagebuffer_variables()) {
+    auto* var = data.first;
+    if (!first) {
+      out_ << ", ";
+    }
+    first = false;
+
+    out_ << "device ";
+    // TODO(dsinclair): Can arrays be in storage buffers? If so, fix this ...
+    if (!EmitType(var->type(), "")) {
+      return false;
+    }
+    out_ << "& " << var->name();
+  }
 
   for (const auto& v : func->params()) {
     if (!first) {
@@ -1209,7 +1231,27 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::EntryPoint* ep) {
     out_ << "& " << var->name() << " [[buffer(" << binding->value() << ")]]";
   }
 
-  // TODO(dsinclair): Binding/Set inputs
+  for (auto data : func->referenced_storagebuffer_variables()) {
+    if (!first) {
+      out_ << ", ";
+    }
+    first = false;
+
+    auto* var = data.first;
+    // TODO(dsinclair): We're using the binding to make up the buffer number but
+    // we should instead be using a provided mapping that uses both buffer and
+    // set. https://bugs.chromium.org/p/tint/issues/detail?id=104
+    auto* binding = data.second.binding;
+    // auto* set = data.second.set;
+
+    out_ << "device ";
+    // TODO(dsinclair): Can you have a storagebuffer have an array? If so, this
+    // needs to be updated to handle arrays property.
+    if (!EmitType(var->type(), "")) {
+      return false;
+    }
+    out_ << "& " << var->name() << " [[buffer(" << binding->value() << ")]]";
+  }
 
   out_ << ") {" << std::endl;
 

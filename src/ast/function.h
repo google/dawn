@@ -101,6 +101,11 @@ class Function : public Node {
   /// @returns the referenced uniforms
   const std::vector<std::pair<Variable*, Function::BindingInfo>>
   referenced_uniform_variables() const;
+  /// Retrieves any referenced storagebuffer variables. Note, the storagebuffer
+  /// must be decorated with both binding and set decorations.
+  /// @returns the referenced storagebuffers
+  const std::vector<std::pair<Variable*, Function::BindingInfo>>
+  referenced_storagebuffer_variables() const;
 
   /// Adds an ancestor entry point
   /// @param ep the entry point ancestor
