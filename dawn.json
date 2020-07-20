@@ -200,7 +200,7 @@
             {
                 "name": "map async",
                 "args": [
-                    {"name": "flags", "type": "map mode"},
+                    {"name": "mode", "type": "map mode"},
                     {"name": "offset", "type": "size_t"},
                     {"name": "size", "type": "size_t"},
                     {"name": "callback", "type": "buffer map callback"},
