@@ -92,8 +92,7 @@ TEST_F(MslGeneratorImplTest, EmitEntryPointData_Vertex_Input) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g;
-  g.set_module_for_testing(&mod);
+  GeneratorImpl g(&mod);
   ASSERT_TRUE(g.EmitEntryPointData(ep_ptr)) << g.error();
   EXPECT_EQ(g.result(), R"(struct vtx_main_in {
   float foo [[attribute(0)]];
@@ -159,8 +158,7 @@ TEST_F(MslGeneratorImplTest, EmitEntryPointData_Vertex_Output) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g;
-  g.set_module_for_testing(&mod);
+  GeneratorImpl g(&mod);
   ASSERT_TRUE(g.EmitEntryPointData(ep_ptr)) << g.error();
   EXPECT_EQ(g.result(), R"(struct vtx_main_out {
   float foo [[user(locn0)]];
@@ -226,8 +224,7 @@ TEST_F(MslGeneratorImplTest, EmitEntryPointData_Fragment_Input) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g;
-  g.set_module_for_testing(&mod);
+  GeneratorImpl g(&mod);
   ASSERT_TRUE(g.EmitEntryPointData(ep_ptr)) << g.error();
   EXPECT_EQ(g.result(), R"(struct main_in {
   float foo [[user(locn0)]];
@@ -293,8 +290,7 @@ TEST_F(MslGeneratorImplTest, EmitEntryPointData_Fragment_Output) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g;
-  g.set_module_for_testing(&mod);
+  GeneratorImpl g(&mod);
   ASSERT_TRUE(g.EmitEntryPointData(ep_ptr)) << g.error();
   EXPECT_EQ(g.result(), R"(struct main_out {
   float foo [[color(0)]];
@@ -357,8 +353,7 @@ TEST_F(MslGeneratorImplTest, EmitEntryPointData_Compute_Input) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g;
-  g.set_module_for_testing(&mod);
+  GeneratorImpl g(&mod);
   ASSERT_FALSE(g.EmitEntryPointData(ep_ptr)) << g.error();
   EXPECT_EQ(g.error(), R"(invalid location variable for pipeline stage)");
 }
@@ -416,8 +411,7 @@ TEST_F(MslGeneratorImplTest, EmitEntryPointData_Compute_Output) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g;
-  g.set_module_for_testing(&mod);
+  GeneratorImpl g(&mod);
   ASSERT_FALSE(g.EmitEntryPointData(ep_ptr)) << g.error();
   EXPECT_EQ(g.error(), R"(invalid location variable for pipeline stage)");
 }
@@ -484,8 +478,7 @@ TEST_F(MslGeneratorImplTest, EmitEntryPointData_Builtins) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g;
-  g.set_module_for_testing(&mod);
+  GeneratorImpl g(&mod);
   ASSERT_TRUE(g.EmitEntryPointData(ep_ptr)) << g.error();
   EXPECT_EQ(g.result(), R"(struct main_out {
   float depth [[depth(any)]];

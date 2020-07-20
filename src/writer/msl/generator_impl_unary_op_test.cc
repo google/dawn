@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/module.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/writer/msl/generator_impl.h"
 
@@ -40,7 +41,8 @@ TEST_P(MslUnaryOpTest, Emit) {
   auto expr = std::make_unique<ast::IdentifierExpression>("expr");
   ast::UnaryOpExpression op(params.op, std::move(expr));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitExpression(&op)) << g.error();
   EXPECT_EQ(g.result(), std::string(params.name) + "(expr)");
 }

@@ -19,6 +19,7 @@
 #include "src/ast/case_statement.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/module.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/type/i32_type.h"
 #include "src/writer/msl/generator_impl.h"
@@ -40,7 +41,8 @@ TEST_F(MslGeneratorImplTest, Emit_Case) {
   lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
   ast::CaseStatement c(std::move(lit), std::move(body));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitCase(&c)) << g.error();
@@ -59,7 +61,8 @@ TEST_F(MslGeneratorImplTest, Emit_Case_BreaksByDefault) {
   lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
   ast::CaseStatement c(std::move(lit), std::move(body));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitCase(&c)) << g.error();
@@ -79,7 +82,8 @@ TEST_F(MslGeneratorImplTest, Emit_Case_WithFallthrough) {
   lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 5));
   ast::CaseStatement c(std::move(lit), std::move(body));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitCase(&c)) << g.error();
@@ -100,7 +104,8 @@ TEST_F(MslGeneratorImplTest, Emit_Case_MultipleSelectors) {
   lit.push_back(std::make_unique<ast::SintLiteral>(&i32, 6));
   ast::CaseStatement c(std::move(lit), std::move(body));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitCase(&c)) << g.error();
@@ -119,7 +124,8 @@ TEST_F(MslGeneratorImplTest, Emit_Case_Default) {
 
   c.set_body(std::move(body));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitCase(&c)) << g.error();

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/module.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_member.h"
 #include "src/ast/struct_member_decoration.h"
@@ -33,7 +34,8 @@ TEST_F(MslGeneratorImplTest, EmitAliasType_F32) {
   ast::type::F32Type f32;
   ast::type::AliasType alias("a", &f32);
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitAliasType(&alias)) << g.error();
   EXPECT_EQ(g.result(), R"(typedef float a;
 )");
@@ -43,7 +45,8 @@ TEST_F(MslGeneratorImplTest, EmitAliasType_NameCollision) {
   ast::type::F32Type f32;
   ast::type::AliasType alias("float", &f32);
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitAliasType(&alias)) << g.error();
   EXPECT_EQ(g.result(), R"(typedef float float_tint_0;
 )");
@@ -68,7 +71,8 @@ TEST_F(MslGeneratorImplTest, EmitAliasType_Struct) {
   ast::type::StructType s(std::move(str));
   ast::type::AliasType alias("a", &s);
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitAliasType(&alias)) << g.error();
   EXPECT_EQ(g.result(), R"(typedef struct {
   float a;

@@ -20,6 +20,7 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/kill_statement.h"
 #include "src/ast/loop_statement.h"
+#include "src/ast/module.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/variable.h"
@@ -39,7 +40,8 @@ TEST_F(MslGeneratorImplTest, Emit_Loop) {
 
   ast::LoopStatement l(std::move(body), {});
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&l)) << g.error();
@@ -58,7 +60,8 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
 
   ast::LoopStatement l(std::move(body), std::move(continuing));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&l)) << g.error();
@@ -97,7 +100,8 @@ TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
 
   ast::LoopStatement outer(std::move(body), std::move(continuing));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&outer)) << g.error();
@@ -148,7 +152,8 @@ TEST_F(MslGeneratorImplTest, DISABLED_Emit_LoopWithVarUsedInContinuing) {
 
   ast::LoopStatement outer(std::move(body), std::move(continuing));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&outer)) << g.error();

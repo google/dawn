@@ -18,6 +18,7 @@
 #include "src/ast/break_statement.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/module.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type/i32_type.h"
@@ -53,7 +54,8 @@ TEST_F(MslGeneratorImplTest, Emit_Switch) {
   auto cond = std::make_unique<ast::IdentifierExpression>("cond");
   ast::SwitchStatement s(std::move(cond), std::move(body));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&s)) << g.error();

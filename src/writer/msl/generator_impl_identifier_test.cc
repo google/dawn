@@ -14,6 +14,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/module.h"
 #include "src/writer/msl/generator_impl.h"
 
 namespace tint {
@@ -26,7 +27,8 @@ using MslGeneratorImplTest = testing::Test;
 TEST_F(MslGeneratorImplTest, DISABLED_EmitExpression_Identifier) {
   ast::IdentifierExpression i(std::vector<std::string>{"std", "glsl"});
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitExpression(&i)) << g.error();
   EXPECT_EQ(g.result(), "std::glsl");
 }
@@ -34,7 +36,8 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitExpression_Identifier) {
 TEST_F(MslGeneratorImplTest, EmitIdentifierExpression_Single) {
   ast::IdentifierExpression i("foo");
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitExpression(&i)) << g.error();
   EXPECT_EQ(g.result(), "foo");
 }
@@ -42,7 +45,8 @@ TEST_F(MslGeneratorImplTest, EmitIdentifierExpression_Single) {
 TEST_F(MslGeneratorImplTest, EmitIdentifierExpression_Single_WithCollision) {
   ast::IdentifierExpression i("virtual");
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitExpression(&i)) << g.error();
   EXPECT_EQ(g.result(), "virtual_tint_0");
 }
@@ -51,7 +55,8 @@ TEST_F(MslGeneratorImplTest, EmitIdentifierExpression_Single_WithCollision) {
 TEST_F(MslGeneratorImplTest, DISABLED_EmitIdentifierExpression_MultipleNames) {
   ast::IdentifierExpression i({"std", "glsl", "init"});
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitExpression(&i)) << g.error();
   EXPECT_EQ(g.result(), "std::glsl::init");
 }

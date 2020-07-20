@@ -36,13 +36,12 @@ namespace msl {
 class GeneratorImpl : public TextGenerator {
  public:
   /// Constructor
-  GeneratorImpl();
+  /// @param module the module to generate
+  explicit GeneratorImpl(ast::Module* module);
   ~GeneratorImpl();
 
-  /// Generates the result data
-  /// @param module the module to generate
   /// @returns true on successful generation; false otherwise
-  bool Generate(const ast::Module& module);
+  bool Generate();
 
   /// Calculates the alignment size of the given |type|. This returns 0
   /// for pointers as the size is unknown.
@@ -204,10 +203,6 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true if the zero value was successfully emitted.
   bool EmitZeroValue(ast::type::Type* type);
 
-  /// Sets the module for testing purposes
-  /// @param mod the module to set.
-  void set_module_for_testing(ast::Module* mod);
-
   /// Determines if any used module variable requires an input or output struct.
   /// @param func the function to check
   /// @returns true if an input or output struct is required.
@@ -217,6 +212,11 @@ class GeneratorImpl : public TextGenerator {
   /// @param prefix the prefix of the name to generate
   /// @returns the name
   std::string generate_name(const std::string& prefix);
+
+  /// Checks if the global variable is in an input or output struct
+  /// @param var the variable to check
+  /// @returns true if the global is in an input or output struct
+  bool global_is_in_struct(ast::Variable* var) const;
 
   /// Converts a builtin to an attribute name
   /// @param builtin the builtin to convert
@@ -228,6 +228,12 @@ class GeneratorImpl : public TextGenerator {
 
  private:
   enum class VarType { kIn, kOut };
+
+  struct EntryPointData {
+    std::string struct_name;
+    std::string var_name;
+  };
+
   std::string current_ep_var_name(VarType type);
 
   Namer namer_;
@@ -237,10 +243,6 @@ class GeneratorImpl : public TextGenerator {
   const ast::Module* module_ = nullptr;
   uint32_t loop_emission_counter_ = 0;
 
-  struct EntryPointData {
-    std::string struct_name;
-    std::string var_name;
-  };
   std::unordered_map<std::string, EntryPointData> ep_name_to_in_data_;
   std::unordered_map<std::string, EntryPointData> ep_name_to_out_data_;
 

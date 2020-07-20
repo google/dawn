@@ -17,6 +17,7 @@
 #include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/member_accessor_expression.h"
+#include "src/ast/module.h"
 #include "src/writer/msl/generator_impl.h"
 
 namespace tint {
@@ -32,7 +33,8 @@ TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor) {
 
   ast::MemberAccessorExpression expr(std::move(str), std::move(mem));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitExpression(&expr)) << g.error();
   EXPECT_EQ(g.result(), "str.mem");
 }

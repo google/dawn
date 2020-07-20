@@ -20,12 +20,13 @@ namespace tint {
 namespace writer {
 namespace msl {
 
-Generator::Generator(ast::Module module) : Text(std::move(module)) {}
+Generator::Generator(ast::Module module)
+    : Text(std::move(module)), impl_(&module_) {}
 
 Generator::~Generator() = default;
 
 bool Generator::Generate() {
-  auto ret = impl_.Generate(module_);
+  auto ret = impl_.Generate();
   if (!ret) {
     error_ = impl_.error();
   }

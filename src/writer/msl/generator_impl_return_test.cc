@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/module.h"
 #include "src/ast/return_statement.h"
 #include "src/writer/msl/generator_impl.h"
 
@@ -30,7 +31,8 @@ using MslGeneratorImplTest = testing::Test;
 TEST_F(MslGeneratorImplTest, Emit_Return) {
   ast::ReturnStatement r;
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&r)) << g.error();
@@ -41,7 +43,8 @@ TEST_F(MslGeneratorImplTest, Emit_ReturnWithValue) {
   auto expr = std::make_unique<ast::IdentifierExpression>("expr");
   ast::ReturnStatement r(std::move(expr));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&r)) << g.error();

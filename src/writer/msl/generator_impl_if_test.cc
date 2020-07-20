@@ -16,6 +16,7 @@
 #include "src/ast/else_statement.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/module.h"
 #include "src/ast/return_statement.h"
 #include "src/writer/msl/generator_impl.h"
 
@@ -33,7 +34,8 @@ TEST_F(MslGeneratorImplTest, Emit_If) {
 
   ast::IfStatement i(std::move(cond), std::move(body));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
@@ -60,7 +62,8 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElseIf) {
   ast::IfStatement i(std::move(cond), std::move(body));
   i.set_else_statements(std::move(elses));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
@@ -86,7 +89,8 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElse) {
   ast::IfStatement i(std::move(cond), std::move(body));
   i.set_else_statements(std::move(elses));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&i)) << g.error();
@@ -119,7 +123,8 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithMultiple) {
   ast::IfStatement i(std::move(cond), std::move(body));
   i.set_else_statements(std::move(elses));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&i)) << g.error();

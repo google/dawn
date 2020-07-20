@@ -41,9 +41,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
   ast::Module m;
   m.AddFunction(std::move(func));
 
-  GeneratorImpl g;
-  g.set_module_for_testing(&m);
-
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitExpression(&call)) << g.error();
   EXPECT_EQ(g.result(), "my_func()");
 }
@@ -63,9 +61,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithParams) {
   ast::Module m;
   m.AddFunction(std::move(func));
 
-  GeneratorImpl g;
-  g.set_module_for_testing(&m);
-
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitExpression(&call)) << g.error();
   EXPECT_EQ(g.result(), "my_func(param1, param2)");
 }

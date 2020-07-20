@@ -60,10 +60,10 @@ TEST_F(MslGeneratorImplTest, Emit_Function) {
   ast::Module m;
   m.AddFunction(std::move(func));
 
-  GeneratorImpl g;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
-  ASSERT_TRUE(g.Generate(m)) << g.error();
+  ASSERT_TRUE(g.Generate()) << g.error();
   EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
 
   void my_func() {
@@ -86,10 +86,10 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Name_Collision) {
   ast::Module m;
   m.AddFunction(std::move(func));
 
-  GeneratorImpl g;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
-  ASSERT_TRUE(g.Generate(m)) << g.error();
+  ASSERT_TRUE(g.Generate()) << g.error();
   EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
 
   void main_tint_0() {
@@ -120,10 +120,10 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
   ast::Module m;
   m.AddFunction(std::move(func));
 
-  GeneratorImpl g;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
-  ASSERT_TRUE(g.Generate(m)) << g.error();
+  ASSERT_TRUE(g.Generate()) << g.error();
   EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
 
   void my_func(float a, int b) {
@@ -145,8 +145,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPoint_NoName) {
   m.AddFunction(std::move(func));
   m.AddEntryPoint(std::move(ep));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.Generate(m)) << g.error();
+  GeneratorImpl g(&m);
+  ASSERT_TRUE(g.Generate()) << g.error();
   EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
 
 fragment void frag_main() {
@@ -199,8 +199,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPoint_WithInOutVars) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.Generate(mod)) << g.error();
+  GeneratorImpl g(&mod);
+  ASSERT_TRUE(g.Generate()) << g.error();
   EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
 
 struct frag_main_in {
@@ -271,8 +271,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPoint_WithInOut_Builtins) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.Generate(mod)) << g.error();
+  GeneratorImpl g(&mod);
+  ASSERT_TRUE(g.Generate()) << g.error();
   EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
 
 struct frag_main_out {
@@ -332,8 +332,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPoint_With_Uniform) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.Generate(mod)) << g.error();
+  GeneratorImpl g(&mod);
+  ASSERT_TRUE(g.Generate()) << g.error();
   EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
 
 fragment void frag_main(constant float4& coord [[buffer(0)]]) {
@@ -418,8 +418,8 @@ TEST_F(MslGeneratorImplTest,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.Generate(mod)) << g.error();
+  GeneratorImpl g(&mod);
+  ASSERT_TRUE(g.Generate()) << g.error();
   EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
 
 struct ep_1_in {
@@ -517,8 +517,8 @@ TEST_F(MslGeneratorImplTest,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.Generate(mod)) << g.error();
+  GeneratorImpl g(&mod);
+  ASSERT_TRUE(g.Generate()) << g.error();
   EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
 
 struct ep_1_out {
@@ -600,8 +600,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Called_By_EntryPoint_With_Uniform) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.Generate(mod)) << g.error();
+  GeneratorImpl g(&mod);
+  ASSERT_TRUE(g.Generate()) << g.error();
   EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
 
 float sub_func(constant float4& coord, float param) {
@@ -677,8 +677,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Called_Two_EntryPoints_WithGlobals) {
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.Generate(mod)) << g.error();
+  GeneratorImpl g(&mod);
+  ASSERT_TRUE(g.Generate()) << g.error();
   EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
 
 struct ep_1_in {
@@ -772,8 +772,8 @@ TEST_F(MslGeneratorImplTest,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.Generate(mod)) << g.error();
+  GeneratorImpl g(&mod);
+  ASSERT_TRUE(g.Generate()) << g.error();
   EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
 
 struct ep_1_out {
@@ -838,8 +838,8 @@ TEST_F(MslGeneratorImplTest,
 
   ASSERT_TRUE(td.Determine()) << td.error();
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.Generate(mod)) << g.error();
+  GeneratorImpl g(&mod);
+  ASSERT_TRUE(g.Generate()) << g.error();
   EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
 
 float sub_func() {
@@ -870,8 +870,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPoint_WithName) {
   m.AddFunction(std::move(func));
   m.AddEntryPoint(std::move(ep));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.Generate(m)) << g.error();
+  GeneratorImpl g(&m);
+  ASSERT_TRUE(g.Generate()) << g.error();
   EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
 
 kernel void my_main() {
@@ -892,8 +892,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPoint_WithNameCollision) {
   m.AddFunction(std::move(func));
   m.AddEntryPoint(std::move(ep));
 
-  GeneratorImpl g;
-  ASSERT_TRUE(g.Generate(m)) << g.error();
+  GeneratorImpl g(&m);
+  ASSERT_TRUE(g.Generate()) << g.error();
   EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
 
 kernel void main_tint_0() {
@@ -921,10 +921,10 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
   ast::Module m;
   m.AddFunction(std::move(func));
 
-  GeneratorImpl g;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
-  ASSERT_TRUE(g.Generate(m)) << g.error();
+  ASSERT_TRUE(g.Generate()) << g.error();
   EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
 
   void my_func(float a[5]) {

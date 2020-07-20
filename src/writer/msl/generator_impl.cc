@@ -81,13 +81,9 @@ uint32_t adjust_for_alignment(uint32_t count, uint32_t alignment) {
 
 }  // namespace
 
-GeneratorImpl::GeneratorImpl() = default;
+GeneratorImpl::GeneratorImpl(ast::Module* module) : module_(module) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
-
-void GeneratorImpl::set_module_for_testing(ast::Module* mod) {
-  module_ = mod;
-}
 
 std::string GeneratorImpl::generate_name(const std::string& prefix) {
   std::string name = prefix;
@@ -100,25 +96,23 @@ std::string GeneratorImpl::generate_name(const std::string& prefix) {
   return name;
 }
 
-bool GeneratorImpl::Generate(const ast::Module& module) {
-  module_ = &module;
-
+bool GeneratorImpl::Generate() {
   out_ << "#include <metal_stdlib>" << std::endl << std::endl;
 
-  for (const auto& global : module.global_variables()) {
+  for (const auto& global : module_->global_variables()) {
     global_variables_.set(global->name(), global.get());
   }
 
-  for (auto* const alias : module.alias_types()) {
+  for (auto* const alias : module_->alias_types()) {
     if (!EmitAliasType(alias)) {
       return false;
     }
   }
-  if (!module.alias_types().empty()) {
+  if (!module_->alias_types().empty()) {
     out_ << std::endl;
   }
 
-  for (const auto& var : module.global_variables()) {
+  for (const auto& var : module_->global_variables()) {
     if (!var->is_const()) {
       continue;
     }
@@ -127,26 +121,25 @@ bool GeneratorImpl::Generate(const ast::Module& module) {
     }
   }
 
-  for (const auto& ep : module.entry_points()) {
+  for (const auto& ep : module_->entry_points()) {
     if (!EmitEntryPointData(ep.get())) {
       return false;
     }
   }
 
-  for (const auto& func : module.functions()) {
+  for (const auto& func : module_->functions()) {
     if (!EmitFunction(func.get())) {
       return false;
     }
   }
 
-  for (const auto& ep : module.entry_points()) {
+  for (const auto& ep : module_->entry_points()) {
     if (!EmitEntryPointFunction(ep.get())) {
       return false;
     }
     out_ << std::endl;
   }
 
-  module_ = nullptr;
   return true;
 }
 
@@ -1126,6 +1119,17 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::EntryPoint* ep) {
   return true;
 }
 
+bool GeneratorImpl::global_is_in_struct(ast::Variable* var) const {
+  bool in_or_out_struct_has_location =
+      var->IsDecorated() && var->AsDecorated()->HasLocationDecoration() &&
+      (var->storage_class() == ast::StorageClass::kInput ||
+       var->storage_class() == ast::StorageClass::kOutput);
+  bool in_struct_has_builtin =
+      var->IsDecorated() && var->AsDecorated()->HasBuiltinDecoration() &&
+      var->storage_class() == ast::StorageClass::kOutput;
+  return in_or_out_struct_has_location || in_struct_has_builtin;
+}
+
 bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
   auto* ident = expr->AsIdentifier();
   if (ident->has_path()) {
@@ -1136,14 +1140,7 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
 
   ast::Variable* var = nullptr;
   if (global_variables_.get(ident->name(), &var)) {
-    bool in_or_out_struct_has_location =
-        var->IsDecorated() && var->AsDecorated()->HasLocationDecoration() &&
-        (var->storage_class() == ast::StorageClass::kInput ||
-         var->storage_class() == ast::StorageClass::kOutput);
-    bool in_struct_has_builtin =
-        var->IsDecorated() && var->AsDecorated()->HasBuiltinDecoration() &&
-        var->storage_class() == ast::StorageClass::kOutput;
-    if (in_or_out_struct_has_location || in_struct_has_builtin) {
+    if (global_is_in_struct(var)) {
       auto var_type = var->storage_class() == ast::StorageClass::kInput
                           ? VarType::kIn
                           : VarType::kOut;

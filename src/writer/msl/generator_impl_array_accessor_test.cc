@@ -17,6 +17,7 @@
 #include "gtest/gtest.h"
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/type/i32_type.h"
@@ -37,7 +38,8 @@ TEST_F(MslGeneratorImplTest, EmitExpression_ArrayAccessor) {
 
   ast::ArrayAccessorExpression expr(std::move(ary), std::move(idx));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitExpression(&expr)) << g.error();
   EXPECT_EQ(g.result(), "ary[5]");
 }
@@ -48,7 +50,8 @@ TEST_F(MslGeneratorImplTest, EmitArrayAccessor) {
 
   ast::ArrayAccessorExpression expr(std::move(ary), std::move(idx));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitArrayAccessor(&expr)) << g.error();
   EXPECT_EQ(g.result(), "ary[idx]");
 }

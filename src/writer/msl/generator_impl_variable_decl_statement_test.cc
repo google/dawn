@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/module.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/f32_type.h"
 #include "src/ast/type/vector_type.h"
@@ -38,7 +39,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement) {
 
   ast::VariableDeclStatement stmt(std::move(var));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
@@ -54,7 +56,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
 
   ast::VariableDeclStatement stmt(std::move(var));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
@@ -68,7 +71,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Function) {
 
   ast::VariableDeclStatement stmt(std::move(var));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
@@ -82,7 +86,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
 
   ast::VariableDeclStatement stmt(std::move(var));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
@@ -99,7 +104,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
 
   ast::VariableDeclStatement stmt(std::move(var));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
   EXPECT_EQ(g.result(), R"(float a = initializer;
 )");
@@ -119,7 +125,8 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {
 
   ast::VariableDeclStatement stmt(std::move(var));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitStatement(&stmt)) << g.error();
   EXPECT_EQ(g.result(), R"(float3 a = float3(0.0f);
 )");

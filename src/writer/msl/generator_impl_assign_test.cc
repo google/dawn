@@ -18,6 +18,7 @@
 #include "gtest/gtest.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/module.h"
 #include "src/writer/msl/generator_impl.h"
 
 namespace tint {
@@ -32,7 +33,8 @@ TEST_F(MslGeneratorImplTest, Emit_Assign) {
   auto rhs = std::make_unique<ast::IdentifierExpression>("rhs");
   ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&assign)) << g.error();

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest.h"
+#include "src/ast/module.h"
 #include "src/ast/struct.h"
 #include "src/ast/struct_decoration.h"
 #include "src/ast/struct_member.h"
@@ -41,7 +42,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Alias) {
   ast::type::F32Type f32;
   ast::type::AliasType alias("alias", &f32);
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&alias, "")) << g.error();
   EXPECT_EQ(g.result(), "alias");
 }
@@ -50,7 +52,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Alias_NameCollision) {
   ast::type::F32Type f32;
   ast::type::AliasType alias("bool", &f32);
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&alias, "")) << g.error();
   EXPECT_EQ(g.result(), "bool_tint_0");
 }
@@ -59,7 +62,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Array) {
   ast::type::BoolType b;
   ast::type::ArrayType a(&b, 4);
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&a, "ary")) << g.error();
   EXPECT_EQ(g.result(), "bool ary[4]");
 }
@@ -69,7 +73,8 @@ TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArray) {
   ast::type::ArrayType a(&b, 4);
   ast::type::ArrayType c(&a, 5);
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&c, "ary")) << g.error();
   EXPECT_EQ(g.result(), "bool ary[5][4]");
 }
@@ -81,7 +86,8 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_ArrayOfArrayOfRuntimeArray) {
   ast::type::ArrayType c(&a, 5);
   ast::type::ArrayType d(&c);
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&c, "ary")) << g.error();
   EXPECT_EQ(g.result(), "bool ary[5][4][1]");
 }
@@ -92,7 +98,8 @@ TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
   ast::type::ArrayType c(&a, 5);
   ast::type::ArrayType d(&c, 6);
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&d, "ary")) << g.error();
   EXPECT_EQ(g.result(), "bool ary[6][5][4]");
 }
@@ -101,7 +108,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Array_NameCollision) {
   ast::type::BoolType b;
   ast::type::ArrayType a(&b, 4);
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&a, "bool")) << g.error();
   EXPECT_EQ(g.result(), "bool bool_tint_0[4]");
 }
@@ -110,7 +118,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Array_WithoutName) {
   ast::type::BoolType b;
   ast::type::ArrayType a(&b, 4);
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&a, "")) << g.error();
   EXPECT_EQ(g.result(), "bool[4]");
 }
@@ -119,7 +128,8 @@ TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
   ast::type::BoolType b;
   ast::type::ArrayType a(&b);
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&a, "ary")) << g.error();
   EXPECT_EQ(g.result(), "bool ary[1]");
 }
@@ -128,7 +138,8 @@ TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray_NameCollision) {
   ast::type::BoolType b;
   ast::type::ArrayType a(&b);
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&a, "discard_fragment")) << g.error();
   EXPECT_EQ(g.result(), "bool discard_fragment_tint_0[1]");
 }
@@ -136,7 +147,8 @@ TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray_NameCollision) {
 TEST_F(MslGeneratorImplTest, EmitType_Bool) {
   ast::type::BoolType b;
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&b, "")) << g.error();
   EXPECT_EQ(g.result(), "bool");
 }
@@ -144,7 +156,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Bool) {
 TEST_F(MslGeneratorImplTest, EmitType_F32) {
   ast::type::F32Type f32;
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&f32, "")) << g.error();
   EXPECT_EQ(g.result(), "float");
 }
@@ -152,7 +165,8 @@ TEST_F(MslGeneratorImplTest, EmitType_F32) {
 TEST_F(MslGeneratorImplTest, EmitType_I32) {
   ast::type::I32Type i32;
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&i32, "")) << g.error();
   EXPECT_EQ(g.result(), "int");
 }
@@ -161,7 +175,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Matrix) {
   ast::type::F32Type f32;
   ast::type::MatrixType m(&f32, 3, 2);
 
-  GeneratorImpl g;
+  ast::Module mod;
+  GeneratorImpl g(&mod);
   ASSERT_TRUE(g.EmitType(&m, "")) << g.error();
   EXPECT_EQ(g.result(), "float2x3");
 }
@@ -171,7 +186,8 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Pointer) {
   ast::type::F32Type f32;
   ast::type::PointerType p(&f32, ast::StorageClass::kWorkgroup);
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&p, "")) << g.error();
   EXPECT_EQ(g.result(), "float*");
 }
@@ -194,7 +210,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct) {
 
   ast::type::StructType s(std::move(str));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&s, "")) << g.error();
   EXPECT_EQ(g.result(), R"(struct {
   int a;
@@ -226,7 +243,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_InjectPadding) {
 
   ast::type::StructType s(std::move(str));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&s, "")) << g.error();
   EXPECT_EQ(g.result(), R"(struct {
   int8_t pad_0[4];
@@ -255,7 +273,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_NameCollision) {
 
   ast::type::StructType s(std::move(str));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&s, "")) << g.error();
   EXPECT_EQ(g.result(), R"(struct {
   int main_tint_0;
@@ -283,7 +302,8 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
 
   ast::type::StructType s(std::move(str));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&s, "")) << g.error();
   EXPECT_EQ(g.result(), R"(struct {
   int a;
@@ -294,7 +314,8 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
 TEST_F(MslGeneratorImplTest, EmitType_U32) {
   ast::type::U32Type u32;
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&u32, "")) << g.error();
   EXPECT_EQ(g.result(), "uint");
 }
@@ -303,7 +324,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Vector) {
   ast::type::F32Type f32;
   ast::type::VectorType v(&f32, 3);
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&v, "")) << g.error();
   EXPECT_EQ(g.result(), "float3");
 }
@@ -311,7 +333,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Vector) {
 TEST_F(MslGeneratorImplTest, EmitType_Void) {
   ast::type::VoidType v;
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitType(&v, "")) << g.error();
   EXPECT_EQ(g.result(), "void");
 }

@@ -17,6 +17,7 @@
 #include "gtest/gtest.h"
 #include "src/ast/as_expression.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/module.h"
 #include "src/ast/type/f32_type.h"
 #include "src/writer/msl/generator_impl.h"
 
@@ -32,7 +33,8 @@ TEST_F(MslGeneratorImplTest, EmitExpression_As) {
   auto id = std::make_unique<ast::IdentifierExpression>("id");
   ast::AsExpression as(&f32, std::move(id));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitExpression(&as)) << g.error();
   EXPECT_EQ(g.result(), "as_type<float>(id)");
 }

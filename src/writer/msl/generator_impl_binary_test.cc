@@ -17,6 +17,7 @@
 #include "gtest/gtest.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/module.h"
 #include "src/writer/msl/generator_impl.h"
 
 namespace tint {
@@ -41,7 +42,8 @@ TEST_P(MslBinaryTest, Emit) {
 
   ast::BinaryExpression expr(params.op, std::move(left), std::move(right));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitExpression(&expr)) << g.error();
   EXPECT_EQ(g.result(), params.result);
 }

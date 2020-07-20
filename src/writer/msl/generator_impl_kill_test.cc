@@ -14,6 +14,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/kill_statement.h"
+#include "src/ast/module.h"
 #include "src/writer/msl/generator_impl.h"
 
 namespace tint {
@@ -26,7 +27,8 @@ using MslGeneratorImplTest = testing::Test;
 TEST_F(MslGeneratorImplTest, Emit_Kill) {
   ast::KillStatement k;
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&k)) << g.error();

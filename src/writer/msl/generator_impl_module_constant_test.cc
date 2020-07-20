@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/float_literal.h"
+#include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type/array_type.h"
 #include "src/ast/type/f32_type.h"
@@ -49,7 +50,8 @@ TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
   var->set_constructor(
       std::make_unique<ast::TypeConstructorExpression>(&ary, std::move(exprs)));
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitProgramConstVariable(var.get())) << g.error();
   EXPECT_EQ(
       g.result(),

@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/break_statement.h"
+#include "src/ast/module.h"
 #include "src/writer/msl/generator_impl.h"
 
 namespace tint {
@@ -29,7 +30,8 @@ using MslGeneratorImplTest = testing::Test;
 TEST_F(MslGeneratorImplTest, Emit_Break) {
   ast::BreakStatement b;
 
-  GeneratorImpl g;
+  ast::Module m;
+  GeneratorImpl g(&m);
   g.increment_indent();
 
   ASSERT_TRUE(g.EmitStatement(&b)) << g.error();
