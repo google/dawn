@@ -33,6 +33,7 @@
 #include "src/ast/expression.h"
 #include "src/ast/module.h"
 #include "src/ast/statement.h"
+#include "src/ast/storage_class.h"
 #include "src/reader/spirv/construct.h"
 #include "src/reader/spirv/fail_stream.h"
 #include "src/reader/spirv/namer.h"
@@ -192,7 +193,7 @@ inline std::ostream& operator<<(std::ostream& o, const BlockInfo& bi) {
 
 /// Bookkeeping info for a SPIR-V ID defined in the function.
 /// This will be valid for result IDs for:
-/// - instructions that are not OpLabel, OpVariable, and OpFunctionParameter
+/// - instructions that are not OpLabel, and not OpFunctionParameter
 /// - are defined in a basic block visited in the block-order for the function.
 struct DefInfo {
   /// Constructor.
@@ -243,8 +244,15 @@ struct DefInfo {
 
   /// If the definition is an OpPhi, then |phi_var| is the name of the
   /// variable that stores the value carried from parent basic blocks into
-  // the basic block containing the OpPhi. Otherwise this is the empty string.
+  /// the basic block containing the OpPhi. Otherwise this is the empty string.
   std::string phi_var;
+
+  /// The storage class to use for this value, if it is of pointer type.
+  /// This is required to carry a stroage class override from a storage
+  /// buffer expressed in the old style (with Uniform storage class)
+  /// that needs to be remapped to StorageBuffer storage class.
+  /// This is kNone for non-pointers.
+  ast::StorageClass storage_class = ast::StorageClass::kNone;
 };
 
 inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
@@ -254,8 +262,11 @@ inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
     << " last_use_pos: " << di.last_use_pos << " requires_named_const_def: "
     << (di.requires_named_const_def ? "true" : "false")
     << " requires_hoisted_def: " << (di.requires_hoisted_def ? "true" : "false")
-    << " phi_var: '" << di.phi_var << "'"
-    << "}";
+    << " phi_var: '" << di.phi_var << "'";
+  if (di.storage_class != ast::StorageClass::kNone) {
+    o << " sc:" << int(di.storage_class);
+  }
+  o << "}";
   return o;
 }
 
@@ -367,7 +378,24 @@ class FunctionEmitter {
   /// @returns false if bad nesting has been detected.
   bool FindIfSelectionInternalHeaders();
 
-  /// Record the SPIR-V IDs of non-constants that should get a 'const'
+  /// Creates a DefInfo record for each locally defined SPIR-V ID.
+  /// Populates the |def_info_| mapping with basic results.
+  /// @returns false on failure
+  bool RegisterLocallyDefinedValues();
+
+  /// Returns the Tint storage class for the given SPIR-V ID that is a
+  /// pointer value.
+  /// @returns the storage class
+  ast::StorageClass GetStorageClassForPointerValue(uint32_t id);
+
+  /// Remaps the storage class for the type of a locally-defined value,
+  /// if necessary. If it's not a pointer type, or if its storage class
+  /// already matches, then the result is a copy of the |type| argument.
+  /// @param type the AST type
+  /// @param result_id the SPIR-V ID for the locally defined value
+  ast::type::Type* RemapStorageClass(ast::type::Type* type, uint32_t result_id);
+
+  /// Marks locally defined values when they should get a 'const'
   /// definition in WGSL, or a 'var' definition at an outer scope.
   /// This occurs in several cases:
   ///  - When a SPIR-V instruction might use the dynamically computed value
@@ -382,8 +410,8 @@ class FunctionEmitter {
   ///  - When a definition is in a construct that does not enclose all the
   ///    uses.  In this case the definition's |requires_hoisted_def| property
   ///    is set to true.
-  /// Populates the |def_info_| mapping.
-  void RegisterValuesNeedingNamedOrHoistedDefinition();
+  /// Updates the |def_info_| mapping.
+  void FindValuesNeedingNamedOrHoistedDefinition();
 
   /// Emits declarations of function variables.
   /// @returns false if emission failed.

@@ -287,10 +287,10 @@ TEST_F(SpvParserTest_CompositeExtract, Vector_IndexTooBigError) {
 TEST_F(SpvParserTest_CompositeExtract, Matrix) {
   const auto assembly = Preamble() + R"(
      %ptr = OpTypePointer Function %m3v2float
-     %var = OpVariable %ptr Function
 
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
+     %var = OpVariable %ptr Function
      %1 = OpLoad %m3v2float %var
      %2 = OpCompositeExtract %v2float %1 2
      OpReturn
@@ -318,10 +318,10 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix) {
 TEST_F(SpvParserTest_CompositeExtract, Matrix_IndexTooBigError) {
   const auto assembly = Preamble() + R"(
      %ptr = OpTypePointer Function %m3v2float
-     %var = OpVariable %ptr Function
 
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
+     %var = OpVariable %ptr Function
      %1 = OpLoad %m3v2float %var
      %2 = OpCompositeExtract %v2float %1 3
      OpReturn
@@ -338,10 +338,10 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix_IndexTooBigError) {
 TEST_F(SpvParserTest_CompositeExtract, Matrix_Vector) {
   const auto assembly = Preamble() + R"(
      %ptr = OpTypePointer Function %m3v2float
-     %var = OpVariable %ptr Function
 
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
+     %var = OpVariable %ptr Function
      %1 = OpLoad %m3v2float %var
      %2 = OpCompositeExtract %float %1 2 1
      OpReturn
@@ -372,10 +372,10 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix_Vector) {
 TEST_F(SpvParserTest_CompositeExtract, Array) {
   const auto assembly = Preamble() + R"(
      %ptr = OpTypePointer Function %a_u_5
-     %var = OpVariable %ptr Function
 
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
+     %var = OpVariable %ptr Function
      %1 = OpLoad %a_u_5 %var
      %2 = OpCompositeExtract %uint %1 3
      OpReturn
@@ -404,10 +404,10 @@ TEST_F(SpvParserTest_CompositeExtract, RuntimeArray_IsError) {
   const auto assembly = Preamble() + R"(
      %rtarr = OpTypeRuntimeArray %uint
      %ptr = OpTypePointer Function %rtarr
-     %var = OpVariable %ptr Function
 
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
+     %var = OpVariable %ptr Function
      %1 = OpLoad %rtarr %var
      %2 = OpCompositeExtract %uint %1 3
      OpReturn
@@ -423,10 +423,10 @@ TEST_F(SpvParserTest_CompositeExtract, RuntimeArray_IsError) {
 TEST_F(SpvParserTest_CompositeExtract, Struct) {
   const auto assembly = Preamble() + R"(
      %ptr = OpTypePointer Function %s_v2f_u_i
-     %var = OpVariable %ptr Function
 
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
+     %var = OpVariable %ptr Function
      %1 = OpLoad %s_v2f_u_i %var
      %2 = OpCompositeExtract %int %1 2
      OpReturn
@@ -454,10 +454,10 @@ TEST_F(SpvParserTest_CompositeExtract, Struct) {
 TEST_F(SpvParserTest_CompositeExtract, Struct_IndexTooBigError) {
   const auto assembly = Preamble() + R"(
      %ptr = OpTypePointer Function %s_v2f_u_i
-     %var = OpVariable %ptr Function
 
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
+     %var = OpVariable %ptr Function
      %1 = OpLoad %s_v2f_u_i %var
      %2 = OpCompositeExtract %int %1 40
      OpReturn
@@ -476,10 +476,10 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_Array_Matrix_Vector) {
      %a_mat = OpTypeArray %m3v2float %uint_3
      %s = OpTypeStruct %uint %a_mat
      %ptr = OpTypePointer Function %s
-     %var = OpVariable %ptr Function
 
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
+     %var = OpVariable %ptr Function
      %1 = OpLoad %s %var
      %2 = OpCompositeExtract %float %1 1 2 0 1
      OpReturn
@@ -553,10 +553,10 @@ VariableDeclStatement{
 TEST_F(SpvParserTest_CopyObject, Pointer) {
   const auto assembly = Preamble() + R"(
      %ptr = OpTypePointer Function %uint
-     %10 = OpVariable %ptr Function
 
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
+     %10 = OpVariable %ptr Function
      %1 = OpCopyObject %ptr %10
      %2 = OpCopyObject %ptr %1
      OpReturn

@@ -708,6 +708,245 @@ TEST_F(SpvParserTest, EmitStatement_AccessChain_InvalidPointeeType) {
               HasSubstr("Access chain with unknown pointee type %60 void"));
 }
 
+std::string OldStorageBufferPreamble() {
+  return R"(
+     OpName %myvar "myvar"
+
+     OpDecorate %struct BufferBlock
+     OpMemberDecorate %struct 0 Offset 0
+     OpMemberDecorate %struct 1 Offset 4
+     OpDecorate %arr ArrayStride 4
+
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+     %uint = OpTypeInt 32 0
+
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+
+     %arr = OpTypeRuntimeArray %uint
+     %struct = OpTypeStruct %uint %arr
+     %ptr_struct = OpTypePointer Uniform %struct
+     %ptr_uint = OpTypePointer Uniform %uint
+
+     %myvar = OpVariable %ptr_struct Uniform
+  )";
+}
+
+TEST_F(SpvParserTest, RemapStorageBuffer_TypesAndVarDeclarations) {
+  // Enusure we get the right module-scope declaration.  This tests translation
+  // of the structure type, arrays of the structure, pointers to them, and
+  // OpVariable of these.
+  const auto assembly = OldStorageBufferPreamble();
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << assembly << p->error();
+  const auto module_str = p->module().to_str();
+  EXPECT_THAT(module_str, HasSubstr(R"(
+  Variable{
+    myvar
+    storage_buffer
+    __alias_S__struct_S
+  }
+RTArr -> __array__u32_stride_4
+S -> __struct_S)"));
+}
+
+TEST_F(SpvParserTest,
+       RemapStorageBuffer_ThroughAccessChain_NonCascaded) {
+  const auto assembly = OldStorageBufferPreamble() + R"(
+  %100 = OpFunction %void None %voidfn
+  %entry = OpLabel
+
+  ; the scalar element
+  %1 = OpAccessChain %ptr_uint %myvar %uint_0
+  OpStore %1 %uint_0
+
+  ; element in the runtime array
+  %2 = OpAccessChain %ptr_uint %myvar %uint_1 %uint_1
+  OpStore %2 %uint_0
+
+  OpReturn
+  OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Assignment{
+  MemberAccessor{
+    Identifier{myvar}
+    Identifier{field0}
+  }
+  ScalarConstructor{0}
+}
+Assignment{
+  ArrayAccessor{
+    MemberAccessor{
+      Identifier{myvar}
+      Identifier{field1}
+    }
+    ScalarConstructor{1}
+  }
+  ScalarConstructor{0}
+})")) << ToString(fe.ast_body())
+      << p->error();
+}
+
+TEST_F(SpvParserTest, RemapStorageBuffer_ThroughAccessChain_Cascaded) {
+  const auto assembly = OldStorageBufferPreamble() + R"(
+  %ptr_rtarr = OpTypePointer Uniform %arr
+  %100 = OpFunction %void None %voidfn
+  %entry = OpLabel
+
+  ; get the runtime array
+  %1 = OpAccessChain %ptr_rtarr %myvar %uint_1
+  ; now an element in it
+  %2 = OpAccessChain %ptr_uint %1 %uint_1
+  OpStore %2 %uint_0
+
+  OpReturn
+  OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(Assignment{
+  ArrayAccessor{
+    MemberAccessor{
+      Identifier{myvar}
+      Identifier{field1}
+    }
+    ScalarConstructor{1}
+  }
+  ScalarConstructor{0}
+})")) << ToString(fe.ast_body())
+      << p->error();
+}
+
+TEST_F(SpvParserTest,
+       RemapStorageBuffer_ThroughCopyObject_WithoutHoisting) {
+  // Generates a const declaration directly.
+  // We have to do a bunch of storage class tracking for locally
+  // defined values in order to get the right pointer-to-storage-buffer
+  // value type for the const declration.
+  const auto assembly = OldStorageBufferPreamble() + R"(
+  %100 = OpFunction %void None %voidfn
+  %entry = OpLabel
+
+  %1 = OpAccessChain %ptr_uint %myvar %uint_1 %uint_1
+  %2 = OpCopyObject %ptr_uint %1
+  OpStore %2 %uint_0
+
+  OpReturn
+  OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_2
+    none
+    __ptr_storage_buffer__u32
+    {
+      ArrayAccessor{
+        MemberAccessor{
+          Identifier{myvar}
+          Identifier{field1}
+        }
+        ScalarConstructor{1}
+      }
+    }
+  }
+}
+Assignment{
+  Identifier{x_2}
+  ScalarConstructor{0}
+})")) << ToString(fe.ast_body())
+      << p->error();
+}
+
+TEST_F(SpvParserTest, RemapStorageBuffer_ThroughCopyObject_WithHoisting) {
+  // Like the previous test, but the declaration for the copy-object
+  // has its declaration hoisted.
+  const auto assembly = OldStorageBufferPreamble() + R"(
+  %bool = OpTypeBool
+  %cond = OpConstantTrue %bool
+
+  %100 = OpFunction %void None %voidfn
+
+  %entry = OpLabel
+  OpSelectionMerge %99 None
+  OpBranchConditional %cond %20 %30
+
+  %20 = OpLabel
+  %1 = OpAccessChain %ptr_uint %myvar %uint_1 %uint_1
+  ; this definintion dominates the use in %99
+  %2 = OpCopyObject %ptr_uint %1
+  OpBranch %99
+
+  %30 = OpLabel
+  OpReturn
+
+  %99 = OpLabel
+  OpStore %2 %uint_0
+  OpReturn
+
+  OpFunctionEnd
+)";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), Eq(R"(VariableDeclStatement{
+  Variable{
+    x_2
+    function
+    __ptr_storage_buffer__u32
+  }
+}
+If{
+  (
+    ScalarConstructor{true}
+  )
+  {
+    Assignment{
+      Identifier{x_2}
+      ArrayAccessor{
+        MemberAccessor{
+          Identifier{myvar}
+          Identifier{field1}
+        }
+        ScalarConstructor{1}
+      }
+    }
+  }
+}
+Else{
+  {
+    Return{}
+  }
+}
+Assignment{
+  Identifier{x_2}
+  ScalarConstructor{0}
+}
+Return{}
+)")) << ToString(fe.ast_body())
+     << p->error();
+}
+
+TEST_F(SpvParserTest, DISABLED_RemapStorageBuffer_ThroughFunctionCall) {
+  // TODO(dneto): Blocked on OpFunctionCall support.
+  // We might need this for passing pointers into atomic builtins.
+}
+TEST_F(SpvParserTest, DISABLED_RemapStorageBuffer_ThroughFunctionParameter) {
+  // TODO(dneto): Blocked on OpFunctionCall support.
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

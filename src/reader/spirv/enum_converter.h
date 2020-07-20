@@ -44,7 +44,7 @@ class EnumConverter {
   /// On failure, logs an error and returns kNone
   /// @param sc the SPIR-V storage class
   /// @returns a Tint AST storage class
-  ast::StorageClass ToStorageClass(SpvStorageClass sc);
+  ast::StorageClass ToStorageClass(const SpvStorageClass sc);
 
   /// Converts a SPIR-V Builtin value a Tint Builtin.
   /// On failure, logs an error and returns kNone

@@ -89,6 +89,11 @@ class ParserImpl : Reader {
   /// @returns true if the parse was successful, false otherwise.
   bool Parse() override;
 
+  /// @returns the Tint context.
+  Context& context() {
+    return ctx_;  // Inherited from Reader
+  }
+
   /// @returns the module. The module in the parser will be reset after this.
   ast::Module module() override;
 
@@ -439,6 +444,16 @@ class ParserImpl : Reader {
   //    [[position]] var<in> gl_Position : vec4<f32>;
   // The builtin variable was detected if and only if the struct_id is non-zero.
   BuiltInPositionInfo builtin_position_;
+
+  // SPIR-V type IDs that are either:
+  // - a struct type decorated by BufferBlock
+  // - an array, runtime array containing one of these
+  // - a pointer type to one of these
+  // These are the types "enclosing" a buffer block with the old style
+  // representation: using Uniform storage class and BufferBlock decoration
+  // on the struct.  The new style is to use the StorageBuffer storage class
+  // and Block decoration.
+  std::unordered_set<uint32_t> remap_buffer_block_type_;
 };
 
 }  // namespace spirv

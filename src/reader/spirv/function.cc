@@ -631,7 +631,10 @@ bool FunctionEmitter::EmitBody() {
     return false;
   }
 
-  RegisterValuesNeedingNamedOrHoistedDefinition();
+  if (!RegisterLocallyDefinedValues()) {
+    return false;
+  }
+  FindValuesNeedingNamedOrHoistedDefinition();
 
   if (!EmitFunctionVariables()) {
     return false;
@@ -2419,10 +2422,10 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
   for (auto id : sorted_by_index(block_info.hoisted_ids)) {
     const auto* def_inst = def_use_mgr_->GetDef(id);
     assert(def_inst);
-    AddStatement(
-        std::make_unique<ast::VariableDeclStatement>(parser_impl_.MakeVariable(
-            id, ast::StorageClass::kFunction,
-            parser_impl_.ConvertType(def_inst->type_id()))));
+    auto* ast_type =
+        RemapStorageClass(parser_impl_.ConvertType(def_inst->type_id()), id);
+    AddStatement(std::make_unique<ast::VariableDeclStatement>(
+        parser_impl_.MakeVariable(id, ast::StorageClass::kFunction, ast_type)));
     // Save this as an already-named value.
     identifier_values_.insert(id);
   }
@@ -2580,12 +2583,14 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       expr.type = expr.type->AsPointer()->type();
       return EmitConstDefOrWriteToHoistedVar(inst, std::move(expr));
     }
-    case SpvOpCopyObject:
+    case SpvOpCopyObject: {
       // Arguably, OpCopyObject is purely combinatorial. On the other hand,
       // it exists to make a new name for something. So we choose to make
       // a new named constant definition.
-      return EmitConstDefOrWriteToHoistedVar(
-          inst, MakeExpression(inst.GetSingleWordInOperand(0)));
+      auto expr = MakeExpression(inst.GetSingleWordInOperand(0));
+      expr.type = RemapStorageClass(expr.type, result_id);
+      return EmitConstDefOrWriteToHoistedVar(inst, std::move(expr));
+    }
     case SpvOpPhi: {
       // Emit a read from the associated state variable.
       auto expr = TypedExpression(
@@ -2754,7 +2759,6 @@ TypedExpression FunctionEmitter::MakeAccessChain(
   // ever-deeper nested indexing expressions. Start off with an expression
   // for the base, and then bury that inside nested indexing expressions.
   TypedExpression current_expr(MakeOperand(inst, 0));
-
   const auto constants = constant_mgr_->GetOperandConstants(&inst);
   static const char* swizzles[] = {"x", "y", "z", "w"};
 
@@ -2803,9 +2807,10 @@ TypedExpression FunctionEmitter::MakeAccessChain(
       // Skip past the member index that gets us to Position.
       first_index = first_index + 1;
       // Replace the gl_PerVertex reference with the gl_Position reference
+      ptr_ty_id = builtin_position_info.member_pointer_type_id;
       current_expr.expr =
           std::make_unique<ast::IdentifierExpression>(namer_.Name(base_id));
-      ptr_ty_id = builtin_position_info.member_pointer_type_id;
+      current_expr.type = parser_impl_.ConvertType(ptr_ty_id);
     }
   }
 
@@ -2815,6 +2820,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(
            << " base pointer is not of pointer type";
     return {};
   }
+  SpvStorageClass storage_class = ptr_type->AsPointer()->storage_class();
   const auto* pointee_type = ptr_type->AsPointer()->pointee_type();
   for (uint32_t index = first_index; index < num_in_operands; ++index) {
     const auto* index_const =
@@ -2904,9 +2910,13 @@ TypedExpression FunctionEmitter::MakeAccessChain(
                << type_mgr_->GetId(pointee_type) << " " << pointee_type->str();
         return {};
     }
-    current_expr.reset(TypedExpression(
-        parser_impl_.ConvertType(type_mgr_->GetId(pointee_type)),
-        std::move(next_expr)));
+    const auto pointee_type_id = type_mgr_->GetId(pointee_type);
+    const auto pointer_type_id =
+        type_mgr_->FindPointerToType(pointee_type_id, storage_class);
+    auto* ast_pointer_type = parser_impl_.ConvertType(pointer_type_id);
+    assert(ast_pointer_type);
+    assert(ast_pointer_type->IsPointer);
+    current_expr.reset(TypedExpression(ast_pointer_type, std::move(next_expr)));
   }
   return current_expr;
 }
@@ -3074,7 +3084,7 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(
                            result_type, std::move(values))};
 }
 
-void FunctionEmitter::RegisterValuesNeedingNamedOrHoistedDefinition() {
+bool FunctionEmitter::RegisterLocallyDefinedValues() {
   // Create a DefInfo for each value definition in this function.
   size_t index = 0;
   for (auto block_id : block_order_) {
@@ -3087,9 +3097,72 @@ void FunctionEmitter::RegisterValuesNeedingNamedOrHoistedDefinition() {
       }
       def_info_[result_id] = std::make_unique<DefInfo>(inst, block_pos, index);
       index++;
+
+      // Determine storage class for pointer values. Do this in order because
+      // we might rely on the storage class for a previously-visited definition.
+      // Logical pointers can't be transmitted through OpPhi, so remaining
+      // pointer definitions are SSA values, and their definitions must be
+      // visited before their uses.
+      auto& storage_class = def_info_[result_id]->storage_class;
+      const auto* type = type_mgr_->GetType(inst.type_id());
+      if (type && type->AsPointer()) {
+        const auto* ast_type = parser_impl_.ConvertType(inst.type_id());
+        if (ast_type && ast_type->AsPointer()) {
+          storage_class = ast_type->AsPointer()->storage_class();
+        }
+        switch (inst.opcode()) {
+          case SpvOpUndef:
+          case SpvOpVariable:
+            // Keep the default decision based on the result type.
+            break;
+          case SpvOpAccessChain:
+          case SpvOpCopyObject:
+            // Inherit from the first operand. We need this so we can pick up
+            // a remapped storage buffer.
+            storage_class =
+                GetStorageClassForPointerValue(inst.GetSingleWordInOperand(0));
+            break;
+          default:
+            return Fail() << "pointer defined in function from unknown opcode: "
+                          << inst.PrettyPrint();
+        }
+      }
     }
   }
+  return true;
+}
 
+ast::StorageClass FunctionEmitter::GetStorageClassForPointerValue(uint32_t id) {
+  auto where = def_info_.find(id);
+  if (where != def_info_.end()) {
+    return where->second.get()->storage_class;
+  }
+  const auto type_id = def_use_mgr_->GetDef(id)->type_id();
+  if (type_id) {
+    auto* ast_type = parser_impl_.ConvertType(type_id);
+    if (ast_type && ast_type->IsPointer()) {
+      return ast_type->AsPointer()->storage_class();
+    }
+  }
+  return ast::StorageClass::kNone;
+}
+
+ast::type::Type* FunctionEmitter::RemapStorageClass(ast::type::Type* type,
+                                                    uint32_t result_id) {
+  if (type->IsPointer()) {
+    // Remap an old-style storage buffer pointer to a new-style storage
+    // buffer pointer.
+    const auto* ast_ptr_type = type->AsPointer();
+    const auto sc = GetStorageClassForPointerValue(result_id);
+    if (ast_ptr_type->storage_class() != sc) {
+      return parser_impl_.context().type_mgr().Get(
+          std::make_unique<ast::type::PointerType>(ast_ptr_type->type(), sc));
+    }
+  }
+  return type;
+}
+
+void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
   // Mark vector operands of OpVectorShuffle as needing a named definition,
   // but only if they are defined in this function as well.
   for (auto& id_def_info_pair : def_info_) {

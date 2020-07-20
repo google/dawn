@@ -65,6 +65,7 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/variable_decoration.h"
+#include "src/reader/spirv/enum_converter.h"
 #include "src/reader/spirv/function.h"
 #include "src/type_manager.h"
 
@@ -612,7 +613,8 @@ ast::type::Type* ParserImpl::ConvertType(
 
 ast::type::Type* ParserImpl::ConvertType(
     const spvtools::opt::analysis::Array* arr_ty) {
-  auto* ast_elem_ty = ConvertType(type_mgr_->GetId(arr_ty->element_type()));
+  const auto elem_type_id = type_mgr_->GetId(arr_ty->element_type());
+  auto* ast_elem_ty = ConvertType(elem_type_id);
   if (ast_elem_ty == nullptr) {
     return nullptr;
   }
@@ -647,6 +649,9 @@ ast::type::Type* ParserImpl::ConvertType(
       ast_elem_ty, static_cast<uint32_t>(num_elem));
   if (!ApplyArrayDecorations(arr_ty, ast_type.get())) {
     return nullptr;
+  }
+  if (remap_buffer_block_type_.count(elem_type_id)) {
+    remap_buffer_block_type_.insert(type_mgr_->GetId(arr_ty));
   }
   return ctx_.type_mgr().Get(std::move(ast_type));
 }
@@ -684,9 +689,17 @@ ast::type::Type* ParserImpl::ConvertType(
   // Compute the struct decoration.
   auto struct_decorations = this->GetDecorationsFor(type_id);
   auto ast_struct_decoration = ast::StructDecoration::kNone;
-  if (struct_decorations.size() == 1 &&
-      struct_decorations[0][0] == SpvDecorationBlock) {
-    ast_struct_decoration = ast::StructDecoration::kBlock;
+  if (struct_decorations.size() == 1) {
+    const auto decoration = struct_decorations[0][0];
+    if (decoration == SpvDecorationBlock) {
+      ast_struct_decoration = ast::StructDecoration::kBlock;
+    } else if (decoration == SpvDecorationBufferBlock) {
+      ast_struct_decoration = ast::StructDecoration::kBlock;
+      remap_buffer_block_type_.insert(type_id);
+    } else {
+      Fail() << "struct with ID " << type_id
+             << " has unrecognized decoration: " << int(decoration);
+    }
   } else if (struct_decorations.size() > 1) {
     Fail() << "can't handle a struct with more than one decoration: struct "
            << type_id << " has " << struct_decorations.size();
@@ -751,32 +764,39 @@ ast::type::Type* ParserImpl::ConvertType(
   // Set the struct name before registering it.
   namer_.SuggestSanitizedName(type_id, "S");
   ast_struct_type->set_name(namer_.GetName(type_id));
-  return ctx_.type_mgr().Get(std::move(ast_struct_type));
+  auto* result = ctx_.type_mgr().Get(std::move(ast_struct_type));
+  return result;
 }
 
 ast::type::Type* ParserImpl::ConvertType(
     uint32_t type_id,
     const spvtools::opt::analysis::Pointer*) {
   const auto* inst = def_use_mgr_->GetDef(type_id);
-  const auto pointee_ty_id = inst->GetSingleWordInOperand(1);
+  const auto pointee_type_id = inst->GetSingleWordInOperand(1);
   const auto storage_class = SpvStorageClass(inst->GetSingleWordInOperand(0));
-  if (pointee_ty_id == builtin_position_.struct_type_id) {
+  if (pointee_type_id == builtin_position_.struct_type_id) {
     builtin_position_.pointer_type_id = type_id;
     builtin_position_.storage_class = storage_class;
     return nullptr;
   }
-  auto* ast_elem_ty = ConvertType(pointee_ty_id);
+  auto* ast_elem_ty = ConvertType(pointee_type_id);
   if (ast_elem_ty == nullptr) {
     Fail() << "SPIR-V pointer type with ID " << type_id
-           << " has invalid pointee type " << pointee_ty_id;
+           << " has invalid pointee type " << pointee_type_id;
     return nullptr;
   }
+
   auto ast_storage_class = enum_converter_.ToStorageClass(storage_class);
   if (ast_storage_class == ast::StorageClass::kNone) {
     Fail() << "SPIR-V pointer type with ID " << type_id
            << " has invalid storage class "
            << static_cast<uint32_t>(storage_class);
     return nullptr;
+  }
+  if (ast_storage_class == ast::StorageClass::kUniform &&
+      remap_buffer_block_type_.count(pointee_type_id)) {
+    ast_storage_class = ast::StorageClass::kStorageBuffer;
+    remap_buffer_block_type_.insert(type_id);
   }
   return ctx_.type_mgr().Get(
       std::make_unique<ast::type::PointerType>(ast_elem_ty, ast_storage_class));
@@ -854,7 +874,8 @@ bool ParserImpl::EmitModuleScopeVariables() {
       continue;
     }
     const auto& var = type_or_value;
-    const auto spirv_storage_class = var.GetSingleWordInOperand(0);
+    const auto spirv_storage_class =
+        SpvStorageClass(var.GetSingleWordInOperand(0));
 
     uint32_t type_id = var.type_id();
     if ((type_id == builtin_position_.pointer_type_id) &&
@@ -864,9 +885,21 @@ bool ParserImpl::EmitModuleScopeVariables() {
       builtin_position_.per_vertex_var_id = var.result_id();
       continue;
     }
-
-    auto ast_storage_class = enum_converter_.ToStorageClass(
-        static_cast<SpvStorageClass>(spirv_storage_class));
+    switch (enum_converter_.ToStorageClass(spirv_storage_class)) {
+      case ast::StorageClass::kInput:
+      case ast::StorageClass::kOutput:
+      case ast::StorageClass::kUniform:
+      case ast::StorageClass::kUniformConstant:
+      case ast::StorageClass::kStorageBuffer:
+      case ast::StorageClass::kImage:
+      case ast::StorageClass::kWorkgroup:
+      case ast::StorageClass::kPrivate:
+        break;
+      default:
+        return Fail() << "invalid SPIR-V storage class "
+                      << int(spirv_storage_class)
+                      << " for module scope variable: " << var.PrettyPrint();
+    }
     if (!success_) {
       return false;
     }
@@ -881,6 +914,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
                     << " has non-pointer type " << var.type_id();
     }
     auto* ast_store_type = ast_type->AsPointer()->type();
+    auto ast_storage_class = ast_type->AsPointer()->storage_class();
     auto ast_var =
         MakeVariable(var.result_id(), ast_storage_class, ast_store_type);
     if (var.NumInOperands() > 1) {

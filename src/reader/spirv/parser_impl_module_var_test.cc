@@ -70,7 +70,7 @@ TEST_F(SpvParserTest, ModuleScopeVar_NoVar) {
   EXPECT_THAT(module_ast, Not(HasSubstr("Variable")));
 }
 
-TEST_F(SpvParserTest, ModuleScopeVar_BadStorageClass) {
+TEST_F(SpvParserTest, ModuleScopeVar_BadStorageClass_NotAWebGPUStorageClass) {
   auto* p = parser(test::Assemble(R"(
     %float = OpTypeFloat 32
     %ptr = OpTypePointer CrossWorkgroup %float
@@ -82,6 +82,22 @@ TEST_F(SpvParserTest, ModuleScopeVar_BadStorageClass) {
   // us catch this error.
   EXPECT_FALSE(p->EmitModuleScopeVariables()) << p->error();
   EXPECT_THAT(p->error(), HasSubstr("unknown SPIR-V storage class: 5"));
+}
+
+TEST_F(SpvParserTest, ModuleScopeVar_BadStorageClass_Function) {
+  auto* p = parser(test::Assemble(R"(
+    %float = OpTypeFloat 32
+    %ptr = OpTypePointer Function %float
+    %52 = OpVariable %ptr Function
+  )"));
+  EXPECT_TRUE(p->BuildInternalModule());
+  // Normally we should run ParserImpl::RegisterTypes before emitting
+  // variables. But defensive coding in EmitModuleScopeVariables lets
+  // us catch this error.
+  EXPECT_FALSE(p->EmitModuleScopeVariables()) << p->error();
+  EXPECT_THAT(p->error(),
+              HasSubstr("invalid SPIR-V storage class 7 for module scope "
+                        "variable: %52 = OpVariable %2 Function"));
 }
 
 TEST_F(SpvParserTest, ModuleScopeVar_BadPointerType) {
