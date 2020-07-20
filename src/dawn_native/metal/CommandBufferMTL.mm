@@ -601,6 +601,7 @@ namespace dawn_native { namespace metal {
                     Buffer* buffer = ToBackend(src.buffer.Get());
                     Texture* texture = ToBackend(dst.texture.Get());
 
+                    buffer->EnsureDataInitialized(commandContext);
                     EnsureDestinationTextureInitialized(texture, copy->destination, copy->copySize);
 
                     TextureBufferCopySplit splitCopies = ComputeTextureBufferCopySplit(

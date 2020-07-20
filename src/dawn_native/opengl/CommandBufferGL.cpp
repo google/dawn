@@ -518,6 +518,8 @@ namespace dawn_native { namespace opengl {
                     GLenum target = texture->GetGLTarget();
                     const GLFormat& format = texture->GetGLFormat();
 
+                    buffer->EnsureDataInitialized();
+
                     ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
                     SubresourceRange subresources = {dst.mipLevel, 1, dst.origin.z,
                                                      copy->copySize.depth};
