@@ -21,6 +21,7 @@
 #include "src/ast/identifier_expression.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/switch_statement.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
 
@@ -317,9 +318,36 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsReturn()) {
     return EmitReturn(stmt->AsReturn());
   }
+  if (stmt->IsSwitch()) {
+    return EmitSwitch(stmt->AsSwitch());
+  }
 
   error_ = "unknown statement type: " + stmt->str();
   return false;
+}
+
+bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
+  make_indent();
+
+  out_ << "switch(";
+  if (!EmitExpression(stmt->condition())) {
+    return false;
+  }
+  out_ << ") {" << std::endl;
+
+  increment_indent();
+
+  for (const auto& s : stmt->body()) {
+    if (!EmitCase(s.get())) {
+      return false;
+    }
+  }
+
+  decrement_indent();
+  make_indent();
+  out_ << "}" << std::endl;
+
+  return true;
 }
 
 bool GeneratorImpl::EmitUnaryOp(ast::UnaryOpExpression* expr) {

@@ -72,6 +72,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
   bool EmitStatement(ast::Statement* stmt);
+  /// Handles generating a switch statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted
+  bool EmitSwitch(ast::SwitchStatement* stmt);
   /// Handles a unary op expression
   /// @param expr the expression to emit
   /// @returns true if the expression was emitted
