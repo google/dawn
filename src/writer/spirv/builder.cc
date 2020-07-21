@@ -1469,6 +1469,8 @@ uint32_t Builder::GenerateIntrinsic(const std::string& name,
     op = spv::Op::OpIsNan;
   } else if (name == "outer_product") {
     op = spv::Op::OpOuterProduct;
+  } else if (name == "select") {
+    op = spv::Op::OpSelect;
   }
   if (op == spv::Op::OpNop) {
     error_ = "unable to determine operator for: " + name;

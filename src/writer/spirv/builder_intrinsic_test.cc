@@ -356,6 +356,58 @@ TEST_F(BuilderTest, Call_OuterProduct) {
 )");
 }
 
+TEST_F(BuilderTest, Call_Select) {
+  ast::type::F32Type f32;
+  ast::type::BoolType bool_type;
+  ast::type::VectorType bool_vec3(&bool_type, 3);
+  ast::type::VectorType vec3(&f32, 3);
+
+  auto v3 =
+      std::make_unique<ast::Variable>("v3", ast::StorageClass::kPrivate, &vec3);
+  auto bool_v3 = std::make_unique<ast::Variable>(
+      "bool_v3", ast::StorageClass::kPrivate, &bool_vec3);
+
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("v3"));
+  params.push_back(std::make_unique<ast::IdentifierExpression>("v3"));
+  params.push_back(std::make_unique<ast::IdentifierExpression>("bool_v3"));
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("select"), std::move(params));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(v3.get());
+  td.RegisterVariableForTesting(bool_v3.get());
+
+  ASSERT_TRUE(td.DetermineResultType(&expr)) << td.error();
+
+  Builder b(&mod);
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(v3.get())) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(bool_v3.get())) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(&expr), 11u) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+%3 = OpTypeVector %4 3
+%2 = OpTypePointer Private %3
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Private %5
+%9 = OpTypeBool
+%8 = OpTypeVector %9 3
+%7 = OpTypePointer Private %8
+%10 = OpConstantNull %8
+%6 = OpVariable %7 Private %10
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%12 = OpLoad %3 %1
+%13 = OpLoad %3 %1
+%14 = OpLoad %8 %6
+%11 = OpSelect %3 %12 %13 %14
+)");
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace writer
