@@ -39,6 +39,14 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the binary expression
   /// @returns true if the expression was emitted, false otherwise
   bool EmitBinary(ast::BinaryExpression* expr);
+  /// Handles a break statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted successfully
+  bool EmitBreak(ast::BreakStatement* stmt);
+  /// Handles a continue statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted successfully
+  bool EmitContinue(ast::ContinueStatement* stmt);
   /// Handles generate an Expression
   /// @param expr the expression
   /// @returns true if the expression was emitted
@@ -47,6 +55,14 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the identifier expression
   /// @returns true if the identifeir was emitted
   bool EmitIdentifier(ast::IdentifierExpression* expr);
+  /// Handles return statements
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was successfully emitted
+  bool EmitReturn(ast::ReturnStatement* stmt);
+  /// Handles statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted
+  bool EmitStatement(ast::Statement* stmt);
 
   /// Checks if the global variable is in an input or output struct
   /// @param var the variable to check
@@ -66,6 +82,7 @@ class GeneratorImpl : public TextGenerator {
   Namer namer_;
   ast::Module* module_ = nullptr;
   std::string current_ep_name_;
+  bool generating_entry_point_ = false;
   ScopeStack<ast::Variable*> global_variables_;
   std::unordered_map<std::string, EntryPointData> ep_name_to_in_data_;
   std::unordered_map<std::string, EntryPointData> ep_name_to_out_data_;

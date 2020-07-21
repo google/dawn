@@ -543,7 +543,10 @@ endif()
 if (${TINT_BUILD_HLSL_WRITER})
   list(APPEND TINT_TEST_SRCS
     writer/hlsl/generator_impl_binary_test.cc
+    writer/hlsl/generator_impl_break_test.cc
+    writer/hlsl/generator_impl_continue_test.cc
     writer/hlsl/generator_impl_identifier_test.cc
+    writer/hlsl/generator_impl_return_test.cc
     writer/hlsl/generator_impl_test.cc
     writer/hlsl/namer_test.cc
   )

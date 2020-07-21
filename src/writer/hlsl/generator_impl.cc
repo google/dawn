@@ -16,6 +16,7 @@
 
 #include "src/ast/binary_expression.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/return_statement.h"
 
 namespace tint {
 namespace writer {
@@ -137,6 +138,18 @@ bool GeneratorImpl::EmitBinary(ast::BinaryExpression* expr) {
   return true;
 }
 
+bool GeneratorImpl::EmitBreak(ast::BreakStatement*) {
+  make_indent();
+  out_ << "break;" << std::endl;
+  return true;
+}
+
+bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
+  make_indent();
+  out_ << "continue;" << std::endl;
+  return true;
+}
+
 bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   if (expr->IsBinary()) {
     return EmitBinary(expr->AsBinary());
@@ -178,6 +191,41 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
   out_ << namer_.NameFor(ident->name());
 
   return true;
+}
+
+bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
+  make_indent();
+
+  out_ << "return";
+
+  if (generating_entry_point_) {
+    auto out_data = ep_name_to_out_data_.find(current_ep_name_);
+    if (out_data != ep_name_to_out_data_.end()) {
+      out_ << " " << out_data->second.var_name;
+    }
+  } else if (stmt->has_value()) {
+    out_ << " ";
+    if (!EmitExpression(stmt->value())) {
+      return false;
+    }
+  }
+  out_ << ";" << std::endl;
+  return true;
+}
+
+bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
+  if (stmt->IsBreak()) {
+    return EmitBreak(stmt->AsBreak());
+  }
+  if (stmt->IsContinue()) {
+    return EmitContinue(stmt->AsContinue());
+  }
+  if (stmt->IsReturn()) {
+    return EmitReturn(stmt->AsReturn());
+  }
+
+  error_ = "unknown statement type: " + stmt->str();
+  return false;
 }
 
 }  // namespace hlsl
