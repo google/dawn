@@ -24,6 +24,7 @@
 #include "src/ast/binary_expression.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/call_expression.h"
+#include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/cast_expression.h"
 #include "src/ast/continue_statement.h"
@@ -283,6 +284,9 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
   }
   if (stmt->IsBreak()) {
     return true;
+  }
+  if (stmt->IsCall()) {
+    return DetermineResultType(stmt->AsCall()->expr());
   }
   if (stmt->IsCase()) {
     auto* c = stmt->AsCase();

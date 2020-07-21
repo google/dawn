@@ -26,6 +26,7 @@
 #include "src/ast/binary_expression.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/call_expression.h"
+#include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/cast_expression.h"
 #include "src/ast/continue_statement.h"
@@ -336,6 +337,29 @@ TEST_F(TypeDeterminerTest, Stmt_Switch) {
   EXPECT_TRUE(stmt.condition()->result_type()->IsI32());
   EXPECT_TRUE(lhs_ptr->result_type()->IsI32());
   EXPECT_TRUE(rhs_ptr->result_type()->IsF32());
+}
+
+TEST_F(TypeDeterminerTest, Stmt_Call) {
+  ast::type::F32Type f32;
+
+  ast::VariableList params;
+  auto func =
+      std::make_unique<ast::Function>("my_func", std::move(params), &f32);
+  mod()->AddFunction(std::move(func));
+
+  // Register the function
+  EXPECT_TRUE(td()->Determine());
+
+  ast::ExpressionList call_params;
+  auto expr = std::make_unique<ast::CallExpression>(
+      std::make_unique<ast::IdentifierExpression>("my_func"),
+      std::move(call_params));
+  auto* expr_ptr = expr.get();
+
+  ast::CallStatement call(std::move(expr));
+  EXPECT_TRUE(td()->DetermineResultType(&call));
+  ASSERT_NE(expr_ptr->result_type(), nullptr);
+  EXPECT_TRUE(expr_ptr->result_type()->IsF32());
 }
 
 TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
