@@ -2605,7 +2605,8 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
     default:
       break;
   }
-  return Fail() << "unhandled instruction with opcode " << inst.opcode();
+  return Fail() << "unhandled instruction with opcode " << inst.opcode() << ": "
+                << inst.PrettyPrint();
 }
 
 TypedExpression FunctionEmitter::MakeOperand(
@@ -2701,6 +2702,10 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   if (opcode == SpvOpUndef) {
     // Replace undef with the null value.
     return {ast_type, parser_impl_.MakeNullValue(ast_type)};
+  }
+
+  if (opcode == SpvOpSelect) {
+    return MakeSimpleSelect(inst);
   }
 
   // builtin readonly function
@@ -3373,6 +3378,33 @@ bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
   }
 
   return EmitConstDefOrWriteToHoistedVar(inst, std::move(expr));
+}
+
+TypedExpression FunctionEmitter::MakeSimpleSelect(
+    const spvtools::opt::Instruction& inst) {
+  auto condition = MakeOperand(inst, 0);
+  auto operand1 = MakeOperand(inst, 1);
+  auto operand2 = MakeOperand(inst, 2);
+
+  // SPIR-V validation requires:
+  // - the condition to be bool or bool vector, so we don't check it here.
+  // - operand1, operand2, and result type to match.
+  // - you can't select over pointers or pointer vectors, unless you also have
+  //   a VariablePointers* capability, which is not allowed in by WebGPU.
+  auto* op_ty = operand1.type;
+  if (op_ty->IsVector() || op_ty->is_float_scalar() ||
+      op_ty->is_integer_scalar() || op_ty->IsBool()) {
+    ast::ExpressionList params;
+    params.push_back(std::move(operand1.expr));
+    params.push_back(std::move(operand2.expr));
+    // The condition goes last.
+    params.push_back(std::move(condition.expr));
+    return {operand1.type,
+            std::make_unique<ast::CallExpression>(
+                std::make_unique<ast::IdentifierExpression>("select"),
+                std::move(params))};
+  }
+  return {};
 }
 
 }  // namespace spirv

@@ -1104,12 +1104,187 @@ TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Vector) {
       << ToString(fe.ast_body());
 }
 
+TEST_F(SpvFUnordTest, Select_BoolCond_BoolParams) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpSelect %bool %true %true %false
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_1
+    none
+    __bool
+    {
+      Call{
+        Identifier{select}
+        (
+          ScalarConstructor{true}
+          ScalarConstructor{false}
+          ScalarConstructor{true}
+        )
+      }
+    }
+  }
+})")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvFUnordTest, Select_BoolCond_IntScalarParams) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpSelect %uint %true %uint_10 %uint_20
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_1
+    none
+    __u32
+    {
+      Call{
+        Identifier{select}
+        (
+          ScalarConstructor{10}
+          ScalarConstructor{20}
+          ScalarConstructor{true}
+        )
+      }
+    }
+  }
+})")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvFUnordTest, Select_BoolCond_FloatScalarParams) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpSelect %float %true %float_50 %float_60
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_1
+    none
+    __f32
+    {
+      Call{
+        Identifier{select}
+        (
+          ScalarConstructor{50.000000}
+          ScalarConstructor{60.000000}
+          ScalarConstructor{true}
+        )
+      }
+    }
+  }
+})")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvFUnordTest, Select_BoolCond_VectorParams) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpSelect %v2uint %true %v2uint_10_20 %v2uint_20_10
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_1
+    none
+    __vec_2__u32
+    {
+      Call{
+        Identifier{select}
+        (
+          TypeConstructor{
+            __vec_2__u32
+            ScalarConstructor{10}
+            ScalarConstructor{20}
+          }
+          TypeConstructor{
+            __vec_2__u32
+            ScalarConstructor{20}
+            ScalarConstructor{10}
+          }
+          ScalarConstructor{true}
+        )
+      }
+    }
+  }
+})")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvFUnordTest, Select_VecBoolCond_VectorParams) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpSelect %v2uint %v2bool_t_f %v2uint_10_20 %v2uint_20_10
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_1
+    none
+    __vec_2__u32
+    {
+      Call{
+        Identifier{select}
+        (
+          TypeConstructor{
+            __vec_2__u32
+            ScalarConstructor{10}
+            ScalarConstructor{20}
+          }
+          TypeConstructor{
+            __vec_2__u32
+            ScalarConstructor{20}
+            ScalarConstructor{10}
+          }
+          TypeConstructor{
+            __vec_2__bool
+            ScalarConstructor{true}
+            ScalarConstructor{false}
+          }
+        )
+      }
+    }
+  }
+})")) << ToString(fe.ast_body());
+}
+
 // TODO(dneto): OpAny  - likely builtin function TBD
 // TODO(dneto): OpAll  - likely builtin function TBD
 // TODO(dneto): OpIsNan - likely builtin function TBD
 // TODO(dneto): OpIsInf - likely builtin function TBD
 // TODO(dneto): Kernel-guarded instructions.
-// TODO(dneto): OpSelect - likely builtin function TBD
+// TODO(dneto): OpSelect over more general types, as in SPIR-V 1.4
 
 }  // namespace
 }  // namespace spirv

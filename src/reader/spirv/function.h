@@ -676,6 +676,13 @@ class FunctionEmitter {
   /// @returns false if emission failed
   bool EmitFunctionCall(const spvtools::opt::Instruction& inst);
 
+  /// Returns an expression for an OpSelect, if its operands are scalars
+  /// or vectors. These translate directly to WGSL select.  Otherwise, return
+  /// an expression with a null owned expression
+  /// @param inst the SPIR-V OpSelect instruction
+  /// @returns a typed expression, or one with a null owned expression
+  TypedExpression MakeSimpleSelect(const spvtools::opt::Instruction& inst);
+
   /// Finds the header block for a structured construct that we can "break"
   /// out from, from deeply nested control flow, if such a block exists.
   /// If the construct is:
