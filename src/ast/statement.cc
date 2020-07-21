@@ -18,6 +18,7 @@
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/break_statement.h"
+#include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/else_statement.h"
@@ -49,6 +50,10 @@ bool Statement::IsBreak() const {
 }
 
 bool Statement::IsCase() const {
+  return false;
+}
+
+bool Statement::IsCall() const {
   return false;
 }
 
@@ -96,6 +101,11 @@ const AssignmentStatement* Statement::AsAssign() const {
 const BreakStatement* Statement::AsBreak() const {
   assert(IsBreak());
   return static_cast<const BreakStatement*>(this);
+}
+
+const CallStatement* Statement::AsCall() const {
+  assert(IsCall());
+  return static_cast<const CallStatement*>(this);
 }
 
 const CaseStatement* Statement::AsCase() const {
@@ -156,6 +166,11 @@ AssignmentStatement* Statement::AsAssign() {
 BreakStatement* Statement::AsBreak() {
   assert(IsBreak());
   return static_cast<BreakStatement*>(this);
+}
+
+CallStatement* Statement::AsCall() {
+  assert(IsCall());
+  return static_cast<CallStatement*>(this);
 }
 
 CaseStatement* Statement::AsCase() {

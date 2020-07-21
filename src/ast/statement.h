@@ -25,6 +25,7 @@ namespace ast {
 
 class AssignmentStatement;
 class BreakStatement;
+class CallStatement;
 class CaseStatement;
 class ContinueStatement;
 class ElseStatement;
@@ -45,6 +46,8 @@ class Statement : public Node {
   virtual bool IsAssign() const;
   /// @returns true if this is a break statement
   virtual bool IsBreak() const;
+  /// @returns true if this is a call statement
+  virtual bool IsCall() const;
   /// @returns true if this is a case statement
   virtual bool IsCase() const;
   /// @returns true if this is a continue statement
@@ -70,6 +73,8 @@ class Statement : public Node {
   const AssignmentStatement* AsAssign() const;
   /// @returns the statement as a const break statement
   const BreakStatement* AsBreak() const;
+  /// @returns the statement as a const call statement
+  const CallStatement* AsCall() const;
   /// @returns the statement as a const case statement
   const CaseStatement* AsCase() const;
   /// @returns the statement as a const continue statement
@@ -95,6 +100,8 @@ class Statement : public Node {
   AssignmentStatement* AsAssign();
   /// @returns the statement as a break statement
   BreakStatement* AsBreak();
+  /// @returns the statement as a call statement
+  CallStatement* AsCall();
   /// @returns the statement as a case statement
   CaseStatement* AsCase();
   /// @returns the statement as a continue statement

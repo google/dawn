@@ -58,6 +58,8 @@ set(TINT_LIB_SRCS
   ast/builtin_decoration.h
   ast/call_expression.cc
   ast/call_expression.h
+  ast/call_statement.cc
+  ast/call_statement.h
   ast/case_statement.cc
   ast/case_statement.h
   ast/cast_expression.cc
@@ -278,6 +280,7 @@ set(TINT_TEST_SRCS
   ast/break_statement_test.cc
   ast/builtin_decoration_test.cc
   ast/call_expression_test.cc
+  ast/call_statement_test.cc
   ast/case_statement_test.cc
   ast/cast_expression_test.cc
   ast/continue_statement_test.cc
