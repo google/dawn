@@ -15,6 +15,7 @@
 #ifndef SRC_WRITER_HLSL_GENERATOR_IMPL_H_
 #define SRC_WRITER_HLSL_GENERATOR_IMPL_H_
 
+#include "src/ast/literal.h"
 #include "src/ast/module.h"
 #include "src/scope_stack.h"
 #include "src/writer/hlsl/namer.h"
@@ -43,6 +44,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
   bool EmitBreak(ast::BreakStatement* stmt);
+  /// Handles a case statement
+  /// @param stmt the statement
+  /// @returns true if the statment was emitted successfully
+  bool EmitCase(ast::CaseStatement* stmt);
   /// Handles a continue statement
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted successfully
@@ -51,6 +56,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the expression
   /// @returns true if the expression was emitted
   bool EmitExpression(ast::Expression* expr);
+  /// Handles a literal
+  /// @param lit the literal to emit
+  /// @returns true if the literal was successfully emitted
+  bool EmitLiteral(ast::Literal* lit);
   /// Handles generating an identifier expression
   /// @param expr the identifier expression
   /// @returns true if the identifeir was emitted

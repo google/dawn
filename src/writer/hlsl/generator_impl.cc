@@ -15,13 +15,29 @@
 #include "src/writer/hlsl/generator_impl.h"
 
 #include "src/ast/binary_expression.h"
+#include "src/ast/bool_literal.h"
+#include "src/ast/case_statement.h"
+#include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/return_statement.h"
+#include "src/ast/sint_literal.h"
+#include "src/ast/uint_literal.h"
 #include "src/ast/unary_op_expression.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
+namespace {
+
+bool last_is_break_or_fallthrough(const ast::StatementList& stmts) {
+  if (stmts.empty()) {
+    return false;
+  }
+
+  return stmts.back()->IsBreak() || stmts.back()->IsFallthrough();
+}
+
+}  // namespace
 
 GeneratorImpl::GeneratorImpl(ast::Module* module) : module_(module) {}
 
@@ -145,6 +161,50 @@ bool GeneratorImpl::EmitBreak(ast::BreakStatement*) {
   return true;
 }
 
+bool GeneratorImpl::EmitCase(ast::CaseStatement* stmt) {
+  make_indent();
+
+  if (stmt->IsDefault()) {
+    out_ << "default:";
+  } else {
+    bool first = true;
+    for (const auto& selector : stmt->selectors()) {
+      if (!first) {
+        out_ << std::endl;
+        make_indent();
+      }
+      first = false;
+
+      out_ << "case ";
+      if (!EmitLiteral(selector.get())) {
+        return false;
+      }
+      out_ << ":";
+    }
+  }
+
+  out_ << " {" << std::endl;
+
+  increment_indent();
+
+  for (const auto& s : stmt->body()) {
+    if (!EmitStatement(s.get())) {
+      return false;
+    }
+  }
+
+  if (!last_is_break_or_fallthrough(stmt->body())) {
+    make_indent();
+    out_ << "break;" << std::endl;
+  }
+
+  decrement_indent();
+  make_indent();
+  out_ << "}" << std::endl;
+
+  return true;
+}
+
 bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
   make_indent();
   out_ << "continue;" << std::endl;
@@ -197,6 +257,31 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
   return true;
 }
 
+bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
+  if (lit->IsBool()) {
+    out_ << (lit->AsBool()->IsTrue() ? "true" : "false");
+  } else if (lit->IsFloat()) {
+    auto flags = out_.flags();
+    auto precision = out_.precision();
+
+    out_.flags(flags | std::ios_base::showpoint);
+    out_.precision(std::numeric_limits<float>::max_digits10);
+
+    out_ << lit->AsFloat()->value() << "f";
+
+    out_.precision(precision);
+    out_.flags(flags);
+  } else if (lit->IsSint()) {
+    out_ << lit->AsSint()->value();
+  } else if (lit->IsUint()) {
+    out_ << lit->AsUint()->value() << "u";
+  } else {
+    error_ = "unknown literal type";
+    return false;
+  }
+  return true;
+}
+
 bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
   make_indent();
 
@@ -223,6 +308,11 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   }
   if (stmt->IsContinue()) {
     return EmitContinue(stmt->AsContinue());
+  }
+  if (stmt->IsFallthrough()) {
+    make_indent();
+    out_ << "/* fallthrough */" << std::endl;
+    return true;
   }
   if (stmt->IsReturn()) {
     return EmitReturn(stmt->AsReturn());
