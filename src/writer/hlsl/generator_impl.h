@@ -63,6 +63,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
   bool EmitStatement(ast::Statement* stmt);
+  /// Handles a unary op expression
+  /// @param expr the expression to emit
+  /// @returns true if the expression was emitted
+  bool EmitUnaryOp(ast::UnaryOpExpression* expr);
 
   /// Checks if the global variable is in an input or output struct
   /// @param var the variable to check

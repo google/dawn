@@ -17,6 +17,7 @@
 #include "src/ast/binary_expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/return_statement.h"
+#include "src/ast/unary_op_expression.h"
 
 namespace tint {
 namespace writer {
@@ -157,6 +158,9 @@ bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
   if (expr->IsIdentifier()) {
     return EmitIdentifier(expr->AsIdentifier());
   }
+  if (expr->IsUnaryOp()) {
+    return EmitUnaryOp(expr->AsUnaryOp());
+  }
 
   error_ = "unknown expression type: " + expr->str();
   return false;
@@ -226,6 +230,26 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
 
   error_ = "unknown statement type: " + stmt->str();
   return false;
+}
+
+bool GeneratorImpl::EmitUnaryOp(ast::UnaryOpExpression* expr) {
+  switch (expr->op()) {
+    case ast::UnaryOp::kNot:
+      out_ << "!";
+      break;
+    case ast::UnaryOp::kNegation:
+      out_ << "-";
+      break;
+  }
+  out_ << "(";
+
+  if (!EmitExpression(expr->expr())) {
+    return false;
+  }
+
+  out_ << ")";
+
+  return true;
 }
 
 }  // namespace hlsl
