@@ -40,7 +40,7 @@ bool IsFloatClassificationIntrinsic(const std::string& name) {
 bool IsIntrinsic(const std::string& name) {
   return IsDerivative(name) || name == "all" || name == "any" ||
          IsFloatClassificationIntrinsic(name) || name == "dot" ||
-         name == "outer_product";
+         name == "outer_product" || name == "select";
 }
 
 }  // namespace intrinsic

@@ -1769,6 +1769,85 @@ TEST_F(TypeDeterminerTest, Intrinsic_Dot) {
   EXPECT_TRUE(expr.result_type()->IsF32());
 }
 
+TEST_F(TypeDeterminerTest, Intrinsic_Select) {
+  ast::type::F32Type f32;
+  ast::type::BoolType bool_type;
+  ast::type::VectorType vec3(&f32, 3);
+  ast::type::VectorType bool_vec3(&bool_type, 3);
+
+  auto var = std::make_unique<ast::Variable>("my_var", ast::StorageClass::kNone,
+                                             &vec3);
+  auto bool_var = std::make_unique<ast::Variable>(
+      "bool_var", ast::StorageClass::kNone, &bool_vec3);
+  mod()->AddGlobalVariable(std::move(var));
+  mod()->AddGlobalVariable(std::move(bool_var));
+
+  ast::ExpressionList call_params;
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("my_var"));
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("my_var"));
+  call_params.push_back(
+      std::make_unique<ast::IdentifierExpression>("bool_var"));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("select"),
+      std::move(call_params));
+
+  // Register the variable
+  EXPECT_TRUE(td()->Determine());
+  EXPECT_TRUE(td()->DetermineResultType(&expr)) << td()->error();
+  ASSERT_NE(expr.result_type(), nullptr);
+  EXPECT_TRUE(expr.result_type()->IsVector());
+  EXPECT_EQ(expr.result_type()->AsVector()->size(), 3u);
+  EXPECT_TRUE(expr.result_type()->AsVector()->type()->IsF32());
+}
+
+TEST_F(TypeDeterminerTest, Intrinsic_Select_TooFewParams) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec3(&f32, 3);
+
+  auto var =
+      std::make_unique<ast::Variable>("v", ast::StorageClass::kNone, &vec3);
+  mod()->AddGlobalVariable(std::move(var));
+
+  ast::ExpressionList call_params;
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("v"));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("select"),
+      std::move(call_params));
+
+  // Register the variable
+  EXPECT_TRUE(td()->Determine());
+  EXPECT_FALSE(td()->DetermineResultType(&expr));
+  EXPECT_EQ(td()->error(),
+            "incorrect number of parameters for select expected 3 got 1");
+}
+
+TEST_F(TypeDeterminerTest, Intrinsic_Select_TooManyParams) {
+  ast::type::F32Type f32;
+  ast::type::VectorType vec3(&f32, 3);
+
+  auto var =
+      std::make_unique<ast::Variable>("v", ast::StorageClass::kNone, &vec3);
+  mod()->AddGlobalVariable(std::move(var));
+
+  ast::ExpressionList call_params;
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("v"));
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("v"));
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("v"));
+  call_params.push_back(std::make_unique<ast::IdentifierExpression>("v"));
+
+  ast::CallExpression expr(
+      std::make_unique<ast::IdentifierExpression>("select"),
+      std::move(call_params));
+
+  // Register the variable
+  EXPECT_TRUE(td()->Determine());
+  EXPECT_FALSE(td()->DetermineResultType(&expr));
+  EXPECT_EQ(td()->error(),
+            "incorrect number of parameters for select expected 3 got 4");
+}
+
 TEST_F(TypeDeterminerTest, Intrinsic_OuterProduct) {
   ast::type::F32Type f32;
   ast::type::VectorType vec3(&f32, 3);

@@ -540,7 +540,11 @@ bool TypeDeterminer::DetermineIntrinsic(const std::string& name,
     auto* bool_type =
         ctx_.type_mgr().Get(std::make_unique<ast::type::BoolType>());
 
-    auto* param_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
+    auto& param = expr->params()[0];
+    if (!DetermineResultType(param.get())) {
+      return false;
+    }
+    auto* param_type = param->result_type()->UnwrapPtrIfNeeded();
     if (param_type->IsVector()) {
       expr->func()->set_result_type(
           ctx_.type_mgr().Get(std::make_unique<ast::type::VectorType>(
@@ -562,8 +566,15 @@ bool TypeDeterminer::DetermineIntrinsic(const std::string& name,
       return false;
     }
 
-    auto* param0_type = expr->params()[0]->result_type()->UnwrapPtrIfNeeded();
-    auto* param1_type = expr->params()[1]->result_type()->UnwrapPtrIfNeeded();
+    auto& param0 = expr->params()[0];
+    auto& param1 = expr->params()[1];
+    if (!DetermineResultType(param0.get()) ||
+        !DetermineResultType(param1.get())) {
+      return false;
+    }
+
+    auto* param0_type = param0->result_type()->UnwrapPtrIfNeeded();
+    auto* param1_type = param1->result_type()->UnwrapPtrIfNeeded();
     if (!param0_type->IsVector() || !param1_type->IsVector()) {
       set_error(expr->source(), "invalid parameter type for outer_product");
       return false;
@@ -573,6 +584,22 @@ bool TypeDeterminer::DetermineIntrinsic(const std::string& name,
         ctx_.type_mgr().Get(std::make_unique<ast::type::MatrixType>(
             ctx_.type_mgr().Get(std::make_unique<ast::type::F32Type>()),
             param0_type->AsVector()->size(), param1_type->AsVector()->size())));
+    return true;
+  }
+  if (name == "select") {
+    if (expr->params().size() != 3) {
+      set_error(expr->source(),
+                "incorrect number of parameters for select expected 3 got " +
+                    std::to_string(expr->params().size()));
+      return false;
+    }
+
+    // The result type must be the same as the type of the parameter.
+    auto& param = expr->params()[0];
+    if (!DetermineResultType(param.get())) {
+      return false;
+    }
+    expr->func()->set_result_type(param->result_type()->UnwrapPtrIfNeeded());
     return true;
   }
 
