@@ -26,6 +26,7 @@
 #include "src/ast/bool_literal.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/call_expression.h"
+#include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/cast_expression.h"
 #include "src/ast/constructor_expression.h"
@@ -1806,6 +1807,9 @@ bool Builder::GenerateStatement(ast::Statement* stmt) {
   }
   if (stmt->IsBreak()) {
     return GenerateBreakStatement(stmt->AsBreak());
+  }
+  if (stmt->IsCall()) {
+    return GenerateCallExpression(stmt->AsCall()->expr()) != 0;
   }
   if (stmt->IsContinue()) {
     return GenerateContinueStatement(stmt->AsContinue());

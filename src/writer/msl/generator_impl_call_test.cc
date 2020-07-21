@@ -16,6 +16,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/call_expression.h"
+#include "src/ast/call_statement.h"
 #include "src/ast/function.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
@@ -64,6 +65,28 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Call_WithParams) {
   GeneratorImpl g(&m);
   ASSERT_TRUE(g.EmitExpression(&call)) << g.error();
   EXPECT_EQ(g.result(), "my_func(param1, param2)");
+}
+
+TEST_F(MslGeneratorImplTest, EmitStatement_Call) {
+  ast::type::VoidType void_type;
+
+  auto id = std::make_unique<ast::IdentifierExpression>("my_func");
+  ast::ExpressionList params;
+  params.push_back(std::make_unique<ast::IdentifierExpression>("param1"));
+  params.push_back(std::make_unique<ast::IdentifierExpression>("param2"));
+  ast::CallStatement call(
+      std::make_unique<ast::CallExpression>(std::move(id), std::move(params)));
+
+  auto func = std::make_unique<ast::Function>("my_func", ast::VariableList{},
+                                              &void_type);
+
+  ast::Module m;
+  m.AddFunction(std::move(func));
+
+  GeneratorImpl g(&m);
+  g.increment_indent();
+  ASSERT_TRUE(g.EmitStatement(&call)) << g.error();
+  EXPECT_EQ(g.result(), "  my_func(param1, param2);\n");
 }
 
 }  // namespace

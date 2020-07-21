@@ -26,6 +26,7 @@
 #include "src/ast/break_statement.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/call_expression.h"
+#include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/cast_expression.h"
 #include "src/ast/constructor_expression.h"
@@ -631,6 +632,14 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   if (stmt->IsBreak()) {
     return EmitBreak(stmt->AsBreak());
   }
+  if (stmt->IsCall()) {
+    make_indent();
+    if (!EmitCall(stmt->AsCall()->expr())) {
+      return false;
+    }
+    out_ << ";" << std::endl;
+    return true;
+  }
   if (stmt->IsContinue()) {
     return EmitContinue(stmt->AsContinue());
   }
@@ -656,7 +665,7 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
     return EmitVariable(stmt->AsVariableDecl()->variable());
   }
 
-  error_ = "unknown statement type";
+  error_ = "unknown statement type: " + stmt->str();
   return false;
 }
 

@@ -22,6 +22,7 @@
 #include "src/ast/bool_literal.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/call_expression.h"
+#include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/cast_expression.h"
 #include "src/ast/continue_statement.h"
@@ -1479,6 +1480,14 @@ bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
   }
   if (stmt->IsBreak()) {
     return EmitBreak(stmt->AsBreak());
+  }
+  if (stmt->IsCall()) {
+    make_indent();
+    if (!EmitCall(stmt->AsCall()->expr())) {
+      return false;
+    }
+    out_ << ";" << std::endl;
+    return true;
   }
   if (stmt->IsContinue()) {
     return EmitContinue(stmt->AsContinue());
