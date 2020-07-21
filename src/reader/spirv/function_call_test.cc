@@ -46,13 +46,26 @@ TEST_F(SpvParserTest, EmitStatement_VoidCallNoParams) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  FunctionEmitter fe(p, *spirv_function(100));
-  EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(
-      p->error(),
-      Eq("missing support for function call as a statement: can't generate "
-         "code for function call returning void: %1 = OpFunctionCall %2 %50"));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error();
+  const auto module_ast_str = p->module().to_str();
+  EXPECT_THAT(module_ast_str, Eq(R"(Module{
+  Function x_50 -> __void
+  ()
+  {
+    Return{}
+  }
+  Function x_100 -> __void
+  ()
+  {
+    Call{
+      Identifier{x_50}
+      (
+      )
+    }
+    Return{}
+  }
+}
+)")) << module_ast_str;
 }
 
 TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParams) {

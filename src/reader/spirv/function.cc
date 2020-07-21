@@ -34,6 +34,7 @@
 #include "src/ast/bool_literal.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/call_expression.h"
+#include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/cast_expression.h"
 #include "src/ast/continue_statement.h"
@@ -3365,19 +3366,21 @@ bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
   for (uint32_t iarg = 1; iarg < inst.NumInOperands(); ++iarg) {
     params.emplace_back(MakeOperand(inst, iarg).expr);
   }
-  TypedExpression expr{parser_impl_.ConvertType(inst.type_id()),
-                       std::make_unique<ast::CallExpression>(
-                           std::move(function), std::move(params))};
-
-  if (expr.type->IsVoid()) {
-    // TODO(dneto): Tint AST needs support for function call as a statement
-    // https://bugs.chromium.org/p/tint/issues/detail?id=45
-    return Fail() << "missing support for function call as a statement: can't "
-                     "generate code for function call returning void: "
+  auto call_expr = std::make_unique<ast::CallExpression>(std::move(function),
+                                                         std::move(params));
+  auto result_type = parser_impl_.ConvertType(inst.type_id());
+  if (!result_type) {
+    return Fail() << "internal error: no mapped type result of call: "
                   << inst.PrettyPrint();
   }
 
-  return EmitConstDefOrWriteToHoistedVar(inst, std::move(expr));
+  if (result_type->IsVoid()) {
+    return nullptr != AddStatement(std::make_unique<ast::CallStatement>(
+                          std::move(call_expr)));
+  }
+
+  return EmitConstDefOrWriteToHoistedVar(inst,
+                                         {result_type, std::move(call_expr)});
 }
 
 TypedExpression FunctionEmitter::MakeSimpleSelect(
