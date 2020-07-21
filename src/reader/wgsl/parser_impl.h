@@ -23,6 +23,7 @@
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/builtin.h"
+#include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/constructor_expression.h"
 #include "src/ast/else_statement.h"
@@ -219,6 +220,9 @@ class ParserImpl {
   /// Parses a `case_body` grammar element
   /// @returns the parsed statements
   ast::StatementList case_body();
+  /// Parses a `func_call_stmt` grammar element
+  /// @returns the parsed function call or nullptr
+  std::unique_ptr<ast::CallStatement> func_call_stmt();
   /// Parses a `loop_stmt` grammar element
   /// @returns the parsed loop or nullptr
   std::unique_ptr<ast::LoopStatement> loop_stmt();

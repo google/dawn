@@ -1422,6 +1422,7 @@ ast::StatementList ParserImpl::statements() {
 //   | if_stmt
 //   | switch_stmt
 //   | loop_stmt
+//   | func_call_stmt SEMICOLON
 //   | variable_stmt SEMICOLON
 //   | break_stmt SEMICOLON
 //   | continue_stmt SEMICOLON
@@ -1463,6 +1464,18 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
     return nullptr;
   if (loop != nullptr)
     return loop;
+
+  auto func = func_call_stmt();
+  if (has_error())
+    return nullptr;
+  if (func != nullptr) {
+    t = next();
+    if (!t.IsSemicolon()) {
+      set_error(t, "missing ;");
+      return nullptr;
+    }
+    return func;
+  }
 
   auto var = variable_stmt();
   if (has_error())
@@ -1906,6 +1919,41 @@ std::unique_ptr<ast::LoopStatement> ParserImpl::loop_stmt() {
 
   return std::make_unique<ast::LoopStatement>(source, std::move(body),
                                               std::move(continuing));
+}
+
+// func_call_stmt
+//    : IDENT PAREN_LEFT argument_expression_list* PAREN_RIGHT
+std::unique_ptr<ast::CallStatement> ParserImpl::func_call_stmt() {
+  auto t = peek();
+  auto t2 = peek(1);
+  if (!t.IsIdentifier() || !t2.IsParenLeft())
+    return nullptr;
+
+  auto source = t.source();
+
+  next();  // Consume the peek
+  next();  // Consume the 2nd peek
+
+  auto name = t.to_str();
+
+  t = peek();
+  ast::ExpressionList params;
+  if (!t.IsParenRight() && !t.IsEof()) {
+    params = argument_expression_list();
+    if (has_error())
+      return nullptr;
+  }
+
+  t = next();
+  if (!t.IsParenRight()) {
+    set_error(t, "missing ) for call statement");
+    return nullptr;
+  }
+
+  return std::make_unique<ast::CallStatement>(
+      std::make_unique<ast::CallExpression>(
+          source, std::make_unique<ast::IdentifierExpression>(name),
+          std::move(params)));
 }
 
 // break_stmt
