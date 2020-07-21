@@ -14,6 +14,7 @@
 
 #include "src/writer/hlsl/generator_impl.h"
 
+#include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/case_statement.h"
@@ -70,6 +71,24 @@ std::string GeneratorImpl::current_ep_var_name(VarType type) {
     }
   }
   return name;
+}
+
+bool GeneratorImpl::EmitAssign(ast::AssignmentStatement* stmt) {
+  make_indent();
+
+  if (!EmitExpression(stmt->lhs())) {
+    return false;
+  }
+
+  out_ << " = ";
+
+  if (!EmitExpression(stmt->rhs())) {
+    return false;
+  }
+
+  out_ << ";" << std::endl;
+
+  return true;
 }
 
 bool GeneratorImpl::EmitBinary(ast::BinaryExpression* expr) {
@@ -304,6 +323,9 @@ bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitStatement(ast::Statement* stmt) {
+  if (stmt->IsAssign()) {
+    return EmitAssign(stmt->AsAssign());
+  }
   if (stmt->IsBreak()) {
     return EmitBreak(stmt->AsBreak());
   }
