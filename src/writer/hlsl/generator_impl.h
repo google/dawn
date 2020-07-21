@@ -16,6 +16,8 @@
 #define SRC_WRITER_HLSL_GENERATOR_IMPL_H_
 
 #include "src/ast/module.h"
+#include "src/scope_stack.h"
+#include "src/writer/hlsl/namer.h"
 #include "src/writer/text_generator.h"
 
 namespace tint {
@@ -26,13 +28,43 @@ namespace hlsl {
 class GeneratorImpl : public TextGenerator {
  public:
   /// Constructor
-  GeneratorImpl();
+  /// @param module the module to generate
+  explicit GeneratorImpl(ast::Module* module);
   ~GeneratorImpl();
 
-  /// Generates the result data
-  /// @param module the module to generate
   /// @returns true on successful generation; false otherwise
-  bool Generate(const ast::Module& module);
+  bool Generate();
+
+  /// Handles generate an Expression
+  /// @param expr the expression
+  /// @returns true if the expression was emitted
+  bool EmitExpression(ast::Expression* expr);
+  /// Handles generating an identifier expression
+  /// @param expr the identifier expression
+  /// @returns true if the identifeir was emitted
+  bool EmitIdentifier(ast::IdentifierExpression* expr);
+
+  /// Checks if the global variable is in an input or output struct
+  /// @param var the variable to check
+  /// @returns true if the global is in an input or output struct
+  bool global_is_in_struct(ast::Variable* var) const;
+
+ private:
+  enum class VarType { kIn, kOut };
+
+  struct EntryPointData {
+    std::string struct_name;
+    std::string var_name;
+  };
+
+  std::string current_ep_var_name(VarType type);
+
+  Namer namer_;
+  ast::Module* module_ = nullptr;
+  std::string current_ep_name_;
+  ScopeStack<ast::Variable*> global_variables_;
+  std::unordered_map<std::string, EntryPointData> ep_name_to_in_data_;
+  std::unordered_map<std::string, EntryPointData> ep_name_to_out_data_;
 };
 
 }  // namespace hlsl

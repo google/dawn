@@ -268,6 +268,8 @@ if(${TINT_BUILD_HLSL_WRITER})
     writer/hlsl/generator.h
     writer/hlsl/generator_impl.cc
     writer/hlsl/generator_impl.h
+    writer/hlsl/namer.cc
+    writer/hlsl/namer.h
   )
 endif()
 
@@ -539,7 +541,9 @@ endif()
 
 if (${TINT_BUILD_HLSL_WRITER})
   list(APPEND TINT_TEST_SRCS
+    writer/hlsl/generator_impl_identifier_test.cc
     writer/hlsl/generator_impl_test.cc
+    writer/hlsl/namer_test.cc
   )
 endif()
 

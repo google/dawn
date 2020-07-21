@@ -37,9 +37,8 @@ TEST_F(HlslGeneratorImplTest, DISABLED_Generate) {
   m.AddEntryPoint(std::make_unique<ast::EntryPoint>(
       ast::PipelineStage::kFragment, "my_func", ""));
 
-  GeneratorImpl g;
-
-  ASSERT_TRUE(g.Generate(m)) << g.error();
+  GeneratorImpl g(&m);
+  ASSERT_TRUE(g.Generate()) << g.error();
   EXPECT_EQ(g.result(), R"(#import <metal_lib>
 
 void my_func() {

@@ -527,6 +527,8 @@ source_set("libtint_hlsl_writer_src") {
     "src/writer/hlsl/generator.h",
     "src/writer/hlsl/generator_impl.cc",
     "src/writer/hlsl/generator_impl.h",
+    "src/writer/hlsl/namer.cc",
+    "src/writer/hlsl/namer.h",
   ]
 
   configs += [ ":tint_common_config" ]
@@ -1014,7 +1016,11 @@ source_set("tint_unittests_msl_writer_src") {
 }
 
 source_set("tint_unittests_hlsl_writer_src") {
-  sources = [ "src/writer/hlsl/generator_impl_test.cc" ]
+  sources = [
+    "src/writer/hlsl/generator_impl_identifier_test.cc",
+    "src/writer/hlsl/generator_impl_test.cc",
+    "src/writer/hlsl/namer_test.cc",
+  ]
 
   configs += [
     ":tint_common_config",
