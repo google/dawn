@@ -207,6 +207,14 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true if the zero value was successfully emitted.
   bool EmitZeroValue(ast::type::Type* type);
 
+  /// Determines if the function needs the input struct passed to it.
+  /// @param func the function to check
+  /// @returns true if there are input struct variables used in the function
+  bool has_referenced_in_var_needing_struct(ast::Function* func);
+  /// Determines if the function needs the output struct passed to it.
+  /// @param func the function to check
+  /// @returns true if there are output struct variables used in the function
+  bool has_referenced_out_var_needing_struct(ast::Function* func);
   /// Determines if any used module variable requires an input or output struct.
   /// @param func the function to check
   /// @returns true if an input or output struct is required.

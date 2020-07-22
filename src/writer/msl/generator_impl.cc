@@ -420,28 +420,32 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
     if (it != ep_func_name_remapped_.end()) {
       name = it->second;
     }
-    out_ << name << "(";
-
-    bool first = true;
-    auto var_name = current_ep_var_name(VarType::kIn);
-    if (!var_name.empty()) {
-      out_ << var_name;
-      first = false;
-    }
-
-    var_name = current_ep_var_name(VarType::kOut);
-    if (!var_name.empty()) {
-      if (!first) {
-        out_ << ", ";
-      }
-      first = false;
-      out_ << var_name;
-    }
 
     auto* func = module_->FindFunctionByName(ident->name());
     if (func == nullptr) {
       error_ = "Unable to find function: " + name;
       return false;
+    }
+
+    out_ << name << "(";
+
+    bool first = true;
+    if (has_referenced_in_var_needing_struct(func)) {
+      auto var_name = current_ep_var_name(VarType::kIn);
+      if (!var_name.empty()) {
+        out_ << var_name;
+        first = false;
+      }
+    }
+    if (has_referenced_out_var_needing_struct(func)) {
+      auto var_name = current_ep_var_name(VarType::kOut);
+      if (!var_name.empty()) {
+        if (!first) {
+          out_ << ", ";
+        }
+        first = false;
+        out_ << var_name;
+      }
     }
 
     for (const auto& data : func->referenced_builtin_variables()) {
@@ -945,11 +949,20 @@ void GeneratorImpl::EmitStage(ast::PipelineStage stage) {
   return;
 }
 
-bool GeneratorImpl::has_referenced_var_needing_struct(ast::Function* func) {
+bool GeneratorImpl::has_referenced_in_var_needing_struct(ast::Function* func) {
   for (auto data : func->referenced_location_variables()) {
     auto* var = data.first;
-    if (var->storage_class() == ast::StorageClass::kInput ||
-        var->storage_class() == ast::StorageClass::kOutput) {
+    if (var->storage_class() == ast::StorageClass::kInput) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool GeneratorImpl::has_referenced_out_var_needing_struct(ast::Function* func) {
+  for (auto data : func->referenced_location_variables()) {
+    auto* var = data.first;
+    if (var->storage_class() == ast::StorageClass::kOutput) {
       return true;
     }
   }
@@ -960,8 +973,12 @@ bool GeneratorImpl::has_referenced_var_needing_struct(ast::Function* func) {
       return true;
     }
   }
-
   return false;
+}
+
+bool GeneratorImpl::has_referenced_var_needing_struct(ast::Function* func) {
+  return has_referenced_in_var_needing_struct(func) ||
+         has_referenced_out_var_needing_struct(func);
 }
 
 bool GeneratorImpl::EmitFunction(ast::Function* func) {

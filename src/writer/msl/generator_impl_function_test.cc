@@ -503,6 +503,84 @@ fragment ep_1_out ep_1(ep_1_in tint_in [[stage_in]]) {
 }
 
 TEST_F(MslGeneratorImplTest,
+       Emit_Function_Called_By_EntryPoints_NoUsedGlobals) {
+  ast::type::VoidType void_type;
+  ast::type::F32Type f32;
+  ast::type::VectorType vec4(&f32, 4);
+
+  auto depth_var =
+      std::make_unique<ast::DecoratedVariable>(std::make_unique<ast::Variable>(
+          "depth", ast::StorageClass::kOutput, &f32));
+
+  ast::VariableDecorationList decos;
+  decos.push_back(
+      std::make_unique<ast::BuiltinDecoration>(ast::Builtin::kFragDepth));
+  depth_var->set_decorations(std::move(decos));
+
+  Context ctx;
+  ast::Module mod;
+  TypeDeterminer td(&ctx, &mod);
+  td.RegisterVariableForTesting(depth_var.get());
+
+  mod.AddGlobalVariable(std::move(depth_var));
+
+  ast::VariableList params;
+  params.push_back(std::make_unique<ast::Variable>(
+      "param", ast::StorageClass::kFunction, &f32));
+  auto sub_func =
+      std::make_unique<ast::Function>("sub_func", std::move(params), &f32);
+
+  ast::StatementList body;
+  body.push_back(std::make_unique<ast::ReturnStatement>(
+      std::make_unique<ast::IdentifierExpression>("param")));
+  sub_func->set_body(std::move(body));
+
+  mod.AddFunction(std::move(sub_func));
+
+  auto func_1 = std::make_unique<ast::Function>("frag_1_main",
+                                                std::move(params), &void_type);
+
+  ast::ExpressionList expr;
+  expr.push_back(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::FloatLiteral>(&f32, 1.0f)));
+  body.push_back(std::make_unique<ast::AssignmentStatement>(
+      std::make_unique<ast::IdentifierExpression>("depth"),
+      std::make_unique<ast::CallExpression>(
+          std::make_unique<ast::IdentifierExpression>("sub_func"),
+          std::move(expr))));
+  body.push_back(std::make_unique<ast::ReturnStatement>());
+  func_1->set_body(std::move(body));
+
+  mod.AddFunction(std::move(func_1));
+
+  auto ep1 = std::make_unique<ast::EntryPoint>(ast::PipelineStage::kFragment,
+                                               "ep_1", "frag_1_main");
+  mod.AddEntryPoint(std::move(ep1));
+
+  ASSERT_TRUE(td.Determine()) << td.error();
+
+  GeneratorImpl g(&mod);
+  ASSERT_TRUE(g.Generate()) << g.error();
+  EXPECT_EQ(g.result(), R"(#include <metal_stdlib>
+
+struct ep_1_out {
+  float depth [[depth(any)]];
+};
+
+float sub_func(float param) {
+  return param;
+}
+
+fragment ep_1_out ep_1() {
+  ep_1_out tint_out = {};
+  tint_out.depth = sub_func(1.00000000f);
+  return tint_out;
+}
+
+)");
+}
+
+TEST_F(MslGeneratorImplTest,
        Emit_Function_Called_By_EntryPoints_WithBuiltinGlobals_And_Params) {
   ast::type::VoidType void_type;
   ast::type::F32Type f32;
