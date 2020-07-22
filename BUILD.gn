@@ -639,6 +639,20 @@ if (!build_with_chromium) {
 }
 
 ###############################################################################
+# Wrapping of Chromium targets
+###############################################################################
+# These targets are separated because they are Chromium sources files that
+# can't use the tint_internal config, otherwise Tint's warning flags get
+# applied while compiling a bunch of Chromium's //base (via header inclusion)
+if (build_with_chromium) {
+  source_set("tint_unittests_main") {
+    testonly = true
+    deps = [ ":gmock_and_gtest" ]
+    sources = [ "//gpu/tint_unittests_main.cc" ]
+  }
+}
+
+###############################################################################
 # Tests - For libtint core and optional modules
 ###############################################################################
 config("tint_unittests_config") {
@@ -1089,8 +1103,9 @@ test("tint_unittests") {
     "${tint_spirv_tools_dir}/:spvtools_val",
   ]
 
-  # TODO(rharrison): Use main() from chromium for chromium tree builds. This
-  # requires adding a file to //gpu like Dawn has done.
+  if (build_with_chromium) {
+    deps += [ ":tint_unittests_main" ]
+  }
 
   configs += [
     ":tint_common_config",
