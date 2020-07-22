@@ -1279,10 +1279,198 @@ TEST_F(SpvFUnordTest, Select_VecBoolCond_VectorParams) {
 })")) << ToString(fe.ast_body());
 }
 
-// TODO(dneto): OpAny  - likely builtin function TBD
-// TODO(dneto): OpAll  - likely builtin function TBD
-// TODO(dneto): OpIsNan - likely builtin function TBD
-// TODO(dneto): OpIsInf - likely builtin function TBD
+using SpvLogicalTest = SpvParserTestBase<::testing::Test>;
+
+TEST_F(SpvLogicalTest, Any) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpAny %bool %v2bool_t_f
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_1
+    none
+    __bool
+    {
+      Call{
+        Identifier{any}
+        (
+          TypeConstructor{
+            __vec_2__bool
+            ScalarConstructor{true}
+            ScalarConstructor{false}
+          }
+        )
+      }
+    }
+  }
+})")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvLogicalTest, All) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpAll %bool %v2bool_t_f
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_1
+    none
+    __bool
+    {
+      Call{
+        Identifier{all}
+        (
+          TypeConstructor{
+            __vec_2__bool
+            ScalarConstructor{true}
+            ScalarConstructor{false}
+          }
+        )
+      }
+    }
+  }
+})")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvLogicalTest, IsNan_Scalar) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpIsNan %bool %float_50
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_1
+    none
+    __bool
+    {
+      Call{
+        Identifier{is_nan}
+        (
+          ScalarConstructor{50.000000}
+        )
+      }
+    }
+  }
+})")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvLogicalTest, IsNan_Vector) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpIsNan %v2bool %v2float_50_60
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_1
+    none
+    __vec_2__bool
+    {
+      Call{
+        Identifier{is_nan}
+        (
+          TypeConstructor{
+            __vec_2__f32
+            ScalarConstructor{50.000000}
+            ScalarConstructor{60.000000}
+          }
+        )
+      }
+    }
+  }
+})")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvLogicalTest, IsInf_Scalar) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpIsInf %bool %float_50
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_1
+    none
+    __bool
+    {
+      Call{
+        Identifier{is_inf}
+        (
+          ScalarConstructor{50.000000}
+        )
+      }
+    }
+  }
+})")) << ToString(fe.ast_body());
+}
+
+TEST_F(SpvLogicalTest, IsInf_Vector) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpIsInf %v2bool %v2float_50_60
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto* p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  FunctionEmitter fe(p, *spirv_function(100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(fe.ast_body()), HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_1
+    none
+    __vec_2__bool
+    {
+      Call{
+        Identifier{is_inf}
+        (
+          TypeConstructor{
+            __vec_2__f32
+            ScalarConstructor{50.000000}
+            ScalarConstructor{60.000000}
+          }
+        )
+      }
+    }
+  }
+})")) << ToString(fe.ast_body());
+}
+
 // TODO(dneto): Kernel-guarded instructions.
 // TODO(dneto): OpSelect over more general types, as in SPIR-V 1.4
 

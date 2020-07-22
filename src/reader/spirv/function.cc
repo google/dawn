@@ -191,6 +191,25 @@ bool GetUnaryOp(SpvOp opcode, ast::UnaryOp* ast_unary_op) {
   return false;
 }
 
+/// Converts a SPIR-V opcode for a WGSL builtin function, if there is a
+/// direct translation. Returns nullptr otherwise.
+/// @returns the WGSL builtin function name for the given opcode, or nullptr.
+const char* GetUnaryBuiltInFunctionName(SpvOp opcode) {
+  switch (opcode) {
+    case SpvOpAny:
+      return "any";
+    case SpvOpAll:
+      return "all";
+    case SpvOpIsNan:
+      return "is_nan";
+    case SpvOpIsInf:
+      return "is_inf";
+    default:
+      break;
+  }
+  return nullptr;
+}
+
 // Converts a SPIR-V opcode to its corresponding AST binary opcode, if any
 // @param opcode SPIR-V opcode
 // @returns the AST binary op for the given opcode, or kNone
@@ -2647,6 +2666,16 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     TypedExpression result(ast_type, std::move(unary_expr));
     return parser_impl_.RectifyForcedResultType(std::move(result), opcode,
                                                 arg0.type);
+  }
+
+  const char* unary_builtin_name = GetUnaryBuiltInFunctionName(opcode);
+  if (unary_builtin_name != nullptr) {
+    ast::ExpressionList params;
+    params.emplace_back(MakeOperand(inst, 0).expr);
+    return {ast_type,
+            std::make_unique<ast::CallExpression>(
+                std::make_unique<ast::IdentifierExpression>(unary_builtin_name),
+                std::move(params))};
   }
 
   if (opcode == SpvOpAccessChain || opcode == SpvOpInBoundsAccessChain) {
