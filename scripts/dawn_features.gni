@@ -69,8 +69,9 @@ declare_args() {
   # Whether Dawn should enable X11 support.
   dawn_use_x11 = is_linux && !is_chromeos
 
-  # Enable support WGSL for shaders.
-  dawn_enable_wgsl = true
+  # Enable support WGSL for shaders. Currently this is
+  # experimental, and requires dawn_tint_dir to be set.
+  dawn_enable_wgsl = false
 }
 
 # GN does not allow reading a variable defined in the same declare_args().
