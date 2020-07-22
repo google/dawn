@@ -330,7 +330,7 @@ set(TINT_TEST_SRCS
   scope_stack_test.cc
   type_determiner_test.cc
   type_manager_test.cc
-  validator_impl_import_test.cc
+  validator_test.cc
 )
 
 ## Tint library

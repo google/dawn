@@ -706,7 +706,7 @@ source_set("tint_unittests_core_src") {
     "src/scope_stack_test.cc",
     "src/type_determiner_test.cc",
     "src/type_manager_test.cc",
-    "src/validator_impl_import_test.cc",
+    "src/validator_test.cc",
   ]
 
   configs += [
