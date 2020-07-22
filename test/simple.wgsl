@@ -15,7 +15,7 @@
 [[location 0]] var<out> gl_FragColor : vec4<f32>;
 
 fn bar() -> void {
-
+  return;
 }
 
 fn main() -> void {
