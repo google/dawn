@@ -3397,7 +3397,7 @@ bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
   }
   auto call_expr = std::make_unique<ast::CallExpression>(std::move(function),
                                                          std::move(params));
-  auto result_type = parser_impl_.ConvertType(inst.type_id());
+  auto* result_type = parser_impl_.ConvertType(inst.type_id());
   if (!result_type) {
     return Fail() << "internal error: no mapped type result of call: "
                   << inst.PrettyPrint();

@@ -61,4 +61,9 @@ declare_args() {
   if (!defined(tint_build_msl_writer)) {
     tint_build_msl_writer = false
   }
+
+  # Build the HLSL output writer
+  if (!defined(tint_build_hlsl_writer)) {
+    tint_build_hlsl_writer = false
+  }
 }
