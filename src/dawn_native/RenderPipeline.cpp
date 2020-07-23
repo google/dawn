@@ -366,10 +366,6 @@ namespace dawn_native {
             DAWN_TRY(ValidateDepthStencilStateDescriptor(device, descriptor->depthStencilState));
         }
 
-        if (descriptor->sampleMask != 0xFFFFFFFF) {
-            return DAWN_VALIDATION_ERROR("sampleMask must be 0xFFFFFFFF (for now)");
-        }
-
         if (descriptor->alphaToCoverageEnabled) {
             return DAWN_VALIDATION_ERROR("alphaToCoverageEnabled isn't supported (yet)");
         }
@@ -569,6 +565,11 @@ namespace dawn_native {
     uint32_t RenderPipelineBase::GetSampleCount() const {
         ASSERT(!IsError());
         return mAttachmentState->GetSampleCount();
+    }
+
+    uint32_t RenderPipelineBase::GetSampleMask() const {
+        ASSERT(!IsError());
+        return mSampleMask;
     }
 
     const AttachmentState* RenderPipelineBase::GetAttachmentState() const {
