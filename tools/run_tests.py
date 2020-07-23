@@ -13,7 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Test runner for executing a test of tests with Tint. The runner will
+# find all .wgsl files in the given folder and attempt to convert them
+# to each of the backend formats. If the file contains a '.fail.' in the
+# name then the runner will expect the file to fail conversion.
+
 import base64
+import copy
 import difflib
 import optparse
 import os
@@ -22,6 +28,12 @@ import re
 import subprocess
 import sys
 import tempfile
+
+
+"""
+A single test case to be executed. Stores the path to the test file
+and the result of executing the test.
+"""
 
 
 class TestCase:
@@ -44,8 +56,15 @@ class TestCase:
         return self.results[fmt]
 
 
+"""
+The test runner, will execute a series of test cases and record the
+results.
+"""
+
+
 class TestRunner:
     def RunTest(self, tc):
+        """Runs a single test."""
         print("Testing {}".format(tc.GetInputPath()))
 
         cmd = [self.options.test_prog_path]
@@ -55,7 +74,7 @@ class TestRunner:
         languages = ["wgsl", "spvasm", "msl", "hlsl"]
         try:
             for lang in languages:
-                lang_cmd = cmd.copy()
+                lang_cmd = copy.copy(cmd)
                 lang_cmd += ['--format', lang]
                 lang_cmd += [tc.GetInputPath()]
                 err = subprocess.check_output(lang_cmd,
@@ -70,6 +89,7 @@ class TestRunner:
         return True
 
     def RunTests(self):
+        """Runs a set of test cases"""
         for tc in self.test_cases:
             result = self.RunTest(tc)
 
@@ -81,6 +101,8 @@ class TestRunner:
                 self.failures.append(tc.GetInputPath())
 
     def SummarizeResults(self):
+        """Prints a summarization of the test results to STDOUT"""
+
         if len(self.failures) > 0:
             self.failures.sort()
 
@@ -96,6 +118,7 @@ class TestRunner:
         print('')
 
     def Run(self):
+        """Executes the test runner."""
         base_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), '..'))
 
@@ -110,9 +133,10 @@ class TestRunner:
                                                'src', 'webgpu', 'shader',
                                                'validation', 'wgsl'),
                           help='path to directory containing test files')
-        parser.add_option('--test-prog-path',
-                          default=None,
-                          help='path to program to test')
+        parser.add_option(
+            '--test-prog-path',
+            default=None,
+            help='path to program to test (default build-dir/tint)')
         parser.add_option('--parse-only',
                           action="store_true",
                           default=False,
@@ -130,7 +154,8 @@ class TestRunner:
             self.options.test_prog_path = test_prog
 
         if not os.path.isfile(self.options.test_prog_path):
-            print("--test-prog-path must point to an executable")
+            print("Cannot find test program '{}'".format(
+                self.options.test_prog_path))
             return 1
 
         input_file_re = re.compile('^.+[\.]wgsl')
@@ -160,7 +185,7 @@ class TestRunner:
         self.RunTests()
         self.SummarizeResults()
 
-        return len(self.failures) != 0
+        return len(self.failures)
 
 
 def main():
