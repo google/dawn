@@ -257,6 +257,8 @@ namespace dawn_native { namespace opengl {
 
         ApplyDepthStencilState(gl, GetDepthStencilStateDescriptor(), &persistentPipelineState);
 
+        gl.SampleMaski(0, GetSampleMask());
+
         for (uint32_t attachmentSlot : IterateBitSet(GetColorAttachmentsMask())) {
             ApplyColorState(gl, attachmentSlot, GetColorStateDescriptor(attachmentSlot));
         }

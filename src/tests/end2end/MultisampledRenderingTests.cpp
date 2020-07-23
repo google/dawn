@@ -525,9 +525,8 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DArrayTexture) {
 // Test using one multisampled color attachment with resolve target can render correctly
 // with a non-default sample mask.
 TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMask) {
-    // TODO(dawn:491): Remove this condition after enabling sampleMask usage in those
-    // backends.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsMetal() || IsD3D12());
+    // TODO(dawn:491): Remove this condition after enabling sampleMask usage in Metal.
+    DAWN_SKIP_TEST_IF(IsMetal());
 
     constexpr bool kTestDepth = false;
     // The second and third samples are included,
@@ -559,9 +558,8 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMask) {
 // Test using one multisampled color attachment with resolve target can render correctly
 // with the final sample mask empty.
 TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithEmptyFinalSampleMask) {
-    // TODO(dawn:491): Remove this condition after enabling sampleMask usage in those
-    // backends.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsMetal() || IsD3D12());
+    // TODO(dawn:491): Remove this condition after enabling sampleMask usage in Metal.
+    DAWN_SKIP_TEST_IF(IsMetal());
 
     constexpr bool kTestDepth = false;
     // The third and fourth samples are included,
@@ -593,9 +591,8 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithEmptyFinalSampleMask) 
 // Test doing MSAA resolve into multiple resolve targets works correctly with a non-default sample
 // mask.
 TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithSampleMask) {
-    // TODO(dawn:491): Remove this condition after enabling sampleMask usage in those
-    // backends.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsMetal() || IsD3D12());
+    // TODO(dawn:491): Remove this condition after enabling sampleMask usage in Metal.
+    DAWN_SKIP_TEST_IF(IsMetal());
 
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForOutputAttachment(kColorFormat, kSampleCount).CreateView();
@@ -635,9 +632,8 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithSampleMas
 
 // Test multisampled rendering with depth test works correctly with a non-default sample mask.
 TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTestAndSampleMask) {
-    // TODO(dawn:491): Remove this condition after enabling sampleMask usage in those
-    // backends.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsMetal() || IsD3D12());
+    // TODO(dawn:491): Remove this condition after enabling sampleMask usage in Metal.
+    DAWN_SKIP_TEST_IF(IsMetal());
 
     // TODO(dawn:491): Find out why this test doesn't work on Windows Intel Vulkan.
     DAWN_SKIP_TEST_IF(IsWindows() && IsIntel() && IsVulkan());
@@ -702,9 +698,11 @@ TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTestAndSampleMas
 // Test using one multisampled color attachment with resolve target can render correctly
 // with non-default sample mask and shader-output mask.
 TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMaskAndShaderOutputMask) {
-    // TODO(dawn:491): Remove this condition after enabling sampleMask usage in those
-    // backends.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsMetal() || IsD3D12());
+    // TODO(dawn:491): Remove this condition after enabling sampleMask usage in Metal.
+    DAWN_SKIP_TEST_IF(IsMetal());
+
+    // TODO(dawn:491): Remove this when SPIRV-cross adds support for SV_Coverage in HLSL.
+    DAWN_SKIP_TEST_IF(IsD3D12());
 
     constexpr bool kTestDepth = false;
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();

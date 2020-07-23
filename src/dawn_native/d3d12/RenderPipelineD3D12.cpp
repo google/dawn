@@ -389,7 +389,7 @@ namespace dawn_native { namespace d3d12 {
         descriptorD3D12.DepthStencilState =
             ComputeDepthStencilDesc(GetDepthStencilStateDescriptor());
 
-        descriptorD3D12.SampleMask = UINT_MAX;
+        descriptorD3D12.SampleMask = GetSampleMask();
         descriptorD3D12.PrimitiveTopologyType = D3D12PrimitiveTopologyType(GetPrimitiveTopology());
         descriptorD3D12.SampleDesc.Count = GetSampleCount();
         descriptorD3D12.SampleDesc.Quality = 0;
