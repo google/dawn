@@ -121,6 +121,8 @@ namespace dawn_wire { namespace client {
         // Successfully created staging memory. The buffer now owns the WriteHandle.
         buffer->mWriteHandle = std::move(writeHandle);
         buffer->mMappedData = result.data;
+        buffer->mMapOffset = 0;
+        buffer->mMapSize = descriptor->size;
 
         result.buffer = ToAPI(buffer);
 
@@ -280,33 +282,34 @@ namespace dawn_wire { namespace client {
         proxy->callback = callback;
         proxy->userdata = userdata;
         proxy->mapOffset = offset;
+        proxy->mapSize = size;
         proxy->self = this;
         // Note technically we should keep the buffer alive until the callback is fired but the
         // client doesn't have good facilities to do that yet.
 
         // Call MapReadAsync or MapWriteAsync and forward the callback.
-        if (mode & WGPUMapMode_Read) {
+        if (isReadMode) {
             MapReadAsync(
                 [](WGPUBufferMapAsyncStatus status, const void*, uint64_t, void* userdata) {
                     ProxyData* proxy = static_cast<ProxyData*>(userdata);
+                    proxy->self->mMapOffset = proxy->mapOffset;
+                    proxy->self->mMapSize = proxy->mapSize;
                     if (proxy->callback) {
                         proxy->callback(status, proxy->userdata);
                     }
-                    proxy->self->mMapOffset = proxy->mapOffset;
-                    proxy->self->mMapSize = proxy->mapSize;
                     delete proxy;
                 },
                 proxy);
         } else {
-            ASSERT(mode & WGPUMapMode_Write);
+            ASSERT(isWriteMode);
             MapWriteAsync(
                 [](WGPUBufferMapAsyncStatus status, void*, uint64_t, void* userdata) {
                     ProxyData* proxy = static_cast<ProxyData*>(userdata);
+                    proxy->self->mMapOffset = proxy->mapOffset;
+                    proxy->self->mMapSize = proxy->mapSize;
                     if (proxy->callback) {
                         proxy->callback(status, proxy->userdata);
                     }
-                    proxy->self->mMapOffset = proxy->mapOffset;
-                    proxy->self->mMapSize = proxy->mapSize;
                     delete proxy;
                 },
                 proxy);
@@ -450,7 +453,7 @@ namespace dawn_wire { namespace client {
 
         mMappedData = nullptr;
         mMapOffset = 0;
-        mMapSize = mSize;
+        mMapSize = 0;
         ClearMapRequests(WGPUBufferMapAsyncStatus_Unknown);
 
         BufferUnmapCmd cmd;

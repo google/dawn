@@ -34,24 +34,24 @@
     AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint16_t), \
                          new ::detail::ExpectEq<uint16_t>(expected))
 
-#define EXPECT_BUFFER_U16_RANGE_EQ(expected, buffer, offset, count)                    \
-    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint16_t) * count, \
+#define EXPECT_BUFFER_U16_RANGE_EQ(expected, buffer, offset, count)                      \
+    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint16_t) * (count), \
                          new ::detail::ExpectEq<uint16_t>(expected, count))
 
 #define EXPECT_BUFFER_U32_EQ(expected, buffer, offset)                         \
     AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t), \
                          new ::detail::ExpectEq<uint32_t>(expected))
 
-#define EXPECT_BUFFER_U32_RANGE_EQ(expected, buffer, offset, count)                    \
-    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t) * count, \
+#define EXPECT_BUFFER_U32_RANGE_EQ(expected, buffer, offset, count)                      \
+    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t) * (count), \
                          new ::detail::ExpectEq<uint32_t>(expected, count))
 
 #define EXPECT_BUFFER_FLOAT_EQ(expected, buffer, offset)                       \
     AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t), \
                          new ::detail::ExpectEq<float>(expected))
 
-#define EXPECT_BUFFER_FLOAT_RANGE_EQ(expected, buffer, offset, count)                  \
-    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t) * count, \
+#define EXPECT_BUFFER_FLOAT_RANGE_EQ(expected, buffer, offset, count)                    \
+    AddBufferExpectation(__FILE__, __LINE__, buffer, offset, sizeof(uint32_t) * (count), \
                          new ::detail::ExpectEq<float>(expected, count))
 
 // Test a pixel of the mip level 0 of a 2D texture.
