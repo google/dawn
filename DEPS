@@ -20,6 +20,7 @@ vars = {
   'clang_revision': '6412135b3979b680c20cf007ab242d968025fc3e',
   'cpplint_revision': '305ac8725a166ed42e3f5dd3f80d6de2cf840ef1',
   'googletest_revision': 'a781fe29bcf73003559a3583167fe3d647518464',
+  'gpuweb_cts_revision': '40e337a38784ad72fa5c7b9afd1b9c358a9e0f1a',
   'spirv_headers_revision': '308bd07424350a6000f35a77b5f85cd4f3da319e',
   'spirv_tools_revision': '717e7877cac15d393fd3bb1bd872679de8b59add',
   'testing_revision': 'cadd4e1eb3a45f562cc7eb5cd646c9b6f91c87dc',
@@ -28,6 +29,9 @@ vars = {
 deps = {
   'third_party/cpplint': Var('chromium_git') + Var('github') +
       '/google/styleguide.git@' + Var('cpplint_revision'),
+
+  'third_party/gpuweb-cts': Var('chromium_git') + Var('github') +
+      '/gpuweb/cts.git@' + Var('gpuweb_cts_revision'),
 
   'third_party/spirv-headers': Var('chromium_git') + Var('github') +
       '/KhronosGroup/SPIRV-Headers.git@' + Var('spirv_headers_revision'),
