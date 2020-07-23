@@ -48,11 +48,26 @@
 #include "src/ast/type/struct_type.h"
 #include "src/ast/type/vector_type.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/type_determiner.h"
 
 namespace tint {
 namespace {
 
-using ValidatorTest = testing::Test;
+class TypeDeterminerHelper {
+ public:
+  TypeDeterminerHelper()
+      : td_(std::make_unique<TypeDeterminer>(&ctx_, &mod_)) {}
+
+  TypeDeterminer* td() const { return td_.get(); }
+  ast::Module* mod() { return &mod_; }
+
+ private:
+  Context ctx_;
+  ast::Module mod_;
+  std::unique_ptr<TypeDeterminer> td_;
+};
+
+class ValidatorTest : public TypeDeterminerHelper, public testing::Test {};
 
 TEST_F(ValidatorTest, Import) {
   ast::Module m;
@@ -64,58 +79,88 @@ TEST_F(ValidatorTest, Import) {
 
 TEST_F(ValidatorTest, Import_Fail_NotGLSL) {
   ast::Module m;
-  m.AddImport(std::make_unique<ast::Import>(Source{1, 1}, "not.GLSL", "glsl"));
+  m.AddImport(
+      std::make_unique<ast::Import>(Source{12, 34}, "not.GLSL", "glsl"));
 
   tint::ValidatorImpl v;
   EXPECT_FALSE(v.CheckImports(m));
   ASSERT_TRUE(v.has_error());
-  EXPECT_EQ(v.error(), "1:1: v-0001: unknown import: not.GLSL");
+  EXPECT_EQ(v.error(), "12:34: v-0001: unknown import: not.GLSL");
 }
 
 TEST_F(ValidatorTest, Import_Fail_Typo) {
   ast::Module m;
   m.AddImport(
-      std::make_unique<ast::Import>(Source{1, 1}, "GLSL.std.4501", "glsl"));
+      std::make_unique<ast::Import>(Source{12, 34}, "GLSL.std.4501", "glsl"));
 
   tint::ValidatorImpl v;
   EXPECT_FALSE(v.CheckImports(m));
   ASSERT_TRUE(v.has_error());
-  EXPECT_EQ(v.error(), "1:1: v-0001: unknown import: GLSL.std.4501");
+  EXPECT_EQ(v.error(), "12:34: v-0001: unknown import: GLSL.std.4501");
 }
 
 TEST_F(ValidatorTest, DISABLED_AssignToScalar_Fail) {
-  // 1 = my_var
+  // 1 = my_var;
   ast::type::I32Type i32;
 
   auto lhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::SintLiteral>(&i32, 1));
   auto rhs = std::make_unique<ast::IdentifierExpression>("my_var");
-  ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
+  ast::AssignmentStatement assign(Source{12, 32}, std::move(lhs),
+                                  std::move(rhs));
 
   tint::ValidatorImpl v;
   // TODO(sarahM0): Invalidate assignment to scalar.
   ASSERT_TRUE(v.has_error());
-  EXPECT_EQ(v.error(), "1:1: v-000x: invalid assignment");
+  // TODO(sarahM0): figure out what should be the error number.
+  EXPECT_EQ(v.error(), "12:34: v-000x: invalid assignment");
 }
 
-TEST_F(ValidatorTest, DISABLED_AssignUncompatibleTypes_Fail) {
+TEST_F(ValidatorTest, AssignIncompatibleTypes_Fail) {
   // var a :i32;
-  // a = 2.3
+  // a = 2.3;
   ast::type::F32Type f32;
   ast::type::I32Type i32;
 
   ast::Variable var("a", ast::StorageClass::kPrivate, &i32);
   auto lhs = std::make_unique<ast::IdentifierExpression>("a");
-
+  auto lhs_ptr = lhs.get();
   auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
       std::make_unique<ast::FloatLiteral>(&f32, 2.3f));
+  auto rhs_ptr = rhs.get();
 
-  ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
+  ast::AssignmentStatement assign(Source{12, 34}, std::move(lhs),
+                                  std::move(rhs));
+  td()->RegisterVariableForTesting(&var);
+  EXPECT_TRUE(td()->DetermineResultType(&assign)) << td()->error();
+  ASSERT_NE(lhs_ptr->result_type(), nullptr);
+  ASSERT_NE(rhs_ptr->result_type(), nullptr);
 
   tint::ValidatorImpl v;
-  // TODO(SarahM0): Invalidate assignments of different types.
+  EXPECT_FALSE(v.ValidateAssign(assign));
   ASSERT_TRUE(v.has_error());
-  EXPECT_EQ(v.error(), "1:1: v-000x: invalid assignment");
+  // TODO(sarahM0): figure out what should be the error number.
+  EXPECT_EQ(v.error(),
+            "12:34: v-000x: invalid assignment of '__i32' to '__f32'");
+}
+
+TEST_F(ValidatorTest, AssignCompatibleTypes_Pass) {
+  // var a :i32;
+  // a = 2;
+  ast::type::I32Type i32;
+
+  ast::Variable var("a", ast::StorageClass::kPrivate, &i32);
+  auto lhs = std::make_unique<ast::IdentifierExpression>("a");
+  auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 2));
+
+  ast::AssignmentStatement assign(Source{12, 34}, std::move(lhs),
+                                  std::move(rhs));
+
+  td()->RegisterVariableForTesting(&var);
+  EXPECT_TRUE(td()->DetermineResultType(&assign)) << td()->error();
+  tint::ValidatorImpl v;
+  EXPECT_TRUE(v.ValidateAssign(assign));
 }
 
 }  // namespace

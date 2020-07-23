@@ -17,7 +17,10 @@
 
 #include <string>
 
+#include "src/ast/assignment_statement.h"
+#include "src/ast/expression.h"
 #include "src/ast/module.h"
+#include "src/ast/statement.h"
 
 namespace tint {
 
@@ -43,7 +46,26 @@ class ValidatorImpl {
   /// @param src the source causing the error
   /// @param msg the error message
   void set_error(const Source& src, const std::string& msg);
-
+  /// Validates Functions
+  /// @param funcs the functions to check
+  /// @returns true if the validation was successful
+  bool ValidateFunctions(const ast::FunctionList& funcs);
+  /// Validates a function
+  /// @param func the function to check
+  /// @returns true if the validation was successful
+  bool ValidateFunction(const ast::Function& func);
+  /// Validates a set of statements
+  /// @param stmts the statements to check
+  /// @returns true if the validation was successful
+  bool ValidateStatements(const ast::StatementList& stmts);
+  /// Validates a statement
+  /// @param stmt the statement to check
+  /// @returns true if the validation was successful
+  bool ValidateStatement(const ast::Statement& stmt);
+  /// Validates an assignment
+  /// @param a the assignment to check
+  /// @returns true if the validation was successful
+  bool ValidateAssign(const ast::AssignmentStatement& a);
   /// Validates v-0001: Only allowed import is "GLSL.std.450"
   /// @param module the modele to check imports
   /// @returns ture if input complies with v-0001 rule

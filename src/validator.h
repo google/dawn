@@ -18,7 +18,10 @@
 #include <memory>
 #include <string>
 
+#include "src/ast/assignment_statement.h"
+#include "src/ast/expression.h"
 #include "src/ast/module.h"
+#include "src/ast/statement.h"
 #include "src/validator_impl.h"
 
 namespace tint {
