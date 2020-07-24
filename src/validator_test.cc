@@ -59,7 +59,6 @@ class TypeDeterminerHelper {
       : td_(std::make_unique<TypeDeterminer>(&ctx_, &mod_)) {}
 
   TypeDeterminer* td() const { return td_.get(); }
-  ast::Module* mod() { return &mod_; }
 
  private:
   Context ctx_;

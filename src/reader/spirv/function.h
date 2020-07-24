@@ -209,7 +209,7 @@ struct DefInfo {
   /// The SPIR-V instruction that defines the ID.
   const spvtools::opt::Instruction& inst;
   /// The position of the block that defines this ID, in the function block
-  /// order.  See method |FunctionEmitter::ComputeBlockOrderAndPositions|
+  /// order.  See method `FunctionEmitter::ComputeBlockOrderAndPositions`
   const uint32_t block_pos = 0;
 
   /// An index for uniquely and deterministically ordering all DefInfo records
