@@ -162,5 +162,28 @@ TEST_F(ValidatorTest, AssignCompatibleTypes_Pass) {
   EXPECT_TRUE(v.ValidateAssign(assign));
 }
 
+TEST_F(ValidatorTest, DISABLED_AssignToConstant_Fail) {
+  // v-0021: Cannot re-assign a constant.
+  // const a :i32 = 1;
+  // a = 2;
+  ast::type::I32Type i32;
+
+  ast::Variable var("a", ast::StorageClass::kPrivate, &i32);
+  var.set_constructor(std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 1)));
+  var.set_is_const(true);
+  auto lhs = std::make_unique<ast::IdentifierExpression>("a");
+
+  auto rhs = std::make_unique<ast::ScalarConstructorExpression>(
+      std::make_unique<ast::SintLiteral>(&i32, 2));
+
+  ast::AssignmentStatement assign(std::move(lhs), std::move(rhs));
+
+  tint::ValidatorImpl v;
+  // TODO(SarahM0): Invalidate assignments to a constant.
+  ASSERT_TRUE(v.has_error());
+  EXPECT_EQ(v.error(), "2:1: v-0021: cannot re-assign a constant");
+}
+
 }  // namespace
 }  // namespace tint
