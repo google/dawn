@@ -21,6 +21,7 @@
 #include "src/ast/call_statement.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/continue_statement.h"
+#include "src/ast/discard_statement.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/if_statement.h"
@@ -58,6 +59,10 @@ bool Statement::IsCall() const {
 }
 
 bool Statement::IsContinue() const {
+  return false;
+}
+
+bool Statement::IsDiscard() const {
   return false;
 }
 
@@ -116,6 +121,11 @@ const CaseStatement* Statement::AsCase() const {
 const ContinueStatement* Statement::AsContinue() const {
   assert(IsContinue());
   return static_cast<const ContinueStatement*>(this);
+}
+
+const DiscardStatement* Statement::AsDiscard() const {
+  assert(IsDiscard());
+  return static_cast<const DiscardStatement*>(this);
 }
 
 const ElseStatement* Statement::AsElse() const {
@@ -181,6 +191,11 @@ CaseStatement* Statement::AsCase() {
 ContinueStatement* Statement::AsContinue() {
   assert(IsContinue());
   return static_cast<ContinueStatement*>(this);
+}
+
+DiscardStatement* Statement::AsDiscard() {
+  assert(IsDiscard());
+  return static_cast<DiscardStatement*>(this);
 }
 
 ElseStatement* Statement::AsElse() {

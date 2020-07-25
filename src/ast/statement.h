@@ -28,6 +28,7 @@ class BreakStatement;
 class CallStatement;
 class CaseStatement;
 class ContinueStatement;
+class DiscardStatement;
 class ElseStatement;
 class FallthroughStatement;
 class IfStatement;
@@ -52,6 +53,8 @@ class Statement : public Node {
   virtual bool IsCase() const;
   /// @returns true if this is a continue statement
   virtual bool IsContinue() const;
+  /// @returns true if this is a discard statement
+  virtual bool IsDiscard() const;
   /// @returns true if this is an else statement
   virtual bool IsElse() const;
   /// @returns true if this is a fallthrough statement
@@ -79,6 +82,8 @@ class Statement : public Node {
   const CaseStatement* AsCase() const;
   /// @returns the statement as a const continue statement
   const ContinueStatement* AsContinue() const;
+  /// @returns the statement as a const discard statement
+  const DiscardStatement* AsDiscard() const;
   /// @returns the statement as a const else statement
   const ElseStatement* AsElse() const;
   /// @returns the statement as a const fallthrough statement
@@ -106,6 +111,8 @@ class Statement : public Node {
   CaseStatement* AsCase();
   /// @returns the statement as a continue statement
   ContinueStatement* AsContinue();
+  /// @returns the statement as a discard statement
+  DiscardStatement* AsDiscard();
   /// @returns the statement as a else statement
   ElseStatement* AsElse();
   /// @returns the statement as a fallthrough statement
