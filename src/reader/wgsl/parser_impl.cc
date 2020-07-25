@@ -29,6 +29,7 @@
 #include "src/ast/cast_expression.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/decorated_variable.h"
+#include "src/ast/discard_statement.h"
 #include "src/ast/else_statement.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/float_literal.h"
@@ -1426,6 +1427,7 @@ ast::StatementList ParserImpl::statements() {
 //   | variable_stmt SEMICOLON
 //   | break_stmt SEMICOLON
 //   | continue_stmt SEMICOLON
+//   | DISCARD SEMICOLON
 //   | KILL SEMICOLON
 //   | assignment_stmt SEMICOLON
 std::unique_ptr<ast::Statement> ParserImpl::statement() {
@@ -1511,6 +1513,18 @@ std::unique_ptr<ast::Statement> ParserImpl::statement() {
       return nullptr;
     }
     return cont;
+  }
+
+  if (t.IsDiscard()) {
+    auto source = t.source();
+    next();  // Consume the peek
+
+    t = next();
+    if (!t.IsSemicolon()) {
+      set_error(t, "missing ;");
+      return nullptr;
+    }
+    return std::make_unique<ast::DiscardStatement>(source);
   }
 
   if (t.IsKill()) {

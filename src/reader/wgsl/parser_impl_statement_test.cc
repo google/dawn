@@ -221,6 +221,22 @@ TEST_F(ParserImplTest, Statement_Kill_MissingSemicolon) {
   EXPECT_EQ(p->error(), "1:5: missing ;");
 }
 
+TEST_F(ParserImplTest, Statement_Discard) {
+  auto* p = parser("discard;");
+  auto e = p->statement();
+  ASSERT_FALSE(p->has_error()) << p->error();
+  EXPECT_NE(e, nullptr);
+  ASSERT_TRUE(e->IsDiscard());
+}
+
+TEST_F(ParserImplTest, Statement_Discard_MissingSemicolon) {
+  auto* p = parser("discard");
+  auto e = p->statement();
+  ASSERT_TRUE(p->has_error());
+  EXPECT_EQ(e, nullptr);
+  EXPECT_EQ(p->error(), "1:8: missing ;");
+}
+
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader

@@ -495,6 +495,8 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kContinue, source, "continue"};
   if (str == "continuing")
     return {Token::Type::kContinuing, source, "continuing"};
+  if (str == "discard")
+    return {Token::Type::kDiscard, source, "discard"};
   if (str == "default")
     return {Token::Type::kDefault, source, "default"};
   if (str == "else")

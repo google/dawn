@@ -142,6 +142,8 @@ class Token {
     kContinue,
     /// A 'continuing'
     kContinuing,
+    /// A 'discard'
+    kDiscard,
     /// A 'default'
     kDefault,
     /// A 'else'
@@ -395,6 +397,8 @@ class Token {
   bool IsContinue() const { return type_ == Type::kContinue; }
   /// @returns true if token is a 'continuing'
   bool IsContinuing() const { return type_ == Type::kContinuing; }
+  /// @returns true if token is a 'discard'
+  bool IsDiscard() const { return type_ == Type::kDiscard; }
   /// @returns true if token is a 'default'
   bool IsDefault() const { return type_ == Type::kDefault; }
   /// @returns true if token is a 'else'

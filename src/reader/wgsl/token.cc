@@ -131,6 +131,8 @@ std::string Token::TypeToName(Type type) {
       return "continue";
     case Token::Type::kContinuing:
       return "continuing";
+    case Token::Type::kDiscard:
+      return "discard";
     case Token::Type::kDefault:
       return "default";
     case Token::Type::kElse:

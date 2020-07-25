@@ -425,6 +425,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TokenData{"continue", Token::Type::kContinue},
                     TokenData{"continuing", Token::Type::kContinuing},
                     TokenData{"default", Token::Type::kDefault},
+                    TokenData{"discard", Token::Type::kDiscard},
                     TokenData{"else", Token::Type::kElse},
                     TokenData{"elseif", Token::Type::kElseIf},
                     TokenData{"entry_point", Token::Type::kEntryPoint},
